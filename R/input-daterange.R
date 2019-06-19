@@ -29,7 +29,7 @@
 #' @param separator String to display between the start and end input boxes.
 #'
 #' @family input elements
-#' @seealso \code{\link{dateInput}}, \code{\link{updateDateRangeInput}}
+#' @seealso [dateInput()], [updateDateRangeInput()]
 #'
 #' @examples
 #' ## Only run examples in interactive R sessions

@@ -24,7 +24,7 @@
 #'   according to some simple heuristics.
 #' @param animate `TRUE` to show simple animation controls with default
 #'   settings; `FALSE` not to; or a custom settings list, such as those
-#'   created using \code{\link{animationOptions}}.
+#'   created using [animationOptions()].
 #' @param sep Separator between thousands places in numbers.
 #' @param pre A prefix string to put in front of the value.
 #' @param post A suffix string to put after the value.
@@ -36,7 +36,7 @@
 #'   format string, to be passed to the Javascript strftime library. See
 #'   <https://github.com/samsonjs/strftime> for more details. The allowed
 #'   format specifications are very similar, but not identical, to those for R's
-#'   \code{\link[base]{strftime}} function. For Dates, the default is `"%F"`
+#'   [base::strftime()] function. For Dates, the default is `"%F"`
 #'   (like `"2015-07-01"`), and for POSIXt, the default is `"%F %T"`
 #'   (like `"2015-07-01 15:32:10"`).
 #' @param timezone Only used if the values are POSIXt objects. A string
@@ -46,7 +46,7 @@
 #'   result in UTC time.
 #' @inheritParams selectizeInput
 #' @family input elements
-#' @seealso \code{\link{updateSliderInput}}
+#' @seealso [updateSliderInput()]
 #'
 #' @examples
 #' ## Only run examples in interactive R sessions
@@ -257,8 +257,8 @@ findStepSize <- function(min, max, step) {
 #'   reaches the end.
 #' @param playButton Specifies the appearance of the play button. Valid values
 #'   are a one-element character vector (for a simple text label), an HTML tag
-#'   or list of tags (using \code{\link{tag}} and friends), or raw HTML (using
-#'   \code{\link{HTML}}).
+#'   or list of tags (using [tag()] and friends), or raw HTML (using
+#'   [HTML()]).
 #' @param pauseButton Similar to `playButton`, but for the pause button.
 #' @export
 animationOptions <- function(interval=1000,

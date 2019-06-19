@@ -13,12 +13,12 @@
 #'   `print(p)`, then the coordinates for interactive graphics will not be
 #'   properly scaled to the data space.
 #'
-#'   See \code{\link{plotOutput}} for more information about interactive plots.
+#'   See [plotOutput()] for more information about interactive plots.
 #'
 #' @seealso For the corresponding client-side output function, and example
-#'   usage, see \code{\link{plotOutput}}. For more details on how the plots are
-#'   generated, and how to control the output, see \code{\link{plotPNG}}.
-#'   \code{\link{renderCachedPlot}} offers a way to cache generated plots to
+#'   usage, see [plotOutput()]. For more details on how the plots are
+#'   generated, and how to control the output, see [plotPNG()].
+#'   [renderCachedPlot()] offers a way to cache generated plots to
 #'   expedite the rendering of identical plots.
 #'
 #' @param expr An expression that generates a plot.
@@ -30,21 +30,21 @@
 #'   inline plot, you must provide numeric values (in pixels) to both
 #'   `width` and `height`.
 #' @param res Resolution of resulting plot, in pixels per inch. This value is
-#'   passed to \code{\link[grDevices]{png}}. Note that this affects the resolution of PNG
+#'   passed to [grDevices::png()]. Note that this affects the resolution of PNG
 #'   rendering in R; it won't change the actual ppi of the browser.
-#' @param ... Arguments to be passed through to \code{\link[grDevices]{png}}.
+#' @param ... Arguments to be passed through to [grDevices::png()].
 #'   These can be used to set the width, height, background color, etc.
 #' @param env The environment in which to evaluate `expr`.
 #' @param quoted Is `expr` a quoted expression (with `quote()`)? This
 #'   is useful if you want to save an expression in a variable.
 #' @param execOnResize If `FALSE` (the default), then when a plot is
 #'   resized, Shiny will *replay* the plot drawing commands with
-#'   \code{\link[grDevices]{replayPlot}()} instead of re-executing `expr`.
+#'   [grDevices::replayPlot()] instead of re-executing `expr`.
 #'   This can result in faster plot redrawing, but there may be rare cases where
 #'   it is undesirable. If you encounter problems when resizing a plot, you can
 #'   have Shiny re-execute the code on resize by setting this to `TRUE`.
 #' @param outputArgs A list of arguments to be passed through to the implicit
-#'   call to \code{\link{plotOutput}} when `renderPlot` is used in an
+#'   call to [plotOutput()] when `renderPlot` is used in an
 #'   interactive R Markdown document.
 #' @export
 renderPlot <- function(expr, width='auto', height='auto', res=72, ...,

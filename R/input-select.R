@@ -33,7 +33,7 @@
 #' @return A select list control that can be added to a UI definition.
 #'
 #' @family input elements
-#' @seealso \code{\link{updateSelectInput}} \code{\link{varSelectInput}}
+#' @seealso [updateSelectInput()] [varSelectInput()]
 #'
 #' @examples
 #' ## Only run examples in interactive R sessions
@@ -155,11 +155,11 @@ needOptgroup <- function(choices) {
 #' @rdname selectInput
 #' @param ... Arguments passed to `selectInput()`.
 #' @param options A list of options. See the documentation of \pkg{selectize.js}
-#'   for possible options (character option values inside \code{\link[base]{I}()} will
-#'   be treated as literal JavaScript code; see \code{\link{renderDataTable}()}
+#'   for possible options (character option values inside [base::I()] will
+#'   be treated as literal JavaScript code; see [renderDataTable()]
 #'   for details).
 #' @param width The width of the input, e.g. `'400px'`, or `'100%'`;
-#'   see \code{\link{validateCssUnit}}.
+#'   see [validateCssUnit()].
 #' @note The selectize input created from `selectizeInput()` allows
 #'   deletion of the selected option even in a single select input, which will
 #'   return an empty string as its value. This is the default behavior of
@@ -228,10 +228,10 @@ selectizeIt <- function(inputId, select, options, nonempty = FALSE) {
 #' The resulting server `input` value will be returned as:
 #' \itemize{
 #'   \item a symbol if `multiple = FALSE`.  The `input` value should be
-#'         used with rlang's \code{\link[rlang]{!!}}. For example,
+#'         used with rlang's [rlang::!!()]. For example,
 #'         `ggplot2::aes(!!input$variable)`.
 #'   \item a list of symbols if `multiple = TRUE`. The `input` value
-#'         should be used with rlang's \code{\link[rlang]{!!!}} to expand
+#'         should be used with rlang's [rlang::!!!()] to expand
 #'         the symbol list as individual arguments. For example,
 #'         `dplyr::select(mtcars, !!!input$variabls)` which is
 #'         equivalent to `dplyr::select(mtcars, !!input$variabls[[1]], !!input$variabls[[2]], ..., !!input$variabls[[length(input$variabls)]])`.
@@ -244,11 +244,11 @@ selectizeIt <- function(inputId, select, options, nonempty = FALSE) {
 #' `selectInput()` with `selectize=FALSE`.
 #'
 #' @inheritParams selectInput
-#' @param data A data frame. Used to retrieve the column names as choices for a \code{\link{selectInput}}
+#' @param data A data frame. Used to retrieve the column names as choices for a [selectInput()]
 #' @return A variable select list control that can be added to a UI definition.
 #'
 #' @family input elements
-#' @seealso \code{\link{updateSelectInput}}
+#' @seealso [updateSelectInput()]
 #' @examples
 #'
 #' ## Only run examples in interactive R sessions
@@ -323,11 +323,11 @@ varSelectInput <- function(
 #' @rdname varSelectInput
 #' @param ... Arguments passed to `varSelectInput()`.
 #' @param options A list of options. See the documentation of \pkg{selectize.js}
-#'   for possible options (character option values inside \code{\link[base]{I}()} will
-#'   be treated as literal JavaScript code; see \code{\link{renderDataTable}()}
+#'   for possible options (character option values inside [base::I()] will
+#'   be treated as literal JavaScript code; see [renderDataTable()]
 #'   for details).
 #' @param width The width of the input, e.g. `'400px'`, or `'100%'`;
-#'   see \code{\link{validateCssUnit}}.
+#'   see [validateCssUnit()].
 #' @note The variable selectize input created from `varSelectizeInput()` allows
 #'   deletion of the selected option even in a single select input, which will
 #'   return an empty string as its value. This is the default behavior of

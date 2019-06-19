@@ -3,7 +3,7 @@
 #' Reports progress to the user during long-running operations.
 #'
 #' This package exposes two distinct programming APIs for working with
-#' progress. \code{\link{withProgress}} and \code{\link{setProgress}}
+#' progress. [withProgress()] and [setProgress()]
 #' together provide a simple function-based interface, while the
 #' `Progress` reference class provides an object-oriented API.
 #'
@@ -17,7 +17,7 @@
 #' CSS), you can use `style="old"` each time you call
 #' `Progress$new()`. If you don't want to set the style each time
 #' `Progress$new` is called, you can instead call
-#' \code{\link{shinyOptions}(progress.style="old")} just once, inside the server
+#' `[shinyOptions](progress.style="old")` just once, inside the server
 #' function.
 #'
 #' **Methods**
@@ -91,7 +91,7 @@
 #'
 #' shinyApp(ui, server)
 #' }
-#' @seealso \code{\link{withProgress}}
+#' @seealso [withProgress()]
 #' @format NULL
 #' @usage NULL
 #' @export
@@ -187,7 +187,7 @@ Progress <- R6Class(
 #'
 #' This package exposes two distinct programming APIs for working with progress.
 #' Using `withProgress` with `incProgress` or `setProgress`
-#' provide a simple function-based interface, while the \code{\link{Progress}}
+#' provide a simple function-based interface, while the [Progress()]
 #' reference class provides an object-oriented API.
 #'
 #' Use `withProgress` to wrap the scope of your work; doing so will cause a
@@ -209,7 +209,7 @@ Progress <- R6Class(
 #' CSS), you can use `style="old"` each time you call
 #' `withProgress()`. If you don't want to set the style each time
 #' `withProgress` is called, you can instead call
-#' \code{\link{shinyOptions}(progress.style="old")} just once, inside the server
+#' `[shinyOptions](progress.style="old")` just once, inside the server
 #' function.
 #'
 #' @param session The Shiny session object, as provided by `shinyServer` to
@@ -263,7 +263,7 @@ Progress <- R6Class(
 #'
 #' shinyApp(ui, server)
 #' }
-#' @seealso \code{\link{Progress}}
+#' @seealso [Progress()]
 #' @rdname withProgress
 #' @export
 withProgress <- function(expr, min = 0, max = 1,

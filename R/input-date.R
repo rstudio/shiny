@@ -49,7 +49,7 @@
 #'   a integer vector with values from 0 (Sunday) to 6 (Saturday).
 #'
 #' @family input elements
-#' @seealso \code{\link{dateRangeInput}}, \code{\link{updateDateInput}}
+#' @seealso [dateRangeInput()], [updateDateInput()]
 #'
 #' @examples
 #' ## Only run examples in interactive R sessions

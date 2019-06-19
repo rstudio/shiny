@@ -2,11 +2,11 @@
 #'
 #' Ensure that a file-based HTML dependency (from the htmltools package) can be
 #' served over Shiny's HTTP server. This function works by using
-#' \code{\link{addResourcePath}} to map the HTML dependency's directory to a
+#' [addResourcePath()] to map the HTML dependency's directory to a
 #' URL.
 #'
 #' @param dependency A single HTML dependency object, created using
-#'   \code{\link[htmltools]{htmlDependency}}. If the `src` value is named,
+#'   [htmltools::htmlDependency()]. If the `src` value is named,
 #'   then `href` and/or `file` names must be present.
 #' @param scrubFile If TRUE (the default), remove `src$file` for the
 #'   dependency. This prevents the local file path from being sent to the client

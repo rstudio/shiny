@@ -1,8 +1,8 @@
 #' Create an object representing click options
 #'
 #' This generates an object representing click options, to be passed as the
-#' `click` argument of \code{\link{imageOutput}} or
-#' \code{\link{plotOutput}}.
+#' `click` argument of [imageOutput()] or
+#' [plotOutput()].
 #'
 #' @param id Input value name. For example, if the value is `"plot_click"`,
 #'   then the click coordinates will be available as `input$plot_click`.
@@ -24,8 +24,8 @@ clickOpts <- function(id = NULL, clip = TRUE) {
 #' Create an object representing double-click options
 #'
 #' This generates an object representing dobule-click options, to be passed as
-#' the `dblclick` argument of \code{\link{imageOutput}} or
-#' \code{\link{plotOutput}}.
+#' the `dblclick` argument of [imageOutput()] or
+#' [plotOutput()].
 #'
 #' @param id Input value name. For example, if the value is
 #'   `"plot_dblclick"`, then the click coordinates will be available as
@@ -50,8 +50,8 @@ dblclickOpts <- function(id = NULL, clip = TRUE, delay = 400) {
 #' Create an object representing hover options
 #'
 #' This generates an object representing hovering options, to be passed as the
-#' `hover` argument of \code{\link{imageOutput}} or
-#' \code{\link{plotOutput}}.
+#' `hover` argument of [imageOutput()] or
+#' [plotOutput()].
 #'
 #' @param id Input value name. For example, if the value is `"plot_hover"`,
 #'   then the hover coordinates will be available as `input$plot_hover`.
@@ -87,8 +87,8 @@ hoverOpts <- function(id = NULL, delay = 300,
 #' Create an object representing brushing options
 #'
 #' This generates an object representing brushing options, to be passed as the
-#' `brush` argument of \code{\link{imageOutput}} or
-#' \code{\link{plotOutput}}.
+#' `brush` argument of [imageOutput()] or
+#' [plotOutput()].
 #'
 #' @param id Input value name. For example, if the value is `"plot_brush"`,
 #'   then the coordinates will be available as `input$plot_brush`. Multiple
@@ -112,7 +112,7 @@ hoverOpts <- function(id = NULL, delay = 300,
 #'   drawn and moved in both x and y directions. If `"x"`, or `"y"`,
 #'   the brush wil work horizontally or vertically.
 #' @param resetOnNew When a new image is sent to the browser (via
-#'   \code{\link{renderImage}}), should the brush be reset? The default,
+#'   [renderImage()]), should the brush be reset? The default,
 #'   `FALSE`, is useful if you want to update the plot while keeping the
 #'   brush. Using `TRUE` is useful if you want to clear the brush whenever
 #'   the plot is updated.

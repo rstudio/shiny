@@ -12,7 +12,7 @@ NULL
 #' the framework in depth, walks you through building a simple application, and
 #' includes extensive annotated examples.
 #'
-#' @seealso \link{shiny-options} for documentation about global options.
+#' @seealso [shiny-options] for documentation about global options.
 #'
 #' @name shiny-package
 #' @aliases shiny
@@ -36,9 +36,9 @@ NULL
 #'
 #' \describe{
 #'   \item{shiny.launch.browser}{A boolean which controls the default behavior
-#'     when an app is run. See \code{\link{runApp}} for more information.}
+#'     when an app is run. See [runApp()] for more information.}
 #'   \item{shiny.port}{A port number that Shiny will listen on. See
-#'     \code{\link{runApp}} for more information.}
+#'     [runApp()] for more information.}
 #'   \item{shiny.trace}{Print messages sent between the R server and the web
 #'     browser client to the R console. This is useful for debugging. Possible
 #'     values are `"send"` (only print messages sent to the client),
@@ -62,22 +62,22 @@ NULL
 #'     by setting e.g. `options(shiny.autoreload.interval = 2000)` (every
 #'     two seconds).}
 #'   \item{shiny.reactlog}{If `TRUE`, enable logging of reactive events,
-#'     which can be viewed later with the \code{\link{reactlogShow}} function.
+#'     which can be viewed later with the [reactlogShow()] function.
 #'     This incurs a substantial performance penalty and should not be used in
 #'     production.}
 #'   \item{shiny.usecairo}{This is used to disable graphical rendering by the
-#'     Cairo package, if it is installed. See \code{\link{plotPNG}} for more
+#'     Cairo package, if it is installed. See [plotPNG()] for more
 #'     information.}
 #'   \item{shiny.maxRequestSize}{This is a number which specifies the maximum
 #'     web request size, which serves as a size limit for file uploads. If
 #'     unset, the maximum request size defaults to 5MB.}
 #'   \item{shiny.suppressMissingContextError}{Normally, invoking a reactive
-#'     outside of a reactive context (or \code{\link{isolate}()}) results in
+#'     outside of a reactive context (or [isolate()]) results in
 #'     an error. If this is `TRUE`, don't error in these cases. This
 #'     should only be used for debugging or demonstrations of reactivity at the
 #'     console.}
 #'   \item{shiny.host}{The IP address that Shiny should listen on. See
-#'     \code{\link{runApp}} for more information.}
+#'     [runApp()] for more information.}
 #'   \item{shiny.json.digits}{The number of digits to use when converting
 #'     numbers to JSON format to send to the client web browser.}
 #'   \item{shiny.minified}{If this is `TRUE` or unset (the default), then
@@ -90,7 +90,7 @@ NULL
 #'   \item{shiny.table.class}{CSS class names to use for tables.}
 #'   \item{shiny.deprecation.messages}{This controls whether messages for
 #'     deprecated functions in Shiny will be printed. See
-#'     \code{\link{shinyDeprecated}} for more information.}
+#'     [shinyDeprecated()] for more information.}
 #'   \item{shiny.fullstacktrace}{Controls whether "pretty" or full stack traces
 #'     are dumped to the console when errors occur during Shiny app execution.
 #'     The default is `FALSE` (pretty stack traces).}
@@ -200,7 +200,7 @@ workerId <- local({
 #'   on a local connection (without Shiny Server or Connect).
 #' }
 #' \item{clientData}{
-#'   A \code{\link{reactiveValues}} object that contains information about the client.
+#'   A [reactiveValues()] object that contains information about the client.
 #'   \itemize{
 #'     \item{`allowDataUriScheme` is a logical value that indicates whether
 #'       the browser is able to handle URIs that use the `data:` scheme.
@@ -215,7 +215,7 @@ workerId <- local({
 #'       that was requested by the browser to load the Shiny app page.
 #'       These values are from the browser's perspective, so neither HTTP
 #'       proxies nor Shiny Server will affect these values. The
-#'       `url_search` value may be used with \code{\link{parseQueryString}}
+#'       `url_search` value may be used with [parseQueryString()]
 #'       to access query string parameters.
 #'     }
 #'   }
@@ -235,7 +235,7 @@ workerId <- local({
 #'   disconnected.
 #' }
 #' \item{ns(id)}{
-#'   Server-side version of \code{ns <- \link{NS}(id)}. If bare IDs need to be
+#'   Server-side version of `ns <- [NS](id)`. If bare IDs need to be
 #'   explicitly namespaced for the current module, `session$ns("name")`
 #'   will return the fully-qualified ID.
 #' }
@@ -319,7 +319,7 @@ workerId <- local({
 #'   the input binding object's `receiveMessage(el, message)` method will
 #'   be called. `sendInputMessage` should generally not be called directly
 #'   from Shiny apps, but through friendlier wrapper functions like
-#'   \code{\link{updateTextInput}}.
+#'   [updateTextInput()].
 #' }
 #' \item{setBookmarkExclude(names)}{
 #'   Set input names to be excluded from bookmarking.
@@ -2196,7 +2196,7 @@ onFlushed <- function(fun, once = TRUE, session = getDefaultReactiveDomain()) {
 
 #' @rdname onFlush
 #'
-#' @seealso \code{\link{onStop}()} for registering callbacks that will be
+#' @seealso [onStop()] for registering callbacks that will be
 #'   invoked when the application exits, or when a session ends.
 #' @export
 onSessionEnded <- function(fun, session = getDefaultReactiveDomain()) {
@@ -2224,7 +2224,7 @@ flushPendingSessions <- function() {
 #' Run code after an application or session ends
 #'
 #' This function registers callback functions that are invoked when the
-#' application exits (when \code{\link{runApp}} exits), or after each user
+#' application exits (when [runApp()] exits), or after each user
 #' session ends (when a client disconnects).
 #'
 #' @param fun A function that will be called after the app has finished running.
@@ -2237,7 +2237,7 @@ flushPendingSessions <- function() {
 #'   be invoked when the application exits.
 #'
 #'
-#' @seealso \code{\link{onSessionEnded}()} for the same functionality, but at
+#' @seealso [onSessionEnded()] for the same functionality, but at
 #'   the session level only.
 #'
 #' @return A function which, if invoked, will cancel the callback.

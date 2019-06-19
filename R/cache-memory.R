@@ -8,7 +8,7 @@
 #'
 #' In a `MemoryCache`, R objects are stored directly in the cache; they are
 #' not *not* serialized before being stored in the cache. This contrasts
-#' with other cache types, like \code{\link{diskCache}}, where objects are
+#' with other cache types, like [diskCache()], where objects are
 #' serialized, and the serialized object is cached. This can result in some
 #' differences of behavior. For example, as long as an object is stored in a
 #' MemoryCache, it will not be garbage collected.
@@ -17,10 +17,10 @@
 #' @section Missing keys:
 #'   The `missing` and `exec_missing` parameters controls what happens
 #'   when `get()` is called with a key that is not in the cache (a cache
-#'   miss). The default behavior is to return a \code{\link{key_missing}}
+#'   miss). The default behavior is to return a [key_missing()]
 #'   object. This is a *sentinel value* that indicates that the key was not
 #'   present in the cache. You can test if the returned value represents a
-#'   missing key by using the \code{\link{is.key_missing}} function. You can
+#'   missing key by using the [is.key_missing()] function. You can
 #'   also have `get()` return a different sentinel value, like `NULL`.
 #'   If you want to throw an error on a cache miss, you can do so by providing a
 #'   function for `missing` that takes one argument, the key, and also use
@@ -57,7 +57,7 @@
 #'   }
 #'
 #'   If you use this, the code that calls `get()` should be wrapped with
-#'   \code{\link{tryCatch}()} to gracefully handle missing keys.
+#'   [tryCatch()] to gracefully handle missing keys.
 #'
 #' @section Cache pruning:
 #'

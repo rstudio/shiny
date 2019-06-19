@@ -184,7 +184,7 @@ markOutputAttrs <- function(renderFunc, snapshotExclude = NULL,
 #' the CSS class name `shiny-image-output`.
 #'
 #' @seealso For more details on how the images are generated, and how to control
-#'   the output, see \code{\link{plotPNG}}.
+#'   the output, see [plotPNG()].
 #'
 #' @param expr An expression that returns a list.
 #' @param env The environment in which to evaluate `expr`.
@@ -195,7 +195,7 @@ markOutputAttrs <- function(renderFunc, snapshotExclude = NULL,
 #'   temp file generated within `func`, then this should be `TRUE`;
 #'   if the image is not a temp file, this should be `FALSE`.
 #' @param outputArgs A list of arguments to be passed through to the implicit
-#'   call to \code{\link{imageOutput}} when `renderImage` is used in an
+#'   call to [imageOutput()] when `renderImage` is used in an
 #'   interactive R Markdown document.
 #' @export
 #'
@@ -295,7 +295,7 @@ renderImage <- function(expr, env=parent.frame(), quoted=FALSE,
 #'
 #' Makes a reactive version of the given function that captures any printed
 #' output, and also captures its printable result (unless
-#' \code{\link[base]{invisible}}), into a string. The resulting function is suitable
+#' [base::invisible()]), into a string. The resulting function is suitable
 #' for assigning to an  `output` slot.
 #'
 #' The corresponding HTML output tag can be anything (though `pre` is
@@ -303,22 +303,22 @@ renderImage <- function(expr, env=parent.frame(), quoted=FALSE,
 #' have the CSS class name `shiny-text-output`.
 #'
 #' The result of executing `func` will be printed inside a
-#' \code{\link[utils]{capture.output}} call.
+#' [utils::capture.output()] call.
 #'
 #' Note that unlike most other Shiny output functions, if the given function
 #' returns `NULL` then `NULL` will actually be visible in the output.
-#' To display nothing, make your function return \code{\link[base]{invisible}()}.
+#' To display nothing, make your function return [base::invisible()].
 #'
 #' @param expr An expression that may print output and/or return a printable R
 #'   object.
 #' @param env The environment in which to evaluate `expr`.
 #' @param quoted Is `expr` a quoted expression (with `quote()`)? This
 #'   is useful if you want to save an expression in a variable.
-#' @param width The value for \code{\link[base]{options}('width')}.
+#' @param width The value for `[options][base::options]('width')`.
 #' @param outputArgs A list of arguments to be passed through to the implicit
-#'   call to \code{\link{verbatimTextOutput}} when `renderPrint` is used
+#'   call to [verbatimTextOutput()] when `renderPrint` is used
 #'   in an interactive R Markdown document.
-#' @seealso \code{\link{renderText}} for displaying the value returned from a
+#' @seealso [renderText()] for displaying the value returned from a
 #'   function, instead of the printed output.
 #'
 #' @example res/text-example.R
@@ -398,7 +398,7 @@ createRenderPrintPromiseDomain <- function(width) {
 #' Text Output
 #'
 #' Makes a reactive version of the given function that also uses
-#' \code{\link[base]{cat}} to turn its result into a single-element character
+#' [base::cat()] to turn its result into a single-element character
 #' vector.
 #'
 #' The corresponding HTML output tag can be anything (though `pre` is
@@ -406,7 +406,7 @@ createRenderPrintPromiseDomain <- function(width) {
 #' have the CSS class name `shiny-text-output`.
 #'
 #' The result of executing `func` will passed to `cat`, inside a
-#' \code{\link[utils]{capture.output}} call.
+#' [utils::capture.output()] call.
 #'
 #' @param expr An expression that returns an R object that can be used as an
 #'   argument to `cat`.
@@ -414,12 +414,12 @@ createRenderPrintPromiseDomain <- function(width) {
 #' @param quoted Is `expr` a quoted expression (with `quote()`)? This
 #'   is useful if you want to save an expression in a variable.
 #' @param outputArgs A list of arguments to be passed through to the implicit
-#'   call to \code{\link{textOutput}} when `renderText` is used in an
+#'   call to [textOutput()] when `renderText` is used in an
 #'   interactive R Markdown document.
 #' @param sep A separator passed to `cat` to be appended after each
 #'   element.
 #'
-#' @seealso \code{\link{renderPrint}} for capturing the print output of a
+#' @seealso [renderPrint()] for capturing the print output of a
 #'   function, rather than the returned text value.
 #'
 #' @example res/text-example.R
@@ -442,18 +442,18 @@ renderText <- function(expr, env=parent.frame(), quoted=FALSE,
 #' Renders reactive HTML using the Shiny UI library.
 #'
 #' The corresponding HTML output tag should be `div` and have the CSS class
-#' name `shiny-html-output` (or use \code{\link{uiOutput}}).
+#' name `shiny-html-output` (or use [uiOutput()]).
 #'
-#' @param expr An expression that returns a Shiny tag object, \code{\link{HTML}},
+#' @param expr An expression that returns a Shiny tag object, [HTML()],
 #'   or a list of such objects.
 #' @param env The environment in which to evaluate `expr`.
 #' @param quoted Is `expr` a quoted expression (with `quote()`)? This
 #'   is useful if you want to save an expression in a variable.
 #' @param outputArgs A list of arguments to be passed through to the implicit
-#'   call to \code{\link{uiOutput}} when `renderUI` is used in an
+#'   call to [uiOutput()] when `renderUI` is used in an
 #'   interactive R Markdown document.
 #'
-#' @seealso \code{\link{uiOutput}}
+#' @seealso [uiOutput()]
 #' @export
 #' @examples
 #' ## Only run examples in interactive R sessions
@@ -497,7 +497,7 @@ renderUI <- function(expr, env=parent.frame(), quoted=FALSE,
 #' file). Both filename and contents can be calculated dynamically at the time
 #' the user initiates the download. Assign the return value to a slot on
 #' `output` in your server function, and in the UI use
-#' \code{\link{downloadButton}} or \code{\link{downloadLink}} to make the
+#' [downloadButton()] or [downloadLink()] to make the
 #' download available.
 #'
 #' @param filename A string of the filename, including extension, that the
@@ -514,7 +514,7 @@ renderUI <- function(expr, env=parent.frame(), quoted=FALSE,
 #'   `NA`, the content type will be guessed based on the filename
 #'   extension, or `application/octet-stream` if the extension is unknown.
 #' @param outputArgs A list of arguments to be passed through to the implicit
-#'   call to \code{\link{downloadButton}} when `downloadHandler` is used
+#'   call to [downloadButton()] when `downloadHandler` is used
 #'   in an interactive R Markdown document.
 #'
 #' @examples
@@ -559,7 +559,7 @@ downloadHandler <- function(filename, content, contentType=NA, outputArgs=list()
 #' the server infrastructure.
 #'
 #' For the `options` argument, the character elements that have the class
-#' `"AsIs"` (usually returned from \code{\link[base]{I}()}) will be evaluated in
+#' `"AsIs"` (usually returned from [base::I()]) will be evaluated in
 #' JavaScript. This is useful when the type of the option value is not supported
 #' in JSON, e.g., a JavaScript function, which can be obtained by evaluating a
 #' character string. Note this only applies to the root-level elements of the
@@ -580,7 +580,7 @@ downloadHandler <- function(filename, content, contentType=NA, outputArgs=list()
 #'   `c(1, 3, 4)`, or `c(-1, -3)` (all columns except the first and
 #'   third), or `c('Species', 'Sepal.Length')`.
 #' @param outputArgs A list of arguments to be passed through to the implicit
-#'   call to \code{\link{dataTableOutput}} when `renderDataTable` is used
+#'   call to [dataTableOutput()] when `renderDataTable` is used
 #'   in an interactive R Markdown document.
 #'
 #' @references <http://datatables.net>
@@ -716,7 +716,7 @@ NULL
 
 #' Plot output (deprecated)
 #'
-#' `reactivePlot` has been replaced by \code{\link{renderPlot}}.
+#' `reactivePlot` has been replaced by [renderPlot()].
 #' @param func A function.
 #' @param width Width.
 #' @param height Height.
@@ -730,7 +730,7 @@ reactivePlot <- function(func, width='auto', height='auto', ...) {
 
 #' Table output (deprecated)
 #'
-#' `reactiveTable` has been replaced by \code{\link{renderTable}}.
+#' `reactiveTable` has been replaced by [renderTable()].
 #' @rdname deprecatedReactives
 #' @export
 reactiveTable <- function(func, ...) {
@@ -740,7 +740,7 @@ reactiveTable <- function(func, ...) {
 
 #' Print output (deprecated)
 #'
-#' `reactivePrint` has been replaced by \code{\link{renderPrint}}.
+#' `reactivePrint` has been replaced by [renderPrint()].
 #' @rdname deprecatedReactives
 #' @export
 reactivePrint <- function(func) {
@@ -750,7 +750,7 @@ reactivePrint <- function(func) {
 
 #' UI output (deprecated)
 #'
-#' `reactiveUI` has been replaced by \code{\link{renderUI}}.
+#' `reactiveUI` has been replaced by [renderUI()].
 #' @rdname deprecatedReactives
 #' @export
 reactiveUI <- function(func) {
@@ -760,7 +760,7 @@ reactiveUI <- function(func) {
 
 #' Text output (deprecated)
 #'
-#' `reactiveText` has been replaced by \code{\link{renderText}}.
+#' `reactiveText` has been replaced by [renderText()].
 #' @rdname deprecatedReactives
 #' @export
 reactiveText <- function(func) {

@@ -36,8 +36,8 @@ startPNG <- function(filename, width, height, res, ...) {
 #' way.
 #'
 #' For output, it will try to use the following devices, in this order:
-#' quartz (via \code{\link[grDevices]{png}}), then \code{\link[Cairo]{CairoPNG}},
-#' and finally \code{\link[grDevices]{png}}. This is in order of quality of
+#' quartz (via [grDevices::png()]), then [Cairo::CairoPNG()],
+#' and finally [grDevices::png()]. This is in order of quality of
 #' output. Notably, plain `png` output on Linux and Windows may not
 #' antialias some point shapes, resulting in poor quality output.
 #'
@@ -51,9 +51,9 @@ startPNG <- function(filename, width, height, res, ...) {
 #' @param width Width in pixels.
 #' @param height Height in pixels.
 #' @param res Resolution in pixels per inch. This value is passed to
-#'   \code{\link[grDevices]{png}}. Note that this affects the resolution of PNG rendering in
+#'   [grDevices::png()]. Note that this affects the resolution of PNG rendering in
 #'   R; it won't change the actual ppi of the browser.
-#' @param ... Arguments to be passed through to \code{\link[grDevices]{png}}.
+#' @param ... Arguments to be passed through to [grDevices::png()].
 #'   These can be used to set the width, height, background color, etc.
 #' @export
 plotPNG <- function(func, filename=tempfile(fileext='.png'),

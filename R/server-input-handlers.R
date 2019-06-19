@@ -48,7 +48,7 @@ inputHandlers <- Map$new()
 #' }
 #'
 #' }
-#' @seealso \code{\link{removeInputHandler}}
+#' @seealso [removeInputHandler()]
 #' @export
 registerInputHandler <- function(type, fun, force=FALSE){
   if (inputHandlers$containsKey(type) && !force){
@@ -65,7 +65,7 @@ registerInputHandler <- function(type, fun, force=FALSE){
 #' @param type The type for which handlers should be removed.
 #' @return The handler previously associated with this `type`, if one
 #'   existed. Otherwise, `NULL`.
-#' @seealso \code{\link{registerInputHandler}}
+#' @seealso [registerInputHandler()]
 #' @export
 removeInputHandler <- function(type){
   inputHandlers$remove(type)

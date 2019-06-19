@@ -1,7 +1,7 @@
 #' Find rows of data that are selected by a brush
 #'
 #' This function returns rows from a data frame which are under a brush used
-#' with \code{\link{plotOutput}}.
+#' with [plotOutput()].
 #'
 #' It is also possible for this function to return all rows from the input data
 #' frame, but with an additional column `selected_`, which indicates which
@@ -52,7 +52,7 @@
 #'   column, `selected_`, which indicates whether the row was inside the
 #'   brush (`TRUE`) or outside the brush (`FALSE`).
 #'
-#' @seealso \code{\link{plotOutput}} for example usage.
+#' @seealso [plotOutput()] for example usage.
 #' @export
 brushedPoints <- function(df, brush, xvar = NULL, yvar = NULL,
                           panelvar1 = NULL, panelvar2 = NULL,
@@ -194,7 +194,7 @@ brushedPoints <- function(df, brush, xvar = NULL, yvar = NULL,
 #'Find rows of data that are near a click/hover/double-click
 #'
 #'This function returns rows from a data frame which are near a click, hover, or
-#'double-click, when used with \code{\link{plotOutput}}. The rows will be sorted
+#'double-click, when used with [plotOutput()]. The rows will be sorted
 #'by their distance to the mouse event.
 #'
 #'It is also possible for this function to return all rows from the input data
@@ -226,7 +226,7 @@ brushedPoints <- function(df, brush, xvar = NULL, yvar = NULL,
 #'  column, `selected_`, which indicates whether the row was inside the
 #'  selected by the mouse event (`TRUE`) or not (`FALSE`).
 #'
-#'@seealso \code{\link{plotOutput}} for more examples.
+#'@seealso [plotOutput()] for more examples.
 #'
 #' @examples
 #' \dontrun{

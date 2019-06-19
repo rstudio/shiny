@@ -25,7 +25,7 @@
 #' @return A list of HTML elements that can be added to a UI definition.
 #'
 #' @family input elements
-#' @seealso \code{\link{checkboxInput}}, \code{\link{updateCheckboxGroupInput}}
+#' @seealso [checkboxInput()], [updateCheckboxGroupInput()]
 #'
 #' @examples
 #' ## Only run examples in interactive R sessions

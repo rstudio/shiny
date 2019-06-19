@@ -4,7 +4,7 @@
 #'
 #' @inheritParams textInput
 #' @param height The height of the input, e.g. `'400px'`, or
-#'   `'100%'`; see \code{\link{validateCssUnit}}.
+#'   `'100%'`; see [validateCssUnit()].
 #' @param cols Value of the visible character columns of the input, e.g.
 #'   `80`. If used with `width`, `width` will take precedence in
 #'   the browser's rendering.
@@ -18,7 +18,7 @@
 #' @return A textarea input control that can be added to a UI definition.
 #'
 #' @family input elements
-#' @seealso \code{\link{updateTextAreaInput}}
+#' @seealso [updateTextAreaInput()]
 #'
 #' @examples
 #' ## Only run examples in interactive R sessions

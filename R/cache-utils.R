@@ -4,7 +4,7 @@
 #'
 #' @param x An object to test.
 #'
-#' @seealso \code{\link{diskCache}}, \code{\link{memoryCache}}.
+#' @seealso [diskCache()], [memoryCache()].
 #'
 #' @export
 key_missing <- function() {

@@ -29,7 +29,7 @@
 #'   Examples.
 #'
 #' @family input elements
-#' @seealso \code{\link{updateRadioButtons}}
+#' @seealso [updateRadioButtons()]
 #'
 #' @examples
 #' ## Only run examples in interactive R sessions

@@ -4,13 +4,13 @@
 #'
 #' This function allows you to dynamically add an arbitrarily large UI
 #' object into your app, whenever you want, as many times as you want.
-#' Unlike \code{\link{renderUI}}, the UI generated with `insertUI`
+#' Unlike [renderUI()], the UI generated with `insertUI`
 #' is not updatable as a whole: once it's created, it stays there. Each
 #' new call to `insertUI` creates more UI objects, in addition to
 #' the ones already there (all independent from one another). To
 #' update a part of the UI (ex: an input object), you must use the
 #' appropriate `render` function or a customized `reactive`
-#' function. To remove any part of your UI, use \code{\link{removeUI}}.
+#' function. To remove any part of your UI, use [removeUI()].
 #'
 #' @param selector A string that is accepted by jQuery's selector (i.e. the
 #' string `s` to be placed in a `$(s)` jQuery call). This selector
@@ -48,7 +48,7 @@
 #'
 #' @param session The shiny session within which to call `insertUI`.
 #'
-#' @seealso \code{\link{removeUI}}
+#' @seealso [removeUI()]
 #'
 #' @examples
 #' ## Only run this example in interactive R sessions
@@ -108,7 +108,7 @@ insertUI <- function(selector,
 #' is executed on some element, it is gone forever.
 #'
 #' While it may be a particularly useful pattern to pair this with
-#' \code{\link{insertUI}} (to remove some UI you had previously inserted),
+#' [insertUI()] (to remove some UI you had previously inserted),
 #' there is no restriction on what you can use `removeUI` on. Any
 #' element that can be selected through a jQuery selector can be removed
 #' through this function.
@@ -131,7 +131,7 @@ insertUI <- function(selector,
 #'
 #' @param session The shiny session within which to call `removeUI`.
 #'
-#' @seealso \code{\link{insertUI}}
+#' @seealso [insertUI()]
 #'
 #' @examples
 #' ## Only run this example in interactive R sessions

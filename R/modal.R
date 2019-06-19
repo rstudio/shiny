@@ -1,13 +1,13 @@
 #' Show or remove a modal dialog
 #'
 #' This causes a modal dialog to be displayed in the client browser, and is
-#' typically used with \code{\link{modalDialog}}.
+#' typically used with [modalDialog()].
 #'
 #' @param ui UI content to show in the modal.
 #' @param session The `session` object passed to function given to
 #'   `shinyServer`.
 #'
-#' @seealso \code{\link{modalDialog}} for examples.
+#' @seealso [modalDialog()] for examples.
 #' @export
 showModal <- function(ui, session = getDefaultReactiveDomain()) {
   res <- processDeps(ui, session)
@@ -42,7 +42,7 @@ removeModal <- function(session = getDefaultReactiveDomain()) {
 #'   clicking outside the dialog box, or be pressing the Escape key. If
 #'   `FALSE` (the default), the modal dialog can't be dismissed in those
 #'   ways; instead it must be dismissed by clicking on the dismiss button, or
-#'   from a call to \code{\link{removeModal}} on the server.
+#'   from a call to [removeModal()] on the server.
 #' @param fade If `FALSE`, the modal dialog will have no fade-in animation
 #'   (it will simply appear rather than fade in to view).
 #'
@@ -174,7 +174,7 @@ modalDialog <- function(..., title = NULL, footer = modalButton("Dismiss"),
 #' When clicked, a `modalButton` will dismiss the modal dialog.
 #'
 #' @inheritParams actionButton
-#' @seealso \code{\link{modalDialog}} for examples.
+#' @seealso [modalDialog()] for examples.
 #' @export
 modalButton <- function(label, icon = NULL) {
   tags$button(type = "button", class = "btn btn-default",

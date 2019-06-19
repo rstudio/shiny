@@ -132,7 +132,7 @@ ReactiveVal <- R6Class(
 #' takes a dependency, and when you change the value, it notifies any reactives
 #' that previously depended on that value.
 #'
-#' `reactiveVal` is very similar to \code{\link{reactiveValues}}, except
+#' `reactiveVal` is very similar to [reactiveValues()], except
 #' that the former is for a single reactive value (like a variable), whereas the
 #' latter lets you conveniently use multiple reactive values by name (like a
 #' named list of variables). For a one-off reactive value, it's more natural to
@@ -140,7 +140,7 @@ ReactiveVal <- R6Class(
 #'
 #' @param value An optional initial value.
 #' @param label An optional label, for debugging purposes (see
-#'   \code{\link{reactlog}}). If missing, a label will be automatically
+#'   [reactlog()]). If missing, a label will be automatically
 #'   created.
 #'
 #' @return A function. Call the function with no arguments to (reactively) read
@@ -562,7 +562,7 @@ ReactiveValues <- R6Class(
 #' @param ... Objects that will be added to the reactivevalues object. All of
 #'   these objects must be named.
 #'
-#' @seealso \code{\link{isolate}} and \code{\link{is.reactivevalues}}.
+#' @seealso [isolate()] and [is.reactivevalues()].
 #' @export
 reactiveValues <- function(...) {
   args <- list(...)
@@ -605,7 +605,7 @@ checkName <- function(x) {
 #' Checks whether its argument is a reactivevalues object.
 #'
 #' @param x The object to test.
-#' @seealso \code{\link{reactiveValues}}.
+#' @seealso [reactiveValues()].
 #' @export
 is.reactivevalues <- function(x) inherits(x, 'reactivevalues')
 
@@ -670,10 +670,10 @@ as.list.reactivevalues <- function(x, all.names=FALSE, ...) {
 
 #' Convert a reactivevalues object to a list
 #'
-#' This function does something similar to what you might \code{\link[base]{as.list}}
+#' This function does something similar to what you might [base::as.list()]
 #' to do. The difference is that the calling context will take dependencies on
 #' every object in the reactivevalues object. To avoid taking dependencies on
-#' all the objects, you can wrap the call with \code{\link{isolate}()}.
+#' all the objects, you can wrap the call with [isolate()].
 #'
 #' @param x A reactivevalues object.
 #' @param all.names If `TRUE`, include objects with a leading dot. If
@@ -723,20 +723,20 @@ str.reactivevalues <- function(object, indent.str = " ", ...) {
 
 #' Freeze a reactive value
 #'
-#' These functions freeze a \code{\link{reactiveVal}}, or an element of a
-#' \code{\link{reactiveValues}}. If the value is accessed while frozen, a
+#' These functions freeze a [reactiveVal()], or an element of a
+#' [reactiveValues()]. If the value is accessed while frozen, a
 #' "silent" exception is raised and the operation is stopped. This is the same
 #' thing that happens if `req(FALSE)` is called. The value is thawed
 #' (un-frozen; accessing it will no longer raise an exception) when the current
 #' reactive domain is flushed. In a Shiny application, this occurs after all of
 #' the observers are executed.
 #'
-#' @param x For `freezeReactiveValue`, a \code{\link{reactiveValues}}
+#' @param x For `freezeReactiveValue`, a [reactiveValues()]
 #'   object (like `input`); for `freezeReactiveVal`, a
-#'   \code{\link{reactiveVal}} object.
-#' @param name The name of a value in the \code{\link{reactiveValues}} object.
+#'   [reactiveVal()] object.
+#' @param name The name of a value in the [reactiveValues()] object.
 #'
-#' @seealso \code{\link{req}}
+#' @seealso [req()]
 #' @examples
 #' ## Only run this examples in interactive R sessions
 #' if (interactive()) {
@@ -922,9 +922,9 @@ Observable <- R6Class(
 #'   This is useful when you want to use an expression that is stored in a
 #'   variable; to do so, it must be quoted with `quote()`.
 #' @param label A label for the reactive expression, useful for debugging.
-#' @param domain See \link{domains}.
+#' @param domain See [domains].
 #' @param ..stacktraceon Advanced use only. For stack manipulation purposes; see
-#'   \code{\link{stacktrace}}.
+#'   [stacktrace()].
 #' @return a function, wrapped in a S3 class "reactive"
 #'
 #' @examples
@@ -1267,7 +1267,7 @@ Observer <- R6Class(
 #' soon as their dependencies change, they schedule themselves to re-execute.
 #'
 #' Starting with Shiny 0.10.0, observers are automatically destroyed by default
-#' when the \link[=domains]{domain} that owns them ends (e.g. when a Shiny
+#' when the [domain][domains] that owns them ends (e.g. when a Shiny
 #' session ends).
 #'
 #' @param x An expression (quoted or unquoted). Any return value will be
@@ -1286,11 +1286,11 @@ Observer <- R6Class(
 #'   observer with a higher priority value will execute before all observers
 #'   with lower priority values. Positive, negative, and zero values are
 #'   allowed.
-#' @param domain See \link{domains}.
+#' @param domain See [domains].
 #' @param autoDestroy If `TRUE` (the default), the observer will be
 #'   automatically destroyed when its domain (if any) ends.
 #' @param ..stacktraceon Advanced use only. For stack manipulation purposes; see
-#'   \code{\link{stacktrace}}.
+#'   [stacktrace()].
 #' @return An observer reference class object. This object has the following
 #'   methods:
 #'   \describe{
@@ -1439,12 +1439,12 @@ setAutoflush <- local({
 #' reactive value, except reactive values are triggered when they are set, while
 #' reactive timers are triggered simply by the passage of time.
 #'
-#' \link[=reactive]{Reactive expressions} and observers that want to be
+#' [Reactive expressions][reactive] and observers that want to be
 #' invalidated by the timer need to call the timer function that
 #' `reactiveTimer` returns, even if the current time value is not actually
 #' needed.
 #'
-#' See \code{\link{invalidateLater}} as a safer and simpler alternative.
+#' See [invalidateLater()] as a safer and simpler alternative.
 #'
 #' @param intervalMs How often to fire, in milliseconds
 #' @param session A session object. This is needed to cancel any scheduled
@@ -1454,8 +1454,8 @@ setAutoflush <- local({
 #' @return A no-parameter function that can be called from a reactive context,
 #'   in order to cause that context to be invalidated the next time the timer
 #'   interval elapses. Calling the returned function also happens to yield the
-#'   current time (as in \code{\link[base]{Sys.time}}).
-#' @seealso \code{\link{invalidateLater}}
+#'   current time (as in [base::Sys.time()]).
+#' @seealso [invalidateLater()]
 #'
 #' @examples
 #' ## Only run examples in interactive R sessions
@@ -1567,7 +1567,7 @@ reactiveTimer <- function(intervalMs=1000, session = getDefaultReactiveDomain())
 #'   this invalidation will not be tied to any session, and so it will still
 #'   occur.
 #'
-#' @seealso \code{\link{reactiveTimer}} is a slightly less safe alternative.
+#' @seealso [reactiveTimer()] is a slightly less safe alternative.
 #'
 #' @examples
 #' ## Only run examples in interactive R sessions
@@ -1684,7 +1684,7 @@ coerceToFunc <- function(x) {
 #' @return A reactive expression that returns the result of `valueFunc`,
 #'   and invalidates when `checkFunc` changes.
 #'
-#' @seealso \code{\link{reactiveFileReader}}
+#' @seealso [reactiveFileReader()]
 #'
 #' @examples
 #' function(input, output, session) {
@@ -1761,7 +1761,7 @@ reactivePoll <- function(intervalMillis, session, checkFunc, valueFunc) {
 #'   automatically invalidates when the file changes on disk (as determined by
 #'   last modified time).
 #'
-#' @seealso \code{\link{reactivePoll}}
+#' @seealso [reactivePoll()]
 #'
 #' @examples
 #' \dontrun{
@@ -1818,7 +1818,7 @@ reactiveFileReader <- function(intervalMillis, session, filePath, readFunc, ...)
 #' The expression given to `isolate()` is evaluated in the calling
 #' environment. This means that if you assign a variable inside the
 #' `isolate()`, its value will be visible outside of the `isolate()`.
-#' If you want to avoid this, you can use \code{\link[base]{local}()} inside the
+#' If you want to avoid this, you can use [base::local()] inside the
 #' `isolate()`.
 #'
 #' This function can also be useful for calling reactive expression at the
@@ -1896,7 +1896,7 @@ isolate <- function(expr) {
 #' @param expr An expression to evaluate.
 #' @return The value of `expr`.
 #'
-#' @seealso \code{\link{isolate}}
+#' @seealso [isolate()]
 #' @export
 maskReactiveContext <- function(expr) {
   .getReactiveEnvironment()$runWith(NULL, function() {
@@ -1913,14 +1913,14 @@ maskReactiveContext <- function(expr) {
 #' that respond to *any* of their inputs changing. That's often what is
 #' desired in Shiny apps, but not always: sometimes you want to wait for a
 #' specific action to be taken from the user, like clicking an
-#' \code{\link{actionButton}}, before calculating an expression or taking an
+#' [actionButton()], before calculating an expression or taking an
 #' action. A reactive value or expression that is used to trigger other
 #' calculations in this way is called an *event*.
 #'
 #' These situations demand a more imperative, "event handling" style of
 #' programming that is possible--but not particularly intuitive--using the
-#' reactive programming primitives \code{\link{observe}} and
-#' \code{\link{isolate}}. `observeEvent` and `eventReactive` provide
+#' reactive programming primitives [observe()] and
+#' [isolate()]. `observeEvent` and `eventReactive` provide
 #' straightforward APIs for event handling that wrap `observe` and
 #' `isolate`.
 #'
@@ -1932,7 +1932,7 @@ maskReactiveContext <- function(expr) {
 #'
 #' Use `eventReactive` to create a *calculated value* that only
 #' updates in response to an event. This is just like a normal
-#' \link[=reactive]{reactive expression} except it ignores all the usual
+#' [reactive expression][reactive] except it ignores all the usual
 #' invalidations that come from its reactive dependencies; it only invalidates
 #' in response to the given event.
 #'
@@ -1940,10 +1940,10 @@ maskReactiveContext <- function(expr) {
 #'
 #' Both `observeEvent` and `eventReactive` take an `ignoreNULL`
 #' parameter that affects behavior when the `eventExpr` evaluates to
-#' `NULL` (or in the special case of an \code{\link{actionButton}},
+#' `NULL` (or in the special case of an [actionButton()],
 #' `0`). In these cases, if `ignoreNULL` is `TRUE`, then an
 #' `observeEvent` will not execute and an `eventReactive` will raise a
-#' silent \link[=validate]{validation} error. This is useful behavior if you
+#' silent [validation][validate] error. This is useful behavior if you
 #' don't want to do the action or calculation when your app first starts, but
 #' wait for the user to initiate the action first (like a "Submit" button);
 #' whereas `ignoreNULL=FALSE` is desirable if you want to initially perform
@@ -2002,10 +2002,10 @@ maskReactiveContext <- function(expr) {
 #'   inside curly braces
 #' @param handlerExpr The expression to call whenever `eventExpr` is
 #'   invalidated. This should be a side-effect-producing action (the return
-#'   value will be ignored). It will be executed within an \code{\link{isolate}}
+#'   value will be ignored). It will be executed within an [isolate()]
 #'   scope.
 #' @param valueExpr The expression that produces the return value of the
-#'   `eventReactive`. It will be executed within an \code{\link{isolate}}
+#'   `eventReactive`. It will be executed within an [isolate()]
 #'   scope.
 #' @param event.env The parent environment for `eventExpr`. By default,
 #'   this is the calling environment.
@@ -2031,7 +2031,7 @@ maskReactiveContext <- function(expr) {
 #'   this observer should be executed. An observer with a given priority level
 #'   will always execute sooner than all observers with a lower priority level.
 #'   Positive, negative, and zero values are allowed.
-#' @param domain See \link{domains}.
+#' @param domain See [domains].
 #' @param autoDestroy If `TRUE` (the default), the observer will be
 #'   automatically destroyed when its domain (if any) ends.
 #' @param ignoreNULL Whether the action should be triggered (or value
@@ -2047,10 +2047,10 @@ maskReactiveContext <- function(expr) {
 #'   happen once.
 #'
 #' @return `observeEvent` returns an observer reference class object (see
-#'   \code{\link{observe}}). `eventReactive` returns a reactive expression
-#'   object (see \code{\link{reactive}}).
+#'   [observe()]). `eventReactive` returns a reactive expression
+#'   object (see [reactive()]).
 #'
-#' @seealso \code{\link{actionButton}}
+#' @seealso [actionButton()]
 #'
 #' @examples
 #' ## Only run this example in interactive R sessions
@@ -2257,10 +2257,10 @@ isNullEvent <- function(value) {
 #'   no-arg function or reactive expression instead, e.g. to let the end-user
 #'   control the time window.
 #' @param priority Debounce/throttle is implemented under the hood using
-#'   \link[=observe]{observers}. Use this parameter to set the priority of
+#'   [observers][observe]. Use this parameter to set the priority of
 #'   these observers. Generally, this should be higher than the priorities of
 #'   downstream observers and outputs (which default to zero).
-#' @param domain See \link{domains}.
+#' @param domain See [domains].
 #'
 #' @examples
 #' ## Only run examples in interactive R sessions

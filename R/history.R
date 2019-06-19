@@ -29,7 +29,7 @@ NULL
 #'   value1, param2 = value2)`. For `getUrlHash`, a character vector with
 #'   the hash (including the leading `#` symbol).
 #'
-#' @seealso \code{\link{updateQueryString}}
+#' @seealso [updateQueryString()]
 #'
 #' @examples
 #' ## Only run this example in interactive R sessions

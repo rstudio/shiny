@@ -12,7 +12,7 @@
 #' automatically passed to the `print()` function, which runs the app. If
 #' this is called in the middle of a function, the value will not be passed to
 #' `print()` and the app will not be run. To make the app run, pass the app
-#' object to `print()` or \code{\link{runApp}()}.
+#' object to `print()` or [runApp()].
 #'
 #' @param ui The UI definition of the app (for example, a call to
 #'   `fluidPage()` with nested controls)
@@ -31,12 +31,12 @@
 #'   expression in order for the match to be considered successful.
 #' @param enableBookmarking Can be one of `"url"`, `"server"`, or
 #'   `"disable"`. This is equivalent to calling the
-#'   \code{\link{enableBookmarking}()} function just before calling
+#'   [enableBookmarking()] function just before calling
 #'   `shinyApp()`. With the default value (`NULL`), the app will
 #'   respect the setting from any previous calls to `enableBookmarking()`.
-#'   See \code{\link{enableBookmarking}} for more information.
+#'   See [enableBookmarking()] for more information.
 #' @return An object that represents the app. Printing the object or passing it
-#'   to \code{\link{runApp}} will run the app.
+#'   to [runApp()] will run the app.
 #'
 #' @examples
 #' ## Only run this example in interactive R sessions

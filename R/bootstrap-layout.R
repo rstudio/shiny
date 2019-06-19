@@ -10,25 +10,25 @@
 #'
 #' @param ... Elements to include within the page
 #' @param title The browser window title (defaults to the host URL of the page).
-#'   Can also be set as a side effect of the \code{\link{titlePanel}} function.
+#'   Can also be set as a side effect of the [titlePanel()] function.
 #' @param responsive This option is deprecated; it is no longer optional with
 #'   Bootstrap 3.
 #' @param theme Alternative Bootstrap stylesheet (normally a css file within the
 #'   www directory). For example, to use the theme located at
 #'   `www/bootstrap.css` you would use `theme = "bootstrap.css"`.
 #'
-#' @return A UI defintion that can be passed to the \link{shinyUI} function.
+#' @return A UI defintion that can be passed to the [shinyUI] function.
 #'
 #' @details To create a fluid page use the `fluidPage` function and include
-#'   instances of `fluidRow` and \code{\link{column}} within it. As an
+#'   instances of `fluidRow` and [column()] within it. As an
 #'   alternative to low-level row and column functions you can also use
-#'   higher-level layout functions like \code{\link{sidebarLayout}}.
+#'   higher-level layout functions like [sidebarLayout()].
 #'
 #' @note See the [
 #'   Shiny-Application-Layout-Guide](http://shiny.rstudio.com/articles/layout-guide.html) for additional details on laying out fluid
 #'   pages.
 #'
-#' @seealso \code{\link{column}}, \code{\link{sidebarLayout}}
+#' @seealso [column()], [sidebarLayout()]
 #'
 #' @examples
 #' ## Only run examples in interactive R sessions
@@ -118,11 +118,11 @@ fluidRow <- function(...) {
 #'   www directory). For example, to use the theme located at
 #'   `www/bootstrap.css` you would use `theme = "bootstrap.css"`.
 #'
-#' @return A UI defintion that can be passed to the \link{shinyUI} function.
+#' @return A UI defintion that can be passed to the [shinyUI] function.
 #'
 #' @details To create a fixed page use the `fixedPage` function and include
-#'   instances of `fixedRow` and \code{\link{column}} within it. Note that
-#'   unlike \code{\link{fluidPage}}, fixed pages cannot make use of higher-level
+#'   instances of `fixedRow` and [column()] within it. Note that
+#'   unlike [fluidPage()], fixed pages cannot make use of higher-level
 #'   layout functions like `sidebarLayout`, rather, all layout must be done
 #'   with `fixedRow` and `column`.
 #'
@@ -130,7 +130,7 @@ fluidRow <- function(...) {
 #'   Shiny Application Layout Guide](http://shiny.rstudio.com/articles/layout-guide.html) for additional details on laying out fixed
 #'   pages.
 #'
-#' @seealso \code{\link{column}}
+#' @seealso [column()]
 #'
 #' @examples
 #' ## Only run examples in interactive R sessions
@@ -169,8 +169,8 @@ fixedRow <- function(...) {
 
 #' Create a column within a UI definition
 #'
-#' Create a column for use within a  \code{\link{fluidRow}} or
-#' \code{\link{fixedRow}}
+#' Create a column for use within a  [fluidRow()] or
+#' [fixedRow()]
 #'
 #' @param width The grid width of the column (must be between 1 and 12)
 #' @param ... Elements to include within the column
@@ -178,10 +178,10 @@ fixedRow <- function(...) {
 #'   previous column.
 #'
 #' @return A column that can be included within a
-#'   \code{\link{fluidRow}} or \code{\link{fixedRow}}.
+#'   [fluidRow()] or [fixedRow()].
 #'
 #'
-#' @seealso \code{\link{fluidRow}}, \code{\link{fixedRow}}.
+#' @seealso [fluidRow()], [fixedRow()].
 #'
 #' @examples
 #' ## Only run examples in interactive R sessions
@@ -267,8 +267,8 @@ titlePanel <- function(title, windowTitle=title) {
 #' distinct background color and typically contains input controls. The main
 #' area occupies 2/3 of the horizontal width and typically contains outputs.
 #'
-#' @param sidebarPanel The \link{sidebarPanel} containing input controls
-#' @param mainPanel The \link{mainPanel} containing outputs
+#' @param sidebarPanel The [sidebarPanel] containing input controls
+#' @param mainPanel The [mainPanel] containing outputs
 #' @param position The position of the sidebar relative to the main area ("left"
 #'   or "right")
 #' @param fluid `TRUE` to use fluid layout; `FALSE` to use fixed
@@ -346,7 +346,7 @@ sidebarLayout <- function(sidebarPanel,
 #' @param fluid `TRUE` to use fluid layout; `FALSE` to use fixed
 #'   layout.
 #'
-#' @seealso \code{\link{fluidPage}}, \code{\link{flowLayout}}
+#' @seealso [fluidPage()], [flowLayout()]
 #'
 #' @examples
 #' ## Only run examples in interactive R sessions
@@ -377,14 +377,14 @@ verticalLayout <- function(..., fluid = TRUE) {
 #' Lays out elements in a left-to-right, top-to-bottom arrangement. The elements
 #' on a given row will be top-aligned with each other. This layout will not work
 #' well with elements that have a percentage-based width (e.g.
-#' \code{\link{plotOutput}} at its default setting of `width = "100%"`).
+#' [plotOutput()] at its default setting of `width = "100%"`).
 #'
 #' @param ... Unnamed arguments will become child elements of the layout. Named
 #'   arguments will become HTML attributes on the outermost tag.
 #' @param cellArgs Any additional attributes that should be used for each cell
 #'   of the layout.
 #'
-#' @seealso \code{\link{verticalLayout}}
+#' @seealso [verticalLayout()]
 #'
 #' @examples
 #' ## Only run examples in interactive R sessions
@@ -415,7 +415,7 @@ flowLayout <- function(..., cellArgs = list()) {
 
 #' Input panel
 #'
-#' A \code{\link{flowLayout}} with a grey border and light grey background,
+#' A [flowLayout()] with a grey border and light grey background,
 #' suitable for wrapping inputs.
 #'
 #' @param ... Input controls or other HTML elements.
@@ -435,7 +435,7 @@ inputPanel <- function(...) {
 #'   arguments will become HTML attributes on the outermost tag.
 #' @param cellWidths Character or numeric vector indicating the widths of the
 #'   individual cells. Recycling will be used if needed. Character values will
-#'   be interpreted as CSS lengths (see \code{\link{validateCssUnit}}), numeric
+#'   be interpreted as CSS lengths (see [validateCssUnit()]), numeric
 #'   values as pixels.
 #' @param cellArgs Any additional attributes that should be used for each cell
 #'   of the layout.
@@ -514,8 +514,8 @@ splitLayout <- function(..., cellWidths = NULL, cellArgs = list()) {
 #' browsers can be assumed.
 #'
 #' @details If you try to use `fillRow` and `fillCol` inside of other
-#'   Shiny containers, such as \code{\link{sidebarLayout}},
-#'   \code{\link{navbarPage}}, or even `tags$div`, you will probably find
+#'   Shiny containers, such as [sidebarLayout()],
+#'   [navbarPage()], or even `tags$div`, you will probably find
 #'   that they will not appear. This is due to `fillRow` and `fillCol`
 #'   defaulting to `height="100%"`, which will only work inside of
 #'   containers that have determined their own size (rather than shrinking to
@@ -531,7 +531,7 @@ splitLayout <- function(..., cellWidths = NULL, cellArgs = list()) {
 #'
 #' @param ... UI objects to put in each row/column cell; each argument will
 #'   occupy a single cell. (To put multiple items in a single cell, you can use
-#'   \code{\link{tagList}} or \code{\link{div}} to combine them.) Named
+#'   [tagList()] or [div()] to combine them.) Named
 #'   arguments will be used as attributes on the `div` element that
 #'   encapsulates the row/column.
 #' @param flex Determines how space should be distributed to the cells. Can be a

@@ -14,7 +14,7 @@ NULL
 #'
 #' @note When called, the returned function attempts to preserve the R session's
 #'   current seed by snapshotting and restoring
-#'   \code{\link[base]{.Random.seed}}.
+#'   [base::.Random.seed()].
 #'
 #' @examples
 #' rnormA <- repeatable(rnorm)
@@ -473,7 +473,7 @@ exprToFunction <- function(expr, env=parent.frame(), quoted=FALSE) {
 #' `installExprFunction(expr, "func")` if we do. Both approaches create a
 #' function named `func` in the current environment.
 #'
-#' @seealso Wraps \code{\link{exprToFunction}}; see that method's documentation
+#' @seealso Wraps [exprToFunction()]; see that method's documentation
 #'   for more documentation and examples.
 #'
 #' @param expr A quoted or unquoted expression
@@ -485,7 +485,7 @@ exprToFunction <- function(expr, env=parent.frame(), quoted=FALSE) {
 #' @param label A label for the object to be shown in the debugger. Defaults to
 #'   the name of the calling function.
 #' @param wrappedWithLabel,..stacktraceon Advanced use only. For stack manipulation purposes; see
-#'   \code{\link{stacktrace}}.
+#'   [stacktrace()].
 #' @export
 installExprFunction <- function(expr, name, eval.env = parent.frame(2),
                                 quoted = FALSE,
@@ -521,8 +521,8 @@ installExprFunction <- function(expr, name, eval.env = parent.frame(2),
 #'   contains pairs of square brackets `[]`. For example, the query
 #'   \samp{a[i1][j1]=x&b[i1][j1]=y&b[i2][j1]=z} will be parsed as `list(a =
 #'   list(i1 = list(j1 = 'x')), b = list(i1 = list(j1 = 'y'), i2 = list(j1 =
-#'   'z')))` when `nested = TRUE`, and \code{list(`a[i1][j1]` = 'x',
-#'   `b[i1][j1]` = 'y', `b[i2][j1]` = 'z')} when `nested = FALSE`.
+#'   'z')))` when `nested = TRUE`, and `list(`a[i1][j1]` = 'x',
+#'   `b[i1][j1]` = 'y', `b[i2][j1]` = 'z')` when `nested = FALSE`.
 #' @export
 #' @examples
 #' parseQueryString("?foo=1&bar=b%20a%20r")
@@ -970,7 +970,7 @@ columnToRowData <- function(data) {
 #' your users' lives much easier by giving them a hint as to where the
 #' error occurred.
 #'
-#' @seealso \code{\link{shiny-options}}
+#' @seealso [shiny-options()]
 #'
 #' @examples
 #' ## Only run examples in interactive R sessions
@@ -1084,7 +1084,7 @@ reactiveStop <- function(message = "", class = NULL) {
 
 #' Validate input values and other conditions
 #'
-#' For an output rendering function (e.g. \code{\link{renderPlot}()}), you may
+#' For an output rendering function (e.g. [renderPlot()]), you may
 #' need to check that certain input values are available and valid before you
 #' can render the output. `validate` gives you a convenient mechanism for
 #' doing so.
@@ -1109,7 +1109,7 @@ reactiveStop <- function(message = "", class = NULL) {
 #'   \item{An atomic vector that contains only missing values}
 #'   \item{A logical vector that contains all `FALSE` or missing values}
 #'   \item{An object of class `"try-error"`}
-#'   \item{A value that represents an unclicked \code{\link{actionButton}}}
+#'   \item{A value that represents an unclicked [actionButton()]}
 #' }
 #'
 #' If any of these values happen to be valid, you can explicitly turn them to
@@ -1243,7 +1243,7 @@ need <- function(expr, message = paste(label, "must be provided"), label) {
 #' **Truthy and falsy values**
 #'
 #' The terms "truthy" and "falsy" generally indicate whether a value, when
-#' coerced to a \code{\link[base]{logical}}, is `TRUE` or `FALSE`. We use
+#' coerced to a [base::logical()], is `TRUE` or `FALSE`. We use
 #' the term a little loosely here; our usage tries to match the intuitive
 #' notions of "Is this value missing or available?", or "Has the user provided
 #' an answer?", or in the case of action buttons, "Has the button been
@@ -1263,7 +1263,7 @@ need <- function(expr, message = paste(label, "must be provided"), label) {
 #'   \item{An atomic vector that contains only missing values}
 #'   \item{A logical vector that contains all `FALSE` or missing values}
 #'   \item{An object of class `"try-error"`}
-#'   \item{A value that represents an unclicked \code{\link{actionButton}}}
+#'   \item{A value that represents an unclicked [actionButton()]}
 #' }
 #'
 #' Note in particular that the value `0` is considered truthy, even though
@@ -1294,7 +1294,7 @@ need <- function(expr, message = paste(label, "must be provided"), label) {
 #' Note that this is always going to be the case if
 #' this is used inside an output context (e.g. `output$txt <- ...`). It may
 #' or may not be the case if it is used inside a non-output context (e.g.
-#' \code{\link{reactive}}, \code{\link{observe}} or \code{\link{observeEvent}})
+#' [reactive()], [observe()] or [observeEvent()])
 #' -- depending on whether or not there is an `output$...` that is triggered
 #' as a result of those calls. See the examples below for concrete scenarios.
 #'

@@ -4,10 +4,10 @@
 #' button do not automatically update their outputs when inputs change,
 #' rather they wait until the user explicitly clicks the submit button.
 #' The use of `submitButton` is generally discouraged in favor of
-#' the more versatile \code{\link{actionButton}} (see details below).
+#' the more versatile [actionButton()] (see details below).
 #'
 #' Submit buttons are unusual Shiny inputs, and we recommend using
-#' \code{\link{actionButton}} instead of `submitButton` when you
+#' [actionButton()] instead of `submitButton` when you
 #' want to delay a reaction.
 #' See [this
 #' article](http://shiny.rstudio.com/articles/action-buttons.html) for more information (including a demo of how to "translate"
@@ -20,13 +20,13 @@
 #' values to the server. This is probably not what you'd want, which is
 #' why submit button are unwieldy for all but the simplest apps. There
 #' are other problems with submit buttons: for example, dynamically
-#' created submit buttons (for example, with \code{\link{renderUI}}
-#' or \code{\link{insertUI}}) will not work.
+#' created submit buttons (for example, with [renderUI()]
+#' or [insertUI()]) will not work.
 #'
 #' @param text Button caption
-#' @param icon Optional \code{\link{icon}} to appear on the button
+#' @param icon Optional [icon()] to appear on the button
 #' @param width The width of the button, e.g. `'400px'`, or `'100%'`;
-#'   see \code{\link{validateCssUnit}}.
+#'   see [validateCssUnit()].
 #' @return A submit button that can be added to a UI definition.
 #'
 #' @family input elements

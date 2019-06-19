@@ -17,7 +17,7 @@
 #' @param destdir Directory to store the downloaded application files. If `NULL`
 #'   (the default), the application files will be stored in a temporary directory
 #'   and removed when the app exits
-#' @param ... Other arguments to be passed to \code{\link{runApp}()}, such as
+#' @param ... Other arguments to be passed to [runApp()], such as
 #'   `port` and `launch.browser`.
 #' @export
 #' @examples

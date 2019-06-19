@@ -1,8 +1,8 @@
 #' Dynamically insert/remove a tabPanel
 #'
-#' Dynamically insert or remove a \code{\link{tabPanel}} (or a
-#' \code{\link{navbarMenu}}) from an existing \code{\link{tabsetPanel}},
-#' \code{\link{navlistPanel}} or \code{\link{navbarPage}}.
+#' Dynamically insert or remove a [tabPanel()] (or a
+#' [navbarMenu()]) from an existing [tabsetPanel()],
+#' [navlistPanel()] or [navbarPage()].
 #'
 #' When you want to insert a new tab before or after an existing tab, you
 #' should use `insertTab`. When you want to prepend a tab (i.e. add a
@@ -12,7 +12,7 @@
 #'
 #' For `navbarPage`, you can insert/remove conventional
 #' `tabPanel`s (whether at the top level or nested inside a
-#' `navbarMenu`), as well as an entire \code{\link{navbarMenu}}.
+#' `navbarMenu`), as well as an entire [navbarMenu()].
 #' For the latter case, `target` should be the `menuName` that
 #' you gave your `navbarMenu` when you first created it (by default,
 #' this is equal to the value of the `title` argument).
@@ -37,7 +37,7 @@
 #'
 #' @param session The shiny session within which to call this function.
 #'
-#' @seealso \code{\link{showTab}}
+#' @seealso [showTab()]
 #'
 #' @examples
 #' ## Only run this example in interactive R sessions
@@ -145,8 +145,8 @@ insertTab <- function(inputId, tab, target,
 
 #' @param menuName This argument should only be used when you want to
 #'   prepend (or append) `tab` to the beginning (or end) of an
-#'   existing \code{\link{navbarMenu}} (which must itself be part of
-#'   an existing \code{\link{navbarPage}}). In this case, this argument
+#'   existing [navbarMenu()] (which must itself be part of
+#'   an existing [navbarPage()]). In this case, this argument
 #'   should be the `menuName` that you gave your `navbarMenu`
 #'   when you first created it (by default, this is equal to the value
 #'   of the `title` argument). Note that you still need to set the
@@ -221,13 +221,13 @@ removeTab <- function(inputId, target,
 
 #' Dynamically hide/show a tabPanel
 #'
-#' Dynamically hide or show a \code{\link{tabPanel}} (or a
-#' \code{\link{navbarMenu}})from an existing \code{\link{tabsetPanel}},
-#' \code{\link{navlistPanel}} or \code{\link{navbarPage}}.
+#' Dynamically hide or show a [tabPanel()] (or a
+#' [navbarMenu()])from an existing [tabsetPanel()],
+#' [navlistPanel()] or [navbarPage()].
 #'
 #' For `navbarPage`, you can hide/show conventional
 #' `tabPanel`s (whether at the top level or nested inside a
-#' `navbarMenu`), as well as an entire \code{\link{navbarMenu}}.
+#' `navbarMenu`), as well as an entire [navbarMenu()].
 #' For the latter case, `target` should be the `menuName` that
 #' you gave your `navbarMenu` when you first created it (by default,
 #' this is equal to the value of the `title` argument).
@@ -244,7 +244,7 @@ removeTab <- function(inputId, target,
 #'
 #' @param session The shiny session within which to call this function.
 #'
-#' @seealso \code{\link{insertTab}}
+#' @seealso [insertTab()]
 #'
 #' @examples
 #' ## Only run this example in interactive R sessions

@@ -4,7 +4,7 @@
 #' @param value The value to set for the input object.
 #' @param placeholder The placeholder to set for the input object.
 #'
-#' @seealso \code{\link{textInput}}
+#' @seealso [textInput()]
 #'
 #' @examples
 #' ## Only run examples in interactive R sessions
@@ -45,7 +45,7 @@ updateTextInput <- function(session, inputId, label = NULL, value = NULL, placeh
 #' @template update-input
 #' @inheritParams updateTextInput
 #'
-#' @seealso \code{\link{textAreaInput}}
+#' @seealso [textAreaInput()]
 #'
 #' @examples
 #' ## Only run examples in interactive R sessions
@@ -84,7 +84,7 @@ updateTextAreaInput <- updateTextInput
 #' @template update-input
 #' @param value The value to set for the input object.
 #'
-#' @seealso \code{\link{checkboxInput}}
+#' @seealso [checkboxInput()]
 #'
 #' @examples
 #' ## Only run examples in interactive R sessions
@@ -119,7 +119,7 @@ updateCheckboxInput <- function(session, inputId, label = NULL, value = NULL) {
 #' @param icon The icon to set for the input object. To remove the
 #' current icon, use `icon=character(0)`.
 #'
-#' @seealso \code{\link{actionButton}}
+#' @seealso [actionButton()]
 #'
 #' @examples
 #' ## Only run examples in interactive R sessions
@@ -176,7 +176,7 @@ updateActionButton <- function(session, inputId, label = NULL, icon = NULL) {
 #' @param max The maximum allowed date. Either a Date object, or a string in
 #'   `yyyy-mm-dd` format.
 #'
-#' @seealso \code{\link{dateInput}}
+#' @seealso [dateInput()]
 #'
 #' @examples
 #' ## Only run examples in interactive R sessions
@@ -226,7 +226,7 @@ updateDateInput <- function(session, inputId, label = NULL, value = NULL,
 #' @param max The maximum allowed date. Either a Date object, or a string in
 #'   `yyyy-mm-dd` format.
 #'
-#' @seealso \code{\link{dateRangeInput}}
+#' @seealso [dateRangeInput()]
 #'
 #' @examples
 #' ## Only run examples in interactive R sessions
@@ -281,8 +281,8 @@ updateDateRangeInput <- function(session, inputId, label = NULL,
 #' or `navbarPage` object.
 #' @param selected The name of the tab to make active.
 #'
-#' @seealso \code{\link{tabsetPanel}}, \code{\link{navlistPanel}},
-#' \code{\link{navbarPage}}
+#' @seealso [tabsetPanel()], [navlistPanel()],
+#' [navbarPage()]
 #'
 #' @examples
 #' ## Only run examples in interactive R sessions
@@ -333,7 +333,7 @@ updateNavlistPanel <- updateTabsetPanel
 #' @param max Maximum value.
 #' @param step Step size.
 #'
-#' @seealso \code{\link{numericInput}}
+#' @seealso [numericInput()]
 #'
 #' @examples
 #' ## Only run examples in interactive R sessions
@@ -385,7 +385,7 @@ updateNumericInput <- function(session, inputId, label = NULL, value = NULL,
 #' @param timeFormat Date and POSIXt formatting.
 #' @param timezone The timezone offset for POSIXt objects.
 #'
-#' @seealso \code{\link{sliderInput}}
+#' @seealso [sliderInput()]
 #'
 #' @examples
 #' ## Only run this example in interactive R sessions
@@ -473,7 +473,7 @@ updateInputOptions <- function(session, inputId, label = NULL, choices = NULL,
 #' @template update-input
 #' @inheritParams checkboxGroupInput
 #'
-#' @seealso \code{\link{checkboxGroupInput}}
+#' @seealso [checkboxGroupInput()]
 #'
 #' @examples
 #' ## Only run examples in interactive R sessions
@@ -520,7 +520,7 @@ updateCheckboxGroupInput <- function(session, inputId, label = NULL,
 #' @template update-input
 #' @inheritParams radioButtons
 #'
-#' @seealso \code{\link{radioButtons}}
+#' @seealso [radioButtons()]
 #'
 #' @examples
 #' ## Only run examples in interactive R sessions
@@ -568,7 +568,7 @@ updateRadioButtons <- function(session, inputId, label = NULL, choices = NULL,
 #' @template update-input
 #' @inheritParams selectInput
 #'
-#' @seealso \code{\link{selectInput}} \code{\link{varSelectInput}}
+#' @seealso [selectInput()] [varSelectInput()]
 #'
 #' @examples
 #' ## Only run examples in interactive R sessions

@@ -175,7 +175,7 @@ onReactiveDomainEnded <- function(domain, callback, failIfNull = FALSE) {
 #' Unless you specify otherwise, newly created observers and reactive
 #' expressions will be assigned to the current default domain (if any). You can
 #' override this assignment by providing an explicit `domain` argument to
-#' \code{\link{reactive}} or \code{\link{observe}}.
+#' [reactive()] or [observe()].
 #'
 #' For advanced usage, it's possible to override the default domain using
 #' `withReactiveDomain`. The `domain` argument will be made the

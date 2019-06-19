@@ -7,7 +7,7 @@
 #' class name `shiny-html-output`.
 #'
 #' @param expr An expression that returns an R object that can be used with
-#'   \code{\link[xtable]{xtable}}.
+#'   [xtable::xtable()].
 #' @param striped,hover,bordered Logicals: if `TRUE`, apply the
 #'   corresponding Bootstrap table format to the output table.
 #' @param spacing The spacing between the rows of the table (`xs`
@@ -38,13 +38,13 @@
 #'   `abs(digits)` digits.
 #' @param na The string to use in the table cells whose values are missing
 #'   (i.e. they either evaluate to `NA` or `NaN`).
-#' @param ... Arguments to be passed through to \code{\link[xtable]{xtable}}
-#'   and \code{\link[xtable]{print.xtable}}.
+#' @param ... Arguments to be passed through to [xtable::xtable()]
+#'   and [xtable::print.xtable()].
 #' @param env The environment in which to evaluate `expr`.
 #' @param quoted Is `expr` a quoted expression (with `quote()`)?
 #'   This is useful if you want to save an expression in a variable.
 #' @param outputArgs A list of arguments to be passed through to the
-#'   implicit call to \code{\link{tableOutput}} when `renderTable` is
+#'   implicit call to [tableOutput()] when `renderTable` is
 #'   used in an interactive R Markdown document.
 #' @export
 renderTable <- function(expr, striped = FALSE, hover = FALSE,

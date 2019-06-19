@@ -8,7 +8,7 @@
 #' changes.
 #'
 #' `cacheKeyExpr` is an expression which, when evaluated, returns an object
-#' which will be serialized and hashed using the \code{\link[digest]{digest}}
+#' which will be serialized and hashed using the [digest::digest()]
 #' function to generate a string that will be used as a cache key. This key is
 #' used to identify the contents of the plot: if the cache key is the same as a
 #' previous time, it assumes that the plot is the same and can be retrieved from
@@ -32,7 +32,7 @@
 #' to normal R objects before returning them. Your expression could even
 #' serialize and hash that information in an efficient way and return a string,
 #' which will in turn be hashed (very quickly) by the
-#' \code{\link[digest]{digest}} function.
+#' [digest::digest()] function.
 #'
 #' Internally, the result from `cacheKeyExpr` is combined with the name of
 #' the output (if you assign it to `output$plot1`, it will be combined
@@ -70,7 +70,7 @@
 #'
 #'   If either `"app"` or `"session"` is used, the cache will be 10 MB
 #'   in size, and will be stored stored in memory, using a
-#'   \code{\link{memoryCache}} object. Note that the cache space will be shared
+#'   [memoryCache()] object. Note that the cache space will be shared
 #'   among all cached plots within a single application or session.
 #'
 #'   In some cases, you may want more control over the caching behavior. For
@@ -79,7 +79,7 @@
 #'   multiple runs of an application, or even across multiple R processes.
 #'
 #'   To use different settings for an application-scoped cache, you can call
-#'   \code{\link{shinyOptions}()} at the top of your app.R, server.R, or
+#'   [shinyOptions()] at the top of your app.R, server.R, or
 #'   global.R. For example, this will create a cache with 20 MB of space
 #'   instead of the default 10 MB:
 #'   \preformatted{
@@ -87,7 +87,7 @@
 #'   }
 #'
 #'   To use different settings for a session-scoped cache, you can call
-#'   \code{\link{shinyOptions}()} at the top of your server function. To use
+#'   [shinyOptions()] at the top of your server function. To use
 #'   the session-scoped cache, you must also call `renderCachedPlot` with
 #'   `cache="session"`. This will create a 20 MB cache for the session:
 #'   \preformatted{
@@ -102,7 +102,7 @@
 #'   }
 #'
 #'   If you want to create a cache that is shared across multiple concurrent
-#'   R processes, you can use a \code{\link{diskCache}}. You can create an
+#'   R processes, you can use a [diskCache()]. You can create an
 #'   application-level shared cache by putting this at the top of your app.R,
 #'   server.R, or global.R:
 #'   \preformatted{
@@ -126,13 +126,13 @@
 #'   the directory.
 #'
 #'   You can also scope a cache to just one plot, or selected plots. To do that,
-#'   create a \code{\link{memoryCache}} or \code{\link{diskCache}}, and pass it
+#'   create a [memoryCache()] or [diskCache()], and pass it
 #'   as the `cache` argument of `renderCachedPlot`.
 #'
 #' @section Interactive plots:
 #'
 #'   `renderCachedPlot` can be used to create interactive plots. See
-#'   \code{\link{plotOutput}} for more information and examples.
+#'   [plotOutput()] for more information and examples.
 #'
 #'
 #' @inheritParams renderPlot
@@ -143,17 +143,17 @@
 #'   `height`, and returns a list with `width` and `height`. The
 #'   purpose is to round the actual pixel dimensions from the browser to some
 #'   other dimensions, so that this will not generate and cache images of every
-#'   possible pixel dimension. See \code{\link{sizeGrowthRatio}} for more
+#'   possible pixel dimension. See [sizeGrowthRatio()] for more
 #'   information on the default sizing policy.
 #' @param res The resolution of the PNG, in pixels per inch.
 #' @param cache The scope of the cache, or a cache object. This can be
 #'   `"app"` (the default), `"session"`, or a cache object like
-#'   a \code{\link{diskCache}}. See the Cache Scoping section for more
+#'   a [diskCache()]. See the Cache Scoping section for more
 #'   information.
 #'
-#' @seealso See \code{\link{renderPlot}} for the regular, non-cached version of
+#' @seealso See [renderPlot()] for the regular, non-cached version of
 #'   this function. For more about configuring caches, see
-#'   \code{\link{memoryCache}} and \code{\link{diskCache}}.
+#'   [memoryCache()] and [diskCache()].
 #'
 #'
 #' @examples
@@ -562,7 +562,7 @@ renderCachedPlot <- function(expr,
 #' @param width,height Base width and height.
 #' @param growthRate Growth rate multiplier.
 #'
-#' @seealso This is to be used with \code{\link{renderCachedPlot}}.
+#' @seealso This is to be used with [renderCachedPlot()].
 #'
 #' @examples
 #' f <- sizeGrowthRatio(500, 500, 1.25)

@@ -9,8 +9,8 @@ NULL
 #'
 #' This function is primarily intended for users who are proficient in HTML/CSS,
 #' and know how to lay out pages in Bootstrap. Most applications should use
-#' \code{\link{fluidPage}} along with layout functions like
-#' \code{\link{fluidRow}} and \code{\link{sidebarLayout}}.
+#' [fluidPage()] along with layout functions like
+#' [fluidRow()] and [sidebarLayout()].
 #'
 #' @param ... The contents of the document body.
 #' @param title The browser window title (defaults to the host URL of the page)
@@ -19,12 +19,12 @@ NULL
 #' @param theme Alternative Bootstrap stylesheet (normally a css file within the
 #'   www directory, e.g. `www/bootstrap.css`)
 #'
-#' @return A UI defintion that can be passed to the \link{shinyUI} function.
+#' @return A UI defintion that can be passed to the [shinyUI] function.
 #'
 #' @note The `basicPage` function is deprecated, you should use the
-#'   \code{\link{fluidPage}} function instead.
+#'   [fluidPage()] function instead.
 #'
-#' @seealso \code{\link{fluidPage}}, \code{\link{fixedPage}}
+#' @seealso [fluidPage()], [fixedPage()]
 #' @export
 bootstrapPage <- function(..., title = NULL, responsive = NULL, theme = NULL) {
 
@@ -52,9 +52,9 @@ bootstrapPage <- function(..., title = NULL, responsive = NULL, theme = NULL) {
 #' components in a web page.
 #'
 #' It isn't necessary to call this function if you use
-#' \code{\link{bootstrapPage}} or others which use `bootstrapPage`, such
-#' \code{\link{basicPage}}, \code{\link{fluidPage}}, \code{\link{fillPage}},
-#' \code{\link{pageWithSidebar}}, and \code{\link{navbarPage}}, because they
+#' [bootstrapPage()] or others which use `bootstrapPage`, such
+#' [basicPage()], [fluidPage()], [fillPage()],
+#' [pageWithSidebar()], and [navbarPage()], because they
 #' already include the Bootstrap web dependencies.
 #'
 #' @inheritParams bootstrapPage
@@ -88,7 +88,7 @@ basicPage <- function(...) {
 #' `fillPage` creates a page whose height and width always fill the
 #' available area of the browser window.
 #'
-#' The \code{\link{fluidPage}} and \code{\link{fixedPage}} functions are used
+#' The [fluidPage()] and [fixedPage()] functions are used
 #' for creating web pages that are laid out from the top down, leaving
 #' whitespace at the bottom if the page content's height is smaller than the
 #' browser window, and scrolling if the content is larger than the window.
@@ -183,14 +183,14 @@ collapseSizes <- function(padding) {
 #' Create a Shiny UI that contains a header with the application title, a
 #' sidebar for input controls, and a main area for output.
 #'
-#' @param headerPanel The \link{headerPanel} with the application title
-#' @param sidebarPanel The \link{sidebarPanel} containing input controls
-#' @param mainPanel The \link{mainPanel} containing outputs
+#' @param headerPanel The [headerPanel] with the application title
+#' @param sidebarPanel The [sidebarPanel] containing input controls
+#' @param mainPanel The [mainPanel] containing outputs
 
-#' @return A UI defintion that can be passed to the \link{shinyUI} function
+#' @return A UI defintion that can be passed to the [shinyUI] function
 #'
-#' @note This function is deprecated. You should use \code{\link{fluidPage}}
-#' along with \code{\link{sidebarLayout}} to implement a page with a sidebar.
+#' @note This function is deprecated. You should use [fluidPage()]
+#' along with [sidebarLayout()] to implement a page with a sidebar.
 #'
 #' @examples
 #' # Define UI
@@ -236,17 +236,17 @@ pageWithSidebar <- function(headerPanel,
 #' Create a page with a top level navigation bar
 #'
 #' Create a page that contains a top level navigation bar that can be used to
-#' toggle a set of \code{\link{tabPanel}} elements.
+#' toggle a set of [tabPanel()] elements.
 #'
 #' @param title The title to display in the navbar
-#' @param ... \code{\link{tabPanel}} elements to include in the page. The
+#' @param ... [tabPanel()] elements to include in the page. The
 #'   `navbarMenu` function also accepts strings, which will be used as menu
 #'   section headers. If the string is a set of dashes like `"----"` a
 #'   horizontal separator will be displayed in the menu.
 #' @param id If provided, you can use `input$`*`id`* in your
 #'   server logic to determine which of the current tabs is active. The value
 #'   will correspond to the `value` argument that is passed to
-#'   \code{\link{tabPanel}}.
+#'   [tabPanel()].
 #' @param selected The `value` (or, if none was supplied, the `title`)
 #'   of the tab that should be selected by default. If `NULL`, the first
 #'   tab will be selected.
@@ -278,15 +278,15 @@ pageWithSidebar <- function(headerPanel,
 #'   Useful if `title` is not a string.
 #' @param icon Optional icon to appear on a `navbarMenu` tab.
 #'
-#' @return A UI defintion that can be passed to the \link{shinyUI} function.
+#' @return A UI defintion that can be passed to the [shinyUI] function.
 #'
 #' @details The `navbarMenu` function can be used to create an embedded
 #'   menu within the navbar that in turns includes additional tabPanels (see
 #'   example below).
 #'
-#' @seealso \code{\link{tabPanel}}, \code{\link{tabsetPanel}},
-#'   \code{\link{updateNavbarPage}}, \code{\link{insertTab}},
-#'   \code{\link{showTab}}
+#' @seealso [tabPanel()], [tabsetPanel()],
+#'   [updateNavbarPage()], [insertTab()],
+#'   [showTab()]
 #'
 #' @examples
 #' navbarPage("App Title",
@@ -415,7 +415,7 @@ navbarMenu <- function(title, ..., menuName = title, icon = NULL) {
 #' @param title An application title to display
 #' @param windowTitle The title that should be displayed by the browser window.
 #'   Useful if `title` is not a string.
-#' @return A headerPanel that can be passed to \link{pageWithSidebar}
+#' @return A headerPanel that can be passed to [pageWithSidebar]
 #'
 #' @examples
 #' headerPanel("Hello Shiny!")
@@ -444,13 +444,13 @@ wellPanel <- function(...) {
 #' Create a sidebar panel
 #'
 #' Create a sidebar panel containing input controls that can in turn be passed
-#' to \code{\link{sidebarLayout}}.
+#' to [sidebarLayout()].
 #'
 #' @param ... UI elements to include on the sidebar
 #' @param width The width of the sidebar. For fluid layouts this is out of 12
 #'   total units; for fixed layouts it is out of whatever the width of the
 #'   sidebar's parent column is.
-#' @return A sidebar that can be passed to \code{\link{sidebarLayout}}
+#' @return A sidebar that can be passed to [sidebarLayout()]
 #'
 #' @examples
 #' # Sidebar with controls to select a dataset and specify
@@ -473,13 +473,13 @@ sidebarPanel <- function(..., width = 4) {
 #' Create a main panel
 #'
 #' Create a main panel containing output elements that can in turn be passed to
-#' \code{\link{sidebarLayout}}.
+#' [sidebarLayout()].
 #'
 #' @param ... Output elements to include in the main panel
 #' @param width The width of the main panel. For fluid layouts this is out of 12
 #'   total units; for fixed layouts it is out of whatever the width of the main
 #'   panel's parent column is.
-#' @return A main panel that can be passed to \code{\link{sidebarLayout}}.
+#' @return A main panel that can be passed to [sidebarLayout()].
 #'
 #' @examples
 #' # Show the caption and plot of the requested variable against mpg
@@ -508,7 +508,7 @@ mainPanel <- function(..., width = 8) {
 #'
 #' @param condition A JavaScript expression that will be evaluated repeatedly to
 #'   determine whether the panel should be displayed.
-#' @param ns The \code{\link[=NS]{namespace}} object of the current module, if
+#' @param ns The [`namespace()`][NS] object of the current module, if
 #'   any.
 #' @param ... Elements to include in the panel.
 #'
@@ -589,7 +589,7 @@ helpText <- function(...) {
 
 #' Create a tab panel
 #'
-#' Create a tab panel that can be included within a \code{\link{tabsetPanel}}.
+#' Create a tab panel that can be included within a [tabsetPanel()].
 #'
 #' @param title Display title for tab
 #' @param ... UI elements to include within the tab
@@ -597,10 +597,10 @@ helpText <- function(...) {
 #'   that this tab is selected. If omitted and `tabsetPanel` has an
 #'   `id`, then the title will be used..
 #' @param icon Optional icon to appear on the tab. This attribute is only
-#' valid when using a `tabPanel` within a \code{\link{navbarPage}}.
-#' @return A tab that can be passed to \code{\link{tabsetPanel}}
+#' valid when using a `tabPanel` within a [navbarPage()].
+#' @return A tab that can be passed to [tabsetPanel()]
 #'
-#' @seealso \code{\link{tabsetPanel}}
+#' @seealso [tabsetPanel()]
 #'
 #' @examples
 #' # Show a tabset that includes a plot, summary, and
@@ -623,14 +623,14 @@ tabPanel <- function(title, ..., value = title, icon = NULL) {
 
 #' Create a tabset panel
 #'
-#' Create a tabset that contains \code{\link{tabPanel}} elements. Tabsets are
+#' Create a tabset that contains [tabPanel()] elements. Tabsets are
 #' useful for dividing output into multiple independently viewable sections.
 #'
-#' @param ... \code{\link{tabPanel}} elements to include in the tabset
+#' @param ... [tabPanel()] elements to include in the tabset
 #' @param id If provided, you can use `input$`*`id`* in your
 #'   server logic to determine which of the current tabs is active. The value
 #'   will correspond to the `value` argument that is passed to
-#'   \code{\link{tabPanel}}.
+#'   [tabPanel()].
 #' @param selected The `value` (or, if none was supplied, the `title`)
 #'   of the tab that should be selected by default. If `NULL`, the first
 #'   tab will be selected.
@@ -638,10 +638,10 @@ tabPanel <- function(title, ..., value = title, icon = NULL) {
 #'   look where tabs are selected using a background fill color.
 #' @param position This argument is deprecated; it has been discontinued in
 #'   Bootstrap 3.
-#' @return A tabset that can be passed to \code{\link{mainPanel}}
+#' @return A tabset that can be passed to [mainPanel()]
 #'
-#' @seealso \code{\link{tabPanel}}, \code{\link{updateTabsetPanel}},
-#'   \code{\link{insertTab}}, \code{\link{showTab}}
+#' @seealso [tabPanel()], [updateTabsetPanel()],
+#'   [insertTab()], [showTab()]
 #'
 #' @examples
 #' # Show a tabset that includes a plot, summary, and
@@ -687,11 +687,11 @@ tabsetPanel <- function(...,
 #' Create a navigation list panel that provides a list of links on the left
 #' which navigate to a set of tabPanels displayed to the right.
 #'
-#' @param ... \code{\link{tabPanel}} elements to include in the navlist
+#' @param ... [tabPanel()] elements to include in the navlist
 #' @param id If provided, you can use `input$`*`id`* in your
 #'   server logic to determine which of the current navlist items is active. The
 #'   value will correspond to the `value` argument that is passed to
-#'   \code{\link{tabPanel}}.
+#'   [tabPanel()].
 #' @param selected The `value` (or, if none was supplied, the `title`)
 #'   of the navigation item that should be selected by default. If `NULL`,
 #'   the first navigation will be selected.
@@ -708,8 +708,8 @@ tabsetPanel <- function(...,
 #'   supported. This is because version 0.11 switched to Bootstrap 3, which
 #'   doesn't support separators.
 #'
-#' @seealso \code{\link{tabPanel}}, \code{\link{updateNavlistPanel}},
-#'    \code{\link{insertTab}}, \code{\link{showTab}}
+#' @seealso [tabPanel()], [updateNavlistPanel()],
+#'    [insertTab()], [showTab()]
 #'
 #' @examples
 #' fluidPage(
@@ -925,7 +925,7 @@ buildTabItem <- function(index, tabsetId, foundSelected, tabs = NULL,
 #'   for the output
 #' @return A text output element that can be included in a panel
 #' @details Text is HTML-escaped prior to rendering. This element is often used
-#'   to display \link{renderText} output variables.
+#'   to display [renderText] output variables.
 #' @examples
 #' h3(textOutput("caption"))
 #' @export
@@ -943,7 +943,7 @@ textOutput <- function(outputId, container = if (inline) span else div, inline =
 #'   behavior when the the output in nonempty)
 #' @return A verbatim text output element that can be included in a panel
 #' @details Text is HTML-escaped prior to rendering. This element is often used
-#'   with the \link{renderPrint} function to preserve fixed-width formatting
+#'   with the [renderPrint] function to preserve fixed-width formatting
 #'   of printed objects.
 #' @examples
 #' ## Only run this example in interactive R sessions
@@ -1066,7 +1066,7 @@ imageOutput <- function(outputId, width = "100%", height="400px",
 
 #' Create an plot or image output element
 #'
-#' Render a \code{\link{renderPlot}} or \code{\link{renderImage}} within an
+#' Render a [renderPlot()] or [renderImage()] within an
 #' application page.
 #'
 #' @section Interactive plots:
@@ -1098,7 +1098,7 @@ imageOutput <- function(outputId, width = "100%", height="400px",
 #'   `"auto"` or `"100%"` generally will not work as expected,
 #'   because of how height is computed with HTML/CSS.
 #' @param click This can be `NULL` (the default), a string, or an object
-#'   created by the \code{\link{clickOpts}} function. If you use a value like
+#'   created by the [clickOpts()] function. If you use a value like
 #'   `"plot_click"` (or equivalently, `clickOpts(id="plot_click")`),
 #'   the plot will send coordinates to the server whenever it is clicked, and
 #'   the value will be accessible via `input$plot_click`. The value will be
@@ -1108,24 +1108,24 @@ imageOutput <- function(outputId, width = "100%", height="400px",
 #'   double-click events.
 #' @param hover Similar to the `click` argument, this can be `NULL`
 #'   (the default), a string, or an object created by the
-#'   \code{\link{hoverOpts}} function. If you use a value like
+#'   [hoverOpts()] function. If you use a value like
 #'   `"plot_hover"` (or equivalently, `hoverOpts(id="plot_hover")`),
 #'   the plot will send coordinates to the server pauses on the plot, and the
 #'   value will be accessible via `input$plot_hover`. The value will be a
 #'   named list with `x` and `y` elements indicating the mouse
 #'   position. To control the hover time or hover delay type, you must use
-#'   \code{\link{hoverOpts}}.
+#'   [hoverOpts()].
 #' @param clickId Deprecated; use `click` instead. Also see the
-#'   \code{\link{clickOpts}} function.
+#'   [clickOpts()] function.
 #' @param hoverId Deprecated; use `hover` instead. Also see the
-#'   \code{\link{hoverOpts}} function.
+#'   [hoverOpts()] function.
 #' @param hoverDelay Deprecated; use `hover` instead. Also see the
-#'   \code{\link{hoverOpts}} function.
+#'   [hoverOpts()] function.
 #' @param hoverDelayType Deprecated; use `hover` instead. Also see the
-#'   \code{\link{hoverOpts}} function.
+#'   [hoverOpts()] function.
 #' @param brush Similar to the `click` argument, this can be `NULL`
 #'   (the default), a string, or an object created by the
-#'   \code{\link{brushOpts}} function. If you use a value like
+#'   [brushOpts()] function. If you use a value like
 #'   `"plot_brush"` (or equivalently, `brushOpts(id="plot_brush")`),
 #'   the plot will allow the user to "brush" in the plotting area, and will send
 #'   information about the brushed area to the server, and the value will be
@@ -1133,19 +1133,19 @@ imageOutput <- function(outputId, width = "100%", height="400px",
 #'   be able to draw a rectangle in the plotting area and drag it around. The
 #'   value will be a named list with `xmin`, `xmax`, `ymin`, and
 #'   `ymax` elements indicating the brush area. To control the brush
-#'   behavior, use \code{\link{brushOpts}}. Multiple
+#'   behavior, use [brushOpts()]. Multiple
 #'   `imageOutput`/`plotOutput` calls may share the same `id`
 #'   value; brushing one image or plot will cause any other brushes with the
 #'   same `id` to disappear.
 #' @inheritParams textOutput
 #' @note The arguments `clickId` and `hoverId` only work for R base
-#'   graphics (see the \pkg{\link[graphics:graphics-package]{graphics}} package). They do not work for
-#'   \pkg{\link[grid:grid-package]{grid}}-based graphics, such as \pkg{ggplot2},
+#'   graphics (see the \pkg{[graphics][graphics::graphics-package]} package). They do not work for
+#'   \pkg{[grid][grid::grid-package]}-based graphics, such as \pkg{ggplot2},
 #'   \pkg{lattice}, and so on.
 #'
 #' @return A plot or image output element that can be included in a panel.
 #' @seealso For the corresponding server-side functions, see
-#'   \code{\link{renderPlot}} and  \code{\link{renderImage}}.
+#'   [renderPlot()] and  [renderImage()].
 #'
 #' @examples
 #' # Only run these examples in interactive R sessions
@@ -1324,7 +1324,7 @@ plotOutput <- function(outputId, width = "100%", height="400px",
 
 #' Create a table output element
 #'
-#' Render a \code{\link{renderTable}} or \code{\link{renderDataTable}} within an
+#' Render a [renderTable()] or [renderDataTable()] within an
 #' application page. `renderTable` uses a standard HTML table, while
 #' `renderDataTable` uses the DataTables Javascript library to create an
 #' interactive table with more features.
@@ -1332,7 +1332,7 @@ plotOutput <- function(outputId, width = "100%", height="400px",
 #' @param outputId output variable to read the table from
 #' @return A table output element that can be included in a panel
 #'
-#' @seealso \code{\link{renderTable}}, \code{\link{renderDataTable}}.
+#' @seealso [renderTable()], [renderDataTable()].
 #' @examples
 #' ## Only run this example in interactive R sessions
 #' if (interactive()) {
@@ -1430,7 +1430,7 @@ uiOutput <- htmlOutput
 #'
 #' Use these functions to create a download button or link; when clicked, it
 #' will initiate a browser download. The filename and contents are specified by
-#' the corresponding \code{\link{downloadHandler}} defined in the server
+#' the corresponding [downloadHandler()] defined in the server
 #' function.
 #'
 #' @param outputId The name of the output slot that the `downloadHandler`
@@ -1456,7 +1456,7 @@ uiOutput <- htmlOutput
 #' }
 #'
 #' @aliases downloadLink
-#' @seealso \code{\link{downloadHandler}}
+#' @seealso [downloadHandler()]
 #' @export
 downloadButton <- function(outputId,
                            label="Download",
@@ -1485,8 +1485,8 @@ downloadLink <- function(outputId, label="Download", class=NULL, ...) {
 #' Create an icon
 #'
 #' Create an icon for use within a page. Icons can appear on their own, inside
-#' of a button, or as an icon for a \code{\link{tabPanel}} within a
-#' \code{\link{navbarPage}}.
+#' of a button, or as an icon for a [tabPanel()] within a
+#' [navbarPage()].
 #'
 #' @param name Name of icon. Icons are drawn from the
 #'   [Font Awesome Free](https://fontawesome.com/) (currently icons from

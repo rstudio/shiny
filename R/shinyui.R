@@ -6,7 +6,7 @@ NULL
 #' This function adds MathJax to the page and typeset the math expressions (if
 #' found) in the content `...`. It only needs to be called once in an app
 #' unless the content is rendered *after* the page is loaded, e.g. via
-#' \code{\link{renderUI}}, in which case we have to call it explicitly every
+#' [renderUI()], in which case we have to call it explicitly every
 #' time we write math expressions to the output.
 #' @param ... any HTML elements to apply MathJax to
 #' @export

@@ -60,7 +60,7 @@ reactIdStr <- function(num) {
 #'
 #' To use the reactive log visualizer, start with a fresh R session and
 #' run the command `options(shiny.reactlog=TRUE)`; then launch your
-#' application in the usual way (e.g. using \code{\link{runApp}}). At
+#' application in the usual way (e.g. using [runApp()]). At
 #' any time you can hit Ctrl+F3 (or for Mac users, Command+F3) in your
 #' web browser to launch the reactive log visualization.
 #'
@@ -91,7 +91,7 @@ NULL
 
 
 #' @describeIn reactlog Return a list of reactive information.  Can be used in conjunction with
-#'   \code{reactlog::\link[reactlog]{reactlog_show}} to later display the reactlog graph.
+#'   `reactlog::[reactlog_show][reactlog::reactlog_show]` to later display the reactlog graph.
 #' @export
 reactlog <- function() {
   rLog$asList()
@@ -104,7 +104,7 @@ reactlogShow <- function(time = TRUE) {
   check_reactlog()
   reactlog::reactlog_show(reactlog(), time = time)
 }
-#' @describeIn reactlog This function is deprecated. You should use \code{\link{reactlogShow}}
+#' @describeIn reactlog This function is deprecated. You should use [reactlogShow()]
 #' @export
 # legacy purposes
 showReactLog <- function(time = TRUE) {

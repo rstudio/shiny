@@ -42,7 +42,7 @@ registerClient <- function(client) {
 #' @param directoryPath The directory that contains the static resources to be
 #'   served.
 #'
-#' @seealso \code{\link{singleton}}
+#' @seealso [singleton()]
 #'
 #' @examples
 #' addResourcePath('datasets', system.file('data', package='datasets'))
@@ -547,7 +547,7 @@ isRunning <- function() {
 #'   \item An `.R` file containing a Shiny application, ending with an
 #'    expression that produces a Shiny app object.
 #'   \item A list with `ui` and `server` components.
-#'   \item A Shiny app object created by \code{\link{shinyApp}}.
+#'   \item A Shiny app object created by [shinyApp()].
 #'   }
 #' @param port The TCP port that the application should listen on. If the
 #'   `port` is not specified, and the `shiny.port` option is set (with
@@ -892,10 +892,10 @@ runApp <- function(appDir=getwd(),
 #' Stop the currently running Shiny app
 #'
 #' Stops the currently running Shiny app, returning control to the caller of
-#' \code{\link{runApp}}.
+#' [runApp()].
 #'
 #' @param returnValue The value that should be returned from
-#'   \code{\link{runApp}}.
+#'   [runApp()].
 #' @export
 stopApp <- function(returnValue = invisible()) {
   # reterror will indicate whether retval is an error (i.e. it should be passed
@@ -985,13 +985,13 @@ runExample <- function(example=NA,
 #' if running in RStudio, defaults to viewing the app in the Viewer pane.
 #'
 #' @param app Either a Shiny app object as created by
-#'   \code{\link[=shiny]{shinyApp}} et al, or, a UI object.
+#'   [`shinyApp()`][shiny] et al, or, a UI object.
 #' @param server Ignored if `app` is a Shiny app object; otherwise, passed
 #'   along to `shinyApp` (i.e. `shinyApp(ui = app, server = server)`).
-#' @param port See \code{\link[=shiny]{runApp}}.
+#' @param port See [`runApp()`][shiny].
 #' @param viewer Specify where the gadget should be displayed--viewer pane,
 #'   dialog window, or external browser--by passing in a call to one of the
-#'   \code{\link{viewer}} functions.
+#'   [viewer()] functions.
 #' @param stopOnCancel If `TRUE` (the default), then an `observeEvent`
 #'   is automatically created that handles `input$cancel` by calling
 #'   `stopApp()` with an error. Pass `FALSE` if you want to handle
@@ -1060,10 +1060,10 @@ decorateServerFunc <- function(appobj, serverFunc) {
 #' other R environments that emulate RStudio's viewer pane/dialog APIs). If
 #' viewer APIs are not available in the current R environment, then the gadget
 #' will be displayed in the system's default web browser (see
-#' \code{\link[utils]{browseURL}}).
+#' [utils::browseURL()]).
 #'
 #' @return A function that takes a single `url` parameter, suitable for
-#'   passing as the `viewer` argument of \code{\link{runGadget}}.
+#'   passing as the `viewer` argument of [runGadget()].
 #'
 #' @rdname viewer
 #' @name viewer
@@ -1101,7 +1101,7 @@ dialogViewer <- function(dialogName, width = 600, height = 600) {
   }
 }
 
-#' @param browser See \code{\link[utils]{browseURL}}.
+#' @param browser See [utils::browseURL()].
 #' @rdname viewer
 #' @export
 browserViewer <- function(browser = getOption("browser")) {

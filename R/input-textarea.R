@@ -3,17 +3,17 @@
 #' Create a textarea input control for entry of unstructured text values.
 #'
 #' @inheritParams textInput
-#' @param height The height of the input, e.g. \code{'400px'}, or
-#'   \code{'100%'}; see \code{\link{validateCssUnit}}.
+#' @param height The height of the input, e.g. `'400px'`, or
+#'   `'100%'`; see \code{\link{validateCssUnit}}.
 #' @param cols Value of the visible character columns of the input, e.g.
-#'   \code{80}. If used with \code{width}, \code{width} will take precedence in
+#'   `80`. If used with `width`, `width` will take precedence in
 #'   the browser's rendering.
 #' @param rows The value of the visible character rows of the input, e.g.
-#'   \code{6}. If used with \code{height}, \code{height} will take precedence in
+#'   `6`. If used with `height`, `height` will take precedence in
 #'   the browser's rendering.
 #' @param resize Which directions the textarea box can be resized. Can be one of
-#'   \code{"both"}, \code{"none"}, \code{"vertical"}, and \code{"horizontal"}.
-#'   The default, \code{NULL}, will use the client browser's default setting for
+#'   `"both"`, `"none"`, `"vertical"`, and `"horizontal"`.
+#'   The default, `NULL`, will use the client browser's default setting for
 #'   resizing textareas.
 #' @return A textarea input control that can be added to a UI definition.
 #'

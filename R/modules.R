@@ -42,7 +42,7 @@ createSessionProxy <- function(parentSession, ...) {
 #' Shiny's module feature lets you break complicated UI and server logic into
 #' smaller, self-contained pieces. Compared to large monolithic Shiny apps,
 #' modules are easier to reuse and easier to reason about. See the article at
-#' \url{http://shiny.rstudio.com/articles/modules.html} to learn more.
+#' <http://shiny.rstudio.com/articles/modules.html> to learn more.
 #'
 #' @param module A Shiny module server function
 #' @param id An ID string that corresponds with the ID used to call the module's
@@ -52,7 +52,7 @@ createSessionProxy <- function(parentSession, ...) {
 #'   almost always be used)
 #'
 #' @return The return value, if any, from executing the module server function
-#' @seealso \url{http://shiny.rstudio.com/articles/modules.html}
+#' @seealso <http://shiny.rstudio.com/articles/modules.html>
 #' @export
 callModule <- function(module, id, ..., session = getDefaultReactiveDomain()) {
   childScope <- session$makeScope(id)

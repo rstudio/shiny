@@ -117,7 +117,7 @@ updateCheckboxInput <- function(session, inputId, label = NULL, value = NULL) {
 #'
 #' @template update-input
 #' @param icon The icon to set for the input object. To remove the
-#' current icon, use \code{icon=character(0)}.
+#' current icon, use `icon=character(0)`.
 #'
 #' @seealso \code{\link{actionButton}}
 #'
@@ -170,11 +170,11 @@ updateActionButton <- function(session, inputId, label = NULL, icon = NULL) {
 #'
 #' @template update-input
 #' @param value The desired date value. Either a Date object, or a string in
-#'   \code{yyyy-mm-dd} format. Supply \code{NA} to clear the date.
+#'   `yyyy-mm-dd` format. Supply `NA` to clear the date.
 #' @param min The minimum allowed date. Either a Date object, or a string in
-#'   \code{yyyy-mm-dd} format.
+#'   `yyyy-mm-dd` format.
 #' @param max The maximum allowed date. Either a Date object, or a string in
-#'   \code{yyyy-mm-dd} format.
+#'   `yyyy-mm-dd` format.
 #'
 #' @seealso \code{\link{dateInput}}
 #'
@@ -218,13 +218,13 @@ updateDateInput <- function(session, inputId, label = NULL, value = NULL,
 #'
 #' @template update-input
 #' @param start The start date. Either a Date object, or a string in
-#'   \code{yyyy-mm-dd} format. Supplying \code{NA} clears the start date.
+#'   `yyyy-mm-dd` format. Supplying `NA` clears the start date.
 #' @param end The end date. Either a Date object, or a string in
-#'   \code{yyyy-mm-dd} format. Supplying \code{NA} clears the end date.
+#'   `yyyy-mm-dd` format. Supplying `NA` clears the end date.
 #' @param min The minimum allowed date. Either a Date object, or a string in
-#'   \code{yyyy-mm-dd} format.
+#'   `yyyy-mm-dd` format.
 #' @param max The maximum allowed date. Either a Date object, or a string in
-#'   \code{yyyy-mm-dd} format.
+#'   `yyyy-mm-dd` format.
 #'
 #' @seealso \code{\link{dateRangeInput}}
 #'
@@ -275,10 +275,10 @@ updateDateRangeInput <- function(session, inputId, label = NULL,
 
 #' Change the selected tab on the client
 #'
-#' @param session The \code{session} object passed to function given to
-#'   \code{shinyServer}.
-#' @param inputId The id of the \code{tabsetPanel}, \code{navlistPanel},
-#' or \code{navbarPage} object.
+#' @param session The `session` object passed to function given to
+#'   `shinyServer`.
+#' @param inputId The id of the `tabsetPanel`, `navlistPanel`,
+#' or `navbarPage` object.
 #' @param selected The name of the tab to make active.
 #'
 #' @seealso \code{\link{tabsetPanel}}, \code{\link{navlistPanel}},
@@ -613,9 +613,9 @@ updateSelectInput <- function(session, inputId, label = NULL, choices = NULL,
 
 #' @rdname updateSelectInput
 #' @inheritParams selectizeInput
-#' @param server whether to store \code{choices} on the server side, and load
+#' @param server whether to store `choices` on the server side, and load
 #'   the select options dynamically on searching, instead of writing all
-#'   \code{choices} into the page at once (i.e., only use the client-side
+#'   `choices` into the page at once (i.e., only use the client-side
 #'   version of \pkg{selectize.js})
 #' @export
 updateSelectizeInput <- function(session, inputId, label = NULL, choices = NULL,

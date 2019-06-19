@@ -4,7 +4,7 @@ NULL
 #' Create a Bootstrap page
 #'
 #' Create a Shiny UI page that loads the CSS and JavaScript for
-#' \href{http://getbootstrap.com/}{Bootstrap}, and has no content in the page
+#' [Bootstrap](http://getbootstrap.com/), and has no content in the page
 #' body (other than what you provide).
 #'
 #' This function is primarily intended for users who are proficient in HTML/CSS,
@@ -17,11 +17,11 @@ NULL
 #' @param responsive This option is deprecated; it is no longer optional with
 #'   Bootstrap 3.
 #' @param theme Alternative Bootstrap stylesheet (normally a css file within the
-#'   www directory, e.g. \code{www/bootstrap.css})
+#'   www directory, e.g. `www/bootstrap.css`)
 #'
 #' @return A UI defintion that can be passed to the \link{shinyUI} function.
 #'
-#' @note The \code{basicPage} function is deprecated, you should use the
+#' @note The `basicPage` function is deprecated, you should use the
 #'   \code{\link{fluidPage}} function instead.
 #'
 #' @seealso \code{\link{fluidPage}}, \code{\link{fixedPage}}
@@ -52,7 +52,7 @@ bootstrapPage <- function(..., title = NULL, responsive = NULL, theme = NULL) {
 #' components in a web page.
 #'
 #' It isn't necessary to call this function if you use
-#' \code{\link{bootstrapPage}} or others which use \code{bootstrapPage}, such
+#' \code{\link{bootstrapPage}} or others which use `bootstrapPage`, such
 #' \code{\link{basicPage}}, \code{\link{fluidPage}}, \code{\link{fillPage}},
 #' \code{\link{pageWithSidebar}}, and \code{\link{navbarPage}}, because they
 #' already include the Bootstrap web dependencies.
@@ -85,7 +85,7 @@ basicPage <- function(...) {
 
 #' Create a page that fills the window
 #'
-#' \code{fillPage} creates a page whose height and width always fill the
+#' `fillPage` creates a page whose height and width always fill the
 #' available area of the browser window.
 #'
 #' The \code{\link{fluidPage}} and \code{\link{fixedPage}} functions are used
@@ -93,26 +93,26 @@ basicPage <- function(...) {
 #' whitespace at the bottom if the page content's height is smaller than the
 #' browser window, and scrolling if the content is larger than the window.
 #'
-#' \code{fillPage} is designed to latch the document body's size to the size of
+#' `fillPage` is designed to latch the document body's size to the size of
 #' the window. This makes it possible to fill it with content that also scales
 #' to the size of the window.
 #'
-#' For example, \code{fluidPage(plotOutput("plot", height = "100%"))} will not
-#' work as expected; the plot element's effective height will be \code{0},
-#' because the plot's containing elements (\code{<div>} and \code{<body>}) have
-#' \emph{automatic} height; that is, they determine their own height based on
+#' For example, `fluidPage(plotOutput("plot", height = "100%"))` will not
+#' work as expected; the plot element's effective height will be `0`,
+#' because the plot's containing elements (`<div>` and `<body>`) have
+#' *automatic* height; that is, they determine their own height based on
 #' the height of their contained elements. However,
-#' \code{fillPage(plotOutput("plot", height = "100%"))} will work because
-#' \code{fillPage} fixes the \code{<body>} height at 100% of the window height.
+#' `fillPage(plotOutput("plot", height = "100%"))` will work because
+#' `fillPage` fixes the `<body>` height at 100% of the window height.
 #'
-#' Note that \code{fillPage(plotOutput("plot"))} will not cause the plot to fill
-#' the page. Like most Shiny output widgets, \code{plotOutput}'s default height
-#' is a fixed number of pixels. You must explicitly set \code{height = "100%"}
+#' Note that `fillPage(plotOutput("plot"))` will not cause the plot to fill
+#' the page. Like most Shiny output widgets, `plotOutput`'s default height
+#' is a fixed number of pixels. You must explicitly set `height = "100%"`
 #' if you want a plot (or htmlwidget, say) to fill its container.
 #'
 #' One must be careful what layouts/panels/elements come between the
-#' \code{fillPage} and the plots/widgets. Any container that has an automatic
-#' height will cause children with \code{height = "100%"} to misbehave. Stick
+#' `fillPage` and the plots/widgets. Any container that has an automatic
+#' height will cause children with `height = "100%"` to misbehave. Stick
 #' to functions that are designed for fill layouts, such as the ones in this
 #' package.
 #'
@@ -127,7 +127,7 @@ basicPage <- function(...) {
 #'   be interpreted as top, right, bottom, and left respectively.
 #' @param title The title to use for the browser window/tab (it will not be
 #'   shown in the document).
-#' @param bootstrap If \code{TRUE}, load the Bootstrap CSS library.
+#' @param bootstrap If `TRUE`, load the Bootstrap CSS library.
 #' @param theme URL to alternative Bootstrap stylesheet.
 #'
 #' @examples
@@ -240,47 +240,47 @@ pageWithSidebar <- function(headerPanel,
 #'
 #' @param title The title to display in the navbar
 #' @param ... \code{\link{tabPanel}} elements to include in the page. The
-#'   \code{navbarMenu} function also accepts strings, which will be used as menu
-#'   section headers. If the string is a set of dashes like \code{"----"} a
+#'   `navbarMenu` function also accepts strings, which will be used as menu
+#'   section headers. If the string is a set of dashes like `"----"` a
 #'   horizontal separator will be displayed in the menu.
-#' @param id If provided, you can use \code{input$}\emph{\code{id}} in your
+#' @param id If provided, you can use `input$`*`id`* in your
 #'   server logic to determine which of the current tabs is active. The value
-#'   will correspond to the \code{value} argument that is passed to
+#'   will correspond to the `value` argument that is passed to
 #'   \code{\link{tabPanel}}.
-#' @param selected The \code{value} (or, if none was supplied, the \code{title})
-#'   of the tab that should be selected by default. If \code{NULL}, the first
+#' @param selected The `value` (or, if none was supplied, the `title`)
+#'   of the tab that should be selected by default. If `NULL`, the first
 #'   tab will be selected.
 #' @param position Determines whether the navbar should be displayed at the top
-#'   of the page with normal scrolling behavior (\code{"static-top"}), pinned at
-#'   the top (\code{"fixed-top"}), or pinned at the bottom
-#'   (\code{"fixed-bottom"}). Note that using \code{"fixed-top"} or
-#'   \code{"fixed-bottom"} will cause the navbar to overlay your body content,
+#'   of the page with normal scrolling behavior (`"static-top"`), pinned at
+#'   the top (`"fixed-top"`), or pinned at the bottom
+#'   (`"fixed-bottom"`). Note that using `"fixed-top"` or
+#'   `"fixed-bottom"` will cause the navbar to overlay your body content,
 #'   unless you add padding, e.g.: \code{tags$style(type="text/css", "body
 #'   {padding-top: 70px;}")}
 #' @param header Tag or list of tags to display as a common header above all
 #'   tabPanels.
 #' @param footer Tag or list of tags to display as a common footer below all
 #'   tabPanels
-#' @param inverse \code{TRUE} to use a dark background and light text for the
+#' @param inverse `TRUE` to use a dark background and light text for the
 #'   navigation bar
-#' @param collapsible \code{TRUE} to automatically collapse the navigation
+#' @param collapsible `TRUE` to automatically collapse the navigation
 #'   elements into a menu when the width of the browser is less than 940 pixels
 #'   (useful for viewing on smaller touchscreen device)
-#' @param collapsable Deprecated; use \code{collapsible} instead.
-#' @param fluid \code{TRUE} to use a fluid layout. \code{FALSE} to use a fixed
+#' @param collapsable Deprecated; use `collapsible` instead.
+#' @param fluid `TRUE` to use a fluid layout. `FALSE` to use a fixed
 #'   layout.
 #' @param responsive This option is deprecated; it is no longer optional with
 #'   Bootstrap 3.
 #' @param theme Alternative Bootstrap stylesheet (normally a css file within the
 #'   www directory). For example, to use the theme located at
-#'   \code{www/bootstrap.css} you would use \code{theme = "bootstrap.css"}.
+#'   `www/bootstrap.css` you would use `theme = "bootstrap.css"`.
 #' @param windowTitle The title that should be displayed by the browser window.
-#'   Useful if \code{title} is not a string.
-#' @param icon Optional icon to appear on a \code{navbarMenu} tab.
+#'   Useful if `title` is not a string.
+#' @param icon Optional icon to appear on a `navbarMenu` tab.
 #'
 #' @return A UI defintion that can be passed to the \link{shinyUI} function.
 #'
-#' @details The \code{navbarMenu} function can be used to create an embedded
+#' @details The `navbarMenu` function can be used to create an embedded
 #'   menu within the navbar that in turns includes additional tabPanels (see
 #'   example below).
 #'
@@ -394,9 +394,9 @@ navbarPage <- function(title,
   )
 }
 
-#' @param menuName A name that identifies this \code{navbarMenu}. This
+#' @param menuName A name that identifies this `navbarMenu`. This
 #'   is needed if you want to insert/remove or show/hide an entire
-#'   \code{navbarMenu}.
+#'   `navbarMenu`.
 #'
 #' @rdname navbarPage
 #' @export
@@ -414,7 +414,7 @@ navbarMenu <- function(title, ..., menuName = title, icon = NULL) {
 #'
 #' @param title An application title to display
 #' @param windowTitle The title that should be displayed by the browser window.
-#'   Useful if \code{title} is not a string.
+#'   Useful if `title` is not a string.
 #' @return A headerPanel that can be passed to \link{pageWithSidebar}
 #'
 #' @examples
@@ -432,7 +432,7 @@ headerPanel <- function(title, windowTitle=title) {
 #' Create a well panel
 #'
 #' Creates a panel with a slightly inset border and grey background. Equivalent
-#' to Bootstrap's \code{well} CSS class.
+#' to Bootstrap's `well` CSS class.
 #'
 #' @param ... UI elements to include inside the panel.
 #' @return The newly created panel.
@@ -500,10 +500,10 @@ mainPanel <- function(..., width = 8) {
 #' JavaScript expression. The JS expression is evaluated once at startup and
 #' whenever Shiny detects a relevant change in input/output.
 #'
-#' In the JS expression, you can refer to \code{input} and \code{output}
+#' In the JS expression, you can refer to `input` and `output`
 #' JavaScript objects that contain the current values of input and output. For
-#' example, if you have an input with an id of \code{foo}, then you can use
-#' \code{input.foo} to read its value. (Be sure not to modify the input/output
+#' example, if you have an input with an id of `foo`, then you can use
+#' `input.foo` to read its value. (Be sure not to modify the input/output
 #' objects, as this may cause unpredictable behavior.)
 #'
 #' @param condition A JavaScript expression that will be evaluated repeatedly to
@@ -513,9 +513,9 @@ mainPanel <- function(..., width = 8) {
 #' @param ... Elements to include in the panel.
 #'
 #' @note You are not recommended to use special JavaScript characters such as a
-#'   period \code{.} in the input id's, but if you do use them anyway, for
-#'   example, \code{inputId = "foo.bar"}, you will have to use
-#'   \code{input["foo.bar"]} instead of \code{input.foo.bar} to read the input
+#'   period `.` in the input id's, but if you do use them anyway, for
+#'   example, `inputId = "foo.bar"`, you will have to use
+#'   `input["foo.bar"]` instead of `input.foo.bar` to read the input
 #'   value.
 #' @examples
 #' ## Only run this example in interactive R sessions
@@ -593,11 +593,11 @@ helpText <- function(...) {
 #'
 #' @param title Display title for tab
 #' @param ... UI elements to include within the tab
-#' @param value The value that should be sent when \code{tabsetPanel} reports
-#'   that this tab is selected. If omitted and \code{tabsetPanel} has an
-#'   \code{id}, then the title will be used..
+#' @param value The value that should be sent when `tabsetPanel` reports
+#'   that this tab is selected. If omitted and `tabsetPanel` has an
+#'   `id`, then the title will be used..
 #' @param icon Optional icon to appear on the tab. This attribute is only
-#' valid when using a \code{tabPanel} within a \code{\link{navbarPage}}.
+#' valid when using a `tabPanel` within a \code{\link{navbarPage}}.
 #' @return A tab that can be passed to \code{\link{tabsetPanel}}
 #'
 #' @seealso \code{\link{tabsetPanel}}
@@ -627,12 +627,12 @@ tabPanel <- function(title, ..., value = title, icon = NULL) {
 #' useful for dividing output into multiple independently viewable sections.
 #'
 #' @param ... \code{\link{tabPanel}} elements to include in the tabset
-#' @param id If provided, you can use \code{input$}\emph{\code{id}} in your
+#' @param id If provided, you can use `input$`*`id`* in your
 #'   server logic to determine which of the current tabs is active. The value
-#'   will correspond to the \code{value} argument that is passed to
+#'   will correspond to the `value` argument that is passed to
 #'   \code{\link{tabPanel}}.
-#' @param selected The \code{value} (or, if none was supplied, the \code{title})
-#'   of the tab that should be selected by default. If \code{NULL}, the first
+#' @param selected The `value` (or, if none was supplied, the `title`)
+#'   of the tab that should be selected by default. If `NULL`, the first
 #'   tab will be selected.
 #' @param type Use "tabs" for the standard look; Use "pills" for a more plain
 #'   look where tabs are selected using a background fill color.
@@ -688,21 +688,21 @@ tabsetPanel <- function(...,
 #' which navigate to a set of tabPanels displayed to the right.
 #'
 #' @param ... \code{\link{tabPanel}} elements to include in the navlist
-#' @param id If provided, you can use \code{input$}\emph{\code{id}} in your
+#' @param id If provided, you can use `input$`*`id`* in your
 #'   server logic to determine which of the current navlist items is active. The
-#'   value will correspond to the \code{value} argument that is passed to
+#'   value will correspond to the `value` argument that is passed to
 #'   \code{\link{tabPanel}}.
-#' @param selected The \code{value} (or, if none was supplied, the \code{title})
-#'   of the navigation item that should be selected by default. If \code{NULL},
+#' @param selected The `value` (or, if none was supplied, the `title`)
+#'   of the navigation item that should be selected by default. If `NULL`,
 #'   the first navigation will be selected.
-#' @param well \code{TRUE} to place a well (gray rounded rectangle) around the
+#' @param well `TRUE` to place a well (gray rounded rectangle) around the
 #'   navigation list.
-#' @param fluid \code{TRUE} to use fluid layout; \code{FALSE} to use fixed
+#' @param fluid `TRUE` to use fluid layout; `FALSE` to use fixed
 #'   layout.
 #' @param widths Column withs of the navigation list and tabset content areas
 #'   respectively.
 #'
-#' @details You can include headers within the \code{navlistPanel} by including
+#' @details You can include headers within the `navlistPanel` by including
 #'   plain text elements in the list. Versions of Shiny before 0.11 supported
 #'   separators with "------", but as of 0.11, separators were no longer
 #'   supported. This is because version 0.11 switched to Bootstrap 3, which
@@ -918,10 +918,10 @@ buildTabItem <- function(index, tabsetId, foundSelected, tabs = NULL,
 #' Create a text output element
 #'
 #' Render a reactive output variable as text within an application page. The
-#' text will be included within an HTML \code{div} tag by default.
+#' text will be included within an HTML `div` tag by default.
 #' @param outputId output variable to read the value from
 #' @param container a function to generate an HTML element to contain the text
-#' @param inline use an inline (\code{span()}) or block container (\code{div()})
+#' @param inline use an inline (`span()`) or block container (`div()`)
 #'   for the output
 #' @return A text output element that can be included in a panel
 #' @details Text is HTML-escaped prior to rendering. This element is often used
@@ -936,9 +936,9 @@ textOutput <- function(outputId, container = if (inline) span else div, inline =
 #' Create a verbatim text output element
 #'
 #' Render a reactive output variable as verbatim text within an
-#' application page. The text will be included within an HTML \code{pre} tag.
+#' application page. The text will be included within an HTML `pre` tag.
 #' @param outputId output variable to read the value from
-#' @param placeholder if the output is empty or \code{NULL}, should an empty
+#' @param placeholder if the output is empty or `NULL`, should an empty
 #'   rectangle be displayed to serve as a placeholder? (does not affect
 #'   behavior when the the output in nonempty)
 #' @return A verbatim text output element that can be included in a panel
@@ -1073,72 +1073,72 @@ imageOutput <- function(outputId, width = "100%", height="400px",
 #'
 #'   Plots and images in Shiny support mouse-based interaction, via clicking,
 #'   double-clicking, hovering, and brushing. When these interaction events
-#'   occur, the mouse coordinates will be sent to the server as \code{input$}
-#'   variables, as specified by \code{click}, \code{dblclick}, \code{hover}, or
-#'   \code{brush}.
+#'   occur, the mouse coordinates will be sent to the server as `input$`
+#'   variables, as specified by `click`, `dblclick`, `hover`, or
+#'   `brush`.
 #'
-#'   For \code{plotOutput}, the coordinates will be sent scaled to the data
+#'   For `plotOutput`, the coordinates will be sent scaled to the data
 #'   space, if possible. (At the moment, plots generated by base graphics and
 #'   ggplot2 support this scaling, although plots generated by lattice and
 #'   others do not.) If scaling is not possible, the raw pixel coordinates will
-#'   be sent. For \code{imageOutput}, the coordinates will be sent in raw pixel
+#'   be sent. For `imageOutput`, the coordinates will be sent in raw pixel
 #'   coordinates.
 #'
-#'   With ggplot2 graphics, the code in \code{renderPlot} should return a ggplot
+#'   With ggplot2 graphics, the code in `renderPlot` should return a ggplot
 #'   object; if instead the code prints the ggplot2 object with something like
-#'   \code{print(p)}, then the coordinates for interactive graphics will not be
+#'   `print(p)`, then the coordinates for interactive graphics will not be
 #'   properly scaled to the data space.
 #'
 #' @param outputId output variable to read the plot/image from.
 #' @param width,height Image width/height. Must be a valid CSS unit (like
-#'   \code{"100%"}, \code{"400px"}, \code{"auto"}) or a number, which will be
-#'   coerced to a string and have \code{"px"} appended. These two arguments are
-#'   ignored when \code{inline = TRUE}, in which case the width/height of a plot
-#'   must be specified in \code{renderPlot()}. Note that, for height, using
-#'   \code{"auto"} or \code{"100%"} generally will not work as expected,
+#'   `"100%"`, `"400px"`, `"auto"`) or a number, which will be
+#'   coerced to a string and have `"px"` appended. These two arguments are
+#'   ignored when `inline = TRUE`, in which case the width/height of a plot
+#'   must be specified in `renderPlot()`. Note that, for height, using
+#'   `"auto"` or `"100%"` generally will not work as expected,
 #'   because of how height is computed with HTML/CSS.
-#' @param click This can be \code{NULL} (the default), a string, or an object
+#' @param click This can be `NULL` (the default), a string, or an object
 #'   created by the \code{\link{clickOpts}} function. If you use a value like
-#'   \code{"plot_click"} (or equivalently, \code{clickOpts(id="plot_click")}),
+#'   `"plot_click"` (or equivalently, `clickOpts(id="plot_click")`),
 #'   the plot will send coordinates to the server whenever it is clicked, and
-#'   the value will be accessible via \code{input$plot_click}. The value will be
-#'   a named list  with \code{x} and \code{y} elements indicating the mouse
+#'   the value will be accessible via `input$plot_click`. The value will be
+#'   a named list  with `x` and `y` elements indicating the mouse
 #'   position.
-#' @param dblclick This is just like the \code{click} argument, but for
+#' @param dblclick This is just like the `click` argument, but for
 #'   double-click events.
-#' @param hover Similar to the \code{click} argument, this can be \code{NULL}
+#' @param hover Similar to the `click` argument, this can be `NULL`
 #'   (the default), a string, or an object created by the
 #'   \code{\link{hoverOpts}} function. If you use a value like
-#'   \code{"plot_hover"} (or equivalently, \code{hoverOpts(id="plot_hover")}),
+#'   `"plot_hover"` (or equivalently, `hoverOpts(id="plot_hover")`),
 #'   the plot will send coordinates to the server pauses on the plot, and the
-#'   value will be accessible via \code{input$plot_hover}. The value will be a
-#'   named list with \code{x} and \code{y} elements indicating the mouse
+#'   value will be accessible via `input$plot_hover`. The value will be a
+#'   named list with `x` and `y` elements indicating the mouse
 #'   position. To control the hover time or hover delay type, you must use
 #'   \code{\link{hoverOpts}}.
-#' @param clickId Deprecated; use \code{click} instead. Also see the
+#' @param clickId Deprecated; use `click` instead. Also see the
 #'   \code{\link{clickOpts}} function.
-#' @param hoverId Deprecated; use \code{hover} instead. Also see the
+#' @param hoverId Deprecated; use `hover` instead. Also see the
 #'   \code{\link{hoverOpts}} function.
-#' @param hoverDelay Deprecated; use \code{hover} instead. Also see the
+#' @param hoverDelay Deprecated; use `hover` instead. Also see the
 #'   \code{\link{hoverOpts}} function.
-#' @param hoverDelayType Deprecated; use \code{hover} instead. Also see the
+#' @param hoverDelayType Deprecated; use `hover` instead. Also see the
 #'   \code{\link{hoverOpts}} function.
-#' @param brush Similar to the \code{click} argument, this can be \code{NULL}
+#' @param brush Similar to the `click` argument, this can be `NULL`
 #'   (the default), a string, or an object created by the
 #'   \code{\link{brushOpts}} function. If you use a value like
-#'   \code{"plot_brush"} (or equivalently, \code{brushOpts(id="plot_brush")}),
+#'   `"plot_brush"` (or equivalently, `brushOpts(id="plot_brush")`),
 #'   the plot will allow the user to "brush" in the plotting area, and will send
 #'   information about the brushed area to the server, and the value will be
-#'   accessible via \code{input$plot_brush}. Brushing means that the user will
+#'   accessible via `input$plot_brush`. Brushing means that the user will
 #'   be able to draw a rectangle in the plotting area and drag it around. The
-#'   value will be a named list with \code{xmin}, \code{xmax}, \code{ymin}, and
-#'   \code{ymax} elements indicating the brush area. To control the brush
+#'   value will be a named list with `xmin`, `xmax`, `ymin`, and
+#'   `ymax` elements indicating the brush area. To control the brush
 #'   behavior, use \code{\link{brushOpts}}. Multiple
-#'   \code{imageOutput}/\code{plotOutput} calls may share the same \code{id}
+#'   `imageOutput`/`plotOutput` calls may share the same `id`
 #'   value; brushing one image or plot will cause any other brushes with the
-#'   same \code{id} to disappear.
+#'   same `id` to disappear.
 #' @inheritParams textOutput
-#' @note The arguments \code{clickId} and \code{hoverId} only work for R base
+#' @note The arguments `clickId` and `hoverId` only work for R base
 #'   graphics (see the \pkg{\link[graphics:graphics-package]{graphics}} package). They do not work for
 #'   \pkg{\link[grid:grid-package]{grid}}-based graphics, such as \pkg{ggplot2},
 #'   \pkg{lattice}, and so on.
@@ -1325,8 +1325,8 @@ plotOutput <- function(outputId, width = "100%", height="400px",
 #' Create a table output element
 #'
 #' Render a \code{\link{renderTable}} or \code{\link{renderDataTable}} within an
-#' application page. \code{renderTable} uses a standard HTML table, while
-#' \code{renderDataTable} uses the DataTables Javascript library to create an
+#' application page. `renderTable` uses a standard HTML table, while
+#' `renderDataTable` uses the DataTables Javascript library to create an
 #' interactive table with more features.
 #'
 #' @param outputId output variable to read the table from
@@ -1394,11 +1394,11 @@ dataTableOutput <- function(outputId) {
 #' Create an HTML output element
 #'
 #' Render a reactive output variable as HTML within an application page. The
-#' text will be included within an HTML \code{div} tag, and is presumed to
+#' text will be included within an HTML `div` tag, and is presumed to
 #' contain HTML content which should not be escaped.
 #'
-#' \code{uiOutput} is intended to be used with \code{renderUI} on the server
-#' side. It is currently just an alias for \code{htmlOutput}.
+#' `uiOutput` is intended to be used with `renderUI` on the server
+#' side. It is currently just an alias for `htmlOutput`.
 #'
 #' @param outputId output variable to read the value from
 #' @param ... Other arguments to pass to the container tag function. This is
@@ -1433,7 +1433,7 @@ uiOutput <- htmlOutput
 #' the corresponding \code{\link{downloadHandler}} defined in the server
 #' function.
 #'
-#' @param outputId The name of the output slot that the \code{downloadHandler}
+#' @param outputId The name of the output slot that the `downloadHandler`
 #'   is assigned to.
 #' @param label The label that should appear on the button.
 #' @param class Additional CSS classes to apply to the tag, if any.
@@ -1489,22 +1489,22 @@ downloadLink <- function(outputId, label="Download", class=NULL, ...) {
 #' \code{\link{navbarPage}}.
 #'
 #' @param name Name of icon. Icons are drawn from the
-#'   \href{https://fontawesome.com/}{Font Awesome Free} (currently icons from
+#'   [Font Awesome Free](https://fontawesome.com/) (currently icons from
 #'   the v5.3.1 set are supported with the v4 naming convention) and
-#'   \href{http://getbootstrap.com/components/#glyphicons}{Glyphicons}
+#'   [Glyphicons](http://getbootstrap.com/components/#glyphicons)
 #'   libraries. Note that the "fa-" and "glyphicon-" prefixes should not be used
 #'   in icon names (i.e. the "fa-calendar" icon should be referred to as
 #'   "calendar")
 #' @param class Additional classes to customize the style of the icon (see the
-#'   \href{http://fontawesome.io/examples/}{usage examples} for details on
+#'   [usage examples](http://fontawesome.io/examples/) for details on
 #'   supported styles).
 #' @param lib Icon library to use ("font-awesome" or "glyphicon")
 #'
 #' @return An icon element
 #'
 #' @seealso For lists of available icons, see
-#'   \href{http://fontawesome.io/icons/}{http://fontawesome.io/icons/} and
-#'   \href{http://getbootstrap.com/components/#glyphicons}{http://getbootstrap.com/components/#glyphicons}.
+#'   [http://fontawesome.io/icons/](http://fontawesome.io/icons/) and
+#'   [http://getbootstrap.com/components/#glyphicons](http://getbootstrap.com/components/#glyphicons).
 #'
 #'
 #' @examples

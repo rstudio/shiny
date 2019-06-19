@@ -6,16 +6,16 @@
 #' URL.
 #'
 #' @param dependency A single HTML dependency object, created using
-#'   \code{\link[htmltools]{htmlDependency}}. If the \code{src} value is named,
-#'   then \code{href} and/or \code{file} names must be present.
-#' @param scrubFile If TRUE (the default), remove \code{src$file} for the
+#'   \code{\link[htmltools]{htmlDependency}}. If the `src` value is named,
+#'   then `href` and/or `file` names must be present.
+#' @param scrubFile If TRUE (the default), remove `src$file` for the
 #'   dependency. This prevents the local file path from being sent to the client
 #'   when dynamic web dependencies are used. If FALSE, don't remove
-#'   \code{src$file}. Setting it to FALSE should be needed only in very unusual
+#'   `src$file`. Setting it to FALSE should be needed only in very unusual
 #'   cases.
 #'
-#' @return A single HTML dependency object that has an \code{href}-named element
-#'   in its \code{src}.
+#' @return A single HTML dependency object that has an `href`-named element
+#'   in its `src`.
 #' @export
 createWebDependency <- function(dependency, scrubFile = TRUE) {
   if (is.null(dependency))

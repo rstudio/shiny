@@ -3,15 +3,15 @@
 #' Create a select list that can be used to choose a single or multiple items
 #' from a list of values.
 #'
-#' By default, \code{selectInput()} and \code{selectizeInput()} use the
+#' By default, `selectInput()` and `selectizeInput()` use the
 #' JavaScript library \pkg{selectize.js}
-#' (\url{https://github.com/selectize/selectize.js}) instead of the basic
+#' (<https://github.com/selectize/selectize.js>) instead of the basic
 #' select input element. To use the standard HTML select input element, use
-#' \code{selectInput()} with \code{selectize=FALSE}.
+#' `selectInput()` with `selectize=FALSE`.
 #'
-#' In selectize mode, if the first element in \code{choices} has a value of
-#' \code{""}, its name will be treated as a placeholder prompt. For example:
-#' \code{selectInput("letter", "Letter", c("Choose one" = "", LETTERS))}
+#' In selectize mode, if the first element in `choices` has a value of
+#' `""`, its name will be treated as a placeholder prompt. For example:
+#' `selectInput("letter", "Letter", c("Choose one" = "", LETTERS))`
 #'
 #' @inheritParams textInput
 #' @param choices List of values to select from. If elements of the list are
@@ -19,17 +19,17 @@
 #'   It's also possible to group related inputs by providing a named list whose
 #'   elements are (either named or unnamed) lists or vectors. In this case, the
 #'   outermost names will be used as the group labels (leveraging the
-#'   \code{<optgroup>} HTML tag) for the elements in the respective sublist. See
+#'   `<optgroup>` HTML tag) for the elements in the respective sublist. See
 #'   the example section for a small demo of this feature.
 #' @param selected The initially selected value (or multiple values if
-#'   \code{multiple = TRUE}). If not specified then defaults to the first value
+#'   `multiple = TRUE`). If not specified then defaults to the first value
 #'   for single-select lists and no values for multiple select lists.
 #' @param multiple Is selection of multiple items allowed?
 #' @param selectize Whether to use \pkg{selectize.js} or not.
 #' @param size Number of items to show in the selection box; a larger number
-#'   will result in a taller box. Not compatible with \code{selectize=TRUE}.
-#'   Normally, when \code{multiple=FALSE}, a select input will be a drop-down
-#'   list, but when \code{size} is set, it will be a box instead.
+#'   will result in a taller box. Not compatible with `selectize=TRUE`.
+#'   Normally, when `multiple=FALSE`, a select input will be a drop-down
+#'   list, but when `size` is set, it will be a box instead.
 #' @return A select list control that can be added to a UI definition.
 #'
 #' @family input elements
@@ -153,21 +153,21 @@ needOptgroup <- function(choices) {
 }
 
 #' @rdname selectInput
-#' @param ... Arguments passed to \code{selectInput()}.
+#' @param ... Arguments passed to `selectInput()`.
 #' @param options A list of options. See the documentation of \pkg{selectize.js}
 #'   for possible options (character option values inside \code{\link[base]{I}()} will
 #'   be treated as literal JavaScript code; see \code{\link{renderDataTable}()}
 #'   for details).
-#' @param width The width of the input, e.g. \code{'400px'}, or \code{'100%'};
+#' @param width The width of the input, e.g. `'400px'`, or `'100%'`;
 #'   see \code{\link{validateCssUnit}}.
-#' @note The selectize input created from \code{selectizeInput()} allows
+#' @note The selectize input created from `selectizeInput()` allows
 #'   deletion of the selected option even in a single select input, which will
 #'   return an empty string as its value. This is the default behavior of
 #'   \pkg{selectize.js}. However, the selectize input created from
-#'   \code{selectInput(..., selectize = TRUE)} will ignore the empty string
+#'   `selectInput(..., selectize = TRUE)` will ignore the empty string
 #'   value when it is a single choice input and the empty string is not in the
-#'   \code{choices} argument. This is to keep compatibility with
-#'   \code{selectInput(..., selectize = FALSE)}.
+#'   `choices` argument. This is to keep compatibility with
+#'   `selectInput(..., selectize = FALSE)`.
 #' @export
 selectizeInput <- function(inputId, ..., options = NULL, width = NULL) {
   selectizeIt(
@@ -225,23 +225,23 @@ selectizeIt <- function(inputId, select, options, nonempty = FALSE) {
 #' Create a select list that can be used to choose a single or multiple items
 #' from the column names of a data frame.
 #'
-#' The resulting server \code{input} value will be returned as:
+#' The resulting server `input` value will be returned as:
 #' \itemize{
-#'   \item a symbol if \code{multiple = FALSE}.  The \code{input} value should be
+#'   \item a symbol if `multiple = FALSE`.  The `input` value should be
 #'         used with rlang's \code{\link[rlang]{!!}}. For example,
-#'         \code{ggplot2::aes(!!input$variable)}.
-#'   \item a list of symbols if \code{multiple = TRUE}. The \code{input} value
+#'         `ggplot2::aes(!!input$variable)`.
+#'   \item a list of symbols if `multiple = TRUE`. The `input` value
 #'         should be used with rlang's \code{\link[rlang]{!!!}} to expand
 #'         the symbol list as individual arguments. For example,
-#'         \code{dplyr::select(mtcars, !!!input$variabls)} which is
-#'         equivalent to \code{dplyr::select(mtcars, !!input$variabls[[1]], !!input$variabls[[2]], ..., !!input$variabls[[length(input$variabls)]])}.
+#'         `dplyr::select(mtcars, !!!input$variabls)` which is
+#'         equivalent to `dplyr::select(mtcars, !!input$variabls[[1]], !!input$variabls[[2]], ..., !!input$variabls[[length(input$variabls)]])`.
 #' }
 #'
-#' By default, \code{varSelectInput()} and \code{selectizeInput()} use the
+#' By default, `varSelectInput()` and `selectizeInput()` use the
 #' JavaScript library \pkg{selectize.js}
-#' (\url{https://github.com/selectize/selectize.js}) to instead of the basic
+#' (<https://github.com/selectize/selectize.js>) to instead of the basic
 #' select input element. To use the standard HTML select input element, use
-#' \code{selectInput()} with \code{selectize=FALSE}.
+#' `selectInput()` with `selectize=FALSE`.
 #'
 #' @inheritParams selectInput
 #' @param data A data frame. Used to retrieve the column names as choices for a \code{\link{selectInput}}
@@ -321,21 +321,21 @@ varSelectInput <- function(
 
 
 #' @rdname varSelectInput
-#' @param ... Arguments passed to \code{varSelectInput()}.
+#' @param ... Arguments passed to `varSelectInput()`.
 #' @param options A list of options. See the documentation of \pkg{selectize.js}
 #'   for possible options (character option values inside \code{\link[base]{I}()} will
 #'   be treated as literal JavaScript code; see \code{\link{renderDataTable}()}
 #'   for details).
-#' @param width The width of the input, e.g. \code{'400px'}, or \code{'100%'};
+#' @param width The width of the input, e.g. `'400px'`, or `'100%'`;
 #'   see \code{\link{validateCssUnit}}.
-#' @note The variable selectize input created from \code{varSelectizeInput()} allows
+#' @note The variable selectize input created from `varSelectizeInput()` allows
 #'   deletion of the selected option even in a single select input, which will
 #'   return an empty string as its value. This is the default behavior of
 #'   \pkg{selectize.js}. However, the selectize input created from
-#'   \code{selectInput(..., selectize = TRUE)} will ignore the empty string
+#'   `selectInput(..., selectize = TRUE)` will ignore the empty string
 #'   value when it is a single choice input and the empty string is not in the
-#'   \code{choices} argument. This is to keep compatibility with
-#'   \code{selectInput(..., selectize = FALSE)}.
+#'   `choices` argument. This is to keep compatibility with
+#'   `selectInput(..., selectize = FALSE)`.
 #' @export
 varSelectizeInput <- function(inputId, ..., options = NULL, width = NULL) {
   selectizeIt(

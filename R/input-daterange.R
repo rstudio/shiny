@@ -3,28 +3,28 @@
 #' Creates a pair of text inputs which, when clicked on, bring up calendars that
 #' the user can click on to select dates.
 #'
-#' The date \code{format} string specifies how the date will be displayed in
+#' The date `format` string specifies how the date will be displayed in
 #' the browser. It allows the following values:
 #'
 #' \itemize{
-#'   \item \code{yy} Year without century (12)
-#'   \item \code{yyyy} Year with century (2012)
-#'   \item \code{mm} Month number, with leading zero (01-12)
-#'   \item \code{m} Month number, without leading zero (1-12)
-#'   \item \code{M} Abbreviated month name
-#'   \item \code{MM} Full month name
-#'   \item \code{dd} Day of month with leading zero
-#'   \item \code{d} Day of month without leading zero
-#'   \item \code{D} Abbreviated weekday name
-#'   \item \code{DD} Full weekday name
+#'   \item `yy` Year without century (12)
+#'   \item `yyyy` Year with century (2012)
+#'   \item `mm` Month number, with leading zero (01-12)
+#'   \item `m` Month number, without leading zero (1-12)
+#'   \item `M` Abbreviated month name
+#'   \item `MM` Full month name
+#'   \item `dd` Day of month with leading zero
+#'   \item `d` Day of month without leading zero
+#'   \item `D` Abbreviated weekday name
+#'   \item `DD` Full weekday name
 #' }
 #'
 #' @inheritParams dateInput
 #' @param start The initial start date. Either a Date object, or a string in
-#'   \code{yyyy-mm-dd} format. If NULL (the default), will use the current
+#'   `yyyy-mm-dd` format. If NULL (the default), will use the current
 #'   date in the client's time zone.
 #' @param end The initial end date. Either a Date object, or a string in
-#'   \code{yyyy-mm-dd} format. If NULL (the default), will use the current
+#'   `yyyy-mm-dd` format. If NULL (the default), will use the current
 #'   date in the client's time zone.
 #' @param separator String to display between the start and end input boxes.
 #'

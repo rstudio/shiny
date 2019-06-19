@@ -3,19 +3,19 @@
 #' Create a submit button for an app. Apps that include a submit
 #' button do not automatically update their outputs when inputs change,
 #' rather they wait until the user explicitly clicks the submit button.
-#' The use of \code{submitButton} is generally discouraged in favor of
+#' The use of `submitButton` is generally discouraged in favor of
 #' the more versatile \code{\link{actionButton}} (see details below).
 #'
 #' Submit buttons are unusual Shiny inputs, and we recommend using
-#' \code{\link{actionButton}} instead of \code{submitButton} when you
+#' \code{\link{actionButton}} instead of `submitButton` when you
 #' want to delay a reaction.
-#' See \href{http://shiny.rstudio.com/articles/action-buttons.html}{this
-#' article} for more information (including a demo of how to "translate"
-#' code using a \code{submitButton} to code using an \code{actionButton}).
+#' See [this
+#' article](http://shiny.rstudio.com/articles/action-buttons.html) for more information (including a demo of how to "translate"
+#' code using a `submitButton` to code using an `actionButton`).
 #'
 #' In essence, the presence of a submit button stops all inputs from
 #' sending their values automatically to the server. This means, for
-#' instance, that if there are \emph{two} submit buttons in the same app,
+#' instance, that if there are *two* submit buttons in the same app,
 #' clicking either one will cause all inputs in the app to send their
 #' values to the server. This is probably not what you'd want, which is
 #' why submit button are unwieldy for all but the simplest apps. There
@@ -25,7 +25,7 @@
 #'
 #' @param text Button caption
 #' @param icon Optional \code{\link{icon}} to appear on the button
-#' @param width The width of the button, e.g. \code{'400px'}, or \code{'100%'};
+#' @param width The width of the button, e.g. `'400px'`, or `'100%'`;
 #'   see \code{\link{validateCssUnit}}.
 #' @return A submit button that can be added to a UI definition.
 #'

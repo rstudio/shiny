@@ -2,10 +2,10 @@
 #'
 #' Create an input control for entry of unstructured text values
 #'
-#' @param inputId The \code{input} slot that will be used to access the value.
-#' @param label Display label for the control, or \code{NULL} for no label.
+#' @param inputId The `input` slot that will be used to access the value.
+#' @param label Display label for the control, or `NULL` for no label.
 #' @param value Initial value.
-#' @param width The width of the input, e.g. \code{'400px'}, or \code{'100%'};
+#' @param width The width of the input, e.g. `'400px'`, or `'100%'`;
 #'   see \code{\link{validateCssUnit}}.
 #' @param placeholder A character string giving the user a hint as to what can
 #'   be entered into the control. Internet Explorer 8 and 9 do not support this

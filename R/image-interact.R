@@ -4,25 +4,25 @@
 #' with \code{\link{plotOutput}}.
 #'
 #' It is also possible for this function to return all rows from the input data
-#' frame, but with an additional column \code{selected_}, which indicates which
-#' rows of the input data frame are selected by the brush (\code{TRUE} for
-#' selected, \code{FALSE} for not-selected). This is enabled by setting
-#' \code{allRows=TRUE} option.
+#' frame, but with an additional column `selected_`, which indicates which
+#' rows of the input data frame are selected by the brush (`TRUE` for
+#' selected, `FALSE` for not-selected). This is enabled by setting
+#' `allRows=TRUE` option.
 #'
-#' The \code{xvar}, \code{yvar}, \code{panelvar1}, and \code{panelvar2}
+#' The `xvar`, `yvar`, `panelvar1`, and `panelvar2`
 #' arguments specify which columns in the data correspond to the x variable, y
 #' variable, and panel variables of the plot. For example, if your plot is
-#' \code{plot(x=cars$speed, y=cars$dist)}, and your brush is named
-#' \code{"cars_brush"}, then you would use \code{brushedPoints(cars,
-#' input$cars_brush, "speed", "dist")}.
+#' `plot(x=cars$speed, y=cars$dist)`, and your brush is named
+#' `"cars_brush"`, then you would use `brushedPoints(cars,
+#' input$cars_brush, "speed", "dist")`.
 #'
 #' For plots created with ggplot2, it should not be necessary to specify the
 #' column names; that information will already be contained in the brush,
 #' provided that variables are in the original data, and not computed. For
-#' example, with \code{ggplot(cars, aes(x=speed, y=dist)) + geom_point()}, you
-#' could use \code{brushedPoints(cars, input$cars_brush)}. If, however, you use
-#' a computed column, like \code{ggplot(cars, aes(x=speed/2, y=dist)) +
-#' geom_point()}, then it will not be able to automatically extract column names
+#' example, with `ggplot(cars, aes(x=speed, y=dist)) + geom_point()`, you
+#' could use `brushedPoints(cars, input$cars_brush)`. If, however, you use
+#' a computed column, like `ggplot(cars, aes(x=speed/2, y=dist)) +
+#' geom_point()`, then it will not be able to automatically extract column names
 #' and filter on them. If you want to use this function to filter data, it is
 #' recommended that you not use computed columns; instead, modify the data
 #' first, and then make the plot with "raw" columns in the modified data.
@@ -33,24 +33,24 @@
 #' to cover a given character/factor value when it covers the center value.
 #'
 #' If the brush is operating in just the x or y directions (e.g., with
-#' \code{brushOpts(direction = "x")}, then this function will filter out points
+#' `brushOpts(direction = "x")`, then this function will filter out points
 #' using just the x or y variable, whichever is appropriate.
 #'
-#' @param brush The data from a brush, such as \code{input$plot_brush}.
+#' @param brush The data from a brush, such as `input$plot_brush`.
 #' @param df A data frame from which to select rows.
 #' @param xvar,yvar A string with the name of the variable on the x or y axis.
-#'   This must also be the name of a column in \code{df}. If absent, then this
+#'   This must also be the name of a column in `df`. If absent, then this
 #'   function will try to infer the variable from the brush (only works for
 #'   ggplot2).
 #' @param panelvar1,panelvar2 Each of these is a string with the name of a panel
 #'   variable. For example, if with ggplot2, you facet on a variable called
-#'   \code{cyl}, then you can use \code{"cyl"} here. However, specifying the
+#'   `cyl`, then you can use `"cyl"` here. However, specifying the
 #'   panel variable should not be necessary with ggplot2; Shiny should be able
 #'   to auto-detect the panel variable.
-#' @param allRows If \code{FALSE} (the default) return a data frame containing
-#'   the selected rows. If \code{TRUE}, the input data frame will have a new
-#'   column, \code{selected_}, which indicates whether the row was inside the
-#'   brush (\code{TRUE}) or outside the brush (\code{FALSE}).
+#' @param allRows If `FALSE` (the default) return a data frame containing
+#'   the selected rows. If `TRUE`, the input data frame will have a new
+#'   column, `selected_`, which indicates whether the row was inside the
+#'   brush (`TRUE`) or outside the brush (`FALSE`).
 #'
 #' @seealso \code{\link{plotOutput}} for example usage.
 #' @export
@@ -198,33 +198,33 @@ brushedPoints <- function(df, brush, xvar = NULL, yvar = NULL,
 #'by their distance to the mouse event.
 #'
 #'It is also possible for this function to return all rows from the input data
-#'frame, but with an additional column \code{selected_}, which indicates which
-#'rows of the input data frame are selected by the brush (\code{TRUE} for
-#'selected, \code{FALSE} for not-selected). This is enabled by setting
-#'\code{allRows=TRUE} option. If this is used, the resulting data frame will not
+#'frame, but with an additional column `selected_`, which indicates which
+#'rows of the input data frame are selected by the brush (`TRUE` for
+#'selected, `FALSE` for not-selected). This is enabled by setting
+#'`allRows=TRUE` option. If this is used, the resulting data frame will not
 #'be sorted by distance to the mouse event.
 #'
-#'The \code{xvar}, \code{yvar}, \code{panelvar1}, and \code{panelvar2} arguments
+#'The `xvar`, `yvar`, `panelvar1`, and `panelvar2` arguments
 #'specify which columns in the data correspond to the x variable, y variable,
 #'and panel variables of the plot. For example, if your plot is
-#'\code{plot(x=cars$speed, y=cars$dist)}, and your click variable is named
-#'\code{"cars_click"}, then you would use \code{nearPoints(cars,
-#'input$cars_brush, "speed", "dist")}.
+#'`plot(x=cars$speed, y=cars$dist)`, and your click variable is named
+#'`"cars_click"`, then you would use `nearPoints(cars,
+#'input$cars_brush, "speed", "dist")`.
 #'
 #'@inheritParams brushedPoints
-#'@param coordinfo The data from a mouse event, such as \code{input$plot_click}.
+#'@param coordinfo The data from a mouse event, such as `input$plot_click`.
 #'@param threshold A maxmimum distance to the click point; rows in the data
-#'  frame where the distance to the click is less than \code{threshold} will be
+#'  frame where the distance to the click is less than `threshold` will be
 #'  returned.
 #'@param maxpoints Maximum number of rows to return. If NULL (the default),
 #'  return all rows that are within the threshold distance.
-#'@param addDist If TRUE, add a column named \code{dist_} that contains the
+#'@param addDist If TRUE, add a column named `dist_` that contains the
 #'  distance from the coordinate to the point, in pixels. When no mouse event
-#'  has yet occured, the value of \code{dist_} will be \code{NA}.
-#'@param allRows If \code{FALSE} (the default) return a data frame containing
-#'  the selected rows. If \code{TRUE}, the input data frame will have a new
-#'  column, \code{selected_}, which indicates whether the row was inside the
-#'  selected by the mouse event (\code{TRUE}) or not (\code{FALSE}).
+#'  has yet occured, the value of `dist_` will be `NA`.
+#'@param allRows If `FALSE` (the default) return a data frame containing
+#'  the selected rows. If `TRUE`, the input data frame will have a new
+#'  column, `selected_`, which indicates whether the row was inside the
+#'  selected by the mouse event (`TRUE`) or not (`FALSE`).
 #'
 #'@seealso \code{\link{plotOutput}} for more examples.
 #'

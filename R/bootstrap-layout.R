@@ -15,17 +15,17 @@
 #'   Bootstrap 3.
 #' @param theme Alternative Bootstrap stylesheet (normally a css file within the
 #'   www directory). For example, to use the theme located at
-#'   \code{www/bootstrap.css} you would use \code{theme = "bootstrap.css"}.
+#'   `www/bootstrap.css` you would use `theme = "bootstrap.css"`.
 #'
 #' @return A UI defintion that can be passed to the \link{shinyUI} function.
 #'
-#' @details To create a fluid page use the \code{fluidPage} function and include
-#'   instances of \code{fluidRow} and \code{\link{column}} within it. As an
+#' @details To create a fluid page use the `fluidPage` function and include
+#'   instances of `fluidRow` and \code{\link{column}} within it. As an
 #'   alternative to low-level row and column functions you can also use
 #'   higher-level layout functions like \code{\link{sidebarLayout}}.
 #'
-#' @note See the \href{http://shiny.rstudio.com/articles/layout-guide.html}{
-#'   Shiny-Application-Layout-Guide} for additional details on laying out fluid
+#' @note See the [
+#'   Shiny-Application-Layout-Guide](http://shiny.rstudio.com/articles/layout-guide.html) for additional details on laying out fluid
 #'   pages.
 #'
 #' @seealso \code{\link{column}}, \code{\link{sidebarLayout}}
@@ -116,18 +116,18 @@ fluidRow <- function(...) {
 #'   Bootstrap 3.
 #' @param theme Alternative Bootstrap stylesheet (normally a css file within the
 #'   www directory). For example, to use the theme located at
-#'   \code{www/bootstrap.css} you would use \code{theme = "bootstrap.css"}.
+#'   `www/bootstrap.css` you would use `theme = "bootstrap.css"`.
 #'
 #' @return A UI defintion that can be passed to the \link{shinyUI} function.
 #'
-#' @details To create a fixed page use the \code{fixedPage} function and include
-#'   instances of \code{fixedRow} and \code{\link{column}} within it. Note that
+#' @details To create a fixed page use the `fixedPage` function and include
+#'   instances of `fixedRow` and \code{\link{column}} within it. Note that
 #'   unlike \code{\link{fluidPage}}, fixed pages cannot make use of higher-level
-#'   layout functions like \code{sidebarLayout}, rather, all layout must be done
-#'   with \code{fixedRow} and \code{column}.
+#'   layout functions like `sidebarLayout`, rather, all layout must be done
+#'   with `fixedRow` and `column`.
 #'
-#' @note See the \href{http://shiny.rstudio.com/articles/layout-guide.html}{
-#'   Shiny Application Layout Guide} for additional details on laying out fixed
+#' @note See the [
+#'   Shiny Application Layout Guide](http://shiny.rstudio.com/articles/layout-guide.html) for additional details on laying out fixed
 #'   pages.
 #'
 #' @seealso \code{\link{column}}
@@ -240,7 +240,7 @@ column <- function(width, ..., offset = 0) {
 #' @param windowTitle The title that should be displayed by the browser window.
 #'
 #' @details Calling this function has the side effect of including a
-#'   \code{title} tag within the head. You can also specify a page title
+#'   `title` tag within the head. You can also specify a page title
 #'   explicitly using the `title` parameter of the top-level page function.
 #'
 #'
@@ -271,7 +271,7 @@ titlePanel <- function(title, windowTitle=title) {
 #' @param mainPanel The \link{mainPanel} containing outputs
 #' @param position The position of the sidebar relative to the main area ("left"
 #'   or "right")
-#' @param fluid \code{TRUE} to use fluid layout; \code{FALSE} to use fixed
+#' @param fluid `TRUE` to use fluid layout; `FALSE` to use fixed
 #'   layout.
 #'
 #' @examples
@@ -343,7 +343,7 @@ sidebarLayout <- function(sidebarPanel,
 #' passed to the container will appear on it's own line in the UI)
 #'
 #' @param ... Elements to include within the container
-#' @param fluid \code{TRUE} to use fluid layout; \code{FALSE} to use fixed
+#' @param fluid `TRUE` to use fluid layout; `FALSE` to use fixed
 #'   layout.
 #'
 #' @seealso \code{\link{fluidPage}}, \code{\link{flowLayout}}
@@ -377,7 +377,7 @@ verticalLayout <- function(..., fluid = TRUE) {
 #' Lays out elements in a left-to-right, top-to-bottom arrangement. The elements
 #' on a given row will be top-aligned with each other. This layout will not work
 #' well with elements that have a percentage-based width (e.g.
-#' \code{\link{plotOutput}} at its default setting of \code{width = "100%"}).
+#' \code{\link{plotOutput}} at its default setting of `width = "100%"`).
 #'
 #' @param ... Unnamed arguments will become child elements of the layout. Named
 #'   arguments will become HTML attributes on the outermost tag.
@@ -509,41 +509,41 @@ splitLayout <- function(..., cellWidths = NULL, cellArgs = list()) {
 #'
 #' Creates row and column layouts with proportionally-sized cells, using the
 #' Flex Box layout model of CSS3. These can be nested to create arbitrary
-#' proportional-grid layouts. \strong{Warning:} Flex Box is not well supported
+#' proportional-grid layouts. **Warning:** Flex Box is not well supported
 #' by Internet Explorer, so these functions should only be used where modern
 #' browsers can be assumed.
 #'
-#' @details If you try to use \code{fillRow} and \code{fillCol} inside of other
+#' @details If you try to use `fillRow` and `fillCol` inside of other
 #'   Shiny containers, such as \code{\link{sidebarLayout}},
-#'   \code{\link{navbarPage}}, or even \code{tags$div}, you will probably find
-#'   that they will not appear. This is due to \code{fillRow} and \code{fillCol}
-#'   defaulting to \code{height="100%"}, which will only work inside of
+#'   \code{\link{navbarPage}}, or even `tags$div`, you will probably find
+#'   that they will not appear. This is due to `fillRow` and `fillCol`
+#'   defaulting to `height="100%"`, which will only work inside of
 #'   containers that have determined their own size (rather than shrinking to
 #'   the size of their contents, as is usually the case in HTML).
 #'
 #'   To avoid this problem, you have two options:
 #'   \itemize{
-#'     \item only use \code{fillRow}/\code{fillCol} inside of \code{fillPage},
-#'       \code{fillRow}, or \code{fillCol}
-#'     \item provide an explicit \code{height} argument to
-#'       \code{fillRow}/\code{fillCol}
+#'     \item only use `fillRow`/`fillCol` inside of `fillPage`,
+#'       `fillRow`, or `fillCol`
+#'     \item provide an explicit `height` argument to
+#'       `fillRow`/`fillCol`
 #'   }
 #'
 #' @param ... UI objects to put in each row/column cell; each argument will
 #'   occupy a single cell. (To put multiple items in a single cell, you can use
 #'   \code{\link{tagList}} or \code{\link{div}} to combine them.) Named
-#'   arguments will be used as attributes on the \code{div} element that
+#'   arguments will be used as attributes on the `div` element that
 #'   encapsulates the row/column.
 #' @param flex Determines how space should be distributed to the cells. Can be a
-#'   single value like \code{1} or \code{2} to evenly distribute the available
+#'   single value like `1` or `2` to evenly distribute the available
 #'   space; or use a vector of numbers to specify the proportions. For example,
-#'   \code{flex = c(2, 3)} would cause the space to be split 40%/60% between
+#'   `flex = c(2, 3)` would cause the space to be split 40%/60% between
 #'   two cells. NA values will cause the corresponding cell to be sized
 #'   according to its contents (without growing or shrinking).
 #' @param width,height The total amount of width and height to use for the
-#'   entire row/column. For the default height of \code{"100%"} to be
-#'   effective, the parent must be \code{fillPage}, another
-#'   \code{fillRow}/\code{fillCol}, or some other HTML element whose height is
+#'   entire row/column. For the default height of `"100%"` to be
+#'   effective, the parent must be `fillPage`, another
+#'   `fillRow`/`fillCol`, or some other HTML element whose height is
 #'   not determined by the height of its contents.
 #'
 #' @examples

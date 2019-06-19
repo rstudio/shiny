@@ -16,8 +16,8 @@ getShinyOption <- function(name, default = NULL) {
 
 #' Get or set Shiny options
 #'
-#' \code{getShinyOption} retrieves the value of a Shiny option.
-#' \code{shinyOptions} sets the value of Shiny options; it can also be used to
+#' `getShinyOption` retrieves the value of a Shiny option.
+#' `shinyOptions` sets the value of Shiny options; it can also be used to
 #' return a list of all currently-set Shiny options.
 #'
 #' There is a global option set, which is available by default. When a Shiny
@@ -28,7 +28,7 @@ getShinyOption <- function(name, default = NULL) {
 #' application. When the application exits, the new option set is discarded and
 #' the global option set is restored.
 #'
-#' @param ... Options to set, with the form \code{name = value}.
+#' @param ... Options to set, with the form `name = value`.
 #'
 #' @examples
 #' \dontrun{

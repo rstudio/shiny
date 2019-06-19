@@ -35,8 +35,8 @@ displays respectively.
 }
 \details{
 To create a fixed page use the \code{fixedPage} function and include
-instances of \code{fixedRow} and \code{\link{column}} within it. Note that
-unlike \code{\link{fluidPage}}, fixed pages cannot make use of higher-level
+instances of \code{fixedRow} and \code{\link[=column]{column()}} within it. Note that
+unlike \code{\link[=fluidPage]{fluidPage()}}, fixed pages cannot make use of higher-level
 layout functions like \code{sidebarLayout}, rather, all layout must be done
 with \code{fixedRow} and \code{column}.
 }
@@ -65,5 +65,5 @@ shinyApp(ui, server = function(input, output) { })
 
 }
 \seealso{
-\code{\link{column}}
+\code{\link[=column]{column()}}
 }

@@ -18,10 +18,10 @@ extension \code{.png}.}
 \item{height}{Height in pixels.}
 
 \item{res}{Resolution in pixels per inch. This value is passed to
-\code{\link[grDevices]{png}}. Note that this affects the resolution of PNG rendering in
+\code{\link[grDevices:png]{grDevices::png()}}. Note that this affects the resolution of PNG rendering in
 R; it won't change the actual ppi of the browser.}
 
-\item{...}{Arguments to be passed through to \code{\link[grDevices]{png}}.
+\item{...}{Arguments to be passed through to \code{\link[grDevices:png]{grDevices::png()}}.
 These can be used to set the width, height, background color, etc.}
 }
 \description{
@@ -32,8 +32,8 @@ way.
 }
 \details{
 For output, it will try to use the following devices, in this order:
-quartz (via \code{\link[grDevices]{png}}), then \code{\link[Cairo]{CairoPNG}},
-and finally \code{\link[grDevices]{png}}. This is in order of quality of
+quartz (via \code{\link[grDevices:png]{grDevices::png()}}), then \code{\link[Cairo:CairoPNG]{Cairo::CairoPNG()}},
+and finally \code{\link[grDevices:png]{grDevices::png()}}. This is in order of quality of
 output. Notably, plain \code{png} output on Linux and Windows may not
 antialias some point shapes, resulting in poor quality output.
 

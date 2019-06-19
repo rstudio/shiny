@@ -27,7 +27,7 @@ you can use a path such as \code{"inst/shinyapp"}.}
 (the default), the application files will be stored in a temporary directory
 and removed when the app exits}
 
-\item{...}{Other arguments to be passed to \code{\link{runApp}()}, such as
+\item{...}{Other arguments to be passed to \code{\link[=runApp]{runApp()}}, such as
 \code{port} and \code{launch.browser}.}
 
 \item{gist}{The identifier of the gist. For example, if the gist is

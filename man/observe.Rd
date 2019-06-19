@@ -38,7 +38,7 @@ allowed.}
 automatically destroyed when its domain (if any) ends.}
 
 \item{..stacktraceon}{Advanced use only. For stack manipulation purposes; see
-\code{\link{stacktrace}}.}
+\code{\link[=stacktrace]{stacktrace()}}.}
 }
 \value{
 An observer reference class object. This object has the following

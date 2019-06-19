@@ -15,7 +15,7 @@ varSelectizeInput(inputId, ..., options = NULL, width = NULL)
 
 \item{label}{Display label for the control, or \code{NULL} for no label.}
 
-\item{data}{A data frame. Used to retrieve the column names as choices for a \code{\link{selectInput}}}
+\item{data}{A data frame. Used to retrieve the column names as choices for a \code{\link[=selectInput]{selectInput()}}}
 
 \item{selected}{The initially selected value (or multiple values if
 \code{multiple = TRUE}). If not specified then defaults to the first value
@@ -26,7 +26,7 @@ for single-select lists and no values for multiple select lists.}
 \item{selectize}{Whether to use \pkg{selectize.js} or not.}
 
 \item{width}{The width of the input, e.g. \code{'400px'}, or \code{'100\%'};
-see \code{\link{validateCssUnit}}.}
+see \code{\link[=validateCssUnit]{validateCssUnit()}}.}
 
 \item{size}{Number of items to show in the selection box; a larger number
 will result in a taller box. Not compatible with \code{selectize=TRUE}.
@@ -36,8 +36,8 @@ list, but when \code{size} is set, it will be a box instead.}
 \item{...}{Arguments passed to \code{varSelectInput()}.}
 
 \item{options}{A list of options. See the documentation of \pkg{selectize.js}
-for possible options (character option values inside \code{\link[base]{I}()} will
-be treated as literal JavaScript code; see \code{\link{renderDataTable}()}
+for possible options (character option values inside \code{\link[base:I]{base::I()}} will
+be treated as literal JavaScript code; see \code{\link[=renderDataTable]{renderDataTable()}}
 for details).}
 }
 \value{
@@ -51,10 +51,10 @@ from the column names of a data frame.
 The resulting server \code{input} value will be returned as:
 \itemize{
 \item a symbol if \code{multiple = FALSE}.  The \code{input} value should be
-used with rlang's \code{\link[rlang]{!!}}. For example,
+used with rlang's \code{\link[rlang:!!]{rlang::!!()}}. For example,
 \code{ggplot2::aes(!!input$variable)}.
 \item a list of symbols if \code{multiple = TRUE}. The \code{input} value
-should be used with rlang's \code{\link[rlang]{!!!}} to expand
+should be used with rlang's \code{\link[rlang:!!!]{rlang::!!!()}} to expand
 the symbol list as individual arguments. For example,
 \code{dplyr::select(mtcars, !!!input$variabls)} which is
 equivalent to \code{dplyr::select(mtcars, !!input$variabls[[1]], !!input$variabls[[2]], ..., !!input$variabls[[length(input$variabls)]])}.
@@ -115,7 +115,7 @@ shinyApp(
 }
 }
 \seealso{
-\code{\link{updateSelectInput}}
+\code{\link[=updateSelectInput]{updateSelectInput()}}
 
 Other input elements: \code{\link{actionButton}},
   \code{\link{checkboxGroupInput}},

@@ -16,7 +16,7 @@ dataTableOutput(outputId)
 A table output element that can be included in a panel
 }
 \description{
-Render a \code{\link{renderTable}} or \code{\link{renderDataTable}} within an
+Render a \code{\link[=renderTable]{renderTable()}} or \code{\link[=renderDataTable]{renderDataTable()}} within an
 application page. \code{renderTable} uses a standard HTML table, while
 \code{renderDataTable} uses the DataTables Javascript library to create an
 interactive table with more features.
@@ -55,5 +55,5 @@ if (interactive()) {
 }
 }
 \seealso{
-\code{\link{renderTable}}, \code{\link{renderDataTable}}.
+\code{\link[=renderTable]{renderTable()}}, \code{\link[=renderDataTable]{renderDataTable()}}.
 }

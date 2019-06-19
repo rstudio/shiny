@@ -51,13 +51,13 @@ Insert a UI object into the app.
 \details{
 This function allows you to dynamically add an arbitrarily large UI
 object into your app, whenever you want, as many times as you want.
-Unlike \code{\link{renderUI}}, the UI generated with \code{insertUI}
+Unlike \code{\link[=renderUI]{renderUI()}}, the UI generated with \code{insertUI}
 is not updatable as a whole: once it's created, it stays there. Each
 new call to \code{insertUI} creates more UI objects, in addition to
 the ones already there (all independent from one another). To
 update a part of the UI (ex: an input object), you must use the
 appropriate \code{render} function or a customized \code{reactive}
-function. To remove any part of your UI, use \code{\link{removeUI}}.
+function. To remove any part of your UI, use \code{\link[=removeUI]{removeUI()}}.
 }
 \examples{
 ## Only run this example in interactive R sessions
@@ -84,5 +84,5 @@ shinyApp(ui, server)
 }
 }
 \seealso{
-\code{\link{removeUI}}
+\code{\link[=removeUI]{removeUI()}}
 }

@@ -26,7 +26,7 @@ supported.}
 
 \item{missing}{A value to return or a function to execute when
 \code{get(key)} is called but the key is not present in the cache. The
-default is a \code{\link{key_missing}} object. If it is a function to
+default is a \code{\link[=key_missing]{key_missing()}} object. If it is a function to
 execute, the function must take one argument (the key), and you must also
 use \code{exec_missing = TRUE}. If it is a function, it is useful in most
 cases for it to throw an error, although another option is to return a
@@ -51,7 +51,7 @@ and \code{evict}.
 \details{
 In a \code{MemoryCache}, R objects are stored directly in the cache; they are
 not \emph{not} serialized before being stored in the cache. This contrasts
-with other cache types, like \code{\link{diskCache}}, where objects are
+with other cache types, like \code{\link[=diskCache]{diskCache()}}, where objects are
 serialized, and the serialized object is cached. This can result in some
 differences of behavior. For example, as long as an object is stored in a
 MemoryCache, it will not be garbage collected.
@@ -60,10 +60,10 @@ MemoryCache, it will not be garbage collected.
 
 The \code{missing} and \code{exec_missing} parameters controls what happens
 when \code{get()} is called with a key that is not in the cache (a cache
-miss). The default behavior is to return a \code{\link{key_missing}}
+miss). The default behavior is to return a \code{\link[=key_missing]{key_missing()}}
 object. This is a \emph{sentinel value} that indicates that the key was not
 present in the cache. You can test if the returned value represents a
-missing key by using the \code{\link{is.key_missing}} function. You can
+missing key by using the \code{\link[=is.key_missing]{is.key_missing()}} function. You can
 also have \code{get()} return a different sentinel value, like \code{NULL}.
 If you want to throw an error on a cache miss, you can do so by providing a
 function for \code{missing} that takes one argument, the key, and also use
@@ -99,7 +99,7 @@ prints the missing key, you could do this:
   }
 
 If you use this, the code that calls \code{get()} should be wrapped with
-\code{\link{tryCatch}()} to gracefully handle missing keys.
+\code{\link[=tryCatch]{tryCatch()}} to gracefully handle missing keys.
 }
 
 \section{Cache pruning}{

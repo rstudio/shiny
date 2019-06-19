@@ -40,8 +40,8 @@ the example section for a small demo of this feature.}
 for single-select lists and no values for multiple select lists.}
 
 \item{options}{A list of options. See the documentation of \pkg{selectize.js}
-for possible options (character option values inside \code{\link[base]{I}()} will
-be treated as literal JavaScript code; see \code{\link{renderDataTable}()}
+for possible options (character option values inside \code{\link[base:I]{base::I()}} will
+be treated as literal JavaScript code; see \code{\link[=renderDataTable]{renderDataTable()}}
 for details).}
 
 \item{server}{whether to store \code{choices} on the server side, and load
@@ -49,7 +49,7 @@ the select options dynamically on searching, instead of writing all
 \code{choices} into the page at once (i.e., only use the client-side
 version of \pkg{selectize.js})}
 
-\item{data}{A data frame. Used to retrieve the column names as choices for a \code{\link{selectInput}}}
+\item{data}{A data frame. Used to retrieve the column names as choices for a \code{\link[=selectInput]{selectInput()}}}
 }
 \description{
 Change the value of a select input on the client
@@ -104,5 +104,5 @@ shinyApp(ui, server)
 }
 }
 \seealso{
-\code{\link{selectInput}} \code{\link{varSelectInput}}
+\code{\link[=selectInput]{selectInput()}} \code{\link[=varSelectInput]{varSelectInput()}}
 }

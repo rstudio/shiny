@@ -67,5 +67,5 @@ function(input, output, session) {
 }
 }
 \seealso{
-\code{\link{reactivePoll}}
+\code{\link[=reactivePoll]{reactivePoll()}}
 }

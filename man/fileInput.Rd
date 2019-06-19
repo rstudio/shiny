@@ -21,7 +21,7 @@ Internet Explorer 9 and earlier.}}
 what kind of files the server is expecting.}
 
 \item{width}{The width of the input, e.g. \code{'400px'}, or \code{'100\%'};
-see \code{\link{validateCssUnit}}.}
+see \code{\link[=validateCssUnit]{validateCssUnit()}}.}
 
 \item{buttonLabel}{The label used on the button. Can be text or an HTML tag
 object.}

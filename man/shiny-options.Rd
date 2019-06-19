@@ -10,9 +10,9 @@ be set with (for example) \code{options(shiny.trace=TRUE)}.
 \details{
 \describe{
 \item{shiny.launch.browser}{A boolean which controls the default behavior
-when an app is run. See \code{\link{runApp}} for more information.}
+when an app is run. See \code{\link[=runApp]{runApp()}} for more information.}
 \item{shiny.port}{A port number that Shiny will listen on. See
-\code{\link{runApp}} for more information.}
+\code{\link[=runApp]{runApp()}} for more information.}
 \item{shiny.trace}{Print messages sent between the R server and the web
 browser client to the R console. This is useful for debugging. Possible
 values are \code{"send"} (only print messages sent to the client),
@@ -36,22 +36,22 @@ The default polling interval is 500 milliseconds. You can change this
 by setting e.g. \code{options(shiny.autoreload.interval = 2000)} (every
 two seconds).}
 \item{shiny.reactlog}{If \code{TRUE}, enable logging of reactive events,
-which can be viewed later with the \code{\link{reactlogShow}} function.
+which can be viewed later with the \code{\link[=reactlogShow]{reactlogShow()}} function.
 This incurs a substantial performance penalty and should not be used in
 production.}
 \item{shiny.usecairo}{This is used to disable graphical rendering by the
-Cairo package, if it is installed. See \code{\link{plotPNG}} for more
+Cairo package, if it is installed. See \code{\link[=plotPNG]{plotPNG()}} for more
 information.}
 \item{shiny.maxRequestSize}{This is a number which specifies the maximum
 web request size, which serves as a size limit for file uploads. If
 unset, the maximum request size defaults to 5MB.}
 \item{shiny.suppressMissingContextError}{Normally, invoking a reactive
-outside of a reactive context (or \code{\link{isolate}()}) results in
+outside of a reactive context (or \code{\link[=isolate]{isolate()}}) results in
 an error. If this is \code{TRUE}, don't error in these cases. This
 should only be used for debugging or demonstrations of reactivity at the
 console.}
 \item{shiny.host}{The IP address that Shiny should listen on. See
-\code{\link{runApp}} for more information.}
+\code{\link[=runApp]{runApp()}} for more information.}
 \item{shiny.json.digits}{The number of digits to use when converting
 numbers to JSON format to send to the client web browser.}
 \item{shiny.minified}{If this is \code{TRUE} or unset (the default), then
@@ -64,7 +64,7 @@ the debugger prompt when an error occurs.}
 \item{shiny.table.class}{CSS class names to use for tables.}
 \item{shiny.deprecation.messages}{This controls whether messages for
 deprecated functions in Shiny will be printed. See
-\code{\link{shinyDeprecated}} for more information.}
+\code{\link[=shinyDeprecated]{shinyDeprecated()}} for more information.}
 \item{shiny.fullstacktrace}{Controls whether "pretty" or full stack traces
 are dumped to the console when errors occur during Shiny app execution.
 The default is \code{FALSE} (pretty stack traces).}

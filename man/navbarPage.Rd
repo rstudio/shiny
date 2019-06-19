@@ -16,7 +16,7 @@ navbarMenu(title, ..., menuName = title, icon = NULL)
 \arguments{
 \item{title}{The title to display in the navbar}
 
-\item{...}{\code{\link{tabPanel}} elements to include in the page. The
+\item{...}{\code{\link[=tabPanel]{tabPanel()}} elements to include in the page. The
 \code{navbarMenu} function also accepts strings, which will be used as menu
 section headers. If the string is a set of dashes like \code{"----"} a
 horizontal separator will be displayed in the menu.}
@@ -24,7 +24,7 @@ horizontal separator will be displayed in the menu.}
 \item{id}{If provided, you can use \code{input$}\emph{\code{id}} in your
 server logic to determine which of the current tabs is active. The value
 will correspond to the \code{value} argument that is passed to
-\code{\link{tabPanel}}.}
+\code{\link[=tabPanel]{tabPanel()}}.}
 
 \item{selected}{The \code{value} (or, if none was supplied, the \code{title})
 of the tab that should be selected by default. If \code{NULL}, the first
@@ -77,7 +77,7 @@ A UI defintion that can be passed to the \link{shinyUI} function.
 }
 \description{
 Create a page that contains a top level navigation bar that can be used to
-toggle a set of \code{\link{tabPanel}} elements.
+toggle a set of \code{\link[=tabPanel]{tabPanel()}} elements.
 }
 \details{
 The \code{navbarMenu} function can be used to create an embedded
@@ -102,7 +102,7 @@ navbarPage("App Title",
 )
 }
 \seealso{
-\code{\link{tabPanel}}, \code{\link{tabsetPanel}},
-\code{\link{updateNavbarPage}}, \code{\link{insertTab}},
-\code{\link{showTab}}
+\code{\link[=tabPanel]{tabPanel()}}, \code{\link[=tabsetPanel]{tabsetPanel()}},
+\code{\link[=updateNavbarPage]{updateNavbarPage()}}, \code{\link[=insertTab]{insertTab()}},
+\code{\link[=showTab]{showTab()}}
 }

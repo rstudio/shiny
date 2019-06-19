@@ -60,5 +60,5 @@ getType: function(el) {
 }
 }
 \seealso{
-\code{\link{removeInputHandler}}
+\code{\link[=removeInputHandler]{removeInputHandler()}}
 }

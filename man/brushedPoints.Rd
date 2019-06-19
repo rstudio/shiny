@@ -30,7 +30,7 @@ brush (\code{TRUE}) or outside the brush (\code{FALSE}).}
 }
 \description{
 This function returns rows from a data frame which are under a brush used
-with \code{\link{plotOutput}}.
+with \code{\link[=plotOutput]{plotOutput()}}.
 }
 \details{
 It is also possible for this function to return all rows from the input data
@@ -65,5 +65,5 @@ If the brush is operating in just the x or y directions (e.g., with
 using just the x or y variable, whichever is appropriate.
 }
 \seealso{
-\code{\link{plotOutput}} for example usage.
+\code{\link[=plotOutput]{plotOutput()}} for example usage.
 }

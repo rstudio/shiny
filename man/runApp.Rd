@@ -19,7 +19,7 @@ a \code{www} directory that contains the file \code{index.html}.
 \item An \code{.R} file containing a Shiny application, ending with an
 expression that produces a Shiny app object.
 \item A list with \code{ui} and \code{server} components.
-\item A Shiny app object created by \code{\link{shinyApp}}.
+\item A Shiny app object created by \code{\link[=shinyApp]{shinyApp()}}.
 }}
 
 \item{port}{The TCP port that the application should listen on. If the

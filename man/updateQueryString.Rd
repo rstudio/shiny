@@ -97,5 +97,5 @@ if (interactive()) {
 }
 }
 \seealso{
-\code{\link{enableBookmarking}}, \code{\link{getQueryString}}
+\code{\link[=enableBookmarking]{enableBookmarking()}}, \code{\link[=getQueryString]{getQueryString()}}
 }

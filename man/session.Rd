@@ -17,7 +17,7 @@ attempt to reconnect. The only reason to use \code{"force"} is for testing
 on a local connection (without Shiny Server or Connect).
 }
 \item{clientData}{
-A \code{\link{reactiveValues}} object that contains information about the client.
+A \code{\link[=reactiveValues]{reactiveValues()}} object that contains information about the client.
 \itemize{
 \item{\code{allowDataUriScheme} is a logical value that indicates whether
 the browser is able to handle URIs that use the \code{data:} scheme.
@@ -32,7 +32,7 @@ and \code{url_hash} can be used to get the components of the URL
 that was requested by the browser to load the Shiny app page.
 These values are from the browser's perspective, so neither HTTP
 proxies nor Shiny Server will affect these values. The
-\code{url_search} value may be used with \code{\link{parseQueryString}}
+\code{url_search} value may be used with \code{\link[=parseQueryString]{parseQueryString()}}
 to access query string parameters.
 }
 }
@@ -52,7 +52,7 @@ server function as an argument).
 disconnected.
 }
 \item{ns(id)}{
-Server-side version of \code{ns <- \link{NS}(id)}. If bare IDs need to be
+Server-side version of \code{ns <- [NS](id)}. If bare IDs need to be
 explicitly namespaced for the current module, \code{session$ns("name")}
 will return the fully-qualified ID.
 }
@@ -136,7 +136,7 @@ is present and bound on the page at the time the message is received, then
 the input binding object's \code{receiveMessage(el, message)} method will
 be called. \code{sendInputMessage} should generally not be called directly
 from Shiny apps, but through friendlier wrapper functions like
-\code{\link{updateTextInput}}.
+\code{\link[=updateTextInput]{updateTextInput()}}.
 }
 \item{setBookmarkExclude(names)}{
 Set input names to be excluded from bookmarking.

@@ -79,5 +79,5 @@ function(input, output, session) {
 }
 }
 \seealso{
-\code{\link{reactiveFileReader}}
+\code{\link[=reactiveFileReader]{reactiveFileReader()}}
 }

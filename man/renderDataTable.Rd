@@ -34,7 +34,7 @@ third), or \code{c('Species', 'Sepal.Length')}.}
 is useful if you want to save an expression in a variable.}
 
 \item{outputArgs}{A list of arguments to be passed through to the implicit
-call to \code{\link{dataTableOutput}} when \code{renderDataTable} is used
+call to \code{\link[=dataTableOutput]{dataTableOutput()}} when \code{renderDataTable} is used
 in an interactive R Markdown document.}
 }
 \description{
@@ -45,7 +45,7 @@ the server infrastructure.
 }
 \details{
 For the \code{options} argument, the character elements that have the class
-\code{"AsIs"} (usually returned from \code{\link[base]{I}()}) will be evaluated in
+\code{"AsIs"} (usually returned from \code{\link[base:I]{base::I()}}) will be evaluated in
 JavaScript. This is useful when the type of the option value is not supported
 in JSON, e.g., a JavaScript function, which can be obtained by evaluating a
 character string. Note this only applies to the root-level elements of the

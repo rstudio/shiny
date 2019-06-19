@@ -43,7 +43,7 @@ Other valid values include "ar", "az", "bg", "bs", "ca", "cs", "cy", "da",
 "vi", "zh-CN", and "zh-TW".}
 
 \item{width}{The width of the input, e.g. \code{'400px'}, or \code{'100\%'};
-see \code{\link{validateCssUnit}}.}
+see \code{\link[=validateCssUnit]{validateCssUnit()}}.}
 
 \item{autoclose}{Whether or not to close the datepicker immediately when a
 date is selected.}
@@ -112,7 +112,7 @@ shinyApp(ui, server = function(input, output) { })
 }
 }
 \seealso{
-\code{\link{dateRangeInput}}, \code{\link{updateDateInput}}
+\code{\link[=dateRangeInput]{dateRangeInput()}}, \code{\link[=updateDateInput]{updateDateInput()}}
 
 Other input elements: \code{\link{actionButton}},
   \code{\link{checkboxGroupInput}},

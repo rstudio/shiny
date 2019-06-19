@@ -25,7 +25,7 @@ to the first value)}
 \item{inline}{If \code{TRUE}, render the choices inline (i.e. horizontally)}
 
 \item{width}{The width of the input, e.g. \code{'400px'}, or \code{'100\%'};
-see \code{\link{validateCssUnit}}.}
+see \code{\link[=validateCssUnit]{validateCssUnit()}}.}
 
 \item{choiceNames, choiceValues}{List of names and values, respectively, that
 are displayed to the user in the app and correspond to the each choice (for
@@ -100,7 +100,7 @@ shinyApp(ui, server)
 }
 }
 \seealso{
-\code{\link{updateRadioButtons}}
+\code{\link[=updateRadioButtons]{updateRadioButtons()}}
 
 Other input elements: \code{\link{actionButton}},
   \code{\link{checkboxGroupInput}},

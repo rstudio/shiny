@@ -12,7 +12,7 @@ determine whether the panel should be displayed.}
 
 \item{...}{Elements to include in the panel.}
 
-\item{ns}{The \code{\link[=NS]{namespace}} object of the current module, if
+\item{ns}{The \code{\link[=NS]{namespace()}} object of the current module, if
 any.}
 }
 \description{

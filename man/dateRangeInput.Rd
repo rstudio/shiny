@@ -49,7 +49,7 @@ Other valid values include "ar", "az", "bg", "bs", "ca", "cs", "cy", "da",
 \item{separator}{String to display between the start and end input boxes.}
 
 \item{width}{The width of the input, e.g. \code{'400px'}, or \code{'100\%'};
-see \code{\link{validateCssUnit}}.}
+see \code{\link[=validateCssUnit]{validateCssUnit()}}.}
 
 \item{autoclose}{Whether or not to close the datepicker immediately when a
 date is selected.}
@@ -116,7 +116,7 @@ shinyApp(ui, server = function(input, output) { })
 }
 }
 \seealso{
-\code{\link{dateInput}}, \code{\link{updateDateRangeInput}}
+\code{\link[=dateInput]{dateInput()}}, \code{\link[=updateDateRangeInput]{updateDateRangeInput()}}
 
 Other input elements: \code{\link{actionButton}},
   \code{\link{checkboxGroupInput}},

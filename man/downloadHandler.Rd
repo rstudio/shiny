@@ -25,7 +25,7 @@ example \code{"text/csv"} or \code{"image/png"}. If \code{NULL} or
 extension, or \code{application/octet-stream} if the extension is unknown.}
 
 \item{outputArgs}{A list of arguments to be passed through to the implicit
-call to \code{\link{downloadButton}} when \code{downloadHandler} is used
+call to \code{\link[=downloadButton]{downloadButton()}} when \code{downloadHandler} is used
 in an interactive R Markdown document.}
 }
 \description{
@@ -34,7 +34,7 @@ file downloads (for example, downloading the currently visible data as a CSV
 file). Both filename and contents can be calculated dynamically at the time
 the user initiates the download. Assign the return value to a slot on
 \code{output} in your server function, and in the UI use
-\code{\link{downloadButton}} or \code{\link{downloadLink}} to make the
+\code{\link[=downloadButton]{downloadButton()}} or \code{\link[=downloadLink]{downloadLink()}} to make the
 download available.
 }
 \examples{

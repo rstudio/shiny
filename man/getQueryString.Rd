@@ -88,5 +88,5 @@ if (interactive()) {
 }
 }
 \seealso{
-\code{\link{updateQueryString}}
+\code{\link[=updateQueryString]{updateQueryString()}}
 }

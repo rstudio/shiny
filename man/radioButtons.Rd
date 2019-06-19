@@ -45,8 +45,7 @@ Create a set of radio buttons used to select an item from a list.
 }
 \details{
 If you need to represent a "None selected" state, it's possible to default
-the radio buttons to have no options selected by using \code{selected =
-character(0)}. However, this is not recommended, as it gives the user no way
+the radio buttons to have no options selected by using \code{selected = character(0)}. However, this is not recommended, as it gives the user no way
 to return to that state once they've made a selection. Instead, consider
 having the first of your choices be \code{c("None selected" = "")}.
 }

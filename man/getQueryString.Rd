@@ -14,8 +14,7 @@ getUrlHash(session = getDefaultReactiveDomain())
 }
 \value{
 For \code{getQueryString}, a named list. For example, the query
-string \code{?param1=value1&param2=value2} becomes \code{list(param1 =
-  value1, param2 = value2)}. For \code{getUrlHash}, a character vector with
+string \code{?param1=value1&param2=value2} becomes \code{list(param1 = value1, param2 = value2)}. For \code{getUrlHash}, a character vector with
 the hash (including the leading \code{#} symbol).
 }
 \description{

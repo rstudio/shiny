@@ -73,8 +73,7 @@ function for \code{missing} that takes one argument, the key, and also use
 When the cache is created, you can supply a value for \code{missing}, which
 sets the default value to be returned for missing values. It can also be
 overridden when \code{get()} is called, by supplying a \code{missing}
-argument. For example, if you use \code{cache$get("mykey", missing =
-  NULL)}, it will return \code{NULL} if the key is not in the cache.
+argument. For example, if you use \code{cache$get("mykey", missing = NULL)}, it will return \code{NULL} if the key is not in the cache.
 
 If your cache is configured so that \code{get()} returns a sentinel value
 to represent a cache miss, then \code{set} will also not allow you to store

@@ -41,8 +41,7 @@ layout functions like \code{sidebarLayout}, rather, all layout must be done
 with \code{fixedRow} and \code{column}.
 }
 \note{
-See the \href{http://shiny.rstudio.com/articles/layout-guide.html}{
-Shiny Application Layout Guide} for additional details on laying out fixed
+See the \href{http://shiny.rstudio.com/articles/layout-guide.html}{ Shiny Application Layout Guide} for additional details on laying out fixed
 pages.
 }
 \examples{

@@ -77,6 +77,5 @@ such as \code{"100px"} (100 pixels) or \code{"25\%"}.
 
 For arcane HTML reasons, to have the panel fill the page or parent you should
 specify \code{0} for \code{top}, \code{left}, \code{right}, and \code{bottom}
-rather than the more obvious \code{width = "100\%"} and \code{height =
-"100\%"}.
+rather than the more obvious \code{width = "100\%"} and \code{height = "100\%"}.
 }

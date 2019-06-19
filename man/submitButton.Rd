@@ -28,8 +28,7 @@ the more versatile \code{\link{actionButton}} (see details below).
 Submit buttons are unusual Shiny inputs, and we recommend using
 \code{\link{actionButton}} instead of \code{submitButton} when you
 want to delay a reaction.
-See \href{http://shiny.rstudio.com/articles/action-buttons.html}{this
-article} for more information (including a demo of how to "translate"
+See \href{http://shiny.rstudio.com/articles/action-buttons.html}{this article} for more information (including a demo of how to "translate"
 code using a \code{submitButton} to code using an \code{actionButton}).
 
 In essence, the presence of a submit button stops all inputs from

@@ -68,8 +68,7 @@ The \code{xvar}, \code{yvar}, \code{panelvar1}, and \code{panelvar2} arguments
 specify which columns in the data correspond to the x variable, y variable,
 and panel variables of the plot. For example, if your plot is
 \code{plot(x=cars$speed, y=cars$dist)}, and your click variable is named
-\code{"cars_click"}, then you would use \code{nearPoints(cars,
-input$cars_brush, "speed", "dist")}.
+\code{"cars_click"}, then you would use \code{nearPoints(cars, input$cars_brush, "speed", "dist")}.
 }
 \examples{
 \dontrun{

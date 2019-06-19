@@ -60,8 +60,7 @@ the following:
 
 If any of these values happen to be valid, you can explicitly turn them to
 logical values. For example, if you allow \code{NA} but not \code{NULL}, you
-can use the condition \code{!is.null(input$foo)}, because \code{!is.null(NA)
-== TRUE}.
+can use the condition \code{!is.null(input$foo)}, because \code{!is.null(NA) == TRUE}.
 
 If you need validation logic that differs significantly from \code{need}, you
 can create other validation test functions. A passing test should return

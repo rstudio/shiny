@@ -521,8 +521,8 @@ installExprFunction <- function(expr, name, eval.env = parent.frame(2),
 #'   contains pairs of square brackets `[]`. For example, the query
 #'   \samp{a[i1][j1]=x&b[i1][j1]=y&b[i2][j1]=z} will be parsed as `list(a =
 #'   list(i1 = list(j1 = 'x')), b = list(i1 = list(j1 = 'y'), i2 = list(j1 =
-#'   'z')))` when `nested = TRUE`, and `list(`a[i1][j1]` = 'x',
-#'   `b[i1][j1]` = 'y', `b[i2][j1]` = 'z')` when `nested = FALSE`.
+#'   'z')))` when `nested = TRUE`, and \code{list(`a[i1][j1]` = 'x',
+#'   `b[i1][j1]` = 'y', `b[i2][j1]` = 'z')} when `nested = FALSE`.
 #' @export
 #' @examples
 #' parseQueryString("?foo=1&bar=b%20a%20r")

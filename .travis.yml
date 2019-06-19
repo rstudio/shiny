@@ -1,13 +1,17 @@
 language: r
 matrix:
   include:
-    - name: "Doc check"
+    - name: "Roxygen check"
       r: release
       r_packages:
         - devtools
         - roxygen2
       script:
         - ./tools/checkDocsCurrent.sh
+    - name: "Javascript check"
+      language: node_js
+      cache: yarn
+      script: ./tools/checkJSCurrent.sh
     - name: "Old Release Check"
       r: oldrel
     - name: "Current Release Check"

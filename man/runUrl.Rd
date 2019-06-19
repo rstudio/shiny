@@ -21,7 +21,7 @@ runGitHub(repo, username = getOption("github.user"), ref = "master",
 
 \item{subdir}{A subdirectory in the repository that contains the app. By
 default, this function will run an app from the top level of the repo, but
-you can use a path such as `\code{"inst/shinyapp"}.}
+you can use a path such as \code{"inst/shinyapp"}.}
 
 \item{destdir}{Directory to store the downloaded application files. If \code{NULL}
 (the default), the application files will be stored in a temporary directory

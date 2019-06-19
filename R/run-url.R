@@ -13,7 +13,7 @@
 #'   `".tar.gz"`. Defaults to the file extension taken from the url.
 #' @param subdir A subdirectory in the repository that contains the app. By
 #'   default, this function will run an app from the top level of the repo, but
-#'   you can use a path such as ``"inst/shinyapp"`.
+#'   you can use a path such as `"inst/shinyapp"`.
 #' @param destdir Directory to store the downloaded application files. If `NULL`
 #'   (the default), the application files will be stored in a temporary directory
 #'   and removed when the app exits

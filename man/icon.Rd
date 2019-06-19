@@ -41,6 +41,6 @@ navbarPage("App Title",
 }
 \seealso{
 For lists of available icons, see
-\href{http://fontawesome.io/icons/}{http://fontawesome.io/icons/} and
-\href{http://getbootstrap.com/components/#glyphicons}{http://getbootstrap.com/components/#glyphicons}.
+\url{http://fontawesome.io/icons/} and
+\url{http://getbootstrap.com/components/#glyphicons}.
 }

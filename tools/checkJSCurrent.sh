@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Run JS build process
-(cd "$(dirname "$0")" && yarn build)
+(cd "$(dirname "$0")" && yarn && yarn build)
 if [ $? -ne 0 ]
 then
   echo "Error generating JavaScript assets with yarn."

@@ -6,12 +6,13 @@ matrix:
       r_packages:
         - devtools
         - roxygen2
-      script:
-        - ./tools/checkDocsCurrent.sh
+      script: ./tools/checkDocsCurrent.sh
     - name: "Javascript check"
       language: node_js
       cache: yarn
       script: ./tools/checkJSCurrent.sh
+      node_js:
+        - "10"
     - name: "Old Release Check"
       r: oldrel
     - name: "Current Release Check"

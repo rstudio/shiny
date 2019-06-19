@@ -377,7 +377,7 @@ verticalLayout <- function(..., fluid = TRUE) {
 #' Lays out elements in a left-to-right, top-to-bottom arrangement. The elements
 #' on a given row will be top-aligned with each other. This layout will not work
 #' well with elements that have a percentage-based width (e.g.
-#' \code{\link{plotOutput}} at its default setting of \code{width = "100\%"}).
+#' \code{\link{plotOutput}} at its default setting of \code{width = "100%"}).
 #'
 #' @param ... Unnamed arguments will become child elements of the layout. Named
 #'   arguments will become HTML attributes on the outermost tag.
@@ -517,7 +517,7 @@ splitLayout <- function(..., cellWidths = NULL, cellArgs = list()) {
 #'   Shiny containers, such as \code{\link{sidebarLayout}},
 #'   \code{\link{navbarPage}}, or even \code{tags$div}, you will probably find
 #'   that they will not appear. This is due to \code{fillRow} and \code{fillCol}
-#'   defaulting to \code{height="100\%"}, which will only work inside of
+#'   defaulting to \code{height="100%"}, which will only work inside of
 #'   containers that have determined their own size (rather than shrinking to
 #'   the size of their contents, as is usually the case in HTML).
 #'
@@ -537,11 +537,11 @@ splitLayout <- function(..., cellWidths = NULL, cellArgs = list()) {
 #' @param flex Determines how space should be distributed to the cells. Can be a
 #'   single value like \code{1} or \code{2} to evenly distribute the available
 #'   space; or use a vector of numbers to specify the proportions. For example,
-#'   \code{flex = c(2, 3)} would cause the space to be split 40\%/60\% between
+#'   \code{flex = c(2, 3)} would cause the space to be split 40%/60% between
 #'   two cells. NA values will cause the corresponding cell to be sized
 #'   according to its contents (without growing or shrinking).
 #' @param width,height The total amount of width and height to use for the
-#'   entire row/column. For the default height of \code{"100\%"} to be
+#'   entire row/column. For the default height of \code{"100%"} to be
 #'   effective, the parent must be \code{fillPage}, another
 #'   \code{fillRow}/\code{fillCol}, or some other HTML element whose height is
 #'   not determined by the height of its contents.

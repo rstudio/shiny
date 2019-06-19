@@ -97,22 +97,22 @@ basicPage <- function(...) {
 #' the window. This makes it possible to fill it with content that also scales
 #' to the size of the window.
 #'
-#' For example, \code{fluidPage(plotOutput("plot", height = "100\%"))} will not
+#' For example, \code{fluidPage(plotOutput("plot", height = "100%"))} will not
 #' work as expected; the plot element's effective height will be \code{0},
 #' because the plot's containing elements (\code{<div>} and \code{<body>}) have
 #' \emph{automatic} height; that is, they determine their own height based on
 #' the height of their contained elements. However,
-#' \code{fillPage(plotOutput("plot", height = "100\%"))} will work because
-#' \code{fillPage} fixes the \code{<body>} height at 100\% of the window height.
+#' \code{fillPage(plotOutput("plot", height = "100%"))} will work because
+#' \code{fillPage} fixes the \code{<body>} height at 100% of the window height.
 #'
 #' Note that \code{fillPage(plotOutput("plot"))} will not cause the plot to fill
 #' the page. Like most Shiny output widgets, \code{plotOutput}'s default height
-#' is a fixed number of pixels. You must explicitly set \code{height = "100\%"}
+#' is a fixed number of pixels. You must explicitly set \code{height = "100%"}
 #' if you want a plot (or htmlwidget, say) to fill its container.
 #'
 #' One must be careful what layouts/panels/elements come between the
 #' \code{fillPage} and the plots/widgets. Any container that has an automatic
-#' height will cause children with \code{height = "100\%"} to misbehave. Stick
+#' height will cause children with \code{height = "100%"} to misbehave. Stick
 #' to functions that are designed for fill layouts, such as the ones in this
 #' package.
 #'
@@ -1091,11 +1091,11 @@ imageOutput <- function(outputId, width = "100%", height="400px",
 #'
 #' @param outputId output variable to read the plot/image from.
 #' @param width,height Image width/height. Must be a valid CSS unit (like
-#'   \code{"100\%"}, \code{"400px"}, \code{"auto"}) or a number, which will be
+#'   \code{"100%"}, \code{"400px"}, \code{"auto"}) or a number, which will be
 #'   coerced to a string and have \code{"px"} appended. These two arguments are
 #'   ignored when \code{inline = TRUE}, in which case the width/height of a plot
 #'   must be specified in \code{renderPlot()}. Note that, for height, using
-#'   \code{"auto"} or \code{"100\%"} generally will not work as expected,
+#'   \code{"auto"} or \code{"100%"} generally will not work as expected,
 #'   because of how height is computed with HTML/CSS.
 #' @param click This can be \code{NULL} (the default), a string, or an object
 #'   created by the \code{\link{clickOpts}} function. If you use a value like

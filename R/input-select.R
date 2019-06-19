@@ -158,7 +158,7 @@ needOptgroup <- function(choices) {
 #'   for possible options (character option values inside \code{\link[base]{I}()} will
 #'   be treated as literal JavaScript code; see \code{\link{renderDataTable}()}
 #'   for details).
-#' @param width The width of the input, e.g. \code{'400px'}, or \code{'100\%'};
+#' @param width The width of the input, e.g. \code{'400px'}, or \code{'100%'};
 #'   see \code{\link{validateCssUnit}}.
 #' @note The selectize input created from \code{selectizeInput()} allows
 #'   deletion of the selected option even in a single select input, which will
@@ -326,7 +326,7 @@ varSelectInput <- function(
 #'   for possible options (character option values inside \code{\link[base]{I}()} will
 #'   be treated as literal JavaScript code; see \code{\link{renderDataTable}()}
 #'   for details).
-#' @param width The width of the input, e.g. \code{'400px'}, or \code{'100\%'};
+#' @param width The width of the input, e.g. \code{'400px'}, or \code{'100%'};
 #'   see \code{\link{validateCssUnit}}.
 #' @note The variable selectize input created from \code{varSelectizeInput()} allows
 #'   deletion of the selected option even in a single select input, which will

@@ -36,8 +36,8 @@
 #'   format string, to be passed to the Javascript strftime library. See
 #'   \url{https://github.com/samsonjs/strftime} for more details. The allowed
 #'   format specifications are very similar, but not identical, to those for R's
-#'   \code{\link[base]{strftime}} function. For Dates, the default is \code{"\%F"}
-#'   (like \code{"2015-07-01"}), and for POSIXt, the default is \code{"\%F \%T"}
+#'   \code{\link[base]{strftime}} function. For Dates, the default is \code{"%F"}
+#'   (like \code{"2015-07-01"}), and for POSIXt, the default is \code{"%F %T"}
 #'   (like \code{"2015-07-01 15:32:10"}).
 #' @param timezone Only used if the values are POSIXt objects. A string
 #'   specifying the time zone offset for the displayed times, in the format

@@ -1,16 +1,11 @@
 #!/bin/bash
 
+set -e
+
 # Run JS build process
 (cd "$(dirname "$0")" && yarn && yarn build)
-if [ $? -ne 0 ]
-then
-  echo "Error generating JavaScript assets with yarn."
-  exit 1
-fi
 
-# This command will return a zero exit code if there are uncommitted changes
-test -n "$(git status --porcelain)"
-if [ $? -eq 0 ]
+if [ -n "$(git status --porcelain)" ]
 then
   git status --porcelain
   echo "Please rebuild the JavaScript and commit the changes."

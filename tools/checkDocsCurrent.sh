@@ -1,16 +1,11 @@
 #!/bin/bash
 
+set -e
+
 # Generate package docs in the working directory
 Rscript -e "devtools::document(roclets=c('rd', 'collate', 'namespace'))"
-if [ $? -ne 0 ]
-then
-  echo "Error generating Roxygen docs."
-  exit 1
-fi
 
-# This command will return a zero exit code if there are uncommitted changes
-test -n "$(git status --porcelain)"
-if [ $? -eq 0 ]
+if [ -n "$(git status --porcelain)" ]
 then
   git status --porcelain
   echo "Please generate the Roxygen documentation and commit the updates."

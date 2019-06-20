@@ -52,7 +52,7 @@ server function as an argument).
 disconnected.
 }
 \item{ns(id)}{
-Server-side version of \code{ns <- [NS](id)}. If bare IDs need to be
+Server-side version of \code{\link[=NS]{ns <- NS(id)}}. If bare IDs need to be
 explicitly namespaced for the current module, \code{session$ns("name")}
 will return the fully-qualified ID.
 }

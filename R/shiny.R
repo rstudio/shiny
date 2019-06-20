@@ -235,7 +235,7 @@ workerId <- local({
 #'   disconnected.
 #' }
 #' \item{ns(id)}{
-#'   Server-side version of `ns <- [NS](id)`. If bare IDs need to be
+#'   Server-side version of [`ns <- NS(id)`][NS]. If bare IDs need to be
 #'   explicitly namespaced for the current module, `session$ns("name")`
 #'   will return the fully-qualified ID.
 #' }

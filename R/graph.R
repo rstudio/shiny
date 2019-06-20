@@ -91,7 +91,7 @@ NULL
 
 
 #' @describeIn reactlog Return a list of reactive information.  Can be used in conjunction with
-#'   `reactlog::[reactlog_show][reactlog::reactlog_show]` to later display the reactlog graph.
+#'   [reactlog::reactlog_show] to later display the reactlog graph.
 #' @export
 reactlog <- function() {
   rLog$asList()

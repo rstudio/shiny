@@ -55,7 +55,7 @@ of the source code of your reactive expressions and observers.
 \section{Functions}{
 \itemize{
 \item \code{reactlog}: Return a list of reactive information.  Can be used in conjunction with
-\code{reactlog::[reactlog_show][reactlog::reactlog_show]} to later display the reactlog graph.
+\link[reactlog:reactlog_show]{reactlog::reactlog_show} to later display the reactlog graph.
 
 \item \code{reactlogShow}: Display a full reactlog graph for all sessions.
 

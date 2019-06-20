@@ -57,7 +57,7 @@ If you want to use the old styling (for example, you may have used customized
 CSS), you can use \code{style="old"} each time you call
 \code{Progress$new()}. If you don't want to set the style each time
 \code{Progress$new} is called, you can instead call
-\link[=shinyOptions]{shinyOptions(progress.style="old")} just once, inside the server
+\code{\link[=shinyOptions]{shinyOptions(progress.style="old")}} just once, inside the server
 function.
 
 \strong{Methods}

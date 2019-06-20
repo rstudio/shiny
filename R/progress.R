@@ -17,7 +17,7 @@
 #' CSS), you can use `style="old"` each time you call
 #' `Progress$new()`. If you don't want to set the style each time
 #' `Progress$new` is called, you can instead call
-#' [shinyOptions(progress.style="old")][shinyOptions] just once, inside the server
+#' [`shinyOptions(progress.style="old")`][shinyOptions] just once, inside the server
 #' function.
 #'
 #' **Methods**
@@ -209,7 +209,7 @@ Progress <- R6Class(
 #' CSS), you can use `style="old"` each time you call
 #' `withProgress()`. If you don't want to set the style each time
 #' `withProgress` is called, you can instead call
-#' `[shinyOptions](progress.style="old")` just once, inside the server
+#' [`shinyOptions(progress.style="old")`][shinyOptions] just once, inside the server
 #' function.
 #'
 #' @param session The Shiny session object, as provided by `shinyServer` to

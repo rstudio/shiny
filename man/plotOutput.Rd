@@ -85,10 +85,10 @@ Render a \code{\link[=renderPlot]{renderPlot()}} or \code{\link[=renderImage]{re
 application page.
 }
 \note{
-The arguments \code{clickId} and \code{hoverId} only work for R base
-graphics (see the \pkg{[graphics][graphics::graphics-package]} package). They do not work for
-\pkg{[grid][grid::grid-package]}-based graphics, such as \pkg{ggplot2},
-\pkg{lattice}, and so on.
+The arguments \code{clickId} and \code{hoverId} only work for R base graphics
+(see the \pkg{\link[graphics:graphics-package]{graphics}} package). They do
+not work for \pkg{\link[grid:grid-package]{grid}}-based graphics, such as
+\pkg{ggplot2}, \pkg{lattice}, and so on.
 }
 \section{Interactive plots}{
 
@@ -272,6 +272,6 @@ shinyApp(
 }
 }
 \seealso{
-For the corresponding server-side functions, see
-\code{\link[=renderPlot]{renderPlot()}} and  \code{\link[=renderImage]{renderImage()}}.
+For the corresponding server-side functions, see \code{\link[=renderPlot]{renderPlot()}} and
+\code{\link[=renderImage]{renderImage()}}.
 }

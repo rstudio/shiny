@@ -1138,14 +1138,13 @@ imageOutput <- function(outputId, width = "100%", height="400px",
 #'   value; brushing one image or plot will cause any other brushes with the
 #'   same `id` to disappear.
 #' @inheritParams textOutput
-#' @note The arguments `clickId` and `hoverId` only work for R base
-#'   graphics (see the \pkg{[graphics][graphics::graphics-package]} package). They do not work for
-#'   \pkg{[grid][grid::grid-package]}-based graphics, such as \pkg{ggplot2},
-#'   \pkg{lattice}, and so on.
-#'
+#' @note The arguments `clickId` and `hoverId` only work for R base graphics
+#'   (see the \pkg{\link[graphics:graphics-package]{graphics}} package). They do
+#'   not work for \pkg{\link[grid:grid-package]{grid}}-based graphics, such as
+#'   \pkg{ggplot2}, \pkg{lattice}, and so on.
 #' @return A plot or image output element that can be included in a panel.
-#' @seealso For the corresponding server-side functions, see
-#'   [renderPlot()] and  [renderImage()].
+#' @seealso For the corresponding server-side functions, see [renderPlot()] and
+#'   [renderImage()].
 #'
 #' @examples
 #' # Only run these examples in interactive R sessions

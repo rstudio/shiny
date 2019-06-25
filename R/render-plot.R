@@ -46,7 +46,7 @@
 #'   call to \code{\link{plotOutput}} when \code{renderPlot} is used in an
 #'   interactive R Markdown document.
 #' @export
-renderPlot <- function(expr, width='auto', height='auto', res=72, alt=NULL, ...,
+renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
                        env=parent.frame(), quoted=FALSE,
                        execOnResize=FALSE, outputArgs=list()
 ) {
@@ -107,7 +107,6 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, alt=NULL, ...,
             func = func,
             width = dims$width,
             height = dims$height,
-            alt = alt,
             pixelratio = pixelratio,
             res = res
           ), args))
@@ -136,7 +135,7 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, alt=NULL, ...,
         dims <- getDims()
         pixelratio <- session$clientData$pixelratio %OR% 1
         result <- do.call("resizeSavedPlot", c(
-          list(name, shinysession, result, dims$width, dims$height, alt, pixelratio, res),
+          list(name, shinysession, result, dims$width, dims$height, pixelratio, res),
           args
         ))
 
@@ -155,7 +154,7 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, alt=NULL, ...,
   markRenderFunction(outputFunc, renderFunc, outputArgs = outputArgs)
 }
 
-resizeSavedPlot <- function(name, session, result, width, height, alt, pixelratio, res, ...) {
+resizeSavedPlot <- function(name, session, result, width, height, pixelratio, res, ...) {
   if (result$img$width == width && result$img$height == height &&
       result$pixelratio == pixelratio && result$res == res) {
     return(result)
@@ -172,7 +171,6 @@ resizeSavedPlot <- function(name, session, result, width, height, alt, pixelrati
     src = session$fileUrl(name, outfile, contentType = "image/png"),
     width = width,
     height = height,
-    alt = alt,
     coordmap = coordmap,
     error = attr(coordmap, "error", exact = TRUE)
   )
@@ -180,7 +178,7 @@ resizeSavedPlot <- function(name, session, result, width, height, alt, pixelrati
   result
 }
 
-drawPlot <- function(name, session, func, width, height, alt, pixelratio, res, ...) {
+drawPlot <- function(name, session, func, width, height, pixelratio, res, ...) {
   #  1. Start PNG
   #  2. Enable displaylist recording
   #  3. Call user-defined func
@@ -250,7 +248,6 @@ drawPlot <- function(name, session, func, width, height, alt, pixelratio, res, .
         src = session$fileUrl(name, outfile, contentType='image/png'),
         width = width,
         height = height,
-        alt = alt,
         coordmap = result$coordmap,
         # Get coordmap error message if present
         error = attr(result$coordmap, "error", exact = TRUE)

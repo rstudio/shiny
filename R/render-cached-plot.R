@@ -294,7 +294,6 @@ renderCachedPlot <- function(expr,
   cacheKeyExpr,
   sizePolicy = sizeGrowthRatio(width = 400, height = 400, growthRate = 1.2),
   res = 72,
-  alt = NULL,
   cache = "app",
   ...,
   outputArgs = list()
@@ -400,7 +399,6 @@ renderCachedPlot <- function(expr,
             func = isolatedFunc,
             width = width,
             height = height,
-            alt = alt,
             pixelratio = pixelratio,
             res = res
           ),
@@ -474,7 +472,6 @@ renderCachedPlot <- function(expr,
               plotObj = drawReactiveResult,
               width = width,
               height = height,
-              alt = alt,
               pixelratio = pixelratio
             )
           }
@@ -504,7 +501,6 @@ renderCachedPlot <- function(expr,
                 result$plotObj,
                 width,
                 height,
-                alt,
                 pixelratio,
                 res
               ),

@@ -1296,7 +1296,7 @@ need <- function(expr, message = paste(label, "must be provided"), label) {
 #' this is used inside an output context (e.g. `output$txt <- ...`). It may
 #' or may not be the case if it is used inside a non-output context (e.g.
 #' [reactive()], [observe()] or [observeEvent()])
-#' -- depending on whether or not there is an `output$...` that is triggered
+#' --- depending on whether or not there is an `output$...` that is triggered
 #' as a result of those calls. See the examples below for concrete scenarios.
 #'
 #' @param ... Values to check for truthiness.

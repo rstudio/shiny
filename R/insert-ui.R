@@ -117,7 +117,7 @@ insertUI <- function(selector,
 #' string `s` to be placed in a `$(s)` jQuery call). This selector
 #' will determine the element(s) to be removed. If you want to remove a
 #' Shiny input or output, note that many of these are wrapped in `div`s,
-#' so you may need to use a somewhat complex selector -- see the Examples below.
+#' so you may need to use a somewhat complex selector --- see the Examples below.
 #' (Alternatively, you could also wrap the inputs/outputs that you want to be
 #' able to remove easily in a `div` with an id.)
 #'

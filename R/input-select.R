@@ -15,12 +15,12 @@
 #'
 #' @inheritParams textInput
 #' @param choices List of values to select from. If elements of the list are
-#'   named, then that name -- rather than the value -- is displayed to the user.
-#'   It's also possible to group related inputs by providing a named list whose
-#'   elements are (either named or unnamed) lists or vectors. In this case, the
-#'   outermost names will be used as the group labels (leveraging the
-#'   `<optgroup>` HTML tag) for the elements in the respective sublist. See
-#'   the example section for a small demo of this feature.
+#'   named, then that name --- rather than the value --- is displayed to the
+#'   user. It's also possible to group related inputs by providing a named list
+#'   whose elements are (either named or unnamed) lists or vectors. In this
+#'   case, the outermost names will be used as the group labels (leveraging the
+#'   `<optgroup>` HTML tag) for the elements in the respective sublist. See the
+#'   example section for a small demo of this feature.
 #' @param selected The initially selected value (or multiple values if
 #'   `multiple = TRUE`). If not specified then defaults to the first value
 #'   for single-select lists and no values for multiple select lists.

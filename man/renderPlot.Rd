@@ -4,9 +4,9 @@
 \alias{renderPlot}
 \title{Plot Output}
 \usage{
-renderPlot(expr, width = "auto", height = "auto", res = 72,
-  alt = NULL, ..., env = parent.frame(), quoted = FALSE,
-  execOnResize = FALSE, outputArgs = list())
+renderPlot(expr, width = "auto", height = "auto", res = 72, ...,
+  env = parent.frame(), quoted = FALSE, execOnResize = FALSE,
+  outputArgs = list())
 }
 \arguments{
 \item{expr}{An expression that generates a plot.}
@@ -22,8 +22,6 @@ inline plot, you must provide numeric values (in pixels) to both
 \item{res}{Resolution of resulting plot, in pixels per inch. This value is
 passed to \code{\link[grDevices]{png}}. Note that this affects the resolution of PNG
 rendering in R; it won't change the actual ppi of the browser.}
-
-\item{alt}{Optional parameter to pass `alt` to the img-tag.}
 
 \item{...}{Arguments to be passed through to \code{\link[grDevices]{png}}.
 These can be used to set the width, height, background color, etc.}

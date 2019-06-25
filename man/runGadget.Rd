@@ -9,16 +9,16 @@ runGadget(app, server = NULL, port = getOption("shiny.port"),
 }
 \arguments{
 \item{app}{Either a Shiny app object as created by
-\code{\link[=shiny]{shinyApp}} et al, or, a UI object.}
+\code{\link[=shiny]{shinyApp()}} et al, or, a UI object.}
 
 \item{server}{Ignored if \code{app} is a Shiny app object; otherwise, passed
 along to \code{shinyApp} (i.e. \code{shinyApp(ui = app, server = server)}).}
 
-\item{port}{See \code{\link[=shiny]{runApp}}.}
+\item{port}{See \code{\link[=shiny]{runApp()}}.}
 
 \item{viewer}{Specify where the gadget should be displayed--viewer pane,
 dialog window, or external browser--by passing in a call to one of the
-\code{\link{viewer}} functions.}
+\code{\link[=viewer]{viewer()}} functions.}
 
 \item{stopOnCancel}{If \code{TRUE} (the default), then an \code{observeEvent}
 is automatically created that handles \code{input$cancel} by calling

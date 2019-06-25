@@ -10,8 +10,8 @@ showBookmarkUrlModal(url)
 \item{url}{A URL to show in the modal dialog.}
 }
 \description{
-This is a wrapper function for \code{\link{urlModal}} that is automatically
-called if an application is bookmarked but no other \code{\link{onBookmark}}
+This is a wrapper function for \code{\link[=urlModal]{urlModal()}} that is automatically
+called if an application is bookmarked but no other \code{\link[=onBookmark]{onBookmark()}}
 callback was set. It displays a modal dialog with the bookmark URL, along
 with a subtitle that is appropriate for the type of bookmarking used ("url"
 or "server").

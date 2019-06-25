@@ -2,32 +2,32 @@
 #'
 #' Creates a panel whose contents are absolutely positioned.
 #'
-#' The \code{absolutePanel} function creates a \code{<div>} tag whose CSS
-#' position is set to \code{absolute} (or fixed if \code{fixed = TRUE}). The way
+#' The `absolutePanel` function creates a `<div>` tag whose CSS
+#' position is set to `absolute` (or fixed if `fixed = TRUE`). The way
 #' absolute positioning works in HTML is that absolute coordinates are specified
 #' relative to its nearest parent element whose position is not set to
-#' \code{static} (which is the default), and if no such parent is found, then
+#' `static` (which is the default), and if no such parent is found, then
 #' relative to the page borders. If you're not sure what that means, just keep
-#' in mind that you may get strange results if you use \code{absolutePanel} from
+#' in mind that you may get strange results if you use `absolutePanel` from
 #' inside of certain types of panels.
 #'
-#' The \code{fixedPanel} function is the same as \code{absolutePanel} with
-#' \code{fixed = TRUE}.
+#' The `fixedPanel` function is the same as `absolutePanel` with
+#' `fixed = TRUE`.
 #'
-#' The position (\code{top}, \code{left}, \code{right}, \code{bottom}) and size
-#' (\code{width}, \code{height}) parameters are all optional, but you should
-#' specify exactly two of \code{top}, \code{bottom}, and \code{height} and
-#' exactly two of \code{left}, \code{right}, and \code{width} for predictable
+#' The position (`top`, `left`, `right`, `bottom`) and size
+#' (`width`, `height`) parameters are all optional, but you should
+#' specify exactly two of `top`, `bottom`, and `height` and
+#' exactly two of `left`, `right`, and `width` for predictable
 #' results.
 #'
 #' Like most other distance parameters in Shiny, the position and size
 #' parameters take a number (interpreted as pixels) or a valid CSS size string,
-#' such as \code{"100px"} (100 pixels) or \code{"25\%"}.
+#' such as `"100px"` (100 pixels) or `"25%"`.
 #'
 #' For arcane HTML reasons, to have the panel fill the page or parent you should
-#' specify \code{0} for \code{top}, \code{left}, \code{right}, and \code{bottom}
-#' rather than the more obvious \code{width = "100\%"} and \code{height =
-#' "100\%"}.
+#' specify `0` for `top`, `left`, `right`, and `bottom`
+#' rather than the more obvious `width = "100%"` and `height =
+#' "100%"`.
 #'
 #' @param ... Attributes (named arguments) or children (unnamed arguments) that
 #'   should be included in the panel.
@@ -42,16 +42,16 @@
 #'   page or parent container.
 #' @param width Width of the panel.
 #' @param height Height of the panel.
-#' @param draggable If \code{TRUE}, allows the user to move the panel by
+#' @param draggable If `TRUE`, allows the user to move the panel by
 #'   clicking and dragging.
 #' @param fixed Positions the panel relative to the browser window and prevents
 #'   it from being scrolled with the rest of the page.
 #' @param cursor The type of cursor that should appear when the user mouses over
-#'   the panel. Use \code{"move"} for a north-east-south-west icon,
-#'   \code{"default"} for the usual cursor arrow, or \code{"inherit"} for the
+#'   the panel. Use `"move"` for a north-east-south-west icon,
+#'   `"default"` for the usual cursor arrow, or `"inherit"` for the
 #'   usual cursor behavior (including changing to an I-beam when the cursor is
-#'   over text). The default is \code{"auto"}, which is equivalent to
-#'   \code{ifelse(draggable, "move", "inherit")}.
+#'   over text). The default is `"auto"`, which is equivalent to
+#'   `ifelse(draggable, "move", "inherit")`.
 #' @return An HTML element or list of elements.
 #' @export
 absolutePanel <- function(...,

@@ -14,11 +14,11 @@ total units; for fixed layouts it is out of whatever the width of the main
 panel's parent column is.}
 }
 \value{
-A main panel that can be passed to \code{\link{sidebarLayout}}.
+A main panel that can be passed to \code{\link[=sidebarLayout]{sidebarLayout()}}.
 }
 \description{
 Create a main panel containing output elements that can in turn be passed to
-\code{\link{sidebarLayout}}.
+\code{\link[=sidebarLayout]{sidebarLayout()}}.
 }
 \examples{
 # Show the caption and plot of the requested variable against mpg

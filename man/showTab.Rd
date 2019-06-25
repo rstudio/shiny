@@ -24,14 +24,14 @@ hidden/shown. See Details if you want to hide/show an entire
 \item{session}{The shiny session within which to call this function.}
 }
 \description{
-Dynamically hide or show a \code{\link{tabPanel}} (or a
-\code{\link{navbarMenu}})from an existing \code{\link{tabsetPanel}},
-\code{\link{navlistPanel}} or \code{\link{navbarPage}}.
+Dynamically hide or show a \code{\link[=tabPanel]{tabPanel()}} (or a
+\code{\link[=navbarMenu]{navbarMenu()}})from an existing \code{\link[=tabsetPanel]{tabsetPanel()}},
+\code{\link[=navlistPanel]{navlistPanel()}} or \code{\link[=navbarPage]{navbarPage()}}.
 }
 \details{
 For \code{navbarPage}, you can hide/show conventional
 \code{tabPanel}s (whether at the top level or nested inside a
-\code{navbarMenu}), as well as an entire \code{\link{navbarMenu}}.
+\code{navbarMenu}), as well as an entire \code{\link[=navbarMenu]{navbarMenu()}}.
 For the latter case, \code{target} should be the \code{menuName} that
 you gave your \code{navbarMenu} when you first created it (by default,
 this is equal to the value of the \code{title} argument).
@@ -81,5 +81,5 @@ shinyApp(ui, server)
 
 }
 \seealso{
-\code{\link{insertTab}}
+\code{\link[=insertTab]{insertTab()}}
 }

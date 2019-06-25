@@ -21,8 +21,8 @@ be passed in explicitly if desired; otherwise, a random number is used.
 }
 \note{
 When called, the returned function attempts to preserve the R session's
-  current seed by snapshotting and restoring
-  \code{\link[base]{.Random.seed}}.
+current seed by snapshotting and restoring
+\code{\link[base:.Random.seed]{base::.Random.seed()}}.
 }
 \examples{
 rnormA <- repeatable(rnorm)

@@ -1,11 +1,26 @@
 language: r
-r:
-  - oldrel
-  - release
-  - devel
+matrix:
+  include:
+    - name: "Roxygen check"
+      r: release
+      r_packages:
+        - devtools
+        - roxygen2
+      script: ./tools/checkDocsCurrent.sh
+    - name: "Javascript check"
+      language: node_js
+      cache: yarn
+      script: ./tools/checkJSCurrent.sh
+      node_js:
+        - "10"
+    - name: "Old Release Check"
+      r: oldrel
+    - name: "Current Release Check"
+      r: release
+    - name: "Development Release Check"
+      r: devel
 sudo: false
 cache: packages
-
 notifications:
   email:
     on_success: change

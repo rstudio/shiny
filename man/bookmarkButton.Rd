@@ -13,7 +13,7 @@ bookmarkButton(label = "Bookmark...", icon = shiny::icon("link", lib =
 \item{label}{The contents of the button or link--usually a text label, but
 you could also use any other HTML, like an image.}
 
-\item{icon}{An optional \code{\link{icon}} to appear on the button.}
+\item{icon}{An optional \code{\link[=icon]{icon()}} to appear on the button.}
 
 \item{title}{A tooltip that is shown when the mouse cursor hovers over the
 button.}
@@ -23,11 +23,11 @@ button.}
 \item{id}{An ID for the bookmark button. The only time it is necessary to set
 the ID unless you have more than one bookmark button in your application.
 If you specify an input ID, it should be excluded from bookmarking with
-\code{\link{setBookmarkExclude}}, and you must create an observer that
+\code{\link[=setBookmarkExclude]{setBookmarkExclude()}}, and you must create an observer that
 does the bookmarking when the button is pressed. See the examples below.}
 }
 \description{
-A \code{bookmarkButton} is a \code{\link{actionButton}} with a default label
+A \code{bookmarkButton} is a \code{\link[=actionButton]{actionButton()}} with a default label
 that consists of a link icon and the text "Bookmark...". It is meant to be
 used for bookmarking state.
 }
@@ -68,5 +68,5 @@ shinyApp(ui, server)
 }
 }
 \seealso{
-\code{\link{enableBookmarking}} for more examples.
+\code{\link[=enableBookmarking]{enableBookmarking()}} for more examples.
 }

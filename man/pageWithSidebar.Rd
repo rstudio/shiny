@@ -21,8 +21,8 @@ Create a Shiny UI that contains a header with the application title, a
 sidebar for input controls, and a main area for output.
 }
 \note{
-This function is deprecated. You should use \code{\link{fluidPage}}
-along with \code{\link{sidebarLayout}} to implement a page with a sidebar.
+This function is deprecated. You should use \code{\link[=fluidPage]{fluidPage()}}
+along with \code{\link[=sidebarLayout]{sidebarLayout()}} to implement a page with a sidebar.
 }
 \examples{
 # Define UI

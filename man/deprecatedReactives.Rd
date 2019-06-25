@@ -29,14 +29,14 @@ reactiveText(func)
 \item{...}{Other arguments to pass on.}
 }
 \description{
-\code{reactivePlot} has been replaced by \code{\link{renderPlot}}.
+\code{reactivePlot} has been replaced by \code{\link[=renderPlot]{renderPlot()}}.
 
-\code{reactiveTable} has been replaced by \code{\link{renderTable}}.
+\code{reactiveTable} has been replaced by \code{\link[=renderTable]{renderTable()}}.
 
-\code{reactivePrint} has been replaced by \code{\link{renderPrint}}.
+\code{reactivePrint} has been replaced by \code{\link[=renderPrint]{renderPrint()}}.
 
-\code{reactiveUI} has been replaced by \code{\link{renderUI}}.
+\code{reactiveUI} has been replaced by \code{\link[=renderUI]{renderUI()}}.
 
-\code{reactiveText} has been replaced by \code{\link{renderText}}.
+\code{reactiveText} has been replaced by \code{\link[=renderText]{renderText()}}.
 }
 \keyword{internal}

@@ -29,7 +29,7 @@ parameter is not needed if \code{message} is provided, but must be provided
 otherwise.}
 }
 \description{
-For an output rendering function (e.g. \code{\link{renderPlot}()}), you may
+For an output rendering function (e.g. \code{\link[=renderPlot]{renderPlot()}}), you may
 need to check that certain input values are available and valid before you
 can render the output. \code{validate} gives you a convenient mechanism for
 doing so.
@@ -48,20 +48,19 @@ considered a failure, then the string will be used as the error message. The
 the following:
 
 \itemize{
-  \item{\code{FALSE}}
-  \item{\code{NULL}}
-  \item{\code{""}}
-  \item{An empty atomic vector}
-  \item{An atomic vector that contains only missing values}
-  \item{A logical vector that contains all \code{FALSE} or missing values}
-  \item{An object of class \code{"try-error"}}
-  \item{A value that represents an unclicked \code{\link{actionButton}}}
+\item{\code{FALSE}}
+\item{\code{NULL}}
+\item{\code{""}}
+\item{An empty atomic vector}
+\item{An atomic vector that contains only missing values}
+\item{A logical vector that contains all \code{FALSE} or missing values}
+\item{An object of class \code{"try-error"}}
+\item{A value that represents an unclicked \code{\link[=actionButton]{actionButton()}}}
 }
 
 If any of these values happen to be valid, you can explicitly turn them to
 logical values. For example, if you allow \code{NA} but not \code{NULL}, you
-can use the condition \code{!is.null(input$foo)}, because \code{!is.null(NA)
-== TRUE}.
+can use the condition \code{!is.null(input$foo)}, because \code{!is.null(NA) == TRUE}.
 
 If you need validation logic that differs significantly from \code{need}, you
 can create other validation test functions. A passing test should return

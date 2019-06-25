@@ -22,7 +22,7 @@ A function which, if invoked, will cancel the callback.
 }
 \description{
 This function registers callback functions that are invoked when the
-application exits (when \code{\link{runApp}} exits), or after each user
+application exits (when \code{\link[=runApp]{runApp()}} exits), or after each user
 session ends (when a client disconnects).
 }
 \examples{
@@ -78,6 +78,6 @@ onStop(function() {
 }
 }
 \seealso{
-\code{\link{onSessionEnded}()} for the same functionality, but at
-  the session level only.
+\code{\link[=onSessionEnded]{onSessionEnded()}} for the same functionality, but at
+the session level only.
 }

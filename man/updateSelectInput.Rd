@@ -28,11 +28,11 @@ updateVarSelectizeInput(session, inputId, label = NULL, data = NULL,
 \item{label}{The label to set for the input object.}
 
 \item{choices}{List of values to select from. If elements of the list are
-named, then that name rather than the value is displayed to the user.
-This can also be a named list whose elements are (either named or
-unnamed) lists or vectors. If this is the case, the outermost names
-will be used as the "optgroup" label for the elements in the respective
-sublist. This allows you to group and label similar choices. See the
+named, then that name --- rather than the value --- is displayed to the
+user. It's also possible to group related inputs by providing a named list
+whose elements are (either named or unnamed) lists or vectors. In this
+case, the outermost names will be used as the group labels (leveraging the
+\code{<optgroup>} HTML tag) for the elements in the respective sublist. See the
 example section for a small demo of this feature.}
 
 \item{selected}{The initially selected value (or multiple values if
@@ -40,8 +40,8 @@ example section for a small demo of this feature.}
 for single-select lists and no values for multiple select lists.}
 
 \item{options}{A list of options. See the documentation of \pkg{selectize.js}
-for possible options (character option values inside \code{\link[base]{I}()} will
-be treated as literal JavaScript code; see \code{\link{renderDataTable}()}
+for possible options (character option values inside \code{\link[base:I]{base::I()}} will
+be treated as literal JavaScript code; see \code{\link[=renderDataTable]{renderDataTable()}}
 for details).}
 
 \item{server}{whether to store \code{choices} on the server side, and load
@@ -49,7 +49,7 @@ the select options dynamically on searching, instead of writing all
 \code{choices} into the page at once (i.e., only use the client-side
 version of \pkg{selectize.js})}
 
-\item{data}{A data frame. Used to retrieve the column names as choices for a \code{\link{selectInput}}}
+\item{data}{A data frame. Used to retrieve the column names as choices for a \code{\link[=selectInput]{selectInput()}}}
 }
 \description{
 Change the value of a select input on the client
@@ -104,5 +104,5 @@ shinyApp(ui, server)
 }
 }
 \seealso{
-\code{\link{selectInput}} \code{\link{varSelectInput}}
+\code{\link[=selectInput]{selectInput()}} \code{\link[=varSelectInput]{varSelectInput()}}
 }

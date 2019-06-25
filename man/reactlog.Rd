@@ -26,7 +26,7 @@ dependencies and execution in your application.
 \details{
 To use the reactive log visualizer, start with a fresh R session and
 run the command \code{options(shiny.reactlog=TRUE)}; then launch your
-application in the usual way (e.g. using \code{\link{runApp}}). At
+application in the usual way (e.g. using \code{\link[=runApp]{runApp()}}). At
 any time you can hit Ctrl+F3 (or for Mac users, Command+F3) in your
 web browser to launch the reactive log visualization.
 
@@ -55,11 +55,11 @@ of the source code of your reactive expressions and observers.
 \section{Functions}{
 \itemize{
 \item \code{reactlog}: Return a list of reactive information.  Can be used in conjunction with
-\code{reactlog::\link[reactlog]{reactlog_show}} to later display the reactlog graph.
+\link[reactlog:reactlog_show]{reactlog::reactlog_show} to later display the reactlog graph.
 
 \item \code{reactlogShow}: Display a full reactlog graph for all sessions.
 
-\item \code{showReactLog}: This function is deprecated. You should use \code{\link{reactlogShow}}
+\item \code{showReactLog}: This function is deprecated. You should use \code{\link[=reactlogShow]{reactlogShow()}}
 
 \item \code{reactlogReset}: Resets the entire reactlog stack.  Useful for debugging and removing all prior reactive history.
 }}

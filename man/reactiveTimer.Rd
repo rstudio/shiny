@@ -16,9 +16,9 @@ occur.}
 }
 \value{
 A no-parameter function that can be called from a reactive context,
-  in order to cause that context to be invalidated the next time the timer
-  interval elapses. Calling the returned function also happens to yield the
-  current time (as in \code{\link[base]{Sys.time}}).
+in order to cause that context to be invalidated the next time the timer
+interval elapses. Calling the returned function also happens to yield the
+current time (as in \code{\link[base:Sys.time]{base::Sys.time()}}).
 }
 \description{
 Creates a reactive timer with the given interval. A reactive timer is like a
@@ -31,7 +31,7 @@ invalidated by the timer need to call the timer function that
 \code{reactiveTimer} returns, even if the current time value is not actually
 needed.
 
-See \code{\link{invalidateLater}} as a safer and simpler alternative.
+See \code{\link[=invalidateLater]{invalidateLater()}} as a safer and simpler alternative.
 }
 \examples{
 ## Only run examples in interactive R sessions
@@ -71,5 +71,5 @@ shinyApp(ui, server)
 }
 }
 \seealso{
-\code{\link{invalidateLater}}
+\code{\link[=invalidateLater]{invalidateLater()}}
 }

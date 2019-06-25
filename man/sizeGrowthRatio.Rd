@@ -29,5 +29,5 @@ f(c(625, 700))
 
 }
 \seealso{
-This is to be used with \code{\link{renderCachedPlot}}.
+This is to be used with \code{\link[=renderCachedPlot]{renderCachedPlot()}}.
 }

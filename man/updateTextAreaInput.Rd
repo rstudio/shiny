@@ -69,5 +69,5 @@ shinyApp(ui, server)
 }
 }
 \seealso{
-\code{\link{textAreaInput}}
+\code{\link[=textAreaInput]{textAreaInput()}}
 }

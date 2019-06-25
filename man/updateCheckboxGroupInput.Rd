@@ -99,5 +99,5 @@ shinyApp(ui, server)
 }
 }
 \seealso{
-\code{\link{checkboxGroupInput}}
+\code{\link[=checkboxGroupInput]{checkboxGroupInput()}}
 }

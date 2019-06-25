@@ -4,10 +4,10 @@
 #' event occurs. These events are triggered by accessing a snapshot URL.
 #'
 #' This function only has an effect if the app is launched in test mode. This is
-#' done by calling \code{runApp()} with \code{test.mode=TRUE}, or by setting the
-#' global option \code{shiny.testmode} to \code{TRUE}.
+#' done by calling `runApp()` with `test.mode=TRUE`, or by setting the
+#' global option `shiny.testmode` to `TRUE`.
 #'
-#' @param quoted_ Are the expression quoted? Default is \code{FALSE}.
+#' @param quoted_ Are the expression quoted? Default is `FALSE`.
 #' @param env_ The environment in which the expression should be evaluated.
 #' @param session_ A Shiny session object.
 #' @param ... Named arguments that are quoted or unquoted expressions that will

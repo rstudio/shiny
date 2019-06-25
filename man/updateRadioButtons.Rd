@@ -96,5 +96,5 @@ shinyApp(ui, server)
 }
 }
 \seealso{
-\code{\link{radioButtons}}
+\code{\link[=radioButtons]{radioButtons()}}
 }

@@ -16,19 +16,19 @@ getShinyOption <- function(name, default = NULL) {
 
 #' Get or set Shiny options
 #'
-#' \code{getShinyOption} retrieves the value of a Shiny option.
-#' \code{shinyOptions} sets the value of Shiny options; it can also be used to
+#' `getShinyOption` retrieves the value of a Shiny option.
+#' `shinyOptions` sets the value of Shiny options; it can also be used to
 #' return a list of all currently-set Shiny options.
 #'
 #' There is a global option set, which is available by default. When a Shiny
-#' application is run with \code{\link{runApp}}, that option set is duplicated
+#' application is run with [runApp()], that option set is duplicated
 #' and the new option set is available for getting or setting values. If options
 #' are set from global.R, app.R, ui.R, or server.R, or if they are set from
 #' inside the server function, then the options will be scoped to the
 #' application. When the application exits, the new option set is discarded and
 #' the global option set is restored.
 #'
-#' @param ... Options to set, with the form \code{name = value}.
+#' @param ... Options to set, with the form `name = value`.
 #'
 #' @examples
 #' \dontrun{

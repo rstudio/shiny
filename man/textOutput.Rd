@@ -24,7 +24,7 @@ text will be included within an HTML \code{div} tag by default.
 }
 \details{
 Text is HTML-escaped prior to rendering. This element is often used
-  to display \link{renderText} output variables.
+to display \link{renderText} output variables.
 }
 \examples{
 h3(textOutput("caption"))

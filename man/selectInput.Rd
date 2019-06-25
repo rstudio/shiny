@@ -16,11 +16,11 @@ selectizeInput(inputId, ..., options = NULL, width = NULL)
 \item{label}{Display label for the control, or \code{NULL} for no label.}
 
 \item{choices}{List of values to select from. If elements of the list are
-named, then that name rather than the value is displayed to the user.
-This can also be a named list whose elements are (either named or
-unnamed) lists or vectors. If this is the case, the outermost names
-will be used as the "optgroup" label for the elements in the respective
-sublist. This allows you to group and label similar choices. See the
+named, then that name --- rather than the value --- is displayed to the
+user. It's also possible to group related inputs by providing a named list
+whose elements are (either named or unnamed) lists or vectors. In this
+case, the outermost names will be used as the group labels (leveraging the
+\code{<optgroup>} HTML tag) for the elements in the respective sublist. See the
 example section for a small demo of this feature.}
 
 \item{selected}{The initially selected value (or multiple values if
@@ -32,7 +32,7 @@ for single-select lists and no values for multiple select lists.}
 \item{selectize}{Whether to use \pkg{selectize.js} or not.}
 
 \item{width}{The width of the input, e.g. \code{'400px'}, or \code{'100\%'};
-see \code{\link{validateCssUnit}}.}
+see \code{\link[=validateCssUnit]{validateCssUnit()}}.}
 
 \item{size}{Number of items to show in the selection box; a larger number
 will result in a taller box. Not compatible with \code{selectize=TRUE}.
@@ -42,8 +42,8 @@ list, but when \code{size} is set, it will be a box instead.}
 \item{...}{Arguments passed to \code{selectInput()}.}
 
 \item{options}{A list of options. See the documentation of \pkg{selectize.js}
-for possible options (character option values inside \code{\link[base]{I}()} will
-be treated as literal JavaScript code; see \code{\link{renderDataTable}()}
+for possible options (character option values inside \code{\link[base:I]{base::I()}} will
+be treated as literal JavaScript code; see \code{\link[=renderDataTable]{renderDataTable()}}
 for details).}
 }
 \value{
@@ -66,13 +66,13 @@ In selectize mode, if the first element in \code{choices} has a value of
 }
 \note{
 The selectize input created from \code{selectizeInput()} allows
-  deletion of the selected option even in a single select input, which will
-  return an empty string as its value. This is the default behavior of
-  \pkg{selectize.js}. However, the selectize input created from
-  \code{selectInput(..., selectize = TRUE)} will ignore the empty string
-  value when it is a single choice input and the empty string is not in the
-  \code{choices} argument. This is to keep compatibility with
-  \code{selectInput(..., selectize = FALSE)}.
+deletion of the selected option even in a single select input, which will
+return an empty string as its value. This is the default behavior of
+\pkg{selectize.js}. However, the selectize input created from
+\code{selectInput(..., selectize = TRUE)} will ignore the empty string
+value when it is a single choice input and the empty string is not in the
+\code{choices} argument. This is to keep compatibility with
+\code{selectInput(..., selectize = FALSE)}.
 }
 \examples{
 ## Only run examples in interactive R sessions
@@ -94,7 +94,7 @@ shinyApp(
   }
 )
 
-# demoing optgroup support in the `choices` arg
+# demoing group support in the `choices` arg
 shinyApp(
   ui = fluidPage(
     selectInput("state", "Choose a state:",
@@ -113,7 +113,7 @@ shinyApp(
 }
 }
 \seealso{
-\code{\link{updateSelectInput}} \code{\link{varSelectInput}}
+\code{\link[=updateSelectInput]{updateSelectInput()}} \code{\link[=varSelectInput]{varSelectInput()}}
 
 Other input elements: \code{\link{actionButton}},
   \code{\link{checkboxGroupInput}},

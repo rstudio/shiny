@@ -24,7 +24,7 @@ types (such as logicals and numbers) will be coerced to strings.}
 \item{inline}{If \code{TRUE}, render the choices inline (i.e. horizontally)}
 
 \item{width}{The width of the input, e.g. \code{'400px'}, or \code{'100\%'};
-see \code{\link{validateCssUnit}}.}
+see \code{\link[=validateCssUnit]{validateCssUnit()}}.}
 
 \item{choiceNames, choiceValues}{List of names and values, respectively,
 that are displayed to the user in the app and correspond to the each
@@ -86,7 +86,7 @@ shinyApp(ui, server)
 }
 }
 \seealso{
-\code{\link{checkboxInput}}, \code{\link{updateCheckboxGroupInput}}
+\code{\link[=checkboxInput]{checkboxInput()}}, \code{\link[=updateCheckboxGroupInput]{updateCheckboxGroupInput()}}
 
 Other input elements: \code{\link{actionButton}},
   \code{\link{checkboxInput}}, \code{\link{dateInput}},

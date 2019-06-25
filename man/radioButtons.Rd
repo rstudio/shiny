@@ -25,7 +25,7 @@ to the first value)}
 \item{inline}{If \code{TRUE}, render the choices inline (i.e. horizontally)}
 
 \item{width}{The width of the input, e.g. \code{'400px'}, or \code{'100\%'};
-see \code{\link{validateCssUnit}}.}
+see \code{\link[=validateCssUnit]{validateCssUnit()}}.}
 
 \item{choiceNames, choiceValues}{List of names and values, respectively, that
 are displayed to the user in the app and correspond to the each choice (for
@@ -45,8 +45,7 @@ Create a set of radio buttons used to select an item from a list.
 }
 \details{
 If you need to represent a "None selected" state, it's possible to default
-the radio buttons to have no options selected by using \code{selected =
-character(0)}. However, this is not recommended, as it gives the user no way
+the radio buttons to have no options selected by using \code{selected = character(0)}. However, this is not recommended, as it gives the user no way
 to return to that state once they've made a selection. Instead, consider
 having the first of your choices be \code{c("None selected" = "")}.
 }
@@ -101,7 +100,7 @@ shinyApp(ui, server)
 }
 }
 \seealso{
-\code{\link{updateRadioButtons}}
+\code{\link[=updateRadioButtons]{updateRadioButtons()}}
 
 Other input elements: \code{\link{actionButton}},
   \code{\link{checkboxGroupInput}},

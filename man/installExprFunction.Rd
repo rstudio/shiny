@@ -25,7 +25,7 @@ calling environment two steps back.}
 the name of the calling function.}
 
 \item{wrappedWithLabel, ..stacktraceon}{Advanced use only. For stack manipulation purposes; see
-\code{\link{stacktrace}}.}
+\code{\link[=stacktrace]{stacktrace()}}.}
 }
 \description{
 Installs an expression in the given environment as a function, and registers
@@ -38,6 +38,6 @@ This function can replace \code{exprToFunction} as follows: we may use
 function named \code{func} in the current environment.
 }
 \seealso{
-Wraps \code{\link{exprToFunction}}; see that method's documentation
-  for more documentation and examples.
+Wraps \code{\link[=exprToFunction]{exprToFunction()}}; see that method's documentation
+for more documentation and examples.
 }

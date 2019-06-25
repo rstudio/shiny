@@ -19,5 +19,5 @@ expression. Any attempt to directly access reactive values or expressions in
 default, an error).
 }
 \seealso{
-\code{\link{isolate}}
+\code{\link[=isolate]{isolate()}}
 }

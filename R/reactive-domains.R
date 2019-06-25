@@ -168,31 +168,31 @@ onReactiveDomainEnded <- function(domain, callback, failIfNull = FALSE) {
 #' them ends) and error handling.
 #'
 #' At any given time, there can be either a single "default" reactive domain
-#' object, or none (i.e. the reactive domain object is \code{NULL}). You can
+#' object, or none (i.e. the reactive domain object is `NULL`). You can
 #' access the current default reactive domain by calling
-#' \code{getDefaultReactiveDomain}.
+#' `getDefaultReactiveDomain`.
 #'
 #' Unless you specify otherwise, newly created observers and reactive
 #' expressions will be assigned to the current default domain (if any). You can
-#' override this assignment by providing an explicit \code{domain} argument to
-#' \code{\link{reactive}} or \code{\link{observe}}.
+#' override this assignment by providing an explicit `domain` argument to
+#' [reactive()] or [observe()].
 #'
 #' For advanced usage, it's possible to override the default domain using
-#' \code{withReactiveDomain}. The \code{domain} argument will be made the
-#' default domain while \code{expr} is evaluated.
+#' `withReactiveDomain`. The `domain` argument will be made the
+#' default domain while `expr` is evaluated.
 #'
-#' Implementers of new reactive primitives can use \code{onReactiveDomainEnded}
+#' Implementers of new reactive primitives can use `onReactiveDomainEnded`
 #' as a convenience function for registering callbacks. If the reactive domain
-#' is \code{NULL} and \code{failIfNull} is \code{FALSE}, then the callback will
+#' is `NULL` and `failIfNull` is `FALSE`, then the callback will
 #' never be invoked.
 #'
 #' @name domains
 #' @param domain A valid domain object (for example, a Shiny session), or
-#'   \code{NULL}
-#' @param expr An expression to evaluate under \code{domain}
+#'   `NULL`
+#' @param expr An expression to evaluate under `domain`
 #' @param callback A callback function to be invoked
-#' @param failIfNull If \code{TRUE} then an error is given if the \code{domain}
-#'   is \code{NULL}
+#' @param failIfNull If `TRUE` then an error is given if the `domain`
+#'   is `NULL`
 NULL
 
 #

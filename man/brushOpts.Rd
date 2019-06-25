@@ -39,13 +39,13 @@ drawn and moved in both x and y directions. If \code{"x"}, or \code{"y"},
 the brush wil work horizontally or vertically.}
 
 \item{resetOnNew}{When a new image is sent to the browser (via
-\code{\link{renderImage}}), should the brush be reset? The default,
+\code{\link[=renderImage]{renderImage()}}), should the brush be reset? The default,
 \code{FALSE}, is useful if you want to update the plot while keeping the
 brush. Using \code{TRUE} is useful if you want to clear the brush whenever
 the plot is updated.}
 }
 \description{
 This generates an object representing brushing options, to be passed as the
-\code{brush} argument of \code{\link{imageOutput}} or
-\code{\link{plotOutput}}.
+\code{brush} argument of \code{\link[=imageOutput]{imageOutput()}} or
+\code{\link[=plotOutput]{plotOutput()}}.
 }

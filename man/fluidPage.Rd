@@ -13,7 +13,7 @@ fluidRow(...)
 \item{...}{Elements to include within the page}
 
 \item{title}{The browser window title (defaults to the host URL of the page).
-Can also be set as a side effect of the \code{\link{titlePanel}} function.}
+Can also be set as a side effect of the \code{\link[=titlePanel]{titlePanel()}} function.}
 
 \item{responsive}{This option is deprecated; it is no longer optional with
 Bootstrap 3.}
@@ -35,14 +35,13 @@ components in realtime to fill all available browser width.
 }
 \details{
 To create a fluid page use the \code{fluidPage} function and include
-  instances of \code{fluidRow} and \code{\link{column}} within it. As an
-  alternative to low-level row and column functions you can also use
-  higher-level layout functions like \code{\link{sidebarLayout}}.
+instances of \code{fluidRow} and \code{\link[=column]{column()}} within it. As an
+alternative to low-level row and column functions you can also use
+higher-level layout functions like \code{\link[=sidebarLayout]{sidebarLayout()}}.
 }
 \note{
-See the \href{http://shiny.rstudio.com/articles/layout-guide.html}{
-  Shiny-Application-Layout-Guide} for additional details on laying out fluid
-  pages.
+See the \href{http://shiny.rstudio.com/articles/layout-guide.html}{ Shiny-Application-Layout-Guide} for additional details on laying out fluid
+pages.
 }
 \examples{
 ## Only run examples in interactive R sessions
@@ -100,5 +99,5 @@ shinyApp(ui, server = function(input, output) { })
 }
 }
 \seealso{
-\code{\link{column}}, \code{\link{sidebarLayout}}
+\code{\link[=column]{column()}}, \code{\link[=sidebarLayout]{sidebarLayout()}}
 }

@@ -16,11 +16,11 @@ previous column.}
 }
 \value{
 A column that can be included within a
-  \code{\link{fluidRow}} or \code{\link{fixedRow}}.
+\code{\link[=fluidRow]{fluidRow()}} or \code{\link[=fixedRow]{fixedRow()}}.
 }
 \description{
-Create a column for use within a  \code{\link{fluidRow}} or
-\code{\link{fixedRow}}
+Create a column for use within a  \code{\link[=fluidRow]{fluidRow()}} or
+\code{\link[=fixedRow]{fixedRow()}}
 }
 \examples{
 ## Only run examples in interactive R sessions
@@ -62,5 +62,5 @@ shinyApp(ui, server = function(input, output) { })
 }
 }
 \seealso{
-\code{\link{fluidRow}}, \code{\link{fixedRow}}.
+\code{\link[=fluidRow]{fluidRow()}}, \code{\link[=fixedRow]{fixedRow()}}.
 }

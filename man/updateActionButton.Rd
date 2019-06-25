@@ -76,5 +76,5 @@ shinyApp(ui, server)
 }
 }
 \seealso{
-\code{\link{actionButton}}
+\code{\link[=actionButton]{actionButton()}}
 }

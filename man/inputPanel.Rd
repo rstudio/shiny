@@ -10,6 +10,6 @@ inputPanel(...)
 \item{...}{Input controls or other HTML elements.}
 }
 \description{
-A \code{\link{flowLayout}} with a grey border and light grey background,
+A \code{\link[=flowLayout]{flowLayout()}} with a grey border and light grey background,
 suitable for wrapping inputs.
 }

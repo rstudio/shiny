@@ -3,66 +3,66 @@
 #' Reports progress to the user during long-running operations.
 #'
 #' This package exposes two distinct programming APIs for working with
-#' progress. \code{\link{withProgress}} and \code{\link{setProgress}}
+#' progress. [withProgress()] and [setProgress()]
 #' together provide a simple function-based interface, while the
-#' \code{Progress} reference class provides an object-oriented API.
+#' `Progress` reference class provides an object-oriented API.
 #'
-#' Instantiating a \code{Progress} object causes a progress panel to be
-#' created, and it will be displayed the first time the \code{set}
-#' method is called. Calling \code{close} will cause the progress panel
+#' Instantiating a `Progress` object causes a progress panel to be
+#' created, and it will be displayed the first time the `set`
+#' method is called. Calling `close` will cause the progress panel
 #' to be removed.
 #'
 #' As of version 0.14, the progress indicators use Shiny's new notification API.
 #' If you want to use the old styling (for example, you may have used customized
-#' CSS), you can use \code{style="old"} each time you call
-#' \code{Progress$new()}. If you don't want to set the style each time
-#' \code{Progress$new} is called, you can instead call
-#' \code{\link{shinyOptions}(progress.style="old")} just once, inside the server
+#' CSS), you can use `style="old"` each time you call
+#' `Progress$new()`. If you don't want to set the style each time
+#' `Progress$new` is called, you can instead call
+#' [`shinyOptions(progress.style="old")`][shinyOptions] just once, inside the server
 #' function.
 #'
-#' \strong{Methods}
+#' **Methods**
 #'   \describe{
-#'     \item{\code{initialize(session, min = 0, max = 1)}}{
+#'     \item{`initialize(session, min = 0, max = 1)`}{
 #'       Creates a new progress panel (but does not display it).
 #'     }
-#'     \item{\code{set(value = NULL, message = NULL, detail = NULL)}}{
+#'     \item{`set(value = NULL, message = NULL, detail = NULL)`}{
 #'       Updates the progress panel. When called the first time, the
 #'       progress panel is displayed.
 #'     }
-#'     \item{\code{inc(amount = 0.1, message = NULL, detail = NULL)}}{
-#'       Like \code{set}, this updates the progress panel. The difference is
-#'       that \code{inc} increases the progress bar by \code{amount}, instead
+#'     \item{`inc(amount = 0.1, message = NULL, detail = NULL)`}{
+#'       Like `set`, this updates the progress panel. The difference is
+#'       that `inc` increases the progress bar by `amount`, instead
 #'       of setting it to a specific value.
 #'     }
-#'     \item{\code{close()}}{
-#'       Removes the progress panel. Future calls to \code{set} and
-#'       \code{close} will be ignored.
+#'     \item{`close()`}{
+#'       Removes the progress panel. Future calls to `set` and
+#'       `close` will be ignored.
 #'     }
 #'   }
 #'
 #' @param session The Shiny session object, as provided by
-#'   \code{shinyServer} to the server function.
+#'   `shinyServer` to the server function.
 #' @param min The value that represents the starting point of the
-#'   progress bar. Must be less tham \code{max}.
+#'   progress bar. Must be less tham `max`.
 #' @param max The value that represents the end of the progress bar.
-#'   Must be greater than \code{min}.
+#'   Must be greater than `min`.
 #' @param message A single-element character vector; the message to be
-#'   displayed to the user, or \code{NULL} to hide the current message
+#'   displayed to the user, or `NULL` to hide the current message
 #'   (if any).
 #' @param detail A single-element character vector; the detail message
-#'   to be displayed to the user, or \code{NULL} to hide the current
+#'   to be displayed to the user, or `NULL` to hide the current
 #'   detail message (if any). The detail message will be shown with a
-#'   de-emphasized appearance relative to \code{message}.
+#'   de-emphasized appearance relative to `message`.
 #' @param value A numeric value at which to set
-#'   the progress bar, relative to \code{min} and \code{max}.
-#' @param style Progress display style. If \code{"notification"} (the default),
+#'   the progress bar, relative to `min` and `max`.
+#' @param style Progress display style. If `"notification"` (the default),
 #'   the progress indicator will show using Shiny's notification API. If
-#'   \code{"old"}, use the same HTML and CSS used in Shiny 0.13.2 and below
+#'   `"old"`, use the same HTML and CSS used in Shiny 0.13.2 and below
 #'   (this is for backward-compatibility).
 #' @param amount Single-element numeric vector; the value at which to set
-#'   the progress bar, relative to \code{min} and \code{max}.
-#'   \code{NULL} hides the progress bar, if it is currently visible.
-#' @param amount For the \code{inc()} method, a numeric value to increment the
+#'   the progress bar, relative to `min` and `max`.
+#'   `NULL` hides the progress bar, if it is currently visible.
+#' @param amount For the `inc()` method, a numeric value to increment the
 #'   progress bar.
 #'
 #' @examples
@@ -91,7 +91,7 @@
 #'
 #' shinyApp(ui, server)
 #' }
-#' @seealso \code{\link{withProgress}}
+#' @seealso [withProgress()]
 #' @format NULL
 #' @usage NULL
 #' @export
@@ -186,58 +186,58 @@ Progress <- R6Class(
 #' Reports progress to the user during long-running operations.
 #'
 #' This package exposes two distinct programming APIs for working with progress.
-#' Using \code{withProgress} with \code{incProgress} or \code{setProgress}
-#' provide a simple function-based interface, while the \code{\link{Progress}}
+#' Using `withProgress` with `incProgress` or `setProgress`
+#' provide a simple function-based interface, while the [Progress()]
 #' reference class provides an object-oriented API.
 #'
-#' Use \code{withProgress} to wrap the scope of your work; doing so will cause a
+#' Use `withProgress` to wrap the scope of your work; doing so will cause a
 #' new progress panel to be created, and it will be displayed the first time
-#' \code{incProgress} or \code{setProgress} are called. When \code{withProgress}
+#' `incProgress` or `setProgress` are called. When `withProgress`
 #' exits, the corresponding progress panel will be removed.
 #'
-#' The \code{incProgress} function increments the status bar by a specified
-#' amount, whereas the \code{setProgress} function sets it to a specific value,
+#' The `incProgress` function increments the status bar by a specified
+#' amount, whereas the `setProgress` function sets it to a specific value,
 #' and can also set the text displayed.
 #'
-#' Generally, \code{withProgress}/\code{incProgress}/\code{setProgress} should
+#' Generally, `withProgress`/`incProgress`/`setProgress` should
 #' be sufficient; the exception is if the work to be done is asynchronous (this
 #' is not common) or otherwise cannot be encapsulated by a single scope. In that
-#' case, you can use the \code{Progress} reference class.
+#' case, you can use the `Progress` reference class.
 #'
 #' As of version 0.14, the progress indicators use Shiny's new notification API.
 #' If you want to use the old styling (for example, you may have used customized
-#' CSS), you can use \code{style="old"} each time you call
-#' \code{withProgress()}. If you don't want to set the style each time
-#' \code{withProgress} is called, you can instead call
-#' \code{\link{shinyOptions}(progress.style="old")} just once, inside the server
+#' CSS), you can use `style="old"` each time you call
+#' `withProgress()`. If you don't want to set the style each time
+#' `withProgress` is called, you can instead call
+#' [`shinyOptions(progress.style="old")`][shinyOptions] just once, inside the server
 #' function.
 #'
-#' @param session The Shiny session object, as provided by \code{shinyServer} to
+#' @param session The Shiny session object, as provided by `shinyServer` to
 #'   the server function. The default is to automatically find the session by
 #'   using the current reactive domain.
 #' @param expr The work to be done. This expression should contain calls to
-#'   \code{setProgress}.
+#'   `setProgress`.
 #' @param min The value that represents the starting point of the progress bar.
-#'   Must be less tham \code{max}. Default is 0.
+#'   Must be less tham `max`. Default is 0.
 #' @param max The value that represents the end of the progress bar. Must be
-#'   greater than \code{min}. Default is 1.
-#' @param amount For \code{incProgress}, the amount to increment the status bar.
+#'   greater than `min`. Default is 1.
+#' @param amount For `incProgress`, the amount to increment the status bar.
 #'   Default is 0.1.
-#' @param env The environment in which \code{expr} should be evaluated.
-#' @param quoted Whether \code{expr} is a quoted expression (this is not
+#' @param env The environment in which `expr` should be evaluated.
+#' @param quoted Whether `expr` is a quoted expression (this is not
 #'   common).
 #' @param message A single-element character vector; the message to be displayed
-#'   to the user, or \code{NULL} to hide the current message (if any).
+#'   to the user, or `NULL` to hide the current message (if any).
 #' @param detail A single-element character vector; the detail message to be
-#'   displayed to the user, or \code{NULL} to hide the current detail message
+#'   displayed to the user, or `NULL` to hide the current detail message
 #'   (if any). The detail message will be shown with a de-emphasized appearance
-#'   relative to \code{message}.
-#' @param style Progress display style. If \code{"notification"} (the default),
+#'   relative to `message`.
+#' @param style Progress display style. If `"notification"` (the default),
 #'   the progress indicator will show using Shiny's notification API. If
-#'   \code{"old"}, use the same HTML and CSS used in Shiny 0.13.2 and below
+#'   `"old"`, use the same HTML and CSS used in Shiny 0.13.2 and below
 #'   (this is for backward-compatibility).
 #' @param value Single-element numeric vector; the value at which to set the
-#'   progress bar, relative to \code{min} and \code{max}.
+#'   progress bar, relative to `min` and `max`.
 #'
 #' @examples
 #' ## Only run examples in interactive R sessions
@@ -263,7 +263,7 @@ Progress <- R6Class(
 #'
 #' shinyApp(ui, server)
 #' }
-#' @seealso \code{\link{Progress}}
+#' @seealso [Progress()]
 #' @rdname withProgress
 #' @export
 withProgress <- function(expr, min = 0, max = 1,

@@ -6,7 +6,7 @@
 #' @inheritParams textInput
 #' @param label The contents of the button or link--usually a text label, but
 #'   you could also use any other HTML, like an image.
-#' @param icon An optional \code{\link{icon}} to appear on the button.
+#' @param icon An optional [icon()] to appear on the button.
 #' @param ... Named attributes to be applied to the button or link.
 #'
 #' @family input elements
@@ -36,7 +36,7 @@
 #'
 #' }
 #'
-#' @seealso \code{\link{observeEvent}} and \code{\link{eventReactive}}
+#' @seealso [observeEvent()] and [eventReactive()]
 #' @export
 actionButton <- function(inputId, label, icon = NULL, width = NULL, ...) {
 

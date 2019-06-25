@@ -16,5 +16,5 @@ is.key_missing(x)
 A \code{key_missing} object represents a cache miss.
 }
 \seealso{
-\code{\link{diskCache}}, \code{\link{memoryCache}}.
+\code{\link[=diskCache]{diskCache()}}, \code{\link[=memoryCache]{memoryCache()}}.
 }

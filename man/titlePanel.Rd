@@ -16,8 +16,8 @@ Create a panel containing an application title.
 }
 \details{
 Calling this function has the side effect of including a
-  \code{title} tag within the head. You can also specify a page title
-  explicitly using the `title` parameter of the top-level page function.
+\code{title} tag within the head. You can also specify a page title
+explicitly using the \code{title} parameter of the top-level page function.
 }
 \examples{
 ## Only run examples in interactive R sessions

@@ -74,5 +74,5 @@ shinyApp(ui, server)
 }
 }
 \seealso{
-\code{\link{dateRangeInput}}
+\code{\link[=dateRangeInput]{dateRangeInput()}}
 }

@@ -31,7 +31,7 @@ shown in the document).}
 available area of the browser window.
 }
 \details{
-The \code{\link{fluidPage}} and \code{\link{fixedPage}} functions are used
+The \code{\link[=fluidPage]{fluidPage()}} and \code{\link[=fixedPage]{fixedPage()}} functions are used
 for creating web pages that are laid out from the top down, leaving
 whitespace at the bottom if the page content's height is smaller than the
 browser window, and scrolling if the content is larger than the window.

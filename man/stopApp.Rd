@@ -8,9 +8,9 @@ stopApp(returnValue = invisible())
 }
 \arguments{
 \item{returnValue}{The value that should be returned from
-\code{\link{runApp}}.}
+\code{\link[=runApp]{runApp()}}.}
 }
 \description{
 Stops the currently running Shiny app, returning control to the caller of
-\code{\link{runApp}}.
+\code{\link[=runApp]{runApp()}}.
 }

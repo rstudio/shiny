@@ -21,7 +21,7 @@ numericInput(inputId, label, value, min = NA, max = NA, step = NA,
 \item{step}{Interval to use when stepping between min and max}
 
 \item{width}{The width of the input, e.g. \code{'400px'}, or \code{'100\%'};
-see \code{\link{validateCssUnit}}.}
+see \code{\link[=validateCssUnit]{validateCssUnit()}}.}
 }
 \value{
 A numeric input control that can be added to a UI definition.
@@ -44,7 +44,7 @@ shinyApp(ui, server)
 }
 }
 \seealso{
-\code{\link{updateNumericInput}}
+\code{\link[=updateNumericInput]{updateNumericInput()}}
 
 Other input elements: \code{\link{actionButton}},
   \code{\link{checkboxGroupInput}},

@@ -43,7 +43,7 @@ Reports progress to the user during long-running operations.
 }
 \details{
 This package exposes two distinct programming APIs for working with
-progress. \code{\link{withProgress}} and \code{\link{setProgress}}
+progress. \code{\link[=withProgress]{withProgress()}} and \code{\link[=setProgress]{setProgress()}}
 together provide a simple function-based interface, while the
 \code{Progress} reference class provides an object-oriented API.
 
@@ -57,28 +57,28 @@ If you want to use the old styling (for example, you may have used customized
 CSS), you can use \code{style="old"} each time you call
 \code{Progress$new()}. If you don't want to set the style each time
 \code{Progress$new} is called, you can instead call
-\code{\link{shinyOptions}(progress.style="old")} just once, inside the server
+\code{\link[=shinyOptions]{shinyOptions(progress.style="old")}} just once, inside the server
 function.
 
 \strong{Methods}
-  \describe{
-    \item{\code{initialize(session, min = 0, max = 1)}}{
-      Creates a new progress panel (but does not display it).
-    }
-    \item{\code{set(value = NULL, message = NULL, detail = NULL)}}{
-      Updates the progress panel. When called the first time, the
-      progress panel is displayed.
-    }
-    \item{\code{inc(amount = 0.1, message = NULL, detail = NULL)}}{
-      Like \code{set}, this updates the progress panel. The difference is
-      that \code{inc} increases the progress bar by \code{amount}, instead
-      of setting it to a specific value.
-    }
-    \item{\code{close()}}{
-      Removes the progress panel. Future calls to \code{set} and
-      \code{close} will be ignored.
-    }
-  }
+\describe{
+\item{\code{initialize(session, min = 0, max = 1)}}{
+Creates a new progress panel (but does not display it).
+}
+\item{\code{set(value = NULL, message = NULL, detail = NULL)}}{
+Updates the progress panel. When called the first time, the
+progress panel is displayed.
+}
+\item{\code{inc(amount = 0.1, message = NULL, detail = NULL)}}{
+Like \code{set}, this updates the progress panel. The difference is
+that \code{inc} increases the progress bar by \code{amount}, instead
+of setting it to a specific value.
+}
+\item{\code{close()}}{
+Removes the progress panel. Future calls to \code{set} and
+\code{close} will be ignored.
+}
+}
 }
 \examples{
 ## Only run examples in interactive R sessions
@@ -108,6 +108,6 @@ shinyApp(ui, server)
 }
 }
 \seealso{
-\code{\link{withProgress}}
+\code{\link[=withProgress]{withProgress()}}
 }
 \keyword{datasets}

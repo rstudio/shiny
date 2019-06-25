@@ -69,5 +69,5 @@ shinyApp(ui, server)
 }
 }
 \seealso{
-\code{\link{dateInput}}
+\code{\link[=dateInput]{dateInput()}}
 }

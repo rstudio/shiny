@@ -8,12 +8,12 @@ tabsetPanel(..., id = NULL, selected = NULL, type = c("tabs",
   "pills"), position = NULL)
 }
 \arguments{
-\item{...}{\code{\link{tabPanel}} elements to include in the tabset}
+\item{...}{\code{\link[=tabPanel]{tabPanel()}} elements to include in the tabset}
 
 \item{id}{If provided, you can use \code{input$}\emph{\code{id}} in your
 server logic to determine which of the current tabs is active. The value
 will correspond to the \code{value} argument that is passed to
-\code{\link{tabPanel}}.}
+\code{\link[=tabPanel]{tabPanel()}}.}
 
 \item{selected}{The \code{value} (or, if none was supplied, the \code{title})
 of the tab that should be selected by default. If \code{NULL}, the first
@@ -26,10 +26,10 @@ look where tabs are selected using a background fill color.}
 Bootstrap 3.}
 }
 \value{
-A tabset that can be passed to \code{\link{mainPanel}}
+A tabset that can be passed to \code{\link[=mainPanel]{mainPanel()}}
 }
 \description{
-Create a tabset that contains \code{\link{tabPanel}} elements. Tabsets are
+Create a tabset that contains \code{\link[=tabPanel]{tabPanel()}} elements. Tabsets are
 useful for dividing output into multiple independently viewable sections.
 }
 \examples{
@@ -44,6 +44,6 @@ mainPanel(
 )
 }
 \seealso{
-\code{\link{tabPanel}}, \code{\link{updateTabsetPanel}},
-  \code{\link{insertTab}}, \code{\link{showTab}}
+\code{\link[=tabPanel]{tabPanel()}}, \code{\link[=updateTabsetPanel]{updateTabsetPanel()}},
+\code{\link[=insertTab]{insertTab()}}, \code{\link[=showTab]{showTab()}}
 }

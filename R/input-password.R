@@ -6,7 +6,7 @@
 #' @return A text input control that can be added to a UI definition.
 #'
 #' @family input elements
-#' @seealso \code{\link{updateTextInput}}
+#' @seealso [updateTextInput()]
 #'
 #' @examples
 #' ## Only run examples in interactive R sessions

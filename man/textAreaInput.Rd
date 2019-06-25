@@ -16,10 +16,10 @@ textAreaInput(inputId, label, value = "", width = NULL,
 \item{value}{Initial value.}
 
 \item{width}{The width of the input, e.g. \code{'400px'}, or \code{'100\%'};
-see \code{\link{validateCssUnit}}.}
+see \code{\link[=validateCssUnit]{validateCssUnit()}}.}
 
 \item{height}{The height of the input, e.g. \code{'400px'}, or
-\code{'100\%'}; see \code{\link{validateCssUnit}}.}
+\code{'100\%'}; see \code{\link[=validateCssUnit]{validateCssUnit()}}.}
 
 \item{cols}{Value of the visible character columns of the input, e.g.
 \code{80}. If used with \code{width}, \code{width} will take precedence in
@@ -60,7 +60,7 @@ shinyApp(ui, server)
 }
 }
 \seealso{
-\code{\link{updateTextAreaInput}}
+\code{\link[=updateTextAreaInput]{updateTextAreaInput()}}
 
 Other input elements: \code{\link{actionButton}},
   \code{\link{checkboxGroupInput}},

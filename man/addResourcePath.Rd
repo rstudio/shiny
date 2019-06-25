@@ -24,5 +24,5 @@ JavaScript/CSS files available to their components.
 addResourcePath('datasets', system.file('data', package='datasets'))
 }
 \seealso{
-\code{\link{singleton}}
+\code{\link[=singleton]{singleton()}}
 }

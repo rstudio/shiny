@@ -112,7 +112,7 @@ Note that this is always going to be the case if
 this is used inside an output context (e.g. \code{output$txt <- ...}). It may
 or may not be the case if it is used inside a non-output context (e.g.
 \code{\link[=reactive]{reactive()}}, \code{\link[=observe]{observe()}} or \code{\link[=observeEvent]{observeEvent()}})
--- depending on whether or not there is an \code{output$...} that is triggered
+--- depending on whether or not there is an \code{output$...} that is triggered
 as a result of those calls. See the examples below for concrete scenarios.
 }
 \examples{

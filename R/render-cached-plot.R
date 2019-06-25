@@ -20,11 +20,11 @@
 #'
 #' The key should consist of "normal" R objects, like vectors and lists. Lists
 #' should in turn contain other normal R objects. If the key contains
-#' environments, external pointers, or reference objects -- or even if it has
-#' such objects attached as attributes -- then it is possible that it will
+#' environments, external pointers, or reference objects --- or even if it has
+#' such objects attached as attributes --- then it is possible that it will
 #' change unpredictably even when you do not expect it to. Additionally, because
 #' the entire key is serialized and hashed, if it contains a very large object
-#' -- a large data set, for example -- there may be a noticeable performance
+#' --- a large data set, for example --- there may be a noticeable performance
 #' penalty.
 #'
 #' If you face these issues with the cache key, you can work around them by
@@ -62,8 +62,8 @@
 #'     be deleted. If plots cannot be safely shared across users, this should
 #'     not be used.}
 #'   \item{2}{To scope the cache to one session, use `cache="session"`.
-#'     When a new user session starts -- in other words, when a web browser
-#'     visits the Shiny application -- a new cache will be created on disk
+#'     When a new user session starts --- in other words, when a web browser
+#'     visits the Shiny application --- a new cache will be created on disk
 #'     for that session. When the session ends, the cache will be deleted.
 #'     The cache will not be shared across multiple sessions.}
 #'  }
@@ -379,7 +379,7 @@ renderCachedPlot <- function(expr,
     hybrid_chain(
       # Depend on the user cache key, even though we don't use the value. When
       # it changes, it can cause the drawReactive to re-execute. (Though
-      # drawReactive will not necessarily re-execute -- it must be called from
+      # drawReactive will not necessarily re-execute --- it must be called from
       # renderFunc, which happens only if there's a cache miss.)
       userCacheKey(),
       function(userCacheKeyValue) {

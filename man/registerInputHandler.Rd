@@ -7,7 +7,7 @@
 registerInputHandler(type, fun, force = FALSE)
 }
 \arguments{
-\item{type}{The type for which the handler should be added -- should be a
+\item{type}{The type for which the handler should be added --- should be a
 single-element character vector.}
 
 \item{fun}{The handler function. This is the function that will be used to

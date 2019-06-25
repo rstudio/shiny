@@ -12,7 +12,7 @@ removeUI(selector, multiple = FALSE, immediate = FALSE,
 string \code{s} to be placed in a \code{$(s)} jQuery call). This selector
 will determine the element(s) to be removed. If you want to remove a
 Shiny input or output, note that many of these are wrapped in \code{div}s,
-so you may need to use a somewhat complex selector -- see the Examples below.
+so you may need to use a somewhat complex selector --- see the Examples below.
 (Alternatively, you could also wrap the inputs/outputs that you want to be
 able to remove easily in a \code{div} with an id.)}
 

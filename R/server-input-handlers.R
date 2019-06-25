@@ -19,7 +19,7 @@ inputHandlers <- Map$new()
 #'
 #' The `type` of a custom Shiny Input widget will be deduced using the
 #' `getType()` JavaScript function on the registered Shiny inputBinding.
-#' @param type The type for which the handler should be added -- should be a
+#' @param type The type for which the handler should be added --- should be a
 #' single-element character vector.
 #' @param fun The handler function. This is the function that will be used to
 #'   parse the data delivered from the client before it is available in the

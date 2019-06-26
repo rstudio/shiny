@@ -61,5 +61,5 @@ shinyApp(ui, server)
 }
 }
 \seealso{
-\code{\link{reactiveTimer}} is a slightly less safe alternative.
+\code{\link[=reactiveTimer]{reactiveTimer()}} is a slightly less safe alternative.
 }

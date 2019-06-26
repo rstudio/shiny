@@ -17,6 +17,7 @@ shiny 1.3.2.9000
 
 * Partially resolved [#2423](https://github.com/rstudio/shiny/issues/2423): Reactivity in Shiny leaked some memory, because R can leak memory whenever a new symbols is interned, which happens whenever a new name/key is used in an environment. R now uses the fastmap package, which avoids this problem. ([#2429](https://github.com/rstudio/shiny/pull/2429))
 
+* Resolved [#2469](https://github.com/rstudio/shiny/issues/2469): `renderText` now takes a `sep` argument that is passed to `cat`. ([#2497](https://github.com/rstudio/shiny/pull/2497))
 
 ### Bug fixes
 

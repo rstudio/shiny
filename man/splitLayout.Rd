@@ -12,7 +12,7 @@ arguments will become HTML attributes on the outermost tag.}
 
 \item{cellWidths}{Character or numeric vector indicating the widths of the
 individual cells. Recycling will be used if needed. Character values will
-be interpreted as CSS lengths (see \code{\link{validateCssUnit}}), numeric
+be interpreted as CSS lengths (see \code{\link[=validateCssUnit]{validateCssUnit()}}), numeric
 values as pixels.}
 
 \item{cellArgs}{Any additional attributes that should be used for each cell

@@ -28,8 +28,8 @@ invoked.}
 }
 \value{
 A reactive expression that returns the contents of the file, and
-  automatically invalidates when the file changes on disk (as determined by
-  last modified time).
+automatically invalidates when the file changes on disk (as determined by
+last modified time).
 }
 \description{
 Given a file path and read function, returns a reactive data source for the
@@ -67,5 +67,5 @@ function(input, output, session) {
 }
 }
 \seealso{
-\code{\link{reactivePoll}}
+\code{\link[=reactivePoll]{reactivePoll()}}
 }

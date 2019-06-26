@@ -113,11 +113,6 @@ sd_section("Rendering functions",
     "renderTable",
     "renderUI",
     "downloadHandler",
-    "reactivePlot",
-    "reactivePrint",
-    "reactiveTable",
-    "reactiveText",
-    "reactiveUI",
     "createRenderFunction"
   )
 )

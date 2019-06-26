@@ -16,13 +16,13 @@ that this tab is selected. If omitted and \code{tabsetPanel} has an
 \code{id}, then the title will be used..}
 
 \item{icon}{Optional icon to appear on the tab. This attribute is only
-valid when using a \code{tabPanel} within a \code{\link{navbarPage}}.}
+valid when using a \code{tabPanel} within a \code{\link[=navbarPage]{navbarPage()}}.}
 }
 \value{
-A tab that can be passed to \code{\link{tabsetPanel}}
+A tab that can be passed to \code{\link[=tabsetPanel]{tabsetPanel()}}
 }
 \description{
-Create a tab panel that can be included within a \code{\link{tabsetPanel}}.
+Create a tab panel that can be included within a \code{\link[=tabsetPanel]{tabsetPanel()}}.
 }
 \examples{
 # Show a tabset that includes a plot, summary, and
@@ -36,5 +36,5 @@ mainPanel(
 )
 }
 \seealso{
-\code{\link{tabsetPanel}}
+\code{\link[=tabsetPanel]{tabsetPanel()}}
 }

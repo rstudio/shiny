@@ -10,12 +10,12 @@ reactiveVal(value = NULL, label = NULL)
 \item{value}{An optional initial value.}
 
 \item{label}{An optional label, for debugging purposes (see
-\code{\link{reactlog}}). If missing, a label will be automatically
+\code{\link[=reactlog]{reactlog()}}). If missing, a label will be automatically
 created.}
 }
 \value{
 A function. Call the function with no arguments to (reactively) read
-  the value; call the function with a single argument to set the value.
+the value; call the function with a single argument to set the value.
 }
 \description{
 The \code{reactiveVal} function is used to construct a "reactive value"
@@ -26,7 +26,7 @@ takes a dependency, and when you change the value, it notifies any reactives
 that previously depended on that value.
 }
 \details{
-\code{reactiveVal} is very similar to \code{\link{reactiveValues}}, except
+\code{reactiveVal} is very similar to \code{\link[=reactiveValues]{reactiveValues()}}, except
 that the former is for a single reactive value (like a variable), whereas the
 latter lets you conveniently use multiple reactive values by name (like a
 named list of variables). For a one-off reactive value, it's more natural to

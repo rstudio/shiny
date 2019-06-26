@@ -77,5 +77,5 @@ if (interactive()) {
 }
 }
 \seealso{
-\code{\link{sliderInput}}
+\code{\link[=sliderInput]{sliderInput()}}
 }

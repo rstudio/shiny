@@ -16,8 +16,8 @@ components in a web page.
 }
 \details{
 It isn't necessary to call this function if you use
-\code{\link{bootstrapPage}} or others which use \code{bootstrapPage}, such
-\code{\link{basicPage}}, \code{\link{fluidPage}}, \code{\link{fillPage}},
-\code{\link{pageWithSidebar}}, and \code{\link{navbarPage}}, because they
+\code{\link[=bootstrapPage]{bootstrapPage()}} or others which use \code{bootstrapPage}, such
+\code{\link[=basicPage]{basicPage()}}, \code{\link[=fluidPage]{fluidPage()}}, \code{\link[=fillPage]{fillPage()}},
+\code{\link[=pageWithSidebar]{pageWithSidebar()}}, and \code{\link[=navbarPage]{navbarPage()}}, because they
 already include the Bootstrap web dependencies.
 }

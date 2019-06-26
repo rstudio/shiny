@@ -23,7 +23,7 @@ return a list of all currently-set Shiny options.
 }
 \details{
 There is a global option set, which is available by default. When a Shiny
-application is run with \code{\link{runApp}}, that option set is duplicated
+application is run with \code{\link[=runApp]{runApp()}}, that option set is duplicated
 and the new option set is available for getting or setting values. If options
 are set from global.R, app.R, ui.R, or server.R, or if they are set from
 inside the server function, then the options will be scoped to the

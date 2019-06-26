@@ -17,8 +17,8 @@ removeModal(session = getDefaultReactiveDomain())
 }
 \description{
 This causes a modal dialog to be displayed in the client browser, and is
-typically used with \code{\link{modalDialog}}.
+typically used with \code{\link[=modalDialog]{modalDialog()}}.
 }
 \seealso{
-\code{\link{modalDialog}} for examples.
+\code{\link[=modalDialog]{modalDialog()}} for examples.
 }

@@ -40,7 +40,7 @@ access the current default reactive domain by calling
 Unless you specify otherwise, newly created observers and reactive
 expressions will be assigned to the current default domain (if any). You can
 override this assignment by providing an explicit \code{domain} argument to
-\code{\link{reactive}} or \code{\link{observe}}.
+\code{\link[=reactive]{reactive()}} or \code{\link[=observe]{observe()}}.
 
 For advanced usage, it's possible to override the default domain using
 \code{withReactiveDomain}. The \code{domain} argument will be made the

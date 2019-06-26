@@ -42,7 +42,7 @@ registerClient <- function(client) {
 #' @param directoryPath The directory that contains the static resources to be
 #'   served.
 #'
-#' @seealso \code{\link{singleton}}
+#' @seealso [singleton()]
 #'
 #' @examples
 #' addResourcePath('datasets', system.file('data', package='datasets'))
@@ -132,23 +132,23 @@ resourcePathHandler <- function(req) {
 #'
 #' Defines the server-side logic of the Shiny application. This generally
 #' involves creating functions that map user inputs to various kinds of output.
-#' In older versions of Shiny, it was necessary to call \code{shinyServer()} in
-#' the \code{server.R} file, but this is no longer required as of Shiny 0.10.
-#' Now the \code{server.R} file may simply return the appropriate server
+#' In older versions of Shiny, it was necessary to call `shinyServer()` in
+#' the `server.R` file, but this is no longer required as of Shiny 0.10.
+#' Now the `server.R` file may simply return the appropriate server
 #' function (as the last expression in the code), without calling
-#' \code{shinyServer()}.
+#' `shinyServer()`.
 #'
-#' Call \code{shinyServer} from your application's \code{server.R}
+#' Call `shinyServer` from your application's `server.R`
 #' file, passing in a "server function" that provides the server-side logic of
 #' your application.
 #'
 #' The server function will be called when each client (web browser) first loads
-#' the Shiny application's page. It must take an \code{input} and an
-#' \code{output} parameter. Any return value will be ignored. It also takes an
-#' optional \code{session} parameter, which is used when greater control is
+#' the Shiny application's page. It must take an `input` and an
+#' `output` parameter. Any return value will be ignored. It also takes an
+#' optional `session` parameter, which is used when greater control is
 #' needed.
 #'
-#' See the \href{http://rstudio.github.com/shiny/tutorial/}{tutorial} for more
+#' See the [tutorial](http://rstudio.github.com/shiny/tutorial/) for more
 #' on how to write a server function.
 #'
 #' @param func The server function for this application. See the details section
@@ -175,6 +175,7 @@ resourcePathHandler <- function(req) {
 #' }
 #' }
 #' @export
+#' @keywords internal
 shinyServer <- function(func) {
   .globals$server <- list(func)
   invisible(func)
@@ -520,8 +521,8 @@ serviceApp <- function() {
 #'
 #' This function tests whether a Shiny application is currently running.
 #'
-#' @return \code{TRUE} if a Shiny application is currently running. Otherwise,
-#'   \code{FALSE}.
+#' @return `TRUE` if a Shiny application is currently running. Otherwise,
+#'   `FALSE`.
 #' @export
 isRunning <- function() {
   .globals$running
@@ -533,44 +534,44 @@ isRunning <- function() {
 #' to stop the application (usually by pressing Ctrl+C or Esc).
 #'
 #' The host parameter was introduced in Shiny 0.9.0. Its default value of
-#' \code{"127.0.0.1"} means that, contrary to previous versions of Shiny, only
+#' `"127.0.0.1"` means that, contrary to previous versions of Shiny, only
 #' the current machine can access locally hosted Shiny apps. To allow other
-#' clients to connect, use the value \code{"0.0.0.0"} instead (which was the
+#' clients to connect, use the value `"0.0.0.0"` instead (which was the
 #' value that was hard-coded into Shiny in 0.8.0 and earlier).
 #'
 #' @param appDir The application to run. Should be one of the following:
 #'   \itemize{
-#'   \item A directory containing \code{server.R}, plus, either \code{ui.R} or
-#'    a \code{www} directory that contains the file \code{index.html}.
-#'   \item A directory containing \code{app.R}.
-#'   \item An \code{.R} file containing a Shiny application, ending with an
+#'   \item A directory containing `server.R`, plus, either `ui.R` or
+#'    a `www` directory that contains the file `index.html`.
+#'   \item A directory containing `app.R`.
+#'   \item An `.R` file containing a Shiny application, ending with an
 #'    expression that produces a Shiny app object.
-#'   \item A list with \code{ui} and \code{server} components.
-#'   \item A Shiny app object created by \code{\link{shinyApp}}.
+#'   \item A list with `ui` and `server` components.
+#'   \item A Shiny app object created by [shinyApp()].
 #'   }
 #' @param port The TCP port that the application should listen on. If the
-#'   \code{port} is not specified, and the \code{shiny.port} option is set (with
-#'   \code{options(shiny.port = XX)}), then that port will be used. Otherwise,
+#'   `port` is not specified, and the `shiny.port` option is set (with
+#'   `options(shiny.port = XX)`), then that port will be used. Otherwise,
 #'   use a random port.
 #' @param launch.browser If true, the system's default web browser will be
 #'   launched automatically after the app is started. Defaults to true in
 #'   interactive sessions only. This value of this parameter can also be a
 #'   function to call with the application's URL.
 #' @param host The IPv4 address that the application should listen on. Defaults
-#'   to the \code{shiny.host} option, if set, or \code{"127.0.0.1"} if not. See
+#'   to the `shiny.host` option, if set, or `"127.0.0.1"` if not. See
 #'   Details.
 #' @param workerId Can generally be ignored. Exists to help some editions of
 #'   Shiny Server Pro route requests to the correct process.
 #' @param quiet Should Shiny status messages be shown? Defaults to FALSE.
 #' @param display.mode The mode in which to display the application. If set to
-#'   the value \code{"showcase"}, shows application code and metadata from a
-#'   \code{DESCRIPTION} file in the application directory alongside the
-#'   application. If set to \code{"normal"}, displays the application normally.
-#'   Defaults to \code{"auto"}, which displays the application in the mode given
-#'   in its \code{DESCRIPTION} file, if any.
+#'   the value `"showcase"`, shows application code and metadata from a
+#'   `DESCRIPTION` file in the application directory alongside the
+#'   application. If set to `"normal"`, displays the application normally.
+#'   Defaults to `"auto"`, which displays the application in the mode given
+#'   in its `DESCRIPTION` file, if any.
 #' @param test.mode Should the application be launched in test mode? This is
 #'   only used for recording or running automated tests. Defaults to the
-#'   \code{shiny.testmode} option, or FALSE if the option is not set.
+#'   `shiny.testmode` option, or FALSE if the option is not set.
 #'
 #' @examples
 #' \dontrun{
@@ -891,10 +892,10 @@ runApp <- function(appDir=getwd(),
 #' Stop the currently running Shiny app
 #'
 #' Stops the currently running Shiny app, returning control to the caller of
-#' \code{\link{runApp}}.
+#' [runApp()].
 #'
 #' @param returnValue The value that should be returned from
-#'   \code{\link{runApp}}.
+#'   [runApp()].
 #' @export
 stopApp <- function(returnValue = invisible()) {
   # reterror will indicate whether retval is an error (i.e. it should be passed
@@ -923,7 +924,7 @@ stopApp <- function(returnValue = invisible()) {
 #'
 #' Launch Shiny example applications, and optionally, your system's web browser.
 #'
-#' @param example The name of the example to run, or \code{NA} (the default) to
+#' @param example The name of the example to run, or `NA` (the default) to
 #'   list the available examples.
 #' @param port The TCP port that the application should listen on. Defaults to
 #'   choosing a random port.
@@ -931,9 +932,9 @@ stopApp <- function(returnValue = invisible()) {
 #'   launched automatically after the app is started. Defaults to true in
 #'   interactive sessions only.
 #' @param host The IPv4 address that the application should listen on. Defaults
-#'   to the \code{shiny.host} option, if set, or \code{"127.0.0.1"} if not.
+#'   to the `shiny.host` option, if set, or `"127.0.0.1"` if not.
 #' @param display.mode The mode in which to display the example. Defaults to
-#'   \code{showcase}, but may be set to \code{normal} to see the example without
+#'   `showcase`, but may be set to `normal` to see the example without
 #'   code or commentary.
 #'
 #' @examples
@@ -980,21 +981,21 @@ runExample <- function(example=NA,
 
 #' Run a gadget
 #'
-#' Similar to \code{runApp}, but handles \code{input$cancel} automatically, and
+#' Similar to `runApp`, but handles `input$cancel` automatically, and
 #' if running in RStudio, defaults to viewing the app in the Viewer pane.
 #'
 #' @param app Either a Shiny app object as created by
-#'   \code{\link[=shiny]{shinyApp}} et al, or, a UI object.
-#' @param server Ignored if \code{app} is a Shiny app object; otherwise, passed
-#'   along to \code{shinyApp} (i.e. \code{shinyApp(ui = app, server = server)}).
-#' @param port See \code{\link[=shiny]{runApp}}.
+#'   [`shinyApp()`][shiny] et al, or, a UI object.
+#' @param server Ignored if `app` is a Shiny app object; otherwise, passed
+#'   along to `shinyApp` (i.e. `shinyApp(ui = app, server = server)`).
+#' @param port See [`runApp()`][shiny].
 #' @param viewer Specify where the gadget should be displayed--viewer pane,
 #'   dialog window, or external browser--by passing in a call to one of the
-#'   \code{\link{viewer}} functions.
-#' @param stopOnCancel If \code{TRUE} (the default), then an \code{observeEvent}
-#'   is automatically created that handles \code{input$cancel} by calling
-#'   \code{stopApp()} with an error. Pass \code{FALSE} if you want to handle
-#'   \code{input$cancel} yourself.
+#'   [viewer()] functions.
+#' @param stopOnCancel If `TRUE` (the default), then an `observeEvent`
+#'   is automatically created that handles `input$cancel` by calling
+#'   `stopApp()` with an error. Pass `FALSE` if you want to handle
+#'   `input$cancel` yourself.
 #' @return The value returned by the gadget.
 #'
 #' @examples
@@ -1059,10 +1060,10 @@ decorateServerFunc <- function(appobj, serverFunc) {
 #' other R environments that emulate RStudio's viewer pane/dialog APIs). If
 #' viewer APIs are not available in the current R environment, then the gadget
 #' will be displayed in the system's default web browser (see
-#' \code{\link[utils]{browseURL}}).
+#' [utils::browseURL()]).
 #'
-#' @return A function that takes a single \code{url} parameter, suitable for
-#'   passing as the \code{viewer} argument of \code{\link{runGadget}}.
+#' @return A function that takes a single `url` parameter, suitable for
+#'   passing as the `viewer` argument of [runGadget()].
 #'
 #' @rdname viewer
 #' @name viewer
@@ -1070,8 +1071,8 @@ NULL
 
 #' @param minHeight The minimum height (in pixels) desired to show the gadget in
 #'   the viewer pane. If a positive number, resize the pane if necessary to show
-#'   at least that many pixels. If \code{NULL}, use the existing viewer pane
-#'   size. If \code{"maximize"}, use the maximum available vertical space.
+#'   at least that many pixels. If `NULL`, use the existing viewer pane
+#'   size. If `"maximize"`, use the maximum available vertical space.
 #' @rdname viewer
 #' @export
 paneViewer <- function(minHeight = NULL) {
@@ -1100,7 +1101,7 @@ dialogViewer <- function(dialogName, width = 600, height = 600) {
   }
 }
 
-#' @param browser See \code{\link[utils]{browseURL}}.
+#' @param browser See [utils::browseURL()].
 #' @rdname viewer
 #' @export
 browserViewer <- function(browser = getOption("browser")) {

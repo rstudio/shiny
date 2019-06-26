@@ -1,13 +1,13 @@
 #' Show or remove a modal dialog
 #'
 #' This causes a modal dialog to be displayed in the client browser, and is
-#' typically used with \code{\link{modalDialog}}.
+#' typically used with [modalDialog()].
 #'
 #' @param ui UI content to show in the modal.
-#' @param session The \code{session} object passed to function given to
-#'   \code{shinyServer}.
+#' @param session The `session` object passed to function given to
+#'   `shinyServer`.
 #'
-#' @seealso \code{\link{modalDialog}} for examples.
+#' @seealso [modalDialog()] for examples.
 #' @export
 showModal <- function(ui, session = getDefaultReactiveDomain()) {
   res <- processDeps(ui, session)
@@ -35,15 +35,15 @@ removeModal <- function(session = getDefaultReactiveDomain()) {
 #'
 #' @param ... UI elements for the body of the modal dialog box.
 #' @param title An optional title for the dialog.
-#' @param footer UI for footer. Use \code{NULL} for no footer.
-#' @param size One of \code{"s"} for small, \code{"m"} (the default) for medium,
-#'   or \code{"l"} for large.
-#' @param easyClose If \code{TRUE}, the modal dialog can be dismissed by
+#' @param footer UI for footer. Use `NULL` for no footer.
+#' @param size One of `"s"` for small, `"m"` (the default) for medium,
+#'   or `"l"` for large.
+#' @param easyClose If `TRUE`, the modal dialog can be dismissed by
 #'   clicking outside the dialog box, or be pressing the Escape key. If
-#'   \code{FALSE} (the default), the modal dialog can't be dismissed in those
+#'   `FALSE` (the default), the modal dialog can't be dismissed in those
 #'   ways; instead it must be dismissed by clicking on the dismiss button, or
-#'   from a call to \code{\link{removeModal}} on the server.
-#' @param fade If \code{FALSE}, the modal dialog will have no fade-in animation
+#'   from a call to [removeModal()] on the server.
+#' @param fade If `FALSE`, the modal dialog will have no fade-in animation
 #'   (it will simply appear rather than fade in to view).
 #'
 #' @examples
@@ -171,10 +171,10 @@ modalDialog <- function(..., title = NULL, footer = modalButton("Dismiss"),
 
 #' Create a button for a modal dialog
 #'
-#' When clicked, a \code{modalButton} will dismiss the modal dialog.
+#' When clicked, a `modalButton` will dismiss the modal dialog.
 #'
 #' @inheritParams actionButton
-#' @seealso \code{\link{modalDialog}} for examples.
+#' @seealso [modalDialog()] for examples.
 #' @export
 modalButton <- function(label, icon = NULL) {
   tags$button(type = "button", class = "btn btn-default",

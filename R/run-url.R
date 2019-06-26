@@ -1,24 +1,24 @@
 #' Run a Shiny application from a URL
 #'
-#' \code{runUrl()} downloads and launches a Shiny application that is hosted at
+#' `runUrl()` downloads and launches a Shiny application that is hosted at
 #' a downloadable URL. The Shiny application must be saved in a .zip, .tar, or
 #' .tar.gz file. The Shiny application files must be contained in the root
 #' directory or a subdirectory in the archive. For example, the files might be
-#' \code{myapp/server.r} and \code{myapp/ui.r}. The functions \code{runGitHub()}
-#' and \code{runGist()} are based on \code{runUrl()}, using URL's from GitHub
-#' (\url{https://github.com}) and GitHub gists (\url{https://gist.github.com}),
+#' `myapp/server.r` and `myapp/ui.r`. The functions `runGitHub()`
+#' and `runGist()` are based on `runUrl()`, using URL's from GitHub
+#' (<https://github.com>) and GitHub gists (<https://gist.github.com>),
 #' respectively.
 #' @param url URL of the application.
-#' @param filetype The file type (\code{".zip"}, \code{".tar"}, or
-#'   \code{".tar.gz"}. Defaults to the file extension taken from the url.
+#' @param filetype The file type (`".zip"`, `".tar"`, or
+#'   `".tar.gz"`. Defaults to the file extension taken from the url.
 #' @param subdir A subdirectory in the repository that contains the app. By
 #'   default, this function will run an app from the top level of the repo, but
-#'   you can use a path such as `\code{"inst/shinyapp"}.
-#' @param destdir Directory to store the downloaded application files. If \code{NULL}
+#'   you can use a path such as `"inst/shinyapp"`.
+#' @param destdir Directory to store the downloaded application files. If `NULL`
 #'   (the default), the application files will be stored in a temporary directory
 #'   and removed when the app exits
-#' @param ... Other arguments to be passed to \code{\link{runApp}()}, such as
-#'   \code{port} and \code{launch.browser}.
+#' @param ... Other arguments to be passed to [runApp()], such as
+#'   `port` and `launch.browser`.
 #' @export
 #' @examples
 #' ## Only run this example in interactive R sessions
@@ -88,8 +88,8 @@ runUrl <- function(url, filetype = NULL, subdir = NULL, destdir = NULL, ...) {
 
 #' @rdname runUrl
 #' @param gist The identifier of the gist. For example, if the gist is
-#'   https://gist.github.com/jcheng5/3239667, then \code{3239667},
-#'   \code{'3239667'}, and \code{'https://gist.github.com/jcheng5/3239667'} are
+#'   https://gist.github.com/jcheng5/3239667, then `3239667`,
+#'   `'3239667'`, and `'https://gist.github.com/jcheng5/3239667'` are
 #'   all valid values.
 #' @export
 #' @examples
@@ -118,10 +118,10 @@ runGist <- function(gist, destdir = NULL, ...) {
 
 #' @rdname runUrl
 #' @param repo Name of the repository.
-#' @param username GitHub username. If \code{repo} is of the form
-#'   \code{"username/repo"}, \code{username} will be taken from \code{repo}.
+#' @param username GitHub username. If `repo` is of the form
+#'   `"username/repo"`, `username` will be taken from `repo`.
 #' @param ref Desired git reference. Could be a commit, tag, or branch name.
-#'   Defaults to \code{"master"}.
+#'   Defaults to `"master"`.
 #' @export
 #' @examples
 #' ## Only run this example in interactive R sessions

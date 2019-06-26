@@ -59,8 +59,8 @@ reactIdStr <- function(num) {
 #' dependencies and execution in your application.
 #'
 #' To use the reactive log visualizer, start with a fresh R session and
-#' run the command \code{options(shiny.reactlog=TRUE)}; then launch your
-#' application in the usual way (e.g. using \code{\link{runApp}}). At
+#' run the command `options(shiny.reactlog=TRUE)`; then launch your
+#' application in the usual way (e.g. using [runApp()]). At
 #' any time you can hit Ctrl+F3 (or for Mac users, Command+F3) in your
 #' web browser to launch the reactive log visualization.
 #'
@@ -75,14 +75,14 @@ reactIdStr <- function(num) {
 #'
 #' As an alternative to pressing Ctrl/Command+F3--for example, if you
 #' are using reactives outside of the context of a Shiny
-#' application--you can run the \code{reactlogShow} function, which will
+#' application--you can run the `reactlogShow` function, which will
 #' generate the reactive log visualization as a static HTML file and
 #' launch it in your default browser. In this case, refreshing your
 #' browser will not load new activity into the report; you will need to
-#' call \code{reactlogShow()} explicitly.
+#' call `reactlogShow()` explicitly.
 #'
 #' For security and performance reasons, do not enable
-#' \code{shiny.reactlog} in production environments. When the option is
+#' `shiny.reactlog` in production environments. When the option is
 #' enabled, it's possible for any user of your app to see at least some
 #' of the source code of your reactive expressions and observers.
 #'
@@ -91,7 +91,7 @@ NULL
 
 
 #' @describeIn reactlog Return a list of reactive information.  Can be used in conjunction with
-#'   \code{reactlog::\link[reactlog]{reactlog_show}} to later display the reactlog graph.
+#'   [reactlog::reactlog_show] to later display the reactlog graph.
 #' @export
 reactlog <- function() {
   rLog$asList()
@@ -104,7 +104,7 @@ reactlogShow <- function(time = TRUE) {
   check_reactlog()
   reactlog::reactlog_show(reactlog(), time = time)
 }
-#' @describeIn reactlog This function is deprecated. You should use \code{\link{reactlogShow}}
+#' @describeIn reactlog This function is deprecated. You should use [reactlogShow()]
 #' @export
 # legacy purposes
 showReactLog <- function(time = TRUE) {

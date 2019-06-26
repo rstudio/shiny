@@ -5,7 +5,7 @@
 \title{Text Output}
 \usage{
 renderText(expr, env = parent.frame(), quoted = FALSE,
-  outputArgs = list())
+  outputArgs = list(), sep = " ")
 }
 \arguments{
 \item{expr}{An expression that returns an R object that can be used as an
@@ -17,12 +17,15 @@ argument to \code{cat}.}
 is useful if you want to save an expression in a variable.}
 
 \item{outputArgs}{A list of arguments to be passed through to the implicit
-call to \code{\link{textOutput}} when \code{renderText} is used in an
+call to \code{\link[=textOutput]{textOutput()}} when \code{renderText} is used in an
 interactive R Markdown document.}
+
+\item{sep}{A separator passed to \code{cat} to be appended after each
+element.}
 }
 \description{
 Makes a reactive version of the given function that also uses
-\code{\link[base]{cat}} to turn its result into a single-element character
+\code{\link[base:cat]{base::cat()}} to turn its result into a single-element character
 vector.
 }
 \details{
@@ -31,7 +34,7 @@ recommended if you need a monospace font and whitespace preserved) and should
 have the CSS class name \code{shiny-text-output}.
 
 The result of executing \code{func} will passed to \code{cat}, inside a
-\code{\link[utils]{capture.output}} call.
+\code{\link[utils:capture.output]{utils::capture.output()}} call.
 }
 \examples{
 isolate({
@@ -98,6 +101,6 @@ vecFun()
 })
 }
 \seealso{
-\code{\link{renderPrint}} for capturing the print output of a
-  function, rather than the returned text value.
+\code{\link[=renderPrint]{renderPrint()}} for capturing the print output of a
+function, rather than the returned text value.
 }

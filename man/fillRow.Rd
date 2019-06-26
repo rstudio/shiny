@@ -12,7 +12,7 @@ fillCol(..., flex = 1, width = "100\%", height = "100\%")
 \arguments{
 \item{...}{UI objects to put in each row/column cell; each argument will
 occupy a single cell. (To put multiple items in a single cell, you can use
-\code{\link{tagList}} or \code{\link{div}} to combine them.) Named
+\code{\link[=tagList]{tagList()}} or \code{\link[=div]{div()}} to combine them.) Named
 arguments will be used as attributes on the \code{div} element that
 encapsulates the row/column.}
 
@@ -38,20 +38,20 @@ browsers can be assumed.
 }
 \details{
 If you try to use \code{fillRow} and \code{fillCol} inside of other
-  Shiny containers, such as \code{\link{sidebarLayout}},
-  \code{\link{navbarPage}}, or even \code{tags$div}, you will probably find
-  that they will not appear. This is due to \code{fillRow} and \code{fillCol}
-  defaulting to \code{height="100\%"}, which will only work inside of
-  containers that have determined their own size (rather than shrinking to
-  the size of their contents, as is usually the case in HTML).
+Shiny containers, such as \code{\link[=sidebarLayout]{sidebarLayout()}},
+\code{\link[=navbarPage]{navbarPage()}}, or even \code{tags$div}, you will probably find
+that they will not appear. This is due to \code{fillRow} and \code{fillCol}
+defaulting to \code{height="100\%"}, which will only work inside of
+containers that have determined their own size (rather than shrinking to
+the size of their contents, as is usually the case in HTML).
 
-  To avoid this problem, you have two options:
-  \itemize{
-    \item only use \code{fillRow}/\code{fillCol} inside of \code{fillPage},
-      \code{fillRow}, or \code{fillCol}
-    \item provide an explicit \code{height} argument to
-      \code{fillRow}/\code{fillCol}
-  }
+To avoid this problem, you have two options:
+\itemize{
+\item only use \code{fillRow}/\code{fillCol} inside of \code{fillPage},
+\code{fillRow}, or \code{fillCol}
+\item provide an explicit \code{height} argument to
+\code{fillRow}/\code{fillCol}
+}
 }
 \examples{
 # Only run this example in interactive R sessions.

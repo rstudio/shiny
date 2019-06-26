@@ -57,10 +57,10 @@ expression in order for the match to be considered successful.}
 
 \item{enableBookmarking}{Can be one of \code{"url"}, \code{"server"}, or
 \code{"disable"}. This is equivalent to calling the
-\code{\link{enableBookmarking}()} function just before calling
+\code{\link[=enableBookmarking]{enableBookmarking()}} function just before calling
 \code{shinyApp()}. With the default value (\code{NULL}), the app will
 respect the setting from any previous calls to \code{enableBookmarking()}.
-See \code{\link{enableBookmarking}} for more information.}
+See \code{\link[=enableBookmarking]{enableBookmarking()}} for more information.}
 
 \item{appDir}{Path to directory that contains a Shiny app (i.e. a server.R
 file and either ui.R or www/index.html)}
@@ -73,7 +73,7 @@ file and either ui.R or www/index.html)}
 }
 \value{
 An object that represents the app. Printing the object or passing it
-  to \code{\link{runApp}} will run the app.
+to \code{\link[=runApp]{runApp()}} will run the app.
 }
 \description{
 These functions create Shiny app objects from either an explicit UI/server
@@ -87,7 +87,7 @@ Normally when this function is used at the R console, the Shiny app object is
 automatically passed to the \code{print()} function, which runs the app. If
 this is called in the middle of a function, the value will not be passed to
 \code{print()} and the app will not be run. To make the app run, pass the app
-object to \code{print()} or \code{\link{runApp}()}.
+object to \code{print()} or \code{\link[=runApp]{runApp()}}.
 }
 \examples{
 ## Only run this example in interactive R sessions

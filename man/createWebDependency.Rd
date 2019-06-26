@@ -8,7 +8,7 @@ createWebDependency(dependency, scrubFile = TRUE)
 }
 \arguments{
 \item{dependency}{A single HTML dependency object, created using
-\code{\link[htmltools]{htmlDependency}}. If the \code{src} value is named,
+\code{\link[htmltools:htmlDependency]{htmltools::htmlDependency()}}. If the \code{src} value is named,
 then \code{href} and/or \code{file} names must be present.}
 
 \item{scrubFile}{If TRUE (the default), remove \code{src$file} for the
@@ -19,11 +19,11 @@ cases.}
 }
 \value{
 A single HTML dependency object that has an \code{href}-named element
-  in its \code{src}.
+in its \code{src}.
 }
 \description{
 Ensure that a file-based HTML dependency (from the htmltools package) can be
 served over Shiny's HTTP server. This function works by using
-\code{\link{addResourcePath}} to map the HTML dependency's directory to a
+\code{\link[=addResourcePath]{addResourcePath()}} to map the HTML dependency's directory to a
 URL.
 }

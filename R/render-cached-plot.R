@@ -2,29 +2,29 @@
 #'
 #' Renders a reactive plot, with plot images cached to disk.
 #'
-#' \code{expr} is an expression that generates a plot, similar to that in
-#' \code{renderPlot}. Unlike with \code{renderPlot}, this expression does not
+#' `expr` is an expression that generates a plot, similar to that in
+#' `renderPlot`. Unlike with `renderPlot`, this expression does not
 #' take reactive dependencies. It is re-executed only when the cache key
 #' changes.
 #'
-#' \code{cacheKeyExpr} is an expression which, when evaluated, returns an object
-#' which will be serialized and hashed using the \code{\link[digest]{digest}}
+#' `cacheKeyExpr` is an expression which, when evaluated, returns an object
+#' which will be serialized and hashed using the [digest::digest()]
 #' function to generate a string that will be used as a cache key. This key is
 #' used to identify the contents of the plot: if the cache key is the same as a
 #' previous time, it assumes that the plot is the same and can be retrieved from
 #' the cache.
 #'
-#' This \code{cacheKeyExpr} is reactive, and so it will be re-evaluated when any
+#' This `cacheKeyExpr` is reactive, and so it will be re-evaluated when any
 #' upstream reactives are invalidated. This will also trigger re-execution of
-#' the plotting expression, \code{expr}.
+#' the plotting expression, `expr`.
 #'
 #' The key should consist of "normal" R objects, like vectors and lists. Lists
 #' should in turn contain other normal R objects. If the key contains
-#' environments, external pointers, or reference objects -- or even if it has
-#' such objects attached as attributes -- then it is possible that it will
+#' environments, external pointers, or reference objects --- or even if it has
+#' such objects attached as attributes --- then it is possible that it will
 #' change unpredictably even when you do not expect it to. Additionally, because
 #' the entire key is serialized and hashed, if it contains a very large object
-#' -- a large data set, for example -- there may be a noticeable performance
+#' --- a large data set, for example --- there may be a noticeable performance
 #' penalty.
 #'
 #' If you face these issues with the cache key, you can work around them by
@@ -32,12 +32,12 @@
 #' to normal R objects before returning them. Your expression could even
 #' serialize and hash that information in an efficient way and return a string,
 #' which will in turn be hashed (very quickly) by the
-#' \code{\link[digest]{digest}} function.
+#' [digest::digest()] function.
 #'
-#' Internally, the result from \code{cacheKeyExpr} is combined with the name of
-#' the output (if you assign it to \code{output$plot1}, it will be combined
-#' with \code{"plot1"}) to form the actual key that is used. As a result, even
-#' if there are multiple plots that have the same \code{cacheKeyExpr}, they
+#' Internally, the result from `cacheKeyExpr` is combined with the name of
+#' the output (if you assign it to `output$plot1`, it will be combined
+#' with `"plot1"`) to form the actual key that is used. As a result, even
+#' if there are multiple plots that have the same `cacheKeyExpr`, they
 #' will not have cache key collisions.
 #'
 #' @section Cache scoping:
@@ -49,28 +49,28 @@
 #'   cache that persists even after the application is shut down and started
 #'   again.
 #'
-#'   To control the scope of the cache, use the \code{cache} parameter. There
+#'   To control the scope of the cache, use the `cache` parameter. There
 #'   are two ways of having Shiny automatically create and clean up the disk
 #'   cache.
 #'
 #' \describe{
 #'   \item{1}{To scope the cache to one run of a Shiny application (shared
-#'     among possibly multiple user sessions), use \code{cache="app"}. This
+#'     among possibly multiple user sessions), use `cache="app"`. This
 #'     is the default. The cache will be shared across multiple sessions, so
 #'     there is potentially a large performance benefit if there are many users
 #'     of the application. When the application stops running, the cache will
 #'     be deleted. If plots cannot be safely shared across users, this should
 #'     not be used.}
-#'   \item{2}{To scope the cache to one session, use \code{cache="session"}.
-#'     When a new user session starts -- in other words, when a web browser
-#'     visits the Shiny application -- a new cache will be created on disk
+#'   \item{2}{To scope the cache to one session, use `cache="session"`.
+#'     When a new user session starts --- in other words, when a web browser
+#'     visits the Shiny application --- a new cache will be created on disk
 #'     for that session. When the session ends, the cache will be deleted.
 #'     The cache will not be shared across multiple sessions.}
 #'  }
 #'
-#'   If either \code{"app"} or \code{"session"} is used, the cache will be 10 MB
+#'   If either `"app"` or `"session"` is used, the cache will be 10 MB
 #'   in size, and will be stored stored in memory, using a
-#'   \code{\link{memoryCache}} object. Note that the cache space will be shared
+#'   [memoryCache()] object. Note that the cache space will be shared
 #'   among all cached plots within a single application or session.
 #'
 #'   In some cases, you may want more control over the caching behavior. For
@@ -79,7 +79,7 @@
 #'   multiple runs of an application, or even across multiple R processes.
 #'
 #'   To use different settings for an application-scoped cache, you can call
-#'   \code{\link{shinyOptions}()} at the top of your app.R, server.R, or
+#'   [shinyOptions()] at the top of your app.R, server.R, or
 #'   global.R. For example, this will create a cache with 20 MB of space
 #'   instead of the default 10 MB:
 #'   \preformatted{
@@ -87,9 +87,9 @@
 #'   }
 #'
 #'   To use different settings for a session-scoped cache, you can call
-#'   \code{\link{shinyOptions}()} at the top of your server function. To use
-#'   the session-scoped cache, you must also call \code{renderCachedPlot} with
-#'   \code{cache="session"}. This will create a 20 MB cache for the session:
+#'   [shinyOptions()] at the top of your server function. To use
+#'   the session-scoped cache, you must also call `renderCachedPlot` with
+#'   `cache="session"`. This will create a 20 MB cache for the session:
 #'   \preformatted{
 #'   function(input, output, session) {
 #'     shinyOptions(cache = memoryCache(size = 20e6))
@@ -102,7 +102,7 @@
 #'   }
 #'
 #'   If you want to create a cache that is shared across multiple concurrent
-#'   R processes, you can use a \code{\link{diskCache}}. You can create an
+#'   R processes, you can use a [diskCache()]. You can create an
 #'   application-level shared cache by putting this at the top of your app.R,
 #'   server.R, or global.R:
 #'   \preformatted{
@@ -110,7 +110,7 @@
 #'   }
 #'
 #'   This will create a subdirectory in your system temp directory named
-#'   \code{myapp-cache} (replace \code{myapp-cache} with a unique name of
+#'   `myapp-cache` (replace `myapp-cache` with a unique name of
 #'   your choosing). On most platforms, this directory will be removed when
 #'   your system reboots. This cache will persist across multiple starts and
 #'   stops of the R process, as long as you do not reboot.
@@ -126,34 +126,34 @@
 #'   the directory.
 #'
 #'   You can also scope a cache to just one plot, or selected plots. To do that,
-#'   create a \code{\link{memoryCache}} or \code{\link{diskCache}}, and pass it
-#'   as the \code{cache} argument of \code{renderCachedPlot}.
+#'   create a [memoryCache()] or [diskCache()], and pass it
+#'   as the `cache` argument of `renderCachedPlot`.
 #'
 #' @section Interactive plots:
 #'
-#'   \code{renderCachedPlot} can be used to create interactive plots. See
-#'   \code{\link{plotOutput}} for more information and examples.
+#'   `renderCachedPlot` can be used to create interactive plots. See
+#'   [plotOutput()] for more information and examples.
 #'
 #'
 #' @inheritParams renderPlot
 #' @param cacheKeyExpr An expression that returns a cache key. This key should
 #'   be a unique identifier for a plot: the assumption is that if the cache key
 #'   is the same, then the plot will be the same.
-#' @param sizePolicy A function that takes two arguments, \code{width} and
-#'   \code{height}, and returns a list with \code{width} and \code{height}. The
+#' @param sizePolicy A function that takes two arguments, `width` and
+#'   `height`, and returns a list with `width` and `height`. The
 #'   purpose is to round the actual pixel dimensions from the browser to some
 #'   other dimensions, so that this will not generate and cache images of every
-#'   possible pixel dimension. See \code{\link{sizeGrowthRatio}} for more
+#'   possible pixel dimension. See [sizeGrowthRatio()] for more
 #'   information on the default sizing policy.
 #' @param res The resolution of the PNG, in pixels per inch.
 #' @param cache The scope of the cache, or a cache object. This can be
-#'   \code{"app"} (the default), \code{"session"}, or a cache object like
-#'   a \code{\link{diskCache}}. See the Cache Scoping section for more
+#'   `"app"` (the default), `"session"`, or a cache object like
+#'   a [diskCache()]. See the Cache Scoping section for more
 #'   information.
 #'
-#' @seealso See \code{\link{renderPlot}} for the regular, non-cached version of
+#' @seealso See [renderPlot()] for the regular, non-cached version of
 #'   this function. For more about configuring caches, see
-#'   \code{\link{memoryCache}} and \code{\link{diskCache}}.
+#'   [memoryCache()] and [diskCache()].
 #'
 #'
 #' @examples
@@ -379,7 +379,7 @@ renderCachedPlot <- function(expr,
     hybrid_chain(
       # Depend on the user cache key, even though we don't use the value. When
       # it changes, it can cause the drawReactive to re-execute. (Though
-      # drawReactive will not necessarily re-execute -- it must be called from
+      # drawReactive will not necessarily re-execute --- it must be called from
       # renderFunc, which happens only if there's a cache miss.)
       userCacheKey(),
       function(userCacheKeyValue) {
@@ -562,7 +562,7 @@ renderCachedPlot <- function(expr,
 #' @param width,height Base width and height.
 #' @param growthRate Growth rate multiplier.
 #'
-#' @seealso This is to be used with \code{\link{renderCachedPlot}}.
+#' @seealso This is to be used with [renderCachedPlot()].
 #'
 #' @examples
 #' f <- sizeGrowthRatio(500, 500, 1.25)

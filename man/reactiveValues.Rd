@@ -43,5 +43,5 @@ isolate(values$a)
 
 }
 \seealso{
-\code{\link{isolate}} and \code{\link{is.reactivevalues}}.
+\code{\link[=isolate]{isolate()}} and \code{\link[=is.reactivevalues]{is.reactivevalues()}}.
 }

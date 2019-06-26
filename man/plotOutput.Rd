@@ -76,6 +76,8 @@ same \code{id} to disappear.}
 
 \item{inline}{use an inline (\code{span()}) or block container (\code{div()})
 for the output}
+
+\item{...}{Is passed along to \code{imageOutput}.}
 }
 \value{
 A plot or image output element that can be included in a panel.

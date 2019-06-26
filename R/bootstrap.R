@@ -1137,6 +1137,7 @@ imageOutput <- function(outputId, width = "100%", height="400px",
 #'   \code{imageOutput}/\code{plotOutput} calls may share the same \code{id}
 #'   value; brushing one image or plot will cause any other brushes with the
 #'   same \code{id} to disappear.
+#' @param ... Is passed along to \code{imageOutput}.
 #' @inheritParams textOutput
 #' @note The arguments \code{clickId} and \code{hoverId} only work for R base
 #'   graphics (see the \pkg{\link[graphics:graphics-package]{graphics}} package). They do not work for

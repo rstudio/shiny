@@ -7,6 +7,8 @@ shiny 1.3.2.9000
 
 ### Improvements
 
+* Resolved [#612](https://github.com/rstudio/shiny/issues/612): Optional paramter `alt` can be passed to `imageOutput()` and `plotOutput()`, which is added to the <img> tag. ([#2494](https://github.com/rstudio/shiny/pull/2494))
+
 * Resolved [#2402](https://github.com/rstudio/shiny/issues/2402): An informative warning is now thrown for mis-specified (date) strings in `dateInput()`, `updateDateInput()`, `dateRangeInput()`, and `updateDateRangeInput()`. ([#2403](https://github.com/rstudio/shiny/pull/2403))
 
 * Resolved [#2442](https://github.com/rstudio/shiny/issues/2442): The `shiny:inputchanged` JavaScript event now triggers on the related input element instead of `document`. Existing event listeners bound to `document` will still detect the event due to event bubbling. ([#2446](https://github.com/rstudio/shiny/pull/2446))

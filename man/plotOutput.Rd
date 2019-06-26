@@ -8,12 +8,12 @@
 imageOutput(outputId, width = "100\%", height = "400px",
   click = NULL, dblclick = NULL, hover = NULL, hoverDelay = NULL,
   hoverDelayType = NULL, brush = NULL, clickId = NULL,
-  hoverId = NULL, inline = FALSE)
+  hoverId = NULL, inline = FALSE, ...)
 
 plotOutput(outputId, width = "100\%", height = "400px", click = NULL,
   dblclick = NULL, hover = NULL, hoverDelay = NULL,
   hoverDelayType = NULL, brush = NULL, clickId = NULL,
-  hoverId = NULL, inline = FALSE)
+  hoverId = NULL, inline = FALSE, ...)
 }
 \arguments{
 \item{outputId}{output variable to read the plot/image from.}

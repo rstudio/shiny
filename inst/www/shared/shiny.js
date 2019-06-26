@@ -601,10 +601,9 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
   };
   (function () {
     this.setInput = function (nameType, value, opts) {
-      var _splitInputNameType = splitInputNameType(nameType);
-
-      var inputName = _splitInputNameType.name;
-      var inputType = _splitInputNameType.inputType;
+      var _splitInputNameType = splitInputNameType(nameType),
+          inputName = _splitInputNameType.name,
+          inputType = _splitInputNameType.inputType;
 
       var jsonValue = JSON.stringify(value);
 
@@ -626,10 +625,9 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
       for (var inputName in values) {
         if (values.hasOwnProperty(inputName)) {
-          var _splitInputNameType2 = splitInputNameType(inputName);
-
-          var _name = _splitInputNameType2.name;
-          var inputType = _splitInputNameType2.inputType;
+          var _splitInputNameType2 = splitInputNameType(inputName),
+              _name = _splitInputNameType2.name,
+              inputType = _splitInputNameType2.inputType;
 
           cacheValues[_name] = {
             jsonValue: JSON.stringify(values[inputName]),
@@ -682,20 +680,16 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     // the input name (i.e., inputId), which is why we distinguish between
     // nameType and name.
     this.setInput = function (nameType, value, opts) {
-      var _splitInputNameType3 = splitInputNameType(nameType);
-
-      var inputName = _splitInputNameType3.name;
-
+      var _splitInputNameType3 = splitInputNameType(nameType),
+          inputName = _splitInputNameType3.name;
 
       this.$ensureInit(inputName);
 
       if (opts.priority !== "deferred") this.inputRatePolicies[inputName].immediateCall(nameType, value, opts);else this.inputRatePolicies[inputName].normalCall(nameType, value, opts);
     };
     this.setRatePolicy = function (nameType, mode, millis) {
-      var _splitInputNameType4 = splitInputNameType(nameType);
-
-      var inputName = _splitInputNameType4.name;
-
+      var _splitInputNameType4 = splitInputNameType(nameType),
+          inputName = _splitInputNameType4.name;
 
       if (mode === 'direct') {
         this.inputRatePolicies[inputName] = new Invoker(this, this.$doSetInput);
@@ -1891,10 +1885,9 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     // Returns a URL which can be queried to get values from inside the server
     // function. This is enabled with `options(shiny.testmode=TRUE)`.
     this.getTestSnapshotBaseUrl = function () {
-      var _ref2 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
-      var _ref2$fullUrl = _ref2.fullUrl;
-      var fullUrl = _ref2$fullUrl === undefined ? true : _ref2$fullUrl;
+      var _ref2 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+          _ref2$fullUrl = _ref2.fullUrl,
+          fullUrl = _ref2$fullUrl === undefined ? true : _ref2$fullUrl;
 
       var loc = window.location;
       var url = "";
@@ -1963,22 +1956,21 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     var fadeDuration = 250;
 
     function show() {
-      var _ref3 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
-      var _ref3$html = _ref3.html;
-      var html = _ref3$html === undefined ? '' : _ref3$html;
-      var _ref3$action = _ref3.action;
-      var action = _ref3$action === undefined ? '' : _ref3$action;
-      var _ref3$deps = _ref3.deps;
-      var deps = _ref3$deps === undefined ? [] : _ref3$deps;
-      var _ref3$duration = _ref3.duration;
-      var duration = _ref3$duration === undefined ? 5000 : _ref3$duration;
-      var _ref3$id = _ref3.id;
-      var id = _ref3$id === undefined ? null : _ref3$id;
-      var _ref3$closeButton = _ref3.closeButton;
-      var closeButton = _ref3$closeButton === undefined ? true : _ref3$closeButton;
-      var _ref3$type = _ref3.type;
-      var type = _ref3$type === undefined ? null : _ref3$type;
+      var _ref3 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+          _ref3$html = _ref3.html,
+          html = _ref3$html === undefined ? '' : _ref3$html,
+          _ref3$action = _ref3.action,
+          action = _ref3$action === undefined ? '' : _ref3$action,
+          _ref3$deps = _ref3.deps,
+          deps = _ref3$deps === undefined ? [] : _ref3$deps,
+          _ref3$duration = _ref3.duration,
+          duration = _ref3$duration === undefined ? 5000 : _ref3$duration,
+          _ref3$id = _ref3.id,
+          id = _ref3$id === undefined ? null : _ref3$id,
+          _ref3$closeButton = _ref3.closeButton,
+          closeButton = _ref3$closeButton === undefined ? true : _ref3$closeButton,
+          _ref3$type = _ref3.type,
+          type = _ref3$type === undefined ? null : _ref3$type;
 
       if (!id) id = randomId();
 
@@ -2122,13 +2114,11 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     // content is non-Bootstrap. Bootstrap modals require some special handling,
     // which is coded in here.
     show: function show() {
-      var _ref4 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
-      var _ref4$html = _ref4.html;
-      var html = _ref4$html === undefined ? '' : _ref4$html;
-      var _ref4$deps = _ref4.deps;
-      var deps = _ref4$deps === undefined ? [] : _ref4$deps;
-
+      var _ref4 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+          _ref4$html = _ref4.html,
+          html = _ref4$html === undefined ? '' : _ref4$html,
+          _ref4$deps = _ref4.deps,
+          deps = _ref4$deps === undefined ? [] : _ref4$deps;
 
       // If there was an existing Bootstrap modal, then there will be a modal-
       // backdrop div that was added outside of the modal wrapper, and it must be
@@ -2480,6 +2470,12 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
             width: null
           }
         };
+      }
+
+      // Set optional alt-attribute
+      var alttext = $el.attr("alt");
+      if (alttext && alttext !== "") {
+        img.setAttribute("alt", alttext);
       }
 
       // Remove event handlers that were added in previous runs of this function.
@@ -6001,10 +5997,10 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     _enableDocumentEvents: function _enableDocumentEvents() {
       var _this2 = this;
 
-      var $doc = $("html");
-      var _ZoneClass = this._ZoneClass;
-      var ACTIVE = _ZoneClass.ACTIVE;
-      var OVER = _ZoneClass.OVER;
+      var $doc = $("html"),
+          _ZoneClass = this._ZoneClass,
+          ACTIVE = _ZoneClass.ACTIVE,
+          OVER = _ZoneClass.OVER;
 
       this._enableDraghover($doc).on({
         "draghover:enter.draghover": function draghoverEnterDraghover(e) {
@@ -6076,27 +6072,25 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       // support the FileList object though, so the user's expectation that DnD is
       // supported based on this highlighting would be incorrect.
       if (!this._isIE9()) {
-        (function () {
-          if ($fileInputs.length === 0) _this3._enableDocumentEvents();
-          $fileInputs = $fileInputs.add(el);
-          var $zone = _this3._zoneOf(el);
-          var OVER = _this3._ZoneClass.OVER;
+        if ($fileInputs.length === 0) this._enableDocumentEvents();
+        $fileInputs = $fileInputs.add(el);
+        var $zone = this._zoneOf(el),
+            OVER = this._ZoneClass.OVER;
 
-          _this3._enableDraghover($zone).on({
-            "draghover:enter.draghover": function draghoverEnterDraghover(e) {
-              $zone.addClass(OVER);
-            },
-            "draghover:leave.draghover": function draghoverLeaveDraghover(e) {
-              $zone.removeClass(OVER);
-              // Prevent this event from bubbling to the document handler,
-              // which would deactivate all zones.
-              e.stopPropagation();
-            },
-            "draghover:drop.draghover": function draghoverDropDraghover(e, dropEvent) {
-              _this3._handleDrop(dropEvent, el);
-            }
-          });
-        })();
+        this._enableDraghover($zone).on({
+          "draghover:enter.draghover": function draghoverEnterDraghover(e) {
+            $zone.addClass(OVER);
+          },
+          "draghover:leave.draghover": function draghoverLeaveDraghover(e) {
+            $zone.removeClass(OVER);
+            // Prevent this event from bubbling to the document handler,
+            // which would deactivate all zones.
+            e.stopPropagation();
+          },
+          "draghover:drop.draghover": function draghoverDropDraghover(e, dropEvent) {
+            _this3._handleDrop(dropEvent, el);
+          }
+        });
       }
     },
 

@@ -111,6 +111,12 @@ $.extend(imageOutputBinding, {
       };
     }
 
+    // Set optional alt-attribute
+    var alttext = $el.attr("alt");
+    if (alttext && alttext !== "") {
+      img.setAttribute("alt", alttext);
+    }
+
     // Remove event handlers that were added in previous runs of this function.
     $el.off('.image_output');
     $img.off('.image_output');

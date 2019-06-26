@@ -977,7 +977,7 @@ imageOutput <- function(outputId, width = "100%", height="400px",
                         hover = NULL, hoverDelay = NULL, hoverDelayType = NULL,
                         brush = NULL,
                         clickId = NULL, hoverId = NULL,
-                        inline = FALSE) {
+                        inline = FALSE, ...) {
 
   if (!is.null(clickId)) {
     shinyDeprecated(
@@ -1018,7 +1018,7 @@ imageOutput <- function(outputId, width = "100%", height="400px",
   args <- list(
     id = outputId,
     class = "shiny-image-output",
-    style = style
+    style = style, ...
   )
 
   # Given a named list with options, replace names like "delayType" with
@@ -1311,12 +1311,12 @@ plotOutput <- function(outputId, width = "100%", height="400px",
                        hover = NULL, hoverDelay = NULL, hoverDelayType = NULL,
                        brush = NULL,
                        clickId = NULL, hoverId = NULL,
-                       inline = FALSE) {
+                       inline = FALSE, ...) {
 
   # Result is the same as imageOutput, except for HTML class
   res <- imageOutput(outputId, width, height, click, dblclick,
                      hover, hoverDelay, hoverDelayType, brush,
-                     clickId, hoverId, inline)
+                     clickId, hoverId, inline, ...)
 
   res$attribs$class <- "shiny-plot-output"
   res

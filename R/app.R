@@ -4,9 +4,7 @@
 #'
 #' These functions create Shiny app objects from either an explicit UI/server
 #' pair (`shinyApp`), or by passing the path of a directory that contains a
-#' Shiny app (`shinyAppDir`). You generally shouldn't need to use these
-#' functions to create/run applications; they are intended for interoperability
-#' purposes, such as embedding Shiny apps inside a \pkg{knitr} document.
+#' Shiny app (`shinyAppDir`).
 #'
 #' Normally when this function is used at the R console, the Shiny app object is
 #' automatically passed to the `print()` function, which runs the app. If

@@ -43,7 +43,7 @@
 #' @param session The Shiny session object, as provided by
 #'   `shinyServer` to the server function.
 #' @param min The value that represents the starting point of the
-#'   progress bar. Must be less tham `max`.
+#'   progress bar. Must be less than `max`.
 #' @param max The value that represents the end of the progress bar.
 #'   Must be greater than `min`.
 #' @param message A single-element character vector; the message to be

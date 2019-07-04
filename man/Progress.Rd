@@ -9,7 +9,7 @@
 \code{shinyServer} to the server function.}
 
 \item{min}{The value that represents the starting point of the
-progress bar. Must be less tham \code{max}.}
+progress bar. Must be less than \code{max}.}
 
 \item{max}{The value that represents the end of the progress bar.
 Must be greater than \code{min}.}

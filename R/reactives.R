@@ -1733,7 +1733,8 @@ reactivePoll <- function(intervalMillis, session, checkFunc, valueFunc) {
 
   rv <- reactiveValues(cookie = isolate(checkFunc()))
 
-  observe({
+  o <- observe({
+    cat(".")
     rv$cookie <- checkFunc()
     invalidateLater(intervalMillis(), session)
   })
@@ -1745,6 +1746,18 @@ reactivePoll <- function(intervalMillis, session, checkFunc, valueFunc) {
     valueFunc()
 
   }, label = NULL)
+
+  # When no one holds a reference to this object anymore, destroy and remove the
+  # observer so that it doesn't keep firing, and hold onto resources.
+  reg.finalizer(attr(re, "observable"), function(e) {
+    message("finalizing reactive")
+    o$destroy()
+    rm(o, envir = parent.env(environment()))
+  })
+
+  # So that the observer and finalizer function don't (indirectly) hold onto a
+  # reference to `re` and thus prevent it from getting GC'd.
+  on.exit(rm(re))
 
   return(re)
 }

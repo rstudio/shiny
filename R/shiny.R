@@ -2100,6 +2100,8 @@ ShinySession <- R6Class(
 
 #' @export
 `$.shinyoutput` <- function(x, name) {
+  name <- .subset2(x, 'ns')(name)
+
   if (getOption("shiny.allowoutputreads", FALSE)) {
     .subset2(x, 'impl')$getOutput(name)
   } else {

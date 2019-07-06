@@ -1088,6 +1088,9 @@ ShinySession <- R6Class(
         # will be attached to the observer after it's created.
         outputAttrs <- attr(func, "outputAttrs", TRUE)
 
+        # Save this for getOutput purposes
+        outputAttrs$renderFunc <- func
+
         funcFormals <- formals(func)
         # ..stacktraceon matches with the top-level ..stacktraceoff.., because
         # the observer we set up below has ..stacktraceon=FALSE
@@ -1098,9 +1101,6 @@ ShinySession <- R6Class(
             orig(name=name, shinysession=self)
           }
         }
-
-        # Save this for getOutput purposes
-        outputAttrs$renderFunc <- func
 
         # Preserve source reference and file information when formatting the
         # label for display in the reactive graph

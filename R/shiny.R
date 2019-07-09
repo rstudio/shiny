@@ -1087,6 +1087,9 @@ ShinySession <- R6Class(
         # will be attached to the observer after it's created.
         outputAttrs <- attr(func, "outputAttrs", TRUE)
 
+        # Save this for getOutput purposes
+        outputAttrs$renderFunc <- func
+
         funcFormals <- formals(func)
         # ..stacktraceon matches with the top-level ..stacktraceoff.., because
         # the observer we set up below has ..stacktraceon=FALSE
@@ -1193,6 +1196,9 @@ ShinySession <- R6Class(
       else {
         stop(paste("Unexpected", class(func), "output for", name))
       }
+    },
+    getOutput = function(name) {
+      attr(private$.outputs[[name]], "renderFunc", exact = TRUE)
     },
     flushOutput = function() {
       if (private$busyCount > 0)
@@ -2093,7 +2099,13 @@ ShinySession <- R6Class(
 
 #' @export
 `$.shinyoutput` <- function(x, name) {
-  stop("Reading objects from shinyoutput object not allowed.")
+  name <- .subset2(x, 'ns')(name)
+
+  if (getOption("shiny.allowoutputreads", FALSE)) {
+    .subset2(x, 'impl')$getOutput(name)
+  } else {
+    stop("Reading from shinyoutput object is not allowed.")
+  }
 }
 
 #' @export

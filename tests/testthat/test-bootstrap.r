@@ -69,20 +69,25 @@ test_that("Repeated names for selectInput and radioButtons choices", {
 
 
 test_that("Choices are correctly assigned names", {
-  # Unnamed vector
+  # Unnamed character vector
   expect_identical(
     choicesWithNames(c("a","b","3")),
     list(a="a", b="b", "3"="3")
+  )
+  # Unnamed numeric vector
+  expect_identical(
+    choicesWithNames(c(1,2,3)),
+    list(`1`="1", `2`="2", `3`="3")
   )
   # Unnamed list
   expect_identical(
     choicesWithNames(list("a","b",3)),
     list(a="a", b="b", "3"="3")
   )
-  # Vector, with some named, some not
+  # Complex vector, with some named, some not
   expect_identical(
-    choicesWithNames(c(A="a", "b", C="3", "4")),
-    list(A="a", "b"="b", C="3", "4"="4")
+    choicesWithNames(c(A=Inf+0i, 1+0i, C=0+0i)),
+    list(A="Inf+0i", "1+0i"="1+0i", C="0+0i")
   )
   # List, with some named, some not
   expect_identical(
@@ -114,10 +119,10 @@ test_that("Choices are correctly assigned names", {
     choicesWithNames(list(A="a", B="b", C=c(D="d"))),
     list(A="a", B="b", C=list(D="d"))
   )
-  # List, named, with a named sub-vector of length 1 with a numeric element
+  # List, named, with a named sub-vector of length 1 with a logical element
   expect_identical(
-    choicesWithNames(list(A="a", B="b", C=c(D=1))),
-    list(A="a", B="b", C=list(D="1"))
+    choicesWithNames(list(A="a", B="b", C=c(D=TRUE))),
+    list(A="a", B="b", C=list(D="TRUE"))
   )
   # List, some named, with sublist
   expect_identical(

@@ -131,6 +131,26 @@ test_that("Choices are correctly assigned names", {
   )
   # Error when sublist is unnamed
   expect_error(choicesWithNames(list(A="a", "b", list(1,2))))
+  # Unnamed factor
+  expect_identical(
+    choicesWithNames(factor(c("a","b","3"))),
+    list(a="a", b="b", "3"="3")
+  )
+  # Named factor
+  expect_identical(
+    choicesWithNames(structure(factor(c("foo", "bar")), names = c("A", "B"))),
+    list(A="foo", B="bar")
+  )
+  # List, named, with a sub-factor
+  expect_identical(
+    choicesWithNames(list(A="a", B="b", C=factor(c("d", "e")))),
+    list(A="a", B="b", C=list(d="d", e="e"))
+  )
+  # List, named, with a named sub-factor
+  expect_identical(
+    choicesWithNames(list(A="a", B="b", C=structure(factor(c("d", "e")), names = c("d", "e")))),
+    list(A="a", B="b", C=list(d="d", e="e"))
+  )
 })
 
 

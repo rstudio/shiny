@@ -15,10 +15,6 @@ showReactLog(time = TRUE)
 
 reactlogReset()
 }
-\arguments{
-\item{time}{A boolean that specifies whether or not to display the
-time that each reactive takes to calculate a result.}
-}
 \description{
 Provides an interactive browser-based tool for visualizing reactive
 dependencies and execution in your application.

@@ -114,6 +114,8 @@ listify.character <- function(x) {
 #' @export
 listify.numeric <- function(x) listify(setNames(as.character(x), names(x)))
 #' @export
+listify.complex <- listify.numeric
+#' @export
 listify.logical <- listify.numeric
 #' @export
 listify.factor <- listify.numeric

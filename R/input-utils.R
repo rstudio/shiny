@@ -109,7 +109,7 @@ listify <- function(x) {
       as.list(ensureNamed(x))
     }
   } else {
-    listify(setNames(as.character(x), names(x)))
+    listify(stats::setNames(as.character(x), names(x)))
   }
 }
 

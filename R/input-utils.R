@@ -99,26 +99,14 @@ ensureNamed <- function(x) {
 # Take a vector or list, and convert to list. Also, if any children are
 # vectors with length > 1, convert those to list. If the list is unnamed,
 # convert it to a named list with blank names.
-listify <- function(x) UseMethod("listify", x)
-
-#' @export
-listify.list <- function(x) ensureNamed(lapply(x, listify))
-#' @export
-listify.NULL <- listify.list
-
-#' @export
-listify.character <- function(x) {
-  if (length(x) == 1 && is.null(names(x))) x else as.list(ensureNamed(x))
+listify <- function(x) {
+  if (is.list(x) || is.null(x))
+    ensureNamed(lapply(x, listify))
+  else if (is.character(x))
+    if (length(x) == 1 && is.null(names(x))) x else as.list(ensureNamed(x))
+  else
+    listify(setNames(as.character(x), names(x)))
 }
-
-#' @export
-listify.numeric <- function(x) listify(setNames(as.character(x), names(x)))
-#' @export
-listify.complex <- listify.numeric
-#' @export
-listify.logical <- listify.numeric
-#' @export
-listify.factor <- listify.numeric
 
 # Takes a vector or list, and adds names (same as the value) to any entries
 # without names. Coerces all leaf nodes to `character`.

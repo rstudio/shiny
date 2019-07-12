@@ -100,12 +100,13 @@ ensureNamed <- function(x) {
 # vectors with length > 1, convert those to list. If the list is unnamed,
 # convert it to a named list with blank names.
 listify <- function(x) {
-  if (is.list(x) || is.null(x))
+  if (is.list(x) || is.null(x)) {
     ensureNamed(lapply(x, listify))
-  else if (is.character(x))
+  } else if (is.character(x)) {
     if (length(x) == 1 && is.null(names(x))) x else as.list(ensureNamed(x))
-  else
+  } else {
     listify(setNames(as.character(x), names(x)))
+  }
 }
 
 # Takes a vector or list, and adds names (same as the value) to any entries

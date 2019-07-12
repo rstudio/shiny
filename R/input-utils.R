@@ -103,7 +103,11 @@ listify <- function(x) {
   if (is.list(x) || is.null(x)) {
     ensureNamed(lapply(x, listify))
   } else if (is.character(x)) {
-    if (length(x) == 1 && is.null(names(x))) x else as.list(ensureNamed(x))
+    if (length(x) == 1 && is.null(names(x))) {
+      x
+    } else {
+      as.list(ensureNamed(x))
+    }
   } else {
     listify(setNames(as.character(x), names(x)))
   }

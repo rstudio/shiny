@@ -459,6 +459,26 @@ startApp <- function(appObj, port, host, quiet) {
     ),
     .globals$resourcePaths
   )
+  checkResourceConflict <- function(paths) {
+    if (length(paths) < 2) return(NULL)
+    # ensure paths is a named character vector: c(resource_path = local_path)
+    local_paths <- vapply(paths, function(x) if (inherits(x, "staticPath")) x$path else x, character(1))
+    paths <- setNames(local_paths, names(paths))
+    # get all possible pairwise combinations of paths
+    pair_indicies <- utils::combn(length(paths), 2, simplify = FALSE)
+    lapply(pair_indicies, function(x) {
+      p1 <- paths[x[1]]
+      p2 <- paths[x[2]]
+      if (identical(names(p1), names(p2)) && (p1 != p2)) {
+        warning(
+          "Found multiple local resource paths pointing the same resource path. ",
+          "If you run into resource-related issues (e.g. 404 requests), consider ",
+          "using `addResourcePath()` and/or `removeResourcePath()` to manage resource mappings."
+        )
+      }
+    })
+  }
+  checkResourceConflict(httpuvApp$staticPaths)
   httpuvApp$staticPathOptions <- httpuv::staticPathOptions(
     html_charset = "utf-8",
     headers = list("X-UA-Compatible" = "IE=edge,chrome=1"),

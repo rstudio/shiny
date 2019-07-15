@@ -544,7 +544,7 @@ knit_print.reactive <- function(x, ..., inline = FALSE) {
 # throw an informative warning if a www subdirectory conflicts
 # with another resourcePath
 wwwSubDirConflicts <- function(wwwdir) {
-  wwwSubDirs <- list.dirs(wwwDir, recursive = FALSE, full.names = FALSE)
+  wwwSubDirs <- list.dirs(wwwdir, recursive = FALSE, full.names = FALSE)
   resourcePrefixes <- c(
     names(.globals$resourcePaths),
     names(.globals$resources),

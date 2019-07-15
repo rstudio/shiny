@@ -169,7 +169,6 @@ shinyAppDir_serverR <- function(appDir, options=list()) {
 
   wwwDir <- file.path.ci(appDir, "www")
   if (dirExists(wwwDir)) {
-    wwwSubDirConflicts(wwwDir)
     staticPaths <- list("/" = staticPath(wwwDir, indexhtml = FALSE, fallthrough = TRUE))
   } else {
     staticPaths <- list()
@@ -323,7 +322,6 @@ shinyAppDir_appR <- function(fileName, appDir, options=list())
 
   wwwDir <- file.path.ci(appDir, "www")
   if (dirExists(wwwDir)) {
-    wwwSubDirConflicts(wwwDir)
     # wwwDir is a static path served by httpuv. It does _not_ serve up
     # index.html, for two reasons. (1) It's possible that the user's
     # www/index.html file is not actually used as the index, but as a template
@@ -537,32 +535,4 @@ knit_print.reactive <- function(x, ..., inline = FALSE) {
   knitr::knit_print(renderFunc({
     x()
   }), inline = inline)
-}
-
-
-
-# throw an informative warning if a www subdirectory conflicts
-# with another resourcePath
-wwwSubDirConflicts <- function(wwwdir) {
-  wwwSubDirs <- list.dirs(wwwdir, recursive = FALSE, full.names = FALSE)
-  resourcePrefixes <- c(
-    names(.globals$resourcePaths),
-    names(.globals$resources),
-    # these staticPaths are added in startApp(), so might as well
-    # check for them now
-    c("session", "shared")
-  )
-  resourceConflicts <- intersect(wwwSubDirs, resourcePrefixes)
-  if (length(resourceConflicts)) {
-    warning(
-      "Found subdirectories of your app's www/ directory that ",
-      "conflict with other (possibly internal) resource routes. ",
-      "Consider renaming these directories: '",
-      paste(resourceConflicts, collapse = "', '"), "'",
-      call. = FALSE
-    )
-    invisible(TRUE)
-  } else {
-    invisible(FALSE)
-  }
 }

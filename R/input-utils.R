@@ -90,23 +90,17 @@ generateOptions <- function(inputId, selected, inline, type = 'checkbox',
   div(class = "shiny-options-group", options)
 }
 
-# If a list/vector is unnamed, give it blank names
-ensureNamed <- function(x) {
-  if (is.null(names(x))) names(x) <- character(length(x))
-  x
-}
-
 # Take a vector or list, and convert to list. Also, if any children are
 # vectors with length > 1, convert those to list. If the list is unnamed,
 # convert it to a named list with blank names.
 listify <- function(x) {
   if (is.list(x) || is.null(x)) {
-    ensureNamed(lapply(x, listify))
+    asNamedVector(lapply(x, listify))
   } else if (is.character(x)) {
     if (length(x) == 1 && is.null(names(x))) {
       x
     } else {
-      as.list(ensureNamed(x))
+      as.list(asNamedVector(x))
     }
   } else {
     listify(stats::setNames(as.character(x), names(x)))

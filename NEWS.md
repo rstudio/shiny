@@ -19,6 +19,8 @@ shiny 1.3.2.9001
 
 * Resolved [#2515](https://github.com/rstudio/shiny/issues/2515): `selectInput()` now deals appropriately with named factors. ([#2524](https://github.com/rstudio/shiny/pull/2524))
 
+* Resolved [#2433](https://github.com/rstudio/shiny/issues/2433): An informative warning is now thrown if subdirectories of the app's `www/` directory are masked by other resource prefixes and/or the same resource prefix is mapped to different local file paths. ([#2434](https://github.com/rstudio/shiny/pull/2434))
+
 ### Bug fixes
 
 * Fixed [#2387](https://github.com/rstudio/shiny/issues/2387): Updating a `sliderInput()`'s type from numeric to date no longer changes the rate policy from debounced to immediate. More generally, updating an input binding with a new type should (no longer) incorrectly alter the input rate policy. ([#2404](https://github.com/rstudio/shiny/pull/2404))

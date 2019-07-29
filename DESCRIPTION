@@ -90,8 +90,6 @@ Suggests:
     reactlog (>= 1.0.0),
     magrittr
 URL: http://shiny.rstudio.com
-Remotes:
-    r-lib/fastmap
 BugReports: https://github.com/rstudio/shiny/issues
 Collate:
     'app.R'

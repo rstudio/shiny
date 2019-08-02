@@ -90,21 +90,22 @@ generateOptions <- function(inputId, selected, inline, type = 'checkbox',
   div(class = "shiny-options-group", options)
 }
 
-# Take a vector or list, and convert to named list. Also, if any children are
+# Take a vector/list/factor, and convert to named list. Also, if any children are
 # vectors with length > 1, convert those to list. If the list is unnamed,
 # convert it to a named list with blank names.
-listify <- function(x) {
+#' @importFrom stats setNames
+listify <- function(x, child = FALSE) {
   if (is.list(x) || is.null(x)) {
-    asNamedVector(lapply(x, listify))
-  } else if (is.character(x)) {
-    if (length(x) == 1 && is.null(names(x))) {
-      x
-    } else {
-      as.list(asNamedVector(x))
-    }
+    # List children are processed and a named list is returned
+    asNamed(lapply(x, listify, TRUE))
+  } else if (child && is.null(names(x)) && length(x) == 1) {
+    # Unnamed children of length = 1 are considered leaves and are converted to
+    # a character(1)
+    as.character(x)
   } else {
-    # Can get here if x is a factor.
-    listify(stats::setNames(as.character(x), names(x)))
+    # Anything else is converted to a (possibly named) character vector, then a
+    # named list
+    asNamed(setNames(as.list(as.character(x)), names(x)))
   }
 }
 

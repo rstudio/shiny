@@ -295,6 +295,10 @@ initAutoReloadMonitor <- function(dir) {
 loadHelpers <- function(appDir){
   # TODO: what if we're on a case-sensitive file system and there's R/ and r/?
   helpersDir <- file.path(appDir, "R")
+  if (!file.exists(helpersDir)){
+    # We may be on a case-sensitive filesystem and have a dir named r/
+    helpersDir <- file.path(appDir, "r")
+  }
   helpers <- list.files(helpersDir, pattern="\\.[rR]$", ignore.case=TRUE,
                         recursive=TRUE, full.names=TRUE)
 

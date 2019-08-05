@@ -213,6 +213,7 @@ shinyAppDir_serverR <- function(appDir, options=list()) {
   onStart <- function() {
     oldwd <<- getwd()
     setwd(appDir)
+    loadHelpers(appDir)
     monitorHandle <<- initAutoReloadMonitor(appDir)
     if (file.exists(file.path.ci(appDir, "global.R")))
       sourceUTF8(file.path.ci(appDir, "global.R"))
@@ -288,6 +289,19 @@ initAutoReloadMonitor <- function(dir) {
   obs$destroy
 }
 
+# Loads in all helpers in the R/ directory of the app
+# From `list.files`:
+# > The files are sorted in alphabetical order, on the full path if full.names = TRUE.
+loadHelpers <- function(appDir){
+  # TODO: what if we're on a case-sensitive file system and there's R/ and r/?
+  helpersDir <- file.path(appDir, "R")
+  helpers <- list.files(helpersDir, pattern="\\.[rR]$", ignore.case=TRUE,
+                        recursive=TRUE, full.names=TRUE)
+
+  # TODO: load into a designated env?
+  lapply(helpers, sourceUTF8)
+}
+
 # This reads in an app dir for a single-file application (e.g. app.R), and
 # returns a shiny.appobj.
 shinyAppDir_appR <- function(fileName, appDir, options=list())
@@ -342,6 +356,7 @@ shinyAppDir_appR <- function(fileName, appDir, options=list())
   onStart <- function() {
     oldwd <<- getwd()
     setwd(appDir)
+    loadHelpers(appDir)
     monitorHandle <<- initAutoReloadMonitor(appDir)
     if (!is.null(appObj()$onStart)) appObj()$onStart()
   }

@@ -69,6 +69,11 @@ test_that("Repeated names for selectInput and radioButtons choices", {
 
 
 test_that("Choices are correctly assigned names", {
+  # Empty character vector
+  expect_identical(
+    choicesWithNames(c("")),
+    stats::setNames(list(""), "")
+  )
   # Unnamed character vector
   expect_identical(
     choicesWithNames(c("a","b","3")),

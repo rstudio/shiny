@@ -26,6 +26,6 @@ test_that("app with both r/ and R/ prefers R/", {
 
   shiny:::loadHelpers("../test-helpers/app4-both")
 
-  expect_equal(lowerHelper, 123)
+  expect_false(exists("lowerHelper"))
   expect_equal(upperHelper, "abc")
 })

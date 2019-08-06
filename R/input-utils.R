@@ -103,11 +103,11 @@ listify <- function(x, child = FALSE) {
     as.character(x)
   } else {
     # The process for anything else is:
-    # 1. Convert to a (possibly named) character vector
+    # 1. Convert to a (possibly named) character vector.
     # 2. Add names(x), though it's possibly NULL, to the character vector.
     #    This is because as.character() on factors discards names.
-    # 3. Convert to a list
-    # 4. Ensure the list is named
+    # 3. Convert to a list.
+    # 4. Ensure the list is named.
     asNamed(as.list(stats::setNames(as.character(x), names(x))))
   }
 }

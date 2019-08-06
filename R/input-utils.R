@@ -93,7 +93,6 @@ generateOptions <- function(inputId, selected, inline, type = 'checkbox',
 # Take a vector/list/factor, and convert to named list. Also, if any children are
 # vectors with length > 1, convert those to list. If the list is unnamed,
 # convert it to a named list with blank names.
-#' @importFrom stats setNames
 listify <- function(x, child = FALSE) {
   if (is.list(x) || is.null(x)) {
     # List children are processed and a named list is returned
@@ -103,9 +102,13 @@ listify <- function(x, child = FALSE) {
     # a character(1)
     as.character(x)
   } else {
-    # Anything else is converted to a (possibly named) character vector, then a
-    # named list
-    asNamed(setNames(as.list(as.character(x)), names(x)))
+    # The process for anything else is:
+    # 1. Convert to a (possibly named) character vector
+    # 2. Add names(x), though it's possibly NULL, to the character vector.
+    #    This is because as.character() on factors discards names.
+    # 3. Convert to a list
+    # 4. Ensure the list is named
+    asNamed(as.list(stats::setNames(as.character(x), names(x))))
   }
 }
 

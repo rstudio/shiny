@@ -139,7 +139,7 @@ shinyAppFile <- function(appFile, options=list()) {
 
 # This reads in an app dir in the case that there's a server.R (and ui.R/www)
 # present, and returns a shiny.appobj.
-shinyAppDir_serverR <- function(appDir, options=list()) {
+shinyAppDir_serverR <- function(appDir, options=list(), sourceFun=sourceUTF8) {
   # Most of the complexity here comes from needing to hot-reload if the .R files
   # change on disk, or are created, or are removed.
 
@@ -157,7 +157,7 @@ shinyAppDir_serverR <- function(appDir, options=list()) {
         # If not, then take the last expression that's returned from ui.R.
         .globals$ui <- NULL
         on.exit(.globals$ui <- NULL, add = FALSE)
-        ui <- sourceUTF8(uiR, envir = new.env(parent = sharedEnv))
+        ui <- sourceFun(uiR, envir = new.env(parent = sharedEnv))
         if (!is.null(.globals$ui)) {
           ui <- .globals$ui[[1]]
         }
@@ -187,7 +187,7 @@ shinyAppDir_serverR <- function(appDir, options=list()) {
       # server.R.
       .globals$server <- NULL
       on.exit(.globals$server <- NULL, add = TRUE)
-      result <- sourceUTF8(serverR, envir = new.env(parent = sharedEnv))
+      result <- sourceFun(serverR, envir = new.env(parent = sharedEnv))
       if (!is.null(.globals$server)) {
         result <- .globals$server[[1]]
       }
@@ -219,8 +219,8 @@ shinyAppDir_serverR <- function(appDir, options=list()) {
     setwd(appDir)
     monitorHandle <<- initAutoReloadMonitor(appDir)
     if (file.exists(file.path.ci(appDir, "global.R")))
-      sourceUTF8(file.path.ci(appDir, "global.R"))
-    loadHelpers(appDir, envir = sharedEnv)
+      sourceFun(file.path.ci(appDir, "global.R"))
+    loadHelpers(appDir, envir = sharedEnv, sourceFun)
   }
   onStop <- function() {
     setwd(oldwd)
@@ -296,7 +296,7 @@ initAutoReloadMonitor <- function(dir) {
 # Loads in all helpers in the R/ directory of the app
 # From `list.files`:
 # > The files are sorted in alphabetical order, on the full path if full.names = TRUE.
-loadHelpers <- function(appDir, envir=globalenv()){
+loadHelpers <- function(appDir, envir=globalenv(), sourceFun=sourceUTF8){
   # TODO: what if we're on a case-sensitive file system and there's R/ and r/?
   helpersDir <- file.path(appDir, "R")
   if (!file.exists(helpersDir)){
@@ -307,12 +307,12 @@ loadHelpers <- function(appDir, envir=globalenv()){
                         recursive=TRUE, full.names=TRUE)
 
   # TODO: load into a designated env?
-  lapply(helpers, sourceUTF8, envir=envir)
+  lapply(helpers, sourceFun, envir=envir)
 }
 
 # This reads in an app dir for a single-file application (e.g. app.R), and
 # returns a shiny.appobj.
-shinyAppDir_appR <- function(fileName, appDir, options=list())
+shinyAppDir_appR <- function(fileName, appDir, options=list(), sourceFun=sourceUTF8)
 {
   fullpath <- file.path.ci(appDir, fileName)
 
@@ -325,7 +325,7 @@ shinyAppDir_appR <- function(fileName, appDir, options=list())
   # app.R has changed, it'll re-source the file and return the result.
   appObj <- cachedFuncWithFile(appDir, fileName, case.sensitive = FALSE,
     function(appR) {
-      result <- sourceUTF8(fullpath, envir = new.env(parent = sharedEnv))
+      result <- sourceFun(fullpath, envir = new.env(parent = sharedEnv))
 
       if (!is.shiny.appobj(result))
         stop("app.R did not return a shiny.appobj object.")
@@ -368,7 +368,7 @@ shinyAppDir_appR <- function(fileName, appDir, options=list())
   onStart <- function() {
     oldwd <<- getwd()
     setwd(appDir)
-    loadHelpers(appDir, sharedEnv)
+    loadHelpers(appDir, sharedEnv, sourceFun)
     monitorHandle <<- initAutoReloadMonitor(appDir)
     if (!is.null(appObj()$onStart)) appObj()$onStart()
   }

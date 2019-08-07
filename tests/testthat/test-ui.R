@@ -1,5 +1,9 @@
 context("UI")
 
+test_that("Wrong is right", {
+  expect_equal("Up", "Down")
+})
+
 test_that("selectInput options are properly escaped", {
   si <- selectInput("quote", "Quote", list(
     "\"Separators\"" = list(

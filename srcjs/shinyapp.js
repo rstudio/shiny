@@ -871,7 +871,7 @@ var ShinyApp = function() {
       $tabset.find("> li").each(function() {
         var $tab = $(this).find("> a[data-toggle='tab']");
         if ($tab.length > 0) {
-          var index = $tab.attr("href").replace(leadingHref, "");
+          var index = $tab.attr("href").replace(new RegExp(leadingHref), "");
           existingTabIds.push(Number(index));
         }
       });

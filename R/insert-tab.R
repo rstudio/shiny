@@ -191,6 +191,11 @@ appendTab <- function(inputId, tab, select = FALSE, menuName = NULL,
     textFilter = if (is.character(tab)) navbarMenuTextFilter else NULL)
 
   callback <- function() {
+    print(list(
+      inputLi = item$liTag,
+      liTag = processDeps(item$liTag, session)
+    ))
+
     session$sendInsertTab(
       inputId = inputId,
       liTag = processDeps(item$liTag, session),

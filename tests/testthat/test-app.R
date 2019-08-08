@@ -3,19 +3,19 @@ context("app")
 
 test_that("helpers are loaded into the right env", {
   env <- new.env(parent=environment())
-  shiny:::loadHelpers("../test-helpers/app1-standard", envir=env)
+  loadHelpers("../test-helpers/app1-standard", envir=env)
   expect_equal(get("helper1", env), 123)
   expect_equal(get("helper2", env), "abc")
 })
 
 test_that("nested helpers are loaded", {
-  shiny:::loadHelpers("../test-helpers/app2-nested")
+  loadHelpers("../test-helpers/app2-nested")
   expect_equal(helper1, 456)
   expect_equal(helper2, "def")
 })
 
 test_that("lower-case helper dir is loaded", {
-  shiny:::loadHelpers("../test-helpers/app3-lowercase")
+  loadHelpers("../test-helpers/app3-lowercase")
   expect_equal(helper1, 789)
 })
 
@@ -25,24 +25,94 @@ test_that("app with both r/ and R/ prefers R/", {
            warning=function(w){testthat::skip("File system is not case-sensitive")})
   writeLines("upperHelper <- 'abc'", file.path("../test-helpers/app4-both/R", "upper.R"))
 
-  shiny:::loadHelpers("../test-helpers/app4-both")
+  loadHelpers("../test-helpers/app4-both")
 
   expect_false(exists("lowerHelper"))
   expect_equal(upperHelper, "abc")
 })
 
-test_that("global.R is loaded before R/ helpers", {
-  testthat::skip("NYI")
+test_that("With ui/server.R, global.R is loaded before R/ helpers and into the right envs", {
+  calls <- list()
+  sourceStub <- function(...){
+    calls[[length(calls)+1]] <<- list(...)
+    NULL
+  }
+
+  # + shinyAppDir_serverR
+  # +--- sourceUTF8
+  # +--+ loadHelpers
+  # |  +--- sourceUTF8
+  loadSpy <- rewire(loadHelpers, sourceUTF8 = sourceStub)
+  sad <- rewire(shinyAppDir_serverR, sourceUTF8 = sourceStub, loadHelpers = loadSpy)
+
+  sa <- sad(normalizePath("../test-helpers/app1-standard"))
+  sa$onStart()
+  sa$onStop() # Close down to free up resources
+
+  # Should have seen three calls -- first to global then to the helpers
+  expect_length(calls, 3)
+  expect_match(calls[[1]][[1]], "/global\\.R$", perl=TRUE)
+  expect_match(calls[[2]][[1]], "/helperCap\\.R$", perl=TRUE)
+  expect_match(calls[[3]][[1]], "/helperLower\\.r$", perl=TRUE)
+
+  # Check environments
+  # global.R has no env specified -- loaded into the global env.
+  expect_length(calls[[1]], 1)
+  # helpers are loaded into a child of the global env
+  helperEnv1 <- calls[[2]]$envir
+  helperEnv2 <- calls[[3]]$envir
+  expect_identical(helperEnv1, helperEnv2)
+  expect_identical(parent.env(helperEnv1), globalenv())
+
+  calls <- NULL
+  # Source the server
+  sa$serverFuncSource()
+  expect_length(calls, 1)
+  # server.R is sourced into a child environment of the helpers
+  expect_match(calls[[1]][[1]], "/server\\.R$")
+  expect_identical(parent.env(calls[[1]]$envir), helperEnv1)
+
+  calls <- NULL
+  # Invoke the UI by simulating a request
+  sa$httpHandler(list())
+  expect_length(calls, 1)
+  # ui.R is sourced into a child environment of the helpers
+  expect_match(calls[[1]][[1]], "/ui\\.R$")
+  expect_identical(parent.env(calls[[1]]$envir), helperEnv1)
 })
 
-test_that("global.R is loaded into the global environment", {
-  testthat::skip("NYI")
-})
 
-test_that("R/ helpers are loaded into a shared parent env of server.R and ui.R", {
-  testthat::skip("NYI")
-})
+test_that("app.R is loaded after R/ helpers and into the right envs", {
+  calls <- list()
+  sourceSpy <- function(...){
+    calls[[length(calls)+1]] <<- list(...)
+    do.call(sourceUTF8, list(...))
+  }
 
-test_that("R/ helpers are loaded into a parent env of app.R", {
-  testthat::skip("NYI")
+  # + shinyAppDir_serverR
+  # +--- sourceUTF8
+  # +--+ loadHelpers
+  # |  +--- sourceUTF8
+  loadSpy <- rewire(loadHelpers, sourceUTF8 = sourceSpy)
+  sad <- rewire(shinyAppDir_appR, sourceUTF8 = sourceSpy, loadHelpers = loadSpy)
+
+  sa <- sad("app.R", normalizePath("../test-helpers/app2-nested"))
+  sa$onStart()
+  sa$onStop() # Close down to free up resources
+
+  # Should have seen three calls -- first to two helpers then to app.R
+  expect_length(calls, 3)
+  expect_match(calls[[1]][[1]], "nested1/helper\\.R$", perl=TRUE)
+  expect_match(calls[[2]][[1]], "nested2/helper\\.R$", perl=TRUE)
+  expect_match(calls[[3]][[1]], "/app\\.R$", perl=TRUE)
+
+  # Check environments
+  # helpers are loaded into a child of the global env
+  helperEnv1 <- calls[[1]]$envir
+  helperEnv2 <- calls[[2]]$envir
+  expect_identical(helperEnv1, helperEnv2)
+  expect_identical(parent.env(helperEnv1), globalenv())
+
+  # app.R is sourced into a child environment of the helpers
+  expect_identical(parent.env(calls[[3]]$envir), helperEnv1)
 })

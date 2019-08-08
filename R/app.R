@@ -139,6 +139,7 @@ shinyAppFile <- function(appFile, options=list()) {
 
 # This reads in an app dir in the case that there's a server.R (and ui.R/www)
 # present, and returns a shiny.appobj.
+# appDir must be a normalized (absolute) path, not a relative one
 shinyAppDir_serverR <- function(appDir, options=list()) {
   # Most of the complexity here comes from needing to hot-reload if the .R files
   # change on disk, or are created, or are removed.
@@ -218,8 +219,9 @@ shinyAppDir_serverR <- function(appDir, options=list()) {
     oldwd <<- getwd()
     setwd(appDir)
     monitorHandle <<- initAutoReloadMonitor(appDir)
-    if (file.exists(file.path.ci(appDir, "global.R")))
+    if (file.exists(file.path.ci(appDir, "global.R"))){
       sourceUTF8(file.path.ci(appDir, "global.R"))
+    }
     loadHelpers(appDir, envir = sharedEnv)
   }
   onStop <- function() {
@@ -306,12 +308,12 @@ loadHelpers <- function(appDir, envir=globalenv()){
   helpers <- list.files(helpersDir, pattern="\\.[rR]$", ignore.case=TRUE,
                         recursive=TRUE, full.names=TRUE)
 
-  # TODO: load into a designated env?
   lapply(helpers, sourceUTF8, envir=envir)
 }
 
 # This reads in an app dir for a single-file application (e.g. app.R), and
 # returns a shiny.appobj.
+# appDir must be a normalized (absolute) path, not a relative one
 shinyAppDir_appR <- function(fileName, appDir, options=list())
 {
   fullpath <- file.path.ci(appDir, fileName)

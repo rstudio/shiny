@@ -297,16 +297,14 @@ initAutoReloadMonitor <- function(dir) {
 
 # Loads in all helpers in the R/ directory of the app
 # From `list.files`:
-# > The files are sorted in alphabetical order, on the full path if full.names = TRUE.
+# > The files are sorted in alphabetical order, on the full path
 loadHelpers <- function(appDir, envir=globalenv()){
-  # TODO: what if we're on a case-sensitive file system and there's R/ and r/?
   helpersDir <- file.path(appDir, "R")
   if (!file.exists(helpersDir)){
     # We may be on a case-sensitive filesystem and have a dir named r/
     helpersDir <- file.path(appDir, "r")
   }
-  helpers <- list.files(helpersDir, pattern="\\.[rR]$", ignore.case=TRUE,
-                        recursive=TRUE, full.names=TRUE)
+  helpers <- list.files(helpersDir, pattern="\\.[rR]$", recursive=TRUE, full.names=TRUE)
 
   lapply(helpers, sourceUTF8, envir=envir)
 }

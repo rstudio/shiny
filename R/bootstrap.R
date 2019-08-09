@@ -985,7 +985,7 @@ imageOutput <- function(outputId, width = "100%", height="400px",
                         hover = NULL, hoverDelay = NULL, hoverDelayType = NULL,
                         brush = NULL,
                         clickId = NULL, hoverId = NULL,
-                        inline = FALSE, class = NULL, ...) {
+                        inline = FALSE, style = NULL, class = NULL, ...) {
 
   if (!is.null(clickId)) {
     shinyDeprecated(
@@ -1017,8 +1017,12 @@ imageOutput <- function(outputId, width = "100%", height="400px",
     hover <- hoverOpts(id = hover, delay = hoverDelay, delayType = hoverDelayType)
   }
 
-  style <- if (!inline) {
-    paste("width:", validateCssUnit(width), ";", "height:", validateCssUnit(height))
+  if (!inline) {
+    style <- paste(
+      "width:", validateCssUnit(width), ";",
+      "height:", validateCssUnit(height), ";",
+      style
+    )
   }
 
 
@@ -1146,6 +1150,7 @@ imageOutput <- function(outputId, width = "100%", height="400px",
 #'   `imageOutput`/`plotOutput` calls may share the same `id`
 #'   value; brushing one image or plot will cause any other brushes with the
 #'   same `id` to disappear.
+#' @param style Additional CSS styles to apply to the container, if any.
 #' @inheritParams textOutput
 #' @note The arguments `clickId` and `hoverId` only work for R base graphics
 #'   (see the \pkg{\link[graphics:graphics-package]{graphics}} package). They do
@@ -1319,12 +1324,12 @@ plotOutput <- function(outputId, width = "100%", height="400px",
                        hover = NULL, hoverDelay = NULL, hoverDelayType = NULL,
                        brush = NULL,
                        clickId = NULL, hoverId = NULL,
-                       inline = FALSE, class = NULL, ...) {
+                       inline = FALSE, style = NULL, class = NULL, ...) {
 
   # Result is the same as imageOutput, except for HTML class
   res <- imageOutput(outputId, width, height, click, dblclick,
                      hover, hoverDelay, hoverDelayType, brush,
-                     clickId, hoverId, inline, ...)
+                     clickId, hoverId, inline, style, ...)
 
   res$attribs$class <- paste(c("shiny-plot-output", class), collapse = " ")
   res

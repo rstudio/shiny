@@ -4,7 +4,7 @@
 \alias{verbatimTextOutput}
 \title{Create a verbatim text output element}
 \usage{
-verbatimTextOutput(outputId, placeholder = FALSE)
+verbatimTextOutput(outputId, placeholder = FALSE, class = NULL, ...)
 }
 \arguments{
 \item{outputId}{output variable to read the value from}
@@ -12,6 +12,10 @@ verbatimTextOutput(outputId, placeholder = FALSE)
 \item{placeholder}{if the output is empty or \code{NULL}, should an empty
 rectangle be displayed to serve as a placeholder? (does not affect
 behavior when the the output in nonempty)}
+
+\item{class}{Additional CSS classes to apply to the pre tag, if any.}
+
+\item{...}{Additional arguments to apply to the pre tag, if any.}
 }
 \value{
 A verbatim text output element that can be included in a panel

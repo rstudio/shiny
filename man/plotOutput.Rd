@@ -8,12 +8,12 @@
 imageOutput(outputId, width = "100\%", height = "400px",
   click = NULL, dblclick = NULL, hover = NULL, hoverDelay = NULL,
   hoverDelayType = NULL, brush = NULL, clickId = NULL,
-  hoverId = NULL, inline = FALSE)
+  hoverId = NULL, inline = FALSE, class = NULL, ...)
 
 plotOutput(outputId, width = "100\%", height = "400px", click = NULL,
   dblclick = NULL, hover = NULL, hoverDelay = NULL,
   hoverDelayType = NULL, brush = NULL, clickId = NULL,
-  hoverId = NULL, inline = FALSE)
+  hoverId = NULL, inline = FALSE, class = NULL, ...)
 }
 \arguments{
 \item{outputId}{output variable to read the plot/image from.}
@@ -76,6 +76,10 @@ same \code{id} to disappear.}
 
 \item{inline}{use an inline (\code{span()}) or block container (\code{div()})
 for the output}
+
+\item{class}{Additional CSS classes to apply to the container, if any.}
+
+\item{...}{Additional arguments to apply to the container, if any.}
 }
 \value{
 A plot or image output element that can be included in a panel.

@@ -1472,7 +1472,7 @@ downloadButton <- function(outputId,
                            label="Download",
                            class=NULL, ...) {
   aTag <- tags$a(id=outputId,
-                 class=paste('btn btn-default shiny-download-link', class),
+                 class=paste(c('btn btn-default shiny-download-link', class), collapse = " "),
                  href='',
                  target='_blank',
                  download=NA,
@@ -1551,7 +1551,7 @@ icon <- function(name, class = NULL, lib = "font-awesome") {
     iconClass <- paste0(prefix_class, " ", prefix, "-", name)
   }
   if (!is.null(class))
-    iconClass <- paste(iconClass, class)
+    iconClass <- paste(c(iconClass, class), collapse = " ")
 
   iconTag <- tags$i(class = iconClass)
 

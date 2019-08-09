@@ -923,6 +923,8 @@ buildTabItem <- function(index, tabsetId, foundSelected, tabs = NULL,
 #' @param container a function to generate an HTML element to contain the text
 #' @param inline use an inline (`span()`) or block container (`div()`)
 #'   for the output
+#' @param class Additional CSS classes to apply to the container, if any.
+#' @param ... Additional arguments to apply to the container, if any.
 #' @return A text output element that can be included in a panel
 #' @details Text is HTML-escaped prior to rendering. This element is often used
 #'   to display [renderText] output variables.
@@ -944,6 +946,8 @@ textOutput <- function(outputId, container = if (inline) span else div,
 #' @param placeholder if the output is empty or `NULL`, should an empty
 #'   rectangle be displayed to serve as a placeholder? (does not affect
 #'   behavior when the the output in nonempty)
+#' @param class Additional CSS classes to apply to the pre tag, if any.
+#' @param ... Additional arguments to apply to the pre tag, if any.
 #' @return A verbatim text output element that can be included in a panel
 #' @details Text is HTML-escaped prior to rendering. This element is often used
 #'   with the [renderPrint] function to preserve fixed-width formatting
@@ -1334,6 +1338,8 @@ plotOutput <- function(outputId, width = "100%", height="400px",
 #' interactive table with more features.
 #'
 #' @param outputId output variable to read the table from
+#' @param class Additional CSS classes to apply to the div tag, if any.
+#' @param ... Additional arguments to apply to the div tag, if any.
 #' @return A table output element that can be included in a panel
 #'
 #' @seealso [renderTable()], [renderDataTable()].

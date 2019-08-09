@@ -77,7 +77,7 @@ the browser. It allows the following values:
 }
 \section{Server value}{
 
-A date-time of class \code{Date}, e.g. \code{"2013-12-31"}.
+A date-time of class \code{Date}.
 }
 
 \examples{

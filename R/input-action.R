@@ -39,7 +39,7 @@
 #' @seealso [observeEvent()] and [eventReactive()]
 #'
 #' @section Server value:
-#' Returns an integer, initialized as 0 and incremented with each press.
+#' An integer, initialized as 0 and incremented with each press.
 #'
 #' @export
 actionButton <- function(inputId, label, icon = NULL, width = NULL, ...) {

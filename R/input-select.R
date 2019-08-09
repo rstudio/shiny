@@ -72,6 +72,10 @@
 #'   }
 #' )
 #' }
+#'
+#' @section Server value:
+#' A vector of character strings, usually with a length of 1, with the value of the selected items.
+#'
 #' @export
 selectInput <- function(inputId, label, choices, selected = NULL,
   multiple = FALSE, selectize = TRUE, width = NULL,

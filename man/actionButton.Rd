@@ -28,7 +28,7 @@ each time it is pressed.
 }
 \section{Server value}{
 
-Returns an integer, initialized as 0 and incremented with each press.
+An integer, initialized as 0 and incremented with each press.
 }
 
 \examples{

@@ -74,6 +74,11 @@ value when it is a single choice input and the empty string is not in the
 \code{choices} argument. This is to keep compatibility with
 \code{selectInput(..., selectize = FALSE)}.
 }
+\section{Server value}{
+
+A vector of character strings, usually with a length of 1, with the value of the selected items.
+}
+
 \examples{
 ## Only run examples in interactive R sessions
 if (interactive()) {
@@ -111,6 +116,7 @@ shinyApp(
   }
 )
 }
+
 }
 \seealso{
 \code{\link[=updateSelectInput]{updateSelectInput()}} \code{\link[=varSelectInput]{varSelectInput()}}

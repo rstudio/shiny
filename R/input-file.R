@@ -71,6 +71,10 @@
 #'
 #' shinyApp(ui, server)
 #' }
+#'
+#' @section Server value:
+#' A `data.frame` that contains one row for each file uploaded and four columns: `name`, `size`, `type`, and `datapath`. See the Details.
+#'
 #' @export
 fileInput <- function(inputId, label, multiple = FALSE, accept = NULL,
   width = NULL, buttonLabel = "Browse...", placeholder = "No file selected") {

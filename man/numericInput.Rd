@@ -29,6 +29,11 @@ A numeric input control that can be added to a UI definition.
 \description{
 Create an input control for entry of numeric values
 }
+\section{Server value}{
+
+The input value as a \code{double}.
+}
+
 \examples{
 ## Only run examples in interactive R sessions
 if (interactive()) {
@@ -42,6 +47,7 @@ server <- function(input, output) {
 }
 shinyApp(ui, server)
 }
+
 }
 \seealso{
 \code{\link[=updateNumericInput]{updateNumericInput()}}

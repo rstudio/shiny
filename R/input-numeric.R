@@ -24,6 +24,10 @@
 #' }
 #' shinyApp(ui, server)
 #' }
+#'
+#' @section Server value:
+#' The input value as a `double`.
+#'
 #' @export
 numericInput <- function(inputId, label, value, min = NA, max = NA, step = NA,
   width = NULL) {

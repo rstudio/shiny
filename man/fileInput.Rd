@@ -49,6 +49,11 @@ uploaded. This file may be deleted if the user performs another upload
 operation.}
 }
 }
+\section{Server value}{
+
+A \code{data.frame} that contains one row for each file uploaded and four columns: \code{name}, \code{size}, \code{type}, and \code{datapath}. See the Details.
+}
+
 \examples{
 ## Only run examples in interactive R sessions
 if (interactive()) {
@@ -89,6 +94,7 @@ server <- function(input, output) {
 
 shinyApp(ui, server)
 }
+
 }
 \seealso{
 Other input elements: \code{\link{actionButton}},

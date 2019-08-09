@@ -80,6 +80,10 @@
 #'
 #' shinyApp(ui, server)
 #' }
+#'
+#' @section Server value:
+#' A character string containing the value of the selected button.
+#'
 #' @export
 radioButtons <- function(inputId, label, choices = NULL, selected = NULL,
   inline = FALSE, width = NULL, choiceNames = NULL, choiceValues = NULL) {

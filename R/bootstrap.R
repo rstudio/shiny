@@ -929,8 +929,11 @@ buildTabItem <- function(index, tabsetId, foundSelected, tabs = NULL,
 #' @examples
 #' h3(textOutput("caption"))
 #' @export
-textOutput <- function(outputId, container = if (inline) span else div, inline = FALSE) {
-  container(id = outputId, class = "shiny-text-output")
+textOutput <- function(outputId, container = if (inline) span else div,
+                       inline = FALSE, class = NULL, ...) {
+  container(id = outputId,
+            class = paste(c("shiny-text-output", class), collapse = " "),
+            ...)
 }
 
 #' Create a verbatim text output element
@@ -961,11 +964,12 @@ textOutput <- function(outputId, container = if (inline) span else div, inline =
 #'   )
 #' }
 #' @export
-verbatimTextOutput <- function(outputId, placeholder = FALSE) {
+verbatimTextOutput <- function(outputId, placeholder = FALSE, class = NULL, ...) {
   pre(id = outputId,
-      class = paste(c("shiny-text-output", if (!placeholder) "noplaceholder"),
-                    collapse = " ")
-      )
+      class = paste(c("shiny-text-output", if (!placeholder) "noplaceholder", class),
+                    collapse = " "),
+      ...
+  )
 }
 
 
@@ -977,7 +981,7 @@ imageOutput <- function(outputId, width = "100%", height="400px",
                         hover = NULL, hoverDelay = NULL, hoverDelayType = NULL,
                         brush = NULL,
                         clickId = NULL, hoverId = NULL,
-                        inline = FALSE) {
+                        inline = FALSE, class = NULL, ...) {
 
   if (!is.null(clickId)) {
     shinyDeprecated(
@@ -1017,8 +1021,9 @@ imageOutput <- function(outputId, width = "100%", height="400px",
   # Build up arguments for call to div() or span()
   args <- list(
     id = outputId,
-    class = "shiny-image-output",
-    style = style
+    class = paste(c("shiny-image-output", class), collapse = " "),
+    style = style,
+    ...
   )
 
   # Given a named list with options, replace names like "delayType" with
@@ -1310,14 +1315,14 @@ plotOutput <- function(outputId, width = "100%", height="400px",
                        hover = NULL, hoverDelay = NULL, hoverDelayType = NULL,
                        brush = NULL,
                        clickId = NULL, hoverId = NULL,
-                       inline = FALSE) {
+                       inline = FALSE, class = NULL, ...) {
 
   # Result is the same as imageOutput, except for HTML class
   res <- imageOutput(outputId, width, height, click, dblclick,
                      hover, hoverDelay, hoverDelayType, brush,
-                     clickId, hoverId, inline)
+                     clickId, hoverId, inline, ...)
 
-  res$attribs$class <- "shiny-plot-output"
+  res$attribs$class <- paste(c("shiny-plot-output", class), collapse = " ")
   res
 }
 
@@ -1365,8 +1370,8 @@ plotOutput <- function(outputId, width = "100%", height="400px",
 #'   )
 #' }
 #' @export
-tableOutput <- function(outputId) {
-  div(id = outputId, class="shiny-html-output")
+tableOutput <- function(outputId, class = NULL, ...) {
+  div(id = outputId, class = paste(c("shiny-html-output", class), collapse = " "), ...)
 }
 
 dataTableDependency <- list(
@@ -1383,9 +1388,9 @@ dataTableDependency <- list(
 
 #' @rdname tableOutput
 #' @export
-dataTableOutput <- function(outputId) {
+dataTableOutput <- function(outputId, class = NULL, ...) {
   attachDependencies(
-    div(id = outputId, class="shiny-datatable-output"),
+    div(id = outputId, class = paste(c("shiny-datatable-output", class), collapse = " "), ...),
     dataTableDependency
   )
 }
@@ -1413,12 +1418,12 @@ dataTableOutput <- function(outputId) {
 #' )
 #' @export
 htmlOutput <- function(outputId, inline = FALSE,
-  container = if (inline) span else div, ...)
+  container = if (inline) span else div, class, ...)
 {
   if (anyUnnamed(list(...))) {
     warning("Unnamed elements in ... will be replaced with dynamic UI.")
   }
-  container(id = outputId, class="shiny-html-output", ...)
+  container(id = outputId, class = paste("shiny-html-output", class), collapse = " "), ...)
 }
 
 #' @rdname htmlOutput

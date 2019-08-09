@@ -1424,12 +1424,12 @@ dataTableOutput <- function(outputId, class = NULL, ...) {
 #' )
 #' @export
 htmlOutput <- function(outputId, inline = FALSE,
-  container = if (inline) span else div, class, ...)
+  container = if (inline) span else div, class = NULL, ...)
 {
   if (anyUnnamed(list(...))) {
     warning("Unnamed elements in ... will be replaced with dynamic UI.")
   }
-  container(id = outputId, class = paste("shiny-html-output", class), collapse = " "), ...)
+  container(id = outputId, class = paste(c("shiny-html-output", class), collapse = " "), ...)
 }
 
 #' @rdname htmlOutput

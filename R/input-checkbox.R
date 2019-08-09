@@ -22,7 +22,12 @@
 #' }
 #' shinyApp(ui, server)
 #' }
+#'
+#' @section Server value:
+#' `TRUE` if checked, `FALSE` otherwise.
+#'
 #' @export
+
 checkboxInput <- function(inputId, label, value = FALSE, width = NULL) {
 
   value <- restoreInput(id = inputId, default = value)

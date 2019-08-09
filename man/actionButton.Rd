@@ -26,6 +26,11 @@ see \code{\link[=validateCssUnit]{validateCssUnit()}}.}
 Creates an action button or link whose value is initially zero, and increments by one
 each time it is pressed.
 }
+\section{Server value}{
+
+Returns an integer, initialized as 0 and incremented with each press.
+}
+
 \examples{
 ## Only run examples in interactive R sessions
 if (interactive()) {

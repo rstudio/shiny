@@ -22,6 +22,11 @@ A checkbox control that can be added to a UI definition.
 \description{
 Create a checkbox that can be used to specify logical values.
 }
+\section{Server value}{
+
+\code{TRUE} if checked, \code{FALSE} otherwise.
+}
+
 \examples{
 ## Only run examples in interactive R sessions
 if (interactive()) {
@@ -35,6 +40,7 @@ server <- function(input, output) {
 }
 shinyApp(ui, server)
 }
+
 }
 \seealso{
 \code{\link[=checkboxGroupInput]{checkboxGroupInput()}}, \code{\link[=updateCheckboxInput]{updateCheckboxInput()}}

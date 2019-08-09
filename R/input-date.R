@@ -86,6 +86,10 @@
 #'
 #' shinyApp(ui, server = function(input, output) { })
 #' }
+#'
+#' @section Server value:
+#' A date-time of class `Date`.
+#'
 #' @export
 dateInput <- function(inputId, label, value = NULL, min = NULL, max = NULL,
   format = "yyyy-mm-dd", startview = "month", weekstart = 0,

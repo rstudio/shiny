@@ -70,6 +70,10 @@
 #'
 #' shinyApp(ui, server = function(input, output) { })
 #' }
+#'
+#' @section Server value:
+#' A vector of two `Date` objects.
+#'
 #' @export
 dateRangeInput <- function(inputId, label, start = NULL, end = NULL,
     min = NULL, max = NULL, format = "yyyy-mm-dd", startview = "month",

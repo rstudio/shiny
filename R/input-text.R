@@ -28,6 +28,10 @@
 #' }
 #' shinyApp(ui, server)
 #' }
+#'
+#' @section Server value:
+#' A character string of the text input.
+#'
 #' @export
 textInput <- function(inputId, label, value = "", width = NULL,
   placeholder = NULL) {

@@ -100,4 +100,10 @@ shinyApp(ui, server = function(input, output) { })
 }
 \seealso{
 \code{\link[=column]{column()}}, \code{\link[=sidebarLayout]{sidebarLayout()}}
+
+Other layout functions: \code{\link{fillRow}},
+  \code{\link{fixedPage}}, \code{\link{flowLayout}},
+  \code{\link{sidebarLayout}}, \code{\link{splitLayout}},
+  \code{\link{titlePanel}}, \code{\link{verticalLayout}}
 }
+\concept{layout functions}

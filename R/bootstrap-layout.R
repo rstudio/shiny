@@ -28,6 +28,8 @@
 #'   Shiny-Application-Layout-Guide](http://shiny.rstudio.com/articles/layout-guide.html) for additional details on laying out fluid
 #'   pages.
 #'
+#' @family layout functions
+#'
 #' @seealso [column()], [sidebarLayout()]
 #'
 #' @examples
@@ -129,6 +131,8 @@ fluidRow <- function(...) {
 #' @note See the [
 #'   Shiny Application Layout Guide](http://shiny.rstudio.com/articles/layout-guide.html) for additional details on laying out fixed
 #'   pages.
+#'
+#'@family layout functions
 #'
 #' @seealso [column()]
 #'
@@ -243,6 +247,7 @@ column <- function(width, ..., offset = 0) {
 #'   `title` tag within the head. You can also specify a page title
 #'   explicitly using the `title` parameter of the top-level page function.
 #'
+#' @family layout functions
 #'
 #' @examples
 #' ## Only run examples in interactive R sessions
@@ -273,6 +278,8 @@ titlePanel <- function(title, windowTitle=title) {
 #'   or "right")
 #' @param fluid `TRUE` to use fluid layout; `FALSE` to use fixed
 #'   layout.
+#'
+#' @family layout functions
 #'
 #' @examples
 #' ## Only run examples in interactive R sessions
@@ -346,6 +353,8 @@ sidebarLayout <- function(sidebarPanel,
 #' @param fluid `TRUE` to use fluid layout; `FALSE` to use fixed
 #'   layout.
 #'
+#' @family layout functions
+#'
 #' @seealso [fluidPage()], [flowLayout()]
 #'
 #' @examples
@@ -383,6 +392,8 @@ verticalLayout <- function(..., fluid = TRUE) {
 #'   arguments will become HTML attributes on the outermost tag.
 #' @param cellArgs Any additional attributes that should be used for each cell
 #'   of the layout.
+#'
+#' @family layout functions
 #'
 #' @seealso [verticalLayout()]
 #'
@@ -439,6 +450,8 @@ inputPanel <- function(...) {
 #'   values as pixels.
 #' @param cellArgs Any additional attributes that should be used for each cell
 #'   of the layout.
+#'
+#' @family layout functions
 #'
 #' @examples
 #' ## Only run examples in interactive R sessions
@@ -545,6 +558,8 @@ splitLayout <- function(..., cellWidths = NULL, cellArgs = list()) {
 #'   effective, the parent must be `fillPage`, another
 #'   `fillRow`/`fillCol`, or some other HTML element whose height is
 #'   not determined by the height of its contents.
+#'
+#' @family layout functions
 #'
 #' @examples
 #' # Only run this example in interactive R sessions.

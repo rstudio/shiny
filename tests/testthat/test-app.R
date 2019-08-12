@@ -14,11 +14,6 @@ test_that("nested helpers are loaded", {
   expect_equal(helper2, "def")
 })
 
-test_that("lower-case helper dir is loaded", {
-  loadHelpers("../test-helpers/app3-lowercase")
-  expect_equal(helper1, 789)
-})
-
 test_that("app with both r/ and R/ prefers R/", {
   ## App 4 already has a lower-case r/ directory. Try to create an upper.
   tryCatch(dir.create("../test-helpers/app4-both/R"),

@@ -66,4 +66,10 @@ shinyApp(ui, server = function(input, output) { })
 }
 \seealso{
 \code{\link[=column]{column()}}
+
+Other layout functions: \code{\link{fillRow}},
+  \code{\link{flowLayout}}, \code{\link{fluidPage}},
+  \code{\link{sidebarLayout}}, \code{\link{splitLayout}},
+  \code{\link{titlePanel}}, \code{\link{verticalLayout}}
 }
+\concept{layout functions}

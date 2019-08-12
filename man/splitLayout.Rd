@@ -61,3 +61,10 @@ ui <- splitLayout(
 shinyApp(ui, server)
 }
 }
+\seealso{
+Other layout functions: \code{\link{fillRow}},
+  \code{\link{fixedPage}}, \code{\link{flowLayout}},
+  \code{\link{fluidPage}}, \code{\link{sidebarLayout}},
+  \code{\link{titlePanel}}, \code{\link{verticalLayout}}
+}
+\concept{layout functions}

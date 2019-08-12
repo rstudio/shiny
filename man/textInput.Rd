@@ -27,6 +27,11 @@ A text input control that can be added to a UI definition.
 \description{
 Create an input control for entry of unstructured text values
 }
+\section{Server value}{
+
+A character string of the text input.
+}
+
 \examples{
 ## Only run examples in interactive R sessions
 if (interactive()) {
@@ -40,6 +45,7 @@ server <- function(input, output) {
 }
 shinyApp(ui, server)
 }
+
 }
 \seealso{
 \code{\link[=updateTextInput]{updateTextInput()}}

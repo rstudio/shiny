@@ -300,7 +300,7 @@ initAutoReloadMonitor <- function(dir) {
 # > The files are sorted in alphabetical order, on the full path
 loadHelpers <- function(appDir, envir=globalenv()){
   helpersDir <- file.path(appDir, "R")
-  helpers <- list.files(helpersDir, pattern="\\.[rR]$", recursive=TRUE, full.names=TRUE)
+  helpers <- list.files(helpersDir, pattern="\\.[rR]$", recursive=FALSE, full.names=TRUE)
 
   lapply(helpers, sourceUTF8, envir=envir)
 }

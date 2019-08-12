@@ -11,7 +11,7 @@ test_that("helpers are loaded into the right env", {
 test_that("nested helpers are loaded", {
   loadHelpers("../test-helpers/app2-nested")
   expect_equal(helper1, 456)
-  expect_equal(helper2, "def")
+  expect_false(exists("helper2"))
 })
 
 test_that("app with both r/ and R/ prefers R/", {
@@ -96,18 +96,15 @@ test_that("app.R is loaded after R/ helpers and into the right envs", {
   sa$onStop() # Close down to free up resources
 
   # Should have seen three calls -- first to two helpers then to app.R
-  expect_length(calls, 3)
-  expect_match(calls[[1]][[1]], "nested1/helper\\.R$", perl=TRUE)
-  expect_match(calls[[2]][[1]], "nested2/helper\\.R$", perl=TRUE)
-  expect_match(calls[[3]][[1]], "/app\\.R$", perl=TRUE)
+  expect_length(calls, 2)
+  expect_match(calls[[1]][[1]], "/helper\\.R$", perl=TRUE)
+  expect_match(calls[[2]][[1]], "/app\\.R$", perl=TRUE)
 
   # Check environments
   # helpers are loaded into a child of the global env
   helperEnv1 <- calls[[1]]$envir
-  helperEnv2 <- calls[[2]]$envir
-  expect_identical(helperEnv1, helperEnv2)
   expect_identical(parent.env(helperEnv1), globalenv())
 
   # app.R is sourced into a child environment of the helpers
-  expect_identical(parent.env(calls[[3]]$envir), helperEnv1)
+  expect_identical(parent.env(calls[[2]]$envir), helperEnv1)
 })

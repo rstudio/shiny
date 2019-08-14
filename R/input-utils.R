@@ -90,25 +90,35 @@ generateOptions <- function(inputId, selected, inline, type = 'checkbox',
   div(class = "shiny-options-group", options)
 }
 
-# Take a vector/list/factor, and convert to named list. Also, if any children are
-# vectors with length > 1, convert those to list. If the list is unnamed,
-# convert it to a named list with blank names.
-listify <- function(x, child = FALSE) {
-  if (is.list(x) || is.null(x)) {
-    # List children are processed and a named list is returned
-    asNamed(lapply(x, listify, TRUE))
-  } else if (child && is.null(names(x)) && length(x) == 1) {
-    # Unnamed children of length = 1 are considered leaves and are converted to
-    # a character(1)
-    as.character(x)
+# Walks tree and coerces any encountered atomic types to possibly-named
+# character vectors.
+coerceAtomicToCharacter <- function(tree) {
+  if (is.atomic(tree)) {
+    # Names are preserved explicitly here to preserve names on factors, which
+    # are atomic
+    stats::setNames(as.character(tree), names(tree))
   } else {
-    # The process for anything else is:
-    # 1. Convert to a (possibly named) character vector.
-    # 2. Add names(x), though it's possibly NULL, to the character vector.
-    #    This is because as.character() on factors discards names.
-    # 3. Convert to a list.
-    # 4. Ensure the list is named.
-    asNamed(as.list(stats::setNames(as.character(x), names(x))))
+    lapply(tree, coerceAtomicToCharacter)
+  }
+}
+
+# Walks tree and converts any unnamed lists or vectors of length 1 to a vector
+# of length 1.
+coerceLeavesToVectors <- function(tree) {
+  if (length(tree) == 1 && is.null(names(tree))) {
+    tree[[1]]
+  } else {
+    lapply(tree, coerceLeavesToVectors)
+  }
+}
+
+# Walks tree and ensures all lists are named. Lists without names are given
+# blank names.
+nameBranches <- function(tree) {
+  if(is.list(tree)) {
+    asNamed(lapply(tree, nameBranches))
+  } else {
+    tree
   }
 }
 
@@ -116,7 +126,11 @@ listify <- function(x, child = FALSE) {
 # without names. Coerces all leaf nodes to `character`.
 choicesWithNames <- function(choices) {
 
-  choices <- listify(choices)
+  choices <- coerceAtomicToCharacter(choices)
+  choices <- coerceLeavesToVectors(choices)
+  choices <- nameBranches(choices)
+  choices <- asNamed(choices)
+
   if (length(choices) == 0) return(choices)
 
   # Recurse into any subgroups

@@ -35,10 +35,10 @@ test_that("app with both r/ and R/ prefers R/", {
            warning=function(w){testthat::skip("File system is not case-sensitive")})
   writeLines("upperHelper <- 'abc'", file.path("../test-helpers/app4-both/R", "upper.R"))
 
-  loadSupport("../test-helpers/app4-both")
+  renv <- loadSupport("../test-helpers/app4-both")
 
-  expect_false(exists("lowerHelper"))
-  expect_equal(upperHelper, "abc")
+  expect_false(exists("lowerHelper", envir=renv))
+  expect_equal(upperHelper, "abc", envir=renv)
 })
 
 test_that("With ui/server.R, global.R is loaded before R/ helpers and into the right envs", {

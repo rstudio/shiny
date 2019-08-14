@@ -1,15 +1,30 @@
 
 context("app")
 
-test_that("helpers are loaded into the right env", {
-  env <- new.env(parent=environment())
-  loadHelpers("../test-helpers/app1-standard", envir=env)
-  expect_equal(get("helper1", env), 123)
-  expect_equal(get("helper2", env), "abc")
+test_that("files are loaded into the right env", {
+  renv <- new.env(parent=environment())
+  genv <- new.env(parent=environment())
+
+  loadSupport("../test-helpers/app1-standard", renv=renv, globalrenv=genv)
+  expect_equal(get("helper1", renv, inherits=FALSE), 123)
+  expect_equal(get("helper2", renv, inherits=FALSE), "abc")
+
+  expect_equal(get("global", genv, inherits=FALSE), "ABC")
 })
 
-test_that("nested helpers are loaded", {
-  loadHelpers("../test-helpers/app2-nested")
+test_that("Can suppress sourcing global.R", {
+  # Confirm that things blow up if we source global.R
+  expect_error(loadSupport("../test-helpers/app3-badglobal"))
+
+  # Shouldn't see an error now that we're suppressing global sourcing.
+  renv <- loadSupport("../test-helpers/app3-badglobal", globalrenv=NULL)
+
+  # But other helpers are still sourced
+  expect_true(exists("helper1", envir=renv))
+})
+
+test_that("nested helpers are not loaded", {
+  loadSupport("../test-helpers/app2-nested", renv=environment())
   expect_equal(helper1, 456)
   expect_false(exists("helper2"))
 })
@@ -20,7 +35,7 @@ test_that("app with both r/ and R/ prefers R/", {
            warning=function(w){testthat::skip("File system is not case-sensitive")})
   writeLines("upperHelper <- 'abc'", file.path("../test-helpers/app4-both/R", "upper.R"))
 
-  loadHelpers("../test-helpers/app4-both")
+  loadSupport("../test-helpers/app4-both")
 
   expect_false(exists("lowerHelper"))
   expect_equal(upperHelper, "abc")
@@ -35,10 +50,10 @@ test_that("With ui/server.R, global.R is loaded before R/ helpers and into the r
 
   # + shinyAppDir_serverR
   # +--- sourceUTF8
-  # +--+ loadHelpers
+  # +--+ loadSupport
   # |  +--- sourceUTF8
-  loadSpy <- rewire(loadHelpers, sourceUTF8 = sourceStub)
-  sad <- rewire(shinyAppDir_serverR, sourceUTF8 = sourceStub, loadHelpers = loadSpy)
+  loadSpy <- rewire(loadSupport, sourceUTF8 = sourceStub)
+  sad <- rewire(shinyAppDir_serverR, sourceUTF8 = sourceStub, loadSupport = loadSpy)
 
   sa <- sad(normalizePath("../test-helpers/app1-standard"))
   sa$onStart()
@@ -51,8 +66,10 @@ test_that("With ui/server.R, global.R is loaded before R/ helpers and into the r
   expect_match(calls[[3]][[1]], "/helperLower\\.r$", perl=TRUE)
 
   # Check environments
-  # global.R has no env specified -- loaded into the global env.
-  expect_length(calls[[1]], 1)
+  # global.R loaded into the global env
+  gEnv <- calls[[1]]$envir
+  expect_identical(gEnv, globalenv())
+
   # helpers are loaded into a child of the global env
   helperEnv1 <- calls[[2]]$envir
   helperEnv2 <- calls[[3]]$envir
@@ -86,10 +103,10 @@ test_that("app.R is loaded after R/ helpers and into the right envs", {
 
   # + shinyAppDir_serverR
   # +--- sourceUTF8
-  # +--+ loadHelpers
+  # +--+ loadSupport
   # |  +--- sourceUTF8
-  loadSpy <- rewire(loadHelpers, sourceUTF8 = sourceSpy)
-  sad <- rewire(shinyAppDir_appR, sourceUTF8 = sourceSpy, loadHelpers = loadSpy)
+  loadSpy <- rewire(loadSupport, sourceUTF8 = sourceSpy)
+  sad <- rewire(shinyAppDir_appR, sourceUTF8 = sourceSpy, loadSupport = loadSpy)
 
   sa <- sad("app.R", normalizePath("../test-helpers/app2-nested"))
   sa$onStart()

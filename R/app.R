@@ -219,10 +219,8 @@ shinyAppDir_serverR <- function(appDir, options=list()) {
     oldwd <<- getwd()
     setwd(appDir)
     monitorHandle <<- initAutoReloadMonitor(appDir)
-    if (file.exists(file.path.ci(appDir, "global.R"))){
-      sourceUTF8(file.path.ci(appDir, "global.R"))
-    }
-    loadHelpers(appDir, envir = sharedEnv)
+    # TODO: we should support hot reloading on global.R and R/*.R changes.
+    loadSupport(appDir, renv=sharedEnv, globalrenv=globalenv())
   }
   onStop <- function() {
     setwd(oldwd)
@@ -295,14 +293,34 @@ initAutoReloadMonitor <- function(dir) {
   obs$destroy
 }
 
-# Loads in all helpers in the R/ directory of the app
-# From `list.files`:
-# > The files are sorted in alphabetical order, on the full path
-loadHelpers <- function(appDir, envir=globalenv()){
+#' Load an app's supporting R files
+#'
+#' Loads all of the supporting R files of a Shiny application. Specifically,
+#' this function loads any top-level supporting `.R` files in the `R/` directory
+#' adjacent to the app and a `global.R` file.
+#'
+#' @details The files are sourced in alphabetical order (as determined by
+#'   [list.files]). `global.R` is evaluated before the supporting R files in the
+#'   `R/` directory.
+#' @param appDir The application directory
+#' @param renv The environmeny in which the files in the `R/` directory should
+#'   be evaluated.
+#' @param globalrenv The environment in which `global.R` should be evaluated. If
+#'   `NULL`, `global.R` will not be evaluated at all.
+#' @export
+loadSupport <- function(appDir, renv=new.env(parent=globalenv()), globalrenv=globalenv()){
+  if (!is.null(globalrenv)){
+    # Evaluate global.R, if it exists.
+    if (file.exists(file.path.ci(appDir, "global.R"))){
+      sourceUTF8(file.path.ci(appDir, "global.R"), envir=globalrenv)
+    }
+  }
   helpersDir <- file.path(appDir, "R")
   helpers <- list.files(helpersDir, pattern="\\.[rR]$", recursive=FALSE, full.names=TRUE)
 
-  lapply(helpers, sourceUTF8, envir=envir)
+  lapply(helpers, sourceUTF8, envir=renv)
+
+  invisible(renv)
 }
 
 # This reads in an app dir for a single-file application (e.g. app.R), and
@@ -364,7 +382,8 @@ shinyAppDir_appR <- function(fileName, appDir, options=list())
   onStart <- function() {
     oldwd <<- getwd()
     setwd(appDir)
-    loadHelpers(appDir, sharedEnv)
+    # TODO: we should support hot reloading on R/*.R changes.
+    loadSupport(appDir, renv=sharedEnv, globalrenv=NULL)
     monitorHandle <<- initAutoReloadMonitor(appDir)
     if (!is.null(appObj()$onStart)) appObj()$onStart()
   }

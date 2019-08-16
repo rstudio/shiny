@@ -90,59 +90,93 @@ generateOptions <- function(inputId, selected, inline, type = 'checkbox',
   div(class = "shiny-options-group", options)
 }
 
-# Walks tree and coerces any encountered atomic types to possibly-named
-# character vectors.
-coerceAtomicToCharacter <- function(tree) {
+# This pass accepts a compound structure and returns a "normalized" structure
+# that simplifies subsequent passes.
+#
+# Input: A tree consisting of named and unnamed lists and atomic vectors.
+#
+# Output: A tree consisting of possibly-named lists and unnamed character(1)
+# vectors. Lists are branches and character(1) vectors are leaves.
+passNormalizeTree <- function(tree, root = TRUE) {
   if (is.atomic(tree)) {
-    # Names are preserved explicitly here to preserve names on factors, which
-    # are atomic
-    stats::setNames(as.character(tree), names(tree))
+    # Names are copied in this manner to preserve names from factors.
+    chr <- stats::setNames(as.character(tree), names(tree))
+    if (is.null(names(chr)) && length(chr) == 1 && !root) {
+      chr
+    } else {
+      as.list(chr)
+    }
   } else {
-    lapply(tree, coerceAtomicToCharacter)
+    lapply(tree, passNormalizeTree, FALSE)
   }
 }
 
-# Walks tree and converts any unnamed lists or vectors of length 1 to a vector
-# of length 1.
-coerceLeavesToVectors <- function(tree) {
-  if (length(tree) == 1 && is.null(names(tree))) {
-    tree[[1]]
-  } else {
-    lapply(tree, coerceLeavesToVectors)
-  }
-}
+# This pass applies to branches containing unnamed leaves. Leaves are named with
+# a default based on their value.
+#
+# If one branch contains another, the child branch is given the name "" in the
+# parent branch.
+#
+# Input: A tree consisting of possibly-named lists and unnamed character(1)
+# vectors.
+#
+# Output: A tree consisting of named lists and unnamed character(1) vectors.
+passNameLeaves <- function(tree, errorMsg) {
+  if (is.list(tree)) {
+    # asNamed preserves existing names, but they still might be empty
+    tree <- asNamed(tree)
 
-# Walks tree and ensures all lists are named. Lists without names are given
-# blank names.
-nameBranches <- function(tree) {
-  if(is.list(tree)) {
-    asNamed(lapply(tree, nameBranches))
+    # Here we compute the set of children that are both atomic (character
+    # vectors) and have empty names, because those are the only ones we can
+    # meaningfully automatically name. Then, we set the names of those children
+    # to their values.
+    toRename <- sapply(tree, is.atomic) & (names(tree) == "")
+    names(tree)[toRename] <- tree[toRename]
+
+    lapply(tree, passNameLeaves)
   } else {
     tree
   }
+}
+
+# Computes the depth of a tree given by the isBranch and children functions.
+# - isBranch() should return TRUE if the given tree is a branch and FALSE
+#   otherwise
+# - children() should return a branch's children as a list.
+getDepth <- function(tree, isBranch = is.list, children = identity, depth = 0) {
+  if (isBranch(tree)) {
+    max(sapply(children(tree), getDepth, isBranch, children, depth + 1))
+  } else {
+    depth
+  }
+}
+
+# Returns TRUE when every item in the list `branch` is named and no name is "",
+# and FALSE otherwise.
+branchHasNames <- function(branch) {
+  stopifnot(is.list(branch))
+  ns <- names(branch)
+  !is.null(ns) && !length(ns[ns == ""])
 }
 
 # Takes a vector or list, and adds names (same as the value) to any entries
 # without names. Coerces all leaf nodes to `character`.
 choicesWithNames <- function(choices) {
 
-  choices <- coerceAtomicToCharacter(choices)
-  choices <- coerceLeavesToVectors(choices)
-  choices <- nameBranches(choices)
-  choices <- asNamed(choices)
-
   if (length(choices) == 0) return(choices)
 
-  # Recurse into any subgroups
-  choices <- mapply(choices, names(choices), FUN = function(choice, name) {
-    if (!is.list(choice)) return(choice)
-    if (name == "") stop('All sub-lists in "choices" must be named.')
-    choicesWithNames(choice)
-  }, SIMPLIFY = FALSE)
+  choices <- passNormalizeTree(choices)
+  choices <- passNameLeaves(choices)
 
-  # default missing names to choice values
-  missing <- names(choices) == ""
-  names(choices)[missing] <- as.character(choices)[missing]
+  # Only choices of depth 1 and 2 are currently meaningful in Shiny. Earlier versions of this
+  # code did not produce an error if the choices tree was deeper than 2, and so we don't here.
+  #
+  # - radioButtons() and checkboxGroupInput() use a depth=1 tree via normalizeChoicesArgs()
+  # - selectInput() and selectizeInput() use either depth=1 or depth=2 trees. depth=2 trees
+  #   are used for "grouped" inputs.
+  if (getDepth(choices) >= 2 && !branchHasNames(choices)) {
+    stop('All sub-lists in "choices" must be named.')
+  }
 
   choices
 }

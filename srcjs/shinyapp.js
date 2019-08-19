@@ -864,13 +864,15 @@ var ShinyApp = function() {
     function getTabIndex($tabset, tabsetId) {
       // The 0 is to ensure this works for empty tabsetPanels as well
       var existingTabIds = [0];
-      var leadingHref = "#tab-" + tabsetId + "-";
       // loop through all existing tabs, find the one with highest id
       // (since this is based on a numeric counter), and increment
       $tabset.find("> li").each(function() {
         var $tab = $(this).find("> a[data-toggle='tab']");
         if ($tab.length > 0) {
-          var index = $tab.attr("href").replace(leadingHref, "");
+          // remove leading url if it exists. (copy of bootstrap url stripper)
+          var href = $tab.attr("href").replace(/.*(?=#[^\s]+$)/, '');
+          // remove tab id to get the index
+          var index = href.replace("#tab-" + tabsetId + "-", "");
           existingTabIds.push(Number(index));
         }
       });

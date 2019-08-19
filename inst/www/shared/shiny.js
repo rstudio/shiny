@@ -4623,6 +4623,14 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         }
       }
 
+      // Recalculate the number of ticks
+      var max = typeof msg.max === 'undefined' ? slider.options.max : +msg.max;
+      var min = typeof msg.min === 'undefined' ? slider.options.min : +msg.min;
+      var step = typeof msg.step === 'undefined' ? slider.options.step : +msg.step;
+      var nSteps = (max - min) / step;
+      var scaleFactor = Math.ceil(nSteps / 10);
+      msg.grid_num = nSteps / scaleFactor;
+
       updateLabel(data.label, this._getLabelNode(el));
 
       var domElements = ['data-type', 'time-format', 'timezone'];

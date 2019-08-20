@@ -1326,3 +1326,44 @@ test_that("Reactive contexts are not GC'd too early", {
   expect_identical(execCount(r), 3L)
   expect_false(r_finalized)
 })
+
+
+test_that("reactivePoll doesn't leak observer (#1548)", {
+  i <- 0
+  count <- reactivePoll(50, NULL,
+    checkFunc = function() {
+      i <<- i + 1
+      i
+    },
+    valueFunc = function() i
+  )
+
+  observe({
+    message(count())
+  })
+  while(i < 3) {
+    Sys.sleep(0.05)
+    shiny:::timerCallbacks$executeElapsed()
+    shiny:::flushReact()
+  }
+
+  # Removing the reference to count means that no one can use it anymore, and so
+  # the checkFunc should not keep firing.
+  rm(count)
+  gc()
+
+  # Make sure the finalizer from safe_finalizer runs -- it is scheduled using
+  # later().
+  later::run_now()
+
+  # If the reactivePoll was cleaned up, then running the following should no
+  # longer increment i.
+  Sys.sleep(0.05)
+  shiny:::timerCallbacks$executeElapsed()
+  shiny:::flushReact()
+  Sys.sleep(0.05)
+  shiny:::timerCallbacks$executeElapsed()
+  shiny:::flushReact()
+
+  expect_equal(i, 3L)
+})

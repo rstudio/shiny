@@ -31,32 +31,29 @@ registerClient <- function(client) {
 
 #' Resource Publishing
 #'
-#' Adds a directory of static resources to Shiny's web server, with the given path prefix.
-#' Primarily intended for package authors to make supporting JavaScript/CSS files available
-#' to their components.
+#' Add, remove, or list directory of static resources to Shiny's web server,
+#' with the given path prefix. Primarily intended for package authors to make
+#' supporting JavaScript/CSS files available to their components.
 #'
 #' Shiny provides two ways of serving static files (i.e., resources):
 #'
-#' 1. Static files under the `www/` directory are automatically made available under a request path that begins with `/`.
-#' 2. `resourcePathAdd()` makes static files in a `directoryPath` available under a request path that begins with `prefix`.
+#' 1. Static files under the `www/` directory are automatically made available
+#' under a request path that begins with `/`.
+#' 2. `addResourcePath()` makes static files in a `directoryPath` available
+#' under a request path that begins with `prefix`.
 #'
-#' The second approach is primarily intended for package authors to make supporting
-#' JavaScript/CSS files available to their components.
+#' The second approach is primarily intended for package authors to make
+#' supporting JavaScript/CSS files available to their components.
 #'
-#' Resource paths make a directory
 #' Tools for managing static resources published by Shiny's web server:
-#'  * `resourcePathAdd()` adds a directory of static resources.
+#'  * `addResourcePath()` adds a directory of static resources.
 #'  * `resourcePaths()` lists the currently active resource mappings.
-#'  * `resourcePathRemove()` removes a directory of static resources.
-#'
-#' Add, remove, or list directory of static resources to Shiny's web server, with the given
-#' path prefix. Primarily intended for package authors to make supporting
-#' JavaScript/CSS files available to their components.
+#'  * `removeResourcePath()` removes a directory of static resources.
 #'
 #' @param prefix The URL prefix (without slashes). Valid characters are a-z,
-#'   A-Z, 0-9, hyphen, period, and underscore.
-#'   For example, a value of 'foo' means that any request paths that begin with
-#'   '/foo' will be mapped to the given directory.
+#'   A-Z, 0-9, hyphen, period, and underscore. For example, a value of 'foo'
+#'   means that any request paths that begin with '/foo' will be mapped to the
+#'   given directory.
 #' @param directoryPath The directory that contains the static resources to be
 #'   served.
 #'
@@ -131,7 +128,7 @@ addResourcePath <- function(prefix, directoryPath) {
 resourcePaths <- function() {
   urls <- names(.globals$resourcePaths)
   paths <- vapply(.globals$resourcePaths, function(x) x$path, character(1))
-  setNames(paths, urls)
+  stats::setNames(paths, urls)
 }
 
 hasResourcePath <- function(prefix) {
@@ -144,6 +141,7 @@ removeResourcePath <- function(prefix) {
   if (length(prefix) > 1) stop("`prefix` must be of length 1.")
   if (!hasResourcePath(prefix)) {
     warning("Resource ", prefix, " not found.")
+    return(invisible(FALSE))
   }
   .globals$resourcePaths[[prefix]] <- NULL
   .globals$resources[[prefix]] <- NULL

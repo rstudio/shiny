@@ -90,18 +90,18 @@ generateOptions <- function(inputId, selected, inline, type = 'checkbox',
   div(class = "shiny-options-group", options)
 }
 
-# True when a choice list item represents a group of related inputs
+# True when a choice list item represents a group of related inputs.
 isGroup <- function(choice) {
   length(choice) > 1 || !is.null(names(choice))
 }
 
-# True when choices is a list and contains at least one group of related inputs
+# True when choices is a list and contains at least one group of related inputs.
 hasGroups <- function(choices) {
   is.list(choices) && Position(isGroup, choices, nomatch = 0)
 }
 
 # Assigns empty names to x if it's unnamed, and then fills any empty names with
-# the corresponding value coerced to a character(1)
+# the corresponding value coerced to a character(1).
 setDefaultNames <- function(x) {
   x <- asNamed(x)
   emptyNames <- names(x) == ""
@@ -115,26 +115,45 @@ asCharacter <- function(x) {
   stats::setNames(as.character(x), names(x))
 }
 
+# Processes a "flat" set of choices, or a collection of choices not containing
+# any named groups. choices should be a list without any list children, or an
+# atomic vector. choices may be named or unnamed. Any empty names are replaced
+# with the corresponding value coerced to a character.
 processFlatChoices <- function(choices) {
   choices <- setDefaultNames(asCharacter(choices))
   as.list(choices)
 }
 
+# Processes a "nested" set of choices, or a collection of choices that contains
+# one or more named groups of related choices and zero or more "flat" choices.
+# choices should be named, and any choice group must have a non-empty name.
+# Empty names of remaining "flat" choices are replaced with that choice's value
+# coerced to a character.
 processGroupedChoices <- function(choices) {
-  choices <- asNamed(choices)
-  choices <- mapply(function(name, group, choice) {
-    if (group && name == "") {
+  choices <- mapply(function(name, choice) {
+    choiceIsGroup <- isGroup(choice)
+    if (choiceIsGroup && name == "") {
+      # If the choice is a group, and if its name is empty, produce an error. We
+      # error here because the composite nature of the choice prevents us from
+      # meaningfully automatically naming it. Note that while not documented,
+      # groups are not necessarily lists (aka generic vectors) but can also be
+      # any named atomic vector, or any atomic vector of length > 1.
       stop('All sub-lists in "choices" must be named.')
-    } else if (group) {
+    } else if (choiceIsGroup) {
+      # The choice is a group, but it is named. Process it using the same
+      # function we use for "top level" choices.
       processFlatChoices(choice)
     } else {
+      # The choice was not named and is not a group; it is a "leaf".
       as.character(choice)
     }
-  }, names(choices), lapply(choices, isGroup), choices, SIMPLIFY = FALSE)
+  }, names(choices), choices, SIMPLIFY = FALSE)
+  # By this point, any leaves in the choices list might still have empty names,
+  # so we're sure to automatically name them.
   setDefaultNames(choices)
 }
 
-# Takes a vector or list, and adds names (same as the value) to any entries
+# Takes a vector/list/factor, and adds names (same as the value) to any entries
 # without names. Coerces all leaf nodes to `character`.
 choicesWithNames <- function(choices) {
   if (length(choices) == 0) {

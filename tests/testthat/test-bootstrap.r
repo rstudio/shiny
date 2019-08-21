@@ -134,11 +134,6 @@ test_that("Choices are correctly assigned names", {
     choicesWithNames(list(A="a", "b", C=list("d", E="e"))),
     list(A="a", b="b", C=list(d="d", E="e"))
   )
-  # Deeper nesting
-  expect_identical(
-    choicesWithNames(list(A="a", "b", C=list(D=list("e", "f"), G=c(H="h", "i")))),
-    list(A="a", b="b", C=list(D=list(e="e", f="f"), G=list(H="h", i="i")))
-  )
   # Error when sublist is unnamed
   expect_error(choicesWithNames(list(A="a", "b", list(1,2))))
   # Unnamed factor

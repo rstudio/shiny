@@ -88,7 +88,8 @@ Suggests:
     rmarkdown,
     ggplot2,
     reactlog (>= 1.0.0),
-    magrittr
+    magrittr,
+    shinytest
 Remotes:
     rstudio/htmltools
 URL: http://shiny.rstudio.com
@@ -163,6 +164,7 @@ Collate:
     'snapshot.R'
     'tar.R'
     'test-export.R'
+    'test.R'
     'timer.R'
     'update-input.R'
 RoxygenNote: 6.1.1

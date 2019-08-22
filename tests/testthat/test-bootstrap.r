@@ -69,9 +69,14 @@ test_that("Repeated names for selectInput and radioButtons choices", {
 
 
 test_that("Choices are correctly assigned names", {
-  # Empty non-list
+  # Empty non-list comes back with names
   expect_identical(
     choicesWithNames(numeric(0)),
+    stats::setNames(list(), character(0))
+  )
+  # Empty list comes back with names
+  expect_identical(
+    choicesWithNames(list()),
     stats::setNames(list(), character(0))
   )
   # Empty character vector

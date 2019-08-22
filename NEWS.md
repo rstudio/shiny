@@ -17,6 +17,8 @@ shiny 1.3.2.9001
 
 * Resolved [#2469](https://github.com/rstudio/shiny/issues/2469): `renderText` now takes a `sep` argument that is passed to `cat`. ([#2497](https://github.com/rstudio/shiny/pull/2497))
 
+* Added `resourcePaths()` and `removeResourcePaths()` functions. ([#2459](https://github.com/rstudio/shiny/pull/2459))
+
 * Resolved [#2515](https://github.com/rstudio/shiny/issues/2515): `selectInput()` now deals appropriately with named factors. ([#2524](https://github.com/rstudio/shiny/pull/2524))
 
 ### Bug fixes

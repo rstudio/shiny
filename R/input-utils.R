@@ -125,10 +125,12 @@ processFlatChoices <- function(choices) {
 
 # Processes a "nested" set of choices, or a collection of choices that contains
 # one or more named groups of related choices and zero or more "flat" choices.
-# choices should be named, and any choice group must have a non-empty name.
-# Empty names of remaining "flat" choices are replaced with that choice's value
-# coerced to a character.
+# choices should be a named list, and any choice group must have a non-empty
+# name. Empty names of remaining "flat" choices are replaced with that choice's
+# value coerced to a character.
 processGroupedChoices <- function(choices) {
+  # We assert choices is a list, since only a list may contain a group.
+  stopifnot(is.list(choices))
   choices <- mapply(function(name, choice) {
     choiceIsGroup <- isGroup(choice)
     if (choiceIsGroup && name == "") {

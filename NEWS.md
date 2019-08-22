@@ -21,6 +21,8 @@ shiny 1.3.2.9001
 
 * Resolved [#2515](https://github.com/rstudio/shiny/issues/2515): `selectInput()` now deals appropriately with named factors. ([#2524](https://github.com/rstudio/shiny/pull/2524))
 
+* Resolved [#2433](https://github.com/rstudio/shiny/issues/2433): An informative warning is now thrown if subdirectories of the app's `www/` directory are masked by other resource prefixes and/or the same resource prefix is mapped to different local file paths. ([#2434](https://github.com/rstudio/shiny/pull/2434))
+
 ### Bug fixes
 
 * Fixed [#2116](https://github.com/rstudio/shiny/issues/2116): Fixed an issue where dynamic tabs could not be added when on a hosted platform. ([#2545](https://github.com/rstudio/shiny/pull/2545))

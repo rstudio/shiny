@@ -527,6 +527,49 @@ startApp <- function(appObj, port, host, quiet) {
     ),
     .globals$resourcePaths
   )
+
+  # throw an informative warning if a subdirectory of the
+  # app's www dir conflicts with another resource prefix
+  wwwDir <- httpuvApp$staticPaths[["/"]]$path
+  if (length(wwwDir)) {
+    # although httpuv allows for resource prefixes like 'foo/bar',
+    # we won't worry about conflicts in sub-sub directories since
+    # addResourcePath() currently doesn't allow it
+    wwwSubDirs <- list.dirs(wwwDir, recursive = FALSE, full.names = FALSE)
+    resourceConflicts <- intersect(wwwSubDirs, names(httpuvApp$staticPaths))
+    if (length(resourceConflicts)) {
+      warning(
+        "Found subdirectories of your app's www/ directory that ",
+        "conflict with other resource URL prefixes.",
+        "Consider renaming these directories: '",
+        paste0("www/", resourceConflicts, collapse = "', '"), "'",
+        call. = FALSE
+      )
+    }
+  }
+
+  # check for conflicts in each pairwise combinations of resource mappings
+  checkResourceConflict <- function(paths) {
+    if (length(paths) < 2) return(NULL)
+    # ensure paths is a named character vector: c(resource_path = local_path)
+    paths <- vapply(paths, function(x) if (inherits(x, "staticPath")) x$path else x, character(1))
+    # get all possible pairwise combinations of paths
+    pair_indices <- utils::combn(length(paths), 2, simplify = FALSE)
+    lapply(pair_indices, function(x) {
+      p1 <- paths[x[1]]
+      p2 <- paths[x[2]]
+      if (identical(names(p1), names(p2)) && (p1 != p2)) {
+        warning(
+          "Found multiple local file paths pointing the same resource prefix: ", names(p1), ". ",
+          "If you run into resource-related issues (e.g. 404 requests), consider ",
+          "using `addResourcePath()` and/or `removeResourcePath()` to manage resource mappings.",
+          call. = FALSE
+        )
+      }
+    })
+  }
+  checkResourceConflict(httpuvApp$staticPaths)
+
   httpuvApp$staticPathOptions <- httpuv::staticPathOptions(
     html_charset = "utf-8",
     headers = list("X-UA-Compatible" = "IE=edge,chrome=1"),

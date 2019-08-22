@@ -19,7 +19,11 @@ shiny 1.3.2.9001
 
 * Added `resourcePaths()` and `removeResourcePaths()` functions. ([#2459](https://github.com/rstudio/shiny/pull/2459))
 
+* Resolved [#2515](https://github.com/rstudio/shiny/issues/2515): `selectInput()` now deals appropriately with named factors. ([#2524](https://github.com/rstudio/shiny/pull/2524))
+
 ### Bug fixes
+
+* Fixed [#2116](https://github.com/rstudio/shiny/issues/2116): Fixed an issue where dynamic tabs could not be added when on a hosted platform. ([#2545](https://github.com/rstudio/shiny/pull/2545))
 
 * Fixed [#2387](https://github.com/rstudio/shiny/issues/2387): Updating a `sliderInput()`'s type from numeric to date no longer changes the rate policy from debounced to immediate. More generally, updating an input binding with a new type should (no longer) incorrectly alter the input rate policy. ([#2404](https://github.com/rstudio/shiny/pull/2404))
 

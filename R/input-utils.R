@@ -97,7 +97,7 @@ isGroup <- function(choice) {
 
 # True when choices is a list and contains at least one group of related inputs.
 hasGroups <- function(choices) {
-  is.list(choices) && Position(isGroup, choices, nomatch = 0)
+  is.list(choices) && any(vapply(choices, isGroup, logical(1)))
 }
 
 # Assigns empty names to x if it's unnamed, and then fills any empty names with

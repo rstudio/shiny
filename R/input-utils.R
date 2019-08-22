@@ -109,8 +109,7 @@ setDefaultNames <- function(x) {
   x
 }
 
-# Makes a character vector out of x in a way that preserves names if x is a
-# factor.
+# Makes a character vector out of x in a way that preserves names.
 asCharacter <- function(x) {
   stats::setNames(as.character(x), names(x))
 }

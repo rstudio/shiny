@@ -155,9 +155,7 @@ processGroupedChoices <- function(choices) {
 # Takes a vector/list/factor, and adds names (same as the value) to any entries
 # without names. Coerces all leaf nodes to `character`.
 choicesWithNames <- function(choices) {
-  if (length(choices) == 0) {
-    choices
-  } else if (hasGroups(choices)) {
+  if (hasGroups(choices)) {
     processGroupedChoices(choices)
   } else {
     processFlatChoices(choices)

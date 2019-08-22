@@ -69,6 +69,11 @@ test_that("Repeated names for selectInput and radioButtons choices", {
 
 
 test_that("Choices are correctly assigned names", {
+  # Empty non-list
+  expect_identical(
+    choicesWithNames(numeric(0)),
+    stats::setNames(list(), character(0))
+  )
   # Empty character vector
   # An empty character vector isn't a sensical input, but we preserved this test
   # in the off chance that somebody relies on the existing behavior.

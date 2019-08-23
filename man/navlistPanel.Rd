@@ -8,12 +8,12 @@ navlistPanel(..., id = NULL, selected = NULL, well = TRUE,
   fluid = TRUE, widths = c(4, 8))
 }
 \arguments{
-\item{...}{\code{\link{tabPanel}} elements to include in the navlist}
+\item{...}{\code{\link[=tabPanel]{tabPanel()}} elements to include in the navlist}
 
 \item{id}{If provided, you can use \code{input$}\emph{\code{id}} in your
 server logic to determine which of the current navlist items is active. The
 value will correspond to the \code{value} argument that is passed to
-\code{\link{tabPanel}}.}
+\code{\link[=tabPanel]{tabPanel()}}.}
 
 \item{selected}{The \code{value} (or, if none was supplied, the \code{title})
 of the navigation item that should be selected by default. If \code{NULL},
@@ -34,10 +34,10 @@ which navigate to a set of tabPanels displayed to the right.
 }
 \details{
 You can include headers within the \code{navlistPanel} by including
-  plain text elements in the list. Versions of Shiny before 0.11 supported
-  separators with "------", but as of 0.11, separators were no longer
-  supported. This is because version 0.11 switched to Bootstrap 3, which
-  doesn't support separators.
+plain text elements in the list. Versions of Shiny before 0.11 supported
+separators with "------", but as of 0.11, separators were no longer
+supported. This is because version 0.11 switched to Bootstrap 3, which
+doesn't support separators.
 }
 \examples{
 fluidPage(
@@ -53,6 +53,6 @@ fluidPage(
 )
 }
 \seealso{
-\code{\link{tabPanel}}, \code{\link{updateNavlistPanel}},
-   \code{\link{insertTab}}, \code{\link{showTab}}
+\code{\link[=tabPanel]{tabPanel()}}, \code{\link[=updateNavlistPanel]{updateNavlistPanel()}},
+\code{\link[=insertTab]{insertTab()}}, \code{\link[=showTab]{showTab()}}
 }

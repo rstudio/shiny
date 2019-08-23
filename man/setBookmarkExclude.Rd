@@ -24,5 +24,5 @@ will not affect inputs from other modules or from the top level of the Shiny
 application.
 }
 \seealso{
-\code{\link{enableBookmarking}} for examples.
+\code{\link[=enableBookmarking]{enableBookmarking()}} for examples.
 }

@@ -1,43 +1,43 @@
 #' Dynamically insert/remove a tabPanel
 #'
-#' Dynamically insert or remove a \code{\link{tabPanel}} (or a
-#' \code{\link{navbarMenu}}) from an existing \code{\link{tabsetPanel}},
-#' \code{\link{navlistPanel}} or \code{\link{navbarPage}}.
+#' Dynamically insert or remove a [tabPanel()] (or a
+#' [navbarMenu()]) from an existing [tabsetPanel()],
+#' [navlistPanel()] or [navbarPage()].
 #'
 #' When you want to insert a new tab before or after an existing tab, you
-#' should use \code{insertTab}. When you want to prepend a tab (i.e. add a
-#' tab to the beginning of the \code{tabsetPanel}), use \code{prependTab}.
+#' should use `insertTab`. When you want to prepend a tab (i.e. add a
+#' tab to the beginning of the `tabsetPanel`), use `prependTab`.
 #' When you want to append a tab (i.e. add a tab to the end of the
-#' \code{tabsetPanel}), use \code{appendTab}.
+#' `tabsetPanel`), use `appendTab`.
 #'
-#' For \code{navbarPage}, you can insert/remove conventional
-#' \code{tabPanel}s (whether at the top level or nested inside a
-#' \code{navbarMenu}), as well as an entire \code{\link{navbarMenu}}.
-#' For the latter case, \code{target} should be the \code{menuName} that
-#' you gave your \code{navbarMenu} when you first created it (by default,
-#' this is equal to the value of the \code{title} argument).
+#' For `navbarPage`, you can insert/remove conventional
+#' `tabPanel`s (whether at the top level or nested inside a
+#' `navbarMenu`), as well as an entire [navbarMenu()].
+#' For the latter case, `target` should be the `menuName` that
+#' you gave your `navbarMenu` when you first created it (by default,
+#' this is equal to the value of the `title` argument).
 #'
-#' @param inputId The \code{id} of the \code{tabsetPanel} (or
-#'   \code{navlistPanel} or \code{navbarPage}) into which \code{tab} will
+#' @param inputId The `id` of the `tabsetPanel` (or
+#'   `navlistPanel` or `navbarPage`) into which `tab` will
 #'   be inserted/removed.
 #'
-#' @param tab The item to be added (must be created with \code{tabPanel},
-#'   or with \code{navbarMenu}).
+#' @param tab The item to be added (must be created with `tabPanel`,
+#'   or with `navbarMenu`).
 #'
-#' @param target If inserting: the \code{value} of an existing
-#'   \code{tabPanel}, next to which \code{tab} will be added.
-#'   If removing: the \code{value} of the \code{tabPanel} that
+#' @param target If inserting: the `value` of an existing
+#'   `tabPanel`, next to which `tab` will be added.
+#'   If removing: the `value` of the `tabPanel` that
 #'   you want to remove. See Details if you want to insert next to/remove
-#'   an entire \code{navbarMenu} instead.
+#'   an entire `navbarMenu` instead.
 #'
-#' @param position Should \code{tab} be added before or after the
-#'   \code{target} tab?
+#' @param position Should `tab` be added before or after the
+#'   `target` tab?
 #'
-#' @param select Should \code{tab} be selected upon being inserted?
+#' @param select Should `tab` be selected upon being inserted?
 #'
 #' @param session The shiny session within which to call this function.
 #'
-#' @seealso \code{\link{showTab}}
+#' @seealso [showTab()]
 #'
 #' @examples
 #' ## Only run this example in interactive R sessions
@@ -144,16 +144,16 @@ insertTab <- function(inputId, tab, target,
 }
 
 #' @param menuName This argument should only be used when you want to
-#'   prepend (or append) \code{tab} to the beginning (or end) of an
-#'   existing \code{\link{navbarMenu}} (which must itself be part of
-#'   an existing \code{\link{navbarPage}}). In this case, this argument
-#'   should be the \code{menuName} that you gave your \code{navbarMenu}
+#'   prepend (or append) `tab` to the beginning (or end) of an
+#'   existing [navbarMenu()] (which must itself be part of
+#'   an existing [navbarPage()]). In this case, this argument
+#'   should be the `menuName` that you gave your `navbarMenu`
 #'   when you first created it (by default, this is equal to the value
-#'   of the \code{title} argument). Note that you still need to set the
-#'   \code{inputId} argument to whatever the \code{id} of the parent
-#'   \code{navbarPage} is. If \code{menuName} is left as \code{NULL},
-#'   \code{tab} will be prepended (or appended) to whatever
-#'   \code{inputId} is.
+#'   of the `title` argument). Note that you still need to set the
+#'   `inputId` argument to whatever the `id` of the parent
+#'   `navbarPage` is. If `menuName` is left as `NULL`,
+#'   `tab` will be prepended (or appended) to whatever
+#'   `inputId` is.
 #'
 #' @rdname insertTab
 #' @export
@@ -221,30 +221,30 @@ removeTab <- function(inputId, target,
 
 #' Dynamically hide/show a tabPanel
 #'
-#' Dynamically hide or show a \code{\link{tabPanel}} (or a
-#' \code{\link{navbarMenu}})from an existing \code{\link{tabsetPanel}},
-#' \code{\link{navlistPanel}} or \code{\link{navbarPage}}.
+#' Dynamically hide or show a [tabPanel()] (or a
+#' [navbarMenu()])from an existing [tabsetPanel()],
+#' [navlistPanel()] or [navbarPage()].
 #'
-#' For \code{navbarPage}, you can hide/show conventional
-#' \code{tabPanel}s (whether at the top level or nested inside a
-#' \code{navbarMenu}), as well as an entire \code{\link{navbarMenu}}.
-#' For the latter case, \code{target} should be the \code{menuName} that
-#' you gave your \code{navbarMenu} when you first created it (by default,
-#' this is equal to the value of the \code{title} argument).
+#' For `navbarPage`, you can hide/show conventional
+#' `tabPanel`s (whether at the top level or nested inside a
+#' `navbarMenu`), as well as an entire [navbarMenu()].
+#' For the latter case, `target` should be the `menuName` that
+#' you gave your `navbarMenu` when you first created it (by default,
+#' this is equal to the value of the `title` argument).
 #'
-#' @param inputId The \code{id} of the \code{tabsetPanel} (or
-#'   \code{navlistPanel} or \code{navbarPage}) in which to find
-#'   \code{target}.
+#' @param inputId The `id` of the `tabsetPanel` (or
+#'   `navlistPanel` or `navbarPage`) in which to find
+#'   `target`.
 #'
-#' @param target The \code{value} of the \code{tabPanel} to be
+#' @param target The `value` of the `tabPanel` to be
 #'   hidden/shown. See Details if you want to hide/show an entire
-#'   \code{navbarMenu} instead.
+#'   `navbarMenu` instead.
 #'
-#' @param select Should \code{target} be selected upon being shown?
+#' @param select Should `target` be selected upon being shown?
 #'
 #' @param session The shiny session within which to call this function.
 #'
-#' @seealso \code{\link{insertTab}}
+#' @seealso [insertTab()]
 #'
 #' @examples
 #' ## Only run this example in interactive R sessions

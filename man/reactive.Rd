@@ -27,7 +27,7 @@ variable; to do so, it must be quoted with \code{quote()}.}
 \item{domain}{See \link{domains}.}
 
 \item{..stacktraceon}{Advanced use only. For stack manipulation purposes; see
-\code{\link{stacktrace}}.}
+\code{\link[=stacktrace]{stacktrace()}}.}
 }
 \value{
 a function, wrapped in a S3 class "reactive"

@@ -26,8 +26,8 @@ An icon element
 }
 \description{
 Create an icon for use within a page. Icons can appear on their own, inside
-of a button, or as an icon for a \code{\link{tabPanel}} within a
-\code{\link{navbarPage}}.
+of a button, or as an icon for a \code{\link[=tabPanel]{tabPanel()}} within a
+\code{\link[=navbarPage]{navbarPage()}}.
 }
 \examples{
 # add an icon to a submit button
@@ -41,6 +41,6 @@ navbarPage("App Title",
 }
 \seealso{
 For lists of available icons, see
-  \href{http://fontawesome.io/icons/}{http://fontawesome.io/icons/} and
-  \href{http://getbootstrap.com/components/#glyphicons}{http://getbootstrap.com/components/#glyphicons}.
+\url{http://fontawesome.io/icons/} and
+\url{http://getbootstrap.com/components/#glyphicons}.
 }

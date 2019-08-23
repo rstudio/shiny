@@ -41,8 +41,8 @@ an entire \code{navbarMenu} instead.}
 
 \item{menuName}{This argument should only be used when you want to
 prepend (or append) \code{tab} to the beginning (or end) of an
-existing \code{\link{navbarMenu}} (which must itself be part of
-an existing \code{\link{navbarPage}}). In this case, this argument
+existing \code{\link[=navbarMenu]{navbarMenu()}} (which must itself be part of
+an existing \code{\link[=navbarPage]{navbarPage()}}). In this case, this argument
 should be the \code{menuName} that you gave your \code{navbarMenu}
 when you first created it (by default, this is equal to the value
 of the \code{title} argument). Note that you still need to set the
@@ -52,9 +52,9 @@ of the \code{title} argument). Note that you still need to set the
 \code{inputId} is.}
 }
 \description{
-Dynamically insert or remove a \code{\link{tabPanel}} (or a
-\code{\link{navbarMenu}}) from an existing \code{\link{tabsetPanel}},
-\code{\link{navlistPanel}} or \code{\link{navbarPage}}.
+Dynamically insert or remove a \code{\link[=tabPanel]{tabPanel()}} (or a
+\code{\link[=navbarMenu]{navbarMenu()}}) from an existing \code{\link[=tabsetPanel]{tabsetPanel()}},
+\code{\link[=navlistPanel]{navlistPanel()}} or \code{\link[=navbarPage]{navbarPage()}}.
 }
 \details{
 When you want to insert a new tab before or after an existing tab, you
@@ -65,7 +65,7 @@ When you want to append a tab (i.e. add a tab to the end of the
 
 For \code{navbarPage}, you can insert/remove conventional
 \code{tabPanel}s (whether at the top level or nested inside a
-\code{navbarMenu}), as well as an entire \code{\link{navbarMenu}}.
+\code{navbarMenu}), as well as an entire \code{\link[=navbarMenu]{navbarMenu()}}.
 For the latter case, \code{target} should be the \code{menuName} that
 you gave your \code{navbarMenu} when you first created it (by default,
 this is equal to the value of the \code{title} argument).
@@ -144,5 +144,5 @@ shinyApp(ui, server)
 }
 }
 \seealso{
-\code{\link{showTab}}
+\code{\link[=showTab]{showTab()}}
 }

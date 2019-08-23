@@ -6,11 +6,18 @@ This directory contains build tools for Shiny.
 ### First-time setup
 Shiny's JavaScript build tools use Node.js, along with [yarn](https://yarnpkg.com/) to manage the JavaScript packages.
 
-Installation of Node.js differs across platforms and is generally pretty easy, so I won't include instructions here.
+Installation of Node.js differs across platforms, see [the official Node.js website](https://nodejs.org/) for instructions on downloading and installing. We presume that you have Node.js installed on your machine before continuing.
 
 Install yarn using the [official instructions](https://yarnpkg.com/en/docs/install).
 
-Then, in this directory (tools/), run the following to install the packages:
+You can test that Node.js and yarn are installed properly by running the following commands:
+
+```
+node --version
+yarn --version
+```
+
+Once both are installed, run the following in this directory (`tools/`) to install the packages :
 
 ```
 yarn

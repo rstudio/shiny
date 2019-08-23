@@ -14,11 +14,11 @@ total units; for fixed layouts it is out of whatever the width of the
 sidebar's parent column is.}
 }
 \value{
-A sidebar that can be passed to \code{\link{sidebarLayout}}
+A sidebar that can be passed to \code{\link[=sidebarLayout]{sidebarLayout()}}
 }
 \description{
 Create a sidebar panel containing input controls that can in turn be passed
-to \code{\link{sidebarLayout}}.
+to \code{\link[=sidebarLayout]{sidebarLayout()}}.
 }
 \examples{
 # Sidebar with controls to select a dataset and specify

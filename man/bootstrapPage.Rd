@@ -31,13 +31,13 @@ body (other than what you provide).
 \details{
 This function is primarily intended for users who are proficient in HTML/CSS,
 and know how to lay out pages in Bootstrap. Most applications should use
-\code{\link{fluidPage}} along with layout functions like
-\code{\link{fluidRow}} and \code{\link{sidebarLayout}}.
+\code{\link[=fluidPage]{fluidPage()}} along with layout functions like
+\code{\link[=fluidRow]{fluidRow()}} and \code{\link[=sidebarLayout]{sidebarLayout()}}.
 }
 \note{
 The \code{basicPage} function is deprecated, you should use the
-  \code{\link{fluidPage}} function instead.
+\code{\link[=fluidPage]{fluidPage()}} function instead.
 }
 \seealso{
-\code{\link{fluidPage}}, \code{\link{fixedPage}}
+\code{\link[=fluidPage]{fluidPage()}}, \code{\link[=fixedPage]{fixedPage()}}
 }

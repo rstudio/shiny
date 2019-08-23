@@ -14,7 +14,7 @@ checkboxInput(inputId, label, value = FALSE, width = NULL)
 \item{value}{Initial value (\code{TRUE} or \code{FALSE}).}
 
 \item{width}{The width of the input, e.g. \code{'400px'}, or \code{'100\%'};
-see \code{\link{validateCssUnit}}.}
+see \code{\link[=validateCssUnit]{validateCssUnit()}}.}
 }
 \value{
 A checkbox control that can be added to a UI definition.
@@ -37,7 +37,7 @@ shinyApp(ui, server)
 }
 }
 \seealso{
-\code{\link{checkboxGroupInput}}, \code{\link{updateCheckboxInput}}
+\code{\link[=checkboxGroupInput]{checkboxGroupInput()}}, \code{\link[=updateCheckboxInput]{updateCheckboxInput()}}
 
 Other input elements: \code{\link{actionButton}},
   \code{\link{checkboxGroupInput}},

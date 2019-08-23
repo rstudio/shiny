@@ -62,7 +62,7 @@ Reports progress to the user during long-running operations.
 \details{
 This package exposes two distinct programming APIs for working with progress.
 Using \code{withProgress} with \code{incProgress} or \code{setProgress}
-provide a simple function-based interface, while the \code{\link{Progress}}
+provide a simple function-based interface, while the \code{\link[=Progress]{Progress()}}
 reference class provides an object-oriented API.
 
 Use \code{withProgress} to wrap the scope of your work; doing so will cause a
@@ -84,7 +84,7 @@ If you want to use the old styling (for example, you may have used customized
 CSS), you can use \code{style="old"} each time you call
 \code{withProgress()}. If you don't want to set the style each time
 \code{withProgress} is called, you can instead call
-\code{\link{shinyOptions}(progress.style="old")} just once, inside the server
+\code{\link[=shinyOptions]{shinyOptions(progress.style="old")}} just once, inside the server
 function.
 }
 \examples{
@@ -113,5 +113,5 @@ shinyApp(ui, server)
 }
 }
 \seealso{
-\code{\link{Progress}}
+\code{\link[=Progress]{Progress()}}
 }

@@ -31,7 +31,7 @@ embedded in R Markdown documents).}
 }
 \value{
 An annotated render function, ready to be assigned to an
-  \code{output} slot.
+\code{output} slot.
 }
 \description{
 Implement render functions

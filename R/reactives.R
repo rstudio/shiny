@@ -24,7 +24,11 @@ Dependents <- R6Class(
           rLog$dependsOn(ctx$.reactId, .reactId, ctx$id, ctx$.domain)
         }
 
-        .dependents$set(ctx$id, ctx)
+        if (ctx$isWeak()) {
+          .dependents$set(ctx$id, rlang::new_weakref(ctx))
+        } else {
+          .dependents$set(ctx$id, ctx)
+        }
 
         ctx$onInvalidate(function() {
           rLog$dependsOnRemove(ctx$.reactId, .reactId, ctx$id, ctx$.domain)
@@ -44,8 +48,15 @@ Dependents <- R6Class(
         )
       }
       lapply(
-        .dependents$values(),
+        .dependents$values(sort = TRUE),
         function(ctx) {
+          if (rlang::is_weakref(ctx)) {
+            ctx <- rlang::wref_key(ctx)
+            if (is.null(ctx)) {
+              # Can get here if weakref target was GC'd
+              return()
+            }
+          }
           ctx$invalidate()
           NULL
         }
@@ -125,22 +136,22 @@ ReactiveVal <- R6Class(
 
 #' Create a (single) reactive value
 #'
-#' The \code{reactiveVal} function is used to construct a "reactive value"
+#' The `reactiveVal` function is used to construct a "reactive value"
 #' object. This is an object used for reading and writing a value, like a
 #' variable, but with special capabilities for reactive programming. When you
 #' read the value out of a reactiveVal object, the calling reactive expression
 #' takes a dependency, and when you change the value, it notifies any reactives
 #' that previously depended on that value.
 #'
-#' \code{reactiveVal} is very similar to \code{\link{reactiveValues}}, except
+#' `reactiveVal` is very similar to [reactiveValues()], except
 #' that the former is for a single reactive value (like a variable), whereas the
 #' latter lets you conveniently use multiple reactive values by name (like a
 #' named list of variables). For a one-off reactive value, it's more natural to
-#' use \code{reactiveVal}. See the Examples section for an illustration.
+#' use `reactiveVal`. See the Examples section for an illustration.
 #'
 #' @param value An optional initial value.
 #' @param label An optional label, for debugging purposes (see
-#'   \code{\link{reactlog}}). If missing, a label will be automatically
+#'   [reactlog()]). If missing, a label will be automatically
 #'   created.
 #'
 #' @return A function. Call the function with no arguments to (reactively) read
@@ -292,9 +303,10 @@ ReactiveValues <- R6Class(
     # For debug purposes
     .reactId = character(0),
     .label = character(0),
-    .values = 'environment',
-    .metadata = 'environment',
-    .dependents = 'environment',
+    .values = 'Map',
+    .metadata = 'Map',
+    # A map of Dependents objects, one for each key
+    .dependents = 'Map',
     # Dependents for the list of all names, including hidden
     .namesDeps = 'Dependents',
     # Dependents for all values, including hidden
@@ -312,10 +324,10 @@ ReactiveValues <- R6Class(
     ) {
       .reactId <<- nextGlobalReactId()
       .label <<- label
-      .values <<- new.env(parent=emptyenv())
-      .metadata <<- new.env(parent=emptyenv())
-      .dependents <<- new.env(parent=emptyenv())
-      .hasRetrieved <<- list(names = FALSE, asListAll = FALSE, asList = FALSE, keys = list())
+      .values <<- Map$new()
+      .metadata <<- Map$new()
+      .dependents <<- Map$new()
+      .hasRetrieved <<- list(names = FALSE, asListAll = FALSE, asList = FALSE)
       .namesDeps <<- Dependents$new(reactId = rLog$namesIdStr(.reactId))
       .allValuesDeps <<- Dependents$new(reactId = rLog$asListAllIdStr(.reactId))
       .valuesDeps <<- Dependents$new(reactId = rLog$asListIdStr(.reactId))
@@ -324,29 +336,20 @@ ReactiveValues <- R6Class(
 
     get = function(key) {
       # get value right away to use for logging
-      if (!exists(key, envir=.values, inherits=FALSE))
-        keyValue <- NULL
-      else
-        keyValue <- .values[[key]]
+      keyValue <- .values$get(key)
+
+      if (!.dependents$containsKey(key)) {
+        # If we got here, this is the first time someone has tried to access
+        # this key.
+        rLog$defineKey(.reactId, keyValue, key, .label, getCurrentContext()$.domain)
+
+        reactKeyId <- rLog$keyIdStr(.reactId, key)
+        .dependents$set(key, Dependents$new(reactKeyId))
+      }
 
       # Register the "downstream" reactive which is accessing this value, so
       # that we know to invalidate them when this value changes.
-      ctx <- getCurrentContext()
-      dep.key <- paste(key, ':', ctx$id, sep='')
-      if (!exists(dep.key, envir=.dependents, inherits=FALSE)) {
-        reactKeyId <- rLog$keyIdStr(.reactId, key)
-
-        if (!isTRUE(.hasRetrieved$keys[[key]])) {
-          rLog$defineKey(.reactId, keyValue, key, .label, ctx$.domain)
-          .hasRetrieved$keys[[key]] <<- TRUE
-        }
-        rLog$dependsOnKey(ctx$.reactId, .reactId, key, ctx$id, ctx$.domain)
-        .dependents[[dep.key]] <- ctx
-        ctx$onInvalidate(function() {
-          rLog$dependsOnKeyRemove(ctx$.reactId, .reactId, key, ctx$id, ctx$.domain)
-          rm(list=dep.key, envir=.dependents, inherits=FALSE)
-        })
-      }
+      .dependents$get(key)$register()
 
       if (isFrozen(key))
         reactiveStop()
@@ -384,59 +387,44 @@ ReactiveValues <- R6Class(
       domain <- getDefaultReactiveDomain()
       hidden <- substr(key, 1, 1) == "."
 
-      key_exists <- exists(key, envir=.values, inherits=FALSE)
+      key_exists <- .values$containsKey(key)
 
       if (key_exists) {
-        if (.dedupe && identical(.values[[key]], value)) {
+        if (.dedupe && identical(.values$get(key), value)) {
           return(invisible())
         }
       }
 
       # set the value for better logging
-      .values[[key]] <- value
+      .values$set(key, value)
 
       # key has been depended upon
-      if (isTRUE(.hasRetrieved$keys[[key]])) {
+      if (.dependents$containsKey(key)) {
         rLog$valueChangeKey(.reactId, key, value, domain)
-        keyReactId <- rLog$keyIdStr(.reactId, key)
-        rLog$invalidateStart(keyReactId, NULL, "other", domain)
-        on.exit(
-          rLog$invalidateEnd(keyReactId, NULL, "other", domain),
-          add = TRUE
-        )
+        .dependents$get(key)$invalidate()
       }
 
       # only invalidate if there are deps
       if (!key_exists && isTRUE(.hasRetrieved$names)) {
-        rLog$valueChangeNames(.reactId, ls(.values, all.names = TRUE), domain)
+        rLog$valueChangeNames(.reactId, .values$keys(), domain)
         .namesDeps$invalidate()
       }
 
       if (hidden) {
         if (isTRUE(.hasRetrieved$asListAll)) {
-          rLog$valueChangeAsListAll(.reactId, as.list(.values, all.names = TRUE), domain)
+          rLog$valueChangeAsListAll(.reactId, .values$values(), domain)
           .allValuesDeps$invalidate()
         }
       } else {
         if (isTRUE(.hasRetrieved$asList)) {
+          react_vals <- .values$values()
+          react_vals <- react_vals[!grepl("^\\.", base::names(react_vals))]
           # leave as is. both object would be registered to the listening object
-          rLog$valueChangeAsList(.reactId, as.list(.values, all.names = FALSE), domain)
+          rLog$valueChangeAsList(.reactId, react_vals, domain)
           .valuesDeps$invalidate()
         }
       }
 
-      dep.keys <- objects(
-        envir=.dependents,
-        pattern=paste('^\\Q', key, ':', '\\E', '\\d+$', sep=''),
-        all.names=TRUE
-      )
-      lapply(
-        mget(dep.keys, envir=.dependents),
-        function(ctx) {
-          ctx$invalidate()
-          NULL
-        }
-      )
       invisible()
     },
 
@@ -448,7 +436,7 @@ ReactiveValues <- R6Class(
     },
 
     names = function() {
-      nameValues <- ls(.values, all.names=TRUE)
+      nameValues <- .values$keys()
       if (!isTRUE(.hasRetrieved$names)) {
         domain <- getDefaultReactiveDomain()
         rLog$defineNames(.reactId, nameValues, .label, domain)
@@ -462,7 +450,7 @@ ReactiveValues <- R6Class(
     getMeta = function(key, metaKey) {
       # Make sure to use named (not numeric) indexing into list.
       metaKey <- as.character(metaKey)
-      .metadata[[key]][[metaKey]]
+      .metadata$get(key)[[metaKey]]
     },
 
     # Set a metadata value. Does not trigger reactivity.
@@ -470,11 +458,13 @@ ReactiveValues <- R6Class(
       # Make sure to use named (not numeric) indexing into list.
       metaKey <- as.character(metaKey)
 
-      if (!exists(key, envir = .metadata, inherits = FALSE)) {
-        .metadata[[key]] <<- list()
+      if (!.metadata$containsKey(key)) {
+        .metadata$set(key, list())
       }
 
-      .metadata[[key]][[metaKey]] <<- value
+      m <- .metadata$get(key)
+      m[[metaKey]] <- value
+      .metadata$set(key, m)
     },
 
     # Mark a value as frozen If accessed while frozen, a shiny.silent.error will
@@ -496,7 +486,10 @@ ReactiveValues <- R6Class(
     },
 
     toList = function(all.names=FALSE) {
-      listValue <- as.list(.values, all.names=all.names)
+      listValue <- .values$values()
+      if (!all.names) {
+        listValue <- listValue[!grepl("^\\.", base::names(listValue))]
+      }
       if (all.names) {
         if (!isTRUE(.hasRetrieved$asListAll)) {
           domain <- getDefaultReactiveDomain()
@@ -509,7 +502,7 @@ ReactiveValues <- R6Class(
       if (!isTRUE(.hasRetrieved$asList)) {
         domain <- getDefaultReactiveDomain()
         # making sure the value being recorded is with `all.names = FALSE`
-        rLog$defineAsList(.reactId, as.list(.values, all.names=FALSE), .label, domain)
+        rLog$defineAsList(.reactId, listValue[!grepl("^\\.", base::names(listValue))], .label, domain)
         .hasRetrieved$asList <<- TRUE
       }
       .valuesDeps$register()
@@ -559,7 +552,7 @@ ReactiveValues <- R6Class(
 #' @param ... Objects that will be added to the reactivevalues object. All of
 #'   these objects must be named.
 #'
-#' @seealso \code{\link{isolate}} and \code{\link{is.reactivevalues}}.
+#' @seealso [isolate()] and [is.reactivevalues()].
 #' @export
 reactiveValues <- function(...) {
   args <- list(...)
@@ -602,7 +595,7 @@ checkName <- function(x) {
 #' Checks whether its argument is a reactivevalues object.
 #'
 #' @param x The object to test.
-#' @seealso \code{\link{reactiveValues}}.
+#' @seealso [reactiveValues()].
 #' @export
 is.reactivevalues <- function(x) inherits(x, 'reactivevalues')
 
@@ -667,14 +660,14 @@ as.list.reactivevalues <- function(x, all.names=FALSE, ...) {
 
 #' Convert a reactivevalues object to a list
 #'
-#' This function does something similar to what you might \code{\link[base]{as.list}}
+#' This function does something similar to what you might [base::as.list()]
 #' to do. The difference is that the calling context will take dependencies on
 #' every object in the reactivevalues object. To avoid taking dependencies on
-#' all the objects, you can wrap the call with \code{\link{isolate}()}.
+#' all the objects, you can wrap the call with [isolate()].
 #'
 #' @param x A reactivevalues object.
-#' @param all.names If \code{TRUE}, include objects with a leading dot. If
-#'   \code{FALSE} (the default) don't include those objects.
+#' @param all.names If `TRUE`, include objects with a leading dot. If
+#'   `FALSE` (the default) don't include those objects.
 #' @examples
 #' values <- reactiveValues(a = 1)
 #' \dontrun{
@@ -720,20 +713,20 @@ str.reactivevalues <- function(object, indent.str = " ", ...) {
 
 #' Freeze a reactive value
 #'
-#' These functions freeze a \code{\link{reactiveVal}}, or an element of a
-#' \code{\link{reactiveValues}}. If the value is accessed while frozen, a
+#' These functions freeze a [reactiveVal()], or an element of a
+#' [reactiveValues()]. If the value is accessed while frozen, a
 #' "silent" exception is raised and the operation is stopped. This is the same
-#' thing that happens if \code{req(FALSE)} is called. The value is thawed
+#' thing that happens if `req(FALSE)` is called. The value is thawed
 #' (un-frozen; accessing it will no longer raise an exception) when the current
 #' reactive domain is flushed. In a Shiny application, this occurs after all of
 #' the observers are executed.
 #'
-#' @param x For \code{freezeReactiveValue}, a \code{\link{reactiveValues}}
-#'   object (like \code{input}); for \code{freezeReactiveVal}, a
-#'   \code{\link{reactiveVal}} object.
-#' @param name The name of a value in the \code{\link{reactiveValues}} object.
+#' @param x For `freezeReactiveValue`, a [reactiveValues()]
+#'   object (like `input`); for `freezeReactiveVal`, a
+#'   [reactiveVal()] object.
+#' @param name The name of a value in the [reactiveValues()] object.
 #'
-#' @seealso \code{\link{req}}
+#' @seealso [req()]
 #' @examples
 #' ## Only run this examples in interactive R sessions
 #' if (interactive()) {
@@ -800,6 +793,7 @@ Observable <- R6Class(
     .visible = logical(0),
     .execCount = integer(0),
     .mostRecentCtxId = character(0),
+    .ctx = 'Context',
 
     initialize = function(func, label = deparse(substitute(func)),
                           domain = getDefaultReactiveDomain(),
@@ -829,6 +823,7 @@ Observable <- R6Class(
       .running <<- FALSE
       .execCount <<- 0L
       .mostRecentCtxId <<- ""
+      .ctx <<- NULL
       rLog$define(.reactId, .value, .label, type = "observable", .domain)
     },
     getValue = function() {
@@ -855,12 +850,22 @@ Observable <- R6Class(
     },
     .updateValue = function() {
       ctx <- Context$new(.domain, .label, type = 'observable',
-                         prevId = .mostRecentCtxId, reactId = .reactId)
+                         prevId = .mostRecentCtxId, reactId = .reactId,
+                         weak = TRUE)
       .mostRecentCtxId <<- ctx$id
+
+      # A Dependency object will have a weak reference to the context, which
+      # doesn't prevent it from being GC'd. However, as long as this
+      # Observable object is reachable and not invalidated, we need to make
+      # sure the context isn't GC'd. To do that we need a strong reference to
+      # the context.
+      .ctx <<- ctx
+
       ctx$onInvalidate(function() {
         .invalidated <<- TRUE
         .value <<- NULL # Value can be GC'd, it won't be read once invalidated
         .dependents$invalidate(log = FALSE)
+        .ctx <<- NULL   # No longer need to prevent the context from being GC'd.
       })
       .execCount <<- .execCount + 1L
 
@@ -907,21 +912,21 @@ Observable <- R6Class(
 #' marked as invalidated. In this way, invalidations ripple through the
 #' expressions that depend on each other.
 #'
-#' See the \href{https://shiny.rstudio.com/tutorial/}{Shiny tutorial} for
+#' See the [Shiny tutorial](https://shiny.rstudio.com/tutorial/) for
 #' more information about reactive expressions.
 #'
-#' @param x For \code{reactive}, an expression (quoted or unquoted). For
-#'   \code{is.reactive}, an object to test.
+#' @param x For `reactive`, an expression (quoted or unquoted). For
+#'   `is.reactive`, an object to test.
 #' @param env The parent environment for the reactive expression. By default,
 #'   this is the calling environment, the same as when defining an ordinary
 #'   non-reactive expression.
-#' @param quoted Is the expression quoted? By default, this is \code{FALSE}.
+#' @param quoted Is the expression quoted? By default, this is `FALSE`.
 #'   This is useful when you want to use an expression that is stored in a
-#'   variable; to do so, it must be quoted with \code{quote()}.
+#'   variable; to do so, it must be quoted with `quote()`.
 #' @param label A label for the reactive expression, useful for debugging.
-#' @param domain See \link{domains}.
+#' @param domain See [domains].
 #' @param ..stacktraceon Advanced use only. For stack manipulation purposes; see
-#'   \code{\link{stacktrace}}.
+#'   [stacktrace()].
 #' @return a function, wrapped in a S3 class "reactive"
 #'
 #' @examples
@@ -1264,7 +1269,7 @@ Observer <- R6Class(
 #' soon as their dependencies change, they schedule themselves to re-execute.
 #'
 #' Starting with Shiny 0.10.0, observers are automatically destroyed by default
-#' when the \link[=domains]{domain} that owns them ends (e.g. when a Shiny
+#' when the [domain][domains] that owns them ends (e.g. when a Shiny
 #' session ends).
 #'
 #' @param x An expression (quoted or unquoted). Any return value will be
@@ -1272,52 +1277,52 @@ Observer <- R6Class(
 #' @param env The parent environment for the reactive expression. By default,
 #'   this is the calling environment, the same as when defining an ordinary
 #'   non-reactive expression.
-#' @param quoted Is the expression quoted? By default, this is \code{FALSE}.
+#' @param quoted Is the expression quoted? By default, this is `FALSE`.
 #'   This is useful when you want to use an expression that is stored in a
-#'   variable; to do so, it must be quoted with \code{quote()}.
+#'   variable; to do so, it must be quoted with `quote()`.
 #' @param label A label for the observer, useful for debugging.
-#' @param suspended If \code{TRUE}, start the observer in a suspended state. If
-#'   \code{FALSE} (the default), start in a non-suspended state.
+#' @param suspended If `TRUE`, start the observer in a suspended state. If
+#'   `FALSE` (the default), start in a non-suspended state.
 #' @param priority An integer or numeric that controls the priority with which
 #'   this observer should be executed. A higher value means higher priority: an
 #'   observer with a higher priority value will execute before all observers
 #'   with lower priority values. Positive, negative, and zero values are
 #'   allowed.
-#' @param domain See \link{domains}.
-#' @param autoDestroy If \code{TRUE} (the default), the observer will be
+#' @param domain See [domains].
+#' @param autoDestroy If `TRUE` (the default), the observer will be
 #'   automatically destroyed when its domain (if any) ends.
 #' @param ..stacktraceon Advanced use only. For stack manipulation purposes; see
-#'   \code{\link{stacktrace}}.
+#'   [stacktrace()].
 #' @return An observer reference class object. This object has the following
 #'   methods:
 #'   \describe{
-#'     \item{\code{suspend()}}{
+#'     \item{`suspend()`}{
 #'       Causes this observer to stop scheduling flushes (re-executions) in
 #'       response to invalidations. If the observer was invalidated prior to
 #'       this call but it has not re-executed yet then that re-execution will
 #'       still occur, because the flush is already scheduled.
 #'     }
-#'     \item{\code{resume()}}{
+#'     \item{`resume()`}{
 #'       Causes this observer to start re-executing in response to
 #'       invalidations. If the observer was invalidated while suspended, then it
 #'       will schedule itself for re-execution.
 #'     }
-#'     \item{\code{destroy()}}{
+#'     \item{`destroy()`}{
 #'       Stops the observer from executing ever again, even if it is currently
 #'       scheduled for re-execution.
 #'     }
-#'     \item{\code{setPriority(priority = 0)}}{
+#'     \item{`setPriority(priority = 0)`}{
 #'       Change this observer's priority. Note that if the observer is currently
 #'       invalidated, then the change in priority will not take effect until the
 #'       next invalidation--unless the observer is also currently suspended, in
 #'       which case the priority change will be effective upon resume.
 #'     }
-#'     \item{\code{setAutoDestroy(autoDestroy)}}{
+#'     \item{`setAutoDestroy(autoDestroy)`}{
 #'       Sets whether this observer should be automatically destroyed when its
 #'       domain (if any) ends. If autoDestroy is TRUE and the domain already
 #'       ended, then destroy() is called immediately."
 #'     }
-#'     \item{\code{onInvalidate(callback)}}{
+#'     \item{`onInvalidate(callback)`}{
 #'       Register a callback function to run when this observer is invalidated.
 #'       No arguments will be provided to the callback function when it is
 #'       invoked.
@@ -1362,7 +1367,7 @@ observe <- function(x, env=parent.frame(), quoted=FALSE, label=NULL,
 #' Turns a normal variable into a reactive variable, that is, one that has
 #' reactive semantics when assigned or read in the usual ways. The variable may
 #' already exist; if so, its value will be used as the initial value of the
-#' reactive variable (or \code{NULL} if the variable did not exist).
+#' reactive variable (or `NULL` if the variable did not exist).
 #'
 #' @param symbol A character string indicating the name of the variable that
 #'   should be made reactive
@@ -1436,23 +1441,23 @@ setAutoflush <- local({
 #' reactive value, except reactive values are triggered when they are set, while
 #' reactive timers are triggered simply by the passage of time.
 #'
-#' \link[=reactive]{Reactive expressions} and observers that want to be
+#' [Reactive expressions][reactive] and observers that want to be
 #' invalidated by the timer need to call the timer function that
-#' \code{reactiveTimer} returns, even if the current time value is not actually
+#' `reactiveTimer` returns, even if the current time value is not actually
 #' needed.
 #'
-#' See \code{\link{invalidateLater}} as a safer and simpler alternative.
+#' See [invalidateLater()] as a safer and simpler alternative.
 #'
 #' @param intervalMs How often to fire, in milliseconds
 #' @param session A session object. This is needed to cancel any scheduled
-#'   invalidations after a user has ended the session. If \code{NULL}, then
+#'   invalidations after a user has ended the session. If `NULL`, then
 #'   this invalidation will not be tied to any session, and so it will still
 #'   occur.
 #' @return A no-parameter function that can be called from a reactive context,
 #'   in order to cause that context to be invalidated the next time the timer
 #'   interval elapses. Calling the returned function also happens to yield the
-#'   current time (as in \code{\link[base]{Sys.time}}).
-#' @seealso \code{\link{invalidateLater}}
+#'   current time (as in [base::Sys.time()]).
+#' @seealso [invalidateLater()]
 #'
 #' @examples
 #' ## Only run examples in interactive R sessions
@@ -1555,16 +1560,16 @@ reactiveTimer <- function(intervalMs=1000, session = getDefaultReactiveDomain())
 #' re-execution will reset the invalidation flag, so in a typical use case, the
 #' object will keep re-executing and waiting for the specified interval. It's
 #' possible to stop this cycle by adding conditional logic that prevents the
-#' \code{invalidateLater} from being run.
+#' `invalidateLater` from being run.
 #'
 #' @param millis Approximate milliseconds to wait before invalidating the
 #'   current reactive context.
 #' @param session A session object. This is needed to cancel any scheduled
-#'   invalidations after a user has ended the session. If \code{NULL}, then
+#'   invalidations after a user has ended the session. If `NULL`, then
 #'   this invalidation will not be tied to any session, and so it will still
 #'   occur.
 #'
-#' @seealso \code{\link{reactiveTimer}} is a slightly less safe alternative.
+#' @seealso [reactiveTimer()] is a slightly less safe alternative.
 #'
 #' @examples
 #' ## Only run examples in interactive R sessions
@@ -1641,47 +1646,47 @@ coerceToFunc <- function(x) {
 #' Used to create a reactive data source, which works by periodically polling a
 #' non-reactive data source.
 #'
-#' \code{reactivePoll} works by pairing a relatively cheap "check" function with
+#' `reactivePoll` works by pairing a relatively cheap "check" function with
 #' a more expensive value retrieval function. The check function will be
 #' executed periodically and should always return a consistent value until the
 #' data changes. When the check function returns a different value, then the
 #' value retrieval function will be used to re-populate the data.
 #'
-#' Note that the check function doesn't return \code{TRUE} or \code{FALSE} to
+#' Note that the check function doesn't return `TRUE` or `FALSE` to
 #' indicate whether the underlying data has changed. Rather, the check function
 #' indicates change by returning a different value from the previous time it was
 #' called.
 #'
-#' For example, \code{reactivePoll} is used to implement
-#' \code{reactiveFileReader} by pairing a check function that simply returns the
+#' For example, `reactivePoll` is used to implement
+#' `reactiveFileReader` by pairing a check function that simply returns the
 #' last modified timestamp of a file, and a value retrieval function that
 #' actually reads the contents of the file.
 #'
 #' As another example, one might read a relational database table reactively by
-#' using a check function that does \code{SELECT MAX(timestamp) FROM table} and
-#' a value retrieval function that does \code{SELECT * FROM table}.
+#' using a check function that does `SELECT MAX(timestamp) FROM table` and
+#' a value retrieval function that does `SELECT * FROM table`.
 #'
-#' The \code{intervalMillis}, \code{checkFunc}, and \code{valueFunc} functions
+#' The `intervalMillis`, `checkFunc`, and `valueFunc` functions
 #' will be executed in a reactive context; therefore, they may read reactive
 #' values and reactive expressions.
 #'
 #' @param intervalMillis Approximate number of milliseconds to wait between
-#'   calls to \code{checkFunc}. This can be either a numeric value, or a
+#'   calls to `checkFunc`. This can be either a numeric value, or a
 #'   function that returns a numeric value.
 #' @param session The user session to associate this file reader with, or
-#'   \code{NULL} if none. If non-null, the reader will automatically stop when
+#'   `NULL` if none. If non-null, the reader will automatically stop when
 #'   the session ends.
 #' @param checkFunc A relatively cheap function whose values over time will be
 #'   tested for equality; inequality indicates that the underlying value has
-#'   changed and needs to be invalidated and re-read using \code{valueFunc}. See
+#'   changed and needs to be invalidated and re-read using `valueFunc`. See
 #'   Details.
 #' @param valueFunc A function that calculates the underlying value. See
 #'   Details.
 #'
-#' @return A reactive expression that returns the result of \code{valueFunc},
-#'   and invalidates when \code{checkFunc} changes.
+#' @return A reactive expression that returns the result of `valueFunc`,
+#'   and invalidates when `checkFunc` changes.
 #'
-#' @seealso \code{\link{reactiveFileReader}}
+#' @seealso [reactiveFileReader()]
 #'
 #' @examples
 #' function(input, output, session) {
@@ -1731,11 +1736,11 @@ reactivePoll <- function(intervalMillis, session, checkFunc, valueFunc) {
 #' Given a file path and read function, returns a reactive data source for the
 #' contents of the file.
 #'
-#' \code{reactiveFileReader} works by periodically checking the file's last
+#' `reactiveFileReader` works by periodically checking the file's last
 #' modified time; if it has changed, then the file is re-read and any reactive
 #' dependents are invalidated.
 #'
-#' The \code{intervalMillis}, \code{filePath}, and \code{readFunc} functions
+#' The `intervalMillis`, `filePath`, and `readFunc` functions
 #' will each be executed in a reactive context; therefore, they may read
 #' reactive values and reactive expressions.
 #'
@@ -1743,22 +1748,22 @@ reactivePoll <- function(intervalMillis, session, checkFunc, valueFunc) {
 #'   checks of the file's last modified time. This can be a numeric value, or a
 #'   function that returns a numeric value.
 #' @param session The user session to associate this file reader with, or
-#'   \code{NULL} if none. If non-null, the reader will automatically stop when
+#'   `NULL` if none. If non-null, the reader will automatically stop when
 #'   the session ends.
-#' @param filePath The file path to poll against and to pass to \code{readFunc}.
+#' @param filePath The file path to poll against and to pass to `readFunc`.
 #'   This can either be a single-element character vector, or a function that
 #'   returns one.
 #' @param readFunc The function to use to read the file; must expect the first
 #'   argument to be the file path to read. The return value of this function is
 #'   used as the value of the reactive file reader.
-#' @param ... Any additional arguments to pass to \code{readFunc} whenever it is
+#' @param ... Any additional arguments to pass to `readFunc` whenever it is
 #'   invoked.
 #'
 #' @return A reactive expression that returns the contents of the file, and
 #'   automatically invalidates when the file changes on disk (as determined by
 #'   last modified time).
 #'
-#' @seealso \code{\link{reactivePoll}}
+#' @seealso [reactivePoll()]
 #'
 #' @examples
 #' \dontrun{
@@ -1808,19 +1813,19 @@ reactiveFileReader <- function(intervalMillis, session, filePath, readFunc, ...)
 #' Ordinarily, the simple act of reading a reactive value causes a relationship
 #' to be established between the caller and the reactive value, where a change
 #' to the reactive value will cause the caller to re-execute. (The same applies
-#' for the act of getting a reactive expression's value.) The \code{isolate}
+#' for the act of getting a reactive expression's value.) The `isolate`
 #' function lets you read a reactive value or expression without establishing this
 #' relationship.
 #'
-#' The expression given to \code{isolate()} is evaluated in the calling
+#' The expression given to `isolate()` is evaluated in the calling
 #' environment. This means that if you assign a variable inside the
-#' \code{isolate()}, its value will be visible outside of the \code{isolate()}.
-#' If you want to avoid this, you can use \code{\link[base]{local}()} inside the
-#' \code{isolate()}.
+#' `isolate()`, its value will be visible outside of the `isolate()`.
+#' If you want to avoid this, you can use [base::local()] inside the
+#' `isolate()`.
 #'
 #' This function can also be useful for calling reactive expression at the
 #' console, which can be useful for debugging. To do so, simply wrap the
-#' calls to the reactive expression with \code{isolate()}.
+#' calls to the reactive expression with `isolate()`.
 #'
 #' @param expr An expression that can access reactive values or expressions.
 #'
@@ -1887,13 +1892,13 @@ isolate <- function(expr) {
 #'
 #' Temporarily blocks the current reactive context and evaluates the given
 #' expression. Any attempt to directly access reactive values or expressions in
-#' \code{expr} will give the same results as doing it at the top-level (by
+#' `expr` will give the same results as doing it at the top-level (by
 #' default, an error).
 #'
 #' @param expr An expression to evaluate.
-#' @return The value of \code{expr}.
+#' @return The value of `expr`.
 #'
-#' @seealso \code{\link{isolate}}
+#' @seealso [isolate()]
 #' @export
 maskReactiveContext <- function(expr) {
   .getReactiveEnvironment()$runWith(NULL, function() {
@@ -1907,147 +1912,147 @@ maskReactiveContext <- function(expr) {
 #'
 #' Shiny's reactive programming framework is primarily designed for calculated
 #' values (reactive expressions) and side-effect-causing actions (observers)
-#' that respond to \emph{any} of their inputs changing. That's often what is
+#' that respond to *any* of their inputs changing. That's often what is
 #' desired in Shiny apps, but not always: sometimes you want to wait for a
 #' specific action to be taken from the user, like clicking an
-#' \code{\link{actionButton}}, before calculating an expression or taking an
+#' [actionButton()], before calculating an expression or taking an
 #' action. A reactive value or expression that is used to trigger other
-#' calculations in this way is called an \emph{event}.
+#' calculations in this way is called an *event*.
 #'
 #' These situations demand a more imperative, "event handling" style of
 #' programming that is possible--but not particularly intuitive--using the
-#' reactive programming primitives \code{\link{observe}} and
-#' \code{\link{isolate}}. \code{observeEvent} and \code{eventReactive} provide
-#' straightforward APIs for event handling that wrap \code{observe} and
-#' \code{isolate}.
+#' reactive programming primitives [observe()] and
+#' [isolate()]. `observeEvent` and `eventReactive` provide
+#' straightforward APIs for event handling that wrap `observe` and
+#' `isolate`.
 #'
-#' Use \code{observeEvent} whenever you want to \emph{perform an action} in
+#' Use `observeEvent` whenever you want to *perform an action* in
 #' response to an event. (Note that "recalculate a value" does not generally
-#' count as performing an action--see \code{eventReactive} for that.) The first
+#' count as performing an action--see `eventReactive` for that.) The first
 #' argument is the event you want to respond to, and the second argument is a
 #' function that should be called whenever the event occurs.
 #'
-#' Use \code{eventReactive} to create a \emph{calculated value} that only
+#' Use `eventReactive` to create a *calculated value* that only
 #' updates in response to an event. This is just like a normal
-#' \link[=reactive]{reactive expression} except it ignores all the usual
+#' [reactive expression][reactive] except it ignores all the usual
 #' invalidations that come from its reactive dependencies; it only invalidates
 #' in response to the given event.
 #'
 #' @section ignoreNULL and ignoreInit:
 #'
-#' Both \code{observeEvent} and \code{eventReactive} take an \code{ignoreNULL}
-#' parameter that affects behavior when the \code{eventExpr} evaluates to
-#' \code{NULL} (or in the special case of an \code{\link{actionButton}},
-#' \code{0}). In these cases, if \code{ignoreNULL} is \code{TRUE}, then an
-#' \code{observeEvent} will not execute and an \code{eventReactive} will raise a
-#' silent \link[=validate]{validation} error. This is useful behavior if you
+#' Both `observeEvent` and `eventReactive` take an `ignoreNULL`
+#' parameter that affects behavior when the `eventExpr` evaluates to
+#' `NULL` (or in the special case of an [actionButton()],
+#' `0`). In these cases, if `ignoreNULL` is `TRUE`, then an
+#' `observeEvent` will not execute and an `eventReactive` will raise a
+#' silent [validation][validate] error. This is useful behavior if you
 #' don't want to do the action or calculation when your app first starts, but
 #' wait for the user to initiate the action first (like a "Submit" button);
-#' whereas \code{ignoreNULL=FALSE} is desirable if you want to initially perform
+#' whereas `ignoreNULL=FALSE` is desirable if you want to initially perform
 #' the action/calculation and just let the user re-initiate it (like a
 #' "Recalculate" button).
 #'
-#' Likewise, both \code{observeEvent} and \code{eventReactive} also take in an
-#' \code{ignoreInit} argument. By default, both of these will run right when they
-#' are created (except if, at that moment, \code{eventExpr} evaluates to \code{NULL}
-#' and \code{ignoreNULL} is \code{TRUE}). But when responding to a click of an action
-#' button, it may often be useful to set \code{ignoreInit} to \code{TRUE}. For
-#' example, if you're setting up an \code{observeEvent} for a dynamically created
-#' button, then \code{ignoreInit = TRUE} will guarantee that the action (in
-#' \code{handlerExpr}) will only be triggered when the button is actually clicked,
+#' Likewise, both `observeEvent` and `eventReactive` also take in an
+#' `ignoreInit` argument. By default, both of these will run right when they
+#' are created (except if, at that moment, `eventExpr` evaluates to `NULL`
+#' and `ignoreNULL` is `TRUE`). But when responding to a click of an action
+#' button, it may often be useful to set `ignoreInit` to `TRUE`. For
+#' example, if you're setting up an `observeEvent` for a dynamically created
+#' button, then `ignoreInit = TRUE` will guarantee that the action (in
+#' `handlerExpr`) will only be triggered when the button is actually clicked,
 #' instead of also being triggered when it is created/initialized. Similarly,
-#' if you're setting up an \code{eventReactive} that responds to a dynamically
-#' created button used to refresh some data (then returned by that \code{eventReactive}),
-#' then you should use \code{eventReactive([...], ignoreInit = TRUE)} if you want
+#' if you're setting up an `eventReactive` that responds to a dynamically
+#' created button used to refresh some data (then returned by that `eventReactive`),
+#' then you should use `eventReactive([...], ignoreInit = TRUE)` if you want
 #' to let the user decide if/when they want to refresh the data (since, depending
 #' on the app, this may be a computationally expensive operation).
 #'
-#' Even though \code{ignoreNULL} and \code{ignoreInit} can be used for similar
+#' Even though `ignoreNULL` and `ignoreInit` can be used for similar
 #' purposes they are independent from one another. Here's the result of combining
 #' these:
 #'
 #' \describe{
-#'   \item{\code{ignoreNULL = TRUE} and \code{ignoreInit = FALSE}}{
-#'      This is the default. This combination means that \code{handlerExpr}/
-#'      \code{valueExpr} will run every time that \code{eventExpr} is not
-#'      \code{NULL}. If, at the time of the creation of the
-#'      \code{observeEvent}/\code{eventReactive}, \code{eventExpr} happens
-#'      to \emph{not} be \code{NULL}, then the code runs.
+#'   \item{`ignoreNULL = TRUE` and `ignoreInit = FALSE`}{
+#'      This is the default. This combination means that `handlerExpr`/
+#'      `valueExpr` will run every time that `eventExpr` is not
+#'      `NULL`. If, at the time of the creation of the
+#'      `observeEvent`/`eventReactive`, `eventExpr` happens
+#'      to *not* be `NULL`, then the code runs.
 #'   }
-#'   \item{\code{ignoreNULL = FALSE} and \code{ignoreInit = FALSE}}{
-#'      This combination means that \code{handlerExpr}/\code{valueExpr} will
+#'   \item{`ignoreNULL = FALSE` and `ignoreInit = FALSE`}{
+#'      This combination means that `handlerExpr`/`valueExpr` will
 #'      run every time no matter what.
 #'   }
-#'   \item{\code{ignoreNULL = FALSE} and \code{ignoreInit = TRUE}}{
-#'      This combination means that \code{handlerExpr}/\code{valueExpr} will
-#'      \emph{not} run when the \code{observeEvent}/\code{eventReactive} is
-#'      created (because \code{ignoreInit = TRUE}), but it will run every
+#'   \item{`ignoreNULL = FALSE` and `ignoreInit = TRUE`}{
+#'      This combination means that `handlerExpr`/`valueExpr` will
+#'      *not* run when the `observeEvent`/`eventReactive` is
+#'      created (because `ignoreInit = TRUE`), but it will run every
 #'      other time.
 #'   }
-#'   \item{\code{ignoreNULL = TRUE} and \code{ignoreInit = TRUE}}{
-#'      This combination means that \code{handlerExpr}/\code{valueExpr} will
-#'      \emph{not} run when the \code{observeEvent}/\code{eventReactive} is
-#'      created (because  \code{ignoreInit = TRUE}). After that,
-#'      \code{handlerExpr}/\code{valueExpr} will run every time that
-#'      \code{eventExpr} is not \code{NULL}.
+#'   \item{`ignoreNULL = TRUE` and `ignoreInit = TRUE`}{
+#'      This combination means that `handlerExpr`/`valueExpr` will
+#'      *not* run when the `observeEvent`/`eventReactive` is
+#'      created (because  `ignoreInit = TRUE`). After that,
+#'      `handlerExpr`/`valueExpr` will run every time that
+#'      `eventExpr` is not `NULL`.
 #'   }
 #' }
 #'
 #' @param eventExpr A (quoted or unquoted) expression that represents the event;
-#'   this can be a simple reactive value like \code{input$click}, a call to a
-#'   reactive expression like \code{dataset()}, or even a complex expression
+#'   this can be a simple reactive value like `input$click`, a call to a
+#'   reactive expression like `dataset()`, or even a complex expression
 #'   inside curly braces
-#' @param handlerExpr The expression to call whenever \code{eventExpr} is
+#' @param handlerExpr The expression to call whenever `eventExpr` is
 #'   invalidated. This should be a side-effect-producing action (the return
-#'   value will be ignored). It will be executed within an \code{\link{isolate}}
+#'   value will be ignored). It will be executed within an [isolate()]
 #'   scope.
 #' @param valueExpr The expression that produces the return value of the
-#'   \code{eventReactive}. It will be executed within an \code{\link{isolate}}
+#'   `eventReactive`. It will be executed within an [isolate()]
 #'   scope.
-#' @param event.env The parent environment for \code{eventExpr}. By default,
+#' @param event.env The parent environment for `eventExpr`. By default,
 #'   this is the calling environment.
-#' @param event.quoted Is the \code{eventExpr} expression quoted? By default,
-#'   this is \code{FALSE}. This is useful when you want to use an expression
+#' @param event.quoted Is the `eventExpr` expression quoted? By default,
+#'   this is `FALSE`. This is useful when you want to use an expression
 #'   that is stored in a variable; to do so, it must be quoted with
-#'   \code{quote()}.
-#' @param handler.env The parent environment for \code{handlerExpr}. By default,
+#'   `quote()`.
+#' @param handler.env The parent environment for `handlerExpr`. By default,
 #'   this is the calling environment.
-#' @param handler.quoted Is the \code{handlerExpr} expression quoted? By
-#'   default, this is \code{FALSE}. This is useful when you want to use an
+#' @param handler.quoted Is the `handlerExpr` expression quoted? By
+#'   default, this is `FALSE`. This is useful when you want to use an
 #'   expression that is stored in a variable; to do so, it must be quoted with
-#'   \code{quote()}.
-#' @param value.env The parent environment for \code{valueExpr}. By default,
+#'   `quote()`.
+#' @param value.env The parent environment for `valueExpr`. By default,
 #'   this is the calling environment.
-#' @param value.quoted Is the \code{valueExpr} expression quoted? By default,
-#'   this is \code{FALSE}. This is useful when you want to use an expression
-#'   that is stored in a variable; to do so, it must be quoted with \code{quote()}.
+#' @param value.quoted Is the `valueExpr` expression quoted? By default,
+#'   this is `FALSE`. This is useful when you want to use an expression
+#'   that is stored in a variable; to do so, it must be quoted with `quote()`.
 #' @param label A label for the observer or reactive, useful for debugging.
-#' @param suspended If \code{TRUE}, start the observer in a suspended state. If
-#'   \code{FALSE} (the default), start in a non-suspended state.
+#' @param suspended If `TRUE`, start the observer in a suspended state. If
+#'   `FALSE` (the default), start in a non-suspended state.
 #' @param priority An integer or numeric that controls the priority with which
 #'   this observer should be executed. An observer with a given priority level
 #'   will always execute sooner than all observers with a lower priority level.
 #'   Positive, negative, and zero values are allowed.
-#' @param domain See \link{domains}.
-#' @param autoDestroy If \code{TRUE} (the default), the observer will be
+#' @param domain See [domains].
+#' @param autoDestroy If `TRUE` (the default), the observer will be
 #'   automatically destroyed when its domain (if any) ends.
 #' @param ignoreNULL Whether the action should be triggered (or value
-#'   calculated, in the case of \code{eventReactive}) when the input is
-#'   \code{NULL}. See Details.
-#' @param ignoreInit If \code{TRUE}, then, when this \code{observeEvent} is
-#'   first created/initialized, ignore the \code{handlerExpr} (the second
+#'   calculated, in the case of `eventReactive`) when the input is
+#'   `NULL`. See Details.
+#' @param ignoreInit If `TRUE`, then, when this `observeEvent` is
+#'   first created/initialized, ignore the `handlerExpr` (the second
 #'   argument), whether it is otherwise supposed to run or not. The default is
-#'   \code{FALSE}. See Details.
-#' @param once Whether this \code{observeEvent} should be immediately destroyed
-#'   after the first time that the code in \code{handlerExpr} is run. This
+#'   `FALSE`. See Details.
+#' @param once Whether this `observeEvent` should be immediately destroyed
+#'   after the first time that the code in `handlerExpr` is run. This
 #'   pattern is useful when you want to subscribe to a event that should only
 #'   happen once.
 #'
-#' @return \code{observeEvent} returns an observer reference class object (see
-#'   \code{\link{observe}}). \code{eventReactive} returns a reactive expression
-#'   object (see \code{\link{reactive}}).
+#' @return `observeEvent` returns an observer reference class object (see
+#'   [observe()]). `eventReactive` returns a reactive expression
+#'   object (see [reactive()]).
 #'
-#' @seealso \code{\link{actionButton}}
+#' @seealso [actionButton()]
 #'
 #' @examples
 #' ## Only run this example in interactive R sessions
@@ -2200,7 +2205,7 @@ isNullEvent <- function(value) {
 #' expression until it becomes idle, which is useful when the intermediate
 #' values don't matter as much as the final value, and the downstream
 #' calculations that depend on the reactive expression take a long time.
-#' \code{debounce} and \code{throttle} use different algorithms for slowing down
+#' `debounce` and `throttle` use different algorithms for slowing down
 #' invalidation signals; see Details.
 #'
 #' @section Limitations:
@@ -2221,43 +2226,43 @@ isNullEvent <- function(value) {
 #'
 #' @details
 #'
-#' This is not a true debounce/throttle in that it will not prevent \code{r}
+#' This is not a true debounce/throttle in that it will not prevent `r`
 #' from being called many times (in fact it may be called more times than
 #' usual), but rather, the reactive invalidation signal that is produced by
-#' \code{r} is debounced/throttled instead. Therefore, these functions should be
-#' used when \code{r} is cheap but the things it will trigger (downstream
+#' `r` is debounced/throttled instead. Therefore, these functions should be
+#' used when `r` is cheap but the things it will trigger (downstream
 #' outputs and reactives) are expensive.
 #'
-#' Debouncing means that every invalidation from \code{r} will be held for the
-#' specified time window. If \code{r} invalidates again within that time window,
+#' Debouncing means that every invalidation from `r` will be held for the
+#' specified time window. If `r` invalidates again within that time window,
 #' then the timer starts over again. This means that as long as invalidations
-#' continually arrive from \code{r} within the time window, the debounced
+#' continually arrive from `r` within the time window, the debounced
 #' reactive will not invalidate at all. Only after the invalidations stop (or
 #' slow down sufficiently) will the downstream invalidation be sent.
 #'
-#' \code{ooo-oo-oo---- => -----------o-}
+#' `ooo-oo-oo---- => -----------o-`
 #'
 #' (In this graphical depiction, each character represents a unit of time, and
 #' the time window is 3 characters.)
 #'
-#' Throttling, on the other hand, delays invalidation if the \emph{throttled}
-#' reactive recently (within the time window) invalidated. New \code{r}
+#' Throttling, on the other hand, delays invalidation if the *throttled*
+#' reactive recently (within the time window) invalidated. New `r`
 #' invalidations do not reset the time window. This means that if invalidations
-#' continually come from \code{r} within the time window, the throttled reactive
+#' continually come from `r` within the time window, the throttled reactive
 #' will invalidate regularly, at a rate equal to or slower than than the time
 #' window.
 #'
-#' \code{ooo-oo-oo---- => o--o--o--o---}
+#' `ooo-oo-oo---- => o--o--o--o---`
 #'
 #' @param r A reactive expression (that invalidates too often).
 #' @param millis The debounce/throttle time window. You may optionally pass a
 #'   no-arg function or reactive expression instead, e.g. to let the end-user
 #'   control the time window.
 #' @param priority Debounce/throttle is implemented under the hood using
-#'   \link[=observe]{observers}. Use this parameter to set the priority of
+#'   [observers][observe]. Use this parameter to set the priority of
 #'   these observers. Generally, this should be higher than the priorities of
 #'   downstream observers and outputs (which default to zero).
-#' @param domain See \link{domains}.
+#' @param domain See [domains].
 #'
 #' @examples
 #' ## Only run examples in interactive R sessions

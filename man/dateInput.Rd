@@ -43,7 +43,7 @@ Other valid values include "ar", "az", "bg", "bs", "ca", "cs", "cy", "da",
 "vi", "zh-CN", and "zh-TW".}
 
 \item{width}{The width of the input, e.g. \code{'400px'}, or \code{'100\%'};
-see \code{\link{validateCssUnit}}.}
+see \code{\link[=validateCssUnit]{validateCssUnit()}}.}
 
 \item{autoclose}{Whether or not to close the datepicker immediately when a
 date is selected.}
@@ -63,16 +63,16 @@ The date \code{format} string specifies how the date will be displayed in
 the browser. It allows the following values:
 
 \itemize{
-  \item \code{yy} Year without century (12)
-  \item \code{yyyy} Year with century (2012)
-  \item \code{mm} Month number, with leading zero (01-12)
-  \item \code{m} Month number, without leading zero (1-12)
-  \item \code{M} Abbreviated month name
-  \item \code{MM} Full month name
-  \item \code{dd} Day of month with leading zero
-  \item \code{d} Day of month without leading zero
-  \item \code{D} Abbreviated weekday name
-  \item \code{DD} Full weekday name
+\item \code{yy} Year without century (12)
+\item \code{yyyy} Year with century (2012)
+\item \code{mm} Month number, with leading zero (01-12)
+\item \code{m} Month number, without leading zero (1-12)
+\item \code{M} Abbreviated month name
+\item \code{MM} Full month name
+\item \code{dd} Day of month with leading zero
+\item \code{d} Day of month without leading zero
+\item \code{D} Abbreviated weekday name
+\item \code{DD} Full weekday name
 }
 }
 \examples{
@@ -102,7 +102,7 @@ ui <- fluidPage(
 
   # Disable Mondays and Tuesdays.
   dateInput("date7", "Date:", daysofweekdisabled = c(1,2)),
-  
+
   # Disable specific dates.
   dateInput("date8", "Date:", value = "2012-02-29",
             datesdisabled = c("2012-03-01", "2012-03-02"))
@@ -112,7 +112,7 @@ shinyApp(ui, server = function(input, output) { })
 }
 }
 \seealso{
-\code{\link{dateRangeInput}}, \code{\link{updateDateInput}}
+\code{\link[=dateRangeInput]{dateRangeInput()}}, \code{\link[=updateDateInput]{updateDateInput()}}
 
 Other input elements: \code{\link{actionButton}},
   \code{\link{checkboxGroupInput}},

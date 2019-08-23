@@ -15,10 +15,10 @@ actionLink(inputId, label, icon = NULL, ...)
 \item{label}{The contents of the button or link--usually a text label, but
 you could also use any other HTML, like an image.}
 
-\item{icon}{An optional \code{\link{icon}} to appear on the button.}
+\item{icon}{An optional \code{\link[=icon]{icon()}} to appear on the button.}
 
 \item{width}{The width of the input, e.g. \code{'400px'}, or \code{'100\%'};
-see \code{\link{validateCssUnit}}.}
+see \code{\link[=validateCssUnit]{validateCssUnit()}}.}
 
 \item{...}{Named attributes to be applied to the button or link.}
 }
@@ -54,7 +54,7 @@ shinyApp(ui, server)
 
 }
 \seealso{
-\code{\link{observeEvent}} and \code{\link{eventReactive}}
+\code{\link[=observeEvent]{observeEvent()}} and \code{\link[=eventReactive]{eventReactive()}}
 
 Other input elements: \code{\link{checkboxGroupInput}},
   \code{\link{checkboxInput}}, \code{\link{dateInput}},

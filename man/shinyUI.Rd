@@ -19,3 +19,4 @@ ensure that the last expression to be returned from ui.R is a user interface.
 This function is kept for backwards compatibility with older applications. It
 returns the value that is passed to it.
 }
+\keyword{internal}

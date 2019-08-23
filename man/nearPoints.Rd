@@ -53,7 +53,7 @@ selected by the mouse event (\code{TRUE}) or not (\code{FALSE}).}
 }
 \description{
 This function returns rows from a data frame which are near a click, hover, or
-double-click, when used with \code{\link{plotOutput}}. The rows will be sorted
+double-click, when used with \code{\link[=plotOutput]{plotOutput()}}. The rows will be sorted
 by their distance to the mouse event.
 }
 \details{
@@ -68,8 +68,7 @@ The \code{xvar}, \code{yvar}, \code{panelvar1}, and \code{panelvar2} arguments
 specify which columns in the data correspond to the x variable, y variable,
 and panel variables of the plot. For example, if your plot is
 \code{plot(x=cars$speed, y=cars$dist)}, and your click variable is named
-\code{"cars_click"}, then you would use \code{nearPoints(cars,
-input$cars_brush, "speed", "dist")}.
+\code{"cars_click"}, then you would use \code{nearPoints(cars, input$cars_brush, "speed", "dist")}.
 }
 \examples{
 \dontrun{
@@ -85,5 +84,5 @@ nearPoints(mtcars, input$plot_click, threshold = 10, maxpoints = 1)
 }
 }
 \seealso{
-\code{\link{plotOutput}} for more examples.
+\code{\link[=plotOutput]{plotOutput()}} for more examples.
 }

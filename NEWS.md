@@ -41,6 +41,11 @@ shiny 1.3.2.9001
 
 * Fixed [#2329](https://github.com/rstudio/shiny/issues/2329), [#1817](https://github.com/rstudio/shiny/issues/1817): These bugs were reported as fixed in Shiny 1.3.0 but were not actually fixed because some JavaScript changes were accidentally not included in the release. The fix resolves issues that occur when `withProgressBar()` or bookmarking are combined with the [networkD3](https://christophergandrud.github.io/networkD3/) package's Sankey plot.
 
+### Library updates
+
+* Resolved [#2554](https://github.com/rstudio/shiny/issues/2554): Upgraded bootstrap to v3.4.1 and jQuery to v3.4.1. ([#2557](https://github.com/rstudio/shiny/pull/2557))
+
+
 shiny 1.3.2
 ===========
 

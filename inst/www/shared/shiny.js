@@ -12,7 +12,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
   var exports = window.Shiny = window.Shiny || {};
 
-  exports.version = "1.3.2.9001"; // Version number inserted by Grunt
+  exports.version = "1.3.2.9002"; // Version number inserted by Grunt
 
   var origPushState = window.history.pushState;
   window.history.pushState = function () {
@@ -4624,6 +4624,14 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
           msg[feats] = data[feats];
         }
       }
+
+      // Recalculate the number of ticks
+      var max = typeof msg.max === 'undefined' ? slider.options.max : +msg.max;
+      var min = typeof msg.min === 'undefined' ? slider.options.min : +msg.min;
+      var step = typeof msg.step === 'undefined' ? slider.options.step : +msg.step;
+      var nSteps = (max - min) / step;
+      var scaleFactor = Math.ceil(nSteps / 10);
+      msg.grid_num = nSteps / scaleFactor;
 
       updateLabel(data.label, this._getLabelNode(el));
 

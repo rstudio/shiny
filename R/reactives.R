@@ -660,14 +660,14 @@ as.list.reactivevalues <- function(x, all.names=FALSE, ...) {
 
 #' Convert a reactivevalues object to a list
 #'
-#' This function does something similar to what you might [base::as.list()]
-#' to do. The difference is that the calling context will take dependencies on
-#' every object in the reactivevalues object. To avoid taking dependencies on
-#' all the objects, you can wrap the call with [isolate()].
+#' This function does something similar to what you might want or expect
+#' [base::as.list()] to do. The difference is that the calling context will take
+#' dependencies on every object in the `reactivevalue`s object. To avoid taking
+#' dependencies on all the objects, you can wrap the call with [isolate()].
 #'
-#' @param x A reactivevalues object.
-#' @param all.names If `TRUE`, include objects with a leading dot. If
-#'   `FALSE` (the default) don't include those objects.
+#' @param x A `reactivevalues` object.
+#' @param all.names If `TRUE`, include objects with a leading dot. If `FALSE`
+#'   (the default) don't include those objects.
 #' @examples
 #' values <- reactiveValues(a = 1)
 #' \dontrun{

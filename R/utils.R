@@ -173,8 +173,8 @@ anyUnnamed <- function(x) {
 }
 
 
-# Given a vector/list, returns a named vector (the labels will be blank).
-asNamedVector <- function(x) {
+# Given a vector/list, returns a named vector/list (the labels will be blank).
+asNamed <- function(x) {
   if (is.null(names(x))) {
     names(x) <- character(length(x))
   }

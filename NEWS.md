@@ -41,6 +41,9 @@ shiny 1.3.2.9001
 
 * Fixed [#2329](https://github.com/rstudio/shiny/issues/2329), [#1817](https://github.com/rstudio/shiny/issues/1817): These bugs were reported as fixed in Shiny 1.3.0 but were not actually fixed because some JavaScript changes were accidentally not included in the release. The fix resolves issues that occur when `withProgressBar()` or bookmarking are combined with the [networkD3](https://christophergandrud.github.io/networkD3/) package's Sankey plot.
 
+* Fixed a bug that `textAreaInput()` doesn't work as expected for relative `width`. (Thanks, @shrektan [#2049](https://github.com/rstudio/shiny/pull/2049))
+
+
 ### Library updates
 
 * Resolved [#2554](https://github.com/rstudio/shiny/issues/2554): Upgraded bootstrap to v3.4.1 and jQuery to v3.4.1. ([#2557](https://github.com/rstudio/shiny/pull/2557))
@@ -224,8 +227,6 @@ This is a significant release for Shiny, with a major new feature that was nearl
 * Fixed [#2000](https://github.com/rstudio/shiny/issues/2000): Implicit calls to `xxxOutput` not working inside modules. (Thanks, @GregorDeCillia! [#2010](https://github.com/rstudio/shiny/pull/2010))
 
 * Fixed [#2021](https://github.com/rstudio/shiny/issues/2021): Memory leak with `reactiveTimer` and `invalidateLater`. ([#2022](https://github.com/rstudio/shiny/pull/2022))
-
-* Fixed a bug that `textAreaInput()` doesn't work as expected for relative `width`. (Thanks, @shrektan [#2049](https://github.com/rstudio/shiny/pull/2049))
 
 
 ### Library updates

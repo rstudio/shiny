@@ -13,14 +13,16 @@ onStop(fun, session = getDefaultReactiveDomain())
 called from within the server function, this will default to the current
 session, and the callback will be invoked when the current session ends. If
 \code{onStop} is called outside a server function, then the callback will
-be invoked with the application exits.}
+be invoked with the application exits. If \code{NULL}, it is the same as
+calling \code{onStop} outside of the server function, and the callback will
+be invoked when the application exits.}
 }
 \value{
 A function which, if invoked, will cancel the callback.
 }
 \description{
 This function registers callback functions that are invoked when the
-application exits (when \code{\link{runApp}} exits), or after each user
+application exits (when \code{\link[=runApp]{runApp()}} exits), or after each user
 session ends (when a client disconnects).
 }
 \examples{
@@ -76,6 +78,6 @@ onStop(function() {
 }
 }
 \seealso{
-\code{\link{onSessionEnded}()} for the same functionality, but at
-  the session level only.
+\code{\link[=onSessionEnded]{onSessionEnded()}} for the same functionality, but at
+the session level only.
 }

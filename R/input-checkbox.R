@@ -3,11 +3,11 @@
 #' Create a checkbox that can be used to specify logical values.
 #'
 #' @inheritParams textInput
-#' @param value Initial value (\code{TRUE} or \code{FALSE}).
+#' @param value Initial value (`TRUE` or `FALSE`).
 #' @return A checkbox control that can be added to a UI definition.
 #'
 #' @family input elements
-#' @seealso \code{\link{checkboxGroupInput}}, \code{\link{updateCheckboxInput}}
+#' @seealso [checkboxGroupInput()], [updateCheckboxInput()]
 #'
 #' @examples
 #' ## Only run examples in interactive R sessions

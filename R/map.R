@@ -9,63 +9,58 @@
 # Remove of unknown key does nothing
 # Setting a key twice always results in last-one-wins
 # /TESTS
+
+# Note that Map objects can't be saved in one R session and restored in
+# another, because they are based on fastmap, which uses an external pointer,
+# and external pointers can't be saved and restored in another session.
+#' @importFrom fastmap fastmap
 Map <- R6Class(
   'Map',
   portable = FALSE,
   public = list(
     initialize = function() {
-      private$env <- new.env(parent=emptyenv())
+      private$map <<- fastmap()
     },
     get = function(key) {
-      env[[key]]
+      map$get(key)
     },
     set = function(key, value) {
-      env[[key]] <- value
+      map$set(key, value)
       value
     },
     mget = function(keys) {
-      base::mget(keys, env)
+      map$mget(keys)
     },
     mset = function(...) {
-      args <- list(...)
-      if (length(args) == 0)
-        return()
-
-      arg_names <- names(args)
-      if (is.null(arg_names) || any(!nzchar(arg_names)))
-        stop("All elements must be named")
-
-      list2env(args, envir = env)
+      map$mset(...)
     },
     remove = function(key) {
-      if (!self$containsKey(key))
+      if (!map$has(key))
         return(NULL)
 
-      result <- env[[key]]
-      rm(list=key, envir=env, inherits=FALSE)
+      result <- map$get(key)
+      map$remove(key)
       result
     },
     containsKey = function(key) {
-      exists(key, envir=env, inherits=FALSE)
+      map$has(key)
     },
-    keys = function() {
-      # Sadly, this is much faster than ls(), because it doesn't sort the keys.
-      names(as.list(env, all.names=TRUE))
+    keys = function(sort = FALSE) {
+      map$keys(sort = sort)
     },
-    values = function() {
-      as.list(env, all.names=TRUE)
+    values = function(sort = FALSE) {
+      map$as_list(sort = sort)
     },
     clear = function() {
-      private$env <- new.env(parent=emptyenv())
-      invisible(NULL)
+      map$reset()
     },
     size = function() {
-      length(env)
+      map$size()
     }
   ),
 
   private = list(
-    env = 'environment'
+    map = NULL
   )
 )
 

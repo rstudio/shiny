@@ -5,8 +5,9 @@
 \title{Create date range input}
 \usage{
 dateRangeInput(inputId, label, start = NULL, end = NULL, min = NULL,
-  max = NULL, format = "yyyy-mm-dd", startview = "month", weekstart = 0,
-  language = "en", separator = " to ", width = NULL, autoclose = TRUE)
+  max = NULL, format = "yyyy-mm-dd", startview = "month",
+  weekstart = 0, language = "en", separator = " to ", width = NULL,
+  autoclose = TRUE)
 }
 \arguments{
 \item{inputId}{The \code{input} slot that will be used to access the value.}
@@ -48,7 +49,7 @@ Other valid values include "ar", "az", "bg", "bs", "ca", "cs", "cy", "da",
 \item{separator}{String to display between the start and end input boxes.}
 
 \item{width}{The width of the input, e.g. \code{'400px'}, or \code{'100\%'};
-see \code{\link{validateCssUnit}}.}
+see \code{\link[=validateCssUnit]{validateCssUnit()}}.}
 
 \item{autoclose}{Whether or not to close the datepicker immediately when a
 date is selected.}
@@ -62,16 +63,16 @@ The date \code{format} string specifies how the date will be displayed in
 the browser. It allows the following values:
 
 \itemize{
-  \item \code{yy} Year without century (12)
-  \item \code{yyyy} Year with century (2012)
-  \item \code{mm} Month number, with leading zero (01-12)
-  \item \code{m} Month number, without leading zero (1-12)
-  \item \code{M} Abbreviated month name
-  \item \code{MM} Full month name
-  \item \code{dd} Day of month with leading zero
-  \item \code{d} Day of month without leading zero
-  \item \code{D} Abbreviated weekday name
-  \item \code{DD} Full weekday name
+\item \code{yy} Year without century (12)
+\item \code{yyyy} Year with century (2012)
+\item \code{mm} Month number, with leading zero (01-12)
+\item \code{m} Month number, without leading zero (1-12)
+\item \code{M} Abbreviated month name
+\item \code{MM} Full month name
+\item \code{dd} Day of month with leading zero
+\item \code{d} Day of month without leading zero
+\item \code{D} Abbreviated weekday name
+\item \code{DD} Full weekday name
 }
 }
 \examples{
@@ -115,7 +116,7 @@ shinyApp(ui, server = function(input, output) { })
 }
 }
 \seealso{
-\code{\link{dateInput}}, \code{\link{updateDateRangeInput}}
+\code{\link[=dateInput]{dateInput()}}, \code{\link[=updateDateRangeInput]{updateDateRangeInput()}}
 
 Other input elements: \code{\link{actionButton}},
   \code{\link{checkboxGroupInput}},
@@ -124,6 +125,6 @@ Other input elements: \code{\link{actionButton}},
   \code{\link{passwordInput}}, \code{\link{radioButtons}},
   \code{\link{selectInput}}, \code{\link{sliderInput}},
   \code{\link{submitButton}}, \code{\link{textAreaInput}},
-  \code{\link{textInput}}
+  \code{\link{textInput}}, \code{\link{varSelectInput}}
 }
 \concept{input elements}

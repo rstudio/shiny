@@ -5,7 +5,8 @@
 \title{Checkbox Group Input Control}
 \usage{
 checkboxGroupInput(inputId, label, choices = NULL, selected = NULL,
-  inline = FALSE, width = NULL, choiceNames = NULL, choiceValues = NULL)
+  inline = FALSE, width = NULL, choiceNames = NULL,
+  choiceValues = NULL)
 }
 \arguments{
 \item{inputId}{The \code{input} slot that will be used to access the value.}
@@ -23,7 +24,7 @@ types (such as logicals and numbers) will be coerced to strings.}
 \item{inline}{If \code{TRUE}, render the choices inline (i.e. horizontally)}
 
 \item{width}{The width of the input, e.g. \code{'400px'}, or \code{'100\%'};
-see \code{\link{validateCssUnit}}.}
+see \code{\link[=validateCssUnit]{validateCssUnit()}}.}
 
 \item{choiceNames, choiceValues}{List of names and values, respectively,
 that are displayed to the user in the app and correspond to the each
@@ -85,7 +86,7 @@ shinyApp(ui, server)
 }
 }
 \seealso{
-\code{\link{checkboxInput}}, \code{\link{updateCheckboxGroupInput}}
+\code{\link[=checkboxInput]{checkboxInput()}}, \code{\link[=updateCheckboxGroupInput]{updateCheckboxGroupInput()}}
 
 Other input elements: \code{\link{actionButton}},
   \code{\link{checkboxInput}}, \code{\link{dateInput}},
@@ -93,6 +94,7 @@ Other input elements: \code{\link{actionButton}},
   \code{\link{numericInput}}, \code{\link{passwordInput}},
   \code{\link{radioButtons}}, \code{\link{selectInput}},
   \code{\link{sliderInput}}, \code{\link{submitButton}},
-  \code{\link{textAreaInput}}, \code{\link{textInput}}
+  \code{\link{textAreaInput}}, \code{\link{textInput}},
+  \code{\link{varSelectInput}}
 }
 \concept{input elements}

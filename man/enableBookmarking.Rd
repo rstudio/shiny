@@ -46,17 +46,17 @@ can be used to save extra information to files in that directory.
 
 For saved-to-server state, this is how the state directory is chosen:
 \itemize{
-  \item If running in a hosting environment such as Shiny Server or
-    Connect, the hosting environment will choose the directory.
-  \item If running an app in a directory with \code{\link{runApp}()}, the
-    saved states will be saved in a subdirectory of the app called
-   shiny_bookmarks.
-  \item If running a Shiny app object that is generated from code (not run
-    from a directory), the saved states will be saved in a subdirectory of
-    the current working directory called shiny_bookmarks.
+\item If running in a hosting environment such as Shiny Server or
+Connect, the hosting environment will choose the directory.
+\item If running an app in a directory with \code{\link[=runApp]{runApp()}}, the
+saved states will be saved in a subdirectory of the app called
+shiny_bookmarks.
+\item If running a Shiny app object that is generated from code (not run
+from a directory), the saved states will be saved in a subdirectory of
+the current working directory called shiny_bookmarks.
 }
 
-When used with \code{\link{shinyApp}()}, this function must be called before
+When used with \code{\link[=shinyApp]{shinyApp()}}, this function must be called before
 \code{shinyApp()}, or in the \code{shinyApp()}'s \code{onStart} function. An
 alternative to calling the \code{enableBookmarking()} function is to use the
 \code{enableBookmarking} \emph{argument} for \code{shinyApp()}. See examples
@@ -221,10 +221,10 @@ shinyApp(ui, server)
 }
 }
 \seealso{
-\code{\link{onBookmark}}, \code{\link{onBookmarked}},
-  \code{\link{onRestore}}, and \code{\link{onRestored}} for registering
-  callback functions that are invoked when the state is bookmarked or
-  restored.
+\code{\link[=onBookmark]{onBookmark()}}, \code{\link[=onBookmarked]{onBookmarked()}},
+\code{\link[=onRestore]{onRestore()}}, and \code{\link[=onRestored]{onRestored()}} for registering
+callback functions that are invoked when the state is bookmarked or
+restored.
 
-  Also see \code{\link{updateQueryString}}.
+Also see \code{\link[=updateQueryString]{updateQueryString()}}.
 }

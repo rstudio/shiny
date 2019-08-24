@@ -249,9 +249,15 @@ function mapValues(obj, f) {
   const newObj = {};
   for (let key in obj) {
     if (obj.hasOwnProperty(key))
-      newObj[key] = f(obj[key]);
+      newObj[key] = f(obj[key], key, obj);
   }
   return newObj;
+}
+
+// This is does the same as Number.isNaN, but that function unfortunately does
+// not exist in any version of IE.
+function isnan(x) {
+  return typeof(x) === 'number' && isNaN(x);
 }
 
 // Binary equality function used by the equal function.
@@ -322,197 +328,21 @@ exports.compareVersion = function(a, op, b) {
 };
 
 
-// multimethod: Creates functions — "multimethods" — that are polymorphic on one
-// or more of their arguments.
-//
-// Multimethods can take any number of arguments. Arguments are passed to an
-// applicable function or "method", returning its result. By default, if no
-// method was applicable, an exception is thrown.
-//
-// Methods are searched in the order that they were added, and the first
-// applicable method found is the one used.
-//
-// A method is applicable when the "dispatch value" associated with it
-// corresponds to the value returned by the dispatch function. The dispatch
-// function defaults to the value of the first argument passed to the
-// multimethod.
-//
-// The correspondence between the value returned by the dispatch function and
-// any method's dispatch value is determined by the test function, which is
-// user-definable and defaults to `equal` or deep equality.
-//
-// # Chainable Functions
-//
-// The function returned by `multimethod()` exposes functions as properties.
-// These functions generally return the multimethod, and so can be chained.
-//
-// - dispatch([function newDispatch]): Sets the dispatch function. The dispatch
-//   function can take any number of arguments, but must return a dispatch
-//   value. The default dispatch function returns the first argument passed to
-//   the multimethod.
-//
-// - test([function newTest]): Sets the test function. The test function takes
-//   two arguments: the dispatch value produced by the dispatch function, and
-//   the dispatch value associated with some method. It must return a boolean
-//   indicating whether or not to select the method. The default test function
-//   is `equal`.
-//
-// - when(object dispatchVal, function method): Adds a new dispatch value/method
-//   combination.
-//
-// - whenAny(array<object> dispatchVals, function method): Like `when`, but
-//   associates the method with every dispatch value in the `dispatchVals`
-//   array.
-//
-// - else(function newDefaultMethod): Sets the default function. This function
-//   is invoked when no methods apply. If left unset, the multimethod will throw
-//   an exception when no methods are applicable.
-//
-// - clone(): Returns a new, functionally-equivalent multimethod. This is a way
-//   to extend an existing multimethod in a local context — such as inside a
-//   function — without modifying the original. NOTE: The array of methods is
-//   copied, but the dispatch values themselves are not.
-//
-// # Self-reference
-//
-// The multimethod function can be obtained inside its method bodies without
-// referring to it by name.
-//
-// This makes it possible for one method to call another, or to pass the
-// multimethod to other functions as a callback from within methods.
-//
-// The mechanism is: the multimethod itself is bound as `this` to methods when
-// they are called. Since arrow functions cannot be bound to objects, **self-reference
-// is only possible within methods created using the `function` keyword**.
-//
-// # Tail recursion
-//
-// A method can call itself in a way that will not overflow the stack by using
-// `this.recur`.
-//
-// `this.recur` is a function available in methods created using `function`.
-// When the return value of a call to `this.recur` is returned by a method, the
-// arguments that were supplied to `this.recur` are used to call the
-// multimethod.
-//
-// # Examples
-//
-// Handling events:
-//
-//    var handle = multimethod()
-//     .dispatch(e => [e.target.tagName.toLowerCase(), e.type])
-//     .when(["h1", "click"], e => "you clicked on an h1")
-//     .when(["p", "mouseover"], e => "you moused over a p"})
-//     .else(e => {
-//       let tag = e.target.tagName.toLowerCase();
-//       return `you did ${e.type} to an ${tag}`;
-//     });
-//
-//    $(document).on("click mouseover mouseup mousedown", e => console.log(handle(e)))
-//
-// Self-calls:
-//
-//    var demoSelfCall = multimethod()
-//     .when(0, function(n) {
-//       this(1);
-//     })
-//     .when(1, function(n) {
-//       doSomething(this);
-//     })
-//     .when(2, _ => console.log("tada"));
-//
-// Using (abusing?) the test function:
-//
-//    var fizzBuzz = multimethod()
-//     .test((x, divs) => divs.map(d => x % d === 0).every(Boolean))
-//     .when([3, 5], x => "FizzBuzz")
-//     .when([3], x => "Fizz")
-//     .when([5], x => "Buzz")
-//     .else(x => x);
-//
-//    for(let i = 0; i <= 100; i++) console.log(fizzBuzz(i));
-//
-// Getting carried away with tail recursion:
-//
-//    var factorial = multimethod()
-//     .when(0, () => 1)
-//     .when(1, (_, prod = 1) => prod)
-//     .else(function(n, prod = 1) {
-//       return this.recur(n-1, n*prod);
-//     });
-//
-//    var fibonacci = multimethod()
-//     .when(0, (_, a = 0) => a)
-//     .else(function(n, a = 0, b = 1) {
-//       return this.recur(n-1, b, a+b);
-//     });
-function multimethod(dispatch = (firstArg) => firstArg,
-                     test = equal,
-                     defaultMethod = null,
-                     methods = []) {
-
-  var trampolining = false;
-
-  function Sentinel (args) { this.args = args; }
-
-  function trampoline(f) {
-    return (...args) => {
-      trampolining = true;
-      var ret = f.apply(invoke, args);
-      while (ret instanceof Sentinel)
-        ret = f.apply(invoke, ret.args);
-      trampolining = false;
-      return ret;
-    };
+function updateLabel(labelTxt, labelNode) {
+  // Only update if label was specified in the update method
+  if (typeof labelTxt === "undefined") return;
+  if (labelNode.length !== 1) {
+    throw new Error("labelNode must be of length 1");
   }
 
-  let invoke = trampoline((...args) => {
-    var dispatchVal = dispatch.apply(null, args);
-    for (let i = 0; i < methods.length; i++) {
-      let [methodVal, methodFn] = methods[i];
-      if (test(dispatchVal, methodVal)) {
-        return methodFn.apply(invoke, args);
-      }
-    }
-    if (defaultMethod) {
-      return defaultMethod.apply(invoke, args);
-    } else {
-      throw new Error(`No method for dispatch value ${dispatchVal}`);
-    }
-  });
+  // Should the label be empty?
+  var emptyLabel = $.isArray(labelTxt) && labelTxt.length === 0;
 
-  invoke.recur = (...args) => {
-    if (!trampolining) throw new Error("recur can only be called inside a method");
-    return new Sentinel(args);
-  };
+  if (emptyLabel) {
+    labelNode.addClass("shiny-label-null");
+  } else {
+    labelNode.text(labelTxt);
+    labelNode.removeClass("shiny-label-null");
+  }
 
-  invoke.dispatch = (newDispatch) => {
-    dispatch = newDispatch;
-    return invoke;
-  };
-
-  invoke.test = (newTest) => {
-    test = newTest;
-    return invoke;
-  };
-
-  invoke.when = (dispatchVal, methodFn) => {
-    methods = methods.concat([[dispatchVal, methodFn]]);
-    return invoke;
-  };
-
-  invoke.whenAny = (dispatchVals, methodFn) => {
-    return dispatchVals.reduce((self, val) => invoke.when(val, methodFn), invoke);
-  };
-
-  invoke.else = (newDefaultMethod = null) => {
-    defaultMethod = newDefaultMethod;
-    return invoke;
-  };
-
-  invoke.clone = () => {
-    return multimethod(dispatch, test, defaultMethod, methods.slice());
-  };
-
-  return invoke;
 }

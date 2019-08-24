@@ -1,7 +1,12 @@
 var textInputBinding = new InputBinding();
 $.extend(textInputBinding, {
   find: function(scope) {
-    return $(scope).find('input[type="text"], input[type="search"], input[type="url"], input[type="email"]');
+    var $inputs = $(scope).find('input[type="text"], input[type="search"], input[type="url"], input[type="email"]');
+    // selectize.js 0.12.4 inserts a hidden text input with an
+    // id that ends in '-selectized'. The .not() selector below
+    // is to prevent textInputBinding from accidentally picking up
+    // this hidden element as a shiny input (#2396)
+    return $inputs.not('input[type="text"][id$="-selectized"]');
   },
   getId: function(el) {
     return InputBinding.prototype.getId.call(this, el) || el.name;
@@ -27,8 +32,7 @@ $.extend(textInputBinding, {
     if (data.hasOwnProperty('value'))
       this.setValue(el, data.value);
 
-    if (data.hasOwnProperty('label'))
-      $(el).parent().find('label[for="' + $escape(el.id) + '"]').text(data.label);
+    updateLabel(data.label, this._getLabelNode(el));
 
     if (data.hasOwnProperty('placeholder'))
       el.placeholder = data.placeholder;
@@ -37,7 +41,7 @@ $.extend(textInputBinding, {
   },
   getState: function(el) {
     return {
-      label: $(el).parent().find('label[for="' + $escape(el.id) + '"]').text(),
+      label: this._getLabelNode(el).text(),
       value: el.value,
       placeholder: el.placeholder
     };
@@ -47,6 +51,9 @@ $.extend(textInputBinding, {
       policy: 'debounce',
       delay: 250
     };
+  },
+  _getLabelNode: function(el) {
+    return $(el).parent().find('label[for="' + $escape(el.id) + '"]');
   }
 });
 inputBindings.register(textInputBinding, 'shiny.textInput');

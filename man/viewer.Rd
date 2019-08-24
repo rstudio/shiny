@@ -23,16 +23,16 @@ size. If \code{"maximize"}, use the maximum available vertical space.}
 
 \item{width, height}{The desired dialog width/height, in pixels.}
 
-\item{browser}{See \code{\link[utils]{browseURL}}.}
+\item{browser}{See \code{\link[utils:browseURL]{utils::browseURL()}}.}
 }
 \value{
 A function that takes a single \code{url} parameter, suitable for
-  passing as the \code{viewer} argument of \code{\link{runGadget}}.
+passing as the \code{viewer} argument of \code{\link[=runGadget]{runGadget()}}.
 }
 \description{
 Use these functions to control where the gadget is displayed in RStudio (or
 other R environments that emulate RStudio's viewer pane/dialog APIs). If
 viewer APIs are not available in the current R environment, then the gadget
 will be displayed in the system's default web browser (see
-\code{\link[utils]{browseURL}}).
+\code{\link[utils:browseURL]{utils::browseURL()}}).
 }

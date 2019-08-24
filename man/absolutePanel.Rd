@@ -5,13 +5,13 @@
 \alias{fixedPanel}
 \title{Panel with absolute positioning}
 \usage{
-absolutePanel(..., top = NULL, left = NULL, right = NULL, bottom = NULL,
-  width = NULL, height = NULL, draggable = FALSE, fixed = FALSE,
-  cursor = c("auto", "move", "default", "inherit"))
+absolutePanel(..., top = NULL, left = NULL, right = NULL,
+  bottom = NULL, width = NULL, height = NULL, draggable = FALSE,
+  fixed = FALSE, cursor = c("auto", "move", "default", "inherit"))
 
-fixedPanel(..., top = NULL, left = NULL, right = NULL, bottom = NULL,
-  width = NULL, height = NULL, draggable = FALSE, cursor = c("auto",
-  "move", "default", "inherit"))
+fixedPanel(..., top = NULL, left = NULL, right = NULL,
+  bottom = NULL, width = NULL, height = NULL, draggable = FALSE,
+  cursor = c("auto", "move", "default", "inherit"))
 }
 \arguments{
 \item{...}{Attributes (named arguments) or children (unnamed arguments) that
@@ -77,6 +77,5 @@ such as \code{"100px"} (100 pixels) or \code{"25\%"}.
 
 For arcane HTML reasons, to have the panel fill the page or parent you should
 specify \code{0} for \code{top}, \code{left}, \code{right}, and \code{bottom}
-rather than the more obvious \code{width = "100\%"} and \code{height =
-"100\%"}.
+rather than the more obvious \code{width = "100\%"} and \code{height = "100\%"}.
 }

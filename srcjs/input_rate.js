@@ -189,8 +189,8 @@ var InputBatchSender = function(shinyapp) {
   this.lastChanceCallback = [];
 };
 (function() {
-  this.setInput = function(name, value, opts) {
-    this.pendingData[name] = value;
+  this.setInput = function(nameType, value, opts) {
+    this.pendingData[nameType] = value;
 
     if (!this.reentrant) {
       if (opts.priority === "event") {
@@ -227,8 +227,8 @@ var InputNoResendDecorator = function(target, initialValues) {
   this.lastSentValues = this.reset(initialValues);
 };
 (function() {
-  this.setInput = function(name, value, opts) {
-    const { name: inputName, inputType: inputType } = splitInputNameType(name);
+  this.setInput = function(nameType, value, opts) {
+    const { name: inputName, inputType: inputType } = splitInputNameType(nameType);
     const jsonValue = JSON.stringify(value);
 
     if (opts.priority !== "event" &&
@@ -267,10 +267,10 @@ var InputEventDecorator = function(target) {
   this.target = target;
 };
 (function() {
-  this.setInput = function(name, value, opts) {
+  this.setInput = function(nameType, value, opts) {
     var evt = jQuery.Event("shiny:inputchanged");
 
-    const input = splitInputNameType(name);
+    const input = splitInputNameType(nameType);
     evt.name      = input.name;
     evt.inputType = input.inputType;
     evt.value     = value;
@@ -278,7 +278,7 @@ var InputEventDecorator = function(target) {
     evt.el        = opts.el;
     evt.priority    = opts.priority;
 
-    $(document).trigger(evt);
+    $(opts.el).trigger(evt);
 
     if (!evt.isDefaultPrevented()) {
       name = evt.name;
@@ -297,31 +297,41 @@ var InputRateDecorator = function(target) {
   this.inputRatePolicies = {};
 };
 (function() {
-  this.setInput = function(name, value, opts) {
-    this.$ensureInit(name);
+  // Note that the first argument of setInput() and setRatePolicy()
+  // are passed both the input name (i.e., inputId) and type.
+  // https://github.com/rstudio/shiny/blob/67d3a/srcjs/init_shiny.js#L111-L126
+  // However, $ensureInit() and $doSetInput() are meant to be passed just
+  // the input name (i.e., inputId), which is why we distinguish between
+  // nameType and name.
+  this.setInput = function(nameType, value, opts) {
+    const {name: inputName} = splitInputNameType(nameType);
+
+    this.$ensureInit(inputName);
 
     if (opts.priority !== "deferred")
-      this.inputRatePolicies[name].immediateCall(name, value, opts);
+      this.inputRatePolicies[inputName].immediateCall(nameType, value, opts);
     else
-      this.inputRatePolicies[name].normalCall(name, value, opts);
+      this.inputRatePolicies[inputName].normalCall(nameType, value, opts);
   };
-  this.setRatePolicy = function(name, mode, millis) {
+  this.setRatePolicy = function(nameType, mode, millis) {
+    const {name: inputName} = splitInputNameType(nameType);
+
     if (mode === 'direct') {
-      this.inputRatePolicies[name] = new Invoker(this, this.$doSetInput);
+      this.inputRatePolicies[inputName] = new Invoker(this, this.$doSetInput);
     }
     else if (mode === 'debounce') {
-      this.inputRatePolicies[name] = new Debouncer(this, this.$doSetInput, millis);
+      this.inputRatePolicies[inputName] = new Debouncer(this, this.$doSetInput, millis);
     }
     else if (mode === 'throttle') {
-      this.inputRatePolicies[name] = new Throttler(this, this.$doSetInput, millis);
+      this.inputRatePolicies[inputName] = new Throttler(this, this.$doSetInput, millis);
     }
   };
   this.$ensureInit = function(name) {
     if (!(name in this.inputRatePolicies))
       this.setRatePolicy(name, 'direct');
   };
-  this.$doSetInput = function(name, value, opts) {
-    this.target.setInput(name, value, opts);
+  this.$doSetInput = function(nameType, value, opts) {
+    this.target.setInput(nameType, value, opts);
   };
 }).call(InputRateDecorator.prototype);
 
@@ -331,9 +341,9 @@ var InputDeferDecorator = function(target) {
   this.pendingInput = {};
 };
 (function() {
-  this.setInput = function(name, value, opts) {
-    if (/^\./.test(name))
-      this.target.setInput(name, value, opts);
+  this.setInput = function(nameType, value, opts) {
+    if (/^\./.test(nameType))
+      this.target.setInput(nameType, value, opts);
     else
       this.pendingInput[name] = { value, opts };
   };
@@ -352,13 +362,13 @@ const InputValidateDecorator = function(target) {
   this.target = target;
 };
 (function() {
-  this.setInput = function(name, value, opts) {
-    if (!name)
+  this.setInput = function(nameType, value, opts) {
+    if (!nameType)
       throw "Can't set input with empty name.";
 
     opts = addDefaultInputOpts(opts);
 
-    this.target.setInput(name, value, opts);
+    this.target.setInput(nameType, value, opts);
   };
 }).call(InputValidateDecorator.prototype);
 
@@ -387,8 +397,8 @@ function addDefaultInputOpts(opts) {
 }
 
 
-function splitInputNameType(name) {
-  const name2 = name.split(':');
+function splitInputNameType(nameType) {
+  const name2 = nameType.split(':');
   return {
     name:      name2[0],
     inputType: name2.length > 1 ? name2[1] : ''

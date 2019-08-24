@@ -65,7 +65,4 @@ We welcome contributions to the **shiny** package. Please see our [CONTRIBUTING.
 
 ## License
 
-The shiny package is licensed under the GPLv3. See these files in the inst directory for additional details:
-
-- COPYING - shiny package license (GPLv3)
-- NOTICE  - Copyright notices for additional included software
+The shiny package as a whole is licensed under the GPLv3. See the [LICENSE](LICENSE) file for more details.

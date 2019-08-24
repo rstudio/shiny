@@ -5,174 +5,174 @@
 \title{Session object}
 \value{
 \item{allowReconnect(value)}{
-  If \code{value} is \code{TRUE} and run in a hosting environment (Shiny
-  Server or Connect) with reconnections enabled,  then when the session ends
-  due to the network connection closing, the client will attempt to
-  reconnect to the server. If a reconnection is successful, the browser will
-  send all the current input values to the new session on the server, and
-  the server will recalculate any outputs and send them back to the client.
-  If \code{value} is \code{FALSE}, reconnections will be disabled (this is
-  the default state). If \code{"force"}, then the client browser will always
-  attempt to reconnect. The only reason to use \code{"force"} is for testing
-  on a local connection (without Shiny Server or Connect).
+If \code{value} is \code{TRUE} and run in a hosting environment (Shiny
+Server or Connect) with reconnections enabled,  then when the session ends
+due to the network connection closing, the client will attempt to
+reconnect to the server. If a reconnection is successful, the browser will
+send all the current input values to the new session on the server, and
+the server will recalculate any outputs and send them back to the client.
+If \code{value} is \code{FALSE}, reconnections will be disabled (this is
+the default state). If \code{"force"}, then the client browser will always
+attempt to reconnect. The only reason to use \code{"force"} is for testing
+on a local connection (without Shiny Server or Connect).
 }
 \item{clientData}{
-  A \code{\link{reactiveValues}} object that contains information about the client.
-  \itemize{
-    \item{\code{allowDataUriScheme} is a logical value that indicates whether
-      the browser is able to handle URIs that use the \code{data:} scheme.
-    }
-    \item{\code{pixelratio} reports the "device pixel ratio" from the web browser,
-      or 1 if none is reported. The value is 2 for Apple Retina displays.
-    }
-    \item{\code{singletons} - for internal use}
-    \item{\code{url_protocol}, \code{url_hostname}, \code{url_port},
-      \code{url_pathname}, \code{url_search}, \code{url_hash_initial}
-      and \code{url_hash} can be used to get the components of the URL
-      that was requested by the browser to load the Shiny app page.
-      These values are from the browser's perspective, so neither HTTP
-      proxies nor Shiny Server will affect these values. The
-      \code{url_search} value may be used with \code{\link{parseQueryString}}
-      to access query string parameters.
-    }
-  }
-  \code{clientData} also contains information about each output.
-  \code{output_\var{outputId}_width} and \code{output_\var{outputId}_height}
-  give the dimensions (using \code{offsetWidth} and \code{offsetHeight}) of
-  the DOM element that is bound to \code{\var{outputId}}, and
-  \code{output_\var{outputId}_hidden} is a logical that indicates whether
-  the element is hidden. These values may be \code{NULL} if the output is
-  not bound.
+A \code{\link[=reactiveValues]{reactiveValues()}} object that contains information about the client.
+\itemize{
+\item{\code{allowDataUriScheme} is a logical value that indicates whether
+the browser is able to handle URIs that use the \code{data:} scheme.
+}
+\item{\code{pixelratio} reports the "device pixel ratio" from the web browser,
+or 1 if none is reported. The value is 2 for Apple Retina displays.
+}
+\item{\code{singletons} - for internal use}
+\item{\code{url_protocol}, \code{url_hostname}, \code{url_port},
+\code{url_pathname}, \code{url_search}, \code{url_hash_initial}
+and \code{url_hash} can be used to get the components of the URL
+that was requested by the browser to load the Shiny app page.
+These values are from the browser's perspective, so neither HTTP
+proxies nor Shiny Server will affect these values. The
+\code{url_search} value may be used with \code{\link[=parseQueryString]{parseQueryString()}}
+to access query string parameters.
+}
+}
+\code{clientData} also contains information about each output.
+\code{output_\var{outputId}_width} and \code{output_\var{outputId}_height}
+give the dimensions (using \code{offsetWidth} and \code{offsetHeight}) of
+the DOM element that is bound to \code{\var{outputId}}, and
+\code{output_\var{outputId}_hidden} is a logical that indicates whether
+the element is hidden. These values may be \code{NULL} if the output is
+not bound.
 }
 \item{input}{
-  The session's \code{input} object (the same as is passed into the Shiny
-  server function as an argument).
+The session's \code{input} object (the same as is passed into the Shiny
+server function as an argument).
 }
 \item{isClosed()}{A function that returns \code{TRUE} if the client has
-  disconnected.
+disconnected.
 }
 \item{ns(id)}{
-  Server-side version of \code{ns <- \link{NS}(id)}. If bare IDs need to be
-  explicitly namespaced for the current module, \code{session$ns("name")}
-  will return the fully-qualified ID.
+Server-side version of \code{\link[=NS]{ns <- NS(id)}}. If bare IDs need to be
+explicitly namespaced for the current module, \code{session$ns("name")}
+will return the fully-qualified ID.
 }
 \item{onEnded(callback)}{
-  Synonym for \code{onSessionEnded}.
+Synonym for \code{onSessionEnded}.
 }
 \item{onFlush(func, once=TRUE)}{
-  Registers a function to be called before the next time (if \code{once=TRUE})
-  or every time (if \code{once=FALSE}) Shiny flushes the reactive system.
-  Returns a function that can be called with no arguments to cancel the
-  registration.
+Registers a function to be called before the next time (if \code{once=TRUE})
+or every time (if \code{once=FALSE}) Shiny flushes the reactive system.
+Returns a function that can be called with no arguments to cancel the
+registration.
 }
 \item{onFlushed(func, once=TRUE)}{
-  Registers a function to be called after the next time (if \code{once=TRUE})
-  or every time (if \code{once=FALSE}) Shiny flushes the reactive system.
-  Returns a function that can be called with no arguments to cancel the
-  registration.
+Registers a function to be called after the next time (if \code{once=TRUE})
+or every time (if \code{once=FALSE}) Shiny flushes the reactive system.
+Returns a function that can be called with no arguments to cancel the
+registration.
 }
 \item{onSessionEnded(callback)}{
-  Registers a function to be called after the client has disconnected.
-  Returns a function that can be called with no arguments to cancel the
-  registration.
+Registers a function to be called after the client has disconnected.
+Returns a function that can be called with no arguments to cancel the
+registration.
 }
 \item{output}{
-  The session's \code{output} object (the same as is passed into the Shiny
-  server function as an argument).
+The session's \code{output} object (the same as is passed into the Shiny
+server function as an argument).
 }
 \item{reactlog}{
-  For internal use.
+For internal use.
 }
 \item{registerDataObj(name, data, filterFunc)}{
-  Publishes any R object as a URL endpoint that is unique to this session.
-  \code{name} must be a single element character vector; it will be used
-  to form part of the URL. \code{filterFunc} must be a function that takes
-  two arguments: \code{data} (the value that was passed into
-  \code{registerDataObj}) and \code{req} (an environment that implements
-  the Rook specification for HTTP requests). \code{filterFunc} will be
-  called with these values whenever an HTTP request is made to the URL
-  endpoint. The return value of \code{filterFunc} should be a Rook-style
-  response.
+Publishes any R object as a URL endpoint that is unique to this session.
+\code{name} must be a single element character vector; it will be used
+to form part of the URL. \code{filterFunc} must be a function that takes
+two arguments: \code{data} (the value that was passed into
+\code{registerDataObj}) and \code{req} (an environment that implements
+the Rook specification for HTTP requests). \code{filterFunc} will be
+called with these values whenever an HTTP request is made to the URL
+endpoint. The return value of \code{filterFunc} should be a Rook-style
+response.
 }
 \item{reload()}{
-  The equivalent of hitting the browser's Reload button. Only works if the
-  session is actually connected.
+The equivalent of hitting the browser's Reload button. Only works if the
+session is actually connected.
 }
 \item{request}{
-  An environment that implements the Rook specification for HTTP requests.
-  This is the request that was used to initiate the websocket connection
-  (as opposed to the request that downloaded the web page for the app).
+An environment that implements the Rook specification for HTTP requests.
+This is the request that was used to initiate the websocket connection
+(as opposed to the request that downloaded the web page for the app).
 }
 \item{userData}{
-  An environment for app authors and module/package authors to store whatever
-  session-specific data they want.
+An environment for app authors and module/package authors to store whatever
+session-specific data they want.
 }
 \item{resetBrush(brushId)}{
-  Resets/clears the brush with the given \code{brushId}, if it exists on
-  any \code{imageOutput} or \code{plotOutput} in the app.
+Resets/clears the brush with the given \code{brushId}, if it exists on
+any \code{imageOutput} or \code{plotOutput} in the app.
 }
 \item{sendCustomMessage(type, message)}{
-  Sends a custom message to the web page. \code{type} must be a
-  single-element character vector giving the type of message, while
-  \code{message} can be any jsonlite-encodable value. Custom messages
-  have no meaning to Shiny itself; they are used soley to convey information
-  to custom JavaScript logic in the browser. You can do this by adding
-  JavaScript code to the browser that calls
-  \code{Shiny.addCustomMessageHandler(type, function(message){...})}
-  as the page loads; the function you provide to
-  \code{addCustomMessageHandler} will be invoked each time
-  \code{sendCustomMessage} is called on the server.
+Sends a custom message to the web page. \code{type} must be a
+single-element character vector giving the type of message, while
+\code{message} can be any jsonlite-encodable value. Custom messages
+have no meaning to Shiny itself; they are used soley to convey information
+to custom JavaScript logic in the browser. You can do this by adding
+JavaScript code to the browser that calls
+\code{Shiny.addCustomMessageHandler(type, function(message){...})}
+as the page loads; the function you provide to
+\code{addCustomMessageHandler} will be invoked each time
+\code{sendCustomMessage} is called on the server.
 }
 \item{sendBinaryMessage(type, message)}{
-  Similar to \code{sendCustomMessage}, but the message must be a raw vector
-  and the registration method on the client is
-  \code{Shiny.addBinaryMessageHandler(type, function(message){...})}. The
-  message argument on the client will be a
-  \href{https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/DataView}{DataView}.
+Similar to \code{sendCustomMessage}, but the message must be a raw vector
+and the registration method on the client is
+\code{Shiny.addBinaryMessageHandler(type, function(message){...})}. The
+message argument on the client will be a
+\href{https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/DataView}{DataView}.
 }
 \item{sendInputMessage(inputId, message)}{
-  Sends a message to an input on the session's client web page; if the input
-  is present and bound on the page at the time the message is received, then
-  the input binding object's \code{receiveMessage(el, message)} method will
-  be called. \code{sendInputMessage} should generally not be called directly
-  from Shiny apps, but through friendlier wrapper functions like
-  \code{\link{updateTextInput}}.
+Sends a message to an input on the session's client web page; if the input
+is present and bound on the page at the time the message is received, then
+the input binding object's \code{receiveMessage(el, message)} method will
+be called. \code{sendInputMessage} should generally not be called directly
+from Shiny apps, but through friendlier wrapper functions like
+\code{\link[=updateTextInput]{updateTextInput()}}.
 }
 \item{setBookmarkExclude(names)}{
-  Set input names to be excluded from bookmarking.
+Set input names to be excluded from bookmarking.
 }
 \item{getBookmarkExclude()}{
-  Returns the set of input names to be excluded from bookmarking.
+Returns the set of input names to be excluded from bookmarking.
 }
 \item{onBookmark(fun)}{
-  Registers a function that will be called just before bookmarking state.
+Registers a function that will be called just before bookmarking state.
 }
 \item{onBookmarked(fun)}{
-  Registers a function that will be called just after bookmarking state.
+Registers a function that will be called just after bookmarking state.
 }
 \item{onRestore(fun)}{
-  Registers a function that will be called when a session is restored, before
-  all other reactives, observers, and render functions are run.
+Registers a function that will be called when a session is restored, before
+all other reactives, observers, and render functions are run.
 }
 \item{onRestored(fun)}{
-  Registers a function that will be called when a session is restored, after
-  all other reactives, observers, and render functions are run.
+Registers a function that will be called when a session is restored, after
+all other reactives, observers, and render functions are run.
 }
 \item{doBookmark()}{
-  Do bookmarking and invoke the onBookmark and onBookmarked callback functions.
+Do bookmarking and invoke the onBookmark and onBookmarked callback functions.
 }
 \item{exportTestValues()}{
-  Registers expressions for export in test mode, available at the test
-  snapshot URL.
+Registers expressions for export in test mode, available at the test
+snapshot URL.
 }
 \item{getTestSnapshotUrl(input=TRUE, output=TRUE, export=TRUE,
-  format="json")}{
-  Returns a URL for the test snapshots. Only has an effect when the
-  \code{shiny.testmode} option is set to TRUE. For the input, output, and
-  export arguments, TRUE means to return all of these values. It is also
-  possible to specify by name which values to return by providing a
-  character vector, as in \code{input=c("x", "y")}. The format can be
-  "rds" or "json".
+format="json")}{
+Returns a URL for the test snapshots. Only has an effect when the
+\code{shiny.testmode} option is set to TRUE. For the input, output, and
+export arguments, TRUE means to return all of these values. It is also
+possible to specify by name which values to return by providing a
+character vector, as in \code{input=c("x", "y")}. The format can be
+"rds" or "json".
 }
 }
 \description{

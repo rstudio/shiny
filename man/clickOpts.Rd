@@ -16,6 +16,6 @@ the plotting area, as long as it is still inside the image.}
 }
 \description{
 This generates an object representing click options, to be passed as the
-\code{click} argument of \code{\link{imageOutput}} or
-\code{\link{plotOutput}}.
+\code{click} argument of \code{\link[=imageOutput]{imageOutput()}} or
+\code{\link[=plotOutput]{plotOutput()}}.
 }

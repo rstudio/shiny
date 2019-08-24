@@ -3,33 +3,33 @@
 #' Creates a pair of text inputs which, when clicked on, bring up calendars that
 #' the user can click on to select dates.
 #'
-#' The date \code{format} string specifies how the date will be displayed in
+#' The date `format` string specifies how the date will be displayed in
 #' the browser. It allows the following values:
 #'
 #' \itemize{
-#'   \item \code{yy} Year without century (12)
-#'   \item \code{yyyy} Year with century (2012)
-#'   \item \code{mm} Month number, with leading zero (01-12)
-#'   \item \code{m} Month number, without leading zero (1-12)
-#'   \item \code{M} Abbreviated month name
-#'   \item \code{MM} Full month name
-#'   \item \code{dd} Day of month with leading zero
-#'   \item \code{d} Day of month without leading zero
-#'   \item \code{D} Abbreviated weekday name
-#'   \item \code{DD} Full weekday name
+#'   \item `yy` Year without century (12)
+#'   \item `yyyy` Year with century (2012)
+#'   \item `mm` Month number, with leading zero (01-12)
+#'   \item `m` Month number, without leading zero (1-12)
+#'   \item `M` Abbreviated month name
+#'   \item `MM` Full month name
+#'   \item `dd` Day of month with leading zero
+#'   \item `d` Day of month without leading zero
+#'   \item `D` Abbreviated weekday name
+#'   \item `DD` Full weekday name
 #' }
 #'
 #' @inheritParams dateInput
 #' @param start The initial start date. Either a Date object, or a string in
-#'   \code{yyyy-mm-dd} format. If NULL (the default), will use the current
+#'   `yyyy-mm-dd` format. If NULL (the default), will use the current
 #'   date in the client's time zone.
 #' @param end The initial end date. Either a Date object, or a string in
-#'   \code{yyyy-mm-dd} format. If NULL (the default), will use the current
+#'   `yyyy-mm-dd` format. If NULL (the default), will use the current
 #'   date in the client's time zone.
 #' @param separator String to display between the start and end input boxes.
 #'
 #' @family input elements
-#' @seealso \code{\link{dateInput}}, \code{\link{updateDateRangeInput}}
+#' @seealso [dateInput()], [updateDateRangeInput()]
 #'
 #' @examples
 #' ## Only run examples in interactive R sessions
@@ -76,12 +76,10 @@ dateRangeInput <- function(inputId, label, start = NULL, end = NULL,
     weekstart = 0, language = "en", separator = " to ", width = NULL,
     autoclose = TRUE) {
 
-  # If start and end are date objects, convert to a string with yyyy-mm-dd format
-  # Same for min and max
-  if (inherits(start, "Date"))  start <- format(start, "%Y-%m-%d")
-  if (inherits(end,   "Date"))  end   <- format(end,   "%Y-%m-%d")
-  if (inherits(min,   "Date"))  min   <- format(min,   "%Y-%m-%d")
-  if (inherits(max,   "Date"))  max   <- format(max,   "%Y-%m-%d")
+  start <- dateYMD(start, "start")
+  end   <- dateYMD(end, "end")
+  min   <- dateYMD(min, "min")
+  max   <- dateYMD(max, "max")
 
   restored <- restoreInput(id = inputId, default = list(start, end))
   start <- restored[[1]]
@@ -92,7 +90,7 @@ dateRangeInput <- function(inputId, label, start = NULL, end = NULL,
       class = "shiny-date-range-input form-group shiny-input-container",
       style = if (!is.null(width)) paste0("width: ", validateCssUnit(width), ";"),
 
-      controlLabel(inputId, label),
+      shinyInputLabel(inputId, label),
       # input-daterange class is needed for dropdown behavior
       div(class = "input-daterange input-group",
         tags$input(

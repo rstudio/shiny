@@ -51,3 +51,19 @@ test_that("Local options", {
   # Finish tests; reset shinyOptions
   shinyOptions(a = NULL)
 })
+
+test_that("Shared secret", {
+  op <- options(shiny.sharedSecret = "This is a secret string")
+  on.exit(options(op))
+
+  checkSharedSecret <- loadSharedSecret()
+
+  expect_true(checkSharedSecret("This is a secret string"))
+  expect_true(checkSharedSecret(charToRaw("This is a secret string")))
+
+  expect_false(checkSharedSecret("this is a secret string"))
+  expect_false(checkSharedSecret("This is a secret string "))
+  expect_false(checkSharedSecret(""))
+  expect_false(checkSharedSecret(NULL))
+  expect_error(checkSharedSecret(1:10))
+})

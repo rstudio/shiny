@@ -22,7 +22,7 @@ is assigned to.}
 \description{
 Use these functions to create a download button or link; when clicked, it
 will initiate a browser download. The filename and contents are specified by
-the corresponding \code{\link{downloadHandler}} defined in the server
+the corresponding \code{\link[=downloadHandler]{downloadHandler()}} defined in the server
 function.
 }
 \examples{
@@ -43,5 +43,5 @@ downloadLink('downloadData', 'Download')
 
 }
 \seealso{
-\code{\link{downloadHandler}}
+\code{\link[=downloadHandler]{downloadHandler()}}
 }

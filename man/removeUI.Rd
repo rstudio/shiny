@@ -12,7 +12,7 @@ removeUI(selector, multiple = FALSE, immediate = FALSE,
 string \code{s} to be placed in a \code{$(s)} jQuery call). This selector
 will determine the element(s) to be removed. If you want to remove a
 Shiny input or output, note that many of these are wrapped in \code{div}s,
-so you may need to use a somewhat complex selector -- see the Examples below.
+so you may need to use a somewhat complex selector --- see the Examples below.
 (Alternatively, you could also wrap the inputs/outputs that you want to be
 able to remove easily in a \code{div} with an id.)}
 
@@ -34,7 +34,7 @@ This function allows you to remove any part of your UI. Once \code{removeUI}
 is executed on some element, it is gone forever.
 
 While it may be a particularly useful pattern to pair this with
-\code{\link{insertUI}} (to remove some UI you had previously inserted),
+\code{\link[=insertUI]{insertUI()}} (to remove some UI you had previously inserted),
 there is no restriction on what you can use \code{removeUI} on. Any
 element that can be selected through a jQuery selector can be removed
 through this function.
@@ -62,5 +62,5 @@ shinyApp(ui, server)
 }
 }
 \seealso{
-\code{\link{insertUI}}
+\code{\link[=insertUI]{insertUI()}}
 }

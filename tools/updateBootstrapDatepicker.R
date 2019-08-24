@@ -1,47 +1,41 @@
 #!/usr/bin/env Rscript
+# Retrieves a particular version of bootstrap-datepicker:
+#  https://github.com/uxsolutions/bootstrap-datepicker
+# After retrieving, you can apply patches stored in
+# tools/datepicker-patches with applyDatepickerPatches.R
 
-# This script copies resources from Bootstrap Datepicker to shiny's inst
-# directory. The bootstrap-datepicker/ project directory should be on the same
-# level as the shiny/ project directory.
+library(rprojroot)
 
-# It is necessary to run Grunt after running this script: This copies the
-# un-minified JS file over, and running Grunt minifies it and inlines the locale
-# files into the minified JS.
+version   <- "1.6.4"
+dest_dir  <- rprojroot::find_package_root_file("inst/www/shared/datepicker")
+tag       <- paste0("v", version)
+dest_file <- file.path(tempdir(), paste0("bootstrap-datepicker-", version, ".zip"))
+url       <- sprintf("https://github.com/uxsolutions/bootstrap-datepicker/releases/download/%s/bootstrap-datepicker-%s-dist.zip", tag, version)
 
-# This script can be sourced from RStudio, or run with Rscript.
+download.file(url, dest_file)
+unzipped <- tempdir()
+unzip(dest_file, exdir = unzipped)
 
-# Returns the file currently being sourced or run with Rscript
-thisFile <- function() {
-  cmdArgs <- commandArgs(trailingOnly = FALSE)
-  needle <- "--file="
-  match <- grep(needle, cmdArgs)
-  if (length(match) > 0) {
-    # Rscript
-    return(normalizePath(sub(needle, "", cmdArgs[match])))
-  } else {
-    # 'source'd via R console
-    return(normalizePath(sys.frames()[[1]]$ofile))
-  }
-}
+unlink(dest_dir, recursive = TRUE)
 
-srcdir <- normalizePath(file.path(dirname(thisFile()), "../../bootstrap-datepicker/dist"))
-destdir <- normalizePath(file.path(dirname(thisFile()), "../inst/www/shared/datepicker"))
-
+dir.create(file.path(dest_dir, "js"), recursive = TRUE)
 file.copy(
-  file.path(srcdir, "js", "bootstrap-datepicker.js"),
-  file.path(destdir, "js"),
+  file.path(unzipped, "js", "bootstrap-datepicker.js"),
+  file.path(dest_dir, "js"),
   overwrite = TRUE
 )
 
+dir.create(file.path(dest_dir, "js", "locales"), recursive = TRUE)
 file.copy(
-  dir(file.path(srcdir, "locales"), "\\.js$", full.names = TRUE),
-  file.path(destdir, "js", "locales"),
+  dir(file.path(unzipped, "locales"), "\\.js$", full.names = TRUE),
+  file.path(dest_dir, "js", "locales"),
   overwrite = TRUE
 )
 
+dir.create(file.path(dest_dir, "css"), recursive = TRUE)
 file.copy(
-  dir(file.path(srcdir, "css"), "^bootstrap-datepicker3(\\.min)?\\.css$",
+  dir(file.path(unzipped, "css"), "^bootstrap-datepicker3(\\.min)?\\.css$",
       full.names = TRUE),
-  file.path(destdir, "css"),
+  file.path(dest_dir, "css"),
   overwrite = TRUE
 )

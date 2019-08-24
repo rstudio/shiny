@@ -6,6 +6,38 @@ function forceIonSliderUpdate(slider) {
     console.log("Couldn't force ion slider to update");
 }
 
+function getTypePrettifyer(dataType, timeFormat, timezone) {
+  var timeFormatter;
+  var prettify;
+  if (dataType === 'date') {
+    timeFormatter = strftime.utc();
+    prettify = function(num) {
+      return timeFormatter(timeFormat, new Date(num));
+    };
+
+  } else if (dataType === 'datetime') {
+    if (timezone)
+      timeFormatter = strftime.timezone(timezone);
+    else
+      timeFormatter = strftime;
+
+    prettify = function(num) {
+      return timeFormatter(timeFormat, new Date(num));
+    };
+
+  } else {
+    // The default prettify function for ion.rangeSlider adds thousands
+    // separators after the decimal mark, so we have our own version here.
+    // (#1958)
+    prettify = function(num) {
+      // When executed, `this` will refer to the `IonRangeSlider.options`
+      // object.
+      return formatNumber(num, this.prettify_separator);
+    };
+  }
+  return prettify;
+}
+
 var sliderInputBinding = {};
 $.extend(sliderInputBinding, textInputBinding, {
   find: function(scope) {
@@ -90,12 +122,29 @@ $.extend(sliderInputBinding, textInputBinding, {
         msg.from = data.value;
       }
     }
-    if (data.hasOwnProperty('min'))  msg.min   = data.min;
-    if (data.hasOwnProperty('max'))  msg.max   = data.max;
-    if (data.hasOwnProperty('step')) msg.step  = data.step;
+    var sliderFeatures = ['min', 'max', 'step'];
+    for (var i = 0; i < sliderFeatures.length; i++) {
+      var feats = sliderFeatures[i];
+      if (data.hasOwnProperty(feats)) {
+        msg[feats] = data[feats];
+      }
+    }
 
-    if (data.hasOwnProperty('label'))
-      $el.parent().find('label[for="' + $escape(el.id) + '"]').text(data.label);
+    updateLabel(data.label, this._getLabelNode(el));
+
+    var domElements = ['data-type', 'time-format', 'timezone'];
+    for (var i = 0; i < domElements.length; i++) {
+      var elem = domElements[i];
+      if (data.hasOwnProperty(elem)) {
+        $el.data(elem, data[elem]);
+      }
+    }
+
+    var dataType = $el.data('data-type');
+    var timeFormat = $el.data('time-format');
+    var timezone = $el.data('timezone');
+
+    msg.prettify = getTypePrettifyer(dataType, timeFormat, timezone);
 
     $el.data('immediate', true);
     try {
@@ -118,40 +167,15 @@ $.extend(sliderInputBinding, textInputBinding, {
     var $el = $(el);
     var dataType = $el.data('data-type');
     var timeFormat = $el.data('time-format');
-    var timeFormatter;
+    var timezone = $el.data('timezone');
 
-    // Set up formatting functions
-    if (dataType === 'date') {
-      timeFormatter = strftime.utc();
-      opts.prettify = function(num) {
-        return timeFormatter(timeFormat, new Date(num));
-      };
-
-    } else if (dataType === 'datetime') {
-      var timezone = $el.data('timezone');
-      if (timezone)
-        timeFormatter = strftime.timezone(timezone);
-      else
-        timeFormatter = strftime;
-
-      opts.prettify = function(num) {
-        return timeFormatter(timeFormat, new Date(num));
-      };
-
-    } else {
-      // The default prettify function for ion.rangeSlider adds thousands
-      // separators after the decimal mark, so we have our own version here.
-      // (#1958)
-      opts.prettify = function(num) {
-        // When executed, `this` will refer to the `IonRangeSlider.options`
-        // object.
-        return formatNumber(num, this.prettify_separator);
-      };
-    }
+    opts.prettify = getTypePrettifyer(dataType, timeFormat, timezone);
 
     $el.ionRangeSlider(opts);
   },
-
+  _getLabelNode: function(el) {
+    return $(el).parent().find('label[for="' + $escape(el.id) + '"]');
+  },
   // Number of values; 1 for single slider, 2 for range slider
   _numValues: function(el) {
     if ($(el).data('ionRangeSlider').options.type === 'double')

@@ -3,40 +3,38 @@
 #' Create a Shiny app object
 #'
 #' These functions create Shiny app objects from either an explicit UI/server
-#' pair (\code{shinyApp}), or by passing the path of a directory that contains a
-#' Shiny app (\code{shinyAppDir}). You generally shouldn't need to use these
-#' functions to create/run applications; they are intended for interoperability
-#' purposes, such as embedding Shiny apps inside a \pkg{knitr} document.
+#' pair (`shinyApp`), or by passing the path of a directory that contains a
+#' Shiny app (`shinyAppDir`).
 #'
 #' Normally when this function is used at the R console, the Shiny app object is
-#' automatically passed to the \code{print()} function, which runs the app. If
+#' automatically passed to the `print()` function, which runs the app. If
 #' this is called in the middle of a function, the value will not be passed to
-#' \code{print()} and the app will not be run. To make the app run, pass the app
-#' object to \code{print()} or \code{\link{runApp}()}.
+#' `print()` and the app will not be run. To make the app run, pass the app
+#' object to `print()` or [runApp()].
 #'
 #' @param ui The UI definition of the app (for example, a call to
-#'   \code{fluidPage()} with nested controls)
+#'   `fluidPage()` with nested controls)
 #' @param server A server function
 #' @param onStart A function that will be called before the app is actually run.
-#'   This is only needed for \code{shinyAppObj}, since in the \code{shinyAppDir}
-#'   case, a \code{global.R} file can be used for this purpose.
-#' @param options Named options that should be passed to the \code{runApp} call
+#'   This is only needed for `shinyAppObj`, since in the `shinyAppDir`
+#'   case, a `global.R` file can be used for this purpose.
+#' @param options Named options that should be passed to the `runApp` call
 #'   (these can be any of the following: "port", "launch.browser", "host", "quiet",
-#'   "display.mode" and "test.mode"). You can also specify \code{width} and
-#'   \code{height} parameters which provide a hint to the embedding environment
+#'   "display.mode" and "test.mode"). You can also specify `width` and
+#'   `height` parameters which provide a hint to the embedding environment
 #'   about the ideal height/width for the app.
-#' @param uiPattern A regular expression that will be applied to each \code{GET}
-#'   request to determine whether the \code{ui} should be used to handle the
+#' @param uiPattern A regular expression that will be applied to each `GET`
+#'   request to determine whether the `ui` should be used to handle the
 #'   request. Note that the entire request path must match the regular
 #'   expression in order for the match to be considered successful.
-#' @param enableBookmarking Can be one of \code{"url"}, \code{"server"}, or
-#'   \code{"disable"}. This is equivalent to calling the
-#'   \code{\link{enableBookmarking}()} function just before calling
-#'   \code{shinyApp()}. With the default value (\code{NULL}), the app will
-#'   respect the setting from any previous calls to \code{enableBookmarking()}.
-#'   See \code{\link{enableBookmarking}} for more information.
+#' @param enableBookmarking Can be one of `"url"`, `"server"`, or
+#'   `"disable"`. This is equivalent to calling the
+#'   [enableBookmarking()] function just before calling
+#'   `shinyApp()`. With the default value (`NULL`), the app will
+#'   respect the setting from any previous calls to `enableBookmarking()`.
+#'   See [enableBookmarking()] for more information.
 #' @return An object that represents the app. Printing the object or passing it
-#'   to \code{\link{runApp}} will run the app.
+#'   to [runApp()] will run the app.
 #'
 #' @examples
 #' ## Only run this example in interactive R sessions
@@ -170,7 +168,14 @@ shinyAppDir_serverR <- function(appDir, options=list()) {
   }
 
   wwwDir <- file.path.ci(appDir, "www")
+  if (dirExists(wwwDir)) {
+    staticPaths <- list("/" = staticPath(wwwDir, indexhtml = FALSE, fallthrough = TRUE))
+  } else {
+    staticPaths <- list()
+  }
+
   fallbackWWWDir <- system.file("www-dir", package = "shiny")
+
   serverSource <- cachedFuncWithFile(appDir, "server.R", case.sensitive = FALSE,
     function(serverR) {
       # If server.R contains a call to shinyServer (which sets .globals$server),
@@ -220,6 +225,13 @@ shinyAppDir_serverR <- function(appDir, options=list()) {
 
   structure(
     list(
+      staticPaths = staticPaths,
+      # Even though the wwwDir is handled as a static path, we need to include
+      # it here to be handled by R as well. This is because the special case
+      # of index.html: it is specifically not handled as a staticPath for
+      # reasons explained above, but if someone does want to serve up an
+      # index.html, we need to handle it, and we do it by using the
+      # staticHandler in the R code path. (#2380)
       httpHandler = joinHandlers(c(uiHandler, wwwDir, fallbackWWWDir)),
       serverFuncSource = serverFuncSource,
       onStart = onStart,
@@ -309,6 +321,20 @@ shinyAppDir_appR <- function(fileName, appDir, options=list())
   }
 
   wwwDir <- file.path.ci(appDir, "www")
+  if (dirExists(wwwDir)) {
+    # wwwDir is a static path served by httpuv. It does _not_ serve up
+    # index.html, for two reasons. (1) It's possible that the user's
+    # www/index.html file is not actually used as the index, but as a template
+    # that gets processed before being sent; and (2) the index content may be
+    # modified by the hosting environment (as in SockJSAdapter.R).
+    #
+    # The call to staticPath normalizes the path, so that if the working dir
+    # later changes, it will continue to point to the right place.
+    staticPaths <- list("/" = staticPath(wwwDir, indexhtml = FALSE, fallthrough = TRUE))
+  } else {
+    staticPaths <- list()
+  }
+
   fallbackWWWDir <- system.file("www-dir", package = "shiny")
 
   oldwd <- NULL
@@ -327,6 +353,18 @@ shinyAppDir_appR <- function(fileName, appDir, options=list())
 
   structure(
     list(
+      # fallbackWWWDir is _not_ listed in staticPaths, because it needs to
+      # come after the uiHandler. It also does not need to be fast, since it
+      # should rarely be hit. The order is wwwDir (in staticPaths), then
+      # uiHandler, then falbackWWWDir (which is served up by the R
+      # staticHandler function).
+      staticPaths = staticPaths,
+      # Even though the wwwDir is handled as a static path, we need to include
+      # it here to be handled by R as well. This is because the special case
+      # of index.html: it is specifically not handled as a staticPath for
+      # reasons explained above, but if someone does want to serve up an
+      # index.html, we need to handle it, and we do it by using the
+      # staticHandler in the R code path. (#2380)
       httpHandler = joinHandlers(c(dynHttpHandler, wwwDir, fallbackWWWDir)),
       serverFuncSource = dynServerFuncSource,
       onStart = onStart,

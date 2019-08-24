@@ -24,17 +24,19 @@ $.extend(numberInputBinding, textInputBinding, {
     if (data.hasOwnProperty('max'))    el.max   = data.max;
     if (data.hasOwnProperty('step'))   el.step  = data.step;
 
-    if (data.hasOwnProperty('label'))
-      $(el).parent().find('label[for="' + $escape(el.id) + '"]').text(data.label);
+    updateLabel(data.label, this._getLabelNode(el));
 
     $(el).trigger('change');
   },
   getState: function(el) {
-    return { label: $(el).parent().find('label[for="' + $escape(el.id) + '"]').text(),
+    return { label: this._getLabelNode(el).text(),
              value: this.getValue(el),
              min:   Number(el.min),
              max:   Number(el.max),
              step:  Number(el.step) };
+  },
+  _getLabelNode: function(el) {
+    return $(el).parent().find('label[for="' + $escape(el.id) + '"]');
   }
 });
 inputBindings.register(numberInputBinding, 'shiny.numberInput');

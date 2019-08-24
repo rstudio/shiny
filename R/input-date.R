@@ -3,32 +3,32 @@
 #' Creates a text input which, when clicked on, brings up a calendar that
 #' the user can click on to select dates.
 #'
-#' The date \code{format} string specifies how the date will be displayed in
+#' The date `format` string specifies how the date will be displayed in
 #' the browser. It allows the following values:
 #'
 #' \itemize{
-#'   \item \code{yy} Year without century (12)
-#'   \item \code{yyyy} Year with century (2012)
-#'   \item \code{mm} Month number, with leading zero (01-12)
-#'   \item \code{m} Month number, without leading zero (1-12)
-#'   \item \code{M} Abbreviated month name
-#'   \item \code{MM} Full month name
-#'   \item \code{dd} Day of month with leading zero
-#'   \item \code{d} Day of month without leading zero
-#'   \item \code{D} Abbreviated weekday name
-#'   \item \code{DD} Full weekday name
+#'   \item `yy` Year without century (12)
+#'   \item `yyyy` Year with century (2012)
+#'   \item `mm` Month number, with leading zero (01-12)
+#'   \item `m` Month number, without leading zero (1-12)
+#'   \item `M` Abbreviated month name
+#'   \item `MM` Full month name
+#'   \item `dd` Day of month with leading zero
+#'   \item `d` Day of month without leading zero
+#'   \item `D` Abbreviated weekday name
+#'   \item `DD` Full weekday name
 #' }
 #'
 #' @inheritParams textInput
 #' @param value The starting date. Either a Date object, or a string in
-#'   \code{yyyy-mm-dd} format. If NULL (the default), will use the current date
+#'   `yyyy-mm-dd` format. If NULL (the default), will use the current date
 #'   in the client's time zone.
 #' @param min The minimum allowed date. Either a Date object, or a string in
-#'   \code{yyyy-mm-dd} format.
+#'   `yyyy-mm-dd` format.
 #' @param max The maximum allowed date. Either a Date object, or a string in
-#'   \code{yyyy-mm-dd} format.
+#'   `yyyy-mm-dd` format.
 #' @param format The format of the date to display in the browser. Defaults to
-#'   \code{"yyyy-mm-dd"}.
+#'   `"yyyy-mm-dd"`.
 #' @param startview The date range shown when the input object is first clicked.
 #'   Can be "month" (the default), "year", or "decade".
 #' @param weekstart Which day is the start of the week. Should be an integer
@@ -43,9 +43,13 @@
 #'   "vi", "zh-CN", and "zh-TW".
 #' @param autoclose Whether or not to close the datepicker immediately when a
 #'   date is selected.
+#' @param datesdisabled Which dates should be disabled. Either a Date object,
+#' or a string in `yyyy-mm-dd` format.
+#' @param daysofweekdisabled Days of the week that should be disabled. Should be
+#'   a integer vector with values from 0 (Sunday) to 6 (Saturday).
 #'
 #' @family input elements
-#' @seealso \code{\link{dateRangeInput}}, \code{\link{updateDateInput}}
+#' @seealso [dateRangeInput()], [updateDateInput()]
 #'
 #' @examples
 #' ## Only run examples in interactive R sessions
@@ -70,21 +74,28 @@
 #'
 #'   # Start with decade view instead of default month view
 #'   dateInput("date6", "Date:",
-#'             startview = "decade")
+#'             startview = "decade"),
+#'
+#'   # Disable Mondays and Tuesdays.
+#'   dateInput("date7", "Date:", daysofweekdisabled = c(1,2)),
+#'
+#'   # Disable specific dates.
+#'   dateInput("date8", "Date:", value = "2012-02-29",
+#'             datesdisabled = c("2012-03-01", "2012-03-02"))
 #' )
 #'
 #' shinyApp(ui, server = function(input, output) { })
 #' }
 #' @export
 dateInput <- function(inputId, label, value = NULL, min = NULL, max = NULL,
-  format = "yyyy-mm-dd", startview = "month", weekstart = 0, language = "en",
-  width = NULL, autoclose = TRUE) {
+  format = "yyyy-mm-dd", startview = "month", weekstart = 0,
+  language = "en", width = NULL, autoclose = TRUE,
+  datesdisabled = NULL, daysofweekdisabled = NULL) {
 
-  # If value is a date object, convert it to a string with yyyy-mm-dd format
-  # Same for min and max
-  if (inherits(value, "Date"))  value <- format(value, "%Y-%m-%d")
-  if (inherits(min,   "Date"))  min   <- format(min,   "%Y-%m-%d")
-  if (inherits(max,   "Date"))  max   <- format(max,   "%Y-%m-%d")
+  value <- dateYMD(value, "value")
+  min <- dateYMD(min, "min")
+  max <- dateYMD(max, "max")
+  datesdisabled <- dateYMD(datesdisabled, "datesdisabled")
 
   value <- restoreInput(id = inputId, default = value)
 
@@ -92,7 +103,7 @@ dateInput <- function(inputId, label, value = NULL, min = NULL, max = NULL,
     class = "shiny-date-input form-group shiny-input-container",
     style = if (!is.null(width)) paste0("width: ", validateCssUnit(width), ";"),
 
-    controlLabel(inputId, label),
+    shinyInputLabel(inputId, label),
     tags$input(type = "text",
                class = "form-control",
                `data-date-language` = language,
@@ -102,7 +113,12 @@ dateInput <- function(inputId, label, value = NULL, min = NULL, max = NULL,
                `data-min-date` = min,
                `data-max-date` = max,
                `data-initial-date` = value,
-               `data-date-autoclose` = if (autoclose) "true" else "false"
+               `data-date-autoclose` = if (autoclose) "true" else "false",
+               `data-date-dates-disabled` =
+                   # Ensure NULL is not sent as `{}` but as 'null'
+                   jsonlite::toJSON(datesdisabled, null = 'null'),
+               `data-date-days-of-week-disabled` =
+                   jsonlite::toJSON(daysofweekdisabled, null = 'null')
     ),
     datePickerDependency
   )

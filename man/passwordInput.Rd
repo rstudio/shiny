@@ -15,7 +15,7 @@ passwordInput(inputId, label, value = "", width = NULL,
 \item{value}{Initial value.}
 
 \item{width}{The width of the input, e.g. \code{'400px'}, or \code{'100\%'};
-see \code{\link{validateCssUnit}}.}
+see \code{\link[=validateCssUnit]{validateCssUnit()}}.}
 
 \item{placeholder}{A character string giving the user a hint as to what can
 be entered into the control. Internet Explorer 8 and 9 do not support this
@@ -46,7 +46,7 @@ shinyApp(ui, server)
 }
 }
 \seealso{
-\code{\link{updateTextInput}}
+\code{\link[=updateTextInput]{updateTextInput()}}
 
 Other input elements: \code{\link{actionButton}},
   \code{\link{checkboxGroupInput}},
@@ -55,6 +55,6 @@ Other input elements: \code{\link{actionButton}},
   \code{\link{numericInput}}, \code{\link{radioButtons}},
   \code{\link{selectInput}}, \code{\link{sliderInput}},
   \code{\link{submitButton}}, \code{\link{textAreaInput}},
-  \code{\link{textInput}}
+  \code{\link{textInput}}, \code{\link{varSelectInput}}
 }
 \concept{input elements}

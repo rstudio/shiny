@@ -22,8 +22,8 @@ application page. The text will be included within an HTML \code{pre} tag.
 }
 \details{
 Text is HTML-escaped prior to rendering. This element is often used
-  with the \link{renderPrint} function to preserve fixed-width formatting
-  of printed objects.
+with the \link{renderPrint} function to preserve fixed-width formatting
+of printed objects.
 }
 \examples{
 ## Only run this example in interactive R sessions

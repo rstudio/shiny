@@ -2,10 +2,11 @@
 % Please edit documentation in R/update-input.R
 \name{updateSliderInput}
 \alias{updateSliderInput}
-\title{Change the value of a slider input on the client}
+\title{Update Slider Input Widget}
 \usage{
 updateSliderInput(session, inputId, label = NULL, value = NULL,
-  min = NULL, max = NULL, step = NULL)
+  min = NULL, max = NULL, step = NULL, timeFormat = NULL,
+  timezone = NULL)
 }
 \arguments{
 \item{session}{The \code{session} object passed to function given to
@@ -22,9 +23,13 @@ updateSliderInput(session, inputId, label = NULL, value = NULL,
 \item{max}{Maximum value.}
 
 \item{step}{Step size.}
+
+\item{timeFormat}{Date and POSIXt formatting.}
+
+\item{timezone}{The timezone offset for POSIXt objects.}
 }
 \description{
-Change the value of a slider input on the client
+Change the value of a slider input on the client.
 }
 \details{
 The input updater functions send a message to the client, telling it to
@@ -72,5 +77,5 @@ if (interactive()) {
 }
 }
 \seealso{
-\code{\link{sliderInput}}
+\code{\link[=sliderInput]{sliderInput()}}
 }

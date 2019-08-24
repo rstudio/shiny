@@ -7,25 +7,25 @@
 #' @inheritParams textInput
 #' @param choices List of values to show checkboxes for. If elements of the list
 #'   are named then that name rather than the value is displayed to the user. If
-#'   this argument is provided, then \code{choiceNames} and \code{choiceValues}
+#'   this argument is provided, then `choiceNames` and `choiceValues`
 #'   must not be provided, and vice-versa. The values should be strings; other
 #'   types (such as logicals and numbers) will be coerced to strings.
 #' @param selected The values that should be initially selected, if any.
-#' @param inline If \code{TRUE}, render the choices inline (i.e. horizontally)
+#' @param inline If `TRUE`, render the choices inline (i.e. horizontally)
 #' @param choiceNames,choiceValues List of names and values, respectively,
 #'   that are displayed to the user in the app and correspond to the each
-#'   choice (for this reason, \code{choiceNames} and \code{choiceValues}
+#'   choice (for this reason, `choiceNames` and `choiceValues`
 #'   must have the same length). If either of these arguments is
-#'   provided, then the other \emph{must} be provided and \code{choices}
-#'   \emph{must not} be provided. The advantage of using both of these over
-#'   a named list for \code{choices} is that \code{choiceNames} allows any
+#'   provided, then the other *must* be provided and `choices`
+#'   *must not* be provided. The advantage of using both of these over
+#'   a named list for `choices` is that `choiceNames` allows any
 #'   type of UI object to be passed through (tag objects, icons, HTML code,
 #'   ...), instead of just simple text. See Examples.
 #'
 #' @return A list of HTML elements that can be added to a UI definition.
 #'
 #' @family input elements
-#' @seealso \code{\link{checkboxInput}}, \code{\link{updateCheckboxGroupInput}}
+#' @seealso [checkboxInput()], [updateCheckboxGroupInput()]
 #'
 #' @examples
 #' ## Only run examples in interactive R sessions
@@ -94,7 +94,7 @@ checkboxGroupInput <- function(inputId, label, choices = NULL, selected = NULL,
   tags$div(id = inputId,
     style = if (!is.null(width)) paste0("width: ", validateCssUnit(width), ";"),
     class = divClass,
-    controlLabel(inputId, label),
+    shinyInputLabel(inputId, label),
     options
   )
 }

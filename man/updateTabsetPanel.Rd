@@ -53,6 +53,6 @@ shinyApp(ui, server)
 }
 }
 \seealso{
-\code{\link{tabsetPanel}}, \code{\link{navlistPanel}},
-\code{\link{navbarPage}}
+\code{\link[=tabsetPanel]{tabsetPanel()}}, \code{\link[=navlistPanel]{navlistPanel()}},
+\code{\link[=navbarPage]{navbarPage()}}
 }

@@ -22,7 +22,7 @@ interpreted as multiple namespaces, in increasing order of specificity
 }
 \value{
 If \code{id} is missing, returns a function that expects an id string
-  as its only argument and returns that id with the namespace prepended.
+as its only argument and returns that id with the namespace prepended.
 }
 \description{
 The \code{NS} function creates namespaced IDs out of bare IDs, by joining

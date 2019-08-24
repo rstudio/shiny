@@ -46,7 +46,8 @@ textAreaInput <- function(inputId, label, value = "", width = NULL, height = NUL
   }
 
   style <- paste(
-    if (!is.null(width))  paste0("width: ",  validateCssUnit(width),  ";"),
+    # The width is specified on the parent div. 
+    if (!is.null(width)) paste0("width: ",  "100%",  ";"),
     if (!is.null(height)) paste0("height: ", validateCssUnit(height), ";"),
     if (!is.null(resize)) paste0("resize: ", resize, ";")
   )

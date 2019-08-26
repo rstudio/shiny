@@ -143,7 +143,7 @@ This release features plot caching, an important new tool for improving performa
 
 * Fixed [#2138](https://github.com/rstudio/shiny/issues/2138): Inputs that are part of a `renderUI` were no longer restoring correctly from bookmarked state. [#2139](https://github.com/rstudio/shiny/pull/2139)
 
-* The `knit_print` methods from htmltools are no longer imported into shiny and then exported. [#2166](https://github.com/rstudio/shiny/pull/2166)
+* The `knit_print` methods from htmltools are no longer imported into shiny and then exported. Also, shiny's `knit_print` methods are no longer exported. [#2166](https://github.com/rstudio/shiny/pull/2166)
 
 * Fixed [#2093](https://github.com/rstudio/shiny/issues/2093): Make sure bookmark scope directory does not exist before trying to create it. [#2168](https://github.com/rstudio/shiny/pull/2168)
 

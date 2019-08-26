@@ -1611,11 +1611,15 @@ invalidateLater <- function(millis, session = getDefaultReactiveDomain()) {
   ctx <- getCurrentContext()
   rLog$invalidateLater(ctx$.reactId, ctx$id, millis, session)
 
+  clear_on_ended_callback <- function() {}
+
   timerHandle <- scheduleTask(millis, function() {
     if (is.null(session)) {
       ctx$invalidate()
       return(invisible())
     }
+
+    clear_on_ended_callback()
 
     if (!session$isClosed()) {
       session$cycleStartAction(function() {
@@ -1627,7 +1631,13 @@ invalidateLater <- function(millis, session = getDefaultReactiveDomain()) {
   })
 
   if (!is.null(session)) {
-    session$onEnded(timerHandle)
+    # timerHandle is a callback that clears the scheduled task. It gets
+    # registered with session$onEnded() each time invalidateLater() is called.
+    # So, to prevent these callbacks from building up and leaking memory, we
+    # need to deregister the onEnded(timerHandle) callback each time when the
+    # scheduled task executes; after the task executes, the timerHandle()
+    # function is essentially a no-op, so we can deregister it.
+    clear_on_ended_callback <- session$onEnded(timerHandle)
   }
 
   invisible()

@@ -30,6 +30,6 @@ value will stop changing when the cursor exits the plotting area.}
 }
 \description{
 This generates an object representing hovering options, to be passed as the
-\code{hover} argument of \code{\link{imageOutput}} or
-\code{\link{plotOutput}}.
+\code{hover} argument of \code{\link[=imageOutput]{imageOutput()}} or
+\code{\link[=plotOutput]{plotOutput()}}.
 }

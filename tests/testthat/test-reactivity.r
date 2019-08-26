@@ -94,12 +94,12 @@ test_that("ReactiveValues", {
   # Initializing with NULL value
   values <- reactiveValues(a=NULL, b=2)
   # a should exist and be NULL
-  expect_equal(isolate(names(values)), c("a", "b"))
+  expect_setequal(isolate(names(values)), c("a", "b"))
   expect_true(is.null(isolate(values$a)))
 
   # Assigning NULL should keep object (not delete it), and set value to NULL
   values$b <- NULL
-  expect_equal(isolate(names(values)), c("a", "b"))
+  expect_setequal(isolate(names(values)), c("a", "b"))
   expect_true(is.null(isolate(values$b)))
 
 
@@ -517,12 +517,12 @@ test_that("names() and reactiveValuesToList()", {
   })
 
   # names() returns all names
-  expect_equal(sort(isolate(names(values))), sort(c(".B", "A")))
+  expect_setequal(isolate(names(values)), c(".B", "A"))
   # Assigning names fails
   expect_error(isolate(names(v) <- c('x', 'y')))
 
-  expect_equal(isolate(reactiveValuesToList(values)), list(A=1))
-  expect_equal(isolate(reactiveValuesToList(values, all.names=TRUE)), list(A=1, .B=2))
+  expect_mapequal(isolate(reactiveValuesToList(values)), list(A=1))
+  expect_mapequal(isolate(reactiveValuesToList(values, all.names=TRUE)), list(A=1, .B=2))
 
 
   flushReact()
@@ -734,6 +734,46 @@ test_that("Observer priorities are respected", {
 
   expect_identical(results, c(30, 20, 21, 22, 10))
 })
+
+
+# The specific order that observers fire in does not necessarily need to be the
+# one below. However, it is important that they fire in an order that is
+# consistent across platforms, so that developers don't see one behavior on
+# their dev platform and another on their deployment platform. (#2466)
+test_that("Observers fire in consistent order across platforms", {
+
+  # Reset the counter for the reactive environment. Not a good thing to do in
+  # general, but necessary for this test.
+  reactive_env <- .getReactiveEnvironment()
+  reactive_env$.nextId <- 0L
+
+  v <- reactiveVal(0)
+  order <- list()
+  order[1:20] <- list(integer())
+
+  observe({
+    order[[v()]] <<- c(order[[v()]], 1L)
+    message(v(), ": observer 1")
+  })
+  observe({
+    order[[v()]] <<- c(order[[v()]], 2L)
+    message(v(), ": observer 2")
+  })
+  observe({
+    order[[v()]] <<- c(order[[v()]], 3L)
+    message(v(), ": observer 3")
+  })
+
+  for (i in 1:20) {
+    v(isolate(v()) + 1); shiny:::flushReact()
+  }
+
+  expected_order <- list()
+  expected_order[1:2] <- list(c(1L, 2L, 3L))
+  expected_order[3:20] <- list(c(2L, 3L, 1L))
+  expect_identical(order, expected_order)
+})
+
 
 test_that("installExprFunction doesn't rely on name being `expr`", {
   justExecute <- function(anExpression, envirToUse = parent.frame(), isQuoted = FALSE) {
@@ -989,8 +1029,10 @@ test_that("Flush completes even when errors occur", {
 
   # Trigger an error
   vals$x <- 0
-  # Errors in reactive are translated to warnings in observers by default
-  expect_warning(flushReact())
+  suppress_stacktrace(
+    # Errors in reactive are translated to warnings in observers by default
+    expect_warning(flushReact())
+  )
   # Both observers should run up until the reactive that errors
   expect_true(all(c(n11, n12, n21, n22) == c(2,1,2,1)))
 
@@ -1137,10 +1179,144 @@ test_that("reactive domain works across async handlers", {
       ~{hasReactiveDomain <<- identical(getDefaultReactiveDomain(), obj)}
     )
   })
-  
+
   while (is.null(hasReactiveDomain) && !later::loop_empty()) {
     later::run_now()
   }
-  
+
   testthat::expect_true(hasReactiveDomain)
+})
+
+# For #2441, #2423
+test_that("Unreachable reactives are GC'd", {
+  v <- reactiveVal(1)
+  r <- reactive({
+    v()
+    12345
+  })
+  o <- observe({
+    r()
+  })
+  # Finalizer on the reactive's underlying Observable object
+  r_finalized <- FALSE
+  reg.finalizer(attr(r, "observable"), function(e) {
+    r_finalized <<- TRUE
+  })
+
+  # Finalizer on the Observer
+  o_finalized <- FALSE
+  reg.finalizer(o, function(e) {
+    o_finalized <<- TRUE
+  })
+
+  flushReact()
+  gc()
+  expect_false(r_finalized)
+
+  rm(r) # Remove the only (strong) reference to r
+  gc()
+  expect_true(r_finalized)
+  expect_false(o_finalized)
+
+  rm(o) # Remove the only reference to o
+  gc()
+  expect_true(o_finalized)
+
+  rm(v)
+  gc()
+
+  # Same, with reactiveValues instead of reactiveVal
+  v <- reactiveValues(x = 1)
+  r <- reactive({
+    v$x
+    12345
+  })
+  o <- observe({
+    r()
+  })
+  # Finalizer on the reactive's underlying Observable object
+  r_finalized <- FALSE
+  reg.finalizer(attr(r, "observable"), function(e) {
+    r_finalized <<- TRUE
+  })
+
+  # Finalizer on the Observer
+  o_finalized <- FALSE
+  reg.finalizer(o, function(e) {
+    o_finalized <<- TRUE
+  })
+
+  flushReact()
+  gc()
+  expect_false(r_finalized)
+
+  rm(r) # Remove the only (strong) reference to r
+  gc()
+  expect_true(r_finalized)
+  expect_false(o_finalized)
+
+  rm(o) # Remove the only reference to o
+  gc()
+  expect_true(o_finalized)
+})
+
+
+
+test_that("Reactive contexts are not GC'd too early", {
+  # When a ReactiveVal or ReactiveValue has an dependency arrow pointing to a
+  # reactive expression (Observable object), it's implemented by having a weak
+  # reference to a reactive context. We need to make sure that the reactive
+  # context is not GC'd too early. This is done by having the Observable have a
+  # strong reference to the context.
+
+  # Check reactiveVal
+  v <- reactiveVal(1)
+  r <- reactive({
+    v()
+  })
+  o <- observe({
+    r()
+    gc()
+  })
+  # Finalizer on the reactive's underlying Observable object
+  r_finalized <- FALSE
+  reg.finalizer(attr(r, "observable"), function(e) {
+    r_finalized <<- TRUE
+  })
+
+  for (i in 1:3) {
+    v(isolate(v()) + 1)
+    flushReact()
+  }
+
+  expect_identical(execCount(r), 3L)
+  expect_false(r_finalized)
+  o$destroy()
+  rm(v, r, o)
+  gc()
+  expect_true(r_finalized)
+
+
+  # Same, but with reactiveValues
+  v <- reactiveValues(x=1)
+  r <- reactive({
+    v$x
+  })
+  o <- observe({
+    r()
+    gc()
+  })
+  # Finalizer on the reactive's underlying Observable object
+  r_finalized <- FALSE
+  reg.finalizer(attr(r, "observable"), function(e) {
+    r_finalized <<- TRUE
+  })
+
+  for (i in 1:3) {
+    v$x <- (isolate(v$x) + 1)
+    flushReact()
+  }
+
+  expect_identical(execCount(r), 3L)
+  expect_false(r_finalized)
 })

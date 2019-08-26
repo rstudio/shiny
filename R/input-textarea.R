@@ -3,22 +3,23 @@
 #' Create a textarea input control for entry of unstructured text values.
 #'
 #' @inheritParams textInput
-#' @param height The height of the input, e.g. \code{'400px'}, or
-#'   \code{'100\%'}; see \code{\link{validateCssUnit}}.
-#' @param cols Value of the visible character columns of the input, e.g.
-#'   \code{80}. If used with \code{width}, \code{width} will take precedence in
-#'   the browser's rendering.
-#' @param rows The value of the visible character rows of the input, e.g.
-#'   \code{6}. If used with \code{height}, \code{height} will take precedence in
-#'   the browser's rendering.
+#' @param height The height of the input, e.g. `'400px'`, or `'100%'`; see
+#'   [validateCssUnit()].
+#' @param cols Value of the visible character columns of the input, e.g. `80`.
+#'   This argument will only take effect if there is not a CSS `width` rule
+#'   defined for this element; such a rule could come from the `width` argument
+#'   of this function or from a containing page layout such as
+#'   [fluidPage()].
+#' @param rows The value of the visible character rows of the input, e.g. `6`.
+#'   If the `height` argument is specified, `height` will take precedence in the
+#'   browser's rendering.
 #' @param resize Which directions the textarea box can be resized. Can be one of
-#'   \code{"both"}, \code{"none"}, \code{"vertical"}, and \code{"horizontal"}.
-#'   The default, \code{NULL}, will use the client browser's default setting for
-#'   resizing textareas.
+#'   `"both"`, `"none"`, `"vertical"`, and `"horizontal"`. The default, `NULL`,
+#'   will use the client browser's default setting for resizing textareas.
 #' @return A textarea input control that can be added to a UI definition.
 #'
 #' @family input elements
-#' @seealso \code{\link{updateTextAreaInput}}
+#' @seealso [updateTextAreaInput()]
 #'
 #' @examples
 #' ## Only run examples in interactive R sessions
@@ -55,7 +56,7 @@ textAreaInput <- function(inputId, label, value = "", width = NULL, height = NUL
   if (length(style) == 0) style <- NULL
 
   div(class = "form-group shiny-input-container",
-    label %AND% tags$label(label, `for` = inputId),
+    shinyInputLabel(inputId, label),
     tags$textarea(
       id = inputId,
       class = "form-control",

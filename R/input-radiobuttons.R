@@ -3,33 +3,33 @@
 #' Create a set of radio buttons used to select an item from a list.
 #'
 #' If you need to represent a "None selected" state, it's possible to default
-#' the radio buttons to have no options selected by using \code{selected =
-#' character(0)}. However, this is not recommended, as it gives the user no way
+#' the radio buttons to have no options selected by using `selected =
+#' character(0)`. However, this is not recommended, as it gives the user no way
 #' to return to that state once they've made a selection. Instead, consider
-#' having the first of your choices be \code{c("None selected" = "")}.
+#' having the first of your choices be `c("None selected" = "")`.
 #'
 #' @inheritParams textInput
 #' @param choices List of values to select from (if elements of the list are
 #'   named then that name rather than the value is displayed to the user). If
-#'   this argument is provided, then \code{choiceNames} and \code{choiceValues}
+#'   this argument is provided, then `choiceNames` and `choiceValues`
 #'   must not be provided, and vice-versa. The values should be strings; other
 #'   types (such as logicals and numbers) will be coerced to strings.
 #' @param selected The initially selected value (if not specified then defaults
 #'   to the first value)
-#' @param inline If \code{TRUE}, render the choices inline (i.e. horizontally)
+#' @param inline If `TRUE`, render the choices inline (i.e. horizontally)
 #' @return A set of radio buttons that can be added to a UI definition.
 #' @param choiceNames,choiceValues List of names and values, respectively, that
 #'   are displayed to the user in the app and correspond to the each choice (for
-#'   this reason, \code{choiceNames} and \code{choiceValues} must have the same
+#'   this reason, `choiceNames` and `choiceValues` must have the same
 #'   length). If either of these arguments is provided, then the other
-#'   \emph{must} be provided and \code{choices} \emph{must not} be provided. The
-#'   advantage of using both of these over a named list for \code{choices} is
-#'   that \code{choiceNames} allows any type of UI object to be passed through
+#'   *must* be provided and `choices` *must not* be provided. The
+#'   advantage of using both of these over a named list for `choices` is
+#'   that `choiceNames` allows any type of UI object to be passed through
 #'   (tag objects, icons, HTML code, ...), instead of just simple text. See
 #'   Examples.
 #'
 #' @family input elements
-#' @seealso \code{\link{updateRadioButtons}}
+#' @seealso [updateRadioButtons()]
 #'
 #' @examples
 #' ## Only run examples in interactive R sessions
@@ -102,7 +102,7 @@ radioButtons <- function(inputId, label, choices = NULL, selected = NULL,
   tags$div(id = inputId,
     style = if (!is.null(width)) paste0("width: ", validateCssUnit(width), ";"),
     class = divClass,
-    controlLabel(inputId, label),
+    shinyInputLabel(inputId, label),
     options
   )
 }

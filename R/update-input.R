@@ -4,7 +4,7 @@
 #' @param value The value to set for the input object.
 #' @param placeholder The placeholder to set for the input object.
 #'
-#' @seealso \code{\link{textInput}}
+#' @seealso [textInput()]
 #'
 #' @examples
 #' ## Only run examples in interactive R sessions
@@ -45,7 +45,7 @@ updateTextInput <- function(session, inputId, label = NULL, value = NULL, placeh
 #' @template update-input
 #' @inheritParams updateTextInput
 #'
-#' @seealso \code{\link{textAreaInput}}
+#' @seealso [textAreaInput()]
 #'
 #' @examples
 #' ## Only run examples in interactive R sessions
@@ -84,7 +84,7 @@ updateTextAreaInput <- updateTextInput
 #' @template update-input
 #' @param value The value to set for the input object.
 #'
-#' @seealso \code{\link{checkboxInput}}
+#' @seealso [checkboxInput()]
 #'
 #' @examples
 #' ## Only run examples in interactive R sessions
@@ -117,9 +117,9 @@ updateCheckboxInput <- function(session, inputId, label = NULL, value = NULL) {
 #'
 #' @template update-input
 #' @param icon The icon to set for the input object. To remove the
-#' current icon, use \code{icon=character(0)}.
+#' current icon, use `icon=character(0)`.
 #'
-#' @seealso \code{\link{actionButton}}
+#' @seealso [actionButton()]
 #'
 #' @examples
 #' ## Only run examples in interactive R sessions
@@ -170,13 +170,13 @@ updateActionButton <- function(session, inputId, label = NULL, icon = NULL) {
 #'
 #' @template update-input
 #' @param value The desired date value. Either a Date object, or a string in
-#'   \code{yyyy-mm-dd} format. Supply \code{NA} to clear the date.
+#'   `yyyy-mm-dd` format. Supply `NA` to clear the date.
 #' @param min The minimum allowed date. Either a Date object, or a string in
-#'   \code{yyyy-mm-dd} format.
+#'   `yyyy-mm-dd` format.
 #' @param max The maximum allowed date. Either a Date object, or a string in
-#'   \code{yyyy-mm-dd} format.
+#'   `yyyy-mm-dd` format.
 #'
-#' @seealso \code{\link{dateInput}}
+#' @seealso [dateInput()]
 #'
 #' @examples
 #' ## Only run examples in interactive R sessions
@@ -205,18 +205,9 @@ updateActionButton <- function(session, inputId, label = NULL, icon = NULL) {
 updateDateInput <- function(session, inputId, label = NULL, value = NULL,
                             min = NULL, max = NULL) {
 
-  # Make sure values are NULL or Date objects. This is so we can ensure that
-  # they will be formatted correctly. For example, the string "2016-08-9" is not
-  # correctly formatted, but the conversion to Date and back to string will fix
-  # it.
-  formatDate <- function(x) {
-    if (is.null(x))
-      return(NULL)
-    format(as.Date(x), "%Y-%m-%d")
-  }
-  value <- formatDate(value)
-  min   <- formatDate(min)
-  max   <- formatDate(max)
+  value <- dateYMD(value, "value")
+  min   <- dateYMD(min, "min")
+  max   <- dateYMD(max, "max")
 
   message <- dropNulls(list(label=label, value=value, min=min, max=max))
   session$sendInputMessage(inputId, message)
@@ -227,15 +218,15 @@ updateDateInput <- function(session, inputId, label = NULL, value = NULL,
 #'
 #' @template update-input
 #' @param start The start date. Either a Date object, or a string in
-#'   \code{yyyy-mm-dd} format. Supplying \code{NA} clears the start date.
+#'   `yyyy-mm-dd` format. Supplying `NA` clears the start date.
 #' @param end The end date. Either a Date object, or a string in
-#'   \code{yyyy-mm-dd} format. Supplying \code{NA} clears the end date.
+#'   `yyyy-mm-dd` format. Supplying `NA` clears the end date.
 #' @param min The minimum allowed date. Either a Date object, or a string in
-#'   \code{yyyy-mm-dd} format.
+#'   `yyyy-mm-dd` format.
 #' @param max The maximum allowed date. Either a Date object, or a string in
-#'   \code{yyyy-mm-dd} format.
+#'   `yyyy-mm-dd` format.
 #'
-#' @seealso \code{\link{dateRangeInput}}
+#' @seealso [dateRangeInput()]
 #'
 #' @examples
 #' ## Only run examples in interactive R sessions
@@ -266,12 +257,11 @@ updateDateInput <- function(session, inputId, label = NULL, value = NULL,
 updateDateRangeInput <- function(session, inputId, label = NULL,
                                  start = NULL, end = NULL, min = NULL,
                                  max = NULL) {
-  # Make sure start and end are strings, not date objects. This is for
-  # consistency across different locales.
-  if (inherits(start, "Date"))  start <- format(start, '%Y-%m-%d')
-  if (inherits(end, "Date"))    end <- format(end, '%Y-%m-%d')
-  if (inherits(min, "Date"))    min <- format(min, '%Y-%m-%d')
-  if (inherits(max, "Date"))    max <- format(max, '%Y-%m-%d')
+
+  start <- dateYMD(start, "start")
+  end <- dateYMD(end, "end")
+  min <- dateYMD(min, "min")
+  max <- dateYMD(max, "max")
 
   message <- dropNulls(list(
     label = label,
@@ -285,14 +275,14 @@ updateDateRangeInput <- function(session, inputId, label = NULL,
 
 #' Change the selected tab on the client
 #'
-#' @param session The \code{session} object passed to function given to
-#'   \code{shinyServer}.
-#' @param inputId The id of the \code{tabsetPanel}, \code{navlistPanel},
-#' or \code{navbarPage} object.
+#' @param session The `session` object passed to function given to
+#'   `shinyServer`.
+#' @param inputId The id of the `tabsetPanel`, `navlistPanel`,
+#' or `navbarPage` object.
 #' @param selected The name of the tab to make active.
 #'
-#' @seealso \code{\link{tabsetPanel}}, \code{\link{navlistPanel}},
-#' \code{\link{navbarPage}}
+#' @seealso [tabsetPanel()], [navlistPanel()],
+#' [navbarPage()]
 #'
 #' @examples
 #' ## Only run examples in interactive R sessions
@@ -343,7 +333,7 @@ updateNavlistPanel <- updateTabsetPanel
 #' @param max Maximum value.
 #' @param step Step size.
 #'
-#' @seealso \code{\link{numericInput}}
+#' @seealso [numericInput()]
 #'
 #' @examples
 #' ## Only run examples in interactive R sessions
@@ -395,7 +385,7 @@ updateNumericInput <- function(session, inputId, label = NULL, value = NULL,
 #' @param timeFormat Date and POSIXt formatting.
 #' @param timezone The timezone offset for POSIXt objects.
 #'
-#' @seealso \code{\link{sliderInput}}
+#' @seealso [sliderInput()]
 #'
 #' @examples
 #' ## Only run this example in interactive R sessions
@@ -428,13 +418,15 @@ updateNumericInput <- function(session, inputId, label = NULL, value = NULL,
 updateSliderInput <- function(session, inputId, label = NULL, value = NULL,
   min = NULL, max = NULL, step = NULL, timeFormat = NULL, timezone = NULL)
 {
+  # If no min/max/value is provided, we won't know the
+  # type, and this will return an empty string
   dataType <- getSliderType(min, max, value)
 
   if (is.null(timeFormat)) {
     timeFormat <- switch(dataType, date = "%F", datetime = "%F %T", number = NULL)
   }
 
-  if (dataType == "date" || dataType == "datetime") {
+  if (isTRUE(dataType %in% c("date", "datetime"))) {
     to_ms <- function(x) 1000 * as.numeric(as.POSIXct(x))
     if (!is.null(min))   min   <- to_ms(min)
     if (!is.null(max))   max   <- to_ms(max)
@@ -481,7 +473,7 @@ updateInputOptions <- function(session, inputId, label = NULL, choices = NULL,
 #' @template update-input
 #' @inheritParams checkboxGroupInput
 #'
-#' @seealso \code{\link{checkboxGroupInput}}
+#' @seealso [checkboxGroupInput()]
 #'
 #' @examples
 #' ## Only run examples in interactive R sessions
@@ -528,7 +520,7 @@ updateCheckboxGroupInput <- function(session, inputId, label = NULL,
 #' @template update-input
 #' @inheritParams radioButtons
 #'
-#' @seealso \code{\link{radioButtons}}
+#' @seealso [radioButtons()]
 #'
 #' @examples
 #' ## Only run examples in interactive R sessions
@@ -576,7 +568,7 @@ updateRadioButtons <- function(session, inputId, label = NULL, choices = NULL,
 #' @template update-input
 #' @inheritParams selectInput
 #'
-#' @seealso \code{\link{selectInput}} \code{\link{varSelectInput}}
+#' @seealso [selectInput()] [varSelectInput()]
 #'
 #' @examples
 #' ## Only run examples in interactive R sessions
@@ -621,9 +613,9 @@ updateSelectInput <- function(session, inputId, label = NULL, choices = NULL,
 
 #' @rdname updateSelectInput
 #' @inheritParams selectizeInput
-#' @param server whether to store \code{choices} on the server side, and load
+#' @param server whether to store `choices` on the server side, and load
 #'   the select options dynamically on searching, instead of writing all
-#'   \code{choices} into the page at once (i.e., only use the client-side
+#'   `choices` into the page at once (i.e., only use the client-side
 #'   version of \pkg{selectize.js})
 #' @export
 updateSelectizeInput <- function(session, inputId, label = NULL, choices = NULL,
@@ -653,8 +645,15 @@ updateSelectizeInput <- function(session, inputId, label = NULL, choices = NULL,
       }
     }
   }
-  # convert choices to a data frame so it returns [{label: , value: , group: },...]
-  choices <- if (is.atomic(choices) || noOptGroup) {
+  # convert choices to a data frame so it returns [{label: , value: , optgroup: },...]
+  choices <- if (is.data.frame(choices)) {
+    # jcheng 2018/09/25: I don't think we ever said data frames were OK to pass
+    # to updateSelectInput, but one of the example apps does this and at least
+    # one user noticed when we broke it.
+    # https://github.com/rstudio/shiny/issues/2172
+    # https://github.com/rstudio/shiny/issues/2192
+    as.data.frame(choices, stringsAsFactors = FALSE)
+  } else if (is.atomic(choices) || noOptGroup) {
     # fast path for vectors and flat lists
     if (is.list(choices)) {
       choices <- unlist(choices)
@@ -701,7 +700,9 @@ updateSelectizeInput <- function(session, inputId, label = NULL, choices = NULL,
       list(
         label = lab,
         value = as.character(choice),
-        group = group
+        # The name "optgroup" is because this is the default field where
+        # selectize will look for group IDs
+        optgroup = group
       )
     }, SIMPLIFY = FALSE)
 
@@ -714,7 +715,7 @@ updateSelectizeInput <- function(session, inputId, label = NULL, choices = NULL,
     data.frame(
       label = extract_vector(choice_list, "label"),
       value = extract_vector(choice_list, "value"),
-      group = extract_vector(choice_list, "group"),
+      optgroup = extract_vector(choice_list, "optgroup"),
       stringsAsFactors = FALSE, row.names = NULL
     )
   }

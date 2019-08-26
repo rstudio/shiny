@@ -1,28 +1,28 @@
 #' Find rows of data that are selected by a brush
 #'
 #' This function returns rows from a data frame which are under a brush used
-#' with \code{\link{plotOutput}}.
+#' with [plotOutput()].
 #'
 #' It is also possible for this function to return all rows from the input data
-#' frame, but with an additional column \code{selected_}, which indicates which
-#' rows of the input data frame are selected by the brush (\code{TRUE} for
-#' selected, \code{FALSE} for not-selected). This is enabled by setting
-#' \code{allRows=TRUE} option.
+#' frame, but with an additional column `selected_`, which indicates which
+#' rows of the input data frame are selected by the brush (`TRUE` for
+#' selected, `FALSE` for not-selected). This is enabled by setting
+#' `allRows=TRUE` option.
 #'
-#' The \code{xvar}, \code{yvar}, \code{panelvar1}, and \code{panelvar2}
+#' The `xvar`, `yvar`, `panelvar1`, and `panelvar2`
 #' arguments specify which columns in the data correspond to the x variable, y
 #' variable, and panel variables of the plot. For example, if your plot is
-#' \code{plot(x=cars$speed, y=cars$dist)}, and your brush is named
-#' \code{"cars_brush"}, then you would use \code{brushedPoints(cars,
-#' input$cars_brush, "speed", "dist")}.
+#' `plot(x=cars$speed, y=cars$dist)`, and your brush is named
+#' `"cars_brush"`, then you would use `brushedPoints(cars,
+#' input$cars_brush, "speed", "dist")`.
 #'
 #' For plots created with ggplot2, it should not be necessary to specify the
 #' column names; that information will already be contained in the brush,
 #' provided that variables are in the original data, and not computed. For
-#' example, with \code{ggplot(cars, aes(x=speed, y=dist)) + geom_point()}, you
-#' could use \code{brushedPoints(cars, input$cars_brush)}. If, however, you use
-#' a computed column, like \code{ggplot(cars, aes(x=speed/2, y=dist)) +
-#' geom_point()}, then it will not be able to automatically extract column names
+#' example, with `ggplot(cars, aes(x=speed, y=dist)) + geom_point()`, you
+#' could use `brushedPoints(cars, input$cars_brush)`. If, however, you use
+#' a computed column, like `ggplot(cars, aes(x=speed/2, y=dist)) +
+#' geom_point()`, then it will not be able to automatically extract column names
 #' and filter on them. If you want to use this function to filter data, it is
 #' recommended that you not use computed columns; instead, modify the data
 #' first, and then make the plot with "raw" columns in the modified data.
@@ -33,26 +33,26 @@
 #' to cover a given character/factor value when it covers the center value.
 #'
 #' If the brush is operating in just the x or y directions (e.g., with
-#' \code{brushOpts(direction = "x")}, then this function will filter out points
+#' `brushOpts(direction = "x")`, then this function will filter out points
 #' using just the x or y variable, whichever is appropriate.
 #'
-#' @param brush The data from a brush, such as \code{input$plot_brush}.
+#' @param brush The data from a brush, such as `input$plot_brush`.
 #' @param df A data frame from which to select rows.
 #' @param xvar,yvar A string with the name of the variable on the x or y axis.
-#'   This must also be the name of a column in \code{df}. If absent, then this
+#'   This must also be the name of a column in `df`. If absent, then this
 #'   function will try to infer the variable from the brush (only works for
 #'   ggplot2).
 #' @param panelvar1,panelvar2 Each of these is a string with the name of a panel
 #'   variable. For example, if with ggplot2, you facet on a variable called
-#'   \code{cyl}, then you can use \code{"cyl"} here. However, specifying the
+#'   `cyl`, then you can use `"cyl"` here. However, specifying the
 #'   panel variable should not be necessary with ggplot2; Shiny should be able
 #'   to auto-detect the panel variable.
-#' @param allRows If \code{FALSE} (the default) return a data frame containing
-#'   the selected rows. If \code{TRUE}, the input data frame will have a new
-#'   column, \code{selected_}, which indicates whether the row was inside the
-#'   brush (\code{TRUE}) or outside the brush (\code{FALSE}).
+#' @param allRows If `FALSE` (the default) return a data frame containing
+#'   the selected rows. If `TRUE`, the input data frame will have a new
+#'   column, `selected_`, which indicates whether the row was inside the
+#'   brush (`TRUE`) or outside the brush (`FALSE`).
 #'
-#' @seealso \code{\link{plotOutput}} for example usage.
+#' @seealso [plotOutput()] for example usage.
 #' @export
 brushedPoints <- function(df, brush, xvar = NULL, yvar = NULL,
                           panelvar1 = NULL, panelvar2 = NULL,
@@ -86,15 +86,16 @@ brushedPoints <- function(df, brush, xvar = NULL, yvar = NULL,
   if (use_x) {
     if (is.null(xvar))
       stop("brushedPoints: not able to automatically infer `xvar` from brush")
-    # Extract data values from the data frame
-    x <- asNumber(df[[xvar]])
-    keep_rows <- keep_rows & (x >= brush$xmin & x <= brush$xmax)
+    if (!(xvar %in% names(df)))
+      stop("brushedPoints: `xvar` ('", xvar ,"')  not in names of input")
+    keep_rows <- keep_rows & within_brush(df[[xvar]], brush, "x")
   }
   if (use_y) {
     if (is.null(yvar))
       stop("brushedPoints: not able to automatically infer `yvar` from brush")
-    y <- asNumber(df[[yvar]])
-    keep_rows <- keep_rows & (y >= brush$ymin & y <= brush$ymax)
+    if (!(yvar %in% names(df)))
+      stop("brushedPoints: `yvar` ('", yvar ,"') not in names of input")
+    keep_rows <- keep_rows & within_brush(df[[yvar]], brush, "y")
   }
 
   # Find which rows are matches for the panel vars (if present)
@@ -118,6 +119,19 @@ brushedPoints <- function(df, brush, xvar = NULL, yvar = NULL,
 #  $ xmax   : num 4.22
 #  $ ymin   : num 13.9
 #  $ ymax   : num 19.8
+#  $ coords_css:List of 4
+#   ..$ xmin: int 260
+#   ..$ xmax: int 298
+#   ..$ ymin: num 112
+#   ..$ ymax: num 205
+#  $ coords_img:List of 4
+#   ..$ xmin: int 325
+#   ..$ xmax: num 372
+#   ..$ ymin: num 140
+#   ..$ ymax: num 257
+#  $ img_css_ratio:List of 2
+#   ..$ x: num 1.25
+#   ..$ y: num 1.25
 #  $ mapping: Named list()
 #  $ domain :List of 4
 #   ..$ left  : num 1.36
@@ -143,6 +157,19 @@ brushedPoints <- function(df, brush, xvar = NULL, yvar = NULL,
 #  $ ymax     : num 20.4
 #  $ panelvar1: int 6
 #  $ panelvar2: int 0
+#  $ coords_css:List of 4
+#   ..$ xmin: int 260
+#   ..$ xmax: int 298
+#   ..$ ymin: num 112
+#   ..$ ymax: num 205
+#  $ coords_img:List of 4
+#   ..$ xmin: int 325
+#   ..$ xmax: num 372
+#   ..$ ymin: num 140
+#   ..$ ymax: num 257
+#  $ img_css_ratio:List of 2
+#   ..$ x: num 1.25
+#   ..$ y: num 1.25
 #  $ mapping  :List of 4
 #   ..$ x        : chr "wt"
 #   ..$ y        : chr "mpg"
@@ -167,39 +194,39 @@ brushedPoints <- function(df, brush, xvar = NULL, yvar = NULL,
 #'Find rows of data that are near a click/hover/double-click
 #'
 #'This function returns rows from a data frame which are near a click, hover, or
-#'double-click, when used with \code{\link{plotOutput}}. The rows will be sorted
+#'double-click, when used with [plotOutput()]. The rows will be sorted
 #'by their distance to the mouse event.
 #'
 #'It is also possible for this function to return all rows from the input data
-#'frame, but with an additional column \code{selected_}, which indicates which
-#'rows of the input data frame are selected by the brush (\code{TRUE} for
-#'selected, \code{FALSE} for not-selected). This is enabled by setting
-#'\code{allRows=TRUE} option. If this is used, the resulting data frame will not
+#'frame, but with an additional column `selected_`, which indicates which
+#'rows of the input data frame are selected by the brush (`TRUE` for
+#'selected, `FALSE` for not-selected). This is enabled by setting
+#'`allRows=TRUE` option. If this is used, the resulting data frame will not
 #'be sorted by distance to the mouse event.
 #'
-#'The \code{xvar}, \code{yvar}, \code{panelvar1}, and \code{panelvar2} arguments
+#'The `xvar`, `yvar`, `panelvar1`, and `panelvar2` arguments
 #'specify which columns in the data correspond to the x variable, y variable,
 #'and panel variables of the plot. For example, if your plot is
-#'\code{plot(x=cars$speed, y=cars$dist)}, and your click variable is named
-#'\code{"cars_click"}, then you would use \code{nearPoints(cars,
-#'input$cars_brush, "speed", "dist")}.
+#'`plot(x=cars$speed, y=cars$dist)`, and your click variable is named
+#'`"cars_click"`, then you would use `nearPoints(cars,
+#'input$cars_brush, "speed", "dist")`.
 #'
 #'@inheritParams brushedPoints
-#'@param coordinfo The data from a mouse event, such as \code{input$plot_click}.
+#'@param coordinfo The data from a mouse event, such as `input$plot_click`.
 #'@param threshold A maxmimum distance to the click point; rows in the data
-#'  frame where the distance to the click is less than \code{threshold} will be
+#'  frame where the distance to the click is less than `threshold` will be
 #'  returned.
 #'@param maxpoints Maximum number of rows to return. If NULL (the default),
 #'  return all rows that are within the threshold distance.
-#'@param addDist If TRUE, add a column named \code{dist_} that contains the
+#'@param addDist If TRUE, add a column named `dist_` that contains the
 #'  distance from the coordinate to the point, in pixels. When no mouse event
-#'  has yet occured, the value of \code{dist_} will be \code{NA}.
-#'@param allRows If \code{FALSE} (the default) return a data frame containing
-#'  the selected rows. If \code{TRUE}, the input data frame will have a new
-#'  column, \code{selected_}, which indicates whether the row was inside the
-#'  selected by the mouse event (\code{TRUE}) or not (\code{FALSE}).
+#'  has yet occured, the value of `dist_` will be `NA`.
+#'@param allRows If `FALSE` (the default) return a data frame containing
+#'  the selected rows. If `TRUE`, the input data frame will have a new
+#'  column, `selected_`, which indicates whether the row was inside the
+#'  selected by the mouse event (`TRUE`) or not (`FALSE`).
 #'
-#'@seealso \code{\link{plotOutput}} for more examples.
+#'@seealso [plotOutput()] for more examples.
 #'
 #' @examples
 #' \dontrun{
@@ -245,20 +272,25 @@ nearPoints <- function(df, coordinfo, xvar = NULL, yvar = NULL,
   if (is.null(yvar))
     stop("nearPoints: not able to automatically infer `yvar` from coordinfo")
 
+  if (!(xvar %in% names(df)))
+    stop("nearPoints: `xvar` ('", xvar ,"')  not in names of input")
+  if (!(yvar %in% names(df)))
+    stop("nearPoints: `yvar` ('", yvar ,"')  not in names of input")
+
   # Extract data values from the data frame
-  x <- asNumber(df[[xvar]])
-  y <- asNumber(df[[yvar]])
+  x <- asNumber(df[[xvar]], coordinfo$domain$discrete_limits$x)
+  y <- asNumber(df[[yvar]], coordinfo$domain$discrete_limits$y)
 
   # Get the coordinates of the point (in img pixel coordinates)
-  point_img <- scaleCoords(coordinfo$x, coordinfo$y, coordinfo)
+  point_img <- coordinfo$coords_img
 
   # Get coordinates of data points (in img pixel coordinates)
   data_img <- scaleCoords(x, y, coordinfo)
 
   # Get x/y distances (in css coordinates)
   dist_css <- list(
-    x = (data_img$x - point_img$x) / coordinfo$pixelratio$x,
-    y = (data_img$y - point_img$y) / coordinfo$pixelratio$y
+    x = (data_img$x - point_img$x) / coordinfo$img_css_ratio$x,
+    y = (data_img$y - point_img$y) / coordinfo$img_css_ratio$y
   )
 
   # Distances of data points to the target point, in css pixels.
@@ -306,9 +338,15 @@ nearPoints <- function(df, coordinfo, xvar = NULL, yvar = NULL,
 # List of 7
 #  $ x         : num 4.37
 #  $ y         : num 12
-#  $ pixelratio:List of 2
-#  ..$ x: num 2
-#  ..$ y: num 2
+#  $ coords_css:List of 2
+#   ..$ x: int 286
+#   ..$ y: int 192
+#  $ coords_img:List of 2
+#   ..$ x: num 358
+#   ..$ y: int 240
+#  $ img_css_ratio:List of 2
+#   ..$ x: num 1.25
+#   ..$ y: num 1.25
 #  $ mapping   : Named list()
 #  $ domain    :List of 4
 #   ..$ left  : num 1.36
@@ -330,9 +368,15 @@ nearPoints <- function(df, coordinfo, xvar = NULL, yvar = NULL,
 # List of 9
 #  $ x         : num 3.78
 #  $ y         : num 17.1
-#  $ pixelratio:List of 2
-#  ..$ x: num 2
-#  ..$ y: num 2
+#  $ coords_css:List of 2
+#   ..$ x: int 286
+#   ..$ y: int 192
+#  $ coords_img:List of 2
+#   ..$ x: num 358
+#   ..$ y: int 240
+#  $ img_css_ratio:List of 2
+#   ..$ x: num 1.25
+#   ..$ y: num 1.25
 #  $ panelvar1 : int 6
 #  $ panelvar2 : int 0
 #  $ mapping   :List of 4
@@ -355,11 +399,27 @@ nearPoints <- function(df, coordinfo, xvar = NULL, yvar = NULL,
 #   ..$ y: NULL
 #  $ .nonce    : num 0.603
 
-
+# Helper to determine if data values are within the limits of
+# an input brush
+within_brush <- function(vals, brush, var = "x") {
+  var <- match.arg(var, c("x", "y"))
+  vals <- asNumber(vals, brush$domain$discrete_limits[[var]])
+  # It's possible for a non-missing data values to not
+  # map to the axis limits, for example:
+  # https://github.com/rstudio/shiny/pull/2410#issuecomment-488100881
+  !is.na(vals) &
+    vals >= brush[[paste0(var, "min")]] &
+    vals <= brush[[paste0(var, "max")]]
+}
 
 # Coerce various types of variables to numbers. This works for Date, POSIXt,
 # characters, and factors. Used because the mouse coords are numeric.
-asNumber <- function(x) {
+# The `levels` argument should be used when mapping this variable to
+# a known set of discrete levels, which is needed for ggplot2 since
+# it allows you to control ordering and possible values of a discrete
+# positional scale (#2410)
+asNumber <- function(x, levels = NULL) {
+  if (length(levels)) return(match(x, levels))
   if (is.character(x)) x <- as.factor(x)
   if (is.factor(x)) x <- as.integer(x)
   as.numeric(x)

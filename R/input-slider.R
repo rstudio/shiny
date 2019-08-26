@@ -8,45 +8,45 @@
 #' @param value The initial value of the slider. A numeric vector of length one
 #'   will create a regular slider; a numeric vector of length two will create a
 #'   double-ended range slider. A warning will be issued if the value doesn't
-#'   fit between \code{min} and \code{max}.
+#'   fit between `min` and `max`.
 #' @param step Specifies the interval between each selectable value on the
-#'   slider (if \code{NULL}, a heuristic is used to determine the step size). If
-#'   the values are dates, \code{step} is in days; if the values are times
-#'   (POSIXt), \code{step} is in seconds.
-#' @param round \code{TRUE} to round all values to the nearest integer;
-#'   \code{FALSE} if no rounding is desired; or an integer to round to that
+#'   slider (if `NULL`, a heuristic is used to determine the step size). If
+#'   the values are dates, `step` is in days; if the values are times
+#'   (POSIXt), `step` is in seconds.
+#' @param round `TRUE` to round all values to the nearest integer;
+#'   `FALSE` if no rounding is desired; or an integer to round to that
 #'   number of digits (for example, 1 will round to the nearest 10, and -2 will
 #'   round to the nearest .01). Any rounding will be applied after snapping to
 #'   the nearest step.
 #' @param format Deprecated.
 #' @param locale Deprecated.
-#' @param ticks \code{FALSE} to hide tick marks, \code{TRUE} to show them
+#' @param ticks `FALSE` to hide tick marks, `TRUE` to show them
 #'   according to some simple heuristics.
-#' @param animate \code{TRUE} to show simple animation controls with default
-#'   settings; \code{FALSE} not to; or a custom settings list, such as those
-#'   created using \code{\link{animationOptions}}.
+#' @param animate `TRUE` to show simple animation controls with default
+#'   settings; `FALSE` not to; or a custom settings list, such as those
+#'   created using [animationOptions()].
 #' @param sep Separator between thousands places in numbers.
 #' @param pre A prefix string to put in front of the value.
 #' @param post A suffix string to put after the value.
 #' @param dragRange This option is used only if it is a range slider (with two
-#'   values). If \code{TRUE} (the default), the range can be dragged. In other
-#'   words, the min and max can be dragged together. If \code{FALSE}, the range
+#'   values). If `TRUE` (the default), the range can be dragged. In other
+#'   words, the min and max can be dragged together. If `FALSE`, the range
 #'   cannot be dragged.
 #' @param timeFormat Only used if the values are Date or POSIXt objects. A time
 #'   format string, to be passed to the Javascript strftime library. See
-#'   \url{https://github.com/samsonjs/strftime} for more details. The allowed
+#'   <https://github.com/samsonjs/strftime> for more details. The allowed
 #'   format specifications are very similar, but not identical, to those for R's
-#'   \code{\link[base]{strftime}} function. For Dates, the default is \code{"\%F"}
-#'   (like \code{"2015-07-01"}), and for POSIXt, the default is \code{"\%F \%T"}
-#'   (like \code{"2015-07-01 15:32:10"}).
+#'   [base::strftime()] function. For Dates, the default is `"%F"`
+#'   (like `"2015-07-01"`), and for POSIXt, the default is `"%F %T"`
+#'   (like `"2015-07-01 15:32:10"`).
 #' @param timezone Only used if the values are POSIXt objects. A string
 #'   specifying the time zone offset for the displayed times, in the format
-#'   \code{"+HHMM"} or \code{"-HHMM"}. If \code{NULL} (the default), times will
-#'   be displayed in the browser's time zone. The value \code{"+0000"} will
+#'   `"+HHMM"` or `"-HHMM"`. If `NULL` (the default), times will
+#'   be displayed in the browser's time zone. The value `"+0000"` will
 #'   result in UTC time.
 #' @inheritParams selectizeInput
 #' @family input elements
-#' @seealso \code{\link{updateSliderInput}}
+#' @seealso [updateSliderInput()]
 #'
 #' @examples
 #' ## Only run examples in interactive R sessions
@@ -172,7 +172,7 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
 
   sliderTag <- div(class = "form-group shiny-input-container",
     style = if (!is.null(width)) paste0("width: ", validateCssUnit(width), ";"),
-    if (!is.null(label)) controlLabel(inputId, label),
+    shinyInputLabel(inputId, label),
     do.call(tags$input, sliderProps)
   )
 
@@ -253,13 +253,13 @@ findStepSize <- function(min, max, step) {
 #' @rdname sliderInput
 #'
 #' @param interval The interval, in milliseconds, between each animation step.
-#' @param loop \code{TRUE} to automatically restart the animation when it
+#' @param loop `TRUE` to automatically restart the animation when it
 #'   reaches the end.
 #' @param playButton Specifies the appearance of the play button. Valid values
 #'   are a one-element character vector (for a simple text label), an HTML tag
-#'   or list of tags (using \code{\link{tag}} and friends), or raw HTML (using
-#'   \code{\link{HTML}}).
-#' @param pauseButton Similar to \code{playButton}, but for the pause button.
+#'   or list of tags (using [tag()] and friends), or raw HTML (using
+#'   [HTML()]).
+#' @param pauseButton Similar to `playButton`, but for the pause button.
 #' @export
 animationOptions <- function(interval=1000,
                              loop=FALSE,

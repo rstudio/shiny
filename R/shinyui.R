@@ -4,9 +4,9 @@ NULL
 #' Load the MathJax library and typeset math expressions
 #'
 #' This function adds MathJax to the page and typeset the math expressions (if
-#' found) in the content \code{...}. It only needs to be called once in an app
-#' unless the content is rendered \emph{after} the page is loaded, e.g. via
-#' \code{\link{renderUI}}, in which case we have to call it explicitly every
+#' found) in the content `...`. It only needs to be called once in an app
+#' unless the content is rendered *after* the page is loaded, e.g. via
+#' [renderUI()], in which case we have to call it explicitly every
 #' time we write math expressions to the output.
 #' @param ... any HTML elements to apply MathJax to
 #' @export
@@ -44,7 +44,7 @@ renderPage <- function(ui, connection, showcase=0, testMode=FALSE) {
 
   shiny_deps <- list(
     htmlDependency("json2", "2014.02.04", c(href="shared"), script = "json2-min.js"),
-    htmlDependency("jquery", "1.12.4", c(href="shared"), script = "jquery.min.js"),
+    htmlDependency("jquery", "3.4.1", c(href="shared"), script = "jquery.min.js"),
     htmlDependency("shiny", utils::packageVersion("shiny"), c(href="shared"),
       script = if (getOption("shiny.minified", TRUE)) "shiny.min.js" else "shiny.js",
       stylesheet = "shiny.css")
@@ -71,6 +71,7 @@ renderPage <- function(ui, connection, showcase=0, testMode=FALSE) {
 #'
 #' @param ui A user interace definition
 #' @return The user interface definition, without modifications or side effects.
+#' @keywords internal
 #' @export
 shinyUI <- function(ui) {
   .globals$ui <- list(ui)

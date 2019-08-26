@@ -6,7 +6,7 @@
 #' @return A text input control that can be added to a UI definition.
 #'
 #' @family input elements
-#' @seealso \code{\link{updateTextInput}}
+#' @seealso [updateTextInput()]
 #'
 #' @examples
 #' ## Only run examples in interactive R sessions
@@ -30,7 +30,7 @@ passwordInput <- function(inputId, label, value = "", width = NULL,
                           placeholder = NULL) {
   div(class = "form-group shiny-input-container",
     style = if (!is.null(width)) paste0("width: ", validateCssUnit(width), ";"),
-    label %AND% tags$label(label, `for` = inputId),
+    shinyInputLabel(inputId, label),
     tags$input(id = inputId, type="password", class="form-control", value=value,
                placeholder = placeholder)
   )

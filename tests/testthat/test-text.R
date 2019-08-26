@@ -18,6 +18,17 @@ test_that("renderPrint and renderText behavior is correct", {
                'foo')
   expect_equal(isolate(renderText({ invisible("foo") })()),
                'foo')
+  expect_equal(isolate(renderText({ c("hello", "world") })()),
+               'hello world')
+
+  expect_equal(isolate(renderText({ c("hello", "world") }, sep=", ")()),
+               'hello, world')
+  # Really just measuring the behavior of `cat` when it receives a vector of
+  # separators, but probably worth covering.
+  expect_equal(isolate(renderText({ c("hello", "there", "world", "repeats") },
+                                  sep=c(" ", ", "))()),
+               'hello there, world repeats')
+
   # Capture the print output so it's not shown on console during test, and
   # also check that it is correct
   print_out <- utils::capture.output(ret <- isolate(renderText({ print("foo"); "bar"})()))

@@ -30,7 +30,7 @@ brush (\code{TRUE}) or outside the brush (\code{FALSE}).}
 }
 \description{
 This function returns rows from a data frame which are under a brush used
-with \code{\link{plotOutput}}.
+with \code{\link[=plotOutput]{plotOutput()}}.
 }
 \details{
 It is also possible for this function to return all rows from the input data
@@ -43,16 +43,14 @@ The \code{xvar}, \code{yvar}, \code{panelvar1}, and \code{panelvar2}
 arguments specify which columns in the data correspond to the x variable, y
 variable, and panel variables of the plot. For example, if your plot is
 \code{plot(x=cars$speed, y=cars$dist)}, and your brush is named
-\code{"cars_brush"}, then you would use \code{brushedPoints(cars,
-input$cars_brush, "speed", "dist")}.
+\code{"cars_brush"}, then you would use \code{brushedPoints(cars, input$cars_brush, "speed", "dist")}.
 
 For plots created with ggplot2, it should not be necessary to specify the
 column names; that information will already be contained in the brush,
 provided that variables are in the original data, and not computed. For
 example, with \code{ggplot(cars, aes(x=speed, y=dist)) + geom_point()}, you
 could use \code{brushedPoints(cars, input$cars_brush)}. If, however, you use
-a computed column, like \code{ggplot(cars, aes(x=speed/2, y=dist)) +
-geom_point()}, then it will not be able to automatically extract column names
+a computed column, like \code{ggplot(cars, aes(x=speed/2, y=dist)) + geom_point()}, then it will not be able to automatically extract column names
 and filter on them. If you want to use this function to filter data, it is
 recommended that you not use computed columns; instead, modify the data
 first, and then make the plot with "raw" columns in the modified data.
@@ -67,5 +65,5 @@ If the brush is operating in just the x or y directions (e.g., with
 using just the x or y variable, whichever is appropriate.
 }
 \seealso{
-\code{\link{plotOutput}} for example usage.
+\code{\link[=plotOutput]{plotOutput()}} for example usage.
 }

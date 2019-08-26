@@ -2,7 +2,7 @@ utils::globalVariables('func')
 
 #' Mark a function as a render function
 #'
-#' Should be called by implementers of \code{renderXXX} functions in order to
+#' Should be called by implementers of `renderXXX` functions in order to
 #' mark their return values as Shiny render functions, and to provide a hint to
 #' Shiny regarding what UI function is most commonly used with this type of
 #' render function. This can be used in R Markdown documents to create complete
@@ -12,13 +12,13 @@ utils::globalVariables('func')
 #'   an output ID.
 #' @param renderFunc A function that is suitable for assigning to a Shiny output
 #'   slot.
-#' @param outputArgs A list of arguments to pass to the \code{uiFunc}. Render
-#'   functions should include \code{outputArgs = list()} in their own parameter
-#'   list, and pass through the value to \code{markRenderFunction}, to allow
+#' @param outputArgs A list of arguments to pass to the `uiFunc`. Render
+#'   functions should include `outputArgs = list()` in their own parameter
+#'   list, and pass through the value to `markRenderFunction`, to allow
 #'   app authors to customize outputs. (Currently, this is only supported for
 #'   dynamically generated UIs, such as those created by Shiny code snippets
 #'   embedded in R Markdown documents).
-#' @return The \code{renderFunc} function, with annotations.
+#' @return The `renderFunc` function, with annotations.
 #' @export
 markRenderFunction <- function(uiFunc, renderFunc, outputArgs = list()) {
   # a mutable object that keeps track of whether `useRenderFunction` has been
@@ -57,22 +57,22 @@ markRenderFunction <- function(uiFunc, renderFunc, outputArgs = list()) {
 #' @param func A function without parameters, that returns user data. If the
 #'   returned value is a promise, then the render function will proceed in async
 #'   mode.
-#' @param transform A function that takes four arguments: \code{value},
-#'   \code{session}, \code{name}, and \code{...} (for future-proofing). This
-#'   function will be invoked each time a value is returned from \code{func},
+#' @param transform A function that takes four arguments: `value`,
+#'   `session`, `name`, and `...` (for future-proofing). This
+#'   function will be invoked each time a value is returned from `func`,
 #'   and is responsible for changing the value into a JSON-ready value to be
 #'   JSON-encoded and sent to the browser.
 #' @param outputFunc The UI function that is used (or most commonly used) with
 #'   this render function. This can be used in R Markdown documents to create
 #'   complete output widgets out of just the render function.
-#' @param outputArgs A list of arguments to pass to the \code{outputFunc}.
-#'   Render functions should include \code{outputArgs = list()} in their own
+#' @param outputArgs A list of arguments to pass to the `outputFunc`.
+#'   Render functions should include `outputArgs = list()` in their own
 #'   parameter list, and pass through the value as this argument, to allow app
 #'   authors to customize outputs. (Currently, this is only supported for
 #'   dynamically generated UIs, such as those created by Shiny code snippets
 #'   embedded in R Markdown documents).
 #' @return An annotated render function, ready to be assigned to an
-#'   \code{output} slot.
+#'   `output` slot.
 #'
 #' @export
 createRenderFunction <- function(
@@ -165,37 +165,37 @@ markOutputAttrs <- function(renderFunc, snapshotExclude = NULL,
 
 #' Image file output
 #'
-#' Renders a reactive image that is suitable for assigning to an \code{output}
+#' Renders a reactive image that is suitable for assigning to an `output`
 #' slot.
 #'
-#' The expression \code{expr} must return a list containing the attributes for
-#' the \code{img} object on the client web page. For the image to display,
-#' properly, the list must have at least one entry, \code{src}, which is the
-#' path to the image file. It may also useful to have a \code{contentType}
+#' The expression `expr` must return a list containing the attributes for
+#' the `img` object on the client web page. For the image to display,
+#' properly, the list must have at least one entry, `src`, which is the
+#' path to the image file. It may also useful to have a `contentType`
 #' entry specifying the MIME type of the image. If one is not provided,
-#' \code{renderImage} will try to autodetect the type, based on the file
+#' `renderImage` will try to autodetect the type, based on the file
 #' extension.
 #'
-#' Other elements such as \code{width}, \code{height}, \code{class}, and
-#' \code{alt}, can also be added to the list, and they will be used as
-#' attributes in the \code{img} object.
+#' Other elements such as `width`, `height`, `class`, and
+#' `alt`, can also be added to the list, and they will be used as
+#' attributes in the `img` object.
 #'
-#' The corresponding HTML output tag should be \code{div} or \code{img} and have
-#' the CSS class name \code{shiny-image-output}.
+#' The corresponding HTML output tag should be `div` or `img` and have
+#' the CSS class name `shiny-image-output`.
 #'
 #' @seealso For more details on how the images are generated, and how to control
-#'   the output, see \code{\link{plotPNG}}.
+#'   the output, see [plotPNG()].
 #'
 #' @param expr An expression that returns a list.
-#' @param env The environment in which to evaluate \code{expr}.
-#' @param quoted Is \code{expr} a quoted expression (with \code{quote()})? This
+#' @param env The environment in which to evaluate `expr`.
+#' @param quoted Is `expr` a quoted expression (with `quote()`)? This
 #'   is useful if you want to save an expression in a variable.
-#' @param deleteFile Should the file in \code{func()$src} be deleted after
+#' @param deleteFile Should the file in `func()$src` be deleted after
 #'   it is sent to the client browser? Generally speaking, if the image is a
-#'   temp file generated within \code{func}, then this should be \code{TRUE};
-#'   if the image is not a temp file, this should be \code{FALSE}.
+#'   temp file generated within `func`, then this should be `TRUE`;
+#'   if the image is not a temp file, this should be `FALSE`.
 #' @param outputArgs A list of arguments to be passed through to the implicit
-#'   call to \code{\link{imageOutput}} when \code{renderImage} is used in an
+#'   call to [imageOutput()] when `renderImage` is used in an
 #'   interactive R Markdown document.
 #' @export
 #'
@@ -295,30 +295,30 @@ renderImage <- function(expr, env=parent.frame(), quoted=FALSE,
 #'
 #' Makes a reactive version of the given function that captures any printed
 #' output, and also captures its printable result (unless
-#' \code{\link[base]{invisible}}), into a string. The resulting function is suitable
-#' for assigning to an  \code{output} slot.
+#' [base::invisible()]), into a string. The resulting function is suitable
+#' for assigning to an  `output` slot.
 #'
-#' The corresponding HTML output tag can be anything (though \code{pre} is
+#' The corresponding HTML output tag can be anything (though `pre` is
 #' recommended if you need a monospace font and whitespace preserved) and should
-#' have the CSS class name \code{shiny-text-output}.
+#' have the CSS class name `shiny-text-output`.
 #'
-#' The result of executing \code{func} will be printed inside a
-#' \code{\link[utils]{capture.output}} call.
+#' The result of executing `func` will be printed inside a
+#' [utils::capture.output()] call.
 #'
 #' Note that unlike most other Shiny output functions, if the given function
-#' returns \code{NULL} then \code{NULL} will actually be visible in the output.
-#' To display nothing, make your function return \code{\link[base]{invisible}()}.
+#' returns `NULL` then `NULL` will actually be visible in the output.
+#' To display nothing, make your function return [base::invisible()].
 #'
 #' @param expr An expression that may print output and/or return a printable R
 #'   object.
-#' @param env The environment in which to evaluate \code{expr}.
-#' @param quoted Is \code{expr} a quoted expression (with \code{quote()})? This
+#' @param env The environment in which to evaluate `expr`.
+#' @param quoted Is `expr` a quoted expression (with `quote()`)? This
 #'   is useful if you want to save an expression in a variable.
-#' @param width The value for \code{\link[base]{options}('width')}.
+#' @param width The value for `[options][base::options]('width')`.
 #' @param outputArgs A list of arguments to be passed through to the implicit
-#'   call to \code{\link{verbatimTextOutput}} when \code{renderPrint} is used
+#'   call to [verbatimTextOutput()] when `renderPrint` is used
 #'   in an interactive R Markdown document.
-#' @seealso \code{\link{renderText}} for displaying the value returned from a
+#' @seealso [renderText()] for displaying the value returned from a
 #'   function, instead of the printed output.
 #'
 #' @example res/text-example.R
@@ -398,38 +398,40 @@ createRenderPrintPromiseDomain <- function(width) {
 #' Text Output
 #'
 #' Makes a reactive version of the given function that also uses
-#' \code{\link[base]{cat}} to turn its result into a single-element character
+#' [base::cat()] to turn its result into a single-element character
 #' vector.
 #'
-#' The corresponding HTML output tag can be anything (though \code{pre} is
+#' The corresponding HTML output tag can be anything (though `pre` is
 #' recommended if you need a monospace font and whitespace preserved) and should
-#' have the CSS class name \code{shiny-text-output}.
+#' have the CSS class name `shiny-text-output`.
 #'
-#' The result of executing \code{func} will passed to \code{cat}, inside a
-#' \code{\link[utils]{capture.output}} call.
+#' The result of executing `func` will passed to `cat`, inside a
+#' [utils::capture.output()] call.
 #'
 #' @param expr An expression that returns an R object that can be used as an
-#'   argument to \code{cat}.
-#' @param env The environment in which to evaluate \code{expr}.
-#' @param quoted Is \code{expr} a quoted expression (with \code{quote()})? This
+#'   argument to `cat`.
+#' @param env The environment in which to evaluate `expr`.
+#' @param quoted Is `expr` a quoted expression (with `quote()`)? This
 #'   is useful if you want to save an expression in a variable.
 #' @param outputArgs A list of arguments to be passed through to the implicit
-#'   call to \code{\link{textOutput}} when \code{renderText} is used in an
+#'   call to [textOutput()] when `renderText` is used in an
 #'   interactive R Markdown document.
+#' @param sep A separator passed to `cat` to be appended after each
+#'   element.
 #'
-#' @seealso \code{\link{renderPrint}} for capturing the print output of a
+#' @seealso [renderPrint()] for capturing the print output of a
 #'   function, rather than the returned text value.
 #'
 #' @example res/text-example.R
 #' @export
 renderText <- function(expr, env=parent.frame(), quoted=FALSE,
-                       outputArgs=list()) {
+                       outputArgs=list(), sep=" ") {
   installExprFunction(expr, "func", env, quoted)
 
   createRenderFunction(
     func,
     function(value, session, name, ...) {
-      paste(utils::capture.output(cat(value)), collapse="\n")
+      paste(utils::capture.output(cat(value, sep=sep)), collapse="\n")
     },
     textOutput, outputArgs
   )
@@ -439,19 +441,19 @@ renderText <- function(expr, env=parent.frame(), quoted=FALSE,
 #'
 #' Renders reactive HTML using the Shiny UI library.
 #'
-#' The corresponding HTML output tag should be \code{div} and have the CSS class
-#' name \code{shiny-html-output} (or use \code{\link{uiOutput}}).
+#' The corresponding HTML output tag should be `div` and have the CSS class
+#' name `shiny-html-output` (or use [uiOutput()]).
 #'
-#' @param expr An expression that returns a Shiny tag object, \code{\link{HTML}},
+#' @param expr An expression that returns a Shiny tag object, [HTML()],
 #'   or a list of such objects.
-#' @param env The environment in which to evaluate \code{expr}.
-#' @param quoted Is \code{expr} a quoted expression (with \code{quote()})? This
+#' @param env The environment in which to evaluate `expr`.
+#' @param quoted Is `expr` a quoted expression (with `quote()`)? This
 #'   is useful if you want to save an expression in a variable.
 #' @param outputArgs A list of arguments to be passed through to the implicit
-#'   call to \code{\link{uiOutput}} when \code{renderUI} is used in an
+#'   call to [uiOutput()] when `renderUI` is used in an
 #'   interactive R Markdown document.
 #'
-#' @seealso \code{\link{uiOutput}}
+#' @seealso [uiOutput()]
 #' @export
 #' @examples
 #' ## Only run examples in interactive R sessions
@@ -494,25 +496,25 @@ renderUI <- function(expr, env=parent.frame(), quoted=FALSE,
 #' file downloads (for example, downloading the currently visible data as a CSV
 #' file). Both filename and contents can be calculated dynamically at the time
 #' the user initiates the download. Assign the return value to a slot on
-#' \code{output} in your server function, and in the UI use
-#' \code{\link{downloadButton}} or \code{\link{downloadLink}} to make the
+#' `output` in your server function, and in the UI use
+#' [downloadButton()] or [downloadLink()] to make the
 #' download available.
 #'
 #' @param filename A string of the filename, including extension, that the
 #'   user's web browser should default to when downloading the file; or a
 #'   function that returns such a string. (Reactive values and functions may be
 #'   used from this function.)
-#' @param content A function that takes a single argument \code{file} that is a
+#' @param content A function that takes a single argument `file` that is a
 #'   file path (string) of a nonexistent temp file, and writes the content to
 #'   that file path. (Reactive values and functions may be used from this
 #'   function.)
 #' @param contentType A string of the download's
-#'   \href{http://en.wikipedia.org/wiki/Internet_media_type}{content type}, for
-#'   example \code{"text/csv"} or \code{"image/png"}. If \code{NULL} or
-#'   \code{NA}, the content type will be guessed based on the filename
-#'   extension, or \code{application/octet-stream} if the extension is unknown.
+#'   [content type](http://en.wikipedia.org/wiki/Internet_media_type), for
+#'   example `"text/csv"` or `"image/png"`. If `NULL` or
+#'   `NA`, the content type will be guessed based on the filename
+#'   extension, or `application/octet-stream` if the extension is unknown.
 #' @param outputArgs A list of arguments to be passed through to the implicit
-#'   call to \code{\link{downloadButton}} when \code{downloadHandler} is used
+#'   call to [downloadButton()] when `downloadHandler` is used
 #'   in an interactive R Markdown document.
 #'
 #' @examples
@@ -556,12 +558,12 @@ downloadHandler <- function(filename, content, contentType=NA, outputArgs=list()
 #' searching, filtering, and sorting can be done on the R side using Shiny as
 #' the server infrastructure.
 #'
-#' For the \code{options} argument, the character elements that have the class
-#' \code{"AsIs"} (usually returned from \code{\link[base]{I}()}) will be evaluated in
+#' For the `options` argument, the character elements that have the class
+#' `"AsIs"` (usually returned from [base::I()]) will be evaluated in
 #' JavaScript. This is useful when the type of the option value is not supported
 #' in JSON, e.g., a JavaScript function, which can be obtained by evaluating a
 #' character string. Note this only applies to the root-level elements of the
-#' options list, and the \code{I()} notation does not work for lower-level
+#' options list, and the `I()` notation does not work for lower-level
 #' elements in the list.
 #' @param expr An expression that returns a data frame or a matrix.
 #' @param options A list of initialization options to be passed to DataTables,
@@ -570,25 +572,25 @@ downloadHandler <- function(filename, content, contentType=NA, outputArgs=list()
 #'   frequent search requests).
 #' @param callback A JavaScript function to be applied to the DataTable object.
 #'   This is useful for DataTables plug-ins, which often require the DataTable
-#'   instance to be available (\url{http://datatables.net/extensions/}).
-#' @param escape Whether to escape HTML entities in the table: \code{TRUE} means
-#'   to escape the whole table, and \code{FALSE} means not to escape it.
+#'   instance to be available (<http://datatables.net/extensions/>).
+#' @param escape Whether to escape HTML entities in the table: `TRUE` means
+#'   to escape the whole table, and `FALSE` means not to escape it.
 #'   Alternatively, you can specify numeric column indices or column names to
-#'   indicate which columns to escape, e.g. \code{1:5} (the first 5 columns),
-#'   \code{c(1, 3, 4)}, or \code{c(-1, -3)} (all columns except the first and
-#'   third), or \code{c('Species', 'Sepal.Length')}.
+#'   indicate which columns to escape, e.g. `1:5` (the first 5 columns),
+#'   `c(1, 3, 4)`, or `c(-1, -3)` (all columns except the first and
+#'   third), or `c('Species', 'Sepal.Length')`.
 #' @param outputArgs A list of arguments to be passed through to the implicit
-#'   call to \code{\link{dataTableOutput}} when \code{renderDataTable} is used
+#'   call to [dataTableOutput()] when `renderDataTable` is used
 #'   in an interactive R Markdown document.
 #'
-#' @references \url{http://datatables.net}
+#' @references <http://datatables.net>
 #' @note This function only provides the server-side version of DataTables
 #'   (using R to process the data object on the server side). There is a
-#'   separate package \pkg{DT} (\url{https://github.com/rstudio/DT}) that allows
+#'   separate package \pkg{DT} (<https://github.com/rstudio/DT>) that allows
 #'   you to create both server-side and client-side DataTables, and supports
-#'   additional DataTables features. Consider using \code{DT::renderDataTable()}
-#'   and \code{DT::dataTableOutput()} (see
-#'   \url{http://rstudio.github.io/DT/shiny.html} for more information).
+#'   additional DataTables features. Consider using `DT::renderDataTable()`
+#'   and `DT::dataTableOutput()` (see
+#'   <http://rstudio.github.io/DT/shiny.html> for more information).
 #' @export
 #' @inheritParams renderPlot
 #' @examples
@@ -707,13 +709,19 @@ checkDT9 <- function(options) {
 
 # Deprecated functions ------------------------------------------------------
 
+#' Deprecated reactive functions
+#' @name deprecatedReactives
+#' @keywords internal
+NULL
+
 #' Plot output (deprecated)
 #'
-#' See \code{\link{renderPlot}}.
+#' `reactivePlot` has been replaced by [renderPlot()].
 #' @param func A function.
 #' @param width Width.
 #' @param height Height.
 #' @param ... Other arguments to pass on.
+#' @rdname deprecatedReactives
 #' @export
 reactivePlot <- function(func, width='auto', height='auto', ...) {
   shinyDeprecated(new="renderPlot")
@@ -722,9 +730,8 @@ reactivePlot <- function(func, width='auto', height='auto', ...) {
 
 #' Table output (deprecated)
 #'
-#' See \code{\link{renderTable}}.
-#' @param func A function.
-#' @param ... Other arguments to pass on.
+#' `reactiveTable` has been replaced by [renderTable()].
+#' @rdname deprecatedReactives
 #' @export
 reactiveTable <- function(func, ...) {
   shinyDeprecated(new="renderTable")
@@ -733,8 +740,8 @@ reactiveTable <- function(func, ...) {
 
 #' Print output (deprecated)
 #'
-#' See \code{\link{renderPrint}}.
-#' @param func A function.
+#' `reactivePrint` has been replaced by [renderPrint()].
+#' @rdname deprecatedReactives
 #' @export
 reactivePrint <- function(func) {
   shinyDeprecated(new="renderPrint")
@@ -743,8 +750,8 @@ reactivePrint <- function(func) {
 
 #' UI output (deprecated)
 #'
-#' See \code{\link{renderUI}}.
-#' @param func A function.
+#' `reactiveUI` has been replaced by [renderUI()].
+#' @rdname deprecatedReactives
 #' @export
 reactiveUI <- function(func) {
   shinyDeprecated(new="renderUI")
@@ -753,8 +760,8 @@ reactiveUI <- function(func) {
 
 #' Text output (deprecated)
 #'
-#' See \code{\link{renderText}}.
-#' @param func A function.
+#' `reactiveText` has been replaced by [renderText()].
+#' @rdname deprecatedReactives
 #' @export
 reactiveText <- function(func) {
   shinyDeprecated(new="renderText")

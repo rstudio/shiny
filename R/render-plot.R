@@ -1,48 +1,50 @@
 #' Plot Output
 #'
-#' Renders a reactive plot that is suitable for assigning to an \code{output}
+#' Renders a reactive plot that is suitable for assigning to an `output`
 #' slot.
 #'
-#' The corresponding HTML output tag should be \code{div} or \code{img} and have
-#' the CSS class name \code{shiny-plot-output}.
+#' The corresponding HTML output tag should be `div` or `img` and have
+#' the CSS class name `shiny-plot-output`.
 #'
 #' @section Interactive plots:
 #'
-#'   With ggplot2 graphics, the code in \code{renderPlot} should return a ggplot
+#'   With ggplot2 graphics, the code in `renderPlot` should return a ggplot
 #'   object; if instead the code prints the ggplot2 object with something like
-#'   \code{print(p)}, then the coordinates for interactive graphics will not be
+#'   `print(p)`, then the coordinates for interactive graphics will not be
 #'   properly scaled to the data space.
 #'
-#'   See \code{\link{plotOutput}} for more information about interactive plots.
+#'   See [plotOutput()] for more information about interactive plots.
 #'
 #' @seealso For the corresponding client-side output function, and example
-#'   usage, see \code{\link{plotOutput}}. For more details on how the plots are
-#'   generated, and how to control the output, see \code{\link{plotPNG}}.
+#'   usage, see [plotOutput()]. For more details on how the plots are
+#'   generated, and how to control the output, see [plotPNG()].
+#'   [renderCachedPlot()] offers a way to cache generated plots to
+#'   expedite the rendering of identical plots.
 #'
 #' @param expr An expression that generates a plot.
 #' @param width,height The width/height of the rendered plot, in pixels; or
-#'   \code{'auto'} to use the \code{offsetWidth}/\code{offsetHeight} of the HTML
+#'   `'auto'` to use the `offsetWidth`/`offsetHeight` of the HTML
 #'   element that is bound to this plot. You can also pass in a function that
-#'   returns the width/height in pixels or \code{'auto'}; in the body of the
+#'   returns the width/height in pixels or `'auto'`; in the body of the
 #'   function you may reference reactive values and functions. When rendering an
 #'   inline plot, you must provide numeric values (in pixels) to both
-#'   \code{width} and \code{height}.
+#'   `width` and `height`.
 #' @param res Resolution of resulting plot, in pixels per inch. This value is
-#'   passed to \code{\link[grDevices]{png}}. Note that this affects the resolution of PNG
+#'   passed to [grDevices::png()]. Note that this affects the resolution of PNG
 #'   rendering in R; it won't change the actual ppi of the browser.
-#' @param ... Arguments to be passed through to \code{\link[grDevices]{png}}.
+#' @param ... Arguments to be passed through to [grDevices::png()].
 #'   These can be used to set the width, height, background color, etc.
-#' @param env The environment in which to evaluate \code{expr}.
-#' @param quoted Is \code{expr} a quoted expression (with \code{quote()})? This
+#' @param env The environment in which to evaluate `expr`.
+#' @param quoted Is `expr` a quoted expression (with `quote()`)? This
 #'   is useful if you want to save an expression in a variable.
-#' @param execOnResize If \code{FALSE} (the default), then when a plot is
-#'   resized, Shiny will \emph{replay} the plot drawing commands with
-#'   \code{\link[grDevices]{replayPlot}()} instead of re-executing \code{expr}.
+#' @param execOnResize If `FALSE` (the default), then when a plot is
+#'   resized, Shiny will *replay* the plot drawing commands with
+#'   [grDevices::replayPlot()] instead of re-executing `expr`.
 #'   This can result in faster plot redrawing, but there may be rare cases where
 #'   it is undesirable. If you encounter problems when resizing a plot, you can
-#'   have Shiny re-execute the code on resize by setting this to \code{TRUE}.
+#'   have Shiny re-execute the code on resize by setting this to `TRUE`.
 #' @param outputArgs A list of arguments to be passed through to the implicit
-#'   call to \code{\link{plotOutput}} when \code{renderPlot} is used in an
+#'   call to [plotOutput()] when `renderPlot` is used in an
 #'   interactive R Markdown document.
 #' @export
 renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
@@ -353,62 +355,88 @@ custom_print.ggplot <- function(x) {
 # With a faceted ggplot2 plot, the outer list contains two objects, each of
 # which represents one panel. In this example, there is one panelvar, but there
 # can be up to two of them.
-# mtc <- mtcars
-# mtc$am <- factor(mtc$am)
-# p <- print(ggplot(mtc, aes(wt, mpg)) + geom_point() + facet_wrap(~ am))
-# str(getGgplotCoordmap(p, 400, 300, 72))
+# p <- print(ggplot(mpg) + geom_point(aes(fl, cty), alpha = 0.2) + facet_wrap(~drv, scales = "free_x"))
+# str(getGgplotCoordmap(p, 500, 400, 72))
 # List of 2
-#  $ panels:List of 2
+#  $ panels:List of 3
 #   ..$ :List of 8
 #   .. ..$ panel     : num 1
 #   .. ..$ row       : int 1
 #   .. ..$ col       : int 1
 #   .. ..$ panel_vars:List of 1
-#   .. .. ..$ panelvar1: Factor w/ 2 levels "0","1": 1
+#   .. .. ..$ panelvar1: chr "4"
 #   .. ..$ log       :List of 2
 #   .. .. ..$ x: NULL
 #   .. .. ..$ y: NULL
-#   .. ..$ domain    :List of 4
-#   .. .. ..$ left  : num 1.32
-#   .. .. ..$ right : num 5.62
-#   .. .. ..$ bottom: num 9.22
-#   .. .. ..$ top   : num 35.1
+#   .. ..$ domain    :List of 5
+#   .. .. ..$ left           : num 0.4
+#   .. .. ..$ right          : num 4.6
+#   .. .. ..$ bottom         : num 7.7
+#   .. .. ..$ top            : num 36.3
+#   .. .. ..$ discrete_limits:List of 1
+#   .. .. .. ..$ x: chr [1:4] "d" "e" "p" "r"
 #   .. ..$ mapping   :List of 3
-#   .. .. ..$ x        : chr "wt"
-#   .. .. ..$ y        : chr "mpg"
-#   .. .. ..$ panelvar1: chr "am"
+#   .. .. ..$ x        : chr "fl"
+#   .. .. ..$ y        : chr "cty"
+#   .. .. ..$ panelvar1: chr "drv"
 #   .. ..$ range     :List of 4
 #   .. .. ..$ left  : num 33.3
-#   .. .. ..$ right : num 191
-#   .. .. ..$ bottom: num 328
+#   .. .. ..$ right : num 177
+#   .. .. ..$ bottom: num 448
 #   .. .. ..$ top   : num 23.1
 #   ..$ :List of 8
 #   .. ..$ panel     : num 2
 #   .. ..$ row       : int 1
 #   .. ..$ col       : int 2
 #   .. ..$ panel_vars:List of 1
-#   .. .. ..$ panelvar1: Factor w/ 2 levels "0","1": 2
+#   .. .. ..$ panelvar1: chr "f"
 #   .. ..$ log       :List of 2
 #   .. .. ..$ x: NULL
 #   .. .. ..$ y: NULL
-#   .. ..$ domain    :List of 4
-#   .. .. ..$ left  : num 1.32
-#   .. .. ..$ right : num 5.62
-#   .. .. ..$ bottom: num 9.22
-#   .. .. ..$ top   : num 35.1
+#   .. ..$ domain    :List of 5
+#   .. .. ..$ left           : num 0.4
+#   .. .. ..$ right          : num 5.6
+#   .. .. ..$ bottom         : num 7.7
+#   .. .. ..$ top            : num 36.3
+#   .. .. ..$ discrete_limits:List of 1
+#   .. .. .. ..$ x: chr [1:5] "c" "d" "e" "p" ...
 #   .. ..$ mapping   :List of 3
-#   .. .. ..$ x        : chr "wt"
-#   .. .. ..$ y        : chr "mpg"
-#   .. .. ..$ panelvar1: chr "am"
+#   .. .. ..$ x        : chr "fl"
+#   .. .. ..$ y        : chr "cty"
+#   .. .. ..$ panelvar1: chr "drv"
 #   .. ..$ range     :List of 4
-#   .. .. ..$ left  : num 197
-#   .. .. ..$ right : num 355
-#   .. .. ..$ bottom: num 328
+#   .. .. ..$ left  : num 182
+#   .. .. ..$ right : num 326
+#   .. .. ..$ bottom: num 448
+#   .. .. ..$ top   : num 23.1
+#   ..$ :List of 8
+#   .. ..$ panel     : num 3
+#   .. ..$ row       : int 1
+#   .. ..$ col       : int 3
+#   .. ..$ panel_vars:List of 1
+#   .. .. ..$ panelvar1: chr "r"
+#   .. ..$ log       :List of 2
+#   .. .. ..$ x: NULL
+#   .. .. ..$ y: NULL
+#   .. ..$ domain    :List of 5
+#   .. .. ..$ left           : num 0.4
+#   .. .. ..$ right          : num 3.6
+#   .. .. ..$ bottom         : num 7.7
+#   .. .. ..$ top            : num 36.3
+#   .. .. ..$ discrete_limits:List of 1
+#   .. .. .. ..$ x: chr [1:3] "e" "p" "r"
+#   .. ..$ mapping   :List of 3
+#   .. .. ..$ x        : chr "fl"
+#   .. .. ..$ y        : chr "cty"
+#   .. .. ..$ panelvar1: chr "drv"
+#   .. ..$ range     :List of 4
+#   .. .. ..$ left  : num 331
+#   .. .. ..$ right : num 475
+#   .. .. ..$ bottom: num 448
 #   .. .. ..$ top   : num 23.1
 #  $ dims  :List of 2
-#   ..$ width : num 400
-#   ..$ height: num 300
-
+#   ..$ width : num 500
+#   ..$ height: num 400
 
 getCoordmap <- function(x, width, height, res) {
   if (inherits(x, "ggplot_build_gtable")) {
@@ -570,6 +598,9 @@ find_panel_info_api <- function(b) {
       domain$bottom <- -domain$bottom
     }
 
+    domain <- add_discrete_limits(domain, xscale, "x")
+    domain <- add_discrete_limits(domain, yscale, "y")
+
     domain
   }
 
@@ -688,6 +719,9 @@ find_panel_info_non_api <- function(b, ggplot_format) {
       domain$top    <- -domain$top
       domain$bottom <- -domain$bottom
     }
+
+    domain <- add_discrete_limits(domain, xscale, "x")
+    domain <- add_discrete_limits(domain, yscale, "y")
 
     domain
   }
@@ -994,4 +1028,24 @@ find_panel_ranges <- function(g, res) {
       top    = y_pos[p$t - 1]
     )
   })
+}
+
+# Remember the x/y limits of discrete axes. This info is
+# necessary to properly inverse map the numeric (i.e., trained)
+# positions back to the data scale, for example:
+# https://github.com/rstudio/shiny/pull/2410#issuecomment-487783828
+# https://github.com/rstudio/shiny/pull/2410#issuecomment-488100881
+#
+# Eventually, we may want to consider storing the entire ggplot2
+# object server-side and querying information from that object
+# as we need it...that's the only way we'll ever be able to
+# faithfully brush examples like this:
+# https://github.com/rstudio/shiny/issues/2411
+add_discrete_limits <- function(domain, scale, var = "x") {
+  var <- match.arg(var, c("x", "y"))
+  if (!is.function(scale$is_discrete) || !is.function(scale$get_limits)) return(domain)
+  if (scale$is_discrete()) {
+    domain$discrete_limits[[var]] <- scale$get_limits()
+  }
+  domain
 }

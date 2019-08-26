@@ -2,19 +2,43 @@
 NULL
 
 reactLogHandler <- function(req) {
-  if (!identical(req$PATH_INFO, '/reactlog'))
-    return(NULL)
-
-  if (!isTRUE(getOption('shiny.reactlog'))) {
+  if (! rLog$isLogging()) {
     return(NULL)
   }
 
-  sessionToken <- parseQueryString(req$QUERY_STRING)$s
+  if (identical(req$PATH_INFO, "/reactlog/mark")) {
+    sessionToken <- parseQueryString(req$QUERY_STRING)$s
+    shinysession <- appsByToken$get(sessionToken)
 
-  return(httpResponse(
-    status=200,
-    content=list(file=renderReactLog(sessionToken), owned=TRUE)
-  ))
+    # log time
+    withReactiveDomain(shinysession, {
+      rLog$userMark(getDefaultReactiveDomain())
+    })
+
+    return(httpResponse(
+      status = 200,
+      content = "marked",
+      content_type = "text/plain"
+    ))
+
+  } else if (identical(req$PATH_INFO, "/reactlog")){
+
+    sessionToken <- parseQueryString(req$QUERY_STRING)$s
+
+    # `renderReactLog` will check/throw if reactlog doesn't exist
+    reactlogFile <- renderReactlog(sessionToken)
+
+    return(httpResponse(
+      status = 200,
+      content = list(
+        file = reactlogFile,
+        owned = TRUE
+      )
+    ))
+
+  } else {
+    return(NULL)
+  }
 }
 
 sessionHandler <- function(req) {

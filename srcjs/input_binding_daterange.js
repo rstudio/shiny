@@ -63,7 +63,7 @@ $.extend(dateRangeInputBinding, dateInputBinding, {
     else if (startview === 0)  startview = 'month';
 
     return {
-      label:       $el.find('label[for="' + $escape(el.id) + '"]').text(),
+      label:       this._getLabelNode(el).text(),
       value:       this.getValue(el),
       valueString: [ $startinput.val(), $endinput.val() ],
       min:         min,
@@ -80,8 +80,7 @@ $.extend(dateRangeInputBinding, dateInputBinding, {
     var $startinput = $inputs.eq(0);
     var $endinput   = $inputs.eq(1);
 
-    if (data.hasOwnProperty('label'))
-      $el.find('label[for="' + $escape(el.id) + '"]').text(data.label);
+    updateLabel(data.label, this._getLabelNode(el));
 
     if (data.hasOwnProperty('min')) {
       this._setMin($startinput[0], data.min);
@@ -140,6 +139,9 @@ $.extend(dateRangeInputBinding, dateInputBinding, {
   },
   unsubscribe: function(el) {
     $(el).off('.dateRangeInputBinding');
-  }
+  },
+  _getLabelNode: function(el) {
+    return $(el).find('label[for="' + $escape(el.id) + '"]');
+  },
 });
 inputBindings.register(dateRangeInputBinding, 'shiny.dateRangeInput');

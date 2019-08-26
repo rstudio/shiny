@@ -60,7 +60,7 @@ way to check for a value "inline" with its first use.
 \strong{Truthy and falsy values}
 
 The terms "truthy" and "falsy" generally indicate whether a value, when
-coerced to a \code{\link[base]{logical}}, is \code{TRUE} or \code{FALSE}. We use
+coerced to a \code{\link[base:logical]{base::logical()}}, is \code{TRUE} or \code{FALSE}. We use
 the term a little loosely here; our usage tries to match the intuitive
 notions of "Is this value missing or available?", or "Has the user provided
 an answer?", or in the case of action buttons, "Has the button been
@@ -73,14 +73,14 @@ To be precise, \code{req} considers a value truthy \emph{unless} it is one
 of:
 
 \itemize{
-  \item{\code{FALSE}}
-  \item{\code{NULL}}
-  \item{\code{""}}
-  \item{An empty atomic vector}
-  \item{An atomic vector that contains only missing values}
-  \item{A logical vector that contains all \code{FALSE} or missing values}
-  \item{An object of class \code{"try-error"}}
-  \item{A value that represents an unclicked \code{\link{actionButton}}}
+\item{\code{FALSE}}
+\item{\code{NULL}}
+\item{\code{""}}
+\item{An empty atomic vector}
+\item{An atomic vector that contains only missing values}
+\item{A logical vector that contains all \code{FALSE} or missing values}
+\item{An object of class \code{"try-error"}}
+\item{A value that represents an unclicked \code{\link[=actionButton]{actionButton()}}}
 }
 
 Note in particular that the value \code{0} is considered truthy, even though
@@ -111,8 +111,8 @@ or update, but the output(s) are left is whatever state they happen to be in
 Note that this is always going to be the case if
 this is used inside an output context (e.g. \code{output$txt <- ...}). It may
 or may not be the case if it is used inside a non-output context (e.g.
-\code{\link{reactive}}, \code{\link{observe}} or \code{\link{observeEvent}})
--- depending on whether or not there is an \code{output$...} that is triggered
+\code{\link[=reactive]{reactive()}}, \code{\link[=observe]{observe()}} or \code{\link[=observeEvent]{observeEvent()}})
+--- depending on whether or not there is an \code{output$...} that is triggered
 as a result of those calls. See the examples below for concrete scenarios.
 }
 \examples{

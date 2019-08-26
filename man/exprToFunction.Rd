@@ -21,9 +21,9 @@ an unquoted expression from two calls back.
 \details{
 If expr is a quoted expression, then this just converts it to a function.
 If expr is a function, then this simply returns expr (and prints a
-  deprecation message).
+deprecation message).
 If expr was a non-quoted expression from two calls back, then this will
-  quote the original expression and convert it to a function.
+quote the original expression and convert it to a function.
 }
 \examples{
 # Example of a new renderer, similar to renderText

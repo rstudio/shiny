@@ -77,5 +77,5 @@ shinyApp(ui, server)
 }
 }
 \seealso{
-\code{\link{shiny-options}}
+\code{\link[=shiny-options]{shiny-options()}}
 }

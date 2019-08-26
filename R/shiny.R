@@ -8,11 +8,11 @@ NULL
 #' prebuilt widgets make it possible to build beautiful, responsive, and
 #' powerful applications with minimal effort.
 #'
-#' The Shiny tutorial at \url{http://shiny.rstudio.com/tutorial/} explains
+#' The Shiny tutorial at <http://shiny.rstudio.com/tutorial/> explains
 #' the framework in depth, walks you through building a simple application, and
 #' includes extensive annotated examples.
 #'
-#' @seealso \link{shiny-options} for documentation about global options.
+#' @seealso [shiny-options] for documentation about global options.
 #'
 #' @name shiny-package
 #' @aliases shiny
@@ -32,20 +32,20 @@ NULL
 #' Global options for Shiny
 #'
 #' There are a number of global options that affect Shiny's behavior. These can
-#' be set with (for example) \code{options(shiny.trace=TRUE)}.
+#' be set with (for example) `options(shiny.trace=TRUE)`.
 #'
 #' \describe{
 #'   \item{shiny.launch.browser}{A boolean which controls the default behavior
-#'     when an app is run. See \code{\link{runApp}} for more information.}
+#'     when an app is run. See [runApp()] for more information.}
 #'   \item{shiny.port}{A port number that Shiny will listen on. See
-#'     \code{\link{runApp}} for more information.}
+#'     [runApp()] for more information.}
 #'   \item{shiny.trace}{Print messages sent between the R server and the web
 #'     browser client to the R console. This is useful for debugging. Possible
-#'     values are \code{"send"} (only print messages sent to the client),
-#'     \code{"recv"} (only print messages received by the server), \code{TRUE}
-#'     (print all messages), or \code{FALSE} (default; don't print any of these
+#'     values are `"send"` (only print messages sent to the client),
+#'     `"recv"` (only print messages received by the server), `TRUE`
+#'     (print all messages), or `FALSE` (default; don't print any of these
 #'     messages).}
-#'   \item{shiny.autoreload}{If \code{TRUE} when a Shiny app is launched, the
+#'   \item{shiny.autoreload}{If `TRUE` when a Shiny app is launched, the
 #'     app directory will be continually monitored for changes to files that
 #'     have the extensions: r, htm, html, js, css, png, jpg, jpeg, gif. If any
 #'     changes are detected, all connected Shiny sessions are reloaded. This
@@ -56,59 +56,59 @@ NULL
 #'
 #'     You can customize the file patterns Shiny will monitor by setting the
 #'     shiny.autoreload.pattern option. For example, to monitor only ui.R:
-#'     \code{options(shiny.autoreload.pattern = glob2rx("ui.R"))}
+#'     `options(shiny.autoreload.pattern = glob2rx("ui.R"))`
 #'
 #'     The default polling interval is 500 milliseconds. You can change this
-#'     by setting e.g. \code{options(shiny.autoreload.interval = 2000)} (every
+#'     by setting e.g. `options(shiny.autoreload.interval = 2000)` (every
 #'     two seconds).}
-#'   \item{shiny.reactlog}{If \code{TRUE}, enable logging of reactive events,
-#'     which can be viewed later with the \code{\link{showReactLog}} function.
+#'   \item{shiny.reactlog}{If `TRUE`, enable logging of reactive events,
+#'     which can be viewed later with the [reactlogShow()] function.
 #'     This incurs a substantial performance penalty and should not be used in
 #'     production.}
 #'   \item{shiny.usecairo}{This is used to disable graphical rendering by the
-#'     Cairo package, if it is installed. See \code{\link{plotPNG}} for more
+#'     Cairo package, if it is installed. See [plotPNG()] for more
 #'     information.}
 #'   \item{shiny.maxRequestSize}{This is a number which specifies the maximum
 #'     web request size, which serves as a size limit for file uploads. If
 #'     unset, the maximum request size defaults to 5MB.}
 #'   \item{shiny.suppressMissingContextError}{Normally, invoking a reactive
-#'     outside of a reactive context (or \code{\link{isolate}()}) results in
-#'     an error. If this is \code{TRUE}, don't error in these cases. This
+#'     outside of a reactive context (or [isolate()]) results in
+#'     an error. If this is `TRUE`, don't error in these cases. This
 #'     should only be used for debugging or demonstrations of reactivity at the
 #'     console.}
 #'   \item{shiny.host}{The IP address that Shiny should listen on. See
-#'     \code{\link{runApp}} for more information.}
+#'     [runApp()] for more information.}
 #'   \item{shiny.json.digits}{The number of digits to use when converting
 #'     numbers to JSON format to send to the client web browser.}
-#'   \item{shiny.minified}{If this is \code{TRUE} or unset (the default), then
-#'     Shiny will use minified JavaScript (\code{shiny.min.js}). If
-#'     \code{FALSE}, then Shiny will use the un-minified JavaScript
-#'     (\code{shiny.js}); this can be useful during development.}
+#'   \item{shiny.minified}{If this is `TRUE` or unset (the default), then
+#'     Shiny will use minified JavaScript (`shiny.min.js`). If
+#'     `FALSE`, then Shiny will use the un-minified JavaScript
+#'     (`shiny.js`); this can be useful during development.}
 #'   \item{shiny.error}{This can be a function which is called when an error
-#'     occurs. For example, \code{options(shiny.error=recover)} will result a
+#'     occurs. For example, `options(shiny.error=recover)` will result a
 #'     the debugger prompt when an error occurs.}
 #'   \item{shiny.table.class}{CSS class names to use for tables.}
 #'   \item{shiny.deprecation.messages}{This controls whether messages for
 #'     deprecated functions in Shiny will be printed. See
-#'     \code{\link{shinyDeprecated}} for more information.}
+#'     [shinyDeprecated()] for more information.}
 #'   \item{shiny.fullstacktrace}{Controls whether "pretty" or full stack traces
 #'     are dumped to the console when errors occur during Shiny app execution.
-#'     The default is \code{FALSE} (pretty stack traces).}
-#'   \item{shiny.stacktraceoffset}{If \code{TRUE}, then Shiny's printed stack
+#'     The default is `FALSE` (pretty stack traces).}
+#'   \item{shiny.stacktraceoffset}{If `TRUE`, then Shiny's printed stack
 #'     traces will display srcrefs one line above their usual location. This is
 #'     an arguably more intuitive arrangement for casual R users, as the name
 #'     of a function appears next to the srcref where it is defined, rather than
 #'     where it is currently being called from.}
-#'   \item{shiny.sanitize.errors}{If \code{TRUE}, then normal errors (i.e.
-#'     errors not wrapped in \code{safeError}) won't show up in the app; a simple
+#'   \item{shiny.sanitize.errors}{If `TRUE`, then normal errors (i.e.
+#'     errors not wrapped in `safeError`) won't show up in the app; a simple
 #'     generic error message is printed instead (the error and strack trace printed
-#'     to the console remain unchanged). The default is \code{FALSE} (unsanitized
+#'     to the console remain unchanged). The default is `FALSE` (unsanitized
 #'     errors).If you want to sanitize errors in general, but you DO want a
-#'     particular error \code{e} to get displayed to the user, then set this option
-#'     to \code{TRUE} and use \code{stop(safeError(e))} for errors you want the
+#'     particular error `e` to get displayed to the user, then set this option
+#'     to `TRUE` and use `stop(safeError(e))` for errors you want the
 #'     user to see.}
-#'   \item{shiny.testmode}{If \code{TRUE}, then enable features for testing Shiny
-#'     applications. If \code{FALSE} (the default), do not enable those features.
+#'   \item{shiny.testmode}{If `TRUE`, then enable features for testing Shiny
+#'     applications. If `FALSE` (the default), do not enable those features.
 #'   }
 #' }
 #' @name shiny-options
@@ -179,78 +179,78 @@ workerId <- local({
 
 #' Session object
 #'
-#' Shiny server functions can optionally include \code{session} as a parameter
-#' (e.g. \code{function(input, output, session)}). The session object is an
+#' Shiny server functions can optionally include `session` as a parameter
+#' (e.g. `function(input, output, session)`). The session object is an
 #' environment that can be used to access information and functionality
 #' relating to the session. The following list describes the items available
-#' in the environment; they can be accessed using the \code{$} operator (for
-#' example, \code{session$clientData$url_search}).
+#' in the environment; they can be accessed using the `$` operator (for
+#' example, `session$clientData$url_search`).
 #'
 #' @return
 #' \item{allowReconnect(value)}{
-#'   If \code{value} is \code{TRUE} and run in a hosting environment (Shiny
+#'   If `value` is `TRUE` and run in a hosting environment (Shiny
 #'   Server or Connect) with reconnections enabled,  then when the session ends
 #'   due to the network connection closing, the client will attempt to
 #'   reconnect to the server. If a reconnection is successful, the browser will
 #'   send all the current input values to the new session on the server, and
 #'   the server will recalculate any outputs and send them back to the client.
-#'   If \code{value} is \code{FALSE}, reconnections will be disabled (this is
-#'   the default state). If \code{"force"}, then the client browser will always
-#'   attempt to reconnect. The only reason to use \code{"force"} is for testing
+#'   If `value` is `FALSE`, reconnections will be disabled (this is
+#'   the default state). If `"force"`, then the client browser will always
+#'   attempt to reconnect. The only reason to use `"force"` is for testing
 #'   on a local connection (without Shiny Server or Connect).
 #' }
 #' \item{clientData}{
-#'   A \code{\link{reactiveValues}} object that contains information about the client.
+#'   A [reactiveValues()] object that contains information about the client.
 #'   \itemize{
-#'     \item{\code{allowDataUriScheme} is a logical value that indicates whether
-#'       the browser is able to handle URIs that use the \code{data:} scheme.
+#'     \item{`allowDataUriScheme` is a logical value that indicates whether
+#'       the browser is able to handle URIs that use the `data:` scheme.
 #'     }
-#'     \item{\code{pixelratio} reports the "device pixel ratio" from the web browser,
+#'     \item{`pixelratio` reports the "device pixel ratio" from the web browser,
 #'       or 1 if none is reported. The value is 2 for Apple Retina displays.
 #'     }
-#'     \item{\code{singletons} - for internal use}
-#'     \item{\code{url_protocol}, \code{url_hostname}, \code{url_port},
-#'       \code{url_pathname}, \code{url_search}, \code{url_hash_initial}
-#'       and \code{url_hash} can be used to get the components of the URL
+#'     \item{`singletons` - for internal use}
+#'     \item{`url_protocol`, `url_hostname`, `url_port`,
+#'       `url_pathname`, `url_search`, `url_hash_initial`
+#'       and `url_hash` can be used to get the components of the URL
 #'       that was requested by the browser to load the Shiny app page.
 #'       These values are from the browser's perspective, so neither HTTP
 #'       proxies nor Shiny Server will affect these values. The
-#'       \code{url_search} value may be used with \code{\link{parseQueryString}}
+#'       `url_search` value may be used with [parseQueryString()]
 #'       to access query string parameters.
 #'     }
 #'   }
-#'   \code{clientData} also contains information about each output.
+#'   `clientData` also contains information about each output.
 #'   \code{output_\var{outputId}_width} and \code{output_\var{outputId}_height}
-#'   give the dimensions (using \code{offsetWidth} and \code{offsetHeight}) of
+#'   give the dimensions (using `offsetWidth` and `offsetHeight`) of
 #'   the DOM element that is bound to \code{\var{outputId}}, and
 #'   \code{output_\var{outputId}_hidden} is a logical that indicates whether
-#'   the element is hidden. These values may be \code{NULL} if the output is
+#'   the element is hidden. These values may be `NULL` if the output is
 #'   not bound.
 #' }
 #' \item{input}{
-#'   The session's \code{input} object (the same as is passed into the Shiny
+#'   The session's `input` object (the same as is passed into the Shiny
 #'   server function as an argument).
 #' }
-#' \item{isClosed()}{A function that returns \code{TRUE} if the client has
+#' \item{isClosed()}{A function that returns `TRUE` if the client has
 #'   disconnected.
 #' }
 #' \item{ns(id)}{
-#'   Server-side version of \code{ns <- \link{NS}(id)}. If bare IDs need to be
-#'   explicitly namespaced for the current module, \code{session$ns("name")}
+#'   Server-side version of [`ns <- NS(id)`][NS]. If bare IDs need to be
+#'   explicitly namespaced for the current module, `session$ns("name")`
 #'   will return the fully-qualified ID.
 #' }
 #' \item{onEnded(callback)}{
-#'   Synonym for \code{onSessionEnded}.
+#'   Synonym for `onSessionEnded`.
 #' }
 #' \item{onFlush(func, once=TRUE)}{
-#'   Registers a function to be called before the next time (if \code{once=TRUE})
-#'   or every time (if \code{once=FALSE}) Shiny flushes the reactive system.
+#'   Registers a function to be called before the next time (if `once=TRUE`)
+#'   or every time (if `once=FALSE`) Shiny flushes the reactive system.
 #'   Returns a function that can be called with no arguments to cancel the
 #'   registration.
 #' }
 #' \item{onFlushed(func, once=TRUE)}{
-#'   Registers a function to be called after the next time (if \code{once=TRUE})
-#'   or every time (if \code{once=FALSE}) Shiny flushes the reactive system.
+#'   Registers a function to be called after the next time (if `once=TRUE`)
+#'   or every time (if `once=FALSE`) Shiny flushes the reactive system.
 #'   Returns a function that can be called with no arguments to cancel the
 #'   registration.
 #' }
@@ -260,7 +260,7 @@ workerId <- local({
 #'   registration.
 #' }
 #' \item{output}{
-#'   The session's \code{output} object (the same as is passed into the Shiny
+#'   The session's `output` object (the same as is passed into the Shiny
 #'   server function as an argument).
 #' }
 #' \item{reactlog}{
@@ -268,13 +268,13 @@ workerId <- local({
 #' }
 #' \item{registerDataObj(name, data, filterFunc)}{
 #'   Publishes any R object as a URL endpoint that is unique to this session.
-#'   \code{name} must be a single element character vector; it will be used
-#'   to form part of the URL. \code{filterFunc} must be a function that takes
-#'   two arguments: \code{data} (the value that was passed into
-#'   \code{registerDataObj}) and \code{req} (an environment that implements
-#'   the Rook specification for HTTP requests). \code{filterFunc} will be
+#'   `name` must be a single element character vector; it will be used
+#'   to form part of the URL. `filterFunc` must be a function that takes
+#'   two arguments: `data` (the value that was passed into
+#'   `registerDataObj`) and `req` (an environment that implements
+#'   the Rook specification for HTTP requests). `filterFunc` will be
 #'   called with these values whenever an HTTP request is made to the URL
-#'   endpoint. The return value of \code{filterFunc} should be a Rook-style
+#'   endpoint. The return value of `filterFunc` should be a Rook-style
 #'   response.
 #' }
 #' \item{reload()}{
@@ -291,35 +291,35 @@ workerId <- local({
 #'   session-specific data they want.
 #' }
 #' \item{resetBrush(brushId)}{
-#'   Resets/clears the brush with the given \code{brushId}, if it exists on
-#'   any \code{imageOutput} or \code{plotOutput} in the app.
+#'   Resets/clears the brush with the given `brushId`, if it exists on
+#'   any `imageOutput` or `plotOutput` in the app.
 #' }
 #' \item{sendCustomMessage(type, message)}{
-#'   Sends a custom message to the web page. \code{type} must be a
+#'   Sends a custom message to the web page. `type` must be a
 #'   single-element character vector giving the type of message, while
-#'   \code{message} can be any jsonlite-encodable value. Custom messages
+#'   `message` can be any jsonlite-encodable value. Custom messages
 #'   have no meaning to Shiny itself; they are used soley to convey information
 #'   to custom JavaScript logic in the browser. You can do this by adding
 #'   JavaScript code to the browser that calls
 #'   \code{Shiny.addCustomMessageHandler(type, function(message){...})}
 #'   as the page loads; the function you provide to
-#'   \code{addCustomMessageHandler} will be invoked each time
-#'   \code{sendCustomMessage} is called on the server.
+#'   `addCustomMessageHandler` will be invoked each time
+#'   `sendCustomMessage` is called on the server.
 #' }
 #' \item{sendBinaryMessage(type, message)}{
-#'   Similar to \code{sendCustomMessage}, but the message must be a raw vector
+#'   Similar to `sendCustomMessage`, but the message must be a raw vector
 #'   and the registration method on the client is
 #'   \code{Shiny.addBinaryMessageHandler(type, function(message){...})}. The
 #'   message argument on the client will be a
-#'   \href{https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/DataView}{DataView}.
+#'   [DataView](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/DataView).
 #' }
 #' \item{sendInputMessage(inputId, message)}{
 #'   Sends a message to an input on the session's client web page; if the input
 #'   is present and bound on the page at the time the message is received, then
-#'   the input binding object's \code{receiveMessage(el, message)} method will
-#'   be called. \code{sendInputMessage} should generally not be called directly
+#'   the input binding object's `receiveMessage(el, message)` method will
+#'   be called. `sendInputMessage` should generally not be called directly
 #'   from Shiny apps, but through friendlier wrapper functions like
-#'   \code{\link{updateTextInput}}.
+#'   [updateTextInput()].
 #' }
 #' \item{setBookmarkExclude(names)}{
 #'   Set input names to be excluded from bookmarking.
@@ -351,10 +351,10 @@ workerId <- local({
 #' \item{getTestSnapshotUrl(input=TRUE, output=TRUE, export=TRUE,
 #'   format="json")}{
 #'   Returns a URL for the test snapshots. Only has an effect when the
-#'   \code{shiny.testmode} option is set to TRUE. For the input, output, and
+#'   `shiny.testmode` option is set to TRUE. For the input, output, and
 #'   export arguments, TRUE means to return all of these values. It is also
 #'   possible to specify by name which values to return by providing a
-#'   character vector, as in \code{input=c("x", "y")}. The format can be
+#'   character vector, as in `input=c("x", "y")`. The format can be
 #'   "rds" or "json".
 #' }
 #'
@@ -363,26 +363,26 @@ NULL
 
 #' Namespaced IDs for inputs/outputs
 #'
-#' The \code{NS} function creates namespaced IDs out of bare IDs, by joining
-#' them using \code{ns.sep} as the delimiter. It is intended for use in Shiny
-#' modules. See \url{http://shiny.rstudio.com/articles/modules.html}.
+#' The `NS` function creates namespaced IDs out of bare IDs, by joining
+#' them using `ns.sep` as the delimiter. It is intended for use in Shiny
+#' modules. See <http://shiny.rstudio.com/articles/modules.html>.
 #'
 #' Shiny applications use IDs to identify inputs and outputs. These IDs must be
 #' unique within an application, as accidentally using the same input/output ID
 #' more than once will result in unexpected behavior. The traditional solution
-#' for preventing name collisions is \emph{namespaces}; a namespace is to an ID
-#' as a directory is to a file. Use the \code{NS} function to turn a bare ID
-#' into a namespaced one, by combining them with \code{ns.sep} in between.
+#' for preventing name collisions is *namespaces*; a namespace is to an ID
+#' as a directory is to a file. Use the `NS` function to turn a bare ID
+#' into a namespaced one, by combining them with `ns.sep` in between.
 #'
 #' @param namespace The character vector to use for the namespace. This can have
 #'   any length, though a single element is most common. Length 0 will cause the
-#'   \code{id} to be returned without a namespace, and length 2 will be
+#'   `id` to be returned without a namespace, and length 2 will be
 #'   interpreted as multiple namespaces, in increasing order of specificity
 #'   (i.e. starting with the top-level namespace).
 #' @param id The id string to be namespaced (optional).
-#' @return If \code{id} is missing, returns a function that expects an id string
+#' @return If `id` is missing, returns a function that expects an id string
 #'   as its only argument and returns that id with the namespace prepended.
-#' @seealso \url{http://shiny.rstudio.com/articles/modules.html}
+#' @seealso <http://shiny.rstudio.com/articles/modules.html>
 #' @export
 NS <- function(namespace, id = NULL) {
   if (length(namespace) == 0)
@@ -513,8 +513,7 @@ ShinySession <- R6Class(
       # in the web page; in these cases, there's no output_foo_hidden flag,
       # and hidden should be TRUE. In other words, NULL and TRUE should map to
       # TRUE, FALSE should map to FALSE.
-      hidden <- private$.clientData$.values[[paste("output_", name, "_hidden",
-                                           sep="")]]
+      hidden <- private$.clientData$.values$get(paste0("output_", name, "_hidden"))
       if (is.null(hidden)) hidden <- TRUE
 
       return(hidden && private$getOutputOption(name, 'suspendWhenHidden', TRUE))
@@ -576,7 +575,7 @@ ShinySession <- R6Class(
 
             # Apply preprocessor functions for inputs that have them.
             values$input <- lapply(
-              setNames(names(values$input), names(values$input)),
+              stats::setNames(names(values$input), names(values$input)),
               function(name) {
                 preprocess <- private$getSnapshotPreprocessInput(name)
                 preprocess(values$input[[name]])
@@ -604,7 +603,7 @@ ShinySession <- R6Class(
 
             # Apply snapshotPreprocess functions for outputs that have them.
             values$output <- lapply(
-              setNames(names(values$output), names(values$output)),
+              stats::setNames(names(values$output), names(values$output)),
               function(name) {
                 preprocess <- private$getSnapshotPreprocessOutput(name)
                 preprocess(values$output[[name]])
@@ -640,7 +639,7 @@ ShinySession <- R6Class(
           # that the resulting object is represented as an object in JSON
           # instead of an array, and so that the RDS data structure is of a
           # consistent type.
-          values <- lapply(values, asNamedVector)
+          values <- lapply(values, asNamed)
 
           if (length(values) == 0) {
             return(httpResponse(400, "text/plain",
@@ -683,11 +682,42 @@ ShinySession <- R6Class(
 
     # See cycleStartAction
     startCycle = function() {
+      # TODO: This should check for busyCount == 0L, and remove the checks from
+      # the call sites
       if (length(private$cycleStartActionQueue) > 0) {
         head <- private$cycleStartActionQueue[[1L]]
         private$cycleStartActionQueue <- private$cycleStartActionQueue[-1L]
+
+        # After we execute the current cycleStartAction (head), there may be
+        # more items left on the queue. If the current busyCount > 0, then that
+        # means an async task is running; whenever that task finishes, it will
+        # decrement the busyCount back to 0 and a startCycle will then be
+        # scheduled. But if the current busyCount is 0, it means that either
+        # busyCount was incremented and then decremented; OR that running head()
+        # never touched busyCount (one example of the latter is that an input
+        # changed that didn't actually cause any observers to be invalidated,
+        # i.e. an input that's used in the body of an observeEvent). Because of
+        # the possibility of the latter case, we need to conditionally schedule
+        # a startCycle ourselves to ensure that the remaining queue items get
+        # processed.
+        #
+        # Since we can't actually tell whether head() increment and decremented
+        # busyCount, it's possible we're calling startCycle spuriously; that's
+        # OK, it's essentially a no-op in that case.
+        on.exit({
+          if (private$busyCount == 0L && length(private$cycleStartActionQueue) > 0L) {
+            later::later(function() {
+              if (private$busyCount == 0L) {
+                private$startCycle()
+              }
+            })
+          }
+        }, add = TRUE)
+
         head()
       }
+
+      invisible()
     }
   ),
   public = list(
@@ -719,8 +749,8 @@ ShinySession <- R6Class(
       private$flushCallbacks <- Callbacks$new()
       private$flushedCallbacks <- Callbacks$new()
       private$inputReceivedCallbacks <- Callbacks$new()
-      private$.input      <- ReactiveValues$new(dedupe = FALSE)
-      private$.clientData <- ReactiveValues$new(dedupe = TRUE)
+      private$.input      <- ReactiveValues$new(dedupe = FALSE, label = "input")
+      private$.clientData <- ReactiveValues$new(dedupe = TRUE, label = "clientData")
       private$timingRecorder <- ShinyServerTimingRecorder$new()
       self$progressStack <- Stack$new()
       self$files <- Map$new()
@@ -728,9 +758,7 @@ ShinySession <- R6Class(
       self$userData <- new.env(parent = emptyenv())
 
       self$input <- .createReactiveValues(private$.input, readonly=TRUE)
-      .setLabel(self$input, 'input')
       self$clientData <- .createReactiveValues(private$.clientData, readonly=TRUE)
-      .setLabel(self$clientData, 'clientData')
 
       self$output <- .createOutputWriter(self)
 
@@ -916,9 +944,11 @@ ShinySession <- R6Class(
         # Create subdir for this scope
         if (!is.null(state$dir)) {
           scopeState$dir <- file.path(state$dir, namespace)
-          res <- dir.create(scopeState$dir)
-          if (res == FALSE) {
-            stop("Error creating subdirectory for scope ", namespace)
+          if (!dirExists(scopeState$dir)) {
+            res <- dir.create(scopeState$dir)
+            if (res == FALSE) {
+              stop("Error creating subdirectory for scope ", namespace)
+            }
           }
         }
 
@@ -1057,6 +1087,9 @@ ShinySession <- R6Class(
         # will be attached to the observer after it's created.
         outputAttrs <- attr(func, "outputAttrs", TRUE)
 
+        # Save this for getOutput purposes
+        outputAttrs$renderFunc <- func
+
         funcFormals <- formals(func)
         # ..stacktraceon matches with the top-level ..stacktraceoff.., because
         # the observer we set up below has ..stacktraceon=FALSE
@@ -1164,6 +1197,9 @@ ShinySession <- R6Class(
         stop(paste("Unexpected", class(func), "output for", name))
       }
     },
+    getOutput = function(name) {
+      attr(private$.outputs[[name]], "renderFunc", exact = TRUE)
+    },
     flushOutput = function() {
       if (private$busyCount > 0)
         return()
@@ -1172,6 +1208,11 @@ ShinySession <- R6Class(
 
       if (self$isClosed())
         return()
+
+      # This is the only place in the session where the restoreContext is
+      # flushed.
+      if (!is.null(self$restoreContext))
+        self$restoreContext$flushPending()
 
       # Return TRUE if there's any stuff to send to the client.
       hasPendingUpdates <- function() {
@@ -1881,7 +1922,7 @@ ShinySession <- R6Class(
 
       fileData <- readBin(file, 'raw', n=bytes)
 
-      if (isTRUE(private$.clientData$.values$allowDataUriScheme)) {
+      if (isTRUE(private$.clientData$.values$get("allowDataUriScheme"))) {
         b64 <- rawToBase64(fileData)
         return(paste('data:', contentType, ';base64,', b64, sep=''))
       } else {
@@ -1992,6 +2033,7 @@ ShinySession <- R6Class(
     },
     incrementBusyCount = function() {
       if (private$busyCount == 0L) {
+        rLog$asyncStart(domain = self)
         private$sendMessage(busy = "busy")
       }
       private$busyCount <- private$busyCount + 1L
@@ -1999,6 +2041,7 @@ ShinySession <- R6Class(
     decrementBusyCount = function() {
       private$busyCount <- private$busyCount - 1L
       if (private$busyCount == 0L) {
+        rLog$asyncStop(domain = self)
         private$sendMessage(busy = "idle")
         self$requestFlush()
         # We defer the call to startCycle() using later(), to defend against
@@ -2056,7 +2099,13 @@ ShinySession <- R6Class(
 
 #' @export
 `$.shinyoutput` <- function(x, name) {
-  stop("Reading objects from shinyoutput object not allowed.")
+  name <- .subset2(x, 'ns')(name)
+
+  if (getOption("shiny.allowoutputreads", FALSE)) {
+    .subset2(x, 'impl')$getOutput(name)
+  } else {
+    stop("Reading from shinyoutput object is not allowed.")
+  }
 }
 
 #' @export
@@ -2076,9 +2125,9 @@ ShinySession <- R6Class(
 #'
 #' These are the available options for an output object:
 #' \itemize{
-#'   \item suspendWhenHidden. When \code{TRUE} (the default), the output object
+#'   \item suspendWhenHidden. When `TRUE` (the default), the output object
 #'     will be suspended (not execute) when it is hidden on the web page. When
-#'     \code{FALSE}, the output object will not suspend when hidden, and if it
+#'     `FALSE`, the output object will not suspend when hidden, and if it
 #'     was already hidden and suspended, then it will resume immediately.
 #'   \item priority. The priority level of the output object. Queued outputs
 #'     with higher priority values will execute before those with lower values.
@@ -2099,7 +2148,7 @@ ShinySession <- R6Class(
 #' outputOptions(output, "myplot")
 #' }
 #'
-#' @param x A shinyoutput object (typically \code{output}).
+#' @param x A shinyoutput object (typically `output`).
 #' @param name The name of an output observer in the shinyoutput object.
 #' @param ... Options to set for the output observer.
 #' @export
@@ -2130,9 +2179,9 @@ getCurrentOutputInfo <- function(session = getDefaultReactiveDomain()) {
 #' Add callbacks for Shiny session events
 #'
 #' These functions are for registering callbacks on Shiny session events.
-#' \code{onFlush} registers a function that will be called before Shiny flushes
-#' the reactive system. \code{onFlushed} registers a function that will be
-#' called after Shiny flushes the reactive system. \code{onSessionEnded}
+#' `onFlush` registers a function that will be called before Shiny flushes
+#' the reactive system. `onFlushed` registers a function that will be
+#' called after Shiny flushes the reactive system. `onSessionEnded`
 #' registers a function to be called after the client has disconnected.
 #'
 #' These functions should be called within the application's server function.
@@ -2142,8 +2191,8 @@ getCurrentOutputInfo <- function(session = getDefaultReactiveDomain()) {
 #'
 #' @param fun A callback function.
 #' @param once Should the function be run once, and then cleared, or should it
-#'   re-run each time the event occurs. (Only for \code{onFlush} and
-#'   \code{onFlushed}.)
+#'   re-run each time the event occurs. (Only for `onFlush` and
+#'   `onFlushed`.)
 #' @param session A shiny session object.
 #'
 #' @export
@@ -2159,7 +2208,7 @@ onFlushed <- function(fun, once = TRUE, session = getDefaultReactiveDomain()) {
 
 #' @rdname onFlush
 #'
-#' @seealso \code{\link{onStop}()} for registering callbacks that will be
+#' @seealso [onStop()] for registering callbacks that will be
 #'   invoked when the application exits, or when a session ends.
 #' @export
 onSessionEnded <- function(fun, session = getDefaultReactiveDomain()) {
@@ -2187,20 +2236,20 @@ flushPendingSessions <- function() {
 #' Run code after an application or session ends
 #'
 #' This function registers callback functions that are invoked when the
-#' application exits (when \code{\link{runApp}} exits), or after each user
+#' application exits (when [runApp()] exits), or after each user
 #' session ends (when a client disconnects).
 #'
 #' @param fun A function that will be called after the app has finished running.
-#' @param session A scope for when the callback will run. If \code{onStop} is
+#' @param session A scope for when the callback will run. If `onStop` is
 #'   called from within the server function, this will default to the current
 #'   session, and the callback will be invoked when the current session ends. If
-#'   \code{onStop} is called outside a server function, then the callback will
-#'   be invoked with the application exits. If \code{NULL}, it is the same as
-#'   calling \code{onStop} outside of the server function, and the callback will
+#'   `onStop` is called outside a server function, then the callback will
+#'   be invoked with the application exits. If `NULL`, it is the same as
+#'   calling `onStop` outside of the server function, and the callback will
 #'   be invoked when the application exits.
 #'
 #'
-#' @seealso \code{\link{onSessionEnded}()} for the same functionality, but at
+#' @seealso [onSessionEnded()] for the same functionality, but at
 #'   the session level only.
 #'
 #' @return A function which, if invoked, will cancel the callback.

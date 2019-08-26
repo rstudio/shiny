@@ -1,50 +1,50 @@
 #' Table Output
 #'
-#' Creates a reactive table that is suitable for assigning to an \code{output}
+#' Creates a reactive table that is suitable for assigning to an `output`
 #' slot.
 #'
-#' The corresponding HTML output tag should be \code{div} and have the CSS
-#' class name \code{shiny-html-output}.
+#' The corresponding HTML output tag should be `div` and have the CSS
+#' class name `shiny-html-output`.
 #'
 #' @param expr An expression that returns an R object that can be used with
-#'   \code{\link[xtable]{xtable}}.
-#' @param striped,hover,bordered Logicals: if \code{TRUE}, apply the
+#'   [xtable::xtable()].
+#' @param striped,hover,bordered Logicals: if `TRUE`, apply the
 #'   corresponding Bootstrap table format to the output table.
-#' @param spacing The spacing between the rows of the table (\code{xs}
-#'   stands for "extra small", \code{s} for "small", \code{m} for "medium"
-#'   and \code{l} for "large").
+#' @param spacing The spacing between the rows of the table (`xs`
+#'   stands for "extra small", `s` for "small", `m` for "medium"
+#'   and `l` for "large").
 #' @param width Table width. Must be a valid CSS unit (like "100%", "400px",
 #'   "auto") or a number, which will be coerced to a string and
 #'   have "px" appended.
 #' @param align A string that specifies the column alignment. If equal to
-#'   \code{'l'}, \code{'c'} or \code{'r'}, then all columns will be,
-#'   respectively, left-, center- or right-aligned. Otherwise, \code{align}
+#'   `'l'`, `'c'` or `'r'`, then all columns will be,
+#'   respectively, left-, center- or right-aligned. Otherwise, `align`
 #'   must have the same number of characters as the resulting table (if
-#'   \code{rownames = TRUE}, this will be equal to \code{ncol()+1}), with
-#'   the \emph{i}-th character specifying the alignment for the
-#'   \emph{i}-th column (besides \code{'l'}, \code{'c'} and
-#'   \code{'r'}, \code{'?'} is also permitted - \code{'?'} is a placeholder
+#'   `rownames = TRUE`, this will be equal to `ncol()+1`), with
+#'   the *i*-th character specifying the alignment for the
+#'   *i*-th column (besides `'l'`, `'c'` and
+#'   `'r'`, `'?'` is also permitted - `'?'` is a placeholder
 #'   for that particular column, indicating that it should keep its default
-#'   alignment). If \code{NULL}, then all numeric/integer columns (including
+#'   alignment). If `NULL`, then all numeric/integer columns (including
 #'   the row names, if they are numbers) will be right-aligned and
-#'   everything else will be left-aligned (\code{align = '?'} produces the
+#'   everything else will be left-aligned (`align = '?'` produces the
 #'   same result).
 #' @param rownames,colnames Logicals: include rownames? include colnames
 #'   (column headers)?
 #' @param digits An integer specifying the number of decimal places for
 #'   the numeric columns (this will not apply to columns with an integer
-#'   class). If \code{digits} is set to a negative value, then the numeric
+#'   class). If `digits` is set to a negative value, then the numeric
 #'   columns will be displayed in scientific format with a precision of
-#'   \code{abs(digits)} digits.
+#'   `abs(digits)` digits.
 #' @param na The string to use in the table cells whose values are missing
-#'   (i.e. they either evaluate to \code{NA} or \code{NaN}).
-#' @param ... Arguments to be passed through to \code{\link[xtable]{xtable}}
-#'   and \code{\link[xtable]{print.xtable}}.
-#' @param env The environment in which to evaluate \code{expr}.
-#' @param quoted Is \code{expr} a quoted expression (with \code{quote()})?
+#'   (i.e. they either evaluate to `NA` or `NaN`).
+#' @param ... Arguments to be passed through to [xtable::xtable()]
+#'   and [xtable::print.xtable()].
+#' @param env The environment in which to evaluate `expr`.
+#' @param quoted Is `expr` a quoted expression (with `quote()`)?
 #'   This is useful if you want to save an expression in a variable.
 #' @param outputArgs A list of arguments to be passed through to the
-#'   implicit call to \code{\link{tableOutput}} when \code{renderTable} is
+#'   implicit call to [tableOutput()] when `renderTable` is
 #'   used in an interactive R Markdown document.
 #' @export
 renderTable <- function(expr, striped = FALSE, hover = FALSE,

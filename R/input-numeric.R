@@ -9,7 +9,7 @@
 #' @return A numeric input control that can be added to a UI definition.
 #'
 #' @family input elements
-#' @seealso \code{\link{updateNumericInput}}
+#' @seealso [updateNumericInput()]
 #'
 #' @examples
 #' ## Only run examples in interactive R sessions
@@ -42,7 +42,7 @@ numericInput <- function(inputId, label, value, min = NA, max = NA, step = NA,
 
   div(class = "form-group shiny-input-container",
     style = if (!is.null(width)) paste0("width: ", validateCssUnit(width), ";"),
-    label %AND% tags$label(label, `for` = inputId),
+    shinyInputLabel(inputId, label),
     inputTag
   )
 }

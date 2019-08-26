@@ -2,8 +2,6 @@
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
-var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
-
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 //---------------------------------------------------------------------
@@ -14,7 +12,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
   var exports = window.Shiny = window.Shiny || {};
 
-  exports.version = "1.1.0.9001"; // Version number inserted by Grunt
+  exports.version = "1.3.2.9001"; // Version number inserted by Grunt
 
   var origPushState = window.history.pushState;
   window.history.pushState = function () {
@@ -323,225 +321,22 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     if (op === "==") return diff === 0;else if (op === ">=") return diff >= 0;else if (op === ">") return diff > 0;else if (op === "<=") return diff <= 0;else if (op === "<") return diff < 0;else throw "Unknown operator: " + op;
   };
 
-  // multimethod: Creates functions — "multimethods" — that are polymorphic on one
-  // or more of their arguments.
-  //
-  // Multimethods can take any number of arguments. Arguments are passed to an
-  // applicable function or "method", returning its result. By default, if no
-  // method was applicable, an exception is thrown.
-  //
-  // Methods are searched in the order that they were added, and the first
-  // applicable method found is the one used.
-  //
-  // A method is applicable when the "dispatch value" associated with it
-  // corresponds to the value returned by the dispatch function. The dispatch
-  // function defaults to the value of the first argument passed to the
-  // multimethod.
-  //
-  // The correspondence between the value returned by the dispatch function and
-  // any method's dispatch value is determined by the test function, which is
-  // user-definable and defaults to `equal` or deep equality.
-  //
-  // # Chainable Functions
-  //
-  // The function returned by `multimethod()` exposes functions as properties.
-  // These functions generally return the multimethod, and so can be chained.
-  //
-  // - dispatch([function newDispatch]): Sets the dispatch function. The dispatch
-  //   function can take any number of arguments, but must return a dispatch
-  //   value. The default dispatch function returns the first argument passed to
-  //   the multimethod.
-  //
-  // - test([function newTest]): Sets the test function. The test function takes
-  //   two arguments: the dispatch value produced by the dispatch function, and
-  //   the dispatch value associated with some method. It must return a boolean
-  //   indicating whether or not to select the method. The default test function
-  //   is `equal`.
-  //
-  // - when(object dispatchVal, function method): Adds a new dispatch value/method
-  //   combination.
-  //
-  // - whenAny(array<object> dispatchVals, function method): Like `when`, but
-  //   associates the method with every dispatch value in the `dispatchVals`
-  //   array.
-  //
-  // - else(function newDefaultMethod): Sets the default function. This function
-  //   is invoked when no methods apply. If left unset, the multimethod will throw
-  //   an exception when no methods are applicable.
-  //
-  // - clone(): Returns a new, functionally-equivalent multimethod. This is a way
-  //   to extend an existing multimethod in a local context — such as inside a
-  //   function — without modifying the original. NOTE: The array of methods is
-  //   copied, but the dispatch values themselves are not.
-  //
-  // # Self-reference
-  //
-  // The multimethod function can be obtained inside its method bodies without
-  // referring to it by name.
-  //
-  // This makes it possible for one method to call another, or to pass the
-  // multimethod to other functions as a callback from within methods.
-  //
-  // The mechanism is: the multimethod itself is bound as `this` to methods when
-  // they are called. Since arrow functions cannot be bound to objects, **self-reference
-  // is only possible within methods created using the `function` keyword**.
-  //
-  // # Tail recursion
-  //
-  // A method can call itself in a way that will not overflow the stack by using
-  // `this.recur`.
-  //
-  // `this.recur` is a function available in methods created using `function`.
-  // When the return value of a call to `this.recur` is returned by a method, the
-  // arguments that were supplied to `this.recur` are used to call the
-  // multimethod.
-  //
-  // # Examples
-  //
-  // Handling events:
-  //
-  //    var handle = multimethod()
-  //     .dispatch(e => [e.target.tagName.toLowerCase(), e.type])
-  //     .when(["h1", "click"], e => "you clicked on an h1")
-  //     .when(["p", "mouseover"], e => "you moused over a p"})
-  //     .else(e => {
-  //       let tag = e.target.tagName.toLowerCase();
-  //       return `you did ${e.type} to an ${tag}`;
-  //     });
-  //
-  //    $(document).on("click mouseover mouseup mousedown", e => console.log(handle(e)))
-  //
-  // Self-calls:
-  //
-  //    var demoSelfCall = multimethod()
-  //     .when(0, function(n) {
-  //       this(1);
-  //     })
-  //     .when(1, function(n) {
-  //       doSomething(this);
-  //     })
-  //     .when(2, _ => console.log("tada"));
-  //
-  // Using (abusing?) the test function:
-  //
-  //    var fizzBuzz = multimethod()
-  //     .test((x, divs) => divs.map(d => x % d === 0).every(Boolean))
-  //     .when([3, 5], x => "FizzBuzz")
-  //     .when([3], x => "Fizz")
-  //     .when([5], x => "Buzz")
-  //     .else(x => x);
-  //
-  //    for(let i = 0; i <= 100; i++) console.log(fizzBuzz(i));
-  //
-  // Getting carried away with tail recursion:
-  //
-  //    var factorial = multimethod()
-  //     .when(0, () => 1)
-  //     .when(1, (_, prod = 1) => prod)
-  //     .else(function(n, prod = 1) {
-  //       return this.recur(n-1, n*prod);
-  //     });
-  //
-  //    var fibonacci = multimethod()
-  //     .when(0, (_, a = 0) => a)
-  //     .else(function(n, a = 0, b = 1) {
-  //       return this.recur(n-1, b, a+b);
-  //     });
-  function multimethod() {
-    var dispatch = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : function (firstArg) {
-      return firstArg;
-    };
-    var test = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : equal;
-    var defaultMethod = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
-    var methods = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : [];
-
-
-    var trampolining = false;
-
-    function Sentinel(args) {
-      this.args = args;
+  function updateLabel(labelTxt, labelNode) {
+    // Only update if label was specified in the update method
+    if (typeof labelTxt === "undefined") return;
+    if (labelNode.length !== 1) {
+      throw new Error("labelNode must be of length 1");
     }
 
-    function trampoline(f) {
-      return function () {
-        for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-          args[_key2] = arguments[_key2];
-        }
+    // Should the label be empty?
+    var emptyLabel = $.isArray(labelTxt) && labelTxt.length === 0;
 
-        trampolining = true;
-        var ret = f.apply(invoke, args);
-        while (ret instanceof Sentinel) {
-          ret = f.apply(invoke, ret.args);
-        }trampolining = false;
-        return ret;
-      };
+    if (emptyLabel) {
+      labelNode.addClass("shiny-label-null");
+    } else {
+      labelNode.text(labelTxt);
+      labelNode.removeClass("shiny-label-null");
     }
-
-    var invoke = trampoline(function () {
-      for (var _len3 = arguments.length, args = Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
-        args[_key3] = arguments[_key3];
-      }
-
-      var dispatchVal = dispatch.apply(null, args);
-      for (var i = 0; i < methods.length; i++) {
-        var _methods$i = _slicedToArray(methods[i], 2);
-
-        var methodVal = _methods$i[0];
-        var methodFn = _methods$i[1];
-
-        if (test(dispatchVal, methodVal)) {
-          return methodFn.apply(invoke, args);
-        }
-      }
-      if (defaultMethod) {
-        return defaultMethod.apply(invoke, args);
-      } else {
-        throw new Error("No method for dispatch value " + dispatchVal);
-      }
-    });
-
-    invoke.recur = function () {
-      for (var _len4 = arguments.length, args = Array(_len4), _key4 = 0; _key4 < _len4; _key4++) {
-        args[_key4] = arguments[_key4];
-      }
-
-      if (!trampolining) throw new Error("recur can only be called inside a method");
-      return new Sentinel(args);
-    };
-
-    invoke.dispatch = function (newDispatch) {
-      dispatch = newDispatch;
-      return invoke;
-    };
-
-    invoke.test = function (newTest) {
-      test = newTest;
-      return invoke;
-    };
-
-    invoke.when = function (dispatchVal, methodFn) {
-      methods = methods.concat([[dispatchVal, methodFn]]);
-      return invoke;
-    };
-
-    invoke.whenAny = function (dispatchVals, methodFn) {
-      return dispatchVals.reduce(function (self, val) {
-        return invoke.when(val, methodFn);
-      }, invoke);
-    };
-
-    invoke.else = function () {
-      var newDefaultMethod = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
-
-      defaultMethod = newDefaultMethod;
-      return invoke;
-    };
-
-    invoke.clone = function () {
-      return multimethod(dispatch, test, defaultMethod, methods.slice());
-    };
-
-    return invoke;
   }
 
   //---------------------------------------------------------------------
@@ -768,8 +563,8 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     this.lastChanceCallback = [];
   };
   (function () {
-    this.setInput = function (name, value, opts) {
-      this.pendingData[name] = value;
+    this.setInput = function (nameType, value, opts) {
+      this.pendingData[nameType] = value;
 
       if (!this.reentrant) {
         if (opts.priority === "event") {
@@ -805,11 +600,10 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     this.lastSentValues = this.reset(initialValues);
   };
   (function () {
-    this.setInput = function (name, value, opts) {
-      var _splitInputNameType = splitInputNameType(name);
-
-      var inputName = _splitInputNameType.name;
-      var inputType = _splitInputNameType.inputType;
+    this.setInput = function (nameType, value, opts) {
+      var _splitInputNameType = splitInputNameType(nameType),
+          inputName = _splitInputNameType.name,
+          inputType = _splitInputNameType.inputType;
 
       var jsonValue = JSON.stringify(value);
 
@@ -831,12 +625,11 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
       for (var inputName in values) {
         if (values.hasOwnProperty(inputName)) {
-          var _splitInputNameType2 = splitInputNameType(inputName);
+          var _splitInputNameType2 = splitInputNameType(inputName),
+              _name = _splitInputNameType2.name,
+              inputType = _splitInputNameType2.inputType;
 
-          var name = _splitInputNameType2.name;
-          var inputType = _splitInputNameType2.inputType;
-
-          cacheValues[name] = {
+          cacheValues[_name] = {
             jsonValue: JSON.stringify(values[inputName]),
             inputType: inputType
           };
@@ -851,10 +644,10 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     this.target = target;
   };
   (function () {
-    this.setInput = function (name, value, opts) {
+    this.setInput = function (nameType, value, opts) {
       var evt = jQuery.Event("shiny:inputchanged");
 
-      var input = splitInputNameType(name);
+      var input = splitInputNameType(nameType);
       evt.name = input.name;
       evt.inputType = input.inputType;
       evt.value = value;
@@ -862,7 +655,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       evt.el = opts.el;
       evt.priority = opts.priority;
 
-      $(document).trigger(evt);
+      $(opts.el).trigger(evt);
 
       if (!evt.isDefaultPrevented()) {
         name = evt.name;
@@ -880,25 +673,37 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     this.inputRatePolicies = {};
   };
   (function () {
-    this.setInput = function (name, value, opts) {
-      this.$ensureInit(name);
+    // Note that the first argument of setInput() and setRatePolicy()
+    // are passed both the input name (i.e., inputId) and type.
+    // https://github.com/rstudio/shiny/blob/67d3a/srcjs/init_shiny.js#L111-L126
+    // However, $ensureInit() and $doSetInput() are meant to be passed just
+    // the input name (i.e., inputId), which is why we distinguish between
+    // nameType and name.
+    this.setInput = function (nameType, value, opts) {
+      var _splitInputNameType3 = splitInputNameType(nameType),
+          inputName = _splitInputNameType3.name;
 
-      if (opts.priority !== "deferred") this.inputRatePolicies[name].immediateCall(name, value, opts);else this.inputRatePolicies[name].normalCall(name, value, opts);
+      this.$ensureInit(inputName);
+
+      if (opts.priority !== "deferred") this.inputRatePolicies[inputName].immediateCall(nameType, value, opts);else this.inputRatePolicies[inputName].normalCall(nameType, value, opts);
     };
-    this.setRatePolicy = function (name, mode, millis) {
+    this.setRatePolicy = function (nameType, mode, millis) {
+      var _splitInputNameType4 = splitInputNameType(nameType),
+          inputName = _splitInputNameType4.name;
+
       if (mode === 'direct') {
-        this.inputRatePolicies[name] = new Invoker(this, this.$doSetInput);
+        this.inputRatePolicies[inputName] = new Invoker(this, this.$doSetInput);
       } else if (mode === 'debounce') {
-        this.inputRatePolicies[name] = new Debouncer(this, this.$doSetInput, millis);
+        this.inputRatePolicies[inputName] = new Debouncer(this, this.$doSetInput, millis);
       } else if (mode === 'throttle') {
-        this.inputRatePolicies[name] = new Throttler(this, this.$doSetInput, millis);
+        this.inputRatePolicies[inputName] = new Throttler(this, this.$doSetInput, millis);
       }
     };
     this.$ensureInit = function (name) {
       if (!(name in this.inputRatePolicies)) this.setRatePolicy(name, 'direct');
     };
-    this.$doSetInput = function (name, value, opts) {
-      this.target.setInput(name, value, opts);
+    this.$doSetInput = function (nameType, value, opts) {
+      this.target.setInput(nameType, value, opts);
     };
   }).call(InputRateDecorator.prototype);
 
@@ -907,8 +712,8 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     this.pendingInput = {};
   };
   (function () {
-    this.setInput = function (name, value, opts) {
-      if (/^\./.test(name)) this.target.setInput(name, value, opts);else this.pendingInput[name] = { value: value, opts: opts };
+    this.setInput = function (nameType, value, opts) {
+      if (/^\./.test(nameType)) this.target.setInput(nameType, value, opts);else this.pendingInput[name] = { value: value, opts: opts };
     };
     this.submit = function () {
       for (var name in this.pendingInput) {
@@ -924,12 +729,12 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     this.target = target;
   };
   (function () {
-    this.setInput = function (name, value, opts) {
-      if (!name) throw "Can't set input with empty name.";
+    this.setInput = function (nameType, value, opts) {
+      if (!nameType) throw "Can't set input with empty name.";
 
       opts = addDefaultInputOpts(opts);
 
-      this.target.setInput(name, value, opts);
+      this.target.setInput(nameType, value, opts);
     };
   }).call(InputValidateDecorator.prototype);
 
@@ -956,8 +761,8 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     return opts;
   }
 
-  function splitInputNameType(name) {
-    var name2 = name.split(':');
+  function splitInputNameType(nameType) {
+    var name2 = nameType.split(':');
     return {
       name: name2[0],
       inputType: name2.length > 1 ? name2[1] : ''
@@ -1106,26 +911,8 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     };
 
     this.$notifyDisconnected = function () {
-
-      // function to normalize hostnames
-      var normalize = function normalize(hostname) {
-        if (hostname === "127.0.0.1") return "localhost";else return hostname;
-      };
-
-      // Send a 'disconnected' message to parent if we are on the same domin
-      var parentUrl = parent !== window ? document.referrer : null;
-      if (parentUrl) {
-        // parse the parent href
-        var a = document.createElement('a');
-        a.href = parentUrl;
-
-        // post the disconnected message if the hostnames are the same
-        if (normalize(a.hostname) === normalize(window.location.hostname)) {
-          var protocol = a.protocol.replace(':', ''); // browser compatability
-          var origin = protocol + '://' + a.hostname;
-          if (a.port) origin = origin + ':' + a.port;
-          parent.postMessage('disconnected', origin);
-        }
+      if (window.parent) {
+        window.parent.postMessage("disconnected", "*");
       }
     };
 
@@ -1813,13 +1600,15 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       function getTabIndex($tabset, tabsetId) {
         // The 0 is to ensure this works for empty tabsetPanels as well
         var existingTabIds = [0];
-        var leadingHref = "#tab-" + tabsetId + "-";
         // loop through all existing tabs, find the one with highest id
         // (since this is based on a numeric counter), and increment
         $tabset.find("> li").each(function () {
           var $tab = $(this).find("> a[data-toggle='tab']");
           if ($tab.length > 0) {
-            var index = $tab.attr("href").replace(leadingHref, "");
+            // remove leading url if it exists. (copy of bootstrap url stripper)
+            var href = $tab.attr("href").replace(/.*(?=#[^\s]+$)/, '');
+            // remove tab id to get the index
+            var index = href.replace("#tab-" + tabsetId + "-", "");
             existingTabIds.push(Number(index));
           }
         });
@@ -2012,7 +1801,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
           var $container = $('.shiny-progress-container');
           if ($container.length === 0) {
             $container = $('<div class="shiny-progress-container"></div>');
-            $('body').append($container);
+            $(document.body).append($container);
           }
 
           // Add div for just this progress ID
@@ -2098,10 +1887,9 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     // Returns a URL which can be queried to get values from inside the server
     // function. This is enabled with `options(shiny.testmode=TRUE)`.
     this.getTestSnapshotBaseUrl = function () {
-      var _ref2 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
-      var _ref2$fullUrl = _ref2.fullUrl;
-      var fullUrl = _ref2$fullUrl === undefined ? true : _ref2$fullUrl;
+      var _ref2 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+          _ref2$fullUrl = _ref2.fullUrl,
+          fullUrl = _ref2$fullUrl === undefined ? true : _ref2$fullUrl;
 
       var loc = window.location;
       var url = "";
@@ -2170,22 +1958,21 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     var fadeDuration = 250;
 
     function show() {
-      var _ref3 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
-      var _ref3$html = _ref3.html;
-      var html = _ref3$html === undefined ? '' : _ref3$html;
-      var _ref3$action = _ref3.action;
-      var action = _ref3$action === undefined ? '' : _ref3$action;
-      var _ref3$deps = _ref3.deps;
-      var deps = _ref3$deps === undefined ? [] : _ref3$deps;
-      var _ref3$duration = _ref3.duration;
-      var duration = _ref3$duration === undefined ? 5000 : _ref3$duration;
-      var _ref3$id = _ref3.id;
-      var id = _ref3$id === undefined ? null : _ref3$id;
-      var _ref3$closeButton = _ref3.closeButton;
-      var closeButton = _ref3$closeButton === undefined ? true : _ref3$closeButton;
-      var _ref3$type = _ref3.type;
-      var type = _ref3$type === undefined ? null : _ref3$type;
+      var _ref3 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+          _ref3$html = _ref3.html,
+          html = _ref3$html === undefined ? '' : _ref3$html,
+          _ref3$action = _ref3.action,
+          action = _ref3$action === undefined ? '' : _ref3$action,
+          _ref3$deps = _ref3.deps,
+          deps = _ref3$deps === undefined ? [] : _ref3$deps,
+          _ref3$duration = _ref3.duration,
+          duration = _ref3$duration === undefined ? 5000 : _ref3$duration,
+          _ref3$id = _ref3.id,
+          id = _ref3$id === undefined ? null : _ref3$id,
+          _ref3$closeButton = _ref3.closeButton,
+          closeButton = _ref3$closeButton === undefined ? true : _ref3$closeButton,
+          _ref3$type = _ref3.type,
+          type = _ref3$type === undefined ? null : _ref3$type;
 
       if (!id) id = randomId();
 
@@ -2266,7 +2053,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
       if ($panel.length > 0) return $panel;
 
-      $('body').append('<div id="shiny-notification-panel">');
+      $(document.body).append('<div id="shiny-notification-panel">');
 
       return $panel;
     }
@@ -2329,13 +2116,11 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     // content is non-Bootstrap. Bootstrap modals require some special handling,
     // which is coded in here.
     show: function show() {
-      var _ref4 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
-      var _ref4$html = _ref4.html;
-      var html = _ref4$html === undefined ? '' : _ref4$html;
-      var _ref4$deps = _ref4.deps;
-      var deps = _ref4$deps === undefined ? [] : _ref4$deps;
-
+      var _ref4 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+          _ref4$html = _ref4.html,
+          html = _ref4$html === undefined ? '' : _ref4$html,
+          _ref4$deps = _ref4.deps,
+          deps = _ref4$deps === undefined ? [] : _ref4$deps;
 
       // If there was an existing Bootstrap modal, then there will be a modal-
       // backdrop div that was added outside of the modal wrapper, and it must be
@@ -2346,7 +2131,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       var $modal = $('#shiny-modal-wrapper');
       if ($modal.length === 0) {
         $modal = $('<div id="shiny-modal-wrapper"></div>');
-        $('body').append($modal);
+        $(document.body).append($modal);
 
         // If the wrapper's content is a Bootstrap modal, then when the inner
         // modal is hidden, remove the entire thing, including wrapper.
@@ -2654,6 +2439,16 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         if (value === null || key === 'coordmap') {
           return;
         }
+        // this checks only against base64 encoded src values
+        // images put here are only from renderImage and renderPlot
+        if (key === "src" && value === img.getAttribute("src")) {
+          // Ensure the browser actually fires an onLoad event, which doesn't
+          // happen on WebKit if the value we set on src is the same as the
+          // value it already has
+          // https://github.com/rstudio/shiny/issues/2197
+          // https://stackoverflow.com/questions/5024111/javascript-image-onload-doesnt-fire-in-webkit-if-loading-same-image
+          img.removeAttribute("src");
+        }
         img.setAttribute(key, value);
       });
 
@@ -2672,6 +2467,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         opts.coordmap = {
           panels: [],
           dims: {
+            // These values be set to the naturalWidth and naturalHeight once the image has loaded
             height: null,
             width: null
           }
@@ -2682,77 +2478,82 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       $el.off('.image_output');
       $img.off('.image_output');
 
-      imageutils.initCoordmap($el, opts.coordmap);
+      // When the image loads, initialize all the interaction handlers. When the
+      // value of src is set, the browser may not load the image immediately,
+      // even if it's a data URL. If we try to initialize this stuff
+      // immediately, it can cause problems because we use we need the raw image
+      // height and width
+      $img.off("load.shiny_image_interaction");
+      $img.one("load.shiny_image_interaction", function () {
 
-      // This object listens for mousedowns, and triggers mousedown2 and dblclick2
-      // events as appropriate.
-      var clickInfo = imageutils.createClickInfo($el, opts.dblclickId, opts.dblclickDelay);
+        imageutils.initCoordmap($el, opts.coordmap);
 
-      $el.on('mousedown.image_output', clickInfo.mousedown);
+        // This object listens for mousedowns, and triggers mousedown2 and dblclick2
+        // events as appropriate.
+        var clickInfo = imageutils.createClickInfo($el, opts.dblclickId, opts.dblclickDelay);
 
-      if (browser.isIE && browser.IEVersion === 8) {
-        $el.on('dblclick.image_output', clickInfo.dblclickIE8);
-      }
+        $el.on('mousedown.image_output', clickInfo.mousedown);
 
-      // ----------------------------------------------------------
-      // Register the various event handlers
-      // ----------------------------------------------------------
-      if (opts.clickId) {
-        var clickHandler = imageutils.createClickHandler(opts.clickId, opts.clickClip, opts.coordmap);
-        $el.on('mousedown2.image_output', clickHandler.mousedown);
+        if (browser.isIE && browser.IEVersion === 8) {
+          $el.on('dblclick.image_output', clickInfo.dblclickIE8);
+        }
 
-        $el.on('resize.image_output', clickHandler.onResize);
+        // ----------------------------------------------------------
+        // Register the various event handlers
+        // ----------------------------------------------------------
+        if (opts.clickId) {
+          imageutils.disableDrag($el, $img);
 
-        // When img is reset, do housekeeping: clear $el's mouse listener and
-        // call the handler's onResetImg callback.
-        $img.on('reset.image_output', clickHandler.onResetImg);
-      }
+          var clickHandler = imageutils.createClickHandler(opts.clickId, opts.clickClip, opts.coordmap);
+          $el.on('mousedown2.image_output', clickHandler.mousedown);
 
-      if (opts.dblclickId) {
-        // We'll use the clickHandler's mousedown function, but register it to
-        // our custom 'dblclick2' event.
-        var dblclickHandler = imageutils.createClickHandler(opts.dblclickId, opts.clickClip, opts.coordmap);
-        $el.on('dblclick2.image_output', dblclickHandler.mousedown);
+          $el.on('resize.image_output', clickHandler.onResize);
 
-        $el.on('resize.image_output', dblclickHandler.onResize);
-        $img.on('reset.image_output', dblclickHandler.onResetImg);
-      }
+          // When img is reset, do housekeeping: clear $el's mouse listener and
+          // call the handler's onResetImg callback.
+          $img.on('reset.image_output', clickHandler.onResetImg);
+        }
 
-      if (opts.hoverId) {
-        var hoverHandler = imageutils.createHoverHandler(opts.hoverId, opts.hoverDelay, opts.hoverDelayType, opts.hoverClip, opts.hoverNullOutside, opts.coordmap);
-        $el.on('mousemove.image_output', hoverHandler.mousemove);
-        $el.on('mouseout.image_output', hoverHandler.mouseout);
+        if (opts.dblclickId) {
+          imageutils.disableDrag($el, $img);
 
-        $el.on('resize.image_output', hoverHandler.onResize);
-        $img.on('reset.image_output', hoverHandler.onResetImg);
-      }
+          // We'll use the clickHandler's mousedown function, but register it to
+          // our custom 'dblclick2' event.
+          var dblclickHandler = imageutils.createClickHandler(opts.dblclickId, opts.clickClip, opts.coordmap);
+          $el.on('dblclick2.image_output', dblclickHandler.mousedown);
 
-      if (opts.brushId) {
-        // Make image non-draggable (Chrome, Safari)
-        $img.css('-webkit-user-drag', 'none');
-        // Firefox, IE<=10
-        $img.on('dragstart', function () {
-          return false;
-        });
+          $el.on('resize.image_output', dblclickHandler.onResize);
+          $img.on('reset.image_output', dblclickHandler.onResetImg);
+        }
 
-        // Disable selection of image and text when dragging in IE<=10
-        $el.on('selectstart.image_output', function () {
-          return false;
-        });
+        if (opts.hoverId) {
+          imageutils.disableDrag($el, $img);
 
-        var brushHandler = imageutils.createBrushHandler(opts.brushId, $el, opts, opts.coordmap, outputId);
-        $el.on('mousedown.image_output', brushHandler.mousedown);
-        $el.on('mousemove.image_output', brushHandler.mousemove);
+          var hoverHandler = imageutils.createHoverHandler(opts.hoverId, opts.hoverDelay, opts.hoverDelayType, opts.hoverClip, opts.hoverNullOutside, opts.coordmap);
+          $el.on('mousemove.image_output', hoverHandler.mousemove);
+          $el.on('mouseout.image_output', hoverHandler.mouseout);
 
-        $el.on('resize.image_output', brushHandler.onResize);
-        $img.on('reset.image_output', brushHandler.onResetImg);
-      }
+          $el.on('resize.image_output', hoverHandler.onResize);
+          $img.on('reset.image_output', hoverHandler.onResetImg);
+        }
 
-      if (opts.clickId || opts.dblclickId || opts.hoverId || opts.brushId) {
-        $el.addClass('crosshair');
-      }
+        if (opts.brushId) {
+          imageutils.disableDrag($el, $img);
 
-      if (data.error) console.log('Error on server extracting coordmap: ' + data.error);
+          var brushHandler = imageutils.createBrushHandler(opts.brushId, $el, opts, opts.coordmap, outputId);
+          $el.on('mousedown.image_output', brushHandler.mousedown);
+          $el.on('mousemove.image_output', brushHandler.mousemove);
+
+          $el.on('resize.image_output', brushHandler.onResize);
+          $img.on('reset.image_output', brushHandler.onResetImg);
+        }
+
+        if (opts.clickId || opts.dblclickId || opts.hoverId || opts.brushId) {
+          $el.addClass('crosshair');
+        }
+
+        if (data.error) console.log('Error on server extracting coordmap: ' + data.error);
+      });
     },
 
     renderError: function renderError(el, err) {
@@ -2777,6 +2578,24 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
   outputBindings.register(imageOutputBinding, 'shiny.imageOutput');
 
   var imageutils = {};
+
+  imageutils.disableDrag = function ($el, $img) {
+    // Make image non-draggable (Chrome, Safari)
+    $img.css('-webkit-user-drag', 'none');
+
+    // Firefox, IE<=10
+    // First remove existing handler so we don't keep adding handlers.
+    $img.off('dragstart.image_output');
+    $img.on('dragstart.image_output', function () {
+      return false;
+    });
+
+    // Disable selection of image and text when dragging in IE<=10
+    $el.off('selectstart.image_output');
+    $el.on('selectstart.image_output', function () {
+      return false;
+    });
+  };
 
   // Modifies the panel objects in a coordmap, adding scaleImgToData(),
   // scaleDataToImg(), and clipImg() functions to each one. The panel objects
@@ -2898,8 +2717,8 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
   // 3. data: The coordinates in the data space. This is a bit more complicated
   //    than the other two, because there can be multiple panels (as in facets).
   imageutils.initCoordmap = function ($el, coordmap) {
-    var el = $el[0];
     var $img = $el.find("img");
+    var img = $img[0];
 
     // If we didn't get any panels, create a dummy one where the domain and range
     // are simply the pixel dimensions.
@@ -2908,8 +2727,8 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       var bounds = {
         top: 0,
         left: 0,
-        right: el.clientWidth - 1,
-        bottom: el.clientHeight - 1
+        right: img.clientWidth - 1,
+        bottom: img.clientHeight - 1
       };
 
       coordmap.panels[0] = {
@@ -2918,6 +2737,12 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         mapping: {}
       };
     }
+
+    // If no dim height and width values are found, set them to the raw image height and width
+    // These values should be the same...
+    // This is only done to initialize an image output, whose height and width are unknown until the image is retrieved
+    coordmap.dims.height = coordmap.dims.height || img.naturalHeight;
+    coordmap.dims.width = coordmap.dims.width || img.naturalWidth;
 
     // Add scaling functions to each panel
     imageutils.initPanelScales(coordmap.panels);
@@ -3078,23 +2903,32 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
           exports.setInputValue(inputId, null);
           return;
         }
-
-        var offset_css = coordmap.mouseOffsetCss(e);
+        var coords = {};
+        var coords_css = coordmap.mouseOffsetCss(e);
         // If outside of plotting region
-        if (!coordmap.isInPanelCss(offset_css)) {
+        if (!coordmap.isInPanelCss(coords_css)) {
           if (nullOutside) {
             exports.setInputValue(inputId, null);
             return;
           }
           if (clip) return;
+
+          coords.coords_css = coords_css;
+          coords.coords_img = coordmap.scaleCssToImg(coords_css);
+
+          exports.setInputValue(inputId, coords, { priority: "event" });
+          return;
         }
-        if (clip && !coordmap.isInPanelCss(offset_css)) return;
+        var panel = coordmap.getPanelCss(coords_css);
 
-        var panel = coordmap.getPanelCss(offset_css);
+        var coords_img = coordmap.scaleCssToImg(coords_css);
+        var coords_data = panel.scaleImgToData(coords_img);
+        coords.x = coords_data.x;
+        coords.y = coords_data.y;
+        coords.coords_css = coords_css;
+        coords.coords_img = coords_img;
 
-        var coords = panel.scaleImgToData(coordmap.scaleCssToImg(offset_css));
-
-        coords.pixelratio = coordmap.cssToImgScalingRatio();
+        coords.img_css_ratio = coordmap.cssToImgScalingRatio();
 
         // Add the panel (facet) variables, if present
         $.extend(coords, panel.panel_vars);
@@ -3344,7 +3178,10 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       // Add the panel (facet) variables, if present
       $.extend(coords, panel.panel_vars);
 
-      coords.pixelratio = coordmap.cssToImgScalingRatio();
+      coords.coords_css = brush.boundsCss();
+      coords.coords_img = coordmap.scaleCssToImg(coords.coords_css);
+
+      coords.img_css_ratio = coordmap.cssToImgScalingRatio();
 
       // Add variable name mappings
       coords.mapping = panel.mapping;
@@ -3534,10 +3371,12 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         // is called before this happens, then the css-img coordinate mappings
         // will give the wrong result, and the brush will have the wrong
         // position.
-        $el.find("img").one("load.shiny-image-interaction", function () {
-          brush.importOldBrush();
-          brushInfoSender.immediateCall();
-        });
+        //
+        // jcheng 09/26/2018: This used to happen in img.onLoad, but recently
+        // we moved to all brush initialization moving to img.onLoad so this
+        // logic can be executed inline.
+        brush.importOldBrush();
+        brushInfoSender.immediateCall();
       }
     }
 
@@ -3779,6 +3618,11 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       }
 
       var box_css = imgToCss(state.panel.scaleDataToImg(box_data));
+      // Round to 13 significant digits to avoid spurious changes in FP values
+      // (#2197).
+      box_css = mapValues(box_css, function (val) {
+        return roundSignif(val, 13);
+      });
 
       // The scaling function can reverse the direction of the axes, so we need to
       // find the min and max again.
@@ -4497,7 +4341,12 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
   var textInputBinding = new InputBinding();
   $.extend(textInputBinding, {
     find: function find(scope) {
-      return $(scope).find('input[type="text"], input[type="search"], input[type="url"], input[type="email"]');
+      var $inputs = $(scope).find('input[type="text"], input[type="search"], input[type="url"], input[type="email"]');
+      // selectize.js 0.12.4 inserts a hidden text input with an
+      // id that ends in '-selectized'. The .not() selector below
+      // is to prevent textInputBinding from accidentally picking up
+      // this hidden element as a shiny input (#2396)
+      return $inputs.not('input[type="text"][id$="-selectized"]');
     },
     getId: function getId(el) {
       return InputBinding.prototype.getId.call(this, el) || el.name;
@@ -4522,7 +4371,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     receiveMessage: function receiveMessage(el, data) {
       if (data.hasOwnProperty('value')) this.setValue(el, data.value);
 
-      if (data.hasOwnProperty('label')) $(el).parent().find('label[for="' + $escape(el.id) + '"]').text(data.label);
+      updateLabel(data.label, this._getLabelNode(el));
 
       if (data.hasOwnProperty('placeholder')) el.placeholder = data.placeholder;
 
@@ -4530,7 +4379,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     },
     getState: function getState(el) {
       return {
-        label: $(el).parent().find('label[for="' + $escape(el.id) + '"]').text(),
+        label: this._getLabelNode(el).text(),
         value: el.value,
         placeholder: el.placeholder
       };
@@ -4540,6 +4389,9 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         policy: 'debounce',
         delay: 250
       };
+    },
+    _getLabelNode: function _getLabelNode(el) {
+      return $(el).parent().find('label[for="' + $escape(el.id) + '"]');
     }
   });
   inputBindings.register(textInputBinding, 'shiny.textInput');
@@ -4595,16 +4447,19 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       if (data.hasOwnProperty('max')) el.max = data.max;
       if (data.hasOwnProperty('step')) el.step = data.step;
 
-      if (data.hasOwnProperty('label')) $(el).parent().find('label[for="' + $escape(el.id) + '"]').text(data.label);
+      updateLabel(data.label, this._getLabelNode(el));
 
       $(el).trigger('change');
     },
     getState: function getState(el) {
-      return { label: $(el).parent().find('label[for="' + $escape(el.id) + '"]').text(),
+      return { label: this._getLabelNode(el).text(),
         value: this.getValue(el),
         min: Number(el.min),
         max: Number(el.max),
         step: Number(el.step) };
+    },
+    _getLabelNode: function _getLabelNode(el) {
+      return $(el).parent().find('label[for="' + $escape(el.id) + '"]');
     }
   });
   inputBindings.register(numberInputBinding, 'shiny.numberInput');
@@ -4640,6 +4495,8 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     receiveMessage: function receiveMessage(el, data) {
       if (data.hasOwnProperty('value')) el.checked = data.value;
 
+      // checkboxInput()'s label works different from other
+      // input labels...the label container should always exist
       if (data.hasOwnProperty('label')) $(el).parent().find('span').text(data.label);
 
       $(el).trigger('change');
@@ -4768,7 +4625,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         }
       }
 
-      if (data.hasOwnProperty('label')) $el.parent().find('label[for="' + $escape(el.id) + '"]').text(data.label);
+      updateLabel(data.label, this._getLabelNode(el));
 
       var domElements = ['data-type', 'time-format', 'timezone'];
       for (var i = 0; i < domElements.length; i++) {
@@ -4810,7 +4667,9 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
       $el.ionRangeSlider(opts);
     },
-
+    _getLabelNode: function _getLabelNode(el) {
+      return $(el).parent().find('label[for="' + $escape(el.id) + '"]');
+    },
     // Number of values; 1 for single slider, 2 for range slider
     _numValues: function _numValues(el) {
       if ($(el).data('ionRangeSlider').options.type === 'double') return 2;else return 1;
@@ -4972,7 +4831,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       if (startview === 2) startview = 'decade';else if (startview === 1) startview = 'year';else if (startview === 0) startview = 'month';
 
       return {
-        label: $el.find('label[for="' + $escape(el.id) + '"]').text(),
+        label: this._getLabelNode(el).text(),
         value: this.getValue(el),
         valueString: $input.val(),
         min: min,
@@ -4986,7 +4845,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     receiveMessage: function receiveMessage(el, data) {
       var $input = $(el).find('input');
 
-      if (data.hasOwnProperty('label')) $(el).find('label[for="' + $escape(el.id) + '"]').text(data.label);
+      updateLabel(data.label, this._getLabelNode(el));
 
       if (data.hasOwnProperty('min')) this._setMin($input[0], data.min);
 
@@ -5040,6 +4899,9 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       if ($input.data('max-date') !== undefined) {
         this._setMax($input[0], $input.data('max-date'));
       }
+    },
+    _getLabelNode: function _getLabelNode(el) {
+      return $(el).find('label[for="' + $escape(el.id) + '"]');
     },
     // Given a format object from a date picker, return a string
     _formatToString: function _formatToString(format) {
@@ -5187,7 +5049,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       if (startview === 2) startview = 'decade';else if (startview === 1) startview = 'year';else if (startview === 0) startview = 'month';
 
       return {
-        label: $el.find('label[for="' + $escape(el.id) + '"]').text(),
+        label: this._getLabelNode(el).text(),
         value: this.getValue(el),
         valueString: [$startinput.val(), $endinput.val()],
         min: min,
@@ -5204,7 +5066,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       var $startinput = $inputs.eq(0);
       var $endinput = $inputs.eq(1);
 
-      if (data.hasOwnProperty('label')) $el.find('label[for="' + $escape(el.id) + '"]').text(data.label);
+      updateLabel(data.label, this._getLabelNode(el));
 
       if (data.hasOwnProperty('min')) {
         this._setMin($startinput[0], data.min);
@@ -5260,6 +5122,9 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     },
     unsubscribe: function unsubscribe(el) {
       $(el).off('.dateRangeInputBinding');
+    },
+    _getLabelNode: function _getLabelNode(el) {
+      return $(el).find('label[for="' + $escape(el.id) + '"]');
     }
   });
   inputBindings.register(dateRangeInputBinding, 'shiny.dateRangeInput');
@@ -5291,10 +5156,14 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       return $(el).val();
     },
     setValue: function setValue(el, value) {
-      var selectize = this._selectize(el);
-      if (typeof selectize !== 'undefined') {
-        selectize.setValue(value);
-      } else $(el).val(value);
+      if (!this._is_selectize(el)) {
+        $(el).val(value);
+      } else {
+        var selectize = this._selectize(el);
+        if (selectize) {
+          selectize.setValue(value);
+        }
+      }
     },
     getState: function getState(el) {
       // Store options in an array of objects, each with with value and label
@@ -5305,7 +5174,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       }
 
       return {
-        label: $(el).parent().find('label[for="' + $escape(el.id) + '"]').text(),
+        label: this._getLabelNode(el),
         value: this.getValue(el),
         options: options
       };
@@ -5356,14 +5225,24 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
               // success is called after options are added, but
               // groups need to be added manually below
               $.each(res, function (index, elem) {
-                selectize.addOptionGroup(elem.group, { group: elem.group });
+                // Call selectize.addOptionGroup once for each optgroup; the
+                // first argument is the group ID, the second is an object with
+                // the group's label and value. We use the current settings of
+                // the selectize object to decide the fieldnames of that obj.
+                var optgroupId = elem[settings.optgroupField || "optgroup"];
+                var optgroup = {};
+                optgroup[settings.optgroupLabelField || "label"] = optgroupId;
+                optgroup[settings.optgroupValueField || "value"] = optgroupId;
+                selectize.addOptionGroup(optgroupId, optgroup);
               });
               callback(res);
-              if (!loaded && data.hasOwnProperty('value')) {
-                selectize.setValue(data.value);
-              } else if (settings.maxItems === 1) {
-                // first item selected by default only for single-select
-                selectize.setValue(res[0].value);
+              if (!loaded) {
+                if (data.hasOwnProperty('value')) {
+                  selectize.setValue(data.value);
+                } else if (settings.maxItems === 1) {
+                  // first item selected by default only for single-select
+                  selectize.setValue(res[0].value);
+                }
               }
               loaded = true;
             }
@@ -5377,12 +5256,20 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         this.setValue(el, data.value);
       }
 
-      if (data.hasOwnProperty('label')) $(el).parent().parent().find('label[for="' + $escape(el.id) + '"]').text(data.label);
+      updateLabel(data.label, this._getLabelNode(el));
 
       $(el).trigger('change');
     },
     subscribe: function subscribe(el, callback) {
+      var _this = this;
+
       $(el).on('change.selectInputBinding', function (event) {
+        // https://github.com/rstudio/shiny/issues/2162
+        // Prevent spurious events that are gonna be squelched in
+        // a second anyway by the onItemRemove down below
+        if (el.nonempty && _this.getValue(el) === "") {
+          return;
+        }
         callback();
       });
     },
@@ -5392,21 +5279,33 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     initialize: function initialize(el) {
       this._selectize(el);
     },
+    _getLabelNode: function _getLabelNode(el) {
+      var escaped_id = $escape(el.id);
+      if (this._is_selectize(el)) {
+        escaped_id += "-selectized";
+      }
+      return $(el).parent().parent().find('label[for="' + escaped_id + '"]');
+    },
+    // Return true if it's a selectize input, false if it's a regular select input.
+    _is_selectize: function _is_selectize(el) {
+      var config = $(el).parent().find('script[data-for="' + $escape(el.id) + '"]');
+      return config.length > 0;
+    },
     _selectize: function _selectize(el, update) {
       if (!$.fn.selectize) return undefined;
       var $el = $(el);
       var config = $el.parent().find('script[data-for="' + $escape(el.id) + '"]');
       if (config.length === 0) return undefined;
+
       var options = $.extend({
         labelField: 'label',
         valueField: 'value',
-        searchField: ['label'],
-        optgroupField: 'group',
-        optgroupLabelField: 'group',
-        optgroupValueField: 'group'
+        searchField: ['label']
       }, JSON.parse(config.html()));
+
       // selectize created from selectInput()
       if (typeof config.data('nonempty') !== 'undefined') {
+        el.nonempty = true;
         options = $.extend(options, {
           onItemRemove: function onItemRemove(value) {
             if (this.getValue() === "") $("select#" + $escape(el.id)).empty().append($("<option/>", {
@@ -5418,6 +5317,8 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
             if (this.getValue() === "") this.setValue($("select#" + $escape(el.id)).val());
           }
         });
+      } else {
+        el.nonempty = false;
       }
       // options that should be eval()ed
       if (config.data('eval') instanceof Array) $.each(config.data('eval'), function (i, x) {
@@ -5462,7 +5363,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       }
 
       return {
-        label: $(el).parent().find('label[for="' + $escape(el.id) + '"]').text(),
+        label: this._getLabelNode(el).text(),
         value: this.getValue(el),
         options: options
       };
@@ -5481,7 +5382,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
       if (data.hasOwnProperty('value')) this.setValue(el, data.value);
 
-      if (data.hasOwnProperty('label')) $(el).parent().find('label[for="' + $escape(el.id) + '"]').text(data.label);
+      updateLabel(data.label, this._getLabelNode(el));
 
       $(el).trigger('change');
     },
@@ -5492,6 +5393,10 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     },
     unsubscribe: function unsubscribe(el) {
       $(el).off('.radioInputBinding');
+    },
+    // Get the DOM element that contains the top-level label
+    _getLabelNode: function _getLabelNode(el) {
+      return $(el).parent().find('label[for="' + $escape(el.id) + '"]');
     },
     // Given an input DOM object, get the associated label. Handles labels
     // that wrap the input as well as labels associated with 'for' attribute.
@@ -5558,7 +5463,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
           label: this._getLabel($objs[i]) };
       }
 
-      return { label: $(el).find('label[for="' + $escape(el.id) + '"]').text(),
+      return { label: this._getLabelNode(el).text(),
         value: this.getValue(el),
         options: options
       };
@@ -5577,7 +5482,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
       if (data.hasOwnProperty('value')) this.setValue(el, data.value);
 
-      if (data.hasOwnProperty('label')) $el.find('label[for="' + $escape(el.id) + '"]').text(data.label);
+      updateLabel(data.label, this._getLabelNode(el));
 
       $(el).trigger('change');
     },
@@ -5588,6 +5493,10 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     },
     unsubscribe: function unsubscribe(el) {
       $(el).off('.checkboxGroupInputBinding');
+    },
+    // Get the DOM element that contains the top-level label
+    _getLabelNode: function _getLabelNode(el) {
+      return $(el).find('label[for="' + $escape(el.id) + '"]');
     },
     // Given an input DOM object, get the associated label. Handles labels
     // that wrap the input as well as labels associated with 'for' attribute.
@@ -5754,7 +5663,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       this.iframe.id = iframeId;
       this.iframe.name = iframeId;
       this.iframe.setAttribute('style', 'position: fixed; top: 0; left: 0; width: 0; height: 0; border: none');
-      $('body').append(this.iframe);
+      $(document.body).append(this.iframe);
       var iframeDestroy = function iframeDestroy() {
         // Forces Shiny to flushReact, flush outputs, etc. Without this we get
         // invalidated reactives, but observers don't actually execute.
@@ -6033,68 +5942,79 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       // This will be used only when restoring a file from a saved state.
       return 'shiny.file';
     },
-    _getZone: function _getZone(el) {
+    _zoneOf: function _zoneOf(el) {
       return $(el).closest("div.input-group");
     },
-    // This implements draghoverstart/draghoverend events that occur once per
-    // selector, instead of once for every child the way native
-    // dragenter/dragleave do. Inspired by https://gist.github.com/meleyal/3794126
-    _enableDraghover: function _enableDraghover($el) {
-      var ns = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : "";
-
-      // Create an empty jQuery collection. This is a set-like data structure that
-      // jQuery normally uses to contain the results of a selection.
-      var collection = $();
-
-      // Attach a dragenter handler to $el and all of its children. When the first
-      // child is entered, trigger a draghoverstart event.
-      $el.on("dragenter.dragHover", function (e) {
-        if (collection.length === 0) {
-          $el.trigger("draghoverstart" + ns, e.originalEvent);
+    // This function makes it possible to attach listeners to the dragenter,
+    // dragleave, and drop events of a single element with children. It's not
+    // intuitive to do directly because outer elements fire "dragleave" events
+    // both when the drag leaves the element and when the drag enters a child. To
+    // make it easier, we maintain a count of the elements being dragged across
+    // and trigger 3 new types of event:
+    //
+    // 1. draghover:enter - When a drag enters el and any of its children.
+    // 2. draghover:leave - When the drag leaves el and all of its children.
+    // 3. draghover:drop - When an item is dropped on el or any of its children.
+    _enableDraghover: function _enableDraghover(el) {
+      var $el = $(el),
+          childCounter = 0;
+      $el.on({
+        "dragenter.draghover": function dragenterDraghover(e) {
+          if (childCounter++ === 0) {
+            $el.trigger("draghover:enter", e);
+          }
+        },
+        "dragleave.draghover": function dragleaveDraghover(e) {
+          if (--childCounter === 0) {
+            $el.trigger("draghover:leave", e);
+          }
+          if (childCounter < 0) {
+            console.error("draghover childCounter is negative somehow");
+          }
+        },
+        "dragover.draghover": function dragoverDraghover(e) {
+          e.preventDefault();
+        },
+        "drop.draghover": function dropDraghover(e) {
+          childCounter = 0;
+          $el.trigger("draghover:drop", e);
+          e.preventDefault();
         }
-        // Every child that has fired dragenter is added to the collection.
-        // Addition is idempotent, which accounts for elements producing dragenter
-        // multiple times.
-        collection = collection.add(e.originalEvent.target);
       });
-
-      // Attach dragleave and drop handlers to $el and its children. Whenever a
-      // child fires either of these events, remove it from the collection.
-      $el.on("dragleave.dragHover drop.dragHover", function (e) {
-        collection = collection.not(e.originalEvent.target);
-        // When the collection has no elements, all of the children have been
-        // removed, and produce draghoverend event.
-        if (collection.length === 0) {
-          $el.trigger("draghoverend" + ns, e.originalEvent);
-        }
-      });
+      return $el;
     },
-    _disableDraghover: function _disableDraghover($el) {
-      $el.off(".dragHover");
+    _disableDraghover: function _disableDraghover(el) {
+      return $(el).off(".draghover");
+    },
+    _ZoneClass: {
+      ACTIVE: "shiny-file-input-active",
+      OVER: "shiny-file-input-over"
     },
     _enableDocumentEvents: function _enableDocumentEvents() {
-      var $doc = $("html");
+      var _this2 = this;
 
-      this._enableDraghover($doc);
-      $doc.on({
-        "draghoverstart.fileDrag": function draghoverstartFileDrag(e) {
-          $fileInputs.trigger("showZone.fileDrag");
+      var $doc = $("html"),
+          _ZoneClass = this._ZoneClass,
+          ACTIVE = _ZoneClass.ACTIVE,
+          OVER = _ZoneClass.OVER;
+
+      this._enableDraghover($doc).on({
+        "draghover:enter.draghover": function draghoverEnterDraghover(e) {
+          _this2._zoneOf($fileInputs).addClass(ACTIVE);
         },
-        "draghoverend.fileDrag": function draghoverendFileDrag(e) {
-          $fileInputs.trigger("hideZone.fileDrag");
+        "draghover:leave.draghover": function draghoverLeaveDraghover(e) {
+          _this2._zoneOf($fileInputs).removeClass(ACTIVE);
         },
-        "dragover.fileDrag drop.fileDrag": function dragoverFileDragDropFileDrag(e) {
-          e.preventDefault();
+        "draghover:drop.draghover": function draghoverDropDraghover(e) {
+          _this2._zoneOf($fileInputs).removeClass(OVER).removeClass(ACTIVE);
         }
       });
     },
     _disableDocumentEvents: function _disableDocumentEvents() {
       var $doc = $("html");
-
-      $doc.off(".fileDrag");
+      $doc.off(".draghover");
       this._disableDraghover($doc);
     },
-    _zoneEvents: ["showZone.fileDrag", "hideZone.fileDrag", "draghoverstart.zone", "draghoverend.zone", "drop"].join(" "),
     _canSetFiles: function _canSetFiles(fileList) {
       var testEl = document.createElement("input");
       testEl.type = "file";
@@ -6122,10 +6042,13 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         // (Chrome, Safari)
         $el.val("");
         el.files = e.originalEvent.dataTransfer.files;
+        // Recent versions of Firefox (57+, or "Quantum" and beyond) don't seem to
+        // automatically trigger a change event, so we trigger one manually here.
+        // On browsers that do trigger change, this operation appears to be
+        // idempotent, as el.files doesn't change between events.
+        $el.trigger("change");
       }
     },
-    _activeClass: "shiny-file-input-active",
-    _overClass: "shiny-file-input-over",
     _isIE9: function _isIE9() {
       try {
         return window.navigator.userAgent.match(/MSIE 9\./) && true || false;
@@ -6134,9 +6057,9 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       }
     },
     subscribe: function subscribe(el, callback) {
-      var _this = this;
+      var _this3 = this;
 
-      var $el = $(el);
+      $(el).on("change.fileInputBinding", uploadFiles);
       // Here we try to set up the necessary events for Drag and Drop ("DnD") on
       // every browser except IE9. We specifically exclude IE9 because it's one
       // browser that supports just enough of the functionality we need to be
@@ -6145,90 +6068,37 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       // support the FileList object though, so the user's expectation that DnD is
       // supported based on this highlighting would be incorrect.
       if (!this._isIE9()) {
-        (function () {
-          var $zone = _this._getZone(el),
-              getState = function getState() {
-            return $el.data("state");
-          },
-              setState = function setState(newState) {
-            return $el.data("state", newState);
-          },
-              transition = multimethod().dispatch(function (e) {
-            return [getState(), e.type];
-          }).when(["plain", "showZone"], function (e) {
-            $zone.removeClass(_this._overClass);
-            $zone.addClass(_this._activeClass);
-            setState("activated");
-          }).when(["activated", "hideZone"], function (e) {
-            $zone.removeClass(_this._overClass);
-            $zone.removeClass(_this._activeClass);
-            setState("plain");
-          }).when(["activated", "draghoverstart"], function (e) {
-            $zone.addClass(_this._overClass);
-            $zone.removeClass(_this._activeClass);
-            setState("over");
-          })
-          // A "drop" event always coincides with a "draghoverend" event. Since
-          // we handle all draghoverend events the same way, by clearing our
-          // over-style and reverting to "activated" state, we only need to
-          // worry about handling the file upload itself here.
-          .when(["over", "drop"], function (e) {
-            _this._handleDrop(e, el);
-            // State change taken care of by ["over", "draghoverend"] handler.
-          }).when(["over", "draghoverend"], function (e) {
-            $zone.removeClass(_this._overClass);
-            $zone.addClass(_this._activeClass);
-            setState("activated");
-          })
-          // This next case happens when the window (like Finder) that a file is
-          // being dragged from occludes the browser window, and the dragged
-          // item first enters the page over a drop zone instead of entering
-          // through a none-zone element.
-          //
-          // The dragenter event that caused this draghoverstart to occur will
-          // bubble to the document, where it will cause a showZone event to be
-          // fired, and drop zones will activate and their states will
-          // transition to "activated".
-          //
-          // We schedule a function to be run *after* that happens, using
-          // setTimeout. The function we schedule will set the current element's
-          // state to "over", preparing us to deal with a subsequent
-          // "draghoverend".
-          .when(["plain", "draghoverstart"], function (e) {
-            window.setTimeout(function () {
-              $zone.addClass(_this._overClass);
-              $zone.removeClass(_this._activeClass);
-              setState("over");
-            }, 0);
-          }).else(function (e) {
-            console.log("fileInput DnD unhandled transition", getState(), e.type, e);
-          });
+        if ($fileInputs.length === 0) this._enableDocumentEvents();
+        $fileInputs = $fileInputs.add(el);
+        var $zone = this._zoneOf(el),
+            OVER = this._ZoneClass.OVER;
 
-          if ($fileInputs.length === 0) _this._enableDocumentEvents();
-          setState("plain");
-          $zone.on(_this._zoneEvents, transition);
-          $fileInputs = $fileInputs.add(el);
-          _this._enableDraghover($zone, ".zone");
-        })();
+        this._enableDraghover($zone).on({
+          "draghover:enter.draghover": function draghoverEnterDraghover(e) {
+            $zone.addClass(OVER);
+          },
+          "draghover:leave.draghover": function draghoverLeaveDraghover(e) {
+            $zone.removeClass(OVER);
+            // Prevent this event from bubbling to the document handler,
+            // which would deactivate all zones.
+            e.stopPropagation();
+          },
+          "draghover:drop.draghover": function draghoverDropDraghover(e, dropEvent) {
+            _this3._handleDrop(dropEvent, el);
+          }
+        });
       }
-
-      $el.on("change.fileInputBinding", uploadFiles);
     },
 
     unsubscribe: function unsubscribe(el) {
       var $el = $(el),
-          $zone = this._getZone(el);
+          $zone = this._zoneOf(el);
 
-      $el.removeData("state");
-
-      $zone.removeClass(this._overClass);
-      $zone.removeClass(this._activeClass);
+      $zone.removeClass(this._ZoneClass.OVER).removeClass(this._ZoneClass.ACTIVE);
 
       this._disableDraghover($zone);
-
-      // Clean up local event handlers.
       $el.off(".fileInputBinding");
-      $zone.off(this._zoneEvents);
+      $zone.off(".draghover");
 
       // Remove el from list of inputs and (maybe) clean up global event handlers.
       $fileInputs = $fileInputs.not(el);
@@ -6655,14 +6525,14 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     // Need to register callbacks for each Bootstrap 3 class.
     var bs3classes = ['modal', 'dropdown', 'tab', 'tooltip', 'popover', 'collapse'];
     $.each(bs3classes, function (idx, classname) {
-      $('body').on('shown.bs.' + classname + '.sendImageSize', '*', filterEventsByNamespace('bs', sendImageSize));
-      $('body').on('shown.bs.' + classname + '.sendOutputHiddenState ' + 'hidden.bs.' + classname + '.sendOutputHiddenState', '*', filterEventsByNamespace('bs', sendOutputHiddenState));
+      $(document.body).on('shown.bs.' + classname + '.sendImageSize', '*', filterEventsByNamespace('bs', sendImageSize));
+      $(document.body).on('shown.bs.' + classname + '.sendOutputHiddenState ' + 'hidden.bs.' + classname + '.sendOutputHiddenState', '*', filterEventsByNamespace('bs', sendOutputHiddenState));
     });
 
     // This is needed for Bootstrap 2 compatibility and for non-Bootstrap
     // related shown/hidden events (like conditionalPanel)
-    $('body').on('shown.sendImageSize', '*', sendImageSize);
-    $('body').on('shown.sendOutputHiddenState hidden.sendOutputHiddenState', '*', sendOutputHiddenState);
+    $(document.body).on('shown.sendImageSize', '*', sendImageSize);
+    $(document.body).on('shown.sendOutputHiddenState hidden.sendOutputHiddenState', '*', sendOutputHiddenState);
 
     // Send initial pixel ratio, and update it if it changes
     initialValues['.clientdata_pixelratio'] = pixelRatio();
@@ -6757,6 +6627,25 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     if (e.which !== 114 || !e.ctrlKey && !e.metaKey || e.shiftKey || e.altKey) return;
     var url = 'reactlog?w=' + window.escape(exports.shinyapp.config.workerId) + "&s=" + window.escape(exports.shinyapp.config.sessionId);
     window.open(url);
+    e.preventDefault();
+  });
+
+  $(document).on('keydown', function (e) {
+    if (e.which !== 115 || !e.ctrlKey && !e.metaKey || e.shiftKey || e.altKey) return;
+    var url = 'reactlog/mark?w=' + window.escape(exports.shinyapp.config.workerId) + "&s=" + window.escape(exports.shinyapp.config.sessionId);
+
+    // send notification
+    $.get(url, function (result) {
+      if (result !== "marked") return;
+
+      var html = '<span id="shiny-reactlog-mark-text">Marked time point in reactlog</span>';
+
+      exports.notifications.show({
+        html: html,
+        closeButton: true
+      });
+    });
+
     e.preventDefault();
   });
 

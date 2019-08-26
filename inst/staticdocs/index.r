@@ -113,11 +113,6 @@ sd_section("Rendering functions",
     "renderTable",
     "renderUI",
     "downloadHandler",
-    "reactivePlot",
-    "reactivePrint",
-    "reactiveTable",
-    "reactiveText",
-    "reactiveUI",
     "createRenderFunction"
   )
 )
@@ -134,7 +129,7 @@ sd_section("Reactive programming",
     "isolate",
     "invalidateLater",
     "debounce",
-    "showReactLog",
+    "reactlog",
     "makeReactiveBinding",
     "reactiveFileReader",
     "reactivePoll",
@@ -177,7 +172,7 @@ sd_section("Extending Shiny",
   "Functions that are intended to be called by third-party packages that extend Shiny.",
   c(
     "createWebDependency",
-    "addResourcePath",
+    "resourcePaths",
     "registerInputHandler",
     "removeInputHandler",
     "markRenderFunction"
@@ -213,7 +208,7 @@ sd_section("Utility functions",
     "onStop",
     "diskCache",
     "memoryCache",
-    "key_missing"
+    "reexports"
   )
 )
 sd_section("Plot interaction",

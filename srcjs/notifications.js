@@ -97,7 +97,7 @@ exports.notifications = (function() {
     if ($panel.length > 0)
       return $panel;
 
-    $('body').append('<div id="shiny-notification-panel">');
+    $(document.body).append('<div id="shiny-notification-panel">');
 
     return $panel;
   }

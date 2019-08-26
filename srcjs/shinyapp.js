@@ -141,30 +141,8 @@ var ShinyApp = function() {
   };
 
   this.$notifyDisconnected = function() {
-
-    // function to normalize hostnames
-    var normalize = function(hostname) {
-      if (hostname === "127.0.0.1")
-        return "localhost";
-      else
-        return hostname;
-    };
-
-    // Send a 'disconnected' message to parent if we are on the same domin
-    var parentUrl = (parent !== window) ? document.referrer : null;
-    if (parentUrl) {
-      // parse the parent href
-      var a = document.createElement('a');
-      a.href = parentUrl;
-
-      // post the disconnected message if the hostnames are the same
-      if (normalize(a.hostname) === normalize(window.location.hostname)) {
-        var protocol = a.protocol.replace(':',''); // browser compatability
-        var origin = protocol + '://' + a.hostname;
-        if (a.port)
-          origin = origin + ':' + a.port;
-        parent.postMessage('disconnected', origin);
-      }
+    if (window.parent) {
+      window.parent.postMessage("disconnected", "*");
     }
   };
 
@@ -886,13 +864,15 @@ var ShinyApp = function() {
     function getTabIndex($tabset, tabsetId) {
       // The 0 is to ensure this works for empty tabsetPanels as well
       var existingTabIds = [0];
-      var leadingHref = "#tab-" + tabsetId + "-";
       // loop through all existing tabs, find the one with highest id
       // (since this is based on a numeric counter), and increment
       $tabset.find("> li").each(function() {
         var $tab = $(this).find("> a[data-toggle='tab']");
         if ($tab.length > 0) {
-          var index = $tab.attr("href").replace(leadingHref, "");
+          // remove leading url if it exists. (copy of bootstrap url stripper)
+          var href = $tab.attr("href").replace(/.*(?=#[^\s]+$)/, '');
+          // remove tab id to get the index
+          var index = href.replace("#tab-" + tabsetId + "-", "");
           existingTabIds.push(Number(index));
         }
       });
@@ -1100,7 +1080,7 @@ var ShinyApp = function() {
         var $container = $('.shiny-progress-container');
         if ($container.length === 0) {
           $container = $('<div class="shiny-progress-container"></div>');
-          $('body').append($container);
+          $(document.body).append($container);
         }
 
         // Add div for just this progress ID

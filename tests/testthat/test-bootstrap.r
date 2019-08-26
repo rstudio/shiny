@@ -69,20 +69,47 @@ test_that("Repeated names for selectInput and radioButtons choices", {
 
 
 test_that("Choices are correctly assigned names", {
-  # Unnamed vector
+  # Empty non-list comes back with names
+  expect_identical(
+    choicesWithNames(numeric(0)),
+    stats::setNames(list(), character(0))
+  )
+  # Empty list comes back with names
+  expect_identical(
+    choicesWithNames(list()),
+    stats::setNames(list(), character(0))
+  )
+  # Empty character vector
+  # An empty character vector isn't a sensical input, but we preserved this test
+  # in the off chance that somebody relies on the existing behavior.
+  expect_identical(
+    choicesWithNames(c("")),
+    stats::setNames(list(""), "")
+  )
+  # Single-item character vector
+  expect_identical(
+    choicesWithNames(c("foob")),
+    list(foob="foob")
+  )
+  # Unnamed character vector
   expect_identical(
     choicesWithNames(c("a","b","3")),
     list(a="a", b="b", "3"="3")
+  )
+  # Unnamed numeric vector
+  expect_identical(
+    choicesWithNames(c(1,2,3)),
+    list(`1`="1", `2`="2", `3`="3")
   )
   # Unnamed list
   expect_identical(
     choicesWithNames(list("a","b",3)),
     list(a="a", b="b", "3"="3")
   )
-  # Vector, with some named, some not
+  # Complex vector, with some named, some not
   expect_identical(
-    choicesWithNames(c(A="a", "b", C="3", "4")),
-    list(A="a", "b"="b", C="3", "4"="4")
+    choicesWithNames(c(A=Inf+0i, 1+0i, C=0+0i)),
+    list(A="Inf+0i", "1+0i"="1+0i", C="0+0i")
   )
   # List, with some named, some not
   expect_identical(
@@ -114,23 +141,38 @@ test_that("Choices are correctly assigned names", {
     choicesWithNames(list(A="a", B="b", C=c(D="d"))),
     list(A="a", B="b", C=list(D="d"))
   )
-  # List, named, with a named sub-vector of length 1 with a numeric element
+  # List, named, with a named sub-vector of length 1 with a logical element
   expect_identical(
-    choicesWithNames(list(A="a", B="b", C=c(D=1))),
-    list(A="a", B="b", C=list(D="1"))
+    choicesWithNames(list(A="a", B="b", C=c(D=TRUE))),
+    list(A="a", B="b", C=list(D="TRUE"))
   )
   # List, some named, with sublist
   expect_identical(
     choicesWithNames(list(A="a", "b", C=list("d", E="e"))),
     list(A="a", b="b", C=list(d="d", E="e"))
   )
-  # Deeper nesting
-  expect_identical(
-    choicesWithNames(list(A="a", "b", C=list(D=list("e", "f"), G=c(H="h", "i")))),
-    list(A="a", b="b", C=list(D=list(e="e", f="f"), G=list(H="h", i="i")))
-  )
   # Error when sublist is unnamed
   expect_error(choicesWithNames(list(A="a", "b", list(1,2))))
+  # Unnamed factor
+  expect_identical(
+    choicesWithNames(factor(c("a","b","3"))),
+    list(a="a", b="b", "3"="3")
+  )
+  # Named factor
+  expect_identical(
+    choicesWithNames(structure(factor(c("foo", "bar")), names = c("A", "B"))),
+    list(A="foo", B="bar")
+  )
+  # List, named, with a sub-factor
+  expect_identical(
+    choicesWithNames(list(A="a", B="b", C=factor(c("d", "e")))),
+    list(A="a", B="b", C=list(d="d", e="e"))
+  )
+  # List, named, with a named sub-factor
+  expect_identical(
+    choicesWithNames(list(A="a", B="b", C=structure(factor(c("d", "e")), names = c("d", "e")))),
+    list(A="a", B="b", C=list(d="d", e="e"))
+  )
 })
 
 

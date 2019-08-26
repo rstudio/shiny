@@ -12,6 +12,13 @@ pre.shiny-text-output.noplaceholder:empty {
   height: 0;
 }
 
+/* Some browsers (like Safari) will wrap text in <pre> tags with Bootstrap's
+   CSS. This changes the behavior to not wrap.
+*/
+pre.shiny-text-output {
+  word-wrap: normal;
+}
+
 .shiny-image-output img.shiny-scalable, .shiny-plot-output img.shiny-scalable {
   max-width: 100%;
   max-height: 100%;
@@ -207,6 +214,10 @@ pre.shiny-text-output.noplaceholder:empty {
 
 .shiny-progress-notification .progress-text .progress-detail {
   font-size: 80%;
+}
+
+.shiny-label-null {
+  display: none;
 }
 
 .crosshair {

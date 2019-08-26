@@ -14,7 +14,7 @@ test_that("ggplot coordmap", {
   dat <- data.frame(xvar = c(0, 5), yvar = c(10, 20))
 
   tmpfile <- tempfile("test-shiny", fileext = ".png")
-  on.exit(rm(tmpfile))
+  on.exit(unlink(tmpfile))
 
   # Basic scatterplot
   p <- ggplot(dat, aes(xvar, yvar)) + geom_point() +
@@ -75,7 +75,7 @@ test_that("ggplot coordmap with facet_wrap", {
                     g = c("a", "b", "c"))
 
   tmpfile <- tempfile("test-shiny", fileext = ".png")
-  on.exit(rm(tmpfile))
+  on.exit(unlink(tmpfile))
 
   # facet_wrap
   p <- ggplot(dat, aes(xvar, yvar)) + geom_point() +
@@ -123,7 +123,7 @@ test_that("ggplot coordmap with facet_grid", {
                     g = c("a", "b", "c"))
 
   tmpfile <- tempfile("test-shiny", fileext = ".png")
-  on.exit(rm(tmpfile))
+  on.exit(unlink(tmpfile))
 
   p <- ggplot(dat, aes(xvar, yvar)) + geom_point() +
     scale_x_continuous(expand = c(0, 0)) +
@@ -209,7 +209,7 @@ test_that("ggplot coordmap with 2D facet_grid", {
                     g = c("a", "b"), h = c("i", "j"))
 
   tmpfile <- tempfile("test-shiny", fileext = ".png")
-  on.exit(rm(tmpfile))
+  on.exit(unlink(tmpfile))
 
   p <- ggplot(dat, aes(xvar, yvar)) + geom_point() +
     scale_x_continuous(expand = c(0, 0)) +
@@ -259,7 +259,7 @@ test_that("ggplot coordmap with 2D facet_grid", {
 
 test_that("ggplot coordmap with various data types", {
   tmpfile <- tempfile("test-shiny", fileext = ".png")
-  on.exit(rm(tmpfile))
+  on.exit(unlink(tmpfile))
 
   # Factors
   dat <- expand.grid(xvar = letters[1:3], yvar = LETTERS[1:4])
@@ -271,9 +271,20 @@ test_that("ggplot coordmap with various data types", {
   dev.off()
 
   # Check domain
+  expectation <- list(
+    left = 1,
+    right = 3,
+    bottom = 1,
+    top = 4,
+    discrete_limits = list(
+      x = letters[1:3],
+      y = LETTERS[1:4]
+    )
+  )
+
   expect_equal(
     sortList(m$panels[[1]]$domain),
-    sortList(list(left=1, right=3, bottom=1, top=4))
+    sortList(expectation)
   )
 
   # Dates and date-times
@@ -302,7 +313,7 @@ test_that("ggplot coordmap with various data types", {
 
 test_that("ggplot coordmap with various scales and coords", {
   tmpfile <- tempfile("test-shiny", fileext = ".png")
-  on.exit(rm(tmpfile))
+  on.exit(unlink(tmpfile))
 
   # Reversed scales
   dat <- data.frame(xvar = c(0, 5), yvar = c(10, 20))
@@ -356,4 +367,104 @@ test_that("ggplot coordmap with various scales and coords", {
     sortList(m$panels[[1]]$domain),
     sortList(list(left=-1, right=3, bottom=-2, top=4))
   )
+})
+
+
+test_that("ggplot coordmap maintains discrete limits", {
+  tmpfile <- tempfile("test-shiny", fileext = ".png")
+  on.exit(unlink(tmpfile))
+
+  # check discrete limits are correct for free x scales
+  p <- ggplot(mpg) +
+    geom_point(aes(fl, cty), alpha = 0.2) +
+    facet_wrap(~drv, scales = "free_x")
+  png(tmpfile)
+  m <- getGgplotCoordmap(print(p), 500, 400, 72)
+  dev.off()
+
+  expect_length(m$panels, 3)
+  expect_equal(
+    m$panels[[1]]$domain$discrete_limits,
+    list(x = c("d", "e", "p", "r"))
+  )
+  expect_equal(
+    m$panels[[2]]$domain$discrete_limits,
+    list(x = c("c", "d", "e", "p", "r"))
+  )
+  expect_equal(
+    m$panels[[3]]$domain$discrete_limits,
+    list(x = c("e", "p", "r"))
+  )
+
+  # same for free y
+  p2 <- ggplot(mpg) +
+    geom_point(aes(cty, fl), alpha = 0.2) +
+    facet_wrap(~drv, scales = "free_y")
+  png(tmpfile)
+  m2 <- getGgplotCoordmap(print(p2), 500, 400, 72)
+  dev.off()
+
+  expect_length(m2$panels, 3)
+  expect_equal(
+    m2$panels[[1]]$domain$discrete_limits,
+    list(y = c("d", "e", "p", "r"))
+  )
+  expect_equal(
+    m2$panels[[2]]$domain$discrete_limits,
+    list(y = c("c", "d", "e", "p", "r"))
+  )
+  expect_equal(
+    m2$panels[[3]]$domain$discrete_limits,
+    list(y = c("e", "p", "r"))
+  )
+
+  # check that specifying x limits is captured
+  p3 <- ggplot(mpg) +
+    geom_point(aes(fl, cty), alpha = 0.2) +
+    scale_x_discrete(limits = c("c", "d", "e"))
+
+  png(tmpfile)
+  m3 <- getGgplotCoordmap(suppressWarnings(print(p3)), 500, 400, 72)
+  dev.off()
+
+  expect_length(m3$panels, 1)
+  expect_equal(
+    m3$panels[[1]]$domain$discrete_limits,
+    list(x = c("c", "d", "e"))
+  )
+
+  # same for y
+  p4 <- ggplot(mpg) +
+    geom_point(aes(cty, fl), alpha = 0.2) +
+    scale_y_discrete(limits = c("e", "f"))
+
+  png(tmpfile)
+  m4 <- getGgplotCoordmap(suppressWarnings(print(p4)), 500, 400, 72)
+  dev.off()
+
+  expect_length(m4$panels, 1)
+  expect_equal(
+    m4$panels[[1]]$domain$discrete_limits,
+    list(y = c("e", "f"))
+  )
+
+  # make sure that when labels are specified, where
+  # still relaying the input data
+  p5 <- ggplot(mpg) +
+    geom_point(aes(fl, cty), alpha = 0.2) +
+    scale_x_discrete(
+      limits = c("e", "f"),
+      labels = c("foo", "bar")
+    )
+
+  png(tmpfile)
+  m5 <- getGgplotCoordmap(suppressWarnings(print(p5)), 500, 400, 72)
+  dev.off()
+
+  expect_length(m5$panels, 1)
+  expect_equal(
+    m5$panels[[1]]$domain$discrete_limits,
+    list(x = c("e", "f"))
+  )
+
 })

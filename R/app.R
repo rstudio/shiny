@@ -479,7 +479,6 @@ shiny_rmd_warning <- function() {
 }
 
 #' @rdname knitr_methods
-#' @export
 knit_print.shiny.appobj <- function(x, ...) {
   opts <- x$options %OR% list()
   width <- if (is.null(opts$width)) "100%" else opts$width
@@ -516,7 +515,6 @@ knit_print.shiny.appobj <- function(x, ...) {
 # calling output$value <- renderFoo(...) and fooOutput().
 #' @rdname knitr_methods
 #' @param inline Whether the object is printed inline.
-#' @export
 knit_print.shiny.render.function <- function(x, ..., inline = FALSE) {
   x <- htmltools::as.tags(x, inline = inline)
   output <- knitr::knit_print(tagList(x))
@@ -529,7 +527,6 @@ knit_print.shiny.render.function <- function(x, ..., inline = FALSE) {
 # Lets us drop reactive expressions directly into a knitr chunk and have the
 # value printed out! Nice for teaching if nothing else.
 #' @rdname knitr_methods
-#' @export
 knit_print.reactive <- function(x, ..., inline = FALSE) {
   renderFunc <- if (inline) renderText else renderPrint
   knitr::knit_print(renderFunc({

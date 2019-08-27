@@ -1,10 +1,10 @@
 \name{include}
 \alias{include}
-\alias{includeCSS}
 \alias{includeHTML}
-\alias{includeMarkdown}
-\alias{includeScript}
 \alias{includeText}
+\alias{includeMarkdown}
+\alias{includeCSS}
+\alias{includeScript}
 \title{Include Content From a File}
 \usage{
 includeHTML(path)
@@ -19,8 +19,8 @@ includeScript(path, ...)
 }
 \arguments{
 \item{path}{The path of the file to be included. It is highly recommended to
-  use a relative path (the base path being the Shiny application directory),
-  not an absolute path.}
+use a relative path (the base path being the Shiny application directory),
+not an absolute path.}
 
 \item{...}{Any additional attributes to be applied to the generated tag.}
 }
@@ -42,4 +42,3 @@ large literal R string.
 The \code{includeMarkdown} function requires the \code{markdown}
   package.
 }
-

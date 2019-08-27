@@ -2,6 +2,8 @@
 \alias{tag}
 \alias{tagList}
 \alias{tagAppendAttributes}
+\alias{tagHasAttribute}
+\alias{tagGetAttribute}
 \alias{tagAppendChild}
 \alias{tagAppendChildren}
 \alias{tagSetChildren}
@@ -10,6 +12,10 @@
 tagList(...)
 
 tagAppendAttributes(tag, ...)
+
+tagHasAttribute(tag, attr)
+
+tagGetAttribute(tag, attr)
 
 tagAppendChild(tag, child)
 
@@ -23,6 +29,8 @@ tag(`_tag_name`, varArgs, .noWS = NULL)
 \item{...}{Unnamed items that comprise this list of tags.}
 
 \item{tag}{A tag to append child elements to.}
+
+\item{attr}{The name of an attribute.}
 
 \item{child}{A child element to append to a parent tag.}
 

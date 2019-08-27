@@ -14,13 +14,25 @@ test_that("files are loaded into the right env", {
 
 test_that("Can suppress sourcing global.R", {
   # Confirm that things blow up if we source global.R
-  expect_error(loadSupport("../test-helpers/app3-badglobal"))
+  expect_error(loadSupport(test_path("../test-helpers/app3-badglobal")))
 
   # Shouldn't see an error now that we're suppressing global sourcing.
-  renv <- loadSupport("../test-helpers/app3-badglobal", globalrenv=NULL)
+  renv <- loadSupport(test_path("../test-helpers/app3-badglobal"), globalrenv=NULL)
 
   # But other helpers are still sourced
   expect_true(exists("helper1", envir=renv))
+})
+
+test_that("Can suppress sourcing supporting R files", {
+  # Confirm that things blow up if we source global.R
+  expect_error(loadSupport(test_path("../test-helpers/app5-bad-supporting")))
+
+  # Shouldn't see an error now that we're suppressing sourcing.
+  rm("happy", envir=globalenv())
+  renv <- loadSupport(test_path("../test-helpers/app5-bad-supporting"), renv=NULL)
+
+  # But other helpers are still sourced
+  expect_true(exists("happy", envir=globalenv()))
 })
 
 test_that("nested helpers are not loaded", {
@@ -47,6 +59,11 @@ test_that("With ui/server.R, global.R is loaded before R/ helpers and into the r
     calls[[length(calls)+1]] <<- list(...)
     NULL
   }
+
+  # Temporarily opt-in to R/ file autoloading
+  orig <- getOption("shiny.autoload.r", NULL)
+  options(shiny.autoload.r=TRUE)
+  on.exit({options(shiny.autoload.r=orig)}, add=TRUE)
 
   # + shinyAppDir_serverR
   # +--- sourceUTF8
@@ -94,12 +111,46 @@ test_that("With ui/server.R, global.R is loaded before R/ helpers and into the r
 })
 
 
+test_that("Loading supporting R fils is opt-in", {
+  calls <- list()
+  sourceStub <- function(...){
+    calls[[length(calls)+1]] <<- list(...)
+    NULL
+  }
+
+  # Temporarily unset autoloading option
+  orig <- getOption("shiny.autoload.r", NULL)
+  options(shiny.autoload.r=NULL)
+  on.exit({options(shiny.autoload.r=orig)}, add=TRUE)
+
+  # + shinyAppDir_serverR
+  # +--- sourceUTF8
+  # +--+ loadSupport
+  # |  +--- sourceUTF8
+  loadSpy <- rewire(loadSupport, sourceUTF8 = sourceStub)
+  sad <- rewire(shinyAppDir_serverR, sourceUTF8 = sourceStub, loadSupport = loadSpy)
+
+  sa <- sad(normalizePath("../test-helpers/app1-standard"))
+  sa$onStart()
+  sa$onStop() # Close down to free up resources
+
+  # Should have seen one call from global.R -- helpers are disabled
+  expect_length(calls, 1)
+  expect_match(calls[[1]][[1]], "/global\\.R$", perl=TRUE)
+})
+
+
 test_that("app.R is loaded after R/ helpers and into the right envs", {
   calls <- list()
   sourceSpy <- function(...){
     calls[[length(calls)+1]] <<- list(...)
     do.call(sourceUTF8, list(...))
   }
+
+  # Temporarily opt-in to R/ file autoloading
+  orig <- getOption("shiny.autoload.r", FALSE)
+  options(shiny.autoload.r=TRUE)
+  on.exit({options(shiny.autoload.r=orig)}, add=TRUE)
 
   # + shinyAppDir_serverR
   # +--- sourceUTF8

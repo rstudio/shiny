@@ -137,6 +137,19 @@ shinyAppFile <- function(appFile, options=list()) {
   shinyAppDir_appR(basename(appFile), appDir, options = options)
 }
 
+#' Determine which renv to use to source the helpers.
+#' Currently returns NULL (disabling autoloading of R/*.R) unless
+#' the user opts in via the sets the option `shiny.autoload.r=TRUE`.
+#' @noRd
+getREnv <- function(se=sharedEnv) {
+  doLoad <- getOption("shiny.autoload.r", FALSE)
+  if (doLoad){
+    se
+  } else {
+    NULL
+  }
+}
+
 # This reads in an app dir in the case that there's a server.R (and ui.R/www)
 # present, and returns a shiny.appobj.
 # appDir must be a normalized (absolute) path, not a relative one
@@ -220,7 +233,7 @@ shinyAppDir_serverR <- function(appDir, options=list()) {
     setwd(appDir)
     monitorHandle <<- initAutoReloadMonitor(appDir)
     # TODO: we should support hot reloading on global.R and R/*.R changes.
-    loadSupport(appDir, renv=sharedEnv, globalrenv=globalenv())
+    loadSupport(appDir, renv=getREnv(sharedEnv), globalrenv=globalenv())
   }
   onStop <- function() {
     setwd(oldwd)
@@ -315,10 +328,13 @@ loadSupport <- function(appDir, renv=new.env(parent=globalenv()), globalrenv=glo
       sourceUTF8(file.path.ci(appDir, "global.R"), envir=globalrenv)
     }
   }
-  helpersDir <- file.path(appDir, "R")
-  helpers <- list.files(helpersDir, pattern="\\.[rR]$", recursive=FALSE, full.names=TRUE)
 
-  lapply(helpers, sourceUTF8, envir=renv)
+  if (!is.null(renv)){
+    helpersDir <- file.path(appDir, "R")
+    helpers <- list.files(helpersDir, pattern="\\.[rR]$", recursive=FALSE, full.names=TRUE)
+
+    lapply(helpers, sourceUTF8, envir=renv)
+  }
 
   invisible(renv)
 }
@@ -383,7 +399,7 @@ shinyAppDir_appR <- function(fileName, appDir, options=list())
     oldwd <<- getwd()
     setwd(appDir)
     # TODO: we should support hot reloading on R/*.R changes.
-    loadSupport(appDir, renv=sharedEnv, globalrenv=NULL)
+    loadSupport(appDir, renv=getREnv(sharedEnv), globalrenv=NULL)
     monitorHandle <<- initAutoReloadMonitor(appDir)
     if (!is.null(appObj()$onStart)) appObj()$onStart()
   }

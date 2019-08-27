@@ -19,7 +19,7 @@ be evaluated.}
 \description{
 Loads all of the supporting R files of a Shiny application. Specifically,
 this function loads any top-level supporting \code{.R} files in the \code{R/} directory
-adjacent to the app and a \code{global.R} file.
+adjacent to the \code{app.R}/\code{server.R}/\code{ui.R} files.
 }
 \details{
 The files are sourced in alphabetical order (as determined by

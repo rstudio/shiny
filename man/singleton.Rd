@@ -1,6 +1,6 @@
 \name{singleton}
-\alias{is.singleton}
 \alias{singleton}
+\alias{is.singleton}
 \title{Include content only once}
 \usage{
 singleton(x, value = TRUE)
@@ -18,4 +18,3 @@ be included in the generated document only once, yet may appear in the
 document-generating code more than once. Only the first appearance of the
 content (in document order) will be used.
 }
-

@@ -703,7 +703,6 @@ reactiveValuesToList <- function(x, all.names=FALSE) {
 # [[.reactivevalues(), which will give an error when it tries to access
 # x[['impl']].
 #' @export
-#' @method str reactivevalues
 str.reactivevalues <- function(object, indent.str = " ", ...) {
   utils::str(unclass(object), indent.str = indent.str, ...)
   # Need to manually print out the class field,

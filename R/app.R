@@ -297,7 +297,7 @@ initAutoReloadMonitor <- function(dir) {
 #'
 #' Loads all of the supporting R files of a Shiny application. Specifically,
 #' this function loads any top-level supporting `.R` files in the `R/` directory
-#' adjacent to the app and a `global.R` file.
+#' adjacent to the `app.R`/`server.R`/`ui.R` files.
 #'
 #' @details The files are sourced in alphabetical order (as determined by
 #'   [list.files]). `global.R` is evaluated before the supporting R files in the

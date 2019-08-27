@@ -141,7 +141,7 @@ shinyAppFile <- function(appFile, options=list()) {
 #' Currently returns NULL (disabling autoloading of R/*.R) unless
 #' the user opts in via the sets the option `shiny.autoload.r=TRUE`.
 #' @noRd
-getREnv <- function(se=sharedEnv) {
+getREnv <- function(se) {
   doLoad <- getOption("shiny.autoload.r", FALSE)
   if (doLoad){
     se

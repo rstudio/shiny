@@ -46,7 +46,7 @@ local({
     vapply(paste0, collapse = " ", character(1), USE.NAMES = FALSE) %>%
     paste0("#' @export ", .) %>%
     paste0(collapse = "\n") %>%
-    paste0("\nNULL") %>%
+    paste0("#' @import htmltools\n", ., "\nNULL") %>%
     writeLines(local_htmltools_r_file)
   message("Updated: ", local_htmltools_r_file)
 

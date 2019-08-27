@@ -2,9 +2,16 @@
 # Will update all man files that are re-exported from htmltools
 # Will save all aliases to `./R/htmltools.R` and document to enforce all re-exports
 
-library(magrittr)
 
 local({
+
+  `%>%` <- magrittr::`%>%`
+
+  # pre document
+  devtools::document()
+
+  namespace_line_count <- length(readLines(rprojroot::find_package_root_file("NAMESPACE")))
+
 
   htmltools_github_man_location <- "https://raw.githubusercontent.com/rstudio/htmltools/master/man/"
 
@@ -50,5 +57,32 @@ local({
     writeLines(local_htmltools_r_file)
   message("Updated: ", local_htmltools_r_file)
 
+  # document new functions
   devtools::document()
+  namespace_line_count_new <- length(readLines(rprojroot::find_package_root_file("NAMESPACE")))
+
+  new_version <-
+    "https://raw.githubusercontent.com/rstudio/htmltools/master/DESCRIPTION" %>%
+    url() %>%
+    read.dcf() %>%
+    as.data.frame() %>%
+    {.$Version[1]} %>%
+    as.character()
+
+  message("\n")
+  if (namespace_line_count_new == namespace_line_count) {
+    message("The NAMESPACE exports did NOT change by copying in the `htmltools` man files")
+    message()
+    message("Possible `htmltools` version requirement to add to DESCRIPTION file:\nImports:\n    htmltools (>= ", new_version, ")")
+  } else {
+    message("The NAMESPACE exports CHANGED by copying in the `htmltools` man files")
+    message()
+    message("`htmltools` version requirement to add to DESCRIPTION file:\nImports:\n    htmltools (>= ", new_version, ")")
+    message()
+    message("Possible remote to add to the DESCRIPTION file:\nRemotes:\n    rstudio/htmltools")
+  }
+
+
+
+
 })

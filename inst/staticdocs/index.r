@@ -173,7 +173,7 @@ sd_section("Extending Shiny",
   "Functions that are intended to be called by third-party packages that extend Shiny.",
   c(
     "createWebDependency",
-    "addResourcePath",
+    "resourcePaths",
     "registerInputHandler",
     "removeInputHandler",
     "markRenderFunction"

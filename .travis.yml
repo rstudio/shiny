@@ -25,3 +25,6 @@ notifications:
   email:
     on_success: change
     on_failure: change
+  slack:
+    secure: QoM0+hliVC4l2HYv126AkljG/uFvgwayW9IpuB5QNqjSukM122MhMDL7ZuMB9a2vWP24juzOTXiNIymgEspfnvvAMnZwYRBNWkuot2m8HIR2B9UjQLiztFnN1EAT+P+thz8Qax9TV2SOfXb2S2ZOeZmRTVkJctxkL8heAZadIC4=
+    on_pull_requests: false

@@ -639,7 +639,7 @@ ShinySession <- R6Class(
           # that the resulting object is represented as an object in JSON
           # instead of an array, and so that the RDS data structure is of a
           # consistent type.
-          values <- lapply(values, asNamedVector)
+          values <- lapply(values, asNamed)
 
           if (length(values) == 0) {
             return(httpResponse(400, "text/plain",

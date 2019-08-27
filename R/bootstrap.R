@@ -60,7 +60,7 @@ bootstrapPage <- function(..., title = NULL, responsive = NULL, theme = NULL) {
 #' @inheritParams bootstrapPage
 #' @export
 bootstrapLib <- function(theme = NULL) {
-  htmlDependency("bootstrap", "3.3.7",
+  htmlDependency("bootstrap", "3.4.1",
     c(
       href = "shared/bootstrap",
       file = system.file("www/shared/bootstrap", package = "shiny")

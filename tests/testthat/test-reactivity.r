@@ -1339,31 +1339,33 @@ test_that("reactivePoll doesn't leak observer (#1548)", {
   )
 
   observe({
-    message(count())
+    count()
   })
-  while(i < 3) {
+
+  while (i < 3) {
     Sys.sleep(0.05)
     shiny:::timerCallbacks$executeElapsed()
     shiny:::flushReact()
   }
 
   # Removing the reference to count means that no one can use it anymore, and so
-  # the checkFunc should not keep firing.
+  # the finalizer should run. The finalizer sets a flag which will allow the
+  # observer (which calls `checkFunc`) to run one more time; in that run, it
+  # will remove itself.
   rm(count)
   gc()
 
-  # Make sure the finalizer from safe_finalizer runs -- it is scheduled using
-  # later().
-  later::run_now()
+  # If the reactivePoll was cleaned up, then the first run of this loop will
+  # increment i (bringing its value to 4), but in that run, the observer will
+  # remove itself so subsequent runs will no longer run `checkFunc`.
+  for (n in 1:3) {
+    Sys.sleep(0.05)
+    shiny:::timerCallbacks$executeElapsed()
+    shiny:::flushReact()
+  }
 
-  # If the reactivePoll was cleaned up, then running the following should no
-  # longer increment i.
-  Sys.sleep(0.05)
-  shiny:::timerCallbacks$executeElapsed()
-  shiny:::flushReact()
-  Sys.sleep(0.05)
-  shiny:::timerCallbacks$executeElapsed()
-  shiny:::flushReact()
-
-  expect_equal(i, 3L)
+  # It is possible in the future we will have a better method which will remove
+  # the observer without requiring the one extra run. If that happens, the
+  # expected value will be 3 instead of 4.
+  expect_equal(i, 4L)
 })

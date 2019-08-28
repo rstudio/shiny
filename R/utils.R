@@ -1805,13 +1805,3 @@ cat_line <- function(...) {
   cat(paste(..., "\n", collapse = ""))
 }
 
-# A wrapper for reg.finalizer that's a bit safer than using it directly.
-# According to the docs for `reg.finalizer`, the finalizer is scheduled during
-# GC, but "run at a relatively safe time thereafter." This wrapper uses
-# `later` to schedule the callback, which lets us run it at an even more
-# controlled time.
-safe_finalizer <- function(obj, finalizer) {
-  reg.finalizer(obj, function(e) {
-    later::later(function() finalizer(e))
-  })
-}

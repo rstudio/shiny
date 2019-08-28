@@ -49,8 +49,21 @@ contents_identical <- function(a, b) {
   TRUE
 }
 
-
 # Don't print out stack traces (which go to stderr)
 suppress_stacktrace <- function(expr) {
   capture.output(force(expr), type = "message")
+}
+
+# Rewire copies the given function, f, and replaces any named
+# provided arguments in its execution.
+# Note #1: this only substitutes variables at the top-level function
+#   call. Recursive calls back into this function will not have the
+#   substitutions.
+# Note #2: this function won't work if the call includes the namespace.
+#   i.e. `rewire(f, ls=function(x))` will not rewire a call to `base::ls()`.
+rewire <- function(f, ...) {
+  orig_env <- environment(f)
+  new_env <- list2env(list(...), parent = orig_env)
+  environment(f) <- new_env
+  f
 }

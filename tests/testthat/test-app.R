@@ -38,7 +38,7 @@ test_that("app with both r/ and R/ prefers R/", {
   renv <- loadSupport("../test-helpers/app4-both")
 
   expect_false(exists("lowerHelper", envir=renv))
-  expect_equal(upperHelper, "abc", envir=renv)
+  expect_equal(get("upperHelper", envir=renv), "abc")
 })
 
 test_that("With ui/server.R, global.R is loaded before R/ helpers and into the right envs", {

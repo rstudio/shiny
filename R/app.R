@@ -347,9 +347,18 @@ shinyAppDir_appR <- function(fileName, appDir, options=list())
 {
   fullpath <- file.path.ci(appDir, fileName)
 
-  # Create a child env which contains all the helpers and will be the parent
-  # of app.R
-  sharedEnv <- new.env(parent = globalenv())
+  # In an upcoming version of shiny, this option will go away and the new behavior will be used.
+  if (getOption("shiny.autoload.r", FALSE)) {
+    # new behavior
+
+    # Create a child env which contains all the helpers and will be the shared parent
+    # of the ui.R and server.R load.
+    sharedEnv <- new.env(parent = globalenv())
+  } else {
+    # old behavior, default
+    sharedEnv <- globalenv()
+  }
+
 
   # This sources app.R and caches the content. When appObj() is called but
   # app.R hasn't changed, it won't re-source the file. But if called and
@@ -402,9 +411,6 @@ shinyAppDir_appR <- function(fileName, appDir, options=list())
     # TODO: we should support hot reloading on R/*.R changes.
     if (getOption("shiny.autoload.r", FALSE)) {
       loadSupport(appDir, renv=sharedEnv, globalrenv=NULL)
-    }  else {
-      if (file.exists(file.path.ci(appDir, "global.R")))
-        sourceUTF8(file.path.ci(appDir, "global.R"))
     }
     monitorHandle <<- initAutoReloadMonitor(appDir)
     if (!is.null(appObj()$onStart)) appObj()$onStart()

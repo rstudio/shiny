@@ -3,13 +3,13 @@ shiny 1.3.2.9001
 
 ## Changes
 
-* All files ending in `.r` or `.R` contained in a directory named `R/` adjacent to your application are sourced when your app is started. ([#2547](https://github.com/rstudio/shiny/pull/2547))
-
 * Resolved [#1433](https://github.com/rstudio/shiny/issues/1433): `plotOutput()`'s coordmap info now includes discrete axis limits for **ggplot2** plots. As a result, any **shinytest** tests that contain **ggplot2** plots with discrete axes (that were recorded before this change) will now report differences that can safely be updated. This new coordmap info was added to correctly infer what data points are within an input brush and/or near input click/hover in scenarios where a non-trivial discrete axis scale is involved (e.g., whenever `scale_[x/y]_discrete(limits = ...)` and/or free scales across multiple discrete axes are used). ([#2410](https://github.com/rstudio/shiny/pull/2410))
 
 ### Improvements
 
 * Resolved [#2402](https://github.com/rstudio/shiny/issues/2402): An informative warning is now thrown for mis-specified (date) strings in `dateInput()`, `updateDateInput()`, `dateRangeInput()`, and `updateDateRangeInput()`. ([#2403](https://github.com/rstudio/shiny/pull/2403))
+
+* If the `shiny.autload.r` option is set to `TRUE`, all files ending in `.r` or `.R` contained in a directory named `R/` adjacent to your application are sourced when your app is started. This will become the default Shiny behavior in a future release. ([#2547](https://github.com/rstudio/shiny/pull/2547))
 
 * Resolved [#2442](https://github.com/rstudio/shiny/issues/2442): The `shiny:inputchanged` JavaScript event now triggers on the related input element instead of `document`. Existing event listeners bound to `document` will still detect the event due to event bubbling. ([#2446](https://github.com/rstudio/shiny/pull/2446))
 

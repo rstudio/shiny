@@ -117,7 +117,7 @@
 
   // If this is the main Shiny window, wire up our custom message handler.
   if (window.Shiny) {
-    Shiny.addCustomMessageHandler('reactlog', function(message) {
+    Shiny.addCustomMessageHandler('showcase-src', function(message) {
       if (message.srcref && message.srcfile) {
         highlightSrcref(message.srcref, message.srcfile);
       }
@@ -267,4 +267,3 @@
   if (window.hljs)
     hljs.initHighlightingOnLoad();
 })();
-

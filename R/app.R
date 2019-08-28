@@ -139,9 +139,22 @@ shinyAppFile <- function(appFile, options=list()) {
 
 # This reads in an app dir in the case that there's a server.R (and ui.R/www)
 # present, and returns a shiny.appobj.
+# appDir must be a normalized (absolute) path, not a relative one
 shinyAppDir_serverR <- function(appDir, options=list()) {
   # Most of the complexity here comes from needing to hot-reload if the .R files
   # change on disk, or are created, or are removed.
+
+  # In an upcoming version of shiny, this option will go away and the new behavior will be used.
+  if (getOption("shiny.autoload.r", FALSE)) {
+    # new behavior
+
+    # Create a child env which contains all the helpers and will be the shared parent
+    # of the ui.R and server.R load.
+    sharedEnv <- new.env(parent = globalenv())
+  } else {
+    # old behavior, default
+    sharedEnv <- globalenv()
+  }
 
   # uiHandlerSource is a function that returns an HTTP handler for serving up
   # ui.R as a webpage. The "cachedFuncWithFile" call makes sure that the closure
@@ -153,7 +166,7 @@ shinyAppDir_serverR <- function(appDir, options=list()) {
         # If not, then take the last expression that's returned from ui.R.
         .globals$ui <- NULL
         on.exit(.globals$ui <- NULL, add = FALSE)
-        ui <- sourceUTF8(uiR, envir = new.env(parent = globalenv()))
+        ui <- sourceUTF8(uiR, envir = new.env(parent = sharedEnv))
         if (!is.null(.globals$ui)) {
           ui <- .globals$ui[[1]]
         }
@@ -183,7 +196,7 @@ shinyAppDir_serverR <- function(appDir, options=list()) {
       # server.R.
       .globals$server <- NULL
       on.exit(.globals$server <- NULL, add = TRUE)
-      result <- sourceUTF8(serverR, envir = new.env(parent = globalenv()))
+      result <- sourceUTF8(serverR, envir = new.env(parent = sharedEnv))
       if (!is.null(.globals$server)) {
         result <- .globals$server[[1]]
       }
@@ -214,8 +227,13 @@ shinyAppDir_serverR <- function(appDir, options=list()) {
     oldwd <<- getwd()
     setwd(appDir)
     monitorHandle <<- initAutoReloadMonitor(appDir)
-    if (file.exists(file.path.ci(appDir, "global.R")))
-      sourceUTF8(file.path.ci(appDir, "global.R"))
+    # TODO: we should support hot reloading on global.R and R/*.R changes.
+    if (getOption("shiny.autoload.r", FALSE)) {
+      loadSupport(appDir, renv=sharedEnv, globalrenv=globalenv())
+    }  else {
+      if (file.exists(file.path.ci(appDir, "global.R")))
+        sourceUTF8(file.path.ci(appDir, "global.R"))
+    }
   }
   onStop <- function() {
     setwd(oldwd)
@@ -288,18 +306,66 @@ initAutoReloadMonitor <- function(dir) {
   obs$destroy
 }
 
+#' Load an app's supporting R files
+#'
+#' Loads all of the supporting R files of a Shiny application. Specifically,
+#' this function loads any top-level supporting `.R` files in the `R/` directory
+#' adjacent to the `app.R`/`server.R`/`ui.R` files.
+#'
+#' At the moment, this function is "opt-in" and only called if the option
+#' `shiny.autoload.r` is set to `TRUE`.
+#'
+#' @details The files are sourced in alphabetical order (as determined by
+#'   [list.files]). `global.R` is evaluated before the supporting R files in the
+#'   `R/` directory.
+#' @param appDir The application directory
+#' @param renv The environmeny in which the files in the `R/` directory should
+#'   be evaluated.
+#' @param globalrenv The environment in which `global.R` should be evaluated. If
+#'   `NULL`, `global.R` will not be evaluated at all.
+#' @export
+loadSupport <- function(appDir, renv=new.env(parent=globalenv()), globalrenv=globalenv()){
+  if (!is.null(globalrenv)){
+    # Evaluate global.R, if it exists.
+    if (file.exists(file.path.ci(appDir, "global.R"))){
+      sourceUTF8(file.path.ci(appDir, "global.R"), envir=globalrenv)
+    }
+  }
+
+  helpersDir <- file.path(appDir, "R")
+  helpers <- list.files(helpersDir, pattern="\\.[rR]$", recursive=FALSE, full.names=TRUE)
+
+  lapply(helpers, sourceUTF8, envir=renv)
+
+  invisible(renv)
+}
+
 # This reads in an app dir for a single-file application (e.g. app.R), and
 # returns a shiny.appobj.
+# appDir must be a normalized (absolute) path, not a relative one
 shinyAppDir_appR <- function(fileName, appDir, options=list())
 {
   fullpath <- file.path.ci(appDir, fileName)
+
+  # In an upcoming version of shiny, this option will go away and the new behavior will be used.
+  if (getOption("shiny.autoload.r", FALSE)) {
+    # new behavior
+
+    # Create a child env which contains all the helpers and will be the shared parent
+    # of the ui.R and server.R load.
+    sharedEnv <- new.env(parent = globalenv())
+  } else {
+    # old behavior, default
+    sharedEnv <- globalenv()
+  }
+
 
   # This sources app.R and caches the content. When appObj() is called but
   # app.R hasn't changed, it won't re-source the file. But if called and
   # app.R has changed, it'll re-source the file and return the result.
   appObj <- cachedFuncWithFile(appDir, fileName, case.sensitive = FALSE,
     function(appR) {
-      result <- sourceUTF8(fullpath, envir = new.env(parent = globalenv()))
+      result <- sourceUTF8(fullpath, envir = new.env(parent = sharedEnv))
 
       if (!is.shiny.appobj(result))
         stop("app.R did not return a shiny.appobj object.")
@@ -342,6 +408,10 @@ shinyAppDir_appR <- function(fileName, appDir, options=list())
   onStart <- function() {
     oldwd <<- getwd()
     setwd(appDir)
+    # TODO: we should support hot reloading on R/*.R changes.
+    if (getOption("shiny.autoload.r", FALSE)) {
+      loadSupport(appDir, renv=sharedEnv, globalrenv=NULL)
+    }
     monitorHandle <<- initAutoReloadMonitor(appDir)
     if (!is.null(appObj()$onStart)) appObj()$onStart()
   }

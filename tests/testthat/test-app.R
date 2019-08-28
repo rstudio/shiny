@@ -23,20 +23,8 @@ test_that("Can suppress sourcing global.R", {
   expect_true(exists("helper1", envir=renv))
 })
 
-test_that("Can suppress sourcing supporting R files", {
-  # Confirm that things blow up if we source global.R
-  expect_error(loadSupport(test_path("../test-helpers/app5-bad-supporting")))
-
-  # Shouldn't see an error now that we're suppressing sourcing.
-  rm("happy", envir=globalenv())
-  renv <- loadSupport(test_path("../test-helpers/app5-bad-supporting"), renv=NULL)
-
-  # But other helpers are still sourced
-  expect_true(exists("happy", envir=globalenv()))
-})
-
 test_that("nested helpers are not loaded", {
-  loadSupport("../test-helpers/app2-nested", renv=environment())
+  loadSupport("../test-helpers/app2-nested", renv=environment(), globalrenv=NULL)
   expect_equal(helper1, 456)
   expect_false(exists("helper2"))
 })

@@ -22,6 +22,9 @@ this function loads any top-level supporting \code{.R} files in the \code{R/} di
 adjacent to the \code{app.R}/\code{server.R}/\code{ui.R} files.
 }
 \details{
+At the moment, this function is "opt-in" and only called if the option
+\code{shiny.autoload.r} is set to \code{TRUE}.
+
 The files are sourced in alphabetical order (as determined by
 \link{list.files}). \code{global.R} is evaluated before the supporting R files in the
 \code{R/} directory.

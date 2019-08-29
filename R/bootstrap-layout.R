@@ -337,6 +337,60 @@ sidebarLayout <- function(sidebarPanel,
     fixedRow(firstPanel, secondPanel)
 }
 
+#' Create a sidebar panel
+#'
+#' Create a sidebar panel containing input controls that can in turn be passed
+#' to [sidebarLayout()].
+#'
+#' @param ... UI elements to include on the sidebar
+#' @param width The width of the sidebar. For fluid layouts this is out of 12
+#'   total units; for fixed layouts it is out of whatever the width of the
+#'   sidebar's parent column is.
+#' @return A sidebar that can be passed to [sidebarLayout()]
+#'
+#' @examples
+#' # Sidebar with controls to select a dataset and specify
+#' # the number of observations to view
+#' sidebarPanel(
+#'   selectInput("dataset", "Choose a dataset:",
+#'               choices = c("rock", "pressure", "cars")),
+#'
+#'   numericInput("obs", "Observations:", 10)
+#' )
+#' @export
+sidebarPanel <- function(..., width = 4) {
+  div(class=paste0("col-sm-", width),
+    tags$form(class="well",
+      ...
+    )
+  )
+}
+
+#' Create a main panel
+#'
+#' Create a main panel containing output elements that can in turn be passed to
+#' [sidebarLayout()].
+#'
+#' @param ... Output elements to include in the main panel
+#' @param width The width of the main panel. For fluid layouts this is out of 12
+#'   total units; for fixed layouts it is out of whatever the width of the main
+#'   panel's parent column is.
+#' @return A main panel that can be passed to [sidebarLayout()].
+#'
+#' @examples
+#' # Show the caption and plot of the requested variable against mpg
+#' mainPanel(
+#'    h3(textOutput("caption")),
+#'    plotOutput("mpgPlot")
+#' )
+#' @export
+mainPanel <- function(..., width = 8) {
+  div(class=paste0("col-sm-", width),
+    ...
+  )
+}
+
+
 #' Lay out UI elements vertically
 #'
 #' Create a container that includes one or more rows of content (each element

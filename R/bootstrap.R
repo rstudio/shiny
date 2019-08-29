@@ -536,7 +536,8 @@ helpText <- function(...) {
 
 #' Create a tab panel
 #'
-#' Create a tab panel that can be included within a [tabsetPanel()].
+#' Create a tab panel that can be included within a [tabsetPanel()] or
+#' a [navbarPage()].
 #'
 #' @param title Display title for tab
 #' @param ... UI elements to include within the tab

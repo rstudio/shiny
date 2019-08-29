@@ -11,13 +11,19 @@ renderPlot(expr, width = "auto", height = "auto", res = 72, ...,
 \arguments{
 \item{expr}{An expression that generates a plot.}
 
-\item{width, height}{The width/height of the rendered plot, in pixels; or
-\code{'auto'} to use the \code{offsetWidth}/\code{offsetHeight} of the HTML
-element that is bound to this plot. You can also pass in a function that
-returns the width/height in pixels or \code{'auto'}; in the body of the
-function you may reference reactive values and functions. When rendering an
-inline plot, you must provide numeric values (in pixels) to both
-\code{width} and \code{height}.}
+\item{width, height}{Height and width can be specified in three ways:
+\itemize{
+\item \code{"auto"}, the default, uses the size specified by \code{\link[=plotOutput]{plotOutput()}}
+(i.e. the \code{offsetWidth}/`offsetHeight`` of the HTML element bound to
+this plot.)
+\item An integer, defining the width/height in pixels.
+\item A function that returns the width/height in pixels (or \code{"auto"}).
+The function is executed in a reactive context so that you can refer to
+reactive values and expression to make the width/height reactive.
+}
+
+When rendering an inline plot, you must provide numeric values (in pixels)
+to both \code{width} and \code{height}.}
 
 \item{res}{Resolution of resulting plot, in pixels per inch. This value is
 passed to \code{\link[grDevices:png]{grDevices::png()}}. Note that this affects the resolution of PNG

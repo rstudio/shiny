@@ -586,12 +586,14 @@ startApp <- function(appObj, port, host, quiet) {
       hostString <- host
       if (httpuv::ipFamily(host) == 6L)
         hostString <- paste0("[", hostString, "]")
-      message('\n', 'Listening on http://', hostString, ':', port)
+      message('Listening for Shiny app on http://', hostString, ':', port)
+      messageStopApp()
     }
     return(startServer(host, port, httpuvApp))
   } else if (is.character(port)) {
     if (!quiet) {
-      message('\n', 'Listening on domain socket ', port)
+      message('Listening for Shiny app on domain socket ', port)
+      messageStopApp()
     }
     mask <- attr(port, 'mask')
     if (is.null(mask)) {
@@ -602,6 +604,11 @@ startApp <- function(appObj, port, host, quiet) {
     }
     return(startPipeServer(port, mask, httpuvApp))
   }
+}
+
+messageStopApp <- function() {
+  key <- if (identical(.Platform$GUI, "RStudio")) "Escape" else "Ctrl + C/Break"
+  message("Press ", key, " to stop Shiny and return control to console")
 }
 
 # Run an application that was created by \code{\link{startApp}}. This

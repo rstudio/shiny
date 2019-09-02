@@ -18,24 +18,26 @@ shinyOptions(...)
 \item{...}{Options to set, with the form \code{name = value}.}
 }
 \description{
-\code{getShinyOption} retrieves the value of a Shiny option.
-\code{shinyOptions} sets the value of Shiny options; it can also be used to
-return a list of all currently-set Shiny options.
+\code{getShinyOption()} retrieves the value of a Shiny option. \code{shinyOptions()}
+sets the value of Shiny options; it can also be used to return a list of all
+currently-set Shiny options.
 }
-\details{
-There is a global option set, which is available by default. When a Shiny
-application is run with \code{\link[=runApp]{runApp()}}, that option set is duplicated
-and the new option set is available for getting or setting values. If options
-are set from global.R, app.R, ui.R, or server.R, or if they are set from
-inside the server function, then the options will be scoped to the
+\section{Scope}{
+
+There is a global option set which is available by default. When a Shiny
+application is run with \code{\link[=runApp]{runApp()}}, that option set is duplicated and the
+new option set is available for getting or setting values. If options
+are set from \code{global.R}, \code{app.R}, \code{ui.R}, or \code{server.R}, or if they are set
+from inside the server function, then the options will be scoped to the
 application. When the application exits, the new option set is discarded and
 the global option set is restored.
 }
+
 \section{Options}{
 
-
 There are a number of global options that affect Shiny's behavior. These can
-be set with (for example) \code{options(shiny.trace=TRUE)}.
+be set globally with \code{options()} or locally (for a single app) with
+\code{shinyOptions()}.
 
 \describe{
 \item{shiny.autoreload}{If \code{TRUE} when a Shiny app is launched, the
@@ -90,16 +92,16 @@ errors).If you want to sanitize errors in general, but you DO want a
 particular error \code{e} to get displayed to the user, then set this option
 to \code{TRUE} and use \code{stop(safeError(e))} for errors you want the
 user to see.}
-\item{shiny.suppressMissingContextError}{Normally, invoking a reactive
-outside of a reactive context (or \code{\link[=isolate]{isolate()}}) results in
-an error. If this is \code{TRUE}, don't error in these cases. This
-should only be used for debugging or demonstrations of reactivity at the
-console.}
 \item{shiny.stacktraceoffset}{If \code{TRUE}, then Shiny's printed stack
 traces will display srcrefs one line above their usual location. This is
 an arguably more intuitive arrangement for casual R users, as the name
 of a function appears next to the srcref where it is defined, rather than
 where it is currently being called from.}
+\item{shiny.suppressMissingContextError}{Normally, invoking a reactive
+outside of a reactive context (or \code{\link[=isolate]{isolate()}}) results in
+an error. If this is \code{TRUE}, don't error in these cases. This
+should only be used for debugging or demonstrations of reactivity at the
+console.}
 \item{shiny.table.class}{CSS class names to use for tables.}
 \item{shiny.testmode}{If \code{TRUE}, then enable features for testing Shiny
 applications. If \code{FALSE} (the default), do not enable those features.}

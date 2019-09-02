@@ -16,22 +16,23 @@ getShinyOption <- function(name, default = NULL) {
 
 #' Get or set Shiny options
 #'
-#' `getShinyOption` retrieves the value of a Shiny option.
-#' `shinyOptions` sets the value of Shiny options; it can also be used to
-#' return a list of all currently-set Shiny options.
+#' `getShinyOption()` retrieves the value of a Shiny option. `shinyOptions()`
+#' sets the value of Shiny options; it can also be used to return a list of all
+#' currently-set Shiny options.
 #'
-#' There is a global option set, which is available by default. When a Shiny
-#' application is run with [runApp()], that option set is duplicated
-#' and the new option set is available for getting or setting values. If options
-#' are set from global.R, app.R, ui.R, or server.R, or if they are set from
-#' inside the server function, then the options will be scoped to the
+#' @section Scope:
+#' There is a global option set which is available by default. When a Shiny
+#' application is run with [runApp()], that option set is duplicated and the
+#' new option set is available for getting or setting values. If options
+#' are set from `global.R`, `app.R`, `ui.R`, or `server.R`, or if they are set
+#' from inside the server function, then the options will be scoped to the
 #' application. When the application exits, the new option set is discarded and
 #' the global option set is restored.
 #'
 #' @section Options:
-#'
 #' There are a number of global options that affect Shiny's behavior. These can
-#' be set with (for example) `options(shiny.trace=TRUE)`.
+#' be set globally with `options()` or locally (for a single app) with
+#' `shinyOptions()`.
 #'
 #' \describe{
 #'   \item{shiny.autoreload}{If `TRUE` when a Shiny app is launched, the

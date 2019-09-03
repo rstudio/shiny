@@ -986,7 +986,6 @@ runApp <- function(appDir=getwd(),
     captureStackTraces({
       while (!.globals$stopped) {
         ..stacktracefloor..(serviceApp())
-        Sys.sleep(0.001)
       }
     })
   )

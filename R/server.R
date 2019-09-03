@@ -586,13 +586,13 @@ startApp <- function(appObj, port, host, quiet) {
       hostString <- host
       if (httpuv::ipFamily(host) == 6L)
         hostString <- paste0("[", hostString, "]")
-      message('Listening for Shiny app on http://', hostString, ':', port)
+      message('Shiny is listening on http://', hostString, ':', port)
       messageStopApp()
     }
     return(startServer(host, port, httpuvApp))
   } else if (is.character(port)) {
     if (!quiet) {
-      message('Listening for Shiny app on domain socket ', port)
+      message('Shiny is listening on domain socket ', port)
       messageStopApp()
     }
     mask <- attr(port, 'mask')

@@ -122,6 +122,12 @@ test_that("ReactiveValues", {
   expect_error(values$a <- 1)
 })
 
+test_that("reactiveValues() has useful print method", {
+  verify_output(test_path("print-reactiveValues.txt"), {
+    x <- reactiveValues(x = 1, y = 2, z = 3)
+    x
+  })
+})
 
 # Test for overreactivity. funcB has an indirect dependency on valueA (via
 # funcA) and also a direct dependency on valueA. When valueA changes, funcB

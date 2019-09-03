@@ -1800,3 +1800,7 @@ constantTimeEquals <- function(raw1, raw2) {
 
   sum(as.integer(xor(raw1, raw2))) == 0
 }
+
+cat_line <- function(...) {
+  cat(paste(..., "\n", collapse = ""))
+}

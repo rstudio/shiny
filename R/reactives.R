@@ -590,6 +590,14 @@ checkName <- function(x) {
   )
 }
 
+#' @export
+print.reactivevalues <- function(x, ...) {
+  impl <- .subset2(x, "impl")
+  cat_line("<ReactiveValues>")
+  cat_line("  Values:   ", paste0(impl$.values$keys(sort = TRUE), collapse = ", "))
+  cat_line("  Readonly: ", .subset2(x, "readonly"))
+}
+
 #' Checks whether an object is a reactivevalues object
 #'
 #' Checks whether its argument is a reactivevalues object.

@@ -263,16 +263,21 @@ titlePanel <- function(title, windowTitle=title) {
 
 #' Layout a sidebar and main area
 #'
-#' Create a layout with a sidebar and main area. The sidebar is displayed with a
-#' distinct background color and typically contains input controls. The main
+#' Create a layout (`sidebarLayout()`) with a sidebar (`sidebarPanel()`) and
+#' main area (`mainPanel()`). The sidebar is displayed with a distinct
+#' background color and typically contains input controls. The main
 #' area occupies 2/3 of the horizontal width and typically contains outputs.
 #'
-#' @param sidebarPanel The [sidebarPanel] containing input controls
-#' @param mainPanel The [mainPanel] containing outputs
+#' @param sidebarPanel The `sidebarPanel()` containing input controls.
+#' @param mainPanel The `mainPanel()` containing outputs.
 #' @param position The position of the sidebar relative to the main area ("left"
-#'   or "right")
+#'   or "right").
 #' @param fluid `TRUE` to use fluid layout; `FALSE` to use fixed
 #'   layout.
+#' @param width The width of the sidebar and main panel. By default, the
+#'   sidebar takes up 1/3 of the width, and the main panel 2/3. The total
+#'   width must be 12 or less.
+#' @param ... Output elements to include in the sidebar/main panel.
 #'
 #' @examples
 #' ## Only run examples in interactive R sessions
@@ -335,6 +340,24 @@ sidebarLayout <- function(sidebarPanel,
     fluidRow(firstPanel, secondPanel)
   else
     fixedRow(firstPanel, secondPanel)
+}
+
+#' @export
+#' @rdname sidebarLayout
+sidebarPanel <- function(..., width = 4) {
+  div(class=paste0("col-sm-", width),
+    tags$form(class="well",
+      ...
+    )
+  )
+}
+
+#' @export
+#' @rdname sidebarLayout
+mainPanel <- function(..., width = 8) {
+  div(class=paste0("col-sm-", width),
+    ...
+  )
 }
 
 #' Lay out UI elements vertically

@@ -178,61 +178,6 @@ collapseSizes <- function(padding) {
     collapse = " ")
 }
 
-#' Create a page with a sidebar
-#'
-#' Create a Shiny UI that contains a header with the application title, a
-#' sidebar for input controls, and a main area for output.
-#'
-#' @param headerPanel The [headerPanel] with the application title
-#' @param sidebarPanel The [sidebarPanel] containing input controls
-#' @param mainPanel The [mainPanel] containing outputs
-
-#' @return A UI defintion that can be passed to the [shinyUI] function
-#'
-#' @note This function is deprecated. You should use [fluidPage()]
-#' along with [sidebarLayout()] to implement a page with a sidebar.
-#'
-#' @examples
-#' # Define UI
-#' pageWithSidebar(
-#'
-#'   # Application title
-#'   headerPanel("Hello Shiny!"),
-#'
-#'   # Sidebar with a slider input
-#'   sidebarPanel(
-#'     sliderInput("obs",
-#'                 "Number of observations:",
-#'                 min = 0,
-#'                 max = 1000,
-#'                 value = 500)
-#'   ),
-#'
-#'   # Show a plot of the generated distribution
-#'   mainPanel(
-#'     plotOutput("distPlot")
-#'   )
-#' )
-#' @export
-pageWithSidebar <- function(headerPanel,
-                            sidebarPanel,
-                            mainPanel) {
-
-  bootstrapPage(
-    # basic application container divs
-    div(
-      class="container-fluid",
-      div(class="row",
-          headerPanel
-      ),
-      div(class="row",
-          sidebarPanel,
-          mainPanel
-      )
-    )
-  )
-}
-
 #' Create a page with a top level navigation bar
 #'
 #' Create a page that contains a top level navigation bar that can be used to
@@ -406,27 +351,6 @@ navbarMenu <- function(title, ..., menuName = title, icon = NULL) {
                  tabs = list(...),
                  iconClass = iconClass(icon)),
             class = "shiny.navbarmenu")
-}
-
-#' Create a header panel
-#'
-#' Create a header panel containing an application title.
-#'
-#' @param title An application title to display
-#' @param windowTitle The title that should be displayed by the browser window.
-#'   Useful if `title` is not a string.
-#' @return A headerPanel that can be passed to [pageWithSidebar]
-#'
-#' @examples
-#' headerPanel("Hello Shiny!")
-#' @export
-headerPanel <- function(title, windowTitle=title) {
-  tagList(
-    tags$head(tags$title(windowTitle)),
-    div(class="col-sm-12",
-      h1(title)
-    )
-  )
 }
 
 #' Create a well panel

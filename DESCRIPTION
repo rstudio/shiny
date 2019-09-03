@@ -98,6 +98,7 @@ Collate:
     'bookmark-state-local.R'
     'stack.R'
     'bookmark-state.R'
+    'bootstrap-deprecated.R'
     'bootstrap-layout.R'
     'globals.R'
     'conditions.R'

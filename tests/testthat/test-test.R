@@ -103,6 +103,27 @@ test_that("calls out to shinytest when appropriate", {
   expect_s3_class(res, "shinytestrun")
 })
 
+test_that("testApp filters", {
+  calls <- list()
+  sourceStub <- function(...){
+    calls[[length(calls)+1]] <<- list(...)
+    NULL
+  }
+
+  testSpy <- rewire(testApp, sourceUTF8 = sourceStub)
+
+  # No filter should see two files
+  testSpy(test_path("../test-helpers/app1-standard"))
+  expect_length(calls, 2)
+
+  calls <- list()
+  testSpy(test_path("../test-helpers/app1-standard"), filter="runner1")
+  expect_length(calls, 1)
+
+  calls <- list()
+  expect_error(testSpy(test_path("../test-helpers/app1-standard"), filter="i don't exist"), "matched the given filter")
+})
+
 test_that("testApp handles the absence of tests", {
   expect_error(testApp(test_path("../test-helpers/app2-nested")), "No tests directory found")
   expect_message(res <- testApp(test_path("../test-helpers/app6-empty-tests")), "No test runners found in")

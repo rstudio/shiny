@@ -4,10 +4,14 @@
 \alias{testApp}
 \title{Runs the tests associated with this Shiny app}
 \usage{
-testApp(appDir = ".")
+testApp(appDir = ".", filter = NULL)
 }
 \arguments{
 \item{appDir}{The base directory for the application.}
+
+\item{filter}{If not \code{NULL}, only tests with file names matching this regular
+expression will be executed passed to \code{grepl}. Matching is performed on
+the file name including the extension.}
 }
 \description{
 Sources the \code{.R} files in the top-level of \code{tests/} much like \code{R CMD check}.
@@ -15,7 +19,7 @@ These files are typically simple runners for tests nested in other
 directories under \code{tests/}.
 }
 \details{
-TODO: add in filters for specific tests, or high-level toggles for particular types of tests. Or should that just be a filter on the runners?
+TODO: rename from testApp -- collision with shinytest is too much
 
 Historically, \href{https://rstudio.github.io/shinytest/}{shinytest}
 recommended placing tests at the top-level of the \code{tests/} directory. In

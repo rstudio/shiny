@@ -14,7 +14,12 @@ isShinyTest <- function(text){
 #' These files are typically simple runners for tests nested in other
 #' directories under `tests/`.
 #'
+#' TODO: rename from testApp -- collision with shinytest is too much
+#'
 #' @param appDir The base directory for the application.
+#' @param filter If not `NULL`, only tests with file names matching this regular
+#'   expression will be executed passed to `grepl`. Matching is performed on
+#'   the file name including the extension.
 #'
 #' @details Historically, [shinytest](https://rstudio.github.io/shinytest/)
 #'   recommended placing tests at the top-level of the `tests/` directory. In
@@ -22,7 +27,7 @@ isShinyTest <- function(text){
 #'   files in the `tests/` directory are all shinytests; if so, just calls out
 #'   to [shinytest::testApp()].
 #' @export
-testApp <- function(appDir="."){
+testApp <- function(appDir=".", filter=NULL){
   testsDir <- file.path(appDir, "tests")
   if (!dirExists(testsDir)){
     stop("No tests directory found: ", testsDir)
@@ -32,6 +37,13 @@ testApp <- function(appDir="."){
   if (length(runners) == 0){
     message("No test runners found in ", testsDir)
     return(structure(list(result=NA, files=list()), class="shinytestrun"))
+  }
+
+  if (!is.null(filter)){
+    runners <- runners[grepl(filter, runners)]
+  }
+  if (length(runners) == 0){
+    stop("No test runners matched the given filter: '", filter, "'")
   }
 
   # Inspect each runner to see if it appears to be a shinytest

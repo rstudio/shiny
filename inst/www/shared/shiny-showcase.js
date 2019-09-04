@@ -191,7 +191,7 @@
     if (above) {
       $(document.body).animate({ scrollTop: 0 }, animateCodeMs);
     }
-    $(newHostElement).hide();
+    $(currentHostElement).hide();
     isCodeAbove = above;
     setAppCodeSxsWidths(above && animate);
     $(window).trigger("resize");

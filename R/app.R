@@ -68,10 +68,10 @@
 #'   runApp(app)
 #' }
 #' @export
-shinyApp <- function(ui=NULL, server=NULL, onStart=NULL, options=list(),
+shinyApp <- function(ui, server, onStart=NULL, options=list(),
                      uiPattern="/", enableBookmarking=NULL) {
-  if (is.null(server)) {
-    stop("`server` missing from shinyApp")
+  if (!is.function(server)) {
+    stop("`server` must be a function", call. = FALSE)
   }
 
   # Ensure that the entire path is a match

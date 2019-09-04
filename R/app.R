@@ -446,26 +446,34 @@ shinyAppDir_appR <- function(fileName, appDir, options=list())
 }
 
 
-#' @rdname shinyApp
+#' Shiny App object
+#'
+#' Internal methods for the `shiny.appobj` S3 class.
+#'
+#' @keywords internal
+#' @name shiny.appobj
+NULL
+
+#' @rdname shiny.appobj
 #' @param x Object to convert to a Shiny app.
 #' @export
 as.shiny.appobj <- function(x) {
   UseMethod("as.shiny.appobj", x)
 }
 
-#' @rdname shinyApp
+#' @rdname shiny.appobj
 #' @export
 as.shiny.appobj.shiny.appobj <- function(x) {
   x
 }
 
-#' @rdname shinyApp
+#' @rdname shiny.appobj
 #' @export
 as.shiny.appobj.list <- function(x) {
   shinyApp(ui = x$ui, server = x$server)
 }
 
-#' @rdname shinyApp
+#' @rdname shiny.appobj
 #' @export
 as.shiny.appobj.character <- function(x) {
   if (identical(tolower(tools::file_ext(x)), "r"))
@@ -474,13 +482,13 @@ as.shiny.appobj.character <- function(x) {
     shinyAppDir(x)
 }
 
-#' @rdname shinyApp
+#' @rdname shiny.appobj
 #' @export
 is.shiny.appobj <- function(x) {
   inherits(x, "shiny.appobj")
 }
 
-#' @rdname shinyApp
+#' @rdname shiny.appobj
 #' @param ... Additional parameters to be passed to print.
 #' @export
 print.shiny.appobj <- function(x, ...) {
@@ -495,7 +503,7 @@ print.shiny.appobj <- function(x, ...) {
   do.call("runApp", args)
 }
 
-#' @rdname shinyApp
+#' @rdname shiny.appobj
 #' @method as.tags shiny.appobj
 #' @export
 as.tags.shiny.appobj <- function(x, ...) {

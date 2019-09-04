@@ -14,7 +14,6 @@ isShinyTest <- function(text){
 #' These files are typically simple runners for tests nested in other
 #' directories under `tests/`.
 #'
-#' TODO: take a regex
 #' @param appDir The base directory for the application.
 #'
 #' @details Historically, [shinytest](https://rstudio.github.io/shinytest/)
@@ -49,9 +48,12 @@ testApp <- function(appDir="."){
            " are all shinytests, but shinytest is not installed.")
     }
 
-    shinytest::testApp(appDir)
-    # TODO: return our result structure
-    return()
+    sares <- shinytest::testApp(appDir)
+    res <- list()
+    lapply(sares$results, function(r){
+      res[r$name] <<- r$pass
+    })
+    return(structure(list(result=all(as.logical(res)), files=res), class="shinytestrun"))
   }
 
   # TODO: load supporting R files -- conditioned on the option
@@ -73,5 +75,5 @@ testApp <- function(appDir="."){
     })
   })
 
-  return(structure(list(results=all(as.logical(fileResults)), files=fileResults), class="shinytestrun"))
+  return(structure(list(result=all(as.logical(fileResults)), files=fileResults), class="shinytestrun"))
 }

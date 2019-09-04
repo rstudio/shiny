@@ -62,9 +62,9 @@ test_that("testApp works", {
 })
 
 test_that("calls out to shinytest when appropriate", {
-  isShiny <- TRUE
+  isShinyTest <- TRUE
   isShinyTestStub <- function(...){
-    isShiny
+    isShinyTest
   }
 
   shinytestInstalled <- FALSE
@@ -72,19 +72,33 @@ test_that("calls out to shinytest when appropriate", {
     shinytestInstalled
   }
 
-  # All shinytests but shinytest isn't installed
+  # All are shinytests but shinytest isn't installed
   testSpy <- rewire(testApp, isShinyTest = isShinyTestStub, requireNamespace = requireNamespaceStub)
   expect_error(testSpy(test_path("../test-helpers/app1-standard")), "but shinytest is not installed")
 
-  # shinytests and shinytest is installed
+  # All are shinytests and shinytest is installed
   shinytestInstalled <- TRUE
-  # TODO: we can't stub out a namespaced call to shinytest::testApp with rewire, so
-  #   we can't test this scenario without actually calling out to shinytest (which may or may not
-  #   be installed, and wouldn't know how to run these stubbed out files).
-  # TODO: check the result structure that comes back when we shell out to shinytest
+  sares <- list()
+  sares[[1]] <- list(name = "test1", pass=TRUE)
+  sares[[2]] <- list(name = "test2", pass=FALSE)
+  overloadShinyTest <- rewire_namespace_handler("shinytest", "testApp", function(...){ list(results=sares) })
+  testSpy <- rewire(testApp, isShinyTest = isShinyTestStub, requireNamespace = requireNamespaceStub, `::` = overloadShinyTest)
+
+  # Run shinytest with a failure
+  res2 <- testSpy(test_path("../test-helpers/app1-standard"))
+  expect_false(res2$result)
+  expect_equal(res2$files, list(test1=TRUE, test2=FALSE))
+  expect_s3_class(res2, "shinytestrun")
+
+  # Run shinytest with all passing
+  sares[[2]]$pass <- TRUE
+  res2 <- testSpy(test_path("../test-helpers/app1-standard"))
+  expect_true(res2$result)
+  expect_equal(res2$files, list(test1=TRUE, test2=TRUE))
+  expect_s3_class(res2, "shinytestrun")
 
   # Not shinytests
-  isShiny <- FALSE
+  isShinyTest <- FALSE
   res <- testSpy(test_path("../test-helpers/app1-standard"))
   expect_s3_class(res, "shinytestrun")
 })

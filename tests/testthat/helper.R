@@ -61,9 +61,27 @@ suppress_stacktrace <- function(expr) {
 #   substitutions.
 # Note #2: this function won't work if the call includes the namespace.
 #   i.e. `rewire(f, ls=function(x))` will not rewire a call to `base::ls()`.
+#   See `rewire_namespace` below for this.
 rewire <- function(f, ...) {
   orig_env <- environment(f)
   new_env <- list2env(list(...), parent = orig_env)
   environment(f) <- new_env
   f
 }
+
+# rewire can't rewire a namespaced call like `base::print`. However, it can overload
+# the `::` function. This helper creates a function that can be used to rewire `::`
+rewire_namespace_handler <- function(pkgname, symbolname, value) {
+  function(pkg, name) {
+    pkg <- substitute(pkg)
+    name <- substitute(name)
+
+    if (identical(as.character(pkg), pkgname) && identical(as.character(name), symbolname)) {
+      return(value)
+    } else {
+      do.call(`::`, list(pkg, name))
+    }
+  }
+}
+
+

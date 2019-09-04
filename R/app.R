@@ -14,7 +14,9 @@
 #'
 #' @param ui The UI definition of the app (for example, a call to
 #'   `fluidPage()` with nested controls)
-#' @param server A server function
+#' @param server A function with three parameters: `input`, `output`, and
+#'   `session`. The function is called once for each session ensuring that each
+#'   app is independent.
 #' @param onStart A function that will be called before the app is actually run.
 #'   This is only needed for `shinyAppObj`, since in the `shinyAppDir`
 #'   case, a `global.R` file can be used for this purpose.

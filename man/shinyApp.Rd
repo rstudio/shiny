@@ -17,7 +17,9 @@ shinyAppFile(appFile, options = list())
 \item{ui}{The UI definition of the app (for example, a call to
 \code{fluidPage()} with nested controls)}
 
-\item{server}{A server function}
+\item{server}{A function with three parameters: \code{input}, \code{output}, and
+\code{session}. The function is called once for each session ensuring that each
+app is independent.}
 
 \item{onStart}{A function that will be called before the app is actually run.
 This is only needed for \code{shinyAppObj}, since in the \code{shinyAppDir}

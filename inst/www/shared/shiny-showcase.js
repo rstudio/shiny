@@ -150,6 +150,8 @@
       }
     }
 
+    // hide the new element before doing anything to it
+    $(newHostElement).hide();
     $(currentHostElement).fadeOut(animateCodeMs, function() {
       var tabs = document.getElementById("showcase-code-tabs");
       currentHostElement.removeChild(tabs);
@@ -162,7 +164,7 @@
         document.getElementById("showcase-code-content").removeAttribute("style");
       }
 
-      $(newHostElement).fadeIn();
+      $(newHostElement).fadeIn(animateCodeMs);
       if (!above) {
         // remove the applied width and zoom on the app container, and
         // scroll smoothly down to the code's new home
@@ -191,7 +193,6 @@
     if (above) {
       $(document.body).animate({ scrollTop: 0 }, animateCodeMs);
     }
-    $(currentHostElement).hide();
     isCodeAbove = above;
     setAppCodeSxsWidths(above && animate);
     $(window).trigger("resize");

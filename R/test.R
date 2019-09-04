@@ -14,8 +14,6 @@ isShinyTest <- function(text){
 #' These files are typically simple runners for tests nested in other
 #' directories under `tests/`.
 #'
-#' TODO: rename from testApp -- collision with shinytest is too much
-#'
 #' @param appDir The base directory for the application.
 #' @param filter If not `NULL`, only tests with file names matching this regular
 #'   expression will be executed passed to `grepl`. Matching is performed on
@@ -60,6 +58,10 @@ testApp <- function(appDir=".", filter=NULL){
            " are all shinytests, but shinytest is not installed.")
     }
 
+    if (getOption("shiny.autoload.r", FALSE)) {
+      warning("You've enabled `shiny.autoload.r` but this is not supported yet with shinytest.")
+    }
+
     sares <- shinytest::testApp(appDir)
     res <- list()
     lapply(sares$results, function(r){
@@ -68,8 +70,16 @@ testApp <- function(appDir=".", filter=NULL){
     return(structure(list(result=all(as.logical(res)), files=res), class="shinytestrun"))
   }
 
-  # TODO: load supporting R files -- conditioned on the option
-  # TODO: shinytest runs in a new process which won't inherit that option^
+  testenv <- new.env(parent=emptyenv())
+  renv <- new.env(parent=testenv)
+  if (getOption("shiny.autoload.r", FALSE)) {
+    loadSupport(appDir, renv=renv, globalrenv=testenv)
+  } else if (file.exists.ci(file.path(appDir, "server.R"))){
+    # then check for global.R to load
+    if (file.exists(file.path.ci(appDir, "global.R"))){
+      sourceUTF8(file.path.ci(appDir, "global.R"))
+    }
+  }
 
   oldwd <- getwd()
   on.exit({
@@ -81,7 +91,7 @@ testApp <- function(appDir=".", filter=NULL){
   # Otherwise source all the runners -- each in their own environment.
   fileResults <- list()
   lapply(runners, function(r){
-    env <- new.env(parent=emptyenv())
+    env <- new.env(parent=renv)
     tryCatch({sourceUTF8(r, envir=env); fileResults[r] <<- TRUE}, error=function(e){
       fileResults[r] <<- FALSE
     })

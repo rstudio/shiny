@@ -20,12 +20,18 @@ test_that("testApp works", {
     NULL
   }
 
+  loadCalls <- list()
+  loadSupportStub <- function(...){
+    loadCalls[[length(calls)+1]] <<- list(...)
+    NULL
+  }
+
   # Temporarily opt-in to R/ file autoloading
   orig <- getOption("shiny.autoload.r", NULL)
   options(shiny.autoload.r=TRUE)
   on.exit({options(shiny.autoload.r=orig)}, add=TRUE)
 
-  testSpy <- rewire(testApp, sourceUTF8 = sourceStub)
+  testSpy <- rewire(testApp, sourceUTF8 = sourceStub, loadSupport=loadSupportStub)
 
   res <- testSpy(test_path("../test-helpers/app1-standard"))
 
@@ -35,13 +41,10 @@ test_that("testApp works", {
   expect_match(calls[[2]][[1]], "runner2\\.R$", perl=TRUE)
 
   # Check environments
-  # Each should be loaded into an isolated env that's a child of emptyenv
+  # Each should be loaded into an isolated env that has a common parent
   env1 <- calls[[1]]$envir
-  expect_identical(parent.env(env1), emptyenv())
-
   env2 <- calls[[2]]$envir
-  expect_identical(parent.env(env2), emptyenv())
-
+  expect_identical(parent.env(env1), parent.env(env2))
   expect_true(!identical(env1, env2))
 
   # Check working directory
@@ -53,12 +56,28 @@ test_that("testApp works", {
   expect_equal(res$files, list(`runner1.R` = TRUE, `runner2.R` = FALSE))
   expect_s3_class(res, "shinytestrun")
 
+  # Check that supporting files were loaded
+  expect_length(loadCalls, 1)
+  # global should be a child of emptyenv
+  ge <- loadCalls[[1]]$globalrenv
+  expect_identical(parent.env(ge), emptyenv())
+  # renv should be a child of our globalrenv
+  expect_identical(parent.env(loadCalls[[1]]$renv), ge)
+
   # Clear out err'ing files and rerun
   filesToError <- character(0)
 
   res <- testSpy(test_path("../test-helpers/app1-standard"))
   expect_equal(res$result, TRUE)
   expect_equal(res$files, list(`runner1.R` = TRUE, `runner2.R` = TRUE))
+
+  # If autoload is false, it should still load global.R. Because this load happens in the top-level of the function,
+  # our spy will catch it.
+  calls <- list()
+  options(shiny.autoload.r=FALSE)
+  res <- testSpy(test_path("../test-helpers/app1-standard"))
+  expect_length(calls, 3)
+  expect_match(calls[[1]][[1]], "/global\\.R", perl=TRUE)
 })
 
 test_that("calls out to shinytest when appropriate", {
@@ -112,13 +131,14 @@ test_that("testApp filters", {
 
   testSpy <- rewire(testApp, sourceUTF8 = sourceStub)
 
-  # No filter should see two files
+  # No filter should see two tests (plus the global.R which we source first)
   testSpy(test_path("../test-helpers/app1-standard"))
-  expect_length(calls, 2)
+  expect_length(calls, 3)
 
+  # Filter down to one (plus the global.R)
   calls <- list()
   testSpy(test_path("../test-helpers/app1-standard"), filter="runner1")
-  expect_length(calls, 1)
+  expect_length(calls, 2)
 
   calls <- list()
   expect_error(testSpy(test_path("../test-helpers/app1-standard"), filter="i don't exist"), "matched the given filter")

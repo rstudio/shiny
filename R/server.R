@@ -540,7 +540,7 @@ startApp <- function(appObj, port, host, quiet) {
     if (length(resourceConflicts)) {
       warning(
         "Found subdirectories of your app's www/ directory that ",
-        "conflict with other resource URL prefixes.",
+        "conflict with other resource URL prefixes. ",
         "Consider renaming these directories: '",
         paste0("www/", resourceConflicts, collapse = "', '"), "'",
         call. = FALSE

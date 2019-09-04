@@ -83,6 +83,8 @@
       el.id = "srcref_" + srcref;
       var ref = srcref;
       var code = document.getElementById(srcfile.replace(/\./g, "_") + "_code");
+      // if there is no code file (might be a shiny file), quit early
+      if (!code) return;
       var start = findTextPoint(code, ref[0], ref[4]);
       var end = findTextPoint(code, ref[2], ref[5]);
 

@@ -20,6 +20,8 @@ shiny 1.3.2.9001
 
 * Fixed [#2267](https://github.com/rstudio/shiny/issues/2267): Fixed a memory leak with `invalidateLater`. ([#2555](https://github.com/rstudio/shiny/pull/2555))
 
+* Fixed [#1548](https://github.com/rstudio/shiny/issues/1548): The `reactivePoll` function leaked an observer; that is the observer would continue to exist even if the `reactivePoll` object was no longer accessible. [#2522](https://github.com/rstudio/shiny/pull/2522)
+
 * Resolved [#2469](https://github.com/rstudio/shiny/issues/2469): `renderText` now takes a `sep` argument that is passed to `cat`. ([#2497](https://github.com/rstudio/shiny/pull/2497))
 
 * Added `resourcePaths()` and `removeResourcePaths()` functions. ([#2459](https://github.com/rstudio/shiny/pull/2459))

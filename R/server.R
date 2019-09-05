@@ -92,7 +92,8 @@ addResourcePath <- function(prefix, directoryPath) {
   # Note that previous versions of shiny used to warn about this case,
   # but it was eventually removed since it caused confusion (#567).
   # It seems a good comprimise is to throw a more information message.
-  if (prefix %in% names(.globals$resourcePaths)) {
+  if (getOption("shiny.resourcePathChanges", FALSE) &&
+      prefix %in% names(.globals$resourcePaths)) {
     existingPath <- .globals$resourcePaths[[prefix]]$path
     if (normalizedPath != existingPath) {
       message(

@@ -85,25 +85,25 @@ addResourcePath <- function(prefix, directoryPath) {
     }
   )
 
-  # Often times overwriting a resource path is "what you want",
-  # but sometimes it can lead to difficult to diagnose issues
-  # (e.g. an implict dependency might set a resource path that
-  # conflicts with what you, the app author, are trying to register)
-  # Note that previous versions of shiny used to warn about this case,
-  # but it was eventually removed since it caused confusion (#567).
-  # It seems a good comprimise is to throw a more information message.
-  if (getOption("shiny.resourcePathChanges", FALSE) &&
-      prefix %in% names(.globals$resourcePaths)) {
-    existingPath <- .globals$resourcePaths[[prefix]]$path
-    if (normalizedPath != existingPath) {
-      message(
-        "The resource path '", prefix, "' used to point to ",
-        existingPath, ", but it now points to ", normalizedPath, ". ",
-        "If your app doesn't work as expected, you may want to ",
-        "choose a different prefix name."
-      )
-    }
-  }
+  # # Often times overwriting a resource path is "what you want",
+  # # but sometimes it can lead to difficult to diagnose issues
+  # # (e.g. an implict dependency might set a resource path that
+  # # conflicts with what you, the app author, are trying to register)
+  # # Note that previous versions of shiny used to warn about this case,
+  # # but it was eventually removed since it caused confusion (#567).
+  # # It seems a good compromise is to throw a more information message.
+  # if (getOption("shiny.resourcePathChanges", FALSE) &&
+  #     prefix %in% names(.globals$resourcePaths)) {
+  #   existingPath <- .globals$resourcePaths[[prefix]]$path
+  #   if (normalizedPath != existingPath) {
+  #     message(
+  #       "The resource path '", prefix, "' used to point to ",
+  #       existingPath, ", but it now points to ", normalizedPath, ". ",
+  #       "If your app doesn't work as expected, you may want to ",
+  #       "choose a different prefix name."
+  #     )
+  #   }
+  # }
 
   # If a shiny app is currently running, dynamically register this path with
   # the corresponding httpuv server object.

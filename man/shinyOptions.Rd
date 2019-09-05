@@ -84,10 +84,6 @@ Shiny will use minified JavaScript (\code{shiny.min.js}). If
 which can be viewed later with the \code{\link[=reactlogShow]{reactlogShow()}} function.
 This incurs a substantial performance penalty and should not be used in
 production.}
-\item{shiny.resourcePathChanges}{If \code{TRUE}, a message is provided whenever
-the path of a given resource prefix has changed, which may be helpful
-for diagnosing problems caused by two different resources accidentally
-use the same prefix.}
 \item{shiny.sanitize.errors}{If \code{TRUE}, then normal errors (i.e.
 errors not wrapped in \code{safeError}) won't show up in the app; a simple
 generic error message is printed instead (the error and strack trace printed

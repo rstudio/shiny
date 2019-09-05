@@ -1364,8 +1364,5 @@ test_that("reactivePoll doesn't leak observer (#1548)", {
     shiny:::flushReact()
   }
 
-  # It is possible in the future we will have a better method which will remove
-  # the observer without requiring the one extra run. If that happens, the
-  # expected value will be 3 instead of 4.
-  expect_equal(i, 4L)
+  expect_equal(i, 3L)
 })

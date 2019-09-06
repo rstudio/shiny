@@ -1,0 +1,18 @@
+diff --git a/inst/www/shared/ionrangeslider/js/ion.rangeSlider.js b/inst/www/shared/ionrangeslider/js/ion.rangeSlider.js
+index 89d204ed..ae467f10 100644
+--- a/inst/www/shared/ionrangeslider/js/ion.rangeSlider.js
++++ b/inst/www/shared/ionrangeslider/js/ion.rangeSlider.js
+@@ -1723,7 +1723,12 @@
+             if (this.has_tab_index) {
+                 this.$cache.input.prop("tabindex", -1);
+             } else {
+-                this.$cache.input.removeProp("tabindex");
++                try {
++                    this.$cache.input.removeProp("tabindex");
++                } catch(e) {
++                    // Do nothing (PhantomJS can throw an error with the
++                    // above, #2587)
++                }
+             }
+ 
+             this.has_tab_index = !this.has_tab_index;

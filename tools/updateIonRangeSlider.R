@@ -36,7 +36,7 @@ file.copy(file.path(unzip_dir, "img"), dest_dir, recursive = TRUE)
 # Apply patches
 # =============================================================================
 # The version of ion.rangeSlider that we use is modified from the base version
-# in two ways:
+# in the following ways:
 # * In our version, mouse events on the slider are not propagated to lower
 #   layers (#711, #1630).
 # * We include a custom skin for Shiny.

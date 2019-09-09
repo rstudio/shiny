@@ -82,7 +82,7 @@ navTabsHelper <- function(files, prefix = "") {
   lapply(files, function(file) {
     with(tags,
       li(class=if (tolower(file) %in% c("app.r", "server.r")) "active" else "",
-         a(href=paste("#", gsub(".", "_", file, fixed=TRUE), "_code", sep=""),
+         a(href=paste0("#", gsub("\\.|\\s+", "_", file), "_code"),
            "data-toggle"="tab", paste0(prefix, file)))
     )
   })
@@ -105,12 +105,11 @@ navTabsDropdown <- function(files) {
 tabContentHelper <- function(files, path, language) {
   lapply(files, function(file) {
     with(tags,
-      div(class=paste("tab-pane",
+      div(class=paste0("tab-pane",
+                      # TODO: what if the app filename is something else?
                       if (tolower(file) %in% c("app.r", "server.r")) " active"
-                      else "",
-                      sep=""),
-          id=paste(gsub(".", "_", file, fixed=TRUE),
-                   "_code", sep=""),
+                      else ""),
+          id=paste0(gsub("\\.|\\s+", "_", file), "_code"),
           pre(class="shiny-code",
               # we need to prevent the indentation of <code> ... </code>
               HTML(format(tags$code(

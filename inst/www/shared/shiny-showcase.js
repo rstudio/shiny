@@ -82,7 +82,7 @@
       el = document.createElement("span");
       el.id = "srcref_" + srcref;
       var ref = srcref;
-      var code = document.getElementById(srcfile.replace(/\./g, "_") + "_code");
+      var code = document.getElementById(srcfile.replace(/\.|\s+/g, "_") + "_code");
       // if there is no code file (might be a shiny file), quit early
       if (!code) return;
       var start = findTextPoint(code, ref[0], ref[4]);

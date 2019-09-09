@@ -47,6 +47,7 @@ shiny 1.3.2.9001
 * Fixed [#2233](https://github.com/rstudio/shiny/issues/2233): `verbatimTextOutput()` produced wrapped text on Safari, but the text should not be wrapped. ([#2353](https://github.com/rstudio/shiny/pull/2353))
 
 * Fixed [#2335](https://github.com/rstudio/shiny/issues/2335): When `dateInput()`'s `value` was unspecified, and `max` and/or `min` was set to `Sys.Date()`, the value was not being set properly. ([#2526](https://github.com/rstudio/shiny/pull/2526)) 
+* Fixed [#2591](https://github.com/rstudio/shiny/issues/2591): Providing malformed date-strings to `min` or `max` no longer results in JS errors for `dateInput()` and `dateRangeInput()`. ([#2592](https://github.com/rstudio/shiny/pull/2592))
 
 * Fixed [rstudio/reactlog#36](https://github.com/rstudio/reactlog/issues/36): Changes to reactive values not displaying accurately in reactlog. ([#2424](https://github.com/rstudio/shiny/pull/2424))
 

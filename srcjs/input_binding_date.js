@@ -143,6 +143,10 @@ $.extend(dateInputBinding, {
     }
 
     date = this._newDate(date);
+    // If date parsing fails, do nothing
+    if (date === null)
+      return;
+
     date = this._UTCDateAsLocal(date);
     if (isNaN(date))
       return;
@@ -177,6 +181,10 @@ $.extend(dateInputBinding, {
     }
 
     date = this._newDate(date);
+    // If date parsing fails, do nothing
+    if (date === null)
+      return;
+
     date = this._UTCDateAsLocal(date);
     if (isNaN(date))
       return;

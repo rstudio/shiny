@@ -4924,6 +4924,9 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       }
 
       date = this._newDate(date);
+      // If date parsing fails, do nothing
+      if (date === null) return;
+
       date = this._UTCDateAsLocal(date);
       if (isNaN(date)) return;
       // Workaround for https://github.com/eternicode/bootstrap-datepicker/issues/2010
@@ -4956,6 +4959,9 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       }
 
       date = this._newDate(date);
+      // If date parsing fails, do nothing
+      if (date === null) return;
+
       date = this._UTCDateAsLocal(date);
       if (isNaN(date)) return;
 

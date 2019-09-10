@@ -45,3 +45,47 @@ headerPanel <- function(title, windowTitle=title) {
     )
   )
 }
+
+
+#' Create a Bootstrap page
+#'
+#' **DEPRECATED**: use [fluidPage()] instead.
+#'
+#' @param ... The contents of the document body.
+#' @param title The browser window title (defaults to the host URL of the page)
+#' @param responsive This option is deprecated; it is no longer optional with
+#'   Bootstrap 3.
+#' @param theme Alternative Bootstrap stylesheet (normally a css file within the
+#'   www directory, e.g. `www/bootstrap.css`)
+#'
+#' @return A UI defintion that can be passed to the [shinyUI] function.
+#'
+#' @keywords internal
+#' @seealso [fluidPage()], [fixedPage()]
+#' @export
+bootstrapPage <- function(..., title = NULL, responsive = NULL, theme = NULL) {
+
+  if (!is.null(responsive)) {
+    shinyDeprecated("The 'responsive' argument is no longer used with Bootstrap 3.")
+  }
+
+  attachDependencies(
+    tagList(
+      if (!is.null(title)) tags$head(tags$title(title)),
+      if (!is.null(theme)) {
+        tags$head(tags$link(rel="stylesheet", type="text/css", href = theme))
+      },
+
+      # remainder of tags passed to the function
+      list(...)
+    ),
+    bootstrapLib()
+  )
+}
+
+
+#' @rdname bootstrapPage
+#' @export
+basicPage <- function(...) {
+  bootstrapPage(div(class="container-fluid", list(...)))
+}

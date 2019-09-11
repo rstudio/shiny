@@ -39,7 +39,10 @@
 #' @seealso [observeEvent()] and [eventReactive()]
 #'
 #' @section Server value:
-#' An integer, initialized as 0 and incremented with each press.
+#' An integer, initialized to `0` and incremented with each press. This `0` is special
+#' in that it's considered "falsy", meaning that it will cause [req()] to fail. This
+#' special behavior is only manifested with `actionButton`; traditional [numericInput()]s
+#' will not cause `req` to fail when --- even when set to `0`.
 #'
 #' @export
 actionButton <- function(inputId, label, icon = NULL, width = NULL, ...) {

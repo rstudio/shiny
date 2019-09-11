@@ -17,9 +17,8 @@ varSelectizeInput(inputId, ..., options = NULL, width = NULL)
 
 \item{data}{A data frame. Used to retrieve the column names as choices for a \code{\link[=selectInput]{selectInput()}}}
 
-\item{selected}{The initially selected value (or multiple values if
-\code{multiple = TRUE}). If not specified then defaults to the first value
-for single-select lists and no values for multiple select lists.}
+\item{selected}{The initially selected value (or multiple values if \code{multiple = TRUE}). If not specified then defaults to the first value for
+single-select lists and no values for multiple select lists.}
 
 \item{multiple}{Is selection of multiple items allowed?}
 
@@ -30,8 +29,8 @@ see \code{\link[=validateCssUnit]{validateCssUnit()}}.}
 
 \item{size}{Number of items to show in the selection box; a larger number
 will result in a taller box. Not compatible with \code{selectize=TRUE}.
-Normally, when \code{multiple=FALSE}, a select input will be a drop-down
-list, but when \code{size} is set, it will be a box instead.}
+Normally, when \code{multiple=FALSE}, a select input will be a drop-down list,
+but when \code{size} is set, it will be a box instead.}
 
 \item{...}{Arguments passed to \code{varSelectInput()}.}
 

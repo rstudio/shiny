@@ -72,7 +72,7 @@
 #' }
 #'
 #' @section Server value:
-#' A vector of two `Date` objects.
+#' A vector of two [Date] objects.
 #'
 #' @export
 dateRangeInput <- function(inputId, label, start = NULL, end = NULL,

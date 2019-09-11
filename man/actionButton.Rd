@@ -28,7 +28,10 @@ each time it is pressed.
 }
 \section{Server value}{
 
-An integer, initialized as 0 and incremented with each press.
+An integer, initialized to \code{0} and incremented with each press. This \code{0} is special
+in that it's considered "falsy", meaning that it will cause \code{\link[=req]{req()}} to fail. This
+special behavior is only manifested with \code{actionButton}; traditional \code{\link[=numericInput]{numericInput()}}s
+will not cause \code{req} to fail when --- even when set to \code{0}.
 }
 
 \examples{

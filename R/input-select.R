@@ -3,33 +3,32 @@
 #' Create a select list that can be used to choose a single or multiple items
 #' from a list of values.
 #'
-#' By default, `selectInput()` and `selectizeInput()` use the
-#' JavaScript library \pkg{selectize.js}
-#' (<https://github.com/selectize/selectize.js>) instead of the basic
-#' select input element. To use the standard HTML select input element, use
-#' `selectInput()` with `selectize=FALSE`.
+#' By default, `selectInput()` and `selectizeInput()` use the JavaScript library
+#' \pkg{selectize.js} (<https://github.com/selectize/selectize.js>) instead of
+#' the basic select input element. To use the standard HTML select input
+#' element, use `selectInput()` with `selectize=FALSE`.
 #'
-#' In selectize mode, if the first element in `choices` has a value of
-#' `""`, its name will be treated as a placeholder prompt. For example:
+#' In selectize mode, if the first element in `choices` has a value of `""`, its
+#' name will be treated as a placeholder prompt. For example:
 #' `selectInput("letter", "Letter", c("Choose one" = "", LETTERS))`
 #'
 #' @inheritParams textInput
 #' @param choices List of values to select from. If elements of the list are
 #'   named, then that name --- rather than the value --- is displayed to the
 #'   user. It's also possible to group related inputs by providing a named list
-#'   whose elements are (either named or unnamed) lists, vectors, or factors. In this
-#'   case, the outermost names will be used as the group labels (leveraging the
-#'   `<optgroup>` HTML tag) for the elements in the respective sublist. See the
-#'   example section for a small demo of this feature.
-#' @param selected The initially selected value (or multiple values if
-#'   `multiple = TRUE`). If not specified then defaults to the first value
-#'   for single-select lists and no values for multiple select lists.
+#'   whose elements are (either named or unnamed) lists, vectors, or factors. In
+#'   this case, the outermost names will be used as the group labels (leveraging
+#'   the `<optgroup>` HTML tag) for the elements in the respective sublist. See
+#'   the example section for a small demo of this feature.
+#' @param selected The initially selected value (or multiple values if `multiple
+#'   = TRUE`). If not specified then defaults to the first value for
+#'   single-select lists and no values for multiple select lists.
 #' @param multiple Is selection of multiple items allowed?
 #' @param selectize Whether to use \pkg{selectize.js} or not.
 #' @param size Number of items to show in the selection box; a larger number
 #'   will result in a taller box. Not compatible with `selectize=TRUE`.
-#'   Normally, when `multiple=FALSE`, a select input will be a drop-down
-#'   list, but when `size` is set, it will be a box instead.
+#'   Normally, when `multiple=FALSE`, a select input will be a drop-down list,
+#'   but when `size` is set, it will be a box instead.
 #' @return A select list control that can be added to a UI definition.
 #'
 #' @family input elements
@@ -73,8 +72,9 @@
 #' )
 #' }
 #'
-#' @section Server value:
-#' A vector of character strings, usually with a length of 1, with the value of the selected items.
+#' @section Server value: A vector of character strings, usually with a length
+#'   of 1, with the value of the selected items. When nothing is selected (e.g. the
+#'   initial state when `multiple` is set to `TRUE`), will return `NULL`.
 #'
 #' @export
 selectInput <- function(inputId, label, choices, selected = NULL,

@@ -72,7 +72,7 @@
 #' }
 #'
 #' @section Server value:
-#' A number, or a vector of two numbers in the case of slider range.
+#' A number, or in the case of slider range, a vector of two numbers.
 #'
 #' @export
 sliderInput <- function(inputId, label, min, max, value, step = NULL,

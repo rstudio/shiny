@@ -81,7 +81,7 @@ appMetadata <- function(desc) {
 navTabsHelper <- function(files, prefix = "") {
   lapply(files, function(file) {
     with(tags,
-      li(class=if (tolower(file) %in% c("app.r", "server.r")) "active" else "",
+      li(class=if (identical(file, getShinyOption("appFile"))) "active" else "",
          a(href=paste0("#", gsub("\\.|\\s+", "_", file), "_code"),
            "data-toggle"="tab", paste0(prefix, file)))
     )
@@ -106,8 +106,7 @@ tabContentHelper <- function(files, path, language) {
   lapply(files, function(file) {
     with(tags,
       div(class=paste0("tab-pane",
-                      # TODO: what if the app filename is something else?
-                      if (tolower(file) %in% c("app.r", "server.r")) " active"
+                      if (identical(file, getShinyOption("appFile"))) " active"
                       else ""),
           id=paste0(gsub("\\.|\\s+", "_", file), "_code"),
           pre(class="shiny-code",

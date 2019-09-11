@@ -77,9 +77,8 @@ shinyApp(ui, server)
 }
 }
 \seealso{
-Other layout functions: \code{\link{fillRow}},
-  \code{\link{fixedPage}}, \code{\link{flowLayout}},
-  \code{\link{fluidPage}}, \code{\link{splitLayout}},
-  \code{\link{titlePanel}}, \code{\link{verticalLayout}}
+Other layout functions: \code{\link{fixedPage}},
+  \code{\link{flowLayout}}, \code{\link{fluidPage}},
+  \code{\link{splitLayout}}, \code{\link{verticalLayout}}
 }
 \concept{layout functions}

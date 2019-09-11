@@ -32,11 +32,8 @@ shinyApp(ui, server = function(input, output) { })
 }
 }
 \seealso{
-\code{\link[=verticalLayout]{verticalLayout()}}
-
-Other layout functions: \code{\link{fillRow}},
-  \code{\link{fixedPage}}, \code{\link{fluidPage}},
-  \code{\link{sidebarLayout}}, \code{\link{splitLayout}},
-  \code{\link{titlePanel}}, \code{\link{verticalLayout}}
+Other layout functions: \code{\link{fixedPage}},
+  \code{\link{fluidPage}}, \code{\link{sidebarLayout}},
+  \code{\link{splitLayout}}, \code{\link{verticalLayout}}
 }
 \concept{layout functions}

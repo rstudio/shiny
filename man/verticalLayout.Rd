@@ -31,11 +31,8 @@ shinyApp(ui, server = function(input, output) { })
 }
 }
 \seealso{
-\code{\link[=fluidPage]{fluidPage()}}, \code{\link[=flowLayout]{flowLayout()}}
-
-Other layout functions: \code{\link{fillRow}},
-  \code{\link{fixedPage}}, \code{\link{flowLayout}},
-  \code{\link{fluidPage}}, \code{\link{sidebarLayout}},
-  \code{\link{splitLayout}}, \code{\link{titlePanel}}
+Other layout functions: \code{\link{fixedPage}},
+  \code{\link{flowLayout}}, \code{\link{fluidPage}},
+  \code{\link{sidebarLayout}}, \code{\link{splitLayout}}
 }
 \concept{layout functions}

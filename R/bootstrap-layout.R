@@ -29,8 +29,7 @@
 #'   pages.
 #'
 #' @family layout functions
-#'
-#' @seealso [column()], [sidebarLayout()]
+#' @seealso [column()]
 #'
 #' @examples
 #' ## Only run examples in interactive R sessions
@@ -247,8 +246,6 @@ column <- function(width, ..., offset = 0) {
 #'   `title` tag within the head. You can also specify a page title
 #'   explicitly using the `title` parameter of the top-level page function.
 #'
-#' @family layout functions
-#'
 #' @examples
 #' ## Only run examples in interactive R sessions
 #' if (interactive()) {
@@ -378,8 +375,6 @@ mainPanel <- function(..., width = 8) {
 #'
 #' @family layout functions
 #'
-#' @seealso [fluidPage()], [flowLayout()]
-#'
 #' @examples
 #' ## Only run examples in interactive R sessions
 #' if (interactive()) {
@@ -417,8 +412,6 @@ verticalLayout <- function(..., fluid = TRUE) {
 #'   of the layout.
 #'
 #' @family layout functions
-#'
-#' @seealso [verticalLayout()]
 #'
 #' @examples
 #' ## Only run examples in interactive R sessions
@@ -581,8 +574,6 @@ splitLayout <- function(..., cellWidths = NULL, cellArgs = list()) {
 #'   effective, the parent must be `fillPage`, another
 #'   `fillRow`/`fillCol`, or some other HTML element whose height is
 #'   not determined by the height of its contents.
-#'
-#' @family layout functions
 #'
 #' @examples
 #' # Only run this example in interactive R sessions.

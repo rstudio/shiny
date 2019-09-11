@@ -1206,15 +1206,13 @@ browserViewer <- function(browser = getOption("browser")) {
 randomPort <- function(min = 3000L, max = 8000L,
                        host = getOption("shiny.host", "127.0.0.1"),
                        n = 20, cache = TRUE) {
-  # A random port has already been found, and is still valid, use it!
   if (cache && !is.null(.globals$lastPort))  {
-    tmp <- try(startServer(host, .globals$lastPort, list()), silent=TRUE)
+    tmp <- try(startServer(host, .globals$lastPort, list()), silent = TRUE)
     if (!inherits(tmp, 'try-error')) {
       stopServer(tmp)
       return(.globals$lastPort)
     }
   }
-  # TODO: does this need to be done withPrivateSeed()?
   .globals$lastPort <- withPrivateSeed(httpuv::randomPort(min, max, host, n))
   .globals$lastPort
 }

@@ -101,9 +101,9 @@ shinyApp(ui, server = function(input, output) { })
 \seealso{
 \code{\link[=column]{column()}}
 
-Other layout functions: \code{\link{fixedPage}},
-  \code{\link{flowLayout}}, \code{\link{navbarPage}},
-  \code{\link{sidebarLayout}}, \code{\link{splitLayout}},
-  \code{\link{verticalLayout}}
+Other layout functions: \code{\link{fillPage}},
+  \code{\link{fixedPage}}, \code{\link{flowLayout}},
+  \code{\link{navbarPage}}, \code{\link{sidebarLayout}},
+  \code{\link{splitLayout}}, \code{\link{verticalLayout}}
 }
 \concept{layout functions}

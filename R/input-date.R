@@ -88,7 +88,7 @@
 #' }
 #'
 #' @section Server value:
-#' A date-time of class `Date`.
+#' A [Date] vector of length 1.
 #'
 #' @export
 dateInput <- function(inputId, label, value = NULL, min = NULL, max = NULL,

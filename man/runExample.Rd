@@ -4,10 +4,10 @@
 \alias{runExample}
 \title{Run Shiny Example Applications}
 \usage{
-runExample(example = NA, port = NULL,
-  launch.browser = getOption("shiny.launch.browser", interactive()),
-  host = getOption("shiny.host", "127.0.0.1"), display.mode = c("auto",
-  "normal", "showcase"))
+runExample(example = NA, port = getOption("shiny.port", randomPort(host
+  = host)), launch.browser = getOption("shiny.launch.browser",
+  interactive()), host = getOption("shiny.host", "127.0.0.1"),
+  display.mode = c("auto", "normal", "showcase"))
 }
 \arguments{
 \item{example}{The name of the example to run, or \code{NA} (the default) to

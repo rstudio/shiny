@@ -69,6 +69,28 @@ test_that("Repeated names for selectInput and radioButtons choices", {
 
 
 test_that("Choices are correctly assigned names", {
+  # Empty non-list comes back with names
+  expect_identical(
+    choicesWithNames(numeric(0)),
+    stats::setNames(list(), character(0))
+  )
+  # Empty list comes back with names
+  expect_identical(
+    choicesWithNames(list()),
+    stats::setNames(list(), character(0))
+  )
+  # Empty character vector
+  # An empty character vector isn't a sensical input, but we preserved this test
+  # in the off chance that somebody relies on the existing behavior.
+  expect_identical(
+    choicesWithNames(c("")),
+    stats::setNames(list(""), "")
+  )
+  # Single-item character vector
+  expect_identical(
+    choicesWithNames(c("foob")),
+    list(foob="foob")
+  )
   # Unnamed character vector
   expect_identical(
     choicesWithNames(c("a","b","3")),
@@ -128,11 +150,6 @@ test_that("Choices are correctly assigned names", {
   expect_identical(
     choicesWithNames(list(A="a", "b", C=list("d", E="e"))),
     list(A="a", b="b", C=list(d="d", E="e"))
-  )
-  # Deeper nesting
-  expect_identical(
-    choicesWithNames(list(A="a", "b", C=list(D=list("e", "f"), G=c(H="h", "i")))),
-    list(A="a", b="b", C=list(D=list(e="e", f="f"), G=list(H="h", i="i")))
   )
   # Error when sublist is unnamed
   expect_error(choicesWithNames(list(A="a", "b", list(1,2))))

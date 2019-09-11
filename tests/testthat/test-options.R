@@ -1,6 +1,9 @@
 context("options")
 
 test_that("Local options", {
+  # Clear out any options so we know we're starting fresh
+  .globals$options <- list()
+
   # Basic options
   shinyOptions(a = 1, b = 2)
 

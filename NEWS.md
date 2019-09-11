@@ -9,17 +9,32 @@ shiny 1.3.2.9001
 
 * Resolved [#2402](https://github.com/rstudio/shiny/issues/2402): An informative warning is now thrown for mis-specified (date) strings in `dateInput()`, `updateDateInput()`, `dateRangeInput()`, and `updateDateRangeInput()`. ([#2403](https://github.com/rstudio/shiny/pull/2403))
 
+* If the `shiny.autoload.r` option is set to `TRUE`, all files ending in `.r` or `.R` contained in a directory named `R/` adjacent to your application are sourced when your app is started. This will become the default Shiny behavior in a future release ([#2547](https://github.com/rstudio/shiny/pull/2547))
+
+
 * Resolved [#2442](https://github.com/rstudio/shiny/issues/2442): The `shiny:inputchanged` JavaScript event now triggers on the related input element instead of `document`. Existing event listeners bound to `document` will still detect the event due to event bubbling. ([#2446](https://github.com/rstudio/shiny/pull/2446))
 
 * Fixed [#1393](https://github.com/rstudio/shiny/issues/1393), [#2223](https://github.com/rstudio/shiny/issues/2223): For plots with any interactions enabled, the image is no longer draggable. ([#2460](https://github.com/rstudio/shiny/pull/2460))
 
 * Partially resolved [#2423](https://github.com/rstudio/shiny/issues/2423): Reactivity in Shiny leaked some memory, because R can leak memory whenever a new symbols is interned, which happens whenever a new name/key is used in an environment. R now uses the fastmap package, which avoids this problem. ([#2429](https://github.com/rstudio/shiny/pull/2429))
 
+* Fixed [#2267](https://github.com/rstudio/shiny/issues/2267): Fixed a memory leak with `invalidateLater`. ([#2555](https://github.com/rstudio/shiny/pull/2555))
+
+* Fixed [#1548](https://github.com/rstudio/shiny/issues/1548): The `reactivePoll` function leaked an observer; that is the observer would continue to exist even if the `reactivePoll` object was no longer accessible. [#2522](https://github.com/rstudio/shiny/pull/2522)
+
 * Resolved [#2469](https://github.com/rstudio/shiny/issues/2469): `renderText` now takes a `sep` argument that is passed to `cat`. ([#2497](https://github.com/rstudio/shiny/pull/2497))
+
+* Added `resourcePaths()` and `removeResourcePaths()` functions. ([#2459](https://github.com/rstudio/shiny/pull/2459))
 
 * Resolved [#2515](https://github.com/rstudio/shiny/issues/2515): `selectInput()` now deals appropriately with named factors. ([#2524](https://github.com/rstudio/shiny/pull/2524))
 
+* Resolved [#2433](https://github.com/rstudio/shiny/issues/2433): An informative warning is now thrown if subdirectories of the app's `www/` directory are masked by other resource prefixes and/or the same resource prefix is mapped to different local file paths. ([#2434](https://github.com/rstudio/shiny/pull/2434))
+
+* Resolved [#2471](https://github.com/rstudio/shiny/issues/2471): Large file uploads to a Windows computer were slow. ([#2579](https://github.com/rstudio/shiny/pull/2579))
+
 ### Bug fixes
+
+* Fixed [#2116](https://github.com/rstudio/shiny/issues/2116): Fixed an issue where dynamic tabs could not be added when on a hosted platform. ([#2545](https://github.com/rstudio/shiny/pull/2545))
 
 * Fixed [#2387](https://github.com/rstudio/shiny/issues/2387): Updating a `sliderInput()`'s type from numeric to date no longer changes the rate policy from debounced to immediate. More generally, updating an input binding with a new type should (no longer) incorrectly alter the input rate policy. ([#2404](https://github.com/rstudio/shiny/pull/2404))
 
@@ -31,9 +46,20 @@ shiny 1.3.2.9001
 
 * Fixed [#2233](https://github.com/rstudio/shiny/issues/2233): `verbatimTextOutput()` produced wrapped text on Safari, but the text should not be wrapped. ([#2353](https://github.com/rstudio/shiny/pull/2353))
 
+* Fixed [#2335](https://github.com/rstudio/shiny/issues/2335): When `dateInput()`'s `value` was unspecified, and `max` and/or `min` was set to `Sys.Date()`, the value was not being set properly. ([#2526](https://github.com/rstudio/shiny/pull/2526))
+
+* Fixed [#2591](https://github.com/rstudio/shiny/issues/2591): Providing malformed date-strings to `min` or `max` no longer results in JS errors for `dateInput()` and `dateRangeInput()`. ([#2592](https://github.com/rstudio/shiny/pull/2592))
+
 * Fixed [rstudio/reactlog#36](https://github.com/rstudio/reactlog/issues/36): Changes to reactive values not displaying accurately in reactlog. ([#2424](https://github.com/rstudio/shiny/pull/2424))
 
+* Fixed [#2598](https://github.com/rstudio/shiny/issues/2598): Showcase files don't appear with a wide window. ([#2582](https://github.com/rstudio/shiny/pull/2582))
+
 * Fixed [#2329](https://github.com/rstudio/shiny/issues/2329), [#1817](https://github.com/rstudio/shiny/issues/1817): These bugs were reported as fixed in Shiny 1.3.0 but were not actually fixed because some JavaScript changes were accidentally not included in the release. The fix resolves issues that occur when `withProgressBar()` or bookmarking are combined with the [networkD3](https://christophergandrud.github.io/networkD3/) package's Sankey plot.
+
+### Library updates
+
+* Resolved [#2554](https://github.com/rstudio/shiny/issues/2554): Upgraded bootstrap to v3.4.1 and jQuery to v3.4.1. ([#2557](https://github.com/rstudio/shiny/pull/2557))
+
 
 shiny 1.3.2
 ===========
@@ -131,6 +157,8 @@ This release features plot caching, an important new tool for improving performa
 * Resolved [#2019](https://github.com/rstudio/shiny/issues/2019): `updateSliderInput` now changes the slider formatting if the input type changes. ([#2099](https://github.com/rstudio/shiny/pull/2099))
 
 * Fixed [#2138](https://github.com/rstudio/shiny/issues/2138): Inputs that are part of a `renderUI` were no longer restoring correctly from bookmarked state. [#2139](https://github.com/rstudio/shiny/pull/2139)
+
+* The `knit_print` methods from htmltools are no longer imported into shiny and then exported. Also, shiny's `knit_print` methods are no longer exported. [#2166](https://github.com/rstudio/shiny/pull/2166)
 
 * Fixed [#2093](https://github.com/rstudio/shiny/issues/2093): Make sure bookmark scope directory does not exist before trying to create it. [#2168](https://github.com/rstudio/shiny/pull/2168)
 

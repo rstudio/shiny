@@ -2,25 +2,38 @@
 % Please edit documentation in R/bootstrap-layout.R
 \name{sidebarLayout}
 \alias{sidebarLayout}
+\alias{sidebarPanel}
+\alias{mainPanel}
 \title{Layout a sidebar and main area}
 \usage{
 sidebarLayout(sidebarPanel, mainPanel, position = c("left", "right"),
   fluid = TRUE)
+
+sidebarPanel(..., width = 4)
+
+mainPanel(..., width = 8)
 }
 \arguments{
-\item{sidebarPanel}{The \link{sidebarPanel} containing input controls}
+\item{sidebarPanel}{The \code{sidebarPanel()} containing input controls.}
 
-\item{mainPanel}{The \link{mainPanel} containing outputs}
+\item{mainPanel}{The \code{mainPanel()} containing outputs.}
 
 \item{position}{The position of the sidebar relative to the main area ("left"
-or "right")}
+or "right").}
 
 \item{fluid}{\code{TRUE} to use fluid layout; \code{FALSE} to use fixed
 layout.}
+
+\item{...}{Output elements to include in the sidebar/main panel.}
+
+\item{width}{The width of the sidebar and main panel. By default, the
+sidebar takes up 1/3 of the width, and the main panel 2/3. The total
+width must be 12 or less.}
 }
 \description{
-Create a layout with a sidebar and main area. The sidebar is displayed with a
-distinct background color and typically contains input controls. The main
+Create a layout (\code{sidebarLayout()}) with a sidebar (\code{sidebarPanel()}) and
+main area (\code{mainPanel()}). The sidebar is displayed with a distinct
+background color and typically contains input controls. The main
 area occupies 2/3 of the horizontal width and typically contains outputs.
 }
 \examples{

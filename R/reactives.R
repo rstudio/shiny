@@ -590,6 +590,14 @@ checkName <- function(x) {
   )
 }
 
+#' @export
+print.reactivevalues <- function(x, ...) {
+  impl <- .subset2(x, "impl")
+  cat_line("<ReactiveValues>")
+  cat_line("  Values:   ", paste0(impl$.values$keys(sort = TRUE), collapse = ", "))
+  cat_line("  Readonly: ", .subset2(x, "readonly"))
+}
+
 #' Checks whether an object is a reactivevalues object
 #'
 #' Checks whether its argument is a reactivevalues object.
@@ -660,14 +668,14 @@ as.list.reactivevalues <- function(x, all.names=FALSE, ...) {
 
 #' Convert a reactivevalues object to a list
 #'
-#' This function does something similar to what you might [base::as.list()]
-#' to do. The difference is that the calling context will take dependencies on
-#' every object in the reactivevalues object. To avoid taking dependencies on
-#' all the objects, you can wrap the call with [isolate()].
+#' This function does something similar to what you might want or expect
+#' [base::as.list()] to do. The difference is that the calling context will take
+#' dependencies on every object in the `reactivevalue`s object. To avoid taking
+#' dependencies on all the objects, you can wrap the call with [isolate()].
 #'
-#' @param x A reactivevalues object.
-#' @param all.names If `TRUE`, include objects with a leading dot. If
-#'   `FALSE` (the default) don't include those objects.
+#' @param x A `reactivevalues` object.
+#' @param all.names If `TRUE`, include objects with a leading dot. If `FALSE`
+#'   (the default) don't include those objects.
 #' @examples
 #' values <- reactiveValues(a = 1)
 #' \dontrun{
@@ -912,7 +920,7 @@ Observable <- R6Class(
 #' marked as invalidated. In this way, invalidations ripple through the
 #' expressions that depend on each other.
 #'
-#' See the [Shiny tutorial](http://rstudio.github.com/shiny/tutorial/) for
+#' See the [Shiny tutorial](https://shiny.rstudio.com/tutorial/) for
 #' more information about reactive expressions.
 #'
 #' @param x For `reactive`, an expression (quoted or unquoted). For
@@ -1611,11 +1619,15 @@ invalidateLater <- function(millis, session = getDefaultReactiveDomain()) {
   ctx <- getCurrentContext()
   rLog$invalidateLater(ctx$.reactId, ctx$id, millis, session)
 
+  clear_on_ended_callback <- function() {}
+
   timerHandle <- scheduleTask(millis, function() {
     if (is.null(session)) {
       ctx$invalidate()
       return(invisible())
     }
+
+    clear_on_ended_callback()
 
     if (!session$isClosed()) {
       session$cycleStartAction(function() {
@@ -1627,7 +1639,13 @@ invalidateLater <- function(millis, session = getDefaultReactiveDomain()) {
   })
 
   if (!is.null(session)) {
-    session$onEnded(timerHandle)
+    # timerHandle is a callback that clears the scheduled task. It gets
+    # registered with session$onEnded() each time invalidateLater() is called.
+    # So, to prevent these callbacks from building up and leaking memory, we
+    # need to deregister the onEnded(timerHandle) callback each time when the
+    # scheduled task executes; after the task executes, the timerHandle()
+    # function is essentially a no-op, so we can deregister it.
+    clear_on_ended_callback <- session$onEnded(timerHandle)
   }
 
   invisible()
@@ -1715,7 +1733,18 @@ reactivePoll <- function(intervalMillis, session, checkFunc, valueFunc) {
 
   rv <- reactiveValues(cookie = isolate(checkFunc()))
 
-  observe({
+  re_finalized <- FALSE
+
+  o <- observe({
+    # When no one holds a reference to the reactive returned from
+    # reactivePoll, destroy and remove the observer so that it doesn't keep
+    # firing and hold onto resources.
+    if (re_finalized) {
+      o$destroy()
+      rm(o, envir = parent.env(environment()))
+      return()
+    }
+
     rv$cookie <- checkFunc()
     invalidateLater(intervalMillis(), session)
   })
@@ -1727,6 +1756,14 @@ reactivePoll <- function(intervalMillis, session, checkFunc, valueFunc) {
     valueFunc()
 
   }, label = NULL)
+
+  reg.finalizer(attr(re, "observable"), function(e) {
+    re_finalized <<- TRUE
+  })
+
+  # So that the observer and finalizer function don't (indirectly) hold onto a
+  # reference to `re` and thus prevent it from getting GC'd.
+  on.exit(rm(re))
 
   return(re)
 }

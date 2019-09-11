@@ -22,7 +22,8 @@ valid when using a \code{tabPanel} within a \code{\link[=navbarPage]{navbarPage(
 A tab that can be passed to \code{\link[=tabsetPanel]{tabsetPanel()}}
 }
 \description{
-Create a tab panel that can be included within a \code{\link[=tabsetPanel]{tabsetPanel()}}.
+Create a tab panel that can be included within a \code{\link[=tabsetPanel]{tabsetPanel()}} or
+a \code{\link[=navbarPage]{navbarPage()}}.
 }
 \examples{
 # Show a tabset that includes a plot, summary, and

@@ -14,7 +14,8 @@ test_that("All man pages have an entry in staticdocs/index.r", {
 
   # Known not to be indexed
   known_unindexed <- c("shiny-package", "stacktrace", "knitr_methods",
-                       "knitr_methods_htmltools", "deprecatedReactives")
+                       "pageWithSidebar", "headerPanel", "shiny.appobj",
+                       "deprecatedReactives")
 
   # Read in topics from a staticdocs/index.r file
   get_indexed_topics <- function(index_path) {

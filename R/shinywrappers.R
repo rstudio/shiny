@@ -52,6 +52,11 @@ markRenderFunction <- function(uiFunc, renderFunc, outputArgs = list()) {
             hasExecuted = hasExecuted)
 }
 
+#' @export
+print.shiny.render.function <- function(x, ...) {
+  cat_line("<shiny.render.function>")
+}
+
 #' Implement render functions
 #'
 #' @param func A function without parameters, that returns user data. If the

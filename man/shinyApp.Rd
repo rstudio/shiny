@@ -4,41 +4,22 @@
 \alias{shinyApp}
 \alias{shinyAppDir}
 \alias{shinyAppFile}
-\alias{as.shiny.appobj}
-\alias{as.shiny.appobj.shiny.appobj}
-\alias{as.shiny.appobj.list}
-\alias{as.shiny.appobj.character}
-\alias{is.shiny.appobj}
-\alias{print.shiny.appobj}
-\alias{as.tags.shiny.appobj}
 \title{Create a Shiny app object}
 \usage{
-shinyApp(ui = NULL, server = NULL, onStart = NULL,
-  options = list(), uiPattern = "/", enableBookmarking = NULL)
+shinyApp(ui, server, onStart = NULL, options = list(),
+  uiPattern = "/", enableBookmarking = NULL)
 
 shinyAppDir(appDir, options = list())
 
 shinyAppFile(appFile, options = list())
-
-as.shiny.appobj(x)
-
-\method{as.shiny.appobj}{shiny.appobj}(x)
-
-\method{as.shiny.appobj}{list}(x)
-
-\method{as.shiny.appobj}{character}(x)
-
-is.shiny.appobj(x)
-
-\method{print}{shiny.appobj}(x, ...)
-
-\method{as.tags}{shiny.appobj}(x, ...)
 }
 \arguments{
 \item{ui}{The UI definition of the app (for example, a call to
 \code{fluidPage()} with nested controls)}
 
-\item{server}{A server function}
+\item{server}{A function with three parameters: \code{input}, \code{output}, and
+\code{session}. The function is called once for each session ensuring that each
+app is independent.}
 
 \item{onStart}{A function that will be called before the app is actually run.
 This is only needed for \code{shinyAppObj}, since in the \code{shinyAppDir}
@@ -66,10 +47,6 @@ See \code{\link[=enableBookmarking]{enableBookmarking()}} for more information.}
 file and either ui.R or www/index.html)}
 
 \item{appFile}{Path to a .R file containing a Shiny application}
-
-\item{x}{Object to convert to a Shiny app.}
-
-\item{...}{Additional parameters to be passed to print.}
 }
 \value{
 An object that represents the app. Printing the object or passing it

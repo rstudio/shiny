@@ -19,4 +19,3 @@ HTML template.
 
 \code{\link[htmltools]{htmlDependency}}
 }
-

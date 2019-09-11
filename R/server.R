@@ -794,20 +794,19 @@ runApp <- function(appDir=getwd(),
     if (arg %in% names(appOps)) appOps[[arg]] else default
   }
 
+  if (missing(host))
+    host <- findVal("host", host)
+  if (is.null(host) || is.na(host)) host <- '0.0.0.0'
   if (missing(port))
     port <- findVal("port", port)
   if (missing(launch.browser))
     launch.browser <- findVal("launch.browser", launch.browser)
-  if (missing(host))
-    host <- findVal("host", host)
   if (missing(quiet))
     quiet <- findVal("quiet", quiet)
   if (missing(display.mode))
     display.mode <- findVal("display.mode", display.mode)
   if (missing(test.mode))
     test.mode <- findVal("test.mode", test.mode)
-
-  if (is.null(host) || is.na(host)) host <- '0.0.0.0'
 
   workerId(workerId)
 

@@ -233,6 +233,8 @@ collapseSizes <- function(padding) {
 #'   [updateNavbarPage()], [insertTab()],
 #'   [showTab()]
 #'
+#' @family layout functions
+#'
 #' @examples
 #' navbarPage("App Title",
 #'   tabPanel("Plot"),

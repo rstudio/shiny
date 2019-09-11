@@ -64,6 +64,7 @@ shinyApp(ui, server)
 \seealso{
 Other layout functions: \code{\link{fixedPage}},
   \code{\link{flowLayout}}, \code{\link{fluidPage}},
-  \code{\link{sidebarLayout}}, \code{\link{verticalLayout}}
+  \code{\link{navbarPage}}, \code{\link{sidebarLayout}},
+  \code{\link{verticalLayout}}
 }
 \concept{layout functions}

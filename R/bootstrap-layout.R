@@ -131,7 +131,7 @@ fluidRow <- function(...) {
 #'   Shiny Application Layout Guide](http://shiny.rstudio.com/articles/layout-guide.html) for additional details on laying out fixed
 #'   pages.
 #'
-#'@family layout functions
+#' @family layout functions
 #'
 #' @seealso [column()]
 #'

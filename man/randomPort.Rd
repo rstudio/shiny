@@ -16,13 +16,10 @@ randomPort(min = 3000L, max = 8000L, host = getOption("shiny.host",
 
 \item{n}{Number of ports to try before giving up.}
 
-\item{cache}{if available, reuse the last random port.}
+\item{cache}{if \code{TRUE}, use the last random port if it's available.}
 }
 \description{
 Finds a random available TCP port for listening on.
-The default range of ports to check is 3000 to 8000.
-To search through a wider range of ports, use
-\code{\link[httpuv:randomPort]{httpuv::randomPort()}} directly.
 }
 \details{
 This function automatically excludes some ports

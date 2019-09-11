@@ -1186,15 +1186,12 @@ browserViewer <- function(browser = getOption("browser")) {
 #' Find an open TCP port
 #'
 #' Finds a random available TCP port for listening on.
-#' The default range of ports to check is 3000 to 8000.
-#' To search through a wider range of ports, use
-#' [httpuv::randomPort()] directly.
 #'
 #' @param min Minimum port number.
 #' @param max Maximum port number.
 #' @param host see [httpuv::randomPort()].
 #' @param n Number of ports to try before giving up.
-#' @param cache if available, reuse the last random port.
+#' @param cache if `TRUE`, use the last random port if it's available.
 #'
 #' @details This function automatically excludes some ports
 #' which are considered unsafe by web browsers.

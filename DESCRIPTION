@@ -73,7 +73,7 @@ Imports:
     htmltools (>= 0.3.6.9004),
     R6 (>= 2.0),
     sourcetools,
-    later (>= 0.7.2),
+    later (>= 0.8.0.9004),
     promises (>= 1.0.1),
     tools,
     crayon,
@@ -91,7 +91,8 @@ Suggests:
     magrittr
 Remotes:
     rstudio/htmltools,
-    rstudio/httpuv
+    rstudio/httpuv,
+    r-lib/later
 URL: http://shiny.rstudio.com
 BugReports: https://github.com/rstudio/shiny/issues
 Collate:

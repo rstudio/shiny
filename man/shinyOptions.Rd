@@ -40,7 +40,7 @@ be set globally with \code{options()} or locally (for a single app) with
 \code{shinyOptions()}.
 
 \describe{
-\item{shiny.autoreload}{If \code{TRUE} when a Shiny app is launched, the
+\item{shiny.autoreload (defaults to \code{FALSE})}{If \code{TRUE} when a Shiny app is launched, the
 app directory will be continually monitored for changes to files that
 have the extensions: r, htm, html, js, css, png, jpg, jpeg, gif. If any
 changes are detected, all connected Shiny sessions are reloaded. This
@@ -56,62 +56,60 @@ by setting e.g. `options(shiny.autoreload.interval = 2000)` (every
 two seconds).}
 }
 
-\item{shiny.deprecation.messages}{This controls whether messages for
+\item{shiny.deprecation.messages (defaults to \code{TRUE})}{This controls whether messages for
 deprecated functions in Shiny will be printed. See
 \code{\link[=shinyDeprecated]{shinyDeprecated()}} for more information.}
-\item{shiny.error}{This can be a function which is called when an error
+\item{shiny.error (defaults to \code{NULL})}{This can be a function which is called when an error
 occurs. For example, \code{options(shiny.error=recover)} will result a
 the debugger prompt when an error occurs.}
-\item{shiny.fullstacktrace}{Controls whether "pretty" or full stack traces
-are dumped to the console when errors occur during Shiny app execution.
-The default is \code{FALSE} (pretty stack traces).}
-\item{shiny.host}{The IP address that Shiny should listen on. See
+\item{shiny.fullstacktrace (defaults to \code{FALSE})}{Controls whether "pretty" (\code{FALSE}) or full
+stack traces (\code{TRUE}) are dumped to the console when errors occur during Shiny app execution.
+Pretty stack traces attempt to only show user-supplied code, but this pruning can't always
+be done 100\% correctly.}
+\item{shiny.host (defaults to \code{"127.0.0.1"})}{The IP address that Shiny should listen on. See
 \code{\link[=runApp]{runApp()}} for more information.}
-\item{shiny.json.digits}{The number of digits to use when converting
+\item{shiny.json.digits (defaults to \code{16})}{The number of digits to use when converting
 numbers to JSON format to send to the client web browser.}
-\item{shiny.launch.browser}{A boolean which controls the default behavior
+\item{shiny.launch.browser (defaults to \code{interactive()})}{A boolean which controls the default behavior
 when an app is run. See \code{\link[=runApp]{runApp()}} for more information.}
-\item{shiny.maxRequestSize}{This is a number which specifies the maximum
-web request size, which serves as a size limit for file uploads. If
-unset, the maximum request size defaults to 5MB.}
-\item{shiny.minified}{If this is \code{TRUE} or unset (the default), then
-Shiny will use minified JavaScript (\code{shiny.min.js}). If
-\code{FALSE}, then Shiny will use the un-minified JavaScript
-(\code{shiny.js}); this can be useful during development.}
-\item{shiny.port}{A port number that Shiny will listen on. See
+\item{shiny.maxRequestSize (defaults to 5MB)}{This is a number which specifies the maximum
+web request size, which serves as a size limit for file uploads.}
+\item{shiny.minified (defaults to \code{TRUE})}{By default
+Whether or not to include Shiny's JavaScript as a minified (\code{shiny.min.js})
+or un-minified (\code{shiny.js}) file. The un-minified version is larger,
+but can be helpful for development and debugging.}
+\item{shiny.port (defaults to \code{httpuv::randomPort()})}{A port number that Shiny will listen on. See
 \code{\link[=runApp]{runApp()}} for more information.}
-\item{shiny.reactlog}{If \code{TRUE}, enable logging of reactive events,
+\item{shiny.reactlog (defaults to \code{FALSE})}{If \code{TRUE}, enable logging of reactive events,
 which can be viewed later with the \code{\link[=reactlogShow]{reactlogShow()}} function.
 This incurs a substantial performance penalty and should not be used in
 production.}
-\item{shiny.sanitize.errors}{If \code{TRUE}, then normal errors (i.e.
+\item{shiny.sanitize.errors (defaults to \code{FALSE})}{If \code{TRUE}, then normal errors (i.e.
 errors not wrapped in \code{safeError}) won't show up in the app; a simple
 generic error message is printed instead (the error and strack trace printed
-to the console remain unchanged). The default is \code{FALSE} (unsanitized
-errors).If you want to sanitize errors in general, but you DO want a
+to the console remain unchanged). If you want to sanitize errors in general, but you DO want a
 particular error \code{e} to get displayed to the user, then set this option
 to \code{TRUE} and use \code{stop(safeError(e))} for errors you want the
 user to see.}
-\item{shiny.stacktraceoffset}{If \code{TRUE}, then Shiny's printed stack
+\item{shiny.stacktraceoffset (defaults to \code{TRUE})}{If \code{TRUE}, then Shiny's printed stack
 traces will display srcrefs one line above their usual location. This is
 an arguably more intuitive arrangement for casual R users, as the name
 of a function appears next to the srcref where it is defined, rather than
 where it is currently being called from.}
-\item{shiny.suppressMissingContextError}{Normally, invoking a reactive
+\item{shiny.suppressMissingContextError (defaults to \code{FALSE})}{Normally, invoking a reactive
 outside of a reactive context (or \code{\link[=isolate]{isolate()}}) results in
 an error. If this is \code{TRUE}, don't error in these cases. This
 should only be used for debugging or demonstrations of reactivity at the
 console.}
-\item{shiny.table.class}{CSS class names to use for tables.}
-\item{shiny.testmode}{If \code{TRUE}, then enable features for testing Shiny
-applications. If \code{FALSE} (the default), do not enable those features.}
-\item{shiny.trace}{Print messages sent between the R server and the web
+\item{shiny.testmode (defaults to \code{FALSE})}{If \code{TRUE}, then various features for testing Shiny
+applications are enabled.}
+\item{shiny.trace (defaults to \code{FALSE})}{Print messages sent between the R server and the web
 browser client to the R console. This is useful for debugging. Possible
 values are \code{"send"} (only print messages sent to the client),
 \code{"recv"} (only print messages received by the server), \code{TRUE}
 (print all messages), or \code{FALSE} (default; don't print any of these
 messages).}
-\item{shiny.usecairo}{This is used to disable graphical rendering by the
+\item{shiny.usecairo (defaults to \code{TRUE})}{This is used to disable graphical rendering by the
 Cairo package, if it is installed. See \code{\link[=plotPNG]{plotPNG()}} for more
 information.}
 }

@@ -78,7 +78,7 @@ web request size, which serves as a size limit for file uploads.}
 Whether or not to include Shiny's JavaScript as a minified (\code{shiny.min.js})
 or un-minified (\code{shiny.js}) file. The un-minified version is larger,
 but can be helpful for development and debugging.}
-\item{shiny.port (defaults to \code{httpuv::randomPort()})}{A port number that Shiny will listen on. See
+\item{shiny.port (defaults to a random open port)}{A port number that Shiny will listen on. See
 \code{\link[=runApp]{runApp()}} for more information.}
 \item{shiny.reactlog (defaults to \code{FALSE})}{If \code{TRUE}, enable logging of reactive events,
 which can be viewed later with the \code{\link[=reactlogShow]{reactlogShow()}} function.

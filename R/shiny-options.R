@@ -73,7 +73,7 @@ getShinyOption <- function(name, default = NULL) {
 #'     Whether or not to include Shiny's JavaScript as a minified (`shiny.min.js`)
 #'     or un-minified (`shiny.js`) file. The un-minified version is larger,
 #'     but can be helpful for development and debugging.}
-#'   \item{shiny.port (defaults to `httpuv::randomPort()`)}{A port number that Shiny will listen on. See
+#'   \item{shiny.port (defaults to a random open port)}{A port number that Shiny will listen on. See
 #'     [runApp()] for more information.}
 #'   \item{shiny.reactlog (defaults to `FALSE`)}{If `TRUE`, enable logging of reactive events,
 #'     which can be viewed later with the [reactlogShow()] function.

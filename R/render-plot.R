@@ -22,13 +22,17 @@
 #'   expedite the rendering of identical plots.
 #'
 #' @param expr An expression that generates a plot.
-#' @param width,height The width/height of the rendered plot, in pixels; or
-#'   `'auto'` to use the `offsetWidth`/`offsetHeight` of the HTML
-#'   element that is bound to this plot. You can also pass in a function that
-#'   returns the width/height in pixels or `'auto'`; in the body of the
-#'   function you may reference reactive values and functions. When rendering an
-#'   inline plot, you must provide numeric values (in pixels) to both
-#'   `width` and `height`.
+#' @param width,height Height and width can be specified in three ways:
+#'   * `"auto"`, the default, uses the size specified by [plotOutput()]
+#'      (i.e. the `offsetWidth`/`offsetHeight`` of the HTML element bound to
+#'      this plot.)
+#'  * An integer, defining the width/height in pixels.
+#'  * A function that returns the width/height in pixels (or `"auto"`).
+#'    The function is executed in a reactive context so that you can refer to
+#'    reactive values and expression to make the width/height reactive.
+#'
+#'   When rendering an inline plot, you must provide numeric values (in pixels)
+#'   to both \code{width} and \code{height}.
 #' @param res Resolution of resulting plot, in pixels per inch. This value is
 #'   passed to [grDevices::png()]. Note that this affects the resolution of PNG
 #'   rendering in R; it won't change the actual ppi of the browser.

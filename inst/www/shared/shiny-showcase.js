@@ -83,6 +83,8 @@
       el.id = "srcref_" + srcref;
       var ref = srcref;
       var code = document.getElementById(srcfile.replace(/\./g, "_") + "_code");
+      // if there is no code file (might be a shiny file), quit early
+      if (!code) return;
       var start = findTextPoint(code, ref[0], ref[4]);
       var end = findTextPoint(code, ref[2], ref[5]);
 
@@ -117,7 +119,7 @@
 
   // If this is the main Shiny window, wire up our custom message handler.
   if (window.Shiny) {
-    Shiny.addCustomMessageHandler('reactlog', function(message) {
+    Shiny.addCustomMessageHandler('showcase-src', function(message) {
       if (message.srcref && message.srcfile) {
         highlightSrcref(message.srcref, message.srcfile);
       }
@@ -148,6 +150,8 @@
       }
     }
 
+    // hide the new element before doing anything to it
+    $(newHostElement).hide();
     $(currentHostElement).fadeOut(animateCodeMs, function() {
       var tabs = document.getElementById("showcase-code-tabs");
       currentHostElement.removeChild(tabs);
@@ -160,7 +164,7 @@
         document.getElementById("showcase-code-content").removeAttribute("style");
       }
 
-      $(newHostElement).fadeIn();
+      $(newHostElement).fadeIn(animateCodeMs);
       if (!above) {
         // remove the applied width and zoom on the app container, and
         // scroll smoothly down to the code's new home
@@ -189,7 +193,6 @@
     if (above) {
       $(document.body).animate({ scrollTop: 0 }, animateCodeMs);
     }
-    $(newHostElement).hide();
     isCodeAbove = above;
     setAppCodeSxsWidths(above && animate);
     $(window).trigger("resize");
@@ -267,4 +270,3 @@
   if (window.hljs)
     hljs.initHighlightingOnLoad();
 })();
-

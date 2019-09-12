@@ -590,6 +590,14 @@ checkName <- function(x) {
   )
 }
 
+#' @export
+print.reactivevalues <- function(x, ...) {
+  impl <- .subset2(x, "impl")
+  cat_line("<ReactiveValues>")
+  cat_line("  Values:   ", paste0(impl$.values$keys(sort = TRUE), collapse = ", "))
+  cat_line("  Readonly: ", .subset2(x, "readonly"))
+}
+
 #' Checks whether an object is a reactivevalues object
 #'
 #' Checks whether its argument is a reactivevalues object.
@@ -1725,7 +1733,18 @@ reactivePoll <- function(intervalMillis, session, checkFunc, valueFunc) {
 
   rv <- reactiveValues(cookie = isolate(checkFunc()))
 
-  observe({
+  re_finalized <- FALSE
+
+  o <- observe({
+    # When no one holds a reference to the reactive returned from
+    # reactivePoll, destroy and remove the observer so that it doesn't keep
+    # firing and hold onto resources.
+    if (re_finalized) {
+      o$destroy()
+      rm(o, envir = parent.env(environment()))
+      return()
+    }
+
     rv$cookie <- checkFunc()
     invalidateLater(intervalMillis(), session)
   })
@@ -1737,6 +1756,14 @@ reactivePoll <- function(intervalMillis, session, checkFunc, valueFunc) {
     valueFunc()
 
   }, label = NULL)
+
+  reg.finalizer(attr(re, "observable"), function(e) {
+    re_finalized <<- TRUE
+  })
+
+  # So that the observer and finalizer function don't (indirectly) hold onto a
+  # reference to `re` and thus prevent it from getting GC'd.
+  on.exit(rm(re))
 
   return(re)
 }

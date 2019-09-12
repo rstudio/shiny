@@ -33,8 +33,11 @@ Create a file upload control that can be used to upload one or more files.
 }
 \details{
 Whenever a file upload completes, the corresponding input variable is set
-to a dataframe. This dataframe contains one row for each selected file, and
-the following columns:
+to a dataframe. See the \code{Server value} section.
+}
+\section{Server value}{
+
+A \code{data.frame} that contains one row for each selected file, and following columns:
 \describe{
 \item{\code{name}}{The filename provided by the web browser. This is
 \strong{not} the path to read to get at the actual data that was uploaded
@@ -49,6 +52,7 @@ uploaded. This file may be deleted if the user performs another upload
 operation.}
 }
 }
+
 \examples{
 ## Only run examples in interactive R sessions
 if (interactive()) {
@@ -89,6 +93,7 @@ server <- function(input, output) {
 
 shinyApp(ui, server)
 }
+
 }
 \seealso{
 Other input elements: \code{\link{actionButton}},

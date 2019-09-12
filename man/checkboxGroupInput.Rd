@@ -44,6 +44,11 @@ Create a group of checkboxes that can be used to toggle multiple choices
 independently. The server will receive the input as a character vector of the
 selected values.
 }
+\section{Server value}{
+
+Character vector of values corresponding to the boxes that are checked.
+}
+
 \examples{
 ## Only run examples in interactive R sessions
 if (interactive()) {

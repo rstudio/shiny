@@ -8,6 +8,10 @@
 #' @family input elements
 #' @seealso [updateTextInput()]
 #'
+#' @section Server value:
+#' A character string of the password input. The default value is `""`
+#' unless `value` is provided.
+#'
 #' @examples
 #' ## Only run examples in interactive R sessions
 #' if (interactive()) {

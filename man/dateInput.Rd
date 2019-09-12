@@ -75,6 +75,11 @@ the browser. It allows the following values:
 \item \code{DD} Full weekday name
 }
 }
+\section{Server value}{
+
+A \link{Date} vector of length 1.
+}
+
 \examples{
 ## Only run examples in interactive R sessions
 if (interactive()) {
@@ -110,6 +115,7 @@ ui <- fluidPage(
 
 shinyApp(ui, server = function(input, output) { })
 }
+
 }
 \seealso{
 \code{\link[=dateRangeInput]{dateRangeInput()}}, \code{\link[=updateDateInput]{updateDateInput()}}

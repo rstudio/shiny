@@ -30,14 +30,13 @@ updateVarSelectizeInput(session, inputId, label = NULL, data = NULL,
 \item{choices}{List of values to select from. If elements of the list are
 named, then that name --- rather than the value --- is displayed to the
 user. It's also possible to group related inputs by providing a named list
-whose elements are (either named or unnamed) lists, vectors, or factors. In this
-case, the outermost names will be used as the group labels (leveraging the
-\code{<optgroup>} HTML tag) for the elements in the respective sublist. See the
-example section for a small demo of this feature.}
+whose elements are (either named or unnamed) lists, vectors, or factors. In
+this case, the outermost names will be used as the group labels (leveraging
+the \code{<optgroup>} HTML tag) for the elements in the respective sublist. See
+the example section for a small demo of this feature.}
 
-\item{selected}{The initially selected value (or multiple values if
-\code{multiple = TRUE}). If not specified then defaults to the first value
-for single-select lists and no values for multiple select lists.}
+\item{selected}{The initially selected value (or multiple values if \code{multiple = TRUE}). If not specified then defaults to the first value for
+single-select lists and no values for multiple select lists.}
 
 \item{options}{A list of options. See the documentation of \pkg{selectize.js}
 for possible options (character option values inside \code{\link[base:I]{base::I()}} will

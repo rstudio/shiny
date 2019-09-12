@@ -27,6 +27,12 @@ A text input control that can be added to a UI definition.
 \description{
 Create an password control for entry of passwords.
 }
+\section{Server value}{
+
+A character string of the password input. The default value is \code{""}
+unless \code{value} is provided.
+}
+
 \examples{
 ## Only run examples in interactive R sessions
 if (interactive()) {

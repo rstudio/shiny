@@ -93,6 +93,11 @@ or list of tags (using \code{\link[=tag]{tag()}} and friends), or raw HTML (usin
 \description{
 Constructs a slider widget to select a numeric value from a range.
 }
+\section{Server value}{
+
+A number, or in the case of slider range, a vector of two numbers.
+}
+
 \examples{
 ## Only run examples in interactive R sessions
 if (interactive()) {
@@ -115,6 +120,7 @@ server <- function(input, output) {
 # Complete app with UI and server components
 shinyApp(ui, server)
 }
+
 }
 \seealso{
 \code{\link[=updateSliderInput]{updateSliderInput()}}

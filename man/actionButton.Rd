@@ -26,6 +26,17 @@ see \code{\link[=validateCssUnit]{validateCssUnit()}}.}
 Creates an action button or link whose value is initially zero, and increments by one
 each time it is pressed.
 }
+\section{Server value}{
+
+An integer of class \code{"shinyActionButtonValue"}. This class differs from
+ordinary integers in that a value of 0 is considered "falsy".
+This implies two things:
+\itemize{
+\item Event handlers (e.g., \code{\link[=observeEvent]{observeEvent()}}, \code{\link[=eventReactive]{eventReactive()}}) won't execute on initial load.
+\item Input validation (e.g., \code{\link[=req]{req()}}, \code{\link[=need]{need()}}) will fail on initial load.
+}
+}
+
 \examples{
 ## Only run examples in interactive R sessions
 if (interactive()) {

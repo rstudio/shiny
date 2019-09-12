@@ -67,6 +67,9 @@
 #'
 #' shinyApp(ui, server)
 #' }
+#' @section Server value:
+#' Character vector of values corresponding to the boxes that are checked.
+#'
 #' @export
 checkboxGroupInput <- function(inputId, label, choices = NULL, selected = NULL,
   inline = FALSE, width = NULL, choiceNames = NULL, choiceValues = NULL) {

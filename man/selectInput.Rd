@@ -73,9 +73,9 @@ value when it is a single choice input and the empty string is not in the
 \code{selectInput(..., selectize = FALSE)}.
 }
 \section{Server value}{
- A vector of character strings, usually with a length
-of 1, with the value of the selected items. When nothing is selected (e.g. the
-initial state when \code{multiple} is set to \code{TRUE}), will return \code{NULL}.
+ A vector of character strings, usually of length
+1, with the value of the selected items. When \code{multiple=TRUE} and
+nothing is selected, this value will be \code{NULL}.
 }
 
 \examples{

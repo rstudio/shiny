@@ -72,9 +72,9 @@
 #' )
 #' }
 #'
-#' @section Server value: A vector of character strings, usually with a length
-#'   of 1, with the value of the selected items. When nothing is selected (e.g. the
-#'   initial state when `multiple` is set to `TRUE`), will return `NULL`.
+#' @section Server value: A vector of character strings, usually of length
+#'   1, with the value of the selected items. When `multiple=TRUE` and
+#'   nothing is selected, this value will be `NULL`.
 #'
 #' @export
 selectInput <- function(inputId, label, choices, selected = NULL,

@@ -29,7 +29,8 @@ Create an input control for entry of unstructured text values
 }
 \section{Server value}{
 
-A character string of the text input. The initial value is \code{""}.
+A character string of the text input. The default value is \code{""}
+unless \code{value} is provided.
 }
 
 \examples{

@@ -12,7 +12,7 @@
 #'   disappear.
 #' @param closeButton If `TRUE`, display a button which will make the
 #'   notification disappear when clicked. If `FALSE` do not display.
-#' @param id An unique identifier for the notification.
+#' @param id A unique identifier for the notification.
 #'
 #'   `id` is optional for `showNotification()`: Shiny will automatically create
 #'   one if needed. If you do supply it, Shiny will update an existing

@@ -26,7 +26,7 @@ disappear.}
 \item{closeButton}{If \code{TRUE}, display a button which will make the
 notification disappear when clicked. If \code{FALSE} do not display.}
 
-\item{id}{An unique identifier for the notification.
+\item{id}{A unique identifier for the notification.
 
 \code{id} is optional for \code{showNotification()}: Shiny will automatically create
 one if needed. If you do supply it, Shiny will update an existing

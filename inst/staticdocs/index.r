@@ -93,8 +93,7 @@ sd_section("Interface builder functions",
     "htmlTemplate",
     "bootstrapLib",
     "suppressDependencies",
-    "insertUI",
-    "removeUI"
+    "insertUI"
   )
 )
 sd_section("Rendering functions",

@@ -130,6 +130,8 @@ basicPage <- function(...) {
 #' @param bootstrap If `TRUE`, load the Bootstrap CSS library.
 #' @param theme URL to alternative Bootstrap stylesheet.
 #'
+#' @family layout functions
+#'
 #' @examples
 #' fillPage(
 #'   tags$style(type = "text/css",
@@ -232,6 +234,8 @@ collapseSizes <- function(padding) {
 #' @seealso [tabPanel()], [tabsetPanel()],
 #'   [updateNavbarPage()], [insertTab()],
 #'   [showTab()]
+#'
+#' @family layout functions
 #'
 #' @examples
 #' navbarPage("App Title",

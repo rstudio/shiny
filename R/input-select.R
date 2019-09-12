@@ -229,18 +229,6 @@ selectizeIt <- function(inputId, select, options, nonempty = FALSE) {
 #' Create a select list that can be used to choose a single or multiple items
 #' from the column names of a data frame.
 #'
-#' The resulting server `input` value will be returned as:
-#' \itemize{
-#'   \item a symbol if `multiple = FALSE`.  The `input` value should be
-#'         used with rlang's [rlang::!!()]. For example,
-#'         `ggplot2::aes(!!input$variable)`.
-#'   \item a list of symbols if `multiple = TRUE`. The `input` value
-#'         should be used with rlang's [rlang::!!!()] to expand
-#'         the symbol list as individual arguments. For example,
-#'         `dplyr::select(mtcars, !!!input$variabls)` which is
-#'         equivalent to `dplyr::select(mtcars, !!input$variabls[[1]], !!input$variabls[[2]], ..., !!input$variabls[[length(input$variabls)]])`.
-#' }
-#'
 #' By default, `varSelectInput()` and `selectizeInput()` use the
 #' JavaScript library \pkg{selectize.js}
 #' (<https://github.com/selectize/selectize.js>) to instead of the basic
@@ -253,6 +241,19 @@ selectizeIt <- function(inputId, select, options, nonempty = FALSE) {
 #'
 #' @family input elements
 #' @seealso [updateSelectInput()]
+#'
+#' @section Server value:
+#' The resulting server `input` value will be returned as:
+#'
+#'  * A symbol if `multiple = FALSE`. The `input` value should be
+#'  used with rlang's [rlang::!!()]. For example,
+#'  `ggplot2::aes(!!input$variable)`.
+#'  * A list of symbols if `multiple = TRUE`. The `input` value
+#'  should be used with rlang's [rlang::!!!()] to expand
+#'  the symbol list as individual arguments. For example,
+#'  `dplyr::select(mtcars, !!!input$variabls)` which is
+#'  equivalent to `dplyr::select(mtcars, !!input$variabls[[1]], !!input$variabls[[2]], ..., !!input$variabls[[length(input$variabls)]])`.
+#'
 #' @examples
 #'
 #' ## Only run examples in interactive R sessions

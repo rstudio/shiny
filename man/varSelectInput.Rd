@@ -47,18 +47,6 @@ Create a select list that can be used to choose a single or multiple items
 from the column names of a data frame.
 }
 \details{
-The resulting server \code{input} value will be returned as:
-\itemize{
-\item a symbol if \code{multiple = FALSE}.  The \code{input} value should be
-used with rlang's \code{\link[rlang:!!]{rlang::!!()}}. For example,
-\code{ggplot2::aes(!!input$variable)}.
-\item a list of symbols if \code{multiple = TRUE}. The \code{input} value
-should be used with rlang's \code{\link[rlang:!!!]{rlang::!!!()}} to expand
-the symbol list as individual arguments. For example,
-\code{dplyr::select(mtcars, !!!input$variabls)} which is
-equivalent to \code{dplyr::select(mtcars, !!input$variabls[[1]], !!input$variabls[[2]], ..., !!input$variabls[[length(input$variabls)]])}.
-}
-
 By default, \code{varSelectInput()} and \code{selectizeInput()} use the
 JavaScript library \pkg{selectize.js}
 (\url{https://github.com/selectize/selectize.js}) to instead of the basic
@@ -75,6 +63,21 @@ value when it is a single choice input and the empty string is not in the
 \code{choices} argument. This is to keep compatibility with
 \code{selectInput(..., selectize = FALSE)}.
 }
+\section{Server value}{
+
+The resulting server \code{input} value will be returned as:
+\itemize{
+\item A symbol if \code{multiple = FALSE}. The \code{input} value should be
+used with rlang's \code{\link[rlang:!!]{rlang::!!()}}. For example,
+\code{ggplot2::aes(!!input$variable)}.
+\item A list of symbols if \code{multiple = TRUE}. The \code{input} value
+should be used with rlang's \code{\link[rlang:!!!]{rlang::!!!()}} to expand
+the symbol list as individual arguments. For example,
+\code{dplyr::select(mtcars, !!!input$variabls)} which is
+equivalent to \code{dplyr::select(mtcars, !!input$variabls[[1]], !!input$variabls[[2]], ..., !!input$variabls[[length(input$variabls)]])}.
+}
+}
+
 \examples{
 
 ## Only run examples in interactive R sessions

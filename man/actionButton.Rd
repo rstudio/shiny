@@ -28,10 +28,13 @@ each time it is pressed.
 }
 \section{Server value}{
 
-An integer, initialized to \code{0} and incremented with each press. This \code{0} is special
-in that it's considered "falsy", meaning that it will cause \code{\link[=req]{req()}} to fail. This
-special behavior is only manifested with \code{actionButton}; traditional \code{\link[=numericInput]{numericInput()}}s
-will not cause \code{req} to fail when --- even when set to \code{0}.
+An integer of class \code{"shinyActionButtonValue"}. This class differs from
+ordinary integers in that a value of 0 is considered "falsy".
+This implies two things:
+\itemize{
+\item Event handlers (e.g., \code{\link[=observeEvent]{observeEvent()}}, \code{\link[=eventReactive]{eventReactive()}}) won't execute on initial load.
+\item Input validation (e.g., \code{\link[=req]{req()}}, \code{\link[=need]{need()}}) will fail on initial load.
+}
 }
 
 \examples{

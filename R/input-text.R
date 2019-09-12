@@ -30,7 +30,7 @@
 #' }
 #'
 #' @section Server value:
-#' A character string of the text input.
+#' A character string of the text input. The initial value is `""`.
 #'
 #' @export
 textInput <- function(inputId, label, value = "", width = NULL,

@@ -39,11 +39,11 @@
 #' @seealso [observeEvent()] and [eventReactive()]
 #'
 #' @section Server value:
-#' An integer, initialized to `0` and incremented with each press. This `0` is special
-#' in that it's considered "falsy", meaning that it will cause [req()] to fail. This
-#' special behavior is only manifested with `actionButton`; traditional [numericInput()]s
-#' will not cause `req` to fail when --- even when set to `0`.
-#'
+#' An integer of class `"shinyActionButtonValue"`. This class differs from
+#' ordinary integers in that a value of 0 is considered "falsy".
+#' This implies two things:
+#'   * Event handlers (e.g., [observeEvent()], [eventReactive()]) won't execute on initial load.
+#'   * Input validation (e.g., [req()], [need()]) will fail on initial load.
 #' @export
 actionButton <- function(inputId, label, icon = NULL, width = NULL, ...) {
 

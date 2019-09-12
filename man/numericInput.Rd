@@ -31,7 +31,7 @@ Create an input control for entry of numeric values
 }
 \section{Server value}{
 
-The input value as a \code{double}.
+A \link{numeric} vector of length 1.
 }
 
 \examples{

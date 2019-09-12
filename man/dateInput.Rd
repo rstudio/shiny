@@ -77,7 +77,7 @@ the browser. It allows the following values:
 }
 \section{Server value}{
 
-A date-time of class \code{Date}.
+A \link{Date} vector of length 1.
 }
 
 \examples{

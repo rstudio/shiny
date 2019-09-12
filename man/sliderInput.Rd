@@ -95,7 +95,7 @@ Constructs a slider widget to select a numeric value from a range.
 }
 \section{Server value}{
 
-A number, or a vector of two numbers in the case of slider range.
+A number, or in the case of slider range, a vector of two numbers.
 }
 
 \examples{

@@ -795,10 +795,9 @@ runApp <- function(appDir=getwd(),
   }
 
   if (missing(host))
-    host <- findVal("host", host)
-  if (is.null(host) || is.na(host)) host <- '0.0.0.0'
+    host <- findVal("host", host %OR% '0.0.0.0')
   if (missing(port))
-    port <- findVal("port", port)
+    port <- findVal("port", port %OR% findPort(host = host))
   if (missing(launch.browser))
     launch.browser <- findVal("launch.browser", launch.browser)
   if (missing(quiet))
@@ -1203,8 +1202,8 @@ browserViewer <- function(browser = getOption("browser")) {
 #' findPort()
 #' findPort(cache = FALSE)
 findPort <- function(min = 3000L, max = 8000L,
-                       host = getOption("shiny.host", "127.0.0.1"),
-                       n = 20, cache = TRUE) {
+                     host = getOption("shiny.host", "127.0.0.1"),
+                     n = 20, cache = TRUE) {
   if (cache && !is.null(.globals$lastPort))  {
     tmp <- try(startServer(host, .globals$lastPort, list()), silent = TRUE)
     if (!inherits(tmp, 'try-error')) {

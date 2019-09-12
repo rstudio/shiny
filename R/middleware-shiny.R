@@ -3,7 +3,27 @@ NULL
 
 reactLogHandler <- function(req) {
   if (! rLog$isLogging()) {
-    return(NULL)
+    if (
+      identical(req$PATH_INFO, "/reactlog/mark") ||
+      identical(req$PATH_INFO, "/reactlog")
+    ) {
+      # is not logging, but is a reactlog path...
+
+      return(
+        httpResponse(
+          # Not Implemented
+          # - The server either does not recognize the request method, or it lacks the ability to fulfil the request.
+          status = 501,
+          content_type = "text/plain; charset=utf-8",
+          content = "To enable reactlog, set the following option before running the application: \n\noptions(shiny.reactlog = TRUE)"
+        )
+      )
+
+    } else {
+      # continue on like normal
+      return(NULL)
+    }
+
   }
 
   if (identical(req$PATH_INFO, "/reactlog/mark")) {
@@ -37,6 +57,7 @@ reactLogHandler <- function(req) {
     ))
 
   } else {
+    # continue on like normal
     return(NULL)
   }
 }

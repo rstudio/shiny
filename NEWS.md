@@ -30,6 +30,8 @@ shiny 1.3.2.9001
 
 * Resolved [#2433](https://github.com/rstudio/shiny/issues/2433): An informative warning is now thrown if subdirectories of the app's `www/` directory are masked by other resource prefixes and/or the same resource prefix is mapped to different local file paths. ([#2434](https://github.com/rstudio/shiny/pull/2434))
 
+* Resolved [#2478](https://github.com/rstudio/shiny/issues/2478): `cmd + shift + f3` and `ctrl + shift + f3` can now be used to add a reactlog mark. If reactlog keybindings are used and the reactlog is not enabled, an error page is displayed showing how to enable reactlog recordings. ([#2560](https://github.com/rstudio/shiny/pull/2560))
+
 * Resolved [#2471](https://github.com/rstudio/shiny/issues/2471): Large file uploads to a Windows computer were slow. ([#2579](https://github.com/rstudio/shiny/pull/2579))
 
 ### Bug fixes

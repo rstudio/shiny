@@ -5,7 +5,7 @@
 \title{Run a gadget}
 \usage{
 runGadget(app, server = NULL, port = getOption("shiny.port",
-  randomPort()), viewer = paneViewer(), stopOnCancel = TRUE)
+  findPort()), viewer = paneViewer(), stopOnCancel = TRUE)
 }
 \arguments{
 \item{app}{Either a Shiny app object as created by

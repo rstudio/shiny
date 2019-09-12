@@ -664,7 +664,7 @@ isRunning <- function() {
 #' @param port The TCP port that the application should listen on. If the
 #'   `port` is not specified, and the `shiny.port` option is set (with
 #'   `options(shiny.port = XX)`), then that port will be used. Otherwise,
-#'    use a random port.
+#'   use a random port.
 #' @param launch.browser If true, the system's default web browser will be
 #'   launched automatically after the app is started. Defaults to true in
 #'   interactive sessions only. This value of this parameter can also be a
@@ -724,7 +724,7 @@ isRunning <- function() {
 #' }
 #' @export
 runApp <- function(appDir=getwd(),
-                   port=getOption('shiny.port', randomPort(host = host)),
+                   port=getOption('shiny.port', findPort(host = host)),
                    launch.browser=getOption('shiny.launch.browser',
                                             interactive()),
                    host=getOption('shiny.host', '127.0.0.1'),
@@ -1023,7 +1023,7 @@ stopApp <- function(returnValue = invisible()) {
 #' }
 #' @export
 runExample <- function(example=NA,
-                       port=getOption('shiny.port', randomPort(host = host)),
+                       port=getOption('shiny.port', findPort(host = host)),
                        launch.browser=getOption('shiny.launch.browser',
                                                 interactive()),
                        host=getOption('shiny.host', '127.0.0.1'),
@@ -1087,7 +1087,7 @@ runExample <- function(example=NA,
 #' runGadget(shinyApp(ui, server))
 #' }
 #' @export
-runGadget <- function(app, server = NULL, port = getOption("shiny.port", randomPort()),
+runGadget <- function(app, server = NULL, port = getOption("shiny.port", findPort()),
   viewer = paneViewer(), stopOnCancel = TRUE) {
 
   if (!is.shiny.appobj(app)) {
@@ -1199,10 +1199,10 @@ browserViewer <- function(browser = getOption("browser")) {
 #' @export
 #' @examples
 #'
-#' randomPort()
-#' randomPort()
-#' randomPort(cache = FALSE)
-randomPort <- function(min = 3000L, max = 8000L,
+#' findPort()
+#' findPort()
+#' findPort(cache = FALSE)
+findPort <- function(min = 3000L, max = 8000L,
                        host = getOption("shiny.host", "127.0.0.1"),
                        n = 20, cache = TRUE) {
   if (cache && !is.null(.globals$lastPort))  {

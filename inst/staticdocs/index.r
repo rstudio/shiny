@@ -205,7 +205,7 @@ sd_section("Utility functions",
     "diskCache",
     "memoryCache",
     "reexports",
-    "randomPort"
+    "findPort"
   )
 )
 sd_section("Plot interaction",

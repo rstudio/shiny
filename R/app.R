@@ -13,7 +13,10 @@
 #' object to `print()` or [runApp()].
 #'
 #' @param ui The UI definition of the app (for example, a call to
-#'   `fluidPage()` with nested controls)
+#'   `fluidPage()` with nested controls).
+#'
+#'    If bookmarking is enabled (see `enableBookmarking`), this must be
+#'    a single argument function that returns the UI definition.
 #' @param server A function with three parameters: `input`, `output`, and
 #'   `session`. The function is called once for each session ensuring that each
 #'   app is independent.
@@ -30,11 +33,9 @@
 #'   request. Note that the entire request path must match the regular
 #'   expression in order for the match to be considered successful.
 #' @param enableBookmarking Can be one of `"url"`, `"server"`, or
-#'   `"disable"`. This is equivalent to calling the
-#'   [enableBookmarking()] function just before calling
-#'   `shinyApp()`. With the default value (`NULL`), the app will
-#'   respect the setting from any previous calls to `enableBookmarking()`.
-#'   See [enableBookmarking()] for more information.
+#'   `"disable"`. The default value, `NULL`, will respect the setting from
+#'   any previous calls to  [enableBookmarking()]. See [enableBookmarking()]
+#'   for more information on bookmarking your app.
 #' @return An object that represents the app. Printing the object or passing it
 #'   to [runApp()] will run the app.
 #'

@@ -42,7 +42,7 @@ expression in order for the match to be considered successful.}
 \item{enableBookmarking}{Can be one of \code{"url"}, \code{"server"}, or
 \code{"disable"}. The default value, \code{NULL}, will respect the setting from
 any previous calls to  \code{\link[=enableBookmarking]{enableBookmarking()}}. See \code{\link[=enableBookmarking]{enableBookmarking()}}
-for more information.}
+for more information on bookmarking your app.}
 
 \item{appDir}{Path to directory that contains a Shiny app (i.e. a server.R
 file and either ui.R or www/index.html)}

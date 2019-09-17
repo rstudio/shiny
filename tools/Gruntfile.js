@@ -110,6 +110,8 @@ module.exports = function(grunt) {
           "dot-location": [1, "property"],
           "eqeqeq": 1,
           // "no-shadow": 1,
+          "no-implicit-globals": 1,
+          "no-global-assign": 1,
           "no-undef": 1,
           "no-unused-vars": [1, {"args": "none"}],
           "guard-for-in": 1,

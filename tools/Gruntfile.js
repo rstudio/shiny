@@ -111,6 +111,7 @@ module.exports = function(grunt) {
           "eqeqeq": 1,
           // "no-shadow": 1,
           "no-implicit-globals": 1,
+          "no-restricted-globals": ["error", "name", "length", "top", "location", "parent", "status"],
           "no-global-assign": 1,
           "no-undef": 1,
           "no-unused-vars": [1, {"args": "none"}],

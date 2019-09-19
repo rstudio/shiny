@@ -26,7 +26,7 @@ shiny 1.4.0
 
 * Added `resourcePaths()` and `removeResourcePaths()` functions. ([#2459](https://github.com/rstudio/shiny/pull/2459))
 
-* Resolved [#2515](https://github.com/rstudio/shiny/issues/2515): `selectInput()` now deals appropriately with named factors. ([#2524](https://github.com/rstudio/shiny/pull/2524))
+* Resolved [#2515](https://github.com/rstudio/shiny/issues/2515): `selectInput()` and `selectizeInput()` now deal appropriately with named factors. Note that `updateSelectInput()` and `updateSelectizeInput()` **do not** yet handle factors; their behavior is unchanged. ([#2524](https://github.com/rstudio/shiny/pull/2524), [#2540](https://github.com/rstudio/shiny/pull/2540), [#2625](https://github.com/rstudio/shiny/pull/2625))
 
 * Resolved [#2433](https://github.com/rstudio/shiny/issues/2433): An informative warning is now thrown if subdirectories of the app's `www/` directory are masked by other resource prefixes and/or the same resource prefix is mapped to different local file paths. ([#2434](https://github.com/rstudio/shiny/pull/2434))
 

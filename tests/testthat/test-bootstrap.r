@@ -69,7 +69,7 @@ test_that("Repeated names for selectInput and radioButtons choices", {
 
 
 test_that("Choices are correctly assigned names", {
-  # Empty non-list comes back with names
+  # Empty non-list comes back as a list with names
   expect_identical(
     choicesWithNames(numeric(0)),
     stats::setNames(list(), character(0))
@@ -78,6 +78,16 @@ test_that("Choices are correctly assigned names", {
   expect_identical(
     choicesWithNames(list()),
     stats::setNames(list(), character(0))
+  )
+  # NULL comes back as an empty list with names
+  expect_identical(
+    choicesWithNames(NULL),
+    stats::setNames(list(), character(0))
+  )
+  # NA is processed as a leaf, not a group
+  expect_identical(
+    choicesWithNames(NA),
+    as.list(stats::setNames(as.character(NA), NA))
   )
   # Empty character vector
   # An empty character vector isn't a sensical input, but we preserved this test
@@ -151,8 +161,19 @@ test_that("Choices are correctly assigned names", {
     choicesWithNames(list(A="a", "b", C=list("d", E="e"))),
     list(A="a", b="b", C=list(d="d", E="e"))
   )
+  # List, with a single-item unnamed group list
+  expect_identical(
+    choicesWithNames(list(C=list(123))),
+    list(C=list("123"="123"))
+  )
   # Error when sublist is unnamed
   expect_error(choicesWithNames(list(A="a", "b", list(1,2))))
+  # Error when list is unnamed and contains a group
+  # NULL, list(1,2), and anything of length() == 0 is considered a group.
+  # NA is NOT a group.
+  expect_error(choicesWithNames(list(NULL)), regexp = "must be named")
+  expect_error(choicesWithNames(list(list(1,2))), regexp = "must be named")
+  expect_error(choicesWithNames(list(character(0))), regexp = "must be named")
   # Unnamed factor
   expect_identical(
     choicesWithNames(factor(c("a","b","3"))),
@@ -172,6 +193,16 @@ test_that("Choices are correctly assigned names", {
   expect_identical(
     choicesWithNames(list(A="a", B="b", C=structure(factor(c("d", "e")), names = c("d", "e")))),
     list(A="a", B="b", C=list(d="d", e="e"))
+  )
+  # List, named, with an empty group as an unnamed empty list
+  expect_identical(
+    choicesWithNames(list(C=list())),
+    list(C=stats::setNames(list(), character()))
+  )
+  # List, named, with an empty group as an unnamed empty vector
+  expect_identical(
+    choicesWithNames(list(C=c())),
+    list(C=stats::setNames(list(), character()))
   )
 })
 

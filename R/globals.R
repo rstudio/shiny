@@ -16,7 +16,9 @@ register_s3_method <- function(pkg, generic, class, fun = NULL) {
     registerS3method(generic, class, fun, envir = asNamespace(pkg))
   }
 
-  # Always register hook in case package is later unloaded & reloaded
+  # Always register hook in case pkg is loaded at some
+  # point the future (or, potentially, but less commonly,
+  # unloaded & reloaded)
   setHook(
     packageEvent(pkg, "onLoad"),
     function(...) {
@@ -26,10 +28,14 @@ register_s3_method <- function(pkg, generic, class, fun = NULL) {
 }
 
 register_upgrade_message <- function(pkg, version) {
-  # Do nothing if the package isn't installed or
-  # meets the version requirement
-  if (system.file(package = pkg) == "") return(NULL)
-  if (packageVersion(pkg) >= as.character(version)) return(NULL)
+  # Is an out-dated version of this package installed?
+  needs_upgrade <- function() {
+    if (system.file(package = pkg) == "")
+      return(FALSE)
+    if (packageVersion(pkg) >= version)
+      return(FALSE)
+    TRUE
+  }
 
   msg <- sprintf(
     "This version of Shiny is designed to work with '%s' >= %s.
@@ -37,16 +43,17 @@ register_upgrade_message <- function(pkg, version) {
     pkg, version, pkg
   )
 
-  # emit startup message of the package is already loaded
-  if (pkg %in% loadedNamespaces()) {
+  if (pkg %in% loadedNamespaces() && needs_upgrade()) {
     packageStartupMessage(msg)
   }
 
-  # Always register hook in case package is later unloaded & reloaded
+  # Always register hook in case pkg is loaded at some
+  # point the future (or, potentially, but less commonly,
+  # unloaded & reloaded)
   setHook(
     packageEvent(pkg, "onLoad"),
     function(...) {
-      packageStartupMessage(msg)
+      if (needs_upgrade()) packageStartupMessage(msg)
     }
   )
 }

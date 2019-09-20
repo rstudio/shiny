@@ -25,6 +25,28 @@ register_s3_method <- function(pkg, generic, class, fun = NULL) {
   )
 }
 
+register_upgrade_message <- function(pkg, version) {
+
+  msg <- sprintf(
+    "This version of Shiny is designed to work with '%s' >= %s.
+    Please upgrade via install.packages('%s').",
+    pkg, version, pkg
+  )
+
+  # emit startup message of the package is already loaded
+  if (pkg %in% loadedNamespaces()) {
+    packageStartupMessage(msg)
+  }
+
+  # Always register hook in case package is later unloaded & reloaded
+  setHook(
+    packageEvent(pkg, "onLoad"),
+    function(...) {
+      packageStartupMessage(msg)
+    }
+  )
+}
+
 .onLoad <- function(libname, pkgname) {
   # R's lazy-loading package scheme causes the private seed to be cached in the
   # package itself, making our PRNG completely deterministic. This line resets
@@ -36,18 +58,10 @@ register_s3_method <- function(pkg, generic, class, fun = NULL) {
   register_s3_method("knitr", "knit_print", "reactive")
   register_s3_method("knitr", "knit_print", "shiny.appobj")
   register_s3_method("knitr", "knit_print", "shiny.render.function")
-}
 
-.onAttach <- function(libname, pkgname) {
-  # Check for htmlwidgets version, if installed. As of Shiny 0.12.0 and
-  # htmlwidgets 0.4, both packages switched from RJSONIO to jsonlite. Because of
-  # this change, Shiny 0.12.0 will work only with htmlwidgets >= 0.4, and vice
-  # versa.
-  if (system.file(package = "htmlwidgets") != "" &&
-      utils::packageVersion("htmlwidgets") < "0.4") {
-    packageStartupMessage(
-      "This version of Shiny is designed to work with htmlwidgets >= 0.4. ",
-      "Please upgrade your version of htmlwidgets."
-    )
-  }
+  # Shiny 1.4.0 bumps jQuery 1.x to 3.x, which caused a problem
+  # with static-rendering of htmlwidgets, and htmlwidgets 1.5
+  # includes a fix for this problem
+  # https://github.com/rstudio/shiny/issues/2630
+  register_upgrade_message("htmlwidgets", 1.5)
 }

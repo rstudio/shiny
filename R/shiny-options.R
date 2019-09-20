@@ -64,7 +64,7 @@ getShinyOption <- function(name, default = NULL) {
 #'   \item{shiny.host (defaults to `"127.0.0.1"`)}{The IP address that Shiny should listen on. See
 #'     [runApp()] for more information.}
 #'   \item{shiny.jquery.version (defaults to `3`)}{The major version of jQuery to use.
-#'   Currently only values of `3` or `1` are supported. If `1`, then jQuery 1.12.1 is used. If `3`,
+#'   Currently only values of `3` or `1` are supported. If `1`, then jQuery 1.12.4 is used. If `3`,
 #'   then jQuery 3.4.1 is used.}
 #'   \item{shiny.json.digits (defaults to `16`)}{The number of digits to use when converting
 #'     numbers to JSON format to send to the client web browser.}

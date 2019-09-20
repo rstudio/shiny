@@ -53,7 +53,7 @@ renderPage <- function(ui, connection, showcase=0, testMode=FALSE) {
     }
     if (version == 1) {
       return(htmlDependency(
-        "jquery", "1.12.1",
+        "jquery", "1.12.4",
         c(href = "shared/legacy"),
         script = "jquery.min.js"
       ))

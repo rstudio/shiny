@@ -3,7 +3,7 @@ shiny 1.4.0
 
 ## Library updates
 
-* Resolved [#2554](https://github.com/rstudio/shiny/issues/2554): Upgraded jQuery from v.1.12.1 to v3.4.1 and bootstrap from v3.3.7 to v3.4.1. ([#2557](https://github.com/rstudio/shiny/pull/2557)). Since the jQuery upgrade may introduce breaking changes to user code, there is an option to switch back to the old version by setting `options(shiny.jquery.version = 1)`. If you're using an `htmlTemplate()`  (or similar) that references the `shared/jquery[.min].js` file that ships with the **shiny** package, in order to downgrade, you'll have to change that filepath to `shared/legacy/jquery[.min].js`.
+* Resolved [#2554](https://github.com/rstudio/shiny/issues/2554): Upgraded jQuery from v.1.12.4 to v3.4.1 and bootstrap from v3.3.7 to v3.4.1. ([#2557](https://github.com/rstudio/shiny/pull/2557)). Since the jQuery upgrade may introduce breaking changes to user code, there is an option to switch back to the old version by setting `options(shiny.jquery.version = 1)`. If you're using an `htmlTemplate()`  (or similar) that references the `shared/jquery[.min].js` file that ships with the **shiny** package, in order to downgrade, you'll have to change that filepath to `shared/legacy/jquery[.min].js`.
 
 ## Changes
 

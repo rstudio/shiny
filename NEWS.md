@@ -1,6 +1,10 @@
 shiny 1.4.0
 ===========
 
+## Library updates
+
+* Resolved [#2554](https://github.com/rstudio/shiny/issues/2554): Upgraded jQuery from v.1.12.1 to v3.4.1 and bootstrap from v3.3.7 to v3.4.1. ([#2557](https://github.com/rstudio/shiny/pull/2557)). Since the jQuery upgrade may introduce breaking changes to user code, there is an option to switch back to the old version by setting `options(shiny.jquery.version = 1)`. If you're using an `htmlTemplate()`  (or similar) that references the `shared/jquery[.min].js` file that ships with the **shiny** package, in order to downgrade, you'll have to change that filepath to `shared/legacy/jquery[.min].js`.
+
 ## Changes
 
 * Resolved [#1433](https://github.com/rstudio/shiny/issues/1433): `plotOutput()`'s coordmap info now includes discrete axis limits for **ggplot2** plots. As a result, any **shinytest** tests that contain **ggplot2** plots with discrete axes (that were recorded before this change) will now report differences that can safely be updated. This new coordmap info was added to correctly infer what data points are within an input brush and/or near input click/hover in scenarios where a non-trivial discrete axis scale is involved (e.g., whenever `scale_[x/y]_discrete(limits = ...)` and/or free scales across multiple discrete axes are used). ([#2410](https://github.com/rstudio/shiny/pull/2410))
@@ -57,10 +61,6 @@ shiny 1.4.0
 * Fixed [#2598](https://github.com/rstudio/shiny/issues/2598): Showcase files don't appear with a wide window. ([#2582](https://github.com/rstudio/shiny/pull/2582))
 
 * Fixed [#2329](https://github.com/rstudio/shiny/issues/2329), [#1817](https://github.com/rstudio/shiny/issues/1817): These bugs were reported as fixed in Shiny 1.3.0 but were not actually fixed because some JavaScript changes were accidentally not included in the release. The fix resolves issues that occur when `withProgressBar()` or bookmarking are combined with the [networkD3](https://christophergandrud.github.io/networkD3/) package's Sankey plot.
-
-### Library updates
-
-* Resolved [#2554](https://github.com/rstudio/shiny/issues/2554): Upgraded bootstrap to v3.4.1 and jQuery to v3.4.1. ([#2557](https://github.com/rstudio/shiny/pull/2557))
 
 
 shiny 1.3.2

@@ -26,6 +26,10 @@ register_s3_method <- function(pkg, generic, class, fun = NULL) {
 }
 
 register_upgrade_message <- function(pkg, version) {
+  # Do nothing if the package isn't installed or
+  # meets the version requirement
+  if (system.file(package = pkg) == "") return(NULL)
+  if (packageVersion(pkg) >= as.character(version)) return(NULL)
 
   msg <- sprintf(
     "This version of Shiny is designed to work with '%s' >= %s.

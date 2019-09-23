@@ -565,6 +565,15 @@ test_that("names() and reactiveValuesToList()", {
   expect_equal(execCount(depAllValues), 5)
 })
 
+test_that("reactiveValuesFromList()", {
+  l <- list(A=1)
+
+  values <- reactiveValuesFromList(l)
+
+  expect_true(is.reactivevalues(values))
+  expect_equal(isolate(values$A), 1)
+})
+
 test_that("Observer pausing works", {
   values <- reactiveValues(a=1)
 

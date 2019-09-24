@@ -32,7 +32,7 @@ register_upgrade_message <- function(pkg, version) {
   needs_upgrade <- function() {
     if (system.file(package = pkg) == "")
       return(FALSE)
-    if (packageVersion(pkg) >= version)
+    if (utils::packageVersion(pkg) >= version)
       return(FALSE)
     TRUE
   }

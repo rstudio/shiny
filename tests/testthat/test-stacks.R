@@ -48,6 +48,10 @@ dumpTests <- function(df) {
 }
 
 test_that("integration tests", {
+  # The expectations on these tests assume a recent version of promises
+  # https://github.com/rstudio/promises/commit/9ebad6#diff-1220ed1
+  skip_if_not_installed("promises", "1.0.1.90002")
+
   df <- causeError(full = FALSE)
   # dumpTests(df)
 

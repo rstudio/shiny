@@ -48,6 +48,15 @@ dumpTests <- function(df) {
 }
 
 test_that("integration tests", {
+  # The expected call stack can be changed by other packages (namely, promises).
+  # If promises changes its internals, it can break this test on CRAN. Because
+  # CRAN package releases are generally not synchronized (that is, promises and
+  # shiny can't be updated at the same time, unless there is manual intervention
+  # from CRAN maintaineres), these specific test expectations make it impossible
+  # to release a version of promises that will not break this test and cause
+  # problems on CRAN.
+  skip_on_cran()
+
   df <- causeError(full = FALSE)
   # dumpTests(df)
 

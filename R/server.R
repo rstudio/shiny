@@ -724,7 +724,7 @@ isRunning <- function() {
 #' }
 #' @export
 runApp <- function(appDir=getwd(),
-                   port=getOption('shiny.port'),
+                   port=getOption('shiny.port', findPort(host = host)),
                    launch.browser=getOption('shiny.launch.browser',
                                             interactive()),
                    host=getOption('shiny.host', '127.0.0.1'),
@@ -794,20 +794,18 @@ runApp <- function(appDir=getwd(),
     if (arg %in% names(appOps)) appOps[[arg]] else default
   }
 
+  if (missing(host))
+    host <- findVal("host", host %OR% '0.0.0.0')
   if (missing(port))
-    port <- findVal("port", port)
+    port <- findVal("port", port %OR% findPort(host = host))
   if (missing(launch.browser))
     launch.browser <- findVal("launch.browser", launch.browser)
-  if (missing(host))
-    host <- findVal("host", host)
   if (missing(quiet))
     quiet <- findVal("quiet", quiet)
   if (missing(display.mode))
     display.mode <- findVal("display.mode", display.mode)
   if (missing(test.mode))
     test.mode <- findVal("test.mode", test.mode)
-
-  if (is.null(host) || is.na(host)) host <- '0.0.0.0'
 
   workerId(workerId)
 
@@ -882,44 +880,6 @@ runApp <- function(appDir=getwd(),
   }
 
   require(shiny)
-
-  # determine port if we need to
-  if (is.null(port)) {
-
-    # Try up to 20 random ports. If we don't succeed just plow ahead
-    # with the final value we tried, and let the "real" startServer
-    # somewhere down the line fail and throw the error to the user.
-    #
-    # If we (think we) succeed, save the value as .globals$lastPort,
-    # and try that first next time the user wants a random port.
-
-    for (i in 1:20) {
-      if (!is.null(.globals$lastPort)) {
-        port <- .globals$lastPort
-        .globals$lastPort <- NULL
-      }
-      else {
-        # Try up to 20 random ports
-        while (TRUE) {
-          port <- p_randomInt(3000, 8000)
-          # Reject ports in this range that are considered unsafe by Chrome
-          # http://superuser.com/questions/188058/which-ports-are-considered-unsafe-on-chrome
-          # https://github.com/rstudio/shiny/issues/1784
-          if (!port %in% c(3659, 4045, 6000, 6665:6669, 6697)) {
-            break
-          }
-        }
-      }
-
-      # Test port to see if we can use it
-      tmp <- try(startServer(host, port, list()), silent=TRUE)
-      if (!inherits(tmp, 'try-error')) {
-        stopServer(tmp)
-        .globals$lastPort <- port
-        break
-      }
-    }
-  }
 
   # Invoke user-defined onStop callbacks, before the application's internal
   # onStop callbacks.
@@ -1062,7 +1022,7 @@ stopApp <- function(returnValue = invisible()) {
 #' }
 #' @export
 runExample <- function(example=NA,
-                       port=NULL,
+                       port=getOption('shiny.port', findPort(host = host)),
                        launch.browser=getOption('shiny.launch.browser',
                                                 interactive()),
                        host=getOption('shiny.host', '127.0.0.1'),
@@ -1126,7 +1086,7 @@ runExample <- function(example=NA,
 #' runGadget(shinyApp(ui, server))
 #' }
 #' @export
-runGadget <- function(app, server = NULL, port = getOption("shiny.port"),
+runGadget <- function(app, server = NULL, port = getOption("shiny.port", findPort()),
   viewer = paneViewer(), stopOnCancel = TRUE) {
 
   if (!is.shiny.appobj(app)) {
@@ -1220,6 +1180,41 @@ browserViewer <- function(browser = getOption("browser")) {
     utils::browseURL(url, browser = browser)
   }
 }
+
+#' Find an open TCP port
+#'
+#' Finds a random available TCP port for listening on.
+#'
+#' @param min Minimum port number.
+#' @param max Maximum port number.
+#' @param host see [httpuv::randomPort()].
+#' @param n Number of ports to try before giving up.
+#' @param cache if `TRUE`, use the last random port if it's available.
+#'
+#' @details This function automatically excludes some ports
+#' which are considered unsafe by web browsers.
+#'
+#' @seealso [httpuv::randomPort()]
+#' @export
+#' @examples
+#'
+#' findPort()
+#' findPort()
+#' findPort(cache = FALSE)
+findPort <- function(min = 3000L, max = 8000L,
+                     host = getOption("shiny.host", "127.0.0.1"),
+                     n = 20, cache = TRUE) {
+  if (cache && !is.null(.globals$lastPort))  {
+    tmp <- try(startServer(host, .globals$lastPort, list()), silent = TRUE)
+    if (!inherits(tmp, 'try-error')) {
+      stopServer(tmp)
+      return(.globals$lastPort)
+    }
+  }
+  .globals$lastPort <- withPrivateSeed(httpuv::randomPort(min, max, host, n))
+  .globals$lastPort
+}
+
 
 # Returns TRUE if we're running in Shiny Server or other hosting environment,
 # otherwise returns FALSE.

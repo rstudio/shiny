@@ -49,6 +49,11 @@ the radio buttons to have no options selected by using \code{selected = characte
 to return to that state once they've made a selection. Instead, consider
 having the first of your choices be \code{c("None selected" = "")}.
 }
+\section{Server value}{
+
+A character string containing the value of the selected button.
+}
+
 \examples{
 ## Only run examples in interactive R sessions
 if (interactive()) {
@@ -98,6 +103,7 @@ server <- function(input, output) {
 
 shinyApp(ui, server)
 }
+
 }
 \seealso{
 \code{\link[=updateRadioButtons]{updateRadioButtons()}}

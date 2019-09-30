@@ -28,7 +28,8 @@
 #'   Shiny-Application-Layout-Guide](http://shiny.rstudio.com/articles/layout-guide.html) for additional details on laying out fluid
 #'   pages.
 #'
-#' @seealso [column()], [sidebarLayout()]
+#' @family layout functions
+#' @seealso [column()]
 #'
 #' @examples
 #' ## Only run examples in interactive R sessions
@@ -129,6 +130,8 @@ fluidRow <- function(...) {
 #' @note See the [
 #'   Shiny Application Layout Guide](http://shiny.rstudio.com/articles/layout-guide.html) for additional details on laying out fixed
 #'   pages.
+#'
+#' @family layout functions
 #'
 #' @seealso [column()]
 #'
@@ -243,7 +246,6 @@ column <- function(width, ..., offset = 0) {
 #'   `title` tag within the head. You can also specify a page title
 #'   explicitly using the `title` parameter of the top-level page function.
 #'
-#'
 #' @examples
 #' ## Only run examples in interactive R sessions
 #' if (interactive()) {
@@ -278,6 +280,8 @@ titlePanel <- function(title, windowTitle=title) {
 #'   sidebar takes up 1/3 of the width, and the main panel 2/3. The total
 #'   width must be 12 or less.
 #' @param ... Output elements to include in the sidebar/main panel.
+#'
+#' @family layout functions
 #'
 #' @examples
 #' ## Only run examples in interactive R sessions
@@ -369,7 +373,7 @@ mainPanel <- function(..., width = 8) {
 #' @param fluid `TRUE` to use fluid layout; `FALSE` to use fixed
 #'   layout.
 #'
-#' @seealso [fluidPage()], [flowLayout()]
+#' @family layout functions
 #'
 #' @examples
 #' ## Only run examples in interactive R sessions
@@ -407,7 +411,7 @@ verticalLayout <- function(..., fluid = TRUE) {
 #' @param cellArgs Any additional attributes that should be used for each cell
 #'   of the layout.
 #'
-#' @seealso [verticalLayout()]
+#' @family layout functions
 #'
 #' @examples
 #' ## Only run examples in interactive R sessions
@@ -462,6 +466,8 @@ inputPanel <- function(...) {
 #'   values as pixels.
 #' @param cellArgs Any additional attributes that should be used for each cell
 #'   of the layout.
+#'
+#' @family layout functions
 #'
 #' @examples
 #' ## Only run examples in interactive R sessions

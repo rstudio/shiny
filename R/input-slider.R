@@ -70,6 +70,10 @@
 #' # Complete app with UI and server components
 #' shinyApp(ui, server)
 #' }
+#'
+#' @section Server value:
+#' A number, or in the case of slider range, a vector of two numbers.
+#'
 #' @export
 sliderInput <- function(inputId, label, min, max, value, step = NULL,
                         round = FALSE, format = NULL, locale = NULL,

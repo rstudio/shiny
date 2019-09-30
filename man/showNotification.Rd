@@ -9,7 +9,7 @@ showNotification(ui, action = NULL, duration = 5, closeButton = TRUE,
   id = NULL, type = c("default", "message", "warning", "error"),
   session = getDefaultReactiveDomain())
 
-removeNotification(id = NULL, session = getDefaultReactiveDomain())
+removeNotification(id, session = getDefaultReactiveDomain())
 }
 \arguments{
 \item{ui}{Content of message.}
@@ -26,11 +26,13 @@ disappear.}
 \item{closeButton}{If \code{TRUE}, display a button which will make the
 notification disappear when clicked. If \code{FALSE} do not display.}
 
-\item{id}{An ID string. This can be used to change the contents of an
-existing message with \code{showNotification}, or to remove it with
-\code{removeNotification}. If not provided, one will be generated
-automatically. If an ID is provided and there does not currently exist a
-notification with that ID, a new notification will be created with that ID.}
+\item{id}{A unique identifier for the notification.
+
+\code{id} is optional for \code{showNotification()}: Shiny will automatically create
+one if needed. If you do supply it, Shiny will update an existing
+notification if it exists, otherwise it will create a new one.
+
+\code{id} is required for \code{removeNotification()}.}
 
 \item{type}{A string which controls the color of the notification. One of
 "default" (gray), "message" (blue), "warning" (yellow), or "error" (red).}

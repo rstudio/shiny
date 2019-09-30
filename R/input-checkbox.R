@@ -22,6 +22,10 @@
 #' }
 #' shinyApp(ui, server)
 #' }
+#'
+#' @section Server value:
+#' `TRUE` if checked, `FALSE` otherwise.
+#'
 #' @export
 checkboxInput <- function(inputId, label, value = FALSE, width = NULL) {
 

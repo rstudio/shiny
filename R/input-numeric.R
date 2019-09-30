@@ -24,6 +24,10 @@
 #' }
 #' shinyApp(ui, server)
 #' }
+#'
+#' @section Server value:
+#' A numeric vector of length 1.
+#'
 #' @export
 numericInput <- function(inputId, label, value, min = NA, max = NA, step = NA,
   width = NULL) {

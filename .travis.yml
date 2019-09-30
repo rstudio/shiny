@@ -13,12 +13,12 @@ matrix:
       script: ./tools/checkJSCurrent.sh
       node_js:
         - "10"
-    - name: "Old Release Check"
-      r: oldrel
-    - name: "Current Release Check"
-      r: release
-    - name: "Development Release Check"
-      r: devel
+    - r: 3.2
+    - r: 3.3
+    - r: 3.4
+    - r: 3.5
+    - r: release
+    - r: devel
 sudo: false
 cache: packages
 notifications:

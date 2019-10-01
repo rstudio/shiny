@@ -799,14 +799,19 @@ buildTabItem <- function(index, tabsetId, foundSelected, tabs = NULL,
 #' @param container a function to generate an HTML element to contain the text
 #' @param inline use an inline (`span()`) or block container (`div()`)
 #'   for the output
+#' @param class Additional CSS classes to apply to the container, if any.
+#' @param ... Additional arguments to apply to the container, if any.
 #' @return A text output element that can be included in a panel
 #' @details Text is HTML-escaped prior to rendering. This element is often used
 #'   to display [renderText] output variables.
 #' @examples
 #' h3(textOutput("caption"))
 #' @export
-textOutput <- function(outputId, container = if (inline) span else div, inline = FALSE) {
-  container(id = outputId, class = "shiny-text-output")
+textOutput <- function(outputId, container = if (inline) span else div,
+                       inline = FALSE, class = NULL, ...) {
+  container(id = outputId,
+            class = paste(c("shiny-text-output", class), collapse = " "),
+            ...)
 }
 
 #' Create a verbatim text output element
@@ -817,6 +822,8 @@ textOutput <- function(outputId, container = if (inline) span else div, inline =
 #' @param placeholder if the output is empty or `NULL`, should an empty
 #'   rectangle be displayed to serve as a placeholder? (does not affect
 #'   behavior when the the output in nonempty)
+#' @param class Additional CSS classes to apply to the pre tag, if any.
+#' @param ... Additional arguments to apply to the pre tag, if any.
 #' @return A verbatim text output element that can be included in a panel
 #' @details Text is HTML-escaped prior to rendering. This element is often used
 #'   with the [renderPrint] function to preserve fixed-width formatting
@@ -837,11 +844,12 @@ textOutput <- function(outputId, container = if (inline) span else div, inline =
 #'   )
 #' }
 #' @export
-verbatimTextOutput <- function(outputId, placeholder = FALSE) {
+verbatimTextOutput <- function(outputId, placeholder = FALSE, class = NULL, ...) {
   pre(id = outputId,
-      class = paste(c("shiny-text-output", if (!placeholder) "noplaceholder"),
-                    collapse = " ")
-      )
+      class = paste(c("shiny-text-output", if (!placeholder) "noplaceholder", class),
+                    collapse = " "),
+      ...
+  )
 }
 
 
@@ -853,7 +861,7 @@ imageOutput <- function(outputId, width = "100%", height="400px",
                         hover = NULL, hoverDelay = NULL, hoverDelayType = NULL,
                         brush = NULL,
                         clickId = NULL, hoverId = NULL,
-                        inline = FALSE) {
+                        inline = FALSE, style = NULL, class = NULL, ...) {
 
   if (!is.null(clickId)) {
     shinyDeprecated(
@@ -885,16 +893,21 @@ imageOutput <- function(outputId, width = "100%", height="400px",
     hover <- hoverOpts(id = hover, delay = hoverDelay, delayType = hoverDelayType)
   }
 
-  style <- if (!inline) {
-    paste("width:", validateCssUnit(width), ";", "height:", validateCssUnit(height))
+  if (!inline) {
+    style <- paste(
+      "width:", validateCssUnit(width), ";",
+      "height:", validateCssUnit(height), ";",
+      style
+    )
   }
 
 
   # Build up arguments for call to div() or span()
   args <- list(
     id = outputId,
-    class = "shiny-image-output",
-    style = style
+    class = paste(c("shiny-image-output", class), collapse = " "),
+    style = style,
+    ...
   )
 
   # Given a named list with options, replace names like "delayType" with
@@ -1013,6 +1026,7 @@ imageOutput <- function(outputId, width = "100%", height="400px",
 #'   `imageOutput`/`plotOutput` calls may share the same `id`
 #'   value; brushing one image or plot will cause any other brushes with the
 #'   same `id` to disappear.
+#' @param style Additional CSS styles to apply to the container, if any.
 #' @inheritParams textOutput
 #' @note The arguments `clickId` and `hoverId` only work for R base graphics
 #'   (see the \pkg{\link[graphics:graphics-package]{graphics}} package). They do
@@ -1186,14 +1200,14 @@ plotOutput <- function(outputId, width = "100%", height="400px",
                        hover = NULL, hoverDelay = NULL, hoverDelayType = NULL,
                        brush = NULL,
                        clickId = NULL, hoverId = NULL,
-                       inline = FALSE) {
+                       inline = FALSE, style = NULL, class = NULL, ...) {
 
   # Result is the same as imageOutput, except for HTML class
   res <- imageOutput(outputId, width, height, click, dblclick,
                      hover, hoverDelay, hoverDelayType, brush,
-                     clickId, hoverId, inline)
+                     clickId, hoverId, inline, style, ...)
 
-  res$attribs$class <- "shiny-plot-output"
+  res$attribs$class <- paste(c("shiny-plot-output", class), collapse = " ")
   res
 }
 
@@ -1205,6 +1219,8 @@ plotOutput <- function(outputId, width = "100%", height="400px",
 #' interactive table with more features.
 #'
 #' @param outputId output variable to read the table from
+#' @param class Additional CSS classes to apply to the div tag, if any.
+#' @param ... Additional arguments to apply to the div tag, if any.
 #' @return A table output element that can be included in a panel
 #'
 #' @seealso [renderTable()], [renderDataTable()].
@@ -1241,8 +1257,8 @@ plotOutput <- function(outputId, width = "100%", height="400px",
 #'   )
 #' }
 #' @export
-tableOutput <- function(outputId) {
-  div(id = outputId, class="shiny-html-output")
+tableOutput <- function(outputId, class = NULL, ...) {
+  div(id = outputId, class = paste(c("shiny-html-output", class), collapse = " "), ...)
 }
 
 dataTableDependency <- list(
@@ -1259,9 +1275,9 @@ dataTableDependency <- list(
 
 #' @rdname tableOutput
 #' @export
-dataTableOutput <- function(outputId) {
+dataTableOutput <- function(outputId, class = NULL, ...) {
   attachDependencies(
-    div(id = outputId, class="shiny-datatable-output"),
+    div(id = outputId, class = paste(c("shiny-datatable-output", class), collapse = " "), ...),
     dataTableDependency
   )
 }
@@ -1289,12 +1305,12 @@ dataTableOutput <- function(outputId) {
 #' )
 #' @export
 htmlOutput <- function(outputId, inline = FALSE,
-  container = if (inline) span else div, ...)
+  container = if (inline) span else div, class = NULL, ...)
 {
   if (anyUnnamed(list(...))) {
     warning("Unnamed elements in ... will be replaced with dynamic UI.")
   }
-  container(id = outputId, class="shiny-html-output", ...)
+  container(id = outputId, class = paste(c("shiny-html-output", class), collapse = " "), ...)
 }
 
 #' @rdname htmlOutput
@@ -1337,7 +1353,7 @@ downloadButton <- function(outputId,
                            label="Download",
                            class=NULL, ...) {
   aTag <- tags$a(id=outputId,
-                 class=paste('btn btn-default shiny-download-link', class),
+                 class=paste(c('btn btn-default shiny-download-link', class), collapse = " "),
                  href='',
                  target='_blank',
                  download=NA,
@@ -1416,7 +1432,7 @@ icon <- function(name, class = NULL, lib = "font-awesome") {
     iconClass <- paste0(prefix_class, " ", prefix, "-", name)
   }
   if (!is.null(class))
-    iconClass <- paste(iconClass, class)
+    iconClass <- paste(c(iconClass, class), collapse = " ")
 
   iconTag <- tags$i(class = iconClass)
 

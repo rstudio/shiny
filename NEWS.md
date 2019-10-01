@@ -7,6 +7,16 @@ shiny 1.3.2.9001
 
 ### Improvements
 
+* Added `class` and `...` arguments to `*Output` functions, so that these functions
+  can take more controlls on the outputs' containers (generally `div` or `span`).
+
+* Added `style` arguments to `plotOutput` and `imageOutput`, so that addtional CSS
+  styles can be applied to them.
+
+* Resolved inconsitency in `class` argument among `downloadButton()`, `downloadLink()` and `icon()`.
+  The `class` argument can be a character vector for `downloadLink()`, but not for others.
+  Now all of them accepts a vector.
+
 * Resolved [#2402](https://github.com/rstudio/shiny/issues/2402): An informative warning is now thrown for mis-specified (date) strings in `dateInput()`, `updateDateInput()`, `dateRangeInput()`, and `updateDateRangeInput()`. ([#2403](https://github.com/rstudio/shiny/pull/2403))
 
 * If the `shiny.autoload.r` option is set to `TRUE`, all files ending in `.r` or `.R` contained in a directory named `R/` adjacent to your application are sourced when your app is started. This will become the default Shiny behavior in a future release ([#2547](https://github.com/rstudio/shiny/pull/2547))

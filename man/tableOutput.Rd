@@ -5,12 +5,16 @@
 \alias{dataTableOutput}
 \title{Create a table output element}
 \usage{
-tableOutput(outputId)
+tableOutput(outputId, class = NULL, ...)
 
-dataTableOutput(outputId)
+dataTableOutput(outputId, class = NULL, ...)
 }
 \arguments{
 \item{outputId}{output variable to read the table from}
+
+\item{class}{Additional CSS classes to apply to the div tag, if any.}
+
+\item{...}{Additional arguments to apply to the div tag, if any.}
 }
 \value{
 A table output element that can be included in a panel

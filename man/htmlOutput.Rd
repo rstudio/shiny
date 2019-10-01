@@ -6,10 +6,10 @@
 \title{Create an HTML output element}
 \usage{
 htmlOutput(outputId, inline = FALSE, container = if (inline) span else
-  div, ...)
+  div, class = NULL, ...)
 
 uiOutput(outputId, inline = FALSE, container = if (inline) span else
-  div, ...)
+  div, class = NULL, ...)
 }
 \arguments{
 \item{outputId}{output variable to read the value from}
@@ -18,6 +18,8 @@ uiOutput(outputId, inline = FALSE, container = if (inline) span else
 for the output}
 
 \item{container}{a function to generate an HTML element to contain the text}
+
+\item{class}{Additional CSS classes to apply to the container, if any.}
 
 \item{...}{Other arguments to pass to the container tag function. This is
 useful for providing additional classes for the tag.}

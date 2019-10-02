@@ -5,6 +5,9 @@
 # those pages for releases from 1.4 onward.  Prior to 1.4, staticdocs from
 # https://github.com/r-lib/pkgdown/releases/tag/old was used and
 # inst/staticdocs/index.r was its configuration.
+template:
+  # NOTE: These templates live in shiny-dev-center
+  path: _pkgdown_templates
 reference:
   - title: UI Layout
     desc: Functions for laying out the user interface for your application.

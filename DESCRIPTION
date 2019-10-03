@@ -164,6 +164,7 @@ Collate:
     'snapshot.R'
     'tar.R'
     'test-export.R'
+    'test-module.R'
     'timer.R'
     'update-input.R'
 RoxygenNote: 6.1.1

@@ -135,6 +135,7 @@ reference:
       - freezeReactiveValue
   - title: Boilerplate
     desc: Functions that are required boilerplate in ui.R and server.R.
+    contents:
       - shinyUI
       - shinyServer
   - title: Running

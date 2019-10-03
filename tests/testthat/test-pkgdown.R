@@ -21,7 +21,7 @@ test_that("All man pages have an entry in _pkgdown.yml", {
   ## Known not to be indexed
   known_unindexed <- c("shiny-package", "stacktrace", "knitr_methods",
                        "pageWithSidebar", "headerPanel", "shiny.appobj",
-                       "deprecatedReactives")
+                       "deprecatedReactives", "shinyServer", "shinyUI")
 
   ## This test ensures that every documented topic is included in
   ## staticdocs/index.r, unless explicitly waived by specifying it

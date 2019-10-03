@@ -33,7 +33,7 @@ test_that("All man pages have an entry in _pkgdown.yml", {
       paste("  ", missing, sep = "", collapse = "\n"),
       sep = ""))
   expect_equal(length(unknown), 0,
-    info = paste("Unrecognized functions in _pkgdown.yaml:\n",
+    info = paste("Unrecognized functions in _pkgdown.yml:\n",
       paste("  ", unknown, sep = "", collapse = "\n"),
       sep = ""))
 })

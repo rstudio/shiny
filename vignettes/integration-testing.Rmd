@@ -1,0 +1,94 @@
+---
+title: "Integration Testing in Shiny"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteIndexEntry{Your Vignette Title}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Introduction to Inspecting Modules
+
+First, we'll define a simple Shiny module:
+
+```{r}
+library(shiny)
+module <- function(input, output, session) {
+  r <- reactive({
+    2 * input$x
+  })
+
+  output$txt <- renderText({
+    r()
+  })
+}
+```
+
+This module
+  - depends on one input (`x`)
+  - has an intermediate, internal reactive (`r`)
+  - and updates an output (`txt`) reactively. 
+  
+It would be nice to write tests that confirm that the module behaves the way we expect. We can do so using the `testModule` function.
+
+```{r}
+testModule(module, {
+  cat("Initially, input$x is NULL, right?", is.null(input$x), "\n")
+  
+  # Give input$x a value.
+  input$x <- 1
+  
+  cat("Now that x is set to 1, r is: ", r(), "\n")
+  cat("\tand output$txt is: ", output$txt(), "\n")
+
+  # Now update input$x to a new value
+  input$x <- 2
+  
+  cat("After updating x to 2, r is: ", r(), "\n")
+  cat("\tand output$txt is: ", output$txt(), "\n")
+})
+```
+
+There are a couple of things to notice in this example. First, you'll need to give values to any inputs that you want to be defined; by default, they're all `NULL`. You can either do this in-line as we've done above, or by specifying a value for the `initialState` parameter of the `testModule` function.
+
+Second, you may have noticed that we have parenthesis when printing `output$txt`. You're probably used to referencing outputs without parenthesis, but outputs are actually `<shiny.render.function>`s so you'll need to evaluate them in order to compare them.
+
+## Automated Tests
+
+Realistically, you don't want to just print the values for manual inspection, you'll want to leverage them in automated tests. That way, we'll be able to build up a collection of tests that we can run against our module in the future to confirm that it always behaves correctly. You can use whatever testing framework you'd like (or none a all!), but we'll use the `expect_*` functions from the testthat package in this example.
+
+```{r}
+# Bring in testthat just for its expectations
+suppressWarnings(library(testthat))
+
+testModule(module, {
+  expect_equal(r(), 2)
+  expect_equal(output$txt(), "2")
+
+  input$x <- 2
+
+  expect_equal(r(), 4)
+  expect_equal(output$txt(), "4")
+}, initialState = list(x=1))
+```
+
+If there's no error, then we know our tests ran successfully. If there were a bug, we'd see an error printed. For example:
+
+```{r}
+# Bring in testthat just for its expectations
+suppressWarnings(library(testthat))
+
+tryCatch({
+  testModule(module, {
+    # Note that we didn't ever specify the initial state, so this expectation will fail.
+    expect_equal(r(), 2)
+  })
+}, error=function(e){
+  print("There was an error!")
+  print(e)
+})
+```

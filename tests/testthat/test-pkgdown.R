@@ -1,7 +1,7 @@
 context("pkgdown")
 
 get_exported <- function() {
-  if ('pkgload' %in% installed.packages() && pkgload::is_dev_package('shiny')) {
+  if ('pkgload' %in% installed.packages() && eval(as.symbol("::"))(pkgload, is_dev_package)('shiny')) {
     # We're running tests on a source tree, likely by devtools::test()
     sub("\\.Rd", "", list.files("../../man", pattern = "*.Rd"))
   } else {

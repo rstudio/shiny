@@ -18,19 +18,20 @@ First, we'll define a simple Shiny module:
 ```{r}
 library(shiny)
 module <- function(input, output, session) {
-  r <- reactive({
-    2 * input$x
+  rv <- reactiveValues(x = 0)
+  observe({
+    rv$x <- input$x * 2
   })
-
   output$txt <- renderText({
-    r()
+    paste0("Value: ", rv$x)
   })
 }
 ```
 
 This module
+
   - depends on one input (`x`)
-  - has an intermediate, internal reactive (`r`)
+  - has an intermediate, internal `reactiveValues` (`rv`) which updates reactively
   - and updates an output (`txt`) reactively. 
   
 It would be nice to write tests that confirm that the module behaves the way we expect. We can do so using the `testModule` function.
@@ -42,20 +43,24 @@ testModule(module, {
   # Give input$x a value.
   input$x <- 1
   
-  cat("Now that x is set to 1, r is: ", r(), "\n")
+  cat("Now that x is set to 1, rv$x is: ", rv$x, "\n")
   cat("\tand output$txt is: ", output$txt(), "\n")
 
   # Now update input$x to a new value
   input$x <- 2
   
-  cat("After updating x to 2, r is: ", r(), "\n")
+  cat("After updating x to 2, rv$x is: ", rv$x, "\n")
   cat("\tand output$txt is: ", output$txt(), "\n")
 })
 ```
 
-There are a couple of things to notice in this example. First, you'll need to give values to any inputs that you want to be defined; by default, they're all `NULL`. You can either do this in-line as we've done above, or by specifying a value for the `initialState` parameter of the `testModule` function.
+There are a few things to notice in this example. 
 
-Second, you may have noticed that we have parenthesis when printing `output$txt`. You're probably used to referencing outputs without parenthesis, but outputs are actually `<shiny.render.function>`s so you'll need to evaluate them in order to compare them.
+First, the test expression provided here assumes the existence of some variables -- specifically, `input`, `output`, and `r`. This is safe because the test code provided to `testModule` is run in the module's environment. This means that any parameters passed in to your module (such as `input`, `output`, and `session`) are readily available, as are any intermediate objects or reactives that you define in the module (such as `r`).
+
+Second, you'll need to give values to any inputs that you want to be defined; by default, they're all `NULL`. You can either do this in-line as we've done above, or by specifying a value for the `initialState` parameter of the `testModule` function.
+
+Last, you may have noticed that we have parenthesis when printing `output$txt`. You're probably used to referencing outputs without parenthesis, but outputs are actually `<shiny.render.function>`s so you'll need to evaluate them in order to compare them.
 
 ## Automated Tests
 
@@ -65,28 +70,24 @@ Realistically, you don't want to just print the values for manual inspection, yo
 # Bring in testthat just for its expectations
 suppressWarnings(library(testthat))
 
+# Specify an initial value of x=1 in the `initialState` parameter below
 testModule(module, {
-  expect_equal(r(), 2)
-  expect_equal(output$txt(), "2")
+  expect_equal(rv$x, 2)
+  expect_equal(output$txt(), "Value: 2")
 
   input$x <- 2
-
-  expect_equal(r(), 4)
-  expect_equal(output$txt(), "4")
+  expect_equal(rv$x, 4)
+  expect_equal(output$txt(), "Value: 4")
 }, initialState = list(x=1))
 ```
 
 If there's no error, then we know our tests ran successfully. If there were a bug, we'd see an error printed. For example:
 
 ```{r}
-# Bring in testthat just for its expectations
-suppressWarnings(library(testthat))
-
 tryCatch({
   testModule(module, {
-    # Note that we didn't ever specify the initial state, so this expectation will fail.
-    expect_equal(r(), 2)
-  })
+  expect_equal(rv$x, 99)
+}, initialState = list(x=1))
 }, error=function(e){
   print("There was an error!")
   print(e)

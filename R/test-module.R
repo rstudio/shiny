@@ -35,9 +35,19 @@ testModule <- function(module, expr, args, initialState=NULL) {
   module(session$input, session$output, session)
 
   # Run the test expression in a reactive context and in the module's environment.
-  isolate({
-    eval(expr, session$env)
-  })
+  # We don't need to flush before entering the loop because the first expr that we execute is `{`.
+  # So we'll already flush before we get to the good stuff.
+  for (i in 1:length(expr)){
+    e <- expr[[i]]
+    isolate({
+      eval(e, session$env)
+    })
+
+    flushReact()
+    later::run_now()
+    timerCallbacks$executeElapsed()
+    #session$onFlushed()
+  }
 }
 
 #' Test an app's server-side logic

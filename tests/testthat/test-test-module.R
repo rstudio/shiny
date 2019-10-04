@@ -77,7 +77,7 @@ test_that("testModule handles reactives with complex dependency tree", {
 test_that("testModule handles reactivePoll", {
   module <- function(input, output, session) {
     rv <- reactiveValues(x = 0)
-    rp <- reactivePoll(20, session, function(){ as.numeric(Sys.time()) }, function(){
+    rp <- reactivePoll(50, session, function(){ as.numeric(Sys.time()) }, function(){
       isolate(rv$x <- rv$x + 1)
       as.numeric(Sys.time())
     })
@@ -88,12 +88,12 @@ test_that("testModule handles reactivePoll", {
   testModule(module, {
     expect_equal(rv$x, 1)
 
-    # Have to repeat these on separate lines because we only give `flushReact` a chance to run
-    # in between each line of this expression
-    Sys.sleep(.02)
-    Sys.sleep(.02)
-    Sys.sleep(.02)
-    Sys.sleep(.02)
+    # Have to repeat these on separate lines because we only give `flushReact` a
+    # chance to run in between each line of this expression
+    Sys.sleep(.055) # Pad the sleep a bit to accommodate compute overhead
+    Sys.sleep(.055)
+    Sys.sleep(.055)
+    Sys.sleep(.055)
 
     expect_equal(rv$x, 5)
   })
@@ -102,10 +102,10 @@ test_that("testModule handles reactivePoll", {
 test_that("testModule handles reactiveTimer", {
   module <- function(input, output, session) {
     rv <- reactiveValues(x = 0)
-    rp <- reactiveTimer(20)
 
+    rp <- reactiveTimer(50)
     observe({
-      rp() # Invalidate this block every 20ms
+      rp()
       isolate(rv$x <- rv$x + 1)
     })
   }
@@ -113,19 +113,38 @@ test_that("testModule handles reactiveTimer", {
   testModule(module, {
     expect_equal(rv$x, 1)
 
-    # Have to repeat these on separate lines because we only give `flushReact` a chance to run
-    # in between each line of this expression.
-    Sys.sleep(.02)
-    Sys.sleep(.02)
-    Sys.sleep(.02)
-    Sys.sleep(.02)
+    # Have to repeat these on separate lines because we only give `flushReact` a
+    # chance to run in between each line of this expression.
+    Sys.sleep(.055) # pad the timer interval a bit to accommodate compute overhead
+    Sys.sleep(.055)
+    Sys.sleep(.055)
+    Sys.sleep(.055)
 
     expect_equal(rv$x, 5)
   })
 })
 
 test_that("testModule handles debounce/throttle", {
-  testthat::skip("NYI")
+  module <- function(input, output, session) {
+    rv <- reactiveValues(x = 0)
+    rp <- throttle(reactiveTimer(50), 300)
+
+    observe({
+      rp() # Invalidate this block on the timer
+      isolate(rv$x <- rv$x + 1)
+    })
+  }
+
+  testModule(module, {
+    expect_equal(rv$x, 1)
+
+    # Have to repeat these on separate lines because we only give `flushReact` a
+    # chance to run in between each line of this expression.
+    Sys.sleep(.15) # Won't be ready to fire yet
+    Sys.sleep(.15) # Now should have one
+    Sys.sleep(.15) # Not yet
+    expect_equal(rv$x, 2)
+  })
 })
 
 test_that("testModule handles rendering output correctly", {

@@ -182,6 +182,20 @@ test_that("testModule handles rendering output correctly", {
   #  - plots and such?
 })
 
+test_that("testModule works with async", {
+  testthat::skip("NYI")
+})
+
+test_that("testModule works with output attributes", {
+  # https://github.com/rstudio/shiny/blob/cf330fcd58daa6c32e38387b7f82509ee75f760c/R/shiny.R#L978
+  testthat::skip("NYI")
+})
+
+test_that("testModule handles errors", {
+  # https://github.com/rstudio/shiny/blob/cf330fcd58daa6c32e38387b7f82509ee75f760c/R/shiny.R#L978
+  testthat::skip("NYI")
+})
+
 test_that("testServer works", {
   testthat::skip("NYI")
 })

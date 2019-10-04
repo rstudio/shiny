@@ -31,12 +31,40 @@ testModule <- function(module, expr, args, initialState=NULL) {
 
   # Create the mock session
   # FIXME: session should be mocked to support the invalidateLater interface
+  # FIXME: getDefaultReactiveDomain() should automatically point to session
   session <- new.env(parent=emptyenv())
+
+  # This is undocumented, but the onFlush* methods return a deregistration function
+  flushCBs <- Callbacks$new()
+  session$onFlush <- function(fun, once){
+    if (!isTRUE(once)) {
+      return(flushCBs$register(fun))
+    } else {
+      dereg <- private$flushCBs$register(function() {
+        dereg()
+        fun()
+      })
+      return(dereg)
+    }
+  }
+  flushedCBs <- Callbacks$new()
+  session$onFlushed <- function(fun, once){
+    if (!isTRUE(once)) {
+      return(flushedCBs$register(fun))
+    } else {
+      dereg <- private$flushedCBs$register(function() {
+        dereg()
+        fun()
+      })
+      return(dereg)
+    }
+  }
+
   session$input <- inp
   session$output <- out
 
   # Initialize the module
-  module(session$input, session$output, session)
+  isolate(module(session$input, session$output, session))
 
   # Run the test expression in a reactive context and in the module's environment.
   # We don't need to flush before entering the loop because the first expr that we execute is `{`.
@@ -48,11 +76,12 @@ testModule <- function(module, expr, args, initialState=NULL) {
     })
 
     # FIXME: what else do we need to call here to complete the flush?
+    isolate(flushCBs$invoke(..stacktraceon = TRUE))
     flushReact()
+    isolate(flushedCBs$invoke(..stacktraceon = TRUE))
     later::run_now()
     timerCallbacks$executeElapsed()
     # FIXME: mock out the session$onFlushed behavior
-    #session$onFlushed()
   }
 }
 

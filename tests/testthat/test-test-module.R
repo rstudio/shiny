@@ -48,3 +48,27 @@ test_that("testModule handles timers", {
     expect_equal(rv$x, 2)
   })
 })
+
+test_that("session flush handlers work", {
+  module <- function(input, output, session) {
+    rv <- reactiveValues(x = 0, flushCounter = 0, flushedCounter = 0)
+
+    onFlush(function(){rv$flushCounter <- rv$flushCounter + 1}, once=FALSE, session)
+    onFlushed(function(){rv$flushedCounter <- rv$flushedCounter + 1}, once=FALSE, session)
+
+    observe({
+      rv$x <- input$x * 2
+    })
+  }
+
+  testModule(module, {
+    expect_equal(rv$x, 2)
+    # We're not concerned with the exact values here -- only that they increase
+    fc <- rv$flushCounter
+    fdc <- rv$flushedCounter
+
+    input$x <- 2
+    expect_gt(rv$flushCounter, fc)
+    expect_gt(rv$flushedCounter, fdc)
+  }, initialState = list(x=1))
+})

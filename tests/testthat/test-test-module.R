@@ -27,10 +27,54 @@ test_that("testModule handles observers", {
 })
 
 test_that("testModule handles reactiveVal", {
-  testthat::skip("NYI")
+  module <- function(input, output, session) {
+    x <- reactiveVal(0)
+    observe({
+      x(input$y + input$z)
+    })
+  }
+
+  testModule(module, {
+    expect_equal(x(), 3)
+
+    input$z <- 3
+    expect_equal(x(), 4)
+
+    input$y <- 5
+    expect_equal(x(), 8)
+  }, initialState = list(y=1, z=2))
 })
-test_that("testModule handles reactives with more complex dependency tree", {
-  # multiple inputs as dependencies into a reactive expression
+
+test_that("testModule handles reactives with complex dependency tree", {
+  module <- function(input, output, session) {
+    x <- reactiveValues(x=1)
+    r <- reactive({
+      x$x + input$a + input$b
+    })
+    r2 <- reactive({
+      r() + input$c
+    })
+  }
+
+  testModule(module, {
+    expect_equal(r(), 4)
+    expect_equal(r2(), 7)
+
+    input$a <- 2
+    expect_equal(r(), 5)
+    expect_equal(r2(), 8)
+
+    input$b <- 0
+    expect_equal(r2(), 6)
+    expect_equal(r(), 3)
+
+    input$c <- 4
+    expect_equal(r(), 3)
+    expect_equal(r2(), 7)
+  }, initialState = list(a=1, b=2, c=3))
+})
+
+test_that("testModule handles rendering output correctly", {
   testthat::skip("NYI")
 })
 

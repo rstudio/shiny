@@ -1,6 +1,5 @@
 # TODO:
 #  - implement testServer
-#  - session should be mocked to support the invalidateLater interface
 #  - defineOutput - create a defineOutput method
 #      https://github.com/rstudio/shiny/blob/aa3c1c80f2eccf13e70503cce9413d75c71003a8/R/shiny.R#L2014
 #      Reading from the output: https://github.com/rstudio/shiny/blob/aa3c1c80f2eccf13e70503cce9413d75c71003a8/R/shiny.R#L2022
@@ -74,8 +73,10 @@ testModule <- function(module, expr, args, initialState=NULL) {
 
   session$input <- inp
   session$output <- out
-  session$isEnded <- function(){ FALSE }
-  session$isClosed <- function(){ FALSE }
+  isClosed <- FALSE
+  session$isEnded <- function(){ isClosed }
+  session$isClosed <- function(){ isClosed }
+  session$close <- function(){ isClosed <<- TRUE }
   session$cycleStartAction <- function(callback){ callback() } #FIXME: this is wrong. Will need to be more complex.
   endedCBs <- Callbacks$new()
   session$onEnded <- function(sessionEndedCallback){

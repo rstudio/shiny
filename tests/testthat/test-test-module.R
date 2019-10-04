@@ -73,7 +73,24 @@ test_that("testModule handles invalidateLater", {
 })
 
 test_that("session ended handlers work", {
-  testthat::skip("NYI")
+  module <- function(input, output, session){}
+
+  testModule(module, {
+    rv <- reactiveValues(closed = FALSE)
+    session$onEnded(function(){
+      rv$closed <- TRUE
+    })
+
+    expect_equal(session$isEnded(), FALSE)
+    expect_equal(session$isClosed(), FALSE)
+    expect_false(rv$closed, FALSE)
+
+    session$close()
+
+    expect_equal(session$isEnded(), TRUE)
+    expect_equal(session$isClosed(), TRUE)
+    expect_false(rv$closed, TRUE)
+  })
 })
 
 test_that("session flush handlers work", {

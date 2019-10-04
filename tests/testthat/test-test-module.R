@@ -74,18 +74,75 @@ test_that("testModule handles reactives with complex dependency tree", {
   }, initialState = list(a=1, b=2, c=3))
 })
 
-test_that("testModule handles rendering output correctly", {
-  testthat::skip("NYI")
+test_that("testModule handles reactivePoll", {
+  module <- function(input, output, session) {
+    rv <- reactiveValues(x = 0)
+    rp <- reactivePoll(20, session, function(){ as.numeric(Sys.time()) }, function(){
+      isolate(rv$x <- rv$x + 1)
+      as.numeric(Sys.time())
+    })
+
+    observe({rp()})
+  }
+
+  testModule(module, {
+    expect_equal(rv$x, 1)
+
+    # Have to repeat these on separate lines because we only give `flushReact` a chance to run
+    # in between each line of this expression
+    Sys.sleep(.02)
+    Sys.sleep(.02)
+    Sys.sleep(.02)
+    Sys.sleep(.02)
+
+    expect_equal(rv$x, 5)
+  })
 })
 
-test_that("testModule handles reactivePoll/reactiveTimer", {
-  # Discouraged, so adding support can be best-effort
-  testthat::skip("NYI")
+test_that("testModule handles reactiveTimer", {
+  module <- function(input, output, session) {
+    rv <- reactiveValues(x = 0)
+    rp <- reactiveTimer(20)
+
+    observe({
+      rp() # Invalidate this block every 20ms
+      isolate(rv$x <- rv$x + 1)
+    })
+  }
+
+  testModule(module, {
+    expect_equal(rv$x, 1)
+
+    # Have to repeat these on separate lines because we only give `flushReact` a chance to run
+    # in between each line of this expression.
+    Sys.sleep(.02)
+    Sys.sleep(.02)
+    Sys.sleep(.02)
+    Sys.sleep(.02)
+
+    expect_equal(rv$x, 5)
+  })
 })
-
-
 
 test_that("testModule handles debounce/throttle", {
+  testthat::skip("NYI")
+})
+
+test_that("testModule handles rendering output correctly", {
+  testthat::skip("NYI")
+  #  - defineOutput - create a defineOutput method
+  #      https://github.com/rstudio/shiny/blob/aa3c1c80f2eccf13e70503cce9413d75c71003a8/R/shiny.R#L2014
+  #      Reading from the output: https://github.com/rstudio/shiny/blob/aa3c1c80f2eccf13e70503cce9413d75c71003a8/R/shiny.R#L2022
+  #      allowOutputReads = TRUE - withr::with_option
+  #  - We do need to make outputs automatically reactive; for free we could make the accessor for outputs not require
+  #      evaluation. So expect_equal(output$x, 2) should work.
+  #      Wrap the outputs that are defined in observers to make them reactive
+  #  - Do we want the output to be accessible natively, or some $get() on the output? If we do a get() we could
+  #    do more helpful spy-type things around exec count.
+  #  - plots and such?
+})
+
+test_that("testServer works", {
   testthat::skip("NYI")
 })
 

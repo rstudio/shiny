@@ -1,15 +1,5 @@
 # TODO:
 #  - implement testServer
-#  - defineOutput - create a defineOutput method
-#      https://github.com/rstudio/shiny/blob/aa3c1c80f2eccf13e70503cce9413d75c71003a8/R/shiny.R#L2014
-#      Reading from the output: https://github.com/rstudio/shiny/blob/aa3c1c80f2eccf13e70503cce9413d75c71003a8/R/shiny.R#L2022
-#      allowOutputReads = TRUE - withr::with_option
-#  - We do need to make outputs automatically reactive; for free we could make the accessor for outputs not require
-#      evaluation. So expect_equal(output$x, 2) should work.
-#      Wrap the outputs that are defined in observers to make them reactive
-#  - Do we want the output to be accessible natively, or some $get() on the output? If we do a get() we could
-#    do more helpful spy-type things around exec count.
-#  - plots and such?
 
 #' Test a shiny module
 #' @param module The module under test
@@ -111,7 +101,9 @@ testModule <- function(module, expr, args, initialState=NULL) {
     later::run_now()
   }
 
-  endedCBs$invoke(onError = printError, ..stacktraceon = TRUE)
+  if (!isClosed){
+    session$close()
+  }
 }
 
 #' Test an app's server-side logic

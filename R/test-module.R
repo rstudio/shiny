@@ -40,7 +40,7 @@ testModule <- function(module, expr, args, initialState=NULL) {
     if (!isTRUE(once)) {
       return(flushCBs$register(fun))
     } else {
-      dereg <- private$flushCBs$register(function() {
+      dereg <- flushCBs$register(function() {
         dereg()
         fun()
       })
@@ -52,7 +52,7 @@ testModule <- function(module, expr, args, initialState=NULL) {
     if (!isTRUE(once)) {
       return(flushedCBs$register(fun))
     } else {
-      dereg <- private$flushedCBs$register(function() {
+      dereg <- flushedCBs$register(function() {
         dereg()
         fun()
       })
@@ -81,7 +81,6 @@ testModule <- function(module, expr, args, initialState=NULL) {
     isolate(flushedCBs$invoke(..stacktraceon = TRUE))
     later::run_now()
     timerCallbacks$executeElapsed()
-    # FIXME: mock out the session$onFlushed behavior
   }
 }
 

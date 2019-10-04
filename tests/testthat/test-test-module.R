@@ -51,10 +51,13 @@ test_that("testModule handles timers", {
 
 test_that("session flush handlers work", {
   module <- function(input, output, session) {
-    rv <- reactiveValues(x = 0, flushCounter = 0, flushedCounter = 0)
+    rv <- reactiveValues(x = 0, flushCounter = 0, flushedCounter = 0,
+                         flushOnceCounter = 0, flushedOnceCounter = 0)
 
     onFlush(function(){rv$flushCounter <- rv$flushCounter + 1}, once=FALSE, session)
     onFlushed(function(){rv$flushedCounter <- rv$flushedCounter + 1}, once=FALSE, session)
+    onFlushed(function(){rv$flushOnceCounter <- rv$flushOnceCounter + 1}, once=TRUE, session)
+    onFlushed(function(){rv$flushedOnceCounter <- rv$flushedOnceCounter + 1}, once=TRUE, session)
 
     observe({
       rv$x <- input$x * 2
@@ -70,5 +73,10 @@ test_that("session flush handlers work", {
     input$x <- 2
     expect_gt(rv$flushCounter, fc)
     expect_gt(rv$flushedCounter, fdc)
+
+    # These should have only run once
+    expect_equal(rv$flushOnceCounter, 1)
+    expect_equal(rv$flushedOnceCounter, 1)
+
   }, initialState = list(x=1))
 })

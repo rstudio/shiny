@@ -631,7 +631,7 @@ There are many more minor features, small improvements, and bug fixes than we ca
 
 *    **Code Diagnostics**: if there is an error parsing `ui.R`, `server.R`, `app.R`, or `global.R`, Shiny will search the code for missing commas, extra commas, and unmatched braces, parens, and brackets, and will print out messages pointing out those problems. ([#1126](https://github.com/rstudio/shiny/pull/1126))
 
-*    **Reactlog visualization**: by default, the [`showReactLog()` function](http://shiny.rstudio.com/reference/shiny/latest/showReactLog.html) (which brings up the reactive graph) also displays the time that each reactive and observer were active for:
+*    **Reactlog visualization**: by default, the [`showReactLog()` function](http://shiny.rstudio.com/reference/shiny/latest/reactlog.html) (which brings up the reactive graph) also displays the time that each reactive and observer were active for:
 
       <p align="center">
       <img src="http://shiny.rstudio.com/images/reactlog.png" alt="modal-dialog" width="75%"/>

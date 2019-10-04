@@ -1,3 +1,17 @@
+# TODO:
+#  - implement testServer
+#  - session should be mocked to support the invalidateLater interface
+#  - defineOutput - create a defineOutput method
+#      https://github.com/rstudio/shiny/blob/aa3c1c80f2eccf13e70503cce9413d75c71003a8/R/shiny.R#L2014
+#      Reading from the output: https://github.com/rstudio/shiny/blob/aa3c1c80f2eccf13e70503cce9413d75c71003a8/R/shiny.R#L2022
+#      allowOutputReads = TRUE - withr::with_option
+#  - We do need to make outputs automatically reactive; for free we could make the accessor for outputs not require
+#      evaluation. So expect_equal(output$x, 2) should work.
+#      Wrap the outputs that are defined in observers to make them reactive
+#  - Do we want the output to be accessible natively, or some $get() on the output? If we do a get() we could
+#    do more helpful spy-type things around exec count.
+#  - plots and such?
+
 #' Test a shiny module
 #' @param module The module under test
 #' @param expr Test code containing expectations. The test expression will run
@@ -30,11 +44,9 @@ testModule <- function(module, expr, args, initialState=NULL) {
   out <- list()
 
   # Create the mock session
-  # FIXME: session should be mocked to support the invalidateLater interface
-  # FIXME: getDefaultReactiveDomain() should automatically point to session
   session <- new.env(parent=emptyenv())
 
-  # This is undocumented, but the onFlush* methods return a deregistration function
+  # The onFlush* methods return a deregistration function
   flushCBs <- Callbacks$new()
   session$onFlush <- function(fun, once){
     if (!isTRUE(once)) {
@@ -62,9 +74,23 @@ testModule <- function(module, expr, args, initialState=NULL) {
 
   session$input <- inp
   session$output <- out
+  session$isEnded <- function(){ FALSE }
+  session$isClosed <- function(){ FALSE }
+  session$cycleStartAction <- function(callback){ callback() } #FIXME: this is wrong. Will need to be more complex.
+  endedCBs <- Callbacks$new()
+  session$onEnded <- function(sessionEndedCallback){
+    endedCBs$register(sessionEndedCallback)
+  }
+
+  session$reactlog <- function(logEntry){} # TODO: Needed for mock?
+  session$incrementBusyCount <- function(){} # TODO: Needed for mock?
 
   # Initialize the module
-  isolate(module(session$input, session$output, session))
+  isolate(
+    withReactiveDomain(session,
+      module(session$input, session$output, session)
+    )
+  )
 
   # Run the test expression in a reactive context and in the module's environment.
   # We don't need to flush before entering the loop because the first expr that we execute is `{`.
@@ -72,16 +98,19 @@ testModule <- function(module, expr, args, initialState=NULL) {
   for (i in 1:length(expr)){
     e <- expr[[i]]
     isolate({
+      # withReactiveDomain(...)
       eval(e, session$env)
     })
 
-    # FIXME: what else do we need to call here to complete the flush?
+    # timerCallbacks must run before flushReact.
+    timerCallbacks$executeElapsed()
     isolate(flushCBs$invoke(..stacktraceon = TRUE))
     flushReact()
     isolate(flushedCBs$invoke(..stacktraceon = TRUE))
     later::run_now()
-    timerCallbacks$executeElapsed()
   }
+
+  endedCBs$invoke(onError = printError, ..stacktraceon = TRUE)
 }
 
 #' Test an app's server-side logic

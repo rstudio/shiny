@@ -1,10 +1,13 @@
 context("testModule")
 
-test_that("testModule handles basic reactivity", {
+test_that("testModule handles observers", {
   module <- function(input, output, session) {
-    rv <- reactiveValues(x = 0)
+    rv <- reactiveValues(x = 0, y = 0)
     observe({
       rv$x <- input$x * 2
+    })
+    observe({
+      rv$y <- rv$x
     })
     output$txt <- renderText({
       paste0("Value: ", rv$x)
@@ -12,23 +15,44 @@ test_that("testModule handles basic reactivity", {
   }
 
   testModule(module, {
+    expect_equal(rv$y, 2)
     expect_equal(rv$x, 2)
     expect_equal(output$txt(), "Value: 2")
 
     input$x <- 2
     expect_equal(rv$x, 4)
+    expect_equal(rv$y, 4)
     expect_equal(output$txt(), "Value: 4")
   }, initialState = list(x=1))
 })
 
-test_that("testModule handles timers", {
+test_that("testModule handles reactiveVal", {
+  testthat::skip("NYI")
+})
+test_that("testModule handles reactives with more complex dependency tree", {
+  # multiple inputs as dependencies into a reactive expression
+  testthat::skip("NYI")
+})
+
+test_that("testModule handles reactivePoll/reactiveTimer", {
+  # Discouraged, so adding support can be best-effort
+  testthat::skip("NYI")
+})
+
+
+
+test_that("testModule handles debounce/throttle", {
+  testthat::skip("NYI")
+})
+
+test_that("testModule handles invalidateLater", {
   module <- function(input, output, session) {
     rv <- reactiveValues(x = 0)
     observe({
       isolate(rv$x <- rv$x + 1)
       # We're only testing one invalidation
       if (isolate(rv$x) <= 1){
-        invalidateLater(50, NULL)
+        invalidateLater(50)
       }
     })
   }
@@ -37,16 +61,19 @@ test_that("testModule handles timers", {
     # Should have run once
     expect_equal(rv$x, 1)
 
-    now <- as.numeric(Sys.time()) * 1000
+    # now <- as.numeric(Sys.time()) * 1000
     # wait 80 milliseconds which should give the invalidateLater time to run
     Sys.sleep(0.08)
     # FIXME: I don't like running this myself because it pollutes the code under
     # test. Is there a better way to sleep while not blocking the event loop?
-    later::run_now()
 
     # Should have been incremented again by now.
     expect_equal(rv$x, 2)
   })
+})
+
+test_that("session ended handlers work", {
+  testthat::skip("NYI")
 })
 
 test_that("session flush handlers work", {
@@ -54,10 +81,10 @@ test_that("session flush handlers work", {
     rv <- reactiveValues(x = 0, flushCounter = 0, flushedCounter = 0,
                          flushOnceCounter = 0, flushedOnceCounter = 0)
 
-    onFlush(function(){rv$flushCounter <- rv$flushCounter + 1}, once=FALSE, session)
-    onFlushed(function(){rv$flushedCounter <- rv$flushedCounter + 1}, once=FALSE, session)
-    onFlushed(function(){rv$flushOnceCounter <- rv$flushOnceCounter + 1}, once=TRUE, session)
-    onFlushed(function(){rv$flushedOnceCounter <- rv$flushedOnceCounter + 1}, once=TRUE, session)
+    onFlush(function(){rv$flushCounter <- rv$flushCounter + 1}, once=FALSE)
+    onFlushed(function(){rv$flushedCounter <- rv$flushedCounter + 1}, once=FALSE)
+    onFlushed(function(){rv$flushOnceCounter <- rv$flushOnceCounter + 1}, once=TRUE)
+    onFlushed(function(){rv$flushedOnceCounter <- rv$flushedOnceCounter + 1}, once=TRUE)
 
     observe({
       rv$x <- input$x * 2

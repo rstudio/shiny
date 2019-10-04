@@ -1,6 +1,9 @@
 #' Test a shiny module
 #' @param module The module under test
-#' @param expr Test code containing expectations
+#' @param expr Test code containing expectations. The test expression will run
+#'   in the module's environment, meaning that the module's parameters (e.g.
+#'   `input`, `output`, and `session`) will be available along with any other
+#'   values created inside of the module.
 #' @param args A list of arguments to pass into the module beyond `input`,
 #'   `output`, and `session`.
 #' @param initialState A list describing the initial values for `input`. If no
@@ -27,6 +30,7 @@ testModule <- function(module, expr, args, initialState=NULL) {
   out <- list()
 
   # Create the mock session
+  # FIXME: session should be mocked to support the invalidateLater interface
   session <- new.env(parent=emptyenv())
   session$input <- inp
   session$output <- out
@@ -43,9 +47,11 @@ testModule <- function(module, expr, args, initialState=NULL) {
       eval(e, session$env)
     })
 
+    # FIXME: what else do we need to call here to complete the flush?
     flushReact()
     later::run_now()
     timerCallbacks$executeElapsed()
+    # FIXME: mock out the session$onFlushed behavior
     #session$onFlushed()
   }
 }

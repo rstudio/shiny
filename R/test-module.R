@@ -30,8 +30,6 @@ testModule <- function(module, expr, args, initialState=NULL) {
     inp <- reactiveValues()
   }
 
-  out <- list()
-
   # Create the mock session
   session <- new.env(parent=emptyenv())
 
@@ -61,8 +59,6 @@ testModule <- function(module, expr, args, initialState=NULL) {
     }
   }
 
-  session$input <- inp
-  session$output <- out
   isClosed <- FALSE
   session$isEnded <- function(){ isClosed }
   session$isClosed <- function(){ isClosed }
@@ -72,14 +68,37 @@ testModule <- function(module, expr, args, initialState=NULL) {
   session$onEnded <- function(sessionEndedCallback){
     endedCBs$register(sessionEndedCallback)
   }
+  outputs <- list()
+  session$defineOutput <- function(name, value, label){
+    # FIXME: there's a lot more here e.g. error handling, async, attribute currying
+    # https://github.com/rstudio/shiny/blob/cf330fcd58daa6c32e38387b7f82509ee75f760c/R/shiny.R#L978
+    obs <- observe({
+      outputs[[name]]$val <<- value()
+    })
+
+    outputs[[name]] <<- list(obs = obs, func = value, val = NULL)
+  }
+  session$getOutput <- function(name){
+    # Unlike the real outputs, we're going to return the last value rather than the unevaluated function
+    outputs[[name]]$val
+  }
 
   session$reactlog <- function(logEntry){} # TODO: Needed for mock?
   session$incrementBusyCount <- function(){} # TODO: Needed for mock?
 
+  out <- .createOutputWriter(session)
+  class(out) <- "shinyoutput"
+
+  session$input <- inp
+  session$output <- out
+
   # Initialize the module
   isolate(
-    withReactiveDomain(session,
-      module(session$input, session$output, session)
+    withReactiveDomain(
+      session,
+      withr::with_options(list(`shiny.allowoutputreads`=TRUE), {
+        module(session$input, session$output, session)
+      })
     )
   )
 
@@ -89,8 +108,12 @@ testModule <- function(module, expr, args, initialState=NULL) {
   for (i in 1:length(expr)){
     e <- expr[[i]]
     isolate({
-      # withReactiveDomain(...)
-      eval(e, session$env)
+      withReactiveDomain(
+        session,
+        withr::with_options(list(`shiny.allowoutputreads`=TRUE), {
+          eval(e, session$env)
+        })
+      )
     })
 
     # timerCallbacks must run before flushReact.

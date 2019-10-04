@@ -148,14 +148,35 @@ test_that("testModule handles debounce/throttle", {
 })
 
 test_that("testModule handles rendering output correctly", {
-  testthat::skip("NYI")
-  #  - defineOutput - create a defineOutput method
-  #      https://github.com/rstudio/shiny/blob/aa3c1c80f2eccf13e70503cce9413d75c71003a8/R/shiny.R#L2014
-  #      Reading from the output: https://github.com/rstudio/shiny/blob/aa3c1c80f2eccf13e70503cce9413d75c71003a8/R/shiny.R#L2022
-  #      allowOutputReads = TRUE - withr::with_option
-  #  - We do need to make outputs automatically reactive; for free we could make the accessor for outputs not require
-  #      evaluation. So expect_equal(output$x, 2) should work.
-  #      Wrap the outputs that are defined in observers to make them reactive
+  module <- function(input, output, session) {
+    rv <- reactiveValues(x=0)
+    rp <- reactiveTimer(50)
+    output$txt <- renderText({
+      rp()
+      isolate(rv$x <- rv$x + 1)
+    })
+  }
+
+  testModule(module, {
+    # Timers only tick if they're being observed. If the output weren't being
+    # wrapped in an observer, we'd see the value of rv$x initialize to zero and
+    # only increment when we evaluated the output. e.g.:
+    #
+    # expect_equal(rv$x, 0)
+    # Sys.sleep(1)
+    # expect_equal(rv$x, 0)
+    # output$txt()
+    # expect_equal(rv$x, 1)
+
+    expect_equal(rv$x, 1)
+    expect_equal(output$txt, "1")
+    Sys.sleep(.05)
+    Sys.sleep(.05)
+    expect_gt(rv$x, 1)
+    expect_equal(output$txt, as.character(rv$x))
+  }, initialState = list(x=1))
+
+  # FIXME:
   #  - Do we want the output to be accessible natively, or some $get() on the output? If we do a get() we could
   #    do more helpful spy-type things around exec count.
   #  - plots and such?

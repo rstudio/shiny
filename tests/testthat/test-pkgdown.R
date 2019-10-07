@@ -30,7 +30,7 @@ test_that("All man pages have an entry in _pkgdown.yml", {
   missing <- setdiff(all_topics, c(known_unindexed, indexed_topics))
   unknown <- setdiff(c(known_unindexed, indexed_topics), all_topics)
   expect_equal(length(missing), 0,
-    info = paste("Functions missing from _pkgdown.yaml:\n",
+    info = paste("Functions missing from _pkgdown.yml:\n",
       paste("  ", missing, sep = "", collapse = "\n"),
       sep = ""))
   expect_equal(length(unknown), 0,

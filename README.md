@@ -61,7 +61,7 @@ The Javascript code in Shiny is minified using tools that run on Node.js. See th
 
 ## Guidelines for contributing
 
-We welcome contributions to the **shiny** package. Please see our [CONTRIBUTING.md](CONTRIBUTING.md) file for detailed guidelines of how to contribute.
+We welcome contributions to the **shiny** package. Please see our [CONTRIBUTING.md](https://github.com/rstudio/shiny/blob/master/.github/CONTRIBUTING.md) file for detailed guidelines of how to contribute.
 
 ## License
 

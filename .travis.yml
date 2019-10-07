@@ -20,11 +20,6 @@ matrix:
     - name: "Development Release Check"
       r: devel
 
-r_github_packages:
-  - rstudio/htmltools@rc-v0.4.0
-  - rstudio/promises@rc-v1.1.0
-  - r-lib/later@rc-v1.0.0
-
 sudo: false
 cache: packages
 notifications:

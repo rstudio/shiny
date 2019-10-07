@@ -17,12 +17,12 @@ test_that("testModule handles observers", {
   testModule(module, {
     expect_equal(rv$y, 2)
     expect_equal(rv$x, 2)
-    expect_equal(output$txt(), "Value: 2")
+    expect_equal(output$txt, "Value: 2")
 
     input$x <- 2
     expect_equal(rv$x, 4)
     expect_equal(rv$y, 4)
-    expect_equal(output$txt(), "Value: 4")
+    expect_equal(output$txt, "Value: 4")
   }, initialState = list(x=1))
 })
 

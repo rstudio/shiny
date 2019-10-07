@@ -15,6 +15,7 @@ get_indexed <- function(f = system.file('_pkgdown.yml', package = 'shiny')) {
 }
 
 test_that("All man pages have an entry in _pkgdown.yml", {
+  skip_on_cran()
   indexed_topics <- get_indexed()
   all_topics     <- get_exported()
 

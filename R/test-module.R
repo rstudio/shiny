@@ -1,6 +1,33 @@
 # TODO:
 #  - implement testServer
 
+# Promise helpers taken from:
+#   https://github.com/rstudio/promises/blob/master/tests/testthat/common.R
+# Block until all pending later tasks have executed
+# FIXME: will this work with multiple promises pending in parallel?
+wait_for_it <- function() {
+  while (!later::loop_empty()) {
+    later::run_now()
+    Sys.sleep(0.1)
+  }
+}
+
+# Block until the promise is resolved/rejected. If resolved, return the value.
+# If rejected, throw (yes throw, not return) the error.
+extract <- function(promise) {
+  promise_value <- NULL
+  error <- NULL
+  promise %...>%
+    (function(value) promise_value <<- value) %...!%
+    (function(reason) error <<- reason)
+
+  wait_for_it()
+  if (!is.null(error))
+    stop(error)
+  else
+    promise_value
+}
+
 #' Test a shiny module
 #' @param module The module under test
 #' @param expr Test code containing expectations. The test expression will run
@@ -80,7 +107,12 @@ testModule <- function(module, expr, args, initialState=NULL) {
   }
   session$getOutput <- function(name){
     # Unlike the real outputs, we're going to return the last value rather than the unevaluated function
-    outputs[[name]]$val
+    res <- outputs[[name]]$val
+    if (promises::is.promising(res)){
+      extract(res)
+    } else {
+      res
+    }
   }
 
   session$reactlog <- function(logEntry){} # TODO: Needed for mock?

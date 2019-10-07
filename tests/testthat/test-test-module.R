@@ -183,7 +183,24 @@ test_that("testModule handles rendering output correctly", {
 })
 
 test_that("testModule works with async", {
-  testthat::skip("NYI")
+  library(promises)
+  library(future)
+  plan(multisession)
+
+  module <- function(input, output, session) {
+    print(input$x)
+    output$txt <- renderText({
+      future({ 1:input$x }) %...>%
+        max()
+    })
+  }
+
+  testModule(module, {
+    print(input$x)
+    print(str(output$txt))
+    expect_equal(output$txt, "1")
+  }, initialState = list(x=1))
+
 })
 
 test_that("testModule works with output attributes", {

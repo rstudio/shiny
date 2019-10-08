@@ -1,5 +1,9 @@
 context("testModule")
 
+library(promises)
+library(future)
+plan(multisession)
+
 test_that("testModule handles observers", {
   module <- function(input, output, session) {
     rv <- reactiveValues(x = 0, y = 0)
@@ -183,10 +187,6 @@ test_that("testModule handles rendering output correctly", {
 })
 
 test_that("testModule works with async", {
-  library(promises)
-  library(future)
-  plan(multisession)
-
   module <- function(input, output, session) {
     output$txt <- renderText({
       val <- input$x
@@ -217,6 +217,42 @@ test_that("testModule works with async", {
     # Error still thrown
     expect_error(output$error, "error here")
   }, initialState = list(x=1))
+})
+
+test_that("testModule works with multiple promises in parallel", {
+  module <- function(input, output, session) {
+    output$txt1 <- renderText({
+      future({
+        Sys.sleep(1)
+        1
+      })
+    })
+
+    output$txt2 <- renderText({
+      future({
+        Sys.sleep(1)
+        2
+      })
+    })
+  }
+
+  testModule(module, {
+    # As we enter this test code, the promises will still be running in the background.
+    # We'll need to give them ~2s (plus overhead) to complete
+    startMS <- as.numeric(Sys.time()) * 1000
+    expect_equal(output$txt1, "1") # This first call will block waiting for the promise to return
+    expect_equal(output$txt2, "2")
+    expect_equal(output$txt2, "2") # Now that we have the values, access should not incur a 1s delay.
+    expect_equal(output$txt1, "1")
+    expect_equal(output$txt1, "1")
+    expect_equal(output$txt2, "2")
+    endMS <- as.numeric(Sys.time()) * 1000
+
+    # We'll pad quite a bit because promises can introduce some lag. But the point we're trying
+    # to prove is that we're not hitting a 1s delay for each output access, which = 6000ms. If we're
+    # under that, then things are likely working.
+    expect_lt(endMS - startMS, 4000)
+  })
 })
 
 test_that("testModule works with output attributes", {

@@ -188,19 +188,35 @@ test_that("testModule works with async", {
   plan(multisession)
 
   module <- function(input, output, session) {
-    print(input$x)
     output$txt <- renderText({
-      future({ 1:input$x }) %...>%
-        max()
+      val <- input$x
+      future({ val })
+    })
+
+    output$error <- renderText({
+      future({ stop("error here") })
+    })
+
+    output$sync <- renderText({
+      # No promises here
+      "abc"
     })
   }
 
   testModule(module, {
-    print(input$x)
-    print(str(output$txt))
     expect_equal(output$txt, "1")
-  }, initialState = list(x=1))
+    expect_equal(output$sync, "abc")
 
+    # Error gets thrown repeatedly
+    expect_error(output$error, "error here")
+    expect_error(output$error, "error here")
+
+    # Responds reactively
+    input$x <- 2
+    expect_equal(output$txt, "2")
+    # Error still thrown
+    expect_error(output$error, "error here")
+  }, initialState = list(x=1))
 })
 
 test_that("testModule works with output attributes", {

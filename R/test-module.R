@@ -100,18 +100,36 @@ testModule <- function(module, expr, args, initialState=NULL) {
     # FIXME: there's a lot more here e.g. error handling, async, attribute currying
     # https://github.com/rstudio/shiny/blob/cf330fcd58daa6c32e38387b7f82509ee75f760c/R/shiny.R#L978
     obs <- observe({
-      outputs[[name]]$val <<- value()
+      # We could just stash the promise, but we get an "unhandled promise error". This bypasses
+      v <- value()
+      if (!promises::is.promise(v)){
+        # Make our sync value into a promise
+        prom <- promise(function(resolve, reject){ resolve(v) })
+      } else {
+        prom <- v
+      }
+      outputs[[name]]$promise <<- hybrid_chain(
+        prom,
+        function(v){
+          list(val = v, err = NULL)
+        }, catch=function(e){
+          list(val = NULL, err = e)
+        })
     })
-
-    outputs[[name]] <<- list(obs = obs, func = value, val = NULL)
+    outputs[[name]] <<- list(obs = obs, func = value, promise = NULL)
   }
   session$getOutput <- function(name){
     # Unlike the real outputs, we're going to return the last value rather than the unevaluated function
-    res <- outputs[[name]]$val
-    if (promises::is.promising(res)){
-      extract(res)
+    if (is.null(outputs[[name]]$promise)) {
+      # FIXME
+      stop("Not expected")
+    }
+    # Make promise return
+    v <- extract(outputs[[name]]$promise)
+    if (!is.null(v$err)){
+      stop(v$err)
     } else {
-      res
+      v$val
     }
   }
 

@@ -147,7 +147,7 @@ shinyAppDir_serverR <- function(appDir, options=list()) {
   # change on disk, or are created, or are removed.
 
   # In an upcoming version of shiny, this option will go away and the new behavior will be used.
-  if (getOption("shiny.autoload.r", FALSE)) {
+  if (getOption("shiny.autoload.r", TRUE)) {
     # new behavior
 
     # Create a child env which contains all the helpers and will be the shared parent
@@ -230,7 +230,7 @@ shinyAppDir_serverR <- function(appDir, options=list()) {
     setwd(appDir)
     monitorHandle <<- initAutoReloadMonitor(appDir)
     # TODO: we should support hot reloading on global.R and R/*.R changes.
-    if (getOption("shiny.autoload.r", FALSE)) {
+    if (getOption("shiny.autoload.r", TRUE)) {
       loadSupport(appDir, renv=sharedEnv, globalrenv=globalenv())
     }  else {
       if (file.exists(file.path.ci(appDir, "global.R")))
@@ -314,8 +314,14 @@ initAutoReloadMonitor <- function(dir) {
 #' this function loads any top-level supporting `.R` files in the `R/` directory
 #' adjacent to the `app.R`/`server.R`/`ui.R` files.
 #'
-#' At the moment, this function is "opt-in" and only called if the option
-#' `shiny.autoload.r` is set to `TRUE`.
+#' Since Shiny 1.5.0, this function is called by default when running an
+#' application. If it causes problems, you can opt out by using
+#' `options(shiny.autoload.r=FALSE)`. Note that in a future version of Shiny,
+#' this option will no longer be available. If you set this option, it will
+#' affect any application that runs later in the same R session, potentially
+#' breaking it, so after running your application, you should unset option with
+#' `options(shiny.autoload.r=NULL)`
+#'
 #'
 #' @details The files are sourced in alphabetical order (as determined by
 #'   [list.files]). `global.R` is evaluated before the supporting R files in the
@@ -350,7 +356,7 @@ shinyAppDir_appR <- function(fileName, appDir, options=list())
   fullpath <- file.path.ci(appDir, fileName)
 
   # In an upcoming version of shiny, this option will go away and the new behavior will be used.
-  if (getOption("shiny.autoload.r", FALSE)) {
+  if (getOption("shiny.autoload.r", TRUE)) {
     # new behavior
 
     # Create a child env which contains all the helpers and will be the shared parent
@@ -411,7 +417,7 @@ shinyAppDir_appR <- function(fileName, appDir, options=list())
     oldwd <<- getwd()
     setwd(appDir)
     # TODO: we should support hot reloading on R/*.R changes.
-    if (getOption("shiny.autoload.r", FALSE)) {
+    if (getOption("shiny.autoload.r", TRUE)) {
       loadSupport(appDir, renv=sharedEnv, globalrenv=NULL)
     }
     monitorHandle <<- initAutoReloadMonitor(appDir)

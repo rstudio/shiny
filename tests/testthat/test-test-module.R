@@ -255,13 +255,26 @@ test_that("testModule works with multiple promises in parallel", {
   })
 })
 
+test_that("testModule handles async errors", {
+  # https://github.com/rstudio/shiny/blob/cf330fcd58daa6c32e38387b7f82509ee75f760c/R/shiny.R#L1042-L1063
+  testthat::skip("NYI")
+})
+
+test_that("testModule handles modules with additional arguments", {
+  testthat::skip("NYI")
+})
+
+test_that("testModule exposes the returned value from the module", {
+  testthat::skip("NYI")
+})
+
 test_that("testModule works with output attributes", {
   # https://github.com/rstudio/shiny/blob/cf330fcd58daa6c32e38387b7f82509ee75f760c/R/shiny.R#L978
   testthat::skip("NYI")
 })
 
 test_that("testModule handles errors", {
-  # https://github.com/rstudio/shiny/blob/cf330fcd58daa6c32e38387b7f82509ee75f760c/R/shiny.R#L978
+  # https://github.com/rstudio/shiny/blob/cf330fcd58daa6c32e38387b7f82509ee75f760c/R/shiny.R#L1042-L1063
   testthat::skip("NYI")
 })
 

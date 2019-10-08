@@ -30,8 +30,8 @@ module <- function(input, output, session) {
 
 This module
 
-  - depends on one input (`x`)
-  - has an intermediate, internal `reactiveValues` (`rv`) which updates reactively
+  - depends on one input (`x`),
+  - has an intermediate, internal `reactiveValues` (`rv`) which updates reactively,
   - and updates an output (`txt`) reactively. 
   
 It would be nice to write tests that confirm that the module behaves the way we expect. We can do so using the `testModule` function.
@@ -44,13 +44,13 @@ testModule(module, {
   input$x <- 1
   
   cat("Now that x is set to 1, rv$x is: ", rv$x, "\n")
-  cat("\tand output$txt is: ", output$txt(), "\n")
+  cat("\tand output$txt is: ", output$txt, "\n")
 
   # Now update input$x to a new value
   input$x <- 2
   
   cat("After updating x to 2, rv$x is: ", rv$x, "\n")
-  cat("\tand output$txt is: ", output$txt(), "\n")
+  cat("\tand output$txt is: ", output$txt, "\n")
 })
 ```
 
@@ -58,13 +58,13 @@ There are a few things to notice in this example.
 
 First, the test expression provided here assumes the existence of some variables -- specifically, `input`, `output`, and `r`. This is safe because the test code provided to `testModule` is run in the module's environment. This means that any parameters passed in to your module (such as `input`, `output`, and `session`) are readily available, as are any intermediate objects or reactives that you define in the module (such as `r`).
 
-Second, you'll need to give values to any inputs that you want to be defined; by default, they're all `NULL`. You can either do this in-line as we've done above, or by specifying a value for the `initialState` parameter of the `testModule` function.
+Second, you'll need to give values to any inputs that you want to be defined; by default, they're all `NULL`. You can either do this in-line as we've done above, or by specifying a value for the `initialState` parameter of the `testModule` function as we'll show below.
 
-Last, you may have noticed that we have parenthesis when printing `output$txt`. You're probably used to referencing outputs without parenthesis, but outputs are actually `<shiny.render.function>`s so you'll need to evaluate them in order to compare them.
+Last, you're likely used to assigning to `output`, but here we're reading from `output$txt` in order to check its value. When running inside `testModule`, you can simply reference an output and it will give the value produced by the `render` function.
 
 ## Automated Tests
 
-Realistically, you don't want to just print the values for manual inspection, you'll want to leverage them in automated tests. That way, we'll be able to build up a collection of tests that we can run against our module in the future to confirm that it always behaves correctly. You can use whatever testing framework you'd like (or none a all!), but we'll use the `expect_*` functions from the testthat package in this example.
+Realistically, we don't want to just print the values for manual inspection; we'll want to leverage them in automated tests. That way, we'll be able to build up a collection of tests that we can run against our module in the future to confirm that it always behaves correctly. You can use whatever testing framework you'd like (or none a all!), but we'll use the `expect_*` functions from the testthat package in this example.
 
 ```{r}
 # Bring in testthat just for its expectations
@@ -73,11 +73,11 @@ suppressWarnings(library(testthat))
 # Specify an initial value of x=1 in the `initialState` parameter below
 testModule(module, {
   expect_equal(rv$x, 2)
-  expect_equal(output$txt(), "Value: 2")
+  expect_equal(output$txt, "Value: 2")
 
   input$x <- 2
   expect_equal(rv$x, 4)
-  expect_equal(output$txt(), "Value: 4")
+  expect_equal(output$txt, "Value: 4")
 }, initialState = list(x=1))
 ```
 
@@ -86,10 +86,71 @@ If there's no error, then we know our tests ran successfully. If there were a bu
 ```{r}
 tryCatch({
   testModule(module, {
-  expect_equal(rv$x, 99)
-}, initialState = list(x=1))
+    expect_equal(rv$x, 99)
+  }, initialState = list(x=1))
 }, error=function(e){
   print("There was an error!")
   print(e)
 })
 ```
+
+## Promises
+
+`testModule` can handle promises inside of render functions.
+
+```{r}
+library(promises)
+library(future)
+plan(multisession)
+
+module <- function(input, output, session){
+  output$async <- renderText({
+    # Stash the value since you can't do reactivity inside of a promise. See 
+    # https://rstudio.github.io/promises/articles/shiny.html#shiny-specific-caveats-and-limitations
+    t <- input$times
+    
+    # A promise chain that repeats the letter A and then collapses it into a string.
+    future({ rep("A", times=t) }) %...>%
+      paste(collapse="")
+  })
+}
+
+testModule(module, {
+  # initialState below sets times=3 by default.
+  expect_equal(output$async, "AAA")
+  
+  input$times <- 5
+  expect_equal(output$async, "AAAAA")
+}, initialState = list(times=3))
+```
+
+As you can see, no special precautions were required for a `render` function that uses promises. Behind-the-scenes, the code in `testModule` will block when trying to read from an `output` that returned a promise. This allows you to interact with the outputs in your tests as if they were synchronous.
+
+TODO: What about internal reactives that are promise-based? We don't do anything special for them...
+
+## Modules with additional inputs
+
+TODO.
+Probably something like...
+
+```
+module <- function(input, output, session, arg1, arg2){
+  # ...
+}
+
+testModule(module, {
+  # ...
+}, arg1=val1, arg2=val2)
+```
+
+## Accessing a module's returned value
+
+TODO: probably hang it off of `session$` somewhere.
+
+## Complex Outputs (plots, htmlwidgets)
+
+TODO
+
+## Testing Servers
+
+TODO: Will show that you can pass in a shinyapp object or a server function to a similar function called `testServer` and it will work similarly.

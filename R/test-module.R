@@ -14,6 +14,8 @@ wait_for_it <- function() {
 
 # Block until the promise is resolved/rejected. If resolved, return the value.
 # If rejected, throw (yes throw, not return) the error.
+#' @importFrom promises %...!%
+#' @importFrom promises %...>%
 extract <- function(promise) {
   promise_value <- NULL
   error <- NULL
@@ -104,7 +106,7 @@ testModule <- function(module, expr, args, initialState=NULL) {
       v <- value()
       if (!promises::is.promise(v)){
         # Make our sync value into a promise
-        prom <- promise(function(resolve, reject){ resolve(v) })
+        prom <- promises::promise(function(resolve, reject){ resolve(v) })
       } else {
         prom <- v
       }

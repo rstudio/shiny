@@ -9,7 +9,10 @@ testModule(module, expr, args, initialState = NULL)
 \arguments{
 \item{module}{The module under test}
 
-\item{expr}{Test code containing expectations}
+\item{expr}{Test code containing expectations. The test expression will run
+in the module's environment, meaning that the module's parameters (e.g.
+\code{input}, \code{output}, and \code{session}) will be available along with any other
+values created inside of the module.}
 
 \item{args}{A list of arguments to pass into the module beyond \code{input},
 \code{output}, and \code{session}.}

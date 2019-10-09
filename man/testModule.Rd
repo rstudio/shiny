@@ -4,7 +4,7 @@
 \alias{testModule}
 \title{Test a shiny module}
 \usage{
-testModule(module, expr, args, initialState = NULL)
+testModule(module, expr, args, initialState = NULL, ...)
 }
 \arguments{
 \item{module}{The module under test}
@@ -19,6 +19,8 @@ values created inside of the module.}
 
 \item{initialState}{A list describing the initial values for \code{input}. If no
 initial state is given, \code{input} will initialize as an empty list.}
+
+\item{...}{Additional named arguments to be passed on to the module function.}
 }
 \description{
 Test a shiny module

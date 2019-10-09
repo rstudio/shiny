@@ -130,17 +130,40 @@ TODO: What about internal reactives that are promise-based? We don't do anything
 
 ## Modules with additional inputs
 
-TODO.
-Probably something like...
+`testModule` can also handle modules that accept additional arguments such as this one.
 
-```
+```{r}
 module <- function(input, output, session, arg1, arg2){
-  # ...
+  output$txt1 <- renderText({ arg1 })
+  
+  output$txt2 <- renderText({ arg2 })
+  
+  output$inp <- renderText({ input$x })
 }
+```
 
+Additional arguments should be passed after the test expression as named parameters.
+
+```{r}
+# Works without initialState
 testModule(module, {
-  # ...
-}, arg1=val1, arg2=val2)
+  expect_equal(output$txt1, "val1")
+  expect_equal(output$txt2, "val2")
+}, arg1="val1", arg2="val2")
+  
+# Works with initialState
+testModule(module, {
+  expect_equal(output$txt1, "val1")
+  expect_equal(output$txt2, "val2")
+  expect_equal(output$inp, "abc")
+}, initialState=list(x="abc"), arg1="val1", arg2="val2")
+  
+# Works when initialState is reordered
+testModule(module, {
+  expect_equal(output$txt1, "val1")
+  expect_equal(output$txt2, "val2")
+  expect_equal(output$inp, "abc")
+}, arg1="val1", arg2="val2", initialState=list(x="abc"))
 ```
 
 ## Accessing a module's returned value

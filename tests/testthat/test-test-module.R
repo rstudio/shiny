@@ -261,15 +261,42 @@ test_that("testModule handles async errors", {
 })
 
 test_that("testModule handles modules with additional arguments", {
-  testthat::skip("NYI")
+  module <- function(input, output, session, arg1, arg2){
+    output$txt1 <- renderText({
+      arg1
+    })
+
+    output$txt2 <- renderText({
+      arg2
+    })
+
+    output$inp <- renderText({
+      input$x
+    })
+  }
+
+  # Works without initialState
+  testModule(module, {
+    expect_equal(output$txt1, "val1")
+    expect_equal(output$txt2, "val2")
+  }, arg1="val1", arg2="val2")
+
+  # Works with initialState
+  testModule(module, {
+    expect_equal(output$txt1, "val1")
+    expect_equal(output$txt2, "val2")
+    expect_equal(output$inp, "abc")
+  }, initialState=list(x="abc"), arg1="val1", arg2="val2")
+
+  # Works when reordered
+  testModule(module, {
+    expect_equal(output$txt1, "val1")
+    expect_equal(output$txt2, "val2")
+    expect_equal(output$inp, "abc")
+  }, arg1="val1", arg2="val2", initialState=list(x="abc"))
 })
 
 test_that("testModule exposes the returned value from the module", {
-  testthat::skip("NYI")
-})
-
-test_that("testModule works with output attributes", {
-  # https://github.com/rstudio/shiny/blob/cf330fcd58daa6c32e38387b7f82509ee75f760c/R/shiny.R#L978
   testthat::skip("NYI")
 })
 

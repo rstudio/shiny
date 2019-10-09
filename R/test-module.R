@@ -40,8 +40,9 @@ extract <- function(promise) {
 #'   `output`, and `session`.
 #' @param initialState A list describing the initial values for `input`. If no
 #'   initial state is given, `input` will initialize as an empty list.
+#' @param ... Additional named arguments to be passed on to the module function.
 #' @export
-testModule <- function(module, expr, args, initialState=NULL) {
+testModule <- function(module, expr, args, initialState=NULL, ...) {
   # Capture the environment from the module
   # Inserts `session$env <- environment()` at the top of the function
   fn_body <- body(module)
@@ -144,12 +145,18 @@ testModule <- function(module, expr, args, initialState=NULL) {
   session$input <- inp
   session$output <- out
 
+  # Parse the additional arguments
+  args <- list(...)
+  args[["input"]] <- session$input
+  args[["output"]] <- session$output
+  args[["session"]] <- session
+
   # Initialize the module
   isolate(
     withReactiveDomain(
       session,
       withr::with_options(list(`shiny.allowoutputreads`=TRUE), {
-        module(session$input, session$output, session)
+        do.call(module, args)
       })
     )
   )

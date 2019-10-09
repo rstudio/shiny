@@ -168,7 +168,23 @@ testModule(module, {
 
 ## Accessing a module's returned value
 
-TODO: probably hang it off of `session$` somewhere.
+Some modules return reactive data as an output. For such modules, it can be helpful to test the returned value, as well. The returned value from the module is made available as a property on the mock `session` object as demonstrated in this example.
+
+```{r}
+module <- function(input, output, session){
+    reactive({
+      return(input$a + input$b)
+    })
+  }
+
+  testModule(module, {
+    expect_equal(session$returned(), 3)
+
+    # And retains reactivity
+    input$a <- 2
+    expect_equal(session$returned(), 4)
+  }, initialState = list(a=1, b=2))
+```
 
 ## Complex Outputs (plots, htmlwidgets)
 

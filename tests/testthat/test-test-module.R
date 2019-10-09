@@ -313,7 +313,19 @@ test_that("testModule handles modules with additional arguments", {
 })
 
 test_that("testModule exposes the returned value from the module", {
-  testthat::skip("NYI")
+  module <- function(input, output, session){
+    reactive({
+      return(input$a + input$b)
+    })
+  }
+
+  testModule(module, {
+    expect_equal(session$returned(), 3)
+
+    # And retains reactivity
+    input$a <- 2
+    expect_equal(session$returned(), 4)
+  }, initialState = list(a=1, b=2))
 })
 
 test_that("testModule handles synchronous errors", {

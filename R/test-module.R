@@ -155,12 +155,15 @@ testModule <- function(module, expr, args, initialState=NULL, ...) {
   args[["output"]] <- session$output
   args[["session"]] <- session
 
+  # Store the result of the last evaluated expression so that we can stash the returned value
+  r <- NULL
+
   # Initialize the module
   isolate(
     withReactiveDomain(
       session,
       withr::with_options(list(`shiny.allowoutputreads`=TRUE), {
-        do.call(module, args)
+        session$returned <- do.call(module, args)
       })
     )
   )

@@ -256,8 +256,24 @@ test_that("testModule works with multiple promises in parallel", {
 })
 
 test_that("testModule handles async errors", {
-  # https://github.com/rstudio/shiny/blob/cf330fcd58daa6c32e38387b7f82509ee75f760c/R/shiny.R#L1042-L1063
-  testthat::skip("NYI")
+  module <- function(input, output, session, arg1, arg2){
+    output$err <- renderText({
+      future({ "my error"}) %...>%
+        stop() %...>%
+        print() # Extra steps after the error
+    })
+
+    output$safe <- renderText({
+      future({ safeError("my safe error") }) %...>%
+        stop()
+    })
+  }
+
+  testModule(module, {
+    expect_error(output$err, "my error")
+    # TODO: helper for safe errors so users don't have to learn "shiny.custom.error"?
+    expect_error(output$safe, "my safe error", class="shiny.custom.error")
+  })
 })
 
 test_that("testModule handles modules with additional arguments", {

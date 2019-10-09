@@ -129,8 +129,7 @@ testModule <- function(module, expr, args, initialState=NULL, ...) {
   session$getOutput <- function(name){
     # Unlike the real outputs, we're going to return the last value rather than the unevaluated function
     if (is.null(outputs[[name]]$promise)) {
-      # FIXME
-      stop("Not expected")
+      stop("The test referenced an output that hasn't been defined yet: output$", name)
     }
     # Make promise return
     v <- extract(outputs[[name]]$promise)

@@ -335,7 +335,11 @@ test_that("testModule handles synchronous errors", {
 })
 
 test_that("accessing a non-existant output gives an informative message", {
-  testthat::skip("NYI")
+  module <- function(input, output, session){}
+
+  testModule(module, {
+    expect_error(output$dontexist, "hasn't been defined yet: output\\$dontexist")
+  })
 })
 
 test_that("testServer works", {

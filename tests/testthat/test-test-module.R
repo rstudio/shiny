@@ -300,8 +300,25 @@ test_that("testModule exposes the returned value from the module", {
   testthat::skip("NYI")
 })
 
-test_that("testModule handles errors", {
-  # https://github.com/rstudio/shiny/blob/cf330fcd58daa6c32e38387b7f82509ee75f760c/R/shiny.R#L1042-L1063
+test_that("testModule handles synchronous errors", {
+  module <- function(input, output, session, arg1, arg2){
+    output$err <- renderText({
+      stop("my error")
+    })
+
+    output$safe <- renderText({
+      stop(safeError("my safe error"))
+    })
+  }
+
+  testModule(module, {
+    expect_error(output$err, "my error")
+    # TODO: helper for safe errors so users don't have to learn "shiny.custom.error"?
+    expect_error(output$safe, "my safe error", class="shiny.custom.error")
+  })
+})
+
+test_that("accessing a non-existant output gives an informative message", {
   testthat::skip("NYI")
 })
 

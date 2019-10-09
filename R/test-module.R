@@ -100,17 +100,22 @@ testModule <- function(module, expr, args, initialState=NULL, ...) {
   }
   outputs <- list()
   session$defineOutput <- function(name, value, label){
-    # FIXME: there's a lot more here e.g. error handling, async, attribute currying
-    # https://github.com/rstudio/shiny/blob/cf330fcd58daa6c32e38387b7f82509ee75f760c/R/shiny.R#L978
     obs <- observe({
       # We could just stash the promise, but we get an "unhandled promise error". This bypasses
-      v <- value()
-      if (!promises::is.promise(v)){
-        # Make our sync value into a promise
-        prom <- promises::promise(function(resolve, reject){ resolve(v) })
-      } else {
-        prom <- v
-      }
+      prom <- NULL
+      tryCatch({
+        v <- value()
+        if (!promises::is.promise(v)){
+          # Make our sync value into a promise
+          prom <- promises::promise(function(resolve, reject){ resolve(v) })
+        } else {
+          prom <- v
+        }
+      }, error=function(e){
+        # Error running value()
+        prom <<- promises::promise(function(resolve, reject){ reject(e) })
+      })
+
       outputs[[name]]$promise <<- hybrid_chain(
         prom,
         function(v){

@@ -30,6 +30,28 @@ test_that("testModule handles observers", {
   }, initialState = list(x=1))
 })
 
+test_that("testModule handles more complex expressions", {
+  testthat::skip("Doesn't work")
+  module <- function(input, output, session){
+    rv <- reactiveValues(x=0, y=0)
+    for (i in 1:10) {
+      input$y <- i
+
+      cat("After updating y to ", i, ", rv$y is: ", rv$y, "\n")
+    }
+
+    if (TRUE) {
+      # Now update input$x to a new value
+      input$x <- 2
+      cat("After updating x to 2, rv$x is: ", rv$x, "\n")
+    }
+  }
+
+  testModule(module, {
+
+  })
+})
+
 test_that("testModule handles reactiveVal", {
   module <- function(input, output, session) {
     x <- reactiveVal(0)

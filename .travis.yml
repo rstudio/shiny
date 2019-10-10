@@ -19,6 +19,7 @@ matrix:
     - r: 3.5
     - r: release
     - r: devel
+
 sudo: false
 cache: packages
 notifications:

@@ -457,7 +457,7 @@ function initShiny() {
   initialValues['.clientdata_url_hash'] = window.location.hash;
 
   $(window).on('hashchange', function(e) {
-    inputs.setInput('.clientdata_url_hash', location.hash);
+    inputs.setInput('.clientdata_url_hash', window.location.hash);
   });
 
   // The server needs to know what singletons were rendered as part of

@@ -1,7 +1,7 @@
 Package: shiny
 Type: Package
 Title: Web Application Framework for R
-Version: 1.3.2.9001
+Version: 1.4.0
 Authors@R: c(
     person("Winston", "Chang", role = c("aut", "cre"), email = "winston@rstudio.com"),
     person("Joe", "Cheng", role = "aut", email = "joe@rstudio.com"),
@@ -65,16 +65,16 @@ Depends:
 Imports:
     utils,
     grDevices,
-    httpuv (>= 1.5.1.9002),
+    httpuv (>= 1.5.2),
     mime (>= 0.3),
     jsonlite (>= 0.9.16),
     xtable,
     digest,
-    htmltools (>= 0.3.6.9004),
+    htmltools (>= 0.4.0),
     R6 (>= 2.0),
     sourcetools,
-    later (>= 0.7.2),
-    promises (>= 1.0.1),
+    later (>= 1.0.0),
+    promises (>= 1.1.0),
     tools,
     crayon,
     rlang (>= 0.4.0),
@@ -88,10 +88,8 @@ Suggests:
     rmarkdown,
     ggplot2,
     reactlog (>= 1.0.0),
-    magrittr
-Remotes:
-    rstudio/htmltools,
-    rstudio/httpuv
+    magrittr,
+    yaml
 URL: http://shiny.rstudio.com
 BugReports: https://github.com/rstudio/shiny/issues
 Collate:

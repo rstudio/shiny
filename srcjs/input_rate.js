@@ -238,7 +238,7 @@ var InputNoResendDecorator = function(target, initialValues) {
       return;
     }
     this.lastSentValues[inputName] = { jsonValue, inputType };
-    this.target.setInput(name, value, opts);
+    this.target.setInput(nameType, value, opts);
   };
   this.reset = function(values = {}) {
     // Given an object with flat name-value format:
@@ -281,7 +281,7 @@ var InputEventDecorator = function(target) {
     $(opts.el).trigger(evt);
 
     if (!evt.isDefaultPrevented()) {
-      name = evt.name;
+      let name = evt.name;
       if (evt.inputType !== '') name += ':' + evt.inputType;
 
       // Most opts aren't passed along to lower levels in the input decorator
@@ -345,13 +345,13 @@ var InputDeferDecorator = function(target) {
     if (/^\./.test(nameType))
       this.target.setInput(nameType, value, opts);
     else
-      this.pendingInput[name] = { value, opts };
+      this.pendingInput[nameType] = { value, opts };
   };
   this.submit = function() {
-    for (var name in this.pendingInput) {
-      if (this.pendingInput.hasOwnProperty(name)) {
-        let input = this.pendingInput[name];
-        this.target.setInput(name, input.value, input.opts);
+    for (var nameType in this.pendingInput) {
+      if (this.pendingInput.hasOwnProperty(nameType)) {
+        let { value, opts } = this.pendingInput[nameType];
+        this.target.setInput(nameType, value, opts);
       }
     }
   };

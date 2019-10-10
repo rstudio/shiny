@@ -146,15 +146,13 @@ shinyAppDir_serverR <- function(appDir, options=list()) {
   # Most of the complexity here comes from needing to hot-reload if the .R files
   # change on disk, or are created, or are removed.
 
-  # In an upcoming version of shiny, this option will go away and the new behavior will be used.
+  # In an upcoming version of shiny, this option will go away.
   if (getOption("shiny.autoload.r", TRUE)) {
-    # new behavior
-
     # Create a child env which contains all the helpers and will be the shared parent
     # of the ui.R and server.R load.
     sharedEnv <- new.env(parent = globalenv())
   } else {
-    # old behavior, default
+    # old behavior
     sharedEnv <- globalenv()
   }
 
@@ -355,15 +353,12 @@ shinyAppDir_appR <- function(fileName, appDir, options=list())
 {
   fullpath <- file.path.ci(appDir, fileName)
 
-  # In an upcoming version of shiny, this option will go away and the new behavior will be used.
+  # In an upcoming version of shiny, this option will go away.
   if (getOption("shiny.autoload.r", TRUE)) {
-    # new behavior
-
     # Create a child env which contains all the helpers and will be the shared parent
     # of the ui.R and server.R load.
     sharedEnv <- new.env(parent = globalenv())
   } else {
-    # old behavior, default
     sharedEnv <- globalenv()
   }
 

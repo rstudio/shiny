@@ -11,6 +11,8 @@ shiny 1.4.0.9000
 
 ### Bug fixes
 
+Fixed [#2653](https://github.com/rstudio/shiny/issues/2653): The `dataTableOutput()` could have incorrect output if certain characters were in the column names. ([#2658](https://github.com/rstudio/shiny/pull/2658))
+
 ### Documentation Updates
 
 

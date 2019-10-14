@@ -345,6 +345,56 @@ test_that("testModule handles modules with additional arguments", {
   }, arg1="val1", arg2="val2")
 })
 
+test_that("testModule captures htmlwidgets", {
+  # TODO: use a simple built-in htmlwidget instead of something complex like dygraph
+  if (!requireNamespace("dygraphs")){
+    testthat::skip("dygraphs not available to test htmlwidgets")
+  }
+
+  module <- function(input, output, session){
+    output$dy <- dygraphs::renderDygraph({
+      dygraphs::dygraph(data.frame(outcome=0:5, year=2000:2005))
+    })
+  }
+
+  testthat::skip("Not sure what should be expected output here or how to handle it")
+
+  testModule(module, {
+    output$dy
+  })
+})
+
+test_that("testModule captures base graphics outputs", {
+  testthat::skip("NYI")
+  module <- function(input, output, session){
+    output$base <- renderPlot({
+      plot(1,1)
+    }, width=300, height=300) #TODO: no fixed width/height
+  }
+
+  testModule(module, {
+    output$base
+  })
+})
+
+test_that("testModule captures ggplot2 outputs", {
+  testthat::skip("NYI")
+  if (!requireNamespace("ggplot2")){
+    testthat::skip("ggplot2 not available")
+  }
+
+  module <- function(input, output, session){
+    output$ggplot <- renderPlot({
+      ggplot2::qplot(iris$Sepal.Length, iris$Sepal.Width)
+    })
+
+  }
+
+  testModule(module, {
+
+  })
+})
+
 test_that("testModule exposes the returned value from the module", {
   module <- function(input, output, session){
     reactive({

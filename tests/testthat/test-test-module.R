@@ -19,36 +19,50 @@ test_that("testModule handles observers", {
   }
 
   testModule(module, {
+    session$setInputs(x=1)
     expect_equal(rv$y, 2)
     expect_equal(rv$x, 2)
     expect_equal(output$txt, "Value: 2")
 
-    input$x <- 2
+    session$setInputs(x=2)
     expect_equal(rv$x, 4)
     expect_equal(rv$y, 4)
     expect_equal(output$txt, "Value: 4")
-  }, initialState = list(x=1))
+  })
+})
+
+test_that("inputs aren't directly assignable", {
+  testthat::skip("NYI")
+  module <- function(input, output, session) {
+  }
+
+  testModule(module, {
+    session$setInputs(x = 0)
+    expect_error({ input$x <- 1 })
+    expect_error({ input$y <- 1 })
+  })
 })
 
 test_that("testModule handles more complex expressions", {
   testthat::skip("Doesn't work")
+
   module <- function(input, output, session){
-    rv <- reactiveValues(x=0, y=0)
-    for (i in 1:10) {
-      input$y <- i
-
-      cat("After updating y to ", i, ", rv$y is: ", rv$y, "\n")
-    }
-
-    if (TRUE) {
-      # Now update input$x to a new value
-      input$x <- 2
-      cat("After updating x to 2, rv$x is: ", rv$x, "\n")
-    }
+    output$txt <- renderText({
+      input$x
+    })
   }
 
   testModule(module, {
+    for (i in 1:5){
+      session$setInputs(x=i)
+      expect_equal(output$txt, as.character(i))
+    }
+    expect_equal(output$txt, "5")
 
+    if(TRUE){
+      session$setInputs(x="abc")
+      expect_equal(output$txt, "abc")
+    }
   })
 })
 
@@ -61,14 +75,16 @@ test_that("testModule handles reactiveVal", {
   }
 
   testModule(module, {
+    session$setInputs(y=1, z=2)
+
     expect_equal(x(), 3)
 
-    input$z <- 3
+    session$setInputs(z=3)
     expect_equal(x(), 4)
 
-    input$y <- 5
+    session$setInputs(y=5)
     expect_equal(x(), 8)
-  }, initialState = list(y=1, z=2))
+  })
 })
 
 test_that("testModule handles reactives with complex dependency tree", {
@@ -83,21 +99,22 @@ test_that("testModule handles reactives with complex dependency tree", {
   }
 
   testModule(module, {
+    session$setInputs(a=1, b=2, c=3)
     expect_equal(r(), 4)
     expect_equal(r2(), 7)
 
-    input$a <- 2
+    session$setInputs(a=2)
     expect_equal(r(), 5)
     expect_equal(r2(), 8)
 
-    input$b <- 0
+    session$setInputs(b=0)
     expect_equal(r2(), 6)
     expect_equal(r(), 3)
 
-    input$c <- 4
+    session$setInputs(c=4)
     expect_equal(r(), 3)
     expect_equal(r2(), 7)
-  }, initialState = list(a=1, b=2, c=3))
+  })
 })
 
 test_that("testModule handles reactivePoll", {
@@ -184,6 +201,7 @@ test_that("testModule handles rendering output correctly", {
   }
 
   testModule(module, {
+    session$setInputs(x=1)
     # Timers only tick if they're being observed. If the output weren't being
     # wrapped in an observer, we'd see the value of rv$x initialize to zero and
     # only increment when we evaluated the output. e.g.:
@@ -200,7 +218,7 @@ test_that("testModule handles rendering output correctly", {
     Sys.sleep(.05)
     expect_gt(rv$x, 1)
     expect_equal(output$txt, as.character(rv$x))
-  }, initialState = list(x=1))
+  })
 
   # FIXME:
   #  - Do we want the output to be accessible natively, or some $get() on the output? If we do a get() we could
@@ -226,6 +244,7 @@ test_that("testModule works with async", {
   }
 
   testModule(module, {
+    session$setInputs(x=1)
     expect_equal(output$txt, "1")
     expect_equal(output$sync, "abc")
 
@@ -234,11 +253,11 @@ test_that("testModule works with async", {
     expect_error(output$error, "error here")
 
     # Responds reactively
-    input$x <- 2
+    session$setInputs(x=2)
     expect_equal(output$txt, "2")
     # Error still thrown
     expect_error(output$error, "error here")
-  }, initialState = list(x=1))
+  })
 })
 
 test_that("testModule works with multiple promises in parallel", {
@@ -313,25 +332,10 @@ test_that("testModule handles modules with additional arguments", {
     })
   }
 
-  # Works without initialState
   testModule(module, {
     expect_equal(output$txt1, "val1")
     expect_equal(output$txt2, "val2")
   }, arg1="val1", arg2="val2")
-
-  # Works with initialState
-  testModule(module, {
-    expect_equal(output$txt1, "val1")
-    expect_equal(output$txt2, "val2")
-    expect_equal(output$inp, "abc")
-  }, initialState=list(x="abc"), arg1="val1", arg2="val2")
-
-  # Works when reordered
-  testModule(module, {
-    expect_equal(output$txt1, "val1")
-    expect_equal(output$txt2, "val2")
-    expect_equal(output$inp, "abc")
-  }, arg1="val1", arg2="val2", initialState=list(x="abc"))
 })
 
 test_that("testModule exposes the returned value from the module", {
@@ -342,12 +346,13 @@ test_that("testModule exposes the returned value from the module", {
   }
 
   testModule(module, {
+    session$setInputs(a=1, b=2)
     expect_equal(session$returned(), 3)
 
     # And retains reactivity
-    input$a <- 2
+    session$setInputs(a=2)
     expect_equal(session$returned(), 4)
-  }, initialState = list(a=1, b=2))
+  })
 })
 
 test_that("testModule handles synchronous errors", {
@@ -444,12 +449,13 @@ test_that("session flush handlers work", {
   }
 
   testModule(module, {
+    session$setInputs(x=1)
     expect_equal(rv$x, 2)
     # We're not concerned with the exact values here -- only that they increase
     fc <- rv$flushCounter
     fdc <- rv$flushedCounter
 
-    input$x <- 2
+    session$setInputs(x=2)
     expect_gt(rv$flushCounter, fc)
     expect_gt(rv$flushedCounter, fdc)
 
@@ -457,5 +463,5 @@ test_that("session flush handlers work", {
     expect_equal(rv$flushOnceCounter, 1)
     expect_equal(rv$flushedOnceCounter, 1)
 
-  }, initialState = list(x=1))
+  })
 })

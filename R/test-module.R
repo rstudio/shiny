@@ -42,7 +42,7 @@ extract <- function(promise) {
 #'   initial state is given, `input` will initialize as an empty list.
 #' @param ... Additional named arguments to be passed on to the module function.
 #' @export
-testModule <- function(module, expr, args, initialState=NULL, ...) {
+testModule <- function(module, expr, args, ...) {
   # Capture the environment from the module
   # Inserts `session$env <- environment()` at the top of the function
   fn_body <- body(module)
@@ -52,13 +52,7 @@ testModule <- function(module, expr, args, initialState=NULL, ...) {
 
   # Substitute expr for later evaluation
   expr <- substitute(expr)
-
-  # Cast the initial state to reactive values
-  if (!is.null(initialState)){
-    inp <- do.call(reactiveValues, initialState)
-  } else {
-    inp <- reactiveValues()
-  }
+  inp <- reactiveValues()
 
   # Create the mock session
   session <- new.env(parent=emptyenv())
@@ -139,6 +133,22 @@ testModule <- function(module, expr, args, initialState=NULL, ...) {
       v$val
     }
   }
+  session$setInputs <- function(...){
+    vals <- list(...)
+    # TODO: is there really not a way to access `names` from inside an lapply?
+    lapply(names(vals), function(k){
+      v <- vals[[k]]
+      inp[[k]] <- v
+    })
+
+    # Now flush
+    # timerCallbacks must run before flushReact.
+    timerCallbacks$executeElapsed()
+    isolate(flushCBs$invoke(..stacktraceon = TRUE))
+    flushReact()
+    isolate(flushedCBs$invoke(..stacktraceon = TRUE))
+    later::run_now()
+  }
 
   session$reactlog <- function(logEntry){} # TODO: Needed for mock?
   session$incrementBusyCount <- function(){} # TODO: Needed for mock?
@@ -164,6 +174,15 @@ testModule <- function(module, expr, args, initialState=NULL, ...) {
       session,
       withr::with_options(list(`shiny.allowoutputreads`=TRUE), {
         session$returned <- do.call(module, args)
+
+        # Initial flush
+        # TODO: DRY up with same code in setInput.
+        # timerCallbacks must run before flushReact.
+        timerCallbacks$executeElapsed()
+        isolate(flushCBs$invoke(..stacktraceon = TRUE))
+        flushReact()
+        isolate(flushedCBs$invoke(..stacktraceon = TRUE))
+        later::run_now()
       })
     )
   )
@@ -171,24 +190,14 @@ testModule <- function(module, expr, args, initialState=NULL, ...) {
   # Run the test expression in a reactive context and in the module's environment.
   # We don't need to flush before entering the loop because the first expr that we execute is `{`.
   # So we'll already flush before we get to the good stuff.
-  for (i in 1:length(expr)){
-    e <- expr[[i]]
-    isolate({
-      withReactiveDomain(
-        session,
-        withr::with_options(list(`shiny.allowoutputreads`=TRUE), {
-          eval(e, session$env)
-        })
-      )
-    })
-
-    # timerCallbacks must run before flushReact.
-    timerCallbacks$executeElapsed()
-    isolate(flushCBs$invoke(..stacktraceon = TRUE))
-    flushReact()
-    isolate(flushedCBs$invoke(..stacktraceon = TRUE))
-    later::run_now()
-  }
+  isolate({
+    withReactiveDomain(
+      session,
+      withr::with_options(list(`shiny.allowoutputreads`=TRUE), {
+        eval(expr, session$env)
+      })
+    )
+  })
 
   if (!isClosed){
     session$close()

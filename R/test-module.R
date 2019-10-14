@@ -133,6 +133,14 @@ testModule <- function(module, expr, args, ...) {
       v$val
     }
   }
+  session$flush <- function(){
+    # timerCallbacks must run before flushReact.
+    timerCallbacks$executeElapsed()
+    isolate(flushCBs$invoke(..stacktraceon = TRUE))
+    flushReact()
+    isolate(flushedCBs$invoke(..stacktraceon = TRUE))
+    later::run_now()
+  }
   session$setInputs <- function(...){
     vals <- list(...)
     # TODO: is there really not a way to access `names` from inside an lapply?
@@ -141,17 +149,17 @@ testModule <- function(module, expr, args, ...) {
       inp[[k]] <- v
     })
 
-    # Now flush
-    # timerCallbacks must run before flushReact.
-    timerCallbacks$executeElapsed()
-    isolate(flushCBs$invoke(..stacktraceon = TRUE))
-    flushReact()
-    isolate(flushedCBs$invoke(..stacktraceon = TRUE))
-    later::run_now()
+    session$flush()
   }
 
   session$reactlog <- function(logEntry){} # TODO: Needed for mock?
   session$incrementBusyCount <- function(){} # TODO: Needed for mock?
+
+  curTime <- 0
+  session$elapse <- function(ms){
+    curTime <- curTime + ms
+    session$flush()
+  }
 
   out <- .createOutputWriter(session)
   class(out) <- "shinyoutput"
@@ -176,13 +184,7 @@ testModule <- function(module, expr, args, ...) {
         session$returned <- do.call(module, args)
 
         # Initial flush
-        # TODO: DRY up with same code in setInput.
-        # timerCallbacks must run before flushReact.
-        timerCallbacks$executeElapsed()
-        isolate(flushCBs$invoke(..stacktraceon = TRUE))
-        flushReact()
-        isolate(flushedCBs$invoke(..stacktraceon = TRUE))
-        later::run_now()
+        session$flush()
       })
     )
   )

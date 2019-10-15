@@ -32,14 +32,13 @@ test_that("testModule handles observers", {
 })
 
 test_that("inputs aren't directly assignable", {
-  testthat::skip("NYI")
   module <- function(input, output, session) {
   }
 
   testModule(module, {
     session$setInputs(x = 0)
-    expect_error({ input$x <- 1 })
-    expect_error({ input$y <- 1 })
+    expect_error({ input$x <- 1 }, "Attempted to assign value to a read-only")
+    expect_error({ input$y <- 1 }, "Attempted to assign value to a read-only")
   })
 })
 

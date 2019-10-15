@@ -12,6 +12,8 @@ wait_for_it <- function() {
   }
 }
 
+# TODO: is there a way to get this behavior without exporting these? R6?
+#' @noRd
 #' @export
 `$.mockclientdata` <- function(x, name) {
   if (name == "pixelratio"){
@@ -36,9 +38,11 @@ wait_for_it <- function() {
   return(NULL)
 }
 
+#' @noRd
 #' @export
 `[[.mockclientdata` <- `$.mockclientdata`
 
+#' @noRd
 #' @export
 `[.mockclientdata` <- function(values, name) {
   stop("Single-bracket indexing of mockclientdata is not allowed.")
@@ -84,7 +88,7 @@ testModule <- function(module, expr, args, ...) {
 
   # Substitute expr for later evaluation
   expr <- substitute(expr)
-  inp <- reactiveValues()
+  .input <- ReactiveValues$new(dedupe = FALSE, label = "input")
 
   # Create the mock session
   session <- new.env(parent=emptyenv())
@@ -195,7 +199,7 @@ testModule <- function(module, expr, args, ...) {
     # TODO: is there really not a way to access `names` from inside an lapply?
     lapply(names(vals), function(k){
       v <- vals[[k]]
-      inp[[k]] <- v
+      .input$set(k, v)
     })
 
     session$flush()
@@ -213,7 +217,8 @@ testModule <- function(module, expr, args, ...) {
   out <- .createOutputWriter(session)
   class(out) <- "shinyoutput"
 
-  session$input <- inp
+  # Create a read-only copy of the inputs reactive.
+  session$input <- .createReactiveValues(.input, readonly = TRUE)
   session$output <- out
 
   # Parse the additional arguments

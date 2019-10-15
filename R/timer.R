@@ -96,3 +96,15 @@ scheduleTask <- function(millis, callback) {
     invisible(timerCallbacks$unschedule(id))
   }
 }
+
+#' Get a scheduler function for scheduling tasks. Give priority to the
+#' session scheduler, but if it doesn't exist, use the global one.
+#' @noRd
+defineScheduler <- function(session){
+  if (!is.null(session)){
+    if (!is.null(session$scheduleTask)){
+      return(session$scheduleTask)
+    }
+  }
+  scheduleTask
+}

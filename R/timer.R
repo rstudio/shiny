@@ -62,7 +62,7 @@ BaseTimerCallbacks <- R6Class(
     },
     takeElapsed = function() {
       t <- .now()
-      elapsed <- .times$time < .now()
+      elapsed <- .times$time <= t
       result <- .times[elapsed,]
       .times <<- .times[!elapsed,]
 

@@ -388,7 +388,7 @@ test_that("testModule captures base graphics outputs", {
   module <- function(input, output, session){
     output$fixed <- renderPlot({
       plot(1,1)
-    }, width=300, height=300)
+    }, width=300, height=350)
 
     output$dynamic <- renderPlot({
       plot(1,1)
@@ -399,7 +399,7 @@ test_that("testModule captures base graphics outputs", {
     # We aren't yet able to create reproducible graphics, so this test is intentionally pretty
     # limited.
     expect_equal(output$fixed$width, 300)
-    expect_equal(output$fixed$height, 300)
+    expect_equal(output$fixed$height, 350)
     expect_match(output$fixed$src, "^data:image/png;base64,")
 
     # Ensure that the plot defaults to a reasonable size.
@@ -413,20 +413,29 @@ test_that("testModule captures base graphics outputs", {
 })
 
 test_that("testModule captures ggplot2 outputs", {
-  testthat::skip("NYI")
   if (!requireNamespace("ggplot2")){
     testthat::skip("ggplot2 not available")
   }
 
   module <- function(input, output, session){
-    output$ggplot <- renderPlot({
+    output$fixed <- renderPlot({
+      ggplot2::qplot(iris$Sepal.Length, iris$Sepal.Width)
+    }, width=300, height=350)
+
+    output$dynamic <- renderPlot({
       ggplot2::qplot(iris$Sepal.Length, iris$Sepal.Width)
     })
-
   }
 
   testModule(module, {
+    expect_equal(output$fixed$width, 300)
+    expect_equal(output$fixed$height, 350)
+    expect_match(output$fixed$src, "^data:image/png;base64,")
 
+    # Ensure that the plot defaults to a reasonable size.
+    expect_equal(output$dynamic$width, 600)
+    expect_equal(output$dynamic$height, 400)
+    expect_match(output$dynamic$src, "^data:image/png;base64,")
   })
 })
 

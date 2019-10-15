@@ -205,6 +205,11 @@ testModule <- function(module, expr, args, ...) {
     session$flush()
   }
 
+  session$scheduleTask <- function(millis, callback){
+    browser()
+    scheduleTask(millis, callback)
+  }
+
   session$reactlog <- function(logEntry){} # TODO: Needed for mock?
   session$incrementBusyCount <- function(){} # TODO: Needed for mock?
 

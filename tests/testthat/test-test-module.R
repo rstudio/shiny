@@ -43,8 +43,6 @@ test_that("inputs aren't directly assignable", {
 })
 
 test_that("testModule handles more complex expressions", {
-  testthat::skip("Doesn't work")
-
   module <- function(input, output, session){
     output$txt <- renderText({
       input$x

@@ -52,3 +52,21 @@ test_that("defineScheduler works", {
   expect_identical(defineScheduler(list()), scheduleTask)
   expect_identical(defineScheduler(list(scheduleTask=123)), 123)
 })
+
+test_that("mockableTimer works", {
+  mt <- MockableTimerCallbacks$new()
+  called <- FALSE
+  mt$schedule(50, function(){
+    called <<- TRUE
+  })
+  expect_false(mt$executeElapsed())
+
+  # Prove that we're not bound to a real clock
+  Sys.sleep(.1)
+  expect_false(mt$executeElapsed())
+  expect_false(called)
+
+  mt$elapse(51)
+  expect_true(mt$executeElapsed())
+  expect_true(called)
+})

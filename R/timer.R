@@ -1,10 +1,10 @@
 # Return the current time, in milliseconds from epoch, with
 # unspecified time zone.
-now <- function() {
+getNow <- function() {
   as.numeric(Sys.time()) * 1000
 }
 
-TimerCallbacks <- R6Class(
+BaseTimerCallbacks <- R6Class(
   'TimerCallbacks',
   portable = FALSE,
   class = FALSE,
@@ -12,9 +12,11 @@ TimerCallbacks <- R6Class(
     .nextId = 0L,
     .funcs = 'Map',
     .times = data.frame(),
+    .now = 'Function',
 
-    initialize = function() {
+    initialize = function(nowFn=getNow) {
       .funcs <<- Map$new()
+      .now <<- nowFn
     },
     clear = function() {
       .nextId <<- 0L
@@ -30,7 +32,7 @@ TimerCallbacks <- R6Class(
       id <- .nextId
       .nextId <<- .nextId + 1L
 
-      t <- now()
+      t <- .now()
 
       # TODO: Horribly inefficient, use a heap instead
       .times <<- rbind(.times, data.frame(time=t+millis,
@@ -56,17 +58,17 @@ TimerCallbacks <- R6Class(
     timeToNextEvent = function() {
       if (dim(.times)[1] == 0)
         return(Inf)
-      return(.times[1, 'time'] - now())
+      return(.times[1, 'time'] - .now())
     },
     takeElapsed = function() {
-      t <- now()
-      elapsed <- .times$time < now()
+      t <- .now()
+      elapsed <- .times$time < .now()
       result <- .times[elapsed,]
       .times <<- .times[!elapsed,]
 
       # TODO: Examine scheduled column to check if any funny business
       #       has occurred with the system clock (e.g. if scheduled
-      #       is later than now())
+      #       is later than .now())
 
       return(result)
     },
@@ -83,6 +85,40 @@ TimerCallbacks <- R6Class(
       }
       return(TRUE)
     }
+  )
+)
+
+TimerCallbacks <- R6Class(
+  'TimerCallbacks',
+  inherit=BaseTimerCallbacks,
+  portable = FALSE,
+  class = FALSE,
+  public = list(
+    # Empty constructor defaults to the getNow implementation
+    initialize = function() {
+      super$initialize(getNow)
+    }
+  )
+)
+
+MockableTimerCallbacks <- R6Class(
+  'MockableTimerCallbacks',
+  inherit=BaseTimerCallbacks,
+  portable = FALSE,
+  class = FALSE,
+  public = list(
+    # Empty constructor defaults to the getNow implementation
+    initialize = function() {
+      super$initialize(self$now)
+    },
+    now = function(){
+      return(private$time)
+    },
+    elapse = function(millis){
+      private$time <<- private$time + millis
+    }
+  ), private = list(
+    time = 0L
   )
 )
 

@@ -98,7 +98,7 @@ testModule <- function(module, expr, args, ...) {
       # We could just stash the promise, but we get an "unhandled promise error". This bypasses
       prom <- NULL
       tryCatch({
-        v <- value()
+        v <- value(session, name) #TODO: I'm not clear what `name` is supposed to be
         if (!promises::is.promise(v)){
           # Make our sync value into a promise
           prom <- promises::promise(function(resolve, reject){ resolve(v) })
@@ -120,6 +120,7 @@ testModule <- function(module, expr, args, ...) {
     })
     outputs[[name]] <<- list(obs = obs, func = value, promise = NULL)
   }
+  session$singletons <- character(0)
   session$getOutput <- function(name){
     # Unlike the real outputs, we're going to return the last value rather than the unevaluated function
     if (is.null(outputs[[name]]$promise)) {
@@ -133,6 +134,7 @@ testModule <- function(module, expr, args, ...) {
       v$val
     }
   }
+  # TODO: make private?
   session$flush <- function(){
     # timerCallbacks must run before flushReact.
     timerCallbacks$executeElapsed()

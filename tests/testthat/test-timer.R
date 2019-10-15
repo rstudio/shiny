@@ -27,13 +27,13 @@ test_that("Scheduling works", {
 test_that("Unscheduling works", {
   origTimes <- timerCallbacks$.times
   origFuncKeys <- timerCallbacks$.funcs$keys()
-  
+
   taskHandle <- scheduleTask(1000, function() {
     message("Whatever")
   })
   # Unregister
   taskHandle()
-  
+
   expect_identical(timerCallbacks$.times, origTimes)
   expect_identical(timerCallbacks$.funcs$keys(), origFuncKeys)
 })
@@ -42,7 +42,13 @@ test_that("Vectorized unscheduling works", {
   key1 <- timerCallbacks$schedule(1000, function() {})
   key2 <- timerCallbacks$schedule(1000, function() {})
   key3 <- timerCallbacks$schedule(1000, function() {})
-  
+
   expect_identical(timerCallbacks$unschedule(key2), TRUE)
   expect_identical(timerCallbacks$unschedule(c(key1, key2, key3)), c(TRUE, FALSE, TRUE))
+})
+
+test_that("defineScheduler works", {
+  expect_identical(defineScheduler(NULL), scheduleTask)
+  expect_identical(defineScheduler(list()), scheduleTask)
+  expect_identical(defineScheduler(list(scheduleTask=123)), 123)
 })

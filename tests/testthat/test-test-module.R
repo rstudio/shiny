@@ -484,7 +484,6 @@ test_that("testServer works", {
 })
 
 test_that("testModule handles invalidateLater", {
-  testthat::skip("Waiting on timer mocking")
   module <- function(input, output, session) {
     rv <- reactiveValues(x = 0)
     observe({
@@ -500,13 +499,11 @@ test_that("testModule handles invalidateLater", {
     # Should have run once
     expect_equal(rv$x, 1)
 
-    # now <- as.numeric(Sys.time()) * 1000
-    # wait 80 milliseconds which should give the invalidateLater time to run
-    Sys.sleep(0.08)
-    # FIXME: I don't like running this myself because it pollutes the code under
-    # test. Is there a better way to sleep while not blocking the event loop?
+    session$elapse(49)
+    expect_equal(rv$x, 1)
 
-    # Should have been incremented again by now.
+    session$elapse(2)
+    # Should have been incremented now
     expect_equal(rv$x, 2)
   })
 })

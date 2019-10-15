@@ -187,8 +187,6 @@ testModule <- function(module, expr, args, ...) {
   }
   # TODO: make private?
   session$flush <- function(){
-    # timerCallbacks must run before flushReact.
-    timerCallbacks$executeElapsed()
     isolate(flushCBs$invoke(..stacktraceon = TRUE))
     flushReact()
     isolate(flushedCBs$invoke(..stacktraceon = TRUE))
@@ -205,19 +203,31 @@ testModule <- function(module, expr, args, ...) {
     session$flush()
   }
 
+  # TODO: private
+  timer <- MockableTimerCallbacks$new()
+
   session$scheduleTask <- function(millis, callback){
-    browser()
-    scheduleTask(millis, callback)
+    id <- timer$schedule(millis, callback)
+
+    # Return a deregistration callback
+    function() {
+      invisible(timer$unschedule(id))
+    }
+  }
+
+  session$elapse <- function(millis){
+    timer$elapse(millis)
+
+    # timerCallbacks must run before flushReact.
+    timer$executeElapsed()
+
+    session$flush()
   }
 
   session$reactlog <- function(logEntry){} # TODO: Needed for mock?
   session$incrementBusyCount <- function(){} # TODO: Needed for mock?
 
   curTime <- 0
-  session$elapse <- function(ms){
-    curTime <- curTime + ms
-    session$flush()
-  }
 
   out <- .createOutputWriter(session)
   class(out) <- "shinyoutput"

@@ -116,6 +116,9 @@ MockableTimerCallbacks <- R6Class(
     },
     elapse = function(millis){
       private$time <<- private$time + millis
+    },
+    getElapsed = function(){
+      private$time
     }
   ), private = list(
     time = 0L

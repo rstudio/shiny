@@ -159,25 +159,42 @@ test_that("testModule handles reactiveTimer", {
 })
 
 test_that("testModule handles debounce/throttle", {
-  testthat::skip("Waiting on debounce/throttle time mocking")
   module <- function(input, output, session) {
-    rv <- reactiveValues(x = 0)
-    rp <- throttle(reactiveTimer(50), 300)
-    #rp <- reactiveTimer(50)
+    rv <- reactiveValues(t = 0, d = 0)
+    react <- reactive({
+      input$y
+    })
+    rt <- throttle(react, 100)
+    rd <- debounce(react, 100)
 
     observe({
-      print("OBSERVED")
-      rp() # Invalidate this block on the timer
-      isolate(rv$x <- rv$x + 1)
+      rt() # Invalidate this block on the timer
+      isolate(rv$t <- rv$t + 1)
+    })
+
+    observe({
+      rd()
+      isolate(rv$d <- rv$d + 1)
     })
   }
 
   testModule(module, {
-    expect_equal(rv$x, 1)
-    session$elapse(151)
-    expect_equal(rv$x, 1)
-    session$elapse(151)
-    expect_equal(rv$x, 2)
+    session$setInputs(y = TRUE)
+    expect_equal(rv$d, 1)
+    for (i in 2:5){
+      session$setInputs(y = FALSE)
+      session$elapse(51)
+      session$setInputs(y = TRUE)
+      expect_equal(rv$t, i-1)
+      session$elapse(51)
+      expect_equal(rv$t, i)
+    }
+    # Never sufficient time to debounce. Not incremented
+    expect_equal(rv$d, 1)
+    session$elapse(51)
+
+    # Now that 100ms has passed since the last update, debounce should have triggered
+    expect_equal(rv$d, 2)
   })
 })
 

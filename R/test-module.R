@@ -223,6 +223,10 @@ testModule <- function(module, expr, args, ...) {
 
     session$flush()
   }
+  # Contract is to return Sys.time, which is seconds, not millis.
+  session$now <- function(){
+    timer$getElapsed()/1000
+  }
 
   session$reactlog <- function(logEntry){} # TODO: Needed for mock?
   session$incrementBusyCount <- function(){} # TODO: Needed for mock?

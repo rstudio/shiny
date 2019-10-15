@@ -385,15 +385,30 @@ test_that("testModule captures renderUI", {
 })
 
 test_that("testModule captures base graphics outputs", {
-  testthat::skip("NYI")
   module <- function(input, output, session){
-    output$base <- renderPlot({
+    output$fixed <- renderPlot({
       plot(1,1)
-    }, width=300, height=300) #TODO: no fixed width/height
+    }, width=300, height=300)
+
+    output$dynamic <- renderPlot({
+      plot(1,1)
+    })
   }
 
   testModule(module, {
-    output$base
+    # We aren't yet able to create reproducible graphics, so this test is intentionally pretty
+    # limited.
+    expect_equal(output$fixed$width, 300)
+    expect_equal(output$fixed$height, 300)
+    expect_match(output$fixed$src, "^data:image/png;base64,")
+
+    # Ensure that the plot defaults to a reasonable size.
+    expect_equal(output$dynamic$width, 600)
+    expect_equal(output$dynamic$height, 400)
+    expect_match(output$dynamic$src, "^data:image/png;base64,")
+
+    # TODO: how do you customize automatically inferred plot sizes?
+    # session$setPlotMeta("dynamic", width=600, height=300) ?
   })
 })
 

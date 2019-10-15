@@ -12,6 +12,38 @@ wait_for_it <- function() {
   }
 }
 
+#' @export
+`$.mockclientdata` <- function(x, name) {
+  if (name == "pixelratio"){
+    return(1)
+  }
+
+  clientRE <- "^output_(.+)_([^_]+)$"
+  if(grepl(clientRE, name)){
+    # TODO: use proper regex group matching here instead of redundantly parsing
+    el <- sub(clientRE, "\\1", name)
+    att <- sub(clientRE, "\\2", name)
+
+    if (att == "width") {
+      return(600)
+    } else if (att == "height") {
+      return(400)
+    } else if (att == "hidden") {
+      return(FALSE)
+    }
+  }
+  warning("Unexpected clientdata attribute accessed: ", name)
+  return(NULL)
+}
+
+#' @export
+`[[.mockclientdata` <- `$.mockclientdata`
+
+#' @export
+`[.mockclientdata` <- function(values, name) {
+  stop("Single-bracket indexing of mockclientdata is not allowed.")
+}
+
 # Block until the promise is resolved/rejected. If resolved, return the value.
 # If rejected, throw (yes throw, not return) the error.
 #' @importFrom promises %...!%
@@ -120,7 +152,22 @@ testModule <- function(module, expr, args, ...) {
     })
     outputs[[name]] <<- list(obs = obs, func = value, promise = NULL)
   }
-  session$singletons <- character(0)
+  session$singletons <- character(0) # Needed for rendering HTML (i.e. renderUI)
+
+  # Define a mock client data that always returns a size for plots
+  session$clientData <- structure(list(), class="mockclientdata")
+
+  # Needed for image rendering. Base64-encode the given file.
+  session$fileUrl <- function(name, file, contentType='application/octet-stream') {
+    bytes <- file.info(file)$size
+    if (is.na(bytes))
+      return(NULL)
+
+    fileData <- readBin(file, 'raw', n=bytes)
+    b64 <- rawToBase64(fileData)
+    return(paste('data:', contentType, ';base64,', b64, sep=''))
+  }
+
   session$getOutput <- function(name){
     # Unlike the real outputs, we're going to return the last value rather than the unevaluated function
     if (is.null(outputs[[name]]$promise)) {

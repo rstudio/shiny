@@ -115,7 +115,6 @@ test_that("testModule handles reactives with complex dependency tree", {
 })
 
 test_that("testModule handles reactivePoll", {
-  testthat::skip("Waiting on timer mocking")
   module <- function(input, output, session) {
     rv <- reactiveValues(x = 0)
     rp <- reactivePoll(50, session, function(){ as.numeric(Sys.time()) }, function(){
@@ -129,19 +128,15 @@ test_that("testModule handles reactivePoll", {
   testModule(module, {
     expect_equal(rv$x, 1)
 
-    # Have to repeat these on separate lines because we only give `flushReact` a
-    # chance to run in between each line of this expression
-    Sys.sleep(.055) # Pad the sleep a bit to accommodate compute overhead
-    Sys.sleep(.055)
-    Sys.sleep(.055)
-    Sys.sleep(.055)
+    for (i in 1:4){
+      session$elapse(51)
+    }
 
     expect_equal(rv$x, 5)
   })
 })
 
 test_that("testModule handles reactiveTimer", {
-  testthat::skip("Waiting on timer mocking")
   module <- function(input, output, session) {
     rv <- reactiveValues(x = 0)
 
@@ -155,24 +150,23 @@ test_that("testModule handles reactiveTimer", {
   testModule(module, {
     expect_equal(rv$x, 1)
 
-    # Have to repeat these on separate lines because we only give `flushReact` a
-    # chance to run in between each line of this expression.
-    Sys.sleep(.055) # pad the timer interval a bit to accommodate compute overhead
-    Sys.sleep(.055)
-    Sys.sleep(.055)
-    Sys.sleep(.055)
+    for (i in 1:4){
+      session$elapse(51)
+    }
 
     expect_equal(rv$x, 5)
   })
 })
 
 test_that("testModule handles debounce/throttle", {
-  testthat::skip("Waiting on timer mocking")
+  testthat::skip("Waiting on debounce/throttle time mocking")
   module <- function(input, output, session) {
     rv <- reactiveValues(x = 0)
     rp <- throttle(reactiveTimer(50), 300)
+    #rp <- reactiveTimer(50)
 
     observe({
+      print("OBSERVED")
       rp() # Invalidate this block on the timer
       isolate(rv$x <- rv$x + 1)
     })
@@ -180,12 +174,9 @@ test_that("testModule handles debounce/throttle", {
 
   testModule(module, {
     expect_equal(rv$x, 1)
-
-    # Have to repeat these on separate lines because we only give `flushReact` a
-    # chance to run in between each line of this expression.
-    Sys.sleep(.15) # Won't be ready to fire yet
-    Sys.sleep(.15) # Now should have one
-    Sys.sleep(.15) # Not yet
+    session$elapse(151)
+    expect_equal(rv$x, 1)
+    session$elapse(151)
     expect_equal(rv$x, 2)
   })
 })

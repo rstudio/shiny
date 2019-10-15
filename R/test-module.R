@@ -216,11 +216,26 @@ testModule <- function(module, expr, args, ...) {
   }
 
   session$elapse <- function(millis){
-    timer$elapse(millis)
+    msLeft <- millis
+
+    while (msLeft > 0){
+      t <- timer$timeToNextEvent()
+
+      if (is.infinite(t) || t <= 0 || msLeft < t){
+        # Either there's no good upcoming event or we can't make it to it in the allotted time.
+        break
+      }
+      msLeft <- msLeft - t
+      timer$elapse(t)
+      timer$executeElapsed()
+      session$flush()
+    }
+
+    timer$elapse(msLeft)
 
     # timerCallbacks must run before flushReact.
+    # TODO: needed? We're guaranteed to not have anything to run given the above loop, right?
     timer$executeElapsed()
-
     session$flush()
   }
   # Contract is to return Sys.time, which is seconds, not millis.

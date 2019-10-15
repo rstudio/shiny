@@ -129,7 +129,7 @@ test_that("testModule handles reactivePoll", {
     expect_equal(rv$x, 1)
 
     for (i in 1:4){
-      session$elapse(51)
+      session$elapse(50)
     }
 
     expect_equal(rv$x, 5)
@@ -150,9 +150,7 @@ test_that("testModule handles reactiveTimer", {
   testModule(module, {
     expect_equal(rv$x, 1)
 
-    for (i in 1:4){
-      session$elapse(51)
-    }
+    session$elapse(200)
 
     expect_equal(rv$x, 5)
   })
@@ -186,12 +184,12 @@ test_that("testModule handles debounce/throttle", {
       session$elapse(51)
       session$setInputs(y = TRUE)
       expect_equal(rv$t, i-1)
-      session$elapse(51)
+      session$elapse(51) # TODO: we usually don't have to pad by a ms, but here we do. Investigate.
       expect_equal(rv$t, i)
     }
     # Never sufficient time to debounce. Not incremented
     expect_equal(rv$d, 1)
-    session$elapse(51)
+    session$elapse(50)
 
     # Now that 100ms has passed since the last update, debounce should have triggered
     expect_equal(rv$d, 2)
@@ -510,7 +508,7 @@ test_that("testModule handles invalidateLater", {
     session$elapse(49)
     expect_equal(rv$x, 1)
 
-    session$elapse(2)
+    session$elapse(1)
     # Should have been incremented now
     expect_equal(rv$x, 2)
   })

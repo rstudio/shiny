@@ -173,6 +173,49 @@ module <- function(input, output, session){
   })
 ```
 
+## Timer and Polling
+
+Testing behavior that relies on timing is notoriously difficult. Modules will behave differently on different machines and under different conditions. In order to make testing with time more deterministic, `testModule` uses simulated time that you control, rather than the actual computer time. Let's look at what happens when you try to use "real" time in your testing.
+
+```{r}
+module <- function(input, output, session){
+  rv <- reactiveValues(x=0)
+  
+  observe({
+    invalidateLater(100)
+    isolate(rv$x <- rv$x + 1)
+  })
+}
+
+testModule(module, {
+  expect_equal(rv$x, 1) # The observer runs once at initialization
+  
+  Sys.sleep(1) # Sleep for a second
+  
+  expect_equal(rv$x, 1) # The value hasn't changed
+})
+```
+
+This behavior may be surprising. It seems like rv$x should have been incremented 10 times (or perhaps 9, due to computational overhead). But in truth, it hasn't changed at all. This is because `testModule` doesn't consider the actual time on your computer -- only its simulated understanding of time.
+
+In order to cause `testModule` to progress through time, instead of `Sys.sleep`, we'll use `session$elapse` -- another method that exists only on our mocked session object. Using the same module object as above...
+
+```{r}
+testModule(module, {
+  expect_equal(rv$x, 1) # The observer runs once at initialization
+  
+  session$elapse(100) # Elapse 100ms -- just long enough to trigger a reactive invalidation
+  
+  expect_equal(rv$x, 2) # The observer was invalidated and the value updated!
+  
+  # You can even simulate multiple events in a single elapse
+  session$elapse(300)
+  expect_equal(rv$x, 5)
+})
+```
+
+As you can see, using `session$elapse` caused `testModule` to recognize that (simulted) time had passed which triggered the reactivity as we'd expect. This approach allows you to deterministically control time in your tests while avoiding expensive pauses that would slow down your tests. Using this approach, this test can complete in only a fraction of the 100ms that it simulates.
+
 ## Complex Outputs (plots, htmlwidgets)
 
 TODO

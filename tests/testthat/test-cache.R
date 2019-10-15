@@ -33,7 +33,7 @@ test_that("DiskCache: handling missing values", {
   expect_identical(d$get("a"), 100)
   expect_identical(d$get("y", missing = NULL, exec_missing = FALSE), NULL)
   expect_true(is.key_missing(d$get("y", missing = key_missing(), exec_missing = FALSE)))
-  expect_identical(d$get("y", exec_missing = FALSE), function(key) stop("Missing key: ", key))
+  expect_equal(d$get("y", exec_missing = FALSE), function(key) stop("Missing key: ", key))
   expect_error(
     d$get("y", missing = function(key) stop("Missing key 2: ", key), exec_missing = TRUE),
     "^Missing key 2: y$",

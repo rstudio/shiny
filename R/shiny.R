@@ -723,6 +723,9 @@ ShinySession <- R6Class(
     requestFlush = function() {
       appsNeedingFlush$set(self$token, self)
     },
+    scheduleTask = function(millis, callback) {
+      scheduleTask(millis, callback)
+    },
     rootScope = function() {
       self
     },

@@ -196,7 +196,7 @@ testModule(module, {
 })
 ```
 
-This behavior may be surprising. It seems like rv$x should have been incremented 10 times (or perhaps 9, due to computational overhead). But in truth, it hasn't changed at all. This is because `testModule` doesn't consider the actual time on your computer -- only its simulated understanding of time.
+This behavior may be surprising. It seems like `rv$x` should have been incremented 10 times (or perhaps 9, due to computational overhead). But in truth, it hasn't changed at all. This is because `testModule` doesn't consider the actual time on your computer -- only its simulated understanding of time.
 
 In order to cause `testModule` to progress through time, instead of `Sys.sleep`, we'll use `session$elapse` -- another method that exists only on our mocked session object. Using the same module object as above...
 
@@ -204,7 +204,7 @@ In order to cause `testModule` to progress through time, instead of `Sys.sleep`,
 testModule(module, {
   expect_equal(rv$x, 1) # The observer runs once at initialization
   
-  session$elapse(100) # Elapse 100ms -- just long enough to trigger a reactive invalidation
+  session$elapse(100) # Simulate the passing of 100ms
   
   expect_equal(rv$x, 2) # The observer was invalidated and the value updated!
   

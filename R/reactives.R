@@ -1513,16 +1513,14 @@ reactiveTimer <- function(intervalMs=1000, session = getDefaultReactiveDomain())
   # reactId <- nextGlobalReactId()
   # rLog$define(reactId, paste0("timer(", intervalMs, ")"))
 
-  scheduler <- defineScheduler(session)
-
   dependents <- Map$new()
-  timerHandle <- scheduler(intervalMs, function() {
+  timerHandle <- scheduleTask(intervalMs, function() {
     # Quit if the session is closed
     if (!is.null(session) && session$isClosed()) {
       return(invisible())
     }
 
-    timerHandle <<- scheduler(intervalMs, sys.function())
+    timerHandle <<- scheduleTask(intervalMs, sys.function())
 
     doInvalidate <- function() {
       lapply(
@@ -1615,6 +1613,7 @@ reactiveTimer <- function(intervalMs=1000, session = getDefaultReactiveDomain())
 #' }
 #' @export
 invalidateLater <- function(millis, session = getDefaultReactiveDomain()) {
+
   force(session)
 
   ctx <- getCurrentContext()
@@ -1622,9 +1621,7 @@ invalidateLater <- function(millis, session = getDefaultReactiveDomain()) {
 
   clear_on_ended_callback <- function() {}
 
-  scheduler <- defineScheduler(session)
-
-  timerHandle <- scheduler(millis, function() {
+  timerHandle <- scheduleTask(millis, function() {
     if (is.null(session)) {
       ctx$invalidate()
       return(invisible())

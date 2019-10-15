@@ -144,3 +144,17 @@ defineScheduler <- function(session){
   }
   scheduleTask
 }
+
+
+#' Get the current time a la `Sys.time()`. Prefer to get it via the
+#' `session$now()` function, but if that's not available, just return the
+#' current system time.
+#' @noRd
+getTime <- function(session){
+  if (!is.null(session)){
+    if (!is.null(session$now)){
+      return(session$now())
+    }
+  }
+  Sys.time()
+}

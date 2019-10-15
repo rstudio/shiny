@@ -2375,7 +2375,7 @@ debounce <- function(r, millis, priority = 100, domain = getDefaultReactiveDomai
     }
 
     # The value (or possibly millis) changed. Start or reset the timer.
-    v$when <- Sys.time() + millis()/1000
+    v$when <- getTime(domain) + millis()/1000
   }, label = "debounce tracker", domain = domain, priority = priority)
 
   # This observer is the timer. It rests until v$when elapses, then touches
@@ -2384,7 +2384,7 @@ debounce <- function(r, millis, priority = 100, domain = getDefaultReactiveDomai
     if (is.null(v$when))
       return()
 
-    now <- Sys.time()
+    now <- getTime(domain)
     if (now >= v$when) {
       # Mod by 999999999 to get predictable overflow behavior
       v$trigger <- isolate(v$trigger %OR% 0) %% 999999999 + 1
@@ -2435,12 +2435,12 @@ throttle <- function(r, millis, priority = 100, domain = getDefaultReactiveDomai
     if (is.null(v$lastTriggeredAt)) {
       0
     } else {
-      max(0, (v$lastTriggeredAt + millis()/1000) - Sys.time()) * 1000
+      max(0, (v$lastTriggeredAt + millis()/1000) - getTime(domain)) * 1000
     }
   }
 
   trigger <- function() {
-    v$lastTriggeredAt <- Sys.time()
+    v$lastTriggeredAt <- getTime(domain)
     # Mod by 999999999 to get predictable overflow behavior
     v$trigger <- isolate(v$trigger) %% 999999999 + 1
     v$pending <- FALSE

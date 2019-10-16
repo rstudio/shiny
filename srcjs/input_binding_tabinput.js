@@ -4,6 +4,7 @@ $.extend(bootstrapTabInputBinding, {
     return $(scope).find('ul.nav.shiny-tab-input');
   },
   getValue: function(el) {
+    debugger;
     var anchor = $(el).find('li:not(.dropdown).active').children('a');
     if (anchor.length === 1)
       return this._getTabName(anchor);
@@ -48,7 +49,7 @@ $.extend(bootstrapTabInputBinding, {
       // also be on the <a>) so that the tab manipulation
       // functions can work without major modifications.
       if (!$target.parent("li.active").length) {
-        $relatedTarget.parent("li").removeClass("active");
+        $oldTarget.parent("li").removeClass("active");
         $target.parent("li").addClass("active");
       }
       callback();

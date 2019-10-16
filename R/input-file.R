@@ -105,7 +105,7 @@ fileInput <- function(inputId, label, multiple = FALSE, accept = NULL,
 
 
   div(class = "form-group shiny-input-container",
-    style = if (!is.null(width)) paste0("width: ", validateCssUnit(width), ";"),
+    style = css(width = validateCssUnit(width)),
     shinyInputLabel(inputId, label),
 
     div(class = "input-group",

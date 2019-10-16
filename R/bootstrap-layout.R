@@ -689,37 +689,3 @@ flexfill <- function(..., direction, flex, width = width, height = height) {
   )
   do.call(tags$div, c(attrs, divArgs))
 }
-
-css <- function(..., collapse_ = "") {
-  props <- list(...)
-  if (length(props) == 0) {
-    return("")
-  }
-
-  if (is.null(names(props)) || any(names(props) == "")) {
-    stop("cssList expects all arguments to be named")
-  }
-
-  # Necessary to make factors show up as level names, not numbers
-  props[] <- lapply(props, paste, collapse = " ")
-
-  # Drop null args
-  props <- props[!sapply(props, empty)]
-  if (length(props) == 0) {
-    return("")
-  }
-
-  # Replace all '.' and '_' in property names to '-'
-  names(props) <- gsub("[._]", "-", tolower(gsub("([A-Z])", "-\\1", names(props))))
-
-  # Create "!important" suffix for each property whose name ends with !, then
-  # remove the ! from the property name
-  important <- ifelse(grepl("!$", names(props), perl = TRUE), " !important", "")
-  names(props) <- sub("!$", "", names(props), perl = TRUE)
-
-  paste0(names(props), ":", props, important, ";", collapse = collapse_)
-}
-
-empty <- function(x) {
-  length(x) == 0 || (is.character(x) && !any(nzchar(x)))
-}

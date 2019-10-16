@@ -104,7 +104,7 @@ radioButtons <- function(inputId, label, choices = NULL, selected = NULL,
   if (inline) divClass <- paste(divClass, "shiny-input-container-inline")
 
   tags$div(id = inputId,
-    style = if (!is.null(width)) paste0("width: ", validateCssUnit(width), ";"),
+    style = css(width = validateCssUnit(width)),
     class = divClass,
     shinyInputLabel(inputId, label),
     options

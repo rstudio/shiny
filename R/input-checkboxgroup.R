@@ -95,7 +95,7 @@ checkboxGroupInput <- function(inputId, label, choices = NULL, selected = NULL,
 
   # return label and select tag
   tags$div(id = inputId,
-    style = if (!is.null(width)) paste0("width: ", validateCssUnit(width), ";"),
+    style = css(width = validateCssUnit(width)),
     class = divClass,
     shinyInputLabel(inputId, label),
     options

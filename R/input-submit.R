@@ -58,7 +58,7 @@ submitButton <- function(text = "Apply Changes", icon = NULL, width = NULL) {
     tags$button(
       type="submit",
       class="btn btn-primary",
-      style = if (!is.null(width)) paste0("width: ", validateCssUnit(width), ";"),
+      style = css(width = validateCssUnit(width)),
       list(icon, text)
     )
   )

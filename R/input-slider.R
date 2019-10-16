@@ -175,7 +175,7 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
   })
 
   sliderTag <- div(class = "form-group shiny-input-container",
-    style = if (!is.null(width)) paste0("width: ", validateCssUnit(width), ";"),
+    style = css(width = validateCssUnit(width)),
     shinyInputLabel(inputId, label),
     do.call(tags$input, sliderProps)
   )

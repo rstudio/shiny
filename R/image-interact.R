@@ -437,10 +437,12 @@ asNumber <- function(x, levels = NULL) {
 # simplifyVector=FALSE, which means NA are replaced by NULL
 # (because jsonlite::fromJSON('["a", "b", null]') -> list("a", "b", NULL))
 #
-# Thankfully, it doesn't seem like it meaningful for a limits to have an
-# explicit NULL, so we simply treat NULL like NA.
+# Thankfully, it doesn't seem like it's meaningful for limits to
+# contains a NULL in the 1st place, so we simply treat NULL like NA.
 # For more context, https://github.com/rstudio/shiny/issues/2666
 fortifyDiscreteLimits <- function(coord) {
+  # Note that discrete_limits$x/y are populated iff
+  # x/y are discrete mappings
   coord$domain$discrete_limits <- lapply(
     coord$domain$discrete_limits,
     function(var) {

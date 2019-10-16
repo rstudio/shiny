@@ -11,6 +11,8 @@ shiny 1.4.0.9000
 
 ### Bug fixes
 
+Fixed [#2666](https://github.com/rstudio/shiny/issues/2666) and [#2670](https://github.com/rstudio/shiny/issues/2670): `nearPoints()` and `brushedPoints()` weren't properly account for missing values (#2666 was introduced in v1.4.0). ([#2668](https://github.com/rstudio/shiny/pull/2668))
+
 Fixed [#2653](https://github.com/rstudio/shiny/issues/2653): The `dataTableOutput()` could have incorrect output if certain characters were in the column names. ([#2658](https://github.com/rstudio/shiny/pull/2658))
 
 ### Documentation Updates

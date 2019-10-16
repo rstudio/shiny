@@ -278,8 +278,9 @@ nearPoints <- function(df, coordinfo, xvar = NULL, yvar = NULL,
     stop("nearPoints: `yvar` ('", yvar ,"')  not in names of input")
 
   # Extract data values from the data frame
-  x <- asNumber(df[[xvar]], asLevels(coordinfo$domain$discrete_limits$x))
-  y <- asNumber(df[[yvar]], asLevels(coordinfo$domain$discrete_limits$y))
+  coordinfo <- fortifyDiscreteLimits(coordinfo)
+  x <- asNumber(df[[xvar]], coordinfo$domain$discrete_limits$x)
+  y <- asNumber(df[[yvar]], coordinfo$domain$discrete_limits$y)
 
   # Get the coordinates of the point (in img pixel coordinates)
   point_img <- coordinfo$coords_img
@@ -403,7 +404,8 @@ nearPoints <- function(df, coordinfo, xvar = NULL, yvar = NULL,
 # an input brush
 within_brush <- function(vals, brush, var = "x") {
   var <- match.arg(var, c("x", "y"))
-  vals <- asNumber(vals, asLevels(brush$domain$discrete_limits[[var]]))
+  brush <- fortifyDiscreteLimits(brush)
+  vals <- asNumber(vals, brush$domain$discrete_limits[[var]])
   # It's possible for a non-missing data values to not
   # map to the axis limits, for example:
   # https://github.com/rstudio/shiny/pull/2410#issuecomment-488100881
@@ -438,9 +440,19 @@ asNumber <- function(x, levels = NULL) {
 # Thankfully, it doesn't seem like it meaningful for a limits to have an
 # explicit NULL, so we simply treat NULL like NA.
 # For more context, https://github.com/rstudio/shiny/issues/2666
-asLevels <- function(x) {
-  vapply(x, function(x) x %OR% NA, character(1))
+fortifyDiscreteLimits <- function(coord) {
+  coord$domain$discrete_limits <- lapply(
+    coord$domain$discrete_limits,
+    function(var) {
+      # if there is an 'explicit' NULL, then the limits are NA
+      if (is.null(var)) return(NA)
+      vapply(var, function(x) x %OR% NA, character(1))
+    }
+  )
+  coord
 }
+
+
 
 # Given a panelvar value and a vector x, return logical vector indicating which
 # items match the panelvar value. Because the panelvar value is always a

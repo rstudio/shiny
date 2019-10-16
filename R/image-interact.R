@@ -420,6 +420,8 @@ within_brush <- function(vals, brush, var = "x") {
 # positional scale (#2410)
 asNumber <- function(x, levels = NULL) {
   if (length(levels)) {
+    # A NULL value for a particular level should be intrepreted as NA
+    # https://github.com/rstudio/shiny/issues/2666
     levels <- lapply(levels, function(x) x %OR% NA)
     return(match(x, levels))
   }

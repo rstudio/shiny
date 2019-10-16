@@ -447,6 +447,7 @@ asLevels <- function(x) {
 # string but the vector could be numeric, it might be necessary to coerce the
 # panelvar to a number before comparing to the vector.
 panelMatch <- function(search_value, x) {
+  if (is.null(search_value)) return(is.na(x))
   if (is.numeric(x)) search_value <- as.numeric(search_value)
   x == search_value
 }

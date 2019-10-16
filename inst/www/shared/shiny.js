@@ -5662,6 +5662,18 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     },
     subscribe: function subscribe(el, callback) {
       $(el).on('change shown.bootstrapTabInputBinding shown.bs.tab.bootstrapTabInputBinding', function (event) {
+        var $target = $(event.target); // newly selected <a>
+        var $oldTarget = $(event.relatedTarget); // previously selected <a>
+
+        // Just in case we're running with Bootstrap 4. Unlike
+        // bs3, bs4 puts the .active on the <a>, not the <li>
+        // around the <a>. We need it to be on the <li> (it can
+        // also be on the <a>) so that the tab manipulation
+        // functions can work without major modifications.
+        if (!$target.parent("li.active").length) {
+          $relatedTarget.parent("li").removeClass("active");
+          $target.parent("li").addClass("active");
+        }
         callback();
       });
     },

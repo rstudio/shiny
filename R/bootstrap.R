@@ -617,8 +617,9 @@ navlistPanel <- function(...,
 
   # build the tabset
   tabs <- list(...)
+  # flex-column is for bootstrap 4 forward compat
   tabset <- buildTabset(tabs,
-                        "nav nav-pills nav-stacked",
+                        "nav nav-pills nav-stacked flex-column",
                         textFilter,
                         id,
                         selected)
@@ -696,7 +697,8 @@ getIcon <- function(tab = NULL, iconClass = NULL) {
 
 # Text filter for navbarMenu's (plain text) separators
 navbarMenuTextFilter <- function(text) {
-  if (grepl("^\\-+$", text)) tags$li(class = "divider")
+  # dropdown-divider is for bootstrap 4 forward compat
+  if (grepl("^\\-+$", text)) tags$li(class = "divider dropdown-divider")
   else tags$li(class = "dropdown-header", text)
 }
 
@@ -755,9 +757,11 @@ buildTabItem <- function(index, tabsetId, foundSelected, tabs = NULL,
     # if this navbarMenu contains a selected item, mark it active
     containsSelected <- containsSelectedTab(divTag$tabs)
     liTag <- tags$li(
-      class = paste0("dropdown", if (containsSelected) " active"),
+      # nav-item is for bootstrap 4 forward compat
+      class = paste0("nav-item dropdown", if (containsSelected) " active"),
       tags$a(href = "#",
-        class = "dropdown-toggle", `data-toggle` = "dropdown",
+        # nav-link is for bootstrap 4 forward compat
+        class = "nav-link dropdown-toggle", `data-toggle` = "dropdown",
         `data-value` = divTag$menuName,
         getIcon(iconClass = divTag$iconClass),
         divTag$title, tags$b(class = "caret")
@@ -770,8 +774,10 @@ buildTabItem <- function(index, tabsetId, foundSelected, tabs = NULL,
   } else {
     # tabPanel item: create the tab's liTag and divTag
     tabId <- paste("tab", tabsetId, index, sep = "-")
-    liTag <- tags$li(
-               tags$a(
+    # nav-item/nav-link are for bootstrap 4 forward compat.
+    liTag <- tags$li(class = "nav-item",
+               tags$a(class = "nav-link",
+                 class = if (isTabSelected(divTag)) "active",
                  href = paste("#", tabId, sep = ""),
                  `data-toggle` = "tab",
                  `data-value` = divTag$attribs$`data-value`,
@@ -781,7 +787,7 @@ buildTabItem <- function(index, tabsetId, foundSelected, tabs = NULL,
     )
     # if this tabPanel is selected item, mark it active
     if (isTabSelected(divTag)) {
-      liTag$attribs$class <- "active"
+      liTag$attribs$class <- paste0(liTag$attribs$class, " active")
       divTag$attribs$class <- "tab-pane active"
     }
     divTag$attribs$id <- tabId

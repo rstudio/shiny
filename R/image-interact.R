@@ -278,8 +278,8 @@ nearPoints <- function(df, coordinfo, xvar = NULL, yvar = NULL,
     stop("nearPoints: `yvar` ('", yvar ,"')  not in names of input")
 
   # Extract data values from the data frame
-  x <- asNumber(df[[xvar]], coordinfo$domain$discrete_limits$x)
-  y <- asNumber(df[[yvar]], coordinfo$domain$discrete_limits$y)
+  x <- asNumber(df[[xvar]], asLevels(coordinfo$domain$discrete_limits$x))
+  y <- asNumber(df[[yvar]], asLevels(coordinfo$domain$discrete_limits$y))
 
   # Get the coordinates of the point (in img pixel coordinates)
   point_img <- coordinfo$coords_img
@@ -403,7 +403,7 @@ nearPoints <- function(df, coordinfo, xvar = NULL, yvar = NULL,
 # an input brush
 within_brush <- function(vals, brush, var = "x") {
   var <- match.arg(var, c("x", "y"))
-  vals <- asNumber(vals, brush$domain$discrete_limits[[var]])
+  vals <- asNumber(vals, asLevels(brush$domain$discrete_limits[[var]]))
   # It's possible for a non-missing data values to not
   # map to the axis limits, for example:
   # https://github.com/rstudio/shiny/pull/2410#issuecomment-488100881
@@ -419,15 +419,27 @@ within_brush <- function(vals, brush, var = "x") {
 # it allows you to control ordering and possible values of a discrete
 # positional scale (#2410)
 asNumber <- function(x, levels = NULL) {
-  if (length(levels)) {
-    # A NULL value for a particular level should be intrepreted as NA
-    # https://github.com/rstudio/shiny/issues/2666
-    levels <- lapply(levels, function(x) x %OR% NA)
-    return(match(x, levels))
-  }
+  if (length(levels)) return(match(x, levels))
   if (is.character(x)) x <- as.factor(x)
   if (is.factor(x)) x <- as.integer(x)
   as.numeric(x)
+}
+
+# Ensure the discrete limits/levels of a coordmap received
+# from the client matches the data structure sent the client.
+#
+# When we construct the coordmap (in getGgplotCoordmap()),
+# we save a character vector which may contain missing values
+# (e.g., c("a", "b", NA)). When that same character is received
+# from the client, it runs through decodeMessage() which sets
+# simplifyVector=FALSE, which means NA are replaced by NULL
+# (because jsonlite::fromJSON('["a", "b", null]') -> list("a", "b", NULL))
+#
+# Thankfully, it doesn't seem like it meaningful for a limits to have an
+# explicit NULL, so we simply treat NULL like NA.
+# For more context, https://github.com/rstudio/shiny/issues/2666
+asLevels <- function(x) {
+  vapply(x, function(x) x %OR% NA, character(1))
 }
 
 # Given a panelvar value and a vector x, return logical vector indicating which

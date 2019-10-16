@@ -2,9 +2,11 @@
 title: "Integration Testing in Shiny"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteEngine{knitr::rmarkdown}
   %\VignetteIndexEntry{Your Vignette Title}
   %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r setup, include=FALSE}
@@ -218,8 +220,77 @@ As you can see, using `session$elapse` caused `testModule` to recognize that (si
 
 ## Complex Outputs (plots, htmlwidgets)
 
-TODO
+**Work in progress** -- We intend to add more helpers to make it easier to inspect and validate the raw HTML/JSON content. But for now, validating the output is an exercise left to the user.
 
-## Testing Servers
+Thus far, we've seen how to validate simple outputs like numeric or text values. Real Shiny modules applications often use more complex outputs such as plots or htmlwidgets. Validating the correctness of these is not as simple, but is doable.
 
-TODO: Will show that you can pass in a shinyapp object or a server function to a similar function called `testServer` and it will work similarly.
+You can access the data for even complex outputs in `testModule`, but the structure of the output may initially be foreign to you.
+
+```{r}
+module <- function(input, output, session){
+  output$plot <- renderPlot({
+    df <- data.frame(length = iris$Petal.Length, width = iris$Petal.Width)
+    plot(df)
+  })
+}
+
+testModule(module, {
+  print(str(output$plot))
+})
+```
+
+As you can see, there are a lot of internal details that go into a plot. Behind-the-scenes, these are all the details that Shiny will use to correctly display a plot in a user's browser. You don't need to learn about all of these properties -- and they're all subject to change. 
+
+In terms of your testing strategy, you shouldn't bother yourself with "is Shiny generating the correct structure so that the plot will generate in the browser?" That's a question that the Shiny package itself needs to answer (and one for which we have our own tests). The goal for your tests should be to ask: "is the code that I wrote producing the plot I want?" There are two components to that question:
+
+1. Does the plot generate without producing an error?
+2. Is the plot visually correct?
+
+`testModule` is great for assessing the first component here. By merely referencing `output$plot` in your test, you'll confirm that the plot was generated without an error. The second component is better suited for a shinytest test which actually loads the Shiny app in a headless browser and confirms that the content visually appears the same as it did previously. Doing this kind of test in `testModule` would be complex and may not be reliable as graphics devices differ slightly from platform to platform; i.e. the exact bits in the `src` field of your plot will not necessarily be reproducible between different versions of R or different operating systems.
+
+For htmlwidgets, you can adopt a similar strategy. The goal is not to confirm that the htmlwidget's render function is behaving properly -- but rather that the data that you intend to render is indeed getting rendered properly.
+
+We could modify the above example to better represent this approach.
+
+```{r}
+module <- function(input, output, session){
+  # Move any complex logic into a separate reactive which can be tested comprehensively
+  plotData <- reactive({
+    data.frame(length = iris$Petal.Length, width = iris$Petal.Width)
+  })
+  
+  # And leave the `render` function to be as simple as possible to lessen the need for 
+  # integration tests.
+  output$plot <- renderPlot({
+    plot(plotData())
+  })
+}
+
+testModule(module, {
+  # Confirm that the data reactive is behaving as expected
+  expect_equal(nrow(plotData()), 150)
+  expect_equal(ncol(plotData()), 2)
+  expect_equal(colnames(plotData()), c("length", "width"))
+  
+  # And now the plot function is so simple that there's not much need for 
+  # automated testing. If we did wish to evaluate the plot visually, we could
+  # do so using the shinytest package.
+  output$plot # Just confirming that the plot can be accessed without an error
+})
+```
+
+You could adopt a similar strategy with other plots or htmlwidgets: move the complexity into reactives that can be tested, and leave the complex `render` functions as simple as possible.
+
+## Testing Shiny Applications
+
+In addition to testing Shiny modules, you can also test Shiny applications. The `testServer` function will automatically extract the server portion given an application's directory and you can test it just like you do any other module.
+
+```{r}
+appdir <- system.file("examples/06_tabsets", package="shiny")
+testServer({
+  session$setInputs(dist="norm", n=10)
+  expect_equal(length(d()), 10)
+}, appdir)
+```
+
+As you can see, the test expression can be run for Shiny servers just like it was run for modules.

@@ -4,7 +4,7 @@ getNow <- function() {
   as.numeric(Sys.time()) * 1000
 }
 
-BaseTimerCallbacks <- R6Class(
+TimerCallbacks <- R6Class(
   'TimerCallbacks',
   portable = FALSE,
   class = FALSE,
@@ -88,22 +88,9 @@ BaseTimerCallbacks <- R6Class(
   )
 )
 
-TimerCallbacks <- R6Class(
-  'TimerCallbacks',
-  inherit=BaseTimerCallbacks,
-  portable = FALSE,
-  class = FALSE,
-  public = list(
-    # Empty constructor defaults to the getNow implementation
-    initialize = function() {
-      super$initialize(getNow)
-    }
-  )
-)
-
 MockableTimerCallbacks <- R6Class(
   'MockableTimerCallbacks',
-  inherit=BaseTimerCallbacks,
+  inherit=TimerCallbacks,
   portable = FALSE,
   class = FALSE,
   public = list(
@@ -115,7 +102,7 @@ MockableTimerCallbacks <- R6Class(
       return(private$time)
     },
     elapse = function(millis){
-      private$time <<- private$time + millis
+      private$time <- private$time + millis
     }
   ), private = list(
     time = 0L
@@ -137,10 +124,8 @@ scheduleTask <- function(millis, callback) {
 #' session scheduler, but if it doesn't exist, use the global one.
 #' @noRd
 defineScheduler <- function(session){
-  if (!is.null(session)){
-    if (!is.null(session$scheduleTask)){
-      return(session$scheduleTask)
-    }
+  if (!is.null(session) && !is.null(session$scheduleTask)){
+    return(session$scheduleTask)
   }
   scheduleTask
 }
@@ -151,10 +136,8 @@ defineScheduler <- function(session){
 #' current system time.
 #' @noRd
 getTime <- function(session){
-  if (!is.null(session)){
-    if (!is.null(session$now)){
-      return(session$now())
-    }
+  if (!is.null(session) && !is.null(session$now)){
+    return(session$now())
   }
   Sys.time()
 }

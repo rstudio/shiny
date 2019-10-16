@@ -177,7 +177,7 @@ modalDialog <- function(..., title = NULL, footer = modalButton("Dismiss"),
 #' @seealso [modalDialog()] for examples.
 #' @export
 modalButton <- function(label, icon = NULL) {
-  tags$button(type = "button", class = "btn btn-default",
+  tags$button(type = "button", class = "btn btn-default btn-secondary",
     `data-dismiss` = "modal", validateIcon(icon), label
   )
 }

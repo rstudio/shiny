@@ -98,7 +98,7 @@ dateRangeInput <- function(inputId, label, start = NULL, end = NULL,
       # input-daterange class is needed for dropdown behavior
       div(class = "input-daterange input-group",
         tags$input(
-          class = "input-sm form-control",
+          class = "input-sm form-control-sm form-control",
           type = "text",
           `data-date-language` = language,
           `data-date-week-start` = weekstart,
@@ -116,7 +116,7 @@ dateRangeInput <- function(inputId, label, start = NULL, end = NULL,
           )
         ),
         tags$input(
-          class = "input-sm form-control",
+          class = "input-sm form-control-sm form-control",
           type = "text",
           `data-date-language` = language,
           `data-date-week-start` = weekstart,

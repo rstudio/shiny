@@ -29,8 +29,8 @@ $.extend( true, DataTable.defaults, {
 /* Default class modification */
 $.extend( DataTable.ext.classes, {
 	sWrapper:      "dataTables_wrapper form-inline dt-bootstrap",
-	sFilterInput:  "form-control input-sm",
-	sLengthSelect: "form-control input-sm"
+	sFilterInput:  "form-control form-control-sm input-sm",
+	sLengthSelect: "form-control form-control-sm input-sm"
 } );
 
 
@@ -137,7 +137,7 @@ if ( DataTable.TableTools ) {
 	$.extend( true, DataTable.TableTools.classes, {
 		"container": "DTTT btn-group",
 		"buttons": {
-			"normal": "btn btn-default",
+			"normal": "btn btn-default btn-secondary",
 			"disabled": "disabled"
 		},
 		"collection": {

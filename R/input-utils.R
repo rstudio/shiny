@@ -1,7 +1,7 @@
 shinyInputLabel <- function(inputId, label = NULL) {
   tags$label(
     label,
-    class = "control-label",
+    class = "control-label col-form-label",
     class = if (is.null(label)) "shiny-label-null",
     `for` = inputId
   )
@@ -77,6 +77,7 @@ generateOptions <- function(inputId, selected, inline, type = 'checkbox',
       # If inline, there's no wrapper div, and the label needs a class like
       # checkbox-inline.
       if (inline) {
+        # TODO: radio-inline and checkbox-inline were dropped in bs4
         tags$label(class = paste0(type, "-inline"), inputTag,
                    tags$span(pd$html, pd$deps))
       } else {

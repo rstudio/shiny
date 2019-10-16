@@ -79,6 +79,11 @@ extract <- function(promise) {
 #' @param ... Additional named arguments to be passed on to the module function.
 #' @export
 testModule <- function(module, expr, args, ...) {
+  expr <- substitute(expr)
+  .testModule(module, expr, args, ...)
+}
+
+.testModule <- function(module, expr, args, ...) {
   # Capture the environment from the module
   # Inserts `session$env <- environment()` at the top of the function
   fn_body <- body(module)
@@ -87,7 +92,9 @@ testModule <- function(module, expr, args, ...) {
   body(module) <- fn_body
 
   # Substitute expr for later evaluation
-  expr <- substitute(expr)
+  if (!is.call(expr)){
+    expr <- substitute(expr)
+  }
   .input <- ReactiveValues$new(dedupe = FALSE, label = "input")
 
   # Create the mock session
@@ -296,10 +303,48 @@ testModule <- function(module, expr, args, ...) {
 
 #' Test an app's server-side logic
 #' @param expr Test code containing expectations
-#' @param dir The directory root of the Shiny application. If `NULL`, this function
+#' @param appdir The directory root of the Shiny application. If `NULL`, this function
 #'   will work up the directory hierarchy --- starting with the current directory ---
 #'   looking for a directory that contains an `app.R` or `server.R` file.
 #' @export
-testServer <- function(expr, dir=NULL) {
-  stop("NYI")
+testServer <- function(expr, appDir=NULL) {
+  if (is.null(appDir)){
+    appDir <- findApp()
+  }
+
+  app <- shinyAppDir(appDir)
+  server <- app$serverFuncSource()
+
+  # Add `session` argument if not present
+  fn_formals <- formals(server)
+  if (! "session" %in% names(fn_formals)) {
+    fn_formals$session <- bquote()
+    formals(server) <- fn_formals
+  }
+
+  s3 <<- server
+  # Now test the server as we would a module
+  .testModule(server, expr=substitute(expr))
+}
+
+findApp <- function(startDir="."){
+  dir <- normalizePath(startDir)
+
+  # The loop will either return or stop() itself.
+  while (TRUE){
+    if(file.exists.ci(file.path(dir, "app.R")) || file.exists.ci(file.path(dir, "server.R"))){
+      return(dir)
+    }
+
+    # Move up a directory
+    origDir <- dir
+    dir <- dirname(dir)
+
+    # Testing for "root" path can be tricky. OSs differ and on Windows, network shares
+    # might have a \\ prefix. Easier to just see if we got stuck and abort.
+    if (dir == origDir){
+      # We can go no further.
+      stop("No shiny app was found in ", startDir, " or any of its parent directories")
+    }
+  }
 }

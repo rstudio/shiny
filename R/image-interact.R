@@ -419,7 +419,10 @@ within_brush <- function(vals, brush, var = "x") {
 # it allows you to control ordering and possible values of a discrete
 # positional scale (#2410)
 asNumber <- function(x, levels = NULL) {
-  if (length(levels)) return(match(x, levels))
+  if (length(levels)) {
+    levels <- lapply(levels, function(x) x %OR% NA)
+    return(match(x, levels))
+  }
   if (is.character(x)) x <- as.factor(x)
   if (is.factor(x)) x <- as.integer(x)
   as.numeric(x)

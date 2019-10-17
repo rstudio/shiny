@@ -199,7 +199,9 @@ MockShinySession <- R6Class(
       } else {
         v$val
       }
-    }
+    },
+
+    registerDataObj = function(name, data, filterFunc) {}
   ),
   private = list(
     .input = NULL,

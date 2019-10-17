@@ -5629,7 +5629,6 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       return $(scope).find('ul.nav.shiny-tab-input');
     },
     getValue: function getValue(el) {
-      debugger;
       var anchor = $(el).find('li:not(.dropdown).active').children('a');
       if (anchor.length === 1) return this._getTabName(anchor);
 

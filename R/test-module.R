@@ -1,6 +1,3 @@
-# TODO:
-#  - implement testServer
-
 # Promise helpers taken from:
 #   https://github.com/rstudio/promises/blob/master/tests/testthat/common.R
 # Block until all pending later tasks have executed
@@ -10,42 +7,6 @@ wait_for_it <- function() {
     later::run_now()
     Sys.sleep(0.1)
   }
-}
-
-# TODO: is there a way to get this behavior without exporting these? R6?
-#' @noRd
-#' @export
-`$.mockclientdata` <- function(x, name) {
-  if (name == "pixelratio"){
-    return(1)
-  }
-
-  clientRE <- "^output_(.+)_([^_]+)$"
-  if(grepl(clientRE, name)){
-    # TODO: use proper regex group matching here instead of redundantly parsing
-    el <- sub(clientRE, "\\1", name)
-    att <- sub(clientRE, "\\2", name)
-
-    if (att == "width") {
-      return(600)
-    } else if (att == "height") {
-      return(400)
-    } else if (att == "hidden") {
-      return(FALSE)
-    }
-  }
-  warning("Unexpected clientdata attribute accessed: ", name)
-  return(NULL)
-}
-
-#' @noRd
-#' @export
-`[[.mockclientdata` <- `$.mockclientdata`
-
-#' @noRd
-#' @export
-`[.mockclientdata` <- function(values, name) {
-  stop("Single-bracket indexing of mockclientdata is not allowed.")
 }
 
 # Block until the promise is resolved/rejected. If resolved, return the value.
@@ -77,6 +38,7 @@ extract <- function(promise) {
 #' @param initialState A list describing the initial values for `input`. If no
 #'   initial state is given, `input` will initialize as an empty list.
 #' @param ... Additional named arguments to be passed on to the module function.
+#' @include mock-session.R
 #' @export
 testModule <- function(module, expr, args, ...) {
   expr <- substitute(expr)
@@ -95,172 +57,9 @@ testModule <- function(module, expr, args, ...) {
   if (!is.call(expr)){
     expr <- substitute(expr)
   }
-  .input <- ReactiveValues$new(dedupe = FALSE, label = "input")
 
-  # Create the mock session
-  session <- new.env(parent=emptyenv())
-
-  # The onFlush* methods return a deregistration function
-  flushCBs <- Callbacks$new()
-  session$onFlush <- function(fun, once){
-    if (!isTRUE(once)) {
-      return(flushCBs$register(fun))
-    } else {
-      dereg <- flushCBs$register(function() {
-        dereg()
-        fun()
-      })
-      return(dereg)
-    }
-  }
-  flushedCBs <- Callbacks$new()
-  session$onFlushed <- function(fun, once){
-    if (!isTRUE(once)) {
-      return(flushedCBs$register(fun))
-    } else {
-      dereg <- flushedCBs$register(function() {
-        dereg()
-        fun()
-      })
-      return(dereg)
-    }
-  }
-
-  isClosed <- FALSE
-  session$isEnded <- function(){ isClosed }
-  session$isClosed <- function(){ isClosed }
-  session$close <- function(){ isClosed <<- TRUE }
-  session$cycleStartAction <- function(callback){ callback() } #FIXME: this is wrong. Will need to be more complex.
-  endedCBs <- Callbacks$new()
-  session$onEnded <- function(sessionEndedCallback){
-    endedCBs$register(sessionEndedCallback)
-  }
-  outputs <- list()
-  session$defineOutput <- function(name, value, label){
-    obs <- observe({
-      # We could just stash the promise, but we get an "unhandled promise error". This bypasses
-      prom <- NULL
-      tryCatch({
-        v <- value(session, name) #TODO: I'm not clear what `name` is supposed to be
-        if (!promises::is.promise(v)){
-          # Make our sync value into a promise
-          prom <- promises::promise(function(resolve, reject){ resolve(v) })
-        } else {
-          prom <- v
-        }
-      }, error=function(e){
-        # Error running value()
-        prom <<- promises::promise(function(resolve, reject){ reject(e) })
-      })
-
-      outputs[[name]]$promise <<- hybrid_chain(
-        prom,
-        function(v){
-          list(val = v, err = NULL)
-        }, catch=function(e){
-          list(val = NULL, err = e)
-        })
-    })
-    outputs[[name]] <<- list(obs = obs, func = value, promise = NULL)
-  }
-  session$singletons <- character(0) # Needed for rendering HTML (i.e. renderUI)
-
-  # Define a mock client data that always returns a size for plots
-  session$clientData <- structure(list(), class="mockclientdata")
-
-  # Needed for image rendering. Base64-encode the given file.
-  session$fileUrl <- function(name, file, contentType='application/octet-stream') {
-    bytes <- file.info(file)$size
-    if (is.na(bytes))
-      return(NULL)
-
-    fileData <- readBin(file, 'raw', n=bytes)
-    b64 <- rawToBase64(fileData)
-    return(paste('data:', contentType, ';base64,', b64, sep=''))
-  }
-
-  session$getOutput <- function(name){
-    # Unlike the real outputs, we're going to return the last value rather than the unevaluated function
-    if (is.null(outputs[[name]]$promise)) {
-      stop("The test referenced an output that hasn't been defined yet: output$", name)
-    }
-    # Make promise return
-    v <- extract(outputs[[name]]$promise)
-    if (!is.null(v$err)){
-      stop(v$err)
-    } else {
-      v$val
-    }
-  }
-  # TODO: make private?
-  session$flush <- function(){
-    isolate(flushCBs$invoke(..stacktraceon = TRUE))
-    flushReact()
-    isolate(flushedCBs$invoke(..stacktraceon = TRUE))
-    later::run_now()
-  }
-  session$setInputs <- function(...){
-    vals <- list(...)
-    # TODO: is there really not a way to access `names` from inside an lapply?
-    lapply(names(vals), function(k){
-      v <- vals[[k]]
-      .input$set(k, v)
-    })
-
-    session$flush()
-  }
-
-  # TODO: private
-  timer <- MockableTimerCallbacks$new()
-
-  session$scheduleTask <- function(millis, callback){
-    id <- timer$schedule(millis, callback)
-
-    # Return a deregistration callback
-    function() {
-      invisible(timer$unschedule(id))
-    }
-  }
-
-  session$elapse <- function(millis){
-    msLeft <- millis
-
-    while (msLeft > 0){
-      t <- timer$timeToNextEvent()
-
-      if (is.infinite(t) || t <= 0 || msLeft < t){
-        # Either there's no good upcoming event or we can't make it to it in the allotted time.
-        break
-      }
-      msLeft <- msLeft - t
-      timer$elapse(t)
-      timer$executeElapsed()
-      session$flush()
-    }
-
-    timer$elapse(msLeft)
-
-    # timerCallbacks must run before flushReact.
-    # TODO: needed? We're guaranteed to not have anything to run given the above loop, right?
-    timer$executeElapsed()
-    session$flush()
-  }
-  # Contract is to return Sys.time, which is seconds, not millis.
-  session$now <- function(){
-    timer$getElapsed()/1000
-  }
-
-  session$reactlog <- function(logEntry){} # TODO: Needed for mock?
-  session$incrementBusyCount <- function(){} # TODO: Needed for mock?
-
-  curTime <- 0
-
-  out <- .createOutputWriter(session)
-  class(out) <- "shinyoutput"
-
-  # Create a read-only copy of the inputs reactive.
-  session$input <- .createReactiveValues(.input, readonly = TRUE)
-  session$output <- out
+  # Create a mock session
+  session <- MockShinySession$new()
 
   # Parse the additional arguments
   args <- list(...)
@@ -268,18 +67,14 @@ testModule <- function(module, expr, args, ...) {
   args[["output"]] <- session$output
   args[["session"]] <- session
 
-  # Store the result of the last evaluated expression so that we can stash the returned value
-  r <- NULL
-
   # Initialize the module
   isolate(
     withReactiveDomain(
       session,
       withr::with_options(list(`shiny.allowoutputreads`=TRUE), {
+        # Remember that invoking this module implicitly assigns to `session$env`
+        # Also, assigning to `$returned` will cause a flush to happen automatically.
         session$returned <- do.call(module, args)
-
-        # Initial flush
-        session$flush()
       })
     )
   )
@@ -296,7 +91,7 @@ testModule <- function(module, expr, args, ...) {
     )
   })
 
-  if (!isClosed){
+  if (!session$isClosed()){
     session$close()
   }
 }

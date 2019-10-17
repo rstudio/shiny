@@ -4,12 +4,12 @@
 \alias{testServer}
 \title{Test an app's server-side logic}
 \usage{
-testServer(expr, dir = NULL)
+testServer(expr, appDir = NULL)
 }
 \arguments{
 \item{expr}{Test code containing expectations}
 
-\item{dir}{The directory root of the Shiny application. If \code{NULL}, this function
+\item{appdir}{The directory root of the Shiny application. If \code{NULL}, this function
 will work up the directory hierarchy --- starting with the current directory ---
 looking for a directory that contains an \code{app.R} or \code{server.R} file.}
 }

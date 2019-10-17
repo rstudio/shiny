@@ -1513,16 +1513,14 @@ reactiveTimer <- function(intervalMs=1000, session = getDefaultReactiveDomain())
   # reactId <- nextGlobalReactId()
   # rLog$define(reactId, paste0("timer(", intervalMs, ")"))
 
-  scheduler <- defineScheduler(session)
-
   dependents <- Map$new()
-  timerHandle <- scheduler(intervalMs, function() {
+  timerHandle <- session$.scheduleTask(intervalMs, function() {
     # Quit if the session is closed
     if (!is.null(session) && session$isClosed()) {
       return(invisible())
     }
 
-    timerHandle <<- scheduler(intervalMs, sys.function())
+    timerHandle <<- session$.scheduleTask(intervalMs, sys.function())
 
     doInvalidate <- function() {
       lapply(
@@ -1622,9 +1620,7 @@ invalidateLater <- function(millis, session = getDefaultReactiveDomain()) {
 
   clear_on_ended_callback <- function() {}
 
-  scheduler <- defineScheduler(session)
-
-  timerHandle <- scheduler(millis, function() {
+  timerHandle <- session$.scheduleTask(millis, function() {
     if (is.null(session)) {
       ctx$invalidate()
       return(invisible())
@@ -2375,7 +2371,7 @@ debounce <- function(r, millis, priority = 100, domain = getDefaultReactiveDomai
     }
 
     # The value (or possibly millis) changed. Start or reset the timer.
-    v$when <- getTime(domain) + millis()/1000
+    v$when <- domain$.now() + millis()/1000
   }, label = "debounce tracker", domain = domain, priority = priority)
 
   # This observer is the timer. It rests until v$when elapses, then touches
@@ -2384,7 +2380,7 @@ debounce <- function(r, millis, priority = 100, domain = getDefaultReactiveDomai
     if (is.null(v$when))
       return()
 
-    now <- getTime(domain)
+    now <- domain$.now()
     if (now >= v$when) {
       # Mod by 999999999 to get predictable overflow behavior
       v$trigger <- isolate(v$trigger %OR% 0) %% 999999999 + 1
@@ -2435,12 +2431,12 @@ throttle <- function(r, millis, priority = 100, domain = getDefaultReactiveDomai
     if (is.null(v$lastTriggeredAt)) {
       0
     } else {
-      max(0, (v$lastTriggeredAt + millis()/1000) - getTime(domain)) * 1000
+      max(0, (v$lastTriggeredAt + millis()/1000) - domain$.now()) * 1000
     }
   }
 
   trigger <- function() {
-    v$lastTriggeredAt <- getTime(domain)
+    v$lastTriggeredAt <- domain$.now()
     # Mod by 999999999 to get predictable overflow behavior
     v$trigger <- isolate(v$trigger) %% 999999999 + 1
     v$pending <- FALSE

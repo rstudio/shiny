@@ -47,12 +47,6 @@ test_that("Vectorized unscheduling works", {
   expect_identical(timerCallbacks$unschedule(c(key1, key2, key3)), c(TRUE, FALSE, TRUE))
 })
 
-test_that("defineScheduler works", {
-  expect_identical(defineScheduler(NULL), scheduleTask)
-  expect_identical(defineScheduler(list()), scheduleTask)
-  expect_identical(defineScheduler(list(scheduleTask=123)), 123)
-})
-
 test_that("mockableTimer works", {
   mt <- MockableTimerCallbacks$new()
   called <- FALSE
@@ -69,19 +63,4 @@ test_that("mockableTimer works", {
   mt$elapse(51)
   expect_true(mt$executeElapsed())
   expect_true(called)
-})
-
-test_that("getTime works", {
-  start <- Sys.time()
-  t1 <- getTime(NULL)
-  t2 <- getTime(list())
-  t3 <- getTime(list(now = function(){456}))
-  end <- Sys.time()
-
-  expect_gte(t1, start)
-  expect_gte(t2, start)
-  expect_lte(t1, end)
-  expect_lte(t2, end)
-
-  expect_equal(t3, 456)
 })

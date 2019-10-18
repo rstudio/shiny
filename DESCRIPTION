@@ -141,6 +141,8 @@ Collate:
     'jqueryui.R'
     'middleware-shiny.R'
     'middleware.R'
+    'timer.R'
+    'mock-session.R'
     'modal.R'
     'modules.R'
     'notifications.R'
@@ -162,7 +164,6 @@ Collate:
     'snapshot.R'
     'tar.R'
     'test-export.R'
-    'timer.R'
     'update-input.R'
 RoxygenNote: 6.1.1
 Encoding: UTF-8

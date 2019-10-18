@@ -32,10 +32,13 @@
 #' @param rownames,colnames Logicals: include rownames? include colnames
 #'   (column headers)?
 #' @param digits An integer specifying the number of decimal places for
-#'   the numeric columns (this will not apply to columns with an integer
-#'   class). If `digits` is set to a negative value, then the numeric
-#'   columns will be displayed in scientific format with a precision of
-#'   `abs(digits)` digits.
+#'   the numeric columns, or a vector with the same number of integers
+#'   as the resulting table (if `rownames = TRUE`, this will be equal to
+#'   `ncol()+1`), with the *i*-th integer specifying the number of decimal
+#'   places for the *i*-th column (the integer is ignored if the
+#'   column is not of type double).
+#'   If `digits` is set to a negative value, then the numeric columns will
+#'   be displayed in scientific format with a precision of `abs(digits)` digits.
 #' @param na The string to use in the table cells whose values are missing
 #'   (i.e. they either evaluate to `NA` or `NaN`).
 #' @param ... Arguments to be passed through to [xtable::xtable()]
@@ -151,8 +154,12 @@ renderTable <- function(expr, striped = FALSE, hover = FALSE,
         }
       }
 
+      # If rownames is false, add dummy value for rownames
+      # So xtable always gets ncol + 1 or 1 values
+      if (!rownames && length(digits) == ncol(data)) digits <- c(0, digits)
+
       # Call xtable with its (updated) args
-      xtable_args <- c(xtable_args, align = cols, digits = digits)
+      xtable_args <- c(xtable_args, align = cols, digits = list(digits))
       xtable_res <- do.call(xtable, c(list(data), xtable_args))
 
       # Set up print args

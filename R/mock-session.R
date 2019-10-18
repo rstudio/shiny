@@ -49,6 +49,7 @@ MockShinySession <- R6Class(
     incrementBusyCount = function(){},
     output = NULL,
     input = NULL,
+    userData = NULL,
 
     initialize = function() {
       private$.input <- ReactiveValues$new(dedupe = FALSE, label = "input")
@@ -56,6 +57,8 @@ MockShinySession <- R6Class(
       private$flushedCBs <- Callbacks$new()
       private$endedCBs <- Callbacks$new()
       private$timer <- MockableTimerCallbacks$new()
+
+      self$userData <- new.env(parent=emptyenv())
 
       # create output
       out <- .createOutputWriter(self)
@@ -201,7 +204,37 @@ MockShinySession <- R6Class(
       }
     },
 
-    registerDataObj = function(name, data, filterFunc) {}
+    registerDataObj = function(name, data, filterFunc) {},
+    allowReconnect = function(value) {},
+    reload = function() {},
+    resetBrush = function(brushId) {
+      warning("session$brush isn't meaningfully mocked on the MockShinySession")
+    },
+    sendCustomMessage = function(type, message) {},
+    sendBinaryMessage = function(type, message) {},
+    sendInputMessage = function(inputId, message) {},
+    setBookmarkExclude = function(names) {
+      warning("Bookmarking isn't meaningfully mocked in MockShinySession")
+    },
+    getBookmarkExclude = function() {
+      warning("Bookmarking isn't meaningfully mocked in MockShinySession")
+    },
+    onBookmark = function(fun) {
+      warning("Bookmarking isn't meaningfully mocked in MockShinySession")
+    },
+    onBookmarked = function(fun) {
+      warning("Bookmarking isn't meaningfully mocked in MockShinySession")
+    },
+    doBookmark = function() {
+      warning("Bookmarking isn't meaningfully mocked in MockShinySession")
+    },
+    onRestore = function(fun) {},
+    onRestored = function(fun) {},
+    exportTestValues = function() {},
+    getTestSnapshotUrl = function(input=TRUE, output=TRUE, export=TRUE, format="json") {},
+    ns = function(id) {
+      paste0("mock-session-", id) # TODO: does this need to be more complex/intelligent?
+    }
   ),
   private = list(
     .input = NULL,
@@ -231,6 +264,13 @@ MockShinySession <- R6Class(
       # here since flush is private.
       private$returnedVal <- value
       private$flush()
+    },
+    request = function(value) {
+      if (!missing(value)){
+        stop("session$request can't be assigned to")
+      }
+      warning("session$request doesn't currently simulate a realistic request on MockShinySession")
+      new.env(parent=emptyenv())
     }
   )
 )

@@ -9,6 +9,8 @@ shiny 1.4.0.9000
 
 ### Minor new features and improvements
 
+* Fixed [#2596](https://github.com/rstudio/shiny/issues/2596): The digits parameter of the `renderTable` function now accepts a vector. ([#2674](https://github.com/rstudio/shiny/pull/2674))
+
 ### Bug fixes
 
 Fixed [#2653](https://github.com/rstudio/shiny/issues/2653): The `dataTableOutput()` could have incorrect output if certain characters were in the column names. ([#2658](https://github.com/rstudio/shiny/pull/2658))

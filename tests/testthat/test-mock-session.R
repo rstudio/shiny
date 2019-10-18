@@ -163,37 +163,20 @@ test_that("session supports allowReconnect", {
 
 test_that("session supports clientData", {
   session <- MockShinySession$new()
-  isolate({
-    #' \item{clientData}{
-    #'   A [reactiveValues()] object that contains information about the client.
-    #'   \itemize{
-    #'     \item{`allowDataUriScheme` is a logical value that indicates whether
-    #'       the browser is able to handle URIs that use the `data:` scheme.
-    #'     }
-    #'     \item{`pixelratio` reports the "device pixel ratio" from the web browser,
-    #'       or 1 if none is reported. The value is 2 for Apple Retina displays.
-    #'     }
-    #'     \item{`singletons` - for internal use}
-    #'     \item{`url_protocol`, `url_hostname`, `url_port`,
-    #'       `url_pathname`, `url_search`, `url_hash_initial`
-    #'       and `url_hash` can be used to get the components of the URL
-    #'       that was requested by the browser to load the Shiny app page.
-    #'       These values are from the browser's perspective, so neither HTTP
-    #'       proxies nor Shiny Server will affect these values. The
-    #'       `url_search` value may be used with [parseQueryString()]
-    #'       to access query string parameters.
-    #'     }
-    #'   }
-    #'   `clientData` also contains information about each output.
-    #'   \code{output_\var{outputId}_width} and \code{output_\var{outputId}_height}
-    #'   give the dimensions (using `offsetWidth` and `offsetHeight`) of
-    #'   the DOM element that is bound to \code{\var{outputId}}, and
-    #'   \code{output_\var{outputId}_hidden} is a logical that indicates whether
-    #'   the element is hidden. These values may be `NULL` if the output is
-    #'   not bound.
-    #' }
-    testthat::skip("NYI")
-  })
+  expect_equal(session$clientData$allowDataUriScheme, TRUE)
+  expect_equal(session$clientData$pixelratio, 1)
+  expect_equal(session$clientData$url_protocol, "http:")
+  expect_equal(session$clientData$url_hostname, "mocksession")
+  expect_equal(session$clientData$url_port, 1234)
+  expect_equal(session$clientData$url_pathname, "/mockpath")
+  expect_equal(session$clientData$url_hash, "#mockhash")
+  expect_equal(session$clientData$url_hash_initial, "#mockhash")
+  expect_equal(session$clientData$url_search, "?mocksearch=1")
+
+  # Arbitrary names have width, height, and hidden
+  expect_equal(session$clientData$output_arbitrary_width, 600)
+  expect_equal(session$clientData$output_arbitrary_height, 400)
+  expect_equal(session$clientData$output_arbitrary_hidden, FALSE)
 })
 
 test_that("session supports ns", {

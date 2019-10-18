@@ -1,13 +1,21 @@
-# TODO: is there a way to get this behavior without exporting these? R6?
+# TODO: is there a way to get this behavior without exporting these functions? R6?
+# TODO: clientData is documented as a reactiveValues, which this is not. Is it possible that
+#   users are currently assigning into clientData? That would not work as expected here.
 #' @noRd
 #' @export
 `$.mockclientdata` <- function(x, name) {
-  if (name == "pixelratio"){
-    return(1)
-  }
+  if (name == "allowDataUriScheme") { return(TRUE) }
+  if (name == "pixelratio") { return(1) }
+  if (name == "url_protocol") { return("http:") }
+  if (name == "url_hostname") { return("mocksession") }
+  if (name == "url_port") { return(1234) }
+  if (name == "url_pathname") { return("/mockpath") }
+  if (name == "url_hash") { return("#mockhash") }
+  if (name == "url_hash_initial") { return("#mockhash") }
+  if (name == "url_search") { return("?mocksearch=1") }
 
   clientRE <- "^output_(.+)_([^_]+)$"
-  if(grepl(clientRE, name)){
+  if(grepl(clientRE, name)) {
     # TODO: use proper regex group matching here instead of redundantly parsing
     el <- sub(clientRE, "\\1", name)
     att <- sub(clientRE, "\\2", name)

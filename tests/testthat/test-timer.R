@@ -50,7 +50,7 @@ test_that("Vectorized unscheduling works", {
 test_that("defineScheduler works", {
   expect_identical(defineScheduler(NULL), scheduleTask)
   expect_identical(defineScheduler(list()), scheduleTask)
-  expect_identical(defineScheduler(list(scheduleTask=123)), 123)
+  expect_identical(defineScheduler(list(.scheduleTask=123)), 123)
 })
 
 test_that("mockableTimer works", {
@@ -75,7 +75,7 @@ test_that("getTime works", {
   start <- Sys.time()
   t1 <- getTime(NULL)
   t2 <- getTime(list())
-  t3 <- getTime(list(now = function(){456}))
+  t3 <- getTime(list(.now = function(){456}))
   end <- Sys.time()
 
   expect_gte(t1, start)

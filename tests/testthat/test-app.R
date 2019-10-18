@@ -99,7 +99,7 @@ test_that("With ui/server.R, global.R is loaded before R/ helpers and into the r
 })
 
 
-test_that("Loading supporting R fils is opt-out", {
+test_that("Loading supporting R files is opt-out", {
   calls <- list()
   sourceStub <- function(...){
     calls[[length(calls)+1]] <<- list(...)
@@ -128,7 +128,7 @@ test_that("Loading supporting R fils is opt-out", {
 })
 
 
-test_that("Disabling supporting R fils works", {
+test_that("Disabling supporting R files works", {
   calls <- list()
   sourceStub <- function(...){
     calls[[length(calls)+1]] <<- list(...)

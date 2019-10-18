@@ -1369,7 +1369,7 @@ test_that("reactivePoll doesn't leak observer (#1548)", {
 
 test_that("reactivePoll prefers session$scheduleTask", {
   called <- 0
-  session <- list(reactlog = function(...){}, onEnded = function(...){}, scheduleTask = function(millis, cb){
+  session <- list(reactlog = function(...){}, onEnded = function(...){}, .scheduleTask = function(millis, cb){
     expect_equal(millis, 50)
     called <<- called + 1
   })
@@ -1388,7 +1388,7 @@ test_that("reactivePoll prefers session$scheduleTask", {
 
 test_that("invalidateLater prefers session$scheduleTask", {
   called <- 0
-  session <- list(reactlog = function(...){}, onEnded = function(...){}, scheduleTask = function(millis, cb){
+  session <- list(reactlog = function(...){}, onEnded = function(...){}, .scheduleTask = function(millis, cb){
     expect_equal(millis, 10)
     called <<- called + 1
   })
@@ -1406,7 +1406,7 @@ test_that("invalidateLater prefers session$scheduleTask", {
 
 test_that("reactiveTimer prefers session$scheduleTask", {
   called <- 0
-  session <- list(reactlog = function(...){}, onEnded = function(...){}, scheduleTask = function(millis, cb){
+  session <- list(reactlog = function(...){}, onEnded = function(...){}, .scheduleTask = function(millis, cb){
     expect_equal(millis, 10)
     called <<- called + 1
   })

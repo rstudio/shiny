@@ -1336,13 +1336,13 @@ uiOutput <- htmlOutput
 downloadButton <- function(outputId,
                            label="Download",
                            class=NULL, ...) {
-  aTag <- tags$a(id=outputId,
-                 class=paste('btn btn-default shiny-download-link', class),
-                 href='',
-                 target='_blank',
-                 download=NA,
-                 icon("download"),
-                 label, ...)
+  tags$a(id=outputId,
+         class=paste('btn btn-default shiny-download-link', class),
+         href='',
+         target='_blank',
+         download=NA,
+         icon("download"),
+         label, ...)
 }
 
 #' @rdname downloadButton

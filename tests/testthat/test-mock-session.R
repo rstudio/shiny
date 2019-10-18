@@ -35,9 +35,9 @@ test_that("reactivePoll supported", {
   session <- MockShinySession$new()
   i <- 0
   isolate({
-    rp <- reactivePoll(10, session, Sys.time, function(){ i <<- i + 1 })
+    rp <- reactivePoll(10, session, function(){ rnorm(1) }, function(){ i <<- i + 1 })
     observe({
-      # Sys.time as the check function will cause it to always run the update.
+      # rnorm(1) as the check function will cause it to (almost) always run the update.
       rp()
     })
   })

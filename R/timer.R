@@ -62,7 +62,7 @@ TimerCallbacks <- R6Class(
     },
     takeElapsed = function() {
       t <- .now()
-      elapsed <- .times$time < .now()
+      elapsed <- .times$time <= .now()
       result <- .times[elapsed,]
       .times <<- .times[!elapsed,]
 
@@ -98,11 +98,14 @@ MockableTimerCallbacks <- R6Class(
     initialize = function() {
       super$initialize(self$now)
     },
-    now = function(){
+    now = function() {
       return(private$time)
     },
-    elapse = function(millis){
+    elapse = function(millis) {
       private$time <- private$time + millis
+    },
+    getElapsed = function() {
+      private$time
     }
   ), private = list(
     time = 0L

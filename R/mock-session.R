@@ -76,7 +76,7 @@ MockShinySession <- R6Class(
       # Create a read-only copy of the inputs reactive.
       self$input <- .createReactiveValues(private$.input, readonly = TRUE)
     },
-    onFlush = function(fun, once) {
+    onFlush = function(fun, once=TRUE) {
       if (!isTRUE(once)) {
         return(private$flushCBs$register(fun))
       } else {
@@ -87,7 +87,7 @@ MockShinySession <- R6Class(
         return(dereg)
       }
     },
-    onFlushed = function(fun, once) {
+    onFlushed = function(fun, once=TRUE) {
       if (!isTRUE(once)) {
         return(private$flushedCBs$register(fun))
       } else {

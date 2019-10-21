@@ -122,12 +122,9 @@ MockShinySession <- R6Class(
 
     setInputs = function(...) {
       vals <- list(...)
-      # TODO: is there really not a way to access `names` from inside an lapply?
-      lapply(names(vals), function(k){
-        v <- vals[[k]]
-        private$.input$set(k, v)
+      mapply(names(vals), vals, FUN = function(name, value) {
+        private$.input$set(name, value)
       })
-
       private$flush()
     },
 
@@ -159,7 +156,8 @@ MockShinySession <- R6Class(
 
       private$timer$elapse(msLeft)
 
-      # TODO: needed? We're guaranteed to not have anything to run given the above loop, right?
+      # Run again in case our callbacks resulted in a scheduled
+      # function that needs executing.
       private$timer$executeElapsed()
       private$flush()
     },
@@ -174,7 +172,7 @@ MockShinySession <- R6Class(
         # We could just stash the promise, but we get an "unhandled promise error". This bypasses
         prom <- NULL
         tryCatch({
-          v <- value(self, name) #TODO: I'm not clear what `name` is supposed to be
+          v <- value(self, name)
           if (!promises::is.promise(v)){
             # Make our sync value into a promise
             prom <- promises::promise(function(resolve, reject){ resolve(v) })

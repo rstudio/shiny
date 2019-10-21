@@ -2362,17 +2362,21 @@ debounce <- function(r, millis, priority = 100, domain = getDefaultReactiveDomai
     when = NULL # the deadline for the timer to fire; NULL if not scheduled
   )
 
-  # Responsible for tracking when f() changes.
+  # Responsible for tracking when r() changes.
   firstRun <- TRUE
   observe({
-    r()
-
     if (firstRun) {
       # During the first run we don't want to set v$when, as this will kick off
       # the timer. We only want to do that when we see r() change.
       firstRun <<- FALSE
+
+      # Ensure r() is called only after setting firstRun to FALSE since r()
+      # may throw an error
+      r()
       return()
     }
+    # This ensures r() is still tracked after firstRun
+    r()
 
     # The value (or possibly millis) changed. Start or reset the timer.
     v$when <- getTime(domain) + millis()/1000

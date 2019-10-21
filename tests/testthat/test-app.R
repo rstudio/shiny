@@ -99,7 +99,7 @@ test_that("With ui/server.R, global.R is loaded before R/ helpers and into the r
 })
 
 
-test_that("Loading supporting R fils is opt-in", {
+test_that("Loading supporting R files is opt-out", {
   calls <- list()
   sourceStub <- function(...){
     calls[[length(calls)+1]] <<- list(...)
@@ -122,11 +122,39 @@ test_that("Loading supporting R fils is opt-in", {
   sa$onStart()
   sa$onStop() # Close down to free up resources
 
-  # Should have seen one call from global.R -- helpers are disabled
-  expect_length(calls, 1)
+  # Should have seen three calls from global.R -- helpers are enabled
+  expect_length(calls, 3)
   expect_match(calls[[1]][[1]], "/global\\.R$", perl=TRUE)
 })
 
+
+test_that("Disabling supporting R files works", {
+  calls <- list()
+  sourceStub <- function(...){
+    calls[[length(calls)+1]] <<- list(...)
+    NULL
+  }
+
+  # Temporarily unset autoloading option
+  orig <- getOption("shiny.autoload.r", NULL)
+  options(shiny.autoload.r=FALSE)
+  on.exit({options(shiny.autoload.r=orig)}, add=TRUE)
+
+  # + shinyAppDir_serverR
+  # +--- sourceUTF8
+  # +--+ loadSupport
+  # |  +--- sourceUTF8
+  loadSpy <- rewire(loadSupport, sourceUTF8 = sourceStub)
+  sad <- rewire(shinyAppDir_serverR, sourceUTF8 = sourceStub, loadSupport = loadSpy)
+
+  sa <- sad(normalizePath("../test-helpers/app1-standard"))
+  sa$onStart()
+  sa$onStop() # Close down to free up resources
+
+  # Should have seen one calls from global.R -- helpers are disabled
+  expect_length(calls, 1)
+  expect_match(calls[[1]][[1]], "/global\\.R$", perl=TRUE)
+})
 
 test_that("app.R is loaded after R/ helpers and into the right envs", {
   calls <- list()

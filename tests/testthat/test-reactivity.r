@@ -1366,3 +1366,59 @@ test_that("reactivePoll doesn't leak observer (#1548)", {
 
   expect_equal(i, 3L)
 })
+
+test_that("reactivePoll prefers session$scheduleTask", {
+  called <- 0
+  session <- list(reactlog = function(...){}, onEnded = function(...){}, .scheduleTask = function(millis, cb){
+    expect_equal(millis, 50)
+    called <<- called + 1
+  })
+
+  count <- reactivePoll(50, session, function(){}, function(){})
+  observe({
+    count()
+  })
+
+  for (i in 1:4) {
+    Sys.sleep(0.05)
+    shiny:::flushReact()
+  }
+  expect_gt(called, 0)
+})
+
+test_that("invalidateLater prefers session$scheduleTask", {
+  called <- 0
+  session <- list(reactlog = function(...){}, onEnded = function(...){}, .scheduleTask = function(millis, cb){
+    expect_equal(millis, 10)
+    called <<- called + 1
+  })
+
+  observe({
+    invalidateLater(10, session)
+  })
+
+  for (i in 1:4) {
+    Sys.sleep(0.05)
+    shiny:::flushReact()
+  }
+  expect_gt(called, 0)
+})
+
+test_that("reactiveTimer prefers session$scheduleTask", {
+  called <- 0
+  session <- list(reactlog = function(...){}, onEnded = function(...){}, .scheduleTask = function(millis, cb){
+    expect_equal(millis, 10)
+    called <<- called + 1
+  })
+
+  rt <- reactiveTimer(10, session)
+  observe({
+    rt()
+  })
+
+  for (i in 1:4) {
+    Sys.sleep(0.05)
+    shiny:::flushReact()
+  }
+  expect_gt(called, 0)
+})

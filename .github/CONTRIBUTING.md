@@ -2,12 +2,14 @@ We welcome contributions to the **shiny** package. To submit a contribution:
 
 1. [Fork](https://github.com/rstudio/shiny/fork) the repository and make your changes.
 
-2. Ensure that you have signed the [individual](https://rstudioblog.files.wordpress.com/2017/05/rstudio_individual_contributor_agreement.pdf) or [corporate](https://rstudioblog.files.wordpress.com/2017/05/rstudio_corporate_contributor_agreement.pdf) contributor agreement as appropriate. You can send the signed copy to jj@rstudio.com.
+2. Submit a [pull request](https://help.github.com/articles/using-pull-requests).
 
-3. Submit a [pull request](https://help.github.com/articles/using-pull-requests).
+3. Ensure that you have signed the contributor license agreement. It will appear as a "Check"
+   on your PR and a comment from "CLAassistant" will also appear explaining whether you have
+   yet to sign. After you sign, you can click the "Recheck" link in that comment and the check
+   will flip to reflect that you've signed.
 
 We generally do not merge pull requests that update included web libraries (such as Bootstrap or jQuery) because it is difficult for us to verify that the update is done correctly; we prefer to update these libraries ourselves.
-
 
 ## How to make changes
 

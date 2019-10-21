@@ -99,7 +99,6 @@ reference:
       - bootstrapLib
       - suppressDependencies
       - insertUI
-      - removeUI
   - title: Rendering functions
     desc: Functions that you use in your application's server side code, assigning them to outputs that appear in your user interface.
     contents:

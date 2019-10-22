@@ -167,12 +167,16 @@ MockShinySession <- R6Class(
       private$timer$getElapsed()/1000
     },
 
-    defineOutput = function(name, value, label) {
+    defineOutput = function(name, func, label) {
+      if (!is.null(private$outs[[name]]$obs)) {
+        private$outs[[name]]$obs$destroy()
+      }
+
       obs <- observe({
         # We could just stash the promise, but we get an "unhandled promise error". This bypasses
         prom <- NULL
         tryCatch({
-          v <- value(self, name)
+          v <- func(self, name)
           if (!promises::is.promise(v)){
             # Make our sync value into a promise
             prom <- promises::promise(function(resolve, reject){ resolve(v) })
@@ -192,14 +196,25 @@ MockShinySession <- R6Class(
             list(val = NULL, err = e)
           })
       })
-      private$outs[[name]] <- list(obs = obs, func = value, promise = NULL)
+      private$outs[[name]] <- list(obs = obs, func = func, promise = NULL)
     },
 
     getOutput = function(name) {
       # Unlike the real outputs, we're going to return the last value rather than the unevaluated function
-      if (is.null(private$outs[[name]]$promise)) {
+      if (is.null(private$outs[[name]])) {
         stop("The test referenced an output that hasn't been defined yet: output$", name)
       }
+
+      if (is.null(private$outs[[name]]$promise)) {
+        # Means the output was defined but the observer hasn't had a chance to run
+        # yet. Run flushReact() now to force the observer to run.
+        flushReact()
+
+        if (is.null(private$outs[[name]]$promise)) {
+          stop("output$", name, " encountered an unexpected error resolving its promise")
+        }
+      }
+
       # Make promise return
       v <- extract(private$outs[[name]]$promise)
       if (!is.null(v$err)){

@@ -52,7 +52,7 @@ actionButton <- function(inputId, label, icon = NULL, width = NULL, ...) {
   tags$button(id=inputId,
     style = if (!is.null(width)) paste0("width: ", validateCssUnit(width), ";"),
     type="button",
-    class="btn btn-default btn-secondary action-button",
+    class="btn btn-default btn-outline-secondary action-button",
     `data-val` = value,
     list(validateIcon(icon), label),
     ...

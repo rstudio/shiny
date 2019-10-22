@@ -282,6 +282,9 @@ MockShinySession <- R6Class(
     getTestSnapshotUrl = function(input=TRUE, output=TRUE, export=TRUE, format="json") {},
     ns = function(id) {
       paste0("mock-session-", id) # TODO: does this need to be more complex/intelligent?
+    },
+    flushReact = function(){
+      shiny:::flushReact()
     }
   ),
   private = list(

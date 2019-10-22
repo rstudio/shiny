@@ -9,7 +9,7 @@ test_that("invalidateLater supported", {
       i <<- i + 1
     })
   })
-  flushReact()
+  session$flushReact()
   expect_equal(i, 1)
   session$elapse(10)
   expect_equal(i, 2)
@@ -25,7 +25,7 @@ test_that("reactiveTimer supported", {
       i <<- i + 1
     })
   })
-  flushReact()
+  session$flushReact()
   expect_equal(i, 1)
   session$elapse(10)
   expect_equal(i, 2)
@@ -36,7 +36,7 @@ test_that("getOutput should auto-flush if needed", {
   session$defineOutput("n", function(...){ 123 })
   # There's no flushing in between these lines, so getOutput may need to instigate a flush
   # in order to get the requisite observer to run.
-  session$getOutput("n")
+  expect_equal(session$getOutput("n"), 123)
 })
 
 test_that("reactivePoll supported", {
@@ -49,10 +49,10 @@ test_that("reactivePoll supported", {
       rp()
     })
   })
-  flushReact()
+  session$flushReact()
   expect_equal(i, 1)
   session$elapse(10)
-  flushReact()
+  session$flushReact()
   expect_equal(i, 2)
 })
 

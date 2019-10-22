@@ -1,3 +1,31 @@
+# Promise helpers taken from:
+#   https://github.com/rstudio/promises/blob/master/tests/testthat/common.R
+# Block until all pending later tasks have executed
+wait_for_it <- function() {
+  while (!later::loop_empty()) {
+    later::run_now()
+    Sys.sleep(0.1)
+  }
+}
+
+# Block until the promise is resolved/rejected. If resolved, return the value.
+# If rejected, throw (yes throw, not return) the error.
+#' @importFrom promises %...!%
+#' @importFrom promises %...>%
+extract <- function(promise) {
+  promise_value <- NULL
+  error <- NULL
+  promise %...>%
+    (function(value) promise_value <<- value) %...!%
+    (function(reason) error <<- reason)
+
+  wait_for_it()
+  if (!is.null(error))
+    stop(error)
+  else
+    promise_value
+}
+
 # TODO: is there a way to get this behavior without exporting these functions? R6?
 # TODO: clientData is documented as a reactiveValues, which this is not. Is it possible that
 #   users are currently assigning into clientData? That would not work as expected here.

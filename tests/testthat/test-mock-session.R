@@ -31,6 +31,14 @@ test_that("reactiveTimer supported", {
   expect_equal(i, 2)
 })
 
+test_that("getOutput should auto-flush if needed", {
+  session <- MockShinySession$new()
+  session$defineOutput("n", function(...){ 123 })
+  # There's no flushing in between these lines, so getOutput may need to instigate a flush
+  # in order to get the requisite observer to run.
+  session$getOutput("n")
+})
+
 test_that("reactivePoll supported", {
   session <- MockShinySession$new()
   i <- 0

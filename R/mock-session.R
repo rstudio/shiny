@@ -267,12 +267,8 @@ MockShinySession <- R6Class(
     getBookmarkExclude = function() {
       warning("Bookmarking isn't meaningfully mocked in MockShinySession")
     },
-    onBookmark = function(fun) {
-      warning("Bookmarking isn't meaningfully mocked in MockShinySession")
-    },
-    onBookmarked = function(fun) {
-      warning("Bookmarking isn't meaningfully mocked in MockShinySession")
-    },
+    onBookmark = function(fun) {},
+    onBookmarked = function(fun) {},
     doBookmark = function() {
       warning("Bookmarking isn't meaningfully mocked in MockShinySession")
     },

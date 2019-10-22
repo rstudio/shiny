@@ -253,12 +253,14 @@ test_that("session supports getBookmarkExclude", {
 
 test_that("session supports onBookmark", {
   session <- MockShinySession$new()
-  expect_warning(session$onBookmark(fun=1), "Bookmarking isn't meaningfully mocked")
+  session$onBookmark(fun=1)
+  expect_true(TRUE) # testthat insists that every test must have an expectation
 })
 
 test_that("session supports onBookmarked", {
   session <- MockShinySession$new()
-  expect_warning(session$onBookmarked(fun=1), "Bookmarking isn't meaningfully mocked")
+  session$onBookmarked(fun=1)
+  expect_true(TRUE) # testthat insists that every test must have an expectation
 })
 
 test_that("session supports doBookmark", {

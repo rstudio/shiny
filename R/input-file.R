@@ -121,7 +121,7 @@ fileInput <- function(inputId, label, multiple = FALSE, accept = NULL,
     tags$div(
       id=paste(inputId, "_progress", sep=""),
       class="progress progress-striped active shiny-file-input-progress",
-      tags$div(class="progress-bar")
+      tags$div(class="progress-bar progress-bar-striped")
     )
   )
 }

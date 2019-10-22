@@ -1793,7 +1793,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
           // Progress bar starts hidden; will be made visible if a value is provided
           // during updates.
           exports.notifications.show({
-            html: "<div id=\"shiny-progress-" + message.id + "\" class=\"shiny-progress-notification\">" + '<div class="progress progress-striped active" style="display: none;"><div class="progress-bar"></div></div>' + '<div class="progress-text">' + '<span class="progress-message">message</span> ' + '<span class="progress-detail"></span>' + '</div>' + '</div>',
+            html: "<div id=\"shiny-progress-" + message.id + "\" class=\"shiny-progress-notification\">" + '<div class="progress progress-striped active" style="display: none;"><div class="progress-bar progress-bar-striped"></div></div>' + '<div class="progress-text">' + '<span class="progress-message">message</span> ' + '<span class="progress-detail"></span>' + '</div>' + '</div>',
             id: message.id,
             duration: null
           });
@@ -1810,7 +1810,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
           // Add div for just this progress ID
           var depth = $('.shiny-progress.open').length;
           // The 'bar' class is needed for backward compatibility with Bootstrap 2.
-          var $progress = $('<div class="shiny-progress open">' + '<div class="progress progress-striped active"><div class="progress-bar bar"></div></div>' + '<div class="progress-text">' + '<span class="progress-message">message</span>' + '<span class="progress-detail"></span>' + '</div>' + '</div>');
+          var $progress = $('<div class="shiny-progress open">' + '<div class="progress progress-striped active"><div class="progress-bar bar progress-bar-striped"></div></div>' + '<div class="progress-text">' + '<span class="progress-message">message</span>' + '<span class="progress-detail"></span>' + '</div>' + '</div>');
 
           $progress.attr('id', message.id);
           $container.append($progress);

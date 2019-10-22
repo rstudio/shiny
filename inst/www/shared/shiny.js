@@ -5859,6 +5859,8 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     };
     this.$setError = function (error) {
       this.$bar().toggleClass('progress-bar-danger', error !== null);
+      // bs4 forward compatibility
+      this.$bar().toggleClass('bg-danger', error !== null);
       if (error !== null) {
         this.onProgress(null, 1);
         this.$bar().text(error);

@@ -48,7 +48,15 @@ $.extend(bootstrapTabInputBinding, {
       // also be on the <a>) so that the tab manipulation
       // functions can work without major modifications.
       if (!$target.parent("li.active").length) {
-        $oldTarget.parent("li").removeClass("active");
+        if ($oldTarget.length) {
+          $oldTarget.parent("li").removeClass("active");
+        } else {
+          // There are cases where $oldTarget doesn't exist
+          // (e.g., if a dropdown-item is already selected,
+          // then a new dropdown-item is selected)
+          $target.parents(".dropdown-menu").find("*").removeClass("active");
+          $target.addClass("active");
+        }
         $target.parent("li").addClass("active");
       }
       callback();

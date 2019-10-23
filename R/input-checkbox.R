@@ -38,7 +38,6 @@ checkboxInput <- function(inputId, label, value = FALSE, width = NULL) {
   div(class = "form-group shiny-input-container",
     style = if (!is.null(width)) paste0("width: ", validateCssUnit(width), ";"),
     div(class = "checkbox",
-      # TODO: bs4 compat
       tags$label(inputTag, tags$span(label))
     )
   )

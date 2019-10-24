@@ -59,7 +59,7 @@ testModule <- function(module, expr, args, ...) {
     withReactiveDomain(
       session,
       withr::with_options(list(`shiny.allowoutputreads`=TRUE), {
-        eval(expr, session$env)
+        eval(expr, new.env(parent=session$env))
       })
     )
   })

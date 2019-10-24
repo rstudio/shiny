@@ -57,7 +57,7 @@ testModule(module, {
 
 There are a few things to notice in this example.
 
-First, the test expression provided here assumes the existence of some variables -- specifically, `input`, `output`, and `r`. This is safe because the test code provided to `testModule` is run in the module's environment. This means that any parameters passed in to your module (such as `input`, `output`, and `session`) are readily available, as are any intermediate objects or reactives that you define in the module (such as `r`).
+First, the test expression provided here assumes the existence of some variables -- specifically, `input`, `output`, and `r`. This is safe because the test code provided to `testModule` is run in a child of the module's environment. This means that any parameters passed in to your module (such as `input`, `output`, and `session`) are readily available, as are any intermediate objects or reactives that you define in the module (such as `r`). However, because it's a child environment, your test code is less likely to accidentally modify anything in the module itself.
 
 Second, you'll need to give values to any inputs that you want to be defined; by default, they're all `NULL`. We do that using the `session$setInputs()` method. The `session` object used in `testModule` differs from the real `session` object Shiny uses; this allows us to tailor it to be more suitable for testing purposes by modifying or creating new methods such as `setInputs()`.
 
@@ -237,7 +237,7 @@ In terms of your testing strategy, you shouldn't bother yourself with "is Shiny 
   1. Does the plot generate without producing an error?
   2. Is the plot visually correct?
 
-  `testModule` is great for assessing the first component here. By merely referencing `output$plot` in your test, you'll confirm that the plot was generated without an error. The second component is better suited for a shinytest test which actually loads the Shiny app in a headless browser and confirms that the content visually appears the same as it did previously. Doing this kind of test in `testModule` would be complex and may not be reliable as graphics devices differ slightly from platform to platform; i.e. the exact bits in the `src` field of your plot will not necessarily be reproducible between different versions of R or different operating systems.
+`testModule` is great for assessing the first component here. By merely referencing `output$plot` in your test, you'll confirm that the plot was generated without an error. The second component is better suited for a shinytest test which actually loads the Shiny app in a headless browser and confirms that the content visually appears the same as it did previously. Doing this kind of test in `testModule` would be complex and may not be reliable as graphics devices differ slightly from platform to platform; i.e. the exact bits in the `src` field of your plot will not necessarily be reproducible between different versions of R or different operating systems.
 
 For htmlwidgets, you can adopt a similar strategy. The goal is not to confirm that the htmlwidget's render function is behaving properly -- but rather that the data that you intend to render is indeed getting rendered properly.
 
@@ -284,3 +284,36 @@ testServer({
 ```
 
 As you can see, the test expression can be run for Shiny servers just like it was run for modules.
+
+## Flushing Reactives
+
+Reactivity differs from imperative programming in that the processing required to update reactives can be deferred and batched together. While this is a boon for the computational speed of a reactive system, it does create some ambiguity about *when* the reactives should be processed or "flushed".
+
+`testModule` will do its best to automatically "flush" the reactives at the right time. There are two triggers that will cause a reactive flush:
+
+1. Calling `session$setInputs()` - After setting the updated inputs, the reactives will be flushed.
+2. Calling `session$elapse()` - After the scheduled callbacks are executed, reactives will be flushed.
+
+However, there may be other times that a Shiny module author might want to trigger a reactive flush. For instance, you might want to flush the reactives after updating an element in a `reactiveValues` in your module like this one.
+
+```{r}
+module <- function(input, output, session){
+  rv <- reactiveValues(a=1)
+  output$txt <- renderText({
+    rv$a
+  })
+}
+
+testModule(module, {
+  expect_equal(output$txt, "1")
+  
+  rv$a <- 2
+  # testModule has no innate knowledge of our `rv` variable so we'll need to manually
+  # force a flush of the reactives.
+  session$flushReact()
+  
+  expect_equal(output$txt, "2")
+})
+```
+
+As you can see, we can use `session$flushReact()` to trigger a reactive flush at any point we'd like. In this example, `testModule` knows  nothing about our `rv` variable. Therefore if we want to observe reactive changes that occur after manually updating this variable, we'd need to explicitly flush the reactives.

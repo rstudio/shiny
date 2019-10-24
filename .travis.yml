@@ -5,7 +5,7 @@ matrix:
       r: release
       r_packages:
         - devtools
-        - roxygen2
+      r_github_packages: r-lib/roxygen2
       script: ./tools/checkDocsCurrent.sh
     - name: "Javascript check"
       language: node_js

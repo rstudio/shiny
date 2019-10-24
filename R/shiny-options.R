@@ -60,7 +60,7 @@ getShinyOption <- function(name, default = NULL) {
 #'   \item{shiny.fullstacktrace (defaults to `FALSE`)}{Controls whether "pretty" (`FALSE`) or full
 #'     stack traces (`TRUE`) are dumped to the console when errors occur during Shiny app execution.
 #'     Pretty stack traces attempt to only show user-supplied code, but this pruning can't always
-#'     be done 100\% correctly.}
+#'     be done 100% correctly.}
 #'   \item{shiny.host (defaults to `"127.0.0.1"`)}{The IP address that Shiny should listen on. See
 #'     [runApp()] for more information.}
 #'   \item{shiny.jquery.version (defaults to `3`)}{The major version of jQuery to use.

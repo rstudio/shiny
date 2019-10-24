@@ -65,7 +65,7 @@ the debugger prompt when an error occurs.}
 \item{shiny.fullstacktrace (defaults to \code{FALSE})}{Controls whether "pretty" (\code{FALSE}) or full
 stack traces (\code{TRUE}) are dumped to the console when errors occur during Shiny app execution.
 Pretty stack traces attempt to only show user-supplied code, but this pruning can't always
-be done 100\\% correctly.}
+be done 100\% correctly.}
 \item{shiny.host (defaults to \code{"127.0.0.1"})}{The IP address that Shiny should listen on. See
 \code{\link[=runApp]{runApp()}} for more information.}
 \item{shiny.jquery.version (defaults to \code{3})}{The major version of jQuery to use.

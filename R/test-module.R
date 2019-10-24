@@ -8,8 +8,6 @@
 #'   values created inside of the module.
 #' @param args A list of arguments to pass into the module beyond `input`,
 #'   `output`, and `session`.
-#' @param initialState A list describing the initial values for `input`. If no
-#'   initial state is given, `input` will initialize as an empty list.
 #' @param ... Additional named arguments to be passed on to the module function.
 #' @include mock-session.R
 #' @export
@@ -18,6 +16,8 @@ testModule <- function(module, expr, args, ...) {
   .testModule(module, expr, args, ...)
 }
 
+#' @noRd
+#' @importFrom withr with_options
 .testModule <- function(module, expr, args, ...) {
   # Capture the environment from the module
   # Inserts `session$env <- environment()` at the top of the function
@@ -71,7 +71,7 @@ testModule <- function(module, expr, args, ...) {
 
 #' Test an app's server-side logic
 #' @param expr Test code containing expectations
-#' @param appdir The directory root of the Shiny application. If `NULL`, this function
+#' @param appDir The directory root of the Shiny application. If `NULL`, this function
 #'   will work up the directory hierarchy --- starting with the current directory ---
 #'   looking for a directory that contains an `app.R` or `server.R` file.
 #' @export
@@ -90,7 +90,6 @@ testServer <- function(expr, appDir=NULL) {
     formals(server) <- fn_formals
   }
 
-  s3 <<- server
   # Now test the server as we would a module
   .testModule(server, expr=substitute(expr))
 }

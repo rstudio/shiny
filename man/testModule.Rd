@@ -18,9 +18,6 @@ values created inside of the module.}
 \code{output}, and \code{session}.}
 
 \item{...}{Additional named arguments to be passed on to the module function.}
-
-\item{initialState}{A list describing the initial values for \code{input}. If no
-initial state is given, \code{input} will initialize as an empty list.}
 }
 \description{
 Test a shiny module

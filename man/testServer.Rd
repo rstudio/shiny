@@ -9,7 +9,7 @@ testServer(expr, appDir = NULL)
 \arguments{
 \item{expr}{Test code containing expectations}
 
-\item{appdir}{The directory root of the Shiny application. If \code{NULL}, this function
+\item{appDir}{The directory root of the Shiny application. If \code{NULL}, this function
 will work up the directory hierarchy --- starting with the current directory ---
 looking for a directory that contains an \code{app.R} or \code{server.R} file.}
 }

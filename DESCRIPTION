@@ -78,7 +78,8 @@ Imports:
     tools,
     crayon,
     rlang (>= 0.4.0),
-    fastmap (>= 1.0.0)
+    fastmap (>= 1.0.0),
+    withr
 Suggests:
     datasets,
     Cairo (>= 1.5-5),
@@ -89,7 +90,9 @@ Suggests:
     ggplot2,
     reactlog (>= 1.0.0),
     magrittr,
-    yaml
+    yaml,
+    future,
+    dygraphs
 URL: http://shiny.rstudio.com
 BugReports: https://github.com/rstudio/shiny/issues
 Collate:
@@ -169,3 +172,4 @@ Collate:
 RoxygenNote: 6.1.1
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
+VignetteBuilder: knitr

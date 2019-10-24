@@ -117,9 +117,9 @@ test_that("testModule handles reactives with complex dependency tree", {
 test_that("testModule handles reactivePoll", {
   module <- function(input, output, session) {
     rv <- reactiveValues(x = 0)
-    rp <- reactivePoll(50, session, function(){ as.numeric(Sys.time()) }, function(){
+    rp <- reactivePoll(50, session, function(){ rnorm(1) }, function(){
       isolate(rv$x <- rv$x + 1)
-      as.numeric(Sys.time())
+      rnorm(1)
     })
 
     observe({rp()})
@@ -493,9 +493,16 @@ test_that("testServer works", {
 
     session$setInputs(dist="unif", n=6)
     expect_length(d(), 6)
-  }, appDir=test_path("../../inst/examples/06_tabsets"))
+  }, appDir=test_path("..", "test-modules", "06_tabsets"))
 
-  # TODO: test with server.R
+  # server.R
+  testServer({
+    session$setInputs(dist="norm", n=5)
+    expect_length(d(), 5)
+
+    session$setInputs(dist="unif", n=6)
+    expect_length(d(), 6)
+  }, appDir=test_path("..", "test-modules", "server_r"))
 })
 
 test_that("testServer works when referencing external globals", {
@@ -602,8 +609,10 @@ test_that("findApp works with app in current or parent dir", {
     # Only TRUE if looking for server.R or app.R in current Dir
     calls <<- calls + 1
 
-    appPath <- file.path(cd, "app.R")
-    serverPath <- file.path(cd, "server.R")
+    path <- normalizePath(path)
+
+    appPath <- normalizePath(file.path(cd, "app.R"))
+    serverPath <- normalizePath(file.path(cd, "server.R"))
     return(path %in% c(appPath, serverPath))
   }
   fa <- rewire(findApp, file.exists.ci=mockExists)
@@ -612,7 +621,8 @@ test_that("findApp works with app in current or parent dir", {
 
   # Reset and point to the parent dir
   calls <- 0
-  cd <- normalizePath("../") # TODO: won't work if running tests in the root dir.
-  expect_equal(fa(), cd)
+  cd <- normalizePath("..") # TODO: won't work if running tests in the root dir.
+  f <- fa()
+  expect_equal(normalizePath(f), cd)
   expect_equal(calls, 3) # Two for current dir and hit on the first in the parent
 })

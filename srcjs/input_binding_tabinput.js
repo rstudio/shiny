@@ -54,7 +54,7 @@ $.extend(bootstrapTabInputBinding, {
           // There are cases where $oldTarget doesn't exist
           // (e.g., if a dropdown-item is already selected,
           // then a new dropdown-item is selected)
-          $target.parents(".dropdown-menu").find("*").removeClass("active");
+          $("#" + this.id).find("*").removeClass("active");
           $target.addClass("active");
         }
         $target.parent("li").addClass("active");

@@ -65,7 +65,7 @@ Last, you're likely used to assigning to `output`, but here we're reading from `
 
 ## Automated Tests
 
-Realistically, we don't want to just print the values for manual inspection; we'll want to leverage them in automated tests. That way, we'll be able to build up a collection of tests that we can run against our module in the future to confirm that it always behaves correctly. You can use whatever testing framework you'd like (or none a all!), but we'll use the `expect_*` functions from the testthat package in this example.
+Realistically, we don't want to just print the values for manual inspection; we'll want to leverage them in automated tests. That way, we'll be able to build up a collection of tests that we can run against our module in the future to confirm that it always behaves correctly. You can use whatever testing framework you'd like (or none at all!), but we'll use the `expect_*` functions from the testthat package in this example.
 
 ```{r}
 # Bring in testthat just for its expectations
@@ -214,7 +214,7 @@ As you can see, using `session$elapse` caused `testModule` to recognize that (si
 
 **Work in progress** -- We intend to add more helpers to make it easier to inspect and validate the raw HTML/JSON content. But for now, validating the output is an exercise left to the user.
 
-Thus far, we've seen how to validate simple outputs like numeric or text values. Real Shiny modules applications often use more complex outputs such as plots or htmlwidgets. Validating the correctness of these is not as simple, but is doable.
+Thus far, we've seen how to validate simple outputs like numeric or text values. Real Shiny modules and applications often use more complex outputs such as plots or htmlwidgets. Validating the correctness of these is not as simple, but is doable.
 
 You can access the data for even complex outputs in `testModule`, but the structure of the output may initially be foreign to you.
 
@@ -232,14 +232,14 @@ testModule(module, {
 
 As you can see, there are a lot of internal details that go into a plot. Behind-the-scenes, these are all the details that Shiny will use to correctly display a plot in a user's browser. You don't need to learn about all of these properties -- and they're all subject to change.
 
-In terms of your testing strategy, you shouldn't bother yourself with "is Shiny generating the correct structure so that the plot will generate in the browser?" That's a question that the Shiny package itself needs to answer (and one for which we have our own tests). The goal for your tests should be to ask: "is the code that I wrote producing the plot I want?" There are two components to that question:
+In terms of your testing strategy, you shouldn't bother yourself with "is Shiny generating the correct structure so that the plot will render in the browser?" That's a question that the Shiny package itself needs to answer (and one for which we have our own tests). The goal for your tests should be to ask: "is the code that I wrote producing the plot I want?" There are two components to that question:
 
   1. Does the plot generate without producing an error?
   2. Is the plot visually correct?
 
-`testModule` is great for assessing the first component here. By merely referencing `output$plot` in your test, you'll confirm that the plot was generated without an error. The second component is better suited for a shinytest test which actually loads the Shiny app in a headless browser and confirms that the content visually appears the same as it did previously. Doing this kind of test in `testModule` would be complex and may not be reliable as graphics devices differ slightly from platform to platform; i.e. the exact bits in the `src` field of your plot will not necessarily be reproducible between different versions of R or different operating systems.
+`testModule` is great for assessing the first component here. By merely referencing `output$plot` in your test, you'll confirm that the plot was generated without an error. The second component is better suited for a [shinytest](https://rstudio.github.io/shinytest/articles/shinytest.html) test which actually loads the Shiny app in a headless browser and confirms that the content visually appears the same as it did previously. Doing this kind of test in `testModule` would be complex and may not be reliable as graphics devices differ slightly from platform to platform; i.e. the exact bits in the `src` field of your plot will not necessarily be reproducible between different versions of R or different operating systems.
 
-For htmlwidgets, you can adopt a similar strategy. The goal is not to confirm that the htmlwidget's render function is behaving properly -- but rather that the data that you intend to render is indeed getting rendered properly.
+For htmlwidgets, you can adopt a similar strategy. The goal is not to confirm that the htmlwidget's render function is behaving properly -- but rather that the data that you intend to render is indeed getting passed through.
 
 We could modify the above example to better represent this approach.
 
@@ -269,7 +269,7 @@ testModule(module, {
 })
 ```
 
-You could adopt a similar strategy with other plots or htmlwidgets: move the complexity into reactives that can be tested, and leave the complex `render` functions as simple as possible.
+You could adopt a similar strategy with other plots or htmlwidgets: move the complexity into reactives that can be tested, and leave the `render` functions as simple as possible.
 
 ## Testing Shiny Applications
 
@@ -308,8 +308,12 @@ testModule(module, {
   expect_equal(output$txt, "1")
   
   rv$a <- 2
-  # testModule has no innate knowledge of our `rv` variable so we'll need to manually
-  # force a flush of the reactives.
+  
+  # testModule has no innate knowledge of our `rv` variable; therefore, it 
+  # hasn't been updated
+  expect_equal(output$txt, "1")
+  
+  # We'll need to manually force a flush of the reactives.
   session$flushReact()
   
   expect_equal(output$txt, "2")

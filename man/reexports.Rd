@@ -12,6 +12,6 @@ These objects are imported from other packages. Follow the links
 below to see their documentation.
 
 \describe{
-  \item{fastmap}{\code{\link[fastmap]{key_missing}}, \code{\link[fastmap]{is.key_missing}}}
+  \item{fastmap}{\code{\link[fastmap]{is.key_missing}}, \code{\link[fastmap]{key_missing}}}
 }}
 

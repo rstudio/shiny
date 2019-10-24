@@ -4,13 +4,18 @@
 \alias{tabsetPanel}
 \title{Create a tabset panel}
 \usage{
-tabsetPanel(..., id = NULL, selected = NULL, type = c("tabs",
-  "pills"), position = NULL)
+tabsetPanel(
+  ...,
+  id = NULL,
+  selected = NULL,
+  type = c("tabs", "pills"),
+  position = NULL
+)
 }
 \arguments{
 \item{...}{\code{\link[=tabPanel]{tabPanel()}} elements to include in the tabset}
 
-\item{id}{If provided, you can use \code{input$}\emph{\code{id}} in your
+\item{id}{If provided, you can use \verb{input$}\emph{\code{id}} in your
 server logic to determine which of the current tabs is active. The value
 will correspond to the \code{value} argument that is passed to
 \code{\link[=tabPanel]{tabPanel()}}.}

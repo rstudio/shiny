@@ -4,13 +4,16 @@
 \alias{loadSupport}
 \title{Load an app's supporting R files}
 \usage{
-loadSupport(appDir, renv = new.env(parent = globalenv()),
-  globalrenv = globalenv())
+loadSupport(
+  appDir,
+  renv = new.env(parent = globalenv()),
+  globalrenv = globalenv()
+)
 }
 \arguments{
 \item{appDir}{The application directory}
 
-\item{renv}{The environmeny in which the files in the \code{R/} directory should
+\item{renv}{The environmeny in which the files in the \verb{R/} directory should
 be evaluated.}
 
 \item{globalrenv}{The environment in which \code{global.R} should be evaluated. If
@@ -18,7 +21,7 @@ be evaluated.}
 }
 \description{
 Loads all of the supporting R files of a Shiny application. Specifically,
-this function loads any top-level supporting \code{.R} files in the \code{R/} directory
+this function loads any top-level supporting \code{.R} files in the \verb{R/} directory
 adjacent to the \code{app.R}/\code{server.R}/\code{ui.R} files.
 }
 \details{
@@ -32,5 +35,5 @@ breaking it, so after running your application, you should unset option with
 
 The files are sourced in alphabetical order (as determined by
 \link{list.files}). \code{global.R} is evaluated before the supporting R files in the
-\code{R/} directory.
+\verb{R/} directory.
 }

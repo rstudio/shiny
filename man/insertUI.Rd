@@ -4,13 +4,18 @@
 \alias{insertUI}
 \title{Insert UI objects}
 \usage{
-insertUI(selector, where = c("beforeBegin", "afterBegin", "beforeEnd",
-  "afterEnd"), ui, multiple = FALSE, immediate = FALSE,
-  session = getDefaultReactiveDomain())
+insertUI(
+  selector,
+  where = c("beforeBegin", "afterBegin", "beforeEnd", "afterEnd"),
+  ui,
+  multiple = FALSE,
+  immediate = FALSE,
+  session = getDefaultReactiveDomain()
+)
 }
 \arguments{
 \item{selector}{A string that is accepted by jQuery's selector (i.e. the
-string \code{s} to be placed in a \code{$(s)} jQuery call). This selector
+string \code{s} to be placed in a \verb{$(s)} jQuery call). This selector
 will determine the element(s) relative to which you want to insert your
 UI object.}
 

@@ -4,8 +4,14 @@
 \alias{plotPNG}
 \title{Run a plotting function and save the output as a PNG}
 \usage{
-plotPNG(func, filename = tempfile(fileext = ".png"), width = 400,
-  height = 400, res = 72, ...)
+plotPNG(
+  func,
+  filename = tempfile(fileext = ".png"),
+  width = 400,
+  height = 400,
+  res = 72,
+  ...
+)
 }
 \arguments{
 \item{func}{A function that generates a plot.}

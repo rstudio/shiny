@@ -4,8 +4,7 @@
 \alias{textOutput}
 \title{Create a text output element}
 \usage{
-textOutput(outputId, container = if (inline) span else div,
-  inline = FALSE)
+textOutput(outputId, container = if (inline) span else div, inline = FALSE)
 }
 \arguments{
 \item{outputId}{output variable to read the value from}

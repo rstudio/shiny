@@ -4,12 +4,16 @@
 \alias{removeUI}
 \title{Remove UI objects}
 \usage{
-removeUI(selector, multiple = FALSE, immediate = FALSE,
-  session = getDefaultReactiveDomain())
+removeUI(
+  selector,
+  multiple = FALSE,
+  immediate = FALSE,
+  session = getDefaultReactiveDomain()
+)
 }
 \arguments{
 \item{selector}{A string that is accepted by jQuery's selector (i.e. the
-string \code{s} to be placed in a \code{$(s)} jQuery call). This selector
+string \code{s} to be placed in a \verb{$(s)} jQuery call). This selector
 will determine the element(s) to be removed. If you want to remove a
 Shiny input or output, note that many of these are wrapped in \code{div}s,
 so you may need to use a somewhat complex selector --- see the Examples below.

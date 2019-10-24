@@ -5,8 +5,14 @@
 \alias{is.reactive}
 \title{Create a reactive expression}
 \usage{
-reactive(x, env = parent.frame(), quoted = FALSE, label = NULL,
-  domain = getDefaultReactiveDomain(), ..stacktraceon = TRUE)
+reactive(
+  x,
+  env = parent.frame(),
+  quoted = FALSE,
+  label = NULL,
+  domain = getDefaultReactiveDomain(),
+  ..stacktraceon = TRUE
+)
 
 is.reactive(x)
 }

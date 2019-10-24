@@ -4,10 +4,23 @@
 \alias{renderTable}
 \title{Table Output}
 \usage{
-renderTable(expr, striped = FALSE, hover = FALSE, bordered = FALSE,
-  spacing = c("s", "xs", "m", "l"), width = "auto", align = NULL,
-  rownames = FALSE, colnames = TRUE, digits = NULL, na = "NA", ...,
-  env = parent.frame(), quoted = FALSE, outputArgs = list())
+renderTable(
+  expr,
+  striped = FALSE,
+  hover = FALSE,
+  bordered = FALSE,
+  spacing = c("s", "xs", "m", "l"),
+  width = "auto",
+  align = NULL,
+  rownames = FALSE,
+  colnames = TRUE,
+  digits = NULL,
+  na = "NA",
+  ...,
+  env = parent.frame(),
+  quoted = FALSE,
+  outputArgs = list()
+)
 }
 \arguments{
 \item{expr}{An expression that returns an R object that can be used with
@@ -20,7 +33,7 @@ corresponding Bootstrap table format to the output table.}
 stands for "extra small", \code{s} for "small", \code{m} for "medium"
 and \code{l} for "large").}
 
-\item{width}{Table width. Must be a valid CSS unit (like "100%", "400px",
+\item{width}{Table width. Must be a valid CSS unit (like "100\%", "400px",
 "auto") or a number, which will be coerced to a string and
 have "px" appended.}
 

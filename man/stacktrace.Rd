@@ -16,21 +16,36 @@
 \usage{
 captureStackTraces(expr)
 
-withLogErrors(expr, full = getOption("shiny.fullstacktrace", FALSE),
-  offset = getOption("shiny.stacktraceoffset", TRUE))
-
-printError(cond, full = getOption("shiny.fullstacktrace", FALSE),
-  offset = getOption("shiny.stacktraceoffset", TRUE))
-
-printStackTrace(cond, full = getOption("shiny.fullstacktrace", FALSE),
-  offset = getOption("shiny.stacktraceoffset", TRUE))
-
-extractStackTrace(calls, full = getOption("shiny.fullstacktrace", FALSE),
-  offset = getOption("shiny.stacktraceoffset", TRUE))
-
-formatStackTrace(calls, indent = "    ",
+withLogErrors(
+  expr,
   full = getOption("shiny.fullstacktrace", FALSE),
-  offset = getOption("shiny.stacktraceoffset", TRUE))
+  offset = getOption("shiny.stacktraceoffset", TRUE)
+)
+
+printError(
+  cond,
+  full = getOption("shiny.fullstacktrace", FALSE),
+  offset = getOption("shiny.stacktraceoffset", TRUE)
+)
+
+printStackTrace(
+  cond,
+  full = getOption("shiny.fullstacktrace", FALSE),
+  offset = getOption("shiny.stacktraceoffset", TRUE)
+)
+
+extractStackTrace(
+  calls,
+  full = getOption("shiny.fullstacktrace", FALSE),
+  offset = getOption("shiny.stacktraceoffset", TRUE)
+)
+
+formatStackTrace(
+  calls,
+  indent = "    ",
+  full = getOption("shiny.fullstacktrace", FALSE),
+  offset = getOption("shiny.stacktraceoffset", TRUE)
+)
 
 conditionStackTrace(cond)
 
@@ -54,14 +69,12 @@ intuitive, as the definition of the function indicated in the call and the
 location specified by the srcref match up. If \code{FALSE}, srcrefs will be
 left alone (traditional R treatment where the srcref is of the callsite).}
 
-\item{cond}{An condition object (generally, an error).}
+\item{cond}{A condition that may have previously been annotated by
+\code{captureStackTraces} (or \code{withLogErrors}).}
 
 \item{indent}{A string to prefix every line of the stack trace.}
 
 \item{value}{The stack trace value to assign to the condition.}
-
-\item{cond}{A condition that may have previously been annotated by
-\code{captureStackTraces} (or \code{withLogErrors}).}
 }
 \value{
 \code{printError} and \code{printStackTrace} return
@@ -106,7 +119,7 @@ it doesn't support deep stack traces.
 it returns a preformatted character vector instead of a data frame. It was
 deprecated after shiny 1.0.5 because it doesn't support deep stack traces.
 
-\code{conditionStackTrace} and \code{conditionStackTrace<-} are
+\code{conditionStackTrace} and \verb{conditionStackTrace<-} are
 accessor functions for getting/setting stack traces on conditions.
 
 The two functions \code{..stacktraceon..} and

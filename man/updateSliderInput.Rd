@@ -4,9 +4,17 @@
 \alias{updateSliderInput}
 \title{Update Slider Input Widget}
 \usage{
-updateSliderInput(session, inputId, label = NULL, value = NULL,
-  min = NULL, max = NULL, step = NULL, timeFormat = NULL,
-  timezone = NULL)
+updateSliderInput(
+  session,
+  inputId,
+  label = NULL,
+  value = NULL,
+  min = NULL,
+  max = NULL,
+  step = NULL,
+  timeFormat = NULL,
+  timezone = NULL
+)
 }
 \arguments{
 \item{session}{The \code{session} object passed to function given to

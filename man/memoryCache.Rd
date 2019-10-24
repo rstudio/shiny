@@ -4,9 +4,15 @@
 \alias{memoryCache}
 \title{Create a memory cache object}
 \usage{
-memoryCache(max_size = 10 * 1024^2, max_age = Inf, max_n = Inf,
-  evict = c("lru", "fifo"), missing = key_missing(),
-  exec_missing = FALSE, logfile = NULL)
+memoryCache(
+  max_size = 10 * 1024^2,
+  max_age = Inf,
+  max_n = Inf,
+  evict = c("lru", "fifo"),
+  missing = key_missing(),
+  exec_missing = FALSE,
+  logfile = NULL
+)
 }
 \arguments{
 \item{max_size}{Maximum size of the cache, in bytes. If the cache exceeds

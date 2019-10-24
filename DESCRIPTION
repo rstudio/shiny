@@ -164,6 +164,7 @@ Collate:
     'snapshot.R'
     'tar.R'
     'test-export.R'
+    'test-module.R'
     'update-input.R'
 RoxygenNote: 6.1.1
 Encoding: UTF-8

@@ -1,0 +1,286 @@
+---
+title: "Integration Testing in Shiny"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Your Vignette Title}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options:
+  chunk_output_type: console
+---
+
+  ```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Introduction to Inspecting Modules
+
+First, we'll define a simple Shiny module:
+
+```{r}
+library(shiny)
+module <- function(input, output, session) {
+  rv <- reactiveValues(x = 0)
+  observe({
+    rv$x <- input$x * 2
+  })
+  output$txt <- renderText({
+    paste0("Value: ", rv$x)
+  })
+}
+```
+
+This module
+
+  - depends on one input (`x`),
+  - has an intermediate, internal `reactiveValues` (`rv`) which updates reactively,
+  - and updates an output (`txt`) reactively.
+
+It would be nice to write tests that confirm that the module behaves the way we expect. We can do so using the `testModule` function.
+
+```{r}
+testModule(module, {
+  cat("Initially, input$x is NULL, right?", is.null(input$x), "\n")
+
+  # Give input$x a value.
+  session$setInputs(x = 1)
+
+  cat("Now that x is set to 1, rv$x is: ", rv$x, "\n")
+  cat("\tand output$txt is: ", output$txt, "\n")
+  # Now update input$x to a new value
+  session$setInputs(x = 2)
+
+  cat("After updating x to 2, rv$x is: ", rv$x, "\n")
+  cat("\tand output$txt is: ", output$txt, "\n")
+})
+```
+
+There are a few things to notice in this example.
+
+First, the test expression provided here assumes the existence of some variables -- specifically, `input`, `output`, and `r`. This is safe because the test code provided to `testModule` is run in the module's environment. This means that any parameters passed in to your module (such as `input`, `output`, and `session`) are readily available, as are any intermediate objects or reactives that you define in the module (such as `r`).
+
+Second, you'll need to give values to any inputs that you want to be defined; by default, they're all `NULL`. We do that using the `session$setInputs()` method. The `session` object used in `testModule` differs from the real `session` object Shiny uses; this allows us to tailor it to be more suitable for testing purposes by modifying or creating new methods such as `setInputs()`.
+
+Last, you're likely used to assigning to `output`, but here we're reading from `output$txt` in order to check its value. When running inside `testModule`, you can simply reference an output and it will give the value produced by the `render` function.
+
+## Automated Tests
+
+Realistically, we don't want to just print the values for manual inspection; we'll want to leverage them in automated tests. That way, we'll be able to build up a collection of tests that we can run against our module in the future to confirm that it always behaves correctly. You can use whatever testing framework you'd like (or none a all!), but we'll use the `expect_*` functions from the testthat package in this example.
+
+```{r}
+# Bring in testthat just for its expectations
+suppressWarnings(library(testthat))
+testModule(module, {
+  session$setInputs(x = 1)
+  expect_equal(rv$x, 2)
+  expect_equal(output$txt, "Value: 2")
+  session$setInputs(x = 2)
+  expect_equal(rv$x, 4)
+  expect_equal(output$txt, "Value: 4")
+})
+```
+
+If there's no error, then we know our tests ran successfully. If there were a bug, we'd see an error printed. For example:
+
+```{r}
+tryCatch({
+  testModule(module, {
+    session$setInputs(x = 1)
+
+    # This expectation will fail
+    expect_equal(rv$x, 99)
+  })
+}, error=function(e){
+  print("There was an error!")
+  print(e)
+})
+```
+
+## Promises
+
+`testModule` can handle promises inside of render functions.
+
+```{r}
+library(promises)
+library(future)
+plan(multisession)
+module <- function(input, output, session){
+  output$async <- renderText({
+    # Stash the value since you can't do reactivity inside of a promise. See
+# https://rstudio.github.io/promises/articles/shiny.html#shiny-specific-caveats-and-limitations
+t <- input$times
+
+# A promise chain that repeats the letter A and then collapses it into a string.
+future({ rep("A", times=t) }) %...>%
+  paste(collapse="")
+})
+}
+testModule(module, {
+  session$setInputs(times = 3)
+  expect_equal(output$async, "AAA")
+
+  session$setInputs(times = 5)
+  expect_equal(output$async, "AAAAA")
+})
+```
+
+As you can see, no special precautions were required for a `render` function that uses promises. Behind-the-scenes, the code in `testModule` will block when trying to read from an `output` that returned a promise. This allows you to interact with the outputs in your tests as if they were synchronous.
+
+TODO: What about internal reactives that are promise-based? We don't do anything special for them...
+
+## Modules with additional inputs
+
+`testModule` can also handle modules that accept additional arguments such as this one.
+
+```{r}
+module <- function(input, output, session, arg1, arg2){
+  output$txt1 <- renderText({ arg1 })
+
+  output$txt2 <- renderText({ arg2 })
+}
+```
+
+Additional arguments should be passed after the test expression as named parameters.
+
+```{r}
+testModule(module, {
+  expect_equal(output$txt1, "val1")
+  expect_equal(output$txt2, "val2")
+}, arg1="val1", arg2="val2")
+```
+
+## Accessing a module's returned value
+
+Some modules return reactive data as an output. For such modules, it can be helpful to test the returned value, as well. The returned value from the module is made available as a property on the mock `session` object as demonstrated in this example.
+
+```{r}
+module <- function(input, output, session){
+  reactive({
+    return(input$a + input$b)
+  })
+}
+testModule(module, {
+  session$setInputs(a = 1, b = 2)
+  expect_equal(session$returned(), 3)
+  # And retains reactivity
+  session$setInputs(a = 2)
+  expect_equal(session$returned(), 4)
+})
+```
+
+## Timer and Polling
+
+Testing behavior that relies on timing is notoriously difficult. Modules will behave differently on different machines and under different conditions. In order to make testing with time more deterministic, `testModule` uses simulated time that you control, rather than the actual computer time. Let's look at what happens when you try to use "real" time in your testing.
+
+```{r}
+module <- function(input, output, session){
+  rv <- reactiveValues(x=0)
+
+  observe({
+    invalidateLater(100)
+    isolate(rv$x <- rv$x + 1)
+  })
+}
+testModule(module, {
+  expect_equal(rv$x, 1) # The observer runs once at initialization
+
+  Sys.sleep(1) # Sleep for a second
+
+  expect_equal(rv$x, 1) # The value hasn't changed
+})
+```
+
+This behavior may be surprising. It seems like `rv$x` should have been incremented 10 times (or perhaps 9, due to computational overhead). But in truth, it hasn't changed at all. This is because `testModule` doesn't consider the actual time on your computer -- only its simulated understanding of time.
+
+In order to cause `testModule` to progress through time, instead of `Sys.sleep`, we'll use `session$elapse` -- another method that exists only on our mocked session object. Using the same module object as above...
+
+```{r}
+testModule(module, {
+  expect_equal(rv$x, 1) # The observer runs once at initialization
+
+  session$elapse(100) # Simulate the passing of 100ms
+
+  expect_equal(rv$x, 2) # The observer was invalidated and the value updated!
+
+  # You can even simulate multiple events in a single elapse
+  session$elapse(300)
+  expect_equal(rv$x, 5)
+})
+```
+
+As you can see, using `session$elapse` caused `testModule` to recognize that (simulted) time had passed which triggered the reactivity as we'd expect. This approach allows you to deterministically control time in your tests while avoiding expensive pauses that would slow down your tests. Using this approach, this test can complete in only a fraction of the 100ms that it simulates.
+
+## Complex Outputs (plots, htmlwidgets)
+
+**Work in progress** -- We intend to add more helpers to make it easier to inspect and validate the raw HTML/JSON content. But for now, validating the output is an exercise left to the user.
+
+Thus far, we've seen how to validate simple outputs like numeric or text values. Real Shiny modules applications often use more complex outputs such as plots or htmlwidgets. Validating the correctness of these is not as simple, but is doable.
+
+You can access the data for even complex outputs in `testModule`, but the structure of the output may initially be foreign to you.
+
+```{r}
+module <- function(input, output, session){
+  output$plot <- renderPlot({
+    df <- data.frame(length = iris$Petal.Length, width = iris$Petal.Width)
+    plot(df)
+  })
+}
+testModule(module, {
+  print(str(output$plot))
+})
+```
+
+As you can see, there are a lot of internal details that go into a plot. Behind-the-scenes, these are all the details that Shiny will use to correctly display a plot in a user's browser. You don't need to learn about all of these properties -- and they're all subject to change.
+
+In terms of your testing strategy, you shouldn't bother yourself with "is Shiny generating the correct structure so that the plot will generate in the browser?" That's a question that the Shiny package itself needs to answer (and one for which we have our own tests). The goal for your tests should be to ask: "is the code that I wrote producing the plot I want?" There are two components to that question:
+
+  1. Does the plot generate without producing an error?
+  2. Is the plot visually correct?
+
+  `testModule` is great for assessing the first component here. By merely referencing `output$plot` in your test, you'll confirm that the plot was generated without an error. The second component is better suited for a shinytest test which actually loads the Shiny app in a headless browser and confirms that the content visually appears the same as it did previously. Doing this kind of test in `testModule` would be complex and may not be reliable as graphics devices differ slightly from platform to platform; i.e. the exact bits in the `src` field of your plot will not necessarily be reproducible between different versions of R or different operating systems.
+
+For htmlwidgets, you can adopt a similar strategy. The goal is not to confirm that the htmlwidget's render function is behaving properly -- but rather that the data that you intend to render is indeed getting rendered properly.
+
+We could modify the above example to better represent this approach.
+
+```{r}
+module <- function(input, output, session){
+  # Move any complex logic into a separate reactive which can be tested comprehensively
+  plotData <- reactive({
+    data.frame(length = iris$Petal.Length, width = iris$Petal.Width)
+  })
+
+  # And leave the `render` function to be as simple as possible to lessen the need for
+  # integration tests.
+  output$plot <- renderPlot({
+    plot(plotData())
+  })
+}
+testModule(module, {
+  # Confirm that the data reactive is behaving as expected
+  expect_equal(nrow(plotData()), 150)
+  expect_equal(ncol(plotData()), 2)
+  expect_equal(colnames(plotData()), c("length", "width"))
+
+  # And now the plot function is so simple that there's not much need for
+  # automated testing. If we did wish to evaluate the plot visually, we could
+  # do so using the shinytest package.
+  output$plot # Just confirming that the plot can be accessed without an error
+})
+```
+
+You could adopt a similar strategy with other plots or htmlwidgets: move the complexity into reactives that can be tested, and leave the complex `render` functions as simple as possible.
+
+## Testing Shiny Applications
+
+In addition to testing Shiny modules, you can also test Shiny applications. The `testServer` function will automatically extract the server portion given an application's directory and you can test it just like you do any other module.
+
+```{r}
+appdir <- system.file("examples/06_tabsets", package="shiny")
+testServer({
+  session$setInputs(dist="norm", n=10)
+  expect_equal(length(d()), 10)
+}, appdir)
+```
+
+As you can see, the test expression can be run for Shiny servers just like it was run for modules.

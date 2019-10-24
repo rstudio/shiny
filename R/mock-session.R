@@ -3,8 +3,7 @@
 # Block until all pending later tasks have executed
 wait_for_it <- function() {
   while (!later::loop_empty()) {
-    later::run_now()
-    Sys.sleep(0.1)
+    later::run_now(0.1)
   }
 }
 

@@ -19,7 +19,7 @@ encapsulates the row/column.}
 \item{flex}{Determines how space should be distributed to the cells. Can be a
 single value like \code{1} or \code{2} to evenly distribute the available
 space; or use a vector of numbers to specify the proportions. For example,
-\code{flex = c(2, 3)} would cause the space to be split 40\\%/60\\% between
+\code{flex = c(2, 3)} would cause the space to be split 40\%/60\% between
 two cells. NA values will cause the corresponding cell to be sized
 according to its contents (without growing or shrinking).}
 

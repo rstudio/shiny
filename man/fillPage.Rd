@@ -45,7 +45,7 @@ because the plot's containing elements (\verb{<div>} and \verb{<body>}) have
 \emph{automatic} height; that is, they determine their own height based on
 the height of their contained elements. However,
 \code{fillPage(plotOutput("plot", height = "100\%"))} will work because
-\code{fillPage} fixes the \verb{<body>} height at 100\\% of the window height.
+\code{fillPage} fixes the \verb{<body>} height at 100\% of the window height.
 
 Note that \code{fillPage(plotOutput("plot"))} will not cause the plot to fill
 the page. Like most Shiny output widgets, \code{plotOutput}'s default height

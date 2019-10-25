@@ -1,5 +1,7 @@
 library(shiny)
 
+global <- 123
+
 # Define UI for random distribution app ----
 ui <- fluidPage(
 

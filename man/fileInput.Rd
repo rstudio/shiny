@@ -23,8 +23,17 @@ fileInput(
 multiple files at once. \strong{Does not work on older browsers, including
 Internet Explorer 9 and earlier.}}
 
-\item{accept}{A character vector of MIME types; gives the browser a hint of
-what kind of files the server is expecting.}
+\item{accept}{A character vector of "unique file type specifiers" which
+gives the browser a hint as to the type of file the server expects.
+Many browsers use this prevent the user from selecting an invalid file.
+
+A unique file type specifier can be:
+\itemize{
+\item A case insensitive extension like \code{.csv} or \code{.rds}.
+\item A valid MIME type, like \code{text/plain} or \code{application/pdf}
+\item One of \verb{audio/*}, \verb{video/*}, or \verb{image/*} meaning any audio, video,
+or image type, respectively.
+}}
 
 \item{width}{The width of the input, e.g. \code{'400px'}, or \code{'100\%'};
 see \code{\link[=validateCssUnit]{validateCssUnit()}}.}
@@ -66,13 +75,7 @@ if (interactive()) {
 ui <- fluidPage(
   sidebarLayout(
     sidebarPanel(
-      fileInput("file1", "Choose CSV File",
-        accept = c(
-          "text/csv",
-          "text/comma-separated-values,text/plain",
-          ".csv")
-        ),
-      tags$hr(),
+      fileInput("file1", "Choose CSV File", accept = ".csv"),
       checkboxInput("header", "Header", TRUE)
     ),
     mainPanel(
@@ -83,17 +86,13 @@ ui <- fluidPage(
 
 server <- function(input, output) {
   output$contents <- renderTable({
-    # input$file1 will be NULL initially. After the user selects
-    # and uploads a file, it will be a data frame with 'name',
-    # 'size', 'type', and 'datapath' columns. The 'datapath'
-    # column will contain the local filenames where the data can
-    # be found.
-    inFile <- input$file1
+    file <- input$file1
+    ext <- tools::file_ext(file$datapath)
 
-    if (is.null(inFile))
-      return(NULL)
+    req(file)
+    validate(need(ext == "csv", "Please upload a csv file"))
 
-    read.csv(inFile$datapath, header = input$header)
+    read.csv(file$datapath, header = input$header)
   })
 }
 

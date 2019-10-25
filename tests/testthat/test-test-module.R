@@ -609,10 +609,10 @@ test_that("findApp works with app in current or parent dir", {
     # Only TRUE if looking for server.R or app.R in current Dir
     calls <<- calls + 1
 
-    path <- normalizePath(path)
+    path <- normalizePath(path, mustWork = FALSE)
 
-    appPath <- normalizePath(file.path(cd, "app.R"))
-    serverPath <- normalizePath(file.path(cd, "server.R"))
+    appPath <- normalizePath(file.path(cd, "app.R"), mustWork = FALSE)
+    serverPath <- normalizePath(file.path(cd, "server.R"), mustWork = FALSE)
     return(path %in% c(appPath, serverPath))
   }
   fa <- rewire(findApp, file.exists.ci=mockExists)
@@ -623,6 +623,6 @@ test_that("findApp works with app in current or parent dir", {
   calls <- 0
   cd <- normalizePath("..") # TODO: won't work if running tests in the root dir.
   f <- fa()
-  expect_equal(normalizePath(f), cd)
+  expect_equal(normalizePath(f, mustWork = FALSE), cd)
   expect_equal(calls, 3) # Two for current dir and hit on the first in the parent
 })

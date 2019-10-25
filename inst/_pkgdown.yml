@@ -218,3 +218,4 @@ reference:
     contents:
       - testModule
       - testServer
+      - MockShinySession

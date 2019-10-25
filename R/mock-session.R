@@ -383,7 +383,7 @@ MockShinySession <- R6Class(
 
     flush = function(){
       isolate(private$flushCBs$invoke(..stacktraceon = TRUE))
-      flushReact()
+      shiny:::flushReact() # namespace to avoid calling our own method
       isolate(private$flushedCBs$invoke(..stacktraceon = TRUE))
       later::run_now()
     }

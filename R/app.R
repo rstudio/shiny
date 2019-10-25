@@ -314,13 +314,12 @@ initAutoReloadMonitor <- function(dir) {
 #' adjacent to the `app.R`/`server.R`/`ui.R` files.
 #'
 #' Since Shiny 1.5.0, this function is called by default when running an
-#' application. If it causes problems, you can opt out by using
-#' `options(shiny.autoload.r=FALSE)`. Note that in a future version of Shiny,
-#' this option will no longer be available. If you set this option, it will
+#' application. If it causes problems, there are two ways to opt out. You can
+#' either place a file named `_disable_autoload.R` in your R/ directory, or
+#' set `options(shiny.autoload.r=FALSE)`. If you set this option, it will
 #' affect any application that runs later in the same R session, potentially
 #' breaking it, so after running your application, you should unset option with
 #' `options(shiny.autoload.r=NULL)`
-#'
 #'
 #' @details The files are sourced in alphabetical order (as determined by
 #'   [list.files]). `global.R` is evaluated before the supporting R files in the
@@ -340,7 +339,20 @@ loadSupport <- function(appDir, renv=new.env(parent=globalenv()), globalrenv=glo
   }
 
   helpersDir <- file.path(appDir, "R")
+
+  disabled <- list.files(helpersDir, pattern="^_disable_autoload\\.r$", recursive=FALSE, ignore.case=TRUE)
+  if (length(disabled) > 0){
+    message("R/_disable_autoload.R detected; not loading the R/ directory automatically")
+    return(invisible(renv))
+  }
+
   helpers <- list.files(helpersDir, pattern="\\.[rR]$", recursive=FALSE, full.names=TRUE)
+
+  if (length(helpers) > 0){
+    message("Automatically loading ", length(helpers), " .R file",
+            ifelse(length(helpers) != 1, "s", ""),
+            " found in the R/ directory.\nSee https://rstd.io/shiny-autoload for more info.")
+  }
 
   lapply(helpers, sourceUTF8, envir=renv)
 

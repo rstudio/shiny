@@ -321,7 +321,6 @@ initAutoReloadMonitor <- function(dir) {
 #' breaking it, so after running your application, you should unset option with
 #' `options(shiny.autoload.r=NULL)`
 #'
-#'
 #' @details The files are sourced in alphabetical order (as determined by
 #'   [list.files]). `global.R` is evaluated before the supporting R files in the
 #'   `R/` directory.
@@ -341,6 +340,12 @@ loadSupport <- function(appDir, renv=new.env(parent=globalenv()), globalrenv=glo
 
   helpersDir <- file.path(appDir, "R")
   helpers <- list.files(helpersDir, pattern="\\.[rR]$", recursive=FALSE, full.names=TRUE)
+
+  if (length(helpers) > 0){
+    message("Automatically loading ", length(helpers), " .R file",
+            ifelse(length(helpers) != 1, "s", ""),
+            " found in the R/ directory.\nSee https://rstd.io/autoload for more info.")
+  }
 
   lapply(helpers, sourceUTF8, envir=renv)
 

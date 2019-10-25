@@ -351,7 +351,7 @@ loadSupport <- function(appDir, renv=new.env(parent=globalenv()), globalrenv=glo
   if (length(helpers) > 0){
     message("Automatically loading ", length(helpers), " .R file",
             ifelse(length(helpers) != 1, "s", ""),
-            " found in the R/ directory.\nSee https://rstd.io/autoload for more info.")
+            " found in the R/ directory.\nSee https://rstd.io/shiny-autoload for more info.")
   }
 
   lapply(helpers, sourceUTF8, envir=renv)

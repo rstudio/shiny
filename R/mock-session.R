@@ -70,6 +70,7 @@ extract <- function(promise) {
 }
 
 #' @include timer.R
+#' @export
 MockShinySession <- R6Class(
   'MockShinySession',
   portable = FALSE,

@@ -76,6 +76,7 @@ extract <- function(promise) {
 #' provided to Shiny server functions or modules.
 #'
 #' @include timer.R
+#' @export
 MockShinySession <- R6Class(
   'MockShinySession',
   portable = FALSE,

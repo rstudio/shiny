@@ -24,6 +24,12 @@ test_that("loadSupport messages to inform about loading", {
                  "Automatically loading 1 .R file")
 })
 
+test_that("loadSupport skips if _disable_autoload.R found", {
+  expect_message(loadSupport(test_path("../test-helpers/app6-disabled"), renv=environment(), globalrenv=NULL),
+                 "disable_autoload.R detected; not loading")
+  expect_false(exists("helper1"))
+})
+
 test_that("Can suppress sourcing global.R", {
   # Confirm that things blow up if we source global.R
   expect_error(loadSupport(test_path("../test-helpers/app3-badglobal")))

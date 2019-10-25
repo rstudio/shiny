@@ -69,6 +69,7 @@ extract <- function(promise) {
   stop("Single-bracket indexing of mockclientdata is not allowed.")
 }
 
+#' Mock Shiny Session
 #' @include timer.R
 #' @export
 MockShinySession <- R6Class(

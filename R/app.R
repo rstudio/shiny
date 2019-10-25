@@ -340,7 +340,7 @@ loadSupport <- function(appDir, renv=new.env(parent=globalenv()), globalrenv=glo
 
   helpersDir <- file.path(appDir, "R")
 
-  disabled <- list.files(helpersDir, pattern="_disable_autoload\\.r$", recursive=FALSE, ignore.case=TRUE)
+  disabled <- list.files(helpersDir, pattern="^_disable_autoload\\.r$", recursive=FALSE, ignore.case=TRUE)
   if (length(disabled) > 0){
     message("R/_disable_autoload.R detected; not loading the R/ directory automatically")
     return(invisible(renv))

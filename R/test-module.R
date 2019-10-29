@@ -1,7 +1,7 @@
 
 
 #' Test a shiny module
-#' @param module The module under test
+#' @param module The module to test
 #' @param expr Test code containing expectations. The test expression will run
 #'   in the module's environment, meaning that the module's parameters (e.g.
 #'   `input`, `output`, and `session`) will be available along with any other
@@ -26,19 +26,11 @@ testModule <- function(module, expr, args, ...) {
   fn_body[[2]] <- quote(session$env <- environment())
   body(module) <- fn_body
 
-  # Substitute expr for later evaluation
-  if (!is.call(expr)){
-    expr <- substitute(expr)
-  }
-
   # Create a mock session
   session <- MockShinySession$new()
 
   # Parse the additional arguments
-  args <- list(...)
-  args[["input"]] <- session$input
-  args[["output"]] <- session$output
-  args[["session"]] <- session
+  args <- list(..., input = session$input, output = session$output, session = session)
 
   # Initialize the module
   isolate(

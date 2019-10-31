@@ -405,4 +405,5 @@ pre.shiny-text-output {
 .datepicker table tbody tr td span.disabled,
 .datepicker table tbody tr td span.disabled:hover {
   color: #aaa;
+  cursor: not-allowed;
 }

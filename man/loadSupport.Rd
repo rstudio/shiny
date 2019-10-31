@@ -26,9 +26,9 @@ adjacent to the \code{app.R}/\code{server.R}/\code{ui.R} files.
 }
 \details{
 Since Shiny 1.5.0, this function is called by default when running an
-application. If it causes problems, you can opt out by using
-\code{options(shiny.autoload.r=FALSE)}. Note that in a future version of Shiny,
-this option will no longer be available. If you set this option, it will
+application. If it causes problems, there are two ways to opt out. You can
+either place a file named \verb{_disable_autoload.R} in your R/ directory, or
+set \code{options(shiny.autoload.r=FALSE)}. If you set this option, it will
 affect any application that runs later in the same R session, potentially
 breaking it, so after running your application, you should unset option with
 \code{options(shiny.autoload.r=NULL)}

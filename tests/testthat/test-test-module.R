@@ -507,7 +507,9 @@ test_that("testServer works", {
 
 test_that("testServer works when referencing external globals", {
   # If global is defined at the top of app.R outside of the server function.
-  testthat::skip("NYI")
+  testServer({
+    expect_equal(global, 123)
+  }, appDir=test_path("..", "test-modules", "06_tabsets"))
 })
 
 test_that("testModule handles invalidateLater", {

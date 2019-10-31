@@ -7,7 +7,7 @@
 testModule(module, expr, args, ...)
 }
 \arguments{
-\item{module}{The module under test}
+\item{module}{The module to test}
 
 \item{expr}{Test code containing expectations. The test expression will run
 in the module's environment, meaning that the module's parameters (e.g.

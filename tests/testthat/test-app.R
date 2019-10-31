@@ -5,11 +5,29 @@ test_that("files are loaded into the right env", {
   renv <- new.env(parent=environment())
   genv <- new.env(parent=environment())
 
-  loadSupport("../test-helpers/app1-standard", renv=renv, globalrenv=genv)
+  loadSupport(test_path("../test-helpers/app1-standard"), renv=renv, globalrenv=genv)
   expect_equal(get("helper1", renv, inherits=FALSE), 123)
   expect_equal(get("helper2", renv, inherits=FALSE), "abc")
 
   expect_equal(get("global", genv, inherits=FALSE), "ABC")
+})
+
+test_that("loadSupport messages to inform about loading", {
+  renv <- new.env(parent=environment())
+  genv <- new.env(parent=environment())
+
+  # Plural
+  expect_message(loadSupport(test_path("../test-helpers/app1-standard"), renv=renv, globalrenv=genv),
+                 "Automatically loading 2 .R files")
+  # Singular
+  expect_message(loadSupport(test_path("../test-helpers/app2-nested"), renv=renv, globalrenv=NULL),
+                 "Automatically loading 1 .R file")
+})
+
+test_that("loadSupport skips if _disable_autoload.R found", {
+  expect_message(loadSupport(test_path("../test-helpers/app6-disabled"), renv=environment(), globalrenv=NULL),
+                 "disable_autoload.R detected; not loading")
+  expect_false(exists("helper1"))
 })
 
 test_that("Can suppress sourcing global.R", {

@@ -9,6 +9,9 @@ shiny 1.4.0.9000
 
 ### Minor new features and improvements
 
+* Added `reactiveValuesFromList()` function.
+([#2511](https://github.com/rstudio/shiny/issues/2511))
+
 ### Bug fixes
 
 * Fixed [#2606](https://github.com/rstudio/shiny/issues/2606): `debounce()` would not work properly if the code in the reactive expression threw an error on the first run. ([#2652](https://github.com/rstudio/shiny/pull/2652))

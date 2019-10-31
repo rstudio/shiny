@@ -120,6 +120,7 @@ reference:
       - reactiveVal
       - reactiveValues
       - reactiveValuesToList
+      - reactiveValuesFromList
       - is.reactivevalues
       - isolate
       - invalidateLater

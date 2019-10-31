@@ -707,6 +707,22 @@ reactiveValuesToList <- function(x, all.names=FALSE) {
   res
 }
 
+#' Convert a list to a reactivevalues object
+#'
+#' This function turns a list into a reactivevalues object.
+#'
+#' @param x A list.
+#' @examples
+#' values <- list(a = 1)
+#' \dontrun{
+#' reactiveValuesFromList(values)
+#' }
+#'
+#' @export
+reactiveValuesFromList <- function(x) {
+  do.call(reactiveValues, x)
+}
+
 # This function is needed because str() on a reactivevalues object will call
 # [[.reactivevalues(), which will give an error when it tries to access
 # x[['impl']].

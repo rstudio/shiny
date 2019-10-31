@@ -7,7 +7,7 @@
 runExample(example = NA, port = NULL,
   launch.browser = getOption("shiny.launch.browser", interactive()),
   host = getOption("shiny.host", "127.0.0.1"), display.mode = c("auto",
-  "normal", "showcase"))
+  "normal", "showcase"), package = "shiny")
 }
 \arguments{
 \item{example}{The name of the example to run, or \code{NA} (the default) to
@@ -26,6 +26,9 @@ to the \code{shiny.host} option, if set, or \code{"127.0.0.1"} if not.}
 \item{display.mode}{The mode in which to display the example. Defaults to
 \code{showcase}, but may be set to \code{normal} to see the example without
 code or commentary.}
+
+\item{package}{The name of the package that contains \code{example}. Defaults to
+shiny package.}
 }
 \description{
 Launch Shiny example applications, and optionally, your system's web browser.

@@ -4,8 +4,13 @@
 \alias{updateTextInput}
 \title{Change the value of a text input on the client}
 \usage{
-updateTextInput(session, inputId, label = NULL, value = NULL,
-  placeholder = NULL)
+updateTextInput(
+  session,
+  inputId,
+  label = NULL,
+  value = NULL,
+  placeholder = NULL
+)
 }
 \arguments{
 \item{session}{The \code{session} object passed to function given to

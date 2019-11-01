@@ -7,17 +7,41 @@
 \alias{updateVarSelectizeInput}
 \title{Change the value of a select input on the client}
 \usage{
-updateSelectInput(session, inputId, label = NULL, choices = NULL,
-  selected = NULL)
+updateSelectInput(
+  session,
+  inputId,
+  label = NULL,
+  choices = NULL,
+  selected = NULL
+)
 
-updateSelectizeInput(session, inputId, label = NULL, choices = NULL,
-  selected = NULL, options = list(), server = FALSE)
+updateSelectizeInput(
+  session,
+  inputId,
+  label = NULL,
+  choices = NULL,
+  selected = NULL,
+  options = list(),
+  server = FALSE
+)
 
-updateVarSelectInput(session, inputId, label = NULL, data = NULL,
-  selected = NULL)
+updateVarSelectInput(
+  session,
+  inputId,
+  label = NULL,
+  data = NULL,
+  selected = NULL
+)
 
-updateVarSelectizeInput(session, inputId, label = NULL, data = NULL,
-  selected = NULL, options = list(), server = FALSE)
+updateVarSelectizeInput(
+  session,
+  inputId,
+  label = NULL,
+  data = NULL,
+  selected = NULL,
+  options = list(),
+  server = FALSE
+)
 }
 \arguments{
 \item{session}{The \code{session} object passed to function given to
@@ -32,7 +56,7 @@ named, then that name --- rather than the value --- is displayed to the
 user. It's also possible to group related inputs by providing a named list
 whose elements are (either named or unnamed) lists, vectors, or factors. In
 this case, the outermost names will be used as the group labels (leveraging
-the \code{<optgroup>} HTML tag) for the elements in the respective sublist. See
+the \verb{<optgroup>} HTML tag) for the elements in the respective sublist. See
 the example section for a small demo of this feature.}
 
 \item{selected}{The initially selected value (or multiple values if \code{multiple = TRUE}). If not specified then defaults to the first value for

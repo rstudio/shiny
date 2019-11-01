@@ -4,9 +4,15 @@
 \alias{fileInput}
 \title{File Upload Control}
 \usage{
-fileInput(inputId, label, multiple = FALSE, accept = NULL,
-  width = NULL, buttonLabel = "Browse...",
-  placeholder = "No file selected")
+fileInput(
+  inputId,
+  label,
+  multiple = FALSE,
+  accept = NULL,
+  width = NULL,
+  buttonLabel = "Browse...",
+  placeholder = "No file selected"
+)
 }
 \arguments{
 \item{inputId}{The \code{input} slot that will be used to access the value.}
@@ -25,7 +31,7 @@ A unique file type specifier can be:
 \itemize{
 \item A case insensitive extension like \code{.csv} or \code{.rds}.
 \item A valid MIME type, like \code{text/plain} or \code{application/pdf}
-\item One of \code{audio/*}, \code{video/*}, or \code{image/*} meaning any audio, video,
+\item One of \verb{audio/*}, \verb{video/*}, or \verb{image/*} meaning any audio, video,
 or image type, respectively.
 }}
 
@@ -42,7 +48,7 @@ Create a file upload control that can be used to upload one or more files.
 }
 \details{
 Whenever a file upload completes, the corresponding input variable is set
-to a dataframe. See the \code{Server value} section.
+to a dataframe. See the \verb{Server value} section.
 }
 \section{Server value}{
 
@@ -95,13 +101,16 @@ shinyApp(ui, server)
 
 }
 \seealso{
-Other input elements: \code{\link{actionButton}},
-  \code{\link{checkboxGroupInput}},
-  \code{\link{checkboxInput}}, \code{\link{dateInput}},
-  \code{\link{dateRangeInput}}, \code{\link{numericInput}},
-  \code{\link{passwordInput}}, \code{\link{radioButtons}},
-  \code{\link{selectInput}}, \code{\link{sliderInput}},
-  \code{\link{submitButton}}, \code{\link{textAreaInput}},
-  \code{\link{textInput}}, \code{\link{varSelectInput}}
+Other input elements: \code{\link{actionButton}()},
+  \code{\link{checkboxGroupInput}()},
+  \code{\link{checkboxInput}()}, \code{\link{dateInput}()},
+  \code{\link{dateRangeInput}()},
+  \code{\link{numericInput}()},
+  \code{\link{passwordInput}()},
+  \code{\link{radioButtons}()},
+  \code{\link{selectInput}()}, \code{\link{sliderInput}()},
+  \code{\link{submitButton}()},
+  \code{\link{textAreaInput}()}, \code{\link{textInput}()},
+  \code{\link{varSelectInput}()}
 }
 \concept{input elements}

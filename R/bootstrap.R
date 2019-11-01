@@ -103,7 +103,7 @@ basicPage <- function(...) {
 #' *automatic* height; that is, they determine their own height based on
 #' the height of their contained elements. However,
 #' `fillPage(plotOutput("plot", height = "100%"))` will work because
-#' `fillPage` fixes the `<body>` height at 100\% of the window height.
+#' `fillPage` fixes the `<body>` height at 100% of the window height.
 #'
 #' Note that `fillPage(plotOutput("plot"))` will not cause the plot to fill
 #' the page. Like most Shiny output widgets, `plotOutput`'s default height

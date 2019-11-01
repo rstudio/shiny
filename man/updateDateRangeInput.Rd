@@ -4,8 +4,15 @@
 \alias{updateDateRangeInput}
 \title{Change the start and end values of a date range input on the client}
 \usage{
-updateDateRangeInput(session, inputId, label = NULL, start = NULL,
-  end = NULL, min = NULL, max = NULL)
+updateDateRangeInput(
+  session,
+  inputId,
+  label = NULL,
+  start = NULL,
+  end = NULL,
+  min = NULL,
+  max = NULL
+)
 }
 \arguments{
 \item{session}{The \code{session} object passed to function given to

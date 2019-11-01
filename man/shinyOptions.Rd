@@ -44,18 +44,18 @@ be set globally with \code{options()} or locally (for a single app) with
 app directory will be continually monitored for changes to files that
 have the extensions: r, htm, html, js, css, png, jpg, jpeg, gif. If any
 changes are detected, all connected Shiny sessions are reloaded. This
-allows for fast feedback loops when tweaking Shiny UI.\preformatted{Since monitoring for changes is expensive (we simply poll for last
+allows for fast feedback loops when tweaking Shiny UI.
+
+Since monitoring for changes is expensive (we simply poll for last
 modified times), this feature is intended only for development.
 
 You can customize the file patterns Shiny will monitor by setting the
 shiny.autoreload.pattern option. For example, to monitor only ui.R:
-`options(shiny.autoreload.pattern = glob2rx("ui.R"))`
+\code{options(shiny.autoreload.pattern = glob2rx("ui.R"))}
 
 The default polling interval is 500 milliseconds. You can change this
-by setting e.g. `options(shiny.autoreload.interval = 2000)` (every
+by setting e.g. \code{options(shiny.autoreload.interval = 2000)} (every
 two seconds).}
-}
-
 \item{shiny.deprecation.messages (defaults to \code{TRUE})}{This controls whether messages for
 deprecated functions in Shiny will be printed. See
 \code{\link[=shinyDeprecated]{shinyDeprecated()}} for more information.}

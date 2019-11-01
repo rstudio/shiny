@@ -6,8 +6,14 @@
 \alias{shinyAppFile}
 \title{Create a Shiny app object}
 \usage{
-shinyApp(ui, server, onStart = NULL, options = list(),
-  uiPattern = "/", enableBookmarking = NULL)
+shinyApp(
+  ui,
+  server,
+  onStart = NULL,
+  options = list(),
+  uiPattern = "/",
+  enableBookmarking = NULL
+)
 
 shinyAppDir(appDir, options = list())
 

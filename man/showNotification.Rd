@@ -5,9 +5,15 @@
 \alias{removeNotification}
 \title{Show or remove a notification}
 \usage{
-showNotification(ui, action = NULL, duration = 5, closeButton = TRUE,
-  id = NULL, type = c("default", "message", "warning", "error"),
-  session = getDefaultReactiveDomain())
+showNotification(
+  ui,
+  action = NULL,
+  duration = 5,
+  closeButton = TRUE,
+  id = NULL,
+  type = c("default", "message", "warning", "error"),
+  session = getDefaultReactiveDomain()
+)
 
 removeNotification(id, session = getDefaultReactiveDomain())
 }

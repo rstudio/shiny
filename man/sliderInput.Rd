@@ -5,14 +5,33 @@
 \alias{animationOptions}
 \title{Slider Input Widget}
 \usage{
-sliderInput(inputId, label, min, max, value, step = NULL,
-  round = FALSE, format = NULL, locale = NULL, ticks = TRUE,
-  animate = FALSE, width = NULL, sep = ",", pre = NULL,
-  post = NULL, timeFormat = NULL, timezone = NULL,
-  dragRange = TRUE)
+sliderInput(
+  inputId,
+  label,
+  min,
+  max,
+  value,
+  step = NULL,
+  round = FALSE,
+  format = NULL,
+  locale = NULL,
+  ticks = TRUE,
+  animate = FALSE,
+  width = NULL,
+  sep = ",",
+  pre = NULL,
+  post = NULL,
+  timeFormat = NULL,
+  timezone = NULL,
+  dragRange = TRUE
+)
 
-animationOptions(interval = 1000, loop = FALSE, playButton = NULL,
-  pauseButton = NULL)
+animationOptions(
+  interval = 1000,
+  loop = FALSE,
+  playButton = NULL,
+  pauseButton = NULL
+)
 }
 \arguments{
 \item{inputId}{The \code{input} slot that will be used to access the value.}
@@ -125,13 +144,16 @@ shinyApp(ui, server)
 \seealso{
 \code{\link[=updateSliderInput]{updateSliderInput()}}
 
-Other input elements: \code{\link{actionButton}},
-  \code{\link{checkboxGroupInput}},
-  \code{\link{checkboxInput}}, \code{\link{dateInput}},
-  \code{\link{dateRangeInput}}, \code{\link{fileInput}},
-  \code{\link{numericInput}}, \code{\link{passwordInput}},
-  \code{\link{radioButtons}}, \code{\link{selectInput}},
-  \code{\link{submitButton}}, \code{\link{textAreaInput}},
-  \code{\link{textInput}}, \code{\link{varSelectInput}}
+Other input elements: \code{\link{actionButton}()},
+  \code{\link{checkboxGroupInput}()},
+  \code{\link{checkboxInput}()}, \code{\link{dateInput}()},
+  \code{\link{dateRangeInput}()},
+  \code{\link{fileInput}()}, \code{\link{numericInput}()},
+  \code{\link{passwordInput}()},
+  \code{\link{radioButtons}()},
+  \code{\link{selectInput}()},
+  \code{\link{submitButton}()},
+  \code{\link{textAreaInput}()}, \code{\link{textInput}()},
+  \code{\link{varSelectInput}()}
 }
 \concept{input elements}

@@ -5,24 +5,33 @@
 \alias{removeUI}
 \title{Insert and remove UI objects}
 \usage{
-insertUI(selector, where = c("beforeBegin", "afterBegin", "beforeEnd",
-  "afterEnd"), ui, multiple = FALSE, immediate = FALSE,
-  session = getDefaultReactiveDomain())
+insertUI(
+  selector,
+  where = c("beforeBegin", "afterBegin", "beforeEnd", "afterEnd"),
+  ui,
+  multiple = FALSE,
+  immediate = FALSE,
+  session = getDefaultReactiveDomain()
+)
 
-removeUI(selector, multiple = FALSE, immediate = FALSE,
-  session = getDefaultReactiveDomain())
+removeUI(
+  selector,
+  multiple = FALSE,
+  immediate = FALSE,
+  session = getDefaultReactiveDomain()
+)
 }
 \arguments{
 \item{selector}{A string that is accepted by jQuery's selector
-(i.e. the string \code{s} to be placed in a \code{$(s)} jQuery call).
+(i.e. the string \code{s} to be placed in a \verb{$(s)} jQuery call).
 
 For \code{insertUI()} this determines the element(s) relative to which you
 want to insert your UI object. For \code{removeUI()} this determine the
 element(s) to be removed. If you want to remove a Shiny input or output,
-note that many of these are wrapped in \code{<div>}s, so you may need to use a
+note that many of these are wrapped in \verb{<div>}s, so you may need to use a
 somewhat complex selector --- see the Examples below. (Alternatively, you
 could also wrap the inputs/outputs that you want to be able to remove
-easily in a \code{<div>} with an id.)}
+easily in a \verb{<div>} with an id.)}
 
 \item{where}{Where your UI object should go relative to the selector:
 \describe{

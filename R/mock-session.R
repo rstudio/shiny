@@ -70,6 +70,11 @@ extract <- function(promise) {
 }
 
 #' Mock Shiny Session
+#'
+#' @description
+#' An R6 class suitable for testing that simulates the `session` parameter
+#' provided to Shiny server functions or modules.
+#'
 #' @include timer.R
 #' @export
 MockShinySession <- R6Class(
@@ -77,17 +82,25 @@ MockShinySession <- R6Class(
   portable = FALSE,
   class = FALSE,
   public = list(
+    #' @field env The environment associated with the session.
     env = NULL,
-    # Needed for rendering HTML (i.e. renderUI)
+    #' @field singletons Hardcoded as empty. Needed for rendering HTML (i.e. renderUI)
     singletons = character(0),
-    # Define a mock client data that always returns a size for plots
+    #' @field clientData Mock client data that always returns a size for plots
     clientData = structure(list(), class="mockclientdata"),
+    #' @description No-op
+    #' @param logEntry Not used
     reactlog = function(logEntry){},
+    #' @description No-op
     incrementBusyCount = function(){},
+    #' @field output The shinyoutputs associated with the session
     output = NULL,
+    #' @field input The reactive inputs associated with the session
     input = NULL,
+    #' @field userData An environment initialized as empty.
     userData = NULL,
 
+    #' @description Create a new MockShinySession
     initialize = function() {
       private$.input <- ReactiveValues$new(dedupe = FALSE, label = "input")
       private$flushCBs <- Callbacks$new()
@@ -105,6 +118,9 @@ MockShinySession <- R6Class(
       # Create a read-only copy of the inputs reactive.
       self$input <- .createReactiveValues(private$.input, readonly = TRUE)
     },
+    #' @description Define a callback to be invoked before a reactive flush
+    #' @param fun The function to invoke
+    #' @param once If `TRUE`, will only run once. Otherwise, will run every time reactives are flushed.
     onFlush = function(fun, once=TRUE) {
       if (!isTRUE(once)) {
         return(private$flushCBs$register(fun))
@@ -116,6 +132,9 @@ MockShinySession <- R6Class(
         return(dereg)
       }
     },
+    #' @description Define a callback to be invoked after a reactive flush
+    #' @param fun The function to invoke
+    #' @param once If `TRUE`, will only run once. Otherwise, will run every time reactives are flushed.
     onFlushed = function(fun, once=TRUE) {
       if (!isTRUE(once)) {
         return(private$flushedCBs$register(fun))
@@ -127,18 +146,29 @@ MockShinySession <- R6Class(
         return(dereg)
       }
     },
+    #' @description Define a callback to be invoked when the session ends
+    #' @param sessionEndedCallback The callback to invoke when the session has ended.
     onEnded = function(sessionEndedCallback) {
       private$endedCBs$register(sessionEndedCallback)
     },
 
+    #' @description Returns `FALSE` if the session has not yet been closed
     isEnded = function(){ private$closed },
+    #' @description Returns `FALSE` if the session has not yet been closed
     isClosed = function(){ private$closed },
+    #' @description Closes the session
     close = function(){ private$closed <- TRUE },
 
     #FIXME: this is wrong. Will need to be more complex.
+    #' @description Unsophisticated mock implementation that merely invokes
+    #'   the given callback immediately.
+    #' @param callback The callback ato be invoked.
     cycleStartAction = function(callback){ callback() },
 
-    # Needed for image rendering. Base64-encode the given file.
+    #' @description Base64-encode the given file. Needed for image rendering.
+    #' @param name Not used
+    #' @param file The file to be encoded
+    #' @param contentType The content type of the base64-encoded string
     fileUrl = function(name, file, contentType='application/octet-stream') {
       bytes <- file.info(file)$size
       if (is.na(bytes))
@@ -149,6 +179,12 @@ MockShinySession <- R6Class(
       return(paste('data:', contentType, ';base64,', b64, sep=''))
     },
 
+    #' @description Sets reactive values associated with the `session$inputs` object
+    #'   and flushes the reactives.
+    #' @param ... The inputs to set.
+    #' @examples
+    #' s <- MockShinySession$new()
+    #' s$setInputs(x=1, y=2)
     setInputs = function(...) {
       vals <- list(...)
       mapply(names(vals), vals, FUN = function(name, value) {
@@ -157,6 +193,9 @@ MockShinySession <- R6Class(
       private$flush()
     },
 
+    #' @description An internal method which shouldn't be used by others.
+    #' @param millis The number of milliseconds on which to schedule a callback
+    #' @param callback The function to schedule
     .scheduleTask = function(millis, callback) {
       id <- private$timer$schedule(millis, callback)
 
@@ -165,6 +204,9 @@ MockShinySession <- R6Class(
         invisible(private$timer$unschedule(id))
       }
     },
+
+    #' @description Simulate the passing of time by the given number of milliseconds.
+    #' @param millis The number of milliseconds to advance time.
     elapse = function(millis) {
       msLeft <- millis
 
@@ -191,11 +233,16 @@ MockShinySession <- R6Class(
       private$flush()
     },
 
+    #' @description An internal method which shouldn't be used by others.
     .now = function() {
       # Contract is to return Sys.time, which is seconds, not millis.
       private$timer$getElapsed()/1000
     },
 
+    #' @description An internal method which shouldn't be used by others.
+    #' @param name The name of the output
+    #' @param func The render definition
+    #' @param label Not used
     defineOutput = function(name, func, label) {
       if (!is.null(private$outs[[name]]$obs)) {
         private$outs[[name]]$obs$destroy()
@@ -228,6 +275,8 @@ MockShinySession <- R6Class(
       private$outs[[name]] <- list(obs = obs, func = func, promise = NULL)
     },
 
+    #' @description An internal method which shouldn't be used by others.
+    #' @param name The name of the output
     getOutput = function(name) {
       # Unlike the real outputs, we're going to return the last value rather than the unevaluated function
       if (is.null(private$outs[[name]])) {
@@ -253,35 +302,74 @@ MockShinySession <- R6Class(
       }
     },
 
+    #' @description No-op
+    #' @param name Not used
+    #' @param data Not used
+    #' @param filterFunc Not used
     registerDataObj = function(name, data, filterFunc) {},
+    #' @description No-op
+    #' @param value Not used
     allowReconnect = function(value) {},
+    #' @description No-op
     reload = function() {},
+    #' @description No-op
+    #' @param brushId Not used
     resetBrush = function(brushId) {
       warning("session$brush isn't meaningfully mocked on the MockShinySession")
     },
+    #' @description No-op
+    #' @param type Not used
+    #' @param message Not used
     sendCustomMessage = function(type, message) {},
+    #' @description No-op
+    #' @param type Not used
+    #' @param message Not used
     sendBinaryMessage = function(type, message) {},
+    #' @description No-op
+    #' @param inputId Not used
+    #' @param message Not used
     sendInputMessage = function(inputId, message) {},
+    #' @description No-op
+    #' @param names Not used
     setBookmarkExclude = function(names) {
       warning("Bookmarking isn't meaningfully mocked in MockShinySession")
     },
+    #' @description No-op
     getBookmarkExclude = function() {
       warning("Bookmarking isn't meaningfully mocked in MockShinySession")
     },
+    #' @description No-op
+    #' @param fun Not used
     onBookmark = function(fun) {},
+    #' @description No-op
+    #' @param fun Not used
     onBookmarked = function(fun) {},
+    #' @description No-op
     doBookmark = function() {
       warning("Bookmarking isn't meaningfully mocked in MockShinySession")
     },
+    #' @description No-op
+    #' @param fun Not used
     onRestore = function(fun) {},
+    #' @description No-op
+    #' @param fun Not used
     onRestored = function(fun) {},
+    #' @description No-op
     exportTestValues = function() {},
+    #' @description No-op
+    #' @param input Not used
+    #' @param output Not used
+    #' @param export Not used
+    #' @param format Not used
     getTestSnapshotUrl = function(input=TRUE, output=TRUE, export=TRUE, format="json") {},
+    #' @description Returns the given id prefixed by `mock-session-`.
+    #' @param id The id to modify.
     ns = function(id) {
       paste0("mock-session-", id) # TODO: does this need to be more complex/intelligent?
     },
+    #' @description Trigger a reactive flush right now.
     flushReact = function(){
-      shiny:::flushReact()
+      private$flush()
     }
   ),
   private = list(
@@ -296,13 +384,14 @@ MockShinySession <- R6Class(
 
     flush = function(){
       isolate(private$flushCBs$invoke(..stacktraceon = TRUE))
-      flushReact()
+      shiny:::flushReact() # namespace to avoid calling our own method
       isolate(private$flushedCBs$invoke(..stacktraceon = TRUE))
       later::run_now()
     }
   ),
   active = list(
     # If assigning to `returned`, proactively flush
+    #' @field returned The value returned from the module
     returned = function(value){
       if(missing(value)){
         return(private$returnedVal)
@@ -313,6 +402,7 @@ MockShinySession <- R6Class(
       private$returnedVal <- value
       private$flush()
     },
+    #' @field request An empty environment where the request should be. The request isn't meaningfully mocked currently.
     request = function(value) {
       if (!missing(value)){
         stop("session$request can't be assigned to")
@@ -322,3 +412,4 @@ MockShinySession <- R6Class(
     }
   )
 )
+

@@ -5,8 +5,7 @@
 \alias{verbatimTextOutput}
 \title{Create a text output element}
 \usage{
-textOutput(outputId, container = if (inline) span else div,
-  inline = FALSE)
+textOutput(outputId, container = if (inline) span else div, inline = FALSE)
 
 verbatimTextOutput(outputId, placeholder = FALSE)
 }
@@ -28,8 +27,8 @@ A output element for use in UI.
 \description{
 Render a reactive output variable as text within an application page.
 \code{textOutput()} is usually paired with \code{\link[=renderText]{renderText()}} and puts regular text
-in \code{<div>} or \code{<span>}; \code{verbatimTextOutput()} is usually paired with
-\code{\link[=renderPrint]{renderPrint()}} and provudes fixed-width text in a \code{<pre>}.
+in \verb{<div>} or \verb{<span>}; \code{verbatimTextOutput()} is usually paired with
+\code{\link[=renderPrint]{renderPrint()}} and provudes fixed-width text in a \verb{<pre>}.
 }
 \details{
 In both funtions, text is HTML-escaped prior to rendering.

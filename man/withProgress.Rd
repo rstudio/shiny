@@ -6,17 +6,32 @@
 \alias{incProgress}
 \title{Reporting progress (functional API)}
 \usage{
-withProgress(expr, min = 0, max = 1, value = min + (max - min) * 0.1,
-  message = NULL, detail = NULL,
+withProgress(
+  expr,
+  min = 0,
+  max = 1,
+  value = min + (max - min) * 0.1,
+  message = NULL,
+  detail = NULL,
   style = getShinyOption("progress.style", default = "notification"),
-  session = getDefaultReactiveDomain(), env = parent.frame(),
-  quoted = FALSE)
+  session = getDefaultReactiveDomain(),
+  env = parent.frame(),
+  quoted = FALSE
+)
 
-setProgress(value = NULL, message = NULL, detail = NULL,
-  session = getDefaultReactiveDomain())
+setProgress(
+  value = NULL,
+  message = NULL,
+  detail = NULL,
+  session = getDefaultReactiveDomain()
+)
 
-incProgress(amount = 0.1, message = NULL, detail = NULL,
-  session = getDefaultReactiveDomain())
+incProgress(
+  amount = 0.1,
+  message = NULL,
+  detail = NULL,
+  session = getDefaultReactiveDomain()
+)
 }
 \arguments{
 \item{expr}{The work to be done. This expression should contain calls to

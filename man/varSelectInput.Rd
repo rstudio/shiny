@@ -5,8 +5,16 @@
 \alias{varSelectizeInput}
 \title{Select variables from a data frame}
 \usage{
-varSelectInput(inputId, label, data, selected = NULL, multiple = FALSE,
-  selectize = TRUE, width = NULL, size = NULL)
+varSelectInput(
+  inputId,
+  label,
+  data,
+  selected = NULL,
+  multiple = FALSE,
+  selectize = TRUE,
+  width = NULL,
+  size = NULL
+)
 
 varSelectizeInput(inputId, ..., options = NULL, width = NULL)
 }
@@ -119,13 +127,15 @@ shinyApp(
 \seealso{
 \code{\link[=updateSelectInput]{updateSelectInput()}}
 
-Other input elements: \code{\link{actionButton}},
-  \code{\link{checkboxGroupInput}},
-  \code{\link{checkboxInput}}, \code{\link{dateInput}},
-  \code{\link{dateRangeInput}}, \code{\link{fileInput}},
-  \code{\link{numericInput}}, \code{\link{passwordInput}},
-  \code{\link{radioButtons}}, \code{\link{selectInput}},
-  \code{\link{sliderInput}}, \code{\link{submitButton}},
-  \code{\link{textAreaInput}}, \code{\link{textInput}}
+Other input elements: \code{\link{actionButton}()},
+  \code{\link{checkboxGroupInput}()},
+  \code{\link{checkboxInput}()}, \code{\link{dateInput}()},
+  \code{\link{dateRangeInput}()},
+  \code{\link{fileInput}()}, \code{\link{numericInput}()},
+  \code{\link{passwordInput}()},
+  \code{\link{radioButtons}()},
+  \code{\link{selectInput}()}, \code{\link{sliderInput}()},
+  \code{\link{submitButton}()},
+  \code{\link{textAreaInput}()}, \code{\link{textInput}()}
 }
 \concept{input elements}

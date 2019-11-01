@@ -75,6 +75,10 @@ testServer <- function(expr, appDir=NULL) {
   app <- shinyAppDir(appDir)
   server <- app$serverFuncSource()
 
+  origwd <- getwd()
+  setwd(appDir)
+  on.exit({ setwd(origwd) }, add=TRUE)
+
   # Add `session` argument if not present
   fn_formals <- formals(server)
   if (! "session" %in% names(fn_formals)) {

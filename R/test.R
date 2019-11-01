@@ -25,7 +25,7 @@ isShinyTest <- function(text){
 #'   files in the `tests/` directory are all shinytests; if so, just calls out
 #'   to [shinytest::testApp()].
 #' @export
-testApp <- function(appDir=".", filter=NULL){
+runTests <- function(appDir=".", filter=NULL){
   testsDir <- file.path(appDir, "tests")
   if (!dirExists(testsDir)){
     stop("No tests directory found: ", testsDir)

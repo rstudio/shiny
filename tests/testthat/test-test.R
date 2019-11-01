@@ -1,7 +1,7 @@
 
-context ("testApp")
+context ("runTests")
 
-test_that("testApp works", {
+test_that("runTests works", {
   calls <- list()
   # Tracks the working directory we were in as of the last call
   wd <- NULL
@@ -31,9 +31,9 @@ test_that("testApp works", {
   options(shiny.autoload.r=TRUE)
   on.exit({options(shiny.autoload.r=orig)}, add=TRUE)
 
-  testSpy <- rewire(testApp, sourceUTF8 = sourceStub, loadSupport=loadSupportStub)
+  runTestsSpy <- rewire(runTests, sourceUTF8 = sourceStub, loadSupport=loadSupportStub)
 
-  res <- testSpy(test_path("../test-helpers/app1-standard"))
+  res <- runTestsSpy(test_path("../test-helpers/app1-standard"))
 
   # Should have seen two calls to each test runner
   expect_length(calls, 2)
@@ -67,7 +67,7 @@ test_that("testApp works", {
   # Clear out err'ing files and rerun
   filesToError <- character(0)
 
-  res <- testSpy(test_path("../test-helpers/app1-standard"))
+  res <- runTestsSpy(test_path("../test-helpers/app1-standard"))
   expect_equal(res$result, TRUE)
   expect_equal(res$files, list(`runner1.R` = TRUE, `runner2.R` = TRUE))
 
@@ -75,7 +75,7 @@ test_that("testApp works", {
   # our spy will catch it.
   calls <- list()
   options(shiny.autoload.r=FALSE)
-  res <- testSpy(test_path("../test-helpers/app1-standard"))
+  res <- runTestsSpy(test_path("../test-helpers/app1-standard"))
   expect_length(calls, 3)
   expect_match(calls[[1]][[1]], "/global\\.R", perl=TRUE)
 })
@@ -92,61 +92,64 @@ test_that("calls out to shinytest when appropriate", {
   }
 
   # All are shinytests but shinytest isn't installed
-  testSpy <- rewire(testApp, isShinyTest = isShinyTestStub, requireNamespace = requireNamespaceStub)
-  expect_error(testSpy(test_path("../test-helpers/app1-standard")), "but shinytest is not installed")
+  runTestsSpy <- rewire(runTests,
+                    isShinyTest = isShinyTestStub,
+                    requireNamespace = requireNamespaceStub)
+  expect_error(runTestsSpy(test_path("../test-helpers/app1-standard")), "but shinytest is not installed")
 
   # All are shinytests and shinytest is installed
   shinytestInstalled <- TRUE
   sares <- list()
   sares[[1]] <- list(name = "test1", pass=TRUE)
   sares[[2]] <- list(name = "test2", pass=FALSE)
-  overloadShinyTest <- rewire_namespace_handler("shinytest", "testApp", function(...){ list(results=sares) })
-  testSpy <- rewire(testApp, isShinyTest = isShinyTestStub, requireNamespace = requireNamespaceStub, `::` = overloadShinyTest)
+  overloadShinyTest <- rewire_namespace_handler("shinytest", "testApp",
+                                                function(...){ list(results=sares) })
+  runTestsSpy <- rewire(runTests, isShinyTest = isShinyTestStub, requireNamespace = requireNamespaceStub, `::` = overloadShinyTest)
 
   # Run shinytest with a failure
-  res2 <- testSpy(test_path("../test-helpers/app1-standard"))
+  res2 <- runTestsSpy(test_path("../test-helpers/app1-standard"))
   expect_false(res2$result)
   expect_equal(res2$files, list(test1=TRUE, test2=FALSE))
   expect_s3_class(res2, "shinytestrun")
 
   # Run shinytest with all passing
   sares[[2]]$pass <- TRUE
-  res2 <- testSpy(test_path("../test-helpers/app1-standard"))
+  res2 <- runTestsSpy(test_path("../test-helpers/app1-standard"))
   expect_true(res2$result)
   expect_equal(res2$files, list(test1=TRUE, test2=TRUE))
   expect_s3_class(res2, "shinytestrun")
 
   # Not shinytests
   isShinyTest <- FALSE
-  res <- testSpy(test_path("../test-helpers/app1-standard"))
+  res <- runTestsSpy(test_path("../test-helpers/app1-standard"))
   expect_s3_class(res, "shinytestrun")
 })
 
-test_that("testApp filters", {
+test_that("runTests filters", {
   calls <- list()
   sourceStub <- function(...){
     calls[[length(calls)+1]] <<- list(...)
     NULL
   }
 
-  testSpy <- rewire(testApp, sourceUTF8 = sourceStub)
+  runTestsSpy <- rewire(runTests, sourceUTF8 = sourceStub)
 
   # No filter should see two tests (plus the global.R which we source first)
-  testSpy(test_path("../test-helpers/app1-standard"))
+  runTestsSpy(test_path("../test-helpers/app1-standard"))
   expect_length(calls, 3)
 
   # Filter down to one (plus the global.R)
   calls <- list()
-  testSpy(test_path("../test-helpers/app1-standard"), filter="runner1")
+  runTestsSpy(test_path("../test-helpers/app1-standard"), filter="runner1")
   expect_length(calls, 2)
 
   calls <- list()
-  expect_error(testSpy(test_path("../test-helpers/app1-standard"), filter="i don't exist"), "matched the given filter")
+  expect_error(runTestsSpy(test_path("../test-helpers/app1-standard"), filter="i don't exist"), "matched the given filter")
 })
 
-test_that("testApp handles the absence of tests", {
-  expect_error(testApp(test_path("../test-helpers/app2-nested")), "No tests directory found")
-  expect_message(res <- testApp(test_path("../test-helpers/app6-empty-tests")), "No test runners found in")
+test_that("runTests handles the absence of tests", {
+  expect_error(runTests(test_path("../test-helpers/app2-nested")), "No tests directory found")
+  expect_message(res <- runTests(test_path("../test-helpers/app6-empty-tests")), "No test runners found in")
   expect_equal(res$result, NA)
   expect_equal(res$files, list())
   expect_s3_class(res, "shinytestrun")

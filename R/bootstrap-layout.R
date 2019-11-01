@@ -566,7 +566,7 @@ splitLayout <- function(..., cellWidths = NULL, cellArgs = list()) {
 #' @param flex Determines how space should be distributed to the cells. Can be a
 #'   single value like `1` or `2` to evenly distribute the available
 #'   space; or use a vector of numbers to specify the proportions. For example,
-#'   `flex = c(2, 3)` would cause the space to be split 40\%/60\% between
+#'   `flex = c(2, 3)` would cause the space to be split 40%/60% between
 #'   two cells. NA values will cause the corresponding cell to be sized
 #'   according to its contents (without growing or shrinking).
 #' @param width,height The total amount of width and height to use for the

@@ -4,13 +4,16 @@
 \alias{loadSupport}
 \title{Load an app's supporting R files}
 \usage{
-loadSupport(appDir, renv = new.env(parent = globalenv()),
-  globalrenv = globalenv())
+loadSupport(
+  appDir,
+  renv = new.env(parent = globalenv()),
+  globalrenv = globalenv()
+)
 }
 \arguments{
 \item{appDir}{The application directory}
 
-\item{renv}{The environmeny in which the files in the \code{R/} directory should
+\item{renv}{The environmeny in which the files in the \verb{R/} directory should
 be evaluated.}
 
 \item{globalrenv}{The environment in which \code{global.R} should be evaluated. If
@@ -18,14 +21,19 @@ be evaluated.}
 }
 \description{
 Loads all of the supporting R files of a Shiny application. Specifically,
-this function loads any top-level supporting \code{.R} files in the \code{R/} directory
+this function loads any top-level supporting \code{.R} files in the \verb{R/} directory
 adjacent to the \code{app.R}/\code{server.R}/\code{ui.R} files.
 }
 \details{
-At the moment, this function is "opt-in" and only called if the option
-\code{shiny.autoload.r} is set to \code{TRUE}.
+Since Shiny 1.5.0, this function is called by default when running an
+application. If it causes problems, there are two ways to opt out. You can
+either place a file named \verb{_disable_autoload.R} in your R/ directory, or
+set \code{options(shiny.autoload.r=FALSE)}. If you set this option, it will
+affect any application that runs later in the same R session, potentially
+breaking it, so after running your application, you should unset option with
+\code{options(shiny.autoload.r=NULL)}
 
 The files are sourced in alphabetical order (as determined by
 \link{list.files}). \code{global.R} is evaluated before the supporting R files in the
-\code{R/} directory.
+\verb{R/} directory.
 }

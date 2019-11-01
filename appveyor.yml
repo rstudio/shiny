@@ -16,6 +16,9 @@ cache:
 # Adapt as necessary starting from here
 
 build_script:
+  - travis-tool.sh install_github rstudio/htmltools@rc-v0.4.0
+  - travis-tool.sh install_github rstudio/promises@rc-v1.1.0
+  - travis-tool.sh install_github r-lib/later@rc-v1.0.0
   - travis-tool.sh install_deps
 
 test_script:

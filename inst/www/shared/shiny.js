@@ -12,7 +12,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
   var exports = window.Shiny = window.Shiny || {};
 
-  exports.version = "1.3.2.9001"; // Version number inserted by Grunt
+  exports.version = "1.4.0.9000"; // Version number inserted by Grunt
 
   var origPushState = window.history.pushState;
   window.history.pushState = function () {
@@ -611,7 +611,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         return;
       }
       this.lastSentValues[inputName] = { jsonValue: jsonValue, inputType: inputType };
-      this.target.setInput(name, value, opts);
+      this.target.setInput(nameType, value, opts);
     };
     this.reset = function () {
       var values = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
@@ -626,10 +626,10 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       for (var inputName in values) {
         if (values.hasOwnProperty(inputName)) {
           var _splitInputNameType2 = splitInputNameType(inputName),
-              _name = _splitInputNameType2.name,
+              name = _splitInputNameType2.name,
               inputType = _splitInputNameType2.inputType;
 
-          cacheValues[_name] = {
+          cacheValues[name] = {
             jsonValue: JSON.stringify(values[inputName]),
             inputType: inputType
           };
@@ -658,7 +658,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       $(opts.el).trigger(evt);
 
       if (!evt.isDefaultPrevented()) {
-        name = evt.name;
+        var name = evt.name;
         if (evt.inputType !== '') name += ':' + evt.inputType;
 
         // Most opts aren't passed along to lower levels in the input decorator
@@ -713,13 +713,16 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
   };
   (function () {
     this.setInput = function (nameType, value, opts) {
-      if (/^\./.test(nameType)) this.target.setInput(nameType, value, opts);else this.pendingInput[name] = { value: value, opts: opts };
+      if (/^\./.test(nameType)) this.target.setInput(nameType, value, opts);else this.pendingInput[nameType] = { value: value, opts: opts };
     };
     this.submit = function () {
-      for (var name in this.pendingInput) {
-        if (this.pendingInput.hasOwnProperty(name)) {
-          var input = this.pendingInput[name];
-          this.target.setInput(name, input.value, input.opts);
+      for (var nameType in this.pendingInput) {
+        if (this.pendingInput.hasOwnProperty(nameType)) {
+          var _pendingInput$nameTyp = this.pendingInput[nameType],
+              value = _pendingInput$nameTyp.value,
+              opts = _pendingInput$nameTyp.opts;
+
+          this.target.setInput(nameType, value, opts);
         }
       }
     };
@@ -2999,9 +3002,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       var e2 = $.Event(newEventType, {
         which: e.which,
         pageX: e.pageX,
-        pageY: e.pageY,
-        offsetX: e.offsetX,
-        offsetY: e.offsetY
+        pageY: e.pageY
       });
 
       $el.trigger(e2);
@@ -3048,7 +3049,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         // If second click is too far away, it doesn't count as a double
         // click. Instead, immediately trigger a mousedown2 for the previous
         // click, and set this click as a new first click.
-        if (pending_e && Math.abs(pending_e.offsetX - e.offsetX) > 2 || Math.abs(pending_e.offsetY - e.offsetY) > 2) {
+        if (pending_e && Math.abs(pending_e.pageX - e.pageX) > 2 || Math.abs(pending_e.pageY - e.pageY) > 2) {
 
           triggerPendingMousedown2();
           scheduleMousedown2(e);
@@ -6593,7 +6594,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     initialValues['.clientdata_url_hash'] = window.location.hash;
 
     $(window).on('hashchange', function (e) {
-      inputs.setInput('.clientdata_url_hash', location.hash);
+      inputs.setInput('.clientdata_url_hash', window.location.hash);
     });
 
     // The server needs to know what singletons were rendered as part of

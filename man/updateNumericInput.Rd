@@ -4,8 +4,15 @@
 \alias{updateNumericInput}
 \title{Change the value of a number input on the client}
 \usage{
-updateNumericInput(session, inputId, label = NULL, value = NULL,
-  min = NULL, max = NULL, step = NULL)
+updateNumericInput(
+  session,
+  inputId,
+  label = NULL,
+  value = NULL,
+  min = NULL,
+  max = NULL,
+  step = NULL
+)
 }
 \arguments{
 \item{session}{The \code{session} object passed to function given to

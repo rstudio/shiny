@@ -4,8 +4,7 @@
 \alias{downloadHandler}
 \title{File Downloads}
 \usage{
-downloadHandler(filename, content, contentType = NA,
-  outputArgs = list())
+downloadHandler(filename, content, contentType = NA, outputArgs = list())
 }
 \arguments{
 \item{filename}{A string of the filename, including extension, that the

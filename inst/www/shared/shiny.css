@@ -401,6 +401,9 @@ pre.shiny-text-output {
 /* Overrides bootstrap-datepicker3.css styling for invalid date ranges.
    See https://github.com/rstudio/shiny/issues/2042 for details. */
 .datepicker table tbody tr td.disabled,
-.datepicker table tbody tr td.disabled:hover {
+.datepicker table tbody tr td.disabled:hover,
+.datepicker table tbody tr td span.disabled,
+.datepicker table tbody tr td span.disabled:hover {
   color: #aaa;
+  cursor: not-allowed;
 }

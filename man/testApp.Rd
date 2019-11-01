@@ -14,16 +14,14 @@ expression will be executed passed to \code{grepl}. Matching is performed on
 the file name including the extension.}
 }
 \description{
-Sources the \code{.R} files in the top-level of \code{tests/} much like \code{R CMD check}.
+Sources the \code{.R} files in the top-level of \verb{tests/} much like \verb{R CMD check}.
 These files are typically simple runners for tests nested in other
-directories under \code{tests/}.
+directories under \verb{tests/}.
 }
 \details{
-TODO: rename from testApp -- collision with shinytest is too much
-
 Historically, \href{https://rstudio.github.io/shinytest/}{shinytest}
-recommended placing tests at the top-level of the \code{tests/} directory. In
+recommended placing tests at the top-level of the \verb{tests/} directory. In
 order to support that model, \code{testApp} first checks to see if the \code{.R}
-files in the \code{tests/} directory are all shinytests; if so, just calls out
+files in the \verb{tests/} directory are all shinytests; if so, just calls out
 to \code{\link[shinytest:testApp]{shinytest::testApp()}}.
 }

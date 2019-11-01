@@ -4,11 +4,16 @@
 \alias{runApp}
 \title{Run Shiny Application}
 \usage{
-runApp(appDir = getwd(), port = getOption("shiny.port"),
+runApp(
+  appDir = getwd(),
+  port = getOption("shiny.port"),
   launch.browser = getOption("shiny.launch.browser", interactive()),
-  host = getOption("shiny.host", "127.0.0.1"), workerId = "",
-  quiet = FALSE, display.mode = c("auto", "normal", "showcase"),
-  test.mode = getOption("shiny.testmode", FALSE))
+  host = getOption("shiny.host", "127.0.0.1"),
+  workerId = "",
+  quiet = FALSE,
+  display.mode = c("auto", "normal", "showcase"),
+  test.mode = getOption("shiny.testmode", FALSE)
+)
 }
 \arguments{
 \item{appDir}{The application to run. Should be one of the following:

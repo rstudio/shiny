@@ -800,7 +800,14 @@ dataTablesJSON <- function(data, req) {
 
   fdata <- unname(as.matrix(fdata))
   if (is.character(fdata) && q$escape != 'false') {
-    if (q$escape == 'true') fdata <- htmlEscape(fdata) else {
+    if (q$escape == 'true') {
+      # fdata must be a matrix at this point, and we need to preserve
+      # dimensions. Note that it could be a 1xn matrix.
+      dims <- dim(fdata)
+      fdata <- htmlEscape(fdata)
+      dim(fdata) <- dims
+
+    } else {
       k <- as.integer(strsplit(q$escape, ',')[[1]])
       # use seq_len() in case escape = negative indices, e.g. c(-1, -5)
       for (j in seq_len(ncol(fdata))[k]) fdata[, j] <- htmlEscape(fdata[, j])

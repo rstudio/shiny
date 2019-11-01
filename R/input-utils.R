@@ -92,7 +92,10 @@ generateOptions <- function(inputId, selected, inline, type = 'checkbox',
 
 # True when a choice list item represents a group of related inputs.
 isGroup <- function(choice) {
-  length(choice) > 1 || !is.null(names(choice))
+  is.list(choice) ||
+    !is.null(names(choice)) ||
+    length(choice) > 1 ||
+    length(choice) == 0
 }
 
 # True when choices is a list and contains at least one group of related inputs.
@@ -131,6 +134,10 @@ processFlatChoices <- function(choices) {
 processGroupedChoices <- function(choices) {
   # We assert choices is a list, since only a list may contain a group.
   stopifnot(is.list(choices))
+  # The list might be unnamed by this point. We add default names of "" so that
+  # names(choices) is not zero-length and mapply can work. Within mapply, we
+  # error if any group's name is ""
+  choices <- asNamed(choices)
   choices <- mapply(function(name, choice) {
     choiceIsGroup <- isGroup(choice)
     if (choiceIsGroup && name == "") {

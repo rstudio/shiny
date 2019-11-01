@@ -6,8 +6,14 @@
 \alias{shinyAppFile}
 \title{Create a Shiny app object}
 \usage{
-shinyApp(ui, server, onStart = NULL, options = list(),
-  uiPattern = "/", enableBookmarking = NULL)
+shinyApp(
+  ui,
+  server,
+  onStart = NULL,
+  options = list(),
+  uiPattern = "/",
+  enableBookmarking = NULL
+)
 
 shinyAppDir(appDir, options = list())
 
@@ -15,7 +21,10 @@ shinyAppFile(appFile, options = list())
 }
 \arguments{
 \item{ui}{The UI definition of the app (for example, a call to
-\code{fluidPage()} with nested controls)}
+\code{fluidPage()} with nested controls).
+
+If bookmarking is enabled (see \code{enableBookmarking}), this must be
+a single argument function that returns the UI definition.}
 
 \item{server}{A function with three parameters: \code{input}, \code{output}, and
 \code{session}. The function is called once for each session ensuring that each
@@ -37,11 +46,9 @@ request. Note that the entire request path must match the regular
 expression in order for the match to be considered successful.}
 
 \item{enableBookmarking}{Can be one of \code{"url"}, \code{"server"}, or
-\code{"disable"}. This is equivalent to calling the
-\code{\link[=enableBookmarking]{enableBookmarking()}} function just before calling
-\code{shinyApp()}. With the default value (\code{NULL}), the app will
-respect the setting from any previous calls to \code{enableBookmarking()}.
-See \code{\link[=enableBookmarking]{enableBookmarking()}} for more information.}
+\code{"disable"}. The default value, \code{NULL}, will respect the setting from
+any previous calls to  \code{\link[=enableBookmarking]{enableBookmarking()}}. See \code{\link[=enableBookmarking]{enableBookmarking()}}
+for more information on bookmarking your app.}
 
 \item{appDir}{Path to directory that contains a Shiny app (i.e. a server.R
 file and either ui.R or www/index.html)}

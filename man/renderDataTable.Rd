@@ -4,9 +4,16 @@
 \alias{renderDataTable}
 \title{Table output with the JavaScript library DataTables}
 \usage{
-renderDataTable(expr, options = NULL, searchDelay = 500,
-  callback = "function(oTable) {}", escape = TRUE,
-  env = parent.frame(), quoted = FALSE, outputArgs = list())
+renderDataTable(
+  expr,
+  options = NULL,
+  searchDelay = 500,
+  callback = "function(oTable) {}",
+  escape = TRUE,
+  env = parent.frame(),
+  quoted = FALSE,
+  outputArgs = list()
+)
 }
 \arguments{
 \item{expr}{An expression that returns a data frame or a matrix.}

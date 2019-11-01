@@ -103,7 +103,7 @@ basicPage <- function(...) {
 #' *automatic* height; that is, they determine their own height based on
 #' the height of their contained elements. However,
 #' `fillPage(plotOutput("plot", height = "100%"))` will work because
-#' `fillPage` fixes the `<body>` height at 100\% of the window height.
+#' `fillPage` fixes the `<body>` height at 100% of the window height.
 #'
 #' Note that `fillPage(plotOutput("plot"))` will not cause the plot to fill
 #' the page. Like most Shiny output widgets, `plotOutput`'s default height
@@ -793,50 +793,43 @@ buildTabItem <- function(index, tabsetId, foundSelected, tabs = NULL,
 
 #' Create a text output element
 #'
-#' Render a reactive output variable as text within an application page. The
-#' text will be included within an HTML `div` tag by default.
+#' Render a reactive output variable as text within an application page.
+#' `textOutput()` is usually paired with [renderText()] and puts regular text
+#' in `<div>` or `<span>`; `verbatimTextOutput()` is usually paired with
+#' [renderPrint()] and provudes fixed-width text in a `<pre>`.
+#'
+#' In both funtions, text is HTML-escaped prior to rendering.
+#'
 #' @param outputId output variable to read the value from
 #' @param container a function to generate an HTML element to contain the text
 #' @param inline use an inline (`span()`) or block container (`div()`)
 #'   for the output
-#' @return A text output element that can be included in a panel
-#' @details Text is HTML-escaped prior to rendering. This element is often used
-#'   to display [renderText] output variables.
-#' @examples
-#' h3(textOutput("caption"))
-#' @export
-textOutput <- function(outputId, container = if (inline) span else div, inline = FALSE) {
-  container(id = outputId, class = "shiny-text-output")
-}
-
-#' Create a verbatim text output element
-#'
-#' Render a reactive output variable as verbatim text within an
-#' application page. The text will be included within an HTML `pre` tag.
-#' @param outputId output variable to read the value from
-#' @param placeholder if the output is empty or `NULL`, should an empty
-#'   rectangle be displayed to serve as a placeholder? (does not affect
-#'   behavior when the the output in nonempty)
-#' @return A verbatim text output element that can be included in a panel
-#' @details Text is HTML-escaped prior to rendering. This element is often used
-#'   with the [renderPrint] function to preserve fixed-width formatting
-#'   of printed objects.
+#' @return A output element for use in UI.
 #' @examples
 #' ## Only run this example in interactive R sessions
 #' if (interactive()) {
 #'   shinyApp(
 #'     ui = basicPage(
 #'       textInput("txt", "Enter the text to display below:"),
-#'       verbatimTextOutput("default"),
-#'       verbatimTextOutput("placeholder", placeholder = TRUE)
+#'       textOutput("text"),
+#'       verbatimTextOutput("verb")
 #'     ),
 #'     server = function(input, output) {
-#'       output$default <- renderText({ input$txt })
-#'       output$placeholder <- renderText({ input$txt })
+#'       output$text <- renderText({ input$txt })
+#'       output$verb <- renderText({ input$txt })
 #'     }
 #'   )
 #' }
 #' @export
+textOutput <- function(outputId, container = if (inline) span else div, inline = FALSE) {
+  container(id = outputId, class = "shiny-text-output")
+}
+
+#' @param placeholder if the output is empty or `NULL`, should an empty
+#'   rectangle be displayed to serve as a placeholder? (does not affect
+#'   behavior when the the output in nonempty)
+#' @export
+#' @rdname textOutput
 verbatimTextOutput <- function(outputId, placeholder = FALSE) {
   pre(id = outputId,
       class = paste(c("shiny-text-output", if (!placeholder) "noplaceholder"),

@@ -13,7 +13,10 @@
 #' object to `print()` or [runApp()].
 #'
 #' @param ui The UI definition of the app (for example, a call to
-#'   `fluidPage()` with nested controls)
+#'   `fluidPage()` with nested controls).
+#'
+#'    If bookmarking is enabled (see `enableBookmarking`), this must be
+#'    a single argument function that returns the UI definition.
 #' @param server A function with three parameters: `input`, `output`, and
 #'   `session`. The function is called once for each session ensuring that each
 #'   app is independent.
@@ -30,11 +33,9 @@
 #'   request. Note that the entire request path must match the regular
 #'   expression in order for the match to be considered successful.
 #' @param enableBookmarking Can be one of `"url"`, `"server"`, or
-#'   `"disable"`. This is equivalent to calling the
-#'   [enableBookmarking()] function just before calling
-#'   `shinyApp()`. With the default value (`NULL`), the app will
-#'   respect the setting from any previous calls to `enableBookmarking()`.
-#'   See [enableBookmarking()] for more information.
+#'   `"disable"`. The default value, `NULL`, will respect the setting from
+#'   any previous calls to  [enableBookmarking()]. See [enableBookmarking()]
+#'   for more information on bookmarking your app.
 #' @return An object that represents the app. Printing the object or passing it
 #'   to [runApp()] will run the app.
 #'
@@ -146,15 +147,13 @@ shinyAppDir_serverR <- function(appDir, options=list()) {
   # Most of the complexity here comes from needing to hot-reload if the .R files
   # change on disk, or are created, or are removed.
 
-  # In an upcoming version of shiny, this option will go away and the new behavior will be used.
-  if (getOption("shiny.autoload.r", FALSE)) {
-    # new behavior
-
+  # In an upcoming version of shiny, this option will go away.
+  if (getOption("shiny.autoload.r", TRUE)) {
     # Create a child env which contains all the helpers and will be the shared parent
     # of the ui.R and server.R load.
     sharedEnv <- new.env(parent = globalenv())
   } else {
-    # old behavior, default
+    # old behavior
     sharedEnv <- globalenv()
   }
 
@@ -230,7 +229,7 @@ shinyAppDir_serverR <- function(appDir, options=list()) {
     setwd(appDir)
     monitorHandle <<- initAutoReloadMonitor(appDir)
     # TODO: we should support hot reloading on global.R and R/*.R changes.
-    if (getOption("shiny.autoload.r", FALSE)) {
+    if (getOption("shiny.autoload.r", TRUE)) {
       loadSupport(appDir, renv=sharedEnv, globalrenv=globalenv())
     }  else {
       if (file.exists(file.path.ci(appDir, "global.R")))
@@ -314,8 +313,13 @@ initAutoReloadMonitor <- function(dir) {
 #' this function loads any top-level supporting `.R` files in the `R/` directory
 #' adjacent to the `app.R`/`server.R`/`ui.R` files.
 #'
-#' At the moment, this function is "opt-in" and only called if the option
-#' `shiny.autoload.r` is set to `TRUE`.
+#' Since Shiny 1.5.0, this function is called by default when running an
+#' application. If it causes problems, there are two ways to opt out. You can
+#' either place a file named `_disable_autoload.R` in your R/ directory, or
+#' set `options(shiny.autoload.r=FALSE)`. If you set this option, it will
+#' affect any application that runs later in the same R session, potentially
+#' breaking it, so after running your application, you should unset option with
+#' `options(shiny.autoload.r=NULL)`
 #'
 #' @details The files are sourced in alphabetical order (as determined by
 #'   [list.files]). `global.R` is evaluated before the supporting R files in the
@@ -335,7 +339,20 @@ loadSupport <- function(appDir, renv=new.env(parent=globalenv()), globalrenv=glo
   }
 
   helpersDir <- file.path(appDir, "R")
+
+  disabled <- list.files(helpersDir, pattern="^_disable_autoload\\.r$", recursive=FALSE, ignore.case=TRUE)
+  if (length(disabled) > 0){
+    message("R/_disable_autoload.R detected; not loading the R/ directory automatically")
+    return(invisible(renv))
+  }
+
   helpers <- list.files(helpersDir, pattern="\\.[rR]$", recursive=FALSE, full.names=TRUE)
+
+  if (length(helpers) > 0){
+    message("Automatically loading ", length(helpers), " .R file",
+            ifelse(length(helpers) != 1, "s", ""),
+            " found in the R/ directory.\nSee https://rstd.io/shiny-autoload for more info.")
+  }
 
   lapply(helpers, sourceUTF8, envir=renv)
 
@@ -349,15 +366,12 @@ shinyAppDir_appR <- function(fileName, appDir, options=list())
 {
   fullpath <- file.path.ci(appDir, fileName)
 
-  # In an upcoming version of shiny, this option will go away and the new behavior will be used.
-  if (getOption("shiny.autoload.r", FALSE)) {
-    # new behavior
-
+  # In an upcoming version of shiny, this option will go away.
+  if (getOption("shiny.autoload.r", TRUE)) {
     # Create a child env which contains all the helpers and will be the shared parent
     # of the ui.R and server.R load.
     sharedEnv <- new.env(parent = globalenv())
   } else {
-    # old behavior, default
     sharedEnv <- globalenv()
   }
 
@@ -411,7 +425,7 @@ shinyAppDir_appR <- function(fileName, appDir, options=list())
     oldwd <<- getwd()
     setwd(appDir)
     # TODO: we should support hot reloading on R/*.R changes.
-    if (getOption("shiny.autoload.r", FALSE)) {
+    if (getOption("shiny.autoload.r", TRUE)) {
       loadSupport(appDir, renv=sharedEnv, globalrenv=NULL)
     }
     monitorHandle <<- initAutoReloadMonitor(appDir)

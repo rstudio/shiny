@@ -4,9 +4,17 @@
 \alias{renderPlot}
 \title{Plot Output}
 \usage{
-renderPlot(expr, width = "auto", height = "auto", res = 72, ...,
-  env = parent.frame(), quoted = FALSE, execOnResize = FALSE,
-  outputArgs = list())
+renderPlot(
+  expr,
+  width = "auto",
+  height = "auto",
+  res = 72,
+  ...,
+  env = parent.frame(),
+  quoted = FALSE,
+  execOnResize = FALSE,
+  outputArgs = list()
+)
 }
 \arguments{
 \item{expr}{An expression that generates a plot.}

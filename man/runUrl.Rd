@@ -10,8 +10,14 @@ runUrl(url, filetype = NULL, subdir = NULL, destdir = NULL, ...)
 
 runGist(gist, destdir = NULL, ...)
 
-runGitHub(repo, username = getOption("github.user"), ref = "master",
-  subdir = NULL, destdir = NULL, ...)
+runGitHub(
+  repo,
+  username = getOption("github.user"),
+  ref = "master",
+  subdir = NULL,
+  destdir = NULL,
+  ...
+)
 }
 \arguments{
 \item{url}{URL of the application.}

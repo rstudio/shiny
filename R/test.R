@@ -26,6 +26,8 @@ isShinyTest <- function(text){
 #'   to [shinytest::testApp()].
 #' @export
 runTests <- function(appDir=".", filter=NULL){
+  require(shiny)
+
   testsDir <- file.path(appDir, "tests")
   if (!dirExists(testsDir)){
     stop("No tests directory found: ", testsDir)
@@ -65,12 +67,16 @@ runTests <- function(appDir=".", filter=NULL){
     sares <- shinytest::testApp(appDir)
     res <- list()
     lapply(sares$results, function(r){
-      res[r$name] <<- r$pass
+      e <- NA_character_
+      if (!r$pass){
+        e <- simpleError("Unknown shinytest error")
+      }
+      res[[r$name]] <<- e
     })
-    return(structure(list(result=all(as.logical(res)), files=res), class="shinytestrun"))
+    return(structure(list(result=all(is.na(res)), files=res), class="shinytestrun"))
   }
 
-  testenv <- new.env(parent=emptyenv())
+  testenv <- new.env(parent=globalenv())
   renv <- new.env(parent=testenv)
   if (getOption("shiny.autoload.r", FALSE)) {
     loadSupport(appDir, renv=renv, globalrenv=testenv)
@@ -92,10 +98,10 @@ runTests <- function(appDir=".", filter=NULL){
   fileResults <- list()
   lapply(runners, function(r){
     env <- new.env(parent=renv)
-    tryCatch({sourceUTF8(r, envir=env); fileResults[r] <<- TRUE}, error=function(e){
-      fileResults[r] <<- FALSE
+    tryCatch({sourceUTF8(r, envir=env); fileResults[[r]] <<- NA_character_}, error=function(e){
+      fileResults[[r]] <<- e
     })
   })
 
-  return(structure(list(result=all(as.logical(fileResults)), files=fileResults), class="shinytestrun"))
+  return(structure(list(result=all(is.na(fileResults)), files=fileResults), class="shinytestrun"))
 }

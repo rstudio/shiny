@@ -53,14 +53,16 @@ test_that("runTests works", {
 
   # Check the results
   expect_equal(res$result, FALSE)
-  expect_equal(res$files, list(`runner1.R` = TRUE, `runner2.R` = FALSE))
+  expect_length(res$files, 2)
+  expect_equal(res$files[1], list(`runner1.R` = NA_character_))
+  expect_equal(res$files[[2]]$message, "I was told to throw an error")
   expect_s3_class(res, "shinytestrun")
 
   # Check that supporting files were loaded
   expect_length(loadCalls, 1)
   # global should be a child of emptyenv
   ge <- loadCalls[[1]]$globalrenv
-  expect_identical(parent.env(ge), emptyenv())
+  expect_identical(parent.env(ge), globalenv())
   # renv should be a child of our globalrenv
   expect_identical(parent.env(loadCalls[[1]]$renv), ge)
 
@@ -69,7 +71,7 @@ test_that("runTests works", {
 
   res <- runTestsSpy(test_path("../test-helpers/app1-standard"))
   expect_equal(res$result, TRUE)
-  expect_equal(res$files, list(`runner1.R` = TRUE, `runner2.R` = TRUE))
+  expect_equal(res$files, list(`runner1.R` = NA_character_, `runner2.R` = NA_character_))
 
   # If autoload is false, it should still load global.R. Because this load happens in the top-level of the function,
   # our spy will catch it.
@@ -109,14 +111,14 @@ test_that("calls out to shinytest when appropriate", {
   # Run shinytest with a failure
   res2 <- runTestsSpy(test_path("../test-helpers/app1-standard"))
   expect_false(res2$result)
-  expect_equal(res2$files, list(test1=TRUE, test2=FALSE))
+  expect_equal(res2$files, list(test1=NA_character_, test2=simpleError("Unknown shinytest error")))
   expect_s3_class(res2, "shinytestrun")
 
   # Run shinytest with all passing
   sares[[2]]$pass <- TRUE
   res2 <- runTestsSpy(test_path("../test-helpers/app1-standard"))
   expect_true(res2$result)
-  expect_equal(res2$files, list(test1=TRUE, test2=TRUE))
+  expect_equal(res2$files, list(test1=NA_character_, test2=NA_character_))
   expect_s3_class(res2, "shinytestrun")
 
   # Not shinytests

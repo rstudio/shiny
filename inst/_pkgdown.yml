@@ -217,5 +217,4 @@ reference:
     desc: Functions intended for testing of Shiny components
     contents:
       - testModule
-      - testServer
       - MockShinySession

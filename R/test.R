@@ -16,8 +16,8 @@ isShinyTest <- function(text){
 #'
 #' @param appDir The base directory for the application.
 #' @param filter If not `NULL`, only tests with file names matching this regular
-#'   expression will be executed passed to `grepl`. Matching is performed on
-#'   the file name including the extension.
+#'   expression will be executed. Matching is performed on the file name
+#'   including the extension.
 #'
 #' @details Historically, [shinytest](https://rstudio.github.io/shinytest/)
 #'   recommended placing tests at the top-level of the `tests/` directory. In
@@ -60,8 +60,8 @@ runTests <- function(appDir=".", filter=NULL){
            " are all shinytests, but shinytest is not installed.")
     }
 
-    if (getOption("shiny.autoload.r", FALSE)) {
-      warning("You've enabled `shiny.autoload.r` but this is not supported yet with shinytest.")
+    if (!getOption("shiny.autoload.r", TRUE)) {
+      warning("You've disabled `shiny.autoload.r` via an option but this is not passed through to shinytest. Consider using a _disable_autoload.R file as described at https://rstd.io/shiny-autoload")
     }
 
     sares <- shinytest::testApp(appDir)
@@ -78,7 +78,7 @@ runTests <- function(appDir=".", filter=NULL){
 
   testenv <- new.env(parent=globalenv())
   renv <- new.env(parent=testenv)
-  if (getOption("shiny.autoload.r", FALSE)) {
+  if (getOption("shiny.autoload.r", TRUE)) {
     loadSupport(appDir, renv=renv, globalrenv=testenv)
   } else if (file.exists.ci(file.path(appDir, "server.R"))){
     # then check for global.R to load

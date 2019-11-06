@@ -76,7 +76,12 @@ test_that("runTests works", {
   # If autoload is false, it should still load global.R. Because this load happens in the top-level of the function,
   # our spy will catch it.
   calls <- list()
+
+  # Temporarily opt-out of R/ file autoloading
+  orig <- getOption("shiny.autoload.r", NULL)
   options(shiny.autoload.r=FALSE)
+  on.exit({options(shiny.autoload.r=orig)}, add=TRUE)
+
   res <- runTestsSpy(test_path("../test-helpers/app1-standard"))
   expect_length(calls, 3)
   expect_match(calls[[1]][[1]], "/global\\.R", perl=TRUE)
@@ -136,14 +141,14 @@ test_that("runTests filters", {
 
   runTestsSpy <- rewire(runTests, sourceUTF8 = sourceStub)
 
-  # No filter should see two tests (plus the global.R which we source first)
+  # No filter should see two tests (global.R is sourced from another function)
   runTestsSpy(test_path("../test-helpers/app1-standard"))
-  expect_length(calls, 3)
+  expect_length(calls, 2)
 
-  # Filter down to one (plus the global.R)
+  # Filter down to one (global.R is sourced from another function)
   calls <- list()
   runTestsSpy(test_path("../test-helpers/app1-standard"), filter="runner1")
-  expect_length(calls, 2)
+  expect_length(calls, 1)
 
   calls <- list()
   expect_error(runTestsSpy(test_path("../test-helpers/app1-standard"), filter="i don't exist"), "matched the given filter")

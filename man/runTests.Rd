@@ -10,8 +10,8 @@ runTests(appDir = ".", filter = NULL)
 \item{appDir}{The base directory for the application.}
 
 \item{filter}{If not \code{NULL}, only tests with file names matching this regular
-expression will be executed passed to \code{grepl}. Matching is performed on
-the file name including the extension.}
+expression will be executed. Matching is performed on the file name
+including the extension.}
 }
 \description{
 Sources the \code{.R} files in the top-level of \verb{tests/} much like \verb{R CMD check}.

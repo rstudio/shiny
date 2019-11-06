@@ -1,6 +1,11 @@
 
 
-#' Test a shiny module
+#' Integration testing for Shiny modules or server functions
+#'
+#' Offer a way to test the reactive interactions in Shiny --- either in Shiny
+#' modules or in the server portion of a Shiny application. For more
+#' information, visit [the Shiny Dev Center article on integration
+#' testing](https://shiny.rstudio.com/articles/integration-testing.html).
 #' @param module The module to test
 #' @param expr Test code containing expectations. The test expression will run
 #'   in the module's environment, meaning that the module's parameters (e.g.
@@ -10,6 +15,29 @@
 #'   `output`, and `session`.
 #' @param ... Additional named arguments to be passed on to the module function.
 #' @include mock-session.R
+#' @rdname testModule
+#' @examples
+#' module <- function(input, output, session) {
+#'   myreactive <- reactive({
+#'     input$x * 2
+#'   })
+#'   output$txt <- renderText({
+#'     paste0("I am ", myreactive())
+#'   })
+#' }
+#'
+#' testModule(module, {
+#'   session$setInputs(x = 1)
+#'   # You're also free to use third-party
+#'   # testing packages like testthat:
+#'   #   expect_equal(myreactive(), 2)
+#'   stopifnot(myreactive() == 2)
+#'   stopifnot(output$txt == "I am 2")
+#'
+#'   session$setInputs(x = 2)
+#'   stopifnot(myreactive() == 4)
+#'   stopifnot(output$txt == "I am 4")
+#' })
 #' @export
 testModule <- function(module, expr, args, ...) {
   expr <- substitute(expr)
@@ -62,10 +90,10 @@ testModule <- function(module, expr, args, ...) {
 }
 
 #' Test an app's server-side logic
-#' @param expr Test code containing expectations
 #' @param appDir The directory root of the Shiny application. If `NULL`, this function
 #'   will work up the directory hierarchy --- starting with the current directory ---
 #'   looking for a directory that contains an `app.R` or `server.R` file.
+#' @rdname testModule
 #' @export
 testServer <- function(expr, appDir=NULL) {
   if (is.null(appDir)){

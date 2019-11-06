@@ -2,9 +2,12 @@
 % Please edit documentation in R/test-module.R
 \name{testModule}
 \alias{testModule}
-\title{Test a shiny module}
+\alias{testServer}
+\title{Integration testing for Shiny modules or server functions}
 \usage{
 testModule(module, expr, args, ...)
+
+testServer(expr, appDir = NULL)
 }
 \arguments{
 \item{module}{The module to test}
@@ -18,7 +21,36 @@ values created inside of the module.}
 \code{output}, and \code{session}.}
 
 \item{...}{Additional named arguments to be passed on to the module function.}
+
+\item{appDir}{The directory root of the Shiny application. If \code{NULL}, this function
+will work up the directory hierarchy --- starting with the current directory ---
+looking for a directory that contains an \code{app.R} or \code{server.R} file.}
 }
 \description{
-Test a shiny module
+Offer a way to test the reactive interactions in Shiny --- either in Shiny
+modules or in the server portion of a Shiny application. For more
+information, visit \href{https://shiny.rstudio.com/articles/integration-testing.html}{the Shiny Dev Center article on integration testing}.
+}
+\examples{
+module <- function(input, output, session) {
+  myreactive <- reactive({
+    input$x * 2
+  })
+  output$txt <- renderText({
+    paste0("I am ", myreactive())
+  })
+}
+
+testModule(module, {
+  session$setInputs(x = 1)
+  # You're alos free to use third-party
+  # testing packages like testthat:
+  #   expect_equal(myreactive(), 2)
+  stopifnot(myreactive() == 2)
+  stopifnot(output$txt == "I am 2")
+
+  session$setInputs(x = 2)
+  stopifnot(myreactive() == 4)
+  stopifnot(output$txt == "I am 4")
+})
 }

@@ -28,7 +28,7 @@
 #'
 #' testModule(module, {
 #'   session$setInputs(x = 1)
-#'   # You're alos free to use third-party
+#'   # You're also free to use third-party
 #'   # testing packages like testthat:
 #'   #   expect_equal(myreactive(), 2)
 #'   stopifnot(myreactive() == 2)

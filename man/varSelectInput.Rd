@@ -117,7 +117,7 @@ shinyApp(
  server = function(input, output) {
    output$data <- renderTable({
       if (length(input$variables) == 0) return(mtcars)
-      mtcars \%>\% dplyr::select(!!!input$variables)
+      mtcars %>% dplyr::select(!!!input$variables)
    }, rownames = TRUE)
  }
 )}
@@ -127,15 +127,20 @@ shinyApp(
 \seealso{
 \code{\link[=updateSelectInput]{updateSelectInput()}}
 
-Other input elements: \code{\link{actionButton}()},
-  \code{\link{checkboxGroupInput}()},
-  \code{\link{checkboxInput}()}, \code{\link{dateInput}()},
-  \code{\link{dateRangeInput}()},
-  \code{\link{fileInput}()}, \code{\link{numericInput}()},
-  \code{\link{passwordInput}()},
-  \code{\link{radioButtons}()},
-  \code{\link{selectInput}()}, \code{\link{sliderInput}()},
-  \code{\link{submitButton}()},
-  \code{\link{textAreaInput}()}, \code{\link{textInput}()}
+Other input elements: 
+\code{\link{actionButton}()},
+\code{\link{checkboxGroupInput}()},
+\code{\link{checkboxInput}()},
+\code{\link{dateInput}()},
+\code{\link{dateRangeInput}()},
+\code{\link{fileInput}()},
+\code{\link{numericInput}()},
+\code{\link{passwordInput}()},
+\code{\link{radioButtons}()},
+\code{\link{selectInput}()},
+\code{\link{sliderInput}()},
+\code{\link{submitButton}()},
+\code{\link{textAreaInput}()},
+\code{\link{textInput}()}
 }
 \concept{input elements}

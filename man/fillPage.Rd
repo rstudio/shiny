@@ -82,11 +82,13 @@ fillPage(
 )
 }
 \seealso{
-Other layout functions: \code{\link{fixedPage}()},
-  \code{\link{flowLayout}()}, \code{\link{fluidPage}()},
-  \code{\link{navbarPage}()},
-  \code{\link{sidebarLayout}()},
-  \code{\link{splitLayout}()},
-  \code{\link{verticalLayout}()}
+Other layout functions: 
+\code{\link{fixedPage}()},
+\code{\link{flowLayout}()},
+\code{\link{fluidPage}()},
+\code{\link{navbarPage}()},
+\code{\link{sidebarLayout}()},
+\code{\link{splitLayout}()},
+\code{\link{verticalLayout}()}
 }
 \concept{layout functions}

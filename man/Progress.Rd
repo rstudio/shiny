@@ -85,6 +85,7 @@ shinyApp(ui, server)
 \item \href{#method-getMax}{\code{Progress$getMax()}}
 \item \href{#method-getValue}{\code{Progress$getValue()}}
 \item \href{#method-close}{\code{Progress$close()}}
+\item \href{#method-clone}{\code{Progress$clone()}}
 }
 }
 \if{html}{\out{<hr>}}
@@ -204,5 +205,21 @@ de-emphasized appearance relative to \code{message}.}
 \if{html}{\out{<div class="r">}}\preformatted{Progress$close()}\if{html}{\out{</div>}}
 }
 
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-clone"></a>}}
+\subsection{Method \code{clone()}}{
+The objects of this class are cloneable with this method.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Progress$clone(deep = FALSE)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{deep}}{Whether to make a deep clone.}
+}
+\if{html}{\out{</div>}}
+}
 }
 }

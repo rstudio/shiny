@@ -117,10 +117,13 @@ navbarPage("App Title",
 \code{\link[=updateNavbarPage]{updateNavbarPage()}}, \code{\link[=insertTab]{insertTab()}},
 \code{\link[=showTab]{showTab()}}
 
-Other layout functions: \code{\link{fillPage}()},
-  \code{\link{fixedPage}()}, \code{\link{flowLayout}()},
-  \code{\link{fluidPage}()}, \code{\link{sidebarLayout}()},
-  \code{\link{splitLayout}()},
-  \code{\link{verticalLayout}()}
+Other layout functions: 
+\code{\link{fillPage}()},
+\code{\link{fixedPage}()},
+\code{\link{flowLayout}()},
+\code{\link{fluidPage}()},
+\code{\link{sidebarLayout}()},
+\code{\link{splitLayout}()},
+\code{\link{verticalLayout}()}
 }
 \concept{layout functions}

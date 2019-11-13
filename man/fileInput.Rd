@@ -101,16 +101,20 @@ shinyApp(ui, server)
 
 }
 \seealso{
-Other input elements: \code{\link{actionButton}()},
-  \code{\link{checkboxGroupInput}()},
-  \code{\link{checkboxInput}()}, \code{\link{dateInput}()},
-  \code{\link{dateRangeInput}()},
-  \code{\link{numericInput}()},
-  \code{\link{passwordInput}()},
-  \code{\link{radioButtons}()},
-  \code{\link{selectInput}()}, \code{\link{sliderInput}()},
-  \code{\link{submitButton}()},
-  \code{\link{textAreaInput}()}, \code{\link{textInput}()},
-  \code{\link{varSelectInput}()}
+Other input elements: 
+\code{\link{actionButton}()},
+\code{\link{checkboxGroupInput}()},
+\code{\link{checkboxInput}()},
+\code{\link{dateInput}()},
+\code{\link{dateRangeInput}()},
+\code{\link{numericInput}()},
+\code{\link{passwordInput}()},
+\code{\link{radioButtons}()},
+\code{\link{selectInput}()},
+\code{\link{sliderInput}()},
+\code{\link{submitButton}()},
+\code{\link{textAreaInput}()},
+\code{\link{textInput}()},
+\code{\link{varSelectInput}()}
 }
 \concept{input elements}

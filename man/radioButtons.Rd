@@ -115,15 +115,20 @@ shinyApp(ui, server)
 \seealso{
 \code{\link[=updateRadioButtons]{updateRadioButtons()}}
 
-Other input elements: \code{\link{actionButton}()},
-  \code{\link{checkboxGroupInput}()},
-  \code{\link{checkboxInput}()}, \code{\link{dateInput}()},
-  \code{\link{dateRangeInput}()},
-  \code{\link{fileInput}()}, \code{\link{numericInput}()},
-  \code{\link{passwordInput}()},
-  \code{\link{selectInput}()}, \code{\link{sliderInput}()},
-  \code{\link{submitButton}()},
-  \code{\link{textAreaInput}()}, \code{\link{textInput}()},
-  \code{\link{varSelectInput}()}
+Other input elements: 
+\code{\link{actionButton}()},
+\code{\link{checkboxGroupInput}()},
+\code{\link{checkboxInput}()},
+\code{\link{dateInput}()},
+\code{\link{dateRangeInput}()},
+\code{\link{fileInput}()},
+\code{\link{numericInput}()},
+\code{\link{passwordInput}()},
+\code{\link{selectInput}()},
+\code{\link{sliderInput}()},
+\code{\link{submitButton}()},
+\code{\link{textAreaInput}()},
+\code{\link{textInput}()},
+\code{\link{varSelectInput}()}
 }
 \concept{input elements}

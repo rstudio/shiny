@@ -30,6 +30,8 @@ s$setInputs(x=1, y=2)
 \item{\code{input}}{The reactive inputs associated with the session}
 
 \item{\code{userData}}{An environment initialized as empty.}
+
+\item{\code{progressStack}}{A stack of progress objects}
 }
 \if{html}{\out{</div>}}
 }
@@ -80,6 +82,7 @@ s$setInputs(x=1, y=2)
 \item \href{#method-getTestSnapshotUrl}{\code{MockShinySession$getTestSnapshotUrl()}}
 \item \href{#method-ns}{\code{MockShinySession$ns()}}
 \item \href{#method-flushReact}{\code{MockShinySession$flushReact()}}
+\item \href{#method-clone}{\code{MockShinySession$clone()}}
 }
 }
 \if{html}{\out{<hr>}}
@@ -610,5 +613,21 @@ Trigger a reactive flush right now.
 \if{html}{\out{<div class="r">}}\preformatted{MockShinySession$flushReact()}\if{html}{\out{</div>}}
 }
 
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-clone"></a>}}
+\subsection{Method \code{clone()}}{
+The objects of this class are cloneable with this method.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{MockShinySession$clone(deep = FALSE)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{deep}}{Whether to make a deep clone.}
+}
+\if{html}{\out{</div>}}
+}
 }
 }

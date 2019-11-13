@@ -104,6 +104,10 @@ testServer <- function(expr, appDir=NULL) {
   message("Testing application found in: ", appDir)
   server <- app$serverFuncSource()
 
+  origwd <- getwd()
+  setwd(appDir)
+  on.exit({ setwd(origwd) }, add=TRUE)
+
   # Add `session` argument if not present
   fn_formals <- formals(server)
   if (! "session" %in% names(fn_formals)) {

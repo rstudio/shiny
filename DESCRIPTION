@@ -90,6 +90,7 @@ Suggests:
     ggplot2,
     reactlog (>= 1.0.0),
     magrittr,
+    shinytest,
     yaml,
     future,
     dygraphs
@@ -168,6 +169,7 @@ Collate:
     'tar.R'
     'test-export.R'
     'test-module.R'
+    'test.R'
     'update-input.R'
 RoxygenNote: 6.1.99.9001
 Encoding: UTF-8

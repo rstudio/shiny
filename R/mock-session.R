@@ -99,7 +99,8 @@ MockShinySession <- R6Class(
     input = NULL,
     #' @field userData An environment initialized as empty.
     userData = NULL,
-    progressStack = 'Stack', # Stack of progress objects
+    #' @field progressStack A stack of progress objects
+    progressStack = 'Stack',
 
     #' @description Create a new MockShinySession
     initialize = function() {

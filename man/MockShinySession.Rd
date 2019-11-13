@@ -30,6 +30,8 @@ s$setInputs(x=1, y=2)
 \item{\code{input}}{The reactive inputs associated with the session}
 
 \item{\code{userData}}{An environment initialized as empty.}
+
+\item{\code{progressStack}}{A stack of progress objects}
 }
 \if{html}{\out{</div>}}
 }

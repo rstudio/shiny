@@ -101,6 +101,7 @@ testServer <- function(expr, appDir=NULL) {
   }
 
   app <- shinyAppDir(appDir)
+  message("Testing application found in: ", appDir)
   server <- app$serverFuncSource()
 
   # Add `session` argument if not present

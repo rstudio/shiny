@@ -99,6 +99,7 @@ MockShinySession <- R6Class(
     input = NULL,
     #' @field userData An environment initialized as empty.
     userData = NULL,
+    progressStack = 'Stack', # Stack of progress objects
 
     #' @description Create a new MockShinySession
     initialize = function() {
@@ -107,6 +108,7 @@ MockShinySession <- R6Class(
       private$flushedCBs <- Callbacks$new()
       private$endedCBs <- Callbacks$new()
       private$timer <- MockableTimerCallbacks$new()
+      self$progressStack <- Stack$new()
 
       self$userData <- new.env(parent=emptyenv())
 

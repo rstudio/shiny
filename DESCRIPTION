@@ -170,6 +170,7 @@ Collate:
     'shinyui.R'
     'shinywrappers.R'
     'showcase.R'
+    'skeleton.R'
     'snapshot.R'
     'tar.R'
     'test-export.R'

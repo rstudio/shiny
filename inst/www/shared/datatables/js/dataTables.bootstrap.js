@@ -137,7 +137,7 @@ if ( DataTable.TableTools ) {
 	$.extend( true, DataTable.TableTools.classes, {
 		"container": "DTTT btn-group",
 		"buttons": {
-			"normal": "btn btn-default btn-outline-secondary",
+			"normal": "btn btn-default",
 			"disabled": "disabled"
 		},
 		"collection": {

@@ -106,9 +106,9 @@ fileInput <- function(inputId, label, multiple = FALSE, accept = NULL,
     shinyInputLabel(inputId, label),
 
     div(class = "input-group",
-      # input-group-prepend and btn-outline-secondary are for bootstrap 4 compat
+      # input-group-prepend is for bootstrap 4 compat
       tags$label(class = "input-group-btn input-group-prepend",
-        span(class = "btn btn-default btn-file btn-outline-secondary",
+        span(class = "btn btn-default btn-file",
           buttonLabel,
           inputTag
         )

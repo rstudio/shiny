@@ -140,7 +140,7 @@ showcaseCodeTabs <- function(codeLicense) {
   }
   with(tags, div(id="showcase-code-tabs",
     a(id="showcase-code-position-toggle",
-      class="btn btn-default btn-outline-secondary btn-sm",
+      class="btn btn-default btn-sm",
       onclick="toggleCodePosition()",
       icon("level-up"),
       "show with app"),

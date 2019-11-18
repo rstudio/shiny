@@ -1330,7 +1330,7 @@ downloadButton <- function(outputId,
                            label="Download",
                            class=NULL, ...) {
   aTag <- tags$a(id=outputId,
-                 class=paste('btn btn-default btn-outline-secondary shiny-download-link', class),
+                 class=paste('btn btn-default shiny-download-link', class),
                  href='',
                  target='_blank',
                  download=NA,

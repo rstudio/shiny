@@ -83,13 +83,8 @@ navTabsHelper <- function(files, prefix = "") {
     isActive <- tolower(file) %in% c("app.r", "server.r")
     withTags(
       li(
-        # bs4 compatibility
-        class = "nav-item",
         class = if (isActive) "active",
         a(
-          # bs4 compatibility
-          class = "nav-link",
-          class = if (isActive) "active",
           href = paste("#", gsub(".", "_", file, fixed = TRUE), "_code", sep = ""),
           "data-toggle" = "tab",
           paste0(prefix, file)
@@ -102,7 +97,7 @@ navTabsHelper <- function(files, prefix = "") {
 navTabsDropdown <- function(files) {
   if (length(files) > 0) {
     with(tags,
-      li(role="presentation", class="nav-item dropdown",
+      li(role="presentation", class="dropdown",
         a(class="dropdown-toggle", `data-toggle`="dropdown", href="#",
           role="button", `aria-haspopup`="true", `aria-expanded`="false",
           "www", span(class="caret")

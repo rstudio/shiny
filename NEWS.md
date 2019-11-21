@@ -1,4 +1,4 @@
-shiny 1.4.0.9000
+shiny 1.4.0.9001
 ===========
 
 ## Full changelog
@@ -10,6 +10,8 @@ shiny 1.4.0.9000
 ### Minor new features and improvements
 
 * Fixed [#2042](https://github.com/rstudio/shiny/issues/2042), [#2628](https://github.com/rstudio/shiny/issues/2628): In a `dateInput` and `dateRangeInput`, disabled months and years are now a lighter gray, to make it easier to see that they are disabled. ([#2690](https://github.com/rstudio/shiny/pull/2690))
+
+* `getCurrentOutputInfo()` previously threw an error when called from outside of an output; now it returns `NULL`. ([#2707](https://github.com/rstudio/shiny/pull/2707))
 
 ### Bug fixes
 

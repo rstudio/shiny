@@ -9,6 +9,11 @@ getCurrentOutputInfo(session = getDefaultReactiveDomain())
 \arguments{
 \item{session}{The current Shiny session.}
 }
+\value{
+A list with information about the current output, including the
+\code{name} of the output. If no output is currently being executed, this will
+return \code{NULL}.
+}
 \description{
 Get information about the output that is currently being executed.
 }

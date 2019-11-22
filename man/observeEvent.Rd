@@ -219,7 +219,7 @@ if (interactive()) {
       # Take an action every time button is pressed;
       # here, we just print a message to the console
       observeEvent(input$button, {
-        cat("Showing", input$x, "rows\\n")
+        cat("Showing", input$x, "rows\n")
       })
       # Take a reactive dependency on input$button, but
       # not on any of the stuff inside the function

@@ -195,15 +195,15 @@ shinyApp(
       plot(d$speed, d$dist)
     })
     output$plot_clickinfo <- renderPrint({
-      cat("Click:\\n")
+      cat("Click:\n")
       str(input$plot_click)
     })
     output$plot_hoverinfo <- renderPrint({
-      cat("Hover (throttled):\\n")
+      cat("Hover (throttled):\n")
       str(input$plot_hover)
     })
     output$plot_brushinfo <- renderPrint({
-      cat("Brush (debounced):\\n")
+      cat("Brush (debounced):\n")
       str(input$plot_brush)
     })
     output$plot_clickedpoints <- renderTable({
@@ -275,15 +275,15 @@ shinyApp(
       )
     })
     output$image_clickinfo <- renderPrint({
-      cat("Click:\\n")
+      cat("Click:\n")
       str(input$image_click)
     })
     output$image_hoverinfo <- renderPrint({
-      cat("Hover (throttled):\\n")
+      cat("Hover (throttled):\n")
       str(input$image_hover)
     })
     output$image_brushinfo <- renderPrint({
-      cat("Brush (debounced):\\n")
+      cat("Brush (debounced):\n")
       str(input$image_brush)
     })
   }

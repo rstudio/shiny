@@ -58,7 +58,7 @@ if (interactive()) {
         query <- getQueryString()
         queryText <- paste(names(query), query,
                        sep = "=", collapse=", ")
-        paste("Your query string is:\\n", queryText)
+        paste("Your query string is:\n", queryText)
       })
     }
   )
@@ -81,7 +81,7 @@ if (interactive()) {
       })
       output$hash <- renderText({
         hash <- getUrlHash()
-        paste("Your hash is:\\n", hash)
+        paste("Your hash is:\n", hash)
       })
     }
   )

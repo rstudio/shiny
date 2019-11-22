@@ -59,7 +59,7 @@ multiprintFun <- renderPrint({
   "bar"
 })
 multiprintFun()
-# '[1] "foo"\\n[1] "bar"'
+# '[1] "foo"\n[1] "bar"'
 
 nullFun <- renderPrint({ NULL })
 nullFun()

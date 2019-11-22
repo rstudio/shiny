@@ -17,7 +17,7 @@ unless the content is rendered \emph{after} the page is loaded, e.g. via
 time we write math expressions to the output.
 }
 \examples{
-withMathJax(helpText("Some math here $$\\\\alpha+\\\\beta$$"))
+withMathJax(helpText("Some math here $$\\alpha+\\beta$$"))
 # now we can just write "static" content without withMathJax()
-div("more math here $$\\\\sqrt{2}$$")
+div("more math here $$\\sqrt{2}$$")
 }

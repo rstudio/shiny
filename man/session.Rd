@@ -180,6 +180,6 @@ Shiny server functions can optionally include \code{session} as a parameter
 (e.g. \verb{function(input, output, session)}). The session object is an
 environment that can be used to access information and functionality
 relating to the session. The following list describes the items available
-in the environment; they can be accessed using the \verb{$} operator (for
+in the environment; they can be accessed using the \code{$} operator (for
 example, \code{session$clientData$url_search}).
 }

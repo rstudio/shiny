@@ -66,7 +66,7 @@ shinyApp(
     })
 
     output$values <- renderText({
-      paste0("vals$x: ", vals$x, "\\ny: ", y())
+      paste0("vals$x: ", vals$x, "\ny: ", y())
     })
   }
 )

@@ -4,6 +4,14 @@ library(promises)
 library(future)
 plan(multisession)
 
+test_that("testModule passes args", {
+  module <- function(input, output, session, someArg) {
+    expect_false(missing(someArg))
+    expect_equal(someArg, 123)
+  }
+  testModule(module, {}, args = list(someArg = 123))
+})
+
 test_that("testModule handles observers", {
   module <- function(input, output, session) {
     rv <- reactiveValues(x = 0, y = 0)

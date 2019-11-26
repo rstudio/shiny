@@ -49,16 +49,17 @@ testModule <- function(module, expr, args, ...) {
 .testModule <- function(module, expr, args, ...) {
   # Capture the environment from the module
   # Inserts `session$env <- environment()` at the top of the function
-  fn_body <- body(module)
-  fn_body[seq(3, length(fn_body)+1)] <- fn_body[seq(2, length(fn_body))]
-  fn_body[[2]] <- quote(session$env <- environment())
-  body(module) <- fn_body
+  body(module) <- rlang::expr({
+    session$env <- environment()
+    !!!body(module)
+  })
 
   # Create a mock session
   session <- MockShinySession$new()
 
   # Parse the additional arguments
-  args <- list(..., input = session$input, output = session$output, session = session)
+  args <- if (missing(args)) list() else args
+  args <- append(rlang::list2(..., input = session$input, output = session$output, session = session), args)
 
   # Initialize the module
   isolate(

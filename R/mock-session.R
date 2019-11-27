@@ -247,9 +247,16 @@ MockShinySession <- R6Class(
     #' @param func The render definition
     #' @param label Not used
     defineOutput = function(name, func, label) {
+      force(name)
+
       if (!is.null(private$outs[[name]]$obs)) {
         private$outs[[name]]$obs$destroy()
       }
+
+      if (is.null(func)) func <- missingOutput
+
+      if (!is.function(func))
+        stop(paste("Unexpected", class(func), "output for", name))
 
       obs <- observe({
         # We could just stash the promise, but we get an "unhandled promise error". This bypasses

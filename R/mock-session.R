@@ -373,6 +373,15 @@ MockShinySession <- R6Class(
     #' @description Trigger a reactive flush right now.
     flushReact = function(){
       private$flush()
+    },
+    makeScope = function(namespace) {
+      ns <- NS(namespace)
+      createSessionProxy(
+        self,
+        input = .createReactiveValues(private$.input, readonly = TRUE, ns = ns),
+        output = structure(.createOutputWriter(self, ns = ns), class = "shinyoutput"),
+        makeScope = function(namespace) self$makeScope(ns(namespace))
+      )
     }
   ),
   private = list(

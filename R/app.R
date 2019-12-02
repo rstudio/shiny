@@ -302,7 +302,8 @@ initAutoReloadMonitor <- function(dir) {
     }
 
     invalidateLater(getOption("shiny.autoreload.interval", 500))
-  })
+  },
+  label = "Shiny Auto-Reload R/ Dir")
 
   obs$destroy
 }

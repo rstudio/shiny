@@ -421,10 +421,20 @@ function initShiny() {
   });
 
   // This is needed for Bootstrap 2 compatibility and for non-Bootstrap
-  // related shown/hidden events (like conditionalPanel)
+  //   related shown/hidden events (like conditionalPanel)
+  // Execute on all body inner elements
   $(document.body).on('shown.sendImageSize', '*', sendImageSize);
-  $(document.body).on('shown.sendOutputHiddenState hidden.sendOutputHiddenState', '*',
-               sendOutputHiddenState);
+  $(document.body).on(
+    'shown.sendOutputHiddenState hidden.sendOutputHiddenState',
+    '*',
+    sendOutputHiddenState
+  );
+  // Bind directly to body element
+  $(document.body).on('shown.sendImageSize', sendImageSize);
+  $(document.body).on(
+    'shown.sendOutputHiddenState hidden.sendOutputHiddenState',
+    sendOutputHiddenState
+  );
 
   // Send initial pixel ratio, and update it if it changes
   initialValues['.clientdata_pixelratio'] = pixelRatio();

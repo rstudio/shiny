@@ -1230,5 +1230,5 @@ inShinyServer <- function() {
 # This check was moved out of the main function body because of an issue with
 # the RStudio debugger. (#1474)
 isEmptyMessage <- function(msg) {
-  identical(charToRaw("\003\xe9"), msg)
+  identical(as.raw(c(0x03, 0xe9)), msg)
 }

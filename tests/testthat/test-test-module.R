@@ -485,6 +485,21 @@ test_that("accessing a non-existant output gives an informative message", {
   })
 })
 
+test_that("testModule works with nested modules", {
+  outerModule <- function(input, output, session) {
+    output$someVar <- renderText("rendered text")
+    expect_equal(callModule(innerModule, "innerModule"), "a return value")
+  }
+
+  innerModule <- function(input, output, session) {
+    "a return value"
+  }
+
+  testModule(outerModule, {
+    expect_equal(output$someVar, "rendered text")
+  })
+})
+
 test_that("testServer works", {
   # app.R
   testServer({

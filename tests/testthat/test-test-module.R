@@ -500,6 +500,14 @@ test_that("testModule works with nested modules", {
   })
 })
 
+test_that("Assigning an output in a module function with a non-function errors", {
+  module <- function(input, output, session) {
+    output$someVar <- 123
+  }
+
+  expect_error(testModule(module, {}), "^Unexpected")
+})
+
 test_that("testServer works", {
   # app.R
   testServer({

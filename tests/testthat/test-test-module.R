@@ -500,7 +500,7 @@ test_that("testModule works with nested modules", {
   })
 })
 
-test_that("Assigning an output in a module function with a non-function errors", {
+test_that("assigning an output in a module function with a non-function errors", {
   module <- function(input, output, session) {
     output$someVar <- 123
   }

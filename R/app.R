@@ -284,7 +284,8 @@ initAutoReloadMonitor <- function(dir) {
     ".*\\.(r|html?|js|css|png|jpe?g|gif)$")
 
   lastValue <- NULL
-  obs <- observe({
+  observeLabel <- paste0("File Auto-Reload - '", basename(dir), "'")
+  obs <- observe(label = observeLabel, {
     files <- sort(list.files(dir, pattern = filePattern, recursive = TRUE,
       ignore.case = TRUE))
     times <- file.info(files)$mtime

@@ -46,7 +46,7 @@ testModule <- function(module, expr, args, ...) {
 
 #' @noRd
 #' @importFrom withr with_options
-.testModule <- function(module, expr, args, ...) {
+.testModule <- function(module, expr, ...) {
   # Capture the environment from the module
   # Inserts `session$env <- environment()` at the top of the function
   body(module) <- rlang::expr({
@@ -58,8 +58,7 @@ testModule <- function(module, expr, args, ...) {
   session <- MockShinySession$new()
 
   # Parse the additional arguments
-  args <- if (missing(args)) list() else args
-  args <- append(rlang::list2(..., input = session$input, output = session$output, session = session), args)
+  args <- rlang::list2(..., input = session$input, output = session$output, session = session)
 
   # Initialize the module
   isolate(

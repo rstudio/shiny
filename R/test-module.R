@@ -39,9 +39,9 @@
 #'   stopifnot(output$txt == "I am 4")
 #' })
 #' @export
-testModule <- function(module, expr, args, ...) {
+testModule <- function(module, expr, ...) {
   expr <- substitute(expr)
-  .testModule(module, expr, args, ...)
+  .testModule(module, expr, ...)
 }
 
 #' @noRd

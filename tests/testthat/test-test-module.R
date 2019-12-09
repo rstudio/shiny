@@ -4,12 +4,22 @@ library(promises)
 library(future)
 plan(multisession)
 
-test_that("testModule passes args", {
+test_that("testModule passes dots", {
   module <- function(input, output, session, someArg) {
     expect_false(missing(someArg))
     expect_equal(someArg, 123)
   }
-  testModule(module, {}, args = list(someArg = 123))
+  testModule(module, {}, someArg = 123)
+})
+
+test_that("testModule passes dynamic dots", {
+  module <- function(input, output, session, someArg) {
+    expect_false(missing(someArg))
+    expect_equal(someArg, 123)
+  }
+
+  moreArgs <- list(someArg = 123)
+  testModule(module, {}, !!!moreArgs)
 })
 
 test_that("testModule handles observers", {

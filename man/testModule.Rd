@@ -5,7 +5,7 @@
 \alias{testServer}
 \title{Integration testing for Shiny modules or server functions}
 \usage{
-testModule(module, expr, args, ...)
+testModule(module, expr, ...)
 
 testServer(expr, appDir = NULL)
 }
@@ -17,10 +17,9 @@ in the module's environment, meaning that the module's parameters (e.g.
 \code{input}, \code{output}, and \code{session}) will be available along with any other
 values created inside of the module.}
 
-\item{args}{A list of arguments to pass into the module beyond \code{input},
-\code{output}, and \code{session}.}
-
-\item{...}{Additional named arguments to be passed on to the module function.}
+\item{...}{Additional named arguments to be passed on to the module function.
+These arguments are processed with \code{\link[rlang:list2]{rlang::list2()}} and so are
+\emph{\link[rlang:dyn-dots]{dynamic}}.}
 
 \item{appDir}{The directory root of the Shiny application. If \code{NULL}, this function
 will work up the directory hierarchy --- starting with the current directory ---
@@ -32,14 +31,19 @@ modules or in the server portion of a Shiny application. For more
 information, visit \href{https://shiny.rstudio.com/articles/integration-testing.html}{the Shiny Dev Center article on integration testing}.
 }
 \examples{
-module <- function(input, output, session) {
+module <- function(input, output, session, multiplier = 2, prefix = "I am ") {
   myreactive <- reactive({
-    input$x * 2
+    input$x * multiplier
   })
   output$txt <- renderText({
-    paste0("I am ", myreactive())
+    paste0(prefix, myreactive())
   })
 }
+
+# !!/:= and !!! from rlang are used below to programmatically splice
+# these into the testModule() argument list.
+multiplier_arg_name = "multiplier"
+more_args <- list(prefix = "I am ")
 
 testModule(module, {
   session$setInputs(x = 1)
@@ -52,5 +56,5 @@ testModule(module, {
   session$setInputs(x = 2)
   stopifnot(myreactive() == 4)
   stopifnot(output$txt == "I am 4")
-})
+}, !!multiplier_arg_name := 2, !!!more_args)
 }

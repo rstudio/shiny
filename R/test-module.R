@@ -11,8 +11,8 @@
 #'   in the module's environment, meaning that the module's parameters (e.g.
 #'   `input`, `output`, and `session`) will be available along with any other
 #'   values created inside of the module.
-#' @param ... Additional named arguments to be passed on to the module function.
-#'   These arguments are processed with [rlang::list2()] and so are
+#' @param ... Additional arguments to pass to the module function. These
+#'   arguments are processed with [rlang::list2()] and so are
 #'   _[dynamic][rlang::dyn-dots]_.
 #' @include mock-session.R
 #' @rdname testModule

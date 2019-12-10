@@ -18,7 +18,14 @@ test_that("testModule passes dynamic dots", {
     expect_equal(someArg, 123)
   }
 
+  # Test with !!! to splice in a whole named list constructed with base::list()
   moreArgs <- list(someArg = 123)
+  testModule(module, {}, !!!moreArgs)
+
+  # Test by splicing in a list constructed with rlang::list2() that uses := to
+  # splice in an argument name
+  argName <- "someArg"
+  moreArgs <- rlang::list2(!!argName := 123)
   testModule(module, {}, !!!moreArgs)
 })
 

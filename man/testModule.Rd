@@ -17,8 +17,8 @@ in the module's environment, meaning that the module's parameters (e.g.
 \code{input}, \code{output}, and \code{session}) will be available along with any other
 values created inside of the module.}
 
-\item{...}{Additional named arguments to be passed on to the module function.
-These arguments are processed with \code{\link[rlang:list2]{rlang::list2()}} and so are
+\item{...}{Additional arguments to pass to the module function. These
+arguments are processed with \code{\link[rlang:list2]{rlang::list2()}} and so are
 \emph{\link[rlang:dyn-dots]{dynamic}}.}
 
 \item{appDir}{The directory root of the Shiny application. If \code{NULL}, this function

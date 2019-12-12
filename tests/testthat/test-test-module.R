@@ -485,6 +485,31 @@ test_that("accessing a non-existant output gives an informative message", {
   })
 })
 
+test_that("testModule works with nested modules", {
+  outerModule <- function(input, output, session) {
+    r1 <- reactive({ input$x + 1})
+    r2 <- callModule(innerModule, "innerModule", r1)
+    output$someVar <- renderText(r2())
+  }
+
+  innerModule <- function(input, output, session, r) {
+    reactive(paste("a value:", r()))
+  }
+
+  testModule(outerModule, {
+    session$setInputs(x = 1)
+    expect_equal(output$someVar, "a value: 2")
+  })
+})
+
+test_that("assigning an output in a module function with a non-function errors", {
+  module <- function(input, output, session) {
+    output$someVar <- 123
+  }
+
+  expect_error(testModule(module, {}), "^Unexpected")
+})
+
 test_that("testServer works", {
   # app.R
   testServer({

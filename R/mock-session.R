@@ -247,9 +247,16 @@ MockShinySession <- R6Class(
     #' @param func The render definition
     #' @param label Not used
     defineOutput = function(name, func, label) {
+      force(name)
+
       if (!is.null(private$outs[[name]]$obs)) {
         private$outs[[name]]$obs$destroy()
       }
+
+      if (is.null(func)) func <- missingOutput
+
+      if (!is.function(func))
+        stop(paste("Unexpected", class(func), "output for", name))
 
       obs <- observe({
         # We could just stash the promise, but we get an "unhandled promise error". This bypasses
@@ -373,6 +380,15 @@ MockShinySession <- R6Class(
     #' @description Trigger a reactive flush right now.
     flushReact = function(){
       private$flush()
+    },
+    makeScope = function(namespace) {
+      ns <- NS(namespace)
+      createSessionProxy(
+        self,
+        input = .createReactiveValues(private$.input, readonly = TRUE, ns = ns),
+        output = structure(.createOutputWriter(self, ns = ns), class = "shinyoutput"),
+        makeScope = function(namespace) self$makeScope(ns(namespace))
+      )
     }
   ),
   private = list(

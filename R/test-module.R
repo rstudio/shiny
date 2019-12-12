@@ -26,11 +26,8 @@
 #'   })
 #' }
 #'
-#' # !!/:= and !!! from rlang are used below to programmatically splice
-#' # these into the testModule() argument list.
-#' multiplier_arg_name = "multiplier"
-#' more_args <- list(prefix = "I am ")
-#'
+#' # Basic Usage
+#' # -----------
 #' testModule(module, {
 #'   session$setInputs(x = 1)
 #'   # You're also free to use third-party
@@ -42,6 +39,19 @@
 #'   session$setInputs(x = 2)
 #'   stopifnot(myreactive() == 4)
 #'   stopifnot(output$txt == "I am 4")
+#'   # Any additional arguments, below, are passed along to the module.
+#' }, multiplier = 2)
+#'
+#' # Advanced Usage
+#' # --------------
+#' multiplier_arg_name = "multiplier"
+#' more_args <- list(prefix = "I am ")
+#' testModule(module, {
+#'   session$setInputs(x = 1)
+#'   stopifnot(myreactive() == 2)
+#'   stopifnot(output$txt == "I am 2")
+#'   # !!/:= and !!! from rlang are used below to splice computed arguments
+#'   # into the testModule() argument list.
 #' }, !!multiplier_arg_name := 2, !!!more_args)
 #' @export
 testModule <- function(module, expr, ...) {

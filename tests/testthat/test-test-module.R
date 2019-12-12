@@ -22,11 +22,9 @@ test_that("testModule passes dynamic dots", {
   moreArgs <- list(someArg = 123)
   testModule(module, {}, !!!moreArgs)
 
-  # Test by splicing in a list constructed with rlang::list2() that uses := to
-  # splice in an argument name
+  # Test with !!/:= to splice in an argument name
   argName <- "someArg"
-  moreArgs <- rlang::list2(!!argName := 123)
-  testModule(module, {}, !!!moreArgs)
+  testModule(module, {}, !!argName := 123)
 })
 
 test_that("testModule handles observers", {

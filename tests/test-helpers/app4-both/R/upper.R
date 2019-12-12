@@ -1,1 +1,0 @@
-upperHelper <- 'abc'

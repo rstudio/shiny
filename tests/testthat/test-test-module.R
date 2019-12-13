@@ -4,6 +4,29 @@ library(promises)
 library(future)
 plan(multisession)
 
+test_that("testModule passes dots", {
+  module <- function(input, output, session, someArg) {
+    expect_false(missing(someArg))
+    expect_equal(someArg, 123)
+  }
+  testModule(module, {}, someArg = 123)
+})
+
+test_that("testModule passes dynamic dots", {
+  module <- function(input, output, session, someArg) {
+    expect_false(missing(someArg))
+    expect_equal(someArg, 123)
+  }
+
+  # Test with !!! to splice in a whole named list constructed with base::list()
+  moreArgs <- list(someArg = 123)
+  testModule(module, {}, !!!moreArgs)
+
+  # Test with !!/:= to splice in an argument name
+  argName <- "someArg"
+  testModule(module, {}, !!argName := 123)
+})
+
 test_that("testModule handles observers", {
   module <- function(input, output, session) {
     rv <- reactiveValues(x = 0, y = 0)

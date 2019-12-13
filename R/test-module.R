@@ -11,21 +11,23 @@
 #'   in the module's environment, meaning that the module's parameters (e.g.
 #'   `input`, `output`, and `session`) will be available along with any other
 #'   values created inside of the module.
-#' @param args A list of arguments to pass into the module beyond `input`,
-#'   `output`, and `session`.
-#' @param ... Additional named arguments to be passed on to the module function.
+#' @param ... Additional arguments to pass to the module function. These
+#'   arguments are processed with [rlang::list2()] and so are
+#'   _[dynamic][rlang::dyn-dots]_.
 #' @include mock-session.R
 #' @rdname testModule
 #' @examples
-#' module <- function(input, output, session) {
+#' module <- function(input, output, session, multiplier = 2, prefix = "I am ") {
 #'   myreactive <- reactive({
-#'     input$x * 2
+#'     input$x * multiplier
 #'   })
 #'   output$txt <- renderText({
-#'     paste0("I am ", myreactive())
+#'     paste0(prefix, myreactive())
 #'   })
 #' }
 #'
+#' # Basic Usage
+#' # -----------
 #' testModule(module, {
 #'   session$setInputs(x = 1)
 #'   # You're also free to use third-party
@@ -37,28 +39,41 @@
 #'   session$setInputs(x = 2)
 #'   stopifnot(myreactive() == 4)
 #'   stopifnot(output$txt == "I am 4")
-#' })
+#'   # Any additional arguments, below, are passed along to the module.
+#' }, multiplier = 2)
+#'
+#' # Advanced Usage
+#' # --------------
+#' multiplier_arg_name = "multiplier"
+#' more_args <- list(prefix = "I am ")
+#' testModule(module, {
+#'   session$setInputs(x = 1)
+#'   stopifnot(myreactive() == 2)
+#'   stopifnot(output$txt == "I am 2")
+#'   # !!/:= and !!! from rlang are used below to splice computed arguments
+#'   # into the testModule() argument list.
+#' }, !!multiplier_arg_name := 2, !!!more_args)
 #' @export
-testModule <- function(module, expr, args, ...) {
+testModule <- function(module, expr, ...) {
   expr <- substitute(expr)
-  .testModule(module, expr, args, ...)
+  .testModule(module, expr, ...)
 }
 
 #' @noRd
 #' @importFrom withr with_options
-.testModule <- function(module, expr, args, ...) {
+.testModule <- function(module, expr, ...) {
   # Capture the environment from the module
   # Inserts `session$env <- environment()` at the top of the function
-  fn_body <- body(module)
-  fn_body[seq(3, length(fn_body)+1)] <- fn_body[seq(2, length(fn_body))]
-  fn_body[[2]] <- quote(session$env <- environment())
-  body(module) <- fn_body
+  body(module) <- rlang::expr({
+    session$env <- environment()
+    !!!body(module)
+  })
 
   # Create a mock session
   session <- MockShinySession$new()
 
   # Parse the additional arguments
-  args <- list(..., input = session$input, output = session$output, session = session)
+  args <- rlang::list2(..., input = session$input, output = session$output, session = session)
 
   # Initialize the module
   isolate(

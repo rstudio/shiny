@@ -49,9 +49,14 @@ test_that("nested helpers are not loaded", {
 
 test_that("app with both r/ and R/ prefers R/", {
   ## App 4 already has a lower-case r/ directory. Try to create an upper.
-  tryCatch(dir.create("../test-helpers/app4-both/R"),
-           warning=function(w){testthat::skip("File system is not case-sensitive")})
-  writeLines("upperHelper <- 'abc'", file.path("../test-helpers/app4-both/R", "upper.R"))
+  dir <- "../test-helpers/app4-both/R"
+  tryCatch({
+    dir.create(dir)
+    teardown(unlink(dir, recursive = TRUE))
+  }, warning = function(w) {
+    testthat::skip("File system is not case-sensitive")
+  })
+  writeLines("upperHelper <- 'abc'", file.path(dir, "upper.R"))
 
   renv <- loadSupport("../test-helpers/app4-both")
 

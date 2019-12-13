@@ -42,14 +42,14 @@ test_that("Can suppress sourcing global.R", {
 })
 
 test_that("nested helpers are not loaded", {
-  loadSupport("../test-helpers/app2-nested", renv=environment(), globalrenv=NULL)
+  loadSupport(test_path("../test-helpers/app2-nested"), renv=environment(), globalrenv=NULL)
   expect_equal(helper1, 456)
   expect_false(exists("helper2"))
 })
 
 test_that("app with both r/ and R/ prefers R/", {
   ## App 4 already has a lower-case r/ directory. Try to create an upper.
-  dir <- "../test-helpers/app4-both/R"
+  dir <- test_path("../test-helpers/app4-both/R")
   tryCatch({
     dir.create(dir)
     teardown(unlink(dir, recursive = TRUE))
@@ -58,7 +58,7 @@ test_that("app with both r/ and R/ prefers R/", {
   })
   writeLines("upperHelper <- 'abc'", file.path(dir, "upper.R"))
 
-  renv <- loadSupport("../test-helpers/app4-both")
+  renv <- loadSupport(test_path("../test-helpers/app4-both"))
 
   expect_false(exists("lowerHelper", envir=renv))
   expect_equal(get("upperHelper", envir=renv), "abc")
@@ -83,7 +83,7 @@ test_that("With ui/server.R, global.R is loaded before R/ helpers and into the r
   loadSpy <- rewire(loadSupport, sourceUTF8 = sourceStub)
   sad <- rewire(shinyAppDir_serverR, sourceUTF8 = sourceStub, loadSupport = loadSpy)
 
-  sa <- sad(normalizePath("../test-helpers/app1-standard"))
+  sa <- sad(normalizePath(test_path("../test-helpers/app1-standard")))
   sa$onStart()
   sa$onStop() # Close down to free up resources
 
@@ -141,7 +141,7 @@ test_that("Loading supporting R files is opt-out", {
   loadSpy <- rewire(loadSupport, sourceUTF8 = sourceStub)
   sad <- rewire(shinyAppDir_serverR, sourceUTF8 = sourceStub, loadSupport = loadSpy)
 
-  sa <- sad(normalizePath("../test-helpers/app1-standard"))
+  sa <- sad(normalizePath(test_path("../test-helpers/app1-standard")))
   sa$onStart()
   sa$onStop() # Close down to free up resources
 
@@ -170,7 +170,7 @@ test_that("Disabling supporting R files works", {
   loadSpy <- rewire(loadSupport, sourceUTF8 = sourceStub)
   sad <- rewire(shinyAppDir_serverR, sourceUTF8 = sourceStub, loadSupport = loadSpy)
 
-  sa <- sad(normalizePath("../test-helpers/app1-standard"))
+  sa <- sad(normalizePath(test_path("../test-helpers/app1-standard")))
   sa$onStart()
   sa$onStop() # Close down to free up resources
 
@@ -198,7 +198,7 @@ test_that("app.R is loaded after R/ helpers and into the right envs", {
   loadSpy <- rewire(loadSupport, sourceUTF8 = sourceSpy)
   sad <- rewire(shinyAppDir_appR, sourceUTF8 = sourceSpy, loadSupport = loadSpy)
 
-  sa <- sad("app.R", normalizePath("../test-helpers/app2-nested"))
+  sa <- sad("app.R", normalizePath(test_path("../test-helpers/app2-nested")))
   sa$onStart()
   sa$onStop() # Close down to free up resources
 

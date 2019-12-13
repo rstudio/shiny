@@ -727,7 +727,7 @@ ShinySession <- R6Class(
       scheduleTask(millis, callback)
     },
     .now = function(){
-      getNow()
+      getTimeMs()
     },
     rootScope = function() {
       self

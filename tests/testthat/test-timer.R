@@ -71,11 +71,11 @@ test_that("mockableTimer works", {
   expect_true(called)
 })
 
-test_that("getTime works", {
+test_that("getDomainTimeMs works", {
   start <- Sys.time()
-  t1 <- getTime(NULL)
-  t2 <- getTime(list())
-  t3 <- getTime(list(.now = function(){456}))
+  t1 <- getDomainTimeMs(NULL)
+  t2 <- getDomainTimeMs(list())
+  t3 <- getDomainTimeMs(list(.now = function(){456}))
   end <- Sys.time()
 
   expect_gte(t1, start)

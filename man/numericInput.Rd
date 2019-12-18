@@ -4,8 +4,15 @@
 \alias{numericInput}
 \title{Create a numeric input control}
 \usage{
-numericInput(inputId, label, value, min = NA, max = NA, step = NA,
-  width = NULL)
+numericInput(
+  inputId,
+  label,
+  value,
+  min = NA,
+  max = NA,
+  step = NA,
+  width = NULL
+)
 }
 \arguments{
 \item{inputId}{The \code{input} slot that will be used to access the value.}
@@ -29,6 +36,11 @@ A numeric input control that can be added to a UI definition.
 \description{
 Create an input control for entry of numeric values
 }
+\section{Server value}{
+
+A numeric vector of length 1.
+}
+
 \examples{
 ## Only run examples in interactive R sessions
 if (interactive()) {
@@ -42,17 +54,25 @@ server <- function(input, output) {
 }
 shinyApp(ui, server)
 }
+
 }
 \seealso{
 \code{\link[=updateNumericInput]{updateNumericInput()}}
 
-Other input elements: \code{\link{actionButton}},
-  \code{\link{checkboxGroupInput}},
-  \code{\link{checkboxInput}}, \code{\link{dateInput}},
-  \code{\link{dateRangeInput}}, \code{\link{fileInput}},
-  \code{\link{passwordInput}}, \code{\link{radioButtons}},
-  \code{\link{selectInput}}, \code{\link{sliderInput}},
-  \code{\link{submitButton}}, \code{\link{textAreaInput}},
-  \code{\link{textInput}}, \code{\link{varSelectInput}}
+Other input elements: 
+\code{\link{actionButton}()},
+\code{\link{checkboxGroupInput}()},
+\code{\link{checkboxInput}()},
+\code{\link{dateInput}()},
+\code{\link{dateRangeInput}()},
+\code{\link{fileInput}()},
+\code{\link{passwordInput}()},
+\code{\link{radioButtons}()},
+\code{\link{selectInput}()},
+\code{\link{sliderInput}()},
+\code{\link{submitButton}()},
+\code{\link{textAreaInput}()},
+\code{\link{textInput}()},
+\code{\link{varSelectInput}()}
 }
 \concept{input elements}

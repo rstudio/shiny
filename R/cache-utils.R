@@ -1,26 +1,10 @@
-#' A Key Missing object
-#'
-#' A `key_missing` object represents a cache miss.
-#'
-#' @param x An object to test.
-#'
-#' @seealso [diskCache()], [memoryCache()].
-#'
+#' @importFrom fastmap key_missing
 #' @export
-key_missing <- function() {
-  structure(list(), class = "key_missing")
-}
+fastmap::key_missing
 
-#' @rdname key_missing
+#' @importFrom fastmap is.key_missing
 #' @export
-is.key_missing <- function(x) {
-  inherits(x, "key_missing")
-}
-
-#' @export
-print.key_missing <- function(x, ...) {
-  cat("<Key Missing>\n")
-}
+fastmap::is.key_missing
 
 
 validate_key <- function(key) {
@@ -31,3 +15,4 @@ validate_key <- function(key) {
     stop("Invalid key: ", key, ". Only lowercase letters and numbers are allowed.")
   }
 }
+

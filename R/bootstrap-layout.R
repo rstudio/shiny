@@ -28,7 +28,8 @@
 #'   Shiny-Application-Layout-Guide](http://shiny.rstudio.com/articles/layout-guide.html) for additional details on laying out fluid
 #'   pages.
 #'
-#' @seealso [column()], [sidebarLayout()]
+#' @family layout functions
+#' @seealso [column()]
 #'
 #' @examples
 #' ## Only run examples in interactive R sessions
@@ -129,6 +130,8 @@ fluidRow <- function(...) {
 #' @note See the [
 #'   Shiny Application Layout Guide](http://shiny.rstudio.com/articles/layout-guide.html) for additional details on laying out fixed
 #'   pages.
+#'
+#' @family layout functions
 #'
 #' @seealso [column()]
 #'
@@ -243,7 +246,6 @@ column <- function(width, ..., offset = 0) {
 #'   `title` tag within the head. You can also specify a page title
 #'   explicitly using the `title` parameter of the top-level page function.
 #'
-#'
 #' @examples
 #' ## Only run examples in interactive R sessions
 #' if (interactive()) {
@@ -263,16 +265,23 @@ titlePanel <- function(title, windowTitle=title) {
 
 #' Layout a sidebar and main area
 #'
-#' Create a layout with a sidebar and main area. The sidebar is displayed with a
-#' distinct background color and typically contains input controls. The main
+#' Create a layout (`sidebarLayout()`) with a sidebar (`sidebarPanel()`) and
+#' main area (`mainPanel()`). The sidebar is displayed with a distinct
+#' background color and typically contains input controls. The main
 #' area occupies 2/3 of the horizontal width and typically contains outputs.
 #'
-#' @param sidebarPanel The [sidebarPanel] containing input controls
-#' @param mainPanel The [mainPanel] containing outputs
+#' @param sidebarPanel The `sidebarPanel()` containing input controls.
+#' @param mainPanel The `mainPanel()` containing outputs.
 #' @param position The position of the sidebar relative to the main area ("left"
-#'   or "right")
+#'   or "right").
 #' @param fluid `TRUE` to use fluid layout; `FALSE` to use fixed
 #'   layout.
+#' @param width The width of the sidebar and main panel. By default, the
+#'   sidebar takes up 1/3 of the width, and the main panel 2/3. The total
+#'   width must be 12 or less.
+#' @param ... Output elements to include in the sidebar/main panel.
+#'
+#' @family layout functions
 #'
 #' @examples
 #' ## Only run examples in interactive R sessions
@@ -337,6 +346,24 @@ sidebarLayout <- function(sidebarPanel,
     fixedRow(firstPanel, secondPanel)
 }
 
+#' @export
+#' @rdname sidebarLayout
+sidebarPanel <- function(..., width = 4) {
+  div(class=paste0("col-sm-", width),
+    tags$form(class="well",
+      ...
+    )
+  )
+}
+
+#' @export
+#' @rdname sidebarLayout
+mainPanel <- function(..., width = 8) {
+  div(class=paste0("col-sm-", width),
+    ...
+  )
+}
+
 #' Lay out UI elements vertically
 #'
 #' Create a container that includes one or more rows of content (each element
@@ -346,7 +373,7 @@ sidebarLayout <- function(sidebarPanel,
 #' @param fluid `TRUE` to use fluid layout; `FALSE` to use fixed
 #'   layout.
 #'
-#' @seealso [fluidPage()], [flowLayout()]
+#' @family layout functions
 #'
 #' @examples
 #' ## Only run examples in interactive R sessions
@@ -384,7 +411,7 @@ verticalLayout <- function(..., fluid = TRUE) {
 #' @param cellArgs Any additional attributes that should be used for each cell
 #'   of the layout.
 #'
-#' @seealso [verticalLayout()]
+#' @family layout functions
 #'
 #' @examples
 #' ## Only run examples in interactive R sessions
@@ -439,6 +466,8 @@ inputPanel <- function(...) {
 #'   values as pixels.
 #' @param cellArgs Any additional attributes that should be used for each cell
 #'   of the layout.
+#'
+#' @family layout functions
 #'
 #' @examples
 #' ## Only run examples in interactive R sessions
@@ -537,7 +566,7 @@ splitLayout <- function(..., cellWidths = NULL, cellArgs = list()) {
 #' @param flex Determines how space should be distributed to the cells. Can be a
 #'   single value like `1` or `2` to evenly distribute the available
 #'   space; or use a vector of numbers to specify the proportions. For example,
-#'   `flex = c(2, 3)` would cause the space to be split 40\%/60\% between
+#'   `flex = c(2, 3)` would cause the space to be split 40%/60% between
 #'   two cells. NA values will cause the corresponding cell to be sized
 #'   according to its contents (without growing or shrinking).
 #' @param width,height The total amount of width and height to use for the

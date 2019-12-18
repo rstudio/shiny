@@ -173,12 +173,12 @@ anyUnnamed <- function(x) {
 }
 
 
-# Given a vector/list, returns a named vector (the labels will be blank).
-asNamedVector <- function(x) {
-  if (!is.null(names(x)))
-    return(x)
+# Given a vector/list, returns a named vector/list (the labels will be blank).
+asNamed <- function(x) {
+  if (is.null(names(x))) {
+    names(x) <- character(length(x))
+  }
 
-  names(x) <- rep.int("", length(x))
   x
 }
 
@@ -800,7 +800,14 @@ dataTablesJSON <- function(data, req) {
 
   fdata <- unname(as.matrix(fdata))
   if (is.character(fdata) && q$escape != 'false') {
-    if (q$escape == 'true') fdata <- htmlEscape(fdata) else {
+    if (q$escape == 'true') {
+      # fdata must be a matrix at this point, and we need to preserve
+      # dimensions. Note that it could be a 1xn matrix.
+      dims <- dim(fdata)
+      fdata <- htmlEscape(fdata)
+      dim(fdata) <- dims
+
+    } else {
       k <- as.integer(strsplit(q$escape, ',')[[1]])
       # use seq_len() in case escape = negative indices, e.g. c(-1, -5)
       for (j in seq_len(ncol(fdata))[k]) fdata[, j] <- htmlEscape(fdata[, j])
@@ -1800,3 +1807,8 @@ constantTimeEquals <- function(raw1, raw2) {
 
   sum(as.integer(xor(raw1, raw2))) == 0
 }
+
+cat_line <- function(...) {
+  cat(paste(..., "\n", collapse = ""))
+}
+

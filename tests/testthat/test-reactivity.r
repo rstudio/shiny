@@ -122,6 +122,12 @@ test_that("ReactiveValues", {
   expect_error(values$a <- 1)
 })
 
+test_that("reactiveValues() has useful print method", {
+  verify_output(test_path("print-reactiveValues.txt"), {
+    x <- reactiveValues(x = 1, y = 2, z = 3)
+    x
+  })
+})
 
 # Test for overreactivity. funcB has an indirect dependency on valueA (via
 # funcA) and also a direct dependency on valueA. When valueA changes, funcB
@@ -1029,8 +1035,10 @@ test_that("Flush completes even when errors occur", {
 
   # Trigger an error
   vals$x <- 0
-  # Errors in reactive are translated to warnings in observers by default
-  expect_warning(flushReact())
+  suppress_stacktrace(
+    # Errors in reactive are translated to warnings in observers by default
+    expect_warning(flushReact())
+  )
   # Both observers should run up until the reactive that errors
   expect_true(all(c(n11, n12, n21, n22) == c(2,1,2,1)))
 
@@ -1183,4 +1191,234 @@ test_that("reactive domain works across async handlers", {
   }
 
   testthat::expect_true(hasReactiveDomain)
+})
+
+# For #2441, #2423
+test_that("Unreachable reactives are GC'd", {
+  v <- reactiveVal(1)
+  r <- reactive({
+    v()
+    12345
+  })
+  o <- observe({
+    r()
+  })
+  # Finalizer on the reactive's underlying Observable object
+  r_finalized <- FALSE
+  reg.finalizer(attr(r, "observable"), function(e) {
+    r_finalized <<- TRUE
+  })
+
+  # Finalizer on the Observer
+  o_finalized <- FALSE
+  reg.finalizer(o, function(e) {
+    o_finalized <<- TRUE
+  })
+
+  flushReact()
+  gc()
+  expect_false(r_finalized)
+
+  rm(r) # Remove the only (strong) reference to r
+  gc()
+  expect_true(r_finalized)
+  expect_false(o_finalized)
+
+  rm(o) # Remove the only reference to o
+  gc()
+  expect_true(o_finalized)
+
+  rm(v)
+  gc()
+
+  # Same, with reactiveValues instead of reactiveVal
+  v <- reactiveValues(x = 1)
+  r <- reactive({
+    v$x
+    12345
+  })
+  o <- observe({
+    r()
+  })
+  # Finalizer on the reactive's underlying Observable object
+  r_finalized <- FALSE
+  reg.finalizer(attr(r, "observable"), function(e) {
+    r_finalized <<- TRUE
+  })
+
+  # Finalizer on the Observer
+  o_finalized <- FALSE
+  reg.finalizer(o, function(e) {
+    o_finalized <<- TRUE
+  })
+
+  flushReact()
+  gc()
+  expect_false(r_finalized)
+
+  rm(r) # Remove the only (strong) reference to r
+  gc()
+  expect_true(r_finalized)
+  expect_false(o_finalized)
+
+  rm(o) # Remove the only reference to o
+  gc()
+  expect_true(o_finalized)
+})
+
+
+
+test_that("Reactive contexts are not GC'd too early", {
+  # When a ReactiveVal or ReactiveValue has an dependency arrow pointing to a
+  # reactive expression (Observable object), it's implemented by having a weak
+  # reference to a reactive context. We need to make sure that the reactive
+  # context is not GC'd too early. This is done by having the Observable have a
+  # strong reference to the context.
+
+  # Check reactiveVal
+  v <- reactiveVal(1)
+  r <- reactive({
+    v()
+  })
+  o <- observe({
+    r()
+    gc()
+  })
+  # Finalizer on the reactive's underlying Observable object
+  r_finalized <- FALSE
+  reg.finalizer(attr(r, "observable"), function(e) {
+    r_finalized <<- TRUE
+  })
+
+  for (i in 1:3) {
+    v(isolate(v()) + 1)
+    flushReact()
+  }
+
+  expect_identical(execCount(r), 3L)
+  expect_false(r_finalized)
+  o$destroy()
+  rm(v, r, o)
+  gc()
+  expect_true(r_finalized)
+
+
+  # Same, but with reactiveValues
+  v <- reactiveValues(x=1)
+  r <- reactive({
+    v$x
+  })
+  o <- observe({
+    r()
+    gc()
+  })
+  # Finalizer on the reactive's underlying Observable object
+  r_finalized <- FALSE
+  reg.finalizer(attr(r, "observable"), function(e) {
+    r_finalized <<- TRUE
+  })
+
+  for (i in 1:3) {
+    v$x <- (isolate(v$x) + 1)
+    flushReact()
+  }
+
+  expect_identical(execCount(r), 3L)
+  expect_false(r_finalized)
+})
+
+
+test_that("reactivePoll doesn't leak observer (#1548)", {
+  i <- 0
+  count <- reactivePoll(50, NULL,
+    checkFunc = function() {
+      i <<- i + 1
+      i
+    },
+    valueFunc = function() i
+  )
+
+  observe({
+    count()
+  })
+
+  while (i < 3) {
+    Sys.sleep(0.05)
+    shiny:::timerCallbacks$executeElapsed()
+    shiny:::flushReact()
+  }
+
+  # Removing the reference to count means that no one can use it anymore, and so
+  # the finalizer should run. The finalizer sets a flag which will allow the
+  # observer (which calls `checkFunc`) to run one more time; in that run, it
+  # will remove itself.
+  rm(count)
+  gc()
+
+  # If the reactivePoll was cleaned up, then the first run of this loop will
+  # increment i (bringing its value to 4), but in that run, the observer will
+  # remove itself so subsequent runs will no longer run `checkFunc`.
+  for (n in 1:3) {
+    Sys.sleep(0.05)
+    shiny:::timerCallbacks$executeElapsed()
+    shiny:::flushReact()
+  }
+
+  expect_equal(i, 3L)
+})
+
+test_that("reactivePoll prefers session$scheduleTask", {
+  called <- 0
+  session <- list(reactlog = function(...){}, onEnded = function(...){}, .scheduleTask = function(millis, cb){
+    expect_equal(millis, 50)
+    called <<- called + 1
+  })
+
+  count <- reactivePoll(50, session, function(){}, function(){})
+  observe({
+    count()
+  })
+
+  for (i in 1:4) {
+    Sys.sleep(0.05)
+    shiny:::flushReact()
+  }
+  expect_gt(called, 0)
+})
+
+test_that("invalidateLater prefers session$scheduleTask", {
+  called <- 0
+  session <- list(reactlog = function(...){}, onEnded = function(...){}, .scheduleTask = function(millis, cb){
+    expect_equal(millis, 10)
+    called <<- called + 1
+  })
+
+  observe({
+    invalidateLater(10, session)
+  })
+
+  for (i in 1:4) {
+    Sys.sleep(0.05)
+    shiny:::flushReact()
+  }
+  expect_gt(called, 0)
+})
+
+test_that("reactiveTimer prefers session$scheduleTask", {
+  called <- 0
+  session <- list(reactlog = function(...){}, onEnded = function(...){}, .scheduleTask = function(millis, cb){
+    expect_equal(millis, 10)
+    called <<- called + 1
+  })
+
+  rt <- reactiveTimer(10, session)
+  observe({
+    rt()
+  })
+
+  for (i in 1:4) {
+    Sys.sleep(0.05)
+    shiny:::flushReact()
+  }
+  expect_gt(called, 0)
 })

@@ -4,8 +4,13 @@
 \alias{runGadget}
 \title{Run a gadget}
 \usage{
-runGadget(app, server = NULL, port = getOption("shiny.port"),
-  viewer = paneViewer(), stopOnCancel = TRUE)
+runGadget(
+  app,
+  server = NULL,
+  port = getOption("shiny.port"),
+  viewer = paneViewer(),
+  stopOnCancel = TRUE
+)
 }
 \arguments{
 \item{app}{Either a Shiny app object as created by

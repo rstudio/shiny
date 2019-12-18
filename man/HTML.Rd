@@ -20,5 +20,5 @@ not to perform HTML escaping on it.
 \examples{
 el <- div(HTML("I like <u>turtles</u>"))
 cat(as.character(el))
-}
 
+}

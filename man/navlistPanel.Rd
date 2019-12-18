@@ -4,13 +4,19 @@
 \alias{navlistPanel}
 \title{Create a navigation list panel}
 \usage{
-navlistPanel(..., id = NULL, selected = NULL, well = TRUE,
-  fluid = TRUE, widths = c(4, 8))
+navlistPanel(
+  ...,
+  id = NULL,
+  selected = NULL,
+  well = TRUE,
+  fluid = TRUE,
+  widths = c(4, 8)
+)
 }
 \arguments{
 \item{...}{\code{\link[=tabPanel]{tabPanel()}} elements to include in the navlist}
 
-\item{id}{If provided, you can use \code{input$}\emph{\code{id}} in your
+\item{id}{If provided, you can use \verb{input$}\emph{\code{id}} in your
 server logic to determine which of the current navlist items is active. The
 value will correspond to the \code{value} argument that is passed to
 \code{\link[=tabPanel]{tabPanel()}}.}

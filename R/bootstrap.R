@@ -60,7 +60,7 @@ bootstrapPage <- function(..., title = NULL, responsive = NULL, theme = NULL) {
 #' @inheritParams bootstrapPage
 #' @export
 bootstrapLib <- function(theme = NULL) {
-  htmlDependency("bootstrap", "3.3.7",
+  htmlDependency("bootstrap", "3.4.1",
     c(
       href = "shared/bootstrap",
       file = system.file("www/shared/bootstrap", package = "shiny")
@@ -103,7 +103,7 @@ basicPage <- function(...) {
 #' *automatic* height; that is, they determine their own height based on
 #' the height of their contained elements. However,
 #' `fillPage(plotOutput("plot", height = "100%"))` will work because
-#' `fillPage` fixes the `<body>` height at 100\% of the window height.
+#' `fillPage` fixes the `<body>` height at 100% of the window height.
 #'
 #' Note that `fillPage(plotOutput("plot"))` will not cause the plot to fill
 #' the page. Like most Shiny output widgets, `plotOutput`'s default height
@@ -129,6 +129,8 @@ basicPage <- function(...) {
 #'   shown in the document).
 #' @param bootstrap If `TRUE`, load the Bootstrap CSS library.
 #' @param theme URL to alternative Bootstrap stylesheet.
+#'
+#' @family layout functions
 #'
 #' @examples
 #' fillPage(
@@ -176,61 +178,6 @@ collapseSizes <- function(padding) {
   paste(
     sapply(padding, shiny::validateCssUnit, USE.NAMES = FALSE),
     collapse = " ")
-}
-
-#' Create a page with a sidebar
-#'
-#' Create a Shiny UI that contains a header with the application title, a
-#' sidebar for input controls, and a main area for output.
-#'
-#' @param headerPanel The [headerPanel] with the application title
-#' @param sidebarPanel The [sidebarPanel] containing input controls
-#' @param mainPanel The [mainPanel] containing outputs
-
-#' @return A UI defintion that can be passed to the [shinyUI] function
-#'
-#' @note This function is deprecated. You should use [fluidPage()]
-#' along with [sidebarLayout()] to implement a page with a sidebar.
-#'
-#' @examples
-#' # Define UI
-#' pageWithSidebar(
-#'
-#'   # Application title
-#'   headerPanel("Hello Shiny!"),
-#'
-#'   # Sidebar with a slider input
-#'   sidebarPanel(
-#'     sliderInput("obs",
-#'                 "Number of observations:",
-#'                 min = 0,
-#'                 max = 1000,
-#'                 value = 500)
-#'   ),
-#'
-#'   # Show a plot of the generated distribution
-#'   mainPanel(
-#'     plotOutput("distPlot")
-#'   )
-#' )
-#' @export
-pageWithSidebar <- function(headerPanel,
-                            sidebarPanel,
-                            mainPanel) {
-
-  bootstrapPage(
-    # basic application container divs
-    div(
-      class="container-fluid",
-      div(class="row",
-          headerPanel
-      ),
-      div(class="row",
-          sidebarPanel,
-          mainPanel
-      )
-    )
-  )
 }
 
 #' Create a page with a top level navigation bar
@@ -287,6 +234,8 @@ pageWithSidebar <- function(headerPanel,
 #' @seealso [tabPanel()], [tabsetPanel()],
 #'   [updateNavbarPage()], [insertTab()],
 #'   [showTab()]
+#'
+#' @family layout functions
 #'
 #' @examples
 #' navbarPage("App Title",
@@ -408,27 +357,6 @@ navbarMenu <- function(title, ..., menuName = title, icon = NULL) {
             class = "shiny.navbarmenu")
 }
 
-#' Create a header panel
-#'
-#' Create a header panel containing an application title.
-#'
-#' @param title An application title to display
-#' @param windowTitle The title that should be displayed by the browser window.
-#'   Useful if `title` is not a string.
-#' @return A headerPanel that can be passed to [pageWithSidebar]
-#'
-#' @examples
-#' headerPanel("Hello Shiny!")
-#' @export
-headerPanel <- function(title, windowTitle=title) {
-  tagList(
-    tags$head(tags$title(windowTitle)),
-    div(class="col-sm-12",
-      h1(title)
-    )
-  )
-}
-
 #' Create a well panel
 #'
 #' Creates a panel with a slightly inset border and grey background. Equivalent
@@ -439,59 +367,6 @@ headerPanel <- function(title, windowTitle=title) {
 #' @export
 wellPanel <- function(...) {
   div(class="well", ...)
-}
-
-#' Create a sidebar panel
-#'
-#' Create a sidebar panel containing input controls that can in turn be passed
-#' to [sidebarLayout()].
-#'
-#' @param ... UI elements to include on the sidebar
-#' @param width The width of the sidebar. For fluid layouts this is out of 12
-#'   total units; for fixed layouts it is out of whatever the width of the
-#'   sidebar's parent column is.
-#' @return A sidebar that can be passed to [sidebarLayout()]
-#'
-#' @examples
-#' # Sidebar with controls to select a dataset and specify
-#' # the number of observations to view
-#' sidebarPanel(
-#'   selectInput("dataset", "Choose a dataset:",
-#'               choices = c("rock", "pressure", "cars")),
-#'
-#'   numericInput("obs", "Observations:", 10)
-#' )
-#' @export
-sidebarPanel <- function(..., width = 4) {
-  div(class=paste0("col-sm-", width),
-    tags$form(class="well",
-      ...
-    )
-  )
-}
-
-#' Create a main panel
-#'
-#' Create a main panel containing output elements that can in turn be passed to
-#' [sidebarLayout()].
-#'
-#' @param ... Output elements to include in the main panel
-#' @param width The width of the main panel. For fluid layouts this is out of 12
-#'   total units; for fixed layouts it is out of whatever the width of the main
-#'   panel's parent column is.
-#' @return A main panel that can be passed to [sidebarLayout()].
-#'
-#' @examples
-#' # Show the caption and plot of the requested variable against mpg
-#' mainPanel(
-#'    h3(textOutput("caption")),
-#'    plotOutput("mpgPlot")
-#' )
-#' @export
-mainPanel <- function(..., width = 8) {
-  div(class=paste0("col-sm-", width),
-    ...
-  )
 }
 
 #' Conditional Panel
@@ -589,7 +464,8 @@ helpText <- function(...) {
 
 #' Create a tab panel
 #'
-#' Create a tab panel that can be included within a [tabsetPanel()].
+#' Create a tab panel that can be included within a [tabsetPanel()] or
+#' a [navbarPage()].
 #'
 #' @param title Display title for tab
 #' @param ... UI elements to include within the tab
@@ -917,50 +793,43 @@ buildTabItem <- function(index, tabsetId, foundSelected, tabs = NULL,
 
 #' Create a text output element
 #'
-#' Render a reactive output variable as text within an application page. The
-#' text will be included within an HTML `div` tag by default.
+#' Render a reactive output variable as text within an application page.
+#' `textOutput()` is usually paired with [renderText()] and puts regular text
+#' in `<div>` or `<span>`; `verbatimTextOutput()` is usually paired with
+#' [renderPrint()] and provudes fixed-width text in a `<pre>`.
+#'
+#' In both funtions, text is HTML-escaped prior to rendering.
+#'
 #' @param outputId output variable to read the value from
 #' @param container a function to generate an HTML element to contain the text
 #' @param inline use an inline (`span()`) or block container (`div()`)
 #'   for the output
-#' @return A text output element that can be included in a panel
-#' @details Text is HTML-escaped prior to rendering. This element is often used
-#'   to display [renderText] output variables.
-#' @examples
-#' h3(textOutput("caption"))
-#' @export
-textOutput <- function(outputId, container = if (inline) span else div, inline = FALSE) {
-  container(id = outputId, class = "shiny-text-output")
-}
-
-#' Create a verbatim text output element
-#'
-#' Render a reactive output variable as verbatim text within an
-#' application page. The text will be included within an HTML `pre` tag.
-#' @param outputId output variable to read the value from
-#' @param placeholder if the output is empty or `NULL`, should an empty
-#'   rectangle be displayed to serve as a placeholder? (does not affect
-#'   behavior when the the output in nonempty)
-#' @return A verbatim text output element that can be included in a panel
-#' @details Text is HTML-escaped prior to rendering. This element is often used
-#'   with the [renderPrint] function to preserve fixed-width formatting
-#'   of printed objects.
+#' @return A output element for use in UI.
 #' @examples
 #' ## Only run this example in interactive R sessions
 #' if (interactive()) {
 #'   shinyApp(
 #'     ui = basicPage(
 #'       textInput("txt", "Enter the text to display below:"),
-#'       verbatimTextOutput("default"),
-#'       verbatimTextOutput("placeholder", placeholder = TRUE)
+#'       textOutput("text"),
+#'       verbatimTextOutput("verb")
 #'     ),
 #'     server = function(input, output) {
-#'       output$default <- renderText({ input$txt })
-#'       output$placeholder <- renderText({ input$txt })
+#'       output$text <- renderText({ input$txt })
+#'       output$verb <- renderText({ input$txt })
 #'     }
 #'   )
 #' }
 #' @export
+textOutput <- function(outputId, container = if (inline) span else div, inline = FALSE) {
+  container(id = outputId, class = "shiny-text-output")
+}
+
+#' @param placeholder if the output is empty or `NULL`, should an empty
+#'   rectangle be displayed to serve as a placeholder? (does not affect
+#'   behavior when the the output in nonempty)
+#' @export
+#' @rdname textOutput
 verbatimTextOutput <- function(outputId, placeholder = FALSE) {
   pre(id = outputId,
       class = paste(c("shiny-text-output", if (!placeholder) "noplaceholder"),

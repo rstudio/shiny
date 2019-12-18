@@ -5,23 +5,27 @@ matrix:
       r: release
       r_packages:
         - devtools
-        - roxygen2
       script: ./tools/checkDocsCurrent.sh
     - name: "Javascript check"
       language: node_js
       cache: yarn
       script: ./tools/checkJSCurrent.sh
       node_js:
-        - "10"
-    - name: "Old Release Check"
-      r: oldrel
-    - name: "Current Release Check"
-      r: release
-    - name: "Development Release Check"
-      r: devel
+        - "12"
+    - r: 3.2
+    - r: 3.3
+    - r: 3.4
+    - r: 3.5
+    - r: release
+    - r: devel
+
 sudo: false
 cache: packages
 notifications:
   email:
     on_success: change
     on_failure: change
+  slack:
+    on_success: change
+    secure: QoM0+hliVC4l2HYv126AkljG/uFvgwayW9IpuB5QNqjSukM122MhMDL7ZuMB9a2vWP24juzOTXiNIymgEspfnvvAMnZwYRBNWkuot2m8HIR2B9UjQLiztFnN1EAT+P+thz8Qax9TV2SOfXb2S2ZOeZmRTVkJctxkL8heAZadIC4=
+    on_pull_requests: false

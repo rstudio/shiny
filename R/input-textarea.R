@@ -35,6 +35,11 @@
 #' shinyApp(ui, server)
 #'
 #' }
+#'
+#' @section Server value:
+#' A character string of the text input. The default value is `""`
+#' unless `value` is provided.
+#'
 #' @export
 textAreaInput <- function(inputId, label, value = "", width = NULL, height = NULL,
   cols = NULL, rows = NULL, placeholder = NULL, resize = NULL) {

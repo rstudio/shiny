@@ -4,9 +4,17 @@
 \alias{diskCache}
 \title{Create a disk cache object}
 \usage{
-diskCache(dir = NULL, max_size = 10 * 1024^2, max_age = Inf,
-  max_n = Inf, evict = c("lru", "fifo"), destroy_on_finalize = FALSE,
-  missing = key_missing(), exec_missing = FALSE, logfile = NULL)
+diskCache(
+  dir = NULL,
+  max_size = 10 * 1024^2,
+  max_age = Inf,
+  max_n = Inf,
+  evict = c("lru", "fifo"),
+  destroy_on_finalize = FALSE,
+  missing = key_missing(),
+  exec_missing = FALSE,
+  logfile = NULL
+)
 }
 \arguments{
 \item{dir}{Directory to store files for the cache. If \code{NULL} (the

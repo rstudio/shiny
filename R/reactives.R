@@ -24,7 +24,11 @@ Dependents <- R6Class(
           rLog$dependsOn(ctx$.reactId, .reactId, ctx$id, ctx$.domain)
         }
 
-        .dependents$set(ctx$id, ctx)
+        if (ctx$isWeak()) {
+          .dependents$set(ctx$id, rlang::new_weakref(ctx))
+        } else {
+          .dependents$set(ctx$id, ctx)
+        }
 
         ctx$onInvalidate(function() {
           rLog$dependsOnRemove(ctx$.reactId, .reactId, ctx$id, ctx$.domain)
@@ -46,6 +50,13 @@ Dependents <- R6Class(
       lapply(
         .dependents$values(sort = TRUE),
         function(ctx) {
+          if (rlang::is_weakref(ctx)) {
+            ctx <- rlang::wref_key(ctx)
+            if (is.null(ctx)) {
+              # Can get here if weakref target was GC'd
+              return()
+            }
+          }
           ctx$invalidate()
           NULL
         }
@@ -294,6 +305,7 @@ ReactiveValues <- R6Class(
     .label = character(0),
     .values = 'Map',
     .metadata = 'Map',
+    # A map of Dependents objects, one for each key
     .dependents = 'Map',
     # Dependents for the list of all names, including hidden
     .namesDeps = 'Dependents',
@@ -315,7 +327,7 @@ ReactiveValues <- R6Class(
       .values <<- Map$new()
       .metadata <<- Map$new()
       .dependents <<- Map$new()
-      .hasRetrieved <<- list(names = FALSE, asListAll = FALSE, asList = FALSE, keys = list())
+      .hasRetrieved <<- list(names = FALSE, asListAll = FALSE, asList = FALSE)
       .namesDeps <<- Dependents$new(reactId = rLog$namesIdStr(.reactId))
       .allValuesDeps <<- Dependents$new(reactId = rLog$asListAllIdStr(.reactId))
       .valuesDeps <<- Dependents$new(reactId = rLog$asListIdStr(.reactId))
@@ -326,24 +338,18 @@ ReactiveValues <- R6Class(
       # get value right away to use for logging
       keyValue <- .values$get(key)
 
+      if (!.dependents$containsKey(key)) {
+        # If we got here, this is the first time someone has tried to access
+        # this key.
+        rLog$defineKey(.reactId, keyValue, key, .label, getCurrentContext()$.domain)
+
+        reactKeyId <- rLog$keyIdStr(.reactId, key)
+        .dependents$set(key, Dependents$new(reactKeyId))
+      }
+
       # Register the "downstream" reactive which is accessing this value, so
       # that we know to invalidate them when this value changes.
-      ctx <- getCurrentContext()
-      dep.key <- paste(key, ':', ctx$id, sep='')
-      if (!.dependents$containsKey(dep.key)) {
-        reactKeyId <- rLog$keyIdStr(.reactId, key)
-
-        if (!isTRUE(.hasRetrieved$keys[[key]])) {
-          rLog$defineKey(.reactId, keyValue, key, .label, ctx$.domain)
-          .hasRetrieved$keys[[key]] <<- TRUE
-        }
-        rLog$dependsOnKey(ctx$.reactId, .reactId, key, ctx$id, ctx$.domain)
-        .dependents$set(dep.key, ctx)
-        ctx$onInvalidate(function() {
-          rLog$dependsOnKeyRemove(ctx$.reactId, .reactId, key, ctx$id, ctx$.domain)
-          .dependents$remove(dep.key)
-        })
-      }
+      .dependents$get(key)$register()
 
       if (isFrozen(key))
         reactiveStop()
@@ -393,14 +399,9 @@ ReactiveValues <- R6Class(
       .values$set(key, value)
 
       # key has been depended upon
-      if (isTRUE(.hasRetrieved$keys[[key]])) {
+      if (.dependents$containsKey(key)) {
         rLog$valueChangeKey(.reactId, key, value, domain)
-        keyReactId <- rLog$keyIdStr(.reactId, key)
-        rLog$invalidateStart(keyReactId, NULL, "other", domain)
-        on.exit(
-          rLog$invalidateEnd(keyReactId, NULL, "other", domain),
-          add = TRUE
-        )
+        .dependents$get(key)$invalidate()
       }
 
       # only invalidate if there are deps
@@ -424,17 +425,6 @@ ReactiveValues <- R6Class(
         }
       }
 
-      dep.keys <- .dependents$keys()
-      dep.keys <- grep(
-        paste('^\\Q', key, ':', '\\E', '\\d+$', sep=''), dep.keys, value = TRUE
-      )
-      lapply(
-        .dependents$mget(dep.keys),
-        function(ctx) {
-          ctx$invalidate()
-          NULL
-        }
-      )
       invisible()
     },
 
@@ -600,6 +590,14 @@ checkName <- function(x) {
   )
 }
 
+#' @export
+print.reactivevalues <- function(x, ...) {
+  impl <- .subset2(x, "impl")
+  cat_line("<ReactiveValues>")
+  cat_line("  Values:   ", paste0(impl$.values$keys(sort = TRUE), collapse = ", "))
+  cat_line("  Readonly: ", .subset2(x, "readonly"))
+}
+
 #' Checks whether an object is a reactivevalues object
 #'
 #' Checks whether its argument is a reactivevalues object.
@@ -670,14 +668,14 @@ as.list.reactivevalues <- function(x, all.names=FALSE, ...) {
 
 #' Convert a reactivevalues object to a list
 #'
-#' This function does something similar to what you might [base::as.list()]
-#' to do. The difference is that the calling context will take dependencies on
-#' every object in the reactivevalues object. To avoid taking dependencies on
-#' all the objects, you can wrap the call with [isolate()].
+#' This function does something similar to what you might want or expect
+#' [base::as.list()] to do. The difference is that the calling context will take
+#' dependencies on every object in the `reactivevalue`s object. To avoid taking
+#' dependencies on all the objects, you can wrap the call with [isolate()].
 #'
-#' @param x A reactivevalues object.
-#' @param all.names If `TRUE`, include objects with a leading dot. If
-#'   `FALSE` (the default) don't include those objects.
+#' @param x A `reactivevalues` object.
+#' @param all.names If `TRUE`, include objects with a leading dot. If `FALSE`
+#'   (the default) don't include those objects.
 #' @examples
 #' values <- reactiveValues(a = 1)
 #' \dontrun{
@@ -803,6 +801,7 @@ Observable <- R6Class(
     .visible = logical(0),
     .execCount = integer(0),
     .mostRecentCtxId = character(0),
+    .ctx = 'Context',
 
     initialize = function(func, label = deparse(substitute(func)),
                           domain = getDefaultReactiveDomain(),
@@ -832,6 +831,7 @@ Observable <- R6Class(
       .running <<- FALSE
       .execCount <<- 0L
       .mostRecentCtxId <<- ""
+      .ctx <<- NULL
       rLog$define(.reactId, .value, .label, type = "observable", .domain)
     },
     getValue = function() {
@@ -858,12 +858,22 @@ Observable <- R6Class(
     },
     .updateValue = function() {
       ctx <- Context$new(.domain, .label, type = 'observable',
-                         prevId = .mostRecentCtxId, reactId = .reactId)
+                         prevId = .mostRecentCtxId, reactId = .reactId,
+                         weak = TRUE)
       .mostRecentCtxId <<- ctx$id
+
+      # A Dependency object will have a weak reference to the context, which
+      # doesn't prevent it from being GC'd. However, as long as this
+      # Observable object is reachable and not invalidated, we need to make
+      # sure the context isn't GC'd. To do that we need a strong reference to
+      # the context.
+      .ctx <<- ctx
+
       ctx$onInvalidate(function() {
         .invalidated <<- TRUE
         .value <<- NULL # Value can be GC'd, it won't be read once invalidated
         .dependents$invalidate(log = FALSE)
+        .ctx <<- NULL   # No longer need to prevent the context from being GC'd.
       })
       .execCount <<- .execCount + 1L
 
@@ -910,7 +920,7 @@ Observable <- R6Class(
 #' marked as invalidated. In this way, invalidations ripple through the
 #' expressions that depend on each other.
 #'
-#' See the [Shiny tutorial](http://rstudio.github.com/shiny/tutorial/) for
+#' See the [Shiny tutorial](https://shiny.rstudio.com/tutorial/) for
 #' more information about reactive expressions.
 #'
 #' @param x For `reactive`, an expression (quoted or unquoted). For
@@ -1503,14 +1513,16 @@ reactiveTimer <- function(intervalMs=1000, session = getDefaultReactiveDomain())
   # reactId <- nextGlobalReactId()
   # rLog$define(reactId, paste0("timer(", intervalMs, ")"))
 
+  scheduler <- defineScheduler(session)
+
   dependents <- Map$new()
-  timerHandle <- scheduleTask(intervalMs, function() {
+  timerHandle <- scheduler(intervalMs, function() {
     # Quit if the session is closed
     if (!is.null(session) && session$isClosed()) {
       return(invisible())
     }
 
-    timerHandle <<- scheduleTask(intervalMs, sys.function())
+    timerHandle <<- scheduler(intervalMs, sys.function())
 
     doInvalidate <- function() {
       lapply(
@@ -1603,17 +1615,22 @@ reactiveTimer <- function(intervalMs=1000, session = getDefaultReactiveDomain())
 #' }
 #' @export
 invalidateLater <- function(millis, session = getDefaultReactiveDomain()) {
-
   force(session)
 
   ctx <- getCurrentContext()
   rLog$invalidateLater(ctx$.reactId, ctx$id, millis, session)
 
-  timerHandle <- scheduleTask(millis, function() {
+  clear_on_ended_callback <- function() {}
+
+  scheduler <- defineScheduler(session)
+
+  timerHandle <- scheduler(millis, function() {
     if (is.null(session)) {
       ctx$invalidate()
       return(invisible())
     }
+
+    clear_on_ended_callback()
 
     if (!session$isClosed()) {
       session$cycleStartAction(function() {
@@ -1625,7 +1642,13 @@ invalidateLater <- function(millis, session = getDefaultReactiveDomain()) {
   })
 
   if (!is.null(session)) {
-    session$onEnded(timerHandle)
+    # timerHandle is a callback that clears the scheduled task. It gets
+    # registered with session$onEnded() each time invalidateLater() is called.
+    # So, to prevent these callbacks from building up and leaking memory, we
+    # need to deregister the onEnded(timerHandle) callback each time when the
+    # scheduled task executes; after the task executes, the timerHandle()
+    # function is essentially a no-op, so we can deregister it.
+    clear_on_ended_callback <- session$onEnded(timerHandle)
   }
 
   invisible()
@@ -1713,7 +1736,18 @@ reactivePoll <- function(intervalMillis, session, checkFunc, valueFunc) {
 
   rv <- reactiveValues(cookie = isolate(checkFunc()))
 
-  observe({
+  re_finalized <- FALSE
+
+  o <- observe({
+    # When no one holds a reference to the reactive returned from
+    # reactivePoll, destroy and remove the observer so that it doesn't keep
+    # firing and hold onto resources.
+    if (re_finalized) {
+      o$destroy()
+      rm(o, envir = parent.env(environment()))
+      return()
+    }
+
     rv$cookie <- checkFunc()
     invalidateLater(intervalMillis(), session)
   })
@@ -1725,6 +1759,14 @@ reactivePoll <- function(intervalMillis, session, checkFunc, valueFunc) {
     valueFunc()
 
   }, label = NULL)
+
+  reg.finalizer(attr(re, "observable"), function(e) {
+    re_finalized <<- TRUE
+  })
+
+  # So that the observer and finalizer function don't (indirectly) hold onto a
+  # reference to `re` and thus prevent it from getting GC'd.
+  on.exit(rm(re))
 
   return(re)
 }
@@ -2320,20 +2362,24 @@ debounce <- function(r, millis, priority = 100, domain = getDefaultReactiveDomai
     when = NULL # the deadline for the timer to fire; NULL if not scheduled
   )
 
-  # Responsible for tracking when f() changes.
+  # Responsible for tracking when r() changes.
   firstRun <- TRUE
   observe({
-    r()
-
     if (firstRun) {
       # During the first run we don't want to set v$when, as this will kick off
       # the timer. We only want to do that when we see r() change.
       firstRun <<- FALSE
+
+      # Ensure r() is called only after setting firstRun to FALSE since r()
+      # may throw an error
+      r()
       return()
     }
+    # This ensures r() is still tracked after firstRun
+    r()
 
     # The value (or possibly millis) changed. Start or reset the timer.
-    v$when <- Sys.time() + millis()/1000
+    v$when <- getTime(domain) + millis()/1000
   }, label = "debounce tracker", domain = domain, priority = priority)
 
   # This observer is the timer. It rests until v$when elapses, then touches
@@ -2342,7 +2388,7 @@ debounce <- function(r, millis, priority = 100, domain = getDefaultReactiveDomai
     if (is.null(v$when))
       return()
 
-    now <- Sys.time()
+    now <- getTime(domain)
     if (now >= v$when) {
       # Mod by 999999999 to get predictable overflow behavior
       v$trigger <- isolate(v$trigger %OR% 0) %% 999999999 + 1
@@ -2393,12 +2439,12 @@ throttle <- function(r, millis, priority = 100, domain = getDefaultReactiveDomai
     if (is.null(v$lastTriggeredAt)) {
       0
     } else {
-      max(0, (v$lastTriggeredAt + millis()/1000) - Sys.time()) * 1000
+      max(0, (v$lastTriggeredAt + millis()/1000) - getTime(domain)) * 1000
     }
   }
 
   trigger <- function() {
-    v$lastTriggeredAt <- Sys.time()
+    v$lastTriggeredAt <- getTime(domain)
     # Mod by 999999999 to get predictable overflow behavior
     v$trigger <- isolate(v$trigger) %% 999999999 + 1
     v$pending <- FALSE

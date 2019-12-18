@@ -3,8 +3,60 @@
 #' Create a file upload control that can be used to upload one or more files.
 #'
 #' Whenever a file upload completes, the corresponding input variable is set
-#' to a dataframe. This dataframe contains one row for each selected file, and
-#' the following columns:
+#' to a dataframe. See the `Server value` section.
+#'
+#' @family input elements
+#'
+#' @inheritParams textInput
+#' @param multiple Whether the user should be allowed to select and upload
+#'   multiple files at once. **Does not work on older browsers, including
+#'   Internet Explorer 9 and earlier.**
+#' @param accept A character vector of "unique file type specifiers" which
+#'   gives the browser a hint as to the type of file the server expects.
+#'   Many browsers use this prevent the user from selecting an invalid file.
+#'
+#'   A unique file type specifier can be:
+#'   * A case insensitive extension like `.csv` or `.rds`.
+#'   * A valid MIME type, like `text/plain` or `application/pdf`
+#'   * One of `audio/*`, `video/*`, or `image/*` meaning any audio, video,
+#'     or image type, respectively.
+#' @param buttonLabel The label used on the button. Can be text or an HTML tag
+#'   object.
+#' @param placeholder The text to show before a file has been uploaded.
+#'
+#' @examples
+#' ## Only run examples in interactive R sessions
+#' if (interactive()) {
+#'
+#' ui <- fluidPage(
+#'   sidebarLayout(
+#'     sidebarPanel(
+#'       fileInput("file1", "Choose CSV File", accept = ".csv"),
+#'       checkboxInput("header", "Header", TRUE)
+#'     ),
+#'     mainPanel(
+#'       tableOutput("contents")
+#'     )
+#'   )
+#' )
+#'
+#' server <- function(input, output) {
+#'   output$contents <- renderTable({
+#'     file <- input$file1
+#'     ext <- tools::file_ext(file$datapath)
+#'
+#'     req(file)
+#'     validate(need(ext == "csv", "Please upload a csv file"))
+#'
+#'     read.csv(file$datapath, header = input$header)
+#'   })
+#' }
+#'
+#' shinyApp(ui, server)
+#' }
+#'
+#' @section Server value:
+#' A `data.frame` that contains one row for each selected file, and following columns:
 #' \describe{
 #'   \item{`name`}{The filename provided by the web browser. This is
 #'   **not** the path to read to get at the actual data that was uploaded
@@ -19,58 +71,6 @@
 #'   operation.}
 #' }
 #'
-#' @family input elements
-#'
-#' @inheritParams textInput
-#' @param multiple Whether the user should be allowed to select and upload
-#'   multiple files at once. **Does not work on older browsers, including
-#'   Internet Explorer 9 and earlier.**
-#' @param accept A character vector of MIME types; gives the browser a hint of
-#'   what kind of files the server is expecting.
-#' @param buttonLabel The label used on the button. Can be text or an HTML tag
-#'   object.
-#' @param placeholder The text to show before a file has been uploaded.
-#'
-#' @examples
-#' ## Only run examples in interactive R sessions
-#' if (interactive()) {
-#'
-#' ui <- fluidPage(
-#'   sidebarLayout(
-#'     sidebarPanel(
-#'       fileInput("file1", "Choose CSV File",
-#'         accept = c(
-#'           "text/csv",
-#'           "text/comma-separated-values,text/plain",
-#'           ".csv")
-#'         ),
-#'       tags$hr(),
-#'       checkboxInput("header", "Header", TRUE)
-#'     ),
-#'     mainPanel(
-#'       tableOutput("contents")
-#'     )
-#'   )
-#' )
-#'
-#' server <- function(input, output) {
-#'   output$contents <- renderTable({
-#'     # input$file1 will be NULL initially. After the user selects
-#'     # and uploads a file, it will be a data frame with 'name',
-#'     # 'size', 'type', and 'datapath' columns. The 'datapath'
-#'     # column will contain the local filenames where the data can
-#'     # be found.
-#'     inFile <- input$file1
-#'
-#'     if (is.null(inFile))
-#'       return(NULL)
-#'
-#'     read.csv(inFile$datapath, header = input$header)
-#'   })
-#' }
-#'
-#' shinyApp(ui, server)
-#' }
 #' @export
 fileInput <- function(inputId, label, multiple = FALSE, accept = NULL,
   width = NULL, buttonLabel = "Browse...", placeholder = "No file selected") {

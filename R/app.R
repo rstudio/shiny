@@ -4,9 +4,7 @@
 #'
 #' These functions create Shiny app objects from either an explicit UI/server
 #' pair (`shinyApp`), or by passing the path of a directory that contains a
-#' Shiny app (`shinyAppDir`). You generally shouldn't need to use these
-#' functions to create/run applications; they are intended for interoperability
-#' purposes, such as embedding Shiny apps inside a \pkg{knitr} document.
+#' Shiny app (`shinyAppDir`).
 #'
 #' Normally when this function is used at the R console, the Shiny app object is
 #' automatically passed to the `print()` function, which runs the app. If
@@ -15,8 +13,13 @@
 #' object to `print()` or [runApp()].
 #'
 #' @param ui The UI definition of the app (for example, a call to
-#'   `fluidPage()` with nested controls)
-#' @param server A server function
+#'   `fluidPage()` with nested controls).
+#'
+#'    If bookmarking is enabled (see `enableBookmarking`), this must be
+#'    a single argument function that returns the UI definition.
+#' @param server A function with three parameters: `input`, `output`, and
+#'   `session`. The function is called once for each session ensuring that each
+#'   app is independent.
 #' @param onStart A function that will be called before the app is actually run.
 #'   This is only needed for `shinyAppObj`, since in the `shinyAppDir`
 #'   case, a `global.R` file can be used for this purpose.
@@ -30,11 +33,9 @@
 #'   request. Note that the entire request path must match the regular
 #'   expression in order for the match to be considered successful.
 #' @param enableBookmarking Can be one of `"url"`, `"server"`, or
-#'   `"disable"`. This is equivalent to calling the
-#'   [enableBookmarking()] function just before calling
-#'   `shinyApp()`. With the default value (`NULL`), the app will
-#'   respect the setting from any previous calls to `enableBookmarking()`.
-#'   See [enableBookmarking()] for more information.
+#'   `"disable"`. The default value, `NULL`, will respect the setting from
+#'   any previous calls to  [enableBookmarking()]. See [enableBookmarking()]
+#'   for more information on bookmarking your app.
 #' @return An object that represents the app. Printing the object or passing it
 #'   to [runApp()] will run the app.
 #'
@@ -70,10 +71,10 @@
 #'   runApp(app)
 #' }
 #' @export
-shinyApp <- function(ui=NULL, server=NULL, onStart=NULL, options=list(),
+shinyApp <- function(ui, server, onStart=NULL, options=list(),
                      uiPattern="/", enableBookmarking=NULL) {
-  if (is.null(server)) {
-    stop("`server` missing from shinyApp")
+  if (!is.function(server)) {
+    stop("`server` must be a function", call. = FALSE)
   }
 
   # Ensure that the entire path is a match
@@ -141,9 +142,20 @@ shinyAppFile <- function(appFile, options=list()) {
 
 # This reads in an app dir in the case that there's a server.R (and ui.R/www)
 # present, and returns a shiny.appobj.
+# appDir must be a normalized (absolute) path, not a relative one
 shinyAppDir_serverR <- function(appDir, options=list()) {
   # Most of the complexity here comes from needing to hot-reload if the .R files
   # change on disk, or are created, or are removed.
+
+  # In an upcoming version of shiny, this option will go away.
+  if (getOption("shiny.autoload.r", TRUE)) {
+    # Create a child env which contains all the helpers and will be the shared parent
+    # of the ui.R and server.R load.
+    sharedEnv <- new.env(parent = globalenv())
+  } else {
+    # old behavior
+    sharedEnv <- globalenv()
+  }
 
   # uiHandlerSource is a function that returns an HTTP handler for serving up
   # ui.R as a webpage. The "cachedFuncWithFile" call makes sure that the closure
@@ -155,7 +167,7 @@ shinyAppDir_serverR <- function(appDir, options=list()) {
         # If not, then take the last expression that's returned from ui.R.
         .globals$ui <- NULL
         on.exit(.globals$ui <- NULL, add = FALSE)
-        ui <- sourceUTF8(uiR, envir = new.env(parent = globalenv()))
+        ui <- sourceUTF8(uiR, envir = new.env(parent = sharedEnv))
         if (!is.null(.globals$ui)) {
           ui <- .globals$ui[[1]]
         }
@@ -185,7 +197,7 @@ shinyAppDir_serverR <- function(appDir, options=list()) {
       # server.R.
       .globals$server <- NULL
       on.exit(.globals$server <- NULL, add = TRUE)
-      result <- sourceUTF8(serverR, envir = new.env(parent = globalenv()))
+      result <- sourceUTF8(serverR, envir = new.env(parent = sharedEnv))
       if (!is.null(.globals$server)) {
         result <- .globals$server[[1]]
       }
@@ -216,8 +228,13 @@ shinyAppDir_serverR <- function(appDir, options=list()) {
     oldwd <<- getwd()
     setwd(appDir)
     monitorHandle <<- initAutoReloadMonitor(appDir)
-    if (file.exists(file.path.ci(appDir, "global.R")))
-      sourceUTF8(file.path.ci(appDir, "global.R"))
+    # TODO: we should support hot reloading on global.R and R/*.R changes.
+    if (getOption("shiny.autoload.r", TRUE)) {
+      loadSupport(appDir, renv=sharedEnv, globalrenv=globalenv())
+    }  else {
+      if (file.exists(file.path.ci(appDir, "global.R")))
+        sourceUTF8(file.path.ci(appDir, "global.R"))
+    }
   }
   onStop <- function() {
     setwd(oldwd)
@@ -267,7 +284,8 @@ initAutoReloadMonitor <- function(dir) {
     ".*\\.(r|html?|js|css|png|jpe?g|gif)$")
 
   lastValue <- NULL
-  obs <- observe({
+  observeLabel <- paste0("File Auto-Reload - '", basename(dir), "'")
+  obs <- observe(label = observeLabel, {
     files <- sort(list.files(dir, pattern = filePattern, recursive = TRUE,
       ignore.case = TRUE))
     times <- file.info(files)$mtime
@@ -290,18 +308,81 @@ initAutoReloadMonitor <- function(dir) {
   obs$destroy
 }
 
+#' Load an app's supporting R files
+#'
+#' Loads all of the supporting R files of a Shiny application. Specifically,
+#' this function loads any top-level supporting `.R` files in the `R/` directory
+#' adjacent to the `app.R`/`server.R`/`ui.R` files.
+#'
+#' Since Shiny 1.5.0, this function is called by default when running an
+#' application. If it causes problems, there are two ways to opt out. You can
+#' either place a file named `_disable_autoload.R` in your R/ directory, or
+#' set `options(shiny.autoload.r=FALSE)`. If you set this option, it will
+#' affect any application that runs later in the same R session, potentially
+#' breaking it, so after running your application, you should unset option with
+#' `options(shiny.autoload.r=NULL)`
+#'
+#' @details The files are sourced in alphabetical order (as determined by
+#'   [list.files]). `global.R` is evaluated before the supporting R files in the
+#'   `R/` directory.
+#' @param appDir The application directory
+#' @param renv The environmeny in which the files in the `R/` directory should
+#'   be evaluated.
+#' @param globalrenv The environment in which `global.R` should be evaluated. If
+#'   `NULL`, `global.R` will not be evaluated at all.
+#' @export
+loadSupport <- function(appDir, renv=new.env(parent=globalenv()), globalrenv=globalenv()){
+  if (!is.null(globalrenv)){
+    # Evaluate global.R, if it exists.
+    if (file.exists(file.path.ci(appDir, "global.R"))){
+      sourceUTF8(file.path.ci(appDir, "global.R"), envir=globalrenv)
+    }
+  }
+
+  helpersDir <- file.path(appDir, "R")
+
+  disabled <- list.files(helpersDir, pattern="^_disable_autoload\\.r$", recursive=FALSE, ignore.case=TRUE)
+  if (length(disabled) > 0){
+    message("R/_disable_autoload.R detected; not loading the R/ directory automatically")
+    return(invisible(renv))
+  }
+
+  helpers <- list.files(helpersDir, pattern="\\.[rR]$", recursive=FALSE, full.names=TRUE)
+
+  if (length(helpers) > 0){
+    message("Automatically loading ", length(helpers), " .R file",
+            ifelse(length(helpers) != 1, "s", ""),
+            " found in the R/ directory.\nSee https://rstd.io/shiny-autoload for more info.")
+  }
+
+  lapply(helpers, sourceUTF8, envir=renv)
+
+  invisible(renv)
+}
+
 # This reads in an app dir for a single-file application (e.g. app.R), and
 # returns a shiny.appobj.
+# appDir must be a normalized (absolute) path, not a relative one
 shinyAppDir_appR <- function(fileName, appDir, options=list())
 {
   fullpath <- file.path.ci(appDir, fileName)
+
+  # In an upcoming version of shiny, this option will go away.
+  if (getOption("shiny.autoload.r", TRUE)) {
+    # Create a child env which contains all the helpers and will be the shared parent
+    # of the ui.R and server.R load.
+    sharedEnv <- new.env(parent = globalenv())
+  } else {
+    sharedEnv <- globalenv()
+  }
+
 
   # This sources app.R and caches the content. When appObj() is called but
   # app.R hasn't changed, it won't re-source the file. But if called and
   # app.R has changed, it'll re-source the file and return the result.
   appObj <- cachedFuncWithFile(appDir, fileName, case.sensitive = FALSE,
     function(appR) {
-      result <- sourceUTF8(fullpath, envir = new.env(parent = globalenv()))
+      result <- sourceUTF8(fullpath, envir = new.env(parent = sharedEnv))
 
       if (!is.shiny.appobj(result))
         stop("app.R did not return a shiny.appobj object.")
@@ -344,6 +425,10 @@ shinyAppDir_appR <- function(fileName, appDir, options=list())
   onStart <- function() {
     oldwd <<- getwd()
     setwd(appDir)
+    # TODO: we should support hot reloading on R/*.R changes.
+    if (getOption("shiny.autoload.r", TRUE)) {
+      loadSupport(appDir, renv=sharedEnv, globalrenv=NULL)
+    }
     monitorHandle <<- initAutoReloadMonitor(appDir)
     if (!is.null(appObj()$onStart)) appObj()$onStart()
   }
@@ -378,26 +463,34 @@ shinyAppDir_appR <- function(fileName, appDir, options=list())
 }
 
 
-#' @rdname shinyApp
+#' Shiny App object
+#'
+#' Internal methods for the `shiny.appobj` S3 class.
+#'
+#' @keywords internal
+#' @name shiny.appobj
+NULL
+
+#' @rdname shiny.appobj
 #' @param x Object to convert to a Shiny app.
 #' @export
 as.shiny.appobj <- function(x) {
   UseMethod("as.shiny.appobj", x)
 }
 
-#' @rdname shinyApp
+#' @rdname shiny.appobj
 #' @export
 as.shiny.appobj.shiny.appobj <- function(x) {
   x
 }
 
-#' @rdname shinyApp
+#' @rdname shiny.appobj
 #' @export
 as.shiny.appobj.list <- function(x) {
   shinyApp(ui = x$ui, server = x$server)
 }
 
-#' @rdname shinyApp
+#' @rdname shiny.appobj
 #' @export
 as.shiny.appobj.character <- function(x) {
   if (identical(tolower(tools::file_ext(x)), "r"))
@@ -406,13 +499,13 @@ as.shiny.appobj.character <- function(x) {
     shinyAppDir(x)
 }
 
-#' @rdname shinyApp
+#' @rdname shiny.appobj
 #' @export
 is.shiny.appobj <- function(x) {
   inherits(x, "shiny.appobj")
 }
 
-#' @rdname shinyApp
+#' @rdname shiny.appobj
 #' @param ... Additional parameters to be passed to print.
 #' @export
 print.shiny.appobj <- function(x, ...) {
@@ -427,7 +520,7 @@ print.shiny.appobj <- function(x, ...) {
   do.call("runApp", args)
 }
 
-#' @rdname shinyApp
+#' @rdname shiny.appobj
 #' @method as.tags shiny.appobj
 #' @export
 as.tags.shiny.appobj <- function(x, ...) {
@@ -481,7 +574,6 @@ shiny_rmd_warning <- function() {
 }
 
 #' @rdname knitr_methods
-#' @export
 knit_print.shiny.appobj <- function(x, ...) {
   opts <- x$options %OR% list()
   width <- if (is.null(opts$width)) "100%" else opts$width
@@ -518,7 +610,6 @@ knit_print.shiny.appobj <- function(x, ...) {
 # calling output$value <- renderFoo(...) and fooOutput().
 #' @rdname knitr_methods
 #' @param inline Whether the object is printed inline.
-#' @export
 knit_print.shiny.render.function <- function(x, ..., inline = FALSE) {
   x <- htmltools::as.tags(x, inline = inline)
   output <- knitr::knit_print(tagList(x))
@@ -531,7 +622,6 @@ knit_print.shiny.render.function <- function(x, ..., inline = FALSE) {
 # Lets us drop reactive expressions directly into a knitr chunk and have the
 # value printed out! Nice for teaching if nothing else.
 #' @rdname knitr_methods
-#' @export
 knit_print.reactive <- function(x, ..., inline = FALSE) {
   renderFunc <- if (inline) renderText else renderPrint
   knitr::knit_print(renderFunc({

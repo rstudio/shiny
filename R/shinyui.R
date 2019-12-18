@@ -42,9 +42,28 @@ renderPage <- function(ui, connection, showcase=0, testMode=FALSE) {
     )
   }
 
+  jquery <- function() {
+    version <- getOption("shiny.jquery.version", 3)
+    if (version == 3) {
+      return(htmlDependency(
+        "jquery", "3.4.1",
+        c(href = "shared"),
+        script = "jquery.min.js"
+      ))
+    }
+    if (version == 1) {
+      return(htmlDependency(
+        "jquery", "1.12.4",
+        c(href = "shared/legacy"),
+        script = "jquery.min.js"
+      ))
+    }
+    stop("Unsupported version of jQuery: ", version)
+  }
+
   shiny_deps <- list(
     htmlDependency("json2", "2014.02.04", c(href="shared"), script = "json2-min.js"),
-    htmlDependency("jquery", "1.12.4", c(href="shared"), script = "jquery.min.js"),
+    jquery(),
     htmlDependency("shiny", utils::packageVersion("shiny"), c(href="shared"),
       script = if (getOption("shiny.minified", TRUE)) "shiny.min.js" else "shiny.js",
       stylesheet = "shiny.css")

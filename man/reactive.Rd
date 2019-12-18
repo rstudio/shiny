@@ -5,8 +5,14 @@
 \alias{is.reactive}
 \title{Create a reactive expression}
 \usage{
-reactive(x, env = parent.frame(), quoted = FALSE, label = NULL,
-  domain = getDefaultReactiveDomain(), ..stacktraceon = TRUE)
+reactive(
+  x,
+  env = parent.frame(),
+  quoted = FALSE,
+  label = NULL,
+  domain = getDefaultReactiveDomain(),
+  ..stacktraceon = TRUE
+)
 
 is.reactive(x)
 }
@@ -45,7 +51,7 @@ invalidated, any other reactive expressions that recently called it are also
 marked as invalidated. In this way, invalidations ripple through the
 expressions that depend on each other.
 
-See the \href{http://rstudio.github.com/shiny/tutorial/}{Shiny tutorial} for
+See the \href{https://shiny.rstudio.com/tutorial/}{Shiny tutorial} for
 more information about reactive expressions.
 }
 \examples{

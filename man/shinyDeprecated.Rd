@@ -4,8 +4,12 @@
 \alias{shinyDeprecated}
 \title{Print message for deprecated functions in Shiny}
 \usage{
-shinyDeprecated(new = NULL, msg = NULL,
-  old = as.character(sys.call(sys.parent()))[1L], version = NULL)
+shinyDeprecated(
+  new = NULL,
+  msg = NULL,
+  old = as.character(sys.call(sys.parent()))[1L],
+  version = NULL
+)
 }
 \arguments{
 \item{new}{Name of replacement function.}

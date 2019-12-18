@@ -33,14 +33,14 @@ if (interactive()) {
     ui = basicPage("onStop demo"),
 
     server = function(input, output, session) {
-      onStop(function() cat("Session stopped\\n"))
+      onStop(function() cat("Session stopped\n"))
     },
 
     onStart = function() {
-      cat("Doing application setup\\n")
+      cat("Doing application setup\n")
 
       onStop(function() {
-        cat("Doing application cleanup\\n")
+        cat("Doing application cleanup\n")
       })
     }
   )
@@ -53,16 +53,16 @@ if (interactive()) {
 
 \dontrun{
 # ==== app.R ====
-cat("Doing application setup\\n")
+cat("Doing application setup\n")
 onStop(function() {
-  cat("Doing application cleanup\\n")
+  cat("Doing application cleanup\n")
 })
 
 shinyApp(
   ui = basicPage("onStop demo"),
 
   server = function(input, output, session) {
-    onStop(function() cat("Session stopped\\n"))
+    onStop(function() cat("Session stopped\n"))
   }
 )
 # ==== end app.R ====
@@ -70,9 +70,9 @@ shinyApp(
 
 # Similarly, if you have a global.R, you can call onStop() from there.
 # ==== global.R ====
-cat("Doing application setup\\n")
+cat("Doing application setup\n")
 onStop(function() {
-  cat("Doing application cleanup\\n")
+  cat("Doing application cleanup\n")
 })
 # ==== end global.R ====
 }

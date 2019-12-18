@@ -662,9 +662,7 @@ imageutils.createClickInfo = function($el, dblclickId, dblclickDelay) {
     var e2 = $.Event(newEventType, {
       which:   e.which,
       pageX:   e.pageX,
-      pageY:   e.pageY,
-      offsetX: e.offsetX,
-      offsetY: e.offsetY
+      pageY:   e.pageY
     });
 
     $el.trigger(e2);
@@ -713,8 +711,8 @@ imageutils.createClickInfo = function($el, dblclickId, dblclickDelay) {
       // click. Instead, immediately trigger a mousedown2 for the previous
       // click, and set this click as a new first click.
       if (pending_e &&
-          Math.abs(pending_e.offsetX - e.offsetX) > 2 ||
-          Math.abs(pending_e.offsetY - e.offsetY) > 2) {
+          Math.abs(pending_e.pageX - e.pageX) > 2 ||
+          Math.abs(pending_e.pageY - e.pageY) > 2) {
 
         triggerPendingMousedown2();
         scheduleMousedown2(e);

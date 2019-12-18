@@ -20,7 +20,7 @@ on a local connection (without Shiny Server or Connect).
 A \code{\link[=reactiveValues]{reactiveValues()}} object that contains information about the client.
 \itemize{
 \item{\code{allowDataUriScheme} is a logical value that indicates whether
-the browser is able to handle URIs that use the \code{data:} scheme.
+the browser is able to handle URIs that use the \verb{data:} scheme.
 }
 \item{\code{pixelratio} reports the "device pixel ratio" from the web browser,
 or 1 if none is reported. The value is 2 for Apple Retina displays.
@@ -177,7 +177,7 @@ character vector, as in \code{input=c("x", "y")}. The format can be
 }
 \description{
 Shiny server functions can optionally include \code{session} as a parameter
-(e.g. \code{function(input, output, session)}). The session object is an
+(e.g. \verb{function(input, output, session)}). The session object is an
 environment that can be used to access information and functionality
 relating to the session. The following list describes the items available
 in the environment; they can be accessed using the \code{$} operator (for

@@ -5,15 +5,37 @@
 \alias{imageOutput}
 \title{Create an plot or image output element}
 \usage{
-imageOutput(outputId, width = "100\%", height = "400px",
-  click = NULL, dblclick = NULL, hover = NULL, hoverDelay = NULL,
-  hoverDelayType = NULL, brush = NULL, clickId = NULL,
-  hoverId = NULL, inline = FALSE, ...)
+imageOutput(
+  outputId,
+  width = "100\%",
+  height = "400px",
+  click = NULL,
+  dblclick = NULL,
+  hover = NULL,
+  hoverDelay = NULL,
+  hoverDelayType = NULL,
+  brush = NULL,
+  clickId = NULL,
+  hoverId = NULL,
+  inline = FALSE,
+  ...
+)
 
-plotOutput(outputId, width = "100\%", height = "400px", click = NULL,
-  dblclick = NULL, hover = NULL, hoverDelay = NULL,
-  hoverDelayType = NULL, brush = NULL, clickId = NULL,
-  hoverId = NULL, inline = FALSE, ...)
+plotOutput(
+  outputId,
+  width = "100\%",
+  height = "400px",
+  click = NULL,
+  dblclick = NULL,
+  hover = NULL,
+  hoverDelay = NULL,
+  hoverDelayType = NULL,
+  brush = NULL,
+  clickId = NULL,
+  hoverId = NULL,
+  inline = FALSE,
+  ...
+)
 }
 \arguments{
 \item{outputId}{output variable to read the plot/image from.}
@@ -97,7 +119,7 @@ not work for \pkg{\link[grid:grid-package]{grid}}-based graphics, such as
 
 Plots and images in Shiny support mouse-based interaction, via clicking,
 double-clicking, hovering, and brushing. When these interaction events
-occur, the mouse coordinates will be sent to the server as \code{input$}
+occur, the mouse coordinates will be sent to the server as \verb{input$}
 variables, as specified by \code{click}, \code{dblclick}, \code{hover}, or
 \code{brush}.
 
@@ -177,15 +199,15 @@ shinyApp(
       plot(d$speed, d$dist)
     })
     output$plot_clickinfo <- renderPrint({
-      cat("Click:\\n")
+      cat("Click:\n")
       str(input$plot_click)
     })
     output$plot_hoverinfo <- renderPrint({
-      cat("Hover (throttled):\\n")
+      cat("Hover (throttled):\n")
       str(input$plot_hover)
     })
     output$plot_brushinfo <- renderPrint({
-      cat("Brush (debounced):\\n")
+      cat("Brush (debounced):\n")
       str(input$plot_brush)
     })
     output$plot_clickedpoints <- renderTable({
@@ -257,15 +279,15 @@ shinyApp(
       )
     })
     output$image_clickinfo <- renderPrint({
-      cat("Click:\\n")
+      cat("Click:\n")
       str(input$image_click)
     })
     output$image_hoverinfo <- renderPrint({
-      cat("Hover (throttled):\\n")
+      cat("Hover (throttled):\n")
       str(input$image_hover)
     })
     output$image_brushinfo <- renderPrint({
-      cat("Brush (debounced):\\n")
+      cat("Brush (debounced):\n")
       str(input$image_brush)
     })
   }

@@ -7,14 +7,30 @@
 \alias{removeTab}
 \title{Dynamically insert/remove a tabPanel}
 \usage{
-insertTab(inputId, tab, target, position = c("before", "after"),
-  select = FALSE, session = getDefaultReactiveDomain())
+insertTab(
+  inputId,
+  tab,
+  target,
+  position = c("before", "after"),
+  select = FALSE,
+  session = getDefaultReactiveDomain()
+)
 
-prependTab(inputId, tab, select = FALSE, menuName = NULL,
-  session = getDefaultReactiveDomain())
+prependTab(
+  inputId,
+  tab,
+  select = FALSE,
+  menuName = NULL,
+  session = getDefaultReactiveDomain()
+)
 
-appendTab(inputId, tab, select = FALSE, menuName = NULL,
-  session = getDefaultReactiveDomain())
+appendTab(
+  inputId,
+  tab,
+  select = FALSE,
+  menuName = NULL,
+  session = getDefaultReactiveDomain()
+)
 
 removeTab(inputId, target, session = getDefaultReactiveDomain())
 }

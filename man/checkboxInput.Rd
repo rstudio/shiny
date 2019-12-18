@@ -22,6 +22,11 @@ A checkbox control that can be added to a UI definition.
 \description{
 Create a checkbox that can be used to specify logical values.
 }
+\section{Server value}{
+
+\code{TRUE} if checked, \code{FALSE} otherwise.
+}
+
 \examples{
 ## Only run examples in interactive R sessions
 if (interactive()) {
@@ -35,17 +40,25 @@ server <- function(input, output) {
 }
 shinyApp(ui, server)
 }
+
 }
 \seealso{
 \code{\link[=checkboxGroupInput]{checkboxGroupInput()}}, \code{\link[=updateCheckboxInput]{updateCheckboxInput()}}
 
-Other input elements: \code{\link{actionButton}},
-  \code{\link{checkboxGroupInput}},
-  \code{\link{dateInput}}, \code{\link{dateRangeInput}},
-  \code{\link{fileInput}}, \code{\link{numericInput}},
-  \code{\link{passwordInput}}, \code{\link{radioButtons}},
-  \code{\link{selectInput}}, \code{\link{sliderInput}},
-  \code{\link{submitButton}}, \code{\link{textAreaInput}},
-  \code{\link{textInput}}, \code{\link{varSelectInput}}
+Other input elements: 
+\code{\link{actionButton}()},
+\code{\link{checkboxGroupInput}()},
+\code{\link{dateInput}()},
+\code{\link{dateRangeInput}()},
+\code{\link{fileInput}()},
+\code{\link{numericInput}()},
+\code{\link{passwordInput}()},
+\code{\link{radioButtons}()},
+\code{\link{selectInput}()},
+\code{\link{sliderInput}()},
+\code{\link{submitButton}()},
+\code{\link{textAreaInput}()},
+\code{\link{textInput}()},
+\code{\link{varSelectInput}()}
 }
 \concept{input elements}

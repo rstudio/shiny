@@ -1,0 +1,20 @@
+diff --git a/inst/www/shared/ionrangeslider/js/ion.rangeSlider.js b/inst/www/shared/ionrangeslider/js/ion.rangeSlider.js
+index 2fe2c8d..89d204e 100644
+--- a/inst/www/shared/ionrangeslider/js/ion.rangeSlider.js
++++ b/inst/www/shared/ionrangeslider/js/ion.rangeSlider.js
+@@ -816,6 +816,7 @@
+          */
+         pointerDown: function (target, e) {
+             e.preventDefault();
++            e.stopPropagation();
+             var x = e.pageX || e.originalEvent.touches && e.originalEvent.touches[0].pageX;
+             if (e.button === 2) {
+                 return;
+@@ -859,6 +860,7 @@
+          */
+         pointerClick: function (target, e) {
+             e.preventDefault();
++            e.stopPropagation();
+             var x = e.pageX || e.originalEvent.touches && e.originalEvent.touches[0].pageX;
+             if (e.button === 2) {
+                 return;

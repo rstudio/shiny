@@ -4,9 +4,17 @@
 \alias{textAreaInput}
 \title{Create a textarea input control}
 \usage{
-textAreaInput(inputId, label, value = "", width = NULL,
-  height = NULL, cols = NULL, rows = NULL, placeholder = NULL,
-  resize = NULL)
+textAreaInput(
+  inputId,
+  label,
+  value = "",
+  width = NULL,
+  height = NULL,
+  cols = NULL,
+  rows = NULL,
+  placeholder = NULL,
+  resize = NULL
+)
 }
 \arguments{
 \item{inputId}{The \code{input} slot that will be used to access the value.}
@@ -45,6 +53,12 @@ A textarea input control that can be added to a UI definition.
 \description{
 Create a textarea input control for entry of unstructured text values.
 }
+\section{Server value}{
+
+A character string of the text input. The default value is \code{""}
+unless \code{value} is provided.
+}
+
 \examples{
 ## Only run examples in interactive R sessions
 if (interactive()) {
@@ -59,17 +73,25 @@ server <- function(input, output) {
 shinyApp(ui, server)
 
 }
+
 }
 \seealso{
 \code{\link[=updateTextAreaInput]{updateTextAreaInput()}}
 
-Other input elements: \code{\link{actionButton}},
-  \code{\link{checkboxGroupInput}},
-  \code{\link{checkboxInput}}, \code{\link{dateInput}},
-  \code{\link{dateRangeInput}}, \code{\link{fileInput}},
-  \code{\link{numericInput}}, \code{\link{passwordInput}},
-  \code{\link{radioButtons}}, \code{\link{selectInput}},
-  \code{\link{sliderInput}}, \code{\link{submitButton}},
-  \code{\link{textInput}}, \code{\link{varSelectInput}}
+Other input elements: 
+\code{\link{actionButton}()},
+\code{\link{checkboxGroupInput}()},
+\code{\link{checkboxInput}()},
+\code{\link{dateInput}()},
+\code{\link{dateRangeInput}()},
+\code{\link{fileInput}()},
+\code{\link{numericInput}()},
+\code{\link{passwordInput}()},
+\code{\link{radioButtons}()},
+\code{\link{selectInput}()},
+\code{\link{sliderInput}()},
+\code{\link{submitButton}()},
+\code{\link{textInput}()},
+\code{\link{varSelectInput}()}
 }
 \concept{input elements}

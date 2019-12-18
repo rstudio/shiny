@@ -49,8 +49,8 @@ last modified timestamp of a file, and a value retrieval function that
 actually reads the contents of the file.
 
 As another example, one might read a relational database table reactively by
-using a check function that does \code{SELECT MAX(timestamp) FROM table} and
-a value retrieval function that does \code{SELECT * FROM table}.
+using a check function that does \verb{SELECT MAX(timestamp) FROM table} and
+a value retrieval function that does \verb{SELECT * FROM table}.
 
 The \code{intervalMillis}, \code{checkFunc}, and \code{valueFunc} functions
 will be executed in a reactive context; therefore, they may read reactive

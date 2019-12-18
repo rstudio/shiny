@@ -4,8 +4,15 @@
 \alias{brushedPoints}
 \title{Find rows of data that are selected by a brush}
 \usage{
-brushedPoints(df, brush, xvar = NULL, yvar = NULL, panelvar1 = NULL,
-  panelvar2 = NULL, allRows = FALSE)
+brushedPoints(
+  df,
+  brush,
+  xvar = NULL,
+  yvar = NULL,
+  panelvar1 = NULL,
+  panelvar2 = NULL,
+  allRows = FALSE
+)
 }
 \arguments{
 \item{df}{A data frame from which to select rows.}

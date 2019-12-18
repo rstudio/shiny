@@ -4,8 +4,14 @@
 \alias{modalDialog}
 \title{Create a modal dialog UI}
 \usage{
-modalDialog(..., title = NULL, footer = modalButton("Dismiss"),
-  size = c("m", "s", "l"), easyClose = FALSE, fade = TRUE)
+modalDialog(
+  ...,
+  title = NULL,
+  footer = modalButton("Dismiss"),
+  size = c("m", "s", "l"),
+  easyClose = FALSE,
+  fade = TRUE
+)
 }
 \arguments{
 \item{...}{UI elements for the body of the modal dialog box.}

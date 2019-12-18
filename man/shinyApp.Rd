@@ -4,41 +4,31 @@
 \alias{shinyApp}
 \alias{shinyAppDir}
 \alias{shinyAppFile}
-\alias{as.shiny.appobj}
-\alias{as.shiny.appobj.shiny.appobj}
-\alias{as.shiny.appobj.list}
-\alias{as.shiny.appobj.character}
-\alias{is.shiny.appobj}
-\alias{print.shiny.appobj}
-\alias{as.tags.shiny.appobj}
 \title{Create a Shiny app object}
 \usage{
-shinyApp(ui = NULL, server = NULL, onStart = NULL,
-  options = list(), uiPattern = "/", enableBookmarking = NULL)
+shinyApp(
+  ui,
+  server,
+  onStart = NULL,
+  options = list(),
+  uiPattern = "/",
+  enableBookmarking = NULL
+)
 
 shinyAppDir(appDir, options = list())
 
 shinyAppFile(appFile, options = list())
-
-as.shiny.appobj(x)
-
-\method{as.shiny.appobj}{shiny.appobj}(x)
-
-\method{as.shiny.appobj}{list}(x)
-
-\method{as.shiny.appobj}{character}(x)
-
-is.shiny.appobj(x)
-
-\method{print}{shiny.appobj}(x, ...)
-
-\method{as.tags}{shiny.appobj}(x, ...)
 }
 \arguments{
 \item{ui}{The UI definition of the app (for example, a call to
-\code{fluidPage()} with nested controls)}
+\code{fluidPage()} with nested controls).
 
-\item{server}{A server function}
+If bookmarking is enabled (see \code{enableBookmarking}), this must be
+a single argument function that returns the UI definition.}
+
+\item{server}{A function with three parameters: \code{input}, \code{output}, and
+\code{session}. The function is called once for each session ensuring that each
+app is independent.}
 
 \item{onStart}{A function that will be called before the app is actually run.
 This is only needed for \code{shinyAppObj}, since in the \code{shinyAppDir}
@@ -56,20 +46,14 @@ request. Note that the entire request path must match the regular
 expression in order for the match to be considered successful.}
 
 \item{enableBookmarking}{Can be one of \code{"url"}, \code{"server"}, or
-\code{"disable"}. This is equivalent to calling the
-\code{\link[=enableBookmarking]{enableBookmarking()}} function just before calling
-\code{shinyApp()}. With the default value (\code{NULL}), the app will
-respect the setting from any previous calls to \code{enableBookmarking()}.
-See \code{\link[=enableBookmarking]{enableBookmarking()}} for more information.}
+\code{"disable"}. The default value, \code{NULL}, will respect the setting from
+any previous calls to  \code{\link[=enableBookmarking]{enableBookmarking()}}. See \code{\link[=enableBookmarking]{enableBookmarking()}}
+for more information on bookmarking your app.}
 
 \item{appDir}{Path to directory that contains a Shiny app (i.e. a server.R
 file and either ui.R or www/index.html)}
 
 \item{appFile}{Path to a .R file containing a Shiny application}
-
-\item{x}{Object to convert to a Shiny app.}
-
-\item{...}{Additional parameters to be passed to print.}
 }
 \value{
 An object that represents the app. Printing the object or passing it
@@ -78,9 +62,7 @@ to \code{\link[=runApp]{runApp()}} will run the app.
 \description{
 These functions create Shiny app objects from either an explicit UI/server
 pair (\code{shinyApp}), or by passing the path of a directory that contains a
-Shiny app (\code{shinyAppDir}). You generally shouldn't need to use these
-functions to create/run applications; they are intended for interoperability
-purposes, such as embedding Shiny apps inside a \pkg{knitr} document.
+Shiny app (\code{shinyAppDir}).
 }
 \details{
 Normally when this function is used at the R console, the Shiny app object is

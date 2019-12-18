@@ -4,9 +4,16 @@
 \alias{radioButtons}
 \title{Create radio buttons}
 \usage{
-radioButtons(inputId, label, choices = NULL, selected = NULL,
-  inline = FALSE, width = NULL, choiceNames = NULL,
-  choiceValues = NULL)
+radioButtons(
+  inputId,
+  label,
+  choices = NULL,
+  selected = NULL,
+  inline = FALSE,
+  width = NULL,
+  choiceNames = NULL,
+  choiceValues = NULL
+)
 }
 \arguments{
 \item{inputId}{The \code{input} slot that will be used to access the value.}
@@ -49,6 +56,11 @@ the radio buttons to have no options selected by using \code{selected = characte
 to return to that state once they've made a selection. Instead, consider
 having the first of your choices be \code{c("None selected" = "")}.
 }
+\section{Server value}{
+
+A character string containing the value of the selected button.
+}
+
 \examples{
 ## Only run examples in interactive R sessions
 if (interactive()) {
@@ -98,17 +110,25 @@ server <- function(input, output) {
 
 shinyApp(ui, server)
 }
+
 }
 \seealso{
 \code{\link[=updateRadioButtons]{updateRadioButtons()}}
 
-Other input elements: \code{\link{actionButton}},
-  \code{\link{checkboxGroupInput}},
-  \code{\link{checkboxInput}}, \code{\link{dateInput}},
-  \code{\link{dateRangeInput}}, \code{\link{fileInput}},
-  \code{\link{numericInput}}, \code{\link{passwordInput}},
-  \code{\link{selectInput}}, \code{\link{sliderInput}},
-  \code{\link{submitButton}}, \code{\link{textAreaInput}},
-  \code{\link{textInput}}, \code{\link{varSelectInput}}
+Other input elements: 
+\code{\link{actionButton}()},
+\code{\link{checkboxGroupInput}()},
+\code{\link{checkboxInput}()},
+\code{\link{dateInput}()},
+\code{\link{dateRangeInput}()},
+\code{\link{fileInput}()},
+\code{\link{numericInput}()},
+\code{\link{passwordInput}()},
+\code{\link{selectInput}()},
+\code{\link{sliderInput}()},
+\code{\link{submitButton}()},
+\code{\link{textAreaInput}()},
+\code{\link{textInput}()},
+\code{\link{varSelectInput}()}
 }
 \concept{input elements}

@@ -238,8 +238,8 @@ MockShinySession <- R6Class(
 
     #' @description An internal method which shouldn't be used by others.
     .now = function() {
-      # Contract is to return Sys.time, which is seconds, not millis.
-      private$timer$getElapsed()/1000
+      # Returns elapsed time in milliseconds
+      private$timer$getElapsed()
     },
 
     #' @description An internal method which shouldn't be used by others.

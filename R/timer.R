@@ -1,6 +1,5 @@
-# Return the current time, in milliseconds from epoch, with
-# unspecified time zone.
-getNow <- function() {
+# Return the current time, in milliseconds from epoch.
+getTimeMs <- function() {
   as.numeric(Sys.time()) * 1000
 }
 
@@ -14,7 +13,7 @@ TimerCallbacks <- R6Class(
     .times = data.frame(),
     .now = 'Function',
 
-    initialize = function(nowFn=getNow) {
+    initialize = function(nowFn = getTimeMs) {
       .funcs <<- Map$new()
       .now <<- nowFn
     },
@@ -90,15 +89,15 @@ TimerCallbacks <- R6Class(
 
 MockableTimerCallbacks <- R6Class(
   'MockableTimerCallbacks',
-  inherit=TimerCallbacks,
+  inherit = TimerCallbacks,
   portable = FALSE,
   class = FALSE,
   public = list(
     # Empty constructor defaults to the getNow implementation
     initialize = function() {
-      super$initialize(self$now)
+      super$initialize(self$mockNow)
     },
-    now = function() {
+    mockNow = function() {
       return(private$time)
     },
     elapse = function(millis) {
@@ -134,13 +133,15 @@ defineScheduler <- function(session){
 }
 
 
-#' Get the current time a la `Sys.time()`. Prefer to get it via the
-#' `session$.now()` function, but if that's not available, just return the
-#' current system time.
+#' Get the current time using the current reactive domain. This will try to use
+#' the session's .now() method, but if that's not available, it will just return
+#' the real time (from getTimeMs()). The purpose of this function is to allow
+#' MockableTimerCallbacks to work.
 #' @noRd
-getTime <- function(session){
+getDomainTimeMs <- function(session){
   if (!is.null(session) && !is.null(session$.now)){
     return(session$.now())
+  } else {
+    getTimeMs()
   }
-  Sys.time()
 }

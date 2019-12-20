@@ -10,15 +10,15 @@ freezeReactiveVal(x)
 freezeReactiveValue(x, name)
 }
 \arguments{
-\item{x}{For \code{freezeReactiveValue}, a \code{\link{reactiveValues}}
+\item{x}{For \code{freezeReactiveValue}, a \code{\link[=reactiveValues]{reactiveValues()}}
 object (like \code{input}); for \code{freezeReactiveVal}, a
-\code{\link{reactiveVal}} object.}
+\code{\link[=reactiveVal]{reactiveVal()}} object.}
 
-\item{name}{The name of a value in the \code{\link{reactiveValues}} object.}
+\item{name}{The name of a value in the \code{\link[=reactiveValues]{reactiveValues()}} object.}
 }
 \description{
-These functions freeze a \code{\link{reactiveVal}}, or an element of a
-\code{\link{reactiveValues}}. If the value is accessed while frozen, a
+These functions freeze a \code{\link[=reactiveVal]{reactiveVal()}}, or an element of a
+\code{\link[=reactiveValues]{reactiveValues()}}. If the value is accessed while frozen, a
 "silent" exception is raised and the operation is stopped. This is the same
 thing that happens if \code{req(FALSE)} is called. The value is thawed
 (un-frozen; accessing it will no longer raise an exception) when the current
@@ -62,5 +62,5 @@ shinyApp(ui, server)
 }
 }
 \seealso{
-\code{\link{req}}
+\code{\link[=req]{req()}}
 }

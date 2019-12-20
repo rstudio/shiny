@@ -199,6 +199,9 @@ staticHandler <- function(root) {
     if (path == '/')
       path <- '/index.html'
 
+    if (grepl('\\', path, fixed = TRUE))
+      return(NULL)
+
     abs.path <- resolve(root, path)
     if (is.null(abs.path))
       return(NULL)

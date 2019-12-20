@@ -25,7 +25,7 @@ relationship.
 The expression given to \code{isolate()} is evaluated in the calling
 environment. This means that if you assign a variable inside the
 \code{isolate()}, its value will be visible outside of the \code{isolate()}.
-If you want to avoid this, you can use \code{\link[base]{local}()} inside the
+If you want to avoid this, you can use \code{\link[base:local]{base::local()}} inside the
 \code{isolate()}.
 
 This function can also be useful for calling reactive expression at the

@@ -4,8 +4,13 @@
 \alias{updateTextAreaInput}
 \title{Change the value of a textarea input on the client}
 \usage{
-updateTextAreaInput(session, inputId, label = NULL, value = NULL,
-  placeholder = NULL)
+updateTextAreaInput(
+  session,
+  inputId,
+  label = NULL,
+  value = NULL,
+  placeholder = NULL
+)
 }
 \arguments{
 \item{session}{The \code{session} object passed to function given to
@@ -69,5 +74,5 @@ shinyApp(ui, server)
 }
 }
 \seealso{
-\code{\link{textAreaInput}}
+\code{\link[=textAreaInput]{textAreaInput()}}
 }

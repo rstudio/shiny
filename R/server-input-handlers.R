@@ -5,34 +5,34 @@ inputHandlers <- Map$new()
 #'
 #' Adds an input handler for data of this type. When called, Shiny will use the
 #' function provided to refine the data passed back from the client (after being
-#' deserialized by jsonlite) before making it available in the \code{input}
-#' variable of the \code{server.R} file.
+#' deserialized by jsonlite) before making it available in the `input`
+#' variable of the `server.R` file.
 #'
 #' This function will register the handler for the duration of the R process
-#' (unless Shiny is explicitly reloaded). For that reason, the \code{type} used
+#' (unless Shiny is explicitly reloaded). For that reason, the `type` used
 #' should be very specific to this package to minimize the risk of colliding
 #' with another Shiny package which might use this data type name. We recommend
 #' the format of "packageName.widgetName".
 #'
-#' Currently Shiny registers the following handlers: \code{shiny.matrix},
-#' \code{shiny.number}, and \code{shiny.date}.
+#' Currently Shiny registers the following handlers: `shiny.matrix`,
+#' `shiny.number`, and `shiny.date`.
 #'
-#' The \code{type} of a custom Shiny Input widget will be deduced using the
-#' \code{getType()} JavaScript function on the registered Shiny inputBinding.
-#' @param type The type for which the handler should be added -- should be a
+#' The `type` of a custom Shiny Input widget will be deduced using the
+#' `getType()` JavaScript function on the registered Shiny inputBinding.
+#' @param type The type for which the handler should be added --- should be a
 #' single-element character vector.
 #' @param fun The handler function. This is the function that will be used to
 #'   parse the data delivered from the client before it is available in the
-#'   \code{input} variable. The function will be called with the following three
+#'   `input` variable. The function will be called with the following three
 #'   parameters:
 #'    \enumerate{
 #'      \item{The value of this input as provided by the client, deserialized
 #'      using jsonlite.}
-#'      \item{The \code{shinysession} in which the input exists.}
+#'      \item{The `shinysession` in which the input exists.}
 #'      \item{The name of the input.}
 #'    }
-#' @param force If \code{TRUE}, will overwrite any existing handler without
-#' warning. If \code{FALSE}, will throw an error if this class already has
+#' @param force If `TRUE`, will overwrite any existing handler without
+#' warning. If `FALSE`, will throw an error if this class already has
 #' a handler defined.
 #' @examples
 #' \dontrun{
@@ -48,7 +48,7 @@ inputHandlers <- Map$new()
 #' }
 #'
 #' }
-#' @seealso \code{\link{removeInputHandler}}
+#' @seealso [removeInputHandler()]
 #' @export
 registerInputHandler <- function(type, fun, force=FALSE){
   if (inputHandlers$containsKey(type) && !force){
@@ -63,9 +63,9 @@ registerInputHandler <- function(type, fun, force=FALSE){
 #' for data of this type, the default jsonlite serialization will be used.
 #'
 #' @param type The type for which handlers should be removed.
-#' @return The handler previously associated with this \code{type}, if one
-#'   existed. Otherwise, \code{NULL}.
-#' @seealso \code{\link{registerInputHandler}}
+#' @return The handler previously associated with this `type`, if one
+#'   existed. Otherwise, `NULL`.
+#' @seealso [registerInputHandler()]
 #' @export
 removeInputHandler <- function(type){
   inputHandlers$remove(type)
@@ -103,8 +103,8 @@ applyInputHandler <- function(name, val, shinysession) {
 #' values.
 #'
 #' The raw input values should be in a named list. Some values may have names
-#' like \code{"x:shiny.date"}. This function would apply the \code{"shiny.date"}
-#' input handler to the value, and then rename the result to \code{"x"}, in the
+#' like `"x:shiny.date"`. This function would apply the `"shiny.date"`
+#' input handler to the value, and then rename the result to `"x"`, in the
 #' output.
 #'
 #' @param inputs A named list of input values.

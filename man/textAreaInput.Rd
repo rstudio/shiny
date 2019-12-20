@@ -4,9 +4,17 @@
 \alias{textAreaInput}
 \title{Create a textarea input control}
 \usage{
-textAreaInput(inputId, label, value = "", width = NULL,
-  height = NULL, cols = NULL, rows = NULL, placeholder = NULL,
-  resize = NULL)
+textAreaInput(
+  inputId,
+  label,
+  value = "",
+  width = NULL,
+  height = NULL,
+  cols = NULL,
+  rows = NULL,
+  placeholder = NULL,
+  resize = NULL
+)
 }
 \arguments{
 \item{inputId}{The \code{input} slot that will be used to access the value.}
@@ -16,27 +24,28 @@ textAreaInput(inputId, label, value = "", width = NULL,
 \item{value}{Initial value.}
 
 \item{width}{The width of the input, e.g. \code{'400px'}, or \code{'100\%'};
-see \code{\link{validateCssUnit}}.}
+see \code{\link[=validateCssUnit]{validateCssUnit()}}.}
 
-\item{height}{The height of the input, e.g. \code{'400px'}, or
-\code{'100\%'}; see \code{\link{validateCssUnit}}.}
+\item{height}{The height of the input, e.g. \code{'400px'}, or \code{'100\%'}; see
+\code{\link[=validateCssUnit]{validateCssUnit()}}.}
 
-\item{cols}{Value of the visible character columns of the input, e.g.
-\code{80}. If used with \code{width}, \code{width} will take precedence in
-the browser's rendering.}
+\item{cols}{Value of the visible character columns of the input, e.g. \code{80}.
+This argument will only take effect if there is not a CSS \code{width} rule
+defined for this element; such a rule could come from the \code{width} argument
+of this function or from a containing page layout such as
+\code{\link[=fluidPage]{fluidPage()}}.}
 
-\item{rows}{The value of the visible character rows of the input, e.g.
-\code{6}. If used with \code{height}, \code{height} will take precedence in
-the browser's rendering.}
+\item{rows}{The value of the visible character rows of the input, e.g. \code{6}.
+If the \code{height} argument is specified, \code{height} will take precedence in the
+browser's rendering.}
 
 \item{placeholder}{A character string giving the user a hint as to what can
 be entered into the control. Internet Explorer 8 and 9 do not support this
 option.}
 
 \item{resize}{Which directions the textarea box can be resized. Can be one of
-\code{"both"}, \code{"none"}, \code{"vertical"}, and \code{"horizontal"}.
-The default, \code{NULL}, will use the client browser's default setting for
-resizing textareas.}
+\code{"both"}, \code{"none"}, \code{"vertical"}, and \code{"horizontal"}. The default, \code{NULL},
+will use the client browser's default setting for resizing textareas.}
 }
 \value{
 A textarea input control that can be added to a UI definition.
@@ -44,6 +53,12 @@ A textarea input control that can be added to a UI definition.
 \description{
 Create a textarea input control for entry of unstructured text values.
 }
+\section{Server value}{
+
+A character string of the text input. The default value is \code{""}
+unless \code{value} is provided.
+}
+
 \examples{
 ## Only run examples in interactive R sessions
 if (interactive()) {
@@ -58,17 +73,25 @@ server <- function(input, output) {
 shinyApp(ui, server)
 
 }
+
 }
 \seealso{
-\code{\link{updateTextAreaInput}}
+\code{\link[=updateTextAreaInput]{updateTextAreaInput()}}
 
-Other input elements: \code{\link{actionButton}},
-  \code{\link{checkboxGroupInput}},
-  \code{\link{checkboxInput}}, \code{\link{dateInput}},
-  \code{\link{dateRangeInput}}, \code{\link{fileInput}},
-  \code{\link{numericInput}}, \code{\link{passwordInput}},
-  \code{\link{radioButtons}}, \code{\link{selectInput}},
-  \code{\link{sliderInput}}, \code{\link{submitButton}},
-  \code{\link{textInput}}, \code{\link{varSelectInput}}
+Other input elements: 
+\code{\link{actionButton}()},
+\code{\link{checkboxGroupInput}()},
+\code{\link{checkboxInput}()},
+\code{\link{dateInput}()},
+\code{\link{dateRangeInput}()},
+\code{\link{fileInput}()},
+\code{\link{numericInput}()},
+\code{\link{passwordInput}()},
+\code{\link{radioButtons}()},
+\code{\link{selectInput}()},
+\code{\link{sliderInput}()},
+\code{\link{submitButton}()},
+\code{\link{textInput}()},
+\code{\link{varSelectInput}()}
 }
 \concept{input elements}

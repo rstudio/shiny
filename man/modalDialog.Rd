@@ -4,8 +4,14 @@
 \alias{modalDialog}
 \title{Create a modal dialog UI}
 \usage{
-modalDialog(..., title = NULL, footer = modalButton("Dismiss"),
-  size = c("m", "s", "l"), easyClose = FALSE, fade = TRUE)
+modalDialog(
+  ...,
+  title = NULL,
+  footer = modalButton("Dismiss"),
+  size = c("m", "s", "l"),
+  easyClose = FALSE,
+  fade = TRUE
+)
 }
 \arguments{
 \item{...}{UI elements for the body of the modal dialog box.}
@@ -21,7 +27,7 @@ or \code{"l"} for large.}
 clicking outside the dialog box, or be pressing the Escape key. If
 \code{FALSE} (the default), the modal dialog can't be dismissed in those
 ways; instead it must be dismissed by clicking on the dismiss button, or
-from a call to \code{\link{removeModal}} on the server.}
+from a call to \code{\link[=removeModal]{removeModal()}} on the server.}
 
 \item{fade}{If \code{FALSE}, the modal dialog will have no fade-in animation
 (it will simply appear rather than fade in to view).}

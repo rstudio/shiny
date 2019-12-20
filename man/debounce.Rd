@@ -5,11 +5,9 @@
 \alias{throttle}
 \title{Slow down a reactive expression with debounce/throttle}
 \usage{
-debounce(r, millis, priority = 100,
-  domain = getDefaultReactiveDomain())
+debounce(r, millis, priority = 100, domain = getDefaultReactiveDomain())
 
-throttle(r, millis, priority = 100,
-  domain = getDefaultReactiveDomain())
+throttle(r, millis, priority = 100, domain = getDefaultReactiveDomain())
 }
 \arguments{
 \item{r}{A reactive expression (that invalidates too often).}
@@ -49,7 +47,7 @@ continually arrive from \code{r} within the time window, the debounced
 reactive will not invalidate at all. Only after the invalidations stop (or
 slow down sufficiently) will the downstream invalidation be sent.
 
-\code{ooo-oo-oo---- => -----------o-}
+\verb{ooo-oo-oo---- => -----------o-}
 
 (In this graphical depiction, each character represents a unit of time, and
 the time window is 3 characters.)
@@ -61,24 +59,24 @@ continually come from \code{r} within the time window, the throttled reactive
 will invalidate regularly, at a rate equal to or slower than than the time
 window.
 
-\code{ooo-oo-oo---- => o--o--o--o---}
+\verb{ooo-oo-oo---- => o--o--o--o---}
 }
 \section{Limitations}{
 
 
-  Because R is single threaded, we can't come close to guaranteeing that the
-  timing of debounce/throttle (or any other timing-related functions in
-  Shiny) will be consistent or accurate; at the time we want to emit an
-  invalidation signal, R may be performing a different task and we have no
-  way to interrupt it (nor would we necessarily want to if we could).
-  Therefore, it's best to think of the time windows you pass to these
-  functions as minimums.
+Because R is single threaded, we can't come close to guaranteeing that the
+timing of debounce/throttle (or any other timing-related functions in
+Shiny) will be consistent or accurate; at the time we want to emit an
+invalidation signal, R may be performing a different task and we have no
+way to interrupt it (nor would we necessarily want to if we could).
+Therefore, it's best to think of the time windows you pass to these
+functions as minimums.
 
-  You may also see undesirable behavior if the amount of time spent doing
-  downstream processing for each change approaches or exceeds the time
-  window: in this case, debounce/throttle may not have any effect, as the
-  time each subsequent event is considered is already after the time window
-  has expired.
+You may also see undesirable behavior if the amount of time spent doing
+downstream processing for each change approaches or exceeds the time
+window: in this case, debounce/throttle may not have any effect, as the
+time each subsequent event is considered is already after the time window
+has expired.
 }
 
 \examples{

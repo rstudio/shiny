@@ -15,10 +15,10 @@ actionLink(inputId, label, icon = NULL, ...)
 \item{label}{The contents of the button or link--usually a text label, but
 you could also use any other HTML, like an image.}
 
-\item{icon}{An optional \code{\link{icon}} to appear on the button.}
+\item{icon}{An optional \code{\link[=icon]{icon()}} to appear on the button.}
 
 \item{width}{The width of the input, e.g. \code{'400px'}, or \code{'100\%'};
-see \code{\link{validateCssUnit}}.}
+see \code{\link[=validateCssUnit]{validateCssUnit()}}.}
 
 \item{...}{Named attributes to be applied to the button or link.}
 }
@@ -26,6 +26,17 @@ see \code{\link{validateCssUnit}}.}
 Creates an action button or link whose value is initially zero, and increments by one
 each time it is pressed.
 }
+\section{Server value}{
+
+An integer of class \code{"shinyActionButtonValue"}. This class differs from
+ordinary integers in that a value of 0 is considered "falsy".
+This implies two things:
+\itemize{
+\item Event handlers (e.g., \code{\link[=observeEvent]{observeEvent()}}, \code{\link[=eventReactive]{eventReactive()}}) won't execute on initial load.
+\item Input validation (e.g., \code{\link[=req]{req()}}, \code{\link[=need]{need()}}) will fail on initial load.
+}
+}
+
 \examples{
 ## Only run examples in interactive R sessions
 if (interactive()) {
@@ -54,15 +65,22 @@ shinyApp(ui, server)
 
 }
 \seealso{
-\code{\link{observeEvent}} and \code{\link{eventReactive}}
+\code{\link[=observeEvent]{observeEvent()}} and \code{\link[=eventReactive]{eventReactive()}}
 
-Other input elements: \code{\link{checkboxGroupInput}},
-  \code{\link{checkboxInput}}, \code{\link{dateInput}},
-  \code{\link{dateRangeInput}}, \code{\link{fileInput}},
-  \code{\link{numericInput}}, \code{\link{passwordInput}},
-  \code{\link{radioButtons}}, \code{\link{selectInput}},
-  \code{\link{sliderInput}}, \code{\link{submitButton}},
-  \code{\link{textAreaInput}}, \code{\link{textInput}},
-  \code{\link{varSelectInput}}
+Other input elements: 
+\code{\link{checkboxGroupInput}()},
+\code{\link{checkboxInput}()},
+\code{\link{dateInput}()},
+\code{\link{dateRangeInput}()},
+\code{\link{fileInput}()},
+\code{\link{numericInput}()},
+\code{\link{passwordInput}()},
+\code{\link{radioButtons}()},
+\code{\link{selectInput}()},
+\code{\link{sliderInput}()},
+\code{\link{submitButton}()},
+\code{\link{textAreaInput}()},
+\code{\link{textInput}()},
+\code{\link{varSelectInput}()}
 }
 \concept{input elements}

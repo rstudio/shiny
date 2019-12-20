@@ -12,7 +12,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
   var exports = window.Shiny = window.Shiny || {};
 
-  exports.version = "1.3.2.9000"; // Version number inserted by Grunt
+  exports.version = "1.4.0.9001"; // Version number inserted by Grunt
 
   var origPushState = window.history.pushState;
   window.history.pushState = function () {
@@ -601,10 +601,9 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
   };
   (function () {
     this.setInput = function (nameType, value, opts) {
-      var _splitInputNameType = splitInputNameType(nameType);
-
-      var inputName = _splitInputNameType.name;
-      var inputType = _splitInputNameType.inputType;
+      var _splitInputNameType = splitInputNameType(nameType),
+          inputName = _splitInputNameType.name,
+          inputType = _splitInputNameType.inputType;
 
       var jsonValue = JSON.stringify(value);
 
@@ -612,7 +611,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         return;
       }
       this.lastSentValues[inputName] = { jsonValue: jsonValue, inputType: inputType };
-      this.target.setInput(name, value, opts);
+      this.target.setInput(nameType, value, opts);
     };
     this.reset = function () {
       var values = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
@@ -626,12 +625,11 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
       for (var inputName in values) {
         if (values.hasOwnProperty(inputName)) {
-          var _splitInputNameType2 = splitInputNameType(inputName);
+          var _splitInputNameType2 = splitInputNameType(inputName),
+              name = _splitInputNameType2.name,
+              inputType = _splitInputNameType2.inputType;
 
-          var _name = _splitInputNameType2.name;
-          var inputType = _splitInputNameType2.inputType;
-
-          cacheValues[_name] = {
+          cacheValues[name] = {
             jsonValue: JSON.stringify(values[inputName]),
             inputType: inputType
           };
@@ -660,7 +658,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       $(opts.el).trigger(evt);
 
       if (!evt.isDefaultPrevented()) {
-        name = evt.name;
+        var name = evt.name;
         if (evt.inputType !== '') name += ':' + evt.inputType;
 
         // Most opts aren't passed along to lower levels in the input decorator
@@ -682,20 +680,16 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     // the input name (i.e., inputId), which is why we distinguish between
     // nameType and name.
     this.setInput = function (nameType, value, opts) {
-      var _splitInputNameType3 = splitInputNameType(nameType);
-
-      var inputName = _splitInputNameType3.name;
-
+      var _splitInputNameType3 = splitInputNameType(nameType),
+          inputName = _splitInputNameType3.name;
 
       this.$ensureInit(inputName);
 
       if (opts.priority !== "deferred") this.inputRatePolicies[inputName].immediateCall(nameType, value, opts);else this.inputRatePolicies[inputName].normalCall(nameType, value, opts);
     };
     this.setRatePolicy = function (nameType, mode, millis) {
-      var _splitInputNameType4 = splitInputNameType(nameType);
-
-      var inputName = _splitInputNameType4.name;
-
+      var _splitInputNameType4 = splitInputNameType(nameType),
+          inputName = _splitInputNameType4.name;
 
       if (mode === 'direct') {
         this.inputRatePolicies[inputName] = new Invoker(this, this.$doSetInput);
@@ -719,13 +713,16 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
   };
   (function () {
     this.setInput = function (nameType, value, opts) {
-      if (/^\./.test(nameType)) this.target.setInput(nameType, value, opts);else this.pendingInput[name] = { value: value, opts: opts };
+      if (/^\./.test(nameType)) this.target.setInput(nameType, value, opts);else this.pendingInput[nameType] = { value: value, opts: opts };
     };
     this.submit = function () {
-      for (var name in this.pendingInput) {
-        if (this.pendingInput.hasOwnProperty(name)) {
-          var input = this.pendingInput[name];
-          this.target.setInput(name, input.value, input.opts);
+      for (var nameType in this.pendingInput) {
+        if (this.pendingInput.hasOwnProperty(nameType)) {
+          var _pendingInput$nameTyp = this.pendingInput[nameType],
+              value = _pendingInput$nameTyp.value,
+              opts = _pendingInput$nameTyp.opts;
+
+          this.target.setInput(nameType, value, opts);
         }
       }
     };
@@ -1606,13 +1603,15 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       function getTabIndex($tabset, tabsetId) {
         // The 0 is to ensure this works for empty tabsetPanels as well
         var existingTabIds = [0];
-        var leadingHref = "#tab-" + tabsetId + "-";
         // loop through all existing tabs, find the one with highest id
         // (since this is based on a numeric counter), and increment
         $tabset.find("> li").each(function () {
           var $tab = $(this).find("> a[data-toggle='tab']");
           if ($tab.length > 0) {
-            var index = $tab.attr("href").replace(leadingHref, "");
+            // remove leading url if it exists. (copy of bootstrap url stripper)
+            var href = $tab.attr("href").replace(/.*(?=#[^\s]+$)/, '');
+            // remove tab id to get the index
+            var index = href.replace("#tab-" + tabsetId + "-", "");
             existingTabIds.push(Number(index));
           }
         });
@@ -1891,10 +1890,9 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     // Returns a URL which can be queried to get values from inside the server
     // function. This is enabled with `options(shiny.testmode=TRUE)`.
     this.getTestSnapshotBaseUrl = function () {
-      var _ref2 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
-      var _ref2$fullUrl = _ref2.fullUrl;
-      var fullUrl = _ref2$fullUrl === undefined ? true : _ref2$fullUrl;
+      var _ref2 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+          _ref2$fullUrl = _ref2.fullUrl,
+          fullUrl = _ref2$fullUrl === undefined ? true : _ref2$fullUrl;
 
       var loc = window.location;
       var url = "";
@@ -1963,22 +1961,21 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     var fadeDuration = 250;
 
     function show() {
-      var _ref3 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
-      var _ref3$html = _ref3.html;
-      var html = _ref3$html === undefined ? '' : _ref3$html;
-      var _ref3$action = _ref3.action;
-      var action = _ref3$action === undefined ? '' : _ref3$action;
-      var _ref3$deps = _ref3.deps;
-      var deps = _ref3$deps === undefined ? [] : _ref3$deps;
-      var _ref3$duration = _ref3.duration;
-      var duration = _ref3$duration === undefined ? 5000 : _ref3$duration;
-      var _ref3$id = _ref3.id;
-      var id = _ref3$id === undefined ? null : _ref3$id;
-      var _ref3$closeButton = _ref3.closeButton;
-      var closeButton = _ref3$closeButton === undefined ? true : _ref3$closeButton;
-      var _ref3$type = _ref3.type;
-      var type = _ref3$type === undefined ? null : _ref3$type;
+      var _ref3 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+          _ref3$html = _ref3.html,
+          html = _ref3$html === undefined ? '' : _ref3$html,
+          _ref3$action = _ref3.action,
+          action = _ref3$action === undefined ? '' : _ref3$action,
+          _ref3$deps = _ref3.deps,
+          deps = _ref3$deps === undefined ? [] : _ref3$deps,
+          _ref3$duration = _ref3.duration,
+          duration = _ref3$duration === undefined ? 5000 : _ref3$duration,
+          _ref3$id = _ref3.id,
+          id = _ref3$id === undefined ? null : _ref3$id,
+          _ref3$closeButton = _ref3.closeButton,
+          closeButton = _ref3$closeButton === undefined ? true : _ref3$closeButton,
+          _ref3$type = _ref3.type,
+          type = _ref3$type === undefined ? null : _ref3$type;
 
       if (!id) id = randomId();
 
@@ -2122,13 +2119,11 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     // content is non-Bootstrap. Bootstrap modals require some special handling,
     // which is coded in here.
     show: function show() {
-      var _ref4 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
-      var _ref4$html = _ref4.html;
-      var html = _ref4$html === undefined ? '' : _ref4$html;
-      var _ref4$deps = _ref4.deps;
-      var deps = _ref4$deps === undefined ? [] : _ref4$deps;
-
+      var _ref4 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+          _ref4$html = _ref4.html,
+          html = _ref4$html === undefined ? '' : _ref4$html,
+          _ref4$deps = _ref4.deps,
+          deps = _ref4$deps === undefined ? [] : _ref4$deps;
 
       // If there was an existing Bootstrap modal, then there will be a modal-
       // backdrop div that was added outside of the modal wrapper, and it must be
@@ -3007,9 +3002,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       var e2 = $.Event(newEventType, {
         which: e.which,
         pageX: e.pageX,
-        pageY: e.pageY,
-        offsetX: e.offsetX,
-        offsetY: e.offsetY
+        pageY: e.pageY
       });
 
       $el.trigger(e2);
@@ -3056,7 +3049,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         // If second click is too far away, it doesn't count as a double
         // click. Instead, immediately trigger a mousedown2 for the previous
         // click, and set this click as a new first click.
-        if (pending_e && Math.abs(pending_e.offsetX - e.offsetX) > 2 || Math.abs(pending_e.offsetY - e.offsetY) > 2) {
+        if (pending_e && Math.abs(pending_e.pageX - e.pageX) > 2 || Math.abs(pending_e.pageY - e.pageY) > 2) {
 
           triggerPendingMousedown2();
           scheduleMousedown2(e);
@@ -4928,18 +4921,33 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       if (date === undefined) return;
       if (date === null) {
         $(el).bsDatepicker('setStartDate', null);
-      } else {
-        date = this._newDate(date);
-        date = this._UTCDateAsLocal(date);
-        if (!isNaN(date)) {
-          // Workaround for https://github.com/eternicode/bootstrap-datepicker/issues/2010
-          // If the start date when there's a two-digit year format, it will set
-          // the date value to null. So we'll save the value, set the start
-          // date, and the restore the value.
-          var curValue = $(el).bsDatepicker('getUTCDate');
-          $(el).bsDatepicker('setStartDate', date);
-          $(el).bsDatepicker('setUTCDate', curValue);
-        }
+        return;
+      }
+
+      date = this._newDate(date);
+      // If date parsing fails, do nothing
+      if (date === null) return;
+
+      date = this._UTCDateAsLocal(date);
+      if (isNaN(date)) return;
+      // Workaround for https://github.com/eternicode/bootstrap-datepicker/issues/2010
+      // If the start date when there's a two-digit year format, it will set
+      // the date value to null. So we'll save the value, set the start
+      // date, and the restore the value.
+      var curValue = $(el).bsDatepicker('getUTCDate');
+      $(el).bsDatepicker('setStartDate', date);
+      $(el).bsDatepicker('setUTCDate', curValue);
+
+      // Workaround for https://github.com/rstudio/shiny/issues/2335
+      // We only set the start date *after* the value in this special
+      // case so we don't effect the intended behavior of having a blank
+      // value when it falls outside the start date
+      if (typeof date.toDateString !== 'function') return;
+      if (typeof curValue.toDateString !== 'function') return;
+      if (date.toDateString() === curValue.toDateString()) {
+        $(el).bsDatepicker('setStartDate', null);
+        $(el).bsDatepicker('setUTCDate', curValue);
+        $(el).bsDatepicker('setStartDate', date);
       }
     },
     // Given an unambiguous date string or a Date object, set the max (end) date
@@ -4948,15 +4956,28 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       if (date === undefined) return;
       if (date === null) {
         $(el).bsDatepicker('setEndDate', null);
-      } else {
-        date = this._newDate(date);
-        date = this._UTCDateAsLocal(date);
-        if (!isNaN(date)) {
-          // Workaround for same issue as in _setMin.
-          var curValue = $(el).bsDatepicker('getUTCDate');
-          $(el).bsDatepicker('setEndDate', date);
-          $(el).bsDatepicker('setUTCDate', curValue);
-        }
+        return;
+      }
+
+      date = this._newDate(date);
+      // If date parsing fails, do nothing
+      if (date === null) return;
+
+      date = this._UTCDateAsLocal(date);
+      if (isNaN(date)) return;
+
+      // Workaround for same issue as in _setMin.
+      var curValue = $(el).bsDatepicker('getUTCDate');
+      $(el).bsDatepicker('setEndDate', date);
+      $(el).bsDatepicker('setUTCDate', curValue);
+
+      // Workaround for same issue as in _setMin.
+      if (typeof date.toDateString !== 'function') return;
+      if (typeof curValue.toDateString !== 'function') return;
+      if (date.toDateString() === curValue.toDateString()) {
+        $(el).bsDatepicker('setEndDate', null);
+        $(el).bsDatepicker('setUTCDate', curValue);
+        $(el).bsDatepicker('setEndDate', date);
       }
     },
     // Given a date string of format yyyy-mm-dd, return a Date object with
@@ -6001,10 +6022,10 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     _enableDocumentEvents: function _enableDocumentEvents() {
       var _this2 = this;
 
-      var $doc = $("html");
-      var _ZoneClass = this._ZoneClass;
-      var ACTIVE = _ZoneClass.ACTIVE;
-      var OVER = _ZoneClass.OVER;
+      var $doc = $("html"),
+          _ZoneClass = this._ZoneClass,
+          ACTIVE = _ZoneClass.ACTIVE,
+          OVER = _ZoneClass.OVER;
 
       this._enableDraghover($doc).on({
         "draghover:enter.draghover": function draghoverEnterDraghover(e) {
@@ -6076,27 +6097,25 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       // support the FileList object though, so the user's expectation that DnD is
       // supported based on this highlighting would be incorrect.
       if (!this._isIE9()) {
-        (function () {
-          if ($fileInputs.length === 0) _this3._enableDocumentEvents();
-          $fileInputs = $fileInputs.add(el);
-          var $zone = _this3._zoneOf(el);
-          var OVER = _this3._ZoneClass.OVER;
+        if ($fileInputs.length === 0) this._enableDocumentEvents();
+        $fileInputs = $fileInputs.add(el);
+        var $zone = this._zoneOf(el),
+            OVER = this._ZoneClass.OVER;
 
-          _this3._enableDraghover($zone).on({
-            "draghover:enter.draghover": function draghoverEnterDraghover(e) {
-              $zone.addClass(OVER);
-            },
-            "draghover:leave.draghover": function draghoverLeaveDraghover(e) {
-              $zone.removeClass(OVER);
-              // Prevent this event from bubbling to the document handler,
-              // which would deactivate all zones.
-              e.stopPropagation();
-            },
-            "draghover:drop.draghover": function draghoverDropDraghover(e, dropEvent) {
-              _this3._handleDrop(dropEvent, el);
-            }
-          });
-        })();
+        this._enableDraghover($zone).on({
+          "draghover:enter.draghover": function draghoverEnterDraghover(e) {
+            $zone.addClass(OVER);
+          },
+          "draghover:leave.draghover": function draghoverLeaveDraghover(e) {
+            $zone.removeClass(OVER);
+            // Prevent this event from bubbling to the document handler,
+            // which would deactivate all zones.
+            e.stopPropagation();
+          },
+          "draghover:drop.draghover": function draghoverDropDraghover(e, dropEvent) {
+            _this3._handleDrop(dropEvent, el);
+          }
+        });
       }
     },
 
@@ -6575,7 +6594,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     initialValues['.clientdata_url_hash'] = window.location.hash;
 
     $(window).on('hashchange', function (e) {
-      inputs.setInput('.clientdata_url_hash', location.hash);
+      inputs.setInput('.clientdata_url_hash', window.location.hash);
     });
 
     // The server needs to know what singletons were rendered as part of
@@ -6641,7 +6660,16 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
   });
 
   $(document).on('keydown', function (e) {
-    if (e.which !== 115 || !e.ctrlKey && !e.metaKey || e.shiftKey || e.altKey) return;
+    if (
+    // if not one of the key combos below
+    !(
+    // cmd/ctrl + fn + f4
+    e.which === 115 && (e.ctrlKey || e.metaKey) && !e.shiftKey && !e.altKey ||
+    // cmd/ctrl + shift + fn + f3
+    e.which === 114 && (e.ctrlKey || e.metaKey) && e.shiftKey && !e.altKey)) {
+      return;
+    }
+
     var url = 'reactlog/mark?w=' + window.escape(exports.shinyapp.config.workerId) + "&s=" + window.escape(exports.shinyapp.config.sessionId);
 
     // send notification
@@ -6654,6 +6682,9 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         html: html,
         closeButton: true
       });
+    }).fail(function () {
+      // found returned error while marking, should open webpage
+      window.open(url);
     });
 
     e.preventDefault();

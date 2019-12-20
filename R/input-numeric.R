@@ -10,7 +10,7 @@
 #' @return A numeric input control that can be added to a UI definition.
 #'
 #' @family input elements
-#' @seealso \code{\link{updateNumericInput}}
+#' @seealso [updateNumericInput()]
 #'
 #' @examples
 #' ## Only run examples in interactive R sessions
@@ -25,6 +25,10 @@
 #' }
 #' shinyApp(ui, server)
 #' }
+#'
+#' @section Server value:
+#' A numeric vector of length 1.
+#'
 #' @export
 numericInput <- function(inputId, label, value, min = NA, max = NA, step = NA,
   width = NULL, ...) {

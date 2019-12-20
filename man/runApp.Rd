@@ -4,22 +4,27 @@
 \alias{runApp}
 \title{Run Shiny Application}
 \usage{
-runApp(appDir = getwd(), port = getOption("shiny.port"),
+runApp(
+  appDir = getwd(),
+  port = getOption("shiny.port"),
   launch.browser = getOption("shiny.launch.browser", interactive()),
-  host = getOption("shiny.host", "127.0.0.1"), workerId = "",
-  quiet = FALSE, display.mode = c("auto", "normal", "showcase"),
-  test.mode = getOption("shiny.testmode", FALSE))
+  host = getOption("shiny.host", "127.0.0.1"),
+  workerId = "",
+  quiet = FALSE,
+  display.mode = c("auto", "normal", "showcase"),
+  test.mode = getOption("shiny.testmode", FALSE)
+)
 }
 \arguments{
 \item{appDir}{The application to run. Should be one of the following:
 \itemize{
 \item A directory containing \code{server.R}, plus, either \code{ui.R} or
- a \code{www} directory that contains the file \code{index.html}.
+a \code{www} directory that contains the file \code{index.html}.
 \item A directory containing \code{app.R}.
 \item An \code{.R} file containing a Shiny application, ending with an
- expression that produces a Shiny app object.
+expression that produces a Shiny app object.
 \item A list with \code{ui} and \code{server} components.
-\item A Shiny app object created by \code{\link{shinyApp}}.
+\item A Shiny app object created by \code{\link[=shinyApp]{shinyApp()}}.
 }}
 
 \item{port}{The TCP port that the application should listen on. If the

@@ -3,32 +3,32 @@
 #' Creates a text input which, when clicked on, brings up a calendar that
 #' the user can click on to select dates.
 #'
-#' The date \code{format} string specifies how the date will be displayed in
+#' The date `format` string specifies how the date will be displayed in
 #' the browser. It allows the following values:
 #'
 #' \itemize{
-#'   \item \code{yy} Year without century (12)
-#'   \item \code{yyyy} Year with century (2012)
-#'   \item \code{mm} Month number, with leading zero (01-12)
-#'   \item \code{m} Month number, without leading zero (1-12)
-#'   \item \code{M} Abbreviated month name
-#'   \item \code{MM} Full month name
-#'   \item \code{dd} Day of month with leading zero
-#'   \item \code{d} Day of month without leading zero
-#'   \item \code{D} Abbreviated weekday name
-#'   \item \code{DD} Full weekday name
+#'   \item `yy` Year without century (12)
+#'   \item `yyyy` Year with century (2012)
+#'   \item `mm` Month number, with leading zero (01-12)
+#'   \item `m` Month number, without leading zero (1-12)
+#'   \item `M` Abbreviated month name
+#'   \item `MM` Full month name
+#'   \item `dd` Day of month with leading zero
+#'   \item `d` Day of month without leading zero
+#'   \item `D` Abbreviated weekday name
+#'   \item `DD` Full weekday name
 #' }
 #'
 #' @inheritParams textInput
 #' @param value The starting date. Either a Date object, or a string in
-#'   \code{yyyy-mm-dd} format. If NULL (the default), will use the current date
+#'   `yyyy-mm-dd` format. If NULL (the default), will use the current date
 #'   in the client's time zone.
 #' @param min The minimum allowed date. Either a Date object, or a string in
-#'   \code{yyyy-mm-dd} format.
+#'   `yyyy-mm-dd` format.
 #' @param max The maximum allowed date. Either a Date object, or a string in
-#'   \code{yyyy-mm-dd} format.
+#'   `yyyy-mm-dd` format.
 #' @param format The format of the date to display in the browser. Defaults to
-#'   \code{"yyyy-mm-dd"}.
+#'   `"yyyy-mm-dd"`.
 #' @param startview The date range shown when the input object is first clicked.
 #'   Can be "month" (the default), "year", or "decade".
 #' @param weekstart Which day is the start of the week. Should be an integer
@@ -44,12 +44,12 @@
 #' @param autoclose Whether or not to close the datepicker immediately when a
 #'   date is selected.
 #' @param datesdisabled Which dates should be disabled. Either a Date object,
-#' or a string in \code{yyyy-mm-dd} format.
+#' or a string in `yyyy-mm-dd` format.
 #' @param daysofweekdisabled Days of the week that should be disabled. Should be
 #'   a integer vector with values from 0 (Sunday) to 6 (Saturday).
 #'
 #' @family input elements
-#' @seealso \code{\link{dateRangeInput}}, \code{\link{updateDateInput}}
+#' @seealso [dateRangeInput()], [updateDateInput()]
 #'
 #' @examples
 #' ## Only run examples in interactive R sessions
@@ -86,6 +86,10 @@
 #'
 #' shinyApp(ui, server = function(input, output) { })
 #' }
+#'
+#' @section Server value:
+#' A [Date] vector of length 1.
+#'
 #' @export
 dateInput <- function(inputId, label, value = NULL, min = NULL, max = NULL,
   format = "yyyy-mm-dd", startview = "month", weekstart = 0,

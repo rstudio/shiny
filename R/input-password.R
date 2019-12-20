@@ -6,7 +6,11 @@
 #' @return A text input control that can be added to a UI definition.
 #'
 #' @family input elements
-#' @seealso \code{\link{updateTextInput}}
+#' @seealso [updateTextInput()]
+#'
+#' @section Server value:
+#' A character string of the password input. The default value is `""`
+#' unless `value` is provided.
 #'
 #' @examples
 #' ## Only run examples in interactive R sessions

@@ -6,11 +6,18 @@ This directory contains build tools for Shiny.
 ### First-time setup
 Shiny's JavaScript build tools use Node.js, along with [yarn](https://yarnpkg.com/) to manage the JavaScript packages.
 
-Installation of Node.js differs across platforms and is generally pretty easy, so I won't include instructions here.
+Installation of Node.js differs across platforms, see [the official Node.js website](https://nodejs.org/) for instructions on downloading and installing. We presume that you have Node.js installed on your machine before continuing.
 
 Install yarn using the [official instructions](https://yarnpkg.com/en/docs/install).
 
-Then, in this directory (tools/), run the following to install the packages:
+You can test that Node.js and yarn are installed properly by running the following commands:
+
+```
+node --version
+yarn --version
+```
+
+Once both are installed, run the following in this directory (`tools/`) to install the packages :
 
 ```
 yarn
@@ -86,6 +93,7 @@ Updating web libraries
 ======================
 
 ## babel-polyfill
+
 To update the version of babel-polyfill:
 
 * Check if there is a newer version available by running `yarn outdated babel-polyfill`. (If there's no output, then you have the latest version.)
@@ -93,9 +101,9 @@ To update the version of babel-polyfill:
 * Edit R/shinyui.R. The `renderPage` function has an `htmlDependency` for
   `babel-polyfill`. Update this to the new version number.
 
-# Updating and patching `bootstrap-datepicker`
+## Updating and patching `bootstrap-datepicker`
 
-## Updating
+### Updating
 
 [bootstrap-datepicker](https://github.com/uxsolutions/bootstrap-datepicker) can be updated with the script `updateBootstrapDatepicker.R`.
 
@@ -103,16 +111,36 @@ After updating, our patches to `bootstrap-datepicker` must be applied using the 
 
 After updating and applying patches, `yarn grunt` should be run per the instructions above in order to generate a minified JavaScript file.
 
-## Making a new patch
+### Making a new patch
 
 To create a new patch:
 
 1. Make any necessary changes to files in `inst/www/shared/datepicker`
 1. **Do not commit your changes.**
 1. Instead, create a patch with a command like `git diff > tools/datepicker-patches/012-a-description.patch`. Patches are applied in alphabetic order (per `list.files`), so you should name your patch based on the last one in `tools/datepicker-patches` so that it's applied last.
-1. Add the new `.patch` file to the repo with a descriptive commit message
 1. Revert `bootstrap-datepicker` to its unpatched state by running `updateBootstrapDatepicker.R`
 1. Apply all patches, including the one you just made, by running `applyDatepickerPatches.R`
+1. Run `yarn grunt`
+1. Test your changes
+1. `git add` the new `.patch` and any resulting changes
+
+
+## Updating and patching ion.rangeSlider
+
+### Updating
+
+[ion.rangeSlider](https://github.com/IonDen/ion.rangeSlider) can be updated with the script `updateBootstrapDatepicker.R`. That script downloads a specific version of ion.rangeSlider and applies our patches in tools/ion.rangeSlider-patches.
+
+After updating and applying patches, `yarn grunt` should be run per the instructions above in order to generate a minified JavaScript file.
+
+### Making a new patch
+
+To create a new patch:
+
+1. Make any necessary changes to files in `inst/www/shared/ion.rangeSlider`
+1. **Do not commit your changes.**
+1. Instead, create a patch with a command like `git diff > tools/ion.rangeSlider-patches/0004-a-description.patch`. Patches are applied in alphabetic order (per `list.files`), so you should name your patch based on the last one in `tools/ion.rangeSlider-patches` so that it's applied last.
+1. Run `updateIonRangeSlider.R` to download the library and apply patches.
 1. Run `yarn grunt`
 1. Test your changes
 1. `git add` the new `.patch` and any resulting changes

@@ -14,9 +14,11 @@ checkboxInput(inputId, label, value = FALSE, width = NULL, ...)
 \item{value}{Initial value (\code{TRUE} or \code{FALSE}).}
 
 \item{width}{The width of the input, e.g. \code{'400px'}, or \code{'100\%'};
-see \code{\link{validateCssUnit}}.}
+
+see \code{\link[=validateCssUnit]{validateCssUnit()}}.}
 
 \item{...}{Can be used to set the attribute `disabled`}
+
 }
 \value{
 A checkbox control that can be added to a UI definition.
@@ -24,6 +26,11 @@ A checkbox control that can be added to a UI definition.
 \description{
 Create a checkbox that can be used to specify logical values.
 }
+\section{Server value}{
+
+\code{TRUE} if checked, \code{FALSE} otherwise.
+}
+
 \examples{
 ## Only run examples in interactive R sessions
 if (interactive()) {
@@ -37,17 +44,25 @@ server <- function(input, output) {
 }
 shinyApp(ui, server)
 }
+
 }
 \seealso{
-\code{\link{checkboxGroupInput}}, \code{\link{updateCheckboxInput}}
+\code{\link[=checkboxGroupInput]{checkboxGroupInput()}}, \code{\link[=updateCheckboxInput]{updateCheckboxInput()}}
 
-Other input elements: \code{\link{actionButton}},
-  \code{\link{checkboxGroupInput}},
-  \code{\link{dateInput}}, \code{\link{dateRangeInput}},
-  \code{\link{fileInput}}, \code{\link{numericInput}},
-  \code{\link{passwordInput}}, \code{\link{radioButtons}},
-  \code{\link{selectInput}}, \code{\link{sliderInput}},
-  \code{\link{submitButton}}, \code{\link{textAreaInput}},
-  \code{\link{textInput}}, \code{\link{varSelectInput}}
+Other input elements: 
+\code{\link{actionButton}()},
+\code{\link{checkboxGroupInput}()},
+\code{\link{dateInput}()},
+\code{\link{dateRangeInput}()},
+\code{\link{fileInput}()},
+\code{\link{numericInput}()},
+\code{\link{passwordInput}()},
+\code{\link{radioButtons}()},
+\code{\link{selectInput}()},
+\code{\link{sliderInput}()},
+\code{\link{submitButton}()},
+\code{\link{textAreaInput}()},
+\code{\link{textInput}()},
+\code{\link{varSelectInput}()}
 }
 \concept{input elements}

@@ -5,8 +5,16 @@
 \alias{selectizeInput}
 \title{Create a select list input control}
 \usage{
-selectInput(inputId, label, choices, selected = NULL, multiple = FALSE,
-  selectize = TRUE, width = NULL, size = NULL)
+selectInput(
+  inputId,
+  label,
+  choices,
+  selected = NULL,
+  multiple = FALSE,
+  selectize = TRUE,
+  width = NULL,
+  size = NULL
+)
 
 selectizeInput(inputId, ..., options = NULL, width = NULL)
 }
@@ -16,34 +24,33 @@ selectizeInput(inputId, ..., options = NULL, width = NULL)
 \item{label}{Display label for the control, or \code{NULL} for no label.}
 
 \item{choices}{List of values to select from. If elements of the list are
-named, then that name rather than the value is displayed to the user.
-This can also be a named list whose elements are (either named or
-unnamed) lists or vectors. If this is the case, the outermost names
-will be used as the "optgroup" label for the elements in the respective
-sublist. This allows you to group and label similar choices. See the
-example section for a small demo of this feature.}
+named, then that name --- rather than the value --- is displayed to the
+user. It's also possible to group related inputs by providing a named list
+whose elements are (either named or unnamed) lists, vectors, or factors. In
+this case, the outermost names will be used as the group labels (leveraging
+the \verb{<optgroup>} HTML tag) for the elements in the respective sublist. See
+the example section for a small demo of this feature.}
 
-\item{selected}{The initially selected value (or multiple values if
-\code{multiple = TRUE}). If not specified then defaults to the first value
-for single-select lists and no values for multiple select lists.}
+\item{selected}{The initially selected value (or multiple values if \code{multiple = TRUE}). If not specified then defaults to the first value for
+single-select lists and no values for multiple select lists.}
 
 \item{multiple}{Is selection of multiple items allowed?}
 
 \item{selectize}{Whether to use \pkg{selectize.js} or not.}
 
 \item{width}{The width of the input, e.g. \code{'400px'}, or \code{'100\%'};
-see \code{\link{validateCssUnit}}.}
+see \code{\link[=validateCssUnit]{validateCssUnit()}}.}
 
 \item{size}{Number of items to show in the selection box; a larger number
 will result in a taller box. Not compatible with \code{selectize=TRUE}.
-Normally, when \code{multiple=FALSE}, a select input will be a drop-down
-list, but when \code{size} is set, it will be a box instead.}
+Normally, when \code{multiple=FALSE}, a select input will be a drop-down list,
+but when \code{size} is set, it will be a box instead.}
 
 \item{...}{Arguments passed to \code{selectInput()}.}
 
 \item{options}{A list of options. See the documentation of \pkg{selectize.js}
-for possible options (character option values inside \code{\link[base]{I}()} will
-be treated as literal JavaScript code; see \code{\link{renderDataTable}()}
+for possible options (character option values inside \code{\link[base:I]{base::I()}} will
+be treated as literal JavaScript code; see \code{\link[=renderDataTable]{renderDataTable()}}
 for details).}
 }
 \value{
@@ -54,26 +61,31 @@ Create a select list that can be used to choose a single or multiple items
 from a list of values.
 }
 \details{
-By default, \code{selectInput()} and \code{selectizeInput()} use the
-JavaScript library \pkg{selectize.js}
-(\url{https://github.com/selectize/selectize.js}) instead of the basic
-select input element. To use the standard HTML select input element, use
-\code{selectInput()} with \code{selectize=FALSE}.
+By default, \code{selectInput()} and \code{selectizeInput()} use the JavaScript library
+\pkg{selectize.js} (\url{https://github.com/selectize/selectize.js}) instead of
+the basic select input element. To use the standard HTML select input
+element, use \code{selectInput()} with \code{selectize=FALSE}.
 
-In selectize mode, if the first element in \code{choices} has a value of
-\code{""}, its name will be treated as a placeholder prompt. For example:
+In selectize mode, if the first element in \code{choices} has a value of \code{""}, its
+name will be treated as a placeholder prompt. For example:
 \code{selectInput("letter", "Letter", c("Choose one" = "", LETTERS))}
 }
 \note{
 The selectize input created from \code{selectizeInput()} allows
-  deletion of the selected option even in a single select input, which will
-  return an empty string as its value. This is the default behavior of
-  \pkg{selectize.js}. However, the selectize input created from
-  \code{selectInput(..., selectize = TRUE)} will ignore the empty string
-  value when it is a single choice input and the empty string is not in the
-  \code{choices} argument. This is to keep compatibility with
-  \code{selectInput(..., selectize = FALSE)}.
+deletion of the selected option even in a single select input, which will
+return an empty string as its value. This is the default behavior of
+\pkg{selectize.js}. However, the selectize input created from
+\code{selectInput(..., selectize = TRUE)} will ignore the empty string
+value when it is a single choice input and the empty string is not in the
+\code{choices} argument. This is to keep compatibility with
+\code{selectInput(..., selectize = FALSE)}.
 }
+\section{Server value}{
+ A vector of character strings, usually of length
+1, with the value of the selected items. When \code{multiple=TRUE} and
+nothing is selected, this value will be \code{NULL}.
+}
+
 \examples{
 ## Only run examples in interactive R sessions
 if (interactive()) {
@@ -94,7 +106,7 @@ shinyApp(
   }
 )
 
-# demoing optgroup support in the `choices` arg
+# demoing group support in the `choices` arg
 shinyApp(
   ui = fluidPage(
     selectInput("state", "Choose a state:",
@@ -111,17 +123,25 @@ shinyApp(
   }
 )
 }
+
 }
 \seealso{
-\code{\link{updateSelectInput}} \code{\link{varSelectInput}}
+\code{\link[=updateSelectInput]{updateSelectInput()}} \code{\link[=varSelectInput]{varSelectInput()}}
 
-Other input elements: \code{\link{actionButton}},
-  \code{\link{checkboxGroupInput}},
-  \code{\link{checkboxInput}}, \code{\link{dateInput}},
-  \code{\link{dateRangeInput}}, \code{\link{fileInput}},
-  \code{\link{numericInput}}, \code{\link{passwordInput}},
-  \code{\link{radioButtons}}, \code{\link{sliderInput}},
-  \code{\link{submitButton}}, \code{\link{textAreaInput}},
-  \code{\link{textInput}}, \code{\link{varSelectInput}}
+Other input elements: 
+\code{\link{actionButton}()},
+\code{\link{checkboxGroupInput}()},
+\code{\link{checkboxInput}()},
+\code{\link{dateInput}()},
+\code{\link{dateRangeInput}()},
+\code{\link{fileInput}()},
+\code{\link{numericInput}()},
+\code{\link{passwordInput}()},
+\code{\link{radioButtons}()},
+\code{\link{sliderInput}()},
+\code{\link{submitButton}()},
+\code{\link{textAreaInput}()},
+\code{\link{textInput}()},
+\code{\link{varSelectInput}()}
 }
 \concept{input elements}

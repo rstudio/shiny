@@ -4,14 +4,27 @@
 \alias{renderTable}
 \title{Table Output}
 \usage{
-renderTable(expr, striped = FALSE, hover = FALSE, bordered = FALSE,
-  spacing = c("s", "xs", "m", "l"), width = "auto", align = NULL,
-  rownames = FALSE, colnames = TRUE, digits = NULL, na = "NA", ...,
-  env = parent.frame(), quoted = FALSE, outputArgs = list())
+renderTable(
+  expr,
+  striped = FALSE,
+  hover = FALSE,
+  bordered = FALSE,
+  spacing = c("s", "xs", "m", "l"),
+  width = "auto",
+  align = NULL,
+  rownames = FALSE,
+  colnames = TRUE,
+  digits = NULL,
+  na = "NA",
+  ...,
+  env = parent.frame(),
+  quoted = FALSE,
+  outputArgs = list()
+)
 }
 \arguments{
 \item{expr}{An expression that returns an R object that can be used with
-\code{\link[xtable]{xtable}}.}
+\code{\link[xtable:xtable]{xtable::xtable()}}.}
 
 \item{striped, hover, bordered}{Logicals: if \code{TRUE}, apply the
 corresponding Bootstrap table format to the output table.}
@@ -20,7 +33,7 @@ corresponding Bootstrap table format to the output table.}
 stands for "extra small", \code{s} for "small", \code{m} for "medium"
 and \code{l} for "large").}
 
-\item{width}{Table width. Must be a valid CSS unit (like "100%", "400px",
+\item{width}{Table width. Must be a valid CSS unit (like "100\%", "400px",
 "auto") or a number, which will be coerced to a string and
 have "px" appended.}
 
@@ -50,8 +63,8 @@ columns will be displayed in scientific format with a precision of
 \item{na}{The string to use in the table cells whose values are missing
 (i.e. they either evaluate to \code{NA} or \code{NaN}).}
 
-\item{...}{Arguments to be passed through to \code{\link[xtable]{xtable}}
-and \code{\link[xtable]{print.xtable}}.}
+\item{...}{Arguments to be passed through to \code{\link[xtable:xtable]{xtable::xtable()}}
+and \code{\link[xtable:print.xtable]{xtable::print.xtable()}}.}
 
 \item{env}{The environment in which to evaluate \code{expr}.}
 
@@ -59,7 +72,7 @@ and \code{\link[xtable]{print.xtable}}.}
 This is useful if you want to save an expression in a variable.}
 
 \item{outputArgs}{A list of arguments to be passed through to the
-implicit call to \code{\link{tableOutput}} when \code{renderTable} is
+implicit call to \code{\link[=tableOutput]{tableOutput()}} when \code{renderTable} is
 used in an interactive R Markdown document.}
 }
 \description{

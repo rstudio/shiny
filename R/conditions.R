@@ -3,9 +3,9 @@
 #' Advanced (borderline internal) functions for capturing, printing, and
 #' manipulating stack traces.
 #'
-#' @return \code{printError} and \code{printStackTrace} return
-#'   \code{invisible()}. The other functions pass through the results of
-#'   \code{expr}.
+#' @return `printError` and `printStackTrace` return
+#'   `invisible()`. The other functions pass through the results of
+#'   `expr`.
 #'
 #' @examples
 #' # Keeps tryCatch and withVisible related calls off the
@@ -106,17 +106,17 @@ getCallCategories <- function(calls) {
   }, character(1))
 }
 
-#' @details \code{captureStackTraces} runs the given \code{expr} and if any
-#'   \emph{uncaught} errors occur, annotates them with stack trace info for use
-#'   by \code{printError} and \code{printStackTrace}. It is not necessary to use
-#'   \code{captureStackTraces} around the same expression as
-#'   \code{withLogErrors}, as the latter includes a call to the former. Note
-#'   that if \code{expr} contains calls (either directly or indirectly) to
-#'   \code{try}, or \code{tryCatch} with an error handler, stack traces therein
-#'   cannot be captured unless another \code{captureStackTraces} call is
-#'   inserted in the interior of the \code{try} or \code{tryCatch}. This is
+#' @details `captureStackTraces` runs the given `expr` and if any
+#'   *uncaught* errors occur, annotates them with stack trace info for use
+#'   by `printError` and `printStackTrace`. It is not necessary to use
+#'   `captureStackTraces` around the same expression as
+#'   `withLogErrors`, as the latter includes a call to the former. Note
+#'   that if `expr` contains calls (either directly or indirectly) to
+#'   `try`, or `tryCatch` with an error handler, stack traces therein
+#'   cannot be captured unless another `captureStackTraces` call is
+#'   inserted in the interior of the `try` or `tryCatch`. This is
 #'   because these calls catch the error and prevent it from traveling up to the
-#'   condition handler installed by \code{captureStackTraces}.
+#'   condition handler installed by `captureStackTraces`.
 #'
 #' @param expr The expression to wrap.
 #' @rdname stacktrace
@@ -209,11 +209,11 @@ doCaptureStack <- function(e) {
   stop(e)
 }
 
-#' @details \code{withLogErrors} captures stack traces and logs errors that
-#'   occur in \code{expr}, but does allow errors to propagate beyond this point
+#' @details `withLogErrors` captures stack traces and logs errors that
+#'   occur in `expr`, but does allow errors to propagate beyond this point
 #'   (i.e. it doesn't catch the error). The same caveats that apply to
-#'   \code{captureStackTraces} with regard to \code{try}/\code{tryCatch} apply
-#'   to \code{withLogErrors}.
+#'   `captureStackTraces` with regard to `try`/`tryCatch` apply
+#'   to `withLogErrors`.
 #' @rdname stacktrace
 #' @export
 withLogErrors <- function(expr,
@@ -247,19 +247,19 @@ withLogErrors <- function(expr,
   )
 }
 
-#' @details \code{printError} prints the error and stack trace (if any) using
-#'   \code{warning(immediate.=TRUE)}. \code{printStackTrace} prints the stack
+#' @details `printError` prints the error and stack trace (if any) using
+#'   `warning(immediate.=TRUE)`. `printStackTrace` prints the stack
 #'   trace only.
 #'
 #' @param cond An condition object (generally, an error).
-#' @param full If \code{TRUE}, then every element of \code{sys.calls()} will be
-#'   included in the stack trace. By default (\code{FALSE}), calls that Shiny
+#' @param full If `TRUE`, then every element of `sys.calls()` will be
+#'   included in the stack trace. By default (`FALSE`), calls that Shiny
 #'   deems uninteresting will be hidden.
-#' @param offset If \code{TRUE} (the default), srcrefs will be reassigned from
+#' @param offset If `TRUE` (the default), srcrefs will be reassigned from
 #'   the calls they originated from, to the destinations of those calls. If
 #'   you're used to stack traces from other languages, this feels more
 #'   intuitive, as the definition of the function indicated in the call and the
-#'   location specified by the srcref match up. If \code{FALSE}, srcrefs will be
+#'   location specified by the srcref match up. If `FALSE`, srcrefs will be
 #'   left alone (traditional R treatment where the srcref is of the callsite).
 #' @rdname stacktrace
 #' @export
@@ -361,10 +361,10 @@ printStackTrace <- function(cond,
   invisible()
 }
 
-#' @details \code{extractStackTrace} takes a list of calls (e.g. as returned
-#'   from \code{conditionStackTrace(cond)}) and returns a data frame with one
-#'   row for each stack frame and the columns \code{num} (stack frame number),
-#'   \code{call} (a function name or similar), and \code{loc} (source file path
+#' @details `extractStackTrace` takes a list of calls (e.g. as returned
+#'   from `conditionStackTrace(cond)`) and returns a data frame with one
+#'   row for each stack frame and the columns `num` (stack frame number),
+#'   `call` (a function name or similar), and `loc` (source file path
 #'   and line number, if available). It was deprecated after shiny 1.0.5 because
 #'   it doesn't support deep stack traces.
 #' @rdname stacktrace
@@ -537,7 +537,7 @@ offsetSrcrefs <- function(calls, offset = TRUE) {
   calls
 }
 
-#' @details \code{formatStackTrace} is similar to \code{extractStackTrace}, but
+#' @details `formatStackTrace` is similar to `extractStackTrace`, but
 #'   it returns a preformatted character vector instead of a data frame. It was
 #'   deprecated after shiny 1.0.5 because it doesn't support deep stack traces.
 #' @param indent A string to prefix every line of the stack trace.
@@ -588,11 +588,11 @@ stripStackTrace <- function(cond) {
   conditionStackTrace(cond) <- NULL
 }
 
-#' @details \code{conditionStackTrace} and \code{conditionStackTrace<-} are
+#' @details `conditionStackTrace` and `conditionStackTrace<-` are
 #'   accessor functions for getting/setting stack traces on conditions.
 #'
 #' @param cond A condition that may have previously been annotated by
-#'   \code{captureStackTraces} (or \code{withLogErrors}).
+#'   `captureStackTraces` (or `withLogErrors`).
 #' @rdname stacktrace
 #' @export
 conditionStackTrace <- function(cond) {
@@ -607,8 +607,8 @@ conditionStackTrace <- function(cond) {
   invisible(cond)
 }
 
-#' @details The two functions \code{..stacktraceon..} and
-#'   \code{..stacktraceoff..} have no runtime behavior during normal execution;
+#' @details The two functions `..stacktraceon..` and
+#'   `..stacktraceoff..` have no runtime behavior during normal execution;
 #'   they exist only to create artifacts on the stack trace (sys.call()) that
 #'   instruct the stack trace pretty printer what parts of the stack trace are
 #'   interesting or not. The initial state is 1 and we walk from the outermost

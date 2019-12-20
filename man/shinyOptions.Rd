@@ -3,6 +3,7 @@
 \name{getShinyOption}
 \alias{getShinyOption}
 \alias{shinyOptions}
+\alias{shiny-options}
 \title{Get or set Shiny options}
 \usage{
 getShinyOption(name, default = NULL)
@@ -17,19 +18,106 @@ shinyOptions(...)
 \item{...}{Options to set, with the form \code{name = value}.}
 }
 \description{
-\code{getShinyOption} retrieves the value of a Shiny option.
-\code{shinyOptions} sets the value of Shiny options; it can also be used to
-return a list of all currently-set Shiny options.
+\code{getShinyOption()} retrieves the value of a Shiny option. \code{shinyOptions()}
+sets the value of Shiny options; it can also be used to return a list of all
+currently-set Shiny options.
 }
-\details{
-There is a global option set, which is available by default. When a Shiny
-application is run with \code{\link{runApp}}, that option set is duplicated
-and the new option set is available for getting or setting values. If options
-are set from global.R, app.R, ui.R, or server.R, or if they are set from
-inside the server function, then the options will be scoped to the
+\section{Scope}{
+
+There is a global option set which is available by default. When a Shiny
+application is run with \code{\link[=runApp]{runApp()}}, that option set is duplicated and the
+new option set is available for getting or setting values. If options
+are set from \code{global.R}, \code{app.R}, \code{ui.R}, or \code{server.R}, or if they are set
+from inside the server function, then the options will be scoped to the
 application. When the application exits, the new option set is discarded and
 the global option set is restored.
 }
+
+\section{Options}{
+
+There are a number of global options that affect Shiny's behavior. These can
+be set globally with \code{options()} or locally (for a single app) with
+\code{shinyOptions()}.
+
+\describe{
+\item{shiny.autoreload (defaults to \code{FALSE})}{If \code{TRUE} when a Shiny app is launched, the
+app directory will be continually monitored for changes to files that
+have the extensions: r, htm, html, js, css, png, jpg, jpeg, gif. If any
+changes are detected, all connected Shiny sessions are reloaded. This
+allows for fast feedback loops when tweaking Shiny UI.
+
+Since monitoring for changes is expensive (we simply poll for last
+modified times), this feature is intended only for development.
+
+You can customize the file patterns Shiny will monitor by setting the
+shiny.autoreload.pattern option. For example, to monitor only ui.R:
+\code{options(shiny.autoreload.pattern = glob2rx("ui.R"))}
+
+The default polling interval is 500 milliseconds. You can change this
+by setting e.g. \code{options(shiny.autoreload.interval = 2000)} (every
+two seconds).}
+\item{shiny.deprecation.messages (defaults to \code{TRUE})}{This controls whether messages for
+deprecated functions in Shiny will be printed. See
+\code{\link[=shinyDeprecated]{shinyDeprecated()}} for more information.}
+\item{shiny.error (defaults to \code{NULL})}{This can be a function which is called when an error
+occurs. For example, \code{options(shiny.error=recover)} will result a
+the debugger prompt when an error occurs.}
+\item{shiny.fullstacktrace (defaults to \code{FALSE})}{Controls whether "pretty" (\code{FALSE}) or full
+stack traces (\code{TRUE}) are dumped to the console when errors occur during Shiny app execution.
+Pretty stack traces attempt to only show user-supplied code, but this pruning can't always
+be done 100\% correctly.}
+\item{shiny.host (defaults to \code{"127.0.0.1"})}{The IP address that Shiny should listen on. See
+\code{\link[=runApp]{runApp()}} for more information.}
+\item{shiny.jquery.version (defaults to \code{3})}{The major version of jQuery to use.
+Currently only values of \code{3} or \code{1} are supported. If \code{1}, then jQuery 1.12.4 is used. If \code{3},
+then jQuery 3.4.1 is used.}
+\item{shiny.json.digits (defaults to \code{16})}{The number of digits to use when converting
+numbers to JSON format to send to the client web browser.}
+\item{shiny.launch.browser (defaults to \code{interactive()})}{A boolean which controls the default behavior
+when an app is run. See \code{\link[=runApp]{runApp()}} for more information.}
+\item{shiny.maxRequestSize (defaults to 5MB)}{This is a number which specifies the maximum
+web request size, which serves as a size limit for file uploads.}
+\item{shiny.minified (defaults to \code{TRUE})}{By default
+Whether or not to include Shiny's JavaScript as a minified (\code{shiny.min.js})
+or un-minified (\code{shiny.js}) file. The un-minified version is larger,
+but can be helpful for development and debugging.}
+\item{shiny.port (defaults to a random open port)}{A port number that Shiny will listen on. See
+\code{\link[=runApp]{runApp()}} for more information.}
+\item{shiny.reactlog (defaults to \code{FALSE})}{If \code{TRUE}, enable logging of reactive events,
+which can be viewed later with the \code{\link[=reactlogShow]{reactlogShow()}} function.
+This incurs a substantial performance penalty and should not be used in
+production.}
+\item{shiny.sanitize.errors (defaults to \code{FALSE})}{If \code{TRUE}, then normal errors (i.e.
+errors not wrapped in \code{safeError}) won't show up in the app; a simple
+generic error message is printed instead (the error and strack trace printed
+to the console remain unchanged). If you want to sanitize errors in general, but you DO want a
+particular error \code{e} to get displayed to the user, then set this option
+to \code{TRUE} and use \code{stop(safeError(e))} for errors you want the
+user to see.}
+\item{shiny.stacktraceoffset (defaults to \code{TRUE})}{If \code{TRUE}, then Shiny's printed stack
+traces will display srcrefs one line above their usual location. This is
+an arguably more intuitive arrangement for casual R users, as the name
+of a function appears next to the srcref where it is defined, rather than
+where it is currently being called from.}
+\item{shiny.suppressMissingContextError (defaults to \code{FALSE})}{Normally, invoking a reactive
+outside of a reactive context (or \code{\link[=isolate]{isolate()}}) results in
+an error. If this is \code{TRUE}, don't error in these cases. This
+should only be used for debugging or demonstrations of reactivity at the
+console.}
+\item{shiny.testmode (defaults to \code{FALSE})}{If \code{TRUE}, then various features for testing Shiny
+applications are enabled.}
+\item{shiny.trace (defaults to \code{FALSE})}{Print messages sent between the R server and the web
+browser client to the R console. This is useful for debugging. Possible
+values are \code{"send"} (only print messages sent to the client),
+\code{"recv"} (only print messages received by the server), \code{TRUE}
+(print all messages), or \code{FALSE} (default; don't print any of these
+messages).}
+\item{shiny.usecairo (defaults to \code{TRUE})}{This is used to disable graphical rendering by the
+Cairo package, if it is installed. See \code{\link[=plotPNG]{plotPNG()}} for more
+information.}
+}
+}
+
 \examples{
 \dontrun{
 shinyOptions(myOption = 10)

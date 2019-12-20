@@ -10,11 +10,11 @@ modalButton(label, icon = NULL)
 \item{label}{The contents of the button or link--usually a text label, but
 you could also use any other HTML, like an image.}
 
-\item{icon}{An optional \code{\link{icon}} to appear on the button.}
+\item{icon}{An optional \code{\link[=icon]{icon()}} to appear on the button.}
 }
 \description{
 When clicked, a \code{modalButton} will dismiss the modal dialog.
 }
 \seealso{
-\code{\link{modalDialog}} for examples.
+\code{\link[=modalDialog]{modalDialog()}} for examples.
 }

@@ -17,7 +17,7 @@ of the layout.}
 Lays out elements in a left-to-right, top-to-bottom arrangement. The elements
 on a given row will be top-aligned with each other. This layout will not work
 well with elements that have a percentage-based width (e.g.
-\code{\link{plotOutput}} at its default setting of \code{width = "100\%"}).
+\code{\link[=plotOutput]{plotOutput()}} at its default setting of \code{width = "100\%"}).
 }
 \examples{
 ## Only run examples in interactive R sessions
@@ -32,5 +32,13 @@ shinyApp(ui, server = function(input, output) { })
 }
 }
 \seealso{
-\code{\link{verticalLayout}}
+Other layout functions: 
+\code{\link{fillPage}()},
+\code{\link{fixedPage}()},
+\code{\link{fluidPage}()},
+\code{\link{navbarPage}()},
+\code{\link{sidebarLayout}()},
+\code{\link{splitLayout}()},
+\code{\link{verticalLayout}()}
 }
+\concept{layout functions}

@@ -4,8 +4,7 @@
 \alias{fillPage}
 \title{Create a page that fills the window}
 \usage{
-fillPage(..., padding = 0, title = NULL, bootstrap = TRUE,
-  theme = NULL)
+fillPage(..., padding = 0, title = NULL, bootstrap = TRUE, theme = NULL)
 }
 \arguments{
 \item{...}{Elements to include within the page.}
@@ -31,7 +30,7 @@ shown in the document).}
 available area of the browser window.
 }
 \details{
-The \code{\link{fluidPage}} and \code{\link{fixedPage}} functions are used
+The \code{\link[=fluidPage]{fluidPage()}} and \code{\link[=fixedPage]{fixedPage()}} functions are used
 for creating web pages that are laid out from the top down, leaving
 whitespace at the bottom if the page content's height is smaller than the
 browser window, and scrolling if the content is larger than the window.
@@ -42,11 +41,11 @@ to the size of the window.
 
 For example, \code{fluidPage(plotOutput("plot", height = "100\%"))} will not
 work as expected; the plot element's effective height will be \code{0},
-because the plot's containing elements (\code{<div>} and \code{<body>}) have
+because the plot's containing elements (\verb{<div>} and \verb{<body>}) have
 \emph{automatic} height; that is, they determine their own height based on
 the height of their contained elements. However,
 \code{fillPage(plotOutput("plot", height = "100\%"))} will work because
-\code{fillPage} fixes the \code{<body>} height at 100\% of the window height.
+\code{fillPage} fixes the \verb{<body>} height at 100\% of the window height.
 
 Note that \code{fillPage(plotOutput("plot"))} will not cause the plot to fill
 the page. Like most Shiny output widgets, \code{plotOutput}'s default height
@@ -82,3 +81,14 @@ fillPage(
   )
 )
 }
+\seealso{
+Other layout functions: 
+\code{\link{fixedPage}()},
+\code{\link{flowLayout}()},
+\code{\link{fluidPage}()},
+\code{\link{navbarPage}()},
+\code{\link{sidebarLayout}()},
+\code{\link{splitLayout}()},
+\code{\link{verticalLayout}()}
+}
+\concept{layout functions}

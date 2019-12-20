@@ -4,8 +4,11 @@
 \alias{updateQueryString}
 \title{Update URL in browser's location bar}
 \usage{
-updateQueryString(queryString, mode = c("replace", "push"),
-  session = getDefaultReactiveDomain())
+updateQueryString(
+  queryString,
+  mode = c("replace", "push"),
+  session = getDefaultReactiveDomain()
+)
 }
 \arguments{
 \item{queryString}{The new query string to show in the location bar.}
@@ -26,14 +29,14 @@ Internet Explorer 9 and below.
 \details{
 For \code{mode = "push"}, only three updates are currently allowed:
 \enumerate{
-  \item the query string (format: \code{?param1=val1&param2=val2})
-  \item the hash (format: \code{#hash})
-  \item both the query string and the hash
-    (format: \code{?param1=val1&param2=val2#hash})
+\item the query string (format: \code{?param1=val1&param2=val2})
+\item the hash (format: \verb{#hash})
+\item both the query string and the hash
+(format: \code{?param1=val1&param2=val2#hash})
 }
 
 In other words, if \code{mode = "push"}, the \code{queryString} must start
-with either \code{?} or with \code{#}.
+with either \verb{?} or with \verb{#}.
 
 A technical curiosity: under the hood, this function is calling the HTML5
 history API (which is where the names for the \code{mode} argument come from).
@@ -90,12 +93,12 @@ if (interactive()) {
         query <- getQueryString()
         queryText <- paste(names(query), query,
                        sep = "=", collapse=", ")
-        paste("Your query string is:\\n", queryText)
+        paste("Your query string is:\n", queryText)
       })
     }
   )
 }
 }
 \seealso{
-\code{\link{enableBookmarking}}, \code{\link{getQueryString}}
+\code{\link[=enableBookmarking]{enableBookmarking()}}, \code{\link[=getQueryString]{getQueryString()}}
 }

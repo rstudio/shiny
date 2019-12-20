@@ -4,19 +4,21 @@
 #'
 #' @param ui Content of message.
 #' @param action Message content that represents an action. For example, this
-#'   could be a link that the user can click on. This is separate from \code{ui}
+#'   could be a link that the user can click on. This is separate from `ui`
 #'   so customized layouts can handle the main notification content separately
 #'   from action content.
 #' @param duration Number of seconds to display the message before it
-#'   disappears. Use \code{NULL} to make the message not automatically
+#'   disappears. Use `NULL` to make the message not automatically
 #'   disappear.
-#' @param closeButton If \code{TRUE}, display a button which will make the
-#'   notification disappear when clicked. If \code{FALSE} do not display.
-#' @param id An ID string. This can be used to change the contents of an
-#'   existing message with \code{showNotification}, or to remove it with
-#'   \code{removeNotification}. If not provided, one will be generated
-#'   automatically. If an ID is provided and there does not currently exist a
-#'   notification with that ID, a new notification will be created with that ID.
+#' @param closeButton If `TRUE`, display a button which will make the
+#'   notification disappear when clicked. If `FALSE` do not display.
+#' @param id A unique identifier for the notification.
+#'
+#'   `id` is optional for `showNotification()`: Shiny will automatically create
+#'   one if needed. If you do supply it, Shiny will update an existing
+#'   notification if it exists, otherwise it will create a new one.
+#'
+#'   `id` is required for `removeNotification()`.
 #' @param type A string which controls the color of the notification. One of
 #'   "default" (gray), "message" (blue), "warning" (yellow), or "error" (red).
 #' @param session Session object to send notification to.
@@ -97,10 +99,8 @@ showNotification <- function(ui, action = NULL, duration = 5,
 
 #' @rdname showNotification
 #' @export
-removeNotification <- function(id = NULL, session = getDefaultReactiveDomain()) {
-  if (is.null(id)) {
-    stop("id is required.")
-  }
+removeNotification <- function(id, session = getDefaultReactiveDomain()) {
+  force(id)
   session$sendNotification("remove", id)
   id
 }

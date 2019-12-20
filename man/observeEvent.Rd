@@ -5,18 +5,35 @@
 \alias{eventReactive}
 \title{Event handler}
 \usage{
-observeEvent(eventExpr, handlerExpr, event.env = parent.frame(),
-  event.quoted = FALSE, handler.env = parent.frame(),
-  handler.quoted = FALSE, label = NULL, suspended = FALSE,
-  priority = 0, domain = getDefaultReactiveDomain(),
-  autoDestroy = TRUE, ignoreNULL = TRUE, ignoreInit = FALSE,
-  once = FALSE)
+observeEvent(
+  eventExpr,
+  handlerExpr,
+  event.env = parent.frame(),
+  event.quoted = FALSE,
+  handler.env = parent.frame(),
+  handler.quoted = FALSE,
+  label = NULL,
+  suspended = FALSE,
+  priority = 0,
+  domain = getDefaultReactiveDomain(),
+  autoDestroy = TRUE,
+  ignoreNULL = TRUE,
+  ignoreInit = FALSE,
+  once = FALSE
+)
 
-eventReactive(eventExpr, valueExpr, event.env = parent.frame(),
-  event.quoted = FALSE, value.env = parent.frame(),
-  value.quoted = FALSE, label = NULL,
-  domain = getDefaultReactiveDomain(), ignoreNULL = TRUE,
-  ignoreInit = FALSE)
+eventReactive(
+  eventExpr,
+  valueExpr,
+  event.env = parent.frame(),
+  event.quoted = FALSE,
+  value.env = parent.frame(),
+  value.quoted = FALSE,
+  label = NULL,
+  domain = getDefaultReactiveDomain(),
+  ignoreNULL = TRUE,
+  ignoreInit = FALSE
+)
 }
 \arguments{
 \item{eventExpr}{A (quoted or unquoted) expression that represents the event;
@@ -26,7 +43,7 @@ inside curly braces}
 
 \item{handlerExpr}{The expression to call whenever \code{eventExpr} is
 invalidated. This should be a side-effect-producing action (the return
-value will be ignored). It will be executed within an \code{\link{isolate}}
+value will be ignored). It will be executed within an \code{\link[=isolate]{isolate()}}
 scope.}
 
 \item{event.env}{The parent environment for \code{eventExpr}. By default,
@@ -75,7 +92,7 @@ pattern is useful when you want to subscribe to a event that should only
 happen once.}
 
 \item{valueExpr}{The expression that produces the return value of the
-\code{eventReactive}. It will be executed within an \code{\link{isolate}}
+\code{eventReactive}. It will be executed within an \code{\link[=isolate]{isolate()}}
 scope.}
 
 \item{value.env}{The parent environment for \code{valueExpr}. By default,
@@ -87,8 +104,8 @@ that is stored in a variable; to do so, it must be quoted with \code{quote()}.}
 }
 \value{
 \code{observeEvent} returns an observer reference class object (see
-  \code{\link{observe}}). \code{eventReactive} returns a reactive expression
-  object (see \code{\link{reactive}}).
+\code{\link[=observe]{observe()}}). \code{eventReactive} returns a reactive expression
+object (see \code{\link[=reactive]{reactive()}}).
 }
 \description{
 Respond to "event-like" reactive inputs, values, and expressions.
@@ -99,14 +116,14 @@ values (reactive expressions) and side-effect-causing actions (observers)
 that respond to \emph{any} of their inputs changing. That's often what is
 desired in Shiny apps, but not always: sometimes you want to wait for a
 specific action to be taken from the user, like clicking an
-\code{\link{actionButton}}, before calculating an expression or taking an
+\code{\link[=actionButton]{actionButton()}}, before calculating an expression or taking an
 action. A reactive value or expression that is used to trigger other
 calculations in this way is called an \emph{event}.
 
 These situations demand a more imperative, "event handling" style of
 programming that is possible--but not particularly intuitive--using the
-reactive programming primitives \code{\link{observe}} and
-\code{\link{isolate}}. \code{observeEvent} and \code{eventReactive} provide
+reactive programming primitives \code{\link[=observe]{observe()}} and
+\code{\link[=isolate]{isolate()}}. \code{observeEvent} and \code{eventReactive} provide
 straightforward APIs for event handling that wrap \code{observe} and
 \code{isolate}.
 
@@ -127,7 +144,7 @@ in response to the given event.
 
 Both \code{observeEvent} and \code{eventReactive} take an \code{ignoreNULL}
 parameter that affects behavior when the \code{eventExpr} evaluates to
-\code{NULL} (or in the special case of an \code{\link{actionButton}},
+\code{NULL} (or in the special case of an \code{\link[=actionButton]{actionButton()}},
 \code{0}). In these cases, if \code{ignoreNULL} is \code{TRUE}, then an
 \code{observeEvent} will not execute and an \code{eventReactive} will raise a
 silent \link[=validate]{validation} error. This is useful behavior if you
@@ -148,7 +165,7 @@ button, then \code{ignoreInit = TRUE} will guarantee that the action (in
 instead of also being triggered when it is created/initialized. Similarly,
 if you're setting up an \code{eventReactive} that responds to a dynamically
 created button used to refresh some data (then returned by that \code{eventReactive}),
-then you should use \code{eventReactive([...], ignoreInit = TRUE)} if you want
+then you should use \verb{eventReactive([...], ignoreInit = TRUE)} if you want
 to let the user decide if/when they want to refresh the data (since, depending
 on the app, this may be a computationally expensive operation).
 
@@ -157,30 +174,30 @@ purposes they are independent from one another. Here's the result of combining
 these:
 
 \describe{
-  \item{\code{ignoreNULL = TRUE} and \code{ignoreInit = FALSE}}{
-     This is the default. This combination means that \code{handlerExpr}/
-     \code{valueExpr} will run every time that \code{eventExpr} is not
-     \code{NULL}. If, at the time of the creation of the
-     \code{observeEvent}/\code{eventReactive}, \code{eventExpr} happens
-     to \emph{not} be \code{NULL}, then the code runs.
-  }
-  \item{\code{ignoreNULL = FALSE} and \code{ignoreInit = FALSE}}{
-     This combination means that \code{handlerExpr}/\code{valueExpr} will
-     run every time no matter what.
-  }
-  \item{\code{ignoreNULL = FALSE} and \code{ignoreInit = TRUE}}{
-     This combination means that \code{handlerExpr}/\code{valueExpr} will
-     \emph{not} run when the \code{observeEvent}/\code{eventReactive} is
-     created (because \code{ignoreInit = TRUE}), but it will run every
-     other time.
-  }
-  \item{\code{ignoreNULL = TRUE} and \code{ignoreInit = TRUE}}{
-     This combination means that \code{handlerExpr}/\code{valueExpr} will
-     \emph{not} run when the \code{observeEvent}/\code{eventReactive} is
-     created (because  \code{ignoreInit = TRUE}). After that,
-     \code{handlerExpr}/\code{valueExpr} will run every time that
-     \code{eventExpr} is not \code{NULL}.
-  }
+\item{\code{ignoreNULL = TRUE} and \code{ignoreInit = FALSE}}{
+This is the default. This combination means that \code{handlerExpr}/
+\code{valueExpr} will run every time that \code{eventExpr} is not
+\code{NULL}. If, at the time of the creation of the
+\code{observeEvent}/\code{eventReactive}, \code{eventExpr} happens
+to \emph{not} be \code{NULL}, then the code runs.
+}
+\item{\code{ignoreNULL = FALSE} and \code{ignoreInit = FALSE}}{
+This combination means that \code{handlerExpr}/\code{valueExpr} will
+run every time no matter what.
+}
+\item{\code{ignoreNULL = FALSE} and \code{ignoreInit = TRUE}}{
+This combination means that \code{handlerExpr}/\code{valueExpr} will
+\emph{not} run when the \code{observeEvent}/\code{eventReactive} is
+created (because \code{ignoreInit = TRUE}), but it will run every
+other time.
+}
+\item{\code{ignoreNULL = TRUE} and \code{ignoreInit = TRUE}}{
+This combination means that \code{handlerExpr}/\code{valueExpr} will
+\emph{not} run when the \code{observeEvent}/\code{eventReactive} is
+created (because  \code{ignoreInit = TRUE}). After that,
+\code{handlerExpr}/\code{valueExpr} will run every time that
+\code{eventExpr} is not \code{NULL}.
+}
 }
 }
 
@@ -202,7 +219,7 @@ if (interactive()) {
       # Take an action every time button is pressed;
       # here, we just print a message to the console
       observeEvent(input$button, {
-        cat("Showing", input$x, "rows\\n")
+        cat("Showing", input$x, "rows\n")
       })
       # Take a reactive dependency on input$button, but
       # not on any of the stuff inside the function
@@ -247,5 +264,5 @@ if (interactive()) {
 }
 }
 \seealso{
-\code{\link{actionButton}}
+\code{\link[=actionButton]{actionButton()}}
 }

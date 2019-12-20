@@ -6,7 +6,7 @@
 #' @inheritParams textInput
 #' @param label The contents of the button or link--usually a text label, but
 #'   you could also use any other HTML, like an image.
-#' @param icon An optional \code{\link{icon}} to appear on the button.
+#' @param icon An optional [icon()] to appear on the button.
 #' @param ... Named attributes to be applied to the button or link.
 #'
 #' @family input elements
@@ -36,7 +36,14 @@
 #'
 #' }
 #'
-#' @seealso \code{\link{observeEvent}} and \code{\link{eventReactive}}
+#' @seealso [observeEvent()] and [eventReactive()]
+#'
+#' @section Server value:
+#' An integer of class `"shinyActionButtonValue"`. This class differs from
+#' ordinary integers in that a value of 0 is considered "falsy".
+#' This implies two things:
+#'   * Event handlers (e.g., [observeEvent()], [eventReactive()]) won't execute on initial load.
+#'   * Input validation (e.g., [req()], [need()]) will fail on initial load.
 #' @export
 actionButton <- function(inputId, label, icon = NULL, width = NULL, ...) {
 

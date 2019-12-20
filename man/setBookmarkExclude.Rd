@@ -4,8 +4,7 @@
 \alias{setBookmarkExclude}
 \title{Exclude inputs from bookmarking}
 \usage{
-setBookmarkExclude(names = character(0),
-  session = getDefaultReactiveDomain())
+setBookmarkExclude(names = character(0), session = getDefaultReactiveDomain())
 }
 \arguments{
 \item{names}{A character vector containing names of inputs to exclude from
@@ -24,5 +23,5 @@ will not affect inputs from other modules or from the top level of the Shiny
 application.
 }
 \seealso{
-\code{\link{enableBookmarking}} for examples.
+\code{\link[=enableBookmarking]{enableBookmarking()}} for examples.
 }

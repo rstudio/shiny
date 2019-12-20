@@ -1,7 +1,7 @@
 Package: shiny
 Type: Package
 Title: Web Application Framework for R
-Version: 1.3.2.9000
+Version: 1.4.0.9001
 Authors@R: c(
     person("Winston", "Chang", role = c("aut", "cre"), email = "winston@rstudio.com"),
     person("Joe", "Cheng", role = "aut", email = "joe@rstudio.com"),
@@ -65,20 +65,21 @@ Depends:
 Imports:
     utils,
     grDevices,
-    httpuv (>= 1.5.0),
+    httpuv (>= 1.5.2),
     mime (>= 0.3),
     jsonlite (>= 0.9.16),
     xtable,
     digest,
-    htmltools (>= 0.3.6),
+    htmltools (>= 0.4.0),
     R6 (>= 2.0),
     sourcetools,
-    later (>= 0.7.2),
-    promises (>= 1.0.1),
+    later (>= 1.0.0),
+    promises (>= 1.1.0),
     tools,
     crayon,
-    rlang,
-    fastmap (>= 0.0.0.9001)
+    rlang (>= 0.4.0),
+    fastmap (>= 1.0.0),
+    withr
 Suggests:
     datasets,
     Cairo (>= 1.5-5),
@@ -88,9 +89,11 @@ Suggests:
     rmarkdown,
     ggplot2,
     reactlog (>= 1.0.0),
-    magrittr
-Remotes:
-    r-lib/fastmap
+    magrittr,
+    shinytest,
+    yaml,
+    future,
+    dygraphs
 URL: http://shiny.rstudio.com
 BugReports: https://github.com/rstudio/shiny/issues
 Collate:
@@ -98,6 +101,7 @@ Collate:
     'bookmark-state-local.R'
     'stack.R'
     'bookmark-state.R'
+    'bootstrap-deprecated.R'
     'bootstrap-layout.R'
     'globals.R'
     'conditions.R'
@@ -141,6 +145,8 @@ Collate:
     'jqueryui.R'
     'middleware-shiny.R'
     'middleware.R'
+    'timer.R'
+    'mock-session.R'
     'modal.R'
     'modules.R'
     'notifications.R'
@@ -162,7 +168,9 @@ Collate:
     'snapshot.R'
     'tar.R'
     'test-export.R'
-    'timer.R'
+    'test-module.R'
+    'test.R'
     'update-input.R'
-RoxygenNote: 6.1.1
+RoxygenNote: 7.0.2
 Encoding: UTF-8
+Roxygen: list(markdown = TRUE)

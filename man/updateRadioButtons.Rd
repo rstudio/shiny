@@ -4,9 +4,16 @@
 \alias{updateRadioButtons}
 \title{Change the value of a radio input on the client}
 \usage{
-updateRadioButtons(session, inputId, label = NULL, choices = NULL,
-  selected = NULL, inline = FALSE, choiceNames = NULL,
-  choiceValues = NULL)
+updateRadioButtons(
+  session,
+  inputId,
+  label = NULL,
+  choices = NULL,
+  selected = NULL,
+  inline = FALSE,
+  choiceNames = NULL,
+  choiceValues = NULL
+)
 }
 \arguments{
 \item{session}{The \code{session} object passed to function given to
@@ -96,5 +103,5 @@ shinyApp(ui, server)
 }
 }
 \seealso{
-\code{\link{radioButtons}}
+\code{\link[=radioButtons]{radioButtons()}}
 }

@@ -2,11 +2,11 @@
 #'
 #' Create an input control for entry of unstructured text values
 #'
-#' @param inputId The \code{input} slot that will be used to access the value.
-#' @param label Display label for the control, or \code{NULL} for no label.
+#' @param inputId The `input` slot that will be used to access the value.
+#' @param label Display label for the control, or `NULL` for no label.
 #' @param value Initial value.
-#' @param width The width of the input, e.g. \code{'400px'}, or \code{'100\%'};
-#'   see \code{\link{validateCssUnit}}.
+#' @param width The width of the input, e.g. `'400px'`, or `'100%'`;
+#'   see [validateCssUnit()].
 #' @param placeholder A character string giving the user a hint as to what can
 #'   be entered into the control. Internet Explorer 8 and 9 do not support this
 #'   option.
@@ -14,7 +14,7 @@
 #' @return A text input control that can be added to a UI definition.
 #'
 #' @family input elements
-#' @seealso \code{\link{updateTextInput}}
+#' @seealso [updateTextInput()]
 #'
 #' @examples
 #' ## Only run examples in interactive R sessions
@@ -29,6 +29,11 @@
 #' }
 #' shinyApp(ui, server)
 #' }
+#'
+#' @section Server value:
+#' A character string of the text input. The default value is `""`
+#' unless `value` is provided.
+#'
 #' @export
 textInput <- function(inputId, label, value = "", width = NULL,
   placeholder = NULL, ...) {

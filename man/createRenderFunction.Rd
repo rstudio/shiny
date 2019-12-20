@@ -4,8 +4,12 @@
 \alias{createRenderFunction}
 \title{Implement render functions}
 \usage{
-createRenderFunction(func, transform = function(value, session, name,
-  ...) value, outputFunc = NULL, outputArgs = NULL)
+createRenderFunction(
+  func,
+  transform = function(value, session, name, ...) value,
+  outputFunc = NULL,
+  outputArgs = NULL
+)
 }
 \arguments{
 \item{func}{A function without parameters, that returns user data. If the
@@ -31,7 +35,7 @@ embedded in R Markdown documents).}
 }
 \value{
 An annotated render function, ready to be assigned to an
-  \code{output} slot.
+\code{output} slot.
 }
 \description{
 Implement render functions

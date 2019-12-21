@@ -95,7 +95,7 @@ Suggests:
     future,
     dygraphs
 Remotes:
-    rstudio/htmltools@joe/feature/bs4
+    rstudio/htmltools
 URL: http://shiny.rstudio.com
 BugReports: https://github.com/rstudio/shiny/issues
 Collate:

@@ -4,28 +4,32 @@
 \alias{markdown}
 \title{Insert inline Markdown}
 \usage{
-markdown(mds, ...)
+markdown(mds, extensions = TRUE, ...)
 }
 \arguments{
-\item{mds}{A character vector of Markdown source to convert to HTML.}
+\item{mds}{A character vector of Markdown source to convert to HTML. If the
+vector has more than one element, resulting HTML is concatenated.}
+
+\item{extensions}{Enable Github syntax extensions, defaults to \code{TRUE}.}
 
 \item{...}{Additional arguments to pass to \code{\link[commonmark:markdown_html]{commonmark::markdown_html()}}.
-These arguments are processed with \code{\link[rlang:list2]{rlang::list2()}} and so are
-\emph{\link[rlang:dyn-dots]{dynamic}}.}
+These arguments are \emph{\link[rlang:dyn-dots]{dynamic}}.}
 }
 \value{
-a \code{\link[htmltools:tagList]{htmltools::tagList()}} of rendered text
+an \code{html}-classed character vector of rendered HTML
 }
 \description{
 This function accepts a character vector of
-\href{https://en.wikipedia.org/wiki/Markdown}{Markdown}-syntax text and returns a
-\code{\link[htmltools:tagList]{htmltools::tagList()}} of HTML tags that may be in included in an
-application's UI.
+\href{https://en.wikipedia.org/wiki/Markdown}{Markdown}-syntax text and renders
+it to HTML that may be included in a UI.
 }
 \details{
 Prior to interpretation as Markdown, leading whitespace is trimmed from text
 with \code{\link[glue:trim]{glue::trim()}}. This makes it possible to insert Markdown and for it to
 be processed correctly even when the call to \code{markdown()} is indented.
+
+By default, \link[commonmark:extensions]{Github extensions} are enabled, but this
+can be disabled by passing \code{extensions = FALSE}.
 
 Markdown rendering is performed by \code{\link[commonmark:markdown_html]{commonmark::markdown_html()}}. Additional
 arguments to \code{markdown()} are passed as arguments to \code{markdown_html()}

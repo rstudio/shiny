@@ -2298,23 +2298,26 @@ missingOutput <- function(...) req(FALSE)
 #' Insert inline Markdown
 #'
 #' This function accepts a character vector of
-#' [Markdown](https://en.wikipedia.org/wiki/Markdown)-syntax text and returns a
-#' [htmltools::tagList()] of HTML tags that may be in included in an
-#' application's UI.
+#' [Markdown](https://en.wikipedia.org/wiki/Markdown)-syntax text and renders
+#' it to HTML that may be included in a UI.
 #'
 #' Prior to interpretation as Markdown, leading whitespace is trimmed from text
 #' with [glue::trim()]. This makes it possible to insert Markdown and for it to
 #' be processed correctly even when the call to `markdown()` is indented.
 #'
+#' By default, [Github extensions][commonmark::extensions] are enabled, but this
+#' can be disabled by passing `extensions = FALSE`.
+#'
 #' Markdown rendering is performed by [commonmark::markdown_html()]. Additional
 #' arguments to `markdown()` are passed as arguments to `markdown_html()`
 #'
-#' @param mds A character vector of Markdown source to convert to HTML.
+#' @param mds A character vector of Markdown source to convert to HTML. If the
+#'   vector has more than one element, resulting HTML is concatenated.
+#' @param extensions Enable Github syntax extensions, defaults to `TRUE`.
 #' @param ... Additional arguments to pass to [commonmark::markdown_html()].
-#'   These arguments are processed with [rlang::list2()] and so are
-#'   _[dynamic][rlang::dyn-dots]_.
+#'   These arguments are _[dynamic][rlang::dyn-dots]_.
 #'
-#' @return a [htmltools::tagList()] of rendered text
+#' @return an `html`-classed character vector of rendered HTML
 #' @export
 #' @examples
 #' ui <- fluidPage(
@@ -2336,8 +2339,6 @@ missingOutput <- function(...) req(FALSE)
 #'     To see more of what's possible, check out [commonmark.org/help](https://commonmark.org/help).
 #'     ")
 #' )
-markdown <- function(mds, ...) {
-  args <- rlang::list2(glue::trim(mds), ...)
-  html <- do.call(commonmark::markdown_html, args)
-  htmltools::HTML(html)
+markdown <- function(mds, extensions = TRUE, ...) {
+  rlang::exec(commonmark::markdown_html, glue::trim(mds), extensions = extensions, ...)
 }

@@ -13,6 +13,8 @@ install:
 cache:
   # Bust library cache every time the description file changes
   #   as appveyor cache can not be busted manually
+  # This helps get around errors such as "can't update curl because it's already loaded"
+  #  when trying to update the existing cache
   # PR: https://github.com/rstudio/shiny/pull/2722
   - C:\RLibrary -> DESCRIPTION
 

@@ -11,6 +11,9 @@ install:
   ps: Bootstrap
 
 cache:
+  # Bust library cache every time the description file changes
+  #   as appveyor cache can not be busted manually
+  # PR: https://github.com/rstudio/shiny/pull/2722
   - C:\RLibrary -> DESCRIPTION
 
 # Adapt as necessary starting from here

@@ -96,9 +96,9 @@ dateRangeInput <- function(inputId, label, start = NULL, end = NULL,
 
       shinyInputLabel(inputId, label),
       # input-daterange class is needed for dropdown behavior
-      div(class = "input-daterange input-group",
+      div(class = "input-daterange input-group input-group-sm",
         tags$input(
-          class = "input-sm form-control",
+          class = "form-control",
           type = "text",
           `data-date-language` = language,
           `data-date-week-start` = weekstart,
@@ -109,9 +109,14 @@ dateRangeInput <- function(inputId, label, start = NULL, end = NULL,
           `data-initial-date` = start,
           `data-date-autoclose` = if (autoclose) "true" else "false"
         ),
-        span(class = "input-group-addon", separator),
+        # input-group-prepend and input-group-append are for bootstrap 4 forward compat
+        span(class = "input-group-addon input-group-prepend input-group-append",
+          span(class = "input-group-text",
+            separator
+          )
+        ),
         tags$input(
-          class = "input-sm form-control",
+          class = "form-control",
           type = "text",
           `data-date-language` = language,
           `data-date-week-start` = weekstart,

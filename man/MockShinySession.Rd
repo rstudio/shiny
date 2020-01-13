@@ -82,6 +82,7 @@ s$setInputs(x=1, y=2)
 \item \href{#method-getTestSnapshotUrl}{\code{MockShinySession$getTestSnapshotUrl()}}
 \item \href{#method-ns}{\code{MockShinySession$ns()}}
 \item \href{#method-flushReact}{\code{MockShinySession$flushReact()}}
+\item \href{#method-makeScope}{\code{MockShinySession$makeScope()}}
 \item \href{#method-clone}{\code{MockShinySession$clone()}}
 }
 }
@@ -611,6 +612,14 @@ Returns the given id prefixed by \verb{mock-session-}.
 Trigger a reactive flush right now.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{MockShinySession$flushReact()}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-makeScope"></a>}}
+\subsection{Method \code{makeScope()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{MockShinySession$makeScope(namespace)}\if{html}{\out{</div>}}
 }
 
 }

@@ -1873,3 +1873,80 @@ findEnclosingApp <- function(path = ".") {
     path <- dirname(path)
   }
 }
+
+
+setAlpha <- function(colorStr, alpha = 1) {
+  colors <- t(col2rgb(colorStr, alpha = FALSE))
+  result <- sprintf("#%02X%02X%02X%02X",
+    colors[,"red"],
+    colors[,"green"],
+    colors[,"blue"],
+    round(pmin(1, pmax(0, alpha)) * 255)
+  )
+  result[is.na(colorStr)] <- NA_character_
+  result
+}
+
+# Test cases:
+# Leading/trailing spaces
+# Spaces around commas
+
+# Parses CSS colors and returns them in "#RRGGBBAA" format (or NA if parsing
+# failed).
+parseCssColor <- function(colorStr) {
+  # Normalize spaces
+  colorStr <- gsub("\\s*,\\s*", ",", colorStr)
+  colorStr <- gsub("^ +", "", colorStr)
+  colorStr <- gsub(" +$", "", colorStr)
+
+  nc <- nchar(colorStr)
+
+  is_hex <- grepl("^#([0-9a-zA-Z]{3,8})$", colorStr)
+  colorStr[is_hex] <- normalizeHexColor(colorStr[is_hex])
+
+  # FIXME: Could stand to do further validation of rgb(a) syntax here
+  is_rgba <- grepl("^rgba?\\(", colorStr)
+  colorStr[is_rgba] <- rgbFuncToHex(colorStr[is_rgba])
+
+  # TODO: Implement hsl? Ugh.
+
+  colorStr[!(is_hex | is_rgba)] <- NA
+  colorStr
+}
+
+# Assumes perfectly valid hex color input
+normalizeHexColor <- function(colorStr) {
+  colorStr <- sub("^#", "", colorStr)
+
+  shortform <- nchar(colorStr) < 6
+  colorStr[shortform] <- gsub("(.)", "\\1\\1", colorStr[shortform])
+
+  noalpha <- nchar(colorStr) == 6
+  colorStr[noalpha] <- paste0(colorStr[noalpha], "FF")
+
+  paste0("#", toupper(colorStr))
+}
+
+# Assumes perfectly valid rgb(a) color input with spaces removed
+rgbFuncToHex <- function(colorStr) {
+  m <- regexec("^rgba?\\(([\\d.]+),([\\d.]+),([\\d.]+)(,([\\d.]+))?\\)$", colorStr, perl = TRUE)
+  m_str <- regmatches(colorStr, m)
+  # m_str elements are character(0) where no match; fill out with NA
+  m_str[vapply(m_str, length, integer(1)) == 0] <- list(rep_len(NA_character_, 6))
+  m_df <- do.call(rbind, m_str)
+  colnames(m_df) <- c("str", "r", "g", "b", "_", "a")
+  red <- m_df[,"r"]
+  green <- m_df[,"g"]
+  blue <- m_df[,"b"]
+  alpha <- m_df[,"a"]
+  invalid <- is.na(red)
+
+  results <- sprintf("#%02X%02X%02X%02X",
+    as.integer(red),
+    as.integer(green),
+    as.integer(blue),
+    ifelse(alpha == "", 255, round(pmax(0, pmin(1, as.numeric(alpha))) * 255))
+  )
+  results[invalid] <- NA
+  results
+}

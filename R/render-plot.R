@@ -53,7 +53,9 @@
 #' @export
 renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
                        env=parent.frame(), quoted=FALSE,
-                       execOnResize=FALSE, outputArgs=list()
+                       execOnResize=FALSE,
+                       autoColors=getShinyOption("plot.autocolors", FALSE),
+                       outputArgs=list()
 ) {
   # This ..stacktraceon is matched by a ..stacktraceoff.. when plotFunc
   # is called
@@ -90,6 +92,19 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
     list(width = width, height = height)
   }
 
+  getColors <- function() {
+    if (!isTRUE(autoColors)) {
+      return(NULL)
+    }
+    bg <- parseCssColor(session$clientData[[paste0('output_', outputName, '_bg')]])
+    fg <- parseCssColor(session$clientData[[paste0('output_', outputName, '_fg')]])
+    if (length(bg) == 1 && length(fg) == 1 && !is.na(bg) && !is.na(fg)) {
+      return(list(bg = bg, fg = fg))
+    } else {
+      return(NULL)
+    }
+  }
+
   # Vars to store session and output, so that they can be accessed from
   # the plotObj() reactive.
   session <- NULL
@@ -104,6 +119,7 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
       {
         # If !execOnResize, don't invalidate when width/height changes.
         dims <- if (execOnResize) getDims() else isolate(getDims())
+        colors <- getColors()
         pixelratio <- session$clientData$pixelratio %OR% 1
         do.call("drawPlot", c(
           list(
@@ -113,7 +129,9 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
             width = dims$width,
             height = dims$height,
             pixelratio = pixelratio,
-            res = res
+            res = res,
+            bg = colors$bg,
+            fg = colors$fg
           ), args))
       },
       catch = function(reason) {
@@ -183,7 +201,9 @@ resizeSavedPlot <- function(name, session, result, width, height, pixelratio, re
   result
 }
 
-drawPlot <- function(name, session, func, width, height, pixelratio, res, ...) {
+drawPlot <- function(name, session, func, width, height, pixelratio, res, bg = NULL, fg = NULL,
+  ...) {
+
   #  1. Start PNG
   #  2. Enable displaylist recording
   #  3. Call user-defined func
@@ -196,9 +216,26 @@ drawPlot <- function(name, session, func, width, height, pixelratio, res, ...) {
   # 10. On error, take width and height dependency
 
   outfile <- tempfile(fileext='.png') # If startPNG throws, this could leak. Shrug.
-  device <- startPNG(outfile, width*pixelratio, height*pixelratio, res = res*pixelratio, ...)
+  device <- startPNG(outfile, width*pixelratio, height*pixelratio, res = res*pixelratio,
+    bg = if (is.null(bg)) "transparent" else bg, ...)
   domain <- createGraphicsDevicePromiseDomain(device)
   grDevices::dev.control(displaylist = "enable")
+
+  # Remember our changes to the graphical parameters so we can restore them
+  # after printing
+  params <- list()
+  if (!is.null(bg)) {
+    params <- c(params, par(bg = bg))
+  }
+  if (!is.null(fg)) {
+    params <- c(params, par(
+      fg = fg,
+      col.axis = fg,
+      col.lab = fg,
+      col.main = fg,
+      col.sub = fg
+    ))
+  }
 
   hybrid_chain(
     hybrid_chain(
@@ -213,7 +250,7 @@ drawPlot <- function(name, session, func, width, height, pixelratio, res, ...) {
               # to be a (pseudo) S3 method is so that, if an object has a class in
               # addition to ggplot, and there's a print method for that class, that we
               # won't override that method. https://github.com/rstudio/shiny/issues/841
-              print.ggplot <- custom_print.ggplot
+              print.ggplot <- custom_print.ggplot(bg, fg)
 
               # Use capture.output to squelch printing to the actual console; we
               # are only interested in plot output
@@ -227,6 +264,9 @@ drawPlot <- function(name, session, func, width, height, pixelratio, res, ...) {
                 result <- ..stacktraceon..(print(value))
                 # TODO jcheng 2017-04-11: Verify above ..stacktraceon..
               })
+              # restore graphical parameters
+              do.call(par, params)
+
               result
             } else {
               # Not necessary, but I wanted to make it explicit
@@ -272,18 +312,72 @@ drawPlot <- function(name, session, func, width, height, pixelratio, res, ...) {
 # to be a (pseudo) S3 method is so that, if an object has a class in
 # addition to ggplot, and there's a print method for that class, that we
 # won't override that method. https://github.com/rstudio/shiny/issues/841
-custom_print.ggplot <- function(x) {
-  grid::grid.newpage()
+custom_print.ggplot <- function(bg, fg) {
+  function(x) {
+    if (!is.null(fg)) {
+      if (is.null(bg)) {
+        bg <- "transparent"
+      }
 
-  build <- ggplot2::ggplot_build(x)
+      # Temporarily set new colour/fill aes defaults for every geom
+      geoms <- mget(
+        grep("^Geom", getNamespaceExports("ggplot2"), ignore.case = FALSE, value = TRUE),
+        asNamespace("ggplot2")
+      )
+      colours <- lapply(geoms, function(x) x$default_aes$colour)
+      fills <- lapply(geoms, function(x) x$default_aes$fill)
+      for (geom in geoms) {
+        geom$default_aes$colour <- fg
+        geom$default_aes$fill <- bg
+      }
+      on.exit({
+        Map(function(geom, colour, fill) {
+          geom$default_aes$colour <- colour
+          geom$default_aes$fill <- fill
+        }, geoms, colours, fills)
+      }, add = TRUE)
 
-  gtable <- ggplot2::ggplot_gtable(build)
-  grid::grid.draw(gtable)
+      # Set sensible theme defaults for the plot
+      user_theme <- x$theme
+      x$theme <- NULL
+      x <- x +
+        auto_color_theme(bg, fg) +
+        do.call(theme, user_theme)
+    }
 
-  structure(list(
-    build = build,
-    gtable = gtable
-  ), class = "ggplot_build_gtable")
+    grid::grid.newpage()
+
+    build <- ggplot2::ggplot_build(x)
+
+    gtable <- ggplot2::ggplot_gtable(build)
+    grid::grid.draw(gtable)
+
+    structure(list(
+      build = build,
+      gtable = gtable
+    ), class = "ggplot_build_gtable")
+  }
+}
+
+auto_color_theme <- function(bg, fg) {
+  text <- element_text(colour = fg)
+  line <- element_line(colour = fg)
+
+  theme(
+    line = line,
+    text = text,
+    axis.title = text,
+    axis.text = text,
+    axis.ticks = line,
+    plot.background = element_rect(fill = bg, colour = "transparent"),
+    panel.background = element_rect(fill = setAlpha(fg, 0.2)),
+    panel.grid = element_line(colour = bg),
+    legend.background = element_rect(fill = "transparent"),
+    legend.box.background = element_rect(fill = "transparent", colour = "transparent"),
+    legend.key = element_rect(fill = setAlpha(fg, 0.1), colour = bg),
+    strip.background = element_rect(fill = setAlpha(bg, 0.1), colour = fg),
+    strip.text = text
+  )
 }
 
 # The coordmap extraction functions below return something like the examples

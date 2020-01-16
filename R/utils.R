@@ -1909,6 +1909,8 @@ parseCssColor <- function(colorStr) {
   colorStr[is_rgba] <- rgbFuncToHex(colorStr[is_rgba])
 
   # TODO: Implement hsl? Ugh.
+  # Update: getPropertyValue() seems to return rgba() codes even if
+  # the element is styled with hsl(), so let's not worry for now.
 
   colorStr[!(is_hex | is_rgba)] <- NA
   colorStr

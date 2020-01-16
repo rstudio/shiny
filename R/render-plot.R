@@ -93,11 +93,23 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
   }
 
   getColors <- function() {
-    if (!isTRUE(autoColors)) {
+    if (identical(autoColors, FALSE)) {
       return(NULL)
     }
-    bg <- parseCssColor(session$clientData[[paste0('output_', outputName, '_bg')]])
-    fg <- parseCssColor(session$clientData[[paste0('output_', outputName, '_fg')]])
+    bg <- if ("bg" %in% names(autoColors)) {
+      # TODO: it would be cool to be able to use Sass variables are part of
+      # this specification, like bg = "$primary", but would need something like
+      # this first https://github.com/rstudio/bootstraplib/issues/33
+      autoColors[["bg"]]
+    } else {
+      parseCssColor(session$clientData[[paste0('output_', outputName, '_bg')]])
+    }
+    fg <- if ("fg" %in% names(autoColors)) {
+      autoColors[["fg"]]
+    } else {
+      parseCssColor(session$clientData[[paste0('output_', outputName, '_fg')]])
+    }
+
     if (length(bg) == 1 && length(fg) == 1 && !is.na(bg) && !is.na(fg)) {
       return(list(bg = bg, fg = fg))
     } else {

@@ -1901,7 +1901,7 @@ parseCssColor <- function(colorStr) {
 
   nc <- nchar(colorStr)
 
-  is_hex <- grepl("^#([0-9a-zA-Z]{3,8})$", colorStr)
+  is_hex <- grepl("^#([0-9a-fA-F]{3,8})$", colorStr)
   colorStr[is_hex] <- normalizeHexColor(colorStr[is_hex])
 
   # FIXME: Could stand to do further validation of rgb(a) syntax here
@@ -1916,6 +1916,8 @@ parseCssColor <- function(colorStr) {
 
 # Assumes perfectly valid hex color input
 normalizeHexColor <- function(colorStr) {
+  if (!length(colorStr)) return(character(0))
+
   colorStr <- sub("^#", "", colorStr)
 
   shortform <- nchar(colorStr) < 6
@@ -1929,6 +1931,8 @@ normalizeHexColor <- function(colorStr) {
 
 # Assumes perfectly valid rgb(a) color input with spaces removed
 rgbFuncToHex <- function(colorStr) {
+  if (!length(colorStr)) return(character(0))
+
   m <- regexec("^rgba?\\(([\\d.]+),([\\d.]+),([\\d.]+)(,([\\d.]+))?\\)$", colorStr, perl = TRUE)
   m_str <- regmatches(colorStr, m)
   # m_str elements are character(0) where no match; fill out with NA

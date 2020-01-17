@@ -47,6 +47,11 @@
 #'   This can result in faster plot redrawing, but there may be rare cases where
 #'   it is undesirable. If you encounter problems when resizing a plot, you can
 #'   have Shiny re-execute the code on resize by setting this to `TRUE`.
+#' @param autoColors A boolean or vector with two R colors named `bg` and `fg`
+#' (e.g., `c(bg = "red", fg = "blue")`). If `TRUE`, the background (`bg`) and
+#' foreground (`fg`) colors derive from the plot's containing HTML element(s)'
+#' CSS styling. When `TRUE`, or a vector of colors, the relevant colors are
+#' used to set default theming for base and ggplot2 graphics.
 #' @param outputArgs A list of arguments to be passed through to the implicit
 #'   call to [plotOutput()] when `renderPlot` is used in an
 #'   interactive R Markdown document.
@@ -333,14 +338,28 @@ custom_print.ggplot <- function(bg, fg) {
 
       # Temporarily set new colour/fill aes defaults for every geom
       geoms <- mget(
-        grep("^Geom", getNamespaceExports("ggplot2"), ignore.case = FALSE, value = TRUE),
+        grep("^Geom[A-Z]", getNamespaceExports("ggplot2"), ignore.case = FALSE, value = TRUE),
         asNamespace("ggplot2")
       )
       colours <- lapply(geoms, function(x) x$default_aes$colour)
       fills <- lapply(geoms, function(x) x$default_aes$fill)
+      maybe_assign_default <- function(geom, aes, color) {
+        aes_val <- geom$default_aes[[aes]]
+        # Not every aes is defined for every geom (e.g., fill isn't relevant for geom_density_2d)
+        # Pretty sure all those cases are NULL
+        if (!length(aes_val)) return()
+        # Some aes default to transparent (e.g., GeomBar$default_aes$colour),
+        # which we don't want to override...it might be surprising that we're introducing stroke/fill
+        if (is.na(aes_val)) return()
+        # For some reason geom_polygon(), and hence others, have "NA" which seems
+        # to be interpreted as transparent as well https://github.com/tidyverse/ggplot2/blob/214f3148/R/geom-polygon.r#L170
+        if (identical(aes_val, "NA")) return()
+
+        geom$default_aes[[aes]] <- color
+      }
       for (geom in geoms) {
-        geom$default_aes$colour <- fg
-        geom$default_aes$fill <- bg
+        maybe_assign_default(geom, "colour", fg)
+        maybe_assign_default(geom, "fill", bg)
       }
       on.exit({
         Map(function(geom, colour, fill) {

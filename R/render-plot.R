@@ -48,10 +48,14 @@
 #'   it is undesirable. If you encounter problems when resizing a plot, you can
 #'   have Shiny re-execute the code on resize by setting this to `TRUE`.
 #' @param autoColors A boolean or vector with two R colors named `bg` and `fg`
-#' (e.g., `c(bg = "red", fg = "blue")`). If `TRUE`, the background (`bg`) and
-#' foreground (`fg`) colors derive from the plot's containing HTML element(s)'
-#' CSS styling. When `TRUE`, or a vector of colors, the relevant colors are
-#' used to set default theming for base and ggplot2 graphics.
+#'   (e.g., `c(bg = "red", fg = "blue")`). If `TRUE`, the background (`bg`) and
+#'   foreground (`fg`) colors derive from the plot's containing HTML element(s)'
+#'   CSS styling. When `TRUE`, or a vector of colors, the relevant colors are
+#'   used to set default theming for ggplot2, lattice, and base graphics. If there
+#'   are certain aspects you don't like about the theming defaults, you can change
+#'   these defaults through [ggplot2::theme()]
+#'   (and/or \href{https://ggplot2.tidyverse.org/articles/ggplot2-specs.html}{aesthetics}),
+#'   [lattice::trellis.par.set()], [grid::gpar()], and [base::par()].
 #' @param outputArgs A list of arguments to be passed through to the implicit
 #'   call to [plotOutput()] when `renderPlot` is used in an
 #'   interactive R Markdown document.
@@ -238,21 +242,12 @@ drawPlot <- function(name, session, func, width, height, pixelratio, res, bg = N
   domain <- createGraphicsDevicePromiseDomain(device)
   grDevices::dev.control(displaylist = "enable")
 
-  # Remember our changes to the graphical parameters so we can restore them
-  # after printing
-  params <- list()
-  if (!is.null(bg)) {
-    params <- c(params, par(bg = bg))
-  }
-  if (!is.null(fg)) {
-    params <- c(params, par(
-      fg = fg,
-      col.axis = fg,
-      col.lab = fg,
-      col.main = fg,
-      col.sub = fg
-    ))
-  }
+  # Set graphical parameters for base/grid/lattice and remember the changes
+  base_params <- base_set_params(bg, fg)
+  grid_params <- grid_set_params(bg, fg)
+  lattice_params <- lattice_set_params(bg, fg)
+
+  old_palette <- maybe_set_palette(fg)
 
   hybrid_chain(
     hybrid_chain(
@@ -281,8 +276,11 @@ drawPlot <- function(name, session, func, width, height, pixelratio, res, bg = N
                 result <- ..stacktraceon..(print(value))
                 # TODO jcheng 2017-04-11: Verify above ..stacktraceon..
               })
-              # restore graphical parameters
-              do.call(par, params)
+              # restore original base/grid/lattice graphical parameters
+              do.call(par, base_params)
+              do.call(grid::gpar, grid_params)
+              lattice_set_par_list(lattice_params)
+              palette(old_palette)
 
               result
             } else {
@@ -323,6 +321,81 @@ drawPlot <- function(name, session, func, width, height, pixelratio, res, bg = N
   )
 }
 
+base_set_params <- function(bg, fg) {
+  params <- list()
+  if (!is.null(bg)) {
+    params <- c(params, par(bg = bg))
+  }
+  if (!is.null(fg)) {
+    params <- c(params, par(
+      fg = fg,
+      col.axis = fg,
+      col.lab = fg,
+      col.main = fg,
+      col.sub = fg
+    ))
+  }
+  params
+}
+
+grid_set_params <- function(bg, fg) {
+  grid::gpar(fill = bg, col = fg)
+}
+
+lattice_set_params <- function(bg, fg) {
+  if (system.file(package = "lattice") == "") return()
+  old_par <- lattice::trellis.par.get()
+  lattice::trellis.par.set(
+    # See figure 9.3 for an example of where grid gpar matters
+    # http://lmdvr.r-forge.r-project.org/figures/figures.html
+    grid.pars = list(col = fg, fill = bg),
+    background = list(col = bg),
+    panel.background = list(col = setAlpha(fg, 0.2)),
+    add.line = list(col = fg),
+    add.text = list(col = fg),
+    plot.polygon = list(border = fg, col = bg),
+    box.dot = list(col = fg),
+    box.rectangle = list(col = fg, fill = bg),
+    box.umbrella = list(col = fg),
+    dot.line = list(col = setAlpha(fg, 0.2)),
+    dot.symbol = list(col = fg),
+    plot.line = list(col = fg),
+    plot.symbol = list(col = fg),
+    reference.line = list(col = bg),
+    strip.background = list(col = setAlpha(fg, 0.4)),
+    strip.border = list(col = "transparent"),
+    superpose.polygon = list(border = rep("transparent", 7)),
+    axis.line = list(col = fg),
+    axis.text = list(col = fg),
+    box.3d = list(col = fg),
+    par.xlab.text = list(col = fg),
+    par.ylab.text = list(col = fg),
+    par.zlab.text = list(col = fg),
+    par.main.text = list(col = fg),
+    par.sub.text = list(col = fg)
+  )
+  old_par
+}
+
+lattice_set_par_list <- function(params) {
+  if (system.file(package = "lattice") == "") return()
+  do.call(lattice::trellis.par.set, params)
+}
+
+maybe_set_palette <- function(fg) {
+  p <- palette()
+  if (is_default_pallete(p)) {
+    p[[1]] <- fg
+    palette(p)
+  }
+  p
+}
+
+is_default_pallete <- function(p) {
+  if (system.file(package = "callr") == "") return(FALSE)
+  identical(p, callr::r(function() { palette() }))
+}
+
 # A modified version of print.ggplot which returns the built ggplot object
 # as well as the gtable grob. This overrides the ggplot::print.ggplot
 # method, but only within the context of renderPlot. The reason this needs
@@ -337,6 +410,10 @@ custom_print.ggplot <- function(bg, fg) {
       }
 
       # Temporarily set new colour/fill aes defaults for every geom
+      # TODO: is there a great set set of geoms we'd like to bless? Or
+      # should we just provide a way for developer to access the fg/bg
+      # during render time (i.e., maybe temporarily set plot.autocolors
+      # to the vector of colors?)
       geoms <- mget(
         grep("^Geom[A-Z]", getNamespaceExports("ggplot2"), ignore.case = FALSE, value = TRUE),
         asNamespace("ggplot2")

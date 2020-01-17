@@ -13,6 +13,7 @@ renderPlot(
   env = parent.frame(),
   quoted = FALSE,
   execOnResize = FALSE,
+  autoColors = getShinyOption("plot.autocolors", FALSE),
   outputArgs = list()
 )
 }
@@ -51,6 +52,16 @@ resized, Shiny will \emph{replay} the plot drawing commands with
 This can result in faster plot redrawing, but there may be rare cases where
 it is undesirable. If you encounter problems when resizing a plot, you can
 have Shiny re-execute the code on resize by setting this to \code{TRUE}.}
+
+\item{autoColors}{A boolean or vector with two R colors named \code{bg} and \code{fg}
+(e.g., \code{c(bg = "red", fg = "blue")}). If \code{TRUE}, the background (\code{bg}) and
+foreground (\code{fg}) colors derive from the plot's containing HTML element(s)'
+CSS styling. When \code{TRUE}, or a vector of colors, the relevant colors are
+used to set default theming for ggplot2, lattice, and base graphics. If there
+are certain aspects you don't like about the theming defaults, you can change
+these defaults through \code{\link[ggplot2:theme]{ggplot2::theme()}}
+(and/or \href{https://ggplot2.tidyverse.org/articles/ggplot2-specs.html}{aesthetics}),
+\code{\link[lattice:trellis.par.set]{lattice::trellis.par.set()}}, \code{\link[grid:gpar]{grid::gpar()}}, and \code{\link[base:par]{base::par()}}.}
 
 \item{outputArgs}{A list of arguments to be passed through to the implicit
 call to \code{\link[=plotOutput]{plotOutput()}} when \code{renderPlot} is used in an

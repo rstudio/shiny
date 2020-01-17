@@ -35,6 +35,9 @@ getShinyOption <- function(name, default = NULL) {
 #' `shinyOptions()`.
 #'
 #' \describe{
+#' \item{shiny.autoplot (defaults to `FALSE`)}{If `TRUE`, or a vector with two R colors
+#' named `bg` and `fg` (e.g., `c(bg = "red", fg = "blue")`), then automatic theming
+#' is applied to ggplot2, lattice, and base graphics in [renderPlot()].}
 #' \item{shiny.autoreload (defaults to `FALSE`)}{If `TRUE` when a Shiny app is launched, the
 #'   app directory will be continually monitored for changes to files that
 #'   have the extensions: r, htm, html, js, css, png, jpg, jpeg, gif. If any

@@ -406,7 +406,7 @@ auto_color_theme <- function(bg, fg) {
     legend.background = element_rect(fill = "transparent"),
     legend.box.background = element_rect(fill = "transparent", colour = "transparent"),
     legend.key = element_rect(fill = setAlpha(fg, 0.1), colour = bg),
-    strip.background = element_rect(fill = setAlpha(bg, 0.1), colour = fg),
+    strip.background = element_rect(fill = setAlpha(fg, 0.3)),
     strip.text = text
   )
 }

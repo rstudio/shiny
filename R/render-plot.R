@@ -223,16 +223,20 @@ drawPlot <- function(name, session, func, width, height, pixelratio, res, bg = N
   domain <- createGraphicsDevicePromiseDomain(device)
   grDevices::dev.control(displaylist = "enable")
 
-  # Set graphical parameters for base/grid/lattice and remember the changes
-  base_params <- base_set_params(bg, fg)
-  grid_params <- grid_set_params(bg, fg)
-  lattice_params <- lattice_set_params(bg, fg)
-
-  old_palette <- maybe_set_palette(fg)
+  base_params <- NULL
+  grid_params <- NULL
+  lattice_params <- NULL
+  old_palette <- NULL
 
   hybrid_chain(
     hybrid_chain(
       promises::with_promise_domain(domain, {
+        # Set graphical parameters for base/grid/lattice and remember the changes
+        base_params <<- base_set_params(bg, fg)
+        grid_params <<- grid_set_params(bg, fg)
+        lattice_params <<- lattice_set_params(bg, fg)
+        old_palette <<- maybe_set_palette(fg)
+
         hybrid_chain(
           func(),
           function(value, .visible) {
@@ -257,11 +261,6 @@ drawPlot <- function(name, session, func, width, height, pixelratio, res, bg = N
                 result <- ..stacktraceon..(print(value))
                 # TODO jcheng 2017-04-11: Verify above ..stacktraceon..
               })
-              # restore original base/grid/lattice graphical parameters
-              do.call(par, base_params)
-              do.call(grid::gpar, grid_params)
-              lattice_set_par_list(lattice_params)
-              palette(old_palette)
 
               result
             } else {
@@ -281,6 +280,16 @@ drawPlot <- function(name, session, func, width, height, pixelratio, res, bg = N
         )
       }),
       finally = function() {
+        # Restore original base/grid/lattice graphical parameters.
+        # The reason these are all checking for NULL is not because they may be
+        # NULL is the normal case, but in case any of the param setting calls
+        # threw an error; in that case, not all of these four may have been
+        # performed.
+        if (!is.null(base_params)) { do.call(par, base_params) }
+        if (!is.null(grid_params)) { do.call(grid::gpar, grid_params) }
+        if (!is.null(lattice_params)) { lattice_set_par_list(lattice_params) }
+        if (!is.null(old_palette)) { palette(old_palette) }
+
         grDevices::dev.off(device)
       }
     ),

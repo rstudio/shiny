@@ -232,10 +232,12 @@ drawPlot <- function(name, session, func, width, height, pixelratio, res, bg = N
     hybrid_chain(
       promises::with_promise_domain(domain, {
         # Set graphical parameters for base/grid/lattice and remember the changes
-        base_params <<- base_set_params(bg, fg)
-        grid_params <<- grid_set_params(bg, fg)
-        lattice_params <<- lattice_set_params(bg, fg)
-        old_palette <<- maybe_set_palette(fg)
+        if (!is.null(fg) && !is.null(bg)) {
+          base_params <- base_set_params(bg, fg)
+          grid_params <- grid_set_params(bg, fg)
+          lattice_params <- lattice_set_params(bg, fg)
+          old_palette <- maybe_set_palette(fg)
+        }
 
         hybrid_chain(
           func(),
@@ -394,14 +396,15 @@ lattice_set_params <- function(bg, fg) {
 
 lattice_set_par_list <- function(params) {
   if (system.file(package = "lattice") == "") return()
-  do.call(lattice::trellis.par.set, params)
+  lattice::trellis.par.set(theme = params)
 }
 
 maybe_set_palette <- function(fg) {
   p <- palette()
-  if (is_default_pallete(p)) {
-    p[[1]] <- fg
-    palette(p)
+  if (is_default_pallete(p) && !is.null(fg)) {
+    p_tmp <- p
+    p_tmp[[1]] <- fg
+    palette(p_tmp)
   }
   p
 }

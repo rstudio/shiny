@@ -496,12 +496,12 @@ auto_color_theme <- function(bg, fg) {
     axis.text = text,
     axis.ticks = line,
     plot.background = element_rect(fill = bg, colour = "transparent"),
-    panel.background = element_rect(fill = setAlpha(fg, 0.2)),
+    panel.background = element_rect(fill = setAlpha(fg, 0.1)),
     panel.grid = element_line(colour = bg),
     legend.background = element_rect(fill = "transparent"),
     legend.box.background = element_rect(fill = "transparent", colour = "transparent"),
     legend.key = element_rect(fill = setAlpha(fg, 0.1), colour = bg),
-    strip.background = element_rect(fill = setAlpha(fg, 0.3)),
+    strip.background = element_rect(fill = setAlpha(fg, 0.215)),
     strip.text = text
   )
 }

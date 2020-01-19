@@ -294,6 +294,7 @@ renderCachedPlot <- function(expr,
   sizePolicy = sizeGrowthRatio(width = 400, height = 400, growthRate = 1.2),
   res = 72,
   cache = "app",
+  autoColors = getShinyOption("plot.autocolors", FALSE),
   ...,
   outputArgs = list()
 ) {
@@ -389,6 +390,7 @@ renderCachedPlot <- function(expr,
           height <- fitDims$height
         })
 
+        colors <- getColors(autoColors, session, outputName)
         pixelratio <- session$clientData$pixelratio %OR% 1
 
         do.call("drawPlot", c(
@@ -399,7 +401,9 @@ renderCachedPlot <- function(expr,
             width = width,
             height = height,
             pixelratio = pixelratio,
-            res = res
+            res = res,
+            bg = colors$bg,
+            fg = colors$fg
           ),
           args
         ))
@@ -435,8 +439,9 @@ renderCachedPlot <- function(expr,
         width  <- fitDims$width
         height <- fitDims$height
         pixelratio <- session$clientData$pixelratio %OR% 1
+        colors <- getColors(autoColors, session, outputName)
 
-        key <- digest::digest(list(outputName, userCacheKeyResult, width, height, res, pixelratio), "xxhash64")
+        key <- digest::digest(list(outputName, userCacheKeyResult, width, height, res, pixelratio, colors), "xxhash64")
 
         plotObj <- cache$get(key)
 
@@ -449,7 +454,8 @@ renderCachedPlot <- function(expr,
             plotObj = plotObj,
             width = width,
             height = height,
-            pixelratio = pixelratio
+            pixelratio = pixelratio,
+            colors = colors
           ))
         }
 
@@ -471,7 +477,8 @@ renderCachedPlot <- function(expr,
               plotObj = drawReactiveResult,
               width = width,
               height = height,
-              pixelratio = pixelratio
+              pixelratio = pixelratio,
+              colors = colors
             )
           }
         )
@@ -481,6 +488,7 @@ renderCachedPlot <- function(expr,
           width      <- result$width
           height     <- result$height
           pixelratio <- result$pixelratio
+          colors     <- result$colors
 
           # Three possibilities when we get here:
           # 1. There was a cache hit. No need to set a value in the cache.
@@ -501,7 +509,9 @@ renderCachedPlot <- function(expr,
                 width,
                 height,
                 pixelratio,
-                res
+                res,
+                bg = colors$bg,
+                fg = colors$fg
               ),
               args
             ))

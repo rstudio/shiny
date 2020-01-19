@@ -101,31 +101,6 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
     list(width = width, height = height)
   }
 
-  getColors <- function() {
-    if (identical(autoColors, FALSE)) {
-      return(NULL)
-    }
-    bg <- if ("bg" %in% names(autoColors)) {
-      # TODO: it would be cool to be able to use Sass variables are part of
-      # this specification, like bg = "$primary", but would need something like
-      # this first https://github.com/rstudio/bootstraplib/issues/33
-      autoColors[["bg"]]
-    } else {
-      parseCssColor(session$clientData[[paste0('output_', outputName, '_bg')]])
-    }
-    fg <- if ("fg" %in% names(autoColors)) {
-      autoColors[["fg"]]
-    } else {
-      parseCssColor(session$clientData[[paste0('output_', outputName, '_fg')]])
-    }
-
-    if (length(bg) == 1 && length(fg) == 1 && !is.na(bg) && !is.na(fg)) {
-      return(list(bg = bg, fg = fg))
-    } else {
-      return(NULL)
-    }
-  }
-
   # Vars to store session and output, so that they can be accessed from
   # the plotObj() reactive.
   session <- NULL
@@ -140,8 +115,8 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
       {
         # If !execOnResize, don't invalidate when width/height changes.
         dims <- if (execOnResize) getDims() else isolate(getDims())
-        colors <- getColors()
         pixelratio <- session$clientData$pixelratio %OR% 1
+        colors <- getColors(autoColors, session, outputName)
         do.call("drawPlot", c(
           list(
             name = outputName,
@@ -178,8 +153,9 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
       function(result) {
         dims <- getDims()
         pixelratio <- session$clientData$pixelratio %OR% 1
+        colors <- getColors(autoColors, session, outputName)
         result <- do.call("resizeSavedPlot", c(
-          list(name, shinysession, result, dims$width, dims$height, pixelratio, res),
+          list(name, shinysession, result, dims$width, dims$height, pixelratio, res, colors$bg, colors$fg),
           args
         ))
 
@@ -198,17 +174,22 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
   markRenderFunction(outputFunc, renderFunc, outputArgs = outputArgs)
 }
 
-resizeSavedPlot <- function(name, session, result, width, height, pixelratio, res, ...) {
+# TODO: bg, fg
+resizeSavedPlot <- function(name, session, result, width, height, pixelratio, res, bg, fg, ...) {
   if (result$img$width == width && result$img$height == height &&
-      result$pixelratio == pixelratio && result$res == res) {
+      result$pixelratio == pixelratio && result$res == res &&
+      identical(result$bg, bg) && identical(result$fg, fg)) {
     return(result)
   }
 
   coordmap <- NULL
   outfile <- plotPNG(function() {
+    # TODO: Is it necessary to set base/lattice parameters for fg/bg? Or will those colors be
+    # reflected in the recordedPlot?
+
     grDevices::replayPlot(result$recordedPlot)
     coordmap <<- getCoordmap(result$plotResult, width*pixelratio, height*pixelratio, res*pixelratio)
-  }, width = width*pixelratio, height = height*pixelratio, res = res*pixelratio, ...)
+  }, width = width*pixelratio, height = height*pixelratio, res = res*pixelratio, bg = bg, ...)
   on.exit(unlink(outfile), add = TRUE)
 
   result$img <- list(
@@ -319,6 +300,31 @@ drawPlot <- function(name, session, func, width, height, pixelratio, res, bg = N
       unlink(outfile)
     }
   )
+}
+
+getColors <- function(autoColors, session, outputName) {
+  if (identical(autoColors, FALSE)) {
+    return(NULL)
+  }
+  bg <- if ("bg" %in% names(autoColors)) {
+    # TODO: it would be cool to be able to use Sass variables are part of
+    # this specification, like bg = "$primary", but would need something like
+    # this first https://github.com/rstudio/bootstraplib/issues/33
+    autoColors[["bg"]]
+  } else {
+    parseCssColor(session$clientData[[paste0('output_', outputName, '_bg')]])
+  }
+  fg <- if ("fg" %in% names(autoColors)) {
+    autoColors[["fg"]]
+  } else {
+    parseCssColor(session$clientData[[paste0('output_', outputName, '_fg')]])
+  }
+
+  if (length(bg) == 1 && length(fg) == 1 && !is.na(bg) && !is.na(fg)) {
+    return(list(bg = bg, fg = fg))
+  } else {
+    return(NULL)
+  }
 }
 
 base_set_params <- function(bg, fg) {

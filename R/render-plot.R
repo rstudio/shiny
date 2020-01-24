@@ -367,14 +367,14 @@ lattice_set_params <- function(bg, fg) {
     # http://lmdvr.r-forge.r-project.org/figures/figures.html
     grid.pars = list(col = fg, fill = bg),
     background = list(col = bg),
-    panel.background = list(col = setAlpha(fg, 0.2)),
+    panel.background = list(col = setAlpha(fg, 0.1)),
     add.line = list(col = fg),
     add.text = list(col = fg),
     plot.polygon = list(border = fg, col = bg),
     box.dot = list(col = fg),
     box.rectangle = list(col = fg, fill = bg),
     box.umbrella = list(col = fg),
-    dot.line = list(col = setAlpha(fg, 0.2)),
+    dot.line = list(col = setAlpha(fg, 0.1)),
     dot.symbol = list(col = fg),
     plot.line = list(col = fg),
     plot.symbol = list(col = fg),
@@ -452,9 +452,20 @@ custom_print.ggplot <- function(bg, fg) {
 
         geom$default_aes[[aes]] <- color
       }
+      mid_color <- colorRamp(c(bg, fg), alpha = TRUE)(0.7)
+      mid_color <- sprintf("#%02X%02X%02X%02X",
+        round(mid_color[1,1]),
+        round(mid_color[1,2]),
+        round(mid_color[1,3]),
+        round(mid_color[1,4]))
       for (geom in geoms) {
-        maybe_assign_default(geom, "colour", fg)
-        maybe_assign_default(geom, "fill", bg)
+        default_colour <- geom$default_aes[["colour"]]
+        if (is.null(default_colour) || isTRUE(is.na(default_colour)) || identical(default_colour, "NA")) {
+          maybe_assign_default(geom, "fill", mid_color)
+        } else {
+          maybe_assign_default(geom, "colour", fg)
+          maybe_assign_default(geom, "fill", bg)
+        }
       }
       on.exit({
         Map(function(geom, colour, fill) {

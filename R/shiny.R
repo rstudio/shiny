@@ -2166,6 +2166,13 @@ flushPendingSessions <- function() {
 }
 
 .globals$onStopCallbacks <- Callbacks$new()
+# Close ShinySession on.exit event (SIGINT signal)
+.globals$onStopCallbacks$register(function() {
+  lapply(appsByToken$keys(), function(session) {
+    session <- appsByToken$get(session)
+    if (isFALSE(session$closed)) session$wsClosed()
+  })
+})
 
 #' Run code after an application or session ends
 #'

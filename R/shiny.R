@@ -2165,14 +2165,20 @@ flushPendingSessions <- function() {
   })
 }
 
-.globals$onStopCallbacks <- Callbacks$new()
-# Close ShinySession on.exit event (SIGINT signal)
-.globals$onStopCallbacks$register(function() {
+#' Close all opened websocket connections
+#'
+#' This function iterate on available user session and trigger \code{wsClosed}
+#' to ends them.
+closeShinySessions <- function() {
   lapply(appsByToken$keys(), function(session) {
     session <- appsByToken$get(session)
-    if (isFALSE(session$closed)) session$wsClosed()
+    if (identical(session$closed, FALSE)) session$wsClosed()
   })
-})
+}
+
+.globals$onStopCallbacks <- Callbacks$new()
+# Close websocket connections on on.exit event (SIGINT signal)
+.globals$onStopCallbacks$register(closeShinySessions)
 
 #' Run code after an application or session ends
 #'

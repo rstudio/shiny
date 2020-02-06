@@ -15,6 +15,9 @@ shiny 1.4.0.9001
 
 * Added a label to observer that auto-reloads `R/` directory to avoid confusion when using `reactlog`. ([#58](https://github.com/rstudio/reactlog/issues/58))
 
+* Resolved [#1365](https://github.com/rstudio/shiny/issues/1365): Added `minviewmode` and `maxviewmode` as new parameters to `dateInput()` and `dateRangeInput()`. This exposes the underlying arguments of [Bootstrap Datepicker](https://bootstrap-datepicker.readthedocs.io/en/latest/options.html#maxviewmode). The `minviewmode` parameter makes it possible to restrict date selection to a month, a year, a decade, or a century.
+
+
 ### Bug fixes
 
 * Fixed [#2606](https://github.com/rstudio/shiny/issues/2606): `debounce()` would not work properly if the code in the reactive expression threw an error on the first run. ([#2652](https://github.com/rstudio/shiny/pull/2652))

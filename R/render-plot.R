@@ -437,8 +437,8 @@ custom_print.ggplot <- function(bg, fg) {
 # This function includes ggplot_build/newpage args so other packages that want to
 # use this function with a custom ggplot_build function (e.g. plotly) can do so
 # and geom defaults will still be restored after building
-ggplot_apply_auto_colors <- function(p, bg, fg, ggplot_build = ggplot2::ggplot_build, newpage = TRUE) {
-  if (is.null(fg)) return(p)
+ggplot_apply_auto_colors <- function(p, bg, fg, accent, ggplot_build = ggplot2::ggplot_build, newpage = TRUE) {
+  if (is.null(fg)) return(ggplot_build(p))
   if (is.null(bg)) bg <- "transparent"
 
   geoms <- mget(

@@ -1337,6 +1337,22 @@ ShinySession <- R6Class(
         }
       }
 
+      # TODO: how to get at values passed to renderPlot()?
+      bg <- paste0("output_", name, "_bg")
+      if (bg %in% cd_names()) {
+        tmp_info$bg <- tmp_info$bg %OR% parseCssColor(self$clientData[[bg]])
+      }
+
+      fg <- paste0("output_", name, "_fg")
+      if (fg %in% cd_names()) {
+        tmp_info$fg <- tmp_info$bg %OR% parseCssColor(self$clientData[[fg]])
+      }
+
+      family <- paste0("output_", name, "_font_family")
+      if (family %in% cd_names()) {
+        tmp_info$family <- tmp_info$family %OR% self$clientData[[family]]
+      }
+
       private$outputInfo[[name]] <- tmp_info
       private$outputInfo[[name]]
     },

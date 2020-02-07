@@ -47,7 +47,7 @@
 #'   This can result in faster plot redrawing, but there may be rare cases where
 #'   it is undesirable. If you encounter problems when resizing a plot, you can
 #'   have Shiny re-execute the code on resize by setting this to `TRUE`.
-#' @param autoColors A boolean or vector with two R colors named `bg` and `fg`
+#' @param autoTheme A boolean or vector with two R colors named `bg` and `fg`
 #'   (e.g., `c(bg = "red", fg = "blue")`). If `TRUE`, the background (`bg`) and
 #'   foreground (`fg`) colors derive from the plot's containing HTML element(s)'
 #'   CSS styling. When `TRUE`, or a vector of colors, the relevant colors are
@@ -63,7 +63,7 @@
 renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
                        env=parent.frame(), quoted=FALSE,
                        execOnResize=FALSE,
-                       autoColors=getShinyOption("plot.autocolors", FALSE),
+                       autoTheme=getShinyOption("plot.autotheme", FALSE),
                        outputArgs=list()
 ) {
   # This ..stacktraceon is matched by a ..stacktraceoff.. when plotFunc
@@ -116,7 +116,7 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
         # If !execOnResize, don't invalidate when width/height changes.
         dims <- if (execOnResize) getDims() else isolate(getDims())
         pixelratio <- session$clientData$pixelratio %OR% 1
-        colors <- getColors(autoColors, session, outputName)
+        colors <- getColors(autoTheme, session, outputName)
         do.call("drawPlot", c(
           list(
             name = outputName,
@@ -153,7 +153,7 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
       function(result) {
         dims <- getDims()
         pixelratio <- session$clientData$pixelratio %OR% 1
-        colors <- getColors(autoColors, session, outputName)
+        colors <- getColors(autoTheme, session, outputName)
         result <- do.call("resizeSavedPlot", c(
           list(name, shinysession, result, dims$width, dims$height, pixelratio, res, colors$bg, colors$fg),
           args
@@ -313,20 +313,20 @@ drawPlot <- function(name, session, func, width, height, pixelratio, res, bg = N
   )
 }
 
-getColors <- function(autoColors, session, outputName) {
-  if (identical(autoColors, FALSE)) {
+getColors <- function(autoTheme, session, outputName) {
+  if (identical(autoTheme, FALSE)) {
     return(NULL)
   }
-  bg <- if ("bg" %in% names(autoColors)) {
+  bg <- if ("bg" %in% names(autoTheme)) {
     # TODO: it would be cool to be able to use Sass variables are part of
     # this specification, like bg = "$primary", but would need something like
     # this first https://github.com/rstudio/bootstraplib/issues/33
-    autoColors[["bg"]]
+    autoTheme[["bg"]]
   } else {
     parseCssColor(session$clientData[[paste0('output_', outputName, '_bg')]])
   }
-  fg <- if ("fg" %in% names(autoColors)) {
-    autoColors[["fg"]]
+  fg <- if ("fg" %in% names(autoTheme)) {
+    autoTheme[["fg"]]
   } else {
     parseCssColor(session$clientData[[paste0('output_', outputName, '_fg')]])
   }
@@ -422,70 +422,7 @@ is_default_pallete <- function(p) {
 # won't override that method. https://github.com/rstudio/shiny/issues/841
 custom_print.ggplot <- function(bg, fg) {
   function(x) {
-    if (!is.null(fg)) {
-      if (is.null(bg)) {
-        bg <- "transparent"
-      }
-
-      # Temporarily set new colour/fill aes defaults for every geom
-      # TODO: is there a great set set of geoms we'd like to bless? Or
-      # should we just provide a way for developer to access the fg/bg
-      # during render time (i.e., maybe temporarily set plot.autocolors
-      # to the vector of colors?)
-      geoms <- mget(
-        grep("^Geom[A-Z]", getNamespaceExports("ggplot2"), ignore.case = FALSE, value = TRUE),
-        asNamespace("ggplot2")
-      )
-      colours <- lapply(geoms, function(x) x$default_aes$colour)
-      fills <- lapply(geoms, function(x) x$default_aes$fill)
-      maybe_assign_default <- function(geom, aes, color) {
-        aes_val <- geom$default_aes[[aes]]
-        # Not every aes is defined for every geom (e.g., fill isn't relevant for geom_density_2d)
-        # Pretty sure all those cases are NULL
-        if (!length(aes_val)) return()
-        # Some aes default to transparent (e.g., GeomBar$default_aes$colour),
-        # which we don't want to override...it might be surprising that we're introducing stroke/fill
-        if (is.na(aes_val)) return()
-        # For some reason geom_polygon(), and hence others, have "NA" which seems
-        # to be interpreted as transparent as well https://github.com/tidyverse/ggplot2/blob/214f3148/R/geom-polygon.r#L170
-        if (identical(aes_val, "NA")) return()
-
-        geom$default_aes[[aes]] <- color
-      }
-      mid_color <- colorRamp(c(bg, fg), alpha = TRUE)(0.7)
-      mid_color <- sprintf("#%02X%02X%02X%02X",
-        round(mid_color[1,1]),
-        round(mid_color[1,2]),
-        round(mid_color[1,3]),
-        round(mid_color[1,4]))
-      for (geom in geoms) {
-        default_colour <- geom$default_aes[["colour"]]
-        if (is.null(default_colour) || isTRUE(is.na(default_colour)) || identical(default_colour, "NA")) {
-          maybe_assign_default(geom, "fill", mid_color)
-        } else {
-          maybe_assign_default(geom, "colour", fg)
-          maybe_assign_default(geom, "fill", bg)
-        }
-      }
-      on.exit({
-        Map(function(geom, colour, fill) {
-          geom$default_aes$colour <- colour
-          geom$default_aes$fill <- fill
-        }, geoms, colours, fills)
-      }, add = TRUE)
-
-      # Set sensible theme defaults for the plot
-      user_theme <- x$theme
-      x$theme <- NULL
-      x <- x +
-        auto_color_theme(bg, fg) +
-        do.call(theme, user_theme)
-    }
-
-    grid::grid.newpage()
-
-    build <- ggplot2::ggplot_build(x)
-
+    build <- ggplot_apply_auto_colors(x, bg, fg)
     gtable <- ggplot2::ggplot_gtable(build)
     grid::grid.draw(gtable)
 
@@ -494,6 +431,72 @@ custom_print.ggplot <- function(bg, fg) {
       gtable = gtable
     ), class = "ggplot_build_gtable")
   }
+}
+
+# Apply sensible ggplot2 theme and geom defaults based on fg/bg color.
+# This function includes ggplot_build/newpage args so other packages that want to
+# use this function with a custom ggplot_build function (e.g. plotly) can do so
+# and geom defaults will still be restored after building
+ggplot_apply_auto_colors <- function(p, bg, fg, ggplot_build = ggplot2::ggplot_build, newpage = TRUE) {
+  if (is.null(fg)) return(p)
+  if (is.null(bg)) bg <- "transparent"
+
+  geoms <- mget(
+    grep("^Geom[A-Z]", getNamespaceExports("ggplot2"), ignore.case = FALSE, value = TRUE),
+    asNamespace("ggplot2")
+  )
+  colours <- lapply(geoms, function(x) x$default_aes$colour)
+  fills <- lapply(geoms, function(x) x$default_aes$fill)
+  maybe_assign_default <- function(geom, aes, color) {
+    aes_val <- geom$default_aes[[aes]]
+    # Not every aes is defined for every geom (e.g., fill isn't relevant for geom_density_2d)
+    # Pretty sure all those cases are NULL
+    if (!length(aes_val)) return()
+    # Some aes default to transparent (e.g., GeomBar$default_aes$colour),
+    # which we don't want to override...it might be surprising that we're introducing stroke/fill
+    if (is.na(aes_val)) return()
+    # For some reason geom_polygon(), and hence others, have "NA" which seems
+    # to be interpreted as transparent as well https://github.com/tidyverse/ggplot2/blob/214f3148/R/geom-polygon.r#L170
+    if (identical(aes_val, "NA")) return()
+
+    geom$default_aes[[aes]] <- color
+  }
+  mid_color <- colorRamp(c(bg, fg), alpha = TRUE)(0.7)
+  mid_color <- sprintf("#%02X%02X%02X%02X",
+    round(mid_color[1,1]),
+    round(mid_color[1,2]),
+    round(mid_color[1,3]),
+    round(mid_color[1,4]))
+  for (geom in geoms) {
+    default_colour <- geom$default_aes[["colour"]]
+    if (is.null(default_colour) || isTRUE(is.na(default_colour)) || identical(default_colour, "NA")) {
+      maybe_assign_default(geom, "fill", mid_color)
+    } else {
+      maybe_assign_default(geom, "colour", fg)
+      maybe_assign_default(geom, "fill", bg)
+    }
+  }
+  on.exit({
+    Map(function(geom, colour, fill) {
+      geom$default_aes$colour <- colour
+      geom$default_aes$fill <- fill
+    }, geoms, colours, fills)
+  }, add = TRUE)
+
+  # Set sensible theme defaults for the plot
+  user_theme <- p$theme
+  p$theme <- NULL
+  p <- p +
+    auto_color_theme(bg, fg) +
+    do.call(theme, user_theme)
+
+  if (newpage) grid::grid.newpage()
+
+  if (is.function(ggplot_build)) {
+    p <- ggplot_build(p)
+  }
+
+  p
 }
 
 auto_color_theme <- function(bg, fg) {

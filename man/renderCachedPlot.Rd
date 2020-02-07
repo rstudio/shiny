@@ -10,6 +10,7 @@ renderCachedPlot(
   sizePolicy = sizeGrowthRatio(width = 400, height = 400, growthRate = 1.2),
   res = 72,
   cache = "app",
+  autoTheme = getShinyOption("plot.autotheme", FALSE),
   ...,
   outputArgs = list()
 )
@@ -34,6 +35,16 @@ information on the default sizing policy.}
 \code{"app"} (the default), \code{"session"}, or a cache object like
 a \code{\link[=diskCache]{diskCache()}}. See the Cache Scoping section for more
 information.}
+
+\item{autoTheme}{A boolean or vector with two R colors named \code{bg} and \code{fg}
+(e.g., \code{c(bg = "red", fg = "blue")}). If \code{TRUE}, the background (\code{bg}) and
+foreground (\code{fg}) colors derive from the plot's containing HTML element(s)'
+CSS styling. When \code{TRUE}, or a vector of colors, the relevant colors are
+used to set default theming for ggplot2, lattice, and base graphics. If there
+are certain aspects you don't like about the theming defaults, you can change
+these defaults through \code{\link[ggplot2:theme]{ggplot2::theme()}}
+(and/or \href{https://ggplot2.tidyverse.org/articles/ggplot2-specs.html}{aesthetics}),
+\code{\link[lattice:trellis.par.set]{lattice::trellis.par.set()}}, \code{\link[grid:gpar]{grid::gpar()}}, and \code{\link[base:par]{base::par()}}.}
 
 \item{...}{Arguments to be passed through to \code{\link[grDevices:png]{grDevices::png()}}.
 These can be used to set the width, height, background color, etc.}

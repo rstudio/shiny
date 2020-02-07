@@ -13,7 +13,7 @@ renderPlot(
   env = parent.frame(),
   quoted = FALSE,
   execOnResize = FALSE,
-  autoColors = getShinyOption("plot.autocolors", FALSE),
+  autoTheme = getShinyOption("plot.autotheme", FALSE),
   outputArgs = list()
 )
 }
@@ -53,7 +53,7 @@ This can result in faster plot redrawing, but there may be rare cases where
 it is undesirable. If you encounter problems when resizing a plot, you can
 have Shiny re-execute the code on resize by setting this to \code{TRUE}.}
 
-\item{autoColors}{A boolean or vector with two R colors named \code{bg} and \code{fg}
+\item{autoTheme}{A boolean or vector with two R colors named \code{bg} and \code{fg}
 (e.g., \code{c(bg = "red", fg = "blue")}). If \code{TRUE}, the background (\code{bg}) and
 foreground (\code{fg}) colors derive from the plot's containing HTML element(s)'
 CSS styling. When \code{TRUE}, or a vector of colors, the relevant colors are

@@ -6300,6 +6300,16 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
     var initialValues = mapValues(_bindAll(document), function (x) {
       return x.value;
+    }); // The server needs to know the size of each image and plot output element,
+    // in case it is auto-sizing
+
+    $('.shiny-image-output, .shiny-plot-output, .shiny-report-size').each(function () {
+      var id = getIdFromEl(this);
+
+      if (this.offsetWidth !== 0 || this.offsetHeight !== 0) {
+        initialValues['.clientdata_output_' + id + '_width'] = this.offsetWidth;
+        initialValues['.clientdata_output_' + id + '_height'] = this.offsetHeight;
+      }
     });
 
     function getComputedBgColor(el) {
@@ -6326,19 +6336,13 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       }
 
       return bgColor;
-    } // The server needs to know the size of each image and plot output element,
-    // in case it is auto-sizing
+    }
 
-
-    $('.shiny-image-output, .shiny-plot-output, .shiny-report-size').each(function () {
+    $('.shiny-image-output, .shiny-plot-output, .shiny-report-theme').each(function () {
       var id = getIdFromEl(this);
-
-      if (this.offsetWidth !== 0 || this.offsetHeight !== 0) {
-        initialValues['.clientdata_output_' + id + '_width'] = this.offsetWidth;
-        initialValues['.clientdata_output_' + id + '_height'] = this.offsetHeight;
-        initialValues['.clientdata_output_' + id + '_bg'] = getComputedBgColor(this);
-        initialValues['.clientdata_output_' + id + '_fg'] = window.getComputedStyle(this).getPropertyValue("color");
-      }
+      initialValues['.clientdata_output_' + id + '_bg'] = getComputedBgColor(this);
+      initialValues['.clientdata_output_' + id + '_fg'] = window.getComputedStyle(this).getPropertyValue("color");
+      initialValues['.clientdata_output_' + id + '_font_family'] = window.getComputedStyle(this).getPropertyValue("font-family");
     });
 
     function doSendImageSize() {
@@ -6348,9 +6352,13 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         if (this.offsetWidth !== 0 || this.offsetHeight !== 0) {
           inputs.setInput('.clientdata_output_' + id + '_width', this.offsetWidth);
           inputs.setInput('.clientdata_output_' + id + '_height', this.offsetHeight);
-          inputs.setInput('.clientdata_output_' + id + '_bg', getComputedBgColor(this));
-          inputs.setInput('.clientdata_output_' + id + '_fg', window.getComputedStyle(this).getPropertyValue("color"));
         }
+      });
+      $('.shiny-image-output, .shiny-plot-output, .shiny-report-theme').each(function () {
+        var id = getIdFromEl(this);
+        inputs.setInput('.clientdata_output_' + id + '_bg', getComputedBgColor(this));
+        inputs.setInput('.clientdata_output_' + id + '_fg', window.getComputedStyle(this).getPropertyValue("color"));
+        inputs.setInput('.clientdata_output_' + id + '_font_family', window.getComputedStyle(this).getPropertyValue("font-family"));
       });
       $('.shiny-bound-output').each(function () {
         var $this = $(this),

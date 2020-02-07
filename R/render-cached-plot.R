@@ -294,7 +294,7 @@ renderCachedPlot <- function(expr,
   sizePolicy = sizeGrowthRatio(width = 400, height = 400, growthRate = 1.2),
   res = 72,
   cache = "app",
-  autoColors = getShinyOption("plot.autocolors", FALSE),
+  autoTheme = getShinyOption("plot.autotheme", FALSE),
   ...,
   outputArgs = list()
 ) {
@@ -390,7 +390,7 @@ renderCachedPlot <- function(expr,
           height <- fitDims$height
         })
 
-        colors <- getColors(autoColors, session, outputName)
+        colors <- getColors(autoTheme, session, outputName)
         pixelratio <- session$clientData$pixelratio %OR% 1
 
         do.call("drawPlot", c(
@@ -439,7 +439,7 @@ renderCachedPlot <- function(expr,
         width  <- fitDims$width
         height <- fitDims$height
         pixelratio <- session$clientData$pixelratio %OR% 1
-        colors <- getColors(autoColors, session, outputName)
+        colors <- getColors(autoTheme, session, outputName)
 
         key <- digest::digest(list(outputName, userCacheKeyResult, width, height, res, pixelratio, colors), "xxhash64")
 

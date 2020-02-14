@@ -36,15 +36,16 @@ information on the default sizing policy.}
 a \code{\link[=diskCache]{diskCache()}}. See the Cache Scoping section for more
 information.}
 
-\item{autoTheme}{A boolean or vector with two R colors named \code{bg} and \code{fg}
-(e.g., \code{c(bg = "red", fg = "blue")}). If \code{TRUE}, the background (\code{bg}) and
-foreground (\code{fg}) colors derive from the plot's containing HTML element(s)'
-CSS styling. When \code{TRUE}, or a vector of colors, the relevant colors are
-used to set default theming for ggplot2, lattice, and base graphics. If there
-are certain aspects you don't like about the theming defaults, you can change
-these defaults through \code{\link[ggplot2:theme]{ggplot2::theme()}}
-(and/or \href{https://ggplot2.tidyverse.org/articles/ggplot2-specs.html}{aesthetics}),
-\code{\link[lattice:trellis.par.set]{lattice::trellis.par.set()}}, \code{\link[grid:gpar]{grid::gpar()}}, and \code{\link[base:par]{base::par()}}.}
+\item{autoTheme}{A boolean or named vector/list. If \code{TRUE}, background
+(\code{bg}), foreground (\code{fg}), and accent (\code{accent}) colors inherit from the
+plot's containing HTML element(s)' CSS styling. When \code{autoTheme} is \code{TRUE}
+(or a list options), default theming rules are applied ggplot2, lattice, and
+base graphics. In addition, a \code{qualitative} color palette is set for each
+plotting framework to ensure a consistent and colour-blind safe palette.
+For \code{qualitative}, as well as (\code{fg}/\code{bg}/\code{accent}), you may supply your own
+color codes to override the defaults, or supply \code{NA} to prevent auto-theming
+logic from being applied
+(e.g., \code{autoTheme = list(accent="red", qualitative=NA)}).}
 
 \item{...}{Arguments to be passed through to \code{\link[grDevices:png]{grDevices::png()}}.
 These can be used to set the width, height, background color, etc.}

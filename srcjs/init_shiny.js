@@ -312,11 +312,27 @@ function initShiny() {
     return bgColor;
   }
 
+  // Compute the color property of an a tag, scoped within the element
+  function getComputedLinkColor(el) {
+    let a = document.createElement("a");
+    a.href = "/";
+    let div = document.createElement("div");
+    div.style.position = "absolute";
+    div.style.top = "-1000px";
+    div.appendChild(a);
+    el.appendChild(div);
+    let link = el.querySelector("a");
+    let linkColor = window.getComputedStyle(link).getPropertyValue("color");
+    el.removeChild(el.lastElementChild);
+    return linkColor;
+  }
+
   $('.shiny-image-output, .shiny-plot-output, .shiny-report-theme').each(function() {
     var id = getIdFromEl(this);
     initialValues['.clientdata_output_' + id + '_bg'] = getComputedBgColor(this);
     initialValues['.clientdata_output_' + id + '_fg'] = window.getComputedStyle(this).getPropertyValue("color");
     initialValues['.clientdata_output_' + id + '_font_family'] = window.getComputedStyle(this).getPropertyValue("font-family");
+    initialValues['.clientdata_output_' + id + '_accent'] = getComputedLinkColor(this);
   });
 
   function doSendImageSize() {
@@ -333,6 +349,7 @@ function initShiny() {
       inputs.setInput('.clientdata_output_' + id + '_bg', getComputedBgColor(this));
       inputs.setInput('.clientdata_output_' + id + '_fg', window.getComputedStyle(this).getPropertyValue("color"));
       inputs.setInput('.clientdata_output_' + id + '_font_family', window.getComputedStyle(this).getPropertyValue("font-family"));
+      inputs.setInput('.clientdata_output_' + id + '_accent', getComputedLinkColor(this));
     });
 
     $('.shiny-bound-output').each(function() {

@@ -47,15 +47,16 @@
 #'   This can result in faster plot redrawing, but there may be rare cases where
 #'   it is undesirable. If you encounter problems when resizing a plot, you can
 #'   have Shiny re-execute the code on resize by setting this to `TRUE`.
-#' @param autoTheme A boolean or vector with two R colors named `bg` and `fg`
-#'   (e.g., `c(bg = "red", fg = "blue")`). If `TRUE`, the background (`bg`) and
-#'   foreground (`fg`) colors derive from the plot's containing HTML element(s)'
-#'   CSS styling. When `TRUE`, or a vector of colors, the relevant colors are
-#'   used to set default theming for ggplot2, lattice, and base graphics. If there
-#'   are certain aspects you don't like about the theming defaults, you can change
-#'   these defaults through [ggplot2::theme()]
-#'   (and/or \href{https://ggplot2.tidyverse.org/articles/ggplot2-specs.html}{aesthetics}),
-#'   [lattice::trellis.par.set()], [grid::gpar()], and [base::par()].
+#' @param autoTheme A boolean or named vector/list. If `TRUE`, background
+#'   (`bg`), foreground (`fg`), and accent (`accent`) colors inherit from the
+#'   plot's containing HTML element(s)' CSS styling. When `autoTheme` is `TRUE`
+#'   (or a list options), default theming rules are applied ggplot2, lattice, and
+#'   base graphics. In addition, a `qualitative` color palette is set for each
+#'   plotting framework to ensure a consistent and colour-blind safe palette.
+#'   For `qualitative`, as well as (`fg`/`bg`/`accent`), you may supply your own
+#'   color codes to override the defaults, or supply `NA` to prevent auto-theming
+#'   logic from being applied
+#'   (e.g., `autoTheme = list(accent="red", qualitative=NA)`).
 #' @param outputArgs A list of arguments to be passed through to the implicit
 #'   call to [plotOutput()] when `renderPlot` is used in an
 #'   interactive R Markdown document.
@@ -116,7 +117,7 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
         # If !execOnResize, don't invalidate when width/height changes.
         dims <- if (execOnResize) getDims() else isolate(getDims())
         pixelratio <- session$clientData$pixelratio %OR% 1
-        colors <- getColors(autoTheme, session, outputName)
+        theme <- getTheme(autoTheme, session, outputName)
         do.call("drawPlot", c(
           list(
             name = outputName,
@@ -126,8 +127,7 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
             height = dims$height,
             pixelratio = pixelratio,
             res = res,
-            bg = colors$bg,
-            fg = colors$fg
+            theme = theme
           ), args))
       },
       catch = function(reason) {
@@ -153,9 +153,9 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
       function(result) {
         dims <- getDims()
         pixelratio <- session$clientData$pixelratio %OR% 1
-        colors <- getColors(autoTheme, session, outputName)
+        theme <- getTheme(autoTheme, session, outputName)
         result <- do.call("resizeSavedPlot", c(
-          list(name, shinysession, result, dims$width, dims$height, pixelratio, res, colors$bg, colors$fg),
+          list(name, shinysession, result, dims$width, dims$height, pixelratio, res, theme),
           args
         ))
 
@@ -175,10 +175,10 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
 }
 
 # TODO: bg, fg
-resizeSavedPlot <- function(name, session, result, width, height, pixelratio, res, bg, fg, ...) {
+resizeSavedPlot <- function(name, session, result, width, height, pixelratio, res, theme, ...) {
   if (result$img$width == width && result$img$height == height &&
       result$pixelratio == pixelratio && result$res == res &&
-      identical(result$bg, bg) && identical(result$fg, fg)) {
+      identical(result$theme, theme)) {
     return(result)
   }
 
@@ -189,7 +189,7 @@ resizeSavedPlot <- function(name, session, result, width, height, pixelratio, re
 
     grDevices::replayPlot(result$recordedPlot)
     coordmap <<- getCoordmap(result$plotResult, width*pixelratio, height*pixelratio, res*pixelratio)
-  }, width = width*pixelratio, height = height*pixelratio, res = res*pixelratio, bg = bg, ...)
+  }, width = width*pixelratio, height = height*pixelratio, res = res*pixelratio, bg = theme$bg, ...)
   on.exit(unlink(outfile), add = TRUE)
 
   result$img <- list(
@@ -203,8 +203,8 @@ resizeSavedPlot <- function(name, session, result, width, height, pixelratio, re
   result
 }
 
-drawPlot <- function(name, session, func, width, height, pixelratio, res, bg = NULL, fg = NULL,
-  ...) {
+drawPlot <- function(name, session, func, width, height, pixelratio, res, theme = NULL,
+                     ...) {
 
   #  1. Start PNG
   #  2. Enable displaylist recording
@@ -219,7 +219,7 @@ drawPlot <- function(name, session, func, width, height, pixelratio, res, bg = N
 
   outfile <- tempfile(fileext='.png') # If startPNG throws, this could leak. Shrug.
   device <- startPNG(outfile, width*pixelratio, height*pixelratio, res = res*pixelratio,
-    bg = if (is.null(bg)) "transparent" else bg, ...)
+                     bg = if (is.null(theme$bg)) "transparent" else theme$bg, ...)
   domain <- createGraphicsDevicePromiseDomain(device)
   grDevices::dev.control(displaylist = "enable")
 
@@ -232,11 +232,11 @@ drawPlot <- function(name, session, func, width, height, pixelratio, res, bg = N
     hybrid_chain(
       promises::with_promise_domain(domain, {
         # Set graphical parameters for base/grid/lattice and remember the changes
-        if (!is.null(fg) && !is.null(bg)) {
-          base_params <- base_set_params(bg, fg)
-          grid_params <- grid_set_params(bg, fg)
-          lattice_params <- lattice_set_params(bg, fg)
-          old_palette <- maybe_set_palette(fg)
+        if (length(theme)) {
+          base_params <- base_set_params(theme)
+          old_palette <- base_set_palette(theme)
+          grid_params <- grid_set_params(theme)
+          lattice_params <- lattice_set_params(theme)
         }
 
         hybrid_chain(
@@ -249,7 +249,7 @@ drawPlot <- function(name, session, func, width, height, pixelratio, res, bg = N
               # to be a (pseudo) S3 method is so that, if an object has a class in
               # addition to ggplot, and there's a print method for that class, that we
               # won't override that method. https://github.com/rstudio/shiny/issues/841
-              print.ggplot <- custom_print.ggplot(bg, fg)
+              print.ggplot <- custom_print.ggplot(theme)
 
               # Use capture.output to squelch printing to the actual console; we
               # are only interested in plot output
@@ -313,36 +313,32 @@ drawPlot <- function(name, session, func, width, height, pixelratio, res, bg = N
   )
 }
 
-getColors <- function(autoTheme, session, outputName) {
+getTheme <- function(autoTheme, session, outputName) {
   if (identical(autoTheme, FALSE)) {
     return(NULL)
   }
-  bg <- if ("bg" %in% names(autoTheme)) {
-    # TODO: it would be cool to be able to use Sass variables are part of
-    # this specification, like bg = "$primary", but would need something like
-    # this first https://github.com/rstudio/bootstraplib/issues/33
-    autoTheme[["bg"]]
-  } else {
-    parseCssColor(session$clientData[[paste0('output_', outputName, '_bg')]])
+  autoTheme <- if (isTRUE(autoTheme)) list() else autoTheme
+  # default to computed styles from the client
+  colors <- c("bg", "fg", "accent")
+  for (col in colors) {
+    if (length(autoTheme[[col]])) next
+    val <- session$clientData[[paste('output', outputName, col, sep = "_")]]
+    autoTheme[[col]] <- parseCssColor(val)
   }
-  fg <- if ("fg" %in% names(autoTheme)) {
-    autoTheme[["fg"]]
-  } else {
-    parseCssColor(session$clientData[[paste0('output_', outputName, '_fg')]])
-  }
-
-  if (length(bg) == 1 && length(fg) == 1 && !is.na(bg) && !is.na(fg)) {
-    return(list(bg = bg, fg = fg))
-  } else {
-    return(NULL)
-  }
+  # If bg/fg computing fails, fall back to bg="white"/fg="black"
+  autoTheme$bg <- autoTheme$bg %OR% "white"
+  autoTheme$fg <- autoTheme$fg %OR% "black"
+  # TODO: Throw a warning if the fg/bg contrast is low (High contrast is important for color mixing)?
+  autoTheme
 }
 
-base_set_params <- function(bg, fg) {
+base_set_params <- function(theme) {
   params <- list()
+  bg <- theme$bg
   if (!is.null(bg)) {
     params <- c(params, par(bg = bg))
   }
+  fg <- theme$fg
   if (!is.null(fg)) {
     params <- c(params, par(
       fg = fg,
@@ -355,43 +351,71 @@ base_set_params <- function(bg, fg) {
   params
 }
 
-grid_set_params <- function(bg, fg) {
-  grid::gpar(fill = bg, col = fg)
+grid_set_params <- function(theme) {
+  # TODO: add fontfamily when we go to support it
+  grid::gpar(fill = theme$bg, col = theme$fg)
 }
 
-lattice_set_params <- function(bg, fg) {
+lattice_set_params <- function(theme) {
   if (system.file(package = "lattice") == "") return()
   old_par <- lattice::trellis.par.get()
+  bg <- theme$bg
+  fg <- theme$fg
+
   lattice::trellis.par.set(
     # See figure 9.3 for an example of where grid gpar matters
     # http://lmdvr.r-forge.r-project.org/figures/figures.html
-    grid.pars = list(col = fg, fill = bg),
-    background = list(col = bg),
-    panel.background = list(col = setAlpha(fg, 0.1)),
-    add.line = list(col = fg),
-    add.text = list(col = fg),
-    plot.polygon = list(border = fg, col = bg),
-    box.dot = list(col = fg),
-    box.rectangle = list(col = fg, fill = bg),
-    box.umbrella = list(col = fg),
-    dot.line = list(col = setAlpha(fg, 0.1)),
-    dot.symbol = list(col = fg),
-    plot.line = list(col = fg),
-    plot.symbol = list(col = fg),
-    reference.line = list(col = bg),
-    strip.background = list(col = setAlpha(fg, 0.4)),
-    strip.border = list(col = "transparent"),
-    superpose.polygon = list(border = rep("transparent", 7)),
-    axis.line = list(col = fg),
-    axis.text = list(col = fg),
-    box.3d = list(col = fg),
-    par.xlab.text = list(col = fg),
-    par.ylab.text = list(col = fg),
-    par.zlab.text = list(col = fg),
-    par.main.text = list(col = fg),
-    par.sub.text = list(col = fg)
+    grid.pars =         list(col = fg),
+    background =        list(col = bg),
+    reference.line =    list(col = bg),
+    panel.background =  list(col = setAlpha(fg, 0.1)),
+    strip.background =  list(col = setAlpha(fg, 0.2)),
+    strip.border =      list(col = fg),
+    axis.line =         list(col = fg),
+    axis.text =         list(col = fg),
+    add.line =          list(col = fg),
+    add.text =          list(col = fg),
+    par.xlab.text =     list(col = fg),
+    par.ylab.text =     list(col = fg),
+    par.zlab.text =     list(col = fg),
+    par.main.text =     list(col = fg),
+    par.sub.text =      list(col = fg),
+    box.3d =            list(col = fg),
+    plot.polygon =      list(border = fg),
+    superpose.polygon = list(border = fg),
+    box.dot =           list(col = fg),
+    dot.line =          list(col = setAlpha(fg, 0.2))
   )
-  old_par
+
+  # For lattice, accent can be of length 2, one to specify
+  # 'stroke' accent and one for fill accent
+  accent <- rep(theme$accent, length.out = 2)
+  if (sum(is.na(accent)) == 0) {
+    lattice::trellis.par.set(
+      plot.line =         list(col = accent[[1]]),
+      plot.symbol =       list(col = accent[[1]]),
+      dot.symbol =        list(col = accent[[1]]),
+      box.rectangle =     list(col = accent[[1]]),
+      box.umbrella =      list(col = accent[[1]]),
+      plot.polygon =      list(col = accent[[2]]),
+      grid.pars =         list(fill = accent[[2]])
+    )
+  }
+
+  qualitative <- getQualitativeCodes(theme, 7)
+  if (sum(is.na(qualitative)) == 0) {
+    # I'm not in love with the idea of this; but alas, it's consistent with lattice's default
+    region_pal <- colorRampPalette(c(qualitative[[1]], "white", qualitative[[2]]))
+    lattice::trellis.par.set(
+      strip.shingle =     list(col = qualitative),
+      regions           = list(col = region_pal(100)),
+      superpose.line =    list(col = qualitative),
+      superpose.symbol =  list(col = qualitative, fill = qualitative),
+      superpose.polygon = list(col = qualitative)
+    )
+  }
+
+  invisible(old_par)
 }
 
 lattice_set_par_list <- function(params) {
@@ -399,20 +423,22 @@ lattice_set_par_list <- function(params) {
   lattice::trellis.par.set(theme = params)
 }
 
-maybe_set_palette <- function(fg) {
-  p <- palette()
-  if (is_default_pallete(p) && !is.null(fg)) {
-    p_tmp <- p
-    p_tmp[[1]] <- fg
-    palette(p_tmp)
-  }
-  p
+base_set_palette <- function(theme) {
+  codes <- getQualitativeCodes(theme)
+  if (isTRUE(is.na(codes))) palette() else palette(codes)
 }
 
-is_default_pallete <- function(p) {
-  if (system.file(package = "callr") == "") return(FALSE)
-  identical(p, callr::r(function() { palette() }))
+getQualitativeCodes <- function(theme, n = NULL) {
+  qualitative <- theme$qualitative
+  if (isTRUE(is.na(qualitative)) || is.character(qualitative)) {
+    return(qualitative)
+  }
+  # TODO: use another colorscale in dark mode?
+  if (is.null(n)) okabeIto else okabeIto[seq_len(n)]
 }
+
+# https://jfly.uni-koeln.de/color/
+okabeIto <- c("#E69F00", "#009E73", "#0072B2", "#CC79A7", "#999999", "#D55E00", "#F0E442", "#56B4E9")
 
 # A modified version of print.ggplot which returns the built ggplot object
 # as well as the gtable grob. This overrides the ggplot::print.ggplot
@@ -420,9 +446,9 @@ is_default_pallete <- function(p) {
 # to be a (pseudo) S3 method is so that, if an object has a class in
 # addition to ggplot, and there's a print method for that class, that we
 # won't override that method. https://github.com/rstudio/shiny/issues/841
-custom_print.ggplot <- function(bg, fg) {
+custom_print.ggplot <- function(theme) {
   function(x) {
-    build <- ggplot_apply_auto_colors(x, bg, fg)
+    build <- ggplot_build_with_theme(x, theme)
     gtable <- ggplot2::ggplot_gtable(build)
     grid::grid.draw(gtable)
 
@@ -437,71 +463,66 @@ custom_print.ggplot <- function(bg, fg) {
 # This function includes ggplot_build/newpage args so other packages that want to
 # use this function with a custom ggplot_build function (e.g. plotly) can do so
 # and geom defaults will still be restored after building
-ggplot_apply_auto_colors <- function(p, bg, fg, accent, ggplot_build = ggplot2::ggplot_build, newpage = TRUE) {
-  if (is.null(fg)) return(ggplot_build(p))
-  if (is.null(bg)) bg <- "transparent"
+ggplot_build_with_theme <- function(p, theme, ggplot_build = ggplot2::ggplot_build, newpage = TRUE) {
+  if (is.null(theme)) return(ggplot_build(p))
+  fg <- theme$fg
+  bg <- theme$bg
+  # Accent can be of length 2 because lattice
+  accent <- theme$accent[1]
 
-  geoms <- mget(
-    grep("^Geom[A-Z]", getNamespaceExports("ggplot2"), ignore.case = FALSE, value = TRUE),
-    asNamespace("ggplot2")
+  # Set theme defaults
+  user_theme <- p$theme
+  p$theme <- NULL
+  p <- p +
+    ggtheme_auto(bg, fg) +
+    do.call(ggplot2::theme, user_theme)
+
+  # Collect all the plot's geoms, as well as some 'core' geoms,
+  # since some geoms, e.g. GeomSf, want their default_aes to derive
+  # from 'lower-level' geoms, like GeomPoint, GeomLine, GeomPolygon
+  geoms <- c(
+    lapply(p$layers, function(x) x$geom),
+    lapply(c("GeomPoint", "GeomLine", "GeomPolygon"), getFromNamespace, "ggplot2")
   )
-  colours <- lapply(geoms, function(x) x$default_aes$colour)
-  fills <- lapply(geoms, function(x) x$default_aes$fill)
-  maybe_assign_default <- function(geom, aes, color) {
-    aes_val <- geom$default_aes[[aes]]
-    # Not every aes is defined for every geom (e.g., fill isn't relevant for geom_density_2d)
-    # Pretty sure all those cases are NULL
-    if (!length(aes_val)) return()
-    # Some aes default to transparent (e.g., GeomBar$default_aes$colour),
-    # which we don't want to override...it might be surprising that we're introducing stroke/fill
-    if (is.na(aes_val)) return()
-    # For some reason geom_polygon(), and hence others, have "NA" which seems
-    # to be interpreted as transparent as well https://github.com/tidyverse/ggplot2/blob/214f3148/R/geom-polygon.r#L170
-    if (identical(aes_val, "NA")) return()
 
-    geom$default_aes[[aes]] <- color
-  }
-  mid_color <- colorRamp(c(bg, fg), alpha = TRUE)(0.7)
-  mid_color <- sprintf("#%02X%02X%02X%02X",
-    round(mid_color[1,1]),
-    round(mid_color[1,2]),
-    round(mid_color[1,3]),
-    round(mid_color[1,4]))
-  for (geom in geoms) {
-    default_colour <- geom$default_aes[["colour"]]
-    if (is.null(default_colour) || isTRUE(is.na(default_colour)) || identical(default_colour, "NA")) {
-      maybe_assign_default(geom, "fill", mid_color)
-    } else {
-      maybe_assign_default(geom, "colour", fg)
-      maybe_assign_default(geom, "fill", bg)
+  # Remember defaults
+  default_colours <- lapply(geoms, function(geom) geom$default_aes$colour)
+  default_fills <- lapply(geoms, function(geom) geom$default_aes$fill)
+
+  # Modify defaults
+  Map(function(geom, default_color, default_fill) {
+    colour <- geom$default_aes$colour
+    fill <- geom$default_aes$fill
+    # To avoid the possibility of modifying twice
+    if (identical(colour, default_color)) {
+      geom$default_aes$colour <- adjust_color(colour, bg, fg, accent)
     }
-  }
+    if (identical(fill, default_fill)) {
+      geom$default_aes$fill <- adjust_color(fill, bg, fg, accent)
+    }
+  }, geoms, default_colours, default_fills)
+
+  # Restore defaults
   on.exit({
     Map(function(geom, colour, fill) {
       geom$default_aes$colour <- colour
       geom$default_aes$fill <- fill
-    }, geoms, colours, fills)
+    }, geoms, default_colours, default_fills)
   }, add = TRUE)
 
-  # Set sensible theme defaults for the plot
-  user_theme <- p$theme
-  p$theme <- NULL
-  p <- p +
-    auto_color_theme(bg, fg) +
-    do.call(theme, user_theme)
+  # Set scaled aes defaults (if appropriate)
+  p <- add_scale_defaults(p, "colour", theme)
+  p <- add_scale_defaults(p, "fill", theme)
 
   if (newpage) grid::grid.newpage()
 
-  if (is.function(ggplot_build)) {
-    p <- ggplot_build(p)
-  }
-
-  p
+  ggplot_build(p)
 }
 
-auto_color_theme <- function(bg, fg) {
+ggtheme_auto <- function(bg, fg) {
   text <- element_text(colour = fg)
   line <- element_line(colour = fg)
+  themeGray <- theme_gray()
 
   theme(
     line = line,
@@ -510,15 +531,107 @@ auto_color_theme <- function(bg, fg) {
     axis.text = text,
     axis.ticks = line,
     plot.background = element_rect(fill = bg, colour = "transparent"),
-    panel.background = element_rect(fill = setAlpha(fg, 0.1)),
+    panel.background = element_rect(
+      fill = adjust_color(themeGray$panel.background$fill, bg, fg)
+    ),
     panel.grid = element_line(colour = bg),
     legend.background = element_rect(fill = "transparent"),
-    legend.box.background = element_rect(fill = "transparent", colour = "transparent"),
-    legend.key = element_rect(fill = setAlpha(fg, 0.1), colour = bg),
-    strip.background = element_rect(fill = setAlpha(fg, 0.215)),
+    legend.box.background = element_rect(
+      fill = "transparent", colour = "transparent"
+    ),
+    legend.key = element_rect(
+      fill = adjust_color(themeGray$legend.key$fill, bg, fg),
+      colour = bg
+    ),
+    strip.background = element_rect(
+      fill = adjust_color(themeGray$strip.background$fill, bg, fg)
+    ),
     strip.text = text
   )
 }
+
+# Logic for adjusting a color based on bg/fg/accent
+adjust_color <- function(color, bg, fg, accent = NA) {
+  if (!length(color)) return(color)
+  if (length(color) > 1) {
+    warning("Failed to translated aes defaults (expected to be of length 1)")
+    return(color)
+  }
+  if (is.na(color) || identical(color, "NA")) return(color)
+
+  # If a gray scale color, then the degree of gray determines
+  # the mixing between fg (aka black) and bg (aka white)
+  rgbs <- col2rgb(color, alpha = TRUE)[1:3,1]
+  if (sum(diff(rgbs)) == 0) {
+    return(mix_colors(bg, fg, 1 - (rgbs[1] / 255)))
+    # IDEA: instead of mixing colors with a colorRamp, perhaps it's better to adjust luminance?
+    #  return(scales::col2hcl(bg, l = luminance(color)))
+  }
+
+  # At this point we should be dealing with an accent color...
+  # If accent is NA though, then the user has specified to NOT change it
+  if (is.na(accent)) color else accent
+}
+
+
+mix_colors <- function(bg, fg, amount) {
+  if (!length(bg) || !length(fg)) return(NULL)
+  mid_color <- colorRamp(c(bg, fg), alpha = TRUE)(amount)
+  sprintf(
+    "#%02X%02X%02X%02X",
+    round(mid_color[1,1]),
+    round(mid_color[1,2]),
+    round(mid_color[1,3]),
+    round(mid_color[1,4])
+  )
+}
+
+add_scale_defaults <- function(p, aesthetic = "colour", theme) {
+  # If user has specified this scale type, then do nothing
+  if (p$scales$has_scale(aesthetic)) return(p)
+  # If palette is explicit NA, do nothing
+  codes <- getQualitativeCodes(theme)
+  if (isTRUE(is.na(codes))) return(p)
+
+  # Obtain the input values to the scale
+  values <- lapply(p$layers, function(x) {
+    aes_map <- c(x$mapping, if (isTRUE(x$inherit.aes)) p$mapping)
+    data <- if (length(x$data)) x$data else p$data
+    rlang::eval_tidy(aes_map[[aesthetic]], data)
+  })
+
+  # At the moment, we only set a default for qualitative scales
+  isQualitative <- all(vapply(values, function(x) is_discrete(x) && !is.ordered(x), logical(1)))
+  if (!isQualitative) return(p)
+
+  # Only apply scale if we have enough codes for it
+  n <- length(unique(unlist(values)))
+  if (n <= length(codes)) {
+    f <- match.fun(paste0("scale_", aesthetic, "_manual"))
+    p <- p + f(values = codes)
+  }
+
+  p
+}
+
+# ala ggplot2:::is.discrete
+is_discrete <- function(x) {
+  is.factor(x) || is.character(x) || is.logical(x)
+}
+
+# ala Bootstrap's color-yiq()
+# https://getbootstrap.com/docs/4.4/getting-started/theming/#color-contrast
+color_yiq <- function(color) {
+  rgb <- col2rgb(color)
+  unname(
+    (rgb["red", ] * 299 + rgb["green", ] * 587 + rgb["blue", ] * 114) / 1000
+  )
+}
+
+color_yiq_islight <- function(color, threshold = 150) {
+  color_yiq(color) >= threshold
+}
+
 
 # The coordmap extraction functions below return something like the examples
 # below. For base graphics:

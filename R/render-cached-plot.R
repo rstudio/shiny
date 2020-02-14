@@ -390,7 +390,7 @@ renderCachedPlot <- function(expr,
           height <- fitDims$height
         })
 
-        colors <- getColors(autoTheme, session, outputName)
+        theme <- getTheme(autoTheme, session, outputName)
         pixelratio <- session$clientData$pixelratio %OR% 1
 
         do.call("drawPlot", c(
@@ -402,8 +402,7 @@ renderCachedPlot <- function(expr,
             height = height,
             pixelratio = pixelratio,
             res = res,
-            bg = colors$bg,
-            fg = colors$fg
+            theme = theme
           ),
           args
         ))
@@ -439,9 +438,9 @@ renderCachedPlot <- function(expr,
         width  <- fitDims$width
         height <- fitDims$height
         pixelratio <- session$clientData$pixelratio %OR% 1
-        colors <- getColors(autoTheme, session, outputName)
+        theme <- getTheme(autoTheme, session, outputName)
 
-        key <- digest::digest(list(outputName, userCacheKeyResult, width, height, res, pixelratio, colors), "xxhash64")
+        key <- digest::digest(list(outputName, userCacheKeyResult, width, height, res, pixelratio, theme), "xxhash64")
 
         plotObj <- cache$get(key)
 
@@ -455,7 +454,7 @@ renderCachedPlot <- function(expr,
             width = width,
             height = height,
             pixelratio = pixelratio,
-            colors = colors
+            theme = theme
           ))
         }
 
@@ -478,7 +477,7 @@ renderCachedPlot <- function(expr,
               width = width,
               height = height,
               pixelratio = pixelratio,
-              colors = colors
+              theme = theme
             )
           }
         )
@@ -488,7 +487,7 @@ renderCachedPlot <- function(expr,
           width      <- result$width
           height     <- result$height
           pixelratio <- result$pixelratio
-          colors     <- result$colors
+          theme     <- result$theme
 
           # Three possibilities when we get here:
           # 1. There was a cache hit. No need to set a value in the cache.
@@ -510,8 +509,7 @@ renderCachedPlot <- function(expr,
                 height,
                 pixelratio,
                 res,
-                bg = colors$bg,
-                fg = colors$fg
+                theme
               ),
               args
             ))

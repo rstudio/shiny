@@ -5,6 +5,7 @@ matrix:
       r: release
       r_packages:
         - devtools
+        - rprojroot
       script: ./tools/checkDocsCurrent.sh
     - name: "Javascript check"
       language: node_js

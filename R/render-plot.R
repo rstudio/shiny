@@ -51,12 +51,14 @@
 #'   (`bg`), foreground (`fg`), and accent (`accent`) colors inherit from the
 #'   plot's containing HTML element(s)' CSS styling. When `autoTheme` is `TRUE`
 #'   (or a list options), default theming rules are applied ggplot2, lattice, and
-#'   base graphics. In addition, a `qualitative` color palette is set for each
-#'   plotting framework to ensure a consistent and colour-blind safe palette.
-#'   For `qualitative`, as well as (`fg`/`bg`/`accent`), you may supply your own
-#'   color codes to override the defaults, or supply `NA` to prevent auto-theming
-#'   logic from being applied
-#'   (e.g., `autoTheme = list(accent="red", qualitative=NA)`).
+#'   base graphics. Additionally, under certain conditions, `sequential` and
+#'   `qualitative` color palettes are also set. The default `sequential` palette
+#'   derives from the `accent` color, whereas the `qualitative` palette is based
+#'   on the Okabe-Ito scale. To control auto-theming defaults, pass a list of
+#'   options with the desired color codes (and/or `NA` to use plotting framework's
+#'   defaults instead of the auto-theming defaults). For example,
+#'   `autoTheme = list(accent="red", sequential=NA)` sets the `accent` to `"red"`,
+#'   but also ensures ggplot2's sequential colorscale defaults still apply.
 #' @param outputArgs A list of arguments to be passed through to the implicit
 #'   call to [plotOutput()] when `renderPlot` is used in an
 #'   interactive R Markdown document.
@@ -287,10 +289,10 @@ drawPlot <- function(name, session, func, width, height, pixelratio, res, theme 
         # NULL is the normal case, but in case any of the param setting calls
         # threw an error; in that case, not all of these four may have been
         # performed.
-        if (!is.null(base_params)) { do.call(par, base_params) }
+        if (!is.null(base_params)) { do.call(graphics::par, base_params) }
         if (!is.null(grid_params)) { do.call(grid::gpar, grid_params) }
         if (!is.null(lattice_params)) { lattice_set_par_list(lattice_params) }
-        if (!is.null(old_palette)) { palette(old_palette) }
+        if (!is.null(old_palette)) { grDevices::palette(old_palette) }
 
         grDevices::dev.off(device)
       }
@@ -336,11 +338,11 @@ base_set_params <- function(theme) {
   params <- list()
   bg <- theme$bg
   if (!is.null(bg)) {
-    params <- c(params, par(bg = bg))
+    params <- c(params, graphics::par(bg = bg))
   }
   fg <- theme$fg
   if (!is.null(fg)) {
-    params <- c(params, par(
+    params <- c(params, graphics::par(
       fg = fg,
       col.axis = fg,
       col.lab = fg,
@@ -358,18 +360,23 @@ grid_set_params <- function(theme) {
 
 lattice_set_params <- function(theme) {
   if (system.file(package = "lattice") == "") return()
-  old_par <- lattice::trellis.par.get()
+  old_par <- utils::getFromNamespace("trellis.par.get", "lattice")()
   bg <- theme$bg
   fg <- theme$fg
 
-  lattice::trellis.par.set(
+  par_set <- utils::getFromNamespace("trellis.par.set", "lattice")
+  par_set(
     # See figure 9.3 for an example of where grid gpar matters
     # http://lmdvr.r-forge.r-project.org/figures/figures.html
     grid.pars =         list(col = fg),
     background =        list(col = bg),
     reference.line =    list(col = bg),
-    panel.background =  list(col = setAlpha(fg, 0.1)),
-    strip.background =  list(col = setAlpha(fg, 0.2)),
+    panel.background =  list(
+      col = mix_colors(theme$bg, theme$fg, 0.1)
+    ),
+    strip.background =  list(
+      col = mix_colors(theme$bg, theme$fg, 0.2)
+    ),
     strip.border =      list(col = fg),
     axis.line =         list(col = fg),
     axis.text =         list(col = fg),
@@ -384,14 +391,16 @@ lattice_set_params <- function(theme) {
     plot.polygon =      list(border = fg),
     superpose.polygon = list(border = fg),
     box.dot =           list(col = fg),
-    dot.line =          list(col = setAlpha(fg, 0.2))
+    dot.line =          list(
+      col = mix_colors(theme$bg, theme$fg, 0.2)
+    )
   )
 
   # For lattice, accent can be of length 2, one to specify
   # 'stroke' accent and one for fill accent
   accent <- rep(theme$accent, length.out = 2)
   if (sum(is.na(accent)) == 0) {
-    lattice::trellis.par.set(
+    par_set(
       plot.line =         list(col = accent[[1]]),
       plot.symbol =       list(col = accent[[1]]),
       dot.symbol =        list(col = accent[[1]]),
@@ -405,8 +414,8 @@ lattice_set_params <- function(theme) {
   qualitative <- getQualitativeCodes(theme, 7)
   if (sum(is.na(qualitative)) == 0) {
     # I'm not in love with the idea of this; but alas, it's consistent with lattice's default
-    region_pal <- colorRampPalette(c(qualitative[[1]], "white", qualitative[[2]]))
-    lattice::trellis.par.set(
+    region_pal <- grDevices::colorRampPalette(c(qualitative[[1]], "white", qualitative[[2]]))
+    par_set(
       strip.shingle =     list(col = qualitative),
       regions           = list(col = region_pal(100)),
       superpose.line =    list(col = qualitative),
@@ -420,12 +429,12 @@ lattice_set_params <- function(theme) {
 
 lattice_set_par_list <- function(params) {
   if (system.file(package = "lattice") == "") return()
-  lattice::trellis.par.set(theme = params)
+  utils::getFromNamespace("trellis.par.set", "lattice")(theme = params)
 }
 
 base_set_palette <- function(theme) {
   codes <- getQualitativeCodes(theme)
-  if (isTRUE(is.na(codes))) palette() else palette(codes)
+  if (isTRUE(is.na(codes))) grDevices::palette() else grDevices::palette(codes)
 }
 
 getQualitativeCodes <- function(theme, n = NULL) {
@@ -433,12 +442,35 @@ getQualitativeCodes <- function(theme, n = NULL) {
   if (isTRUE(is.na(qualitative)) || is.character(qualitative)) {
     return(qualitative)
   }
+  # https://jfly.uni-koeln.de/color/
   # TODO: use another colorscale in dark mode?
+  okabeIto <- c("#E69F00", "#009E73", "#0072B2", "#CC79A7", "#999999", "#D55E00", "#F0E442", "#56B4E9")
   if (is.null(n)) okabeIto else okabeIto[seq_len(n)]
 }
 
-# https://jfly.uni-koeln.de/color/
-okabeIto <- c("#E69F00", "#009E73", "#0072B2", "#CC79A7", "#999999", "#D55E00", "#F0E442", "#56B4E9")
+# Currently only used for ggplot2
+getSequentialCodes <- function(theme, n = 8) {
+  sequential <- theme$sequential
+  if (isTRUE(is.na(sequential)) || is.character(sequential)) {
+    return(sequential)
+  }
+  # This shouldn't really happen since ggplot2 depends on scales
+  # (and this is only called in the ggplot2 case)
+  if (system.file(package = "farver") == "") {
+    warning("Computing default sequential codes (for autoTheme) requires the farver package.")
+    return(NA)
+  }
+  decode_colour <- utils::getFromNamespace("decode_colour", "farver")
+  if (system.file(package = "colorspace") == "") {
+    warning("Computing default sequential codes (for autoTheme) requires the colorspace package.")
+    return(NA)
+  }
+  sequential_hcl <- utils::getFromNamespace("sequential_hcl", "colorspace")
+  hcl <- as.list(decode_colour(theme$accent, to = "hcl")[1, ])
+  l <- c(hcl$l - 20, hcl$l + 20)
+  c <- c(hcl$c + 20, hcl$c - 20)
+  sequential_hcl(n = n, h = hcl$h, c = c, l = l)
+}
 
 # A modified version of print.ggplot which returns the built ggplot object
 # as well as the gtable grob. This overrides the ggplot::print.ggplot
@@ -446,7 +478,7 @@ okabeIto <- c("#E69F00", "#009E73", "#0072B2", "#CC79A7", "#999999", "#D55E00", 
 # to be a (pseudo) S3 method is so that, if an object has a class in
 # addition to ggplot, and there's a print method for that class, that we
 # won't override that method. https://github.com/rstudio/shiny/issues/841
-custom_print.ggplot <- function(theme) {
+custom_print.ggplot <- function(theme = list()) {
   function(x) {
     build <- ggplot_build_with_theme(x, theme)
     gtable <- ggplot2::ggplot_gtable(build)
@@ -464,7 +496,7 @@ custom_print.ggplot <- function(theme) {
 # use this function with a custom ggplot_build function (e.g. plotly) can do so
 # and geom defaults will still be restored after building
 ggplot_build_with_theme <- function(p, theme, ggplot_build = ggplot2::ggplot_build, newpage = TRUE) {
-  if (is.null(theme)) return(ggplot_build(p))
+  if (!length(theme)) return(ggplot_build(p))
   fg <- theme$fg
   bg <- theme$bg
   # Accent can be of length 2 because lattice
@@ -482,7 +514,10 @@ ggplot_build_with_theme <- function(p, theme, ggplot_build = ggplot2::ggplot_bui
   # from 'lower-level' geoms, like GeomPoint, GeomLine, GeomPolygon
   geoms <- c(
     lapply(p$layers, function(x) x$geom),
-    lapply(c("GeomPoint", "GeomLine", "GeomPolygon"), getFromNamespace, "ggplot2")
+    lapply(
+      c("GeomPoint", "GeomLine", "GeomPolygon"),
+      utils::getFromNamespace, "ggplot2"
+    )
   )
 
   # Remember defaults
@@ -520,30 +555,30 @@ ggplot_build_with_theme <- function(p, theme, ggplot_build = ggplot2::ggplot_bui
 }
 
 ggtheme_auto <- function(bg, fg) {
-  text <- element_text(colour = fg)
-  line <- element_line(colour = fg)
-  themeGray <- theme_gray()
+  text <- ggplot2::element_text(colour = fg)
+  line <- ggplot2::element_line(colour = fg)
+  themeGray <- ggplot2::theme_gray()
 
-  theme(
+  ggplot2::theme(
     line = line,
     text = text,
     axis.title = text,
     axis.text = text,
     axis.ticks = line,
-    plot.background = element_rect(fill = bg, colour = "transparent"),
-    panel.background = element_rect(
+    plot.background = ggplot2::element_rect(fill = bg, colour = "transparent"),
+    panel.background = ggplot2::element_rect(
       fill = adjust_color(themeGray$panel.background$fill, bg, fg)
     ),
-    panel.grid = element_line(colour = bg),
-    legend.background = element_rect(fill = "transparent"),
-    legend.box.background = element_rect(
+    panel.grid = ggplot2::element_line(colour = bg),
+    legend.background = ggplot2::element_rect(fill = "transparent"),
+    legend.box.background = ggplot2::element_rect(
       fill = "transparent", colour = "transparent"
     ),
-    legend.key = element_rect(
+    legend.key = ggplot2::element_rect(
       fill = adjust_color(themeGray$legend.key$fill, bg, fg),
       colour = bg
     ),
-    strip.background = element_rect(
+    strip.background = ggplot2::element_rect(
       fill = adjust_color(themeGray$strip.background$fill, bg, fg)
     ),
     strip.text = text
@@ -561,11 +596,9 @@ adjust_color <- function(color, bg, fg, accent = NA) {
 
   # If a gray scale color, then the degree of gray determines
   # the mixing between fg (aka black) and bg (aka white)
-  rgbs <- col2rgb(color, alpha = TRUE)[1:3,1]
+  rgbs <- grDevices::col2rgb(color, alpha = TRUE)[1:3,1]
   if (sum(diff(rgbs)) == 0) {
     return(mix_colors(bg, fg, 1 - (rgbs[1] / 255)))
-    # IDEA: instead of mixing colors with a colorRamp, perhaps it's better to adjust luminance?
-    #  return(scales::col2hcl(bg, l = luminance(color)))
   }
 
   # At this point we should be dealing with an accent color...
@@ -576,7 +609,7 @@ adjust_color <- function(color, bg, fg, accent = NA) {
 
 mix_colors <- function(bg, fg, amount) {
   if (!length(bg) || !length(fg)) return(NULL)
-  mid_color <- colorRamp(c(bg, fg), alpha = TRUE)(amount)
+  mid_color <- grDevices::colorRamp(c(bg, fg), alpha = TRUE)(amount)
   sprintf(
     "#%02X%02X%02X%02X",
     round(mid_color[1,1]),
@@ -589,9 +622,6 @@ mix_colors <- function(bg, fg, amount) {
 add_scale_defaults <- function(p, aesthetic = "colour", theme) {
   # If user has specified this scale type, then do nothing
   if (p$scales$has_scale(aesthetic)) return(p)
-  # If palette is explicit NA, do nothing
-  codes <- getQualitativeCodes(theme)
-  if (isTRUE(is.na(codes))) return(p)
 
   # Obtain the input values to the scale
   values <- lapply(p$layers, function(x) {
@@ -600,15 +630,27 @@ add_scale_defaults <- function(p, aesthetic = "colour", theme) {
     rlang::eval_tidy(aes_map[[aesthetic]], data)
   })
 
-  # At the moment, we only set a default for qualitative scales
-  isQualitative <- all(vapply(values, function(x) is_discrete(x) && !is.ordered(x), logical(1)))
-  if (!isQualitative) return(p)
+  # Apply sequential default, if relevant
+  isSequential <- all(vapply(values, is.numeric, logical(1)))
+  if (isSequential) {
+    seqCodes <- getSequentialCodes(theme)
+    if (!isTRUE(is.na(seqCodes))) {
+      f <- match.fun(paste0("scale_", aesthetic, "_gradientn"))
+      p <- p + f(colors = seqCodes)
+    }
+  }
 
-  # Only apply scale if we have enough codes for it
-  n <- length(unique(unlist(values)))
-  if (n <= length(codes)) {
-    f <- match.fun(paste0("scale_", aesthetic, "_manual"))
-    p <- p + f(values = codes)
+  # Apply qualitative default, if relevant (and we have enough codes)
+  isQualitative <- all(vapply(values, function(x) is_discrete(x) && !is.ordered(x), logical(1)))
+  if (isQualitative) {
+    qualCodes <- getQualitativeCodes(theme)
+    if (!isTRUE(is.na(qualCodes))) {
+      n <- length(unique(unlist(values)))
+      if (n <= length(qualCodes)) {
+        f <- match.fun(paste0("scale_", aesthetic, "_manual"))
+        p <- p + f(values = qualCodes)
+      }
+    }
   }
 
   p
@@ -622,7 +664,7 @@ is_discrete <- function(x) {
 # ala Bootstrap's color-yiq()
 # https://getbootstrap.com/docs/4.4/getting-started/theming/#color-contrast
 color_yiq <- function(color) {
-  rgb <- col2rgb(color)
+  rgb <- grDevices::col2rgb(color)
   unname(
     (rgb["red", ] * 299 + rgb["green", ] * 587 + rgb["blue", ] * 114) / 1000
   )
@@ -791,6 +833,7 @@ color_yiq_islight <- function(color, threshold = 150) {
 
 getCoordmap <- function(x, width, height, res) {
   if (inherits(x, "ggplot_build_gtable")) {
+
     getGgplotCoordmap(x, width, height, res)
   } else {
     getPrevPlotCoordmap(width, height)
@@ -849,7 +892,6 @@ getPrevPlotCoordmap <- function(width, height) {
 getGgplotCoordmap <- function(p, width, height, res) {
   if (!inherits(p, "ggplot_build_gtable"))
     return(NULL)
-
   tryCatch({
     # Get info from built ggplot object
     panel_info <- find_panel_info(p$build)

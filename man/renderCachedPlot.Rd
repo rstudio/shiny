@@ -40,12 +40,14 @@ information.}
 (\code{bg}), foreground (\code{fg}), and accent (\code{accent}) colors inherit from the
 plot's containing HTML element(s)' CSS styling. When \code{autoTheme} is \code{TRUE}
 (or a list options), default theming rules are applied ggplot2, lattice, and
-base graphics. In addition, a \code{qualitative} color palette is set for each
-plotting framework to ensure a consistent and colour-blind safe palette.
-For \code{qualitative}, as well as (\code{fg}/\code{bg}/\code{accent}), you may supply your own
-color codes to override the defaults, or supply \code{NA} to prevent auto-theming
-logic from being applied
-(e.g., \code{autoTheme = list(accent="red", qualitative=NA)}).}
+base graphics. Additionally, under certain conditions, \code{sequential} and
+\code{qualitative} color palettes are also set. The default \code{sequential} palette
+derives from the \code{accent} color, whereas the \code{qualitative} palette is based
+on the Okabe-Ito scale. To control auto-theming defaults, pass a list of
+options with the desired color codes (and/or \code{NA} to use plotting framework's
+defaults instead of the auto-theming defaults). For example,
+\code{autoTheme = list(accent="red", sequential=NA)} sets the \code{accent} to \code{"red"},
+but also ensures ggplot2's sequential colorscale defaults still apply.}
 
 \item{...}{Arguments to be passed through to \code{\link[grDevices:png]{grDevices::png()}}.
 These can be used to set the width, height, background color, etc.}

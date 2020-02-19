@@ -1,11 +1,11 @@
-make_results <- function() {
-  structure(list(result = TRUE, files = list()), class = "shinytestrun")
-}
-
-add_result <- function(results, file, result, error) {
-  if (!is.na(error)) results[["result"]] <- FALSE
-  results[["files"]][[file]] <- list(result = result, error = error)
-  results
+make_result <- function(file, result, error) {
+  data.frame(
+    file = r,
+    pass = is.na(error),
+    result = I(list(result)),
+    error = I(list(error)),
+    stringsAsFactors = FALSE
+  )
 }
 
 #' Check to see if the given text is a shinytest
@@ -73,11 +73,10 @@ runTests <- function(appDir=".", filter=NULL){
       warning("You've disabled `shiny.autoload.r` via an option but this is not passed through to shinytest. Consider using a _disable_autoload.R file as described at https://rstd.io/shiny-autoload")
     }
 
-    return(Reduce(function(results, r) {
-        error <- if (r[["pass"]]) NA else simpleError("Unknown shinytest error")
-        add_result(results, r[["name"]], TRUE, error)
-      }, shinytest::testApp(appDir)[["results"]], make_results())
-    )
+    return(do.call(rbind, lapply(shinytest::testApp(appDir)[["results"]], function(r) {
+      error <- if (r[["pass"]]) NA else simpleError("Unknown shinytest error")
+      make_result(r[["name"]], NA, error)
+    })))
   }
 
   testenv <- new.env(parent=globalenv())
@@ -99,16 +98,15 @@ runTests <- function(appDir=".", filter=NULL){
   setwd(testsDir)
 
   # Otherwise source all the runners -- each in their own environment.
-  return(Reduce(function(results, r) {
-      result <- NA
-      error <- NA
-      tryCatch({
-        env <- new.env(parent = renv)
-        result <- sourceUTF8(r, envir = env)
-      }, error = function(e) {
-        error <<- e
-      })
-      add_result(results, r, result, error)
-    }, runners, make_results())
-  )
+  return(do.call(rbind, lapply(runners, function(r) {
+    result <- NA
+    error <- NA
+    tryCatch({
+      env <- new.env(parent = renv)
+      result <- sourceUTF8(r, envir = env)
+    }, error = function(e) {
+      error <<- e
+    })
+    make_result(r, result, error)
+  })))
 }

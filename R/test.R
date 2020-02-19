@@ -6,7 +6,7 @@ add_result <- function(results, file, result, error) {
   if (!is.na(error)) {
     results[["result"]] <- FALSE
   }
-  results[["files"]][["file"]] <- list(
+  results[["files"]][[file]] <- list(
     result = result,
     error = error
   )

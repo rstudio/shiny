@@ -1,3 +1,6 @@
+make_results <- function() {
+  structure(list(result = TRUE, files = list()), class = "shinytestrun")
+}
 
 #' Check to see if the given text is a shinytest
 #' Scans for the magic string of `app <- ShinyDriver$new(` as an indicator that this is a shinytest.
@@ -64,16 +67,13 @@ runTests <- function(appDir=".", filter=NULL){
       warning("You've disabled `shiny.autoload.r` via an option but this is not passed through to shinytest. Consider using a _disable_autoload.R file as described at https://rstd.io/shiny-autoload")
     }
 
-    sares <- shinytest::testApp(appDir)
-    res <- list()
-    lapply(sares$results, function(r){
-      e <- NA_character_
-      if (!r$pass){
-        e <- simpleError("Unknown shinytest error")
-      }
-      res[[r$name]] <<- e
-    })
-    return(structure(list(result=all(is.na(res)), files=res), class="shinytestrun"))
+    return(Reduce(function(results, r) {
+        error <- if (r[["pass"]]) NA else simpleError("Unknown shinytest error")
+        if (!r[["pass"]]) results[["result"]] <- FALSE
+        results[["files"]][[r[["name"]]]] <- list(result = TRUE, error = error)
+        results
+      }, shinytest::testApp(appDir)[["results"]], make_results())
+    )
   }
 
   testenv <- new.env(parent=globalenv())
@@ -95,13 +95,18 @@ runTests <- function(appDir=".", filter=NULL){
   setwd(testsDir)
 
   # Otherwise source all the runners -- each in their own environment.
-  fileResults <- list()
-  lapply(runners, function(r){
-    env <- new.env(parent=renv)
-    tryCatch({sourceUTF8(r, envir=env); fileResults[[r]] <<- NA_character_}, error=function(e){
-      fileResults[[r]] <<- e
-    })
-  })
-
-  return(structure(list(result=all(is.na(fileResults)), files=fileResults), class="shinytestrun"))
+  return(Reduce(function(results, r) {
+      result <- NA
+      error <- NA
+      tryCatch({
+        env <- new.env(parent = renv)
+        result <- sourceUTF8(r, envir = env)
+      }, error = function(e) {
+        error <<- e
+        results[["result"]] <<- FALSE
+      })
+      results[["files"]][[r]] <- list(result = result, error = error)
+      results
+    }, runners, make_results())
+  )
 }

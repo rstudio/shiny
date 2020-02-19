@@ -70,7 +70,7 @@ Imports:
     jsonlite (>= 0.9.16),
     xtable,
     digest,
-    htmltools (>= 0.4.0.9001),
+    htmltools (>= 0.4.0.9003),
     R6 (>= 2.0),
     sourcetools,
     later (>= 1.0.0),

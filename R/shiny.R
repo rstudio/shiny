@@ -1340,17 +1340,17 @@ ShinySession <- R6Class(
       # TODO: how to get at values passed to renderPlot()?
       bg <- paste0("output_", name, "_bg")
       if (bg %in% cd_names()) {
-        tmp_info$bg <- tmp_info$bg %OR% parseCssColor(self$clientData[[bg]])
+        tmp_info$bg <- tmp_info$bg %OR% htmltools::parseCssColors(self$clientData[[bg]])
       }
 
       fg <- paste0("output_", name, "_fg")
       if (fg %in% cd_names()) {
-        tmp_info$fg <- tmp_info$fg %OR% parseCssColor(self$clientData[[fg]])
+        tmp_info$fg <- tmp_info$fg %OR% htmltools::parseCssColors(self$clientData[[fg]])
       }
 
       accent <- paste0("output_", name, "_accent")
       if (accent %in% cd_names()) {
-        tmp_info$accent <- tmp_info$accent %OR% parseCssColor(self$clientData[[accent]])
+        tmp_info$accent <- tmp_info$accent %OR% htmltools::parseCssColors(self$clientData[[accent]])
       }
 
       family <- paste0("output_", name, "_font_family")

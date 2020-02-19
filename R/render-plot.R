@@ -325,7 +325,7 @@ getTheme <- function(autoTheme, session, outputName) {
   for (col in colors) {
     if (length(autoTheme[[col]])) next
     val <- session$clientData[[paste('output', outputName, col, sep = "_")]]
-    autoTheme[[col]] <- parseCssColor(val)
+    autoTheme[[col]] <- htmltools::parseCssColors(val)
   }
   # If bg/fg computing fails, fall back to bg="white"/fg="black"
   autoTheme$bg <- autoTheme$bg %OR% "white"

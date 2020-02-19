@@ -1821,7 +1821,6 @@ cat_line <- function(...) {
   cat(paste(..., "\n", collapse = ""))
 }
 
-<<<<<<< HEAD
 select_menu <- function(choices, title = NULL, msg = "Enter one or more numbers (with spaces), or an empty line to exit: \n")
 {
   if (!is.null(title)) {

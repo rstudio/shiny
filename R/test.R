@@ -2,6 +2,17 @@ make_results <- function() {
   structure(list(result = TRUE, files = list()), class = "shinytestrun")
 }
 
+add_result <- function(results, file, result, error) {
+  if (!is.na(error)) {
+    results[["result"]] <- FALSE
+  }
+  results[["files"]][["file"]] <- list(
+    result = result,
+    error = error
+  )
+  results
+}
+
 #' Check to see if the given text is a shinytest
 #' Scans for the magic string of `app <- ShinyDriver$new(` as an indicator that this is a shinytest.
 #' Brought in from shinytest to avoid having to export this function.
@@ -69,9 +80,7 @@ runTests <- function(appDir=".", filter=NULL){
 
     return(Reduce(function(results, r) {
         error <- if (r[["pass"]]) NA else simpleError("Unknown shinytest error")
-        if (!r[["pass"]]) results[["result"]] <- FALSE
-        results[["files"]][[r[["name"]]]] <- list(result = TRUE, error = error)
-        results
+        add_result(results, r[["name"]], TRUE, error)
       }, shinytest::testApp(appDir)[["results"]], make_results())
     )
   }
@@ -103,10 +112,8 @@ runTests <- function(appDir=".", filter=NULL){
         result <- sourceUTF8(r, envir = env)
       }, error = function(e) {
         error <<- e
-        results[["result"]] <<- FALSE
       })
-      results[["files"]][[r]] <- list(result = result, error = error)
-      results
+      add_result(results, r, result, error)
     }, runners, make_results())
   )
 }

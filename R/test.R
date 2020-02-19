@@ -3,13 +3,8 @@ make_results <- function() {
 }
 
 add_result <- function(results, file, result, error) {
-  if (!is.na(error)) {
-    results[["result"]] <- FALSE
-  }
-  results[["files"]][[file]] <- list(
-    result = result,
-    error = error
-  )
+  if (!is.na(error)) results[["result"]] <- FALSE
+  results[["files"]][[file]] <- list(result = result, error = error)
   results
 }
 

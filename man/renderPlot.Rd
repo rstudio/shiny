@@ -53,18 +53,10 @@ This can result in faster plot redrawing, but there may be rare cases where
 it is undesirable. If you encounter problems when resizing a plot, you can
 have Shiny re-execute the code on resize by setting this to \code{TRUE}.}
 
-\item{autoTheme}{A boolean or named vector/list. If \code{TRUE}, background
-(\code{bg}), foreground (\code{fg}), and accent (\code{accent}) colors inherit from the
-plot's containing HTML element(s)' CSS styling. When \code{autoTheme} is \code{TRUE}
-(or a list options), default theming rules are applied ggplot2, lattice, and
-base graphics. Additionally, under certain conditions, \code{sequential} and
-\code{qualitative} color palettes are also set. The default \code{sequential} palette
-derives from the \code{accent} color, whereas the \code{qualitative} palette is based
-on the Okabe-Ito scale. To control auto-theming defaults, pass a list of
-options with the desired color codes (and/or \code{NA} to use plotting framework's
-defaults instead of the auto-theming defaults). For example,
-\code{autoTheme = list(accent="red", sequential=NA)} sets the \code{accent} to \code{"red"},
-but also ensures ggplot2's sequential colorscale defaults still apply.}
+\item{autoTheme}{A boolean or result of \code{\link[=autoThemeOptions]{autoThemeOptions()}}.
+If \code{TRUE}, or the result of \code{\link[=autoThemeOptions]{autoThemeOptions()}}, default theming
+is applied to ggplot2, lattice and base graphics to match the styling
+of the app (for details, see \code{\link[=autoThemeOptions]{autoThemeOptions()}}).}
 
 \item{outputArgs}{A list of arguments to be passed through to the implicit
 call to \code{\link[=plotOutput]{plotOutput()}} when \code{renderPlot} is used in an

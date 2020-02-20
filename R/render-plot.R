@@ -47,18 +47,10 @@
 #'   This can result in faster plot redrawing, but there may be rare cases where
 #'   it is undesirable. If you encounter problems when resizing a plot, you can
 #'   have Shiny re-execute the code on resize by setting this to `TRUE`.
-#' @param autoTheme A boolean or named vector/list. If `TRUE`, background
-#'   (`bg`), foreground (`fg`), and accent (`accent`) colors inherit from the
-#'   plot's containing HTML element(s)' CSS styling. When `autoTheme` is `TRUE`
-#'   (or a list options), default theming rules are applied ggplot2, lattice, and
-#'   base graphics. Additionally, under certain conditions, `sequential` and
-#'   `qualitative` color palettes are also set. The default `sequential` palette
-#'   derives from the `accent` color, whereas the `qualitative` palette is based
-#'   on the Okabe-Ito scale. To control auto-theming defaults, pass a list of
-#'   options with the desired color codes (and/or `NA` to use plotting framework's
-#'   defaults instead of the auto-theming defaults). For example,
-#'   `autoTheme = list(accent="red", sequential=NA)` sets the `accent` to `"red"`,
-#'   but also ensures ggplot2's sequential colorscale defaults still apply.
+#' @param autoTheme A boolean or result of [autoThemeOptions()].
+#'   If `TRUE`, or the result of [autoThemeOptions()], default theming
+#'   is applied to ggplot2, lattice and base graphics to match the styling
+#'   of the app (for details, see [autoThemeOptions()]).
 #' @param outputArgs A list of arguments to be passed through to the implicit
 #'   call to [plotOutput()] when `renderPlot` is used in an
 #'   interactive R Markdown document.
@@ -176,7 +168,60 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
   markRenderFunction(outputFunc, renderFunc, outputArgs = outputArgs)
 }
 
-# TODO: bg, fg
+#' Plot auto theming options
+#'
+#' Create a list of options for passing to [renderPlot()]'s `autoTheme`
+#' argument (either directly or through [shinyOptions()]' `plot.autotheme`).
+#' This function helps you:
+#' 1. Override auto-theming defaults, which is especially useful for
+#' `qualitative` and/or `sequential` color palettes.
+#' 2. Opt-out of particular auto-theming features (by supplying `NA` to specific
+#' option(s)).
+#'
+#' @param bg background color (defaults to the background color of the containing
+#' HTML element).
+#' @param fg foreground color (defaults to the foreground color of the containing
+#' HTML element).
+#' @param accent color for making certain graphical markers 'stand out'
+#' (e.g., the fitted line color for [ggplot2::geom_smooth()]).
+#' Defaults to the hyperlink color (inside the containing HTML element).
+#' Can be of length 2 for lattice graphics.
+#' @param qualitative color palette for discrete variables.
+#' Defaults to the Okabe-Ito colorscale (won't be used in ggplot2 when
+#' the number of data levels exceeds the max allowed colors).
+#' @param sequential color palette for numeric variables.
+#' Defaults to a gradient based on `accent` color.
+#'
+#' @export
+#' @examples
+#' opts <- autoThemeOptions(accent = "red", sequential = NA)
+#' shinyOptions(plot.autotheme = opts)
+#'
+#' if (interactive()) {
+#'   shinyApp(
+#'     fluidPage(
+#'       tags$style(HTML("body {background-color: black; color: white}")),
+#'       plotOutput("p")
+#'     ),
+#'     function(input, output) {
+#'       output$p <- renderPlot({
+#'         ggplot(mtcars, aes(wt, mpg)) +
+#'           geom_point(aes(color = mpg)) +
+#'           geom_smooth()
+#'       })
+#'     }
+#'   )
+#' }
+#'
+autoThemeOptions <- function(bg = NULL, fg = NULL, accent = NULL,
+                             qualitative = NULL, sequential = NULL) {
+  list(
+    bg = bg, fg = fg, accent = accent,
+    qualitative = qualitative, sequential = sequential
+  )
+}
+
+
 resizeSavedPlot <- function(name, session, result, width, height, pixelratio, res, theme, ...) {
   if (result$img$width == width && result$img$height == height &&
       result$pixelratio == pixelratio && result$res == res &&
@@ -188,10 +233,9 @@ resizeSavedPlot <- function(name, session, result, width, height, pixelratio, re
   outfile <- plotPNG(function() {
     # TODO: Is it necessary to set base/lattice parameters for fg/bg? Or will those colors be
     # reflected in the recordedPlot?
-
     grDevices::replayPlot(result$recordedPlot)
     coordmap <<- getCoordmap(result$plotResult, width*pixelratio, height*pixelratio, res*pixelratio)
-  }, width = width*pixelratio, height = height*pixelratio, res = res*pixelratio, bg = theme$bg, ...)
+  }, width = width*pixelratio, height = height*pixelratio, res = res*pixelratio, bg = theme$bg %OR% "transparent", ...)
   on.exit(unlink(outfile), add = TRUE)
 
   result$img <- list(
@@ -221,7 +265,7 @@ drawPlot <- function(name, session, func, width, height, pixelratio, res, theme 
 
   outfile <- tempfile(fileext='.png') # If startPNG throws, this could leak. Shrug.
   device <- startPNG(outfile, width*pixelratio, height*pixelratio, res = res*pixelratio,
-                     bg = if (is.null(theme$bg)) "transparent" else theme$bg, ...)
+                     bg = theme$bg %OR% "transparent", ...)
   domain <- createGraphicsDevicePromiseDomain(device)
   grDevices::dev.control(displaylist = "enable")
 
@@ -443,7 +487,6 @@ getQualitativeCodes <- function(theme, n = NULL) {
     return(qualitative)
   }
   # https://jfly.uni-koeln.de/color/
-  # TODO: use another colorscale in dark mode?
   okabeIto <- c("#E69F00", "#009E73", "#0072B2", "#CC79A7", "#999999", "#D55E00", "#F0E442", "#56B4E9")
   if (is.null(n)) okabeIto else okabeIto[seq_len(n)]
 }

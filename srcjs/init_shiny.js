@@ -318,12 +318,15 @@ function initShiny() {
     a.href = "/";
     let div = document.createElement("div");
     div.style.position = "absolute";
-    div.style.top = "-1000px";
+    div.style.setProperty("position", "absolute", "important");
+    div.style.setProperty("top", "-1000px", "important");
+    div.style.setProperty("left", "0", "important");
+    div.style.setProperty("width", "30px", "important");
+    div.style.setProperty("height", "10px", "important");
     div.appendChild(a);
     el.appendChild(div);
-    let link = el.querySelector("a");
-    let linkColor = window.getComputedStyle(link).getPropertyValue("color");
-    el.removeChild(el.lastElementChild);
+    let linkColor = window.getComputedStyle(a).getPropertyValue("color");
+    el.removeChild(div);
     return linkColor;
   }
 

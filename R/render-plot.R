@@ -652,14 +652,7 @@ adjust_color <- function(color, bg, fg, accent = NA) {
 
 mix_colors <- function(bg, fg, amount) {
   if (!length(bg) || !length(fg)) return(NULL)
-  mid_color <- grDevices::colorRamp(c(bg, fg), alpha = TRUE)(amount)
-  sprintf(
-    "#%02X%02X%02X%02X",
-    round(mid_color[1,1]),
-    round(mid_color[1,2]),
-    round(mid_color[1,3]),
-    round(mid_color[1,4])
-  )
+  scales::colour_ramp(c(bg, fg), alpha = TRUE)(amount)
 }
 
 add_scale_defaults <- function(p, aesthetic = "colour", theme) {

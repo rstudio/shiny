@@ -1,4 +1,14 @@
-make_result <- function(file, result, error) {
+#' Creates and returns run result data frame.
+#'
+#' @param file Name of the test runner file, a character vector of length = 1.
+#' @param result Value obtained by evaluating `file` or `NA` if no value was
+#'   obtained, such as with `shinytest`.
+#' @param error Error, if any, that was signaled during evaluation of `file`.
+#'
+#' @return A 1-row data frame representing a single test run. `result` and
+#'   `error` are "list columns", or columns that may contain list elements.
+result_row <- function(file, result, error) {
+  stopifnot(length(file) == 1)
   data.frame(
     file = r,
     pass = is.na(error),
@@ -75,7 +85,7 @@ runTests <- function(appDir=".", filter=NULL){
 
     return(do.call(rbind, lapply(shinytest::testApp(appDir)[["results"]], function(r) {
       error <- if (r[["pass"]]) NA else simpleError("Unknown shinytest error")
-      make_result(r[["name"]], NA, error)
+      result_row(r[["name"]], NA, error)
     })))
   }
 
@@ -107,6 +117,6 @@ runTests <- function(appDir=".", filter=NULL){
     }, error = function(e) {
       error <<- e
     })
-    make_result(r, result, error)
+    result_row(r, result, error)
   })))
 }

@@ -1,5 +1,5 @@
 
-B <- 2
+b <- 2
 
 if (!identical(helper1, 123)){
   stop("Missing helper1")

@@ -10,7 +10,7 @@
 result_row <- function(file, result, error) {
   stopifnot(length(file) == 1)
   data.frame(
-    file = r,
+    file = file,
     pass = is.na(error),
     result = I(list(result)),
     error = I(list(error)),

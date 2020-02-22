@@ -311,32 +311,16 @@ HandlerManager <- R6Class("HandlerManager",
         },
         call = .httpServer(
           function (req) {
-            hybrid_chain(
-              hybrid_chain(
-                withCallingHandlers(withLogErrors(handlers$invoke(req)),
-                  error = function(cond) {
-                    sanitizeErrors <- getOption('shiny.sanitize.errors', FALSE)
-                    if (inherits(cond, 'shiny.custom.error') || !sanitizeErrors) {
-                      stop(cond$message, call. = FALSE)
-                    } else {
-                      stop(paste("An error has occurred. Check your logs or",
-                                 "contact the app author for clarification."),
-                           call. = FALSE)
-                    }
-                  }
-                ),
-                catch = function(err) {
-                  httpResponse(status = 500L,
-                    content_type = "text/html",
-                    content = as.character(htmltools::htmlTemplate(
-                      system.file("template", "error.html", package = "shiny"),
-                      message = conditionMessage(err)
-                    ))
-                  )
+            withCallingHandlers(withLogErrors(handlers$invoke(req)),
+              error = function(cond) {
+                sanitizeErrors <- getOption('shiny.sanitize.errors', FALSE)
+                if (inherits(cond, 'shiny.custom.error') || !sanitizeErrors) {
+                  stop(cond$message, call. = FALSE)
+                } else {
+                  stop(paste("An error has occurred. Check your logs or",
+                             "contact the app author for clarification."),
+                       call. = FALSE)
                 }
-              ),
-              function(resp) {
-                maybeInjectAutoreload(resp)
               }
             )
           },
@@ -405,22 +389,6 @@ HandlerManager <- R6Class("HandlerManager",
     }
   )
 )
-
-maybeInjectAutoreload <- function(resp) {
-  if (getOption("shiny.autoreload", FALSE) &&
-      isTRUE(grepl("^text/html($|;)", resp$content_type)) &&
-      is.character(resp$content)) {
-
-    resp$content <- gsub(
-      "</head>",
-      "<script src=\"shared/shiny-autoreload.js\"></script>\n</head>",
-      resp$content,
-      fixed = TRUE
-    )
-  }
-
-  resp
-}
 
 # Safely get the Content-Length of a Rook response, or NULL if the length cannot
 # be determined for whatever reason (probably malformed response$content).

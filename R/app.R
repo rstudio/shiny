@@ -297,7 +297,9 @@ initAutoReloadMonitor <- function(dir) {
     } else if (!identical(lastValue, times)) {
       # We've changed!
       lastValue <<- times
-      autoReloadCallbacks$invoke()
+      for (session in appsByToken$values()) {
+        session$reload()
+      }
     }
 
     invalidateLater(getOption("shiny.autoreload.interval", 500))

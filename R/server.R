@@ -279,8 +279,6 @@ decodeMessage <- function(data) {
   return(mainMessage)
 }
 
-autoReloadCallbacks <- Callbacks$new()
-
 createAppHandlers <- function(httpHandlers, serverFuncSource) {
   appvars <- new.env()
   appvars$server <- NULL
@@ -303,22 +301,6 @@ createAppHandlers <- function(httpHandlers, serverFuncSource) {
     ws = function(ws) {
       if (!checkSharedSecret(ws$request$HTTP_SHINY_SHARED_SECRET)) {
         ws$close()
-        return(TRUE)
-      }
-
-      if (identical(ws$request$PATH_INFO, "/autoreload/")) {
-        if (!getOption("shiny.autoreload", FALSE)) {
-          ws$close()
-          return(TRUE)
-        }
-
-        callbackHandle <- autoReloadCallbacks$register(function() {
-          ws$send("autoreload")
-          ws$close()
-        })
-        ws$onClose(function() {
-          callbackHandle()
-        })
         return(TRUE)
       }
 

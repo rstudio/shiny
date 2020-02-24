@@ -1,17 +1,19 @@
 #' Creates and returns run result data frame.
 #'
-#' @param file Name of the test runner file, a character vector of length = 1.
+#' @param file Name of the test runner file, a character vector of length 1.
+#' @param pass Whether or not the test passed, a logical vector of length 1.
 #' @param result Value obtained by evaluating `file` or `NA` if no value was
 #'   obtained, such as with `shinytest`.
 #' @param error Error, if any, that was signaled during evaluation of `file`.
 #'
 #' @return A 1-row data frame representing a single test run. `result` and
 #'   `error` are "list columns", or columns that may contain list elements.
-result_row <- function(file, result, error) {
-  stopifnot(length(file) == 1)
+result_row <- function(file, pass, result, error) {
+  stopifnot(is.character(file) && length(file) == 1)
+  stopifnot(is.logical(pass) && length(pass) == 1)
   data.frame(
     file = file,
-    pass = is.na(error),
+    pass = pass,
     result = I(list(result)),
     error = I(list(error)),
     stringsAsFactors = FALSE
@@ -85,7 +87,7 @@ runTests <- function(appDir=".", filter=NULL){
 
     return(do.call(rbind, lapply(shinytest::testApp(appDir)[["results"]], function(r) {
       error <- if (r[["pass"]]) NA else simpleError("Unknown shinytest error")
-      result_row(r[["name"]], NA, error)
+      result_row(r[["name"]], r[["pass"]], NA, error)
     })))
   }
 
@@ -111,12 +113,14 @@ runTests <- function(appDir=".", filter=NULL){
   return(do.call(rbind, lapply(runners, function(r) {
     result <- NA
     error <- NA
+    pass <- FALSE
     tryCatch({
       env <- new.env(parent = renv)
       result <- sourceUTF8(r, envir = env)
+      pass <- TRUE
     }, error = function(e) {
       error <<- e
     })
-    result_row(r, result, error)
+    result_row(r, pass, result, error)
   })))
 }

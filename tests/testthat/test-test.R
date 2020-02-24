@@ -52,10 +52,10 @@ test_that("runTests works", {
     file.path(test_path("../test-helpers/app1-standard"), "tests")))
 
   # Check the results
-  expect_equal(res$result, FALSE)
-  expect_length(res$files, 2)
-  expect_equal(res$files[1], list(`runner1.R` = NA_character_))
-  expect_equal(res$files[[2]]$message, "I was told to throw an error")
+  expect_equal(all(res$pass), FALSE)
+  expect_length(res$file, 2)
+  expect_equal(res$file[1], "runner1.R")
+  expect_equal(res[2,]$error[[1]]$message, "I was told to throw an error")
   expect_s3_class(res, "shinytestrun")
 
   # Check that supporting files were loaded
@@ -70,8 +70,8 @@ test_that("runTests works", {
   filesToError <- character(0)
 
   res <- runTestsSpy(test_path("../test-helpers/app1-standard"))
-  expect_equal(res$result, TRUE)
-  expect_equal(res$files, list(`runner1.R` = NA_character_, `runner2.R` = NA_character_))
+  expect_equal(all(res$pass), TRUE)
+  expect_equal(res$file, c("runner1.R", "runner2.R"))
 
   # If autoload is false, it should still load global.R. Because this load happens in the top-level of the function,
   # our spy will catch it.
@@ -115,15 +115,15 @@ test_that("calls out to shinytest when appropriate", {
 
   # Run shinytest with a failure
   res2 <- runTestsSpy(test_path("../test-helpers/app1-standard"))
-  expect_false(res2$result)
-  expect_equal(res2$files, list(test1=NA_character_, test2=simpleError("Unknown shinytest error")))
+  expect_false(all(res2$pass))
+  expect_equivalent(res2$error, list(NA, simpleError("Unknown shinytest error")))
   expect_s3_class(res2, "shinytestrun")
 
   # Run shinytest with all passing
   sares[[2]]$pass <- TRUE
   res2 <- runTestsSpy(test_path("../test-helpers/app1-standard"))
-  expect_true(res2$result)
-  expect_equal(res2$files, list(test1=NA_character_, test2=NA_character_))
+  expect_true(all(res2$pass))
+  expect_equivalent(res2$file, c("test1", "test2"))
   expect_s3_class(res2, "shinytestrun")
 
   # Not shinytests

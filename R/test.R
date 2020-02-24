@@ -11,13 +11,15 @@
 result_row <- function(file, pass, result, error) {
   stopifnot(is.character(file) && length(file) == 1)
   stopifnot(is.logical(pass) && length(pass) == 1)
-  data.frame(
+  df <- data.frame(
     file = file,
     pass = pass,
     result = I(list(result)),
     error = I(list(error)),
     stringsAsFactors = FALSE
   )
+  class(df) <- c("shinytestrun", class(df))
+  df
 }
 
 #' Check to see if the given text is a shinytest

@@ -15,6 +15,8 @@ shiny 1.4.0.9001
 
 * Added a label to observer that auto-reloads `R/` directory to avoid confusion when using `reactlog`. ([#58](https://github.com/rstudio/reactlog/issues/58))
 
+* `getDefaultReactiveDomain()` can now be called inside a `session$onSessionEnded` callback and will return the calling `session` information. ([#2757](https://github.com/rstudio/shiny/pull/2757))
+
 ### Bug fixes
 
 * Fixed [#2606](https://github.com/rstudio/shiny/issues/2606): `debounce()` would not work properly if the code in the reactive expression threw an error on the first run. ([#2652](https://github.com/rstudio/shiny/pull/2652))

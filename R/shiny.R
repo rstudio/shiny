@@ -962,7 +962,9 @@ ShinySession <- R6Class(
         output$suspend()
       }
       # ..stacktraceon matches with the top-level ..stacktraceoff..
-      private$closedCallbacks$invoke(onError = printError, ..stacktraceon = TRUE)
+      withReactiveDomain(self, {
+        private$closedCallbacks$invoke(onError = printError, ..stacktraceon = TRUE)
+      })
     },
     isClosed = function() {
       return(self$closed)

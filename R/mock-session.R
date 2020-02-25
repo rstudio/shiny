@@ -381,6 +381,8 @@ MockShinySession <- R6Class(
     flushReact = function(){
       private$flush()
     },
+    #' @description Create and return a namespace-specific session proxy.
+    #' @param namespace Character vector indicating a namespace.
     makeScope = function(namespace) {
       ns <- NS(namespace)
       createSessionProxy(

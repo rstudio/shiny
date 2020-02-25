@@ -157,7 +157,21 @@ test_that("runTests filters", {
 test_that("runTests handles the absence of tests", {
   expect_error(runTests(test_path("../test-helpers/app2-nested")), "No tests directory found")
   expect_message(res <- runTests(test_path("../test-helpers/app6-empty-tests")), "No test runners found in")
-  expect_equal(res$result, NA)
-  expect_equal(res$files, list())
+  expect_equal(res$file, character(0))
+  expect_equal(res$pass, logical(0))
+  expect_equivalent(res$result, list())
+  expect_equivalent(res$error, list())
   expect_s3_class(res, "shinytestrun")
+})
+
+test_that("runTests runs as expected without rewiring", {
+  df <- runTests(appDir = "../test-helpers/app1-standard")
+  expect_equivalent(df, data.frame(
+    file = c("runner1.R", "runner2.R"),
+    pass = c(TRUE, TRUE),
+    result = I(list(1, NULL)),
+    error = I(list(NA, NA)),
+    stringsAsFactors = FALSE
+  ))
+  expect_s3_class(df, "shinytestrun")
 })

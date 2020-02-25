@@ -2,7 +2,6 @@
 context("runTests")
 
 test_that("app1 tests pass", {
-  dput(getwd())
   df <- shiny::runTests(appDir = "../test-helpers/app1-standard")
   expect_equal(df, data.frame(
     file = c("runner1.R", "runner2.R"),

@@ -9,6 +9,7 @@
 #'
 #' @return A 1-row data frame representing a single test run. `result` and
 #'   `error` are "list columns", or columns that may contain list elements.
+#' @noRd
 result_row <- function(file, pass, result, error) {
   stopifnot(is.list(result))
   stopifnot(is.list(error))

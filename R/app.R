@@ -227,7 +227,6 @@ shinyAppDir_serverR <- function(appDir, options=list()) {
   onStart <- function() {
     oldwd <<- getwd()
     setwd(appDir)
-    monitorHandle <<- initAutoReloadMonitor(appDir)
     # TODO: we should support hot reloading on global.R and R/*.R changes.
     if (getOption("shiny.autoload.r", TRUE)) {
       loadSupport(appDir, renv=sharedEnv, globalrenv=globalenv())
@@ -235,6 +234,7 @@ shinyAppDir_serverR <- function(appDir, options=list()) {
       if (file.exists(file.path.ci(appDir, "global.R")))
         sourceUTF8(file.path.ci(appDir, "global.R"))
     }
+    monitorHandle <<- initAutoReloadMonitor(appDir)
   }
   onStop <- function() {
     setwd(oldwd)
@@ -302,6 +302,8 @@ initAutoReloadMonitor <- function(dir) {
 
     invalidateLater(getOption("shiny.autoreload.interval", 500))
   })
+
+  onStop(obs$destroy)
 
   obs$destroy
 }
@@ -427,8 +429,9 @@ shinyAppDir_appR <- function(fileName, appDir, options=list())
     if (getOption("shiny.autoload.r", TRUE)) {
       loadSupport(appDir, renv=sharedEnv, globalrenv=NULL)
     }
-    monitorHandle <<- initAutoReloadMonitor(appDir)
     if (!is.null(appObj()$onStart)) appObj()$onStart()
+    monitorHandle <<- initAutoReloadMonitor(appDir)
+    invisible()
   }
   onStop <- function() {
     setwd(oldwd)

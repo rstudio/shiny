@@ -346,15 +346,21 @@ RestoreContext <- R6Class("RestoreContext",
       values <- parseQueryString(valueStr, nested = TRUE)
 
       valuesFromJSON <- function(vals) {
-        mapply(names(vals), vals, SIMPLIFY = FALSE,
+        valsParsed <- mapply(names(vals), vals, SIMPLIFY = FALSE,
           FUN = function(name, value) {
             tryCatch(
               safeFromJSON(value),
               error = function(e) {
-                stop("Failed to parse URL parameter \"", name, "\"")
+                # If a value did not parse from JSON successfully, return NA
+                # because that's a unique value that can't be obtained from JSON
+                NA
               }
             )
           }
+        )
+        Filter(
+          function(val) !identical(NA, val),
+          valsParsed
         )
       }
 
@@ -453,7 +459,7 @@ hasCurrentRestoreContext <- function() {
   domain <- getDefaultReactiveDomain()
   if (!is.null(domain) && !is.null(domain$restoreContext))
     return(TRUE)
-  
+
   return(FALSE)
 }
 

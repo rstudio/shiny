@@ -55,53 +55,60 @@
 #' }, !!multiplier_arg_name := 2, !!!more_args)
 #' @export
 testModule <- function(module, expr, ...) {
-  expr <- substitute(expr)
-  .testModule(module, expr, ...)
+  .testModule(
+    module,
+    quosure = rlang::enquo(expr),
+    dots = rlang::list2(...),
+    env = rlang::caller_env()
+  )
 }
 
 #' @noRd
 #' @importFrom withr with_options
-.testModule <- function(module, expr, ...) {
-  # Capture the environment from the module
-  # Inserts `session$env <- environment()` at the top of the function
+.testModule <- function(module, quosure, dots, env) {
+  # Modify the module function locally by inserting `session$env <-
+  # environment()` at the beginning of its body. The dynamic environment of the
+  # module function is saved so that it may be referenced after the module
+  # function has returned. The saved dynamic environment is the basis for the
+  # `data` argument of tidy_eval() when used below to evaluate `quosure`, the
+  # test code expression.
   body(module) <- rlang::expr({
-    session$env <- environment()
+    session$env <- base::environment()
     !!!body(module)
   })
 
-  # Create a mock session
   session <- MockShinySession$new()
+  args <- append(dots, list(input = session$input, output = session$output, session = session))
 
-  # Parse the additional arguments
-  args <- rlang::list2(..., input = session$input, output = session$output, session = session)
-
-  # Initialize the module
   isolate(
     withReactiveDomain(
       session,
       withr::with_options(list(`shiny.allowoutputreads`=TRUE), {
-        # Remember that invoking this module implicitly assigns to `session$env`
-        # Also, assigning to `$returned` will cause a flush to happen automatically.
+        # Assigning to `$returned` causes a flush to happen automatically.
         session$returned <- do.call(module, args)
       })
     )
   )
 
-  # Run the test expression in a reactive context and in the module's environment.
-  # We don't need to flush before entering the loop because the first expr that we execute is `{`.
-  # So we'll already flush before we get to the good stuff.
+  # Evaluate `quosure` in a reactive context, and in the provided `env`, but
+  # with `env` masked by a shallow view of `session$env`, the environment that
+  # was saved when the module function was invoked. flush is not needed before
+  # entering the loop because the first expr execute is `{`.
   isolate({
     withReactiveDomain(
       session,
       withr::with_options(list(`shiny.allowoutputreads`=TRUE), {
-        eval(expr, new.env(parent=session$env))
+        rlang::eval_tidy(
+          quosure,
+          data = rlang::new_data_mask(as.list(session$env)),
+          env = env
+        )
       })
     )
   })
 
-  if (!session$isClosed()){
-    session$close()
-  }
+  # TODO Should we be closing this via on.exit() in case the test expression throws?
+  if (!session$isClosed()) session$close()
 }
 
 #' Test an app's server-side logic
@@ -130,8 +137,14 @@ testServer <- function(expr, appDir=NULL) {
     formals(server) <- fn_formals
   }
 
-  # Now test the server as we would a module
-  .testModule(server, expr=substitute(expr))
+  # Test the server function almost as if it were a module. `dots` is empty
+  # because server functions never take additional arguments.
+  .testModule(
+    server,
+    quosure = rlang::enquo(expr),
+    dots = list(),
+    env = rlang::caller_env()
+  )
 }
 
 findApp <- function(startDir="."){

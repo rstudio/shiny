@@ -93,14 +93,14 @@ testModule <- function(module, expr, ...) {
   # Evaluate `quosure` in a reactive context, and in the provided `env`, but
   # with `env` masked by a shallow view of `session$env`, the environment that
   # was saved when the module function was invoked. flush is not needed before
-  # entering the loop because the first expr execute is `{`.
+  # entering the loop because the first expr executed is `{`.
   isolate({
     withReactiveDomain(
       session,
       withr::with_options(list(`shiny.allowoutputreads`=TRUE), {
         rlang::eval_tidy(
           quosure,
-          data = rlang::new_data_mask(as.list(session$env)),
+          data = rlang::as_data_mask(as.list(session$env)),
           env = env
         )
       })

@@ -556,7 +556,7 @@ test_that("testServer works", {
 test_that("testServer works when referencing external globals", {
   # If global is defined at the top of app.R outside of the server function.
   testServer({
-    expect_equal(global, 123)
+    expect_equal(get("global", session$env), 123)
   }, appDir=test_path("..", "test-modules", "06_tabsets"))
 })
 

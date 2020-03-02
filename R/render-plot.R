@@ -588,9 +588,43 @@ ggplot_build_with_theme <- function(p, theme, ggplot_build = ggplot2::ggplot_bui
     }, geoms, default_colours, default_fills)
   }, add = TRUE)
 
-  # Set scaled aes defaults (if appropriate)
-  p <- add_scale_defaults(p, "colour", theme)
-  p <- add_scale_defaults(p, "fill", theme)
+  # Modify scaling defaults
+  qual_codes <- getQualitativeCodes(theme)
+  seq_codes <- getSequentialCodes(theme, n = 10)
+  scale_defaults <- list()
+  if (!identical(qual_codes, NA)) {
+    scale_defaults$ggplot2.discrete.colour <- qual_codes
+    scale_defaults$ggplot2.discrete.fill <- qual_codes
+  }
+  if (!identical(seq_codes, NA)) {
+    scale_defaults$ggplot2.continuous.colour <- function(...) {
+      ggplot2::scale_colour_gradientn(..., colours = seq_codes)
+    }
+    scale_defaults$ggplot2.continuous.fill <- function(...) {
+      ggplot2::scale_fill_gradientn(..., colours = seq_codes)
+    }
+  }
+
+  # If we have modern ggplot2, use the official scale default APIs.
+  # TODO: update version depending on when these PRs are merged.
+  # https://github.com/tidyverse/ggplot2/pull/3828
+  # https://github.com/tidyverse/ggplot2/pull/3833
+  if (packageVersion("ggplot2") > "3.3.1") {
+    old_scales <- do.call(options, scale_defaults)
+    on.exit({options(old_scales)}, add = TRUE)
+  } else {
+    # This isn't an officially supported way of setting default scales, but
+    # `scales_add_defaults()` first looks in the plot_env to find default scales
+    # https://github.com/tidyverse/ggplot2/blob/a7b3135/R/layer.r#L214
+    if (!identical(seq_codes, NA)) {
+      p$plot_env$scale_colour_continuous <- scale_defaults$ggplot2.continuous.colour
+      p$plot_env$scale_fill_continuous <- scale_defaults$ggplot2.continuous.fill
+    }
+    if (!identical(qual_codes, NA)) {
+      p$plot_env$scale_colour_discrete <- function(...) discrete_scale("colour", "qualitative", qualitative_pal(qual_codes), ...)
+      p$plot_env$scale_fill_discrete <- function(...) discrete_scale("fill", "qualitative", qualitative_pal(qual_codes), ...)
+    }
+  }
 
   if (newpage) grid::grid.newpage()
 
@@ -655,46 +689,14 @@ mix_colors <- function(bg, fg, amount) {
   scales::colour_ramp(c(bg, fg), alpha = TRUE)(amount)
 }
 
-add_scale_defaults <- function(p, aesthetic = "colour", theme) {
-  # If user has specified this scale type, then do nothing
-  if (p$scales$has_scale(aesthetic)) return(p)
-
-  # Obtain the input values to the scale
-  values <- lapply(p$layers, function(x) {
-    aes_map <- c(x$mapping, if (isTRUE(x$inherit.aes)) p$mapping)
-    data <- if (length(x$data)) x$data else p$data
-    rlang::eval_tidy(aes_map[[aesthetic]], data)
-  })
-
-  # Apply sequential default, if relevant
-  isSequential <- all(vapply(values, is.numeric, logical(1)))
-  if (isSequential) {
-    seqCodes <- getSequentialCodes(theme)
-    if (!isTRUE(is.na(seqCodes))) {
-      f <- match.fun(paste0("scale_", aesthetic, "_gradientn"))
-      p <- p + f(colors = seqCodes)
+qualitative_pal <- function(codes) {
+  function(n) {
+    if (n <= length(codes)) {
+      codes[seq_len(n)]
+    } else {
+      scales::hue_pal()(n)
     }
   }
-
-  # Apply qualitative default, if relevant (and we have enough codes)
-  isQualitative <- all(vapply(values, function(x) is_discrete(x) && !is.ordered(x), logical(1)))
-  if (isQualitative) {
-    qualCodes <- getQualitativeCodes(theme)
-    if (!isTRUE(is.na(qualCodes))) {
-      n <- length(unique(unlist(values)))
-      if (n <= length(qualCodes)) {
-        f <- match.fun(paste0("scale_", aesthetic, "_manual"))
-        p <- p + f(values = qualCodes)
-      }
-    }
-  }
-
-  p
-}
-
-# ala ggplot2:::is.discrete
-is_discrete <- function(x) {
-  is.factor(x) || is.character(x) || is.logical(x)
 }
 
 # ala Bootstrap's color-yiq()

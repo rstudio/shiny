@@ -587,6 +587,20 @@ test_that("testServer works when referencing external globals", {
   }, appDir=test_path("..", "test-modules", "06_tabsets"))
 })
 
+test_that("testModule allows lexical environment access through session$env", {
+  m <- local({
+    a_var <- 123
+    function(input, output, session) {
+      b_var <- 321
+    }
+  })
+  expect_error(a_var, "not found")
+  testModule(m, {
+    expect_equal(b_var, 321)
+    expect_equal(get("a_var", session$env), 123)
+  })
+})
+
 test_that("testModule handles invalidateLater", {
   module <- function(input, output, session) {
     rv <- reactiveValues(x = 0)

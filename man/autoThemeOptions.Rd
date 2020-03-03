@@ -42,24 +42,47 @@ This function helps you:
 option(s)).
 }
 }
+\details{
+Options may also be reactive values that trigger a plot redraw when they change.
+}
 \examples{
-opts <- autoThemeOptions(accent = "red", sequential = NA)
-shinyOptions(plot.autotheme = opts)
+
+library(ggplot2)
+
+p <- ggplot(diamonds[sample(nrow(diamonds), 1000), ], aes(carat, price)) +
+  geom_point(alpha = 0.2) +
+  geom_smooth() +
+  facet_wrap(~cut) + ggtitle("Diamond price by carat and cut")
+
+base_colors <- tags$style(HTML("body{background-color:#444; color:#e4e4e4}"))
+
+if (interactive()) {
+  shinyApp(
+    fluidPage(base_colors, plotOutput("p")),
+    function(input, output, session) {
+      shinyOptions(plot.autotheme = TRUE)
+      output$p <- renderPlot(p)
+    }
+  )
+}
 
 if (interactive()) {
   shinyApp(
     fluidPage(
-      tags$style(HTML("body {background-color: black; color: white}")),
+      base_colors,
+      selectInput(
+        "accent_color", "Select an accent color",
+        colors(), selected = "darkred"
+      ),
       plotOutput("p")
     ),
-    function(input, output) {
-      output$p <- renderPlot({
-        ggplot(mtcars, aes(wt, mpg)) +
-          geom_point(aes(color = mpg)) +
-          geom_smooth()
-      })
+    function(input, output, session) {
+      # Options could also be set globally via shinyOptions()
+      opts <- autoThemeOptions(accent = reactive(input$accent_color))
+      output$p <- renderPlot(p, autoTheme = opts)
     }
   )
 }
+
 
 }

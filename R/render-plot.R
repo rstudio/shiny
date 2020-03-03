@@ -178,6 +178,9 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
 #' 2. Opt-out of particular auto-theming features (by supplying `NA` to specific
 #' option(s)).
 #'
+#' Options may also be reactive values which, when invalidated, trigger a redraw for
+#' any plots that depend on those values.
+#'
 #' @param bg background color (defaults to the background color of the containing
 #' HTML element).
 #' @param fg foreground color (defaults to the foreground color of the containing
@@ -194,24 +197,44 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
 #'
 #' @export
 #' @examples
-#' opts <- autoThemeOptions(accent = "red", sequential = NA)
-#' shinyOptions(plot.autotheme = opts)
+#'
+#' library(ggplot2)
+#'
+#' p <- ggplot(diamonds[sample(nrow(diamonds), 1000), ], aes(carat, price)) +
+#'   geom_point(alpha = 0.2) +
+#'   geom_smooth() +
+#'   facet_wrap(~cut) + ggtitle("Diamond price by carat and cut")
+#'
+#' base_colors <- tags$style(HTML("body{background-color:#444; color:#e4e4e4}"))
+#'
+#' if (interactive()) {
+#'   shinyApp(
+#'     fluidPage(base_colors, plotOutput("p")),
+#'     function(input, output, session) {
+#'       shinyOptions(plot.autotheme = TRUE)
+#'       output$p <- renderPlot(p)
+#'     }
+#'   )
+#' }
 #'
 #' if (interactive()) {
 #'   shinyApp(
 #'     fluidPage(
-#'       tags$style(HTML("body {background-color: black; color: white}")),
+#'       base_colors,
+#'       selectInput(
+#'         "accent_color", "Select an accent color",
+#'         colors(), selected = "darkred"
+#'       ),
 #'       plotOutput("p")
 #'     ),
-#'     function(input, output) {
-#'       output$p <- renderPlot({
-#'         ggplot(mtcars, aes(wt, mpg)) +
-#'           geom_point(aes(color = mpg)) +
-#'           geom_smooth()
-#'       })
+#'     function(input, output, session) {
+#'       # Options could also be set globally via shinyOptions()
+#'       opts <- autoThemeOptions(accent = reactive(input$accent_color))
+#'       output$p <- renderPlot(p, autoTheme = opts)
 #'     }
 #'   )
 #' }
+#'
 #'
 autoThemeOptions <- function(bg = NULL, fg = NULL, accent = NULL,
                              qualitative = NULL, sequential = NULL) {
@@ -364,6 +387,7 @@ getTheme <- function(autoTheme, session, outputName) {
     return(NULL)
   }
   autoTheme <- if (isTRUE(autoTheme)) list() else autoTheme
+  autoTheme <- lapply(autoTheme, function(x) if (is.reactive(x)) x() else x)
   # default to computed styles from the client
   colors <- c("bg", "fg", "accent")
   for (col in colors) {

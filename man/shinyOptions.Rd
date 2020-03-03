@@ -40,9 +40,10 @@ be set globally with \code{options()} or locally (for a single app) with
 \code{shinyOptions()}.
 
 \describe{
-\item{shiny.autoplot (defaults to \code{FALSE})}{If \code{TRUE}, or a vector with two R colors
-named \code{bg} and \code{fg} (e.g., \code{c(bg = "red", fg = "blue")}), then automatic theming
-is applied to ggplot2, lattice, and base graphics in \code{\link[=renderPlot]{renderPlot()}}.}
+\item{plot.autotheme (defaults to \code{FALSE})}{A boolean or result of
+\code{\link[=autoThemeOptions]{autoThemeOptions()}}. If \code{TRUE}, or the result of \code{\link[=autoThemeOptions]{autoThemeOptions()}},
+default theming is applied to ggplot2, lattice and base graphics to
+match the styling of the app (for details, see \code{\link[=autoThemeOptions]{autoThemeOptions()}}).}
 \item{shiny.autoreload (defaults to \code{FALSE})}{If \code{TRUE} when a Shiny app is launched, the
 app directory will be continually monitored for changes to files that
 have the extensions: r, htm, html, js, css, png, jpg, jpeg, gif. If any

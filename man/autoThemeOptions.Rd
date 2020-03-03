@@ -13,11 +13,11 @@ autoThemeOptions(
 )
 }
 \arguments{
-\item{bg}{background color. Defaults to the background color of the containing
-HTML element.}
+\item{bg}{background color (defaults to the background color of the containing
+HTML element).}
 
-\item{fg}{foreground color. Defaults to the foreground color of the containing
-HTML element.}
+\item{fg}{foreground color (defaults to the foreground color of the containing
+HTML element).}
 
 \item{accent}{color for making certain graphical markers 'stand out'
 (e.g., the fitted line color for \code{\link[ggplot2:geom_smooth]{ggplot2::geom_smooth()}}).
@@ -37,8 +37,8 @@ argument (either directly or through \code{\link[=shinyOptions]{shinyOptions()}}
 This function helps you:
 \enumerate{
 \item Override auto-theming defaults, which is especially useful for
-specifying a \code{qualitative} and/or \code{sequential} color palette.
-\item Opt-out of specific auto-theming features (by supplying \code{NA} to specific
+\code{qualitative} and/or \code{sequential} color palettes.
+\item Opt-out of particular auto-theming features (by supplying \code{NA} to specific
 option(s)).
 }
 }

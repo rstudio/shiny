@@ -699,19 +699,6 @@ qualitative_pal <- function(codes) {
   }
 }
 
-# ala Bootstrap's color-yiq()
-# https://getbootstrap.com/docs/4.4/getting-started/theming/#color-contrast
-color_yiq <- function(color) {
-  rgb <- grDevices::col2rgb(color)
-  unname(
-    (rgb["red", ] * 299 + rgb["green", ] * 587 + rgb["blue", ] * 114) / 1000
-  )
-}
-
-color_yiq_islight <- function(color, threshold = 150) {
-  color_yiq(color) >= threshold
-}
-
 
 # The coordmap extraction functions below return something like the examples
 # below. For base graphics:
@@ -871,7 +858,6 @@ color_yiq_islight <- function(color, threshold = 150) {
 
 getCoordmap <- function(x, width, height, res) {
   if (inherits(x, "ggplot_build_gtable")) {
-
     getGgplotCoordmap(x, width, height, res)
   } else {
     getPrevPlotCoordmap(width, height)
@@ -930,6 +916,7 @@ getPrevPlotCoordmap <- function(width, height) {
 getGgplotCoordmap <- function(p, width, height, res) {
   if (!inherits(p, "ggplot_build_gtable"))
     return(NULL)
+
   tryCatch({
     # Get info from built ggplot object
     panel_info <- find_panel_info(p$build)

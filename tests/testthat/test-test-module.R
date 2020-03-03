@@ -601,6 +601,25 @@ test_that("testModule allows lexical environment access through session$env", {
   })
 })
 
+test_that("Module shadowing can be mitigated with unquote", {
+  i <- 0
+  inc <- function() i <<- i+1
+
+  m <- local({
+    function(input, output, session) {
+      inc <- function() stop("I should never be called")
+    }
+  })
+
+  testModule(m, {
+    expect_is(inc, "function")
+    expect_false(identical(inc, !!inc))
+    !!inc()
+  })
+
+  expect_equal(i, 1)
+})
+
 test_that("testModule handles invalidateLater", {
   module <- function(input, output, session) {
     rv <- reactiveValues(x = 0)

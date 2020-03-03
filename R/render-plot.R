@@ -892,11 +892,10 @@ find_panel_info_non_api <- function(b, ggplot_format) {
 # Use public API for getting the unit's type (grid::unitType(), added in R 4.0)
 # https://github.com/wch/r-source/blob/f9b8a42/src/library/grid/R/unit.R#L179
 getUnitType <- function(u) {
-  if (getRversion() >= "4.0.0") {
-    get("unitType", envir = asNamespace("grid"))(u)
-  } else {
-    attr(u, "unit", exact = TRUE)
-  }
+  tryCatch(
+    get("unitType", envir = asNamespace("grid"))(u),
+    error = function(e) attr(u, "unit", exact = TRUE)
+  )
 }
 
 # Given a gtable object, return the x and y ranges (in pixel dimensions)

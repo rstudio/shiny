@@ -525,6 +525,33 @@ test_that("testModule works with nested modules", {
   })
 })
 
+test_that("testModule calls can be nested", {
+  outerModule <- function(input, output, session) {
+    doubled <- reactive({ input$x * 2 })
+    innerModule <- function(input, output, session) {
+      quadrupled <- reactive({ doubled() * 2 })
+    }
+  }
+
+  testModule(outerModule, {
+    session$setInputs(x = 1)
+    expect_equal(doubled(), 2)
+    testModule(innerModule, {
+      expect_equal(quadrupled(), 4)
+    })
+  })
+})
+
+test_that("testModule returns a meaningful result", {
+  result <- testModule(function(input, output, session) {
+    reactive({ input$x * 2 })
+  }, {
+    session$setInputs(x = 2)
+    session$returned()
+  })
+  expect_equal(result, 4)
+})
+
 test_that("assigning an output in a module function with a non-function errors", {
   module <- function(input, output, session) {
     output$someVar <- 123

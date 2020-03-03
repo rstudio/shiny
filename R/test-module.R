@@ -14,6 +14,7 @@
 #' @param ... Additional arguments to pass to the module function. These
 #'   arguments are processed with [rlang::list2()] and so are
 #'   _[dynamic][rlang::dyn-dots]_.
+#' @return The result of evaluating `expr`.
 #' @include mock-session.R
 #' @rdname testModule
 #' @examples
@@ -78,6 +79,7 @@ testModule <- function(module, expr, ...) {
   })
 
   session <- MockShinySession$new()
+  on.exit(if (!session$isClosed()) session$close())
   args <- append(dots, list(input = session$input, output = session$output, session = session))
 
   isolate(
@@ -106,9 +108,6 @@ testModule <- function(module, expr, ...) {
       })
     )
   })
-
-  # TODO Should we be closing this via on.exit() in case the test expression throws?
-  if (!session$isClosed()) session$close()
 }
 
 #' Test an app's server-side logic

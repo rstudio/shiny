@@ -25,6 +25,9 @@ arguments are processed with \code{\link[rlang:list2]{rlang::list2()}} and so ar
 will work up the directory hierarchy --- starting with the current directory ---
 looking for a directory that contains an \code{app.R} or \code{server.R} file.}
 }
+\value{
+The result of evaluating \code{expr}.
+}
 \description{
 Offer a way to test the reactive interactions in Shiny --- either in Shiny
 modules or in the server portion of a Shiny application. For more
@@ -40,11 +43,8 @@ module <- function(input, output, session, multiplier = 2, prefix = "I am ") {
   })
 }
 
-# !!/:= and !!! from rlang are used below to programmatically splice
-# these into the testModule() argument list.
-multiplier_arg_name = "multiplier"
-more_args <- list(prefix = "I am ")
-
+# Basic Usage
+# -----------
 testModule(module, {
   session$setInputs(x = 1)
   # You're also free to use third-party
@@ -56,5 +56,18 @@ testModule(module, {
   session$setInputs(x = 2)
   stopifnot(myreactive() == 4)
   stopifnot(output$txt == "I am 4")
+  # Any additional arguments, below, are passed along to the module.
+}, multiplier = 2)
+
+# Advanced Usage
+# --------------
+multiplier_arg_name = "multiplier"
+more_args <- list(prefix = "I am ")
+testModule(module, {
+  session$setInputs(x = 1)
+  stopifnot(myreactive() == 2)
+  stopifnot(output$txt == "I am 2")
+  # !!/:= and !!! from rlang are used below to splice computed arguments
+  # into the testModule() argument list.
 }, !!multiplier_arg_name := 2, !!!more_args)
 }

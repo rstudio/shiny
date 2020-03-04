@@ -3,7 +3,7 @@
 set -e
 
 # Run JS build process
-(cd "$(dirname "$0")" && yarn && yarn build)
+(cd "$(dirname "$0")" && yarn install --frozen-lockfile && yarn build)
 
 if [ -n "$(git status --porcelain)" ]
 then

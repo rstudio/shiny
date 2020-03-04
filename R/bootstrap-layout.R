@@ -231,8 +231,12 @@ column <- function(width, ..., offset = 0) {
     stop("column width must be between 1 and 12")
 
   colClass <- paste0("col-sm-", width)
-  if (offset > 0)
-    colClass <- paste0(colClass, " col-sm-offset-", offset)
+  if (offset > 0) {
+    # offset-md-x is for bootstrap 4 forward compat
+    # (every size tier has been bumped up one level)
+    # https://github.com/twbs/bootstrap/blob/74b8fe7/docs/4.3/migration/index.html#L659
+    colClass <- paste0(colClass, " offset-md-", offset, " col-sm-offset-", offset)
+  }
   div(class = colClass, ...)
 }
 

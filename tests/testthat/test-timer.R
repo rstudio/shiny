@@ -72,11 +72,11 @@ test_that("mockableTimer works", {
 })
 
 test_that("getDomainTimeMs works", {
-  start <- Sys.time()
+  start <- as.numeric(Sys.time()) * 1000
   t1 <- getDomainTimeMs(NULL)
   t2 <- getDomainTimeMs(list())
   t3 <- getDomainTimeMs(list(.now = function(){456}))
-  end <- Sys.time()
+  end <- as.numeric(Sys.time()) * 1000
 
   expect_gte(t1, start)
   expect_gte(t2, start)

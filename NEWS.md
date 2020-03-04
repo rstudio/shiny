@@ -7,6 +7,8 @@ shiny 1.4.0.9001
 
 ### New features
 
+* The new `moduleServer` function provides a simpler interface for creating and using modules. ([#2773](https://github.com/rstudio/shiny/pull/2773))
+
 ### Minor new features and improvements
 
 * Fixed [#2042](https://github.com/rstudio/shiny/issues/2042), [#2628](https://github.com/rstudio/shiny/issues/2628): In a `dateInput` and `dateRangeInput`, disabled months and years are now a lighter gray, to make it easier to see that they are disabled. ([#2690](https://github.com/rstudio/shiny/pull/2690))
@@ -14,6 +16,8 @@ shiny 1.4.0.9001
 * `getCurrentOutputInfo()` previously threw an error when called from outside of an output; now it returns `NULL`. ([#2707](https://github.com/rstudio/shiny/pull/2707))
 
 * Added a label to observer that auto-reloads `R/` directory to avoid confusion when using `reactlog`. ([#58](https://github.com/rstudio/reactlog/issues/58))
+
+* `getDefaultReactiveDomain()` can now be called inside a `session$onSessionEnded` callback and will return the calling `session` information. ([#2757](https://github.com/rstudio/shiny/pull/2757))
 
 ### Bug fixes
 
@@ -93,7 +97,7 @@ shiny 1.3.2
 
 ### Bug fixes
 
-* Fixed [#2285](https://github.com/rstudio/shiny/issues/2285), [#2288](https://github.com/rstudio/shiny/issues/2288): Static CSS/JS resources in subapps in R Markdown documents did not render properly. ([#2386](https://github.com/rstudio/shiny/pull/2386))
+* Fixed [#2385](https://github.com/rstudio/shiny/issues/2385): Static CSS/JS resources in subapps in R Markdown documents did not render properly. ([#2386](https://github.com/rstudio/shiny/pull/2386))
 
 * Fixed [#2280](https://github.com/rstudio/shiny/issues/2280): Shiny applications that used a www/index.html file did not serve up the index file. ([#2382](https://github.com/rstudio/shiny/pull/2382))
 

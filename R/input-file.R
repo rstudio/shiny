@@ -106,7 +106,8 @@ fileInput <- function(inputId, label, multiple = FALSE, accept = NULL,
     shinyInputLabel(inputId, label),
 
     div(class = "input-group",
-      tags$label(class = "input-group-btn",
+      # input-group-prepend is for bootstrap 4 compat
+      tags$label(class = "input-group-btn input-group-prepend",
         span(class = "btn btn-default btn-file",
           buttonLabel,
           inputTag
@@ -119,7 +120,7 @@ fileInput <- function(inputId, label, multiple = FALSE, accept = NULL,
 
     tags$div(
       id=paste(inputId, "_progress", sep=""),
-      class="progress progress-striped active shiny-file-input-progress",
+      class="progress active shiny-file-input-progress",
       tags$div(class="progress-bar")
     )
   )

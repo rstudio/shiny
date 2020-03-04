@@ -1,3 +1,8 @@
+shiny 1.4.0.1
+===========
+
+Minor patch release to account for changes to the grid package that will be upcoming in the R 4.0 release ([#2776](https://github.com/rstudio/shiny/pull/2776)).
+
 shiny 1.4.0
 ===========
 

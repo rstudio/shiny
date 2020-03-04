@@ -594,7 +594,7 @@ test_that("testModule allows lexical environment access through session$env", {
       b_var <- 321
     }
   })
-  expect_error(a_var, "not found")
+  expect_false(exists("a_var", inherits = FALSE))
   testModule(m, {
     expect_equal(b_var, 321)
     expect_equal(get("a_var", session$env), 123)

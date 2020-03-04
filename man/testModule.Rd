@@ -25,6 +25,9 @@ arguments are processed with \code{\link[rlang:list2]{rlang::list2()}} and so ar
 will work up the directory hierarchy --- starting with the current directory ---
 looking for a directory that contains an \code{app.R} or \code{server.R} file.}
 }
+\value{
+The result of evaluating \code{expr}.
+}
 \description{
 Offer a way to test the reactive interactions in Shiny --- either in Shiny
 modules or in the server portion of a Shiny application. For more

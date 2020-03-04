@@ -618,10 +618,18 @@ Trigger a reactive flush right now.
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-makeScope"></a>}}
 \subsection{Method \code{makeScope()}}{
+Create and return a namespace-specific session proxy.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{MockShinySession$makeScope(namespace)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{namespace}}{Character vector indicating a namespace.}
+}
+\if{html}{\out{</div>}}
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-clone"></a>}}

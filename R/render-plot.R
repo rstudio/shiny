@@ -633,7 +633,7 @@ ggplot_build_with_theme <- function(p, theme, ggplot_build = ggplot2::ggplot_bui
   # TODO: update version depending on when these PRs are merged.
   # https://github.com/tidyverse/ggplot2/pull/3828
   # https://github.com/tidyverse/ggplot2/pull/3833
-  if (packageVersion("ggplot2") > "3.3.1") {
+  if (utils::packageVersion("ggplot2") > "3.3.1") {
     old_scales <- do.call(options, scale_defaults)
     on.exit({options(old_scales)}, add = TRUE)
   } else {
@@ -645,8 +645,8 @@ ggplot_build_with_theme <- function(p, theme, ggplot_build = ggplot2::ggplot_bui
       p$plot_env$scale_fill_continuous <- scale_defaults$ggplot2.continuous.fill
     }
     if (!identical(qual_codes, NA)) {
-      p$plot_env$scale_colour_discrete <- function(...) discrete_scale("colour", "qualitative", qualitative_pal(qual_codes), ...)
-      p$plot_env$scale_fill_discrete <- function(...) discrete_scale("fill", "qualitative", qualitative_pal(qual_codes), ...)
+      p$plot_env$scale_colour_discrete <- function(...) ggplot2::discrete_scale("colour", "qualitative", qualitative_pal(qual_codes), ...)
+      p$plot_env$scale_fill_discrete <- function(...) ggplot2::discrete_scale("fill", "qualitative", qualitative_pal(qual_codes), ...)
     }
   }
 

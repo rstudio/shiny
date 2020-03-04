@@ -95,7 +95,8 @@ Suggests:
     shinytest,
     yaml,
     future,
-    dygraphs
+    dygraphs,
+    scales
 Remotes:
     rstudio/htmltools,
     rstudio/shinytest

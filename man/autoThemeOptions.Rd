@@ -43,7 +43,8 @@ option(s)).
 }
 }
 \details{
-Options may also be reactive values that trigger a plot redraw when they change.
+Options may also be reactive values which, when invalidated, trigger a redraw for
+any plots that depend on those values.
 }
 \examples{
 

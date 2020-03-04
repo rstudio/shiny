@@ -87,6 +87,7 @@ runTests <- function(appDir=".", filter=NULL){
     isShinyTest(text)
   }, logical(1))
 
+  # See the @details section of the runTests() docs above for why this branch exists.
   if (all(isST)){
     # just call out to shinytest
     # We don't need to message/warn here since shinytest already does it.

@@ -258,7 +258,8 @@ resizeSavedPlot <- function(name, session, result, width, height, pixelratio, re
     # reflected in the recordedPlot?
     grDevices::replayPlot(result$recordedPlot)
     coordmap <<- getCoordmap(result$plotResult, width*pixelratio, height*pixelratio, res*pixelratio)
-  }, width = width*pixelratio, height = height*pixelratio, res = res*pixelratio, bg = theme$bg %OR% "transparent", ...)
+    # TODO: if and when we move to ragg::agg_png(), we'll need to translate bg -> background
+  }, width = width*pixelratio, height = height*pixelratio, res = res*pixelratio, bg = theme$bg %OR% "white", ...)
   on.exit(unlink(outfile), add = TRUE)
 
   result$img <- list(
@@ -287,8 +288,9 @@ drawPlot <- function(name, session, func, width, height, pixelratio, res, theme 
   # 10. On error, take width and height dependency
 
   outfile <- tempfile(fileext='.png') # If startPNG throws, this could leak. Shrug.
+  # TODO: if and when we move to ragg::agg_png(), we'll need to translate bg -> background
   device <- startPNG(outfile, width*pixelratio, height*pixelratio, res = res*pixelratio,
-                     bg = theme$bg %OR% "transparent", ...)
+                     bg = theme$bg %OR% "white", ...)
   domain <- createGraphicsDevicePromiseDomain(device)
   grDevices::dev.control(displaylist = "enable")
 

@@ -525,6 +525,33 @@ test_that("testModule works with nested modules", {
   })
 })
 
+test_that("testModule calls can be nested", {
+  outerModule <- function(input, output, session) {
+    doubled <- reactive({ input$x * 2 })
+    innerModule <- function(input, output, session) {
+      quadrupled <- reactive({ doubled() * 2 })
+    }
+  }
+
+  testModule(outerModule, {
+    session$setInputs(x = 1)
+    expect_equal(doubled(), 2)
+    testModule(innerModule, {
+      expect_equal(quadrupled(), 4)
+    })
+  })
+})
+
+test_that("testModule returns a meaningful result", {
+  result <- testModule(function(input, output, session) {
+    reactive({ input$x * 2 })
+  }, {
+    session$setInputs(x = 2)
+    session$returned()
+  })
+  expect_equal(result, 4)
+})
+
 test_that("assigning an output in a module function with a non-function errors", {
   module <- function(input, output, session) {
     output$someVar <- 123
@@ -556,8 +583,41 @@ test_that("testServer works", {
 test_that("testServer works when referencing external globals", {
   # If global is defined at the top of app.R outside of the server function.
   testServer({
-    expect_equal(global, 123)
+    expect_equal(get("global", session$env), 123)
   }, appDir=test_path("..", "test-modules", "06_tabsets"))
+})
+
+test_that("testModule allows lexical environment access through session$env", {
+  m <- local({
+    a_var <- 123
+    function(input, output, session) {
+      b_var <- 321
+    }
+  })
+  expect_false(exists("a_var", inherits = FALSE))
+  testModule(m, {
+    expect_equal(b_var, 321)
+    expect_equal(get("a_var", session$env), 123)
+  })
+})
+
+test_that("Module shadowing can be mitigated with unquote", {
+  i <- 0
+  inc <- function() i <<- i+1
+
+  m <- local({
+    function(input, output, session) {
+      inc <- function() stop("I should never be called")
+    }
+  })
+
+  testModule(m, {
+    expect_is(inc, "function")
+    expect_false(identical(inc, !!inc))
+    !!inc()
+  })
+
+  expect_equal(i, 1)
 })
 
 test_that("testModule handles invalidateLater", {

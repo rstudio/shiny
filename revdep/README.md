@@ -21,11 +21,3 @@
 
 # Revdeps
 
-## Failed to check (3)
-
-|package        |version  |error |warning |note |
-|:--------------|:--------|:-----|:-------|:----|
-|MissingDataGUI |0.2-5    |1     |        |     |
-|rgl            |0.100.50 |1     |        |1    |
-|RQuantLib      |0.4.11   |1     |        |1    |
-

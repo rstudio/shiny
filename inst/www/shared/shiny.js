@@ -4973,6 +4973,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
       // Workaround for same issue as in _setMin.
       if (typeof date.toDateString !== 'function') return;
+      if (curValue === null) return;
       if (typeof curValue.toDateString !== 'function') return;
       if (date.toDateString() === curValue.toDateString()) {
         $(el).bsDatepicker('setEndDate', null);

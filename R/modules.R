@@ -147,11 +147,10 @@ callModule <- function(module, id, ..., session = getDefaultReactiveDomain()) {
 
   childScope <- session$makeScope(id)
   parent <- parentSession(session)
-  trace <- rlang::trace_back()
 
   if (inherits(parent, "MockShinySession")
       && (sys.nframe() >= 2)
-      && (as.character(sys.call(1)[[1]]) == "moduleServer")) {
+      && (as.character(sys.call(sys.nframe() - 1)[[1]]) == "moduleServer")) {
     # If the module is under test *and* was called by moduleServer(), modify the
     # module function locally by inserting the equivalent of `session$env <-
     # environment()` at the beginning of its body. A similar operation is

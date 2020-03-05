@@ -92,7 +92,8 @@ isOldModule <- function(func) {
     # If the module is a "new-style" module, we rely on logic in callModule()
     # that instruments the function if the session is a MockShinySession.
     # Appending additional arguments is not necessary, as input/output/session
-    # will be provided in moduleServer().
+    # will be provided in moduleServer(). `id` is also provided via
+    # moduleServer().
     args <- dots
   }
 
@@ -101,6 +102,7 @@ isOldModule <- function(func) {
       session,
       withr::with_options(list(`shiny.allowoutputreads`=TRUE), {
         # Assigning to `$returned` causes a flush to happen automatically.
+        # TODO Wrong for new-style modules; fix
         session$returned <- do.call(module, args)
       })
     )

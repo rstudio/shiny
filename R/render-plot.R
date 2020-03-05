@@ -565,6 +565,7 @@ custom_print.ggplot <- function(theme = list()) {
 # use this function with a custom ggplot_build function (e.g. plotly) can do so
 # and geom defaults will still be restored after building
 ggplot_build_with_theme <- function(p, theme, ggplot_build = ggplot2::ggplot_build, newpage = TRUE) {
+  if (newpage) grid::grid.newpage()
   if (!length(theme)) return(ggplot_build(p))
   fg <- theme$fg
   bg <- theme$bg
@@ -651,8 +652,6 @@ ggplot_build_with_theme <- function(p, theme, ggplot_build = ggplot2::ggplot_bui
       p$plot_env$scale_fill_discrete <- function(...) ggplot2::discrete_scale("fill", "qualitative", qualitative_pal(qual_codes), ...)
     }
   }
-
-  if (newpage) grid::grid.newpage()
 
   ggplot_build(p)
 }

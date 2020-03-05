@@ -521,24 +521,27 @@ getQualitativeCodes <- function(theme, n = NULL) {
 getSequentialCodes <- function(theme, n = 8) {
   sequential <- theme$sequential
   if (isTRUE(is.na(sequential)) || is.character(sequential)) {
-    return(sequential)
+    return(
+      scales::colour_ramp(sequential)(seq(0, 1, length.out = n))
+    )
   }
-  # This shouldn't really happen since ggplot2 depends on scales
-  # (and this is only called in the ggplot2 case)
-  if (system.file(package = "farver") == "") {
-    warning("Computing default sequential codes (for autoTheme) requires the farver package.")
-    return(NA)
-  }
-  decode_colour <- utils::getFromNamespace("decode_colour", "farver")
-  if (system.file(package = "colorspace") == "") {
-    warning("Computing default sequential codes (for autoTheme) requires the colorspace package.")
-    return(NA)
-  }
-  sequential_hcl <- utils::getFromNamespace("sequential_hcl", "colorspace")
-  hcl <- as.list(decode_colour(theme$accent, to = "hcl")[1, ])
-  l <- c(hcl$l - 20, hcl$l + 20)
-  c <- c(hcl$c + 20, hcl$c - 20)
-  sequential_hcl(n = n, h = hcl$h, c = c, l = l)
+  # Main idea: Interpolate between [fg+accent -> accent -> bg+accent]
+  # For the endpoints the amount of blending of fg/bg and accent
+  # depends on how similar thwt
+  fg <- farver::decode_colour(theme$fg)
+  accent <- farver::decode_colour(theme$accent)
+  bg <- farver::decode_colour(theme$bg)
+  fg_dist <- farver::compare_colour(fg, accent, from_space = "rgb", method = "cie2000")
+  bg_dist <- farver::compare_colour(bg, accent, from_space = "rgb", method = "cie2000")
+  fg_dist_prop <- as.numeric(fg_dist / (bg_dist + fg_dist))
+  bg_dist_prop <- as.numeric(bg_dist / (bg_dist + fg_dist))
+  ramp <- scales::colour_ramp(c(theme$fg, theme$accent, theme$bg), alpha = TRUE)
+  ramp(
+    scales::rescale(
+      seq(0, 1, length.out = n),
+      to = 0.5 + c(-0.5 * fg_dist_prop, 0.4 * bg_dist_prop)
+    )
+  )
 }
 
 # A modified version of print.ggplot which returns the built ggplot object
@@ -617,7 +620,7 @@ ggplot_build_with_theme <- function(p, theme, ggplot_build = ggplot2::ggplot_bui
 
   # Modify scaling defaults
   qual_codes <- getQualitativeCodes(theme)
-  seq_codes <- getSequentialCodes(theme, n = 10)
+  seq_codes <- getSequentialCodes(theme, n = 50)
   scale_defaults <- list()
   if (!identical(qual_codes, NA)) {
     scale_defaults$ggplot2.discrete.colour <- qual_codes

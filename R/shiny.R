@@ -2346,5 +2346,6 @@ missingOutput <- function(...) req(FALSE)
 #'     ")
 #' )
 markdown <- function(mds, extensions = TRUE, .noWS = NULL, ...) {
-  htmltools::HTML(rlang::exec(commonmark::markdown_html, glue::trim(mds), extensions = extensions, ...), .noWS = .noWS)
+  html <- rlang::exec(commonmark::markdown_html, glue::trim(mds), extensions = extensions, ...)
+  htmltools::HTML(html, .noWS = .noWS)
 }

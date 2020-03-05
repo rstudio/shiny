@@ -125,21 +125,50 @@ moduleServer <- function(id, module, session = getDefaultReactiveDomain()) {
 }
 
 
+parentSession <- function(session) {
+  if (inherits(session, c("ShinySession", "MockShinySession")))
+    return(session)
+
+  if (!inherits(session, "session_proxy"))
+    stop("session must be a ShinySession, MockShinySession, or session_proxy object.")
+
+  while (inherits(session, "session_proxy"))
+    session <- session$parent
+
+  session
+}
+
 #' @rdname moduleServer
 #' @export
 callModule <- function(module, id, ..., session = getDefaultReactiveDomain()) {
-  if (!inherits(session, "ShinySession")
-      && !inherits(session, "session_proxy")
-      && !inherits(session, "MockShinySession")) {
-    stop("session must be a ShinySession or session_proxy object.")
+  if (!inherits(session, c("ShinySession", "MockShinySession", "session_proxy"))) {
+    stop("session must be a ShinySession, MockShinySession, or session_proxy object.")
   }
+
   childScope <- session$makeScope(id)
+  parent <- parentSession(session)
+  trace <- rlang::trace_back()
+
+  if (inherits(parent, "MockShinySession")
+      && (sys.nframe() >= 2)
+      && (as.character(sys.call(1)[[1]]) == "moduleServer")) {
+    # If the module is under test *and* was called by moduleServer(), modify the
+    # module function locally by inserting the equivalent of `session$env <-
+    # environment()` at the beginning of its body. A similar operation is
+    # performed by .testModule() if the module is *not* called through
+    # moduleServer() but is under test. See .testModule() for details.
+    body(module) <- rlang::expr({
+      base::assign("env", base::environment(), envir = !!parent)
+      !!!body(module)
+    })
+  }
 
   withReactiveDomain(childScope, {
     if (!is.function(module)) {
       stop("module argument must be a function")
     }
 
+    # TODO use rlang::execute to support dynamic dots?
     module(childScope$input, childScope$output, childScope, ...)
   })
 }

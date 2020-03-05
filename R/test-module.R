@@ -64,23 +64,37 @@ testModule <- function(module, expr, ...) {
   )
 }
 
-#' @noRd
-#' @importFrom withr with_options
-.testModule <- function(module, quosure, dots, env) {
-  # Modify the module function locally by inserting `session$env <-
-  # environment()` at the beginning of its body. The dynamic environment of the
-  # module function is saved so that it may be referenced after the module
-  # function has returned. The saved dynamic environment is the basis for the
-  # `data` argument of tidy_eval() when used below to evaluate `quosure`, the
-  # test code expression.
-  body(module) <- rlang::expr({
-    session$env <- base::environment()
-    !!!body(module)
-  })
+isOldModule <- function(func) {
+  stopifnot(is.function(func))
+  required <- c("input", "output", "session")
+  declared <- names(formals(func))
+  setequal(required, intersect(required, declared))
+}
 
+#' @noRd
+.testModule <- function(module, quosure, dots, env) {
   session <- MockShinySession$new()
   on.exit(if (!session$isClosed()) session$close())
-  args <- append(dots, list(input = session$input, output = session$output, session = session))
+
+  if (isOldModule(module)) {
+    # If the module is an "old-style" module that accepts input, output, and
+    # session parameters, modify the function locally by inserting `session$env
+    # <- environment()` at the beginning of its body. The dynamic environment of
+    # the module function is saved so that it may be referenced after the module
+    # function has returned. The saved dynamic environment is the basis for the
+    # `data` argument of tidy_eval() when used below to evaluate `quosure`.
+    body(module) <- rlang::expr({
+      session$env <- base::environment()
+      !!!body(module)
+    })
+    args <- append(dots, list(input = session$input, output = session$output, session = session))
+  } else {
+    # If the module is a "new-style" module, we rely on logic in callModule()
+    # that instruments the function if the session is a MockShinySession.
+    # Appending additional arguments is not necessary, as input/output/session
+    # will be provided in moduleServer().
+    args <- dots
+  }
 
   isolate(
     withReactiveDomain(

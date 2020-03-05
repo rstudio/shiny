@@ -121,6 +121,8 @@ createSessionProxy <- function(parentSession, ...) {
 #'
 #' @export
 moduleServer <- function(id, module, session = getDefaultReactiveDomain()) {
+  parent <- parentSession(session)
+  if (inherits(parent, c("MockShinySession"))) session$isModuleServer <- TRUE
   callModule(module, id, session = session)
 }
 
@@ -148,9 +150,7 @@ callModule <- function(module, id, ..., session = getDefaultReactiveDomain()) {
   childScope <- session$makeScope(id)
   parent <- parentSession(session)
 
-  if (inherits(parent, "MockShinySession")
-      && (sys.nframe() >= 2)
-      && (as.character(sys.call(sys.nframe() - 1)[[1]]) == "moduleServer")) {
+  if (inherits(parent, "MockShinySession") && parent$isModuleServer) {
     # If the module is under test *and* was called by moduleServer(), modify the
     # module function locally by inserting the equivalent of `session$env <-
     # environment()` at the beginning of its body. A similar operation is

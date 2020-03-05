@@ -100,7 +100,8 @@ MockShinySession <- R6Class(
     userData = NULL,
     #' @field progressStack A stack of progress objects
     progressStack = 'Stack',
-
+    #' @field TRUE when a moduleServer()-based module is under test
+    isModuleServer = FALSE,
     #' @description Create a new MockShinySession
     initialize = function() {
       private$.input <- ReactiveValues$new(dedupe = FALSE, label = "input")

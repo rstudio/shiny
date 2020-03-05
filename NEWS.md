@@ -25,6 +25,8 @@ shiny 1.4.0.9001
 
 * Fixed [#2653](https://github.com/rstudio/shiny/issues/2653): The `dataTableOutput()` could have incorrect output if certain characters were in the column names. ([#2658](https://github.com/rstudio/shiny/pull/2658))
 
+* Fixed [#2703](https://github.com/rstudio/shiny/issues/2703): `updateDateInput` and `ùpdateDateRangeInput` failed when setting min and max limits in the future of the currently selected date.
+
 ### Documentation Updates
 
 

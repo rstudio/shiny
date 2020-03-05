@@ -2299,13 +2299,13 @@ missingOutput <- function(...) req(FALSE)
 
 #' Insert inline Markdown
 #'
-#' This function accepts a character vector of
-#' [Markdown](https://en.wikipedia.org/wiki/Markdown)-syntax text and renders
-#' it to HTML that may be included in a UI.
+#' This function accepts
+#' [Markdown](https://en.wikipedia.org/wiki/Markdown)-syntax text and returns
+#' HTML that may be included in Shiny UIs.
 #'
-#' Prior to interpretation as Markdown, leading whitespace is trimmed from text
-#' with [glue::trim()]. This makes it possible to insert Markdown and for it to
-#' be processed correctly even when the call to `markdown()` is indented.
+#' Leading whitespace is trimmed from Markdown text with [glue::trim()].
+#' Whitespace trimming ensures Markdown is processed correctly even when the
+#' call to `markdown()` is indented within surrounding R code.
 #'
 #' By default, [Github extensions][commonmark::extensions] are enabled, but this
 #' can be disabled by passing `extensions = FALSE`.
@@ -2314,12 +2314,16 @@ missingOutput <- function(...) req(FALSE)
 #' arguments to `markdown()` are passed as arguments to `markdown_html()`
 #'
 #' @param mds A character vector of Markdown source to convert to HTML. If the
-#'   vector has more than one element, resulting HTML is concatenated.
-#' @param extensions Enable Github syntax extensions, defaults to `TRUE`.
+#'   vector has more than one element, a single-element character vector of
+#'   concatenated HTML is returned.
+#' @param extensions Enable Github syntax extensions; defaults to `TRUE`.
+#' @param .noWS Character vector used to omit some of the whitespace that would
+#'   normally be written around this HTML. Valid options include `before`,
+#'   `after`, and `outside` (equivalent to `before` and `end`).
 #' @param ... Additional arguments to pass to [commonmark::markdown_html()].
 #'   These arguments are _[dynamic][rlang::dyn-dots]_.
 #'
-#' @return an `html`-classed character vector of rendered HTML
+#' @return a character vector marked as HTML.
 #' @export
 #' @examples
 #' ui <- fluidPage(
@@ -2341,6 +2345,6 @@ missingOutput <- function(...) req(FALSE)
 #'     To see more of what's possible, check out [commonmark.org/help](https://commonmark.org/help).
 #'     ")
 #' )
-markdown <- function(mds, extensions = TRUE, ...) {
-  rlang::exec(commonmark::markdown_html, glue::trim(mds), extensions = extensions, ...)
+markdown <- function(mds, extensions = TRUE, .noWS = NULL, ...) {
+  htmltools::HTML(rlang::exec(commonmark::markdown_html, glue::trim(mds), extensions = extensions, ...), .noWS = .noWS)
 }

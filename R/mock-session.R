@@ -69,6 +69,20 @@ extract <- function(promise) {
   stop("Single-bracket indexing of mockclientdata is not allowed.")
 }
 
+#' @noRd
+patchModuleFunction <- function(module) {
+  body(module) <- rlang::expr({
+    withr::with_options(base::list(`shiny.allowoutputreads` = TRUE), {
+      session$env <- base::environment()
+      session$returned <- {
+        !!!body(module)
+      }
+      session$returned
+    })
+  })
+  module
+}
+
 #' Mock Shiny Session
 #'
 #' @description
@@ -389,7 +403,12 @@ MockShinySession <- R6Class(
         self,
         input = .createReactiveValues(private$.input, readonly = TRUE, ns = ns),
         output = structure(.createOutputWriter(self, ns = ns), class = "shinyoutput"),
-        makeScope = function(namespace) self$makeScope(ns(namespace))
+        makeScope = function(namespace) self$makeScope(ns(namespace)),
+        setInputs = function(...) {
+          args <- list(...)
+          names(args) <- ns(names(args))
+          do.call(self$setInputs, args)
+        }
       )
     }
   ),

@@ -121,8 +121,25 @@ createSessionProxy <- function(parentSession, ...) {
 #'
 #' @export
 moduleServer <- function(id, module, session = getDefaultReactiveDomain()) {
-  if (inherits(session, c("MockShinySession"))) session$isModuleServer <- TRUE
+  if (inherits(sessionFor(session), "MockShinySession")) {
+    # session is either a MockShinySession or a proxy for one
+    module <- patchModuleFunction(module)
+  }
   callModule(module, id, session = session)
+}
+
+#' @noRd
+sessionFor <- function(session) {
+  if (inherits(session, c("MockShinySession", "ShinySession")))
+    return(session)
+
+  if (!inherits(session, "session_proxy"))
+    stop("session must be a ShinySession, MockShinySession, or session_proxy object.")
+
+  while (inherits(session, "session_proxy"))
+    session <- session$parent
+
+  session
 }
 
 #' @rdname moduleServer
@@ -131,30 +148,13 @@ callModule <- function(module, id, ..., session = getDefaultReactiveDomain()) {
   if (!inherits(session, c("ShinySession", "MockShinySession", "session_proxy"))) {
     stop("session must be a ShinySession, MockShinySession, or session_proxy object.")
   }
+  childScope <- session$makeScope(id)
 
-  if (inherits(session, "MockShinySession") && session$isModuleServer) {
-    # If the module is under test *and* was called by moduleServer(), modify the
-    # module function locally by inserting the equivalent of `session$env <-
-    # environment()` at the beginning of its body. A similar operation is
-    # performed by .testModule() if the module is *not* called through
-    # moduleServer() but is under test. See .testModule() for details.
-    body(module) <- rlang::expr({
-      base::assign("env", base::environment(), envir = !!session)
-      !!!body(module)
-    })
-    isolate(
-      withReactiveDomain(
-        session,
-        withr::with_options(list(`shiny.allowoutputreads`=TRUE), {
-          session$returned <- module(session$input, session$output, session, ...)
-        })
-      )
-    )
-  } else {
-    childScope <- session$makeScope(id)
-    withReactiveDomain(childScope, {
-      if (!is.function(module)) stop("module argument must be a function")
-      module(childScope$input, childScope$output, childScope, ...)
-    })
-  }
+  withReactiveDomain(childScope, {
+    if (!is.function(module)) {
+      stop("module argument must be a function")
+    }
+
+    module(childScope$input, childScope$output, childScope, ...)
+  })
 }

@@ -77,59 +77,24 @@ isOldModule <- function(func) {
   on.exit(if (!session$isClosed()) session$close())
 
   if (isOldModule(module)) {
-    # If the module is an "old-style" module that accepts input, output, and
-    # session parameters, modify the function locally by inserting `session$env
-    # <- environment()` at the beginning of its body. The dynamic environment of
-    # the module function is saved so that it may be referenced after the module
-    # function has returned. The saved dynamic environment is the basis for the
-    # `data` argument of tidy_eval() when used below to evaluate `quosure`.
-    body(module) <- rlang::expr({
-      session$env <- base::environment()
-      !!!body(module)
-    })
+    module <- patchModuleFunction(module)
     args <- append(dots, list(input = session$input, output = session$output, session = session))
-    isolate(
-      withReactiveDomain(
-        session,
-        withr::with_options(list(`shiny.allowoutputreads`=TRUE), {
-          # Assigning to `$returned` causes a flush to happen automatically.
-          session$returned <- do.call(module, args)
-        })
-      )
-    )
   } else {
-    # If the module is a "new-style" module, we rely on logic in callModule()
-    # that instruments the function if the session is a MockShinySession.
-    # Appending additional arguments is not necessary, as input/output/session
-    # will be provided in moduleServer(). `id` is also provided via
-    # moduleServer().
-    isolate(
-      withReactiveDomain(
-        session,
-        withr::with_options(list(`shiny.allowoutputreads`=TRUE), {
-          # TODO Implement session$returned for new style modules
-          do.call(module, dots)
-        })
-      )
-    )
+    args <- dots
   }
 
-  # Evaluate `quosure` in a reactive context, and in the provided `env`, but
-  # with `env` masked by a shallow view of `session$env`, the environment that
-  # was saved when the module function was invoked. flush is not needed before
-  # entering the loop because the first expr executed is `{`.
-  isolate({
-    withReactiveDomain(
-      session,
-      withr::with_options(list(`shiny.allowoutputreads`=TRUE), {
-        rlang::eval_tidy(
-          quosure,
-          data = rlang::as_data_mask(as.list(session$env)),
-          env = env
-        )
-      })
-    )
-  })
+  withReactiveDomain(session, do.call(module, args))
+
+  withReactiveDomain(
+    session,
+    withr::with_options(list(`shiny.allowoutputreads`=TRUE), {
+      rlang::eval_tidy(
+        quosure,
+        data = rlang::as_data_mask(as.list(session$env)),
+        env = env
+      )
+    })
+  )
 }
 
 #' Test an app's server-side logic

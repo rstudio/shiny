@@ -88,25 +88,31 @@ isOldModule <- function(func) {
       !!!body(module)
     })
     args <- append(dots, list(input = session$input, output = session$output, session = session))
+    isolate(
+      withReactiveDomain(
+        session,
+        withr::with_options(list(`shiny.allowoutputreads`=TRUE), {
+          # Assigning to `$returned` causes a flush to happen automatically.
+          session$returned <- do.call(module, args)
+        })
+      )
+    )
   } else {
     # If the module is a "new-style" module, we rely on logic in callModule()
     # that instruments the function if the session is a MockShinySession.
     # Appending additional arguments is not necessary, as input/output/session
     # will be provided in moduleServer(). `id` is also provided via
     # moduleServer().
-    args <- dots
-  }
-
-  isolate(
-    withReactiveDomain(
-      session,
-      withr::with_options(list(`shiny.allowoutputreads`=TRUE), {
-        # Assigning to `$returned` causes a flush to happen automatically.
-        # TODO Wrong for new-style modules; fix
-        session$returned <- do.call(module, args)
-      })
+    isolate(
+      withReactiveDomain(
+        session,
+        withr::with_options(list(`shiny.allowoutputreads`=TRUE), {
+          # TODO Implement session$returned for new style modules
+          do.call(module, dots)
+        })
+      )
     )
-  )
+  }
 
   # Evaluate `quosure` in a reactive context, and in the provided `env`, but
   # with `env` masked by a shallow view of `session$env`, the environment that

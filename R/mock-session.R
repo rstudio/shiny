@@ -73,11 +73,10 @@ extract <- function(promise) {
 patchModuleFunction <- function(module) {
   body(module) <- rlang::expr({
     withr::with_options(base::list(`shiny.allowoutputreads` = TRUE), {
-      session$env <- base::environment()
-      session$returned <- {
+      session$setEnv(base::environment())
+      session$setReturned({
         !!!body(module)
-      }
-      session$returned
+      })
     })
   })
   module
@@ -395,21 +394,38 @@ MockShinySession <- R6Class(
     flushReact = function(){
       private$flush()
     },
+    setEnv = function(env) {
+      self$env <- env
+    },
+    setReturned = function(value) {
+      private$returnedVal <- value
+      private$flush()
+      value
+    },
     #' @description Create and return a namespace-specific session proxy.
     #' @param namespace Character vector indicating a namespace.
     makeScope = function(namespace) {
       ns <- NS(namespace)
-      createSessionProxy(
+      proxy <- createSessionProxy(
         self,
         input = .createReactiveValues(private$.input, readonly = TRUE, ns = ns),
         output = structure(.createOutputWriter(self, ns = ns), class = "shinyoutput"),
         makeScope = function(namespace) self$makeScope(ns(namespace)),
+        env = NULL,
+        returned = NULL,
+        setEnv = function(env) assign("env", env, envir = proxy),
+        setReturned = function(value) {
+          assign("returned", value, envir = proxy)
+          private$flush()
+          value
+        },
         setInputs = function(...) {
           args <- list(...)
           names(args) <- ns(names(args))
           do.call(self$setInputs, args)
         }
       )
+      proxy
     }
   ),
   private = list(

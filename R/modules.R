@@ -122,10 +122,11 @@ createSessionProxy <- function(parentSession, ...) {
 #' @export
 moduleServer <- function(id, module, session = getDefaultReactiveDomain()) {
   if (inherits(sessionFor(session), "MockShinySession")) {
-    # session is either a MockShinySession or a proxy for one
     module <- patchModuleFunction(module)
+    isolate(callModule(module, id, session = session))
+  } else {
+    callModule(module, id, session = session)
   }
-  callModule(module, id, session = session)
 }
 
 #' @noRd

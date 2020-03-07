@@ -83,18 +83,20 @@ isOldModule <- function(func) {
     args <- dots
   }
 
-  withReactiveDomain(session, do.call(module, args))
+  isolate(withReactiveDomain(session, do.call(module, args)))
 
-  withReactiveDomain(
-    session,
-    withr::with_options(list(`shiny.allowoutputreads`=TRUE), {
-      rlang::eval_tidy(
-        quosure,
-        data = rlang::as_data_mask(as.list(session$env)),
-        env = env
-      )
-    })
-  )
+  isolate({
+    withReactiveDomain(
+      session,
+      withr::with_options(list(`shiny.allowoutputreads`=TRUE), {
+        rlang::eval_tidy(
+          quosure,
+          data = rlang::as_data_mask(as.list(session$env)),
+          env = env
+        )
+      })
+    )
+  })
 }
 
 #' Test an app's server-side logic

@@ -29,7 +29,6 @@ If the number has a suffix, it must be valid: \code{px},
 \code{vmax}.
 If the number has no suffix, the suffix \code{"px"} is appended.
 
-
 Any other value will cause an error to be thrown.
 }
 \examples{

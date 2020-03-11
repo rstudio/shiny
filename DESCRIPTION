@@ -81,7 +81,8 @@ Imports:
     fastmap (>= 1.0.0),
     withr,
     commonmark (>= 1.7),
-    glue (>= 1.3.2)
+    glue (>= 1.3.2),
+    thematic
 Suggests:
     datasets,
     Cairo (>= 1.5-5),
@@ -95,11 +96,12 @@ Suggests:
     shinytest,
     yaml,
     future,
-    dygraphs,
-    scales
+    dygraphs
 Remotes:
     rstudio/htmltools,
-    rstudio/shinytest
+    rstudio/shinytest,
+    rstudio/thematic
+>>>>>>> port auto-theming logic to new thematic package
 URL: http://shiny.rstudio.com
 BugReports: https://github.com/rstudio/shiny/issues
 Collate:

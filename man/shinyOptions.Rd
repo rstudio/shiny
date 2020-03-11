@@ -40,10 +40,11 @@ be set globally with \code{options()} or locally (for a single app) with
 \code{shinyOptions()}.
 
 \describe{
-\item{plot.autotheme (defaults to \code{FALSE})}{A boolean or result of
-\code{\link[=autoThemeOptions]{autoThemeOptions()}}. If \code{TRUE}, or the result of \code{\link[=autoThemeOptions]{autoThemeOptions()}},
-default theming is applied to ggplot2, lattice and base graphics to
-match the styling of the app (for details, see \code{\link[=autoThemeOptions]{autoThemeOptions()}}).}
+\item{plot.autotheme (defaults to \code{FALSE})}{If \code{TRUE}, default theming is applied
+to ggplot2, lattice, and base graphics. For control over the auto-theming defaults,
+use the \code{\link[thematic:thematic_begin]{thematic::thematic_begin()}} and/or the graphing library of interest (e.g.,
+\code{\link[ggplot2:theme]{ggplot2::theme()}}, \code{\link[lattice:trellis.par.set]{lattice::trellis.par.set()}}, \code{\link[graphics:par]{graphics::par()}},
+\code{\link[grDevices:palette]{grDevices::palette()}}, etc).}
 \item{shiny.autoreload (defaults to \code{FALSE})}{If \code{TRUE} when a Shiny app is launched, the
 app directory will be continually monitored for changes to files that
 have the extensions: r, htm, html, js, css, png, jpg, jpeg, gif. If any

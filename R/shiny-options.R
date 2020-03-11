@@ -35,10 +35,11 @@ getShinyOption <- function(name, default = NULL) {
 #' `shinyOptions()`.
 #'
 #' \describe{
-#' \item{plot.autotheme (defaults to `FALSE`)}{A boolean or result of
-#'   [autoThemeOptions()]. If `TRUE`, or the result of [autoThemeOptions()],
-#'   default theming is applied to ggplot2, lattice and base graphics to
-#'   match the styling of the app (for details, see [autoThemeOptions()]).}
+#' \item{plot.autotheme (defaults to `FALSE`)}{If `TRUE`, default theming is applied
+#'  to ggplot2, lattice, and base graphics. For control over the auto-theming defaults,
+#'  use the [thematic::thematic_begin()] and/or the graphing library of interest (e.g.,
+#'  [ggplot2::theme()], [lattice::trellis.par.set()], [graphics::par()],
+#'  [grDevices::palette()], etc).}
 #' \item{shiny.autoreload (defaults to `FALSE`)}{If `TRUE` when a Shiny app is launched, the
 #'   app directory will be continually monitored for changes to files that
 #'   have the extensions: r, htm, html, js, css, png, jpg, jpeg, gif. If any

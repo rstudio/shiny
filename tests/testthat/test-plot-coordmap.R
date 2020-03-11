@@ -7,7 +7,8 @@ sortList <- function(x) {
 }
 
 # This will create print.ggplot in the current environment
-print.ggplot <- custom_print.ggplot()
+print.ggplot <- custom_print.ggplot
+
 
 test_that("ggplot coordmap", {
   dat <- data.frame(xvar = c(0, 5), yvar = c(10, 20))

@@ -47,10 +47,11 @@
 #'   This can result in faster plot redrawing, but there may be rare cases where
 #'   it is undesirable. If you encounter problems when resizing a plot, you can
 #'   have Shiny re-execute the code on resize by setting this to `TRUE`.
-#' @param autoTheme A boolean or result of [autoThemeOptions()].
-#'   If `TRUE`, or the result of [autoThemeOptions()], default theming
-#'   is applied to ggplot2, lattice and base graphics to match the styling
-#'   of the app (for details, see [autoThemeOptions()]).
+#' @param autoTheme If `TRUE`, default theming is applied to ggplot2, lattice,
+#'  and base graphics. For control over the auto-theming defaults, use the
+#'  [thematic::thematic_begin()] and/or the graphing library of interest (e.g.,
+#'  [ggplot2::theme()], [lattice::trellis.par.set()], [graphics::par()],
+#'  [grDevices::palette()], etc).
 #' @param outputArgs A list of arguments to be passed through to the implicit
 #'   call to [plotOutput()] when `renderPlot` is used in an
 #'   interactive R Markdown document.
@@ -168,82 +169,6 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
   markRenderFunction(outputFunc, renderFunc, outputArgs = outputArgs)
 }
 
-#' Plot auto theming options
-#'
-#' Create a list of options for passing to [renderPlot()]'s `autoTheme`
-#' argument (either directly or through [shinyOptions()]' `plot.autotheme`).
-#' This function helps you:
-#' 1. Override auto-theming defaults, which is especially useful for
-#' `qualitative` and/or `sequential` color palettes.
-#' 2. Opt-out of particular auto-theming features (by supplying `NA` to specific
-#' option(s)).
-#'
-#' Options may also be reactive values which, when invalidated, trigger a redraw for
-#' any plots that depend on those values.
-#'
-#' @param bg background color (defaults to the background color of the containing
-#' HTML element).
-#' @param fg foreground color (defaults to the foreground color of the containing
-#' HTML element).
-#' @param accent color for making certain graphical markers 'stand out'
-#' (e.g., the fitted line color for [ggplot2::geom_smooth()]).
-#' Defaults to the hyperlink color (inside the containing HTML element).
-#' Can be of length 2 for lattice graphics.
-#' @param qualitative color palette for discrete variables.
-#' Defaults to the Okabe-Ito colorscale (won't be used in ggplot2 when
-#' the number of data levels exceeds the max allowed colors).
-#' @param sequential color palette for numeric variables.
-#' Defaults to a gradient based on `accent` color.
-#'
-#' @export
-#' @examples
-#'
-#' library(ggplot2)
-#'
-#' p <- ggplot(diamonds[sample(nrow(diamonds), 1000), ], aes(carat, price)) +
-#'   geom_point(alpha = 0.2) +
-#'   geom_smooth() +
-#'   facet_wrap(~cut) + ggtitle("Diamond price by carat and cut")
-#'
-#' base_colors <- tags$style(HTML("body{background-color:#444; color:#e4e4e4}"))
-#'
-#' if (interactive()) {
-#'   shinyApp(
-#'     fluidPage(base_colors, plotOutput("p")),
-#'     function(input, output, session) {
-#'       shinyOptions(plot.autotheme = TRUE)
-#'       output$p <- renderPlot(p)
-#'     }
-#'   )
-#' }
-#'
-#' if (interactive()) {
-#'   shinyApp(
-#'     fluidPage(
-#'       base_colors,
-#'       selectInput(
-#'         "accent_color", "Select an accent color",
-#'         colors(), selected = "darkred"
-#'       ),
-#'       plotOutput("p")
-#'     ),
-#'     function(input, output, session) {
-#'       # Options could also be set globally via shinyOptions()
-#'       opts <- autoThemeOptions(accent = reactive(input$accent_color))
-#'       output$p <- renderPlot(p, autoTheme = opts)
-#'     }
-#'   )
-#' }
-#'
-#'
-autoThemeOptions <- function(bg = NULL, fg = NULL, accent = NULL,
-                             qualitative = NULL, sequential = NULL) {
-  list(
-    bg = bg, fg = fg, accent = accent,
-    qualitative = qualitative, sequential = sequential
-  )
-}
-
 
 resizeSavedPlot <- function(name, session, result, width, height, pixelratio, res, theme, ...) {
   if (result$img$width == width && result$img$height == height &&
@@ -254,11 +179,8 @@ resizeSavedPlot <- function(name, session, result, width, height, pixelratio, re
 
   coordmap <- NULL
   outfile <- plotPNG(function() {
-    # TODO: Is it necessary to set base/lattice parameters for fg/bg? Or will those colors be
-    # reflected in the recordedPlot?
     grDevices::replayPlot(result$recordedPlot)
     coordmap <<- getCoordmap(result$plotResult, width*pixelratio, height*pixelratio, res*pixelratio)
-    # TODO: if and when we move to ragg::agg_png(), we'll need to translate bg -> background
   }, width = width*pixelratio, height = height*pixelratio, res = res*pixelratio, bg = theme$bg %OR% "white", ...)
   on.exit(unlink(outfile), add = TRUE)
 
@@ -294,22 +216,11 @@ drawPlot <- function(name, session, func, width, height, pixelratio, res, theme 
   domain <- createGraphicsDevicePromiseDomain(device)
   grDevices::dev.control(displaylist = "enable")
 
-  base_params <- NULL
-  grid_params <- NULL
-  lattice_params <- NULL
-  old_palette <- NULL
+  beginThematic(theme)
 
   hybrid_chain(
     hybrid_chain(
       promises::with_promise_domain(domain, {
-        # Set graphical parameters for base/grid/lattice and remember the changes
-        if (length(theme)) {
-          base_params <- base_set_params(theme)
-          old_palette <- base_set_palette(theme)
-          grid_params <- grid_set_params(theme)
-          lattice_params <- lattice_set_params(theme)
-        }
-
         hybrid_chain(
           func(),
           function(value, .visible) {
@@ -320,7 +231,7 @@ drawPlot <- function(name, session, func, width, height, pixelratio, res, theme 
               # to be a (pseudo) S3 method is so that, if an object has a class in
               # addition to ggplot, and there's a print method for that class, that we
               # won't override that method. https://github.com/rstudio/shiny/issues/841
-              print.ggplot <- custom_print.ggplot(theme)
+              print.ggplot <- custom_print.ggplot
 
               # Use capture.output to squelch printing to the actual console; we
               # are only interested in plot output
@@ -334,7 +245,6 @@ drawPlot <- function(name, session, func, width, height, pixelratio, res, theme 
                 result <- ..stacktraceon..(print(value))
                 # TODO jcheng 2017-04-11: Verify above ..stacktraceon..
               })
-
               result
             } else {
               # Not necessary, but I wanted to make it explicit
@@ -353,16 +263,7 @@ drawPlot <- function(name, session, func, width, height, pixelratio, res, theme 
         )
       }),
       finally = function() {
-        # Restore original base/grid/lattice graphical parameters.
-        # The reason these are all checking for NULL is not because they may be
-        # NULL is the normal case, but in case any of the param setting calls
-        # threw an error; in that case, not all of these four may have been
-        # performed.
-        if (!is.null(base_params)) { do.call(graphics::par, base_params) }
-        if (!is.null(grid_params)) { do.call(grid::gpar, grid_params) }
-        if (!is.null(lattice_params)) { lattice_set_par_list(lattice_params) }
-        if (!is.null(old_palette)) { grDevices::palette(old_palette) }
-
+        endThematic()
         grDevices::dev.off(device)
       }
     ),
@@ -384,164 +285,29 @@ drawPlot <- function(name, session, func, width, height, pixelratio, res, theme 
   )
 }
 
+beginThematic <- function(theme) {
+  if (!length(theme)) return()
+  do.call(thematic::thematic_begin, theme)
+}
+
+endThematic <- function() {
+  thematic::thematic_end()
+}
+
 getTheme <- function(autoTheme, session, outputName) {
-  if (identical(autoTheme, FALSE)) {
-    return(NULL)
+  if (!autoTheme) return(NULL)
+  theme <- list()
+  for (x in c("bg", "fg", "accent")) {
+    theme[[x]] <- thematic::thematic_get_option(
+      x, default = parseCssColors(session$clientData[[paste('output', outputName, x, sep = "_")]])
+    )
   }
-  autoTheme <- if (isTRUE(autoTheme)) list() else autoTheme
-  autoTheme <- lapply(autoTheme, function(x) if (is.reactive(x)) x() else x)
-  # default to computed styles from the client
-  colors <- c("bg", "fg", "accent")
-  for (col in colors) {
-    if (length(autoTheme[[col]])) next
-    val <- session$clientData[[paste('output', outputName, col, sep = "_")]]
-    autoTheme[[col]] <- htmltools::parseCssColors(val)
-  }
-  # If bg/fg computing fails, fall back to bg="white"/fg="black"
-  autoTheme$bg <- autoTheme$bg %OR% "white"
-  autoTheme$fg <- autoTheme$fg %OR% "black"
-  # TODO: Throw a warning if the fg/bg contrast is low (High contrast is important for color mixing)?
-  autoTheme
-}
-
-base_set_params <- function(theme) {
-  params <- list()
-  bg <- theme$bg
-  if (!is.null(bg)) {
-    params <- c(params, graphics::par(bg = bg))
-  }
-  fg <- theme$fg
-  if (!is.null(fg)) {
-    params <- c(params, graphics::par(
-      fg = fg,
-      col.axis = fg,
-      col.lab = fg,
-      col.main = fg,
-      col.sub = fg
-    ))
-  }
-  params
-}
-
-grid_set_params <- function(theme) {
-  # TODO: add fontfamily when we go to support it
-  grid::gpar(fill = theme$bg, col = theme$fg)
-}
-
-lattice_set_params <- function(theme) {
-  if (system.file(package = "lattice") == "") return()
-  old_par <- utils::getFromNamespace("trellis.par.get", "lattice")()
-  bg <- theme$bg
-  fg <- theme$fg
-
-  par_set <- utils::getFromNamespace("trellis.par.set", "lattice")
-  par_set(
-    # See figure 9.3 for an example of where grid gpar matters
-    # http://lmdvr.r-forge.r-project.org/figures/figures.html
-    grid.pars =         list(col = fg),
-    background =        list(col = bg),
-    reference.line =    list(col = bg),
-    panel.background =  list(
-      col = mix_colors(theme$bg, theme$fg, 0.1)
-    ),
-    strip.background =  list(
-      col = mix_colors(theme$bg, theme$fg, 0.2)
-    ),
-    strip.border =      list(col = fg),
-    axis.line =         list(col = fg),
-    axis.text =         list(col = fg),
-    add.line =          list(col = fg),
-    add.text =          list(col = fg),
-    par.xlab.text =     list(col = fg),
-    par.ylab.text =     list(col = fg),
-    par.zlab.text =     list(col = fg),
-    par.main.text =     list(col = fg),
-    par.sub.text =      list(col = fg),
-    box.3d =            list(col = fg),
-    plot.polygon =      list(border = fg),
-    superpose.polygon = list(border = fg),
-    box.dot =           list(col = fg),
-    dot.line =          list(
-      col = mix_colors(theme$bg, theme$fg, 0.2)
+  theme[["font"]] <- thematic::thematic_get_option(
+    "font", default = font_spec(
+      session$clientData[[paste('output', outputName, "font_family", sep = "_")]]
     )
   )
-
-  # For lattice, accent can be of length 2, one to specify
-  # 'stroke' accent and one for fill accent
-  accent <- rep(theme$accent, length.out = 2)
-  if (sum(is.na(accent)) == 0) {
-    par_set(
-      plot.line =         list(col = accent[[1]]),
-      plot.symbol =       list(col = accent[[1]]),
-      dot.symbol =        list(col = accent[[1]]),
-      box.rectangle =     list(col = accent[[1]]),
-      box.umbrella =      list(col = accent[[1]]),
-      plot.polygon =      list(col = accent[[2]]),
-      grid.pars =         list(fill = accent[[2]])
-    )
-  }
-
-  qualitative <- getQualitativeCodes(theme, 7)
-  if (sum(is.na(qualitative)) == 0) {
-    # I'm not in love with the idea of this; but alas, it's consistent with lattice's default
-    region_pal <- grDevices::colorRampPalette(c(qualitative[[1]], "white", qualitative[[2]]))
-    par_set(
-      strip.shingle =     list(col = qualitative),
-      regions           = list(col = region_pal(100)),
-      superpose.line =    list(col = qualitative),
-      superpose.symbol =  list(col = qualitative, fill = qualitative),
-      superpose.polygon = list(col = qualitative)
-    )
-  }
-
-  invisible(old_par)
-}
-
-lattice_set_par_list <- function(params) {
-  if (system.file(package = "lattice") == "") return()
-  utils::getFromNamespace("trellis.par.set", "lattice")(theme = params)
-}
-
-base_set_palette <- function(theme) {
-  codes <- getQualitativeCodes(theme)
-  if (isTRUE(is.na(codes))) grDevices::palette() else grDevices::palette(codes)
-}
-
-getQualitativeCodes <- function(theme, n = NULL) {
-  qualitative <- theme$qualitative
-  if (isTRUE(is.na(qualitative)) || is.character(qualitative)) {
-    return(qualitative)
-  }
-  # https://jfly.uni-koeln.de/color/
-  okabeIto <- c("#E69F00", "#009E73", "#0072B2", "#CC79A7", "#999999", "#D55E00", "#F0E442", "#56B4E9")
-  if (is.null(n)) okabeIto else okabeIto[seq_len(n)]
-}
-
-# Currently only used for ggplot2
-getSequentialCodes <- function(theme, n = 8) {
-  sequential <- theme$sequential
-  if (isTRUE(is.na(sequential)) || is.character(sequential)) {
-    return(
-      scales::colour_ramp(sequential)(seq(0, 1, length.out = n))
-    )
-  }
-  # Main idea: Interpolate between [fg+accent -> accent -> bg+accent]
-  # For the endpoints the amount of blending of fg/bg and accent
-  # depends on how similar thwt
-  fg <- farver::decode_colour(theme$fg)
-  accent <- farver::decode_colour(theme$accent)
-  bg <- farver::decode_colour(theme$bg)
-  fg_dist <- farver::compare_colour(fg, accent, from_space = "rgb", method = "cie2000")
-  bg_dist <- farver::compare_colour(bg, accent, from_space = "rgb", method = "cie2000")
-  fg_dist_prop <- as.numeric(fg_dist / (bg_dist + fg_dist))
-  bg_dist_prop <- as.numeric(bg_dist / (bg_dist + fg_dist))
-  ramp <- scales::colour_ramp(c(theme$fg, theme$accent, theme$bg), alpha = TRUE)
-  ramp(
-    scales::rescale(
-      seq(0, 1, length.out = n),
-      to = 0.5 + c(-0.5 * fg_dist_prop, 0.4 * bg_dist_prop)
-    )
-  )
+  theme
 }
 
 # A modified version of print.ggplot which returns the built ggplot object
@@ -550,183 +316,19 @@ getSequentialCodes <- function(theme, n = 8) {
 # to be a (pseudo) S3 method is so that, if an object has a class in
 # addition to ggplot, and there's a print method for that class, that we
 # won't override that method. https://github.com/rstudio/shiny/issues/841
-custom_print.ggplot <- function(theme = list()) {
-  function(x) {
-    build <- ggplot_build_with_theme(x, theme)
-    gtable <- ggplot2::ggplot_gtable(build)
-    grid::grid.draw(gtable)
+custom_print.ggplot <- function(x) {
+  grid::grid.newpage()
 
-    structure(list(
-      build = build,
-      gtable = gtable
-    ), class = "ggplot_build_gtable")
-  }
+  build <- ggplot2::ggplot_build(x)
+
+  gtable <- ggplot2::ggplot_gtable(build)
+  grid::grid.draw(gtable)
+
+  structure(list(
+    build = build,
+    gtable = gtable
+  ), class = "ggplot_build_gtable")
 }
-
-# Apply sensible ggplot2 theme and geom defaults based on fg/bg color.
-# This function includes ggplot_build/newpage args so other packages that want to
-# use this function with a custom ggplot_build function (e.g. plotly) can do so
-# and geom defaults will still be restored after building
-ggplot_build_with_theme <- function(p, theme, ggplot_build = ggplot2::ggplot_build, newpage = TRUE) {
-  if (newpage) grid::grid.newpage()
-  if (!length(theme)) return(ggplot_build(p))
-  fg <- theme$fg
-  bg <- theme$bg
-  # Accent can be of length 2 because lattice
-  accent <- theme$accent[1]
-
-  # Set theme defaults
-  user_theme <- p$theme
-  p$theme <- NULL
-  p <- p +
-    ggtheme_auto(bg, fg) +
-    do.call(ggplot2::theme, user_theme)
-
-  # Collect all the plot's geoms, as well as some 'core' geoms,
-  # since some geoms, e.g. GeomSf, want their default_aes to derive
-  # from 'lower-level' geoms, like GeomPoint, GeomLine, GeomPolygon
-  geoms <- c(
-    lapply(p$layers, function(x) x$geom),
-    lapply(
-      c("GeomPoint", "GeomLine", "GeomPolygon"),
-      utils::getFromNamespace, "ggplot2"
-    )
-  )
-
-  # Remember defaults
-  default_colours <- lapply(geoms, function(geom) geom$default_aes$colour)
-  default_fills <- lapply(geoms, function(geom) geom$default_aes$fill)
-
-  # Modify defaults
-  Map(function(geom, default_color, default_fill) {
-    colour <- geom$default_aes$colour
-    fill <- geom$default_aes$fill
-    # To avoid the possibility of modifying twice
-    if (identical(colour, default_color)) {
-      geom$default_aes$colour <- adjust_color(colour, bg, fg, accent)
-    }
-    if (identical(fill, default_fill)) {
-      geom$default_aes$fill <- adjust_color(fill, bg, fg, accent)
-    }
-  }, geoms, default_colours, default_fills)
-
-  # Restore defaults
-  on.exit({
-    Map(function(geom, colour, fill) {
-      geom$default_aes$colour <- colour
-      geom$default_aes$fill <- fill
-    }, geoms, default_colours, default_fills)
-  }, add = TRUE)
-
-  # Modify scaling defaults
-  qual_codes <- getQualitativeCodes(theme)
-  seq_codes <- getSequentialCodes(theme, n = 50)
-  scale_defaults <- list()
-  if (!identical(qual_codes, NA)) {
-    scale_defaults$ggplot2.discrete.colour <- qual_codes
-    scale_defaults$ggplot2.discrete.fill <- qual_codes
-  }
-  if (!identical(seq_codes, NA)) {
-    scale_defaults$ggplot2.continuous.colour <- function(...) {
-      ggplot2::scale_colour_gradientn(..., colours = seq_codes)
-    }
-    scale_defaults$ggplot2.continuous.fill <- function(...) {
-      ggplot2::scale_fill_gradientn(..., colours = seq_codes)
-    }
-  }
-
-  # If we have modern ggplot2, use the official scale default APIs.
-  # TODO: update version depending on when these PRs are merged.
-  # https://github.com/tidyverse/ggplot2/pull/3828
-  # https://github.com/tidyverse/ggplot2/pull/3833
-  if (utils::packageVersion("ggplot2") > "3.3.1") {
-    old_scales <- do.call(options, scale_defaults)
-    on.exit({options(old_scales)}, add = TRUE)
-  } else {
-    # This isn't an officially supported way of setting default scales, but
-    # `scales_add_defaults()` first looks in the plot_env to find default scales
-    # https://github.com/tidyverse/ggplot2/blob/a7b3135/R/layer.r#L214
-    if (!identical(seq_codes, NA)) {
-      p$plot_env$scale_colour_continuous <- scale_defaults$ggplot2.continuous.colour
-      p$plot_env$scale_fill_continuous <- scale_defaults$ggplot2.continuous.fill
-    }
-    if (!identical(qual_codes, NA)) {
-      p$plot_env$scale_colour_discrete <- function(...) ggplot2::discrete_scale("colour", "qualitative", qualitative_pal(qual_codes), ...)
-      p$plot_env$scale_fill_discrete <- function(...) ggplot2::discrete_scale("fill", "qualitative", qualitative_pal(qual_codes), ...)
-    }
-  }
-
-  ggplot_build(p)
-}
-
-ggtheme_auto <- function(bg, fg) {
-  text <- ggplot2::element_text(colour = fg)
-  line <- ggplot2::element_line(colour = fg)
-  themeGray <- ggplot2::theme_gray()
-
-  ggplot2::theme(
-    line = line,
-    text = text,
-    axis.title = text,
-    axis.text = text,
-    axis.ticks = line,
-    plot.background = ggplot2::element_rect(fill = bg, colour = "transparent"),
-    panel.background = ggplot2::element_rect(
-      fill = adjust_color(themeGray$panel.background$fill, bg, fg)
-    ),
-    panel.grid = ggplot2::element_line(colour = bg),
-    legend.background = ggplot2::element_rect(fill = "transparent"),
-    legend.box.background = ggplot2::element_rect(
-      fill = "transparent", colour = "transparent"
-    ),
-    legend.key = ggplot2::element_rect(
-      fill = adjust_color(themeGray$legend.key$fill, bg, fg),
-      colour = bg
-    ),
-    strip.background = ggplot2::element_rect(
-      fill = adjust_color(themeGray$strip.background$fill, bg, fg)
-    ),
-    strip.text = text
-  )
-}
-
-# Logic for adjusting a color based on bg/fg/accent
-adjust_color <- function(color, bg, fg, accent = NA) {
-  if (!length(color)) return(color)
-  if (length(color) > 1) {
-    warning("Failed to translated aes defaults (expected to be of length 1)")
-    return(color)
-  }
-  if (is.na(color) || identical(color, "NA")) return(color)
-
-  # If a gray scale color, then the degree of gray determines
-  # the mixing between fg (aka black) and bg (aka white)
-  rgbs <- grDevices::col2rgb(color, alpha = TRUE)[1:3,1]
-  if (sum(diff(rgbs)) == 0) {
-    return(mix_colors(bg, fg, 1 - (rgbs[1] / 255)))
-  }
-
-  # At this point we should be dealing with an accent color...
-  # If accent is NA though, then the user has specified to NOT change it
-  if (is.na(accent)) color else accent
-}
-
-
-mix_colors <- function(bg, fg, amount) {
-  if (!length(bg) || !length(fg)) return(NULL)
-  scales::colour_ramp(c(bg, fg), alpha = TRUE)(amount)
-}
-
-qualitative_pal <- function(codes) {
-  function(n) {
-    if (n <= length(codes)) {
-      codes[seq_len(n)]
-    } else {
-      scales::hue_pal()(n)
-    }
-  }
-}
-
 
 # The coordmap extraction functions below return something like the examples
 # below. For base graphics:

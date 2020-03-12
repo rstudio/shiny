@@ -1,7 +1,14 @@
+shiny 1.4.0.2
+===========
+
+Minor patch release: fixed some timing-dependent tests failed intermittently on CRAN build machines.
+
+
 shiny 1.4.0.1
 ===========
 
 Minor patch release to account for changes to the grid package that will be upcoming in the R 4.0 release ([#2776](https://github.com/rstudio/shiny/pull/2776)).
+
 
 shiny 1.4.0
 ===========

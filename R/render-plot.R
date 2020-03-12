@@ -889,6 +889,14 @@ find_panel_info_non_api <- function(b, ggplot_format) {
   })
 }
 
+# Use public API for getting the unit's type (grid::unitType(), added in R 4.0)
+# https://github.com/wch/r-source/blob/f9b8a42/src/library/grid/R/unit.R#L179
+getUnitType <- function(u) {
+  tryCatch(
+    get("unitType", envir = asNamespace("grid"))(u),
+    error = function(e) attr(u, "unit", exact = TRUE)
+  )
+}
 
 # Given a gtable object, return the x and y ranges (in pixel dimensions)
 find_panel_ranges <- function(g, res) {
@@ -904,11 +912,11 @@ find_panel_ranges <- function(g, res) {
     if (inherits(x, "unit.list")) {
       # For ggplot2 <= 1.0.1
       vapply(x, FUN.VALUE = logical(1), function(u) {
-        isTRUE(attr(u, "unit", exact = TRUE) == "null")
+        isTRUE(getUnitType(u) == "null")
       })
     } else {
       # For later versions of ggplot2
-      attr(x, "unit", exact = TRUE) == "null"
+      getUnitType(x) == "null"
     }
   }
 
@@ -948,7 +956,11 @@ find_panel_ranges <- function(g, res) {
 
     # The plotting panels all are 'null' units.
     null_sizes <- rep(NA_real_, length(rel_sizes))
-    null_sizes[null_idx] <- as.numeric(rel_sizes[null_idx])
+    # Workaround for `[.unit` forbidding zero-length subsets
+    # https://github.com/wch/r-source/blob/f9b8a42/src/library/grid/R/unit.R#L448-L450
+    if (length(null_idx)) {
+      null_sizes[null_idx] <- as.numeric(rel_sizes[null_idx])
+    }
 
     # Total size allocated for panels is the total image size minus absolute
     # (non-panel) elements.

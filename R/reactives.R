@@ -222,7 +222,7 @@ reactiveVal <- function(value = NULL, label = NULL) {
         rv$set(x)
       }
     },
-    class = c("reactiveVal", "reactive"),
+    class = c("reactiveVal", "reactive", "function"),
     label = label,
     .impl = rv
   )

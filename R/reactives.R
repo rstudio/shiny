@@ -969,7 +969,7 @@ reactive <- function(x, env = parent.frame(), quoted = FALSE, label = NULL,
   if (length(srcref) >= 2) attr(label, "srcref") <- srcref[[2]]
   attr(label, "srcfile") <- srcFileOfRef(srcref[[1]])
   o <- Observable$new(fun, label, domain, ..stacktraceon = ..stacktraceon)
-  structure(o$getValue, observable = o, class = c("reactiveExpr", "reactive"))
+  structure(o$getValue, observable = o, class = c("reactiveExpr", "reactive", "function"))
 }
 
 # Given the srcref to a reactive expression, attempts to figure out what the

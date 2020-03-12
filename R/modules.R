@@ -91,7 +91,9 @@ createSessionProxy <- function(parentSession, ...) {
 #'   counterServer("counter1")
 #'   counterServer("counter2")
 #' }
-#' shinyApp(ui, server)
+#' if (interactive()) {
+#'   shinyApp(ui, server)
+#' }
 #'
 #'
 #'
@@ -117,7 +119,9 @@ createSessionProxy <- function(parentSession, ...) {
 #' server <- function(input, output, session) {
 #'   counterServer2("counter", "The current count is: ")
 #' }
-#' shinyApp(ui, server)
+#' if (interactive()) {
+#'   shinyApp(ui, server)
+#' }
 #'
 #' @export
 moduleServer <- function(id, module, session = getDefaultReactiveDomain()) {

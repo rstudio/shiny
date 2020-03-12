@@ -1097,6 +1097,10 @@ test_that("event handling helpers take correct dependencies", {
 })
 
 run_debounce_throttle <- function(do_priming) {
+  # Some of the CRAN test machines are heavily loaded and so the timing for
+  # these tests isn't reliable. https://github.com/rstudio/shiny/pull/2789
+  skip_on_cran()
+
   # The changing of rv$a will be the (chatty) source of reactivity.
   rv <- reactiveValues(a = 0)
 

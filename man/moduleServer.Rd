@@ -67,7 +67,9 @@ server <- function(input, output, session) {
   counterServer("counter1")
   counterServer("counter2")
 }
-shinyApp(ui, server)
+if (interactive()) {
+  shinyApp(ui, server)
+}
 
 
 
@@ -93,7 +95,9 @@ ui <- fluidPage(
 server <- function(input, output, session) {
   counterServer2("counter", "The current count is: ")
 }
-shinyApp(ui, server)
+if (interactive()) {
+  shinyApp(ui, server)
+}
 
 }
 \seealso{

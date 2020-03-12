@@ -74,6 +74,7 @@ shinyApp(ui, server)
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-new"></a>}}
+\if{latex}{\out{\hypertarget{method-new}{}}}
 \subsection{Method \code{new()}}{
 Creates a new progress panel (but does not display it).
 \subsection{Usage}{
@@ -107,6 +108,7 @@ is for backward-compatibility).}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-set"></a>}}
+\if{latex}{\out{\hypertarget{method-set}{}}}
 \subsection{Method \code{set()}}{
 Updates the progress panel. When called the first time, the
 progress panel is displayed.
@@ -134,6 +136,7 @@ relative to \code{message}.}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-inc"></a>}}
+\if{latex}{\out{\hypertarget{method-inc}{}}}
 \subsection{Method \code{inc()}}{
 Like \code{set}, this updates the progress panel. The difference
 is that \code{inc} increases the progress bar by \code{amount}, instead of
@@ -161,6 +164,7 @@ relative to \code{message}.}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-getMin"></a>}}
+\if{latex}{\out{\hypertarget{method-getMin}{}}}
 \subsection{Method \code{getMin()}}{
 Returns the minimum value.
 \subsection{Usage}{
@@ -170,6 +174,7 @@ Returns the minimum value.
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-getMax"></a>}}
+\if{latex}{\out{\hypertarget{method-getMax}{}}}
 \subsection{Method \code{getMax()}}{
 Returns the maximum value.
 \subsection{Usage}{
@@ -179,6 +184,7 @@ Returns the maximum value.
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-getValue"></a>}}
+\if{latex}{\out{\hypertarget{method-getValue}{}}}
 \subsection{Method \code{getValue()}}{
 Returns the current value.
 \subsection{Usage}{
@@ -188,6 +194,7 @@ Returns the current value.
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-close"></a>}}
+\if{latex}{\out{\hypertarget{method-close}{}}}
 \subsection{Method \code{close()}}{
 Removes the progress panel. Future calls to \code{set} and
 \code{close} will be ignored.
@@ -198,6 +205,7 @@ Removes the progress panel. Future calls to \code{set} and
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-clone"></a>}}
+\if{latex}{\out{\hypertarget{method-clone}{}}}
 \subsection{Method \code{clone()}}{
 The objects of this class are cloneable with this method.
 \subsection{Usage}{

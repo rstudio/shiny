@@ -20,6 +20,10 @@ test_that("All man pages have an entry in _pkgdown.yml", {
   all_topics     <- get_exported()
 
   ## Known not to be indexed
+  htmltools_man_info <- jsonlite::fromJSON(system.file("_htmltools_reexports.json", package = "shiny"), simplifyDataFrame = FALSE)
+  htmltools_man_file_names <- vapply(htmltools_man_info, function(man_item) {
+    sub(".Rd", "", man_item$file, fixed = TRUE)
+  }, character(1))
   known_unindexed <- c("shiny-package", "stacktrace", "knitr_methods",
                        "pageWithSidebar", "headerPanel", "shiny.appobj",
                        "deprecatedReactives")
@@ -28,7 +32,9 @@ test_that("All man pages have an entry in _pkgdown.yml", {
   ## staticdocs/index.r, unless explicitly waived by specifying it
   ## in the known_unindexed variable above.
   missing <- setdiff(all_topics, c(known_unindexed, indexed_topics))
-  unknown <- setdiff(c(known_unindexed, indexed_topics), all_topics)
+  ## Explicitly add htmltools man files as they will be added at documentation time
+  unknown <- setdiff(c(known_unindexed, indexed_topics), c(all_topics, htmltools_man_file_names))
+
   expect_equal(length(missing), 0,
     info = paste("Functions missing from _pkgdown.yml:\n",
       paste("  ", missing, sep = "", collapse = "\n"),

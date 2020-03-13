@@ -1,6 +1,7 @@
 # source("tools/updateHtmltoolsMan.R")
 # Will add all functions aliased in the htmltools man files below
 # Will save all reexports to `./R/reexport-htmltools.R` and document to enforce all re-exports
+# This script needs information from `./inst/_htmltools_reexports.yml` to allow pkgdown to be on the same page
 
 
 local({
@@ -10,7 +11,7 @@ local({
   # pre document
   devtools::document()
 
-  namespace_line_count <- length(readLines(rprojroot::find_package_root_file("NAMESPACE")))
+  pre_namespace_lines <- readLines(rprojroot::find_package_root_file("NAMESPACE"))
 
   # tags are returned from newest to oldest. (Newest being first)
   latest_tag_name <- jsonlite::fromJSON("https://api.github.com/repos/rstudio/htmltools/tags", simplifyDataFrame = FALSE)[[1]]$name
@@ -33,22 +34,17 @@ local({
       setdiff(ignore) %>%
       list(functions = ., file = man_file)
   }
-  add_aliases("builder.Rd", ignore = c("builder"))
-  add_aliases("tag.Rd")
-  add_aliases("HTML.Rd")
-  add_aliases("include.Rd", ignore = c("include"))
-  add_aliases("singleton.Rd")
-  add_aliases("validateCssUnit.Rd")
-  add_aliases("htmlTemplate.Rd")
-  add_aliases("suppressDependencies.Rd")
-  add_aliases("withTags.Rd")
-
+  alias_info <- jsonlite::fromJSON(rprojroot::find_package_root_file("inst/_htmltools_reexports.json"), simplifyDataFrame = FALSE)
+  lapply(alias_info, function(alias_item) {
+    add_aliases(alias_item$file, ignore = alias_item$ignore)
+  })
 
   alias_list %>%
     vapply(FUN.VALUE = character(1), USE.NAMES = FALSE,
       function(alias_item) {
         beginning <- "# htmltools "
         paste0(
+          "\n",
           beginning, alias_item$file, " ", paste0(rep("-", 80 - nchar(beginning) - nchar(alias_item$file) - 1), collapse = ""), "\n",
           ### https://github.com/tidyverse/dplyr/blob/713849e31b1f7b217154586d30aa169749075481/R/reexport-tibble.r
           # #' @importFrom tibble data_frame
@@ -60,8 +56,7 @@ local({
             "#' @importFrom htmltools ", alias_item$functions, "\n",
             "#' @export\n",
             "htmltools::", alias_item$functions
-          ),
-          "\n"
+          )
         )
       }
     ) %>%
@@ -72,7 +67,6 @@ local({
       "# Please call `source('tools/updateHtmltoolsMan.R') from the root folder to update`\n",
       "####\n",
       "\n",
-      "\n",
       .
     ) %>%
     writeLines(local_htmltools_r_file)
@@ -80,7 +74,7 @@ local({
 
   # document new functions
   devtools::document()
-  namespace_line_count_new <- length(readLines(rprojroot::find_package_root_file("NAMESPACE")))
+  post_namespace_lines <- readLines(rprojroot::find_package_root_file("NAMESPACE"))
 
   new_version <-
     paste0("https://raw.githubusercontent.com/rstudio/htmltools/", latest_tag_name, "/DESCRIPTION") %>%
@@ -91,7 +85,7 @@ local({
     as.character()
 
   message("\n")
-  if (namespace_line_count_new == namespace_line_count) {
+  if (identical(pre_namespace_lines, post_namespace_lines)) {
     message("The NAMESPACE exports did NOT change by copying in the `htmltools` man files")
     message()
     message("Possible `htmltools` version requirement to add to DESCRIPTION file:\nImports:\n    htmltools (>= ", new_version, ")")

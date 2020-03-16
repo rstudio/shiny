@@ -1,5 +1,11 @@
 context("reactivity")
 
+test_that("reactive and reactiveVal are functions", {
+  expect_s3_class(reactive({1}), "function")
+  expect_s3_class(reactiveVal(1), "function")
+})
+
+
 
 test_that("ReactiveVal", {
   val <- reactiveVal()

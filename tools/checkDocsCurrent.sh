@@ -17,7 +17,7 @@ fi
 
 
 # Update htmltools docs
-Rscript './tools/updateHtmltoolsMan.R'
+Rscript './tools/updateReexports.R'
 
 if [ -n "$(git status --porcelain)" ]
 then

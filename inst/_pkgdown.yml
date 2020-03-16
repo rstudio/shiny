@@ -193,7 +193,7 @@ reference:
       - onStop
       - diskCache
       - memoryCache
-      - reexports
+      - key_missing
   - title: Plot interaction
     desc: Functions related to interactive plots
     contents:

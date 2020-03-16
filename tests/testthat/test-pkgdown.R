@@ -15,7 +15,17 @@ get_indexed <- function(f = system.file('_pkgdown.yml', package = 'shiny')) {
 }
 
 test_that("All man pages have an entry in _pkgdown.yml", {
-  skip_on_cran()
+
+  can_test <- any(
+    # called using devtools::test()
+    identical(Sys.getenv("NOT_CRAN", FALSE), "true"),
+    # called within CI testing
+    isTRUE(as.logical(Sys.getenv("CI")))
+  )
+  if (!can_test) {
+    skip("Not called using `devtools::test()` (`NOT_CRAN=true`) or in CI (`CI=true`)")
+  }
+
   indexed_topics <- get_indexed()
   all_topics     <- get_exported()
 

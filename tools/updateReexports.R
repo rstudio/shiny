@@ -23,12 +23,6 @@ local({
     jsonlite::fromJSON(paste0("https://api.github.com/repos/", repo, "/tags"), simplifyDataFrame = FALSE)[[1]]$name
   })
 
-  pb <- progress::progress_bar$new(
-    total = lapply(alias_info, `[[`, "exports") %>% vapply(length, numeric(1)) %>% sum(),
-    format = "[:bar] :pkg:::alias :current/:total :spin",
-    show_after = 0,
-    clear = FALSE
-  )
   vapply(
     FUN.VALUE = character(1), USE.NAMES = FALSE,
     alias_info,
@@ -43,7 +37,7 @@ local({
         alias_pkg_info$exports,
         function(alias_item) {
 
-          pb$tick(tokens = list(pkg = alias_pkg_info$name, alias = alias_item$file))
+          message("Gathering: ", alias_pkg_info$name, " ", alias_item$file)
 
           lines <- paste0(github_man_location, alias_item$file) %>%
             readLines() %>%

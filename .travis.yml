@@ -6,7 +6,7 @@ matrix:
       r_packages:
         - devtools
         - rprojroot
-      script: ./tools/checkDocsCurrent.sh
+      script: ./tools/documentation/checkDocsCurrent.sh
     - name: "Javascript check"
       language: node_js
       cache: yarn

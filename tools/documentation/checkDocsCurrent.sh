@@ -17,7 +17,8 @@ fi
 
 
 # Update htmltools docs
-Rscript './tools/updateReexports.R'
+Rscript './tools/documentation/updateReexports.R'
+Rscript './tools/documentation/checkPkgdown.R'
 
 if [ -n "$(git status --porcelain)" ]
 then

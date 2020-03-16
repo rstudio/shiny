@@ -1,8 +1,8 @@
-# source("tools/updateReexports.R")
-# Will add all functions aliased in `./inst/_reexports.yml`
+# source("tools/documentation/updateReexports.R")
+# Will add all functions aliased in `./tools/documentation/reexports.yml`
 # Will save all reexports to `./R/reexports.R` and document to enforce all re-exports
-# This script needs information from `./inst/_reexports.yml` to allow pkgdown to be on the same page
-# Information from `./inst/_reexports.yml` will be used in `shiny-dev-center`
+# This script needs information from `./tools/documentation/reexports.yml` to allow pkgdown to be on the same page
+# Information from `./tools/documentation/reexports.yml` will be used in `shiny-dev-center`
 
 
 local({
@@ -15,7 +15,7 @@ local({
   pre_namespace_lines <- readLines(rprojroot::find_package_root_file("NAMESPACE"))
 
 
-  alias_info <- jsonlite::fromJSON(rprojroot::find_package_root_file("inst/_reexports.json"), simplifyDataFrame = FALSE)
+  alias_info <- jsonlite::fromJSON(rprojroot::find_package_root_file("tools/documentation/reexports.json"), simplifyDataFrame = FALSE)
   local_man_folder <- rprojroot::find_package_root_file("man")
   local_reexports_r_file <- rprojroot::find_package_root_file("R/reexports.R")
 

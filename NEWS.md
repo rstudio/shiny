@@ -30,6 +30,12 @@ shiny 1.4.0.9001
 ### Documentation Updates
 
 
+shiny 1.4.0.2
+===========
+
+Minor patch release: fixed some timing-dependent tests failed intermittently on CRAN build machines.
+
+
 shiny 1.4.0.1
 ===========
 

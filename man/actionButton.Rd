@@ -63,6 +63,10 @@ shinyApp(ui, server)
 
 }
 
+## Example of adding extra class values
+actionButton("goButton", "Go!", class = "go")
+actionLink("goLink", "Go!", class = "go link")
+
 }
 \seealso{
 \code{\link[=observeEvent]{observeEvent()}} and \code{\link[=eventReactive]{eventReactive()}}

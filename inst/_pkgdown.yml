@@ -207,7 +207,7 @@ reference:
     desc: Functions for modularizing Shiny apps
     contents:
       - NS
-      - callModule
+      - moduleServer
   - title: Embedding
     desc: Functions that are intended for third-party packages that embed Shiny applications.
     contents:

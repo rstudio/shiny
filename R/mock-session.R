@@ -80,7 +80,6 @@ extract <- function(promise) {
 MockShinySession <- R6Class(
   'MockShinySession',
   portable = FALSE,
-  class = FALSE,
   public = list(
     #' @field env The environment associated with the session.
     env = NULL,
@@ -381,6 +380,8 @@ MockShinySession <- R6Class(
     flushReact = function(){
       private$flush()
     },
+    #' @description Create and return a namespace-specific session proxy.
+    #' @param namespace Character vector indicating a namespace.
     makeScope = function(namespace) {
       ns <- NS(namespace)
       createSessionProxy(

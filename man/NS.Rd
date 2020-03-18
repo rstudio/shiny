@@ -5,7 +5,9 @@
 \alias{NS}
 \alias{ns.sep}
 \title{Namespaced IDs for inputs/outputs}
-\format{An object of class \code{character} of length 1.}
+\format{
+An object of class \code{character} of length 1.
+}
 \usage{
 NS(namespace, id = NULL)
 

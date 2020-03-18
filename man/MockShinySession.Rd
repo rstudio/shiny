@@ -88,6 +88,7 @@ s$setInputs(x=1, y=2)
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-reactlog"></a>}}
+\if{latex}{\out{\hypertarget{method-reactlog}{}}}
 \subsection{Method \code{reactlog()}}{
 No-op
 \subsection{Usage}{
@@ -104,6 +105,7 @@ No-op
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-incrementBusyCount"></a>}}
+\if{latex}{\out{\hypertarget{method-incrementBusyCount}{}}}
 \subsection{Method \code{incrementBusyCount()}}{
 No-op
 \subsection{Usage}{
@@ -113,6 +115,7 @@ No-op
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-new"></a>}}
+\if{latex}{\out{\hypertarget{method-new}{}}}
 \subsection{Method \code{new()}}{
 Create a new MockShinySession
 \subsection{Usage}{
@@ -122,6 +125,7 @@ Create a new MockShinySession
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-onFlush"></a>}}
+\if{latex}{\out{\hypertarget{method-onFlush}{}}}
 \subsection{Method \code{onFlush()}}{
 Define a callback to be invoked before a reactive flush
 \subsection{Usage}{
@@ -140,6 +144,7 @@ Define a callback to be invoked before a reactive flush
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-onFlushed"></a>}}
+\if{latex}{\out{\hypertarget{method-onFlushed}{}}}
 \subsection{Method \code{onFlushed()}}{
 Define a callback to be invoked after a reactive flush
 \subsection{Usage}{
@@ -158,6 +163,7 @@ Define a callback to be invoked after a reactive flush
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-onEnded"></a>}}
+\if{latex}{\out{\hypertarget{method-onEnded}{}}}
 \subsection{Method \code{onEnded()}}{
 Define a callback to be invoked when the session ends
 \subsection{Usage}{
@@ -174,6 +180,7 @@ Define a callback to be invoked when the session ends
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-isEnded"></a>}}
+\if{latex}{\out{\hypertarget{method-isEnded}{}}}
 \subsection{Method \code{isEnded()}}{
 Returns \code{FALSE} if the session has not yet been closed
 \subsection{Usage}{
@@ -183,6 +190,7 @@ Returns \code{FALSE} if the session has not yet been closed
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-isClosed"></a>}}
+\if{latex}{\out{\hypertarget{method-isClosed}{}}}
 \subsection{Method \code{isClosed()}}{
 Returns \code{FALSE} if the session has not yet been closed
 \subsection{Usage}{
@@ -192,6 +200,7 @@ Returns \code{FALSE} if the session has not yet been closed
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-close"></a>}}
+\if{latex}{\out{\hypertarget{method-close}{}}}
 \subsection{Method \code{close()}}{
 Closes the session
 \subsection{Usage}{
@@ -201,6 +210,7 @@ Closes the session
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-cycleStartAction"></a>}}
+\if{latex}{\out{\hypertarget{method-cycleStartAction}{}}}
 \subsection{Method \code{cycleStartAction()}}{
 Unsophisticated mock implementation that merely invokes
 the given callback immediately.
@@ -218,6 +228,7 @@ the given callback immediately.
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-fileUrl"></a>}}
+\if{latex}{\out{\hypertarget{method-fileUrl}{}}}
 \subsection{Method \code{fileUrl()}}{
 Base64-encode the given file. Needed for image rendering.
 \subsection{Usage}{
@@ -238,6 +249,7 @@ Base64-encode the given file. Needed for image rendering.
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-setInputs"></a>}}
+\if{latex}{\out{\hypertarget{method-setInputs}{}}}
 \subsection{Method \code{setInputs()}}{
 Sets reactive values associated with the \code{session$inputs} object
 and flushes the reactives.
@@ -264,6 +276,7 @@ s$setInputs(x=1, y=2)
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-.scheduleTask"></a>}}
+\if{latex}{\out{\hypertarget{method-.scheduleTask}{}}}
 \subsection{Method \code{.scheduleTask()}}{
 An internal method which shouldn't be used by others.
 \subsection{Usage}{
@@ -282,6 +295,7 @@ An internal method which shouldn't be used by others.
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-elapse"></a>}}
+\if{latex}{\out{\hypertarget{method-elapse}{}}}
 \subsection{Method \code{elapse()}}{
 Simulate the passing of time by the given number of milliseconds.
 \subsection{Usage}{
@@ -298,6 +312,7 @@ Simulate the passing of time by the given number of milliseconds.
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-.now"></a>}}
+\if{latex}{\out{\hypertarget{method-.now}{}}}
 \subsection{Method \code{.now()}}{
 An internal method which shouldn't be used by others.
 \subsection{Usage}{
@@ -307,6 +322,7 @@ An internal method which shouldn't be used by others.
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-defineOutput"></a>}}
+\if{latex}{\out{\hypertarget{method-defineOutput}{}}}
 \subsection{Method \code{defineOutput()}}{
 An internal method which shouldn't be used by others.
 \subsection{Usage}{
@@ -327,6 +343,7 @@ An internal method which shouldn't be used by others.
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-getOutput"></a>}}
+\if{latex}{\out{\hypertarget{method-getOutput}{}}}
 \subsection{Method \code{getOutput()}}{
 An internal method which shouldn't be used by others.
 \subsection{Usage}{
@@ -343,6 +360,7 @@ An internal method which shouldn't be used by others.
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-registerDataObj"></a>}}
+\if{latex}{\out{\hypertarget{method-registerDataObj}{}}}
 \subsection{Method \code{registerDataObj()}}{
 No-op
 \subsection{Usage}{
@@ -363,6 +381,7 @@ No-op
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-allowReconnect"></a>}}
+\if{latex}{\out{\hypertarget{method-allowReconnect}{}}}
 \subsection{Method \code{allowReconnect()}}{
 No-op
 \subsection{Usage}{
@@ -379,6 +398,7 @@ No-op
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-reload"></a>}}
+\if{latex}{\out{\hypertarget{method-reload}{}}}
 \subsection{Method \code{reload()}}{
 No-op
 \subsection{Usage}{
@@ -388,6 +408,7 @@ No-op
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-resetBrush"></a>}}
+\if{latex}{\out{\hypertarget{method-resetBrush}{}}}
 \subsection{Method \code{resetBrush()}}{
 No-op
 \subsection{Usage}{
@@ -404,6 +425,7 @@ No-op
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-sendCustomMessage"></a>}}
+\if{latex}{\out{\hypertarget{method-sendCustomMessage}{}}}
 \subsection{Method \code{sendCustomMessage()}}{
 No-op
 \subsection{Usage}{
@@ -422,6 +444,7 @@ No-op
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-sendBinaryMessage"></a>}}
+\if{latex}{\out{\hypertarget{method-sendBinaryMessage}{}}}
 \subsection{Method \code{sendBinaryMessage()}}{
 No-op
 \subsection{Usage}{
@@ -440,6 +463,7 @@ No-op
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-sendInputMessage"></a>}}
+\if{latex}{\out{\hypertarget{method-sendInputMessage}{}}}
 \subsection{Method \code{sendInputMessage()}}{
 No-op
 \subsection{Usage}{
@@ -458,6 +482,7 @@ No-op
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-setBookmarkExclude"></a>}}
+\if{latex}{\out{\hypertarget{method-setBookmarkExclude}{}}}
 \subsection{Method \code{setBookmarkExclude()}}{
 No-op
 \subsection{Usage}{
@@ -474,6 +499,7 @@ No-op
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-getBookmarkExclude"></a>}}
+\if{latex}{\out{\hypertarget{method-getBookmarkExclude}{}}}
 \subsection{Method \code{getBookmarkExclude()}}{
 No-op
 \subsection{Usage}{
@@ -483,6 +509,7 @@ No-op
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-onBookmark"></a>}}
+\if{latex}{\out{\hypertarget{method-onBookmark}{}}}
 \subsection{Method \code{onBookmark()}}{
 No-op
 \subsection{Usage}{
@@ -499,6 +526,7 @@ No-op
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-onBookmarked"></a>}}
+\if{latex}{\out{\hypertarget{method-onBookmarked}{}}}
 \subsection{Method \code{onBookmarked()}}{
 No-op
 \subsection{Usage}{
@@ -515,6 +543,7 @@ No-op
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-doBookmark"></a>}}
+\if{latex}{\out{\hypertarget{method-doBookmark}{}}}
 \subsection{Method \code{doBookmark()}}{
 No-op
 \subsection{Usage}{
@@ -524,6 +553,7 @@ No-op
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-onRestore"></a>}}
+\if{latex}{\out{\hypertarget{method-onRestore}{}}}
 \subsection{Method \code{onRestore()}}{
 No-op
 \subsection{Usage}{
@@ -540,6 +570,7 @@ No-op
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-onRestored"></a>}}
+\if{latex}{\out{\hypertarget{method-onRestored}{}}}
 \subsection{Method \code{onRestored()}}{
 No-op
 \subsection{Usage}{
@@ -556,6 +587,7 @@ No-op
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-exportTestValues"></a>}}
+\if{latex}{\out{\hypertarget{method-exportTestValues}{}}}
 \subsection{Method \code{exportTestValues()}}{
 No-op
 \subsection{Usage}{
@@ -565,6 +597,7 @@ No-op
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-getTestSnapshotUrl"></a>}}
+\if{latex}{\out{\hypertarget{method-getTestSnapshotUrl}{}}}
 \subsection{Method \code{getTestSnapshotUrl()}}{
 No-op
 \subsection{Usage}{
@@ -592,6 +625,7 @@ No-op
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-ns"></a>}}
+\if{latex}{\out{\hypertarget{method-ns}{}}}
 \subsection{Method \code{ns()}}{
 Returns the given id prefixed by \verb{mock-session-}.
 \subsection{Usage}{
@@ -608,6 +642,7 @@ Returns the given id prefixed by \verb{mock-session-}.
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-flushReact"></a>}}
+\if{latex}{\out{\hypertarget{method-flushReact}{}}}
 \subsection{Method \code{flushReact()}}{
 Trigger a reactive flush right now.
 \subsection{Usage}{
@@ -617,14 +652,24 @@ Trigger a reactive flush right now.
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-makeScope"></a>}}
+\if{latex}{\out{\hypertarget{method-makeScope}{}}}
 \subsection{Method \code{makeScope()}}{
+Create and return a namespace-specific session proxy.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{MockShinySession$makeScope(namespace)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{namespace}}{Character vector indicating a namespace.}
+}
+\if{html}{\out{</div>}}
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-clone"></a>}}
+\if{latex}{\out{\hypertarget{method-clone}{}}}
 \subsection{Method \code{clone()}}{
 The objects of this class are cloneable with this method.
 \subsection{Usage}{

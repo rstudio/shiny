@@ -7,6 +7,8 @@ shiny 1.4.0.9001
 
 ### New features
 
+* The new `moduleServer` function provides a simpler interface for creating and using modules. ([#2773](https://github.com/rstudio/shiny/pull/2773))
+
 ### Minor new features and improvements
 
 * Fixed [#2042](https://github.com/rstudio/shiny/issues/2042), [#2628](https://github.com/rstudio/shiny/issues/2628): In a `dateInput` and `dateRangeInput`, disabled months and years are now a lighter gray, to make it easier to see that they are disabled. ([#2690](https://github.com/rstudio/shiny/pull/2690))
@@ -14,6 +16,10 @@ shiny 1.4.0.9001
 * `getCurrentOutputInfo()` previously threw an error when called from outside of an output; now it returns `NULL`. ([#2707](https://github.com/rstudio/shiny/pull/2707))
 
 * Added a label to observer that auto-reloads `R/` directory to avoid confusion when using `reactlog`. ([#58](https://github.com/rstudio/reactlog/issues/58))
+
+* `getDefaultReactiveDomain()` can now be called inside a `session$onSessionEnded` callback and will return the calling `session` information. ([#2757](https://github.com/rstudio/shiny/pull/2757))
+
+* Added a `'function'` class to `reactive()` and `reactiveVal()` objects. ([#2793](https://github.com/rstudio/shiny/pull/2793))
 
 * Resolved [#1365](https://github.com/rstudio/shiny/issues/1365): Added `minviewmode` and `maxviewmode` as new parameters to `dateInput()` and `dateRangeInput()`. This exposes the underlying arguments of [Bootstrap Datepicker](https://bootstrap-datepicker.readthedocs.io/en/latest/options.html#maxviewmode). The `minviewmode` parameter makes it possible to restrict date selection to a month, a year, a decade, or a century.
 
@@ -25,6 +31,18 @@ shiny 1.4.0.9001
 * Fixed [#2653](https://github.com/rstudio/shiny/issues/2653): The `dataTableOutput()` could have incorrect output if certain characters were in the column names. ([#2658](https://github.com/rstudio/shiny/pull/2658))
 
 ### Documentation Updates
+
+
+shiny 1.4.0.2
+===========
+
+Minor patch release: fixed some timing-dependent tests failed intermittently on CRAN build machines.
+
+
+shiny 1.4.0.1
+===========
+
+Minor patch release to account for changes to the grid package that will be upcoming in the R 4.0 release ([#2776](https://github.com/rstudio/shiny/pull/2776)).
 
 
 shiny 1.4.0

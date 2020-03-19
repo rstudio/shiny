@@ -31,8 +31,9 @@ modules are easier to reuse and easier to reason about. See the article at
 \url{http://shiny.rstudio.com/articles/modules.html} to learn more.
 }
 \details{
-Starting in Shiny 1.5.0, we recommend using \code{moduleFunction} instead of
-\code{callModule}, because syntax is a little easier to understand.
+Starting in Shiny 1.5.0, we recommend using \code{moduleServer} instead of
+\code{callModule}, because the syntax is a little easier to understand, and
+modules created with \code{moduleServer} can be tested with \code{\link[=testServer]{testServer()}}.
 }
 \examples{
 # Define the UI for a module
@@ -46,16 +47,19 @@ counterUI <- function(id, label = "Counter") {
 
 # Define the server logic for a module
 counterServer <- function(id) {
-  moduleServer(id, function(input, output, session) {
-    count <- reactiveVal(0)
-    observeEvent(input$button, {
-      count(count() + 1)
-    })
-    output$out <- renderText({
-      count()
-    })
-    count
-  })
+  moduleServer(
+    id,
+    function(input, output, session) {
+      count <- reactiveVal(0)
+      observeEvent(input$button, {
+        count(count() + 1)
+      })
+      output$out <- renderText({
+        count()
+      })
+      count
+    }
+  )
 }
 
 # Use the module in an app
@@ -77,16 +81,19 @@ if (interactive()) {
 # add them to your function. In this case `prefix` is text that will be
 # printed before the count.
 counterServer2 <- function(id, prefix = NULL) {
-  moduleServer(id, function(input, output, session) {
-    count <- reactiveVal(0)
-    observeEvent(input$button, {
-      count(count() + 1)
-    })
-    output$out <- renderText({
-      paste0(prefix, count())
-    })
-    count
-  })
+  moduleServer(
+    id,
+    function(input, output, session) {
+      count <- reactiveVal(0)
+      observeEvent(input$button, {
+        count(count() + 1)
+      })
+      output$out <- renderText({
+        paste0(prefix, count())
+      })
+      count
+    }
+  )
 }
 
 ui <- fluidPage(

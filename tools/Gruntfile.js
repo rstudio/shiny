@@ -99,7 +99,7 @@ module.exports = function(grunt) {
       options: {
         sourceMap: true,
         compact: false,
-        presets: ['es2015']
+        presets: ["@babel/preset-env"]
       },
       shiny: {
         src: "./temp_concat/shiny.js",

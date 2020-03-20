@@ -27,6 +27,7 @@ local({
     FUN.VALUE = character(1), USE.NAMES = FALSE,
     alias_info,
     function(alias_pkg_info) {
+      message("Starting: ", alias_pkg_info$repo)
 
       # tags are returned from newest to oldest. (Newest being first)
       latest_tag_name <- latest_tag(alias_pkg_info$repo)

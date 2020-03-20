@@ -155,6 +155,7 @@ Collate:
     'priorityqueue.R'
     'progress.R'
     'react.R'
+    'reexports.R'
     'render-cached-plot.R'
     'render-plot.R'
     'render-table.R'

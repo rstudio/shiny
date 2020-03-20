@@ -26,7 +26,7 @@ local({
   local_reexports_r_file <- rprojroot::find_package_root_file("R/reexports.R")
 
   latest_tag <- memoise::memoise(function(repo) {
-    gh::gh(paste0("GET /repos/", repo, "/tags"), username = "schloerke")[[1]]$name
+    gh::gh(paste0("GET /repos/", repo, "/tags"))[[1]]$name
   })
 
   vapply(

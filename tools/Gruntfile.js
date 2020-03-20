@@ -175,7 +175,7 @@ module.exports = function(grunt) {
       },
       datepicker: {
         files: "<%= uglify.datepicker.src %>",
-        tasks: ["newer:uglify:datepicker"]
+        tasks: ["uglify:datepicker"]
       }
     },
 
@@ -224,13 +224,13 @@ module.exports = function(grunt) {
   grunt.initConfig(gruntConfig);
 
   grunt.registerTask('default', [
-    'newer:concat',
-    'newer:string-replace',
+    'concat',
+    'string-replace',
     'validateStringReplace',
-    'newer:eslint',
+    'eslint',
     'configureBabel',
-    'newer:babel',
-    'newer:uglify'
+    'babel',
+    'uglify'
   ]);
 
 

@@ -3,6 +3,7 @@ context("pkgdown")
 
 
 test_that("pkgdown works", {
+  skip_on_cran()
 
   # only test pkgdown from within `devtools::test()`
   ## `./tools` will not exist when shiny is installed

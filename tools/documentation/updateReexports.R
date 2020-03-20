@@ -7,8 +7,9 @@
 
 local({
 
-  for (pkg in c("gh", "rprojroot", "devtools", "memoise")) {
-    if (!requireNamespace(pkg)) {
+  # make sure packages are installed
+  for (pkg in c("gh", "rprojroot", "devtools", "memoise", "magrittr", "jsonlite")) {
+    if (!requireNamespace(pkg, quietly = TRUE)) {
       install.packages(pkg)
     }
   }
@@ -20,12 +21,12 @@ local({
 
   pre_namespace_lines <- readLines(rprojroot::find_package_root_file("NAMESPACE"))
 
-
   alias_info <- jsonlite::fromJSON(rprojroot::find_package_root_file("tools/documentation/reexports.json"), simplifyDataFrame = FALSE)
   local_man_folder <- rprojroot::find_package_root_file("man")
   local_reexports_r_file <- rprojroot::find_package_root_file("R/reexports.R")
 
   latest_tag <- memoise::memoise(function(repo) {
+    # requires a GITHUB_PAT token
     gh::gh(paste0("GET /repos/", repo, "/tags"))[[1]]$name
   })
 

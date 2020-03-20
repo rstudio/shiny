@@ -20,7 +20,12 @@ local({
   local_reexports_r_file <- rprojroot::find_package_root_file("R/reexports.R")
 
   latest_tag <- memoise::memoise(function(repo) {
-    jsonlite::fromJSON(paste0("https://api.github.com/repos/", repo, "/tags"), simplifyDataFrame = FALSE)[[1]]$name
+    repo_url <- url(paste0("https://api.github.com/repos/", repo, "/tags"))
+    on.exit({
+      close(repo_url)
+    })
+    message("Downloading repo tags: ", repo_url)
+    jsonlite::fromJSON(repo_url, simplifyDataFrame = FALSE)[[1]]$name
   })
 
   vapply(

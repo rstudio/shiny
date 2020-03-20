@@ -7,6 +7,12 @@
 
 local({
 
+  for (pkg in c("gh", "rprojroot", "devtools", "memoise")) {
+    if (!requireNamespace(pkg)) {
+      install.packages(pkg)
+    }
+  }
+
   `%>%` <- magrittr::`%>%`
 
   # pre document
@@ -20,14 +26,7 @@ local({
   local_reexports_r_file <- rprojroot::find_package_root_file("R/reexports.R")
 
   latest_tag <- memoise::memoise(function(repo) {
-    repo_url <- url(paste0("https://api.github.com/repos/", repo, "/tags"))
-    on.exit({
-      close(repo_url)
-    })
-    message("Downloading repo tags: ", repo_url)
-    repo_content <- paste0(readLines(repo_url), collapse = "\n")
-    print(repo_content)
-    jsonlite::fromJSON(repo_content, simplifyDataFrame = FALSE)[[1]]$name
+    gh::gh(paste0("GET /repos/", repo, "/tags"), username = "schloerke")[[1]]$name
   })
 
   vapply(

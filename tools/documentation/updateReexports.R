@@ -25,7 +25,9 @@ local({
       close(repo_url)
     })
     message("Downloading repo tags: ", repo_url)
-    jsonlite::fromJSON(repo_url, simplifyDataFrame = FALSE)[[1]]$name
+    repo_content <- paste0(readLines(repo_url), collapse = "\n")
+    print(repo_content)
+    jsonlite::fromJSON(repo_content, simplifyDataFrame = FALSE)[[1]]$name
   })
 
   vapply(

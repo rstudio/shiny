@@ -1,74 +1,81 @@
-
-#' Generate a Shiny package template
+#' Generate a Shiny application template
+#'
+#' @param path Path to create new shiny application template.
+#' @param examples Should the new path include example code? Defaults to `TRUE`.
+#' @param quiet Should status information be printed? Defaults to `FALSE`.
+#' @param interactive If `TRUE`, the user may be asked questions and prompted
+#'   for a response.
 #' @export
-shinyPackageSkeleton <- function(name, dir, twoFiles=FALSE, rDir=TRUE, examples=TRUE) {
-  dir <- file.path(dir, name)
-  if (file.exists(dir)){
-    stop(dir, " already exists!")
+shinyAppTemplate <- function(path = NULL, ..., examples = TRUE, quiet = FALSE,
+  interactive = base::interactive())
+{
+  # Check if a directory is empty, ignoring certain files
+  dir_is_empty <- function(path) {
+    files <- list.files(path, all.files = TRUE, no.. = TRUE)
+    # Ignore .DS_Store files, which are sometimes automatically created on macOS
+    files <- setdiff(files, ".DS_Store")
+    return(length(files) != 0)
   }
-  dir.create(dir)
 
   # Little helper to resolve paths relative to our example
-  examplePath <- function(path) {
-    system.file(file.path("examples/12_counter/", path), package="shiny")
+  example_path <- function(path) {
+    system.file("examples", "12_counter", path, package = "shiny")
+  }
+
+  if (is.null(path)) {
+    stop("`path` is missing.")
+  }
+  if (file.exists(path) && !dir.exists(path)) {
+    stop(path, " exists but is not a directory.")
+  }
+
+  if (dir.exists(path) && dir_is_empty(path)) {
+    if (interactive) {
+      response <- readline(paste0(
+        ensure_trailing_slash(path),
+        " is not empty. Do you want to create a Shiny app in this directory anyway? [y/n] "
+      ))
+      if (tolower(response) != "y") {
+        return(invisible())
+      }
+    }
+  } else {
+    dir.create(path)
   }
 
   # The R/ dir
-  rDir <- file.path(dir, "R")
-  dir.create(rDir)
-  if (examples){
-    file.copy(examplePath("R/counter.R"), rDir)
+  r_dir <- file.path(path, "R")
+  dir.create(r_dir)
+  if (examples) {
+    file.copy(example_path("R/counter.R"), r_dir)
   }
-
 
   # The tests/ dir
-  testsDir <- file.path(dir, "tests")
-  dir.create(testsDir)
-  file.copy(examplePath("tests/shinytests.R"), file.path(testsDir, "shinytests.R"))
-  file.copy(examplePath("tests/testthat.R"), file.path(testsDir, "testthat.R"))
-  file.copy(examplePath("tests/integration.R"), file.path(testsDir, "integration.R"))
-  if (!examples){
-    dir.create(file.path(testsDir, "shinytests"))
-    dir.create(file.path(testsDir, "testthat"))
-    dir.create(file.path(testsDir, "integration"))
+  tests_dir <- file.path(path, "tests")
+  dir.create(tests_dir)
+  file.copy(
+    example_path(c("tests/shinytests.R", "tests/testthat.R", "tests/integration.R")),
+    tests_dir
+  )
+  if (!examples) {
+    dir.create(file.path(tests_dir, "shinytests"))
+    dir.create(file.path(tests_dir, "testthat"))
+    dir.create(file.path(tests_dir, "integration"))
   } else {
-    file.copy(examplePath("tests/shinytests"),
-              testsDir, recursive=TRUE)
-    file.copy(examplePath("tests/testthat"),
-              testsDir, recursive=TRUE)
-    file.copy(examplePath("tests/integration"),
-              testsDir, recursive=TRUE)
+    file.copy(example_path("tests/shinytests"), tests_dir, recursive = TRUE)
+    file.copy(example_path("tests/testthat"),   tests_dir, recursive = TRUE)
+    file.copy(example_path("tests/integration"),tests_dir, recursive = TRUE)
   }
-
 
   # app/ui/server.R files
-  if(!twoFiles){
-    # Create app.R
-    if (!examples) {
-      file.create(file.path(dir, "app.R"))
-    } else {
-      uiLines <- readLines(examplePath("ui.R"))
-      firstCodeLine <- which(grepl("^\\s*[^#]", uiLines, perl=TRUE))[1]
-      uiLines[firstCodeLine] <- paste0("ui <- ", uiLines[firstCodeLine])
-      ui <- paste(uiLines, collapse="\n") # TODO: does windows need \r?
-
-      serverLines <- readLines(examplePath("server.R"))
-      server <- paste(serverLines, collapse="\n") # TODO: does windows need \r?
-      # Name the artifacts
-      server <- sub("function", "server <- function", server)
-
-      appR <- c(ui, "\n", server, "\n", "shinyApp(ui = ui, server = server)\n")
-      writeLines(appR, file.path(dir, "app.R"))
-    }
+  # Create app.R
+  if (!examples) {
+    file.create(file.path(path, "app.R"))
   } else {
-    # Create server.R and ui.R
-    if (!examples) {
-      file.create(file.path(dir, "server.R"))
-      file.create(file.path(dir, "ui.R"))
-    } else {
-      file.copy(examplePath("R/ui.R"), dir)
-      file.copy(examplePath("R/server.R"), dir)
-    }
+    file.copy(example_path("app.R"), path)
+  }
+
+  if (!quiet) {
+    message("Shiny app template created at ", ensure_trailing_slash(path))
   }
 }
-

@@ -316,6 +316,15 @@ resolve <- function(dir, relpath) {
   return(abs.path)
 }
 
+# Given a string, make sure it has a trailing slash.
+ensure_trailing_slash <- function(path) {
+  if (!grepl("/$", path)) {
+    path <- paste0(path, "/")
+  }
+  path
+}
+
+
 isWindows <- function() .Platform$OS.type == 'windows'
 
 # This is a wrapper for download.file and has the same interface.

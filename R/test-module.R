@@ -110,39 +110,45 @@ testModule <- function(module, expr, ...) {
   })
 }
 
+testCallModule <- function(module, id, session) {
+  # TODO alan Figure out what to do with id here, necessary for nested usage
+  body(module) <- rlang::expr({
+    session$env <- base::environment()
+    !!!body(module)
+  })
+
+  session$setReturned(do.call(module, list(
+    input = session$input,
+    output = session$output,
+    session = session
+  )))
+}
+
 #' Test an app's server-side logic
 #' @param appDir The directory root of the Shiny application. If `NULL`, this function
 #'   will work up the directory hierarchy --- starting with the current directory ---
 #'   looking for a directory that contains an `app.R` or `server.R` file.
 #' @rdname testModule
 #' @export
-testServer <- function(expr, appDir=NULL) {
-  if (is.null(appDir)){
-    appDir <- findApp()
-  }
-
-  app <- shinyAppDir(appDir)
-  message("Testing application found in: ", appDir)
-  server <- app$serverFuncSource()
-
-  origwd <- getwd()
-  setwd(appDir)
-  on.exit({ setwd(origwd) }, add=TRUE)
-
-  # Add `session` argument if not present
-  fn_formals <- formals(server)
-  if (! "session" %in% names(fn_formals)) {
-    fn_formals$session <- bquote()
-    formals(server) <- fn_formals
-  }
-
-  # Test the server function almost as if it were a module. `dots` is empty
-  # because server functions never take additional arguments.
-  .testModule(
-    server,
-    quosure = rlang::enquo(expr),
-    dots = list(),
-    env = rlang::caller_env()
+testServer <- function(app, expr, ...) {
+  session <- MockShinySession$new()
+  on.exit(if (!session$isClosed()) session$close())
+  quosure <- rlang::enquo(expr)
+  isolate(
+    withReactiveDomain(
+      session,
+      withr::with_options(list(`shiny.allowoutputreads` = TRUE), {
+        rlang::exec(app, ...)
+      })
+    )
+  )
+  isolate(
+    withReactiveDomain(
+      session,
+      withr::with_options(list(`shiny.allowoutputreads`=TRUE), {
+        rlang::eval_tidy(quosure, as.list(session$env), rlang::caller_env())
+      })
+    )
   )
 }
 

@@ -83,6 +83,10 @@ MockShinySession <- R6Class(
   public = list(
     #' @field env The environment associated with the session.
     env = NULL,
+    #' @field mask The inner-module environment mask
+    mask = NULL,
+    #' @field returned The value returned by the module.
+    returned = NULL,
     #' @field singletons Hardcoded as empty. Needed for rendering HTML (i.e. renderUI)
     singletons = character(0),
     #' @field clientData Mock client data that always returns a size for plots
@@ -390,6 +394,13 @@ MockShinySession <- R6Class(
         output = structure(.createOutputWriter(self, ns = ns), class = "shinyoutput"),
         makeScope = function(namespace) self$makeScope(ns(namespace))
       )
+    },
+    # If assigning to `returned`, proactively flush
+    #' @param value The value returned from the module
+    setReturned = function(value) {
+      self$returned <- value
+      private$flush()
+      value
     }
   ),
   private = list(
@@ -400,7 +411,6 @@ MockShinySession <- R6Class(
     timer = NULL,
     closed = FALSE,
     outs = list(),
-    returnedVal = NULL,
 
     flush = function(){
       isolate(private$flushCBs$invoke(..stacktraceon = TRUE))
@@ -410,18 +420,6 @@ MockShinySession <- R6Class(
     }
   ),
   active = list(
-    # If assigning to `returned`, proactively flush
-    #' @field returned The value returned from the module
-    returned = function(value){
-      if(missing(value)){
-        return(private$returnedVal)
-      }
-      # When you assign to returned, that implies that you just ran
-      # the module. So we should proactively flush. We have to do this
-      # here since flush is private.
-      private$returnedVal <- value
-      private$flush()
-    },
     #' @field request An empty environment where the request should be. The request isn't meaningfully mocked currently.
     request = function(value) {
       if (!missing(value)){

@@ -36,6 +36,10 @@
 #'
 #' }
 #'
+#' ## Example of adding extra class values
+#' actionButton("goButton", "Go!", class = "go")
+#' actionLink("goLink", "Go!", class = "go link")
+#'
 #' @seealso [observeEvent()] and [eventReactive()]
 #'
 #' @section Server value:

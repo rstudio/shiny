@@ -8,4 +8,4 @@
 # Note that this may redundantly source the files in your R/ dir depending on your
 # workflow.
 library(shiny)
-shiny::loadSupport("../../", renv=globalenv())
+shiny::loadSupport("../../", renv = globalenv())

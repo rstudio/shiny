@@ -1,10 +1,61 @@
 #' Generate a Shiny application template
 #'
+#' This function populates a directory with files for a Shiny application. They
+#' are based off of the "12_counter" example which can be run with
+#' `runExample()`.
+#'
+#' The example application includes the following files and directories:
+#'
+#' ```
+#' appdir/
+#' ├── app.R
+#' ├── R
+#' │   └── counter-module.R
+#' └── tests
+#'     ├── integration.R
+#'     ├── integration
+#'     │   └── test-counter.R
+#'     ├── shinytest.R
+#'     ├── shinytests
+#'     │   └── mytest.R
+#'     ├── testthat.R
+#'     └── testthat
+#'         ├── helper-load.R
+#'         └── test-counter.R
+#' ```
+#'
+#' Some notes about these files:
+#' * app.R is the main application file.
+#' * All files in the R/ subdirectory are automatically sourced when the
+#'   application is run.
+#' * The R/counter-module.R file is automatically sourced when the application
+#'   is run. This file contains code for a [Shiny module](moduleServer()) which
+#'   is used in the application.
+#' * The tests/ directory contains various tests for the application. You may
+#'   choose to use or remove any of them. They can be executed by the
+#'   [runTests()] function.
+#' * tests/integration.R is a test runner for test files in the
+#'   tests/integration/ directory.
+#' * tests/integration/test-counter.R is a test for the counter module.
+#' * tests/shinytest.R is a test runner for test files in the
+#'   tests/shinytest/ directory.
+#' * tests/shinytest/mytest.R is a test that uses the
+#'   [shinytest](https://rstudio.github.io/shinytest/) package to do
+#'   snapshot-based testing.
+#' * tests/testthat.R is a test runner for test files in the
+#'   tests/testthat/ directory.
+#' * tests/testthat/test-counter.R is a set of tests that use the
+#'   [testthat](https://testthat.r-lib.org/) package for testing.
+#' * tests/testthat/helper-load.R is a helper script that is automatically
+#'   loaded before running test-counter.R. (This is performed by the testthat
+#'   package.)
+#'
 #' @param path Path to create new shiny application template.
 #' @param examples Should the new path include example code? Defaults to `TRUE`.
 #' @param quiet Should status information be printed? Defaults to `FALSE`.
 #' @param interactive If `TRUE`, the user may be asked questions and prompted
 #'   for a response.
+#'
 #' @export
 shinyAppTemplate <- function(path = NULL, ..., examples = TRUE, quiet = FALSE,
   interactive = base::interactive())

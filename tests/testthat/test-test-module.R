@@ -393,53 +393,75 @@ test_that("testModule handles async errors", {
   })
 })
 
-#test_that("testModule handles modules with additional arguments", {
-#  module <- function(input, output, session, arg1, arg2){
-#    output$txt1 <- renderText({
-#      arg1
-#    })
+test_that("testServer handles modules with additional arguments", {
+  server <- function(id, arg1, arg2) {
+    moduleServer(id, function(input, output, session){
+      output$txt1 <- renderText({
+        arg1
+      })
 
-#    output$txt2 <- renderText({
-#      arg2
-#    })
+      output$txt2 <- renderText({
+        arg2
+      })
 
-#    output$inp <- renderText({
-#      input$x
-#    })
-#  }
+      output$inp <- renderText({
+        input$x
+      })
+    })
+  }
 
-#  testModule(module, {
-#    expect_equal(output$txt1, "val1")
-#    expect_equal(output$txt2, "val2")
-#  }, arg1="val1", arg2="val2")
-#})
+  testServer(server, {
+    expect_equal(output$txt1, "val1")
+    expect_equal(output$txt2, "val2")
+  }, arg1="val1", arg2="val2")
+})
 
-#test_that("testModule captures htmlwidgets", {
-#  # TODO: use a simple built-in htmlwidget instead of something complex like dygraph
-#  if (!requireNamespace("dygraphs")){
-#    testthat::skip("dygraphs not available to test htmlwidgets")
-#  }
+test_that("testServer captures htmlwidgets", {
+  # TODO: use a simple built-in htmlwidget instead of something complex like dygraph
+  if (!requireNamespace("dygraphs")){
+    testthat::skip("dygraphs not available to test htmlwidgets")
+  }
 
-#  if (!requireNamespace("jsonlite")){
-#    testthat::skip("jsonlite not available to test htmlwidgets")
-#  }
+  if (!requireNamespace("jsonlite")){
+    testthat::skip("jsonlite not available to test htmlwidgets")
+  }
 
-#  module <- function(input, output, session){
-#    output$dy <- dygraphs::renderDygraph({
-#      dygraphs::dygraph(data.frame(outcome=0:5, year=2000:2005))
-#    })
-#  }
+  server <- function(id) {
+    moduleServer(id, function(input, output, session){
+      output$dy <- dygraphs::renderDygraph({
+        dygraphs::dygraph(data.frame(outcome=0:5, year=2000:2005))
+      })
+    })
+  }
 
-#  testModule(module, {
-#    # Really, this test should be specific to each htmlwidget. Here, we don't want to bind ourselves
-#    # to the current JSON structure of dygraphs, so we'll just check one element to see that the raw
-#    # JSON was exposed and is accessible in tests.
-#    d <- jsonlite::fromJSON(output$dy)$x$data
-#    expect_equal(d[1,], 0:5)
-#    expect_equal(d[2,], 2000:2005)
-#  })
-#})
+  testServer(server, {
+    # Really, this test should be specific to each htmlwidget. Here, we don't want to bind ourselves
+    # to the current JSON structure of dygraphs, so we'll just check one element to see that the raw
+    # JSON was exposed and is accessible in tests.
+    d <- jsonlite::fromJSON(output$dy)$x$data
+    expect_equal(d[1,], 0:5)
+    expect_equal(d[2,], 2000:2005)
+  })
+})
 
+test_that("Variables outside of the module are inaccessible", {
+  server <- local({
+    outside <- 123
+    function(id, x) {
+      y <- x+1
+      moduleServer(id, function(input, output, session) {
+        z <- y+1
+      })
+    }
+  }, envir = rlang::new_environment(parent = rlang::global_env()))
+
+  testServer(server, {
+    expect_equal(x, 0)
+    expect_equal(y, 1)
+    expect_equal(z, 2)
+    expect_equal(exists("outside"), FALSE)
+  }, x = 0)
+})
 #test_that("testModule captures renderUI", {
 #  module <- function(input, output, session){
 #    output$ui <- renderUI({

@@ -110,6 +110,7 @@ testModule <- function(module, expr, ...) {
   })
 }
 
+#' @noRd
 testCallModule <- function(module, id, session) {
   # TODO alan Figure out what to do with id here, necessary for nested usage
   body(module) <- rlang::expr({
@@ -122,6 +123,19 @@ testCallModule <- function(module, id, session) {
     output = session$output,
     session = session
   )))
+}
+
+# Create a "data mask" suitable for passing to rlang::eval_tidy. Bindings in
+# `env` and bindings in the parent of `env` are merged into a single named list.
+# Bindings in `env` take precedence over bindings in the parent of `env`.
+#' @noRd
+makeMask <- function(env) {
+  stopifnot(length(rlang::env_parents(env)) > 1)
+  stopifnot(all(c("input", "output", "session") %in% ls(env)))
+  child <- as.list(env)
+  parent <- as.list(rlang::env_parent(env))
+  parent_only <- setdiff(names(parent), names(child))
+  append(child, parent[parent_only])
 }
 
 #' Test an app's server-side logic
@@ -146,7 +160,7 @@ testServer <- function(app, expr, ...) {
     withReactiveDomain(
       session,
       withr::with_options(list(`shiny.allowoutputreads`=TRUE), {
-        rlang::eval_tidy(quosure, as.list(session$env), rlang::caller_env())
+        rlang::eval_tidy(quosure, makeMask(session$env), rlang::caller_env())
       })
     )
   )

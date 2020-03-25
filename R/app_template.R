@@ -16,7 +16,7 @@
 #'     ├── integration
 #'     │   └── test-counter.R
 #'     ├── shinytest.R
-#'     ├── shinytests
+#'     ├── shinytest
 #'     │   └── mytest.R
 #'     ├── testthat.R
 #'     └── testthat
@@ -105,15 +105,15 @@ shinyAppTemplate <- function(path = NULL, ..., examples = TRUE, quiet = FALSE,
   tests_dir <- file.path(path, "tests")
   dir.create(tests_dir)
   file.copy(
-    example_path(c("tests/shinytests.R", "tests/testthat.R", "tests/integration.R")),
+    example_path(c("tests/shinytest.R", "tests/testthat.R", "tests/integration.R")),
     tests_dir
   )
   if (!examples) {
-    dir.create(file.path(tests_dir, "shinytests"))
+    dir.create(file.path(tests_dir, "shinytest"))
     dir.create(file.path(tests_dir, "testthat"))
     dir.create(file.path(tests_dir, "integration"))
   } else {
-    file.copy(example_path("tests/shinytests"), tests_dir, recursive = TRUE)
+    file.copy(example_path("tests/shinytest"), tests_dir, recursive = TRUE)
     file.copy(example_path("tests/testthat"),   tests_dir, recursive = TRUE)
     file.copy(example_path("tests/integration"),tests_dir, recursive = TRUE)
   }

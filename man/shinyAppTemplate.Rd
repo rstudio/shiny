@@ -37,7 +37,7 @@ The example application includes the following files and directories:\preformatt
     ├── integration
     │   └── test-counter.R
     ├── shinytest.R
-    ├── shinytests
+    ├── shinytest
     │   └── mytest.R
     ├── testthat.R
     └── testthat

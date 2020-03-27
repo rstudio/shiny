@@ -38,7 +38,7 @@
 #'
 #' ## Example of adding extra class values
 #' actionButton("largeButton", "Large Primary Button", class = "btn-primary btn-lg")
-#' actionLink("infoLink", "Information Button", class = "btn-info")
+#' actionLink("infoLink", "Information Link", class = "btn-info")
 #'
 #' @seealso [observeEvent()] and [eventReactive()]
 #'

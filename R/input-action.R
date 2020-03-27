@@ -16,7 +16,7 @@
 #'
 #' ui <- fluidPage(
 #'   sliderInput("obs", "Number of observations", 0, 1000, 500),
-#'   actionButton("goButton", "Go!"),
+#'   actionButton("goButton", "Go!", class = "btn-success"),
 #'   plotOutput("distPlot")
 #' )
 #'
@@ -37,8 +37,8 @@
 #' }
 #'
 #' ## Example of adding extra class values
-#' actionButton("goButton", "Go!", class = "go")
-#' actionLink("goLink", "Go!", class = "go link")
+#' actionButton("largeButton", "Large Primary Button", class = "btn-primary btn-lg")
+#' actionLink("infoLink", "Information Button", class = "btn-info")
 #'
 #' @seealso [observeEvent()] and [eventReactive()]
 #'

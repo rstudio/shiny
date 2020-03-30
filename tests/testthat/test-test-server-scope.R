@@ -40,3 +40,36 @@ test_that("Variables outside the testServer() have correct visibility", {
     expect_equal(z, 123)
   }, x = 0)
 })
+
+#test_that("testModule allows lexical environment access through session$env", {
+#  m <- local({
+#    a_var <- 123
+#    function(input, output, session) {
+#      b_var <- 321
+#    }
+#  })
+#  expect_false(exists("a_var", inherits = FALSE))
+#  testModule(m, {
+#    expect_equal(b_var, 321)
+#    expect_equal(get("a_var", session$env), 123)
+#  })
+#})
+
+#test_that("Module shadowing can be mitigated with unquote", {
+#  i <- 0
+#  inc <- function() i <<- i+1
+
+#  m <- local({
+#    function(input, output, session) {
+#      inc <- function() stop("I should never be called")
+#    }
+#  })
+
+#  testModule(m, {
+#    expect_is(inc, "function")
+#    expect_false(identical(inc, !!inc))
+#    !!inc()
+#  })
+
+#  expect_equal(i, 1)
+#})

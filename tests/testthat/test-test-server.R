@@ -444,228 +444,180 @@ test_that("testServer captures htmlwidgets", {
   })
 })
 
-#test_that("testModule captures renderUI", {
-#  module <- function(input, output, session){
-#    output$ui <- renderUI({
-#      tags$a(href="https://rstudio.com", "hello!")
-#    })
-#  }
+test_that("testServer captures renderUI", {
+  server <- function(id) {
+    moduleServer(id, function(input, output, session){
+      output$ui <- renderUI({
+        tags$a(href="https://rstudio.com", "hello!")
+      })
+    })
+  }
 
-#  testModule(module, {
-#    expect_equal(output$ui$deps, list())
-#    expect_equal(as.character(output$ui$html), "<a href=\"https://rstudio.com\">hello!</a>")
-#  })
-#})
+  testServer(server, {
+    expect_equal(output$ui$deps, list())
+    expect_equal(as.character(output$ui$html), "<a href=\"https://rstudio.com\">hello!</a>")
+  })
+})
 
-#test_that("testModule captures base graphics outputs", {
-#  module <- function(input, output, session){
-#    output$fixed <- renderPlot({
-#      plot(1,1)
-#    }, width=300, height=350)
+test_that("testServer captures base graphics outputs", {
+  server <- function(id) {
+    moduleServer(id, function(input, output, session){
+      output$fixed <- renderPlot({
+        plot(1,1)
+      }, width=300, height=350)
 
-#    output$dynamic <- renderPlot({
-#      plot(1,1)
-#    })
-#  }
+      output$dynamic <- renderPlot({
+        plot(1,1)
+      })
+    })
+  }
 
-#  testModule(module, {
-#    # We aren't yet able to create reproducible graphics, so this test is intentionally pretty
-#    # limited.
-#    expect_equal(output$fixed$width, 300)
-#    expect_equal(output$fixed$height, 350)
-#    expect_match(output$fixed$src, "^data:image/png;base64,")
+  testServer(server, {
+    # We aren't yet able to create reproducible graphics, so this test is intentionally pretty
+    # limited.
+    expect_equal(output$fixed$width, 300)
+    expect_equal(output$fixed$height, 350)
+    expect_match(output$fixed$src, "^data:image/png;base64,")
 
-#    # Ensure that the plot defaults to a reasonable size.
-#    expect_equal(output$dynamic$width, 600)
-#    expect_equal(output$dynamic$height, 400)
-#    expect_match(output$dynamic$src, "^data:image/png;base64,")
+    # Ensure that the plot defaults to a reasonable size.
+    expect_equal(output$dynamic$width, 600)
+    expect_equal(output$dynamic$height, 400)
+    expect_match(output$dynamic$src, "^data:image/png;base64,")
 
-#    # TODO: how do you customize automatically inferred plot sizes?
-#    # session$setPlotMeta("dynamic", width=600, height=300) ?
-#  })
-#})
+    # TODO: how do you customize automatically inferred plot sizes?
+    # session$setPlotMeta("dynamic", width=600, height=300) ?
+  })
+})
 
-#test_that("testModule captures ggplot2 outputs", {
-#  if (!requireNamespace("ggplot2")){
-#    testthat::skip("ggplot2 not available")
-#  }
+test_that("testServer captures ggplot2 outputs", {
+  if (!requireNamespace("ggplot2")){
+    testthat::skip("ggplot2 not available")
+  }
 
-#  module <- function(input, output, session){
-#    output$fixed <- renderPlot({
-#      ggplot2::qplot(iris$Sepal.Length, iris$Sepal.Width)
-#    }, width=300, height=350)
+  server <- function(id) {
+    moduleServer(id, function(input, output, session){
+      output$fixed <- renderPlot({
+        ggplot2::qplot(iris$Sepal.Length, iris$Sepal.Width)
+      }, width=300, height=350)
 
-#    output$dynamic <- renderPlot({
-#      ggplot2::qplot(iris$Sepal.Length, iris$Sepal.Width)
-#    })
-#  }
+      output$dynamic <- renderPlot({
+        ggplot2::qplot(iris$Sepal.Length, iris$Sepal.Width)
+      })
+    })
+  }
 
-#  testModule(module, {
-#    expect_equal(output$fixed$width, 300)
-#    expect_equal(output$fixed$height, 350)
-#    expect_match(output$fixed$src, "^data:image/png;base64,")
+  testServer(server, {
+    expect_equal(output$fixed$width, 300)
+    expect_equal(output$fixed$height, 350)
+    expect_match(output$fixed$src, "^data:image/png;base64,")
 
-#    # Ensure that the plot defaults to a reasonable size.
-#    expect_equal(output$dynamic$width, 600)
-#    expect_equal(output$dynamic$height, 400)
-#    expect_match(output$dynamic$src, "^data:image/png;base64,")
-#  })
-#})
+    # Ensure that the plot defaults to a reasonable size.
+    expect_equal(output$dynamic$width, 600)
+    expect_equal(output$dynamic$height, 400)
+    expect_match(output$dynamic$src, "^data:image/png;base64,")
+  })
+})
 
-#test_that("testModule exposes the returned value from the module", {
-#  module <- function(input, output, session){
-#    reactive({
-#      return(input$a + input$b)
-#    })
-#  }
+test_that("testServer exposes the returned value from the module", {
+  server <- function(id) {
+    moduleServer(id, function(input, output, session){
+      reactive({
+        return(input$a + input$b)
+      })
+    })
+  }
 
-#  testModule(module, {
-#    session$setInputs(a=1, b=2)
-#    expect_equal(session$returned(), 3)
+  testServer(server, {
+    session$setInputs(a=1, b=2)
+    expect_equal(session$returned(), 3)
 
-#    # And retains reactivity
-#    session$setInputs(a=2)
-#    expect_equal(session$returned(), 4)
-#  })
-#})
+    # And retains reactivity
+    session$setInputs(a=2)
+    expect_equal(session$returned(), 4)
+  })
+})
 
-#test_that("testModule handles synchronous errors", {
-#  module <- function(input, output, session, arg1, arg2){
-#    output$err <- renderText({
-#      stop("my error")
-#    })
+test_that("testServer handles synchronous errors", {
+  server <- function(id) {
+    moduleServer(id, function(input, output, session, arg1, arg2){
+      output$err <- renderText({
+        stop("my error")
+      })
 
-#    output$safe <- renderText({
-#      stop(safeError("my safe error"))
-#    })
-#  }
+      output$safe <- renderText({
+        stop(safeError("my safe error"))
+      })
+    })
+  }
 
-#  testModule(module, {
-#    expect_error(output$err, "my error")
-#    # TODO: helper for safe errors so users don't have to learn "shiny.custom.error"?
-#    expect_error(output$safe, "my safe error", class="shiny.custom.error")
-#  })
-#})
+  testServer(server, {
+    expect_error(output$err, "my error")
+    # TODO: helper for safe errors so users don't have to learn "shiny.custom.error"?
+    expect_error(output$safe, "my safe error", class="shiny.custom.error")
+  })
+})
 
-#test_that("accessing a non-existant output gives an informative message", {
-#  module <- function(input, output, session){}
+test_that("accessing a non-existent output gives an informative message", {
+  server <- function(id) {
+    moduleServer(id, function(input, output, session){})
+  }
 
-#  testModule(module, {
-#    expect_error(output$dontexist, "hasn't been defined yet: output\\$dontexist")
-#  })
-#})
+  testServer(server, {
+    expect_error(output$dontexist, "hasn't been defined yet: output\\$dontexist")
+  })
+})
 
-#test_that("testModule works with nested modules", {
-#  outerModule <- function(input, output, session) {
-#    r1 <- reactive({ input$x + 1})
-#    r2 <- callModule(innerModule, "innerModule", r1)
-#    output$someVar <- renderText(r2())
-#  }
+test_that("testServer returns a meaningful result", {
+  result <- testServer(function(id) {
+    moduleServer(id, function(input, output, session) {
+      reactive({ input$x * 2 })
+    })
+  }, {
+    session$setInputs(x = 2)
+    session$returned()
+  })
+  expect_equal(result, 4)
+})
 
-#  innerModule <- function(input, output, session, r) {
-#    reactive(paste("a value:", r()))
-#  }
+test_that("assigning an output in a module function with a non-function errors", {
+  server <- function(id) {
+    moduleServer(id, function(input, output, session) {
+      output$someVar <- 123
 
-#  testModule(outerModule, {
-#    session$setInputs(x = 1)
-#    expect_equal(output$someVar, "a value: 2")
-#  })
-#})
+    })
+  }
 
-#test_that("testModule calls can be nested", {
-#  outerModule <- function(input, output, session) {
-#    doubled <- reactive({ input$x * 2 })
-#    innerModule <- function(input, output, session) {
-#      quadrupled <- reactive({ doubled() * 2 })
-#    }
-#  }
+  expect_error(testServer(server, {}), "^Unexpected")
+})
 
-#  testModule(outerModule, {
-#    session$setInputs(x = 1)
-#    expect_equal(doubled(), 2)
-#    testModule(innerModule, {
-#      expect_equal(quadrupled(), 4)
-#    })
-#  })
-#})
+skip("TODO: testServer() with dir arg")
+test_that("testServer works", {
+  # app.R
+  testServer({
+    session$setInputs(dist="norm", n=5)
+    expect_length(d(), 5)
 
-#test_that("testModule returns a meaningful result", {
-#  result <- testModule(function(input, output, session) {
-#    reactive({ input$x * 2 })
-#  }, {
-#    session$setInputs(x = 2)
-#    session$returned()
-#  })
-#  expect_equal(result, 4)
-#})
+    session$setInputs(dist="unif", n=6)
+    expect_length(d(), 6)
+  }, appDir=test_path("..", "test-modules", "06_tabsets"))
 
-#test_that("assigning an output in a module function with a non-function errors", {
-#  module <- function(input, output, session) {
-#    output$someVar <- 123
-#  }
+  # server.R
+  testServer({
+    session$setInputs(dist="norm", n=5)
+    expect_length(d(), 5)
 
-#  expect_error(testModule(module, {}), "^Unexpected")
-#})
+    session$setInputs(dist="unif", n=6)
+    expect_length(d(), 6)
+  }, appDir=test_path("..", "test-modules", "server_r"))
+})
 
-#test_that("testServer works", {
-#  # app.R
-#  testServer({
-#    session$setInputs(dist="norm", n=5)
-#    expect_length(d(), 5)
-
-#    session$setInputs(dist="unif", n=6)
-#    expect_length(d(), 6)
-#  }, appDir=test_path("..", "test-modules", "06_tabsets"))
-
-#  # server.R
-#  testServer({
-#    session$setInputs(dist="norm", n=5)
-#    expect_length(d(), 5)
-
-#    session$setInputs(dist="unif", n=6)
-#    expect_length(d(), 6)
-#  }, appDir=test_path("..", "test-modules", "server_r"))
-#})
-
-#test_that("testServer works when referencing external globals", {
-#  # If global is defined at the top of app.R outside of the server function.
-#  testServer({
-#    expect_equal(get("global", session$env), 123)
-#  }, appDir=test_path("..", "test-modules", "06_tabsets"))
-#})
-
-#test_that("testModule allows lexical environment access through session$env", {
-#  m <- local({
-#    a_var <- 123
-#    function(input, output, session) {
-#      b_var <- 321
-#    }
-#  })
-#  expect_false(exists("a_var", inherits = FALSE))
-#  testModule(m, {
-#    expect_equal(b_var, 321)
-#    expect_equal(get("a_var", session$env), 123)
-#  })
-#})
-
-#test_that("Module shadowing can be mitigated with unquote", {
-#  i <- 0
-#  inc <- function() i <<- i+1
-
-#  m <- local({
-#    function(input, output, session) {
-#      inc <- function() stop("I should never be called")
-#    }
-#  })
-
-#  testModule(m, {
-#    expect_is(inc, "function")
-#    expect_false(identical(inc, !!inc))
-#    !!inc()
-#  })
-
-#  expect_equal(i, 1)
-#})
+skip("TODO: testServer() with dir arg")
+test_that("testServer works when referencing external globals", {
+  # If global is defined at the top of app.R outside of the server function.
+  testServer({
+    expect_equal(get("global", session$env), 123)
+  }, appDir=test_path("..", "test-modules", "06_tabsets"))
+})
 
 #test_that("testModule handles invalidateLater", {
 #  module <- function(input, output, session) {

@@ -1,3 +1,7 @@
+context("testServer nesting")
+
+library(shiny)
+library(testthat)
 #test_that("testModule works with nested modules", {
 #  outerModule <- function(input, output, session) {
 #    r1 <- reactive({ input$x + 1})

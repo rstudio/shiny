@@ -4,24 +4,6 @@ library(shiny)
 library(testthat)
 library(future)
 
-#m <- function(id, multiplier = 2) {
-#  moduleServer(id, function(input, output, session) {
-#    multiplied <- reactive(input$x * multiplier)
-#    output$txt <- renderText(multiplied())
-#  })
-#}
-#
-#test_that("it works", {
-#  expected <- 4
-#  testServer(m, {
-#    session$setInputs(x = 2)
-#    expect_equal(multiplied(), expected)
-#  }, multiplier = 2)
-#})
-
-#library(promises)
-#plan(multisession)
-
 test_that("testServer passes dots", {
   server <- function(id, someArg) {
     expect_false(missing(someArg))
@@ -590,148 +572,87 @@ test_that("assigning an output in a module function with a non-function errors",
   expect_error(testServer(server, {}), "^Unexpected")
 })
 
-skip("TODO: testServer() with dir arg")
-test_that("testServer works", {
-  # app.R
-  testServer({
-    session$setInputs(dist="norm", n=5)
-    expect_length(d(), 5)
+test_that("testServer handles invalidateLater", {
+  server <- function(id) {
+    moduleServer(id, function(input, output, session) {
+      rv <- reactiveValues(x = 0)
+      observe({
+        isolate(rv$x <- rv$x + 1)
+        # We're only testing one invalidation
+        if (isolate(rv$x) <= 1){
+          invalidateLater(50)
+        }
+      })
+    })
+  }
 
-    session$setInputs(dist="unif", n=6)
-    expect_length(d(), 6)
-  }, appDir=test_path("..", "test-modules", "06_tabsets"))
+  testServer(server, {
+    # Should have run once
+    expect_equal(rv$x, 1)
 
-  # server.R
-  testServer({
-    session$setInputs(dist="norm", n=5)
-    expect_length(d(), 5)
+    session$elapse(49)
+    expect_equal(rv$x, 1)
 
-    session$setInputs(dist="unif", n=6)
-    expect_length(d(), 6)
-  }, appDir=test_path("..", "test-modules", "server_r"))
+    session$elapse(1)
+    # Should have been incremented now
+    expect_equal(rv$x, 2)
+  })
 })
 
-skip("TODO: testServer() with dir arg")
-test_that("testServer works when referencing external globals", {
-  # If global is defined at the top of app.R outside of the server function.
-  testServer({
-    expect_equal(get("global", session$env), 123)
-  }, appDir=test_path("..", "test-modules", "06_tabsets"))
+test_that("session ended handlers work", {
+  server <- function(id) {
+    moduleServer(id, function(input, output, session){})
+  }
+
+  testServer(server, {
+    rv <- reactiveValues(closed = FALSE)
+    session$onEnded(function(){
+      rv$closed <- TRUE
+    })
+
+    expect_equal(session$isEnded(), FALSE)
+    expect_equal(session$isClosed(), FALSE)
+    expect_false(rv$closed, FALSE)
+
+    session$close()
+
+    expect_equal(session$isEnded(), TRUE)
+    expect_equal(session$isClosed(), TRUE)
+    expect_false(rv$closed, TRUE)
+  })
 })
 
-#test_that("testModule handles invalidateLater", {
-#  module <- function(input, output, session) {
-#    rv <- reactiveValues(x = 0)
-#    observe({
-#      isolate(rv$x <- rv$x + 1)
-#      # We're only testing one invalidation
-#      if (isolate(rv$x) <= 1){
-#        invalidateLater(50)
-#      }
-#    })
-#  }
+test_that("session flush handlers work", {
+  server <- function(id) {
+    moduleServer(id, function(input, output, session) {
+      rv <- reactiveValues(x = 0, flushCounter = 0, flushedCounter = 0,
+                           flushOnceCounter = 0, flushedOnceCounter = 0)
 
-#  testModule(module, {
-#    # Should have run once
-#    expect_equal(rv$x, 1)
+      onFlush(function(){rv$flushCounter <- rv$flushCounter + 1}, once=FALSE)
+      onFlushed(function(){rv$flushedCounter <- rv$flushedCounter + 1}, once=FALSE)
+      onFlushed(function(){rv$flushOnceCounter <- rv$flushOnceCounter + 1}, once=TRUE)
+      onFlushed(function(){rv$flushedOnceCounter <- rv$flushedOnceCounter + 1}, once=TRUE)
 
-#    session$elapse(49)
-#    expect_equal(rv$x, 1)
+      observe({
+        rv$x <- input$x * 2
+      })
+    })
+  }
 
-#    session$elapse(1)
-#    # Should have been incremented now
-#    expect_equal(rv$x, 2)
-#  })
-#})
+  testServer(server, {
+    session$setInputs(x=1)
+    expect_equal(rv$x, 2)
+    # We're not concerned with the exact values here -- only that they increase
+    fc <- rv$flushCounter
+    fdc <- rv$flushedCounter
 
-#test_that("session ended handlers work", {
-#  module <- function(input, output, session){}
+    session$setInputs(x=2)
+    expect_gt(rv$flushCounter, fc)
+    expect_gt(rv$flushedCounter, fdc)
 
-#  testModule(module, {
-#    rv <- reactiveValues(closed = FALSE)
-#    session$onEnded(function(){
-#      rv$closed <- TRUE
-#    })
+    # These should have only run once
+    expect_equal(rv$flushOnceCounter, 1)
+    expect_equal(rv$flushedOnceCounter, 1)
 
-#    expect_equal(session$isEnded(), FALSE)
-#    expect_equal(session$isClosed(), FALSE)
-#    expect_false(rv$closed, FALSE)
-
-#    session$close()
-
-#    expect_equal(session$isEnded(), TRUE)
-#    expect_equal(session$isClosed(), TRUE)
-#    expect_false(rv$closed, TRUE)
-#  })
-#})
-
-#test_that("session flush handlers work", {
-#  module <- function(input, output, session) {
-#    rv <- reactiveValues(x = 0, flushCounter = 0, flushedCounter = 0,
-#                         flushOnceCounter = 0, flushedOnceCounter = 0)
-
-#    onFlush(function(){rv$flushCounter <- rv$flushCounter + 1}, once=FALSE)
-#    onFlushed(function(){rv$flushedCounter <- rv$flushedCounter + 1}, once=FALSE)
-#    onFlushed(function(){rv$flushOnceCounter <- rv$flushOnceCounter + 1}, once=TRUE)
-#    onFlushed(function(){rv$flushedOnceCounter <- rv$flushedOnceCounter + 1}, once=TRUE)
-
-#    observe({
-#      rv$x <- input$x * 2
-#    })
-#  }
-
-#  testModule(module, {
-#    session$setInputs(x=1)
-#    expect_equal(rv$x, 2)
-#    # We're not concerned with the exact values here -- only that they increase
-#    fc <- rv$flushCounter
-#    fdc <- rv$flushedCounter
-
-#    session$setInputs(x=2)
-#    expect_gt(rv$flushCounter, fc)
-#    expect_gt(rv$flushedCounter, fdc)
-
-#    # These should have only run once
-#    expect_equal(rv$flushOnceCounter, 1)
-#    expect_equal(rv$flushedOnceCounter, 1)
-
-#  })
-#})
-
-#test_that("findApp errors with no app", {
-#  calls <- 0
-#  nothingExists <- function(path){
-#    calls <<- calls + 1
-#    FALSE
-#  }
-#  fa <- rewire(findApp, file.exists.ci=nothingExists)
-#  expect_error(
-#    expect_warning(fa("/some/path/here"), "No such file or directory"), # since we just made up a path
-#    "No shiny app was found in ")
-#  expect_equal(calls, 4 * 2) # Checks here, path, some, and / -- looking for app.R and server.R for each
-#})
-
-#test_that("findApp works with app in current or parent dir", {
-#  calls <- 0
-#  cd <- normalizePath(".")
-#  mockExists <- function(path){
-#    # Only TRUE if looking for server.R or app.R in current Dir
-#    calls <<- calls + 1
-
-#    path <- normalizePath(path, mustWork = FALSE)
-
-#    appPath <- normalizePath(file.path(cd, "app.R"), mustWork = FALSE)
-#    serverPath <- normalizePath(file.path(cd, "server.R"), mustWork = FALSE)
-#    return(path %in% c(appPath, serverPath))
-#  }
-#  fa <- rewire(findApp, file.exists.ci=mockExists)
-#  expect_equal(fa(), cd)
-#  expect_equal(calls, 1) # Should get a hit on the first call and stop
-
-#  # Reset and point to the parent dir
-#  calls <- 0
-#  cd <- normalizePath("..") # TODO: won't work if running tests in the root dir.
-#  f <- fa()
-#  expect_equal(normalizePath(f, mustWork = FALSE), cd)
-#  expect_equal(calls, 3) # Two for current dir and hit on the first in the parent
-#})
+  })
+})

@@ -1,7 +1,7 @@
 library(shiny)
 
 # Define server logic for random distribution app ----
-function(input, output) {
+function(input, output, session) {
 
   # Reactive expression to generate the requested distribution ----
   # This is called whenever the inputs change. The output functions

@@ -143,6 +143,11 @@ isModuleServer <- function(x) {
   is.function(x) && names(formals(x)) == "id"
 }
 
+#' @noRd
+coercableToAppObj <- function(x) {
+  !is.null(getS3method("as.shiny.appobj", class(x), optional = TRUE))
+}
+
 #' Test an app's server-side logic
 #' @param appDir The directory root of the Shiny application. If `NULL`, this function
 #'   will work up the directory hierarchy --- starting with the current directory ---
@@ -154,14 +159,11 @@ testServer <- function(app, expr, ...) {
   session <- MockShinySession$new()
   on.exit(if (!session$isClosed()) session$close())
 
-  if (is.character(app) && length(app) == 1) {
-    server <- shinyAppDir(app)$serverFuncSource()
-    message("Testing application found in: ", app)
-    fn_formals <- formals(server)
-    if (! "session" %in% names(fn_formals)) {
-      fn_formals$session <- bquote()
-      formals(server) <- fn_formals
-    }
+  if (coercableToAppObj(app)) {
+    appobj <- as.shiny.appobj(app)
+    server <- appobj$serverFuncSource()
+    if (! "session" %in% names(formals(server)))
+      stop("Tested application server functions must declare input, output, and session arguments.")
     body(server) <- rlang::expr({
       session$env <- base::environment()
       session$setReturned({ !!!body(server) })
@@ -169,11 +171,9 @@ testServer <- function(app, expr, ...) {
     app <- function() {
       server(input = session$input, output = session$output, session = session)
     }
-  } else if (!isModuleServer(app)) {
-    stop("app must be either the location of a Shiny app or a module server function")
+  } else if (!moduleServer(app)) {
+    stop("app argument must be a module function or coercable by as.shiny.appobj")
   }
-
-  quosure <- rlang::enquo(expr)
 
   isolate(
     withReactiveDomain(
@@ -183,6 +183,8 @@ testServer <- function(app, expr, ...) {
       })
     )
   )
+
+  quosure <- rlang::enquo(expr)
   isolate(
     withReactiveDomain(
       session,

@@ -41,35 +41,41 @@ test_that("Variables outside the testServer() have correct visibility", {
   }, x = 0)
 })
 
-#test_that("testModule allows lexical environment access through session$env", {
-#  m <- local({
-#    a_var <- 123
-#    function(input, output, session) {
-#      b_var <- 321
-#    }
-#  })
-#  expect_false(exists("a_var", inherits = FALSE))
-#  testModule(m, {
-#    expect_equal(b_var, 321)
-#    expect_equal(get("a_var", session$env), 123)
-#  })
-#})
+test_that("testServer allows lexical environment access through session$env", {
+  server <- local({
+    a_var <- 123
+    function(id) {
+      moduleServer(id, function(input, output, session) {
+        b_var <- 321
+      })
+    }
+  })
 
-#test_that("Module shadowing can be mitigated with unquote", {
-#  i <- 0
-#  inc <- function() i <<- i+1
+  expect_false(exists("a_var", inherits = FALSE))
 
-#  m <- local({
-#    function(input, output, session) {
-#      inc <- function() stop("I should never be called")
-#    }
-#  })
+  testServer(server, {
+    expect_equal(b_var, 321)
+    expect_equal(get("a_var", session$env), 123)
+  })
+})
 
-#  testModule(m, {
-#    expect_is(inc, "function")
-#    expect_false(identical(inc, !!inc))
-#    !!inc()
-#  })
+test_that("Shadowing can be mitigated with unquote", {
+  i <- 0
+  inc <- function() i <<- i+1
 
-#  expect_equal(i, 1)
-#})
+  server <- local({
+    function(id) {
+      moduleServer(id, function(input, output, session) {
+        inc <- function() stop("I should never be called")
+      })
+    }
+  }, envir = globalenv())
+
+  testServer(server, {
+    expect_is(inc, "function")
+    expect_false(identical(inc, !!inc))
+    !!inc()
+  })
+
+  expect_equal(i, 1)
+})

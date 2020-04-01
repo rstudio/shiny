@@ -6,7 +6,11 @@ matrix:
       r_packages:
         - devtools
         - rprojroot
-      script: ./tools/checkDocsCurrent.sh
+      script: ./tools/documentation/checkDocsCurrent.sh
+      env:
+        # GITHUB_PAT for gh::gh calls
+        - secure: "Hk4piVNtDobLT1dQPnCOcM7sOlwNGJOU5cpvbRvOxYSgxP+Bj2MyRZMe825rdHkHbFez0h8w3tJOBf9DDBH7PC1BhhNll2+WM/WxGlkNleg8vsoH/Xopffl+2YgtWbAYZjQ2j0QYdgNn0e/TY86/ggk9qit6+gpsZ7z/HmWQuVY="
+
     - name: "Javascript check"
       language: node_js
       cache: yarn

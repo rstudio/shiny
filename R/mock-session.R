@@ -83,8 +83,6 @@ MockShinySession <- R6Class(
   public = list(
     #' @field env The environment associated with the session.
     env = NULL,
-    #' @field mask The inner-module environment mask
-    mask = NULL,
     #' @field returned The value returned by the module.
     returned = NULL,
     #' @field singletons Hardcoded as empty. Needed for rendering HTML (i.e. renderUI)

@@ -21,8 +21,6 @@ s$setInputs(x=1, y=2)
 \describe{
 \item{\code{env}}{The environment associated with the session.}
 
-\item{\code{mask}}{The inner-module environment mask}
-
 \item{\code{returned}}{The value returned by the module.}
 
 \item{\code{singletons}}{Hardcoded as empty. Needed for rendering HTML (i.e. renderUI)}

@@ -2318,7 +2318,7 @@ missingOutput <- function(...) req(FALSE)
 #'   concatenated HTML is returned.
 #' @param extensions Enable Github syntax extensions; defaults to `TRUE`.
 #' @param .noWS Character vector used to omit some of the whitespace that would
-#'   normally be written around this HTML. Valid options include `before`,
+#'   normally be written around generated HTML. Valid options include `before`,
 #'   `after`, and `outside` (equivalent to `before` and `end`).
 #' @param ... Additional arguments to pass to [commonmark::markdown_html()].
 #'   These arguments are _[dynamic][rlang::dyn-dots]_.

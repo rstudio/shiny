@@ -21,6 +21,10 @@ s$setInputs(x=1, y=2)
 \describe{
 \item{\code{env}}{The environment associated with the session.}
 
+\item{\code{mask}}{The inner-module environment mask}
+
+\item{\code{returned}}{The value returned by the module.}
+
 \item{\code{singletons}}{Hardcoded as empty. Needed for rendering HTML (i.e. renderUI)}
 
 \item{\code{clientData}}{Mock client data that always returns a size for plots}
@@ -38,8 +42,6 @@ s$setInputs(x=1, y=2)
 \section{Active bindings}{
 \if{html}{\out{<div class="r6-active-bindings">}}
 \describe{
-\item{\code{returned}}{The value returned from the module}
-
 \item{\code{request}}{An empty environment where the request should be. The request isn't meaningfully mocked currently.}
 }
 \if{html}{\out{</div>}}
@@ -83,6 +85,7 @@ s$setInputs(x=1, y=2)
 \item \href{#method-ns}{\code{MockShinySession$ns()}}
 \item \href{#method-flushReact}{\code{MockShinySession$flushReact()}}
 \item \href{#method-makeScope}{\code{MockShinySession$makeScope()}}
+\item \href{#method-setReturned}{\code{MockShinySession$setReturned()}}
 \item \href{#method-clone}{\code{MockShinySession$clone()}}
 }
 }
@@ -663,6 +666,22 @@ Create and return a namespace-specific session proxy.
 \if{html}{\out{<div class="arguments">}}
 \describe{
 \item{\code{namespace}}{Character vector indicating a namespace.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-setReturned"></a>}}
+\if{latex}{\out{\hypertarget{method-setReturned}{}}}
+\subsection{Method \code{setReturned()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{MockShinySession$setReturned(value)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{value}}{The value returned from the module}
 }
 \if{html}{\out{</div>}}
 }

@@ -97,14 +97,16 @@ test_that("testServer handles more complex expressions", {
 })
 
 test_that("testServer handles reactiveVal", {
-  module <- function(input, output, session) {
-    x <- reactiveVal(0)
-    observe({
-      x(input$y + input$z)
+  server <- function(id) {
+    moduleServer(id, function(input, output, session) {
+      x <- reactiveVal(0)
+      observe({
+        x(input$y + input$z)
+      })
     })
   }
 
-  testModule(module, {
+  testServer(server, {
     session$setInputs(y=1, z=2)
 
     expect_equal(x(), 3)

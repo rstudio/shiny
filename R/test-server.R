@@ -43,7 +43,8 @@ coercableToAppObj <- function(x) {
 #' modules.
 #' @param app The path to an application or module to test. In addition to
 #'   paths, applications may be represented by any object suitable for coercion
-#'   to an `appObj` by `as.shiny.appobj`.
+#'   to an `appObj` by `as.shiny.appobj`. Application server functions must
+#'   include a `session` argument in order to be tested.
 #' @param expr Test code containing expectations. The test expression will run
 #'   in the server function environment, meaning that the parameters of the
 #'   server function (e.g. `input`, `output`, and `session`) will be available

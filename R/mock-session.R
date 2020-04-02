@@ -69,6 +69,16 @@ extract <- function(promise) {
   stop("Single-bracket indexing of mockclientdata is not allowed.")
 }
 
+#' @noRd
+mapNames <- function(func, ...) {
+  vals <- list(...)
+  for (name in names(vals)) {
+    vals[[func(name)]] <- vals[[name]]
+    vals[[name]] <- NULL
+  }
+  vals
+}
+
 #' Mock Shiny Session
 #'
 #' @description
@@ -393,17 +403,18 @@ MockShinySession <- R6Class(
         input = .createReactiveValues(private$.input, readonly = TRUE, ns = ns),
         output = structure(.createOutputWriter(self, ns = ns), class = "shinyoutput"),
         makeScope = function(namespace) self$makeScope(ns(namespace)),
+        ns = ns,
         getEnv <- function() env,
-        setEnv <- function(env) {
-          env <<- env
-        },
+        setEnv <- function(env) env <<- env,
         getReturned <- function() returned,
         setReturned <- function(val) {
           returned <<- val
           private$flush()
           val
-        }
+        },
+        setInputs = function(...) do.call(self$setInputs, mapNames(ns, ...))
       )
+      proxy
     },
     getEnv = function() self$env,
     setEnv = function(env) {
@@ -426,7 +437,7 @@ MockShinySession <- R6Class(
     timer = NULL,
     closed = FALSE,
     outs = list(),
-    nsPrefix = "",
+    nsPrefix = "mock-session",
 
     flush = function(){
       isolate(private$flushCBs$invoke(..stacktraceon = TRUE))

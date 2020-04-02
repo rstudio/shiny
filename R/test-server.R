@@ -1,19 +1,3 @@
-#' @noRd
-testCallModule <- function(module, id, session) {
-  body(module) <- rlang::expr({
-    session$setEnv(base::environment())
-    !!!body(module)
-  })
-
-  childSession <- session$makeScope(id)
-
-  session$setReturned(module(
-    input = childSession$input,
-    output = childSession$output,
-    session = childSession
-  ))
-}
-
 # Create a "data mask" suitable for passing to rlang::eval_tidy. Bindings in
 # `env` and bindings in the parent of `env` are merged into a single named list.
 # Bindings in `env` take precedence over bindings in the parent of `env`.
@@ -98,6 +82,7 @@ coercableToAppObj <- function(x) {
 #' @export
 testServer <- function(app, expr, ...) {
 
+  args <- rlang::list2(...)
   session <- MockShinySession$new()
   on.exit(if (!session$isClosed()) session$close())
 
@@ -113,16 +98,21 @@ testServer <- function(app, expr, ...) {
     app <- function() {
       session$setReturned(server(input = session$input, output = session$output, session = session))
     }
-  } else if (!isModuleServer(app)) {
+    if (length(args)) message("Discarding unused arguments to server function")
+  } else if (isModuleServer(app)) {
+    if (!("id" %in% names(args))) {
+      # If an id was not provided, one is generated.
+      args[["id"]] <- shiny::createUniqueId(bytes = 4)
+    }
+  } else {
     stop("app argument must be a module function or coercable by as.shiny.appobj")
   }
-
 
   isolate(
     withReactiveDomain(
       session,
       withr::with_options(list(`shiny.allowoutputreads` = TRUE), {
-        rlang::exec(app, ...)
+        rlang::exec(app, !!!args)
       })
     )
   )

@@ -37,6 +37,15 @@ createSessionProxy <- function(parentSession, ...) {
 `[[<-.session_proxy` <- `$<-.session_proxy`
 
 
+#' @noRd
+isMockSession <- function(session) {
+  if (inherits(session, "MockShinySession"))
+    return(TRUE)
+  if (inherits(session, "session_proxy"))
+    return(isMockSession(session$parent))
+  FALSE
+}
+
 #' Shiny modules
 #'
 #' Shiny's module feature lets you break complicated UI and server logic into
@@ -132,11 +141,13 @@ createSessionProxy <- function(parentSession, ...) {
 #'
 #' @export
 moduleServer <- function(id, module, session = getDefaultReactiveDomain()) {
-  if (inherits(session, "MockShinySession")) {
-    testCallModule(module, id, session)
-  } else {
-    callModule(module, id, session = session)
+  if (isMockSession(session)) {
+    body(module) <- rlang::expr({
+      session$setEnv(base::environment())
+      !!!body(module)
+    })
   }
+  callModule(module, id, session = session)
 }
 
 

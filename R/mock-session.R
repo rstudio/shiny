@@ -373,10 +373,10 @@ MockShinySession <- R6Class(
     #' @param export Not used
     #' @param format Not used
     getTestSnapshotUrl = function(input=TRUE, output=TRUE, export=TRUE, format="json") {},
-    #' @description Returns the given id prefixed by `mock-session-`.
+    #' @description Returns the given id prefixed by this namespace's id.
     #' @param id The id to modify.
     ns = function(id) {
-      paste0("mock-session-", id) # TODO: does this need to be more complex/intelligent?
+      NS(private$nsPrefix, id)
     },
     #' @description Trigger a reactive flush right now.
     flushReact = function(){
@@ -386,13 +386,30 @@ MockShinySession <- R6Class(
     #' @param namespace Character vector indicating a namespace.
     makeScope = function(namespace) {
       ns <- NS(namespace)
-      createSessionProxy(
+      env <- NULL
+      returned <- NULL
+      proxy <- createSessionProxy(
         self,
         input = .createReactiveValues(private$.input, readonly = TRUE, ns = ns),
         output = structure(.createOutputWriter(self, ns = ns), class = "shinyoutput"),
-        makeScope = function(namespace) self$makeScope(ns(namespace))
+        makeScope = function(namespace) self$makeScope(ns(namespace)),
+        getEnv <- function() env,
+        setEnv <- function(env) {
+          env <<- env
+        },
+        getReturned <- function() returned,
+        setReturned <- function(val) {
+          returned <<- val
+          private$flush()
+          val
+        }
       )
     },
+    getEnv = function() self$env,
+    setEnv = function(env) {
+      self$env <- env
+    },
+    getReturned = function() self$returned,
     # If assigning to `returned`, proactively flush
     #' @param value The value returned from the module
     setReturned = function(value) {
@@ -409,6 +426,7 @@ MockShinySession <- R6Class(
     timer = NULL,
     closed = FALSE,
     outs = list(),
+    nsPrefix = "",
 
     flush = function(){
       isolate(private$flushCBs$invoke(..stacktraceon = TRUE))

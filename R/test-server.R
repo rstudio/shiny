@@ -1,16 +1,17 @@
 #' @noRd
 testCallModule <- function(module, id, session) {
-  # TODO alan Figure out what to do with id here, necessary for nested usage?
   body(module) <- rlang::expr({
-    session$env <- base::environment()
+    session$setEnv(base::environment())
     !!!body(module)
   })
 
-  session$setReturned(do.call(module, list(
-    input = session$input,
-    output = session$output,
-    session = session
-  )))
+  childSession <- session$makeScope(id)
+
+  session$setReturned(module(
+    input = childSession$input,
+    output = childSession$output,
+    session = childSession
+  ))
 }
 
 # Create a "data mask" suitable for passing to rlang::eval_tidy. Bindings in
@@ -106,7 +107,7 @@ testServer <- function(app, expr, ...) {
     if (! "session" %in% names(formals(server)))
       stop("Tested application server functions must declare input, output, and session arguments.")
     body(server) <- rlang::expr({
-      session$env <- base::environment()
+      session$setEnv(base::environment())
       !!!body(server)
     })
     app <- function() {
@@ -131,7 +132,7 @@ testServer <- function(app, expr, ...) {
     withReactiveDomain(
       session,
       withr::with_options(list(`shiny.allowoutputreads`=TRUE), {
-        rlang::eval_tidy(quosure, makeMask(session$env), rlang::caller_env())
+        rlang::eval_tidy(quosure, makeMask(session$getEnv()), rlang::caller_env())
       })
     )
   )

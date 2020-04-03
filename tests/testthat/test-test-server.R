@@ -547,7 +547,11 @@ test_that("accessing a non-existent output gives an informative message", {
   }
 
   testServer(server, {
-    expect_error(output$dontexist, "hasn't been defined yet: output\\$dontexist")
+    expect_error(output$dontexist, "hasn't been defined yet: output\\$server1-dontexist")
+  }, id = "server1")
+
+  testServer(server, {
+    expect_error(output$dontexist, "hasn't been defined yet: output\\$.*-dontexist")
   })
 })
 

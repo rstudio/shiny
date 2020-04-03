@@ -513,11 +513,11 @@ test_that("testServer exposes the returned value from the module", {
 
   testServer(server, {
     session$setInputs(a=1, b=2)
-    expect_equal(session$returned(), 3)
+    expect_equal(session$getReturned()(), 3)
 
     # And retains reactivity
     session$setInputs(a=2)
-    expect_equal(session$returned(), 4)
+    expect_equal(session$getReturned()(), 4)
   })
 })
 
@@ -562,7 +562,7 @@ test_that("testServer returns a meaningful result", {
     })
   }, {
     session$setInputs(x = 2)
-    session$returned()
+    session$getReturned()()
   })
   expect_equal(result, 4)
 })

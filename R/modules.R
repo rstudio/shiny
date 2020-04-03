@@ -144,7 +144,7 @@ moduleServer <- function(id, module, session = getDefaultReactiveDomain()) {
   if (isMockSession(session)) {
     body(module) <- rlang::expr({
       session$setEnv(base::environment())
-      !!!body(module)
+      session$setReturned({ !!!body(module) })
     })
   }
   callModule(module, id, session = session)

@@ -83,8 +83,12 @@ coercableToAppObj <- function(x) {
 testServer <- function(app, expr, ...) {
 
   args <- rlang::list2(...)
-  session <- MockShinySession$new()
-  on.exit(if (!session$isClosed()) session$close())
+
+  session <- getDefaultReactiveDomain()
+  if (is.null(session)) {
+    session <- MockShinySession$new()
+    on.exit(if (!session$isClosed()) session$close())
+  }
 
   if (coercableToAppObj(app)) {
     appobj <- as.shiny.appobj(app)
@@ -102,7 +106,7 @@ testServer <- function(app, expr, ...) {
   } else if (isModuleServer(app)) {
     if (!("id" %in% names(args))) {
       # If an id was not provided, one is generated.
-      args[["id"]] <- shiny::createUniqueId(bytes = 4)
+      args[["id"]] <- session$genId()
     }
   } else {
     stop("app argument must be a module function or coercable by as.shiny.appobj")
@@ -118,6 +122,18 @@ testServer <- function(app, expr, ...) {
   )
 
   quosure <- rlang::enquo(expr)
+
+  # If app is a module server, we know that callModule() will be involved and
+  # will call session$makeScope(id). This is problematic for us because it means
+  # that `session` inside the module function will correspond to a proxy of the
+  # `session` in scope in this function, right now. To work around this, we rely
+  # on the fact that we know the `id` of the proxy. MockSession$makeScope()
+  # stores all the proxies it creates by name in a fastmap, so we can find the
+  # proxy we need by looking for the one with the id we have now.
+  if (isModuleServer(app)) {
+    session <- session$getProxy(args[["id"]])
+  }
+
   isolate(
     withReactiveDomain(
       session,

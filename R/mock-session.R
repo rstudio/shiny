@@ -404,29 +404,36 @@ MockShinySession <- R6Class(
         output = structure(.createOutputWriter(self, ns = ns), class = "shinyoutput"),
         makeScope = function(namespace) self$makeScope(ns(namespace)),
         ns = ns,
-        getEnv <- function() env,
-        setEnv <- function(env) env <<- env,
-        getReturned <- function() returned,
-        setReturned <- function(val) {
+        getEnv = function() env,
+        setEnv = function(env) env <<- env,
+        setReturned = function(val) {
           returned <<- val
           private$flush()
           val
         },
+        getReturned = function() returned,
         setInputs = function(...) do.call(self$setInputs, mapNames(ns, ...))
       )
+      private$proxies$set(namespace, proxy)
       proxy
     },
     getEnv = function() self$env,
     setEnv = function(env) {
       self$env <- env
     },
-    getReturned = function() self$returned,
     # If assigning to `returned`, proactively flush
     #' @param value The value returned from the module
     setReturned = function(value) {
       self$returned <- value
       private$flush()
       value
+    },
+    getReturned = function() self$returned,
+    genId = function() {
+      paste0("proxy", (private$proxyCounter <- private$proxyCounter+1))
+    },
+    getProxy = function(namespace) {
+      private$proxies$get(namespace)
     }
   ),
   private = list(
@@ -438,6 +445,8 @@ MockShinySession <- R6Class(
     closed = FALSE,
     outs = list(),
     nsPrefix = "mock-session",
+    proxyCounter = 0,
+    proxies = fastmap::fastmap(),
 
     flush = function(){
       isolate(private$flushCBs$invoke(..stacktraceon = TRUE))

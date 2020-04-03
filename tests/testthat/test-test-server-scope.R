@@ -41,7 +41,7 @@ test_that("Variables outside the testServer() have correct visibility", {
   }, x = 0)
 })
 
-test_that("testServer allows lexical environment access through session$env", {
+test_that("testServer allows lexical environment access through session$getEnv()", {
   server <- local({
     a_var <- 123
     function(id) {
@@ -55,7 +55,7 @@ test_that("testServer allows lexical environment access through session$env", {
 
   testServer(server, {
     expect_equal(b_var, 321)
-    expect_equal(get("a_var", session$env), 123)
+    expect_equal(get("a_var", session$getEnv()), 123)
   })
 })
 

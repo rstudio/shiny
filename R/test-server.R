@@ -16,11 +16,6 @@ isModuleServer <- function(x) {
   is.function(x) && names(formals(x))[1] == "id"
 }
 
-#' @noRd
-coercableToAppObj <- function(x) {
-  !is.null(getS3method("as.shiny.appobj", class(x), optional = TRUE))
-}
-
 #' Reactive testing for Shiny server functions and modules
 #'
 #' A way to test the reactive interactions in Shiny applications. Reactive
@@ -85,12 +80,20 @@ testServer <- function(app, expr, ...) {
   args <- rlang::list2(...)
 
   session <- getDefaultReactiveDomain()
-  if (is.null(session)) {
-    session <- MockShinySession$new()
-    on.exit(if (!session$isClosed()) session$close())
-  }
 
-  if (coercableToAppObj(app)) {
+  if (inherits(session, "MockShinySession"))
+    stop("Test expressions may not call testServer()")
+  if (inherits(session, "session_proxy")
+      && inherits(get("parent", envir = session), "MockShinySession"))
+    stop("Modules may not call testServer()")
+
+  session <- MockShinySession$new()
+  on.exit(if (!session$isClosed()) session$close())
+
+  if (isModuleServer(app)) {
+    if (!("id" %in% names(args)))
+      args[["id"]] <- session$genId()
+  } else {
     appobj <- as.shiny.appobj(app)
     server <- appobj$serverFuncSource()
     if (! "session" %in% names(formals(server)))
@@ -102,14 +105,8 @@ testServer <- function(app, expr, ...) {
     app <- function() {
       session$setReturned(server(input = session$input, output = session$output, session = session))
     }
-    if (length(args)) message("Discarding unused arguments to server function")
-  } else if (isModuleServer(app)) {
-    if (!("id" %in% names(args))) {
-      # If an id was not provided, one is generated.
-      args[["id"]] <- session$genId()
-    }
-  } else {
-    stop("app argument must be a module function or coercable by as.shiny.appobj")
+    if (length(args))
+      message("Discarding unused arguments to server function")
   }
 
   isolate(
@@ -122,17 +119,6 @@ testServer <- function(app, expr, ...) {
   )
 
   quosure <- rlang::enquo(expr)
-
-  # If app is a module server, we know that callModule() will be involved and
-  # will call session$makeScope(id). This is problematic for us because it means
-  # that `session` inside the module function will correspond to a proxy of the
-  # `session` in scope in this function, right now. To work around this, we rely
-  # on the fact that we know the `id` of the proxy. MockSession$makeScope()
-  # stores all the proxies it creates by name in a fastmap, so we can find the
-  # proxy we need by looking for the one with the id we have now.
-  if (isModuleServer(app)) {
-    session <- session$getProxy(args[["id"]])
-  }
 
   isolate(
     withReactiveDomain(

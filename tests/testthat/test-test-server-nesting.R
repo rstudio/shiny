@@ -56,24 +56,34 @@ test_that("testServer works with nested module servers", {
   }, id = "foo")
 })
 
-test_that("testServer calls can be nested", {
-
-  outerServer <- function(id) {
+test_that("testServer calls do not nest in module functions", {
+  server <- function(id) {
     moduleServer(id, function(input, output, session) {
-      doubled <- reactive({ input$x * 2 })
-      innerServer <- function(id) {
+      x <- 1
+      testServer(function(id) {
         moduleServer(id, function(input, output, session) {
-          quadrupled <- reactive({ doubled() * 2 })
+          y <- x + 1
+        })
+      })
+    })
+  }
+
+  expect_error(testServer(server, {}), regexp = "Modules may not call testServer()")
+})
+
+test_that("testServer calls do not nest in test exprs", {
+  server <- function(id) {
+    x <- 1
+    moduleServer(id, function(input, output, session) {
+      inner <- function(id) {
+        moduleServer(id, function(input, output, session) {
+          y <- x + 1
         })
       }
     })
   }
 
-  testServer(outerServer, {
-    session$setInputs(x = 1)
-    expect_equal(doubled(), 2)
-    testServer(innerServer, {
-      expect_equal(quadrupled(), 4)
-    })
-  })
+  expect_error(testServer(server, {
+    testServer(inner, {})
+  }), regexp = "Test expressions may not call testServer()")
 })

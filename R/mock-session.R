@@ -396,29 +396,19 @@ MockShinySession <- R6Class(
     #' @param namespace Character vector indicating a namespace.
     makeScope = function(namespace) {
       ns <- NS(namespace)
-      env <- NULL
       returned <- NULL
-      proxy <- createSessionProxy(
+      createSessionProxy(
         self,
         input = .createReactiveValues(private$.input, readonly = TRUE, ns = ns),
         output = structure(.createOutputWriter(self, ns = ns), class = "shinyoutput"),
         makeScope = function(namespace) self$makeScope(ns(namespace)),
-        ns = ns,
-        getEnv = function() env,
-        setEnv = function(env) env <<- env,
-        setReturned = function(val) {
-          returned <<- val
-          private$flush()
-          val
-        },
-        getReturned = function() returned,
+        ns = function(namespace) ns(namespace),
         setInputs = function(...) do.call(self$setInputs, mapNames(ns, ...))
       )
-      private$proxies$set(namespace, proxy)
-      proxy
     },
     getEnv = function() self$env,
     setEnv = function(env) {
+      stopifnot(is.null(self$env))
       self$env <- env
     },
     # If assigning to `returned`, proactively flush
@@ -430,10 +420,7 @@ MockShinySession <- R6Class(
     },
     getReturned = function() self$returned,
     genId = function() {
-      paste0("proxy", (private$proxyCounter <- private$proxyCounter+1))
-    },
-    getProxy = function(namespace) {
-      private$proxies$get(namespace)
+      paste0("proxy", (private$idCounter <- private$idCounter + 1))
     }
   ),
   private = list(
@@ -445,8 +432,7 @@ MockShinySession <- R6Class(
     closed = FALSE,
     outs = list(),
     nsPrefix = "mock-session",
-    proxyCounter = 0,
-    proxies = fastmap::fastmap(),
+    idCounter = 0,
 
     flush = function(){
       isolate(private$flushCBs$invoke(..stacktraceon = TRUE))

@@ -406,9 +406,7 @@ MockShinySession <- R6Class(
         setInputs = function(...) do.call(self$setInputs, mapNames(ns, ...))
       )
     },
-    getEnv = function() self$env,
     setEnv = function(env) {
-      stopifnot(is.null(self$env))
       self$env <- env
     },
     # If assigning to `returned`, proactively flush

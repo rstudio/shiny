@@ -31,7 +31,8 @@ isModuleServer <- function(x) {
 #'   along with any other values created inside of the server function.
 #' @param ... Additional arguments to pass to the module function. These
 #'   arguments are processed with [rlang::list2()] and so are
-#'   _[dynamic][rlang::dyn-dots]_.
+#'   _[dynamic][rlang::dyn-dots]_. If `app` is a module, and no `id` argument is
+#'   provided, one will be generated and supplied automatically.
 #' @return The result of evaluating `expr`.
 #' @include mock-session.R
 #' @rdname testServer
@@ -47,8 +48,6 @@ isModuleServer <- function(x) {
 #'   })
 #' }
 #'
-#' # Basic Usage
-#' # -----------
 #' testServer(server, {
 #'   session$setInputs(x = 1)
 #'   # You're also free to use third-party
@@ -62,18 +61,6 @@ isModuleServer <- function(x) {
 #'   stopifnot(output$txt == "I am 4")
 #'   # Any additional arguments, below, are passed along to the module.
 #' }, multiplier = 2)
-#'
-#' # Advanced Usage
-#' # --------------
-#' multiplier_arg_name = "multiplier"
-#' more_args <- list(prefix = "I am ")
-#' testServer(server, {
-#'   session$setInputs(x = 1)
-#'   stopifnot(myreactive() == 2)
-#'   stopifnot(output$txt == "I am 2")
-#'   # !!/:= and !!! from rlang are used below to splice computed arguments
-#'   # into the testModule() argument list.
-#' }, !!multiplier_arg_name := 2, !!!more_args)
 #' @export
 testServer <- function(app, expr, ...) {
 
@@ -123,8 +110,8 @@ testServer <- function(app, expr, ...) {
   isolate(
     withReactiveDomain(
       session,
-      withr::with_options(list(`shiny.allowoutputreads`=TRUE), {
-        rlang::eval_tidy(quosure, makeMask(session$getEnv()), rlang::caller_env())
+      withr::with_options(list(`shiny.allowoutputreads` = TRUE), {
+        rlang::eval_tidy(quosure, makeMask(session$env), rlang::caller_env())
       })
     )
   )

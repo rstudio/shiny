@@ -1,3 +1,28 @@
+#' Creates and returns run result data frame.
+#'
+#' @param file Name of the test runner file, a character vector of length 1.
+#' @param pass Whether or not the test passed, a logical vector of length 1.
+#' @param result Value (wrapped in a list) obtained by evaluating `file` or `NA`
+#'   if no value was obtained, such as with `shinytest`.
+#' @param error Error, if any, (and wrapped in a list) that was signaled during
+#'   evaluation of `file`.
+#'
+#' @return A 1-row data frame representing a single test run. `result` and
+#'   `error` are "list columns", or columns that may contain list elements.
+#' @noRd
+result_row <- function(file, pass, result, error) {
+  stopifnot(is.list(result))
+  stopifnot(is.list(error))
+  df <- data.frame(
+    file = file,
+    pass = pass,
+    result = I(result),
+    error = I(error),
+    stringsAsFactors = FALSE
+  )
+  class(df) <- c("shinytestrun", class(df))
+  df
+}
 
 #' Check to see if the given text is a shinytest
 #' Scans for the magic string of `app <- ShinyDriver$new(` as an indicator that this is a shinytest.
@@ -19,6 +44,16 @@ isShinyTest <- function(text){
 #'   expression will be executed. Matching is performed on the file name
 #'   including the extension.
 #'
+#' @return A data frame classed with the supplemental class `"shinytestrun"`.
+#'   The data frame has the following columns:
+#'
+#' | **Name** | **Type** | **Meaning** |
+#' | :-- | :-- | :-- |
+#' | `file` | `character(1)` | File name of the runner script in `tests/` that was sourced. |
+#' | `pass` | `logical(1)` | Whether or not the runner script signaled an error when sourced. |
+#' | `result` | any or `NA` | The return value of the runner, or `NA` if `pass == FALSE`. |
+#' | `error` | any or `NA` | The error signaled by the runner, or `NA` if `pass == TRUE`. |
+#'
 #' @details Historically, [shinytest](https://rstudio.github.io/shinytest/)
 #'   recommended placing tests at the top-level of the `tests/` directory. In
 #'   order to support that model, `testApp` first checks to see if the `.R`
@@ -36,7 +71,7 @@ runTests <- function(appDir=".", filter=NULL){
 
   if (length(runners) == 0){
     message("No test runners found in ", testsDir)
-    return(structure(list(result=NA, files=list()), class="shinytestrun"))
+    return(result_row(character(0), logical(0), list(), list()))
   }
 
   if (!is.null(filter)){
@@ -52,6 +87,7 @@ runTests <- function(appDir=".", filter=NULL){
     isShinyTest(text)
   }, logical(1))
 
+  # See the @details section of the runTests() docs above for why this branch exists.
   if (all(isST)){
     # just call out to shinytest
     # We don't need to message/warn here since shinytest already does it.
@@ -64,16 +100,10 @@ runTests <- function(appDir=".", filter=NULL){
       warning("You've disabled `shiny.autoload.r` via an option but this is not passed through to shinytest. Consider using a _disable_autoload.R file as described at https://rstd.io/shiny-autoload")
     }
 
-    sares <- shinytest::testApp(appDir)
-    res <- list()
-    lapply(sares$results, function(r){
-      e <- NA_character_
-      if (!r$pass){
-        e <- simpleError("Unknown shinytest error")
-      }
-      res[[r$name]] <<- e
-    })
-    return(structure(list(result=all(is.na(res)), files=res), class="shinytestrun"))
+    return(do.call(rbind, lapply(shinytest::testApp(appDir)[["results"]], function(r) {
+      error <- if (r[["pass"]]) NA else simpleError("Unknown shinytest error")
+      result_row(r[["name"]], r[["pass"]], list(NA), list(error))
+    })))
   }
 
   testenv <- new.env(parent=globalenv())
@@ -95,13 +125,17 @@ runTests <- function(appDir=".", filter=NULL){
   setwd(testsDir)
 
   # Otherwise source all the runners -- each in their own environment.
-  fileResults <- list()
-  lapply(runners, function(r){
-    env <- new.env(parent=renv)
-    tryCatch({sourceUTF8(r, envir=env); fileResults[[r]] <<- NA_character_}, error=function(e){
-      fileResults[[r]] <<- e
+  return(do.call(rbind, lapply(runners, function(r) {
+    result <- NA
+    error <- NA
+    pass <- FALSE
+    tryCatch({
+      env <- new.env(parent = renv)
+      result <- sourceUTF8(r, envir = env)
+      pass <- TRUE
+    }, error = function(e) {
+      error <<- e
     })
-  })
-
-  return(structure(list(result=all(is.na(fileResults)), files=fileResults), class="shinytestrun"))
+    result_row(r, pass, list(result), list(error))
+  })))
 }

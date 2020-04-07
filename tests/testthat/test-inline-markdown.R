@@ -28,4 +28,42 @@ test_that("Additional options are respected", {
 })
 
 test_that("Multiline markdown works properly", {
+  essay <- "
+   # The [Louisiana Purchase](https://en.wikipedia.org/wiki/Louisiana_Purchase)
+   
+   Larry Sellers
+   Mrs. Jamtoss
+   History Period 4
+
+   ## Introduction
+
+   The most important purchase in history is the Lousiana
+   Purchase. It was also the most important evente. It
+   happened in President Jeffersons 1st administration.
+   Its when the United States bought 827,987 square miles
+   of lande from the French guys.
+
+   The end."
+
+  # Ensure markdown string contains leading whitespace, which might be removed
+  # by some editors. We care about it here to ensure blank are ignored in the
+  # conversion to markdown. The line being tested here is the one after the one
+  # that starts with "   # The [Louis...". It should contain three spaces.
+  expect_equal(strsplit(essay, "\n")[[1]][[3]], "   ")
+
+  expected <- HTML(paste0(c(
+    "<h1>The <a href=\"https://en.wikipedia.org/wiki/Louisiana_Purchase\">Louisiana Purchase</a></h1>",
+    "<p>Larry Sellers",
+    "Mrs. Jamtoss",
+    "History Period 4</p>",
+    "<h2>Introduction</h2>",
+    "<p>The most important purchase in history is the Lousiana",
+    "Purchase. It was also the most important evente. It",
+    "happened in President Jeffersons 1st administration.",
+    "Its when the United States bought 827,987 square miles",
+    "of lande from the French guys.</p>",
+    "<p>The end.</p>",
+    ""
+  ), collapse = "\n"))
+  expect_equivalent(markdown(essay), expected)
 })

@@ -406,17 +406,22 @@ MockShinySession <- R6Class(
         setInputs = function(...) do.call(self$setInputs, mapNames(ns, ...))
       )
     },
+    #' @description Set the environment associated with a testServer() call.
+    #' @param env The environment to retain.
     setEnv = function(env) {
       self$env <- env
     },
-    # If assigning to `returned`, proactively flush
+    #' @description Set the value returned by the module call and proactively flush.
     #' @param value The value returned from the module
     setReturned = function(value) {
       self$returned <- value
       private$flush()
       value
     },
+    #' @description Get the value returned by the module call.
     getReturned = function() self$returned,
+    #' @description Return a distinct character identifier for use as a proxy
+    #'   namespace.
     genId = function() {
       paste0("proxy", (private$idCounter <- private$idCounter + 1))
     }

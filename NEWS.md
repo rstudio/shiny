@@ -7,6 +7,10 @@ shiny 1.4.0.9001
 
 ### New features
 
+* `runTests()` is a new function that behaves much like R CMD check. `runTests()` invokes all of the top-level R files in the tests/ directory inside an application, in that application's environment. ([#2585](https://github.com/rstudio/shiny/pull/2585))
+
+* `testServer()` and `testModule()` are two new functions for testing reactive behavior inside server functions and modules, respectively. ([#2682](https://github.com/rstudio/shiny/pull/2682), [#2764](https://github.com/rstudio/shiny/pull/2764))
+
 * The new `moduleServer` function provides a simpler interface for creating and using modules. ([#2773](https://github.com/rstudio/shiny/pull/2773))
 
 ### Minor new features and improvements
@@ -19,6 +23,8 @@ shiny 1.4.0.9001
 
 * `getDefaultReactiveDomain()` can now be called inside a `session$onSessionEnded` callback and will return the calling `session` information. ([#2757](https://github.com/rstudio/shiny/pull/2757))
 
+* Added a `'function'` class to `reactive()` and `reactiveVal()` objects. ([#2793](https://github.com/rstudio/shiny/pull/2793))
+
 ### Bug fixes
 
 * Fixed [#2606](https://github.com/rstudio/shiny/issues/2606): `debounce()` would not work properly if the code in the reactive expression threw an error on the first run. ([#2652](https://github.com/rstudio/shiny/pull/2652))
@@ -26,6 +32,18 @@ shiny 1.4.0.9001
 * Fixed [#2653](https://github.com/rstudio/shiny/issues/2653): The `dataTableOutput()` could have incorrect output if certain characters were in the column names. ([#2658](https://github.com/rstudio/shiny/pull/2658))
 
 ### Documentation Updates
+
+
+shiny 1.4.0.2
+===========
+
+Minor patch release: fixed some timing-dependent tests failed intermittently on CRAN build machines.
+
+
+shiny 1.4.0.1
+===========
+
+Minor patch release to account for changes to the grid package that will be upcoming in the R 4.0 release ([#2776](https://github.com/rstudio/shiny/pull/2776)).
 
 
 shiny 1.4.0

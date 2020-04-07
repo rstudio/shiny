@@ -80,7 +80,6 @@ extract <- function(promise) {
 MockShinySession <- R6Class(
   'MockShinySession',
   portable = FALSE,
-  class = FALSE,
   public = list(
     #' @field env The environment associated with the session.
     env = NULL,

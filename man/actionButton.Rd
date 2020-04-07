@@ -43,7 +43,7 @@ if (interactive()) {
 
 ui <- fluidPage(
   sliderInput("obs", "Number of observations", 0, 1000, 500),
-  actionButton("goButton", "Go!"),
+  actionButton("goButton", "Go!", class = "btn-success"),
   plotOutput("distPlot")
 )
 
@@ -62,6 +62,10 @@ server <- function(input, output) {
 shinyApp(ui, server)
 
 }
+
+## Example of adding extra class values
+actionButton("largeButton", "Large Primary Button", class = "btn-primary btn-lg")
+actionLink("infoLink", "Information Link", class = "btn-info")
 
 }
 \seealso{

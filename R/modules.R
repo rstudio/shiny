@@ -44,8 +44,9 @@ createSessionProxy <- function(parentSession, ...) {
 #' modules are easier to reuse and easier to reason about. See the article at
 #' <http://shiny.rstudio.com/articles/modules.html> to learn more.
 #'
-#' Starting in Shiny 1.5.0, we recommend using `moduleFunction` instead of
-#' `callModule`, because syntax is a little easier to understand.
+#' Starting in Shiny 1.5.0, we recommend using `moduleServer` instead of
+#' `callModule`, because the syntax is a little easier to understand, and
+#' modules created with `moduleServer` can be tested with [`testServer()`].
 #'
 #' @param module A Shiny module server function.
 #' @param id An ID string that corresponds with the ID used to call the module's
@@ -70,16 +71,19 @@ createSessionProxy <- function(parentSession, ...) {
 #'
 #' # Define the server logic for a module
 #' counterServer <- function(id) {
-#'   moduleServer(id, function(input, output, session) {
-#'     count <- reactiveVal(0)
-#'     observeEvent(input$button, {
-#'       count(count() + 1)
-#'     })
-#'     output$out <- renderText({
-#'       count()
-#'     })
-#'     count
-#'   })
+#'   moduleServer(
+#'     id,
+#'     function(input, output, session) {
+#'       count <- reactiveVal(0)
+#'       observeEvent(input$button, {
+#'         count(count() + 1)
+#'       })
+#'       output$out <- renderText({
+#'         count()
+#'       })
+#'       count
+#'     }
+#'   )
 #' }
 #'
 #' # Use the module in an app
@@ -91,7 +95,9 @@ createSessionProxy <- function(parentSession, ...) {
 #'   counterServer("counter1")
 #'   counterServer("counter2")
 #' }
-#' shinyApp(ui, server)
+#' if (interactive()) {
+#'   shinyApp(ui, server)
+#' }
 #'
 #'
 #'
@@ -99,16 +105,19 @@ createSessionProxy <- function(parentSession, ...) {
 #' # add them to your function. In this case `prefix` is text that will be
 #' # printed before the count.
 #' counterServer2 <- function(id, prefix = NULL) {
-#'   moduleServer(id, function(input, output, session) {
-#'     count <- reactiveVal(0)
-#'     observeEvent(input$button, {
-#'       count(count() + 1)
-#'     })
-#'     output$out <- renderText({
-#'       paste0(prefix, count())
-#'     })
-#'     count
-#'   })
+#'   moduleServer(
+#'     id,
+#'     function(input, output, session) {
+#'       count <- reactiveVal(0)
+#'       observeEvent(input$button, {
+#'         count(count() + 1)
+#'       })
+#'       output$out <- renderText({
+#'         paste0(prefix, count())
+#'       })
+#'       count
+#'     }
+#'   )
 #' }
 #'
 #' ui <- fluidPage(
@@ -117,7 +126,9 @@ createSessionProxy <- function(parentSession, ...) {
 #' server <- function(input, output, session) {
 #'   counterServer2("counter", "The current count is: ")
 #' }
-#' shinyApp(ui, server)
+#' if (interactive()) {
+#'   shinyApp(ui, server)
+#' }
 #'
 #' @export
 moduleServer <- function(id, module, session = getDefaultReactiveDomain()) {
@@ -128,7 +139,7 @@ moduleServer <- function(id, module, session = getDefaultReactiveDomain()) {
 #' @rdname moduleServer
 #' @export
 callModule <- function(module, id, ..., session = getDefaultReactiveDomain()) {
-  if (!inherits(session, "ShinySession") && !inherits(session, "session_proxy")) {
+  if (!inherits(session, c("ShinySession", "session_proxy", "MockShinySession"))) {
     stop("session must be a ShinySession or session_proxy object.")
   }
   childScope <- session$makeScope(id)

@@ -83,7 +83,10 @@ s$setInputs(x=1, y=2)
 \item \href{#method-ns}{\code{MockShinySession$ns()}}
 \item \href{#method-flushReact}{\code{MockShinySession$flushReact()}}
 \item \href{#method-makeScope}{\code{MockShinySession$makeScope()}}
+\item \href{#method-setEnv}{\code{MockShinySession$setEnv()}}
 \item \href{#method-setReturned}{\code{MockShinySession$setReturned()}}
+\item \href{#method-getReturned}{\code{MockShinySession$getReturned()}}
+\item \href{#method-genId}{\code{MockShinySession$genId()}}
 \item \href{#method-clone}{\code{MockShinySession$clone()}}
 }
 }
@@ -628,7 +631,7 @@ No-op
 \if{html}{\out{<a id="method-ns"></a>}}
 \if{latex}{\out{\hypertarget{method-ns}{}}}
 \subsection{Method \code{ns()}}{
-Returns the given id prefixed by \verb{mock-session-}.
+Returns the given id prefixed by this namespace's id.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{MockShinySession$ns(id)}\if{html}{\out{</div>}}
 }
@@ -669,9 +672,27 @@ Create and return a namespace-specific session proxy.
 }
 }
 \if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-setEnv"></a>}}
+\if{latex}{\out{\hypertarget{method-setEnv}{}}}
+\subsection{Method \code{setEnv()}}{
+Set the environment associated with a testServer() call.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{MockShinySession$setEnv(env)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{env}}{The environment to retain.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-setReturned"></a>}}
 \if{latex}{\out{\hypertarget{method-setReturned}{}}}
 \subsection{Method \code{setReturned()}}{
+Set the value returned by the module call and proactively flush.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{MockShinySession$setReturned(value)}\if{html}{\out{</div>}}
 }
@@ -683,6 +704,27 @@ Create and return a namespace-specific session proxy.
 }
 \if{html}{\out{</div>}}
 }
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-getReturned"></a>}}
+\if{latex}{\out{\hypertarget{method-getReturned}{}}}
+\subsection{Method \code{getReturned()}}{
+Get the value returned by the module call.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{MockShinySession$getReturned()}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-genId"></a>}}
+\if{latex}{\out{\hypertarget{method-genId}{}}}
+\subsection{Method \code{genId()}}{
+Return a distinct character identifier for use as a proxy
+namespace.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{MockShinySession$genId()}\if{html}{\out{</div>}}
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-clone"></a>}}

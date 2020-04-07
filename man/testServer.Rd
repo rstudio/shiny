@@ -19,7 +19,8 @@ along with any other values created inside of the server function.}
 
 \item{...}{Additional arguments to pass to the module function. These
 arguments are processed with \code{\link[rlang:list2]{rlang::list2()}} and so are
-\emph{\link[rlang:dyn-dots]{dynamic}}.}
+\emph{\link[rlang:dyn-dots]{dynamic}}. If \code{app} is a module, and no \code{id} argument is
+provided, one will be generated and supplied automatically.}
 }
 \value{
 The result of evaluating \code{expr}.
@@ -41,8 +42,6 @@ server <- function(id, multiplier = 2, prefix = "I am ") {
   })
 }
 
-# Basic Usage
-# -----------
 testServer(server, {
   session$setInputs(x = 1)
   # You're also free to use third-party
@@ -56,16 +55,4 @@ testServer(server, {
   stopifnot(output$txt == "I am 4")
   # Any additional arguments, below, are passed along to the module.
 }, multiplier = 2)
-
-# Advanced Usage
-# --------------
-multiplier_arg_name = "multiplier"
-more_args <- list(prefix = "I am ")
-testServer(server, {
-  session$setInputs(x = 1)
-  stopifnot(myreactive() == 2)
-  stopifnot(output$txt == "I am 2")
-  # !!/:= and !!! from rlang are used below to splice computed arguments
-  # into the testModule() argument list.
-}, !!multiplier_arg_name := 2, !!!more_args)
 }

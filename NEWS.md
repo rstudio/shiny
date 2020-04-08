@@ -13,7 +13,7 @@ shiny 1.4.0.9001
 
 * The new `moduleServer` function provides a simpler interface for creating and using modules. ([#2773](https://github.com/rstudio/shiny/pull/2773))
 
-* `markdown()` is a new function for writing Markdown with Github extensions directly in Shiny UIs. Markdown rendering is performed by the [commonmark](https://github.com/jeroen/commonmark) package. ([#2737](https://github.com/rstudio/shiny/pull/2737))
+* Resolved [#2732](https://github.com/rstudio/shiny/issues/2732): `markdown()` is a new function for writing Markdown with Github extensions directly in Shiny UIs. Markdown rendering is performed by the [commonmark](https://github.com/jeroen/commonmark) package. ([#2737](https://github.com/rstudio/shiny/pull/2737))
 
 ### Minor new features and improvements
 

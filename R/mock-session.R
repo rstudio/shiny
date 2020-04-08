@@ -419,7 +419,8 @@ MockShinySession <- R6Class(
     #' @description Return a distinct character identifier for use as a proxy
     #'   namespace.
     genId = function() {
-      paste0("proxy", (private$idCounter <- private$idCounter + 1))
+      private$idCounter <- private$idCounter + 1
+      paste0("proxy", private$idCounter)
     }
   ),
   private = list(

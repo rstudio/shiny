@@ -2,9 +2,12 @@
 % Please edit documentation in R/update-input.R
 \name{updateActionButton}
 \alias{updateActionButton}
+\alias{updateActionLink}
 \title{Change the label or icon of an action button on the client}
 \usage{
 updateActionButton(session, inputId, label = NULL, icon = NULL)
+
+updateActionLink(session, inputId, label = NULL, icon = NULL)
 }
 \arguments{
 \item{session}{The \code{session} object passed to function given to
@@ -42,13 +45,15 @@ can be cleared by using \code{selected=character(0)}.
 if (interactive()) {
 
 ui <- fluidPage(
-  actionButton("update", "Update other buttons"),
+  actionButton("update", "Update other buttons and link"),
   br(),
   actionButton("goButton", "Go"),
   br(),
   actionButton("goButton2", "Go 2", icon = icon("area-chart")),
   br(),
-  actionButton("goButton3", "Go 3")
+  actionButton("goButton3", "Go 3"),
+  br(),
+  actionLink("goLink", "Go Link")
 )
 
 server <- function(input, output, session) {
@@ -69,6 +74,11 @@ server <- function(input, output, session) {
     # unchaged and changes its label
     updateActionButton(session, "goButton3",
       label = "New label 3")
+
+    # Updates goLink's label and icon
+    updateActionButton(session, "goLink",
+      label = "New link label",
+      icon = icon("link"))
   })
 }
 

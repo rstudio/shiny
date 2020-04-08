@@ -72,10 +72,7 @@ extract <- function(promise) {
 #' @noRd
 mapNames <- function(func, ...) {
   vals <- list(...)
-  for (name in names(vals)) {
-    vals[[func(name)]] <- vals[[name]]
-    vals[[name]] <- NULL
-  }
+  names(vals) <- vapply(names(vals), func, character(1))
   vals
 }
 

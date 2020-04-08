@@ -402,8 +402,8 @@ MockShinySession <- R6Class(
         setInputs = function(...) do.call(self$setInputs, mapNames(ns, ...))
       )
     },
-    #' @description Set the environment associated with a testServer() call.
-    #' @param env The environment to retain.
+    #' @description Clone the environment associated with a testServer() call.
+    #' @param env The environment to clone and retain.
     setEnv = function(env) {
       self$env <- env
     },

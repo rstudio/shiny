@@ -393,7 +393,6 @@ MockShinySession <- R6Class(
     #' @param namespace Character vector indicating a namespace.
     makeScope = function(namespace) {
       ns <- NS(namespace)
-      returned <- NULL
       createSessionProxy(
         self,
         input = .createReactiveValues(private$.input, readonly = TRUE, ns = ns),

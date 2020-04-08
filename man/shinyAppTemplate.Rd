@@ -2,25 +2,20 @@
 % Please edit documentation in R/app_template.R
 \name{shinyAppTemplate}
 \alias{shinyAppTemplate}
-\title{Generate a Shiny application template}
+\title{Generate a Shiny application from a template}
 \usage{
-shinyAppTemplate(
-  path = NULL,
-  ...,
-  examples = TRUE,
-  quiet = FALSE,
-  interactive = base::interactive()
-)
+shinyAppTemplate(path = NULL, examples = "default")
 }
 \arguments{
 \item{path}{Path to create new shiny application template.}
 
-\item{examples}{Should the new path include example code? Defaults to \code{TRUE}.}
-
-\item{quiet}{Should status information be printed? Defaults to \code{FALSE}.}
-
-\item{interactive}{If \code{TRUE}, the user may be asked questions and prompted
-for a response.}
+\item{examples}{Either one of "default", "ask", "all", or any combination of
+"app", "rdir", "module", "shinytest", "testthat", and "server". In an
+interactive session, "default" falls back to "ask"; in a non-interactive
+session, "default" falls back to "all". With "ask", this function will
+prompt the user to select which template items will be added to the new app
+directory. With "all", all template items will be added to the app
+directory.}
 }
 \description{
 This function populates a directory with files for a Shiny application. They
@@ -28,21 +23,26 @@ are based off of the "12_counter" example which can be run with
 \code{runExample()}.
 }
 \details{
-The example application includes the following files and directories:\preformatted{appdir/
+In an interactive R session, this function will, by default, prompt the user
+which components to add to the application.
+
+The full example application includes the following files and directories:\preformatted{appdir/
 ├── app.R
 ├── R
-│   └── counter-module.R
+│   ├── my-module.R
+│   └── utils.R
 └── tests
-    ├── integration.R
-    ├── integration
-    │   └── test-counter.R
+    ├── server.R
+    ├── server
+    │   ├── test-mymodule.R
+    │   └── test-server.R
     ├── shinytest.R
     ├── shinytest
     │   └── mytest.R
     ├── testthat.R
     └── testthat
         ├── helper-load.R
-        └── test-counter.R
+        └── test-utils.R
 }
 
 Some notes about these files:
@@ -50,15 +50,15 @@ Some notes about these files:
 \item app.R is the main application file.
 \item All files in the R/ subdirectory are automatically sourced when the
 application is run.
-\item The R/counter-module.R file is automatically sourced when the application
+\item The R/my-module.R file is automatically sourced when the application
 is run. This file contains code for a \href{moduleServer()}{Shiny module} which
 is used in the application.
 \item The tests/ directory contains various tests for the application. You may
 choose to use or remove any of them. They can be executed by the
 \code{\link[=runTests]{runTests()}} function.
-\item tests/integration.R is a test runner for test files in the
-tests/integration/ directory.
-\item tests/integration/test-counter.R is a test for the counter module.
+\item tests/server.R is a test runner for test files in
+tests/server/.
+\item tests/server/test-mymodule.R is a test for the module.
 \item tests/shinytest.R is a test runner for test files in the
 tests/shinytest/ directory.
 \item tests/shinytest/mytest.R is a test that uses the
@@ -66,10 +66,10 @@ tests/shinytest/ directory.
 snapshot-based testing.
 \item tests/testthat.R is a test runner for test files in the
 tests/testthat/ directory.
-\item tests/testthat/test-counter.R is a set of tests that use the
-\href{https://testthat.r-lib.org/}{testthat} package for testing.
 \item tests/testthat/helper-load.R is a helper script that is automatically
 loaded before running test-counter.R. (This is performed by the testthat
 package.)
+\item tests/testthat/test-utils.R is a set of tests that use the
+\href{https://testthat.r-lib.org/}{testthat} package for testing.
 }
 }

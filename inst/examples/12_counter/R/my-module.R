@@ -1,4 +1,4 @@
-counterUI <- function(id, label = "Counter") {
+mymoduleUI <- function(id, label = "Counter") {
   ns <- NS(id)
   tagList(
     actionButton(ns("button"), label = label),
@@ -6,7 +6,7 @@ counterUI <- function(id, label = "Counter") {
   )
 }
 
-counterServer <- function(id) {
+mymoduleServer <- function(id) {
   moduleServer(
     id,
     function(input, output, session) {

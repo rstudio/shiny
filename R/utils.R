@@ -1821,3 +1821,20 @@ cat_line <- function(...) {
   cat(paste(..., "\n", collapse = ""))
 }
 
+select_menu <- function(choices, title = NULL, msg = "Enter one or more numbers (with spaces), or an empty line to exit: \n") 
+{
+  if (!is.null(title)) {
+    cat(title, "\n", sep = "")
+  }
+  nc <- length(choices)
+  op <- paste0(format(seq_len(nc)), ": ", choices)
+  fop <- format(op)
+  cat("", fop, "", sep = "\n")
+  repeat {
+    answer <- readline(msg)
+    answer <- strsplit(answer, "[ ,]+")[[1]]
+    if (all(answer %in% seq_along(choices))) {
+      return(choices[as.integer(answer)])
+    }
+  }
+}

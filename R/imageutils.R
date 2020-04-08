@@ -1,17 +1,24 @@
 startPNG <- function(filename, width, height, res, ...) {
+  args <- rlang::list2(filename=filename, width=width, height=height, res=res, ...)
+
   # If quartz is available, use png() (which will default to quartz).
   # Otherwise, if the Cairo package is installed, use CairoPNG().
   # Finally, if neither quartz nor Cairo, use png().
   if (capabilities("aqua")) {
     pngfun <- grDevices::png
   } else if ((getOption('shiny.usecairo') %OR% TRUE) &&
-      nchar(system.file(package = "Cairo"))) {
+             nchar(system.file(package = "Cairo"))) {
     pngfun <- Cairo::CairoPNG
+  } else if (nchar(system.file(package = "ragg"))) {
+    pngfun <- ragg::agg_png
+    args$background <- args$background %OR% args$bg
+    args$bg <- NULL
   } else {
     pngfun <- grDevices::png
   }
 
-  pngfun(filename=filename, width=width, height=height, res=res, ...)
+
+  do.call(pngfun, args)
   # Call plot.new() so that even if no plotting operations are performed at
   # least we have a blank background. N.B. we need to set the margin to 0
   # temporarily before plot.new() because when the plot size is small (e.g.

@@ -1352,9 +1352,9 @@ ShinySession <- R6Class(
         tmp_info$accent <- tmp_info$accent %OR% htmltools::parseCssColors(self$clientData[[accent]])
       }
 
-      family <- paste0("output_", name, "_font_family")
-      if (family %in% cd_names()) {
-        tmp_info$family <- tmp_info$family %OR% self$clientData[[family]]
+      font <- paste0("output_", name, "_font")
+      if (font %in% cd_names()) {
+        tmp_info$font <- tmp_info$font %OR% self$clientData[[font]]
       }
 
       private$outputInfo[[name]] <- tmp_info

@@ -6356,12 +6356,45 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       return linkColor;
     }
 
+    function getComputedFont(el) {
+      var style = window.getComputedStyle(el);
+      var fontFamily = style.getPropertyValue("font-family");
+      var fontSize = style.getPropertyValue("font-size");
+      var font = {
+        families: fontFamily.replace(/"/g, '').split(", "),
+        size: fontSize
+      }; // If the FontFaceSet API is available, use it to determine
+      // which font-family is supported by the browser
+      // https://developer.mozilla.org/en-US/docs/Web/API/FontFaceSet/check
+      // https://caniuse.com/#feat=mdn-api_fontfaceset_check
+
+      if (!document.fonts) {
+        return font;
+      }
+
+      for (var i = 0; i < font.families.length; i++) {
+        var family = font.families[i];
+        var hasFont = false;
+
+        try {
+          hasFont = hasFont || document.fonts.check(font.size + " " + family);
+        } catch (err) {}
+
+        if (hasFont) {
+          font.renderedFamily = family;
+          break;
+        }
+      }
+
+      return font;
+    }
+
     $('.shiny-image-output, .shiny-plot-output, .shiny-report-theme').each(function () {
       var id = getIdFromEl(this);
       initialValues['.clientdata_output_' + id + '_bg'] = getComputedBgColor(this);
       initialValues['.clientdata_output_' + id + '_fg'] = window.getComputedStyle(this).getPropertyValue("color");
-      initialValues['.clientdata_output_' + id + '_font_family'] = window.getComputedStyle(this).getPropertyValue("font-family");
       initialValues['.clientdata_output_' + id + '_accent'] = getComputedLinkColor(this);
+      initialValues['.clientdata_output_' + id + '_font'] = getComputedFont(this);
     });
 
     function doSendImageSize() {
@@ -6377,8 +6410,8 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         var id = getIdFromEl(this);
         inputs.setInput('.clientdata_output_' + id + '_bg', getComputedBgColor(this));
         inputs.setInput('.clientdata_output_' + id + '_fg', window.getComputedStyle(this).getPropertyValue("color"));
-        inputs.setInput('.clientdata_output_' + id + '_font_family', window.getComputedStyle(this).getPropertyValue("font-family"));
         inputs.setInput('.clientdata_output_' + id + '_accent', getComputedLinkColor(this));
+        inputs.setInput('.clientdata_output_' + id + '_font', getComputedFont(this));
       });
       $('.shiny-bound-output').each(function () {
         var $this = $(this),

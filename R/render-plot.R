@@ -172,10 +172,16 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
 
 resizeSavedPlot <- function(name, session, result, width, height, pixelratio, res, theme, ...) {
   if (result$img$width == width && result$img$height == height &&
-      result$pixelratio == pixelratio && result$res == res &&
-      identical(result$theme, theme)) {
+      result$pixelratio == pixelratio && result$res == res) {
     return(result)
   }
+
+  # I'm pretty sure this is needed only for replaying fonts registered with
+  # sysfonts/showtext, but might as well couple this logic to thematic instead
+  # (which will register showtext plot hooks, as well as it's own)
+  oldTheme <- getThematic()
+  beginThematic(theme)
+  on.exit(setThematic(oldTheme), add = TRUE)
 
   coordmap <- NULL
   outfile <- plotPNG(function() {
@@ -210,12 +216,12 @@ drawPlot <- function(name, session, func, width, height, pixelratio, res, theme 
   # 10. On error, take width and height dependency
 
   outfile <- tempfile(fileext='.png') # If startPNG throws, this could leak. Shrug.
-  # TODO: if and when we move to ragg::agg_png(), we'll need to translate bg -> background
   device <- startPNG(outfile, width*pixelratio, height*pixelratio, res = res*pixelratio,
                      bg = theme$bg %OR% "white", ...)
   domain <- createGraphicsDevicePromiseDomain(device)
   grDevices::dev.control(displaylist = "enable")
 
+  oldTheme <- getThematic()
   beginThematic(theme)
 
   hybrid_chain(
@@ -263,8 +269,8 @@ drawPlot <- function(name, session, func, width, height, pixelratio, res, theme 
         )
       }),
       finally = function() {
-        endThematic()
         grDevices::dev.off(device)
+        setThematic(oldTheme)
       }
     ),
     function(result) {
@@ -286,13 +292,23 @@ drawPlot <- function(name, session, func, width, height, pixelratio, res, theme 
 }
 
 beginThematic <- function(theme) {
-  if (!length(theme)) return()
-  do.call(thematic::thematic_begin, theme)
+  if (length(theme)) {
+    do.call(thematic::thematic_begin, theme)
+  }
 }
 
-endThematic <- function() {
-  thematic::thematic_end()
+getThematic <- function() {
+  thematic::thematic_get()
 }
+
+setThematic <- function(theme) {
+  if (length(theme)) {
+    do.call(thematic::thematic_begin, theme)
+  } else {
+    thematic::thematic_end()
+  }
+}
+
 
 getTheme <- function(autoTheme, session, outputName) {
   if (!autoTheme) return(NULL)
@@ -302,12 +318,41 @@ getTheme <- function(autoTheme, session, outputName) {
       x, default = parseCssColors(session$clientData[[paste('output', outputName, x, sep = "_")]])
     )
   }
-  theme[["font"]] <- thematic::thematic_get_option(
-    "font", default = font_spec(
-      session$clientData[[paste('output', outputName, "font_family", sep = "_")]]
+  font <- session$clientData[[paste('output', outputName, "font", sep = "_")]]
+  if (isTRUE(font$renderedFamily %in% generic_css_families())) {
+    warning(
+      "plot.autotheme doesn't support generic CSS font families (e.g. '",
+      font$renderedFamily, "'). Consider using a Google Font family instead ",
+      "https://fonts.google.com/", call. = FALSE
     )
-  )
+    font$renderedFamily <- NULL
+  }
+  families <- as.character(font$renderedFamily %OR% font$families)
+  families <- setdiff(families, generic_css_families())
+  font_default <- thematic::font_spec(families %OR% "", scale = parseFontScale(font$size))
+  theme[["font"]] <- thematic::thematic_get_option("font", default = font_default)
   theme
+}
+
+# TODO: does font-size come in anything other than pixels?
+parseFontScale <- function(size, pointsize = 12) {
+  if (grepl("[0-9]+px$", size)) {
+    return(
+      as.numeric(sub("px$", "", size)) / pointsize
+    )
+  }
+  1
+}
+
+# https://drafts.csswg.org/css-fonts-4/#generic-font-families
+generic_css_families <- function() {
+  c(
+    "serif", "sans-serif", "cursive", "fantasy", "monospace",
+    "system-ui", "emoji", "math", "fangsong",
+    "ui-serif", "ui-sans-serif", "ui-monospace", "ui-rounded",
+    # not part of the official spec (earlier versions of system-ui)
+    "-apple-system" , "BlinkMacSystemFont"
+  )
 }
 
 # A modified version of print.ggplot which returns the built ggplot object

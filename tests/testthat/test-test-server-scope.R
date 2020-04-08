@@ -55,7 +55,8 @@ test_that("testServer allows lexical environment access through session$env", {
 
   testServer(server, {
     expect_equal(b_var, 321)
-    expect_equal(get("a_var", session$env), 123)
+    expect_equal(get("a_var", session$env, inherits = TRUE), 123)
+    expect_false(exists("a_var", inherits = FALSE))
   })
 })
 

@@ -48,7 +48,7 @@ ui <- fluidPage(
 )
 
 # Define server logic for random distribution app ----
-server <- function(input, output) {
+server <- function(input, output, session) {
 
   # Reactive expression to generate the requested distribution ----
   # This is called whenever the inputs change. The output functions

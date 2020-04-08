@@ -36,7 +36,6 @@ createSessionProxy <- function(parentSession, ...) {
 
 `[[<-.session_proxy` <- `$<-.session_proxy`
 
-
 #' Shiny modules
 #'
 #' Shiny's module feature lets you break complicated UI and server logic into
@@ -132,6 +131,12 @@ createSessionProxy <- function(parentSession, ...) {
 #'
 #' @export
 moduleServer <- function(id, module, session = getDefaultReactiveDomain()) {
+  if (inherits(session, "MockShinySession")) {
+    body(module) <- rlang::expr({
+      session$setEnv(base::environment())
+      session$setReturned({ !!!body(module) })
+    })
+  }
   callModule(module, id, session = session)
 }
 

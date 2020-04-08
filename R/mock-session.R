@@ -69,6 +69,13 @@ extract <- function(promise) {
   stop("Single-bracket indexing of mockclientdata is not allowed.")
 }
 
+#' @noRd
+mapNames <- function(func, ...) {
+  vals <- list(...)
+  names(vals) <- vapply(names(vals), func, character(1))
+  vals
+}
+
 #' Mock Shiny Session
 #'
 #' @description
@@ -83,6 +90,8 @@ MockShinySession <- R6Class(
   public = list(
     #' @field env The environment associated with the session.
     env = NULL,
+    #' @field returned The value returned by the module.
+    returned = NULL,
     #' @field singletons Hardcoded as empty. Needed for rendering HTML (i.e. renderUI)
     singletons = character(0),
     #' @field clientData Mock client data that always returns a size for plots
@@ -371,10 +380,10 @@ MockShinySession <- R6Class(
     #' @param export Not used
     #' @param format Not used
     getTestSnapshotUrl = function(input=TRUE, output=TRUE, export=TRUE, format="json") {},
-    #' @description Returns the given id prefixed by `mock-session-`.
+    #' @description Returns the given id prefixed by this namespace's id.
     #' @param id The id to modify.
     ns = function(id) {
-      paste0("mock-session-", id) # TODO: does this need to be more complex/intelligent?
+      NS(private$nsPrefix, id)
     },
     #' @description Trigger a reactive flush right now.
     flushReact = function(){
@@ -388,8 +397,30 @@ MockShinySession <- R6Class(
         self,
         input = .createReactiveValues(private$.input, readonly = TRUE, ns = ns),
         output = structure(.createOutputWriter(self, ns = ns), class = "shinyoutput"),
-        makeScope = function(namespace) self$makeScope(ns(namespace))
+        makeScope = function(namespace) self$makeScope(ns(namespace)),
+        ns = function(namespace) ns(namespace),
+        setInputs = function(...) do.call(self$setInputs, mapNames(ns, ...))
       )
+    },
+    #' @description Set the environment associated with a testServer() call.
+    #' @param env The environment to retain.
+    setEnv = function(env) {
+      self$env <- env
+    },
+    #' @description Set the value returned by the module call and proactively flush.
+    #' @param value The value returned from the module
+    setReturned = function(value) {
+      self$returned <- value
+      private$flush()
+      value
+    },
+    #' @description Get the value returned by the module call.
+    getReturned = function() self$returned,
+    #' @description Return a distinct character identifier for use as a proxy
+    #'   namespace.
+    genId = function() {
+      private$idCounter <- private$idCounter + 1
+      paste0("proxy", private$idCounter)
     }
   ),
   private = list(
@@ -400,7 +431,8 @@ MockShinySession <- R6Class(
     timer = NULL,
     closed = FALSE,
     outs = list(),
-    returnedVal = NULL,
+    nsPrefix = "mock-session",
+    idCounter = 0,
 
     flush = function(){
       isolate(private$flushCBs$invoke(..stacktraceon = TRUE))
@@ -410,18 +442,6 @@ MockShinySession <- R6Class(
     }
   ),
   active = list(
-    # If assigning to `returned`, proactively flush
-    #' @field returned The value returned from the module
-    returned = function(value){
-      if(missing(value)){
-        return(private$returnedVal)
-      }
-      # When you assign to returned, that implies that you just ran
-      # the module. So we should proactively flush. We have to do this
-      # here since flush is private.
-      private$returnedVal <- value
-      private$flush()
-    },
     #' @field request An empty environment where the request should be. The request isn't meaningfully mocked currently.
     request = function(value) {
       if (!missing(value)){

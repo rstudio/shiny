@@ -4,7 +4,6 @@
 #' @noRd
 makeMask <- function(env) {
   stopifnot(length(rlang::env_parents(env)) > 1)
-  stopifnot(all(c("input", "output", "session") %in% ls(env)))
   child <- as.list(env)
   parent <- as.list(rlang::env_parent(env))
   parent_only <- setdiff(names(parent), names(child))
@@ -104,6 +103,8 @@ testServer <- function(app, expr, ...) {
       })
     )
   )
+
+  stopifnot(all(c("input", "output", "session") %in% ls(session$env)))
 
   quosure <- rlang::enquo(expr)
 

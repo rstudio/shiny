@@ -5,17 +5,17 @@ library(testthat)
 library(future)
 
 test_that("testServer passes dots", {
-  server <- function(id, someArg) {
+  module <- function(id, someArg) {
     expect_false(missing(someArg))
     moduleServer(id, function(input, output, session) {
       expect_equal(someArg, 123)
     })
   }
-  testServer(server, {}, someArg = 123)
+  testServer(module, {}, someArg = 123)
 })
 
 test_that("testServer passes dynamic dots", {
-  server <- function(id, someArg) {
+  module <- function(id, someArg) {
     expect_false(missing(someArg))
     moduleServer(id, function(input, output, session) {
       expect_equal(someArg, 123)
@@ -24,15 +24,15 @@ test_that("testServer passes dynamic dots", {
 
   # Test with !!! to splice in a whole named list constructed with base::list()
   moreArgs <- list(someArg = 123)
-  testServer(server, {}, !!!moreArgs)
+  testServer(module, {}, !!!moreArgs)
 
   # Test with !!/:= to splice in an argument name
   argName <- "someArg"
-  testServer(server, {}, !!argName := 123)
+  testServer(module, {}, !!argName := 123)
 })
 
 test_that("testServer handles observers", {
-  server <- function(id) {
+  module <- function(id) {
     moduleServer(id, function(input, output, session) {
       rv <- reactiveValues(x = 0, y = 0)
       observe({
@@ -47,7 +47,7 @@ test_that("testServer handles observers", {
     })
   }
 
-  testServer(server, {
+  testServer(module, {
     session$setInputs(x=1)
     expect_equal(rv$y, 2)
     expect_equal(rv$x, 2)
@@ -61,12 +61,12 @@ test_that("testServer handles observers", {
 })
 
 test_that("inputs aren't directly assignable", {
-  server <- function(id) {
+  module <- function(id) {
     moduleServer(id, function(input, output, session) {
     })
   }
 
-  testServer(server, {
+  testServer(module, {
     session$setInputs(x = 0)
     expect_error({ input$x <- 1 })
     expect_error({ input$y <- 1 })
@@ -74,7 +74,7 @@ test_that("inputs aren't directly assignable", {
 })
 
 test_that("testServer handles more complex expressions", {
-  server <- function(id) {
+  module <- function(id) {
     moduleServer(id, function(input, output, session){
       output$txt <- renderText({
         input$x
@@ -82,7 +82,7 @@ test_that("testServer handles more complex expressions", {
     })
   }
 
-  testServer(server, {
+  testServer(module, {
     for (i in 1:5){
       session$setInputs(x=i)
       expect_equal(output$txt, as.character(i))
@@ -97,7 +97,7 @@ test_that("testServer handles more complex expressions", {
 })
 
 test_that("testServer handles reactiveVal", {
-  server <- function(id) {
+  module <- function(id) {
     moduleServer(id, function(input, output, session) {
       x <- reactiveVal(0)
       observe({
@@ -106,7 +106,7 @@ test_that("testServer handles reactiveVal", {
     })
   }
 
-  testServer(server, {
+  testServer(module, {
     session$setInputs(y=1, z=2)
 
     expect_equal(x(), 3)
@@ -120,7 +120,7 @@ test_that("testServer handles reactiveVal", {
 })
 
 test_that("testServer handles reactives with complex dependency tree", {
-  server <- function(id) {
+  module <- function(id) {
     moduleServer(id, function(input, output, session) {
       x <- reactiveValues(x=1)
       r <- reactive({
@@ -132,7 +132,7 @@ test_that("testServer handles reactives with complex dependency tree", {
     })
   }
 
-  testServer(server, {
+  testServer(module, {
     session$setInputs(a=1, b=2, c=3)
     expect_equal(r(), 4)
     expect_equal(r2(), 7)
@@ -152,7 +152,7 @@ test_that("testServer handles reactives with complex dependency tree", {
 })
 
 test_that("testServer handles reactivePoll", {
-  server <- function(id) {
+  module <- function(id) {
     moduleServer(id, function(input, output, session) {
       rv <- reactiveValues(x = 0)
       rp <- reactivePoll(50, session, function(){ rnorm(1) }, function(){
@@ -164,7 +164,7 @@ test_that("testServer handles reactivePoll", {
     })
   }
 
-  testServer(server, {
+  testServer(module, {
     expect_equal(rv$x, 1)
 
     for (i in 1:4){
@@ -176,7 +176,7 @@ test_that("testServer handles reactivePoll", {
 })
 
 test_that("testServer handles reactiveTimer", {
-  server <- function(id) {
+  module <- function(id) {
     moduleServer(id, function(input, output, session) {
       rv <- reactiveValues(x = 0)
 
@@ -188,7 +188,7 @@ test_that("testServer handles reactiveTimer", {
     })
   }
 
-  testServer(server, {
+  testServer(module, {
     expect_equal(rv$x, 1)
 
     session$elapse(200)
@@ -198,7 +198,7 @@ test_that("testServer handles reactiveTimer", {
 })
 
 test_that("testServer handles debounce/throttle", {
-  server <- function(id) {
+  module <- function(id) {
     moduleServer(id, function(input, output, session) {
       rv <- reactiveValues(t = 0, d = 0)
       react <- reactive({
@@ -219,7 +219,7 @@ test_that("testServer handles debounce/throttle", {
     })
   }
 
-  testServer(server, {
+  testServer(module, {
     session$setInputs(y = TRUE)
     expect_equal(rv$d, 1)
     for (i in 2:5){
@@ -243,7 +243,7 @@ test_that("testServer wraps output in an observer", {
   testthat::skip("I'm not sure of a great way to test this without timers.")
   # And honestly it's so foundational in what we're doing now that it might not be necessary to test?
 
-  server <- function(id) {
+  module <- function(id) {
     moduleServer(id, function(input, output, session) {
       rv <- reactiveValues(x=0)
       rp <- reactiveTimer(50)
@@ -254,7 +254,7 @@ test_that("testServer wraps output in an observer", {
     })
   }
 
-  testServer(server, {
+  testServer(module, {
     session$setInputs(x=1)
     # Timers only tick if they're being observed. If the output weren't being
     # wrapped in an observer, we'd see the value of rv$x initialize to zero and
@@ -281,7 +281,7 @@ test_that("testServer wraps output in an observer", {
 })
 
 test_that("testServer works with async", {
-  server <- function(id) {
+  module <- function(id) {
     moduleServer(id, function(input, output, session) {
       output$txt <- renderText({
         val <- input$x
@@ -299,7 +299,7 @@ test_that("testServer works with async", {
     })
   }
 
-  testServer(server, {
+  testServer(module, {
     session$setInputs(x=1)
     expect_equal(output$txt, "1")
     expect_equal(output$sync, "abc")
@@ -317,7 +317,7 @@ test_that("testServer works with async", {
 })
 
 test_that("testModule works with multiple promises in parallel", {
-  server <- function(id) {
+  module <- function(id) {
     moduleServer(id, function(input, output, session) {
       output$txt1 <- renderText({
         future({
@@ -335,7 +335,7 @@ test_that("testModule works with multiple promises in parallel", {
     })
   }
 
-  testServer(server, {
+  testServer(module, {
     # As we enter this test code, the promises will still be running in the background.
     # We'll need to give them ~2s (plus overhead) to complete
     startMS <- as.numeric(Sys.time()) * 1000
@@ -355,7 +355,7 @@ test_that("testModule works with multiple promises in parallel", {
 })
 
 test_that("testModule handles async errors", {
-  server <- function(id) {
+  module <- function(id) {
     moduleServer(id, function(input, output, session, arg1, arg2){
       output$err <- renderText({
         future({ "my error"}) %...>%
@@ -370,7 +370,7 @@ test_that("testModule handles async errors", {
     })
   }
 
-  testServer(server, {
+  testServer(module, {
     expect_error(output$err, "my error")
     # TODO: helper for safe errors so users don't have to learn "shiny.custom.error"?
     expect_error(output$safe, "my safe error", class="shiny.custom.error")
@@ -378,7 +378,7 @@ test_that("testModule handles async errors", {
 })
 
 test_that("testServer handles modules with additional arguments", {
-  server <- function(id, arg1, arg2) {
+  module <- function(id, arg1, arg2) {
     moduleServer(id, function(input, output, session){
       output$txt1 <- renderText({
         arg1
@@ -394,7 +394,7 @@ test_that("testServer handles modules with additional arguments", {
     })
   }
 
-  testServer(server, {
+  testServer(module, {
     expect_equal(output$txt1, "val1")
     expect_equal(output$txt2, "val2")
   }, arg1="val1", arg2="val2")
@@ -410,7 +410,7 @@ test_that("testServer captures htmlwidgets", {
     testthat::skip("jsonlite not available to test htmlwidgets")
   }
 
-  server <- function(id) {
+  module <- function(id) {
     moduleServer(id, function(input, output, session){
       output$dy <- dygraphs::renderDygraph({
         dygraphs::dygraph(data.frame(outcome=0:5, year=2000:2005))
@@ -418,7 +418,7 @@ test_that("testServer captures htmlwidgets", {
     })
   }
 
-  testServer(server, {
+  testServer(module, {
     # Really, this test should be specific to each htmlwidget. Here, we don't want to bind ourselves
     # to the current JSON structure of dygraphs, so we'll just check one element to see that the raw
     # JSON was exposed and is accessible in tests.
@@ -429,7 +429,7 @@ test_that("testServer captures htmlwidgets", {
 })
 
 test_that("testServer captures renderUI", {
-  server <- function(id) {
+  module <- function(id) {
     moduleServer(id, function(input, output, session){
       output$ui <- renderUI({
         tags$a(href="https://rstudio.com", "hello!")
@@ -437,14 +437,14 @@ test_that("testServer captures renderUI", {
     })
   }
 
-  testServer(server, {
+  testServer(module, {
     expect_equal(output$ui$deps, list())
     expect_equal(as.character(output$ui$html), "<a href=\"https://rstudio.com\">hello!</a>")
   })
 })
 
 test_that("testServer captures base graphics outputs", {
-  server <- function(id) {
+  module <- function(id) {
     moduleServer(id, function(input, output, session){
       output$fixed <- renderPlot({
         plot(1,1)
@@ -456,7 +456,7 @@ test_that("testServer captures base graphics outputs", {
     })
   }
 
-  testServer(server, {
+  testServer(module, {
     # We aren't yet able to create reproducible graphics, so this test is intentionally pretty
     # limited.
     expect_equal(output$fixed$width, 300)
@@ -478,7 +478,7 @@ test_that("testServer captures ggplot2 outputs", {
     testthat::skip("ggplot2 not available")
   }
 
-  server <- function(id) {
+  module <- function(id) {
     moduleServer(id, function(input, output, session){
       output$fixed <- renderPlot({
         ggplot2::qplot(iris$Sepal.Length, iris$Sepal.Width)
@@ -490,7 +490,7 @@ test_that("testServer captures ggplot2 outputs", {
     })
   }
 
-  testServer(server, {
+  testServer(module, {
     expect_equal(output$fixed$width, 300)
     expect_equal(output$fixed$height, 350)
     expect_match(output$fixed$src, "^data:image/png;base64,")
@@ -503,7 +503,7 @@ test_that("testServer captures ggplot2 outputs", {
 })
 
 test_that("testServer exposes the returned value from the module", {
-  server <- function(id) {
+  module <- function(id) {
     moduleServer(id, function(input, output, session){
       reactive({
         return(input$a + input$b)
@@ -511,7 +511,7 @@ test_that("testServer exposes the returned value from the module", {
     })
   }
 
-  testServer(server, {
+  testServer(module, {
     session$setInputs(a=1, b=2)
     expect_equal(session$getReturned()(), 3)
 
@@ -522,7 +522,7 @@ test_that("testServer exposes the returned value from the module", {
 })
 
 test_that("testServer handles synchronous errors", {
-  server <- function(id) {
+  module <- function(id) {
     moduleServer(id, function(input, output, session, arg1, arg2){
       output$err <- renderText({
         stop("my error")
@@ -534,7 +534,7 @@ test_that("testServer handles synchronous errors", {
     })
   }
 
-  testServer(server, {
+  testServer(module, {
     expect_error(output$err, "my error")
     # TODO: helper for safe errors so users don't have to learn "shiny.custom.error"?
     expect_error(output$safe, "my safe error", class="shiny.custom.error")
@@ -542,15 +542,15 @@ test_that("testServer handles synchronous errors", {
 })
 
 test_that("accessing a non-existent output gives an informative message", {
-  server <- function(id) {
+  module <- function(id) {
     moduleServer(id, function(input, output, session){})
   }
 
-  testServer(server, {
+  testServer(module, {
     expect_error(output$dontexist, "hasn't been defined yet: output\\$server1-dontexist")
   }, id = "server1")
 
-  testServer(server, {
+  testServer(module, {
     expect_error(output$dontexist, "hasn't been defined yet: output\\$.*-dontexist")
   })
 })
@@ -568,18 +568,18 @@ test_that("testServer returns a meaningful result", {
 })
 
 test_that("assigning an output in a module function with a non-function errors", {
-  server <- function(id) {
+  module <- function(id) {
     moduleServer(id, function(input, output, session) {
       output$someVar <- 123
 
     })
   }
 
-  expect_error(testServer(server, {}), "^Unexpected")
+  expect_error(testServer(module, {}), "^Unexpected")
 })
 
 test_that("testServer handles invalidateLater", {
-  server <- function(id) {
+  module <- function(id) {
     moduleServer(id, function(input, output, session) {
       rv <- reactiveValues(x = 0)
       observe({
@@ -592,7 +592,7 @@ test_that("testServer handles invalidateLater", {
     })
   }
 
-  testServer(server, {
+  testServer(module, {
     # Should have run once
     expect_equal(rv$x, 1)
 
@@ -606,11 +606,11 @@ test_that("testServer handles invalidateLater", {
 })
 
 test_that("session ended handlers work", {
-  server <- function(id) {
+  module <- function(id) {
     moduleServer(id, function(input, output, session){})
   }
 
-  testServer(server, {
+  testServer(module, {
     rv <- reactiveValues(closed = FALSE)
     session$onEnded(function(){
       rv$closed <- TRUE
@@ -629,7 +629,7 @@ test_that("session ended handlers work", {
 })
 
 test_that("session flush handlers work", {
-  server <- function(id) {
+  module <- function(id) {
     moduleServer(id, function(input, output, session) {
       rv <- reactiveValues(x = 0, flushCounter = 0, flushedCounter = 0,
                            flushOnceCounter = 0, flushedOnceCounter = 0)
@@ -645,7 +645,7 @@ test_that("session flush handlers work", {
     })
   }
 
-  testServer(server, {
+  testServer(module, {
     session$setInputs(x=1)
     expect_equal(rv$x, 2)
     # We're not concerned with the exact values here -- only that they increase

@@ -4,7 +4,7 @@ library(shiny)
 library(testthat)
 
 test_that("Variables outside of the module are inaccessible", {
-  server <- local({
+  module <- local({
     outside <- 123
     function(id, x) {
       y <- x+1
@@ -14,7 +14,7 @@ test_that("Variables outside of the module are inaccessible", {
     }
   }, envir = new.env(parent = globalenv()))
 
-  testServer(server, {
+  testServer(module, {
     expect_equal(x, 0)
     expect_equal(y, 1)
     expect_equal(z, 2)
@@ -23,7 +23,7 @@ test_that("Variables outside of the module are inaccessible", {
 })
 
 test_that("Variables outside the testServer() have correct visibility", {
-  server <- local({
+  module <- local({
     function(id, x) {
       moduleServer(id, function(input, output, session) {
         y <- 1
@@ -34,7 +34,7 @@ test_that("Variables outside the testServer() have correct visibility", {
   x <- 99
   z <- 123
 
-  testServer(server, {
+  testServer(module, {
     expect_equal(x, 0)
     expect_equal(y, 1)
     expect_equal(z, 123)
@@ -42,7 +42,7 @@ test_that("Variables outside the testServer() have correct visibility", {
 })
 
 test_that("testServer allows lexical environment access through session$env", {
-  server <- local({
+  module <- local({
     a_var <- 123
     function(id) {
       moduleServer(id, function(input, output, session) {
@@ -53,7 +53,7 @@ test_that("testServer allows lexical environment access through session$env", {
 
   expect_false(exists("a_var", inherits = FALSE))
 
-  testServer(server, {
+  testServer(module, {
     expect_equal(b_var, 321)
     expect_equal(get("a_var", session$env, inherits = TRUE), 123)
     expect_false(exists("a_var", inherits = FALSE))
@@ -64,7 +64,7 @@ test_that("Shadowing can be mitigated with unquote", {
   i <- 0
   inc <- function() i <<- i+1
 
-  server <- local({
+  module <- local({
     function(id) {
       moduleServer(id, function(input, output, session) {
         inc <- function() stop("I should never be called")
@@ -72,7 +72,7 @@ test_that("Shadowing can be mitigated with unquote", {
     }
   }, envir = globalenv())
 
-  testServer(server, {
+  testServer(module, {
     expect_is(inc, "function")
     expect_false(identical(inc, !!inc))
     !!inc()

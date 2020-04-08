@@ -2296,3 +2296,56 @@ ShinyServerTimingRecorder <- R6Class("ShinyServerTimingRecorder",
 )
 
 missingOutput <- function(...) req(FALSE)
+
+#' Insert inline Markdown
+#'
+#' This function accepts
+#' [Markdown](https://en.wikipedia.org/wiki/Markdown)-syntax text and returns
+#' HTML that may be included in Shiny UIs.
+#'
+#' Leading whitespace is trimmed from Markdown text with [glue::trim()].
+#' Whitespace trimming ensures Markdown is processed correctly even when the
+#' call to `markdown()` is indented within surrounding R code.
+#'
+#' By default, [Github extensions][commonmark::extensions] are enabled, but this
+#' can be disabled by passing `extensions = FALSE`.
+#'
+#' Markdown rendering is performed by [commonmark::markdown_html()]. Additional
+#' arguments to `markdown()` are passed as arguments to `markdown_html()`
+#'
+#' @param mds A character vector of Markdown source to convert to HTML. If the
+#'   vector has more than one element, a single-element character vector of
+#'   concatenated HTML is returned.
+#' @param extensions Enable Github syntax extensions; defaults to `TRUE`.
+#' @param .noWS Character vector used to omit some of the whitespace that would
+#'   normally be written around generated HTML. Valid options include `before`,
+#'   `after`, and `outside` (equivalent to `before` and `end`).
+#' @param ... Additional arguments to pass to [commonmark::markdown_html()].
+#'   These arguments are _[dynamic][rlang::dyn-dots]_.
+#'
+#' @return a character vector marked as HTML.
+#' @export
+#' @examples
+#' ui <- fluidPage(
+#'   markdown("
+#'     # Markdown Example
+#'
+#'     This is a markdown paragraph, and will be contained within a `<p>` tag
+#'     in the UI.
+#'
+#'     The following is an unordered list, which will be represented in the UI as
+#'     a `<ul>` with `<li>` children:
+#'
+#'     * a bullet
+#'     * another
+#'
+#'     [Links](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/a) work;
+#'     so does *emphasis*.
+#'
+#'     To see more of what's possible, check out [commonmark.org/help](https://commonmark.org/help).
+#'     ")
+#' )
+markdown <- function(mds, extensions = TRUE, .noWS = NULL, ...) {
+  html <- rlang::exec(commonmark::markdown_html, glue::trim(mds), extensions = extensions, ...)
+  htmltools::HTML(html, .noWS = .noWS)
+}

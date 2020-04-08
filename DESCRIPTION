@@ -79,7 +79,9 @@ Imports:
     crayon,
     rlang (>= 0.4.0),
     fastmap (>= 1.0.0),
-    withr
+    withr,
+    commonmark (>= 1.7),
+    glue (>= 1.3.2)
 Suggests:
     datasets,
     Cairo (>= 1.5-5),

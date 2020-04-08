@@ -1,6 +1,20 @@
 # Create a "data mask" suitable for passing to rlang::eval_tidy. Bindings in
 # `env` and bindings in the parent of `env` are merged into a single named list.
-# Bindings in `env` take precedence over bindings in the parent of `env`.
+# The rationale for merging two environments into a mask is that thes recommended
+# pattern for defining modules involves two functions. Consider the
+# following code:
+#
+# a <- 0
+# mymodule <- function(id) {
+#   y <- 1
+#   moduleServer(function(input, output, session) {
+#     x <- 2
+#   })
+# }
+#
+# For the purposes of module testing, the desired environment includes all of
+# id, y, input, output, session, and x, but none of the definitions from the
+# environment in which mymodule is defined, such as a.
 #' @noRd
 makeMask <- function(env) {
   stopifnot(length(rlang::env_parents(env)) > 1)

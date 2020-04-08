@@ -12,7 +12,7 @@ test_that("Variables outside of the module are inaccessible", {
         z <- y+1
       })
     }
-  }, envir = rlang::new_environment(parent = rlang::global_env()))
+  }, envir = new.env(parent = globalenv()))
 
   testServer(server, {
     expect_equal(x, 0)
@@ -29,7 +29,7 @@ test_that("Variables outside the testServer() have correct visibility", {
         y <- 1
       })
     }
-  }, envir = rlang::new_environment(parent = rlang::global_env()))
+  }, envir = new.env(parent = globalenv()))
 
   x <- 99
   z <- 123

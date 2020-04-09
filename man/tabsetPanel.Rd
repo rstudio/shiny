@@ -27,7 +27,7 @@ tab will be selected.}
 \item{type}{Use \code{"tabs"} for the standard look; Use \code{"pills"} for a more plain
 look where tabs are selected using a background fill color; Use \code{"hidden"}
 to hide the tab titles.  \code{\link[=updateTabsetPanel]{updateTabsetPanel()}} must be used to switch tabs.
-Using \code{type = "hidden"} allows for quick switching between dynamic UIs.}
+Using \code{type = "hidden"} allows for quick switching between different UI sets.}
 
 \item{position}{This argument is deprecated; it has been discontinued in
 Bootstrap 3.}
@@ -57,13 +57,13 @@ ui <- fluidPage(
     ),
     mainPanel(
       tabsetPanel(
-        "hidden_tabs",
+        id = "hidden_tabs",
         # Hide the tab values.
         # Can only switch tabs by using `updateTabsetPanel()`
         type = "hidden",
-        tabPanel(title = NULL, value = "panel1", "Panel 1 content"),
-        tabPanel(title = NULL, value = "panel2", "Panel 2 content"),
-        tabPanel(title = NULL, value = "panel3", "Panel 3 content")
+        tabPanelBody(value = "panel1", "Panel 1 content"),
+        tabPanelBody(value = "panel2", "Panel 2 content"),
+        tabPanelBody(value = "panel3", "Panel 3 content")
       )
     )
   )

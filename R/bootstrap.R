@@ -464,8 +464,6 @@ helpText <- function(...) {
 
 #' Create a tab panel
 #'
-#' Create a tab panel that can be included within a [tabsetPanel()] or
-#' a [navbarPage()].
 #'
 #' @param title Display title for tab
 #' @param ... UI elements to include within the tab
@@ -489,12 +487,21 @@ helpText <- function(...) {
 #'   )
 #' )
 #' @export
+#' @describeIn tabPanel Create a tab panel that can be included within a [tabsetPanel()] or a [navbarPage()].
 tabPanel <- function(title, ..., value = title, icon = NULL) {
-  divTag <- div(class="tab-pane",
-                title=title,
-                `data-value`=value,
-                `data-icon-class` = iconClass(icon),
-                ...)
+  div(
+    class = "tab-pane",
+    title = title,
+    `data-value` = value,
+    `data-icon-class` = iconClass(icon),
+    ...
+  )
+}
+#' @export
+#' @describeIn tabPanel Create a tab panel that drops the title argument.
+#'   This function should be used within `tabsetPanel(type = "hidden")`. See [tabsetPanel()] for example usage.
+tabPanelBody <- function(..., value = NULL, icon = NULL) {
+  tabPanel(title = NULL, ..., value = value, icon = icon)
 }
 
 #' Create a tabset panel
@@ -513,7 +520,7 @@ tabPanel <- function(title, ..., value = title, icon = NULL) {
 #' @param type Use `"tabs"` for the standard look; Use `"pills"` for a more plain
 #'   look where tabs are selected using a background fill color; Use `"hidden"`
 #'   to hide the tab titles.  [updateTabsetPanel()] must be used to switch tabs.
-#'   Using `type = "hidden"` allows for quick switching between dynamic UIs.
+#'   Using `type = "hidden"` allows for quick switching between different UI sets.
 #' @param position This argument is deprecated; it has been discontinued in
 #'   Bootstrap 3.
 #' @return A tabset that can be passed to [mainPanel()]
@@ -539,13 +546,13 @@ tabPanel <- function(title, ..., value = title, icon = NULL) {
 #'     ),
 #'     mainPanel(
 #'       tabsetPanel(
-#'         "hidden_tabs",
+#'         id = "hidden_tabs",
 #'         # Hide the tab values.
 #'         # Can only switch tabs by using `updateTabsetPanel()`
 #'         type = "hidden",
-#'         tabPanel(title = NULL, value = "panel1", "Panel 1 content"),
-#'         tabPanel(title = NULL, value = "panel2", "Panel 2 content"),
-#'         tabPanel(title = NULL, value = "panel3", "Panel 3 content")
+#'         tabPanelBody(value = "panel1", "Panel 1 content"),
+#'         tabPanelBody(value = "panel2", "Panel 2 content"),
+#'         tabPanelBody(value = "panel3", "Panel 3 content")
 #'       )
 #'     )
 #'   )

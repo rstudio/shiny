@@ -8,7 +8,7 @@ tabsetPanel(
   ...,
   id = NULL,
   selected = NULL,
-  type = c("tabs", "pills"),
+  type = c("tabs", "pills", "hidden"),
   position = NULL
 )
 }
@@ -24,8 +24,10 @@ will correspond to the \code{value} argument that is passed to
 of the tab that should be selected by default. If \code{NULL}, the first
 tab will be selected.}
 
-\item{type}{Use "tabs" for the standard look; Use "pills" for a more plain
-look where tabs are selected using a background fill color.}
+\item{type}{Use \code{"tabs"} for the standard look; Use \code{"pills"} for a more plain
+look where tabs are selected using a background fill color; Use \code{"hidden"}
+to hide the tab titles.  \code{\link[=updateTabsetPanel]{updateTabsetPanel()}} must be used to switch tabs.
+Using \code{type = "hidden"} allows for quick switching between dynamic UIs.}
 
 \item{position}{This argument is deprecated; it has been discontinued in
 Bootstrap 3.}
@@ -47,6 +49,35 @@ mainPanel(
     tabPanel("Table", tableOutput("table"))
   )
 )
+
+ui <- fluidPage(
+  sidebarLayout(
+    sidebarPanel(
+      radioButtons("controller", "Controller", 1:3, 1)
+    ),
+    mainPanel(
+      tabsetPanel(
+        "hidden_tabs",
+        # Hide the tab values.
+        # Can only switch tabs by using `updateTabsetPanel()`
+        type = "hidden",
+        tabPanel(title = NULL, value = "panel1", "Panel 1 content"),
+        tabPanel(title = NULL, value = "panel2", "Panel 2 content"),
+        tabPanel(title = NULL, value = "panel3", "Panel 3 content")
+      )
+    )
+  )
+)
+
+server <- function(input, output, session) {
+  observeEvent(input$controller, {
+    updateTabsetPanel(session, "hidden_tabs", selected = paste0("panel", input$controller))
+  })
+}
+
+if (interactive()) {
+  shinyApp(ui, server)
+}
 }
 \seealso{
 \code{\link[=tabPanel]{tabPanel()}}, \code{\link[=updateTabsetPanel]{updateTabsetPanel()}},

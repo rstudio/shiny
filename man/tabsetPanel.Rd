@@ -24,10 +24,13 @@ will correspond to the \code{value} argument that is passed to
 of the tab that should be selected by default. If \code{NULL}, the first
 tab will be selected.}
 
-\item{type}{Use \code{"tabs"} for the standard look; Use \code{"pills"} for a more plain
-look where tabs are selected using a background fill color; Use \code{"hidden"}
-to hide the tab titles.  \code{\link[=updateTabsetPanel]{updateTabsetPanel()}} must be used to switch tabs.
-Using \code{type = "hidden"} allows for quick switching between different UI sets.}
+\item{type}{\describe{
+\item{\code{"tabs"}}{Standard tab look}
+\item{\code{"pills"}}{Selected tabs use the background fill color}
+\item{\code{"hidden"}}{Hides the selectable tabs. Use \code{type = "hidden"} in
+conjunction with \code{\link[=tabPanelBody]{tabPanelBody()}} and \code{\link[=updateTabsetPanel]{updateTabsetPanel()}} to control the
+active tab via other input controls. (See example below)}
+}}
 
 \item{position}{This argument is deprecated; it has been discontinued in
 Bootstrap 3.}

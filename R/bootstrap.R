@@ -517,10 +517,13 @@ tabPanelBody <- function(..., value = NULL, icon = NULL) {
 #' @param selected The `value` (or, if none was supplied, the `title`)
 #'   of the tab that should be selected by default. If `NULL`, the first
 #'   tab will be selected.
-#' @param type Use `"tabs"` for the standard look; Use `"pills"` for a more plain
-#'   look where tabs are selected using a background fill color; Use `"hidden"`
-#'   to hide the tab titles.  [updateTabsetPanel()] must be used to switch tabs.
-#'   Using `type = "hidden"` allows for quick switching between different UI sets.
+#' @param type  \describe{
+#'   \item{`"tabs"`}{Standard tab look}
+#'   \item{`"pills"`}{Selected tabs use the background fill color}
+#'   \item{`"hidden"`}{Hides the selectable tabs. Use `type = "hidden"` in
+#'   conjunction with [tabPanelBody()] and [updateTabsetPanel()] to control the
+#'   active tab via other input controls. (See example below)}
+#' }
 #' @param position This argument is deprecated; it has been discontinued in
 #'   Bootstrap 3.
 #' @return A tabset that can be passed to [mainPanel()]

@@ -19,7 +19,7 @@
 # resolved in the environment in which testServer() is called.
 #
 # env is cloned because rlang::new_data_mask() mutates the parent of its `top`
-# argument
+# argument.
 #' @importFrom rlang env_clone
 buildMask <- function(env) {
   if (identical(parent.env(env), emptyenv()))

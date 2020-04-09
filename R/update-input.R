@@ -126,13 +126,15 @@ updateCheckboxInput <- function(session, inputId, label = NULL, value = NULL) {
 #' if (interactive()) {
 #'
 #' ui <- fluidPage(
-#'   actionButton("update", "Update other buttons"),
+#'   actionButton("update", "Update other buttons and link"),
 #'   br(),
 #'   actionButton("goButton", "Go"),
 #'   br(),
 #'   actionButton("goButton2", "Go 2", icon = icon("area-chart")),
 #'   br(),
-#'   actionButton("goButton3", "Go 3")
+#'   actionButton("goButton3", "Go 3"),
+#'   br(),
+#'   actionLink("goLink", "Go Link")
 #' )
 #'
 #' server <- function(input, output, session) {
@@ -153,17 +155,26 @@ updateCheckboxInput <- function(session, inputId, label = NULL, value = NULL) {
 #'     # unchaged and changes its label
 #'     updateActionButton(session, "goButton3",
 #'       label = "New label 3")
+#'
+#'     # Updates goLink's label and icon
+#'     updateActionButton(session, "goLink",
+#'       label = "New link label",
+#'       icon = icon("link"))
 #'   })
 #' }
 #'
 #' shinyApp(ui, server)
 #' }
+#' @rdname updateActionButton
 #' @export
 updateActionButton <- function(session, inputId, label = NULL, icon = NULL) {
   if (!is.null(icon)) icon <- as.character(validateIcon(icon))
   message <- dropNulls(list(label=label, icon=icon))
   session$sendInputMessage(inputId, message)
 }
+#' @rdname updateActionButton
+#' @export
+updateActionLink <- updateActionButton
 
 
 #' Change the value of a date input on the client

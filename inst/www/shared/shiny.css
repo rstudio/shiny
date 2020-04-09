@@ -407,3 +407,9 @@ pre.shiny-text-output {
   color: #aaa;
   cursor: not-allowed;
 }
+
+
+/* Hidden tabPanels */
+.nav-hidden {
+  display: none;
+}

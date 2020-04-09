@@ -27,7 +27,7 @@ shiny 1.4.0.9001
 
 * Added a `'function'` class to `reactive()` and `reactiveVal()` objects. ([#2793](https://github.com/rstudio/shiny/pull/2793))
 
-* Added function `updateActionLink()` to update an action link label and icon value. ([#2811](https://github.com/rstudio/shiny/pull/2811))
+* Added function `updateActionLink()` to update an `actionLink()` label and/or icon value. ([#2811](https://github.com/rstudio/shiny/pull/2811))
 
 ### Bug fixes
 

@@ -29,3 +29,9 @@ test_that("testServer works when referencing external globals", {
     expect_equal(get("global", session$env), 123)
   })
 })
+
+test_that("runApp works with a dir app that calls modules and uses testServer", {
+  app <- test_path("..", "test-modules", "12_counter")
+  run <- runTests(app)
+  expect_true(all(run$pass))
+})

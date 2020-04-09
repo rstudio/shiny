@@ -24,9 +24,8 @@
 buildMask <- function(env) {
   if (identical(parent.env(env), emptyenv()))
     stop("env must have a non-empty parent")
-  parent <- env_clone(parent.env(env), emptyenv())
-  child <- env_clone(env, parent)
-  rlang::new_data_mask(child, parent)
+  clone <- env_clone(env, env_clone(parent.env(env), emptyenv()))
+  rlang::new_data_mask(clone, parent.env(clone))
 }
 
 #' @noRd

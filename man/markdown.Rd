@@ -4,29 +4,34 @@
 \alias{markdown}
 \title{Insert inline Markdown}
 \usage{
-markdown(mds, extensions = TRUE, ...)
+markdown(mds, extensions = TRUE, .noWS = NULL, ...)
 }
 \arguments{
 \item{mds}{A character vector of Markdown source to convert to HTML. If the
-vector has more than one element, resulting HTML is concatenated.}
+vector has more than one element, a single-element character vector of
+concatenated HTML is returned.}
 
-\item{extensions}{Enable Github syntax extensions, defaults to \code{TRUE}.}
+\item{extensions}{Enable Github syntax extensions; defaults to \code{TRUE}.}
+
+\item{.noWS}{Character vector used to omit some of the whitespace that would
+normally be written around generated HTML. Valid options include \code{before},
+\code{after}, and \code{outside} (equivalent to \code{before} and \code{end}).}
 
 \item{...}{Additional arguments to pass to \code{\link[commonmark:markdown_html]{commonmark::markdown_html()}}.
 These arguments are \emph{\link[rlang:dyn-dots]{dynamic}}.}
 }
 \value{
-an \code{html}-classed character vector of rendered HTML
+a character vector marked as HTML.
 }
 \description{
-This function accepts a character vector of
-\href{https://en.wikipedia.org/wiki/Markdown}{Markdown}-syntax text and renders
-it to HTML that may be included in a UI.
+This function accepts
+\href{https://en.wikipedia.org/wiki/Markdown}{Markdown}-syntax text and returns
+HTML that may be included in Shiny UIs.
 }
 \details{
-Prior to interpretation as Markdown, leading whitespace is trimmed from text
-with \code{\link[glue:trim]{glue::trim()}}. This makes it possible to insert Markdown and for it to
-be processed correctly even when the call to \code{markdown()} is indented.
+Leading whitespace is trimmed from Markdown text with \code{\link[glue:trim]{glue::trim()}}.
+Whitespace trimming ensures Markdown is processed correctly even when the
+call to \code{markdown()} is indented within surrounding R code.
 
 By default, \link[commonmark:extensions]{Github extensions} are enabled, but this
 can be disabled by passing \code{extensions = FALSE}.

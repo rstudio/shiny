@@ -1,15 +1,3 @@
-# Like rlang::env_clone() but recursively clones up to n parents too.
-#' @noRd
-env_deep_clone <- function(env, n = 0) {
-  if (identical(env, emptyenv())) {
-    env
-  } else if (n == 0) {
-    rlang::env_clone(env, emptyenv())
-  } else {
-    rlang::env_clone(env, env_deep_clone(parent.env(env), n - 1))
-  }
-}
-
 # Constructs an rlang::eval_tidy() data mask with semantics appropriate for use
 # in testServer().
 #
@@ -30,10 +18,15 @@ env_deep_clone <- function(env, n = 0) {
 # output, input, y, and id, but *not* x. Definitions not masked are
 # resolved in the environment in which testServer() is called.
 #
-# env is cloned because rlang::new_data_mask() mutates the parent of `top` argument
+# env is cloned because rlang::new_data_mask() mutates the parent of its `top`
+# argument
+#' @importFrom rlang env_clone
 buildMask <- function(env) {
-  clone <- env_deep_clone(env, 1)
-  rlang::new_data_mask(clone, parent.env(clone))
+  if (identical(parent.env(env), emptyenv()))
+    stop("env must have a parent")
+  parent <- env_clone(parent.env(env), emptyenv())
+  child <- env_clone(env, parent)
+  rlang::new_data_mask(child, parent)
 }
 
 #' @noRd

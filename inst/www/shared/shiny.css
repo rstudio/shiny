@@ -411,5 +411,6 @@ pre.shiny-text-output {
 
 /* Hidden tabPanels */
 .nav-hidden {
-  display: none;
+  /* override anything bootstrap sets for `.nav` */
+  display: none !important;
 }

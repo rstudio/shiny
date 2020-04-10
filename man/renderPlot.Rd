@@ -13,7 +13,7 @@ renderPlot(
   env = parent.frame(),
   quoted = FALSE,
   execOnResize = FALSE,
-  autoTheme = getShinyOption("plot.autotheme", FALSE),
+  autoTheme = autoThemeGet(),
   outputArgs = list()
 )
 }

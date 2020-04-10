@@ -294,7 +294,7 @@ renderCachedPlot <- function(expr,
   sizePolicy = sizeGrowthRatio(width = 400, height = 400, growthRate = 1.2),
   res = 72,
   cache = "app",
-  autoTheme = getShinyOption("plot.autotheme", FALSE),
+  autoTheme = autoThemeGet(),
   ...,
   outputArgs = list()
 ) {

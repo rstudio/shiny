@@ -59,7 +59,7 @@
 renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
                        env=parent.frame(), quoted=FALSE,
                        execOnResize=FALSE,
-                       autoTheme=getShinyOption("plot.autotheme", FALSE),
+                       autoTheme=autoThemeGet(),
                        outputArgs=list()
 ) {
   # This ..stacktraceon is matched by a ..stacktraceoff.. when plotFunc
@@ -167,6 +167,43 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
   if (!identical(height, 'auto')) formals(outputFunc)['height'] <- list(NULL)
 
   markRenderFunction(outputFunc, renderFunc, outputArgs = outputArgs)
+}
+
+#' Plot auto theming options
+#'
+#' @inheritParams thematic::thematic_begin
+#'
+#' @rdname autoTheme
+#' @export
+autoThemeSet <- function(fg = "auto", bg = "auto", accent = "auto",
+                         font = NA, sequential = thematic::sequential_gradient(),
+                         qualitative = thematic::okabe_ito()) {
+  oldOptions <- .globals$autoThemeOptions
+  .globals$autoThemeOptions <- list(
+    fg = fg, bg = bg, accent = accent, font = font,
+    sequential = sequential, qualitative = qualitative
+  )
+  oldOptions
+
+  oldTheme <- getThematic()
+  onStop(function() {
+    autoThemeClear()
+    setThematic(oldTheme)
+  })
+}
+
+#' @rdname autoTheme
+#' @export
+autoThemeGet <- function() {
+  .globals$autoThemeOptions
+}
+
+#' @rdname autoTheme
+#' @export
+autoThemeClear <- function() {
+  oldOptions <- .globals$autoThemeOptions
+  rm("autoThemeOptions", envir = .globals)
+  oldOptions
 }
 
 
@@ -311,27 +348,37 @@ setThematic <- function(theme) {
 
 
 getTheme <- function(autoTheme, session, outputName) {
-  if (!autoTheme) return(NULL)
-  theme <- list()
+  if (!length(autoTheme)) return(NULL)
+  if (identical(autoTheme, FALSE)) return(NULL)
+
+  # TODO: throw if thematic::thematic_get() is not NULL?
+  # Or do we fallback to those options?
   for (x in c("bg", "fg", "accent")) {
-    theme[[x]] <- thematic::thematic_get_option(
-      x, default = parseCssColors(session$clientData[[paste('output', outputName, x, sep = "_")]])
-    )
+    if (identical(autoTheme[[x]], "auto")) {
+      autoTheme[[x]] <- parseCssColors(session$clientData[[paste('output', outputName, x, sep = "_")]])
+    }
   }
-  font <- session$clientData[[paste('output', outputName, "font", sep = "_")]]
+  if (identical(autoTheme$font, "auto")) {
+    autoTheme$font <- parseFont(session$clientData[[paste('output', outputName, "font", sep = "_")]])
+  }
+
+  autoTheme
+}
+
+parseFont <- function(font) {
   if (isTRUE(font$renderedFamily %in% generic_css_families())) {
     warning(
-      "plot.autotheme doesn't support generic CSS font families (e.g. '",
+      "renderPlot()'s autoTheme doesn't support generic CSS font families (e.g. '",
       font$renderedFamily, "'). Consider using a Google Font family instead ",
       "https://fonts.google.com/", call. = FALSE
     )
     font$renderedFamily <- NULL
   }
   families <- as.character(font$renderedFamily %OR% font$families)
-  families <- setdiff(families, generic_css_families())
-  font_default <- thematic::font_spec(families %OR% "", scale = parseFontScale(font$size))
-  theme[["font"]] <- thematic::thematic_get_option("font", default = font_default)
-  theme
+  thematic::font_spec(
+    setdiff(families, generic_css_families()) %OR% "",
+    scale = parseFontScale(font$size)
+  )
 }
 
 # TODO: does font-size come in anything other than pixels?

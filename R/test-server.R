@@ -1,13 +1,31 @@
-# Create a "data mask" suitable for passing to rlang::eval_tidy. Bindings in
-# `env` and bindings in the parent of `env` are merged into a single named list.
-# Bindings in `env` take precedence over bindings in the parent of `env`.
-#' @noRd
-makeMask <- function(env) {
-  stopifnot(length(rlang::env_parents(env)) > 1)
-  child <- as.list(env)
-  parent <- as.list(rlang::env_parent(env))
-  parent_only <- setdiff(names(parent), names(child))
-  append(child, parent[parent_only])
+# Constructs an rlang::eval_tidy() data mask with semantics appropriate for use
+# in testServer().
+#
+# env is assumed to be session$env, or the environment captured by invoking a
+# module under test.
+#
+# Consider the following module definition and its enclosing environment:
+#
+# x <- 1
+# m <- function(id) {
+#   y <- 2
+#   moduleServer(id, function(input, output, session){
+#     z <- 3
+#   })
+# }
+#
+# The data mask returned by this function should include z, session,
+# output, input, y, and id, but *not* x. Definitions not masked are
+# resolved in the environment in which testServer() is called.
+#
+# env is cloned because rlang::new_data_mask() mutates the parent of its `top`
+# argument.
+#' @importFrom rlang env_clone
+buildMask <- function(env) {
+  if (identical(parent.env(env), emptyenv()))
+    stop("env must have a non-empty parent")
+  clone <- env_clone(env, env_clone(parent.env(env), emptyenv()))
+  rlang::new_data_mask(clone, parent.env(clone))
 }
 
 #' @noRd
@@ -112,7 +130,7 @@ testServer <- function(app, expr, ...) {
     withReactiveDomain(
       session,
       withr::with_options(list(`shiny.allowoutputreads` = TRUE), {
-        rlang::eval_tidy(quosure, makeMask(session$env), rlang::caller_env())
+        rlang::eval_tidy(quosure, buildMask(session$env), rlang::caller_env())
       })
     )
   )

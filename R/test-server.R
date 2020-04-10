@@ -82,7 +82,6 @@ isModuleServer <- function(x) {
 testServer <- function(app, expr, ...) {
 
   args <- rlang::list2(...)
-
   session <- getDefaultReactiveDomain()
 
   if (inherits(session, "MockShinySession"))
@@ -97,30 +96,48 @@ testServer <- function(app, expr, ...) {
   if (isModuleServer(app)) {
     if (!("id" %in% names(args)))
       args[["id"]] <- session$genId()
+    # app is presumed to be a module, and modules may take additional arguments,
+    # so splice in any args.
+    isolate(
+      withReactiveDomain(
+        session,
+        withr::with_options(list(`shiny.allowoutputreads` = TRUE), {
+          rlang::exec(app, !!!args)
+        })
+      )
+    )
   } else {
     appobj <- as.shiny.appobj(app)
-    server <- appobj$serverFuncSource()
-    if (! "session" %in% names(formals(server)))
-      stop("Tested application server functions must declare input, output, and session arguments.")
-    body(server) <- rlang::expr({
-      session$setEnv(base::environment())
-      !!!body(server)
-    })
-    app <- function() {
-      session$setReturned(server(input = session$input, output = session$output, session = session))
-    }
-    if (length(args))
-      message("Discarding unused arguments to server function")
-  }
-
-  isolate(
-    withReactiveDomain(
-      session,
-      withr::with_options(list(`shiny.allowoutputreads` = TRUE), {
-        rlang::exec(app, !!!args)
+    if (!is.null(appobj$onStart))
+      appobj$onStart()
+    # Ensure appobj$onStop() is called, and the current directory is restored,
+    # regardless of whether invoking the server function is successful.
+    tryCatch({
+      server <- appobj$serverFuncSource()
+      if (! "session" %in% names(formals(server)))
+        stop("Tested application server functions must declare input, output, and session arguments.")
+      body(server) <- rlang::expr({
+        session$setEnv(base::environment())
+        !!!body(server)
       })
-    )
-  )
+      app <- function() {
+        session$setReturned(server(input = session$input, output = session$output, session = session))
+      }
+      if (length(args))
+        message("Discarding unused arguments to server function")
+      isolate(
+        withReactiveDomain(
+          session,
+          withr::with_options(list(`shiny.allowoutputreads` = TRUE), {
+            app()
+          })
+        )
+      )
+    }, finally = {
+      if (!is.null(appobj$onStop))
+        appobj$onStop()
+    })
+  }
 
   stopifnot(all(c("input", "output", "session") %in% ls(session$env)))
 

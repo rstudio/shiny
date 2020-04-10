@@ -1,0 +1,259 @@
+#' Generate a Shiny application from a template
+#'
+#' This function populates a directory with files for a Shiny application. They
+#' are based off of the "12_counter" example which can be run with
+#' `runExample()`.
+#'
+#' In an interactive R session, this function will, by default, prompt the user
+#' which components to add to the application.
+#'
+#' The full example application includes the following files and directories:
+#'
+#' ```
+#' appdir/
+#' ├── app.R
+#' ├── R
+#' │   ├── my-module.R
+#' │   └── utils.R
+#' └── tests
+#'     ├── server.R
+#'     ├── server
+#'     │   ├── test-mymodule.R
+#'     │   └── test-server.R
+#'     ├── shinytest.R
+#'     ├── shinytest
+#'     │   └── mytest.R
+#'     ├── testthat.R
+#'     └── testthat
+#'         ├── helper-load.R
+#'         └── test-utils.R
+#' ```
+#'
+#' Some notes about these files:
+#' * app.R is the main application file.
+#' * All files in the R/ subdirectory are automatically sourced when the
+#'   application is run.
+#' * The R/my-module.R file is automatically sourced when the application
+#'   is run. This file contains code for a [Shiny module](moduleServer()) which
+#'   is used in the application.
+#' * The tests/ directory contains various tests for the application. You may
+#'   choose to use or remove any of them. They can be executed by the
+#'   [runTests()] function.
+#' * tests/server.R is a test runner for test files in
+#'   tests/server/.
+#' * tests/server/test-mymodule.R is a test for the module.
+#' * tests/shinytest.R is a test runner for test files in the
+#'   tests/shinytest/ directory.
+#' * tests/shinytest/mytest.R is a test that uses the
+#'   [shinytest](https://rstudio.github.io/shinytest/) package to do
+#'   snapshot-based testing.
+#' * tests/testthat.R is a test runner for test files in the
+#'   tests/testthat/ directory.
+#' * tests/testthat/helper-load.R is a helper script that is automatically
+#'   loaded before running test-counter.R. (This is performed by the testthat
+#'   package.)
+#' * tests/testthat/test-utils.R is a set of tests that use the
+#'   [testthat](https://testthat.r-lib.org/) package for testing.
+#'
+#' @param path Path to create new shiny application template.
+#' @param examples Either one of "default", "ask", "all", or any combination of
+#'   "app", "rdir", "module", "shinytest", "testthat", and "server". In an
+#'   interactive session, "default" falls back to "ask"; in a non-interactive
+#'   session, "default" falls back to "all". With "ask", this function will
+#'   prompt the user to select which template items will be added to the new app
+#'   directory. With "all", all template items will be added to the app
+#'   directory.
+#'
+#' @export
+shinyAppTemplate <- function(path = NULL, examples = "default")
+{
+  choices <- c(
+    app       = "app.R            : Main application file",
+    rdir      = "R/utils.R        : Helper file with R code",
+    module    = "R/my-module.R    : Example module",
+    shinytest = "tests/shinytest/ : Tests using shinytest package",
+    testthat  = "tests/testthat/  : Tests using testthat",
+    server    = "tests/server/    : Tests of server and module code"
+  )
+
+  if (length(examples) == 1 && examples == "default") {
+    if (interactive()) {
+      examples <- "ask"
+    } else {
+      examples <- "all"
+    }
+  }
+
+  if (!identical(examples, "ask") &&
+      !identical(examples, "all") &&
+      any(! examples %in% names(choices)))
+  {
+    stop('`examples` must be one of "default", "ask", "all", or any combination of "',
+      paste(names(choices), collapse = '", "'), '".')
+  }
+
+  if (identical(examples, "ask")) {
+    response <- select_menu(
+      c(all = "All", choices),
+      title = paste0(
+        "Select which of the following to add at ", path, "/ :"
+      ),
+      msg = "Enter one or more numbers (with spaces), or an empty line to exit: \n"
+    )
+
+    examples <- names(response)
+  }
+
+  if ("all" %in% examples) {
+    examples <- names(choices)
+  }
+
+  if (length(examples) == 0) {
+    return(invisible())
+  }
+
+  # Check if a directory is empty, ignoring certain files
+  dir_is_empty <- function(path) {
+    files <- list.files(path, all.files = TRUE, no.. = TRUE)
+    # Ignore .DS_Store files, which are sometimes automatically created on macOS
+    files <- setdiff(files, ".DS_Store")
+    return(length(files) != 0)
+  }
+
+  # Helper to resolve paths relative to our example
+  example_path <- function(path) {
+    system.file("examples", "12_counter", path, package = "shiny")
+  }
+
+  # Helper to remove rdir code from a file
+  remove_rdir_code <- function(filename) {
+    txt <- readLines(filename)
+    txt <- txt[!grepl("# lexical_sort from R/utils.R", txt)]
+    txt <- sub("Lexically sorted sequence", "Sorted sequence", txt, fixed = TRUE)
+    txt <- sub("lexical_sort", "sort", txt, fixed = TRUE)
+    # Write with \n line endings on all platforms
+    con <- file(filename, open="wb")
+    writeLines(txt, con)
+    close(con)
+  }
+
+  # Helper to remove module code from a file
+  remove_module_code <- function(filename) {
+    txt <- readLines(filename)
+    start_lines <- grep("^ +# =+ Modules =+$", txt)
+    stop_lines  <- grep("^ +# =+$", txt)
+    if (length(start_lines) != length(stop_lines)) {
+      stop("Start and end markers are unbalanced.")
+    }
+    if (length(start_lines) == 0) {
+      return()
+    }
+    drop_lines <- unlist(lapply(seq_along(start_lines), function(i) {
+      seq(start_lines[i], stop_lines[i])
+    }))
+    # Write with \n line endings on all platforms
+    con <- file(filename, open="wb")
+    writeLines(txt[-drop_lines], con)
+    close(con)
+  }
+
+  # Copy the files for a tests/ subdirectory
+  copy_test_dir <- function(name, with_rdir, with_module) {
+    tests_dir <- file.path(path, "tests")
+    if (!dirExists(tests_dir)) {
+      dir.create(tests_dir, recursive = TRUE)
+    }
+    files <- dir(example_path("tests"), recursive = TRUE)
+    # Note: This is not the same as using dir(pattern = "^shinytest"), since
+    # that will not match files inside of shinytest/.
+    files <- files[grepl(paste0("^", name), files)]
+
+    # Filter out files related to R/utils.R, if applicable.
+    if (!with_rdir) {
+      files <- files[!grepl("utils", files)]
+    }
+
+    # Filter out module files, if applicable.
+    if (!with_module) {
+      files <- files[!grepl("module", files)]
+    }
+
+    # Create any subdirectories if needed
+    dirs <- setdiff(unique(dirname(files)), ".")
+    for (dir in dirs) {
+      dir.create(file.path(tests_dir, dir), recursive = TRUE)
+    }
+
+    file.copy(
+      file.path(example_path("tests"), files),
+      file.path(path, "tests", files)
+    )
+  }
+
+
+  if (is.null(path)) {
+    stop("`path` is missing.")
+  }
+  if (file.exists(path) && !dir.exists(path)) {
+    stop(path, " exists but is not a directory.")
+  }
+
+  if (dir.exists(path) && dir_is_empty(path)) {
+    if (interactive()) {
+      response <- readline(paste0(
+        ensure_trailing_slash(path),
+        " is not empty. Do you want to create a Shiny app in this directory anyway? [y/n] "
+      ))
+      if (tolower(response) != "y") {
+        return(invisible())
+      }
+    }
+  } else {
+    dir.create(path)
+  }
+
+  # app.R - If "app", populate with example; otherwise use empty file.
+  app_file <- file.path(path, "app.R")
+  if ("app" %in% examples) {
+    if (file.exists(app_file)) {
+      message(app_file, " already exists")
+    }
+    file.copy(example_path("app.R"), path)
+
+    if (!"rdir" %in% examples) {
+      remove_rdir_code(app_file)
+    }
+    if (!"module" %in% examples) {
+      remove_module_code(app_file)
+    }
+  }
+
+  # R/ dir with utils and/or module
+  r_dir <- file.path(path, "R")
+  if ("rdir" %in% examples) {
+    if (!dirExists(r_dir)) {
+      dir.create(r_dir, recursive = TRUE)
+    }
+    file.copy(example_path("R/utils.R"), r_dir, recursive = TRUE)
+  }
+  if ("module" %in% examples) {
+    if (!dirExists(r_dir)) {
+      dir.create(r_dir, recursive = TRUE)
+    }
+    file.copy(example_path("R/my-module.R"), r_dir, recursive = TRUE)
+  }
+
+  # tests/ dir
+  if ("shinytest" %in% examples) {
+    copy_test_dir("shinytest", "rdir" %in% examples, "module" %in% examples)
+  }
+  if ("testthat" %in% examples) {
+    copy_test_dir("testthat", "rdir" %in% examples, "module" %in% examples)
+  }
+  if ("server" %in% examples) {
+    copy_test_dir("server", "rdir" %in% examples, "module" %in% examples)
+  }
+  if ("app" %in% examples) {
+    message("Shiny application created at ", ensure_trailing_slash(path))
+  }
+}

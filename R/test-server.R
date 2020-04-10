@@ -102,6 +102,11 @@ testServer <- function(app, expr, ...) {
     server <- appobj$serverFuncSource()
     if (! "session" %in% names(formals(server)))
       stop("Tested application server functions must declare input, output, and session arguments.")
+    appEnv <- new.env(parent = rlang::caller_env())
+    if (is.character(app)) {
+      loadSupport(app, appEnv, appEnv)
+      environment(server) <- appEnv
+    }
     body(server) <- rlang::expr({
       session$setEnv(base::environment())
       !!!body(server)

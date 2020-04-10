@@ -402,12 +402,18 @@ MockShinySession <- R6Class(
         setInputs = function(...) do.call(self$setInputs, mapNames(ns, ...))
       )
     },
-    #' @description Set the environment associated with a testServer() call.
+    #' @description Set the environment associated with a testServer() call, but
+    #'   only if it has not previously been set. This ensures that only the
+    #'   environment of the outermost module under test is the one retained. In
+    #'   other words, the first assignment wins.
     #' @param env The environment to retain.
     setEnv = function(env) {
-      self$env <- env
+      if (is.null(self$env)) self$env <- env
     },
-    #' @description Set the value returned by the module call and proactively flush.
+    #' @description Set the value returned by the module call and proactively
+    #'   flush. Note that this method may be called multiple times if modules
+    #'   are nested. The last assignment, corresponding to an invocation of
+    #'   setReturned() in the outermost module, wins.
     #' @param value The value returned from the module
     setReturned = function(value) {
       self$returned <- value

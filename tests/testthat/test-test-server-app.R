@@ -35,3 +35,49 @@ test_that("runApp works with a dir app that calls modules and uses testServer", 
   run <- runTests(app)
   expect_true(all(run$pass))
 })
+
+test_that("a Shiny app object with a module inside can be tested", {
+
+  counterUI <- function(id, label = "Counter") {
+    ns <- NS(id)
+    tagList(
+      actionButton(ns("button"), label = label),
+      verbatimTextOutput(ns("out"))
+    )
+  }
+
+  counterServer <- function(id) {
+    moduleServer(
+      id,
+      function(input, output, session) {
+        count <- reactiveVal(0)
+        observeEvent(input$button, {
+          count(count() + 1)
+        })
+        output$out <- renderText({
+          count()
+        })
+        count
+      }
+    )
+  }
+
+  ui <- fluidPage(
+    textInput("number", "A number"),
+    textOutput("numberDoubled"),
+    counterUI("counter1", "Counter #1"),
+    counterUI("counter2", "Counter #2")
+  )
+  server <- function(input, output, session) {
+    counterServer("counter1")
+    counterServer("counter2")
+    doubled <- reactive( { as.integer(input$number) * 2 })
+    output$numberDoubled <- renderText({ doubled() })
+  }
+  app <- shinyApp(ui, server)
+
+  testServer(app, {
+    session$setInputs(number = "42")
+    expect_equal(doubled(), 84)
+  })
+})

@@ -14,7 +14,7 @@
 #' ├── app.R
 #' ├── R
 #' │   ├── my-module.R
-#' │   └── utils.R
+#' │   └── sort.R
 #' └── tests
 #'     ├── server.R
 #'     ├── server
@@ -26,7 +26,7 @@
 #'     ├── testthat.R
 #'     └── testthat
 #'         ├── helper-load.R
-#'         └── test-utils.R
+#'         └── test-sort.R
 #' ```
 #'
 #' Some notes about these files:
@@ -52,7 +52,7 @@
 #' * tests/testthat/helper-load.R is a helper script that is automatically
 #'   loaded before running test-counter.R. (This is performed by the testthat
 #'   package.)
-#' * tests/testthat/test-utils.R is a set of tests that use the
+#' * tests/testthat/test-sort.R is a set of tests that use the
 #'   [testthat](https://testthat.r-lib.org/) package for testing.
 #'
 #' @param path Path to create new shiny application template.
@@ -69,7 +69,7 @@ shinyAppTemplate <- function(path = NULL, examples = "default")
 {
   choices <- c(
     app       = "app.R            : Main application file",
-    rdir      = "R/utils.R        : Helper file with R code",
+    rdir      = "R/sort.R         : Helper file with R code",
     module    = "R/my-module.R    : Example module",
     shinytest = "tests/shinytest/ : Tests using shinytest package",
     testthat  = "tests/testthat/  : Tests using testthat",
@@ -128,7 +128,7 @@ shinyAppTemplate <- function(path = NULL, examples = "default")
   # Helper to remove rdir code from a file
   remove_rdir_code <- function(filename) {
     txt <- readLines(filename)
-    txt <- txt[!grepl("# lexical_sort from R/utils.R", txt)]
+    txt <- txt[!grepl("# lexical_sort from R/sort.R", txt)]
     txt <- sub("Lexically sorted sequence", "Sorted sequence", txt, fixed = TRUE)
     txt <- sub("lexical_sort", "sort", txt, fixed = TRUE)
     # Write with \n line endings on all platforms
@@ -168,7 +168,7 @@ shinyAppTemplate <- function(path = NULL, examples = "default")
     # that will not match files inside of shinytest/.
     files <- files[grepl(paste0("^", name), files)]
 
-    # Filter out files related to R/utils.R, if applicable.
+    # Filter out files related to R/sort.R, if applicable.
     if (!with_rdir) {
       files <- files[!grepl("utils", files)]
     }
@@ -234,7 +234,7 @@ shinyAppTemplate <- function(path = NULL, examples = "default")
     if (!dirExists(r_dir)) {
       dir.create(r_dir, recursive = TRUE)
     }
-    file.copy(example_path("R/utils.R"), r_dir, recursive = TRUE)
+    file.copy(example_path("R/sort.R"), r_dir, recursive = TRUE)
   }
   if ("module" %in% examples) {
     if (!dirExists(r_dir)) {

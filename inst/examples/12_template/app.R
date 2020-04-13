@@ -19,7 +19,7 @@ server <- function(input, output, session) {
   # =========================
 
   data <- reactive({
-    # lexical_sort from R/utils.R
+    # lexical_sort from R/sort.R
     lexical_sort(seq_len(input$size))
   })
   output$sequence <- renderText({

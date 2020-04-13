@@ -1,7 +1,7 @@
 #' Generate a Shiny application from a template
 #'
 #' This function populates a directory with files for a Shiny application. They
-#' are based off of the "12_counter" example which can be run with
+#' are based off of the "12_template" example which can be run with
 #' `runExample()`.
 #'
 #' In an interactive R session, this function will, by default, prompt the user
@@ -122,7 +122,7 @@ shinyAppTemplate <- function(path = NULL, examples = "default")
 
   # Helper to resolve paths relative to our example
   example_path <- function(path) {
-    system.file("examples", "12_counter", path, package = "shiny")
+    system.file("examples", "12_template", path, package = "shiny")
   }
 
   # Helper to remove rdir code from a file

@@ -343,17 +343,10 @@ loadSupport <- function(appDir, renv=new.env(parent=globalenv()), globalrenv=glo
 
   disabled <- list.files(helpersDir, pattern="^_disable_autoload\\.r$", recursive=FALSE, ignore.case=TRUE)
   if (length(disabled) > 0){
-    message("R/_disable_autoload.R detected; not loading the R/ directory automatically")
     return(invisible(renv))
   }
 
   helpers <- list.files(helpersDir, pattern="\\.[rR]$", recursive=FALSE, full.names=TRUE)
-
-  if (length(helpers) > 0){
-    message("Automatically loading ", length(helpers), " .R file",
-            ifelse(length(helpers) != 1, "s", ""),
-            " found in the R/ directory.\nSee https://rstd.io/shiny-autoload for more info.")
-  }
 
   lapply(helpers, sourceUTF8, envir=renv)
 

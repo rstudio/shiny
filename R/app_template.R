@@ -30,29 +30,30 @@
 #' ```
 #'
 #' Some notes about these files:
-#' * app.R is the main application file.
-#' * All files in the R/ subdirectory are automatically sourced when the
+#' * `app.R` is the main application file.
+#' * All files in the `R/` subdirectory are automatically sourced when the
 #'   application is run.
-#' * The R/my-module.R file is automatically sourced when the application
-#'   is run. This file contains code for a [Shiny module](moduleServer()) which
+#' * `R/sort.R` and `R/my-module.R` are automatically sourced when
+#'   the application is run. The first contains a function `lexical_sort()`,
+#'   and the second contains code for a [Shiny module](moduleServer()) which
 #'   is used in the application.
-#' * The tests/ directory contains various tests for the application. You may
+#' * `tests/` contains various tests for the application. You may
 #'   choose to use or remove any of them. They can be executed by the
 #'   [runTests()] function.
-#' * tests/server.R is a test runner for test files in
-#'   tests/server/.
-#' * tests/server/test-mymodule.R is a test for the module.
-#' * tests/shinytest.R is a test runner for test files in the
-#'   tests/shinytest/ directory.
-#' * tests/shinytest/mytest.R is a test that uses the
+#' * `tests/server.R` is a test runner for test files in
+#'   `tests/server/`.
+#' * `tests/server/test-mymodule.R` is a test for the module.
+#' * `tests/shinytest.R` is a test runner for test files in the
+#'   `tests/shinytest/` directory.
+#' * `tests/shinytest/mytest.R` is a test that uses the
 #'   [shinytest](https://rstudio.github.io/shinytest/) package to do
 #'   snapshot-based testing.
-#' * tests/testthat.R is a test runner for test files in the
-#'   tests/testthat/ directory.
-#' * tests/testthat/helper-load.R is a helper script that is automatically
-#'   loaded before running test-counter.R. (This is performed by the testthat
+#' * `tests/testthat.R` is a test runner for test files in the
+#'   `tests/testthat/` directory.
+#' * `tests/testthat/helper-load.R` is a helper script that is automatically
+#'   loaded before running `test-mymodule.`R. (This is performed by the testthat
 #'   package.)
-#' * tests/testthat/test-sort.R is a set of tests that use the
+#' * `tests/testthat/test-sort.R` is a set of tests that use the
 #'   [testthat](https://testthat.r-lib.org/) package for testing.
 #'
 #' @param path Path to create new shiny application template.
@@ -67,6 +68,10 @@
 #' @export
 shinyAppTemplate <- function(path = NULL, examples = "default")
 {
+  if (is.null(path)) {
+    stop("Please provide a `path`.")
+  }
+
   choices <- c(
     app       = "app.R            : Main application file",
     rdir      = "R/sort.R         : Helper file with R code",
@@ -76,7 +81,7 @@ shinyAppTemplate <- function(path = NULL, examples = "default")
     server    = "tests/server/    : Tests of server and module code"
   )
 
-  if (length(examples) == 1 && examples == "default") {
+  if (identical(examples, "default")) {
     if (interactive()) {
       examples <- "ask"
     } else {
@@ -104,6 +109,8 @@ shinyAppTemplate <- function(path = NULL, examples = "default")
     examples <- names(response)
   }
 
+  examples <- unique(examples)
+
   if ("all" %in% examples) {
     examples <- names(choices)
   }
@@ -122,7 +129,7 @@ shinyAppTemplate <- function(path = NULL, examples = "default")
 
   # Helper to resolve paths relative to our example
   example_path <- function(path) {
-    system.file("examples", "12_template", path, package = "shiny")
+    system.file("app_template", path, package = "shiny")
   }
 
   # Helper to remove rdir code from a file
@@ -160,9 +167,8 @@ shinyAppTemplate <- function(path = NULL, examples = "default")
   # Copy the files for a tests/ subdirectory
   copy_test_dir <- function(name, with_rdir, with_module) {
     tests_dir <- file.path(path, "tests")
-    if (!dirExists(tests_dir)) {
-      dir.create(tests_dir, recursive = TRUE)
-    }
+    dir.create(tests_dir, showWarnings = FALSE, recursive = TRUE)
+
     files <- dir(example_path("tests"), recursive = TRUE)
     # Note: This is not the same as using dir(pattern = "^shinytest"), since
     # that will not match files inside of shinytest/.
@@ -181,7 +187,7 @@ shinyAppTemplate <- function(path = NULL, examples = "default")
     # Create any subdirectories if needed
     dirs <- setdiff(unique(dirname(files)), ".")
     for (dir in dirs) {
-      dir.create(file.path(tests_dir, dir), recursive = TRUE)
+      dir.create(file.path(tests_dir, dir), showWarnings = FALSE, recursive = TRUE)
     }
 
     file.copy(
@@ -231,15 +237,11 @@ shinyAppTemplate <- function(path = NULL, examples = "default")
   # R/ dir with utils and/or module
   r_dir <- file.path(path, "R")
   if ("rdir" %in% examples) {
-    if (!dirExists(r_dir)) {
-      dir.create(r_dir, recursive = TRUE)
-    }
+    dir.create(r_dir, showWarnings = FALSE, recursive = TRUE)
     file.copy(example_path("R/sort.R"), r_dir, recursive = TRUE)
   }
   if ("module" %in% examples) {
-    if (!dirExists(r_dir)) {
-      dir.create(r_dir, recursive = TRUE)
-    }
+    dir.create(r_dir, showWarnings = FALSE, recursive = TRUE)
     file.copy(example_path("R/my-module.R"), r_dir, recursive = TRUE)
   }
 

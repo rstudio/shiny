@@ -19,7 +19,7 @@ directory.}
 }
 \description{
 This function populates a directory with files for a Shiny application. They
-are based off of the "12_counter" example which can be run with
+are based off of the "12_template" example which can be run with
 \code{runExample()}.
 }
 \details{
@@ -30,7 +30,7 @@ The full example application includes the following files and directories:\prefo
 ├── app.R
 ├── R
 │   ├── my-module.R
-│   └── utils.R
+│   └── sort.R
 └── tests
     ├── server.R
     ├── server
@@ -42,34 +42,35 @@ The full example application includes the following files and directories:\prefo
     ├── testthat.R
     └── testthat
         ├── helper-load.R
-        └── test-utils.R
+        └── test-sort.R
 }
 
 Some notes about these files:
 \itemize{
-\item app.R is the main application file.
-\item All files in the R/ subdirectory are automatically sourced when the
+\item \code{app.R} is the main application file.
+\item All files in the \verb{R/} subdirectory are automatically sourced when the
 application is run.
-\item The R/my-module.R file is automatically sourced when the application
-is run. This file contains code for a \href{moduleServer()}{Shiny module} which
+\item \code{R/sort.R} and \code{R/my-module.R} are automatically sourced when
+the application is run. The first contains a function \code{lexical_sort()},
+and the second contains code for a \href{moduleServer()}{Shiny module} which
 is used in the application.
-\item The tests/ directory contains various tests for the application. You may
+\item \verb{tests/} contains various tests for the application. You may
 choose to use or remove any of them. They can be executed by the
 \code{\link[=runTests]{runTests()}} function.
-\item tests/server.R is a test runner for test files in
-tests/server/.
-\item tests/server/test-mymodule.R is a test for the module.
-\item tests/shinytest.R is a test runner for test files in the
-tests/shinytest/ directory.
-\item tests/shinytest/mytest.R is a test that uses the
+\item \code{tests/server.R} is a test runner for test files in
+\verb{tests/server/}.
+\item \code{tests/server/test-mymodule.R} is a test for the module.
+\item \code{tests/shinytest.R} is a test runner for test files in the
+\verb{tests/shinytest/} directory.
+\item \code{tests/shinytest/mytest.R} is a test that uses the
 \href{https://rstudio.github.io/shinytest/}{shinytest} package to do
 snapshot-based testing.
-\item tests/testthat.R is a test runner for test files in the
-tests/testthat/ directory.
-\item tests/testthat/helper-load.R is a helper script that is automatically
-loaded before running test-counter.R. (This is performed by the testthat
+\item \code{tests/testthat.R} is a test runner for test files in the
+\verb{tests/testthat/} directory.
+\item \code{tests/testthat/helper-load.R} is a helper script that is automatically
+loaded before running \code{test-mymodule.}R. (This is performed by the testthat
 package.)
-\item tests/testthat/test-utils.R is a set of tests that use the
+\item \code{tests/testthat/test-sort.R} is a set of tests that use the
 \href{https://testthat.r-lib.org/}{testthat} package for testing.
 }
 }

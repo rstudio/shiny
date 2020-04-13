@@ -1,8 +1,6 @@
 #' Generate a Shiny application from a template
 #'
-#' This function populates a directory with files for a Shiny application. They
-#' are based off of the "12_counter" example which can be run with
-#' `runExample()`.
+#' This function populates a directory with files for a Shiny application.
 #'
 #' In an interactive R session, this function will, by default, prompt the user
 #' which components to add to the application.
@@ -14,7 +12,7 @@
 #' ├── app.R
 #' ├── R
 #' │   ├── my-module.R
-#' │   └── utils.R
+#' │   └── sort.R
 #' └── tests
 #'     ├── server.R
 #'     ├── server
@@ -26,33 +24,34 @@
 #'     ├── testthat.R
 #'     └── testthat
 #'         ├── helper-load.R
-#'         └── test-utils.R
+#'         └── test-sort.R
 #' ```
 #'
 #' Some notes about these files:
-#' * app.R is the main application file.
-#' * All files in the R/ subdirectory are automatically sourced when the
+#' * `app.R` is the main application file.
+#' * All files in the `R/` subdirectory are automatically sourced when the
 #'   application is run.
-#' * The R/my-module.R file is automatically sourced when the application
-#'   is run. This file contains code for a [Shiny module](moduleServer()) which
+#' * `R/sort.R` and `R/my-module.R` are automatically sourced when
+#'   the application is run. The first contains a function `lexical_sort()`,
+#'   and the second contains code for a [Shiny module](moduleServer()) which
 #'   is used in the application.
-#' * The tests/ directory contains various tests for the application. You may
+#' * `tests/` contains various tests for the application. You may
 #'   choose to use or remove any of them. They can be executed by the
 #'   [runTests()] function.
-#' * tests/server.R is a test runner for test files in
-#'   tests/server/.
-#' * tests/server/test-mymodule.R is a test for the module.
-#' * tests/shinytest.R is a test runner for test files in the
-#'   tests/shinytest/ directory.
-#' * tests/shinytest/mytest.R is a test that uses the
+#' * `tests/server.R` is a test runner for test files in
+#'   `tests/server/`.
+#' * `tests/server/test-mymodule.R` is a test for the module.
+#' * `tests/shinytest.R` is a test runner for test files in the
+#'   `tests/shinytest/` directory.
+#' * `tests/shinytest/mytest.R` is a test that uses the
 #'   [shinytest](https://rstudio.github.io/shinytest/) package to do
 #'   snapshot-based testing.
-#' * tests/testthat.R is a test runner for test files in the
-#'   tests/testthat/ directory.
-#' * tests/testthat/helper-load.R is a helper script that is automatically
-#'   loaded before running test-counter.R. (This is performed by the testthat
+#' * `tests/testthat.R` is a test runner for test files in the
+#'   `tests/testthat/` directory.
+#' * `tests/testthat/helper-load.R` is a helper script that is automatically
+#'   loaded before running `test-mymodule.`R. (This is performed by the testthat
 #'   package.)
-#' * tests/testthat/test-utils.R is a set of tests that use the
+#' * `tests/testthat/test-sort.R` is a set of tests that use the
 #'   [testthat](https://testthat.r-lib.org/) package for testing.
 #'
 #' @param path Path to create new shiny application template.
@@ -67,16 +66,20 @@
 #' @export
 shinyAppTemplate <- function(path = NULL, examples = "default")
 {
+  if (is.null(path)) {
+    stop("Please provide a `path`.")
+  }
+
   choices <- c(
     app       = "app.R            : Main application file",
-    rdir      = "R/utils.R        : Helper file with R code",
+    rdir      = "R/sort.R         : Helper file with R code",
     module    = "R/my-module.R    : Example module",
     shinytest = "tests/shinytest/ : Tests using shinytest package",
     testthat  = "tests/testthat/  : Tests using testthat",
     server    = "tests/server/    : Tests of server and module code"
   )
 
-  if (length(examples) == 1 && examples == "default") {
+  if (identical(examples, "default")) {
     if (interactive()) {
       examples <- "ask"
     } else {
@@ -104,6 +107,8 @@ shinyAppTemplate <- function(path = NULL, examples = "default")
     examples <- names(response)
   }
 
+  examples <- unique(examples)
+
   if ("all" %in% examples) {
     examples <- names(choices)
   }
@@ -122,53 +127,20 @@ shinyAppTemplate <- function(path = NULL, examples = "default")
 
   # Helper to resolve paths relative to our example
   example_path <- function(path) {
-    system.file("examples", "12_counter", path, package = "shiny")
-  }
-
-  # Helper to remove rdir code from a file
-  remove_rdir_code <- function(filename) {
-    txt <- readLines(filename)
-    txt <- txt[!grepl("# lexical_sort from R/utils.R", txt)]
-    txt <- sub("Lexically sorted sequence", "Sorted sequence", txt, fixed = TRUE)
-    txt <- sub("lexical_sort", "sort", txt, fixed = TRUE)
-    # Write with \n line endings on all platforms
-    con <- file(filename, open="wb")
-    writeLines(txt, con)
-    close(con)
-  }
-
-  # Helper to remove module code from a file
-  remove_module_code <- function(filename) {
-    txt <- readLines(filename)
-    start_lines <- grep("^ +# =+ Modules =+$", txt)
-    stop_lines  <- grep("^ +# =+$", txt)
-    if (length(start_lines) != length(stop_lines)) {
-      stop("Start and end markers are unbalanced.")
-    }
-    if (length(start_lines) == 0) {
-      return()
-    }
-    drop_lines <- unlist(lapply(seq_along(start_lines), function(i) {
-      seq(start_lines[i], stop_lines[i])
-    }))
-    # Write with \n line endings on all platforms
-    con <- file(filename, open="wb")
-    writeLines(txt[-drop_lines], con)
-    close(con)
+    system.file("app_template", path, package = "shiny")
   }
 
   # Copy the files for a tests/ subdirectory
   copy_test_dir <- function(name, with_rdir, with_module) {
     tests_dir <- file.path(path, "tests")
-    if (!dirExists(tests_dir)) {
-      dir.create(tests_dir, recursive = TRUE)
-    }
+    dir.create(tests_dir, showWarnings = FALSE, recursive = TRUE)
+
     files <- dir(example_path("tests"), recursive = TRUE)
     # Note: This is not the same as using dir(pattern = "^shinytest"), since
     # that will not match files inside of shinytest/.
     files <- files[grepl(paste0("^", name), files)]
 
-    # Filter out files related to R/utils.R, if applicable.
+    # Filter out files related to R/sort.R, if applicable.
     if (!with_rdir) {
       files <- files[!grepl("utils", files)]
     }
@@ -181,7 +153,7 @@ shinyAppTemplate <- function(path = NULL, examples = "default")
     # Create any subdirectories if needed
     dirs <- setdiff(unique(dirname(files)), ".")
     for (dir in dirs) {
-      dir.create(file.path(tests_dir, dir), recursive = TRUE)
+      dir.create(file.path(tests_dir, dir), showWarnings = FALSE, recursive = TRUE)
     }
 
     file.copy(
@@ -216,30 +188,29 @@ shinyAppTemplate <- function(path = NULL, examples = "default")
   app_file <- file.path(path, "app.R")
   if ("app" %in% examples) {
     if (file.exists(app_file)) {
-      message(app_file, " already exists")
-    }
-    file.copy(example_path("app.R"), path)
+      message("Not writing ", app_file, "because file already exists.")
 
-    if (!"rdir" %in% examples) {
-      remove_rdir_code(app_file)
-    }
-    if (!"module" %in% examples) {
-      remove_module_code(app_file)
+    } else {
+      writeChar(
+        as.character(htmlTemplate(
+          example_path("app.R"),
+          rdir = "rdir" %in% examples,
+          module = "module" %in% examples
+        )),
+        con = app_file,
+        eos = NULL
+      )
     }
   }
 
   # R/ dir with utils and/or module
   r_dir <- file.path(path, "R")
   if ("rdir" %in% examples) {
-    if (!dirExists(r_dir)) {
-      dir.create(r_dir, recursive = TRUE)
-    }
-    file.copy(example_path("R/utils.R"), r_dir, recursive = TRUE)
+    dir.create(r_dir, showWarnings = FALSE, recursive = TRUE)
+    file.copy(example_path("R/sort.R"), r_dir, recursive = TRUE)
   }
   if ("module" %in% examples) {
-    if (!dirExists(r_dir)) {
-      dir.create(r_dir, recursive = TRUE)
-    }
+    dir.create(r_dir, showWarnings = FALSE, recursive = TRUE)
     file.copy(example_path("R/my-module.R"), r_dir, recursive = TRUE)
   }
 

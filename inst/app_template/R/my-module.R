@@ -1,4 +1,6 @@
 mymoduleUI <- function(id, label = "Counter") {
+  # Al uses of Shiny input/output IDs in the UI must be namespaced,
+  # as in ns("x").
   ns <- NS(id)
   tagList(
     actionButton(ns("button"), label = label),
@@ -7,6 +9,8 @@ mymoduleUI <- function(id, label = "Counter") {
 }
 
 mymoduleServer <- function(id) {
+  # moduleServer() wraps a function to create the server component of a
+  # module.
   moduleServer(
     id,
     function(input, output, session) {

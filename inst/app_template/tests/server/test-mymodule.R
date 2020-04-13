@@ -1,6 +1,7 @@
 # Use testthat just for expectations
 library(testthat)
 
+# See ?testServer for more information
 testServer(mymoduleServer, {
   # Set initial value of a button
   session$setInputs(button = 0)

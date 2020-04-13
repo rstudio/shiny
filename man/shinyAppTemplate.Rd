@@ -18,9 +18,7 @@ directory. With "all", all template items will be added to the app
 directory.}
 }
 \description{
-This function populates a directory with files for a Shiny application. They
-are based off of the "12_template" example which can be run with
-\code{runExample()}.
+This function populates a directory with files for a Shiny application.
 }
 \details{
 In an interactive R session, this function will, by default, prompt the user

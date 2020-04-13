@@ -1,8 +1,6 @@
 #' Generate a Shiny application from a template
 #'
-#' This function populates a directory with files for a Shiny application. They
-#' are based off of the "12_template" example which can be run with
-#' `runExample()`.
+#' This function populates a directory with files for a Shiny application.
 #'
 #' In an interactive R session, this function will, by default, prompt the user
 #' which components to add to the application.
@@ -132,38 +130,6 @@ shinyAppTemplate <- function(path = NULL, examples = "default")
     system.file("app_template", path, package = "shiny")
   }
 
-  # Helper to remove rdir code from a file
-  remove_rdir_code <- function(filename) {
-    txt <- readLines(filename)
-    txt <- txt[!grepl("# lexical_sort from R/sort.R", txt)]
-    txt <- sub("Lexically sorted sequence", "Sorted sequence", txt, fixed = TRUE)
-    txt <- sub("lexical_sort", "sort", txt, fixed = TRUE)
-    # Write with \n line endings on all platforms
-    con <- file(filename, open="wb")
-    writeLines(txt, con)
-    close(con)
-  }
-
-  # Helper to remove module code from a file
-  remove_module_code <- function(filename) {
-    txt <- readLines(filename)
-    start_lines <- grep("^ +# =+ Modules =+$", txt)
-    stop_lines  <- grep("^ +# =+$", txt)
-    if (length(start_lines) != length(stop_lines)) {
-      stop("Start and end markers are unbalanced.")
-    }
-    if (length(start_lines) == 0) {
-      return()
-    }
-    drop_lines <- unlist(lapply(seq_along(start_lines), function(i) {
-      seq(start_lines[i], stop_lines[i])
-    }))
-    # Write with \n line endings on all platforms
-    con <- file(filename, open="wb")
-    writeLines(txt[-drop_lines], con)
-    close(con)
-  }
-
   # Copy the files for a tests/ subdirectory
   copy_test_dir <- function(name, with_rdir, with_module) {
     tests_dir <- file.path(path, "tests")
@@ -222,15 +188,18 @@ shinyAppTemplate <- function(path = NULL, examples = "default")
   app_file <- file.path(path, "app.R")
   if ("app" %in% examples) {
     if (file.exists(app_file)) {
-      message(app_file, " already exists")
-    }
-    file.copy(example_path("app.R"), path)
+      message("Not writing ", app_file, "because file already exists.")
 
-    if (!"rdir" %in% examples) {
-      remove_rdir_code(app_file)
-    }
-    if (!"module" %in% examples) {
-      remove_module_code(app_file)
+    } else {
+      writeChar(
+        as.character(htmlTemplate(
+          example_path("app.R"),
+          rdir = "rdir" %in% examples,
+          module = "module" %in% examples
+        )),
+        con = app_file,
+        eos = NULL
+      )
     }
   }
 

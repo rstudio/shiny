@@ -22,6 +22,8 @@ var ShinyApp = function() {
   this.$nextRequestId = 0;
 
   this.$allowReconnect = false;
+
+  this.$invalidateOutputQueue = [];
 };
 
 (function() {
@@ -314,6 +316,8 @@ var ShinyApp = function() {
     evt.name = name;
     evt.value = value;
     evt.binding = binding;
+
+    delete this.$invalidateOutputQueue[name];
 
     if (this.$values[name] === value) {
       $(binding ? binding.el : document).trigger(evt);
@@ -1049,6 +1053,8 @@ var ShinyApp = function() {
           name: key
         });
         if (binding.showProgress) binding.showProgress(true);
+      } else {
+        this.$invalidateOutputQueue[key] = true;
       }
     },
 

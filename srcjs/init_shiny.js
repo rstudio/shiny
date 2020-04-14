@@ -31,6 +31,16 @@ function initShiny() {
           continue;
         }
 
+        if (shinyapp.$invalidateOutputQueue[id]) {
+          $el.trigger({
+            type: 'shiny:outputinvalidated',
+            binding: binding,
+            name: id
+          });
+          if (binding.showProgress) binding.showProgress(true);
+        }
+        delete shinyapp.$invalidateOutputQueue[id];
+
         var bindingAdapter = new OutputBindingAdapter(el, binding);
         shinyapp.bindOutput(id, bindingAdapter);
         $el.data('shiny-output-binding', bindingAdapter);
@@ -69,6 +79,7 @@ function initShiny() {
         binding: bindingAdapter.binding,
         bindingType: 'output'
       });
+      delete shinyapp.$invalidateOutputQueue[id];
     }
 
     // Send later in case DOM layout isn't final yet.

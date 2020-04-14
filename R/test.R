@@ -84,6 +84,8 @@ runTests <- function(appDir=".", filter=NULL){
 
   # See the @details section of the runTests() docs above for why this branch exists.
   if (all(isST)){
+    # TODO-barret throw error instead of supporting legacy setup
+
     # just call out to shinytest
     # We don't need to message/warn here since shinytest already does it.
     if (!requireNamespace("shinytest", quietly=TRUE) ){

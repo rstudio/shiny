@@ -28,7 +28,7 @@ The full example application includes the following files and directories:\prefo
 |- app.R
 |- R
 |   |- my-module.R
-|   |-- sort.R
+|   |- sort.R
 `-- tests
     |- server.R
     |- server

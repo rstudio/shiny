@@ -135,5 +135,43 @@ runTests <- function(appDir=".", filter=NULL){
         err
       })
     result_row(r, pass, list(result))
-  })))
+  }))
+
+
+
+
+print.shiny_runtests <- function(x, ..., reporter = "summary") {
+
+  cat("Shiny Run Tests\n")
+
+  if (any(x$pass)) {
+    cat("* Success\n")
+    mapply(
+      x$file,
+      x$pass,
+      x$result,
+      FUN = function(file, pass, result) {
+        if (!pass) return()
+        # print(result)
+        cat("  - ", basename(file), "\n", sep = "")
+      }
+    )
+  }
+  if (any(!x$pass)) {
+    cat("* Failure\n")
+    mapply(
+      x$file,
+      x$pass,
+      x$result,
+      FUN = function(file, pass, result) {
+        if (pass) return()
+        # print(result)
+        cat("  - ", basename(file), "\n", sep = "")
+      }
+    )
+
+    # stop("Test failures", call. = FALSE)
+  }
+
+  invisible(x)
 }

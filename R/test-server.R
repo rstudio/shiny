@@ -108,7 +108,7 @@ testServer <- function(app = ".", expr, ...) {
         !!!body(server)
       })
       if (length(args))
-        message("Discarding unused arguments to server function")
+        stop("Arguments were provided to a server function.")
       isolate(
         withReactiveDomain(
           session,

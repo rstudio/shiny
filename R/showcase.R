@@ -104,20 +104,18 @@ navTabsDropdown <- function(files) {
 
 tabContentHelper <- function(files, path, language) {
   lapply(files, function(file) {
-    with(tags,
-      div(class=paste("tab-pane",
+      tags$div(class=paste("tab-pane",
                       if (tolower(file) %in% c("app.r", "server.r")) " active"
                       else "",
                       sep=""),
           id=paste(gsub(".", "_", file, fixed=TRUE),
                    "_code", sep=""),
-          pre(class="shiny-code",
+          tags$pre(class="shiny-code",
               # we need to prevent the indentation of <code> ... </code>
               HTML(format(tags$code(
                 class=paste0("language-", language),
                 paste(readUTF8(file.path.ci(path, file)), collapse="\n")
               ), indent = FALSE))))
-    )
   })
 }
 

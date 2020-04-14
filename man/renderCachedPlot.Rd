@@ -35,7 +35,7 @@ information on the default sizing policy.}
 a \code{\link[=diskCache]{diskCache()}}. See the Cache Scoping section for more
 information.}
 
-\item{...}{Arguments to be passed through to \code{\link[grDevices:png]{grDevices::png()}}.
+\item{...}{Arguments to be passed through to \code{device}.
 These can be used to set the width, height, background color, etc.}
 
 \item{outputArgs}{A list of arguments to be passed through to the implicit

@@ -295,6 +295,7 @@ renderCachedPlot <- function(expr,
   res = 72,
   cache = "app",
   ...,
+  device = getShinyOption("shiny.device", shinyDevice()),
   outputArgs = list()
 ) {
 
@@ -399,7 +400,8 @@ renderCachedPlot <- function(expr,
             width = width,
             height = height,
             pixelratio = pixelratio,
-            res = res
+            res = res,
+            device = device
           ),
           args
         ))

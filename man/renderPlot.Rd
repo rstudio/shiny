@@ -10,6 +10,7 @@ renderPlot(
   height = "auto",
   res = 72,
   ...,
+  device = getShinyOption("shiny.device", shinyDevice()),
   env = parent.frame(),
   quoted = FALSE,
   execOnResize = FALSE,
@@ -34,11 +35,15 @@ When rendering an inline plot, you must provide numeric values (in pixels)
 to both \code{width} and \code{height}.}
 
 \item{res}{Resolution of resulting plot, in pixels per inch. This value is
-passed to \code{\link[grDevices:png]{grDevices::png()}}. Note that this affects the resolution of PNG
+passed to \code{device}. Note that this affects the resolution of PNG
 rendering in R; it won't change the actual ppi of the browser.}
 
-\item{...}{Arguments to be passed through to \code{\link[grDevices:png]{grDevices::png()}}.
+\item{...}{Arguments to be passed through to \code{device}.
 These can be used to set the width, height, background color, etc.}
+
+\item{device}{A function that opens a png graphics device.
+The default (i.e., \code{shinyDevice()}) depends on the system's capabilities.
+See \code{\link[=plotPNG]{plotPNG()}} for more information.}
 
 \item{env}{The environment in which to evaluate \code{expr}.}
 

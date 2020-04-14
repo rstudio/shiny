@@ -1,28 +1,24 @@
-startPNG <- function(filename, width, height, res, ...) {
+startPNG <- function(filename, width, height, res, ..., device) {
+  if (!is.function(device)) {
+    stop("The `device` argument must be a function", call. = FALSE)
+  }
+
   args <- rlang::list2(filename=filename, width=width, height=height, res=res, ...)
 
   if (is.null(args$bg)) {
     args$bg <- getCurrentOutputInfo()[["bg"]] %OR% "white"
   }
 
-  # If quartz is available, use png() (which will default to quartz).
-  # Otherwise, if the Cairo package is installed, use CairoPNG().
-  # Finally, if neither quartz nor Cairo, use png().
-  if (capabilities("aqua")) {
-    pngfun <- grDevices::png
-  } else if ((getOption('shiny.useragg') %OR% TRUE) &&
-             nchar(system.file(package = "ragg"))) {
-    pngfun <- ragg::agg_png
-    args$background <- args$background %OR% args$bg
+  # https://github.com/r-lib/ragg/issues/35
+  fmls <- names(formals(device))
+  if (("background" %in% fmls) && (!"bg" %in% fmls)) {
+    if (is.null(args$background)) {
+      args$background <- args$bg
+    }
     args$bg <- NULL
-  } else if ((getOption('shiny.usecairo') %OR% TRUE) &&
-             nchar(system.file(package = "Cairo"))) {
-    pngfun <- Cairo::CairoPNG
-  } else {
-    pngfun <- grDevices::png
   }
 
-  do.call(pngfun, args)
+  do.call(device, args)
   # Call plot.new() so that even if no plotting operations are performed at
   # least we have a blank background. N.B. we need to set the margin to 0
   # temporarily before plot.new() because when the plot size is small (e.g.
@@ -39,22 +35,29 @@ startPNG <- function(filename, width, height, res, ...) {
   grDevices::dev.cur()
 }
 
+shinyDevice <- function() {
+  if (capabilities("aqua")) {
+    grDevices::png
+  } else if ((getOption('shiny.usecairo') %OR% TRUE) &&
+             nchar(system.file(package = "Cairo"))) {
+    Cairo::CairoPNG
+  } else {
+    grDevices::png
+  }
+}
+
+
 #' Run a plotting function and save the output as a PNG
 #'
 #' This function returns the name of the PNG file that it generates. In
-#' essence, it calls `png()`, then `func()`, then `dev.off()`.
+#' essence, it calls `device()`, then `func()`, then `dev.off()`.
 #' So `func` must be a function that will generate a plot when used this
 #' way.
 #'
-#' For output, it will try to use the following devices, in this order:
-#' quartz (via [grDevices::png()]), then [Cairo::CairoPNG()],
-#' and finally [grDevices::png()]. This is in order of quality of
-#' output. Notably, plain `png` output on Linux and Windows may not
-#' antialias some point shapes, resulting in poor quality output.
-#'
-#' In some cases, `Cairo()` provides output that looks worse than
-#' `png()`. To disable Cairo output for an app, use
-#' `options(shiny.usecairo=FALSE)`.
+#' The default `device` (i.e., `shinyDevice()`) is determined as follows:
+#'  * If [quartz()] is operational, then [png()].
+#'  * If installed and `options(shiny.usecairo=TRUE)` (the default), then [Cairo::CairoPNG()].
+#'  * Otherwise, [png()].
 #'
 #' @param func A function that generates a plot.
 #' @param filename The name of the output file. Defaults to a temp file with
@@ -62,14 +65,16 @@ startPNG <- function(filename, width, height, res, ...) {
 #' @param width Width in pixels.
 #' @param height Height in pixels.
 #' @param res Resolution in pixels per inch. This value is passed to
-#'   [grDevices::png()]. Note that this affects the resolution of PNG rendering in
+#'   `device`. Note that this affects the resolution of PNG rendering in
 #'   R; it won't change the actual ppi of the browser.
-#' @param ... Arguments to be passed through to [grDevices::png()].
+#' @param ... Arguments to be passed through to `device`.
 #'   These can be used to set the width, height, background color, etc.
+#' @param device A function that opens a png graphics device (e.g., [png()]).
 #' @export
 plotPNG <- function(func, filename=tempfile(fileext='.png'),
-                    width=400, height=400, res=72, ...) {
-  dv <- startPNG(filename, width, height, res, ...)
+                    width=400, height=400, res=72, ...,
+                    device=getShinyOption("shiny.device", shinyDevice())) {
+  dv <- startPNG(filename, width, height, res, ..., device = device)
   on.exit(grDevices::dev.off(dv), add = TRUE)
   func()
 

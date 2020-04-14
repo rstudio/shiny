@@ -10,7 +10,8 @@ plotPNG(
   width = 400,
   height = 400,
   res = 72,
-  ...
+  ...,
+  device = getShinyOption("shiny.device", shinyDevice())
 )
 }
 \arguments{
@@ -24,26 +25,25 @@ extension \code{.png}.}
 \item{height}{Height in pixels.}
 
 \item{res}{Resolution in pixels per inch. This value is passed to
-\code{\link[grDevices:png]{grDevices::png()}}. Note that this affects the resolution of PNG rendering in
+\code{device}. Note that this affects the resolution of PNG rendering in
 R; it won't change the actual ppi of the browser.}
 
-\item{...}{Arguments to be passed through to \code{\link[grDevices:png]{grDevices::png()}}.
+\item{...}{Arguments to be passed through to \code{device}.
 These can be used to set the width, height, background color, etc.}
+
+\item{device}{A function that opens a png graphics device (e.g., \code{\link[=png]{png()}}).}
 }
 \description{
 This function returns the name of the PNG file that it generates. In
-essence, it calls \code{png()}, then \code{func()}, then \code{dev.off()}.
+essence, it calls \code{device()}, then \code{func()}, then \code{dev.off()}.
 So \code{func} must be a function that will generate a plot when used this
 way.
 }
 \details{
-For output, it will try to use the following devices, in this order:
-quartz (via \code{\link[grDevices:png]{grDevices::png()}}), then \code{\link[Cairo:CairoPNG]{Cairo::CairoPNG()}},
-and finally \code{\link[grDevices:png]{grDevices::png()}}. This is in order of quality of
-output. Notably, plain \code{png} output on Linux and Windows may not
-antialias some point shapes, resulting in poor quality output.
-
-In some cases, \code{Cairo()} provides output that looks worse than
-\code{png()}. To disable Cairo output for an app, use
-\code{options(shiny.usecairo=FALSE)}.
+The default \code{device} (i.e., \code{shinyDevice()}) is determined as follows:
+\itemize{
+\item If \code{\link[=quartz]{quartz()}} is operational, then \code{\link[=png]{png()}}.
+\item If installed and \code{options(shiny.usecairo=TRUE)} (the default), then \code{\link[Cairo:CairoPNG]{Cairo::CairoPNG()}}.
+\item Otherwise, \code{\link[=png]{png()}}.
+}
 }

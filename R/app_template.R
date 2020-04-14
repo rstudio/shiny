@@ -12,7 +12,7 @@
 #' |- app.R
 #' |- R
 #' |   |- my-module.R
-#' |   |-- sort.R
+#' |   |- sort.R
 #' `-- tests
 #'     |- server.R
 #'     |- server

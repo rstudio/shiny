@@ -1,33 +1,3 @@
-# Constructs an rlang::eval_tidy() data mask with semantics appropriate for use
-# in testServer().
-#
-# env is assumed to be session$env, or the environment captured by invoking a
-# module under test.
-#
-# Consider the following module definition and its enclosing environment:
-#
-# x <- 1
-# m <- function(id) {
-#   y <- 2
-#   moduleServer(id, function(input, output, session){
-#     z <- 3
-#   })
-# }
-#
-# The data mask returned by this function should include z, session,
-# output, input, y, and id, but *not* x. Definitions not masked are
-# resolved in the environment in which testServer() is called.
-#
-# env is cloned because rlang::new_data_mask() mutates the parent of its `top`
-# argument.
-#' @importFrom rlang env_clone
-buildMask <- function(env) {
-  if (identical(parent.env(env), emptyenv()))
-    stop("env must have a non-empty parent")
-  clone <- env_clone(env, env_clone(parent.env(env), emptyenv()))
-  rlang::new_data_mask(clone, parent.env(clone))
-}
-
 #' @noRd
 isModuleServer <- function(x) {
   is.function(x) && names(formals(x))[1] == "id"
@@ -41,7 +11,8 @@ isModuleServer <- function(x) {
 #' @param app The path to an application or module to test. In addition to
 #'   paths, applications may be represented by any object suitable for coercion
 #'   to an `appObj` by `as.shiny.appobj`. Application server functions must
-#'   include a `session` argument in order to be tested.
+#'   include a `session` argument in order to be tested. Defaults to the Shiny
+#'   application at ".".
 #' @param expr Test code containing expectations. The test expression will run
 #'   in the server function environment, meaning that the parameters of the
 #'   server function (e.g. `input`, `output`, and `session`) will be available
@@ -79,8 +50,9 @@ isModuleServer <- function(x) {
 #'   # Any additional arguments, below, are passed along to the module.
 #' }, multiplier = 2)
 #' @export
-testServer <- function(app, expr, ...) {
+testServer <- function(app = ".", expr, ...) {
 
+  quosure <- rlang::enquo(expr)
   args <- rlang::list2(...)
   session <- getDefaultReactiveDomain()
 
@@ -106,6 +78,21 @@ testServer <- function(app, expr, ...) {
         })
       )
     )
+
+    # If app is a module, then we must use both the module function's immediate
+    # environment and also its enclosing environment to construct the mask.
+    parent_clone <- rlang::env_clone(parent.env(session$env))
+    clone <- rlang::env_clone(session$env, parent_clone)
+    mask <- rlang::new_data_mask(clone, parent_clone)
+
+    isolate(
+      withReactiveDomain(
+        session,
+        withr::with_options(list(`shiny.allowoutputreads` = TRUE), {
+          rlang::eval_tidy(quosure, mask, rlang::caller_env())
+        })
+      )
+    )
   } else {
     appobj <- as.shiny.appobj(app)
     if (!is.null(appobj$onStart))
@@ -120,16 +107,13 @@ testServer <- function(app, expr, ...) {
         session$setEnv(base::environment())
         !!!body(server)
       })
-      app <- function() {
-        session$setReturned(server(input = session$input, output = session$output, session = session))
-      }
       if (length(args))
         message("Discarding unused arguments to server function")
       isolate(
         withReactiveDomain(
           session,
           withr::with_options(list(`shiny.allowoutputreads` = TRUE), {
-            app()
+            session$setReturned(server(input = session$input, output = session$output, session = session))
           })
         )
       )
@@ -137,18 +121,18 @@ testServer <- function(app, expr, ...) {
       if (!is.null(appobj$onStop))
         appobj$onStop()
     })
-  }
 
-  stopifnot(all(c("input", "output", "session") %in% ls(session$env)))
+    # If app is a server, we use only the server function's immediate
+    # environment to construct the mask.
+    mask <- rlang::new_data_mask(rlang::env_clone(session$env))
 
-  quosure <- rlang::enquo(expr)
-
-  isolate(
-    withReactiveDomain(
-      session,
-      withr::with_options(list(`shiny.allowoutputreads` = TRUE), {
-        rlang::eval_tidy(quosure, buildMask(session$env), rlang::caller_env())
-      })
+    isolate(
+      withReactiveDomain(
+        session,
+        withr::with_options(list(`shiny.allowoutputreads` = TRUE), {
+          rlang::eval_tidy(quosure, mask, rlang::caller_env())
+        })
+      )
     )
-  )
+  }
 }

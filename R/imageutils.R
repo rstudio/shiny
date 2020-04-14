@@ -6,13 +6,14 @@ startPNG <- function(filename, width, height, res, ...) {
   # Finally, if neither quartz nor Cairo, use png().
   if (capabilities("aqua")) {
     pngfun <- grDevices::png
-  } else if ((getOption('shiny.usecairo') %OR% TRUE) &&
-             nchar(system.file(package = "Cairo"))) {
-    pngfun <- Cairo::CairoPNG
-  } else if (nchar(system.file(package = "ragg"))) {
+  } else if ((getOption('shiny.useragg') %OR% TRUE) &&
+             nchar(system.file(package = "ragg"))) {
     pngfun <- ragg::agg_png
     args$background <- args$background %OR% args$bg
     args$bg <- NULL
+  } else if ((getOption('shiny.usecairo') %OR% TRUE) &&
+             nchar(system.file(package = "Cairo"))) {
+    pngfun <- Cairo::CairoPNG
   } else {
     pngfun <- grDevices::png
   }

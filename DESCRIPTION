@@ -98,8 +98,7 @@ Suggests:
     future,
     dygraphs,
     thematic,
-    ragg,
-    showtext
+    ragg
 Remotes:
     rstudio/htmltools,
     rstudio/shinytest,

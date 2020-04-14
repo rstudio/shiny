@@ -169,7 +169,7 @@ resizeSavedPlot <- function(name, session, result, width, height, pixelratio, re
   outfile <- plotPNG(function() {
     grDevices::replayPlot(result$recordedPlot)
     coordmap <<- getCoordmap(result$plotResult, width*pixelratio, height*pixelratio, res*pixelratio)
-  }, width = width*pixelratio, height = height*pixelratio, res = res*pixelratio, bg = device_bg(), ...)
+  }, width = width*pixelratio, height = height*pixelratio, res = res*pixelratio, ...)
   on.exit(unlink(outfile), add = TRUE)
 
   result$img <- list(
@@ -196,8 +196,7 @@ drawPlot <- function(name, session, func, width, height, pixelratio, res, ...) {
   # 10. On error, take width and height dependency
 
   outfile <- tempfile(fileext='.png') # If startPNG throws, this could leak. Shrug.
-  device <- startPNG(outfile, width*pixelratio, height*pixelratio, res = res*pixelratio,
-                     bg = device_bg(), ...)
+  device <- startPNG(outfile, width*pixelratio, height*pixelratio, res = res*pixelratio, ...)
   domain <- createGraphicsDevicePromiseDomain(device)
   grDevices::dev.control(displaylist = "enable")
 
@@ -265,11 +264,6 @@ drawPlot <- function(name, session, func, width, height, pixelratio, res, ...) {
       unlink(outfile)
     }
   )
-}
-
-device_bg <- function(default = "white") {
-  if (system.file(package = "thematic") == "") return(default)
-  thematic::thematic_get_option("bg", default)
 }
 
 # A modified version of print.ggplot which returns the built ggplot object

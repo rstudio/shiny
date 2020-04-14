@@ -1,6 +1,10 @@
 startPNG <- function(filename, width, height, res, ...) {
   args <- rlang::list2(filename=filename, width=width, height=height, res=res, ...)
 
+  if (is.null(args$bg)) {
+    args$bg <- device_bg()
+  }
+
   # If quartz is available, use png() (which will default to quartz).
   # Otherwise, if the Cairo package is installed, use CairoPNG().
   # Finally, if neither quartz nor Cairo, use png().
@@ -18,7 +22,6 @@ startPNG <- function(filename, width, height, res, ...) {
     pngfun <- grDevices::png
   }
 
-
   do.call(pngfun, args)
   # Call plot.new() so that even if no plotting operations are performed at
   # least we have a blank background. N.B. we need to set the margin to 0
@@ -34,6 +37,14 @@ startPNG <- function(filename, width, height, res, ...) {
   )
 
   grDevices::dev.cur()
+}
+
+device_bg <- function(default = "white") {
+  if (nzchar(system.file(package = "thematic"))) {
+    thematic::thematic_get_option("bg", default)
+  } else {
+    default
+  }
 }
 
 #' Run a plotting function and save the output as a PNG

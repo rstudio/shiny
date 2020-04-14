@@ -97,7 +97,6 @@ Suggests:
     yaml,
     future,
     dygraphs,
-    thematic,
     ragg
 Remotes:
     rstudio/htmltools,

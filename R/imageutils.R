@@ -2,7 +2,7 @@ startPNG <- function(filename, width, height, res, ...) {
   args <- rlang::list2(filename=filename, width=width, height=height, res=res, ...)
 
   if (is.null(args$bg)) {
-    args$bg <- device_bg()
+    args$bg <- getCurrentOutputInfo()[["bg"]] %OR% "white"
   }
 
   # If quartz is available, use png() (which will default to quartz).
@@ -37,14 +37,6 @@ startPNG <- function(filename, width, height, res, ...) {
   )
 
   grDevices::dev.cur()
-}
-
-device_bg <- function(default = "white") {
-  if (nzchar(system.file(package = "thematic"))) {
-    thematic::thematic_get_option("bg", default)
-  } else {
-    default
-  }
 }
 
 #' Run a plotting function and save the output as a PNG

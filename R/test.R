@@ -39,6 +39,7 @@ isShinyTest <- function(text){
 #' @param filter If not `NULL`, only tests with file names matching this regular
 #'   expression will be executed. Matching is performed on the file name
 #'   including the extension.
+#' @param assert Logical value which determines if an error should be thrown if any error is captured.
 #'
 #' @return A data frame classed with the supplemental class `"shiny_runtests"`.
 #'   The data frame has the following columns:
@@ -55,7 +56,7 @@ isShinyTest <- function(text){
 #'   files in the `tests/` directory are all shinytests; if so, just calls out
 #'   to [shinytest::testApp()].
 #' @export
-runTests <- function(appDir=".", filter=NULL){
+runTests <- function(appDir=".", filter=NULL, assert = TRUE){
   require(shiny)
 
   testsDir <- file.path(appDir, "tests")
@@ -122,7 +123,7 @@ runTests <- function(appDir=".", filter=NULL){
   setwd(testsDir)
 
   # Otherwise source all the runners -- each in their own environment.
-  return(do.call(rbind, lapply(runners, function(r) {
+  ret <- do.call(rbind, lapply(runners, function(r) {
     pass <- FALSE
     result <-
       tryCatch({
@@ -137,6 +138,14 @@ runTests <- function(appDir=".", filter=NULL){
     result_row(r, pass, list(result))
   }))
 
+  if (isTRUE(assert)) {
+    if (!all(ret$pass)) {
+      stop("Failures detected in\n", paste0("* ", basename(ret$file[!ret$pass]), collapse = "\n"), call. = FALSE)
+    }
+  }
+
+  ret
+}
 
 
 

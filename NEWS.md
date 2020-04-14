@@ -27,6 +27,8 @@ shiny 1.4.0.9001
 
 * Fixed [#2653](https://github.com/rstudio/shiny/issues/2653): The `dataTableOutput()` could have incorrect output if certain characters were in the column names. ([#2658](https://github.com/rstudio/shiny/pull/2658))
 
+* Fixed [#2797](https://github.com/rstudio/shiny/issues/2797): `shiny:outputinvalidated` events missed for outputs corresponding to html not in the DOM (eg closed modals).
+
 ### Documentation Updates
 
 

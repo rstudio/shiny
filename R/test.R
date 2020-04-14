@@ -131,6 +131,7 @@ runTests <- function(appDir=".", filter=NULL){
         pass <- TRUE
         ret
       }, error = function(err) {
+        message("Error in ", r, "\n", err)
         err
       })
     result_row(r, pass, list(result))

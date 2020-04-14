@@ -4,7 +4,7 @@
 \alias{runTests}
 \title{Runs the tests associated with this Shiny app}
 \usage{
-runTests(appDir = ".", filter = NULL)
+runTests(appDir = ".", filter = NULL, assert = TRUE)
 }
 \arguments{
 \item{appDir}{The base directory for the application.}
@@ -12,6 +12,8 @@ runTests(appDir = ".", filter = NULL)
 \item{filter}{If not \code{NULL}, only tests with file names matching this regular
 expression will be executed. Matching is performed on the file name
 including the extension.}
+
+\item{assert}{Logical value which determines if an error should be thrown if any error is captured.}
 }
 \value{
 A data frame classed with the supplemental class \code{"shiny_runtests"}.

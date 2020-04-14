@@ -819,6 +819,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     this.$activeRequests = {};
     this.$nextRequestId = 0;
     this.$allowReconnect = false;
+    this.$invalidateOutputQueue = [];
   };
 
   (function () {
@@ -1097,6 +1098,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       evt.name = name;
       evt.value = value;
       evt.binding = binding;
+      delete this.$invalidateOutputQueue[name];
 
       if (this.$values[name] === value) {
         $(binding ? binding.el : document).trigger(evt);
@@ -1794,6 +1796,8 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
             name: key
           });
           if (binding.showProgress) binding.showProgress(true);
+        } else {
+          this.$invalidateOutputQueue[key] = true;
         }
       },
       // Open a page-level progress bar
@@ -6060,6 +6064,16 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
             continue;
           }
 
+          if (shinyapp.$invalidateOutputQueue[id]) {
+            $el.trigger({
+              type: 'shiny:outputinvalidated',
+              binding: binding,
+              name: id
+            });
+            if (binding.showProgress) binding.showProgress(true);
+          }
+
+          delete shinyapp.$invalidateOutputQueue[id];
           var bindingAdapter = new OutputBindingAdapter(el, binding);
           shinyapp.bindOutput(id, bindingAdapter);
           $el.data('shiny-output-binding', bindingAdapter);
@@ -6099,6 +6113,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
           binding: bindingAdapter.binding,
           bindingType: 'output'
         });
+        delete shinyapp.$invalidateOutputQueue[id];
       } // Send later in case DOM layout isn't final yet.
 
 

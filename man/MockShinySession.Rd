@@ -675,7 +675,10 @@ Create and return a namespace-specific session proxy.
 \if{html}{\out{<a id="method-setEnv"></a>}}
 \if{latex}{\out{\hypertarget{method-setEnv}{}}}
 \subsection{Method \code{setEnv()}}{
-Set the environment associated with a testServer() call.
+Set the environment associated with a testServer() call, but
+only if it has not previously been set. This ensures that only the
+environment of the outermost module under test is the one retained. In
+other words, the first assignment wins.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{MockShinySession$setEnv(env)}\if{html}{\out{</div>}}
 }
@@ -692,7 +695,10 @@ Set the environment associated with a testServer() call.
 \if{html}{\out{<a id="method-setReturned"></a>}}
 \if{latex}{\out{\hypertarget{method-setReturned}{}}}
 \subsection{Method \code{setReturned()}}{
-Set the value returned by the module call and proactively flush.
+Set the value returned by the module call and proactively
+flush. Note that this method may be called multiple times if modules
+are nested. The last assignment, corresponding to an invocation of
+setReturned() in the outermost module, wins.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{MockShinySession$setReturned(value)}\if{html}{\out{</div>}}
 }

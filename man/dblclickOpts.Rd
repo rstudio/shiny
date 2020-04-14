@@ -4,7 +4,7 @@
 \alias{dblclickOpts}
 \title{Create an object representing double-click options}
 \usage{
-dblclickOpts(id = NULL, clip = TRUE, delay = 400)
+dblclickOpts(id, clip = TRUE, delay = 400)
 }
 \arguments{
 \item{id}{Input value name. For example, if the value is

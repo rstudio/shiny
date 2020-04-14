@@ -5,7 +5,7 @@
 \title{Create an object representing hover options}
 \usage{
 hoverOpts(
-  id = NULL,
+  id,
   delay = 300,
   delayType = c("debounce", "throttle"),
   clip = TRUE,

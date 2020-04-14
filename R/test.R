@@ -106,14 +106,6 @@ runTests <- function(appDir=".", filter=NULL, assert = TRUE){
 
   testenv <- new.env(parent=globalenv())
   renv <- new.env(parent=testenv)
-  if (getOption("shiny.autoload.r", TRUE)) {
-    loadSupport(appDir, renv=renv, globalrenv=testenv)
-  } else if (file.exists.ci(file.path(appDir, "server.R"))){
-    # then check for global.R to load
-    if (file.exists(file.path.ci(appDir, "global.R"))){
-      sourceUTF8(file.path.ci(appDir, "global.R"))
-    }
-  }
 
   oldwd <- getwd()
   on.exit({

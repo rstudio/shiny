@@ -14,7 +14,6 @@ result_row <- function(file, pass, result) {
     file = file,
     pass = pass,
     result = I(result),
-    error = I(error),
     stringsAsFactors = FALSE
   )
   class(df) <- c("shiny_runtests", class(df))
@@ -48,8 +47,7 @@ isShinyTest <- function(text){
 #' | :-- | :-- | :-- |
 #' | `file` | `character(1)` | File name of the runner script in `tests/` that was sourced. |
 #' | `pass` | `logical(1)` | Whether or not the runner script signaled an error when sourced. |
-#' | `result` | any or `NA` | The return value of the runner, or `NA` if `pass == FALSE`. |
-#' | `error` | any or `NA` | The error signaled by the runner, or `NA` if `pass == TRUE`. |
+#' | `result` | any or `NA` | The return value of the runner |
 #'
 #' @details Historically, [shinytest](https://rstudio.github.io/shinytest/)
 #'   recommended placing tests at the top-level of the `tests/` directory. In

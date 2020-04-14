@@ -5,7 +5,7 @@
 \title{Create an object representing brushing options}
 \usage{
 brushOpts(
-  id = NULL,
+  id,
   fill = "#9cf",
   stroke = "#036",
   opacity = 0.25,

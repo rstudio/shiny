@@ -10,7 +10,7 @@
 #'   then the server will receive click events even when the mouse is outside
 #'   the plotting area, as long as it is still inside the image.
 #' @export
-clickOpts <- function(id = NULL, clip = TRUE) {
+clickOpts <- function(id, clip = TRUE) {
   if (is.null(id))
     stop("id must not be NULL")
 
@@ -36,7 +36,7 @@ clickOpts <- function(id = NULL, clip = TRUE) {
 #' @param delay Maximum delay (in ms) between a pair clicks for them to be
 #'   counted as a double-click.
 #' @export
-dblclickOpts <- function(id = NULL, clip = TRUE, delay = 400) {
+dblclickOpts <- function(id, clip = TRUE, delay = 400) {
   if (is.null(id))
     stop("id must not be NULL")
 
@@ -69,7 +69,7 @@ dblclickOpts <- function(id = NULL, clip = TRUE, delay = 400) {
 #'   `NULL` when the mouse exits the plotting area. If `FALSE`, the
 #'   value will stop changing when the cursor exits the plotting area.
 #' @export
-hoverOpts <- function(id = NULL, delay = 300,
+hoverOpts <- function(id, delay = 300,
                       delayType = c("debounce", "throttle"), clip = TRUE,
                       nullOutside = TRUE) {
   if (is.null(id))
@@ -117,7 +117,7 @@ hoverOpts <- function(id = NULL, delay = 300,
 #'   brush. Using `TRUE` is useful if you want to clear the brush whenever
 #'   the plot is updated.
 #' @export
-brushOpts <- function(id = NULL, fill = "#9cf", stroke = "#036",
+brushOpts <- function(id, fill = "#9cf", stroke = "#036",
                       opacity = 0.25, delay = 300,
                       delayType = c("debounce", "throttle"), clip = TRUE,
                       direction = c("xy", "x", "y"),

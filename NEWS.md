@@ -7,6 +7,8 @@ shiny 1.4.0.9001
 
 ### New features
 
+* The new `shinyAppTemplate()` function creates a new template Shiny application, where components are optional, such as helper files in an R/ subdirectory, a module, and various kids of tests. ([#2704](https://github.com/rstudio/shiny/pull/2704))
+
 * `runTests()` is a new function that behaves much like R CMD check. `runTests()` invokes all of the top-level R files in the tests/ directory inside an application, in that application's environment. ([#2585](https://github.com/rstudio/shiny/pull/2585))
 
 * `testServer()` and `testModule()` are two new functions for testing reactive behavior inside server functions and modules, respectively. ([#2682](https://github.com/rstudio/shiny/pull/2682), [#2764](https://github.com/rstudio/shiny/pull/2764))

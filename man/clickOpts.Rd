@@ -4,7 +4,7 @@
 \alias{clickOpts}
 \title{Create an object representing click options}
 \usage{
-clickOpts(id = NULL, clip = TRUE)
+clickOpts(id, clip = TRUE)
 }
 \arguments{
 \item{id}{Input value name. For example, if the value is \code{"plot_click"},

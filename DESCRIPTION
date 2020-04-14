@@ -97,13 +97,13 @@ Suggests:
     yaml,
     future,
     dygraphs,
+    thematic,
     ragg,
     showtext
 Remotes:
     rstudio/htmltools,
     rstudio/shinytest,
     rstudio/thematic
->>>>>>> port auto-theming logic to new thematic package
 URL: http://shiny.rstudio.com
 BugReports: https://github.com/rstudio/shiny/issues
 Collate:

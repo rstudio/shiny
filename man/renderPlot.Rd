@@ -13,7 +13,6 @@ renderPlot(
   env = parent.frame(),
   quoted = FALSE,
   execOnResize = FALSE,
-  autoTheme = autoThemeGet(),
   outputArgs = list()
 )
 }
@@ -52,12 +51,6 @@ resized, Shiny will \emph{replay} the plot drawing commands with
 This can result in faster plot redrawing, but there may be rare cases where
 it is undesirable. If you encounter problems when resizing a plot, you can
 have Shiny re-execute the code on resize by setting this to \code{TRUE}.}
-
-\item{autoTheme}{If \code{TRUE}, default theming is applied to ggplot2, lattice,
-and base graphics. For control over the auto-theming defaults, use the
-\code{\link[thematic:thematic_begin]{thematic::thematic_begin()}} and/or the graphing library of interest (e.g.,
-\code{\link[ggplot2:theme]{ggplot2::theme()}}, \code{\link[lattice:trellis.par.set]{lattice::trellis.par.set()}}, \code{\link[graphics:par]{graphics::par()}},
-\code{\link[grDevices:palette]{grDevices::palette()}}, etc).}
 
 \item{outputArgs}{A list of arguments to be passed through to the implicit
 call to \code{\link[=plotOutput]{plotOutput()}} when \code{renderPlot} is used in an

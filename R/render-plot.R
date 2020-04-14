@@ -47,20 +47,13 @@
 #'   This can result in faster plot redrawing, but there may be rare cases where
 #'   it is undesirable. If you encounter problems when resizing a plot, you can
 #'   have Shiny re-execute the code on resize by setting this to `TRUE`.
-#' @param autoTheme If `TRUE`, default theming is applied to ggplot2, lattice,
-#'  and base graphics. For control over the auto-theming defaults, use the
-#'  [thematic::thematic_begin()] and/or the graphing library of interest (e.g.,
-#'  [ggplot2::theme()], [lattice::trellis.par.set()], [graphics::par()],
-#'  [grDevices::palette()], etc).
 #' @param outputArgs A list of arguments to be passed through to the implicit
 #'   call to [plotOutput()] when `renderPlot` is used in an
 #'   interactive R Markdown document.
 #' @export
 renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
                        env=parent.frame(), quoted=FALSE,
-                       execOnResize=FALSE,
-                       autoTheme=autoThemeGet(),
-                       outputArgs=list()
+                       execOnResize=FALSE, outputArgs=list()
 ) {
   # This ..stacktraceon is matched by a ..stacktraceoff.. when plotFunc
   # is called
@@ -112,7 +105,6 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
         # If !execOnResize, don't invalidate when width/height changes.
         dims <- if (execOnResize) getDims() else isolate(getDims())
         pixelratio <- session$clientData$pixelratio %OR% 1
-        theme <- getTheme(autoTheme, session, outputName)
         do.call("drawPlot", c(
           list(
             name = outputName,
@@ -121,8 +113,7 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
             width = dims$width,
             height = dims$height,
             pixelratio = pixelratio,
-            res = res,
-            theme = theme
+            res = res
           ), args))
       },
       catch = function(reason) {
@@ -148,9 +139,8 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
       function(result) {
         dims <- getDims()
         pixelratio <- session$clientData$pixelratio %OR% 1
-        theme <- getTheme(autoTheme, session, outputName)
         result <- do.call("resizeSavedPlot", c(
-          list(name, shinysession, result, dims$width, dims$height, pixelratio, res, theme),
+          list(name, shinysession, result, dims$width, dims$height, pixelratio, res),
           args
         ))
 
@@ -169,62 +159,17 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
   markRenderFunction(outputFunc, renderFunc, outputArgs = outputArgs)
 }
 
-#' Plot auto theming options
-#'
-#' @inheritParams thematic::thematic_begin
-#'
-#' @rdname autoTheme
-#' @export
-autoThemeSet <- function(fg = "auto", bg = "auto", accent = "auto",
-                         font = NA, sequential = thematic::sequential_gradient(),
-                         qualitative = thematic::okabe_ito()) {
-  oldOptions <- .globals$autoThemeOptions
-  .globals$autoThemeOptions <- list(
-    fg = fg, bg = bg, accent = accent, font = font,
-    sequential = sequential, qualitative = qualitative
-  )
-  oldOptions
-
-  oldTheme <- getThematic()
-  onStop(function() {
-    autoThemeClear()
-    setThematic(oldTheme)
-  })
-}
-
-#' @rdname autoTheme
-#' @export
-autoThemeGet <- function() {
-  .globals$autoThemeOptions
-}
-
-#' @rdname autoTheme
-#' @export
-autoThemeClear <- function() {
-  oldOptions <- .globals$autoThemeOptions
-  rm("autoThemeOptions", envir = .globals)
-  oldOptions
-}
-
-
-resizeSavedPlot <- function(name, session, result, width, height, pixelratio, res, theme, ...) {
+resizeSavedPlot <- function(name, session, result, width, height, pixelratio, res, ...) {
   if (result$img$width == width && result$img$height == height &&
       result$pixelratio == pixelratio && result$res == res) {
     return(result)
   }
 
-  # I'm pretty sure this is needed only for replaying fonts registered with
-  # sysfonts/showtext, but might as well couple this logic to thematic instead
-  # (which will register showtext plot hooks, as well as it's own)
-  oldTheme <- getThematic()
-  beginThematic(theme)
-  on.exit(setThematic(oldTheme), add = TRUE)
-
   coordmap <- NULL
   outfile <- plotPNG(function() {
     grDevices::replayPlot(result$recordedPlot)
     coordmap <<- getCoordmap(result$plotResult, width*pixelratio, height*pixelratio, res*pixelratio)
-  }, width = width*pixelratio, height = height*pixelratio, res = res*pixelratio, bg = theme$bg %OR% "white", ...)
+  }, width = width*pixelratio, height = height*pixelratio, res = res*pixelratio, bg = device_bg(), ...)
   on.exit(unlink(outfile), add = TRUE)
 
   result$img <- list(
@@ -238,9 +183,7 @@ resizeSavedPlot <- function(name, session, result, width, height, pixelratio, re
   result
 }
 
-drawPlot <- function(name, session, func, width, height, pixelratio, res, theme = NULL,
-                     ...) {
-
+drawPlot <- function(name, session, func, width, height, pixelratio, res, ...) {
   #  1. Start PNG
   #  2. Enable displaylist recording
   #  3. Call user-defined func
@@ -254,12 +197,9 @@ drawPlot <- function(name, session, func, width, height, pixelratio, res, theme 
 
   outfile <- tempfile(fileext='.png') # If startPNG throws, this could leak. Shrug.
   device <- startPNG(outfile, width*pixelratio, height*pixelratio, res = res*pixelratio,
-                     bg = theme$bg %OR% "white", ...)
+                     bg = device_bg(), ...)
   domain <- createGraphicsDevicePromiseDomain(device)
   grDevices::dev.control(displaylist = "enable")
-
-  oldTheme <- getThematic()
-  beginThematic(theme)
 
   hybrid_chain(
     hybrid_chain(
@@ -307,7 +247,6 @@ drawPlot <- function(name, session, func, width, height, pixelratio, res, theme 
       }),
       finally = function() {
         grDevices::dev.off(device)
-        setThematic(oldTheme)
       }
     ),
     function(result) {
@@ -328,78 +267,9 @@ drawPlot <- function(name, session, func, width, height, pixelratio, res, theme 
   )
 }
 
-beginThematic <- function(theme) {
-  if (length(theme)) {
-    do.call(thematic::thematic_begin, theme)
-  }
-}
-
-getThematic <- function() {
-  thematic::thematic_get()
-}
-
-setThematic <- function(theme) {
-  if (length(theme)) {
-    do.call(thematic::thematic_begin, theme)
-  } else {
-    thematic::thematic_end()
-  }
-}
-
-
-getTheme <- function(autoTheme, session, outputName) {
-  if (!length(autoTheme)) return(NULL)
-  if (identical(autoTheme, FALSE)) return(NULL)
-
-  # TODO: throw if thematic::thematic_get() is not NULL?
-  # Or do we fallback to those options?
-  for (x in c("bg", "fg", "accent")) {
-    if (identical(autoTheme[[x]], "auto")) {
-      autoTheme[[x]] <- parseCssColors(session$clientData[[paste('output', outputName, x, sep = "_")]])
-    }
-  }
-  if (identical(autoTheme$font, "auto")) {
-    autoTheme$font <- parseFont(session$clientData[[paste('output', outputName, "font", sep = "_")]])
-  }
-
-  autoTheme
-}
-
-parseFont <- function(font) {
-  if (isTRUE(font$renderedFamily %in% generic_css_families())) {
-    warning(
-      "renderPlot()'s autoTheme doesn't support generic CSS font families (e.g. '",
-      font$renderedFamily, "'). Consider using a Google Font family instead ",
-      "https://fonts.google.com/", call. = FALSE
-    )
-    font$renderedFamily <- NULL
-  }
-  families <- as.character(font$renderedFamily %OR% font$families)
-  thematic::font_spec(
-    setdiff(families, generic_css_families()) %OR% "",
-    scale = parseFontScale(font$size)
-  )
-}
-
-# TODO: does font-size come in anything other than pixels?
-parseFontScale <- function(size, pointsize = 12) {
-  if (grepl("[0-9]+px$", size)) {
-    return(
-      as.numeric(sub("px$", "", size)) / pointsize
-    )
-  }
-  1
-}
-
-# https://drafts.csswg.org/css-fonts-4/#generic-font-families
-generic_css_families <- function() {
-  c(
-    "serif", "sans-serif", "cursive", "fantasy", "monospace",
-    "system-ui", "emoji", "math", "fangsong",
-    "ui-serif", "ui-sans-serif", "ui-monospace", "ui-rounded",
-    # not part of the official spec (earlier versions of system-ui)
-    "-apple-system" , "BlinkMacSystemFont"
-  )
+device_bg <- function(default = "white") {
+  if (system.file(package = "thematic") == "") return(default)
+  thematic::thematic_get_option("bg", default)
 }
 
 # A modified version of print.ggplot which returns the built ggplot object

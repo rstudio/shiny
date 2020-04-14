@@ -10,7 +10,6 @@ renderCachedPlot(
   sizePolicy = sizeGrowthRatio(width = 400, height = 400, growthRate = 1.2),
   res = 72,
   cache = "app",
-  autoTheme = getShinyOption("plot.autotheme", FALSE),
   ...,
   outputArgs = list()
 )
@@ -35,12 +34,6 @@ information on the default sizing policy.}
 \code{"app"} (the default), \code{"session"}, or a cache object like
 a \code{\link[=diskCache]{diskCache()}}. See the Cache Scoping section for more
 information.}
-
-\item{autoTheme}{If \code{TRUE}, default theming is applied to ggplot2, lattice,
-and base graphics. For control over the auto-theming defaults, use the
-\code{\link[thematic:thematic_begin]{thematic::thematic_begin()}} and/or the graphing library of interest (e.g.,
-\code{\link[ggplot2:theme]{ggplot2::theme()}}, \code{\link[lattice:trellis.par.set]{lattice::trellis.par.set()}}, \code{\link[graphics:par]{graphics::par()}},
-\code{\link[grDevices:palette]{grDevices::palette()}}, etc).}
 
 \item{...}{Arguments to be passed through to \code{\link[grDevices:png]{grDevices::png()}}.
 These can be used to set the width, height, background color, etc.}

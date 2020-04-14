@@ -25,22 +25,22 @@ In an interactive R session, this function will, by default, prompt the user
 which components to add to the application.
 
 The full example application includes the following files and directories:\preformatted{appdir/
-├── app.R
-├── R
-│   ├── my-module.R
-│   └── sort.R
-└── tests
-    ├── server.R
-    ├── server
-    │   ├── test-mymodule.R
-    │   └── test-server.R
-    ├── shinytest.R
-    ├── shinytest
-    │   └── mytest.R
-    ├── testthat.R
-    └── testthat
-        ├── helper-load.R
-        └── test-sort.R
+|- app.R
+|- R
+|   |- my-module.R
+|   |-- sort.R
+`-- tests
+    |- server.R
+    |- server
+    |   |- test-mymodule.R
+    |   `- test-server.R
+    |- shinytest.R
+    |- shinytest
+    |   `- mytest.R
+    |- testthat.R
+    `-- testthat
+        |- helper-load.R
+        `- test-sort.R
 }
 
 Some notes about these files:

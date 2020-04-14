@@ -9,22 +9,22 @@
 #'
 #' ```
 #' appdir/
-#' ├── app.R
-#' ├── R
-#' │   ├── my-module.R
-#' │   └── sort.R
-#' └── tests
-#'     ├── server.R
-#'     ├── server
-#'     │   ├── test-mymodule.R
-#'     │   └── test-server.R
-#'     ├── shinytest.R
-#'     ├── shinytest
-#'     │   └── mytest.R
-#'     ├── testthat.R
-#'     └── testthat
-#'         ├── helper-load.R
-#'         └── test-sort.R
+#' |- app.R
+#' |- R
+#' |   |- my-module.R
+#' |   |-- sort.R
+#' `-- tests
+#'     |- server.R
+#'     |- server
+#'     |   |- test-mymodule.R
+#'     |   `- test-server.R
+#'     |- shinytest.R
+#'     |- shinytest
+#'     |   `- mytest.R
+#'     |- testthat.R
+#'     `-- testthat
+#'         |- helper-load.R
+#'         `- test-sort.R
 #' ```
 #'
 #' Some notes about these files:

@@ -14,7 +14,7 @@ expression will be executed. Matching is performed on the file name
 including the extension.}
 }
 \value{
-A data frame classed with the supplemental class \code{"shinytestrun"}.
+A data frame classed with the supplemental class \code{"shiny_runtests"}.
 The data frame has the following columns:\tabular{lll}{
    \strong{Name} \tab \strong{Type} \tab \strong{Meaning} \cr
    \code{file} \tab \code{character(1)} \tab File name of the runner script in \verb{tests/} that was sourced. \cr

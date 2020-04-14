@@ -2,17 +2,14 @@
 #'
 #' @param file Name of the test runner file, a character vector of length 1.
 #' @param pass Whether or not the test passed, a logical vector of length 1.
-#' @param result Value (wrapped in a list) obtained by evaluating `file` or `NA`
-#'   if no value was obtained, such as with `shinytest`.
-#' @param error Error, if any, (and wrapped in a list) that was signaled during
-#'   evaluation of `file`.
+#' @param result Value (wrapped in a list) obtained by evaluating `file`.
+#'   This can also by any errors signaled when evaluating the `file`.
 #'
 #' @return A 1-row data frame representing a single test run. `result` and
-#'   `error` are "list columns", or columns that may contain list elements.
+#'   is a "list column", or a column that contains list elements.
 #' @noRd
-result_row <- function(file, pass, result, error) {
+result_row <- function(file, pass, result) {
   stopifnot(is.list(result))
-  stopifnot(is.list(error))
   df <- data.frame(
     file = file,
     pass = pass,
@@ -20,7 +17,7 @@ result_row <- function(file, pass, result, error) {
     error = I(error),
     stringsAsFactors = FALSE
   )
-  class(df) <- c("shinytestrun", class(df))
+  class(df) <- c("shiny_runtests", class(df))
   df
 }
 
@@ -44,7 +41,7 @@ isShinyTest <- function(text){
 #'   expression will be executed. Matching is performed on the file name
 #'   including the extension.
 #'
-#' @return A data frame classed with the supplemental class `"shinytestrun"`.
+#' @return A data frame classed with the supplemental class `"shiny_runtests"`.
 #'   The data frame has the following columns:
 #'
 #' | **Name** | **Type** | **Meaning** |
@@ -71,7 +68,7 @@ runTests <- function(appDir=".", filter=NULL){
 
   if (length(runners) == 0){
     message("No test runners found in ", testsDir)
-    return(result_row(character(0), logical(0), list(), list()))
+    return(result_row(character(0), logical(0), list()))
   }
 
   if (!is.null(filter)){
@@ -101,8 +98,8 @@ runTests <- function(appDir=".", filter=NULL){
     }
 
     return(do.call(rbind, lapply(shinytest::testApp(appDir)[["results"]], function(r) {
-      error <- if (r[["pass"]]) NA else simpleError("Unknown shinytest error")
-      result_row(r[["name"]], r[["pass"]], list(NA), list(error))
+      result <- if (r[["pass"]]) NA else simpleError("Unknown shinytest error")
+      result_row(r[["name"]], r[["pass"]], list(result))
     })))
   }
 
@@ -126,16 +123,16 @@ runTests <- function(appDir=".", filter=NULL){
 
   # Otherwise source all the runners -- each in their own environment.
   return(do.call(rbind, lapply(runners, function(r) {
-    result <- NA
-    error <- NA
     pass <- FALSE
-    tryCatch({
-      env <- new.env(parent = renv)
-      result <- sourceUTF8(r, envir = env)
-      pass <- TRUE
-    }, error = function(e) {
-      error <<- e
-    })
-    result_row(r, pass, list(result), list(error))
+    result <-
+      tryCatch({
+        env <- new.env(parent = renv)
+        ret <- sourceUTF8(r, envir = env)
+        pass <- TRUE
+        ret
+      }, error = function(err) {
+        err
+      })
+    result_row(r, pass, list(result))
   })))
 }

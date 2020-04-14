@@ -111,20 +111,21 @@ test_that("calls out to shinytest when appropriate", {
   # Run shinytest with a failure
   res2 <- runTestsSpy(test_path("../test-helpers/app1-standard"))
   expect_false(all(res2$pass))
-  expect_equivalent(res2$error, list(NA, simpleError("Unknown shinytest error")))
-  expect_s3_class(res2, "shinytestrun")
+  expect_equal(nrow(res2), 2)
+  expect_equivalent(res2$result[[2]], simpleError("Unknown shinytest error"))
+  expect_s3_class(res2, "shiny_runtests")
 
   # Run shinytest with all passing
   sares[[2]]$pass <- TRUE
   res2 <- runTestsSpy(test_path("../test-helpers/app1-standard"))
   expect_true(all(res2$pass))
   expect_equivalent(res2$file, c("test1", "test2"))
-  expect_s3_class(res2, "shinytestrun")
+  expect_s3_class(res2, "shiny_runtests")
 
   # Not shinytests
   isShinyTest <- FALSE
   res <- runTestsSpy(test_path("../test-helpers/app1-standard"))
-  expect_s3_class(res, "shinytestrun")
+  expect_s3_class(res, "shiny_runtests")
 })
 
 test_that("runTests filters", {
@@ -155,8 +156,7 @@ test_that("runTests handles the absence of tests", {
   expect_equal(res$file, character(0))
   expect_equal(res$pass, logical(0))
   expect_equivalent(res$result, list())
-  expect_equivalent(res$error, list())
-  expect_s3_class(res, "shinytestrun")
+  expect_s3_class(res, "shiny_runtests")
 })
 
 test_that("runTests runs as expected without rewiring", {
@@ -165,8 +165,7 @@ test_that("runTests runs as expected without rewiring", {
     file = c("runner1.R", "runner2.R"),
     pass = c(TRUE, TRUE),
     result = I(list(1, NULL)),
-    error = I(list(NA, NA)),
     stringsAsFactors = FALSE
   ))
-  expect_s3_class(df, "shinytestrun")
+  expect_s3_class(df, "shiny_runtests")
 })

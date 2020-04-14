@@ -19,8 +19,7 @@ The data frame has the following columns:\tabular{lll}{
    \strong{Name} \tab \strong{Type} \tab \strong{Meaning} \cr
    \code{file} \tab \code{character(1)} \tab File name of the runner script in \verb{tests/} that was sourced. \cr
    \code{pass} \tab \code{logical(1)} \tab Whether or not the runner script signaled an error when sourced. \cr
-   \code{result} \tab any or \code{NA} \tab The return value of the runner, or \code{NA} if \code{pass == FALSE}. \cr
-   \code{error} \tab any or \code{NA} \tab The error signaled by the runner, or \code{NA} if \code{pass == TRUE}. \cr
+   \code{result} \tab any or \code{NA} \tab The return value of the runner \cr
 }
 }
 \description{

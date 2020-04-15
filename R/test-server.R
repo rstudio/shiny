@@ -3,6 +3,27 @@ isModuleServer <- function(x) {
   is.function(x) && names(formals(x))[1] == "id"
 }
 
+#' @noRd
+isAppDir <- function(path) {
+
+  if (file.exists(file.path(path, "app.R")))
+    return(TRUE)
+
+  if (file.exists(file.path(path, "server.R"))
+      && file.exists(file.path(path, "ui.R")))
+    return(TRUE)
+
+  FALSE
+}
+
+#' @noRd
+findEnclosingApp <- function(path = ".") {
+  rprojroot::find_root(
+    rprojroot::root_criterion(isAppDir, "is a Shiny app"),
+    path
+  )
+}
+
 #' Reactive testing for Shiny server functions and modules
 #'
 #' A way to test the reactive interactions in Shiny applications. Reactive
@@ -94,6 +115,12 @@ testServer <- function(app = ".", expr, ...) {
       )
     )
   } else {
+    # If app is a character vector it is assumed to be a path. If the path does
+    # not constitute a Shiny app, the path is traversed upward until one is
+    # found. If one is not found, an error is signaled.
+    if (is.character(app)) {
+      app <- findEnclosingApp(app)
+    }
     appobj <- as.shiny.appobj(app)
     if (!is.null(appobj$onStart))
       appobj$onStart()

@@ -81,7 +81,8 @@ Imports:
     fastmap (>= 1.0.0),
     withr,
     commonmark (>= 1.7),
-    glue (>= 1.3.2)
+    glue (>= 1.3.2),
+    rprojroot (>= 1.3-2)
 Suggests:
     datasets,
     Cairo (>= 1.5-5),

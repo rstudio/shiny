@@ -15,7 +15,7 @@ including the extension.}
 
 \item{assert}{Logical value which determines if an error should be thrown if any error is captured.}
 
-\item{envir}{Environment in which to base the individual testing environments.}
+\item{envir}{Parent testing environment in which to base the individual testing environments.}
 }
 \value{
 A data frame classed with the supplemental class \code{"shiny_runtests"}.

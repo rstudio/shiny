@@ -169,7 +169,7 @@ test_that("app.R is loaded after R/ helpers and into the right envs", {
   }
 
   # Temporarily opt-in to R/ file autoloading
-  orig <- getOption("shiny.autoload.r", FALSE)
+  orig <- getOption("shiny.autoload.r", NULL)
   options(shiny.autoload.r=TRUE)
   on.exit({options(shiny.autoload.r=orig)}, add=TRUE)
 

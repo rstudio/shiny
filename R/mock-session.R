@@ -408,7 +408,10 @@ MockShinySession <- R6Class(
     #'   other words, the first assignment wins.
     #' @param env The environment to retain.
     setEnv = function(env) {
-      if (is.null(self$env)) self$env <- env
+      if (is.null(self$env)) {
+        stopifnot(all(c("input", "output", "session") %in% ls(env)))
+        self$env <- env
+      }
     },
     #' @description Set the value returned by the module call and proactively
     #'   flush. Note that this method may be called multiple times if modules

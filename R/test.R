@@ -116,7 +116,7 @@ runTests <- function(
 
 print.shiny_runtests <- function(x, ..., reporter = "summary") {
 
-  cat("Shiny Run Tests\n")
+  cat("Shiny Test Results\n")
 
   if (any(x$pass)) {
     # TODO in future... use clisymbols::symbol$tick and crayon green

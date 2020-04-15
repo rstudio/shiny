@@ -26,65 +26,60 @@ test_that("runTests works", {
     NULL
   }
 
-  # Temporarily opt-in to R/ file autoloading
-  orig <- getOption("shiny.autoload.r", NULL)
-  options(shiny.autoload.r=TRUE)
-  on.exit({options(shiny.autoload.r=orig)}, add=TRUE)
+  withr::with_options(list("shiny.autoload.r" = TRUE), {
 
-  runTestsSpy <- rewire(runTests, sourceUTF8 = sourceStub, loadSupport=loadSupportStub)
+    runTestsSpy <- rewire(runTests, sourceUTF8 = sourceStub, loadSupport=loadSupportStub)
 
-  res <- runTestsSpy(test_path("../test-helpers/app1-standard"))
+    res <- runTestsSpy(test_path("../test-helpers/app1-standard"))
 
-  # Should have seen two calls to each test runner
-  expect_length(calls, 2)
-  expect_match(calls[[1]][[1]], "runner1\\.R$", perl=TRUE)
-  expect_match(calls[[2]][[1]], "runner2\\.R$", perl=TRUE)
+    # Should have seen two calls to each test runner
+    expect_length(calls, 2)
+    expect_match(calls[[1]][[1]], "runner1\\.R$", perl=TRUE)
+    expect_match(calls[[2]][[1]], "runner2\\.R$", perl=TRUE)
 
-  # Check environments
-  # Each should be loaded into an isolated env that has a common parent
-  env1 <- calls[[1]]$envir
-  env2 <- calls[[2]]$envir
-  expect_identical(parent.env(env1), parent.env(env2))
-  expect_true(!identical(env1, env2))
+    # Check environments
+    # Each should be loaded into an isolated env that has a common parent
+    env1 <- calls[[1]]$envir
+    env2 <- calls[[2]]$envir
+    expect_identical(parent.env(env1), parent.env(env2))
+    expect_true(!identical(env1, env2))
 
-  # Check working directory
-  expect_equal(normalizePath(wd), normalizePath(
-    file.path(test_path("../test-helpers/app1-standard"), "tests")))
+    # Check working directory
+    expect_equal(normalizePath(wd), normalizePath(
+      file.path(test_path("../test-helpers/app1-standard"), "tests")))
 
-  # Check the results
-  expect_equal(all(res$pass), FALSE)
-  expect_length(res$file, 2)
-  expect_equal(res$file[1], "runner1.R")
-  expect_equal(res[2,]$error[[1]]$message, "I was told to throw an error")
-  expect_s3_class(res, "shinytestrun")
+    # Check the results
+    expect_equal(all(res$pass), FALSE)
+    expect_length(res$file, 2)
+    expect_equal(res$file[1], "runner1.R")
+    expect_equal(res[2,]$error[[1]]$message, "I was told to throw an error")
+    expect_s3_class(res, "shinytestrun")
 
-  # Check that supporting files were loaded
-  expect_length(loadCalls, 1)
-  # global should be a child of emptyenv
-  ge <- loadCalls[[1]]$globalrenv
-  expect_identical(parent.env(ge), globalenv())
-  # renv should be a child of our globalrenv
-  expect_identical(parent.env(loadCalls[[1]]$renv), ge)
+    # Check that supporting files were loaded
+    expect_length(loadCalls, 1)
+    # global should be a child of emptyenv
+    ge <- loadCalls[[1]]$globalrenv
+    expect_identical(parent.env(ge), globalenv())
+    # renv should be a child of our globalrenv
+    expect_identical(parent.env(loadCalls[[1]]$renv), ge)
 
-  # Clear out err'ing files and rerun
-  filesToError <- character(0)
+    # Clear out err'ing files and rerun
+    filesToError <- character(0)
 
-  res <- runTestsSpy(test_path("../test-helpers/app1-standard"))
-  expect_equal(all(res$pass), TRUE)
-  expect_equal(res$file, c("runner1.R", "runner2.R"))
+    res <- runTestsSpy(test_path("../test-helpers/app1-standard"))
+    expect_equal(all(res$pass), TRUE)
+    expect_equal(res$file, c("runner1.R", "runner2.R"))
+  })
 
-  # If autoload is false, it should still load global.R. Because this load happens in the top-level of the function,
-  # our spy will catch it.
-  calls <- list()
+  withr::with_options(list("shiny.autoload.r" = FALSE), {
+    # If autoload is false, it should still load global.R. Because this load happens in the top-level of the function,
+    # our spy will catch it.
+    calls <- list()
 
-  # Temporarily opt-out of R/ file autoloading
-  orig <- getOption("shiny.autoload.r", NULL)
-  options(shiny.autoload.r=FALSE)
-  on.exit({options(shiny.autoload.r=orig)}, add=TRUE)
-
-  res <- runTestsSpy(test_path("../test-helpers/app1-standard"))
-  expect_length(calls, 3)
-  expect_match(calls[[1]][[1]], "/global\\.R", perl=TRUE)
+    res <- runTestsSpy(test_path("../test-helpers/app1-standard"))
+    expect_length(calls, 3)
+    expect_match(calls[[1]][[1]], "/global\\.R", perl=TRUE)
+  })
 })
 
 test_that("calls out to shinytest when appropriate", {

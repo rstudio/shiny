@@ -51,6 +51,11 @@ isShinyTest <- function(text){
 #' | `pass` | `logical(1)` | Whether or not the runner script signaled an error when sourced. |
 #' | `result` | any or `NA` | The return value of the runner |
 #'
+#' @details Historically, [shinytest](https://rstudio.github.io/shinytest/)
+#'   recommended placing tests at the top-level of the `tests/` directory. In
+#'   order to support that model, `testApp` first checks to see if the `.R`
+#'   files in the `tests/` directory are all shinytests; if so, just calls out
+#'   to [shinytest::testApp()].
 #' @export
 runTests <- function(
   appDir = ".",
@@ -77,6 +82,33 @@ runTests <- function(
   }
   if (length(runners) == 0) {
     stop("No test runners matched the given filter: '", filter, "'")
+  }
+
+  # Inspect each runner to see if it appears to be a shinytest
+  isST <- vapply(runners, function(r){
+    text <- readLines(file.path(testsDir, r), warn = FALSE)
+    isShinyTest(text)
+  }, logical(1))
+
+  # See the @details section of the runTests() docs above for why this branch exists.
+  if (all(isST)){
+    # TODO-barret throw error instead of supporting legacy setup
+
+    # just call out to shinytest
+    # We don't need to message/warn here since shinytest already does it.
+    if (!requireNamespace("shinytest", quietly=TRUE) ){
+      stop("It appears that the .R files in ", testsDir,
+           " are all shinytests, but shinytest is not installed.")
+    }
+
+    if (!getOption("shiny.autoload.r", TRUE)) {
+      warning("You've disabled `shiny.autoload.r` via an option but this is not passed through to shinytest. Consider using a _disable_autoload.R file as described at https://rstd.io/shiny-autoload")
+    }
+
+    return(do.call(rbind, lapply(shinytest::testApp(appDir)[["results"]], function(r) {
+      result <- if (r[["pass"]]) NA else simpleError("Unknown shinytest error")
+      result_row(r[["name"]], r[["pass"]], list(result))
+    })))
   }
 
   renv <- new.env(parent = envir)

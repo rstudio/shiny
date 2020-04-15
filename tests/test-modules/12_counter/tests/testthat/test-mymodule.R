@@ -1,5 +1,5 @@
-# Use testthat just for expectations
-library(testthat)
+
+context("mymoduleServer")
 
 testServer(mymoduleServer, {
   # Set initial value of a button

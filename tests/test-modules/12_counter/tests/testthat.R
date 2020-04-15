@@ -5,7 +5,6 @@ library(testthat)
 # the supporting files that were already loaded into that env.
 testthat::test_dir(
   "./testthat",
-  reporter = SummaryReporter,
-  env = environment(),
-  stop_on_failure = TRUE
+  env = shiny::loadSupport("../"),
+  reporter = c("summary", "fail")
 )

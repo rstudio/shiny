@@ -105,7 +105,7 @@ runTests <- function(
 
   if (isTRUE(assert)) {
     if (!all(ret$pass)) {
-      stop("Failures detected in\n", paste0("* ", basename(ret$file[!ret$pass]), collapse = "\n"), call. = FALSE)
+      stop("Shiny App Test Failures detected in\n", paste0("* ", basename(ret$file[!ret$pass]), collapse = "\n"), call. = FALSE)
     }
   }
 
@@ -116,7 +116,7 @@ runTests <- function(
 
 print.shiny_runtests <- function(x, ..., reporter = "summary") {
 
-  cat("Shiny Test Results\n")
+  cat("Shiny App Test Results\n")
 
   if (any(x$pass)) {
     # TODO in future... use clisymbols::symbol$tick and crayon green

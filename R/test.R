@@ -24,9 +24,15 @@ result_row <- function(file, pass, result) {
 #' Scans for the magic string of `app <- ShinyDriver$new(` as an indicator that this is a shinytest.
 #' Brought in from shinytest to avoid having to export this function.
 #' @noRd
-isShinyTest <- function(text){
-  lines <- grepl("app\\s*<-\\s*ShinyDriver\\$new\\(", text, perl=TRUE)
-  any(lines)
+isLegacyShinyTest <- function(files){
+  all(
+    vapply(files, function(file) {
+      text <- readLines(file, warn = FALSE)
+      any(
+        grepl("app\\s*<-\\s*ShinyDriver\\$new\\(", text, perl=TRUE)
+      )
+    }, logical(1))
+  )
 }
 
 #' Runs the tests associated with this Shiny app
@@ -52,10 +58,9 @@ isShinyTest <- function(text){
 #' | `result` | any or `NA` | The return value of the runner |
 #'
 #' @details Historically, [shinytest](https://rstudio.github.io/shinytest/)
-#'   recommended placing tests at the top-level of the `tests/` directory. In
-#'   order to support that model, `testApp` first checks to see if the `.R`
-#'   files in the `tests/` directory are all shinytests; if so, just calls out
-#'   to [shinytest::testApp()].
+#'   recommended placing tests at the top-level of the `tests/` directory.
+#'   This older folder structure is not supported by runTests.
+#'   Please see [shinyAppTemplate()] for more details.
 #' @export
 runTests <- function(
   appDir = ".",
@@ -84,31 +89,13 @@ runTests <- function(
     stop("No test runners matched the given filter: '", filter, "'")
   }
 
-  # Inspect each runner to see if it appears to be a shinytest
-  isST <- vapply(runners, function(r){
-    text <- readLines(file.path(testsDir, r), warn = FALSE)
-    isShinyTest(text)
-  }, logical(1))
-
   # See the @details section of the runTests() docs above for why this branch exists.
-  if (all(isST)){
-    # TODO-barret throw error instead of supporting legacy setup
-
-    # just call out to shinytest
-    # We don't need to message/warn here since shinytest already does it.
-    if (!requireNamespace("shinytest", quietly=TRUE) ){
-      stop("It appears that the .R files in ", testsDir,
-           " are all shinytests, but shinytest is not installed.")
-    }
-
-    if (!getOption("shiny.autoload.r", TRUE)) {
-      warning("You've disabled `shiny.autoload.r` via an option but this is not passed through to shinytest. Consider using a _disable_autoload.R file as described at https://rstd.io/shiny-autoload")
-    }
-
-    return(do.call(rbind, lapply(shinytest::testApp(appDir)[["results"]], function(r) {
-      result <- if (r[["pass"]]) NA else simpleError("Unknown shinytest error")
-      result_row(r[["name"]], r[["pass"]], list(result))
-    })))
+  if (isLegacyShinyTest(file.path(testsDir, runners))) {
+    stop(
+      "It appears that the .R files in ", testsDir, " are all shinytests.",
+      "\nThis is not supported by `shiny::runTests()`.",
+      " Please see `?shiny::shinyAppTemplate` on how to structure your shinytest tests."
+    )
   }
 
   renv <- new.env(parent = envir)

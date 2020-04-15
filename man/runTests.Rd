@@ -31,3 +31,9 @@ Sources the \code{.R} files in the top-level of \verb{tests/} much like \verb{R 
 These files are typically simple runners for tests nested in other
 directories under \verb{tests/}.
 }
+\details{
+Historically, \href{https://rstudio.github.io/shinytest/}{shinytest}
+recommended placing tests at the top-level of the \verb{tests/} directory.
+This older folder structure is not supported by runTests.
+Please see \code{\link[=shinyAppTemplate]{shinyAppTemplate()}} for more details.
+}

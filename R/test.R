@@ -40,6 +40,7 @@ isShinyTest <- function(text){
 #'   expression will be executed. Matching is performed on the file name
 #'   including the extension.
 #' @param assert Logical value which determines if an error should be thrown if any error is captured.
+#' @param envir Environment in which to base the individual testing environments.
 #'
 #' @return A data frame classed with the supplemental class `"shiny_runtests"`.
 #'   The data frame has the following columns:
@@ -51,7 +52,13 @@ isShinyTest <- function(text){
 #' | `result` | any or `NA` | The return value of the runner |
 #'
 #' @export
-runTests <- function(appDir=".", filter=NULL, assert = TRUE){
+runTests <- function(
+  appDir = ".",
+  filter = NULL,
+  assert = TRUE,
+  envir = globalenv()
+) {
+  # make sure shiny is available to use without `::`
   require(shiny)
 
   testsDir <- file.path(appDir, "tests")
@@ -72,9 +79,7 @@ runTests <- function(appDir=".", filter=NULL, assert = TRUE){
     stop("No test runners matched the given filter: '", filter, "'")
   }
 
-
-  testenv <- new.env(parent=globalenv())
-  renv <- new.env(parent=testenv)
+  renv <- new.env(parent = envir)
 
   oldwd <- getwd()
   on.exit({

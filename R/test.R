@@ -40,7 +40,7 @@ isShinyTest <- function(text){
 #'   expression will be executed. Matching is performed on the file name
 #'   including the extension.
 #' @param assert Logical value which determines if an error should be thrown if any error is captured.
-#' @param envir Environment in which to base the individual testing environments.
+#' @param envir Parent testing environment in which to base the individual testing environments.
 #'
 #' @return A data frame classed with the supplemental class `"shiny_runtests"`.
 #'   The data frame has the following columns:

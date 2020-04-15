@@ -4,7 +4,7 @@
 \alias{runTests}
 \title{Runs the tests associated with this Shiny app}
 \usage{
-runTests(appDir = ".", filter = NULL, assert = TRUE)
+runTests(appDir = ".", filter = NULL, assert = TRUE, envir = globalenv())
 }
 \arguments{
 \item{appDir}{The base directory for the application.}
@@ -14,6 +14,8 @@ expression will be executed. Matching is performed on the file name
 including the extension.}
 
 \item{assert}{Logical value which determines if an error should be thrown if any error is captured.}
+
+\item{envir}{Environment in which to base the individual testing environments.}
 }
 \value{
 A data frame classed with the supplemental class \code{"shiny_runtests"}.
@@ -28,11 +30,4 @@ The data frame has the following columns:\tabular{lll}{
 Sources the \code{.R} files in the top-level of \verb{tests/} much like \verb{R CMD check}.
 These files are typically simple runners for tests nested in other
 directories under \verb{tests/}.
-}
-\details{
-Historically, \href{https://rstudio.github.io/shinytest/}{shinytest}
-recommended placing tests at the top-level of the \verb{tests/} directory. In
-order to support that model, \code{testApp} first checks to see if the \code{.R}
-files in the \verb{tests/} directory are all shinytests; if so, just calls out
-to \code{\link[shinytest:testApp]{shinytest::testApp()}}.
 }

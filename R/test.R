@@ -62,20 +62,20 @@ runTests <- function(
   require(shiny)
 
   testsDir <- file.path(appDir, "tests")
-  if (!dirExists(testsDir)){
+  if (!dirExists(testsDir)) {
     stop("No tests directory found: ", testsDir)
   }
   runners <- list.files(testsDir, pattern="\\.r$", ignore.case = TRUE)
 
-  if (length(runners) == 0){
+  if (length(runners) == 0) {
     message("No test runners found in ", testsDir)
     return(result_row(character(0), logical(0), list()))
   }
 
-  if (!is.null(filter)){
+  if (!is.null(filter)) {
     runners <- runners[grepl(filter, runners)]
   }
-  if (length(runners) == 0){
+  if (length(runners) == 0) {
     stop("No test runners matched the given filter: '", filter, "'")
   }
 
@@ -84,8 +84,7 @@ runTests <- function(
   oldwd <- getwd()
   on.exit({
     setwd(oldwd)
-  }, add=TRUE)
-
+  }, add = TRUE)
   setwd(testsDir)
 
   # Otherwise source all the runners -- each in their own environment.
@@ -120,6 +119,7 @@ print.shiny_runtests <- function(x, ..., reporter = "summary") {
   cat("Shiny Run Tests\n")
 
   if (any(x$pass)) {
+    # TODO in future... use clisymbols::symbol$tick and crayon green
     cat("* Success\n")
     mapply(
       x$file,
@@ -133,6 +133,7 @@ print.shiny_runtests <- function(x, ..., reporter = "summary") {
     )
   }
   if (any(!x$pass)) {
+    # TODO in future... use clisymbols::symbol$cross and crayon red
     cat("* Failure\n")
     mapply(
       x$file,
@@ -144,8 +145,6 @@ print.shiny_runtests <- function(x, ..., reporter = "summary") {
         cat("  - ", basename(file), "\n", sep = "")
       }
     )
-
-    # stop("Test failures", call. = FALSE)
   }
 
   invisible(x)

@@ -1,8 +1,7 @@
-# Use testthat just for expectations
-library(testthat)
+context("mymoduleServer")
 
 # See ?testServer for more information
-testServer(mymoduleServer, {
+testServer(mymoduleServer, expr = {
   # Set initial value of a button
   session$setInputs(button = 0)
 

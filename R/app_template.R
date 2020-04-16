@@ -14,16 +14,15 @@
 #' |   |- my-module.R
 #' |   |- sort.R
 #' `-- tests
-#'     |- server.R
-#'     |- server
-#'     |   |- test-mymodule.R
-#'     |   `- test-server.R
+#'     |- adhoc.R
 #'     |- shinytest.R
 #'     |- shinytest
 #'     |   `- mytest.R
 #'     |- testthat.R
 #'     `-- testthat
 #'         |- helper-load.R
+#'     |   |- test-mymodule.R
+#'     |   `- test-server.R
 #'         `- test-sort.R
 #' ```
 #'
@@ -38,25 +37,21 @@
 #' * `tests/` contains various tests for the application. You may
 #'   choose to use or remove any of them. They can be executed by the
 #'   [runTests()] function.
-#' * `tests/server.R` is a test runner for test files in
-#'   `tests/server/`.
-#' * `tests/server/test-mymodule.R` is a test for the module.
 #' * `tests/shinytest.R` is a test runner for test files in the
 #'   `tests/shinytest/` directory.
 #' * `tests/shinytest/mytest.R` is a test that uses the
 #'   [shinytest](https://rstudio.github.io/shinytest/) package to do
 #'   snapshot-based testing.
 #' * `tests/testthat.R` is a test runner for test files in the
-#'   `tests/testthat/` directory.
-#' * `tests/testthat/helper-load.R` is a helper script that is automatically
-#'   loaded before running `test-mymodule.`R. (This is performed by the testthat
-#'   package.)
-#' * `tests/testthat/test-sort.R` is a set of tests that use the
-#'   [testthat](https://testthat.r-lib.org/) package for testing.
+#'   `tests/testthat/` directory using the [testthat](https://testthat.r-lib.org/) package.
+#' * `tests/testthat/test-mymodule.R` is a test for the module.
+#' * `tests/testthat/test-server.R` is a test for the appliction.
+#' * `tests/testthat/test-sort.R` is a test for a supporting function.
+#' * `tests/adhoc.R` is a DIY testing file that produces an error if a test fails.
 #'
 #' @param path Path to create new shiny application template.
 #' @param examples Either one of "default", "ask", "all", or any combination of
-#'   "app", "rdir", "module", "shinytest", "testthat", and "server". In an
+#'   "app", "rdir", "module", "shinytest", "testthat", and "adhoc". In an
 #'   interactive session, "default" falls back to "ask"; in a non-interactive
 #'   session, "default" falls back to "all". With "ask", this function will
 #'   prompt the user to select which template items will be added to the new app
@@ -76,7 +71,7 @@ shinyAppTemplate <- function(path = NULL, examples = "default")
     module    = "R/my-module.R    : Example module",
     shinytest = "tests/shinytest/ : Tests using shinytest package",
     testthat  = "tests/testthat/  : Tests using testthat",
-    server    = "tests/server/    : Tests of server and module code"
+    adhoc     = "tests/adhoc.R    : DIY Tests"
   )
 
   if (identical(examples, "default")) {
@@ -142,7 +137,7 @@ shinyAppTemplate <- function(path = NULL, examples = "default")
 
     # Filter out files related to R/sort.R, if applicable.
     if (!with_rdir) {
-      files <- files[!grepl("utils", files)]
+      files <- files[!grepl("sort", files)]
     }
 
     # Filter out module files, if applicable.
@@ -221,8 +216,20 @@ shinyAppTemplate <- function(path = NULL, examples = "default")
   if ("testthat" %in% examples) {
     copy_test_dir("testthat", "rdir" %in% examples, "module" %in% examples)
   }
-  if ("server" %in% examples) {
-    copy_test_dir("server", "rdir" %in% examples, "module" %in% examples)
+  if ("adhoc" %in% examples) {
+    dir.create(file.path(path, "tests"), showWarnings = FALSE, recursive = TRUE)
+    writeChar(
+      as.character(htmlTemplate(
+        example_path("tests/adhoc.R"),
+        rdir = "rdir" %in% examples,
+        module = "module" %in% examples
+      )),
+      con = file.path(path, "tests", "adhoc.R"),
+      eos = NULL
+    )
+
+    dir.create(r_dir, showWarnings = FALSE, recursive = TRUE)
+    copy_test_dir("adhoc", "rdir" %in% examples, "module" %in% examples)
   }
   if ("app" %in% examples) {
     message("Shiny application created at ", ensure_trailing_slash(path))

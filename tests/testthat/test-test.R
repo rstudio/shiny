@@ -59,18 +59,10 @@ test_that("runTests works", {
   # Clear out err'ing files and rerun
   filesToError <- character(0)
 
+  calls <- list()
   res <- runTestsSpy(test_path("../test-helpers/app1-standard"))
   expect_equal(all(res$pass), TRUE)
   expect_equal(basename(res$file), c("runner1.R", "runner2.R"))
-
-  # If autoload is false, it should still load global.R.
-  calls <- list()
-  # Temporarily opt-out of R/ file autoloading
-  orig <- getOption("shiny.autoload.r", NULL)
-  options(shiny.autoload.r=FALSE)
-  on.exit({options(shiny.autoload.r=orig)}, add=TRUE)
-
-  res <- runTestsSpy(test_path("../test-helpers/app1-standard"))
   expect_length(calls, 2)
   expect_match(calls[[1]][[1]], "runner1\\.R", perl=TRUE)
   expect_match(calls[[2]][[1]], "runner2\\.R", perl=TRUE)

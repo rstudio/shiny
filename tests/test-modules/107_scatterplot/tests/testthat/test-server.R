@@ -4,7 +4,7 @@ testServer("../..", expr = {
   # TODO-barret remove path above
 
   # Init count... 0
-  expect_equal(nrow(dplyr::filter(df(), selected_)), 0)
+  expect_equal(sum(df()$selected_), 0)
   expect_equal(output$summary, "0 observation(s) selected")
 
   # Select a region
@@ -26,6 +26,6 @@ testServer("../..", expr = {
   )
 
   # Check the value of the reactiveVal `count()`
-  expect_equal(nrow(dplyr::filter(df(), selected_)), 23)
+  expect_equal(sum(df()$selected_), 23)
   expect_equal(output$summary, "23 observation(s) selected")
 })

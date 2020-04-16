@@ -17,7 +17,7 @@ server <- function(input, output, session) {
   )
 
   output$summary <- renderText({
-    sprintf("%d observation(s) selected", nrow(dplyr::filter(df(), selected_)))
+    sprintf("%d observation(s) selected", sum(df()$selected_))
   })
 }
 

@@ -55,7 +55,7 @@ test_that("runTests works", {
   # Check the results
   expect_equal(all(res$pass), FALSE)
   expect_length(res$file, 2)
-  expect_equal(res$file[1], "runner1.R")
+  expect_equal(basename(res$file[1]), "runner1.R")
   expect_equal(res[2,]$result[[1]]$message, "I was told to throw an error")
   expect_s3_class(res, "shiny_runtests")
 
@@ -67,7 +67,7 @@ test_that("runTests works", {
 
   res <- runTestsSpy(test_path("../test-helpers/app1-standard"))
   expect_equal(all(res$pass), TRUE)
-  expect_equal(res$file, c("runner1.R", "runner2.R"))
+  expect_equal(basename(res$file), c("runner1.R", "runner2.R"))
 
   # If autoload is false, it should still load global.R.
   calls <- list()
@@ -133,9 +133,10 @@ test_that("runTests handles the absence of tests", {
 })
 
 test_that("runTests runs as expected without rewiring", {
-  df <- runTests(appDir = "../test-helpers/app1-standard", assert = FALSE)
+  appDir <- file.path("..", "test-helpers", "app1-standard")
+  df <- runTests(appDir = appDir, assert = FALSE)
   expect_equivalent(df, data.frame(
-    file = c("runner1.R", "runner2.R"),
+    file = file.path(appDir, "tests", c("runner1.R", "runner2.R")),
     pass = c(TRUE, TRUE),
     result = I(list(1, NULL)),
     stringsAsFactors = FALSE

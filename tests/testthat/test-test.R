@@ -141,3 +141,12 @@ test_that("runTests runs as expected without rewiring", {
   ))
   expect_s3_class(df, "shiny_runtests")
 })
+
+
+test_that("app template works with runTests", {
+  tempTemplateDir <- file.path(tempdir(), paste0("shinyAppTemplate-", floor(runif(1) * 10000)))
+  shinyAppTemplate(tempTemplateDir, "all")
+  on.exit(unlink(tempTemplateDir, recursive = TRUE))
+
+  testthat::expect_output(print(runTests(tempTemplateDir)), "Shiny App Test Results\\n\\* Success\\n  - adhoc\\.R\\n  - shinytest\\.R\\n  - testthat\\.R")
+})

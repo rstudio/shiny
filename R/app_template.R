@@ -132,9 +132,11 @@ shinyAppTemplate <- function(path = NULL, examples = "default")
     # that will not match files inside of shinytest/.
     files <- files[grepl(paste0("^", name), files)]
 
-    # Filter out files related to R/sort.R, if applicable.
+    # Filter out files that are not module files in the R directory.
     if (!with_rdir) {
-      files <- files[!grepl("sort", files)]
+      # find all files in the testthat folder that are not module or server files
+      is_r_folder_file <- (!grepl("module|server", basename(files))) & (dirname(files) == "testthat")
+      files <- files[!is_r_folder_file]
     }
 
     # Filter out module files, if applicable.

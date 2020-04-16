@@ -191,3 +191,17 @@ test_that("Callbacks fire in predictable order", {
   cb$invoke()
   expect_equal(x, c(1, 2, 3))
 })
+
+test_that("Application directories are identified", {
+  tests <- test_path("..", "test-modules", "12_counter", "tests")
+  expect_false(isAppDir(tests), "tests directory not an app")
+  expect_true(isAppDir(dirname(tests)), "tests parent directory is an app")
+  expect_equal(
+    findEnclosingApp(tests),
+    normalizePath(dirname(tests), winslash = "/")
+  )
+  expect_equal(
+    findEnclosingApp(dirname(tests)),
+    normalizePath(dirname(tests), winslash = "/")
+  )
+})

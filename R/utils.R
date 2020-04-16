@@ -1852,10 +1852,22 @@ isAppDir <- function(path) {
   FALSE
 }
 
+# Borrowed from rprojroot which borrowed from devtools
+#' @noRd
+is_root <- function(path) {
+  identical(
+    normalizePath(path, winslash = "/"),
+    normalizePath(dirname(path), winslash = "/")
+  )
+}
+
 #' @noRd
 findEnclosingApp <- function(path = ".") {
-  rprojroot::find_root(
-    rprojroot::root_criterion(isAppDir, "is a Shiny app"),
-    path
-  )
+  path <- normalizePath(path, winslash = "/", mustWork = TRUE)
+  while (!is_root(path)) {
+    if (isAppDir(path))
+      return(path)
+    path <- dirname(path)
+  }
+  stop("Shiny app not found")
 }

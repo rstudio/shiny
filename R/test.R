@@ -24,7 +24,7 @@ result_row <- function(file, pass, result) {
 #' Scans for the magic string of `app <- ShinyDriver$new(` as an indicator that this is a shinytest.
 #' Brought in from shinytest to avoid having to export this function.
 #' @noRd
-isLegacyShinyTest <- function(files){
+is_legacy_shinytest <- function(files){
   all(
     vapply(files, function(file) {
       text <- readLines(file, warn = FALSE)
@@ -68,7 +68,8 @@ runTests <- function(
   assert = TRUE,
   envir = globalenv()
 ) {
-  # make sure shiny is available to use without `::`
+  # similar to runApp()
+  # Allows shiny's functions to be available in the UI, server, and test code
   require(shiny)
 
   testsDir <- file.path(appDir, "tests")
@@ -90,11 +91,12 @@ runTests <- function(
   }
 
   # See the @details section of the runTests() docs above for why this branch exists.
-  if (isLegacyShinyTest(file.path(testsDir, runners))) {
+  if (is_legacy_shinytest(file.path(testsDir, runners))) {
     stop(
       "It appears that the .R files in ", testsDir, " are all shinytests.",
-      "\nThis is not supported by `shiny::runTests()`.",
-      " Please see `?shiny::shinyAppTemplate` on how to structure your shinytest tests."
+      " This is not supported by `shiny::runTests()`.",
+      "\nPlease see ?shiny::migrateLegacyShinytest to migrate your shinytest file structure to the new format.",
+      "\nSee ?shiny::shinyAppTemplate for an example of the new testing file structure."
     )
   }
 
@@ -119,12 +121,12 @@ runTests <- function(
         message("Error in ", r, "\n", err)
         err
       })
-    result_row(r, pass, list(result))
+    result_row(file.path(testsDir, r), pass, list(result))
   }))
 
   if (isTRUE(assert)) {
     if (!all(ret$pass)) {
-      stop("Shiny App Test Failures detected in\n", paste0("* ", basename(ret$file[!ret$pass]), collapse = "\n"), call. = FALSE)
+      stop("Shiny App Test Failures detected in\n", paste0("* ", runtest_pretty_file(ret$file[!ret$pass]), collapse = "\n"), call. = FALSE)
     }
   }
 
@@ -132,10 +134,21 @@ runTests <- function(
 }
 
 
+runtest_pretty_file <- function(f) {
+  test_folder <- dirname(f)
+  app_folder <- dirname(test_folder)
+  file.path(
+    basename(app_folder),
+    basename(test_folder),
+    basename(f)
+  )
+}
+
 
 print.shiny_runtests <- function(x, ..., reporter = "summary") {
 
   cat("Shiny App Test Results\n")
+
 
   if (any(x$pass)) {
     # TODO in future... use clisymbols::symbol$tick and crayon green
@@ -147,7 +160,7 @@ print.shiny_runtests <- function(x, ..., reporter = "summary") {
       FUN = function(file, pass, result) {
         if (!pass) return()
         # print(result)
-        cat("  - ", basename(file), "\n", sep = "")
+        cat("  - ", runtest_pretty_file(file), "\n", sep = "")
       }
     )
   }
@@ -160,8 +173,7 @@ print.shiny_runtests <- function(x, ..., reporter = "summary") {
       x$result,
       FUN = function(file, pass, result) {
         if (pass) return()
-        # print(result)
-        cat("  - ", basename(file), "\n", sep = "")
+        cat("  - ", runtest_pretty_file(file), "\n", sep = "")
       }
     )
   }

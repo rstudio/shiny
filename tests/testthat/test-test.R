@@ -26,12 +26,6 @@ test_that("runTests works", {
     NULL
   }
 
-
-  # Temporarily opt-in to R/ file autoloading
-  orig <- getOption("shiny.autoload.r", NULL)
-  options(shiny.autoload.r=TRUE)
-  on.exit({options(shiny.autoload.r=orig)}, add=TRUE)
-
   runTestsSpy <- rewire(runTests, sourceUTF8 = sourceStub, loadSupport=loadSupportStub)
 
   res <- runTestsSpy(test_path("../test-helpers/app1-standard"), assert = FALSE)
@@ -80,6 +74,7 @@ test_that("runTests works", {
   expect_length(calls, 2)
   expect_match(calls[[1]][[1]], "runner1\\.R", perl=TRUE)
   expect_match(calls[[2]][[1]], "runner2\\.R", perl=TRUE)
+
 })
 
 test_that("calls out to shinytest when appropriate", {

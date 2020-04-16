@@ -1863,11 +1863,12 @@ is_root <- function(path) {
 
 #' @noRd
 findEnclosingApp <- function(path = ".") {
+  orig_path <- path
   path <- normalizePath(path, winslash = "/", mustWork = TRUE)
   while (!is_root(path)) {
     if (isAppDir(path))
       return(path)
     path <- dirname(path)
   }
-  stop("Shiny app not found")
+  stop("Shiny app not found at ", orig_path, " or in any parent directory.")
 }

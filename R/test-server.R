@@ -33,7 +33,8 @@ findEnclosingApp <- function(path = ".") {
 #'   paths, applications may be represented by any object suitable for coercion
 #'   to an `appObj` by `as.shiny.appobj`. Application server functions must
 #'   include a `session` argument in order to be tested. Defaults to the Shiny
-#'   application at "." or any directory enclosing ".".
+#'   application at ".". If `app` is a directory, the nearest enclosing directory
+#'   that is a Shiny app will be used.
 #' @param expr Test code containing expectations. The test expression will run
 #'   in the server function environment, meaning that the parameters of the
 #'   server function (e.g. `input`, `output`, and `session`) will be available
@@ -71,7 +72,7 @@ findEnclosingApp <- function(path = ".") {
 #'   # Any additional arguments, below, are passed along to the module.
 #' }, multiplier = 2)
 #' @export
-testServer <- function(app = findEnclosingApp("."), expr, ...) {
+testServer <- function(app = ".", expr, ...) {
 
   require(shiny)
 
@@ -117,6 +118,12 @@ testServer <- function(app = findEnclosingApp("."), expr, ...) {
       )
     )
   } else {
+    # If app is a character vector it is assumed to be a path. If the path does
+    # not constitute a Shiny app, the path is traversed upward until one is
+    # found. If one is not found, an error is signaled.
+    if (is.character(app)) {
+      app <- findEnclosingApp(app)
+    }
     appobj <- as.shiny.appobj(app)
     if (!is.null(appobj$onStart))
       appobj$onStart()

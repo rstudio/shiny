@@ -3,27 +3,6 @@ isModuleServer <- function(x) {
   is.function(x) && names(formals(x))[1] == "id"
 }
 
-#' @noRd
-isAppDir <- function(path) {
-
-  if (file.exists(file.path(path, "app.R")))
-    return(TRUE)
-
-  if (file.exists(file.path(path, "server.R"))
-      && file.exists(file.path(path, "ui.R")))
-    return(TRUE)
-
-  FALSE
-}
-
-#' @noRd
-findEnclosingApp <- function(path = ".") {
-  rprojroot::find_root(
-    rprojroot::root_criterion(isAppDir, "is a Shiny app"),
-    path
-  )
-}
-
 #' Reactive testing for Shiny server functions and modules
 #'
 #' A way to test the reactive interactions in Shiny applications. Reactive

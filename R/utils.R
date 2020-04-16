@@ -1821,7 +1821,7 @@ cat_line <- function(...) {
   cat(paste(..., "\n", collapse = ""))
 }
 
-select_menu <- function(choices, title = NULL, msg = "Enter one or more numbers (with spaces), or an empty line to exit: \n") 
+select_menu <- function(choices, title = NULL, msg = "Enter one or more numbers (with spaces), or an empty line to exit: \n")
 {
   if (!is.null(title)) {
     cat(title, "\n", sep = "")
@@ -1837,4 +1837,25 @@ select_menu <- function(choices, title = NULL, msg = "Enter one or more numbers 
       return(choices[as.integer(answer)])
     }
   }
+}
+
+#' @noRd
+isAppDir <- function(path) {
+
+  if (file.exists(file.path(path, "app.R")))
+    return(TRUE)
+
+  if (file.exists(file.path(path, "server.R"))
+      && file.exists(file.path(path, "ui.R")))
+    return(TRUE)
+
+  FALSE
+}
+
+#' @noRd
+findEnclosingApp <- function(path = ".") {
+  rprojroot::find_root(
+    rprojroot::root_criterion(isAppDir, "is a Shiny app"),
+    path
+  )
 }

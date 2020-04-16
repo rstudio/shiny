@@ -143,10 +143,47 @@ test_that("runTests runs as expected without rewiring", {
 })
 
 
+context("shinyAppTemplate + runTests")
 test_that("app template works with runTests", {
-  tempTemplateDir <- file.path(tempdir(), paste0("shinyAppTemplate-", floor(runif(1) * 10000)))
-  shinyAppTemplate(tempTemplateDir, "all")
-  on.exit(unlink(tempTemplateDir, recursive = TRUE))
 
-  testthat::expect_output(print(runTests(tempTemplateDir)), "Shiny App Test Results\\n\\* Success\\n  - adhoc\\.R\\n  - shinytest\\.R\\n  - testthat\\.R")
+  # test all combos
+  make_combos <- function(...) {
+    args <- list(...)
+    combo_dt <- do.call(expand.grid, args)
+    lapply(apply(combo_dt, 1, unlist), unname)
+  }
+
+  combos <- unique(unlist(
+    recursive = FALSE,
+    list(
+      "all",
+      make_combos("app", list(NULL, "module"), "shinytest"),
+      make_combos("app", list(NULL, "module"), list(NULL, "rdir"), "testthat"),
+      make_combos("app", list(NULL, "module"), list(NULL, "rdir"))
+    )
+  ))
+
+  lapply(combos, function(combo) {
+    tempTemplateDir <- file.path(tempdir(), paste0("shinyAppTemplate-", floor(runif(1) * 10000)))
+    shinyAppTemplate(tempTemplateDir, combo)
+    on.exit(unlink(tempTemplateDir, recursive = TRUE))
+
+    if (any(c("all", "shinytest", "testthat") %in% combo)) {
+      expect_output(
+        print(runTests(tempTemplateDir)),
+        paste0(
+          "Shiny App Test Results\\n\\* Success",
+          if ("shinytest" %in% combo) "\\n  - shinytest\\.R",
+          if ("testthat" %in% combo) "\\n  - testthat\\.R"
+        )
+      )
+
+    } else {
+      expect_error(
+        runTests(tempTemplateDir)
+      )
+    }
+
+  })
+
 })

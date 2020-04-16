@@ -41,7 +41,10 @@ test_that("testServer defaults to the app at .", {
 
 test_that("runApp works with a dir app that calls modules and uses testServer", {
   app <- test_path("..", "test-modules", "12_counter")
-  run <- runTests(app)
+  run <- testthat::expect_output(
+    print(runTests(app)),
+    "Shiny App Test Results\\n\\* Success\\n  - testthat\\.R"
+  )
   expect_true(all(run$pass))
 })
 

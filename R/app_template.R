@@ -14,7 +14,6 @@
 #' |   |- my-module.R
 #' |   |- sort.R
 #' `-- tests
-#'     |- adhoc.R
 #'     |- shinytest.R
 #'     |- shinytest
 #'     |   `- mytest.R
@@ -44,14 +43,13 @@
 #'   snapshot-based testing.
 #' * `tests/testthat.R` is a test runner for test files in the
 #'   `tests/testthat/` directory using the [testthat](https://testthat.r-lib.org/) package.
-#' * `tests/testthat/test-mymodule.R` is a test for the module.
-#' * `tests/testthat/test-server.R` is a test for the appliction.
-#' * `tests/testthat/test-sort.R` is a test for a supporting function.
-#' * `tests/adhoc.R` is a DIY testing file that produces an error if a test fails.
+#' * `tests/testthat/test-mymodule.R` is a test for an application's module server function.
+#' * `tests/testthat/test-server.R` is a test for the application's server code
+#' * `tests/testthat/test-sort.R` is a test for a supporting function in the `R/` directory.
 #'
 #' @param path Path to create new shiny application template.
 #' @param examples Either one of "default", "ask", "all", or any combination of
-#'   "app", "rdir", "module", "shinytest", "testthat", and "adhoc". In an
+#'   "app", "rdir", "module", "shinytest", and "testthat". In an
 #'   interactive session, "default" falls back to "ask"; in a non-interactive
 #'   session, "default" falls back to "all". With "ask", this function will
 #'   prompt the user to select which template items will be added to the new app
@@ -70,8 +68,7 @@ shinyAppTemplate <- function(path = NULL, examples = "default")
     rdir      = "R/sort.R         : Helper file with R code",
     module    = "R/my-module.R    : Example module",
     shinytest = "tests/shinytest/ : Tests using shinytest package",
-    testthat  = "tests/testthat/  : Tests using testthat",
-    adhoc     = "tests/adhoc.R    : DIY Tests"
+    testthat  = "tests/testthat/  : Tests using testthat"
   )
 
   if (identical(examples, "default")) {
@@ -215,21 +212,6 @@ shinyAppTemplate <- function(path = NULL, examples = "default")
   }
   if ("testthat" %in% examples) {
     copy_test_dir("testthat", "rdir" %in% examples, "module" %in% examples)
-  }
-  if ("adhoc" %in% examples) {
-    dir.create(file.path(path, "tests"), showWarnings = FALSE, recursive = TRUE)
-    writeChar(
-      as.character(htmlTemplate(
-        example_path("tests/adhoc.R"),
-        rdir = "rdir" %in% examples,
-        module = "module" %in% examples
-      )),
-      con = file.path(path, "tests", "adhoc.R"),
-      eos = NULL
-    )
-
-    dir.create(r_dir, showWarnings = FALSE, recursive = TRUE)
-    copy_test_dir("adhoc", "rdir" %in% examples, "module" %in% examples)
   }
   if ("app" %in% examples) {
     message("Shiny application created at ", ensure_trailing_slash(path))

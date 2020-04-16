@@ -4,15 +4,15 @@
 \alias{testServer}
 \title{Reactive testing for Shiny server functions and modules}
 \usage{
-testServer(app = ".", expr, ...)
+testServer(app = NULL, expr, ...)
 }
 \arguments{
 \item{app}{The path to an application or module to test. In addition to
 paths, applications may be represented by any object suitable for coercion
 to an \code{appObj} by \code{as.shiny.appobj}. Application server functions must
-include a \code{session} argument in order to be tested. Defaults to the Shiny
-application at ".". If \code{app} is a directory, the nearest enclosing directory
-that is a Shiny app will be used.}
+include a \code{session} argument in order to be tested. If \code{app} is \code{NULL} or
+not supplied, the nearest enclosing directory that is a Shiny app, starting
+with the current directory, is used.}
 
 \item{expr}{Test code containing expectations. The test expression will run
 in the server function environment, meaning that the parameters of the

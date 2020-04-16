@@ -325,14 +325,15 @@ initAutoReloadMonitor <- function(dir) {
 #' @details The files are sourced in alphabetical order (as determined by
 #'   [list.files]). `global.R` is evaluated before the supporting R files in the
 #'   `R/` directory.
-#' @param appDir The application directory; defaults to '.'. If `appDir` does not
-#'   contain a Shiny application, parent directories are walked until one is found.
+#' @param appDir The application directory. If `appDir` is `NULL` or
+#'   not supplied, the nearest enclosing directory that is a Shiny app, starting
+#'   with the current directory, is used.
 #' @param renv The environmeny in which the files in the `R/` directory should
 #'   be evaluated.
 #' @param globalrenv The environment in which `global.R` should be evaluated. If
 #'   `NULL`, `global.R` will not be evaluated at all.
 #' @export
-loadSupport <- function(appDir=".", renv=new.env(parent=globalenv()), globalrenv=globalenv()){
+loadSupport <- function(appDir=NULL, renv=new.env(parent=globalenv()), globalrenv=globalenv()){
   if (!is.null(globalrenv)){
     # Evaluate global.R, if it exists.
     if (file.exists(file.path.ci(appDir, "global.R"))){
@@ -340,7 +341,10 @@ loadSupport <- function(appDir=".", renv=new.env(parent=globalenv()), globalrenv
     }
   }
 
-  appDir <- findEnclosingApp(appDir)
+  if (is.null(appDir)) {
+    appDir <- findEnclosingApp(appDir)
+  }
+
   helpersDir <- file.path(appDir, "R")
 
   disabled <- list.files(helpersDir, pattern="^_disable_autoload\\.r$", recursive=FALSE, ignore.case=TRUE)

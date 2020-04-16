@@ -165,7 +165,8 @@ test_that("app template works with runTests", {
   ))
 
   lapply(combos, function(combo) {
-    tempTemplateDir <- file.path(tempdir(), paste0("shinyAppTemplate-", floor(runif(1) * 10000)))
+    random_folder <- paste0("shinyAppTemplate-", floor(runif(1) * 10000))
+    tempTemplateDir <- file.path(tempdir(), random_folder)
     shinyAppTemplate(tempTemplateDir, combo)
     on.exit(unlink(tempTemplateDir, recursive = TRUE))
 
@@ -174,8 +175,8 @@ test_that("app template works with runTests", {
         print(runTests(tempTemplateDir)),
         paste0(
           "Shiny App Test Results\\n\\* Success",
-          if ("shinytest" %in% combo) "\\n  - shinytest\\.R",
-          if ("testthat" %in% combo) "\\n  - testthat\\.R"
+          if ("shinytest" %in% combo) paste0("\\n  - ", file.path(random_folder, "tests", "shinytest\\.R")),
+          if ("testthat" %in% combo) paste0("\\n  - ", file.path(random_folder, "tests", "testthat\\.R"))
         )
       )
 

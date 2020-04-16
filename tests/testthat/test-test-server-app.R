@@ -101,10 +101,10 @@ test_that("Application directories are identified", {
   expect_true(isAppDir(dirname(tests)), "tests parent directory is an app")
   expect_equal(
     findEnclosingApp(tests),
-    normalizePath(dirname(tests))
+    normalizePath(dirname(tests), winslash = "/")
   )
   expect_equal(
     findEnclosingApp(dirname(tests)),
-    normalizePath(dirname(tests))
+    normalizePath(dirname(tests), winslash = "/")
   )
 })

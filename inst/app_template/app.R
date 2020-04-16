@@ -35,7 +35,6 @@ if (isTRUE(module)) {
 }
 }}
   data <- reactive({
-    req(input$size)
 {{
 if (isTRUE(rdir)) {
 '    # lexical_sort from R/sort.R

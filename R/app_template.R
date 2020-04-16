@@ -148,10 +148,24 @@ shinyAppTemplate <- function(path = NULL, examples = "default")
       dir.create(file.path(tests_dir, dir), showWarnings = FALSE, recursive = TRUE)
     }
 
-    file.copy(
-      file.path(example_path("tests"), files),
-      file.path(path, "tests", files)
-    )
+    for (file in files) {
+      from_file <- file.path(example_path("tests"), file)
+      to_file <- file.path(path, "tests", file)
+      # is glue file
+      if (any(grepl("{{", readLines(from_file), fixed = TRUE))) {
+        writeChar(
+          as.character(htmlTemplate(
+            from_file,
+            rdir = with_rdir,
+            module = with_module
+          )),
+          con = to_file,
+          eos = NULL
+        )
+      } else {
+        file.copy(from_file, to_file)
+      }
+    }
   }
 
 

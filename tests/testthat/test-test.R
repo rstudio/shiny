@@ -157,7 +157,7 @@ test_that("app template works with runTests", {
   ))
 
   lapply(combos, function(combo) {
-    random_folder <- paste0("shinyAppTemplate-", floor(runif(1) * 10000))
+    random_folder <- paste0("shinyAppTemplate-", paste0(combo, collapse = "_"))
     tempTemplateDir <- file.path(tempdir(), random_folder)
     shinyAppTemplate(tempTemplateDir, combo)
     on.exit(unlink(tempTemplateDir, recursive = TRUE))

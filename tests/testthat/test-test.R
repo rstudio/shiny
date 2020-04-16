@@ -33,7 +33,7 @@ test_that("runTests works", {
 
   runTestsSpy <- rewire(runTests, sourceUTF8 = sourceStub, loadSupport=loadSupportStub)
 
-  res <- runTestsSpy(test_path("../test-helpers/app1-standard"))
+  res <- runTestsSpy(test_path("../test-helpers/app1-standard"), assert = FALSE)
 
   # Should have seen two calls to each test runner
   expect_length(calls, 2)
@@ -58,13 +58,8 @@ test_that("runTests works", {
   expect_equal(res[2,]$result[[1]]$message, "I was told to throw an error")
   expect_s3_class(res, "shiny_runtests")
 
-  # Check that supporting files were loaded
-  expect_length(loadCalls, 1)
-  # global should be a child of emptyenv
-  ge <- loadCalls[[1]]$globalrenv
-  expect_identical(parent.env(ge), globalenv())
-  # renv should be a child of our globalrenv
-  expect_identical(parent.env(loadCalls[[1]]$renv), ge)
+  # Check that supporting files were NOT loaded using Spy Functions
+  expect_length(loadCalls, 0)
 
   # Clear out err'ing files and rerun
   filesToError <- character(0)
@@ -73,62 +68,34 @@ test_that("runTests works", {
   expect_equal(all(res$pass), TRUE)
   expect_equal(res$file, c("runner1.R", "runner2.R"))
 
-  # If autoload is false, it should still load global.R. Because this load happens in the top-level of the function,
-  # our spy will catch it.
+  # If autoload is false, it should still load global.R.
   calls <- list()
-
   # Temporarily opt-out of R/ file autoloading
   orig <- getOption("shiny.autoload.r", NULL)
   options(shiny.autoload.r=FALSE)
   on.exit({options(shiny.autoload.r=orig)}, add=TRUE)
 
   res <- runTestsSpy(test_path("../test-helpers/app1-standard"))
-  expect_length(calls, 3)
-  expect_match(calls[[1]][[1]], "/global\\.R", perl=TRUE)
+  expect_length(calls, 2)
+  expect_match(calls[[1]][[1]], "runner1\\.R", perl=TRUE)
+  expect_match(calls[[2]][[1]], "runner2\\.R", perl=TRUE)
 })
 
 test_that("calls out to shinytest when appropriate", {
-  isShinyTest <- TRUE
-  isShinyTestStub <- function(...){
-    isShinyTest
+  isLegacyShinyTestVal <- TRUE
+  isLegacyShinyTestStub <- function(...){
+    isLegacyShinyTestVal
   }
 
-  shinytestInstalled <- FALSE
-  requireNamespaceStub <- function(...){
-    shinytestInstalled
-  }
-
-  # All are shinytests but shinytest isn't installed
-  runTestsSpy <- rewire(runTests,
-                    isShinyTest = isShinyTestStub,
-                    requireNamespace = requireNamespaceStub)
-  expect_error(runTestsSpy(test_path("../test-helpers/app1-standard")), "but shinytest is not installed")
-
-  # All are shinytests and shinytest is installed
-  shinytestInstalled <- TRUE
-  sares <- list()
-  sares[[1]] <- list(name = "test1", pass=TRUE)
-  sares[[2]] <- list(name = "test2", pass=FALSE)
-  overloadShinyTest <- rewire_namespace_handler("shinytest", "testApp",
-                                                function(...){ list(results=sares) })
-  runTestsSpy <- rewire(runTests, isShinyTest = isShinyTestStub, requireNamespace = requireNamespaceStub, `::` = overloadShinyTest)
-
-  # Run shinytest with a failure
-  res2 <- runTestsSpy(test_path("../test-helpers/app1-standard"))
-  expect_false(all(res2$pass))
-  expect_equal(nrow(res2), 2)
-  expect_equivalent(res2$result[[2]], simpleError("Unknown shinytest error"))
-  expect_s3_class(res2, "shiny_runtests")
-
-  # Run shinytest with all passing
-  sares[[2]]$pass <- TRUE
-  res2 <- runTestsSpy(test_path("../test-helpers/app1-standard"))
-  expect_true(all(res2$pass))
-  expect_equivalent(res2$file, c("test1", "test2"))
-  expect_s3_class(res2, "shiny_runtests")
+  # All are shinytests
+  runTestsSpy <- rewire(runTests, isLegacyShinyTest = isLegacyShinyTestStub)
+  expect_error(
+    runTestsSpy(test_path("../test-helpers/app1-standard"), assert = FALSE),
+    "not supported"
+  )
 
   # Not shinytests
-  isShinyTest <- FALSE
+  isLegacyShinyTestVal <- FALSE
   res <- runTestsSpy(test_path("../test-helpers/app1-standard"))
   expect_s3_class(res, "shiny_runtests")
 })
@@ -165,7 +132,7 @@ test_that("runTests handles the absence of tests", {
 })
 
 test_that("runTests runs as expected without rewiring", {
-  df <- runTests(appDir = "../test-helpers/app1-standard")
+  df <- runTests(appDir = "../test-helpers/app1-standard", assert = FALSE)
   expect_equivalent(df, data.frame(
     file = c("runner1.R", "runner2.R"),
     pass = c(TRUE, TRUE),

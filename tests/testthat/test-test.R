@@ -134,7 +134,11 @@ test_that("runTests handles the absence of tests", {
 
 test_that("runTests runs as expected without rewiring", {
   appDir <- file.path("..", "test-helpers", "app1-standard")
-  df <- runTests(appDir = appDir, assert = FALSE)
+  df <- testthat::expect_output(
+    print(runTests(appDir = appDir, assert = FALSE)),
+    "Shiny App Test Results\\n\\* Success\\n  - runner1\\.R\\n  - runner2\\.R"
+  )
+
   expect_equivalent(df, data.frame(
     file = file.path(appDir, "tests", c("runner1.R", "runner2.R")),
     pass = c(TRUE, TRUE),

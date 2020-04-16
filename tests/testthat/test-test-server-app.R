@@ -108,3 +108,10 @@ test_that("Application directories are identified", {
     normalizePath(dirname(tests), winslash = "/")
   )
 })
+
+test_that("testServer() works when the shiny package is detached", {
+  detach("package:shiny")
+  on.exit(library(shiny))
+  app <- test_path("..", "test-modules", "06_tabsets")
+  expect_equal(shiny::testServer(app, {}), NULL)
+})

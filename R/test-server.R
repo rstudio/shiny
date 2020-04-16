@@ -73,6 +73,8 @@ findEnclosingApp <- function(path = ".") {
 #' @export
 testServer <- function(app = findEnclosingApp("."), expr, ...) {
 
+  require(shiny)
+
   quosure <- rlang::enquo(expr)
   args <- rlang::list2(...)
   session <- getDefaultReactiveDomain()

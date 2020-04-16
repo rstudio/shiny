@@ -1,3 +1,5 @@
+library(shiny)
+
 ui <- fluidPage(
   # ======== Modules ========
   # mymoduleUI is defined in R/my-module.R

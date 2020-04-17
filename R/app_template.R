@@ -117,7 +117,7 @@ shinyAppTemplate <- function(path = NULL, examples = "default", dryrun = FALSE)
 
   if ("shinytest" %in% examples) {
     if (system.file(package = "shinytest") != "" &&
-        packageVersion("shinytest") <= "1.4.0")
+        packageVersion("shinytest") <= "1.3.1.9000")
     {
       message(
         "The tests/shinytest directory needs shinytest 1.4.0 or later to work properly.\n",

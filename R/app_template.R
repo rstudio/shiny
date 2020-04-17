@@ -138,9 +138,14 @@ shinyAppTemplate <- function(path = NULL, examples = "default", dryrun = FALSE)
     return(length(files) != 0)
   }
 
-  # Helper to resolve paths relative to our example
-  example_path <- function(path) {
-    system.file("app_template", path, package = "shiny")
+  # Helper to resolve paths relative to our template
+  template_path <- function(...) {
+    system.file("app_template", ..., package = "shiny")
+  }
+
+  # Resolve path relative to destination
+  dest_path <- function(...) {
+    file.path(path, ...)
   }
 
   mkdir <- function(path) {
@@ -152,7 +157,13 @@ shinyAppTemplate <- function(path = NULL, examples = "default", dryrun = FALSE)
     }
   }
 
-  copy_file <- function(from, to) {
+  # Copy a file from the template directory to the destination directory. If the
+  # file has templating code (it contains `{{` in the text), then run it through
+  # the htmlTemplate().
+  copy_file_one <- function(name) {
+    from <- template_path(name)
+    to <- dest_path(name)
+
     message("Creating ", to)
     if (file.exists(to)) {
       stop(to, " already exists. Please remove it and try again.", call. = FALSE)
@@ -177,11 +188,16 @@ shinyAppTemplate <- function(path = NULL, examples = "default", dryrun = FALSE)
     }
   }
 
+  # Copy multiple files from template to destination.
+  copy_file <- function(names) {
+    for (name in names) {
+      copy_file_one(name)
+    }
+  }
+
   # Copy the files for a tests/ subdirectory
   copy_test_dir <- function(name) {
-    tests_dir <- file.path(path, "tests")
-
-    files <- dir(example_path("tests"), recursive = TRUE)
+    files <- dir(template_path("tests"), recursive = TRUE)
     # Note: This is not the same as using dir(pattern = "^shinytest"), since
     # that will not match files inside of shinytest/.
     files <- files[grepl(paste0("^", name), files)]
@@ -198,20 +214,15 @@ shinyAppTemplate <- function(path = NULL, examples = "default", dryrun = FALSE)
       files <- files[!grepl("module", files)]
     }
 
-    mkdir(tests_dir)
+    mkdir(dest_path("tests"))
 
     # Create any subdirectories if needed
     dirs <- setdiff(unique(dirname(files)), ".")
     for (dir in dirs) {
-      mkdir(file.path(tests_dir, dir))
+      mkdir(dest_path("tests", dir))
     }
 
-    for (file in files) {
-      copy_file(
-        file.path(example_path("tests"), file),
-        file.path(path, "tests", file)
-      )
-    }
+    copy_file(file.path("tests", files))
   }
 
   # =======================================================
@@ -239,37 +250,22 @@ shinyAppTemplate <- function(path = NULL, examples = "default", dryrun = FALSE)
     mkdir(path)
   }
 
-  # app.R - If "app", populate with example; otherwise use empty file.
   if ("app" %in% examples) {
-    copy_file(
-      example_path("app.R"),
-      file.path(path, "app.R")
-    )
+    copy_file("app.R")
   }
 
   # R/ dir with non-module files
-  r_dir <- file.path(path, "R")
   if ("rdir" %in% examples) {
-    non_module_files <- dir(example_path("R"), pattern = "[^(module)].R$")
-    mkdir(r_dir)
-    for (file in non_module_files) {
-      copy_file(
-        example_path(file.path("R", file)),
-        file.path(r_dir, file)
-      )
-    }
+    non_module_files <- dir(template_path("R"), pattern = "[^(module)].R$")
+    mkdir(dest_path("R"))
+    copy_file(file.path("R", non_module_files))
   }
 
   # R/ dir with module files
   if ("module" %in% examples) {
-    module_files <- dir(example_path("R"), pattern = "module.R$")
-    mkdir(r_dir)
-    for (file in module_files) {
-      copy_file(
-        example_path(file.path("R", file)),
-        file.path(r_dir, file)
-      )
-    }
+    module_files <- dir(template_path("R"), pattern = "module.R$")
+    mkdir(dest_path("R"))
+    copy_file(file.path("R", module_files))
   }
 
   # tests/ dir

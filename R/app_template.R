@@ -122,10 +122,14 @@ shinyAppTemplate <- function(path = NULL, examples = "default")
     system.file("app_template", path, package = "shiny")
   }
 
+  mkdir_p <- function(path) {
+    dir.create(path, showWarnings = FALSE, recursive = TRUE)
+  }
+
   # Copy the files for a tests/ subdirectory
   copy_test_dir <- function(name, with_rdir, with_module) {
     tests_dir <- file.path(path, "tests")
-    dir.create(tests_dir, showWarnings = FALSE, recursive = TRUE)
+    mkdir_p(tests_dir)
 
     files <- dir(example_path("tests"), recursive = TRUE)
     # Note: This is not the same as using dir(pattern = "^shinytest"), since
@@ -147,7 +151,7 @@ shinyAppTemplate <- function(path = NULL, examples = "default")
     # Create any subdirectories if needed
     dirs <- setdiff(unique(dirname(files)), ".")
     for (dir in dirs) {
-      dir.create(file.path(tests_dir, dir), showWarnings = FALSE, recursive = TRUE)
+      mkdir_p(file.path(tests_dir, dir))
     }
 
     for (file in files) {
@@ -189,7 +193,7 @@ shinyAppTemplate <- function(path = NULL, examples = "default")
       }
     }
   } else {
-    dir.create(path)
+    mkdir_p(path)
   }
 
   # app.R - If "app", populate with example; otherwise use empty file.
@@ -214,11 +218,11 @@ shinyAppTemplate <- function(path = NULL, examples = "default")
   # R/ dir with utils and/or module
   r_dir <- file.path(path, "R")
   if ("rdir" %in% examples) {
-    dir.create(r_dir, showWarnings = FALSE, recursive = TRUE)
+    mkdir_p(r_dir)
     file.copy(example_path("R/sort.R"), r_dir, recursive = TRUE)
   }
   if ("module" %in% examples) {
-    dir.create(r_dir, showWarnings = FALSE, recursive = TRUE)
+    mkdir_p(r_dir)
     file.copy(example_path("R/my-module.R"), r_dir, recursive = TRUE)
   }
 

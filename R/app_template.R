@@ -14,16 +14,14 @@
 #' |   |- my-module.R
 #' |   |- sort.R
 #' `-- tests
-#'     |- server.R
-#'     |- server
-#'     |   |- test-mymodule.R
-#'     |   `- test-server.R
 #'     |- shinytest.R
 #'     |- shinytest
 #'     |   `- mytest.R
 #'     |- testthat.R
 #'     `-- testthat
 #'         |- helper-load.R
+#'     |   |- test-mymodule.R
+#'     |   `- test-server.R
 #'         `- test-sort.R
 #' ```
 #'
@@ -38,25 +36,20 @@
 #' * `tests/` contains various tests for the application. You may
 #'   choose to use or remove any of them. They can be executed by the
 #'   [runTests()] function.
-#' * `tests/server.R` is a test runner for test files in
-#'   `tests/server/`.
-#' * `tests/server/test-mymodule.R` is a test for the module.
 #' * `tests/shinytest.R` is a test runner for test files in the
 #'   `tests/shinytest/` directory.
 #' * `tests/shinytest/mytest.R` is a test that uses the
 #'   [shinytest](https://rstudio.github.io/shinytest/) package to do
 #'   snapshot-based testing.
 #' * `tests/testthat.R` is a test runner for test files in the
-#'   `tests/testthat/` directory.
-#' * `tests/testthat/helper-load.R` is a helper script that is automatically
-#'   loaded before running `test-mymodule.`R. (This is performed by the testthat
-#'   package.)
-#' * `tests/testthat/test-sort.R` is a set of tests that use the
-#'   [testthat](https://testthat.r-lib.org/) package for testing.
+#'   `tests/testthat/` directory using the [testthat](https://testthat.r-lib.org/) package.
+#' * `tests/testthat/test-mymodule.R` is a test for an application's module server function.
+#' * `tests/testthat/test-server.R` is a test for the application's server code
+#' * `tests/testthat/test-sort.R` is a test for a supporting function in the `R/` directory.
 #'
 #' @param path Path to create new shiny application template.
 #' @param examples Either one of "default", "ask", "all", or any combination of
-#'   "app", "rdir", "module", "shinytest", "testthat", and "server". In an
+#'   "app", "rdir", "module", "shinytest", and "testthat". In an
 #'   interactive session, "default" falls back to "ask"; in a non-interactive
 #'   session, "default" falls back to "all". With "ask", this function will
 #'   prompt the user to select which template items will be added to the new app
@@ -75,8 +68,7 @@ shinyAppTemplate <- function(path = NULL, examples = "default")
     rdir      = "R/sort.R         : Helper file with R code",
     module    = "R/my-module.R    : Example module",
     shinytest = "tests/shinytest/ : Tests using shinytest package",
-    testthat  = "tests/testthat/  : Tests using testthat",
-    server    = "tests/server/    : Tests of server and module code"
+    testthat  = "tests/testthat/  : Tests using testthat"
   )
 
   if (identical(examples, "default")) {
@@ -130,19 +122,25 @@ shinyAppTemplate <- function(path = NULL, examples = "default")
     system.file("app_template", path, package = "shiny")
   }
 
+  mkdir_p <- function(path) {
+    dir.create(path, showWarnings = FALSE, recursive = TRUE)
+  }
+
   # Copy the files for a tests/ subdirectory
   copy_test_dir <- function(name, with_rdir, with_module) {
     tests_dir <- file.path(path, "tests")
-    dir.create(tests_dir, showWarnings = FALSE, recursive = TRUE)
+    mkdir_p(tests_dir)
 
     files <- dir(example_path("tests"), recursive = TRUE)
     # Note: This is not the same as using dir(pattern = "^shinytest"), since
     # that will not match files inside of shinytest/.
     files <- files[grepl(paste0("^", name), files)]
 
-    # Filter out files related to R/sort.R, if applicable.
+    # Filter out files that are not module files in the R directory.
     if (!with_rdir) {
-      files <- files[!grepl("utils", files)]
+      # find all files in the testthat folder that are not module or server files
+      is_r_folder_file <- (!grepl("module|server", basename(files))) & (dirname(files) == "testthat")
+      files <- files[!is_r_folder_file]
     }
 
     # Filter out module files, if applicable.
@@ -153,13 +151,27 @@ shinyAppTemplate <- function(path = NULL, examples = "default")
     # Create any subdirectories if needed
     dirs <- setdiff(unique(dirname(files)), ".")
     for (dir in dirs) {
-      dir.create(file.path(tests_dir, dir), showWarnings = FALSE, recursive = TRUE)
+      mkdir_p(file.path(tests_dir, dir))
     }
 
-    file.copy(
-      file.path(example_path("tests"), files),
-      file.path(path, "tests", files)
-    )
+    for (file in files) {
+      from_file <- file.path(example_path("tests"), file)
+      to_file <- file.path(path, "tests", file)
+      # is template file
+      if (any(grepl("{{", readLines(from_file), fixed = TRUE))) {
+        writeChar(
+          as.character(htmlTemplate(
+            from_file,
+            rdir = with_rdir,
+            module = with_module
+          )),
+          con = to_file,
+          eos = NULL
+        )
+      } else {
+        file.copy(from_file, to_file)
+      }
+    }
   }
 
 
@@ -181,7 +193,7 @@ shinyAppTemplate <- function(path = NULL, examples = "default")
       }
     }
   } else {
-    dir.create(path)
+    mkdir_p(path)
   }
 
   # app.R - If "app", populate with example; otherwise use empty file.
@@ -206,11 +218,11 @@ shinyAppTemplate <- function(path = NULL, examples = "default")
   # R/ dir with utils and/or module
   r_dir <- file.path(path, "R")
   if ("rdir" %in% examples) {
-    dir.create(r_dir, showWarnings = FALSE, recursive = TRUE)
+    mkdir_p(r_dir)
     file.copy(example_path("R/sort.R"), r_dir, recursive = TRUE)
   }
   if ("module" %in% examples) {
-    dir.create(r_dir, showWarnings = FALSE, recursive = TRUE)
+    mkdir_p(r_dir)
     file.copy(example_path("R/my-module.R"), r_dir, recursive = TRUE)
   }
 
@@ -220,9 +232,6 @@ shinyAppTemplate <- function(path = NULL, examples = "default")
   }
   if ("testthat" %in% examples) {
     copy_test_dir("testthat", "rdir" %in% examples, "module" %in% examples)
-  }
-  if ("server" %in% examples) {
-    copy_test_dir("server", "rdir" %in% examples, "module" %in% examples)
   }
   if ("app" %in% examples) {
     message("Shiny application created at ", ensure_trailing_slash(path))

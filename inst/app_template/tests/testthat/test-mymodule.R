@@ -1,5 +1,4 @@
-# Use testthat just for expectations
-library(testthat)
+context("mymoduleServer")
 
 # See ?testServer for more information
 testServer(mymoduleServer, {

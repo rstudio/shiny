@@ -9,7 +9,7 @@ testServer(
   {
 
     # Init count... 0
-    expect_equal(nrow(dplyr::filter(dataWithSelection(), selected_)), 0)
+    expect_equal(sum(dataWithSelection()$selected_), 0)
 
     # Select a region
     session$setInputs(
@@ -30,7 +30,7 @@ testServer(
     )
 
     # Check the value of the reactiveVal `count()`
-    expect_equal(nrow(dplyr::filter(dataWithSelection(), selected_)), 23)
+    expect_equal(sum(dataWithSelection()$selected_), 23)
 
   }
 )

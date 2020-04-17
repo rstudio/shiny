@@ -26,12 +26,6 @@ test_that("runTests works", {
     NULL
   }
 
-
-  # Temporarily opt-in to R/ file autoloading
-  orig <- getOption("shiny.autoload.r", NULL)
-  options(shiny.autoload.r=TRUE)
-  on.exit({options(shiny.autoload.r=orig)}, add=TRUE)
-
   runTestsSpy <- rewire(runTests, sourceUTF8 = sourceStub, loadSupport=loadSupportStub)
 
   res <- runTestsSpy(test_path("../test-helpers/app1-standard"), assert = FALSE)
@@ -65,21 +59,14 @@ test_that("runTests works", {
   # Clear out err'ing files and rerun
   filesToError <- character(0)
 
+  calls <- list()
   res <- runTestsSpy(test_path("../test-helpers/app1-standard"))
   expect_equal(all(res$pass), TRUE)
   expect_equal(basename(res$file), c("runner1.R", "runner2.R"))
-
-  # If autoload is false, it should still load global.R.
-  calls <- list()
-  # Temporarily opt-out of R/ file autoloading
-  orig <- getOption("shiny.autoload.r", NULL)
-  options(shiny.autoload.r=FALSE)
-  on.exit({options(shiny.autoload.r=orig)}, add=TRUE)
-
-  res <- runTestsSpy(test_path("../test-helpers/app1-standard"))
   expect_length(calls, 2)
   expect_match(calls[[1]][[1]], "runner1\\.R", perl=TRUE)
   expect_match(calls[[2]][[1]], "runner2\\.R", perl=TRUE)
+
 })
 
 test_that("calls out to shinytest when appropriate", {
@@ -134,7 +121,11 @@ test_that("runTests handles the absence of tests", {
 
 test_that("runTests runs as expected without rewiring", {
   appDir <- file.path("..", "test-helpers", "app1-standard")
-  df <- runTests(appDir = appDir, assert = FALSE)
+  df <- testthat::expect_output(
+    print(runTests(appDir = appDir, assert = FALSE)),
+    "Shiny App Test Results\\n\\* Success\\n  - app1-standard/tests/runner1\\.R\\n  - app1-standard/tests/runner2\\.R"
+  )
+
   expect_equivalent(df, data.frame(
     file = file.path(appDir, "tests", c("runner1.R", "runner2.R")),
     pass = c(TRUE, TRUE),
@@ -142,4 +133,57 @@ test_that("runTests runs as expected without rewiring", {
     stringsAsFactors = FALSE
   ))
   expect_s3_class(df, "shiny_runtests")
+})
+
+
+context("shinyAppTemplate + runTests")
+test_that("app template works with runTests", {
+
+  testthat::skip_on_cran()
+  testthat::skip_if_not_installed("shinytest", "1.3.1.9000")
+
+  # test all combos
+  make_combos <- function(...) {
+    args <- list(...)
+    combo_dt <- do.call(expand.grid, args)
+    lapply(apply(combo_dt, 1, unlist), unname)
+  }
+
+  combos <- unique(unlist(
+    recursive = FALSE,
+    list(
+      "all",
+      # only test cases for shinytest where appropriate, shinytest is "slow"
+      make_combos("app", list(NULL, "module"), "shinytest"),
+      # expand.grid on all combos
+      make_combos("app", list(NULL, "module"), list(NULL, "rdir"), list(NULL, "testthat"))
+    )
+  ))
+
+  lapply(combos, function(combo) {
+    random_folder <- paste0("shinyAppTemplate-", paste0(combo, collapse = "_"))
+    tempTemplateDir <- file.path(tempdir(), random_folder)
+    shinyAppTemplate(tempTemplateDir, combo)
+    on.exit(unlink(tempTemplateDir, recursive = TRUE))
+
+    if (any(c("all", "shinytest", "testthat") %in% combo)) {
+      expect_output(
+        print(runTests(tempTemplateDir)),
+        paste0(
+          "Shiny App Test Results\\n\\* Success",
+          if (any(c("all", "shinytest") %in% combo))
+            paste0("\\n  - ", file.path(random_folder, "tests", "shinytest\\.R")),
+          if (any(c("all", "testthat") %in% combo))
+            paste0("\\n  - ", file.path(random_folder, "tests", "testthat\\.R"))
+        )
+      )
+
+    } else {
+      expect_error(
+        runTests(tempTemplateDir)
+      )
+    }
+
+  })
+
 })

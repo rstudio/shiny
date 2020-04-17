@@ -11,8 +11,9 @@ isModuleServer <- function(x) {
 #' @param app The path to an application or module to test. In addition to
 #'   paths, applications may be represented by any object suitable for coercion
 #'   to an `appObj` by `as.shiny.appobj`. Application server functions must
-#'   include a `session` argument in order to be tested. Defaults to the Shiny
-#'   application at ".".
+#'   include a `session` argument in order to be tested. If `app` is `NULL` or
+#'   not supplied, the nearest enclosing directory that is a Shiny app, starting
+#'   with the current directory, is used.
 #' @param expr Test code containing expectations. The test expression will run
 #'   in the server function environment, meaning that the parameters of the
 #'   server function (e.g. `input`, `output`, and `session`) will be available
@@ -50,7 +51,9 @@ isModuleServer <- function(x) {
 #'   # Any additional arguments, below, are passed along to the module.
 #' }, multiplier = 2)
 #' @export
-testServer <- function(app = ".", expr, ...) {
+testServer <- function(app = NULL, expr, ...) {
+
+  require(shiny)
 
   quosure <- rlang::enquo(expr)
   args <- rlang::list2(...)
@@ -94,6 +97,10 @@ testServer <- function(app = ".", expr, ...) {
       )
     )
   } else {
+    if (is.null(app)) {
+      app <- findEnclosingApp(".")
+    }
+
     appobj <- as.shiny.appobj(app)
     if (!is.null(appobj$onStart))
       appobj$onStart()

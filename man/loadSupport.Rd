@@ -5,13 +5,15 @@
 \title{Load an app's supporting R files}
 \usage{
 loadSupport(
-  appDir,
+  appDir = NULL,
   renv = new.env(parent = globalenv()),
   globalrenv = globalenv()
 )
 }
 \arguments{
-\item{appDir}{The application directory}
+\item{appDir}{The application directory. If \code{appDir} is \code{NULL} or
+not supplied, the nearest enclosing directory that is a Shiny app, starting
+with the current directory, is used.}
 
 \item{renv}{The environmeny in which the files in the \verb{R/} directory should
 be evaluated.}

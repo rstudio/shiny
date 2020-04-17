@@ -1821,7 +1821,7 @@ cat_line <- function(...) {
   cat(paste(..., "\n", collapse = ""))
 }
 
-select_menu <- function(choices, title = NULL, msg = "Enter one or more numbers (with spaces), or an empty line to exit: \n") 
+select_menu <- function(choices, title = NULL, msg = "Enter one or more numbers (with spaces), or an empty line to exit: \n")
 {
   if (!is.null(title)) {
     cat(title, "\n", sep = "")
@@ -1836,5 +1836,40 @@ select_menu <- function(choices, title = NULL, msg = "Enter one or more numbers 
     if (all(answer %in% seq_along(choices))) {
       return(choices[as.integer(answer)])
     }
+  }
+}
+
+#' @noRd
+isAppDir <- function(path) {
+
+  if (file.exists(file.path(path, "app.R")))
+    return(TRUE)
+
+  if (file.exists(file.path(path, "server.R"))
+      && file.exists(file.path(path, "ui.R")))
+    return(TRUE)
+
+  FALSE
+}
+
+# Borrowed from rprojroot which borrowed from devtools
+#' @noRd
+is_root <- function(path) {
+  identical(
+    normalizePath(path, winslash = "/"),
+    normalizePath(dirname(path), winslash = "/")
+  )
+}
+
+#' @noRd
+findEnclosingApp <- function(path = ".") {
+  orig_path <- path
+  path <- normalizePath(path, winslash = "/", mustWork = TRUE)
+  repeat {
+    if (isAppDir(path))
+      return(path)
+    if (is_root(path))
+      stop("Shiny app not found at ", orig_path, " or in any parent directory.")
+    path <- dirname(path)
   }
 }

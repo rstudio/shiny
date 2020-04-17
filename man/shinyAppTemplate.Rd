@@ -4,18 +4,21 @@
 \alias{shinyAppTemplate}
 \title{Generate a Shiny application from a template}
 \usage{
-shinyAppTemplate(path = NULL, examples = "default")
+shinyAppTemplate(path = NULL, examples = "default", dryrun = FALSE)
 }
 \arguments{
 \item{path}{Path to create new shiny application template.}
 
 \item{examples}{Either one of "default", "ask", "all", or any combination of
-"app", "rdir", "module", "shinytest", "testthat", and "server". In an
+"app", "rdir", "module", "shinytest", and "testthat". In an
 interactive session, "default" falls back to "ask"; in a non-interactive
 session, "default" falls back to "all". With "ask", this function will
 prompt the user to select which template items will be added to the new app
 directory. With "all", all template items will be added to the app
 directory.}
+
+\item{dryrun}{If \code{TRUE}, don't actually write any files; just print out what
+would be written.}
 }
 \description{
 This function populates a directory with files for a Shiny application.
@@ -28,18 +31,16 @@ The full example application includes the following files and directories:\prefo
 |- app.R
 |- R
 |   |- my-module.R
-|   |- sort.R
-`-- tests
-    |- server.R
-    |- server
-    |   |- test-mymodule.R
-    |   `- test-server.R
+|   `- sort.R
+`- tests
     |- shinytest.R
     |- shinytest
     |   `- mytest.R
     |- testthat.R
-    `-- testthat
+    `- testthat
         |- helper-load.R
+        |- test-mymodule.R
+        |- test-server.R
         `- test-sort.R
 }
 
@@ -55,20 +56,15 @@ is used in the application.
 \item \verb{tests/} contains various tests for the application. You may
 choose to use or remove any of them. They can be executed by the
 \code{\link[=runTests]{runTests()}} function.
-\item \code{tests/server.R} is a test runner for test files in
-\verb{tests/server/}.
-\item \code{tests/server/test-mymodule.R} is a test for the module.
 \item \code{tests/shinytest.R} is a test runner for test files in the
 \verb{tests/shinytest/} directory.
 \item \code{tests/shinytest/mytest.R} is a test that uses the
 \href{https://rstudio.github.io/shinytest/}{shinytest} package to do
 snapshot-based testing.
 \item \code{tests/testthat.R} is a test runner for test files in the
-\verb{tests/testthat/} directory.
-\item \code{tests/testthat/helper-load.R} is a helper script that is automatically
-loaded before running \code{test-mymodule.}R. (This is performed by the testthat
-package.)
-\item \code{tests/testthat/test-sort.R} is a set of tests that use the
-\href{https://testthat.r-lib.org/}{testthat} package for testing.
+\verb{tests/testthat/} directory using the \href{https://testthat.r-lib.org/}{testthat} package.
+\item \code{tests/testthat/test-mymodule.R} is a test for an application's module server function.
+\item \code{tests/testthat/test-server.R} is a test for the application's server code
+\item \code{tests/testthat/test-sort.R} is a test for a supporting function in the \verb{R/} directory.
 }
 }

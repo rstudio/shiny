@@ -1,5 +1,5 @@
 # Use testthat just for expectations
-library(testthat)
+context("App")
 
 testServer(expr = {
   # Set the `size` slider and check the output

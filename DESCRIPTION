@@ -97,7 +97,8 @@ Suggests:
     future,
     dygraphs
 Remotes:
-    rstudio/htmltools
+    rstudio/htmltools,
+    rstudio/shinytest
 URL: http://shiny.rstudio.com
 BugReports: https://github.com/rstudio/shiny/issues
 Collate:

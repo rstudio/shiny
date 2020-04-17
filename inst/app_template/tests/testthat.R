@@ -1,6 +1,9 @@
 library(testthat)
 
-# Run in the "current" environment, because shiny::runTests() is going to
-# provision a new environment that's just for our test. And we'll want access to
-# the supporting files that were already loaded into that env.
-testthat::test_dir("./testthat", env = environment())
+test_dir(
+  "./testthat",
+  # Run in the app's environment containing all support methods.
+  env = shiny::loadSupport("../"),
+  # Display the regular progress output and throw an error if any test error is found
+  reporter = c("progress", "fail")
+)

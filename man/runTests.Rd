@@ -4,7 +4,7 @@
 \alias{runTests}
 \title{Runs the tests associated with this Shiny app}
 \usage{
-runTests(appDir = ".", filter = NULL)
+runTests(appDir = ".", filter = NULL, assert = TRUE, envir = globalenv())
 }
 \arguments{
 \item{appDir}{The base directory for the application.}
@@ -12,15 +12,18 @@ runTests(appDir = ".", filter = NULL)
 \item{filter}{If not \code{NULL}, only tests with file names matching this regular
 expression will be executed. Matching is performed on the file name
 including the extension.}
+
+\item{assert}{Logical value which determines if an error should be thrown if any error is captured.}
+
+\item{envir}{Parent testing environment in which to base the individual testing environments.}
 }
 \value{
-A data frame classed with the supplemental class \code{"shinytestrun"}.
+A data frame classed with the supplemental class \code{"shiny_runtests"}.
 The data frame has the following columns:\tabular{lll}{
    \strong{Name} \tab \strong{Type} \tab \strong{Meaning} \cr
    \code{file} \tab \code{character(1)} \tab File name of the runner script in \verb{tests/} that was sourced. \cr
    \code{pass} \tab \code{logical(1)} \tab Whether or not the runner script signaled an error when sourced. \cr
-   \code{result} \tab any or \code{NA} \tab The return value of the runner, or \code{NA} if \code{pass == FALSE}. \cr
-   \code{error} \tab any or \code{NA} \tab The error signaled by the runner, or \code{NA} if \code{pass == TRUE}. \cr
+   \code{result} \tab any or \code{NA} \tab The return value of the runner \cr
 }
 }
 \description{
@@ -30,8 +33,7 @@ directories under \verb{tests/}.
 }
 \details{
 Historically, \href{https://rstudio.github.io/shinytest/}{shinytest}
-recommended placing tests at the top-level of the \verb{tests/} directory. In
-order to support that model, \code{testApp} first checks to see if the \code{.R}
-files in the \verb{tests/} directory are all shinytests; if so, just calls out
-to \code{\link[shinytest:testApp]{shinytest::testApp()}}.
+recommended placing tests at the top-level of the \verb{tests/} directory.
+This older folder structure is not supported by runTests.
+Please see \code{\link[=shinyAppTemplate]{shinyAppTemplate()}} for more details.
 }

@@ -117,7 +117,7 @@ shinyAppTemplate <- function(path = NULL, examples = "default", dryrun = FALSE)
 
   if ("shinytest" %in% examples) {
     if (system.file(package = "shinytest") != "" &&
-        packageVersion("shinytest") <= "1.3.1.9000")
+        utils::packageVersion("shinytest") <= "1.3.1.9000")
     {
       message(
         "The tests/shinytest directory needs shinytest 1.4.0 or later to work properly.\n",
@@ -159,7 +159,7 @@ shinyAppTemplate <- function(path = NULL, examples = "default", dryrun = FALSE)
     }
 
     if (!dryrun) {
-      is_template <- any(grepl("{{", readLines(from_file), fixed = TRUE))
+      is_template <- any(grepl("{{", readLines(from), fixed = TRUE))
 
       if (is_template) {
         writeChar(

@@ -152,13 +152,15 @@ shinyAppTemplate <- function(path = NULL, examples = "default", dryrun = FALSE)
     }
   }
 
-  copy_file <- function(from, to, is_template = FALSE) {
+  copy_file <- function(from, to) {
     message("Creating ", to)
     if (file.exists(to)) {
       stop(to, " already exists. Please remove it and try again.", call. = FALSE)
     }
 
     if (!dryrun) {
+      is_template <- any(grepl("{{", readLines(from_file), fixed = TRUE))
+
       if (is_template) {
         writeChar(
           as.character(htmlTemplate(
@@ -205,11 +207,10 @@ shinyAppTemplate <- function(path = NULL, examples = "default", dryrun = FALSE)
     }
 
     for (file in files) {
-      from_file <- file.path(example_path("tests"), file)
-      to_file <- file.path(path, "tests", file)
-
-      is_template <- any(grepl("{{", readLines(from_file), fixed = TRUE))
-      copy_file(from_file, to_file, is_template)
+      copy_file(
+        file.path(example_path("tests"), file),
+        file.path(path, "tests", file)
+      )
     }
   }
 
@@ -242,8 +243,7 @@ shinyAppTemplate <- function(path = NULL, examples = "default", dryrun = FALSE)
   if ("app" %in% examples) {
     copy_file(
       example_path("app.R"),
-      file.path(path, "app.R"),
-      is_template = TRUE
+      file.path(path, "app.R")
     )
   }
 

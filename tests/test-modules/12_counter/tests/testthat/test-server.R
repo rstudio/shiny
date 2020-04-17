@@ -1,7 +1,8 @@
 # Use testthat just for expectations
-library(testthat)
+context("App")
 
-testServer('../..', {
+testServer('../..', expr = {
+  # TODO-barret remove path
   # Set the `size` slider and check the output
   session$setInputs(size = 6)
   expect_equal(output$sequence, "1 2 3 4 5 6")

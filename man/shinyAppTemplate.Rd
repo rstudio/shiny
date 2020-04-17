@@ -31,16 +31,16 @@ The full example application includes the following files and directories:\prefo
 |- app.R
 |- R
 |   |- my-module.R
-|   |- sort.R
-`-- tests
+|   `- sort.R
+`- tests
     |- shinytest.R
     |- shinytest
     |   `- mytest.R
     |- testthat.R
-    `-- testthat
+    `- testthat
         |- helper-load.R
-    |   |- test-mymodule.R
-    |   `- test-server.R
+        |- test-mymodule.R
+        |- test-server.R
         `- test-sort.R
 }
 

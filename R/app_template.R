@@ -65,6 +65,10 @@ shinyAppTemplate <- function(path = NULL, examples = "default", dryrun = FALSE)
     stop("Please provide a `path`.")
   }
 
+  # =======================================================
+  # Option handling
+  # =======================================================
+
   choices <- c(
     app       = "app.R            : Main application file",
     rdir      = "R/sort.R         : Helper file with R code",
@@ -111,6 +115,10 @@ shinyAppTemplate <- function(path = NULL, examples = "default", dryrun = FALSE)
     return(invisible())
   }
 
+  # =======================================================
+  # Utility functions
+  # =======================================================
+
   # Check if a directory is empty, ignoring certain files
   dir_is_empty <- function(path) {
     files <- list.files(path, all.files = TRUE, no.. = TRUE)
@@ -124,7 +132,7 @@ shinyAppTemplate <- function(path = NULL, examples = "default", dryrun = FALSE)
     system.file("app_template", path, package = "shiny")
   }
 
-  mkdir_p <- function(path, dryrun) {
+  mkdir <- function(path) {
     if (!dirExists(path)) {
       message("Creating ", ensure_trailing_slash(path))
       if (!dryrun) {
@@ -133,8 +141,31 @@ shinyAppTemplate <- function(path = NULL, examples = "default", dryrun = FALSE)
     }
   }
 
+  copy_file <- function(from, to, is_template = FALSE) {
+    message("Creating ", to)
+    if (file.exists(to)) {
+      stop(to, " already exists. Please remove it and try again.", call. = FALSE)
+    }
+
+    if (!dryrun) {
+      if (is_template) {
+        writeChar(
+          as.character(htmlTemplate(
+            from,
+            rdir = "rdir" %in% examples,
+            module = "module" %in% examples
+          )),
+          con = to,
+          eos = NULL
+        )
+      } else {
+        file.copy(from, to)
+      }
+    }
+  }
+
   # Copy the files for a tests/ subdirectory
-  copy_test_dir <- function(name, with_rdir, with_module) {
+  copy_test_dir <- function(name) {
     tests_dir <- file.path(path, "tests")
 
     files <- dir(example_path("tests"), recursive = TRUE)
@@ -143,51 +174,37 @@ shinyAppTemplate <- function(path = NULL, examples = "default", dryrun = FALSE)
     files <- files[grepl(paste0("^", name), files)]
 
     # Filter out files that are not module files in the R directory.
-    if (!with_rdir) {
+    if (! "rdir" %in% examples) {
       # find all files in the testthat folder that are not module or server files
       is_r_folder_file <- (!grepl("module|server", basename(files))) & (dirname(files) == "testthat")
       files <- files[!is_r_folder_file]
     }
 
     # Filter out module files, if applicable.
-    if (!with_module) {
+    if (! "module" %in% examples) {
       files <- files[!grepl("module", files)]
     }
 
-    mkdir_p(tests_dir, dryrun)
+    mkdir(tests_dir)
 
     # Create any subdirectories if needed
     dirs <- setdiff(unique(dirname(files)), ".")
     for (dir in dirs) {
-      if (!dryrun) {
-        mkdir_p(file.path(tests_dir, dir), dryrun)
-      }
+      mkdir(file.path(tests_dir, dir))
     }
 
     for (file in files) {
       from_file <- file.path(example_path("tests"), file)
       to_file <- file.path(path, "tests", file)
 
-      message("Creating ", to_file)
-
-      # is template file
-      if (!dryrun) {
-        if (any(grepl("{{", readLines(from_file), fixed = TRUE))) {
-          writeChar(
-            as.character(htmlTemplate(
-              from_file,
-              rdir = with_rdir,
-              module = with_module
-            )),
-            con = to_file,
-            eos = NULL
-          )
-        } else {
-          file.copy(from_file, to_file)
-        }
-      }
+      is_template <- any(grepl("{{", readLines(from_file), fixed = TRUE))
+      copy_file(from_file, to_file, is_template)
     }
   }
+
+  # =======================================================
+  # Main function
+  # =======================================================
 
   if (is.null(path)) {
     stop("`path` is missing.")
@@ -207,54 +224,49 @@ shinyAppTemplate <- function(path = NULL, examples = "default", dryrun = FALSE)
       }
     }
   } else {
-    mkdir_p(path, dryrun)
+    mkdir(path)
   }
 
   # app.R - If "app", populate with example; otherwise use empty file.
-  app_file <- file.path(path, "app.R")
   if ("app" %in% examples) {
-    if (file.exists(app_file)) {
-      message("Not writing ", app_file, "because file already exists.")
-
-    } else {
-      message("Creating ", app_file)
-      if (!dryrun) {
-        writeChar(
-          as.character(htmlTemplate(
-            example_path("app.R"),
-            rdir = "rdir" %in% examples,
-            module = "module" %in% examples
-          )),
-          con = app_file,
-          eos = NULL
-        )
-      }
-    }
+    copy_file(
+      example_path("app.R"),
+      file.path(path, "app.R"),
+      is_template = TRUE
+    )
   }
 
-  # R/ dir with utils and/or module
+  # R/ dir with non-module files
   r_dir <- file.path(path, "R")
   if ("rdir" %in% examples) {
-    mkdir_p(r_dir, dryrun)
-    message("Creating ", file.path(r_dir, "sort.R"))
-    if (!dryrun) {
-      file.copy(example_path("R/sort.R"), r_dir, recursive = TRUE)
+    non_module_files <- dir(example_path("R"), pattern = "[^(module)].R$")
+    mkdir(r_dir)
+    for (file in non_module_files) {
+      copy_file(
+        example_path(file.path("R", file)),
+        file.path(r_dir, file)
+      )
     }
   }
+
+  # R/ dir with module files
   if ("module" %in% examples) {
-    mkdir_p(r_dir, dryrun)
-    message("Creating ", file.path(r_dir, "my-module.R"))
-    if (!dryrun) {
-      file.copy(example_path("R/my-module.R"), r_dir, recursive = TRUE)
+    module_files <- dir(example_path("R"), pattern = "module.R$")
+    mkdir(r_dir)
+    for (file in module_files) {
+      copy_file(
+        example_path(file.path("R", file)),
+        file.path(r_dir, file)
+      )
     }
   }
 
   # tests/ dir
   if ("shinytest" %in% examples) {
-    copy_test_dir("shinytest", "rdir" %in% examples, "module" %in% examples)
+    copy_test_dir("shinytest")
   }
   if ("testthat" %in% examples) {
-    copy_test_dir("testthat", "rdir" %in% examples, "module" %in% examples)
+    copy_test_dir("testthat")
   }
   invisible()
 }

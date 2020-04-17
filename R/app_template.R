@@ -157,7 +157,7 @@ shinyAppTemplate <- function(path = NULL, examples = "default")
     for (file in files) {
       from_file <- file.path(example_path("tests"), file)
       to_file <- file.path(path, "tests", file)
-      # is glue file
+      # is template file
       if (any(grepl("{{", readLines(from_file), fixed = TRUE))) {
         writeChar(
           as.character(htmlTemplate(

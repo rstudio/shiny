@@ -139,6 +139,7 @@ test_that("runTests runs as expected without rewiring", {
 context("shinyAppTemplate + runTests")
 test_that("app template works with runTests", {
 
+  testthat::skip_on_cran()
   testthat::skip_if_not_installed("shinytest", "1.3.1.9000")
 
   # test all combos
@@ -170,8 +171,10 @@ test_that("app template works with runTests", {
         print(runTests(tempTemplateDir)),
         paste0(
           "Shiny App Test Results\\n\\* Success",
-          if ("shinytest" %in% combo) paste0("\\n  - ", file.path(random_folder, "tests", "shinytest\\.R")),
-          if ("testthat" %in% combo) paste0("\\n  - ", file.path(random_folder, "tests", "testthat\\.R"))
+          if (any(c("all", "shinytest") %in% combo))
+            paste0("\\n  - ", file.path(random_folder, "tests", "shinytest\\.R")),
+          if (any(c("all", "testthat") %in% combo))
+            paste0("\\n  - ", file.path(random_folder, "tests", "testthat\\.R"))
         )
       )
 

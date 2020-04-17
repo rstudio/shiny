@@ -139,6 +139,8 @@ test_that("runTests runs as expected without rewiring", {
 context("shinyAppTemplate + runTests")
 test_that("app template works with runTests", {
 
+  testthat::skip_if_not_installed("shinytest", "1.3.1.9000")
+
   # test all combos
   make_combos <- function(...) {
     args <- list(...)

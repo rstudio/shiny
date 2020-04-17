@@ -15,8 +15,6 @@ shiny 1.4.0.9001
 
 * Resolved [#2732](https://github.com/rstudio/shiny/issues/2732): `markdown()` is a new function for writing Markdown with Github extensions directly in Shiny UIs. Markdown rendering is performed by the [commonmark](https://github.com/jeroen/commonmark) package. ([#2737](https://github.com/rstudio/shiny/pull/2737))
 
-* `tabsetPanel()` added a new option `type = "hidden"` which hides the tab titles. When using this option, `updateTabsetPanel()` must be called to switch tabs. `type = "hidden"` allows for quick switching between different UI sets.  ([#2814](https://github.com/rstudio/shiny/pull/2814))
-
 ### Minor new features and improvements
 
 * Fixed [#2042](https://github.com/rstudio/shiny/issues/2042), [#2628](https://github.com/rstudio/shiny/issues/2628): In a `dateInput` and `dateRangeInput`, disabled months and years are now a lighter gray, to make it easier to see that they are disabled. ([#2690](https://github.com/rstudio/shiny/pull/2690))
@@ -29,7 +27,7 @@ shiny 1.4.0.9001
 
 * Added a `'function'` class to `reactive()` and `reactiveVal()` objects. ([#2793](https://github.com/rstudio/shiny/pull/2793))
 
-* Added function `tabPanelBody()` which wraps `tabPanel()` without the title argument.  This function should be used within `tabsetPanel(type = "hidden")` ([#2814](https://github.com/rstudio/shiny/pull/2814))
+* Added a new option (`type = "hidden"`) to `tabsetPanel()`, making it easier to set the active tab via other input controls (e.g., `radioButtons()`) rather than tabs or pills. Use this option in conjunction with `updateTabsetPanel()` and the new `tabsetPanelBody()` function (see `help(tabsetPanel)` for an example and more details).  ([#2814](https://github.com/rstudio/shiny/pull/2814))
 
 * Added function `updateActionLink()` to update an `actionLink()` label and/or icon value. ([#2811](https://github.com/rstudio/shiny/pull/2811))
 

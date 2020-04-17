@@ -221,11 +221,11 @@ shinyAppTemplate <- function(path = NULL, examples = "default", dryrun = FALSE)
   if (is.null(path)) {
     stop("`path` is missing.")
   }
-  if (file.exists(path) && !dir.exists(path)) {
+  if (file.exists(path) && !dirExists(path)) {
     stop(path, " exists but is not a directory.")
   }
 
-  if (dir.exists(path) && dir_is_empty(path)) {
+  if (dirExists(path) && dir_is_empty(path)) {
     if (interactive()) {
       response <- readline(paste0(
         ensure_trailing_slash(path),

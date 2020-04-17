@@ -71,12 +71,12 @@ test_that("runTests works", {
 
 test_that("calls out to shinytest when appropriate", {
   is_legacy_shinytest_val <- TRUE
-  is_legacy_shinytest_stub <- function(...){
+  is_legacy_shinytest_dir_stub <- function(...){
     is_legacy_shinytest_val
   }
 
   # All are shinytests
-  runTestsSpy <- rewire(runTests, is_legacy_shinytest = is_legacy_shinytest_stub)
+  runTestsSpy <- rewire(runTests, is_legacy_shinytest_dir = is_legacy_shinytest_dir_stub)
   expect_error(
     runTestsSpy(test_path("../test-helpers/app1-standard"), assert = FALSE),
     "not supported"

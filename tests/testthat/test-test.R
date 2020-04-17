@@ -150,9 +150,10 @@ test_that("app template works with runTests", {
     recursive = FALSE,
     list(
       "all",
+      # only test cases for shinytest where appropriate, shinytest is "slow"
       make_combos("app", list(NULL, "module"), "shinytest"),
-      make_combos("app", list(NULL, "module"), list(NULL, "rdir"), "testthat"),
-      make_combos("app", list(NULL, "module"), list(NULL, "rdir"))
+      # expand.grid on all combos
+      make_combos("app", list(NULL, "module"), list(NULL, "rdir"), list(NULL, "testthat"))
     )
   ))
 

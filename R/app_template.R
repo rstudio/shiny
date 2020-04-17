@@ -123,7 +123,8 @@ shinyAppTemplate <- function(path = NULL, examples = "default", dryrun = FALSE)
         "The tests/shinytest directory needs shinytest 1.4.0 or later to work properly.\n",
       )
       if (system.file(package = "shinytest") != "") {
-        message("You currently have shinytest ", packageVersion("shinytest"), " installed.")
+        message("You currently have shinytest ",
+                utils::packageVersion("shinytest"), " installed.")
       }
 
     }

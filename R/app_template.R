@@ -55,9 +55,11 @@
 #'   prompt the user to select which template items will be added to the new app
 #'   directory. With "all", all template items will be added to the app
 #'   directory.
+#' @param dryrun If `TRUE`, don't actually write any files; just print out what
+#'   would be written.
 #'
 #' @export
-shinyAppTemplate <- function(path = NULL, examples = "default")
+shinyAppTemplate <- function(path = NULL, examples = "default", dryrun = FALSE)
 {
   if (is.null(path)) {
     stop("Please provide a `path`.")
@@ -122,14 +124,18 @@ shinyAppTemplate <- function(path = NULL, examples = "default")
     system.file("app_template", path, package = "shiny")
   }
 
-  mkdir_p <- function(path) {
-    dir.create(path, showWarnings = FALSE, recursive = TRUE)
+  mkdir_p <- function(path, dryrun) {
+    if (!dirExists(path)) {
+      message("Creating ", ensure_trailing_slash(path))
+      if (!dryrun) {
+        dir.create(path, recursive = TRUE)
+      }
+    }
   }
 
   # Copy the files for a tests/ subdirectory
   copy_test_dir <- function(name, with_rdir, with_module) {
     tests_dir <- file.path(path, "tests")
-    mkdir_p(tests_dir)
 
     files <- dir(example_path("tests"), recursive = TRUE)
     # Note: This is not the same as using dir(pattern = "^shinytest"), since
@@ -148,32 +154,40 @@ shinyAppTemplate <- function(path = NULL, examples = "default")
       files <- files[!grepl("module", files)]
     }
 
+    mkdir_p(tests_dir, dryrun)
+
     # Create any subdirectories if needed
     dirs <- setdiff(unique(dirname(files)), ".")
     for (dir in dirs) {
-      mkdir_p(file.path(tests_dir, dir))
+      if (!dryrun) {
+        mkdir_p(file.path(tests_dir, dir), dryrun)
+      }
     }
 
     for (file in files) {
       from_file <- file.path(example_path("tests"), file)
       to_file <- file.path(path, "tests", file)
+
+      message("Creating ", to_file)
+
       # is template file
-      if (any(grepl("{{", readLines(from_file), fixed = TRUE))) {
-        writeChar(
-          as.character(htmlTemplate(
-            from_file,
-            rdir = with_rdir,
-            module = with_module
-          )),
-          con = to_file,
-          eos = NULL
-        )
-      } else {
-        file.copy(from_file, to_file)
+      if (!dryrun) {
+        if (any(grepl("{{", readLines(from_file), fixed = TRUE))) {
+          writeChar(
+            as.character(htmlTemplate(
+              from_file,
+              rdir = with_rdir,
+              module = with_module
+            )),
+            con = to_file,
+            eos = NULL
+          )
+        } else {
+          file.copy(from_file, to_file)
+        }
       }
     }
   }
-
 
   if (is.null(path)) {
     stop("`path` is missing.")
@@ -193,7 +207,7 @@ shinyAppTemplate <- function(path = NULL, examples = "default")
       }
     }
   } else {
-    mkdir_p(path)
+    mkdir_p(path, dryrun)
   }
 
   # app.R - If "app", populate with example; otherwise use empty file.
@@ -203,27 +217,36 @@ shinyAppTemplate <- function(path = NULL, examples = "default")
       message("Not writing ", app_file, "because file already exists.")
 
     } else {
-      writeChar(
-        as.character(htmlTemplate(
-          example_path("app.R"),
-          rdir = "rdir" %in% examples,
-          module = "module" %in% examples
-        )),
-        con = app_file,
-        eos = NULL
-      )
+      message("Creating ", app_file)
+      if (!dryrun) {
+        writeChar(
+          as.character(htmlTemplate(
+            example_path("app.R"),
+            rdir = "rdir" %in% examples,
+            module = "module" %in% examples
+          )),
+          con = app_file,
+          eos = NULL
+        )
+      }
     }
   }
 
   # R/ dir with utils and/or module
   r_dir <- file.path(path, "R")
   if ("rdir" %in% examples) {
-    mkdir_p(r_dir)
-    file.copy(example_path("R/sort.R"), r_dir, recursive = TRUE)
+    mkdir_p(r_dir, dryrun)
+    message("Creating ", file.path(r_dir, "sort.R"))
+    if (!dryrun) {
+      file.copy(example_path("R/sort.R"), r_dir, recursive = TRUE)
+    }
   }
   if ("module" %in% examples) {
-    mkdir_p(r_dir)
-    file.copy(example_path("R/my-module.R"), r_dir, recursive = TRUE)
+    mkdir_p(r_dir, dryrun)
+    message("Creating ", file.path(r_dir, "my-module.R"))
+    if (!dryrun) {
+      file.copy(example_path("R/my-module.R"), r_dir, recursive = TRUE)
+    }
   }
 
   # tests/ dir
@@ -233,7 +256,5 @@ shinyAppTemplate <- function(path = NULL, examples = "default")
   if ("testthat" %in% examples) {
     copy_test_dir("testthat", "rdir" %in% examples, "module" %in% examples)
   }
-  if ("app" %in% examples) {
-    message("Shiny application created at ", ensure_trailing_slash(path))
-  }
+  invisible()
 }

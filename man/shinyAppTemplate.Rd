@@ -4,7 +4,7 @@
 \alias{shinyAppTemplate}
 \title{Generate a Shiny application from a template}
 \usage{
-shinyAppTemplate(path = NULL, examples = "default")
+shinyAppTemplate(path = NULL, examples = "default", dryrun = FALSE)
 }
 \arguments{
 \item{path}{Path to create new shiny application template.}
@@ -16,6 +16,9 @@ session, "default" falls back to "all". With "ask", this function will
 prompt the user to select which template items will be added to the new app
 directory. With "all", all template items will be added to the app
 directory.}
+
+\item{dryrun}{If \code{TRUE}, don't actually write any files; just print out what
+would be written.}
 }
 \description{
 This function populates a directory with files for a Shiny application.

@@ -199,14 +199,14 @@ test_that("app.R is loaded after R/ helpers and into the right envs", {
 })
 
 test_that("global.R and sources in R/ are sourced in the app directory", {
-  appDir <- normalizePath(test_path("../test-helpers/app1-standard"))
+  appDir <- test_path("../test-helpers/app1-standard")
   appGlobalEnv <- new.env(parent = globalenv())
   appEnv <- new.env(parent = appGlobalEnv)
   loadSupport(appDir, renv = appEnv, globalrenv = appGlobalEnv)
 
   # Set by ../test-helpers/app1-standard/global.R
-  expect_equal(appGlobalEnv$global_wd, appDir)
+  expect_equal(appGlobalEnv$global_wd, normalizePath(appDir))
 
   # Set by ../test-helpers/app1-standard/R/helperCap.R
-  expect_equal(appEnv$source_wd, appDir)
+  expect_equal(appEnv$source_wd, normalizePath(appDir))
 })

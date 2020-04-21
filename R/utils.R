@@ -1873,3 +1873,11 @@ findEnclosingApp <- function(path = ".") {
     path <- dirname(path)
   }
 }
+
+# Reverts working dir to that when called.
+#' @noRd
+with_save_wd <- function(expr) {
+  original_wd <- getwd()
+  on.exit(setwd(original_wd))
+  force(expr)
+}

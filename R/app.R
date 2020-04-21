@@ -334,16 +334,22 @@ initAutoReloadMonitor <- function(dir) {
 #'   `NULL`, `global.R` will not be evaluated at all.
 #' @export
 loadSupport <- function(appDir=NULL, renv=new.env(parent=globalenv()), globalrenv=globalenv()){
+  require(shiny)
+
+  if (is.null(appDir)) {
+    appDir <- findEnclosingApp(".")
+  }
+
   if (!is.null(globalrenv)){
     # Evaluate global.R, if it exists.
     if (file.exists(file.path.ci(appDir, "global.R"))){
-      sourceUTF8(file.path.ci(appDir, "global.R"), envir=globalrenv)
+      with_save_wd({
+        setwd(appDir)
+        sourceUTF8(file.path.ci(appDir, "global.R"), envir=globalrenv)
+      })
     }
   }
 
-  if (is.null(appDir)) {
-    appDir <- findEnclosingApp(appDir)
-  }
 
   helpersDir <- file.path(appDir, "R")
 

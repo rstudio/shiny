@@ -342,9 +342,10 @@ loadSupport <- function(appDir=NULL, renv=new.env(parent=globalenv()), globalren
 
   if (!is.null(globalrenv)){
     # Evaluate global.R, if it exists.
-    if (file.exists(file.path.ci(appDir, "global.R"))){
+    globalPath <- file.path.ci(appDir, "global.R")
+    if (file.exists(globalPath)){
       withr::with_dir(appDir, {
-        sourceUTF8("global.R", envir=globalrenv)
+        sourceUTF8(basename(globalPath), envir=globalrenv)
       })
     }
   }

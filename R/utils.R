@@ -1842,11 +1842,11 @@ select_menu <- function(choices, title = NULL, msg = "Enter one or more numbers 
 #' @noRd
 isAppDir <- function(path) {
 
-  if (file.exists(file.path(path, "app.R")))
+  if (file.exists(file.path.ci(path, "app.R")))
     return(TRUE)
 
-  if (file.exists(file.path(path, "server.R"))
-      && file.exists(file.path(path, "ui.R")))
+  if (file.exists(file.path.ci(path, "server.R"))
+      && file.exists(file.path.ci(path, "ui.R")))
     return(TRUE)
 
   FALSE

@@ -358,8 +358,11 @@ loadSupport <- function(appDir=NULL, renv=new.env(parent=globalenv()), globalren
   }
 
   helpers <- list.files(helpersDir, pattern="\\.[rR]$", recursive=FALSE, full.names=TRUE)
+  helpers <- normalizePath(helpers)
 
-  lapply(helpers, sourceUTF8, envir=renv)
+  withr::with_dir(appDir, {
+    lapply(helpers, sourceUTF8, envir=renv)
+  })
 
   invisible(renv)
 }

@@ -359,6 +359,10 @@ loadSupport <- function(appDir=NULL, renv=new.env(parent=globalenv()), globalren
   }
 
   helpers <- list.files(helpersDir, pattern="\\.[rR]$", recursive=FALSE, full.names=TRUE)
+  # Ensure files in R/ are sorted according to the 'C' locale before sourcing.
+  # This convention is based on the default for packages. For details, see:
+  # https://cran.r-project.org/doc/manuals/r-release/R-exts.html#The-DESCRIPTION-file
+  helpers <- sort(helpers, method = "radix")
   helpers <- normalizePath(helpers)
 
   withr::with_dir(appDir, {

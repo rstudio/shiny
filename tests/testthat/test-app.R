@@ -71,7 +71,7 @@ test_that("With ui/server.R, global.R is loaded before R/ helpers and into the r
 
   # Should have seen three calls -- first to global then to the helpers
   expect_length(calls, 3)
-  expect_match(calls[[1]][[1]], "/global\\.R$", perl=TRUE)
+  expect_match(calls[[1]][[1]], "global\\.R$", perl=TRUE)
   expect_match(calls[[2]][[1]], "/helperCap\\.R$", perl=TRUE)
   expect_match(calls[[3]][[1]], "/helperLower\\.r$", perl=TRUE)
 
@@ -129,7 +129,7 @@ test_that("Loading supporting R files is opt-out", {
 
   # Should have seen three calls from global.R -- helpers are enabled
   expect_length(calls, 3)
-  expect_match(calls[[1]][[1]], "/global\\.R$", perl=TRUE)
+  expect_match(calls[[1]][[1]], "global\\.R$", perl=TRUE)
 })
 
 

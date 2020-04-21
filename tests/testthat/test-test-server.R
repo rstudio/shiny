@@ -165,6 +165,7 @@ test_that("testServer handles reactivePoll", {
   }
 
   testServer(module, {
+    session$flushReact()
     expect_equal(rv$x, 1)
 
     for (i in 1:4){
@@ -189,6 +190,7 @@ test_that("testServer handles reactiveTimer", {
   }
 
   testServer(module, {
+    session$flushReact()
     expect_equal(rv$x, 1)
 
     session$elapse(200)
@@ -593,6 +595,7 @@ test_that("testServer handles invalidateLater", {
   }
 
   testServer(module, {
+    session$flushReact()
     # Should have run once
     expect_equal(rv$x, 1)
 

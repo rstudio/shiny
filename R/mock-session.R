@@ -420,7 +420,6 @@ MockShinySession <- R6Class(
     #' @param value The value returned from the module
     setReturned = function(value) {
       self$returned <- value
-      private$flush()
       value
     },
     #' @description Get the value returned by the module call.
@@ -461,4 +460,3 @@ MockShinySession <- R6Class(
     }
   )
 )
-

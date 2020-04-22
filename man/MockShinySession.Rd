@@ -13,15 +13,17 @@ provided to Shiny server functions or modules.
 ## Method `MockShinySession$setInputs`
 ## ------------------------------------------------
 
-session <- MockShinySession$new()
+\dontrun{
 session$setInputs(x=1, y=2)
+}
 
 ## ------------------------------------------------
 ## Method `MockShinySession$click`
 ## ------------------------------------------------
 
-session <- MockShinySession$new()
+\dontrun{
 session$click("button1")
+}
 }
 \section{Public fields}{
 \if{html}{\out{<div class="r6-fields">}}
@@ -278,8 +280,9 @@ and flushes the reactives.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{session <- MockShinySession$new()
+\preformatted{\dontrun{
 session$setInputs(x=1, y=2)
+}
 }
 \if{html}{\out{</div>}}
 
@@ -304,8 +307,9 @@ Simulates clicking an action button.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{session <- MockShinySession$new()
+\preformatted{\dontrun{
 session$click("button1")
+}
 }
 \if{html}{\out{</div>}}
 

@@ -71,7 +71,7 @@ test_that("With ui/server.R, global.R is loaded before R/ helpers and into the r
 
   # Should have seen three calls -- first to global then to the helpers
   expect_length(calls, 3)
-  expect_match(calls[[1]][[1]], "/global\\.R$", perl=TRUE)
+  expect_match(calls[[1]][[1]], "global\\.R$", perl=TRUE)
   expect_match(calls[[2]][[1]], "/helperCap\\.R$", perl=TRUE)
   expect_match(calls[[3]][[1]], "/helperLower\\.r$", perl=TRUE)
 
@@ -129,7 +129,7 @@ test_that("Loading supporting R files is opt-out", {
 
   # Should have seen three calls from global.R -- helpers are enabled
   expect_length(calls, 3)
-  expect_match(calls[[1]][[1]], "/global\\.R$", perl=TRUE)
+  expect_match(calls[[1]][[1]], "global\\.R$", perl=TRUE)
 })
 
 
@@ -196,4 +196,17 @@ test_that("app.R is loaded after R/ helpers and into the right envs", {
 
   # app.R is sourced into a child environment of the helpers
   expect_identical(parent.env(calls[[2]]$envir), helperEnv1)
+})
+
+test_that("global.R and sources in R/ are sourced in the app directory", {
+  appDir <- test_path("../test-helpers/app1-standard")
+  appGlobalEnv <- new.env(parent = globalenv())
+  appEnv <- new.env(parent = appGlobalEnv)
+  loadSupport(appDir, renv = appEnv, globalrenv = appGlobalEnv)
+
+  # Set by ../test-helpers/app1-standard/global.R
+  expect_equal(appGlobalEnv$global_wd, normalizePath(appDir))
+
+  # Set by ../test-helpers/app1-standard/R/helperCap.R
+  expect_equal(appEnv$source_wd, normalizePath(appDir))
 })

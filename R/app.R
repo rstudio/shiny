@@ -334,16 +334,22 @@ initAutoReloadMonitor <- function(dir) {
 #'   `NULL`, `global.R` will not be evaluated at all.
 #' @export
 loadSupport <- function(appDir=NULL, renv=new.env(parent=globalenv()), globalrenv=globalenv()){
+  require(shiny)
+
+  if (is.null(appDir)) {
+    appDir <- findEnclosingApp(".")
+  }
+
   if (!is.null(globalrenv)){
     # Evaluate global.R, if it exists.
-    if (file.exists(file.path.ci(appDir, "global.R"))){
-      sourceUTF8(file.path.ci(appDir, "global.R"), envir=globalrenv)
+    globalPath <- file.path.ci(appDir, "global.R")
+    if (file.exists(globalPath)){
+      withr::with_dir(appDir, {
+        sourceUTF8(basename(globalPath), envir=globalrenv)
+      })
     }
   }
 
-  if (is.null(appDir)) {
-    appDir <- findEnclosingApp(appDir)
-  }
 
   helpersDir <- file.path(appDir, "R")
 
@@ -353,8 +359,15 @@ loadSupport <- function(appDir=NULL, renv=new.env(parent=globalenv()), globalren
   }
 
   helpers <- list.files(helpersDir, pattern="\\.[rR]$", recursive=FALSE, full.names=TRUE)
+  # Ensure files in R/ are sorted according to the 'C' locale before sourcing.
+  # This convention is based on the default for packages. For details, see:
+  # https://cran.r-project.org/doc/manuals/r-release/R-exts.html#The-DESCRIPTION-file
+  helpers <- sort(helpers, method = "radix")
+  helpers <- normalizePath(helpers)
 
-  lapply(helpers, sourceUTF8, envir=renv)
+  withr::with_dir(appDir, {
+    lapply(helpers, sourceUTF8, envir=renv)
+  })
 
   invisible(renv)
 }

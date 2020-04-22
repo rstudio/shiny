@@ -102,19 +102,15 @@ runTests <- function(
 
   renv <- new.env(parent = envir)
 
-  oldwd <- getwd()
-  on.exit({
-    setwd(oldwd)
-  }, add = TRUE)
-  setwd(testsDir)
-
   # Otherwise source all the runners -- each in their own environment.
   ret <- do.call(rbind, lapply(runners, function(r) {
     pass <- FALSE
     result <-
       tryCatch({
         env <- new.env(parent = renv)
-        ret <- sourceUTF8(r, envir = env)
+        withr::with_dir(testsDir, {
+          ret <- sourceUTF8(r, envir = env)
+        })
         pass <- TRUE
         ret
       }, error = function(err) {

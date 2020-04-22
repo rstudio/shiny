@@ -13,8 +13,8 @@ provided to Shiny server functions or modules.
 ## Method `MockShinySession$setInputs`
 ## ------------------------------------------------
 
-s <- MockShinySession$new()
-s$setInputs(x=1, y=2)
+session <- MockShinySession$new()
+session$setInputs(x=1, y=2)
 }
 \section{Public fields}{
 \if{html}{\out{<div class="r6-fields">}}
@@ -59,6 +59,7 @@ s$setInputs(x=1, y=2)
 \item \href{#method-cycleStartAction}{\code{MockShinySession$cycleStartAction()}}
 \item \href{#method-fileUrl}{\code{MockShinySession$fileUrl()}}
 \item \href{#method-setInputs}{\code{MockShinySession$setInputs()}}
+\item \href{#method-click}{\code{MockShinySession$click()}}
 \item \href{#method-.scheduleTask}{\code{MockShinySession$.scheduleTask()}}
 \item \href{#method-elapse}{\code{MockShinySession$elapse()}}
 \item \href{#method-.now}{\code{MockShinySession$.now()}}
@@ -270,13 +271,30 @@ and flushes the reactives.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{s <- MockShinySession$new()
-s$setInputs(x=1, y=2)
+\preformatted{session <- MockShinySession$new()
+session$setInputs(x=1, y=2)
 }
 \if{html}{\out{</div>}}
 
 }
 
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-click"></a>}}
+\if{latex}{\out{\hypertarget{method-click}{}}}
+\subsection{Method \code{click()}}{
+Simulates clicking an action button.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{MockShinySession$click(id)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{id}}{The id of the button to click.}
+}
+\if{html}{\out{</div>}}
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-.scheduleTask"></a>}}

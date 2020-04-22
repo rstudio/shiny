@@ -194,14 +194,23 @@ MockShinySession <- R6Class(
     #'   and flushes the reactives.
     #' @param ... The inputs to set.
     #' @examples
-    #' s <- MockShinySession$new()
-    #' s$setInputs(x=1, y=2)
+    #' session <- MockShinySession$new()
+    #' session$setInputs(x=1, y=2)
     setInputs = function(...) {
       vals <- list(...)
       mapply(names(vals), vals, FUN = function(name, value) {
         private$.input$set(name, value)
       })
       private$flush()
+    },
+
+    #' @description Simulates clicking an action button.
+    #' @param id The id of the button to click.
+    click = function(id) {
+      val <- (private$.input$get(id) %OR% 0) + 1
+      private$.input$set(id, val)
+      private$flush()
+      next_val
     },
 
     #' @description An internal method which shouldn't be used by others.
@@ -399,6 +408,7 @@ MockShinySession <- R6Class(
         output = structure(.createOutputWriter(self, ns = ns), class = "shinyoutput"),
         makeScope = function(namespace) self$makeScope(ns(namespace)),
         ns = function(namespace) ns(namespace),
+        click = function(id) self$click(ns(id)),
         setInputs = function(...) do.call(self$setInputs, mapNames(ns, ...))
       )
     },

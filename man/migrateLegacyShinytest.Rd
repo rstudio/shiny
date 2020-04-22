@@ -2,7 +2,7 @@
 % Please edit documentation in R/test.R
 \name{migrateLegacyShinytest}
 \alias{migrateLegacyShinytest}
-\title{Migrate legacy shinytest files to new test directory structure}
+\title{Migrate legacy \pkg{shinytest} files to new test directory structure}
 \usage{
 migrateLegacyShinytest(appdir, prompt = interactive())
 }
@@ -12,9 +12,9 @@ migrateLegacyShinytest(appdir, prompt = interactive())
 \item{prompt}{If \code{TRUE}, ask for confirmation when moving files.}
 }
 \description{
-This function migrates the old-style directory structure used by shinytest to
-(versions 1.3.1 and below) new test directory structure used in Shiny 1.5.0
-and above.
+This function migrates the old-style directory structure used by
+\pkg{shinytest} to (versions 1.3.1 and below) new test directory structure
+used in Shiny 1.5.0 and above.
 }
 \details{
 In Shiny 1.5.0, the \code{\link[=runTests]{runTests()}} function was added, and it will run test
@@ -30,18 +30,19 @@ look something like this:\preformatted{appdir/
          `- test-script.R
 }
 
-This allows for tests using the shinytest package as well as other testsing
-tools, such as the \code{\link[=testServer]{testServer()}} function, which can be used for testing
-module and server logic, and for unit tests of functions in an R/
+This allows for tests using the \pkg{shinytest} package as well as other
+testing tools, such as the \code{\link[=testServer]{testServer()}} function, which can be used for
+testing module and server logic, and for unit tests of functions in an R/
 subdirectory.
 
-With the shinytest package, in versions 1.3.0 and below, the tests/
-subdirectory of the application was used specifically for shinytest, and
-could not be used for other types of tests. So the directory structure would
-look like this:\preformatted{appdir/
+With the \pkg{shinytest} package, in versions 1.3.0 and below, the tests/
+subdirectory of the application was used specifically for \pkg{shinytest},
+and could not be used for other types of tests. So the directory structure
+would look like this:\preformatted{appdir/
  `- tests
      `- mytest.R
 }
 
-In shinytest 1.4.0 and above, it defaults to the new directory structure.
+In \pkg{shinytest} 1.4.0 and above, it defaults to the new directory
+structure.
 }

@@ -105,8 +105,8 @@ runTests <- function(
     stop(
       "It appears that the .R files in ", testsDir, " are all shinytests.",
       " This is not supported by `shiny::runTests()`.",
-      "\nPlease see ?shiny::migrateLegacyShinytest to migrate your shinytest file structure to the new format.",
-      "\nSee ?shiny::shinyAppTemplate for an example of the new testing file structure."
+      "\nPlease see `?shiny::migrateLegacyShinytest` to migrate your shinytest file structure to the new format.",
+      "\nSee `?shiny::shinyAppTemplate` for an example of the new testing file structure."
     )
   }
 
@@ -192,11 +192,11 @@ print.shiny_runtests <- function(x, ..., reporter = "summary") {
 }
 
 
-#' Migrate legacy shinytest files to new test directory structure
+#' Migrate legacy \pkg{shinytest} files to new test directory structure
 #'
-#' This function migrates the old-style directory structure used by shinytest to
-#' (versions 1.3.1 and below) new test directory structure used in Shiny 1.5.0
-#' and above.
+#' This function migrates the old-style directory structure used by
+#' \pkg{shinytest} to (versions 1.3.1 and below) new test directory structure
+#' used in Shiny 1.5.0 and above.
 #'
 #' In Shiny 1.5.0, the [runTests()] function was added, and it will run test
 #' scripts tests/ subdirectory of the application. The directory structure will
@@ -214,16 +214,16 @@ print.shiny_runtests <- function(x, ..., reporter = "summary") {
 #'          `- test-script.R
 #' ```
 #'
-#' This allows for tests using the shinytest package as well as other testsing
-#' tools, such as the [testServer()] function, which can be used for testing
-#' module and server logic, and for unit tests of functions in an R/
+#' This allows for tests using the \pkg{shinytest} package as well as other
+#' testing tools, such as the [testServer()] function, which can be used for
+#' testing module and server logic, and for unit tests of functions in an R/
 #' subdirectory.
 #'
 #'
-#' With the shinytest package, in versions 1.3.0 and below, the tests/
-#' subdirectory of the application was used specifically for shinytest, and
-#' could not be used for other types of tests. So the directory structure would
-#' look like this:
+#' With the \pkg{shinytest} package, in versions 1.3.0 and below, the tests/
+#' subdirectory of the application was used specifically for \pkg{shinytest},
+#' and could not be used for other types of tests. So the directory structure
+#' would look like this:
 #'
 #' ```
 #' appdir/
@@ -231,7 +231,8 @@ print.shiny_runtests <- function(x, ..., reporter = "summary") {
 #'      `- mytest.R
 #' ```
 #'
-#' In shinytest 1.4.0 and above, it defaults to the new directory structure.
+#' In \pkg{shinytest} 1.4.0 and above, it defaults to the new directory
+#' structure.
 #'
 #' @param appdir A directory containing a Shiny application.
 #' @param prompt If \code{TRUE}, ask for confirmation when moving files.

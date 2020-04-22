@@ -206,6 +206,9 @@ MockShinySession <- R6Class(
 
     #' @description Simulates clicking an action button.
     #' @param id The id of the button to click.
+    #' @examples
+    #' session <- MockShinySession$new()
+    #' session$click("button1")
     click = function(id) {
       val <- (private$.input$get(id) %OR% 0) + 1
       private$.input$set(id, val)

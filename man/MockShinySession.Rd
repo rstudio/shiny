@@ -15,6 +15,13 @@ provided to Shiny server functions or modules.
 
 session <- MockShinySession$new()
 session$setInputs(x=1, y=2)
+
+## ------------------------------------------------
+## Method `MockShinySession$click`
+## ------------------------------------------------
+
+session <- MockShinySession$new()
+session$click("button1")
 }
 \section{Public fields}{
 \if{html}{\out{<div class="r6-fields">}}
@@ -295,6 +302,15 @@ Simulates clicking an action button.
 }
 \if{html}{\out{</div>}}
 }
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{session <- MockShinySession$new()
+session$click("button1")
+}
+\if{html}{\out{</div>}}
+
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-.scheduleTask"></a>}}

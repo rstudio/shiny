@@ -265,8 +265,8 @@ Base64-encode the given file. Needed for image rendering.
 \if{html}{\out{<a id="method-setInputs"></a>}}
 \if{latex}{\out{\hypertarget{method-setInputs}{}}}
 \subsection{Method \code{setInputs()}}{
-Sets reactive values associated with the \code{session$inputs} object
-and flushes the reactives.
+Sets reactive values associated with the \code{session$inputs}
+object and flushes the reactives.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{MockShinySession$setInputs(...)}\if{html}{\out{</div>}}
 }
@@ -274,7 +274,9 @@ and flushes the reactives.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{...}}{The inputs to set.}
+\item{\code{...}}{The inputs to set. These arguments are processed with
+\code{\link[rlang:list2]{rlang::list2()}} and so are \emph{\link[rlang:dyn-dots]{dynamic}}. Input names
+may not be duplicated.}
 }
 \if{html}{\out{</div>}}
 }

@@ -210,7 +210,7 @@ MockShinySession <- R6Class(
       val <- (private$.input$get(id) %OR% 0) + 1
       private$.input$set(id, val)
       private$flush()
-      next_val
+      val
     },
 
     #' @description An internal method which shouldn't be used by others.

@@ -120,7 +120,7 @@ testServer <- function(app = NULL, expr, ...) {
         withReactiveDomain(
           session,
           withr::with_options(list(`shiny.allowoutputreads` = TRUE), {
-            session$setReturned(server(input = session$input, output = session$output, session = session))
+            server(input = session$input, output = session$output, session = session)
           })
         )
       )

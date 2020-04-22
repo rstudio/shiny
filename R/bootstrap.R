@@ -842,41 +842,8 @@ verbatimTextOutput <- function(outputId, placeholder = FALSE) {
 #' @rdname plotOutput
 #' @export
 imageOutput <- function(outputId, width = "100%", height="400px",
-                        click = NULL, dblclick = NULL,
-                        hover = NULL, hoverDelay = NULL, hoverDelayType = NULL,
-                        brush = NULL,
-                        clickId = NULL, hoverId = NULL,
+                        click = NULL, dblclick = NULL, hover = NULL, brush = NULL,
                         inline = FALSE) {
-
-  if (!is.null(clickId)) {
-    shinyDeprecated(
-      msg = paste("The 'clickId' argument is deprecated. ",
-                  "Please use 'click' instead. ",
-                  "See ?imageOutput or ?plotOutput for more information."),
-      version = "0.11.1"
-    )
-    click <- clickId
-  }
-
-  if (!is.null(hoverId)) {
-    shinyDeprecated(
-      msg = paste("The 'hoverId' argument is deprecated. ",
-                  "Please use 'hover' instead. ",
-                  "See ?imageOutput or ?plotOutput for more information."),
-      version = "0.11.1"
-    )
-    hover <- hoverId
-  }
-
-  if (!is.null(hoverDelay) || !is.null(hoverDelayType)) {
-    shinyDeprecated(
-      msg = paste("The 'hoverDelay'and 'hoverDelayType' arguments are deprecated. ",
-                  "Please use 'hoverOpts' instead. ",
-                  "See ?imageOutput or ?plotOutput for more information."),
-      version = "0.11.1"
-    )
-    hover <- hoverOpts(id = hover, delay = hoverDelay, delayType = hoverDelayType)
-  }
 
   style <- if (!inline) {
     paste("width:", validateCssUnit(width), ";", "height:", validateCssUnit(height))
@@ -984,14 +951,6 @@ imageOutput <- function(outputId, width = "100%", height="400px",
 #'   named list with `x` and `y` elements indicating the mouse
 #'   position. To control the hover time or hover delay type, you must use
 #'   [hoverOpts()].
-#' @param clickId Deprecated; use `click` instead. Also see the
-#'   [clickOpts()] function.
-#' @param hoverId Deprecated; use `hover` instead. Also see the
-#'   [hoverOpts()] function.
-#' @param hoverDelay Deprecated; use `hover` instead. Also see the
-#'   [hoverOpts()] function.
-#' @param hoverDelayType Deprecated; use `hover` instead. Also see the
-#'   [hoverOpts()] function.
 #' @param brush Similar to the `click` argument, this can be `NULL`
 #'   (the default), a string, or an object created by the
 #'   [brushOpts()] function. If you use a value like
@@ -1175,16 +1134,12 @@ imageOutput <- function(outputId, width = "100%", height="400px",
 #' }
 #' @export
 plotOutput <- function(outputId, width = "100%", height="400px",
-                       click = NULL, dblclick = NULL,
-                       hover = NULL, hoverDelay = NULL, hoverDelayType = NULL,
-                       brush = NULL,
-                       clickId = NULL, hoverId = NULL,
+                       click = NULL, dblclick = NULL, hover = NULL, brush = NULL,
                        inline = FALSE) {
 
   # Result is the same as imageOutput, except for HTML class
   res <- imageOutput(outputId, width, height, click, dblclick,
-                     hover, hoverDelay, hoverDelayType, brush,
-                     clickId, hoverId, inline)
+                     hover, brush, inline)
 
   res$attribs$class <- "shiny-plot-output"
   res

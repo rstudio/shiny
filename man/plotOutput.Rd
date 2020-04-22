@@ -12,11 +12,7 @@ imageOutput(
   click = NULL,
   dblclick = NULL,
   hover = NULL,
-  hoverDelay = NULL,
-  hoverDelayType = NULL,
   brush = NULL,
-  clickId = NULL,
-  hoverId = NULL,
   inline = FALSE
 )
 
@@ -27,11 +23,7 @@ plotOutput(
   click = NULL,
   dblclick = NULL,
   hover = NULL,
-  hoverDelay = NULL,
-  hoverDelayType = NULL,
   brush = NULL,
-  clickId = NULL,
-  hoverId = NULL,
   inline = FALSE
 )
 }
@@ -67,12 +59,6 @@ named list with \code{x} and \code{y} elements indicating the mouse
 position. To control the hover time or hover delay type, you must use
 \code{\link[=hoverOpts]{hoverOpts()}}.}
 
-\item{hoverDelay}{Deprecated; use \code{hover} instead. Also see the
-\code{\link[=hoverOpts]{hoverOpts()}} function.}
-
-\item{hoverDelayType}{Deprecated; use \code{hover} instead. Also see the
-\code{\link[=hoverOpts]{hoverOpts()}} function.}
-
 \item{brush}{Similar to the \code{click} argument, this can be \code{NULL}
 (the default), a string, or an object created by the
 \code{\link[=brushOpts]{brushOpts()}} function. If you use a value like
@@ -87,12 +73,6 @@ behavior, use \code{\link[=brushOpts]{brushOpts()}}. Multiple
 \code{imageOutput}/\code{plotOutput} calls may share the same \code{id}
 value; brushing one image or plot will cause any other brushes with the
 same \code{id} to disappear.}
-
-\item{clickId}{Deprecated; use \code{click} instead. Also see the
-\code{\link[=clickOpts]{clickOpts()}} function.}
-
-\item{hoverId}{Deprecated; use \code{hover} instead. Also see the
-\code{\link[=hoverOpts]{hoverOpts()}} function.}
 
 \item{inline}{use an inline (\code{span()}) or block container (\code{div()})
 for the output}

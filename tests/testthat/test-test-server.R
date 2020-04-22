@@ -86,9 +86,14 @@ test_that("inputs can be incremented like actionButtons with session$click", {
 
     observeEvent(input$button1, num_clicks(num_clicks() + 1))
 
-    session$click("button1")
+    newv <- session$click("button1")
+    expect_equal(newv, 1)
     expect_equal(input$button1, 1)
     expect_equal(num_clicks(), 1)
+
+    for (i in 1:10) session$click("button1")
+    expect_equal(input$button1, 11)
+    expect_equal(num_clicks(), 11)
   })
 })
 

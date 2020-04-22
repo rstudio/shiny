@@ -61,10 +61,7 @@ test_that("testServer handles observers", {
 })
 
 test_that("inputs aren't directly assignable", {
-  module <- function(id) {
-    moduleServer(id, function(input, output, session) {
-    })
-  }
+  module <- function(id) moduleServer(id, function(input, output, session) {})
 
   testServer(module, {
     session$setInputs(x = 0)
@@ -94,6 +91,24 @@ test_that("inputs can be incremented like actionButtons with session$click", {
     for (i in 1:10) session$click("button1")
     expect_equal(input$button1, 11)
     expect_equal(num_clicks(), 11)
+  })
+})
+
+test_that("setInputs dots are dynamic", {
+  module <- function(id) moduleServer(id, function(input, output, session) {})
+
+  inputs_initial <- list(x=1, y=2)
+  input_y <- "y"
+
+  testServer(module, {
+    session$setInputs(!!!inputs_initial)
+    expect_equal(input$x, 1)
+    expect_equal(input$y, 2)
+    session$setInputs(!!input_y := 3)
+    expect_equal(input$y, 3)
+
+    # Duplicate names are an error
+    expect_error(session$setInputs(x = 1, x = 2))
   })
 })
 

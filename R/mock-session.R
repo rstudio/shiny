@@ -70,8 +70,7 @@ extract <- function(promise) {
 }
 
 #' @noRd
-mapNames <- function(func, ...) {
-  vals <- list(...)
+mapNames <- function(func, vals) {
   names(vals) <- vapply(names(vals), func, character(1))
   vals
 }
@@ -190,15 +189,17 @@ MockShinySession <- R6Class(
       return(paste('data:', contentType, ';base64,', b64, sep=''))
     },
 
-    #' @description Sets reactive values associated with the `session$inputs` object
-    #'   and flushes the reactives.
-    #' @param ... The inputs to set.
+    #' @description Sets reactive values associated with the `session$inputs`
+    #'   object and flushes the reactives.
+    #' @param ... The inputs to set. These arguments are processed with
+    #'   [rlang::list2()] and so are _[dynamic][rlang::dyn-dots]_. Input names
+    #'   may not be duplicated.
     #' @examples
     #' \dontrun{
     #' session$setInputs(x=1, y=2)
     #' }
     setInputs = function(...) {
-      vals <- list(...)
+      vals <- rlang::dots_list(..., .homonyms = "error")
       mapply(names(vals), vals, FUN = function(name, value) {
         private$.input$set(name, value)
       })
@@ -212,9 +213,8 @@ MockShinySession <- R6Class(
     #' session$click("button1")
     #' }
     click = function(id) {
-      val <- (private$.input$get(id) %OR% 0) + 1
-      private$.input$set(id, val)
-      private$flush()
+      val <- (private$.input$get(id) %OR% 0L) + 1L
+      self$setInputs(!!id := val)
       val
     },
 
@@ -414,7 +414,9 @@ MockShinySession <- R6Class(
         makeScope = function(namespace) self$makeScope(ns(namespace)),
         ns = function(namespace) ns(namespace),
         click = function(id) self$click(ns(id)),
-        setInputs = function(...) do.call(self$setInputs, mapNames(ns, ...))
+        setInputs = function(...) {
+          self$setInputs(!!!mapNames(ns, rlang::dots_list(..., .homonyms = "error")))
+        }
       )
     },
     #' @description Set the environment associated with a testServer() call, but

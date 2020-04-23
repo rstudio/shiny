@@ -407,3 +407,10 @@ pre.shiny-text-output {
   color: #aaa;
   cursor: not-allowed;
 }
+
+
+/* Hidden tabPanels */
+.nav-hidden {
+  /* override anything bootstrap sets for `.nav` */
+  display: none !important;
+}

@@ -29,6 +29,8 @@ shiny 1.4.0.9001
 
 * Added a `'function'` class to `reactive()` and `reactiveVal()` objects. ([#2793](https://github.com/rstudio/shiny/pull/2793))
 
+* Added a new option (`type = "hidden"`) to `tabsetPanel()`, making it easier to set the active tab via other input controls (e.g., `radioButtons()`) rather than tabs or pills. Use this option in conjunction with `updateTabsetPanel()` and the new `tabsetPanelBody()` function (see `help(tabsetPanel)` for an example and more details).  ([#2814](https://github.com/rstudio/shiny/pull/2814))
+
 * Added function `updateActionLink()` to update an `actionLink()` label and/or icon value. ([#2811](https://github.com/rstudio/shiny/pull/2811))
 
 ### Bug fixes

@@ -464,8 +464,6 @@ helpText <- function(...) {
 
 #' Create a tab panel
 #'
-#' Create a tab panel that can be included within a [tabsetPanel()] or
-#' a [navbarPage()].
 #'
 #' @param title Display title for tab
 #' @param ... UI elements to include within the tab
@@ -489,12 +487,21 @@ helpText <- function(...) {
 #'   )
 #' )
 #' @export
+#' @describeIn tabPanel Create a tab panel that can be included within a [tabsetPanel()] or a [navbarPage()].
 tabPanel <- function(title, ..., value = title, icon = NULL) {
-  divTag <- div(class="tab-pane",
-                title=title,
-                `data-value`=value,
-                `data-icon-class` = iconClass(icon),
-                ...)
+  div(
+    class = "tab-pane",
+    title = title,
+    `data-value` = value,
+    `data-icon-class` = iconClass(icon),
+    ...
+  )
+}
+#' @export
+#' @describeIn tabPanel Create a tab panel that drops the title argument.
+#'   This function should be used within `tabsetPanel(type = "hidden")`. See [tabsetPanel()] for example usage.
+tabPanelBody <- function(..., value = NULL, icon = NULL) {
+  tabPanel(title = NULL, ..., value = value, icon = icon)
 }
 
 #' Create a tabset panel
@@ -510,8 +517,13 @@ tabPanel <- function(title, ..., value = title, icon = NULL) {
 #' @param selected The `value` (or, if none was supplied, the `title`)
 #'   of the tab that should be selected by default. If `NULL`, the first
 #'   tab will be selected.
-#' @param type Use "tabs" for the standard look; Use "pills" for a more plain
-#'   look where tabs are selected using a background fill color.
+#' @param type  \describe{
+#'   \item{`"tabs"`}{Standard tab look}
+#'   \item{`"pills"`}{Selected tabs use the background fill color}
+#'   \item{`"hidden"`}{Hides the selectable tabs. Use `type = "hidden"` in
+#'   conjunction with [tabPanelBody()] and [updateTabsetPanel()] to control the
+#'   active tab via other input controls. (See example below)}
+#' }
 #' @param position This argument is deprecated; it has been discontinued in
 #'   Bootstrap 3.
 #' @return A tabset that can be passed to [mainPanel()]
@@ -529,11 +541,40 @@ tabPanel <- function(title, ..., value = title, icon = NULL) {
 #'     tabPanel("Table", tableOutput("table"))
 #'   )
 #' )
+#'
+#' ui <- fluidPage(
+#'   sidebarLayout(
+#'     sidebarPanel(
+#'       radioButtons("controller", "Controller", 1:3, 1)
+#'     ),
+#'     mainPanel(
+#'       tabsetPanel(
+#'         id = "hidden_tabs",
+#'         # Hide the tab values.
+#'         # Can only switch tabs by using `updateTabsetPanel()`
+#'         type = "hidden",
+#'         tabPanelBody(value = "panel1", "Panel 1 content"),
+#'         tabPanelBody(value = "panel2", "Panel 2 content"),
+#'         tabPanelBody(value = "panel3", "Panel 3 content")
+#'       )
+#'     )
+#'   )
+#' )
+#'
+#' server <- function(input, output, session) {
+#'   observeEvent(input$controller, {
+#'     updateTabsetPanel(session, "hidden_tabs", selected = paste0("panel", input$controller))
+#'   })
+#' }
+#'
+#' if (interactive()) {
+#'   shinyApp(ui, server)
+#' }
 #' @export
 tabsetPanel <- function(...,
                         id = NULL,
                         selected = NULL,
-                        type = c("tabs", "pills"),
+                        type = c("tabs", "pills", "hidden"),
                         position = NULL) {
   if (!is.null(position)) {
     shinyDeprecated(msg = paste("tabsetPanel: argument 'position' is deprecated;",

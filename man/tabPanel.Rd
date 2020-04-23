@@ -2,9 +2,12 @@
 % Please edit documentation in R/bootstrap.R
 \name{tabPanel}
 \alias{tabPanel}
+\alias{tabPanelBody}
 \title{Create a tab panel}
 \usage{
 tabPanel(title, ..., value = title, icon = NULL)
+
+tabPanelBody(..., value = NULL, icon = NULL)
 }
 \arguments{
 \item{title}{Display title for tab}
@@ -22,9 +25,16 @@ valid when using a \code{tabPanel} within a \code{\link[=navbarPage]{navbarPage(
 A tab that can be passed to \code{\link[=tabsetPanel]{tabsetPanel()}}
 }
 \description{
-Create a tab panel that can be included within a \code{\link[=tabsetPanel]{tabsetPanel()}} or
-a \code{\link[=navbarPage]{navbarPage()}}.
+Create a tab panel
 }
+\section{Functions}{
+\itemize{
+\item \code{tabPanel}: Create a tab panel that can be included within a \code{\link[=tabsetPanel]{tabsetPanel()}} or a \code{\link[=navbarPage]{navbarPage()}}.
+
+\item \code{tabPanelBody}: Create a tab panel that drops the title argument.
+This function should be used within \code{tabsetPanel(type = "hidden")}. See \code{\link[=tabsetPanel]{tabsetPanel()}} for example usage.
+}}
+
 \examples{
 # Show a tabset that includes a plot, summary, and
 # table view of the generated distribution

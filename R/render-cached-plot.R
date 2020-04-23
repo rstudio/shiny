@@ -503,7 +503,8 @@ renderCachedPlot <- function(expr,
                 width,
                 height,
                 pixelratio,
-                res
+                res,
+                device = device
               ),
               args
             ))

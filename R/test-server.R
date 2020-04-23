@@ -18,10 +18,9 @@ isModuleServer <- function(x) {
 #'   in the server function environment, meaning that the parameters of the
 #'   server function (e.g. `input`, `output`, and `session`) will be available
 #'   along with any other values created inside of the server function.
-#' @param ... Additional arguments to pass to the module function. These
-#'   arguments are processed with [rlang::list2()] and so are
-#'   _[dynamic][rlang::dyn-dots]_. If `app` is a module, and no `id` argument is
-#'   provided, one will be generated and supplied automatically.
+#' @param args Additional arguments to pass to the module function.
+#'   If `app` is a module, and no `id` argument is provided, one will be
+#'   generated and supplied automatically.
 #' @return The result of evaluating `expr`.
 #' @include mock-session.R
 #' @rdname testServer
@@ -37,7 +36,7 @@ isModuleServer <- function(x) {
 #'   })
 #' }
 #'
-#' testServer(server, {
+#' testServer(server, args = list(multiplier = 2), {
 #'   session$setInputs(x = 1)
 #'   # You're also free to use third-party
 #'   # testing packages like testthat:
@@ -49,14 +48,13 @@ isModuleServer <- function(x) {
 #'   stopifnot(myreactive() == 4)
 #'   stopifnot(output$txt == "I am 4")
 #'   # Any additional arguments, below, are passed along to the module.
-#' }, multiplier = 2)
+#' })
 #' @export
-testServer <- function(app = NULL, expr, ...) {
+testServer <- function(app = NULL, expr, args = rlang::list2()) {
 
   require(shiny)
 
   quosure <- rlang::enquo(expr)
-  args <- rlang::list2(...)
   session <- getDefaultReactiveDomain()
 
   if (inherits(session, "MockShinySession"))

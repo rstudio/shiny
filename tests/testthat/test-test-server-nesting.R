@@ -17,9 +17,9 @@ test_that("Nested modules", {
     })
   }
 
-  testServer(parent, {
+  testServer(parent, args = list(id = "parent-id"), {
     expect_equal(output$txt, "foo")
-  }, id = "parent-id")
+  })
 
 })
 
@@ -30,9 +30,9 @@ test_that("Lack of ID", {
     })
   }
 
-  testServer(module, {
+  testServer(module, args = list(id = "foo"), {
     expect_equal(output$txt, "foo-x")
-  }, id = "foo")
+  })
 })
 
 test_that("testServer works with nested module servers", {
@@ -50,10 +50,10 @@ test_that("testServer works with nested module servers", {
     })
   }
 
-  testServer(outerModule, {
+  testServer(outerModule, args = list(id = "foo"), {
     session$setInputs(x = 1)
     expect_equal(output$someVar, "a value: 2")
-  }, id = "foo")
+  })
 })
 
 test_that("testServer calls do not nest in module functions", {

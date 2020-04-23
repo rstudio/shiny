@@ -4,7 +4,7 @@
 \alias{testServer}
 \title{Reactive testing for Shiny server functions and modules}
 \usage{
-testServer(app = NULL, expr, args = rlang::list2())
+testServer(app = NULL, expr, args = list())
 }
 \arguments{
 \item{app}{The path to an application or module to test. In addition to

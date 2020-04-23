@@ -34,29 +34,28 @@ nearPoints(
 \item{brush, coordinfo}{The data from a brush or click/dblclick/hover event
 e.g. \code{input$plot_brush}, \code{input$plot_click}.}
 
-\item{xvar, yvar}{A string with the name of the variable on the x or y axis.
-This must also be the name of a column in \code{df}. These are only required
-for base graphics.}
+\item{xvar, yvar}{A string giving the name of the variable on the x or y axis.
+These are only required for base graphics, and must be the name of
+a column in \code{df}.}
 
-\item{panelvar1, panelvar2}{Each of these is a string with the name of a panel
-variable. For expert use only; in most cases these will be automatically
+\item{panelvar1, panelvar2}{A string giving the name of a panel variable.
+For expert use only; in most cases these will be automatically
 derived from the ggplot2 spec.}
 
 \item{allRows}{If \code{FALSE} (the default) return a data frame containing
 the selected rows. If \code{TRUE}, the input data frame will have a new
-column, \code{selected_}, which indicates whether the row was inside the
-brush (\code{TRUE}) or outside the brush (\code{FALSE}).}
+column, \code{selected_}, which indicates whether the row was selected or not.}
 
-\item{threshold}{A maximum distance (in pixels) to the click point. Only
-rows in the data frame where the distance to the click is less than
-\code{threshold} will be returned.}
+\item{threshold}{A maximum distance (in pixels) to the pointer location.
+Rows in the data frame will be selected if the distance to the pointer is
+less than \code{threshold}.}
 
 \item{maxpoints}{Maximum number of rows to return. If \code{NULL} (the default),
 will return all rows within the threshold distance.}
 
 \item{addDist}{If TRUE, add a column named \code{dist_} that contains the
-distance from the coordinate to the point, in pixels. When no mouse event
-has yet occurred, the value of \code{dist_} will be \code{NA}.}
+distance from the coordinate to the point, in pixels. When no pointer
+event has yet occurred, the value of \code{dist_} will be \code{NA}.}
 }
 \value{
 A data frame based on \code{df}, containing the observations selected by the
@@ -67,7 +66,7 @@ If \code{allRows = TRUE}, then all rows will returned, along with a new
 \code{selected_} column that indicates whether or not the point was selected.
 The output from \code{nearPoints()} will no longer be sorted, but you can
 set \code{addDist = TRUE} to get an additional column that gives the pixel
-distance to the mouse.
+distance to the pointer.
 }
 \description{
 \code{brushedPoints()} returns rows from a data frame which are under a brush.

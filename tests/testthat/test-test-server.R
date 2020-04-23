@@ -70,30 +70,6 @@ test_that("inputs aren't directly assignable", {
   })
 })
 
-test_that("inputs can be incremented like actionButtons with session$click", {
-  module <- function(id) {
-    moduleServer(id, function(input, output, session) {
-      num_clicks <- reactiveVal(0)
-    })
-  }
-
-  testServer(module, {
-    expect_null(input$button1)
-    expect_equal(num_clicks(), 0)
-
-    observeEvent(input$button1, num_clicks(num_clicks() + 1))
-
-    newv <- session$click("button1")
-    expect_equal(newv, 1)
-    expect_equal(input$button1, 1)
-    expect_equal(num_clicks(), 1)
-
-    for (i in 1:10) session$click("button1")
-    expect_equal(input$button1, 11)
-    expect_equal(num_clicks(), 11)
-  })
-})
-
 test_that("setInputs dots are dynamic", {
   module <- function(id) moduleServer(id, function(input, output, session) {})
 

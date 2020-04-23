@@ -206,18 +206,6 @@ MockShinySession <- R6Class(
       private$flush()
     },
 
-    #' @description Simulates clicking an action button.
-    #' @param id The id of the button to click.
-    #' @examples
-    #' \dontrun{
-    #' session$click("button1")
-    #' }
-    click = function(id) {
-      val <- (private$.input$get(id) %OR% 0L) + 1L
-      self$setInputs(!!id := val)
-      val
-    },
-
     #' @description An internal method which shouldn't be used by others.
     #' @param millis The number of milliseconds on which to schedule a callback
     #' @param callback The function to schedule
@@ -413,7 +401,6 @@ MockShinySession <- R6Class(
         output = structure(.createOutputWriter(self, ns = ns), class = "shinyoutput"),
         makeScope = function(namespace) self$makeScope(ns(namespace)),
         ns = function(namespace) ns(namespace),
-        click = function(id) self$click(ns(id)),
         setInputs = function(...) {
           self$setInputs(!!!mapNames(ns, rlang::dots_list(..., .homonyms = "error")))
         }

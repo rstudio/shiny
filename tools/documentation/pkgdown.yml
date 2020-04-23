@@ -205,7 +205,6 @@ reference:
       - clickOpts
       - dblclickOpts
       - hoverOpts
-      - nearPoints
   - title: Modules
     desc: Functions for modularizing Shiny apps
     contents:

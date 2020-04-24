@@ -3,9 +3,11 @@ context("linkedScatterServer")
 
 testServer(
   linkedScatterServer,
-  data = reactive(ggplot2::mpg),
-  left = reactive(c("cty", "hwy")),
-  right = reactive(c("drv", "hwy")),
+  args = list(
+    data = reactive(ggplot2::mpg),
+    left = reactive(c("cty", "hwy")),
+    right = reactive(c("drv", "hwy"))
+  ),
   {
 
     # Init count... 0

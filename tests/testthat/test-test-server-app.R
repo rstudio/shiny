@@ -104,5 +104,5 @@ test_that("a Shiny app object with a module inside can be tested", {
 })
 
 test_that("It's an error to pass arguments to a server", {
-  expect_error(testServer(test_path("..", "test-modules", "06_tabsets"), {}, an_arg = 123))
+  expect_error(testServer(test_path("..", "test-modules", "06_tabsets"), {}, args = list(an_arg = 123)))
 })

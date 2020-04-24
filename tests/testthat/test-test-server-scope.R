@@ -14,12 +14,12 @@ test_that("Variables outside of the module are inaccessible", {
     }
   }, envir = new.env(parent = globalenv()))
 
-  testServer(module, {
+  testServer(module, args = list(x = 0), {
     expect_equal(x, 0)
     expect_equal(y, 1)
     expect_equal(z, 2)
     expect_equal(exists("outside"), FALSE)
-  }, x = 0)
+  })
 })
 
 test_that("Variables outside the testServer() have correct visibility", {
@@ -34,11 +34,11 @@ test_that("Variables outside the testServer() have correct visibility", {
   x <- 99
   z <- 123
 
-  testServer(module, {
+  testServer(module, args = list(x = 0), {
     expect_equal(x, 0)
     expect_equal(y, 1)
     expect_equal(z, 123)
-  }, x = 0)
+  })
 })
 
 test_that("testServer allows lexical environment access through session$env", {

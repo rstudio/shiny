@@ -2,7 +2,7 @@
 
 
 withr::with_environment(
-  shiny::loadSupport("../"),
+  shiny::loadSupport(),
   {
     runner2_B <- 2
 

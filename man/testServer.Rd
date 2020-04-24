@@ -4,7 +4,7 @@
 \alias{testServer}
 \title{Reactive testing for Shiny server functions and modules}
 \usage{
-testServer(app = NULL, expr, ...)
+testServer(app = NULL, expr, args = list())
 }
 \arguments{
 \item{app}{The path to an application or module to test. In addition to
@@ -19,10 +19,9 @@ in the server function environment, meaning that the parameters of the
 server function (e.g. \code{input}, \code{output}, and \code{session}) will be available
 along with any other values created inside of the server function.}
 
-\item{...}{Additional arguments to pass to the module function. These
-arguments are processed with \code{\link[rlang:list2]{rlang::list2()}} and so are
-\emph{\link[rlang:dyn-dots]{dynamic}}. If \code{app} is a module, and no \code{id} argument is
-provided, one will be generated and supplied automatically.}
+\item{args}{Additional arguments to pass to the module function.
+If \code{app} is a module, and no \code{id} argument is provided, one will be
+generated and supplied automatically.}
 }
 \value{
 The result of evaluating \code{expr}.
@@ -44,7 +43,7 @@ server <- function(id, multiplier = 2, prefix = "I am ") {
   })
 }
 
-testServer(server, {
+testServer(server, args = list(multiplier = 2), {
   session$setInputs(x = 1)
   # You're also free to use third-party
   # testing packages like testthat:
@@ -56,5 +55,5 @@ testServer(server, {
   stopifnot(myreactive() == 4)
   stopifnot(output$txt == "I am 4")
   # Any additional arguments, below, are passed along to the module.
-}, multiplier = 2)
+})
 }

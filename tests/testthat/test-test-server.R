@@ -11,24 +11,7 @@ test_that("testServer passes dots", {
       expect_equal(someArg, 123)
     })
   }
-  testServer(module, {}, someArg = 123)
-})
-
-test_that("testServer passes dynamic dots", {
-  module <- function(id, someArg) {
-    expect_false(missing(someArg))
-    moduleServer(id, function(input, output, session) {
-      expect_equal(someArg, 123)
-    })
-  }
-
-  # Test with !!! to splice in a whole named list constructed with base::list()
-  moreArgs <- list(someArg = 123)
-  testServer(module, {}, !!!moreArgs)
-
-  # Test with !!/:= to splice in an argument name
-  argName <- "someArg"
-  testServer(module, {}, !!argName := 123)
+  testServer(module, {}, args = list(someArg = 123))
 })
 
 test_that("testServer handles observers", {
@@ -414,7 +397,7 @@ test_that("testServer handles modules with additional arguments", {
   testServer(module, {
     expect_equal(output$txt1, "val1")
     expect_equal(output$txt2, "val2")
-  }, arg1="val1", arg2="val2")
+  }, list(arg1="val1", arg2="val2"))
 })
 
 test_that("testServer captures htmlwidgets", {
@@ -565,7 +548,7 @@ test_that("accessing a non-existent output gives an informative message", {
 
   testServer(module, {
     expect_error(output$dontexist, "hasn't been defined yet: output\\$server1-dontexist")
-  }, id = "server1")
+  }, list(id = "server1"))
 
   testServer(module, {
     expect_error(output$dontexist, "hasn't been defined yet: output\\$.*-dontexist")

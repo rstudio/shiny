@@ -140,4 +140,6 @@ testServer <- function(app = NULL, expr, args = list()) {
       )
     )
   }
+
+  invisible()
 }

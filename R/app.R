@@ -238,8 +238,13 @@ shinyAppDir_serverR <- function(appDir, options=list()) {
   }
   onStop <- function() {
     setwd(oldwd)
-    monitorHandle()
-    monitorHandle <<- NULL
+    # It is possible that while calling appObj()$onStart() or loadingSupport, an error occured
+    # This will cause `onStop` to be called.
+    #   The `oldwd` will exist, but `monitorHandle` is not a function yet.
+    if (is.function(monitorHandle)) {
+      monitorHandle()
+      monitorHandle <<- NULL
+    }
   }
 
   structure(
@@ -447,8 +452,13 @@ shinyAppDir_appR <- function(fileName, appDir, options=list())
   }
   onStop <- function() {
     setwd(oldwd)
-    monitorHandle()
-    monitorHandle <<- NULL
+    # It is possible that while calling appObj()$onStart() or loadingSupport, an error occured
+    # This will cause `onStop` to be called.
+    #   The `oldwd` will exist, but `monitorHandle` is not a function yet.
+    if (is.function(monitorHandle)) {
+      monitorHandle()
+      monitorHandle <<- NULL
+    }
   }
 
   structure(

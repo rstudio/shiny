@@ -172,7 +172,7 @@ MockShinySession <- R6Class(
     #FIXME: this is wrong. Will need to be more complex.
     #' @description Unsophisticated mock implementation that merely invokes
     #'   the given callback immediately.
-    #' @param callback The callback ato be invoked.
+    #' @param callback The callback to be invoked.
     cycleStartAction = function(callback){ callback() },
 
     #' @description Base64-encode the given file. Needed for image rendering.
@@ -354,6 +354,10 @@ MockShinySession <- R6Class(
     setBookmarkExclude = function(names) {
       warning("Bookmarking isn't meaningfully mocked in MockShinySession")
     },
+    #' @description No-op
+    #' @param type Not used
+    #' @param message Not used
+    sendModal = function(type, message) {},
     #' @description No-op
     getBookmarkExclude = function() {
       warning("Bookmarking isn't meaningfully mocked in MockShinySession")

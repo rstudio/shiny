@@ -73,6 +73,7 @@ session$setInputs(x=1, y=2)
 \item \href{#method-sendBinaryMessage}{\code{MockShinySession$sendBinaryMessage()}}
 \item \href{#method-sendInputMessage}{\code{MockShinySession$sendInputMessage()}}
 \item \href{#method-setBookmarkExclude}{\code{MockShinySession$setBookmarkExclude()}}
+\item \href{#method-sendModal}{\code{MockShinySession$sendModal()}}
 \item \href{#method-getBookmarkExclude}{\code{MockShinySession$getBookmarkExclude()}}
 \item \href{#method-onBookmark}{\code{MockShinySession$onBookmark()}}
 \item \href{#method-onBookmarked}{\code{MockShinySession$onBookmarked()}}
@@ -226,7 +227,7 @@ the given callback immediately.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{callback}}{The callback ato be invoked.}
+\item{\code{callback}}{The callback to be invoked.}
 }
 \if{html}{\out{</div>}}
 }
@@ -501,6 +502,25 @@ No-op
 \if{html}{\out{<div class="arguments">}}
 \describe{
 \item{\code{names}}{Not used}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-sendModal"></a>}}
+\if{latex}{\out{\hypertarget{method-sendModal}{}}}
+\subsection{Method \code{sendModal()}}{
+No-op
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{MockShinySession$sendModal(type, message)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{type}}{Not used}
+
+\item{\code{message}}{Not used}
 }
 \if{html}{\out{</div>}}
 }

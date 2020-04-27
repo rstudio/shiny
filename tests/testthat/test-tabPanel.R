@@ -1,14 +1,13 @@
 
-context("tabPanel")
 
 test_that("tabPanelBody", {
-  expect_error(tabPanelBody(), "at least one character")
-  expect_error(tabPanelBody(NULL), "at least one character")
-  expect_error(tabPanelBody(1), "at least one character")
-  expect_error(tabPanelBody(TRUE), "at least one character")
-  expect_error(tabPanelBody(NA), "at least one character")
-  expect_error(tabPanelBody(NA_character_), "at least one character")
-  expect_error(tabPanelBody(""), "at least one character")
-  expect_error(tabPanelBody(letters[1:2]), "at least one character")
+  expect_error(tabPanelBody())
+  expect_error(tabPanelBody(NULL), "single, non-empty string")
+  expect_error(tabPanelBody(1), "single, non-empty string")
+  expect_error(tabPanelBody(TRUE), "single, non-empty string")
+  expect_error(tabPanelBody(NA), "single, non-empty string")
+  expect_error(tabPanelBody(NA_character_), "single, non-empty string")
+  expect_error(tabPanelBody(""), "single, non-empty string")
+  expect_error(tabPanelBody(letters[1:2]), "single, non-empty string")
   expect_silent(tabPanelBody("a"))
 })

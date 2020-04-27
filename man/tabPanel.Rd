@@ -7,7 +7,7 @@
 \usage{
 tabPanel(title, ..., value = title, icon = NULL)
 
-tabPanelBody(value, ..., icon = NULL)
+tabPanelBody(id, ..., icon = NULL)
 }
 \arguments{
 \item{title}{Display title for tab}
@@ -16,10 +16,12 @@ tabPanelBody(value, ..., icon = NULL)
 
 \item{value}{The value that should be sent when \code{tabsetPanel} reports
 that this tab is selected. If omitted and \code{tabsetPanel} has an
-\code{id}, then the title will be used..}
+\code{id}, then the title will be used.}
 
 \item{icon}{Optional icon to appear on the tab. This attribute is only
 valid when using a \code{tabPanel} within a \code{\link[=navbarPage]{navbarPage()}}.}
+
+\item{id}{The value used to set the selected \code{\link[=tabsetPanel]{tabsetPanel()}} when calling \code{\link[=updateTabsetPanel]{updateTabsetPanel()}}}
 }
 \value{
 A tab that can be passed to \code{\link[=tabsetPanel]{tabsetPanel()}}
@@ -33,7 +35,6 @@ Create a tab panel
 
 \item \code{tabPanelBody}: Create a tab panel that drops the title argument.
 This function should be used within \code{tabsetPanel(type = "hidden")}. See \code{\link[=tabsetPanel]{tabsetPanel()}} for example usage.
-\code{value} must be set when using \code{tabPanelBody}.
 }}
 
 \examples{

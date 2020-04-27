@@ -469,7 +469,7 @@ helpText <- function(...) {
 #' @param ... UI elements to include within the tab
 #' @param value The value that should be sent when `tabsetPanel` reports
 #'   that this tab is selected. If omitted and `tabsetPanel` has an
-#'   `id`, then the title will be used..
+#'   `id`, then the title will be used.
 #' @param icon Optional icon to appear on the tab. This attribute is only
 #' valid when using a `tabPanel` within a [navbarPage()].
 #' @return A tab that can be passed to [tabsetPanel()]
@@ -500,19 +500,17 @@ tabPanel <- function(title, ..., value = title, icon = NULL) {
 #' @export
 #' @describeIn tabPanel Create a tab panel that drops the title argument.
 #'   This function should be used within `tabsetPanel(type = "hidden")`. See [tabsetPanel()] for example usage.
-#'   `value` must be set when using `tabPanelBody`.
-tabPanelBody <- function(value, ..., icon = NULL) {
+#' @param id The value used to set the selected [tabsetPanel()] when calling [updateTabsetPanel()]
+tabPanelBody <- function(id, ..., icon = NULL) {
   if (
-    missing(value) ||
-    nullOrEmpty(value) ||
-    !is.character(value) ||
-    length(value) != 1 ||
-    is.na(value) || # must be after length check
-    nchar(value) == 0
+    !is.character(id) ||
+    length(id) != 1 ||
+    is.na(id) || # must be after length check
+    nchar(id) == 0
   ) {
-    stop("`value` must be a single, non-empty string value")
+    stop("`id` must be a single, non-empty string value")
   }
-  tabPanel(title = NULL, ..., value = value, icon = icon)
+  tabPanel(title = NULL, ..., value = id, icon = icon)
 }
 
 #' Create a tabset panel

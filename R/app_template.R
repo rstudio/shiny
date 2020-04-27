@@ -55,8 +55,8 @@
 #'   prompt the user to select which template items will be added to the new app
 #'   directory. With "all", all template items will be added to the app
 #'   directory.
-#' @param dryrun If `TRUE`, don't actually write any files; just print out what
-#'   would be written.
+#' @param dryrun If `TRUE`, don't actually write any files; just print out which
+#'   files would be written.
 #'
 #' @export
 shinyAppTemplate <- function(path = NULL, examples = "default", dryrun = FALSE)

@@ -7,7 +7,7 @@
 \usage{
 tabPanel(title, ..., value = title, icon = NULL)
 
-tabPanelBody(..., value = NULL, icon = NULL)
+tabPanelBody(value, ..., icon = NULL)
 }
 \arguments{
 \item{title}{Display title for tab}
@@ -33,6 +33,7 @@ Create a tab panel
 
 \item \code{tabPanelBody}: Create a tab panel that drops the title argument.
 This function should be used within \code{tabsetPanel(type = "hidden")}. See \code{\link[=tabsetPanel]{tabsetPanel()}} for example usage.
+\code{value} must be set when using \code{tabPanelBody}.
 }}
 
 \examples{

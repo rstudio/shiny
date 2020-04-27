@@ -500,7 +500,18 @@ tabPanel <- function(title, ..., value = title, icon = NULL) {
 #' @export
 #' @describeIn tabPanel Create a tab panel that drops the title argument.
 #'   This function should be used within `tabsetPanel(type = "hidden")`. See [tabsetPanel()] for example usage.
-tabPanelBody <- function(..., value = NULL, icon = NULL) {
+#'   `value` must be set when using `tabPanelBody`.
+tabPanelBody <- function(value, ..., icon = NULL) {
+  if (
+    missing(value) ||
+    nullOrEmpty(value) ||
+    !is.character(value) ||
+    length(value) != 1 ||
+    is.na(value) || # must be after length check
+    nchar(value) == 0
+  ) {
+    stop("`value` must be a single, non-empty string value")
+  }
   tabPanel(title = NULL, ..., value = value, icon = icon)
 }
 
@@ -553,9 +564,9 @@ tabPanelBody <- function(..., value = NULL, icon = NULL) {
 #'         # Hide the tab values.
 #'         # Can only switch tabs by using `updateTabsetPanel()`
 #'         type = "hidden",
-#'         tabPanelBody(value = "panel1", "Panel 1 content"),
-#'         tabPanelBody(value = "panel2", "Panel 2 content"),
-#'         tabPanelBody(value = "panel3", "Panel 3 content")
+#'         tabPanelBody("panel1", "Panel 1 content"),
+#'         tabPanelBody("panel2", "Panel 2 content"),
+#'         tabPanelBody("panel3", "Panel 3 content")
 #'       )
 #'     )
 #'   )

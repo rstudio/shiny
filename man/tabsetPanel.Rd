@@ -64,9 +64,9 @@ ui <- fluidPage(
         # Hide the tab values.
         # Can only switch tabs by using `updateTabsetPanel()`
         type = "hidden",
-        tabPanelBody(value = "panel1", "Panel 1 content"),
-        tabPanelBody(value = "panel2", "Panel 2 content"),
-        tabPanelBody(value = "panel3", "Panel 3 content")
+        tabPanelBody("panel1", "Panel 1 content"),
+        tabPanelBody("panel2", "Panel 2 content"),
+        tabPanelBody("panel3", "Panel 3 content")
       )
     )
   )

@@ -467,11 +467,12 @@ helpText <- function(...) {
 #'
 #' @param title Display title for tab
 #' @param ... UI elements to include within the tab
-#' @param value The value that should be sent when `tabsetPanel` reports
+#' @param id The value that should be sent when `tabsetPanel` reports
 #'   that this tab is selected. If omitted and `tabsetPanel` has an
 #'   `id`, then the title will be used.
 #' @param icon Optional icon to appear on the tab. This attribute is only
 #' valid when using a `tabPanel` within a [navbarPage()].
+#' @param value Deprecated. Please use `id` instead.
 #' @return A tab that can be passed to [tabsetPanel()]
 #'
 #' @seealso [tabsetPanel()]
@@ -488,12 +489,17 @@ helpText <- function(...) {
 #' )
 #' @export
 #' @describeIn tabPanel Create a tab panel that can be included within a [tabsetPanel()] or a [navbarPage()].
-tabPanel <- function(title, ..., value = title, icon = NULL) {
+tabPanel <- function(title, ..., id = title, icon = NULL, value = NULL) {
+  if (!missing(value)) {
+    shinyDeprecated(new = "`tabPanel(id)`", old = "`tabPanel(value)`", version = "1.4.0.2")
+    id <- value
+  }
   div(
     class = "tab-pane",
     title = title,
-    `data-value` = value,
+    `data-value` = id,
     `data-icon-class` = iconClass(icon),
+    id = id,
     ...
   )
 }
@@ -510,7 +516,7 @@ tabPanelBody <- function(id, ..., icon = NULL) {
   ) {
     stop("`id` must be a single, non-empty string value")
   }
-  tabPanel(title = NULL, ..., value = id, icon = icon)
+  tabPanel(title = NULL, ..., id = id, icon = icon)
 }
 
 #' Create a tabset panel

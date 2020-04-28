@@ -34,9 +34,9 @@ ui <- fluidPage(sidebarLayout(
   ),
   mainPanel(
     tabsetPanel(id = "inTabset",
-      tabPanel(title = "Panel 1", value = "panel1", "Panel 1 content"),
-      tabPanel(title = "Panel 2", value = "panel2", "Panel 2 content"),
-      tabPanel(title = "Panel 3", value = "panel3", "Panel 3 content")
+      tabPanel(title = "Panel 1", id = "panel1", "Panel 1 content"),
+      tabPanel(title = "Panel 2", id = "panel2", "Panel 2 content"),
+      tabPanel(title = "Panel 3", id = "panel3", "Panel 3 content")
     )
   )
 ))

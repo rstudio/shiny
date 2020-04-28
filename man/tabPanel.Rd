@@ -14,7 +14,9 @@ tabPanelBody(id, ..., icon = NULL)
 
 \item{...}{UI elements to include within the tab}
 
-\item{id}{The value used to set the selected \code{\link[=tabsetPanel]{tabsetPanel()}} when calling \code{\link[=updateTabsetPanel]{updateTabsetPanel()}}}
+\item{id}{The value that should be sent when \code{tabsetPanel} reports
+that this tab is selected. If omitted and \code{tabsetPanel} has an
+\code{id}, then the title will be used.}
 
 \item{icon}{Optional icon to appear on the tab. This attribute is only
 valid when using a \code{tabPanel} within a \code{\link[=navbarPage]{navbarPage()}}.}

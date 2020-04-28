@@ -506,7 +506,6 @@ tabPanel <- function(title, ..., id = title, icon = NULL, value = NULL) {
 #' @export
 #' @describeIn tabPanel Create a tab panel that drops the title argument.
 #'   This function should be used within `tabsetPanel(type = "hidden")`. See [tabsetPanel()] for example usage.
-#' @param id The value used to set the selected [tabsetPanel()] when calling [updateTabsetPanel()]
 tabPanelBody <- function(id, ..., icon = NULL) {
   if (
     !is.character(id) ||

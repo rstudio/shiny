@@ -5,10 +5,18 @@ startPNG <- function(filename, width, height, res, ..., device) {
 
   args <- rlang::list2(filename=filename, width=width, height=height, res=res, ...)
 
+  # The order of priority for the bg color is:
+  # (1) User specified bg via `renderPlot()`
+  # (2) bg option was set via thematic
   if (is.null(args$bg) && rlang::is_installed("thematic")) {
     args$bg <- thematic::thematic_get_option("bg", "white")
+    # auto vals aren't resolved until plot time, so if we see one, resolve it
+    if (isTRUE("auto" == args$bg)) {
+      args$bg <- getCurrentOutputInfo()[["bg"]]
+    }
   }
 
+  # Handle both bg and background device arg
   # https://github.com/r-lib/ragg/issues/35
   fmls <- names(formals(device))
   if (("background" %in% fmls) && (!"bg" %in% fmls)) {

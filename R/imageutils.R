@@ -5,8 +5,8 @@ startPNG <- function(filename, width, height, res, ..., device) {
 
   args <- rlang::list2(filename=filename, width=width, height=height, res=res, ...)
 
-  if (is.null(args$bg)) {
-    args$bg <- getCurrentOutputInfo()[["bg"]] %OR% "white"
+  if (is.null(args$bg) && rlang::is_installed("thematic")) {
+    args$bg <- thematic::thematic_get_option("bg", "white")
   }
 
   # https://github.com/r-lib/ragg/issues/35

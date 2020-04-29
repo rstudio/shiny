@@ -651,3 +651,42 @@ test_that("session flush handlers work", {
 
   })
 })
+
+test_that("module return value captured", {
+  module_implicit_return <- function(id) {
+    moduleServer(id, function(input, output, session) {
+      123
+    })
+  }
+
+  testServer(module_implicit_return, {
+    expect_equal(session$returned, 123)
+  })
+
+  module_early_returns <- function(id, n) {
+    retval <<- NULL
+    moduleServer(id, function(input, output, session) {
+      if (n == 0) return(n)
+      if (n %% 2 == 0) {
+        retval <<- "even"
+      } else {
+        return(FALSE)
+      }
+      retval
+    })
+  }
+
+  testServer(module_early_returns, {
+    expect_equal(session$returned, 0)
+  }, args = list(n = 0))
+
+  testServer(module_early_returns, {
+    expect_equal(session$returned, FALSE)
+  }, args = list(n = 1))
+
+  testServer(module_early_returns, {
+    expect_equal(session$returned, "even")
+  }, args = list(n = 2))
+})
+
+#test_that("server return value captured", {})

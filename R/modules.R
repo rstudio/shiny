@@ -134,10 +134,12 @@ moduleServer <- function(id, module, session = getDefaultReactiveDomain()) {
   if (inherits(session, "MockShinySession")) {
     body(module) <- rlang::expr({
       session$setEnv(base::environment())
-      session$setReturned({ !!!body(module) })
+      !!body(module)
     })
+    session$setReturned(callModule(module, id, session = session))
+  } else {
+    callModule(module, id, session = session)
   }
-  callModule(module, id, session = session)
 }
 
 

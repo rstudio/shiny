@@ -4,7 +4,7 @@ startPNG <- function(filename, width, height, res, ...) {
   # Finally, if neither quartz nor Cairo, use png().
   if (capabilities("aqua")) {
     pngfun <- grDevices::png
-  } else if ((getOption('shiny.useragg') %OR% TRUE) &&
+  } else if ((getOption('shiny.useragg') %OR% FALSE) &&
              nchar(system.file(package = "ragg"))) {
     # ragg seems preferrable to Cairo, especially when it comes to custom fonts
     # https://github.com/yixuan/showtext/issues/33#issuecomment-620848077

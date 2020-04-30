@@ -54,8 +54,6 @@ getShinyOption <- function(name, default = NULL) {
 #' \item{shiny.deprecation.messages (defaults to `TRUE`)}{This controls whether messages for
 #'   deprecated functions in Shiny will be printed. See
 #'   [shinyDeprecated()] for more information.}
-#' \item{shiny.device (defaults to `shinyDevice()`)}{A function that opens a png graphics device.
-#'   Useful for changing the default device used by [renderPlot()] and [plotPNG()].}
 #' \item{shiny.error (defaults to `NULL`)}{This can be a function which is called when an error
 #'   occurs. For example, `options(shiny.error=recover)` will result a
 #'   the debugger prompt when an error occurs.}
@@ -111,6 +109,9 @@ getShinyOption <- function(name, default = NULL) {
 #'   messages).}
 #' \item{shiny.usecairo (defaults to `TRUE`)}{This is used to disable graphical rendering by the
 #'   Cairo package, if it is installed. See [plotPNG()] for more
+#'   information.}
+#'  \item{shiny.useragg (defaults to `TRUE`)}{This is used to disable graphical rendering by the
+#'   ragg package, if it is installed. See [plotPNG()] for more
 #'   information.}
 #' }
 #' @param ... Options to set, with the form `name = value`.

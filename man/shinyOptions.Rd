@@ -59,8 +59,6 @@ two seconds).}
 \item{shiny.deprecation.messages (defaults to \code{TRUE})}{This controls whether messages for
 deprecated functions in Shiny will be printed. See
 \code{\link[=shinyDeprecated]{shinyDeprecated()}} for more information.}
-\item{shiny.device (defaults to \code{shinyDevice()})}{A function that opens a png graphics device.
-Useful for changing the default device used by \code{\link[=renderPlot]{renderPlot()}} and \code{\link[=plotPNG]{plotPNG()}}.}
 \item{shiny.error (defaults to \code{NULL})}{This can be a function which is called when an error
 occurs. For example, \code{options(shiny.error=recover)} will result a
 the debugger prompt when an error occurs.}
@@ -116,6 +114,9 @@ values are \code{"send"} (only print messages sent to the client),
 messages).}
 \item{shiny.usecairo (defaults to \code{TRUE})}{This is used to disable graphical rendering by the
 Cairo package, if it is installed. See \code{\link[=plotPNG]{plotPNG()}} for more
+information.}
+\item{shiny.useragg (defaults to \code{TRUE})}{This is used to disable graphical rendering by the
+ragg package, if it is installed. See \code{\link[=plotPNG]{plotPNG()}} for more
 information.}
 }
 }

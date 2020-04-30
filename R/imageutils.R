@@ -1,6 +1,20 @@
-startPNG <- function(filename, width, height, res, ..., device) {
-  if (!is.function(device)) {
-    stop("The `device` argument must be a function", call. = FALSE)
+startPNG <- function(filename, width, height, res, ...) {
+  # If quartz is available, use png() (which will default to quartz).
+  # Otherwise, if the Cairo package is installed, use CairoPNG().
+  # Finally, if neither quartz nor Cairo, use png().
+  if (capabilities("aqua")) {
+    pngfun <- grDevices::png
+  } else if ((getOption('shiny.useragg') %OR% TRUE) &&
+             nchar(system.file(package = "ragg"))) {
+    # ragg seems preferrable to Cairo, especially when it comes to custom fonts
+    # https://github.com/yixuan/showtext/issues/33#issuecomment-620848077
+    # https://ragg.r-lib.org/articles/ragg_quality.html
+    pngfun <- ragg::agg_png
+  } else if ((getOption('shiny.usecairo') %OR% TRUE) &&
+             nchar(system.file(package = "Cairo"))) {
+    pngfun <- Cairo::CairoPNG
+  } else {
+    pngfun <- grDevices::png
   }
 
   args <- rlang::list2(filename=filename, width=width, height=height, res=res, ...)
@@ -18,7 +32,7 @@ startPNG <- function(filename, width, height, res, ..., device) {
 
   # Handle both bg and background device arg
   # https://github.com/r-lib/ragg/issues/35
-  fmls <- names(formals(device))
+  fmls <- names(formals(pngfun))
   if (("background" %in% fmls) && (!"bg" %in% fmls)) {
     if (is.null(args$background)) {
       args$background <- args$bg
@@ -26,7 +40,7 @@ startPNG <- function(filename, width, height, res, ..., device) {
     args$bg <- NULL
   }
 
-  do.call(device, args)
+  do.call(pngfun, args)
   # Call plot.new() so that even if no plotting operations are performed at
   # least we have a blank background. N.B. we need to set the margin to 0
   # temporarily before plot.new() because when the plot size is small (e.g.
@@ -43,29 +57,24 @@ startPNG <- function(filename, width, height, res, ..., device) {
   grDevices::dev.cur()
 }
 
-shinyDevice <- function() {
-  if (capabilities("aqua")) {
-    grDevices::png
-  } else if ((getOption('shiny.usecairo') %OR% TRUE) &&
-             nchar(system.file(package = "Cairo"))) {
-    Cairo::CairoPNG
-  } else {
-    grDevices::png
-  }
-}
-
-
 #' Run a plotting function and save the output as a PNG
 #'
 #' This function returns the name of the PNG file that it generates. In
-#' essence, it calls `device()`, then `func()`, then `dev.off()`.
+#' essence, it calls `png()`, then `func()`, then `dev.off()`.
 #' So `func` must be a function that will generate a plot when used this
 #' way.
 #'
-#' The default `device` (i.e., `shinyDevice()`) is determined as follows:
-#'  * If [quartz()] is operational, then [png()].
-#'  * If installed and `options(shiny.usecairo=TRUE)` (the default), then [Cairo::CairoPNG()].
-#'  * Otherwise, [png()].
+#' For output, it will try to use the following devices, in this order:
+#' quartz (via [grDevices::png()]), then [ragg::agg_png()], then [Cairo::CairoPNG()],
+#' and finally [grDevices::png()]. This is in order of quality of
+#' output. Notably, plain `png` output on Linux and Windows may not
+#' antialias some point shapes, resulting in poor quality output.
+#'
+#' In some rare cases, `ragg::agg_png()` provides output that looks worse than
+#' `Cairo()` (and `png()`). To disable ragg output for an app, use
+#' `options(shiny.useragg=FALSE)`. Moreover, in some rare cases, `Cairo()`
+#' provides output that looks worse than `png()`. To disable Cairo output
+#' for an app, use `options(shiny.usecairo=FALSE)`.
 #'
 #' @param func A function that generates a plot.
 #' @param filename The name of the output file. Defaults to a temp file with
@@ -73,16 +82,14 @@ shinyDevice <- function() {
 #' @param width Width in pixels.
 #' @param height Height in pixels.
 #' @param res Resolution in pixels per inch. This value is passed to
-#'   `device`. Note that this affects the resolution of PNG rendering in
+#'   [grDevices::png()]. Note that this affects the resolution of PNG rendering in
 #'   R; it won't change the actual ppi of the browser.
-#' @param ... Arguments to be passed through to `device`.
+#' @param ... Arguments to be passed through to [grDevices::png()].
 #'   These can be used to set the width, height, background color, etc.
-#' @param device A function that opens a png graphics device (e.g., [png()]).
 #' @export
 plotPNG <- function(func, filename=tempfile(fileext='.png'),
-                    width=400, height=400, res=72, ...,
-                    device=getShinyOption("shiny.device", shinyDevice())) {
-  dv <- startPNG(filename, width, height, res, ..., device = device)
+                    width=400, height=400, res=72, ...) {
+  dv <- startPNG(filename, width, height, res, ...)
   on.exit(grDevices::dev.off(dv), add = TRUE)
   func()
 

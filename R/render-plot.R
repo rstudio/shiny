@@ -34,13 +34,10 @@
 #'   When rendering an inline plot, you must provide numeric values (in pixels)
 #'   to both \code{width} and \code{height}.
 #' @param res Resolution of resulting plot, in pixels per inch. This value is
-#'   passed to `device`. Note that this affects the resolution of PNG
+#'   passed to [grDevices::png()]. Note that this affects the resolution of PNG
 #'   rendering in R; it won't change the actual ppi of the browser.
-#' @param ... Arguments to be passed through to `device`.
+#' @param ... Arguments to be passed through to [grDevices::png()].
 #'   These can be used to set the width, height, background color, etc.
-#' @param device A function that opens a png graphics device.
-#' The default (i.e., `shinyDevice()`) depends on the system's capabilities.
-#' See [plotPNG()] for more information.
 #' @param env The environment in which to evaluate `expr`.
 #' @param quoted Is `expr` a quoted expression (with `quote()`)? This
 #'   is useful if you want to save an expression in a variable.
@@ -55,7 +52,6 @@
 #'   interactive R Markdown document.
 #' @export
 renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
-                       device=getShinyOption("shiny.device", shinyDevice()),
                        env=parent.frame(), quoted=FALSE,
                        execOnResize=FALSE, outputArgs=list()
 ) {
@@ -117,8 +113,7 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
             width = dims$width,
             height = dims$height,
             pixelratio = pixelratio,
-            res = res,
-            device = device
+            res = res
           ), args))
       },
       catch = function(reason) {
@@ -145,7 +140,7 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
         dims <- getDims()
         pixelratio <- session$clientData$pixelratio %OR% 1
         result <- do.call("resizeSavedPlot", c(
-          list(name, shinysession, result, dims$width, dims$height, pixelratio, res, device = device),
+          list(name, shinysession, result, dims$width, dims$height, pixelratio, res),
           args
         ))
 
@@ -164,7 +159,7 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
   markRenderFunction(outputFunc, renderFunc, outputArgs = outputArgs)
 }
 
-resizeSavedPlot <- function(name, session, result, width, height, pixelratio, res, ..., device) {
+resizeSavedPlot <- function(name, session, result, width, height, pixelratio, res, ...) {
   if (result$img$width == width && result$img$height == height &&
       result$pixelratio == pixelratio && result$res == res) {
     return(result)
@@ -174,7 +169,7 @@ resizeSavedPlot <- function(name, session, result, width, height, pixelratio, re
   outfile <- plotPNG(function() {
     grDevices::replayPlot(result$recordedPlot)
     coordmap <<- getCoordmap(result$plotResult, width*pixelratio, height*pixelratio, res*pixelratio)
-  }, width = width*pixelratio, height = height*pixelratio, res = res*pixelratio, ..., device = device)
+  }, width = width*pixelratio, height = height*pixelratio, res = res*pixelratio, ...)
   on.exit(unlink(outfile), add = TRUE)
 
   result$img <- list(
@@ -188,7 +183,7 @@ resizeSavedPlot <- function(name, session, result, width, height, pixelratio, re
   result
 }
 
-drawPlot <- function(name, session, func, width, height, pixelratio, res, ..., device) {
+drawPlot <- function(name, session, func, width, height, pixelratio, res, ...) {
   #  1. Start PNG
   #  2. Enable displaylist recording
   #  3. Call user-defined func
@@ -201,7 +196,7 @@ drawPlot <- function(name, session, func, width, height, pixelratio, res, ..., d
   # 10. On error, take width and height dependency
 
   outfile <- tempfile(fileext='.png') # If startPNG throws, this could leak. Shrug.
-  device <- startPNG(outfile, width*pixelratio, height*pixelratio, res = res*pixelratio, ..., device = device)
+  device <- startPNG(outfile, width*pixelratio, height*pixelratio, res = res*pixelratio, ...)
   domain <- createGraphicsDevicePromiseDomain(device)
   grDevices::dev.control(displaylist = "enable")
 

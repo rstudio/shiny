@@ -96,7 +96,8 @@ Suggests:
     yaml,
     future,
     dygraphs,
-    ragg
+    ragg,
+    showtext
 Remotes:
     rstudio/htmltools,
     rstudio/shinytest

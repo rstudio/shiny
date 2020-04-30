@@ -41,6 +41,12 @@ startPNG <- function(filename, width, height, res, ...) {
     args$bg <- NULL
   }
 
+  # Let showtext know about the resolution (for rendering custom fonts)
+  # https://github.com/yixuan/showtext/issues/33
+  if (rlang::is_installed("showtext")) {
+    showtext::showtext_opts(dpi = res)
+  }
+
   do.call(pngfun, args)
   # Call plot.new() so that even if no plotting operations are performed at
   # least we have a blank background. N.B. we need to set the margin to 0

@@ -21,7 +21,7 @@ shiny 1.4.0.9001
 
 * Fixed [#2042](https://github.com/rstudio/shiny/issues/2042), [#2628](https://github.com/rstudio/shiny/issues/2628): In a `dateInput` and `dateRangeInput`, disabled months and years are now a lighter gray, to make it easier to see that they are disabled. ([#2690](https://github.com/rstudio/shiny/pull/2690))
 
-* `getCurrentOutputInfo()` previously threw an error when called from outside of an output; now it returns `NULL`. ([#2707](https://github.com/rstudio/shiny/pull/2707))
+* `getCurrentOutputInfo()` previously threw an error when called from outside of an output; now it returns `NULL`. ([#2707](https://github.com/rstudio/shiny/pull/2707) and [#2858](https://github.com/rstudio/shiny/pull/2858))
 
 * Added a label to observer that auto-reloads `R/` directory to avoid confusion when using `reactlog`. ([#58](https://github.com/rstudio/reactlog/issues/58))
 

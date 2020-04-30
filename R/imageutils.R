@@ -23,7 +23,8 @@ startPNG <- function(filename, width, height, res, ...) {
   # (1) User specified bg via `renderPlot()`
   # (2) bg option was set via thematic
   if (is.null(args$bg) && rlang::is_installed("thematic")) {
-    args$bg <- thematic::thematic_get_option("bg", "white")
+    # TODO: use :: once thematic is on CRAN
+    args$bg <- getFromNamespace("thematic_get_option", "thematic")("bg", "white")
     # auto vals aren't resolved until plot time, so if we see one, resolve it
     if (isTRUE("auto" == args$bg)) {
       args$bg <- getCurrentOutputInfo()[["bg"]]

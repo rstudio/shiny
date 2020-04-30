@@ -33,6 +33,8 @@ shiny 1.4.0.9001
 
 * Added function `updateActionLink()` to update an `actionLink()` label and/or icon value. ([#2811](https://github.com/rstudio/shiny/pull/2811))
 
+* Fixed [#2856](https://github.com/rstudio/shiny/issues/2856): Bumped jQuery 3 from 3.4.1 to 3.5.0. ([#2857](https://github.com/rstudio/shiny/pull/2857))
+
 ### Bug fixes
 
 * Fixed [#2606](https://github.com/rstudio/shiny/issues/2606): `debounce()` would not work properly if the code in the reactive expression threw an error on the first run. ([#2652](https://github.com/rstudio/shiny/pull/2652))

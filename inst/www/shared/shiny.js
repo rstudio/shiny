@@ -5322,7 +5322,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     _getLabel: function _getLabel(obj) {
       // If <label><input /><span>label text</span></label>
       if (obj.parentNode.tagName === "LABEL") {
-        return $.trim($(obj.parentNode).find('span').text());
+        return $(obj.parentNode).find('span').text().trim();
       }
 
       return null;
@@ -5420,7 +5420,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     _getLabel: function _getLabel(obj) {
       // If <label><input /><span>label text</span></label>
       if (obj.parentNode.tagName === "LABEL") {
-        return $.trim($(obj.parentNode).find('span').text());
+        return $(obj.parentNode).find('span').text().trim();
       }
 
       return null;

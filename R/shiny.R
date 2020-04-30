@@ -2109,6 +2109,7 @@ outputOptions <- function(x, name, ...) {
 #'
 #' @export
 getCurrentOutputInfo <- function(session = getDefaultReactiveDomain()) {
+  if (is.null(session)) return(NULL)
   session$getCurrentOutputInfo()
 }
 

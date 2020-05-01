@@ -50,20 +50,21 @@ isModuleServer <- function(x) {
 #'   # Any additional arguments, below, are passed along to the module.
 #' })
 #' @export
-testServer <- function(app = NULL, expr, args = list()) {
+testServer <- function(app = NULL, expr, args = list(), session = MockShinySession$new()) {
 
   require(shiny)
 
   quosure <- rlang::enquo(expr)
-  session <- getDefaultReactiveDomain()
 
-  if (inherits(session, "MockShinySession"))
-    stop("Test expressions may not call testServer()")
-  if (inherits(session, "session_proxy")
-      && inherits(get("parent", envir = session), "MockShinySession"))
-    stop("Modules may not call testServer()")
+  local({
+    active_session <- getDefaultReactiveDomain()
+    if (inherits(active_session, "MockShinySession"))
+      stop("Test expressions may not call testServer()")
+    if (inherits(active_session, "session_proxy")
+        && inherits(get("parent", envir = active_session), "MockShinySession"))
+      stop("Modules may not call testServer()")
+  })
 
-  session <- MockShinySession$new()
   on.exit(if (!session$isClosed()) session$close())
 
   if (isModuleServer(app)) {
@@ -110,7 +111,7 @@ testServer <- function(app = NULL, expr, args = list()) {
         stop("Tested application server functions must declare input, output, and session arguments.")
       body(server) <- rlang::expr({
         session$setEnv(base::environment())
-        !!!body(server)
+        !!body(server)
       })
       if (length(args))
         stop("Arguments were provided to a server function.")

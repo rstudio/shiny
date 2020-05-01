@@ -689,4 +689,16 @@ test_that("module return value captured", {
   }, args = list(n = 2))
 })
 
-#test_that("server return value captured", {})
+test_that("It's an error to pass arguments to a server", {
+  expect_error(testServer(test_path("..", "test-modules", "06_tabsets"), {}, args = list(an_arg = 123)))
+})
+
+test_that("MockShinySession has all public ShinySession methods and fields", {
+  real_methods <- ShinySession$public_methods
+  real_fields <- ShinySession$public_fields
+  mock_methods <- MockShinySession$public_methods
+  mock_fields <- MockShinySession$public_fields
+
+  expect_mapequal(mock_methods, real_methods)
+  expect_mapequal(mock_fields, real_fields)
+})

@@ -75,6 +75,32 @@ mapNames <- function(func, vals) {
   vals
 }
 
+#' @noRd
+mockMethodNotify <- function(method, msg, error = FALSE) {
+  # Strips $ and () from method name for use as part of option name
+  formatMethod <- function(method) gsub("[$()]", "", method)
+
+  if (getOption("shiny.mocksession")
+      %OR% getOption(paste0("shiny.mocksession.", formatMethod(method)))
+      %OR% TRUE == FALSE)
+    return(invisible())
+
+  printFunc <- if (error) {
+    function(...) {
+      stop(..., call. = FALSE)
+    }
+  } else {
+    message
+  }
+
+  out <- paste0(method, " unimplemented by MockShinySesson: ", msg)
+  out <- paste0(out, "\n", "To disable this message, run `options(shiny.mocksession.", method, "=FALSE)`")
+  out <- paste0(out, "\n", "To disable all messages like this, run `options(shiny.mocksession=FALSE)`")
+
+  printFunc(out)
+}
+
+
 #' Mock Shiny Session
 #'
 #' @description
@@ -454,6 +480,9 @@ MockShinySession <- R6Class(
     }
   ),
   active = list(
+    session = function() {
+      mockMethodNotify("$session", "$session is deprecated", error = TRUE)
+    },
     #' @field request An empty environment where the request should be. The request isn't meaningfully mocked currently.
     request = function(value) {
       if (!missing(value)){

@@ -19,10 +19,11 @@ startPNG <- function(filename, width, height, res, ...) {
 
   args <- rlang::list2(filename=filename, width=width, height=height, res=res, ...)
 
-  # The order of priority for the bg color is:
-  # (1) User specified bg via `renderPlot()`
-  # (2) bg option was set via thematic
-  if (is.null(args$bg) && rlang::is_installed("thematic")) {
+  # Set a smarter default for the device's bg argument (based on thematic's global state).
+  # Note that, technically, this is really only needed for CairoPNG, since the other
+  # devices allow their bg arg to be overridden by par(bg=...), which thematic does prior
+  # to plot-time, but it shouldn't hurt to inform other the device directly as well
+  if (is.null(args$bg) && isNamespaceLoaded("thematic")) {
     # TODO: use :: once thematic is on CRAN
     args$bg <- getFromNamespace("thematic_get_option", "thematic")("bg", "white")
     # auto vals aren't resolved until plot time, so if we see one, resolve it
@@ -39,12 +40,6 @@ startPNG <- function(filename, width, height, res, ...) {
       args$background <- args$bg
     }
     args$bg <- NULL
-  }
-
-  # Let showtext know about the resolution (for rendering custom fonts)
-  # https://github.com/yixuan/showtext/issues/33
-  if (rlang::is_installed("showtext")) {
-    showtext::showtext_opts(dpi = res)
   }
 
   do.call(pngfun, args)

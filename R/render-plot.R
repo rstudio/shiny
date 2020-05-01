@@ -200,6 +200,17 @@ drawPlot <- function(name, session, func, width, height, pixelratio, res, ...) {
   domain <- createGraphicsDevicePromiseDomain(device)
   grDevices::dev.control(displaylist = "enable")
 
+  # In some cases (at least with `png(type='cairo')), showtext's font
+  # rendering needs to know about the device's resolution to work properly.
+  # I don't see any immediate harm in setting the dpi option for any device,
+  # but it's worth noting that CairoPNG currently doesn't pick up on the option.
+  # https://github.com/yixuan/showtext/issues/33
+  showtextOpts <- if (isNamespaceLoaded("showtext")) {
+    showtext::showtext_opts(dpi = res)
+  } else {
+    NULL
+  }
+
   hybrid_chain(
     hybrid_chain(
       promises::with_promise_domain(domain, {
@@ -246,6 +257,9 @@ drawPlot <- function(name, session, func, width, height, pixelratio, res, ...) {
       }),
       finally = function() {
         grDevices::dev.off(device)
+        if (length(showtextOpts)) {
+          showtext::showtext_opts(showtextOpts)
+        }
       }
     ),
     function(result) {

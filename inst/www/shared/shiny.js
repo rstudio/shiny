@@ -9,7 +9,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 (function () {
   var $ = jQuery;
   var exports = window.Shiny = window.Shiny || {};
-  exports.version = "1.4.0.9002"; // Version number inserted by Grunt
+  exports.version = "1.4.0.9900"; // Version number inserted by Grunt
 
   var origPushState = window.history.pushState;
 
@@ -6343,7 +6343,6 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       var a = document.createElement("a");
       a.href = "/";
       var div = document.createElement("div");
-      div.style.position = "absolute";
       div.style.setProperty("position", "absolute", "important");
       div.style.setProperty("top", "-1000px", "important");
       div.style.setProperty("left", "0", "important");

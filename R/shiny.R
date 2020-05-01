@@ -1339,17 +1339,26 @@ ShinySession <- R6Class(
 
       bg <- paste0("output_", name, "_bg")
       if (bg %in% cd_names()) {
-        tmp_info$bg <- htmltools::parseCssColors(self$clientData[[bg]])
+        tmp_info$bg <- htmltools::parseCssColors(
+          self$clientData[[bg]] %OR% "",
+          mustWork = FALSE
+        )
       }
 
       fg <- paste0("output_", name, "_fg")
       if (fg %in% cd_names()) {
-        tmp_info$fg <- htmltools::parseCssColors(self$clientData[[fg]])
+        tmp_info$fg <- htmltools::parseCssColors(
+          self$clientData[[fg]] %OR% "",
+          mustWork = FALSE
+        )
       }
 
       accent <- paste0("output_", name, "_accent")
       if (accent %in% cd_names()) {
-        tmp_info$accent <- htmltools::parseCssColors(self$clientData[[accent]])
+        tmp_info$accent <- htmltools::parseCssColors(
+          self$clientData[[accent]] %OR% "",
+          mustWork = FALSE
+        )
       }
 
       font <- paste0("output_", name, "_font")

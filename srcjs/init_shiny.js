@@ -317,7 +317,6 @@ function initShiny() {
     let a = document.createElement("a");
     a.href = "/";
     let div = document.createElement("div");
-    div.style.position = "absolute";
     div.style.setProperty("position", "absolute", "important");
     div.style.setProperty("top", "-1000px", "important");
     div.style.setProperty("left", "0", "important");

@@ -29,7 +29,6 @@
 #'     |   `- mytest.R
 #'     |- testthat.R
 #'     `- testthat
-#'         |- helper-load.R
 #'         |- test-mymodule.R
 #'         |- test-server.R
 #'         `- test-sort.R

@@ -3,9 +3,19 @@
 #' This function populates a directory with files for a Shiny application.
 #'
 #' In an interactive R session, this function will, by default, prompt the user
-#' which components to add to the application.
+#' to select which components to add to the application. Choices are
 #'
-#' The full example application includes the following files and directories:
+#' ```
+#' 1: All
+#' 2: app.R            : Main application file
+#' 3: R/sort.R         : Helper file with R code
+#' 4: R/my-module.R    : Example module
+#' 5: tests/shinytest/ : Tests using the shinytest package
+#' 6: tests/testthat/  : Tests using the testthat package
+#' ```
+#'
+#' If option 1 is selected, the full example application including the
+#' following files and directories is created:
 #'
 #' ```
 #' appdir/
@@ -19,7 +29,6 @@
 #'     |   `- mytest.R
 #'     |- testthat.R
 #'     `- testthat
-#'         |- helper-load.R
 #'         |- test-mymodule.R
 #'         |- test-server.R
 #'         `- test-sort.R
@@ -73,8 +82,8 @@ shinyAppTemplate <- function(path = NULL, examples = "default", dryrun = FALSE)
     app       = "app.R            : Main application file",
     rdir      = "R/sort.R         : Helper file with R code",
     module    = "R/my-module.R    : Example module",
-    shinytest = "tests/shinytest/ : Tests using shinytest package",
-    testthat  = "tests/testthat/  : Tests using testthat"
+    shinytest = "tests/shinytest/ : Tests using the shinytest package",
+    testthat  = "tests/testthat/  : Tests using the testthat package"
   )
 
   if (identical(examples, "default")) {

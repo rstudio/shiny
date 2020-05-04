@@ -71,6 +71,14 @@ $.extend(imageOutputBinding, {
       coordmap: data.coordmap
     };
 
+    if (opts.brushFill === "auto") {
+      opts.brushFill = getComputedLinkColor($el[0]);
+    }
+    if (opts.brushStroke === "auto") {
+      opts.brushStroke = window.getComputedStyle($el[0]).getPropertyValue("color");
+    }
+
+
     // Copy items from data to img. Don't set the coordmap as an attribute.
     $.each(data, function(key, value) {
       if (value === null || key === 'coordmap') {

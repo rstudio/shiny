@@ -76,8 +76,12 @@ hoverOpts <- function(id, delay = 300,
 #'   `imageOutput`/`plotOutput` calls may share the same `id`
 #'   value; brushing one image or plot will cause any other brushes with the
 #'   same `id` to disappear.
-#' @param fill Fill color of the brush.
-#' @param stroke Outline color of the brush.
+#' @param fill Fill color of the brush. If `'auto'`, it derives from the link
+#'   color of the plot's HTML container (if **thematic** is enabled, and `accent`
+#'   is a non-`'auto'` value, that color is used instead).
+#' @param stroke Outline color of the brush. If `'auto'`, it derives from the
+#'   foreground color of the plot's HTML container (if **thematic** is enabled,
+#'   and `fg` is a non-`'auto'` value, that color is used instead).
 #' @param opacity Opacity of the brush
 #' @param delay How long to delay (in milliseconds) when debouncing or
 #'   throttling, before sending the brush data to the server.
@@ -107,6 +111,13 @@ brushOpts <- function(id, fill = "#9cf", stroke = "#036",
   if (is.null(id))
     stop("id must not be NULL")
 
+  if (identical(fill, "auto")) {
+    fill <- getThematicOption("accent", "auto")
+  }
+  if (identical(stroke, "auto")) {
+    stroke <- getThematicOption("fg", "auto")
+  }
+
   list(
     id = id,
     fill = fill,
@@ -118,4 +129,9 @@ brushOpts <- function(id, fill = "#9cf", stroke = "#036",
     direction = match.arg(direction),
     resetOnNew = resetOnNew
   )
+}
+
+getThematicOption <- function(...) {
+  if (system.file(package = "thematic") == "") return(NULL)
+  thematic::thematic_get_option(...)
 }

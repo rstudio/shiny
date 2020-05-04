@@ -322,23 +322,6 @@ function initShiny() {
     return bgColor;
   }
 
-  // Compute the color property of an a tag, scoped within the element
-  function getComputedLinkColor(el) {
-    let a = document.createElement("a");
-    a.href = "/";
-    let div = document.createElement("div");
-    div.style.setProperty("position", "absolute", "important");
-    div.style.setProperty("top", "-1000px", "important");
-    div.style.setProperty("left", "0", "important");
-    div.style.setProperty("width", "30px", "important");
-    div.style.setProperty("height", "10px", "important");
-    div.appendChild(a);
-    el.appendChild(div);
-    let linkColor = getStyle(a, "color");
-    el.removeChild(div);
-    return linkColor;
-  }
-
   function getComputedFont(el) {
     let fontFamily = getStyle(el, "font-family");
     let fontSize = getStyle(el, "font-size");

@@ -346,6 +346,23 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       labelNode.text(labelTxt);
       labelNode.removeClass("shiny-label-null");
     }
+  } // Compute the color property of an a tag, scoped within the element
+
+
+  function getComputedLinkColor(el) {
+    var a = document.createElement("a");
+    a.href = "/";
+    var div = document.createElement("div");
+    div.style.setProperty("position", "absolute", "important");
+    div.style.setProperty("top", "-1000px", "important");
+    div.style.setProperty("left", "0", "important");
+    div.style.setProperty("width", "30px", "important");
+    div.style.setProperty("height", "10px", "important");
+    div.appendChild(a);
+    el.appendChild(div);
+    var linkColor = window.getComputedStyle(a).getPropertyValue("color");
+    el.removeChild(div);
+    return linkColor;
   } //---------------------------------------------------------------------
   // Source file: ../srcjs/browser.js
 
@@ -2442,7 +2459,16 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         brushDirection: OR($el.data('brush-direction'), 'xy'),
         brushResetOnNew: OR(strToBool($el.data('brush-reset-on-new')), false),
         coordmap: data.coordmap
-      }; // Copy items from data to img. Don't set the coordmap as an attribute.
+      };
+
+      if (opts.brushFill === "auto") {
+        opts.brushFill = getComputedLinkColor($el[0]);
+      }
+
+      if (opts.brushStroke === "auto") {
+        opts.brushStroke = window.getComputedStyle($el[0]).getPropertyValue("color");
+      } // Copy items from data to img. Don't set the coordmap as an attribute.
+
 
       $.each(data, function (key, value) {
         if (value === null || key === 'coordmap') {
@@ -6376,23 +6402,6 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       }
 
       return bgColor;
-    } // Compute the color property of an a tag, scoped within the element
-
-
-    function getComputedLinkColor(el) {
-      var a = document.createElement("a");
-      a.href = "/";
-      var div = document.createElement("div");
-      div.style.setProperty("position", "absolute", "important");
-      div.style.setProperty("top", "-1000px", "important");
-      div.style.setProperty("left", "0", "important");
-      div.style.setProperty("width", "30px", "important");
-      div.style.setProperty("height", "10px", "important");
-      div.appendChild(a);
-      el.appendChild(div);
-      var linkColor = getStyle(a, "color");
-      el.removeChild(div);
-      return linkColor;
     }
 
     function getComputedFont(el) {

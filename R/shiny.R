@@ -1319,6 +1319,10 @@ ShinySession <- R6Class(
 
       # If we don't already have width for this output info, see if it's
       # present, and if so, add it.
+
+      # Note that all the following clientData values (which are reactiveValues)
+      # are wrapped in reactive() so that users can take a dependency on particular
+      # output info (i.e., just depend on width/height, or just depend on bg, fg, etc)
       if (! ("width" %in% names(tmp_info)) ) {
         width_name  <- paste0("output_", name, "_width")
         if (width_name %in% cd_names()) {
@@ -1341,33 +1345,36 @@ ShinySession <- R6Class(
       # This'll make sure we're always working with a string (and if
       # that string isn't a valid CSS color, will return NA)
       # https://github.com/rstudio/htmltools/issues/161
+      parse_css_colors <- function(x) {
+        htmltools::parseCssColors(x %OR% "", mustWork = FALSE)
+      }
+
       bg <- paste0("output_", name, "_bg")
       if (bg %in% cd_names()) {
-        tmp_info$bg <- htmltools::parseCssColors(
-          self$clientData[[bg]] %OR% "",
-          mustWork = FALSE
-        )
+        tmp_info$bg <- reactive({
+          parse_css_colors(self$clientData[[bg]])
+        })
       }
 
       fg <- paste0("output_", name, "_fg")
       if (fg %in% cd_names()) {
-        tmp_info$fg <- htmltools::parseCssColors(
-          self$clientData[[fg]] %OR% "",
-          mustWork = FALSE
-        )
+        tmp_info$fg <- reactive({
+          parse_css_colors(self$clientData[[fg]])
+        })
       }
 
       accent <- paste0("output_", name, "_accent")
       if (accent %in% cd_names()) {
-        tmp_info$accent <- htmltools::parseCssColors(
-          self$clientData[[accent]] %OR% "",
-          mustWork = FALSE
-        )
+        tmp_info$accent <- reactive({
+          parse_css_colors(self$clientData[[accent]])
+        })
       }
 
       font <- paste0("output_", name, "_font")
       if (font %in% cd_names()) {
-        tmp_info$font <- self$clientData[[font]]
+        tmp_info$font <- reactive({
+          self$clientData[[font]]
+        })
       }
 
       private$outputInfo[[name]] <- tmp_info

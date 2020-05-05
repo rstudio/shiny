@@ -26,7 +26,7 @@ startPNG <- function(filename, width, height, res, ...) {
     args$bg <- getFromNamespace("thematic_get_option", "thematic")("bg", "white")
     # auto vals aren't resolved until plot time, so if we see one, resolve it
     if (isTRUE("auto" == args$bg)) {
-      args$bg <- getCurrentOutputInfo()[["bg"]]
+      args$bg <- getCurrentOutputInfo()[["bg"]]()
     }
   }
 

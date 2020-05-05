@@ -1,3 +1,6 @@
+#' @include shiny.R
+NULL
+
 # Promise helpers taken from:
 #   https://github.com/rstudio/promises/blob/master/tests/testthat/common.R
 # Block until all pending later tasks have executed
@@ -76,15 +79,58 @@ mapNames <- function(func, vals) {
 }
 
 #' @noRd
-noop <- function(name, msg = paste0(name, "is a noop.")) {
+noopWarn <- function(name, msg) {
   if (getOption("shiny.mocksession.warn", FALSE) == FALSE)
     return(invisible())
   out <- paste0(name, " is not fully implemented by MockShinySession: ", msg)
   out <- paste0(out, "\n", "To disable messages like this, run `options(shiny.mocksession.warn=FALSE)`")
   warning(out, call. = FALSE)
-  NULL
 }
 
+#' Returns a noop implementation of the public method `name` of ShinySession.
+#' @noRd
+makeNoop <- function(name, msg = paste0(name, " is a noop.")) {
+  if (!(name %in% names(ShinySession$public_methods)))
+    stop(name, " is not public method of ShinySession.")
+  impl <- ShinySession$public_methods[[name]]
+  body(impl) <- rlang::expr({
+    # Force arguments
+    !!lapply(formalArgs(impl), rlang::sym)
+    (!!noopWarn)(!!name, !!msg)
+    NULL
+  })
+  impl
+}
+
+#' Accepts a series of symbols as arguments and generates corresponding noop
+#' implementations.
+#' @noRd
+makeWarnNoops <- function(...) {
+  methods <- as.character(rlang::ensyms(...))
+  sapply(methods, makeNoop, USE.NAMES = TRUE, simplify = FALSE)
+}
+
+#' Returns an implementation of a ShinySession public method that signals an
+#' error.
+#' @noRd
+makeError <- function(name, msg = paste0(name, " is for internal use only.")) {
+  if (!(name %in% names(ShinySession$public_methods)))
+    stop(name, " is not public method of ShinySession.")
+  impl <- ShinySession$public_methods[[name]]
+  body(impl) <- rlang::expr({
+    base::stop(!!msg)
+  })
+  impl
+}
+
+#' Accepts a series of named arguments. Each name corresponds to a ShinySession
+#' public method that should signal an error, and each argument corresponds to
+#' an error message.
+#' @noRd
+makeErrors <- function(...) {
+  errors <- rlang::list2(...)
+  mapply(makeError, names(errors), errors, USE.NAMES = TRUE, SIMPLIFY = FALSE)
+}
 
 #' Mock Shiny Session
 #'
@@ -97,7 +143,7 @@ noop <- function(name, msg = paste0(name, "is a noop.")) {
 MockShinySession <- R6Class(
   'MockShinySession',
   portable = FALSE,
-  public = list(
+  public = c(list(
     #' @field env The environment associated with the session.
     env = NULL,
     #' @field returned The value returned by the module.
@@ -106,11 +152,6 @@ MockShinySession <- R6Class(
     singletons = character(0),
     #' @field clientData Mock client data that always returns a size for plots
     clientData = structure(list(), class="mockclientdata"),
-    #' @description No-op
-    #' @param logEntry Not used
-    reactlog = function(logEntry) noop("$reactlog()"),
-    #' @description No-op
-    incrementBusyCount = function() noop("$incrementBusyCount()"),
     #' @field output The shinyoutputs associated with the session
     output = NULL,
     #' @field input The reactive inputs associated with the session
@@ -333,66 +374,6 @@ MockShinySession <- R6Class(
       }
     },
 
-    #' @description No-op
-    #' @param name Not used
-    #' @param data Not used
-    #' @param filterFunc Not used
-    registerDataObj = function(name, data, filterFunc) {},
-    #' @description No-op
-    #' @param value Not used
-    allowReconnect = function(value) {},
-    #' @description No-op
-    reload = function() {},
-    #' @description No-op
-    #' @param brushId Not used
-    resetBrush = function(brushId) {
-      warning("session$brush isn't meaningfully mocked on the MockShinySession")
-    },
-    #' @description No-op
-    #' @param type Not used
-    #' @param message Not used
-    sendCustomMessage = function(type, message) {},
-    #' @description No-op
-    #' @param type Not used
-    #' @param message Not used
-    sendBinaryMessage = function(type, message) {},
-    #' @description No-op
-    #' @param inputId Not used
-    #' @param message Not used
-    sendInputMessage = function(inputId, message) {},
-    #' @description No-op
-    #' @param names Not used
-    setBookmarkExclude = function(names) {
-      warning("Bookmarking isn't meaningfully mocked in MockShinySession")
-    },
-    #' @description No-op
-    getBookmarkExclude = function() {
-      warning("Bookmarking isn't meaningfully mocked in MockShinySession")
-    },
-    #' @description No-op
-    #' @param fun Not used
-    onBookmark = function(fun) {},
-    #' @description No-op
-    #' @param fun Not used
-    onBookmarked = function(fun) {},
-    #' @description No-op
-    doBookmark = function() {
-      warning("Bookmarking isn't meaningfully mocked in MockShinySession")
-    },
-    #' @description No-op
-    #' @param fun Not used
-    onRestore = function(fun) {},
-    #' @description No-op
-    #' @param fun Not used
-    onRestored = function(fun) {},
-    #' @description No-op
-    exportTestValues = function() {},
-    #' @description No-op
-    #' @param input Not used
-    #' @param output Not used
-    #' @param export Not used
-    #' @param format Not used
-    getTestSnapshotUrl = function(input=TRUE, output=TRUE, export=TRUE, format="json") {},
     #' @description Returns the given id prefixed by this namespace's id.
     #' @param id The id to modify.
     ns = function(id) {
@@ -446,6 +427,29 @@ MockShinySession <- R6Class(
       paste0("proxy", private$idCounter)
     }
   ),
+  makeWarnNoops(
+    allowReconnect,
+    doBookmark,
+    exportTestValues,
+    getBookmarkExclude,
+    getTestSnapshotUrl,
+    incrementBusyCount,
+    onBookmark,
+    onBookmarked,
+    onRestore,
+    onRestored,
+    reactlog,
+    registerDataObj,
+    reload,
+    resetBrush,
+    sendBinaryMessage,
+    sendCustomMessage,
+    sendInputMessage,
+    setBookmarkExclude
+  ),
+  makeErrors(
+    wsClosed = "for internal use only"
+  )),
   private = list(
     .input = NULL,
     flushCBs = NULL,

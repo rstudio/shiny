@@ -1,6 +1,9 @@
 is_installed <- function(package, version) {
-  installedVersion <- tryCatch(utils::packageVersion(package), error = function(e) NA)
-  !is.na(installedVersion) && installedVersion >= version
+  installed <- nzchar(system.file(package = package))
+  if (missing(version)) {
+    return(installed)
+  }
+  isTRUE(utils::packageVersion(package) >= version)
 }
 
 # Check that the version of an suggested package satisfies the requirements

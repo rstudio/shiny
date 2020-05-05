@@ -1,7 +1,7 @@
 context("MockShinySession")
 
 test_that("invalidateLater supported", {
-  session <- MockShinySession$new()
+  session <- makeMockSession()
   i <- 0
   isolate({
     observe({
@@ -16,7 +16,7 @@ test_that("invalidateLater supported", {
 })
 
 test_that("reactiveTimer supported", {
-  session <- MockShinySession$new()
+  session <- makeMockSession()
   i <- 0
   isolate({
     rt <- reactiveTimer(10, session)
@@ -32,7 +32,7 @@ test_that("reactiveTimer supported", {
 })
 
 test_that("getOutput should auto-flush if needed", {
-  session <- MockShinySession$new()
+  session <- makeMockSession()
   session$defineOutput("n", function(...){ 123 })
   # There's no flushing in between these lines, so getOutput may need to instigate a flush
   # in order to get the requisite observer to run.
@@ -40,7 +40,7 @@ test_that("getOutput should auto-flush if needed", {
 })
 
 test_that("reactivePoll supported", {
-  session <- MockShinySession$new()
+  session <- makeMockSession()
   i <- 0
   isolate({
     rp <- reactivePoll(10, session, function(){ rnorm(1) }, function(){ i <<- i + 1 })
@@ -57,7 +57,7 @@ test_that("reactivePoll supported", {
 })
 
 test_that("renderCachedPlot supported", {
-  session <- MockShinySession$new()
+  session <- makeMockSession()
   isolate({
     # renderCachedPlot is sensitive to having the cache set for it before entering.
     origCache <- getShinyOption("cache")
@@ -74,7 +74,7 @@ test_that("renderCachedPlot supported", {
 })
 
 test_that("renderDataTable supported", {
-  session <- MockShinySession$new()
+  session <- makeMockSession()
   isolate({
     rt <- renderDataTable({
       head(iris)
@@ -85,7 +85,7 @@ test_that("renderDataTable supported", {
 })
 
 test_that("renderImage supported", {
-  session <- MockShinySession$new()
+  session <- makeMockSession()
   isolate({
     ri <- renderImage({
       # A temp file to save the output. It will be deleted after renderImage
@@ -108,7 +108,7 @@ test_that("renderImage supported", {
 })
 
 test_that("renderPlot supported", {
-  session <- MockShinySession$new()
+  session <- makeMockSession()
   isolate({
     p <- renderPlot({ plot(1,1) })
     plt <- p(session, "name")
@@ -120,7 +120,7 @@ test_that("renderPlot supported", {
 })
 
 test_that("renderPrint supported", {
-  session <- MockShinySession$new()
+  session <- makeMockSession()
   isolate({
     p <- renderPrint({ print("hi") })
     pt <- p(session, "name")
@@ -130,7 +130,7 @@ test_that("renderPrint supported", {
 })
 
 test_that("renderTable supported", {
-  session <- MockShinySession$new()
+  session <- makeMockSession()
   isolate({
     rt <- renderTable({
       head(iris)
@@ -141,7 +141,7 @@ test_that("renderTable supported", {
 })
 
 test_that("renderText supported", {
-  session <- MockShinySession$new()
+  session <- makeMockSession()
   isolate({
     rt <- renderText({
       "text here"
@@ -152,7 +152,7 @@ test_that("renderText supported", {
 })
 
 test_that("renderUI supported", {
-  session <- MockShinySession$new()
+  session <- makeMockSession()
   isolate({
     ui <- renderUI({
       tags$a(href="https://rstudio.com", "link")
@@ -164,13 +164,13 @@ test_that("renderUI supported", {
 })
 
 test_that("session supports allowReconnect", {
-  session <- MockShinySession$new()
+  session <- makeMockSession()
   session$allowReconnect(TRUE)
   expect_true(TRUE) # testthat insists that every test must have an expectation
 })
 
 test_that("session supports clientData", {
-  session <- MockShinySession$new()
+  session <- makeMockSession()
   expect_equal(session$clientData$allowDataUriScheme, TRUE)
   expect_equal(session$clientData$pixelratio, 1)
   expect_equal(session$clientData$url_protocol, "http:")
@@ -188,30 +188,30 @@ test_that("session supports clientData", {
 })
 
 test_that("session supports ns", {
-  session <- MockShinySession$new()
+  session <- makeMockSession()
   expect_equal(session$ns("hi"), "mock-session-hi")
 })
 
 test_that("session supports reload", {
-  session <- MockShinySession$new()
+  session <- makeMockSession()
   session$reload()
   expect_true(TRUE) # testthat insists that every test must have an expectation
 })
 
 test_that("session supports close", {
-  session <- MockShinySession$new()
+  session <- makeMockSession()
   session$close()
   expect_true(TRUE) # testthat insists that every test must have an expectation
 })
 
 test_that("session supports request", {
-  session <- MockShinySession$new()
+  session <- makeMockSession()
   expect_warning(session$request, "doesn't currently simulate a realistic request")
   expect_error(session$request <- "blah", "can't be assigned to")
 })
 
 test_that("session supports userData", {
-  session <- MockShinySession$new()
+  session <- makeMockSession()
   expect_length(ls(session$userData), 0)
   session$userData$x <- 123
   expect_length(ls(session$userData), 1)
@@ -219,75 +219,75 @@ test_that("session supports userData", {
 })
 
 test_that("session supports resetBrush", {
-  session <- MockShinySession$new()
+  session <- makeMockSession()
   expect_warning(session$resetBrush(1), "isn't meaningfully mocked")
 })
 
 test_that("session supports sendCustomMessage", {
-  session <- MockShinySession$new()
+  session <- makeMockSession()
   session$sendCustomMessage(type=1, message=2)
   expect_true(TRUE) # testthat insists that every test must have an expectation
 })
 
 test_that("session supports sendBinaryMessage", {
-  session <- MockShinySession$new()
+  session <- makeMockSession()
   session$sendBinaryMessage(type=1, message=2)
   expect_true(TRUE) # testthat insists that every test must have an expectation
 })
 
 test_that("session supports sendInputMessage", {
-  session <- MockShinySession$new()
+  session <- makeMockSession()
   session$sendInputMessage(inputId=1, message=2)
   expect_true(TRUE) # testthat insists that every test must have an expectation
 })
 
 test_that("session supports setBookmarkExclude", {
-  session <- MockShinySession$new()
+  session <- makeMockSession()
   expect_warning(session$setBookmarkExclude(names=1), "Bookmarking isn't meaningfully mocked")
 })
 
 test_that("session supports getBookmarkExclude", {
-  session <- MockShinySession$new()
+  session <- makeMockSession()
   expect_warning(session$getBookmarkExclude(), "Bookmarking isn't meaningfully mocked")
 })
 
 test_that("session supports onBookmark", {
-  session <- MockShinySession$new()
+  session <- makeMockSession()
   session$onBookmark(fun=1)
   expect_true(TRUE) # testthat insists that every test must have an expectation
 })
 
 test_that("session supports onBookmarked", {
-  session <- MockShinySession$new()
+  session <- makeMockSession()
   session$onBookmarked(fun=1)
   expect_true(TRUE) # testthat insists that every test must have an expectation
 })
 
 test_that("session supports doBookmark", {
-  session <- MockShinySession$new()
+  session <- makeMockSession()
   expect_warning(session$doBookmark(), "Bookmarking isn't meaningfully mocked")
 })
 
 test_that("session supports onRestore", {
-  session <- MockShinySession$new()
+  session <- makeMockSession()
   session$onRestore(fun=1)
   expect_true(TRUE) # testthat insists that every test must have an expectation
 })
 
 test_that("session supports onRestored", {
-  session <- MockShinySession$new()
+  session <- makeMockSession()
   session$onRestored(fun=1)
   expect_true(TRUE) # testthat insists that every test must have an expectation
 })
 
 test_that("session supports exportTestValues", {
-  session <- MockShinySession$new()
+  session <- makeMockSession()
   session$exportTestValues()
   expect_true(TRUE) # testthat insists that every test must have an expectation
 })
 
 test_that("session supports getTestSnapshotUrl", {
-  session <- MockShinySession$new()
+  session <- makeMockSession()
   session$getTestSnapshotUrl(input=1, output=1, export=1, format=1)
   expect_true(TRUE) # testthat insists that every test must have an expectation
 })

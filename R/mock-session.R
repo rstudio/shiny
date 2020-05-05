@@ -1,6 +1,3 @@
-#' @include shiny.R
-NULL
-
 # Promise helpers taken from:
 #   https://github.com/rstudio/promises/blob/master/tests/testthat/common.R
 # Block until all pending later tasks have executed
@@ -88,6 +85,7 @@ noopWarn <- function(name, msg) {
 }
 
 #' Returns a noop implementation of the public method `name` of ShinySession.
+#' @include shiny.R
 #' @noRd
 makeNoop <- function(name, msg = paste0(name, " is a noop.")) {
   if (!(name %in% names(ShinySession$public_methods)))
@@ -112,6 +110,7 @@ makeWarnNoops <- function(...) {
 
 #' Returns an implementation of a ShinySession public method that signals an
 #' error.
+#' @include shiny.R
 #' @noRd
 makeError <- function(name, msg = paste0(name, " is for internal use only.")) {
   if (!(name %in% names(ShinySession$public_methods)))
@@ -132,18 +131,44 @@ makeErrors <- function(...) {
   mapply(makeError, names(errors), errors, USE.NAMES = TRUE, SIMPLIFY = FALSE)
 }
 
+#' @noRd
+makeExtraMethods <- function() {
+  c(makeWarnNoops(
+    "allowReconnect",
+    "doBookmark",
+    "exportTestValues",
+    "getBookmarkExclude",
+    "getTestSnapshotUrl",
+    "incrementBusyCount",
+    "onBookmark",
+    "onBookmarked",
+    "onRestore",
+    "onRestored",
+    "reactlog",
+    "registerDataObj",
+    "reload",
+    "resetBrush",
+    "sendBinaryMessage",
+    "sendCustomMessage",
+    "sendInputMessage",
+    "setBookmarkExclude"
+  ), makeErrors(
+    wsClosed = "for internal use only"
+  ))
+}
+
 #' Mock Shiny Session
 #'
 #' @description
 #' An R6 class suitable for testing that simulates the `session` parameter
 #' provided to Shiny server functions or modules.
 #'
-#' @include timer.R
 #' @export
+#' @noRd
 MockShinySession <- R6Class(
   'MockShinySession',
   portable = FALSE,
-  public = c(list(
+  public = c(makeExtraMethods(), list(
     #' @field env The environment associated with the session.
     env = NULL,
     #' @field returned The value returned by the module.
@@ -426,29 +451,6 @@ MockShinySession <- R6Class(
       private$idCounter <- private$idCounter + 1
       paste0("proxy", private$idCounter)
     }
-  ),
-  makeWarnNoops(
-    allowReconnect,
-    doBookmark,
-    exportTestValues,
-    getBookmarkExclude,
-    getTestSnapshotUrl,
-    incrementBusyCount,
-    onBookmark,
-    onBookmarked,
-    onRestore,
-    onRestored,
-    reactlog,
-    registerDataObj,
-    reload,
-    resetBrush,
-    sendBinaryMessage,
-    sendCustomMessage,
-    sendInputMessage,
-    setBookmarkExclude
-  ),
-  makeErrors(
-    wsClosed = "for internal use only"
   )),
   private = list(
     .input = NULL,

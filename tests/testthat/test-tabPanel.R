@@ -13,7 +13,7 @@ test_that("tabPanelBody", {
   expect_error(tabPanelBody(letters[1:2]), "single, non-empty string")
 })
 
-test_that("tabPanel", {
+test_that("tabPanel works with deprecated interface", {
   title <- "titleVal"
   id <- "idVal"
   content <- "contentVal"

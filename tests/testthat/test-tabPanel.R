@@ -1,6 +1,6 @@
 
 
-test_that("tabPanelBody", {
+test_that("tabPanelBody validates it's input", {
   expect_silent(tabPanelBody("a"))
 
   expect_error(tabPanelBody())

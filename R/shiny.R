@@ -1337,6 +1337,10 @@ ShinySession <- R6Class(
         }
       }
 
+      # parseCssColors() currently errors out if you hand it any NAs
+      # This'll make sure we're always working with a string (and if
+      # that string isn't a valid CSS color, will return NA)
+      # https://github.com/rstudio/htmltools/issues/161
       bg <- paste0("output_", name, "_bg")
       if (bg %in% cd_names()) {
         tmp_info$bg <- htmltools::parseCssColors(

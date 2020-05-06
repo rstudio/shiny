@@ -295,12 +295,11 @@ function initShiny() {
       return null;
     }
 
-    let props = window.getComputedStyle(el);
-    let bgColor = props.getPropertyValue("background-color");
+    let bgColor = getStyle(el, "background-color");
     let m = bgColor.match(/^rgba\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)\s*\)$/);
     if (bgColor === "transparent" || (m && parseFloat(m[4]) === 0)) {
       // No background color on this element. See if it has a background image.
-      let bgImage = props.getPropertyValue("background-image");
+      let bgImage = getStyle(el, "background-image");
       if (bgImage && bgImage !== "none") {
         // Failed to detect background color, since it has a background image
         return null;
@@ -324,15 +323,14 @@ function initShiny() {
     div.style.setProperty("height", "10px", "important");
     div.appendChild(a);
     el.appendChild(div);
-    let linkColor = window.getComputedStyle(a).getPropertyValue("color");
+    let linkColor = getStyle(a, "color");
     el.removeChild(div);
     return linkColor;
   }
 
   function getComputedFont(el) {
-    let style = window.getComputedStyle(el);
-    let fontFamily = style.getPropertyValue("font-family");
-    let fontSize = style.getPropertyValue("font-size");
+    let fontFamily = getStyle(el, "font-family");
+    let fontSize = getStyle(el, "font-size");
     let font = {
       families: fontFamily.replace(/"/g, '').split(", "),
       size: fontSize
@@ -366,7 +364,7 @@ function initShiny() {
   $('.shiny-image-output, .shiny-plot-output, .shiny-report-theme').each(function() {
     var id = getIdFromEl(this);
     initialValues['.clientdata_output_' + id + '_bg'] = getComputedBgColor(this);
-    initialValues['.clientdata_output_' + id + '_fg'] = window.getComputedStyle(this).getPropertyValue("color");
+    initialValues['.clientdata_output_' + id + '_fg'] = getStyle(this, "color");
     initialValues['.clientdata_output_' + id + '_accent'] = getComputedLinkColor(this);
     initialValues['.clientdata_output_' + id + '_font'] = getComputedFont(this);
   });
@@ -383,7 +381,7 @@ function initShiny() {
     $('.shiny-image-output, .shiny-plot-output, .shiny-report-theme').each(function() {
       var id = getIdFromEl(this);
       inputs.setInput('.clientdata_output_' + id + '_bg', getComputedBgColor(this));
-      inputs.setInput('.clientdata_output_' + id + '_fg', window.getComputedStyle(this).getPropertyValue("color"));
+      inputs.setInput('.clientdata_output_' + id + '_fg', getStyle(this, "color"));
       inputs.setInput('.clientdata_output_' + id + '_accent', getComputedLinkColor(this));
       inputs.setInput('.clientdata_output_' + id + '_font', getComputedFont(this));
     });

@@ -126,6 +126,7 @@ makeErrors <- function(...) {
 makeExtraMethods <- function() {
   c(makeWarnNoops(
     "allowReconnect",
+    "decrementBusyCount",
     "doBookmark",
     "exportTestValues",
     "getBookmarkExclude",
@@ -144,6 +145,7 @@ makeExtraMethods <- function() {
     "sendInputMessage",
     "sendInsertTab",
     "sendInsertUI",
+    "sendModal",
     "sendNotification",
     "sendProgress",
     "sendRemoveTab",
@@ -194,7 +196,9 @@ makeMockSession <- function() {
 #' An R6 class suitable for testing that simulates the `session` parameter
 #' provided to Shiny server functions or modules.
 #'
+#' @include timer.R
 #' @noRd
+#' @export
 MockShinySession <- R6Class(
   'MockShinySession',
   portable = FALSE,

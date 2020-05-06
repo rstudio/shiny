@@ -699,7 +699,7 @@ test_that("It's an error to pass arguments to a server", {
 # considered `fields`.
 get_mocked_publics <- function(instance) {
   generator <- get(class(instance)[[1]])
-  publics <- ls(mock_session)
+  publics <- ls(instance, all.names = TRUE)
   actives <- names(generator$active)
   # Active bindings are considered fields.
   methods_or_fields <- publics[!(publics %in% actives)]

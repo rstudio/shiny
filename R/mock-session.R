@@ -129,18 +129,25 @@ makeExtraMethods <- function() {
     "decrementBusyCount",
     "doBookmark",
     "exportTestValues",
+    "flushOutput",
     "getBookmarkExclude",
+    "getCurrentOutputInfo",
     "getTestSnapshotUrl",
     "incrementBusyCount",
+    "manageHiddenOutputs",
+    "manageInputs",
     "onBookmark",
     "onBookmarked",
+    "onInputReceived",
     "onRestore",
     "onRestored",
+    "outputOptions",
     "reactlog",
     "registerDataObj",
     "reload",
     "resetBrush",
     "sendBinaryMessage",
+    "sendChangeTabVisibility",
     "sendCustomMessage",
     "sendInputMessage",
     "sendInsertTab",
@@ -152,9 +159,9 @@ makeExtraMethods <- function() {
     "sendRemoveUI",
     "setBookmarkExclude",
     "setShowcase",
-    "showProgress"
+    "showProgress",
+    "updateQueryString"
   ), makeErrors(
-    #closed = "for internal use only"
     `@uploadEnd` = "for internal use only",
     `@uploadInit` = "for internal use only",
     `@uploadieFinish` = "for internal use only",
@@ -204,29 +211,35 @@ MockShinySession <- R6Class(
   portable = FALSE,
   lock_objects = FALSE,
   public = list(
-    # @field env The environment associated with the session.
+    #' @field env The environment associated with the session.
     env = NULL,
-    # @field returned The value returned by the module.
+    #' @field returned The value returned by the module.
     returned = NULL,
-    # @field singletons Hardcoded as empty. Needed for rendering HTML (i.e. renderUI)
+    #' @field singletons Hardcoded as empty. Needed for rendering HTML (i.e. renderUI)
     singletons = character(0),
-    # @field clientData Mock client data that always returns a size for plots
+    #' @field clientData Mock client data that always returns a size for plots
     clientData = structure(list(), class="mockclientdata"),
-    # @field output The shinyoutputs associated with the session
+    #' @field output The shinyoutputs associated with the session
     output = NULL,
-    # @field input The reactive inputs associated with the session
+    #' @field input The reactive inputs associated with the session
     input = NULL,
-    # @field userData An environment initialized as empty.
+    #' @field userData An environment initialized as empty.
     userData = NULL,
-    # @field progressStack A stack of progress objects
+    #' @field progressStack A stack of progress objects
     progressStack = 'Stack',
+    token = 'character',
+    cache = NULL,
+    restoreContext = NULL,
+    groups = NULL,
+    user = NULL,
 
-    # @description Create a new MockShinySession
+    #' @description Create a new MockShinySession
     initialize = function() {
       private$.input <- ReactiveValues$new(dedupe = FALSE, label = "input")
       private$flushCBs <- Callbacks$new()
       private$flushedCBs <- Callbacks$new()
       private$endedCBs <- Callbacks$new()
+
       private$timer <- MockableTimerCallbacks$new()
       self$progressStack <- Stack$new()
 
@@ -240,14 +253,17 @@ MockShinySession <- R6Class(
       # Create a read-only copy of the inputs reactive.
       self$input <- .createReactiveValues(private$.input, readonly = TRUE)
 
+      self$token <- createUniqueId(16)
+      self$cache <- MemoryCache$new()
+
       # Adds various generated noop and error-producing method implementations.
       # Note that noop methods can be configured to produce warnings by setting
       # the option shiny.mocksession.warn = TRUE; see $noopWarn() for details.
       addGeneratedInstanceMethods(self)
     },
-    # @description Define a callback to be invoked before a reactive flush
-    # @param fun The function to invoke
-    # @param once If `TRUE`, will only run once. Otherwise, will run every time reactives are flushed.
+    #' @description Define a callback to be invoked before a reactive flush
+    #' @param fun The function to invoke
+    #' @param once If `TRUE`, will only run once. Otherwise, will run every time reactives are flushed.
     onFlush = function(fun, once=TRUE) {
       if (!isTRUE(once)) {
         return(private$flushCBs$register(fun))
@@ -259,9 +275,9 @@ MockShinySession <- R6Class(
         return(dereg)
       }
     },
-    # @description Define a callback to be invoked after a reactive flush
-    # @param fun The function to invoke
-    # @param once If `TRUE`, will only run once. Otherwise, will run every time reactives are flushed.
+    #' @description Define a callback to be invoked after a reactive flush
+    #' @param fun The function to invoke
+    #' @param once If `TRUE`, will only run once. Otherwise, will run every time reactives are flushed.
     onFlushed = function(fun, once=TRUE) {
       if (!isTRUE(once)) {
         return(private$flushedCBs$register(fun))
@@ -273,29 +289,29 @@ MockShinySession <- R6Class(
         return(dereg)
       }
     },
-    # @description Define a callback to be invoked when the session ends
-    # @param sessionEndedCallback The callback to invoke when the session has ended.
+    #' @description Define a callback to be invoked when the session ends
+    #' @param sessionEndedCallback The callback to invoke when the session has ended.
     onEnded = function(sessionEndedCallback) {
       private$endedCBs$register(sessionEndedCallback)
     },
 
-    # @description Returns `FALSE` if the session has not yet been closed
-    isEnded = function(){ private$closed },
-    # @description Returns `FALSE` if the session has not yet been closed
-    isClosed = function(){ private$closed },
-    # @description Closes the session
-    close = function(){ private$closed <- TRUE },
+    #' @description Returns `FALSE` if the session has not yet been closed
+    isEnded = function(){ private$was_closed },
+    #' @description Returns `FALSE` if the session has not yet been closed
+    isClosed = function(){ private$was_closed },
+    #' @description Closes the session
+    close = function(){ private$was_closed <- TRUE },
 
     #FIXME: this is wrong. Will need to be more complex.
-    # @description Unsophisticated mock implementation that merely invokes
+    #' @description Unsophisticated mock implementation that merely invokes
     #   the given callback immediately.
-    # @param callback The callback ato be invoked.
+    #' @param callback The callback ato be invoked.
     cycleStartAction = function(callback){ callback() },
 
-    # @description Base64-encode the given file. Needed for image rendering.
-    # @param name Not used
-    # @param file The file to be encoded
-    # @param contentType The content type of the base64-encoded string
+    #' @description Base64-encode the given file. Needed for image rendering.
+    #' @param name Not used
+    #' @param file The file to be encoded
+    #' @param contentType The content type of the base64-encoded string
     fileUrl = function(name, file, contentType='application/octet-stream') {
       bytes <- file.info(file)$size
       if (is.na(bytes))
@@ -306,12 +322,12 @@ MockShinySession <- R6Class(
       return(paste('data:', contentType, ';base64,', b64, sep=''))
     },
 
-    # @description Sets reactive values associated with the `session$inputs`
+    #' @description Sets reactive values associated with the `session$inputs`
     #   object and flushes the reactives.
-    # @param ... The inputs to set. These arguments are processed with
+    #' @param ... The inputs to set. These arguments are processed with
     #   [rlang::list2()] and so are _[dynamic][rlang::dyn-dots]_. Input names
     #   may not be duplicated.
-    # @examples
+    #' @examples
     # \dontrun{
     # session$setInputs(x=1, y=2)
     # }
@@ -323,9 +339,9 @@ MockShinySession <- R6Class(
       private$flush()
     },
 
-    # @description An internal method which shouldn't be used by others.
-    # @param millis The number of milliseconds on which to schedule a callback
-    # @param callback The function to schedule
+    #' @description An internal method which shouldn't be used by others.
+    #' @param millis The number of milliseconds on which to schedule a callback
+    #' @param callback The function to schedule
     .scheduleTask = function(millis, callback) {
       id <- private$timer$schedule(millis, callback)
 
@@ -335,8 +351,8 @@ MockShinySession <- R6Class(
       }
     },
 
-    # @description Simulate the passing of time by the given number of milliseconds.
-    # @param millis The number of milliseconds to advance time.
+    #' @description Simulate the passing of time by the given number of milliseconds.
+    #' @param millis The number of milliseconds to advance time.
     elapse = function(millis) {
       msLeft <- millis
 
@@ -363,16 +379,16 @@ MockShinySession <- R6Class(
       private$flush()
     },
 
-    # @description An internal method which shouldn't be used by others.
+    #' @description An internal method which shouldn't be used by others.
     .now = function() {
       # Returns elapsed time in milliseconds
       private$timer$getElapsed()
     },
 
-    # @description An internal method which shouldn't be used by others.
-    # @param name The name of the output
-    # @param func The render definition
-    # @param label Not used
+    #' @description An internal method which shouldn't be used by others.
+    #' @param name The name of the output
+    #' @param func The render definition
+    #' @param label Not used
     defineOutput = function(name, func, label) {
       force(name)
 
@@ -412,8 +428,8 @@ MockShinySession <- R6Class(
       private$outs[[name]] <- list(obs = obs, func = func, promise = NULL)
     },
 
-    # @description An internal method which shouldn't be used by others.
-    # @param name The name of the output
+    #' @description An internal method which shouldn't be used by others.
+    #' @param name The name of the output
     getOutput = function(name) {
       # Unlike the real outputs, we're going to return the last value rather than the unevaluated function
       if (is.null(private$outs[[name]])) {
@@ -439,17 +455,17 @@ MockShinySession <- R6Class(
       }
     },
 
-    # @description Returns the given id prefixed by this namespace's id.
-    # @param id The id to modify.
+    #' @description Returns the given id prefixed by this namespace's id.
+    #' @param id The id to modify.
     ns = function(id) {
       NS(private$nsPrefix, id)
     },
-    # @description Trigger a reactive flush right now.
+    #' @description Trigger a reactive flush right now.
     flushReact = function(){
       private$flush()
     },
-    # @description Create and return a namespace-specific session proxy.
-    # @param namespace Character vector indicating a namespace.
+    #' @description Create and return a namespace-specific session proxy.
+    #' @param namespace Character vector indicating a namespace.
     makeScope = function(namespace) {
       ns <- NS(namespace)
       createSessionProxy(
@@ -463,33 +479,51 @@ MockShinySession <- R6Class(
         }
       )
     },
-    # @description Set the environment associated with a testServer() call, but
+    #' @description Set the environment associated with a testServer() call, but
     #   only if it has not previously been set. This ensures that only the
     #   environment of the outermost module under test is the one retained. In
     #   other words, the first assignment wins.
-    # @param env The environment to retain.
+    #' @param env The environment to retain.
     setEnv = function(env) {
       if (is.null(self$env)) {
         stopifnot(all(c("input", "output", "session") %in% ls(env)))
         self$env <- env
       }
     },
-    # @description Set the value returned by the module call and proactively
+    #' @description Set the value returned by the module call and proactively
     #   flush. Note that this method may be called multiple times if modules
     #   are nested. The last assignment, corresponding to an invocation of
     #   setReturned() in the outermost module, wins.
-    # @param value The value returned from the module
+    #' @param value The value returned from the module
     setReturned = function(value) {
       self$returned <- value
       value
     },
-    # @description Get the value returned by the module call.
+    #' @description Get the value returned by the module call.
     getReturned = function() self$returned,
-    # @description Return a distinct character identifier for use as a proxy
+    #' @description Return a distinct character identifier for use as a proxy
     #   namespace.
     genId = function() {
       private$idCounter <- private$idCounter + 1
       paste0("proxy", private$idCounter)
+    },
+    rootScope = function() {
+      self
+    },
+    unhandledError = function(e) {
+      self$close()
+    },
+    freezeValue = function(x, name) {
+      if (!is.reactivevalues(x))
+        stop("x must be a reactivevalues object")
+
+      impl <- .subset2(x, 'impl')
+      key <- .subset2(x, 'ns')(name)
+      impl$freeze(key)
+      self$onFlushed(function() impl$thaw(key))
+    },
+    onSessionEnded = function(sessionEndedCallback) {
+      self$onEnded(sessionEndedCallback)
     }
   ),
   private = list(
@@ -498,7 +532,7 @@ MockShinySession <- R6Class(
     flushedCBs = NULL,
     endedCBs = NULL,
     timer = NULL,
-    closed = FALSE,
+    was_closed = FALSE,
     outs = list(),
     nsPrefix = "mock-session",
     idCounter = 0,
@@ -520,8 +554,13 @@ MockShinySession <- R6Class(
 
   ),
   active = list(
+    #' @field files Part of saveFileUrl; for internal use only.
+    files = function() stop("$files is for internal use only."),
+    #' @field closed Deprecated in ShinySession so signals an error here.
+    closed = function() stop("$closed is deprecated"),
+    #' @field session Deprecated in ShinySession so signals an error here.
     session = function() stop("$session is deprecated"),
-    # @field request An empty environment where the request should be. The request isn't meaningfully mocked currently.
+    #' @field request An empty environment where the request should be. The request isn't meaningfully mocked currently.
     request = function(value) {
       if (!missing(value)){
         stop("session$request can't be assigned to")

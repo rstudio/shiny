@@ -1,17 +1,18 @@
 startPNG <- function(filename, width, height, res, ...) {
-  # If quartz is available, use png() (which will default to quartz).
-  # Otherwise, if the Cairo package is installed, use CairoPNG().
-  # Finally, if neither quartz nor Cairo, use png().
-  if (capabilities("aqua")) {
-    pngfun <- grDevices::png
-  } else if ((getOption('shiny.useragg') %OR% FALSE) && is_available("ragg")) {
-    # ragg seems preferrable to Cairo, especially when it comes to custom fonts
-    # https://github.com/yixuan/showtext/issues/33#issuecomment-620848077
-    # https://ragg.r-lib.org/articles/ragg_quality.html
+  # shiny.useragg is an experimental option that isn't officially supported or
+  # documented. It's here in the off chance that someone really wants
+  # to use ragg (say, instead of showtext, for custom font rendering).
+  # In the next shiny release, this option will likely be superseded in
+  # favor of a fully customizable graphics device option
+  if (getOption('shiny.useragg', FALSE) && is_available("ragg")) {
     pngfun <- ragg::agg_png
-  } else if ((getOption('shiny.usecairo') %OR% TRUE) && is_available("Cairo")) {
+  } else if (capabilities("aqua")) {
+    # i.e., png(type = 'quartz')
+    pngfun <- grDevices::png
+  } else if (getOption('shiny.usecairo', TRUE) && is_available("Cairo")) {
     pngfun <- Cairo::CairoPNG
   } else {
+    # i.e., png(type = 'cairo')
     pngfun <- grDevices::png
   }
 
@@ -65,16 +66,14 @@ startPNG <- function(filename, width, height, res, ...) {
 #' way.
 #'
 #' For output, it will try to use the following devices, in this order:
-#' quartz (via [grDevices::png()]), then [ragg::agg_png()], then [Cairo::CairoPNG()],
+#' quartz (via [grDevices::png()]), then [Cairo::CairoPNG()],
 #' and finally [grDevices::png()]. This is in order of quality of
 #' output. Notably, plain `png` output on Linux and Windows may not
 #' antialias some point shapes, resulting in poor quality output.
 #'
-#' In some rare cases, `ragg::agg_png()` provides output that looks worse than
-#' `Cairo()` (and `png()`). To disable ragg output for an app, use
-#' `options(shiny.useragg=FALSE)`. Moreover, in some rare cases, `Cairo()`
-#' provides output that looks worse than `png()`. To disable Cairo output
-#' for an app, use `options(shiny.usecairo=FALSE)`.
+#' In some cases, `Cairo()` provides output that looks worse than
+#' `png()`. To disable Cairo output for an app, use
+#' `options(shiny.usecairo=FALSE)`.
 #'
 #' @param func A function that generates a plot.
 #' @param filename The name of the output file. Defaults to a temp file with

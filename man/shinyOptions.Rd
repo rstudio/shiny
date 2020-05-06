@@ -115,9 +115,6 @@ messages).}
 \item{shiny.usecairo (defaults to \code{TRUE})}{This is used to disable graphical rendering by the
 Cairo package, if it is installed. See \code{\link[=plotPNG]{plotPNG()}} for more
 information.}
-\item{shiny.useragg (defaults to \code{TRUE})}{This is used to disable graphical rendering by the
-ragg package, if it is installed. See \code{\link[=plotPNG]{plotPNG()}} for more
-information.}
 }
 }
 

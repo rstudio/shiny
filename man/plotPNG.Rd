@@ -38,14 +38,12 @@ way.
 }
 \details{
 For output, it will try to use the following devices, in this order:
-quartz (via \code{\link[grDevices:png]{grDevices::png()}}), then \code{\link[ragg:agg_png]{ragg::agg_png()}}, then \code{\link[Cairo:CairoPNG]{Cairo::CairoPNG()}},
+quartz (via \code{\link[grDevices:png]{grDevices::png()}}), then \code{\link[Cairo:CairoPNG]{Cairo::CairoPNG()}},
 and finally \code{\link[grDevices:png]{grDevices::png()}}. This is in order of quality of
 output. Notably, plain \code{png} output on Linux and Windows may not
 antialias some point shapes, resulting in poor quality output.
 
-In some rare cases, \code{ragg::agg_png()} provides output that looks worse than
-\code{Cairo()} (and \code{png()}). To disable ragg output for an app, use
-\code{options(shiny.useragg=FALSE)}. Moreover, in some rare cases, \code{Cairo()}
-provides output that looks worse than \code{png()}. To disable Cairo output
-for an app, use \code{options(shiny.usecairo=FALSE)}.
+In some cases, \code{Cairo()} provides output that looks worse than
+\code{png()}. To disable Cairo output for an app, use
+\code{options(shiny.usecairo=FALSE)}.
 }

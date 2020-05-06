@@ -110,9 +110,6 @@ getShinyOption <- function(name, default = NULL) {
 #' \item{shiny.usecairo (defaults to `TRUE`)}{This is used to disable graphical rendering by the
 #'   Cairo package, if it is installed. See [plotPNG()] for more
 #'   information.}
-#'  \item{shiny.useragg (defaults to `TRUE`)}{This is used to disable graphical rendering by the
-#'   ragg package, if it is installed. See [plotPNG()] for more
-#'   information.}
 #' }
 #' @param ... Options to set, with the form `name = value`.
 #' @aliases shiny-options

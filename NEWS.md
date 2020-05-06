@@ -17,7 +17,7 @@ shiny 1.4.0.9001
 
 * Resolved [#2732](https://github.com/rstudio/shiny/issues/2732): `markdown()` is a new function for writing Markdown with Github extensions directly in Shiny UIs. Markdown rendering is performed by the [commonmark](https://github.com/jeroen/commonmark) package. ([#2737](https://github.com/rstudio/shiny/pull/2737))
 
-* The `getCurrentOutputInfo()` function can now return the background color (`bg`), foreground color (`fg`), `accent` (i.e., hyperlink) color, and `font` information of the HTML container. This information is reported for `plotOutput()`, `imageOutput()`, and any other output bindings containing a class of `.shiny-report-theme`. This feature allows developers to style an output's contents based on the container's CSS styling.  ([#2740](https://github.com/rstudio/shiny/pull/2740))
+* The `getCurrentOutputInfo()` function can now return the background color (`bg`), foreground color (`fg`), `accent` (i.e., hyperlink) color, and `font` information of the output's HTML container. This information is reported by `plotOutput()`, `imageOutput()`, and any other output bindings containing a class of `.shiny-report-theme`. This feature allows developers to style an output's contents based on the container's CSS styling.  ([#2740](https://github.com/rstudio/shiny/pull/2740))
 
 ### Minor new features and improvements
 

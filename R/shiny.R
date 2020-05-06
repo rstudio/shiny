@@ -1322,7 +1322,10 @@ ShinySession <- R6Class(
 
       # Note that all the following clientData values (which are reactiveValues)
       # are wrapped in reactive() so that users can take a dependency on particular
-      # output info (i.e., just depend on width/height, or just depend on bg, fg, etc)
+      # output info (i.e., just depend on width/height, or just depend on bg, fg, etc).
+      # To put it another way, if getCurrentOutputInfo() simply returned a list of values
+      # from self$clientData, than anything that calls getCurrentOutputInfo() would take
+      # a reactive dependency on all of these values.
       if (! ("width" %in% names(tmp_info)) ) {
         width_name  <- paste0("output_", name, "_width")
         if (width_name %in% cd_names()) {

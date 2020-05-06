@@ -75,6 +75,119 @@ mapNames <- function(func, vals) {
   vals
 }
 
+#' Returns a noop implementation of the public method `name` of ShinySession.
+#' @include shiny.R
+#' @noRd
+makeNoop <- function(name, msg = paste0(name, " is a noop.")) {
+  if (!(name %in% names(ShinySession$public_methods)))
+    stop(name, " is not public method of ShinySession.")
+  impl <- ShinySession$public_methods[[name]]
+  body(impl) <- rlang::expr({
+    # Force arguments
+    !!lapply(formalArgs(impl), rlang::sym)
+    private$noopWarn(!!name, !!msg)
+    NULL
+  })
+  impl
+}
+
+#' Accepts a series of symbols as arguments and generates corresponding noop
+#' implementations.
+#' @noRd
+makeWarnNoops <- function(...) {
+  methods <- as.character(rlang::ensyms(...))
+  sapply(methods, makeNoop, USE.NAMES = TRUE, simplify = FALSE)
+}
+
+#' Returns an implementation of a ShinySession public method that signals an
+#' error.
+#' @include shiny.R
+#' @noRd
+makeError <- function(name, msg = paste0(name, " is for internal use only.")) {
+  if (!(name %in% names(ShinySession$public_methods)))
+    stop(name, " is not public method of ShinySession.")
+  impl <- ShinySession$public_methods[[name]]
+  body(impl) <- rlang::expr({
+    base::stop(!!msg)
+  })
+  impl
+}
+
+#' Accepts a series of named arguments. Each name corresponds to a ShinySession
+#' public method that should signal an error, and each argument corresponds to
+#' an error message.
+#' @noRd
+makeErrors <- function(...) {
+  errors <- rlang::list2(...)
+  mapply(makeError, names(errors), errors, USE.NAMES = TRUE, SIMPLIFY = FALSE)
+}
+
+#' @noRd
+makeExtraMethods <- function() {
+  c(makeWarnNoops(
+    "allowReconnect",
+    "doBookmark",
+    "exportTestValues",
+    "getBookmarkExclude",
+    "getTestSnapshotUrl",
+    "incrementBusyCount",
+    "onBookmark",
+    "onBookmarked",
+    "onRestore",
+    "onRestored",
+    "reactlog",
+    "registerDataObj",
+    "reload",
+    "resetBrush",
+    "sendBinaryMessage",
+    "sendCustomMessage",
+    "sendInputMessage",
+    "sendInsertTab",
+    "sendInsertUI",
+    "sendNotification",
+    "sendProgress",
+    "sendRemoveTab",
+    "sendRemoveUI",
+    "setBookmarkExclude",
+    "setShowcase",
+    "showProgress"
+  ), makeErrors(
+    #closed = "for internal use only"
+    `@uploadEnd` = "for internal use only",
+    `@uploadInit` = "for internal use only",
+    `@uploadieFinish` = "for internal use only",
+    createBookmarkObservers = "for internal use only",
+    dispatch = "for internal use only",
+    handleRequest = "for internal use only",
+    requestFlush = "for internal use only",
+    saveFileUrl = "for internal use only",
+    startTiming = "for internal use only",
+    wsClosed = "for internal use only"
+  ))
+}
+
+#' @description Adds generated instance methods to a MockShinySession instance.
+#'   Note that `lock_objects = FALSE` must be set in the call to `R6Class()`
+#'   that produced the generator object of the instance.
+#' @param instance instance of an R6 object, generally a `MockShinySession`.
+#' @param methods named list of method names to method implementation functions.
+#'   In our typical usage, each function is derived from a public method of
+#'   `ShinySession`. The environment of each implementation function is set to
+#'   `instance$.__enclos_env` before the method is added.
+#' @noRd
+addGeneratedInstanceMethods <- function(instance, methods = makeExtraMethods()) {
+  mapply(function(name, impl) {
+    environment(impl) <- instance$.__enclos_env__
+    instance[[name]] <- impl
+  }, names(methods), methods)
+}
+
+#' @export
+makeMockSession <- function() {
+  MockShinySession$new()
+}
+
+
 #' Mock Shiny Session
 #'
 #' @description
@@ -85,6 +198,7 @@ mapNames <- function(func, vals) {
 MockShinySession <- R6Class(
   'MockShinySession',
   portable = FALSE,
+  lock_objects = FALSE,
   public = list(
     # @field env The environment associated with the session.
     env = NULL,
@@ -121,6 +235,11 @@ MockShinySession <- R6Class(
 
       # Create a read-only copy of the inputs reactive.
       self$input <- .createReactiveValues(private$.input, readonly = TRUE)
+
+      # Adds various generated noop and error-producing method implementations.
+      # Note that noop methods can be configured to produce warnings by setting
+      # the option shiny.mocksession.warn = TRUE; see $noopWarn() for details.
+      addGeneratedInstanceMethods(self)
     },
     # @description Define a callback to be invoked before a reactive flush
     # @param fun The function to invoke
@@ -408,109 +527,3 @@ MockShinySession <- R6Class(
     }
   )
 )
-
-#' Returns a noop implementation of the public method `name` of ShinySession.
-#' @include shiny.R
-#' @noRd
-makeNoop <- function(name, msg = paste0(name, " is a noop.")) {
-  if (!(name %in% names(ShinySession$public_methods)))
-    stop(name, " is not public method of ShinySession.")
-  impl <- ShinySession$public_methods[[name]]
-  body(impl) <- rlang::expr({
-    # Force arguments
-    !!lapply(formalArgs(impl), rlang::sym)
-    private$noopWarn(!!name, !!msg)
-    NULL
-  })
-  impl
-}
-
-#' Accepts a series of symbols as arguments and generates corresponding noop
-#' implementations.
-#' @noRd
-makeWarnNoops <- function(...) {
-  methods <- as.character(rlang::ensyms(...))
-  sapply(methods, makeNoop, USE.NAMES = TRUE, simplify = FALSE)
-}
-
-#' Returns an implementation of a ShinySession public method that signals an
-#' error.
-#' @include shiny.R
-#' @noRd
-makeError <- function(name, msg = paste0(name, " is for internal use only.")) {
-  if (!(name %in% names(ShinySession$public_methods)))
-    stop(name, " is not public method of ShinySession.")
-  impl <- ShinySession$public_methods[[name]]
-  body(impl) <- rlang::expr({
-    base::stop(!!msg)
-  })
-  impl
-}
-
-#' Accepts a series of named arguments. Each name corresponds to a ShinySession
-#' public method that should signal an error, and each argument corresponds to
-#' an error message.
-#' @noRd
-makeErrors <- function(...) {
-  errors <- rlang::list2(...)
-  mapply(makeError, names(errors), errors, USE.NAMES = TRUE, SIMPLIFY = FALSE)
-}
-
-#' @noRd
-makeExtraMethods <- function() {
-  c(makeWarnNoops(
-    "allowReconnect",
-    "doBookmark",
-    "exportTestValues",
-    "getBookmarkExclude",
-    "getTestSnapshotUrl",
-    "incrementBusyCount",
-    "onBookmark",
-    "onBookmarked",
-    "onRestore",
-    "onRestored",
-    "reactlog",
-    "registerDataObj",
-    "reload",
-    "resetBrush",
-    "sendBinaryMessage",
-    "sendCustomMessage",
-    "sendInputMessage",
-    "sendInsertTab",
-    "sendInsertUI",
-    "sendNotification",
-    "sendProgress",
-    "sendRemoveTab",
-    "sendRemoveUI",
-    "setBookmarkExclude",
-    "setShowcase",
-    "showProgress"
-  ), makeErrors(
-    #closed = "for internal use only"
-    `@uploadEnd` = "for internal use only",
-    `@uploadInit` = "for internal use only",
-    `@uploadieFinish` = "for internal use only",
-    createBookmarkObservers = "for internal use only",
-    dispatch = "for internal use only",
-    handleRequest = "for internal use only",
-    requestFlush = "for internal use only",
-    saveFileUrl = "for internal use only",
-    startTiming = "for internal use only",
-    wsClosed = "for internal use only"
-  ))
-}
-
-#' @noRd
-addedExtras <- rlang::new_environment(data = list(val = FALSE))
-
-#' @export
-makeMockSession <- function() {
-  if (!addedExtras$val) {
-    extras <- makeExtraMethods()
-    mapply(function(name, impl) {
-      MockShinySession$set("public", name, impl)
-    }, names(extras), extras)
-    addedExtras$val <- TRUE
-  }
-  MockShinySession$new()
-}

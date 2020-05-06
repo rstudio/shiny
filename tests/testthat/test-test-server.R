@@ -693,12 +693,33 @@ test_that("It's an error to pass arguments to a server", {
   expect_error(testServer(test_path("..", "test-modules", "06_tabsets"), {}, args = list(an_arg = 123)))
 })
 
-test_that("MockShinySession has all public ShinySession methods and fields", {
-  real_methods <- ShinySession$public_methods
-  real_fields <- ShinySession$public_fields
-  mock_methods <- MockShinySession$public_methods
-  mock_fields <- MockShinySession$public_fields
+get_mocked_publics <- function(instance) {
+  generator <- get(class(instance)[[1]])
+  publics <- ls(mock_session)
+  actives <- names(generator$active)
+  # Active bindings are considered fields here.
+  methods_or_fields <- publics[!(publics %in% actives)]
+  methods <- character(0)
+  fields <- c(character(0), actives)
+  for (name in methods_or_fields) {
+    if (is.function(instance[[name]])) {
+      methods <- c(methods, name)
+    } else {
+      fields <- c(fields, name)
+    }
+  }
+  list(methods = methods, fields = fields)
+}
 
-  expect_mapequal(mock_methods, real_methods)
-  expect_mapequal(mock_fields, real_fields)
+test_that("MockShinySession has all public ShinySession methods and fields", {
+  real_methods <- names(ShinySession$public_methods)
+  real_fields <- c(names(ShinySession$public_fields), names(ShinySession$active))
+
+  # Here we must instantiate a MockShinySession because methods are added to the
+  # instance in the constructor.
+  mock_session <- MockShinySession$new()
+  mocked <- get_mocked_publics(mock_session)
+
+  expect_equal(setdiff(real_methods, mocked$methods), character(0))
+  expect_equal(setdiff(real_fields, mocked$fields), character(0))
 })

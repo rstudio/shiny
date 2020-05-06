@@ -10,10 +10,71 @@ getCurrentOutputInfo(session = getDefaultReactiveDomain())
 \item{session}{The current Shiny session.}
 }
 \value{
-A list with information about the current output, including the
-\code{name} of the output. If no output is currently being executed, this will
-return \code{NULL}.
+\code{NULL} if called outside of an output context; otherwise,
+a list which includes:
+\itemize{
+\item The \code{name} of the output (reported for any output).
+\item If the output is a \code{plotOutput()} or \code{imageOutput()}, then:
+\itemize{
+\item \code{height}: a reactive expression which returns the height in pixels.
+\item \code{width}: a reactive expression which returns the width in pixels.
+}
+\item If the output is a \code{plotOutput()}, \code{imageOutput()}, or contains a \code{shiny-report-theme} class, then:
+\itemize{
+\item \code{bg}: a reactive expression which returns the background color.
+\item \code{fg}: a reactive expression which returns the foreground color.
+\item \code{accent}: a reactive expression which returns the hyperlink color.
+\item \code{font}: a reactive expression which returns a list of font information, including:
+\itemize{
+\item \code{families}: a character vector containing the CSS \code{font-family} property.
+\item \code{size}: a character string containing the CSS \code{font-size} property
+\item \code{renderedFamily}: if running in a browser that supports
+\href{https://developer.mozilla.org/en-US/docs/Web/API/FontFaceSet/check}{FontFaceSet.check},
+a character string containing the first of \code{families} available to the browser.
+}
+}
+}
 }
 \description{
 Get information about the output that is currently being executed.
+}
+\examples{
+
+if (interactive()) {
+  shinyApp(
+    fluidPage(
+      tags$style(HTML("body {background-color: black; color: white; }")),
+      tags$style(HTML("body a {color: purple}")),
+      tags$style(HTML("#info {background-color: teal; color: orange; }")),
+      plotOutput("p"),
+      "Computed CSS styles for the output named info:",
+      tagAppendAttributes(
+        textOutput("info"),
+        class = "shiny-report-theme"
+      )
+    ),
+    function(input, output) {
+      output$p <- renderPlot({
+        info <- getCurrentOutputInfo()
+        par(bg = info$bg(), fg = info$fg(), col.axis = info$fg(), col.main = info$fg())
+        plot(1:10, col = info$accent(), pch = 19)
+        title("A simple R plot that uses its CSS styling")
+      })
+      output$info <- renderText({
+        info <- getCurrentOutputInfo()
+        jsonlite::toJSON(
+          list(
+            bg = info$bg(),
+            fg = info$fg(),
+            accent = info$accent(),
+            font = info$font()
+          ),
+          auto_unbox = TRUE
+        )
+      })
+    }
+  )
+}
+
+
 }

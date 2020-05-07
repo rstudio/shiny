@@ -210,6 +210,12 @@ sortByName <- function(x) {
   x[order(names(x))]
 }
 
+# Sort a vector. If a character vector, sort using C locale, which is consistent
+# across platforms. Note that radix sort uses C locale according to ?sort.
+sort_c <- function(x, ...) {
+  sort(x, method = "radix", ...)
+}
+
 # Wrapper around list2env with a NULL check. In R <3.2.0, if an empty unnamed
 # list is passed to list2env(), it errors. But an empty named list is OK. For
 # R >=3.2.0, this wrapper is not necessary.

@@ -95,7 +95,7 @@ makeNoop <- function(name, msg = paste0(name, " is a noop.")) {
 #' implementations.
 #' @noRd
 makeWarnNoops <- function(...) {
-  methods <- as.character(rlang::ensyms(...))
+  methods <- as.character(list(...))
   sapply(methods, makeNoop, USE.NAMES = TRUE, simplify = FALSE)
 }
 

@@ -128,7 +128,7 @@ shinyAppTemplate <- function(path = NULL, examples = "default", dryrun = FALSE)
     if (!is_available("shinytest", "1.4.0"))
     {
       message(
-        "The tests/shinytest directory needs shinytest 1.4.0 or later to work properly.\n",
+        "The tests/shinytest directory needs shinytest 1.4.0 or later to work properly."
       )
       if (is_available("shinytest")) {
         message("You currently have shinytest ",

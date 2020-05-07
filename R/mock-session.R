@@ -96,7 +96,8 @@ makeNoop <- function(name, msg = paste0(name, " is a noop.")) {
 #' @noRd
 makeWarnNoops <- function(...) {
   methods <- as.character(list(...))
-  sapply(methods, makeNoop, USE.NAMES = TRUE, simplify = FALSE)
+  names(methods) <- methods
+  lapply(methods, makeNoop)
 }
 
 #' Returns an implementation of a ShinySession public method that signals an

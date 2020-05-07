@@ -2,7 +2,7 @@
 % Please edit documentation in R/shiny.R
 \name{getCurrentOutputInfo}
 \alias{getCurrentOutputInfo}
-\title{Get information about the output that is currently being executed.}
+\title{Get output information}
 \usage{
 getCurrentOutputInfo(session = getDefaultReactiveDomain())
 }
@@ -36,7 +36,9 @@ a character string containing the first of \code{families} available to the brow
 }
 }
 \description{
-Get information about the output that is currently being executed.
+Calling this function within an output context returns information about
+the output, including its \code{name} (i.e., \code{outputId}); and in some cases,
+sizing and styling information.
 }
 \examples{
 

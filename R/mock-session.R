@@ -142,6 +142,9 @@ makeExtraMethods <- function() {
     "onRestored",
     "outputOptions",
     "reactlog",
+    # TODO Consider implementing this. Would require a new method like
+    # session$getDataObj() to access in a test expression.
+    "registerDataObj",
     "reload",
     "resetBrush",
     "sendBinaryMessage",
@@ -409,7 +412,7 @@ MockShinySession <- R6Class(
         })
 
         private$outs[[name]]$promise <- hybrid_chain(
-          prom,
+          private$withCurrentOutput(name, prom),
           function(v){
             list(val = v, err = NULL)
           }, catch=function(e){
@@ -441,8 +444,8 @@ MockShinySession <- R6Class(
       v <- extract(private$outs[[name]]$promise)
       if (!is.null(v$err)){
         stop(v$err)
-      } else if (private$downloads$has(self$ns(name))) {
-        download <- private$downloads$get(self$ns(name))
+      } else if (private$file_generators$has(self$ns(name))) {
+        download <- private$file_generators$get(self$ns(name))
         private$renderFile(download)
       } else {
         v$val
@@ -520,10 +523,14 @@ MockShinySession <- R6Class(
       self$onEnded(sessionEndedCallback)
     },
     registerDownload = function(name, filename, contentType, content) {
-      private$downloads$set(self$ns(name), list(
+      private$file_generators$set(self$ns(name), list(
         filename = if (is.function(filename)) filename else function() filename,
         content = content
       ))
+    },
+    getCurrentOutputInfo = function() {
+      name <- private$currentOutputName
+      if (is.null(name)) NULL else list(name = name)
     }
   ),
   private = list(
@@ -540,7 +547,8 @@ MockShinySession <- R6Class(
     # elements, each a function. Insterted into by $registerDownload() and read
     # by $getOutput(). Files are generated on demand when the output is
     # accessed.
-    downloads = fastmap(),
+    file_generators = fastmap(),
+    currentOutputName = NULL,
 
     renderFile = function(download) {
       tmpd <- tempdir()
@@ -562,12 +570,24 @@ MockShinySession <- R6Class(
       out <- paste0(name, " is not fully implemented by MockShinySession: ", msg)
       out <- paste0(out, "\n", "To disable messages like this, run `options(shiny.mocksession.warn=FALSE)`")
       warning(out, call. = FALSE)
-    }
+    },
 
+    withCurrentOutput = function(name, expr) {
+      if (!is.null(private$currentOutputName)) {
+        stop("Nested calls to withCurrentOutput() are not allowed.")
+      }
+
+      promises::with_promise_domain(
+        createVarPromiseDomain(private, "currentOutputName", name),
+        expr
+      )
+    }
   ),
   active = list(
     #' @field files Part of saveFileUrl; for internal use only.
     files = function() stop("$files is for internal use only."),
+    #' @field files Part of registerDownload/registerDataObj; for internal use only.
+    downloads = function() stop("$downloads is for internal use only."),
     #' @field closed Deprecated in ShinySession so signals an error here.
     closed = function() stop("$closed is deprecated"),
     #' @field session Deprecated in ShinySession so signals an error here.

@@ -24,7 +24,7 @@ startPNG <- function(filename, width, height, res, ...) {
   # to plot-time, but it shouldn't hurt to inform other the device directly as well
   if (is.null(args$bg) && isNamespaceLoaded("thematic")) {
     # TODO: use :: once thematic is on CRAN
-    args$bg <- getFromNamespace("thematic_get_option", "thematic")("bg", "white")
+    args$bg <- utils::getFromNamespace("thematic_get_option", "thematic")("bg", "white")
     # auto vals aren't resolved until plot time, so if we see one, resolve it
     if (isTRUE("auto" == args$bg)) {
       args$bg <- getCurrentOutputInfo()[["bg"]]()

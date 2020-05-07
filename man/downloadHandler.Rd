@@ -41,7 +41,7 @@ download available.
 if (interactive()) {
 
 ui <- fluidPage(
-  downloadLink("downloadData", "Download")
+  downloadButton("downloadData", "Download")
 )
 
 server <- function(input, output) {

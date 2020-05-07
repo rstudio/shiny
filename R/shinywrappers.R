@@ -527,7 +527,7 @@ renderUI <- function(expr, env=parent.frame(), quoted=FALSE,
 #' if (interactive()) {
 #'
 #' ui <- fluidPage(
-#'   downloadLink("downloadData", "Download")
+#'   downloadButton("downloadData", "Download")
 #' )
 #'
 #' server <- function(input, output) {

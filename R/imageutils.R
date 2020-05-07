@@ -1,17 +1,47 @@
 startPNG <- function(filename, width, height, res, ...) {
-  # If quartz is available, use png() (which will default to quartz).
-  # Otherwise, if the Cairo package is installed, use CairoPNG().
-  # Finally, if neither quartz nor Cairo, use png().
-  if (capabilities("aqua")) {
+  # shiny.useragg is an experimental option that isn't officially supported or
+  # documented. It's here in the off chance that someone really wants
+  # to use ragg (say, instead of showtext, for custom font rendering).
+  # In the next shiny release, this option will likely be superseded in
+  # favor of a fully customizable graphics device option
+  if ((getOption('shiny.useragg') %OR% TRUE) && is_available("ragg")) {
+    pngfun <- ragg::agg_png
+  } else if (capabilities("aqua")) {
+    # i.e., png(type = 'quartz')
     pngfun <- grDevices::png
-  } else if ((getOption('shiny.usecairo') %OR% TRUE) &&
-      nchar(system.file(package = "Cairo"))) {
+  } else if ((getOption('shiny.usecairo') %OR% TRUE) && is_available("Cairo")) {
     pngfun <- Cairo::CairoPNG
   } else {
+    # i.e., png(type = 'cairo')
     pngfun <- grDevices::png
   }
 
-  pngfun(filename=filename, width=width, height=height, res=res, ...)
+  args <- rlang::list2(filename=filename, width=width, height=height, res=res, ...)
+
+  # Set a smarter default for the device's bg argument (based on thematic's global state).
+  # Note that, technically, this is really only needed for CairoPNG, since the other
+  # devices allow their bg arg to be overridden by par(bg=...), which thematic does prior
+  # to plot-time, but it shouldn't hurt to inform other the device directly as well
+  if (is.null(args$bg) && isNamespaceLoaded("thematic")) {
+    # TODO: use :: once thematic is on CRAN
+    args$bg <- getFromNamespace("thematic_get_option", "thematic")("bg", "white")
+    # auto vals aren't resolved until plot time, so if we see one, resolve it
+    if (isTRUE("auto" == args$bg)) {
+      args$bg <- getCurrentOutputInfo()[["bg"]]()
+    }
+  }
+
+  # Handle both bg and background device arg
+  # https://github.com/r-lib/ragg/issues/35
+  fmls <- names(formals(pngfun))
+  if (("background" %in% fmls) && (!"bg" %in% fmls)) {
+    if (is.null(args$background)) {
+      args$background <- args$bg
+    }
+    args$bg <- NULL
+  }
+
+  do.call(pngfun, args)
   # Call plot.new() so that even if no plotting operations are performed at
   # least we have a blank background. N.B. we need to set the margin to 0
   # temporarily before plot.new() because when the plot size is small (e.g.

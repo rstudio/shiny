@@ -555,18 +555,6 @@ test_that("accessing a non-existent output gives an informative message", {
   })
 })
 
-test_that("testServer returns a meaningful result", {
-  result <- testServer(function(id) {
-    moduleServer(id, function(input, output, session) {
-      reactive({ input$x * 2 })
-    })
-  }, {
-    session$setInputs(x = 2)
-    session$getReturned()()
-  })
-  expect_equal(result, 4)
-})
-
 test_that("assigning an output in a module function with a non-function errors", {
   module <- function(id) {
     moduleServer(id, function(input, output, session) {

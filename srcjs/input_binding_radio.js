@@ -62,7 +62,7 @@ $.extend(radioInputBinding, {
   _getLabel: function(obj) {
     // If <label><input /><span>label text</span></label>
     if (obj.parentNode.tagName === "LABEL") {
-      return $.trim($(obj.parentNode).find('span').text());
+      return $(obj.parentNode).find('span').text().trim();
     }
 
     return null;

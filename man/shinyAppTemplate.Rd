@@ -25,9 +25,16 @@ This function populates a directory with files for a Shiny application.
 }
 \details{
 In an interactive R session, this function will, by default, prompt the user
-which components to add to the application.
+to select which components to add to the application. Choices are\preformatted{1: All
+2: app.R            : Main application file
+3: R/sort.R         : Helper file with R code
+4: R/my-module.R    : Example module
+5: tests/shinytest/ : Tests using the shinytest package
+6: tests/testthat/  : Tests using the testthat package
+}
 
-The full example application includes the following files and directories:\preformatted{appdir/
+If option 1 is selected, the full example application including the
+following files and directories is created:\preformatted{appdir/
 |- app.R
 |- R
 |   |- my-module.R
@@ -38,7 +45,6 @@ The full example application includes the following files and directories:\prefo
     |   `- mytest.R
     |- testthat.R
     `- testthat
-        |- helper-load.R
         |- test-mymodule.R
         |- test-server.R
         `- test-sort.R

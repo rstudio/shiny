@@ -201,6 +201,7 @@ addGeneratedInstanceMethods <- function(instance, methods = makeExtraMethods()) 
 #'
 #' @include timer.R
 #' @noRd
+#' @export
 MockShinySession <- R6Class(
   'MockShinySession',
   portable = FALSE,

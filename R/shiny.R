@@ -2144,9 +2144,8 @@ outputOptions <- function(x, name, ...) {
 
 #' Get output information
 #'
-#' Calling this function within an output context returns information about
-#' the output, including its `name` (i.e., `outputId`); and in some cases,
-#' sizing and styling information.
+#' Returns information about the currently executing output, including its `name` (i.e., `outputId`);
+#' and in some cases, relevant sizing and styling information.
 #'
 #' @param session The current Shiny session.
 #'

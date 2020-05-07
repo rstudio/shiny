@@ -36,9 +36,8 @@ a character string containing the first of \code{families} available to the brow
 }
 }
 \description{
-Calling this function within an output context returns information about
-the output, including its \code{name} (i.e., \code{outputId}); and in some cases,
-sizing and styling information.
+Returns information about the currently executing output, including its \code{name} (i.e., \code{outputId});
+and in some cases, relevant sizing and styling information.
 }
 \examples{
 

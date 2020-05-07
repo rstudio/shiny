@@ -86,7 +86,7 @@ makeNoop <- function(name, msg = paste0(name, " is a noop.")) {
     # Force arguments
     !!lapply(formalArgs(impl), rlang::sym)
     private$noopWarn(!!name, !!msg)
-    NULL
+    invisible()
   })
   impl
 }

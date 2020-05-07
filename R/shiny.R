@@ -2142,15 +2142,70 @@ outputOptions <- function(x, name, ...) {
 }
 
 
-#' Get information about the output that is currently being executed.
+#' Get output information
 #'
-#' @return A list with information about the current output, including the
-#'   `name` of the output. If no output is currently being executed, this will
-#'   return `NULL`.
+#' Returns information about the currently executing output, including its `name` (i.e., `outputId`);
+#' and in some cases, relevant sizing and styling information.
 #'
 #' @param session The current Shiny session.
 #'
+#' @return `NULL` if called outside of an output context; otherwise,
+#'   a list which includes:
+#'   * The `name` of the output (reported for any output).
+#'   * If the output is a `plotOutput()` or `imageOutput()`, then:
+#'     * `height`: a reactive expression which returns the height in pixels.
+#'     * `width`: a reactive expression which returns the width in pixels.
+#'  * If the output is a `plotOutput()`, `imageOutput()`, or contains a `shiny-report-theme` class, then:
+#'     * `bg`: a reactive expression which returns the background color.
+#'     * `fg`: a reactive expression which returns the foreground color.
+#'     * `accent`: a reactive expression which returns the hyperlink color.
+#'     * `font`: a reactive expression which returns a list of font information, including:
+#'       * `families`: a character vector containing the CSS `font-family` property.
+#'       * `size`: a character string containing the CSS `font-size` property
+#'       * `renderedFamily`: if running in a browser that supports
+#'         [FontFaceSet.check](https://developer.mozilla.org/en-US/docs/Web/API/FontFaceSet/check),
+#'         a character string containing the first of `families` available to the browser.
+#'
 #' @export
+#' @examples
+#'
+#' if (interactive()) {
+#'   shinyApp(
+#'     fluidPage(
+#'       tags$style(HTML("body {background-color: black; color: white; }")),
+#'       tags$style(HTML("body a {color: purple}")),
+#'       tags$style(HTML("#info {background-color: teal; color: orange; }")),
+#'       plotOutput("p"),
+#'       "Computed CSS styles for the output named info:",
+#'       tagAppendAttributes(
+#'         textOutput("info"),
+#'         class = "shiny-report-theme"
+#'       )
+#'     ),
+#'     function(input, output) {
+#'       output$p <- renderPlot({
+#'         info <- getCurrentOutputInfo()
+#'         par(bg = info$bg(), fg = info$fg(), col.axis = info$fg(), col.main = info$fg())
+#'         plot(1:10, col = info$accent(), pch = 19)
+#'         title("A simple R plot that uses its CSS styling")
+#'       })
+#'       output$info <- renderText({
+#'         info <- getCurrentOutputInfo()
+#'         jsonlite::toJSON(
+#'           list(
+#'             bg = info$bg(),
+#'             fg = info$fg(),
+#'             accent = info$accent(),
+#'             font = info$font()
+#'           ),
+#'           auto_unbox = TRUE
+#'         )
+#'       })
+#'     }
+#'   )
+#' }
+#'
+#'
 getCurrentOutputInfo <- function(session = getDefaultReactiveDomain()) {
   if (is.null(session)) return(NULL)
   session$getCurrentOutputInfo()

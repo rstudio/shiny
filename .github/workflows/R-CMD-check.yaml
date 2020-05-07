@@ -172,4 +172,4 @@ jobs:
 
       - name: Check node build
         run: |
-          ./tools/documentation/checkDocsCurrent.sh
+          ./tools/documentation/checkJSCurrent.sh

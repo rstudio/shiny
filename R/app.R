@@ -291,8 +291,9 @@ initAutoReloadMonitor <- function(dir) {
   lastValue <- NULL
   observeLabel <- paste0("File Auto-Reload - '", basename(dir), "'")
   obs <- observe(label = observeLabel, {
-    files <- sort(list.files(dir, pattern = filePattern, recursive = TRUE,
-      ignore.case = TRUE))
+    files <- sort_c(
+      list.files(dir, pattern = filePattern, recursive = TRUE, ignore.case = TRUE)
+    )
     times <- file.info(files)$mtime
     names(times) <- files
 
@@ -367,7 +368,7 @@ loadSupport <- function(appDir=NULL, renv=new.env(parent=globalenv()), globalren
   # Ensure files in R/ are sorted according to the 'C' locale before sourcing.
   # This convention is based on the default for packages. For details, see:
   # https://cran.r-project.org/doc/manuals/r-release/R-exts.html#The-DESCRIPTION-file
-  helpers <- sort(helpers, method = "radix")
+  helpers <- sort_c(helpers)
   helpers <- normalizePath(helpers)
 
   withr::with_dir(appDir, {

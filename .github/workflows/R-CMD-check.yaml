@@ -10,8 +10,6 @@ name: R-CMD-check
 
 jobs:
 
-
-
   R-CMD-check:
     runs-on: ${{ matrix.config.os }}
 
@@ -31,6 +29,7 @@ jobs:
           - {os: ubuntu-16.04,   r: '3.3', rspm: "https://packagemanager.rstudio.com/cran/__linux__/xenial/latest"}
 
     env:
+      _R_CHECK_FORCE_SUGGESTS_: false
       R_REMOTES_NO_ERRORS_FROM_WARNINGS: true
       RSPM: ${{ matrix.config.rspm }}
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
@@ -93,7 +92,7 @@ jobs:
 
       - name: Upload check results
         if: failure()
-        uses: actions/upload-artifact@master
+        uses: actions/upload-artifact@v2
         with:
           name: ${{ runner.os }}-r${{ matrix.config.r }}-results
           path: check
@@ -125,13 +124,15 @@ jobs:
           install.packages('remotes')
           saveRDS(remotes::dev_package_deps(dependencies = TRUE), ".github/depends.Rds", version = 2)
         shell: Rscript {0}
-
       - name: Cache R packages
         uses: actions/cache@v1
         with:
           path: ${{ env.R_LIBS_USER }}
           key: macOS-r-4.0-2-${{ hashFiles('.github/depends.Rds') }}
           restore-keys: macOS-r-4.0-2-
+      - name: Remove dependencies file
+        run: |
+          rm .github/depends.Rds
 
       - name: Install dependencies
         run: |

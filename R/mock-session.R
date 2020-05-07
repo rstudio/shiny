@@ -441,6 +441,9 @@ MockShinySession <- R6Class(
       v <- extract(private$outs[[name]]$promise)
       if (!is.null(v$err)){
         stop(v$err)
+      } else if (private$downloads$has(self$ns(name))) {
+        download <- private$downloads$get(self$ns(name))
+        private$renderFile(download)
       } else {
         v$val
       }
@@ -515,6 +518,12 @@ MockShinySession <- R6Class(
     },
     onSessionEnded = function(sessionEndedCallback) {
       self$onEnded(sessionEndedCallback)
+    },
+    registerDownload = function(name, filename, contentType, content) {
+      private$downloads$set(self$ns(name), list(
+        filename = if (is.function(filename)) filename else function() filename,
+        content = content
+      ))
     }
   ),
   private = list(
@@ -527,6 +536,15 @@ MockShinySession <- R6Class(
     outs = list(),
     nsPrefix = "mock-session",
     idCounter = 0,
+    # Conceptually a set; maps namespaced output names to TRUE.
+    downloads = fastmap(),
+
+    renderFile = function(download) {
+      tmpd <- tempdir()
+      file <- file.path(tmpd, download$filename())
+      download$content(file)
+      file
+    },
 
     flush = function(){
       isolate(private$flushCBs$invoke(..stacktraceon = TRUE))

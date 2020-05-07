@@ -727,3 +727,20 @@ test_that("MockShinySession has all public ShinySession methods and fields", {
   expect_equal(intersect(real_methods, mocked$methods), real_methods)
   expect_equal(intersect(real_fields, mocked$fields), real_fields)
 })
+
+test_that("downloadHandler() works", {
+  module <- function(id, data) {
+    moduleServer(id, function(input, output, session) {
+      output$downloadData <- downloadHandler(
+        filename = "mtcars.rds",
+        content = function(file) saveRDS(data, file)
+      )
+    })
+  }
+
+  testServer(module, {
+    f <- output$downloadData
+    expect_equal(basename(f), "mtcars.rds")
+    expect_equal(readRDS(f), mtcars)
+  }, args = list(data = mtcars))
+})

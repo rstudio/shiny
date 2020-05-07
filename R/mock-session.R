@@ -536,7 +536,10 @@ MockShinySession <- R6Class(
     outs = list(),
     nsPrefix = "mock-session",
     idCounter = 0,
-    # Conceptually a set; maps namespaced output names to TRUE.
+    # Map of namespaced output names to lists with `filename` and `output`
+    # elements, each a function. Insterted into by $registerDownload() and read
+    # by $getOutput(). Files are generated on demand when the output is
+    # accessed.
     downloads = fastmap(),
 
     renderFile = function(download) {

@@ -191,12 +191,6 @@ addGeneratedInstanceMethods <- function(instance, methods = makeExtraMethods()) 
   }, names(methods), methods)
 }
 
-#' @export
-makeMockSession <- function() {
-  MockShinySession$new()
-}
-
-
 #' Mock Shiny Session
 #'
 #' @description

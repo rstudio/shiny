@@ -50,7 +50,7 @@ isModuleServer <- function(x) {
 #'   # Any additional arguments, below, are passed along to the module.
 #' })
 #' @export
-testServer <- function(app = NULL, expr, args = list(), session = makeMockSession()) {
+testServer <- function(app = NULL, expr, args = list(), session = MockShinySession$new()) {
 
   require(shiny)
 

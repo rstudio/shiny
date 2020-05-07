@@ -399,7 +399,7 @@ MockShinySession <- R6Class(
         # We could just stash the promise, but we get an "unhandled promise error". This bypasses
         prom <- NULL
         tryCatch({
-          v <- func(self, name)
+          v <- private$withCurrentOutput(name, func(self, name))
           if (!promises::is.promise(v)){
             # Make our sync value into a promise
             prom <- promises::promise(function(resolve, reject){ resolve(v) })
@@ -412,7 +412,7 @@ MockShinySession <- R6Class(
         })
 
         private$outs[[name]]$promise <- hybrid_chain(
-          private$withCurrentOutput(name, prom),
+          prom,
           function(v){
             list(val = v, err = NULL)
           }, catch=function(e){

@@ -743,10 +743,25 @@ test_that("downloadHandler() works", {
   testServer(module, {
     f <- output$downloadData
     expect_equal(basename(f), "mtcars.rds")
-    expect_equal(readRDS(f), mtcars)
+    expect_equal(readRDS(f), data)
   })
 })
 
-test_that("inner downloadHandler() works", {
+test_that("getOutputInfo() returns current output name", {
+  savedOutputInfo <- NULL
 
+  module <- function(id) {
+    moduleServer(id, function(input, output, session) {
+      output$txt <- renderText({
+        savedOutputInfo <<- getCurrentOutputInfo()
+        "some text"
+      })
+    })
+  }
+
+  testServer(module, {
+    expect_equal(output$txt, "some text")
+    expect_equal(savedOutputInfo, list(name = session$ns("txt")))
+    expect_equal(getCurrentOutputInfo(), NULL)
+  })
 })

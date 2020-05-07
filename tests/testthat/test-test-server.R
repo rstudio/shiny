@@ -664,7 +664,7 @@ test_that("module return value captured", {
   })
 
   module_early_returns <- function(id, n) {
-    retval <<- NULL
+    retval <- NULL
     moduleServer(id, function(input, output, session) {
       if (n == 0) return(n)
       if (n %% 2 == 0) {

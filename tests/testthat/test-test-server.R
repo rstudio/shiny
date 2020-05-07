@@ -733,14 +733,18 @@ test_that("downloadHandler() works", {
 
   module <- function(id) {
     moduleServer(id, function(input, output, session) {
+      filename <- reactive({
+        paste0(input$name, ".", input$extension)
+      })
       output$downloadData <- downloadHandler(
-        filename = "mtcars.rds",
+        filename = filename(),
         content = function(file) saveRDS(data, file)
       )
     })
   }
 
   testServer(module, {
+    session$setInputs(name = "mtcars", extension = "rds")
     f <- output$downloadData
     expect_equal(basename(f), "mtcars.rds")
     expect_equal(readRDS(f), data)
@@ -760,6 +764,8 @@ test_that("getOutputInfo() returns current output name", {
   }
 
   testServer(module, {
+    expect_equal(savedOutputInfo, NULL)
+    # savedOutputInfo is not set until output$txt is accessed
     expect_equal(output$txt, "some text")
     expect_equal(savedOutputInfo, list(name = session$ns("txt")))
     expect_equal(getCurrentOutputInfo(), NULL)

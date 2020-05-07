@@ -5,23 +5,21 @@
 \alias{tabPanelBody}
 \title{Create a tab panel}
 \usage{
-tabPanel(title, ..., id = title, icon = NULL, value = NULL)
+tabPanel(title, ..., value = title, icon = NULL)
 
-tabPanelBody(id, ..., icon = NULL)
+tabPanelBody(value, ..., icon = NULL)
 }
 \arguments{
 \item{title}{Display title for tab}
 
 \item{...}{UI elements to include within the tab}
 
-\item{id}{The value that should be sent when \code{tabsetPanel} reports
+\item{value}{The value that should be sent when \code{tabsetPanel} reports
 that this tab is selected. If omitted and \code{tabsetPanel} has an
 \code{id}, then the title will be used.}
 
 \item{icon}{Optional icon to appear on the tab. This attribute is only
 valid when using a \code{tabPanel} within a \code{\link[=navbarPage]{navbarPage()}}.}
-
-\item{value}{Deprecated. Please use \code{id} instead.}
 }
 \value{
 A tab that can be passed to \code{\link[=tabsetPanel]{tabsetPanel()}}

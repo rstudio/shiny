@@ -1,7 +1,8 @@
 
 
 test_that("tabPanelBody validates it's input", {
-  expect_silent(tabPanelBody("a"))
+  expect_silent(tabPanelBody("a", "content1", "content2", icon = icon("table")))
+  expect_silent(tabPanelBody(value = "a", "content1", "content2", icon = icon("table")))
 
   expect_error(tabPanelBody())
   expect_error(tabPanelBody(NULL), "single, non-empty string")
@@ -11,18 +12,4 @@ test_that("tabPanelBody validates it's input", {
   expect_error(tabPanelBody(NA_character_), "single, non-empty string")
   expect_error(tabPanelBody(""), "single, non-empty string")
   expect_error(tabPanelBody(letters[1:2]), "single, non-empty string")
-})
-
-test_that("tabPanel works with deprecated interface", {
-  title <- "titleVal"
-  id <- "idVal"
-  content <- "contentVal"
-
-  expect_silent({
-    test_val <- tabPanel(title, content, id = id)
-  })
-  expect_equal(
-    expect_message(tabPanel(title, content, value = id), "is deprecated"),
-    test_val
-  )
 })

@@ -467,12 +467,11 @@ helpText <- function(...) {
 #'
 #' @param title Display title for tab
 #' @param ... UI elements to include within the tab
-#' @param id The value that should be sent when `tabsetPanel` reports
+#' @param value The value that should be sent when `tabsetPanel` reports
 #'   that this tab is selected. If omitted and `tabsetPanel` has an
 #'   `id`, then the title will be used.
 #' @param icon Optional icon to appear on the tab. This attribute is only
 #' valid when using a `tabPanel` within a [navbarPage()].
-#' @param value Deprecated. Please use `id` instead.
 #' @return A tab that can be passed to [tabsetPanel()]
 #'
 #' @seealso [tabsetPanel()]
@@ -489,33 +488,28 @@ helpText <- function(...) {
 #' )
 #' @export
 #' @describeIn tabPanel Create a tab panel that can be included within a [tabsetPanel()] or a [navbarPage()].
-tabPanel <- function(title, ..., id = title, icon = NULL, value = NULL) {
-  if (!missing(value)) {
-    shinyDeprecated(new = "`tabPanel(id)`", old = "`tabPanel(value)`", version = "1.4.0.2")
-    id <- value
-  }
+tabPanel <- function(title, ..., value = title, icon = NULL) {
   div(
     class = "tab-pane",
     title = title,
-    `data-value` = id,
+    `data-value` = value,
     `data-icon-class` = iconClass(icon),
-    id = id,
     ...
   )
 }
 #' @export
 #' @describeIn tabPanel Create a tab panel that drops the title argument.
 #'   This function should be used within `tabsetPanel(type = "hidden")`. See [tabsetPanel()] for example usage.
-tabPanelBody <- function(id, ..., icon = NULL) {
+tabPanelBody <- function(value, ..., icon = NULL) {
   if (
-    !is.character(id) ||
-    length(id) != 1 ||
-    is.na(id) || # must be after length check
-    nchar(id) == 0
+    !is.character(value) ||
+    length(value) != 1 ||
+    any(is.na(value)) ||
+    nchar(value) == 0
   ) {
-    stop("`id` must be a single, non-empty string value")
+    stop("`value` must be a single, non-empty string value")
   }
-  tabPanel(title = NULL, ..., id = id, icon = icon)
+  tabPanel(title = NULL, ..., value = value, icon = icon)
 }
 
 #' Create a tabset panel

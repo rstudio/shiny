@@ -205,7 +205,6 @@ makeMockSession <- function() {
 #'
 #' @include timer.R
 #' @noRd
-#' @export
 MockShinySession <- R6Class(
   'MockShinySession',
   portable = FALSE,
@@ -323,14 +322,14 @@ MockShinySession <- R6Class(
     },
 
     #' @description Sets reactive values associated with the `session$inputs`
-    #   object and flushes the reactives.
+    #'  object and flushes the reactives.
     #' @param ... The inputs to set. These arguments are processed with
-    #   [rlang::list2()] and so are _[dynamic][rlang::dyn-dots]_. Input names
-    #   may not be duplicated.
+    #'  [rlang::list2()] and so are _[dynamic][rlang::dyn-dots]_. Input names
+    #'  may not be duplicated.
     #' @examples
-    # \dontrun{
-    # session$setInputs(x=1, y=2)
-    # }
+    #' \dontrun{
+    #' session$setInputs(x=1, y=2)
+    #' }
     setInputs = function(...) {
       vals <- rlang::dots_list(..., .homonyms = "error")
       mapply(names(vals), vals, FUN = function(name, value) {
@@ -480,9 +479,9 @@ MockShinySession <- R6Class(
       )
     },
     #' @description Set the environment associated with a testServer() call, but
-    #   only if it has not previously been set. This ensures that only the
-    #   environment of the outermost module under test is the one retained. In
-    #   other words, the first assignment wins.
+    #'  only if it has not previously been set. This ensures that only the
+    #'  environment of the outermost module under test is the one retained. In
+    #'  other words, the first assignment wins.
     #' @param env The environment to retain.
     setEnv = function(env) {
       if (is.null(self$env)) {
@@ -491,9 +490,9 @@ MockShinySession <- R6Class(
       }
     },
     #' @description Set the value returned by the module call and proactively
-    #   flush. Note that this method may be called multiple times if modules
-    #   are nested. The last assignment, corresponding to an invocation of
-    #   setReturned() in the outermost module, wins.
+    #'  flush. Note that this method may be called multiple times if modules
+    #'  are nested. The last assignment, corresponding to an invocation of
+    #'  setReturned() in the outermost module, wins.
     #' @param value The value returned from the module
     setReturned = function(value) {
       self$returned <- value
@@ -502,7 +501,7 @@ MockShinySession <- R6Class(
     #' @description Get the value returned by the module call.
     getReturned = function() self$returned,
     #' @description Return a distinct character identifier for use as a proxy
-    #   namespace.
+    #'   namespace.
     genId = function() {
       private$idCounter <- private$idCounter + 1
       paste0("proxy", private$idCounter)

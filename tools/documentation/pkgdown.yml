@@ -220,4 +220,3 @@ reference:
     contents:
       - runTests
       - testServer
-      - MockShinySession

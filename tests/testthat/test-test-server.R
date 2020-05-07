@@ -729,7 +729,9 @@ test_that("MockShinySession has all public ShinySession methods and fields", {
 })
 
 test_that("downloadHandler() works", {
-  module <- function(id, data) {
+  data <- mtcars
+
+  module <- function(id) {
     moduleServer(id, function(input, output, session) {
       output$downloadData <- downloadHandler(
         filename = "mtcars.rds",
@@ -742,5 +744,9 @@ test_that("downloadHandler() works", {
     f <- output$downloadData
     expect_equal(basename(f), "mtcars.rds")
     expect_equal(readRDS(f), mtcars)
-  }, args = list(data = mtcars))
+  })
+})
+
+test_that("inner downloadHandler() works", {
+
 })

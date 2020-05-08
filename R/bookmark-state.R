@@ -318,7 +318,7 @@ RestoreContext <- R6Class("RestoreContext",
         stop("Invalid state string: more than one '_values_' found")
 
       # Look for _inputs_ and store following content in inputStr
-      splitStr <- strsplit(queryString, "(^|&)_inputs_(&|$)")[[1]]
+      splitStr <- strsplit(queryString, "(^|&)_inputs_=?(&|$)")[[1]]
       if (length(splitStr) == 2) {
         inputStr <- splitStr[2]
         # Remove any _values_ (and content after _values_) that may come after
@@ -453,7 +453,7 @@ hasCurrentRestoreContext <- function() {
   domain <- getDefaultReactiveDomain()
   if (!is.null(domain) && !is.null(domain$restoreContext))
     return(TRUE)
-  
+
   return(FALSE)
 }
 

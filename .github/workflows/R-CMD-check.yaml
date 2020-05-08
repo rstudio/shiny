@@ -35,6 +35,13 @@ jobs:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
 
     steps:
+      # https://github.com/actions/checkout/issues/135
+      - name: Set git to use LF
+        if: runner.os == 'Windows'
+        run: |
+          git config --system core.autocrlf false
+          git config --system core.eol lf
+
       - uses: actions/checkout@v2
 
       - uses: r-lib/actions/setup-r@master

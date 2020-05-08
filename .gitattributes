@@ -2,3 +2,4 @@
 /inst/www/shared/shiny.js -merge -diff
 *.min.js -merge -diff
 *.js.map -merge -diff
+* text eol=lf

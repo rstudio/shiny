@@ -219,7 +219,7 @@ Unsophisticated mock implementation that merely invokes
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{callback}}{The callback ato be invoked.}
+\item{\code{callback}}{The callback to be invoked.}
 }
 \if{html}{\out{</div>}}
 }
@@ -499,7 +499,7 @@ A character identifier unique to the current session.
 \if{latex}{\out{\hypertarget{method-rootScope}{}}}
 \subsection{Method \code{rootScope()}}{
 Provides a way to access the root \code{MockShinySession} from
-any descendent proxy.
+any descendant proxy.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{MockShinySession$rootScope()}\if{html}{\out{</div>}}
 }

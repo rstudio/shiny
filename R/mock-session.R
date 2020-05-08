@@ -319,7 +319,7 @@ MockShinySession <- R6Class(
     #FIXME: this is wrong. Will need to be more complex.
     #' @description Unsophisticated mock implementation that merely invokes
     #   the given callback immediately.
-    #' @param callback The callback ato be invoked.
+    #' @param callback The callback to be invoked.
     cycleStartAction = function(callback){ callback() },
 
     #' @description Base64-encode the given file. Needed for image rendering.
@@ -538,7 +538,7 @@ MockShinySession <- R6Class(
       paste0("proxy", private$idCounter)
     },
     #' @description Provides a way to access the root `MockShinySession` from
-    #'   any descendent proxy.
+    #'   any descendant proxy.
     #' @return The root `MockShinySession`.
     rootScope = function() {
       self

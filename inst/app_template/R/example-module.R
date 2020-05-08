@@ -1,5 +1,5 @@
 exampleModuleUI <- function(id, label = "Counter") {
-  # Al uses of Shiny input/output IDs in the UI must be namespaced,
+  # All uses of Shiny input/output IDs in the UI must be namespaced,
   # as in ns("x").
   ns <- NS(id)
   tagList(

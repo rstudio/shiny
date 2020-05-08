@@ -26,26 +26,26 @@ This function populates a directory with files for a Shiny application.
 \details{
 In an interactive R session, this function will, by default, prompt the user
 to select which components to add to the application. Choices are\preformatted{1: All
-2: app.R            : Main application file
-3: R/sort.R         : Helper file with R code
-4: R/my-module.R    : Example module
-5: tests/shinytest/ : Tests using the shinytest package
-6: tests/testthat/  : Tests using the testthat package
+2: app.R              : Main application file
+3: R/example.R        : Helper file with R code
+4: R/example-module.R : Example module
+5: tests/shinytest/   : Tests using the shinytest package
+6: tests/testthat/    : Tests using the testthat package
 }
 
 If option 1 is selected, the full example application including the
 following files and directories is created:\preformatted{appdir/
 |- app.R
 |- R
-|   |- my-module.R
-|   `- sort.R
+|   |- example-module.R
+|   `- example.R
 `- tests
     |- shinytest.R
     |- shinytest
     |   `- mytest.R
     |- testthat.R
     `- testthat
-        |- test-mymodule.R
+        |- test-examplemodule.R
         |- test-server.R
         `- test-sort.R
 }
@@ -55,10 +55,10 @@ Some notes about these files:
 \item \code{app.R} is the main application file.
 \item All files in the \verb{R/} subdirectory are automatically sourced when the
 application is run.
-\item \code{R/sort.R} and \code{R/my-module.R} are automatically sourced when
+\item \code{R/example.R} and \code{R/example-module.R} are automatically sourced when
 the application is run. The first contains a function \code{lexical_sort()},
-and the second contains code for a \href{moduleServer()}{Shiny module} which
-is used in the application.
+and the second contains code for module created by the
+\code{\link[=moduleServer]{moduleServer()}} function, which is used in the application.
 \item \verb{tests/} contains various tests for the application. You may
 choose to use or remove any of them. They can be executed by the
 \code{\link[=runTests]{runTests()}} function.
@@ -69,7 +69,7 @@ choose to use or remove any of them. They can be executed by the
 snapshot-based testing.
 \item \code{tests/testthat.R} is a test runner for test files in the
 \verb{tests/testthat/} directory using the \href{https://testthat.r-lib.org/}{testthat} package.
-\item \code{tests/testthat/test-mymodule.R} is a test for an application's module server function.
+\item \code{tests/testthat/test-examplemodule.R} is a test for an application's module server function.
 \item \code{tests/testthat/test-server.R} is a test for the application's server code
 \item \code{tests/testthat/test-sort.R} is a test for a supporting function in the \verb{R/} directory.
 }

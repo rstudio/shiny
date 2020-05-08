@@ -40,8 +40,8 @@
 #'   application is run.
 #' * `R/example.R` and `R/example-module.R` are automatically sourced when
 #'   the application is run. The first contains a function `lexical_sort()`,
-#'   and the second contains code for a [Shiny module](moduleServer()) which
-#'   is used in the application.
+#'   and the second contains code for module created by the
+#'   [moduleServer()] function, which is used in the application.
 #' * `tests/` contains various tests for the application. You may
 #'   choose to use or remove any of them. They can be executed by the
 #'   [runTests()] function.

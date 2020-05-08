@@ -28,9 +28,6 @@ a list which includes:
 \itemize{
 \item \code{families}: a character vector containing the CSS \code{font-family} property.
 \item \code{size}: a character string containing the CSS \code{font-size} property
-\item \code{renderedFamily}: if running in a browser that supports
-\href{https://developer.mozilla.org/en-US/docs/Web/API/FontFaceSet/check}{FontFaceSet.check},
-a character string containing the first of \code{families} available to the browser.
 }
 }
 }

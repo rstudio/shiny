@@ -5,7 +5,7 @@ shiny 1.4.0.9001
 
 ### Breaking changes
 
-* Until this release, `renderImage()` had a dangerous default of `deleteFile = TRUE`. (Sorry!) Going forward, calls to `renderImage()` will need an explicit `deleteFile` argument; for now, failing to provide one will result in a warning message, and the file will be deleted if it appears to be within the `tempdir()`.
+* Until this release, `renderImage()` had a dangerous default of `deleteFile = TRUE`. (Sorry!) Going forward, calls to `renderImage()` will need an explicit `deleteFile` argument; for now, failing to provide one will result in a warning message, and the file will be deleted if it appears to be within the `tempdir()`. ([#2881](https://github.com/rstudio/shiny/pull/2881))
 
 ### New features
 

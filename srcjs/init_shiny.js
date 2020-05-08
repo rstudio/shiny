@@ -331,34 +331,10 @@ function initShiny() {
   function getComputedFont(el) {
     let fontFamily = getStyle(el, "font-family");
     let fontSize = getStyle(el, "font-size");
-    let font = {
+    return {
       families: fontFamily.replace(/"/g, '').split(", "),
       size: fontSize
     };
-
-    // If the FontFaceSet API is available, use it to determine
-    // which font-family is supported by the browser
-    // https://developer.mozilla.org/en-US/docs/Web/API/FontFaceSet/check
-    // https://caniuse.com/#feat=mdn-api_fontfaceset_check
-    if (!document.fonts) {
-      return font;
-    }
-
-    for (let i = 0; i < font.families.length; i++)  {
-      let family = font.families[i];
-      let hasFont = false;
-      try {
-        hasFont = hasFont || document.fonts.check(font.size + " " + family);
-      } catch(err) {
-
-      }
-      if (hasFont) {
-        font.renderedFamily = family;
-        break;
-      }
-    }
-
-    return font;
   }
 
   $('.shiny-image-output, .shiny-plot-output, .shiny-report-theme').each(function() {

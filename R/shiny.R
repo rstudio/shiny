@@ -2162,9 +2162,6 @@ outputOptions <- function(x, name, ...) {
 #'     * `font`: a reactive expression which returns a list of font information, including:
 #'       * `families`: a character vector containing the CSS `font-family` property.
 #'       * `size`: a character string containing the CSS `font-size` property
-#'       * `renderedFamily`: if running in a browser that supports
-#'         [FontFaceSet.check](https://developer.mozilla.org/en-US/docs/Web/API/FontFaceSet/check),
-#'         a character string containing the first of `families` available to the browser.
 #'
 #' @export
 #' @examples

@@ -6357,33 +6357,10 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     function getComputedFont(el) {
       var fontFamily = getStyle(el, "font-family");
       var fontSize = getStyle(el, "font-size");
-      var font = {
+      return {
         families: fontFamily.replace(/"/g, '').split(", "),
         size: fontSize
-      }; // If the FontFaceSet API is available, use it to determine
-      // which font-family is supported by the browser
-      // https://developer.mozilla.org/en-US/docs/Web/API/FontFaceSet/check
-      // https://caniuse.com/#feat=mdn-api_fontfaceset_check
-
-      if (!document.fonts) {
-        return font;
-      }
-
-      for (var i = 0; i < font.families.length; i++) {
-        var family = font.families[i];
-        var hasFont = false;
-
-        try {
-          hasFont = hasFont || document.fonts.check(font.size + " " + family);
-        } catch (err) {}
-
-        if (hasFont) {
-          font.renderedFamily = family;
-          break;
-        }
-      }
-
-      return font;
+      };
     }
 
     $('.shiny-image-output, .shiny-plot-output, .shiny-report-theme').each(function () {

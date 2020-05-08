@@ -72,8 +72,8 @@ test_that("With ui/server.R, global.R is loaded before R/ helpers and into the r
   # Should have seen three calls -- first to global then to the helpers
   expect_length(calls, 3)
   expect_match(calls[[1]][[1]], "global\\.R$", perl=TRUE)
-  expect_match(calls[[2]][[1]], "/helperCap\\.R$", perl=TRUE)
-  expect_match(calls[[3]][[1]], "/helperLower\\.r$", perl=TRUE)
+  expect_match(calls[[2]][[1]], "helperCap\\.R$", perl=TRUE)
+  expect_match(calls[[3]][[1]], "helperLower\\.r$", perl=TRUE)
 
   # Check environments
   # global.R loaded into the global env
@@ -99,7 +99,7 @@ test_that("With ui/server.R, global.R is loaded before R/ helpers and into the r
   sa$httpHandler(list())
   expect_length(calls, 1)
   # ui.R is sourced into a child environment of the helpers
-  expect_match(calls[[1]][[1]], "/ui\\.R$")
+  expect_match(calls[[1]][[1]], "ui\\.R$")
   expect_identical(parent.env(calls[[1]]$envir), helperEnv1)
 })
 
@@ -158,7 +158,7 @@ test_that("Disabling supporting R files works", {
 
   # Should have seen one calls from global.R -- helpers are disabled
   expect_length(calls, 1)
-  expect_match(calls[[1]][[1]], "/global\\.R$", perl=TRUE)
+  expect_match(calls[[1]][[1]], "global\\.R$", perl=TRUE)
 })
 
 test_that("app.R is loaded after R/ helpers and into the right envs", {
@@ -186,8 +186,8 @@ test_that("app.R is loaded after R/ helpers and into the right envs", {
 
   # Should have seen three calls -- first to two helpers then to app.R
   expect_length(calls, 2)
-  expect_match(calls[[1]][[1]], "/helper\\.R$", perl=TRUE)
-  expect_match(calls[[2]][[1]], "/app\\.R$", perl=TRUE)
+  expect_match(calls[[1]][[1]], "helper\\.R$", perl=TRUE)
+  expect_match(calls[[2]][[1]], "app\\.R$", perl=TRUE)
 
   # Check environments
   # helpers are loaded into a child of the global env

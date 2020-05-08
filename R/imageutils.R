@@ -4,7 +4,7 @@ startPNG <- function(filename, width, height, res, ...) {
   # to use ragg (say, instead of showtext, for custom font rendering).
   # In the next shiny release, this option will likely be superseded in
   # favor of a fully customizable graphics device option
-  if ((getOption('shiny.useragg') %OR% TRUE) && is_available("ragg")) {
+  if ((getOption('shiny.useragg') %OR% FALSE) && is_available("ragg")) {
     pngfun <- ragg::agg_png
   } else if (capabilities("aqua")) {
     # i.e., png(type = 'quartz')

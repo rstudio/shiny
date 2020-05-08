@@ -54,47 +54,40 @@ testServer <- function(app = NULL, expr, args = list(), session = MockShinySessi
 
   require(shiny)
 
+  if (!is.null(getDefaultReactiveDomain()))
+    stop("testServer() is for use only within tests and may not indirectly call itself.")
+
   quosure <- rlang::enquo(expr)
 
-  local({
-    active_session <- getDefaultReactiveDomain()
-    if (inherits(active_session, "MockShinySession"))
-      stop("Test expressions may not call testServer()")
-    if (inherits(active_session, "session_proxy")
-        && inherits(get("parent", envir = active_session), "MockShinySession"))
-      stop("Modules may not call testServer()")
-  })
-
   on.exit(if (!session$isClosed()) session$close())
+
+  withMockContext <- function(expr) {
+    isolate(
+      withReactiveDomain(session, {
+        withr::with_options(list(`shiny.allowoutputreads` = TRUE), {
+          withLocalOptions({
+            # Sets a cache for renderCachedPlot() with cache = "app" to use.
+            shinyOptions("cache" = session$appcache)
+            expr
+          })
+        })
+      })
+    )
+  }
 
   if (isModuleServer(app)) {
     if (!("id" %in% names(args)))
       args[["id"]] <- session$genId()
     # app is presumed to be a module, and modules may take additional arguments,
     # so splice in any args.
-    isolate(
-      withReactiveDomain(
-        session,
-        withr::with_options(list(`shiny.allowoutputreads` = TRUE), {
-          rlang::exec(app, !!!args)
-        })
-      )
-    )
+    withMockContext(rlang::exec(app, !!!args))
 
     # If app is a module, then we must use both the module function's immediate
     # environment and also its enclosing environment to construct the mask.
     parent_clone <- rlang::env_clone(parent.env(session$env))
     clone <- rlang::env_clone(session$env, parent_clone)
     mask <- rlang::new_data_mask(clone, parent_clone)
-
-    isolate(
-      withReactiveDomain(
-        session,
-        withr::with_options(list(`shiny.allowoutputreads` = TRUE), {
-          rlang::eval_tidy(quosure, mask, rlang::caller_env())
-        })
-      )
-    )
+    withMockContext(rlang::eval_tidy(quosure, mask, rlang::caller_env()))
   } else {
     if (is.null(app)) {
       app <- findEnclosingApp(".")
@@ -115,14 +108,7 @@ testServer <- function(app = NULL, expr, args = list(), session = MockShinySessi
       })
       if (length(args))
         stop("Arguments were provided to a server function.")
-      isolate(
-        withReactiveDomain(
-          session,
-          withr::with_options(list(`shiny.allowoutputreads` = TRUE), {
-            server(input = session$input, output = session$output, session = session)
-          })
-        )
-      )
+      withMockContext(server(input = session$input, output = session$output, session = session))
     }, finally = {
       if (!is.null(appobj$onStop))
         appobj$onStop()
@@ -131,15 +117,7 @@ testServer <- function(app = NULL, expr, args = list(), session = MockShinySessi
     # If app is a server, we use only the server function's immediate
     # environment to construct the mask.
     mask <- rlang::new_data_mask(rlang::env_clone(session$env))
-
-    isolate(
-      withReactiveDomain(
-        session,
-        withr::with_options(list(`shiny.allowoutputreads` = TRUE), {
-          rlang::eval_tidy(quosure, mask, rlang::caller_env())
-        })
-      )
-    )
+    withMockContext(rlang::eval_tidy(quosure, mask, rlang::caller_env()))
   }
 
   invisible()

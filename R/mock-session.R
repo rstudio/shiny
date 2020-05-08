@@ -235,8 +235,10 @@ MockShinySession <- R6Class(
     progressStack = 'Stack',
     #' @field token On a real `ShinySession`, used to identify this instance in URLs.
     token = 'character',
-    #' @field cache A cache object used in the session.
+    #' @field cache The session cache MemoryCache.
     cache = NULL,
+    #' @field appcache The app cache MemoryCache.
+    appcache = NULL,
     #' @field restoreContext Part of bookmarking support in a real
     #'   `ShinySession` but always `NULL` for a `MockShinySession`.
     restoreContext = NULL,
@@ -254,6 +256,8 @@ MockShinySession <- R6Class(
       private$flushedCBs <- Callbacks$new()
       private$endedCBs <- Callbacks$new()
 
+      private$file_generators <- fastmap()
+
       private$timer <- MockableTimerCallbacks$new()
       self$progressStack <- Stack$new()
 
@@ -269,6 +273,7 @@ MockShinySession <- R6Class(
 
       self$token <- createUniqueId(16)
       self$cache <- MemoryCache$new()
+      self$appcache <- MemoryCache$new()
 
       # Adds various generated noop and error-producing method implementations.
       # Note that noop methods can be configured to produce warnings by setting
@@ -617,7 +622,7 @@ MockShinySession <- R6Class(
     #   `filename` and `output` elements, each a function. Updated by
     #   `$registerDownload()` and read by `$getOutput()`. Files are generated
     #   on demand when the output is accessed.
-    file_generators = fastmap(),
+    file_generators = NULL,
     # @field currentOutputName Namespaced name of the currently executing
     #'   output, or `NULL` if no output is currently executing.
     currentOutputName = NULL,

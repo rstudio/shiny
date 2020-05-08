@@ -771,3 +771,42 @@ test_that("getOutputInfo() returns current output name", {
     expect_equal(getCurrentOutputInfo(), NULL)
   })
 })
+
+test_that("renderCachedPlot with cache = app and cache = session works", {
+  module <- function(id, cache, callback) {
+    moduleServer(id, function(input, output, session) {
+      output$plot <- renderCachedPlot({
+        callback()
+        plot(input$x, input$y)
+      },
+        cacheKeyExpr = c(input$x, input$y),
+        cache = cache
+      )
+    })
+  }
+
+  timesRendered <- 0
+  callback <- function() (timesRendered <<- timesRendered + 1)
+
+  testServer(module, {
+    expect_equal(timesRendered, 0)
+    session$setInputs(x = 1:10, y = 1:10)
+    output$plot
+    expect_equal(timesRendered, 1)
+    session$setInputs(x = 1:10, y = 1:10)
+    output$plot
+    expect_equal(timesRendered, 1)
+  }, args = list(cache = "session", callback = callback))
+
+  timesRendered <- 0
+
+  testServer(module, {
+    expect_equal(timesRendered, 0)
+    session$setInputs(x = 1:10, y = 1:10)
+    output$plot
+    expect_equal(timesRendered, 1)
+    session$setInputs(x = 1:10, y = 1:10)
+    output$plot
+    expect_equal(timesRendered, 1)
+  }, args = list(cache = "app", callback = callback))
+})

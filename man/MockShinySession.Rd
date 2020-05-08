@@ -50,7 +50,9 @@ session$setInputs(x=1, y=2)
 
 \item{\code{token}}{On a real \code{ShinySession}, used to identify this instance in URLs.}
 
-\item{\code{cache}}{A cache object used in the session.}
+\item{\code{cache}}{The session cache MemoryCache.}
+
+\item{\code{appcache}}{The app cache MemoryCache.}
 
 \item{\code{restoreContext}}{Part of bookmarking support in a real
 \code{ShinySession} but always \code{NULL} for a \code{MockShinySession}.}

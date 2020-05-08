@@ -170,7 +170,7 @@ jobs:
 
 
   node_js:
-    runs-on: ubuntu-latest
+    runs-on: macOS-latest
     name: node_js
 
     steps:

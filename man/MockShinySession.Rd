@@ -14,8 +14,8 @@ instantiated manually. See instead \code{\link[=testServer]{testServer()}}.
 
 In order to support advanced usage, instances of \code{MockShinySession} are
 \strong{unlocked} so that public methods and fields of instances may be
-modified. For example, in order to test authentication workflows, users may
-choose to override the \code{user} or \code{groups} fields. Modified instances of
+modified. For example, in order to test authentication workflows, the
+\code{user} or \code{groups} fields may be overridden. Modified instances of
 \code{MockShinySession} may then be passed explicitly as the \code{session} argument
 of \code{\link[=testServer]{testServer()}}.
 }
@@ -606,6 +606,7 @@ executed.
 \subsection{Returns}{
 A list with with the \code{name} of the output. If no output is
 currently being executed, this will return \code{NULL}.
+output, or \code{NULL} if no output is currently executing.
 }
 }
 \if{html}{\out{<hr>}}

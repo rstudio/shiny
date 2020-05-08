@@ -205,8 +205,8 @@ addGeneratedInstanceMethods <- function(instance, methods = makeExtraMethods()) 
 #'
 #'   In order to support advanced usage, instances of `MockShinySession` are
 #'   **unlocked** so that public methods and fields of instances may be
-#'   modified. For example, in order to test authentication workflows, users may
-#'   choose to override the `user` or `groups` fields. Modified instances of
+#'   modified. For example, in order to test authentication workflows, the
+#'   `user` or `groups` fields may be overridden. Modified instances of
 #'   `MockShinySession` may then be passed explicitly as the `session` argument
 #'   of [testServer()].
 #'
@@ -473,7 +473,7 @@ MockShinySession <- R6Class(
         stop(v$err)
       } else if (private$file_generators$has(self$ns(name))) {
         download <- private$file_generators$get(self$ns(name))
-        private$renderFile(download)
+        private$renderFile(name, download)
       } else {
         v$val
       }
@@ -595,29 +595,54 @@ MockShinySession <- R6Class(
     }
   ),
   private = list(
+    # @field .input Internal ReactiveValues object for normal input sent from client.
     .input = NULL,
+    # @field flushCBs `Callbacks` called before flush.
     flushCBs = NULL,
+    # @field flushedCBs `Callbacks` called after flush.
     flushedCBs = NULL,
+    # @field endedCBs `Callbacks` called when session ends.
     endedCBs = NULL,
+    # @field timer `MockableTimerCallbacks` called at particular times.
     timer = NULL,
+    # @field was_closed Set to `TRUE` once the session is closed.
     was_closed = FALSE,
+    # @field outs List of namespaced output names.
     outs = list(),
+    # @field nsPrefix Prefix with which to namespace inputs and outputs.
     nsPrefix = "mock-session",
+    # @field idCounter Incremented every time `$genId()` is called.
     idCounter = 0,
-    # Map of namespaced output names to lists with `filename` and `output`
-    # elements, each a function. Insterted into by $registerDownload() and read
-    # by $getOutput(). Files are generated on demand when the output is
-    # accessed.
+    # @field file_generators Map of namespaced output names to lists with
+    #   `filename` and `output` elements, each a function. Updated by
+    #   `$registerDownload()` and read by `$getOutput()`. Files are generated
+    #   on demand when the output is accessed.
     file_generators = fastmap(),
+    # @field currentOutputName Namespaced name of the currently executing
+    #'   output, or `NULL` if no output is currently executing.
     currentOutputName = NULL,
 
-    renderFile = function(download) {
+    # @description Writes a downloadable file to disk. If the `content`
+    #   function associated with a download handler does not write a file, an
+    #   error is signaled.
+    # @param name The un-namespaced output name associated with the
+    #   downloadable file.
+    # @param download List with two names, `filename` and `content`. Both
+    #   should be functions. `filename` should take no arguments and return a
+    #   string. `content` should accept a path argument and create a file at
+    #   that path.
+    # @return A path to a temp file.
+    renderFile = function(name, download) {
       tmpd <- tempdir()
       file <- file.path(tmpd, download$filename())
       download$content(file)
+      if (!file.exists(file))
+        error("downloadHandler for ", name, " did not write a file.")
       file
     },
 
+    # @description Calls `shiny:::flushReact()` and executes all callbacks
+    #   related to reactivity.
     flush = function(){
       isolate(private$flushCBs$invoke(..stacktraceon = TRUE))
       shiny:::flushReact() # namespace to avoid calling our own method
@@ -625,6 +650,10 @@ MockShinySession <- R6Class(
       later::run_now()
     },
 
+    # @description Produces a warning if the option `shiny.mocksession.warn` is
+    #   unset and not `FALSE`.
+    # @param name The name of the mocked method.
+    # @param msg A message describing why the method is not implemented.
     noopWarn = function(name, msg) {
       if (getOption("shiny.mocksession.warn", FALSE) == FALSE)
         return(invisible())
@@ -633,6 +662,11 @@ MockShinySession <- R6Class(
       warning(out, call. = FALSE)
     },
 
+    # @description Binds a domain to `expr` and uses `createVarPromiseDomain()`
+    #   to ensure `private$currentOutputName` is set to `name` around any of
+    #   the promise's callbacks. Domains are something like dynamic scopes but
+    #   for promise chains instead of the call stack.
+    # @return A promise.
     withCurrentOutput = function(name, expr) {
       if (!is.null(private$currentOutputName)) {
         stop("Nested calls to withCurrentOutput() are not allowed.")

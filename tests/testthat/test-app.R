@@ -205,8 +205,8 @@ test_that("global.R and sources in R/ are sourced in the app directory", {
   loadSupport(appDir, renv = appEnv, globalrenv = appGlobalEnv)
 
   # Set by ../test-helpers/app1-standard/global.R
-  expect_equal(appGlobalEnv$global_wd, normalizePath(appDir))
+  expect_equal(normalizePath(appGlobalEnv$global_wd), normalizePath(appDir))
 
   # Set by ../test-helpers/app1-standard/R/helperCap.R
-  expect_equal(appEnv$source_wd, normalizePath(appDir))
+  expect_equal(normalizePath(appEnv$source_wd), normalizePath(appDir))
 })

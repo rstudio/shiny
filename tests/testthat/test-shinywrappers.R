@@ -1,27 +1,50 @@
 context("shinywrappers")
 
-test_that("isTempFile passes sanity checks", {
-  expect_true(isTempFile(tempfile()))
-  expect_false(isTempFile(path.expand("~")))
-  expect_false(isTempFile("."))
+test_that("isTemp passes sanity checks", {
+  t <- tempfile(fileext = ".txt")
+  writeLines("hello", t)
+  on.exit(unlink(t), add = TRUE, after = FALSE)
+
+  expect_true(isTemp(t, mustExist = TRUE))
+  expect_false(isTemp(path.expand("~"), mustExist = TRUE))
+  expect_false(isTemp(".", mustExist = TRUE))
+
+  # Tempdir itself isn't a temp file
+  expect_false(isTemp(tempdir(), mustExist = TRUE))
 
   # Malformed temp dir isn't a problem
-  expect_false(isTempFile(path.expand("~"), tempDir = ""))
-
-  # Tolerant of trailing slashes
-  expect_true(isTempFile("/foo/bar", tempDir = "/foo"))
-  expect_true(isTempFile("/foo/bar", tempDir = "/foo/"))
-
-  expect_false(isTempFile("/foo/bar", tempDir = "/foo/bar"))
-
-  # Short filenames are OK
-  expect_false(isTempFile("/foo", tempDir = "/foo/bar"))
+  expect_error(isTemp(path.expand("~"), tempDir = "", mustExist = TRUE))
 
   # path normalization
-  expect_true(isTempFile(".", tempDir = normalizePath("..")))
-  expect_true(isTempFile(normalizePath("."), tempDir = ".."))
-  expect_true(isTempFile(".", tempDir = ".."))
+  expect_true(isTemp(".", tempDir = normalizePath(".."), mustExist = TRUE))
+  expect_true(isTemp(normalizePath("."), tempDir = "..", mustExist = TRUE))
+  expect_true(isTemp(".", tempDir = "..", mustExist = TRUE))
 
   # not based on simple string matching
-  expect_false(isTempFile("/foo/barbaz", tempDir = "/foo/bar"))
+  subdir <- tempfile()
+  dir.create(subdir)
+  on.exit(unlink(subdir), add = TRUE, after = FALSE)
+  badpath <- paste0(subdir, "1")
+  writeLines("hello", badpath)
+  on.exit(unlink(badpath), add = TRUE, after = FALSE)
+  expect_false(isTemp(badpath, tempDir = subdir, mustExist = TRUE))
+  # While we're here, make sure that paths can count as temp
+  expect_true(isTemp(subdir, mustExist = TRUE))
+})
+
+test_that("isTemp symlink scenarios", {
+  testthat::skip_on_os("windows")
+
+  faketmp <- file.path(getwd(), "faketmp")
+  file.symlink(tempdir(), faketmp)
+  on.exit(unlink(faketmp), add = TRUE, after = FALSE)
+
+  t <- tempfile(fileext = ".txt")
+  writeLines("hello", t)
+  on.exit(unlink(t), add = TRUE, after = FALSE)
+
+  expect_true(isTemp(t, mustExist = TRUE))
+  expect_true(isTemp(t, tempDir = faketmp, mustExist = TRUE))
+  expect_true(isTemp(file.path(faketmp, basename(t)), mustExist = TRUE))
+  expect_true(isTemp(file.path(faketmp, basename(t)), tempDir = faketmp, mustExist = TRUE))
 })

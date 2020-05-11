@@ -303,7 +303,10 @@ renderImage <- function(expr, env=parent.frame(), quoted=FALSE,
       # now, change the default behavior to only delete temp files; and emit a
       # warning encouraging people to not rely on the default.
       if (is.null(shouldDelete)) {
-        shouldDelete <- isTempFile(imageinfo$src)
+        shouldDelete <- isTRUE(try(silent = TRUE,
+          file.exists(imageinfo$src) && isTemp(imageinfo$src, mustExist = TRUE)
+        ))
+
         if (!warned) {
           warned <<- TRUE
           warning("The renderImage output named '",
@@ -333,15 +336,38 @@ renderImage <- function(expr, env=parent.frame(), quoted=FALSE,
     imageOutput, outputArgs)
 }
 
-isTempFile <- function(path, tempDir = tempdir(), default = FALSE) {
-  if (nchar(tempDir) == 0) {
-    # This should never happen, but just to be super paranoid...
-    return(default)
+# TODO: If we ever take a dependency on fs, it'd be great to replace this with
+# fs::path_as_parent().
+isTemp <- function(path, tempDir = tempdir(), mustExist) {
+  if (!isTRUE(mustExist)) {
+    # jcheng 2020-05-11: I added mustExist just to make it totally obvious that
+    # the path must exist. We don't support the case where the file doesn't
+    # exist because it makes normalizePath unusable, and it's a bit scary
+    # security-wise to compare paths without normalization. Using fs would fix
+    # this as it knows how to normalize paths that don't exist.
+    stop("isTemp(mustExist=FALSE) is not implemented")
   }
-  tempDir <- normalizePath(tempDir, winslash = "/", mustWork = FALSE)
-  tempDir <- ensure_trailing_slash(tempDir)
 
-  path <- normalizePath(path, winslash = "/", mustWork = FALSE)
+  if (mustExist && !file.exists(path)) {
+    stop("path does not exist")
+  }
+
+  if (nchar(tempDir) == 0 || !dir.exists(tempDir)) {
+    # This should never happen, but just to be super paranoid...
+    stop("invalid temp dir")
+  }
+
+  path <- normalizePath(path, winslash = "/", mustWork = mustExist)
+
+  tempDir <- normalizePath(tempDir, winslash = "/", mustWork = TRUE)
+  if (path == tempDir) {
+    return(FALSE)
+  }
+
+  tempDir <- ensure_trailing_slash(tempDir)
+  if (path == tempDir) {
+    return(FALSE)
+  }
 
   return(substr(path, 1, nchar(tempDir)) == tempDir)
 }

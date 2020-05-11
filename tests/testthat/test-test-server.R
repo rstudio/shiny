@@ -693,18 +693,17 @@ test_that("It's an error to pass arguments to a server", {
   expect_error(testServer(test_path("..", "test-modules", "06_tabsets"), {}, args = list(an_arg = 123)))
 })
 
-# Provided an instance of an R6 object, returns a list with `methods` and
-# `fields`. `methods` contains a character vector of names of public methods.
-# `fields` is a character vector of public fields. Any active bindings are
-# considered `fields`.
-get_mocked_publics <- function(instance) {
-  generator <- get(class(instance)[[1]])
+# Provided an instance of an R6 object and its generator, returns a list with
+# `methods` and `fields`. `methods` contains a character vector of names of
+# public methods. `fields` is a character vector of public fields. Any active
+# bindings are considered `fields`.
+get_mocked_publics <- function(instance, generator) {
   publics <- ls(instance, all.names = TRUE)
-  actives <- names(generator$active)
+  actives <- names(generator$active) %OR% character(0)
   # Active bindings are considered fields.
   methods_or_fields <- publics[!(publics %in% actives)]
   methods <- character(0)
-  fields <- c(character(0), actives)
+  fields <- actives
   for (name in methods_or_fields) {
     if (is.function(instance[[name]])) {
       methods <- c(methods, name)
@@ -722,7 +721,7 @@ test_that("MockShinySession has all public ShinySession methods and fields", {
   # Here we must instantiate a MockShinySession because methods are added to the
   # instance in the constructor.
   mock_session <- MockShinySession$new()
-  mocked <- get_mocked_publics(mock_session)
+  mocked <- get_mocked_publics(mock_session, MockShinySession)
 
   expect_equal(intersect(real_methods, mocked$methods), real_methods)
   expect_equal(intersect(real_fields, mocked$fields), real_fields)

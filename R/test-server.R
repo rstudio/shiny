@@ -18,10 +18,12 @@ isModuleServer <- function(x) {
 #'   in the server function environment, meaning that the parameters of the
 #'   server function (e.g. `input`, `output`, and `session`) will be available
 #'   along with any other values created inside of the server function.
-#' @param args Additional arguments to pass to the module function.
-#'   If `app` is a module, and no `id` argument is provided, one will be
-#'   generated and supplied automatically.
-#' @return The result of evaluating `expr`.
+#' @param args Additional arguments to pass to the module function. If `app` is
+#'   a module, and no `id` argument is provided, one will be generated and
+#'   supplied automatically.
+#' @param session The `MockShinySession` object to use as the reactive domain.
+#'   The same session object is used as the domain both during invocation of the
+#'   server or module under test and during evaluation of `expr`.
 #' @include mock-session.R
 #' @rdname testServer
 #' @examples

@@ -19,12 +19,13 @@ in the server function environment, meaning that the parameters of the
 server function (e.g. \code{input}, \code{output}, and \code{session}) will be available
 along with any other values created inside of the server function.}
 
-\item{args}{Additional arguments to pass to the module function.
-If \code{app} is a module, and no \code{id} argument is provided, one will be
-generated and supplied automatically.}
-}
-\value{
-The result of evaluating \code{expr}.
+\item{args}{Additional arguments to pass to the module function. If \code{app} is
+a module, and no \code{id} argument is provided, one will be generated and
+supplied automatically.}
+
+\item{session}{The \code{MockShinySession} object to use as the reactive domain.
+The same session object is used as the domain both during invocation of the
+server or module under test and during evaluation of \code{expr}.}
 }
 \description{
 A way to test the reactive interactions in Shiny applications. Reactive

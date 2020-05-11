@@ -293,7 +293,7 @@ renderImage <- function(expr, env=parent.frame(), quoted=FALSE,
 
       # jcheng 2020-05-08
       #
-      # Until Shiny 1.4.1, the default for deleteFile was, incredibly, TRUE.
+      # Until Shiny 1.5.0, the default for deleteFile was, incredibly, TRUE.
       # Changing it to default to FALSE might cause existing Shiny apps to pile
       # up images in their temp directory (for long lived R processes). Not
       # having a default (requiring explicit value) is the right long-term move,
@@ -308,9 +308,9 @@ renderImage <- function(expr, env=parent.frame(), quoted=FALSE,
           warned <<- TRUE
           warning("The renderImage output named '",
             getCurrentOutputInfo()$name,
-            "' is missing the deleteFile argument; please provide TRUE or ",
-            "FALSE. (This warning will become an error in a future version of ",
-            "Shiny.)",
+            "' is missing the deleteFile argument; as of Shiny 1.5.0, you must ",
+            "use deleteFile=TRUE or deleteFile=FALSE. (This warning will ",
+            "become an error in a future version of Shiny.)",
             call. = FALSE
           )
         }
@@ -339,9 +339,7 @@ isTempFile <- function(path, tempDir = tempdir(), default = FALSE) {
     return(default)
   }
   tempDir <- normalizePath(tempDir, winslash = "/", mustWork = FALSE)
-  if (substr(tempDir, nchar(tempDir), nchar(tempDir)) != .Platform$file.sep) {
-    tempDir <- paste0(tempDir, .Platform$file.sep)
-  }
+  tempDir <- ensure_trailing_slash(tempDir)
 
   path <- normalizePath(path, winslash = "/", mustWork = FALSE)
 

@@ -337,7 +337,7 @@ renderImage <- function(expr, env=parent.frame(), quoted=FALSE,
 }
 
 # TODO: If we ever take a dependency on fs, it'd be great to replace this with
-# fs::path_as_parent().
+# fs::path_has_parent().
 isTemp <- function(path, tempDir = tempdir(), mustExist) {
   if (!isTRUE(mustExist)) {
     # jcheng 2020-05-11: I added mustExist just to make it totally obvious that

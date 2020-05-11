@@ -3,7 +3,7 @@ context("shinywrappers")
 test_that("isTemp passes sanity checks", {
   t <- tempfile(fileext = ".txt")
   writeLines("hello", t)
-  on.exit(unlink(t), add = TRUE, after = FALSE)
+  on.exit(unlink(t), add = TRUE)
 
   expect_true(isTemp(t, mustExist = TRUE))
   expect_false(isTemp(path.expand("~"), mustExist = TRUE))
@@ -23,10 +23,12 @@ test_that("isTemp passes sanity checks", {
   # not based on simple string matching
   subdir <- tempfile()
   dir.create(subdir)
-  on.exit(unlink(subdir), add = TRUE, after = FALSE)
+  on.exit(unlink(subdir), add = TRUE)
+
   badpath <- paste0(subdir, "1")
   writeLines("hello", badpath)
-  on.exit(unlink(badpath), add = TRUE, after = FALSE)
+  on.exit(unlink(badpath), add = TRUE)
+
   expect_false(isTemp(badpath, tempDir = subdir, mustExist = TRUE))
   # While we're here, make sure that paths can count as temp
   expect_true(isTemp(subdir, mustExist = TRUE))
@@ -37,11 +39,11 @@ test_that("isTemp symlink scenarios", {
 
   faketmp <- file.path(getwd(), "faketmp")
   file.symlink(tempdir(), faketmp)
-  on.exit(unlink(faketmp), add = TRUE, after = FALSE)
+  on.exit(unlink(faketmp), add = TRUE)
 
   t <- tempfile(fileext = ".txt")
   writeLines("hello", t)
-  on.exit(unlink(t), add = TRUE, after = FALSE)
+  on.exit(unlink(t), add = TRUE)
 
   expect_true(isTemp(t, mustExist = TRUE))
   expect_true(isTemp(t, tempDir = faketmp, mustExist = TRUE))

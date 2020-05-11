@@ -478,7 +478,7 @@ MockShinySession <- R6Class(
         stop(v$err)
       } else if (private$file_generators$has(self$ns(name))) {
         download <- private$file_generators$get(self$ns(name))
-        private$renderFile(name, download)
+        private$renderFile(self$ns(name), download)
       } else {
         v$val
       }
@@ -627,15 +627,14 @@ MockShinySession <- R6Class(
     #'   output, or `NULL` if no output is currently executing.
     currentOutputName = NULL,
 
-    # @description Writes a downloadable file to disk. If the `content`
-    #   function associated with a download handler does not write a file, an
-    #   error is signaled.
-    # @param name The un-namespaced output name associated with the
-    #   downloadable file.
-    # @param download List with two names, `filename` and `content`. Both
-    #   should be functions. `filename` should take no arguments and return a
-    #   string. `content` should accept a path argument and create a file at
-    #   that path.
+    # @description Writes a downloadable file to disk. If the `content` function
+    #   associated with a download handler does not write a file, an error is
+    #   signaled. Created files are deleted upon session close.
+    # @param name The eamespaced output name associated with the downloadable
+    #   file.
+    # @param download List with two names, `filename` and `content`. Both should
+    #   be functions. `filename` should take no arguments and return a string.
+    #   `content` should accept a path argument and create a file at that path.
     # @return A path to a temp file.
     renderFile = function(name, download) {
       tmpd <- tempdir()

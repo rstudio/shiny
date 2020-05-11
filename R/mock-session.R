@@ -319,7 +319,15 @@ MockShinySession <- R6Class(
     #' @description Returns `FALSE` if the session has not yet been closed
     isClosed = function(){ private$was_closed },
     #' @description Closes the session
-    close = function(){ private$was_closed <- TRUE },
+    close = function(){
+      for (output in private$output) {
+        output$suspend()
+      }
+      withReactiveDomain(self, {
+        private$endedCBs$invoke(onError = printError, ..stacktraceon = TRUE)
+      })
+      private$was_closed <- TRUE
+    },
 
     #FIXME: this is wrong. Will need to be more complex.
     #' @description Unsophisticated mock implementation that merely invokes

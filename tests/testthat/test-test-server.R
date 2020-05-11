@@ -607,13 +607,13 @@ test_that("session ended handlers work", {
 
     expect_equal(session$isEnded(), FALSE)
     expect_equal(session$isClosed(), FALSE)
-    expect_false(rv$closed, FALSE)
+    expect_false(rv$closed)
 
     session$close()
 
     expect_equal(session$isEnded(), TRUE)
     expect_equal(session$isClosed(), TRUE)
-    expect_false(rv$closed, TRUE)
+    expect_true(rv$closed)
   })
 })
 

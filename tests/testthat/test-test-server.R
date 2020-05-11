@@ -729,6 +729,7 @@ test_that("MockShinySession has all public ShinySession methods and fields", {
 
 test_that("downloadHandler() works", {
   data <- mtcars
+  tmpd <- NULL
 
   module <- function(id) {
     moduleServer(id, function(input, output, session) {
@@ -737,7 +738,10 @@ test_that("downloadHandler() works", {
       })
       output$downloadData <- downloadHandler(
         filename = filename(),
-        content = function(file) saveRDS(data, file)
+        content = function(file) {
+          tmpd <<- dirname(file)
+          saveRDS(data, file)
+        }
       )
     })
   }
@@ -748,6 +752,9 @@ test_that("downloadHandler() works", {
     expect_equal(basename(f), "mtcars.rds")
     expect_equal(readRDS(f), data)
   })
+
+  # Ensure the temp file was closed when the session ended.
+  expect_false(file.exists(tmpd))
 })
 
 test_that("getOutputInfo() returns current output name", {

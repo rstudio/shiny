@@ -646,6 +646,7 @@ MockShinySession <- R6Class(
     # @return A path to a temp file.
     renderFile = function(name, download) {
       tmpd <- tempdir()
+      self$onSessionEnded(function() unlink(tmpd, recursive = TRUE))
       file <- file.path(tmpd, download$filename())
       download$content(file)
       if (!file.exists(file))

@@ -3,6 +3,7 @@ context("testServer")
 library(shiny)
 library(testthat)
 library(future)
+library(promises)
 
 test_that("testServer passes dots", {
   module <- function(id, someArg) {
@@ -815,4 +816,74 @@ test_that("renderCachedPlot with cache = app and cache = session works", {
     output$plot
     expect_equal(timesRendered, 1)
   }, args = list(cache = "app", callback = callback))
+})
+
+
+test_that("promise chains evaluate in correct order", {
+  messages <- list()
+  clearMessages <- function() {
+    messages <<- list()
+  }
+  pushMessage <- function(msg) {
+    messages <<- c(messages, msg)
+  }
+
+  module <- function(id) {
+    moduleServer(id, function(input, output, session) {
+      r1 <- reactive({
+        promise(function(resolve, reject) {
+          pushMessage("promise 1")
+          resolve(input$go)
+        })$then(function(value) {
+          pushMessage(paste("promise 1 then", value))
+          paste("r1", input$go)
+        })
+      })
+      r2 <- reactive({
+        promise(function(resolve, reject) {
+          pushMessage("promise 2")
+          resolve(input$go)
+        })$then(function(value) {
+          pushMessage(paste("promise 2 then", value))
+          paste("r2", input$go)
+        })
+      })
+      output$text1 <- renderText({
+        pushMessage("output$text1")
+        r1()
+      })
+      output$text2 <- renderText({
+        pushMessage("output$text2")
+        input$go
+        r2()
+      })
+    })
+  }
+
+  testServer(module, {
+    expect_length(messages, 0)
+    session$setInputs(go = 1)
+    expect_equal(output$text1, "r1 1")
+    expect_equal(output$text2, "r2 1")
+    expect_equal(messages, list(
+      "output$text1",
+      "promise 1",
+      "output$text2",
+      "promise 2",
+      "promise 1 then 1",
+      "promise 2 then 1"
+    ))
+    clearMessages()
+    session$setInputs(go = 2)
+    expect_equal(output$text1, "r1 2")
+    expect_equal(output$text2, "r2 2")
+    expect_equal(messages, list(
+      "output$text1",
+      "promise 1",
+      "output$text2",
+      "promise 2",
+      "promise 1 then 2",
+      "promise 2 then 2"
+    ))
+  })
 })

@@ -5,8 +5,8 @@ app$snapshot()
 {{
 if (isTRUE(module)) {
 '
-app$setInputs(`mymodule1-button` = "click")
-app$setInputs(`mymodule1-button` = "click")
+app$setInputs(`examplemodule1-button` = "click")
+app$setInputs(`examplemodule1-button` = "click")
 app$snapshot()'
 }
 }}

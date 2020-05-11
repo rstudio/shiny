@@ -469,7 +469,7 @@ helpText <- function(...) {
 #' @param ... UI elements to include within the tab
 #' @param value The value that should be sent when `tabsetPanel` reports
 #'   that this tab is selected. If omitted and `tabsetPanel` has an
-#'   `id`, then the title will be used..
+#'   `id`, then the title will be used.
 #' @param icon Optional icon to appear on the tab. This attribute is only
 #' valid when using a `tabPanel` within a [navbarPage()].
 #' @return A tab that can be passed to [tabsetPanel()]
@@ -500,7 +500,15 @@ tabPanel <- function(title, ..., value = title, icon = NULL) {
 #' @export
 #' @describeIn tabPanel Create a tab panel that drops the title argument.
 #'   This function should be used within `tabsetPanel(type = "hidden")`. See [tabsetPanel()] for example usage.
-tabPanelBody <- function(..., value = NULL, icon = NULL) {
+tabPanelBody <- function(value, ..., icon = NULL) {
+  if (
+    !is.character(value) ||
+    length(value) != 1 ||
+    any(is.na(value)) ||
+    nchar(value) == 0
+  ) {
+    stop("`value` must be a single, non-empty string value")
+  }
   tabPanel(title = NULL, ..., value = value, icon = icon)
 }
 
@@ -553,9 +561,9 @@ tabPanelBody <- function(..., value = NULL, icon = NULL) {
 #'         # Hide the tab values.
 #'         # Can only switch tabs by using `updateTabsetPanel()`
 #'         type = "hidden",
-#'         tabPanelBody(value = "panel1", "Panel 1 content"),
-#'         tabPanelBody(value = "panel2", "Panel 2 content"),
-#'         tabPanelBody(value = "panel3", "Panel 3 content")
+#'         tabPanelBody("panel1", "Panel 1 content"),
+#'         tabPanelBody("panel2", "Panel 2 content"),
+#'         tabPanelBody("panel3", "Panel 3 content")
 #'       )
 #'     )
 #'   )
@@ -1305,18 +1313,25 @@ uiOutput <- htmlOutput
 #'
 #' @examples
 #' \dontrun{
-#' # In server.R:
-#' output$downloadData <- downloadHandler(
-#'   filename = function() {
-#'     paste('data-', Sys.Date(), '.csv', sep='')
-#'   },
-#'   content = function(con) {
-#'     write.csv(data, con)
-#'   }
+#' ui <- fluidPage(
+#'   downloadButton("downloadData", "Download")
 #' )
 #'
-#' # In ui.R:
-#' downloadLink('downloadData', 'Download')
+#' server <- function(input, output) {
+#'   # Our dataset
+#'   data <- mtcars
+#'
+#'   output$downloadData <- downloadHandler(
+#'     filename = function() {
+#'       paste("data-", Sys.Date(), ".csv", sep="")
+#'     },
+#'     content = function(file) {
+#'       write.csv(data, file)
+#'     }
+#'   )
+#' }
+#'
+#' shinyApp(ui, server)
 #' }
 #'
 #' @aliases downloadLink

@@ -1,31 +1,20 @@
-is_installed <- function(package, version) {
-  installedVersion <- tryCatch(utils::packageVersion(package), error = function(e) NA)
-  !is.na(installedVersion) && installedVersion >= version
-}
-
 # Check that the version of an suggested package satisfies the requirements
 #
 # @param package The name of the suggested package
 # @param version The version of the package
-check_suggested <- function(package, version, location) {
+check_suggested <- function(package, version = NULL) {
 
-  if (is_installed(package, version)) {
+  if (is_available(package, version)) {
     return()
   }
 
-  missing_location <- missing(location)
   msg <- paste0(
     sQuote(package),
-    if (is.na(version)) "" else paste0("(>= ", version, ")"),
-    " must be installed for this functionality.",
-    if (!missing_location)
-      paste0(
-        "\nPlease install the missing package: \n",
-        "  source(\"https://install-github.me/", location, "\")"
-      )
+    if (is.na(version %OR% NA)) "" else paste0("(>= ", version, ")"),
+    " must be installed for this functionality."
   )
 
-  if (interactive() && missing_location) {
+  if (interactive()) {
     message(msg, "\nWould you like to install it?")
     if (utils::menu(c("Yes", "No")) == 1) {
       return(utils::install.packages(package))

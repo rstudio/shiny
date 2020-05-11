@@ -3,24 +3,33 @@
 #' This function populates a directory with files for a Shiny application.
 #'
 #' In an interactive R session, this function will, by default, prompt the user
-#' which components to add to the application.
+#' to select which components to add to the application. Choices are
 #'
-#' The full example application includes the following files and directories:
+#' ```
+#' 1: All
+#' 2: app.R              : Main application file
+#' 3: R/example.R        : Helper file with R code
+#' 4: R/example-module.R : Example module
+#' 5: tests/shinytest/   : Tests using the shinytest package
+#' 6: tests/testthat/    : Tests using the testthat package
+#' ```
+#'
+#' If option 1 is selected, the full example application including the
+#' following files and directories is created:
 #'
 #' ```
 #' appdir/
 #' |- app.R
 #' |- R
-#' |   |- my-module.R
-#' |   `- sort.R
+#' |   |- example-module.R
+#' |   `- example.R
 #' `- tests
 #'     |- shinytest.R
 #'     |- shinytest
 #'     |   `- mytest.R
 #'     |- testthat.R
 #'     `- testthat
-#'         |- helper-load.R
-#'         |- test-mymodule.R
+#'         |- test-examplemodule.R
 #'         |- test-server.R
 #'         `- test-sort.R
 #' ```
@@ -29,10 +38,10 @@
 #' * `app.R` is the main application file.
 #' * All files in the `R/` subdirectory are automatically sourced when the
 #'   application is run.
-#' * `R/sort.R` and `R/my-module.R` are automatically sourced when
+#' * `R/example.R` and `R/example-module.R` are automatically sourced when
 #'   the application is run. The first contains a function `lexical_sort()`,
-#'   and the second contains code for a [Shiny module](moduleServer()) which
-#'   is used in the application.
+#'   and the second contains code for module created by the
+#'   [moduleServer()] function, which is used in the application.
 #' * `tests/` contains various tests for the application. You may
 #'   choose to use or remove any of them. They can be executed by the
 #'   [runTests()] function.
@@ -43,7 +52,7 @@
 #'   snapshot-based testing.
 #' * `tests/testthat.R` is a test runner for test files in the
 #'   `tests/testthat/` directory using the [testthat](https://testthat.r-lib.org/) package.
-#' * `tests/testthat/test-mymodule.R` is a test for an application's module server function.
+#' * `tests/testthat/test-examplemodule.R` is a test for an application's module server function.
 #' * `tests/testthat/test-server.R` is a test for the application's server code
 #' * `tests/testthat/test-sort.R` is a test for a supporting function in the `R/` directory.
 #'
@@ -70,11 +79,11 @@ shinyAppTemplate <- function(path = NULL, examples = "default", dryrun = FALSE)
   # =======================================================
 
   choices <- c(
-    app       = "app.R            : Main application file",
-    rdir      = "R/sort.R         : Helper file with R code",
-    module    = "R/my-module.R    : Example module",
-    shinytest = "tests/shinytest/ : Tests using shinytest package",
-    testthat  = "tests/testthat/  : Tests using testthat"
+    app       = "app.R              : Main application file",
+    rdir      = "R/example.R        : Helper file with R code",
+    module    = "R/example-module.R : Example module",
+    shinytest = "tests/shinytest/   : Tests using the shinytest package",
+    testthat  = "tests/testthat/    : Tests using the testthat package"
   )
 
   if (identical(examples, "default")) {
@@ -116,13 +125,12 @@ shinyAppTemplate <- function(path = NULL, examples = "default", dryrun = FALSE)
   }
 
   if ("shinytest" %in% examples) {
-    if (system.file(package = "shinytest") != "" &&
-        utils::packageVersion("shinytest") <= "1.3.1.9000")
+    if (!is_available("shinytest", "1.4.0"))
     {
       message(
-        "The tests/shinytest directory needs shinytest 1.4.0 or later to work properly.\n",
+        "The tests/shinytest directory needs shinytest 1.4.0 or later to work properly."
       )
-      if (system.file(package = "shinytest") != "") {
+      if (is_available("shinytest")) {
         message("You currently have shinytest ",
                 utils::packageVersion("shinytest"), " installed.")
       }
@@ -260,14 +268,16 @@ shinyAppTemplate <- function(path = NULL, examples = "default", dryrun = FALSE)
 
   # R/ dir with non-module files
   if ("rdir" %in% examples) {
-    non_module_files <- dir(template_path("R"), pattern = "[^(module)].R$")
+    files <- dir(template_path("R"))
+    non_module_files <- files[!grepl("module.R$", files)]
     mkdir(dest_path("R"))
     copy_file(file.path("R", non_module_files))
   }
 
   # R/ dir with module files
   if ("module" %in% examples) {
-    module_files <- dir(template_path("R"), pattern = "module.R$")
+    files <- dir(template_path("R"))
+    module_files <- files[grepl("module.R$", files)]
     mkdir(dest_path("R"))
     copy_file(file.path("R", module_files))
   }

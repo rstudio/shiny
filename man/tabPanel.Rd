@@ -7,7 +7,7 @@
 \usage{
 tabPanel(title, ..., value = title, icon = NULL)
 
-tabPanelBody(..., value = NULL, icon = NULL)
+tabPanelBody(value, ..., icon = NULL)
 }
 \arguments{
 \item{title}{Display title for tab}
@@ -16,7 +16,7 @@ tabPanelBody(..., value = NULL, icon = NULL)
 
 \item{value}{The value that should be sent when \code{tabsetPanel} reports
 that this tab is selected. If omitted and \code{tabsetPanel} has an
-\code{id}, then the title will be used..}
+\code{id}, then the title will be used.}
 
 \item{icon}{Optional icon to appear on the tab. This attribute is only
 valid when using a \code{tabPanel} within a \code{\link[=navbarPage]{navbarPage()}}.}

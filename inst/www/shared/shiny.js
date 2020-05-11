@@ -9,7 +9,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 (function () {
   var $ = jQuery;
   var exports = window.Shiny = window.Shiny || {};
-  exports.version = "1.4.0.9002"; // Version number inserted by Grunt
+  exports.version = "1.4.0.9003"; // Version number inserted by Grunt
 
   var origPushState = window.history.pushState;
 
@@ -5322,7 +5322,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     _getLabel: function _getLabel(obj) {
       // If <label><input /><span>label text</span></label>
       if (obj.parentNode.tagName === "LABEL") {
-        return $.trim($(obj.parentNode).find('span').text());
+        return $(obj.parentNode).find('span').text().trim();
       }
 
       return null;
@@ -5420,7 +5420,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     _getLabel: function _getLabel(obj) {
       // If <label><input /><span>label text</span></label>
       if (obj.parentNode.tagName === "LABEL") {
-        return $.trim($(obj.parentNode).find('span').text());
+        return $(obj.parentNode).find('span').text().trim();
       }
 
       return null;
@@ -6312,6 +6312,65 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       }
     });
 
+    function getComputedBgColor(el) {
+      if (!el) {
+        // Top of document, can't recurse further
+        return null;
+      }
+
+      var bgColor = getStyle(el, "background-color");
+      var m = bgColor.match(/^rgba\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)\s*\)$/);
+
+      if (bgColor === "transparent" || m && parseFloat(m[4]) === 0) {
+        // No background color on this element. See if it has a background image.
+        var bgImage = getStyle(el, "background-image");
+
+        if (bgImage && bgImage !== "none") {
+          // Failed to detect background color, since it has a background image
+          return null;
+        } else {
+          // Recurse
+          return getComputedBgColor(el.parentElement);
+        }
+      }
+
+      return bgColor;
+    } // Compute the color property of an a tag, scoped within the element
+
+
+    function getComputedLinkColor(el) {
+      var a = document.createElement("a");
+      a.href = "/";
+      var div = document.createElement("div");
+      div.style.setProperty("position", "absolute", "important");
+      div.style.setProperty("top", "-1000px", "important");
+      div.style.setProperty("left", "0", "important");
+      div.style.setProperty("width", "30px", "important");
+      div.style.setProperty("height", "10px", "important");
+      div.appendChild(a);
+      el.appendChild(div);
+      var linkColor = getStyle(a, "color");
+      el.removeChild(div);
+      return linkColor;
+    }
+
+    function getComputedFont(el) {
+      var fontFamily = getStyle(el, "font-family");
+      var fontSize = getStyle(el, "font-size");
+      return {
+        families: fontFamily.replace(/"/g, '').split(", "),
+        size: fontSize
+      };
+    }
+
+    $('.shiny-image-output, .shiny-plot-output, .shiny-report-theme').each(function () {
+      var id = getIdFromEl(this);
+      initialValues['.clientdata_output_' + id + '_bg'] = getComputedBgColor(this);
+      initialValues['.clientdata_output_' + id + '_fg'] = getStyle(this, "color");
+      initialValues['.clientdata_output_' + id + '_accent'] = getComputedLinkColor(this);
+      initialValues['.clientdata_output_' + id + '_font'] = getComputedFont(this);
+    });
+
     function doSendImageSize() {
       $('.shiny-image-output, .shiny-plot-output, .shiny-report-size').each(function () {
         var id = getIdFromEl(this);
@@ -6320,6 +6379,13 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
           inputs.setInput('.clientdata_output_' + id + '_width', this.offsetWidth);
           inputs.setInput('.clientdata_output_' + id + '_height', this.offsetHeight);
         }
+      });
+      $('.shiny-image-output, .shiny-plot-output, .shiny-report-theme').each(function () {
+        var id = getIdFromEl(this);
+        inputs.setInput('.clientdata_output_' + id + '_bg', getComputedBgColor(this));
+        inputs.setInput('.clientdata_output_' + id + '_fg', getStyle(this, "color"));
+        inputs.setInput('.clientdata_output_' + id + '_accent', getComputedLinkColor(this));
+        inputs.setInput('.clientdata_output_' + id + '_font', getComputedFont(this));
       });
       $('.shiny-bound-output').each(function () {
         var $this = $(this),

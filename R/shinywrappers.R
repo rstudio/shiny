@@ -198,7 +198,10 @@ markOutputAttrs <- function(renderFunc, snapshotExclude = NULL,
 #' @param deleteFile Should the file in `func()$src` be deleted after
 #'   it is sent to the client browser? Generally speaking, if the image is a
 #'   temp file generated within `func`, then this should be `TRUE`;
-#'   if the image is not a temp file, this should be `FALSE`.
+#'   if the image is not a temp file, this should be `FALSE`. (For backward
+#'   compatibility reasons, if this argument is missing, a warning will be
+#'   emitted, and if the file is in the temp directory it will be deleted. In
+#'   the future, this warning will become an error.)
 #' @param outputArgs A list of arguments to be passed through to the implicit
 #'   call to [imageOutput()] when `renderImage` is used in an
 #'   interactive R Markdown document.
@@ -271,15 +274,50 @@ markOutputAttrs <- function(renderFunc, snapshotExclude = NULL,
 #' shinyApp(ui, server)
 #' }
 renderImage <- function(expr, env=parent.frame(), quoted=FALSE,
-                        deleteFile=TRUE, outputArgs=list()) {
+                        deleteFile, outputArgs=list()) {
   installExprFunction(expr, "func", env, quoted)
+
+  # missing() must be used directly within the function with the given arg
+  if (missing(deleteFile)) {
+    deleteFile <- NULL
+  }
+
+  # Tracks whether we've reported the `deleteFile` warning yet; we don't want to
+  # do it on every invalidation (though we will end up doing it at least once
+  # per output per session).
+  warned <- FALSE
 
   createRenderFunction(func,
     transform = function(imageinfo, session, name, ...) {
-      # Should the file be deleted after being sent? If .deleteFile not set or if
-      # TRUE, then delete; otherwise don't delete.
-      if (deleteFile) {
-        on.exit(unlink(imageinfo$src))
+      shouldDelete <- deleteFile
+
+      # jcheng 2020-05-08
+      #
+      # Until Shiny 1.5.0, the default for deleteFile was, incredibly, TRUE.
+      # Changing it to default to FALSE might cause existing Shiny apps to pile
+      # up images in their temp directory (for long lived R processes). Not
+      # having a default (requiring explicit value) is the right long-term move,
+      # but would break today's apps.
+      #
+      # Compromise we decided on was to eventually require TRUE/FALSE, but for
+      # now, change the default behavior to only delete temp files; and emit a
+      # warning encouraging people to not rely on the default.
+      if (is.null(shouldDelete)) {
+        shouldDelete <- isTempFile(imageinfo$src)
+        if (!warned) {
+          warned <<- TRUE
+          warning("The renderImage output named '",
+            getCurrentOutputInfo()$name,
+            "' is missing the deleteFile argument; as of Shiny 1.5.0, you must ",
+            "use deleteFile=TRUE or deleteFile=FALSE. (This warning will ",
+            "become an error in a future version of Shiny.)",
+            call. = FALSE
+          )
+        }
+      }
+
+      if (shouldDelete) {
+        on.exit(unlink(imageinfo$src), add = TRUE)
       }
 
       # If contentType not specified, autodetect based on extension
@@ -295,6 +333,18 @@ renderImage <- function(expr, env=parent.frame(), quoted=FALSE,
     imageOutput, outputArgs)
 }
 
+isTempFile <- function(path, tempDir = tempdir(), default = FALSE) {
+  if (nchar(tempDir) == 0) {
+    # This should never happen, but just to be super paranoid...
+    return(default)
+  }
+  tempDir <- normalizePath(tempDir, winslash = "/", mustWork = FALSE)
+  tempDir <- ensure_trailing_slash(tempDir)
+
+  path <- normalizePath(path, winslash = "/", mustWork = FALSE)
+
+  return(substr(path, 1, nchar(tempDir)) == tempDir)
+}
 
 #' Printable Output
 #'
@@ -527,7 +577,7 @@ renderUI <- function(expr, env=parent.frame(), quoted=FALSE,
 #' if (interactive()) {
 #'
 #' ui <- fluidPage(
-#'   downloadLink("downloadData", "Download")
+#'   downloadButton("downloadData", "Download")
 #' )
 #'
 #' server <- function(input, output) {

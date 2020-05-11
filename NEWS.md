@@ -5,6 +5,8 @@ shiny 1.4.0.9001
 
 ### Breaking changes
 
+* Fixed [#2869](https://github.com/rstudio/shiny/issues/2869): Until this release, `renderImage()` had a dangerous default of `deleteFile = TRUE`. (Sorry!) Going forward, calls to `renderImage()` will need an explicit `deleteFile` argument; for now, failing to provide one will result in a warning message, and the file will be deleted if it appears to be within the `tempdir()`. ([#2881](https://github.com/rstudio/shiny/pull/2881))
+
 ### New features
 
 * The new `shinyAppTemplate()` function creates a new template Shiny application, where components are optional, such as helper files in an R/ subdirectory, a module, and various kinds of tests. ([#2704](https://github.com/rstudio/shiny/pull/2704))
@@ -17,11 +19,13 @@ shiny 1.4.0.9001
 
 * Resolved [#2732](https://github.com/rstudio/shiny/issues/2732): `markdown()` is a new function for writing Markdown with Github extensions directly in Shiny UIs. Markdown rendering is performed by the [commonmark](https://github.com/jeroen/commonmark) package. ([#2737](https://github.com/rstudio/shiny/pull/2737))
 
+* The `getCurrentOutputInfo()` function can now return the background color (`bg`), foreground color (`fg`), `accent` (i.e., hyperlink) color, and `font` information of the output's HTML container. This information is reported by `plotOutput()`, `imageOutput()`, and any other output bindings containing a class of `.shiny-report-theme`. This feature allows developers to style an output's contents based on the container's CSS styling.  ([#2740](https://github.com/rstudio/shiny/pull/2740))
+
 ### Minor new features and improvements
 
 * Fixed [#2042](https://github.com/rstudio/shiny/issues/2042), [#2628](https://github.com/rstudio/shiny/issues/2628): In a `dateInput` and `dateRangeInput`, disabled months and years are now a lighter gray, to make it easier to see that they are disabled. ([#2690](https://github.com/rstudio/shiny/pull/2690))
 
-* `getCurrentOutputInfo()` previously threw an error when called from outside of an output; now it returns `NULL`. ([#2707](https://github.com/rstudio/shiny/pull/2707))
+* `getCurrentOutputInfo()` previously threw an error when called from outside of an output; now it returns `NULL`. ([#2707](https://github.com/rstudio/shiny/pull/2707) and [#2858](https://github.com/rstudio/shiny/pull/2858))
 
 * Added a label to observer that auto-reloads `R/` directory to avoid confusion when using `reactlog`. ([#58](https://github.com/rstudio/reactlog/issues/58))
 
@@ -32,6 +36,8 @@ shiny 1.4.0.9001
 * Added a new option (`type = "hidden"`) to `tabsetPanel()`, making it easier to set the active tab via other input controls (e.g., `radioButtons()`) rather than tabs or pills. Use this option in conjunction with `updateTabsetPanel()` and the new `tabsetPanelBody()` function (see `help(tabsetPanel)` for an example and more details).  ([#2814](https://github.com/rstudio/shiny/pull/2814))
 
 * Added function `updateActionLink()` to update an `actionLink()` label and/or icon value. ([#2811](https://github.com/rstudio/shiny/pull/2811))
+
+* Fixed [#2856](https://github.com/rstudio/shiny/issues/2856): Bumped jQuery 3 from 3.4.1 to 3.5.0. ([#2857](https://github.com/rstudio/shiny/pull/2857))
 
 ### Bug fixes
 

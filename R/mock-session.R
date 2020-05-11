@@ -645,7 +645,10 @@ MockShinySession <- R6Class(
     #   `content` should accept a path argument and create a file at that path.
     # @return A path to a temp file.
     renderFile = function(name, download) {
-      tmpd <- tempdir()
+      # We make our own tempdir here because it's not safe to delete the result
+      # of tempdir().
+      tmpd <- tempfile()
+      dir.create(tmpd, recursive = TRUE)
       self$onSessionEnded(function() unlink(tmpd, recursive = TRUE))
       file <- file.path(tmpd, download$filename())
       download$content(file)

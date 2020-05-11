@@ -85,7 +85,8 @@ makeNoop <- function(name, msg = paste0(name, " is a noop.")) {
   body(impl) <- rlang::expr({
     # Force arguments
     !!lapply(formalArgs(impl), rlang::sym)
-    private$noopWarn(!!name, !!msg)
+    # Evade "no visible binding" note for reference to `private`
+    get("private")$noopWarn(!!name, !!msg)
     invisible()
   })
   impl

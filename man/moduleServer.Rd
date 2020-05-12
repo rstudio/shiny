@@ -14,9 +14,6 @@ UI function.}
 
 \item{session}{Session from which to make a child scope (the default should
 almost always be used).}
-
-\item{...}{For \code{callModule}, additional parameters to pass to module server
-function.}
 }
 \value{
 The return value, if any, from executing the module server function

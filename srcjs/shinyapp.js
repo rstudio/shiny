@@ -1031,6 +1031,10 @@ var ShinyApp = function() {
     if (what === "hash") $(document).trigger("hashchange");
   });
 
+  addMessageHandler("setBrush", function (message) {
+    exports.setBrush(message.brushId, message.coords, message.panel - 1);
+  });
+
   addMessageHandler("resetBrush", function(message) {
     exports.resetBrush(message.brushId);
   });

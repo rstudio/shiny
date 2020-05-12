@@ -205,6 +205,13 @@ workerId <- local({
 #'   An environment for app authors and module/package authors to store whatever
 #'   session-specific data they want.
 #' }
+#' \item{setBrush(brushId, coords, panel=1)}{
+#'   Sets the brush with the given `brushId`, if it exists on
+#'   any `imageOutput` or `plotOutput` in the app. The `coords` should be a
+#'   list with `xmin`, `xmax`, `ymin`, `ymax` single-element numerics that
+#'   specify the desired brush position (in the plot scale). `panel` should
+#'   be a single-element integer that defines the panel that should be brushed.
+#' }
 #' \item{resetBrush(brushId)}{
 #'   Resets/clears the brush with the given `brushId`, if it exists on
 #'   any `imageOutput` or `plotOutput` in the app.
@@ -1662,6 +1669,18 @@ ShinySession <- R6Class(
     updateQueryString = function(queryString, mode) {
       private$sendMessage(updateQueryString = list(
         queryString = queryString, mode = mode))
+    },
+    setBrush = function(brushId, coords, panel = 1) {
+      if (!all(c("xmin", "xmax", "ymin", "ymax") %in% names(coords))){
+        stop("coords must have xmin, xmax, ymin and ymax fields")
+      }
+      private$sendMessage(
+        setBrush = list(
+          brushId = brushId,
+          coords = coords,
+          panel = panel
+        )
+      )
     },
     resetBrush = function(brushId) {
       private$sendMessage(

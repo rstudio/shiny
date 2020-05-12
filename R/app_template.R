@@ -252,7 +252,7 @@ shinyAppTemplate <- function(path = NULL, examples = "default", dryrun = FALSE)
     if (interactive()) {
       response <- readline(paste0(
         ensure_trailing_slash(path),
-        " is not empty. Do you want to create a Shiny app in this directory anyway? [y/n] "
+        " is not empty. Do you want to use this directory anyway? [y/n] "
       ))
       if (tolower(response) != "y") {
         return(invisible())

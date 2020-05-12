@@ -47,6 +47,10 @@ shiny 1.4.0.9001
 
 ### Documentation Updates
 
+### Library updates
+
+* Updated to Font-Awesome 5.13.0, which includes icons related to COVID-19. ([#2891](https://github.com/rstudio/shiny/pull/2891))
+
 
 shiny 1.4.0.2
 ===========

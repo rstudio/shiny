@@ -21,6 +21,8 @@ almost always be used)}
 The return value, if any, from executing the module server function
 }
 \description{
-\strong{Deprecated} \code{callModule} has been deprecated in favor of
-\code{\link[=moduleServer]{moduleServer()}} starting in Shiny 1.5.0.
+Note: As of Shiny 1.5.0, we recommend using \code{\link[=moduleServer]{moduleServer()}} instead of
+\code{\link[=callModule]{callModule()}}, because the syntax is a little easier
+to understand, and modules created with \code{moduleServer} can be tested with
+\code{\link[=testServer]{testServer()}}.
 }

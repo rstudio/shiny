@@ -1663,6 +1663,15 @@ ShinySession <- R6Class(
       private$sendMessage(updateQueryString = list(
         queryString = queryString, mode = mode))
     },
+    setBrush = function(brushId, coords, panel = 1) {
+      private$sendMessage(
+        setBrush = list(
+          brushId = brushId,
+          coords = coords,
+          panel = panel
+        )
+      )
+    },
     resetBrush = function(brushId) {
       private$sendMessage(
         resetBrush = list(

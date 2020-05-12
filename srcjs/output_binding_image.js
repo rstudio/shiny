@@ -872,6 +872,29 @@ imageutils.createBrushHandler = function(inputId, $el, opts, coordmap, outputId)
     brushInfoSender = new Debouncer(null, sendBrushInfo, opts.brushDelay);
   }
 
+  $el.on("shiny-internal:setbrush.image_output", function(e, payload) {
+    if (payload.brushId === inputId){
+      var panel = coordmap.panels[payload.panel];
+      var imgCoords = panel.scaleDataToImg({
+        xmin: payload.coords.xmin,
+        xmax: payload.coords.xmax,
+        ymin: payload.coords.ymin,
+        ymax: payload.coords.ymax
+      });
+
+      var cssCoords = coordmap.scaleImgToCss(imgCoords);
+
+      brush.reset();
+      brush.down({x: cssCoords.xmin, y: cssCoords.ymin}); // click at start
+      brush.startBrushing();
+      brush.brushTo({x: cssCoords.xmax, y: cssCoords.ymax}); // go to end
+      brush.up({x: cssCoords.xmax, y: cssCoords.ymax});  // mouseup
+      brush.stopBrushing();
+
+      brushInfoSender.immediateCall(); // push to backend
+    }
+  });
+
   function mousedown(e) {
     // This can happen when mousedown inside the graphic, then mouseup
     // outside, then mousedown inside. Just ignore the second
@@ -1557,6 +1580,12 @@ imageutils.createBrush = function($el, opts, coordmap, expandPixels) {
     resizeTo: resizeTo,
     stopResizing: stopResizing
   };
+};
+
+exports.setBrush = function(brushId, coords, panel) {
+  imageOutputBinding.find(document).trigger("shiny-internal:setbrush", {
+    brushId: brushId, coords: coords, panel: panel
+  });
 };
 
 exports.resetBrush = function(brushId) {

@@ -218,6 +218,11 @@ test_that("session supports userData", {
   expect_equal(session$userData$x, 123)
 })
 
+test_that("session supports setBrush", {
+  session <- MockShinySession$new()
+  expect_warning(session$setBrush(1), "isn't meaningfully mocked")
+})
+
 test_that("session supports resetBrush", {
   session <- MockShinySession$new()
   expect_warning(session$resetBrush(1), "isn't meaningfully mocked")

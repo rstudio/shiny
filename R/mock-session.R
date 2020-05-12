@@ -334,6 +334,13 @@ MockShinySession <- R6Class(
     reload = function() {},
     #' @description No-op
     #' @param brushId Not used
+    #' @param coords Not used
+    #' @param panel Not used
+    setBrush = function(brushId, coords, panel = 1) {
+      warning("session$brush isn't meaningfully mocked on the MockShinySession")
+    },
+    #' @description No-op
+    #' @param brushId Not used
     resetBrush = function(brushId) {
       warning("session$brush isn't meaningfully mocked on the MockShinySession")
     },

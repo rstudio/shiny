@@ -220,7 +220,14 @@ test_that("session supports userData", {
 
 test_that("session supports resetBrush", {
   session <- MockShinySession$new()
-  expect_warning(session$resetBrush(1), "isn't meaningfully mocked")
+  withr::with_options(list("shiny.mocksession.warn" = TRUE), {
+    expect_warning(session$resetBrush(1))
+  })
+})
+
+test_that("generated methods signal unused argument errors", {
+  expect_error(session$resetBrush(1,2,3))
+  expect_error(session$resetBrush(1,2))
 })
 
 test_that("session supports sendCustomMessage", {
@@ -243,12 +250,16 @@ test_that("session supports sendInputMessage", {
 
 test_that("session supports setBookmarkExclude", {
   session <- MockShinySession$new()
-  expect_warning(session$setBookmarkExclude(names=1), "Bookmarking isn't meaningfully mocked")
+  withr::with_options(list("shiny.mocksession.warn" = TRUE), {
+    expect_warning(session$setBookmarkExclude(names=1))
+  })
 })
 
 test_that("session supports getBookmarkExclude", {
   session <- MockShinySession$new()
-  expect_warning(session$getBookmarkExclude(), "Bookmarking isn't meaningfully mocked")
+  withr::with_options(list("shiny.mocksession.warn" = TRUE), {
+    expect_warning(session$getBookmarkExclude())
+  })
 })
 
 test_that("session supports onBookmark", {
@@ -265,7 +276,9 @@ test_that("session supports onBookmarked", {
 
 test_that("session supports doBookmark", {
   session <- MockShinySession$new()
-  expect_warning(session$doBookmark(), "Bookmarking isn't meaningfully mocked")
+  withr::with_options(list("shiny.mocksession.warn" = TRUE), {
+    expect_warning(session$doBookmark())
+  })
 })
 
 test_that("session supports onRestore", {

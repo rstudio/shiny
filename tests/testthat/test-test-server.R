@@ -3,6 +3,7 @@ context("testServer")
 library(shiny)
 library(testthat)
 library(future)
+library(promises)
 
 test_that("testServer passes dots", {
   module <- function(id, someArg) {
@@ -607,13 +608,13 @@ test_that("session ended handlers work", {
 
     expect_equal(session$isEnded(), FALSE)
     expect_equal(session$isClosed(), FALSE)
-    expect_false(rv$closed, FALSE)
+    expect_false(rv$closed)
 
     session$close()
 
     expect_equal(session$isEnded(), TRUE)
     expect_equal(session$isClosed(), TRUE)
-    expect_false(rv$closed, TRUE)
+    expect_true(rv$closed)
   })
 })
 
@@ -649,5 +650,240 @@ test_that("session flush handlers work", {
     expect_equal(rv$flushOnceCounter, 1)
     expect_equal(rv$flushedOnceCounter, 1)
 
+  })
+})
+
+test_that("module return value captured", {
+  module_implicit_return <- function(id) {
+    moduleServer(id, function(input, output, session) {
+      123
+    })
+  }
+
+  testServer(module_implicit_return, {
+    expect_equal(session$returned, 123)
+  })
+
+  module_early_returns <- function(id, n) {
+    retval <- NULL
+    moduleServer(id, function(input, output, session) {
+      if (n == 0) return(n)
+      if (n %% 2 == 0) {
+        retval <<- "even"
+      } else {
+        return(FALSE)
+      }
+      retval
+    })
+  }
+
+  testServer(module_early_returns, {
+    expect_equal(session$returned, 0)
+  }, args = list(n = 0))
+
+  testServer(module_early_returns, {
+    expect_equal(session$returned, FALSE)
+  }, args = list(n = 1))
+
+  testServer(module_early_returns, {
+    expect_equal(session$returned, "even")
+  }, args = list(n = 2))
+})
+
+test_that("It's an error to pass arguments to a server", {
+  expect_error(testServer(test_path("..", "test-modules", "06_tabsets"), {}, args = list(an_arg = 123)))
+})
+
+# Provided an instance of an R6 object and its generator, returns a list with
+# `methods` and `fields`. `methods` contains a character vector of names of
+# public methods. `fields` is a character vector of public fields. Any active
+# bindings are considered `fields`.
+get_mocked_publics <- function(instance, generator) {
+  publics <- ls(instance, all.names = TRUE)
+  actives <- names(generator$active) %OR% character(0)
+  # Active bindings are considered fields.
+  methods_or_fields <- publics[!(publics %in% actives)]
+  methods <- character(0)
+  fields <- actives
+  for (name in methods_or_fields) {
+    if (is.function(instance[[name]])) {
+      methods <- c(methods, name)
+    } else {
+      fields <- c(fields, name)
+    }
+  }
+  list(methods = methods, fields = fields)
+}
+
+test_that("MockShinySession has all public ShinySession methods and fields", {
+  real_methods <- names(ShinySession$public_methods)
+  real_fields <- c(names(ShinySession$public_fields), names(ShinySession$active))
+
+  # Here we must instantiate a MockShinySession because methods are added to the
+  # instance in the constructor.
+  mock_session <- MockShinySession$new()
+  mocked <- get_mocked_publics(mock_session, MockShinySession)
+
+  expect_equal(intersect(real_methods, mocked$methods), real_methods)
+  expect_equal(intersect(real_fields, mocked$fields), real_fields)
+})
+
+test_that("downloadHandler() works", {
+  data <- mtcars
+  tmpd <- NULL
+
+  module <- function(id) {
+    moduleServer(id, function(input, output, session) {
+      filename <- reactive({
+        paste0(input$name, ".", input$extension)
+      })
+      output$downloadData <- downloadHandler(
+        filename = filename(),
+        content = function(file) {
+          tmpd <<- dirname(file)
+          saveRDS(data, file)
+        }
+      )
+    })
+  }
+
+  testServer(module, {
+    session$setInputs(name = "mtcars", extension = "rds")
+    f <- output$downloadData
+    expect_equal(basename(f), "mtcars.rds")
+    expect_equal(readRDS(f), data)
+  })
+
+  # Ensure the temp file was closed when the session ended.
+  expect_false(file.exists(tmpd))
+})
+
+test_that("getOutputInfo() returns current output name", {
+  savedOutputInfo <- NULL
+
+  module <- function(id) {
+    moduleServer(id, function(input, output, session) {
+      output$txt <- renderText({
+        savedOutputInfo <<- getCurrentOutputInfo()
+        "some text"
+      })
+    })
+  }
+
+  testServer(module, {
+    expect_equal(savedOutputInfo, NULL)
+    # savedOutputInfo is not set until output$txt is accessed
+    expect_equal(output$txt, "some text")
+    expect_equal(savedOutputInfo, list(name = session$ns("txt")))
+    expect_equal(getCurrentOutputInfo(), NULL)
+  })
+})
+
+test_that("renderCachedPlot with cache = app and cache = session works", {
+  module <- function(id, cache, callback) {
+    moduleServer(id, function(input, output, session) {
+      output$plot <- renderCachedPlot({
+        callback()
+        plot(input$x, input$y)
+      },
+        cacheKeyExpr = c(input$x, input$y),
+        cache = cache
+      )
+    })
+  }
+
+  timesRendered <- 0
+  callback <- function() (timesRendered <<- timesRendered + 1)
+
+  testServer(module, {
+    expect_equal(timesRendered, 0)
+    session$setInputs(x = 1:10, y = 1:10)
+    output$plot
+    expect_equal(timesRendered, 1)
+    session$setInputs(x = 1:10, y = 1:10)
+    output$plot
+    expect_equal(timesRendered, 1)
+  }, args = list(cache = "session", callback = callback))
+
+  timesRendered <- 0
+
+  testServer(module, {
+    expect_equal(timesRendered, 0)
+    session$setInputs(x = 1:10, y = 1:10)
+    output$plot
+    expect_equal(timesRendered, 1)
+    session$setInputs(x = 1:10, y = 1:10)
+    output$plot
+    expect_equal(timesRendered, 1)
+  }, args = list(cache = "app", callback = callback))
+})
+
+
+test_that("promise chains evaluate in correct order", {
+  messages <- list()
+  clearMessages <- function() {
+    messages <<- list()
+  }
+  pushMessage <- function(msg) {
+    messages <<- c(messages, msg)
+  }
+
+  module <- function(id) {
+    moduleServer(id, function(input, output, session) {
+      r1 <- reactive({
+        promise(function(resolve, reject) {
+          pushMessage("promise 1")
+          resolve(input$go)
+        })$then(function(value) {
+          pushMessage(paste("promise 1 then", value))
+          paste("r1", input$go)
+        })
+      })
+      r2 <- reactive({
+        promise(function(resolve, reject) {
+          pushMessage("promise 2")
+          resolve(input$go)
+        })$then(function(value) {
+          pushMessage(paste("promise 2 then", value))
+          paste("r2", input$go)
+        })
+      })
+      output$text1 <- renderText({
+        pushMessage("output$text1")
+        r1()
+      })
+      output$text2 <- renderText({
+        pushMessage("output$text2")
+        input$go
+        r2()
+      })
+    })
+  }
+
+  testServer(module, {
+    expect_length(messages, 0)
+    session$setInputs(go = 1)
+    expect_equal(output$text1, "r1 1")
+    expect_equal(output$text2, "r2 1")
+    expect_equal(messages, list(
+      "output$text1",
+      "promise 1",
+      "output$text2",
+      "promise 2",
+      "promise 1 then 1",
+      "promise 2 then 1"
+    ))
+    clearMessages()
+    session$setInputs(go = 2)
+    expect_equal(output$text1, "r1 2")
+    expect_equal(output$text2, "r2 2")
+    expect_equal(messages, list(
+      "output$text1",
+      "promise 1",
+      "output$text2",
+      "promise 2",
+      "promise 1 then 2",
+      "promise 2 then 2"
+    ))
   })
 })

@@ -2,12 +2,9 @@
 % Please edit documentation in R/modules.R
 \name{moduleServer}
 \alias{moduleServer}
-\alias{callModule}
 \title{Shiny modules}
 \usage{
 moduleServer(id, module, session = getDefaultReactiveDomain())
-
-callModule(module, id, ..., session = getDefaultReactiveDomain())
 }
 \arguments{
 \item{id}{An ID string that corresponds with the ID used to call the module's
@@ -17,9 +14,6 @@ UI function.}
 
 \item{session}{Session from which to make a child scope (the default should
 almost always be used).}
-
-\item{...}{For \code{callModule}, additional parameters to pass to module server
-function.}
 }
 \value{
 The return value, if any, from executing the module server function
@@ -32,8 +26,9 @@ modules are easier to reuse and easier to reason about. See the article at
 }
 \details{
 Starting in Shiny 1.5.0, we recommend using \code{moduleServer} instead of
-\code{callModule}, because the syntax is a little easier to understand, and
-modules created with \code{moduleServer} can be tested with \code{\link[=testServer]{testServer()}}.
+\code{\link[=callModule]{callModule()}}, because the syntax is a little easier
+to understand, and modules created with \code{moduleServer} can be tested with
+\code{\link[=testServer]{testServer()}}.
 }
 \examples{
 # Define the UI for a module

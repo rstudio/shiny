@@ -9,7 +9,7 @@ testServer(app = NULL, expr, args = list(), session = MockShinySession$new())
 \arguments{
 \item{app}{The path to an application or module to test. In addition to
 paths, applications may be represented by any object suitable for coercion
-to an \code{appObj} by \code{as.shiny.appobj}. Application server functions must
+to an \code{appObj} by \code{\link{as.shiny.appobj}}. Application server functions must
 include a \code{session} argument in order to be tested. If \code{app} is \code{NULL} or
 not supplied, the nearest enclosing directory that is a Shiny app, starting
 with the current directory, is used.}
@@ -23,9 +23,9 @@ along with any other values created inside of the server function.}
 a module, and no \code{id} argument is provided, one will be generated and
 supplied automatically.}
 
-\item{session}{The \code{MockShinySession} object to use as the reactive domain.
-The same session object is used as the domain both during invocation of the
-server or module under test and during evaluation of \code{expr}.}
+\item{session}{The \code{\link{MockShinySession}} object to use as the \link[shiny:domains]{reactive domain}. The same session object is used as the domain both
+during invocation of the server or module under test and during evaluation
+of \code{expr}.}
 }
 \description{
 A way to test the reactive interactions in Shiny applications. Reactive

@@ -210,6 +210,7 @@ reference:
     contents:
       - NS
       - moduleServer
+      - callModule
   - title: Embedding
     desc: Functions that are intended for third-party packages that embed Shiny applications.
     contents:

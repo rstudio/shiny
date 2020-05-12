@@ -44,14 +44,13 @@ createSessionProxy <- function(parentSession, ...) {
 #' <http://shiny.rstudio.com/articles/modules.html> to learn more.
 #'
 #' Starting in Shiny 1.5.0, we recommend using `moduleServer` instead of
-#' `callModule`, because the syntax is a little easier to understand, and
-#' modules created with `moduleServer` can be tested with [`testServer()`].
+#' [`callModule()`], because the syntax is a little easier
+#' to understand, and modules created with `moduleServer` can be tested with
+#' [`testServer()`].
 #'
 #' @param module A Shiny module server function.
 #' @param id An ID string that corresponds with the ID used to call the module's
 #'   UI function.
-#' @param ... For `callModule`, additional parameters to pass to module server
-#'   function.
 #' @param session Session from which to make a child scope (the default should
 #'   almost always be used).
 #'
@@ -143,7 +142,21 @@ moduleServer <- function(id, module, session = getDefaultReactiveDomain()) {
 }
 
 
-#' @rdname moduleServer
+#' Invoke a Shiny module
+#'
+#' Note: As of Shiny 1.5.0, we recommend using [`moduleServer()`] instead of
+#' [`callModule()`], because the syntax is a little easier
+#' to understand, and modules created with `moduleServer` can be tested with
+#' [`testServer()`].
+#'
+#' @param module A Shiny module server function
+#' @param id An ID string that corresponds with the ID used to call the module's
+#'   UI function
+#' @param ... Additional parameters to pass to module server function
+#' @param session Session from which to make a child scope (the default should
+#'   almost always be used)
+#'
+#' @return The return value, if any, from executing the module server function
 #' @export
 callModule <- function(module, id, ..., session = getDefaultReactiveDomain()) {
   if (!inherits(session, c("ShinySession", "session_proxy", "MockShinySession"))) {

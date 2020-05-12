@@ -144,8 +144,10 @@ moduleServer <- function(id, module, session = getDefaultReactiveDomain()) {
 
 #' Invoke a Shiny module
 #'
-#' **Deprecated** `callModule` has been deprecated in favor of
-#' [`moduleServer()`] starting in Shiny 1.5.0.
+#' Note: As of Shiny 1.5.0, we recommend using [`moduleServer()`] instead of
+#' [`callModule()`], because the syntax is a little easier
+#' to understand, and modules created with `moduleServer` can be tested with
+#' [`testServer()`].
 #'
 #' @param module A Shiny module server function
 #' @param id An ID string that corresponds with the ID used to call the module's

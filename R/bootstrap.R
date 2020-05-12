@@ -1369,7 +1369,7 @@ downloadLink <- function(outputId, label="Download", class=NULL, ...) {
 #'
 #' @param name Name of icon. Icons are drawn from the
 #'   [Font Awesome Free](https://fontawesome.com/) (currently icons from
-#'   the v5.3.1 set are supported with the v4 naming convention) and
+#'   the v5.13.0 set are supported with the v4 naming convention) and
 #'   [Glyphicons](http://getbootstrap.com/components/#glyphicons)
 #'   libraries. Note that the "fa-" and "glyphicon-" prefixes should not be used
 #'   in icon names (i.e. the "fa-calendar" icon should be referred to as
@@ -1427,7 +1427,7 @@ icon <- function(name, class = NULL, lib = "font-awesome") {
   # font-awesome needs an additional dependency (glyphicon is in bootstrap)
   if (lib == "font-awesome") {
     htmlDependencies(iconTag) <- htmlDependency(
-      "font-awesome", "5.3.1", "www/shared/fontawesome", package = "shiny",
+      "font-awesome", "5.13.0", "www/shared/fontawesome", package = "shiny",
       stylesheet = c(
         "css/all.min.css",
         "css/v4-shims.min.css"

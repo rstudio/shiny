@@ -51,8 +51,6 @@ createSessionProxy <- function(parentSession, ...) {
 #' @param module A Shiny module server function.
 #' @param id An ID string that corresponds with the ID used to call the module's
 #'   UI function.
-#' @param ... For `callModule`, additional parameters to pass to module server
-#'   function.
 #' @param session Session from which to make a child scope (the default should
 #'   almost always be used).
 #'

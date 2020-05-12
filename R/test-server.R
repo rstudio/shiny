@@ -10,7 +10,7 @@ isModuleServer <- function(x) {
 #' modules.
 #' @param app The path to an application or module to test. In addition to
 #'   paths, applications may be represented by any object suitable for coercion
-#'   to an `appObj` by `as.shiny.appobj`. Application server functions must
+#'   to an `appObj` by [`as.shiny.appobj`]. Application server functions must
 #'   include a `session` argument in order to be tested. If `app` is `NULL` or
 #'   not supplied, the nearest enclosing directory that is a Shiny app, starting
 #'   with the current directory, is used.
@@ -21,9 +21,10 @@ isModuleServer <- function(x) {
 #' @param args Additional arguments to pass to the module function. If `app` is
 #'   a module, and no `id` argument is provided, one will be generated and
 #'   supplied automatically.
-#' @param session The `MockShinySession` object to use as the reactive domain.
-#'   The same session object is used as the domain both during invocation of the
-#'   server or module under test and during evaluation of `expr`.
+#' @param session The [`MockShinySession`] object to use as the [reactive
+#'   domain][shiny::domains]. The same session object is used as the domain both
+#'   during invocation of the server or module under test and during evaluation
+#'   of `expr`.
 #' @include mock-session.R
 #' @rdname testServer
 #' @examples

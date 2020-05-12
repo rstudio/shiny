@@ -107,6 +107,13 @@ This is the request that was used to initiate the websocket connection
 An environment for app authors and module/package authors to store whatever
 session-specific data they want.
 }
+\item{setBrush(brushId, coords, panel=1)}{
+Sets the brush with the given \code{brushId}, if it exists on
+any \code{imageOutput} or \code{plotOutput} in the app. The \code{coords} should be a
+list with \code{xmin}, \code{xmax}, \code{ymin}, \code{ymax} single-element numerics that
+specify the desired brush position (in the plot scale). \code{panel} should
+be a single-element integer that defines the panel that should be brushed.
+}
 \item{resetBrush(brushId)}{
 Resets/clears the brush with the given \code{brushId}, if it exists on
 any \code{imageOutput} or \code{plotOutput} in the app.

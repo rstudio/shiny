@@ -8,7 +8,7 @@ renderImage(
   expr,
   env = parent.frame(),
   quoted = FALSE,
-  deleteFile = TRUE,
+  deleteFile,
   outputArgs = list()
 )
 }
@@ -23,7 +23,10 @@ is useful if you want to save an expression in a variable.}
 \item{deleteFile}{Should the file in \code{func()$src} be deleted after
 it is sent to the client browser? Generally speaking, if the image is a
 temp file generated within \code{func}, then this should be \code{TRUE};
-if the image is not a temp file, this should be \code{FALSE}.}
+if the image is not a temp file, this should be \code{FALSE}. (For backward
+compatibility reasons, if this argument is missing, a warning will be
+emitted, and if the file is in the temp directory it will be deleted. In
+the future, this warning will become an error.)}
 
 \item{outputArgs}{A list of arguments to be passed through to the implicit
 call to \code{\link[=imageOutput]{imageOutput()}} when \code{renderImage} is used in an

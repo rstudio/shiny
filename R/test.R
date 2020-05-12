@@ -151,6 +151,7 @@ runtest_pretty_file <- function(f) {
 }
 
 
+#' @export
 print.shiny_runtests <- function(x, ..., reporter = "summary") {
 
   cat("Shiny App Test Results\n")

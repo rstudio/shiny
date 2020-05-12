@@ -213,6 +213,10 @@ sortByName <- function(x) {
 # Sort a vector. If a character vector, sort using C locale, which is consistent
 # across platforms. Note that radix sort uses C locale according to ?sort.
 sort_c <- function(x, ...) {
+  # Use UTF-8 encoding, because if encoding is "unknown" for non-ASCII
+  # characters, the sort() will throw an error.
+  if (is.character(x))
+    x <- enc2utf8(x)
   sort(x, method = "radix", ...)
 }
 

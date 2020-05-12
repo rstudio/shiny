@@ -68,7 +68,7 @@ test_that("testServer calls do not nest in module functions", {
     })
   }
 
-  expect_error(testServer(module, {}), regexp = "Modules may not call testServer()")
+  expect_error(testServer(module, {}))
 })
 
 test_that("testServer calls do not nest in test exprs", {
@@ -83,7 +83,5 @@ test_that("testServer calls do not nest in test exprs", {
     })
   }
 
-  expect_error(testServer(module, {
-    testServer(inner, {})
-  }), regexp = "Test expressions may not call testServer()")
+  expect_error(testServer(module, { testServer(inner, {}) }))
 })

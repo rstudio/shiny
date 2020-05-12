@@ -4,8 +4,20 @@
 \alias{MockShinySession}
 \title{Mock Shiny Session}
 \description{
-An R6 class suitable for testing that simulates the \code{session} parameter
-provided to Shiny server functions or modules.
+An R6 class suitable for testing purposes. Simulates, to the
+extent possible, the behavior of the \code{ShinySession} class. The \code{session}
+parameter provided to Shiny server functions and modules is an instance of
+a \code{ShinySession} in normal operation.
+
+Most kinds of module and server testing do not require this class be
+instantiated manually. See instead \code{\link[=testServer]{testServer()}}.
+
+In order to support advanced usage, instances of \code{MockShinySession} are
+\strong{unlocked} so that public methods and fields of instances may be
+modified. For example, in order to test authentication workflows, the
+\code{user} or \code{groups} fields may be overridden. Modified instances of
+\code{MockShinySession} may then be passed explicitly as the \code{session} argument
+of \code{\link[=testServer]{testServer()}}.
 }
 \examples{
 
@@ -22,25 +34,48 @@ session$setInputs(x=1, y=2)
 \describe{
 \item{\code{env}}{The environment associated with the session.}
 
-\item{\code{returned}}{The value returned by the module.}
+\item{\code{returned}}{The value returned by the module under test.}
 
-\item{\code{singletons}}{Hardcoded as empty. Needed for rendering HTML (i.e. renderUI)}
+\item{\code{singletons}}{Hardcoded as empty. Needed for rendering HTML (i.e. renderUI).}
 
-\item{\code{clientData}}{Mock client data that always returns a size for plots}
+\item{\code{clientData}}{Mock client data that always returns a size for plots.}
 
-\item{\code{output}}{The shinyoutputs associated with the session}
+\item{\code{output}}{The shinyoutputs associated with the session.}
 
-\item{\code{input}}{The reactive inputs associated with the session}
+\item{\code{input}}{The reactive inputs associated with the session.}
 
 \item{\code{userData}}{An environment initialized as empty.}
 
-\item{\code{progressStack}}{A stack of progress objects}
+\item{\code{progressStack}}{A stack of progress objects.}
+
+\item{\code{token}}{On a real \code{ShinySession}, used to identify this instance in URLs.}
+
+\item{\code{cache}}{The session cache MemoryCache.}
+
+\item{\code{appcache}}{The app cache MemoryCache.}
+
+\item{\code{restoreContext}}{Part of bookmarking support in a real
+\code{ShinySession} but always \code{NULL} for a \code{MockShinySession}.}
+
+\item{\code{groups}}{Character vector of groups associated with an authenticated
+user. Always \code{NULL} for a \code{MockShinySesion}.}
+
+\item{\code{user}}{The username of an authenticated user. Always \code{NULL} for a
+\code{MockShinySession}.}
 }
 \if{html}{\out{</div>}}
 }
 \section{Active bindings}{
 \if{html}{\out{<div class="r6-active-bindings">}}
 \describe{
+\item{\code{files}}{For internal use only.}
+
+\item{\code{downloads}}{For internal use only.}
+
+\item{\code{closed}}{Deprecated in \code{ShinySession} and signals an error.}
+
+\item{\code{session}}{Deprecated in ShinySession and signals an error.}
+
 \item{\code{request}}{An empty environment where the request should be. The request isn't meaningfully mocked currently.}
 }
 \if{html}{\out{</div>}}
@@ -48,8 +83,6 @@ session$setInputs(x=1, y=2)
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
-\item \href{#method-reactlog}{\code{MockShinySession$reactlog()}}
-\item \href{#method-incrementBusyCount}{\code{MockShinySession$incrementBusyCount()}}
 \item \href{#method-new}{\code{MockShinySession$new()}}
 \item \href{#method-onFlush}{\code{MockShinySession$onFlush()}}
 \item \href{#method-onFlushed}{\code{MockShinySession$onFlushed()}}
@@ -65,22 +98,6 @@ session$setInputs(x=1, y=2)
 \item \href{#method-.now}{\code{MockShinySession$.now()}}
 \item \href{#method-defineOutput}{\code{MockShinySession$defineOutput()}}
 \item \href{#method-getOutput}{\code{MockShinySession$getOutput()}}
-\item \href{#method-registerDataObj}{\code{MockShinySession$registerDataObj()}}
-\item \href{#method-allowReconnect}{\code{MockShinySession$allowReconnect()}}
-\item \href{#method-reload}{\code{MockShinySession$reload()}}
-\item \href{#method-resetBrush}{\code{MockShinySession$resetBrush()}}
-\item \href{#method-sendCustomMessage}{\code{MockShinySession$sendCustomMessage()}}
-\item \href{#method-sendBinaryMessage}{\code{MockShinySession$sendBinaryMessage()}}
-\item \href{#method-sendInputMessage}{\code{MockShinySession$sendInputMessage()}}
-\item \href{#method-setBookmarkExclude}{\code{MockShinySession$setBookmarkExclude()}}
-\item \href{#method-getBookmarkExclude}{\code{MockShinySession$getBookmarkExclude()}}
-\item \href{#method-onBookmark}{\code{MockShinySession$onBookmark()}}
-\item \href{#method-onBookmarked}{\code{MockShinySession$onBookmarked()}}
-\item \href{#method-doBookmark}{\code{MockShinySession$doBookmark()}}
-\item \href{#method-onRestore}{\code{MockShinySession$onRestore()}}
-\item \href{#method-onRestored}{\code{MockShinySession$onRestored()}}
-\item \href{#method-exportTestValues}{\code{MockShinySession$exportTestValues()}}
-\item \href{#method-getTestSnapshotUrl}{\code{MockShinySession$getTestSnapshotUrl()}}
 \item \href{#method-ns}{\code{MockShinySession$ns()}}
 \item \href{#method-flushReact}{\code{MockShinySession$flushReact()}}
 \item \href{#method-makeScope}{\code{MockShinySession$makeScope()}}
@@ -88,41 +105,20 @@ session$setInputs(x=1, y=2)
 \item \href{#method-setReturned}{\code{MockShinySession$setReturned()}}
 \item \href{#method-getReturned}{\code{MockShinySession$getReturned()}}
 \item \href{#method-genId}{\code{MockShinySession$genId()}}
+\item \href{#method-rootScope}{\code{MockShinySession$rootScope()}}
+\item \href{#method-unhandledError}{\code{MockShinySession$unhandledError()}}
+\item \href{#method-freezeValue}{\code{MockShinySession$freezeValue()}}
+\item \href{#method-onSessionEnded}{\code{MockShinySession$onSessionEnded()}}
+\item \href{#method-registerDownload}{\code{MockShinySession$registerDownload()}}
+\item \href{#method-getCurrentOutputInfo}{\code{MockShinySession$getCurrentOutputInfo()}}
 \item \href{#method-clone}{\code{MockShinySession$clone()}}
 }
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-reactlog"></a>}}
-\if{latex}{\out{\hypertarget{method-reactlog}{}}}
-\subsection{Method \code{reactlog()}}{
-No-op
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{MockShinySession$reactlog(logEntry)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{logEntry}}{Not used}
-}
-\if{html}{\out{</div>}}
-}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-incrementBusyCount"></a>}}
-\if{latex}{\out{\hypertarget{method-incrementBusyCount}{}}}
-\subsection{Method \code{incrementBusyCount()}}{
-No-op
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{MockShinySession$incrementBusyCount()}\if{html}{\out{</div>}}
-}
-
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-new"></a>}}
 \if{latex}{\out{\hypertarget{method-new}{}}}
 \subsection{Method \code{new()}}{
-Create a new MockShinySession
+Create a new MockShinySession.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{MockShinySession$new()}\if{html}{\out{</div>}}
 }
@@ -218,7 +214,6 @@ Closes the session
 \if{latex}{\out{\hypertarget{method-cycleStartAction}{}}}
 \subsection{Method \code{cycleStartAction()}}{
 Unsophisticated mock implementation that merely invokes
-the given callback immediately.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{MockShinySession$cycleStartAction(callback)}\if{html}{\out{</div>}}
 }
@@ -226,7 +221,7 @@ the given callback immediately.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{callback}}{The callback ato be invoked.}
+\item{\code{callback}}{The callback to be invoked.}
 }
 \if{html}{\out{</div>}}
 }
@@ -287,6 +282,8 @@ session$setInputs(x=1, y=2)
 \if{latex}{\out{\hypertarget{method-.scheduleTask}{}}}
 \subsection{Method \code{.scheduleTask()}}{
 An internal method which shouldn't be used by others.
+Schedules \code{callback} for execution after some number of \code{millis}
+milliseconds.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{MockShinySession$.scheduleTask(millis, callback)}\if{html}{\out{</div>}}
 }
@@ -296,7 +293,7 @@ An internal method which shouldn't be used by others.
 \describe{
 \item{\code{millis}}{The number of milliseconds on which to schedule a callback}
 
-\item{\code{callback}}{The function to schedule}
+\item{\code{callback}}{The function to schedule.}
 }
 \if{html}{\out{</div>}}
 }
@@ -327,12 +324,17 @@ An internal method which shouldn't be used by others.
 \if{html}{\out{<div class="r">}}\preformatted{MockShinySession$.now()}\if{html}{\out{</div>}}
 }
 
+\subsection{Returns}{
+Elapsed time in milliseconds.
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-defineOutput"></a>}}
 \if{latex}{\out{\hypertarget{method-defineOutput}{}}}
 \subsection{Method \code{defineOutput()}}{
 An internal method which shouldn't be used by others.
+Defines an output in a way that sets private$currentOutputName
+appropriately.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{MockShinySession$defineOutput(name, func, label)}\if{html}{\out{</div>}}
 }
@@ -340,11 +342,11 @@ An internal method which shouldn't be used by others.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{name}}{The name of the output}
+\item{\code{name}}{The name of the output.}
 
-\item{\code{func}}{The render definition}
+\item{\code{func}}{The render definition.}
 
-\item{\code{label}}{Not used}
+\item{\code{label}}{Not used.}
 }
 \if{html}{\out{</div>}}
 }
@@ -353,7 +355,8 @@ An internal method which shouldn't be used by others.
 \if{html}{\out{<a id="method-getOutput"></a>}}
 \if{latex}{\out{\hypertarget{method-getOutput}{}}}
 \subsection{Method \code{getOutput()}}{
-An internal method which shouldn't be used by others.
+An internal method which shouldn't be used by others. Forces
+evaluation of any reactive dependencies of the output function.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{MockShinySession$getOutput(name)}\if{html}{\out{</div>}}
 }
@@ -361,274 +364,13 @@ An internal method which shouldn't be used by others.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{name}}{The name of the output}
+\item{\code{name}}{The name of the output.}
 }
 \if{html}{\out{</div>}}
 }
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-registerDataObj"></a>}}
-\if{latex}{\out{\hypertarget{method-registerDataObj}{}}}
-\subsection{Method \code{registerDataObj()}}{
-No-op
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{MockShinySession$registerDataObj(name, data, filterFunc)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{name}}{Not used}
-
-\item{\code{data}}{Not used}
-
-\item{\code{filterFunc}}{Not used}
-}
-\if{html}{\out{</div>}}
-}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-allowReconnect"></a>}}
-\if{latex}{\out{\hypertarget{method-allowReconnect}{}}}
-\subsection{Method \code{allowReconnect()}}{
-No-op
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{MockShinySession$allowReconnect(value)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{value}}{Not used}
-}
-\if{html}{\out{</div>}}
-}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-reload"></a>}}
-\if{latex}{\out{\hypertarget{method-reload}{}}}
-\subsection{Method \code{reload()}}{
-No-op
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{MockShinySession$reload()}\if{html}{\out{</div>}}
-}
-
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-resetBrush"></a>}}
-\if{latex}{\out{\hypertarget{method-resetBrush}{}}}
-\subsection{Method \code{resetBrush()}}{
-No-op
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{MockShinySession$resetBrush(brushId)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{brushId}}{Not used}
-}
-\if{html}{\out{</div>}}
-}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-sendCustomMessage"></a>}}
-\if{latex}{\out{\hypertarget{method-sendCustomMessage}{}}}
-\subsection{Method \code{sendCustomMessage()}}{
-No-op
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{MockShinySession$sendCustomMessage(type, message)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{type}}{Not used}
-
-\item{\code{message}}{Not used}
-}
-\if{html}{\out{</div>}}
-}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-sendBinaryMessage"></a>}}
-\if{latex}{\out{\hypertarget{method-sendBinaryMessage}{}}}
-\subsection{Method \code{sendBinaryMessage()}}{
-No-op
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{MockShinySession$sendBinaryMessage(type, message)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{type}}{Not used}
-
-\item{\code{message}}{Not used}
-}
-\if{html}{\out{</div>}}
-}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-sendInputMessage"></a>}}
-\if{latex}{\out{\hypertarget{method-sendInputMessage}{}}}
-\subsection{Method \code{sendInputMessage()}}{
-No-op
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{MockShinySession$sendInputMessage(inputId, message)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{inputId}}{Not used}
-
-\item{\code{message}}{Not used}
-}
-\if{html}{\out{</div>}}
-}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-setBookmarkExclude"></a>}}
-\if{latex}{\out{\hypertarget{method-setBookmarkExclude}{}}}
-\subsection{Method \code{setBookmarkExclude()}}{
-No-op
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{MockShinySession$setBookmarkExclude(names)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{names}}{Not used}
-}
-\if{html}{\out{</div>}}
-}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-getBookmarkExclude"></a>}}
-\if{latex}{\out{\hypertarget{method-getBookmarkExclude}{}}}
-\subsection{Method \code{getBookmarkExclude()}}{
-No-op
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{MockShinySession$getBookmarkExclude()}\if{html}{\out{</div>}}
-}
-
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-onBookmark"></a>}}
-\if{latex}{\out{\hypertarget{method-onBookmark}{}}}
-\subsection{Method \code{onBookmark()}}{
-No-op
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{MockShinySession$onBookmark(fun)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{fun}}{Not used}
-}
-\if{html}{\out{</div>}}
-}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-onBookmarked"></a>}}
-\if{latex}{\out{\hypertarget{method-onBookmarked}{}}}
-\subsection{Method \code{onBookmarked()}}{
-No-op
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{MockShinySession$onBookmarked(fun)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{fun}}{Not used}
-}
-\if{html}{\out{</div>}}
-}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-doBookmark"></a>}}
-\if{latex}{\out{\hypertarget{method-doBookmark}{}}}
-\subsection{Method \code{doBookmark()}}{
-No-op
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{MockShinySession$doBookmark()}\if{html}{\out{</div>}}
-}
-
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-onRestore"></a>}}
-\if{latex}{\out{\hypertarget{method-onRestore}{}}}
-\subsection{Method \code{onRestore()}}{
-No-op
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{MockShinySession$onRestore(fun)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{fun}}{Not used}
-}
-\if{html}{\out{</div>}}
-}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-onRestored"></a>}}
-\if{latex}{\out{\hypertarget{method-onRestored}{}}}
-\subsection{Method \code{onRestored()}}{
-No-op
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{MockShinySession$onRestored(fun)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{fun}}{Not used}
-}
-\if{html}{\out{</div>}}
-}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-exportTestValues"></a>}}
-\if{latex}{\out{\hypertarget{method-exportTestValues}{}}}
-\subsection{Method \code{exportTestValues()}}{
-No-op
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{MockShinySession$exportTestValues()}\if{html}{\out{</div>}}
-}
-
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-getTestSnapshotUrl"></a>}}
-\if{latex}{\out{\hypertarget{method-getTestSnapshotUrl}{}}}
-\subsection{Method \code{getTestSnapshotUrl()}}{
-No-op
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{MockShinySession$getTestSnapshotUrl(
-  input = TRUE,
-  output = TRUE,
-  export = TRUE,
-  format = "json"
-)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{input}}{Not used}
-
-\item{\code{output}}{Not used}
-
-\item{\code{export}}{Not used}
-
-\item{\code{format}}{Not used}
-}
-\if{html}{\out{</div>}}
+\subsection{Returns}{
+The return value of the function responsible for rendering the
+output.
 }
 }
 \if{html}{\out{<hr>}}
@@ -643,9 +385,12 @@ Returns the given id prefixed by this namespace's id.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{id}}{The id to modify.}
+\item{\code{id}}{The id to prefix with a namespace id.}
 }
 \if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+The id with a namespace prefix.
 }
 }
 \if{html}{\out{<hr>}}
@@ -674,6 +419,9 @@ Create and return a namespace-specific session proxy.
 }
 \if{html}{\out{</div>}}
 }
+\subsection{Returns}{
+A new session proxy.
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-setEnv"></a>}}
@@ -693,6 +441,9 @@ other words, the first assignment wins.
 \item{\code{env}}{The environment to retain.}
 }
 \if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+The provided \code{env}.
 }
 }
 \if{html}{\out{<hr>}}
@@ -714,6 +465,9 @@ setReturned() in the outermost module, wins.
 }
 \if{html}{\out{</div>}}
 }
+\subsection{Returns}{
+The provided \code{value}.
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-getReturned"></a>}}
@@ -724,17 +478,138 @@ Get the value returned by the module call.
 \if{html}{\out{<div class="r">}}\preformatted{MockShinySession$getReturned()}\if{html}{\out{</div>}}
 }
 
+\subsection{Returns}{
+The value returned by the module call
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-genId"></a>}}
 \if{latex}{\out{\hypertarget{method-genId}{}}}
 \subsection{Method \code{genId()}}{
-Return a distinct character identifier for use as a proxy
+Generate a distinct character identifier for use as a proxy
 namespace.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{MockShinySession$genId()}\if{html}{\out{</div>}}
 }
 
+\subsection{Returns}{
+A character identifier unique to the current session.
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-rootScope"></a>}}
+\if{latex}{\out{\hypertarget{method-rootScope}{}}}
+\subsection{Method \code{rootScope()}}{
+Provides a way to access the root \code{MockShinySession} from
+any descendant proxy.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{MockShinySession$rootScope()}\if{html}{\out{</div>}}
+}
+
+\subsection{Returns}{
+The root \code{MockShinySession}.
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-unhandledError"></a>}}
+\if{latex}{\out{\hypertarget{method-unhandledError}{}}}
+\subsection{Method \code{unhandledError()}}{
+Called by observers when a reactive expression errors.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{MockShinySession$unhandledError(e)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{e}}{An error object.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-freezeValue"></a>}}
+\if{latex}{\out{\hypertarget{method-freezeValue}{}}}
+\subsection{Method \code{freezeValue()}}{
+Freeze a value until the flush cycle completes.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{MockShinySession$freezeValue(x, name)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{x}}{A \code{ReactiveValues} object.}
+
+\item{\code{name}}{The name of a reactive value within \code{x}.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-onSessionEnded"></a>}}
+\if{latex}{\out{\hypertarget{method-onSessionEnded}{}}}
+\subsection{Method \code{onSessionEnded()}}{
+Registers the given callback to be invoked when the session
+is closed (i.e. the connection to the client has been severed). The
+return value is a function which unregisters the callback. If multiple
+callbacks are registered, the order in which they are invoked is not
+guaranteed.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{MockShinySession$onSessionEnded(sessionEndedCallback)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{sessionEndedCallback}}{Function to call when the session ends.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-registerDownload"></a>}}
+\if{latex}{\out{\hypertarget{method-registerDownload}{}}}
+\subsection{Method \code{registerDownload()}}{
+Associated a downloadable file with the session.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{MockShinySession$registerDownload(name, filename, contentType, content)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{name}}{The un-namespaced output name to associate with the
+downloadable file.}
+
+\item{\code{filename}}{A string or function designating the name of the file.}
+
+\item{\code{contentType}}{A string of the content type of the file. Not used by
+\code{MockShinySession}.}
+
+\item{\code{content}}{A function that takes a single argument file that is a
+file path (string) of a nonexistent temp file, and writes the content
+to that file path. (Reactive values and functions may be used from this
+function.)}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-getCurrentOutputInfo"></a>}}
+\if{latex}{\out{\hypertarget{method-getCurrentOutputInfo}{}}}
+\subsection{Method \code{getCurrentOutputInfo()}}{
+Get information about the output that is currently being
+executed.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{MockShinySession$getCurrentOutputInfo()}\if{html}{\out{</div>}}
+}
+
+\subsection{Returns}{
+A list with with the \code{name} of the output. If no output is
+currently being executed, this will return \code{NULL}.
+output, or \code{NULL} if no output is currently executing.
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-clone"></a>}}

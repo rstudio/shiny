@@ -1,0 +1,26 @@
+From af6f8371599ae28a277f53ddd264a673f83853fa Mon Sep 17 00:00:00 2001
+From: Carson <cpsievert1@gmail.com>
+Date: Fri, 15 May 2020 12:16:06 -0500
+Subject: [PATCH] Don't assume option is always a string. Fixes bug introduced
+ by #16011 which discovered by https://github.com/rstudio/shiny/issues/2896
+
+---
+ js/collapse.js | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/js/collapse.js b/js/collapse.js
+index 9dff15422..151d307f3 100644
+--- a/js/collapse.js
++++ b/js/collapse.js
+@@ -173,7 +173,7 @@
+       var data    = $this.data('bs.collapse')
+       var options = $.extend({}, Collapse.DEFAULTS, $this.data(), typeof option == 'object' && option)
+ 
+-      if (!data && options.toggle && /show|hide/.test(option)) options.toggle = false
++      if (!data && options.toggle && typeof option === 'string' && /show|hide/.test(option)) options.toggle = false
+       if (!data) $this.data('bs.collapse', (data = new Collapse(this, options)))
+       if (typeof option == 'string') data[option]()
+     })
+-- 
+2.20.1 (Apple Git-117)
+

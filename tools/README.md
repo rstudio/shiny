@@ -153,3 +153,17 @@ To create a new patch:
 * Update the documentation for the `icon()` function in `R/bootstrap.R` to reflect the new version.
 * Run `devtools::document()`.
 * Commit the changes.
+
+## Updating and patching `bootstrap`
+
+NOTE: Currently we're on Bootstrap 3, which is end-of-life, so we don't anticipate any more updates to Bootstrap 3, but you can update with `updateAndPatchBootstrap.R`. 
+
+### Making a new patch
+
+To create a new patch:
+
+* Make the necessary changes to <https://github.com/twbs/bootstrap/tree/v3-dev>
+* Create a patch file with a command like `git diff > /path/to/shiny/tools/bootstrap-patches/0001-a-description.patch`. Patches are applied in alphabetic order (per `list.files`), so you should name your patch based on the last one in `tools/bootstrap-patches` so that it's applied last.
+* Run `updateAndPatchBootstrap.R` to download the library and apply patches.
+* Test your changes
+* `git add` the new `.patch` and any resulting changes

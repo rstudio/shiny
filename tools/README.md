@@ -153,3 +153,11 @@ To create a new patch:
 * Update the documentation for the `icon()` function in `R/bootstrap.R` to reflect the new version.
 * Run `devtools::document()`.
 * Commit the changes.
+
+## Updating jQuery
+
+* * Edit `updatejQuery.R` to use the new version, and then run it. This will download and copy the files to the relevant locations.
+* Update the "jquery" htmlDependency in `R/shinyui.R` to reflect the new version.
+* Update the documentation for the `shiny.jquery.version` option in `R/shiny-options.R` to reflect the new version.
+* Run `devtools::document()`.
+* Commit the changes.

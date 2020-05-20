@@ -13,7 +13,7 @@ shiny 1.4.0.9001
 
 * `runTests()` is a new function that behaves much like R CMD check. `runTests()` invokes all of the top-level R files in the tests/ directory inside an application, in that application's environment. ([#2585](https://github.com/rstudio/shiny/pull/2585))
 
-* `testServer()` and `testModule()` are two new functions for testing reactive behavior inside server functions and modules, respectively. ([#2682](https://github.com/rstudio/shiny/pull/2682), [#2764](https://github.com/rstudio/shiny/pull/2764))
+* `testServer()` is a new function for testing reactive behavior inside server functions and modules. ([#2682](https://github.com/rstudio/shiny/pull/2682), [#2764](https://github.com/rstudio/shiny/pull/2764), [#2807](https://github.com/rstudio/shiny/pull/2807))
 
 * The new `moduleServer` function provides a simpler interface for creating and using modules. ([#2773](https://github.com/rstudio/shiny/pull/2773))
 

@@ -29,10 +29,16 @@ removeModal <- function(session = getDefaultReactiveDomain()) {
 
 #' Create a modal dialog UI
 #'
-#' This creates the UI for a modal dialog, using Bootstrap's modal class. Modals
-#' are typically used for showing important messages, or for presenting UI that
-#' requires input from the user, such as a username and password input.
+#' @description
+#' `modalDialog()` creates the UI for a modal dialog, using Bootstrap's modal
+#' class. Modals are typically used for showing important messages, or for
+#' presenting UI that requires input from the user, such as a user name and
+#' password input.
 #'
+#' `modalButton()` creates a button that will dismiss the dialog when clicked,
+#' typically used when customising the `footer`.
+#'
+#' @inheritParams actionButton
 #' @param ... UI elements for the body of the modal dialog box.
 #' @param title An optional title for the dialog.
 #' @param footer UI for footer. Use `NULL` for no footer.
@@ -41,7 +47,7 @@ removeModal <- function(session = getDefaultReactiveDomain()) {
 #' @param easyClose If `TRUE`, the modal dialog can be dismissed by
 #'   clicking outside the dialog box, or be pressing the Escape key. If
 #'   `FALSE` (the default), the modal dialog can't be dismissed in those
-#'   ways; instead it must be dismissed by clicking on the dismiss button, or
+#'   ways; instead it must be dismissed by clicking on a `modalButton()`, or
 #'   from a call to [removeModal()] on the server.
 #' @param fade If `FALSE`, the modal dialog will have no fade-in animation
 #'   (it will simply appear rather than fade in to view).
@@ -169,13 +175,8 @@ modalDialog <- function(..., title = NULL, footer = modalButton("Dismiss"),
   )
 }
 
-#' Create a button for a modal dialog
-#'
-#' When clicked, a `modalButton` will dismiss the modal dialog.
-#'
-#' @inheritParams actionButton
-#' @seealso [modalDialog()] for examples.
 #' @export
+#' @rdname modalDialog
 modalButton <- function(label, icon = NULL) {
   tags$button(type = "button", class = "btn btn-default",
     `data-dismiss` = "modal", validateIcon(icon), label

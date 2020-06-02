@@ -1068,6 +1068,10 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     };
 
     this.$sendMsg = function (msg) {
+      if (!this.$socket) {
+        this.reconnect();
+      }
+
       if (!this.$socket.readyState) {
         this.$pendingMessages.push(msg);
       } else {

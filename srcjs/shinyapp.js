@@ -282,6 +282,9 @@ var ShinyApp = function() {
   };
 
   this.$sendMsg = function(msg) {
+    if (!this.$socket) {
+      this.reconnect();
+    }
     if (!this.$socket.readyState) {
       this.$pendingMessages.push(msg);
     }

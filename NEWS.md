@@ -1,3 +1,8 @@
+### Accessibility
+
+* Added `aria-hidden` attribute to `icon()` to avoid redundant screen reader announcements for decorative fontawesome icons: this is [Font Awesome's recommendation for accessibility](https://fontawesome.com/how-to-use/on-the-web/other-topics/accessibility).
+
+
 shiny 1.4.0.9001
 ===========
 

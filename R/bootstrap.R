@@ -1422,7 +1422,7 @@ icon <- function(name, class = NULL, lib = "font-awesome") {
   if (!is.null(class))
     iconClass <- paste(iconClass, class)
 
-  iconTag <- tags$i(class = iconClass)
+  iconTag <- tags$i(class = iconClass, `aria-hidden` = "true")
 
   # font-awesome needs an additional dependency (glyphicon is in bootstrap)
   if (lib == "font-awesome") {

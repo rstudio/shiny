@@ -15,7 +15,7 @@ css_url       <- sprintf("https://raw.githubusercontent.com/paypal/bootstrap-acc
 url <- c(js_url, min_js_url, css_url)
 
 # Downloading each required file:
-invisible(sapply(url, function(x) {download.file(x, file.path(tempdir(), basename(x)))}))
+lapply(url, function(x) {download.file(x, file.path(tempdir(), basename(x)))})
 
 # Copying js files:
 dir.create(file.path(dest_dir, "js"), recursive = TRUE)

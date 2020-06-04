@@ -1,3 +1,8 @@
+### Accessibility
+
+* Added [bootstrap accessibility plugin](https://github.com/paypal/bootstrap-accessibility-plugin) under the hood to improve accessibility of shiny apps for screen-reader and keyboard users: the enhancements include better navigations for alert, tooltip, popover, modal dialog, dropdown, tab Panel, collapse, and carousel elements.
+
+
 shiny 1.4.0.9001
 ===========
 
@@ -6,10 +11,6 @@ shiny 1.4.0.9001
 ### Breaking changes
 
 * Fixed [#2869](https://github.com/rstudio/shiny/issues/2869): Until this release, `renderImage()` had a dangerous default of `deleteFile = TRUE`. (Sorry!) Going forward, calls to `renderImage()` will need an explicit `deleteFile` argument; for now, failing to provide one will result in a warning message, and the file will be deleted if it appears to be within the `tempdir()`. ([#2881](https://github.com/rstudio/shiny/pull/2881))
-
-### Accessibility
-
-* Added [bootstrap accessibility plugin](https://github.com/paypal/bootstrap-accessibility-plugin) under the hood to improve accessibility of shiny apps for screen-reader and keyboard users: the enhancements include better navigations for alert, tooltip, popover, modal dialog, dropdown, tab Panel, collapse, and carousel elements.
 
 ### New features
 

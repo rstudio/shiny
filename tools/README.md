@@ -161,3 +161,11 @@ To create a new patch:
 * Update the documentation for the `shiny.jquery.version` option in `R/shiny-options.R` to reflect the new version.
 * Run `devtools::document()`.
 * Commit the changes.
+
+## Updating Bootstrap-Accessibility-Plugin
+
+* [bootstrap-accessibility-plugin](https://github.com/paypal/bootstrap-accessibility-plugin) can be updated with the script `updateBootstrapAccessibilityPlugin.R`.
+* Edit `updateBootstrapAccessibilityPlugin.R` to use the new version, and then run it. This will download and copy the files to the relevant locations.
+* Update the documentation for the `bootstrapLib()` function in `R/bootstrap.R` to reflect the new version.
+* Run `devtools::document()`.
+* Commit the changes.

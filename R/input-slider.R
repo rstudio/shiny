@@ -164,7 +164,14 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
     # The following are ignored by the ion.rangeSlider, but are used by Shiny.
     `data-data-type` = dataType,
     `data-time-format` = timeFormat,
-    `data-timezone` = timezone
+    `data-timezone` = timezone,
+    # The following is required for accessibility improvements:
+    role = "slider",
+    # tabindex = "0", # This does not take any effect now because tabindex is forced to "-1" in `ionrangeslider`; will be fixed in v3.x (see https://github.com/IonDen/ion.rangeSlider/issues/708#issuecomment-640095410).
+    `aria-valuemin` = formatNoSci(min),
+    `aria-valuemax` = formatNoSci(max),
+    `aria-valuenow` = formatNoSci(value[1]),
+    `aria-labelledby` = paste0(inputId, "-label")
   ))
 
   # Replace any TRUE and FALSE with "true" and "false"

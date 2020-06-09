@@ -1,6 +1,6 @@
 ### Accessibility
 
-* Added the `lang` argument to `shinyApp()` that specifies document-level language within the app for the accessibility of screen readers and search-engine parsers.
+* Added the `lang` argument to `shinyApp()` that specifies document-level language within the app for the accessibility of screen readers and search-engine parsers [#2844](https://github.com/rstudio/shiny/issues/2844).
 
 
 shiny 1.4.0.9001

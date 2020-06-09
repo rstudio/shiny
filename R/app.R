@@ -100,8 +100,6 @@ shinyApp <- function(ui, server, onStart=NULL, options=list(),
   # Also store `lang` option to be passed for rendering processors.
   if(!is.null(lang) && is.character(lang)) {
     shinyOptions(appLang = lang)
-  } else {
-    shinyOptions(appLang = "")
   }
 
   structure(

@@ -38,6 +38,7 @@ renderPage <- function(ui, connection, showcase=0, testMode=FALSE) {
     # Put the body into the default template
     ui <- htmlTemplate(
       system.file("template", "default.html", package = "shiny"),
+      lang = getShinyOption("appLang"),
       body = ui
     )
   }

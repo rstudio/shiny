@@ -38,6 +38,7 @@
 #'   for more information on bookmarking your app.
 #' @return An object that represents the app. Printing the object or passing it
 #'   to [runApp()] will run the app.
+#' @param lang Two-character language code. Set to "en" by default.
 #'
 #' @examples
 #' ## Only run this example in interactive R sessions
@@ -72,10 +73,12 @@
 #' }
 #' @export
 shinyApp <- function(ui, server, onStart=NULL, options=list(),
-                     uiPattern="/", enableBookmarking=NULL) {
+                     uiPattern="/", enableBookmarking=NULL, lang = "en") {
   if (!is.function(server)) {
     stop("`server` must be a function", call. = FALSE)
   }
+
+shinyOptions(appLang = lang)
 
   # Ensure that the entire path is a match
   uiPattern <- sprintf("^%s$", uiPattern)

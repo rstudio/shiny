@@ -13,7 +13,7 @@ shinyApp(
   options = list(),
   uiPattern = "/",
   enableBookmarking = NULL,
-  lang = "en"
+  lang = NULL
 )
 
 shinyAppDir(appDir, options = list())
@@ -51,7 +51,7 @@ expression in order for the match to be considered successful.}
 any previous calls to  \code{\link[=enableBookmarking]{enableBookmarking()}}. See \code{\link[=enableBookmarking]{enableBookmarking()}}
 for more information on bookmarking your app.}
 
-\item{lang}{Two-character language code. Set to "en" by default.}
+\item{lang}{ISO 639-1 language code used within the shiny app. Default is set to empty value.}
 
 \item{appDir}{Path to directory that contains a Shiny app (i.e. a server.R
 file and either ui.R or www/index.html)}

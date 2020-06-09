@@ -330,6 +330,7 @@ HandlerManager <- R6Class("HandlerManager",
                     content_type = "text/html",
                     content = as.character(htmltools::htmlTemplate(
                       system.file("template", "error.html", package = "shiny"),
+                      lang = getShinyOption("appLang"),
                       message = conditionMessage(err)
                     ))
                   )

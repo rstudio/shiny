@@ -1,6 +1,6 @@
 ### Accessibility
 
-* Added appropriate labels to `icon()` element to provide screen-reader users with alternative descriptions of the `fontawesome`: `aria-label` is automatically applied based on the fontawesome name. For example, `icon("calendar")` will be announced as "calendar icon" to screen readers now.
+* Added appropriate labels to `icon()` element to provide screen-reader users with alternative descriptions for the `fontawesome` and `glyphicon`: `aria-label` is automatically applied based on the fontawesome name. For example, `icon("calendar")` will be announced as "calendar icon" to screen readers. "presentation" aria role has also been attached to `icon()` to remove redundant semantic info for screen readers.
 
 
 shiny 1.4.0.9001

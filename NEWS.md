@@ -1,6 +1,6 @@
 ### Accessibility
 
-* Added `aria-hidden` attribute to `icon()` to avoid redundant screen reader announcements for decorative fontawesome icons: this is [Font Awesome's recommendation for accessibility](https://fontawesome.com/how-to-use/on-the-web/other-topics/accessibility).
+* Added appropriate labels to `icon()` element to provide screen-reader users with alternative descriptions of the `fontawesome`: `aria-label` is automatically applied based on the fontawesome name. For example, `icon("calendar")` will be announced as "calendar icon" to screen readers now.
 
 
 shiny 1.4.0.9001

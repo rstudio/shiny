@@ -148,6 +148,7 @@ makeExtraMethods <- function() {
     # session$getDataObj() to access in a test expression.
     "registerDataObj",
     "reload",
+    "setBrush",
     "resetBrush",
     "sendBinaryMessage",
     "sendChangeTabVisibility",

@@ -52,7 +52,7 @@ the server infrastructure.
 }
 \details{
 For the \code{options} argument, the character elements that have the class
-\code{"AsIs"} (usually returned from \code{\link[base:I]{base::I()}}) will be evaluated in
+\code{"AsIs"} (usually returned from \code{\link[base:AsIs]{base::I()}}) will be evaluated in
 JavaScript. This is useful when the type of the option value is not supported
 in JSON, e.g., a JavaScript function, which can be obtained by evaluating a
 character string. Note this only applies to the root-level elements of the

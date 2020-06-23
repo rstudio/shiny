@@ -2,7 +2,8 @@
 % Please edit documentation in R/shinywrappers.R
 \name{renderPrint}
 \alias{renderPrint}
-\title{Printable Output}
+\alias{renderText}
+\title{Text Output}
 \usage{
 renderPrint(
   expr,
@@ -11,39 +12,50 @@ renderPrint(
   width = getOption("width"),
   outputArgs = list()
 )
+
+renderText(
+  expr,
+  env = parent.frame(),
+  quoted = FALSE,
+  outputArgs = list(),
+  sep = " "
+)
 }
 \arguments{
-\item{expr}{An expression that may print output and/or return a printable R
-object.}
+\item{expr}{An expression to evaluate.}
 
-\item{env}{The environment in which to evaluate \code{expr}.}
+\item{env}{The environment in which to evaluate \code{expr}. For expert use only.}
 
 \item{quoted}{Is \code{expr} a quoted expression (with \code{quote()})? This
 is useful if you want to save an expression in a variable.}
 
-\item{width}{The value for \verb{[options][base::options]('width')}.}
+\item{width}{Width of printed output.}
 
 \item{outputArgs}{A list of arguments to be passed through to the implicit
-call to \code{\link[=verbatimTextOutput]{verbatimTextOutput()}} when \code{renderPrint} is used
-in an interactive R Markdown document.}
+call to \code{\link[=verbatimTextOutput]{verbatimTextOutput()}} or \code{\link[=textOutput]{textOutput()}} when the functions are
+used in an interactive RMarkdown document.}
+
+\item{sep}{A separator passed to \code{cat} to be appended after each
+element.}
+}
+\value{
+For \code{renderPrint()}, note the given expression returns \code{NULL} then \code{NULL}
+will actually be visible in the output. To display nothing, make your
+function return \code{\link[=invisible]{invisible()}}.
 }
 \description{
-Makes a reactive version of the given function that captures any printed
-output, and also captures its printable result (unless
-\code{\link[base:invisible]{base::invisible()}}), into a string. The resulting function is suitable
-for assigning to an  \code{output} slot.
+\code{renderPrint()} prints the result of \code{expr}, while \code{renderText()} pastes it
+together into a single string. \code{renderPrint()} is equivalent to \code{\link[=print]{print()}};
+\code{renderText()} is equivalent to \code{\link[=cat]{cat()}}. Both functions capture all other
+printed output generated while evaluating \code{expr}.
+
+\code{renderPrint()} is usually paired with \code{\link[=verbatimTextOutput]{verbatimTextOutput()}};
+\code{renderText()} is usually paired with \code{\link[=textOutput]{textOutput()}}.
 }
 \details{
 The corresponding HTML output tag can be anything (though \code{pre} is
 recommended if you need a monospace font and whitespace preserved) and should
 have the CSS class name \code{shiny-text-output}.
-
-The result of executing \code{func} will be printed inside a
-\code{\link[utils:capture.output]{utils::capture.output()}} call.
-
-Note that unlike most other Shiny output functions, if the given function
-returns \code{NULL} then \code{NULL} will actually be visible in the output.
-To display nothing, make your function return \code{\link[base:invisible]{base::invisible()}}.
 }
 \examples{
 isolate({
@@ -108,8 +120,4 @@ vecFun()
 # '1 2 3 4 5'
 
 })
-}
-\seealso{
-\code{\link[=renderText]{renderText()}} for displaying the value returned from a
-function, instead of the printed output.
 }

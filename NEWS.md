@@ -1,3 +1,9 @@
+
+### Accessibility
+
+* Fixed keyboard accessibility for file picker button: keyboard users can now tab to focus on `fileInput()` widget ([#2929](https://github.com/rstudio/shiny/issues/2929)).
+
+
 shiny 1.5.0
 ===========
 

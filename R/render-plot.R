@@ -165,6 +165,11 @@ resizeSavedPlot <- function(name, session, result, width, height, pixelratio, re
     return(result)
   }
 
+  if (isNamespaceLoaded("showtext")) {
+    showtextOpts <- showtext::showtext_opts(dpi = res*pixelratio)
+    on.exit({showtext::showtext_opts(showtextOpts)}, add = TRUE)
+  }
+
   coordmap <- NULL
   outfile <- plotPNG(function() {
     grDevices::replayPlot(result$recordedPlot)

@@ -1,3 +1,3 @@
 library(shinytest)
-shinytest::testApp("../")
+expect_pass(testApp("../", compareImages = FALSE))
 

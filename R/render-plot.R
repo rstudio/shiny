@@ -206,7 +206,7 @@ drawPlot <- function(name, session, func, width, height, pixelratio, res, ...) {
   # but it's worth noting that the option doesn't currently work with CairoPNG.
   # https://github.com/yixuan/showtext/issues/33
   showtextOpts <- if (isNamespaceLoaded("showtext")) {
-    showtext::showtext_opts(dpi = res)
+    showtext::showtext_opts(dpi = res*pixelratio)
   } else {
     NULL
   }

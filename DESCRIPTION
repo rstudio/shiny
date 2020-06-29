@@ -103,7 +103,9 @@ Suggests:
     future,
     dygraphs,
     ragg,
-    showtext
+    showtext,
+    bootstraplib
+Remotes: rstudio/bootstraplib
 URL: http://shiny.rstudio.com
 BugReports: https://github.com/rstudio/shiny/issues
 Collate:

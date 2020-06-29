@@ -56,6 +56,10 @@ shiny.autoreload.pattern option. For example, to monitor only ui.R:
 The default polling interval is 500 milliseconds. You can change this
 by setting e.g. \code{options(shiny.autoreload.interval = 2000)} (every
 two seconds).}
+\item{bootstraplib (defaults to \code{FALSE})}{When a global \strong{bootstraplib} theme
+is set (via \code{\link[bootstraplib:theming]{bootstraplib::bs_theme_new()}}), should \strong{shiny} compile it
+(via \code{\link[bootstraplib:bootstrap]{bootstraplib::bootstrap()}}) and include the result with \code{\link[=bootstrapPage]{bootstrapPage()}}
+as well as use it to set better default styles for input widgets (e.g., \code{\link[=selectInput]{selectInput()}})?}
 \item{shiny.deprecation.messages (defaults to \code{TRUE})}{This controls whether messages for
 deprecated functions in Shiny will be printed. See
 \code{\link[=shinyDeprecated]{shinyDeprecated()}} for more information.}

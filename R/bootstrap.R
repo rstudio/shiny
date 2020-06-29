@@ -42,8 +42,18 @@ bootstrapPage <- function(..., title = NULL, responsive = NULL, theme = NULL) {
       # remainder of tags passed to the function
       list(...)
     ),
-    bootstrapLib()
+    if (useBsTheme()) bootstraplib::bootstrap() else bootstrapLib()
   )
+}
+
+useBsTheme <- function() {
+  if (!isTRUE(getOption("shiny.bootstraplib"))) {
+    return(FALSE)
+  }
+  if (!is_available("bootstraplib")) {
+    return(FALSE)
+  }
+  !is.null(bootstraplib::bs_theme_get())
 }
 
 #' Bootstrap libraries

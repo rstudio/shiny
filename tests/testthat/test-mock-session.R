@@ -163,12 +163,6 @@ test_that("renderUI supported", {
   })
 })
 
-test_that("session supports allowReconnect", {
-  session <- MockShinySession$new()
-  session$allowReconnect(TRUE)
-  expect_true(TRUE) # testthat insists that every test must have an expectation
-})
-
 test_that("session supports clientData", {
   session <- MockShinySession$new()
   expect_equal(session$clientData$allowDataUriScheme, TRUE)
@@ -192,12 +186,6 @@ test_that("session supports ns", {
   expect_equal(session$ns("hi"), "mock-session-hi")
 })
 
-test_that("session supports reload", {
-  session <- MockShinySession$new()
-  session$reload()
-  expect_true(TRUE) # testthat insists that every test must have an expectation
-})
-
 test_that("session supports close", {
   session <- MockShinySession$new()
   session$close()
@@ -218,89 +206,31 @@ test_that("session supports userData", {
   expect_equal(session$userData$x, 123)
 })
 
-test_that("session supports resetBrush", {
-  session <- MockShinySession$new()
-  withr::with_options(list("shiny.mocksession.warn" = TRUE), {
-    expect_warning(session$resetBrush(1))
-  })
-})
-
 test_that("generated methods signal unused argument errors", {
   expect_error(session$resetBrush(1,2,3))
   expect_error(session$resetBrush(1,2))
 })
 
-test_that("session supports sendCustomMessage", {
+test_that("session mocks important unsupported methods with warning", {
   session <- MockShinySession$new()
-  session$sendCustomMessage(type=1, message=2)
-  expect_true(TRUE) # testthat insists that every test must have an expectation
-})
 
-test_that("session supports sendBinaryMessage", {
-  session <- MockShinySession$new()
-  session$sendBinaryMessage(type=1, message=2)
-  expect_true(TRUE) # testthat insists that every test must have an expectation
-})
+  expect_warning(session$reload(), "MockShinySession")
+  expect_warning(session$allowReconnect(TRUE), "MockShinySession")
+  expect_warning(session$resetBrush(1), "MockShinySession")
 
-test_that("session supports sendInputMessage", {
-  session <- MockShinySession$new()
-  session$sendInputMessage(inputId=1, message=2)
-  expect_true(TRUE) # testthat insists that every test must have an expectation
-})
+  expect_warning(session$sendCustomMessage(type=1, message=2), "MockShinySession")
+  expect_warning(session$sendBinaryMessage(type=1, message=2), "MockShinySession")
+  expect_warning(session$sendInputMessage(inputId=1, message=2), "MockShinySession")
 
-test_that("session supports setBookmarkExclude", {
-  session <- MockShinySession$new()
-  withr::with_options(list("shiny.mocksession.warn" = TRUE), {
-    expect_warning(session$setBookmarkExclude(names=1))
-  })
-})
+  expect_warning(session$setBookmarkExclude(names=1), "MockShinySession")
+  expect_warning(session$getBookmarkExclude(), "MockShinySession")
+  expect_warning(session$doBookmark(), "MockShinySession")
 
-test_that("session supports getBookmarkExclude", {
-  session <- MockShinySession$new()
-  withr::with_options(list("shiny.mocksession.warn" = TRUE), {
-    expect_warning(session$getBookmarkExclude())
-  })
-})
+  expect_warning(session$onBookmark(fun=1), "MockShinySession")
+  expect_warning(session$onBookmarked(fun=1), "MockShinySession")
+  expect_warning(session$onRestore(fun=1), "MockShinySession")
+  expect_warning(session$onRestored(fun=1), "MockShinySession")
 
-test_that("session supports onBookmark", {
-  session <- MockShinySession$new()
-  session$onBookmark(fun=1)
-  expect_true(TRUE) # testthat insists that every test must have an expectation
-})
-
-test_that("session supports onBookmarked", {
-  session <- MockShinySession$new()
-  session$onBookmarked(fun=1)
-  expect_true(TRUE) # testthat insists that every test must have an expectation
-})
-
-test_that("session supports doBookmark", {
-  session <- MockShinySession$new()
-  withr::with_options(list("shiny.mocksession.warn" = TRUE), {
-    expect_warning(session$doBookmark())
-  })
-})
-
-test_that("session supports onRestore", {
-  session <- MockShinySession$new()
-  session$onRestore(fun=1)
-  expect_true(TRUE) # testthat insists that every test must have an expectation
-})
-
-test_that("session supports onRestored", {
-  session <- MockShinySession$new()
-  session$onRestored(fun=1)
-  expect_true(TRUE) # testthat insists that every test must have an expectation
-})
-
-test_that("session supports exportTestValues", {
-  session <- MockShinySession$new()
-  session$exportTestValues()
-  expect_true(TRUE) # testthat insists that every test must have an expectation
-})
-
-test_that("session supports getTestSnapshotUrl", {
-  session <- MockShinySession$new()
-  session$getTestSnapshotUrl(input=1, output=1, export=1, format=1)
-  expect_true(TRUE) # testthat insists that every test must have an expectation
+  expect_warning(session$exportTestValues(), "MockShinySession")
+  expect_warning(session$getTestSnapshotUrl(input=1, output=1, export=1, format=1), "MockShinySession")
 })

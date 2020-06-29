@@ -111,6 +111,10 @@ user. Always \code{NULL} for a \code{MockShinySesion}.}
 \item \href{#method-onSessionEnded}{\code{MockShinySession$onSessionEnded()}}
 \item \href{#method-registerDownload}{\code{MockShinySession$registerDownload()}}
 \item \href{#method-getCurrentOutputInfo}{\code{MockShinySession$getCurrentOutputInfo()}}
+\item \href{#method-reactlog}{\code{MockShinySession$reactlog()}}
+\item \href{#method-registerDataObj}{\code{MockShinySession$registerDataObj()}}
+\item \href{#method-incrementBusyCount}{\code{MockShinySession$incrementBusyCount()}}
+\item \href{#method-decrementBusyCount}{\code{MockShinySession$decrementBusyCount()}}
 \item \href{#method-clone}{\code{MockShinySession$clone()}}
 }
 }
@@ -610,6 +614,42 @@ A list with with the \code{name} of the output. If no output is
 currently being executed, this will return \code{NULL}.
 output, or \code{NULL} if no output is currently executing.
 }
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-reactlog"></a>}}
+\if{latex}{\out{\hypertarget{method-reactlog}{}}}
+\subsection{Method \code{reactlog()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{MockShinySession$reactlog(...)}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-registerDataObj"></a>}}
+\if{latex}{\out{\hypertarget{method-registerDataObj}{}}}
+\subsection{Method \code{registerDataObj()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{MockShinySession$registerDataObj(...)}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-incrementBusyCount"></a>}}
+\if{latex}{\out{\hypertarget{method-incrementBusyCount}{}}}
+\subsection{Method \code{incrementBusyCount()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{MockShinySession$incrementBusyCount(...)}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-decrementBusyCount"></a>}}
+\if{latex}{\out{\hypertarget{method-decrementBusyCount}{}}}
+\subsection{Method \code{decrementBusyCount()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{MockShinySession$decrementBusyCount(...)}\if{html}{\out{</div>}}
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-clone"></a>}}

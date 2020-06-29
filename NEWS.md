@@ -1,3 +1,9 @@
+* `MockShinySession` warns about methods that are currently unimplemented.
+  This means that `testServer()` will now warn if it evaluates functions
+  (like `updateTextInput()` and friends) that require javascript (#2947).
+  You can suppress these messages by setting
+  `options(shiny.mocksession.warn = FALSE)`
+
 shiny 1.5.0
 ===========
 

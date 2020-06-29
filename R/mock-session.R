@@ -78,7 +78,7 @@ mapNames <- function(func, vals) {
 #' Returns a noop implementation of the public method `name` of ShinySession.
 #' @include shiny.R
 #' @noRd
-makeNoop <- function(name, msg = paste0(name, " is a noop.")) {
+makeNoop <- function(name) {
   if (!(name %in% names(ShinySession$public_methods)))
     stop(name, " is not public method of ShinySession.")
   impl <- ShinySession$public_methods[[name]]
@@ -86,7 +86,7 @@ makeNoop <- function(name, msg = paste0(name, " is a noop.")) {
     # Force arguments
     !!lapply(formalArgs(impl), rlang::sym)
     # Evade "no visible binding" note for reference to `private`
-    (!!as.symbol("private"))$noopWarn(!!name, !!msg)
+    (!!as.symbol("private"))$noopWarn(!!name)
     invisible()
   })
   impl
@@ -128,13 +128,11 @@ makeErrors <- function(...) {
 makeExtraMethods <- function() {
   c(makeWarnNoops(
     "allowReconnect",
-    "decrementBusyCount",
     "doBookmark",
     "exportTestValues",
     "flushOutput",
     "getBookmarkExclude",
     "getTestSnapshotUrl",
-    "incrementBusyCount",
     "manageHiddenOutputs",
     "manageInputs",
     "onBookmark",
@@ -143,10 +141,6 @@ makeExtraMethods <- function() {
     "onRestore",
     "onRestored",
     "outputOptions",
-    "reactlog",
-    # TODO Consider implementing this. Would require a new method like
-    # session$getDataObj() to access in a test expression.
-    "registerDataObj",
     "reload",
     "resetBrush",
     "sendBinaryMessage",
@@ -606,7 +600,12 @@ MockShinySession <- R6Class(
     getCurrentOutputInfo = function() {
       name <- private$currentOutputName
       if (is.null(name)) NULL else list(name = name)
-    }
+    },
+
+    reactlog = function(...) {},
+    registerDataObj = function(...) {},
+    incrementBusyCount = function(...) {},
+    decrementBusyCount = function(...) {}
   ),
   private = list(
     # @field .input Internal ReactiveValues object for normal input sent from client.
@@ -672,11 +671,14 @@ MockShinySession <- R6Class(
     # @param name The name of the mocked method.
     # @param msg A message describing why the method is not implemented.
     noopWarn = function(name, msg) {
-      if (getOption("shiny.mocksession.warn", FALSE) == FALSE)
+      if (!isTRUE(getOption("shiny.mocksession.warn", TRUE))) {
         return(invisible())
-      out <- paste0(name, " is not fully implemented by MockShinySession: ", msg)
-      out <- paste0(out, "\n", "To disable messages like this, run `options(shiny.mocksession.warn=FALSE)`")
-      warning(out, call. = FALSE)
+      }
+
+      rlang::warn(c(
+        paste0(name, " is not fully implemented by MockShinySession"),
+        i = "To disable this warning set `options(shiny.mocksession.warn = FALSE)`"
+      ))
     },
 
     # @description Binds a domain to `expr` and uses `createVarPromiseDomain()`

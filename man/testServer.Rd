@@ -14,10 +14,12 @@ include a \code{session} argument in order to be tested. If \code{app} is \code{
 not supplied, the nearest enclosing directory that is a Shiny app, starting
 with the current directory, is used.}
 
-\item{expr}{Test code containing expectations. The test expression will run
-in the server function environment, meaning that the parameters of the
-server function (e.g. \code{input}, \code{output}, and \code{session}) will be available
-along with any other values created inside of the server function.}
+\item{expr}{Test code containing expectations. The objects from inside the
+server function environment will be made available in the environment of
+the test expression (this is done using a data mask with
+\code{\link[rlang:eval_tidy]{rlang::eval_tidy()}}). This includes the parameters of the server function
+(e.g. \code{input}, \code{output}, and \code{session}), along with any other values
+created inside of the server function.}
 
 \item{args}{Additional arguments to pass to the module function. If \code{app} is
 a module, and no \code{id} argument is provided, one will be generated and

@@ -1,0 +1,27 @@
+diff --git a/inst/www/shared/ionrangeslider/scss/_base.scss b/inst/www/shared/ionrangeslider/scss/_base.scss
+index f167f8cc..fc96ef02 100644
+--- a/inst/www/shared/ionrangeslider/scss/_base.scss
++++ b/inst/www/shared/ionrangeslider/scss/_base.scss
+@@ -1,11 +1,12 @@
++@import "_variables";
+ @import "_mixins";
+ 
+ .irs {
+     @include pos-r();
+     -webkit-touch-callout: none;
+     @include no-click();
+-    font-size: 12px;
+-    font-family: Arial, sans-serif;
++    font-size: $irs_font_size;
++    font-family: $irs_font_family;
+ 
+     &-line {
+         @include pos-r();
+diff --git a/inst/www/shared/ionrangeslider/scss/_variables.scss b/inst/www/shared/ionrangeslider/scss/_variables.scss
+new file mode 100644
+index 00000000..f2bb02b4
+--- /dev/null
++++ b/inst/www/shared/ionrangeslider/scss/_variables.scss
+@@ -0,0 +1,2 @@
++$irs_font_size: 12px !default;
++$irs_font_family: Arial, sans-serif !default;

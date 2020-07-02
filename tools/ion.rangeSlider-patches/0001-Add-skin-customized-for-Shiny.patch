@@ -1,134 +1,159 @@
-diff --git a/inst/www/shared/ionrangeslider/css/ion.rangeSlider.skinShiny.css b/inst/www/shared/ionrangeslider/css/ion.rangeSlider.skinShiny.css
+diff --git a/inst/www/shared/ionrangeslider/scss/skins/shiny.scss b/inst/www/shared/ionrangeslider/scss/skins/shiny.scss
 new file mode 100644
-index 0000000..3b96e6b
+index 00000000..3356cb6d
 --- /dev/null
-+++ b/inst/www/shared/ionrangeslider/css/ion.rangeSlider.skinShiny.css
-@@ -0,0 +1,128 @@
-+/* Ion.RangeSlider, Shiny Skin
++++ b/inst/www/shared/ionrangeslider/scss/skins/shiny.scss
+@@ -0,0 +1,153 @@
++/* 'shiny' skin for Ion.RangeSlider, largely based on the 'big' skin, but with smaller dimensions, grayscale grid text, and without gradients
++© RStudio, Inc, 2014
++© Denis Ineshin, 2014  https://github.com/IonDen
++© guybowden, 2014  https://github.com/guybowden
++*/
 +
-+// This skin has been modified for use with Shiny.
-+// It's based on the HTML5 skin, which doesn't require any sprites, but
-+// has been modified to have no gradients, and to have dimensions similar to
-+// the skinNice theme.
++.irs--shiny {
++  $name: irs !default;
 +
-+// css version 2.0.0
-+// © RStudio, Inc, 2014
-+// © Denis Ineshin, 2014    https://github.com/IonDen
-+// © guybowden, 2014        https://github.com/guybowden
-+// ===================================================================================================================*/
++  // Sizing controls
++  $top:           25px !default;
++  $line_height:   8px !default;
++  $handle_width:  22px !default;
++  $handle_height: 22px !default;
++  $custom_radius: 3px !default;
 +
-+/* =====================================================================================================================
-+// Skin details */
++  // "High-level" coloring
++  $bg:     white !default;
++  $fg:     black !default;
++  $accent: #428bca !default;
 +
-+.irs {
-+    height: 40px;
-+}
-+.irs-with-grid {
++  // "Low-level" coloring, borders, and fonts
++  $line_bg:            linear-gradient(to bottom, mix($bg, $fg, 87%) -50%, $bg 150%) !default;
++  $line_bg_color:      mix($bg, $fg, 93%) !default;
++  $line_border:        1px solid mix($bg, $fg, 80%) !default;
++
++  $bar_color:          $accent !default;
++
++  $handle_color:       mix($bg, $fg, 87%) !default;
++  $handle_color_hover: $bg !default;
++  $handle_border:      1px solid mix($bg, $fg, 67%) !default;
++  $handle_box_shadow:  1px 1px 3px rgba($bg, 0.3) !default;
++
++  $minmax_text_color:  mix($bg, $fg, 20%) !default;
++  $minmax_bg_color:    rgba($fg, 0.1) !default;
++  $minmax_font_size:   $irs_font_size * (10/12) !default;
++  $minmax_line_height: 1.333 !default;
++
++  $fromto_bg_color:    $accent !default;
++  $fromto_color:       $bg !default;
++  $fromto_font_size:   $irs_font_size * (11/12) !default;
++  $fromto_line_height: 1.333 !default;
++
++  $grid_major_color:  rgba($accent, 0.5) !default;
++  $grid_minor_color:  mix($bg, $fg, 60%) !default;
++  $grid_text_color:   mix($fg, $accent, 80%) !default;
++
++
++  height: 40px;
++
++  &.irs-with-grid {
 +    height: 60px;
-+}
-+.irs-line {
-+    height: 8px; top: 25px;
-+    background: #EEE;
-+    background: linear-gradient(to bottom, #DDD -50%, #FFF 150%); /* W3C */
-+    border: 1px solid #CCC;
-+    border-radius: 16px;
-+    -moz-border-radius: 16px;
-+}
-+    .irs-line-left {
-+        height: 8px;
-+    }
-+    .irs-line-mid {
-+        height: 8px;
-+    }
-+    .irs-line-right {
-+        height: 8px;
-+    }
++  }
 +
-+.irs-bar {
-+    height: 8px; top: 25px;
-+    border-top: 1px solid #428bca;
-+    border-bottom: 1px solid #428bca;
-+    background: #428bca;
-+}
-+    .irs-bar-edge {
-+        height: 8px; top: 25px;
-+        width: 14px;
-+        border: 1px solid #428bca;
-+        border-right: 0;
-+        background: #428bca;
-+        border-radius: 16px 0 0 16px;
-+        -moz-border-radius: 16px 0 0 16px;
-+    }
++  .#{$name}-line {
++    top: $top;
++    height: $line_height;
++    background: $line_bg;
++    background-color: $line_bg_color;
++    border: $line_border;
++    border-radius: $line_height;
++  }
 +
-+.irs-shadow {
-+    height: 2px; top: 38px;
-+    background: #000;
-+    opacity: 0.3;
++  .#{$name}-bar {
++    top: $top;
++    height: $line_height;
++    border-top: 1px solid $bar_color;
++    border-bottom: 1px solid $bar_color;
++    background: $bar_color;
++
++    &--single {
++      border-radius: $line_height 0 0 $line_height;
++    }
++  }
++
++  // sliderInput() doesn't currently support from_min/from_max, so this isn't relevant
++  .#{$name}-shadow {
++    top: 38px;
++    height: 2px;
++    background: rgba($fg, 0.3);
 +    border-radius: 5px;
-+    -moz-border-radius: 5px;
-+}
-+.lt-ie9 .irs-shadow {
++  }
++  .lt-ie9 .#{$name}-shadow {
 +    filter: alpha(opacity=30);
-+}
++  }
 +
-+.irs-slider {
++  // .irs-slider changed to .irs-handle in v2.3.0
++  // https://github.com/IonDen/ion.rangeSlider/commit/c98c10d3d360aa52e997bb8e4fd371c958f78e4b#diff-91cc6fde25fe380ac2a7ac58e1538dceR140
++  .#{$name}-handle {
 +    top: 17px;
-+    width: 22px; height: 22px;
-+    border: 1px solid #AAA;
-+    background: #DDD;
-+    border-radius: 27px;
-+    -moz-border-radius: 27px;
-+    box-shadow: 1px 1px 3px rgba(0,0,0,0.3);
-+    cursor: pointer;
-+}
++    width: $handle_width;
++    height: $handle_height;
++    border: $handle_border;
++    background-color: $handle_color;
++    box-shadow: $handle_box_shadow;
++    border-radius: $handle_width;
 +
-+#irs-active-slider, .irs-slider:hover {
-+    background: #FFF;
-+}
++    &.state_hover,
++    &:hover {
++      background: $handle_color_hover;
++    }
++  }
 +
-+.irs-min, .irs-max {
-+    color: #333;
-+    font-size: 10px; line-height: 1.333;
-+    text-shadow: none;
++  .#{$name}-min,
++  .#{$name}-max {
 +    top: 0;
 +    padding: 1px 3px;
-+    background: rgba(0,0,0,0.1);
-+    border-radius: 3px;
-+    -moz-border-radius: 3px;
-+}
++    color: $minmax_text_color;
++    text-shadow: none;
++    background-color: $minmax_bg_color;
++    border-radius: $custom_radius;
++    font-size: $minmax_font_size;
++    line-height: $minmax_line_height;
++  }
 +
-+.lt-ie9 .irs-min, .lt-ie9 .irs-max {
-+    background: #ccc;
-+}
++  .lt-ie9 .#{$name}-min,
++  .lt-ie9 .#{$name}-max {
++    background: mix($bg, $fg, 80%);
++  }
 +
-+.irs-from, .irs-to, .irs-single {
-+    color: #fff;
-+    font-size: 11px; line-height: 1.333;
++  .#{$name}-from,
++  .#{$name}-to,
++  .#{$name}-single {
++    color: $fromto_color;
 +    text-shadow: none;
 +    padding: 1px 3px;
-+    background: #428bca;
-+    border-radius: 3px;
-+    -moz-border-radius: 3px;
-+}
-+.lt-ie9 .irs-from, .lt-ie9 .irs-to, .lt-ie9 .irs-single {
-+    background: #999;
-+}
++    background-color: $fromto_bg_color;
++    border-radius: $custom_radius;
++    font-size: $fromto_font_size;
++    line-height: $fromto_line_height;
++  }
 +
-+.irs-grid {
++  .lt-ie9 .#{$name}-from,
++  .lt-ie9 .#{$name}-to,
++  .lt-ie9 .#{$name}-single {
++    background: mix($bg, $fg, 60%);
++  }
++
++  .#{$name}-grid {
 +    height: 27px;
-+}
-+.irs-grid-pol {
-+    opacity: 0.5;
-+    background: #428bca;
-+}
-+.irs-grid-pol.small {
-+    background: #999;
-+}
++    &-pol {
++      background-color: $grid_major_color;
++    }
++    &-text {
++      bottom: 5px;
++      color: $grid_text_color;
++    }
++    &-pol.small {
++      background-color: $grid_minor_color;
++    }
++  }
 +
-+.irs-grid-text {
-+    bottom: 5px;
-+    color: #99a4ac;
-+}
-+
-+.irs-disabled {
 +}

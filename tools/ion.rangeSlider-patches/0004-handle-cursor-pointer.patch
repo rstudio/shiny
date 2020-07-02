@@ -1,0 +1,13 @@
+diff --git a/inst/www/shared/ionrangeslider/scss/_base.scss b/inst/www/shared/ionrangeslider/scss/_base.scss
+index dbe14260..1a12c546 100644
+--- a/inst/www/shared/ionrangeslider/scss/_base.scss
++++ b/inst/www/shared/ionrangeslider/scss/_base.scss
+@@ -32,7 +32,7 @@ $irs-font-family: Arial, sans-serif !default;
+     &-handle {
+         @include pos-a();
+         box-sizing: border-box;
+-        cursor: default;
++        cursor: pointer;
+         z-index: 1;
+ 
+         &.single,

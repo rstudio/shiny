@@ -44,6 +44,15 @@
 #'   `"+HHMM"` or `"-HHMM"`. If `NULL` (the default), times will
 #'   be displayed in the browser's time zone. The value `"+0000"` will
 #'   result in UTC time.
+#' @param skin controls the overall look of the slider. For a demo of different
+#' skins, see <http://ionden.com/a/plugins/ion.rangeSlider/skins.html>.
+#' @param accentColor a CSS color string (e.g., `'#ED5564'`) or Bootstrap Sass
+#' variable (e.g., `'$primary'`) to use for the `style`'s accent color. If a Sass
+#' variable is used, it must match a Sass variable name of a currently active
+#' **bootstraplib** theme.
+#' @param sassVariables a list of Sass variables to control particular CSS rules in a
+#' given `skin`. To see what variables are available, see the relevant `style` scss
+#' file(s) [here](https://github.com/rstudio/shiny/blob/master/inst/www/shared/ionrangeslider/scss/skins)
 #' @inheritParams selectizeInput
 #' @family input elements
 #' @seealso [updateSliderInput()]
@@ -79,8 +88,9 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
                         round = FALSE, format = NULL, locale = NULL,
                         ticks = TRUE, animate = FALSE, width = NULL, sep = ",",
                         pre = NULL, post = NULL, timeFormat = NULL,
-                        timezone = NULL, dragRange = TRUE)
-{
+                        timezone = NULL, dragRange = TRUE,
+                        skin = c("shiny", "big", "flat", "modern", "round", "sharp", "square"),
+                        accentColor = NULL, sassVariables = NULL) {
   if (!missing(format)) {
     shinyDeprecated(msg = "The `format` argument to sliderInput is deprecated. Use `sep`, `pre`, and `post` instead.",
                     version = "0.10.2.2")
@@ -141,9 +151,12 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
     n_ticks <- NULL
   }
 
+  skin <- match.arg(skin)
+
   sliderProps <- dropNulls(list(
     class = "js-range-slider",
     id = inputId,
+    `data-skin` = skin,
     `data-type` = if (length(value) > 1) "double",
     `data-min` = formatNoSci(min),
     `data-max` = formatNoSci(max),
@@ -205,25 +218,223 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
     )
   }
 
-  dep <- list(
-    htmlDependency("ionrangeslider", "2.1.6", c(href="shared/ionrangeslider"),
-      script = "js/ion.rangeSlider.min.js",
+  # Any of these cases require Sass compilation
+  if (useBsTheme() || length(accentColor) || length(sassVariables)) {
+    scssDir <- system.file(package = "shiny", "www", "shared", "ionrangeslider", "scss")
+    tmpDir <- tempfile("ion-scss")
+    dir.create(tmpDir)
+    outFile <- file.path(tmpDir, "slider-custom.css")
+    sassFunc <- if (useBsTheme()) bootstraplib::bootstrap_sass else sass::sass
+    defaults <- list(
+      sassVariables %OR% "",
+      accentVariableDefaults(skin, accentColor),
+      bsThemeVariableDefaults(skin)
+    )
+    sassFunc(
+      list(
+        defaults,
+        sass::sass_file(file.path(scssDir, "_base.scss")),
+        sass::sass_file(file.path(scssDir, "skins", paste0(skin, ".scss")))
+      ),
+      output = outFile
+    )
+    # Hash the skin and defaults so that the html dependency from one slider won't stomp another
+    name <- paste0("ionrangeslider-", digest::digest(list(skin, defaults), "xxhash64"))
+    cssDependency <- htmlDependency(
+      name, "2.3.1",
+      src = dirname(outFile),
+      stylesheet = basename(outFile)
+    )
+  } else {
+    cssDependency <- htmlDependency(
+      paste0("ionrangeslider-", skin), "2.3.1",
+      src = c(href = "shared/ionrangeslider"),
       # ion.rangeSlider also needs normalize.css, which is already included in
       # Bootstrap.
-      stylesheet = c("css/ion.rangeSlider.css",
-                     "css/ion.rangeSlider.skinShiny.css")
-    ),
-    htmlDependency("strftime", "0.9.2", c(href="shared/strftime"),
-      script = "strftime-min.js"
+      stylesheet = c(
+        "css/ion.rangeSlider.css",
+        sprintf("css/ion.rangeSlider.skin%s.css", tools::toTitleCase(skin))
+      )
+    )
+  }
+
+  attachDependencies(
+    sliderTag, list(
+      cssDependency,
+      # Include ion JS as a separate dependency so that we aren't duplicating it
+      htmlDependency(
+        "ionrangeslider-javascript", "2.3.1",
+        src = c(href = "shared/ionrangeslider"),
+        script = "js/ion.rangeSlider.min.js"
+      ),
+      htmlDependency(
+        "strftime", "0.9.2",
+        src = c(href = "shared/strftime"),
+        script = "strftime-min.js"
+      )
     )
   )
-
-  attachDependencies(sliderTag, dep)
 }
 
 hasDecimals <- function(value) {
   truncatedValue <- round(value)
   return (!identical(value, truncatedValue))
+}
+
+
+accentVariableDefaults <- function(skin, accentColor = NULL) {
+  accentColor <- parseAccentColor(accentColor %OR% defaultAccentColor(skin))
+  if (useBsTheme()) {
+    accentColorDark <- paste0("mix(", accentColor, ", $black, 80%)")
+    accentColorLight <- paste0("mix(", accentColor, ", $white, 10%)")
+  } else {
+    accentColorDark <- paste0("mix(", accentColor, ", black, 80%)")
+    accentColorLight <- paste0("mix(", accentColor, ", white, 10%)")
+  }
+  vars <- switch(skin,
+    big = list(
+      "bar_color"     = accentColor,
+      "label_color_1" = accentColor,
+      "grid_color_1"  = accentColor
+    ),
+    flat = list(
+      "bar_color"      = accentColor,
+      "handle_color_1" = accentColorDark,
+      "handle_color_2" = accentColorDark,
+      "label_color_1"  = accentColor
+    ),
+    modern = list(
+      "bar_color"     = accentColor,
+      "label_color_1" = accentColor
+    ),
+    round = list(
+      "bar_color"      = accentColor,
+      "handle_color_1" = accentColor,
+      "handle_color_3" = accentColorLight,
+      "label_color_1"  = accentColor
+    ),
+    sharp = list(
+      "bar_color"       = accentColor,
+      "handle_color_1"  = accentColorDark,
+      "minmax_bg_color" = accentColorDark,
+      "label_color_1"   = accentColorDark
+    ),
+    shiny = list("accent" = accentColor),
+    square = list(
+      "bar_color"      = accentColor,
+      "handle_color_1" = accentColor,
+      "handle_color_3" = accentColorLight,
+      "label_color_1"  = accentColor
+    ),
+    stop("Couldn't find skin named '", skin, "'", call. = FALSE)
+  )
+
+  lapply(vars, function(x) paste(x, "!default"))
+}
+
+# TODO: BS3 version!
+bsThemeVariableDefaults <- function(skin) {
+  if (!useBsTheme()) {
+    return("")
+  }
+
+  vars <- switch(skin,
+    big = list(
+      "line_color_1"      = "$white",
+      "line_color_2"      = "gray('200')",
+      "line_color_3"      = "gray('100')",
+      "handle_color_1"    = "gray('200')",
+      "handle_color_2"    = "gray('300')",
+      "handle_color_3"    = "$white",
+      "handle_color_4"    = "gray('400')",
+      "minmax_text_color" = "$white",
+      "minmax_bg_color"   = "gray('500')",
+      "label_color_2"     = "$white"
+    ),
+    flat = list(
+      "line_color"        = "gray('200')",
+      "minmax_text_color" = "gray('600')",
+      "minmax_bg_color"   = "gray('200')",
+      "label_color_2"     = "$white",
+      "grid_color_1"      = "gray('200')",
+      "grid_color_2"      = "gray('600')"
+    ),
+    modern = list(
+      "line_color"        = "gray('200')",
+      "handle_color_1"    = "gray('100')",
+      "handle_color_2"    = "$white",
+      "handle_color_3"    = "gray('500')",
+      "handle_color_4"    = "gray('700')",
+      "minmax_text_color" = "$white",
+      "minmax_bg_color"   = "gray('400')",
+      "label_color_2"     = "$white",
+      "grid_color_1"      = "gray('300')",
+      "grid_color_2"      = "gray('500')"
+    ),
+    round = list(
+      "line_color"        = "gray('200')",
+      "handle_color_2"    = "$white",
+      "minmax_text_color" = "gray('800')",
+      "minmax_bg_color"   = "gray('300')",
+      "label_color_2"     = "$white",
+      "grid_color_1"      = "gray('300')",
+      "grid_color_2"      = "gray('500')"
+    ),
+    sharp = list(
+      "line_color"        = "$black",
+      "handle_color_2"    = "$white",
+      "handle_color_3"    = "$black",
+      "minmax_text_color" = "$white",
+      "label_color_2"     = "$white",
+      "grid_color_1"      = "gray('200')",
+      "grid_color_2"      = "gray('400')"
+    ),
+    shiny = list(
+      "bg" = "$white",
+      "fg" = "$black"
+    ),
+    square = list(
+      "line_color"        = "gray('200')",
+      "handle_color_2"    = "$white",
+      "minmax_text_color" = "gray('800')",
+      "minmax_bg_color"   = "gray('200')",
+      "label_color_2"     = "$white",
+      "grid_color_1"      = "gray('200')",
+      "grid_color_2"      = "gray('400')"
+    ),
+    stop("Couldn't find skin named '", skin, "'", call. = FALSE)
+  )
+
+  lapply(vars, function(x) paste(x, "!default"))
+}
+
+defaultAccentColor <- function(skin) {
+  switch(
+    skin, big = "#428bca", flat = "#ed5565", modern = "#20b426",
+    round = "#006cfa", sharp = "#ee22fa", shiny = "#428bca", square = "black",
+    stop("Couldn't find skin named '", skin, "'", call. = FALSE)
+  )
+}
+
+parseAccentColor <- function(x) {
+  if (length(x) != 1) {
+    stop("`accentColor` must be of length 1", call. = FALSE)
+  }
+  color <- parseCssColors(x, mustWork = FALSE)
+  if (!is.na(color)) {
+    return(color)
+  }
+  if (useBsTheme()) {
+    color <- parseCssColors(
+      bootstraplib::bs_theme_get_variables(x),
+      mustWork = FALSE
+    )
+    if (!is.na(color)) {
+      return(color)
+    }
+    stop("Couldn't find a Bootstrap Sass variable named '", x, "' with a CSS color string value.", call. = FALSE)
+  }
+  stop("Failed to parse the accent color '", x, "' as a CSS color.", call. = FALSE)
 }
 
 

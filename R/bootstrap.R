@@ -46,6 +46,16 @@ bootstrapPage <- function(..., title = NULL, responsive = NULL, theme = NULL) {
   )
 }
 
+useBsTheme <- function() {
+  if (!isTRUE(getShinyOption("bootstraplib"))) {
+    return(FALSE)
+  }
+  if (!is_available("bootstraplib")) {
+    return(FALSE)
+  }
+  !is.null(bootstraplib::bs_theme_get())
+}
+
 #' Bootstrap libraries
 #'
 #' This function returns a set of web dependencies necessary for using Bootstrap

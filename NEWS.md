@@ -14,6 +14,8 @@ shiny 1.5.0.9000
 
 * When UI is specified as a function (e.g. `ui <- function(req) { ... }`), the response can now be an HTTP response as returned from the (newly exported) `httpResponse()` function. (#2970)
 
+* `selectInput` and `selectizeInput` now warn about performance implications when thousands of choices are used, and recommend [server-side selectize](https://shiny.rstudio.com/articles/selectize.html) be used instead.
+
 ### Bug fixes
 
 * Fixed #2859: `renderPlot()` wasn't correctly setting `showtext::showtext_opts()`'s `dpi` setting with the correct resolution on high resolution displays; which means, if the font was rendered by showtext, font sizes would look smaller than they should on such displays. (#2941)

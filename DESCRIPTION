@@ -1,7 +1,7 @@
 Package: shiny
 Type: Package
 Title: Web Application Framework for R
-Version: 1.5.0
+Version: 1.5.0.9000
 Authors@R: c(
     person("Winston", "Chang", role = c("aut", "cre"), email = "winston@rstudio.com"),
     person("Joe", "Cheng", role = "aut", email = "joe@rstudio.com"),
@@ -177,6 +177,6 @@ Collate:
     'test-server.R'
     'test.R'
     'update-input.R'
-RoxygenNote: 7.1.0.9000
+RoxygenNote: 7.1.1
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)

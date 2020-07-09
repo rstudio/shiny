@@ -17,10 +17,12 @@ isServer <- function(x) {
 #'
 #'   You can also provide an app, a path an app, or anything that
 #'   [`as.shiny.appobj()`] can handle.
-#' @param expr Test code containing expectations. The test expression will run
-#'   in the server function environment, meaning that the parameters of the
-#'   server function (e.g. `input`, `output`, and `session`) will be available
-#'   along with any other values created inside of the server function.
+#' @param expr Test code containing expectations. The objects from inside the
+#'   server function environment will be made available in the environment of
+#'   the test expression (this is done using a data mask with
+#'   [rlang::eval_tidy()]). This includes the parameters of the server function
+#'   (e.g. `input`, `output`, and `session`), along with any other values
+#'   created inside of the server function.
 #' @param args Additional arguments to pass to the module function. If `app` is
 #'   a module, and no `id` argument is provided, one will be generated and
 #'   supplied automatically.

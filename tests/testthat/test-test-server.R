@@ -16,22 +16,20 @@ test_that("testServer passes dots", {
 })
 
 test_that("testServer handles observers", {
-  module <- function(id) {
-    moduleServer(id, function(input, output, session) {
-      rv <- reactiveValues(x = 0, y = 0)
-      observe({
-        rv$x <- input$x * 2
-      })
-      observe({
-        rv$y <- rv$x
-      })
-      output$txt <- renderText({
-        paste0("Value: ", rv$x)
-      })
+  server <- function(input, output, session) {
+    rv <- reactiveValues(x = 0, y = 0)
+    observe({
+      rv$x <- input$x * 2
+    })
+    observe({
+      rv$y <- rv$x
+    })
+    output$txt <- renderText({
+      paste0("Value: ", rv$x)
     })
   }
 
-  testServer(module, {
+  testServer(server, {
     session$setInputs(x=1)
     expect_equal(rv$y, 2)
     expect_equal(rv$x, 2)
@@ -690,8 +688,22 @@ test_that("module return value captured", {
   }, args = list(n = 2))
 })
 
-test_that("It's an error to pass arguments to a server", {
-  expect_error(testServer(test_path("..", "test-modules", "06_tabsets"), {}, args = list(an_arg = 123)))
+test_that("can't test within test", {
+  server <- function(input, output, session) {
+    testServer()
+  }
+  expect_error(testServer(server, {}), "only within tests")
+})
+
+test_that("validates server function", {
+  server <- function(input, output, session) {}
+  expect_error(
+    testServer(server, {}, args = list(an_arg = 123)),
+    "Arguments were provided"
+  )
+
+  app <- shinyApp(fluidPage(), function(x, y, z) {})
+  expect_error(testServer(app, {}), "must declare")
 })
 
 # Provided an instance of an R6 object and its generator, returns a list with

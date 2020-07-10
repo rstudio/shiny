@@ -52,7 +52,7 @@ test_that("Repeated names for selectInput and radioButtons choices", {
   choices <- x$children
 
   expect_equal(choices[[2]]$children[[1]][[1]]$children[[1]]$children[[2]]$children[[1]],
-    HTML('<i class="fa fa-calendar"></i>'))
+    HTML('<i class="fa fa-calendar" role="presentation" aria-label="calendar icon"></i>'))
   expect_equal(choices[[2]]$children[[1]][[1]]$children[[1]]$children[[1]]$attribs$value, 'icon')
   expect_equal(choices[[2]]$children[[1]][[1]]$children[[1]]$children[[1]]$attribs$checked, 'checked')
 

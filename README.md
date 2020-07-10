@@ -37,9 +37,9 @@ install.packages("shiny")
 To install the latest development builds directly from GitHub, run this instead:
 
 ```r
-if (!require("devtools"))
-  install.packages("devtools")
-devtools::install_github("rstudio/shiny")
+if (!require("remotes"))
+  install.packages("remotes")
+remotes::install_github("rstudio/shiny")
 ```
 
 ## Getting Started

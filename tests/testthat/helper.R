@@ -83,5 +83,3 @@ rewire_namespace_handler <- function(pkgname, symbolname, value) {
     }
   }
 }
-
-

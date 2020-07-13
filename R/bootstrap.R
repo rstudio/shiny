@@ -47,7 +47,7 @@ bootstrapPage <- function(..., title = NULL, responsive = NULL, theme = NULL) {
 }
 
 useBsTheme <- function() {
-  if (!isTRUE(getOption("shiny.bootstraplib"))) {
+  if (!isTRUE(getShinyOption("bootstraplib"))) {
     return(FALSE)
   }
   if (!is_available("bootstraplib")) {

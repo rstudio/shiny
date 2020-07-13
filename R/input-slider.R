@@ -228,7 +228,7 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
     defaults <- list(
       sassVariables %OR% "",
       accentVariableDefaults(skin, accentColor),
-      bsThemeVariableDefaults(skin)
+      bsThemeSliderDefaults(skin)
     )
     sassFunc(
       list(
@@ -283,11 +283,13 @@ hasDecimals <- function(value) {
 
 
 accentVariableDefaults <- function(skin, accentColor = NULL) {
-  accentColor <- parseAccentColor(accentColor %OR% defaultAccentColor(skin))
   if (useBsTheme()) {
+    primary <- if ("3" %in% bootstraplib::theme_version()) "$brand-primary" else "$primary"
+    accentColor <- parseAccentColor(accentColor %OR% primary)
     accentColorDark <- paste0("mix(", accentColor, ", $black, 80%)")
     accentColorLight <- paste0("mix(", accentColor, ", $white, 10%)")
   } else {
+    accentColor <- parseAccentColor(accentColor %OR% defaultAccentColor(skin))
     accentColorDark <- paste0("mix(", accentColor, ", black, 80%)")
     accentColorLight <- paste0("mix(", accentColor, ", white, 10%)")
   }
@@ -333,7 +335,7 @@ accentVariableDefaults <- function(skin, accentColor = NULL) {
 }
 
 # TODO: BS3 version!
-bsThemeVariableDefaults <- function(skin) {
+bsThemeSliderDefaults <- function(skin) {
   if (!useBsTheme()) {
     return("")
   }

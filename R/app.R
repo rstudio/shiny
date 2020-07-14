@@ -32,6 +32,12 @@
 #'   request to determine whether the `ui` should be used to handle the
 #'   request. Note that the entire request path must match the regular
 #'   expression in order for the match to be considered successful.
+#'   Alternatively, a function that takes a single argument that is a Rook
+#'   request (that is, an environment object that follows the Rook request
+#'   specification) and returns `TRUE` if the request should be handled by `ui`
+#'   and `FALSE` if not. If a function is used for `uiPattern`, it will be
+#'   invoked for all HTTP request methods, whereas if a regular expression is
+#'   used, only `GET` requests will be considered.
 #' @param enableBookmarking Can be one of `"url"`, `"server"`, or
 #'   `"disable"`. The default value, `NULL`, will respect the setting from
 #'   any previous calls to  [enableBookmarking()]. See [enableBookmarking()]
@@ -78,7 +84,9 @@ shinyApp <- function(ui, server, onStart=NULL, options=list(),
   }
 
   # Ensure that the entire path is a match
-  uiPattern <- sprintf("^%s$", uiPattern)
+  if (is.character(uiPattern)) {
+    uiPattern <- sprintf("^%s$", uiPattern)
+  }
 
   httpHandler <- uiHttpHandler(ui, uiPattern)
 

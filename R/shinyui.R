@@ -102,14 +102,19 @@ uiHttpHandler <- function(ui, uiPattern = "^/$") {
   force(ui)
 
   function(req) {
-    if (!identical(req$REQUEST_METHOD, 'GET'))
-      return(NULL)
+    if (is.function(uiPattern)) {
+      if (!uiPattern(req)) {
+        return(NULL)
+      }
+    }
 
-    if (!isTRUE(grepl(uiPattern, req$PATH_INFO)))
+    if (!identical(req$REQUEST_METHOD, 'GET')) {
       return(NULL)
+    }
 
-    textConn <- file(open = "w+")
-    on.exit(close(textConn))
+    if (is.character(uiPattern) && !isTRUE(grepl(uiPattern, req$PATH_INFO))) {
+      return(NULL)
+    }
 
     showcaseMode <- .globals$showcaseDefault
     if (.globals$showcaseOverride) {
@@ -153,6 +158,9 @@ uiHttpHandler <- function(ui, uiPattern = "^/$") {
     if (inherits(uiValue, "httpResponse")) {
       return(uiValue)
     } else {
+      textConn <- file(open = "w+")
+      on.exit(close(textConn))
+
       renderPage(uiValue, textConn, showcaseMode, testMode)
       html <- paste(readLines(textConn, encoding = 'UTF-8'), collapse='\n')
       return(httpResponse(200, content=enc2utf8(html)))

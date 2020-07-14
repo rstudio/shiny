@@ -10,7 +10,9 @@ shiny 1.5.0.9000
 
 * When UI is specified as a function (e.g. `ui <- function(req) { ... }`), the
   response can now be an HTTP response as returned from the (newly exported)
-  `httpResponse()` function.
+  `httpResponse()` function. Also, the `shinyApp()` function's `uiPattern`
+  parameter can now be a function that takes a request object and returns `TRUE`
+  or `FALSE`. (#2968)
 
 
 shiny 1.5.0

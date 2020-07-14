@@ -165,6 +165,11 @@ resizeSavedPlot <- function(name, session, result, width, height, pixelratio, re
     return(result)
   }
 
+  if (isNamespaceLoaded("showtext")) {
+    showtextOpts <- showtext::showtext_opts(dpi = res*pixelratio)
+    on.exit({showtext::showtext_opts(showtextOpts)}, add = TRUE)
+  }
+
   coordmap <- NULL
   outfile <- plotPNG(function() {
     grDevices::replayPlot(result$recordedPlot)
@@ -206,7 +211,7 @@ drawPlot <- function(name, session, func, width, height, pixelratio, res, ...) {
   # but it's worth noting that the option doesn't currently work with CairoPNG.
   # https://github.com/yixuan/showtext/issues/33
   showtextOpts <- if (isNamespaceLoaded("showtext")) {
-    showtext::showtext_opts(dpi = res)
+    showtext::showtext_opts(dpi = res*pixelratio)
   } else {
     NULL
   }

@@ -47,7 +47,9 @@ expression in order for the match to be considered successful.
 Alternatively, a function that takes a single argument that is a Rook
 request (that is, an environment object that follows the Rook request
 specification) and returns \code{TRUE} if the request should be handled by \code{ui}
-and \code{FALSE} if not.}
+and \code{FALSE} if not. If a function is used for \code{uiPattern}, it will be
+invoked for all HTTP request methods, whereas if a regular expression is
+used, only \code{GET} requests will be considered.}
 
 \item{enableBookmarking}{Can be one of \code{"url"}, \code{"server"}, or
 \code{"disable"}. The default value, \code{NULL}, will respect the setting from

@@ -150,8 +150,12 @@ uiHttpHandler <- function(ui, uiPattern = "^/$") {
     if (is.null(uiValue))
       return(NULL)
 
-    renderPage(uiValue, textConn, showcaseMode, testMode)
-    html <- paste(readLines(textConn, encoding = 'UTF-8'), collapse='\n')
-    return(httpResponse(200, content=enc2utf8(html)))
+    if (inherits(uiValue, "httpResponse")) {
+      return(uiValue)
+    } else {
+      renderPage(uiValue, textConn, showcaseMode, testMode)
+      html <- paste(readLines(textConn, encoding = 'UTF-8'), collapse='\n')
+      return(httpResponse(200, content=enc2utf8(html)))
+    }
   }
 }

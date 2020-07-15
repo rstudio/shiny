@@ -549,10 +549,7 @@ joinOptions <- function(a, b) {
   stopifnot(is.null(a) || is.list(a))
   stopifnot(is.null(b) || is.list(b))
 
-  for (key in names(b)) {
-    a[[key]] <- b[[key]]
-  }
-  a
+  mergeVectors(a, b)
 }
 
 #' @rdname shiny.appobj

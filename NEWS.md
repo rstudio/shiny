@@ -10,7 +10,7 @@ shiny 1.5.0.9000
 
 * Fixed #2859: `renderPlot()` wasn't correctly setting `showtext::showtext_opts()`'s `dpi` setting with the correct resolution on high resolution displays; which means, if the font was rendered by showtext, font sizes would look smaller than they should on such displays. (#2941)
 
-* Fixed #1942: Calling `runApp("app.R")` ignored options passed into `shinyApp()`.
+* Fixed #1942: Calling `runApp("app.R")` no longer ignores options passed into `shinyApp()`. This makes it possible for Shiny apps to specify what port/host should be used by default. (#2969)
 
 
 shiny 1.5.0

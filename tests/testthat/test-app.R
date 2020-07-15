@@ -54,9 +54,8 @@ test_that("With ui/server.R, global.R is loaded before R/ helpers and into the r
   }
 
   # Temporarily opt-in to R/ file autoloading
-  orig <- getOption("shiny.autoload.r", NULL)
-  options(shiny.autoload.r=TRUE)
-  on.exit({options(shiny.autoload.r=orig)}, add=TRUE)
+  op <- options(shiny.autoload.r=TRUE)
+  on.exit(options(op), add=TRUE)
 
   # + shinyAppDir_serverR
   # +--- sourceUTF8
@@ -212,10 +211,13 @@ test_that("global.R and sources in R/ are sourced in the app directory", {
 })
 
 test_that("Setting options in various places works", {
+  op <- options(shiny.launch.browser = FALSE)
+  on.exit(options(op), add = TRUE)
+
   appDir <- test_path("../test-helpers/app7-port")
   withPort <- function(port, expr) {
     op <- options(app7.port = port)
-    on.exit(options(op))
+    on.exit(options(op), add = TRUE)
 
     force(expr)
   }
@@ -249,7 +251,13 @@ test_that("Setting options in various places works", {
 
   # Calls to options(shiny.port = xxx) within app.R should also work reliably
   expect_port(runApp(file.path(appDir, "option.R")), 7777)
-  # But still overrideable
+  # Ensure that option was unset
+  expect_null(getOption("shiny.port"))
+  # options(shiny.port = xxx) is overrideable
   appObj <- shinyAppFile(file.path(appDir, "option.R"), options = list(port = 8888))
   expect_port(print(appObj), 8888)
+
+  # onStop still works even if app.R has an error (ensure option was unset)
+  expect_error(runApp(file.path(appDir, "option-broken.R")), "^boom$")
+  expect_null(getOption("shiny.port"))
 })

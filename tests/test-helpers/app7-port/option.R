@@ -1,6 +1,7 @@
 library(shiny)
 
-options(shiny.port = 7777)
+op <- options(shiny.port = 7777)
+onStop(function() { options(op) })
 
 ui <- fluidPage(
 

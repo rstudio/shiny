@@ -249,10 +249,11 @@ test_that("Setting options in various places works", {
   # wrapped2.R calls shinyAppFile("wrapped.R", options = list(port = 3032))
   expect_port(runApp(file.path(appDir, "wrapped2.R")), 3032)
 
+  shiny_port_orig <- getOption("shiny.port")
   # Calls to options(shiny.port = xxx) within app.R should also work reliably
   expect_port(runApp(file.path(appDir, "option.R")), 7777)
-  # Ensure that option was unset
-  expect_null(getOption("shiny.port"))
+  # Ensure that option was unset/restored
+  expect_identical(getOption("shiny.port"), shiny_port_orig)
   # options(shiny.port = xxx) is overrideable
   appObj <- shinyAppFile(file.path(appDir, "option.R"), options = list(port = 8888))
   expect_port(print(appObj), 8888)

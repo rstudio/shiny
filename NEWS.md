@@ -8,9 +8,7 @@ shiny 1.5.0.9000
 
 ### Minor new features and improvements
 
-* When UI is specified as a function (e.g. `ui <- function(req) { ... }`), the
-  response can now be an HTTP response as returned from the (newly exported)
-  `httpResponse()` function. (#2970)
+* When UI is specified as a function (e.g. `ui <- function(req) { ... }`), the response can now be an HTTP response as returned from the (newly exported) `httpResponse()` function. (#2970)
 
 ### Bug fixes
 

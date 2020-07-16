@@ -195,6 +195,7 @@ reference:
       - onStop
       - diskCache
       - memoryCache
+      - httpResponse
       - key_missing
   - title: Plot interaction
     desc: Functions related to interactive plots

@@ -1,7 +1,7 @@
 Package: shiny
 Type: Package
 Title: Web Application Framework for R
-Version: 1.5.0.9000
+Version: 1.5.0.9001
 Authors@R: c(
     person("Winston", "Chang", role = c("aut", "cre"), email = "winston@rstudio.com"),
     person("Joe", "Cheng", role = "aut", email = "joe@rstudio.com"),
@@ -35,10 +35,6 @@ Authors@R: c(
     comment = "Bootstrap accessibility plugin"),
     person(family = "PayPal, Inc", role = "cph",
     comment = "Bootstrap accessibility plugin"),
-    person("Alexander", "Farkas", role = c("ctb", "cph"),
-    comment = "html5shiv library"),
-    person("Scott", "Jehl", role = c("ctb", "cph"),
-    comment = "Respond.js library"),
     person("Stefan", "Petre", role = c("ctb", "cph"),
     comment = "Bootstrap-datepicker library"),
     person("Andrew", "Rowls", role = c("ctb", "cph"),

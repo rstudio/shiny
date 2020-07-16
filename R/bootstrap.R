@@ -68,10 +68,7 @@ bootstrapLib <- function(theme = NULL) {
     script = c(
       "js/bootstrap.min.js",
       # Safely adding accessibility plugin for screen readers and keyboard users; no break for sighted aspects (see https://github.com/paypal/bootstrap-accessibility-plugin)
-      "accessibility/js/bootstrap-accessibility.min.js",
-      # These shims are necessary for IE 8 compatibility
-      "shim/html5shiv.min.js",
-      "shim/respond.min.js"
+      "accessibility/js/bootstrap-accessibility.min.js"
     ),
     stylesheet = if (is.null(theme)) c(
       "css/bootstrap.min.css",

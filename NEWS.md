@@ -8,6 +8,8 @@ shiny 1.5.0.9000
 
 * Added appropriate labels to `icon()` element to provide screen-reader users with alternative descriptions for the `fontawesome` and `glyphicon`: `aria-label` is automatically applied based on the fontawesome name. For example, `icon("calendar")` will be announced as "calendar icon" to screen readers. "presentation" aria role has also been attached to `icon()` to remove redundant semantic info for screen readers.
 
+* Fixed keyboard accessibility for file picker button: keyboard users can now tab to focus on `fileInput()` widget (#2929).
+
 ### Minor new features and improvements
 
 * When UI is specified as a function (e.g. `ui <- function(req) { ... }`), the response can now be an HTTP response as returned from the (newly exported) `httpResponse()` function. (#2970)
@@ -19,6 +21,7 @@ shiny 1.5.0.9000
 ### Library updates
 
 * Removed html5shiv and respond.js, which were used for IE 8 and IE 9 compatibility. (#2973)
+
 
 shiny 1.5.0
 ===========

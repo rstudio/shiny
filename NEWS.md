@@ -4,6 +4,8 @@ shiny 1.5.0.9000
 
 ### Accessibility
 
+* Added [bootstrap accessibility plugin](https://github.com/paypal/bootstrap-accessibility-plugin) under the hood to improve accessibility of shiny apps for screen-reader and keyboard users: the enhancements include better navigations for alert, tooltip, popover, modal dialog, dropdown, tab Panel, collapse, and carousel elements.
+
 * Added appropriate labels to `icon()` element to provide screen-reader users with alternative descriptions for the `fontawesome` and `glyphicon`: `aria-label` is automatically applied based on the fontawesome name. For example, `icon("calendar")` will be announced as "calendar icon" to screen readers. "presentation" aria role has also been attached to `icon()` to remove redundant semantic info for screen readers.
 
 ### Minor new features and improvements

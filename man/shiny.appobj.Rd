@@ -28,7 +28,7 @@ is.shiny.appobj(x)
 \arguments{
 \item{x}{Object to convert to a Shiny app.}
 
-\item{...}{Additional parameters to be passed to print.}
+\item{...}{Ignored.}
 }
 \description{
 Internal methods for the \code{shiny.appobj} S3 class.

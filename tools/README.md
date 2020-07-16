@@ -129,7 +129,7 @@ To create a new patch:
 
 ### Updating
 
-[ion.rangeSlider](https://github.com/IonDen/ion.rangeSlider) can be updated with the script `updateBootstrapDatepicker.R`. That script downloads a specific version of ion.rangeSlider and applies our patches in tools/ion.rangeSlider-patches.
+[ion.rangeSlider](https://github.com/IonDen/ion.rangeSlider) can be updated with the script `updateIonRangeSlider.R`. That script downloads a specific version of ion.rangeSlider and applies our patches in tools/ion.rangeSlider-patches.
 
 After updating and applying patches, `yarn grunt` should be run per the instructions above in order to generate a minified JavaScript file.
 

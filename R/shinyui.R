@@ -156,7 +156,7 @@ uiHttpHandler <- function(ui, uiPattern = "^/$") {
       return(uiValue)
     } else {
       textConn <- file(open = "w+")
-      on.exit(close(textConn))
+      on.exit(close(textConn), add = TRUE)
 
       renderPage(uiValue, textConn, showcaseMode, testMode)
       html <- paste(readLines(textConn, encoding = 'UTF-8'), collapse='\n')

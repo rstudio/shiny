@@ -786,6 +786,15 @@ runApp <- function(appDir=getwd(),
     shinyOptions(cache = MemoryCache$new())
   }
 
+  # Invoke user-defined onStop callbacks, before the application's internal
+  # onStop callbacks.
+  on.exit({
+    .globals$onStopCallbacks$invoke()
+    .globals$onStopCallbacks <- Callbacks$new()
+  }, add = TRUE)
+
+  require(shiny)
+
   appParts <- as.shiny.appobj(appDir)
 
   # The lines below set some of the app's running options, which
@@ -899,8 +908,6 @@ runApp <- function(appDir=getwd(),
     setShowcaseDefault(1)
   }
 
-  require(shiny)
-
   # determine port if we need to
   if (is.null(port)) {
 
@@ -938,13 +945,6 @@ runApp <- function(appDir=getwd(),
       }
     }
   }
-
-  # Invoke user-defined onStop callbacks, before the application's internal
-  # onStop callbacks.
-  on.exit({
-    .globals$onStopCallbacks$invoke()
-    .globals$onStopCallbacks <- Callbacks$new()
-  }, add = TRUE)
 
   # Extract appOptions (which is a list) and store them as shinyOptions, for
   # this app. (This is the only place we have to store settings that are

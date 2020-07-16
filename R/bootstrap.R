@@ -65,12 +65,7 @@ bootstrapLib <- function(theme = NULL) {
       href = "shared/bootstrap",
       file = system.file("www/shared/bootstrap", package = "shiny")
     ),
-    script = c(
-      "js/bootstrap.min.js",
-      # These shims are necessary for IE 8 compatibility
-      "shim/html5shiv.min.js",
-      "shim/respond.min.js"
-    ),
+    script =  "js/bootstrap.min.js",
     stylesheet = if (is.null(theme)) "css/bootstrap.min.css",
     meta = list(viewport = "width=device-width, initial-scale=1")
   )

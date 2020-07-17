@@ -626,7 +626,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
       var jsonValue = JSON.stringify(value);
 
-      if (opts.priority !== "event" && this.lastSentValues[inputName] && this.lastSentValues[inputName].jsonValue === jsonValue && this.lastSentValues[inputName].inputType === inputType) {
+      if (opts.priority !== "event" && opts.priority !== "initialize" && this.lastSentValues[inputName] && this.lastSentValues[inputName].jsonValue === jsonValue && this.lastSentValues[inputName].inputType === inputType) {
         return;
       }
 
@@ -779,6 +779,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
     if (opts && typeof opts.priority !== "undefined") {
       switch (opts.priority) {
+        case "initialize":
         case "deferred":
         case "immediate":
         case "event":
@@ -6171,6 +6172,12 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
           inputItems[effectiveId] = {
             value: binding.getValue(el),
             opts: {
+              // The "initialize" priority is like a hybrid of "immediate" and
+              // "event". Like "event", the input value is sent even if it is the
+              // same as the last-known value for this input (i.e. no dedupe).
+              // But unlike "event", and like "immediate", it's free to be batched
+              // up with other input values and sent at once.
+              priority: "initialize",
               immediate: true,
               binding: binding,
               el: el

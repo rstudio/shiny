@@ -231,7 +231,7 @@ var InputNoResendDecorator = function(target, initialValues) {
     const { name: inputName, inputType: inputType } = splitInputNameType(nameType);
     const jsonValue = JSON.stringify(value);
 
-    if (opts.priority !== "event" &&
+    if ((opts.priority !== "event" && opts.priority !== "initialize") &&
         this.lastSentValues[inputName] &&
         this.lastSentValues[inputName].jsonValue === jsonValue &&
         this.lastSentValues[inputName].inputType === inputType) {
@@ -384,6 +384,7 @@ function addDefaultInputOpts(opts) {
 
   if (opts && typeof(opts.priority) !== "undefined") {
     switch (opts.priority) {
+      case "initialize":
       case "deferred":
       case "immediate":
       case "event":

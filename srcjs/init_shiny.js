@@ -146,6 +146,12 @@ function initShiny() {
         inputItems[effectiveId] = {
           value: binding.getValue(el),
           opts: {
+            // The "initialize" priority is like a hybrid of "immediate" and
+            // "event". Like "event", the input value is sent even if it is the
+            // same as the last-known value for this input (i.e. no dedupe).
+            // But unlike "event", and like "immediate", it's free to be batched
+            // up with other input values and sent at once.
+            priority: "initialize",
             immediate: true,
             binding: binding,
             el: el

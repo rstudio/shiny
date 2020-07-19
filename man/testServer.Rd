@@ -4,7 +4,7 @@
 \alias{testServer}
 \title{Reactive testing for Shiny server functions and modules}
 \usage{
-testServer(app, expr, args = list(), session = MockShinySession$new())
+testServer(app = NULL, expr, args = list(), session = MockShinySession$new())
 }
 \arguments{
 \item{app}{A server function (i.e. a function with \code{input}, \code{output},

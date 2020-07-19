@@ -96,7 +96,8 @@ testServer <- function(app = NULL, expr, args = list(), session = MockShinySessi
   }
 
   if (is.null(app)) {
-    app <- findEnclosingApp(".")
+    path <- findEnclosingApp(".")
+    app <- shinyAppDir(path)
   } else if (isServer(app)) {
     app <- shinyApp(fluidPage(), app)
   } else {

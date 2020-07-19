@@ -13,7 +13,7 @@ isServer <- function(x) {
 #' modules.
 #' @param app A server function (i.e. a function with `input`, `output`,
 #'   and `session()`), or a module function (i.e. a function with first
-#'   argument `id` that returns a server function).
+#'   argument `id` that calls [moduleServer()].
 #'
 #'   You can also provide an app, a path an app, or anything that
 #'   [`as.shiny.appobj()`] can handle.

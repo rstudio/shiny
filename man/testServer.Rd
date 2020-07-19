@@ -9,7 +9,7 @@ testServer(app = NULL, expr, args = list(), session = MockShinySession$new())
 \arguments{
 \item{app}{A server function (i.e. a function with \code{input}, \code{output},
 and \code{session()}), or a module function (i.e. a function with first
-argument \code{id} that returns a server function).
+argument \code{id} that calls \code{\link[=moduleServer]{moduleServer()}}.
 
 You can also provide an app, a path an app, or anything that
 \code{\link[=as.shiny.appobj]{as.shiny.appobj()}} can handle.}

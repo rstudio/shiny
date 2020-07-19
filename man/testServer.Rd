@@ -35,7 +35,19 @@ interactions are defined in the server function of applications and in
 modules.
 }
 \examples{
-server <- function(id, multiplier = 2, prefix = "I am ") {
+# Testing a server function  ----------------------------------------------
+server <- function(input, output, session) {
+  x <- reactive(input$a * input$b)
+}
+
+testServer(server, {
+  session$setInputs(a = 2, b = 3)
+  stopifnot(x() == 6)
+})
+
+
+# Testing a module --------------------------------------------------------
+myModuleServer <- function(id, multiplier = 2, prefix = "I am ") {
   moduleServer(id, function(input, output, session) {
     myreactive <- reactive({
       input$x * multiplier
@@ -46,7 +58,7 @@ server <- function(id, multiplier = 2, prefix = "I am ") {
   })
 }
 
-testServer(server, args = list(multiplier = 2), {
+testServer(myModuleServer, args = list(multiplier = 2), {
   session$setInputs(x = 1)
   # You're also free to use third-party
   # testing packages like testthat:

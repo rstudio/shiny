@@ -10,7 +10,7 @@ shiny 1.5.0.9000
 
 * Closed #2929: Fixed keyboard accessibility for file picker button: keyboard users can now tab to focus on `fileInput()` widget. (#2937)
 
-* Fixed #2951: screen readers correctly announce labels and date formats for `dateInput()` and `dateRangeInput()` widgets.
+* Fixed #2951: screen readers correctly announce labels and date formats for `dateInput()` and `dateRangeInput()` widgets. (#2978)
 
 ### Minor new features and improvements
 

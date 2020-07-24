@@ -6,7 +6,7 @@
 \usage{
 runExample(
   example = NA,
-  port = NULL,
+  port = getOption("shiny.port"),
   launch.browser = getOption("shiny.launch.browser", interactive()),
   host = getOption("shiny.host", "127.0.0.1"),
   display.mode = c("auto", "normal", "showcase")
@@ -16,8 +16,10 @@ runExample(
 \item{example}{The name of the example to run, or \code{NA} (the default) to
 list the available examples.}
 
-\item{port}{The TCP port that the application should listen on. Defaults to
-choosing a random port.}
+\item{port}{The TCP port that the application should listen on. If the
+\code{port} is not specified, and the \code{shiny.port} option is set (with
+\code{options(shiny.port = XX)}), then that port will be used. Otherwise,
+use a random port.}
 
 \item{launch.browser}{If true, the system's default web browser will be
 launched automatically after the app is started. Defaults to true in

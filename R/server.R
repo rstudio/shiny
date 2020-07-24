@@ -1080,7 +1080,7 @@ stopApp <- function(returnValue = invisible()) {
 #' }
 #' @export
 runExample <- function(example=NA,
-                       port=NULL,
+                       port=getOption("shiny.port"),
                        launch.browser=getOption('shiny.launch.browser',
                                                 interactive()),
                        host=getOption('shiny.host', '127.0.0.1'),

@@ -72,7 +72,7 @@ registerClient <- function(client) {
 addResourcePath <- function(prefix, directoryPath) {
   if (length(prefix) != 1) stop("prefix must be of length 1")
   if (grepl("^\\.+$", prefix)) stop("prefix can't be composed of dots only")
-  if (!grepl('^[a-z0-9\\-_\\.][a-z0-9\\-_.]*$', prefix, ignore.case = TRUE, perl = TRUE)) {
+  if (!grepl('[a-z0-9\\-_.]*$', prefix, ignore.case = TRUE, perl = TRUE)) {
     stop("addResourcePath called with invalid prefix; please see documentation")
   }
   if (prefix %in% c('shared')) {

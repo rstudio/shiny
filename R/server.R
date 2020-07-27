@@ -1056,8 +1056,6 @@ stopApp <- function(returnValue = invisible()) {
 #'
 #' @param example The name of the example to run, or `NA` (the default) to
 #'   list the available examples.
-#' @param port The TCP port that the application should listen on. Defaults to
-#'   choosing a random port.
 #' @param launch.browser If true, the system's default web browser will be
 #'   launched automatically after the app is started. Defaults to true in
 #'   interactive sessions only.
@@ -1066,6 +1064,7 @@ stopApp <- function(returnValue = invisible()) {
 #' @param display.mode The mode in which to display the example. Defaults to
 #'   `showcase`, but may be set to `normal` to see the example without
 #'   code or commentary.
+#' @inheritParams runApp
 #'
 #' @examples
 #' ## Only run this example in interactive R sessions
@@ -1081,7 +1080,7 @@ stopApp <- function(returnValue = invisible()) {
 #' }
 #' @export
 runExample <- function(example=NA,
-                       port=NULL,
+                       port=getOption("shiny.port"),
                        launch.browser=getOption('shiny.launch.browser',
                                                 interactive()),
                        host=getOption('shiny.host', '127.0.0.1'),

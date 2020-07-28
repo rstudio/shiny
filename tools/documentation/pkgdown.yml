@@ -104,7 +104,7 @@ reference:
     contents:
       - renderPlot
       - renderCachedPlot
-      - renderText
+      - renderPrint
       - renderDataTable
       - renderImage
       - renderTable

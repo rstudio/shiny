@@ -5,14 +5,15 @@ inputHandlers <- Map$new()
 #'
 #' Adds an input handler for data of this type. When called, Shiny will use the
 #' function provided to refine the data passed back from the client (after being
-#' deserialized by jsonlite) before making it available in the `input`
-#' variable of the `server.R` file.
+#' deserialized by jsonlite) before making it available in the `input` variable
+#' of the `server.R` file.
 #'
 #' This function will register the handler for the duration of the R process
 #' (unless Shiny is explicitly reloaded). For that reason, the `type` used
 #' should be very specific to this package to minimize the risk of colliding
 #' with another Shiny package which might use this data type name. We recommend
-#' the format of "packageName.widgetName".
+#' the format of "packageName.widgetName". It should be called from the
+#' package's `.onLoad()` function.
 #'
 #' Currently Shiny registers the following handlers: `shiny.matrix`,
 #' `shiny.number`, and `shiny.date`.
@@ -20,23 +21,20 @@ inputHandlers <- Map$new()
 #' The `type` of a custom Shiny Input widget will be deduced using the
 #' `getType()` JavaScript function on the registered Shiny inputBinding.
 #' @param type The type for which the handler should be added --- should be a
-#' single-element character vector.
+#'   single-element character vector.
 #' @param fun The handler function. This is the function that will be used to
 #'   parse the data delivered from the client before it is available in the
 #'   `input` variable. The function will be called with the following three
-#'   parameters:
-#'    \enumerate{
-#'      \item{The value of this input as provided by the client, deserialized
-#'      using jsonlite.}
-#'      \item{The `shinysession` in which the input exists.}
-#'      \item{The name of the input.}
-#'    }
-#' @param force If `TRUE`, will overwrite any existing handler without
-#' warning. If `FALSE`, will throw an error if this class already has
-#' a handler defined.
+#'   parameters: \enumerate{ \item{The value of this input as provided by the
+#'   client, deserialized using jsonlite.} \item{The `shinysession` in which the
+#'   input exists.} \item{The name of the input.} }
+#' @param force If `TRUE`, will overwrite any existing handler without warning.
+#'   If `FALSE`, will throw an error if this class already has a handler
+#'   defined.
 #' @examples
 #' \dontrun{
 #' # Register an input handler which rounds a input number to the nearest integer
+#' # In a package, this should be called from the .onLoad function.
 #' registerInputHandler("mypackage.validint", function(x, shinysession, name) {
 #'   if (is.null(x)) return(NA)
 #'   round(x)

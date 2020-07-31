@@ -336,5 +336,5 @@ test_that("Choices need not be provided, can be NULL or c()", {
   expect_identical(noChoices, choicesCharacter0)
   expect_identical(noChoices, allChoicesNull)
 
-  expect_true(grepl(fixed = TRUE, expected, format(noChoices)))
+  expect_equal(expected, format(noChoices))
 })

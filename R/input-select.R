@@ -192,7 +192,9 @@ selectizeIt <- function(inputId, select, options, nonempty = FALSE) {
       HTML('<!--[if lt IE 9]>'),
       tags$script(src = 'shared/selectize/js/es5-shim.min.js'),
       HTML('<![endif]-->'),
-      tags$script(src = 'shared/selectize/js/selectize.min.js')
+      tags$script(src = 'shared/selectize/js/selectize.min.js'),
+      # Need accessibility plugin for screen readers (https://github.com/SLMNBJ/selectize-plugin-a11y):
+      tags$script(src = 'shared/selectize/accessibility/js/selectize-plugin-a11y.js')
     ))
   )
 

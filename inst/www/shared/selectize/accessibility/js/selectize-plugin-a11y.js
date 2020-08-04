@@ -37,6 +37,16 @@ Selectize.define("selectize-plugin-a11y", function (options) {
             if ($target.hasClass("dropdown-active")) {
               // open
               self.$control_input.attr("aria-expanded", "true");
+              var kids = self.$dropdown_content[0].children;
+              for (i = 0; i < kids.length; i++) {
+                var attrs = kids[i].attributes;
+                if (!attrs.role) {
+                  kids[i].setAttribute("role", "option");
+                }
+                if (!attrs.id) {
+                  kids[i].setAttribute("id", self.accessibility.helpers.randomId());
+                }
+              }
             } else {
               // close
               self.$control_input.attr("aria-expanded", "false");

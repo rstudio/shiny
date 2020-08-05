@@ -198,6 +198,12 @@ selectizeIt <- function(inputId, select, options, nonempty = FALSE) {
     ))
   )
 
+  # Make sure to enable accessibility plugin
+  options$plugins <- jsonlite::toJSON(c(
+    if (length(options$plugins)) jsonlite::parse_json(options$plugins),
+    'selectize-plugin-a11y'
+  ))
+
   if ('drag_drop' %in% options$plugins) {
     selectizeDep <- list(selectizeDep, htmlDependency(
       'jqueryui', '1.12.1', c(href = 'shared/jqueryui'),

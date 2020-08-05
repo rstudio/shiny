@@ -183,6 +183,11 @@ selectizeInput <- function(inputId, ..., options = NULL, width = NULL) {
 
 # given a select input and its id, selectize it
 selectizeIt <- function(inputId, select, options, nonempty = FALSE) {
+  # Make sure accessibility plugin is included
+  if (!('selectize-plugin-a11y' %in% options$plugins)) {
+    options$plugins <- c(options$plugins, list('selectize-plugin-a11y'))
+  }
+
   res <- checkAsIs(options)
 
   selectizeDep <- htmlDependency(
@@ -193,16 +198,10 @@ selectizeIt <- function(inputId, select, options, nonempty = FALSE) {
       tags$script(src = 'shared/selectize/js/es5-shim.min.js'),
       HTML('<![endif]-->'),
       tags$script(src = 'shared/selectize/js/selectize.min.js'),
-      # Need accessibility plugin for screen readers (https://github.com/SLMNBJ/selectize-plugin-a11y):
+      # Accessibility plugin for screen readers (https://github.com/SLMNBJ/selectize-plugin-a11y):
       tags$script(src = 'shared/selectize/accessibility/js/selectize-plugin-a11y.js')
     ))
   )
-
-  # Make sure to enable accessibility plugin
-  options$plugins <- jsonlite::toJSON(c(
-    if (length(options$plugins)) jsonlite::parse_json(options$plugins),
-    'selectize-plugin-a11y'
-  ))
 
   if ('drag_drop' %in% options$plugins) {
     selectizeDep <- list(selectizeDep, htmlDependency(

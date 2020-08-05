@@ -63,9 +63,6 @@ file.copy(
 # in the following ways:
 # * In our version, each option item has their own unique id to be announced to screen readers when selection changes.
 
-#   try-catch. This is because this line results in an error with jQuery 3 and
-#   PhantomJS. (#2587)
-
 patch_dir <- rprojroot::find_package_root_file("tools/selectize-patches")
 
 for (patch in list.files(patch_dir, full.names = TRUE)) {

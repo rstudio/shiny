@@ -43,6 +43,8 @@ Authors@R: c(
     comment = "Font-Awesome font"),
     person("Brian", "Reavis", role = c("ctb", "cph"),
     comment = "selectize.js library"),
+    person("Salmen", "Bejaoui", role = c("ctb", "cph"),
+    comment = "selectize-plugin-a11y library"),
     person("Kristopher Michael", "Kowal", role = c("ctb", "cph"),
     comment = "es5-shim library"),
     person(family = "es5-shim contributors", role = c("ctb", "cph"),

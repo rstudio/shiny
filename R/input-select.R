@@ -199,7 +199,7 @@ selectizeIt <- function(inputId, select, options, nonempty = FALSE) {
       HTML('<![endif]-->'),
       tags$script(src = 'shared/selectize/js/selectize.min.js'),
       # Accessibility plugin for screen readers (https://github.com/SLMNBJ/selectize-plugin-a11y):
-      tags$script(src = 'shared/selectize/accessibility/js/selectize-plugin-a11y.js')
+      tags$script(src = 'shared/selectize/accessibility/js/selectize-plugin-a11y.min.js')
     ))
   )
 

@@ -1,5 +1,5 @@
 diff --git a/inst/www/shared/selectize/accessibility/js/selectize-plugin-a11y.js b/inst/www/shared/selectize/accessibility/js/selectize-plugin-a11y.js
-index e3cd799..1d494f8 100644
+index e3cd799e..1d494f88 100644
 --- a/inst/www/shared/selectize/accessibility/js/selectize-plugin-a11y.js
 +++ b/inst/www/shared/selectize/accessibility/js/selectize-plugin-a11y.js
 @@ -37,6 +37,16 @@ Selectize.define("selectize-plugin-a11y", function (options) {

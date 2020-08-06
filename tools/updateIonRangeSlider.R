@@ -56,10 +56,6 @@ for (patch in list.files(patch_dir, full.names = TRUE)) {
     }
   )
 }
-
-# Reset to tools directory to do yarn command
-setwd(rprojroot::find_package_root_file("tools"))
-
 # =============================================================================
 # Generate minified js
 system("yarn build")

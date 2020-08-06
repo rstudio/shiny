@@ -89,6 +89,7 @@ fileInput <- function(inputId, label, multiple = FALSE, accept = NULL,
 
   inputTag <- tags$input(
     id = inputId,
+    class = "shiny-input-file",
     name = inputId,
     type = "file",
     # Don't use "display: none;" style, which causes keyboard accessibility issue; instead use the following workaround: https://css-tricks.com/places-its-tempting-to-use-display-none-but-dont/

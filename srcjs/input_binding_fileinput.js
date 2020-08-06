@@ -267,7 +267,11 @@ var $fileInputs = $();
 var fileInputBinding = new InputBinding();
 $.extend(fileInputBinding, {
   find: function(scope) {
-    return $(scope).find('input[type="file"]');
+    if (exports.bindGenericInputs) {
+      return $(scope).find('input[type="file"]');
+    } else {
+      return $(scope).find('input[type="file"].shiny-input-file');
+    }
   },
   getId: function(el) {
     return InputBinding.prototype.getId.call(this, el) || el.name;

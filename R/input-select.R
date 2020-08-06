@@ -98,6 +98,7 @@ selectInput <- function(inputId, label, choices, selected = NULL,
   # create select tag and add options
   selectTag <- tags$select(
     id = inputId,
+    class = "shiny-input-select",
     class = if (!selectize) "form-control",
     size = size,
     selectOptions(choices, selected)

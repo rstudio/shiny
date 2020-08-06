@@ -1,7 +1,11 @@
 var numberInputBinding = {};
 $.extend(numberInputBinding, textInputBinding, {
   find: function(scope) {
-    return $(scope).find('input[type="number"]');
+    if (exports.bindGenericInputs) {
+      return $(scope).find('input[type="number"]');
+    } else {
+      return $(scope).find('input[type="number"].shiny-input-number');
+    }
   },
   getValue: function(el) {
     var numberVal = $(el).val();

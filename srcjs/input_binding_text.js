@@ -1,12 +1,16 @@
 var textInputBinding = new InputBinding();
 $.extend(textInputBinding, {
   find: function(scope) {
-    var $inputs = $(scope).find('input[type="text"], input[type="search"], input[type="url"], input[type="email"]');
-    // selectize.js 0.12.4 inserts a hidden text input with an
-    // id that ends in '-selectized'. The .not() selector below
-    // is to prevent textInputBinding from accidentally picking up
-    // this hidden element as a shiny input (#2396)
-    return $inputs.not('input[type="text"][id$="-selectized"]');
+    if (exports.bindGenericInputs) {
+      var $inputs = $(scope).find('input[type="text"], input[type="search"], input[type="url"], input[type="email"]');
+      // selectize.js 0.12.4 inserts a hidden text input with an
+      // id that ends in '-selectized'. The .not() selector below
+      // is to prevent textInputBinding from accidentally picking up
+      // this hidden element as a shiny input (#2396)
+      return $inputs.not('input[type="text"][id$="-selectized"]');
+    } else {
+      return $(scope).find('input.shiny-input-text');
+    }
   },
   getId: function(el) {
     return InputBinding.prototype.getId.call(this, el) || el.name;

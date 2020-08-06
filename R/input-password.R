@@ -35,7 +35,7 @@ passwordInput <- function(inputId, label, value = "", width = NULL,
   div(class = "form-group shiny-input-container",
     style = if (!is.null(width)) paste0("width: ", validateCssUnit(width), ";"),
     shinyInputLabel(inputId, label),
-    tags$input(id = inputId, type="password", class="form-control", value=value,
+    tags$input(id = inputId, type="password", class="shiny-input-password form-control", value=value,
                placeholder = placeholder)
   )
 }

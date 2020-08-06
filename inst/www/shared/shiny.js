@@ -11,6 +11,13 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
   var exports = window.Shiny = window.Shiny || {};
   exports.version = "1.5.0.9001"; // Version number inserted by Grunt
 
+  if (!exports.hasOwnProperty("bindGenericInputs")) {
+    // Setting Shiny.bindGenericInputs=false during page load prevents inputs
+    // that don't have Shiny-specific classnames from being bound. See
+    // https://github.com/rstudio/shiny/issues/2956 for context.
+    exports.bindGenericInputs = true;
+  }
+
   var origPushState = window.history.pushState;
 
   window.history.pushState = function () {
@@ -4252,12 +4259,16 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
   var textInputBinding = new InputBinding();
   $.extend(textInputBinding, {
     find: function find(scope) {
-      var $inputs = $(scope).find('input[type="text"], input[type="search"], input[type="url"], input[type="email"]'); // selectize.js 0.12.4 inserts a hidden text input with an
-      // id that ends in '-selectized'. The .not() selector below
-      // is to prevent textInputBinding from accidentally picking up
-      // this hidden element as a shiny input (#2396)
+      if (exports.bindGenericInputs) {
+        var $inputs = $(scope).find('input[type="text"], input[type="search"], input[type="url"], input[type="email"]'); // selectize.js 0.12.4 inserts a hidden text input with an
+        // id that ends in '-selectized'. The .not() selector below
+        // is to prevent textInputBinding from accidentally picking up
+        // this hidden element as a shiny input (#2396)
 
-      return $inputs.not('input[type="text"][id$="-selectized"]');
+        return $inputs.not('input[type="text"][id$="-selectized"]');
+      } else {
+        return $(scope).find('input.shiny-input-text');
+      }
     },
     getId: function getId(el) {
       return InputBinding.prototype.getId.call(this, el) || el.name;
@@ -4308,7 +4319,11 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
   var textareaInputBinding = {};
   $.extend(textareaInputBinding, textInputBinding, {
     find: function find(scope) {
-      return $(scope).find('textarea');
+      if (exports.bindGenericInputs) {
+        return $(scope).find('textarea');
+      } else {
+        return $(scope).find('textarea.shiny-input-textarea');
+      }
     }
   });
   inputBindings.register(textareaInputBinding, 'shiny.textareaInput'); //---------------------------------------------------------------------
@@ -4317,7 +4332,11 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
   var passwordInputBinding = {};
   $.extend(passwordInputBinding, textInputBinding, {
     find: function find(scope) {
-      return $(scope).find('input[type="password"]');
+      if (exports.bindGenericInputs) {
+        return $(scope).find('input[type="password"]');
+      } else {
+        return $(scope).find('input[type="password"].shiny-input-password');
+      }
     },
     getType: function getType(el) {
       return "shiny.password";
@@ -4329,7 +4348,11 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
   var numberInputBinding = {};
   $.extend(numberInputBinding, textInputBinding, {
     find: function find(scope) {
-      return $(scope).find('input[type="number"]');
+      if (exports.bindGenericInputs) {
+        return $(scope).find('input[type="number"]');
+      } else {
+        return $(scope).find('input[type="number"].shiny-input-number');
+      }
     },
     getValue: function getValue(el) {
       var numberVal = $(el).val();
@@ -4370,7 +4393,11 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
   var checkboxInputBinding = new InputBinding();
   $.extend(checkboxInputBinding, {
     find: function find(scope) {
-      return $(scope).find('input[type="checkbox"]');
+      if (exports.bindGenericInputs) {
+        return $(scope).find('input[type="checkbox"]');
+      } else {
+        return $(scope).find('input[type="checkbox"].shiny-input-checkbox');
+      }
     },
     getValue: function getValue(el) {
       return el.checked;
@@ -5044,7 +5071,11 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
   var selectInputBinding = new InputBinding();
   $.extend(selectInputBinding, {
     find: function find(scope) {
-      return $(scope).find('select');
+      if (exports.bindGenericInputs) {
+        return $(scope).find('select');
+      } else {
+        return $(scope).find('select.shiny-input-select');
+      }
     },
     getType: function getType(el) {
       var $el = $(el);
@@ -5820,7 +5851,11 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
   var fileInputBinding = new InputBinding();
   $.extend(fileInputBinding, {
     find: function find(scope) {
-      return $(scope).find('input[type="file"]');
+      if (exports.bindGenericInputs) {
+        return $(scope).find('input[type="file"]');
+      } else {
+        return $(scope).find('input[type="file"].shiny-input-file');
+      }
     },
     getId: function getId(el) {
       return InputBinding.prototype.getId.call(this, el) || el.name;

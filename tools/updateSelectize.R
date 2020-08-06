@@ -28,7 +28,7 @@ unlink(dest_dir, recursive = TRUE)
 
 dir.create(file.path(dest_dir, "js"), recursive = TRUE)
 file.copy(
-  file.path(unzipped, paste0("selectize.js-", version), "dist", "js", "selectize.min.js"),
+  file.path(unzipped, paste0("selectize.js-", version), "dist", "js", "standalone", "selectize.min.js"),
   file.path(dest_dir, "js"),
   overwrite = TRUE
 )

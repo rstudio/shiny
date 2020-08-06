@@ -46,13 +46,23 @@ file.copy(file.path(unzip_dir, "img"), dest_dir, recursive = TRUE)
 
 patch_dir <- rprojroot::find_package_root_file("tools/ion.rangeSlider-patches")
 
+# Need to apply patch in the package root
+setwd(rprojroot::find_package_root_file())
+
 for (patch in list.files(patch_dir, full.names = TRUE)) {
   tryCatch({
     message(sprintf("Applying %s", basename(patch)))
-    system(sprintf("git apply '%s'", patch))
+    system(sprintf("git apply %s", patch))
   },
     error = function(e) {
       quit(save = "no", status = 1)
     }
   )
 }
+
+# Reset to tools directory to do yarn command
+setwd(rprojroot::find_package_root_file("tools"))
+
+# =============================================================================
+# Generate minified js
+system("yarn build")

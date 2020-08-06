@@ -195,7 +195,11 @@ function fileInputBindingGetId(this: any, el: HTMLInputElement): string {
 
 class FileInputBinding extends InputBinding {
   find(scope: HTMLElement): JQuery<HTMLElement> {
-    return $(scope).find('input[type="file"]');
+    if (exports.bindGenericInputs) {
+      return $(scope).find('input[type="file"]');
+    } else {
+      return $(scope).find('input[type="file"].shiny-input-file');
+    }
   }
   getId(el: HTMLInputElement): string {
     return fileInputBindingGetId(el);

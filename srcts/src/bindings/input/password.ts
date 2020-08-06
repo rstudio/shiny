@@ -4,7 +4,11 @@ import { TextInputBinding } from "./text";
 
 class PasswordInputBinding extends TextInputBinding {
   find(scope: HTMLElement): JQuery<HTMLElement> {
-    return $(scope).find('input[type="password"]');
+    if (exports.bindGenericInputs) {
+      return $(scope).find('input[type="password"]');
+    } else {
+      return $(scope).find('input[type="password"].shiny-input-password');
+    }
   }
 
   getType(el: HTMLElement): string {

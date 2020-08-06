@@ -4,7 +4,11 @@ import { TextInputBinding } from "./text";
 
 class TextareaInputBinding extends TextInputBinding {
   find(scope: HTMLElement): JQuery<HTMLElement> {
-    return $(scope).find("textarea");
+    if (exports.bindGenericInputs) {
+      return $(scope).find('textarea');
+    } else {
+      return $(scope).find('textarea.shiny-input-textarea');
+    }
   }
 }
 

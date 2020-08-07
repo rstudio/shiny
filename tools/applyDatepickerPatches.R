@@ -8,11 +8,15 @@ patch_dir <- rprojroot::find_package_root_file("tools/datepicker-patches")
 
 for (patch in list.files(patch_dir, full.names = TRUE)) {
   tryCatch({
-      message(sprintf("Applying %s", basename(patch)))
-      system(sprintf("git apply '%s'", patch))
-    },
+    message(sprintf("Applying %s", basename(patch)))
+    withr::with_dir(rprojroot::find_package_root_file(), system(sprintf("git apply %s", patch)))
+  },
     error = function(e) {
       quit(save = "no", status = 1)
     }
   )
 }
+
+# =============================================================================
+# Generate minified js
+withr::with_dir(rprojroot::find_package_root_file("tools"), system("yarn grunt"))

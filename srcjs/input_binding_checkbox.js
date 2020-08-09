@@ -1,7 +1,11 @@
 var checkboxInputBinding = new InputBinding();
 $.extend(checkboxInputBinding, {
   find: function(scope) {
-    return $(scope).find('input[type="checkbox"]');
+    if (exports.bindGenericInputs) {
+      return $(scope).find('input[type="checkbox"]');
+    } else {
+      return $(scope).find('input[type="checkbox"].shiny-input-checkbox');
+    }
   },
   getValue: function(el) {
     return el.checked;

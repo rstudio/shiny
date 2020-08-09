@@ -1,7 +1,11 @@
 var selectInputBinding = new InputBinding();
 $.extend(selectInputBinding, {
   find: function(scope) {
-    return $(scope).find('select');
+    if (exports.bindGenericInputs) {
+      return $(scope).find('select');
+    } else {
+      return $(scope).find('select.shiny-input-select');
+    }
   },
   getType: function(el) {
     var $el = $(el);

@@ -345,7 +345,7 @@ function initShiny() {
     initialValues['.clientdata_output_' + id + '_font'] = getComputedFont(this);
   });
 
-  function doSendImageSize() {
+  function doSendImageSize(poll) {
     $('.shiny-image-output, .shiny-plot-output, .shiny-report-size').each(function() {
       var id = getIdFromEl(this);
       if (this.offsetWidth !== 0 || this.offsetHeight !== 0) {
@@ -354,12 +354,23 @@ function initShiny() {
       }
     });
 
-    $('.shiny-image-output, .shiny-plot-output, .shiny-report-theme').each(function() {
+    $('.shiny-image-output, .shiny-plot-output, .shiny-report-theme').each(function(index) {
       var id = getIdFromEl(this);
       inputs.setInput('.clientdata_output_' + id + '_bg', getComputedBgColor(this));
       inputs.setInput('.clientdata_output_' + id + '_fg', getStyle(this, "color"));
       inputs.setInput('.clientdata_output_' + id + '_accent', getComputedLinkColor(this));
       inputs.setInput('.clientdata_output_' + id + '_font', getComputedFont(this));
+      // Listen for changes in the number of stylesheets (and resend if they do)
+      if (index === 0) {
+        var nStyleSheets = document.styleSheets.length;
+        clearInterval(poll);
+        var poll = setInterval(function() {
+          if (document.styleSheets.length === nStyleSheets) {
+            return;
+          }
+          doSendImageSize(poll);
+        }, 100);
+      }
     });
 
     $('.shiny-bound-output').each(function() {

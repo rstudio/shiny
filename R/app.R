@@ -98,8 +98,13 @@ shinyApp <- function(ui, server, onStart=NULL, options=list(),
   appOptions <- consumeAppOptions()
 
   # Also store `lang` option to be passed for rendering processors.
-  if(!is.null(lang) && is.character(lang)) {
-    shinyOptions(appLang = lang)
+  if (!is.null(lang)) {
+    if (is.character(lang) && length(lang) == 1) {
+      shinyOptions(appLang = lang)
+    } else {
+      warning("Invalid lang value inserted: defaulting to empty string.")
+      lang <- NULL
+    }
   }
 
   structure(

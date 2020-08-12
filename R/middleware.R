@@ -14,7 +14,26 @@
 # returns `NULL`, or an `httpResponse`.
 #
 ## ------------------------------------------------------------------------
-httpResponse <- function(status = 200,
+
+#' Create an HTTP response object
+#'
+#' @param status HTTP status code for the response.
+#' @param content_type The value for the `Content-Type` header.
+#' @param content The body of the response, given as a single-element character
+#'   vector (will be encoded as UTF-8) or a raw vector.
+#' @param headers A named list of additional headers to include. Do not include
+#'   `Content-Length` (as it is automatically calculated) or `Content-Type` (the
+#'   `content_type` argument is used instead).
+#'
+#' @examples
+#' httpResponse(status = 405L,
+#'   content_type = "text/plain",
+#'   content = "The requested method was not allowed"
+#' )
+#'
+#' @keywords internal
+#' @export
+httpResponse <- function(status = 200L,
                          content_type = "text/html; charset=UTF-8",
                          content = "",
                          headers = list()) {

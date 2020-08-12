@@ -110,6 +110,10 @@ dateInput <- function(inputId, label, value = NULL, min = NULL, max = NULL,
     shinyInputLabel(inputId, label),
     tags$input(type = "text",
                class = "form-control",
+               # `aria-labelledby` attribute is required for accessibility to avoid doubled labels (#2951).
+               `aria-labelledby` = paste0(inputId, "-label"),
+               # title attribute is announced for screen readers for date format.
+               title = paste("Date format:", format),
                `data-date-language` = language,
                `data-date-week-start` = weekstart,
                `data-date-format` = format,

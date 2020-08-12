@@ -191,7 +191,7 @@ selectizeIt <- function(inputId, select, options, nonempty = FALSE) {
   res <- checkAsIs(options)
 
   selectizeDep <- htmlDependency(
-    "selectize", "0.11.2", c(href = "shared/selectize"),
+    "selectize", "0.12.4", c(href = "shared/selectize"),
     stylesheet = "css/selectize.bootstrap3.css",
     head = format(tagList(
       tags$script(src = 'shared/selectize/js/selectize.min.js'),

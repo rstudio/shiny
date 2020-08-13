@@ -1,6 +1,7 @@
-module.exports = function (grunt) {
-  var instdir = "../inst/";
-  var js_srcdir = "../srcjs/";
+module.exports = function(grunt) {
+
+  var instdir = '../inst/';
+  var js_srcdir = '../srcjs/'
 
   // Make sure all plattforms to use `\n` as eol char: https://stackoverflow.com/questions/29817511/grunt-issue-with-line-endings
   grunt.util.linefeed = "\n";
@@ -18,13 +19,13 @@ module.exports = function (grunt) {
         "./temp_concat/shiny.js",
         "./temp_concat/shiny.js.map",
         instdir + "www/shared/datepicker/js/bootstrap-datepicker.min.js",
-        instdir + "www/shared/ionrangeslider/js/ion.rangeSlider.min.js",
-      ],
+        instdir + "www/shared/ionrangeslider/js/ion.rangeSlider.min.js"
+      ]
     },
 
     concat: {
       options: {
-        process: function (src, filepath) {
+        process: function(src, filepath) {
           return (
             "//---------------------------------------------------------------------\n" +
             "// Source file: " +
@@ -33,7 +34,7 @@ module.exports = function (grunt) {
             src
           );
         },
-        sourceMap: true,
+        sourceMap: true
       },
       shiny: {
         src: [
@@ -70,43 +71,43 @@ module.exports = function (grunt) {
           js_srcdir + "input_binding_fileinput.js",
           js_srcdir + "init_shiny.js",
           js_srcdir + "reactlog.js",
-          js_srcdir + "_end.js",
+          js_srcdir + "_end.js"
         ],
         // The temp_concat/ directory would have gone under /srcjs/, but the
         // Babel Grunt plugin has trouble finding presets if it operates on a
         // file that's not under the current directory. So we'll put it under
         // ./
         dest: "./temp_concat/shiny.js",
-        nonull: true,
-      },
+        nonull: true
+      }
     },
 
     "string-replace": {
       version: {
         files: {
-          "./temp_concat/shiny.js": "./temp_concat/shiny.js",
+          "./temp_concat/shiny.js": "./temp_concat/shiny.js"
         },
         options: {
           replacements: [
             {
               pattern: /{{\s*VERSION\s*}}/g,
-              replacement: pkgInfo().version,
-            },
-          ],
-        },
-      },
+              replacement: pkgInfo().version
+            }
+          ]
+        }
+      }
     },
 
     babel: {
       options: {
         sourceMap: true,
         compact: false,
-        presets: ["@babel/preset-env"],
+        presets: ["@babel/preset-env"]
       },
       shiny: {
         src: "./temp_concat/shiny.js",
-        dest: instdir + "/www/shared/shiny.js",
-      },
+        dest: instdir + "/www/shared/shiny.js"
+      }
     },
 
     eslint: {
@@ -127,19 +128,19 @@ module.exports = function (grunt) {
             "top",
             "location",
             "parent",
-            "status",
+            "status"
           ],
           "no-global-assign": 1,
           "no-undef": 1,
           "no-unused-vars": [1, { args: "none" }],
           "guard-for-in": 1,
           // "no-use-before-define": [1, {"functions": false}],
-          semi: [1, "always"],
+          semi: [1, "always"]
         },
         envs: ["es6", "browser", "jquery"],
-        globals: ["strftime"],
+        globals: ["strftime"]
       },
-      shiny: ["./temp_concat/shiny.js"],
+      shiny: ["./temp_concat/shiny.js"]
     },
 
     uglify: {
@@ -152,39 +153,38 @@ module.exports = function (grunt) {
           sourceMap: true,
           // Base the .min.js sourcemap off of the .js sourcemap created by concat
           sourceMapIn: instdir + "www/shared/shiny.js.map",
-          sourceMapIncludeSources: true,
+          sourceMapIncludeSources: true
         },
         src: instdir + "www/shared/shiny.js",
-        dest: instdir + "www/shared/shiny.min.js",
+        dest: instdir + "www/shared/shiny.min.js"
       },
       datepicker: {
         src: [
           instdir + "www/shared/datepicker/js/bootstrap-datepicker.js",
-          instdir +
-            "www/shared/datepicker/js/locales/bootstrap-datepicker.*.js",
+          instdir + "www/shared/datepicker/js/locales/bootstrap-datepicker.*.js"
         ],
-        dest: instdir + "www/shared/datepicker/js/bootstrap-datepicker.min.js",
+        dest: instdir + "www/shared/datepicker/js/bootstrap-datepicker.min.js"
       },
       ionrangeslider: {
         src: instdir + "www/shared/ionrangeslider/js/ion.rangeSlider.js",
-        dest: instdir + "www/shared/ionrangeslider/js/ion.rangeSlider.min.js",
-      },
+        dest: instdir + "www/shared/ionrangeslider/js/ion.rangeSlider.min.js"
+      }
     },
 
     watch: {
       shiny: {
         files: ["<%= concat.shiny.src %>", "../DESCRIPTION"],
-        tasks: ["default"],
+        tasks: ["default"]
       },
       datepicker: {
         files: "<%= uglify.datepicker.src %>",
-        tasks: ["uglify:datepicker"],
-      },
+        tasks: ["uglify:datepicker"]
+      }
     },
 
     newer: {
       options: {
-        override: function (detail, include) {
+        override: function(detail, include) {
           // If DESCRIPTION is updated, we'll also need to re-minify shiny.js
           // because the min.js file embeds the version number.
           if (detail.task === "uglify" && detail.target === "shiny") {
@@ -192,60 +192,50 @@ module.exports = function (grunt) {
           } else {
             include(false);
           }
-        },
-      },
-    },
+        }
+      }
+    }
   };
 
-  grunt.loadNpmTasks("grunt-contrib-clean");
-  grunt.loadNpmTasks("grunt-contrib-concat");
-  grunt.loadNpmTasks("grunt-string-replace");
-  grunt.loadNpmTasks("grunt-babel");
-  grunt.loadNpmTasks("grunt-eslint");
-  grunt.loadNpmTasks("grunt-contrib-uglify");
-  grunt.loadNpmTasks("grunt-contrib-watch");
-  grunt.loadNpmTasks("grunt-newer");
+  grunt.loadNpmTasks('grunt-contrib-clean');
+  grunt.loadNpmTasks('grunt-contrib-concat');
+  grunt.loadNpmTasks('grunt-string-replace');
+  grunt.loadNpmTasks('grunt-babel');
+  grunt.loadNpmTasks('grunt-eslint');
+  grunt.loadNpmTasks('grunt-contrib-uglify');
+  grunt.loadNpmTasks('grunt-contrib-watch');
+  grunt.loadNpmTasks('grunt-newer');
 
   // Need this here so that babel reads in the source map file after it's
   // generated. Without this task, it would read in the source map when Grunt
   // runs, which is wrong, if the source map doesn't exist, or is change later.
-  grunt.task.registerTask(
-    "configureBabel",
-    "configures babel options",
-    function () {
-      gruntConfig.babel.options.inputSourceMap = grunt.file.readJSON(
-        "./temp_concat/shiny.js.map"
-      );
-    }
-  );
+  grunt.task.registerTask("configureBabel", "configures babel options", function() {
+    gruntConfig.babel.options.inputSourceMap = grunt.file.readJSON('./temp_concat/shiny.js.map');
+  });
 
   grunt.task.registerTask(
     "validateStringReplace",
     "tests to make sure the version value was replaced",
-    function () {
-      var shinyContent = require("fs").readFileSync(
-        "./temp_concat/shiny.js",
-        "utf8"
-      );
+    function() {
+      var shinyContent = require('fs').readFileSync('./temp_concat/shiny.js', 'utf8');
       if (/{{\s*VERSION\s*}}/.test(shinyContent)) {
-        grunt.fail.fatal(
-          "{{ VERSION }} was not replaced in compiled shiny.js file!"
-        );
+        grunt.fail.fatal("{{ VERSION }} was not replaced in compiled shiny.js file!")
       }
     }
   );
 
   grunt.initConfig(gruntConfig);
 
-  grunt.registerTask("default", [
-    "concat",
-    "string-replace",
-    "validateStringReplace",
-    "eslint",
-    "configureBabel",
-    "babel",
-    "uglify",
+  grunt.registerTask('default', [
+    'concat',
+    'string-replace',
+    'validateStringReplace',
+    'eslint',
+    'configureBabel',
+    'babel',
+    'uglify'
   ]);
+
 
   // ---------------------------------------------------------------------------
   // Utility functions
@@ -254,11 +244,11 @@ module.exports = function (grunt) {
   // Return an object which merges information from package.json and the
   // DESCRIPTION file.
   function pkgInfo() {
-    var pkg = grunt.file.readJSON("package.json");
+    var pkg = grunt.file.readJSON('package.json');
 
-    pkg.name = descKeyValue("Package");
-    pkg.version = descKeyValue("Version");
-    pkg.license = descKeyValue("License");
+    pkg.name    = descKeyValue('Package');
+    pkg.version = descKeyValue('Version');
+    pkg.license = descKeyValue('License');
 
     return pkg;
   }
@@ -266,25 +256,23 @@ module.exports = function (grunt) {
   // From the DESCRIPTION file, get the value of a key. This presently only
   // works if the value is on one line, the same line as the key.
   function descKeyValue(key) {
-    var lines = require("fs")
-      .readFileSync("../DESCRIPTION", "utf8")
-      .split(/\r?\n/);
+    var lines = require('fs').readFileSync('../DESCRIPTION', 'utf8').split(/\r?\n/);
 
-    var pattern = new RegExp("^" + key + ":");
-    var txt = lines.filter(function (line) {
+    var pattern = new RegExp('^' + key + ':');
+    var txt = lines.filter(function(line) {
       return pattern.test(line);
     });
 
     txt = txt[0];
 
-    pattern = new RegExp(key + ": *");
-    txt = txt.replace(pattern, "");
+    pattern = new RegExp(key + ': *');
+    txt = txt.replace(pattern, '');
 
     return txt;
   }
 
   // Return true if file's mtime is newer than mtime; false otherwise.
   function isNewer(file, mtime) {
-    return require("fs").statSync(file).mtime > mtime;
+    return require('fs').statSync(file).mtime > mtime;
   }
 };

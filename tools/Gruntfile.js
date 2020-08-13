@@ -3,6 +3,9 @@ module.exports = function(grunt) {
   var instdir = '../inst/';
   var js_srcdir = '../srcjs/'
 
+  // Make sure all plattforms to use `\n` as eol char: https://stackoverflow.com/questions/29817511/grunt-issue-with-line-endings
+  grunt.util.linefeed = "\n";
+
   gruntConfig = {
     pkg: pkgInfo(),
 

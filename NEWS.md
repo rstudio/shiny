@@ -12,6 +12,8 @@ shiny 1.5.0.9000
 
 * Fixed #2951: screen readers correctly announce labels and date formats for `dateInput()` and `dateRangeInput()` widgets. (#2978)
 
+* Closed #2847: `selectInput()` is reasonably accessible for screen readers even when `selectize` option is set to TRUE. To improve `selectize.js` accessibility, We have added [selectize-plugin-a11y](https://github.com/SLMNBJ/selectize-plugin-a11y) by default. (#2993)
+
 ### Minor new features and improvements
 
 * When UI is specified as a function (e.g. `ui <- function(req) { ... }`), the response can now be an HTTP response as returned from the (newly exported) `httpResponse()` function. (#2970)

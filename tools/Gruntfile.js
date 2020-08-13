@@ -165,6 +165,10 @@ module.exports = function(grunt) {
       ionrangeslider: {
         src: instdir + "www/shared/ionrangeslider/js/ion.rangeSlider.js",
         dest: instdir + "www/shared/ionrangeslider/js/ion.rangeSlider.min.js"
+      },
+      selectize: {
+        src: instdir + "www/shared/selectize/accessibility/js/selectize-plugin-a11y.js",
+        dest: instdir + "www/shared/selectize/accessibility/js/selectize-plugin-a11y.min.js"
       }
     },
 

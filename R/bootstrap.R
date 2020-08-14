@@ -856,6 +856,8 @@ buildTabItem <- function(index, tabsetId, foundSelected, tabs = NULL,
 #' @param container a function to generate an HTML element to contain the text
 #' @param inline use an inline (`span()`) or block container (`div()`)
 #'   for the output
+#' @param aria_live accessibility setting on dynamic content for assistive technologies 
+#'  (the possible settings are: "off", "polite" or "assertive"; set to "polite" by default)
 #' @return A output element for use in UI.
 #' @examples
 #' ## Only run this example in interactive R sessions
@@ -873,8 +875,12 @@ buildTabItem <- function(index, tabsetId, foundSelected, tabs = NULL,
 #'   )
 #' }
 #' @export
-textOutput <- function(outputId, container = if (inline) span else div, inline = FALSE) {
-  container(id = outputId, class = "shiny-text-output")
+textOutput <- function(outputId, container = if (inline) span else div, inline = FALSE, aria_live = "polite") {
+  container(id = outputId,
+    class = "shiny-text-output",
+    # Accessibility option for dynamic content
+    `aria-live` = aria_liveCheck(aria_live)
+  )
 }
 
 #' @param placeholder if the output is empty or `NULL`, should an empty
@@ -882,11 +888,16 @@ textOutput <- function(outputId, container = if (inline) span else div, inline =
 #'   behavior when the the output in nonempty)
 #' @export
 #' @rdname textOutput
-verbatimTextOutput <- function(outputId, placeholder = FALSE) {
+verbatimTextOutput <- function(outputId, placeholder = FALSE, aria_live = "polite") {
   pre(id = outputId,
-      class = paste(c("shiny-text-output", if (!placeholder) "noplaceholder"),
-                    collapse = " ")
-      )
+    class = paste(
+      c("shiny-text-output",
+        if (!placeholder) "noplaceholder"),
+      collapse = " "
+    ),
+    # Accessibility option for dynamic content
+    `aria-live` = aria_liveCheck(aria_live)
+  )
 }
 
 
@@ -895,7 +906,7 @@ verbatimTextOutput <- function(outputId, placeholder = FALSE) {
 #' @export
 imageOutput <- function(outputId, width = "100%", height="400px",
                         click = NULL, dblclick = NULL, hover = NULL, brush = NULL,
-                        inline = FALSE) {
+                        inline = FALSE, aria_live = "polite") {
 
   style <- if (!inline) {
     paste("width:", validateCssUnit(width), ";", "height:", validateCssUnit(height))
@@ -906,7 +917,9 @@ imageOutput <- function(outputId, width = "100%", height="400px",
   args <- list(
     id = outputId,
     class = "shiny-image-output",
-    style = style
+    style = style,
+    # Accessibility option for dynamic content
+    `aria-live` = aria_liveCheck(aria_live)
   )
 
   # Given a named list with options, replace names like "delayType" with
@@ -1017,6 +1030,8 @@ imageOutput <- function(outputId, width = "100%", height="400px",
 #'   `imageOutput`/`plotOutput` calls may share the same `id`
 #'   value; brushing one image or plot will cause any other brushes with the
 #'   same `id` to disappear.
+#' @param aria_live accessibility setting on dynamic content for assistive technologies 
+#'  (the possible settings are: "off", "polite" or "assertive"; set to "polite" by default)
 #' @inheritParams textOutput
 #' @note The arguments `clickId` and `hoverId` only work for R base graphics
 #'   (see the \pkg{\link[graphics:graphics-package]{graphics}} package). They do
@@ -1187,11 +1202,11 @@ imageOutput <- function(outputId, width = "100%", height="400px",
 #' @export
 plotOutput <- function(outputId, width = "100%", height="400px",
                        click = NULL, dblclick = NULL, hover = NULL, brush = NULL,
-                       inline = FALSE) {
+                       inline = FALSE, aria_live = "polite") {
 
   # Result is the same as imageOutput, except for HTML class
   res <- imageOutput(outputId, width, height, click, dblclick,
-                     hover, brush, inline)
+                     hover, brush, inline, aria_live)
 
   res$attribs$class <- "shiny-plot-output"
   res
@@ -1205,6 +1220,8 @@ plotOutput <- function(outputId, width = "100%", height="400px",
 #' interactive table with more features.
 #'
 #' @param outputId output variable to read the table from
+#' @param aria_live accessibility setting on dynamic content for assistive technologies 
+#'  (the possible settings are: "off", "polite" or "assertive"; set to "polite" by default)
 #' @return A table output element that can be included in a panel
 #'
 #' @seealso [renderTable()], [renderDataTable()].
@@ -1241,8 +1258,12 @@ plotOutput <- function(outputId, width = "100%", height="400px",
 #'   )
 #' }
 #' @export
-tableOutput <- function(outputId) {
-  div(id = outputId, class="shiny-html-output")
+tableOutput <- function(outputId, aria_live = "polite") {
+  div(id = outputId,
+    class = "shiny-html-output",
+    # Accessibility option for dynamic content
+    `aria-live` = aria_liveCheck(aria_live)
+  )
 }
 
 dataTableDependency <- list(
@@ -1259,9 +1280,13 @@ dataTableDependency <- list(
 
 #' @rdname tableOutput
 #' @export
-dataTableOutput <- function(outputId) {
+dataTableOutput <- function(outputId, aria_live = "polite") {
   attachDependencies(
-    div(id = outputId, class="shiny-datatable-output"),
+    div(id = outputId,
+      class = "shiny-datatable-output",
+      # Accessibility option for dynamic content
+      `aria-live` = aria_liveCheck(aria_live)
+    ),
     dataTableDependency
   )
 }
@@ -1289,12 +1314,20 @@ dataTableOutput <- function(outputId) {
 #' )
 #' @export
 htmlOutput <- function(outputId, inline = FALSE,
-  container = if (inline) span else div, ...)
+  container = if (inline) span else div, aria_live = "polite", ...)
 {
   if (anyUnnamed(list(...))) {
     warning("Unnamed elements in ... will be replaced with dynamic UI.")
   }
-  container(id = outputId, class="shiny-html-output", ...)
+  args <- list(id = outputId,
+    class="shiny-html-output",
+    ...
+  )
+  # If "aria-live" is not customized, add accessibility option for dynamic content by default
+  if (!("aria-live" %in% names(list(...)))) {
+    args <- c(args, `aria-live` = aria_liveCheck(aria_live))
+  }
+  do.call(container, args)
 }
 
 #' @rdname htmlOutput
@@ -1444,4 +1477,16 @@ icon <- function(name, class = NULL, lib = "font-awesome") {
 # Helper funtion to extract the class from an icon
 iconClass <- function(icon) {
   if (!is.null(icon)) icon$attribs$class
+}
+
+# Accessibility-helper function to determine `aria-live` value for `*Output()` functions
+# Used for dynamic content announcement for assistive technologies: https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/ARIA_Live_Regions
+aria_liveCheck <- function(aria_live) {
+  # Make sure aria_live to be one of the three values; otherwise, set to "polite" by default
+  if (!(aria_live %in% c("off", "polite", "assertive"))) {
+    warning("Invalid `aria-live` value: defaulting to 'polite'")
+    "polite"
+  } else {
+    aria_live
+  }
 }

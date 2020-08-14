@@ -9,10 +9,17 @@ htmlOutput(
   outputId,
   inline = FALSE,
   container = if (inline) span else div,
+  aria_live = "polite",
   ...
 )
 
-uiOutput(outputId, inline = FALSE, container = if (inline) span else div, ...)
+uiOutput(
+  outputId,
+  inline = FALSE,
+  container = if (inline) span else div,
+  aria_live = "polite",
+  ...
+)
 }
 \arguments{
 \item{outputId}{output variable to read the value from}
@@ -21,6 +28,9 @@ uiOutput(outputId, inline = FALSE, container = if (inline) span else div, ...)
 for the output}
 
 \item{container}{a function to generate an HTML element to contain the text}
+
+\item{aria_live}{accessibility setting on dynamic content for assistive technologies
+(the possible settings are: "off", "polite" or "assertive"; set to "polite" by default)}
 
 \item{...}{Other arguments to pass to the container tag function. This is
 useful for providing additional classes for the tag.}

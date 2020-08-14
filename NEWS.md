@@ -12,6 +12,8 @@ shiny 1.5.0.9000
 
 * Fixed #2951: screen readers correctly announce labels and date formats for `dateInput()` and `dateRangeInput()` widgets. (#2978)
 
+* Closed #2987: Dynamic content within `*Output()` functions is now automatically announced to assistive technologies via `aria-live = "polite"` by default. All the `*Output()` functions now have `aria_live` param to control how their dynamic changes are announced to assistive technologies (see [ARIA live regions - Accessibility MDN](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/ARIA_Live_Regions) for technical details).
+
 ### Minor new features and improvements
 
 * When UI is specified as a function (e.g. `ui <- function(req) { ... }`), the response can now be an HTTP response as returned from the (newly exported) `httpResponse()` function. (#2970)

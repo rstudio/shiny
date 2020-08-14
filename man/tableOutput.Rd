@@ -5,12 +5,15 @@
 \alias{dataTableOutput}
 \title{Create a table output element}
 \usage{
-tableOutput(outputId)
+tableOutput(outputId, aria_live = "polite")
 
-dataTableOutput(outputId)
+dataTableOutput(outputId, aria_live = "polite")
 }
 \arguments{
 \item{outputId}{output variable to read the table from}
+
+\item{aria_live}{accessibility setting on dynamic content for assistive technologies
+(the possible settings are: "off", "polite" or "assertive"; set to "polite" by default)}
 }
 \value{
 A table output element that can be included in a panel

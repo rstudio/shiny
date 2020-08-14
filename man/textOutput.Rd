@@ -5,9 +5,14 @@
 \alias{verbatimTextOutput}
 \title{Create a text output element}
 \usage{
-textOutput(outputId, container = if (inline) span else div, inline = FALSE)
+textOutput(
+  outputId,
+  container = if (inline) span else div,
+  inline = FALSE,
+  aria_live = "polite"
+)
 
-verbatimTextOutput(outputId, placeholder = FALSE)
+verbatimTextOutput(outputId, placeholder = FALSE, aria_live = "polite")
 }
 \arguments{
 \item{outputId}{output variable to read the value from}
@@ -16,6 +21,9 @@ verbatimTextOutput(outputId, placeholder = FALSE)
 
 \item{inline}{use an inline (\code{span()}) or block container (\code{div()})
 for the output}
+
+\item{aria_live}{accessibility setting on dynamic content for assistive technologies
+(the possible settings are: "off", "polite" or "assertive"; set to "polite" by default)}
 
 \item{placeholder}{if the output is empty or \code{NULL}, should an empty
 rectangle be displayed to serve as a placeholder? (does not affect

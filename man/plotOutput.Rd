@@ -13,7 +13,8 @@ imageOutput(
   dblclick = NULL,
   hover = NULL,
   brush = NULL,
-  inline = FALSE
+  inline = FALSE,
+  aria_live = "polite"
 )
 
 plotOutput(
@@ -24,7 +25,8 @@ plotOutput(
   dblclick = NULL,
   hover = NULL,
   brush = NULL,
-  inline = FALSE
+  inline = FALSE,
+  aria_live = "polite"
 )
 }
 \arguments{
@@ -76,6 +78,9 @@ same \code{id} to disappear.}
 
 \item{inline}{use an inline (\code{span()}) or block container (\code{div()})
 for the output}
+
+\item{aria_live}{accessibility setting on dynamic content for assistive technologies
+(the possible settings are: "off", "polite" or "assertive"; set to "polite" by default)}
 }
 \value{
 A plot or image output element that can be included in a panel.

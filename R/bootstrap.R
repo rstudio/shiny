@@ -51,9 +51,12 @@ useBsTheme <- function() {
     return(FALSE)
   }
   if (!is_available("bootstraplib")) {
-    return(FALSE)
+    stop("Shiny's bootstraplib option requires the bootstraplib package to be installed.", call. = FALSE)
   }
-  !is.null(bootstraplib::bs_theme_get())
+  if (is.null(bootstraplib::bs_theme_get())) {
+    stop("Shiny's bootstraplib option requires a bootstraplib theme to be active. Initialize one with `bootstraplib::bs_theme_new()`.", call. = FALSE)
+  }
+  TRUE
 }
 
 #' Bootstrap libraries

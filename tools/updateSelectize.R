@@ -1,16 +1,3 @@
-<<<<<<< HEAD
-#!/usr/bin/env Rscript
-# Retrieves a particular version of selectize:
-#  https://github.com/selectize/selectize.js
-# and selectize-plugin-a11y:
-#  https://github.com/SLMNBJ/selectize-plugin-a11y
-# Then applies patches from tools/selectize-patches.
-
-# This script can be sourced from RStudio, or run with Rscript.
-
-# =============================================================================
-# Download library
-# =============================================================================
 
 ## First, download the main selectize.js and css
 library(rprojroot)
@@ -57,32 +44,6 @@ file.copy(
   overwrite = TRUE
 )
 
-# =============================================================================
-# Apply patches
-# =============================================================================
-# The version of selectize-plugin-a11y that we use is modified from the base version
-# in the following ways:
-# * In our version, each option item has their own unique id to be announced to screen readers when selection changes.
-
-patch_dir <- rprojroot::find_package_root_file("tools/selectize-patches")
-
-for (patch in list.files(patch_dir, full.names = TRUE)) {
-  tryCatch(
-    {
-      message(sprintf("Applying %s", basename(patch)))
-      withr::with_dir(rprojroot::find_package_root_file(), system(sprintf("git apply %s", patch)))
-    },
-    error = function(e) {
-      quit(save = "no", status = 1)
-    }
-  )
-}
-
-# =============================================================================
-# Generate minified js
-# =============================================================================
-withr::with_dir(rprojroot::find_package_root_file("tools"), system("yarn grunt"))
-=======
 tmpdir <- tempdir()
 
 # Bootstrap 4 SASS port https://github.com/papakay/selectize-bootstrap-4-style
@@ -124,6 +85,28 @@ file.rename(
 )
 
 
+# =============================================================================
+# Apply patches
+# =============================================================================
+# The version of selectize-plugin-a11y that we use is modified from the base version
+# in the following ways:
+# * In our version, each option item has their own unique id to be announced to screen readers when selection changes.
 
-# TODO: add selectize CSS here as well?
->>>>>>> Add option to use bootstraplib and have selectInput() theming variables
+patch_dir <- rprojroot::find_package_root_file("tools/selectize-patches")
+
+for (patch in list.files(patch_dir, full.names = TRUE)) {
+  tryCatch(
+    {
+      message(sprintf("Applying %s", basename(patch)))
+      withr::with_dir(rprojroot::find_package_root_file(), system(sprintf("git apply %s", patch)))
+    },
+    error = function(e) {
+      quit(save = "no", status = 1)
+    }
+  )
+}
+
+# =============================================================================
+# Generate minified js
+# =============================================================================
+withr::with_dir(rprojroot::find_package_root_file("tools"), system("yarn grunt"))

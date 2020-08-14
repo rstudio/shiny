@@ -12,6 +12,8 @@ shiny 1.5.0.9000
 
 * Fixed #2951: screen readers correctly announce labels and date formats for `dateInput()` and `dateRangeInput()` widgets. (#2978)
 
+* Closed #2847: `selectInput()` is reasonably accessible for screen readers even when `selectize` option is set to TRUE. To improve `selectize.js` accessibility, We have added [selectize-plugin-a11y](https://github.com/SLMNBJ/selectize-plugin-a11y) by default. (#2993)
+
 * Closed #2987: Dynamic content within `*Output()` functions is now automatically announced to assistive technologies via `aria-live = "polite"` by default. All the `*Output()` functions now have `aria_live` param to control how their dynamic changes are announced to assistive technologies (see [ARIA live regions - Accessibility MDN](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/ARIA_Live_Regions) for technical details).
 
 ### Minor new features and improvements

@@ -3,7 +3,8 @@ shinyInputLabel <- function(inputId, label = NULL) {
     label,
     class = "control-label",
     class = if (is.null(label)) "shiny-label-null",
-    id = paste0(inputId, "-label"),  # This is passed to `aria-labelledby` value for scrreen reader accessibility.
+    # `id` attribute is required for `aria-labelledby` used by screen readers:
+    id = paste0(inputId, "-label"),
     `for` = inputId
   )
 }

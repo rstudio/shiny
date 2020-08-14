@@ -104,7 +104,6 @@ reference:
     contents:
       - renderPlot
       - renderCachedPlot
-      - renderText
       - renderPrint
       - renderDataTable
       - renderImage
@@ -169,7 +168,6 @@ reference:
     desc: Miscellaneous utilities that may be useful to advanced users or when extending Shiny.
     contents:
       - shinyAppTemplate
-      - migrateLegacyShinytest
       - req
       - validate
       - session
@@ -196,6 +194,7 @@ reference:
       - onStop
       - diskCache
       - memoryCache
+      - httpResponse
       - key_missing
   - title: Plot interaction
     desc: Functions related to interactive plots

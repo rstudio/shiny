@@ -3,6 +3,9 @@ module.exports = function(grunt) {
   var instdir = '../inst/';
   var js_srcdir = '../srcjs/'
 
+  // Make sure all plattforms to use `\n` as eol char: https://stackoverflow.com/questions/29817511/grunt-issue-with-line-endings
+  grunt.util.linefeed = "\n";
+
   gruntConfig = {
     pkg: pkgInfo(),
 
@@ -165,6 +168,10 @@ module.exports = function(grunt) {
       ionrangeslider: {
         src: instdir + "www/shared/ionrangeslider/js/ion.rangeSlider.js",
         dest: instdir + "www/shared/ionrangeslider/js/ion.rangeSlider.min.js"
+      },
+      selectize: {
+        src: instdir + "www/shared/selectize/accessibility/js/selectize-plugin-a11y.js",
+        dest: instdir + "www/shared/selectize/accessibility/js/selectize-plugin-a11y.min.js"
       }
     },
 
@@ -253,7 +260,7 @@ module.exports = function(grunt) {
   // From the DESCRIPTION file, get the value of a key. This presently only
   // works if the value is on one line, the same line as the key.
   function descKeyValue(key) {
-    var lines = require('fs').readFileSync('../DESCRIPTION', 'utf8').split('\n');
+    var lines = require('fs').readFileSync('../DESCRIPTION', 'utf8').split(/\r?\n/);
 
     var pattern = new RegExp('^' + key + ':');
     var txt = lines.filter(function(line) {

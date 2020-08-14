@@ -1,55 +1,90 @@
-shiny 1.4.0.9001
+
+shiny 1.5.0.9000
+================
+
+### Accessibility
+
+* Added [bootstrap accessibility plugin](https://github.com/paypal/bootstrap-accessibility-plugin) under the hood to improve accessibility of shiny apps for screen-reader and keyboard users: the enhancements include better navigations for alert, tooltip, popover, modal dialog, dropdown, tab Panel, collapse, and carousel elements. (#2911)
+
+* Added appropriate labels to `icon()` element to provide screen-reader users with alternative descriptions for the `fontawesome` and `glyphicon`: `aria-label` is automatically applied based on the fontawesome name. For example, `icon("calendar")` will be announced as "calendar icon" to screen readers. "presentation" aria role has also been attached to `icon()` to remove redundant semantic info for screen readers. (#2917)
+
+* Closed #2929: Fixed keyboard accessibility for file picker button: keyboard users can now tab to focus on `fileInput()` widget. (#2937)
+
+* Fixed #2951: screen readers correctly announce labels and date formats for `dateInput()` and `dateRangeInput()` widgets. (#2978)
+
+* Closed #2847: `selectInput()` is reasonably accessible for screen readers even when `selectize` option is set to TRUE. To improve `selectize.js` accessibility, We have added [selectize-plugin-a11y](https://github.com/SLMNBJ/selectize-plugin-a11y) by default. (#2993)
+
+### Minor new features and improvements
+
+* When UI is specified as a function (e.g. `ui <- function(req) { ... }`), the response can now be an HTTP response as returned from the (newly exported) `httpResponse()` function. (#2970)
+
+* Closed #2980: `addResourcePath()` now allows paths with a leading `.` (thanks to @ColinFay). (#2981)
+
+* Closed #2972: `runExample()` now supports the `shiny.port` option (thanks to @ColinFay). (#2982)
+
+### Bug fixes
+
+* Fixed #2859: `renderPlot()` wasn't correctly setting `showtext::showtext_opts()`'s `dpi` setting with the correct resolution on high resolution displays; which means, if the font was rendered by showtext, font sizes would look smaller than they should on such displays. (#2941)
+
+* Fixed #1942: Calling `runApp("app.R")` no longer ignores options passed into `shinyApp()`. This makes it possible for Shiny apps to specify what port/host should be used by default. (#2969)
+
+### Library updates
+
+* Removed html5shiv and respond.js, which were used for IE 8 and IE 9 compatibility. (#2973)
+
+
+shiny 1.5.0
 ===========
 
 ## Full changelog
 
 ### Breaking changes
 
-* Fixed [#2869](https://github.com/rstudio/shiny/issues/2869): Until this release, `renderImage()` had a dangerous default of `deleteFile = TRUE`. (Sorry!) Going forward, calls to `renderImage()` will need an explicit `deleteFile` argument; for now, failing to provide one will result in a warning message, and the file will be deleted if it appears to be within the `tempdir()`. ([#2881](https://github.com/rstudio/shiny/pull/2881))
+* Fixed #2869: Until this release, `renderImage()` had a dangerous default of `deleteFile = TRUE`. (Sorry!) Going forward, calls to `renderImage()` will need an explicit `deleteFile` argument; for now, failing to provide one will result in a warning message, and the file will be deleted if it appears to be within the `tempdir()`. (#2881)
 
 ### New features
 
-* The new `shinyAppTemplate()` function creates a new template Shiny application, where components are optional, such as helper files in an R/ subdirectory, a module, and various kinds of tests. ([#2704](https://github.com/rstudio/shiny/pull/2704))
+* The new `shinyAppTemplate()` function creates a new template Shiny application, where components are optional, such as helper files in an R/ subdirectory, a module, and various kinds of tests. (#2704)
 
-* `runTests()` is a new function that behaves much like R CMD check. `runTests()` invokes all of the top-level R files in the tests/ directory inside an application, in that application's environment. ([#2585](https://github.com/rstudio/shiny/pull/2585))
+* `runTests()` is a new function that behaves much like R CMD check. `runTests()` invokes all of the top-level R files in the tests/ directory inside an application, in that application's environment. (#2585)
 
 * `testServer()` is a new function for testing reactive behavior inside server functions and modules. ([#2682](https://github.com/rstudio/shiny/pull/2682), [#2764](https://github.com/rstudio/shiny/pull/2764), [#2807](https://github.com/rstudio/shiny/pull/2807))
 
-* The new `moduleServer` function provides a simpler interface for creating and using modules. ([#2773](https://github.com/rstudio/shiny/pull/2773))
+* The new `moduleServer` function provides a simpler interface for creating and using modules. (#2773)
 
-* Resolved [#2732](https://github.com/rstudio/shiny/issues/2732): `markdown()` is a new function for writing Markdown with Github extensions directly in Shiny UIs. Markdown rendering is performed by the [commonmark](https://github.com/jeroen/commonmark) package. ([#2737](https://github.com/rstudio/shiny/pull/2737))
+* Resolved #2732: `markdown()` is a new function for writing Markdown with Github extensions directly in Shiny UIs. Markdown rendering is performed by the [commonmark](https://github.com/jeroen/commonmark) package. (#2737)
 
-* The `getCurrentOutputInfo()` function can now return the background color (`bg`), foreground color (`fg`), `accent` (i.e., hyperlink) color, and `font` information of the output's HTML container. This information is reported by `plotOutput()`, `imageOutput()`, and any other output bindings containing a class of `.shiny-report-theme`. This feature allows developers to style an output's contents based on the container's CSS styling.  ([#2740](https://github.com/rstudio/shiny/pull/2740))
+* The `getCurrentOutputInfo()` function can now return the background color (`bg`), foreground color (`fg`), `accent` (i.e., hyperlink) color, and `font` information of the output's HTML container. This information is reported by `plotOutput()`, `imageOutput()`, and any other output bindings containing a class of `.shiny-report-theme`. This feature allows developers to style an output's contents based on the container's CSS styling.  (#2740)
 
 ### Minor new features and improvements
 
-* Fixed [#2042](https://github.com/rstudio/shiny/issues/2042), [#2628](https://github.com/rstudio/shiny/issues/2628): In a `dateInput` and `dateRangeInput`, disabled months and years are now a lighter gray, to make it easier to see that they are disabled. ([#2690](https://github.com/rstudio/shiny/pull/2690))
+* Fixed #2042, #2628: In a `dateInput` and `dateRangeInput`, disabled months and years are now a lighter gray, to make it easier to see that they are disabled. (#2690)
 
-* `getCurrentOutputInfo()` previously threw an error when called from outside of an output; now it returns `NULL`. ([#2707](https://github.com/rstudio/shiny/pull/2707) and [#2858](https://github.com/rstudio/shiny/pull/2858))
+* `getCurrentOutputInfo()` previously threw an error when called from outside of an output; now it returns `NULL`. (#2707 and #2858)
 
-* Added a label to observer that auto-reloads `R/` directory to avoid confusion when using `reactlog`. ([#58](https://github.com/rstudio/reactlog/issues/58))
+* Added a label to observer that auto-reloads `R/` directory to avoid confusion when using `reactlog`. (#58)
 
-* `getDefaultReactiveDomain()` can now be called inside a `session$onSessionEnded` callback and will return the calling `session` information. ([#2757](https://github.com/rstudio/shiny/pull/2757))
+* `getDefaultReactiveDomain()` can now be called inside a `session$onSessionEnded` callback and will return the calling `session` information. (#2757)
 
-* Added a `'function'` class to `reactive()` and `reactiveVal()` objects. ([#2793](https://github.com/rstudio/shiny/pull/2793))
+* Added a `'function'` class to `reactive()` and `reactiveVal()` objects. (#2793)
 
-* Added a new option (`type = "hidden"`) to `tabsetPanel()`, making it easier to set the active tab via other input controls (e.g., `radioButtons()`) rather than tabs or pills. Use this option in conjunction with `updateTabsetPanel()` and the new `tabsetPanelBody()` function (see `help(tabsetPanel)` for an example and more details).  ([#2814](https://github.com/rstudio/shiny/pull/2814))
+* Added a new option (`type = "hidden"`) to `tabsetPanel()`, making it easier to set the active tab via other input controls (e.g., `radioButtons()`) rather than tabs or pills. Use this option in conjunction with `updateTabsetPanel()` and the new `tabsetPanelBody()` function (see `help(tabsetPanel)` for an example and more details).  (#2814)
 
-* Added function `updateActionLink()` to update an `actionLink()` label and/or icon value. ([#2811](https://github.com/rstudio/shiny/pull/2811))
+* Added function `updateActionLink()` to update an `actionLink()` label and/or icon value. (#2811)
 
-* Fixed [#2856](https://github.com/rstudio/shiny/issues/2856): Bumped jQuery 3 from 3.4.1 to 3.5.1. ([#2857](https://github.com/rstudio/shiny/pull/2857))
+* Fixed #2856: Bumped jQuery 3 from 3.4.1 to 3.5.1. (#2857)
 
 ### Bug fixes
 
-* Fixed [#2606](https://github.com/rstudio/shiny/issues/2606): `debounce()` would not work properly if the code in the reactive expression threw an error on the first run. ([#2652](https://github.com/rstudio/shiny/pull/2652))
+* Fixed #2606: `debounce()` would not work properly if the code in the reactive expression threw an error on the first run. (#2652)
 
-* Fixed [#2653](https://github.com/rstudio/shiny/issues/2653): The `dataTableOutput()` could have incorrect output if certain characters were in the column names. ([#2658](https://github.com/rstudio/shiny/pull/2658))
+* Fixed #2653: The `dataTableOutput()` could have incorrect output if certain characters were in the column names. (#2658)
 
 ### Documentation Updates
 
 ### Library updates
 
-* Updated from Font-Awesome 5.3.1 to 5.13.0, which includes icons related to COVID-19. For upgrade notes, see https://github.com/FortAwesome/Font-Awesome/blob/master/UPGRADING.md. ([#2891](https://github.com/rstudio/shiny/pull/2891))
+* Updated from Font-Awesome 5.3.1 to 5.13.0, which includes icons related to COVID-19. For upgrade notes, see https://github.com/FortAwesome/Font-Awesome/blob/master/UPGRADING.md. (#2891)
 
 
 shiny 1.4.0.2
@@ -61,7 +96,7 @@ Minor patch release: fixed some timing-dependent tests failed intermittently on 
 shiny 1.4.0.1
 ===========
 
-Minor patch release to account for changes to the grid package that will be upcoming in the R 4.0 release ([#2776](https://github.com/rstudio/shiny/pull/2776)).
+Minor patch release to account for changes to the grid package that will be upcoming in the R 4.0 release (#2776).
 
 
 shiny 1.4.0
@@ -71,61 +106,61 @@ shiny 1.4.0
 
 ### Breaking changes
 
-* Resolved [#2554](https://github.com/rstudio/shiny/issues/2554): Upgraded jQuery from v.1.12.4 to v3.4.1 and bootstrap from v3.3.7 to v3.4.1. ([#2557](https://github.com/rstudio/shiny/pull/2557)). Since the jQuery upgrade may introduce breaking changes to user code, there is an option to switch back to the old version by setting `options(shiny.jquery.version = 1)`. If you've hard-coded `shared/jquery[.min].js` in the HTML of your Shiny app, in order to downgrade, you'll have to change that filepath to `shared/legacy/jquery[.min].js`.
+* Resolved #2554: Upgraded jQuery from v.1.12.4 to v3.4.1 and bootstrap from v3.3.7 to v3.4.1. (#2557). Since the jQuery upgrade may introduce breaking changes to user code, there is an option to switch back to the old version by setting `options(shiny.jquery.version = 1)`. If you've hard-coded `shared/jquery[.min].js` in the HTML of your Shiny app, in order to downgrade, you'll have to change that filepath to `shared/legacy/jquery[.min].js`.
 
 ### Improvements
 
-* Resolved [#1433](https://github.com/rstudio/shiny/issues/1433): `plotOutput()`'s coordmap info now includes discrete axis limits for **ggplot2** plots. As a result, any **shinytest** tests that contain **ggplot2** plots with discrete axes (that were recorded before this change) will now report differences that can safely be updated. This new coordmap info was added to correctly infer what data points are within an input brush and/or near input click/hover in scenarios where a non-trivial discrete axis scale is involved (e.g., whenever `scale_[x/y]_discrete(limits = ...)` and/or free scales across multiple discrete axes are used). ([#2410](https://github.com/rstudio/shiny/pull/2410))
+* Resolved #1433: `plotOutput()`'s coordmap info now includes discrete axis limits for **ggplot2** plots. As a result, any **shinytest** tests that contain **ggplot2** plots with discrete axes (that were recorded before this change) will now report differences that can safely be updated. This new coordmap info was added to correctly infer what data points are within an input brush and/or near input click/hover in scenarios where a non-trivial discrete axis scale is involved (e.g., whenever `scale_[x/y]_discrete(limits = ...)` and/or free scales across multiple discrete axes are used). (#2410)
 
-* Resolved [#2402](https://github.com/rstudio/shiny/issues/2402): An informative warning is now thrown for mis-specified (date) strings in `dateInput()`, `updateDateInput()`, `dateRangeInput()`, and `updateDateRangeInput()`. ([#2403](https://github.com/rstudio/shiny/pull/2403))
+* Resolved #2402: An informative warning is now thrown for mis-specified (date) strings in `dateInput()`, `updateDateInput()`, `dateRangeInput()`, and `updateDateRangeInput()`. (#2403)
 
-* If the `shiny.autoload.r` option is set to `TRUE`, all files ending in `.r` or `.R` contained in a directory named `R/` adjacent to your application are sourced when your app is started. This will become the default Shiny behavior in a future release ([#2547](https://github.com/rstudio/shiny/pull/2547))
+* If the `shiny.autoload.r` option is set to `TRUE`, all files ending in `.r` or `.R` contained in a directory named `R/` adjacent to your application are sourced when your app is started. This will become the default Shiny behavior in a future release (#2547)
 
-* Resolved [#2442](https://github.com/rstudio/shiny/issues/2442): The `shiny:inputchanged` JavaScript event now triggers on the related input element instead of `document`. Existing event listeners bound to `document` will still detect the event due to event bubbling. ([#2446](https://github.com/rstudio/shiny/pull/2446))
+* Resolved #2442: The `shiny:inputchanged` JavaScript event now triggers on the related input element instead of `document`. Existing event listeners bound to `document` will still detect the event due to event bubbling. (#2446)
 
-* Fixed [#1393](https://github.com/rstudio/shiny/issues/1393), [#2223](https://github.com/rstudio/shiny/issues/2223): For plots with any interactions enabled, the image is no longer draggable. ([#2460](https://github.com/rstudio/shiny/pull/2460))
+* Fixed #1393, #2223: For plots with any interactions enabled, the image is no longer draggable. (#2460)
 
-* Resolved [#2469](https://github.com/rstudio/shiny/issues/2469): `renderText` now takes a `sep` argument that is passed to `cat`. ([#2497](https://github.com/rstudio/shiny/pull/2497))
+* Resolved #2469: `renderText` now takes a `sep` argument that is passed to `cat`. (#2497)
 
-* Added `resourcePaths()` and `removeResourcePaths()` functions. ([#2459](https://github.com/rstudio/shiny/pull/2459))
+* Added `resourcePaths()` and `removeResourcePaths()` functions. (#2459)
 
-* Resolved [#2433](https://github.com/rstudio/shiny/issues/2433): An informative warning is now thrown if subdirectories of the app's `www/` directory are masked by other resource prefixes and/or the same resource prefix is mapped to different local file paths. ([#2434](https://github.com/rstudio/shiny/pull/2434))
+* Resolved #2433: An informative warning is now thrown if subdirectories of the app's `www/` directory are masked by other resource prefixes and/or the same resource prefix is mapped to different local file paths. (#2434)
 
-* Resolved [#2478](https://github.com/rstudio/shiny/issues/2478): `cmd + shift + f3` and `ctrl + shift + f3` can now be used to add a reactlog mark. If reactlog keybindings are used and the reactlog is not enabled, an error page is displayed showing how to enable reactlog recordings. ([#2560](https://github.com/rstudio/shiny/pull/2560))
+* Resolved #2478: `cmd + shift + f3` and `ctrl + shift + f3` can now be used to add a reactlog mark. If reactlog keybindings are used and the reactlog is not enabled, an error page is displayed showing how to enable reactlog recordings. (#2560)
 
 ### Bug fixes
 
-* Partially resolved [#2423](https://github.com/rstudio/shiny/issues/2423): Reactivity in Shiny leaked some memory, because R can leak memory whenever a new symbols is interned, which happens whenever a new name/key is used in an environment. R now uses the fastmap package, which avoids this problem. ([#2429](https://github.com/rstudio/shiny/pull/2429))
+* Partially resolved #2423: Reactivity in Shiny leaked some memory, because R can leak memory whenever a new symbols is interned, which happens whenever a new name/key is used in an environment. R now uses the fastmap package, which avoids this problem. (#2429)
 
-* Fixed [#2267](https://github.com/rstudio/shiny/issues/2267): Fixed a memory leak with `invalidateLater`. ([#2555](https://github.com/rstudio/shiny/pull/2555))
+* Fixed #2267: Fixed a memory leak with `invalidateLater`. (#2555)
 
-* Fixed [#1548](https://github.com/rstudio/shiny/issues/1548): The `reactivePoll` function leaked an observer; that is the observer would continue to exist even if the `reactivePoll` object was no longer accessible. [#2522](https://github.com/rstudio/shiny/pull/2522)
+* Fixed #1548: The `reactivePoll` function leaked an observer; that is the observer would continue to exist even if the `reactivePoll` object was no longer accessible. #2522
 
-* Fixed [#2116](https://github.com/rstudio/shiny/issues/2116): Fixed an issue where dynamic tabs could not be added when on a hosted platform. ([#2545](https://github.com/rstudio/shiny/pull/2545))
+* Fixed #2116: Fixed an issue where dynamic tabs could not be added when on a hosted platform. (#2545)
 
-* Resolved [#2515](https://github.com/rstudio/shiny/issues/2515): `selectInput()` and `selectizeInput()` now deal appropriately with named factors. Note that `updateSelectInput()` and `updateSelectizeInput()` **do not** yet handle factors; their behavior is unchanged. ([#2524](https://github.com/rstudio/shiny/pull/2524), [#2540](https://github.com/rstudio/shiny/pull/2540), [#2625](https://github.com/rstudio/shiny/pull/2625))
+* Resolved #2515: `selectInput()` and `selectizeInput()` now deal appropriately with named factors. Note that `updateSelectInput()` and `updateSelectizeInput()` **do not** yet handle factors; their behavior is unchanged. (#2524, #2540, #2625)
 
-* Resolved [#2471](https://github.com/rstudio/shiny/issues/2471): Large file uploads to a Windows computer were slow. ([#2579](https://github.com/rstudio/shiny/pull/2579))
+* Resolved #2471: Large file uploads to a Windows computer were slow. (#2579)
 
-* Fixed [#2387](https://github.com/rstudio/shiny/issues/2387): Updating a `sliderInput()`'s type from numeric to date no longer changes the rate policy from debounced to immediate. More generally, updating an input binding with a new type should (no longer) incorrectly alter the input rate policy. ([#2404](https://github.com/rstudio/shiny/pull/2404))
+* Fixed #2387: Updating a `sliderInput()`'s type from numeric to date no longer changes the rate policy from debounced to immediate. More generally, updating an input binding with a new type should (no longer) incorrectly alter the input rate policy. (#2404)
 
-* Fixed [#868](https://github.com/rstudio/shiny/issues/868): If an input is initialized with a `NULL` label, it can now be updated with a string. Moreover, if an input label is initialized with a string, it can now be removed by updating with `label=character(0)` (similar to how `choices` and `selected` can be cleared in `updateSelectInput()`). ([#2406](https://github.com/rstudio/shiny/pull/2406))
+* Fixed #868: If an input is initialized with a `NULL` label, it can now be updated with a string. Moreover, if an input label is initialized with a string, it can now be removed by updating with `label=character(0)` (similar to how `choices` and `selected` can be cleared in `updateSelectInput()`). (#2406)
 
-* Fixed [#2250](https://github.com/rstudio/shiny/issues/2250): `updateSliderInput()` now works with un-specified (or zero-length) `min`, `max`, and `value`. ([#2416](https://github.com/rstudio/shiny/pull/2416))
+* Fixed #2250: `updateSliderInput()` now works with un-specified (or zero-length) `min`, `max`, and `value`. (#2416)
 
-* Fixed [#2396](https://github.com/rstudio/shiny/issues/2396): `selectInput("myID", ...)` resulting in an extra `myID-selectized` input (introduced in v1.2.0). ([#2418](https://github.com/rstudio/shiny/pull/2418))
+* Fixed #2396: `selectInput("myID", ...)` resulting in an extra `myID-selectized` input (introduced in v1.2.0). (#2418)
 
-* Fixed [#2233](https://github.com/rstudio/shiny/issues/2233): `verbatimTextOutput()` produced wrapped text on Safari, but the text should not be wrapped. ([#2353](https://github.com/rstudio/shiny/pull/2353))
+* Fixed #2233: `verbatimTextOutput()` produced wrapped text on Safari, but the text should not be wrapped. (#2353)
 
-* Fixed [#2335](https://github.com/rstudio/shiny/issues/2335): When `dateInput()`'s `value` was unspecified, and `max` and/or `min` was set to `Sys.Date()`, the value was not being set properly. ([#2526](https://github.com/rstudio/shiny/pull/2526))
+* Fixed #2335: When `dateInput()`'s `value` was unspecified, and `max` and/or `min` was set to `Sys.Date()`, the value was not being set properly. (#2526)
 
-* Fixed [#2591](https://github.com/rstudio/shiny/issues/2591): Providing malformed date-strings to `min` or `max` no longer results in JS errors for `dateInput()` and `dateRangeInput()`. ([#2592](https://github.com/rstudio/shiny/pull/2592))
+* Fixed #2591: Providing malformed date-strings to `min` or `max` no longer results in JS errors for `dateInput()` and `dateRangeInput()`. (#2592)
 
-* Fixed [rstudio/reactlog#36](https://github.com/rstudio/reactlog/issues/36): Changes to reactive values not displaying accurately in reactlog. ([#2424](https://github.com/rstudio/shiny/pull/2424))
+* Fixed [rstudio/reactlog#36](https://github.com/rstudio/reactlog/issues/36): Changes to reactive values not displaying accurately in reactlog. (#2424)
 
-* Fixed [#2598](https://github.com/rstudio/shiny/issues/2598): Showcase files don't appear with a wide window. ([#2582](https://github.com/rstudio/shiny/pull/2582))
+* Fixed #2598: Showcase files don't appear with a wide window. (#2582)
 
-* Fixed [#2329](https://github.com/rstudio/shiny/issues/2329), [#1817](https://github.com/rstudio/shiny/issues/1817): These bugs were reported as fixed in Shiny 1.3.0 but were not actually fixed because some JavaScript changes were accidentally not included in the release. The fix resolves issues that occur when `withProgressBar()` or bookmarking are combined with the [networkD3](https://christophergandrud.github.io/networkD3/) package's Sankey plot.
+* Fixed #2329, #1817: These bugs were reported as fixed in Shiny 1.3.0 but were not actually fixed because some JavaScript changes were accidentally not included in the release. The fix resolves issues that occur when `withProgressBar()` or bookmarking are combined with the [networkD3](https://christophergandrud.github.io/networkD3/) package's Sankey plot.
 
 
 shiny 1.3.2
@@ -133,9 +168,9 @@ shiny 1.3.2
 
 ### Bug fixes
 
-* Fixed [#2385](https://github.com/rstudio/shiny/issues/2385): Static CSS/JS resources in subapps in R Markdown documents did not render properly. ([#2386](https://github.com/rstudio/shiny/pull/2386))
+* Fixed #2385: Static CSS/JS resources in subapps in R Markdown documents did not render properly. (#2386)
 
-* Fixed [#2280](https://github.com/rstudio/shiny/issues/2280): Shiny applications that used a www/index.html file did not serve up the index file. ([#2382](https://github.com/rstudio/shiny/pull/2382))
+* Fixed #2280: Shiny applications that used a www/index.html file did not serve up the index file. (#2382)
 
 
 shiny 1.3.1
@@ -145,7 +180,7 @@ shiny 1.3.1
 
 ### Bug fixes
 
-* Fixed a performance issue introduced in v1.3.0 when using large nested lists within Shiny. ([#2377](https://github.com/rstudio/shiny/pull/2377))
+* Fixed a performance issue introduced in v1.3.0 when using large nested lists within Shiny. (#2377)
 
 
 shiny 1.3.0
@@ -157,27 +192,27 @@ shiny 1.3.0
 
 ### New features
 
-* Revamped Shiny's [reactlog](https://github.com/rstudio/reactlog) viewer which debugs reactivity within a shiny application.  This allows users to traverse the reactivity history of a shiny application, filter to the dependency tree of a selected reactive object, and search for matching reactive objects.  See `?reactlogShow` for more details and how to enable this feature. ([#2107](https://github.com/rstudio/shiny/pull/2107))
+* Revamped Shiny's [reactlog](https://github.com/rstudio/reactlog) viewer which debugs reactivity within a shiny application.  This allows users to traverse the reactivity history of a shiny application, filter to the dependency tree of a selected reactive object, and search for matching reactive objects.  See `?reactlogShow` for more details and how to enable this feature. (#2107)
 
-* Shiny now serves static files on a background thread. This means that things like JavaScript and CSS assets can be served without blocking or being blocked by the main R thread, and should result in significantly better performance for heavily loaded servers. ([#2280](https://github.com/rstudio/shiny/pull/2280))
+* Shiny now serves static files on a background thread. This means that things like JavaScript and CSS assets can be served without blocking or being blocked by the main R thread, and should result in significantly better performance for heavily loaded servers. (#2280)
 
 ### Minor new features and improvements
 
-* The `Shiny-Shared-Secret` security header is now checked using constant-time comparison to prevent timing attacks (thanks @dirkschumacher!). ([#2319](https://github.com/rstudio/shiny/pull/2319))
+* The `Shiny-Shared-Secret` security header is now checked using constant-time comparison to prevent timing attacks (thanks @dirkschumacher!). (#2319)
 
 ### Bug fixes
 
-* Fixed [#2245](https://github.com/rstudio/shiny/issues/2245): `updateSelectizeInput()` did not update labels. ([#2248](https://github.com/rstudio/shiny/pull/2248))
+* Fixed #2245: `updateSelectizeInput()` did not update labels. (#2248)
 
-* Fixed [#2308](https://github.com/rstudio/shiny/issues/2308): When restoring a bookmarked application, inputs with a leading `.` would not be restored. ([#2311](https://github.com/rstudio/shiny/pull/2311))
+* Fixed #2308: When restoring a bookmarked application, inputs with a leading `.` would not be restored. (#2311)
 
-* Fixed [#2305](https://github.com/rstudio/shiny/issues/2305), [#2322](https://github.com/rstudio/shiny/issues/2322), [#2351](https://github.com/rstudio/shiny/issues/2351): When an input in dynamic UI is restored from bookmarks, it would keep getting set to the same value. ([#2360](https://github.com/rstudio/shiny/pull/2360))
+* Fixed #2305, #2322, #2351: When an input in dynamic UI is restored from bookmarks, it would keep getting set to the same value. (#2360)
 
-* Fixed [#2349](https://github.com/rstudio/shiny/issues/2349), [#2329](https://github.com/rstudio/shiny/issues/2329), [#1817](https://github.com/rstudio/shiny/issues/1817): These were various bugs triggered by the presence of the [networkD3](https://christophergandrud.github.io/networkD3/) package's Sankey plot in an app. Impacted features included `dateRangeInput`, `withProgressBar`, and bookmarking ([#2359](https://github.com/rstudio/shiny/pull/2359))
+* Fixed #2349, #2329, #1817: These were various bugs triggered by the presence of the [networkD3](https://christophergandrud.github.io/networkD3/) package's Sankey plot in an app. Impacted features included `dateRangeInput`, `withProgressBar`, and bookmarking (#2359)
 
 ### Documentation Updates
 
-* Fixed [#2247](https://github.com/rstudio/shiny/issues/2247): `renderCachedPlot` now supports using promises for either `expr` or `cacheKeyExpr`. (Shiny v1.2.0 supported async `expr`, but only if `cacheKeyExpr` was async as well; now you can use any combination of sync/async for `expr` and `cacheKeyExpr`.) [#2261](https://github.com/rstudio/shiny/pull/2261)
+* Fixed #2247: `renderCachedPlot` now supports using promises for either `expr` or `cacheKeyExpr`. (Shiny v1.2.0 supported async `expr`, but only if `cacheKeyExpr` was async as well; now you can use any combination of sync/async for `expr` and `cacheKeyExpr`.) #2261
 
 
 shiny 1.2.0
@@ -193,57 +228,57 @@ This release features plot caching, an important new tool for improving performa
 
 ### New features
 
-* Added `renderCachedPlot()`, which stores plots in a cache so that they can be served up almost instantly. ([#1997](https://github.com/rstudio/shiny/pull/1997))
+* Added `renderCachedPlot()`, which stores plots in a cache so that they can be served up almost instantly. (#1997)
 
 ### Minor new features and improvements
 
-* Upgrade FontAwesome from 4.7.0 to 5.3.1 and made `icon` tags browsable, which means they will display in a web browser or RStudio viewer by default ([#2186](https://github.com/rstudio/shiny/issues/2186)). Note that if your application or library depends on FontAwesome directly using custom CSS, you may need to make some or all of the changes recommended in [Upgrade from Version 4](https://fontawesome.com/how-to-use/on-the-web/setup/upgrading-from-version-4). Font Awesome icons can also now be used in static R Markdown documents.
+* Upgrade FontAwesome from 4.7.0 to 5.3.1 and made `icon` tags browsable, which means they will display in a web browser or RStudio viewer by default (#2186). Note that if your application or library depends on FontAwesome directly using custom CSS, you may need to make some or all of the changes recommended in [Upgrade from Version 4](https://fontawesome.com/how-to-use/on-the-web/setup/upgrading-from-version-4). Font Awesome icons can also now be used in static R Markdown documents.
 
-* Address [#174](https://github.com/rstudio/shiny/issues/174): Added `datesdisabled` and `daysofweekdisabled` as new parameters to `dateInput()`. This resolves [#174](https://github.com/rstudio/shiny/issues/174) and exposes the underlying arguments of [Bootstrap Datepicker](http://bootstrap-datepicker.readthedocs.io/en/latest/options.html#datesdisabled). `datesdisabled` expects a character vector with values in `yyyy/mm/dd` format and `daysofweekdisabled` expects an integer vector with day interger ids (Sunday=0, Saturday=6). The default value for both is `NULL`, which leaves all days selectable. Thanks, @nathancday! ([#2147](https://github.com/rstudio/shiny/pull/2147))
+* Address #174: Added `datesdisabled` and `daysofweekdisabled` as new parameters to `dateInput()`. This resolves #174 and exposes the underlying arguments of [Bootstrap Datepicker](http://bootstrap-datepicker.readthedocs.io/en/latest/options.html#datesdisabled). `datesdisabled` expects a character vector with values in `yyyy/mm/dd` format and `daysofweekdisabled` expects an integer vector with day interger ids (Sunday=0, Saturday=6). The default value for both is `NULL`, which leaves all days selectable. Thanks, @nathancday! (#2147)
 
-* Support for selecting variables of a data frame with the output values to be used within tidy evaluation.  Added functions: `varSelectInput`, `varSelectizeInput`, `updateVarSelectInput`, `updateVarSelectizeInput`. ([#2091](https://github.com/rstudio/shiny/pull/2091))
+* Support for selecting variables of a data frame with the output values to be used within tidy evaluation.  Added functions: `varSelectInput`, `varSelectizeInput`, `updateVarSelectInput`, `updateVarSelectizeInput`. (#2091)
 
-* Addressed [#2042](https://github.com/rstudio/shiny/issues/2042): dates outside of `min`/`max` date range are now a lighter shade of grey to highlight the allowed range. ([#2087](https://github.com/rstudio/shiny/pull/2087))
+* Addressed #2042: dates outside of `min`/`max` date range are now a lighter shade of grey to highlight the allowed range. (#2087)
 
-* Added support for plot interaction when the plot is scaled. ([#2125](https://github.com/rstudio/shiny/pull/2125))
+* Added support for plot interaction when the plot is scaled. (#2125)
 
-* Fixed [#1933](https://github.com/rstudio/shiny/issues/1933): extended server-side selectize to lists and optgroups. ([#2102](https://github.com/rstudio/shiny/pull/2102))
+* Fixed #1933: extended server-side selectize to lists and optgroups. (#2102)
 
-* Added namespace support when freezing reactiveValue keys. [#2080](https://github.com/rstudio/shiny/pull/2080)
+* Added namespace support when freezing reactiveValue keys. #2080
 
-* Upgrade selectize.js from 0.12.1 to 0.12.4 [#2028](https://github.com/rstudio/shiny/issues/2028)
+* Upgrade selectize.js from 0.12.1 to 0.12.4 #2028
 
-* Addressed [#2079](https://github.com/rstudio/shiny/issues/2079): Added `coords_img`, `coords_css`, and `img_css_ratio` fields containing x and y location information for plot brush, hover, and click events. [#2183](https://github.com/rstudio/shiny/pull/2183)
+* Addressed #2079: Added `coords_img`, `coords_css`, and `img_css_ratio` fields containing x and y location information for plot brush, hover, and click events. #2183
 
 ### Bug fixes
 
-* Fixed [#2033](https://github.com/rstudio/shiny/issues/2033): RStudio Viewer window not closed on `shiny::stopApp()`. Thanks, @vnijs! [#2047](https://github.com/rstudio/shiny/pull/2047)
+* Fixed #2033: RStudio Viewer window not closed on `shiny::stopApp()`. Thanks, @vnijs! #2047
 
-* Fixed [#1935](https://github.com/rstudio/shiny/issues/1935): correctly returns plot coordinates when using outer margins. ([#2108](https://github.com/rstudio/shiny/pull/2108))
+* Fixed #1935: correctly returns plot coordinates when using outer margins. (#2108)
 
-* Resolved [#2019](https://github.com/rstudio/shiny/issues/2019): `updateSliderInput` now changes the slider formatting if the input type changes. ([#2099](https://github.com/rstudio/shiny/pull/2099))
+* Resolved #2019: `updateSliderInput` now changes the slider formatting if the input type changes. (#2099)
 
-* Fixed [#2138](https://github.com/rstudio/shiny/issues/2138): Inputs that are part of a `renderUI` were no longer restoring correctly from bookmarked state. [#2139](https://github.com/rstudio/shiny/pull/2139)
+* Fixed #2138: Inputs that are part of a `renderUI` were no longer restoring correctly from bookmarked state. #2139
 
-* The `knit_print` methods from htmltools are no longer imported into shiny and then exported. Also, shiny's `knit_print` methods are no longer exported. [#2166](https://github.com/rstudio/shiny/pull/2166)
+* The `knit_print` methods from htmltools are no longer imported into shiny and then exported. Also, shiny's `knit_print` methods are no longer exported. #2166
 
-* Fixed [#2093](https://github.com/rstudio/shiny/issues/2093): Make sure bookmark scope directory does not exist before trying to create it. [#2168](https://github.com/rstudio/shiny/pull/2168)
+* Fixed #2093: Make sure bookmark scope directory does not exist before trying to create it. #2168
 
-* Fixed [#2177](https://github.com/rstudio/shiny/issues/2177): The session name is now being recorded when exiting a context.  Multiple sessions can now view their respective reactlogs. [#2180](https://github.com/rstudio/shiny/pull/2180)
+* Fixed #2177: The session name is now being recorded when exiting a context.  Multiple sessions can now view their respective reactlogs. #2180
 
-* Fixed [#2162](https://github.com/rstudio/shiny/issues/2162): `selectInput` was sending spurious duplicate values to the server when using backspace. Thanks, @sada1993! [#2187](https://github.com/rstudio/shiny/pull/2187)
+* Fixed #2162: `selectInput` was sending spurious duplicate values to the server when using backspace. Thanks, @sada1993! #2187
 
-* Fixed [#2142](https://github.com/rstudio/shiny/issues/2142): Dropping files on `fileInput`s stopped working on recent releases of Firefox. Thanks @dmenne for reporting! [#2203](https://github.com/rstudio/shiny/pull/2203)
+* Fixed #2142: Dropping files on `fileInput`s stopped working on recent releases of Firefox. Thanks @dmenne for reporting! #2203
 
-* Fixed [#2204](https://github.com/rstudio/shiny/issues/2204): `updateDateInput` could set the wrong date on days where DST begins. (Thanks @GaGaMan1101!) [#2212](https://github.com/rstudio/shiny/pull/2212)
+* Fixed #2204: `updateDateInput` could set the wrong date on days where DST begins. (Thanks @GaGaMan1101!) #2212
 
-* Fixed [#2225](https://github.com/rstudio/shiny/issues/2225): Input event queue can stall in apps that use async. [#2226](https://github.com/rstudio/shiny/pull/2226)
+* Fixed #2225: Input event queue can stall in apps that use async. #2226
 
-* Fixed [#2228](https://github.com/rstudio/shiny/issues/2228): `reactiveTimer` fails when not owned by a session. Thanks, @P-Bettega! [#2229](https://github.com/rstudio/shiny/pull/2229)
+* Fixed #2228: `reactiveTimer` fails when not owned by a session. Thanks, @P-Bettega! #2229
 
 ### Documentation Updates
 
-* Addressed [#1864](https://github.com/rstudio/shiny/issues/1864) by changing `optgroup` documentation to use `list` instead of `c`. ([#2084](https://github.com/rstudio/shiny/pull/2084))
+* Addressed #1864 by changing `optgroup` documentation to use `list` instead of `c`. (#2084)
 
 
 shiny 1.1.0
@@ -259,59 +294,59 @@ This is a significant release for Shiny, with a major new feature that was nearl
 
 ### New features
 
-* Support for asynchronous operations! Built-in render functions that expected a certain kind of object to be yielded from their `expr`, now generally can handle a promise for that kind of object. Reactive expressions and observers are now promise-aware as well. ([#1932](https://github.com/rstudio/shiny/pull/1932))
+* Support for asynchronous operations! Built-in render functions that expected a certain kind of object to be yielded from their `expr`, now generally can handle a promise for that kind of object. Reactive expressions and observers are now promise-aware as well. (#1932)
 
-* Introduced two changes to the (undocumented but widely used) JavaScript function `Shiny.onInputChange(name, value)`. First, we changed the function name to `Shiny.setInputValue` (but don't worry--the old function name will continue to work). Second, until now, all calls to `Shiny.onInputChange(inputId, value)` have been "deduplicated"; that is, anytime an input is set to the same value it already has, the set is ignored. With Shiny v1.1, you can now add an options object as the third parameter: `Shiny.setInputValue("name", value, {priority: "event"})`. When the priority option is set to `"event"`, Shiny will always send the value and trigger reactivity, whether it is a duplicate or not. This closes [#928](https://github.com/rstudio/shiny/issues/928), which was the most upvoted open issue by far! Thanks, @daattali. ([#2018](https://github.com/rstudio/shiny/pull/2018))
+* Introduced two changes to the (undocumented but widely used) JavaScript function `Shiny.onInputChange(name, value)`. First, we changed the function name to `Shiny.setInputValue` (but don't worry--the old function name will continue to work). Second, until now, all calls to `Shiny.onInputChange(inputId, value)` have been "deduplicated"; that is, anytime an input is set to the same value it already has, the set is ignored. With Shiny v1.1, you can now add an options object as the third parameter: `Shiny.setInputValue("name", value, {priority: "event"})`. When the priority option is set to `"event"`, Shiny will always send the value and trigger reactivity, whether it is a duplicate or not. This closes #928, which was the most upvoted open issue by far! Thanks, @daattali. (#2018)
 
 ### Minor new features and improvements
 
-* Addressed [#1978](https://github.com/rstudio/shiny/issues/1978): `shiny:value` is now triggered when duplicate output data is received from the server. (Thanks, @andrewsali! [#1999](https://github.com/rstudio/shiny/pull/1999))
+* Addressed #1978: `shiny:value` is now triggered when duplicate output data is received from the server. (Thanks, @andrewsali! #1999)
 
-* If a shiny output contains a css class of `shiny-report-size`, its container height and width are now reported in `session$clientData`. So, for an output with an id with `"myID"`, the height/width can be accessed via `session$clientData[['output_myID_height']]`/`session$clientData[['output_myID_width']]`. Addresses [#1980](https://github.com/rstudio/shiny/issues/1980). (Thanks, @cpsievert! [#1981](https://github.com/rstudio/shiny/pull/1981))
+* If a shiny output contains a css class of `shiny-report-size`, its container height and width are now reported in `session$clientData`. So, for an output with an id with `"myID"`, the height/width can be accessed via `session$clientData[['output_myID_height']]`/`session$clientData[['output_myID_width']]`. Addresses #1980. (Thanks, @cpsievert! #1981)
 
-* Added a new `autoclose = TRUE` parameter to `dateInput()` and `dateRangeInput()`. This closed [#1969](https://github.com/rstudio/shiny/issues/1969) which was a duplicate of much older issue, [#173](https://github.com/rstudio/shiny/issues/173). The default value is `TRUE` since that seems to be the common use case. However, this will cause existing apps with date inputs (that update to this version of Shiny) to have the datepicker be immediately closed once a date is selected. For most apps, this is actually desired behavior; if you wish to keep the datepicker open until the user clicks out of it use `autoclose = FALSE`. ([#1987](https://github.com/rstudio/shiny/pull/1987))
+* Added a new `autoclose = TRUE` parameter to `dateInput()` and `dateRangeInput()`. This closed #1969 which was a duplicate of much older issue, #173. The default value is `TRUE` since that seems to be the common use case. However, this will cause existing apps with date inputs (that update to this version of Shiny) to have the datepicker be immediately closed once a date is selected. For most apps, this is actually desired behavior; if you wish to keep the datepicker open until the user clicks out of it use `autoclose = FALSE`. (#1987)
 
-* The version of Shiny is now accessible from Javascript, with `Shiny.version`. There is also a new function for comparing version strings, `Shiny.compareVersion()`. ([#1826](https://github.com/rstudio/shiny/pull/1826), [#1830](https://github.com/rstudio/shiny/pull/1830))
+* The version of Shiny is now accessible from Javascript, with `Shiny.version`. There is also a new function for comparing version strings, `Shiny.compareVersion()`. (#1826, #1830)
 
-* Addressed [#1851](https://github.com/rstudio/shiny/issues/1851): Stack traces are now smaller in some places `do.call()` is used. ([#1856](https://github.com/rstudio/shiny/pull/1856))
+* Addressed #1851: Stack traces are now smaller in some places `do.call()` is used. (#1856)
 
 * Stack traces have been improved, with more aggressive de-noising and support for deep stack traces (stitching together multiple stack traces that are conceptually part of the same async operation).
 
-* Addressed [#1859](https://github.com/rstudio/shiny/issues/1859): Server-side selectize is now significantly faster. (Thanks to @dselivanov [#1861](https://github.com/rstudio/shiny/pull/1861))
+* Addressed #1859: Server-side selectize is now significantly faster. (Thanks to @dselivanov #1861)
 
-* [#1989](https://github.com/rstudio/shiny/issues/1989): The server side of outputs can now be removed (e.g. `output$plot <- NULL`). This is not usually necessary but it does allow some objects to be garbage collected, which might matter if you are dynamically creating and destroying many outputs. (Thanks, @mmuurr! [#2011](https://github.com/rstudio/shiny/pull/2011))
+* #1989: The server side of outputs can now be removed (e.g. `output$plot <- NULL`). This is not usually necessary but it does allow some objects to be garbage collected, which might matter if you are dynamically creating and destroying many outputs. (Thanks, @mmuurr! #2011)
 
-* Removed the (ridiculously outdated) "experimental feature" tag from the reference documentation for `renderUI`. ([#2036](https://github.com/rstudio/shiny/pull/2036))
+* Removed the (ridiculously outdated) "experimental feature" tag from the reference documentation for `renderUI`. (#2036)
 
-* Addressed [#1907](https://github.com/rstudio/shiny/issues/1907): the `ignoreInit` argument was first added only to `observeEvent`. Later, we also added it to `eventReactive`, but forgot to update the documentation. Now done, thanks [@flo12392](https://github.com/flo12392)! ([#2036](https://github.com/rstudio/shiny/pull/2036))
+* Addressed #1907: the `ignoreInit` argument was first added only to `observeEvent`. Later, we also added it to `eventReactive`, but forgot to update the documentation. Now done, thanks [@flo12392](https://github.com/flo12392)! (#2036)
 
 ### Bug fixes
 
-* Fixed [#1006](https://github.com/rstudio/shiny/issues/1006): Slider inputs sometimes showed too many digits. ([#1956](https://github.com/rstudio/shiny/pull/1956))
+* Fixed #1006: Slider inputs sometimes showed too many digits. (#1956)
 
-* Fixed [#1958](https://github.com/rstudio/shiny/issues/1958): Slider inputs previously displayed commas after a decimal point. ([#1960](https://github.com/rstudio/shiny/pull/1960))
+* Fixed #1958: Slider inputs previously displayed commas after a decimal point. (#1960)
 
 * The internal `URLdecode()` function previously was a copy of `httpuv::decodeURIComponent()`, assigned at build time; now it invokes the httpuv function at run time.
 
-* Fixed [#1840](https://github.com/rstudio/shiny/issues/1840): with the release of Shiny 1.0.5, we accidently changed the relative positioning of the icon and the title text in `navbarMenu`s and `tabPanel`s. This fix reverts this behavior back (i.e. the icon should be to the left of the text and/or the downward arrow in case of `navbarMenu`s). ([#1848](https://github.com/rstudio/shiny/pull/1848))
+* Fixed #1840: with the release of Shiny 1.0.5, we accidently changed the relative positioning of the icon and the title text in `navbarMenu`s and `tabPanel`s. This fix reverts this behavior back (i.e. the icon should be to the left of the text and/or the downward arrow in case of `navbarMenu`s). (#1848)
 
-* Fixed [#1600](https://github.com/rstudio/shiny/issues/1600): URL-encoded bookmarking did not work with sliders that had dates or date-times. ([#1961](https://github.com/rstudio/shiny/pull/1961))
+* Fixed #1600: URL-encoded bookmarking did not work with sliders that had dates or date-times. (#1961)
 
-* Fixed [#1962](https://github.com/rstudio/shiny/issues/1962): [File dragging and dropping](https://blog.rstudio.com/2017/08/15/shiny-1-0-4/) broke in the presence of jQuery version 3.0 as introduced by the [rhandsontable](https://jrowen.github.io/rhandsontable/) [htmlwidget](https://www.htmlwidgets.org/). ([#2005](https://github.com/rstudio/shiny/pull/2005))
+* Fixed #1962: [File dragging and dropping](https://blog.rstudio.com/2017/08/15/shiny-1-0-4/) broke in the presence of jQuery version 3.0 as introduced by the [rhandsontable](https://jrowen.github.io/rhandsontable/) [htmlwidget](https://www.htmlwidgets.org/). (#2005)
 
-* Improved the error handling inside the `addResourcePath()` function, to give end users more informative error messages when the `directoryPath` argument cannot be normalized. This is especially useful for `runtime: shiny_prerendered` Rmd documents, like `learnr` tutorials. ([#1968](https://github.com/rstudio/shiny/pull/1968))
+* Improved the error handling inside the `addResourcePath()` function, to give end users more informative error messages when the `directoryPath` argument cannot be normalized. This is especially useful for `runtime: shiny_prerendered` Rmd documents, like `learnr` tutorials. (#1968)
 
-* Changed script tags in reactlog ([inst/www/reactive-graph.html](https://github.com/rstudio/shiny/blob/v1.1.0/inst/www/reactive-graph.html)) from HTTP to HTTPS in order to avoid mixed content blocking by most browsers. (Thanks, @jekriske-lilly! [#1844](https://github.com/rstudio/shiny/pull/1844))
+* Changed script tags in reactlog ([inst/www/reactive-graph.html](https://github.com/rstudio/shiny/blob/v1.1.0/inst/www/reactive-graph.html)) from HTTP to HTTPS in order to avoid mixed content blocking by most browsers. (Thanks, @jekriske-lilly! #1844)
 
-* Addressed [#1784](https://github.com/rstudio/shiny/issues/1784): `runApp()` will avoid port 6697, which is considered unsafe by Chrome.
+* Addressed #1784: `runApp()` will avoid port 6697, which is considered unsafe by Chrome.
 
-* Fixed [#2000](https://github.com/rstudio/shiny/issues/2000): Implicit calls to `xxxOutput` not working inside modules. (Thanks, @GregorDeCillia! [#2010](https://github.com/rstudio/shiny/pull/2010))
+* Fixed #2000: Implicit calls to `xxxOutput` not working inside modules. (Thanks, @GregorDeCillia! #2010)
 
-* Fixed [#2021](https://github.com/rstudio/shiny/issues/2021): Memory leak with `reactiveTimer` and `invalidateLater`. ([#2022](https://github.com/rstudio/shiny/pull/2022))
+* Fixed #2021: Memory leak with `reactiveTimer` and `invalidateLater`. (#2022)
 
 ### Library updates
 
-* Updated to ion.rangeSlider 2.2.0. ([#1955](https://github.com/rstudio/shiny/pull/1955))
+* Updated to ion.rangeSlider 2.2.0. (#1955)
 
 
 ## Known issues
@@ -326,11 +361,11 @@ shiny 1.0.5
 
 ### Bug fixes
 
-* Fixed [#1818](https://github.com/rstudio/shiny/issues/1818): `conditionalPanel()` expressions that have a newline character in them caused the application to not work. ([#1820](https://github.com/rstudio/shiny/pull/1820))
+* Fixed #1818: `conditionalPanel()` expressions that have a newline character in them caused the application to not work. (#1820)
 
-* Added a safe wrapper function for internal calls to `jsonlite::fromJSON()`. ([#1822](https://github.com/rstudio/shiny/pull/1822))
+* Added a safe wrapper function for internal calls to `jsonlite::fromJSON()`. (#1822)
 
-* Fixed [#1824](https://github.com/rstudio/shiny/issues/1824): HTTP HEAD requests on static files caused the application to stop. ([#1825](https://github.com/rstudio/shiny/pull/1825))
+* Fixed #1824: HTTP HEAD requests on static files caused the application to stop. (#1825)
 
 
 shiny 1.0.4
@@ -342,57 +377,57 @@ There are three headlining features in this release of Shiny. It is now possible
 
 ### New features
 
-* Implemented [#1668](https://github.com/rstudio/shiny/issues/1668): dynamic tabs: added functions (`insertTab`, `appendTab`, `prependTab`, `removeTab`, `showTab` and `hideTab`) that allow you to do those actions for an existing `tabsetPanel`. ([#1794](https://github.com/rstudio/shiny/pull/1794))
+* Implemented #1668: dynamic tabs: added functions (`insertTab`, `appendTab`, `prependTab`, `removeTab`, `showTab` and `hideTab`) that allow you to do those actions for an existing `tabsetPanel`. (#1794)
 
-* Implemented [#1213](https://github.com/rstudio/shiny/issues/1213): Added a new function, `onStop()`, which can be used to register callback functions that are invoked when an application exits, or when a user session ends. (Multiple sessions can be connected to a single running Shiny application.) This is useful if you have finalization/clean-up code that should be run after the application exits. ([#1770](https://github.com/rstudio/shiny/pull/1770)
+* Implemented #1213: Added a new function, `onStop()`, which can be used to register callback functions that are invoked when an application exits, or when a user session ends. (Multiple sessions can be connected to a single running Shiny application.) This is useful if you have finalization/clean-up code that should be run after the application exits. (#1770
 
-* Implemented [#1155](https://github.com/rstudio/shiny/issues/1155): Files can now be drag-and-dropped on `fileInput` controls. The appearance of `fileInput` controls while files are being dragged can be modified by overriding the `shiny-file-input-active` and `shiny-file-input-over` classes. ([#1782](https://github.com/rstudio/shiny/pull/1782))
+* Implemented #1155: Files can now be drag-and-dropped on `fileInput` controls. The appearance of `fileInput` controls while files are being dragged can be modified by overriding the `shiny-file-input-active` and `shiny-file-input-over` classes. (#1782)
 
 ### Minor new features and improvements
 
-* Addressed [#1688](https://github.com/rstudio/shiny/issues/1688): trigger a new `shiny:outputinvalidated` event when an output gets invalidated, at the same time that the `recalculating` CSS class is added. ([#1758](https://github.com/rstudio/shiny/pull/1758), thanks [@andrewsali](https://github.com/andrewsali)!)
+* Addressed #1688: trigger a new `shiny:outputinvalidated` event when an output gets invalidated, at the same time that the `recalculating` CSS class is added. (#1758, thanks [@andrewsali](https://github.com/andrewsali)!)
 
-* Addressed [#1508](https://github.com/rstudio/shiny/issues/1508): `fileInput` now permits the same file to be uploaded multiple times. ([#1719](https://github.com/rstudio/shiny/pull/1719))
+* Addressed #1508: `fileInput` now permits the same file to be uploaded multiple times. (#1719)
 
-* Addressed [#1501](https://github.com/rstudio/shiny/issues/1501): The `fileInput` control now retains uploaded file extensions on the server. This fixes [readxl](https://github.com/tidyverse/readxl)'s `readxl::read_excel` and other functions that must recognize a file's extension in order to work. ([#1706](https://github.com/rstudio/shiny/pull/1706))
+* Addressed #1501: The `fileInput` control now retains uploaded file extensions on the server. This fixes [readxl](https://github.com/tidyverse/readxl)'s `readxl::read_excel` and other functions that must recognize a file's extension in order to work. (#1706)
 
-* For `conditionalPanel`s, Shiny now gives more informative messages if there are errors evaluating or parsing the JavaScript conditional expression. ([#1727](https://github.com/rstudio/shiny/pull/1727))
+* For `conditionalPanel`s, Shiny now gives more informative messages if there are errors evaluating or parsing the JavaScript conditional expression. (#1727)
 
-* Addressed [#1586](https://github.com/rstudio/shiny/issues/1586): The `conditionalPanel` function now accepts an `ns` argument. The `ns` argument can be used in a [module](https://shiny.rstudio.com/articles/modules.html) UI function to scope the `condition` expression to the module's own input and output IDs. ([#1735](https://github.com/rstudio/shiny/pull/1735))
+* Addressed #1586: The `conditionalPanel` function now accepts an `ns` argument. The `ns` argument can be used in a [module](https://shiny.rstudio.com/articles/modules.html) UI function to scope the `condition` expression to the module's own input and output IDs. (#1735)
 
-* With `options(shiny.testmode=TRUE)`, the Shiny process will send a message to the client in response to a changed input, even if no outputs have changed. This helps to streamline testing using the shinytest package. ([#1747](https://github.com/rstudio/shiny/pull/1747))
+* With `options(shiny.testmode=TRUE)`, the Shiny process will send a message to the client in response to a changed input, even if no outputs have changed. This helps to streamline testing using the shinytest package. (#1747)
 
-* Addressed [#1738](https://github.com/rstudio/shiny/issues/1738): The `updateTextInput` and `updateTextAreaInput` functions can now update the placeholder. ([#1742](https://github.com/rstudio/shiny/pull/1742))
+* Addressed #1738: The `updateTextInput` and `updateTextAreaInput` functions can now update the placeholder. (#1742)
 
-* Converted examples to single file apps, and made updates and enhancements to comments in the example app scripts. ([#1685](https://github.com/rstudio/shiny/pull/1685))
+* Converted examples to single file apps, and made updates and enhancements to comments in the example app scripts. (#1685)
 
-* Added new `snapshotPreprocessInput()` and `snapshotPreprocessOutput()` functions, which is used for preprocessing and input and output values before taking a test snapshot. ([#1760](https://github.com/rstudio/shiny/pull/1760), [#1789](https://github.com/rstudio/shiny/pull/1789))
+* Added new `snapshotPreprocessInput()` and `snapshotPreprocessOutput()` functions, which is used for preprocessing and input and output values before taking a test snapshot. (#1760, #1789)
 
-* The HTML generated by `renderTable()` no longer includes comments with the R version, xtable version, and timestamp. ([#1771](https://github.com/rstudio/shiny/pull/1771))
+* The HTML generated by `renderTable()` no longer includes comments with the R version, xtable version, and timestamp. (#1771)
 
-* Added a function `isRunning` to test whether a Shiny app is currently running. ([#1785](https://github.com/rstudio/shiny/pull/1785))
+* Added a function `isRunning` to test whether a Shiny app is currently running. (#1785)
 
-* Added a function `setSerializer`, which allows authors to specify a function for serializing the value of a custom input. ([#1791](https://github.com/rstudio/shiny/pull/1791))
+* Added a function `setSerializer`, which allows authors to specify a function for serializing the value of a custom input. (#1791)
 
 ### Bug fixes
 
-* Fixed [#1546](https://github.com/rstudio/shiny/issues/1546): make it possible (without any hacks) to write arbitrary data into a module's `session$userData` (which is exactly the same environment as the parent's `session$userData`). To be clear, it allows something like `session$userData$x <- TRUE`, but not something like `session$userData <- TRUE` (that is not allowed in any context, whether you're in the main app, or in a module) ([#1732](https://github.com/rstudio/shiny/pull/1732)).
+* Fixed #1546: make it possible (without any hacks) to write arbitrary data into a module's `session$userData` (which is exactly the same environment as the parent's `session$userData`). To be clear, it allows something like `session$userData$x <- TRUE`, but not something like `session$userData <- TRUE` (that is not allowed in any context, whether you're in the main app, or in a module) (#1732).
 
-* Fixed [#1701](https://github.com/rstudio/shiny/issues/1701): There was a partial argument match in the `generateOptions` function. ([#1702](https://github.com/rstudio/shiny/pull/1702))
+* Fixed #1701: There was a partial argument match in the `generateOptions` function. (#1702)
 
-* Fixed [#1710](https://github.com/rstudio/shiny/issues/1710): `ReactiveVal` objects did not have separate dependents. ([#1712](https://github.com/rstudio/shiny/pull/1712))
+* Fixed #1710: `ReactiveVal` objects did not have separate dependents. (#1712)
 
-* Fixed [#1438](https://github.com/rstudio/shiny/issues/1438): `unbindAll()` should not be called when inserting content with `insertUI()`. A previous fix ([#1449](https://github.com/rstudio/shiny/pull/1449)) did not work correctly. ([#1736](https://github.com/rstudio/shiny/pull/1736))
+* Fixed #1438: `unbindAll()` should not be called when inserting content with `insertUI()`. A previous fix (#1449) did not work correctly. (#1736)
 
-* Fixed [#1755](https://github.com/rstudio/shiny/issues/1755): dynamic htmlwidgets sent the path of the package on the server to the client. ([#1756](https://github.com/rstudio/shiny/pull/1756))
+* Fixed #1755: dynamic htmlwidgets sent the path of the package on the server to the client. (#1756)
 
-* Fixed [#1763](https://github.com/rstudio/shiny/issues/1763): Shiny's private random stream leaked out into the main random stream. ([#1768](https://github.com/rstudio/shiny/pull/1768))
+* Fixed #1763: Shiny's private random stream leaked out into the main random stream. (#1768)
 
-* Fixed [#1680](https://github.com/rstudio/shiny/issues/1680): `options(warn=2)` was not respected when running an app. ([#1790](https://github.com/rstudio/shiny/pull/1790))
+* Fixed #1680: `options(warn=2)` was not respected when running an app. (#1790)
 
-* Fixed [#1772](https://github.com/rstudio/shiny/issues/1772): ensure that `runApp()` respects the `shinyApp(onStart = function())` argument. ([#1770](https://github.com/rstudio/shiny/pull/1770))
+* Fixed #1772: ensure that `runApp()` respects the `shinyApp(onStart = function())` argument. (#1770)
 
-* Fixed [#1474](https://github.com/rstudio/shiny/issues/1474): A `browser()` call in an observer could cause an error in the RStudio IDE on Windows. ([#1802](https://github.com/rstudio/shiny/pull/1802))
+* Fixed #1474: A `browser()` call in an observer could cause an error in the RStudio IDE on Windows. (#1802)
 
 
 shiny 1.0.3
@@ -404,9 +439,9 @@ This is a hotfix release of Shiny. With previous versions of Shiny, when running
 
 ### Bug fixes
 
-* Fixed [#1672](https://github.com/rstudio/shiny/issues/1672): When an error occurred while uploading a file, the progress bar did not change colors. ([#1673](https://github.com/rstudio/shiny/pull/1673))
+* Fixed #1672: When an error occurred while uploading a file, the progress bar did not change colors. (#1673)
 
-* Fixed [#1676](https://github.com/rstudio/shiny/issues/1676): On R 3.4.0, running a Shiny application gave a warning: `Warning in body(fun) : argument is not a function`. ([#1677](https://github.com/rstudio/shiny/pull/1677))
+* Fixed #1676: On R 3.4.0, running a Shiny application gave a warning: `Warning in body(fun) : argument is not a function`. (#1677)
 
 
 shiny 1.0.2
@@ -418,15 +453,15 @@ This is a hotfix release of Shiny. The primary reason for this release is becaus
 
 ### Minor new features and improvements
 
-* Added a `shiny:sessioninitialized` Javascript event, which is fired at the end of the initialize method of the Session object. This allows us to listen for this event when we want to get the value of things like `Shiny.user`. ([#1568](https://github.com/rstudio/shiny/pull/1568))
+* Added a `shiny:sessioninitialized` Javascript event, which is fired at the end of the initialize method of the Session object. This allows us to listen for this event when we want to get the value of things like `Shiny.user`. (#1568)
 
-* Fixed [#1649](https://github.com/rstudio/shiny/issues/1649): allow the `choices` argument in `checkboxGroupInput()` to be `NULL` (or `c()`) to keep backward compatibility with Shiny < 1.0.1. This will result in the same thing as providing `choices = character(0)`. ([#1652](https://github.com/rstudio/shiny/pull/1652))
+* Fixed #1649: allow the `choices` argument in `checkboxGroupInput()` to be `NULL` (or `c()`) to keep backward compatibility with Shiny < 1.0.1. This will result in the same thing as providing `choices = character(0)`. (#1652)
 
-* The official URL for accessing MathJax libraries over CDN has been deprecated and will be removed soon. We have switched to a new rstudio.com URL that we will support going forward. ([#1664](https://github.com/rstudio/shiny/pull/1664))
+* The official URL for accessing MathJax libraries over CDN has been deprecated and will be removed soon. We have switched to a new rstudio.com URL that we will support going forward. (#1664)
 
 ### Bug fixes
 
-* Fixed [#1653](https://github.com/rstudio/shiny/issues/1653): wrong code example in documentation. ([#1658](https://github.com/rstudio/shiny/pull/1658))
+* Fixed #1653: wrong code example in documentation. (#1658)
 
 
 shiny 1.0.1
@@ -442,62 +477,62 @@ This is a maintenance release of Shiny, mostly aimed at fixing bugs and introduc
 
 ### New features
 
-* Added `reactiveVal` function, for storing a single value which can be (reactively) read and written. Similar to `reactiveValues`, except that `reactiveVal` just lets you store a single value instead of storing multiple values by name. ([#1614](https://github.com/rstudio/shiny/pull/1614))
+* Added `reactiveVal` function, for storing a single value which can be (reactively) read and written. Similar to `reactiveValues`, except that `reactiveVal` just lets you store a single value instead of storing multiple values by name. (#1614)
 
 ### Minor new features and improvements
 
-* Fixed [#1637](https://github.com/rstudio/shiny/issues/1637): Outputs stay faded on MS Edge. ([#1640](https://github.com/rstudio/shiny/pull/1640))
+* Fixed #1637: Outputs stay faded on MS Edge. (#1640)
 
-* Addressed [#1348](https://github.com/rstudio/shiny/issues/1348) and [#1437](https://github.com/rstudio/shiny/issues/1437) by adding two new arguments to `radioButtons()` and `checkboxGroupInput()`: `choiceNames` (list or vector) and `choiceValues` (list or vector). These can be passed in as an alternative to `choices`, with the added benefit that the elements in `choiceNames` can be arbitrary UI (i.e. anything created by `HTML()` and the `tags()` functions, like icons and images). While the underlying values for each choice (passed in through `choiceValues`) must still be simple text, their visual representation on the app (what the user actually clicks to select a different option) can be any valid HTML element. See `?radioButtons` for a small example. ([#1521](https://github.com/rstudio/shiny/pull/1521))
+* Addressed #1348 and #1437 by adding two new arguments to `radioButtons()` and `checkboxGroupInput()`: `choiceNames` (list or vector) and `choiceValues` (list or vector). These can be passed in as an alternative to `choices`, with the added benefit that the elements in `choiceNames` can be arbitrary UI (i.e. anything created by `HTML()` and the `tags()` functions, like icons and images). While the underlying values for each choice (passed in through `choiceValues`) must still be simple text, their visual representation on the app (what the user actually clicks to select a different option) can be any valid HTML element. See `?radioButtons` for a small example. (#1521)
 
-* Updated `tools/README.md` with more detailed instructions. ([#1616](https://github.com/rstudio/shiny/pull/1616))
+* Updated `tools/README.md` with more detailed instructions. (#1616)
 
-* Fixed [#1565](https://github.com/rstudio/shiny/issues/1565), which meant that resources with spaces in their names return HTTP 404. ([#1566](https://github.com/rstudio/shiny/pull/1566))
+* Fixed #1565, which meant that resources with spaces in their names return HTTP 404. (#1566)
 
-* Exported `session$user` (if it exists) to the client-side; it's accessible in the Shiny object: `Shiny.user`. ([#1563](https://github.com/rstudio/shiny/pull/1563))
+* Exported `session$user` (if it exists) to the client-side; it's accessible in the Shiny object: `Shiny.user`. (#1563)
 
 * Added support for HTML5's `pushState` which allows for pseudo-navigation
-in shiny apps. For more info, see the documentation (`?updateQueryString` and `?getQueryString`). ([#1447](https://github.com/rstudio/shiny/pull/1447))
+in shiny apps. For more info, see the documentation (`?updateQueryString` and `?getQueryString`). (#1447)
 
-* Fixed [#1121](https://github.com/rstudio/shiny/issues/1121): plot interactions with ggplot2 now support `coord_fixed()`. ([#1525](https://github.com/rstudio/shiny/pull/1525))
+* Fixed #1121: plot interactions with ggplot2 now support `coord_fixed()`. (#1525)
 
-* Added `snapshotExclude` function, which marks an output so that it is not recorded in a test snapshot. ([#1559](https://github.com/rstudio/shiny/pull/1559))
+* Added `snapshotExclude` function, which marks an output so that it is not recorded in a test snapshot. (#1559)
 
-* Added `shiny:filedownload` JavaScript event, which is triggered when a `downloadButton` or `downloadLink` is clicked. Also, the values of `downloadHandler`s are not recorded in test snapshots, because the values change every time the application is run. ([#1559](https://github.com/rstudio/shiny/pull/1559))
+* Added `shiny:filedownload` JavaScript event, which is triggered when a `downloadButton` or `downloadLink` is clicked. Also, the values of `downloadHandler`s are not recorded in test snapshots, because the values change every time the application is run. (#1559)
 
-* Added support for plot interactions with ggplot2 > 2.2.1. ([#1578](https://github.com/rstudio/shiny/pull/1578))
+* Added support for plot interactions with ggplot2 > 2.2.1. (#1578)
 
-* Fixed [#1577](https://github.com/rstudio/shiny/issues/1577): Improved `escapeHTML` (util.js) in terms of the order dependency of replacing, XSS risk attack and performance. ([#1579](https://github.com/rstudio/shiny/pull/1579))
+* Fixed #1577: Improved `escapeHTML` (util.js) in terms of the order dependency of replacing, XSS risk attack and performance. (#1579)
 
-* The `shiny:inputchanged` JavaScript event now includes two new fields, `binding` and `el`, which contain the input binding and DOM element, respectively. Additionally, `Shiny.onInputChange()` now accepts an optional argument, `opts`, which can contain the same fields. ([#1596](https://github.com/rstudio/shiny/pull/1596))
+* The `shiny:inputchanged` JavaScript event now includes two new fields, `binding` and `el`, which contain the input binding and DOM element, respectively. Additionally, `Shiny.onInputChange()` now accepts an optional argument, `opts`, which can contain the same fields. (#1596)
 
-* The `NS()` function now returns a vectorized function. ([#1613](https://github.com/rstudio/shiny/pull/1613))
+* The `NS()` function now returns a vectorized function. (#1613)
 
-* Fixed [#1617](https://github.com/rstudio/shiny/issues/1617): `fileInput` can have customized text for the button and the placeholder. ([#1619](https://github.com/rstudio/shiny/pull/1619))
+* Fixed #1617: `fileInput` can have customized text for the button and the placeholder. (#1619)
 
 ### Bug fixes
 
-* Fixed [#1511](https://github.com/rstudio/shiny/issues/1511): `fileInput`s did not trigger the `shiny:inputchanged` event on the client. Also removed `shiny:fileuploaded` JavaScript event, because it is no longer needed after this fix. ([#1541](https://github.com/rstudio/shiny/pull/1541), [#1570](https://github.com/rstudio/shiny/pull/1570))
+* Fixed #1511: `fileInput`s did not trigger the `shiny:inputchanged` event on the client. Also removed `shiny:fileuploaded` JavaScript event, because it is no longer needed after this fix. (#1541, #1570)
 
-* Fixed [#1472](https://github.com/rstudio/shiny/issues/1472): With a Progress object, calling `set(value=NULL)` made the progress bar go to 100%. Now it does not change the value of the progress bar. The documentation also incorrectly said that setting the `value` to `NULL` would hide the progress bar. ([#1547](https://github.com/rstudio/shiny/pull/1547))
+* Fixed #1472: With a Progress object, calling `set(value=NULL)` made the progress bar go to 100%. Now it does not change the value of the progress bar. The documentation also incorrectly said that setting the `value` to `NULL` would hide the progress bar. (#1547)
 
-* Fixed [#162](https://github.com/rstudio/shiny/issues/162): When a dynamically-generated input changed to a different `inputType`, it might be incorrectly deduplicated.  ([#1594](https://github.com/rstudio/shiny/pull/1594))
+* Fixed #162: When a dynamically-generated input changed to a different `inputType`, it might be incorrectly deduplicated.  (#1594)
 
-* Removed redundant call to `inputs.setInput`. ([#1595](https://github.com/rstudio/shiny/pull/1595))
+* Removed redundant call to `inputs.setInput`. (#1595)
 
-* Fixed bug where `dateRangeInput` did not respect `weekstart` argument. ([#1592](https://github.com/rstudio/shiny/pull/1592))
+* Fixed bug where `dateRangeInput` did not respect `weekstart` argument. (#1592)
 
-* Fixed [#1598](https://github.com/rstudio/shiny/issues/1598): `setBookmarkExclude()` did not work properly inside of modules. ([#1599](https://github.com/rstudio/shiny/pull/1599))
+* Fixed #1598: `setBookmarkExclude()` did not work properly inside of modules. (#1599)
 
-* Fixed [#1605](https://github.com/rstudio/shiny/issues/1605): sliders did not move when clicked on the bar area. ([#1610](https://github.com/rstudio/shiny/pull/1610))
+* Fixed #1605: sliders did not move when clicked on the bar area. (#1610)
 
-* Fixed [#1621](https://github.com/rstudio/shiny/issues/1621): if a `reactiveTimer`'s session was closed before the first time that the `reactiveTimer` fired, then the `reactiveTimer` would not get cleared and would keep firing indefinitely. ([#1623](https://github.com/rstudio/shiny/pull/1623))
+* Fixed #1621: if a `reactiveTimer`'s session was closed before the first time that the `reactiveTimer` fired, then the `reactiveTimer` would not get cleared and would keep firing indefinitely. (#1623)
 
-* Fixed [#1634](https://github.com/rstudio/shiny/issues/1634): If brushing on a plot causes the plot to redraw, then the redraw could in turn trigger the plot to redraw again and again. This was due to spurious changes in values of floating point numbers. ([#1641](https://github.com/rstudio/shiny/pull/1641))
+* Fixed #1634: If brushing on a plot causes the plot to redraw, then the redraw could in turn trigger the plot to redraw again and again. This was due to spurious changes in values of floating point numbers. (#1641)
 
 ### Library updates
 
-* Closed [#1500](https://github.com/rstudio/shiny/issues/1500): Updated ion.rangeSlider to 2.1.6. ([#1540](https://github.com/rstudio/shiny/pull/1540))
+* Closed #1500: Updated ion.rangeSlider to 2.1.6. (#1540)
 
 
 shiny 1.0.0
@@ -509,57 +544,57 @@ Here are some highlights from this release. For more details, see the full chang
 
 ## Support for testing Shiny applications
 
-Shiny now supports automated testing of applications, with the [shinytest](https://github.com/rstudio/shinytest) package. Shinytest has not yet been released on CRAN, but will be soon. ([#18](https://github.com/rstudio/shiny/issues/18), [#1464](https://github.com/rstudio/shiny/pull/1464))
+Shiny now supports automated testing of applications, with the [shinytest](https://github.com/rstudio/shinytest) package. Shinytest has not yet been released on CRAN, but will be soon. (#18, #1464)
 
 ## Debounce/throttle reactives
 
-Now there's an official way to slow down reactive values and expressions that invalidate too quickly. Pass a reactive expression to the new `debounce` or `throttle` function, and get back a modified reactive expression that doesn't invalidate as often. ([#1510](https://github.com/rstudio/shiny/pull/1510))
+Now there's an official way to slow down reactive values and expressions that invalidate too quickly. Pass a reactive expression to the new `debounce` or `throttle` function, and get back a modified reactive expression that doesn't invalidate as often. (#1510)
 
 ## Full changelog
 
 ### Breaking changes
 
-* Added a new `placeholder` argument to `verbatimTextOutput()`. The default is `FALSE`, which means that, if there is no content for this output, no representation of this slot will be made in the UI. Previsouly, even if there was no content, you'd see an empty rectangle in the UI that served as a placeholder. You can set `placeholder = TRUE` to revert back to that look. ([#1480](https://github.com/rstudio/shiny/pull/1480))
+* Added a new `placeholder` argument to `verbatimTextOutput()`. The default is `FALSE`, which means that, if there is no content for this output, no representation of this slot will be made in the UI. Previsouly, even if there was no content, you'd see an empty rectangle in the UI that served as a placeholder. You can set `placeholder = TRUE` to revert back to that look. (#1480)
 
 ### New features
 
-* Added support for testing Shiny applications with the shinytest package. ([#18](https://github.com/rstudio/shiny/issues/18), [#1464](https://github.com/rstudio/shiny/pull/1464))
+* Added support for testing Shiny applications with the shinytest package. (#18, #1464)
 
-* Added `debounce` and `throttle` functions, to control the rate at which reactive values and expressions invalidate. ([#1510](https://github.com/rstudio/shiny/pull/1510))
+* Added `debounce` and `throttle` functions, to control the rate at which reactive values and expressions invalidate. (#1510)
 
 ### Minor new features and improvements
 
-* Addressed [#1486](https://github.com/rstudio/shiny/issues/1486) by adding a new argument to `observeEvent` and `eventReactive`, called `ignoreInit` (defaults to `FALSE` for backwards compatibility). When set to `TRUE`, the action (i.e. the second argument: `handlerExpr` and `valueExpr`, respectively) will not be triggered when the observer/reactive is first created/initialized. In other words, `ignoreInit = TRUE` ensures that the `observeEvent` (or `eventReactive`) is *never* run right away. For more info, see the documentation (`?observeEvent`). ([#1494](https://github.com/rstudio/shiny/pull/1494))
+* Addressed #1486 by adding a new argument to `observeEvent` and `eventReactive`, called `ignoreInit` (defaults to `FALSE` for backwards compatibility). When set to `TRUE`, the action (i.e. the second argument: `handlerExpr` and `valueExpr`, respectively) will not be triggered when the observer/reactive is first created/initialized. In other words, `ignoreInit = TRUE` ensures that the `observeEvent` (or `eventReactive`) is *never* run right away. For more info, see the documentation (`?observeEvent`). (#1494)
 
-* Added a new argument to `observeEvent` called `once`. When set to `TRUE`, it results in the observer being destroyed (stop observing) after the first time that `handlerExpr` is run (i.e. `once = TRUE` guarantees that the observer only runs, at most, once). For more info, see the documentation (`?observeEvent`). ([#1494](https://github.com/rstudio/shiny/pull/1494))
+* Added a new argument to `observeEvent` called `once`. When set to `TRUE`, it results in the observer being destroyed (stop observing) after the first time that `handlerExpr` is run (i.e. `once = TRUE` guarantees that the observer only runs, at most, once). For more info, see the documentation (`?observeEvent`). (#1494)
 
-* Addressed [#1358](https://github.com/rstudio/shiny/issues/1358): more informative error message when calling `runApp()` inside of an app's app.R (or inside ui.R or server.R). ([#1482](https://github.com/rstudio/shiny/pull/1482))
+* Addressed #1358: more informative error message when calling `runApp()` inside of an app's app.R (or inside ui.R or server.R). (#1482)
 
-* Added a more descriptive JS warning for `insertUI()` when the selector argument does not match anything in DOM. ([#1488](https://github.com/rstudio/shiny/pull/1488))
+* Added a more descriptive JS warning for `insertUI()` when the selector argument does not match anything in DOM. (#1488)
 
-* Added support for injecting JavaScript code when the `shiny.testmode` option is set to `TRUE`. This makes it possible to record test events interactively. ([#1464](https://github.com/rstudio/shiny/pull/1464))
+* Added support for injecting JavaScript code when the `shiny.testmode` option is set to `TRUE`. This makes it possible to record test events interactively. (#1464)
 
-* Added ability through arguments to the `a` tag function called inside `downloadButton()` and `downloadLink()`. Closes [#986](https://github.com/rstudio/shiny/issues/986). ([#1492](https://github.com/rstudio/shiny/pulls/1492))
+* Added ability through arguments to the `a` tag function called inside `downloadButton()` and `downloadLink()`. Closes #986. (#1492)
 
-* Implemented [#1512](https://github.com/rstudio/shiny/issues/1512): added a `userData` environment to `session`, for storing arbitrary session-related variables. Generally, session-scoped variables are created just by declaring normal variables that are local to the Shiny server function, but `session$userData` may be more convenient for some advanced scenarios. ([#1513](https://github.com/rstudio/shiny/pull/1513))
+* Implemented #1512: added a `userData` environment to `session`, for storing arbitrary session-related variables. Generally, session-scoped variables are created just by declaring normal variables that are local to the Shiny server function, but `session$userData` may be more convenient for some advanced scenarios. (#1513)
 
-* Relaxed naming requirements for `addResourcePath()` (the first character no longer needs to be a letter). ([#1529](https://github.com/rstudio/shiny/pull/1529))
+* Relaxed naming requirements for `addResourcePath()` (the first character no longer needs to be a letter). (#1529)
 
 ### Bug fixes
 
-* Fixed [#969](https://github.com/rstudio/shiny/issues/969): allow navbarPage's `fluid` param to control both containers. ([#1481](https://github.com/rstudio/shiny/pull/1481))
+* Fixed #969: allow navbarPage's `fluid` param to control both containers. (#1481)
 
-* Fixed [#1438](https://github.com/rstudio/shiny/issues/1438): `unbindAll()` should not be called when inserting content with `insertUI()` ([#1449](https://github.com/rstudio/shiny/pull/1449))
+* Fixed #1438: `unbindAll()` should not be called when inserting content with `insertUI()` (#1449)
 
-* Fixed bug causing `<meta>` tags associated with HTML dependencies of Shiny R Markdown files to be rendered incorrectly. ([#1463](https://github.com/rstudio/shiny/pull/1463))
+* Fixed bug causing `<meta>` tags associated with HTML dependencies of Shiny R Markdown files to be rendered incorrectly. (#1463)
 
-* Fixed [#1359](https://github.com/rstudio/shiny/issues/1359): `shinyApp()` options argument ignored when passed to `runApp()`. ([#1483](https://github.com/rstudio/shiny/pull/1483))
+* Fixed #1359: `shinyApp()` options argument ignored when passed to `runApp()`. (#1483)
 
-* Fixed [#117](https://github.com/rstudio/shiny/issues/117): Reactive expressions now release references to cached values as soon as they are invalidated, potentially making those cached values eligible for garbage collection sooner. Previously, this would not occur until the next cached value was calculated and stored. ([#1504](https://github.com/rstudio/shiny/pull/1504/files))
+* Fixed #117: Reactive expressions now release references to cached values as soon as they are invalidated, potentially making those cached values eligible for garbage collection sooner. Previously, this would not occur until the next cached value was calculated and stored. (#1504)
 
-* Fixed [#1013](https://github.com/rstudio/shiny/issues/1013): `flushReact` should be called after app loads. Observers set up outside of server functions were not running until after the first user connects. ([#1503](https://github.com/rstudio/shiny/pull/1503))
+* Fixed #1013: `flushReact` should be called after app loads. Observers set up outside of server functions were not running until after the first user connects. (#1503)
 
-* Fixed [#1453](https://github.com/rstudio/shiny/issues/1453): When using a modal dialog with `easyClose=TRUE` in a Shiny gadget, pressing Esc would close both the modal and the gadget. Now pressing Esc only closes the modal. ([#1523](https://github.com/rstudio/shiny/pull/1523))
+* Fixed #1453: When using a modal dialog with `easyClose=TRUE` in a Shiny gadget, pressing Esc would close both the modal and the gadget. Now pressing Esc only closes the modal. (#1523)
 
 ### Library updates
 
@@ -575,25 +610,25 @@ This is a maintenance release of Shiny, with some bug fixes and minor new featur
 
 ### Minor new features and improvements
 
-* Added a `fade` argument to `modalDialog()` -- setting it to `FALSE` will remove the usual fade-in animation for that modal window. ([#1414](https://github.com/rstudio/shiny/pull/1414))
+* Added a `fade` argument to `modalDialog()` -- setting it to `FALSE` will remove the usual fade-in animation for that modal window. (#1414)
 
-* Fixed a "duplicate binding" error that occurred in some edge cases involving `insertUI` and nested `uiOutput`. ([#1402](https://github.com/rstudio/shiny/pull/1402))
+* Fixed a "duplicate binding" error that occurred in some edge cases involving `insertUI` and nested `uiOutput`. (#1402)
 
-* Fixed [#1422](https://github.com/rstudio/shiny/issues/1422): When using the `shiny.trace` option, allow specifying to only log SEND or RECV messages, or both. (PR [#1428](https://github.com/rstudio/shiny/pull/1428))
+* Fixed #1422: When using the `shiny.trace` option, allow specifying to only log SEND or RECV messages, or both. (PR #1428)
 
-* Fixed [#1419](https://github.com/rstudio/shiny/issues/1419): Allow overriding a JS custom message handler. (PR [#1445](https://github.com/rstudio/shiny/pull/1445))
+* Fixed #1419: Allow overriding a JS custom message handler. (PR #1445)
 
-* Added `exportTestValues()` function, which allows a test driver to query the session for values internal to an application's server function. This only has an effect if the `shiny.testmode` option is set to `TRUE`. ([#1436](https://github.com/rstudio/shiny/pull/1436))
+* Added `exportTestValues()` function, which allows a test driver to query the session for values internal to an application's server function. This only has an effect if the `shiny.testmode` option is set to `TRUE`. (#1436)
 
 ### Bug fixes
 
-* Fixed [#1427](https://github.com/rstudio/shiny/issues/1427): make sure that modals do not close incorrectly when an element inside them is triggered as hidden. ([#1430](https://github.com/rstudio/shiny/pull/1430))
+* Fixed #1427: make sure that modals do not close incorrectly when an element inside them is triggered as hidden. (#1430)
 
-* Fixed [#1404](https://github.com/rstudio/shiny/issues/1404): stack trace tests were not compatible with the byte-code compiler in R-devel, which now tracks source references.
+* Fixed #1404: stack trace tests were not compatible with the byte-code compiler in R-devel, which now tracks source references.
 
-* `sliderInputBinding.setValue()` now sends a slider's value immediately, instead of waiting for the usual 250ms debounce delay. ([#1429](https://github.com/rstudio/shiny/pull/1429))
+* `sliderInputBinding.setValue()` now sends a slider's value immediately, instead of waiting for the usual 250ms debounce delay. (#1429)
 
-* Fixed a bug where, in versions of R before 3.2, Shiny applications could crash due to a bug in R's implementation of `list2env()`. ([#1446](https://github.com/rstudio/shiny/pull/1446))
+* Fixed a bug where, in versions of R before 3.2, Shiny applications could crash due to a bug in R's implementation of `list2env()`. (#1446)
 
 shiny 0.14.1
 ============
@@ -604,26 +639,26 @@ This is a maintenance release of Shiny, with some bug fixes and minor new featur
 
 ### Minor new features and improvements
 
-* Restored file inputs are now copied on restore, so that the restored application can't modify the bookmarked file. ([#1370](https://github.com/rstudio/shiny/issues/1370))
+* Restored file inputs are now copied on restore, so that the restored application can't modify the bookmarked file. (#1370)
 
-* Added support for plot interaction in the development version of ggplot2, 2.1.0.9000. Also added support for ggplot2 plots with `coord_flip()` (in the development version of ggplot2). ([hadley/ggplot2#1781](https://github.com/hadley/ggplot2/issues/1781), [#1392](https://github.com/rstudio/shiny/pull/1392))
+* Added support for plot interaction in the development version of ggplot2, 2.1.0.9000. Also added support for ggplot2 plots with `coord_flip()` (in the development version of ggplot2). ([hadley/ggplot2#1781](https://github.com/hadley/ggplot2/issues/1781), #1392)
 
 
 ### Bug fixes
 
-* Fixed [#1093](https://github.com/rstudio/shiny/issues/1093) better: `updateRadioButtons()` and `updateCheckboxGroupInput()` were not working correctly if the choices were given as a numeric vector. This had been solved in [#1291](https://github.com/rstudio/shiny/pull/1291), but that introduced a different bug [#1396](https://github.com/rstudio/shiny/issues/1396) that this better fix avoids. ([#1370](https://github.com/rstudio/shiny/pull/1397))
+* Fixed #1093 better: `updateRadioButtons()` and `updateCheckboxGroupInput()` were not working correctly if the choices were given as a numeric vector. This had been solved in #1291, but that introduced a different bug #1396 that this better fix avoids. (#1370)
 
-* Fixed [#1368](https://github.com/rstudio/shiny/issues/1368): If an app with a file input was bookmarked and restored, and then the restored app was bookmarked and restored (without uploading a new file), then it would fail to restore the file the second time. ([#1370](https://github.com/rstudio/shiny/pull/1370))
+* Fixed #1368: If an app with a file input was bookmarked and restored, and then the restored app was bookmarked and restored (without uploading a new file), then it would fail to restore the file the second time. (#1370)
 
-* Fixed [#1369](https://github.com/rstudio/shiny/issues/1369): `sliderInput()` did not allow showing numbers without a thousands separator.
+* Fixed #1369: `sliderInput()` did not allow showing numbers without a thousands separator.
 
-* Fixed [#1346](https://github.com/rstudio/shiny/issues/1346) and [#1107](https://github.com/rstudio/shiny/issues/1107) : jQuery UI's datepicker conflicted with the bootstrap-datepicker used by Shiny's `dateInput()` and `dateRangeInput()`. ([#1374](https://github.com/rstudio/shiny/pull/1374))
+* Fixed #1346 and #1107 : jQuery UI's datepicker conflicted with the bootstrap-datepicker used by Shiny's `dateInput()` and `dateRangeInput()`. (#1374)
 
 ### Library updates
 
-* Updated to bootstrap-datepicker 1.6.4. ([#1218](https://github.com/rstudio/shiny/issues/1218), [#1374](https://github.com/rstudio/shiny/pull/1374))
+* Updated to bootstrap-datepicker 1.6.4. (#1218, #1374)
 
-* Updated to jQuery UI 1.12.1. Previously, Shiny included a build of 1.11.4 which was missing the datepicker component due to a conflict with the bootstrap-datepicker used by Shiny's `dateInput()` and `dateRangeInput()`. ([#1374](https://github.com/rstudio/shiny/pull/1374))
+* Updated to jQuery UI 1.12.1. Previously, Shiny included a build of 1.11.4 which was missing the datepicker component due to a conflict with the bootstrap-datepicker used by Shiny's `dateInput()` and `dateRangeInput()`. (#1374)
 
 
 shiny 0.14
@@ -695,7 +730,7 @@ There are many more minor features, small improvements, and bug fixes than we ca
 
 *    **Error Sanitization**: you now have the option to sanitize error messages; in other words, the content of the original error message can be suppressed so that it doesn't leak any sensitive information. To sanitize errors everywhere in your app, just add `options(shiny.sanitize.errors = TRUE)` somewhere in your app. Read [this article](http://shiny.rstudio.com/articles/sanitize-errors.html) for more, or play with the [demo app](https://gallery.shinyapps.io/110-error-sanitization/).
 
-*    **Code Diagnostics**: if there is an error parsing `ui.R`, `server.R`, `app.R`, or `global.R`, Shiny will search the code for missing commas, extra commas, and unmatched braces, parens, and brackets, and will print out messages pointing out those problems. ([#1126](https://github.com/rstudio/shiny/pull/1126))
+*    **Code Diagnostics**: if there is an error parsing `ui.R`, `server.R`, `app.R`, or `global.R`, Shiny will search the code for missing commas, extra commas, and unmatched braces, parens, and brackets, and will print out messages pointing out those problems. (#1126)
 
 *    **Reactlog visualization**: by default, the [`showReactLog()` function](http://shiny.rstudio.com/reference/shiny/latest/reactlog.html) (which brings up the reactive graph) also displays the time that each reactive and observer were active for:
 
@@ -719,99 +754,99 @@ There are many more minor features, small improvements, and bug fixes than we ca
 
 ### Breaking changes
 
-* Progress indicators can now either use the new notification API, using `style = "notification"` (default), or be displayed with the previous styling, using `style = "old"`. You can also call `shinyOptions(progress.style = "old")` in the server function to make all progress indicators use the old styling. Note that if you had customized your progress indicators with additional CSS, you'll need to use the old style if you want your UI to look the same ([#1160](https://github.com/rstudio/shiny/pull/1160) and [#1329](https://github.com/rstudio/shiny/pull/1329)).
+* Progress indicators can now either use the new notification API, using `style = "notification"` (default), or be displayed with the previous styling, using `style = "old"`. You can also call `shinyOptions(progress.style = "old")` in the server function to make all progress indicators use the old styling. Note that if you had customized your progress indicators with additional CSS, you'll need to use the old style if you want your UI to look the same (#1160 and #1329).
 
-* Closed [#1161](https://github.com/rstudio/shiny/issues/1161): Deprecated the `position` argument to `tabsetPanel()` since Bootstrap 3 stopped supporting this feature.
+* Closed #1161: Deprecated the `position` argument to `tabsetPanel()` since Bootstrap 3 stopped supporting this feature.
 
 * The long-deprecated ability to pass a `func` argument to many of the `render` functions has been removed.
 
 ### New features
 
-* Added the ability to bookmark and restore application state. (main PR: [#1209](https://github.com/rstudio/shiny/pull/1209))
+* Added the ability to bookmark and restore application state. (main PR: #1209)
 
-* Added a new notification API. From R, there are new functions `showNotification` and `hideNotification`. From JavaScript, there is a new `Shiny.notification` object that controls notifications. ([#1141](https://github.com/rstudio/shiny/pull/1141))
+* Added a new notification API. From R, there are new functions `showNotification` and `hideNotification`. From JavaScript, there is a new `Shiny.notification` object that controls notifications. (#1141)
 
-* Progress indicators now use the notification API. ([#1160](https://github.com/rstudio/shiny/pull/1160))
+* Progress indicators now use the notification API. (#1160)
 
-* Added the ability for the client browser to reconnect to a new session on the server, by setting `session$allowReconnect(TRUE)`. This requires a version of Shiny Server that supports reconnections. ([#1074](https://github.com/rstudio/shiny/pull/1074))
+* Added the ability for the client browser to reconnect to a new session on the server, by setting `session$allowReconnect(TRUE)`. This requires a version of Shiny Server that supports reconnections. (#1074)
 
-* Added modal dialogs. ([#1157](https://github.com/rstudio/shiny/pull/1157))
+* Added modal dialogs. (#1157)
 
-* Added insertUI and removeUI functions to be able to add and remove chunks of UI, standalone, and all independent of one another. ([#1174](https://github.com/rstudio/shiny/pull/1174) and [#1189](https://github.com/rstudio/shiny/pull/1189))
+* Added insertUI and removeUI functions to be able to add and remove chunks of UI, standalone, and all independent of one another. (#1174 and #1189)
 
-* Improved `renderTable()` function to make the tables look prettier and also provide the user with a lot more parameters to customize their tables with. ([#1129](https://github.com/rstudio/shiny/pull/1129))
+* Improved `renderTable()` function to make the tables look prettier and also provide the user with a lot more parameters to customize their tables with. (#1129)
 
-* Added support for the `pool` package (use Shiny's timer/scheduler). ([#1226](https://github.com/rstudio/shiny/pull/1226))
+* Added support for the `pool` package (use Shiny's timer/scheduler). (#1226)
 
 ### Minor new features and improvements
 
-* Added `cancelOutput` argument to `req()`. This causes the currently executing reactive to cancel its execution, and leave its previous state alone (as opposed to clearing the output). ([#1272](https://github.com/rstudio/shiny/pull/1272))
+* Added `cancelOutput` argument to `req()`. This causes the currently executing reactive to cancel its execution, and leave its previous state alone (as opposed to clearing the output). (#1272)
 
-* `Display: Showcase` now displays the .js, .html and .css files in the `www` directory by default. In order to use showcase mode and not display these, include a new line in your Description file: `IncludeWWW: False`. ([#1185](https://github.com/rstudio/shiny/pull/1185))
+* `Display: Showcase` now displays the .js, .html and .css files in the `www` directory by default. In order to use showcase mode and not display these, include a new line in your Description file: `IncludeWWW: False`. (#1185)
 
-* Added an error sanitization option: `options(shiny.sanitize.errors = TRUE)`. By default, this option is `FALSE`. When `TRUE`, normal errors will be sanitized, displaying only a generic error message. This changes the look of an app when errors are printed (but the console log remains the same). ([#1156](https://github.com/rstudio/shiny/pull/1156))
+* Added an error sanitization option: `options(shiny.sanitize.errors = TRUE)`. By default, this option is `FALSE`. When `TRUE`, normal errors will be sanitized, displaying only a generic error message. This changes the look of an app when errors are printed (but the console log remains the same). (#1156)
 
-* Added the option of passing arguments to an `xxxOutput()` function through the corresponding `renderXXX()` function via an `outputArgs` parameter to the latter. This is only valid for snippets of Shiny code in an interactive `runtime: shiny` Rmd document (never for full apps, even if embedded in an Rmd). ([#1443](https://github.com/rstudio/shiny/pull/1143))
+* Added the option of passing arguments to an `xxxOutput()` function through the corresponding `renderXXX()` function via an `outputArgs` parameter to the latter. This is only valid for snippets of Shiny code in an interactive `runtime: shiny` Rmd document (never for full apps, even if embedded in an Rmd). (#1443)
 
-* Added `updateActionButton()` function, so the user can change an `actionButton`'s (or `actionLink`'s) label and/or icon. It also checks that the icon argument (for both creation and updating of a button) is valid and throws a warning otherwise. ([#1134](https://github.com/rstudio/shiny/pull/1134))
+* Added `updateActionButton()` function, so the user can change an `actionButton`'s (or `actionLink`'s) label and/or icon. It also checks that the icon argument (for both creation and updating of a button) is valid and throws a warning otherwise. (#1134)
 
-* Added code diagnostics: if there is an error parsing ui.R, server.R, app.R, or global.R, Shiny will search the code for missing commas, extra commas, and unmatched braces, parens, and brackets, and will print out messages pointing out those problems. ([#1126](https://github.com/rstudio/shiny/pull/1126))
+* Added code diagnostics: if there is an error parsing ui.R, server.R, app.R, or global.R, Shiny will search the code for missing commas, extra commas, and unmatched braces, parens, and brackets, and will print out messages pointing out those problems. (#1126)
 
-* Added support for horizontal dividers in `navbarMenu`. ([#1147](https://github.com/rstudio/shiny/pull/1147))
+* Added support for horizontal dividers in `navbarMenu`. (#1147)
 
-* Added `placeholder` option to `passwordInput`. ([#1152](https://github.com/rstudio/shiny/pull/1152))
+* Added `placeholder` option to `passwordInput`. (#1152)
 
-* Added `session$resetBrush(brushId)` (R) and `Shiny.resetBrush(brushId)` (JS) to programatically clear brushes from `imageOutput`/`plotOutput`. ([#1197](https://github.com/rstudio/shiny/pull/1197))
+* Added `session$resetBrush(brushId)` (R) and `Shiny.resetBrush(brushId)` (JS) to programatically clear brushes from `imageOutput`/`plotOutput`. (#1197)
 
-* Added textAreaInput. (thanks, [@nuno-agostinho](https://github.com/nuno-agostinho)! [#1300](https://github.com/rstudio/shiny/pull/1300))
+* Added textAreaInput. (thanks, [@nuno-agostinho](https://github.com/nuno-agostinho)! #1300)
 
-* Added `session$sendBinaryMessage(type, message)` method for sending custom binary data to the client. See `?session`. (thanks, [@daef](https://github.com/daef)! [#1316](https://github.com/rstudio/shiny/pull/1316) and [#1320](https://github.com/rstudio/shiny/pull/1320))
+* Added `session$sendBinaryMessage(type, message)` method for sending custom binary data to the client. See `?session`. (thanks, [@daef](https://github.com/daef)! #1316 and #1320)
 
-* Almost all code examples now have a runnable example with `shinyApp()`, so that users can run the examples and see them in action. ([#1158](https://github.com/rstudio/shiny/pull/1158))
+* Almost all code examples now have a runnable example with `shinyApp()`, so that users can run the examples and see them in action. (#1158)
 
-* When resized, plots are drawn with `replayPlot()`, instead of re-executing all plotting code. This results in faster plot rendering. ([#1112](https://github.com/rstudio/shiny/pull/1112))
+* When resized, plots are drawn with `replayPlot()`, instead of re-executing all plotting code. This results in faster plot rendering. (#1112)
 
-* Exported the `isTruthy()` function. (part of PR [#1272](https://github.com/rstudio/shiny/pull/1272))
+* Exported the `isTruthy()` function. (part of PR #1272)
 
-* Reactive log now shows elapsed time for reactives and observers. ([#1132](https://github.com/rstudio/shiny/pull/1132))
+* Reactive log now shows elapsed time for reactives and observers. (#1132)
 
-* Nodes in the reactlog visualization are now sticky if the user drags them. ([#1283](https://github.com/rstudio/shiny/pull/1283))
+* Nodes in the reactlog visualization are now sticky if the user drags them. (#1283)
 
 ### Bug fixes
 
-* Fixed [#1350](https://github.com/rstudio/shiny/issues/1350): Highlighting of reactives didn't work in showcase mode.
+* Fixed #1350: Highlighting of reactives didn't work in showcase mode.
 
-* Fixed [#1331](https://github.com/rstudio/shiny/issues/1331): `renderPlot()` now correctly records and replays plots when `execOnResize = FALSE`.
+* Fixed #1331: `renderPlot()` now correctly records and replays plots when `execOnResize = FALSE`.
 
-* `updateDateInput()` and `updateDateRangeInput()` can now clear the date input fields. (thanks, [@gaborcsardi](https://github.com/gaborcsardi)! [#1299](https://github.com/rstudio/shiny/pull/1299), [#1315](https://github.com/rstudio/shiny/pull/1315) and  [#1317](https://github.com/rstudio/shiny/pull/1317))
+* `updateDateInput()` and `updateDateRangeInput()` can now clear the date input fields. (thanks, [@gaborcsardi](https://github.com/gaborcsardi)! #1299, #1315 and  #1317)
 
-* Fixed [#561](https://github.com/rstudio/shiny/issues/561): DataTables previously might pop up a warning when the data was updated extremely frequently.
+* Fixed #561: DataTables previously might pop up a warning when the data was updated extremely frequently.
 
-* Fixed [#776](https://github.com/rstudio/shiny/issues/776): In some browsers, plots sometimes flickered when updated.
+* Fixed #776: In some browsers, plots sometimes flickered when updated.
 
-* Fixed [#543](https://github.com/rstudio/shiny/issues/543) and [#855](https://github.com/rstudio/shiny/issues/855): When `navbarPage()` had a `navbarMenu()` as the first item, it did not automatically select an item.
+* Fixed #543 and #855: When `navbarPage()` had a `navbarMenu()` as the first item, it did not automatically select an item.
 
-* Fixed [#970](https://github.com/rstudio/shiny/issues/970): `navbarPage()` previously did not have an option to set the selected tab.
+* Fixed #970: `navbarPage()` previously did not have an option to set the selected tab.
 
-* Fixed [#1253](https://github.com/rstudio/shiny/issues/1253): Memory could leak when an observer was destroyed without first being invalidated.
+* Fixed #1253: Memory could leak when an observer was destroyed without first being invalidated.
 
-* Fixed [#931](https://github.com/rstudio/shiny/issues/931): Nested observers could leak memory.
+* Fixed #931: Nested observers could leak memory.
 
-* Fixed [#1144](https://github.com/rstudio/shiny/issues/1144): `updateRadioButton()` and `updateCheckboxGroupInput()` broke controls when used in modules (thanks, [@sipemu](https://github.com/sipemu)!).
+* Fixed #1144: `updateRadioButton()` and `updateCheckboxGroupInput()` broke controls when used in modules (thanks, [@sipemu](https://github.com/sipemu)!).
 
-* Fixed [#1093](https://github.com/rstudio/shiny/issues/1093): `updateRadioButtons()` and `updateCheckboxGroupInput()` didn't work if `choices` was numeric vector.
+* Fixed #1093: `updateRadioButtons()` and `updateCheckboxGroupInput()` didn't work if `choices` was numeric vector.
 
-* Fixed [#1122](https://github.com/rstudio/shiny/issues/1122): `downloadHandler()` popped up empty browser window if the file wasn't present. It now gives a 404 error code.
+* Fixed #1122: `downloadHandler()` popped up empty browser window if the file wasn't present. It now gives a 404 error code.
 
-* Fixed [#1278](https://github.com/rstudio/shiny/issues/1278): Reactive system was being flushed too often (usually this just means a more-expensive no-op than necessary).
+* Fixed #1278: Reactive system was being flushed too often (usually this just means a more-expensive no-op than necessary).
 
-* Fixed [#803](https://github.com/rstudio/shiny/issues/803) and [#1179](https://github.com/rstudio/shiny/issues/1179): handling malformed dates in `dateInput` and `updateDateInput()`.
+* Fixed #803 and #1179: handling malformed dates in `dateInput` and `updateDateInput()`.
 
-* Fixed [#1257](https://github.com/rstudio/shiny/issues/1257): `updateSelectInput()` didn't work correctly in IE 11 and Edge.
+* Fixed #1257: `updateSelectInput()` didn't work correctly in IE 11 and Edge.
 
-* Fixed [#971](https://github.com/rstudio/shiny/issues/971): `runApp()` would give confusing error if `port` was not numeric.
+* Fixed #971: `runApp()` would give confusing error if `port` was not numeric.
 
-* Shiny now avoids using ports that Chrome deems unsafe. ([#1222](https://github.com/rstudio/shiny/pull/1222))
+* Shiny now avoids using ports that Chrome deems unsafe. (#1222)
 
 * Added workaround for quartz graphics device resolution bug, where resolution is hard-coded to 72 ppi.
 

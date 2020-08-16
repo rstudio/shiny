@@ -150,6 +150,7 @@
 #'   `"app"` (the default), `"session"`, or a cache object like
 #'   a [diskCache()]. See the Cache Scoping section for more
 #'   information.
+#' @param alt Optional parameter to pass `alt` to the img-tag.
 #'
 #' @seealso See [renderPlot()] for the regular, non-cached version of
 #'   this function. For more about configuring caches, see
@@ -293,6 +294,7 @@ renderCachedPlot <- function(expr,
   cacheKeyExpr,
   sizePolicy = sizeGrowthRatio(width = 400, height = 400, growthRate = 1.2),
   res = 72,
+  alt = "Plot object",
   cache = "app",
   ...,
   outputArgs = list()
@@ -398,6 +400,8 @@ renderCachedPlot <- function(expr,
             func = isolatedFunc,
             width = width,
             height = height,
+#jy: default to title when NULL
+            alt = alt,
             pixelratio = pixelratio,
             res = res
           ),
@@ -471,6 +475,8 @@ renderCachedPlot <- function(expr,
               plotObj = drawReactiveResult,
               width = width,
               height = height,
+#jy: default to title when NULL
+            alt = alt,
               pixelratio = pixelratio
             )
           }
@@ -500,6 +506,7 @@ renderCachedPlot <- function(expr,
                 result$plotObj,
                 width,
                 height,
+                alt,
                 pixelratio,
                 res
               ),

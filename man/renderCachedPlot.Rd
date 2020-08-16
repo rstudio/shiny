@@ -9,6 +9,7 @@ renderCachedPlot(
   cacheKeyExpr,
   sizePolicy = sizeGrowthRatio(width = 400, height = 400, growthRate = 1.2),
   res = 72,
+  alt = "Plot object",
   cache = "app",
   ...,
   outputArgs = list()
@@ -29,6 +30,8 @@ possible pixel dimension. See \code{\link[=sizeGrowthRatio]{sizeGrowthRatio()}} 
 information on the default sizing policy.}
 
 \item{res}{The resolution of the PNG, in pixels per inch.}
+
+\item{alt}{Optional parameter to pass \code{alt} to the img-tag.}
 
 \item{cache}{The scope of the cache, or a cache object. This can be
 \code{"app"} (the default), \code{"session"}, or a cache object like

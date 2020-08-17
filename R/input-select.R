@@ -246,23 +246,22 @@ selectizeCSSFile <- function() {
   bootstraplib::bootstrap_sass(
     output = file.path(tmpdir, "selectize-custom.css"),
     rules = list(
-      # For some reason the selectize.bootstrap.scss hard codes these values
-      # assuming a normal white bg black fg theme...these are better default values
-      if (is_bs3) {
-        list(
-          "selectize-color-item" = "$gray-lighter !default;",
-          "selectize-color-item-border" = "$gray-light !default;",
-          "selectize-color-item-active-text" = "$white !default;",
-          "selectize-color-item-active-border" = "$gray-base !default;"
-        )
-      } else {
-        list(
-          "selectize-color-item" = "gray('100') !default;",
-          "selectize-color-item-border" = "gray('400') !default;",
-          "selectize-color-item-active-text" = "$white !default;",
-          "selectize-color-item-active-border" = "$black !default;"
-        )
-      },
+      # Some bootswatch themes such as darkly or cyborg have inverted input/dropdown colors,
+      # which presents some problems for selectize's CSS (it's not designed to handle two drastically
+      # different bg/fg color models). A reasonable way to workaround this that can work consistently with
+      # bs_theme_base_colors() is to have the "input" colors derive from dropdown colors
+      list(
+        # BS3 doesn't have a $dropdown-color, so use $text-color in that case
+        "dropdown-color" = "$text-color !default",
+        "selectize-color-text" = "$dropdown-color !default",
+        "selectize-color-input" = "$dropdown-bg !default",
+        "selectize-color-input-full" = "$dropdown-bg !default",
+        # BS3 doesn't have a $dropdown-border-width
+        "dropdown-border-width" = "1px !default",
+        "selectize-border" = "$dropdown-border-width solid $selectize-color-text !default",
+        "selectize-color-item" = "mix($selectize-color-input, $selectize-color-text, 70%) !default;",
+        "selectize-color-item-active-text" = "$component-active-color !default;"
+      ),
       sass::sass_file(scss_file)
     ),
     options = sass::sass_options(output_style = "compressed")

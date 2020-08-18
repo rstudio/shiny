@@ -76,6 +76,13 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, alt="Plot obje
   else
     heightWrapper <- function() { height }
 
+  if (is.reactive(alt))
+    altWrapper <- alt
+  else if (is.function(alt))
+    altWrapper <- reactive({ alt() })
+  else
+    altWrapper <- function() { alt }
+
   getDims <- function() {
     width <- widthWrapper()
     height <- heightWrapper()

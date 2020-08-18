@@ -31,9 +31,12 @@ information on the default sizing policy.}
 
 \item{res}{The resolution of the PNG, in pixels per inch.}
 
-\item{alt}{Descriptive text for a plot object. The default is "Plot object".
-Dynamic alt text can be made when reactive function is passed.
-(NULL or "" is not recommended because those should be limited to decorative images)}
+\item{alt}{Alternate text for the HTML \verb{<img>} tag
+if it cannot be displayed or viewed (i.e., the user uses a screen reader).
+In addition to a character string, the value may be a reactive expression
+(or a function referencing reactive values) that returns a character string.
+NULL or "" is not recommended because those should be limited to decorative images
+(the default is "Plot object").}
 
 \item{cache}{The scope of the cache, or a cache object. This can be
 \code{"app"} (the default), \code{"session"}, or a cache object like

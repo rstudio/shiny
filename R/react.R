@@ -140,9 +140,13 @@ ReactiveEnvironment <- R6Class(
         if (isTRUE(getOption('shiny.suppressMissingContextError'))) {
           return(getDummyContext())
         } else {
-          stop('Operation not allowed without an active reactive context. ',
-               '(You tried to do something that can only be done from inside a ',
-               'reactive expression or observer.)')
+          rlang::abort(c(
+            'Operation not allowed without an active reactive context.',
+            paste0(
+              'You tried to do something that can only be done from inside a ',
+              'reactive consumer.'
+            )
+          ))
         }
       }
       return(.currentContext)

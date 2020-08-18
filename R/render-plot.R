@@ -113,7 +113,7 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, alt="Plot obje
             func = func,
             width = dims$width,
             height = dims$height,
-            alt = alt,
+            alt = altWrapper(),
             pixelratio = pixelratio,
             res = res
           ), args))

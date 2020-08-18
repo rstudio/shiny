@@ -150,7 +150,9 @@
 #'   `"app"` (the default), `"session"`, or a cache object like
 #'   a [diskCache()]. See the Cache Scoping section for more
 #'   information.
-#' @param alt Optional parameter to pass `alt` to the img-tag.
+#' @param alt Descriptive text for a plot object. The default is "Plot object".
+#'   Dynamic alt text can be made when reactive function is passed.
+#'   (NULL or "" is not recommended because those should be limited to decorative images)
 #'
 #' @seealso See [renderPlot()] for the regular, non-cached version of
 #'   this function. For more about configuring caches, see

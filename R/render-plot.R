@@ -36,7 +36,9 @@
 #' @param res Resolution of resulting plot, in pixels per inch. This value is
 #'   passed to [grDevices::png()]. Note that this affects the resolution of PNG
 #'   rendering in R; it won't change the actual ppi of the browser.
-#' @param alt Optional parameter to pass `alt` to the img-tag.
+#' @param alt Descriptive text for a plot object. The default is "Plot object".
+#'   Dynamic alt text can be made when reactive function is passed.
+#'   (NULL or "" is not recommended because those should be limited to decorative images)
 #' @param ... Arguments to be passed through to [grDevices::png()].
 #'   These can be used to set the width, height, background color, etc.
 #' @param env The environment in which to evaluate `expr`.

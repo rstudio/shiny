@@ -142,7 +142,7 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, alt="Plot obje
         dims <- getDims()
         pixelratio <- session$clientData$pixelratio %OR% 1
         result <- do.call("resizeSavedPlot", c(
-          list(name, shinysession, result, dims$width, dims$height, alt, pixelratio, res),
+          list(name, shinysession, result, dims$width, dims$height, altWrapper(), pixelratio, res),
           args
         ))
 

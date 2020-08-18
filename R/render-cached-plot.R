@@ -476,7 +476,7 @@ renderCachedPlot <- function(expr,
               width = width,
               height = height,
 #jy: default to title when NULL
-            alt = alt,
+              alt = alt,
               pixelratio = pixelratio
             )
           }

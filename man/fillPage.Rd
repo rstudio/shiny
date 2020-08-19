@@ -32,7 +32,9 @@ shown in the document).}
 
 \item{theme}{URL to alternative Bootstrap stylesheet.}
 
-\item{lang}{ISO 639-1 language code used within the shiny app. Default is set to empty value.}
+\item{lang}{ISO 639-1 language code for the HTML page, such as "en" or "ko".
+This will be used as the lang in the \code{<html>} tag, as in \code{<html lang="en">}.
+The default (NULL) results in an empty string.}
 }
 \description{
 \code{fillPage} creates a page whose height and width always fill the

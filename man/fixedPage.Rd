@@ -21,7 +21,9 @@ Bootstrap 3.}
 www directory). For example, to use the theme located at
 \code{www/bootstrap.css} you would use \code{theme = "bootstrap.css"}.}
 
-\item{lang}{ISO 639-1 language code used within the shiny app. Default is set to empty value.}
+\item{lang}{ISO 639-1 language code for the HTML page, such as "en" or "ko".
+This will be used as the lang in the \code{<html>} tag, as in \code{<html lang="en">}.
+The default (NULL) results in an empty string.}
 }
 \value{
 A UI defintion that can be passed to the \link{shinyUI} function.

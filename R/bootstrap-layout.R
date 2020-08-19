@@ -16,7 +16,9 @@
 #' @param theme Alternative Bootstrap stylesheet (normally a css file within the
 #'   www directory). For example, to use the theme located at
 #'   `www/bootstrap.css` you would use `theme = "bootstrap.css"`.
-#' @param lang ISO 639-1 language code used within the shiny app. Default is set to empty value.
+#' @param lang ISO 639-1 language code for the HTML page, such as "en" or "ko".
+#'   This will be used as the lang in the \code{<html>} tag, as in \code{<html lang="en">}.
+#'   The default (NULL) results in an empty string.
 #'
 #' @return A UI defintion that can be passed to the [shinyUI] function.
 #'
@@ -120,7 +122,9 @@ fluidRow <- function(...) {
 #' @param theme Alternative Bootstrap stylesheet (normally a css file within the
 #'   www directory). For example, to use the theme located at
 #'   `www/bootstrap.css` you would use `theme = "bootstrap.css"`.
-#' @param lang ISO 639-1 language code used within the shiny app. Default is set to empty value.
+#' @param lang ISO 639-1 language code for the HTML page, such as "en" or "ko".
+#'   This will be used as the lang in the \code{<html>} tag, as in \code{<html lang="en">}.
+#'   The default (NULL) results in an empty string.
 #'
 #' @return A UI defintion that can be passed to the [shinyUI] function.
 #'

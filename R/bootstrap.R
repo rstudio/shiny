@@ -18,7 +18,9 @@ NULL
 #'   Bootstrap 3.
 #' @param theme Alternative Bootstrap stylesheet (normally a css file within the
 #'   www directory, e.g. `www/bootstrap.css`)
-#' @param lang ISO 639-1 language code used within the shiny app. Default is set to empty value.
+#' @param lang ISO 639-1 language code for the HTML page, such as "en" or "ko".
+#'   This will be used as the lang in the \code{<html>} tag, as in \code{<html lang="en">}.
+#'   The default (NULL) results in an empty string.
 #'
 #' @return A UI defintion that can be passed to the [shinyUI] function.
 #'
@@ -50,10 +52,7 @@ bootstrapPage <- function(..., title = NULL, responsive = NULL, theme = NULL, la
   if (!is.null(lang)) {
     if (is.character(lang) && length(lang) == 1) {
       # Append lang attribute to be passed to renderPage function
-      attributes(ui) <- c(attributes(ui), list(lang = lang))
-    } else {
-      warning("Invalid lang value: defaulting to empty string.")
-      attributes(ui) <- c(attributes(ui), list(lang = NULL))
+      attr(ui, "lang") <- lang
     }
   }
 
@@ -95,8 +94,8 @@ bootstrapLib <- function(theme = NULL) {
 
 #' @rdname bootstrapPage
 #' @export
-basicPage <- function(...) {
-  bootstrapPage(div(class="container-fluid", list(...)))
+basicPage <- function(..., lang = NULL) {
+  bootstrapPage(div(class="container-fluid", list(...)), lang = lang)
 }
 
 
@@ -146,7 +145,9 @@ basicPage <- function(...) {
 #'   shown in the document).
 #' @param bootstrap If `TRUE`, load the Bootstrap CSS library.
 #' @param theme URL to alternative Bootstrap stylesheet.
-#' @param lang ISO 639-1 language code used within the shiny app. Default is set to empty value.
+#' @param lang ISO 639-1 language code for the HTML page, such as "en" or "ko".
+#'   This will be used as the lang in the \code{<html>} tag, as in \code{<html lang="en">}.
+#'   The default (NULL) results in an empty string.
 #'
 #' @family layout functions
 #'
@@ -181,25 +182,20 @@ fillPage <- function(..., padding = 0, title = NULL, bootstrap = TRUE,
     sprintf("body { padding: %s; margin: 0; }", collapseSizes(padding))
   ))
 
-  ui <- if (isTRUE(bootstrap)) {
-    bootstrapPage(title = title, theme = theme, fillCSS, lang = lang, ...)
+  if (isTRUE(bootstrap)) {
+    ui <- bootstrapPage(title = title, theme = theme, fillCSS, lang = lang, ...)
   } else {
-    tagList(
+    ui <- tagList(
       fillCSS,
       if (!is.null(title)) tags$head(tags$title(title)),
       ...
     )
-  }
 
-  # Also store `lang` to be passed for rendering processor.
-  if (!isTRUE(bootstrap)) {
+    # Also store `lang` to be passed for rendering processor.
     if (!is.null(lang)) {
       if (is.character(lang) && length(lang) == 1) {
         # Append lang attribute to be passed to renderPage function
-        attributes(ui) <- c(attributes(ui), list(lang = lang))
-      } else {
-        warning("Invalid lang value: defaulting to empty string.")
-        attributes(ui) <- c(attributes(ui), list(lang = NULL))
+        attr(ui, "lang") <- lang
       }
     }
   }
@@ -256,7 +252,9 @@ collapseSizes <- function(padding) {
 #'   `www/bootstrap.css` you would use `theme = "bootstrap.css"`.
 #' @param windowTitle The title that should be displayed by the browser window.
 #'   Useful if `title` is not a string.
-#' @param lang ISO 639-1 language code used within the shiny app. Default is set to empty value.
+#' @param lang ISO 639-1 language code for the HTML page, such as "en" or "ko".
+#'   This will be used as the lang in the \code{<html>} tag, as in \code{<html lang="en">}.
+#'   The default (NULL) results in an empty string.
 #' @param icon Optional icon to appear on a `navbarMenu` tab.
 #'
 #' @return A UI defintion that can be passed to the [shinyUI] function.

@@ -27,7 +27,7 @@ withMathJax <- function(...) {
 renderPage <- function(ui, showcase=0, testMode=FALSE) {
   # Check if ui has lang attribute; otherwise, NULL
   lang <- if ("lang" %in% names(attributes(ui))) {
-    attributes(ui)$lang
+    attr(ui, "lang")
   } else {
     NULL
   }

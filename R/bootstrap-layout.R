@@ -355,6 +355,8 @@ sidebarLayout <- function(sidebarPanel,
 sidebarPanel <- function(..., width = 4) {
   div(class=paste0("col-sm-", width),
     tags$form(class="well",
+      # A11y semantic landmark for sidebar
+      role="complementary",
       ...
     )
   )
@@ -364,6 +366,8 @@ sidebarPanel <- function(..., width = 4) {
 #' @rdname sidebarLayout
 mainPanel <- function(..., width = 8) {
   div(class=paste0("col-sm-", width),
+          # A11y semantic landmark for main region
+    role="main",
     ...
   )
 }

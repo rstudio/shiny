@@ -16,7 +16,7 @@ shiny 1.5.0.9000
 
 * Closed #2847: `selectInput()` is reasonably accessible for screen readers even when `selectize` option is set to TRUE. To improve `selectize.js` accessibility, We have added [selectize-plugin-a11y](https://github.com/SLMNBJ/selectize-plugin-a11y) by default. (#2993)
 
-* Added semantic landmarks for `mainPanel()` and `sidebarPanel()` so that assistive technologies can recognize them as "main" and "complementary" region respectively.
+* Added semantic landmarks for `mainPanel()` and `sidebarPanel()` so that assistive technologies can recognize them as "main" and "complementary" region respectively. (#3009)
 
 ### Minor new features and improvements
 

@@ -2,6 +2,8 @@
 shiny 1.5.0.9000
 ================
 
+## Full changelog
+
 ### Accessibility
 
 * Added [bootstrap accessibility plugin](https://github.com/paypal/bootstrap-accessibility-plugin) under the hood to improve accessibility of shiny apps for screen-reader and keyboard users: the enhancements include better navigations for alert, tooltip, popover, modal dialog, dropdown, tab Panel, collapse, and carousel elements. (#2911)
@@ -11,6 +13,8 @@ shiny 1.5.0.9000
 * Closed #2929: Fixed keyboard accessibility for file picker button: keyboard users can now tab to focus on `fileInput()` widget. (#2937)
 
 * Fixed #2951: screen readers correctly announce labels and date formats for `dateInput()` and `dateRangeInput()` widgets. (#2978)
+
+* Closed #2844: Added `lang` argument to ui `*Page()` functions (e.g., `fluidPage`, `bootstrapPage`) that specifies document-level language within the app for the accessibility of screen readers and search-engine parsers. By default, it is set to empty string which is commonly recognized as a browser's default locale.
 
 ### Minor new features and improvements
 

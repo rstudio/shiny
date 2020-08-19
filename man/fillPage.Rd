@@ -4,7 +4,14 @@
 \alias{fillPage}
 \title{Create a page that fills the window}
 \usage{
-fillPage(..., padding = 0, title = NULL, bootstrap = TRUE, theme = NULL)
+fillPage(
+  ...,
+  padding = 0,
+  title = NULL,
+  bootstrap = TRUE,
+  theme = NULL,
+  lang = NULL
+)
 }
 \arguments{
 \item{...}{Elements to include within the page.}
@@ -24,6 +31,8 @@ shown in the document).}
 \item{bootstrap}{If \code{TRUE}, load the Bootstrap CSS library.}
 
 \item{theme}{URL to alternative Bootstrap stylesheet.}
+
+\item{lang}{ISO 639-1 language code used within the shiny app. Default is set to empty value.}
 }
 \description{
 \code{fillPage} creates a page whose height and width always fill the

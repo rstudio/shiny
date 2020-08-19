@@ -38,7 +38,6 @@
 #'   for more information on bookmarking your app.
 #' @return An object that represents the app. Printing the object or passing it
 #'   to [runApp()] will run the app.
-#' @param lang ISO 639-1 language code used within the shiny app. Default is set to empty value.
 #'
 #' @examples
 #' ## Only run this example in interactive R sessions
@@ -73,7 +72,7 @@
 #' }
 #' @export
 shinyApp <- function(ui, server, onStart=NULL, options=list(),
-                     uiPattern="/", enableBookmarking=NULL, lang=NULL) {
+                     uiPattern="/", enableBookmarking=NULL) {
   if (!is.function(server)) {
     stop("`server` must be a function", call. = FALSE)
   }
@@ -96,16 +95,6 @@ shinyApp <- function(ui, server, onStart=NULL, options=list(),
   # from within the app.
   shinyOptions(appDir = getwd())
   appOptions <- consumeAppOptions()
-
-  # Also store `lang` option to be passed for rendering processors.
-  if (!is.null(lang)) {
-    if (is.character(lang) && length(lang) == 1) {
-      shinyOptions(appLang = lang)
-    } else {
-      warning("Invalid lang value inserted: defaulting to empty string.")
-      lang <- NULL
-    }
-  }
 
   structure(
     list(

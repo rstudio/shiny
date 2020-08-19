@@ -12,8 +12,7 @@ shinyApp(
   onStart = NULL,
   options = list(),
   uiPattern = "/",
-  enableBookmarking = NULL,
-  lang = NULL
+  enableBookmarking = NULL
 )
 
 shinyAppDir(appDir, options = list())
@@ -50,8 +49,6 @@ expression in order for the match to be considered successful.}
 \code{"disable"}. The default value, \code{NULL}, will respect the setting from
 any previous calls to  \code{\link[=enableBookmarking]{enableBookmarking()}}. See \code{\link[=enableBookmarking]{enableBookmarking()}}
 for more information on bookmarking your app.}
-
-\item{lang}{ISO 639-1 language code used within the shiny app. Default is set to empty value.}
 
 \item{appDir}{Path to directory that contains a Shiny app (i.e. a server.R
 file and either ui.R or www/index.html)}

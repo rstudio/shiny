@@ -5,7 +5,7 @@
 \alias{basicPage}
 \title{Create a Bootstrap page}
 \usage{
-bootstrapPage(..., title = NULL, responsive = NULL, theme = NULL)
+bootstrapPage(..., title = NULL, responsive = NULL, theme = NULL, lang = NULL)
 
 basicPage(...)
 }
@@ -19,6 +19,8 @@ Bootstrap 3.}
 
 \item{theme}{Alternative Bootstrap stylesheet (normally a css file within the
 www directory, e.g. \code{www/bootstrap.css})}
+
+\item{lang}{ISO 639-1 language code used within the shiny app. Default is set to empty value.}
 }
 \value{
 A UI defintion that can be passed to the \link{shinyUI} function.

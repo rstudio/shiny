@@ -25,6 +25,13 @@ withMathJax <- function(...) {
 }
 
 renderPage <- function(ui, showcase=0, testMode=FALSE) {
+  # Check if ui has lang attribute; otherwise, NULL
+  lang <- if ("lang" %in% names(attributes(ui))) {
+    attributes(ui)$lang
+  } else {
+    NULL
+  }
+
   # If the ui is a NOT complete document (created by htmlTemplate()), then do some
   # preprocessing and make sure it's a complete document.
   if (!inherits(ui, "html_document")) {
@@ -38,7 +45,7 @@ renderPage <- function(ui, showcase=0, testMode=FALSE) {
     # Put the body into the default template
     ui <- htmlTemplate(
       system.file("template", "default.html", package = "shiny"),
-      lang = getShinyOption("appLang"),
+      lang = lang,
       body = ui
     )
   }

@@ -18,6 +18,7 @@ NULL
 #'   Bootstrap 3.
 #' @param theme Alternative Bootstrap stylesheet (normally a css file within the
 #'   www directory, e.g. `www/bootstrap.css`)
+#' @param lang ISO 639-1 language code used within the shiny app. Default is set to empty value.
 #'
 #' @return A UI defintion that can be passed to the [shinyUI] function.
 #'
@@ -26,13 +27,13 @@ NULL
 #'
 #' @seealso [fluidPage()], [fixedPage()]
 #' @export
-bootstrapPage <- function(..., title = NULL, responsive = NULL, theme = NULL) {
+bootstrapPage <- function(..., title = NULL, responsive = NULL, theme = NULL, lang = NULL) {
 
   if (!is.null(responsive)) {
     shinyDeprecated("The 'responsive' argument is no longer used with Bootstrap 3.")
   }
 
-  attachDependencies(
+  ui <- attachDependencies(
     tagList(
       if (!is.null(title)) tags$head(tags$title(title)),
       if (!is.null(theme)) {
@@ -44,6 +45,19 @@ bootstrapPage <- function(..., title = NULL, responsive = NULL, theme = NULL) {
     ),
     bootstrapLib()
   )
+
+  # Also store `lang` to be passed for rendering processor.
+  if (!is.null(lang)) {
+    if (is.character(lang) && length(lang) == 1) {
+      # Append lang attribute to be passed to renderPage function
+      attributes(ui) <- c(attributes(ui), list(lang = lang))
+    } else {
+      warning("Invalid lang value: defaulting to empty string.")
+      attributes(ui) <- c(attributes(ui), list(lang = NULL))
+    }
+  }
+
+  return(ui)
 }
 
 #' Bootstrap libraries
@@ -132,6 +146,7 @@ basicPage <- function(...) {
 #'   shown in the document).
 #' @param bootstrap If `TRUE`, load the Bootstrap CSS library.
 #' @param theme URL to alternative Bootstrap stylesheet.
+#' @param lang ISO 639-1 language code used within the shiny app. Default is set to empty value.
 #'
 #' @family layout functions
 #'
@@ -159,15 +174,15 @@ basicPage <- function(...) {
 #' )
 #' @export
 fillPage <- function(..., padding = 0, title = NULL, bootstrap = TRUE,
-  theme = NULL) {
+  theme = NULL, lang = NULL) {
 
   fillCSS <- tags$head(tags$style(type = "text/css",
     "html, body { width: 100%; height: 100%; overflow: hidden; }",
     sprintf("body { padding: %s; margin: 0; }", collapseSizes(padding))
   ))
 
-  if (isTRUE(bootstrap)) {
-    bootstrapPage(title = title, theme = theme, fillCSS, ...)
+  ui <- if (isTRUE(bootstrap)) {
+    bootstrapPage(title = title, theme = theme, fillCSS, lang = lang, ...)
   } else {
     tagList(
       fillCSS,
@@ -175,6 +190,21 @@ fillPage <- function(..., padding = 0, title = NULL, bootstrap = TRUE,
       ...
     )
   }
+
+  # Also store `lang` to be passed for rendering processor.
+  if (isFALSE(bootstrap)) {
+    if (!is.null(lang)) {
+      if (is.character(lang) && length(lang) == 1) {
+        # Append lang attribute to be passed to renderPage function
+        attributes(ui) <- c(attributes(ui), list(lang = lang))
+      } else {
+        warning("Invalid lang value: defaulting to empty string.")
+        attributes(ui) <- c(attributes(ui), list(lang = NULL))
+      }
+    }
+  }
+
+  return(ui)
 }
 
 collapseSizes <- function(padding) {
@@ -226,6 +256,7 @@ collapseSizes <- function(padding) {
 #'   `www/bootstrap.css` you would use `theme = "bootstrap.css"`.
 #' @param windowTitle The title that should be displayed by the browser window.
 #'   Useful if `title` is not a string.
+#' @param lang ISO 639-1 language code used within the shiny app. Default is set to empty value.
 #' @param icon Optional icon to appear on a `navbarMenu` tab.
 #'
 #' @return A UI defintion that can be passed to the [shinyUI] function.
@@ -270,7 +301,8 @@ navbarPage <- function(title,
                        fluid = TRUE,
                        responsive = NULL,
                        theme = NULL,
-                       windowTitle = title) {
+                       windowTitle = title,
+                       lang = NULL) {
 
   if (!missing(collapsable)) {
     shinyDeprecated("`collapsable` is deprecated; use `collapsible` instead.")
@@ -341,6 +373,7 @@ navbarPage <- function(title,
     title = windowTitle,
     responsive = responsive,
     theme = theme,
+    lang = lang,
     tags$nav(class=navbarClass, role="navigation", containerDiv),
     contentDiv
   )

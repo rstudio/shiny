@@ -19,7 +19,8 @@ navbarPage(
   fluid = TRUE,
   responsive = NULL,
   theme = NULL,
-  windowTitle = title
+  windowTitle = title,
+  lang = NULL
 )
 
 navbarMenu(title, ..., menuName = title, icon = NULL)
@@ -76,6 +77,8 @@ www directory). For example, to use the theme located at
 
 \item{windowTitle}{The title that should be displayed by the browser window.
 Useful if \code{title} is not a string.}
+
+\item{lang}{ISO 639-1 language code used within the shiny app. Default is set to empty value.}
 
 \item{menuName}{A name that identifies this \code{navbarMenu}. This
 is needed if you want to insert/remove or show/hide an entire

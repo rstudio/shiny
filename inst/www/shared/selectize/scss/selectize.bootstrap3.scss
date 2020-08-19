@@ -18,22 +18,23 @@ $selectize-font-family: inherit !default;
 $selectize-font-size: inherit !default;
 $selectize-line-height: $line-height-computed !default;
 
-$selectize-color-text: $text-color !default;
+$selectize-color-text: $input-color !default;
 $selectize-color-highlight: rgba(255,237,40,0.4) !default;
 $selectize-color-input: $input-bg !default;
 $selectize-color-input-full: $input-bg !default;
 $selectize-color-input-error: $state-danger-text !default;
 $selectize-color-input-error-focus: darken($selectize-color-input-error, 10%) !default;
 $selectize-color-disabled: $input-bg !default;
-$selectize-color-item: #efefef !default;
+$selectize-color-item: mix($selectize-color-input, $selectize-color-text, 80%) !default;
 $selectize-color-item-border: rgba(black, 0) !default;
 $selectize-color-item-active: $component-active-bg !default;
-$selectize-color-item-active-text: #fff !default;
+$selectize-color-item-active-text: $component-active-color !default;
 $selectize-color-item-active-border: rgba(black, 0) !default;
 $selectize-color-optgroup: $dropdown-bg !default;
 $selectize-color-optgroup-text: $dropdown-header-color !default;
 $selectize-color-optgroup-border: $dropdown-divider-bg !default;
 $selectize-color-dropdown: $dropdown-bg !default;
+$selectize-color-dropdown-text: $dropdown-link-color !default;
 $selectize-color-dropdown-border-top: mix($input-border, $input-bg, 0.8) !default;
 $selectize-color-dropdown-item-active: $dropdown-link-hover-bg !default;
 $selectize-color-dropdown-item-active-text: $dropdown-link-hover-color !default;
@@ -63,12 +64,19 @@ $selectize-arrow-offset: $selectize-padding-x + 5px !default;
 
 @import "selectize";
 
+//Import Plugins
+@import "plugins/drag_drop";
+@import "plugins/dropdown_header";
+@import "plugins/optgroup_columns";
+@import "plugins/remove_button";
+
 .selectize-dropdown, .selectize-dropdown.form-control {
     height: auto;
     padding: 0;
     margin: 2px 0 0 0;
     z-index: $zindex-dropdown;
     background: $selectize-color-dropdown;
+    color: $selectize-color-dropdown-text;
     border: 1px solid $dropdown-fallback-border;
     border: 1px solid $dropdown-border;
     @include selectize-border-radius ($border-radius-base);

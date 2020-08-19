@@ -235,38 +235,18 @@ selectizeCSSFile <- function() {
   }
   # Compile selectize Sass against the active bootstraplib theme
   scss <- system.file(package = "shiny", "www", "shared", "selectize", "scss")
-  is_bs3 <- "3" %in% bootstraplib::theme_version()
-  scss_file <- if (is_bs3) {
+  scss_file <- if ("3" %in% bootstraplib::theme_version()) {
     file.path(scss, "selectize.bootstrap3.scss")
   } else {
     file.path(scss, "selectize.bootstrap4.scss")
   }
-  tmpdir <- tempfile("selectize-custom")
-  dir.create(tmpdir)
+  tmpfile <- tempfile(fileext = ".css")
   bootstraplib::bootstrap_sass(
-    output = file.path(tmpdir, "selectize-custom.css"),
-    rules = list(
-      # Some bootswatch themes such as darkly or cyborg have inverted input/dropdown colors,
-      # which presents some problems for selectize's CSS (it's not designed to handle two drastically
-      # different bg/fg color models). A reasonable way to workaround this that can work consistently with
-      # bs_theme_base_colors() is to have the "input" colors derive from dropdown colors
-      list(
-        # BS3 doesn't have a $dropdown-color, so use $text-color in that case
-        "dropdown-color" = "$text-color !default",
-        "selectize-color-text" = "$dropdown-color !default",
-        "selectize-color-input" = "$dropdown-bg !default",
-        "selectize-color-input-full" = "$dropdown-bg !default",
-        # BS3 doesn't have a $dropdown-border-width
-        "dropdown-border-width" = "1px !default",
-        "selectize-border" = "$dropdown-border-width solid $selectize-color-text !default",
-        "selectize-color-item" = "mix($selectize-color-input, $selectize-color-text, 70%) !default;",
-        "selectize-color-item-active-text" = "$component-active-color !default;"
-      ),
-      sass::sass_file(scss_file)
-    ),
+    output = tmpfile,
+    rules = sass::sass_file(scss_file),
     options = sass::sass_options(output_style = "compressed")
   )
-  list(file = tmpdir, stylesheet = "selectize-custom.css")
+  list(file = dirname(tmpfile), stylesheet = basename(tmpfile))
 }
 
 

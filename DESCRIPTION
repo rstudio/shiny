@@ -105,6 +105,7 @@ Suggests:
     dygraphs,
     ragg,
     showtext,
+    sass,
     bootstraplib
 Remotes: rstudio/bootstraplib
 URL: http://shiny.rstudio.com

@@ -14,7 +14,9 @@ shiny 1.5.0.9000
 
 * Fixed #2951: screen readers correctly announce labels and date formats for `dateInput()` and `dateRangeInput()` widgets. (#2978)
 
-* Closed #2844: Added `lang` argument to ui `*Page()` functions (e.g., `fluidPage`, `bootstrapPage`) that specifies document-level language within the app for the accessibility of screen readers and search-engine parsers. By default, it is set to empty string which is commonly recognized as a browser's default locale.
+* Closed #2847: `selectInput()` is reasonably accessible for screen readers even when `selectize` option is set to TRUE. To improve `selectize.js` accessibility, We have added [selectize-plugin-a11y](https://github.com/SLMNBJ/selectize-plugin-a11y) by default. (#2993)
+
+* Closed #2844: Added `lang` argument to ui `*Page()` functions (e.g., `fluidPage`, `bootstrapPage`) that specifies document-level language within the app for the accessibility of screen readers and search-engine parsers. By default, it is set to empty string which is commonly recognized as a browser's default locale. (#2920)
 
 ### Minor new features and improvements
 

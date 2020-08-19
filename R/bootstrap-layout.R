@@ -366,7 +366,7 @@ sidebarPanel <- function(..., width = 4) {
 #' @rdname sidebarLayout
 mainPanel <- function(..., width = 8) {
   div(class=paste0("col-sm-", width),
-          # A11y semantic landmark for main region
+    # A11y semantic landmark for main region
     role="main",
     ...
   )

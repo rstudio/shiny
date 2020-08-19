@@ -80,6 +80,8 @@ shiny 1.5.0
 
 * Fixed #2653: The `dataTableOutput()` could have incorrect output if certain characters were in the column names. (#2658)
 
+* Fixed [#2392](https://github.com/rstudio/shiny/issues/2392): The `downloadButton()` now renders correctly in R Markdown output. ([#2672](https://github.com/rstudio/shiny/pull/2672))
+
 ### Documentation Updates
 
 ### Library updates

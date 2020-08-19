@@ -192,7 +192,7 @@ fillPage <- function(..., padding = 0, title = NULL, bootstrap = TRUE,
   }
 
   # Also store `lang` to be passed for rendering processor.
-  if (isFALSE(bootstrap)) {
+  if (!isTRUE(bootstrap)) {
     if (!is.null(lang)) {
       if (is.character(lang) && length(lang) == 1) {
         # Append lang attribute to be passed to renderPage function

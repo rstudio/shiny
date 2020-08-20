@@ -446,6 +446,7 @@ renderCachedPlot <- function(expr,
       function(userCacheKeyResult) {
         width  <- fitDims$width
         height <- fitDims$height
+        alt <- altWrapper()
         pixelratio <- session$clientData$pixelratio %OR% 1
 
         key <- digest::digest(list(outputName, userCacheKeyResult, width, height, res, pixelratio), "xxhash64")
@@ -461,6 +462,7 @@ renderCachedPlot <- function(expr,
             plotObj = plotObj,
             width = width,
             height = height,
+            alt = alt,
             pixelratio = pixelratio
           ))
         }

@@ -1,12 +1,11 @@
-@import "_variables";
 @import "_mixins";
 
 .irs {
     @include pos-r();
     -webkit-touch-callout: none;
     @include no-click();
-    font-size: $irs_font_size;
-    font-family: $irs_font_family;
+    font-size: 12px;
+    font-family: Arial, sans-serif;
 
     &-line {
         @include pos-r();

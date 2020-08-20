@@ -1,14 +1,16 @@
-diff --git a/inst/www/shared/ionrangeslider/scss/skins/shiny.scss b/inst/www/shared/ionrangeslider/scss/skins/shiny.scss
+diff --git a/inst/www/shared/ionrangeslider/scss/shiny.scss b/inst/www/shared/ionrangeslider/scss/shiny.scss
 new file mode 100644
 index 00000000..3356cb6d
 --- /dev/null
-+++ b/inst/www/shared/ionrangeslider/scss/skins/shiny.scss
-@@ -0,0 +1,153 @@
++++ b/inst/www/shared/ionrangeslider/scss/shiny.scss
+@@ -0,0 +1,155 @@
 +/* 'shiny' skin for Ion.RangeSlider, largely based on the 'big' skin, but with smaller dimensions, grayscale grid text, and without gradients
 +© RStudio, Inc, 2014
 +© Denis Ineshin, 2014  https://github.com/IonDen
 +© guybowden, 2014  https://github.com/guybowden
 +*/
++
++@import "_base";
 +
 +.irs--shiny {
 +  $name: irs !default;
@@ -39,12 +41,12 @@ index 00000000..3356cb6d
 +
 +  $minmax_text_color:  mix($bg, $fg, 20%) !default;
 +  $minmax_bg_color:    rgba($fg, 0.1) !default;
-+  $minmax_font_size:   $irs_font_size * (10/12) !default;
++  $minmax_font_size:   0.8333rem !default;
 +  $minmax_line_height: 1.333 !default;
 +
 +  $fromto_bg_color:    $accent !default;
 +  $fromto_color:       $bg !default;
-+  $fromto_font_size:   $irs_font_size * (11/12) !default;
++  $fromto_font_size:   0.92rem !default;
 +  $fromto_line_height: 1.333 !default;
 +
 +  $grid_major_color:  rgba($accent, 0.5) !default;

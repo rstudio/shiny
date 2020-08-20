@@ -1,3 +1,9 @@
+@charset "UTF-8";
+/* 'shiny' skin for Ion.RangeSlider, largely based on the 'big' skin, but with smaller dimensions, grayscale grid text, and without gradients
+© RStudio, Inc, 2014
+© Denis Ineshin, 2014  https://github.com/IonDen
+© guybowden, 2014  https://github.com/guybowden
+*/
 .irs {
   position: relative;
   display: block;
@@ -144,5 +150,111 @@
   background: none !important;
   border-style: solid !important;
   border-color: transparent !important;
+}
+
+.irs--shiny {
+  height: 40px;
+}
+
+.irs--shiny.irs-with-grid {
+  height: 60px;
+}
+
+.irs--shiny .irs-line {
+  top: 25px;
+  height: 8px;
+  background: linear-gradient(to bottom, #dedede -50%, white 150%);
+  background-color: #ededed;
+  border: 1px solid #cccccc;
+  border-radius: 8px;
+}
+
+.irs--shiny .irs-bar {
+  top: 25px;
+  height: 8px;
+  border-top: 1px solid #428bca;
+  border-bottom: 1px solid #428bca;
+  background: #428bca;
+}
+
+.irs--shiny .irs-bar--single {
+  border-radius: 8px 0 0 8px;
+}
+
+.irs--shiny .irs-shadow {
+  top: 38px;
+  height: 2px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 5px;
+}
+
+.irs--shiny .lt-ie9 .irs-shadow {
+  filter: alpha(opacity=30);
+}
+
+.irs--shiny .irs-handle {
+  top: 17px;
+  width: 22px;
+  height: 22px;
+  border: 1px solid #ababab;
+  background-color: #dedede;
+  box-shadow: 1px 1px 3px rgba(255, 255, 255, 0.3);
+  border-radius: 22px;
+}
+
+.irs--shiny .irs-handle.state_hover, .irs--shiny .irs-handle:hover {
+  background: white;
+}
+
+.irs--shiny .irs-min,
+.irs--shiny .irs-max {
+  top: 0;
+  padding: 1px 3px;
+  color: #333333;
+  text-shadow: none;
+  background-color: rgba(0, 0, 0, 0.1);
+  border-radius: 3px;
+  font-size: 0.8333rem;
+  line-height: 1.333;
+}
+
+.irs--shiny .lt-ie9 .irs-min,
+.irs--shiny .lt-ie9 .irs-max {
+  background: #cccccc;
+}
+
+.irs--shiny .irs-from,
+.irs--shiny .irs-to,
+.irs--shiny .irs-single {
+  color: white;
+  text-shadow: none;
+  padding: 1px 3px;
+  background-color: #428bca;
+  border-radius: 3px;
+  font-size: 0.92rem;
+  line-height: 1.333;
+}
+
+.irs--shiny .lt-ie9 .irs-from,
+.irs--shiny .lt-ie9 .irs-to,
+.irs--shiny .lt-ie9 .irs-single {
+  background: #999999;
+}
+
+.irs--shiny .irs-grid {
+  height: 27px;
+}
+
+.irs--shiny .irs-grid-pol {
+  background-color: rgba(66, 139, 202, 0.5);
+}
+
+.irs--shiny .irs-grid-text {
+  bottom: 5px;
+  color: #0d1c28;
+}
+
+.irs--shiny .irs-grid-pol.small {
+  background-color: #999999;
 }
 

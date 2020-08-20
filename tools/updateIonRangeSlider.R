@@ -22,29 +22,22 @@ less_files <- dir(file.path(src, "less"), full.names = TRUE, recursive = TRUE)
 invisible(lapply(less_files, function(file) {
   system(paste("less2sass", file))
 }))
-sass_files <- dir(file.path(src, "less"), pattern = "scss$", full.names = TRUE, recursive = TRUE)
 
-invisible(lapply(sass_files, function(file) {
-  txt <- readLines(file)
-  # Add !default flags to variable definitions
-  txt <- sub("(\\$.*:.*);", "\\1 !default;", txt)
-  # less2sass misses this bit
-  txt <- sub("@import (reference)", "@import", txt, fixed = TRUE)
-  writeLines(txt, file)
-}))
-
-# Move over less/sass
-file.rename(
-  file.path(src, "less"),
-  file.path(target, "scss")
-)
-# Cleanup
-file.remove(
-  dir(target, pattern = "less$", full.names = TRUE, recursive = TRUE)
+# Copy over only the base (i.e., core) scss that we need for the shiny skin
+dir.create(file.path(target, "scss"))
+file.copy(
+  file.path(src, "less", c("_base.scss", "_mixins.scss")),
+  file.path(target, "scss", c("_base.scss", "_mixins.scss"))
 )
 
+# less2sass conversion doesn't convert this import correctly
+base_css <- file.path(target, "scss", "_base.scss")
+writeLines(
+  sub("@import (reference)", "@import", readLines(base_css), fixed = TRUE),
+  base_css
+)
 
-# Apply git patches *before* compiling skin Sass -> CSS (so shiny skin is included)
+# Apply git patches *before* compiling skin Sass -> CSS (this should add the shiny skin)
 patch_dir <- rprojroot::find_package_root_file("tools/ion.rangeSlider-patches")
 for (patch in list.files(patch_dir, full.names = TRUE)) {
   tryCatch({
@@ -62,30 +55,11 @@ for (patch in list.files(patch_dir, full.names = TRUE)) {
 # can serve them up without compilation (The distributed CSS includes all
 # the skins in the same CSS file, but we want them split up)
 library(sass)
-css_home <- file.path(target, "css")
-dir.create(css_home)
-
-# Compile the 'base' Sass to CSS
-scss_home <- file.path(target, "scss")
+dir.create(file.path(target, "css"))
 sass(
-  sass_file(file.path(scss_home, "_base.scss")),
-  output = file.path(css_home, "ion.rangeSlider.css")
+  sass_file(file.path(target, "scss", "shiny.scss")),
+  output = file.path(target, "css", "ion.rangeSlider.css")
 )
-
-# Compile each skin
-skin_home <- file.path(scss_home, "skins")
-for (skin_scss in dir(skin_home, full.names = TRUE)) {
-  skin_name <- tools::file_path_sans_ext(basename(skin_scss))
-  sass(
-    list(
-      sass_file(file.path(scss_home, "_variables.scss")),
-      sass_file(skin_scss)
-    ),
-    output = file.path(
-      css_home, sprintf("ion.rangeSlider.skin%s.css", tools::toTitleCase(skin_name))
-    )
-  )
-}
 
 
 # Finally, run yarn build so the JS patches propogate to the minified files

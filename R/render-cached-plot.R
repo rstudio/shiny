@@ -493,7 +493,7 @@ renderCachedPlot <- function(expr,
         hybrid_chain(possiblyAsyncResult, function(result) {
           width      <- result$width
           height     <- result$height
-          alt     <- result$alt
+          alt        <- result$alt
           pixelratio <- result$pixelratio
 
           # Three possibilities when we get here:

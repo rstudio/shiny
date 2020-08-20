@@ -4568,7 +4568,25 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       var dataType = $el.data('data-type');
       var timeFormat = $el.data('time-format');
       var timezone = $el.data('timezone');
-      opts.prettify = getTypePrettifyer(dataType, timeFormat, timezone);
+      opts.prettify = getTypePrettifyer(dataType, timeFormat, timezone); // Ensure accessibility labels are updated when the slider updates (programmatically or interactively)
+
+      function updateAriaLabels(data) {
+        data.input[0].setAttribute("role", "slider");
+        data.input[0].setAttribute("tabindex", "0");
+        data.input[0].setAttribute("aria-valuenow", data.from);
+        data.input[0].setAttribute("aria-valuemin", data.min);
+        data.input[0].setAttribute("aria-valuemax", data.max);
+      }
+
+      ;
+      opts.onStart = updateAriaLabels;
+      opts.onChange = updateAriaLabels;
+      opts.onUpdate = updateAriaLabels;
+
+      opts.onFinish = function (data) {
+        data.input[0].setAttribute("tabindex", "0");
+      };
+
       $el.ionRangeSlider(opts);
     },
     _getLabelNode: function _getLabelNode(el) {

@@ -173,18 +173,17 @@ $.extend(sliderInputBinding, textInputBinding, {
 
     // Ensure accessibility labels are updated when the slider updates (programmatically or interactively)
     function updateAriaLabels(data) {
-      data.input[0].setAttribute("role", "slider");
-      data.input[0].setAttribute("tabindex", "0");
-      data.input[0].setAttribute("aria-valuenow", data.from);
-      data.input[0].setAttribute("aria-valuemin", data.min);
-      data.input[0].setAttribute("aria-valuemax", data.max);
+      var line = data.slider.find(".irs-line");
+      if (!line.length) return;
+      line[0].setAttribute("role", "slider");
+      line[0].setAttribute("tabindex", "0");
+      line[0].setAttribute("aria-valuenow", data.from);
+      line[0].setAttribute("aria-valuemin", data.min);
+      line[0].setAttribute("aria-valuemax", data.max);
     };
     opts.onStart = updateAriaLabels;
     opts.onChange = updateAriaLabels;
     opts.onUpdate = updateAriaLabels;
-    opts.onFinish = function(data) {
-      data.input[0].setAttribute("tabindex", "0");
-    };
 
     $el.ionRangeSlider(opts);
   },

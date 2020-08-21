@@ -4568,16 +4568,37 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       var dataType = $el.data('data-type');
       var timeFormat = $el.data('time-format');
       var timezone = $el.data('timezone');
-      opts.prettify = getTypePrettifyer(dataType, timeFormat, timezone); // Ensure accessibility labels are updated when the slider updates (programmatically or interactively)
+      opts.prettify = getTypePrettifyer(dataType, timeFormat, timezone);
+
+      function setAriaLabels(el, label, value, min, max) {
+        if (!el.length) return;
+        el.attr({
+          "role": "slider",
+          "tabindex": "0",
+          "aria-labelledby": label,
+          "aria-valuenow": value,
+          "aria-valuemin": min,
+          "aria-valuemax": max
+        });
+      }
+
+      ; // Ensure accessibility labels are updated when the slider updates (programmatically or interactively)
 
       function updateAriaLabels(data) {
+        var isSingleValue = !data.input.data("to");
         var line = data.slider.find(".irs-line");
-        if (!line.length) return;
-        line[0].setAttribute("role", "slider");
-        line[0].setAttribute("tabindex", "0");
-        line[0].setAttribute("aria-valuenow", data.from);
-        line[0].setAttribute("aria-valuemin", data.min);
-        line[0].setAttribute("aria-valuemax", data.max);
+        var label = el.id + "-label";
+
+        if (isSingleValue) {
+          setAriaLabels(line, label, data.from, data.min, data.max);
+          return;
+        }
+
+        line.attr("tabindex", "-1");
+        var from = data.slider.find(".irs-from");
+        setAriaLabels(from, label + "-upper", data.from, data.min, data.max);
+        var to = data.slider.find(".irs-to");
+        setAriaLabels(to, label + "-lower", data.to, data.min, data.max);
       }
 
       ;

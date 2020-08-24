@@ -89,6 +89,15 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
                     version = "0.10.2.2")
   }
 
+  if (value < min | value > max) {
+    warning(noBreaks. = TRUE,
+      sprintf(
+        "Trying to set a `value` outside of the [`min`, `max`] range (value = %s, min =%s, max = %s). `value` will be set to `max`.",
+        value, min, max
+      )
+    )
+  }
+
   dataType <- getSliderType(min, max, value)
 
   if (is.null(timeFormat)) {

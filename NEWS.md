@@ -24,7 +24,7 @@ shiny 1.5.0.9000
 
 * Closed #2972: `runExample()` now supports the `shiny.port` option (thanks to @ColinFay). (#2982)
 
-* `reactiveValuesToList()` will save it's `reactlog` label as `reactiveValuesToList(<ID>)` vs `as.list(<ID>)` (#3017)
+* `reactiveValuesToList()` will save its `reactlog` label as `reactiveValuesToList(<ID>)` vs `as.list(<ID>)` (#3017)
 
 ### Bug fixes
 

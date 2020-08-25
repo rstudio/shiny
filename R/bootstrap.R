@@ -1312,6 +1312,7 @@ uiOutput <- htmlOutput
 #'   is assigned to.
 #' @param label The label that should appear on the button.
 #' @param class Additional CSS classes to apply to the tag, if any.
+#' @param icon An [icon()] to appear on the button. Default is `icon("download")`.
 #' @param ... Other arguments to pass to the container tag function.
 #'
 #' @examples
@@ -1342,13 +1343,15 @@ uiOutput <- htmlOutput
 #' @export
 downloadButton <- function(outputId,
                            label="Download",
-                           class=NULL, ...) {
+                           class=NULL,
+                           ...,
+                           icon=icon("download")) {
   aTag <- tags$a(id=outputId,
                  class=paste('btn btn-default shiny-download-link', class),
                  href='',
                  target='_blank',
                  download=NA,
-                 icon("download"),
+                 validateIcon(icon),
                  label, ...)
 }
 

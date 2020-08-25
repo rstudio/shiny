@@ -24,6 +24,8 @@ shiny 1.5.0.9000
 
 * Closed #2972: `runExample()` now supports the `shiny.port` option (thanks to @ColinFay). (#2982)
 
+* Closed #2692: `downloadButton()` icon can now be changed via the `icon` parameter (thanks to @ColinFay). (#3010)
+
 * `reactiveValuesToList()` will save its `reactlog` label as `reactiveValuesToList(<ID>)` vs `as.list(<ID>)` (#3017)
 
 * Removed unused (and non-exported) `cacheContext` class.

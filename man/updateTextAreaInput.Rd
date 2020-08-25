@@ -5,7 +5,7 @@
 \title{Change the value of a textarea input on the client}
 \usage{
 updateTextAreaInput(
-  session,
+  session = getDefaultReactiveDomain(),
   inputId,
   label = NULL,
   value = NULL,
@@ -14,7 +14,7 @@ updateTextAreaInput(
 }
 \arguments{
 \item{session}{The \code{session} object passed to function given to
-\code{shinyServer}.}
+\code{shinyServer}. Default is \code{getDefaultReactiveDomain()}.}
 
 \item{inputId}{The id of the input object.}
 

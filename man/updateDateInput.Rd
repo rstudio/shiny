@@ -5,7 +5,7 @@
 \title{Change the value of a date input on the client}
 \usage{
 updateDateInput(
-  session,
+  session = getDefaultReactiveDomain(),
   inputId,
   label = NULL,
   value = NULL,
@@ -15,7 +15,7 @@ updateDateInput(
 }
 \arguments{
 \item{session}{The \code{session} object passed to function given to
-\code{shinyServer}.}
+\code{shinyServer}. Default is \code{getDefaultReactiveDomain()}.}
 
 \item{inputId}{The id of the input object.}
 

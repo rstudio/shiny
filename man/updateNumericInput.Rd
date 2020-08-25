@@ -5,7 +5,7 @@
 \title{Change the value of a number input on the client}
 \usage{
 updateNumericInput(
-  session,
+  session = getDefaultReactiveDomain(),
   inputId,
   label = NULL,
   value = NULL,
@@ -16,7 +16,7 @@ updateNumericInput(
 }
 \arguments{
 \item{session}{The \code{session} object passed to function given to
-\code{shinyServer}.}
+\code{shinyServer}. Default is \code{getDefaultReactiveDomain()}.}
 
 \item{inputId}{The id of the input object.}
 

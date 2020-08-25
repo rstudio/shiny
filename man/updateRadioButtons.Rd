@@ -5,7 +5,7 @@
 \title{Change the value of a radio input on the client}
 \usage{
 updateRadioButtons(
-  session,
+  session = getDefaultReactiveDomain(),
   inputId,
   label = NULL,
   choices = NULL,
@@ -17,7 +17,7 @@ updateRadioButtons(
 }
 \arguments{
 \item{session}{The \code{session} object passed to function given to
-\code{shinyServer}.}
+\code{shinyServer}. Default is \code{getDefaultReactiveDomain()}.}
 
 \item{inputId}{The id of the input object.}
 

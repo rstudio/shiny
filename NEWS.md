@@ -26,7 +26,7 @@ shiny 1.5.0.9000
 
 * `reactiveValuesToList()` will save its `reactlog` label as `reactiveValuesToList(<ID>)` vs `as.list(<ID>)` (#3017)
 
-* Removed unused `cacheContext` class. (#3018)
+* Removed unused (and non-exported) `cacheContext` class.
 
 ### Bug fixes
 

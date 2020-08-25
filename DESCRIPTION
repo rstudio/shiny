@@ -1,7 +1,7 @@
 Package: shiny
 Type: Package
 Title: Web Application Framework for R
-Version: 1.5.0
+Version: 1.5.0.9001
 Authors@R: c(
     person("Winston", "Chang", role = c("aut", "cre"), email = "winston@rstudio.com"),
     person("Joe", "Cheng", role = "aut", email = "joe@rstudio.com"),
@@ -23,10 +23,18 @@ Authors@R: c(
     comment = "Bootstrap library"),
     person(family = "Twitter, Inc", role = "cph",
     comment = "Bootstrap library"),
-    person("Alexander", "Farkas", role = c("ctb", "cph"),
-    comment = "html5shiv library"),
-    person("Scott", "Jehl", role = c("ctb", "cph"),
-    comment = "Respond.js library"),
+    person("Prem Nawaz", "Khan", role = "ctb",
+    comment = "Bootstrap accessibility plugin"),
+    person("Victor", "Tsaran", role = "ctb",
+    comment = "Bootstrap accessibility plugin"),
+    person("Dennis", "Lembree", role = "ctb",
+    comment = "Bootstrap accessibility plugin"),
+    person("Srinivasu", "Chakravarthula", role = "ctb",
+    comment = "Bootstrap accessibility plugin"),
+    person("Cathy", "O'Connor", role = "ctb",
+    comment = "Bootstrap accessibility plugin"),
+    person(family = "PayPal, Inc", role = "cph",
+    comment = "Bootstrap accessibility plugin"),
     person("Stefan", "Petre", role = c("ctb", "cph"),
     comment = "Bootstrap-datepicker library"),
     person("Andrew", "Rowls", role = c("ctb", "cph"),
@@ -35,10 +43,8 @@ Authors@R: c(
     comment = "Font-Awesome font"),
     person("Brian", "Reavis", role = c("ctb", "cph"),
     comment = "selectize.js library"),
-    person("Kristopher Michael", "Kowal", role = c("ctb", "cph"),
-    comment = "es5-shim library"),
-    person(family = "es5-shim contributors", role = c("ctb", "cph"),
-    comment = "es5-shim library"),
+    person("Salmen", "Bejaoui", role = c("ctb", "cph"),
+    comment = "selectize-plugin-a11y library"),
     person("Denis", "Ineshin", role = c("ctb", "cph"),
     comment = "ion.rangeSlider library"),
     person("Sami", "Samhuri", role = c("ctb", "cph"),
@@ -177,6 +183,6 @@ Collate:
     'test-server.R'
     'test.R'
     'update-input.R'
-RoxygenNote: 7.1.0.9000
+RoxygenNote: 7.1.1
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)

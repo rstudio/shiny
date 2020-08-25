@@ -183,16 +183,20 @@ selectizeInput <- function(inputId, ..., options = NULL, width = NULL) {
 
 # given a select input and its id, selectize it
 selectizeIt <- function(inputId, select, options, nonempty = FALSE) {
+  # Make sure accessibility plugin is included
+  if (!('selectize-plugin-a11y' %in% options$plugins)) {
+    options$plugins <- c(options$plugins, list('selectize-plugin-a11y'))
+  }
+
   res <- checkAsIs(options)
 
   selectizeDep <- htmlDependency(
-    "selectize", "0.11.2", c(href = "shared/selectize"),
+    "selectize", "0.12.4", c(href = "shared/selectize"),
     stylesheet = "css/selectize.bootstrap3.css",
     head = format(tagList(
-      HTML('<!--[if lt IE 9]>'),
-      tags$script(src = 'shared/selectize/js/es5-shim.min.js'),
-      HTML('<![endif]-->'),
-      tags$script(src = 'shared/selectize/js/selectize.min.js')
+      tags$script(src = 'shared/selectize/js/selectize.min.js'),
+      # Accessibility plugin for screen readers (https://github.com/SLMNBJ/selectize-plugin-a11y):
+      tags$script(src = 'shared/selectize/accessibility/js/selectize-plugin-a11y.min.js')
     ))
   )
 

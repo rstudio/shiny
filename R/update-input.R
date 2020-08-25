@@ -1,3 +1,6 @@
+# The text for the stop() is defined there, so that it can be changed globally
+stopText <- "`session` should be a 'ShinySession' object. Did you forget to pass `session` as the first argument to the `update` function?"
+
 #' Change the value of a text input on the client
 #'
 #' @template update-input
@@ -35,6 +38,9 @@
 #' }
 #' @export
 updateTextInput <- function(session = getDefaultReactiveDomain(), inputId, label = NULL, value = NULL, placeholder = NULL) {
+
+  if ( !"ShinySession" %in% class(session) ) stop(stopText)
+
   message <- dropNulls(list(label=label, value=value, placeholder=placeholder))
   session$sendInputMessage(inputId, message)
 }
@@ -107,6 +113,9 @@ updateTextAreaInput <- updateTextInput
 #' }
 #' @export
 updateCheckboxInput <- function(session = getDefaultReactiveDomain(), inputId, label = NULL, value = NULL) {
+
+  if (!"ShinySession" %in% class(session) ) stop(stopText)
+
   message <- dropNulls(list(label=label, value=value))
   session$sendInputMessage(inputId, message)
 }
@@ -166,6 +175,9 @@ updateCheckboxInput <- function(session = getDefaultReactiveDomain(), inputId, l
 #' @rdname updateActionButton
 #' @export
 updateActionButton <- function(session = getDefaultReactiveDomain(), inputId, label = NULL, icon = NULL) {
+
+  if (!"ShinySession" %in% class(session) ) stop(stopText)
+
   if (!is.null(icon)) icon <- as.character(validateIcon(icon))
   message <- dropNulls(list(label=label, icon=icon))
   session$sendInputMessage(inputId, message)
@@ -208,6 +220,8 @@ updateActionLink <- updateActionButton
 #' @export
 updateDateInput <- function(session = getDefaultReactiveDomain(), inputId, label = NULL, value = NULL,
                             min = NULL, max = NULL) {
+
+  if (!"ShinySession" %in% class(session) ) stop(stopText)
 
   value <- dateYMD(value, "value")
   min   <- dateYMD(min, "min")
@@ -254,6 +268,8 @@ updateDateInput <- function(session = getDefaultReactiveDomain(), inputId, label
 updateDateRangeInput <- function(session = getDefaultReactiveDomain(), inputId, label = NULL,
                                  start = NULL, end = NULL, min = NULL,
                                  max = NULL) {
+
+  if (!"ShinySession" %in% class(session) ) stop(stopText)
 
   start <- dateYMD(start, "start")
   end <- dateYMD(end, "end")
@@ -310,6 +326,9 @@ updateDateRangeInput <- function(session = getDefaultReactiveDomain(), inputId, 
 #' }
 #' @export
 updateTabsetPanel <- function(session = getDefaultReactiveDomain(), inputId, selected = NULL) {
+
+  if (!"ShinySession" %in% class(session) ) stop(stopText)
+
   message <- dropNulls(list(value = selected))
   session$sendInputMessage(inputId, message)
 }
@@ -360,6 +379,8 @@ updateNavlistPanel <- updateTabsetPanel
 updateNumericInput <- function(session = getDefaultReactiveDomain(), inputId, label = NULL, value = NULL,
     min = NULL, max = NULL, step = NULL) {
 
+  if (!"ShinySession" %in% class(session) ) stop(stopText)
+
   message <- dropNulls(list(
     label = label, value = formatNoSci(value),
     min = formatNoSci(min), max = formatNoSci(max), step = formatNoSci(step)
@@ -407,6 +428,9 @@ updateNumericInput <- function(session = getDefaultReactiveDomain(), inputId, la
 updateSliderInput <- function(session = getDefaultReactiveDomain(), inputId, label = NULL, value = NULL,
   min = NULL, max = NULL, step = NULL, timeFormat = NULL, timezone = NULL)
 {
+
+  if (!"ShinySession" %in% class(session) ) stop(stopText)
+
   # If no min/max/value is provided, we won't know the
   # type, and this will return an empty string
   dataType <- getSliderType(min, max, value)
@@ -499,6 +523,9 @@ updateInputOptions <- function(session, inputId, label = NULL, choices = NULL,
 updateCheckboxGroupInput <- function(session = getDefaultReactiveDomain(), inputId, label = NULL,
   choices = NULL, selected = NULL, inline = FALSE,
   choiceNames = NULL, choiceValues = NULL) {
+
+  if (!"ShinySession" %in% class(session) ) stop(stopText)
+
   updateInputOptions(session, inputId, label, choices, selected,
                      inline, "checkbox", choiceNames, choiceValues)
 }
@@ -542,6 +569,9 @@ updateCheckboxGroupInput <- function(session = getDefaultReactiveDomain(), input
 updateRadioButtons <- function(session = getDefaultReactiveDomain(), inputId, label = NULL, choices = NULL,
                                selected = NULL, inline = FALSE,
                                choiceNames = NULL, choiceValues = NULL) {
+
+  if (!"ShinySession" %in% class(session) ) stop(stopText)
+
   # you must select at least one radio button
   if (is.null(selected)) {
     if (!is.null(choices)) selected <- choices[[1]]
@@ -593,6 +623,9 @@ updateRadioButtons <- function(session = getDefaultReactiveDomain(), inputId, la
 #' @export
 updateSelectInput <- function(session = getDefaultReactiveDomain(), inputId, label = NULL, choices = NULL,
                               selected = NULL) {
+
+  if (!"ShinySession" %in% class(session) ) stop(stopText)
+
   choices <- if (!is.null(choices)) choicesWithNames(choices)
   if (!is.null(selected)) selected <- as.character(selected)
   options <- if (!is.null(choices)) selectOptions(choices, selected, inputId, FALSE)
@@ -610,6 +643,9 @@ updateSelectInput <- function(session = getDefaultReactiveDomain(), inputId, lab
 updateSelectizeInput <- function(session = getDefaultReactiveDomain(), inputId, label = NULL, choices = NULL,
                                  selected = NULL, options = list(),
                                  server = FALSE) {
+
+  if (!"ShinySession" %in% class(session) ) stop(stopText)
+
   if (length(options)) {
     res <- checkAsIs(options)
     cfg <- tags$script(
@@ -728,6 +764,9 @@ updateVarSelectInput <- function(session = getDefaultReactiveDomain(), inputId, 
   } else {
     choices <- colnames(data)
   }
+
+  if (!"ShinySession" %in% class(session) ) stop(stopText)
+
   updateSelectInput(
     session = session,
     inputId = inputId,
@@ -740,6 +779,9 @@ updateVarSelectInput <- function(session = getDefaultReactiveDomain(), inputId, 
 #' @export
 updateVarSelectizeInput <- function(session = getDefaultReactiveDomain(), inputId, label = NULL,
                                     data = NULL, selected = NULL, options = list(), server = FALSE) {
+
+  if (!"ShinySession" %in% class(session) ) stop(stopText)
+
   if (is.null(data)) {
     choices <- NULL
   } else {

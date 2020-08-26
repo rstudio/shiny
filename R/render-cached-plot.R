@@ -150,6 +150,8 @@
 #'   `"app"` (the default), `"session"`, or a cache object like
 #'   a [diskCache()]. See the Cache Scoping section for more
 #'   information.
+#' @param width,height not used. They are specified via the argument
+#'   `sizePolicy`.
 #'
 #' @seealso See [renderPlot()] for the regular, non-cached version of
 #'   this function. For more about configuring caches, see
@@ -295,7 +297,9 @@ renderCachedPlot <- function(expr,
   res = 72,
   cache = "app",
   ...,
-  outputArgs = list()
+  outputArgs = list(),
+  width = NULL,
+  height = NULL
 ) {
 
   # This ..stacktraceon is matched by a ..stacktraceoff.. when plotFunc
@@ -306,6 +310,11 @@ renderCachedPlot <- function(expr,
   isolatedFunc <- function() isolate(func())
 
   args <- list(...)
+
+  if (!is.null(width) || !is.null(height)) {
+    warning("Unused argument(s) 'width' and/or 'height'. ",
+            "'sizePolicy' is used instead.")
+  }
 
   cacheKeyExpr <- substitute(cacheKeyExpr)
   # The real cache key we'll use also includes width, height, res, pixelratio.

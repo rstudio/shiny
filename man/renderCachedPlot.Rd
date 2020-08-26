@@ -11,7 +11,9 @@ renderCachedPlot(
   res = 72,
   cache = "app",
   ...,
-  outputArgs = list()
+  outputArgs = list(),
+  width = NULL,
+  height = NULL
 )
 }
 \arguments{
@@ -41,6 +43,9 @@ These can be used to set the width, height, background color, etc.}
 \item{outputArgs}{A list of arguments to be passed through to the implicit
 call to \code{\link[=plotOutput]{plotOutput()}} when \code{renderPlot} is used in an
 interactive R Markdown document.}
+
+\item{width, height}{not used. They are specified via the argument
+\code{sizePolicy}.}
 }
 \description{
 Renders a reactive plot, with plot images cached to disk.

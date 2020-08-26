@@ -42,7 +42,7 @@ bootstrapPage <- function(..., title = NULL, responsive = NULL, theme = NULL) {
       # remainder of tags passed to the function
       list(...)
     ),
-    bootstrapLib()
+    if (useBsTheme()) bootstraplib::bootstrap() else bootstrapLib()
   )
 }
 

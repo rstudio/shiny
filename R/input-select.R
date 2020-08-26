@@ -233,20 +233,16 @@ selectizeCSSFile <- function() {
   if (!useBsTheme()) {
     return(list(href = "shared/selectize", stylesheet = "css/selectize.bootstrap3.css"))
   }
-  # Compile selectize Sass against the active bootstraplib theme
-  scss <- system.file(package = "shiny", "www", "shared", "selectize", "scss")
-  scss_file <- if ("3" %in% bootstraplib::theme_version()) {
-    file.path(scss, "selectize.bootstrap3.scss")
-  } else {
-    file.path(scss, "selectize.bootstrap4.scss")
-  }
-  tmpfile <- tempfile(fileext = ".css")
-  bootstraplib::bootstrap_sass(
-    output = tmpfile,
-    rules = sass::sass_file(scss_file),
-    options = sass::sass_options(output_style = "compressed")
+  scss <- system.file(
+    package = "shiny", "www", "shared", "selectize", "scss",
+    if ("3" %in% bootstraplib::theme_version()) {
+      "selectize.bootstrap3.scss"
+    } else {
+      "selectize.bootstrap4.scss"
+    }
   )
-  list(file = dirname(tmpfile), stylesheet = basename(tmpfile))
+  outFile <- bootstrapSass(sass::sass_file(scss), pattern = "selectize-")
+  list(file = dirname(outFile), stylesheet = basename(outFile))
 }
 
 

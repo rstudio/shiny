@@ -235,18 +235,15 @@ ionRangeSliderCSSFile <- function() {
   if (!useBsTheme()) {
     return(list(stylesheet = "css/ion.rangeSlider.css", href = "shared/ionrangeslider"))
   }
-  scssDir <- system.file(package = "shiny", "www", "shared", "ionrangeslider", "scss")
-  tmpFile <- tempfile(fileext = ".css")
-  bootstraplib::bootstrap_sass(
-    list(
-      list(bg = "$input-bg", fg = "$input-color", accent = "$component-active-bg"),
-      sass::sass_file(file.path(scssDir, "shiny.scss"))
-    ),
-    output = tmpFile
+  sassInput <- list(
+    list(bg = "$input-bg", fg = "$input-color", accent = "$component-active-bg"),
+    sass::sass_file(
+      system.file(package = "shiny", "www", "shared", "ionrangeslider", "scss", "shiny.scss")
+    )
   )
-  list(stylesheet = basename(tmpFile), file = dirname(tmpFile))
+  outFile <- bootstrapSass(sassInput, pattern = "ion.rangeslider-")
+  list(stylesheet = basename(outFile), file = dirname(outFile))
 }
-
 
 hasDecimals <- function(value) {
   truncatedValue <- round(value)

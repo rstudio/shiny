@@ -42,7 +42,7 @@ bootstrapPage <- function(..., title = NULL, responsive = NULL, theme = NULL) {
       # remainder of tags passed to the function
       list(...)
     ),
-    bootstrapLib()
+    if (useBsTheme()) bootstraplib::bootstrap() else bootstrapLib()
   )
 }
 
@@ -58,6 +58,20 @@ useBsTheme <- function() {
   }
   TRUE
 }
+
+# Reusable function for input widgets to compile their Sass against a bootstraplib theme
+bootstrapSass <- function(sassInput, pattern = "file", ...) {
+  # TODO: outFile should eventually become something like
+  # file.path(tempdir(), paste(pattern, "-", sass::hash(sassInput), ".min.css"))
+  outFile <- tempfile(pattern = pattern, fileext = ".min.css")
+  bootstraplib::bootstrap_sass(
+    sassInput, output = outFile, ...,
+    options = sass::sass_options(output_style = "compressed")
+  )
+  outFile
+}
+
+
 
 #' Bootstrap libraries
 #'

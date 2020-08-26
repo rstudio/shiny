@@ -25,7 +25,7 @@ $selectize-color-input-full: $input-bg !default;
 $selectize-color-input-error: $state-danger-text !default;
 $selectize-color-input-error-focus: darken($selectize-color-input-error, 10%) !default;
 $selectize-color-disabled: $input-bg !default;
-$selectize-color-item: mix($selectize-color-input, $selectize-color-text, 80%) !default;
+$selectize-color-item: mix($selectize-color-input, $selectize-color-text, 90%) !default;
 $selectize-color-item-border: rgba(black, 0) !default;
 $selectize-color-item-active: $component-active-bg !default;
 $selectize-color-item-active-text: $component-active-color !default;

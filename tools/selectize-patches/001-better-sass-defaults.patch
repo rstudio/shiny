@@ -5,7 +5,7 @@ index 81d018a8..88d042db 100644
 @@ -18,22 +18,23 @@ $selectize-font-family: inherit !default;
  $selectize-font-size: inherit !default;
  $selectize-line-height: $line-height-computed !default;
- 
+
 -$selectize-color-text: $text-color !default;
 +$selectize-color-text: $input-color !default;
  $selectize-color-highlight: rgba(255,237,40,0.4) !default;
@@ -15,7 +15,7 @@ index 81d018a8..88d042db 100644
  $selectize-color-input-error-focus: darken($selectize-color-input-error, 10%) !default;
  $selectize-color-disabled: $input-bg !default;
 -$selectize-color-item: #efefef !default;
-+$selectize-color-item: mix($selectize-color-input, $selectize-color-text, 80%) !default;
++$selectize-color-item: mix($selectize-color-input, $selectize-color-text, 90%) !default;
  $selectize-color-item-border: rgba(black, 0) !default;
  $selectize-color-item-active: $component-active-bg !default;
 -$selectize-color-item-active-text: #fff !default;
@@ -30,9 +30,9 @@ index 81d018a8..88d042db 100644
  $selectize-color-dropdown-item-active: $dropdown-link-hover-bg !default;
  $selectize-color-dropdown-item-active-text: $dropdown-link-hover-color !default;
 @@ -63,12 +64,19 @@ $selectize-arrow-offset: $selectize-padding-x + 5px !default;
- 
+
  @import "selectize";
- 
+
 +//Import Plugins
 +@import "plugins/drag_drop";
 +@import "plugins/dropdown_header";
@@ -56,7 +56,7 @@ index 5eca2f3d..c8502847 100644
 @@ -9,22 +9,23 @@ $selectize-font-family: inherit !default;
  $selectize-font-size: inherit !default;
  $selectize-line-height: $input-btn-line-height !default; //formerly line-height-computed
- 
+
 -$selectize-color-text: gray("800") !default; //$gray-800
 +$selectize-color-text: $input-color !default;
  $selectize-color-highlight: rgba(255,237,40,0.4) !default;
@@ -67,7 +67,7 @@ index 5eca2f3d..c8502847 100644
  $selectize-color-disabled: $input-bg !default;
 -$selectize-color-item: #efefef !default;
 -$selectize-color-item-border: #999 !default;
-+$selectize-color-item: mix($selectize-color-input, $selectize-color-text, 80%) !default;
++$selectize-color-item: mix($selectize-color-input, $selectize-color-text, 90%) !default;
 +$selectize-color-item-border: $input-border-color !default;
  $selectize-color-item-active: $component-active-bg !default;
 -$selectize-color-item-active-text: #fff !default;

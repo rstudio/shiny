@@ -23,10 +23,7 @@ sliderInput(
   post = NULL,
   timeFormat = NULL,
   timezone = NULL,
-  dragRange = TRUE,
-  skin = c("shiny", "big", "flat", "modern", "round", "sharp", "square"),
-  accentColor = NULL,
-  sassVariables = NULL
+  dragRange = TRUE
 )
 
 animationOptions(
@@ -99,18 +96,6 @@ result in UTC time.}
 values). If \code{TRUE} (the default), the range can be dragged. In other
 words, the min and max can be dragged together. If \code{FALSE}, the range
 cannot be dragged.}
-
-\item{skin}{controls the overall look of the slider. For a demo of different
-skins, see \url{http://ionden.com/a/plugins/ion.rangeSlider/skins.html}.}
-
-\item{accentColor}{a CSS color string (e.g., \code{'#ED5564'}) or Bootstrap Sass
-variable (e.g., \code{'$primary'}) to use for the \code{style}'s accent color. If a Sass
-variable is used, it must match a Sass variable name of a currently active
-\strong{bootstraplib} theme.}
-
-\item{sassVariables}{a list of Sass variables to control particular CSS rules in a
-given \code{skin}. To see what variables are available, see the relevant \code{style} scss
-file(s) \href{https://github.com/rstudio/shiny/blob/master/inst/www/shared/ionrangeslider/scss/skins}{here}}
 
 \item{interval}{The interval, in milliseconds, between each animation step.}
 

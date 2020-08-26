@@ -6,6 +6,33 @@
 
 @import "_base";
 
+////////////////////////////////////////////////////////////////////////////
+// Setup BS4 style color contrasting
+$yiq-contrasted-threshold:  150 !default;
+$yiq-text-dark:             #212529 !default;
+$yiq-text-light:            #fff !default;
+
+@function color-yiq($color, $dark: $yiq-text-dark, $light: $yiq-text-light) {
+  $r: red($color);
+  $g: green($color);
+  $b: blue($color);
+
+  $yiq: (($r * 299) + ($g * 587) + ($b * 114)) / 1000;
+
+  @if ($yiq >= $yiq-contrasted-threshold) {
+    @return $dark;
+  } @else {
+    @return $light;
+  }
+}
+////////////////////////////////////////////////////////////////////////////
+
+// Re-define font-family on .irs to make it configurable
+$font-family: Arial, sans-serif !default;
+.irs {
+  font-family: $font-family;
+}
+
 .irs--shiny {
   $name: irs !default;
 
@@ -35,17 +62,17 @@
 
   $minmax_text_color:  mix($bg, $fg, 20%) !default;
   $minmax_bg_color:    rgba($fg, 0.1) !default;
-  $minmax_font_size:   0.8333rem !default;
+  $minmax_font_size:   10px !default;
   $minmax_line_height: 1.333 !default;
 
   $fromto_bg_color:    $accent !default;
-  $fromto_color:       $bg !default;
-  $fromto_font_size:   0.92rem !default;
+  $fromto_color:       color-yiq($fromto_bg_color) !default;
+  $fromto_font_size:   11px !default;
   $fromto_line_height: 1.333 !default;
 
-  $grid_major_color:  rgba($accent, 0.5) !default;
+  $grid_major_color:  $fg !default;
   $grid_minor_color:  mix($bg, $fg, 60%) !default;
-  $grid_text_color:   mix($fg, $accent, 80%) !default;
+  $grid_text_color:   mix($bg, $fg, 10%) !default;
 
 
   height: 40px;

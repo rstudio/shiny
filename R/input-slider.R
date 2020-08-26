@@ -236,7 +236,10 @@ ionRangeSliderCSSFile <- function() {
     return(list(stylesheet = "css/ion.rangeSlider.css", href = "shared/ionrangeslider"))
   }
   sassInput <- list(
-    list(bg = "$input-bg", fg = "$input-color", accent = "$component-active-bg"),
+    list(
+      bg = "$input-bg", fg = "$input-color", accent = "$component-active-bg",
+      `font-family` = "$font-family-base"
+    ),
     sass::sass_file(
       system.file(package = "shiny", "www", "shared", "ionrangeslider", "scss", "shiny.scss")
     )

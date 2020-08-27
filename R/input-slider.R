@@ -89,14 +89,7 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
                     version = "0.10.2.2")
   }
 
-  if (isTRUE(min(value) < min | max(value) > max)) {
-    warning(noBreaks. = TRUE,
-      sprintf(
-        "Trying to set a `value` outside of the [`min`, `max`] range (`value` = %s, `min` = %s, `max = %s). `value` will be set to `max`.",
-        paste(value, collapse = ","), min, max
-      )
-    )
-  }
+  assert_slider_value(value = value, min = min, max = max, fun = "sliderInput")
 
   dataType <- getSliderType(min, max, value)
 
@@ -302,6 +295,18 @@ findStepSize <- function(min, max, step) {
 
   } else {
     1
+  }
+}
+
+# Throw a warning if ever `value` is not in the [`min`, `max`] range
+assert_slider_value <- function(value, min, max, fun){
+  if (isTRUE(min(value) < min || max(value) > max)) {
+    warning(noBreaks. = TRUE, call. = FALSE,
+            sprintf(
+              "In %s(): Trying to set a `value` outside of the [`min`, `max`] range (`value` = %s, `min` = %s, `max = %s). `value` will be set to `max`.",
+              fun, paste(value, collapse = ","), min, max
+            )
+    )
   }
 }
 

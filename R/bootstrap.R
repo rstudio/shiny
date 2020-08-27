@@ -1346,6 +1346,7 @@ downloadButton <- function(outputId,
                            class=NULL,
                            ...,
                            icon=icon("download")) {
+  icon <- eval(substitute(icon), parent.frame())
   aTag <- tags$a(id=outputId,
                  class=paste('btn btn-default shiny-download-link', class),
                  href='',

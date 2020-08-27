@@ -444,6 +444,15 @@ updateSliderInput <- function(session, inputId, label = NULL, value = NULL,
     if (!is.null(value)) value <- to_ms(value)
   }
 
+  if (isTRUE(min(value) < min | max(value) > max)) {
+    warning(noBreaks. = TRUE,
+            sprintf(
+              "Trying to set a `value` outside of the [`min`, `max`] range (`value` = %s, `min` = %s, `max = %s). `value` will be set to `max`.",
+              paste(value, collapse = ","), min, max
+            )
+    )
+  }
+
   message <- dropNulls(list(
     label = label,
     value = formatNoSci(value),

@@ -89,7 +89,7 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
                     version = "0.10.2.2")
   }
 
-  if (min(value) < min | max(value) > max) {
+  if (isTRUE(min(value) < min | max(value) > max)) {
     warning(noBreaks. = TRUE,
       sprintf(
         "Trying to set a `value` outside of the [`min`, `max`] range (`value` = %s, `min` = %s, `max = %s). `value` will be set to `max`.",

@@ -2,6 +2,8 @@
 shiny 1.5.0.9000
 ================
 
+## Full changelog
+
 ### Accessibility
 
 * Added [bootstrap accessibility plugin](https://github.com/paypal/bootstrap-accessibility-plugin) under the hood to improve accessibility of shiny apps for screen-reader and keyboard users: the enhancements include better navigations for alert, tooltip, popover, modal dialog, dropdown, tab Panel, collapse, and carousel elements. (#2911)
@@ -21,6 +23,12 @@ shiny 1.5.0.9000
 * Closed #2980: `addResourcePath()` now allows paths with a leading `.` (thanks to @ColinFay). (#2981)
 
 * Closed #2972: `runExample()` now supports the `shiny.port` option (thanks to @ColinFay). (#2982)
+
+* Closed #2692: `downloadButton()` icon can now be changed via the `icon` parameter (thanks to @ColinFay). (#3010)
+
+* `reactiveValuesToList()` will save its `reactlog` label as `reactiveValuesToList(<ID>)` vs `as.list(<ID>)` (#3017)
+
+* Removed unused (and non-exported) `cacheContext` class.
 
 ### Bug fixes
 

@@ -26,7 +26,7 @@ shiny 1.5.0.9000
 
 * Closed #2692: `downloadButton()` icon can now be changed via the `icon` parameter (thanks to @ColinFay). (#3010)
 
-* Closed #2984: improved documentation for `renderCachedPlot()`.
+* Closed #2984: improved documentation for `renderCachedPlot()` (thanks to @aalucaci). (#3016)
 
 * `reactiveValuesToList()` will save its `reactlog` label as `reactiveValuesToList(<ID>)` vs `as.list(<ID>)` (#3017)
 

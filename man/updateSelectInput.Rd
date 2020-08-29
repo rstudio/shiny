@@ -63,7 +63,7 @@ the example section for a small demo of this feature.}
 single-select lists and no values for multiple select lists.}
 
 \item{options}{A list of options. See the documentation of \pkg{selectize.js}
-for possible options (character option values inside \code{\link[base:AsIs]{base::I()}} will
+for possible options (character option values inside \code{\link[base:I]{base::I()}} will
 be treated as literal JavaScript code; see \code{\link[=renderDataTable]{renderDataTable()}}
 for details).}
 

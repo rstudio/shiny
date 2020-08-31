@@ -260,7 +260,7 @@ assert_slider_value <- function(value, min, max, fun){
   if (isTRUE(min(value) < min || max(value) > max)) {
     warning(noBreaks. = TRUE, call. = FALSE,
             sprintf(
-              "In %s(): Trying to set a `value` outside of the [`min`, `max`] range (`value` = %s, `min` = %s, `max = %s). `value` will be set to `max`.",
+              "In %s(): Trying to set a `value` outside of the [`min`, `max`] range (`value` = %s, `min` = %s, `max = %s). `value`(s) will be constrained to [`min`, `max`].",
               fun, paste(value, collapse = ","), min, max
             )
     )

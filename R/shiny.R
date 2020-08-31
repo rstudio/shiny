@@ -474,8 +474,22 @@ ShinySession <- R6Class(
 
           if (!is.null(params$input)) {
 
-            allInputs <- isolate(
-              reactiveValuesToList(self$input, all.names = TRUE)
+            # The isolate and reactiveValuesToList calls are being executed
+            # in a non-reactive context, but will produce output in the reactlog
+            # Seeing new, unlabelled reactives ONLY when calling shinytest is
+            # jarring / frustrating to debug.
+            # Since labeling these values is not currently supported in reactlog,
+            # it is better to hide them.
+            # Hopefully we can replace this with something like
+            # `with_reactlog_group("shinytest", {})`, which would visibily explain
+            # why the new reactives are added when calling shinytest
+            withr::with_options(
+              list(shiny.reactlog = FALSE),
+              {
+                allInputs <- isolate(
+                  reactiveValuesToList(self$input, all.names = TRUE)
+                )
+              }
             )
 
             # If params$input is "1", return all; otherwise return just the

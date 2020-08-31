@@ -9,9 +9,9 @@ renderCachedPlot(
   cacheKeyExpr,
   sizePolicy = sizeGrowthRatio(width = 400, height = 400, growthRate = 1.2),
   res = 72,
-  alt = "Plot object",
   cache = "app",
   ...,
+  alt = "Plot object",
   outputArgs = list(),
   width = NULL,
   height = NULL
@@ -33,13 +33,6 @@ information on the default sizing policy.}
 
 \item{res}{The resolution of the PNG, in pixels per inch.}
 
-\item{alt}{Alternate text for the HTML \verb{<img>} tag
-if it cannot be displayed or viewed (i.e., the user uses a screen reader).
-In addition to a character string, the value may be a reactive expression
-(or a function referencing reactive values) that returns a character string.
-NULL or "" is not recommended because those should be limited to decorative images
-(the default is "Plot object").}
-
 \item{cache}{The scope of the cache, or a cache object. This can be
 \code{"app"} (the default), \code{"session"}, or a cache object like
 a \code{\link[=diskCache]{diskCache()}}. See the Cache Scoping section for more
@@ -47,6 +40,13 @@ information.}
 
 \item{...}{Arguments to be passed through to \code{\link[grDevices:png]{grDevices::png()}}.
 These can be used to set the width, height, background color, etc.}
+
+\item{alt}{Alternate text for the HTML \verb{<img>} tag
+if it cannot be displayed or viewed (i.e., the user uses a screen reader).
+In addition to a character string, the value may be a reactive expression
+(or a function referencing reactive values) that returns a character string.
+NULL or "" is not recommended because those should be limited to decorative images
+(the default is "Plot object").}
 
 \item{outputArgs}{A list of arguments to be passed through to the implicit
 call to \code{\link[=plotOutput]{plotOutput()}} when \code{renderPlot} is used in an

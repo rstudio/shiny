@@ -9,6 +9,7 @@ renderPlot(
   width = "auto",
   height = "auto",
   res = 72,
+  alt = "Plot object",
   ...,
   env = parent.frame(),
   quoted = FALSE,
@@ -36,6 +37,13 @@ to both \code{width} and \code{height}.}
 \item{res}{Resolution of resulting plot, in pixels per inch. This value is
 passed to \code{\link[grDevices:png]{grDevices::png()}}. Note that this affects the resolution of PNG
 rendering in R; it won't change the actual ppi of the browser.}
+
+\item{alt}{Alternate text for the HTML \verb{<img>} tag
+if it cannot be displayed or viewed (i.e., the user uses a screen reader).
+In addition to a character string, the value may be a reactive expression
+(or a function referencing reactive values) that returns a character string.
+NULL or "" is not recommended because those should be limited to decorative images
+(the default is "Plot object").}
 
 \item{...}{Arguments to be passed through to \code{\link[grDevices:png]{grDevices::png()}}.
 These can be used to set the width, height, background color, etc.}

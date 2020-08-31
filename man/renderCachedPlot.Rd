@@ -11,7 +11,10 @@ renderCachedPlot(
   res = 72,
   cache = "app",
   ...,
-  outputArgs = list()
+  alt = "Plot object",
+  outputArgs = list(),
+  width = NULL,
+  height = NULL
 )
 }
 \arguments{
@@ -38,9 +41,19 @@ information.}
 \item{...}{Arguments to be passed through to \code{\link[grDevices:png]{grDevices::png()}}.
 These can be used to set the width, height, background color, etc.}
 
+\item{alt}{Alternate text for the HTML \verb{<img>} tag
+if it cannot be displayed or viewed (i.e., the user uses a screen reader).
+In addition to a character string, the value may be a reactive expression
+(or a function referencing reactive values) that returns a character string.
+NULL or "" is not recommended because those should be limited to decorative images
+(the default is "Plot object").}
+
 \item{outputArgs}{A list of arguments to be passed through to the implicit
 call to \code{\link[=plotOutput]{plotOutput()}} when \code{renderPlot} is used in an
 interactive R Markdown document.}
+
+\item{width, height}{not used. They are specified via the argument
+\code{sizePolicy}.}
 }
 \description{
 Renders a reactive plot, with plot images cached to disk.

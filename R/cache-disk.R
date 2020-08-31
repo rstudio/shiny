@@ -130,8 +130,8 @@
 #' if an object is in the cache, and then call `get(key)`, the object may
 #' be removed from the cache in between those two calls, and `get(key)`
 #' will throw an error. Instead of calling the two functions, it is better to
-#' simply call `get(key)`, and use `tryCatch()` to handle the error
-#' that is thrown if the object is not in the cache. This effectively tests for
+#' simply call `get(key)`, and check that the returned object is not a
+#' `key_missing()` object, using `is.key_missing()`. This effectively tests for
 #' existence and gets the object in one operation.
 #'
 #' It is also possible for one processes to prune objects at the same time that

@@ -295,9 +295,9 @@ renderCachedPlot <- function(expr,
   cacheKeyExpr,
   sizePolicy = sizeGrowthRatio(width = 400, height = 400, growthRate = 1.2),
   res = 72,
-  alt = "Plot object",
   cache = "app",
   ...,
+  alt = "Plot object",
   outputArgs = list(),
   width = NULL,
   height = NULL
@@ -406,7 +406,7 @@ renderCachedPlot <- function(expr,
           width  <- fitDims$width
           height <- fitDims$height
           # Make sure alt text to be reactive function
-          alt <- altWrapper() 
+          alt <- altWrapper()
         })
 
         pixelratio <- session$clientData$pixelratio %OR% 1

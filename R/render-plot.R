@@ -38,7 +38,7 @@
 #'   rendering in R; it won't change the actual ppi of the browser.
 #' @param alt Alternate text for the HTML `<img>` tag
 #'   if it cannot be displayed or viewed (i.e., the user uses a screen reader).
-#'   In addition to a character string, the value may be a reactive expression 
+#'   In addition to a character string, the value may be a reactive expression
 #'   (or a function referencing reactive values) that returns a character string.
 #'   NULL or "" is not recommended because those should be limited to decorative images
 #'   (the default is "Plot object").
@@ -57,9 +57,10 @@
 #'   call to [plotOutput()] when `renderPlot` is used in an
 #'   interactive R Markdown document.
 #' @export
-renderPlot <- function(expr, width='auto', height='auto', res=72, alt="Plot object", ...,
-                       env=parent.frame(), quoted=FALSE,
-                       execOnResize=FALSE, outputArgs=list()
+renderPlot <- function(expr, width = 'auto', height = 'auto', res = 72, ...,
+                       alt = "Plot object",
+                       env = parent.frame(), quoted = FALSE,
+                       execOnResize = FALSE, outputArgs = list()
 ) {
   # This ..stacktraceon is matched by a ..stacktraceoff.. when plotFunc
   # is called

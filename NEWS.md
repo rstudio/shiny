@@ -1,6 +1,8 @@
 shiny 1.5.0.9000
 ================
 
+* `testServer()` can accept a single server function as input (#2965).
+
 shiny 1.5.0
 ===========
 

@@ -4,7 +4,7 @@
 #' interactions are defined in the server function of applications and in
 #' modules.
 #' @param app A server function (i.e. a function with `input`, `output`,
-#'   and `session()`), or a module function (i.e. a function with first
+#'   and `session`), or a module function (i.e. a function with first
 #'   argument `id` that calls [moduleServer()].
 #'
 #'   You can also provide an app, a path an app, or anything that

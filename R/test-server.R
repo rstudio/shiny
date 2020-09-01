@@ -1,11 +1,3 @@
-isModuleServer <- function(x) {
-  is.function(x) && names(formals(x))[1] == "id"
-}
-
-isServer <- function(x) {
-  is.function(x) && all(c("input", "output", "session") %in% names(formals(x)))
-}
-
 #' Reactive testing for Shiny server functions and modules
 #'
 #' A way to test the reactive interactions in Shiny applications. Reactive
@@ -144,4 +136,23 @@ withMockContext <- function(session, expr) {
       })
     })
   )
+}
+
+
+# Helpers -----------------------------------------------------------------
+
+isModuleServer <- function(x) {
+  is.function(x) && names(formals(x))[[1]] == "id"
+}
+
+isServer <- function(x) {
+  if (!is.function(x)) {
+    return(FALSE)
+  }
+
+  if (length(formals(x)) < 3) {
+    return(FALSE)
+  }
+
+  identical(names(formals(x))[1:3], c("input", "output", "session"))
 }

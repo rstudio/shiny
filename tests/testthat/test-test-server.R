@@ -811,3 +811,13 @@ test_that("renderCachedPlot with cache = app and cache = session works", {
     expect_equal(timesRendered, 1)
   }, args = list(cache = "app", callback = callback))
 })
+
+
+# Helpers -----------------------------------------------------------------
+
+test_that("isServer is only returns true for server funtions", {
+  expect_false(isServer(10))
+  expect_false(isServer(function(x) {}))
+  expect_false(isServer(function(output, session, input) {}))
+  expect_true(isServer(function(input, output, session) {}))
+})

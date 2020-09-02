@@ -387,7 +387,7 @@ DiskCache <- R6Class("DiskCache",
       # is because it is expensive to find the size of the serialized object
       # before adding it.
 
-      private$log(paste0('prune'))
+      private$log('prune')
       self$is_destroyed(throw = TRUE)
 
       current_time <- Sys.time()

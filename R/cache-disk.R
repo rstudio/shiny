@@ -407,7 +407,11 @@ DiskCache <- R6Class("DiskCache",
         rm_idx <- timediff > private$max_age
         if (any(rm_idx)) {
           private$log(paste0("prune max_age: Removing ", paste(info$name[rm_idx], collapse = ", ")))
-          file.remove(info$name[rm_idx])
+          rm_success <- file.remove(info$name[rm_idx])
+          # This maps rm_success back into the TRUEs in the rm_idx vector.
+          # If (for example) rm_idx is c(F,T,F,T,T) and rm_success is c(T,F,T),
+          # then this line modifies rm_idx to be c(F,T,F,F,T).
+          rm_idx[rm_idx] <- rm_success
           info <- info[!rm_idx, ]
         }
       }
@@ -428,7 +432,8 @@ DiskCache <- R6Class("DiskCache",
         rm_idx <- seq_len(nrow(info)) > private$max_n
         private$log(paste0("prune max_n: Removing ", paste(info$name[rm_idx], collapse = ", ")))
         rm_success <- file.remove(info$name[rm_idx])
-        info <- info[!rm_success, ]
+        rm_idx[rm_idx] <- rm_success
+        info <- info[!rm_idx, ]
       }
 
       # 3. Remove files if cache is too large.
@@ -438,7 +443,8 @@ DiskCache <- R6Class("DiskCache",
         rm_idx <- cum_size > private$max_size
         private$log(paste0("prune max_size: Removing ", paste(info$name[rm_idx], collapse = ", ")))
         rm_success <- file.remove(info$name[rm_idx])
-        info <- info[!rm_success, ]
+        rm_idx[rm_idx] <- rm_success
+        info <- info[!rm_idx, ]
       }
 
       private$prune_last_time <- as.numeric(current_time)

@@ -40,6 +40,8 @@ shiny 1.5.0.9000
 
 * Fixed #1942: Calling `runApp("app.R")` no longer ignores options passed into `shinyApp()`. This makes it possible for Shiny apps to specify what port/host should be used by default. (#2969)
 
+* Fixed #3033: When a `DiskCache` was created with both `max_n` and `max_size`, too many items could get pruned when `prune()` was called. (#3034)
+
 ### Library updates
 
 * Removed html5shiv and respond.js, which were used for IE 8 and IE 9 compatibility. (#2973)

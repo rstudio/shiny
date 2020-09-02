@@ -22,7 +22,8 @@
 #' @inheritParams textInput
 #' @param value The starting date. Either a Date object, or a string in
 #'   `yyyy-mm-dd` format. If NULL (the default), will use the current date
-#'   in the client's time zone.
+#'   in the client's time zone. Note that `value` is required if you set
+#'   both a `min` and a `max`.
 #' @param min The minimum allowed date. Either a Date object, or a string in
 #'   `yyyy-mm-dd` format.
 #' @param max The maximum allowed date. Either a Date object, or a string in
@@ -95,6 +96,12 @@ dateInput <- function(inputId, label, value = NULL, min = NULL, max = NULL,
   format = "yyyy-mm-dd", startview = "month", weekstart = 0,
   language = "en", width = NULL, autoclose = TRUE,
   datesdisabled = NULL, daysofweekdisabled = NULL) {
+
+  # Following https://github.com/rstudio/shiny/issues/3036, input binding will
+  #  error if `min` & `max` are set but not `value`
+  if (is.null(value) && !is.null(min) && !is.null(max)){
+    stop("`value` is required when `min` and `max` are set")
+  }
 
   value <- dateYMD(value, "value")
   min <- dateYMD(min, "min")

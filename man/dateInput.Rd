@@ -27,7 +27,8 @@ dateInput(
 
 \item{value}{The starting date. Either a Date object, or a string in
 \code{yyyy-mm-dd} format. If NULL (the default), will use the current date
-in the client's time zone.}
+in the client's time zone. Note that \code{value} is required if you set
+both a \code{min} and a \code{max}.}
 
 \item{min}{The minimum allowed date. Either a Date object, or a string in
 \code{yyyy-mm-dd} format.}

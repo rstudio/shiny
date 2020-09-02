@@ -150,25 +150,13 @@ $.extend(dateInputBinding, {
     date = this._UTCDateAsLocal(date);
     if (isNaN(date))
       return;
-    // Workaround for https://github.com/eternicode/bootstrap-datepicker/issues/2010
-    // If the start date when there's a two-digit year format, it will set
-    // the date value to null. So we'll save the value, set the start
-    // date, and the restore the value.
+    // Workarounds for
+    // https://github.com/eternicode/bootstrap-datepicker/issues/2010
+    // https://github.com/rstudio/shiny/issues/2335
     var curValue = $(el).bsDatepicker('getUTCDate');
-    $(el).bsDatepicker('setStartDate', date);
+    $(el).bsDatepicker('setStartDate', null);
     $(el).bsDatepicker('setUTCDate', curValue);
-
-    // Workaround for https://github.com/rstudio/shiny/issues/2335
-    // We only set the start date *after* the value in this special
-    // case so we don't effect the intended behavior of having a blank
-    // value when it falls outside the start date
-    if (typeof date.toDateString !== 'function') return;
-    if (typeof curValue.toDateString !== 'function') return;
-    if (date.toDateString() === curValue.toDateString()) {
-      $(el).bsDatepicker('setStartDate', null);
-      $(el).bsDatepicker('setUTCDate', curValue);
-      $(el).bsDatepicker('setStartDate', date);
-    }
+    $(el).bsDatepicker('setStartDate', date);
   },
   // Given an unambiguous date string or a Date object, set the max (end) date
   // null will unset.
@@ -191,17 +179,9 @@ $.extend(dateInputBinding, {
 
     // Workaround for same issue as in _setMin.
     var curValue = $(el).bsDatepicker('getUTCDate');
-    $(el).bsDatepicker('setEndDate', date);
+    $(el).bsDatepicker('setEndDate', null);
     $(el).bsDatepicker('setUTCDate', curValue);
-
-    // Workaround for same issue as in _setMin.
-    if (typeof date.toDateString !== 'function') return;
-    if (typeof curValue.toDateString !== 'function') return;
-    if (date.toDateString() === curValue.toDateString()) {
-      $(el).bsDatepicker('setEndDate', null);
-      $(el).bsDatepicker('setUTCDate', curValue);
-      $(el).bsDatepicker('setEndDate', date);
-    }
+    $(el).bsDatepicker('setEndDate', date);
   },
   // Given a date string of format yyyy-mm-dd, return a Date object with
   // that date at 12AM UTC.

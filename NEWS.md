@@ -34,6 +34,8 @@ shiny 1.5.0.9000
 
 * Removed unused (and non-exported) `cacheContext` class.
 
+* `testServer()` can accept a single server function as input (#2965).
+
 ### Bug fixes
 
 * Fixed #2859: `renderPlot()` wasn't correctly setting `showtext::showtext_opts()`'s `dpi` setting with the correct resolution on high resolution displays; which means, if the font was rendered by showtext, font sizes would look smaller than they should on such displays. (#2941)

@@ -372,35 +372,35 @@ isTemp <- function(path, tempDir = tempdir(), mustExist) {
   return(substr(path, 1, nchar(tempDir)) == tempDir)
 }
 
-#' Printable Output
+#' Text Output
 #'
-#' Makes a reactive version of the given function that captures any printed
-#' output, and also captures its printable result (unless
-#' [base::invisible()]), into a string. The resulting function is suitable
-#' for assigning to an  `output` slot.
+#' @description
+#' `renderPrint()` prints the result of `expr`, while `renderText()` pastes it
+#' together into a single string. `renderPrint()` is equivalent to [print()];
+#' `renderText()` is equivalent to [cat()]. Both functions capture all other
+#' printed output generated while evaluating `expr`.
 #'
+#' `renderPrint()` is usually paired with [verbatimTextOutput()];
+#' `renderText()` is usually paired with [textOutput()].
+#'
+#' @details
 #' The corresponding HTML output tag can be anything (though `pre` is
 #' recommended if you need a monospace font and whitespace preserved) and should
 #' have the CSS class name `shiny-text-output`.
 #'
-#' The result of executing `func` will be printed inside a
-#' [utils::capture.output()] call.
+#' @return
+#' For `renderPrint()`, note the given expression returns `NULL` then `NULL`
+#' will actually be visible in the output. To display nothing, make your
+#' function return [invisible()].
 #'
-#' Note that unlike most other Shiny output functions, if the given function
-#' returns `NULL` then `NULL` will actually be visible in the output.
-#' To display nothing, make your function return [base::invisible()].
-#'
-#' @param expr An expression that may print output and/or return a printable R
-#'   object.
-#' @param env The environment in which to evaluate `expr`.
+#' @param expr An expression to evaluate.
+#' @param env The environment in which to evaluate `expr`. For expert use only.
 #' @param quoted Is `expr` a quoted expression (with `quote()`)? This
 #'   is useful if you want to save an expression in a variable.
-#' @param width The value for `[options][base::options]('width')`.
+#' @param width Width of printed output.
 #' @param outputArgs A list of arguments to be passed through to the implicit
-#'   call to [verbatimTextOutput()] when `renderPrint` is used
-#'   in an interactive R Markdown document.
-#' @seealso [renderText()] for displaying the value returned from a
-#'   function, instead of the printed output.
+#'   call to [verbatimTextOutput()] or [textOutput()] when the functions are
+#'   used in an interactive RMarkdown document.
 #'
 #' @example res/text-example.R
 #' @export
@@ -476,35 +476,10 @@ createRenderPrintPromiseDomain <- function(width) {
   )
 }
 
-#' Text Output
-#'
-#' Makes a reactive version of the given function that also uses
-#' [base::cat()] to turn its result into a single-element character
-#' vector.
-#'
-#' The corresponding HTML output tag can be anything (though `pre` is
-#' recommended if you need a monospace font and whitespace preserved) and should
-#' have the CSS class name `shiny-text-output`.
-#'
-#' The result of executing `func` will passed to `cat`, inside a
-#' [utils::capture.output()] call.
-#'
-#' @param expr An expression that returns an R object that can be used as an
-#'   argument to `cat`.
-#' @param env The environment in which to evaluate `expr`.
-#' @param quoted Is `expr` a quoted expression (with `quote()`)? This
-#'   is useful if you want to save an expression in a variable.
-#' @param outputArgs A list of arguments to be passed through to the implicit
-#'   call to [textOutput()] when `renderText` is used in an
-#'   interactive R Markdown document.
 #' @param sep A separator passed to `cat` to be appended after each
 #'   element.
-#'
-#' @seealso [renderPrint()] for capturing the print output of a
-#'   function, rather than the returned text value.
-#'
-#' @example res/text-example.R
 #' @export
+#' @rdname renderPrint
 renderText <- function(expr, env=parent.frame(), quoted=FALSE,
                        outputArgs=list(), sep=" ") {
   installExprFunction(expr, "func", env, quoted)

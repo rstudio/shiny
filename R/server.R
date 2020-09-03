@@ -71,7 +71,8 @@ registerClient <- function(client) {
 #' @export
 addResourcePath <- function(prefix, directoryPath) {
   if (length(prefix) != 1) stop("prefix must be of length 1")
-  if (!grepl('^[a-z0-9\\-_][a-z0-9\\-_.]*$', prefix, ignore.case = TRUE, perl = TRUE)) {
+  if (grepl("^\\.+$", prefix)) stop("prefix can't be composed of dots only")
+  if (!grepl('[a-z0-9\\-_.]+$', prefix, ignore.case = TRUE, perl = TRUE)) {
     stop("addResourcePath called with invalid prefix; please see documentation")
   }
   if (prefix %in% c('shared')) {
@@ -786,6 +787,15 @@ runApp <- function(appDir=getwd(),
     shinyOptions(cache = MemoryCache$new())
   }
 
+  # Invoke user-defined onStop callbacks, before the application's internal
+  # onStop callbacks.
+  on.exit({
+    .globals$onStopCallbacks$invoke()
+    .globals$onStopCallbacks <- Callbacks$new()
+  }, add = TRUE)
+
+  require(shiny)
+
   appParts <- as.shiny.appobj(appDir)
 
   # The lines below set some of the app's running options, which
@@ -899,8 +909,6 @@ runApp <- function(appDir=getwd(),
     setShowcaseDefault(1)
   }
 
-  require(shiny)
-
   # determine port if we need to
   if (is.null(port)) {
 
@@ -938,13 +946,6 @@ runApp <- function(appDir=getwd(),
       }
     }
   }
-
-  # Invoke user-defined onStop callbacks, before the application's internal
-  # onStop callbacks.
-  on.exit({
-    .globals$onStopCallbacks$invoke()
-    .globals$onStopCallbacks <- Callbacks$new()
-  }, add = TRUE)
 
   # Extract appOptions (which is a list) and store them as shinyOptions, for
   # this app. (This is the only place we have to store settings that are
@@ -1055,8 +1056,6 @@ stopApp <- function(returnValue = invisible()) {
 #'
 #' @param example The name of the example to run, or `NA` (the default) to
 #'   list the available examples.
-#' @param port The TCP port that the application should listen on. Defaults to
-#'   choosing a random port.
 #' @param launch.browser If true, the system's default web browser will be
 #'   launched automatically after the app is started. Defaults to true in
 #'   interactive sessions only.
@@ -1065,6 +1064,7 @@ stopApp <- function(returnValue = invisible()) {
 #' @param display.mode The mode in which to display the example. Defaults to
 #'   `showcase`, but may be set to `normal` to see the example without
 #'   code or commentary.
+#' @inheritParams runApp
 #'
 #' @examples
 #' ## Only run this example in interactive R sessions
@@ -1080,7 +1080,7 @@ stopApp <- function(returnValue = invisible()) {
 #' }
 #' @export
 runExample <- function(example=NA,
-                       port=NULL,
+                       port=getOption("shiny.port"),
                        launch.browser=getOption('shiny.launch.browser',
                                                 interactive()),
                        host=getOption('shiny.host', '127.0.0.1'),

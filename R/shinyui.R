@@ -24,7 +24,7 @@ withMathJax <- function(...) {
   )
 }
 
-renderPage <- function(ui, connection, showcase=0, testMode=FALSE) {
+renderPage <- function(ui, showcase=0, testMode=FALSE) {
   # If the ui is a NOT complete document (created by htmlTemplate()), then do some
   # preprocessing and make sure it's a complete document.
   if (!inherits(ui, "html_document")) {
@@ -77,7 +77,7 @@ renderPage <- function(ui, connection, showcase=0, testMode=FALSE) {
   }
 
   html <- renderDocument(ui, shiny_deps, processDep = createWebDependency)
-  writeUTF8(html, con = connection)
+  enc2utf8(paste(collapse = "\n", html))
 }
 
 #' Create a Shiny UI handler
@@ -101,15 +101,17 @@ uiHttpHandler <- function(ui, uiPattern = "^/$") {
 
   force(ui)
 
+  allowed_methods <- "GET"
+  if (is.function(ui)) {
+    allowed_methods <- attr(ui, "http_methods_supported", exact = TRUE) %OR% allowed_methods
+  }
+
   function(req) {
-    if (!identical(req$REQUEST_METHOD, 'GET'))
+    if (!isTRUE(req$REQUEST_METHOD %in% allowed_methods))
       return(NULL)
 
     if (!isTRUE(grepl(uiPattern, req$PATH_INFO)))
       return(NULL)
-
-    textConn <- file(open = "w+")
-    on.exit(close(textConn))
 
     showcaseMode <- .globals$showcaseDefault
     if (.globals$showcaseOverride) {
@@ -150,8 +152,11 @@ uiHttpHandler <- function(ui, uiPattern = "^/$") {
     if (is.null(uiValue))
       return(NULL)
 
-    renderPage(uiValue, textConn, showcaseMode, testMode)
-    html <- paste(readLines(textConn, encoding = 'UTF-8'), collapse='\n')
-    return(httpResponse(200, content=enc2utf8(html)))
+    if (inherits(uiValue, "httpResponse")) {
+      return(uiValue)
+    } else {
+      html <- renderPage(uiValue, showcaseMode, testMode)
+      return(httpResponse(200, content=html))
+    }
   }
 }

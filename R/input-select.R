@@ -241,7 +241,7 @@ selectizeCSSFile <- function() {
       "selectize.bootstrap4.scss"
     }
   )
-  outFile <- bootstrapSass(sass::sass_file(scss), pattern = "selectize-")
+  outFile <- bootstrapSass(sass::sass_file(scss), basename = "selectize")
   list(file = dirname(outFile), stylesheet = basename(outFile))
 }
 

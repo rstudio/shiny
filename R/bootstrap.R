@@ -50,8 +50,8 @@ useBsTheme <- function() {
   if (!isTRUE(getShinyOption("bootstraplib"))) {
     return(FALSE)
   }
-  if (!is_available("bootstraplib")) {
-    stop("Shiny's bootstraplib option requires the bootstraplib package to be installed.", call. = FALSE)
+  if (!is_available("bootstraplib", "0.1.0.9001")) {
+    stop("Shiny's bootstraplib option requires version 0.1.0.9001 of the bootstraplib package.", call. = FALSE)
   }
   if (is.null(bootstraplib::bs_theme_get())) {
     stop("Shiny's bootstraplib option requires a bootstraplib theme to be active. Initialize one with `bootstraplib::bs_theme_new()`.", call. = FALSE)
@@ -60,17 +60,16 @@ useBsTheme <- function() {
 }
 
 # Reusable function for input widgets to compile their Sass against a bootstraplib theme
-bootstrapSass <- function(sassInput, pattern = "file", ...) {
-  # TODO: outFile should eventually become something like
-  # file.path(tempdir(), paste(pattern, "-", sass::hash(sassInput), ".min.css"))
-  outFile <- tempfile(pattern = pattern, fileext = ".min.css")
+bootstrapSass <- function(sassInput, basename, pattern = "shiny-sass-",
+                          write_attachments = FALSE, ...) {
   bootstraplib::bootstrap_sass(
-    sassInput, output = outFile, ...,
-    options = sass::sass_options(output_style = "compressed")
+    sassInput, ...,
+    output = sass::output_file(basename = basename, pattern = pattern),
+    options = sass::sass_options(output_style = "compressed"),
+    write_attachments = write_attachments,
+    cache_key_extra = utils::packageVersion("shiny")
   )
-  outFile
 }
-
 
 
 #' Bootstrap libraries

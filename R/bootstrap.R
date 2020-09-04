@@ -60,11 +60,11 @@ useBsTheme <- function() {
 }
 
 # Reusable function for input widgets to compile their Sass against a bootstraplib theme
-bootstrapSass <- function(sassInput, basename, pattern = "shiny-sass-",
+bootstrapSass <- function(sassInput, basename, dirname = "shiny-sass-",
                           write_attachments = FALSE, ...) {
   bootstraplib::bootstrap_sass(
     sassInput, ...,
-    output = sass::output_file(basename = basename, pattern = pattern),
+    output = sass::output_file(basename = basename, dirname = dirname),
     options = sass::sass_options(output_style = "compressed"),
     write_attachments = write_attachments,
     cache_key_extra = utils::packageVersion("shiny")

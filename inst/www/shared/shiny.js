@@ -4569,6 +4569,42 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       var timeFormat = $el.data('time-format');
       var timezone = $el.data('timezone');
       opts.prettify = getTypePrettifyer(dataType, timeFormat, timezone);
+
+      function setAriaLabels(el, label, value, min, max) {
+        if (!el.length) return;
+        el.attr({
+          "role": "slider",
+          "tabindex": "0",
+          "aria-labelledby": label,
+          "aria-valuenow": value,
+          "aria-valuemin": min,
+          "aria-valuemax": max
+        });
+      }
+
+      ; // Ensure accessibility labels are updated when the slider updates (programmatically or interactively)
+
+      function updateAriaLabels(data) {
+        var isSingleValue = !data.input.data("to");
+        var line = data.slider.find(".irs-line");
+        var label = el.id + "-label";
+
+        if (isSingleValue) {
+          setAriaLabels(line, label, data.from, data.min, data.max);
+          return;
+        }
+
+        line.attr("tabindex", "-1");
+        var from = data.slider.find(".irs-from");
+        setAriaLabels(from, label + "-upper", data.from, data.min, data.max);
+        var to = data.slider.find(".irs-to");
+        setAriaLabels(to, label + "-lower", data.to, data.min, data.max);
+      }
+
+      ;
+      opts.onStart = updateAriaLabels;
+      opts.onChange = updateAriaLabels;
+      opts.onUpdate = updateAriaLabels;
       $el.ionRangeSlider(opts);
     },
     _getLabelNode: function _getLabelNode(el) {

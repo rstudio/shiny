@@ -42,16 +42,60 @@ bootstrapPage <- function(..., title = NULL, responsive = NULL, theme = NULL) {
       # remainder of tags passed to the function
       list(...)
     ),
-    if (useBsTheme()) bootstraplib::bootstrap() else bootstrapLib()
+    bootstrapLib_()
   )
+}
+
+#' Bootstrap libraries
+#'
+#' This function is deprecated in favor of [bootstraplib::bootstrap()], which
+#' provides a more fully featured approach to accessing and theming Bootstrap
+#' CSS. Note that most users won't need to call this function directly since
+#' [bootstrapPage()] and it's special cases ( e.g., [fluidPage()],
+#' [basicPage()], [navbarPage()], etc) implicitly depend on Bootstrap.
+#'
+#' @param theme deprecated (it never worked).
+#' @export
+#' @keywords internal
+bootstrapLib <- function(theme = NULL) {
+  if (!is.null(theme)) {
+    stop("shiny::bootstrapLib()'s theme argument never worked as intended, don't use it.")
+  }
+  shinyDeprecated("bootstraplib::bootstrap()", old = "shiny::bootstrapLib()")
+  bootstrapLib_()
+}
+
+bootstrapLib_ <- function() {
+  if (useBsTheme()) {
+    bootstraplib::bootstrap()
+  } else {
+    htmlDependency(
+      "bootstrap", "3.4.1",
+      c(
+        href = "shared/bootstrap",
+        file = system.file("www/shared/bootstrap", package = "shiny")
+      ),
+      script = c(
+        "js/bootstrap.min.js",
+        # Safely adding accessibility plugin for screen readers and keyboard users; no break for sighted aspects (see https://github.com/paypal/bootstrap-accessibility-plugin)
+        "accessibility/js/bootstrap-accessibility.min.js"
+      ),
+      stylesheet = c(
+        "css/bootstrap.min.css",
+        # Safely adding accessibility plugin for screen readers and keyboard users; no break for sighted aspects (see https://github.com/paypal/bootstrap-accessibility-plugin)
+        "accessibility/css/bootstrap-accessibility.css"
+      ),
+      meta = list(viewport = "width=device-width, initial-scale=1")
+    )
+  }
 }
 
 useBsTheme <- function() {
   if (!isTRUE(getShinyOption("bootstraplib"))) {
     return(FALSE)
   }
-  if (!is_available("bootstraplib")) {
-    stop("Shiny's bootstraplib option requires the bootstraplib package to be installed.", call. = FALSE)
+  if (!is_available("bootstraplib", "0.1.0.9001")) {
+    stop("Shiny's bootstraplib option requires version 0.1.0.9001 of the bootstraplib package.", call. = FALSE)
   }
   if (is.null(bootstraplib::bs_theme_get())) {
     stop("Shiny's bootstraplib option requires a bootstraplib theme to be active. Initialize one with `bootstraplib::bs_theme_new()`.", call. = FALSE)
@@ -60,51 +104,17 @@ useBsTheme <- function() {
 }
 
 # Reusable function for input widgets to compile their Sass against a bootstraplib theme
-bootstrapSass <- function(sassInput, pattern = "file", ...) {
-  # TODO: outFile should eventually become something like
-  # file.path(tempdir(), paste(pattern, "-", sass::hash(sassInput), ".min.css"))
-  outFile <- tempfile(pattern = pattern, fileext = ".min.css")
+bootstrapSass <- function(sassInput, basename, dirname = "shiny-sass-",
+                          write_attachments = FALSE, ...) {
   bootstraplib::bootstrap_sass(
-    sassInput, output = outFile, ...,
-    options = sass::sass_options(output_style = "compressed")
-  )
-  outFile
-}
-
-
-
-#' Bootstrap libraries
-#'
-#' This function returns a set of web dependencies necessary for using Bootstrap
-#' components in a web page.
-#'
-#' It isn't necessary to call this function if you use
-#' [bootstrapPage()] or others which use `bootstrapPage`, such
-#' [basicPage()], [fluidPage()], [fillPage()],
-#' [pageWithSidebar()], and [navbarPage()], because they
-#' already include the Bootstrap web dependencies.
-#'
-#' @inheritParams bootstrapPage
-#' @export
-bootstrapLib <- function(theme = NULL) {
-  htmlDependency("bootstrap", "3.4.1",
-    c(
-      href = "shared/bootstrap",
-      file = system.file("www/shared/bootstrap", package = "shiny")
-    ),
-    script = c(
-      "js/bootstrap.min.js",
-      # Safely adding accessibility plugin for screen readers and keyboard users; no break for sighted aspects (see https://github.com/paypal/bootstrap-accessibility-plugin)
-      "accessibility/js/bootstrap-accessibility.min.js"
-    ),
-    stylesheet = if (is.null(theme)) c(
-      "css/bootstrap.min.css",
-      # Safely adding accessibility plugin for screen readers and keyboard users; no break for sighted aspects (see https://github.com/paypal/bootstrap-accessibility-plugin)
-      "accessibility/css/bootstrap-accessibility.css"
-    ),
-    meta = list(viewport = "width=device-width, initial-scale=1")
+    sassInput, ...,
+    output = sass::output_template(basename = basename, dirname = dirname),
+    options = sass::sass_options(output_style = "compressed"),
+    write_attachments = write_attachments,
+    cache_key_extra = utils::packageVersion("shiny")
   )
 }
+
 
 #' @rdname bootstrapPage
 #' @export

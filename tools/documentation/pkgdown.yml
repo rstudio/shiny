@@ -95,7 +95,6 @@ reference:
       - validateCssUnit
       - withTags
       - htmlTemplate
-      - bootstrapLib
       - suppressDependencies
       - insertUI
       - markdown
@@ -189,7 +188,6 @@ reference:
       - snapshotPreprocessOutput
       - markOutputAttrs
       - repeatable
-      - shinyDeprecated
       - serverInfo
       - onStop
       - diskCache

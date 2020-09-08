@@ -219,7 +219,7 @@ selectizeDependency <- function() {
   cssFile <- selectizeCSSFile()
   htmlDependency(
     "selectize", "0.12.4",
-    c(href = cssFile$href, file = cssFile$file),
+    src = cssFile$src,
     stylesheet = cssFile$stylesheet,
     head = format(tagList(
       tags$script(src = 'shared/selectize/js/selectize.min.js'),
@@ -231,7 +231,7 @@ selectizeDependency <- function() {
 
 selectizeCSSFile <- function() {
   if (!useBsTheme()) {
-    return(list(href = "shared/selectize", stylesheet = "css/selectize.bootstrap3.css"))
+    return(list(src = c(href = "shared/selectize"), stylesheet = "css/selectize.bootstrap3.css"))
   }
   scss <- system.file(
     package = "shiny", "www", "shared", "selectize", "scss",
@@ -242,7 +242,7 @@ selectizeCSSFile <- function() {
     }
   )
   outFile <- bootstrapSass(sass::sass_file(scss), basename = "selectize")
-  list(file = dirname(outFile), stylesheet = basename(outFile))
+  list(src = c(file = dirname(outFile)), stylesheet = basename(outFile))
 }
 
 

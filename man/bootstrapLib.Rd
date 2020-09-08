@@ -7,17 +7,13 @@
 bootstrapLib(theme = NULL)
 }
 \arguments{
-\item{theme}{Alternative Bootstrap stylesheet (normally a css file within the
-www directory, e.g. \code{www/bootstrap.css})}
+\item{theme}{deprecated (it never worked).}
 }
 \description{
-This function returns a set of web dependencies necessary for using Bootstrap
-components in a web page.
+This function is deprecated in favor of \code{\link[bootstraplib:bootstrap]{bootstraplib::bootstrap()}}, which
+provides a more fully featured approach to accessing and theming Bootstrap
+CSS. Note that most users won't need to call this function directly since
+\code{\link[=bootstrapPage]{bootstrapPage()}} and it's special cases ( e.g., \code{\link[=fluidPage]{fluidPage()}},
+\code{\link[=basicPage]{basicPage()}}, \code{\link[=navbarPage]{navbarPage()}}, etc) implicitly depend on Bootstrap.
 }
-\details{
-It isn't necessary to call this function if you use
-\code{\link[=bootstrapPage]{bootstrapPage()}} or others which use \code{bootstrapPage}, such
-\code{\link[=basicPage]{basicPage()}}, \code{\link[=fluidPage]{fluidPage()}}, \code{\link[=fillPage]{fillPage()}},
-\code{\link[=pageWithSidebar]{pageWithSidebar()}}, and \code{\link[=navbarPage]{navbarPage()}}, because they
-already include the Bootstrap web dependencies.
-}
+\keyword{internal}

@@ -106,7 +106,9 @@ Suggests:
     showtext,
     sass,
     bootstraplib (>= 0.1.0.9001)
-Remotes: rstudio/bootstraplib
+Remotes: 
+    rstudio/sass,
+    rstudio/bootstraplib
 URL: http://shiny.rstudio.com
 BugReports: https://github.com/rstudio/shiny/issues
 Collate:

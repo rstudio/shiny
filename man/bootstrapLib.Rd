@@ -10,9 +10,10 @@ bootstrapLib(theme = NULL)
 \item{theme}{deprecated (it never worked).}
 }
 \description{
-\Sexpr[results=rd, stage=render]{lifecycle::badge("superseded")}
-
-See \code{\link[bootstraplib:bootstrap]{bootstraplib::bootstrap()}} for a modern alternative for accessing
-Bootstrap's HTML dependencies.
+This function is deprecated in favor of \code{\link[bootstraplib:bootstrap]{bootstraplib::bootstrap()}}, which
+provides a more fully featured approach to accessing and theming Bootstrap
+CSS. Note that most users won't need to call this function directly since
+\code{\link[=bootstrapPage]{bootstrapPage()}} and it's special cases ( e.g., \code{\link[=fluidPage]{fluidPage()}},
+\code{\link[=basicPage]{basicPage()}}, \code{\link[=navbarPage]{navbarPage()}}, etc) implicitly depend on Bootstrap.
 }
 \keyword{internal}

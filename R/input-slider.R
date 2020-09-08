@@ -215,7 +215,7 @@ ionRangeSliderDependencies <- function() {
     # ion.rangeSlider also needs normalize.css, which is already included in Bootstrap.
     htmlDependency(
       "ionrangeslider-css", version,
-      src = c(href = cssFile$href, file = cssFile$file),
+      src = cssFile$src,
       stylesheet = cssFile$stylesheet
     ),
     htmlDependency(
@@ -233,7 +233,7 @@ ionRangeSliderDependencies <- function() {
 
 ionRangeSliderCSSFile <- function() {
   if (!useBsTheme()) {
-    return(list(stylesheet = "css/ion.rangeSlider.css", href = "shared/ionrangeslider"))
+    return(list(stylesheet = "css/ion.rangeSlider.css", src = c(href = "shared/ionrangeslider")))
   }
   sassInput <- list(
     list(
@@ -244,8 +244,8 @@ ionRangeSliderCSSFile <- function() {
       system.file(package = "shiny", "www", "shared", "ionrangeslider", "scss", "shiny.scss")
     )
   )
-  outFile <- bootstrapSass(sassInput, pattern = "ion.rangeslider-")
-  list(stylesheet = basename(outFile), file = dirname(outFile))
+  outFile <- bootstrapSass(sassInput, basename = "ionRangeSlider")
+  list(stylesheet = basename(outFile), src = c(file = dirname(outFile)))
 }
 
 hasDecimals <- function(value) {

@@ -138,13 +138,15 @@ datePickerDependencies <- function() {
 
   list(
     htmlDependency(
-      "bootstrap-datepicker-css", version,
-      c(href = cssFile$href, file = cssFile$file),
+      name = "bootstrap-datepicker-css",
+      version = version,
+      src = cssFile$src,
       stylesheet = cssFile$stylesheet
     ),
     htmlDependency(
-      "bootstrap-datepicker-js", version,
-      c(href = "shared/datepicker"),
+      name = "bootstrap-datepicker-js",
+      version = version,
+      src = c(href = "shared/datepicker"),
       script = "js/bootstrap-datepicker.min.js",
       # Need to enable noConflict mode. See #1346.
       head = "<script>(function() {
@@ -158,9 +160,9 @@ datePickerDependencies <- function() {
 
 datePickerCssFile <- function() {
   if (!useBsTheme()) {
-    return(list(href = "shared/datepicker", stylesheet = "css/bootstrap-datepicker3.min.css"))
+    return(list(src = c(href = "shared/datepicker"), stylesheet = "css/bootstrap-datepicker3.min.css"))
   }
   scss <- system.file(package = "shiny", "www", "shared", "datepicker", "scss", "build3.scss")
   outFile <- bootstrapSass(sass::sass_file(scss), pattern = "bootstrap-datepicker-")
-  list(file = dirname(outFile), stylesheet = basename(outFile))
+  list(src = c(file = dirname(outFile)), stylesheet = basename(outFile))
 }

@@ -5,10 +5,23 @@ $.extend(radioInputBinding, {
   },
   getValue: function(el) {
     // Select the radio objects that have name equal to the grouping div's id
-    return $('input:radio[name="' + $escape(el.id) + '"]:checked').val();
+    var value = $('input:radio[name="' + $escape(el.id) + '"]:checked').val();
+    // If none are checked, the input will return null (it's the default on load,
+    // but it wasn't emptied when calling updateRadioButtons with character(0)
+    if (value) {
+      return value
+    } else {
+      return null
+    }
   },
   setValue: function(el, value) {
-    $('input:radio[name="' + $escape(el.id) + '"][value="' + $escape(value) + '"]').prop('checked', true);
+    if (value.length === 0){
+      // Removing all checked item if the sent data is empty
+      $('input:radio[name="' + $escape(el.id) + '"]').prop('checked', false);
+    } else {
+      $('input:radio[name="' + $escape(el.id) + '"][value="' + $escape(value) + '"]').prop('checked', true);
+    }
+
   },
   getState: function(el) {
     var $objs = $('input:radio[name="' + $escape(el.id) + '"]');
@@ -28,7 +41,6 @@ $.extend(radioInputBinding, {
   },
   receiveMessage: function(el, data) {
     var $el = $(el);
-
     // This will replace all the options
     if (data.hasOwnProperty('options')) {
       // Clear existing options and add each new one

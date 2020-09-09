@@ -35,6 +35,7 @@ function initShiny() {
         shinyapp.bindOutput(id, bindingAdapter);
         $el.data('shiny-output-binding', bindingAdapter);
         $el.addClass('shiny-bound-output');
+        if (!$el.attr("aria-live")) $el.attr("aria-live", "polite");
         $el.trigger({
           type: 'shiny:bound',
           binding: binding,

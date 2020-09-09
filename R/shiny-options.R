@@ -51,6 +51,10 @@ getShinyOption <- function(name, default = NULL) {
 #'   The default polling interval is 500 milliseconds. You can change this
 #'   by setting e.g. `options(shiny.autoreload.interval = 2000)` (every
 #'   two seconds).}
+#' \item{bootstraplib (defaults to `FALSE`)}{When a global **bootstraplib** theme
+#'   is set (via [bootstraplib::bs_theme_new()]), should **shiny** compile it
+#'   (via [bootstraplib::bootstrap()]) and include the result with [bootstrapPage()]
+#'   as well as use it to set better default styles for input widgets (e.g., [selectInput()])?}
 #' \item{shiny.deprecation.messages (defaults to `TRUE`)}{This controls whether messages for
 #'   deprecated functions in Shiny will be printed. See
 #'   [shinyDeprecated()] for more information.}

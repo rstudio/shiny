@@ -190,15 +190,7 @@ selectizeIt <- function(inputId, select, options, nonempty = FALSE) {
 
   res <- checkAsIs(options)
 
-  selectizeDep <- htmlDependency(
-    "selectize", "0.12.4", c(href = "shared/selectize"),
-    stylesheet = "css/selectize.bootstrap3.css",
-    head = format(tagList(
-      tags$script(src = 'shared/selectize/js/selectize.min.js'),
-      # Accessibility plugin for screen readers (https://github.com/SLMNBJ/selectize-plugin-a11y):
-      tags$script(src = 'shared/selectize/accessibility/js/selectize-plugin-a11y.min.js')
-    ))
-  )
+  selectizeDep <- selectizeDependency()
 
   if ('drag_drop' %in% options$plugins) {
     selectizeDep <- list(selectizeDep, htmlDependency(
@@ -221,6 +213,36 @@ selectizeIt <- function(inputId, select, options, nonempty = FALSE) {
   attachDependencies(select, selectizeDep)
 }
 
+
+selectizeDependency <- function() {
+  cssFile <- selectizeCSSFile()
+  htmlDependency(
+    "selectize", "0.12.4",
+    src = cssFile$src,
+    stylesheet = cssFile$stylesheet,
+    head = format(tagList(
+      tags$script(src = 'shared/selectize/js/selectize.min.js'),
+      # Accessibility plugin for screen readers (https://github.com/SLMNBJ/selectize-plugin-a11y):
+      tags$script(src = 'shared/selectize/accessibility/js/selectize-plugin-a11y.min.js')
+    ))
+  )
+}
+
+selectizeCSSFile <- function() {
+  if (!useBsTheme()) {
+    return(list(src = c(href = "shared/selectize"), stylesheet = "css/selectize.bootstrap3.css"))
+  }
+  scss <- system.file(
+    package = "shiny", "www", "shared", "selectize", "scss",
+    if ("3" %in% bootstraplib::theme_version()) {
+      "selectize.bootstrap3.scss"
+    } else {
+      "selectize.bootstrap4.scss"
+    }
+  )
+  outFile <- bootstrapSass(sass::sass_file(scss), basename = "selectize")
+  list(src = c(file = dirname(outFile)), stylesheet = basename(outFile))
+}
 
 
 #' Select variables from a data frame

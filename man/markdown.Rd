@@ -17,7 +17,7 @@ concatenated HTML is returned.}
 normally be written around generated HTML. Valid options include \code{before},
 \code{after}, and \code{outside} (equivalent to \code{before} and \code{end}).}
 
-\item{...}{Additional arguments to pass to \code{\link[commonmark:commonmark]{commonmark::markdown_html()}}.
+\item{...}{Additional arguments to pass to \code{\link[commonmark:markdown_html]{commonmark::markdown_html()}}.
 These arguments are \emph{\link[rlang:dyn-dots]{dynamic}}.}
 }
 \value{
@@ -36,7 +36,7 @@ call to \code{markdown()} is indented within surrounding R code.
 By default, \link[commonmark:extensions]{Github extensions} are enabled, but this
 can be disabled by passing \code{extensions = FALSE}.
 
-Markdown rendering is performed by \code{\link[commonmark:commonmark]{commonmark::markdown_html()}}. Additional
+Markdown rendering is performed by \code{\link[commonmark:markdown_html]{commonmark::markdown_html()}}. Additional
 arguments to \code{markdown()} are passed as arguments to \code{markdown_html()}
 }
 \examples{

@@ -21,8 +21,9 @@ updateDateInput(
 
 \item{label}{The label to set for the input object.}
 
-\item{value}{The desired date value. Either a Date object, or a string in
-\code{yyyy-mm-dd} format. Supply \code{NA} to clear the date.}
+\item{value}{The starting date. Either a Date object, or a string in
+\code{yyyy-mm-dd} format. If NULL (the default), will use the current date
+in the client's time zone.}
 
 \item{min}{The minimum allowed date. Either a Date object, or a string in
 \code{yyyy-mm-dd} format.}

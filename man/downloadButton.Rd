@@ -10,7 +10,7 @@ downloadButton(
   label = "Download",
   class = NULL,
   ...,
-  icon = icon("download")
+  icon = shiny::icon("download")
 )
 
 downloadLink(outputId, label = "Download", class = NULL, ...)

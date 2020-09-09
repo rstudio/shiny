@@ -48,20 +48,26 @@ bootstrapPage <- function(..., title = NULL, responsive = NULL, theme = NULL) {
 
 #' Bootstrap libraries
 #'
-#' This function is deprecated in favor of [bootstraplib::bootstrap()], which
-#' provides a more fully featured approach to accessing and theming Bootstrap
-#' CSS. Note that most users won't need to call this function directly since
-#' [bootstrapPage()] and it's special cases ( e.g., [fluidPage()],
-#' [basicPage()], [navbarPage()], etc) implicitly depend on Bootstrap.
+#' This function returns a set of web dependencies necessary for using Bootstrap
+#' components in a web page.
+#'
+#' It isn't necessary to call this function if you use [bootstrapPage()] or
+#' others which use `bootstrapPage`, such [basicPage()], [fluidPage()],
+#' [fillPage()], [pageWithSidebar()], and [navbarPage()], because they already
+#' include the Bootstrap web dependencies.
+#'
+#' See also [bootstraplib::bootstrap()] for a more fully featured alternative to
+#' accessing and customizing Bootstrap CSS.
 #'
 #' @param theme deprecated (it never worked).
 #' @export
 #' @keywords internal
 bootstrapLib <- function(theme = NULL) {
   if (!is.null(theme)) {
-    stop("shiny::bootstrapLib()'s theme argument never worked as intended, don't use it.")
+    message("shiny::bootstrapLib()'s theme argument never worked as intended, don't use it.")
   }
-  shinyDeprecated("bootstraplib::bootstrap()", old = "shiny::bootstrapLib()")
+  # Eventually this should be deprecated in favor of bootstraplib::bootstrap()
+  #shinyDeprecated("bootstraplib::bootstrap()", old = "shiny::bootstrapLib()")
   bootstrapLib_()
 }
 
@@ -1382,7 +1388,7 @@ downloadButton <- function(outputId,
                            label="Download",
                            class=NULL,
                            ...,
-                           icon=icon("download")) {
+                           icon = shiny::icon("download")) {
   aTag <- tags$a(id=outputId,
                  class=paste('btn btn-default shiny-download-link', class),
                  href='',

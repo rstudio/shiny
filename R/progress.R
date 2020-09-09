@@ -227,6 +227,7 @@ Progress <- R6Class(
 #' @param value Single-element numeric vector; the value at which to set the
 #'   progress bar, relative to `min` and `max`.
 #'
+#' @return The result of `expr`.
 #' @examples
 #' ## Only run examples in interactive R sessions
 #' if (interactive()) {

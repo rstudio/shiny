@@ -48,20 +48,26 @@ bootstrapPage <- function(..., title = NULL, responsive = NULL, theme = NULL) {
 
 #' Bootstrap libraries
 #'
-#' This function is deprecated in favor of [bootstraplib::bootstrap()], which
-#' provides a more fully featured approach to accessing and theming Bootstrap
-#' CSS. Note that most users won't need to call this function directly since
-#' [bootstrapPage()] and it's special cases ( e.g., [fluidPage()],
-#' [basicPage()], [navbarPage()], etc) implicitly depend on Bootstrap.
+#' This function returns a set of web dependencies necessary for using Bootstrap
+#' components in a web page.
+#'
+#' It isn't necessary to call this function if you use [bootstrapPage()] or
+#' others which use `bootstrapPage`, such [basicPage()], [fluidPage()],
+#' [fillPage()], [pageWithSidebar()], and [navbarPage()], because they already
+#' include the Bootstrap web dependencies.
+#'
+#' See also [bootstraplib::bootstrap()] for a more fully featured alternative to
+#' accessing and customizing Bootstrap CSS.
 #'
 #' @param theme deprecated (it never worked).
 #' @export
 #' @keywords internal
 bootstrapLib <- function(theme = NULL) {
   if (!is.null(theme)) {
-    stop("shiny::bootstrapLib()'s theme argument never worked as intended, don't use it.")
+    message("shiny::bootstrapLib()'s theme argument never worked as intended, don't use it.")
   }
-  shinyDeprecated("bootstraplib::bootstrap()", old = "shiny::bootstrapLib()")
+  # Eventually this should be deprecated in favor of bootstraplib::bootstrap()
+  #shinyDeprecated("bootstraplib::bootstrap()", old = "shiny::bootstrapLib()")
   bootstrapLib_()
 }
 
@@ -1349,6 +1355,7 @@ uiOutput <- htmlOutput
 #'   is assigned to.
 #' @param label The label that should appear on the button.
 #' @param class Additional CSS classes to apply to the tag, if any.
+#' @param icon An [icon()] to appear on the button. Default is `icon("download")`.
 #' @param ... Other arguments to pass to the container tag function.
 #'
 #' @examples
@@ -1379,13 +1386,15 @@ uiOutput <- htmlOutput
 #' @export
 downloadButton <- function(outputId,
                            label="Download",
-                           class=NULL, ...) {
+                           class=NULL,
+                           ...,
+                           icon = shiny::icon("download")) {
   aTag <- tags$a(id=outputId,
                  class=paste('btn btn-default shiny-download-link', class),
                  href='',
                  target='_blank',
                  download=NA,
-                 icon("download"),
+                 validateIcon(icon),
                  label, ...)
 }
 

@@ -24,17 +24,33 @@ updateSliderInput(
 
 \item{label}{The label to set for the input object.}
 
-\item{value}{The value to set for the input object.}
+\item{value}{The initial value of the slider. A numeric vector of length one
+will create a regular slider; a numeric vector of length two will create a
+double-ended range slider. A warning will be issued if the value doesn't
+fit between \code{min} and \code{max}.}
 
-\item{min}{Minimum value.}
+\item{min}{The minimum value (inclusive) that can be selected.}
 
-\item{max}{Maximum value.}
+\item{max}{The maximum value (inclusive) that can be selected.}
 
-\item{step}{Step size.}
+\item{step}{Specifies the interval between each selectable value on the
+slider (if \code{NULL}, a heuristic is used to determine the step size). If
+the values are dates, \code{step} is in days; if the values are times
+(POSIXt), \code{step} is in seconds.}
 
-\item{timeFormat}{Date and POSIXt formatting.}
+\item{timeFormat}{Only used if the values are Date or POSIXt objects. A time
+format string, to be passed to the Javascript strftime library. See
+\url{https://github.com/samsonjs/strftime} for more details. The allowed
+format specifications are very similar, but not identical, to those for R's
+\code{\link[base:strptime]{base::strftime()}} function. For Dates, the default is \code{"\%F"}
+(like \code{"2015-07-01"}), and for POSIXt, the default is \code{"\%F \%T"}
+(like \code{"2015-07-01 15:32:10"}).}
 
-\item{timezone}{The timezone offset for POSIXt objects.}
+\item{timezone}{Only used if the values are POSIXt objects. A string
+specifying the time zone offset for the displayed times, in the format
+\code{"+HHMM"} or \code{"-HHMM"}. If \code{NULL} (the default), times will
+be displayed in the browser's time zone. The value \code{"+0000"} will
+result in UTC time.}
 }
 \description{
 Change the value of a slider input on the client.

@@ -214,7 +214,6 @@ selectizeIt <- function(inputId, select, options, nonempty = FALSE) {
 }
 
 
-
 selectizeDependency <- function() {
   cssFile <- selectizeCSSFile()
   htmlDependency(

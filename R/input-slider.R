@@ -79,8 +79,7 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
                         round = FALSE, format = NULL, locale = NULL,
                         ticks = TRUE, animate = FALSE, width = NULL, sep = ",",
                         pre = NULL, post = NULL, timeFormat = NULL,
-                        timezone = NULL, dragRange = TRUE)
-{
+                        timezone = NULL, dragRange = TRUE) {
   if (!missing(format)) {
     shinyDeprecated(msg = "The `format` argument to sliderInput is deprecated. Use `sep`, `pre`, and `post` instead.",
                     version = "0.10.2.2")
@@ -144,6 +143,7 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
   sliderProps <- dropNulls(list(
     class = "js-range-slider",
     id = inputId,
+    `data-skin` = "shiny",
     `data-type` = if (length(value) > 1) "double",
     `data-min` = formatNoSci(min),
     `data-max` = formatNoSci(max),
@@ -205,27 +205,53 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
     )
   }
 
-  dep <- list(
-    htmlDependency("ionrangeslider", "2.1.6", c(href="shared/ionrangeslider"),
-      script = "js/ion.rangeSlider.min.js",
-      # ion.rangeSlider also needs normalize.css, which is already included in
-      # Bootstrap.
-      stylesheet = c("css/ion.rangeSlider.css",
-                     "css/ion.rangeSlider.skinShiny.css")
+  attachDependencies(sliderTag, ionRangeSliderDependencies())
+}
+
+ionRangeSliderDependencies <- function() {
+  cssFile <- ionRangeSliderCSSFile()
+  version <- "2.3.1"
+  list(
+    # ion.rangeSlider also needs normalize.css, which is already included in Bootstrap.
+    htmlDependency(
+      "ionrangeslider-css", version,
+      src = cssFile$src,
+      stylesheet = cssFile$stylesheet
     ),
-    htmlDependency("strftime", "0.9.2", c(href="shared/strftime"),
+    htmlDependency(
+      "ionrangeslider-javascript", version,
+      src = c(href = "shared/ionrangeslider"),
+      script = "js/ion.rangeSlider.min.js"
+    ),
+    htmlDependency(
+      "strftime", "0.9.2",
+      src = c(href = "shared/strftime"),
       script = "strftime-min.js"
     )
   )
+}
 
-  attachDependencies(sliderTag, dep)
+ionRangeSliderCSSFile <- function() {
+  if (!useBsTheme()) {
+    return(list(stylesheet = "css/ion.rangeSlider.css", src = c(href = "shared/ionrangeslider")))
+  }
+  sassInput <- list(
+    list(
+      bg = "$input-bg", fg = "$input-color", accent = "$component-active-bg",
+      `font-family` = "$font-family-base"
+    ),
+    sass::sass_file(
+      system.file(package = "shiny", "www", "shared", "ionrangeslider", "scss", "shiny.scss")
+    )
+  )
+  outFile <- bootstrapSass(sassInput, basename = "ionRangeSlider")
+  list(stylesheet = basename(outFile), src = c(file = dirname(outFile)))
 }
 
 hasDecimals <- function(value) {
   truncatedValue <- round(value)
   return (!identical(value, truncatedValue))
 }
-
 
 # If step is NULL, use heuristic to set the step size.
 findStepSize <- function(min, max, step) {

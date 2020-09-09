@@ -25,7 +25,7 @@ created inside of the server function.}
 a module, and no \code{id} argument is provided, one will be generated and
 supplied automatically.}
 
-\item{session}{The \code{\link{MockShinySession}} object to use as the \link[shiny:domains]{reactive domain}. The same session object is used as the domain both
+\item{session}{The \code{\link{MockShinySession}} object to use as the \link[=domains]{reactive domain}. The same session object is used as the domain both
 during invocation of the server or module under test and during evaluation
 of \code{expr}.}
 }

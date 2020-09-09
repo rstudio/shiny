@@ -18,6 +18,8 @@ shiny 1.5.0.9000
 
 * Closed #612: Added `alt` argument to `renderPlot()` and `renderCachedPlot()` to specify descriptive texts for `plotOutput()` objects, which is essential for screen readers. By default, alt text is set to the static text, "Plot object," but even dynamic text can be made with reactive function. (#3006, thanks @trafficonese and @leonawicz for the original PR and discussion via #2494)
 
+* Added semantic landmarks for `mainPanel()` and `sidebarPanel()` so that assistive technologies can recognize them as "main" and "complementary" region respectively. (#3009)
+
 ### Minor new features and improvements
 
 * When UI is specified as a function (e.g. `ui <- function(req) { ... }`), the response can now be an HTTP response as returned from the (newly exported) `httpResponse()` function. (#2970)

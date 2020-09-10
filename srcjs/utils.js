@@ -241,7 +241,7 @@ function mergeSort(list, sortfunc) {
 // Escape jQuery selector metacharacters: !"#$%&'()*+,./:;<=>?@[\]^`{|}~
 var $escape = exports.$escape = function(val) {
   // Sometime val comes empty, and Js throws a 'e.replace() is not a function' error
-  if (val.length)  {
+  if (typeof val === "string")  {
     return val.replace(/([!"#$%&'()*+,.\/:;<=>?@\[\\\]^`{|}~])/g, '\\$1');
   } else {
     return val

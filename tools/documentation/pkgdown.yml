@@ -202,8 +202,6 @@ reference:
       - brushedPoints
       - brushOpts
       - clickOpts
-      - dblclickOpts
-      - hoverOpts
   - title: Modules
     desc: Functions for modularizing Shiny apps
     contents:

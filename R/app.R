@@ -291,8 +291,9 @@ initAutoReloadMonitor <- function(dir) {
   lastValue <- NULL
   observeLabel <- paste0("File Auto-Reload - '", basename(dir), "'")
   obs <- observe(label = observeLabel, {
-    files <- sort(list.files(dir, pattern = filePattern, recursive = TRUE,
-      ignore.case = TRUE))
+    files <- sort_c(
+      list.files(dir, pattern = filePattern, recursive = TRUE, ignore.case = TRUE)
+    )
     times <- file.info(files)$mtime
     names(times) <- files
 
@@ -367,7 +368,7 @@ loadSupport <- function(appDir=NULL, renv=new.env(parent=globalenv()), globalren
   # Ensure files in R/ are sorted according to the 'C' locale before sourcing.
   # This convention is based on the default for packages. For details, see:
   # https://cran.r-project.org/doc/manuals/r-release/R-exts.html#The-DESCRIPTION-file
-  helpers <- sort(helpers, method = "radix")
+  helpers <- sort_c(helpers)
   helpers <- normalizePath(helpers)
 
   withr::with_dir(appDir, {
@@ -384,21 +385,24 @@ shinyAppDir_appR <- function(fileName, appDir, options=list())
 {
   fullpath <- file.path.ci(appDir, fileName)
 
-  # In an upcoming version of shiny, this option will go away.
-  if (getOption("shiny.autoload.r", TRUE)) {
-    # Create a child env which contains all the helpers and will be the shared parent
-    # of the ui.R and server.R load.
-    sharedEnv <- new.env(parent = globalenv())
-  } else {
-    sharedEnv <- globalenv()
-  }
-
-
   # This sources app.R and caches the content. When appObj() is called but
   # app.R hasn't changed, it won't re-source the file. But if called and
   # app.R has changed, it'll re-source the file and return the result.
   appObj <- cachedFuncWithFile(appDir, fileName, case.sensitive = FALSE,
     function(appR) {
+      wasDir <- setwd(appDir)
+      on.exit(setwd(wasDir))
+
+      # TODO: we should support hot reloading on R/*.R changes.
+      # In an upcoming version of shiny, this option will go away.
+      if (getOption("shiny.autoload.r", TRUE)) {
+        # Create a child env which contains all the helpers and will be the shared parent
+        # of the ui.R and server.R load.
+        sharedEnv <- new.env(parent = globalenv())
+        loadSupport(appDir, renv=sharedEnv, globalrenv=NULL)
+      } else {
+        sharedEnv <- globalenv()
+      }
       result <- sourceUTF8(fullpath, envir = new.env(parent = sharedEnv))
 
       if (!is.shiny.appobj(result))
@@ -442,10 +446,6 @@ shinyAppDir_appR <- function(fileName, appDir, options=list())
   onStart <- function() {
     oldwd <<- getwd()
     setwd(appDir)
-    # TODO: we should support hot reloading on R/*.R changes.
-    if (getOption("shiny.autoload.r", TRUE)) {
-      loadSupport(appDir, renv=sharedEnv, globalrenv=NULL)
-    }
     if (!is.null(appObj()$onStart)) appObj()$onStart()
     monitorHandle <<- initAutoReloadMonitor(appDir)
     invisible()
@@ -460,6 +460,8 @@ shinyAppDir_appR <- function(fileName, appDir, options=list())
       monitorHandle <<- NULL
     }
   }
+
+  appObjOptions <- appObj()$options
 
   structure(
     list(
@@ -479,7 +481,7 @@ shinyAppDir_appR <- function(fileName, appDir, options=list())
       serverFuncSource = dynServerFuncSource,
       onStart = onStart,
       onStop = onStop,
-      options = options
+      options = joinOptions(appObjOptions, options)
     ),
     class = "shiny.appobj"
   )
@@ -529,18 +531,25 @@ is.shiny.appobj <- function(x) {
 }
 
 #' @rdname shiny.appobj
-#' @param ... Additional parameters to be passed to print.
+#' @param ... Ignored.
 #' @export
 print.shiny.appobj <- function(x, ...) {
-  opts <- x$options %OR% list()
-  opts <- opts[names(opts) %in%
-      c("port", "launch.browser", "host", "quiet",
-        "display.mode", "test.mode")]
+  runApp(x)
+}
 
-  # Quote x and put runApp in quotes so that there's a nicer stack trace (#1851)
-  args <- c(list(quote(x)), opts)
+# Joins two options objects (i.e. the `options` argument to shinyApp(),
+# shinyAppDir(), etc.). The values in `b` should take precedence over the values
+# in `a`. Given the current options available, it is safe to throw away any
+# values in `a` that are provided in `b`. But in the future, if new options are
+# introduced that need to be combined in some way instead of simply overwritten,
+# then this will be the place to do it. See the implementations of
+# print.shiny.appobj() and runApp() (for the latter, look specifically for
+# "findVal()") to determine the set of possible options.
+joinOptions <- function(a, b) {
+  stopifnot(is.null(a) || is.list(a))
+  stopifnot(is.null(b) || is.list(b))
 
-  do.call("runApp", args)
+  mergeVectors(a, b)
 }
 
 #' @rdname shiny.appobj

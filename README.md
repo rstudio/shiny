@@ -1,8 +1,11 @@
-# Shiny
+# shiny <img src="man/figures/logo.png" align="right" width=120 height=139 alt="" />
 
-*Travis:* [![Travis Build Status](https://travis-ci.org/rstudio/shiny.svg?branch=master)](https://travis-ci.org/rstudio/shiny)
+<!-- badges: start -->
+[![CRAN](https://www.r-pkg.org/badges/version/shiny)](https://CRAN.R-project.org/package=shiny)
+[![R build status](https://github.com/rstudio/shiny/workflows/R-CMD-check/badge.svg)](https://github.com/rstudio/shiny/actions)
+[![RStudio community](https://img.shields.io/badge/community-shiny-blue?style=social&logo=rstudio&logoColor=75AADB)](https://community.rstudio.com/new-topic?category=shiny&tags=shiny)
 
-*AppVeyor:* [![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/rstudio/shiny?branch=master&svg=true)](https://ci.appveyor.com/project/rstudio/shiny)
+<!-- badges: end -->
 
 Shiny is a new package from RStudio that makes it incredibly easy to build interactive web applications with R.
 
@@ -34,9 +37,9 @@ install.packages("shiny")
 To install the latest development builds directly from GitHub, run this instead:
 
 ```r
-if (!require("devtools"))
-  install.packages("devtools")
-devtools::install_github("rstudio/shiny")
+if (!require("remotes"))
+  install.packages("remotes")
+remotes::install_github("rstudio/shiny")
 ```
 
 ## Getting Started

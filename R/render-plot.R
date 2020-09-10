@@ -36,6 +36,12 @@
 #' @param res Resolution of resulting plot, in pixels per inch. This value is
 #'   passed to [grDevices::png()]. Note that this affects the resolution of PNG
 #'   rendering in R; it won't change the actual ppi of the browser.
+#' @param alt Alternate text for the HTML `<img>` tag
+#'   if it cannot be displayed or viewed (i.e., the user uses a screen reader).
+#'   In addition to a character string, the value may be a reactive expression
+#'   (or a function referencing reactive values) that returns a character string.
+#'   NULL or "" is not recommended because those should be limited to decorative images
+#'   (the default is "Plot object").
 #' @param ... Arguments to be passed through to [grDevices::png()].
 #'   These can be used to set the width, height, background color, etc.
 #' @param env The environment in which to evaluate `expr`.
@@ -51,9 +57,10 @@
 #'   call to [plotOutput()] when `renderPlot` is used in an
 #'   interactive R Markdown document.
 #' @export
-renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
-                       env=parent.frame(), quoted=FALSE,
-                       execOnResize=FALSE, outputArgs=list()
+renderPlot <- function(expr, width = 'auto', height = 'auto', res = 72, ...,
+                       alt = "Plot object",
+                       env = parent.frame(), quoted = FALSE,
+                       execOnResize = FALSE, outputArgs = list()
 ) {
   # This ..stacktraceon is matched by a ..stacktraceoff.. when plotFunc
   # is called
@@ -74,6 +81,13 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
     heightWrapper <- reactive({ height() })
   else
     heightWrapper <- function() { height }
+
+  if (is.reactive(alt))
+    altWrapper <- alt
+  else if (is.function(alt))
+    altWrapper <- reactive({ alt() })
+  else
+    altWrapper <- function() { alt }
 
   getDims <- function() {
     width <- widthWrapper()
@@ -112,6 +126,7 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
             func = func,
             width = dims$width,
             height = dims$height,
+            alt = altWrapper(),
             pixelratio = pixelratio,
             res = res
           ), args))
@@ -140,7 +155,7 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
         dims <- getDims()
         pixelratio <- session$clientData$pixelratio %OR% 1
         result <- do.call("resizeSavedPlot", c(
-          list(name, shinysession, result, dims$width, dims$height, pixelratio, res),
+          list(name, shinysession, result, dims$width, dims$height, altWrapper(), pixelratio, res),
           args
         ))
 
@@ -159,10 +174,15 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
   markRenderFunction(outputFunc, renderFunc, outputArgs = outputArgs)
 }
 
-resizeSavedPlot <- function(name, session, result, width, height, pixelratio, res, ...) {
+resizeSavedPlot <- function(name, session, result, width, height, alt, pixelratio, res, ...) {
   if (result$img$width == width && result$img$height == height &&
       result$pixelratio == pixelratio && result$res == res) {
     return(result)
+  }
+
+  if (isNamespaceLoaded("showtext")) {
+    showtextOpts <- showtext::showtext_opts(dpi = res*pixelratio)
+    on.exit({showtext::showtext_opts(showtextOpts)}, add = TRUE)
   }
 
   coordmap <- NULL
@@ -176,6 +196,7 @@ resizeSavedPlot <- function(name, session, result, width, height, pixelratio, re
     src = session$fileUrl(name, outfile, contentType = "image/png"),
     width = width,
     height = height,
+    alt = alt,
     coordmap = coordmap,
     error = attr(coordmap, "error", exact = TRUE)
   )
@@ -183,7 +204,7 @@ resizeSavedPlot <- function(name, session, result, width, height, pixelratio, re
   result
 }
 
-drawPlot <- function(name, session, func, width, height, pixelratio, res, ...) {
+drawPlot <- function(name, session, func, width, height, alt, pixelratio, res, ...) {
   #  1. Start PNG
   #  2. Enable displaylist recording
   #  3. Call user-defined func
@@ -199,6 +220,17 @@ drawPlot <- function(name, session, func, width, height, pixelratio, res, ...) {
   device <- startPNG(outfile, width*pixelratio, height*pixelratio, res = res*pixelratio, ...)
   domain <- createGraphicsDevicePromiseDomain(device)
   grDevices::dev.control(displaylist = "enable")
+
+  # In some cases (at least when `png(type='cairo')), showtext's font
+  # rendering needs to know about the device's resolution to work properly.
+  # I don't see any immediate harm in setting the dpi option for any device,
+  # but it's worth noting that the option doesn't currently work with CairoPNG.
+  # https://github.com/yixuan/showtext/issues/33
+  showtextOpts <- if (isNamespaceLoaded("showtext")) {
+    showtext::showtext_opts(dpi = res*pixelratio)
+  } else {
+    NULL
+  }
 
   hybrid_chain(
     hybrid_chain(
@@ -246,6 +278,9 @@ drawPlot <- function(name, session, func, width, height, pixelratio, res, ...) {
       }),
       finally = function() {
         grDevices::dev.off(device)
+        if (length(showtextOpts)) {
+          showtext::showtext_opts(showtextOpts)
+        }
       }
     ),
     function(result) {
@@ -253,6 +288,7 @@ drawPlot <- function(name, session, func, width, height, pixelratio, res, ...) {
         src = session$fileUrl(name, outfile, contentType='image/png'),
         width = width,
         height = height,
+        alt = alt,
         coordmap = result$coordmap,
         # Get coordmap error message if present
         error = attr(result$coordmap, "error", exact = TRUE)

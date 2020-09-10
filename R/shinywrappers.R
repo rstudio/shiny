@@ -198,7 +198,10 @@ markOutputAttrs <- function(renderFunc, snapshotExclude = NULL,
 #' @param deleteFile Should the file in `func()$src` be deleted after
 #'   it is sent to the client browser? Generally speaking, if the image is a
 #'   temp file generated within `func`, then this should be `TRUE`;
-#'   if the image is not a temp file, this should be `FALSE`.
+#'   if the image is not a temp file, this should be `FALSE`. (For backward
+#'   compatibility reasons, if this argument is missing, a warning will be
+#'   emitted, and if the file is in the temp directory it will be deleted. In
+#'   the future, this warning will become an error.)
 #' @param outputArgs A list of arguments to be passed through to the implicit
 #'   call to [imageOutput()] when `renderImage` is used in an
 #'   interactive R Markdown document.
@@ -271,15 +274,53 @@ markOutputAttrs <- function(renderFunc, snapshotExclude = NULL,
 #' shinyApp(ui, server)
 #' }
 renderImage <- function(expr, env=parent.frame(), quoted=FALSE,
-                        deleteFile=TRUE, outputArgs=list()) {
+                        deleteFile, outputArgs=list()) {
   installExprFunction(expr, "func", env, quoted)
+
+  # missing() must be used directly within the function with the given arg
+  if (missing(deleteFile)) {
+    deleteFile <- NULL
+  }
+
+  # Tracks whether we've reported the `deleteFile` warning yet; we don't want to
+  # do it on every invalidation (though we will end up doing it at least once
+  # per output per session).
+  warned <- FALSE
 
   createRenderFunction(func,
     transform = function(imageinfo, session, name, ...) {
-      # Should the file be deleted after being sent? If .deleteFile not set or if
-      # TRUE, then delete; otherwise don't delete.
-      if (deleteFile) {
-        on.exit(unlink(imageinfo$src))
+      shouldDelete <- deleteFile
+
+      # jcheng 2020-05-08
+      #
+      # Until Shiny 1.5.0, the default for deleteFile was, incredibly, TRUE.
+      # Changing it to default to FALSE might cause existing Shiny apps to pile
+      # up images in their temp directory (for long lived R processes). Not
+      # having a default (requiring explicit value) is the right long-term move,
+      # but would break today's apps.
+      #
+      # Compromise we decided on was to eventually require TRUE/FALSE, but for
+      # now, change the default behavior to only delete temp files; and emit a
+      # warning encouraging people to not rely on the default.
+      if (is.null(shouldDelete)) {
+        shouldDelete <- isTRUE(try(silent = TRUE,
+          file.exists(imageinfo$src) && isTemp(imageinfo$src, mustExist = TRUE)
+        ))
+
+        if (!warned) {
+          warned <<- TRUE
+          warning("The renderImage output named '",
+            getCurrentOutputInfo()$name,
+            "' is missing the deleteFile argument; as of Shiny 1.5.0, you must ",
+            "use deleteFile=TRUE or deleteFile=FALSE. (This warning will ",
+            "become an error in a future version of Shiny.)",
+            call. = FALSE
+          )
+        }
+      }
+
+      if (shouldDelete) {
+        on.exit(unlink(imageinfo$src), add = TRUE)
       }
 
       # If contentType not specified, autodetect based on extension
@@ -295,36 +336,71 @@ renderImage <- function(expr, env=parent.frame(), quoted=FALSE,
     imageOutput, outputArgs)
 }
 
+# TODO: If we ever take a dependency on fs, it'd be great to replace this with
+# fs::path_has_parent().
+isTemp <- function(path, tempDir = tempdir(), mustExist) {
+  if (!isTRUE(mustExist)) {
+    # jcheng 2020-05-11: I added mustExist just to make it totally obvious that
+    # the path must exist. We don't support the case where the file doesn't
+    # exist because it makes normalizePath unusable, and it's a bit scary
+    # security-wise to compare paths without normalization. Using fs would fix
+    # this as it knows how to normalize paths that don't exist.
+    stop("isTemp(mustExist=FALSE) is not implemented")
+  }
 
-#' Printable Output
+  if (mustExist && !file.exists(path)) {
+    stop("path does not exist")
+  }
+
+  if (nchar(tempDir) == 0 || !dir.exists(tempDir)) {
+    # This should never happen, but just to be super paranoid...
+    stop("invalid temp dir")
+  }
+
+  path <- normalizePath(path, winslash = "/", mustWork = mustExist)
+
+  tempDir <- normalizePath(tempDir, winslash = "/", mustWork = TRUE)
+  if (path == tempDir) {
+    return(FALSE)
+  }
+
+  tempDir <- ensure_trailing_slash(tempDir)
+  if (path == tempDir) {
+    return(FALSE)
+  }
+
+  return(substr(path, 1, nchar(tempDir)) == tempDir)
+}
+
+#' Text Output
 #'
-#' Makes a reactive version of the given function that captures any printed
-#' output, and also captures its printable result (unless
-#' [base::invisible()]), into a string. The resulting function is suitable
-#' for assigning to an  `output` slot.
+#' @description
+#' `renderPrint()` prints the result of `expr`, while `renderText()` pastes it
+#' together into a single string. `renderPrint()` is equivalent to [print()];
+#' `renderText()` is equivalent to [cat()]. Both functions capture all other
+#' printed output generated while evaluating `expr`.
 #'
+#' `renderPrint()` is usually paired with [verbatimTextOutput()];
+#' `renderText()` is usually paired with [textOutput()].
+#'
+#' @details
 #' The corresponding HTML output tag can be anything (though `pre` is
 #' recommended if you need a monospace font and whitespace preserved) and should
 #' have the CSS class name `shiny-text-output`.
 #'
-#' The result of executing `func` will be printed inside a
-#' [utils::capture.output()] call.
+#' @return
+#' For `renderPrint()`, note the given expression returns `NULL` then `NULL`
+#' will actually be visible in the output. To display nothing, make your
+#' function return [invisible()].
 #'
-#' Note that unlike most other Shiny output functions, if the given function
-#' returns `NULL` then `NULL` will actually be visible in the output.
-#' To display nothing, make your function return [base::invisible()].
-#'
-#' @param expr An expression that may print output and/or return a printable R
-#'   object.
-#' @param env The environment in which to evaluate `expr`.
+#' @param expr An expression to evaluate.
+#' @param env The environment in which to evaluate `expr`. For expert use only.
 #' @param quoted Is `expr` a quoted expression (with `quote()`)? This
 #'   is useful if you want to save an expression in a variable.
-#' @param width The value for `[options][base::options]('width')`.
+#' @param width Width of printed output.
 #' @param outputArgs A list of arguments to be passed through to the implicit
-#'   call to [verbatimTextOutput()] when `renderPrint` is used
-#'   in an interactive R Markdown document.
-#' @seealso [renderText()] for displaying the value returned from a
-#'   function, instead of the printed output.
+#'   call to [verbatimTextOutput()] or [textOutput()] when the functions are
+#'   used in an interactive RMarkdown document.
 #'
 #' @example res/text-example.R
 #' @export
@@ -400,35 +476,10 @@ createRenderPrintPromiseDomain <- function(width) {
   )
 }
 
-#' Text Output
-#'
-#' Makes a reactive version of the given function that also uses
-#' [base::cat()] to turn its result into a single-element character
-#' vector.
-#'
-#' The corresponding HTML output tag can be anything (though `pre` is
-#' recommended if you need a monospace font and whitespace preserved) and should
-#' have the CSS class name `shiny-text-output`.
-#'
-#' The result of executing `func` will passed to `cat`, inside a
-#' [utils::capture.output()] call.
-#'
-#' @param expr An expression that returns an R object that can be used as an
-#'   argument to `cat`.
-#' @param env The environment in which to evaluate `expr`.
-#' @param quoted Is `expr` a quoted expression (with `quote()`)? This
-#'   is useful if you want to save an expression in a variable.
-#' @param outputArgs A list of arguments to be passed through to the implicit
-#'   call to [textOutput()] when `renderText` is used in an
-#'   interactive R Markdown document.
 #' @param sep A separator passed to `cat` to be appended after each
 #'   element.
-#'
-#' @seealso [renderPrint()] for capturing the print output of a
-#'   function, rather than the returned text value.
-#'
-#' @example res/text-example.R
 #' @export
+#' @rdname renderPrint
 renderText <- function(expr, env=parent.frame(), quoted=FALSE,
                        outputArgs=list(), sep=" ") {
   installExprFunction(expr, "func", env, quoted)
@@ -527,7 +578,7 @@ renderUI <- function(expr, env=parent.frame(), quoted=FALSE,
 #' if (interactive()) {
 #'
 #' ui <- fluidPage(
-#'   downloadLink("downloadData", "Download")
+#'   downloadButton("downloadData", "Download")
 #' )
 #'
 #' server <- function(input, output) {

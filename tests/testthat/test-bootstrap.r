@@ -52,7 +52,7 @@ test_that("Repeated names for selectInput and radioButtons choices", {
   choices <- x$children
 
   expect_equal(choices[[2]]$children[[1]][[1]]$children[[1]]$children[[2]]$children[[1]],
-    HTML('<i class="fa fa-calendar"></i>'))
+    HTML('<i class="fa fa-calendar" role="presentation" aria-label="calendar icon"></i>'))
   expect_equal(choices[[2]]$children[[1]][[1]]$children[[1]]$children[[1]]$attribs$value, 'icon')
   expect_equal(choices[[2]]$children[[1]][[1]]$children[[1]]$children[[1]]$attribs$checked, 'checked')
 
@@ -323,7 +323,7 @@ test_that("normalizeChoicesArgs does its job", {
 
 test_that("Choices need not be provided, can be NULL or c()", {
 
-  expected <- "<div id=\"cb\" class=\"form-group shiny-input-checkboxgroup shiny-input-container\">\n  <label class=\"control-label\" for=\"cb\">Choose:</label>\n  <div class=\"shiny-options-group\"></div>\n</div>"
+  expected <- "<div id=\"cb\" class=\"form-group shiny-input-checkboxgroup shiny-input-container\">\n  <label class=\"control-label\" id=\"cb-label\" for=\"cb\">Choose:</label>\n  <div class=\"shiny-options-group\"></div>\n</div>"
   noChoices <- checkboxGroupInput("cb", "Choose:")
   choicesNull <- checkboxGroupInput("cb", "Choose:", choices = NULL)
   choicesCharacter <- checkboxGroupInput("cb", "Choose:", choices = c())
@@ -336,5 +336,5 @@ test_that("Choices need not be provided, can be NULL or c()", {
   expect_identical(noChoices, choicesCharacter0)
   expect_identical(noChoices, allChoicesNull)
 
-  expect_true(grepl(fixed = TRUE, expected, format(noChoices)))
+  expect_equal(expected, format(noChoices))
 })

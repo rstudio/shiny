@@ -82,7 +82,7 @@ see \code{\link[=validateCssUnit]{validateCssUnit()}}.}
 format string, to be passed to the Javascript strftime library. See
 \url{https://github.com/samsonjs/strftime} for more details. The allowed
 format specifications are very similar, but not identical, to those for R's
-\code{\link[base:strftime]{base::strftime()}} function. For Dates, the default is \code{"\%F"}
+\code{\link[base:strptime]{base::strftime()}} function. For Dates, the default is \code{"\%F"}
 (like \code{"2015-07-01"}), and for POSIXt, the default is \code{"\%F \%T"}
 (like \code{"2015-07-01 15:32:10"}).}
 

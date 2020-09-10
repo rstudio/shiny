@@ -1,7 +1,7 @@
-context("mymoduleServer")
+context("exampleModuleServer")
 
 # See ?testServer for more information
-testServer(mymoduleServer, {
+testServer(exampleModuleServer, {
   # Set initial value of a button
   session$setInputs(button = 0)
 

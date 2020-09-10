@@ -130,8 +130,8 @@
 #' if an object is in the cache, and then call `get(key)`, the object may
 #' be removed from the cache in between those two calls, and `get(key)`
 #' will throw an error. Instead of calling the two functions, it is better to
-#' simply call `get(key)`, and use `tryCatch()` to handle the error
-#' that is thrown if the object is not in the cache. This effectively tests for
+#' simply call `get(key)`, and check that the returned object is not a
+#' `key_missing()` object, using `is.key_missing()`. This effectively tests for
 #' existence and gets the object in one operation.
 #'
 #' It is also possible for one processes to prune objects at the same time that
@@ -387,7 +387,7 @@ DiskCache <- R6Class("DiskCache",
       # is because it is expensive to find the size of the serialized object
       # before adding it.
 
-      private$log(paste0('prune'))
+      private$log('prune')
       self$is_destroyed(throw = TRUE)
 
       current_time <- Sys.time()
@@ -407,7 +407,11 @@ DiskCache <- R6Class("DiskCache",
         rm_idx <- timediff > private$max_age
         if (any(rm_idx)) {
           private$log(paste0("prune max_age: Removing ", paste(info$name[rm_idx], collapse = ", ")))
-          file.remove(info$name[rm_idx])
+          rm_success <- file.remove(info$name[rm_idx])
+          # This maps rm_success back into the TRUEs in the rm_idx vector.
+          # If (for example) rm_idx is c(F,T,F,T,T) and rm_success is c(T,F,T),
+          # then this line modifies rm_idx to be c(F,T,F,F,T).
+          rm_idx[rm_idx] <- rm_success
           info <- info[!rm_idx, ]
         }
       }
@@ -428,7 +432,8 @@ DiskCache <- R6Class("DiskCache",
         rm_idx <- seq_len(nrow(info)) > private$max_n
         private$log(paste0("prune max_n: Removing ", paste(info$name[rm_idx], collapse = ", ")))
         rm_success <- file.remove(info$name[rm_idx])
-        info <- info[!rm_success, ]
+        rm_idx[rm_idx] <- rm_success
+        info <- info[!rm_idx, ]
       }
 
       # 3. Remove files if cache is too large.
@@ -438,7 +443,8 @@ DiskCache <- R6Class("DiskCache",
         rm_idx <- cum_size > private$max_size
         private$log(paste0("prune max_size: Removing ", paste(info$name[rm_idx], collapse = ", ")))
         rm_success <- file.remove(info$name[rm_idx])
-        info <- info[!rm_success, ]
+        rm_idx[rm_idx] <- rm_success
+        info <- info[!rm_idx, ]
       }
 
       private$prune_last_time <- as.numeric(current_time)
@@ -555,7 +561,7 @@ DiskCache <- R6Class("DiskCache",
       if (is.null(private$logfile)) return()
 
       text <- paste0(format(Sys.time(), "[%Y-%m-%d %H:%M:%OS3] DiskCache "), text)
-      writeLines(text, private$logfile)
+      cat(text, sep = "\n", file = private$logfile, append = TRUE)
     }
   )
 )

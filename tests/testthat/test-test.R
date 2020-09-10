@@ -141,6 +141,7 @@ test_that("app template works with runTests", {
 
   testthat::skip_on_cran()
   testthat::skip_if_not_installed("shinytest", "1.3.1.9000")
+  testthat::skip_if(!shinytest::dependenciesInstalled(), "shinytest dependencies not installed. Call `shinytest::installDependencies()`")
 
   # test all combos
   make_combos <- function(...) {

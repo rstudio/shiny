@@ -210,6 +210,16 @@ sortByName <- function(x) {
   x[order(names(x))]
 }
 
+# Sort a vector. If a character vector, sort using C locale, which is consistent
+# across platforms. Note that radix sort uses C locale according to ?sort.
+sort_c <- function(x, ...) {
+  # Use UTF-8 encoding, because if encoding is "unknown" for non-ASCII
+  # characters, the sort() will throw an error.
+  if (is.character(x))
+    x <- enc2utf8(x)
+  sort(x, method = "radix", ...)
+}
+
 # Wrapper around list2env with a NULL check. In R <3.2.0, if an empty unnamed
 # list is passed to list2env(), it errors. But an empty named list is OK. For
 # R >=3.2.0, this wrapper is not necessary.
@@ -1872,4 +1882,14 @@ findEnclosingApp <- function(path = ".") {
       stop("Shiny app not found at ", orig_path, " or in any parent directory.")
     path <- dirname(path)
   }
+}
+
+# Check if a package is installed, and if version is specified,
+# that we have at least that version
+is_available <- function(package, version = NULL) {
+  installed <- nzchar(system.file(package = package))
+  if (is.null(version)) {
+    return(installed)
+  }
+  installed && isTRUE(utils::packageVersion(package) >= version)
 }

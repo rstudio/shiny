@@ -70,7 +70,7 @@ be done 100\% correctly.}
 \code{\link[=runApp]{runApp()}} for more information.}
 \item{shiny.jquery.version (defaults to \code{3})}{The major version of jQuery to use.
 Currently only values of \code{3} or \code{1} are supported. If \code{1}, then jQuery 1.12.4 is used. If \code{3},
-then jQuery 3.4.1 is used.}
+then jQuery 3.5.1 is used.}
 \item{shiny.json.digits (defaults to \code{16})}{The number of digits to use when converting
 numbers to JSON format to send to the client web browser.}
 \item{shiny.launch.browser (defaults to \code{interactive()})}{A boolean which controls the default behavior

@@ -67,11 +67,14 @@ bootstrapLib <- function(theme = NULL) {
     ),
     script = c(
       "js/bootstrap.min.js",
-      # These shims are necessary for IE 8 compatibility
-      "shim/html5shiv.min.js",
-      "shim/respond.min.js"
+      # Safely adding accessibility plugin for screen readers and keyboard users; no break for sighted aspects (see https://github.com/paypal/bootstrap-accessibility-plugin)
+      "accessibility/js/bootstrap-accessibility.min.js"
     ),
-    stylesheet = if (is.null(theme)) "css/bootstrap.min.css",
+    stylesheet = if (is.null(theme)) c(
+      "css/bootstrap.min.css",
+      # Safely adding accessibility plugin for screen readers and keyboard users; no break for sighted aspects (see https://github.com/paypal/bootstrap-accessibility-plugin)
+      "accessibility/css/bootstrap-accessibility.css"
+    ),
     meta = list(viewport = "width=device-width, initial-scale=1")
   )
 }
@@ -469,7 +472,7 @@ helpText <- function(...) {
 #' @param ... UI elements to include within the tab
 #' @param value The value that should be sent when `tabsetPanel` reports
 #'   that this tab is selected. If omitted and `tabsetPanel` has an
-#'   `id`, then the title will be used..
+#'   `id`, then the title will be used.
 #' @param icon Optional icon to appear on the tab. This attribute is only
 #' valid when using a `tabPanel` within a [navbarPage()].
 #' @return A tab that can be passed to [tabsetPanel()]
@@ -500,7 +503,15 @@ tabPanel <- function(title, ..., value = title, icon = NULL) {
 #' @export
 #' @describeIn tabPanel Create a tab panel that drops the title argument.
 #'   This function should be used within `tabsetPanel(type = "hidden")`. See [tabsetPanel()] for example usage.
-tabPanelBody <- function(..., value = NULL, icon = NULL) {
+tabPanelBody <- function(value, ..., icon = NULL) {
+  if (
+    !is.character(value) ||
+    length(value) != 1 ||
+    any(is.na(value)) ||
+    nchar(value) == 0
+  ) {
+    stop("`value` must be a single, non-empty string value")
+  }
   tabPanel(title = NULL, ..., value = value, icon = icon)
 }
 
@@ -553,9 +564,9 @@ tabPanelBody <- function(..., value = NULL, icon = NULL) {
 #'         # Hide the tab values.
 #'         # Can only switch tabs by using `updateTabsetPanel()`
 #'         type = "hidden",
-#'         tabPanelBody(value = "panel1", "Panel 1 content"),
-#'         tabPanelBody(value = "panel2", "Panel 2 content"),
-#'         tabPanelBody(value = "panel3", "Panel 3 content")
+#'         tabPanelBody("panel1", "Panel 1 content"),
+#'         tabPanelBody("panel2", "Panel 2 content"),
+#'         tabPanelBody("panel3", "Panel 3 content")
 #'       )
 #'     )
 #'   )
@@ -1301,22 +1312,30 @@ uiOutput <- htmlOutput
 #'   is assigned to.
 #' @param label The label that should appear on the button.
 #' @param class Additional CSS classes to apply to the tag, if any.
+#' @param icon An [icon()] to appear on the button. Default is `icon("download")`.
 #' @param ... Other arguments to pass to the container tag function.
 #'
 #' @examples
 #' \dontrun{
-#' # In server.R:
-#' output$downloadData <- downloadHandler(
-#'   filename = function() {
-#'     paste('data-', Sys.Date(), '.csv', sep='')
-#'   },
-#'   content = function(con) {
-#'     write.csv(data, con)
-#'   }
+#' ui <- fluidPage(
+#'   downloadButton("downloadData", "Download")
 #' )
 #'
-#' # In ui.R:
-#' downloadLink('downloadData', 'Download')
+#' server <- function(input, output) {
+#'   # Our dataset
+#'   data <- mtcars
+#'
+#'   output$downloadData <- downloadHandler(
+#'     filename = function() {
+#'       paste("data-", Sys.Date(), ".csv", sep="")
+#'     },
+#'     content = function(file) {
+#'       write.csv(data, file)
+#'     }
+#'   )
+#' }
+#'
+#' shinyApp(ui, server)
 #' }
 #'
 #' @aliases downloadLink
@@ -1324,13 +1343,15 @@ uiOutput <- htmlOutput
 #' @export
 downloadButton <- function(outputId,
                            label="Download",
-                           class=NULL, ...) {
+                           class=NULL,
+                           ...,
+                           icon = shiny::icon("download")) {
   aTag <- tags$a(id=outputId,
                  class=paste('btn btn-default shiny-download-link', class),
                  href='',
                  target='_blank',
                  download=NA,
-                 icon("download"),
+                 validateIcon(icon),
                  label, ...)
 }
 
@@ -1354,7 +1375,7 @@ downloadLink <- function(outputId, label="Download", class=NULL, ...) {
 #'
 #' @param name Name of icon. Icons are drawn from the
 #'   [Font Awesome Free](https://fontawesome.com/) (currently icons from
-#'   the v5.3.1 set are supported with the v4 naming convention) and
+#'   the v5.13.0 set are supported with the v4 naming convention) and
 #'   [Glyphicons](http://getbootstrap.com/components/#glyphicons)
 #'   libraries. Note that the "fa-" and "glyphicon-" prefixes should not be used
 #'   in icon names (i.e. the "fa-calendar" icon should be referred to as
@@ -1407,12 +1428,12 @@ icon <- function(name, class = NULL, lib = "font-awesome") {
   if (!is.null(class))
     iconClass <- paste(iconClass, class)
 
-  iconTag <- tags$i(class = iconClass)
+  iconTag <- tags$i(class = iconClass, role = "presentation", `aria-label` = paste(name, "icon"))
 
   # font-awesome needs an additional dependency (glyphicon is in bootstrap)
   if (lib == "font-awesome") {
     htmlDependencies(iconTag) <- htmlDependency(
-      "font-awesome", "5.3.1", "www/shared/fontawesome", package = "shiny",
+      "font-awesome", "5.13.0", "www/shared/fontawesome", package = "shiny",
       stylesheet = c(
         "css/all.min.css",
         "css/v4-shims.min.css"

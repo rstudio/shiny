@@ -7,7 +7,8 @@
 bootstrapLib(theme = NULL)
 }
 \arguments{
-\item{theme}{deprecated (it never worked).}
+\item{theme}{Alternative Bootstrap stylesheet (normally a css file within the
+www directory, e.g. \code{www/bootstrap.css})}
 }
 \description{
 This function returns a set of web dependencies necessary for using Bootstrap

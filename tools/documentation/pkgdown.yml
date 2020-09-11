@@ -52,7 +52,6 @@ reference:
       - textInput
       - textAreaInput
       - passwordInput
-      - modalButton
       - updateActionButton
       - updateCheckboxGroupInput
       - updateCheckboxInput

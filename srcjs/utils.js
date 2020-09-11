@@ -244,7 +244,7 @@ var $escape = exports.$escape = function(val) {
   if (typeof val === "string")  {
     return val.replace(/([!"#$%&'()*+,.\/:;<=>?@\[\\\]^`{|}~])/g, '\\$1');
   } else {
-    return val
+    return val;
   }
 };
 

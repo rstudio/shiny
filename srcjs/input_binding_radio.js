@@ -9,15 +9,15 @@ $.extend(radioInputBinding, {
     // If none are checked, the input will return null (it's the default on load,
     // but it wasn't emptied when calling updateRadioButtons with character(0)
     if (value) {
-      return value
+      return value;
     } else {
-      return null
+      return null;
     }
   },
   setValue: function(el, value) {
-    if (value === undefined){
-      return
-    } else if (value.length === 0){
+    if (value === undefined) {
+      return;
+    } else if (value.length === 0) {
       // Removing all checked item if the sent data is empty
       $('input:radio[name="' + $escape(el.id) + '"]').prop('checked', false);
     } else {

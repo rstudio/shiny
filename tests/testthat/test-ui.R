@@ -22,6 +22,23 @@ test_that("sliderInput steps don't have rounding errors", {
   expect_identical(findStepSize(-5.5, 4, NULL), 0.1)
 })
 
+test_that("sliderInput warns if length(value) > 2", {
+  expect_warning(
+    object = {
+      si <- sliderInput(
+        inputId = "a",
+        label = "a",
+        min = 1,
+        max = 10,
+        value = 1:10
+      )
+    },
+    expr = "only the first 2 elements (1 and 2) of 'value' will be used"
+  )
+  varHtml <- si$children[[2]]$attribs
+  expect_equal(varHtml[["data-from"]], "1")
+  expect_equal(varHtml[["data-to"]], "2")
+})
 
 test_that("selectInputUI has a select at an expected location", {
   for (multiple in c(TRUE, FALSE)) {

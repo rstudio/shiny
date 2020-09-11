@@ -124,6 +124,13 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
     value <- to_ms(value)
   }
 
+  if (length(value) > 2) {
+    warning(
+      "only the first 2 elements (", value[1], " and ", value[2],
+      ") of 'value' will be used"
+    )
+  }
+
   range <- max - min
 
   # Try to get a sane number of tick marks

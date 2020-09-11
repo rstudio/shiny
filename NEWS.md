@@ -32,6 +32,8 @@ shiny 1.5.0.9000
 
 * Closed #2984: improved documentation for `renderCachedPlot()` (thanks to @aalucaci). (#3016)
 
+* Closed #3019: `sliderInput()` stops if `length(value) > 2` (thanks to @aalucaci).
+
 * `reactiveValuesToList()` will save its `reactlog` label as `reactiveValuesToList(<ID>)` vs `as.list(<ID>)` (#3017)
 
 * Removed unused (and non-exported) `cacheContext` class.

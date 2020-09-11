@@ -42,7 +42,7 @@ bootstrapPage <- function(..., title = NULL, responsive = NULL, theme = NULL) {
       # remainder of tags passed to the function
       list(...)
     ),
-    bootstrapLib_(theme)
+    bootstrapLib(theme)
   )
 }
 
@@ -65,24 +65,25 @@ bootstrapPage <- function(..., title = NULL, responsive = NULL, theme = NULL) {
 bootstrapLib <- function(theme = NULL) {
   # Eventually this should be deprecated in favor of bootstraplib::bootstrap()
   #shinyDeprecated("bootstraplib::bootstrap()", old = "shiny::bootstrapLib()")
-  bootstrapLib_(theme)
-}
-
-bootstrapLib_ <- function(theme) {
-  if (useBsTheme()) {
-    if (!is.null(theme)) {
-      warning(
-        "The `theme` argument in `fluidPage()`, `bootstrapPage()`, etc. is not compatible ",
-        "with bootstraplib theming, so the bootstrap theme is being ignored in favor of ",
-        "theme='", theme, "'. To instead use the bootstraplib theme, remove the ",
-        "`theme` argument and use the bootstraplib equivalent (if you want a shinytheme, ",
-        "provide the theme name to bs_theme_new()'s `bootswatch` argument)."
-      )
-      return()
-    }
-    return(bootstraplib::bootstrap())
+  if (!useBsTheme()) {
+    return(bootstrapDependency(theme))
   }
 
+  if (!is.null(theme)) {
+    warning(
+      "The `theme` argument in `fluidPage()`, `bootstrapPage()`, etc. is not compatible ",
+      "with bootstraplib theming, so the bootstrap theme is being ignored in favor of ",
+      "theme='", theme, "'. To instead use the bootstraplib theme, remove the ",
+      "`theme` argument and use the bootstraplib equivalent (if you want a shinytheme, ",
+      "provide the theme name to bs_theme_new()'s `bootswatch` argument)."
+    )
+    return(bootstrapDependency(theme))
+  }
+
+  bootstraplib::bootstrap()
+}
+
+bootstrapDependency <- function(theme) {
   htmlDependency(
     "bootstrap", "3.4.1",
     c(

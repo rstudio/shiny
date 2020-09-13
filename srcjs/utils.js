@@ -240,12 +240,7 @@ function mergeSort(list, sortfunc) {
 
 // Escape jQuery selector metacharacters: !"#$%&'()*+,./:;<=>?@[\]^`{|}~
 var $escape = exports.$escape = function(val) {
-  // Sometime val comes empty, and Js throws a 'e.replace() is not a function' error
-  if (typeof val === "string")  {
-    return val.replace(/([!"#$%&'()*+,.\/:;<=>?@\[\\\]^`{|}~])/g, '\\$1');
-  } else {
-    return val;
-  }
+  return val.replace(/([!"#$%&'()*+,.\/:;<=>?@\[\\\]^`{|}~])/g, '\\$1');
 };
 
 // Maps a function over an object, preserving keys. Like the mapValues

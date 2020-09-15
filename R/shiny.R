@@ -943,7 +943,18 @@ ShinySession <- R6Class(
 
       impl <- .subset2(x, 'impl')
       key <- .subset2(x, 'ns')(name)
+
       impl$freeze(key)
+      if (identical(impl, private$.input)) {
+        # Notify the client that this input was frozen. The client will ensure
+        # that the next time it sees a value for that input, even if the value
+        # has not changed from the last known value of that input, it will be
+        # sent to the server anyway.
+        private$sendMessage(frozen = list(
+          ids = list(key)
+        ))
+      }
+
       self$onFlushed(function() impl$thaw(key))
     },
 

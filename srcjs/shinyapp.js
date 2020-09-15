@@ -696,6 +696,12 @@ var ShinyApp = function() {
     });
   });
 
+  addMessageHandler('frozen', function(message) {
+    for (let i = 0; i < message.ids.length; i++) {
+      exports.forgetLastInputValue(message.ids[i]);
+    }
+  });
+
   function getTabset(id) {
     var $tabset = $("#" + $escape(id));
     if ($tabset.length === 0)

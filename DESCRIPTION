@@ -6,9 +6,10 @@ Authors@R: c(
     person("Winston", "Chang", role = c("aut", "cre"), email = "winston@rstudio.com"),
     person("Joe", "Cheng", role = "aut", email = "joe@rstudio.com"),
     person("JJ", "Allaire", role = "aut", email = "jj@rstudio.com"),
+    person("Carson", "Sievert", role = "aut", email = "carson@rstudio.com"),
+    person("Barret", "Schloerke", role = "aut", email = "barret@rstudio.com"),
     person("Yihui", "Xie", role = "aut", email = "yihui@rstudio.com"),
     person("Jonathan", "McPherson", role = "aut", email = "jonathan@rstudio.com"),
-    person("Carson", "Sievert", role = "aut", email = "carson@rstudio.com"),
     person(family = "RStudio", role = "cph"),
     person(family = "jQuery Foundation", role = "cph",
     comment = "jQuery library and jQuery UI library"),
@@ -107,7 +108,7 @@ Suggests:
     showtext,
     sass,
     bootstraplib (>= 0.1.0.9001)
-Remotes: 
+Remotes:
     rstudio/sass,
     rstudio/bootstraplib
 URL: http://shiny.rstudio.com

@@ -57,3 +57,6 @@ This generates an object representing brushing options, to be passed as the
 \code{brush} argument of \code{\link[=imageOutput]{imageOutput()}} or
 \code{\link[=plotOutput]{plotOutput()}}.
 }
+\seealso{
+\code{\link[=clickOpts]{clickOpts()}} for clicking events.
+}

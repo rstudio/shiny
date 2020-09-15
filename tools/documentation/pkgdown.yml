@@ -52,7 +52,6 @@ reference:
       - textInput
       - textAreaInput
       - passwordInput
-      - modalButton
       - updateActionButton
       - updateCheckboxGroupInput
       - updateCheckboxInput
@@ -104,7 +103,6 @@ reference:
     contents:
       - renderPlot
       - renderCachedPlot
-      - renderText
       - renderPrint
       - renderDataTable
       - renderImage
@@ -203,8 +201,6 @@ reference:
       - brushedPoints
       - brushOpts
       - clickOpts
-      - dblclickOpts
-      - hoverOpts
   - title: Modules
     desc: Functions for modularizing Shiny apps
     contents:

@@ -1,58 +1,66 @@
-#!/usr/bin/env Rscript
-# Retrieves a particular version of ion.rangeSlider:
-#  https://github.com/IonDen/ion.rangeSlider
-# Then applies patches from tools/ion.rangeSlider-patches.
+tmpdir <- tempdir()
 
-# This script can be sourced from RStudio, or run with Rscript.
+# https://github.com/IonDen/ion.rangeSlider
+version <- "2.3.1"
+zip_src <- sprintf("https://github.com/IonDen/ion.rangeSlider/archive/%s.zip", version)
+zip_target <- file.path(tmpdir, "ion.zip")
+download.file(zip_src, zip_target)
+unzip(zip_target, exdir = dirname(zip_target))
+src <- file.path(dirname(zip_target), paste0("ion.rangeSlider-", version))
+target <- "inst/www/shared/ionrangeslider"
+unlink(target, recursive = TRUE)
+dir.create(target)
+# Move over JS files
+file.rename(
+  file.path(src, "js"),
+  file.path(target, "js")
+)
 
-# =============================================================================
-# Download library
-# =============================================================================
-# TODO: In the future, use a tag instead of a bare commit hash. See
-# updateBootstrapDatepicker.R for an example. This commit happened to be the
-# tip of the development tree when we used it.
-version   <- "f0e1116b065c3d091a9c5f04477aaf8894974e2a"
-dest_dir  <- rprojroot::find_package_root_file("inst/www/shared/ionrangeslider")
-dest_file <- file.path(tempdir(), paste0("ionrangeslider-", version, ".zip"))
-url       <- sprintf("https://github.com/IonDen/ion.rangeSlider/archive/%s.zip", version)
+# Grab less src files and convert to sass
+# npm install -g less2sass
+less_files <- dir(file.path(src, "less"), full.names = TRUE, recursive = TRUE)
+invisible(lapply(less_files, function(file) {
+  system(paste("less2sass", file))
+}))
 
-download.file(url, dest_file)
-unzip(dest_file, exdir = tempdir())
-unzip_dir <- file.path(tempdir(), paste0("ion.rangeSlider-", version))
+# Copy over only the base (i.e., core) scss that we need for the shiny skin
+dir.create(file.path(target, "scss"))
+file.copy(
+  file.path(src, "less", c("_base.scss", "_mixins.scss")),
+  file.path(target, "scss", c("_base.scss", "_mixins.scss"))
+)
 
-unlink(dest_dir, recursive = TRUE)
+# less2sass conversion doesn't convert this import correctly
+base_css <- file.path(target, "scss", "_base.scss")
+writeLines(
+  sub("@import (reference)", "@import", readLines(base_css), fixed = TRUE),
+  base_css
+)
 
-dir.create(file.path(dest_dir, "js"), recursive = TRUE)
-dir.create(file.path(dest_dir, "css"), recursive = TRUE)
-dir.create(file.path(dest_dir, "img"), recursive = TRUE)
-
-file.copy(file.path(unzip_dir, "js/ion.rangeSlider.js"), file.path(dest_dir, "js"),
-  overwrite = TRUE)
-file.copy(file.path(unzip_dir, "css"), dest_dir, recursive = TRUE)
-file.copy(file.path(unzip_dir, "img"), dest_dir, recursive = TRUE)
-
-
-# =============================================================================
-# Apply patches
-# =============================================================================
-# The version of ion.rangeSlider that we use is modified from the base version
-# in the following ways:
-# * In our version, mouse events on the slider are not propagated to lower
-#   layers (#711, #1630).
-# * We include a custom skin for Shiny.
-# * When .update() is called, the `.removeProp("tabindex")` is wrapped in
-#   try-catch. This is because this line results in an error with jQuery 3 and
-#   PhantomJS. (#2587)
-
+# Apply git patches *before* compiling skin Sass -> CSS (this should add the shiny skin)
 patch_dir <- rprojroot::find_package_root_file("tools/ion.rangeSlider-patches")
-
 for (patch in list.files(patch_dir, full.names = TRUE)) {
   tryCatch({
     message(sprintf("Applying %s", basename(patch)))
-    system(sprintf("git apply '%s'", patch))
+    withr::with_dir(rprojroot::find_package_root_file(), system(sprintf("git apply %s", patch)))
   },
     error = function(e) {
       quit(save = "no", status = 1)
     }
   )
 }
+
+
+# Now compile Sass -> CSS so that if the default styles are requested, we
+# can serve them up without compilation (The distributed CSS includes all
+# the skins in the same CSS file, but we want them split up)
+library(sass)
+dir.create(file.path(target, "css"))
+sass(
+  sass_file(file.path(target, "scss", "shiny.scss")),
+  output = file.path(target, "css", "ion.rangeSlider.css")
+)
+
+
+# Finally, run yarn build so the JS patches propogate to the minified files
+withr::with_dir(rprojroot::find_package_root_file("tools"), system("yarn build"))

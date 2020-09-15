@@ -192,8 +192,8 @@ race conditions. For example, if your code calls \code{exists(key)} to check
 if an object is in the cache, and then call \code{get(key)}, the object may
 be removed from the cache in between those two calls, and \code{get(key)}
 will throw an error. Instead of calling the two functions, it is better to
-simply call \code{get(key)}, and use \code{tryCatch()} to handle the error
-that is thrown if the object is not in the cache. This effectively tests for
+simply call \code{get(key)}, and check that the returned object is not a
+\code{key_missing()} object, using \code{is.key_missing()}. This effectively tests for
 existence and gets the object in one operation.
 
 It is also possible for one processes to prune objects at the same time that

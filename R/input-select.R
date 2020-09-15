@@ -197,18 +197,14 @@ selectizeInput <- function(inputId, ..., options = NULL, width = NULL) {
 
 # given a select input and its id, selectize it
 selectizeIt <- function(inputId, select, options, nonempty = FALSE) {
+  # Make sure accessibility plugin is included
+  if (!('selectize-plugin-a11y' %in% options$plugins)) {
+    options$plugins <- c(options$plugins, list('selectize-plugin-a11y'))
+  }
+
   res <- checkAsIs(options)
 
-  selectizeDep <- htmlDependency(
-    "selectize", "0.11.2", c(href = "shared/selectize"),
-    stylesheet = "css/selectize.bootstrap3.css",
-    head = format(tagList(
-      HTML('<!--[if lt IE 9]>'),
-      tags$script(src = 'shared/selectize/js/es5-shim.min.js'),
-      HTML('<![endif]-->'),
-      tags$script(src = 'shared/selectize/js/selectize.min.js')
-    ))
-  )
+  selectizeDep <- selectizeDependency()
 
   if ('drag_drop' %in% options$plugins) {
     selectizeDep <- list(selectizeDep, htmlDependency(
@@ -232,10 +228,35 @@ selectizeIt <- function(inputId, select, options, nonempty = FALSE) {
 }
 
 
+selectizeDependency <- function() {
+  cssFile <- selectizeCSSFile()
+  htmlDependency(
+    "selectize", "0.12.4",
+    src = cssFile$src,
+    stylesheet = cssFile$stylesheet,
+    head = format(tagList(
+      tags$script(src = 'shared/selectize/js/selectize.min.js'),
+      # Accessibility plugin for screen readers (https://github.com/SLMNBJ/selectize-plugin-a11y):
+      tags$script(src = 'shared/selectize/accessibility/js/selectize-plugin-a11y.min.js')
+    ))
+  )
+}
 
-
-
-
+selectizeCSSFile <- function() {
+  if (!useBsTheme()) {
+    return(list(src = c(href = "shared/selectize"), stylesheet = "css/selectize.bootstrap3.css"))
+  }
+  scss <- system.file(
+    package = "shiny", "www", "shared", "selectize", "scss",
+    if ("3" %in% bootstraplib::theme_version()) {
+      "selectize.bootstrap3.scss"
+    } else {
+      "selectize.bootstrap4.scss"
+    }
+  )
+  outFile <- bootstrapSass(sass::sass_file(scss), basename = "selectize")
+  list(src = c(file = dirname(outFile)), stylesheet = basename(outFile))
+}
 
 
 #' Select variables from a data frame

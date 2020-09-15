@@ -7,12 +7,12 @@
 testServer(app = NULL, expr, args = list(), session = MockShinySession$new())
 }
 \arguments{
-\item{app}{The path to an application or module to test. In addition to
-paths, applications may be represented by any object suitable for coercion
-to an \code{appObj} by \code{\link{as.shiny.appobj}}. Application server functions must
-include a \code{session} argument in order to be tested. If \code{app} is \code{NULL} or
-not supplied, the nearest enclosing directory that is a Shiny app, starting
-with the current directory, is used.}
+\item{app}{A server function (i.e. a function with \code{input}, \code{output},
+and \code{session}), or a module function (i.e. a function with first
+argument \code{id} that calls \code{\link[=moduleServer]{moduleServer()}}.
+
+You can also provide an app, a path an app, or anything that
+\code{\link[=as.shiny.appobj]{as.shiny.appobj()}} can handle.}
 
 \item{expr}{Test code containing expectations. The objects from inside the
 server function environment will be made available in the environment of
@@ -35,7 +35,19 @@ interactions are defined in the server function of applications and in
 modules.
 }
 \examples{
-server <- function(id, multiplier = 2, prefix = "I am ") {
+# Testing a server function  ----------------------------------------------
+server <- function(input, output, session) {
+  x <- reactive(input$a * input$b)
+}
+
+testServer(server, {
+  session$setInputs(a = 2, b = 3)
+  stopifnot(x() == 6)
+})
+
+
+# Testing a module --------------------------------------------------------
+myModuleServer <- function(id, multiplier = 2, prefix = "I am ") {
   moduleServer(id, function(input, output, session) {
     myreactive <- reactive({
       input$x * multiplier
@@ -46,7 +58,7 @@ server <- function(id, multiplier = 2, prefix = "I am ") {
   })
 }
 
-testServer(server, args = list(multiplier = 2), {
+testServer(myModuleServer, args = list(multiplier = 2), {
   session$setInputs(x = 1)
   # You're also free to use third-party
   # testing packages like testthat:

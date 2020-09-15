@@ -42,7 +42,7 @@ bootstrapPage <- function(..., title = NULL, responsive = NULL, theme = NULL) {
       # remainder of tags passed to the function
       list(...)
     ),
-    bootstrapLib()
+    bootstrapLib(theme)
   )
 }
 
@@ -51,16 +51,41 @@ bootstrapPage <- function(..., title = NULL, responsive = NULL, theme = NULL) {
 #' This function returns a set of web dependencies necessary for using Bootstrap
 #' components in a web page.
 #'
-#' It isn't necessary to call this function if you use
-#' [bootstrapPage()] or others which use `bootstrapPage`, such
-#' [basicPage()], [fluidPage()], [fillPage()],
-#' [pageWithSidebar()], and [navbarPage()], because they
-#' already include the Bootstrap web dependencies.
+#' It isn't necessary to call this function if you use [bootstrapPage()] or
+#' others which use `bootstrapPage`, such [basicPage()], [fluidPage()],
+#' [fillPage()], [pageWithSidebar()], and [navbarPage()], because they already
+#' include the Bootstrap web dependencies.
+#'
+#' See also [bootstraplib::bootstrap()] for a more fully featured alternative to
+#' accessing and customizing Bootstrap CSS.
 #'
 #' @inheritParams bootstrapPage
 #' @export
+#' @keywords internal
 bootstrapLib <- function(theme = NULL) {
-  htmlDependency("bootstrap", "3.4.1",
+  # Eventually this should be deprecated in favor of bootstraplib::bootstrap()
+  #shinyDeprecated("bootstraplib::bootstrap()", old = "shiny::bootstrapLib()")
+  if (!useBsTheme()) {
+    return(bootstrapDependency(theme))
+  }
+
+  if (!is.null(theme)) {
+    warning(
+      "The `theme` argument in `fluidPage()`, `bootstrapPage()`, etc. is not compatible ",
+      "with bootstraplib theming, so the bootstrap theme is being ignored in favor of ",
+      "theme='", theme, "'. To instead use the bootstraplib theme, remove the ",
+      "`theme` argument and use the bootstraplib equivalent (if you want a shinytheme, ",
+      "provide the theme name to bs_theme_new()'s `bootswatch` argument)."
+    )
+    return(bootstrapDependency(theme))
+  }
+
+  bootstraplib::bootstrap()
+}
+
+bootstrapDependency <- function(theme) {
+  htmlDependency(
+    "bootstrap", "3.4.1",
     c(
       href = "shared/bootstrap",
       file = system.file("www/shared/bootstrap", package = "shiny")
@@ -70,14 +95,40 @@ bootstrapLib <- function(theme = NULL) {
       # Safely adding accessibility plugin for screen readers and keyboard users; no break for sighted aspects (see https://github.com/paypal/bootstrap-accessibility-plugin)
       "accessibility/js/bootstrap-accessibility.min.js"
     ),
-    stylesheet = if (is.null(theme)) c(
-      "css/bootstrap.min.css",
+    stylesheet = c(
+      theme %OR% "css/bootstrap.min.css",
       # Safely adding accessibility plugin for screen readers and keyboard users; no break for sighted aspects (see https://github.com/paypal/bootstrap-accessibility-plugin)
       "accessibility/css/bootstrap-accessibility.css"
     ),
     meta = list(viewport = "width=device-width, initial-scale=1")
   )
 }
+
+useBsTheme <- function() {
+  if (!isTRUE(getShinyOption("bootstraplib"))) {
+    return(FALSE)
+  }
+  if (!is_available("bootstraplib", "0.1.0.9001")) {
+    stop("Shiny's bootstraplib option requires version 0.1.0.9001 of the bootstraplib package.", call. = FALSE)
+  }
+  if (is.null(bootstraplib::bs_theme_get())) {
+    stop("Shiny's bootstraplib option requires a bootstraplib theme to be active. Initialize one with `bootstraplib::bs_theme_new()`.", call. = FALSE)
+  }
+  TRUE
+}
+
+# Reusable function for input widgets to compile their Sass against a bootstraplib theme
+bootstrapSass <- function(sassInput, basename, dirname = "shiny-sass-",
+                          write_attachments = FALSE, ...) {
+  bootstraplib::bootstrap_sass(
+    sassInput, ...,
+    output = sass::output_template(basename = basename, dirname = dirname),
+    options = sass::sass_options(output_style = "compressed"),
+    write_attachments = write_attachments,
+    cache_key_extra = utils::packageVersion("shiny")
+  )
+}
+
 
 #' @rdname bootstrapPage
 #' @export
@@ -1312,6 +1363,7 @@ uiOutput <- htmlOutput
 #'   is assigned to.
 #' @param label The label that should appear on the button.
 #' @param class Additional CSS classes to apply to the tag, if any.
+#' @param icon An [icon()] to appear on the button. Default is `icon("download")`.
 #' @param ... Other arguments to pass to the container tag function.
 #'
 #' @examples
@@ -1342,13 +1394,15 @@ uiOutput <- htmlOutput
 #' @export
 downloadButton <- function(outputId,
                            label="Download",
-                           class=NULL, ...) {
+                           class=NULL,
+                           ...,
+                           icon = shiny::icon("download")) {
   aTag <- tags$a(id=outputId,
                  class=paste('btn btn-default shiny-download-link', class),
                  href='',
                  target='_blank',
                  download=NA,
-                 icon("download"),
+                 validateIcon(icon),
                  label, ...)
 }
 

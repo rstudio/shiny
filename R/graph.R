@@ -179,10 +179,10 @@ RLog <- R6Class(
       paste0("names(", reactId, ")")
     },
     asListIdStr = function(reactId) {
-      paste0("as.list(", reactId, ")")
+      paste0("reactiveValuesToList(", reactId, ")")
     },
     asListAllIdStr = function(reactId) {
-      paste0("as.list(", reactId, ", all.names = TRUE)")
+      paste0("reactiveValuesToList(", reactId, ", all.names = TRUE)")
     },
     keyIdStr = function(reactId, key) {
       paste0(reactId, "$", key)

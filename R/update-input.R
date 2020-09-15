@@ -1,8 +1,7 @@
 #' Change the value of a text input on the client
 #'
 #' @template update-input
-#' @param value The value to set for the input object.
-#' @param placeholder The placeholder to set for the input object.
+#' @inheritParams textInput
 #'
 #' @seealso [textInput()]
 #'
@@ -82,7 +81,7 @@ updateTextAreaInput <- updateTextInput
 #' Change the value of a checkbox input on the client
 #'
 #' @template update-input
-#' @param value The value to set for the input object.
+#' @inheritParams checkboxInput
 #'
 #' @seealso [checkboxInput()]
 #'
@@ -116,8 +115,7 @@ updateCheckboxInput <- function(session, inputId, label = NULL, value = NULL) {
 #' Change the label or icon of an action button on the client
 #'
 #' @template update-input
-#' @param icon The icon to set for the input object. To remove the
-#' current icon, use `icon=character(0)`.
+#' @inheritParams actionButton
 #'
 #' @seealso [actionButton()]
 #'
@@ -180,12 +178,7 @@ updateActionLink <- updateActionButton
 #' Change the value of a date input on the client
 #'
 #' @template update-input
-#' @param value The desired date value. Either a Date object, or a string in
-#'   `yyyy-mm-dd` format. Supply `NA` to clear the date.
-#' @param min The minimum allowed date. Either a Date object, or a string in
-#'   `yyyy-mm-dd` format.
-#' @param max The maximum allowed date. Either a Date object, or a string in
-#'   `yyyy-mm-dd` format.
+#' @inheritParams dateInput
 #'
 #' @seealso [dateInput()]
 #'
@@ -228,14 +221,7 @@ updateDateInput <- function(session, inputId, label = NULL, value = NULL,
 #' Change the start and end values of a date range input on the client
 #'
 #' @template update-input
-#' @param start The start date. Either a Date object, or a string in
-#'   `yyyy-mm-dd` format. Supplying `NA` clears the start date.
-#' @param end The end date. Either a Date object, or a string in
-#'   `yyyy-mm-dd` format. Supplying `NA` clears the end date.
-#' @param min The minimum allowed date. Either a Date object, or a string in
-#'   `yyyy-mm-dd` format.
-#' @param max The maximum allowed date. Either a Date object, or a string in
-#'   `yyyy-mm-dd` format.
+#' @inheritParams dateRangeInput
 #'
 #' @seealso [dateRangeInput()]
 #'
@@ -290,7 +276,7 @@ updateDateRangeInput <- function(session, inputId, label = NULL,
 #'   `shinyServer`.
 #' @param inputId The id of the `tabsetPanel`, `navlistPanel`,
 #' or `navbarPage` object.
-#' @param selected The name of the tab to make active.
+#' @inheritParams tabsetPanel
 #'
 #' @seealso [tabsetPanel()], [navlistPanel()],
 #' [navbarPage()]
@@ -339,10 +325,7 @@ updateNavlistPanel <- updateTabsetPanel
 #' Change the value of a number input on the client
 #'
 #' @template update-input
-#' @param value The value to set for the input object.
-#' @param min Minimum value.
-#' @param max Maximum value.
-#' @param step Step size.
+#' @inheritParams numericInput
 #'
 #' @seealso [numericInput()]
 #'
@@ -389,12 +372,7 @@ updateNumericInput <- function(session, inputId, label = NULL, value = NULL,
 #' Change the value of a slider input on the client.
 #'
 #' @template update-input
-#' @param value The value to set for the input object.
-#' @param min Minimum value.
-#' @param max Maximum value.
-#' @param step Step size.
-#' @param timeFormat Date and POSIXt formatting.
-#' @param timezone The timezone offset for POSIXt objects.
+#' @inheritParams sliderInput
 #'
 #' @seealso [sliderInput()]
 #'

@@ -217,6 +217,15 @@ RestoreContext <- R6Class("RestoreContext",
       self$dir <- NULL
     },
 
+    # Completely replace the state
+    set = function(active = FALSE, initErrorMessage = NULL, input = list(), values = new.env(parent = emptyenv()), dir = NULL) {
+      self$active <- active
+      self$initErrorMessage <- initErrorMessage
+      self$input <- RestoreInputSet$new(input)
+      self$values <- values
+      self$dir <- dir
+    },
+
     # This should be called before a restore context is popped off the stack.
     flushPending = function() {
       self$input$flushPending()
@@ -453,7 +462,7 @@ hasCurrentRestoreContext <- function() {
   domain <- getDefaultReactiveDomain()
   if (!is.null(domain) && !is.null(domain$restoreContext))
     return(TRUE)
-  
+
   return(FALSE)
 }
 

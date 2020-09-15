@@ -24,6 +24,8 @@ shiny 1.5.0.9000
 
 * When UI is specified as a function (e.g. `ui <- function(req) { ... }`), the response can now be an HTTP response as returned from the (newly exported) `httpResponse()` function. (#2970)
 
+* `selectInput` and `selectizeInput` now warn about performance implications when thousands of choices are used, and recommend [server-side selectize](https://shiny.rstudio.com/articles/selectize.html) be used instead. (#2959)
+
 * Closed #2980: `addResourcePath()` now allows paths with a leading `.` (thanks to @ColinFay). (#2981)
 
 * Closed #2972: `runExample()` now supports the `shiny.port` option (thanks to @ColinFay). (#2982)

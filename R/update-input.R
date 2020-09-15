@@ -595,7 +595,7 @@ updateSelectInput <- function(session, inputId, label = NULL, choices = NULL,
                               selected = NULL) {
   choices <- if (!is.null(choices)) choicesWithNames(choices)
   if (!is.null(selected)) selected <- as.character(selected)
-  options <- if (!is.null(choices)) selectOptions(choices, selected)
+  options <- if (!is.null(choices)) selectOptions(choices, selected, inputId, FALSE)
   message <- dropNulls(list(label = label, options = options, value = selected))
   session$sendInputMessage(inputId, message)
 }

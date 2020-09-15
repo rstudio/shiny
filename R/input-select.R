@@ -12,6 +12,14 @@
 #' name will be treated as a placeholder prompt. For example:
 #' `selectInput("letter", "Letter", c("Choose one" = "", LETTERS))`
 #'
+#' **Performance note:** `selectInput()` and `selectizeInput()` can slow down
+#' significantly when thousands of choices are used; with legacy browsers like
+#' Internet Explorer, the user interface may hang for many seconds. For large
+#' numbers of choices, Shiny offers a "server-side selectize" option that
+#' massively improves performance and efficiency; see
+#' [this selectize article](https://shiny.rstudio.com/articles/selectize.html)
+#' on the Shiny Dev Center for details.
+#'
 #' @inheritParams textInput
 #' @param choices List of values to select from. If elements of the list are
 #'   named, then that name --- rather than the value --- is displayed to the
@@ -100,7 +108,7 @@ selectInput <- function(inputId, label, choices, selected = NULL,
     id = inputId,
     class = if (!selectize) "form-control",
     size = size,
-    selectOptions(choices, selected)
+    selectOptions(choices, selected, inputId, selectize)
   )
   if (multiple)
     selectTag$attribs$multiple <- "multiple"
@@ -125,16 +133,22 @@ firstChoice <- function(choices) {
 }
 
 # Create tags for each of the options; use <optgroup> if necessary.
-# This returns a HTML string instead of tags, because of the 'selected'
-# attribute.
-selectOptions <- function(choices, selected = NULL) {
+# This returns a HTML string instead of tags for performance reasons.
+selectOptions <- function(choices, selected = NULL, inputId, perfWarning = FALSE) {
+  if (length(choices) >= 1000) {
+    warning("The select input \"", inputId, "\" contains a large number of ",
+      "options; consider using server-side selectize for massively improved ",
+      "performance. See the Details section of the ?selectizeInput help topic.",
+      call. = FALSE)
+  }
+
   html <- mapply(choices, names(choices), FUN = function(choice, label) {
     if (is.list(choice)) {
       # If sub-list, create an optgroup and recurse into the sublist
       sprintf(
         '<optgroup label="%s">\n%s\n</optgroup>',
         htmlEscape(label, TRUE),
-        selectOptions(choice, selected)
+        selectOptions(choice, selected, inputId, perfWarning)
       )
 
     } else {

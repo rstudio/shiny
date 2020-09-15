@@ -89,6 +89,11 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
                     version = "0.10.2.2")
   }
 
+  if (length(value) == 2 && value[2] < value[1]) {
+    value <- rev(value)
+    warning("values were reverted")
+  }
+
   dataType <- getSliderType(min, max, value)
 
   if (is.null(timeFormat)) {

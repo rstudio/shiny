@@ -48,6 +48,8 @@ shiny 1.5.0.9000
 
 * Fixed #3033: When a `DiskCache` was created with both `max_n` and `max_size`, too many items could get pruned when `prune()` was called. (#3034)
 
+* Fixed #2936: `dateYMD` was giving a warning when passed a vector of dates from `dateInput` which was greater than length 1. The length check was removed because it was not needed. (#3061)
+
 ### Library updates
 
 * Removed html5shiv and respond.js, which were used for IE 8 and IE 9 compatibility. (#2973)

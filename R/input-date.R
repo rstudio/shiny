@@ -99,7 +99,7 @@ dateInput <- function(inputId, label, value = NULL, min = NULL, max = NULL,
   value <- dateYMD(value, "value")
   min <- dateYMD(min, "min")
   max <- dateYMD(max, "max")
-  datestisabled <- sapply(datesdisabled, dateYMD, "datesdisabled", USE.NAMES = FALSE)
+  datesdisabled <- sapply(datesdisabled, dateYMD, "datesdisabled", USE.NAMES = FALSE)
 
   value <- restoreInput(id = inputId, default = value)
 

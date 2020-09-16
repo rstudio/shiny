@@ -95,8 +95,8 @@ ReactiveVal <- R6Class(
 
       private$value
     },
-    set = function(value) {
-      if (identical(private$value, value)) {
+    set = function(value, force = FALSE) {
+      if (!force && identical(private$value, value)) {
         return(invisible(FALSE))
       }
       rLog$valueChange(private$reactId, value, getDefaultReactiveDomain())
@@ -113,6 +113,9 @@ ReactiveVal <- R6Class(
         self$thaw(session)
       })
       private$frozen <- TRUE
+      # Force an invalidation
+      self$set(NULL, force = TRUE)
+      invisible(TRUE)
     },
     thaw = function(session = getDefaultReactiveDomain()) {
       rLog$thawReactiveVal(private$reactId, session)
@@ -357,7 +360,7 @@ ReactiveValues <- R6Class(
       keyValue
     },
 
-    set = function(key, value) {
+    set = function(key, value, force = FALSE) {
       # if key exists
       #   if it is the same value, return
       #
@@ -389,10 +392,8 @@ ReactiveValues <- R6Class(
 
       key_exists <- .values$containsKey(key)
 
-      if (key_exists) {
-        if (.dedupe && identical(.values$get(key), value)) {
-          return(invisible())
-        }
+      if (key_exists && !isTRUE(force) && .dedupe && identical(.values$get(key), value)) {
+        return(invisible())
       }
 
       # set the value for better logging
@@ -473,6 +474,8 @@ ReactiveValues <- R6Class(
       domain <- getDefaultReactiveDomain()
       rLog$freezeReactiveKey(.reactId, key, domain)
       setMeta(key, "frozen", TRUE)
+      # Force an invalidation
+      self$set(key, NULL, force = TRUE)
     },
 
     thaw = function(key) {

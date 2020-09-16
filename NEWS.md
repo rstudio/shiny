@@ -48,7 +48,7 @@ shiny 1.5.0.9000
 
 * Fixed #3033: When a `DiskCache` was created with both `max_n` and `max_size`, too many items could get pruned when `prune()` was called. (#3034)
 
-* Fixed #2936: `dateYMD` was giving a warning when passed a vector of dates from `dateInput` which was greater than length 1. Used `sapply` to apply `dateYMD` once per value in vector.
+* Fixed #2936: `dateYMD` was giving a warning when passed a vector of dates from `dateInput` which was greater than length 1. Removed check.
 
 ### Library updates
 

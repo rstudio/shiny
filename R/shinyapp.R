@@ -517,6 +517,10 @@ as.shiny.appobj.list <- function(x) {
 #' @rdname shiny.appobj
 #' @export
 as.shiny.appobj.character <- function(x) {
+  # Make sure that running an app dir/file won't affect bootstraplib's global state
+  old_theme <- bootstraplib::bs_theme_get()
+  on.exit({ bootstraplib::bs_theme_set(old_theme) }, add = TRUE)
+
   if (identical(tolower(tools::file_ext(x)), "r"))
     shinyAppFile(x)
   else

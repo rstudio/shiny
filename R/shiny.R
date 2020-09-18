@@ -953,6 +953,12 @@ ShinySession <- R6Class(
         private$sendMessage(frozen = list(
           ids = list(key)
         ))
+      } else {
+        if (getOption("shiny.deprecation.messages", TRUE) && getOption("shiny.deprecation.messages.freeze", TRUE)) {
+          rlang::warn(
+            "Support for calling freezeReactiveValue() with non-`input` reactiveValues objects is soft-deprecated, and may be removed in a future version of Shiny. (See https://github.com/rstudio/shiny/issues/3063)",
+            .frequency = "once", .frequency_id = "freezeReactiveValue")
+        }
       }
 
       self$onFlushed(function() impl$thaw(key))

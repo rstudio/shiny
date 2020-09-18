@@ -218,11 +218,18 @@ RestoreContext <- R6Class("RestoreContext",
     },
 
     # Completely replace the state
-    set = function(active = FALSE, initErrorMessage = NULL, input = list(), values = new.env(parent = emptyenv()), dir = NULL) {
+    set = function(active = FALSE, initErrorMessage = NULL, input = list(), values = list(), dir = NULL) {
+      # Validate all inputs
+      stopifnot(is.logical(active))
+      stopifnot(is.null(initErrorMessage) || is.character(initErrorMessage))
+      stopifnot(is.list(input))
+      stopifnot(is.list(values))
+      stopifnot(is.null(dir) || is.character(dir))
+
       self$active <- active
       self$initErrorMessage <- initErrorMessage
       self$input <- RestoreInputSet$new(input)
-      self$values <- values
+      self$values <- list2env2(values, parent = emptyenv())
       self$dir <- dir
     },
 

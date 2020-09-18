@@ -72,9 +72,14 @@ Progress <- R6Class(
     #'   the progress indicator will show using Shiny's notification API. If
     #'   `"old"`, use the same HTML and CSS used in Shiny 0.13.2 and below (this
     #'   is for backward-compatibility).
-    initialize = function(session = getDefaultReactiveDomain(),
+    #' @param closeButton If `TRUE`, display a button which will make the
+    #'   progress disappear when clicked. If `FALSE` do not display.
+    initialize = function(
+      session = getDefaultReactiveDomain(),
       min = 0, max = 1,
-      style = getShinyOption("progress.style", default = "notification"))
+      style = getShinyOption("progress.style", default = "notification"),
+      closeButton = TRUE
+    )
     {
       if (is.null(session$progressStack))
         stop("'session' is not a ShinySession object.")
@@ -87,7 +92,7 @@ Progress <- R6Class(
       private$style <- match.arg(style, choices = c("notification", "old"))
       private$closed <- FALSE
 
-      session$sendProgress('open', list(id = private$id, style = private$style))
+      session$sendProgress('open', list(id = private$id, style = private$style, closeButton = closeButton))
     },
 
     #' @description Updates the progress panel. When called the first time, the
@@ -152,7 +157,7 @@ Progress <- R6Class(
       }
 
       private$session$sendProgress('close',
-        list(id = private$id, style = private$style)
+                                   list(id = private$id, style = private$style)
       )
       private$closed <- TRUE
     }
@@ -226,7 +231,8 @@ Progress <- R6Class(
 #'   (this is for backward-compatibility).
 #' @param value Single-element numeric vector; the value at which to set the
 #'   progress bar, relative to `min` and `max`.
-#'
+#' @param closeButton If `TRUE`, display a button which will make the
+#'   progress disappear when clicked. If `FALSE` do not display.
 #' @return The result of `expr`.
 #' @examples
 #' ## Only run examples in interactive R sessions
@@ -255,12 +261,16 @@ Progress <- R6Class(
 #' @seealso [Progress()]
 #' @rdname withProgress
 #' @export
-withProgress <- function(expr, min = 0, max = 1,
+withProgress <- function(
+  expr, min = 0, max = 1,
   value = min + (max - min) * 0.1,
   message = NULL, detail = NULL,
   style = getShinyOption("progress.style", default = "notification"),
   session = getDefaultReactiveDomain(),
-  env = parent.frame(), quoted = FALSE)
+  env = parent.frame(),
+  quoted = FALSE,
+  closeButton = TRUE
+)
 {
 
   if (!quoted)
@@ -271,7 +281,7 @@ withProgress <- function(expr, min = 0, max = 1,
 
   style <- match.arg(style, c("notification", "old"))
 
-  p <- Progress$new(session, min = min, max = max, style = style)
+  p <- Progress$new(session, min = min, max = max, style = style, closeButton = closeButton)
 
   session$progressStack$push(p)
   on.exit({

@@ -156,8 +156,9 @@ Progress <- R6Class(
         return()
       }
 
-      private$session$sendProgress('close',
-                                   list(id = private$id, style = private$style)
+      private$session$sendProgress(
+        'close',
+        list(id = private$id, style = private$style)
       )
       private$closed <- TRUE
     }

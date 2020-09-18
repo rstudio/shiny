@@ -569,6 +569,11 @@ updateRadioButtons <- function(session, inputId, label = NULL, choices = NULL,
     if (!is.null(choices)) selected <- choices[[1]]
     else if (!is.null(choiceValues)) selected <- choiceValues[[1]]
   }
+
+  # length of selected can't be more than one
+  if (length(selected) > 1)
+    stop("The 'selected' argument must be of length 1")
+
   updateInputOptions(session, inputId, label, choices, selected,
     inline, 'radio', choiceNames, choiceValues)
 }

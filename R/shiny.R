@@ -944,8 +944,17 @@ ShinySession <- R6Class(
       impl <- .subset2(x, 'impl')
       key <- .subset2(x, 'ns')(name)
 
-      impl$freeze(key)
-      if (identical(impl, private$.input)) {
+      is_input <- identical(impl, private$.input)
+
+      # There's no good reason for us not to just do force=TRUE, except that we
+      # know this fixes problems for freezeReactiveValue(input) but we don't
+      # currently even know what you would use freezeReactiveValue(rv) for. In
+      # the spirit of not breaking things we don't understand, we're making as
+      # targeted a fix as possible, while emitting a deprecation warning (below)
+      # that should help us gather more data about the other case.
+      impl$freeze(key, invalidate = is_input)
+
+      if (is_input) {
         # Notify the client that this input was frozen. The client will ensure
         # that the next time it sees a value for that input, even if the value
         # has not changed from the last known value of that input, it will be

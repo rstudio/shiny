@@ -81,7 +81,7 @@ Imports:
     jsonlite (>= 0.9.16),
     xtable,
     digest,
-    htmltools (>= 0.4.0.9003),
+    htmltools (>= 0.5.0.9001),
     R6 (>= 2.0),
     sourcetools,
     later (>= 1.0.0),
@@ -110,7 +110,7 @@ Suggests:
     ragg,
     showtext,
     sass,
-    bootstraplib (>= 0.1.0.9001)
+    bootstraplib (>= 0.2.0.9000)
 Remotes:
     rstudio/sass,
     rstudio/bootstraplib

@@ -128,11 +128,11 @@ dateInput <- function(inputId, label, value = NULL, min = NULL, max = NULL,
                `data-date-days-of-week-disabled` =
                    jsonlite::toJSON(daysofweekdisabled, null = 'null')
     ),
-    datePickerDependencies()
+    datePickerDependency
   )
 }
 
-datePickerDependencies <- function() {
+datePickerDependency <- htmlDependencyFunction(function() {
   cssFile <- datePickerCssFile()
   version <- "1.9.0"
 
@@ -156,13 +156,13 @@ datePickerDependencies <- function() {
      </script>"
     )
   )
-}
+})
 
-datePickerCssFile <- function() {
-  if (!useBsTheme()) {
+datePickerCssFile <- function(theme = getShinyOption("bs_theme")) {
+  if (is.null(theme)) {
     return(list(src = c(href = "shared/datepicker"), stylesheet = "css/bootstrap-datepicker3.min.css"))
   }
   scss <- system.file(package = "shiny", "www", "shared", "datepicker", "scss", "build3.scss")
-  outFile <- bootstrapSass(sass::sass_file(scss), basename = "bootstrap-datepicker-")
+  outFile <- bootstrapSass(sass::sass_file(scss), basename = "bootstrap-datepicker-", theme = theme)
   list(src = c(file = dirname(outFile)), stylesheet = basename(outFile))
 }

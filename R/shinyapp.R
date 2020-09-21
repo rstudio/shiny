@@ -36,6 +36,7 @@
 #'   `"disable"`. The default value, `NULL`, will respect the setting from
 #'   any previous calls to  [enableBookmarking()]. See [enableBookmarking()]
 #'   for more information on bookmarking your app.
+#' @param bs_theme a [bootstraplib::bs_theme()] object.
 #' @return An object that represents the app. Printing the object or passing it
 #'   to [runApp()] will run the app.
 #'
@@ -72,7 +73,8 @@
 #' }
 #' @export
 shinyApp <- function(ui, server, onStart=NULL, options=list(),
-                     uiPattern="/", enableBookmarking=NULL) {
+                     uiPattern="/", enableBookmarking=NULL,
+                     bs_theme=getShinyOption("bs_theme")) {
   if (!is.function(server)) {
     stop("`server` must be a function", call. = FALSE)
   }
@@ -94,6 +96,8 @@ shinyApp <- function(ui, server, onStart=NULL, options=list(),
   # Store the appDir and bookmarking-related options, so that we can read them
   # from within the app.
   appOptions <- captureAppOptions()
+
+  shinyOptions(bs_theme = bs_theme)
 
   structure(
     list(
@@ -518,8 +522,8 @@ as.shiny.appobj.list <- function(x) {
 #' @export
 as.shiny.appobj.character <- function(x) {
   # Make sure that running an app dir/file won't affect bootstraplib's global state
-  old_theme <- bootstraplib::bs_theme_get()
-  on.exit({ bootstraplib::bs_theme_set(old_theme) }, add = TRUE)
+  old_theme <- bootstraplib::bs_global_get()
+  on.exit({ bootstraplib::bs_global_set(old_theme) }, add = TRUE)
 
   if (identical(tolower(tools::file_ext(x)), "r"))
     shinyAppFile(x)

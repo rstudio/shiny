@@ -204,7 +204,7 @@ selectizeIt <- function(inputId, select, options, nonempty = FALSE) {
 
   res <- checkAsIs(options)
 
-  selectizeDep <- selectizeDependency()
+  selectizeDep <- selectizeDependency
 
   if ('drag_drop' %in% options$plugins) {
     selectizeDep <- list(selectizeDep, htmlDependency(
@@ -228,7 +228,7 @@ selectizeIt <- function(inputId, select, options, nonempty = FALSE) {
 }
 
 
-selectizeDependency <- function() {
+selectizeDependency <- htmlDependencyFunction(function() {
   cssFile <- selectizeCSSFile()
   htmlDependency(
     "selectize", "0.12.4",
@@ -240,10 +240,10 @@ selectizeDependency <- function() {
       tags$script(src = 'shared/selectize/accessibility/js/selectize-plugin-a11y.min.js')
     ))
   )
-}
+})
 
-selectizeCSSFile <- function() {
-  if (!useBsTheme()) {
+selectizeCSSFile <- function(theme = getShinyOption("bs_theme")) {
+  if (is.null(theme)) {
     return(list(src = c(href = "shared/selectize"), stylesheet = "css/selectize.bootstrap3.css"))
   }
   scss <- system.file(
@@ -254,7 +254,7 @@ selectizeCSSFile <- function() {
       "selectize.bootstrap4.scss"
     }
   )
-  outFile <- bootstrapSass(sass::sass_file(scss), basename = "selectize")
+  outFile <- bootstrapSass(sass::sass_file(scss), basename = "selectize", theme = theme)
   list(src = c(file = dirname(outFile)), stylesheet = basename(outFile))
 }
 

@@ -205,10 +205,10 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
     )
   }
 
-  attachDependencies(sliderTag, ionRangeSliderDependencies())
+  attachDependencies(sliderTag, ionRangeSliderDependency)
 }
 
-ionRangeSliderDependencies <- function() {
+ionRangeSliderDependency <- htmlDependencyFunction(function() {
   cssFile <- ionRangeSliderCSSFile()
   version <- "2.3.1"
   list(
@@ -229,10 +229,10 @@ ionRangeSliderDependencies <- function() {
       script = "strftime-min.js"
     )
   )
-}
+})
 
-ionRangeSliderCSSFile <- function() {
-  if (!useBsTheme()) {
+ionRangeSliderCSSFile <- function(theme = getShinyOption("bs_theme")) {
+  if (is.null(theme)) {
     return(list(stylesheet = "css/ion.rangeSlider.css", src = c(href = "shared/ionrangeslider")))
   }
   sassInput <- list(
@@ -244,7 +244,7 @@ ionRangeSliderCSSFile <- function() {
       system.file(package = "shiny", "www", "shared", "ionrangeslider", "scss", "shiny.scss")
     )
   )
-  outFile <- bootstrapSass(sassInput, basename = "ionRangeSlider")
+  outFile <- bootstrapSass(sassInput, basename = "ionRangeSlider", theme = theme)
   list(stylesheet = basename(outFile), src = c(file = dirname(outFile)))
 }
 

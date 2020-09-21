@@ -24,6 +24,9 @@ createWebDependency <- function(dependency, scrubFile = TRUE) {
   if (!inherits(dependency, "html_dependency"))
     stop("Unexpected non-html_dependency type")
 
+  # Resolve htmlDependencyFunction()
+  dependency <- htmltools::resolveDependencies(list(dependency))[[1]]
+
   if (is.null(dependency$src$href)) {
     prefix <- paste(dependency$name, "-", dependency$version, sep = "")
     addResourcePath(prefix, dependency$src$file)

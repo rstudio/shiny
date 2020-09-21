@@ -63,24 +63,25 @@ bootstrapPage <- function(..., title = NULL, responsive = NULL, theme = NULL) {
 #' @export
 #' @keywords internal
 bootstrapLib <- function(theme = NULL) {
-  # Eventually this should be deprecated in favor of bootstraplib::bootstrap()
-  #shinyDeprecated("bootstraplib::bootstrap()", old = "shiny::bootstrapLib()")
-  if (!useBsTheme()) {
-    return(bootstrapDependency(theme))
-  }
-
-  if (!is.null(theme)) {
-    warning(
-      "The `theme` argument in `fluidPage()`, `bootstrapPage()`, etc. is not compatible ",
-      "with bootstraplib theming, so the bootstrap theme is being ignored in favor of ",
-      "theme='", theme, "'. To instead use the bootstraplib theme, remove the ",
-      "`theme` argument and use the bootstraplib equivalent (if you want a shinytheme, ",
-      "provide the theme name to bs_theme_new()'s `bootswatch` argument)."
-    )
-    return(bootstrapDependency(theme))
-  }
-
-  bootstraplib::bootstrap()
+  htmlDependencyFunction(
+    function() {
+      bs_theme <- getShinyOption("bs_theme")
+      if (is.null(bs_theme)) {
+        return(bootstrapDependency(theme))
+      }
+      if (!is.null(theme)) {
+        warning(
+          "The `theme` argument in `fluidPage()`, `bootstrapPage()`, etc. is not compatible ",
+          "with bootstraplib theming, so the bootstrap theme is being ignored in favor of ",
+          "theme='", theme, "'. To instead use the bootstraplib theme, remove the ",
+          "`theme` argument and use the bootstraplib equivalent (if you want a shinytheme, ",
+          "provide the theme name to bs_theme_new()'s `bootswatch` argument)."
+        )
+        return(bootstrapDependency(theme))
+      }
+      bootstraplib::bs_dependencies(theme = bs_theme)
+    }
+  )
 }
 
 bootstrapDependency <- function(theme) {
@@ -104,21 +105,12 @@ bootstrapDependency <- function(theme) {
   )
 }
 
-useBsTheme <- function() {
-  if (!is_available("bootstraplib", "0.1.0.9001")) {
-    return(FALSE)
-  }
-  !is.null(bootstraplib::bs_theme_get())
-}
-
 # Reusable function for input widgets to compile their Sass against a bootstraplib theme
-bootstrapSass <- function(sassInput, basename, dirname = "shiny-sass-",
-                          write_attachments = FALSE, ...) {
-  bootstraplib::bootstrap_sass(
-    sassInput, ...,
+bootstrapSass <- function(sassInput, basename, dirname = "shiny-sass-", theme = getShinyOption("bs_theme")) {
+  bootstraplib::bs_sass(
+    rules = sassInput, theme = theme,
     output = sass::output_template(basename = basename, dirname = dirname),
     options = sass::sass_options(output_style = "compressed"),
-    write_attachments = write_attachments,
     cache_key_extra = utils::packageVersion("shiny")
   )
 }

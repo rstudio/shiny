@@ -101,7 +101,7 @@ shinyApp <- function(ui, server, onStart=NULL, options=list(),
   appOptions <- captureAppOptions()
 
   # Give the app access to the theme object
-  if (!is.null(bs_theme) || !inherits(bs_theme, "bs_theme")) {
+  if (!is.null(bs_theme) && !inherits(bs_theme, "bs_theme")) {
     stop("The `bs_theme` argument must be a `bootstraplib::bs_theme()` object or `NULL`")
   }
   shinyOptions(bs_theme = bs_theme)

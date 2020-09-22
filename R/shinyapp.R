@@ -97,6 +97,10 @@ shinyApp <- function(ui, server, onStart=NULL, options=list(),
   # from within the app.
   appOptions <- captureAppOptions()
 
+  # Give the app access to the theme object
+  if (!is.null(bs_theme) || !inherits(bs_theme, "bs_theme")) {
+    stop("The `bs_theme` argument must be a `bootstraplib::bs_theme() object or `NULL`")
+  }
   shinyOptions(bs_theme = bs_theme)
 
   structure(
@@ -521,10 +525,6 @@ as.shiny.appobj.list <- function(x) {
 #' @rdname shiny.appobj
 #' @export
 as.shiny.appobj.character <- function(x) {
-  # Make sure that running an app dir/file won't affect bootstraplib's global state
-  old_theme <- bootstraplib::bs_global_get()
-  on.exit({ bootstraplib::bs_global_set(old_theme) }, add = TRUE)
-
   if (identical(tolower(tools::file_ext(x)), "r"))
     shinyAppFile(x)
   else

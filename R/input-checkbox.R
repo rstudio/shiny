@@ -27,11 +27,22 @@
 #' `TRUE` if checked, `FALSE` otherwise.
 #'
 #' @export
-checkboxInput <- function(inputId, label, value = FALSE, width = NULL) {
+checkboxInput <- function(inputId, label, value = FALSE, width = NULL, ...) {
 
   value <- restoreInput(id = inputId, default = value)
 
-  inputTag <- tags$input(id = inputId, type="checkbox")
+  args <- list(...)
+  if (!is.null(args[["disabled"]])) {
+    if (args[["disabled"]]) {
+      disable = TRUE
+    } else {
+      disable = NULL
+    }
+  } else {
+    disable = NULL
+  }
+
+  inputTag <- tags$input(id = inputId, type="checkbox", disabled = disable)
   if (!is.null(value) && value)
     inputTag$attribs$checked <- "checked"
 

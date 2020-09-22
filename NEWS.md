@@ -98,6 +98,10 @@ shiny 1.5.0
 
 * Fixed #2856: Bumped jQuery 3 from 3.4.1 to 3.5.1. (#2857)
 
+* Resolved [#413](https://github.com/rstudio/shiny/issues/413): Disabled can be set for all or individual `radioButtons`.
+
+* Resolved [#2489](https://github.com/rstudio/shiny/issues/2489): Enables to set the attribute `disabled` for `numericInput`, `textInput`, `passwordInput` and `checkboxInput`.
+
 ### Bug fixes
 
 * Fixed #2606: `debounce()` would not work properly if the code in the reactive expression threw an error on the first run. (#2652)

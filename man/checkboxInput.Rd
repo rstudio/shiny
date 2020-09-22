@@ -4,7 +4,7 @@
 \alias{checkboxInput}
 \title{Checkbox Input Control}
 \usage{
-checkboxInput(inputId, label, value = FALSE, width = NULL)
+checkboxInput(inputId, label, value = FALSE, width = NULL, ...)
 }
 \arguments{
 \item{inputId}{The \code{input} slot that will be used to access the value.}
@@ -14,7 +14,11 @@ checkboxInput(inputId, label, value = FALSE, width = NULL)
 \item{value}{Initial value (\code{TRUE} or \code{FALSE}).}
 
 \item{width}{The width of the input, e.g. \code{'400px'}, or \code{'100\%'};
+
 see \code{\link[=validateCssUnit]{validateCssUnit()}}.}
+
+\item{...}{Can be used to set the attribute `disabled`}
+
 }
 \value{
 A checkbox control that can be added to a UI definition.

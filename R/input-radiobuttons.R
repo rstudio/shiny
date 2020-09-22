@@ -27,6 +27,7 @@
 #'   that `choiceNames` allows any type of UI object to be passed through
 #'   (tag objects, icons, HTML code, ...), instead of just simple text. See
 #'   Examples.
+#' @param ... Can be used to disable all or individual radio buttons.
 #'
 #' @family input elements
 #' @seealso [updateRadioButtons()]
@@ -86,7 +87,7 @@
 #'
 #' @export
 radioButtons <- function(inputId, label, choices = NULL, selected = NULL,
-  inline = FALSE, width = NULL, choiceNames = NULL, choiceValues = NULL) {
+  inline = FALSE, width = NULL, choiceNames = NULL, choiceValues = NULL, ...) {
 
   args <- normalizeChoicesArgs(choices, choiceNames, choiceValues)
 
@@ -98,7 +99,7 @@ radioButtons <- function(inputId, label, choices = NULL, selected = NULL,
   if (length(selected) > 1) stop("The 'selected' argument must be of length 1")
 
   options <- generateOptions(inputId, selected, inline,
-    'radio', args$choiceNames, args$choiceValues)
+    'radio', args$choiceNames, args$choiceValues, ...)
 
   divClass <- "form-group shiny-input-radiogroup shiny-input-container"
   if (inline) divClass <- paste(divClass, "shiny-input-container-inline")

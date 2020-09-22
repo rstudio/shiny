@@ -12,7 +12,8 @@ radioButtons(
   inline = FALSE,
   width = NULL,
   choiceNames = NULL,
-  choiceValues = NULL
+  choiceValues = NULL,
+  ...
 )
 }
 \arguments{
@@ -43,6 +44,8 @@ advantage of using both of these over a named list for \code{choices} is
 that \code{choiceNames} allows any type of UI object to be passed through
 (tag objects, icons, HTML code, ...), instead of just simple text. See
 Examples.}
+
+\item{...}{Can be used to disable all or individual radio buttons.}
 }
 \value{
 A set of radio buttons that can be added to a UI definition.

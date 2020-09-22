@@ -20,7 +20,7 @@ others which use \code{bootstrapPage}, such \code{\link[=basicPage]{basicPage()}
 \code{\link[=fillPage]{fillPage()}}, \code{\link[=pageWithSidebar]{pageWithSidebar()}}, and \code{\link[=navbarPage]{navbarPage()}}, because they already
 include the Bootstrap web dependencies.
 
-See also \code{\link[bootstraplib:bootstrap]{bootstraplib::bootstrap()}} for a more fully featured alternative to
+See also \code{\link[bootstraplib:deprecated]{bootstraplib::bootstrap()}} for a more fully featured alternative to
 accessing and customizing Bootstrap CSS.
 }
 \keyword{internal}

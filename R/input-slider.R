@@ -208,7 +208,7 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
   attachDependencies(sliderTag, ionRangeSliderDependency)
 }
 
-ionRangeSliderDependency <- htmlDependencyFunction(function() {
+ionRangeSliderDependency <- tagFunction(function() {
   cssFile <- ionRangeSliderCSSFile()
   version <- "2.3.1"
   list(

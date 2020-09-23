@@ -132,7 +132,7 @@ dateInput <- function(inputId, label, value = NULL, min = NULL, max = NULL,
   )
 }
 
-datePickerDependency <- htmlDependencyFunction(function() {
+datePickerDependency <- tagFunction(function() {
   cssFile <- datePickerCssFile()
   version <- "1.9.0"
 

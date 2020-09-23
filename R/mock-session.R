@@ -167,7 +167,6 @@ makeExtraMethods <- function() {
   ), makeErrors(
     `@uploadEnd` = "for internal use only",
     `@uploadInit` = "for internal use only",
-    `@uploadieFinish` = "for internal use only",
     createBookmarkObservers = "for internal use only",
     dispatch = "for internal use only",
     handleRequest = "for internal use only",

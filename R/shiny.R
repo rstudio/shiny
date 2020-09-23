@@ -1685,10 +1685,6 @@ ShinySession <- R6Class(
       )
     },
 
-    # Public RPC methods
-    `@uploadieFinish` = function() {
-      # Do nothing; just want the side effect of flushReact, output flush, etc.
-    },
     `@uploadInit` = function(fileInfos) {
       maxSize <- getOption('shiny.maxRequestSize', 5 * 1024 * 1024)
       fileInfos <- lapply(fileInfos, function(fi) {
@@ -1755,33 +1751,6 @@ ShinySession <- R6Class(
         }
       }
 
-      # @description Only applicable to files uploaded via IE. When possible,
-      #   adds the appropriate extension to temporary files created by
-      #   \code{mime::parse_multipart}.
-      # @param multipart A named list as returned by
-      #   \code{mime::parse_multipart}
-      # @return A named list with datapath updated to point to the new location
-      #   of the file, if an extension was added.
-      maybeMoveIEUpload <- function(multipart) {
-        if (is.null(multipart)) return(NULL)
-
-        lapply(multipart, function(input) {
-          oldPath <- input$datapath
-          newPath <- paste0(oldPath, maybeGetExtension(input$name))
-          if (oldPath != newPath) {
-            file.rename(oldPath, newPath)
-            input$datapath <- newPath
-          }
-          input
-        })
-      }
-
-      if (matches[2] == 'uploadie' && identical(req$REQUEST_METHOD, "POST")) {
-        id <- URLdecode(matches[3])
-        res <- maybeMoveIEUpload(mime::parse_multipart(req))
-        private$.input$set(id, res[[id]])
-        return(httpResponse(200, 'text/plain', 'OK'))
-      }
 
       if (matches[2] == 'download') {
 

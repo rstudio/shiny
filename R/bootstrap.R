@@ -36,10 +36,6 @@ bootstrapPage <- function(..., title = NULL, responsive = NULL, theme = NULL) {
     shinyDeprecated("The 'responsive' argument is no longer used with Bootstrap 3.")
   }
 
-  # Make the bootstrap theme available for other (lazily rendered) UI components
-  # to use (e.g., sliderInput(), selectInput(), dateInput())
-  shinyOptions(bootstrapTheme = theme)
-
   attachDependencies(
     tagList(
       if (!is.null(title)) tags$head(tags$title(title)),
@@ -72,6 +68,10 @@ bootstrapPage <- function(..., title = NULL, responsive = NULL, theme = NULL) {
 #' @export
 #' @keywords internal
 bootstrapLib <- function(theme = NULL) {
+  # Make the bootstrap theme available for other (lazily rendered) UI components
+  # to use (e.g., sliderInput(), selectInput(), dateInput())
+  shinyOptions(bootstrapTheme = theme)
+
   tagFunction(function() {
     if (is.null(theme) || is.character(theme)) {
       bootstrapDependency(theme)

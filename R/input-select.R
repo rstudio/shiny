@@ -204,6 +204,15 @@ selectizeIt <- function(inputId, select, options, nonempty = FALSE) {
 
   res <- checkAsIs(options)
 
+  selectizeDep <- selectizeDependency
+
+  if ('drag_drop' %in% options$plugins) {
+    selectizeDep <- list(selectizeDep, htmlDependency(
+      'jqueryui', '1.12.1', c(href = 'shared/jqueryui'),
+      script = 'jquery-ui.min.js'
+    ))
+  }
+
   # Insert script on same level as <select> tag
   select$children[[2]] <- tagAppendChild(
     select$children[[2]],
@@ -215,15 +224,7 @@ selectizeIt <- function(inputId, select, options, nonempty = FALSE) {
     )
   )
 
-  tagList(
-    select, selectizeDependency,
-    if ('drag_drop' %in% options$plugins) {
-      htmlDependency(
-        'jqueryui', '1.12.1', c(href = 'shared/jqueryui'),
-        script = 'jquery-ui.min.js'
-      )
-    }
-  )
+  attachDependencies(select, selectizeDep)
 }
 
 

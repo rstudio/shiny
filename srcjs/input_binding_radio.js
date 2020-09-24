@@ -15,9 +15,7 @@ $.extend(radioInputBinding, {
     }
   },
   setValue: function(el, value) {
-    if (value === undefined) {
-      return;
-    } else if (value.length === 0) {
+    if ($.isArray(value) && value.length === 0) {
       // Removing all checked item if the sent data is empty
       $('input:radio[name="' + $escape(el.id) + '"]').prop('checked', false);
     } else {

@@ -16,8 +16,12 @@ NULL
 #' @param title The browser window title (defaults to the host URL of the page)
 #' @param responsive This option is deprecated; it is no longer optional with
 #'   Bootstrap 3.
-#' @param theme Alternative Bootstrap stylesheet (normally a css file within the
-#'   www directory, e.g. `www/bootstrap.css`)
+#' @param theme One of the following:
+#'   * `NULL` (the default), which implies a "stock" build of Bootstrap 3.
+#'   * A [bootstraplib::bs_theme()] object. This can be used to replace a stock
+#'   build of Bootstrap 3 with a customized version of Bootstrap 3 or higher.
+#'   * A character string pointing to an alternative Bootstrap stylesheet
+#'   (normally a css file within the www directory, e.g. `www/bootstrap.css`).
 #'
 #' @return A UI defintion that can be passed to the [shinyUI] function.
 #'
@@ -32,10 +36,15 @@ bootstrapPage <- function(..., title = NULL, responsive = NULL, theme = NULL) {
     shinyDeprecated("The 'responsive' argument is no longer used with Bootstrap 3.")
   }
 
+  # Make the bootstrap theme available for other (lazily rendered) UI components
+  # to use (e.g., sliderInput(), selectInput(), dateInput())
+  shinyOptions(bootstrapTheme = theme)
+
   attachDependencies(
     tagList(
       if (!is.null(title)) tags$head(tags$title(title)),
-      if (!is.null(theme)) {
+      # TODO: throw better error when length > 1?
+      if (is.character(theme)) {
         tags$head(tags$link(rel="stylesheet", type="text/css", href = theme))
       },
 
@@ -64,21 +73,11 @@ bootstrapPage <- function(..., title = NULL, responsive = NULL, theme = NULL) {
 #' @keywords internal
 bootstrapLib <- function(theme = NULL) {
   tagFunction(function() {
-    bs_theme <- getShinyOption("bs_theme")
-    if (is.null(bs_theme)) {
-      return(bootstrapDependency(theme))
+    if (is.null(theme) || is.character(theme)) {
+      bootstrapDependency(theme)
+    } else {
+      bootstraplib::bs_dependencies(theme = theme)
     }
-    if (!is.null(theme)) {
-      warning(
-        "The `theme` argument in `fluidPage()`, `bootstrapPage()`, etc. is not compatible ",
-        "with bootstraplib theming, so the bootstrap theme is being ignored in favor of ",
-        "theme='", theme, "'. To instead use the bootstraplib theme, remove the ",
-        "`theme` argument and use the bootstraplib equivalent (if you want a shinytheme, ",
-        "provide the theme name to bs_theme_new()'s `bootswatch` argument)."
-      )
-      return(bootstrapDependency(theme))
-    }
-    bootstraplib::bs_dependencies(theme = bs_theme)
   })
 }
 

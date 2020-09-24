@@ -12,8 +12,7 @@ shinyApp(
   onStart = NULL,
   options = list(),
   uiPattern = "/",
-  enableBookmarking = NULL,
-  bs_theme = getShinyOption("bs_theme")
+  enableBookmarking = NULL
 )
 
 shinyAppDir(appDir, options = list())
@@ -50,11 +49,6 @@ expression in order for the match to be considered successful.}
 \code{"disable"}. The default value, \code{NULL}, will respect the setting from
 any previous calls to  \code{\link[=enableBookmarking]{enableBookmarking()}}. See \code{\link[=enableBookmarking]{enableBookmarking()}}
 for more information on bookmarking your app.}
-
-\item{bs_theme}{a \code{\link[bootstraplib:bs_theme]{bootstraplib::bs_theme()}} used to influence the CSS
-included with any \code{\link[=bootstrapLib]{bootstrapLib()}} dependency (e.g., \code{\link[=fluidPage]{fluidPage()}},
-\code{\link[=bootstrapPage]{bootstrapPage()}}, etc) as well as other CSS included with some input
-widgets (e.g., \code{\link[=selectInput]{selectInput()}}, \code{\link[=sliderInput]{sliderInput()}}, \code{\link[=dateInput]{dateInput()}}, etc).}
 
 \item{appDir}{Path to directory that contains a Shiny app (i.e. a server.R
 file and either ui.R or www/index.html)}

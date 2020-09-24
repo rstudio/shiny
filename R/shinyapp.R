@@ -36,10 +36,6 @@
 #'   `"disable"`. The default value, `NULL`, will respect the setting from
 #'   any previous calls to  [enableBookmarking()]. See [enableBookmarking()]
 #'   for more information on bookmarking your app.
-#' @param bs_theme a [bootstraplib::bs_theme()] used to influence the CSS
-#'   included with any [bootstrapLib()] dependency (e.g., [fluidPage()],
-#'   [bootstrapPage()], etc) as well as other CSS included with some input
-#'   widgets (e.g., [selectInput()], [sliderInput()], [dateInput()], etc).
 #' @return An object that represents the app. Printing the object or passing it
 #'   to [runApp()] will run the app.
 #'
@@ -76,8 +72,7 @@
 #' }
 #' @export
 shinyApp <- function(ui, server, onStart=NULL, options=list(),
-                     uiPattern="/", enableBookmarking=NULL,
-                     bs_theme=getShinyOption("bs_theme")) {
+                     uiPattern="/", enableBookmarking=NULL) {
   if (!is.function(server)) {
     stop("`server` must be a function", call. = FALSE)
   }
@@ -99,12 +94,6 @@ shinyApp <- function(ui, server, onStart=NULL, options=list(),
   # Store the appDir and bookmarking-related options, so that we can read them
   # from within the app.
   appOptions <- captureAppOptions()
-
-  # Give the app access to the theme object
-  if (!is.null(bs_theme) && !inherits(bs_theme, "bs_theme")) {
-    stop("The `bs_theme` argument must be a `bootstraplib::bs_theme()` object or `NULL`")
-  }
-  shinyOptions(bs_theme = bs_theme)
 
   structure(
     list(

@@ -7,8 +7,14 @@
 bootstrapLib(theme = NULL)
 }
 \arguments{
-\item{theme}{Alternative Bootstrap stylesheet (normally a css file within the
-www directory, e.g. \code{www/bootstrap.css})}
+\item{theme}{One of the following:
+\itemize{
+\item \code{NULL} (the default), which implies a "stock" build of Bootstrap 3.
+\item A \code{\link[bootstraplib:bs_theme]{bootstraplib::bs_theme()}} object. This can be used to replace a stock
+build of Bootstrap 3 with a customized version of Bootstrap 3 or higher.
+\item A character string pointing to an alternative Bootstrap stylesheet
+(normally a css file within the www directory, e.g. \code{www/bootstrap.css}).
+}}
 }
 \description{
 This function returns a set of web dependencies necessary for using Bootstrap

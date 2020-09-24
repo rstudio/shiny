@@ -5267,10 +5267,23 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     },
     getValue: function getValue(el) {
       // Select the radio objects that have name equal to the grouping div's id
-      return $('input:radio[name="' + $escape(el.id) + '"]:checked').val();
+      var checked_items = $('input:radio[name="' + $escape(el.id) + '"]:checked');
+
+      if (checked_items.length === 0) {
+        // If none are checked, the input will return null (it's the default on load,
+        // but it wasn't emptied when calling updateRadioButtons with character(0)
+        return null;
+      }
+
+      return checked_items.val();
     },
     setValue: function setValue(el, value) {
-      $('input:radio[name="' + $escape(el.id) + '"][value="' + $escape(value) + '"]').prop('checked', true);
+      if ($.isArray(value) && value.length === 0) {
+        // Removing all checked item if the sent data is empty
+        $('input:radio[name="' + $escape(el.id) + '"]').prop('checked', false);
+      } else {
+        $('input:radio[name="' + $escape(el.id) + '"][value="' + $escape(value) + '"]').prop('checked', true);
+      }
     },
     getState: function getState(el) {
       var $objs = $('input:radio[name="' + $escape(el.id) + '"]'); // Store options in an array of objects, each with with value and label

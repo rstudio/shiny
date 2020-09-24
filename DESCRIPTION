@@ -117,7 +117,6 @@ Remotes:
 URL: http://shiny.rstudio.com
 BugReports: https://github.com/rstudio/shiny/issues
 Collate:
-    'app.R'
     'app_template.R'
     'bookmark-state-local.R'
     'stack.R'
@@ -163,6 +162,7 @@ Collate:
     'insert-tab.R'
     'insert-ui.R'
     'jqueryui.R'
+    'knitr.R'
     'middleware-shiny.R'
     'middleware.R'
     'timer.R'
@@ -183,6 +183,7 @@ Collate:
     'server-input-handlers.R'
     'server.R'
     'shiny-options.R'
+    'shinyapp.R'
     'shinyui.R'
     'shinywrappers.R'
     'showcase.R'

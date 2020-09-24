@@ -50,6 +50,8 @@ shiny 1.5.0.9000
 
 * Fixed #2936: `dateYMD` was giving a warning when passed a vector of dates from `dateInput` which was greater than length 1. The length check was removed because it was not needed. (#3061)
 
+* Fixed #2266, #2688: `radioButtons` and `updateRadioButtons` now accept `character(0)` to indicate that none of the options should be selected (thanks to @ColinFay). (#3043)
+
 ### Library updates
 
 * Removed html5shiv and respond.js, which were used for IE 8 and IE 9 compatibility. (#2973)

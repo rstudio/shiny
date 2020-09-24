@@ -25,34 +25,33 @@ updateRadioButtons(
 
 \item{choices}{List of values to select from (if elements of the list are
 named then that name rather than the value is displayed to the user). If
-this argument is provided, then \code{choiceNames} and \code{choiceValues}
-must not be provided, and vice-versa. The values should be strings; other
-types (such as logicals and numbers) will be coerced to strings.}
+this argument is provided, then \code{choiceNames} and \code{choiceValues} must not
+be provided, and vice-versa. The values should be strings; other types
+(such as logicals and numbers) will be coerced to strings.}
 
-\item{selected}{The initially selected value (if not specified then defaults
-to the first value)}
+\item{selected}{The initially selected value. If not specified, then it
+defaults to the first item in \code{choices}. To start with no items selected,
+use \code{character(0)}.}
 
 \item{inline}{If \code{TRUE}, render the choices inline (i.e. horizontally)}
 
 \item{choiceNames}{List of names and values, respectively, that
 are displayed to the user in the app and correspond to the each choice (for
-this reason, \code{choiceNames} and \code{choiceValues} must have the same
-length). If either of these arguments is provided, then the other
-\emph{must} be provided and \code{choices} \emph{must not} be provided. The
-advantage of using both of these over a named list for \code{choices} is
-that \code{choiceNames} allows any type of UI object to be passed through
-(tag objects, icons, HTML code, ...), instead of just simple text. See
-Examples.}
+this reason, \code{choiceNames} and \code{choiceValues} must have the same length).
+If either of these arguments is provided, then the other \emph{must} be provided
+and \code{choices} \emph{must not} be provided. The advantage of using both of these
+over a named list for \code{choices} is that \code{choiceNames} allows any type of UI
+object to be passed through (tag objects, icons, HTML code, ...), instead
+of just simple text. See Examples.}
 
 \item{choiceValues}{List of names and values, respectively, that
 are displayed to the user in the app and correspond to the each choice (for
-this reason, \code{choiceNames} and \code{choiceValues} must have the same
-length). If either of these arguments is provided, then the other
-\emph{must} be provided and \code{choices} \emph{must not} be provided. The
-advantage of using both of these over a named list for \code{choices} is
-that \code{choiceNames} allows any type of UI object to be passed through
-(tag objects, icons, HTML code, ...), instead of just simple text. See
-Examples.}
+this reason, \code{choiceNames} and \code{choiceValues} must have the same length).
+If either of these arguments is provided, then the other \emph{must} be provided
+and \code{choices} \emph{must not} be provided. The advantage of using both of these
+over a named list for \code{choices} is that \code{choiceNames} allows any type of UI
+object to be passed through (tag objects, icons, HTML code, ...), instead
+of just simple text. See Examples.}
 }
 \description{
 Change the value of a radio input on the client

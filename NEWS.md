@@ -4,6 +4,11 @@ shiny 1.5.0.9000
 
 ## Full changelog
 
+
+### Breaking changes
+
+* Closed #3074: Shiny no longer supports file uploads for Internet Explorer 8 or 9. (#3075)
+
 ### Accessibility
 
 * Added [bootstrap accessibility plugin](https://github.com/paypal/bootstrap-accessibility-plugin) under the hood to improve accessibility of shiny apps for screen-reader and keyboard users: the enhancements include better navigations for alert, tooltip, popover, modal dialog, dropdown, tab Panel, collapse, and carousel elements. (#2911)

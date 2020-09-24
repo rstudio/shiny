@@ -182,6 +182,7 @@ Collate:
     'runapp.R'
     'serializers.R'
     'server-input-handlers.R'
+    'server-resource-paths.R'
     'server.R'
     'shiny-options.R'
     'shinyapp.R'

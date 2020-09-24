@@ -171,7 +171,6 @@ test_that("session supports allowReconnect", {
 
 test_that("session supports clientData", {
   session <- MockShinySession$new()
-  expect_equal(session$clientData$allowDataUriScheme, TRUE)
   expect_equal(session$clientData$pixelratio, 1)
   expect_equal(session$clientData$url_protocol, "http:")
   expect_equal(session$clientData$url_hostname, "mocksession")

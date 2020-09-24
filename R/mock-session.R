@@ -31,7 +31,6 @@ extract <- function(promise) {
 #' @noRd
 #' @export
 `$.mockclientdata` <- function(x, name) {
-  if (name == "allowDataUriScheme") { return(TRUE) }
   if (name == "pixelratio") { return(1) }
   if (name == "url_protocol") { return("http:") }
   if (name == "url_hostname") { return("mocksession") }

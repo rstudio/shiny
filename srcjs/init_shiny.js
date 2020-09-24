@@ -540,9 +540,6 @@ function initShiny() {
     }
   });
 
-  // IE8 and IE9 have some limitations with data URIs
-  initialValues['.clientdata_allowDataUriScheme'] = typeof WebSocket !== 'undefined';
-
   // We've collected all the initial values--start the server process!
   inputsNoResend.reset(initialValues);
   shinyapp.connect(initialValues);

@@ -116,10 +116,6 @@ workerId <- local({
 #' }
 #' \item{clientData}{
 #'   A [reactiveValues()] object that contains information about the client.
-#'   \itemize{
-#'     \item{`allowDataUriScheme` is a logical value that indicates whether
-#'       the browser is able to handle URIs that use the `data:` scheme.
-#'     }
 #'     \item{`pixelratio` reports the "device pixel ratio" from the web browser,
 #'       or 1 if none is reported. The value is 2 for Apple Retina displays.
 #'     }
@@ -1871,21 +1867,16 @@ ShinySession <- R6Class(
     },
     # Send a file to the client
     fileUrl = function(name, file, contentType='application/octet-stream') {
-      "Return a URL for a file to be sent to the client. If allowDataUriScheme
-      is TRUE, then the file will be base64 encoded and embedded in the URL.
-      Otherwise, a URL pointing to the file will be returned."
+      "Return a URL for a file to be sent to the client. The file will be base64
+      encoded and embedded in the URL."
       bytes <- file.info(file)$size
       if (is.na(bytes))
         return(NULL)
 
       fileData <- readBin(file, 'raw', n=bytes)
 
-      if (isTRUE(private$.clientData$.values$get("allowDataUriScheme"))) {
-        b64 <- rawToBase64(fileData)
-        return(paste('data:', contentType, ';base64,', b64, sep=''))
-      } else {
-        return(self$saveFileUrl(name, fileData, contentType))
-      }
+      b64 <- rawToBase64(fileData)
+      return(paste('data:', contentType, ';base64,', b64, sep=''))
     },
     registerDownload = function(name, filename, contentType, func) {
 

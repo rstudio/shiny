@@ -93,14 +93,10 @@ runApp <- function(appDir=getwd(),
     handlerManager$clear()
   }, add = TRUE)
 
-  if (.globals$running) {
+  if (isRunning()) {
     stop("Can't call `runApp()` from within `runApp()`. If your ",
          "application code contains `runApp()`, please remove it.")
   }
-  .globals$running <- TRUE
-  on.exit({
-    .globals$running <- FALSE
-  }, add = TRUE)
 
   # Make warnings print immediately
   # Set pool.scheduler to support pool package

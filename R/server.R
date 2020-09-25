@@ -474,9 +474,6 @@ serviceApp <- function() {
 
 .shinyServerMinVersion <- '0.3.4'
 
-# Global flag that's TRUE whenever we're inside of the scope of a call to runApp
-.globals$running <- FALSE
-
 #' Check whether a Shiny application is running
 #'
 #' This function tests whether a Shiny application is currently running.
@@ -485,7 +482,7 @@ serviceApp <- function() {
 #'   `FALSE`.
 #' @export
 isRunning <- function() {
-  .globals$running
+  !is.null(getCurrentAppState())
 }
 
 

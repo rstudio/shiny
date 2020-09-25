@@ -146,11 +146,36 @@ withLocalOptions <- function(expr) {
 
 # Get specific shiny options and put them in a list, reset those shiny options,
 # and then return the options list. This should be during the creation of a
-# shiny app object, which happens before another option frame is added to the
-# options stack (the new option frame is added when the app is run). This
-# function "consumes" the options when the shinyApp object is created, so the
-# options won't affect another app that is created later.
-consumeAppOptions <- function() {
+# shiny app object. This function "consumes" the options when the shinyApp
+# object is created, so the options won't affect another app that is created
+# later.
+#
+# ==== Example ====
+# shinyOptions(bookmarkStore = 1234)
+# # This now returns 1234.
+# getShinyOption("bookmarkStore")
+#
+# # Creating the app captures the bookmarkStore option and clears it.
+# s <- shinyApp(
+#   fluidPage(verbatimTextOutput("txt")),
+#   function(input, output) {
+#     output$txt <- renderText(getShinyOption("bookmarkStore"))
+#   }
+# )
+#
+# # This now returns NULL.
+# getShinyOption("bookmarkStore")
+#
+# When running the app, the app will display "1234"
+# runApp(s)
+#
+# # After quitting the app, this still returns NULL.
+# getShinyOption("bookmarkStore")
+# ==================
+#
+# If another app had been created after s was created, but before s was run,
+# then it would capture the value of "bookmarkStore" at the time of creation.
+captureAppOptions <- function() {
   options <- list(
     appDir = getwd(),
     bookmarkStore = getShinyOption("bookmarkStore")
@@ -161,9 +186,9 @@ consumeAppOptions <- function() {
   options
 }
 
-# Do the inverse of consumeAppOptions. This should be called once the app is
+# Do the inverse of captureAppOptions. This should be called once the app is
 # started.
-unconsumeAppOptions <- function(options) {
+applyCapturedAppOptions <- function(options) {
   if (!is.null(options)) {
     do.call(shinyOptions, options)
   }

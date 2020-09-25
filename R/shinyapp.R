@@ -94,7 +94,7 @@ shinyApp <- function(ui, server, onStart=NULL, options=list(),
   # Store the appDir and bookmarking-related options, so that we can read them
   # from within the app.
   shinyOptions(appDir = getwd())
-  appOptions <- consumeAppOptions()
+  appOptions <- captureAppOptions()
 
   structure(
     list(
@@ -408,7 +408,7 @@ shinyAppDir_appR <- function(fileName, appDir, options=list())
       if (!is.shiny.appobj(result))
         stop("app.R did not return a shiny.appobj object.")
 
-      unconsumeAppOptions(result$appOptions)
+      applyCapturedAppOptions(result$appOptions)
 
       return(result)
     }

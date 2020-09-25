@@ -289,7 +289,7 @@ runApp <- function(appDir=getwd(),
   # Extract appOptions (which is a list) and store them as shinyOptions, for
   # this app. (This is the only place we have to store settings that are
   # accessible both the UI and server portion of the app.)
-  unconsumeAppOptions(appParts$appOptions)
+  applyCapturedAppOptions(appParts$appOptions)
 
   # Set up the onStop before we call onStart, so that it gets called even if an
   # error happens in onStart.

@@ -706,7 +706,7 @@ ShinySession <- R6Class(
       private$restoreCallbacks <- Callbacks$new()
       private$restoredCallbacks <- Callbacks$new()
 
-      private$testMode <- .globals$testMode
+      private$testMode <- getShinyOption("testmode", default = FALSE)
       private$enableTestSnapshot()
 
       private$registerSessionEndCallbacks()

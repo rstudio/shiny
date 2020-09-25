@@ -213,7 +213,10 @@ runApp <- function(appDir=getwd(),
   # ============================================================================
   # Shinytest
   # ============================================================================
-  .globals$testMode <- test.mode
+  # Set the testmode shinyoption so that this can be read by both the
+  # ShinySession and the UI code (which executes separately from the
+  # ShinySession code).
+  shinyOptions(testmode = test.mode)
   if (test.mode) {
     message("Running application in test mode.")
   }

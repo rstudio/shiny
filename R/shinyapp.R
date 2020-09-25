@@ -93,7 +93,6 @@ shinyApp <- function(ui, server, onStart=NULL, options=list(),
 
   # Store the appDir and bookmarking-related options, so that we can read them
   # from within the app.
-  shinyOptions(appDir = getwd())
   appOptions <- captureAppOptions()
 
   structure(

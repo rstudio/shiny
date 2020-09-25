@@ -163,6 +163,6 @@ datePickerCssFile <- function(theme = getShinyOption("bootstrapTheme")) {
     return(list(src = c(href = "shared/datepicker"), stylesheet = "css/bootstrap-datepicker3.min.css"))
   }
   scss <- system.file(package = "shiny", "www", "shared", "datepicker", "scss", "build3.scss")
-  outFile <- bootstrapSass(sass::sass_file(scss), basename = "bootstrap-datepicker-", theme = theme)
+  outFile <- bootstrapSass(sass::sass_file(scss), theme = theme, basename = "bootstrap-datepicker-")
   list(src = c(file = dirname(outFile)), stylesheet = basename(outFile))
 }

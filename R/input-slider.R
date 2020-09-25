@@ -244,7 +244,7 @@ ionRangeSliderCSSFile <- function(theme = getShinyOption("bootstrapTheme")) {
       system.file(package = "shiny", "www", "shared", "ionrangeslider", "scss", "shiny.scss")
     )
   )
-  outFile <- bootstrapSass(sassInput, basename = "ionRangeSlider", theme = theme)
+  outFile <- bootstrapSass(sassInput, theme = theme, basename = "ionRangeSlider")
   list(stylesheet = basename(outFile), src = c(file = dirname(outFile)))
 }
 

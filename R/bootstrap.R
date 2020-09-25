@@ -108,7 +108,7 @@ bootstrapDependency <- function(theme) {
 }
 
 # Reusable function for input widgets to compile their Sass against a bootstraplib theme
-bootstrapSass <- function(sassInput, basename, dirname = "shiny-sass-", theme = getShinyOption("bs_theme")) {
+bootstrapSass <- function(sassInput, theme, basename, dirname = "shiny-sass-") {
   bootstraplib::bs_sass(
     rules = sassInput, theme = theme,
     output = sass::output_template(basename = basename, dirname = dirname),

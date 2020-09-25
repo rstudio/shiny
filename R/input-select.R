@@ -254,7 +254,7 @@ selectizeCSSFile <- function(theme = getShinyOption("bootstrapTheme")) {
       "selectize.bootstrap4.scss"
     }
   )
-  outFile <- bootstrapSass(sass::sass_file(scss), basename = "selectize", theme = theme)
+  outFile <- bootstrapSass(sass::sass_file(scss), theme = theme, basename = "selectize")
   list(src = c(file = dirname(outFile)), stylesheet = basename(outFile))
 }
 

@@ -8,10 +8,18 @@ getShinyOption <- function(name, default = NULL) {
   # Make sure to use named (not numeric) indexing
   name <- as.character(name)
 
-  if (name %in% names(.globals$options))
-    .globals$options[[name]]
-  else
-    default
+  # First check app-level options.
+  if (name %in% names(getCurrentAppState()$options)) {
+    return(getCurrentAppState()$options[[name]])
+  }
+
+  # Next check global options.
+  if (name %in% names(.globals$options)) {
+    return(.globals$options[[name]])
+  }
+
+  # If not found, just use default.
+  default
 }
 
 #' Get or set Shiny options
@@ -127,11 +135,23 @@ shinyOptions <- function(...) {
   newOpts <- list(...)
 
   if (length(newOpts) > 0) {
+    # If we have a currently running app, modify options at the app level.
+    app_state <- getCurrentAppState()
+    if (!is.null(app_state)) {
+      # Modify app-level options
+      app_state$options <- dropNulls(mergeVectors(app_state$options, newOpts))
+      # Return merged options
+      all_opts <- mergeVectors(.globals$options, app_state$options)
+      return(invisible(all_opts))
+    }
+
+    # If no currently running app, modify global options.
     .globals$options <- dropNulls(mergeVectors(.globals$options, newOpts))
-    invisible(.globals$options)
-  } else {
-    .globals$options
+    return(invisible(.globals$options))
   }
+
+
+  dropNulls(mergeVectors(.globals$options, app_state$options))
 }
 
 

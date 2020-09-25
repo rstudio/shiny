@@ -159,7 +159,7 @@ datePickerDependency <- tagFunction(function() {
 })
 
 datePickerCssFile <- function(theme = getShinyOption("bootstrapTheme")) {
-  if (is.null(theme)) {
+  if (!is_bs_theme(theme)) {
     return(list(src = c(href = "shared/datepicker"), stylesheet = "css/bootstrap-datepicker3.min.css"))
   }
   scss <- system.file(package = "shiny", "www", "shared", "datepicker", "scss", "build3.scss")

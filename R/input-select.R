@@ -243,7 +243,7 @@ selectizeDependency <- tagFunction(function() {
 })
 
 selectizeCSSFile <- function(theme = getShinyOption("bootstrapTheme")) {
-  if (is.null(theme)) {
+  if (!is_bs_theme(theme)) {
     return(list(src = c(href = "shared/selectize"), stylesheet = "css/selectize.bootstrap3.css"))
   }
   scss <- system.file(

@@ -73,12 +73,17 @@ bootstrapLib <- function(theme = NULL) {
   shinyOptions(bootstrapTheme = theme)
 
   tagFunction(function() {
-    if (is.null(theme) || is.character(theme)) {
-      bootstrapDependency(theme)
-    } else {
+    if (is_bs_theme(theme)) {
       bootstraplib::bs_dependencies(theme = theme)
+    } else {
+      bootstrapDependency(theme)
     }
   })
+}
+
+# bootstraplib will eventually export this same func
+is_bs_theme <- function(x) {
+  inherits(x, "bs_theme")
 }
 
 bootstrapDependency <- function(theme) {

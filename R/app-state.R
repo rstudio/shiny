@@ -1,8 +1,6 @@
 #' @include globals.R
 NULL
 
-# TODO: implement for mock session?
-
 # The current app state is a place to read and hang state for the
 # currently-running application. This is useful for setting options that will
 # last as long as the application is running.

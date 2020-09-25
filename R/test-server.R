@@ -128,11 +128,9 @@ withMockContext <- function(session, expr) {
   isolate(
     withReactiveDomain(session, {
       withr::with_options(list(`shiny.allowoutputreads` = TRUE), {
-        withLocalOptions({
-          # Sets a cache for renderCachedPlot() with cache = "app" to use.
-          shinyOptions("cache" = session$appcache)
-          expr
-        })
+        # Sets a cache for renderCachedPlot() with cache = "app" to use.
+        shinyOptions("cache" = session$appcache)
+        expr
       })
     })
   )

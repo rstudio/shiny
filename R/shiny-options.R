@@ -187,15 +187,6 @@ shinyOptions <- function(...) {
 }
 
 
-# Eval an expression with a new option set
-withLocalOptions <- function(expr) {
-  oldOptionSet <- .globals$options
-  on.exit(.globals$options <- oldOptionSet)
-
-  expr
-}
-
-
 # Get specific shiny options and put them in a list, reset those shiny options,
 # and then return the options list. This should be during the creation of a
 # shiny app object. This function "consumes" the options when the shinyApp

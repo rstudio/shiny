@@ -15,7 +15,8 @@ initCurrentAppState <- function(appobj) {
   }
   .globals$appState <- new.env(parent = emptyenv())
   .globals$appState$app <- appobj
-  .globals$appState$options <- list()
+  # Copy over global options
+  .globals$appState$options <- .globals$options
 }
 
 getCurrentAppState <- function() {

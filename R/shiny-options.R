@@ -8,23 +8,32 @@ getShinyOption <- function(name, default = NULL) {
   # Make sure to use named (not numeric) indexing
   name <- as.character(name)
 
-  # Check session-level options.
-  if (name %in% names(getDefaultReactiveDomain()$options)) {
-    return(getDefaultReactiveDomain()$options[[name]])
+  # Check if there's a current session
+  session <- getDefaultReactiveDomain()
+  if (!is.null(session)) {
+    if (name %in% names(session$options)) {
+      return(session$options[[name]])
+    } else {
+      return(default)
+    }
   }
 
-  # Check app-level options.
-  if (name %in% names(getCurrentAppState()$options)) {
-    return(getCurrentAppState()$options[[name]])
+  # Check if there's a current app
+  app_state <- getCurrentAppState()
+  if (!is.null(app_state)) {
+    if (name %in% names(app_state$options)) {
+      return(app_state$options[[name]])
+    } else {
+      return(default)
+    }
   }
 
-  # Check global options.
+  # If we got here, look in global options
   if (name %in% names(.globals$options)) {
     return(.globals$options[[name]])
+  } else {
+    return(default)
   }
-
-  # If not found, just use default.
-  default
 }
 
 #' Get or set Shiny options
@@ -145,9 +154,8 @@ shinyOptions <- function(...) {
     if (!is.null(session)) {
       # Modify session-level-options
       session$options <- dropNulls(mergeVectors(session$options, newOpts))
-      return(invisible(getShinyOptions()))
+      return(invisible(session$options))
     }
-
 
     # If not in a session, but we have a currently running app, modify options
     # at the app level.
@@ -155,27 +163,27 @@ shinyOptions <- function(...) {
     if (!is.null(app_state)) {
       # Modify app-level options
       app_state$options <- dropNulls(mergeVectors(app_state$options, newOpts))
-      return(invisible(getShinyOptions()))
+      return(invisible(app_state$options))
     }
-
 
     # If no currently running app, modify global options and return them.
     .globals$options <- dropNulls(mergeVectors(.globals$options, newOpts))
-    return(invisible(getShinyOptions()))
+    return(invisible(.globals$options))
   }
 
-  # Return merged options, visibly.
-  getShinyOptions()
-}
+  # If not setting any options, just return current option set, visibly.
 
+  session <- getDefaultReactiveDomain()
+  if (!is.null(session)) {
+    return(session$options)
+  }
 
-# Get the current set of options, merging the session-level, app-level, and
-# global shinyOptions.
-getShinyOptions <- function() {
-  # Note that if any of these are NULL, they'll simply have no effect, since
-  # NULLs are ignored by mergeVectors.
-  opts <- mergeVectors(.globals$options, getCurrentAppState()$options)
-  opts <- mergeVectors(opts, getDefaultReactiveDomain()$options)
+  app_state <- getCurrentAppState()
+  if (!is.null(app_state)) {
+    return(app_state$options)
+  }
+
+  return(.globals$options)
 }
 
 

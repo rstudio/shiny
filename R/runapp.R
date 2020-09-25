@@ -102,16 +102,6 @@ runApp <- function(appDir=getwd(),
     .globals$running <- FALSE
   }, add = TRUE)
 
-  # Enable per-app Shiny options, for shinyOptions() and getShinyOption().
-  oldOptionSet <- .globals$options
-  on.exit({
-    .globals$options <- oldOptionSet
-  },add = TRUE)
-
-  # A unique identifier associated with this run of this application. It is
-  # shared across sessions.
-  shinyOptions(appToken = createUniqueId(8))
-
   # Make warnings print immediately
   # Set pool.scheduler to support pool package
   ops <- options(
@@ -121,11 +111,9 @@ runApp <- function(appDir=getwd(),
   )
   on.exit(options(ops), add = TRUE)
 
-  # Set up default cache for app.
-  if (is.null(getShinyOption("cache"))) {
-    shinyOptions(cache = MemoryCache$new())
-  }
-
+  # ============================================================================
+  # Global onStart/onStop callbacks
+  # ============================================================================
   # Invoke user-defined onStop callbacks, before the application's internal
   # onStop callbacks.
   on.exit({
@@ -135,11 +123,44 @@ runApp <- function(appDir=getwd(),
 
   require(shiny)
 
+  # ============================================================================
+  # Convert to Shiny app object
+  # ============================================================================
   appParts <- as.shiny.appobj(appDir)
 
+  # ============================================================================
+  # Initialize app state object
+  # ============================================================================
+  # This is so calls to getCurrentAppState() can be used to find (A) whether an
+  # app is running and (B), get options and data associated with the app.
+  initCurrentAppState(appParts)
+  on.exit(clearCurrentAppState(), add = TRUE)
+  # Any shinyOptions set after this point will apply to the current app only
+  # (and will not persist after the app stops).
+
+  # ============================================================================
+  # shinyOptions
+  # ============================================================================
+  # A unique identifier associated with this run of this application. It is
+  # shared across sessions.
+  shinyOptions(appToken = createUniqueId(8))
+
+  # Set up default cache for app.
+  if (is.null(getShinyOption("cache"))) {
+    shinyOptions(cache = MemoryCache$new())
+  }
+
+  # Extract appOptions (which is a list) and store them as shinyOptions, for
+  # this app. (This is the only place we have to store settings that are
+  # accessible both the UI and server portion of the app.)
+  applyCapturedAppOptions(appParts$appOptions)
+
+  # ============================================================================
+  # runApp options set via shinyApp(options = list(...))
+  # ============================================================================
   # The lines below set some of the app's running options, which
   # can be:
-  #   - left unspeficied (in which case the arguments' default
+  #   - left unspecified (in which case the arguments' default
   #     values from `runApp` kick in);
   #   - passed through `shinyApp`
   #   - passed through `runApp` (this function)
@@ -176,6 +197,9 @@ runApp <- function(appDir=getwd(),
 
   if (is.null(host) || is.na(host)) host <- '0.0.0.0'
 
+  # ============================================================================
+  # Hosted environment
+  # ============================================================================
   workerId(workerId)
 
   if (inShinyServer()) {
@@ -190,15 +214,21 @@ runApp <- function(appDir=getwd(),
     }
   }
 
-  # Showcase mode is disabled by default; it must be explicitly enabled in
-  # either the DESCRIPTION file for directory-based apps, or via
-  # the display.mode parameter. The latter takes precedence.
-  setShowcaseDefault(0)
-
+  # ============================================================================
+  # Shinytest
+  # ============================================================================
   .globals$testMode <- test.mode
   if (test.mode) {
     message("Running application in test mode.")
   }
+
+  # ============================================================================
+  # Showcase mode
+  # ============================================================================
+  # Showcase mode is disabled by default; it must be explicitly enabled in
+  # either the DESCRIPTION file for directory-based apps, or via
+  # the display.mode parameter. The latter takes precedence.
+  setShowcaseDefault(0)
 
   # If appDir specifies a path, and display mode is specified in the
   # DESCRIPTION file at that path, apply it here.
@@ -248,6 +278,9 @@ runApp <- function(appDir=getwd(),
     setShowcaseDefault(1)
   }
 
+  # ============================================================================
+  # Server port
+  # ============================================================================
   # determine port if we need to
   if (is.null(port)) {
 
@@ -286,11 +319,9 @@ runApp <- function(appDir=getwd(),
     }
   }
 
-  # Extract appOptions (which is a list) and store them as shinyOptions, for
-  # this app. (This is the only place we have to store settings that are
-  # accessible both the UI and server portion of the app.)
-  applyCapturedAppOptions(appParts$appOptions)
-
+  # ============================================================================
+  # onStart/onStop callbacks
+  # ============================================================================
   # Set up the onStop before we call onStart, so that it gets called even if an
   # error happens in onStart.
   if (!is.null(appParts$onStop))
@@ -298,6 +329,9 @@ runApp <- function(appDir=getwd(),
   if (!is.null(appParts$onStart))
     appParts$onStart()
 
+  # ============================================================================
+  # Start/stop httpuv app
+  # ============================================================================
   server <- startApp(appParts, port, host, quiet)
 
   # Make the httpuv server object accessible. Needed for calling
@@ -308,6 +342,9 @@ runApp <- function(appDir=getwd(),
     stopServer(server)
   }, add = TRUE)
 
+  # ============================================================================
+  # Launch web browser
+  # ============================================================================
   if (!is.character(port)) {
     browseHost <- host
     if (identical(host, "0.0.0.0")) {
@@ -330,12 +367,17 @@ runApp <- function(appDir=getwd(),
     appUrl <- NULL
   }
 
-  # call application hooks
+  # ============================================================================
+  # Application hooks
+  # ============================================================================
   callAppHook("onAppStart", appUrl)
   on.exit({
     callAppHook("onAppStop", appUrl)
   }, add = TRUE)
 
+  # ============================================================================
+  # Run event loop via httpuv
+  # ============================================================================
   .globals$reterror <- NULL
   .globals$retval <- NULL
   .globals$stopped <- FALSE

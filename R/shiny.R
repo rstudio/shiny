@@ -665,6 +665,7 @@ ShinySession <- R6Class(
     cache = NULL,         # A cache object used in the session
     user = NULL,
     groups = NULL,
+    options = list(),     # For session-specific shinyOptions()
 
     initialize = function(websocket) {
       private$websocket <- websocket

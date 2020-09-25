@@ -249,6 +249,8 @@ MockShinySession <- R6Class(
     #' @field user The username of an authenticated user. Always `NULL` for a
     #'   `MockShinySession`.
     user = NULL,
+    #' @field options A list containing session-level shinyOptions.
+    options = list(),
 
     #' @description Create a new MockShinySession.
     initialize = function() {

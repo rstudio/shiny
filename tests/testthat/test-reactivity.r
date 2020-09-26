@@ -135,6 +135,13 @@ test_that("reactiveValues() has useful print method", {
   })
 })
 
+test_that("reactiveValues() has useful format method", {
+  expect_identical(
+    isolate(format(reactiveValues(x = 1, y = 2, .z = 3))),
+    "<ReactiveValues> \n  Values:    .z, x, y \n  Readonly:  FALSE"
+  )
+})
+
 # Test for overreactivity. funcB has an indirect dependency on valueA (via
 # funcA) and also a direct dependency on valueA. When valueA changes, funcB
 # should only execute once.
@@ -528,6 +535,10 @@ test_that("names() and reactiveValuesToList()", {
     reactiveValuesToList(values, all.names = TRUE)
   })
 
+  # Format takes dependency
+  fmtDepValues <- observe(format(values, all.names = FALSE))
+  fmtDepAllValues <- observe(format(values, all.names = TRUE))
+
   # names() returns all names
   expect_setequal(isolate(names(values)), c(".B", "A"))
   # Assigning names fails
@@ -541,6 +552,8 @@ test_that("names() and reactiveValuesToList()", {
   expect_equal(execCount(depNames), 1)
   expect_equal(execCount(depValues), 1)
   expect_equal(execCount(depAllValues), 1)
+  expect_equal(execCount(fmtDepValues), 1)
+  expect_equal(execCount(fmtDepAllValues), 1)
 
   # Update existing variable
   values$A <- 2
@@ -548,6 +561,8 @@ test_that("names() and reactiveValuesToList()", {
   expect_equal(execCount(depNames), 1)
   expect_equal(execCount(depValues), 2)
   expect_equal(execCount(depAllValues), 2)
+  expect_equal(execCount(fmtDepValues), 2)
+  expect_equal(execCount(fmtDepAllValues), 2)
 
   # Update existing hidden variable
   values$.B <- 3
@@ -555,6 +570,8 @@ test_that("names() and reactiveValuesToList()", {
   expect_equal(execCount(depNames), 1)
   expect_equal(execCount(depValues), 2)
   expect_equal(execCount(depAllValues), 3)
+  expect_equal(execCount(fmtDepValues), 2)
+  expect_equal(execCount(fmtDepAllValues), 3)
 
   # Add new variable
   values$C <- 1

@@ -590,12 +590,35 @@ checkName <- function(x) {
   )
 }
 
+#' Format or print reactivevalues object
+#' 
+#' `format.reactivevalues` creates a textual representation of a 
+#' reactivevalues object, whereas `print.reactivevalues` prints it.
+#' @details `format.reactivevalues` calls [reactiveValuesToList] internally. 
+#'   Thereby its calling context will take a dependency on all the values 
+#'   of `x`. If you want to avoid it, wrap the call with `isolate()`.\cr
+#'   `print.reactivevalues` does not take a dependency on the reactive objects.
+#' @aliases print.reactivevalues
+#' @param x A reactivevalues object.
+#' @param all.names If `TRUE` (the default), include objects with a 
+#'   leading dot. If FALSE, don't include those objects.
+#' @param ... Not used. 
 #' @export
-print.reactivevalues <- function(x, ...) {
-  impl <- .subset2(x, "impl")
-  cat_line("<ReactiveValues>")
-  cat_line("  Values:   ", paste0(impl$.values$keys(sort = TRUE), collapse = ", "))
-  cat_line("  Readonly: ", .subset2(x, "readonly"))
+format.reactivevalues <- function(x, all.names = TRUE, ...) {
+  nms <- sort(
+    names(reactiveValuesToList(x = x, all.names = all.names))
+  )
+  paste0(
+    "<ReactiveValues> \n",
+    "  Values:    ", paste0(nms, collapse = ", "), " \n",
+    "  Readonly:  ", .subset2(x, "readonly")
+  )
+}
+
+#' @export
+print.reactivevalues <- function(x, all.names = TRUE, ...) {
+  fmt <- isolate(format(x = x, all.names = all.names))
+  cat_line(fmt)
 }
 
 #' Checks whether an object is a reactivevalues object

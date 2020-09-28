@@ -17,6 +17,19 @@ test_that("Shared secret", {
   expect_error(checkSharedSecret(1:10))
 })
 
+test_that("Captured options contain expected elements", {
+  shinyOptions(bookmarkStore = 123)
+  shinyOptions(appDir = normalizePath("../")) # stomped
+  caps <- captureAppOptions()
+  
+  expect_equal(sort(names(caps)), c("appDir", "bookmarkStore")
+  expect_equal(caps$appDir, getwd())
+  expect_equal(caps$bookmarkStore, 123)
+
+  # verify that options are reset
+  expect_equal(getShinyOption("bookmarkStore"), NULL)
+  expect_equal(getShinyOption("appDir"), NULL)
+})
 
 test_that("Capturing options at creation time", {
   # These are tests of captureAppOptions. Specific options should be captured

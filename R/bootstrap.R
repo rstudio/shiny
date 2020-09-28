@@ -36,18 +36,15 @@ bootstrapPage <- function(..., title = NULL, responsive = NULL, theme = NULL) {
     shinyDeprecated("The 'responsive' argument is no longer used with Bootstrap 3.")
   }
 
-  attachDependencies(
-    tagList(
-      if (!is.null(title)) tags$head(tags$title(title)),
-      # TODO: throw better error when length > 1?
-      if (is.character(theme)) {
-        tags$head(tags$link(rel="stylesheet", type="text/css", href = theme))
-      },
-
-      # remainder of tags passed to the function
-      list(...)
-    ),
-    bootstrapLib(theme)
+  tagList(
+    bootstrapLib(theme),
+    if (!is.null(title)) tags$head(tags$title(title)),
+    # TODO: throw better error when length > 1?
+    if (is.character(theme)) {
+      tags$head(tags$link(rel="stylesheet", type="text/css", href = theme))
+    },
+    # remainder of tags passed to the function
+    list(...)
   )
 }
 

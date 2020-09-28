@@ -1855,16 +1855,6 @@ ShinySession <- R6Class(
 
       return(httpResponse(404, 'text/html', '<h1>Not Found</h1>'))
     },
-    saveFileUrl = function(name, data, contentType, extra=list()) {
-      "Creates an entry in the file map for the data, and returns a URL pointing
-      to the file."
-      self$files$set(name, list(data=data, contentType=contentType))
-      return(sprintf('session/%s/file/%s?w=%s&r=%s',
-                     URLencode(self$token, TRUE),
-                     URLencode(name, TRUE),
-                     workerId(),
-                     createUniqueId(8)))
-    },
     # Send a file to the client
     fileUrl = function(name, file, contentType='application/octet-stream') {
       "Return a URL for a file to be sent to the client. The file will be base64

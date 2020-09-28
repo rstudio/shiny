@@ -170,7 +170,6 @@ makeExtraMethods <- function() {
     dispatch = "for internal use only",
     handleRequest = "for internal use only",
     requestFlush = "for internal use only",
-    saveFileUrl = "for internal use only",
     startTiming = "for internal use only",
     wsClosed = "for internal use only"
   ))

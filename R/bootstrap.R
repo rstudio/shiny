@@ -68,11 +68,17 @@ bootstrapPage <- function(..., title = NULL, responsive = NULL, theme = NULL) {
 #' @export
 #' @keywords internal
 bootstrapLib <- function(theme = NULL) {
-  # Make the bootstrap theme available for other (lazily rendered) UI components
-  # to use (e.g., sliderInput(), selectInput(), dateInput())
-  shinyOptions(bootstrapTheme = theme)
-
   tagFunction(function() {
+    # Make the bootstrap theme available so other tagFunction()s (e.g., sliderInput(),
+    # selectInput(), dateInput()) can resolve their HTML dependencies at render time.
+    # Note that we're making an implicit assumption that this tagFunction() executes
+    # *before* all other tagFunction()s; but that should be fine considering that,
+    # DOM tree order is preorder, depth-first traversal, and at least in the
+    # fluidPage(theme) case, we can control the relative ordering.
+    # https://dom.spec.whatwg.org/#concept-tree
+    # https://stackoverflow.com/a/16113998/1583084
+    shinyOptions(bootstrapTheme = theme)
+
     if (is_bs_theme(theme)) {
       bootstraplib::bs_dependencies(theme = theme)
     } else {

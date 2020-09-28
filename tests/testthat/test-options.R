@@ -21,8 +21,8 @@ test_that("Captured options contain expected elements", {
   shinyOptions(bookmarkStore = 123)
   shinyOptions(appDir = normalizePath("../")) # stomped
   caps <- captureAppOptions()
-  
-  expect_equal(sort(names(caps)), c("appDir", "bookmarkStore")
+
+  expect_equal(sort(names(caps)), c("appDir", "bookmarkStore"))
   expect_equal(caps$appDir, getwd())
   expect_equal(caps$bookmarkStore, 123)
 

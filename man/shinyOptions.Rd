@@ -18,26 +18,58 @@ shinyOptions(...)
 \item{...}{Options to set, with the form \code{name = value}.}
 }
 \description{
-\code{getShinyOption()} retrieves the value of a Shiny option. \code{shinyOptions()}
-sets the value of Shiny options; it can also be used to return a list of all
-currently-set Shiny options.
+There are two mechanisms for working with options for Shiny. One is the
+\code{\link[=options]{options()}} function, which is part of base R, and the other is the
+\code{shinyOptions()} function, which is in the Shiny package. The reason for
+these two mechanisms is has to do with legacy code and scoping.
+
+The \code{\link[=options]{options()}} function sets options globally, for the duration of an R
+session. The \code{\link[=getOption]{getOption()}} function retrieves the value of an option.
+
+The \code{shinyOptions()} function sets the value of a shiny option, but unlike
+\code{options()}, it is not always global in scope; the options may be scoped
+globally, to an application, or to a user session in an application,
+depending on the context. The \code{getShinyOption()} function retrieves a value
+of a shiny option.
 }
 \section{Scope}{
 
-There is a global option set which is available by default. When a Shiny
-application is run with \code{\link[=runApp]{runApp()}}, that option set is duplicated and the
-new option set is available for getting or setting values. If options
-are set from \code{global.R}, \code{app.R}, \code{ui.R}, or \code{server.R}, or if they are set
-from inside the server function, then the options will be scoped to the
-application. When the application exits, the new option set is discarded and
-the global option set is restored.
+
+There are three levels of scoping for \code{shinyOptions()}: global,
+application, and session.
+
+The global option set is available by default. Any calls to
+\code{shinyOptions()} and \code{getShinyOption()} outside of an app will access the
+global option set.
+
+When a Shiny application is run with \code{\link[=runApp]{runApp()}}, the global option set is
+duplicated and the new option set is available at the application level. If
+options are set from \code{global.R}, \code{app.R}, \code{ui.R}, or \code{server.R} (but
+outside of the server function), then the application-level options will be
+modified.
+
+Each time a user session is started, the application-level option set is
+duplicated, for that session. If the options are set from inside the server
+function, then they will be scoped to the session.
 }
 
-\section{Options}{
+\section{Options with \code{shinyOptions()}}{
 
-There are a number of global options that affect Shiny's behavior. These can
-be set globally with \code{options()} or locally (for a single app) with
+
+There are a number of global options that affect Shiny's behavior. These
+can be set globally with \code{options()} or locally (for a single app) with
 \code{shinyOptions()}.
+
+\describe{
+\item{bootstraplib (defaults to \code{FALSE})}{When a global \strong{bootstraplib} theme
+is set (via \code{\link[bootstraplib:theming]{bootstraplib::bs_theme_new()}}), should \strong{shiny} compile it
+(via \code{\link[bootstraplib:bootstrap]{bootstraplib::bootstrap()}}) and include the result with \code{\link[=bootstrapPage]{bootstrapPage()}}
+as well as use it to set better default styles for input widgets (e.g., \code{\link[=selectInput]{selectInput()}})?}
+}
+}
+
+\section{Options with \code{options()}}{
+
 
 \describe{
 \item{shiny.autoreload (defaults to \code{FALSE})}{If \code{TRUE} when a Shiny app is launched, the
@@ -56,10 +88,6 @@ shiny.autoreload.pattern option. For example, to monitor only ui.R:
 The default polling interval is 500 milliseconds. You can change this
 by setting e.g. \code{options(shiny.autoreload.interval = 2000)} (every
 two seconds).}
-\item{bootstraplib (defaults to \code{FALSE})}{When a global \strong{bootstraplib} theme
-is set (via \code{\link[bootstraplib:theming]{bootstraplib::bs_theme_new()}}), should \strong{shiny} compile it
-(via \code{\link[bootstraplib:bootstrap]{bootstraplib::bootstrap()}}) and include the result with \code{\link[=bootstrapPage]{bootstrapPage()}}
-as well as use it to set better default styles for input widgets (e.g., \code{\link[=selectInput]{selectInput()}})?}
 \item{shiny.deprecation.messages (defaults to \code{TRUE})}{This controls whether messages for
 deprecated functions in Shiny will be printed. See
 \code{\link[=shinyDeprecated]{shinyDeprecated()}} for more information.}

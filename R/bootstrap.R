@@ -66,21 +66,39 @@ bootstrapPage <- function(..., title = NULL, responsive = NULL, theme = NULL) {
 #' @keywords internal
 bootstrapLib <- function(theme = NULL) {
   tagFunction(function() {
-    # Make the bootstrap theme available so other tagFunction()s (e.g., sliderInput(),
-    # selectInput(), dateInput()) can resolve their HTML dependencies at render time.
-    # Note that we're making an implicit assumption that this tagFunction() executes
-    # *before* all other tagFunction()s; but that should be fine considering that,
-    # DOM tree order is preorder, depth-first traversal, and at least in the
-    # fluidPage(theme) case, we can control the relative ordering.
+    # If a bootstraplib theme isn't requested, return static/default Bootstrap
+    # build; otherwise, we're going be dynamically generating a new HTML
+    # dependency
+    if (!is_bs_theme(theme)) {
+      return(bootstrapDependency(theme))
+    }
+    # Prior to compilation, make the bootstrap theme available so other
+    # tagFunction()s (e.g., sliderInput(), selectInput(), dateInput()) can
+    # resolve their HTML dependencies at render time. Note that we're making an
+    # implicit assumption that this tagFunction() executes *before* all other
+    # tagFunction()s; but that should be fine considering that, DOM tree order
+    # is preorder, depth-first traversal, and at least in the fluidPage(theme)
+    # case, we can control the relative ordering.
     # https://dom.spec.whatwg.org/#concept-tree
     # https://stackoverflow.com/a/16113998/1583084
-    shinyOptions(bootstrapTheme = theme)
-
-    if (is_bs_theme(theme)) {
-      bootstraplib::bs_dependencies(theme = theme)
+    #
+    # Note also that since this is shinyOptions() (and not options()), the
+    # option is automatically reset when the app (or session) exits
+    if (isRunning()) {
+      shinyOptions(bootstrapTheme = theme)
     } else {
-      bootstrapDependency(theme)
+      warning(
+        "It appears `shiny::bootstrapLib()` was rendered outside of an Shiny ",
+        "application context, likely by calling `as.tags()`, `as.character()`, ",
+        "or `print()` directly on `bootstrapLib()` or UI components that may ",
+        "depend on it (e.g., `fluidPage()`, etc). For 'themable' UI components ",
+        "(e.g., `sliderInput()`, `selectInput()`, `dateInput()`, etc) to style ",
+        "themselves based on the Bootstrap theme, make sure `bootstrapLib()` is ",
+        "provided directly to the UI and that the UI is provided direction to ",
+        "`shinyApp()` (or `runApp()`)", call. = FALSE
+      )
     }
+    bootstraplib::bs_dependencies(theme = theme)
   })
 }
 

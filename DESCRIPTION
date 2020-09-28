@@ -112,6 +112,7 @@ Suggests:
     sass,
     bootstraplib (>= 0.2.0.9000)
 Remotes:
+    rstudio/htmltools,
     rstudio/sass,
     rstudio/bootstraplib
 URL: http://shiny.rstudio.com

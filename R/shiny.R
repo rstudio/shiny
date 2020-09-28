@@ -116,10 +116,6 @@ workerId <- local({
 #' }
 #' \item{clientData}{
 #'   A [reactiveValues()] object that contains information about the client.
-#'   \itemize{
-#'     \item{`allowDataUriScheme` is a logical value that indicates whether
-#'       the browser is able to handle URIs that use the `data:` scheme.
-#'     }
 #'     \item{`pixelratio` reports the "device pixel ratio" from the web browser,
 #'       or 1 if none is reported. The value is 2 for Apple Retina displays.
 #'     }
@@ -1685,10 +1681,6 @@ ShinySession <- R6Class(
       )
     },
 
-    # Public RPC methods
-    `@uploadieFinish` = function() {
-      # Do nothing; just want the side effect of flushReact, output flush, etc.
-    },
     `@uploadInit` = function(fileInfos) {
       maxSize <- getOption('shiny.maxRequestSize', 5 * 1024 * 1024)
       fileInfos <- lapply(fileInfos, function(fi) {
@@ -1755,33 +1747,6 @@ ShinySession <- R6Class(
         }
       }
 
-      # @description Only applicable to files uploaded via IE. When possible,
-      #   adds the appropriate extension to temporary files created by
-      #   \code{mime::parse_multipart}.
-      # @param multipart A named list as returned by
-      #   \code{mime::parse_multipart}
-      # @return A named list with datapath updated to point to the new location
-      #   of the file, if an extension was added.
-      maybeMoveIEUpload <- function(multipart) {
-        if (is.null(multipart)) return(NULL)
-
-        lapply(multipart, function(input) {
-          oldPath <- input$datapath
-          newPath <- paste0(oldPath, maybeGetExtension(input$name))
-          if (oldPath != newPath) {
-            file.rename(oldPath, newPath)
-            input$datapath <- newPath
-          }
-          input
-        })
-      }
-
-      if (matches[2] == 'uploadie' && identical(req$REQUEST_METHOD, "POST")) {
-        id <- URLdecode(matches[3])
-        res <- maybeMoveIEUpload(mime::parse_multipart(req))
-        private$.input$set(id, res[[id]])
-        return(httpResponse(200, 'text/plain', 'OK'))
-      }
 
       if (matches[2] == 'download') {
 
@@ -1890,33 +1855,18 @@ ShinySession <- R6Class(
 
       return(httpResponse(404, 'text/html', '<h1>Not Found</h1>'))
     },
-    saveFileUrl = function(name, data, contentType, extra=list()) {
-      "Creates an entry in the file map for the data, and returns a URL pointing
-      to the file."
-      self$files$set(name, list(data=data, contentType=contentType))
-      return(sprintf('session/%s/file/%s?w=%s&r=%s',
-                     URLencode(self$token, TRUE),
-                     URLencode(name, TRUE),
-                     workerId(),
-                     createUniqueId(8)))
-    },
     # Send a file to the client
     fileUrl = function(name, file, contentType='application/octet-stream') {
-      "Return a URL for a file to be sent to the client. If allowDataUriScheme
-      is TRUE, then the file will be base64 encoded and embedded in the URL.
-      Otherwise, a URL pointing to the file will be returned."
+      "Return a URL for a file to be sent to the client. The file will be base64
+      encoded and embedded in the URL."
       bytes <- file.info(file)$size
       if (is.na(bytes))
         return(NULL)
 
       fileData <- readBin(file, 'raw', n=bytes)
 
-      if (isTRUE(private$.clientData$.values$get("allowDataUriScheme"))) {
-        b64 <- rawToBase64(fileData)
-        return(paste('data:', contentType, ';base64,', b64, sep=''))
-      } else {
-        return(self$saveFileUrl(name, fileData, contentType))
-      }
+      b64 <- rawToBase64(fileData)
+      return(paste('data:', contentType, ';base64,', b64, sep=''))
     },
     registerDownload = function(name, filename, contentType, func) {
 

@@ -18,10 +18,6 @@ on a local connection (without Shiny Server or Connect).
 }
 \item{clientData}{
 A \code{\link[=reactiveValues]{reactiveValues()}} object that contains information about the client.
-\itemize{
-\item{\code{allowDataUriScheme} is a logical value that indicates whether
-the browser is able to handle URIs that use the \verb{data:} scheme.
-}
 \item{\code{pixelratio} reports the "device pixel ratio" from the web browser,
 or 1 if none is reported. The value is 2 for Apple Retina displays.
 }

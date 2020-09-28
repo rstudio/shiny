@@ -31,7 +31,6 @@ extract <- function(promise) {
 #' @noRd
 #' @export
 `$.mockclientdata` <- function(x, name) {
-  if (name == "allowDataUriScheme") { return(TRUE) }
   if (name == "pixelratio") { return(1) }
   if (name == "url_protocol") { return("http:") }
   if (name == "url_hostname") { return("mocksession") }
@@ -167,12 +166,10 @@ makeExtraMethods <- function() {
   ), makeErrors(
     `@uploadEnd` = "for internal use only",
     `@uploadInit` = "for internal use only",
-    `@uploadieFinish` = "for internal use only",
     createBookmarkObservers = "for internal use only",
     dispatch = "for internal use only",
     handleRequest = "for internal use only",
     requestFlush = "for internal use only",
-    saveFileUrl = "for internal use only",
     startTiming = "for internal use only",
     wsClosed = "for internal use only"
   ))

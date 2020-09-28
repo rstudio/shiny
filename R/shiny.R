@@ -116,6 +116,7 @@ workerId <- local({
 #' }
 #' \item{clientData}{
 #'   A [reactiveValues()] object that contains information about the client.
+#'   \itemize{
 #'     \item{`pixelratio` reports the "device pixel ratio" from the web browser,
 #'       or 1 if none is reported. The value is 2 for Apple Retina displays.
 #'     }

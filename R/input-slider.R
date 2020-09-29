@@ -205,31 +205,33 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
     )
   }
 
-  attachDependencies(sliderTag, ionRangeSliderDependency)
+  attachDependencies(sliderTag, ionRangeSliderDependency())
 }
 
-ionRangeSliderDependency <- tagFunction(function() {
-  cssFile <- ionRangeSliderCSSFile()
-  version <- "2.3.1"
-  list(
-    # ion.rangeSlider also needs normalize.css, which is already included in Bootstrap.
-    htmlDependency(
-      "ionrangeslider-css", version,
-      src = cssFile$src,
-      stylesheet = cssFile$stylesheet
-    ),
-    htmlDependency(
-      "ionrangeslider-javascript", version,
-      src = c(href = "shared/ionrangeslider"),
-      script = "js/ion.rangeSlider.min.js"
-    ),
-    htmlDependency(
-      "strftime", "0.9.2",
-      src = c(href = "shared/strftime"),
-      script = "strftime-min.js"
+ionRangeSliderDependency <- function() {
+  tagFunction(function() {
+    cssFile <- ionRangeSliderCSSFile()
+    version <- "2.3.1"
+    list(
+      # ion.rangeSlider also needs normalize.css, which is already included in Bootstrap.
+      htmlDependency(
+        "ionrangeslider-css", version,
+        src = cssFile$src,
+        stylesheet = cssFile$stylesheet
+      ),
+      htmlDependency(
+        "ionrangeslider-javascript", version,
+        src = c(href = "shared/ionrangeslider"),
+        script = "js/ion.rangeSlider.min.js"
+      ),
+      htmlDependency(
+        "strftime", "0.9.2",
+        src = c(href = "shared/strftime"),
+        script = "strftime-min.js"
+      )
     )
-  )
-})
+  })
+}
 
 ionRangeSliderCSSFile <- function(theme = getShinyOption("bootstrapTheme")) {
   if (!is_bs_theme(theme)) {

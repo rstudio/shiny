@@ -87,16 +87,20 @@ bootstrapLib <- function(theme = NULL) {
     if (isRunning()) {
       shinyOptions(bootstrapTheme = theme)
     } else {
-      warning(
-        "It appears `shiny::bootstrapLib()` was rendered outside of an Shiny ",
-        "application context, likely by calling `as.tags()`, `as.character()`, ",
-        "or `print()` directly on `bootstrapLib()` or UI components that may ",
-        "depend on it (e.g., `fluidPage()`, etc). For 'themable' UI components ",
-        "(e.g., `sliderInput()`, `selectInput()`, `dateInput()`, etc) to style ",
-        "themselves based on the Bootstrap theme, make sure `bootstrapLib()` is ",
-        "provided directly to the UI and that the UI is provided direction to ",
-        "`shinyApp()` (or `runApp()`)", call. = FALSE
-      )
+      # Technically, this a potential issue (someone trying to execute/render
+      # bootstrapLib outside of a Shiny app), but it seems that, in that case,
+      # you likely have other problems, since sliderInput() et al. already assume
+      # that Shiny is the one doing the rendering
+      #warning(
+      #  "It appears `shiny::bootstrapLib()` was rendered outside of an Shiny ",
+      #  "application context, likely by calling `as.tags()`, `as.character()`, ",
+      #  "or `print()` directly on `bootstrapLib()` or UI components that may ",
+      #  "depend on it (e.g., `fluidPage()`, etc). For 'themable' UI components ",
+      #  "(e.g., `sliderInput()`, `selectInput()`, `dateInput()`, etc) to style ",
+      #  "themselves based on the Bootstrap theme, make sure `bootstrapLib()` is ",
+      #  "provided directly to the UI and that the UI is provided direction to ",
+      #  "`shinyApp()` (or `runApp()`)", call. = FALSE
+      #)
     }
     bootstraplib::bs_dependencies(theme = theme)
   })

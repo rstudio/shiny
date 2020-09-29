@@ -244,13 +244,13 @@ selectizeDependency <- function() {
   })
 }
 
-selectizeCSSFile <- function(theme = getShinyOption("bootstrapTheme")) {
+selectizeCSSFile <- function(theme = getCurrentTheme()) {
   if (!is_bs_theme(theme)) {
     return(list(src = c(href = "shared/selectize"), stylesheet = "css/selectize.bootstrap3.css"))
   }
   scss <- system.file(
     package = "shiny", "www", "shared", "selectize", "scss",
-    if ("3" %in% bootstraplib::theme_version()) {
+    if ("3" %in% bootstraplib::theme_version(theme)) {
       "selectize.bootstrap3.scss"
     } else {
       "selectize.bootstrap4.scss"

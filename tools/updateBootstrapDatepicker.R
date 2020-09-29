@@ -75,14 +75,17 @@ for (patch in list.files(patch_dir, full.names = TRUE)) {
 
 # Compile to CSS
 library(sass)
+library(bootstraplib)
 css_dir <- file.path(dest_dir, "css")
 dir.create(css_dir, recursive = TRUE)
-bootstraplib::bootstrap_sass(
+bs_sass(
   sass_file(file.path(dest_dir, "scss", "build3.scss")),
+  theme = bs_theme(),
   output = file.path(css_dir, "bootstrap-datepicker3.css")
 )
-bootstraplib::bootstrap_sass(
+bs_sass(
   sass_file(file.path(dest_dir, "scss", "build3.scss")),
+  theme = bs_theme(),
   output = file.path(css_dir, "bootstrap-datepicker3.min.css"),
   options = sass_options(output_style = "compressed")
 )

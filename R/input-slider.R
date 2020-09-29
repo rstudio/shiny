@@ -233,7 +233,7 @@ ionRangeSliderDependency <- function() {
   })
 }
 
-ionRangeSliderCSSFile <- function(theme = getShinyOption("bootstrapTheme")) {
+ionRangeSliderCSSFile <- function(theme = getCurrentTheme()) {
   if (!is_bs_theme(theme)) {
     return(list(stylesheet = "css/ion.rangeSlider.css", src = c(href = "shared/ionrangeslider")))
   }

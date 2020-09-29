@@ -50,35 +50,29 @@ bootstrapPage <- function(..., title = NULL, responsive = NULL, theme = NULL) {
 
 #' Bootstrap libraries
 #'
-#' This function returns a set of web dependencies necessary for using Bootstrap
+#' This function defines a set of web dependencies necessary for using Bootstrap
 #' components in a web page.
 #'
 #' It isn't necessary to call this function if you use [bootstrapPage()] or
-#' others which use `bootstrapPage`, such [basicPage()], [fluidPage()],
-#' [fillPage()], [pageWithSidebar()], and [navbarPage()], because they already
-#' include the Bootstrap web dependencies.
-#'
-#' See also [bootstraplib::bootstrap()] for a more fully featured alternative to
-#' accessing and customizing Bootstrap CSS.
+#' others which use `bootstrapPage`, such [fluidPage()], [navbarPage()],
+#' [fillPage()], etc, because they already include the Bootstrap web dependencies.
 #'
 #' @inheritParams bootstrapPage
 #' @export
-#' @keywords internal
 bootstrapLib <- function(theme = NULL) {
   tagFunction(function() {
-    # If a bootstraplib theme isn't requested, return static/default Bootstrap
-    # build; otherwise, we're going be dynamically generating a new HTML
-    # dependency
-    if (!is_bs_theme(theme)) {
+    # If we're not compiling Bootstrap Sass, return the static Bootstrap build
+    if (!bootstraplib::is_bs_theme(theme)) {
       return(bootstrapDependency(theme))
     }
-    # Prior to compilation, make the bootstrap theme available so other
-    # tagFunction()s (e.g., sliderInput(), selectInput(), dateInput()) can
-    # resolve their HTML dependencies at render time. Note that we're making an
-    # implicit assumption that this tagFunction() executes *before* all other
-    # tagFunction()s; but that should be fine considering that, DOM tree order
-    # is preorder, depth-first traversal, and at least in the fluidPage(theme)
-    # case, we can control the relative ordering.
+
+    # Make bootstrap Sass available so other tagFunction()s (e.g.,
+    # sliderInput() et al) can resolve their HTML dependencies at render time
+    # using getCurrentTheme(). Note that we're making an implicit assumption
+    # that this tagFunction() executes *before* all other tagFunction()s; but
+    # that should be fine considering that, DOM tree order is preorder,
+    # depth-first traversal, and at least in the bootstrapPage(theme) case, we
+    # have control over the relative ordering.
     # https://dom.spec.whatwg.org/#concept-tree
     # https://stackoverflow.com/a/16113998/1583084
     #
@@ -102,13 +96,53 @@ bootstrapLib <- function(theme = NULL) {
       #  "`shinyApp()` (or `runApp()`)", call. = FALSE
       #)
     }
-    bootstraplib::bs_dependencies(theme = theme)
+
+    bootstraplib::bs_dependencies(theme)
   })
 }
 
-# bootstraplib will eventually export this same func
-is_bs_theme <- function(x) {
-  inherits(x, "bs_theme")
+#' Obtain Shiny's Bootstrap Sass theme
+#'
+#' Intended for use by Shiny developers to create Shiny bindings with intelligent
+#' styling based on the [bootstrapLib()]'s `theme` value.
+#'
+#' @return If called at render-time (i.e., inside a [htmltools::tagFunction()]),
+#' and [bootstrapLib()]'s `theme` has been set to a [bootstraplib::bs_theme()]
+#' object, then this returns the `theme`. Otherwise, this returns `NULL`.
+#' @seealso [getCurrentOutputInfo()], [bootstrapLib()], [htmltools::tagFunction()]
+#' @examples
+#'
+#' library(bootstraplib)
+#' myThemableContent <- htmltools::tagFunction(function() {
+#'   theme <- getCurrentTheme()
+#'   if (is_bs_theme(theme)) {
+#'     tagList(
+#'       tags$head(
+#'         tags$style(HTML(
+#'           bs_sass(".text-50 { color: mix($body-bg, $body-color, 50%); }", theme)
+#'         ))
+#'       ),
+#'       h3(
+#'         "This color is 50% background and 50% foreground color",
+#'         class = "text-50"
+#'       )
+#'     )
+#'   } else {
+#'     "Try setting a theme = bs_theme()"
+#'   }
+#' })
+#'
+#' if (interactive()) {
+#'   ui <- fluidPage(
+#'     theme = bs_theme(bg = "yellow", fg = "red"),
+#'     myThemableContent
+#'   )
+#'   shinyApp(ui, function(input, output) {})
+#' }
+#'
+#' @export
+getCurrentTheme <- function() {
+  getShinyOption("bootstrapTheme")
 }
 
 bootstrapDependency <- function(theme) {

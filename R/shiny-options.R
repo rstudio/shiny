@@ -161,6 +161,8 @@ getShinyOption <- function(name, default = NULL) {
 #'   `"recv"` (only print messages received by the server), `TRUE`
 #'   (print all messages), or `FALSE` (default; don't print any of these
 #'   messages).}
+#' \item{shiny.autoload.r (defaults to `TRUE`)}{If `TRUE`, then the R/
+#'   of a shiny app will automatically be sourced.}
 #' \item{shiny.usecairo (defaults to `TRUE`)}{This is used to disable graphical rendering by the
 #'   Cairo package, if it is installed. See [plotPNG()] for more
 #'   information.}

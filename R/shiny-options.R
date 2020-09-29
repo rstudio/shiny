@@ -80,10 +80,8 @@ getShinyOption <- function(name, default = NULL) {
 #'   `shinyOptions()`.
 #'
 #' \describe{
-#' \item{bootstraplib (defaults to `FALSE`)}{When a global **bootstraplib** theme
-#'   is set (via [bootstraplib::bs_theme_new()]), should **shiny** compile it
-#'   (via [bootstraplib::bootstrap()]) and include the result with [bootstrapPage()]
-#'   as well as use it to set better default styles for input widgets (e.g., [selectInput()])?}
+#' \item{cache}{A caching object that will be used by [renderCachedPlot()]. If
+#'   not specified, a [memoryCache()] will be used.}
 #' }
 #'
 #' @section Options with `options()`:

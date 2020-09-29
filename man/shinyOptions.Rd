@@ -61,10 +61,8 @@ can be set globally with \code{options()} or locally (for a single app) with
 \code{shinyOptions()}.
 
 \describe{
-\item{bootstraplib (defaults to \code{FALSE})}{When a global \strong{bootstraplib} theme
-is set (via \code{\link[bootstraplib:theming]{bootstraplib::bs_theme_new()}}), should \strong{shiny} compile it
-(via \code{\link[bootstraplib:bootstrap]{bootstraplib::bootstrap()}}) and include the result with \code{\link[=bootstrapPage]{bootstrapPage()}}
-as well as use it to set better default styles for input widgets (e.g., \code{\link[=selectInput]{selectInput()}})?}
+\item{cache}{A caching object that will be used by \code{\link[=renderCachedPlot]{renderCachedPlot()}}. If
+not specified, a \code{\link[=memoryCache]{memoryCache()}} will be used.}
 }
 }
 
@@ -144,6 +142,8 @@ values are \code{"send"} (only print messages sent to the client),
 \code{"recv"} (only print messages received by the server), \code{TRUE}
 (print all messages), or \code{FALSE} (default; don't print any of these
 messages).}
+\item{shiny.autoload.r (defaults to \code{TRUE})}{If \code{TRUE}, then the R/
+of a shiny app will automatically be sourced.}
 \item{shiny.usecairo (defaults to \code{TRUE})}{This is used to disable graphical rendering by the
 Cairo package, if it is installed. See \code{\link[=plotPNG]{plotPNG()}} for more
 information.}

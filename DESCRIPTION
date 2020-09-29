@@ -117,13 +117,14 @@ Remotes:
 URL: http://shiny.rstudio.com
 BugReports: https://github.com/rstudio/shiny/issues
 Collate:
+    'globals.R'
+    'app-state.R'
     'app_template.R'
     'bookmark-state-local.R'
     'stack.R'
     'bookmark-state.R'
     'bootstrap-deprecated.R'
     'bootstrap-layout.R'
-    'globals.R'
     'conditions.R'
     'map.R'
     'utils.R'

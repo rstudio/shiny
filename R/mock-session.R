@@ -246,6 +246,8 @@ MockShinySession <- R6Class(
     #' @field user The username of an authenticated user. Always `NULL` for a
     #'   `MockShinySession`.
     user = NULL,
+    #' @field options A list containing session-level shinyOptions.
+    options = NULL,
 
     #' @description Create a new MockShinySession.
     initialize = function() {
@@ -270,6 +272,10 @@ MockShinySession <- R6Class(
       self$input <- .createReactiveValues(private$.input, readonly = TRUE)
 
       self$token <- createUniqueId(16)
+
+      # Copy app-level options
+      self$options <- getCurrentAppState()$options
+
       self$cache <- MemoryCache$new()
       self$appcache <- MemoryCache$new()
 

@@ -120,7 +120,7 @@ uiHttpHandler <- function(ui, uiPattern = "^/$") {
         showcaseMode <- mode
     }
 
-    testMode <- .globals$testMode %OR% FALSE
+    testMode <- getShinyOption("testmode", default = FALSE)
 
     # Create a restore context using query string
     bookmarkStore <- getShinyOption("bookmarkStore", default = "disable")

@@ -662,6 +662,7 @@ ShinySession <- R6Class(
     cache = NULL,         # A cache object used in the session
     user = NULL,
     groups = NULL,
+    options = NULL,       # For session-specific shinyOptions()
 
     initialize = function(websocket) {
       private$websocket <- websocket
@@ -692,6 +693,9 @@ ShinySession <- R6Class(
       private$.outputs <- list()
       private$.outputOptions <- list()
 
+      # Copy app-level options
+      self$options <- getCurrentAppState()$options
+
       self$cache <- MemoryCache$new()
 
       private$bookmarkCallbacks <- Callbacks$new()
@@ -699,7 +703,7 @@ ShinySession <- R6Class(
       private$restoreCallbacks <- Callbacks$new()
       private$restoredCallbacks <- Callbacks$new()
 
-      private$testMode <- .globals$testMode
+      private$testMode <- getShinyOption("testmode", default = FALSE)
       private$enableTestSnapshot()
 
       private$registerSessionEndCallbacks()

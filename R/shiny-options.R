@@ -45,44 +45,16 @@ getShinyOption <- function(name, default = NULL) {
 #' `shinyOptions()` function, which is in the Shiny package. The reason for
 #' these two mechanisms is has to do with legacy code and scoping.
 #'
-#' The [options()] function sets options globally, for the duration of an R
-#' session. The [getOption()] function retrieves the value of an option.
+#' The [options()] function sets options globally, for the duration of the R
+#' process. The [getOption()] function retrieves the value of an option. All
+#' shiny related options of this type are prefixed with `"shiny."`.
 #'
 #' The `shinyOptions()` function sets the value of a shiny option, but unlike
 #' `options()`, it is not always global in scope; the options may be scoped
 #' globally, to an application, or to a user session in an application,
 #' depending on the context. The `getShinyOption()` function retrieves a value
-#' of a shiny option.
-#'
-#' @section Scope:
-#'
-#'   There are three levels of scoping for `shinyOptions()`: global,
-#'   application, and session.
-#'
-#'   The global option set is available by default. Any calls to
-#'   `shinyOptions()` and `getShinyOption()` outside of an app will access the
-#'   global option set.
-#'
-#'   When a Shiny application is run with [runApp()], the global option set is
-#'   duplicated and the new option set is available at the application level. If
-#'   options are set from `global.R`, `app.R`, `ui.R`, or `server.R` (but
-#'   outside of the server function), then the application-level options will be
-#'   modified.
-#'
-#'   Each time a user session is started, the application-level option set is
-#'   duplicated, for that session. If the options are set from inside the server
-#'   function, then they will be scoped to the session.
-#'
-#' @section Options with `shinyOptions()`:
-#'
-#'   There are a number of global options that affect Shiny's behavior. These
-#'   can be set globally with `options()` or locally (for a single app) with
-#'   `shinyOptions()`.
-#'
-#' \describe{
-#' \item{cache}{A caching object that will be used by [renderCachedPlot()]. If
-#'   not specified, a [memoryCache()] will be used.}
-#' }
+#' of a shiny option. Currently, the options set via `shinyOptions` are for
+#' internal use only.
 #'
 #' @section Options with `options()`:
 #'
@@ -166,13 +138,37 @@ getShinyOption <- function(name, default = NULL) {
 #'   information.}
 #' }
 #'
+#'
+#' @section Scoping for `shinyOptions()`:
+#'
+#'   There are three levels of scoping for `shinyOptions()`: global,
+#'   application, and session.
+#'
+#'   The global option set is available by default. Any calls to
+#'   `shinyOptions()` and `getShinyOption()` outside of an app will access the
+#'   global option set.
+#'
+#'   When a Shiny application is run with [runApp()], the global option set is
+#'   duplicated and the new option set is available at the application level. If
+#'   options are set from `global.R`, `app.R`, `ui.R`, or `server.R` (but
+#'   outside of the server function), then the application-level options will be
+#'   modified.
+#'
+#'   Each time a user session is started, the application-level option set is
+#'   duplicated, for that session. If the options are set from inside the server
+#'   function, then they will be scoped to the session.
+#'
+#' @section Options with `shinyOptions()`:
+#'
+#'   There are a number of global options that affect Shiny's behavior. These
+#'   can be set globally with `options()` or locally (for a single app) with
+#'   `shinyOptions()`.
+#'
+#'   \describe{ \item{cache}{A caching object that will be used by
+#'   [renderCachedPlot()]. If not specified, a [memoryCache()] will be used.} }
+#'
 #' @param ... Options to set, with the form `name = value`.
 #' @aliases shiny-options
-#' @examples
-#' \dontrun{
-#' shinyOptions(myOption = 10)
-#' getShinyOption("myOption")
-#' }
 #' @export
 shinyOptions <- function(...) {
   newOpts <- list(...)

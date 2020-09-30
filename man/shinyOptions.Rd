@@ -23,49 +23,17 @@ There are two mechanisms for working with options for Shiny. One is the
 \code{shinyOptions()} function, which is in the Shiny package. The reason for
 these two mechanisms is has to do with legacy code and scoping.
 
-The \code{\link[=options]{options()}} function sets options globally, for the duration of an R
-session. The \code{\link[=getOption]{getOption()}} function retrieves the value of an option.
+The \code{\link[=options]{options()}} function sets options globally, for the duration of the R
+process. The \code{\link[=getOption]{getOption()}} function retrieves the value of an option. All
+shiny related options of this type are prefixed with \code{"shiny."}.
 
 The \code{shinyOptions()} function sets the value of a shiny option, but unlike
 \code{options()}, it is not always global in scope; the options may be scoped
 globally, to an application, or to a user session in an application,
 depending on the context. The \code{getShinyOption()} function retrieves a value
-of a shiny option.
+of a shiny option. Currently, the options set via \code{shinyOptions} are for
+internal use only.
 }
-\section{Scope}{
-
-
-There are three levels of scoping for \code{shinyOptions()}: global,
-application, and session.
-
-The global option set is available by default. Any calls to
-\code{shinyOptions()} and \code{getShinyOption()} outside of an app will access the
-global option set.
-
-When a Shiny application is run with \code{\link[=runApp]{runApp()}}, the global option set is
-duplicated and the new option set is available at the application level. If
-options are set from \code{global.R}, \code{app.R}, \code{ui.R}, or \code{server.R} (but
-outside of the server function), then the application-level options will be
-modified.
-
-Each time a user session is started, the application-level option set is
-duplicated, for that session. If the options are set from inside the server
-function, then they will be scoped to the session.
-}
-
-\section{Options with \code{shinyOptions()}}{
-
-
-There are a number of global options that affect Shiny's behavior. These
-can be set globally with \code{options()} or locally (for a single app) with
-\code{shinyOptions()}.
-
-\describe{
-\item{cache}{A caching object that will be used by \code{\link[=renderCachedPlot]{renderCachedPlot()}}. If
-not specified, a \code{\link[=memoryCache]{memoryCache()}} will be used.}
-}
-}
-
 \section{Options with \code{options()}}{
 
 
@@ -150,9 +118,35 @@ information.}
 }
 }
 
-\examples{
-\dontrun{
-shinyOptions(myOption = 10)
-getShinyOption("myOption")
+\section{Scoping for \code{shinyOptions()}}{
+
+
+There are three levels of scoping for \code{shinyOptions()}: global,
+application, and session.
+
+The global option set is available by default. Any calls to
+\code{shinyOptions()} and \code{getShinyOption()} outside of an app will access the
+global option set.
+
+When a Shiny application is run with \code{\link[=runApp]{runApp()}}, the global option set is
+duplicated and the new option set is available at the application level. If
+options are set from \code{global.R}, \code{app.R}, \code{ui.R}, or \code{server.R} (but
+outside of the server function), then the application-level options will be
+modified.
+
+Each time a user session is started, the application-level option set is
+duplicated, for that session. If the options are set from inside the server
+function, then they will be scoped to the session.
 }
+
+\section{Options with \code{shinyOptions()}}{
+
+
+There are a number of global options that affect Shiny's behavior. These
+can be set globally with \code{options()} or locally (for a single app) with
+\code{shinyOptions()}.
+
+\describe{ \item{cache}{A caching object that will be used by
+\code{\link[=renderCachedPlot]{renderCachedPlot()}}. If not specified, a \code{\link[=memoryCache]{memoryCache()}} will be used.} }
 }
+

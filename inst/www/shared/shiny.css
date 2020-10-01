@@ -37,52 +37,27 @@ pre.shiny-text-output {
   pointer-events: none;
 }
 
-.table.shiny-table > thead > tr > th,
-.table.shiny-table > tbody > tr > th,
-.table.shiny-table > tfoot > tr > th,
-.table.shiny-table > thead > tr > td,
-.table.shiny-table > tbody > tr > td,
-.table.shiny-table > tfoot > tr > td {
+.table.shiny-table > thead > tr > th, .table.shiny-table > thead > tr > td, .table.shiny-table > tbody > tr > th, .table.shiny-table > tbody > tr > td, .table.shiny-table > tfoot > tr > th, .table.shiny-table > tfoot > tr > td {
+  padding-right: 12px;
   padding-left: 12px;
-  padding-right: 12px ;
 }
 
-.shiny-table.spacing-xs > thead > tr > th,
-.shiny-table.spacing-xs > tbody > tr > th,
-.shiny-table.spacing-xs > tfoot > tr > th,
-.shiny-table.spacing-xs > thead > tr > td,
-.shiny-table.spacing-xs > tbody > tr > td,
-.shiny-table.spacing-xs > tfoot > tr > td {
+.shiny-table.spacing-xs > thead > tr > th, .shiny-table.spacing-xs > thead > tr > td, .shiny-table.spacing-xs > tbody > tr > th, .shiny-table.spacing-xs > tbody > tr > td, .shiny-table.spacing-xs > tfoot > tr > th, .shiny-table.spacing-xs > tfoot > tr > td {
   padding-top: 3px;
   padding-bottom: 3px;
 }
 
-.shiny-table.spacing-s > thead > tr > th,
-.shiny-table.spacing-s > tbody > tr > th,
-.shiny-table.spacing-s > tfoot > tr > th,
-.shiny-table.spacing-s > thead > tr > td,
-.shiny-table.spacing-s > tbody > tr > td,
-.shiny-table.spacing-s > tfoot > tr > td {
+.shiny-table.spacing-s > thead > tr > th, .shiny-table.spacing-s > thead > tr > td, .shiny-table.spacing-s > tbody > tr > th, .shiny-table.spacing-s > tbody > tr > td, .shiny-table.spacing-s > tfoot > tr > th, .shiny-table.spacing-s > tfoot > tr > td {
   padding-top: 5px;
   padding-bottom: 5px;
 }
 
-.shiny-table.spacing-m > thead > tr > th,
-.shiny-table.spacing-m > tbody > tr > th,
-.shiny-table.spacing-m > tfoot > tr > th,
-.shiny-table.spacing-m > thead > tr > td,
-.shiny-table.spacing-m > tbody > tr > td,
-.shiny-table.spacing-m > tfoot > tr > td {
+.shiny-table.spacing-m > thead > tr > th, .shiny-table.spacing-m > thead > tr > td, .shiny-table.spacing-m > tbody > tr > th, .shiny-table.spacing-m > tbody > tr > td, .shiny-table.spacing-m > tfoot > tr > th, .shiny-table.spacing-m > tfoot > tr > td {
   padding-top: 8px;
   padding-bottom: 8px;
 }
 
-.shiny-table.spacing-l > thead > tr > th,
-.shiny-table.spacing-l > tbody > tr > th,
-.shiny-table.spacing-l > tfoot > tr > th,
-.shiny-table.spacing-l > thead > tr > td,
-.shiny-table.spacing-l > tbody > tr > td,
-.shiny-table.spacing-l > tfoot > tr > td {
+.shiny-table.spacing-l > thead > tr > th, .shiny-table.spacing-l > thead > tr > td, .shiny-table.spacing-l > tbody > tr > th, .shiny-table.spacing-l > tbody > tr > td, .shiny-table.spacing-l > tfoot > tr > th, .shiny-table.spacing-l > tfoot > tr > td {
   padding-top: 10px;
   padding-bottom: 10px;
 }
@@ -95,20 +70,23 @@ pre.shiny-text-output {
   color: red;
   white-space: pre-wrap;
 }
+
 .shiny-output-error:before {
   content: 'Error: ';
   font-weight: bold;
 }
+
 .shiny-output-error-validation {
   color: #888;
 }
+
 .shiny-output-error-validation:before {
   content: '';
   font-weight: inherit;
 }
 
 /* Work around MS Edge transition bug (issue #1637) */
-@supports (-ms-ime-align:auto) {
+@supports (-ms-ime-align: auto) {
   .shiny-bound-output {
     transition: 0;
   }
@@ -117,27 +95,29 @@ pre.shiny-text-output {
 .recalculating {
   opacity: 0.3;
   transition: opacity 250ms ease 500ms;
-  -moz-transition: opacity 250ms ease 500ms;
-  -webkit-transition: opacity 250ms ease 500ms;
-  -o-transition: opacity 250ms ease 500ms;
 }
 
 .slider-animate-container {
   text-align: right;
   margin-top: -9px;
 }
+
 .slider-animate-button {
   opacity: 0.5;
 }
+
 .slider-animate-button .pause {
   display: none;
 }
+
 .slider-animate-button.playing .pause {
   display: inline;
 }
+
 .slider-animate-button .play {
   display: inline;
 }
+
 .slider-animate-button.playing .play {
   display: none;
 }
@@ -145,12 +125,11 @@ pre.shiny-text-output {
 .progress.shiny-file-input-progress {
   visibility: hidden;
 }
+
 .progress.shiny-file-input-progress .progress-bar.bar-danger {
-  -webkit-transition: none;
-  -moz-transition: none;
-  -o-transition: none;
   transition: none;
 }
+
 /* Make sure the filename doesn't extend past the bounds of the container */
 .shiny-input-container input[type=file] {
   overflow: hidden;
@@ -182,7 +161,6 @@ pre.shiny-text-output {
 .shiny-progress .progress-text {
   position: absolute;
   right: 10px;
-  height: 24px;
   width: 240px;
   background-color: #eef8ff;
   margin: 0px;
@@ -252,7 +230,6 @@ pre.shiny-text-output {
   cursor: nwse-resize;
 }
 
-
 /* Workaround for Qt, which doesn't use font fallbacks */
 .qt pre, .qt code {
   font-family: monospace !important;
@@ -274,17 +251,19 @@ pre.shiny-text-output {
   border: none;
 }
 
-.shiny-flow-layout>div {
+.shiny-flow-layout > div {
   display: inline-block;
   vertical-align: top;
   padding-right: 12px;
   width: 220px;
 }
+
 .shiny-split-layout {
   width: 100%;
   white-space: nowrap;
 }
-.shiny-split-layout>div {
+
+.shiny-split-layout > div {
   display: inline-block;
   vertical-align: top;
   box-sizing: border-box;
@@ -330,12 +309,11 @@ pre.shiny-text-output {
   width: 100%;
 }
 
-
 #shiny-notification-panel {
   position: fixed;
   bottom: 0;
   right: 0;
-  background-color: rgba(0,0,0,0);
+  background-color: rgba(0, 0, 0, 0);
   padding: 2px;
   width: 250px;
   z-index: 99999;
@@ -385,17 +363,17 @@ pre.shiny-text-output {
 }
 
 .shiny-notification-content-action a {
-  color: rgb(51, 122, 183);
+  color: #337ab7;
   text-decoration: underline;
   font-weight: bold;
 }
 
 .shiny-file-input-active {
-  box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102, 175, 233, .6);
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(102, 175, 233, 0.6);
 }
 
 .shiny-file-input-over {
-  box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(76, 174, 76, .6);
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(76, 174, 76, 0.6);
 }
 
 /* Overrides bootstrap-datepicker3.css styling for invalid date ranges.
@@ -407,7 +385,6 @@ pre.shiny-text-output {
   color: #aaa;
   cursor: not-allowed;
 }
-
 
 /* Hidden tabPanels */
 .nav-hidden {

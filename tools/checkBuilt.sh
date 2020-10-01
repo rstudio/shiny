@@ -14,3 +14,16 @@ then
 else
   echo "No difference detected; JavaScript build is current."
 fi
+
+
+# Build Shiny's CSS
+Rscript tools/updateShinyCSS.R
+
+if [ -n "$(git status --porcelain)" ]
+then
+  git status --porcelain
+  >&2 echo "Please run tools/updateShinyCSS.R and commit the changes."
+  exit 1
+else
+  echo "No difference detected; shiny.css build is current."
+fi

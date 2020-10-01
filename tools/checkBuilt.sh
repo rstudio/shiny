@@ -17,6 +17,8 @@ fi
 
 
 # Build Shiny's CSS
+R -e "if (!require('rprojroot')) install.packages('rprojroot')"
+R -e "if (!require('sass')) install.packages('sass')"
 Rscript tools/updateShinyCSS.R
 
 if [ -n "$(git status --porcelain)" ]

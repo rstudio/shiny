@@ -98,7 +98,7 @@ shinyDependencies <- tagFunction(function() {
 
 shinyCssFile <- function(theme = getShinyOption("bootstrapTheme")) {
   if (!is_bs_theme(theme)) {
-    return(list(src = c(href = "shared"), stylesheet = "shiny.css"))
+    return(list(src = c(href = "shared"), stylesheet = "shiny.min.css"))
   }
   scss_home <- system.file("www", "shared", "shiny_scss", package = "shiny")
   scss_files <- file.path(scss_home, c("bootstrap.scss", "shiny.scss"))

@@ -193,6 +193,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-yarn-
 
-      - name: Check built files
+      - name: Check node build
         run: |
-          ./tools/checkBuilt.sh
+          ./tools/checkJSCurrent.sh

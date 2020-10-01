@@ -63,7 +63,7 @@ renderPage <- function(ui, showcase=0, testMode=FALSE) {
 
   shiny_deps <- c(
     list(jquery()),
-    shinyDependencies
+    shinyDependencies()
   )
 
   if (testMode) {
@@ -77,26 +77,28 @@ renderPage <- function(ui, showcase=0, testMode=FALSE) {
   enc2utf8(paste(collapse = "\n", html))
 }
 
-shinyDependencies <- tagFunction(function() {
-  cssFile <- shinyCssFile()
-  version <- utils::packageVersion("shiny")
-  list(
-    htmlDependency(
-      name = "shiny-css",
-      version = version,
-      src = cssFile$src,
-      stylesheet = cssFile$stylesheet
-    ),
-    htmlDependency(
-      name = "shiny-javascript",
-      version = version,
-      src = c(href = "shared"),
-      script = if (getOption("shiny.minified", TRUE)) "shiny.min.js" else "shiny.js"
+shinyDependencies <- function() {
+  tagFunction(function() {
+    cssFile <- shinyCssFile()
+    version <- utils::packageVersion("shiny")
+    list(
+      htmlDependency(
+        name = "shiny-css",
+        version = version,
+        src = cssFile$src,
+        stylesheet = cssFile$stylesheet
+      ),
+      htmlDependency(
+        name = "shiny-javascript",
+        version = version,
+        src = c(href = "shared"),
+        script = if (getOption("shiny.minified", TRUE)) "shiny.min.js" else "shiny.js"
+      )
     )
-  )
-})
+  })
+}
 
-shinyCssFile <- function(theme = getShinyOption("bootstrapTheme")) {
+shinyCssFile <- function(theme = getCurrentTheme()) {
   if (!is_bs_theme(theme)) {
     return(list(src = c(href = "shared"), stylesheet = "shiny.min.css"))
   }

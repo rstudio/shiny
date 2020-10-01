@@ -18,12 +18,14 @@ fi
 
 # Build Shiny's CSS
 R -e "if (!require('rprojroot')) install.packages('rprojroot', repos = c(CRAN = 'https://cran.rstudio.com/'))"
-R -e "if (!require('sass')) install.packages('sass', repos = c(CRAN = 'https://cran.rstudio.com/'))"
+R -e "if (!require('remotes')) install.packages('remotes', repos = c(CRAN = 'https://cran.rstudio.com/'))"
+R -e "remotes::install_github('rstudio/sass')"
 Rscript tools/updateShinyCSS.R
 
 if [ -n "$(git status --porcelain)" ]
 then
   git status --porcelain
+  git diff
   >&2 echo "Please run tools/updateShinyCSS.R and commit the changes."
   exit 1
 else

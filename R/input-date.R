@@ -128,41 +128,43 @@ dateInput <- function(inputId, label, value = NULL, min = NULL, max = NULL,
                `data-date-days-of-week-disabled` =
                    jsonlite::toJSON(daysofweekdisabled, null = 'null')
     ),
-    datePickerDependencies()
+    datePickerDependency()
   )
 }
 
-datePickerDependencies <- function() {
-  cssFile <- datePickerCssFile()
-  version <- "1.9.0"
+datePickerDependency <- function() {
+  tagFunction(function() {
+    cssFile <- datePickerCssFile()
+    version <- "1.9.0"
 
-  list(
-    htmlDependency(
-      name = "bootstrap-datepicker-css",
-      version = version,
-      src = cssFile$src,
-      stylesheet = cssFile$stylesheet
-    ),
-    htmlDependency(
-      name = "bootstrap-datepicker-js",
-      version = version,
-      src = c(href = "shared/datepicker"),
-      script = "js/bootstrap-datepicker.min.js",
-      # Need to enable noConflict mode. See #1346.
-      head = "<script>(function() {
+    list(
+      htmlDependency(
+        name = "bootstrap-datepicker-css",
+        version = version,
+        src = cssFile$src,
+        stylesheet = cssFile$stylesheet
+      ),
+      htmlDependency(
+        name = "bootstrap-datepicker-js",
+        version = version,
+        src = c(href = "shared/datepicker"),
+        script = "js/bootstrap-datepicker.min.js",
+        # Need to enable noConflict mode. See #1346.
+        head = "<script>(function() {
         var datepicker = $.fn.datepicker.noConflict();
         $.fn.bsDatepicker = datepicker;
       })();
      </script>"
+      )
     )
-  )
+  })
 }
 
-datePickerCssFile <- function() {
-  if (!useBsTheme()) {
+datePickerCssFile <- function(theme = getCurrentTheme()) {
+  if (!is_bs_theme(theme)) {
     return(list(src = c(href = "shared/datepicker"), stylesheet = "css/bootstrap-datepicker3.min.css"))
   }
   scss <- system.file(package = "shiny", "www", "shared", "datepicker", "scss", "build3.scss")
-  outFile <- bootstrapSass(sass::sass_file(scss), basename = "bootstrap-datepicker-")
+  outFile <- bootstrapSass(sass::sass_file(scss), theme = theme, basename = "bootstrap-datepicker-")
   list(src = c(file = dirname(outFile)), stylesheet = basename(outFile))
 }

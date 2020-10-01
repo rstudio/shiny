@@ -229,32 +229,34 @@ selectizeIt <- function(inputId, select, options, nonempty = FALSE) {
 
 
 selectizeDependency <- function() {
-  cssFile <- selectizeCSSFile()
-  htmlDependency(
-    "selectize", "0.12.4",
-    src = cssFile$src,
-    stylesheet = cssFile$stylesheet,
-    head = format(tagList(
-      tags$script(src = 'shared/selectize/js/selectize.min.js'),
-      # Accessibility plugin for screen readers (https://github.com/SLMNBJ/selectize-plugin-a11y):
-      tags$script(src = 'shared/selectize/accessibility/js/selectize-plugin-a11y.min.js')
-    ))
-  )
+  tagFunction(function() {
+    cssFile <- selectizeCSSFile()
+    htmlDependency(
+      "selectize", "0.12.4",
+      src = cssFile$src,
+      stylesheet = cssFile$stylesheet,
+      head = format(tagList(
+        tags$script(src = 'shared/selectize/js/selectize.min.js'),
+        # Accessibility plugin for screen readers (https://github.com/SLMNBJ/selectize-plugin-a11y):
+        tags$script(src = 'shared/selectize/accessibility/js/selectize-plugin-a11y.min.js')
+      ))
+    )
+  })
 }
 
-selectizeCSSFile <- function() {
-  if (!useBsTheme()) {
+selectizeCSSFile <- function(theme = getCurrentTheme()) {
+  if (!is_bs_theme(theme)) {
     return(list(src = c(href = "shared/selectize"), stylesheet = "css/selectize.bootstrap3.css"))
   }
   scss <- system.file(
     package = "shiny", "www", "shared", "selectize", "scss",
-    if ("3" %in% bootstraplib::theme_version()) {
+    if ("3" %in% bootstraplib::theme_version(theme)) {
       "selectize.bootstrap3.scss"
     } else {
       "selectize.bootstrap4.scss"
     }
   )
-  outFile <- bootstrapSass(sass::sass_file(scss), basename = "selectize")
+  outFile <- bootstrapSass(sass::sass_file(scss), theme = theme, basename = "selectize")
   list(src = c(file = dirname(outFile)), stylesheet = basename(outFile))
 }
 

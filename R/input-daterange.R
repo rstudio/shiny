@@ -137,6 +137,6 @@ dateRangeInput <- function(inputId, label, start = NULL, end = NULL,
         )
       )
     ),
-    datePickerDependencies()
+    datePickerDependency()
   )
 }

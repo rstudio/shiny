@@ -205,34 +205,36 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
     )
   }
 
-  attachDependencies(sliderTag, ionRangeSliderDependencies())
+  attachDependencies(sliderTag, ionRangeSliderDependency())
 }
 
-ionRangeSliderDependencies <- function() {
-  cssFile <- ionRangeSliderCSSFile()
-  version <- "2.3.1"
-  list(
-    # ion.rangeSlider also needs normalize.css, which is already included in Bootstrap.
-    htmlDependency(
-      "ionrangeslider-css", version,
-      src = cssFile$src,
-      stylesheet = cssFile$stylesheet
-    ),
-    htmlDependency(
-      "ionrangeslider-javascript", version,
-      src = c(href = "shared/ionrangeslider"),
-      script = "js/ion.rangeSlider.min.js"
-    ),
-    htmlDependency(
-      "strftime", "0.9.2",
-      src = c(href = "shared/strftime"),
-      script = "strftime-min.js"
+ionRangeSliderDependency <- function() {
+  tagFunction(function() {
+    cssFile <- ionRangeSliderCSSFile()
+    version <- "2.3.1"
+    list(
+      # ion.rangeSlider also needs normalize.css, which is already included in Bootstrap.
+      htmlDependency(
+        "ionrangeslider-css", version,
+        src = cssFile$src,
+        stylesheet = cssFile$stylesheet
+      ),
+      htmlDependency(
+        "ionrangeslider-javascript", version,
+        src = c(href = "shared/ionrangeslider"),
+        script = "js/ion.rangeSlider.min.js"
+      ),
+      htmlDependency(
+        "strftime", "0.9.2",
+        src = c(href = "shared/strftime"),
+        script = "strftime-min.js"
+      )
     )
-  )
+  })
 }
 
-ionRangeSliderCSSFile <- function() {
-  if (!useBsTheme()) {
+ionRangeSliderCSSFile <- function(theme = getCurrentTheme()) {
+  if (!is_bs_theme(theme)) {
     return(list(stylesheet = "css/ion.rangeSlider.css", src = c(href = "shared/ionrangeslider")))
   }
   sassInput <- list(
@@ -244,7 +246,7 @@ ionRangeSliderCSSFile <- function() {
       system.file(package = "shiny", "www", "shared", "ionrangeslider", "scss", "shiny.scss")
     )
   )
-  outFile <- bootstrapSass(sassInput, basename = "ionRangeSlider")
+  outFile <- bootstrapSass(sassInput, theme = theme, basename = "ionRangeSlider")
   list(stylesheet = basename(outFile), src = c(file = dirname(outFile)))
 }
 

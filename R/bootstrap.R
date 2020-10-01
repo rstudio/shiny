@@ -62,7 +62,7 @@ bootstrapPage <- function(..., title = NULL, responsive = NULL, theme = NULL) {
 bootstrapLib <- function(theme = NULL) {
   tagFunction(function() {
     # If we're not compiling Bootstrap Sass, return the static Bootstrap build
-    if (!bootstraplib::is_bs_theme(theme)) {
+    if (!is_bs_theme(theme)) {
       return(bootstrapDependency(theme))
     }
 
@@ -99,6 +99,11 @@ bootstrapLib <- function(theme = NULL) {
 
     bootstraplib::bs_dependencies(theme)
   })
+}
+
+is_bs_theme <- function(x) {
+  is_available("bootstraplib", "0.2.0.9000") &&
+    bootstraplib::is_bs_theme(x)
 }
 
 #' Obtain Shiny's Bootstrap Sass theme

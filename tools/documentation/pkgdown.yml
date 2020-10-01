@@ -179,6 +179,7 @@ reference:
       - installExprFunction
       - parseQueryString
       - getCurrentOutputInfo
+      - getCurrentTheme
       - plotPNG
       - sizeGrowthRatio
       - exportTestValues

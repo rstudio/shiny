@@ -11,20 +11,17 @@ test_that("shiny.js version was replaced", {
 })
 
 test_that("shiny.css has been built", {
-  skip_on_cran()
-  skip_if_not_installed("rprojroot")
-  # These tests can only be run when we have access to the source
-  # (i.e., they are skipped with `R CMD check`)
-  build_script <- "../../tools/updateShinyCSS.R"
-  if (file.exists(build_script)) {
-    target <- rprojroot::find_package_root_file("inst/www/shared/shiny.min.css")
-    expect_true(file.exists(target))
-    pre_build_time <- file.mtime(target)
-    pre_build_content <- readLines(target)
-    source(build_script, local = TRUE)
-    expect_true(file.mtime(target) > pre_build_time)
-    expect_identical(readLines(target), pre_build_content)
-  } else {
-    skip("Not able to verify whether shiny.css has been built")
-  }
+  new_css <- sass::sass(
+    sass::sass_file(system.file("www/shared/shiny_scss/shiny.scss", package = "shiny")),
+    cache = NULL,
+    options = sass::sass_options(output_style = "compressed"),
+  )
+  # Remove class and attributes
+  new_css <- as.character(new_css)
+
+  pkg_css_file <- system.file("www/shared/shiny.min.css", package = "shiny")
+  pkg_css <- readChar(pkg_css_file, file.size(pkg_css_file), useBytes = TRUE)
+
+  # If this fails, that means that tools/updateShinyCSS.R needs to be run.
+  expect_identical(new_css, pkg_css)
 })

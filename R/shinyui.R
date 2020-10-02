@@ -61,23 +61,51 @@ renderPage <- function(ui, showcase=0, testMode=FALSE) {
     stop("Unsupported version of jQuery: ", version)
   }
 
-  shiny_deps <- list(
-    htmlDependency("json2", "2014.02.04", c(href="shared"), script = "json2-min.js"),
-    jquery(),
-    htmlDependency("shiny", utils::packageVersion("shiny"), c(href="shared"),
-      script = if (getOption("shiny.minified", TRUE)) "shiny.min.js" else "shiny.js",
-      stylesheet = "shiny.css")
+  shiny_deps <- c(
+    list(jquery()),
+    shinyDependencies()
   )
 
   if (testMode) {
     # Add code injection listener if in test mode
     shiny_deps[[length(shiny_deps) + 1]] <-
       htmlDependency("shiny-testmode", utils::packageVersion("shiny"),
-        c(href="shared"), script = "shiny-testmode.js")
+                     c(href="shared"), script = "shiny-testmode.js")
   }
 
   html <- renderDocument(ui, shiny_deps, processDep = createWebDependency)
   enc2utf8(paste(collapse = "\n", html))
+}
+
+shinyDependencies <- function() {
+  tagFunction(function() {
+    cssFile <- shinyCssFile()
+    version <- utils::packageVersion("shiny")
+    list(
+      htmlDependency(
+        name = "shiny-css",
+        version = version,
+        src = cssFile$src,
+        stylesheet = cssFile$stylesheet
+      ),
+      htmlDependency(
+        name = "shiny-javascript",
+        version = version,
+        src = c(href = "shared"),
+        script = if (getOption("shiny.minified", TRUE)) "shiny.min.js" else "shiny.js"
+      )
+    )
+  })
+}
+
+shinyCssFile <- function(theme = getCurrentTheme()) {
+  if (!is_bs_theme(theme)) {
+    return(list(src = c(href = "shared"), stylesheet = "shiny.min.css"))
+  }
+  scss_home <- system.file("www", "shared", "shiny_scss", package = "shiny")
+  scss_files <- file.path(scss_home, c("bootstrap.scss", "shiny.scss"))
+  outFile <- bootstrapSass(lapply(scss_files, sass::sass_file), theme = theme, "shiny")
+  list(src = c(file = dirname(outFile)), stylesheet = basename(outFile))
 }
 
 #' Create a Shiny UI handler

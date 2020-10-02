@@ -36,6 +36,8 @@
 #' @param res Resolution of resulting plot, in pixels per inch. This value is
 #'   passed to [grDevices::png()]. Note that this affects the resolution of PNG
 #'   rendering in R; it won't change the actual ppi of the browser.
+#'   Like `width` and `height`, this can also be a function, executed in a
+#'   reactive context, that returns a number.
 #' @param alt Alternate text for the HTML `<img>` tag
 #'   if it cannot be displayed or viewed (i.e., the user uses a screen reader).
 #'   In addition to a character string, the value may be a reactive expression
@@ -82,6 +84,13 @@ renderPlot <- function(expr, width = 'auto', height = 'auto', res = 72, ...,
   else
     heightWrapper <- function() { height }
 
+  if (is.reactive(res))
+    resWrapper <- res
+  else if (is.function(res))
+    resWrapper <- reactive({ res() })
+  else
+    resWrapper <- function() { res }
+
   if (is.reactive(alt))
     altWrapper <- alt
   else if (is.function(alt))
@@ -92,6 +101,7 @@ renderPlot <- function(expr, width = 'auto', height = 'auto', res = 72, ...,
   getDims <- function() {
     width <- widthWrapper()
     height <- heightWrapper()
+    res <- resWrapper()
 
     # Note that these are reactive calls. A change to the width and height
     # will inherently cause a reactive plot to redraw (unless width and
@@ -100,8 +110,10 @@ renderPlot <- function(expr, width = 'auto', height = 'auto', res = 72, ...,
       width <- session$clientData[[paste0('output_', outputName, '_width')]]
     if (height == 'auto')
       height <- session$clientData[[paste0('output_', outputName, '_height')]]
+    if (res == 'auto')
+      res <- session$clientData[[paste0('output_', outputName, '_res')]]
 
-    list(width = width, height = height)
+    list(width = width, height = height, res = res)
   }
 
   # Vars to store session and output, so that they can be accessed from
@@ -128,7 +140,7 @@ renderPlot <- function(expr, width = 'auto', height = 'auto', res = 72, ...,
             height = dims$height,
             alt = altWrapper(),
             pixelratio = pixelratio,
-            res = res
+            res = dims$res
           ), args))
       },
       catch = function(reason) {
@@ -155,7 +167,7 @@ renderPlot <- function(expr, width = 'auto', height = 'auto', res = 72, ...,
         dims <- getDims()
         pixelratio <- session$clientData$pixelratio %OR% 1
         result <- do.call("resizeSavedPlot", c(
-          list(name, shinysession, result, dims$width, dims$height, altWrapper(), pixelratio, res),
+          list(name, shinysession, result, dims$width, dims$height, altWrapper(), pixelratio, dims$res),
           args
         ))
 

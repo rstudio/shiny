@@ -1359,6 +1359,15 @@ ShinySession <- R6Class(
         }
       }
 
+      if (! ("res" %in% names(tmp_info)) ) {
+        res_name  <- paste0("output_", name, "_res")
+        if (res_name %in% cd_names()) {
+          tmp_info$res <- reactive({
+            self$clientData[[res_name]]
+          })
+        }
+      }
+
       # parseCssColors() currently errors out if you hand it any NAs
       # This'll make sure we're always working with a string (and if
       # that string isn't a valid CSS color, will return NA)

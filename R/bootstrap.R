@@ -146,8 +146,19 @@ is_bs_theme <- function(x) {
 #' }
 #'
 #' @export
-getCurrentTheme <- function() {
-  getShinyOption("bootstrapTheme")
+getCurrentTheme <- function(session = getDefaultReactiveDomain()) {
+  getRealTimeTheme(session) %OR% getShinyOption("bootstrapTheme")
+}
+
+# bootstraplib::bs_themer() sets this reactiveVal() when the theme changes.
+# So, if this returns a non-NULL value, we know that the widget has been
+# used to modify the theme (after initial page render)
+getRealTimeTheme <- function(session) {
+  if (is.reactive(session$userData$bs_themer_theme)) {
+    session$userData$bs_themer_theme()
+  } else {
+    NULL
+  }
 }
 
 bootstrapDependency <- function(theme) {

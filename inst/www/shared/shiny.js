@@ -3907,16 +3907,34 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
   function registerDependency(name, version) {
     htmlDependencies[name] = version;
+  } // Re-render stylesheet(s) if the dependency has specificially requested it
+  // and it matches an existing dependency (name and version)
+
+
+  function needsRestyle(dep) {
+    if (!dep.restyle) {
+      return false;
+    }
+
+    var names = Object.keys(htmlDependencies);
+    var idx = names.indexOf(dep.name);
+
+    if (idx === -1) {
+      return false;
+    }
+
+    return htmlDependencies[names[idx]] === dep.version;
   } // Client-side dependency resolution and rendering
 
 
   function renderDependency(dep) {
-    if (htmlDependencies.hasOwnProperty(dep.name)) return false;
+    var restyle = needsRestyle(dep);
+    if (htmlDependencies.hasOwnProperty(dep.name) && !restyle) return false;
     registerDependency(dep.name, dep.version);
     var href = dep.src.href;
     var $head = $("head").first();
 
-    if (dep.meta) {
+    if (dep.meta && !restyle) {
       var metas = $.map(asArray(dep.meta), function (obj, idx) {
         // only one named pair is expected in obj as it's already been decomposed
         var name = Object.keys(obj)[0];
@@ -3927,19 +3945,27 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
     if (dep.stylesheet) {
       var stylesheets = $.map(asArray(dep.stylesheet), function (stylesheet) {
-        return $("<link rel='stylesheet' type='text/css'>").attr("href", href + "/" + encodeURI(stylesheet));
+        var this_href = href + "/" + encodeURI(stylesheet);
+
+        for (var i = 0; i < document.styleSheets.length; i++) {
+          if (restyle && this_href === document.styleSheets[i].href) {
+            document.styleSheets[i].disabled = true;
+          }
+        }
+
+        return $("<link rel='stylesheet' type='text/css'>").attr("href", this_href);
       });
       $head.append(stylesheets);
     }
 
-    if (dep.script) {
+    if (dep.script && !restyle) {
       var scripts = $.map(asArray(dep.script), function (scriptName) {
         return $("<script>").attr("src", href + "/" + encodeURI(scriptName));
       });
       $head.append(scripts);
     }
 
-    if (dep.attachment) {
+    if (dep.attachment && !restyle) {
       // dep.attachment might be a single string, an array, or an object.
       var attachments = dep.attachment;
       if (typeof attachments === "string") attachments = [attachments];
@@ -3960,7 +3986,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       $head.append(attach);
     }
 
-    if (dep.head) {
+    if (dep.head && !restyle) {
       var $newHead = $("<head></head>");
       $newHead.html(dep.head);
       $head.append($newHead.children());

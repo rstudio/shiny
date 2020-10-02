@@ -1253,6 +1253,36 @@ ShinySession <- R6Class(
         modal = list(type = type, message = message)
       )
     },
+    # Allow one to update the current theme so that any themeDependencyFuncs
+    # can be re-executed and stylesheets re-rendered (i.e., restyled)
+    setCurrentTheme = function(theme) {
+      if (!is_bs_theme(theme)) return()
+      # Update the option that getCurrentTheme() reads
+      shinyOptions(bootstrapTheme = theme)
+      # Call any theme dependency functions and make sure we get a list of deps back
+      funcs <- getShinyOption("themeDependencyFuncs")
+      deps <- lapply(funcs, function(func) {
+        deps <- func(theme)
+        if (length(deps) == 0) return(NULL)
+        if (inherits(deps, "html_dependency")) return(list(deps))
+        is_dep <- vapply(deps, inherits, logical(1), "html_dependency")
+        if (all(is_dep)) return(deps)
+        stop("All registerThemeDependency() functions must yield htmlDependency() object(s)", call. = FALSE)
+      })
+      # Work with a flat list of dependencies
+      deps <- unlist(dropNulls(deps), recursive = FALSE)
+      # Add a special flag to let Shiny.renderDependencies() know that, even
+      # though we've already rendered the dependency, that we need to re-render
+      # the stylesheets
+      deps <- lapply(deps, function(dep) {
+        dep$restyle <- TRUE
+        dep
+      })
+      # Send any dependencies to be re-rendered
+      if (length(deps)) {
+        insertUI(selector = "body", where = "afterEnd", ui = tagList(deps))
+      }
+    },
     dispatch = function(msg) {
       method <- paste('@', msg$method, sep='')
       func <- try(self[[method]], silent = TRUE)

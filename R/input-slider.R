@@ -205,35 +205,34 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
     )
   }
 
-  attachDependencies(sliderTag, ionRangeSliderDependency())
+  # TODO: make it so we can still suggest bootstraplib
+  attachDependencies(sliderTag, bs_runtime_dependencies(ionRangeSliderDependency))
 }
 
-ionRangeSliderDependency <- function() {
-  tagFunction(function() {
-    cssFile <- ionRangeSliderCSSFile()
-    version <- "2.3.1"
-    list(
-      # ion.rangeSlider also needs normalize.css, which is already included in Bootstrap.
-      htmlDependency(
-        "ionrangeslider-css", version,
-        src = cssFile$src,
-        stylesheet = cssFile$stylesheet
-      ),
-      htmlDependency(
-        "ionrangeslider-javascript", version,
-        src = c(href = "shared/ionrangeslider"),
-        script = "js/ion.rangeSlider.min.js"
-      ),
-      htmlDependency(
-        "strftime", "0.9.2",
-        src = c(href = "shared/strftime"),
-        script = "strftime-min.js"
-      )
+ionRangeSliderDependency <- function(theme) {
+  cssFile <- ionRangeSliderCSSFile(theme)
+  version <- "2.3.1"
+  list(
+    # ion.rangeSlider also needs normalize.css, which is already included in Bootstrap.
+    htmlDependency(
+      "ionrangeslider-css", version,
+      src = cssFile$src,
+      stylesheet = cssFile$stylesheet
+    ),
+    htmlDependency(
+      "ionrangeslider-javascript", version,
+      src = c(href = "shared/ionrangeslider"),
+      script = "js/ion.rangeSlider.min.js"
+    ),
+    htmlDependency(
+      "strftime", "0.9.2",
+      src = c(href = "shared/strftime"),
+      script = "strftime-min.js"
     )
-  })
+  )
 }
 
-ionRangeSliderCSSFile <- function(theme = getCurrentTheme()) {
+ionRangeSliderCSSFile <- function(theme) {
   if (!is_bs_theme(theme)) {
     return(list(stylesheet = "css/ion.rangeSlider.css", src = c(href = "shared/ionrangeslider")))
   }

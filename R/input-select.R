@@ -204,7 +204,7 @@ selectizeIt <- function(inputId, select, options, nonempty = FALSE) {
 
   res <- checkAsIs(options)
 
-  selectizeDep <- selectizeDependency()
+  selectizeDep <- bs_runtime_dependencies(selectizeDependency)
 
   if ('drag_drop' %in% options$plugins) {
     selectizeDep <- list(selectizeDep, htmlDependency(
@@ -228,20 +228,18 @@ selectizeIt <- function(inputId, select, options, nonempty = FALSE) {
 }
 
 
-selectizeDependency <- function() {
-  tagFunction(function() {
-    cssFile <- selectizeCSSFile()
-    htmlDependency(
-      "selectize", "0.12.4",
-      src = cssFile$src,
-      stylesheet = cssFile$stylesheet,
-      head = format(tagList(
-        tags$script(src = 'shared/selectize/js/selectize.min.js'),
-        # Accessibility plugin for screen readers (https://github.com/SLMNBJ/selectize-plugin-a11y):
-        tags$script(src = 'shared/selectize/accessibility/js/selectize-plugin-a11y.min.js')
-      ))
-    )
-  })
+selectizeDependency <- function(theme) {
+  cssFile <- selectizeCSSFile(theme)
+  htmlDependency(
+    "selectize", "0.12.4",
+    src = cssFile$src,
+    stylesheet = cssFile$stylesheet,
+    head = format(tagList(
+      tags$script(src = 'shared/selectize/js/selectize.min.js'),
+      # Accessibility plugin for screen readers (https://github.com/SLMNBJ/selectize-plugin-a11y):
+      tags$script(src = 'shared/selectize/accessibility/js/selectize-plugin-a11y.min.js')
+    ))
+  )
 }
 
 selectizeCSSFile <- function(theme = getCurrentTheme()) {

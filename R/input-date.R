@@ -128,39 +128,38 @@ dateInput <- function(inputId, label, value = NULL, min = NULL, max = NULL,
                `data-date-days-of-week-disabled` =
                    jsonlite::toJSON(daysofweekdisabled, null = 'null')
     ),
-    datePickerDependency()
+    # Does two things: (1) wraps in tagFunction so it can access the current theme
+    # at render time, (2) sets up stuff for real-time theming
+    bs_runtime_dependencies(datePickerDependency)
   )
 }
 
-datePickerDependency <- function() {
-  tagFunction(function() {
-    cssFile <- datePickerCssFile()
-    version <- "1.9.0"
-
-    list(
-      htmlDependency(
-        name = "bootstrap-datepicker-css",
-        version = version,
-        src = cssFile$src,
-        stylesheet = cssFile$stylesheet
-      ),
-      htmlDependency(
-        name = "bootstrap-datepicker-js",
-        version = version,
-        src = c(href = "shared/datepicker"),
-        script = "js/bootstrap-datepicker.min.js",
-        # Need to enable noConflict mode. See #1346.
-        head = "<script>(function() {
+datePickerDependency <- function(theme) {
+  cssFile <- datePickerCssFile(theme)
+  version <- "1.9.0"
+  list(
+    htmlDependency(
+      name = "bootstrap-datepicker-css",
+      version = version,
+      src = cssFile$src,
+      stylesheet = cssFile$stylesheet
+    ),
+    htmlDependency(
+      name = "bootstrap-datepicker-js",
+      version = version,
+      src = c(href = "shared/datepicker"),
+      script = "js/bootstrap-datepicker.min.js",
+      # Need to enable noConflict mode. See #1346.
+      head = "<script>(function() {
         var datepicker = $.fn.datepicker.noConflict();
         $.fn.bsDatepicker = datepicker;
       })();
      </script>"
-      )
     )
-  })
+  )
 }
 
-datePickerCssFile <- function(theme = getCurrentTheme()) {
+datePickerCssFile <- function(theme) {
   if (!is_bs_theme(theme)) {
     return(list(src = c(href = "shared/datepicker"), stylesheet = "css/bootstrap-datepicker3.min.css"))
   }

@@ -80,6 +80,9 @@ bootstrapLib <- function(theme = NULL) {
     # option is automatically reset when the app (or session) exits
     if (isRunning()) {
       shinyOptions(bootstrapTheme = theme)
+      registerThemeDependency(function(theme) {
+        bootstraplib::bs_dependencies(theme)
+      })
     } else {
       # Technically, this a potential issue (someone trying to execute/render
       # bootstrapLib outside of a Shiny app), but it seems that, in that case,
@@ -117,48 +120,61 @@ is_bs_theme <- function(x) {
 #' @seealso [getCurrentOutputInfo()], [bootstrapLib()], [htmltools::tagFunction()]
 #' @examples
 #'
-#' library(bootstraplib)
-#' myThemableContent <- htmltools::tagFunction(function() {
-#'   theme <- getCurrentTheme()
-#'   if (is_bs_theme(theme)) {
-#'     tagList(
-#'       tags$head(
-#'         tags$style(HTML(
-#'           bs_sass(".text-50 { color: mix($body-bg, $body-color, 50%); }", theme)
-#'         ))
-#'       ),
-#'       h3(
-#'         "This color is 50% background and 50% foreground color",
-#'         class = "text-50"
-#'       )
-#'     )
-#'   } else {
-#'     "Try setting a theme = bs_theme()"
-#'   }
-#' })
-#'
 #' if (interactive()) {
+#'   library(bootstraplib)
 #'   ui <- fluidPage(
-#'     theme = bs_theme(bg = "yellow", fg = "red"),
-#'     myThemableContent
+#'     theme = bs_theme(),
+#'     h3("The current theme's primary color is:"),
+#'     uiOutput("primary"),
+#'     textInput("primary_input", label = "", placeholder = "Choose a new primary color")
 #'   )
-#'   shinyApp(ui, function(input, output) {})
+#'   server <- function(input, output, session) {
+#'     get_primary <- function() bs_get_variables(getCurrentTheme(), "primary")
+#'     primary <- reactiveVal(get_primary())
+#'     output$primary <- renderUI({
+#'       tags$span(primary(), style = paste("color: ", primary()))
+#'     })
+#'     # TODO: simplify & tryCatch
+#'     observeEvent(input$primary_input, {
+#'       new_theme <- bs_theme_update(getCurrentTheme(), primary = input$primary_input)
+#'       setCurrentTheme(new_theme)
+#'       primary(get_primary())
+#'     }, ignoreInit = TRUE)
+#'
+#'   }
+#'   shinyApp(ui, server)
 #' }
 #'
 #' @export
-getCurrentTheme <- function(session = getDefaultReactiveDomain()) {
-  getRealTimeTheme(session) %OR% getShinyOption("bootstrapTheme")
+getCurrentTheme <- function() {
+  # TODO: we still might need to elevate this to a reactive read
+  # during a session so that it feels more natural for users
+  getShinyOption("bootstrapTheme")
 }
 
-# bootstraplib::bs_themer() sets this reactiveVal() when the theme changes.
-# So, if this returns a non-NULL value, we know that the widget has been
-# used to modify the theme (after initial page render)
-getRealTimeTheme <- function(session) {
-  if (is.reactive(session$userData$bs_themer_theme)) {
-    session$userData$bs_themer_theme()
-  } else {
-    NULL
+#' @rdname getCurrentTheme
+#' @inheritParams getCurrentOutputInfo
+#' @param theme a [bootstraplib::bs_theme()] object
+#' @export
+setCurrentTheme <- function(theme, session = getDefaultReactiveDomain()) {
+  if (is.null(session)) {
+    stop("A shiny session must be active in order to set a theme")
   }
+  old_theme <- getCurrentTheme()
+  session$setCurrentTheme(theme)
+  invisible(old_theme)
+}
+
+registerThemeDependency <- function(func) {
+  if (!is.function(func) || length(formals(func)) != 1) {
+    stop("`func` must be a function with one argument (the current theme)")
+  }
+  funcs <- getShinyOption("themeDependencyFuncs")
+  have_func <- any(vapply(funcs, identical, logical(1), func))
+  if (!have_func) {
+    funcs[[length(funcs) + 1]] <- func
+  }
+  shinyOptions("themeDependencyFuncs" = funcs)
 }
 
 bootstrapDependency <- function(theme) {

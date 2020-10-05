@@ -39,7 +39,7 @@ bootstrapPage <- function(..., title = NULL, responsive = NULL, theme = NULL, la
     shinyDeprecated("The 'responsive' argument is no longer used with Bootstrap 3.")
   }
 
-  tagList(
+  ui <- tagList(
     bootstrapLib(theme),
     if (!is.null(title)) tags$head(tags$title(title)),
     # TODO: throw better error when length > 1?

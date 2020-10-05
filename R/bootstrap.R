@@ -67,6 +67,7 @@ getLang <- function(ui) {
 htmlStartTag <- function(lang) {
   if (isTRUE(nzchar(lang))) {
     return(HTML("<html lang = \"{{ lang }}\">"))
+  }
 
   HTML("<html>")
 }

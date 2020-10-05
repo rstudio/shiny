@@ -246,16 +246,10 @@ shinyOptions <- function(...) {
 captureAppOptions <- function() {
   options <- list(
     appDir = getwd(),
-    bookmarkStore = getShinyOption("bookmarkStore"),
-    bootstrapTheme = getShinyOption("bootstrapTheme"),
-    themeDependencyFuncs = getShinyOption("themeDependencyFuncs")
+    bookmarkStore = getShinyOption("bookmarkStore")
   )
 
-  shinyOptions(
-    appDir = NULL, bookmarkStore = NULL,
-    bootstrapTheme = NULL,
-    themeDependencyFuncs = NULL
-  )
+  shinyOptions(appDir = NULL, bookmarkStore = NULL)
 
   options
 }

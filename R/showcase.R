@@ -220,4 +220,3 @@ showcaseUI <- function(ui) {
     showcaseBody(ui)
   )
 }
-

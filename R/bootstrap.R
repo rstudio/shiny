@@ -152,18 +152,6 @@ getCurrentTheme <- function() {
   getShinyOption("bootstrapTheme")
 }
 
-#' @rdname getCurrentTheme
-#' @inheritParams getCurrentOutputInfo
-#' @param theme a [bootstraplib::bs_theme()] object
-#' @export
-setCurrentTheme <- function(theme, session = getDefaultReactiveDomain()) {
-  if (is.null(session)) {
-    stop("A shiny session must be active in order to set a theme")
-  }
-  old_theme <- getCurrentTheme()
-  session$setCurrentTheme(theme)
-  invisible(old_theme)
-}
 
 registerThemeDependency <- function(func) {
   if (!is.function(func) || length(formals(func)) != 1) {

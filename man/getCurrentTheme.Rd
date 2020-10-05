@@ -2,17 +2,9 @@
 % Please edit documentation in R/bootstrap.R
 \name{getCurrentTheme}
 \alias{getCurrentTheme}
-\alias{setCurrentTheme}
 \title{Obtain Shiny's Bootstrap Sass theme}
 \usage{
 getCurrentTheme()
-
-setCurrentTheme(theme, session = getDefaultReactiveDomain())
-}
-\arguments{
-\item{theme}{a \code{\link[bootstraplib:bs_theme]{bootstraplib::bs_theme()}} object}
-
-\item{session}{The current Shiny session.}
 }
 \value{
 If called at render-time (i.e., inside a \code{\link[htmltools:tagFunction]{htmltools::tagFunction()}}),
@@ -25,8 +17,8 @@ styling based on the \code{\link[=bootstrapLib]{bootstrapLib()}}'s \code{theme} 
 }
 \examples{
 
-library(bootstraplib)
 if (interactive()) {
+  library(bootstraplib)
   ui <- fluidPage(
     theme = bs_theme(),
     h3("The current theme's primary color is:"),
@@ -34,16 +26,16 @@ if (interactive()) {
     textInput("primary_input", label = "", placeholder = "Choose a new primary color")
   )
   server <- function(input, output, session) {
-    get_primary <- reactive({
-      bs_get_variables(getCurrentTheme(), "primary")
-    })
+    get_primary <- function() bs_get_variables(getCurrentTheme(), "primary")
+    primary <- reactiveVal(get_primary())
     output$primary <- renderUI({
-      input$primary_input
-      tags$span(get_primary(), style = paste("color: ", get_primary()))
+      tags$span(primary(), style = paste("color: ", primary()))
     })
+    # TODO: simplify & tryCatch
     observeEvent(input$primary_input, {
       new_theme <- bs_theme_update(getCurrentTheme(), primary = input$primary_input)
       setCurrentTheme(new_theme)
+      primary(get_primary())
     }, ignoreInit = TRUE)
 
   }

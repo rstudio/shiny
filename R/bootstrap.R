@@ -64,13 +64,6 @@ getLang <- function(ui) {
   # Check if ui has lang attribute; otherwise, NULL
   attr(ui, "lang", exact = TRUE)
 }
-htmlStartTag <- function(lang) {
-  if (isTRUE(nzchar(lang))) {
-    return(HTML(paste0("<html lang = \"", lang, "\">")))
-  }
-
-  HTML("<html>")
-}
 
 #' Bootstrap libraries
 #'

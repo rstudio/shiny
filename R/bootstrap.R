@@ -50,15 +50,19 @@ bootstrapPage <- function(..., title = NULL, responsive = NULL, theme = NULL, la
     list(...)
   )
 
-  # Also store `lang` to be passed for rendering processor.
-  if (!is.null(lang)) {
-    if (is.character(lang) && length(lang) == 1) {
-      # Append lang attribute to be passed to renderPage function
-      attr(ui, "lang") <- lang
-    }
-  }
+  ui <- setLang(ui, lang)
 
   return(ui)
+}
+
+setLang <- function(ui, lang) {
+  # Add lang attribute to be passed to renderPage function
+  attr(ui, "lang") <- lang
+  ui
+}
+getLang <- function(ui) {
+  # Check if ui has lang attribute; otherwise, NULL
+  attr(ui, "lang", exact = TRUE)
 }
 
 #' Bootstrap libraries
@@ -197,8 +201,8 @@ bootstrapSass <- function(sassInput, theme, basename, dirname = "shiny-sass-") {
 
 #' @rdname bootstrapPage
 #' @export
-basicPage <- function(..., lang = NULL) {
-  bootstrapPage(div(class="container-fluid", list(...)), lang = lang)
+basicPage <- function(...) {
+  bootstrapPage(div(class="container-fluid", list(...)))
 }
 
 
@@ -294,13 +298,7 @@ fillPage <- function(..., padding = 0, title = NULL, bootstrap = TRUE,
       ...
     )
 
-    # Also store `lang` to be passed for rendering processor.
-    if (!is.null(lang)) {
-      if (is.character(lang) && length(lang) == 1) {
-        # Append lang attribute to be passed to renderPage function
-        attr(ui, "lang") <- lang
-      }
-    }
+    ui <- setLang(ui, lang)
   }
 
   return(ui)

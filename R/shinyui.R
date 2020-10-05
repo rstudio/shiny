@@ -25,8 +25,7 @@ withMathJax <- function(...) {
 }
 
 renderPage <- function(ui, showcase=0, testMode=FALSE) {
-  # Check if ui has lang attribute; otherwise, NULL
-  lang <- attr(ui, "lang", exact = TRUE)
+  lang <- getLang(ui)
 
   # If the ui is a NOT complete document (created by htmlTemplate()), then do some
   # preprocessing and make sure it's a complete document.

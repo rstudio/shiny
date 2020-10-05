@@ -41,7 +41,9 @@ renderPage <- function(ui, showcase=0, testMode=FALSE) {
     ui <- htmlTemplate(
       system.file("template", "default.html", package = "shiny"),
       lang = lang,
-      body = ui
+      body = ui,
+      # this template is a complete HTML document
+      document_ = TRUE
     )
   }
 

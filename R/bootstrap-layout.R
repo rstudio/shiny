@@ -16,6 +16,9 @@
 #' @param theme Alternative Bootstrap stylesheet (normally a css file within the
 #'   www directory). For example, to use the theme located at
 #'   `www/bootstrap.css` you would use `theme = "bootstrap.css"`.
+#' @param lang ISO 639-1 language code for the HTML page, such as "en" or "ko".
+#'   This will be used as the lang in the \code{<html>} tag, as in \code{<html lang="en">}.
+#'   The default (NULL) results in an empty string.
 #'
 #' @return A UI defintion that can be passed to the [shinyUI] function.
 #'
@@ -87,11 +90,12 @@
 #' }
 #' @rdname fluidPage
 #' @export
-fluidPage <- function(..., title = NULL, responsive = NULL, theme = NULL) {
+fluidPage <- function(..., title = NULL, responsive = NULL, theme = NULL, lang = NULL) {
   bootstrapPage(div(class = "container-fluid", ...),
                 title = title,
                 responsive = responsive,
-                theme = theme)
+                theme = theme,
+                lang = lang)
 }
 
 
@@ -118,6 +122,9 @@ fluidRow <- function(...) {
 #' @param theme Alternative Bootstrap stylesheet (normally a css file within the
 #'   www directory). For example, to use the theme located at
 #'   `www/bootstrap.css` you would use `theme = "bootstrap.css"`.
+#' @param lang ISO 639-1 language code for the HTML page, such as "en" or "ko".
+#'   This will be used as the lang in the \code{<html>} tag, as in \code{<html lang="en">}.
+#'   The default (NULL) results in an empty string.
 #'
 #' @return A UI defintion that can be passed to the [shinyUI] function.
 #'
@@ -156,11 +163,12 @@ fluidRow <- function(...) {
 #'
 #' @rdname fixedPage
 #' @export
-fixedPage <- function(..., title = NULL, responsive = NULL, theme = NULL) {
+fixedPage <- function(..., title = NULL, responsive = NULL, theme = NULL, lang = NULL) {
   bootstrapPage(div(class = "container", ...),
                 title = title,
                 responsive = responsive,
-                theme = theme)
+                theme = theme,
+                lang = lang)
 }
 
 #' @rdname fixedPage

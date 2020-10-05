@@ -252,9 +252,7 @@ basicPage <- function(...) {
 #'   shown in the document).
 #' @param bootstrap If `TRUE`, load the Bootstrap CSS library.
 #' @param theme URL to alternative Bootstrap stylesheet.
-#' @param lang ISO 639-1 language code for the HTML page, such as "en" or "ko".
-#'   This will be used as the lang in the \code{<html>} tag, as in \code{<html lang="en">}.
-#'   The default (NULL) results in an empty string.
+#' @inheritParams bootstrapPage
 #'
 #' @family layout functions
 #'
@@ -353,9 +351,7 @@ collapseSizes <- function(padding) {
 #'   `www/bootstrap.css` you would use `theme = "bootstrap.css"`.
 #' @param windowTitle The title that should be displayed by the browser window.
 #'   Useful if `title` is not a string.
-#' @param lang ISO 639-1 language code for the HTML page, such as "en" or "ko".
-#'   This will be used as the lang in the \code{<html>} tag, as in \code{<html lang="en">}.
-#'   The default (NULL) results in an empty string.
+#' @inheritParams bootstrapPage
 #' @param icon Optional icon to appear on a `navbarMenu` tab.
 #'
 #' @return A UI defintion that can be passed to the [shinyUI] function.

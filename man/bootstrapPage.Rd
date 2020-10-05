@@ -7,7 +7,7 @@
 \usage{
 bootstrapPage(..., title = NULL, responsive = NULL, theme = NULL, lang = NULL)
 
-basicPage(..., lang = NULL)
+basicPage(...)
 }
 \arguments{
 \item{...}{The contents of the document body.}

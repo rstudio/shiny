@@ -36,6 +36,7 @@ $.extend(bootstrapTabInputBinding, {
   receiveMessage: function(el, data) {
     if (data.hasOwnProperty('value'))
       this.setValue(el, data.value);
+    $(el).trigger("change");
   },
   subscribe: function(el, callback) {
     $(el).on('change shown.bootstrapTabInputBinding shown.bs.tab.bootstrapTabInputBinding', function(event) {

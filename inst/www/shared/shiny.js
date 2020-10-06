@@ -5568,6 +5568,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     },
     receiveMessage: function receiveMessage(el, data) {
       if (data.hasOwnProperty('value')) this.setValue(el, data.value);
+      $(el).trigger("change");
     },
     subscribe: function subscribe(el, callback) {
       $(el).on('change shown.bootstrapTabInputBinding shown.bs.tab.bootstrapTabInputBinding', function (event) {

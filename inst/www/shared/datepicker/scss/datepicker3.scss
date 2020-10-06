@@ -1,5 +1,15 @@
+// Both BS3 and BS4 define a border radius mixin, but just in case
+// we're trying to compile this without bootstrapSass
+@mixin border-radius-shim($radius) {
+  @if mixin-exists("border-radius") {
+    @include border-radius($radius);
+  } @else {
+    border-radius: $radius;
+  }
+}
+
 .datepicker {
-	border-radius: $border-radius-base;
+	@include border-radius-shim($border-radius-base);
 	&-inline {
 		width: 220px;
 	}
@@ -64,7 +74,7 @@
 				text-align: center;
 				width: 30px;
 				height: 30px;
-				border-radius: 4px;
+				@include border-radius-shim(4px);
 				border: none;
 			}
 		}
@@ -179,7 +189,7 @@
 			float: left;
 			margin: 1%;
 			cursor: pointer;
-			border-radius: 4px;
+			@include border-radius-shim(4px);
 			&:hover,
 			&.focused {
 			  color: color-yiq($gray-lighter);
@@ -243,10 +253,10 @@
 		text-align: center;
 	}
 	input:first-child {
-		border-radius: 3px 0 0 3px;
+	  @include border-radius-shim(3px 0 0 3px);
 	}
 	input:last-child {
-		border-radius: 0 3px 3px 0;
+		@include border-radius-shim(0 3px 3px 0);
 	}
 	.input-group-addon {
 		width: auto;

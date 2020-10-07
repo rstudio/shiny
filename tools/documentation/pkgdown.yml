@@ -124,7 +124,6 @@ reference:
       - invalidateLater
       - debounce
       - reactlog
-      - makeReactiveBinding
       - reactiveFileReader
       - reactivePoll
       - reactiveTimer

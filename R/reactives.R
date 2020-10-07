@@ -1377,35 +1377,34 @@ observe <- function(x, env=parent.frame(), quoted=FALSE, label=NULL,
 #' already exist; if so, its value will be used as the initial value of the
 #' reactive variable (or `NULL` if the variable did not exist).
 #'
-#' @param symbol A character string indicating the name of the variable that
-#'   should be made reactive
-#' @param env The environment that will contain the reactive variable
-#'
+#' @param symbol Name of variable to make reactive, as a string.
+#' @param env Environment in which to create binding. Expert use only.
 #' @return None.
-#'
+#' @keywords internal
 #' @examples
-#' \dontrun{
+#' reactiveConsole(TRUE)
+#'
 #' a <- 10
 #' makeReactiveBinding("a")
+#'
 #' b <- reactive(a * -1)
 #' observe(print(b()))
+#'
 #' a <- 20
-#' }
+#' a <- 30
+#'
+#' reactiveConsole(FALSE)
 #' @export
 makeReactiveBinding <- function(symbol, env = parent.frame()) {
   if (exists(symbol, envir = env, inherits = FALSE)) {
     initialValue <- env[[symbol]]
     rm(list = symbol, envir = env, inherits = FALSE)
-  }
-  else
+  } else {
     initialValue <- NULL
-  values <- reactiveValues(value = initialValue)
-  makeActiveBinding(symbol, env=env, fun=function(v) {
-    if (missing(v))
-      values$value
-    else
-      values$value <- v
-  })
+  }
+
+  val <- reactiveVal(initialValue)
+  makeActiveBinding(symbol, val, env = env)
 
   invisible()
 }

@@ -1441,6 +1441,29 @@ setAutoflush <- local({
   }
 })
 
+
+#' Activate reactivity in the console
+#'
+#' This is an experimental feature that allows you to enable reactivity
+#' at the console, for the purposes of experimentation and learning.
+#'
+#' @keywords internal
+#' @param enabled Turn console reactivity on or off?
+#' @export
+#' @examples
+#' reactiveConsole(TRUE)
+#' x <- reactiveVal(10)
+#' y <- observe({
+#'   message("The value of x is ", x())
+#' })
+#' x(20)
+#' x(30)
+#' reactiveConsole(FALSE)
+reactiveConsole <- function(enabled) {
+  options(shiny.suppressMissingContextError = enabled)
+  setAutoflush(enabled)
+}
+
 # ---------------------------------------------------------------------------
 
 #' Timer

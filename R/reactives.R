@@ -1403,7 +1403,7 @@ makeReactiveBinding <- function(symbol, env = parent.frame()) {
     initialValue <- NULL
   }
 
-  val <- reactiveVal(initialValue)
+  val <- reactiveVal(initialValue, label = symbol)
   makeActiveBinding(symbol, val, env = env)
 
   invisible()

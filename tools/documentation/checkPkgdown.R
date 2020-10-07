@@ -31,7 +31,8 @@ local({
   )
   known_unindexed <- c("shiny-package", "stacktrace", "knitr_methods",
                        "pageWithSidebar", "headerPanel", "shiny.appobj",
-                       "deprecatedReactives", "reexports")
+                       "deprecatedReactives", "reexports", "makeReactiveBinding",
+                       "reactiveConsole")
 
   ## This test ensures that every documented topic is included in
   ## staticdocs/index.r, unless explicitly waived by specifying it

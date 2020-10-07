@@ -943,7 +943,33 @@ ShinySession <- R6Class(
 
       impl <- .subset2(x, 'impl')
       key <- .subset2(x, 'ns')(name)
-      impl$freeze(key)
+
+      is_input <- identical(impl, private$.input)
+
+      # There's no good reason for us not to just do force=TRUE, except that we
+      # know this fixes problems for freezeReactiveValue(input) but we don't
+      # currently even know what you would use freezeReactiveValue(rv) for. In
+      # the spirit of not breaking things we don't understand, we're making as
+      # targeted a fix as possible, while emitting a deprecation warning (below)
+      # that should help us gather more data about the other case.
+      impl$freeze(key, invalidate = is_input)
+
+      if (is_input) {
+        # Notify the client that this input was frozen. The client will ensure
+        # that the next time it sees a value for that input, even if the value
+        # has not changed from the last known value of that input, it will be
+        # sent to the server anyway.
+        private$sendMessage(frozen = list(
+          ids = list(key)
+        ))
+      } else {
+        if (getOption("shiny.deprecation.messages", TRUE) && getOption("shiny.deprecation.messages.freeze", TRUE)) {
+          rlang::warn(
+            "Support for calling freezeReactiveValue() with non-`input` reactiveValues objects is soft-deprecated, and may be removed in a future version of Shiny. (See https://github.com/rstudio/shiny/issues/3063)",
+            .frequency = "once", .frequency_id = "freezeReactiveValue")
+        }
+      }
+
       self$onFlushed(function() impl$thaw(key))
     },
 

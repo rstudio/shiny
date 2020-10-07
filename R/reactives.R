@@ -231,6 +231,12 @@ reactiveVal <- function(value = NULL, label = NULL) {
 #' @rdname freezeReactiveValue
 #' @export
 freezeReactiveVal <- function(x) {
+  if (getOption("shiny.deprecation.messages", TRUE) && getOption("shiny.deprecation.messages.freeze", TRUE)) {
+    rlang::warn(
+      "freezeReactiveVal() is soft-deprecated, and may be removed in a future version of Shiny. (See https://github.com/rstudio/shiny/issues/3063)",
+      .frequency = "once", .frequency_id = "freezeReactiveVal")
+  }
+
   domain <- getDefaultReactiveDomain()
   if (is.null(domain)) {
     stop("freezeReactiveVal() must be called when a default reactive domain is active.")
@@ -357,7 +363,7 @@ ReactiveValues <- R6Class(
       keyValue
     },
 
-    set = function(key, value) {
+    set = function(key, value, force = FALSE) {
       # if key exists
       #   if it is the same value, return
       #
@@ -389,10 +395,8 @@ ReactiveValues <- R6Class(
 
       key_exists <- .values$containsKey(key)
 
-      if (key_exists) {
-        if (.dedupe && identical(.values$get(key), value)) {
-          return(invisible())
-        }
+      if (key_exists && !isTRUE(force) && .dedupe && identical(.values$get(key), value)) {
+        return(invisible())
       }
 
       # set the value for better logging
@@ -469,10 +473,15 @@ ReactiveValues <- R6Class(
 
     # Mark a value as frozen If accessed while frozen, a shiny.silent.error will
     # be thrown.
-    freeze = function(key) {
+    freeze = function(key, invalidate = FALSE) {
       domain <- getDefaultReactiveDomain()
       rLog$freezeReactiveKey(.reactId, key, domain)
       setMeta(key, "frozen", TRUE)
+
+      if (invalidate) {
+        # Force an invalidation
+        self$set(key, NULL, force = TRUE)
+      }
     },
 
     thaw = function(key) {
@@ -727,7 +736,10 @@ str.reactivevalues <- function(object, indent.str = " ", ...) {
 #' thing that happens if `req(FALSE)` is called. The value is thawed
 #' (un-frozen; accessing it will no longer raise an exception) when the current
 #' reactive domain is flushed. In a Shiny application, this occurs after all of
-#' the observers are executed.
+#' the observers are executed. **NOTE:** We are considering deprecating
+#' `freezeReactiveVal`, and `freezeReactiveValue` except when `x` is `input`.
+#' If this affects your app, please let us know by leaving a comment on
+#' [this GitHub issue](https://github.com/rstudio/shiny/issues/3063).
 #'
 #' @param x For `freezeReactiveValue`, a [reactiveValues()]
 #'   object (like `input`); for `freezeReactiveVal`, a

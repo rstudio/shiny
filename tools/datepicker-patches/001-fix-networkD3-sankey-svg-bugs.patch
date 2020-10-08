@@ -1,8 +1,8 @@
 diff --git a/inst/www/shared/datepicker/js/bootstrap-datepicker.js b/inst/www/shared/datepicker/js/bootstrap-datepicker.js
-index 97f5c086..2a0d8ae6 100644
+index a94f79fc..c22f0806 100644
 --- a/inst/www/shared/datepicker/js/bootstrap-datepicker.js
 +++ b/inst/www/shared/datepicker/js/bootstrap-datepicker.js
-@@ -671,7 +671,7 @@
+@@ -660,7 +660,7 @@
  				visualPadding = 10,
  				container = $(this.o.container),
  				windowWidth = container.width(),
@@ -10,17 +10,17 @@ index 97f5c086..2a0d8ae6 100644
 +				scrollTop = this.o.container === 'body:first' ? $(document).scrollTop() : container.scrollTop(),
  				appendOffset = container.offset();
  
- 			var parentsZindex = [];
-@@ -686,7 +686,7 @@
- 			var left = offset.left - appendOffset.left,
- 				top = offset.top - appendOffset.top;
+ 			var parentsZindex = [0];
+@@ -675,7 +675,7 @@
+ 			var left = offset.left - appendOffset.left;
+ 			var top = offset.top - appendOffset.top;
  
 -			if (this.o.container !== 'body') {
 +			if (this.o.container !== 'body:first') {
  				top += scrollTop;
  			}
  
-@@ -1766,7 +1766,7 @@
+@@ -1709,7 +1709,7 @@
  		enableOnReadonly: true,
  		showOnFocus: true,
  		zIndexOffset: 10,

@@ -8,31 +8,55 @@ getShinyOption <- function(name, default = NULL) {
   # Make sure to use named (not numeric) indexing
   name <- as.character(name)
 
-  if (name %in% names(.globals$options))
-    .globals$options[[name]]
-  else
-    default
+  # Check if there's a current session
+  session <- getDefaultReactiveDomain()
+  if (!is.null(session)) {
+    if (name %in% names(session$options)) {
+      return(session$options[[name]])
+    } else {
+      return(default)
+    }
+  }
+
+  # Check if there's a current app
+  app_state <- getCurrentAppState()
+  if (!is.null(app_state)) {
+    if (name %in% names(app_state$options)) {
+      return(app_state$options[[name]])
+    } else {
+      return(default)
+    }
+  }
+
+  # If we got here, look in global options
+  if (name %in% names(.globals$options)) {
+    return(.globals$options[[name]])
+  } else {
+    return(default)
+  }
 }
 
 #' Get or set Shiny options
 #'
-#' `getShinyOption()` retrieves the value of a Shiny option. `shinyOptions()`
-#' sets the value of Shiny options; it can also be used to return a list of all
-#' currently-set Shiny options.
+#' @description
 #'
-#' @section Scope:
-#' There is a global option set which is available by default. When a Shiny
-#' application is run with [runApp()], that option set is duplicated and the
-#' new option set is available for getting or setting values. If options
-#' are set from `global.R`, `app.R`, `ui.R`, or `server.R`, or if they are set
-#' from inside the server function, then the options will be scoped to the
-#' application. When the application exits, the new option set is discarded and
-#' the global option set is restored.
+#' There are two mechanisms for working with options for Shiny. One is the
+#' [options()] function, which is part of base R, and the other is the
+#' `shinyOptions()` function, which is in the Shiny package. The reason for
+#' these two mechanisms is has to do with legacy code and scoping.
 #'
-#' @section Options:
-#' There are a number of global options that affect Shiny's behavior. These can
-#' be set globally with `options()` or locally (for a single app) with
-#' `shinyOptions()`.
+#' The [options()] function sets options globally, for the duration of the R
+#' process. The [getOption()] function retrieves the value of an option. All
+#' shiny related options of this type are prefixed with `"shiny."`.
+#'
+#' The `shinyOptions()` function sets the value of a shiny option, but unlike
+#' `options()`, it is not always global in scope; the options may be scoped
+#' globally, to an application, or to a user session in an application,
+#' depending on the context. The `getShinyOption()` function retrieves a value
+#' of a shiny option. Currently, the options set via `shinyOptions` are for
+#' internal use only.
+#'
+#' @section Options with `options()`:
 #'
 #' \describe{
 #' \item{shiny.autoreload (defaults to `FALSE`)}{If `TRUE` when a Shiny app is launched, the
@@ -107,46 +131,119 @@ getShinyOption <- function(name, default = NULL) {
 #'   `"recv"` (only print messages received by the server), `TRUE`
 #'   (print all messages), or `FALSE` (default; don't print any of these
 #'   messages).}
+#' \item{shiny.autoload.r (defaults to `TRUE`)}{If `TRUE`, then the R/
+#'   of a shiny app will automatically be sourced.}
 #' \item{shiny.usecairo (defaults to `TRUE`)}{This is used to disable graphical rendering by the
 #'   Cairo package, if it is installed. See [plotPNG()] for more
 #'   information.}
 #' }
+#'
+#'
+#' @section Scoping for `shinyOptions()`:
+#'
+#'   There are three levels of scoping for `shinyOptions()`: global,
+#'   application, and session.
+#'
+#'   The global option set is available by default. Any calls to
+#'   `shinyOptions()` and `getShinyOption()` outside of an app will access the
+#'   global option set.
+#'
+#'   When a Shiny application is run with [runApp()], the global option set is
+#'   duplicated and the new option set is available at the application level. If
+#'   options are set from `global.R`, `app.R`, `ui.R`, or `server.R` (but
+#'   outside of the server function), then the application-level options will be
+#'   modified.
+#'
+#'   Each time a user session is started, the application-level option set is
+#'   duplicated, for that session. If the options are set from inside the server
+#'   function, then they will be scoped to the session.
+#'
+#' @section Options with `shinyOptions()`:
+#'
+#'   There are a number of global options that affect Shiny's behavior. These
+#'   can be set globally with `options()` or locally (for a single app) with
+#'   `shinyOptions()`.
+#'
+#'   \describe{ \item{cache}{A caching object that will be used by
+#'   [renderCachedPlot()]. If not specified, a [memoryCache()] will be used.} }
+#'
 #' @param ... Options to set, with the form `name = value`.
 #' @aliases shiny-options
-#' @examples
-#' \dontrun{
-#' shinyOptions(myOption = 10)
-#' getShinyOption("myOption")
-#' }
 #' @export
 shinyOptions <- function(...) {
   newOpts <- list(...)
 
   if (length(newOpts) > 0) {
+    # If we're within a session, modify at the session level.
+    session <- getDefaultReactiveDomain()
+    if (!is.null(session)) {
+      # Modify session-level-options
+      session$options <- dropNulls(mergeVectors(session$options, newOpts))
+      return(invisible(session$options))
+    }
+
+    # If not in a session, but we have a currently running app, modify options
+    # at the app level.
+    app_state <- getCurrentAppState()
+    if (!is.null(app_state)) {
+      # Modify app-level options
+      app_state$options <- dropNulls(mergeVectors(app_state$options, newOpts))
+      return(invisible(app_state$options))
+    }
+
+    # If no currently running app, modify global options and return them.
     .globals$options <- dropNulls(mergeVectors(.globals$options, newOpts))
-    invisible(.globals$options)
-  } else {
-    .globals$options
+    return(invisible(.globals$options))
   }
-}
 
+  # If not setting any options, just return current option set, visibly.
 
-# Eval an expression with a new option set
-withLocalOptions <- function(expr) {
-  oldOptionSet <- .globals$options
-  on.exit(.globals$options <- oldOptionSet)
+  session <- getDefaultReactiveDomain()
+  if (!is.null(session)) {
+    return(session$options)
+  }
 
-  expr
+  app_state <- getCurrentAppState()
+  if (!is.null(app_state)) {
+    return(app_state$options)
+  }
+
+  return(.globals$options)
 }
 
 
 # Get specific shiny options and put them in a list, reset those shiny options,
 # and then return the options list. This should be during the creation of a
-# shiny app object, which happens before another option frame is added to the
-# options stack (the new option frame is added when the app is run). This
-# function "consumes" the options when the shinyApp object is created, so the
-# options won't affect another app that is created later.
-consumeAppOptions <- function() {
+# shiny app object. This function "consumes" the options when the shinyApp
+# object is created, so the options won't affect another app that is created
+# later.
+#
+# ==== Example ====
+# shinyOptions(bookmarkStore = 1234)
+# # This now returns 1234.
+# getShinyOption("bookmarkStore")
+#
+# # Creating the app captures the bookmarkStore option and clears it.
+# s <- shinyApp(
+#   fluidPage(verbatimTextOutput("txt")),
+#   function(input, output) {
+#     output$txt <- renderText(getShinyOption("bookmarkStore"))
+#   }
+# )
+#
+# # This now returns NULL.
+# getShinyOption("bookmarkStore")
+#
+# When running the app, the app will display "1234"
+# runApp(s)
+#
+# # After quitting the app, this still returns NULL.
+# getShinyOption("bookmarkStore")
+# ==================
+#
+# If another app had been created after s was created, but before s was run,
+# then it would capture the value of "bookmarkStore" at the time of creation.
+captureAppOptions <- function() {
   options <- list(
     appDir = getwd(),
     bookmarkStore = getShinyOption("bookmarkStore")
@@ -157,9 +254,9 @@ consumeAppOptions <- function() {
   options
 }
 
-# Do the inverse of consumeAppOptions. This should be called once the app is
+# Do the inverse of captureAppOptions. This should be called once the app is
 # started.
-unconsumeAppOptions <- function(options) {
+applyCapturedAppOptions <- function(options) {
   if (!is.null(options)) {
     do.call(shinyOptions, options)
   }

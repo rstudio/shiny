@@ -12,6 +12,14 @@
 #' name will be treated as a placeholder prompt. For example:
 #' `selectInput("letter", "Letter", c("Choose one" = "", LETTERS))`
 #'
+#' **Performance note:** `selectInput()` and `selectizeInput()` can slow down
+#' significantly when thousands of choices are used; with legacy browsers like
+#' Internet Explorer, the user interface may hang for many seconds. For large
+#' numbers of choices, Shiny offers a "server-side selectize" option that
+#' massively improves performance and efficiency; see
+#' [this selectize article](https://shiny.rstudio.com/articles/selectize.html)
+#' on the Shiny Dev Center for details.
+#'
 #' @inheritParams textInput
 #' @param choices List of values to select from. If elements of the list are
 #'   named, then that name --- rather than the value --- is displayed to the
@@ -100,7 +108,7 @@ selectInput <- function(inputId, label, choices, selected = NULL,
     id = inputId,
     class = if (!selectize) "form-control",
     size = size,
-    selectOptions(choices, selected)
+    selectOptions(choices, selected, inputId, selectize)
   )
   if (multiple)
     selectTag$attribs$multiple <- "multiple"
@@ -125,16 +133,22 @@ firstChoice <- function(choices) {
 }
 
 # Create tags for each of the options; use <optgroup> if necessary.
-# This returns a HTML string instead of tags, because of the 'selected'
-# attribute.
-selectOptions <- function(choices, selected = NULL) {
+# This returns a HTML string instead of tags for performance reasons.
+selectOptions <- function(choices, selected = NULL, inputId, perfWarning = FALSE) {
+  if (length(choices) >= 1000) {
+    warning("The select input \"", inputId, "\" contains a large number of ",
+      "options; consider using server-side selectize for massively improved ",
+      "performance. See the Details section of the ?selectizeInput help topic.",
+      call. = FALSE)
+  }
+
   html <- mapply(choices, names(choices), FUN = function(choice, label) {
     if (is.list(choice)) {
       # If sub-list, create an optgroup and recurse into the sublist
       sprintf(
         '<optgroup label="%s">\n%s\n</optgroup>',
         htmlEscape(label, TRUE),
-        selectOptions(choice, selected)
+        selectOptions(choice, selected, inputId, perfWarning)
       )
 
     } else {
@@ -190,15 +204,7 @@ selectizeIt <- function(inputId, select, options, nonempty = FALSE) {
 
   res <- checkAsIs(options)
 
-  selectizeDep <- htmlDependency(
-    "selectize", "0.12.4", c(href = "shared/selectize"),
-    stylesheet = "css/selectize.bootstrap3.css",
-    head = format(tagList(
-      tags$script(src = 'shared/selectize/js/selectize.min.js'),
-      # Accessibility plugin for screen readers (https://github.com/SLMNBJ/selectize-plugin-a11y):
-      tags$script(src = 'shared/selectize/accessibility/js/selectize-plugin-a11y.min.js')
-    ))
-  )
+  selectizeDep <- selectizeDependency()
 
   if ('drag_drop' %in% options$plugins) {
     selectizeDep <- list(selectizeDep, htmlDependency(
@@ -222,10 +228,37 @@ selectizeIt <- function(inputId, select, options, nonempty = FALSE) {
 }
 
 
+selectizeDependency <- function() {
+  tagFunction(function() {
+    cssFile <- selectizeCSSFile()
+    htmlDependency(
+      "selectize", "0.12.4",
+      src = cssFile$src,
+      stylesheet = cssFile$stylesheet,
+      head = format(tagList(
+        tags$script(src = 'shared/selectize/js/selectize.min.js'),
+        # Accessibility plugin for screen readers (https://github.com/SLMNBJ/selectize-plugin-a11y):
+        tags$script(src = 'shared/selectize/accessibility/js/selectize-plugin-a11y.min.js')
+      ))
+    )
+  })
+}
 
-
-
-
+selectizeCSSFile <- function(theme = getCurrentTheme()) {
+  if (!is_bs_theme(theme)) {
+    return(list(src = c(href = "shared/selectize"), stylesheet = "css/selectize.bootstrap3.css"))
+  }
+  scss <- system.file(
+    package = "shiny", "www", "shared", "selectize", "scss",
+    if ("3" %in% bootstraplib::theme_version(theme)) {
+      "selectize.bootstrap3.scss"
+    } else {
+      "selectize.bootstrap4.scss"
+    }
+  )
+  outFile <- bootstrapSass(sass::sass_file(scss), theme = theme, basename = "selectize")
+  list(src = c(file = dirname(outFile)), stylesheet = basename(outFile))
+}
 
 
 #' Select variables from a data frame

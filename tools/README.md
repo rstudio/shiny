@@ -192,3 +192,8 @@ To create a new patch:
 1. Test your changes
 1. `git add` the new `.patch` and any resulting changes
 
+## Updating Shiny's [S]CSS
+
+1. Make any desired changes to source files in `inst/www/shared/shiny_scss`
+1. Run `Rscript updateShinyCSS.R` to generate a built `shiny.min.css` file
+1. Commit any changes

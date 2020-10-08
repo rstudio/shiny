@@ -150,10 +150,11 @@ module.exports = function(grunt) {
             "/*! <%= pkg.name %> <%= pkg.version %> | " +
             '(c) 2012-<%= grunt.template.today("yyyy") %> RStudio, Inc. | ' +
             "License: <%= pkg.license %> */\n",
-          sourceMap: true,
+          sourceMap: {
+            includeSources: true
+          },
           // Base the .min.js sourcemap off of the .js sourcemap created by concat
-          sourceMapIn: instdir + "www/shared/shiny.js.map",
-          sourceMapIncludeSources: true
+          sourceMapIn: instdir + "www/shared/shiny.js.map"
         },
         src: instdir + "www/shared/shiny.js",
         dest: instdir + "www/shared/shiny.min.js"

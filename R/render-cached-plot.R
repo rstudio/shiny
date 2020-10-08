@@ -150,6 +150,8 @@
 #'   `"app"` (the default), `"session"`, or a cache object like
 #'   a [diskCache()]. See the Cache Scoping section for more
 #'   information.
+#' @param width,height not used. They are specified via the argument
+#'   `sizePolicy`.
 #'
 #' @seealso See [renderPlot()] for the regular, non-cached version of
 #'   this function. For more about configuring caches, see
@@ -295,7 +297,10 @@ renderCachedPlot <- function(expr,
   res = 72,
   cache = "app",
   ...,
-  outputArgs = list()
+  alt = "Plot object",
+  outputArgs = list(),
+  width = NULL,
+  height = NULL
 ) {
 
   # This ..stacktraceon is matched by a ..stacktraceoff.. when plotFunc
@@ -306,6 +311,11 @@ renderCachedPlot <- function(expr,
   isolatedFunc <- function() isolate(func())
 
   args <- list(...)
+
+  if (!is.null(width) || !is.null(height)) {
+    warning("Unused argument(s) 'width' and/or 'height'. ",
+            "'sizePolicy' is used instead.")
+  }
 
   cacheKeyExpr <- substitute(cacheKeyExpr)
   # The real cache key we'll use also includes width, height, res, pixelratio.
@@ -340,6 +350,14 @@ renderCachedPlot <- function(expr,
   # The width and height of the plot to draw, given from sizePolicy. These
   # values get filled by an observer below.
   fitDims <- reactiveValues(width = NULL, height = NULL)
+
+  # Make sure alt param to be reactive function
+  if (is.reactive(alt))
+    altWrapper <- alt
+  else if (is.function(alt))
+    altWrapper <- reactive({ alt() })
+  else
+    altWrapper <- function() { alt }
 
   resizeObserver <- NULL
   ensureResizeObserver <- function() {
@@ -387,6 +405,8 @@ renderCachedPlot <- function(expr,
         isolate({
           width  <- fitDims$width
           height <- fitDims$height
+          # Make sure alt text to be reactive function
+          alt <- altWrapper()
         })
 
         pixelratio <- session$clientData$pixelratio %OR% 1
@@ -398,6 +418,7 @@ renderCachedPlot <- function(expr,
             func = isolatedFunc,
             width = width,
             height = height,
+            alt = alt,
             pixelratio = pixelratio,
             res = res
           ),
@@ -434,6 +455,7 @@ renderCachedPlot <- function(expr,
       function(userCacheKeyResult) {
         width  <- fitDims$width
         height <- fitDims$height
+        alt <- altWrapper()
         pixelratio <- session$clientData$pixelratio %OR% 1
 
         key <- digest::digest(list(outputName, userCacheKeyResult, width, height, res, pixelratio), "xxhash64")
@@ -449,6 +471,7 @@ renderCachedPlot <- function(expr,
             plotObj = plotObj,
             width = width,
             height = height,
+            alt = alt,
             pixelratio = pixelratio
           ))
         }
@@ -471,6 +494,7 @@ renderCachedPlot <- function(expr,
               plotObj = drawReactiveResult,
               width = width,
               height = height,
+              alt = alt,
               pixelratio = pixelratio
             )
           }
@@ -480,6 +504,7 @@ renderCachedPlot <- function(expr,
         hybrid_chain(possiblyAsyncResult, function(result) {
           width      <- result$width
           height     <- result$height
+          alt        <- result$alt
           pixelratio <- result$pixelratio
 
           # Three possibilities when we get here:
@@ -500,6 +525,7 @@ renderCachedPlot <- function(expr,
                 result$plotObj,
                 width,
                 height,
+                alt,
                 pixelratio,
                 res
               ),

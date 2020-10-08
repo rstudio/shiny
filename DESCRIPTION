@@ -1,13 +1,18 @@
 Package: shiny
 Type: Package
 Title: Web Application Framework for R
-Version: 1.5.0.9001
+Version: 1.5.0.9003
 Authors@R: c(
     person("Winston", "Chang", role = c("aut", "cre"), email = "winston@rstudio.com"),
     person("Joe", "Cheng", role = "aut", email = "joe@rstudio.com"),
     person("JJ", "Allaire", role = "aut", email = "jj@rstudio.com"),
+    person("Carson", "Sievert", role = "aut", email = "carson@rstudio.com"),
+    person("Barret", "Schloerke", role = "aut", email = "barret@rstudio.com"),
     person("Yihui", "Xie", role = "aut", email = "yihui@rstudio.com"),
+    person("Jeff", "Allen", role = "aut", email = "jeff@rstudio.com"),
     person("Jonathan", "McPherson", role = "aut", email = "jonathan@rstudio.com"),
+    person("Alan", "Dipert", role = "aut"),
+    person("Barbara", "Borges", role = "aut"),
     person(family = "RStudio", role = "cph"),
     person(family = "jQuery Foundation", role = "cph",
     comment = "jQuery library and jQuery UI library"),
@@ -76,7 +81,7 @@ Imports:
     jsonlite (>= 0.9.16),
     xtable,
     digest,
-    htmltools (>= 0.4.0.9003),
+    htmltools (>= 0.5.0.9001),
     R6 (>= 2.0),
     sourcetools,
     later (>= 1.0.0),
@@ -103,23 +108,28 @@ Suggests:
     future,
     dygraphs,
     ragg,
-    showtext
+    showtext,
+    sass,
+    bootstraplib (>= 0.2.0.9000)
+Remotes:
+    rstudio/htmltools,
+    rstudio/sass,
+    rstudio/bootstraplib
 URL: http://shiny.rstudio.com
 BugReports: https://github.com/rstudio/shiny/issues
 Collate:
-    'app.R'
+    'globals.R'
+    'app-state.R'
     'app_template.R'
     'bookmark-state-local.R'
     'stack.R'
     'bookmark-state.R'
     'bootstrap-deprecated.R'
     'bootstrap-layout.R'
-    'globals.R'
     'conditions.R'
     'map.R'
     'utils.R'
     'bootstrap.R'
-    'cache-context.R'
     'cache-disk.R'
     'cache-memory.R'
     'cache-utils.R'
@@ -154,6 +164,7 @@ Collate:
     'insert-tab.R'
     'insert-ui.R'
     'jqueryui.R'
+    'knitr.R'
     'middleware-shiny.R'
     'middleware.R'
     'timer.R'
@@ -170,10 +181,13 @@ Collate:
     'render-plot.R'
     'render-table.R'
     'run-url.R'
+    'runapp.R'
     'serializers.R'
     'server-input-handlers.R'
+    'server-resource-paths.R'
     'server.R'
     'shiny-options.R'
+    'shinyapp.R'
     'shinyui.R'
     'shinywrappers.R'
     'showcase.R'
@@ -183,6 +197,7 @@ Collate:
     'test-server.R'
     'test.R'
     'update-input.R'
+    'viewer.R'
 RoxygenNote: 7.1.1
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)

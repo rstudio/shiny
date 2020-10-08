@@ -62,6 +62,8 @@ user. Always \code{NULL} for a \code{MockShinySesion}.}
 
 \item{\code{user}}{The username of an authenticated user. Always \code{NULL} for a
 \code{MockShinySession}.}
+
+\item{\code{options}}{A list containing session-level shinyOptions.}
 }
 \if{html}{\out{</div>}}
 }

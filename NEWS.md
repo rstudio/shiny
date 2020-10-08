@@ -2,6 +2,13 @@
 shiny 1.5.0.9000
 ================
 
+## Full changelog
+
+
+### Breaking changes
+
+* Closed #3074: Shiny no longer supports file uploads for Internet Explorer 8 or 9. (#3075)
+
 ### Accessibility
 
 * Added [bootstrap accessibility plugin](https://github.com/paypal/bootstrap-accessibility-plugin) under the hood to improve accessibility of shiny apps for screen-reader and keyboard users: the enhancements include better navigations for alert, tooltip, popover, modal dialog, dropdown, tab Panel, collapse, and carousel elements. (#2911)
@@ -12,15 +19,37 @@ shiny 1.5.0.9000
 
 * Fixed #2951: screen readers correctly announce labels and date formats for `dateInput()` and `dateRangeInput()` widgets. (#2978)
 
-* Closed #2847: `selectInput()` is reasonably accessible for screen readers even when `selectize` option is set to TRUE. To improve `selectize.js` accessibility, We have added [selectize-plugin-a11y](https://github.com/SLMNBJ/selectize-plugin-a11y) by default. (#2993)
+* Closed #2847: `selectInput()` is reasonably accessible for screen readers even when `selectize` option is set to TRUE. To improve `selectize.js` accessibility, we have added [selectize-plugin-a11y](https://github.com/SLMNBJ/selectize-plugin-a11y) by default. (#2993)
+
+* Closed #612: Added `alt` argument to `renderPlot()` and `renderCachedPlot()` to specify descriptive texts for `plotOutput()` objects, which is essential for screen readers. By default, alt text is set to the static text, "Plot object," but even dynamic text can be made with reactive function. (#3006, thanks @trafficonese and @leonawicz for the original PR and discussion via #2494)
+
+* Added semantic landmarks for `mainPanel()` and `sidebarPanel()` so that assistive technologies can recognize them as "main" and "complementary" region respectively. (#3009)
+
+* Closed #2844: Added `lang` argument to ui `*Page()` functions (e.g., `fluidPage`, `bootstrapPage`) that specifies document-level language within the app for the accessibility of screen readers and search-engine parsers. By default, it is set to empty string which is commonly recognized as a browser's default locale. (#2920)
 
 ### Minor new features and improvements
 
+* New `reactiveConsole()` makes it easier to interactively experiment with reactivity at the console (#2518).
+
 * When UI is specified as a function (e.g. `ui <- function(req) { ... }`), the response can now be an HTTP response as returned from the (newly exported) `httpResponse()` function. (#2970)
+
+* `selectInput` and `selectizeInput` now warn about performance implications when thousands of choices are used, and recommend [server-side selectize](https://shiny.rstudio.com/articles/selectize.html) be used instead. (#2959)
 
 * Closed #2980: `addResourcePath()` now allows paths with a leading `.` (thanks to @ColinFay). (#2981)
 
 * Closed #2972: `runExample()` now supports the `shiny.port` option (thanks to @ColinFay). (#2982)
+
+* Closed #2692: `downloadButton()` icon can now be changed via the `icon` parameter (thanks to @ColinFay). (#3010)
+
+* Closed #2984: improved documentation for `renderCachedPlot()` (thanks to @aalucaci). (#3016)
+
+* `reactiveValuesToList()` will save its `reactlog` label as `reactiveValuesToList(<ID>)` vs `as.list(<ID>)` (#3017)
+
+* Removed unused (and non-exported) `cacheContext` class.
+
+* `testServer()` can accept a single server function as input (#2965).
+
+* `shinyOptions()` now has session-level scoping, in addition to global and application-level scoping. (#3080)
 
 ### Bug fixes
 
@@ -28,9 +57,17 @@ shiny 1.5.0.9000
 
 * Fixed #1942: Calling `runApp("app.R")` no longer ignores options passed into `shinyApp()`. This makes it possible for Shiny apps to specify what port/host should be used by default. (#2969)
 
+* Fixed #3033: When a `DiskCache` was created with both `max_n` and `max_size`, too many items could get pruned when `prune()` was called. (#3034)
+
+* Fixed #2936: `dateYMD` was giving a warning when passed a vector of dates from `dateInput` which was greater than length 1. The length check was removed because it was not needed. (#3061)
+
+* Fixed #2266, #2688: `radioButtons` and `updateRadioButtons` now accept `character(0)` to indicate that none of the options should be selected (thanks to @ColinFay). (#3043)
+
 ### Library updates
 
 * Removed html5shiv and respond.js, which were used for IE 8 and IE 9 compatibility. (#2973)
+
+* Removed es5-shim library, which was internally used within `selectInput()` for ECMAScript 5 compatibility. (#2993)
 
 
 shiny 1.5.0

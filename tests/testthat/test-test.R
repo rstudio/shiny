@@ -161,7 +161,7 @@ test_that("app template works with runTests", {
     )
   ))
 
-  lapply(combos, function(combo) {
+  for (combo in combos) {local({
     random_folder <- paste0("shinyAppTemplate-", paste0(combo, collapse = "_"))
     tempTemplateDir <- file.path(tempdir(), random_folder)
     shinyAppTemplate(tempTemplateDir, combo)
@@ -184,7 +184,6 @@ test_that("app template works with runTests", {
         runTests(tempTemplateDir)
       )
     }
-
-  })
+  })}
 
 })

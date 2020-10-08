@@ -87,7 +87,8 @@ reactlog <- function() {
 }
 
 #' @describeIn reactlog Display a full reactlog graph for all sessions.
-#' @inheritParams reactlog::reactlog_show
+#' @param time A boolean that specifies whether or not to display the
+#' time that each reactive takes to calculate a result.
 #' @export
 reactlogShow <- function(time = TRUE) {
   check_reactlog()
@@ -179,10 +180,10 @@ RLog <- R6Class(
       paste0("names(", reactId, ")")
     },
     asListIdStr = function(reactId) {
-      paste0("as.list(", reactId, ")")
+      paste0("reactiveValuesToList(", reactId, ")")
     },
     asListAllIdStr = function(reactId) {
-      paste0("as.list(", reactId, ", all.names = TRUE)")
+      paste0("reactiveValuesToList(", reactId, ", all.names = TRUE)")
     },
     keyIdStr = function(reactId, key) {
       paste0(reactId, "$", key)

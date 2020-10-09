@@ -2,9 +2,21 @@
 % Please edit documentation in R/bootstrap.R
 \name{getCurrentTheme}
 \alias{getCurrentTheme}
+\alias{setCurrentTheme}
 \title{Obtain Shiny's Bootstrap Sass theme}
 \usage{
-getCurrentTheme()
+getCurrentTheme(session = getDefaultReactiveDomain())
+
+setCurrentTheme(theme, flush = TRUE)
+}
+\arguments{
+\item{session}{A Shiny session object.}
+
+\item{theme}{A \code{\link[=bs_theme]{bs_theme()}} object.}
+
+\item{flush}{if \code{TRUE}, then after setting the current theme, registered
+functions which depend on the theme will be re-executed and the resulting
+html dependencies sent to the client.}
 }
 \value{
 If called at render-time (i.e., inside a \code{\link[htmltools:tagFunction]{htmltools::tagFunction()}}),
@@ -41,8 +53,8 @@ if (interactive()) {
   }
   shinyApp(ui, server)
 }
-
 }
 \seealso{
 \code{\link[=getCurrentOutputInfo]{getCurrentOutputInfo()}}, \code{\link[=bootstrapLib]{bootstrapLib()}}, \code{\link[htmltools:tagFunction]{htmltools::tagFunction()}}
 }
+\keyword{internal}

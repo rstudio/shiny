@@ -1253,12 +1253,10 @@ ShinySession <- R6Class(
         modal = list(type = type, message = message)
       )
     },
-    # Allow one to update the current theme so that any themeDependencyFuncs
-    # can be re-executed and stylesheets re-rendered (i.e., restyled)
-    setCurrentTheme = function(theme) {
-      if (!is_bs_theme(theme)) return()
-      # Update the option that getCurrentTheme() reads
-      shinyOptions(bootstrapTheme = theme)
+    # Re-execute any registered theme dependencies, and send them to the client.
+    flushCurrentTheme = function() {
+      theme <- getCurrentTheme()
+
       # Call any theme dependency functions and make sure we get a list of deps back
       funcs <- getShinyOption("themeDependencyFuncs")
       deps <- lapply(funcs, function(func) {

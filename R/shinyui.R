@@ -63,7 +63,7 @@ renderPage <- function(ui, showcase=0, testMode=FALSE) {
 
   shiny_deps <- c(
     list(jquery()),
-    bs_runtime_dependencies(shinyDependencies)
+    shinyDependencies()
   )
 
   if (testMode) {
@@ -77,16 +77,10 @@ renderPage <- function(ui, showcase=0, testMode=FALSE) {
   enc2utf8(paste(collapse = "\n", html))
 }
 
-shinyDependencies <- function(theme) {
-  cssFile <- shinyCssFile(theme)
+shinyDependencies <- function() {
   version <- utils::packageVersion("shiny")
   list(
-    htmlDependency(
-      name = "shiny-css",
-      version = version,
-      src = cssFile$src,
-      stylesheet = cssFile$stylesheet
-    ),
+    bootstraplib::bs_dependency_dynamic(shinyDependencyCSS),
     htmlDependency(
       name = "shiny-javascript",
       version = version,
@@ -96,14 +90,24 @@ shinyDependencies <- function(theme) {
   )
 }
 
-shinyCssFile <- function(theme) {
+shinyDependencyCSS <- function(theme) {
   if (!is_bs_theme(theme)) {
     return(list(src = c(href = "shared"), stylesheet = "shiny.min.css"))
   }
-  scss_home <- system.file("www", "shared", "shiny_scss", package = "shiny")
+
+  scss_home <- system.file("www/shared/shiny_scss", package = "shiny")
   scss_files <- file.path(scss_home, c("bootstrap.scss", "shiny.scss"))
-  outFile <- bootstrapSass(lapply(scss_files, sass::sass_file), theme = theme, "shiny")
-  list(src = c(file = dirname(outFile)), stylesheet = basename(outFile))
+  scss_files <- lapply(scss_files, sass::sass_file)
+
+  version <- utils::packageVersion("shiny")
+
+  bs_dependency(
+    input = scss_files,
+    theme = theme,
+    name = "shiny-sass",
+    version = version,
+    cache_key_extra = version
+  )
 }
 
 #' Create a Shiny UI handler

@@ -137,6 +137,6 @@ dateRangeInput <- function(inputId, label, start = NULL, end = NULL,
         )
       )
     ),
-    bs_runtime_dependencies(datePickerDependency)
+    datePickerDependency()
   )
 }

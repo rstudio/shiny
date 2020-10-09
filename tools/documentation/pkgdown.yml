@@ -161,6 +161,7 @@ reference:
       - createWebDependency
       - resourcePaths
       - registerInputHandler
+      - registerThemeDependency
       - removeInputHandler
       - markRenderFunction
   - title: Utility functions

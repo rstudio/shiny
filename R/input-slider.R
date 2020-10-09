@@ -205,22 +205,17 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
     )
   }
 
-  # TODO: make it so we can still suggest bootstraplib
-  attachDependencies(sliderTag, bs_runtime_dependencies(ionRangeSliderDependency))
+  attachDependencies(sliderTag, ionRangeSliderDependency())
 }
 
-ionRangeSliderDependency <- function(theme) {
-  cssFile <- ionRangeSliderCSSFile(theme)
-  version <- "2.3.1"
+
+ionRangeSliderVersion <- "2.3.1"
+
+ionRangeSliderDependency <- function() {
   list(
     # ion.rangeSlider also needs normalize.css, which is already included in Bootstrap.
     htmlDependency(
-      "ionrangeslider-css", version,
-      src = cssFile$src,
-      stylesheet = cssFile$stylesheet
-    ),
-    htmlDependency(
-      "ionrangeslider-javascript", version,
+      "ionrangeslider-javascript", ionRangeSliderVersion,
       src = c(href = "shared/ionrangeslider"),
       script = "js/ion.rangeSlider.min.js"
     ),
@@ -228,25 +223,40 @@ ionRangeSliderDependency <- function(theme) {
       "strftime", "0.9.2",
       src = c(href = "shared/strftime"),
       script = "strftime-min.js"
-    )
+    ),
+    bootstraplib::bs_dependency_dynamic(ionRangeSliderDependencyCSS)
   )
 }
 
-ionRangeSliderCSSFile <- function(theme) {
+ionRangeSliderDependencyCSS <- function(theme) {
   if (!is_bs_theme(theme)) {
-    return(list(stylesheet = "css/ion.rangeSlider.css", src = c(href = "shared/ionrangeslider")))
+    htmlDependency(
+      "ionrangeslider-css", ionRangeSliderVersion,
+      src = c(href = "shared/ionrangeslider"),
+      stylesheet = "css/ion.rangeSlider.css"
+    )
   }
-  sassInput <- list(
+
+  # Remap some variable names for ionRangeSlider's scss
+  sass_input <- list(
     list(
-      bg = "$input-bg", fg = "$input-color", accent = "$component-active-bg",
+      bg = "$input-bg",
+      fg = "$input-color",
+      accent = "$component-active-bg",
       `font-family` = "$font-family-base"
     ),
     sass::sass_file(
-      system.file(package = "shiny", "www", "shared", "ionrangeslider", "scss", "shiny.scss")
+      system.file(package = "shiny", "www/shared/ionrangeslider/scss/shiny.scss")
     )
   )
-  outFile <- bootstrapSass(sassInput, theme = theme, basename = "ionRangeSlider")
-  list(stylesheet = basename(outFile), src = c(file = dirname(outFile)))
+
+  bs_dependency(
+    input = sass_input,
+    theme = theme,
+    name = "ionRangeSlider",
+    version = ionRangeSliderVersion,
+    cache_key_extra = utils::packageVersion("shiny")
+  )
 }
 
 hasDecimals <- function(value) {

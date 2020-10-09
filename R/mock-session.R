@@ -155,6 +155,7 @@ makeExtraMethods <- function() {
     "sendInsertTab",
     "sendInsertUI",
     "sendModal",
+    "flushCurrentTheme",
     "sendNotification",
     "sendProgress",
     "sendRemoveTab",

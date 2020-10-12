@@ -322,31 +322,6 @@ renderCachedPlot <- function(expr,
   # This is just the part supplied by the user.
   userCacheKey <- reactive(cacheKeyExpr, env = parent.frame(), quoted = TRUE, label = "userCacheKey")
 
-  ensureCacheSetup <- function() {
-    # For our purposes, cache objects must support these methods.
-    isCacheObject <- function(x) {
-      # Use tryCatch in case the object does not support `$`.
-      tryCatch(
-        is.function(x$get) && is.function(x$set),
-        error = function(e) FALSE
-      )
-    }
-
-    if (isCacheObject(cache)) {
-      # If `cache` is already a cache object, do nothing
-      return()
-
-    } else if (identical(cache, "app")) {
-      cache <<- getShinyOption("cache", default = NULL)
-
-    } else if (identical(cache, "session")) {
-      cache <<- session$cache
-
-    } else {
-      stop('`cache` must either be "app", "session", or a cache object with methods, `$get`, and `$set`.')
-    }
-  }
-
   # The width and height of the plot to draw, given from sizePolicy. These
   # values get filled by an observer below.
   fitDims <- reactiveValues(width = NULL, height = NULL)
@@ -444,7 +419,7 @@ renderCachedPlot <- function(expr,
   renderFunc <- function(shinysession, name, ...) {
     outputName <<- name
     session <<- shinysession
-    ensureCacheSetup()
+    cache <<- resolve_cache_object(cache, session)
     ensureResizeObserver()
 
     hybrid_chain(

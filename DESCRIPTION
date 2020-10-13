@@ -92,7 +92,8 @@ Imports:
     fastmap (>= 1.0.0),
     withr,
     commonmark (>= 1.7),
-    glue (>= 1.3.2)
+    glue (>= 1.3.2),
+    bootstraplib (>= 0.2.0.9001)
 Suggests:
     datasets,
     Cairo (>= 1.5-5),
@@ -109,8 +110,7 @@ Suggests:
     dygraphs,
     ragg,
     showtext,
-    sass,
-    bootstraplib (>= 0.2.0.9000)
+    sass
 Remotes:
     rstudio/htmltools,
     rstudio/sass,

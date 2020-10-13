@@ -114,8 +114,7 @@ bs_theme_dependencies_css <- function(theme) {
   deps <- bootstraplib::bs_theme_dependencies(theme)
   # Extract out the CSS files only (no need to re-send JS files, even though
   # they wouldn't be re-rendered on the client anyway.)
-  css_deps <- Filter(deps, f = function(dep) !is.null(dep$stylesheet))
-  css_deps
+  Filter(deps, f = function(dep) !is.null(dep$stylesheet))
 }
 
 is_bs_theme <- function(x) {

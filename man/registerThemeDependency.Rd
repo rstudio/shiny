@@ -13,7 +13,7 @@ of them.}
 }
 \description{
 This function registers a function that returns an \code{\link[=htmlDependency]{htmlDependency()}} or list
-of such objects. If \code{seesion$setCurrentTheme()} is called, the function will
+of such objects. If \code{session$setCurrentTheme()} is called, the function will
 be re-executed, and the resulting html dependency will be sent to the client.
 }
 \details{

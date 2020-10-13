@@ -250,7 +250,7 @@ ionRangeSliderDependencyCSS <- function(theme) {
     )
   )
 
-  bs_dependency(
+  bootstraplib::bs_dependency(
     input = sass_input,
     theme = theme,
     name = "ionRangeSlider",

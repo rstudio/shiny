@@ -269,7 +269,7 @@ selectizeCSS <- function(theme) {
       "selectize.bootstrap4.scss"
     }
   )
-  bs_dependency(
+  bootstraplib::bs_dependency(
     input = sass::sass_file(scss_file),
     theme = theme,
     name = "selectize",

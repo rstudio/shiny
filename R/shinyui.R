@@ -101,7 +101,7 @@ shinyDependencyCSS <- function(theme) {
 
   version <- utils::packageVersion("shiny")
 
-  bs_dependency(
+  bootstraplib::bs_dependency(
     input = scss_files,
     theme = theme,
     name = "shiny-sass",

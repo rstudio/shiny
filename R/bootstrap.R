@@ -82,9 +82,7 @@ bootstrapLib <- function(theme = NULL) {
     # Note also that since this is shinyOptions() (and not options()), the
     # option is automatically reset when the app (or session) exits
     if (isRunning()) {
-      # Don't flush from here -- that's only for when someone else sets the
-      # theme.
-      setCurrentTheme(theme, flush = FALSE)
+      setCurrentTheme(theme)
       registerThemeDependency(bs_theme_dependencies_css)
 
     } else {
@@ -127,73 +125,26 @@ is_bs_theme <- function(x) {
 #' Intended for use by Shiny developers to create Shiny bindings with intelligent
 #' styling based on the [bootstrapLib()]'s `theme` value.
 #'
-#' @param session A Shiny session object.
-#'
 #' @return If called at render-time (i.e., inside a [htmltools::tagFunction()]),
 #' and [bootstrapLib()]'s `theme` has been set to a [bootstraplib::bs_theme()]
 #' object, then this returns the `theme`. Otherwise, this returns `NULL`.
 #' @seealso [getCurrentOutputInfo()], [bootstrapLib()], [htmltools::tagFunction()]
-#' @examples
 #'
-#' if (interactive()) {
-#'   library(bootstraplib)
-#'   ui <- fluidPage(
-#'     theme = bs_theme(),
-#'     h3("The current theme's primary color is:"),
-#'     uiOutput("primary"),
-#'     textInput("primary_input", label = "", placeholder = "Choose a new primary color")
-#'   )
-#'   server <- function(input, output, session) {
-#'     get_primary <- function() bs_get_variables(getCurrentTheme(), "primary")
-#'     primary <- reactiveVal(get_primary())
-#'     output$primary <- renderUI({
-#'       tags$span(primary(), style = paste("color: ", primary()))
-#'     })
-#'     # TODO: simplify & tryCatch
-#'     observeEvent(input$primary_input, {
-#'       new_theme <- bs_theme_update(getCurrentTheme(), primary = input$primary_input)
-#'       setCurrentTheme(new_theme)
-#'       primary(get_primary())
-#'     }, ignoreInit = TRUE)
-#'
-#'   }
-#'   shinyApp(ui, server)
-#' }
 #' @keywords internal
 #' @export
-getCurrentTheme <- function(session = getDefaultReactiveDomain()) {
+getCurrentTheme <- function() {
   getShinyOption("bootstrapTheme")
 }
 
-#' @param theme A [bs_theme()] object.
-#' @param flush if `TRUE`, then after setting the current theme, registered
-#'   functions which depend on the theme will be re-executed and the resulting
-#'   html dependencies sent to the client.
-#' @export
-#' @rdname getCurrentTheme
-setCurrentTheme <- function(theme, flush = TRUE) {
-  # TODO: Detect and prevent re-entrant calls to setCurrentTheme
-
-  # Note that this will automatically scope to the app or session level,
-  # depending on if this is called from within a session or not.
+setCurrentTheme <- function(theme) {
   shinyOptions(bootstrapTheme = theme)
-
-  if (flush) {
-    session <- getDefaultReactiveDomain()
-    if (!is.null(session)) {
-      session$flushCurrentTheme()
-    }
-  }
-
-  invisible()
 }
 
 #' Register a theme dependency
 #'
 #' This function registers a function that returns an [htmlDependency()] or list
-#' of such objects. If `setCurrentTheme()` is called from within a Shiny
-#' session, the function will be re-executed, and the resulting html dependency
-#' will be sent to the client.
+#' of such objects. If `seesion$setCurrentTheme()` is called, the function will
+#' be re-executed, and the resulting html dependency will be sent to the client.
 #'
 #' Note that `func` should **not** be an anonymous function, or a function which
 #' is defined within the calling function. This is so that,

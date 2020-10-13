@@ -1253,9 +1253,14 @@ ShinySession <- R6Class(
         modal = list(type = type, message = message)
       )
     },
-    # Re-execute any registered theme dependencies, and send them to the client.
-    flushCurrentTheme = function() {
-      theme <- getCurrentTheme()
+
+    setCurrentTheme = function(theme) {
+      # This function does three things: (1) sets theme as the current
+      # bootstrapTheme, (2) re-executes any registered theme dependencies, and
+      # (3) sends the resulting dependencies to the client.
+
+      # Note that this will automatically scope to the session.
+      shinyOptions(bootstrapTheme = theme)
 
       # Call any theme dependency functions and make sure we get a list of deps back
       funcs <- getShinyOption("themeDependencyFuncs")
@@ -1276,11 +1281,13 @@ ShinySession <- R6Class(
         dep$restyle <- TRUE
         dep
       })
+
       # Send any dependencies to be re-rendered
       if (length(deps)) {
         insertUI(selector = "body", where = "afterEnd", ui = tagList(deps))
       }
     },
+
     dispatch = function(msg) {
       method <- paste('@', msg$method, sep='')
       func <- try(self[[method]], silent = TRUE)

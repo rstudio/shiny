@@ -13,9 +13,8 @@ of them.}
 }
 \description{
 This function registers a function that returns an \code{\link[=htmlDependency]{htmlDependency()}} or list
-of such objects. If \code{setCurrentTheme()} is called from within a Shiny
-session, the function will be re-executed, and the resulting html dependency
-will be sent to the client.
+of such objects. If \code{seesion$setCurrentTheme()} is called, the function will
+be re-executed, and the resulting html dependency will be sent to the client.
 }
 \details{
 Note that \code{func} should \strong{not} be an anonymous function, or a function which

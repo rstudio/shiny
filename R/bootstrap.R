@@ -22,6 +22,9 @@ NULL
 #'   build of Bootstrap 3 with a customized version of Bootstrap 3 or higher.
 #'   * A character string pointing to an alternative Bootstrap stylesheet
 #'   (normally a css file within the www directory, e.g. `www/bootstrap.css`).
+#' @param lang ISO 639-1 language code for the HTML page, such as "en" or "ko".
+#'   This will be used as the lang in the \code{<html>} tag, as in \code{<html lang="en">}.
+#'   The default (NULL) results in an empty string.
 #'
 #' @return A UI defintion that can be passed to the [shinyUI] function.
 #'
@@ -30,13 +33,13 @@ NULL
 #'
 #' @seealso [fluidPage()], [fixedPage()]
 #' @export
-bootstrapPage <- function(..., title = NULL, responsive = NULL, theme = NULL) {
+bootstrapPage <- function(..., title = NULL, responsive = NULL, theme = NULL, lang = NULL) {
 
   if (!is.null(responsive)) {
     shinyDeprecated("The 'responsive' argument is no longer used with Bootstrap 3.")
   }
 
-  tagList(
+  ui <- tagList(
     bootstrapLib(theme),
     if (!is.null(title)) tags$head(tags$title(title)),
     # TODO: throw better error when length > 1?
@@ -46,6 +49,20 @@ bootstrapPage <- function(..., title = NULL, responsive = NULL, theme = NULL) {
     # remainder of tags passed to the function
     list(...)
   )
+
+  ui <- setLang(ui, lang)
+
+  return(ui)
+}
+
+setLang <- function(ui, lang) {
+  # Add lang attribute to be passed to renderPage function
+  attr(ui, "lang") <- lang
+  ui
+}
+getLang <- function(ui) {
+  # Check if ui has lang attribute; otherwise, NULL
+  attr(ui, "lang", exact = TRUE)
 }
 
 #' Bootstrap libraries
@@ -257,6 +274,7 @@ basicPage <- function(...) {
 #'   shown in the document).
 #' @param bootstrap If `TRUE`, load the Bootstrap CSS library.
 #' @param theme URL to alternative Bootstrap stylesheet.
+#' @inheritParams bootstrapPage
 #'
 #' @family layout functions
 #'
@@ -284,7 +302,7 @@ basicPage <- function(...) {
 #' )
 #' @export
 fillPage <- function(..., padding = 0, title = NULL, bootstrap = TRUE,
-  theme = NULL) {
+  theme = NULL, lang = NULL) {
 
   fillCSS <- tags$head(tags$style(type = "text/css",
     "html, body { width: 100%; height: 100%; overflow: hidden; }",
@@ -292,14 +310,18 @@ fillPage <- function(..., padding = 0, title = NULL, bootstrap = TRUE,
   ))
 
   if (isTRUE(bootstrap)) {
-    bootstrapPage(title = title, theme = theme, fillCSS, ...)
+    ui <- bootstrapPage(title = title, theme = theme, fillCSS, lang = lang, ...)
   } else {
-    tagList(
+    ui <- tagList(
       fillCSS,
       if (!is.null(title)) tags$head(tags$title(title)),
       ...
     )
+
+    ui <- setLang(ui, lang)
   }
+
+  return(ui)
 }
 
 collapseSizes <- function(padding) {
@@ -351,6 +373,7 @@ collapseSizes <- function(padding) {
 #'   `www/bootstrap.css` you would use `theme = "bootstrap.css"`.
 #' @param windowTitle The title that should be displayed by the browser window.
 #'   Useful if `title` is not a string.
+#' @inheritParams bootstrapPage
 #' @param icon Optional icon to appear on a `navbarMenu` tab.
 #'
 #' @return A UI defintion that can be passed to the [shinyUI] function.
@@ -395,7 +418,8 @@ navbarPage <- function(title,
                        fluid = TRUE,
                        responsive = NULL,
                        theme = NULL,
-                       windowTitle = title) {
+                       windowTitle = title,
+                       lang = NULL) {
 
   if (!missing(collapsable)) {
     shinyDeprecated("`collapsable` is deprecated; use `collapsible` instead.")
@@ -466,6 +490,7 @@ navbarPage <- function(title,
     title = windowTitle,
     responsive = responsive,
     theme = theme,
+    lang = lang,
     tags$nav(class=navbarClass, role="navigation", containerDiv),
     contentDiv
   )

@@ -106,6 +106,16 @@ function initShiny() {
     inputs.setInput(name, value, opts);
   };
 
+  // By default, Shiny deduplicates input value changes; that is, if
+  // `setInputValue` is called with the same value as the input already
+  // has, the call is ignored (unless opts.priority = "event"). Calling
+  // `forgetLastInputValue` tells Shiny that the very next call to
+  // `setInputValue` for this input id shouldn't be ignored, even if it
+  // is a dupe of the existing value.
+  exports.forgetLastInputValue = function(name) {
+    inputsNoResend.forget(name);
+  };
+
   var boundInputs = {};
 
   function valueChangeCallback(binding, el, allowDeferred) {

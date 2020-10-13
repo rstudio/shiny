@@ -9,7 +9,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 (function () {
   var $ = jQuery;
   var exports = window.Shiny = window.Shiny || {};
-  exports.version = "1.5.0.9003"; // Version number inserted by Grunt
+  exports.version = "1.5.0.9004"; // Version number inserted by Grunt
 
   var origPushState = window.history.pushState;
 
@@ -660,6 +660,10 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       }
 
       this.lastSentValues = cacheValues;
+    };
+
+    this.forget = function (name) {
+      delete this.lastSentValues[name];
     };
   }).call(InputNoResendDecorator.prototype);
 
@@ -1444,6 +1448,11 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
         return message.multiple;
       });
+    });
+    addMessageHandler('frozen', function (message) {
+      for (var i = 0; i < message.ids.length; i++) {
+        exports.forgetLastInputValue(message.ids[i]);
+      }
     });
 
     function getTabset(id) {
@@ -5593,6 +5602,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     },
     receiveMessage: function receiveMessage(el, data) {
       if (data.hasOwnProperty('value')) this.setValue(el, data.value);
+      $(el).trigger("change");
     },
     subscribe: function subscribe(el, callback) {
       $(el).on('change shown.bootstrapTabInputBinding shown.bs.tab.bootstrapTabInputBinding', function (event) {
@@ -6103,6 +6113,16 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     exports.setInputValue = exports.onInputChange = function (name, value, opts) {
       opts = addDefaultInputOpts(opts);
       inputs.setInput(name, value, opts);
+    }; // By default, Shiny deduplicates input value changes; that is, if
+    // `setInputValue` is called with the same value as the input already
+    // has, the call is ignored (unless opts.priority = "event"). Calling
+    // `forgetLastInputValue` tells Shiny that the very next call to
+    // `setInputValue` for this input id shouldn't be ignored, even if it
+    // is a dupe of the existing value.
+
+
+    exports.forgetLastInputValue = function (name) {
+      inputsNoResend.forget(name);
     };
 
     var boundInputs = {};

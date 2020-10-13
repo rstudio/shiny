@@ -4,10 +4,13 @@ shiny 1.5.0.9000
 
 ## Full changelog
 
-
 ### Breaking changes
 
 * Closed #3074: Shiny no longer supports file uploads for Internet Explorer 8 or 9. (#3075)
+
+* Subtle changes, and some soft-deprecations, have come to `freezeReactiveValue` and `freezeReactiveVal` (#3055). These functions have been fragile at best in previous releases (issues #1791, #2463, #2946). In this release, we've solved all the problems we know about with `freezeReactiveValue(input, "x")`, by 1) invalidating `input$x` and set it to `NULL` whenever we freeze, and 2) ensuring that, after a freeze, even if the effect of `renderUI` or `updateXXXInput` is to set `input$x` to the same value it already has, this will result in an invalidation (whereas by default, Shiny filters out such spurious assignments).
+
+  Similar problems may exist when using `freezeReactiveVal`, and when using `freezeReactiveValue` with non-`input` reactive values objects. But support for those was added mostly for symmetry with `freezeReactiveValue(input)`, and given the above issues, it's not clear to us how you could have used these successfully in the past, or why you would even want to. For this release, we're soft-deprecating both of those uses, but we're more than willing to un-deprecate if it turns out people are using these; if that includes you, please join the conversation at https://github.com/rstudio/shiny/issues/3063. In the meantime, you can squelch the deprecation messages for these functions specifically, by setting `options(shiny.deprecation.messages.freeze = FALSE)`.
 
 ### Accessibility
 
@@ -25,7 +28,11 @@ shiny 1.5.0.9000
 
 * Added semantic landmarks for `mainPanel()` and `sidebarPanel()` so that assistive technologies can recognize them as "main" and "complementary" region respectively. (#3009)
 
+* Closed #2844: Added `lang` argument to ui `*Page()` functions (e.g., `fluidPage`, `bootstrapPage`) that specifies document-level language within the app for the accessibility of screen readers and search-engine parsers. By default, it is set to empty string which is commonly recognized as a browser's default locale. (#2920)
+
 ### Minor new features and improvements
+
+* New `reactiveConsole()` makes it easier to interactively experiment with reactivity at the console (#2518).
 
 * When UI is specified as a function (e.g. `ui <- function(req) { ... }`), the response can now be an HTTP response as returned from the (newly exported) `httpResponse()` function. (#2970)
 
@@ -58,6 +65,8 @@ shiny 1.5.0.9000
 * Fixed #2936: `dateYMD` was giving a warning when passed a vector of dates from `dateInput` which was greater than length 1. The length check was removed because it was not needed. (#3061)
 
 * Fixed #2266, #2688: `radioButtons` and `updateRadioButtons` now accept `character(0)` to indicate that none of the options should be selected (thanks to @ColinFay). (#3043)
+
+* Fixed a bug that `textAreaInput()` doesn't work as expected for relative `width` (thanks to @shrektan). (#2049)
 
 ### Library updates
 
@@ -376,6 +385,7 @@ This is a significant release for Shiny, with a major new feature that was nearl
 * Fixed #2000: Implicit calls to `xxxOutput` not working inside modules. (Thanks, @GregorDeCillia! #2010)
 
 * Fixed #2021: Memory leak with `reactiveTimer` and `invalidateLater`. (#2022)
+
 
 ### Library updates
 

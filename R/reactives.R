@@ -231,6 +231,12 @@ reactiveVal <- function(value = NULL, label = NULL) {
 #' @rdname freezeReactiveValue
 #' @export
 freezeReactiveVal <- function(x) {
+  if (getOption("shiny.deprecation.messages", TRUE) && getOption("shiny.deprecation.messages.freeze", TRUE)) {
+    rlang::warn(
+      "freezeReactiveVal() is soft-deprecated, and may be removed in a future version of Shiny. (See https://github.com/rstudio/shiny/issues/3063)",
+      .frequency = "once", .frequency_id = "freezeReactiveVal")
+  }
+
   domain <- getDefaultReactiveDomain()
   if (is.null(domain)) {
     stop("freezeReactiveVal() must be called when a default reactive domain is active.")
@@ -357,7 +363,7 @@ ReactiveValues <- R6Class(
       keyValue
     },
 
-    set = function(key, value) {
+    set = function(key, value, force = FALSE) {
       # if key exists
       #   if it is the same value, return
       #
@@ -389,10 +395,8 @@ ReactiveValues <- R6Class(
 
       key_exists <- .values$containsKey(key)
 
-      if (key_exists) {
-        if (.dedupe && identical(.values$get(key), value)) {
-          return(invisible())
-        }
+      if (key_exists && !isTRUE(force) && .dedupe && identical(.values$get(key), value)) {
+        return(invisible())
       }
 
       # set the value for better logging
@@ -469,10 +473,15 @@ ReactiveValues <- R6Class(
 
     # Mark a value as frozen If accessed while frozen, a shiny.silent.error will
     # be thrown.
-    freeze = function(key) {
+    freeze = function(key, invalidate = FALSE) {
       domain <- getDefaultReactiveDomain()
       rLog$freezeReactiveKey(.reactId, key, domain)
       setMeta(key, "frozen", TRUE)
+
+      if (invalidate) {
+        # Force an invalidation
+        self$set(key, NULL, force = TRUE)
+      }
     },
 
     thaw = function(key) {
@@ -727,7 +736,10 @@ str.reactivevalues <- function(object, indent.str = " ", ...) {
 #' thing that happens if `req(FALSE)` is called. The value is thawed
 #' (un-frozen; accessing it will no longer raise an exception) when the current
 #' reactive domain is flushed. In a Shiny application, this occurs after all of
-#' the observers are executed.
+#' the observers are executed. **NOTE:** We are considering deprecating
+#' `freezeReactiveVal`, and `freezeReactiveValue` except when `x` is `input`.
+#' If this affects your app, please let us know by leaving a comment on
+#' [this GitHub issue](https://github.com/rstudio/shiny/issues/3063).
 #'
 #' @param x For `freezeReactiveValue`, a [reactiveValues()]
 #'   object (like `input`); for `freezeReactiveVal`, a
@@ -1377,35 +1389,34 @@ observe <- function(x, env=parent.frame(), quoted=FALSE, label=NULL,
 #' already exist; if so, its value will be used as the initial value of the
 #' reactive variable (or `NULL` if the variable did not exist).
 #'
-#' @param symbol A character string indicating the name of the variable that
-#'   should be made reactive
-#' @param env The environment that will contain the reactive variable
-#'
+#' @param symbol Name of variable to make reactive, as a string.
+#' @param env Environment in which to create binding. Expert use only.
 #' @return None.
-#'
+#' @keywords internal
 #' @examples
-#' \dontrun{
+#' reactiveConsole(TRUE)
+#'
 #' a <- 10
 #' makeReactiveBinding("a")
+#'
 #' b <- reactive(a * -1)
 #' observe(print(b()))
+#'
 #' a <- 20
-#' }
+#' a <- 30
+#'
+#' reactiveConsole(FALSE)
 #' @export
 makeReactiveBinding <- function(symbol, env = parent.frame()) {
   if (exists(symbol, envir = env, inherits = FALSE)) {
     initialValue <- env[[symbol]]
     rm(list = symbol, envir = env, inherits = FALSE)
-  }
-  else
+  } else {
     initialValue <- NULL
-  values <- reactiveValues(value = initialValue)
-  makeActiveBinding(symbol, env=env, fun=function(v) {
-    if (missing(v))
-      values$value
-    else
-      values$value <- v
-  })
+  }
+
+  val <- reactiveVal(initialValue, label = symbol)
+  makeActiveBinding(symbol, val, env = env)
 
   invisible()
 }
@@ -1440,6 +1451,29 @@ setAutoflush <- local({
     invisible()
   }
 })
+
+
+#' Activate reactivity in the console
+#'
+#' This is an experimental feature that allows you to enable reactivity
+#' at the console, for the purposes of experimentation and learning.
+#'
+#' @keywords internal
+#' @param enabled Turn console reactivity on or off?
+#' @export
+#' @examples
+#' reactiveConsole(TRUE)
+#' x <- reactiveVal(10)
+#' y <- observe({
+#'   message("The value of x is ", x())
+#' })
+#' x(20)
+#' x(30)
+#' reactiveConsole(FALSE)
+reactiveConsole <- function(enabled) {
+  options(shiny.suppressMissingContextError = enabled)
+  setAutoflush(enabled)
+}
 
 # ---------------------------------------------------------------------------
 

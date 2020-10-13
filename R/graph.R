@@ -87,7 +87,8 @@ reactlog <- function() {
 }
 
 #' @describeIn reactlog Display a full reactlog graph for all sessions.
-#' @inheritParams reactlog::reactlog_show
+#' @param time A boolean that specifies whether or not to display the
+#' time that each reactive takes to calculate a result.
 #' @export
 reactlogShow <- function(time = TRUE) {
   check_reactlog()

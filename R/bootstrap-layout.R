@@ -16,6 +16,7 @@
 #' @param theme Alternative Bootstrap stylesheet (normally a css file within the
 #'   www directory). For example, to use the theme located at
 #'   `www/bootstrap.css` you would use `theme = "bootstrap.css"`.
+#' @inheritParams bootstrapPage
 #'
 #' @return A UI defintion that can be passed to the [shinyUI] function.
 #'
@@ -87,11 +88,12 @@
 #' }
 #' @rdname fluidPage
 #' @export
-fluidPage <- function(..., title = NULL, responsive = NULL, theme = NULL) {
+fluidPage <- function(..., title = NULL, responsive = NULL, theme = NULL, lang = NULL) {
   bootstrapPage(div(class = "container-fluid", ...),
                 title = title,
                 responsive = responsive,
-                theme = theme)
+                theme = theme,
+                lang = lang)
 }
 
 
@@ -118,6 +120,7 @@ fluidRow <- function(...) {
 #' @param theme Alternative Bootstrap stylesheet (normally a css file within the
 #'   www directory). For example, to use the theme located at
 #'   `www/bootstrap.css` you would use `theme = "bootstrap.css"`.
+#' @inheritParams bootstrapPage
 #'
 #' @return A UI defintion that can be passed to the [shinyUI] function.
 #'
@@ -156,11 +159,12 @@ fluidRow <- function(...) {
 #'
 #' @rdname fixedPage
 #' @export
-fixedPage <- function(..., title = NULL, responsive = NULL, theme = NULL) {
+fixedPage <- function(..., title = NULL, responsive = NULL, theme = NULL, lang = NULL) {
   bootstrapPage(div(class = "container", ...),
                 title = title,
                 responsive = responsive,
-                theme = theme)
+                theme = theme,
+                lang = lang)
 }
 
 #' @rdname fixedPage

@@ -260,6 +260,9 @@ var InputNoResendDecorator = function(target, initialValues) {
 
     this.lastSentValues = cacheValues;
   };
+  this.forget = function(name) {
+    delete this.lastSentValues[name];
+  };
 }).call(InputNoResendDecorator.prototype);
 
 

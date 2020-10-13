@@ -136,6 +136,7 @@
 #'
 #'
 #' @inheritParams renderPlot
+#' @inheritParams cachedReactive
 #' @param cacheKeyExpr An expression that returns a cache key. This key should
 #'   be a unique identifier for a plot: the assumption is that if the cache key
 #'   is the same, then the plot will be the same.
@@ -146,10 +147,6 @@
 #'   possible pixel dimension. See [sizeGrowthRatio()] for more
 #'   information on the default sizing policy.
 #' @param res The resolution of the PNG, in pixels per inch.
-#' @param cache The scope of the cache, or a cache object. This can be
-#'   `"app"` (the default), `"session"`, or a cache object like
-#'   a [diskCache()]. See the Cache Scoping section for more
-#'   information.
 #' @param width,height not used. They are specified via the argument
 #'   `sizePolicy`.
 #'

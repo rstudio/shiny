@@ -100,6 +100,7 @@ bootstrapLib <- function(theme = NULL) {
     # option is automatically reset when the app (or session) exits
     if (isRunning()) {
       setCurrentTheme(theme)
+      print("is running! and registering bs_theme_dependencies_css")
       registerThemeDependency(bs_theme_dependencies_css)
 
     } else {
@@ -188,13 +189,14 @@ registerThemeDependency <- function(func) {
 
   # Note that this will automatically scope to the app or session level,
   # depending on if this is called from within a session or not.
-
   funcs <- getShinyOption("themeDependencyFuncs", list())
+str(funcs)
   # Don't add func if it's already present.
   have_func <- any(vapply(funcs, identical, logical(1), func))
   if (!have_func) {
     funcs[[length(funcs) + 1]] <- func
   }
+str(funcs)
 
   shinyOptions("themeDependencyFuncs" = funcs)
 }

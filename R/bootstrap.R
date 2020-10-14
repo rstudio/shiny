@@ -78,8 +78,11 @@ getLang <- function(ui) {
 #' @export
 bootstrapLib <- function(theme = NULL) {
   tagFunction(function() {
-    # If we're not compiling Bootstrap Sass, return the static Bootstrap build
+    # If we're not compiling Bootstrap Sass (from bootstraplib), return the
+    # static Bootstrap build.
     if (!is_bs_theme(theme)) {
+      # We'll enter here if `theme` is the path to a .css file, like that
+      # provided by `shinythemes::shinytheme("darkly")`.
       return(bootstrapDependency(theme))
     }
 
@@ -96,7 +99,9 @@ bootstrapLib <- function(theme = NULL) {
     # Note also that since this is shinyOptions() (and not options()), the
     # option is automatically reset when the app (or session) exits
     if (isRunning()) {
-      shinyOptions(bootstrapTheme = theme)
+      setCurrentTheme(theme)
+      registerThemeDependency(bs_theme_dependencies_css)
+
     } else {
       # Technically, this a potential issue (someone trying to execute/render
       # bootstrapLib outside of a Shiny app), but it seems that, in that case,
@@ -114,8 +119,17 @@ bootstrapLib <- function(theme = NULL) {
       #)
     }
 
-    bootstraplib::bs_dependencies(theme)
+    bootstraplib::bs_theme_dependencies(theme)
   })
+}
+
+# This is defined outside of bootstrapLib() because registerThemeDependency()
+# wants non-anonymous functions.
+bs_theme_dependencies_css <- function(theme) {
+  deps <- bootstraplib::bs_theme_dependencies(theme)
+  # Extract out the CSS files only (no need to re-send JS files, even though
+  # they wouldn't be re-rendered on the client anyway.)
+  Filter(deps, f = function(dep) !is.null(dep$stylesheet))
 }
 
 is_bs_theme <- function(x) {
@@ -132,39 +146,57 @@ is_bs_theme <- function(x) {
 #' and [bootstrapLib()]'s `theme` has been set to a [bootstraplib::bs_theme()]
 #' object, then this returns the `theme`. Otherwise, this returns `NULL`.
 #' @seealso [getCurrentOutputInfo()], [bootstrapLib()], [htmltools::tagFunction()]
-#' @examples
 #'
-#' library(bootstraplib)
-#' myThemableContent <- htmltools::tagFunction(function() {
-#'   theme <- getCurrentTheme()
-#'   if (is_bs_theme(theme)) {
-#'     tagList(
-#'       tags$head(
-#'         tags$style(HTML(
-#'           bs_sass(".text-50 { color: mix($body-bg, $body-color, 50%); }", theme)
-#'         ))
-#'       ),
-#'       h3(
-#'         "This color is 50% background and 50% foreground color",
-#'         class = "text-50"
-#'       )
-#'     )
-#'   } else {
-#'     "Try setting a theme = bs_theme()"
-#'   }
-#' })
-#'
-#' if (interactive()) {
-#'   ui <- fluidPage(
-#'     theme = bs_theme(bg = "yellow", fg = "red"),
-#'     myThemableContent
-#'   )
-#'   shinyApp(ui, function(input, output) {})
-#' }
-#'
+#' @keywords internal
 #' @export
 getCurrentTheme <- function() {
   getShinyOption("bootstrapTheme")
+}
+
+setCurrentTheme <- function(theme) {
+  shinyOptions(bootstrapTheme = theme)
+}
+
+#' Register a theme dependency
+#'
+#' This function registers a function that returns an [htmlDependency()] or list
+#' of such objects. If `session$setCurrentTheme()` is called, the function will
+#' be re-executed, and the resulting html dependency will be sent to the client.
+#'
+#' Note that `func` should **not** be an anonymous function, or a function which
+#' is defined within the calling function. This is so that,
+#' `registerThemeDependency()` is called multiple times with the function, it
+#' tries to deduplicate them
+#'
+#' @param func A function that takes one argument, `theme` (which is a
+#'   [sass::sass_layer()] object), and returns an htmlDependency object, or list
+#'   of them.
+#'
+#' @export
+#' @keywords internal
+registerThemeDependency <- function(func) {
+  func_expr <- substitute(func)
+  if (is.call(func_expr) && identical(func_expr[[1]], as.symbol("function"))) {
+    warning("`func` should not be an anonymous function. ",
+      "It should be declared outside of the function that calls registerThemeDependency(); ",
+      "otherwise it will not be deduplicated by Shiny and multiple copies of the ",
+      "resulting htmlDependency may be computed and sent to the client.")
+  }
+  if (!is.function(func) || length(formals(func)) != 1) {
+    stop("`func` must be a function with one argument (the current theme)")
+  }
+
+  # Note that this will automatically scope to the app or session level,
+  # depending on if this is called from within a session or not.
+  funcs <- getShinyOption("themeDependencyFuncs")
+
+  # Don't add func if it's already present.
+  have_func <- any(vapply(funcs, identical, logical(1), func))
+  if (!have_func) {
+    funcs[[length(funcs) + 1]] <- func
+  }
+
+  shinyOptions("themeDependencyFuncs" = funcs)
 }
 
 bootstrapDependency <- function(theme) {
@@ -185,16 +217,6 @@ bootstrapDependency <- function(theme) {
       "accessibility/css/bootstrap-accessibility.css"
     ),
     meta = list(viewport = "width=device-width, initial-scale=1")
-  )
-}
-
-# Reusable function for input widgets to compile their Sass against a bootstraplib theme
-bootstrapSass <- function(sassInput, theme, basename, dirname = "shiny-sass-") {
-  bootstraplib::bs_sass(
-    rules = sassInput, theme = theme,
-    output = sass::output_template(basename = basename, dirname = dirname),
-    options = sass::sass_options(output_style = "compressed"),
-    cache_key_extra = utils::packageVersion("shiny")
   )
 }
 

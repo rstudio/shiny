@@ -71,9 +71,24 @@ function registerDependency(name, version) {
   htmlDependencies[name] = version;
 }
 
+// Re-render stylesheet(s) if the dependency has specificially requested it
+// and it matches an existing dependency (name and version)
+function needsRestyle(dep) {
+  if (!dep.restyle) {
+    return false;
+  }
+  var names = Object.keys(htmlDependencies);
+  var idx = names.indexOf(dep.name);
+  if (idx === -1) {
+    return false;
+  }
+  return htmlDependencies[names[idx]] === dep.version;
+}
+
 // Client-side dependency resolution and rendering
 function renderDependency(dep) {
-  if (htmlDependencies.hasOwnProperty(dep.name))
+  var restyle = needsRestyle(dep);
+  if (htmlDependencies.hasOwnProperty(dep.name) && !restyle)
     return false;
 
   registerDependency(dep.name, dep.version);
@@ -82,7 +97,7 @@ function renderDependency(dep) {
 
   var $head = $("head").first();
 
-  if (dep.meta) {
+  if (dep.meta && !restyle) {
     var metas = $.map(asArray(dep.meta), function(obj, idx) {
       // only one named pair is expected in obj as it's already been decomposed
       var name = Object.keys(obj)[0];
@@ -93,20 +108,32 @@ function renderDependency(dep) {
 
   if (dep.stylesheet) {
     var stylesheets = $.map(asArray(dep.stylesheet), function(stylesheet) {
-      return $("<link rel='stylesheet' type='text/css'>")
-        .attr("href", href + "/" + encodeURI(stylesheet));
+      var this_href = href + "/" + encodeURI(stylesheet);
+      // If a styleSheet with this href is already active, then disable it
+      var re = new RegExp(this_href + "$");
+      for (var i = 0; i < document.styleSheets.length; i++) {
+        var h = document.styleSheets[i].href;
+        if (!h) continue;
+        if (restyle && h.match(re)) document.styleSheets[i].disabled = true;
+      }
+      // Force client to re-request the stylesheet if we've already seen it
+      // (without this unique param, the request might get cached)
+      if (restyle) {
+        this_href = this_href + "?restyle=" + new Date().getTime();
+      }
+      return $("<link rel='stylesheet' type='text/css'>").attr("href", this_href);
     });
     $head.append(stylesheets);
   }
 
-  if (dep.script) {
+  if (dep.script && !restyle) {
     var scripts = $.map(asArray(dep.script), function(scriptName) {
       return $("<script>").attr("src", href + "/" + encodeURI(scriptName));
     });
     $head.append(scripts);
   }
 
-  if (dep.attachment) {
+  if (dep.attachment && !restyle) {
     // dep.attachment might be a single string, an array, or an object.
     var attachments = dep.attachment;
     if (typeof(attachments) === "string")
@@ -129,7 +156,7 @@ function renderDependency(dep) {
     $head.append(attach);
   }
 
-  if (dep.head) {
+  if (dep.head && !restyle) {
     var $newHead = $("<head></head>");
     $newHead.html(dep.head);
     $head.append($newHead.children());

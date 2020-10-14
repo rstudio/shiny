@@ -15,37 +15,7 @@ object, then this returns the \code{theme}. Otherwise, this returns \code{NULL}.
 Intended for use by Shiny developers to create Shiny bindings with intelligent
 styling based on the \code{\link[=bootstrapLib]{bootstrapLib()}}'s \code{theme} value.
 }
-\examples{
-
-library(bootstraplib)
-myThemableContent <- htmltools::tagFunction(function() {
-  theme <- getCurrentTheme()
-  if (is_bs_theme(theme)) {
-    tagList(
-      tags$head(
-        tags$style(HTML(
-          bs_sass(".text-50 { color: mix($body-bg, $body-color, 50\%); }", theme)
-        ))
-      ),
-      h3(
-        "This color is 50\% background and 50\% foreground color",
-        class = "text-50"
-      )
-    )
-  } else {
-    "Try setting a theme = bs_theme()"
-  }
-})
-
-if (interactive()) {
-  ui <- fluidPage(
-    theme = bs_theme(bg = "yellow", fg = "red"),
-    myThemableContent
-  )
-  shinyApp(ui, function(input, output) {})
-}
-
-}
 \seealso{
 \code{\link[=getCurrentOutputInfo]{getCurrentOutputInfo()}}, \code{\link[=bootstrapLib]{bootstrapLib()}}, \code{\link[htmltools:tagFunction]{htmltools::tagFunction()}}
 }
+\keyword{internal}

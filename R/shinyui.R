@@ -83,34 +83,41 @@ renderPage <- function(ui, showcase=0, testMode=FALSE) {
 }
 
 shinyDependencies <- function() {
-  tagFunction(function() {
-    cssFile <- shinyCssFile()
-    version <- utils::packageVersion("shiny")
-    list(
-      htmlDependency(
-        name = "shiny-css",
-        version = version,
-        src = cssFile$src,
-        stylesheet = cssFile$stylesheet
-      ),
-      htmlDependency(
-        name = "shiny-javascript",
-        version = version,
-        src = c(href = "shared"),
-        script = if (getOption("shiny.minified", TRUE)) "shiny.min.js" else "shiny.js"
-      )
+  version <- utils::packageVersion("shiny")
+  list(
+    bootstraplib::bs_dependency_defer(shinyDependencyCSS),
+    htmlDependency(
+      name = "shiny-javascript",
+      version = version,
+      src = c(href = "shared"),
+      script = if (getOption("shiny.minified", TRUE)) "shiny.min.js" else "shiny.js"
     )
-  })
+  )
 }
 
-shinyCssFile <- function(theme = getCurrentTheme()) {
+shinyDependencyCSS <- function(theme) {
+  version <- utils::packageVersion("shiny")
+
   if (!is_bs_theme(theme)) {
-    return(list(src = c(href = "shared"), stylesheet = "shiny.min.css"))
+    return(htmlDependency(
+      name = "shiny-css",
+      version = version,
+      src = c(href = "shared"),
+      stylesheet = "shiny.min.css"
+    ))
   }
-  scss_home <- system.file("www", "shared", "shiny_scss", package = "shiny")
+
+  scss_home <- system.file("www/shared/shiny_scss", package = "shiny")
   scss_files <- file.path(scss_home, c("bootstrap.scss", "shiny.scss"))
-  outFile <- bootstrapSass(lapply(scss_files, sass::sass_file), theme = theme, "shiny")
-  list(src = c(file = dirname(outFile)), stylesheet = basename(outFile))
+  scss_files <- lapply(scss_files, sass::sass_file)
+
+  bootstraplib::bs_dependency(
+    input = scss_files,
+    theme = theme,
+    name = "shiny-sass",
+    version = version,
+    cache_key_extra = version
+  )
 }
 
 #' Create a Shiny UI handler

@@ -247,7 +247,7 @@ selectizeDependency <- function(theme) {
         "accessibility/js/selectize-plugin-a11y.min.js"
       )
     ),
-    bootstraplib::bs_dependency_dynamic(selectizeCSS)
+    bootstraplib::bs_dependency_defer(selectizeCSS)
   )
 }
 

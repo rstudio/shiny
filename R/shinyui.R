@@ -85,7 +85,7 @@ renderPage <- function(ui, showcase=0, testMode=FALSE) {
 shinyDependencies <- function() {
   version <- utils::packageVersion("shiny")
   list(
-    bootstraplib::bs_dependency_dynamic(shinyDependencyCSS),
+    bootstraplib::bs_dependency_defer(shinyDependencyCSS),
     htmlDependency(
       name = "shiny-javascript",
       version = version,

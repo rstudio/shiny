@@ -149,7 +149,7 @@ datePickerDependency <- function(theme) {
       })();
      </script>"
     ),
-    bootstraplib::bs_dependency_dynamic(datePickerCSS)
+    bootstraplib::bs_dependency_defer(datePickerCSS)
   )
 }
 

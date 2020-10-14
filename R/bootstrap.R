@@ -150,7 +150,7 @@ is_bs_theme <- function(x) {
 #' @keywords internal
 #' @export
 getCurrentTheme <- function() {
-  getShinyOption("bootstrapTheme")
+  getShinyOption("bootstrapTheme", default = NULL)
 }
 
 setCurrentTheme <- function(theme) {

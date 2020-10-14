@@ -142,7 +142,7 @@ runApp <- function(appDir=getwd(),
   shinyOptions(appToken = createUniqueId(8))
 
   # Set up default cache for app.
-  if (is.null(getShinyOption("cache"))) {
+  if (is.null(getShinyOption("cache", default = NULL))) {
     shinyOptions(cache = MemoryCache$new())
   }
 

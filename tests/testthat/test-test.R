@@ -168,8 +168,12 @@ test_that("app template works with runTests", {
     on.exit(unlink(tempTemplateDir, recursive = TRUE))
 
     if (any(c("all", "shinytest", "testthat") %in% combo)) {
+
+      ignore <- capture.output({
+        test_result <- runTests(tempTemplateDir)
+      })
       expect_output(
-        print(runTests(tempTemplateDir)),
+        print(test_result),
         paste0(
           "Shiny App Test Results\\n\\* Success",
           if (any(c("all", "shinytest") %in% combo))

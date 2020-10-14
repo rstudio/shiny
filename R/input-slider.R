@@ -230,11 +230,12 @@ ionRangeSliderDependency <- function() {
 
 ionRangeSliderDependencyCSS <- function(theme) {
   if (!is_bs_theme(theme)) {
-    htmlDependency(
-      "ionrangeslider-css", ionRangeSliderVersion,
+    return(htmlDependency(
+      "ionrangeslider-css",
+      ionRangeSliderVersion,
       src = c(href = "shared/ionrangeslider"),
       stylesheet = "css/ion.rangeSlider.css"
-    )
+    ))
   }
 
   # Remap some variable names for ionRangeSlider's scss

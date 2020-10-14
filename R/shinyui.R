@@ -96,15 +96,20 @@ shinyDependencies <- function() {
 }
 
 shinyDependencyCSS <- function(theme) {
+  version <- utils::packageVersion("shiny")
+
   if (!is_bs_theme(theme)) {
-    return(list(src = c(href = "shared"), stylesheet = "shiny.min.css"))
+    return(htmlDependency(
+      name = "shiny-css",
+      version = version,
+      src = c(href = "shared"),
+      stylesheet = "shiny.min.css"
+    ))
   }
 
   scss_home <- system.file("www/shared/shiny_scss", package = "shiny")
   scss_files <- file.path(scss_home, c("bootstrap.scss", "shiny.scss"))
   scss_files <- lapply(scss_files, sass::sass_file)
-
-  version <- utils::packageVersion("shiny")
 
   bootstraplib::bs_dependency(
     input = scss_files,

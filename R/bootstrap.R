@@ -188,7 +188,7 @@ registerThemeDependency <- function(func) {
 
   # Note that this will automatically scope to the app or session level,
   # depending on if this is called from within a session or not.
-  funcs <- getShinyOption("themeDependencyFuncs")
+  funcs <- getShinyOption("themeDependencyFuncs", default = list())
 
   # Don't add func if it's already present.
   have_func <- any(vapply(funcs, identical, logical(1), func))

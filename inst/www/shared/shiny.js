@@ -3953,26 +3953,26 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     }
 
     if (dep.stylesheet) {
-      var stylesheets = $.map(asArray(dep.stylesheet), function (stylesheet) {
-        var this_href = href + "/" + encodeURI(stylesheet); // If a styleSheet with this href is already active, then disable it
+      var link = $("<link rel='stylesheet' type='text/css'>");
+      $.map(asArray(dep.stylesheet), function (stylesheet) {
+        var this_href = href + "/" + encodeURI(stylesheet);
+        $head.append( // Force client to re-request the stylesheet if we've already seen it
+        // (without this unique param, the request might get cached)
+        link.attr("href", restyle ? this_href + "?restyle=" + new Date().getTime() : this_href)); // If a styleSheet with this href is already active, then disable it
 
         var re = new RegExp(this_href + "$");
 
         for (var i = 0; i < document.styleSheets.length; i++) {
           var h = document.styleSheets[i].href;
           if (!h) continue;
-          if (restyle && h.match(re)) document.styleSheets[i].disabled = true;
-        } // Force client to re-request the stylesheet if we've already seen it
-        // (without this unique param, the request might get cached)
 
-
-        if (restyle) {
-          this_href = this_href + "?restyle=" + new Date().getTime();
+          if (restyle && h.match(re)) {
+            setTimeout(function () {
+              document.styleSheets[i].disabled = true;
+            }, 10);
+          }
         }
-
-        return $("<link rel='stylesheet' type='text/css'>").attr("href", this_href);
       });
-      $head.append(stylesheets);
     }
 
     if (dep.script && !restyle) {

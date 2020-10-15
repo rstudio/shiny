@@ -32,8 +32,98 @@ arbitrary identifier (like an ID string) to the cache key.}
 Cache Scoping section for more information.}
 }
 \description{
-Create a reactive expression with caching
+Ordinary \code{\link[=reactive]{reactive()}} expressions will cache their most recent value. This
+can make computation more efficient, because time-consuming code can execute
+once and the result can be used in multiple different places without needing
+to re-execute the code.
+
+With \code{cachedReactive()}, any number of previous values can be cached. The
+most important difference in using \code{cachedReactive()} is that you must
+provide \code{cacheKeyExpr}, which is an expression that generates as a \emph{cache
+key}, in addition to \code{valueExpr}, which is an expression that generates the
+value returned by the \code{cachedReactive()}.
+
+For each possible value returned by \code{cacheKeyExpr}, there should be one
+possible value returned by \code{valueExpr}; a given value of \code{cacheKeyExpr}
+should correspond to multiple possible values of \code{valueExpr}.
+
+The way to use this is to have a \code{cacheKeyExpr} that is fast to compute, and
+a \code{valueExpr} that is expensive to compute. It evaluates the \code{cacheKeyExpr},
+and then serializes and hashes the result. If the resulting hashed key is in
+the cache, then it simply retrieves and returns it; if not, then it executes
+\code{valueExpr}, stores the result in the cache, and returns it.
+
+The \code{cacheKeyExpr} should be fast to compute, and ideally it will return an
+object that is not too large, since the object must be serialized and hashed.
+Typically, \code{cacheKeyExpr} will use any reactive inputs that are used by
+\code{valueExpr}, but will do something that is fast and simple with them, like
+put them together in a list. It is also best to use non-reference objects,
+since the serialization of these objects may not capture relevant changes.
 }
+\section{Cache keys and reactivity}{
+
+
+Because the value from \code{valueExpr} is cached, it is not necessarily
+re-executed, and therefore it can't be used to decide what objects to take
+reactive dependencies on. Instead, the \code{cacheKeyExpr} is used to figure out
+which objects to take reactive dependencies on. In short, the \code{cacheKeyExpr}
+is reactive, and \code{valueExpr} is not (it is run inside of \code{\link[=isolate]{isolate()}}).
+
+For example, if \code{cacheKeyExpr=input$x} and \code{valueExpr={input$x + input$y}},
+then it will only take a reactive dependency on \code{input$x} -- it won't
+recompute \code{valueExpr} when \code{input$y} changes. Moreover, the cache won't use
+\code{input$y} as part of the key, and so it could return incorrect values in the
+future when it retrieves values from the cache. (See the examples below for
+an example of this.)
+
+A better cache key would be something like \code{list(input$x, input$y)}. This
+does two things: it ensures that a reactive dependency is taken on both \code{x}
+and \code{y}, and it also makes sure that both values are represented in the cache
+key.
+
+In general, \code{cacheKeyExpr} should use the same reactive inputs as
+\code{valueExpr}, but the computation should be simpler. If there are other
+(non-reactive) values that are consumed, such as external data sources, they
+should be used in the \code{cacheKeyExpr} as well. Note that if the data object is
+large, it can make sense to do some sort of reduction on it so that the
+serialization and hashing of the cache key is not too expensive.
+
+Remember that the \code{cacheKeyExpr} is \emph{reactive}, so it is not re-executed
+every single time that someone accesses the \code{cachedReactive}. For example,
+suppose we have this \code{cachedReactive}:\if{html}{\out{<div class="NA">}}\preformatted{r <- cachedReactive(
+  cacheKeyExpr = list(input$x, input$y),
+  valueExpr = \{ input$x + input$y \}
+)
+}\if{html}{\out{</div>}}
+
+The first time someone calls \code{r()}, it executes both \code{cacheKeyExpr} and
+\code{valueExpr}. If someone calls \code{r()} again, then it does not need to
+re-execute \code{cacheKeyExpr}, because that \code{expr} has not been invalidated
+via a change to \code{input$x} or \code{input$y}; it simply returns the previous value.
+However, if \code{input$x} or \code{input$y} changes, then the reactive expression will
+be invalidated, and the next time that someone calls \code{r()}, \code{cacheKeyExpr}
+will need to be re-executed.
+}
+
+\section{Async with cached reactives}{
+
+
+With a cached reactive expression, they key and/or value expression can be
+\emph{asynchronous}. In other words, they can be promises -- not regular R
+promises, but rather objects provided by the promises package, which are
+similar to promises in JavaScript. (See \code{\link[promises:promise]{promises::promise()}} for more
+information.)
+
+If \code{valueExpr} is a promise, then anything that consumes the \code{cachedReactive}
+must expect it to return a promise.
+
+Similarly, if \code{cacheKeyExpr} is a promise (in other words, it is
+asynchronous), then the entire \code{cachedReactive} must be asynchronous, since
+the key must be computed before \code{valueExpr} is evaluated (or the value is
+retrieved from the cache). Anything that consumes the \code{cachedReactive} must
+therefore expect it to return a promise.
+}
+
 \examples{
 ## Only run examples in interactive R sessions
 if (interactive()) {
@@ -49,7 +139,7 @@ shinyApp(
   server = function(input, output) {
     r <- cachedReactive(
       # Use input$x and input$y for the cache key. This is a reactive
-      # expression
+      # expression.
       list(input$x, input$y),
       {
         # The value expression is an expensive computation

@@ -80,7 +80,7 @@ addResourcePath <- function(prefix, directoryPath) {
 
   # If a shiny app is currently running, dynamically register this path with
   # the corresponding httpuv server object.
-  if (!is.null(getShinyOption("server")))
+  if (!is.null(getShinyOption("server", default = NULL)))
   {
     getShinyOption("server")$setStaticPath(.list = stats::setNames(normalizedPath, prefix))
   }

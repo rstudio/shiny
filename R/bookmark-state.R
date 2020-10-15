@@ -79,7 +79,7 @@ saveShinySaveState <- function(state) {
 
   # Look for a save.interface function. This will be defined by the hosting
   # environment if it supports bookmarking.
-  saveInterface <- getShinyOption("save.interface")
+  saveInterface <- getShinyOption("save.interface", default = NULL)
 
   if (is.null(saveInterface)) {
     if (inShinyServer()) {
@@ -296,7 +296,7 @@ RestoreContext <- R6Class("RestoreContext",
 
       # Look for a load.interface function. This will be defined by the hosting
       # environment if it supports bookmarking.
-      loadInterface <- getShinyOption("load.interface")
+      loadInterface <- getShinyOption("load.interface", default = NULL)
 
       if (is.null(loadInterface)) {
         if (inShinyServer()) {

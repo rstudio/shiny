@@ -1289,7 +1289,7 @@ ShinySession <- R6Class(
       shinyOptions(bootstrapTheme = theme)
 
       # Call any theme dependency functions and make sure we get a list of deps back
-      funcs <- getShinyOption("themeDependencyFuncs")
+      funcs <- getShinyOption("themeDependencyFuncs", default = list())
       deps <- lapply(funcs, function(func) {
         deps <- func(theme)
         if (length(deps) == 0) return(NULL)
@@ -1471,7 +1471,7 @@ ShinySession <- R6Class(
       # Warn if trying to enable save-to-server bookmarking on a version of SS,
       # SSP, or Connect that doesn't support it.
       if (store == "server" && inShinyServer() &&
-          is.null(getShinyOption("save.interface")))
+          is.null(getShinyOption("save.interface", default = NULL)))
       {
         showNotification(
           "This app tried to enable saved-to-server bookmarking, but it is not supported by the hosting environment.",

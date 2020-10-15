@@ -12,6 +12,26 @@ shiny 1.5.0.9000
 
   Similar problems may exist when using `freezeReactiveVal`, and when using `freezeReactiveValue` with non-`input` reactive values objects. But support for those was added mostly for symmetry with `freezeReactiveValue(input)`, and given the above issues, it's not clear to us how you could have used these successfully in the past, or why you would even want to. For this release, we're soft-deprecating both of those uses, but we're more than willing to un-deprecate if it turns out people are using these; if that includes you, please join the conversation at https://github.com/rstudio/shiny/issues/3063. In the meantime, you can squelch the deprecation messages for these functions specifically, by setting `options(shiny.deprecation.messages.freeze = FALSE)`.
 
+### Themability & Bootstrap 4
+
+* The `theme` argument of `fluidPage()`, `navbarPage()`, `fillPage()`, `fixedPage()`, `bootstrapPage()`, and `bootstrapLib()` all now accept a `bs_theme()` object from the new `{bootstraplib}` package. This makes it much easier to create custom themes for Bootstrap 4 or 3 (not to mention leverage new BS4 features like utility classes). To learn more, see `{bootstraplib}`'s website <https://rstudio.github.io/bootstraplib/>
+  * When a `bs_theme()` is provided, any CSS that Shiny provides (e.g., CSS for `sliderInput()`, `selectInput()`, `showNotification()`, etc) now derive their default styles from `bs_theme()`, which makes these styles look much better by default with a wider range of themes.
+
+* Added a `session` method named `setCurrentTheme()` to update the `theme` server-side. In doing so, `setCurrentTheme()` forces any stylesheet(s) that depend on the `theme` (via `bootstraplib::bs_dependency_defer()`) to re-render, which provides a proper infrastructure for dynamically themeable widgets ([see here](https://rstudio.github.io/bootstraplib/articles/theming.html#custom-components-1) to learn more). For an example of how this might be useful, here's a minimal example of implementing a dark mode switch:
+
+```r
+library(shiny)
+library(bootstraplib)
+dark <- bs_theme(bg = "black", fg = "white")
+light <- bs_theme()
+ui <- fluidPage(theme = light, checkboxInput("dark_mode", "Dark mode", FALSE))
+server <- function(input, output, session) {
+  observe(session$setCurrentTheme(if (isTRUE(input$dark_mode)) dark else light))
+}
+shinyApp(ui, server)
+```
+
+
 ### Accessibility
 
 * Added [bootstrap accessibility plugin](https://github.com/paypal/bootstrap-accessibility-plugin) under the hood to improve accessibility of shiny apps for screen-reader and keyboard users: the enhancements include better navigations for alert, tooltip, popover, modal dialog, dropdown, tab Panel, collapse, and carousel elements. (#2911)

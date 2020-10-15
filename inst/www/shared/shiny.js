@@ -3958,15 +3958,16 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         var this_href = href + "/" + encodeURI(stylesheet);
         $head.append( // Force client to re-request the stylesheet if we've already seen it
         // (without this unique param, the request might get cached)
-        link.attr("href", restyle ? this_href + "?restyle=" + new Date().getTime() : this_href)); // If a styleSheet with this href is already active, then disable it
+        link.attr("href", restyle ? this_href + "?restyle=" + new Date().getTime() : this_href));
+        if (!restyle) return; // If a styleSheet with this href is already active, then disable it
 
-        var re = new RegExp(this_href + "$");
+        var re = new RegExp(this_href.split("/").join("\\/") + "$");
 
         for (var i = 0; i < document.styleSheets.length; i++) {
           var h = document.styleSheets[i].href;
           if (!h) continue;
 
-          if (restyle && h.match(re)) {
+          if (h.split("?restyle=")[0].match(re)) {
             setTimeout(function () {
               document.styleSheets[i].disabled = true;
             }, 10);

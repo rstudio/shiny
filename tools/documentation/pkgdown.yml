@@ -158,7 +158,6 @@ reference:
     desc: Functions that are intended to be called by third-party packages that extend Shiny.
     contents:
       - createWebDependency
-      - registerThemeDependency
       - resourcePaths
       - registerInputHandler
       - removeInputHandler

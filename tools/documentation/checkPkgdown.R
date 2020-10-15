@@ -32,7 +32,7 @@ local({
   known_unindexed <- c("shiny-package", "stacktrace", "knitr_methods",
                        "pageWithSidebar", "headerPanel", "shiny.appobj",
                        "deprecatedReactives", "reexports", "makeReactiveBinding",
-                       "reactiveConsole")
+                       "reactiveConsole", "registerThemeDependency2")
 
   ## This test ensures that every documented topic is included in
   ## staticdocs/index.r, unless explicitly waived by specifying it
@@ -42,12 +42,15 @@ local({
   unknown <- setdiff(c(known_unindexed, indexed_topics), c(all_topics, reexports_man_file_names))
 
   testthat::expect_equal(length(missing), 0,
-    info = paste("Functions missing from _pkgdown.yml:\n",
-      paste("  ", missing, sep = "", collapse = "\n"),
+    info = paste("Functions missing from ./tools/documentation/pkgdown.yaml:\n",
+      paste(" - ", missing, sep = "", collapse = "\n"),
+      "\nPlease update ./tools/documentation/pkgdown.yaml or ",
+      "`known_unindexed` in ./tools/documentation/checkPkgdown.R",
       sep = ""))
   testthat::expect_equal(length(unknown), 0,
-    info = paste("Unrecognized functions in _pkgdown.yml:\n",
-      paste("  ", unknown, sep = "", collapse = "\n"),
+    info = paste("Unrecognized functions in ./tools/documentation/pkgdown.yaml:\n",
+      paste(" - ", unknown, sep = "", collapse = "\n"),
+      "\nPlease update ./tools/documentation/pkgdown.yaml",
       sep = ""))
   invisible(TRUE)
 })

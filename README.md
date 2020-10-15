@@ -19,7 +19,7 @@ If you have general questions about using Shiny, please use the [RStudio Communi
 * Shiny applications are automatically "live" in the same way that spreadsheets are live. Outputs change instantly as users modify inputs, without requiring a reload of the browser.
 * Shiny user interfaces can be built entirely using R, or can be written directly in HTML, CSS, and JavaScript for more flexibility.
 * Works in any R environment (Console R, Rgui for Windows or Mac, ESS, StatET, RStudio, etc.).
-* Attractive default UI theme based on [Bootstrap](http://getbootstrap.com/).
+* Attractive default UI theme based on [Bootstrap](http://getbootstrap.com/) as well as easy customization of colors and fonts via [bootstraplib](https://rstudio.github.io/bootstraplib/) package.
 * A highly customizable slider widget with built-in support for animation.
 * Prebuilt output widgets for displaying plots, tables, and printed output of R objects.
 * Fast bidirectional communication between the web browser and R using the [httpuv](https://github.com/rstudio/httpuv) package.
@@ -37,30 +37,31 @@ install.packages("shiny")
 To install the latest development builds directly from GitHub, run this instead:
 
 ```r
-if (!require("remotes"))
-  install.packages("remotes")
+if (!require("remotes")) {
+ install.packages("remotes")
+}
 remotes::install_github("rstudio/shiny")
 ```
 
 ## Getting Started
 
-To learn more we highly recommend you check out the [Shiny Tutorial](http://shiny.rstudio.com/tutorial/). The tutorial explains the framework in-depth, walks you through building a simple application, and includes extensive annotated examples.
+To learn more we highly recommend going through:
 
-## Bootstrap 3 migration
+* The [Shiny Tutorial](https://shiny.rstudio.com/tutorial/) which explains the framework in-depth, walks you through building a simple application, and includes extensive annotated examples.
 
-Shiny versions 0.10.2.2 and below used the Bootstrap 2 web framework. After 0.10.2.2, Shiny switched to Bootstrap 3. For most users, the upgrade should be seamless. However, if you have have customized your HTML-generating code to use features specific to Bootstrap 2, you may need to update your code to work with Bootstrap 3.
+* The [Shiny Gallery](https://shiny.rstudio.com/gallery/) to see a variety of examples that demonstrate the functionality and power of the framework.
 
-If you do not wish to update your code at this time, you can use the [shinybootstrap2](https://github.com/rstudio/shinybootstrap2) package for backward compatibility.
+* [Shiny Articles](https://shiny.rstudio.com/articles/) to dive further into more advanced topics.
 
-If you prefer to install an older version of Shiny, you can do it using the devtools package:
+## A Note on Shiny UI
 
-```R
-devtools::install_version("shiny", version = "0.10.2.2")
-```
+Some Shiny UI functions implicitly require [Bootstrap](https://getbootstrap.com/) (e.g., `fluidPage()`, `column()`, etc). These functions, import Bootstrap 3 by default, but are also compatible with **bootstraplib**'s patched version of Bootstrap 4+. See [**bootstraplib**'s website](https://rstudio.github.io/bootstraplib) for more on using different versions of Bootstrap, using Bootswatch themes, as well as [customizing Bootstrap's default styles](https://rstudio.github.io/bootstraplib/articles/recipes.html) from R (no CSS required!).
+
+Note also that the Shiny framework doesn't necessarily force the use of Bootstrap (or any other HTML/CSS framework for that matter), but avoiding Bootstrap will likely require writing your own HTML/CSS (in such case, [`htmlTemplate()` can be useful](https://shiny.rstudio.com/articles/templates.html)).
 
 ## Development notes
 
-The Javascript code in Shiny is minified using tools that run on Node.js. See the tools/ directory for more information.
+The Javascript code in Shiny is minified using tools that run on Node.js. See the `tools/` directory for more information.
 
 ## Guidelines for contributing
 

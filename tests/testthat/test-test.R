@@ -165,19 +165,46 @@ test_that("app template works with runTests", {
     random_folder <- paste0("shinyAppTemplate-", paste0(combo, collapse = "_"))
     tempTemplateDir <- file.path(tempdir(), random_folder)
     shinyAppTemplate(tempTemplateDir, combo)
-    on.exit(unlink(tempTemplateDir, recursive = TRUE))
+    on.exit(unlink(tempTemplateDir, recursive = TRUE), add = TRUE)
 
     if (any(c("all", "shinytest", "testthat") %in% combo)) {
-      expect_output(
-        print(runTests(tempTemplateDir)),
-        paste0(
-          "Shiny App Test Results\\n\\* Success",
+
+      # suppress all output messages
+      ignore <- capture.output({
+        # do not let an error here stop this test
+        # string comparisons will be made below
+        test_result <- try({
+          runTests(tempTemplateDir)
+        }, silent = TRUE)
+      })
+
+      expected_test_output <- paste0(
+        c(
+          "Shiny App Test Results",
+          "* Success",
           if (any(c("all", "shinytest") %in% combo))
-            paste0("\\n  - ", file.path(random_folder, "tests", "shinytest\\.R")),
+            paste0("  - ", file.path(random_folder, "tests", "shinytest.R")),
           if (any(c("all", "testthat") %in% combo))
-            paste0("\\n  - ", file.path(random_folder, "tests", "testthat\\.R"))
-        )
+            paste0("  - ", file.path(random_folder, "tests", "testthat.R"))
+        ),
+        collapse = "\n"
       )
+
+      test_output <- paste0(
+        capture.output({
+          print(test_result)
+        }),
+        collapse = "\n"
+      )
+
+      if (identical(expected_test_output, test_output)) {
+        testthat::succeed()
+      } else {
+        # be very verbose in the error output to help find root cause of failure
+        cat("\nrunTests() output:\n", test_output, "\n\n")
+        cat("Expected print output:\n", expected_test_output, "\n")
+        testthat::fail(paste0("runTests() output for '", random_folder, "' failed. Received:\n", test_output, "\n"))
+      }
 
     } else {
       expect_error(

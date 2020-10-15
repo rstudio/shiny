@@ -42,15 +42,15 @@ local({
   unknown <- setdiff(c(known_unindexed, indexed_topics), c(all_topics, reexports_man_file_names))
 
   testthat::expect_equal(length(missing), 0,
-    info = paste("Functions missing from ./tools/documentation/pkgdown.yaml:\n",
+    info = paste("Functions missing from ./tools/documentation/pkgdown.yml:\n",
       paste(" - ", missing, sep = "", collapse = "\n"),
-      "\nPlease update ./tools/documentation/pkgdown.yaml or ",
+      "\nPlease update ./tools/documentation/pkgdown.yml or ",
       "`known_unindexed` in ./tools/documentation/checkPkgdown.R",
       sep = ""))
   testthat::expect_equal(length(unknown), 0,
-    info = paste("Unrecognized functions in ./tools/documentation/pkgdown.yaml:\n",
+    info = paste("Unrecognized functions in ./tools/documentation/pkgdown.yml:\n",
       paste(" - ", unknown, sep = "", collapse = "\n"),
-      "\nPlease update ./tools/documentation/pkgdown.yaml",
+      "\nPlease update ./tools/documentation/pkgdown.yml",
       sep = ""))
   invisible(TRUE)
 })

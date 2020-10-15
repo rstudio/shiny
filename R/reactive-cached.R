@@ -77,6 +77,7 @@
 #' }
 #'
 #' @importFrom digest digest
+#' @importFrom promises promise is.promising
 #' @export
 cachedReactive <- function(
   cacheKeyExpr,
@@ -89,9 +90,7 @@ cachedReactive <- function(
     stop("Additional ... arguments are not allowed.")
   }
 
-  cacheKeyExpr <- substitute(cacheKeyExpr)
-  cacheKeyFunc <- reactive(cacheKeyExpr, env = parent.frame(), quoted = TRUE,
-                           domain = domain, label = "userCacheKey")
+  cacheKeyFunc <- exprToFunction(cacheKeyExpr, parent.frame(), quoted = FALSE)
 
   valueExpr <- substitute(isolate(valueExpr))
   valueFunc <- exprToFunction(valueExpr, parent.frame(), quoted = TRUE)
@@ -103,21 +102,40 @@ cachedReactive <- function(
       function(cacheKeyResult) {
         cache <- resolve_cache_object(cache, domain)
         key   <- digest(cacheKeyResult, algo = "sha1")
-        value <- cache$get(key)
+        res <- cache$get(key)
 
         # Case 1: cache hit
-        if (!is.key_missing(value)) {
-          return(value)
-        }
-        # Case 2: cache miss
-        hybrid_chain(
-          valueFunc(),
-          function(value) {
-            cache$set(key, value)
-
-            value
+        if (!is.key_missing(res)) {
+          if (res$is_promise) {
+            return(promise(function(resolve, reject) resolve(res$value)))
+          } else {
+            return(res$value)
           }
-        )
+        }
+
+        # Case 2: cache miss
+        #
+        # valueFunc() might return a promise, or an actual value. Normally we'd
+        # use a hybrid_chain() for this, but in this case, we need to have
+        # different behavior if it's a promise or not a promise -- the
+        # information about whether or not it's a promise needs to be stored in
+        # the cache. We need to handle both cases and record in the cache
+        # whether it's a promise or not, so that any consumer of the
+        # cachedReactive() will be given the correct kind of object (a promise
+        # vs. an actual value) in the case of a future cache hit.
+        p <- valueFunc()
+        if (is.promising(p)) {
+          return(
+            p$then(function(value) {
+              cache$set(key, list(is_promise = TRUE, value = value))
+              value
+            })
+          )
+        } else {
+          # p is an ordinary value, not a promise.
+          cache$set(key, list(is_promise = FALSE, value = p))
+          p
+        }
       }
     ),
     domain = domain

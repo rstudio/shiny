@@ -407,3 +407,132 @@ test_that("cachedReactive key collisions", {
 })
 
 
+# ============================================================================
+# Error handling
+# ============================================================================
+test_that("cachedReactive error handling", {
+  cache <- memoryCache()
+
+  k <- reactiveVal(0)
+
+  # Error in key
+  r_vals <- numeric()
+  r <- cachedReactive(
+    { k(); stop("foo") },
+    {
+      r_vals <<- c(r_vals, k())
+      k()
+    },
+    cache = cache
+  )
+
+  o_vals <- numeric()
+  o <- observe({
+    o_vals <<- c(o_vals, r())
+  })
+
+  suppress_stacktrace(expect_warning(flushReact()))
+  # A second flushReact should not raise warnings, since cacheKeyExpr has not
+  # been invalidated.
+  expect_silent(flushReact())
+
+  k(1)
+  suppress_stacktrace(expect_warning(flushReact()))
+  k(0)
+  suppress_stacktrace(expect_warning(flushReact()))
+  # valueExpr and observer shouldn't have changed at all
+  expect_identical(r_vals,  numeric())
+  expect_identical(o_vals,  numeric())
+
+  rm(list = ls()); gc()
+  # ===================================
+  # Silent error in key with req(FALSE)
+  cache <- memoryCache()
+  k <- reactiveVal(0)
+
+  r_vals <- numeric()
+  r <- cachedReactive(
+    { k(); req(FALSE) },
+    {
+      r_vals <<- c(r_vals, k())
+      k()
+    },
+    cache = cache
+  )
+
+  o_vals <- numeric()
+  o <- observe({
+    o_vals <<- c(o_vals, r())
+  })
+
+  expect_silent(flushReact())
+  k(1)
+  expect_silent(flushReact())
+  k(0)
+  expect_silent(flushReact())
+  # valueExpr and observer shouldn't have changed at all
+  expect_identical(r_vals,  numeric())
+  expect_identical(o_vals,  numeric())
+
+  rm(list = ls()); gc()
+  # ===================================
+  # Error in value
+  cache <- memoryCache()
+  k <- reactiveVal(0)
+
+  r_vals <- numeric()
+  r <- cachedReactive(
+    { k() },
+    {
+      stop("foo")
+      r_vals <<- c(r_vals, k())
+      k()
+    },
+    cache = cache
+  )
+
+  o_vals <- numeric()
+  o <- observe({
+    o_vals <<- c(o_vals, r())
+  })
+
+  suppress_stacktrace(expect_warning(flushReact()))
+  k(1)
+  suppress_stacktrace(expect_warning(flushReact()))
+  k(0)
+  suppress_stacktrace(expect_warning(flushReact()))
+  # valueExpr and observer shouldn't have changed at all
+  expect_identical(r_vals,  numeric())
+  expect_identical(o_vals,  numeric())
+
+  rm(list = ls()); gc()
+  # =====================================
+  # Silent error in value with req(FALSE)
+  cache <- memoryCache()
+  k <- reactiveVal(0)
+
+  r_vals <- numeric()
+  r <- cachedReactive(
+    { k() },
+    {
+      req(FALSE)
+      r_vals <<- c(r_vals, k())
+      k()
+    },
+    cache = cache
+  )
+
+  o_vals <- numeric()
+  o <- observe({
+    o_vals <<- c(o_vals, r())
+  })
+
+  expect_silent(flushReact())
+  k(1)
+  expect_silent(flushReact())
+  k(0)
+  expect_silent(flushReact())
+  # valueExpr and observer shouldn't have changed at all
+  expect_identical(r_vals,  numeric())
+  expect_identical(o_vals,  numeric())
+})

@@ -136,6 +136,37 @@
 #' )
 #'
 #'
+#' # Demo of using actionButton with other values
+#' shinyApp(
+#'   ui = fluidPage(
+#'     sliderInput("x", "x", 1, 10, 5),
+#'     sliderInput("y", "y", 1, 10, 5),
+#'     actionButton("go", "Go"),
+#'     div("x * y: "),
+#'     verbatimTextOutput("txt")
+#'   ),
+#'   server = function(input, output) {
+#'     r <- cachedReactive(
+#'       {
+#'         # This expression takes a reactive dependency on input$go, so clicking
+#'         # the `go` button causes the computation to happen. However, it uses
+#'         # input$x and input$y (and not input$go) for the cache key, and it
+#'         # uses isolate() so that it does not take a reactive dependency on x and
+#'         # y.
+#'         req(input$go)
+#'         isolate(list(input$x, input$y))
+#'       },
+#'       {
+#'         message("Doing expensive computation...")
+#'         Sys.sleep(2)
+#'         input$x * input$y
+#'       }
+#'     )
+#'     output$txt <- renderText(r())
+#'   }
+#' )
+#'
+#'
 #' # Demo of cache key collisions and how to avoid them
 #' shinyApp(
 #'   ui = fluidPage(

@@ -1782,7 +1782,10 @@ getSliderType <- function(min, max, value) {
     else                            "number"
   }))
   if (length(type) > 1) {
-    stop("Type mismatch for `min`, `max`, and `value`. Each must be Date, POSIXt, or number.")
+    rlang::abort(c(
+      "Type mismatch for `min`, `max`, and `value`.",
+      "All values must either be numeric, Date, or POSIXt."
+    ))
   }
   type[[1]]
 }

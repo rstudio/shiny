@@ -65,7 +65,7 @@ Context <- R6Class(
         that have been registered with onInvalidate()."
 
       if (!identical(.pid, processId())) {
-        stop("Reactive context was created in one process and invalidated from another")
+        rlang::abort("Reactive context was created in one process and invalidated from another.")
       }
 
       if (.invalidated)
@@ -87,7 +87,7 @@ Context <- R6Class(
         immediately."
 
       if (!identical(.pid, processId())) {
-        stop("Reactive context was created in one process and accessed from another")
+        rlang::abort("Reactive context was created in one process and accessed from another.")
       }
 
       if (.invalidated)

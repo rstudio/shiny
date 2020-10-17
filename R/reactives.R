@@ -105,9 +105,7 @@ ReactiveVal <- R6Class(
       invisible(TRUE)
     },
     freeze = function(session = getDefaultReactiveDomain()) {
-      if (is.null(session)) {
-        stop("Can't freeze a reactiveVal without a reactive domain")
-      }
+      checkReactiveDomain(session)
       rLog$freezeReactiveVal(private$reactId, session)
       session$onFlushed(function() {
         self$thaw(session)
@@ -232,16 +230,22 @@ reactiveVal <- function(value = NULL, label = NULL) {
 #' @export
 freezeReactiveVal <- function(x) {
   domain <- getDefaultReactiveDomain()
-  if (is.null(domain)) {
-    stop("freezeReactiveVal() must be called when a default reactive domain is active.")
-  }
+  checkReactiveDomain(domain)
+
   if (!inherits(x, "reactiveVal")) {
-    stop("x must be a reactiveVal object")
+    rlang::abort("`x` must be a reactiveVal.")
   }
 
   attr(x, ".impl", exact = TRUE)$freeze(domain)
   invisible()
 }
+
+checkReactiveDomain <- function(x) {
+  if (is.null(x)) {
+    rlang::abort("Can't freeze reactive values without a reactive domain.")
+  }
+}
+
 
 #' @export
 format.reactiveVal <- function(x, ...) {
@@ -557,7 +561,7 @@ ReactiveValues <- R6Class(
 reactiveValues <- function(...) {
   args <- list(...)
   if ((length(args) > 0) && (is.null(names(args)) || any(names(args) == "")))
-    stop("All arguments passed to reactiveValues() must be named.")
+    rlang::abort("All arguments passed to reactiveValues() must be named.")
 
   values <- .createReactiveValues(ReactiveValues$new())
 
@@ -568,7 +572,7 @@ reactiveValues <- function(...) {
 
 checkName <- function(x) {
   if (!is.character(x) || length(x) != 1) {
-    stop("Must use single string to index into reactivevalues")
+    rlang::abort("Must use single string to index into reactivevalues.")
   }
 }
 
@@ -619,7 +623,7 @@ is.reactivevalues <- function(x) inherits(x, 'reactivevalues')
 #' @export
 `$<-.reactivevalues` <- function(x, name, value) {
   if (.subset2(x, 'readonly')) {
-    stop("Attempted to assign value to a read-only reactivevalues object")
+    rlang::abort("Can't modify read-only reactivevalues.")
   }
   checkName(name)
   .subset2(x, 'impl')$set(.subset2(x, 'ns')(name), value)
@@ -631,12 +635,12 @@ is.reactivevalues <- function(x) inherits(x, 'reactivevalues')
 
 #' @export
 `[.reactivevalues` <- function(values, name) {
-  stop("Single-bracket indexing of reactivevalues object is not allowed.")
+  rlang::abort("Can't index reactivevalues with `[`.")
 }
 
 #' @export
 `[<-.reactivevalues` <- function(values, name, value) {
-  stop("Single-bracket indexing of reactivevalues object is not allowed.")
+  rlang::abort("Can't index reactivevalues with `[`.")
 }
 
 #' @export
@@ -652,7 +656,7 @@ names.reactivevalues <- function(x) {
 
 #' @export
 `names<-.reactivevalues` <- function(x, value) {
-  stop("Can't assign names to reactivevalues object")
+  rlang::abort("Can't assign names to reactivevalues.")
 }
 
 #' @export
@@ -773,9 +777,7 @@ str.reactivevalues <- function(object, indent.str = " ", ...) {
 #' @export
 freezeReactiveValue <- function(x, name) {
   domain <- getDefaultReactiveDomain()
-  if (is.null(domain)) {
-    stop("freezeReactiveValue() must be called when a default reactive domain is active.")
-  }
+  checkReactiveDomain(domain)
 
   domain$freezeValue(x, name)
   invisible()
@@ -807,9 +809,10 @@ Observable <- R6Class(
                           domain = getDefaultReactiveDomain(),
                           ..stacktraceon = TRUE) {
       if (length(formals(func)) > 0)
-        stop("Can't make a reactive expression from a function that takes one ",
-             "or more parameters; only functions without parameters can be ",
-             "reactive.")
+        rlang::abort(c(
+          "Can't make a reactive expression from a function that takes arguments.",
+          "Only functions without parameters can become reactive expressions."
+        ))
 
       # This is to make sure that the function labels that show in the profiler
       # and in stack traces doesn't contain whitespace. See
@@ -1038,7 +1041,7 @@ execCount <- function(x) {
   else if (inherits(x, 'Observer'))
     return(x$.execCount)
   else
-    stop('Unexpected argument to execCount')
+    rlang::abort("Unexpected argument to execCount().")
 }
 
 # Observer ------------------------------------------------------------------
@@ -1070,8 +1073,10 @@ Observer <- R6Class(
                           domain = getDefaultReactiveDomain(),
                           autoDestroy = TRUE, ..stacktraceon = TRUE) {
       if (length(formals(observerFunc)) > 0)
-        stop("Can't make an observer from a function that takes parameters; ",
-             "only functions without parameters can be reactive.")
+        rlang::abort(c(
+          "Can't make an observer from a function that takes arguments.",
+          "Only functions without arguments can become observers."
+        ))
       if (grepl("\\s", label, perl = TRUE)) {
         funcLabel <- "<observer>"
       } else {

@@ -351,13 +351,8 @@ renderCachedPlot <- function(expr,
   # values get filled by an observer below.
   fitDims <- reactiveValues(width = NULL, height = NULL)
 
-  # Make sure alt param to be reactive function
-  if (is.reactive(alt))
-    altWrapper <- alt
-  else if (is.function(alt))
-    altWrapper <- reactive({ alt() })
-  else
-    altWrapper <- function() { alt }
+  # Allow alt param to be reactive function
+  altWrapper <- coerceToReactive(alt)
 
   resizeObserver <- NULL
   ensureResizeObserver <- function() {

@@ -614,6 +614,14 @@ is.reactivevalues <- function(x) inherits(x, 'reactivevalues')
 #' @export
 `$.reactivevalues` <- function(x, name) {
   checkName(name)
+
+  if (!hasCurrentContext()) {
+    rlang::abort(c(
+      paste0("Can't access reactive value '", name, "' outside of reactive consumer."),
+      i = "Do you need to wrap inside reactive() or observer()?"
+    ))
+  }
+
   .subset2(x, 'impl')$get(.subset2(x, 'ns')(name))
 }
 
@@ -623,7 +631,7 @@ is.reactivevalues <- function(x) inherits(x, 'reactivevalues')
 #' @export
 `$<-.reactivevalues` <- function(x, name, value) {
   if (.subset2(x, 'readonly')) {
-    rlang::abort("Can't modify read-only reactivevalues.")
+    rlang::abort(paste0("Can't modify read-only reactive value '", name, "'"))
   }
   checkName(name)
   .subset2(x, 'impl')$set(.subset2(x, 'ns')(name), value)

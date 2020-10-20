@@ -3953,27 +3953,49 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     }
 
     if (dep.stylesheet) {
-      var link = $("<link rel='stylesheet' type='text/css'>");
-      $.map(asArray(dep.stylesheet), function (stylesheet) {
+      var links = $.map(asArray(dep.stylesheet), function (stylesheet) {
+        var link = $("<link rel='stylesheet' type='text/css'>");
         var this_href = href + "/" + encodeURI(stylesheet);
-        $head.append( // Force client to re-request the stylesheet if we've already seen it
-        // (without this unique param, the request might get cached)
-        link.attr("href", restyle ? this_href + "?restyle=" + new Date().getTime() : this_href));
-        if (!restyle) return; // If a styleSheet with this href is already active, then disable it
 
-        var re = new RegExp(this_href.split("/").join("\\/") + "$");
+        if (!restyle) {
+          return link.attr("href", this_href);
+        } // When we're restyling (i.e., this is coming through
+        // session$setCurrentTheme()), then before rendering the new
+        // stylesheet, search the existing styleSheets for href(s) that
+        // appear to point to match the same source, and flag for removal
+
 
         for (var i = 0; i < document.styleSheets.length; i++) {
-          var h = document.styleSheets[i].href;
-          if (!h) continue;
+          var sheet = document.styleSheets[i];
+          if (!sheet.href) continue;
+          var pieces = sheet.href.split("?")[0].split("/");
 
-          if (h.split("?restyle=")[0].match(re)) {
-            setTimeout(function () {
-              document.styleSheets[i].disabled = true;
-            }, 10);
+          if (pieces[pieces.length - 1] === encodeURI(stylesheet) && pieces[pieces.length - 2] === href) {
+            sheet._shiny_restyle = true;
           }
-        }
+        } // Include a timestamp to force the client to re-request 'new'
+        // stylesheets (otherwise it might get cached)
+
+
+        var param = "?restyle=" + new Date().getTime();
+        return link.attr("href", this_href + param);
       });
+      $head.append(links); // Disable and remove old stylesheets on the next tick
+      // The timeout amount here is currently a total guess...
+      // At first I had 10 milliseconds, but encountered some FOUC
+      // with bootstraplib's real-time themer. In the future, if we encounter
+      // other examples of FOUC we may want to consider increasing the timeout
+
+      if (restyle) {
+        setTimeout(function () {
+          for (var i = 0; i < document.styleSheets.length; i++) {
+            var sheet = document.styleSheets[i];
+            if (!sheet._shiny_restyle) continue;
+            sheet.disabled = true;
+            sheet.ownerNode.remove();
+          }
+        }, 100);
+      }
     }
 
     if (dep.script && !restyle) {

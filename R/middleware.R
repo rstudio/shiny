@@ -346,7 +346,7 @@ HandlerManager <- R6Class("HandlerManager",
                 ),
                 catch = function(err) {
                   httpResponse(status = 500L,
-                    content_type = "text/html",
+                    content_type = "text/html; charset=UTF-8",
                     content = as.character(htmltools::htmlTemplate(
                       system.file("template", "error.html", package = "shiny"),
                       message = conditionMessage(err)

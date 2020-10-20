@@ -76,7 +76,7 @@ pre.shiny-text-output.noplaceholder:empty {
 */
 pre.shiny-text-output {
   word-wrap: normal;
-  @include border-radius($shiny-text-output-border-radius);
+  @include border-radius-shim($shiny-text-output-border-radius);
 }
 
 .shiny-image-output, .shiny-plot-output {
@@ -329,7 +329,7 @@ pre.shiny-text-output {
   margin-bottom: 6px;
   background-color: $shiny-input-panel-bg;
   border: $shiny-input-panel-border;
-  @include border-radius($shiny-input-panel-border-radius);
+  @include border-radius-shim($shiny-input-panel-border-radius);
 }
 
 /* For checkbox groups and radio buttons, bring the options closer to label,
@@ -377,7 +377,7 @@ pre.shiny-text-output {
   background-color: $notification-bg-color;
   color: $notification-color;
   border: $notification-border;
-  @include border-radius($notification-border-radius);
+  @include border-radius-shim($notification-border-radius);
   opacity: 0.85;
   padding: $notification-padding;
   margin: 2px;

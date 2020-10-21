@@ -4,44 +4,51 @@ test_that("cachedReactive basic functionality", {
 
   k <- reactiveVal(0)
 
-  r_vals <- numeric()
-  r <- cachedReactive(k(), {
-      r_vals <<- c(r_vals, k())
+  vals <- character()
+  r <- cachedReactive(
+    {
+      x <- paste0(k(), "k")
+      vals <<- c(vals, x)
+      k()
+    },
+    {
+      x <- paste0(k(), "v")
+      vals <<- c(vals, x)
       k()
     },
     cache = cache
   )
 
-  o_vals <- numeric()
   o <- observe({
-    o_vals <<- c(o_vals, r())
+    x <- paste0(r(), "o")
+    vals <<- c(vals, x)
   })
 
   flushReact()
+  expect_identical(vals, c("0k", "0v", "0o"))
 
+  vals <- character()
   k(1)
   flushReact()
   k(2)
   flushReact()
-  expect_identical(r_vals, c(0, 1, 2))
-  expect_identical(o_vals, c(0, 1, 2))
+  expect_identical(vals, c("1k", "1v", "1o", "2k", "2v", "2o"))
 
-  # Use a value that is in the cache. o will re-execute, but r will not.
+  # Use a value that is in the cache. k and o will re-execute, but v will not.
+  vals <- character(0)
   k(1)
   flushReact()
-  expect_identical(r_vals, c(0, 1, 2))
-  expect_identical(o_vals, c(0, 1, 2, 1))
+  expect_identical(vals, c("1k", "1o"))
   k(0)
   flushReact()
-  expect_identical(r_vals, c(0, 1, 2))
-  expect_identical(o_vals, c(0, 1, 2, 1, 0))
+  expect_identical(vals, c("1k", "1o", "0k", "0o"))
 
-  # Reset the cache - r will re-execute even if it's a previously-used value.
+  # Reset the cache - k and v will re-execute even if it's a previously-used value.
+  vals <- character(0)
   cache$reset()
   k(1)
   flushReact()
-  expect_identical(r_vals, c(0, 1, 2, 1))
-  expect_identical(o_vals, c(0, 1, 2, 1, 0, 1))
+  expect_identical(vals, c("1k","1v", "1o"))
 })
 
 
@@ -53,52 +60,58 @@ test_that("cachedReactive - valueExpr is isolated", {
   k <- reactiveVal(1)
   v <- reactiveVal(10)
 
-  r_vals <- numeric()
-  r <- cachedReactive(k(), {
-      r_vals <<- c(r_vals, v())
+  vals <- character()
+  r <- cachedReactive(
+    {
+      x <- paste0(k(), "k")
+      vals <<- c(vals, x)
+      k()
+    },
+    {
+      x <- paste0(v(), "v")
+      vals <<- c(vals, x)
       v()
     },
     cache = cache
   )
 
-  o_vals <- numeric()
   o <- observe({
-    o_vals <<- c(o_vals, r())
+    x <- paste0(r(), "o")
+    vals <<- c(vals, x)
   })
 
   flushReact()
+  expect_identical(vals, c("1k", "10v", "10o"))
 
-  # Changing v() triggers reactivity
+  # Changing k() triggers reactivity
   k(2)
   flushReact()
   k(3)
   flushReact()
-  expect_identical(r_vals, c(10, 10, 10))
-  expect_identical(o_vals, c(10, 10, 10))
+  expect_identical(vals, c("1k", "10v", "10o", "2k", "10v", "10o", "3k", "10v", "10o"))
 
-  # Changing w() does not trigger reactivity
+  # Changing v() does not trigger reactivity
+  vals <- character()
   v(20)
   flushReact()
   v(30)
   flushReact()
-  expect_identical(r_vals, c(10, 10, 10))
-  expect_identical(o_vals, c(10, 10, 10))
+  expect_identical(vals, character())
 
-  # If v() changes, it will invalidate r, which will invalidate o. r will not
+  # If k() changes, it will invalidate r, which will invalidate o. r will not
   # re-execute, but instead fetch the old value (10) from the cache (from when
   # the key was 1), and that value will be passed to o. This is an example of a
   # bad key!
   k(1)
   flushReact()
-  expect_identical(r_vals, c(10, 10, 10))
-  expect_identical(o_vals, c(10, 10, 10, 10))
+  expect_identical(vals, c("1k", "10o"))
 
   # A new un-cached value for v will cause r to re-execute; it will fetch the
-  # current value of w (30), and that value will be passed to o.
+  # current value of v (30), and that value will be passed to o.
+  vals <- character()
   k(4)
   flushReact()
-  expect_identical(r_vals, c(10, 10, 10, 30))
-  expect_identical(o_vals, c(10, 10, 10, 10, 30))
+  expect_identical(vals, c("4k", "30v", "30o"))
 })
 
 
@@ -109,73 +122,59 @@ test_that("cachedReactive with async key", {
   cache <- memoryCache()
   k <- reactiveVal(0)
 
-  r_vals <- numeric()
+  vals <- character()
   r <- cachedReactive(
     {
       promises::promise(function(resolve, reject) {
+        x <- paste0(k(), "k1")
+        vals <<- c(vals, x)
         resolve(k())
+      })$then(function(value) {
+        x <- paste0(k(), "k2")
+        vals <<- c(vals, x)
+        value
       })
     },
     {
-      r_vals <<- c(r_vals, k())
+      x <- paste0(k(), "v")
+      vals <<- c(vals, x)
       k()
     },
     cache = cache
   )
 
-  o_vals <- numeric()
   o <- observe({
-    # v <- r()
-    # o_vals <<- c(o_vals, v)
     r()$then(function(value) {
-      o_vals <<- c(o_vals, value)
+      x <- paste0(value, "o")
+      vals <<- c(vals, x)
     })
   })
 
-  # Initially, the valueExpr and observer don't run; they will run on the next
-  # tick of the event loop.
+  # Initially, only the first step in the promise for key runs.
   flushReact()
-  expect_identical(r_vals, numeric())
-  expect_identical(o_vals, numeric())
-  # After running the event loop once, the cachedReactive's valueExpr will run,
-  # but the observer's then() function won't run yet (it gets scheduled in this
-  # tick).
-  later::run_now()
-  expect_identical(r_vals, 0)
-  expect_identical(o_vals, numeric())
-  # One more run of the event loop, and the then() function will run.
-  later::run_now()
-  expect_identical(r_vals, 0)
-  expect_identical(o_vals, 0)
+  expect_identical(vals, c("0k1"))
+
+  # After pumping the event loop a feww times, the rest of the chain will run.
+  for (i in 1:3) later::run_now()
+  expect_identical(vals, c("0k1", "0k2", "0v", "0o"))
 
   # If we change k, we should see same pattern as above, where run_now() is
   # needed for the promise callbacks to run.
+  vals <- character()
   k(1)
   flushReact()
-  expect_identical(r_vals, 0)
-  expect_identical(o_vals, 0)
-  later::run_now()
-  expect_identical(r_vals, c(0, 1))
-  expect_identical(o_vals, 0)
-  later::run_now()
-  expect_identical(r_vals, c(0, 1))
-  expect_identical(o_vals, c(0, 1))
+  expect_identical(vals, c("1k1"))
+  for (i in 1:3) later::run_now()
+  expect_identical(vals, c("1k1", "1k2", "1v", "1o"))
 
   # Going back to a cached value: The cachedReactive's valueExpr won't run, but
   # the observer will.
+  vals <- character()
   k(0)
   flushReact()
-  # Step 1: cacheKeyExpr runs
-  expect_identical(r_vals, c(0, 1))
-  expect_identical(o_vals, c(0, 1))
-  # Step 2: value is retrieved from the cache (valueExpr doesn't run)
-  later::run_now()
-  expect_identical(r_vals, c(0, 1))
-  expect_identical(o_vals, c(0, 1))
-  # Step 3: observer's then() function runs.
-  later::run_now()
-  expect_identical(r_vals, c(0, 1))
-  expect_identical(o_vals, c(0, 1, 0))
+  expect_identical(vals, c("0k1"))
+  for (i in 1:3) later::run_now()
+  expect_identical(vals, c("0k1", "0k2", "0o"))
 })
 
 
@@ -193,67 +192,59 @@ test_that("cachedReactives with async value", {
   cache <- memoryCache()
   k <- reactiveVal(0)
 
-  r_vals <- numeric()
+  vals <- character()
+
   r <- cachedReactive(
-    k(),
+    {
+      x <- paste0(k(), "k")
+      vals <<- c(vals, x)
+      k()
+    },
     {
       promises::promise(function(resolve, reject) {
-        r_vals <<- c(r_vals, k())
+        x <- paste0(k(), "v1")
+        vals <<- c(vals, x)
         resolve(k())
+      })$then(function(value) {
+        x <- paste0(value, "v2")
+        vals <<- c(vals, x)
+        value
       })
     },
     cache = cache
   )
 
-  o_vals <- numeric()
   o <- observe({
-    p <- r()
-    p$then(function(value) {
-      o_vals <<- c(o_vals, value)
+    r()$then(function(value) {
+      x <- paste0(value, "o")
+      vals <<- c(vals, x)
     })
   })
 
-  # Initially, the valueExpr and observer don't run; they will run on the next
-  # tick of the event loop.
+  # Initially, the `then` in the valueExpr and observer don't run, but they will
+  # after running the event loop.
   flushReact()
-  expect_identical(r_vals, 0)
-  expect_identical(o_vals, numeric())
-  # After running the event loop once, the cachedReactive's valueExpr will run,
-  # but the observer's then() function won't run yet (it gets scheduled in this
-  # tick).
-  later::run_now()
-  expect_identical(r_vals, 0)
-  expect_identical(o_vals, numeric())
-  # One more run of the event loop, and the then() function will run.
-  later::run_now()
-  expect_identical(r_vals, 0)
-  expect_identical(o_vals, 0)
+  expect_identical(vals, c("0k", "0v1"))
+  for (i in 1:3) later::run_now()
+  expect_identical(vals, c("0k", "0v1", "0v2", "0o"))
 
   # If we change k, we should see same pattern as above, where run_now() is
   # needed for the promise callbacks to run.
+  vals <- character()
   k(1)
   flushReact()
-  expect_identical(r_vals, c(0, 1))
-  expect_identical(o_vals, 0)
-  later::run_now()
-  expect_identical(r_vals, c(0, 1))
-  expect_identical(o_vals, 0)
-  later::run_now()
-  expect_identical(r_vals, c(0, 1))
-  expect_identical(o_vals, c(0, 1))
+  expect_identical(vals, c("1k", "1v1"))
+  for (i in 1:3) later::run_now()
+  expect_identical(vals, c("1k", "1v1", "1v2", "1o"))
 
   # Going back to a cached value: The cachedReactive's valueExpr won't run, but
   # the observer will.
+  vals <- character()
   k(0)
   flushReact()
-  # Step 1: cacheKeyExpr runs, value is retrieved from the cache, wrapped in a
-  # promise, and returned.
-  expect_identical(r_vals, c(0, 1))
-  expect_identical(o_vals, c(0, 1))
-  # Step 2: observer's then() function runs.
+  expect_identical(vals, c("0k"))
   later::run_now()
-  expect_identical(r_vals, c(0, 1))
-  expect_identical(o_vals, c(0, 1, 0))
+  expect_identical(vals, c("0k", "0o"))
 })
 
 
@@ -267,98 +258,66 @@ test_that("cachedReactives with async key and value", {
   # the cache. This tests the promise case (almost all the other tests here test
   # the non-promise case).
 
-  # Async value
+  # Async key and value
   cache <- memoryCache()
   k <- reactiveVal(0)
 
-  r_vals <- numeric()
+  vals <- character()
+
   r <- cachedReactive(
     {
       promises::promise(function(resolve, reject) {
+        x <- paste0(k(), "k1")
+        vals <<- c(vals, x)
         resolve(k())
+      })$then(function(value) {
+        x <- paste0(k(), "k2")
+        vals <<- c(vals, x)
+        value
       })
     },
     {
       promises::promise(function(resolve, reject) {
-        r_vals <<- c(r_vals, k())
+        x <- paste0(k(), "v1")
+        vals <<- c(vals, x)
         resolve(k())
+      })$then(function(value) {
+        x <- paste0(value, "v2")
+        vals <<- c(vals, x)
+        value
       })
     },
     cache = cache
   )
 
-  o_vals <- numeric()
   o <- observe({
-    p <- r()
-    p$then(function(value) {
-      o_vals <<- c(o_vals, value)
+    r()$then(function(value) {
+      x <- paste0(value, "o")
+      vals <<- c(vals, x)
     })
   })
 
-  # Initially, the valueExpr and observer don't run; they will run on the next
-  # tick of the event loop.
   flushReact()
-  expect_identical(r_vals, numeric())
-  expect_identical(o_vals, numeric())
-  # After running the event loop once, the cachedReactive's valueExpr will run,
-  # but the observer's then() function won't run yet (it gets scheduled in this
-  # tick).
-  later::run_now()
-  expect_identical(r_vals, 0)
-  expect_identical(o_vals, numeric())
-  # Next tick: the then() in the cachedReactive sets the value in the cache, and
-  # then returns the value.
-  later::run_now()
-  expect_identical(r_vals, 0)
-  expect_identical(o_vals, numeric())
-  # Next tick: ???
-  later::run_now()
-  expect_identical(r_vals, 0)
-  expect_identical(o_vals, numeric())
-  # Next tick: The then() function in the observer will run.
-  later::run_now()
-  expect_identical(r_vals, 0)
-  expect_identical(o_vals, 0)
+  expect_identical(vals, c("0k1"))
+  for (i in 1:6) later::run_now()
+  expect_identical(vals, c("0k1", "0k2", "0v1", "0v2", "0o"))
 
-  # If we change k, we should see same pattern as above, where run_now() is
-  # needed for the promise callbacks to run.
+  # If we change k, we should see same pattern as above.
+  vals <- character(0)
   k(1)
   flushReact()
-  expect_identical(r_vals, 0)
-  expect_identical(o_vals, 0)
-  later::run_now()
-  expect_identical(r_vals, c(0, 1))
-  expect_identical(o_vals, 0)
-  later::run_now()
-  expect_identical(r_vals, c(0, 1))
-  expect_identical(o_vals, 0)
-  later::run_now()
-  expect_identical(r_vals, c(0, 1))
-  expect_identical(o_vals, 0)
-  later::run_now()
-  expect_identical(r_vals, c(0, 1))
-  expect_identical(o_vals, c(0, 1))
+  expect_identical(vals, c("1k1"))
+  for (i in 1:6) later::run_now()
+  expect_identical(vals, c("1k1", "1k2", "1v1", "1v2", "1o"))
 
   # Going back to a cached value: The cachedReactive's valueExpr won't run, but
   # the observer will.
+  vals <- character(0)
   k(0)
   flushReact()
-  # Step 1: cacheKeyExpr promise runs
-  expect_identical(r_vals, c(0, 1))
-  expect_identical(o_vals, c(0, 1))
-  # The next step in the hybrid_chain runs, value is retrieved from the cache,
-  # wrapped in a promise, and the promise is returned.
-  later::run_now()
-  expect_identical(r_vals, c(0, 1))
-  expect_identical(o_vals, c(0, 1))
-  # ???
-  later::run_now()
-  expect_identical(r_vals, c(0, 1))
-  expect_identical(o_vals, c(0, 1))
-  # Observer's then() function runs.
-  later::run_now()
-  expect_identical(r_vals, c(0, 1))
-  expect_identical(o_vals, c(0, 1, 0))
+  expect_identical(vals, c("0k1"))
+  for (i in 1:4) later::run_now()
+  expect_identical(vals, c("0k1", "0k2", "0o"))
 })
 
 test_that("cachedReactive key collisions", {
@@ -444,7 +403,6 @@ test_that("cachedReactive error handling", {
   expect_identical(r_vals,  numeric())
   expect_identical(o_vals,  numeric())
 
-  rm(list = ls()); gc()
   # ===================================
   # Silent error in key with req(FALSE)
   cache <- memoryCache()
@@ -474,7 +432,6 @@ test_that("cachedReactive error handling", {
   expect_identical(r_vals,  numeric())
   expect_identical(o_vals,  numeric())
 
-  rm(list = ls()); gc()
   # ===================================
   # Error in value
   cache <- memoryCache()
@@ -505,7 +462,6 @@ test_that("cachedReactive error handling", {
   expect_identical(r_vals,  numeric())
   expect_identical(o_vals,  numeric())
 
-  rm(list = ls()); gc()
   # =====================================
   # Silent error in value with req(FALSE)
   cache <- memoryCache()

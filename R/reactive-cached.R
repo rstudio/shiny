@@ -15,7 +15,7 @@
 #'
 #' For each possible value returned by `cacheKeyExpr`, there should be one
 #' possible value returned by `valueExpr`; a given value of `cacheKeyExpr`
-#' should correspond to multiple possible values of `valueExpr`.
+#' should not correspond to multiple possible values of `valueExpr`.
 #'
 #' The way to use this is to have a `cacheKeyExpr` that is fast to compute, and
 #' a `valueExpr` that is expensive to compute. It evaluates the `cacheKeyExpr`,
@@ -30,43 +30,48 @@
 #' put them together in a list. It is also best to use non-reference objects,
 #' since the serialization of these objects may not capture relevant changes.
 #'
+#' `cachedReactive()` also can take an `eventExpr` so that it behaves similar to
+#' [eventReactive()]. See more in the **Event expression** section.
+#'
 #' @section Cache keys and reactivity:
 #'
-#' Because the value from `valueExpr` is cached, it is not necessarily
-#' re-executed, and therefore it can't be used to decide what objects to take
-#' reactive dependencies on. Instead, the `cacheKeyExpr` is used to figure out
-#' which objects to take reactive dependencies on. In short, the `cacheKeyExpr`
-#' is reactive, and `valueExpr` is not (it is run inside of [isolate()]).
+#'   Because the value from `valueExpr` is cached, it is not necessarily
+#'   re-executed, and therefore it can't be used to decide what objects to take
+#'   reactive dependencies on. Instead, the `cacheKeyExpr` is used to figure out
+#'   which objects to take reactive dependencies on. In short, the
+#'   `cacheKeyExpr` is reactive, and `valueExpr` is not (it is run inside of
+#'   [isolate()]).
 #'
-#' For example, if `cacheKeyExpr=input$x` and `valueExpr={input$x + input$y}`,
-#' then it will only take a reactive dependency on `input$x` -- it won't
-#' recompute `valueExpr` when `input$y` changes. Moreover, the cache won't use
-#' `input$y` as part of the key, and so it could return incorrect values in the
-#' future when it retrieves values from the cache. (See the examples below for
-#' an example of this.)
+#'   Here's an example of what not to do: if `cacheKeyExpr=input$x` and
+#'   `valueExpr={input$x + input$y}`, then it will only take a reactive
+#'   dependency on `input$x` -- it won't recompute `valueExpr` when `input$y`
+#'   changes. Moreover, the cache won't use `input$y` as part of the key, and so
+#'   it could return incorrect values in the future when it retrieves values
+#'   from the cache. (See the examples below for an example of this.)
 #'
-#' A better cache key would be something like `list(input$x, input$y)`. This
-#' does two things: it ensures that a reactive dependency is taken on both `x`
-#' and `y`, and it also makes sure that both values are represented in the cache
-#' key.
+#'   A better cache key would be something like `list(input$x, input$y)`. This
+#'   does two things: it ensures that a reactive dependency is taken on both `x`
+#'   and `y`, and it also makes sure that both values are represented in the
+#'   cache key.
 #'
-#' In general, `cacheKeyExpr` should use the same reactive inputs as
-#' `valueExpr`, but the computation should be simpler. If there are other
-#' (non-reactive) values that are consumed, such as external data sources, they
-#' should be used in the `cacheKeyExpr` as well. Note that if the data object is
-#' large, it can make sense to do some sort of reduction on it so that the
-#' serialization and hashing of the cache key is not too expensive.
+#'   In general, `cacheKeyExpr` should use the same reactive inputs as
+#'   `valueExpr`, but the computation should be simpler. If there are other
+#'   (non-reactive) values that are consumed, such as external data sources,
+#'   they should be used in the `cacheKeyExpr` as well. Note that if the
+#'   `cacheKeyExpr` is large, it can make sense to do some sort of reduction on
+#'   it so that the serialization and hashing of the cache key is not too
+#'   expensive.
 #'
-#' Remember that the `cacheKeyExpr` is _reactive_, so it is not re-executed
-#' every single time that someone accesses the `cachedReactive`. For example,
-#' suppose we have this `cachedReactive`:
+#'   Remember that the `cacheKeyExpr` is _reactive_, so it is not re-executed
+#'   every single time that someone accesses the `cachedReactive`. For example,
+#'   suppose we have this `cachedReactive`:
 #'
-#' ```
-#' r <- cachedReactive(
-#'   cacheKeyExpr = list(input$x, input$y),
-#'   valueExpr = { input$x + input$y }
-#' )
-#' ```
+#'   ```
+#'   r <- cachedReactive(
+#'     cacheKeyExpr = list(input$x, input$y),
+#'     valueExpr = { input$x + input$y }
+#'   )
+#'   ```
 #'
 #' The first time someone calls `r()`, it executes both `cacheKeyExpr` and
 #' `valueExpr`. If someone calls `r()` again, then it does not need to
@@ -76,22 +81,60 @@
 #' be invalidated, and the next time that someone calls `r()`, `cacheKeyExpr`
 #' will need to be re-executed.
 #'
-#' @section Async with cached reactives:
 #'
-#' With a cached reactive expression, they key and/or value expression can be
-#' _asynchronous_. In other words, they can be promises -- not regular R
-#' promises, but rather objects provided by the promises package, which are
-#' similar to promises in JavaScript. (See [promises::promise()] for more
-#' information.)
+#' @section Event expressions and reactivity:
 #'
-#' If `valueExpr` is a promise, then anything that consumes the `cachedReactive`
-#' must expect it to return a promise.
+#'   Typically, the `cacheKeyExpr` is reactive, and the `valueExpr` is not (it
+#'   is run within [isolate()]). However, there are times when this isn't ideal:
+#'   perhaps you have [sliderInput]s `x` and `y`, but you don't want the
+#'   computation to occur until the user sets both `x` and `y`, and then clicks
+#'   on an [actionButton] named `go`.
 #'
-#' Similarly, if `cacheKeyExpr` is a promise (in other words, it is
-#' asynchronous), then the entire `cachedReactive` must be asynchronous, since
-#' the key must be computed before `valueExpr` is evaluated (or the value is
-#' retrieved from the cache). Anything that consumes the `cachedReactive` must
-#' therefore expect it to return a promise.
+#'   The value of `input$go` shouldn't be included in the cache key, because its
+#'   value is not relevant to the calculation involving `input$x` and `input$y`.
+#'   You also don't want to take a reactive dependency on `input$x` and
+#'   `input$y`, because then any changes to those values would cause this cached
+#'   reactive to do the computation or fetch the value from the cache and return
+#'   it.
+#'
+#'   In short, in this case, you want to take a reactive dependency on
+#'   `input$go` and not use its value for the cache key, and you want to **not**
+#'   take a reactive dependency on `input$x` and `input$y` but use those values
+#'   for the cache key.
+#'
+#'   This can be done by using `eventExpr`, similar to in the [eventReactive()]
+#'   function. If a non-NULL `eventExpr` is provided to `cachedReactive()`, then
+#'   it will be used for the reactive dependencies but its value will be
+#'   ignored, and the `cacheKeyExpr` will be used for its value, but it will be
+#'   executed in an [isolate()], so it will not be used for its reactive
+#'   dependencies.
+#'
+#'   In the example described above, you would use something like:
+#'
+#'   ```
+#'   r <- cachedReactive(
+#'     eventExpr = input$go,
+#'     cacheKeyExpr = list(input$x, input$y),
+#'     valueExpr = { input$x + input$y }
+#'   )
+#'   ```
+#'
+#'   @section Async with cached reactives:
+#'
+#'   With a cached reactive expression, they key and/or value expression can be
+#'   _asynchronous_. In other words, they can be promises -- not regular R
+#'   promises, but rather objects provided by the promises package, which are
+#'   similar to promises in JavaScript. (See [promises::promise()] for more
+#'   information.)
+#'
+#'   If `valueExpr` is a promise, then anything that consumes the
+#'   `cachedReactive` must expect it to return a promise.
+#'
+#'   Similarly, if `cacheKeyExpr` or `eventExpr` is a promise (in other words,
+#'   if they are asynchronous), then the entire `cachedReactive` must be
+#'   asynchronous, since the key must be computed before `valueExpr` is
+#'   evaluated (or the value is retrieved from the cache). Anything that
+#'   consumes the `cachedReactive` must therefore expect it to return a promise.
 #'
 #' @inheritParams reactive
 #' @param cacheKeyExpr An expression that returns a value that will be hashed
@@ -102,6 +145,13 @@
 #'   arbitrary identifier (like an ID string) to the cache key.
 #' @param valueExpr The expression that produces the return value of the
 #'   `cachedReactive`. It will be executed within an [isolate()] scope.
+#' @param eventExpr An optional expression used for reactivity. If non-NULL,
+#'   then `eventExpr` will be evaluated in a reactive context, and `valueExpr`
+#'   will be evaluated in an isolated context (and it will not be used for
+#'   reactive dependencies).
+#' @param ignoreNULL If `TRUE`, then if `eventExpr` evaluates to `NULL`, then
+#'   a silent exception will be raised and the cache key and the value will not
+#'   be computed. See [req()] for more on silent exceptions.
 #' @param cache The scope of the cache, or a cache object. This can be `"app"`
 #'   (the default), `"session"`, or a cache object like a [diskCache()]. See the
 #'   Cache Scoping section for more information.
@@ -136,7 +186,7 @@
 #' )
 #'
 #'
-#' # Demo of using actionButton with other values
+#' # Demo of using eventExpr with an actionButton
 #' shinyApp(
 #'   ui = fluidPage(
 #'     sliderInput("x", "x", 1, 10, 5),
@@ -147,14 +197,13 @@
 #'   ),
 #'   server = function(input, output) {
 #'     r <- cachedReactive(
-#'       {
-#'         # This expression takes a reactive dependency on input$go, so clicking
-#'         # the `go` button causes the computation to happen. However, it uses
-#'         # input$x and input$y (and not input$go) for the cache key, and it
-#'         # uses isolate() so that it does not take a reactive dependency on x and
-#'         # y.
-#'         req(input$go)
-#'         isolate(list(input$x, input$y))
+#'       # Take a reactive dependency on input$go, but don't use its value
+#'       # for the cache key.
+#'       eventExpr = input$go,
+#'       # Use input$x and input$y for the cache key, but don't take a reactive
+#'       # dependency on them.
+#'       cacheKeyExpr = {
+#'         list(input$x, input$y)
 #'       },
 #'       {
 #'         message("Doing expensive computation...")
@@ -207,22 +256,47 @@ cachedReactive <- function(
   cacheKeyExpr,
   valueExpr,
   ...,
+  eventExpr = NULL,
+  ignoreNULL = TRUE,
   domain = getDefaultReactiveDomain(),
-  cache = "app")
-{
+  cache = "app"
+) {
   if (length(list(...)) != 0) {
     stop("Additional ... arguments are not allowed.")
   }
 
-  cacheKeyFunc <- exprToFunction(cacheKeyExpr, parent.frame(), quoted = FALSE)
+  # eventExpr is optional
+  eventExpr <- enquo(eventExpr)
+  if (identical(get_expr(eventExpr), NULL)) {
+    eventFunc <- NULL
+  } else {
+    eventFunc <- as_function(eventExpr)
+  }
 
-  valueExpr <- substitute(isolate(valueExpr))
-  valueFunc <- exprToFunction(valueExpr, parent.frame(), quoted = TRUE)
+  cacheKeyFunc <- as_function(enquo(cacheKeyExpr))
+
+  valueFunc <- as_function(enquo(valueExpr))
   valueFunc <- wrapFunctionLabel(valueFunc, "cachedReactiveHandler", ..stacktraceon = TRUE)
 
-  reactive(label = "cachedReactive",
+  reactive(label = "cachedReactive", {
+    # Set up the first steps in the hybrid chain. If there's no eventFunc, then
+    # the first step is just the cacheKeyFunc(). If there is an eventFunc(),
+    # then start with that, and isolate the cacheKeyFunc().
+    if (is.null(eventFunc)) {
+      firstStep <- cacheKeyFunc
+    } else {
+      firstStep <- hybrid_chain(
+        eventFunc(),
+        function(value) {
+          req(!ignoreNULL || !isNullEvent(value))
+          isolate(cacheKeyFunc())
+        }
+      )
+    }
+
+    # Connect the (maybe) eventExpr and cacheKeyExpr with the valueExpr
     hybrid_chain(
-      cacheKeyFunc(),
+      firstStep(),
       function(cacheKeyResult) {
         cache <- resolve_cache_object(cache, domain)
         key   <- digest(cacheKeyResult, algo = "sha1")
@@ -247,7 +321,7 @@ cachedReactive <- function(
         # whether it's a promise or not, so that any consumer of the
         # cachedReactive() will be given the correct kind of object (a promise
         # vs. an actual value) in the case of a future cache hit.
-        p <- valueFunc()
+        p <- isolate(valueFunc())
         if (is.promising(p)) {
           return(
             p$then(function(value) {
@@ -260,8 +334,8 @@ cachedReactive <- function(
           cache$set(key, list(is_promise = FALSE, value = p))
           p
         }
-      }
-    ),
+      })
+    },
     domain = domain
   )
 }

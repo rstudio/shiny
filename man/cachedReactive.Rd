@@ -8,6 +8,8 @@ cachedReactive(
   cacheKeyExpr,
   valueExpr,
   ...,
+  eventExpr = NULL,
+  ignoreNULL = TRUE,
   domain = getDefaultReactiveDomain(),
   cache = "app"
 )
@@ -24,6 +26,8 @@ arbitrary identifier (like an ID string) to the cache key.}
 \code{cachedReactive}. It will be executed within an \code{\link[=isolate]{isolate()}} scope.}
 
 \item{...}{Other arguments are ignored.}
+
+\item{eventExpr}{An optional expression that i}
 
 \item{domain}{See \link{domains}.}
 
@@ -45,7 +49,7 @@ value returned by the \code{cachedReactive()}.
 
 For each possible value returned by \code{cacheKeyExpr}, there should be one
 possible value returned by \code{valueExpr}; a given value of \code{cacheKeyExpr}
-should correspond to multiple possible values of \code{valueExpr}.
+should not correspond to multiple possible values of \code{valueExpr}.
 
 The way to use this is to have a \code{cacheKeyExpr} that is fast to compute, and
 a \code{valueExpr} that is expensive to compute. It evaluates the \code{cacheKeyExpr},
@@ -60,6 +64,42 @@ Typically, \code{cacheKeyExpr} will use any reactive inputs that are used by
 put them together in a list. It is also best to use non-reference objects,
 since the serialization of these objects may not capture relevant changes.
 }
+\section{Event expressions and reactivity}{
+
+
+Typically, the \code{cacheKeyExpr} is reactive, and the \code{valueExpr} is not (it
+is run within \code{\link[=isolate]{isolate()}}). However, there are times when this isn't ideal:
+perhaps you have \link{sliderInput}s \code{x} and \code{y}, but you don't want the
+computation to occur until the user sets both \code{x} and \code{y}, and then clicks
+on an \link{actionButton} named \code{go}.
+
+The value of \code{input$go} shouldn't be included in the cache key, because its
+value is not relevant to the calculation involving \code{input$x} and \code{input$y}.
+You also don't want to take a reactive dependency on \code{input$x} and
+\code{input$y}, because then any changes to those values would cause this cached
+reactive to do the computation or fetch the value from the cache and return
+it.
+
+In short, in this case, you want to take a reactive dependency on
+\code{input$go} and not use its value for the cache key, and you want to \strong{not}
+take a reactive dependency on \code{input$x} and \code{input$y} but use those values
+for the cache key.
+
+This can be done by using \code{eventExpr}, similar to in the \code{\link[=eventReactive]{eventReactive()}}
+function. If a non-NULL \code{eventExpr} is provided to \code{cachedReactive()}, then
+it will be used for the reactive dependencies but its value will be
+ignored, and the \code{cacheKeyExpr} will be used for its value, but it will be
+executed in an \code{\link[=isolate]{isolate()}}, so it will not be used for its reactive
+dependencies.
+
+In the example described above, you would use something like:\if{html}{\out{<div class="NA">}}\preformatted{r <- cachedReactive(
+ eventExpr = input$go,
+ cacheKeyExpr = list(input$x, input$y),
+ valueExpr = \{ ... \}
+)
+}\if{html}{\out{</div>}}
+}
+
 \section{Cache keys and reactivity}{
 
 

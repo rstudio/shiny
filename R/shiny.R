@@ -28,6 +28,10 @@ NULL
 #' @import methods
 NULL
 
+
+#' @importFrom rlang enquo as_function get_expr get_env
+NULL
+
 createUniqueId <- function(bytes, prefix = "", suffix = "") {
   withPrivateSeed({
     paste(

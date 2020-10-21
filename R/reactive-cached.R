@@ -249,8 +249,6 @@
 #'
 #' }
 #'
-#' @importFrom digest digest
-#' @importFrom promises promise is.promising
 #' @export
 cachedReactive <- function(
   cacheKeyExpr,
@@ -261,9 +259,7 @@ cachedReactive <- function(
   domain = getDefaultReactiveDomain(),
   cache = "app"
 ) {
-  if (length(list(...)) != 0) {
-    stop("Additional ... arguments are not allowed.")
-  }
+  check_dots_empty()
 
   # eventExpr is optional
   eventExpr <- enquo(eventExpr)

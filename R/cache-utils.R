@@ -20,17 +20,16 @@ is_cache_object <- function(x) {
 # Given a cache object, or string "app" or "session", return appropriate cache
 # object.
 resolve_cache_object <- function(cache, session) {
-  if (is_cache_object(cache)) {
-    # If `cache` is already a cache object, do nothing
-    return(cache)
-
-  } else if (identical(cache, "app")) {
-    return(getShinyOption("cache", default = NULL))
+  if (identical(cache, "app")) {
+    cache <- getShinyOption("cache", default = NULL)
 
   } else if (identical(cache, "session")) {
-    return(session$cache)
-
-  } else {
-    stop('`cache` must either be "app", "session", or a cache object with methods, `$get`, and `$set`.')
+    cache <- session$cache
   }
+
+  if (is_cache_object(cache)) {
+    return(cache)
+  }
+
+  stop('`cache` must either be "app", "session", or a cache object with methods, `$get`, and `$set`.')
 }

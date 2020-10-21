@@ -301,9 +301,16 @@ cachedReactive <- function(
         # Case 1: cache hit
         if (!is.key_missing(res)) {
           if (res$is_promise) {
-            return(promise(function(resolve, reject) resolve(res$value)))
+            if (res$error) {
+              return(promise_reject(valueWithVisible(res)))
+            }
+            return(promise_resolve(valueWithVisible(res)))
+
           } else {
-            return(res$value)
+            if (res$error) {
+              stop(res$value)
+            }
+            return(valueWithVisible(res))
           }
         }
 
@@ -317,18 +324,49 @@ cachedReactive <- function(
         # whether it's a promise or not, so that any consumer of the
         # cachedReactive() will be given the correct kind of object (a promise
         # vs. an actual value) in the case of a future cache hit.
-        p <- isolate(valueFunc())
-        if (is.promising(p)) {
-          return(
-            p$then(function(value) {
-              cache$set(key, list(is_promise = TRUE, value = value))
-              value
-            })
-          )
+        p <- withCallingHandlers(
+          withVisible(isolate(valueFunc())),
+          error = function(e) {
+            cache$set(key, list(
+              is_promise = FALSE,
+              value      = e,
+              visible    = TRUE,
+              error      = TRUE
+            ))
+          }
+        )
+
+        if (is.promising(p$value)) {
+            p$value <- p$value$
+              then(function(value) {
+                res <- withVisible(value)
+                cache$set(key, list(
+                  is_promise = TRUE,
+                  value      = res$value,
+                  visible    = res$visible,
+                  error      = FALSE
+                ))
+                valueWithVisible(res)
+              })$
+              catch(function(e) {
+                cache$set(key, list(
+                  is_promise = TRUE,
+                  value      = e,
+                  visible    = TRUE,
+                  error      = TRUE
+                ))
+                stop(e)
+              })
+            valueWithVisible(p)
         } else {
-          # p is an ordinary value, not a promise.
-          cache$set(key, list(is_promise = FALSE, value = p))
-          p
+          # result is an ordinary value, not a promise.
+          cache$set(key, list(
+            is_promise = FALSE,
+            value      = p$value,
+            visible    = p$visible,
+            error      = FALSE
+          ))
+          return(valueWithVisible(p))
         }
       })
     },

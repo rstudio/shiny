@@ -29,7 +29,7 @@ NULL
 NULL
 
 #' @importFrom digest digest
-#' @importFrom promises promise is.promising
+#' @importFrom promises promise promise_resolve promise_reject is.promising
 #' @importFrom rlang enquo as_function get_expr get_env
 #' @importFrom ellipsis check_dots_empty
 NULL

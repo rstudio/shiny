@@ -225,7 +225,7 @@ test_that("cachedReactives with async value", {
   # after running the event loop.
   flushReact()
   expect_identical(vals, c("0k", "0v1"))
-  for (i in 1:3) later::run_now()
+  for (i in 1:6) later::run_now()
   expect_identical(vals, c("0k", "0v1", "0v2", "0o"))
 
   # If we change k, we should see same pattern as above, where run_now() is
@@ -234,7 +234,7 @@ test_that("cachedReactives with async value", {
   k(1)
   flushReact()
   expect_identical(vals, c("1k", "1v1"))
-  for (i in 1:3) later::run_now()
+  for (i in 1:6) later::run_now()
   expect_identical(vals, c("1k", "1v1", "1v2", "1o"))
 
   # Going back to a cached value: The cachedReactive's valueExpr won't run, but
@@ -299,7 +299,7 @@ test_that("cachedReactives with async key and value", {
 
   flushReact()
   expect_identical(vals, c("0k1"))
-  for (i in 1:6) later::run_now()
+  for (i in 1:8) later::run_now()
   expect_identical(vals, c("0k1", "0k2", "0v1", "0v2", "0o"))
 
   # If we change k, we should see same pattern as above.
@@ -307,7 +307,7 @@ test_that("cachedReactives with async key and value", {
   k(1)
   flushReact()
   expect_identical(vals, c("1k1"))
-  for (i in 1:6) later::run_now()
+  for (i in 1:8) later::run_now()
   expect_identical(vals, c("1k1", "1k2", "1v1", "1v2", "1o"))
 
   # Going back to a cached value: The cachedReactive's valueExpr won't run, but
@@ -316,7 +316,7 @@ test_that("cachedReactives with async key and value", {
   k(0)
   flushReact()
   expect_identical(vals, c("0k1"))
-  for (i in 1:4) later::run_now()
+  for (i in 1:6) later::run_now()
   expect_identical(vals, c("0k1", "0k2", "0o"))
 })
 
@@ -370,24 +370,30 @@ test_that("cachedReactive key collisions", {
 # Error handling
 # ============================================================================
 test_that("cachedReactive error handling", {
+  # ===================================
+  # Error in key
   cache <- memoryCache()
-
   k <- reactiveVal(0)
 
   # Error in key
-  r_vals <- numeric()
+  vals <- character()
   r <- cachedReactive(
-    { k(); stop("foo") },
     {
-      r_vals <<- c(r_vals, k())
+      x <- paste0(k(), "k")
+      vals <<- c(vals, x)
+      k()
+      stop("foo")
+    },
+    {
+      x <- paste0(k(), "v")
       k()
     },
     cache = cache
   )
 
-  o_vals <- numeric()
   o <- observe({
-    o_vals <<- c(o_vals, r())
+    x <- paste0(r(), "o")
+    vals <<- c(vals, x)
   })
 
   suppress_stacktrace(expect_warning(flushReact()))
@@ -397,31 +403,38 @@ test_that("cachedReactive error handling", {
 
   k(1)
   suppress_stacktrace(expect_warning(flushReact()))
+  expect_silent(flushReact())
   k(0)
   suppress_stacktrace(expect_warning(flushReact()))
+  expect_silent(flushReact())
   # valueExpr and observer shouldn't have changed at all
-  expect_identical(r_vals,  numeric())
-  expect_identical(o_vals,  numeric())
+  expect_identical(vals, c("0k", "1k", "0k"))
 
   # ===================================
   # Silent error in key with req(FALSE)
   cache <- memoryCache()
   k <- reactiveVal(0)
 
-  r_vals <- numeric()
+  vals <- character()
   r <- cachedReactive(
-    { k(); req(FALSE) },
     {
-      r_vals <<- c(r_vals, k())
+      x <- paste0(k(), "k")
+      vals <<- c(vals, x)
+      k()
+      req(FALSE)
+    },
+    {
+      x <- paste0(k(), "v")
       k()
     },
     cache = cache
   )
 
-  o_vals <- numeric()
   o <- observe({
-    o_vals <<- c(o_vals, r())
+    x <- paste0(r(), "o")
+    vals <<- c(vals, x)
   })
+
 
   expect_silent(flushReact())
   k(1)
@@ -429,66 +442,411 @@ test_that("cachedReactive error handling", {
   k(0)
   expect_silent(flushReact())
   # valueExpr and observer shouldn't have changed at all
-  expect_identical(r_vals,  numeric())
-  expect_identical(o_vals,  numeric())
+  expect_identical(vals, c("0k", "1k", "0k"))
 
   # ===================================
   # Error in value
   cache <- memoryCache()
   k <- reactiveVal(0)
 
-  r_vals <- numeric()
+  vals <- character()
   r <- cachedReactive(
-    { k() },
     {
+      x <- paste0(k(), "k")
+      vals <<- c(vals, x)
+      k()
+    },
+    {
+      x <- paste0(k(), "v")
+      vals <<- c(vals, x)
       stop("foo")
-      r_vals <<- c(r_vals, k())
       k()
     },
     cache = cache
   )
 
-  o_vals <- numeric()
   o <- observe({
-    o_vals <<- c(o_vals, r())
+    x <- paste0(r(), "o")
+    vals <<- c(vals, x)
   })
 
   suppress_stacktrace(expect_warning(flushReact()))
+  expect_silent(flushReact())
   k(1)
   suppress_stacktrace(expect_warning(flushReact()))
+  expect_silent(flushReact())
   k(0)
+  # Should re-throw cached error
   suppress_stacktrace(expect_warning(flushReact()))
-  # valueExpr and observer shouldn't have changed at all
-  expect_identical(r_vals,  numeric())
-  expect_identical(o_vals,  numeric())
+  expect_silent(flushReact())
+
+  # 0v shouldn't be present, because error should be re-thrown without
+  # re-running code.
+  expect_identical(vals, c("0k", "0v", "1k", "1v", "0k"))
 
   # =====================================
   # Silent error in value with req(FALSE)
   cache <- memoryCache()
   k <- reactiveVal(0)
 
-  r_vals <- numeric()
+  vals <- character()
   r <- cachedReactive(
-    { k() },
     {
+      x <- paste0(k(), "k")
+      vals <<- c(vals, x)
+      k()
+    },
+    {
+      x <- paste0(k(), "v")
+      vals <<- c(vals, x)
       req(FALSE)
-      r_vals <<- c(r_vals, k())
       k()
     },
     cache = cache
   )
 
-  o_vals <- numeric()
   o <- observe({
-    o_vals <<- c(o_vals, r())
+    x <- paste0(r(), "o")
+    vals <<- c(vals, x)
   })
 
   expect_silent(flushReact())
   k(1)
   expect_silent(flushReact())
   k(0)
+  # Should re-throw cached error
   expect_silent(flushReact())
-  # valueExpr and observer shouldn't have changed at all
-  expect_identical(r_vals,  numeric())
-  expect_identical(o_vals,  numeric())
+
+  # 0v shouldn't be present, because error should be re-thrown without
+  # re-running code.
+  expect_identical(vals, c("0k", "0v", "1k", "1v", "0k"))
+})
+
+
+test_that("cachedReactive error handling - async", {
+  # ===================================
+  # Error in key
+  cache <- memoryCache()
+  k <- reactiveVal(0)
+  vals <- character()
+  r <- cachedReactive(
+    {
+      promises::promise(function(resolve, reject) {
+        x <- paste0(k(), "k1")
+        vals <<- c(vals, x)
+        resolve(k())
+      })$then(function(value) {
+        x <- paste0(k(), "k2")
+        vals <<- c(vals, x)
+        stop("err", k())
+        value
+      })
+    },
+    {
+      promises::promise(function(resolve, reject) {
+        x <- paste0(k(), "v1")
+        vals <<- c(vals, x)
+        resolve(k())
+      })$then(function(value) {
+        x <- paste0(value, "v2")
+        vals <<- c(vals, x)
+        value
+      })
+    },
+    cache = cache
+  )
+
+  o <- observe({
+    r()$then(function(value) {
+      x <- paste0(value, "o")
+      vals <<- c(vals, x)
+    })$catch(function(value) {
+      x <- paste0(value$message, "oc")
+      vals <<- c(vals, x)
+    })
+  })
+
+  suppress_stacktrace(flushReact())
+  for (i in 1:4) later::run_now()
+  expect_identical(vals, c("0k1", "0k2", "err0oc"))
+
+  # A second flushReact should not raise warnings, since cacheKeyExpr has not
+  # been invalidated.
+  expect_silent(flushReact())
+
+  vals <- character()
+  k(1)
+  suppress_stacktrace(flushReact())
+  expect_silent(flushReact())
+  for (i in 1:4) later::run_now()
+  expect_identical(vals, c("1k1", "1k2", "err1oc"))
+
+  vals <- character()
+  k(0)
+  suppress_stacktrace(flushReact())
+  expect_silent(flushReact())
+  for (i in 1:4) later::run_now()
+  expect_identical(vals, c("0k1", "0k2", "err0oc"))
+
+  # ===================================
+  # Silent error in key with req(FALSE)
+  cache <- memoryCache()
+  k <- reactiveVal(0)
+  vals <- character()
+  r <- cachedReactive(
+    {
+      promises::promise(function(resolve, reject) {
+        x <- paste0(k(), "k1")
+        vals <<- c(vals, x)
+        resolve(k())
+      })$then(function(value) {
+        x <- paste0(k(), "k2")
+        vals <<- c(vals, x)
+        req(FALSE)
+        value
+      })
+    },
+    {
+      x <- paste0(k(), "v")
+      vals <<- c(vals, x)
+      resolve(k())
+    },
+    cache = cache
+  )
+
+  o <- observe({
+    r()$then(function(value) {
+      x <- paste0(value, "o")
+      vals <<- c(vals, x)
+    })$catch(function(value) {
+      x <- paste0(value$message, "oc")
+      vals <<- c(vals, x)
+    })
+  })
+
+  suppress_stacktrace(flushReact())
+  for (i in 1:4) later::run_now()
+  # The `catch` will receive an empty message
+  expect_identical(vals, c("0k1", "0k2", "oc"))
+
+  # A second flushReact should not raise warnings, since cacheKeyExpr has not
+  # been invalidated.
+  expect_silent(flushReact())
+
+  vals <- character()
+  k(1)
+  suppress_stacktrace(flushReact())
+  expect_silent(flushReact())
+  for (i in 1:4) later::run_now()
+  expect_identical(vals, c("1k1", "1k2", "oc"))
+
+  vals <- character()
+  k(0)
+  suppress_stacktrace(flushReact())
+  expect_silent(flushReact())
+  for (i in 1:4) later::run_now()
+  expect_identical(vals, c("0k1", "0k2", "oc"))
+
+  # ===================================
+  # Error in value
+  cache <- memoryCache()
+  k <- reactiveVal(0)
+  vals <- character()
+  r <- cachedReactive(
+    {
+      promises::promise(function(resolve, reject) {
+        x <- paste0(k(), "k1")
+        vals <<- c(vals, x)
+        resolve(k())
+      })$then(function(value) {
+        x <- paste0(k(), "k2")
+        vals <<- c(vals, x)
+        value
+      })
+    },
+    {
+      promises::promise(function(resolve, reject) {
+        x <- paste0(k(), "v1")
+        vals <<- c(vals, x)
+        resolve(k())
+      })$then(function(value) {
+        x <- paste0(value, "v2")
+        vals <<- c(vals, x)
+        stop("err", k())
+        value
+      })
+    },
+    cache = cache
+  )
+
+  o <- observe({
+    r()$then(function(value) {
+      x <- paste0(value, "o")
+      vals <<- c(vals, x)
+    })$catch(function(value) {
+      x <- paste0(value$message, "oc")
+      vals <<- c(vals, x)
+    })
+  })
+
+  suppress_stacktrace(flushReact())
+  for (i in 1:9) later::run_now()
+  # A second flushReact should not raise warnings, since cacheKeyExpr has not
+  # been invalidated.
+  expect_silent(flushReact())
+  expect_identical(vals, c("0k1", "0k2", "0v1", "0v2", "err0oc"))
+
+  vals <- character()
+  k(1)
+  suppress_stacktrace(flushReact())
+  expect_silent(flushReact())
+  for (i in 1:9) later::run_now()
+  expect_identical(vals, c("1k1", "1k2", "1v1", "1v2", "err1oc"))
+
+  vals <- character()
+  k(0)
+  suppress_stacktrace(flushReact())
+  expect_silent(flushReact())
+  for (i in 1:6) later::run_now()
+  expect_identical(vals, c("0k1", "0k2", "err0oc"))
+
+  # =====================================
+  # Silent error in value with req(FALSE)
+  cache <- memoryCache()
+  k <- reactiveVal(0)
+  vals <- character()
+  r <- cachedReactive(
+    {
+      promises::promise(function(resolve, reject) {
+        x <- paste0(k(), "k1")
+        vals <<- c(vals, x)
+        resolve(k())
+      })$then(function(value) {
+        x <- paste0(k(), "k2")
+        vals <<- c(vals, x)
+        value
+      })
+    },
+    {
+      promises::promise(function(resolve, reject) {
+        x <- paste0(k(), "v1")
+        vals <<- c(vals, x)
+        resolve(k())
+      })$then(function(value) {
+        x <- paste0(value, "v2")
+        vals <<- c(vals, x)
+        req(FALSE)
+        value
+      })
+    },
+    cache = cache
+  )
+
+  o <- observe({
+    r()$then(function(value) {
+      x <- paste0(value, "o")
+      vals <<- c(vals, x)
+    })$catch(function(value) {
+      x <- paste0(value$message, "oc")
+      vals <<- c(vals, x)
+    })
+  })
+
+  suppress_stacktrace(flushReact())
+  for (i in 1:9) later::run_now()
+  # A second flushReact should not raise warnings, since cacheKeyExpr has not
+  # been invalidated.
+  expect_silent(flushReact())
+  expect_identical(vals, c("0k1", "0k2", "0v1", "0v2", "oc"))
+
+  vals <- character()
+  k(1)
+  suppress_stacktrace(flushReact())
+  expect_silent(flushReact())
+  for (i in 1:9) later::run_now()
+  expect_identical(vals, c("1k1", "1k2", "1v1", "1v2", "oc"))
+
+  vals <- character()
+  k(0)
+  suppress_stacktrace(flushReact())
+  expect_silent(flushReact())
+  for (i in 1:6) later::run_now()
+  expect_identical(vals, c("0k1", "0k2", "oc"))
+})
+
+
+# ============================================================================
+# Visibility
+# ============================================================================
+test_that("cachedReactive visibility", {
+  cache <- memoryCache()
+  k <- reactiveVal(0)
+  res <- NULL
+  r <- cachedReactive(
+    k(),
+    {
+      if (k() == 0) invisible(k())
+      else          k()
+    },
+    cache = cache
+  )
+
+  o <- observe({
+    res <<- withVisible(r())
+  })
+
+  flushReact()
+  expect_identical(res, list(value = 0, visible = FALSE))
+  k(1)
+  flushReact()
+  expect_identical(res, list(value = 1, visible = TRUE))
+  # Now fetch from cache
+  k(0)
+  flushReact()
+  expect_identical(res, list(value = 0, visible = FALSE))
+  k(1)
+  flushReact()
+  expect_identical(res, list(value = 1, visible = TRUE))
+})
+
+
+test_that("cachedReactive visibility - async", {
+  # Skippping because of https://github.com/rstudio/promises/issues/58
+  skip("Visibility currently not supported by promises")
+  cache <- memoryCache()
+  k <- reactiveVal(0)
+  res <- NULL
+  r <- cachedReactive(
+    k(),
+    {
+      promise(function(resolve, reject) {
+        if (k() == 0) resolve(invisible(k()))
+        else          resolve(k())
+      })
+    },
+    cache = cache
+  )
+
+  o <- observe({
+    r()$then(function(value) {
+      res <<- withVisible(value)
+    })
+  })
+
+  flushReact()
+  for (i in 1:3) later::run_now()
+  expect_identical(res, list(value = 0, visible = FALSE))
+  k(1)
+  flushReact()
+  for (i in 1:3) later::run_now()
+  expect_identical(res, list(value = 1, visible = TRUE))
+  # Now fetch from cache
+  k(0)
+  flushReact()
+  for (i in 1:3) later::run_now()
+  expect_identical(res, list(value = 0, visible = FALSE))
+  k(1)
+  flushReact()
+  for (i in 1:3) later::run_now()
+  expect_identical(res, list(value = 1, visible = TRUE))
 })

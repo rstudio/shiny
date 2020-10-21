@@ -15,19 +15,26 @@ cachedReactive(
 )
 }
 \arguments{
-\item{cacheKeyExpr}{An expression that returns a value that will be hashed
-and used as a cache key. This key should be a unique identifier for the
-value: the assumption is that if the cache key is the same, then the value
-of \code{expr} is the same. If two separate \code{cachedReactive}s have the same key,
-the value is assumed to be the same. To avoid this, you can add an
-arbitrary identifier (like an ID string) to the cache key.}
+\item{cacheKeyExpr}{An expression or quosure that returns a value that will
+be hashed and used as a cache key. This key should be a unique identifier
+for the value: the assumption is that if the cache key is the same, then
+the value of \code{expr} is the same. If two separate \code{cachedReactive}s have the
+same key, the value is assumed to be the same. To avoid this, you can add
+an arbitrary identifier (like an ID string) to the cache key.}
 
-\item{valueExpr}{The expression that produces the return value of the
-\code{cachedReactive}. It will be executed within an \code{\link[=isolate]{isolate()}} scope.}
+\item{valueExpr}{The expression or quosure that produces the return value of
+the \code{cachedReactive}. It will be executed within an \code{\link[=isolate]{isolate()}} scope.}
 
 \item{...}{Other arguments are ignored.}
 
-\item{eventExpr}{An optional expression that i}
+\item{eventExpr}{An optional expression or quosure used for reactivity. If
+non-NULL, then \code{eventExpr} will be evaluated in a reactive context, and
+\code{valueExpr} will be evaluated in an isolated context (and it will not be
+used for reactive dependencies).}
+
+\item{ignoreNULL}{If \code{TRUE}, then if \code{eventExpr} evaluates to \code{NULL}, then a
+silent exception will be raised and the cache key and the value will not be
+computed. See \code{\link[=req]{req()}} for more on silent exceptions.}
 
 \item{domain}{See \link{domains}.}
 
@@ -63,7 +70,57 @@ Typically, \code{cacheKeyExpr} will use any reactive inputs that are used by
 \code{valueExpr}, but will do something that is fast and simple with them, like
 put them together in a list. It is also best to use non-reference objects,
 since the serialization of these objects may not capture relevant changes.
+
+\code{cachedReactive()} also can take an \code{eventExpr} so that it behaves similar to
+\code{\link[=eventReactive]{eventReactive()}}. See more in the \strong{Event expression} section.
 }
+\section{Cache keys and reactivity}{
+
+
+Because the value from \code{valueExpr} is cached, it is not necessarily
+re-executed, and therefore it can't be used to decide what objects to take
+reactive dependencies on. Instead, the \code{cacheKeyExpr} is used to figure out
+which objects to take reactive dependencies on. In short, the
+\code{cacheKeyExpr} is reactive, and \code{valueExpr} is not (it is run inside of
+\code{\link[=isolate]{isolate()}}).
+
+Here's an example of what not to do: if \code{cacheKeyExpr=input$x} and
+\code{valueExpr={input$x + input$y}}, then it will only take a reactive
+dependency on \code{input$x} -- it won't recompute \code{valueExpr} when \code{input$y}
+changes. Moreover, the cache won't use \code{input$y} as part of the key, and so
+it could return incorrect values in the future when it retrieves values
+from the cache. (See the examples below for an example of this.)
+
+A better cache key would be something like \code{list(input$x, input$y)}. This
+does two things: it ensures that a reactive dependency is taken on both \code{x}
+and \code{y}, and it also makes sure that both values are represented in the
+cache key.
+
+In general, \code{cacheKeyExpr} should use the same reactive inputs as
+\code{valueExpr}, but the computation should be simpler. If there are other
+(non-reactive) values that are consumed, such as external data sources,
+they should be used in the \code{cacheKeyExpr} as well. Note that if the
+\code{cacheKeyExpr} is large, it can make sense to do some sort of reduction on
+it so that the serialization and hashing of the cache key is not too
+expensive.
+
+Remember that the \code{cacheKeyExpr} is \emph{reactive}, so it is not re-executed
+every single time that someone accesses the \code{cachedReactive}. For example,
+suppose we have this \code{cachedReactive}:\if{html}{\out{<div class="NA">}}\preformatted{r <- cachedReactive(
+ cacheKeyExpr = list(input$x, input$y),
+ valueExpr = \{ input$x + input$y \}
+)
+}\if{html}{\out{</div>}}
+
+The first time someone calls \code{r()}, it executes both \code{cacheKeyExpr} and
+\code{valueExpr}. If someone calls \code{r()} again, then it does not need to
+re-execute \code{cacheKeyExpr}, because that \code{expr} has not been invalidated
+via a change to \code{input$x} or \code{input$y}; it simply returns the previous value.
+However, if \code{input$x} or \code{input$y} changes, then the reactive expression will
+be invalidated, and the next time that someone calls \code{r()}, \code{cacheKeyExpr}
+will need to be re-executed.
+}
+
 \section{Event expressions and reactivity}{
 
 
@@ -95,58 +152,11 @@ dependencies.
 In the example described above, you would use something like:\if{html}{\out{<div class="NA">}}\preformatted{r <- cachedReactive(
  eventExpr = input$go,
  cacheKeyExpr = list(input$x, input$y),
- valueExpr = \{ ... \}
-)
-}\if{html}{\out{</div>}}
-}
-
-\section{Cache keys and reactivity}{
-
-
-Because the value from \code{valueExpr} is cached, it is not necessarily
-re-executed, and therefore it can't be used to decide what objects to take
-reactive dependencies on. Instead, the \code{cacheKeyExpr} is used to figure out
-which objects to take reactive dependencies on. In short, the \code{cacheKeyExpr}
-is reactive, and \code{valueExpr} is not (it is run inside of \code{\link[=isolate]{isolate()}}).
-
-For example, if \code{cacheKeyExpr=input$x} and \code{valueExpr={input$x + input$y}},
-then it will only take a reactive dependency on \code{input$x} -- it won't
-recompute \code{valueExpr} when \code{input$y} changes. Moreover, the cache won't use
-\code{input$y} as part of the key, and so it could return incorrect values in the
-future when it retrieves values from the cache. (See the examples below for
-an example of this.)
-
-A better cache key would be something like \code{list(input$x, input$y)}. This
-does two things: it ensures that a reactive dependency is taken on both \code{x}
-and \code{y}, and it also makes sure that both values are represented in the cache
-key.
-
-In general, \code{cacheKeyExpr} should use the same reactive inputs as
-\code{valueExpr}, but the computation should be simpler. If there are other
-(non-reactive) values that are consumed, such as external data sources, they
-should be used in the \code{cacheKeyExpr} as well. Note that if the data object is
-large, it can make sense to do some sort of reduction on it so that the
-serialization and hashing of the cache key is not too expensive.
-
-Remember that the \code{cacheKeyExpr} is \emph{reactive}, so it is not re-executed
-every single time that someone accesses the \code{cachedReactive}. For example,
-suppose we have this \code{cachedReactive}:\if{html}{\out{<div class="NA">}}\preformatted{r <- cachedReactive(
-  cacheKeyExpr = list(input$x, input$y),
-  valueExpr = \{ input$x + input$y \}
+ valueExpr = \{ input$x + input$y \}
 )
 }\if{html}{\out{</div>}}
 
-The first time someone calls \code{r()}, it executes both \code{cacheKeyExpr} and
-\code{valueExpr}. If someone calls \code{r()} again, then it does not need to
-re-execute \code{cacheKeyExpr}, because that \code{expr} has not been invalidated
-via a change to \code{input$x} or \code{input$y}; it simply returns the previous value.
-However, if \code{input$x} or \code{input$y} changes, then the reactive expression will
-be invalidated, and the next time that someone calls \code{r()}, \code{cacheKeyExpr}
-will need to be re-executed.
-}
-
-\section{Async with cached reactives}{
-
+@section Async with cached reactives:
 
 With a cached reactive expression, they key and/or value expression can be
 \emph{asynchronous}. In other words, they can be promises -- not regular R
@@ -154,14 +164,14 @@ promises, but rather objects provided by the promises package, which are
 similar to promises in JavaScript. (See \code{\link[promises:promise]{promises::promise()}} for more
 information.)
 
-If \code{valueExpr} is a promise, then anything that consumes the \code{cachedReactive}
-must expect it to return a promise.
+If \code{valueExpr} is a promise, then anything that consumes the
+\code{cachedReactive} must expect it to return a promise.
 
-Similarly, if \code{cacheKeyExpr} is a promise (in other words, it is
-asynchronous), then the entire \code{cachedReactive} must be asynchronous, since
-the key must be computed before \code{valueExpr} is evaluated (or the value is
-retrieved from the cache). Anything that consumes the \code{cachedReactive} must
-therefore expect it to return a promise.
+Similarly, if \code{cacheKeyExpr} or \code{eventExpr} is a promise (in other words,
+if they are asynchronous), then the entire \code{cachedReactive} must be
+asynchronous, since the key must be computed before \code{valueExpr} is
+evaluated (or the value is retrieved from the cache). Anything that
+consumes the \code{cachedReactive} must therefore expect it to return a promise.
 }
 
 \examples{
@@ -193,7 +203,7 @@ shinyApp(
 )
 
 
-# Demo of using actionButton with other values
+# Demo of using eventExpr with an actionButton
 shinyApp(
   ui = fluidPage(
     sliderInput("x", "x", 1, 10, 5),
@@ -204,14 +214,13 @@ shinyApp(
   ),
   server = function(input, output) {
     r <- cachedReactive(
-      {
-        # This expression takes a reactive dependency on input$go, so clicking
-        # the `go` button causes the computation to happen. However, it uses
-        # input$x and input$y (and not input$go) for the cache key, and it
-        # uses isolate() so that it does not take a reactive dependency on x and
-        # y.
-        req(input$go)
-        isolate(list(input$x, input$y))
+      # Take a reactive dependency on input$go, but don't use its value
+      # for the cache key.
+      eventExpr = input$go,
+      # Use input$x and input$y for the cache key, but don't take a reactive
+      # dependency on them.
+      cacheKeyExpr = {
+        list(input$x, input$y)
       },
       {
         message("Doing expensive computation...")

@@ -137,21 +137,21 @@
 #'   consumes the `cachedReactive` must therefore expect it to return a promise.
 #'
 #' @inheritParams reactive
-#' @param cacheKeyExpr An expression that returns a value that will be hashed
-#'   and used as a cache key. This key should be a unique identifier for the
-#'   value: the assumption is that if the cache key is the same, then the value
-#'   of `expr` is the same. If two separate `cachedReactive`s have the same key,
-#'   the value is assumed to be the same. To avoid this, you can add an
-#'   arbitrary identifier (like an ID string) to the cache key.
-#' @param valueExpr The expression that produces the return value of the
-#'   `cachedReactive`. It will be executed within an [isolate()] scope.
-#' @param eventExpr An optional expression used for reactivity. If non-NULL,
-#'   then `eventExpr` will be evaluated in a reactive context, and `valueExpr`
-#'   will be evaluated in an isolated context (and it will not be used for
-#'   reactive dependencies).
-#' @param ignoreNULL If `TRUE`, then if `eventExpr` evaluates to `NULL`, then
-#'   a silent exception will be raised and the cache key and the value will not
-#'   be computed. See [req()] for more on silent exceptions.
+#' @param cacheKeyExpr An expression or quosure that returns a value that will
+#'   be hashed and used as a cache key. This key should be a unique identifier
+#'   for the value: the assumption is that if the cache key is the same, then
+#'   the value of `expr` is the same. If two separate `cachedReactive`s have the
+#'   same key, the value is assumed to be the same. To avoid this, you can add
+#'   an arbitrary identifier (like an ID string) to the cache key.
+#' @param valueExpr The expression or quosure that produces the return value of
+#'   the `cachedReactive`. It will be executed within an [isolate()] scope.
+#' @param eventExpr An optional expression or quosure used for reactivity. If
+#'   non-NULL, then `eventExpr` will be evaluated in a reactive context, and
+#'   `valueExpr` will be evaluated in an isolated context (and it will not be
+#'   used for reactive dependencies).
+#' @param ignoreNULL If `TRUE`, then if `eventExpr` evaluates to `NULL`, then a
+#'   silent exception will be raised and the cache key and the value will not be
+#'   computed. See [req()] for more on silent exceptions.
 #' @param cache The scope of the cache, or a cache object. This can be `"app"`
 #'   (the default), `"session"`, or a cache object like a [diskCache()]. See the
 #'   Cache Scoping section for more information.

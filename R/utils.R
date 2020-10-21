@@ -1688,7 +1688,7 @@ hybrid_chain <- function(expr, ..., catch = NULL, finally = NULL,
           if (promises::is.promising(result$value)) {
             # Purposefully NOT including domain (nor replace), as we're already in
             # the domain at this point
-            p <- promise_chain(setVisible(result), ..., catch = catch, finally = finally)
+            p <- promise_chain(valueWithVisible(result), ..., catch = catch, finally = finally)
             runFinally <- FALSE
             p
           } else {
@@ -1700,7 +1700,7 @@ hybrid_chain <- function(expr, ..., catch = NULL, finally = NULL,
               }
             }, list(...), result)
 
-            setVisible(result)
+            valueWithVisible(result)
           }
         })
       },
@@ -1723,21 +1723,20 @@ hybrid_chain <- function(expr, ..., catch = NULL, finally = NULL,
 
 # Returns `value` with either `invisible()` applied or not, depending on the
 # value of `visible`.
-#
-# If the `visible` is missing, then `value` should be a list as returned from
-# `withVisible()`, and that visibility will be applied.
 setVisible <- function(value, visible) {
-  if (missing(visible)) {
-    visible <- value$visible
-    value <- value$value
-  }
-
   if (!visible) {
     invisible(value)
   } else {
     (value)
   }
 }
+
+# Given a list with items named `value` and `visible`, return `x$value` either
+# visibly, or invisibly, depending on the value of `x$visible`.
+valueWithVisible <- function(x) {
+  if (x$visible) x$value else invisible(x$value)
+}
+
 
 createVarPromiseDomain <- function(env, name, value) {
   force(env)

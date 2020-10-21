@@ -299,7 +299,7 @@ cachedReactive <- function(
       firstStep(),
       function(cacheKeyResult) {
         cache <- resolve_cache_object(cache, domain)
-        key   <- digest(cacheKeyResult, algo = "sha1")
+        key   <- digest(cacheKeyResult, algo = "spookyhash")
         res <- cache$get(key)
 
         # Case 1: cache hit

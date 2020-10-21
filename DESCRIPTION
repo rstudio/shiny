@@ -80,7 +80,7 @@ Imports:
     mime (>= 0.3),
     jsonlite (>= 0.9.16),
     xtable,
-    digest,
+    digest (>= 0.6.25),
     htmltools (>= 0.5.0.9001),
     R6 (>= 2.0),
     sourcetools,

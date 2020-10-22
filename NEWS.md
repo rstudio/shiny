@@ -30,7 +30,7 @@ shiny 1.5.0.9000
 
 * Closed #2844: Added `lang` argument to ui `*Page()` functions (e.g., `fluidPage`, `bootstrapPage`) that specifies document-level language within the app for the accessibility of screen readers and search-engine parsers. By default, it is set to empty string which is commonly recognized as a browser's default locale. (#2920)
 
-* Closed #3105: Improved `radioButtons()` accessibility. Choices generated from `radioButtons()` are semantically grouped together for assistive technologies. Group-level label passed to `label` argument in `radioButtons()` is now tied to each choice, meaning that screen readers announce the group label along with each radio option name when tabbing around.
+* Closed #3105: Improved `radioButtons()` accessibility. Choices generated from `radioButtons()` are semantically grouped together for assistive technologies. Group-level label passed to `label` argument in `radioButtons()` is now tied to each choice, meaning that screen readers announce the group label along with each radio option name when tabbing around. (thanks @jooyoungseo, #3106)
 
 ### Minor new features and improvements
 

@@ -779,6 +779,10 @@ test_that("cachedReactive error handling - async", {
 # Visibility
 # ============================================================================
 test_that("cachedReactive visibility", {
+  # cachedReactive() uses rlang::as_function, and in rlang 0.4.8 and below, it
+  # did not preserve visibility.
+  # https://github.com/r-lib/rlang/issues/1055
+  skip_if_not_installed("rlang", "0.4.8.9000")
   cache <- memoryCache()
   k <- reactiveVal(0)
   res <- NULL

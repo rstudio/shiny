@@ -108,6 +108,9 @@ radioButtons <- function(inputId, label, choices = NULL, selected = NULL,
     style = if (!is.null(width)) paste0("width: ", validateCssUnit(width), ";"),
     class = divClass,
     shinyInputLabel(inputId, label),
+    # Improve accessibility (#3105)
+    role = "radiogroup",
+    `aria-labelledby` = paste0(inputId, "-label"),
     options
   )
 }

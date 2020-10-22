@@ -1692,13 +1692,21 @@ hybrid_chain <- function(expr, ..., catch = NULL, finally = NULL,
             runFinally <- FALSE
             p
           } else {
-            result <- Reduce(function(v, func) {
-              if (".visible" %in% names(formals(func))) {
-                withVisible(func(v$value, .visible = v$visible))
-              } else {
-                withVisible(func(v$value))
-              }
-            }, list(...), result)
+            result <- Reduce(
+              function(v, func) {
+                if (".visible" %in% names(formals(func))) {
+                  withVisible(func(v$value, .visible = v$visible))
+                } else {
+                  if (v$visible) {
+                    withVisible(func(v$value))
+                  } else {
+                    withVisible(func(invisible(v$value)))
+                  }
+                }
+              },
+              list(...),
+              result
+            )
 
             valueWithVisible(result)
           }

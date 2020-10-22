@@ -1461,4 +1461,35 @@ test_that("Reactive expression visibility", {
     withVisible(isolate(invisible(1))),
     list(value = 1, visible = FALSE)
   )
+})
+
+
+test_that("Reactive expression labels", {
+  r <- list()
+
+  # Automatic label
+  r$x <- reactive({
+    a+1;b+  2
   })
+  # Printed output - uses expression, not `label`
+  expect_identical(
+    capture.output(print(r$x)),
+    c("reactive({", "    a + 1", "    b + 2", "}) ")
+  )
+  # Label used for debugging
+  expect_identical(
+    as.character(attr(r$x, "observable")$.label),
+    "r$x"
+  )
+
+  # With explicit label
+  r$y <- reactive({ a+1;b+  2 }, label = "hello")
+  expect_identical(
+    capture.output(print(r$y)),
+    c("reactive({", "    a + 1", "    b + 2", "}) ")
+  )
+  expect_identical(
+    as.character(attr(r$y, "observable")$.label),
+    "hello"
+  )
+})

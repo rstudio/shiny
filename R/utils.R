@@ -531,6 +531,23 @@ installExprFunction <- function(expr, name, eval.env = parent.frame(2),
   assign(name, func, envir = assign.env)
 }
 
+# Utility function for creating a debugging label, given an expression.
+# `expr` is a quoted expression.
+# `function_name` is the name of the calling function.
+# `label` is an optional user-provided label. If NULL, it will be inferred.
+exprToLabel <- function(expr, function_name, label = NULL) {
+  srcref <- attr(expr, "srcref", exact = TRUE)
+  if (is.null(label)) {
+    label <- rexprSrcrefToLabel(
+      srcref[[1]],
+      sprintf('%s(%s)', function_name, paste(deparse(expr), collapse = '\n'))
+    )
+  }
+  if (length(srcref) >= 2) attr(label, "srcref") <- srcref[[2]]
+  attr(label, "srcfile") <- srcFileOfRef(srcref[[1]])
+  label
+}
+
 #' Parse a GET query string from a URL
 #'
 #' Returns a named list of key-value pairs.

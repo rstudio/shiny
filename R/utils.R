@@ -1694,14 +1694,10 @@ hybrid_chain <- function(expr, ..., catch = NULL, finally = NULL,
           } else {
             result <- Reduce(
               function(v, func) {
-                if (".visible" %in% names(formals(func))) {
-                  withVisible(func(v$value, .visible = v$visible))
+                if (v$visible) {
+                  withVisible(func(v$value))
                 } else {
-                  if (v$visible) {
-                    withVisible(func(v$value))
-                  } else {
-                    withVisible(func(invisible(v$value)))
-                  }
+                  withVisible(func(invisible(v$value)))
                 }
               },
               list(...),
@@ -1726,16 +1722,6 @@ hybrid_chain <- function(expr, ..., catch = NULL, finally = NULL,
     promises::with_promise_domain(domain, do(), replace = replace)
   } else {
     do()
-  }
-}
-
-# Returns `value` with either `invisible()` applied or not, depending on the
-# value of `visible`.
-setVisible <- function(value, visible) {
-  if (!visible) {
-    invisible(value)
-  } else {
-    (value)
   }
 }
 

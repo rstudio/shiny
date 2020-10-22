@@ -88,8 +88,8 @@ createRenderFunction <- function(
   renderFunc <- function(shinysession, name, ...) {
     hybrid_chain(
       func(),
-      function(value, .visible) {
-        transform(setVisible(value, .visible), shinysession, name, ...)
+      function(value) {
+        transform(value, shinysession, name, ...)
       }
     )
   }
@@ -419,12 +419,12 @@ renderPrint <- function(expr, env = parent.frame(), quoted = FALSE,
       {
         promises::with_promise_domain(domain, func())
       },
-      function(value, .visible) {
-        if (.visible) {
-          cat(file = domain$conn, paste(utils::capture.output(value, append = TRUE), collapse = "\n"))
+      function(value) {
+        res <- withVisible(value)
+        if (res$visible) {
+          cat(file = domain$conn, paste(utils::capture.output(res$value, append = TRUE), collapse = "\n"))
         }
-        res <- paste(readLines(domain$conn, warn = FALSE), collapse = "\n")
-        res
+        paste(readLines(domain$conn, warn = FALSE), collapse = "\n")
       },
       finally = function() {
         close(domain$conn)

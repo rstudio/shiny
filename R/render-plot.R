@@ -237,8 +237,9 @@ drawPlot <- function(name, session, func, width, height, alt, pixelratio, res, .
       promises::with_promise_domain(domain, {
         hybrid_chain(
           func(),
-          function(value, .visible) {
-            if (.visible) {
+          function(value) {
+            res <- withVisible(value)
+            if (res$visible) {
               # A modified version of print.ggplot which returns the built ggplot object
               # as well as the gtable grob. This overrides the ggplot::print.ggplot
               # method, but only within the context of renderPlot. The reason this needs
@@ -256,7 +257,7 @@ drawPlot <- function(name, session, func, width, height, alt, pixelratio, res, .
                 # similar to ggplot2. But for base graphics, it would already have
                 # been rendered when func was called above, and the print should
                 # have no effect.
-                result <- ..stacktraceon..(print(value))
+                result <- ..stacktraceon..(print(res$value))
                 # TODO jcheng 2017-04-11: Verify above ..stacktraceon..
               })
               result

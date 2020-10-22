@@ -149,16 +149,14 @@ function renderDependency(dep) {
       }
 
       function findSheet(href) {
-        var old = null;
         for (var i = 0; i < document.styleSheets.length; i++) {
           var sheet = document.styleSheets[i];
           // The sheet's href is a full URL
           if (typeof sheet.href === "string" && sheet.href.indexOf(href) > -1) {
-            old = sheet;
-            break;
+            return sheet;
           }
         }
-        return old;
+        return null;
       }
 
       function removeSheet(sheet) {

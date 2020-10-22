@@ -3954,45 +3954,54 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
     if (dep.stylesheet) {
       var links = $.map(asArray(dep.stylesheet), function (stylesheet) {
-        var link = $("<link rel='stylesheet' type='text/css'>");
-        var this_href = href + "/" + encodeURI(stylesheet);
-
-        if (!restyle) {
-          return link.attr("href", this_href);
-        } // When we're restyling (i.e., this is coming through
-        // session$setCurrentTheme()), then before rendering the new
-        // stylesheet, search the existing styleSheets for href(s) that
-        // appear to point to match the same source, and flag for removal
-
-
-        for (var i = 0; i < document.styleSheets.length; i++) {
-          var sheet = document.styleSheets[i];
-          if (!sheet.href) continue;
-          var pieces = sheet.href.split("?")[0].split("/");
-
-          if (pieces[pieces.length - 1] === encodeURI(stylesheet) && pieces[pieces.length - 2] === href) {
-            sheet._shiny_restyle = true;
-          }
-        } // Include a timestamp to force the client to re-request 'new'
-        // stylesheets (otherwise it might get cached)
-
-
-        var param = "?restyle=" + new Date().getTime();
-        return link.attr("href", this_href + param);
+        return $("<link rel='stylesheet' type='text/css'>").attr("href", href + "/" + encodeURI(stylesheet));
       });
-      $head.append(links); // Disable and remove old stylesheets on the next tick
-      // The timeout amount here is currently a total guess...
-      // At first I had 10 milliseconds, but encountered some FOUC
-      // with bootstraplib's real-time themer. In the future, if we encounter
-      // other examples of FOUC we may want to consider increasing the timeout
 
-      if (restyle) {
+      if (!restyle) {
+        $head.append(links);
+      } else {
+        $.map(links, function (link) {
+          // Flag 'stale' stylesheets for disable+removal after new styles are inserted
+          for (var i = 0; i < document.styleSheets.length; i++) {
+            var sheet = document.styleSheets[i];
+            if (typeof sheet.href !== "string") continue; // The sheet's href is a full URL
+
+            if (sheet.href.indexOf(link.attr("href")) === -1) continue;
+            sheet._shiny_restyle = true;
+          } // Request the new stylesheet (with a timestamp to prevent caching)
+          // and insert a new inline style. Note that this could also done by inserting
+          // a the new <link> (w/ timestamp in href), then disabling the 'stale'
+          // document.styleSheets, but that approach doesn't work with IE11 (and this one does)
+
+
+          var xhr = new XMLHttpRequest();
+          var url = link.attr("href") + "?restyle=" + new Date().getTime();
+          xhr.open('GET', url);
+
+          xhr.onreadystatechange = function () {
+            if (this.readyState === 4 && this.status === 200) {
+              xhr.onreadystatechange = null;
+              var id = "shiny_restyle_" + link.attr("href").replace(/\W/g, '_');
+              var style_old = $head.find("style#" + id);
+              var style_new = $("<style>").attr("id", id).html(this.responseText);
+              $head.append(style_new);
+              style_old.remove();
+            }
+          };
+
+          xhr.send();
+        }); // Disable & remove 'stale' <link> tags
+
         setTimeout(function () {
           for (var i = 0; i < document.styleSheets.length; i++) {
             var sheet = document.styleSheets[i];
             if (!sheet._shiny_restyle) continue;
             sheet.disabled = true;
-            sheet.ownerNode.remove();
+            $(sheet.ownerNode).remove(); // disabled=true doesn't work on IE11, but this does :shrug:
+
+            if (navigator.appName === 'Microsoft Internet Explorer') {
+              sheet.cssText = "";
+            }
           }
         }, 100);
       }

@@ -346,6 +346,12 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       labelNode.text(labelTxt);
       labelNode.removeClass("shiny-label-null");
     }
+  } // https://stackoverflow.com/a/22551342/1583084
+
+
+  function isIE() {
+    var ua = window.navigator.userAgent;
+    return /MSIE|Trident/.test(ua);
   } //---------------------------------------------------------------------
   // Source file: ../srcjs/browser.js
 
@@ -3960,53 +3966,69 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       if (!restyle) {
         $head.append(links);
       } else {
-        $.map(links, function (link) {
-          // Flag 'stale' stylesheets for disable+removal after new styles are inserted
-          for (var i = 0; i < document.styleSheets.length; i++) {
-            var sheet = document.styleSheets[i];
-            if (typeof sheet.href !== "string") continue; // The sheet's href is a full URL
-
-            if (sheet.href.indexOf(link.attr("href")) === -1) continue;
-            sheet._shiny_restyle = true;
-          } // Request the new stylesheet (with a timestamp to prevent caching)
-          // and insert a new inline style. Note that this could also done by inserting
-          // a the new <link> (w/ timestamp in href), then disabling the 'stale'
-          // document.styleSheets, but that approach doesn't work with IE11 (and this one does)
-
-
+        // This inline <style> based approach works for IE11
+        var refreshStyle = function refreshStyle(href, oldSheet) {
           var xhr = new XMLHttpRequest();
-          var url = link.attr("href") + "?restyle=" + new Date().getTime();
-          xhr.open('GET', url);
+          xhr.open('GET', href);
 
-          xhr.onreadystatechange = function () {
-            if (this.readyState === 4 && this.status === 200) {
-              xhr.onreadystatechange = null;
-              var id = "shiny_restyle_" + link.attr("href").replace(/\W/g, '_');
-              var style_old = $head.find("style#" + id);
-              var style_new = $("<style>").attr("id", id).html(this.responseText);
-              $head.append(style_new);
-              style_old.remove();
-            }
+          xhr.onload = function () {
+            var id = "shiny_restyle_" + href.split("?restyle")[0].replace(/\W/g, '_');
+            var oldStyle = $head.find("style#" + id);
+            var newStyle = $("<style>").attr("id", id).html(xhr.responseText);
+            $head.append(newStyle);
+            if (oldStyle) setTimeout(function () {
+              return oldStyle.remove();
+            }, 10);
+            if (oldSheet) setTimeout(function () {
+              return removeSheet(oldSheet);
+            }, 10);
           };
 
           xhr.send();
-        }); // Disable & remove 'stale' <link> tags on the next tick (to avoid FOUC)
+        };
 
-        setTimeout(function () {
-          var staleNodes = $.map(document.styleSheets, function (sheet) {
-            if (!sheet._shiny_restyle) return null;
-            sheet.disabled = true; // disabled=true doesn't work on IE11, but this does :shrug:?
+        var findSheet = function findSheet(href) {
+          var old = null;
 
-            if (navigator.appName === 'Microsoft Internet Explorer') {
-              sheet.cssText = "";
+          for (var i = 0; i < document.styleSheets.length; i++) {
+            var sheet = document.styleSheets[i]; // The sheet's href is a full URL
+
+            if (typeof sheet.href === "string" && sheet.href.indexOf(href) > -1) {
+              old = sheet;
+              break;
             }
+          }
 
-            return sheet.ownerNode;
-          });
-          $.map(staleNodes, function (node) {
-            if (node) $(node).remove();
-          });
-        }, 100);
+          return old;
+        };
+
+        var removeSheet = function removeSheet(sheet) {
+          if (!sheet) return;
+          sheet.disabled = true;
+          if (isIE()) sheet.cssText = "";
+          $(sheet.ownerNode).remove();
+        };
+
+        $.map(links, function (link) {
+          // Find any document.styleSheets that match this link's href
+          // so we can remove it after bringing in the new stylesheet
+          var oldSheet = findSheet(link.attr("href")); // Add a timestamp to the href to prevent caching
+
+          var href = link.attr("href") + "?restyle=" + new Date().getTime(); // Use inline <style> approach for IE, otherwise use the more elegant
+          // <link> -based approach
+
+          if (isIE()) {
+            refreshStyle(href, oldSheet);
+          } else {
+            link.attr("href", href);
+            link.attr("onload", function () {
+              setTimeout(function () {
+                return removeSheet(oldSheet);
+              }, 10);
+            });
+            $head.append(link);
+          }
+        });
       }
     }
 

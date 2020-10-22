@@ -142,20 +142,19 @@ function renderDependency(dep) {
         };
         xhr.send();
       });
-      // Disable & remove 'stale' <link> tags
+      // Disable & remove 'stale' <link> tags on the next tick (to avoid FOUC)
       setTimeout(function() {
-        for (var i = 0; i < document.styleSheets.length; i++) {
-          var sheet = document.styleSheets[i];
-          if (!sheet._shiny_restyle) continue;
+        var staleNodes = $.map(document.styleSheets, function(sheet) {
+          if (!sheet._shiny_restyle) return null;
           sheet.disabled = true;
-          $(sheet.ownerNode).remove();
-          // disabled=true doesn't work on IE11, but this does :shrug:
+          // disabled=true doesn't work on IE11, but this does :shrug:?
           if (navigator.appName === 'Microsoft Internet Explorer') {
             sheet.cssText = "";
           }
-        }
+          return sheet.ownerNode;
+        });
+        $.map(staleNodes, function(node) { if (node) $(node).remove(); });
       }, 100);
-
     }
   }
 

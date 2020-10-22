@@ -122,10 +122,12 @@ function renderDependency(dep) {
         var href = link.attr("href") + "?restyle=" + new Date().getTime();
         // Use inline <style> approach for IE, otherwise use the more elegant
         // <link> -based approach
-        if (isIE()) {
+        if (browser.isIE) {
           refreshStyle(href, oldSheet);
         } else {
           link.attr("href", href);
+          // Once the new <link> is loaded, schedule the old <link> to be removed
+          // on the next tick which is needed to avoid FOUC
           link.attr("onload", () => {
             setTimeout(() => removeSheet(oldSheet), 10);
           });
@@ -162,7 +164,7 @@ function renderDependency(dep) {
       function removeSheet(sheet) {
         if (!sheet) return;
         sheet.disabled = true;
-        if (isIE()) sheet.cssText = "";
+        if (browser.isIE) sheet.cssText = "";
         $(sheet.ownerNode).remove();
       }
 

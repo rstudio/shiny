@@ -346,9 +346,3 @@ function updateLabel(labelTxt, labelNode) {
   }
 
 }
-
-// https://stackoverflow.com/a/22551342/1583084
-function isIE() {
-  var ua = window.navigator.userAgent;
-  return /MSIE|Trident/.test(ua);
-}

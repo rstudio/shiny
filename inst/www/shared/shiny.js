@@ -346,12 +346,6 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       labelNode.text(labelTxt);
       labelNode.removeClass("shiny-label-null");
     }
-  } // https://stackoverflow.com/a/22551342/1583084
-
-
-  function isIE() {
-    var ua = window.navigator.userAgent;
-    return /MSIE|Trident/.test(ua);
   } //---------------------------------------------------------------------
   // Source file: ../srcjs/browser.js
 
@@ -368,20 +362,29 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     if (/\bQt\/5/.test(window.navigator.userAgent) && /Linux/.test(window.navigator.userAgent)) {
       $(document.documentElement).addClass('qt5');
     } // Detect IE information
+    // https://stackoverflow.com/a/22551342/1583084
 
 
-    var isIE = navigator.appName === 'Microsoft Internet Explorer';
+    var ua = window.navigator.userAgent;
+    var isIE = /MSIE|Trident/.test(ua);
 
     function getIEVersion() {
-      var rv = -1;
+      var msie = ua.indexOf('MSIE ');
 
-      if (isIE) {
-        var ua = navigator.userAgent;
-        var re = new RegExp("MSIE ([0-9]{1,}[\\.0-9]{0,})");
-        if (re.exec(ua) !== null) rv = parseFloat(RegExp.$1);
+      if (isIE && msie > 0) {
+        // IE 10 or older => return version number
+        return parseInt(ua.substring(msie + 5, ua.indexOf('.', msie)), 10);
       }
 
-      return rv;
+      var trident = ua.indexOf('Trident/');
+
+      if (trident > 0) {
+        // IE 11 => return version number
+        var rv = ua.indexOf('rv:');
+        return parseInt(ua.substring(rv + 3, ua.indexOf('.', rv)), 10);
+      }
+
+      return -1;
     }
 
     return {
@@ -3988,24 +3991,21 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         };
 
         var findSheet = function findSheet(href) {
-          var old = null;
-
           for (var i = 0; i < document.styleSheets.length; i++) {
             var sheet = document.styleSheets[i]; // The sheet's href is a full URL
 
             if (typeof sheet.href === "string" && sheet.href.indexOf(href) > -1) {
-              old = sheet;
-              break;
+              return sheet;
             }
           }
 
-          return old;
+          return null;
         };
 
         var removeSheet = function removeSheet(sheet) {
           if (!sheet) return;
           sheet.disabled = true;
-          if (isIE()) sheet.cssText = "";
+          if (browser.isIE) sheet.cssText = "";
           $(sheet.ownerNode).remove();
         };
 
@@ -4017,10 +4017,12 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
           var href = link.attr("href") + "?restyle=" + new Date().getTime(); // Use inline <style> approach for IE, otherwise use the more elegant
           // <link> -based approach
 
-          if (isIE()) {
+          if (browser.isIE) {
             refreshStyle(href, oldSheet);
           } else {
-            link.attr("href", href);
+            link.attr("href", href); // Once the new <link> is loaded, schedule the old <link> to be removed
+            // on the next tick which is needed to avoid FOUC
+
             link.attr("onload", function () {
               setTimeout(function () {
                 return removeSheet(oldSheet);

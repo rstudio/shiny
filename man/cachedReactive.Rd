@@ -10,6 +10,7 @@ cachedReactive(
   ...,
   eventExpr = NULL,
   ignoreNULL = TRUE,
+  label = NULL,
   domain = getDefaultReactiveDomain(),
   cache = "app"
 )
@@ -35,6 +36,8 @@ used for reactive dependencies).}
 \item{ignoreNULL}{If \code{TRUE}, then if \code{eventExpr} evaluates to \code{NULL}, then a
 silent exception will be raised and the cache key and the value will not be
 computed. See \code{\link[=req]{req()}} for more on silent exceptions.}
+
+\item{label}{A label for the reactive expression, useful for debugging.}
 
 \item{domain}{See \link{domains}.}
 

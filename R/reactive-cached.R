@@ -256,6 +256,7 @@ cachedReactive <- function(
   ...,
   eventExpr = NULL,
   ignoreNULL = TRUE,
+  label = NULL,
   domain = getDefaultReactiveDomain(),
   cache = "app"
 ) {
@@ -269,12 +270,14 @@ cachedReactive <- function(
     eventFunc <- as_function(eventExpr)
   }
 
+  label <- exprToLabel(substitute(cacheKeyExpr), "cachedReactive", label)
+
   cacheKeyFunc <- as_function(enquo(cacheKeyExpr))
 
   valueFunc <- as_function(enquo(valueExpr))
-  valueFunc <- wrapFunctionLabel(valueFunc, "cachedReactiveHandler", ..stacktraceon = TRUE)
+  valueFunc <- wrapFunctionLabel(valueFunc, "cachedReactiveValueFunc", ..stacktraceon = TRUE)
 
-  reactive(label = "cachedReactive", {
+  reactive(label = label, {
     # Set up the first steps in the hybrid chain. If there's no eventFunc, then
     # the first step is just the cacheKeyFunc(). If there is an eventFunc(),
     # then start with that, and isolate the cacheKeyFunc().

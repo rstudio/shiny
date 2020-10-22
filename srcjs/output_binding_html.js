@@ -144,8 +144,8 @@ function renderDependency(dep) {
           var oldStyle = $head.find("style#" + id);
           var newStyle = $("<style>").attr("id", id).html(xhr.responseText);
           $head.append(newStyle);
-          if (oldStyle) setTimeout(() => oldStyle.remove(), 10);
-          if (oldSheet) setTimeout(() => removeSheet(oldSheet), 10);
+          setTimeout(() => oldStyle.remove(), 10);
+          setTimeout(() => removeSheet(oldSheet), 10);
         };
         xhr.send();
       }

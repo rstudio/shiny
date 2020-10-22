@@ -362,7 +362,6 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     if (/\bQt\/5/.test(window.navigator.userAgent) && /Linux/.test(window.navigator.userAgent)) {
       $(document.documentElement).addClass('qt5');
     } // Detect IE information
-    // https://stackoverflow.com/a/22551342/1583084
 
 
     var ua = window.navigator.userAgent;
@@ -3979,10 +3978,10 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
             var oldStyle = $head.find("style#" + id);
             var newStyle = $("<style>").attr("id", id).html(xhr.responseText);
             $head.append(newStyle);
-            if (oldStyle) setTimeout(function () {
+            setTimeout(function () {
               return oldStyle.remove();
             }, 10);
-            if (oldSheet) setTimeout(function () {
+            setTimeout(function () {
               return removeSheet(oldSheet);
             }, 10);
           };

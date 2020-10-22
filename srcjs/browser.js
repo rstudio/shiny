@@ -14,7 +14,6 @@ var browser = (function() {
   }
 
   // Detect IE information
-  // https://stackoverflow.com/a/22551342/1583084
   var ua = window.navigator.userAgent;
   var isIE = /MSIE|Trident/.test(ua);
 

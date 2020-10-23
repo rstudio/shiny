@@ -98,6 +98,9 @@ checkboxGroupInput <- function(inputId, label, choices = NULL, selected = NULL,
     style = if (!is.null(width)) paste0("width: ", validateCssUnit(width), ";"),
     class = divClass,
     shinyInputLabel(inputId, label),
+    # Improve accessibility
+    role = "group",
+    `aria-labelledby` = paste0(inputId, "-label"),
     options
   )
 }

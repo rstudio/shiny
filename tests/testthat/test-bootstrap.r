@@ -323,7 +323,7 @@ test_that("normalizeChoicesArgs does its job", {
 
 test_that("Choices need not be provided, can be NULL or c()", {
 
-  expected <- "<div id=\"cb\" class=\"form-group shiny-input-checkboxgroup shiny-input-container\" role=\"group\" aria-labelledby=\"cb-label\">\n  <label class=\"control-label\" id=\"cb-label\" for=\"cb\">Choose:</label>\n  <div class=\"shiny-options-group\"></div>\n</div>"
+  expected <- "<div id=\"cb\" class=\"form-group shiny-input-checkboxgroup shiny-input-container\" aria-labelledby=\"cb-label\" role=\"group\">\n  <label class=\"control-label\" id=\"cb-label\" for=\"cb\">Choose:</label>\n  <div class=\"shiny-options-group\"></div>\n</div>"
   noChoices <- checkboxGroupInput("cb", "Choose:")
   choicesNull <- checkboxGroupInput("cb", "Choose:", choices = NULL)
   choicesCharacter <- checkboxGroupInput("cb", "Choose:", choices = c())

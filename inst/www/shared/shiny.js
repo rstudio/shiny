@@ -364,18 +364,26 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     } // Detect IE information
 
 
-    var isIE = navigator.appName === 'Microsoft Internet Explorer';
+    var ua = window.navigator.userAgent;
+    var isIE = /MSIE|Trident/.test(ua);
 
     function getIEVersion() {
-      var rv = -1;
+      var msie = ua.indexOf('MSIE ');
 
-      if (isIE) {
-        var ua = navigator.userAgent;
-        var re = new RegExp("MSIE ([0-9]{1,}[\\.0-9]{0,})");
-        if (re.exec(ua) !== null) rv = parseFloat(RegExp.$1);
+      if (isIE && msie > 0) {
+        // IE 10 or older => return version number
+        return parseInt(ua.substring(msie + 5, ua.indexOf('.', msie)), 10);
       }
 
-      return rv;
+      var trident = ua.indexOf('Trident/');
+
+      if (trident > 0) {
+        // IE 11 => return version number
+        var rv = ua.indexOf('rv:');
+        return parseInt(ua.substring(rv + 3, ua.indexOf('.', rv)), 10);
+      }
+
+      return -1;
     }
 
     return {
@@ -3953,26 +3961,76 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     }
 
     if (dep.stylesheet) {
-      var stylesheets = $.map(asArray(dep.stylesheet), function (stylesheet) {
-        var this_href = href + "/" + encodeURI(stylesheet); // If a styleSheet with this href is already active, then disable it
-
-        var re = new RegExp(this_href + "$");
-
-        for (var i = 0; i < document.styleSheets.length; i++) {
-          var h = document.styleSheets[i].href;
-          if (!h) continue;
-          if (restyle && h.match(re)) document.styleSheets[i].disabled = true;
-        } // Force client to re-request the stylesheet if we've already seen it
-        // (without this unique param, the request might get cached)
-
-
-        if (restyle) {
-          this_href = this_href + "?restyle=" + new Date().getTime();
-        }
-
-        return $("<link rel='stylesheet' type='text/css'>").attr("href", this_href);
+      var links = $.map(asArray(dep.stylesheet), function (stylesheet) {
+        return $("<link rel='stylesheet' type='text/css'>").attr("href", href + "/" + encodeURI(stylesheet));
       });
-      $head.append(stylesheets);
+
+      if (!restyle) {
+        $head.append(links);
+      } else {
+        // This inline <style> based approach works for IE11
+        var refreshStyle = function refreshStyle(href, oldSheet) {
+          var xhr = new XMLHttpRequest();
+          xhr.open('GET', href);
+
+          xhr.onload = function () {
+            var id = "shiny_restyle_" + href.split("?restyle")[0].replace(/\W/g, '_');
+            var oldStyle = $head.find("style#" + id);
+            var newStyle = $("<style>").attr("id", id).html(xhr.responseText);
+            $head.append(newStyle);
+            setTimeout(function () {
+              return oldStyle.remove();
+            }, 10);
+            setTimeout(function () {
+              return removeSheet(oldSheet);
+            }, 10);
+          };
+
+          xhr.send();
+        };
+
+        var findSheet = function findSheet(href) {
+          for (var i = 0; i < document.styleSheets.length; i++) {
+            var sheet = document.styleSheets[i]; // The sheet's href is a full URL
+
+            if (typeof sheet.href === "string" && sheet.href.indexOf(href) > -1) {
+              return sheet;
+            }
+          }
+
+          return null;
+        };
+
+        var removeSheet = function removeSheet(sheet) {
+          if (!sheet) return;
+          sheet.disabled = true;
+          if (browser.isIE) sheet.cssText = "";
+          $(sheet.ownerNode).remove();
+        };
+
+        $.map(links, function (link) {
+          // Find any document.styleSheets that match this link's href
+          // so we can remove it after bringing in the new stylesheet
+          var oldSheet = findSheet(link.attr("href")); // Add a timestamp to the href to prevent caching
+
+          var href = link.attr("href") + "?restyle=" + new Date().getTime(); // Use inline <style> approach for IE, otherwise use the more elegant
+          // <link> -based approach
+
+          if (browser.isIE) {
+            refreshStyle(href, oldSheet);
+          } else {
+            link.attr("href", href); // Once the new <link> is loaded, schedule the old <link> to be removed
+            // on the next tick which is needed to avoid FOUC
+
+            link.attr("onload", function () {
+              setTimeout(function () {
+                return removeSheet(oldSheet);
+              }, 10);
+            });
+            $head.append(link);
+          }
+        });
+      }
     }
 
     if (dep.script && !restyle) {

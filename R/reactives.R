@@ -947,6 +947,7 @@ Observable <- R6Class(
 #' @param domain See [domains].
 #' @param ..stacktraceon Advanced use only. For stack manipulation purposes; see
 #'   [stacktrace()].
+#' @param ... Not used.
 #' @return a function, wrapped in a S3 class "reactive"
 #'
 #' @examples
@@ -968,12 +969,32 @@ Observable <- R6Class(
 #' isolate(reactiveC())
 #' isolate(reactiveD())
 #' @export
-reactive <- function(x, env = parent.frame(), quoted = FALSE, label = NULL,
-                     domain = getDefaultReactiveDomain(),
-                     ..stacktraceon = TRUE) {
-  fun <- exprToFunction(x, env, quoted)
-  # Attach a label and a reference to the original user source for debugging
-  label <- exprToLabel(substitute(x), "reactive", label)
+reactive <- function(x, env = parent.frame(), quoted = FALSE,
+  ...,
+  label = NULL,
+  domain = getDefaultReactiveDomain(),
+  ..stacktraceon = TRUE)
+{
+  check_dots_empty()
+
+  if (!missing(env) || !missing(quoted)) {
+    shinyDeprecated(msg = paste(
+      "The `env` and `quoted` functions are deprecated.",
+      "Please use quosures from rlang instead.",
+      "See https://github.com/rstudio/shiny/issues/3108 for more information."
+    ))
+    fun <- exprToFunction(x, env, quoted)
+    label <- exprToLabel(substitute(x), "reactive", label)
+
+  } else {
+    q <- enquo(x)
+    # Note: Unlike as_function(), new_function() won't work with nested
+    # quosures. However, it does have the advantage of preserving the
+    # parent.env() -- as_function will add one more layer in between.
+    fun <- new_function(NULL, get_expr(q), get_env(q))
+    # Attach a label and a reference to the original user source for debugging
+    label <- exprToLabel(get_expr(q), "reactive", label)
+  }
 
   o <- Observable$new(fun, label, domain, ..stacktraceon = ..stacktraceon)
   structure(o$getValue, observable = o, class = c("reactiveExpr", "reactive", "function"))
@@ -1308,6 +1329,8 @@ Observer <- R6Class(
 #'   automatically destroyed when its domain (if any) ends.
 #' @param ..stacktraceon Advanced use only. For stack manipulation purposes; see
 #'   [stacktrace()].
+#' @param ... Not used.
+#'
 #' @return An observer reference class object. This object has the following
 #'   methods:
 #'   \describe{
@@ -1362,18 +1385,45 @@ Observer <- R6Class(
 #' # are at the console, you can force a flush with flushReact()
 #' shiny:::flushReact()
 #' @export
-observe <- function(x, env=parent.frame(), quoted=FALSE, label=NULL,
-                    suspended=FALSE, priority=0,
-                    domain=getDefaultReactiveDomain(), autoDestroy = TRUE,
-                    ..stacktraceon = TRUE) {
+observe <- function(x, env = parent.frame(), quoted = FALSE,
+  ...,
+  label = NULL,
+  suspended = FALSE,
+  priority = 0,
+  domain = getDefaultReactiveDomain(),
+  autoDestroy = TRUE,
+  ..stacktraceon = TRUE)
+{
+  check_dots_empty()
 
-  fun <- exprToFunction(x, env, quoted)
-  if (is.null(label))
-    label <- sprintf('observe(%s)', paste(deparse(body(fun)), collapse='\n'))
+  if (!missing(env) || !missing(quoted)) {
+    shinyDeprecated(msg = paste(
+      "The `env` and `quoted` functions are deprecated.",
+      "Please use quosures from rlang instead.",
+      "See https://github.com/rstudio/shiny/issues/3108 for more information."
+    ))
+    fun <- exprToFunction(x, env, quoted)
+    label <- exprToLabel(substitute(x), "reactive", label)
 
-  o <- Observer$new(fun, label=label, suspended=suspended, priority=priority,
-                    domain=domain, autoDestroy=autoDestroy,
-                    ..stacktraceon=..stacktraceon)
+  } else {
+    q <- enquo(x)
+    # Note: Unlike as_function(), new_function() won't work with nested
+    # quosures. However, it does have the advantage of preserving the
+    # parent.env() -- as_function will add one more layer in between.
+    fun <- new_function(NULL, get_expr(q), get_env(q))
+    # Attach a label and a reference to the original user source for debugging
+    label <- exprToLabel(get_expr(q), "reactive", label)
+  }
+
+  o <- Observer$new(
+    fun,
+    label = label,
+    suspended = suspended,
+    priority = priority,
+    domain = domain,
+    autoDestroy = autoDestroy,
+    ..stacktraceon = ..stacktraceon
+  )
   invisible(o)
 }
 

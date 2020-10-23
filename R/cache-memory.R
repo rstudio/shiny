@@ -151,7 +151,7 @@
 #'
 #' @export
 memoryCache <- function(
-  max_size = 10 * 1024 ^ 2,
+  max_size = 200 * 1024 ^ 2,
   max_age = Inf,
   max_n = Inf,
   evict = c("lru", "fifo"),
@@ -165,7 +165,7 @@ memoryCache <- function(
 MemoryCache <- R6Class("MemoryCache",
   public = list(
     initialize = function(
-      max_size = 10 * 1024 ^ 2,
+      max_size = 200 * 1024 ^ 2,
       max_age = Inf,
       max_n = Inf,
       evict = c("lru", "fifo"),

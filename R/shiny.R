@@ -30,6 +30,7 @@ NULL
 
 #' @importFrom digest digest
 #' @importFrom promises promise promise_resolve promise_reject is.promising
+#'   as.promise
 #' @importFrom rlang enquo as_function get_expr get_env
 #' @importFrom ellipsis check_dots_empty
 NULL

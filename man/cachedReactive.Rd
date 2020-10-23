@@ -158,14 +158,17 @@ In the example described above, you would use something like:\if{html}{\out{<div
  valueExpr = \{ input$x + input$y \}
 )
 }\if{html}{\out{</div>}}
+}
 
-@section Async with cached reactives:
+\section{Async with cached reactives}{
+
 
 With a cached reactive expression, they key and/or value expression can be
 \emph{asynchronous}. In other words, they can be promises -- not regular R
 promises, but rather objects provided by the promises package, which are
 similar to promises in JavaScript. (See \code{\link[promises:promise]{promises::promise()}} for more
-information.)
+information.) You can also use \code{\link[future:future]{future::future()}} objects to run code in
+a separate process or even on a remote machine.
 
 If \code{valueExpr} is a promise, then anything that consumes the
 \code{cachedReactive} must expect it to return a promise.

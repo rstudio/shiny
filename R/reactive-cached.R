@@ -119,13 +119,14 @@
 #'   )
 #'   ```
 #'
-#'   @section Async with cached reactives:
+#' @section Async with cached reactives:
 #'
 #'   With a cached reactive expression, they key and/or value expression can be
 #'   _asynchronous_. In other words, they can be promises -- not regular R
 #'   promises, but rather objects provided by the promises package, which are
 #'   similar to promises in JavaScript. (See [promises::promise()] for more
-#'   information.)
+#'   information.) You can also use [future::future()] objects to run code in
+#'   a separate process or even on a remote machine.
 #'
 #'   If `valueExpr` is a promise, then anything that consumes the
 #'   `cachedReactive` must expect it to return a promise.
@@ -340,27 +341,28 @@ cachedReactive <- function(
         )
 
         if (is.promising(p$value)) {
-            p$value <- p$value$
-              then(function(value) {
-                res <- withVisible(value)
-                cache$set(key, list(
-                  is_promise = TRUE,
-                  value      = res$value,
-                  visible    = res$visible,
-                  error      = FALSE
-                ))
-                valueWithVisible(res)
-              })$
-              catch(function(e) {
-                cache$set(key, list(
-                  is_promise = TRUE,
-                  value      = e,
-                  visible    = TRUE,
-                  error      = TRUE
-                ))
-                stop(e)
-              })
-            valueWithVisible(p)
+          p$value <- as.promise(p$value)
+          p$value <- p$value$
+            then(function(value) {
+              res <- withVisible(value)
+              cache$set(key, list(
+                is_promise = TRUE,
+                value      = res$value,
+                visible    = res$visible,
+                error      = FALSE
+              ))
+              valueWithVisible(res)
+            })$
+            catch(function(e) {
+              cache$set(key, list(
+                is_promise = TRUE,
+                value      = e,
+                visible    = TRUE,
+                error      = TRUE
+              ))
+              stop(e)
+            })
+          valueWithVisible(p)
         } else {
           # result is an ordinary value, not a promise.
           cache$set(key, list(

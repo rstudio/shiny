@@ -278,6 +278,10 @@ cachedReactive <- function(
   valueFunc <- as_function(enquo(valueExpr))
   valueFunc <- wrapFunctionLabel(valueFunc, "cachedReactiveValueFunc", ..stacktraceon = TRUE)
 
+  # Hash the valueExpr now -- this will be added to the key later on, to reduce
+  # the chance of key collisions with other cachedReactives.
+  valueExprHash <- digest(get_expr(valueExpr), algo = "spookyhash")
+
   reactive(label = label, {
     # Set up the first steps in the hybrid chain. If there's no eventFunc, then
     # the first step is just the cacheKeyFunc(). If there is an eventFunc(),
@@ -299,7 +303,7 @@ cachedReactive <- function(
       firstStep(),
       function(cacheKeyResult) {
         cache <- resolve_cache_object(cache, domain)
-        key   <- digest(cacheKeyResult, algo = "spookyhash")
+        key <- digest(list(cacheKeyResult, valueExprHash), algo = "spookyhash")
         res <- cache$get(key)
 
         # Case 1: cache hit

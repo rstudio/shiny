@@ -110,6 +110,7 @@ radioButtons <- function(inputId, label, choices = NULL, selected = NULL,
     shinyInputLabel(inputId, label),
     # Improve accessibility (#3105)
     role = "radiogroup",
+    # The `aria-labelledby` is tied to id value in `shinyInputLabel()` to be announced to screen readers and in Braille:
     `aria-labelledby` = paste0(inputId, "-label"),
     options
   )

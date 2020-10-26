@@ -31,6 +31,14 @@ createSessionProxy <- function(parentSession, ...) {
   # but not `session$userData <- TRUE`) from within a module
   # without any hacks (see PR #1732)
   if (identical(x[[name]], value)) return(x)
+
+  # Special case for $options (issue #3112)
+  if (name == "options") {
+    parent <- .subset2(x, "parent")
+    parent[[name]] <- value
+    return(x)
+  }
+
   stop("Attempted to assign value on session proxy.")
 }
 

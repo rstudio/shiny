@@ -346,13 +346,13 @@ loadSupport <- function(appDir=NULL, renv=new.env(parent=globalenv()), globalren
   }
 
   descFile <- file.path.ci(appDir, "DESCRIPTION")
-  if (file.exists(descFile) &&
-      identical(as.character(read.dcf(descFile, fields = "Type")), "Package"))
+  if (file.exists(file.path.ci(appDir, "NAMESPACE")) ||
+      (file.exists(descFile) &&
+       identical(as.character(read.dcf(descFile, fields = "Type")), "Package")))
   {
     warning(
-      "Loading R/ subdirectory for Shiny application, but the DESCRIPTION file ",
-      "says this directory contains an R package. Sourcing files in R/ may cause ",
-      "unexpected behavior."
+      "Loading R/ subdirectory for Shiny application, but this directory appears ",
+      "to contain an R package. Sourcing files in R/ may cause unexpected behavior."
     )
   }
 

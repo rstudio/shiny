@@ -345,6 +345,17 @@ loadSupport <- function(appDir=NULL, renv=new.env(parent=globalenv()), globalren
     appDir <- findEnclosingApp(".")
   }
 
+  descFile <- file.path.ci(appDir, "DESCRIPTION")
+  if (file.exists(descFile) &&
+      identical(as.character(read.dcf(descFile, fields = "Type")), "Package"))
+  {
+    warning(
+      "Loading R/ subdirectory for Shiny application, but the DESCRIPTION file ",
+      "says this directory contains an R package. Sourcing files in R/ may cause ",
+      "unexpected behavior."
+    )
+  }
+
   if (!is.null(globalrenv)){
     # Evaluate global.R, if it exists.
     globalPath <- file.path.ci(appDir, "global.R")

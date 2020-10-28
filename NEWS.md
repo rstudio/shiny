@@ -54,6 +54,8 @@ shiny 1.5.0.9000
 
 * `shinyOptions()` now has session-level scoping, in addition to global and application-level scoping. (#3080)
 
+* `runApp()` now warns when running an application in an R package directory. (#3114)
+
 ### Bug fixes
 
 * Fixed #2859: `renderPlot()` wasn't correctly setting `showtext::showtext_opts()`'s `dpi` setting with the correct resolution on high resolution displays; which means, if the font was rendered by showtext, font sizes would look smaller than they should on such displays. (#2941)

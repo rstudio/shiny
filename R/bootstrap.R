@@ -100,7 +100,7 @@ bootstrapLib <- function(theme = NULL) {
     # option is automatically reset when the app (or session) exits
     if (isRunning()) {
       setCurrentTheme(theme)
-      registerThemeDependency(bs_theme_dependencies_css)
+      registerThemeDependency(bs_theme_deps)
 
     } else {
       # Technically, this a potential issue (someone trying to execute/render
@@ -124,12 +124,9 @@ bootstrapLib <- function(theme = NULL) {
 }
 
 # This is defined outside of bootstrapLib() because registerThemeDependency()
-# wants non-anonymous functions.
-bs_theme_dependencies_css <- function(theme) {
-  deps <- bootstraplib::bs_theme_dependencies(theme)
-  # Extract out the CSS files only (no need to re-send JS files, even though
-  # they wouldn't be re-rendered on the client anyway.)
-  Filter(deps, f = function(dep) !is.null(dep$stylesheet))
+# wants a non-anonymous function with a single argument
+bs_theme_deps <- function(theme) {
+  bootstraplib::bs_theme_dependencies(theme)
 }
 
 is_bs_theme <- function(x) {

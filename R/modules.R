@@ -46,7 +46,7 @@ createSessionProxy <- function(parentSession, ...) {
 
 # Given a session_proxy, search `parent` recursively to find the real
 # ShinySession object. If given a ShinySession, simply return it.
-find_ancestor_session <- function(x, depth = 5) {
+find_ancestor_session <- function(x, depth = 20) {
   if (depth < 0) {
     stop("ShinySession not found")
   }

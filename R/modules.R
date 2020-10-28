@@ -34,8 +34,8 @@ createSessionProxy <- function(parentSession, ...) {
 
   # Special case for $options (issue #3112)
   if (name == "options") {
-    parent <- .subset2(x, "parent")
-    parent[[name]] <- value
+    session <- find_ancestor_session(x)
+    session[[name]] <- value
     return(x)
   }
 
@@ -43,6 +43,23 @@ createSessionProxy <- function(parentSession, ...) {
 }
 
 `[[<-.session_proxy` <- `$<-.session_proxy`
+
+# Given a session_proxy, search `parent` recursively to find the real
+# ShinySession object. If given a ShinySession, simply return it.
+find_ancestor_session <- function(x, depth = 5) {
+  if (depth < 0) {
+    stop("ShinySession not found")
+  }
+  if (inherits(x, "ShinySession")) {
+    return(x)
+  }
+  if (inherits(x, "session_proxy")) {
+    return(find_ancestor_session(.subset2(x, "parent"), depth-1))
+  }
+
+  stop("ShinySession not found")
+}
+
 
 #' Shiny modules
 #'

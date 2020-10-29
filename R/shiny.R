@@ -703,7 +703,7 @@ ShinySession <- R6Class(
       # Copy app-level options
       self$options <- getCurrentAppState()$options
 
-      self$cache <- MemoryCache$new()
+      self$cache <- cachem::cache_mem(max_size = 200 * 1024^2)
 
       private$bookmarkCallbacks <- Callbacks$new()
       private$bookmarkedCallbacks <- Callbacks$new()

@@ -70,7 +70,7 @@
 #'
 #'   If either `"app"` or `"session"` is used, the cache will be 10 MB
 #'   in size, and will be stored stored in memory, using a
-#'   [memoryCache()] object. Note that the cache space will be shared
+#'   [cachem::cache_mem()] object. Note that the cache space will be shared
 #'   among all cached plots within a single application or session.
 #'
 #'   In some cases, you may want more control over the caching behavior. For
@@ -83,7 +83,7 @@
 #'   global.R. For example, this will create a cache with 20 MB of space
 #'   instead of the default 10 MB:
 #'   \preformatted{
-#'   shinyOptions(cache = memoryCache(size = 20e6))
+#'   shinyOptions(cache = cachem::cache_mem(size = 20e6))
 #'   }
 #'
 #'   To use different settings for a session-scoped cache, you can call
@@ -92,7 +92,7 @@
 #'   `cache="session"`. This will create a 20 MB cache for the session:
 #'   \preformatted{
 #'   function(input, output, session) {
-#'     shinyOptions(cache = memoryCache(size = 20e6))
+#'     shinyOptions(cache = cachem::cache_mem(size = 20e6))
 #'
 #'     output$plot <- renderCachedPlot(
 #'       ...,
@@ -102,11 +102,11 @@
 #'   }
 #'
 #'   If you want to create a cache that is shared across multiple concurrent
-#'   R processes, you can use a [diskCache()]. You can create an
+#'   R processes, you can use a [cachem::cache_disk()]. You can create an
 #'   application-level shared cache by putting this at the top of your app.R,
 #'   server.R, or global.R:
 #'   \preformatted{
-#'   shinyOptions(cache = diskCache(file.path(dirname(tempdir()), "myapp-cache"))
+#'   shinyOptions(cache = cachem::cache_disk(file.path(dirname(tempdir()), "myapp-cache"))
 #'   }
 #'
 #'   This will create a subdirectory in your system temp directory named
@@ -119,14 +119,14 @@
 #'   cache in a location outside of the temp directory. For example, it could
 #'   be a subdirectory of the application:
 #'   \preformatted{
-#'   shinyOptions(cache = diskCache("./myapp-cache"))
+#'   shinyOptions(cache = cachem::cache_disk("./myapp-cache"))
 #'   }
 #'
 #'   In this case, resetting the cache will have to be done manually, by deleting
 #'   the directory.
 #'
 #'   You can also scope a cache to just one plot, or selected plots. To do that,
-#'   create a [memoryCache()] or [diskCache()], and pass it
+#'   create a [cachem::cache_mem()] or [cachem::cache_disk()], and pass it
 #'   as the `cache` argument of `renderCachedPlot`.
 #'
 #' @section Interactive plots:
@@ -152,7 +152,7 @@
 #'
 #' @seealso See [renderPlot()] for the regular, non-cached version of
 #'   this function. For more about configuring caches, see
-#'   [memoryCache()] and [diskCache()].
+#'   [cachem::cache_mem()] and [cachem::cache_disk()].
 #'
 #'
 #' @examples
@@ -243,7 +243,7 @@
 #'              xlim = range(mtcars$wt), ylim = range(mtcars$mpg))
 #'       },
 #'       cacheKeyExpr = { list(input$n) },
-#'       cache = memoryCache()
+#'       cache = cachem::cache_mem()
 #'     )
 #'     output$plot2 <- renderCachedPlot({
 #'         Sys.sleep(2)  # Add an artificial delay
@@ -252,7 +252,7 @@
 #'              xlim = range(mtcars$wt), ylim = range(mtcars$mpg))
 #'       },
 #'       cacheKeyExpr = { list(input$n) },
-#'       cache = memoryCache()
+#'       cache = cachem::cache_mem()
 #'     )
 #'   }
 #' )
@@ -263,22 +263,22 @@
 #' # At the top of app.R, this set the application-scoped cache to be a memory
 #' # cache that is 20 MB in size, and where cached objects expire after one
 #' # hour.
-#' shinyOptions(cache = memoryCache(max_size = 20e6, max_age = 3600))
+#' shinyOptions(cache = cachem::cache_mem(max_size = 20e6, max_age = 3600))
 #'
 #' # At the top of app.R, this set the application-scoped cache to be a disk
 #' # cache that can be shared among multiple concurrent R processes, and is
 #' # deleted when the system reboots.
-#' shinyOptions(cache = diskCache(file.path(dirname(tempdir()), "myapp-cache"))
+#' shinyOptions(cache = cachem::cache_disk(file.path(dirname(tempdir()), "myapp-cache"))
 #'
 #' # At the top of app.R, this set the application-scoped cache to be a disk
 #' # cache that can be shared among multiple concurrent R processes, and
 #' # persists on disk across reboots.
-#' shinyOptions(cache = diskCache("./myapp-cache"))
+#' shinyOptions(cache = cachem::cache_disk("./myapp-cache"))
 #'
 #' # At the top of the server function, this set the session-scoped cache to be
 #' # a memory cache that is 5 MB in size.
 #' server <- function(input, output, session) {
-#'   shinyOptions(cache = memoryCache(max_size = 5e6))
+#'   shinyOptions(cache = cachem::cache_mem(max_size = 5e6))
 #'
 #'   output$plot <- renderCachedPlot(
 #'     ...,
@@ -513,7 +513,7 @@ renderCachedPlot <- function(expr,
             # other metadata be saved and restored just fine.) Displaylists can
             # also be very large (~1.5MB for a basic ggplot), and they would not
             # be commonly used. Note that displaylist serialization was fixed in
-            # revision 74506 (2e6c669), and should be in R 3.6. A MemoryCache
+            # revision 74506 (2e6c669), and should be in R 3.6. A cache_mem
             # doesn't need to serialize objects, so it could actually save a
             # display list, but for the reasons listed previously, it's
             # generally not worth it.

@@ -34,8 +34,8 @@ information on the default sizing policy.}
 \item{res}{The resolution of the PNG, in pixels per inch.}
 
 \item{cache}{The scope of the cache, or a cache object. This can be \code{"app"}
-(the default), \code{"session"}, or a cache object like a \code{\link[=diskCache]{diskCache()}}. See the
-Cache Scoping section for more information.}
+(the default), \code{"session"}, or a cache object like a
+\code{\link[cachem:cache_disk]{cachem::cache_disk()}}. See the Cache Scoping section for more information.}
 
 \item{...}{Arguments to be passed through to \code{\link[grDevices:png]{grDevices::png()}}.
 These can be used to set the width, height, background color, etc.}
@@ -127,7 +127,7 @@ The cache will not be shared across multiple sessions.}
 
 If either \code{"app"} or \code{"session"} is used, the cache will be 10 MB
 in size, and will be stored stored in memory, using a
-\code{\link[=memoryCache]{memoryCache()}} object. Note that the cache space will be shared
+\code{\link[cachem:cache_mem]{cachem::cache_mem()}} object. Note that the cache space will be shared
 among all cached plots within a single application or session.
 
 In some cases, you may want more control over the caching behavior. For
@@ -140,7 +140,7 @@ To use different settings for an application-scoped cache, you can call
 global.R. For example, this will create a cache with 20 MB of space
 instead of the default 10 MB:
 \preformatted{
-  shinyOptions(cache = memoryCache(size = 20e6))
+  shinyOptions(cache = cachem::cache_mem(size = 20e6))
   }
 
 To use different settings for a session-scoped cache, you can call
@@ -149,7 +149,7 @@ the session-scoped cache, you must also call \code{renderCachedPlot} with
 \code{cache="session"}. This will create a 20 MB cache for the session:
 \preformatted{
   function(input, output, session) {
-    shinyOptions(cache = memoryCache(size = 20e6))
+    shinyOptions(cache = cachem::cache_mem(size = 20e6))
 
     output$plot <- renderCachedPlot(
       ...,
@@ -159,11 +159,11 @@ the session-scoped cache, you must also call \code{renderCachedPlot} with
   }
 
 If you want to create a cache that is shared across multiple concurrent
-R processes, you can use a \code{\link[=diskCache]{diskCache()}}. You can create an
+R processes, you can use a \code{\link[cachem:cache_disk]{cachem::cache_disk()}}. You can create an
 application-level shared cache by putting this at the top of your app.R,
 server.R, or global.R:
 \preformatted{
-  shinyOptions(cache = diskCache(file.path(dirname(tempdir()), "myapp-cache"))
+  shinyOptions(cache = cachem::cache_disk(file.path(dirname(tempdir()), "myapp-cache"))
   }
 
 This will create a subdirectory in your system temp directory named
@@ -176,14 +176,14 @@ To have the cache persist even across multiple reboots, you can create the
 cache in a location outside of the temp directory. For example, it could
 be a subdirectory of the application:
 \preformatted{
-  shinyOptions(cache = diskCache("./myapp-cache"))
+  shinyOptions(cache = cachem::cache_disk("./myapp-cache"))
   }
 
 In this case, resetting the cache will have to be done manually, by deleting
 the directory.
 
 You can also scope a cache to just one plot, or selected plots. To do that,
-create a \code{\link[=memoryCache]{memoryCache()}} or \code{\link[=diskCache]{diskCache()}}, and pass it
+create a \code{\link[cachem:cache_mem]{cachem::cache_mem()}} or \code{\link[cachem:cache_disk]{cachem::cache_disk()}}, and pass it
 as the \code{cache} argument of \code{renderCachedPlot}.
 }
 
@@ -282,7 +282,7 @@ shinyApp(
              xlim = range(mtcars$wt), ylim = range(mtcars$mpg))
       },
       cacheKeyExpr = { list(input$n) },
-      cache = memoryCache()
+      cache = cachem::cache_mem()
     )
     output$plot2 <- renderCachedPlot({
         Sys.sleep(2)  # Add an artificial delay
@@ -291,7 +291,7 @@ shinyApp(
              xlim = range(mtcars$wt), ylim = range(mtcars$mpg))
       },
       cacheKeyExpr = { list(input$n) },
-      cache = memoryCache()
+      cache = cachem::cache_mem()
     )
   }
 )
@@ -302,22 +302,22 @@ shinyApp(
 # At the top of app.R, this set the application-scoped cache to be a memory
 # cache that is 20 MB in size, and where cached objects expire after one
 # hour.
-shinyOptions(cache = memoryCache(max_size = 20e6, max_age = 3600))
+shinyOptions(cache = cachem::cache_mem(max_size = 20e6, max_age = 3600))
 
 # At the top of app.R, this set the application-scoped cache to be a disk
 # cache that can be shared among multiple concurrent R processes, and is
 # deleted when the system reboots.
-shinyOptions(cache = diskCache(file.path(dirname(tempdir()), "myapp-cache"))
+shinyOptions(cache = cachem::cache_disk(file.path(dirname(tempdir()), "myapp-cache"))
 
 # At the top of app.R, this set the application-scoped cache to be a disk
 # cache that can be shared among multiple concurrent R processes, and
 # persists on disk across reboots.
-shinyOptions(cache = diskCache("./myapp-cache"))
+shinyOptions(cache = cachem::cache_disk("./myapp-cache"))
 
 # At the top of the server function, this set the session-scoped cache to be
 # a memory cache that is 5 MB in size.
 server <- function(input, output, session) {
-  shinyOptions(cache = memoryCache(max_size = 5e6))
+  shinyOptions(cache = cachem::cache_mem(max_size = 5e6))
 
   output$plot <- renderCachedPlot(
     ...,
@@ -330,5 +330,5 @@ server <- function(input, output, session) {
 \seealso{
 See \code{\link[=renderPlot]{renderPlot()}} for the regular, non-cached version of
 this function. For more about configuring caches, see
-\code{\link[=memoryCache]{memoryCache()}} and \code{\link[=diskCache]{diskCache()}}.
+\code{\link[cachem:cache_mem]{cachem::cache_mem()}} and \code{\link[cachem:cache_disk]{cachem::cache_disk()}}.
 }

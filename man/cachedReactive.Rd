@@ -40,8 +40,8 @@ computed. See \code{\link[=req]{req()}} for more on silent exceptions.}
 \item{label}{A label for the reactive expression, useful for debugging.}
 
 \item{cache}{The scope of the cache, or a cache object. This can be \code{"app"}
-(the default), \code{"session"}, or a cache object like a \code{\link[=diskCache]{diskCache()}}. See the
-Cache Scoping section for more information.}
+(the default), \code{"session"}, or a cache object like a
+\code{\link[cachem:cache_disk]{cachem::cache_disk()}}. See the Cache Scoping section for more information.}
 
 \item{domain}{See \link{domains}.}
 }

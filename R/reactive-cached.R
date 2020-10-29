@@ -9,86 +9,83 @@
 #'
 #' With `cachedReactive()`, any number of previous values can be cached. The
 #' most important difference in using `cachedReactive()` is that you must
-#' provide `cacheKeyExpr`, which is an expression that generates as a _cache
-#' key_, in addition to `valueExpr`, which is an expression that generates the
-#' value returned by the `cachedReactive()`.
+#' provide `key`, which is an expression that generates as a _cache key_, in
+#' addition to `value`, which is an expression that generates the value returned
+#' by the `cachedReactive()`.
 #'
-#' For each possible value returned by `cacheKeyExpr`, there should be one
-#' possible value returned by `valueExpr`; a given value of `cacheKeyExpr`
-#' should not correspond to multiple possible values of `valueExpr`.
+#' For each possible value returned by `key`, there should be one possible value
+#' returned by `value`; a given value of `key` should not correspond to multiple
+#' possible values of `value`.
 #'
-#' The way to use this is to have a `cacheKeyExpr` that is fast to compute, and
-#' a `valueExpr` that is expensive to compute. It evaluates the `cacheKeyExpr`,
-#' and then serializes and hashes the result. If the resulting hashed key is in
-#' the cache, then it simply retrieves and returns it; if not, then it executes
-#' `valueExpr`, stores the result in the cache, and returns it.
+#' The way to use this is to have a `key` that is fast to compute, and a `value`
+#' that is expensive to compute. It evaluates the `key`, and then serializes and
+#' hashes the result. If the resulting hashed key is in the cache, then it
+#' simply retrieves and returns it; if not, then it executes `value`, stores the
+#' result in the cache, and returns it.
 #'
-#' The `cacheKeyExpr` should be fast to compute, and ideally it will return an
-#' object that is not too large, since the object must be serialized and hashed.
-#' Typically, `cacheKeyExpr` will use any reactive inputs that are used by
-#' `valueExpr`, but will do something that is fast and simple with them, like
-#' put them together in a list. It is also best to use non-reference objects,
-#' since the serialization of these objects may not capture relevant changes.
+#' The `key` should be fast to compute, and ideally it will return an object
+#' that is not too large, since the object must be serialized and hashed.
+#' Typically, `key` will use any reactive inputs that are used by `value`, but
+#' will do something that is fast and simple with them, like put them together
+#' in a list. It is also best to use non-reference objects, since the
+#' serialization of these objects may not capture relevant changes.
 #'
-#' `cachedReactive()` also can take an `eventExpr` so that it behaves similar to
+#' `cachedReactive()` also can take an `event` so that it behaves similar to
 #' [eventReactive()]. See more in the **Event expression** section.
 #'
 #' @section Cache keys and reactivity:
 #'
-#'   Because the value from `valueExpr` is cached, it is not necessarily
+#'   Because the value from `value` is cached, it is not necessarily
 #'   re-executed, and therefore it can't be used to decide what objects to take
-#'   reactive dependencies on. Instead, the `cacheKeyExpr` is used to figure out
-#'   which objects to take reactive dependencies on. In short, the
-#'   `cacheKeyExpr` is reactive, and `valueExpr` is not (it is run inside of
-#'   [isolate()]).
+#'   reactive dependencies on. Instead, the `key` is used to figure out which
+#'   objects to take reactive dependencies on. In short, the `key` is reactive,
+#'   and `value` is not (it is run inside of [isolate()]).
 #'
-#'   Here's an example of what not to do: if `cacheKeyExpr=input$x` and
-#'   `valueExpr={input$x + input$y}`, then it will only take a reactive
-#'   dependency on `input$x` -- it won't recompute `valueExpr` when `input$y`
-#'   changes. Moreover, the cache won't use `input$y` as part of the key, and so
-#'   it could return incorrect values in the future when it retrieves values
-#'   from the cache. (See the examples below for an example of this.)
+#'   Here's an example of what not to do: if `key=input$x` and `value={input$x +
+#'   input$y}`, then it will only take a reactive dependency on `input$x` -- it
+#'   won't recompute `value` when `input$y` changes. Moreover, the cache won't
+#'   use `input$y` as part of the key, and so it could return incorrect values
+#'   in the future when it retrieves values from the cache. (See the examples
+#'   below for an example of this.)
 #'
 #'   A better cache key would be something like `list(input$x, input$y)`. This
 #'   does two things: it ensures that a reactive dependency is taken on both `x`
 #'   and `y`, and it also makes sure that both values are represented in the
 #'   cache key.
 #'
-#'   In general, `cacheKeyExpr` should use the same reactive inputs as
-#'   `valueExpr`, but the computation should be simpler. If there are other
-#'   (non-reactive) values that are consumed, such as external data sources,
-#'   they should be used in the `cacheKeyExpr` as well. Note that if the
-#'   `cacheKeyExpr` is large, it can make sense to do some sort of reduction on
-#'   it so that the serialization and hashing of the cache key is not too
-#'   expensive.
+#'   In general, `key` should use the same reactive inputs as `value`, but the
+#'   computation should be simpler. If there are other (non-reactive) values
+#'   that are consumed, such as external data sources, they should be used in
+#'   the `key` as well. Note that if the `key` is large, it can make sense to do
+#'   some sort of reduction on it so that the serialization and hashing of the
+#'   cache key is not too expensive.
 #'
-#'   Remember that the `cacheKeyExpr` is _reactive_, so it is not re-executed
-#'   every single time that someone accesses the `cachedReactive`. For example,
+#'   Remember that the `key` is _reactive_, so it is not re-executed every
+#'   single time that someone accesses the `cachedReactive`. For example,
 #'   suppose we have this `cachedReactive`:
 #'
 #'   ```
 #'   r <- cachedReactive(
-#'     cacheKeyExpr = list(input$x, input$y),
-#'     valueExpr = { input$x + input$y }
+#'     key = list(input$x, input$y),
+#'     value = { input$x + input$y }
 #'   )
 #'   ```
 #'
-#' The first time someone calls `r()`, it executes both `cacheKeyExpr` and
-#' `valueExpr`. If someone calls `r()` again, then it does not need to
-#' re-execute `cacheKeyExpr`, because that `expr` has not been invalidated
-#' via a change to `input$x` or `input$y`; it simply returns the previous value.
-#' However, if `input$x` or `input$y` changes, then the reactive expression will
-#' be invalidated, and the next time that someone calls `r()`, `cacheKeyExpr`
-#' will need to be re-executed.
+#' The first time someone calls `r()`, it executes both `key` and `value`. If
+#' someone calls `r()` again, then it does not need to re-execute `key`, because
+#' that `expr` has not been invalidated via a change to `input$x` or `input$y`;
+#' it simply returns the previous value. However, if `input$x` or `input$y`
+#' changes, then the reactive expression will be invalidated, and the next time
+#' that someone calls `r()`, `key` will need to be re-executed.
 #'
 #'
 #' @section Event expressions and reactivity:
 #'
-#'   Typically, the `cacheKeyExpr` is reactive, and the `valueExpr` is not (it
-#'   is run within [isolate()]). However, there are times when this isn't ideal:
-#'   perhaps you have [sliderInput]s `x` and `y`, but you don't want the
-#'   computation to occur until the user sets both `x` and `y`, and then clicks
-#'   on an [actionButton] named `go`.
+#'   Typically, the `key` is reactive, and the `value` is not (it is run within
+#'   [isolate()]). However, there are times when this isn't ideal: perhaps you
+#'   have [sliderInput]s `x` and `y`, but you don't want the computation to
+#'   occur until the user sets both `x` and `y`, and then clicks on an
+#'   [actionButton] named `go`.
 #'
 #'   The value of `input$go` shouldn't be included in the cache key, because its
 #'   value is not relevant to the calculation involving `input$x` and `input$y`.
@@ -102,20 +99,19 @@
 #'   take a reactive dependency on `input$x` and `input$y` but use those values
 #'   for the cache key.
 #'
-#'   This can be done by using `eventExpr`, similar to in the [eventReactive()]
-#'   function. If a non-NULL `eventExpr` is provided to `cachedReactive()`, then
-#'   it will be used for the reactive dependencies but its value will be
-#'   ignored, and the `cacheKeyExpr` will be used for its value, but it will be
-#'   executed in an [isolate()], so it will not be used for its reactive
-#'   dependencies.
+#'   This can be done by using `event`, similar to in the [eventReactive()]
+#'   function. If a non-NULL `event` is provided to `cachedReactive()`, then it
+#'   will be used for the reactive dependencies but its value will be ignored,
+#'   and the `key` will be used for its value, but it will be executed in an
+#'   [isolate()], so it will not be used for its reactive dependencies.
 #'
 #'   In the example described above, you would use something like:
 #'
 #'   ```
 #'   r <- cachedReactive(
-#'     eventExpr = input$go,
-#'     cacheKeyExpr = list(input$x, input$y),
-#'     valueExpr = { input$x + input$y }
+#'     event = input$go,
+#'     key = list(input$x, input$y),
+#'     value = { input$x + input$y }
 #'   )
 #'   ```
 #'
@@ -125,32 +121,32 @@
 #'   _asynchronous_. In other words, they can be promises -- not regular R
 #'   promises, but rather objects provided by the promises package, which are
 #'   similar to promises in JavaScript. (See [promises::promise()] for more
-#'   information.) You can also use [future::future()] objects to run code in
-#'   a separate process or even on a remote machine.
+#'   information.) You can also use [future::future()] objects to run code in a
+#'   separate process or even on a remote machine.
 #'
-#'   If `valueExpr` is a promise, then anything that consumes the
-#'   `cachedReactive` must expect it to return a promise.
+#'   If `value` is a promise, then anything that consumes the `cachedReactive`
+#'   must expect it to return a promise.
 #'
-#'   Similarly, if `cacheKeyExpr` or `eventExpr` is a promise (in other words,
-#'   if they are asynchronous), then the entire `cachedReactive` must be
-#'   asynchronous, since the key must be computed before `valueExpr` is
-#'   evaluated (or the value is retrieved from the cache). Anything that
-#'   consumes the `cachedReactive` must therefore expect it to return a promise.
+#'   Similarly, if `key` or `event` is a promise (in other words, if they are
+#'   asynchronous), then the entire `cachedReactive` must be asynchronous, since
+#'   the key must be computed before `value` is evaluated (or the value is
+#'   retrieved from the cache). Anything that consumes the `cachedReactive` must
+#'   therefore expect it to return a promise.
 #'
 #' @inheritParams reactive
-#' @param cacheKeyExpr An expression or quosure that returns a value that will
-#'   be hashed and used as a cache key. This key should be a unique identifier
-#'   for the value: the assumption is that if the cache key is the same, then
-#'   the value of `expr` is the same. If two separate `cachedReactive`s have the
-#'   same key, the value is assumed to be the same. To avoid this, you can add
-#'   an arbitrary identifier (like an ID string) to the cache key.
-#' @param valueExpr The expression or quosure that produces the return value of
-#'   the `cachedReactive`. It will be executed within an [isolate()] scope.
-#' @param eventExpr An optional expression or quosure used for reactivity. If
-#'   non-NULL, then `eventExpr` will be evaluated in a reactive context, and
-#'   `valueExpr` will be evaluated in an isolated context (and it will not be
-#'   used for reactive dependencies).
-#' @param ignoreNULL If `TRUE`, then if `eventExpr` evaluates to `NULL`, then a
+#' @param key An expression or quosure that returns a value that will be hashed
+#'   and used as a cache key. This key should be a unique identifier for the
+#'   value: the assumption is that if the cache key is the same, then the value
+#'   of `expr` is the same. If two separate `cachedReactive`s have the same key,
+#'   the value is assumed to be the same. To avoid this, you can add an
+#'   arbitrary identifier (like an ID string) to the cache key.
+#' @param value The expression or quosure that produces the return value of the
+#'   `cachedReactive`. It will be executed within an [isolate()] scope.
+#' @param event An optional expression or quosure used for reactivity. If
+#'   non-NULL, then `event` will be evaluated in a reactive context, and `value`
+#'   will be evaluated in an isolated context (and it will not be used for
+#'   reactive dependencies).
+#' @param ignoreNULL If `TRUE`, then if `event` evaluates to `NULL`, then a
 #'   silent exception will be raised and the cache key and the value will not be
 #'   computed. See [req()] for more on silent exceptions.
 #' @param cache The scope of the cache, or a cache object. This can be `"app"`
@@ -187,7 +183,7 @@
 #' )
 #'
 #'
-#' # Demo of using eventExpr with an actionButton
+#' # Demo of using event with an actionButton
 #' shinyApp(
 #'   ui = fluidPage(
 #'     sliderInput("x", "x", 1, 10, 5),
@@ -200,10 +196,10 @@
 #'     r <- cachedReactive(
 #'       # Take a reactive dependency on input$go, but don't use its value
 #'       # for the cache key.
-#'       eventExpr = input$go,
+#'       event = input$go,
 #'       # Use input$x and input$y for the cache key, but don't take a reactive
 #'       # dependency on them.
-#'       cacheKeyExpr = {
+#'       key = {
 #'         list(input$x, input$y)
 #'       },
 #'       {
@@ -252,10 +248,10 @@
 #'
 #' @export
 cachedReactive <- function(
-  cacheKeyExpr,
-  valueExpr,
+  key,
+  value,
   ...,
-  eventExpr = NULL,
+  event = NULL,
   ignoreNULL = TRUE,
   label = NULL,
   domain = getDefaultReactiveDomain(),
@@ -263,48 +259,50 @@ cachedReactive <- function(
 ) {
   check_dots_empty()
 
-  # eventExpr is optional
-  eventExpr <- enquo(eventExpr)
-  if (identical(get_expr(eventExpr), NULL)) {
+  # event is optional
+  event <- enquo(event)
+  if (identical(get_expr(event), NULL)) {
     eventFunc <- NULL
   } else {
-    eventFunc <- as_function(eventExpr)
+    eventFunc <- as_function(event)
   }
 
-  label <- exprToLabel(substitute(cacheKeyExpr), "cachedReactive", label)
+  label <- exprToLabel(substitute(key), "cachedReactive", label)
 
-  cacheKeyFunc <- as_function(enquo(cacheKeyExpr))
+  keyFunc <- as_function(enquo(key))
 
-  valueFunc <- as_function(enquo(valueExpr))
+  valueFunc <- as_function(enquo(value))
   valueFunc <- wrapFunctionLabel(valueFunc, "cachedReactiveValueFunc", ..stacktraceon = TRUE)
 
-  # Hash the valueExpr now -- this will be added to the key later on, to reduce
-  # the chance of key collisions with other cachedReactives.
-  valueExprHash <- digest(get_expr(valueExpr), algo = "spookyhash")
+  # Hash the value expression now -- this will be added to the key later on, to
+  # reduce the chance of key collisions with other cachedReactives. Remove
+  # source refs because they can differ even though the code is the same.
+  valueExprHash <- digest(removeSource(get_expr(enquo(value))), algo = "spookyhash")
+  message("valuExprHash: ", valueExprHash)
 
   reactive(label = label, {
     # Set up the first steps in the hybrid chain. If there's no eventFunc, then
-    # the first step is just the cacheKeyFunc(). If there is an eventFunc(),
-    # then start with that, and isolate the cacheKeyFunc().
+    # the first step is just the keyFunc(). If there is an eventFunc(),
+    # then start with that, and isolate the keyFunc().
     if (is.null(eventFunc)) {
-      firstStep <- cacheKeyFunc
+      firstStep <- keyFunc
     } else {
       firstStep <- hybrid_chain(
         eventFunc(),
         function(value) {
           req(!ignoreNULL || !isNullEvent(value))
-          isolate(cacheKeyFunc())
+          isolate(keyFunc())
         }
       )
     }
 
-    # Connect the (maybe) eventExpr and cacheKeyExpr with the valueExpr
+    # Connect the (maybe) event and key with the value
     hybrid_chain(
       firstStep(),
       function(cacheKeyResult) {
         cache <- resolve_cache_object(cache, domain)
-        key <- digest(list(cacheKeyResult, valueExprHash), algo = "spookyhash")
-        res <- cache$get(key)
+        key_str <- digest(list(cacheKeyResult, valueExprHash), algo = "spookyhash")
+        res <- cache$get(key_str)
 
         # Case 1: cache hit
         if (!is.key_missing(res)) {
@@ -335,7 +333,7 @@ cachedReactive <- function(
         p <- withCallingHandlers(
           withVisible(isolate(valueFunc())),
           error = function(e) {
-            cache$set(key, list(
+            cache$set(key_str, list(
               is_promise = FALSE,
               value      = e,
               visible    = TRUE,
@@ -349,7 +347,7 @@ cachedReactive <- function(
           p$value <- p$value$
             then(function(value) {
               res <- withVisible(value)
-              cache$set(key, list(
+              cache$set(key_str, list(
                 is_promise = TRUE,
                 value      = res$value,
                 visible    = res$visible,
@@ -358,7 +356,7 @@ cachedReactive <- function(
               valueWithVisible(res)
             })$
             catch(function(e) {
-              cache$set(key, list(
+              cache$set(key_str, list(
                 is_promise = TRUE,
                 value      = e,
                 visible    = TRUE,
@@ -369,7 +367,7 @@ cachedReactive <- function(
           valueWithVisible(p)
         } else {
           # result is an ordinary value, not a promise.
-          cache$set(key, list(
+          cache$set(key_str, list(
             is_promise = FALSE,
             value      = p$value,
             visible    = p$visible,

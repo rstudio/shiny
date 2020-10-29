@@ -52,9 +52,8 @@ test_that("cachedReactive basic functionality", {
 })
 
 
-test_that("cachedReactive - valueExpr is isolated", {
-  # The valueExpr is isolated; the cacheKeyExpr is the one that dependencies
-  # are taken on.
+test_that("cachedReactive - value is isolated", {
+  # The value is isolated; the key is the one that dependencies are taken on.
   cache <- memoryCache()
 
   k <- reactiveVal(1)
@@ -167,7 +166,7 @@ test_that("cachedReactive with async key", {
   for (i in 1:3) later::run_now()
   expect_identical(vals, c("1k1", "1k2", "1v", "1o"))
 
-  # Going back to a cached value: The cachedReactive's valueExpr won't run, but
+  # Going back to a cached value: The cachedReactive's value expr won't run, but
   # the observer will.
   vals <- character()
   k(0)
@@ -182,7 +181,7 @@ test_that("cachedReactive with async key", {
 # Async value
 # ============================================================================
 test_that("cachedReactives with async value", {
-  # If the valueExpr returns a promise, it must return a promise every time,
+  # If the value expr returns a promise, it must return a promise every time,
   # even when the value is fetched in the cache. Similarly, if it returns a
   # non-promise value, then it needs to do that whether or not it's fetched from
   # the cache. This tests the promise case (almost all the other tests here test
@@ -221,7 +220,7 @@ test_that("cachedReactives with async value", {
     })
   })
 
-  # Initially, the `then` in the valueExpr and observer don't run, but they will
+  # Initially, the `then` in the value expr and observer don't run, but they will
   # after running the event loop.
   flushReact()
   expect_identical(vals, c("0k", "0v1"))
@@ -237,7 +236,7 @@ test_that("cachedReactives with async value", {
   for (i in 1:6) later::run_now()
   expect_identical(vals, c("1k", "1v1", "1v2", "1o"))
 
-  # Going back to a cached value: The cachedReactive's valueExpr won't run, but
+  # Going back to a cached value: The cachedReactive's value expr won't run, but
   # the observer will.
   vals <- character()
   k(0)
@@ -252,7 +251,7 @@ test_that("cachedReactives with async value", {
 # Async key and value
 # ============================================================================
 test_that("cachedReactives with async key and value", {
-  # If the valueExpr returns a promise, it must return a promise every time,
+  # If the value expr returns a promise, it must return a promise every time,
   # even when the value is fetched in the cache. Similarly, if it returns a
   # non-promise value, then it needs to do that whether or not it's fetched from
   # the cache. This tests the promise case (almost all the other tests here test
@@ -310,7 +309,7 @@ test_that("cachedReactives with async key and value", {
   for (i in 1:8) later::run_now()
   expect_identical(vals, c("1k1", "1k2", "1v1", "1v2", "1o"))
 
-  # Going back to a cached value: The cachedReactive's valueExpr won't run, but
+  # Going back to a cached value: The cachedReactive's value expr won't run, but
   # the observer will.
   vals <- character(0)
   k(0)
@@ -321,9 +320,14 @@ test_that("cachedReactives with async key and value", {
 })
 
 test_that("cachedReactive key collisions", {
+  # =======================================
+  # No collision with different value exprs
+  # =======================================
   cache <- memoryCache()
   k <- reactiveVal(0)
 
+  # Key collisions don't happen if they have different value expressions
+  # (because that is used in the key).
   r1_vals <- numeric()
   r1 <- cachedReactive(
     k(),
@@ -351,18 +355,63 @@ test_that("cachedReactive key collisions", {
     o_vals <<- c(o_vals, r1(), r2())
   })
 
-  # The key for r2() collides with the one from r1(), so the valueExpr for r2()
+  # The key for r2() collides with the one from r1(), so the value expr for r2()
   # never actually executes, and it returns the cached value for r1().
   flushReact()
   expect_identical(r1_vals, 0)
-  expect_identical(r2_vals, numeric())
+  expect_identical(r2_vals, 0)
   expect_identical(o_vals, c(0, 0))
 
   k(1)
   flushReact()
   expect_identical(r1_vals, c(0, 10))
-  expect_identical(r2_vals, numeric())
-  expect_identical(o_vals, c(0, 0, 10, 10))
+  expect_identical(r2_vals,  c(0, 100))
+  expect_identical(o_vals, c(0, 0, 10, 100))
+
+
+  # ====================================
+  # Collision with identical value exprs
+  # ====================================
+  cache <- memoryCache()
+  k <- reactiveVal(1)
+
+  # Key collisions DO happen if they have different value expressions
+  # (because that is used in the key).
+  r_vals <- numeric()
+  r1 <- cachedReactive(
+    k(),
+    {
+      val <- k() * 10
+      r_vals <<- c(r_vals, val)
+      val
+    },
+    cache = cache
+  )
+
+  r2 <- cachedReactive(
+    k(),
+    {
+      val <- k() * 10
+      r_vals <<- c(r_vals, val)
+      val
+    },
+    cache = cache
+  )
+
+  o_vals <- numeric()
+  o <- observe({
+    o_vals <<- c(o_vals, r1(), r2())
+  })
+
+  # r2() never actually runs -- key collision.
+  flushReact()
+  expect_identical(r_vals, 10)
+  expect_identical(o_vals, c(10, 10))
+
+  k(2)
+  flushReact()
+  expect_identical(r_vals, c(10, 20))
+  expect_identical(o_vals, c(10, 10, 20, 20))
 })
 
 
@@ -397,8 +446,8 @@ test_that("cachedReactive error handling", {
   })
 
   suppress_stacktrace(expect_warning(flushReact()))
-  # A second flushReact should not raise warnings, since cacheKeyExpr has not
-  # been invalidated.
+  # A second flushReact should not raise warnings, since key has not been
+  # invalidated.
   expect_silent(flushReact())
 
   k(1)
@@ -407,7 +456,7 @@ test_that("cachedReactive error handling", {
   k(0)
   suppress_stacktrace(expect_warning(flushReact()))
   expect_silent(flushReact())
-  # valueExpr and observer shouldn't have changed at all
+  # value expr and observer shouldn't have changed at all
   expect_identical(vals, c("0k", "1k", "0k"))
 
   # ===================================
@@ -441,7 +490,7 @@ test_that("cachedReactive error handling", {
   expect_silent(flushReact())
   k(0)
   expect_silent(flushReact())
-  # valueExpr and observer shouldn't have changed at all
+  # value expr and observer shouldn't have changed at all
   expect_identical(vals, c("0k", "1k", "0k"))
 
   # ===================================
@@ -570,8 +619,8 @@ test_that("cachedReactive error handling - async", {
   for (i in 1:4) later::run_now()
   expect_identical(vals, c("0k1", "0k2", "err0oc"))
 
-  # A second flushReact should not raise warnings, since cacheKeyExpr has not
-  # been invalidated.
+  # A second flushReact should not raise warnings, since key has not been
+  # invalidated.
   expect_silent(flushReact())
 
   vals <- character()
@@ -629,7 +678,7 @@ test_that("cachedReactive error handling - async", {
   # The `catch` will receive an empty message
   expect_identical(vals, c("0k1", "0k2", "oc"))
 
-  # A second flushReact should not raise warnings, since cacheKeyExpr has not
+  # A second flushReact should not raise warnings, since key has not
   # been invalidated.
   expect_silent(flushReact())
 
@@ -691,8 +740,8 @@ test_that("cachedReactive error handling - async", {
 
   suppress_stacktrace(flushReact())
   for (i in 1:9) later::run_now()
-  # A second flushReact should not raise warnings, since cacheKeyExpr has not
-  # been invalidated.
+  # A second flushReact should not raise warnings, since key has not been
+  # invalidated.
   expect_silent(flushReact())
   expect_identical(vals, c("0k1", "0k2", "0v1", "0v2", "err0oc"))
 
@@ -754,8 +803,8 @@ test_that("cachedReactive error handling - async", {
 
   suppress_stacktrace(flushReact())
   for (i in 1:9) later::run_now()
-  # A second flushReact should not raise warnings, since cacheKeyExpr has not
-  # been invalidated.
+  # A second flushReact should not raise warnings, since key has not been
+  # invalidated.
   expect_silent(flushReact())
   expect_identical(vals, c("0k1", "0k2", "0v1", "0v2", "oc"))
 

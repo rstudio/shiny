@@ -133,6 +133,23 @@
 #'   retrieved from the cache). Anything that consumes the `cachedReactive` must
 #'   therefore expect it to return a promise.
 #'
+#' @section Cache key internals:
+#'
+#' The actual cache key that is used internally takes value from evaluating
+#' `key` and combines it with the (unevaluated) _body_ of the `value`
+#' expression.
+#'
+#' This means that if there are two `cachedReactive`s which use the same value
+#' from evaluating `key`, but different `value` expressions, then they will not
+#' need to worry about collisions.
+#'
+#' However, if two `cachedReactive`s have the identical `key` and `value`
+#' expressions, they will share the cached values. This is useful when using
+#' `cache="app"`: there may be multiple user sessions which create separate
+#' `cachedReactive` objects (by executing the server function multiple times),
+#' and those `cachedReactive` objects across sessions can share values in the
+#' cache.
+#'
 #' @inheritParams reactive
 #' @param key An expression or quosure that returns a value that will be hashed
 #'   and used as a cache key. This key should be a unique identifier for the
@@ -209,38 +226,6 @@
 #'       }
 #'     )
 #'     output$txt <- renderText(r())
-#'   }
-#' )
-#'
-#'
-#' # Demo of cache key collisions and how to avoid them
-#' shinyApp(
-#'   ui = fluidPage(
-#'     numericInput("n", "n", 1),
-#'     "n * 2: ", verbatimTextOutput("txt2"),
-#'     "n * 3: ", verbatimTextOutput("txt3"),
-#'     "n * 4: ", verbatimTextOutput("txt4")
-#'
-#'   ),
-#'   server = function(input, output) {
-#'     r2 <- cachedReactive(input$n, {
-#'       input$n * 2
-#'     })
-#'     output$txt2 <- renderText(r2())
-#'
-#'     # BAD: This uses the same cache key as r2 above, and so it will collide with
-#'     # r2.
-#'     r3 <- cachedReactive(input$n, {
-#'       input$n * 3
-#'     })
-#'     output$txt3 <- renderText(r3())
-#'
-#'     # GOOD: By adding an ID string,this uses a different cache key from r2,
-#'     # and so its keys will not collide with those from r2.
-#'     r4 <- cachedReactive(list(input$n, "times4"), {
-#'       input$n * 4
-#'     })
-#'     output$txt4 <- renderText(r4())
 #'   }
 #' )
 #'

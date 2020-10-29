@@ -175,6 +175,25 @@ retrieved from the cache). Anything that consumes the \code{cachedReactive} must
 therefore expect it to return a promise.
 }
 
+\section{Cache key internals}{
+
+
+The actual cache key that is used internally takes value from evaluating
+\code{key} and combines it with the (unevaluated) \emph{body} of the \code{value}
+expression.
+
+This means that if there are two \code{cachedReactive}s which use the same value
+from evaluating \code{key}, but different \code{value} expressions, then they will not
+need to worry about collisions.
+
+However, if two \code{cachedReactive}s have the identical \code{key} and \code{value}
+expressions, they will share the cached values. This is useful when using
+\code{cache="app"}: there may be multiple user sessions which create separate
+\code{cachedReactive} objects (by executing the server function multiple times),
+and those \code{cachedReactive} objects across sessions can share values in the
+cache.
+}
+
 \examples{
 ## Only run examples in interactive R sessions
 if (interactive()) {
@@ -230,38 +249,6 @@ shinyApp(
       }
     )
     output$txt <- renderText(r())
-  }
-)
-
-
-# Demo of cache key collisions and how to avoid them
-shinyApp(
-  ui = fluidPage(
-    numericInput("n", "n", 1),
-    "n * 2: ", verbatimTextOutput("txt2"),
-    "n * 3: ", verbatimTextOutput("txt3"),
-    "n * 4: ", verbatimTextOutput("txt4")
-
-  ),
-  server = function(input, output) {
-    r2 <- cachedReactive(input$n, {
-      input$n * 2
-    })
-    output$txt2 <- renderText(r2())
-
-    # BAD: This uses the same cache key as r2 above, and so it will collide with
-    # r2.
-    r3 <- cachedReactive(input$n, {
-      input$n * 3
-    })
-    output$txt3 <- renderText(r3())
-
-    # GOOD: By adding an ID string,this uses a different cache key from r2,
-    # and so its keys will not collide with those from r2.
-    r4 <- cachedReactive(list(input$n, "times4"), {
-      input$n * 4
-    })
-    output$txt4 <- renderText(r4())
   }
 )
 

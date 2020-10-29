@@ -88,11 +88,12 @@ reactive dependencies on. Instead, the \code{key} is used to figure out which
 objects to take reactive dependencies on. In short, the \code{key} is reactive,
 and \code{value} is not (it is run inside of \code{\link[=isolate]{isolate()}}).
 
-Here's an example of what not to do: if \code{key=input$x} and \code{value={input$x + input$y}}, then it will only take a reactive dependency on \code{input$x} -- it
-won't recompute \code{value} when \code{input$y} changes. Moreover, the cache won't
-use \code{input$y} as part of the key, and so it could return incorrect values
-in the future when it retrieves values from the cache. (See the examples
-below for an example of this.)
+Here's an example of what not to do: if \code{key={input$x}} and `value={input$x
+\itemize{
+\item input$y}\verb{, then it will only take a reactive dependency on }input$x\verb{--   it won't recompute}value\code{when}input$y\verb{changes. Moreover, the cache   won't use}input$y` as part of the key, and so it could return incorrect
+values in the future when it retrieves values from the cache. (See the
+examples below for an example of this.)
+}
 
 A better cache key would be something like \code{list(input$x, input$y)}. This
 does two things: it ensures that a reactive dependency is taken on both \code{x}
@@ -127,7 +128,7 @@ that someone calls \code{r()}, \code{key} will need to be re-executed.
 
 Typically, the \code{key} expression is reactive (the \code{value} is never reactive,
 as it is run inside of \code{\link[=isolate]{isolate()}}). However, there are times when it's not
-idea for \code{key} to be reactive: perhaps you have \link{sliderInput}s \code{x} and \code{y},
+ideal for \code{key} to be reactive: perhaps you have \link{sliderInput}s \code{x} and \code{y},
 but you don't want the computation to occur until the user sets both \code{x}
 and \code{y}, and then clicks on an \link{actionButton} named \code{go}.
 

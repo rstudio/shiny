@@ -43,12 +43,12 @@
 #'   objects to take reactive dependencies on. In short, the `key` is reactive,
 #'   and `value` is not (it is run inside of [isolate()]).
 #'
-#'   Here's an example of what not to do: if `key=input$x` and `value={input$x +
-#'   input$y}`, then it will only take a reactive dependency on `input$x` -- it
-#'   won't recompute `value` when `input$y` changes. Moreover, the cache won't
-#'   use `input$y` as part of the key, and so it could return incorrect values
-#'   in the future when it retrieves values from the cache. (See the examples
-#'   below for an example of this.)
+#'   Here's an example of what not to do: if `key={input$x}` and `value={input$x
+#'   + input$y}`, then it will only take a reactive dependency on `input$x` --
+#'   it won't recompute `value` when `input$y` changes. Moreover, the cache
+#'   won't use `input$y` as part of the key, and so it could return incorrect
+#'   values in the future when it retrieves values from the cache. (See the
+#'   examples below for an example of this.)
 #'
 #'   A better cache key would be something like `list(input$x, input$y)`. This
 #'   does two things: it ensures that a reactive dependency is taken on both `x`
@@ -85,7 +85,7 @@
 #'
 #'   Typically, the `key` expression is reactive (the `value` is never reactive,
 #'   as it is run inside of [isolate()]). However, there are times when it's not
-#'   idea for `key` to be reactive: perhaps you have [sliderInput]s `x` and `y`,
+#'   ideal for `key` to be reactive: perhaps you have [sliderInput]s `x` and `y`,
 #'   but you don't want the computation to occur until the user sets both `x`
 #'   and `y`, and then clicks on an [actionButton] named `go`.
 #'
@@ -267,7 +267,7 @@ cachedReactive <- function(
   # source refs because they can differ even though the code is the same.
   valueExprHash <- digest(remove_srcref(get_expr(enquo(value))), algo = "spookyhash")
 
-  reactive(label = label, {
+  reactive(label = label, domain = domain, {
     # Set up the first steps in the hybrid chain. If there's no eventFunc, then
     # the first step is just the keyFunc(). If there is an eventFunc(),
     # then start with that, and isolate the keyFunc().
@@ -363,7 +363,6 @@ cachedReactive <- function(
           return(valueWithVisible(p))
         }
       })
-    },
-    domain = domain
+    }
   )
 }

@@ -548,6 +548,24 @@ exprToLabel <- function(expr, function_name, label = NULL) {
   label
 }
 
+# Remove the source ref attribute from a language object. Used in places where
+# we would use utils::removeSource(), but that function only worked on functions
+# until R 3.6. With 3.6 and later, it worked on language objects. removeSource()
+# is actually smarter than this function for handling language objects, since it
+# will recurse into the object, but this is good enough for our purposes.
+remove_srcref <- function(x) {
+  if (is.function(x)) {
+    return(utils::removeSource(x))
+  }
+  if (is.language(x)) {
+    attr(x, "srcref") <- NULL
+    attr(x, "srcfile") <- NULL
+    attr(x, "wholeSrcref") <- NULL
+    return(x)
+  }
+  stop("x must be a function or language object.")
+}
+
 #' Parse a GET query string from a URL
 #'
 #' Returns a named list of key-value pairs.

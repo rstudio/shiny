@@ -262,8 +262,7 @@ cachedReactive <- function(
   # Hash the value expression now -- this will be added to the key later on, to
   # reduce the chance of key collisions with other cachedReactives. Remove
   # source refs because they can differ even though the code is the same.
-  valueExprHash <- digest(removeSource(get_expr(enquo(value))), algo = "spookyhash")
-  message("valuExprHash: ", valueExprHash)
+  valueExprHash <- digest(remove_srcref(get_expr(enquo(value))), algo = "spookyhash")
 
   reactive(label = label, {
     # Set up the first steps in the hybrid chain. If there's no eventFunc, then

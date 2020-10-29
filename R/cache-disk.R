@@ -215,7 +215,7 @@
 #' @export
 diskCache <- function(
   dir = NULL,
-  max_size = 200 * 1024 ^ 2,
+  max_size = 500 * 1024 ^ 2,
   max_age = Inf,
   max_n = Inf,
   evict = c("lru", "fifo"),
@@ -233,7 +233,7 @@ DiskCache <- R6Class("DiskCache",
   public = list(
     initialize = function(
       dir = NULL,
-      max_size = 200 * 1024 ^ 2,
+      max_size = 500 * 1024 ^ 2,
       max_age = Inf,
       max_n = Inf,
       evict = c("lru", "fifo"),

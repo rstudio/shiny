@@ -825,6 +825,53 @@ test_that("cachedReactive error handling - async", {
 
 
 # ============================================================================
+# Quosures
+# ============================================================================
+test_that("cachedReactive quosure handling", {
+  cache <- memoryCache()
+  res <- NULL
+  key_env <- local({
+    v <- reactiveVal(1)
+    expr <- rlang::quo(v())
+    environment()
+  })
+
+  value_env <- local({
+    v <- reactiveVal(10)
+    expr <- rlang::quo({
+      v()
+    })
+    environment()
+  })
+
+  r <- cachedReactive(
+    !!key_env$expr,
+    !!value_env$expr,
+    cache = cache
+  )
+
+  vals <- numeric()
+  o <- observe({
+    x <- r()
+    vals <<- c(vals, x)
+  })
+
+  flushReact()
+  expect_identical(vals, 10)
+
+  # Changing v() in value env doesn't cause anything to happen
+  value_env$v(20)
+  flushReact()
+  expect_identical(vals, 10)
+
+  # Changing v() in key env causes invalidation
+  key_env$v(20)
+  flushReact()
+  expect_identical(vals, c(10, 20))
+})
+
+
+# ============================================================================
 # Visibility
 # ============================================================================
 test_that("cachedReactive visibility", {

@@ -5,9 +5,9 @@
 \title{Create a reactive expression with caching}
 \usage{
 cachedReactive(
-  key,
   value,
   ...,
+  key,
   event = NULL,
   ignoreNULL = TRUE,
   label = NULL,
@@ -16,17 +16,17 @@ cachedReactive(
 )
 }
 \arguments{
+\item{value}{The expression or quosure that produces the return value of the
+\code{cachedReactive}. It will be executed within an \code{\link[=isolate]{isolate()}} scope.}
+
+\item{...}{Other arguments are ignored.}
+
 \item{key}{An expression or quosure that returns a value that will be hashed
 and used as a cache key. This key should be a unique identifier for the
 value: the assumption is that if the cache key is the same, then the value
 of \code{expr} is the same. If two separate \code{cachedReactive}s have the same key,
 the value is assumed to be the same. To avoid this, you can add an
 arbitrary identifier (like an ID string) to the cache key.}
-
-\item{value}{The expression or quosure that produces the return value of the
-\code{cachedReactive}. It will be executed within an \code{\link[=isolate]{isolate()}} scope.}
-
-\item{...}{Other arguments are ignored.}
 
 \item{event}{An optional expression or quosure used for reactivity. If
 non-NULL, then \code{event} will be evaluated in a reactive context, and both
@@ -212,7 +212,7 @@ shinyApp(
     r <- cachedReactive(
       # Use input$x and input$y for the cache key.
       # This is a reactive expression.
-      list(input$x, input$y),
+      key = { list(input$x, input$y) },
       {
         # The value expression is an _expensive_ computation
         message("Doing expensive computation...")

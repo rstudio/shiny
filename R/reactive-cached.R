@@ -190,7 +190,7 @@
 #'     r <- cachedReactive(
 #'       # Use input$x and input$y for the cache key.
 #'       # This is a reactive expression.
-#'       list(input$x, input$y),
+#'       key = { list(input$x, input$y) },
 #'       {
 #'         # The value expression is an _expensive_ computation
 #'         message("Doing expensive computation...")
@@ -236,9 +236,9 @@
 #'
 #' @export
 cachedReactive <- function(
-  key,
   value,
   ...,
+  key,
   event = NULL,
   ignoreNULL = TRUE,
   label = NULL,

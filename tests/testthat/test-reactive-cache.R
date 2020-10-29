@@ -6,7 +6,7 @@ test_that("cachedReactive basic functionality", {
 
   vals <- character()
   r <- cachedReactive(
-    {
+    key = {
       x <- paste0(k(), "k")
       vals <<- c(vals, x)
       k()
@@ -61,7 +61,7 @@ test_that("cachedReactive - value is isolated", {
 
   vals <- character()
   r <- cachedReactive(
-    {
+    key = {
       x <- paste0(k(), "k")
       vals <<- c(vals, x)
       k()
@@ -123,7 +123,7 @@ test_that("cachedReactive with async key", {
 
   vals <- character()
   r <- cachedReactive(
-    {
+    key = {
       promises::promise(function(resolve, reject) {
         x <- paste0(k(), "k1")
         vals <<- c(vals, x)
@@ -194,7 +194,7 @@ test_that("cachedReactives with async value", {
   vals <- character()
 
   r <- cachedReactive(
-    {
+    key = {
       x <- paste0(k(), "k")
       vals <<- c(vals, x)
       k()
@@ -264,7 +264,7 @@ test_that("cachedReactives with async key and value", {
   vals <- character()
 
   r <- cachedReactive(
-    {
+    key = {
       promises::promise(function(resolve, reject) {
         x <- paste0(k(), "k1")
         vals <<- c(vals, x)
@@ -330,7 +330,7 @@ test_that("cachedReactive key collisions", {
   # (because that is used in the key).
   r1_vals <- numeric()
   r1 <- cachedReactive(
-    k(),
+    key = k(),
     {
       val <- k() * 10
       r1_vals <<- c(r1_vals, val)
@@ -341,7 +341,7 @@ test_that("cachedReactive key collisions", {
 
   r2_vals <- numeric()
   r2 <- cachedReactive(
-    k(),
+    key = k(),
     {
       val <- k() * 100
       r2_vals <<- c(r2_vals, val)
@@ -379,7 +379,7 @@ test_that("cachedReactive key collisions", {
   # (because that is used in the key).
   r_vals <- numeric()
   r1 <- cachedReactive(
-    k(),
+    key = k(),
     {
       val <- k() * 10
       r_vals <<- c(r_vals, val)
@@ -389,7 +389,7 @@ test_that("cachedReactive key collisions", {
   )
 
   r2 <- cachedReactive(
-    k(),
+    key = k(),
     {
       val <- k() * 10
       r_vals <<- c(r_vals, val)
@@ -427,7 +427,7 @@ test_that("cachedReactive error handling", {
   # Error in key
   vals <- character()
   r <- cachedReactive(
-    {
+    key = {
       x <- paste0(k(), "k")
       vals <<- c(vals, x)
       k()
@@ -466,7 +466,7 @@ test_that("cachedReactive error handling", {
 
   vals <- character()
   r <- cachedReactive(
-    {
+    key = {
       x <- paste0(k(), "k")
       vals <<- c(vals, x)
       k()
@@ -500,7 +500,7 @@ test_that("cachedReactive error handling", {
 
   vals <- character()
   r <- cachedReactive(
-    {
+    key = {
       x <- paste0(k(), "k")
       vals <<- c(vals, x)
       k()
@@ -540,7 +540,7 @@ test_that("cachedReactive error handling", {
 
   vals <- character()
   r <- cachedReactive(
-    {
+    key = {
       x <- paste0(k(), "k")
       vals <<- c(vals, x)
       k()
@@ -579,7 +579,7 @@ test_that("cachedReactive error handling - async", {
   k <- reactiveVal(0)
   vals <- character()
   r <- cachedReactive(
-    {
+    key = {
       promises::promise(function(resolve, reject) {
         x <- paste0(k(), "k1")
         vals <<- c(vals, x)
@@ -643,7 +643,7 @@ test_that("cachedReactive error handling - async", {
   k <- reactiveVal(0)
   vals <- character()
   r <- cachedReactive(
-    {
+    key = {
       promises::promise(function(resolve, reject) {
         x <- paste0(k(), "k1")
         vals <<- c(vals, x)
@@ -702,7 +702,7 @@ test_that("cachedReactive error handling - async", {
   k <- reactiveVal(0)
   vals <- character()
   r <- cachedReactive(
-    {
+    key = {
       promises::promise(function(resolve, reject) {
         x <- paste0(k(), "k1")
         vals <<- c(vals, x)
@@ -765,7 +765,7 @@ test_that("cachedReactive error handling - async", {
   k <- reactiveVal(0)
   vals <- character()
   r <- cachedReactive(
-    {
+    key = {
       promises::promise(function(resolve, reject) {
         x <- paste0(k(), "k1")
         vals <<- c(vals, x)
@@ -845,7 +845,7 @@ test_that("cachedReactive quosure handling", {
   })
 
   r <- cachedReactive(
-    !!key_env$expr,
+    key = !!key_env$expr,
     !!value_env$expr,
     cache = cache
   )
@@ -883,7 +883,7 @@ test_that("cachedReactive visibility", {
   k <- reactiveVal(0)
   res <- NULL
   r <- cachedReactive(
-    k(),
+    key = k(),
     {
       if (k() == 0) invisible(k())
       else          k()
@@ -917,7 +917,7 @@ test_that("cachedReactive visibility - async", {
   k <- reactiveVal(0)
   res <- NULL
   r <- cachedReactive(
-    k(),
+    key = k(),
     {
       promise(function(resolve, reject) {
         if (k() == 0) resolve(invisible(k()))

@@ -1432,3 +1432,64 @@ test_that("reactiveTimer prefers session$scheduleTask", {
   }
   expect_gt(called, 0)
 })
+
+
+test_that("Reactive expression visibility", {
+  res <- NULL
+  rv <- reactive(1)
+  o <- observe({
+    res <<- withVisible(rv())
+  })
+  flushReact()
+  expect_identical(res, list(value = 1, visible = TRUE))
+
+
+  res <- NULL
+  rv <- reactive(invisible(1))
+  o <- observe({
+    res <<- withVisible(rv())
+  })
+  flushReact()
+  expect_identical(res, list(value = 1, visible = FALSE))
+
+  # isolate
+  expect_identical(
+    withVisible(isolate(1)),
+    list(value = 1, visible = TRUE)
+  )
+  expect_identical(
+    withVisible(isolate(invisible(1))),
+    list(value = 1, visible = FALSE)
+  )
+})
+
+
+test_that("Reactive expression labels", {
+  r <- list()
+
+  # Automatic label
+  r$x <- reactive({
+    a+1;b+  2
+  })
+  # Printed output - uses expression, not `label`
+  expect_identical(
+    capture.output(print(r$x)),
+    c("reactive({", "    a + 1", "    b + 2", "}) ")
+  )
+  # Label used for debugging
+  expect_identical(
+    as.character(attr(r$x, "observable")$.label),
+    "r$x"
+  )
+
+  # With explicit label
+  r$y <- reactive({ a+1;b+  2 }, label = "hello")
+  expect_identical(
+    capture.output(print(r$y)),
+    c("reactive({", "    a + 1", "    b + 2", "}) ")
+  )
+  expect_identical(
+    as.character(attr(r$y, "observable")$.label),
+    "hello"
+  )
+})

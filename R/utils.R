@@ -531,6 +531,41 @@ installExprFunction <- function(expr, name, eval.env = parent.frame(2),
   assign(name, func, envir = assign.env)
 }
 
+# Utility function for creating a debugging label, given an expression.
+# `expr` is a quoted expression.
+# `function_name` is the name of the calling function.
+# `label` is an optional user-provided label. If NULL, it will be inferred.
+exprToLabel <- function(expr, function_name, label = NULL) {
+  srcref <- attr(expr, "srcref", exact = TRUE)
+  if (is.null(label)) {
+    label <- rexprSrcrefToLabel(
+      srcref[[1]],
+      sprintf('%s(%s)', function_name, paste(deparse(expr), collapse = '\n'))
+    )
+  }
+  if (length(srcref) >= 2) attr(label, "srcref") <- srcref[[2]]
+  attr(label, "srcfile") <- srcFileOfRef(srcref[[1]])
+  label
+}
+
+# Remove the source ref attribute from a language object. Used in places where
+# we would use utils::removeSource(), but that function only worked on functions
+# until R 3.6. With 3.6 and later, it worked on language objects. removeSource()
+# is actually smarter than this function for handling language objects, since it
+# will recurse into the object, but this is good enough for our purposes.
+remove_srcref <- function(x) {
+  if (is.function(x)) {
+    return(utils::removeSource(x))
+  }
+  if (is.language(x)) {
+    attr(x, "srcref") <- NULL
+    attr(x, "srcfile") <- NULL
+    attr(x, "wholeSrcref") <- NULL
+    return(x)
+  }
+  stop("x must be a function or language object.")
+}
+
 #' Parse a GET query string from a URL
 #'
 #' Returns a named list of key-value pairs.
@@ -1688,19 +1723,23 @@ hybrid_chain <- function(expr, ..., catch = NULL, finally = NULL,
           if (promises::is.promising(result$value)) {
             # Purposefully NOT including domain (nor replace), as we're already in
             # the domain at this point
-            p <- promise_chain(setVisible(result), ..., catch = catch, finally = finally)
+            p <- promise_chain(valueWithVisible(result), ..., catch = catch, finally = finally)
             runFinally <- FALSE
             p
           } else {
-            result <- Reduce(function(v, func) {
-              if (".visible" %in% names(formals(func))) {
-                withVisible(func(v$value, .visible = v$visible))
-              } else {
-                withVisible(func(v$value))
-              }
-            }, list(...), result)
+            result <- Reduce(
+              function(v, func) {
+                if (v$visible) {
+                  withVisible(func(v$value))
+                } else {
+                  withVisible(func(invisible(v$value)))
+                }
+              },
+              list(...),
+              result
+            )
 
-            setVisible(result)
+            valueWithVisible(result)
           }
         })
       },
@@ -1721,23 +1760,12 @@ hybrid_chain <- function(expr, ..., catch = NULL, finally = NULL,
   }
 }
 
-# Returns `value` with either `invisible()` applied or not, depending on the
-# value of `visible`.
-#
-# If the `visible` is missing, then `value` should be a list as returned from
-# `withVisible()`, and that visibility will be applied.
-setVisible <- function(value, visible) {
-  if (missing(visible)) {
-    visible <- value$visible
-    value <- value$value
-  }
-
-  if (!visible) {
-    invisible(value)
-  } else {
-    (value)
-  }
+# Given a list with items named `value` and `visible`, return `x$value` either
+# visibly, or invisibly, depending on the value of `x$visible`.
+valueWithVisible <- function(x) {
+  if (x$visible) x$value else invisible(x$value)
 }
+
 
 createVarPromiseDomain <- function(env, name, value) {
   force(env)

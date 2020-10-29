@@ -973,13 +973,8 @@ reactive <- function(x, env = parent.frame(), quoted = FALSE, label = NULL,
                      ..stacktraceon = TRUE) {
   fun <- exprToFunction(x, env, quoted)
   # Attach a label and a reference to the original user source for debugging
-  srcref <- attr(substitute(x), "srcref", exact = TRUE)
-  if (is.null(label)) {
-    label <- rexprSrcrefToLabel(srcref[[1]],
-      sprintf('reactive(%s)', paste(deparse(body(fun)), collapse='\n')))
-  }
-  if (length(srcref) >= 2) attr(label, "srcref") <- srcref[[2]]
-  attr(label, "srcfile") <- srcFileOfRef(srcref[[1]])
+  label <- exprToLabel(substitute(x), "reactive", label)
+
   o <- Observable$new(fun, label, domain, ..stacktraceon = ..stacktraceon)
   structure(o$getValue, observable = o, class = c("reactiveExpr", "reactive", "function"))
 }

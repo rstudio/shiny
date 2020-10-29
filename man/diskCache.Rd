@@ -6,7 +6,7 @@
 \usage{
 diskCache(
   dir = NULL,
-  max_size = 10 * 1024^2,
+  max_size = 500 * 1024^2,
   max_age = Inf,
   max_n = Inf,
   evict = c("lru", "fifo"),

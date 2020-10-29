@@ -11,8 +11,8 @@ cachedReactive(
   event = NULL,
   ignoreNULL = TRUE,
   label = NULL,
-  domain = getDefaultReactiveDomain(),
-  cache = "app"
+  cache = "app",
+  domain = getDefaultReactiveDomain()
 )
 }
 \arguments{
@@ -29,9 +29,9 @@ arbitrary identifier (like an ID string) to the cache key.}
 \item{...}{Other arguments are ignored.}
 
 \item{event}{An optional expression or quosure used for reactivity. If
-non-NULL, then \code{event} will be evaluated in a reactive context, and \code{value}
-will be evaluated in an isolated context (and it will not be used for
-reactive dependencies).}
+non-NULL, then \code{event} will be evaluated in a reactive context, and both
+\code{key} and \code{value} will be evaluated in an \code{\link[=isolate]{isolate()}} scope (and will not
+be used for reactive dependencies).}
 
 \item{ignoreNULL}{If \code{TRUE}, then if \code{event} evaluates to \code{NULL}, then a
 silent exception will be raised and the cache key and the value will not be
@@ -39,11 +39,11 @@ computed. See \code{\link[=req]{req()}} for more on silent exceptions.}
 
 \item{label}{A label for the reactive expression, useful for debugging.}
 
-\item{domain}{See \link{domains}.}
-
 \item{cache}{The scope of the cache, or a cache object. This can be \code{"app"}
 (the default), \code{"session"}, or a cache object like a \code{\link[=diskCache]{diskCache()}}. See the
 Cache Scoping section for more information.}
+
+\item{domain}{See \link{domains}.}
 }
 \description{
 Ordinary \code{\link[=reactive]{reactive()}} expressions will cache their most recent value. This
@@ -62,10 +62,12 @@ returned by \code{value}; a given value of \code{key} should not correspond to m
 possible values of \code{value}.
 
 The way to use this is to have a \code{key} that is fast to compute, and a \code{value}
-that is expensive to compute. It evaluates the \code{key}, and then serializes and
-hashes the result. If the resulting hashed key is in the cache, then it
-simply retrieves and returns it; if not, then it executes \code{value}, stores the
-result in the cache, and returns it.
+that is expensive to compute.  To see if \code{value} should be computed,
+\code{cachedReactive()} evaluates \code{key} and then serializes and hashes the result.
+If the resulting hashed key is in the cache, then \code{cachedReactive()} simply
+retrieves the previously calculated value and returns it; if not, then the
+\code{value} is computed and the result is stored in the cache before being
+returned.
 
 The \code{key} should be fast to compute, and ideally it will return an object
 that is not too large, since the object must be serialized and hashed.
@@ -107,7 +109,7 @@ cache key is not too expensive.
 Remember that the \code{key} is \emph{reactive}, so it is not re-executed every
 single time that someone accesses the \code{cachedReactive}. For example,
 suppose we have this \code{cachedReactive}:\if{html}{\out{<div class="NA">}}\preformatted{r <- cachedReactive(
- key = list(input$x, input$y),
+ key = \{ list(input$x, input$y) \},
  value = \{ input$x + input$y \}
 )
 }\if{html}{\out{</div>}}
@@ -123,11 +125,11 @@ that someone calls \code{r()}, \code{key} will need to be re-executed.
 \section{Event expressions and reactivity}{
 
 
-Typically, the \code{key} is reactive, and the \code{value} is not (it is run within
-\code{\link[=isolate]{isolate()}}). However, there are times when this isn't ideal: perhaps you
-have \link{sliderInput}s \code{x} and \code{y}, but you don't want the computation to
-occur until the user sets both \code{x} and \code{y}, and then clicks on an
-\link{actionButton} named \code{go}.
+Typically, the \code{key} expression is reactive (the \code{value} is never reactive,
+as it is run inside of \code{\link[=isolate]{isolate()}}). However, there are times when it's not
+idea for \code{key} to be reactive: perhaps you have \link{sliderInput}s \code{x} and \code{y},
+but you don't want the computation to occur until the user sets both \code{x}
+and \code{y}, and then clicks on an \link{actionButton} named \code{go}.
 
 The value of \code{input$go} shouldn't be included in the cache key, because its
 value is not relevant to the calculation involving \code{input$x} and \code{input$y}.
@@ -148,8 +150,8 @@ and the \code{key} will be used for its value, but it will be executed in an
 \code{\link[=isolate]{isolate()}}, so it will not be used for its reactive dependencies.
 
 In the example described above, you would use something like:\if{html}{\out{<div class="NA">}}\preformatted{r <- cachedReactive(
- event = input$go,
- key = list(input$x, input$y),
+ event = \{ input$go \},
+ key = \{ list(input$x, input$y) \},
  value = \{ input$x + input$y \}
 )
 }\if{html}{\out{</div>}}
@@ -158,10 +160,10 @@ In the example described above, you would use something like:\if{html}{\out{<div
 \section{Async with cached reactives}{
 
 
-With a cached reactive expression, they key and/or value expression can be
+With a cached reactive expression, the key and/or value expression can be
 \emph{asynchronous}. In other words, they can be promises -- not regular R
-promises, but rather objects provided by the promises package, which are
-similar to promises in JavaScript. (See \code{\link[promises:promise]{promises::promise()}} for more
+promises, but rather objects provided by the \pkg{promises}  package, which
+are similar to promises in JavaScript. (See \code{\link[promises:promise]{promises::promise()}} for more
 information.) You can also use \code{\link[future:future]{future::future()}} objects to run code in a
 separate process or even on a remote machine.
 
@@ -203,16 +205,16 @@ shinyApp(
   ui = fluidPage(
     sliderInput("x", "x", 1, 10, 5),
     sliderInput("y", "y", 1, 10, 5),
-    "x * y: ",
+    div("x * y: "),
     verbatimTextOutput("txt")
   ),
   server = function(input, output) {
     r <- cachedReactive(
-      # Use input$x and input$y for the cache key. This is a reactive
-      # expression.
+      # Use input$x and input$y for the cache key.
+      # This is a reactive expression.
       list(input$x, input$y),
       {
-        # The value expression is an expensive computation
+        # The value expression is an _expensive_ computation
         message("Doing expensive computation...")
         Sys.sleep(2)
         input$x * input$y

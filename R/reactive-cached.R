@@ -18,10 +18,12 @@
 #' possible values of `value`.
 #'
 #' The way to use this is to have a `key` that is fast to compute, and a `value`
-#' that is expensive to compute. It evaluates the `key`, and then serializes and
-#' hashes the result. If the resulting hashed key is in the cache, then it
-#' simply retrieves and returns it; if not, then it executes `value`, stores the
-#' result in the cache, and returns it.
+#' that is expensive to compute.  To see if `value` should be computed,
+#' `cachedReactive()` evaluates `key` and then serializes and hashes the result.
+#' If the resulting hashed key is in the cache, then `cachedReactive()` simply
+#' retrieves the previously calculated value and returns it; if not, then the
+#' `value` is computed and the result is stored in the cache before being
+#' returned.
 #'
 #' The `key` should be fast to compute, and ideally it will return an object
 #' that is not too large, since the object must be serialized and hashed.
@@ -66,7 +68,7 @@
 #'
 #'   ```
 #'   r <- cachedReactive(
-#'     key = list(input$x, input$y),
+#'     key = { list(input$x, input$y) },
 #'     value = { input$x + input$y }
 #'   )
 #'   ```
@@ -81,11 +83,11 @@
 #'
 #' @section Event expressions and reactivity:
 #'
-#'   Typically, the `key` is reactive, and the `value` is not (it is run within
-#'   [isolate()]). However, there are times when this isn't ideal: perhaps you
-#'   have [sliderInput]s `x` and `y`, but you don't want the computation to
-#'   occur until the user sets both `x` and `y`, and then clicks on an
-#'   [actionButton] named `go`.
+#'   Typically, the `key` expression is reactive (the `value` is never reactive,
+#'   as it is run inside of [isolate()]). However, there are times when it's not
+#'   idea for `key` to be reactive: perhaps you have [sliderInput]s `x` and `y`,
+#'   but you don't want the computation to occur until the user sets both `x`
+#'   and `y`, and then clicks on an [actionButton] named `go`.
 #'
 #'   The value of `input$go` shouldn't be included in the cache key, because its
 #'   value is not relevant to the calculation involving `input$x` and `input$y`.
@@ -107,20 +109,21 @@
 #'
 #'   In the example described above, you would use something like:
 #'
+#'
 #'   ```
 #'   r <- cachedReactive(
-#'     event = input$go,
-#'     key = list(input$x, input$y),
+#'     event = { input$go },
+#'     key = { list(input$x, input$y) },
 #'     value = { input$x + input$y }
 #'   )
 #'   ```
 #'
 #' @section Async with cached reactives:
 #'
-#'   With a cached reactive expression, they key and/or value expression can be
+#'   With a cached reactive expression, the key and/or value expression can be
 #'   _asynchronous_. In other words, they can be promises -- not regular R
-#'   promises, but rather objects provided by the promises package, which are
-#'   similar to promises in JavaScript. (See [promises::promise()] for more
+#'   promises, but rather objects provided by the \pkg{promises}  package, which
+#'   are similar to promises in JavaScript. (See [promises::promise()] for more
 #'   information.) You can also use [future::future()] objects to run code in a
 #'   separate process or even on a remote machine.
 #'
@@ -160,9 +163,9 @@
 #' @param value The expression or quosure that produces the return value of the
 #'   `cachedReactive`. It will be executed within an [isolate()] scope.
 #' @param event An optional expression or quosure used for reactivity. If
-#'   non-NULL, then `event` will be evaluated in a reactive context, and `value`
-#'   will be evaluated in an isolated context (and it will not be used for
-#'   reactive dependencies).
+#'   non-NULL, then `event` will be evaluated in a reactive context, and both
+#'   `key` and `value` will be evaluated in an [isolate()] scope (and will not
+#'   be used for reactive dependencies).
 #' @param ignoreNULL If `TRUE`, then if `event` evaluates to `NULL`, then a
 #'   silent exception will be raised and the cache key and the value will not be
 #'   computed. See [req()] for more on silent exceptions.
@@ -180,16 +183,16 @@
 #'   ui = fluidPage(
 #'     sliderInput("x", "x", 1, 10, 5),
 #'     sliderInput("y", "y", 1, 10, 5),
-#'     "x * y: ",
+#'     div("x * y: "),
 #'     verbatimTextOutput("txt")
 #'   ),
 #'   server = function(input, output) {
 #'     r <- cachedReactive(
-#'       # Use input$x and input$y for the cache key. This is a reactive
-#'       # expression.
+#'       # Use input$x and input$y for the cache key.
+#'       # This is a reactive expression.
 #'       list(input$x, input$y),
 #'       {
-#'         # The value expression is an expensive computation
+#'         # The value expression is an _expensive_ computation
 #'         message("Doing expensive computation...")
 #'         Sys.sleep(2)
 #'         input$x * input$y
@@ -239,8 +242,8 @@ cachedReactive <- function(
   event = NULL,
   ignoreNULL = TRUE,
   label = NULL,
-  domain = getDefaultReactiveDomain(),
-  cache = "app"
+  cache = "app",
+  domain = getDefaultReactiveDomain()
 ) {
   check_dots_empty()
 

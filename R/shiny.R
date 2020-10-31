@@ -31,8 +31,8 @@ NULL
 #' @importFrom digest digest
 #' @importFrom promises promise promise_resolve promise_reject is.promising
 #'   as.promise
-#' @importFrom rlang enquo as_function get_expr get_env new_function
-#' @importFrom ellipsis check_dots_empty
+#' @importFrom rlang enquo as_function get_expr get_env new_function enquos eval_tidy
+#' @importFrom ellipsis check_dots_empty check_dots_unnamed
 NULL
 
 createUniqueId <- function(bytes, prefix = "", suffix = "") {

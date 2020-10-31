@@ -201,6 +201,8 @@ Collate:
     'test.R'
     'update-input.R'
     'viewer.R'
+    'with-cache.R'
+    'with-event.R'
 RoxygenNote: 7.1.1
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)

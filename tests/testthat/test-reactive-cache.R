@@ -1,23 +1,19 @@
 
-test_that("cachedReactive basic functionality", {
+test_that("withCache reactive basic functionality", {
   cache <- cachem::cache_mem()
 
   k <- reactiveVal(0)
 
   vals <- character()
-  r <- cachedReactive(
-    key = {
-      x <- paste0(k(), "k")
-      vals <<- c(vals, x)
-      k()
-    },
-    {
-      x <- paste0(k(), "v")
-      vals <<- c(vals, x)
-      k()
-    },
-    cache = cache
-  )
+  r <- reactive({
+    x <- paste0(k(), "v")
+    vals <<- c(vals, x)
+    k()
+  }) %>% withCache({
+    x <- paste0(k(), "k")
+    vals <<- c(vals, x)
+    k()
+  }, cache = cache)
 
   o <- observe({
     x <- paste0(r(), "o")
@@ -51,8 +47,80 @@ test_that("cachedReactive basic functionality", {
   expect_identical(vals, c("1k","1v", "1o"))
 })
 
+test_that("withCache - multiple key expressions", {
+  cache <- cachem::cache_mem()
 
-test_that("cachedReactive - value is isolated", {
+  k1 <- reactiveVal(0)
+  k2 <- reactiveVal(0)
+
+  r_vals <- character()
+  r <- reactive({
+    x <- paste0(k1(), ":", k2())
+    r_vals <<- c(r_vals, x)
+    x
+  }) %>%
+    withCache(k1(), k2(), cache = cache)
+
+  o_vals <- character()
+  o <- observe({
+    o_vals <<- c(o_vals, r())
+  })
+
+  flushReact()
+  expect_identical(r_vals, "0:0")
+  expect_identical(o_vals, "0:0")
+  flushReact()
+  expect_identical(r_vals, "0:0")
+  expect_identical(o_vals, "0:0")
+
+  # Each of the items can trigger
+  r_vals <- character(); o_vals <- character()
+  k1(10)
+  flushReact()
+  expect_identical(r_vals, "10:0")
+  expect_identical(o_vals, "10:0")
+
+  r_vals <- character(); o_vals <- character()
+  k2(100)
+  flushReact()
+  expect_identical(r_vals, "10:100")
+  expect_identical(o_vals, "10:100")
+
+  # Using a cached value means that reactive won't execute
+  r_vals <- character(); o_vals <- character()
+  k2(0)
+  flushReact()
+  expect_identical(r_vals, character())
+  expect_identical(o_vals, "10:0")
+  k1(0)
+  flushReact()
+  expect_identical(r_vals, character())
+  expect_identical(o_vals, c("10:0", "0:0"))
+})
+
+
+test_that("withCache reactive - original reactive can be GC'd", {
+  # withCache.reactive essentially extracts code from the original reactive and
+  # then doesn't need the original anymore. We want to make sure the original
+  # can be GC'd afterward (if no one else has a reference to it).
+  k <- reactiveVal(0)
+
+  vals <- character()
+  r <- reactive({ k() })
+
+  finalized <- FALSE
+  reg.finalizer(attr(r, "observable"), function(e) finalized <<- TRUE)
+
+  # r1 <- withCache(r, k(), cache = cache)
+  # Note: using pipe causes this to fail due to:
+  # https://github.com/tidyverse/magrittr/issues/229
+  r1 <- r %>% withCache(k(), cache = cache)
+  rm(r)
+  gc()
+  expect_true(finalized)
+})
+
+test_that("withCache reactive - value is isolated", {
   # The value is isolated; the key is the one that dependencies are taken on.
   cache <- cachem::cache_mem()
 
@@ -60,19 +128,15 @@ test_that("cachedReactive - value is isolated", {
   v <- reactiveVal(10)
 
   vals <- character()
-  r <- cachedReactive(
-    key = {
-      x <- paste0(k(), "k")
-      vals <<- c(vals, x)
-      k()
-    },
-    {
-      x <- paste0(v(), "v")
-      vals <<- c(vals, x)
-      v()
-    },
-    cache = cache
-  )
+  r <- reactive({
+    x <- paste0(v(), "v")
+    vals <<- c(vals, x)
+    v()
+  }) %>% withCache({
+    x <- paste0(k(), "k")
+    vals <<- c(vals, x)
+    k()
+  }, cache = cache)
 
   o <- observe({
     x <- paste0(r(), "o")
@@ -117,30 +181,26 @@ test_that("cachedReactive - value is isolated", {
 # ============================================================================
 # Async key
 # ============================================================================
-test_that("cachedReactive with async key", {
+test_that("withCache reactive with async key", {
   cache <- cachem::cache_mem()
   k <- reactiveVal(0)
 
   vals <- character()
-  r <- cachedReactive(
-    key = {
-      promises::promise(function(resolve, reject) {
-        x <- paste0(k(), "k1")
-        vals <<- c(vals, x)
-        resolve(k())
-      })$then(function(value) {
-        x <- paste0(k(), "k2")
-        vals <<- c(vals, x)
-        value
-      })
-    },
-    {
-      x <- paste0(k(), "v")
+  r <- reactive({
+    x <- paste0(k(), "v")
+    vals <<- c(vals, x)
+    k()
+  }) %>% withCache({
+    promises::promise(function(resolve, reject) {
+      x <- paste0(k(), "k1")
       vals <<- c(vals, x)
-      k()
-    },
-    cache = cache
-  )
+      resolve(k())
+    })$then(function(value) {
+      x <- paste0(k(), "k2")
+      vals <<- c(vals, x)
+      value
+    })
+  }, cache = cache)
 
   o <- observe({
     r()$then(function(value) {
@@ -166,8 +226,8 @@ test_that("cachedReactive with async key", {
   for (i in 1:3) later::run_now()
   expect_identical(vals, c("1k1", "1k2", "1v", "1o"))
 
-  # Going back to a cached value: The cachedReactive's value expr won't run, but
-  # the observer will.
+  # Going back to a cached value: The reactive's expr won't run, but the
+  # observer will.
   vals <- character()
   k(0)
   flushReact()
@@ -180,7 +240,7 @@ test_that("cachedReactive with async key", {
 # ============================================================================
 # Async value
 # ============================================================================
-test_that("cachedReactives with async value", {
+test_that("withCache reactives with async value", {
   # If the value expr returns a promise, it must return a promise every time,
   # even when the value is fetched in the cache. Similarly, if it returns a
   # non-promise value, then it needs to do that whether or not it's fetched from
@@ -193,25 +253,21 @@ test_that("cachedReactives with async value", {
 
   vals <- character()
 
-  r <- cachedReactive(
-    key = {
-      x <- paste0(k(), "k")
+  r <- reactive({
+    promises::promise(function(resolve, reject) {
+      x <- paste0(k(), "v1")
       vals <<- c(vals, x)
-      k()
-    },
-    {
-      promises::promise(function(resolve, reject) {
-        x <- paste0(k(), "v1")
-        vals <<- c(vals, x)
-        resolve(k())
-      })$then(function(value) {
-        x <- paste0(value, "v2")
-        vals <<- c(vals, x)
-        value
-      })
-    },
-    cache = cache
-  )
+      resolve(k())
+    })$then(function(value) {
+      x <- paste0(value, "v2")
+      vals <<- c(vals, x)
+      value
+    })
+  }) %>% withCache({
+    x <- paste0(k(), "k")
+    vals <<- c(vals, x)
+    k()
+  }, cache = cache)
 
   o <- observe({
     r()$then(function(value) {
@@ -236,8 +292,8 @@ test_that("cachedReactives with async value", {
   for (i in 1:6) later::run_now()
   expect_identical(vals, c("1k", "1v1", "1v2", "1o"))
 
-  # Going back to a cached value: The cachedReactive's value expr won't run, but
-  # the observer will.
+  # Going back to a cached value: The reactives's expr won't run, but the
+  # observer will.
   vals <- character()
   k(0)
   flushReact()
@@ -250,7 +306,7 @@ test_that("cachedReactives with async value", {
 # ============================================================================
 # Async key and value
 # ============================================================================
-test_that("cachedReactives with async key and value", {
+test_that("withCache reactives with async key and value", {
   # If the value expr returns a promise, it must return a promise every time,
   # even when the value is fetched in the cache. Similarly, if it returns a
   # non-promise value, then it needs to do that whether or not it's fetched from
@@ -263,31 +319,27 @@ test_that("cachedReactives with async key and value", {
 
   vals <- character()
 
-  r <- cachedReactive(
-    key = {
-      promises::promise(function(resolve, reject) {
-        x <- paste0(k(), "k1")
-        vals <<- c(vals, x)
-        resolve(k())
-      })$then(function(value) {
-        x <- paste0(k(), "k2")
-        vals <<- c(vals, x)
-        value
-      })
-    },
-    {
-      promises::promise(function(resolve, reject) {
-        x <- paste0(k(), "v1")
-        vals <<- c(vals, x)
-        resolve(k())
-      })$then(function(value) {
-        x <- paste0(value, "v2")
-        vals <<- c(vals, x)
-        value
-      })
-    },
-    cache = cache
-  )
+  r <- reactive({
+    promises::promise(function(resolve, reject) {
+      x <- paste0(k(), "v1")
+      vals <<- c(vals, x)
+      resolve(k())
+    })$then(function(value) {
+      x <- paste0(value, "v2")
+      vals <<- c(vals, x)
+      value
+    })
+  }) %>% withCache({
+    promises::promise(function(resolve, reject) {
+      x <- paste0(k(), "k1")
+      vals <<- c(vals, x)
+      resolve(k())
+    })$then(function(value) {
+      x <- paste0(k(), "k2")
+      vals <<- c(vals, x)
+      value
+    })
+  }, cache = cache)
 
   o <- observe({
     r()$then(function(value) {
@@ -309,8 +361,8 @@ test_that("cachedReactives with async key and value", {
   for (i in 1:8) later::run_now()
   expect_identical(vals, c("1k1", "1k2", "1v1", "1v2", "1o"))
 
-  # Going back to a cached value: The cachedReactive's value expr won't run, but
-  # the observer will.
+  # Going back to a cached value: The reactive's expr won't run, but the
+  # observer will.
   vals <- character(0)
   k(0)
   flushReact()
@@ -319,54 +371,45 @@ test_that("cachedReactives with async key and value", {
   expect_identical(vals, c("0k1", "0k2", "0o"))
 })
 
-test_that("cachedReactive key collisions", {
+test_that("withCache reactive key collisions", {
   # =======================================
   # No collision with different value exprs
   # =======================================
   cache <- cachem::cache_mem()
-  k <- reactiveVal(0)
+  k <- reactiveVal(1)
 
-  # Key collisions don't happen if they have different value expressions
+  # Key collisions don't happen if they have different reactive expressions
   # (because that is used in the key).
-  r1_vals <- numeric()
-  r1 <- cachedReactive(
-    key = k(),
-    {
-      val <- k() * 10
-      r1_vals <<- c(r1_vals, val)
-      val
-    },
-    cache = cache
-  )
+  r_vals <- numeric()
+  r1 <- reactive({
+    val <- k() * 10
+    r_vals <<- c(r_vals, val)
+    val
+  }) %>%
+    withCache(k(), cache = cache)
 
-  r2_vals <- numeric()
-  r2 <- cachedReactive(
-    key = k(),
-    {
-      val <- k() * 100
-      r2_vals <<- c(r2_vals, val)
-      val
-    },
-    cache = cache
-  )
+  r_vals <- numeric()
+  r2 <- reactive({
+    val <- k() * 100
+    r_vals <<- c(r_vals, val)
+    val
+  }) %>%
+    withCache(k(), cache = cache)
 
   o_vals <- numeric()
   o <- observe({
     o_vals <<- c(o_vals, r1(), r2())
   })
 
-  # The key for r2() collides with the one from r1(), so the value expr for r2()
-  # never actually executes, and it returns the cached value for r1().
+  # No collision because the reactive's expr is used in the key
   flushReact()
-  expect_identical(r1_vals, 0)
-  expect_identical(r2_vals, 0)
-  expect_identical(o_vals, c(0, 0))
+  expect_identical(r_vals, c(10, 100))
+  expect_identical(o_vals, c(10, 100))
 
-  k(1)
+  k(2)
   flushReact()
-  expect_identical(r1_vals, c(0, 10))
-  expect_identical(r2_vals,  c(0, 100))
-  expect_identical(o_vals, c(0, 0, 10, 100))
+  expect_identical(r_vals, c(10, 100, 20, 200))
+  expect_identical(o_vals, c(10, 100, 20, 200))
 
 
   # ====================================
@@ -375,35 +418,29 @@ test_that("cachedReactive key collisions", {
   cache <- cachem::cache_mem()
   k <- reactiveVal(1)
 
-  # Key collisions DO happen if they have different value expressions
-  # (because that is used in the key).
+  # Key collisions DO happen if they have the same value expressions.
   r_vals <- numeric()
-  r1 <- cachedReactive(
-    key = k(),
-    {
-      val <- k() * 10
-      r_vals <<- c(r_vals, val)
-      val
-    },
-    cache = cache
-  )
+  r1 <- reactive({
+    val <- k() * 10
+    r_vals <<- c(r_vals, val)
+    val
+  }) %>%
+    withCache(k(), cache = cache)
 
-  r2 <- cachedReactive(
-    key = k(),
-    {
-      val <- k() * 10
-      r_vals <<- c(r_vals, val)
-      val
-    },
-    cache = cache
-  )
+  r2 <- reactive({
+    val <- k() * 10
+    r_vals <<- c(r_vals, val)
+    val
+  }) %>%
+    withCache(k(), cache = cache)
 
   o_vals <- numeric()
   o <- observe({
     o_vals <<- c(o_vals, r1(), r2())
   })
 
-  # r2() never actually runs -- key collision.
+  # r2() never actually runs -- key collision. This is good, because this is
+  # what allows cache to be shared across multiple sessions.
   flushReact()
   expect_identical(r_vals, 10)
   expect_identical(o_vals, c(10, 10))
@@ -418,7 +455,7 @@ test_that("cachedReactive key collisions", {
 # ============================================================================
 # Error handling
 # ============================================================================
-test_that("cachedReactive error handling", {
+test_that("withCache reactive error handling", {
   # ===================================
   # Error in key
   cache <- cachem::cache_mem()
@@ -426,19 +463,15 @@ test_that("cachedReactive error handling", {
 
   # Error in key
   vals <- character()
-  r <- cachedReactive(
-    key = {
-      x <- paste0(k(), "k")
-      vals <<- c(vals, x)
-      k()
-      stop("foo")
-    },
-    {
-      x <- paste0(k(), "v")
-      k()
-    },
-    cache = cache
-  )
+  r <- reactive({
+    x <- paste0(k(), "v")
+    k()
+  }) %>% withCache({
+    x <- paste0(k(), "k")
+    vals <<- c(vals, x)
+    k()
+    stop("foo")
+  }, cache = cache)
 
   o <- observe({
     x <- paste0(r(), "o")
@@ -465,19 +498,15 @@ test_that("cachedReactive error handling", {
   k <- reactiveVal(0)
 
   vals <- character()
-  r <- cachedReactive(
-    key = {
-      x <- paste0(k(), "k")
-      vals <<- c(vals, x)
-      k()
-      req(FALSE)
-    },
-    {
-      x <- paste0(k(), "v")
-      k()
-    },
-    cache = cache
-  )
+  r <- reactive({
+    x <- paste0(k(), "v")
+    k()
+  }) %>% withCache({
+    x <- paste0(k(), "k")
+    vals <<- c(vals, x)
+    k()
+    req(FALSE)
+  }, cache = cache)
 
   o <- observe({
     x <- paste0(r(), "o")
@@ -499,20 +528,17 @@ test_that("cachedReactive error handling", {
   k <- reactiveVal(0)
 
   vals <- character()
-  r <- cachedReactive(
-    key = {
+  r <- reactive({
+    x <- paste0(k(), "v")
+    vals <<- c(vals, x)
+    stop("foo")
+    k()
+  }) %>%
+    withCache({
       x <- paste0(k(), "k")
       vals <<- c(vals, x)
       k()
-    },
-    {
-      x <- paste0(k(), "v")
-      vals <<- c(vals, x)
-      stop("foo")
-      k()
-    },
-    cache = cache
-  )
+    }, cache = cache)
 
   o <- observe({
     x <- paste0(r(), "o")
@@ -539,20 +565,16 @@ test_that("cachedReactive error handling", {
   k <- reactiveVal(0)
 
   vals <- character()
-  r <- cachedReactive(
-    key = {
-      x <- paste0(k(), "k")
-      vals <<- c(vals, x)
-      k()
-    },
-    {
-      x <- paste0(k(), "v")
-      vals <<- c(vals, x)
-      req(FALSE)
-      k()
-    },
-    cache = cache
-  )
+  r <- reactive({
+    x <- paste0(k(), "v")
+    vals <<- c(vals, x)
+    req(FALSE)
+    k()
+  }) %>% withCache({
+    x <- paste0(k(), "k")
+    vals <<- c(vals, x)
+    k()
+  }, cache = cache)
 
   o <- observe({
     x <- paste0(r(), "o")
@@ -572,36 +594,34 @@ test_that("cachedReactive error handling", {
 })
 
 
-test_that("cachedReactive error handling - async", {
+test_that("withCache reactive error handling - async", {
   # ===================================
   # Error in key
   cache <- cachem::cache_mem()
   k <- reactiveVal(0)
   vals <- character()
-  r <- cachedReactive(
-    key = {
-      promises::promise(function(resolve, reject) {
-        x <- paste0(k(), "k1")
-        vals <<- c(vals, x)
-        resolve(k())
-      })$then(function(value) {
-        x <- paste0(k(), "k2")
-        vals <<- c(vals, x)
-        stop("err", k())
-        value
-      })
-    },
-    {
-      promises::promise(function(resolve, reject) {
-        x <- paste0(k(), "v1")
-        vals <<- c(vals, x)
-        resolve(k())
-      })$then(function(value) {
-        x <- paste0(value, "v2")
-        vals <<- c(vals, x)
-        value
-      })
-    },
+  r <- reactive({
+    promises::promise(function(resolve, reject) {
+      x <- paste0(k(), "v1")
+      vals <<- c(vals, x)
+      resolve(k())
+    })$then(function(value) {
+      x <- paste0(value, "v2")
+      vals <<- c(vals, x)
+      value
+    })
+  }) %>% withCache({
+    promises::promise(function(resolve, reject) {
+      x <- paste0(k(), "k1")
+      vals <<- c(vals, x)
+      resolve(k())
+    })$then(function(value) {
+      x <- paste0(k(), "k2")
+      vals <<- c(vals, x)
+      stop("err", k())
+      value
+    })
+  },
     cache = cache
   )
 
@@ -642,26 +662,22 @@ test_that("cachedReactive error handling - async", {
   cache <- cachem::cache_mem()
   k <- reactiveVal(0)
   vals <- character()
-  r <- cachedReactive(
-    key = {
-      promises::promise(function(resolve, reject) {
-        x <- paste0(k(), "k1")
-        vals <<- c(vals, x)
-        resolve(k())
-      })$then(function(value) {
-        x <- paste0(k(), "k2")
-        vals <<- c(vals, x)
-        req(FALSE)
-        value
-      })
-    },
-    {
-      x <- paste0(k(), "v")
+  r <- reactive({
+    x <- paste0(k(), "v")
+    vals <<- c(vals, x)
+    resolve(k())
+  }) %>% withCache({
+    promises::promise(function(resolve, reject) {
+      x <- paste0(k(), "k1")
       vals <<- c(vals, x)
       resolve(k())
-    },
-    cache = cache
-  )
+    })$then(function(value) {
+      x <- paste0(k(), "k2")
+      vals <<- c(vals, x)
+      req(FALSE)
+      value
+    })
+  }, cache = cache)
 
   o <- observe({
     r()$then(function(value) {
@@ -701,32 +717,28 @@ test_that("cachedReactive error handling - async", {
   cache <- cachem::cache_mem()
   k <- reactiveVal(0)
   vals <- character()
-  r <- cachedReactive(
-    key = {
-      promises::promise(function(resolve, reject) {
-        x <- paste0(k(), "k1")
-        vals <<- c(vals, x)
-        resolve(k())
-      })$then(function(value) {
-        x <- paste0(k(), "k2")
-        vals <<- c(vals, x)
-        value
-      })
-    },
-    {
-      promises::promise(function(resolve, reject) {
-        x <- paste0(k(), "v1")
-        vals <<- c(vals, x)
-        resolve(k())
-      })$then(function(value) {
-        x <- paste0(value, "v2")
-        vals <<- c(vals, x)
-        stop("err", k())
-        value
-      })
-    },
-    cache = cache
-  )
+  r <- reactive({
+    promises::promise(function(resolve, reject) {
+      x <- paste0(k(), "v1")
+      vals <<- c(vals, x)
+      resolve(k())
+    })$then(function(value) {
+      x <- paste0(value, "v2")
+      vals <<- c(vals, x)
+      stop("err", k())
+      value
+    })
+  }) %>% withCache({
+    promises::promise(function(resolve, reject) {
+      x <- paste0(k(), "k1")
+      vals <<- c(vals, x)
+      resolve(k())
+    })$then(function(value) {
+      x <- paste0(k(), "k2")
+      vals <<- c(vals, x)
+      value
+    })
+  }, cache = cache)
 
   o <- observe({
     r()$then(function(value) {
@@ -764,8 +776,19 @@ test_that("cachedReactive error handling - async", {
   cache <- cachem::cache_mem()
   k <- reactiveVal(0)
   vals <- character()
-  r <- cachedReactive(
-    key = {
+  r <- reactive({
+    promises::promise(function(resolve, reject) {
+      x <- paste0(k(), "v1")
+      vals <<- c(vals, x)
+      resolve(k())
+    })$then(function(value) {
+      x <- paste0(value, "v2")
+      vals <<- c(vals, x)
+      req(FALSE)
+      value
+    })
+  }) %>%
+    withCache({
       promises::promise(function(resolve, reject) {
         x <- paste0(k(), "k1")
         vals <<- c(vals, x)
@@ -775,21 +798,7 @@ test_that("cachedReactive error handling - async", {
         vals <<- c(vals, x)
         value
       })
-    },
-    {
-      promises::promise(function(resolve, reject) {
-        x <- paste0(k(), "v1")
-        vals <<- c(vals, x)
-        resolve(k())
-      })$then(function(value) {
-        x <- paste0(value, "v2")
-        vals <<- c(vals, x)
-        req(FALSE)
-        value
-      })
-    },
-    cache = cache
-  )
+    }, cache = cache)
 
   o <- observe({
     r()$then(function(value) {
@@ -827,7 +836,7 @@ test_that("cachedReactive error handling - async", {
 # ============================================================================
 # Quosures
 # ============================================================================
-test_that("cachedReactive quosure handling", {
+test_that("withCache quosure handling", {
   cache <- cachem::cache_mem()
   res <- NULL
   key_env <- local({
@@ -844,11 +853,8 @@ test_that("cachedReactive quosure handling", {
     environment()
   })
 
-  r <- cachedReactive(
-    key = !!key_env$expr,
-    !!value_env$expr,
-    cache = cache
-  )
+  r <- reactive(!!value_env$expr) %>%
+    withCache(!!key_env$expr, cache = cache)
 
   vals <- numeric()
   o <- observe({
@@ -874,21 +880,15 @@ test_that("cachedReactive quosure handling", {
 # ============================================================================
 # Visibility
 # ============================================================================
-test_that("cachedReactive visibility", {
-  # cachedReactive() uses rlang::as_function, and in rlang 0.4.8 and below, it
-  # did not preserve visibility.
-  # https://github.com/r-lib/rlang/issues/1055
-  skip_if_not_installed("rlang", "0.4.8.9000")
+test_that("withCache visibility", {
   cache <- cachem::cache_mem()
   k <- reactiveVal(0)
   res <- NULL
-  r <- cachedReactive(
-    key = k(),
-    {
+  r <- withCache(k(), cache = cache,
+    x = reactive({
       if (k() == 0) invisible(k())
       else          k()
-    },
-    cache = cache
+    })
   )
 
   o <- observe({
@@ -910,22 +910,19 @@ test_that("cachedReactive visibility", {
 })
 
 
-test_that("cachedReactive visibility - async", {
+test_that("withCache reactive visibility - async", {
   # Skippping because of https://github.com/rstudio/promises/issues/58
   skip("Visibility currently not supported by promises")
   cache <- cachem::cache_mem()
   k <- reactiveVal(0)
   res <- NULL
-  r <- cachedReactive(
-    key = k(),
-    {
-      promise(function(resolve, reject) {
-        if (k() == 0) resolve(invisible(k()))
-        else          resolve(k())
-      })
-    },
-    cache = cache
-  )
+  r <- reactive({
+    promise(function(resolve, reject) {
+      if (k() == 0) resolve(invisible(k()))
+      else          resolve(k())
+    })
+  }) %>%
+    withCache(k(), cache = cache)
 
   o <- observe({
     r()$then(function(value) {

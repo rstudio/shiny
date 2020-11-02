@@ -1621,18 +1621,13 @@ wrapFunctionLabel <- function(func, name, ..stacktraceon = FALSE) {
   assign(name, func, environment())
   registerDebugHook(name, environment(), name)
 
-  relabelWrapper <- eval(substitute(
-    function(...) {
-      # This `f` gets renamed to the value of `name`. Note that it may not
-      # print as the new name, because of source refs stored in the function.
-      if (..stacktraceon)
-        ..stacktraceon..(f(...))
-      else
-        f(...)
-    },
-    list(f = as.name(name))
-  ))
-
+  if (..stacktraceon) {
+    body <- expr({ ..stacktraceon..((!!name)(...)) })
+  } else {
+    body <- expr({ (!!name)(...) })
+  }
+  relabelWrapper <- new_function(pairlist2(... =), body, environment())
+  attr(relabelWrapper, "wrappedFunc") <- func
   relabelWrapper
 }
 

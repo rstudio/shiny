@@ -1201,6 +1201,10 @@ Observer <- R6Class(
 
       return(ctx)
     },
+    .getOrigFunc = function() {
+      # Get the original function that was passed in (before it was wrapped).
+      attr(.func, "wrappedFunc", exact = TRUE)
+    },
     run = function() {
       ctx <- .createContext()
       .execCount <<- .execCount + 1L

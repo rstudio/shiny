@@ -2246,42 +2246,51 @@ maskReactiveContext <- function(expr) {
 observeEvent <- function(eventExpr, handlerExpr,
   event.env = parent.frame(), event.quoted = FALSE,
   handler.env = parent.frame(), handler.quoted = FALSE,
+  ...,
   label = NULL, suspended = FALSE, priority = 0,
   domain = getDefaultReactiveDomain(), autoDestroy = TRUE,
-  ignoreNULL = TRUE, ignoreInit = FALSE, once = FALSE) {
+  ignoreNULL = TRUE, ignoreInit = FALSE, once = FALSE)
+{
+  check_dots_empty()
 
-  eventFunc <- exprToFunction(eventExpr, event.env, event.quoted)
-  if (is.null(label))
-    label <- sprintf('observeEvent(%s)', paste(deparse(body(eventFunc)), collapse='\n'))
-  eventFunc <- wrapFunctionLabel(eventFunc, "observeEventExpr", ..stacktraceon = TRUE)
+  if (!missing(event.env) || !missing(event.quoted)) {
+    deprecatedEnvQuotedMessage("event.env", "event.quoted")
+    if (!event.quoted) {
+      eventExpr <- enexpr(eventExpr)
+    }
+    eventQuo <- new_quosure(eventExpr, event.env)
+  } else {
+    eventQuo <- enquo(eventExpr)
+  }
 
-  handlerFunc <- exprToFunction(handlerExpr, handler.env, handler.quoted)
-  handlerFunc <- wrapFunctionLabel(handlerFunc, "observeEventHandler", ..stacktraceon = TRUE)
+  if (!missing(handler.env) || !missing(handler.quoted)) {
+    deprecatedEnvQuotedMessage("handler.env", "handler.quoted")
+    if (!handler.quoted) {
+      handlerExpr <- enexpr(handlerExpr)
+    }
+    handlerExpr <- new_quosure(handlerExpr, handler.env)
+  } else {
+    handlerQuo <- enquo(handlerExpr)
+  }
 
-  initialized <- FALSE
+  handler <- observe(
+    !!handlerQuo,
+    label = "observeEventHandler",
+    suspended = suspended,
+    priority = priority,
+    domain = domain,
+    autoDestroy = TRUE,
+    ..stacktraceon = FALSE # TODO: Does this go in the withEvent?
+  )
 
-  o <- observe({
-    hybrid_chain(
-      {eventFunc()},
-      function(value) {
-        if (ignoreInit && !initialized) {
-          initialized <<- TRUE
-          return()
-        }
-
-        if (ignoreNULL && isNullEvent(value)) {
-          return()
-        }
-
-        if (once) {
-          on.exit(o$destroy())
-        }
-
-        isolate(handlerFunc())
-      }
-    )
-  }, label = label, suspended = suspended, priority = priority, domain = domain,
-  autoDestroy = TRUE, ..stacktraceon = FALSE)
+  o <- withEvent(
+    ignoreNULL = ignoreNULL,
+    ignoreInit = ignoreInit,
+    once = once,
+    label = label,
+    !!eventQuo,
+    x = handler
+  )
 
   invisible(o)
 }
@@ -2291,34 +2300,38 @@ observeEvent <- function(eventExpr, handlerExpr,
 eventReactive <- function(eventExpr, valueExpr,
   event.env = parent.frame(), event.quoted = FALSE,
   value.env = parent.frame(), value.quoted = FALSE,
+  ...,
   label = NULL, domain = getDefaultReactiveDomain(),
-  ignoreNULL = TRUE, ignoreInit = FALSE) {
+  ignoreNULL = TRUE, ignoreInit = FALSE)
+{
+  check_dots_empty()
 
-  eventFunc <- exprToFunction(eventExpr, event.env, event.quoted)
-  if (is.null(label))
-    label <- sprintf('eventReactive(%s)', paste(deparse(body(eventFunc)), collapse='\n'))
-  eventFunc <- wrapFunctionLabel(eventFunc, "eventReactiveExpr", ..stacktraceon = TRUE)
+  if (!missing(event.env) || !missing(event.quoted)) {
+    deprecatedEnvQuotedMessage("event.env", "event.quoted")
+    if (!event.quoted) {
+      eventExpr <- enexpr(eventExpr)
+    }
+    eventQuo <- new_quosure(eventExpr, event.env)
+  } else {
+    eventQuo <- enquo(eventExpr)
+  }
 
-  handlerFunc <- exprToFunction(valueExpr, value.env, value.quoted)
-  handlerFunc <- wrapFunctionLabel(handlerFunc, "eventReactiveHandler", ..stacktraceon = TRUE)
+  if (!missing(value.env) || !missing(value.quoted)) {
+    deprecatedEnvQuotedMessage("value.env", "handler.quoted")
+    if (!value.quoted) {
+      valueExpr <- enexpr(valueExpr)
+    }
+    valueQuo <- new_quosure(valueExpr, value.env)
+  } else {
+    valueQuo <- enquo(valueExpr)
+  }
 
-  initialized <- FALSE
-
-  invisible(reactive({
-    hybrid_chain(
-      eventFunc(),
-      function(value) {
-        if (ignoreInit && !initialized) {
-          initialized <<- TRUE
-          req(FALSE)
-        }
-
-        req(!ignoreNULL || !isNullEvent(value))
-
-        isolate(handlerFunc())
-      }
-    )
-  }, label = label, domain = domain, ..stacktraceon = FALSE))
+  invisible(withEvent(
+    ignoreNULL = ignoreNULL,
+    ignoreInit = ignoreInit,
+    !!eventQuo,
+    x = reactive(!!valueQuo, domain = domain, label = "eventReactiveHandler")
+  ))
 }
 
 isNullEvent <- function(value) {

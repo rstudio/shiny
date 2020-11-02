@@ -1,6 +1,8 @@
 #' Event decorator
 #' @export
-withEvent <- function(x, ..., ignoreNULL = TRUE, ignoreInit = FALSE , once = FALSE) {
+withEvent <- function(x, ..., ignoreNULL = TRUE, ignoreInit = FALSE,
+                      once = FALSE, label = NULL)
+{
   check_dots_unnamed()
   force(ignoreNULL)
   force(ignoreInit)
@@ -17,14 +19,19 @@ withEvent.default <- function(x, ...) {
 
 
 #' @export
-withEvent.reactiveExpr <- function(x, ..., ignoreNULL = TRUE, ignoreInit = FALSE, once) {
-  label <- exprToLabel(substitute(event), "eventReactive")
+withEvent.reactiveExpr <- function(x, ..., ignoreNULL = TRUE, ignoreInit = FALSE,
+  label = NULL)
+{
   domain <- reactive_get_domain(x)
 
   eventFunc <- make_quos_func(enquos(...))
 
   valueFunc <- reactive_get_value_func(x)
   valueFunc <- wrapFunctionLabel(valueFunc, "eventReactiveValueFunc", ..stacktraceon = TRUE)
+
+  if (is.null(label)) {
+    label <- sprintf("eventReactive(%s)", paste(deparse(body(eventFunc)), collapse = "\n"))
+  }
 
   # Don't hold on to the reference for x, so that it can be GC'd
   rm(x)
@@ -53,7 +60,7 @@ withEvent.reactiveExpr <- function(x, ..., ignoreNULL = TRUE, ignoreInit = FALSE
 
 
 #' @export
-withEvent.shiny.render.function <- function(x, ..., ignoreNULL = TRUE, ignoreInit = FALSE, once) {
+withEvent.shiny.render.function <- function(x, ..., ignoreNULL = TRUE, ignoreInit = FALSE) {
   eventFunc <- make_quos_func(enquos(...))
 
   valueFunc <- x
@@ -80,16 +87,22 @@ withEvent.shiny.render.function <- function(x, ..., ignoreNULL = TRUE, ignoreIni
 
 
 #' @export
-withEvent.Observer <- function(x, ..., ignoreNULL = TRUE, ignoreInit = FALSE, once = FALSE) {
+withEvent.Observer <- function(x, ..., ignoreNULL = TRUE, ignoreInit = FALSE,
+  once = FALSE, label = NULL)
+{
   if (isTRUE(x$.destroyed)) {
     stop("Can't call withEvent() on an observer that has been destroyed.")
   }
 
   eventFunc <- make_quos_func(enquos(...))
-  valueFunc <- observer_get_orig_func(x)
+  valueFunc <- x$.func
+
+  if (is.null(label)) {
+    label <- sprintf('observeEvent(%s)', paste(deparse(body(eventFunc)), collapse='\n'))
+  }
 
   res <- observe(
-    label       = x$.label,
+    label       = label,
     domain      = x$.domain,
     priority    = x$.priority,
     autoDestroy = x$.autoDestroy,

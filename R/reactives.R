@@ -978,23 +978,21 @@ reactive <- function(x, env = parent.frame(), quoted = FALSE,
   check_dots_empty()
 
   if (!missing(env) || !missing(quoted)) {
-    shinyDeprecated(msg = paste(
-      "The `env` and `quoted` functions are deprecated.",
-      "Please use quosures from rlang instead.",
-      "See https://github.com/rstudio/shiny/issues/3108 for more information."
-    ))
-    fun <- exprToFunction(x, env, quoted)
-    label <- exprToLabel(substitute(x), "reactive", label)
-
+    deprecatedEnvQuotedMessage()
+    if (!quoted) {
+      eventExpr <- enexpr(x)
+    }
+    q <- new_quosure(x, env)
   } else {
     q <- enquo(x)
-    # Note: Unlike as_function(), new_function() won't work with nested
-    # quosures. However, it does have the advantage of preserving the
-    # parent.env() -- as_function will add one more layer in between.
-    fun <- new_function(NULL, get_expr(q), get_env(q))
-    # Attach a label and a reference to the original user source for debugging
-    label <- exprToLabel(get_expr(q), "reactive", label)
   }
+
+  # Note: Unlike as_function(), new_function() won't work with nested
+  # quosures. However, it does have the advantage of preserving the
+  # parent.env() -- as_function will add one more layer in between.
+  fun <- new_function(NULL, get_expr(q), get_env(q))
+  # Attach a label and a reference to the original user source for debugging
+  label <- exprToLabel(get_expr(q), "reactive", label)
 
   o <- Observable$new(fun, label, domain, ..stacktraceon = ..stacktraceon)
   structure(o$getValue, observable = o, class = c("reactiveExpr", "reactive", "function"))
@@ -1201,10 +1199,6 @@ Observer <- R6Class(
 
       return(ctx)
     },
-    .getOrigFunc = function() {
-      # Get the original function that was passed in (before it was wrapped).
-      attr(.func, "wrappedFunc", exact = TRUE)
-    },
     run = function() {
       ctx <- .createContext()
       .execCount <<- .execCount + 1L
@@ -1409,22 +1403,24 @@ observe <- function(x, env = parent.frame(), quoted = FALSE,
   check_dots_empty()
 
   if (!missing(env) || !missing(quoted)) {
-    shinyDeprecated(msg = paste(
-      "The `env` and `quoted` functions are deprecated.",
-      "Please use quosures from rlang instead.",
-      "See https://github.com/rstudio/shiny/issues/3108 for more information."
-    ))
-    fun <- exprToFunction(x, env, quoted)
-    label <- exprToLabel(substitute(x), "reactive", label)
-
+    # Eventually we'll be able to get rid of this code path, and the env and
+    # quoted arguments.
+    deprecatedEnvQuotedMessage()
+    if (!quoted) {
+      eventExpr <- enexpr(x)
+    }
+    q <- new_quosure(x, env)
   } else {
     q <- enquo(x)
-    # Note: Unlike as_function(), new_function() won't work with nested
-    # quosures. However, it does have the advantage of preserving the
-    # parent.env() -- as_function will add one more layer in between.
-    fun <- new_function(NULL, get_expr(q), get_env(q))
-    # Attach a label and a reference to the original user source for debugging
-    label <- exprToLabel(get_expr(q), "reactive", label)
+  }
+
+  # Note: Unlike as_function(), new_function() won't work with nested
+  # quosures. However, it does have the advantage of preserving the
+  # parent.env() -- as_function will add one more layer in between.
+  fun <- new_function(NULL, get_expr(q), get_env(q))
+
+  if (is.null(label)) {
+    label <- sprintf('observe(%s)', paste(deparse(get_expr(q)), collapse='\n'))
   }
 
   o <- Observer$new(
@@ -2574,4 +2570,13 @@ throttle <- function(r, millis, priority = 100, domain = getDefaultReactiveDomai
   eventReactive(v$trigger, {
     r()
   }, label = "throttle result", ignoreNULL = FALSE, domain = domain)
+}
+
+
+deprecatedEnvQuotedMessage <- function(env_arg = "env", quoted_arg = "quoted") {
+  shinyDeprecated(msg = paste(
+    sprintf("The `%s` and `%s` arguments are deprecated.", env_arg, quoted_arg),
+    "Please use quosures from rlang instead.",
+    "See https://github.com/rstudio/shiny/issues/3108 for more information."
+  ))
 }

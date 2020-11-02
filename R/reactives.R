@@ -1069,6 +1069,14 @@ execCount <- function(x) {
     stop('Unexpected argument to execCount')
 }
 
+# Internal utility functions for extracting things out of reactives.
+reactive_get_value_func <- function(x) {
+  attr(x, "observable", exact = TRUE)$.origFunc
+}
+reactive_get_domain <- function(x) {
+  attr(x, "observable", exact = TRUE)$.domain
+}
+
 # Observer ------------------------------------------------------------------
 
 Observer <- R6Class(

@@ -14,11 +14,11 @@ withCache.reactive <- function(x, ..., cache = "app") {
   check_dots_unnamed()
 
   label <- exprToLabel(substitute(key), "cachedReactive")
-  domain <- attr(x, "observable")$.domain
+  domain <- reactive_get_domain(x)
 
   keyFunc <- make_key_func(enquos(...))
 
-  valueFunc <- attr(x, "observable")$.origFunc
+  valueFunc <- reactive_get_value_func(x)
   # Hash the value expression now -- this will be added to the key later on, to
   # reduce the chance of key collisions with other cachedReactives. Remove
   # source refs because they can differ even though the code is the same.

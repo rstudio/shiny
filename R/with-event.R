@@ -14,11 +14,11 @@ withEvent.default <- function(x, ...) {
 #' @export
 withEvent.reactive <- function(x, event, ignoreNULL = TRUE, ignoreInit = FALSE) {
   label <- exprToLabel(substitute(event), "eventReactive")
-  domain <- attr(x, "observable")$.domain
+  domain <- reactive_get_domain(x)
 
   eventFunc <- as_function(enquo(event))
 
-  valueFunc <- attr(x, "observable")$.origFunc
+  valueFunc <- reactive_get_value_func(x)
   valueFunc <- wrapFunctionLabel(valueFunc, "eventReactiveValueFunc", ..stacktraceon = TRUE)
 
   # Don't hold on to the reference for x, so that it can be GC'd

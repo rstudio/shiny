@@ -1,6 +1,11 @@
 #' Event decorator
 #' @export
-withEvent <- function(x, event = NULL, ignoreNULL = TRUE, ignoreInit = FALSE) {
+withEvent <- function(x, ..., ignoreNULL = TRUE, ignoreInit = FALSE , once = FALSE) {
+  check_dots_unnamed()
+  force(ignoreNULL)
+  force(ignoreInit)
+  force(once)
+
   UseMethod("withEvent")
 }
 
@@ -12,11 +17,11 @@ withEvent.default <- function(x, ...) {
 
 
 #' @export
-withEvent.reactive <- function(x, event, ignoreNULL = TRUE, ignoreInit = FALSE) {
+withEvent.reactiveExpr <- function(x, ..., ignoreNULL = TRUE, ignoreInit = FALSE, once) {
   label <- exprToLabel(substitute(event), "eventReactive")
   domain <- reactive_get_domain(x)
 
-  eventFunc <- as_function(enquo(event))
+  eventFunc <- make_quos_func(enquos(...))
 
   valueFunc <- reactive_get_value_func(x)
   valueFunc <- wrapFunctionLabel(valueFunc, "eventReactiveValueFunc", ..stacktraceon = TRUE)
@@ -48,8 +53,8 @@ withEvent.reactive <- function(x, event, ignoreNULL = TRUE, ignoreInit = FALSE) 
 
 
 #' @export
-withEvent.shiny.render.function <- function(x, event, ignoreNULL = TRUE, ignoreInit = FALSE) {
-  eventFunc <- as_function(enquo(event))
+withEvent.shiny.render.function <- function(x, ..., ignoreNULL = TRUE, ignoreInit = FALSE, once) {
+  eventFunc <- make_quos_func(enquos(...))
 
   valueFunc <- x
 
@@ -71,4 +76,54 @@ withEvent.shiny.render.function <- function(x, event, ignoreNULL = TRUE, ignoreI
 
   class(res) <- c("shiny.render.function.event", class(res))
   res
+}
+
+
+#' @export
+withEvent.Observer <- function(x, ..., ignoreNULL = TRUE, ignoreInit = FALSE, once = FALSE) {
+  if (isTRUE(x$.destroyed)) {
+    stop("Can't call withEvent() on an observer that has been destroyed.")
+  }
+
+  eventFunc <- make_quos_func(enquos(...))
+  valueFunc <- observer_get_orig_func(x)
+
+  res <- observe(
+    label       = x$.label,
+    domain      = x$.domain,
+    priority    = x$.priority,
+    autoDestroy = x$.autoDestroy,
+    suspended   = x$.suspended,
+    ..stacktraceon = FALSE,
+    {
+      hybrid_chain(
+        eventFunc(),
+        function(value) {
+          if (ignoreInit && !initialized) {
+            initialized <<- TRUE
+            return()
+          }
+
+          if (ignoreNULL && isNullEvent(value)) {
+            return()
+          }
+
+          if (once) {
+            on.exit(x$destroy())
+          }
+
+          req(!ignoreNULL || !isNullEvent(value))
+
+          isolate(valueFunc())
+        }
+      )
+    }
+  )
+
+  x$destroy()
+  # Don't hold onto x, so that it can be gc'd
+  rm(x)
+
+  class(res) <- c("Observer.event", class(res))
+  invisible(res)
 }

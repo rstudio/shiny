@@ -1,6 +1,9 @@
 #' Cache decorator
 #' @export
 withCache <- function(x, ..., cache = "app") {
+  check_dots_unnamed()
+  force(cache)
+
   UseMethod("withCache")
 }
 
@@ -10,13 +13,11 @@ withCache.default <- function(x, ...) {
 }
 
 #' @export
-withCache.reactive <- function(x, ..., cache = "app") {
-  check_dots_unnamed()
-
+withCache.reactiveExpr <- function(x, ..., cache = "app") {
   label <- exprToLabel(substitute(key), "cachedReactive")
   domain <- reactive_get_domain(x)
 
-  keyFunc <- make_key_func(enquos(...))
+  keyFunc <- make_quos_func(enquos(...))
 
   valueFunc <- reactive_get_value_func(x)
   # Hash the value expression now -- this will be added to the key later on, to
@@ -123,7 +124,7 @@ withCache.reactive <- function(x, ..., cache = "app") {
 
 #' @export
 withCache.shiny.render.function <- function(x, ..., cache = "app") {
-  keyFunc <- make_key_func(enquos(...))
+  keyFunc <- make_quos_func(enquos(...))
 
   valueExprHash <- "TODO"
   valueFunc <- x
@@ -233,23 +234,22 @@ withCache.Observer <- function(x, ...) {
   stop("Can't withCache an observer, because observers exist for the side efects, not for their return values.")
 }
 
-# Given a list of key quosures, return a function that will evaluate them and
-# return the list. If the list contains a single quosure, unwrap it from the
-# list.
-make_key_func <- function(key_quos) {
-  if (length(key_quos) == 0) {
-    stop("Need at least one expression in `...` to use as cache key.")
+# Given a list of quosures, return a function that will evaluate them and return
+# the list. If the list contains a single quosure, unwrap it from the list.
+make_quos_func <- function(quos) {
+  if (length(quos) == 0) {
+    stop("Need at least one expression in `...` to use as cache key or event.")
   }
-  if (length(key_quos) == 1) {
+  if (length(quos) == 1) {
     # Special case for one key expr. This is needed for async to work -- that
     # is, when the expr returns a promise. It needs to not be wrapped into a
     # list for the hybrid_chain stuff to detect that it's a promise. (Plus,
     # it's not even clear what it would mean to mix promises and non-promises
     # in the key.)
-    key_quos <- key_quos[[1]]
-    function() { eval_tidy(key_quos) }
+    quos <- quos[[1]]
+    function() { eval_tidy(quos) }
 
   } else {
-    function() { lapply(key_quos, eval_tidy) }
+    function() { lapply(quos, eval_tidy) }
   }
 }

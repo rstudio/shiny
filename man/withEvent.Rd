@@ -4,7 +4,7 @@
 \alias{withEvent}
 \title{Event decorator}
 \usage{
-withEvent(x, event = NULL, ignoreNULL = TRUE, ignoreInit = FALSE)
+withEvent(x, ..., ignoreNULL = TRUE, ignoreInit = FALSE, once = FALSE)
 }
 \description{
 Event decorator

@@ -103,6 +103,7 @@ test_that("withCache reactive - original reactive can be GC'd", {
   # withCache.reactive essentially extracts code from the original reactive and
   # then doesn't need the original anymore. We want to make sure the original
   # can be GC'd afterward (if no one else has a reference to it).
+  cache <- memoryCache()
   k <- reactiveVal(0)
 
   vals <- character()

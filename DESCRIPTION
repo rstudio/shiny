@@ -178,7 +178,6 @@ Collate:
     'priorityqueue.R'
     'progress.R'
     'react.R'
-    'reactive-cached.R'
     'reexports.R'
     'render-cached-plot.R'
     'render-plot.R'

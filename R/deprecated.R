@@ -35,6 +35,7 @@ shinyDeprecated <- function(new=NULL, msg=NULL,
 #'
 #' @param exec_missing Deprecated.
 #' @inheritParams cachem::cache_disk
+#' @keywords internal
 #' @export
 diskCache <- function(
   dir = NULL,
@@ -66,6 +67,7 @@ diskCache <- function(
 #'
 #' @param exec_missing Deprecated.
 #' @inheritParams cachem::cache_mem
+#' @keywords internal
 #' @export
 memoryCache <- function(
   max_size = 200 * 1024 ^ 2,

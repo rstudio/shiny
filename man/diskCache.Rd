@@ -53,3 +53,4 @@ information will be written. To log to the console, use \code{stderr()} or
 \description{
 Create disk cache (deprecated)
 }
+\keyword{internal}

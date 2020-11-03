@@ -43,3 +43,4 @@ information will be written. To log to the console, use \code{stderr()} or
 \description{
 Create memory cache (deprecated)
 }
+\keyword{internal}

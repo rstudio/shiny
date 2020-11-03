@@ -78,7 +78,7 @@ memoryCache <- function(
 {
   shinyDeprecated("cachem::cache_mem", version = "1.5.1")
 
-  cachem::cache_disk(
+  cachem::cache_mem(
     dir = dir,
     max_size = max_size,
     max_age = max_age,

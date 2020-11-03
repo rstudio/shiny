@@ -18,9 +18,17 @@ utils::globalVariables('func')
 #'   app authors to customize outputs. (Currently, this is only supported for
 #'   dynamically generated UIs, such as those created by Shiny code snippets
 #'   embedded in R Markdown documents).
+#' @param cacheable A boolean which indicates whether this function can be
+#'   cached using [withCache()]. Some render functions (such as [renderPlot])
+#'   contain internal state that makes them unsuitable for caching.
 #' @return The `renderFunc` function, with annotations.
 #' @export
-markRenderFunction <- function(uiFunc, renderFunc, outputArgs = list()) {
+markRenderFunction <- function(
+  uiFunc,
+  renderFunc,
+  outputArgs = list(),
+  cacheable = TRUE
+) {
   # a mutable object that keeps track of whether `useRenderFunction` has been
   # executed (this usually only happens when rendering Shiny code snippets in
   # an interactive R Markdown document); its initial value is FALSE
@@ -45,11 +53,14 @@ markRenderFunction <- function(uiFunc, renderFunc, outputArgs = list()) {
     else origRenderFunc(...)
   }
 
-  structure(renderFunc,
-            class       = c("shiny.render.function", "function"),
-            outputFunc  = uiFunc,
-            outputArgs  = outputArgs,
-            hasExecuted = hasExecuted)
+  structure(
+    renderFunc,
+    class       = c("shiny.render.function", "function"),
+    outputFunc  = uiFunc,
+    outputArgs  = outputArgs,
+    hasExecuted = hasExecuted,
+    cacheable   = cacheable
+  )
 }
 
 #' @export
@@ -70,21 +81,18 @@ print.shiny.render.function <- function(x, ...) {
 #' @param outputFunc The UI function that is used (or most commonly used) with
 #'   this render function. This can be used in R Markdown documents to create
 #'   complete output widgets out of just the render function.
-#' @param outputArgs A list of arguments to pass to the `outputFunc`.
-#'   Render functions should include `outputArgs = list()` in their own
-#'   parameter list, and pass through the value as this argument, to allow app
-#'   authors to customize outputs. (Currently, this is only supported for
-#'   dynamically generated UIs, such as those created by Shiny code snippets
-#'   embedded in R Markdown documents).
+#' @inheritParams markRenderFunction
 #' @return An annotated render function, ready to be assigned to an
 #'   `output` slot.
 #'
 #' @export
 createRenderFunction <- function(
-  func, transform = function(value, session, name, ...) value,
-  outputFunc = NULL, outputArgs = NULL
+  func,
+  transform = function(value, session, name, ...) value,
+  outputFunc = NULL,
+  outputArgs = NULL,
+  cacheable = TRUE
 ) {
-
   renderFunc <- function(shinysession, name, ...) {
     hybrid_chain(
       func(),
@@ -94,10 +102,11 @@ createRenderFunction <- function(
     )
   }
 
-  if (!is.null(outputFunc))
-    markRenderFunction(outputFunc, renderFunc, outputArgs = outputArgs)
-  else
-    renderFunc
+  if (!is.null(outputFunc)) {
+    markRenderFunction(outputFunc, renderFunc, outputArgs, cacheable)
+  } else {
+    structure(renderFunc, cacheable = cacheable)
+  }
 }
 
 useRenderFunction <- function(renderFunc, inline = FALSE) {
@@ -333,7 +342,10 @@ renderImage <- function(expr, env=parent.frame(), quoted=FALSE,
       c(src = session$fileUrl(name, file=imageinfo$src, contentType=contentType),
         extra_attr)
     },
-    imageOutput, outputArgs)
+    imageOutput,
+    outputArgs,
+    cacheable = FALSE
+  )
 }
 
 # TODO: If we ever take a dependency on fs, it'd be great to replace this with
@@ -603,7 +615,7 @@ downloadHandler <- function(filename, content, contentType=NA, outputArgs=list()
     shinysession$registerDownload(name, filename, contentType, content)
   }
   snapshotExclude(
-    markRenderFunction(downloadButton, renderFunc, outputArgs = outputArgs)
+    markRenderFunction(downloadButton, renderFunc, outputArgs, cacheable = FALSE)
   )
 }
 

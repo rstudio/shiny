@@ -546,7 +546,7 @@ renderCachedPlot <- function(expr,
   outputFunc <- plotOutput
   formals(outputFunc)['height'] <- list(NULL)
 
-  markRenderFunction(outputFunc, renderFunc, outputArgs = outputArgs)
+  markRenderFunction(outputFunc, renderFunc, outputArgs, cacheable = FALSE)
 }
 
 

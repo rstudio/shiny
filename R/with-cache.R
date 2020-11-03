@@ -388,6 +388,10 @@ withCache.reactiveExpr <- function(x, ..., cache = "app") {
 
 #' @export
 withCache.shiny.render.function <- function(x, ..., cache = "app") {
+  if (isFALSE(attr(x, "cacheable"))) {
+    stop("Cannot call `withCache()` on this render function because it is marked as not cacheable.")
+  }
+
   keyFunc <- make_quos_func(enquos(...))
 
   valueExprHash <- "TODO"

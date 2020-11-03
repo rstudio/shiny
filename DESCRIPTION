@@ -134,6 +134,7 @@ Collate:
     'utils.R'
     'bootstrap.R'
     'cache-utils.R'
+    'deprecated.R'
     'diagnose.R'
     'fileupload.R'
     'font-awesome.R'

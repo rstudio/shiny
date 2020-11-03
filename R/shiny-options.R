@@ -165,7 +165,8 @@ getShinyOption <- function(name, default = NULL) {
 #'   `shinyOptions()`.
 #'
 #'   \describe{ \item{cache}{A caching object that will be used by
-#'   [renderCachedPlot()]. If not specified, a [memoryCache()] will be used.} }
+#'   [renderCachedPlot()]. If not specified, a [cachem::cache_mem()] will be
+#'   used.} }
 #'
 #' @param ... Options to set, with the form `name = value`.
 #' @aliases shiny-options

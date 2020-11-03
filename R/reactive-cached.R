@@ -170,8 +170,8 @@
 #'   silent exception will be raised and the cache key and the value will not be
 #'   computed. See [req()] for more on silent exceptions.
 #' @param cache The scope of the cache, or a cache object. This can be `"app"`
-#'   (the default), `"session"`, or a cache object like a [diskCache()]. See the
-#'   Cache Scoping section for more information.
+#'   (the default), `"session"`, or a cache object like a
+#'   [cachem::cache_disk()]. See the Cache Scoping section for more information.
 #' @param ... Other arguments are ignored.
 #'
 #' @examples

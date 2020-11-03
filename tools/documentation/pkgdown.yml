@@ -192,8 +192,6 @@ reference:
       - shinyDeprecated
       - serverInfo
       - onStop
-      - diskCache
-      - memoryCache
       - httpResponse
       - key_missing
   - title: Plot interaction

@@ -143,7 +143,7 @@ runApp <- function(appDir=getwd(),
 
   # Set up default cache for app.
   if (is.null(getShinyOption("cache", default = NULL))) {
-    shinyOptions(cache = MemoryCache$new())
+    shinyOptions(cache = cachem::cache_mem(max_size = 200 * 1024^2))
   }
 
   # Extract appOptions (which is a list) and store them as shinyOptions, for

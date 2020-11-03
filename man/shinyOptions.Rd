@@ -147,6 +147,7 @@ can be set globally with \code{options()} or locally (for a single app) with
 \code{shinyOptions()}.
 
 \describe{ \item{cache}{A caching object that will be used by
-\code{\link[=renderCachedPlot]{renderCachedPlot()}}. If not specified, a \code{\link[=memoryCache]{memoryCache()}} will be used.} }
+\code{\link[=renderCachedPlot]{renderCachedPlot()}}. If not specified, a \code{\link[cachem:cache_mem]{cachem::cache_mem()}} will be
+used.} }
 }
 

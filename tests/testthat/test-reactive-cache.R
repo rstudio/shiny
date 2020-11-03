@@ -1,6 +1,6 @@
 
 test_that("cachedReactive basic functionality", {
-  cache <- memoryCache()
+  cache <- cachem::cache_mem()
 
   k <- reactiveVal(0)
 
@@ -54,7 +54,7 @@ test_that("cachedReactive basic functionality", {
 
 test_that("cachedReactive - value is isolated", {
   # The value is isolated; the key is the one that dependencies are taken on.
-  cache <- memoryCache()
+  cache <- cachem::cache_mem()
 
   k <- reactiveVal(1)
   v <- reactiveVal(10)
@@ -118,7 +118,7 @@ test_that("cachedReactive - value is isolated", {
 # Async key
 # ============================================================================
 test_that("cachedReactive with async key", {
-  cache <- memoryCache()
+  cache <- cachem::cache_mem()
   k <- reactiveVal(0)
 
   vals <- character()
@@ -188,7 +188,7 @@ test_that("cachedReactives with async value", {
   # the non-promise case).
 
   # Async value
-  cache <- memoryCache()
+  cache <- cachem::cache_mem()
   k <- reactiveVal(0)
 
   vals <- character()
@@ -258,7 +258,7 @@ test_that("cachedReactives with async key and value", {
   # the non-promise case).
 
   # Async key and value
-  cache <- memoryCache()
+  cache <- cachem::cache_mem()
   k <- reactiveVal(0)
 
   vals <- character()
@@ -323,7 +323,7 @@ test_that("cachedReactive key collisions", {
   # =======================================
   # No collision with different value exprs
   # =======================================
-  cache <- memoryCache()
+  cache <- cachem::cache_mem()
   k <- reactiveVal(0)
 
   # Key collisions don't happen if they have different value expressions
@@ -372,7 +372,7 @@ test_that("cachedReactive key collisions", {
   # ====================================
   # Collision with identical value exprs
   # ====================================
-  cache <- memoryCache()
+  cache <- cachem::cache_mem()
   k <- reactiveVal(1)
 
   # Key collisions DO happen if they have different value expressions
@@ -421,7 +421,7 @@ test_that("cachedReactive key collisions", {
 test_that("cachedReactive error handling", {
   # ===================================
   # Error in key
-  cache <- memoryCache()
+  cache <- cachem::cache_mem()
   k <- reactiveVal(0)
 
   # Error in key
@@ -461,7 +461,7 @@ test_that("cachedReactive error handling", {
 
   # ===================================
   # Silent error in key with req(FALSE)
-  cache <- memoryCache()
+  cache <- cachem::cache_mem()
   k <- reactiveVal(0)
 
   vals <- character()
@@ -495,7 +495,7 @@ test_that("cachedReactive error handling", {
 
   # ===================================
   # Error in value
-  cache <- memoryCache()
+  cache <- cachem::cache_mem()
   k <- reactiveVal(0)
 
   vals <- character()
@@ -535,7 +535,7 @@ test_that("cachedReactive error handling", {
 
   # =====================================
   # Silent error in value with req(FALSE)
-  cache <- memoryCache()
+  cache <- cachem::cache_mem()
   k <- reactiveVal(0)
 
   vals <- character()
@@ -575,7 +575,7 @@ test_that("cachedReactive error handling", {
 test_that("cachedReactive error handling - async", {
   # ===================================
   # Error in key
-  cache <- memoryCache()
+  cache <- cachem::cache_mem()
   k <- reactiveVal(0)
   vals <- character()
   r <- cachedReactive(
@@ -639,7 +639,7 @@ test_that("cachedReactive error handling - async", {
 
   # ===================================
   # Silent error in key with req(FALSE)
-  cache <- memoryCache()
+  cache <- cachem::cache_mem()
   k <- reactiveVal(0)
   vals <- character()
   r <- cachedReactive(
@@ -698,7 +698,7 @@ test_that("cachedReactive error handling - async", {
 
   # ===================================
   # Error in value
-  cache <- memoryCache()
+  cache <- cachem::cache_mem()
   k <- reactiveVal(0)
   vals <- character()
   r <- cachedReactive(
@@ -761,7 +761,7 @@ test_that("cachedReactive error handling - async", {
 
   # =====================================
   # Silent error in value with req(FALSE)
-  cache <- memoryCache()
+  cache <- cachem::cache_mem()
   k <- reactiveVal(0)
   vals <- character()
   r <- cachedReactive(
@@ -828,7 +828,7 @@ test_that("cachedReactive error handling - async", {
 # Quosures
 # ============================================================================
 test_that("cachedReactive quosure handling", {
-  cache <- memoryCache()
+  cache <- cachem::cache_mem()
   res <- NULL
   key_env <- local({
     v <- reactiveVal(1)
@@ -879,7 +879,7 @@ test_that("cachedReactive visibility", {
   # did not preserve visibility.
   # https://github.com/r-lib/rlang/issues/1055
   skip_if_not_installed("rlang", "0.4.8.9000")
-  cache <- memoryCache()
+  cache <- cachem::cache_mem()
   k <- reactiveVal(0)
   res <- NULL
   r <- cachedReactive(
@@ -913,7 +913,7 @@ test_that("cachedReactive visibility", {
 test_that("cachedReactive visibility - async", {
   # Skippping because of https://github.com/rstudio/promises/issues/58
   skip("Visibility currently not supported by promises")
-  cache <- memoryCache()
+  cache <- cachem::cache_mem()
   k <- reactiveVal(0)
   res <- NULL
   r <- cachedReactive(

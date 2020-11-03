@@ -234,9 +234,9 @@ MockShinySession <- R6Class(
     progressStack = 'Stack',
     #' @field token On a real `ShinySession`, used to identify this instance in URLs.
     token = 'character',
-    #' @field cache The session cache MemoryCache.
+    #' @field cache The session cache object.
     cache = NULL,
-    #' @field appcache The app cache MemoryCache.
+    #' @field appcache The app cache object.
     appcache = NULL,
     #' @field restoreContext Part of bookmarking support in a real
     #'   `ShinySession` but always `NULL` for a `MockShinySession`.
@@ -277,8 +277,8 @@ MockShinySession <- R6Class(
       # Copy app-level options
       self$options <- getCurrentAppState()$options
 
-      self$cache <- MemoryCache$new()
-      self$appcache <- MemoryCache$new()
+      self$cache <- cachem::cache_mem()
+      self$appcache <- cachem::cache_mem()
 
       # Adds various generated noop and error-producing method implementations.
       # Note that noop methods can be configured to produce warnings by setting

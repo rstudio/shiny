@@ -61,7 +61,7 @@ test_that("renderCachedPlot supported", {
   isolate({
     # renderCachedPlot is sensitive to having the cache set for it before entering.
     origCache <- getShinyOption("cache")
-    shinyOptions(cache = MemoryCache$new())
+    shinyOptions(cache = cachem::cache_mem())
     on.exit(shinyOptions(cache = origCache), add=TRUE)
 
     p <- renderCachedPlot({ plot(1,1) }, { Sys.time() })

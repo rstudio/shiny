@@ -4,7 +4,7 @@
 \alias{markRenderFunction}
 \title{Mark a function as a render function}
 \usage{
-markRenderFunction(uiFunc, renderFunc, outputArgs = list())
+markRenderFunction(uiFunc, renderFunc, outputArgs = list(), cacheable = TRUE)
 }
 \arguments{
 \item{uiFunc}{A function that renders Shiny UI. Must take a single argument:
@@ -19,6 +19,10 @@ list, and pass through the value to \code{markRenderFunction}, to allow
 app authors to customize outputs. (Currently, this is only supported for
 dynamically generated UIs, such as those created by Shiny code snippets
 embedded in R Markdown documents).}
+
+\item{cacheable}{A boolean which indicates whether this function can be
+cached using \code{\link[=withCache]{withCache()}}. Some render functions (such as \link{renderPlot})
+contain internal state that makes them unsuitable for caching.}
 }
 \value{
 The \code{renderFunc} function, with annotations.

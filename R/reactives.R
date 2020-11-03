@@ -2174,6 +2174,7 @@ maskReactiveContext <- function(expr) {
 #'   after the first time that the code in `handlerExpr` is run. This
 #'   pattern is useful when you want to subscribe to a event that should only
 #'   happen once.
+#' @param ... Currently not used.
 #'
 #' @return `observeEvent` returns an observer reference class object (see
 #'   [observe()]). `eventReactive` returns a reactive expression

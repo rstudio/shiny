@@ -13,6 +13,30 @@ withEvent(
   label = NULL
 )
 }
+\arguments{
+\item{x}{An object to wrap so that is triggered only when a the specified
+event occurs.}
+
+\item{...}{One or more expressions that represents the event; this can be a
+simple reactive value like \code{input$click}, a call to a reactive expression
+like \code{dataset()}, or even a complex expression inside curly braces. If
+there are multiple expressions in the \code{...}, then it will take a dependency
+on all of them.}
+
+\item{ignoreNULL}{Whether the action should be triggered (or value
+calculated) when the input is \code{NULL}. See Details.}
+
+\item{ignoreInit}{If \code{TRUE}, then, when the eventified object is first
+created/initialized, don't trigger the action or (compute the value). The
+default is \code{FALSE}. See Details.}
+
+\item{once}{Used only for observers. Whether this \code{observer} should be
+immediately destroyed after the first time that the code in the observer is
+run. This pattern is useful when you want to subscribe to a event that
+should only happen once.}
+
+\item{label}{A label for the observer or reactive, useful for debugging.}
+}
 \description{
 Event decorator
 }

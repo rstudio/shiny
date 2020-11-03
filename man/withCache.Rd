@@ -7,7 +7,9 @@
 withCache(x, ..., cache = "app")
 }
 \arguments{
-\item{...}{Expressions to use in the caching key.}
+\item{x}{The object to add caching to.}
+
+\item{...}{One or more expressions to use in the caching key.}
 
 \item{cache}{The scope of the cache, or a cache object. This can be \code{"app"}
 (the default), \code{"session"}, or a cache object like a \code{\link[cachem:cache_disk]{cachem::cache_disk()}}.

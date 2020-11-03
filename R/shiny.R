@@ -32,7 +32,7 @@ NULL
 #' @importFrom promises promise promise_resolve promise_reject is.promising
 #'   as.promise
 #' @importFrom rlang enquo as_function get_expr get_env new_function enquos
-#'   eval_tidy expr pairlist2 new_quosure
+#'   eval_tidy expr pairlist2 new_quosure enexpr
 #' @importFrom ellipsis check_dots_empty check_dots_unnamed
 NULL
 

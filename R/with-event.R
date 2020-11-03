@@ -1,4 +1,22 @@
 #' Event decorator
+#'
+#' @param x An object to wrap so that is triggered only when a the specified
+#'   event occurs.
+#' @param ignoreNULL Whether the action should be triggered (or value
+#'   calculated) when the input is `NULL`. See Details.
+#' @param ignoreInit If `TRUE`, then, when the eventified object is first
+#'   created/initialized, don't trigger the action or (compute the value). The
+#'   default is `FALSE`. See Details.
+#' @param once Used only for observers. Whether this `observer` should be
+#'   immediately destroyed after the first time that the code in the observer is
+#'   run. This pattern is useful when you want to subscribe to a event that
+#'   should only happen once.
+#' @param label A label for the observer or reactive, useful for debugging.
+#' @param ... One or more expressions that represents the event; this can be a
+#'   simple reactive value like `input$click`, a call to a reactive expression
+#'   like `dataset()`, or even a complex expression inside curly braces. If
+#'   there are multiple expressions in the `...`, then it will take a dependency
+#'   on all of them.
 #' @export
 withEvent <- function(x, ..., ignoreNULL = TRUE, ignoreInit = FALSE,
                       once = FALSE, label = NULL)
@@ -65,6 +83,8 @@ withEvent.shiny.render.function <- function(x, ..., ignoreNULL = TRUE, ignoreIni
 
   valueFunc <- x
 
+  initialized <- FALSE
+
   res <- function() {
     hybrid_chain(
       eventFunc(),
@@ -100,6 +120,8 @@ withEvent.Observer <- function(x, ..., ignoreNULL = TRUE, ignoreInit = FALSE,
   if (is.null(label)) {
     label <- sprintf('observeEvent(%s)', paste(deparse(body(eventFunc)), collapse='\n'))
   }
+
+  initialized <- FALSE
 
   res <- observe(
     label       = label,

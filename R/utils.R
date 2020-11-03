@@ -1622,9 +1622,11 @@ wrapFunctionLabel <- function(func, name, ..stacktraceon = FALSE) {
   registerDebugHook(name, environment(), name)
 
   if (..stacktraceon) {
-    body <- expr({ ..stacktraceon..((!!name)(...)) })
+    # We need to wrap the `...` in `!!quote(...)` so that R CMD check won't
+    # complain about "... may be used in an incorrect context"
+    body <- expr({ ..stacktraceon..((!!name)(!!quote(...))) })
   } else {
-    body <- expr({ (!!name)(...) })
+    body <- expr({ (!!name)(!!quote(...)) })
   }
   relabelWrapper <- new_function(pairlist2(... =), body, environment())
   attr(relabelWrapper, "wrappedFunc") <- func

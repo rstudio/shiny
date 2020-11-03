@@ -1,3 +1,5 @@
+utils::globalVariables(".GenericCallEnv", add = TRUE)
+
 #' Add caching with reactivity to an object
 #'
 #' @description
@@ -163,7 +165,8 @@
 #'   session), and those cached reactive objects across sessions can share values
 #'   in the cache.
 #'
-#' @param ... Expressions to use in the caching key.
+#' @param x The object to add caching to.
+#' @param ... One or more expressions to use in the caching key.
 #' @param cache The scope of the cache, or a cache object. This can be `"app"`
 #'   (the default), `"session"`, or a cache object like a [cachem::cache_disk()].
 #'   See the Cache Scoping section for more information.
@@ -295,7 +298,7 @@ withCache.reactiveExpr <- function(x, ..., cache = "app") {
   # Hacky workaround for issue with `%>%` preventing GC:
   # https://github.com/tidyverse/magrittr/issues/229
   if (exists(".GenericCallEnv") && exists(".", envir = .GenericCallEnv)) {
-    rm(., envir = .GenericCallEnv)
+    rm(list = ".", envir = .GenericCallEnv)
   }
 
 
@@ -398,6 +401,8 @@ withCache.shiny.render.function <- function(x, ..., cache = "app") {
   valueFunc <- x
 
   res <- function(...) {
+    domain <- getDefaultReactiveDomain()
+
     hybrid_chain(
       keyFunc(),
       function(cacheKeyResult) {

@@ -64,6 +64,8 @@ default, this is \code{FALSE}. This is useful when you want to use an
 expression that is stored in a variable; to do so, it must be quoted with
 \code{quote()}.}
 
+\item{...}{Currently not used.}
+
 \item{label}{A label for the observer or reactive, useful for debugging.}
 
 \item{suspended}{If \code{TRUE}, start the observer in a suspended state. If

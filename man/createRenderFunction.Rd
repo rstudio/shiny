@@ -8,7 +8,8 @@ createRenderFunction(
   func,
   transform = function(value, session, name, ...) value,
   outputFunc = NULL,
-  outputArgs = NULL
+  outputArgs = NULL,
+  cacheable = TRUE
 )
 }
 \arguments{
@@ -26,12 +27,16 @@ JSON-encoded and sent to the browser.}
 this render function. This can be used in R Markdown documents to create
 complete output widgets out of just the render function.}
 
-\item{outputArgs}{A list of arguments to pass to the \code{outputFunc}.
-Render functions should include \code{outputArgs = list()} in their own
-parameter list, and pass through the value as this argument, to allow app
-authors to customize outputs. (Currently, this is only supported for
+\item{outputArgs}{A list of arguments to pass to the \code{uiFunc}. Render
+functions should include \code{outputArgs = list()} in their own parameter
+list, and pass through the value to \code{markRenderFunction}, to allow
+app authors to customize outputs. (Currently, this is only supported for
 dynamically generated UIs, such as those created by Shiny code snippets
 embedded in R Markdown documents).}
+
+\item{cacheable}{A boolean which indicates whether this function can be
+cached using \code{\link[=withCache]{withCache()}}. Some render functions (such as \link{renderPlot})
+contain internal state that makes them unsuitable for caching.}
 }
 \value{
 An annotated render function, ready to be assigned to an

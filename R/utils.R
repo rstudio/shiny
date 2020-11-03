@@ -531,6 +531,14 @@ installExprFunction <- function(expr, name, eval.env = parent.frame(2),
   assign(name, func, envir = assign.env)
 }
 
+
+quoToFunction <- function(q, label, ..stacktraceon = FALSE) {
+  q <- as_quosure(q)
+  func <- as_function(q)
+  wrapFunctionLabel(func, label, ..stacktraceon = ..stacktraceon)
+}
+
+
 # Utility function for creating a debugging label, given an expression.
 # `expr` is a quoted expression.
 # `function_name` is the name of the calling function.

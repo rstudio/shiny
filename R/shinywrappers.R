@@ -494,14 +494,24 @@ createRenderPrintPromiseDomain <- function(width) {
 #' @rdname renderPrint
 renderText <- function(expr, env=parent.frame(), quoted=FALSE,
                        outputArgs=list(), sep=" ") {
-  installExprFunction(expr, "func", env, quoted)
+
+  if (!missing(env) || !missing(quoted)) {
+    deprecatedEnvQuotedMessage()
+    if (!quoted) x <- enexpr(x)
+    q <- new_quosure(x, env)
+  } else {
+    q <- enquo(x)
+  }
+
+  func <- quoToFunction(q, "renderText")
 
   createRenderFunction(
     func,
     function(value, session, name, ...) {
       paste(utils::capture.output(cat(value, sep=sep)), collapse="\n")
     },
-    textOutput, outputArgs
+    textOutput,
+    outputArgs
   )
 }
 

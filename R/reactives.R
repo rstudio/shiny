@@ -980,7 +980,7 @@ reactive <- function(x, env = parent.frame(), quoted = FALSE,
   if (!missing(env) || !missing(quoted)) {
     deprecatedEnvQuotedMessage()
     if (!quoted) {
-      eventExpr <- enexpr(x)
+      x <- enexpr(x)
     }
     q <- new_quosure(x, env)
   } else {
@@ -1407,7 +1407,7 @@ observe <- function(x, env = parent.frame(), quoted = FALSE,
     # quoted arguments.
     deprecatedEnvQuotedMessage()
     if (!quoted) {
-      eventExpr <- enexpr(x)
+      x <- enexpr(x)
     }
     q <- new_quosure(x, env)
   } else {

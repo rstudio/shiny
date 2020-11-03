@@ -140,3 +140,12 @@ withEvent.Observer <- function(x, ..., ignoreNULL = TRUE, ignoreInit = FALSE,
   class(res) <- c("Observer.event", class(res))
   invisible(res)
 }
+
+
+#' @export
+withEvent.reactive.event <-  function(x, ...) {
+  stop("withEvent() has already been called on the object.")
+}
+
+#' @export
+withEvent.Observer.event <- withEvent.reactive.event

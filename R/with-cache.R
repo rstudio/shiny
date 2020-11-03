@@ -222,6 +222,9 @@ withCache.reactive.cache <- function(x, ...) {
 }
 
 #' @export
+withCache.shiny.render.function.cache <- withCache.reactive.cache
+
+#' @export
 withCache.reactive.event <- function(x, ...) {
   stop("Can't call withCache() after calling withEvent() on an object. Maybe you wanted to call withEvent() after withCache()?")
 }

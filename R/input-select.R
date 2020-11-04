@@ -247,7 +247,7 @@ selectizeDependency <- function(theme) {
         "accessibility/js/selectize-plugin-a11y.min.js"
       )
     ),
-    bootstraplib::bs_dependency_defer(selectizeCSS)
+    bslib::bs_dependency_defer(selectizeCSS)
   )
 }
 
@@ -263,13 +263,13 @@ selectizeCSS <- function(theme) {
 
   scss_file <- system.file(
     package = "shiny", "www/shared/selectize/scss",
-    if ("3" %in% bootstraplib::theme_version(theme)) {
+    if ("3" %in% bslib::theme_version(theme)) {
       "selectize.bootstrap3.scss"
     } else {
       "selectize.bootstrap4.scss"
     }
   )
-  bootstraplib::bs_dependency(
+  bslib::bs_dependency(
     input = sass::sass_file(scss_file),
     theme = theme,
     name = "selectize",

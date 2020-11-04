@@ -8,7 +8,7 @@ getCurrentTheme()
 }
 \value{
 If called at render-time (i.e., inside a \code{\link[htmltools:tagFunction]{htmltools::tagFunction()}}),
-and \code{\link[=bootstrapLib]{bootstrapLib()}}'s \code{theme} has been set to a \code{\link[bootstraplib:bs_theme]{bootstraplib::bs_theme()}}
+and \code{\link[=bootstrapLib]{bootstrapLib()}}'s \code{theme} has been set to a \code{\link[bslib:bs_theme]{bslib::bs_theme()}}
 object, then this returns the \code{theme}. Otherwise, this returns \code{NULL}.
 }
 \description{

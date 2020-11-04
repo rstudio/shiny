@@ -18,7 +18,7 @@ NULL
 #'   Bootstrap 3.
 #' @param theme One of the following:
 #'   * `NULL` (the default), which implies a "stock" build of Bootstrap 3.
-#'   * A [bootstraplib::bs_theme()] object. This can be used to replace a stock
+#'   * A [bslib::bs_theme()] object. This can be used to replace a stock
 #'   build of Bootstrap 3 with a customized version of Bootstrap 3 or higher.
 #'   * A character string pointing to an alternative Bootstrap stylesheet
 #'   (normally a css file within the www directory, e.g. `www/bootstrap.css`).
@@ -78,7 +78,7 @@ getLang <- function(ui) {
 #' @export
 bootstrapLib <- function(theme = NULL) {
   tagFunction(function() {
-    # If we're not compiling Bootstrap Sass (from bootstraplib), return the
+    # If we're not compiling Bootstrap Sass (from bslib), return the
     # static Bootstrap build.
     if (!is_bs_theme(theme)) {
       # We'll enter here if `theme` is the path to a .css file, like that
@@ -119,19 +119,19 @@ bootstrapLib <- function(theme = NULL) {
       #)
     }
 
-    bootstraplib::bs_theme_dependencies(theme)
+    bslib::bs_theme_dependencies(theme)
   })
 }
 
 # This is defined outside of bootstrapLib() because registerThemeDependency()
 # wants a non-anonymous function with a single argument
 bs_theme_deps <- function(theme) {
-  bootstraplib::bs_theme_dependencies(theme)
+  bslib::bs_theme_dependencies(theme)
 }
 
 is_bs_theme <- function(x) {
-  is_available("bootstraplib", "0.2.0.9000") &&
-    bootstraplib::is_bs_theme(x)
+  is_available("bslib", "0.2.0.9000") &&
+    bslib::is_bs_theme(x)
 }
 
 #' Obtain Shiny's Bootstrap Sass theme
@@ -140,7 +140,7 @@ is_bs_theme <- function(x) {
 #' styling based on the [bootstrapLib()]'s `theme` value.
 #'
 #' @return If called at render-time (i.e., inside a [htmltools::tagFunction()]),
-#' and [bootstrapLib()]'s `theme` has been set to a [bootstraplib::bs_theme()]
+#' and [bootstrapLib()]'s `theme` has been set to a [bslib::bs_theme()]
 #' object, then this returns the `theme`. Otherwise, this returns `NULL`.
 #' @seealso [getCurrentOutputInfo()], [bootstrapLib()], [htmltools::tagFunction()]
 #'

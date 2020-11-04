@@ -241,8 +241,13 @@ ionRangeSliderDependencyCSS <- function(theme) {
   # Remap some variable names for ionRangeSlider's scss
   sass_input <- list(
     list(
-      bg = "$input-bg",
-      fg = "$input-color",
+      # The bootswatch materia theme sets $input-bg: transparent;
+      # which is an issue for the slider's handle(s) (#3130)
+      bg = "if(alpha($input-bg)==0, $body-bg, $input-bg)",
+      fg = sprintf(
+        "if(alpha($input-color)==0, $%s, $input-color)",
+        if ("3" %in% bslib::theme_version(theme)) "text-color" else "body-color"
+      ),
       accent = "$component-active-bg",
       `font-family` = "$font-family-base"
     ),

@@ -11,7 +11,7 @@ index b5388654..0dac6a62 100644
 -$gray-light:             lighten(#000, 46.7%); // #777
 -$gray-lighter:           lighten(#000, 93.5%); // #eee
 +// These are BS3 variables that are used in datepicker3.scss. So, when compiling against
-+// a BS3 bootstraplib theme, these variables should already be defined. Here we set
++// a BS3 bslib theme, these variables should already be defined. Here we set
 +// *defaults* for these variables based on BS4 variables, so this scss can work for
 +// both BS3 and BS4
 +$gray:                mix($body-bg, $body-color, 33.5%) !default;

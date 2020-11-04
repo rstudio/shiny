@@ -75,7 +75,7 @@ for (patch in list.files(patch_dir, full.names = TRUE)) {
 
 # Compile to CSS
 library(sass)
-library(bootstraplib)
+library(bslib)
 css_dir <- file.path(dest_dir, "css")
 dir.create(css_dir, recursive = TRUE)
 bs_sass(

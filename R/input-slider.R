@@ -224,7 +224,7 @@ ionRangeSliderDependency <- function() {
       src = c(href = "shared/strftime"),
       script = "strftime-min.js"
     ),
-    bootstraplib::bs_dependency_defer(ionRangeSliderDependencyCSS)
+    bslib::bs_dependency_defer(ionRangeSliderDependencyCSS)
   )
 }
 
@@ -251,7 +251,7 @@ ionRangeSliderDependencyCSS <- function(theme) {
     )
   )
 
-  bootstraplib::bs_dependency(
+  bslib::bs_dependency(
     input = sass_input,
     theme = theme,
     name = "ionRangeSlider",

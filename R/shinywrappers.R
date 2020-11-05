@@ -24,6 +24,8 @@ utils::globalVariables('func', add = TRUE)
 #'   allow caching for the object. Some render functions (such as [renderPlot])
 #'   contain internal state that makes them unsuitable for caching.
 #' @return The `renderFunc` function, with annotations.
+#'
+#' @seealso [createRenderFunction()], [quoToFunction()]
 #' @export
 markRenderFunction <- function(
   uiFunc,
@@ -117,6 +119,9 @@ print.shiny.render.function <- function(x, ...) {
 
 #' Implement render functions
 #'
+#' This function is a wrapper for [markRenderFunction()] which provides support
+#' for async computation via promises.
+#'
 #' @param func A function without parameters, that returns user data. If the
 #'   returned value is a promise, then the render function will proceed in async
 #'   mode.
@@ -131,6 +136,22 @@ print.shiny.render.function <- function(x, ...) {
 #' @inheritParams markRenderFunction
 #' @return An annotated render function, ready to be assigned to an
 #'   `output` slot.
+#'
+#' @seealso [quoToFunction()], [markRenderFunction()].
+#'
+#' @examples
+#' # A very simple render function
+#' renderTriple <- function(expr) {
+#'   func <- quoToFunction(rlang::enquo(expr), "renderTriple")
+#'
+#'   createRenderFunction(
+#'     func,
+#'     transform = function(value, session, name, ...) {
+#'       paste(rep(value, 3), collapse=", ")
+#'     }
+#'     outputFunc = textOutput
+#'   )
+#' }
 #'
 #' @export
 createRenderFunction <- function(

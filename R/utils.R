@@ -427,7 +427,8 @@ makeFunction <- function(args = pairlist(), body, env = parent.frame()) {
 #' Convert an expression to a function
 #'
 #' This is to be called from another function, because it will attempt to get
-#' an unquoted expression from two calls back.
+#' an unquoted expression from two calls back. Note: as of Shiny 1.6.0, it is
+#' recommended to use [quoToFunction()] instead.
 #'
 #' If expr is a quoted expression, then this just converts it to a function.
 #' If expr is a function, then this simply returns expr (and prints a
@@ -485,7 +486,8 @@ exprToFunction <- function(expr, env=parent.frame(), quoted=FALSE) {
 #' Install an expression as a function
 #'
 #' Installs an expression in the given environment as a function, and registers
-#' debug hooks so that breakpoints may be set in the function.
+#' debug hooks so that breakpoints may be set in the function. Note: as of
+#' Shiny 1.6.0, it is recommended to use [quoToFunction()] instead.
 #'
 #' This function can replace `exprToFunction` as follows: we may use
 #' `func <- exprToFunction(expr)` if we do not want the debug hooks, or
@@ -531,7 +533,35 @@ installExprFunction <- function(expr, name, eval.env = parent.frame(2),
   assign(name, func, envir = assign.env)
 }
 
-
+#' Convert a quosure to a function for a Shiny render function
+#'
+#' This takes a quosure and label, and wraps them into a function that should be
+#' passed to [createRenderFunction()] or [markRenderFunction()].
+#'
+#' This function was added in Shiny 1.6.0. Previously, it was recommended to use
+#' [installExprFunction()] or [exprToFunction()] in render functions, but now we
+#' recommend using [quoToFunction()], because it does not require `env` and
+#' `quoted` arguments -- that information is captured by quosures provided by
+#' \pkg{rlang}.
+#'
+#' @param quo A quosure.
+#' @inheritParams installExprFunction
+#'
+#' @examples
+#' # A very simple render function
+#' renderTriple <- function(expr) {
+#'   func <- quoToFunction(rlang::enquo(expr), "renderTriple")
+#'
+#'   createRenderFunction(
+#'     func,
+#'     transform = function(value, session, name, ...) {
+#'       paste(rep(value, 3), collapse=", ")
+#'     }
+#'     outputFunc = textOutput
+#'   )
+#' }
+#'
+#' @export
 quoToFunction <- function(q, label, ..stacktraceon = FALSE) {
   q <- as_quosure(q)
   # Use new_function() instead of as_function(), because as_function() adds an

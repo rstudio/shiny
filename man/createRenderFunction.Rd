@@ -45,5 +45,24 @@ An annotated render function, ready to be assigned to an
 \code{output} slot.
 }
 \description{
-Implement render functions
+This function is a wrapper for \code{\link[=markRenderFunction]{markRenderFunction()}} which provides support
+for async computation via promises.
+}
+\examples{
+# A very simple render function
+renderTriple <- function(expr) {
+  func <- quoToFunction(rlang::enquo(expr), "renderTriple")
+
+  createRenderFunction(
+    func,
+    transform = function(value, session, name, ...) {
+      paste(rep(value, 3), collapse=", ")
+    }
+    outputFunc = textOutput
+  )
+}
+
+}
+\seealso{
+\code{\link[=quoToFunction]{quoToFunction()}}, \code{\link[=markRenderFunction]{markRenderFunction()}}.
 }

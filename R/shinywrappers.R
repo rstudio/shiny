@@ -27,7 +27,8 @@ markRenderFunction <- function(
   uiFunc,
   renderFunc,
   outputArgs = list(),
-  cacheable = TRUE
+  cacheable = TRUE,
+  origRenderFunc = renderFunc
 ) {
   # a mutable object that keeps track of whether `useRenderFunction` has been
   # executed (this usually only happens when rendering Shiny code snippets in
@@ -35,8 +36,16 @@ markRenderFunction <- function(
   hasExecuted <- Mutable$new()
   hasExecuted$set(FALSE)
 
-  origRenderFunc <- renderFunc
-  renderFunc <- function(...) {
+  if (is.null(uiFunc)) {
+    uiFunc <- function(id) {
+      pre(
+        "No UI/output function provided for render function. ",
+        "Please see ?shiny::markRenderFunction and ?shiny::createRenderFunction."
+      )
+    }
+  }
+
+  wrappedRenderFunc <- function(...) {
     # if the user provided something through `outputArgs` BUT the
     # `useRenderFunction` was not executed, then outputArgs will be ignored,
     # so throw a warning to let user know the correct usage
@@ -49,17 +58,18 @@ markRenderFunction <- function(
       # stop warning from happening again for the same object
       hasExecuted$set(TRUE)
     }
-    if (is.null(formals(origRenderFunc))) origRenderFunc()
-    else origRenderFunc(...)
+    if (is.null(formals(renderFunc))) renderFunc()
+    else renderFunc(...)
   }
 
   structure(
-    renderFunc,
-    class       = c("shiny.render.function", "function"),
-    outputFunc  = uiFunc,
-    outputArgs  = outputArgs,
-    hasExecuted = hasExecuted,
-    cacheable   = cacheable
+    wrappedRenderFunc,
+    class          = c("shiny.render.function", "function"),
+    outputFunc     = uiFunc,
+    outputArgs     = outputArgs,
+    hasExecuted    = hasExecuted,
+    cacheable      = cacheable,
+    origRenderFunc = origRenderFunc
   )
 }
 
@@ -102,11 +112,7 @@ createRenderFunction <- function(
     )
   }
 
-  if (!is.null(outputFunc)) {
-    markRenderFunction(outputFunc, renderFunc, outputArgs, cacheable)
-  } else {
-    structure(renderFunc, cacheable = cacheable)
-  }
+  markRenderFunction(outputFunc, renderFunc, outputArgs, cacheable, func)
 }
 
 useRenderFunction <- function(renderFunc, inline = FALSE) {
@@ -417,8 +423,17 @@ isTemp <- function(path, tempDir = tempdir(), mustExist) {
 #' @example res/text-example.R
 #' @export
 renderPrint <- function(expr, env = parent.frame(), quoted = FALSE,
-                        width = getOption('width'), outputArgs=list()) {
-  installExprFunction(expr, "func", env, quoted)
+                        width = getOption('width'), outputArgs=list())
+{
+  if (!missing(env) || !missing(quoted)) {
+    deprecatedEnvQuotedMessage()
+    if (!quoted) expr <- enexpr(expr)
+    q <- new_quosure(expr, env)
+  } else {
+    q <- enquo(expr)
+  }
+
+  func <- quoToFunction(q, "renderPrint")
 
   # Set a promise domain that sets the console width
   #   and captures output
@@ -444,7 +459,7 @@ renderPrint <- function(expr, env = parent.frame(), quoted = FALSE,
     )
   }
 
-  markRenderFunction(verbatimTextOutput, renderFunc, outputArgs = outputArgs)
+  markRenderFunction(verbatimTextOutput, renderFunc, outputArgs, origRenderFunc = func)
 }
 
 createRenderPrintPromiseDomain <- function(width) {
@@ -497,10 +512,10 @@ renderText <- function(expr, env=parent.frame(), quoted=FALSE,
 
   if (!missing(env) || !missing(quoted)) {
     deprecatedEnvQuotedMessage()
-    if (!quoted) x <- enexpr(x)
-    q <- new_quosure(x, env)
+    if (!quoted) expr <- enexpr(expr)
+    q <- new_quosure(expr, env)
   } else {
-    q <- enquo(x)
+    q <- enquo(expr)
   }
 
   func <- quoToFunction(q, "renderText")

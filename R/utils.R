@@ -534,7 +534,9 @@ installExprFunction <- function(expr, name, eval.env = parent.frame(2),
 
 quoToFunction <- function(q, label, ..stacktraceon = FALSE) {
   q <- as_quosure(q)
-  func <- as_function(q)
+  # Use new_function() instead of as_function(), because as_function() adds an
+  # extra parent environment. (This may not actually be a problem, though.)
+  func <- new_function(NULL, get_expr(q), get_env(q))
   wrapFunctionLabel(func, label, ..stacktraceon = ..stacktraceon)
 }
 
@@ -1619,6 +1621,8 @@ wrapFunctionLabel <- function(func, name, ..stacktraceon = FALSE) {
     body <- expr({ (!!name)(!!quote(...)) })
   }
   relabelWrapper <- new_function(pairlist2(... =), body, environment())
+
+  # Preserve the original function that was passed in; is used for caching.
   attr(relabelWrapper, "wrappedFunc") <- func
   relabelWrapper
 }

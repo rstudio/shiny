@@ -948,3 +948,203 @@ test_that("withCache reactive visibility - async", {
   for (i in 1:3) later::run_now()
   expect_identical(res, list(value = 1, visible = TRUE))
 })
+
+
+# ============================================================================
+# withCache and render functions
+# ============================================================================
+
+test_that("withCache renderFunction basic functionality", {
+  m <- cachem::cache_mem()
+  n <- 0 # Counter for how many times renderFunctions run.
+  a <- 1
+
+  # Two renderTexts with the same expression should share cache
+  t1 <- renderText({ n <<- n+1; a + 1 }) %>% withCache(a, cache = m)
+  t2 <- renderText({ n <<- n+1; a + 1 }) %>% withCache(a, cache = m)
+  expect_identical(t1(), "2")
+  expect_identical(t2(), "2")
+  expect_identical(n, 1)
+
+  a <- 2
+  expect_identical(t1(), "3")
+  expect_identical(t2(), "3")
+  expect_identical(n, 2)
+
+  # renderPrint with the same expression -- should run, and have a different
+  # result.
+  p1 <- renderPrint({ n <<- n+1; a + 1 }) %>% withCache(a, cache = m)
+  p2 <- renderPrint({ n <<- n+1; a + 1 }) %>% withCache(a, cache = m)
+  expect_identical(p1(), "[1] 3")
+  expect_identical(p2(), "[1] 3")
+  expect_identical(n, 3)
+})
+
+# ==============================================================================
+# Custom render functions
+# ==============================================================================
+test_that("Custom render functions that call installExprFunction", {
+  # Combinations with `installExprFunction` or `quoToFunction` plus
+  # `markRenderFunction` or `createRenderFunction` should worjk.
+
+  # The expressions passed into renderDouble below should be converted into this
+  # function. We'll use this for comparison.
+  target_function <- utils::removeSource(function() { n <<- n + 1; a })
+
+  # installExprFunction + createRenderFunction: OK
+  renderDouble <- function(expr) {
+    installExprFunction(expr, "func")
+    createRenderFunction(
+      func,
+      transform = function(value, session, name, ...) paste0(value, ",", value)
+    )
+  }
+  n <- 0
+  a <- 1
+  tc <- renderDouble({ n <<- n+1; a }) %>% withCache(a, cache = cachem::cache_mem())
+  expect_identical(tc(), "1,1")
+  expect_identical(tc(), "1,1")
+  expect_identical(n, 1)
+  expect_identical(extractUserRenderFunc(renderDouble({ n <<- n+1; a })), target_function)
+
+
+  # quoToFunction + createRenderFunction: OK
+  renderDouble <- function(expr) {
+    func <- quoToFunction(enquo(expr), "renderDouble")
+    createRenderFunction(
+      func,
+      transform = function(value, session, name, ...) paste0(value, ",", value)
+    )
+  }
+  # Should work, because it went through createRenderFunction().
+  n <- 0
+  a <- 1
+  tc <- renderDouble({ n <<- n+1; a }) %>% withCache(a, cache = cachem::cache_mem())
+  expect_identical(tc(), "1,1")
+  expect_identical(tc(), "1,1")
+  expect_identical(n, 1)
+  expect_identical(extractUserRenderFunc(renderDouble({ n <<- n+1; a })), target_function)
+
+
+  # installExprFunction + markRenderFunction (without origRenderFunc): warning
+  # because the original function can't be automatically extracted (it was
+  # wrapped by installExprFunction).
+  renderDouble <- function(expr) {
+    installExprFunction(expr, "func")
+    markRenderFunction(textOutput, function() {
+      value <- func()
+      paste0(value, ",", value)
+    })
+  }
+  expect_warning(renderDouble({ n <<- n+1; a }) %>% withCache(a, cache = cachem::cache_mem()))
+
+  # installExprFunction + markRenderFunction (without origRenderFunc): warning
+  # because the original function can't be automatically extracted (it was
+  # wrapped by installExprFunction).
+  renderDouble <- function(expr) {
+    installExprFunction(expr, "func")
+    markRenderFunction(textOutput,
+      function() {
+        value <- func()
+        paste0(value, ",", value)
+      },
+      origRenderFunc = func
+    )
+  }
+  n <- 0
+  a <- 1
+  tc <- renderDouble({ n <<- n+1; a }) %>% withCache(a, cache = cachem::cache_mem())
+  expect_identical(tc(), "1,1")
+  expect_identical(tc(), "1,1")
+  expect_identical(n, 1)
+  expect_identical(extractUserRenderFunc(renderDouble({ n <<- n+1; a })), target_function)
+
+
+  # quoToFunction + markRenderFunction (without origRenderFunc): warning
+  renderDouble <- function(expr) {
+    func <- quoToFunction(enquo(expr), "renderDouble")
+    markRenderFunction(textOutput, function() {
+      value <- func()
+      paste0(value, ",", value)
+    })
+  }
+  expect_warning(renderDouble({ n <<- n+1; a }) %>% withCache(a, cache = cachem::cache_mem()))
+
+
+  # quoToFunction + markRenderFunction (with origRenderFunc): OK
+  renderDouble <- function(expr) {
+    func <- quoToFunction(enquo(expr), "renderDouble")
+    markRenderFunction(textOutput,
+      function() {
+        value <- func()
+        paste0(value, ",", value)
+      },
+      origRenderFunc = func
+    )
+  }
+  n <- 0
+  a <- 1
+  tc <- renderDouble({ n <<- n+1; a }) %>% withCache(a, cache = cachem::cache_mem())
+  expect_identical(tc(), "1,1")
+  expect_identical(tc(), "1,1")
+  expect_identical(n, 1)
+  expect_identical(extractUserRenderFunc(renderDouble({ n <<- n+1; a })), target_function)
+
+
+  # installExprFunction + nothing: error
+  renderTriple <- function(expr) {
+    installExprFunction(expr, "func")
+    func
+  }
+  expect_error(renderTriple({ n <<- n+1; a }) %>% withCache(a, cache = cachem::cache_mem()))
+
+  # quoToFunction + nothing: error
+  renderTriple <- function(expr) {
+    quoToFunction(enquo(expr), "renderTriple")
+  }
+  expect_error(renderTriple({ n <<- n+1; a }) %>% withCache(a, cache = cachem::cache_mem()))
+})
+
+
+test_that("Custom render functions that call exprToFunction", {
+  # A render function that uses exprToFunction won't work with withCache(). It
+  # needs to use quoToFunction or installExprFunction.
+
+  renderDouble <- function(expr, env = parent.frame(), quoted = FALSE) {
+    func <- exprToFunction(expr, env, quoted)
+    function() { value <- func(); paste0(value, ",", value) }
+  }
+
+  m <- cachem::cache_mem()
+  # Should throw an error because withCache doesn't know how to deal with plain
+  # functions.
+  expect_error(renderDouble({ a }) %>% withCache(a, cache = m))
+
+  renderDouble <- function(expr, env = parent.frame(), quoted = FALSE) {
+    func <- exprToFunction(expr, env, quoted)
+  }
+  expect_error(renderDouble({ a }) %>% withCache(a, cache = m))
+
+  # exprToFunction + markRenderFunction: warning because exprToFunction
+  # doesn't attach the original function as metadata.
+  renderDouble <- function(expr, env = parent.frame(), quoted = FALSE) {
+    func <- exprToFunction(expr, env, quoted)
+    markRenderFunction(textOutput, func)
+  }
+  expect_warning(renderDouble({ a }) %>% withCache(a, cache = m))
+
+  # exprToFunction + createRenderFunction: warning because exprToFunction
+  # doesn't attach the original function as metadata.
+  renderDouble <- function(expr, env = parent.frame(), quoted = FALSE) {
+    func <- exprToFunction(expr, env, quoted)
+    createRenderFunction(func, outputFunc = textOutput)
+  }
+  expect_warning(renderDouble({ a }) %>% withCache(a, cache = m))
+})
+
+
+
+test_that("as", {
+  extractUserRenderFunc(renderText({ a + 1 }))
+
+})

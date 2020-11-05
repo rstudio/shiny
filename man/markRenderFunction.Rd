@@ -4,7 +4,13 @@
 \alias{markRenderFunction}
 \title{Mark a function as a render function}
 \usage{
-markRenderFunction(uiFunc, renderFunc, outputArgs = list(), cacheable = TRUE)
+markRenderFunction(
+  uiFunc,
+  renderFunc,
+  outputArgs = list(),
+  cacheable = TRUE,
+  origRenderFunc = renderFunc
+)
 }
 \arguments{
 \item{uiFunc}{A function that renders Shiny UI. Must take a single argument:

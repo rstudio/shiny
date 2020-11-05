@@ -290,7 +290,7 @@ withCache.reactiveExpr <- function(x, ..., cache = "app") {
   # Hash the value expression now -- this will be added to the key later on, to
   # reduce the chance of key collisions with other cachedReactives. Remove
   # source refs because they can differ even though the code is the same.
-  valueExprHash <- digest(body(utils::removeSource(valueFunc)), algo = "spookyhash")
+  valueExprHash <- digest(formalsAndBody(valueFunc), algo = "spookyhash")
   valueFunc <- wrapFunctionLabel(valueFunc, "cachedReactiveValueFunc", ..stacktraceon = TRUE)
 
   # Don't hold on to the reference for x, so that it can be GC'd
@@ -397,7 +397,11 @@ withCache.shiny.render.function <- function(x, ..., cache = "app") {
 
   keyFunc <- make_quos_func(enquos(...))
 
-  valueExprHash <- "TODO"
+  valueExprHash <- digest(list(
+    formalsAndBody(extractUserRenderFunc(x)),
+    formalsAndBody(attr(x, "outputFunc", exact = TRUE))
+  ), algo = "spookyhash")
+
   valueFunc <- x
 
   res <- function(...) {
@@ -510,6 +514,17 @@ withCache.Observer <- function(x, ...) {
   stop("Can't withCache an observer, because observers exist for the side efects, not for their return values.")
 }
 
+#' @export
+withCache.function <- function(x, ...) {
+  stop(
+    "Don't know how to add caching to a plain function. ",
+    "If this is a render* function for Shiny, it may need to be updated. ",
+    "Please see ?shiny::withCache for more information."
+  )
+}
+
+
+
 # Given a list of quosures, return a function that will evaluate them and return
 # the list. If the list contains a single quosure, unwrap it from the list.
 make_quos_func <- function(quos) {
@@ -528,4 +543,40 @@ make_quos_func <- function(quos) {
   } else {
     function() { lapply(quos, eval_tidy) }
   }
+}
+
+
+# Given the render function, this extracts the original function created from
+# expression that the user passed to the render function. So if they called
+# `renderText({ a + b })`, this would return `function() { a + b })`.
+extractUserRenderFunc <- function(func) {
+  wrapped <- attr(func, "origRenderFunc", exact = TRUE)
+  if (is.null(wrapped)) {
+    warning("origRenderFunc attribute not found. ",
+            "Caching may not work properly for this render function.")
+    return(func)
+  }
+
+  unwrapped <- attr(wrapped, "wrappedFunc", exact = TRUE)
+  if (is.null(unwrapped)) {
+    warning("wrappedFunc attribute not found. ",
+            "Caching may not work properly for this render function.")
+    return(wrapped)
+  }
+
+  unwrapped
+}
+
+
+# Get the formals and body for a function, without source refs. This is used for
+# consistent hashing of the function.
+formalsAndBody <- function(x) {
+  if (is.null(x)) {
+    return(list())
+  }
+
+  list(
+    formals(x),
+    body(utils::removeSource(x))
+  )
 }

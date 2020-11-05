@@ -135,6 +135,14 @@ function renderDependency(dep) {
         }
       });
 
+      // Once the new styles are applied, CSS values that are accessible server-side
+      // (e.g., getCurrentOutputInfo(), output visibility, etc) may become outdated.
+      // At the time of writing, that means we need to do sendImageSize() &
+      // sendOutputHiddenState() again, which can be done by re-binding.
+      /* global Shiny */
+      var bindDebouncer = new Debouncer(null, Shiny.bindAll, 10);
+      setTimeout(() => bindDebouncer.normalCall(), 10);
+
       // This inline <style> based approach works for IE11
       function refreshStyle(href, oldSheet) {
         var xhr = new XMLHttpRequest();

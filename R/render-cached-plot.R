@@ -302,7 +302,7 @@ renderCachedPlot <- function(expr,
 
   # This ..stacktraceon is matched by a ..stacktraceoff.. when plotFunc
   # is called
-  installExprFunction(expr, "func", parent.frame(), quoted = FALSE, ..stacktraceon = TRUE)
+  func <- quoToFunction(enquo(expr), "renderCachedPlot", ..stacktraceon = TRUE)
   # This is so that the expr doesn't re-execute by itself; it needs to be
   # triggered by the cache key (or width/height) changing.
   isolatedFunc <- function() isolate(func())
@@ -314,10 +314,10 @@ renderCachedPlot <- function(expr,
             "'sizePolicy' is used instead.")
   }
 
-  cacheKeyExpr <- substitute(cacheKeyExpr)
+  cacheKeyExpr <- enquo(cacheKeyExpr)
   # The real cache key we'll use also includes width, height, res, pixelratio.
   # This is just the part supplied by the user.
-  userCacheKey <- reactive(cacheKeyExpr, env = parent.frame(), quoted = TRUE, label = "userCacheKey")
+  userCacheKey <- reactive(cacheKeyExpr, label = "userCacheKey")
 
   # The width and height of the plot to draw, given from sizePolicy. These
   # values get filled by an observer below.

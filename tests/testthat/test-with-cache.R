@@ -1159,3 +1159,12 @@ test_that("Custom render functions that call exprToFunction", {
   }
   expect_warning(renderDouble({ a }) %>% withCache(a, cache = m))
 })
+
+
+test_that("Some render functions can't be cached", {
+  cache <- cachem::cache_mem()
+  expect_error(renderDataTable({ cars }) %>% withCache(1, cache = m))
+  expect_error(renderPlot({ plot(1) }) %>% withCache(1, cache = m))
+  expect_error(renderCachedPlot({ plot(1) }, 1) %>% withCache(1, cache = m))
+  expect_error(renderImage({ cars }) %>% withCache(1, cache = m))
+})

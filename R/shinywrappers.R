@@ -68,14 +68,14 @@ markRenderFunction <- function(
     }
   }
 
-  # For functions, remove the env and source refs because they can cause
-  #   spurious differences.
-  # For expressions, remove source refs.
-  # For everything else, do nothing.
-  if (!is.null(cacheHint)) {
+  if (!is.null(cacheHint) && !isFALSE(cacheHint)) {
     if (!is.list(cacheHint)) {
       cacheHint <- list(cacheHint)
     }
+    # For functions, remove the env and source refs because they can cause
+    #   spurious differences.
+    # For expressions, remove source refs.
+    # For everything else, do nothing.
     cacheHint <- lapply(cacheHint, function(x) {
       if      (is.function(x)) formalsAndBody(x)
       else if (is.language(x)) remove_source(x)
@@ -799,7 +799,7 @@ renderDataTable <- function(expr, options = NULL, searchDelay = 500,
   }
 
   renderFunc <- markRenderFunction(dataTableOutput, renderFunc, outputArgs,
-    cacheHint = FALSE, origRenderFunc = func)
+    cacheHint = FALSE)
 
   renderFunc <- snapshotPreprocessOutput(renderFunc, function(value) {
     # Remove the action field so that it's not saved in test snapshots. It

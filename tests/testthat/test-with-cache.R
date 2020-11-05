@@ -1035,7 +1035,7 @@ test_that("Custom render functions that call installExprFunction", {
   )
 
 
-  # installExprFunction + markRenderFunction (without origRenderFunc): warning
+  # installExprFunction + markRenderFunction (without cacheHint): warning
   # because the original function can't be automatically extracted (it was
   # wrapped by installExprFunction).
   renderDouble <- function(expr) {
@@ -1047,7 +1047,7 @@ test_that("Custom render functions that call installExprFunction", {
   }
   expect_warning(renderDouble({ n <<- n+1; a }) %>% withCache(a, cache = cachem::cache_mem()))
 
-  # installExprFunction + markRenderFunction (without origRenderFunc): warning
+  # installExprFunction + markRenderFunction (without cacheHint): warning
   # because the original function can't be automatically extracted (it was
   # wrapped by installExprFunction).
   renderDouble <- function(expr) {
@@ -1073,7 +1073,7 @@ test_that("Custom render functions that call installExprFunction", {
   )
 
 
-  # quoToFunction + markRenderFunction (without origRenderFunc): warning
+  # quoToFunction + markRenderFunction (without cacheHint): warning
   renderDouble <- function(expr) {
     func <- quoToFunction(enquo(expr), "renderDouble")
     markRenderFunction(textOutput, function() {

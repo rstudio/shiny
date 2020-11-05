@@ -393,7 +393,7 @@ withCache.reactiveExpr <- function(x, ..., cache = "app") {
 withCache.shiny.render.function <- function(x, ..., cache = "app") {
   keyFunc <- make_quos_func(enquos(...))
 
-  valueExprHash <- digest(extractCacheHint(x), algo = "spookyhash")
+  cacheHint <- digest(extractCacheHint(x), algo = "spookyhash")
 
   valueFunc <- x
 
@@ -404,7 +404,7 @@ withCache.shiny.render.function <- function(x, ..., cache = "app") {
       keyFunc(),
       function(cacheKeyResult) {
         cache <- resolve_cache_object(cache, domain)
-        key_str <- digest(list(cacheKeyResult, valueExprHash), algo = "spookyhash")
+        key_str <- digest(list(cacheKeyResult, cacheHint), algo = "spookyhash")
         res <- cache$get(key_str)
 
         # Case 1: cache hit
@@ -543,7 +543,10 @@ extractCacheHint <- function(func) {
   cacheHint <- attr(func, "cacheHint", exact = TRUE)
 
   if (isFALSE(cacheHint)) {
-    stop("Cannot call `withCache()` on this render function because it is marked as not cacheable.")
+    stop(
+      "Cannot call `withCache()` on this render function because it is marked as not cacheable.",
+      call. = FALSE
+    )
   }
 
   if (is.null(cacheHint)) {

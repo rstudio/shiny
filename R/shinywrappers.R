@@ -2,24 +2,26 @@ utils::globalVariables('func', add = TRUE)
 
 #' Mark a function as a render function
 #'
-#' Should be called by implementers of `renderXXX` functions in order to
-#' mark their return values as Shiny render functions, and to provide a hint to
-#' Shiny regarding what UI function is most commonly used with this type of
-#' render function. This can be used in R Markdown documents to create complete
-#' output widgets out of just the render function.
+#' Should be called by implementers of `renderXXX` functions in order to mark
+#' their return values as Shiny render functions, and to provide a hint to Shiny
+#' regarding what UI function is most commonly used with this type of render
+#' function. This can be used in R Markdown documents to create complete output
+#' widgets out of just the render function.
 #'
 #' @param uiFunc A function that renders Shiny UI. Must take a single argument:
 #'   an output ID.
 #' @param renderFunc A function that is suitable for assigning to a Shiny output
 #'   slot.
 #' @param outputArgs A list of arguments to pass to the `uiFunc`. Render
-#'   functions should include `outputArgs = list()` in their own parameter
-#'   list, and pass through the value to `markRenderFunction`, to allow
-#'   app authors to customize outputs. (Currently, this is only supported for
-#'   dynamically generated UIs, such as those created by Shiny code snippets
-#'   embedded in R Markdown documents).
-#' @param cacheable A boolean which indicates whether this function can be
-#'   cached using [withCache()]. Some render functions (such as [renderPlot])
+#'   functions should include `outputArgs = list()` in their own parameter list,
+#'   and pass through the value to `markRenderFunction`, to allow app authors to
+#'   customize outputs. (Currently, this is only supported for dynamically
+#'   generated UIs, such as those created by Shiny code snippets embedded in R
+#'   Markdown documents).
+#' @param cacheHint One of `"auto"`, `FALSE`, or some other information to
+#'   identify this instance for caching using [withCache()]. If `"auto"`, it
+#'   will try to automatically infer caching information. If `FALSE`, do not
+#'   allow caching for the object. Some render functions (such as [renderPlot])
 #'   contain internal state that makes them unsuitable for caching.
 #' @return The `renderFunc` function, with annotations.
 #' @export
@@ -27,8 +29,7 @@ markRenderFunction <- function(
   uiFunc,
   renderFunc,
   outputArgs = list(),
-  cacheable = TRUE,
-  origRenderFunc = renderFunc
+  cacheHint = "auto"
 ) {
   force(renderFunc)
 
@@ -45,6 +46,41 @@ markRenderFunction <- function(
         "Please see ?shiny::markRenderFunction and ?shiny::createRenderFunction."
       )
     }
+  }
+
+  if (identical(cacheHint, "auto")) {
+    origUserFunc <- attr(renderFunc, "wrappedFunc", exact = TRUE)
+    # The result could be NULL, but don't warn now because it'll only affect
+    # users if they try to use caching. We'll warn when someone calls
+    # withCache() on this object.
+    if (is.null(origUserFunc)) {
+      cacheHint <- NULL
+    } else {
+      # Add in the wrapper render function and they output function, because
+      # they can be useful for distinguishing two renderX functions that receive
+      # the same user expression but do different things with them (like
+      # renderText and renderPrint).
+      cacheHint <- list(
+        origUserFunc = origUserFunc,
+        renderFunc   = renderFunc,
+        outputFunc   = uiFunc
+      )
+    }
+  }
+
+  # For functions, remove the env and source refs because they can cause
+  #   spurious differences.
+  # For expressions, remove source refs.
+  # For everything else, do nothing.
+  if (!is.null(cacheHint)) {
+    if (!is.list(cacheHint)) {
+      cacheHint <- list(cacheHint)
+    }
+    cacheHint <- lapply(cacheHint, function(x) {
+      if      (is.function(x)) formalsAndBody(x)
+      else if (is.language(x)) remove_source(x)
+      else                     x
+    })
   }
 
   wrappedRenderFunc <- function(...) {
@@ -66,12 +102,11 @@ markRenderFunction <- function(
 
   structure(
     wrappedRenderFunc,
-    class          = c("shiny.render.function", "function"),
-    outputFunc     = uiFunc,
-    outputArgs     = outputArgs,
-    hasExecuted    = hasExecuted,
-    cacheable      = cacheable,
-    origRenderFunc = origRenderFunc
+    class       = c("shiny.render.function", "function"),
+    outputFunc  = uiFunc,
+    outputArgs  = outputArgs,
+    hasExecuted = hasExecuted,
+    cacheHint   = cacheHint
   )
 }
 
@@ -103,7 +138,7 @@ createRenderFunction <- function(
   transform = function(value, session, name, ...) value,
   outputFunc = NULL,
   outputArgs = NULL,
-  cacheable = TRUE
+  cacheHint = "auto"
 ) {
   renderFunc <- function(shinysession, name, ...) {
     hybrid_chain(
@@ -114,7 +149,14 @@ createRenderFunction <- function(
     )
   }
 
-  markRenderFunction(outputFunc, renderFunc, outputArgs, cacheable, func)
+  # Hoist func's wrappedFunc attribute into renderFunc, so that when we pass
+  # renderFunc on to markRenderFunction, it is able to find the original user
+  # function.
+  if (identical(cacheHint, "auto")) {
+    attr(renderFunc, "wrappedFunc") <- attr(func, "wrappedFunc", exact = TRUE)
+  }
+
+  markRenderFunction(outputFunc, renderFunc, outputArgs, cacheHint)
 }
 
 useRenderFunction <- function(renderFunc, inline = FALSE) {
@@ -352,7 +394,7 @@ renderImage <- function(expr, env=parent.frame(), quoted=FALSE,
     },
     imageOutput,
     outputArgs,
-    cacheable = FALSE
+    cacheHint = FALSE
   )
 }
 
@@ -461,7 +503,15 @@ renderPrint <- function(expr, env = parent.frame(), quoted = FALSE,
     )
   }
 
-  markRenderFunction(verbatimTextOutput, renderFunc, outputArgs, origRenderFunc = func)
+  markRenderFunction(
+    verbatimTextOutput,
+    renderFunc,
+    outputArgs,
+    cacheHint = list(
+      label = "renderPrint",
+      origUserExpr = body(func)
+    )
+  )
 }
 
 createRenderPrintPromiseDomain <- function(width) {
@@ -642,7 +692,7 @@ downloadHandler <- function(filename, content, contentType=NA, outputArgs=list()
     shinysession$registerDownload(name, filename, contentType, content)
   }
   snapshotExclude(
-    markRenderFunction(downloadButton, renderFunc, outputArgs, cacheable = FALSE)
+    markRenderFunction(downloadButton, renderFunc, outputArgs, cacheHint = FALSE)
   )
 }
 
@@ -749,7 +799,7 @@ renderDataTable <- function(expr, options = NULL, searchDelay = 500,
   }
 
   renderFunc <- markRenderFunction(dataTableOutput, renderFunc, outputArgs,
-    cacheable = FALSE, origRenderFunc = func)
+    cacheHint = FALSE, origRenderFunc = func)
 
   renderFunc <- snapshotPreprocessOutput(renderFunc, function(value) {
     # Remove the action field so that it's not saved in test snapshots. It

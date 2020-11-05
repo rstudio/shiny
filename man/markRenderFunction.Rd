@@ -4,13 +4,7 @@
 \alias{markRenderFunction}
 \title{Mark a function as a render function}
 \usage{
-markRenderFunction(
-  uiFunc,
-  renderFunc,
-  outputArgs = list(),
-  cacheable = TRUE,
-  origRenderFunc = renderFunc
-)
+markRenderFunction(uiFunc, renderFunc, outputArgs = list(), cacheHint = "auto")
 }
 \arguments{
 \item{uiFunc}{A function that renders Shiny UI. Must take a single argument:
@@ -20,23 +14,25 @@ an output ID.}
 slot.}
 
 \item{outputArgs}{A list of arguments to pass to the \code{uiFunc}. Render
-functions should include \code{outputArgs = list()} in their own parameter
-list, and pass through the value to \code{markRenderFunction}, to allow
-app authors to customize outputs. (Currently, this is only supported for
-dynamically generated UIs, such as those created by Shiny code snippets
-embedded in R Markdown documents).}
+functions should include \code{outputArgs = list()} in their own parameter list,
+and pass through the value to \code{markRenderFunction}, to allow app authors to
+customize outputs. (Currently, this is only supported for dynamically
+generated UIs, such as those created by Shiny code snippets embedded in R
+Markdown documents).}
 
-\item{cacheable}{A boolean which indicates whether this function can be
-cached using \code{\link[=withCache]{withCache()}}. Some render functions (such as \link{renderPlot})
+\item{cacheHint}{One of \code{"auto"}, \code{FALSE}, or some other information to
+identify this instance for caching using \code{\link[=withCache]{withCache()}}. If \code{"auto"}, it
+will try to automatically infer caching information. If \code{FALSE}, do not
+allow caching for the object. Some render functions (such as \link{renderPlot})
 contain internal state that makes them unsuitable for caching.}
 }
 \value{
 The \code{renderFunc} function, with annotations.
 }
 \description{
-Should be called by implementers of \code{renderXXX} functions in order to
-mark their return values as Shiny render functions, and to provide a hint to
-Shiny regarding what UI function is most commonly used with this type of
-render function. This can be used in R Markdown documents to create complete
-output widgets out of just the render function.
+Should be called by implementers of \code{renderXXX} functions in order to mark
+their return values as Shiny render functions, and to provide a hint to Shiny
+regarding what UI function is most commonly used with this type of render
+function. This can be used in R Markdown documents to create complete output
+widgets out of just the render function.
 }

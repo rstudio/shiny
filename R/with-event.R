@@ -1,4 +1,4 @@
-#' Event decorator
+#' Make a reactive object respond only to specified events
 #'
 #' @param x An object to wrap so that is triggered only when a the specified
 #'   event occurs.

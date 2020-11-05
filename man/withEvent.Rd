@@ -2,7 +2,7 @@
 % Please edit documentation in R/with-event.R
 \name{withEvent}
 \alias{withEvent}
-\title{Event decorator}
+\title{Make a reactive object respond only to specified events}
 \usage{
 withEvent(
   x,
@@ -38,5 +38,5 @@ should only happen once.}
 \item{label}{A label for the observer or reactive, useful for debugging.}
 }
 \description{
-Event decorator
+Make a reactive object respond only to specified events
 }

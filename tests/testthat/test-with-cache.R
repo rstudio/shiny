@@ -989,7 +989,10 @@ test_that("Custom render functions that call installExprFunction", {
 
   # The expressions passed into renderDouble below should be converted into this
   # function. We'll use this for comparison.
-  target_function <- utils::removeSource(function() { n <<- n + 1; a })
+  target_cachehint <- list(
+    origUserFunc = formalsAndBody(function() { n <<- n + 1; a }),
+    renderFunc = list()
+  )
 
   # installExprFunction + createRenderFunction: OK
   renderDouble <- function(expr) {
@@ -1005,7 +1008,10 @@ test_that("Custom render functions that call installExprFunction", {
   expect_identical(tc(), "1,1")
   expect_identical(tc(), "1,1")
   expect_identical(n, 1)
-  expect_identical(extractUserRenderFunc(renderDouble({ n <<- n+1; a })), target_function)
+  expect_identical(
+    extractCacheHint(renderDouble({ n <<- n+1; a }))$origUserFunc,
+    formalsAndBody(function() { n <<- n + 1; a })
+  )
 
 
   # quoToFunction + createRenderFunction: OK
@@ -1023,7 +1029,10 @@ test_that("Custom render functions that call installExprFunction", {
   expect_identical(tc(), "1,1")
   expect_identical(tc(), "1,1")
   expect_identical(n, 1)
-  expect_identical(extractUserRenderFunc(renderDouble({ n <<- n+1; a })), target_function)
+  expect_identical(
+    extractCacheHint(renderDouble({ n <<- n+1; a }))$origUserFunc,
+    formalsAndBody(function() { n <<- n + 1; a })
+  )
 
 
   # installExprFunction + markRenderFunction (without origRenderFunc): warning
@@ -1048,16 +1057,20 @@ test_that("Custom render functions that call installExprFunction", {
         value <- func()
         paste0(value, ",", value)
       },
-      origRenderFunc = func
+      cacheHint = list(label = "renderDouble", userExpr = substitute(expr))
     )
   }
   n <- 0
   a <- 1
   tc <- renderDouble({ n <<- n+1; a }) %>% withCache(a, cache = cachem::cache_mem())
+  extractCacheHint(renderDouble({ n <<- n+1; a }))
   expect_identical(tc(), "1,1")
   expect_identical(tc(), "1,1")
   expect_identical(n, 1)
-  expect_identical(extractUserRenderFunc(renderDouble({ n <<- n+1; a })), target_function)
+  expect_identical(
+    extractCacheHint(renderDouble({ n <<- n+1; a })),
+    list(label = "renderDouble", userExpr = remove_source(quote({ n <<- n+1; a })))
+  )
 
 
   # quoToFunction + markRenderFunction (without origRenderFunc): warning
@@ -1071,15 +1084,17 @@ test_that("Custom render functions that call installExprFunction", {
   expect_warning(renderDouble({ n <<- n+1; a }) %>% withCache(a, cache = cachem::cache_mem()))
 
 
-  # quoToFunction + markRenderFunction (with origRenderFunc): OK
+  # quoToFunction + markRenderFunction (with cacheHint): OK
+  # Also, non-list cacheHint will get wrapped into a list
   renderDouble <- function(expr) {
+    # browser()
     func <- quoToFunction(enquo(expr), "renderDouble")
     markRenderFunction(textOutput,
       function() {
         value <- func()
         paste0(value, ",", value)
       },
-      origRenderFunc = func
+      cacheHint = enexpr(expr)
     )
   }
   n <- 0
@@ -1088,7 +1103,10 @@ test_that("Custom render functions that call installExprFunction", {
   expect_identical(tc(), "1,1")
   expect_identical(tc(), "1,1")
   expect_identical(n, 1)
-  expect_identical(extractUserRenderFunc(renderDouble({ n <<- n+1; a })), target_function)
+  expect_identical(
+    extractCacheHint(renderDouble({ n <<- n+1; a })),
+    list(remove_source(quote({ n <<- n + 1; a })))
+  )
 
 
   # installExprFunction + nothing: error
@@ -1140,11 +1158,4 @@ test_that("Custom render functions that call exprToFunction", {
     createRenderFunction(func, outputFunc = textOutput)
   }
   expect_warning(renderDouble({ a }) %>% withCache(a, cache = m))
-})
-
-
-
-test_that("as", {
-  extractUserRenderFunc(renderText({ a + 1 }))
-
 })

@@ -391,16 +391,9 @@ withCache.reactiveExpr <- function(x, ..., cache = "app") {
 
 #' @export
 withCache.shiny.render.function <- function(x, ..., cache = "app") {
-  if (isFALSE(attr(x, "cacheable"))) {
-    stop("Cannot call `withCache()` on this render function because it is marked as not cacheable.")
-  }
-
   keyFunc <- make_quos_func(enquos(...))
 
-  valueExprHash <- digest(list(
-    formalsAndBody(extractUserRenderFunc(x)),
-    formalsAndBody(attr(x, "outputFunc", exact = TRUE))
-  ), algo = "spookyhash")
+  valueExprHash <- digest(extractCacheHint(x), algo = "spookyhash")
 
   valueFunc <- x
 
@@ -546,25 +539,18 @@ make_quos_func <- function(quos) {
 }
 
 
-# Given the render function, this extracts the original function created from
-# expression that the user passed to the render function. So if they called
-# `renderText({ a + b })`, this would return `function() { a + b })`.
-extractUserRenderFunc <- function(func) {
-  wrapped <- attr(func, "origRenderFunc", exact = TRUE)
-  if (is.null(wrapped)) {
-    warning("origRenderFunc attribute not found. ",
-            "Caching may not work properly for this render function.")
-    return(func)
+extractCacheHint <- function(func) {
+  cacheHint <- attr(func, "cacheHint", exact = TRUE)
+
+  if (isFALSE(cacheHint)) {
+    stop("Cannot call `withCache()` on this render function because it is marked as not cacheable.")
   }
 
-  unwrapped <- attr(wrapped, "wrappedFunc", exact = TRUE)
-  if (is.null(unwrapped)) {
-    warning("wrappedFunc attribute not found. ",
+  if (is.null(cacheHint)) {
+    warning("No cacheHint found for this object. ",
             "Caching may not work properly for this render function.")
-    return(wrapped)
   }
-
-  unwrapped
+  cacheHint
 }
 
 
@@ -576,7 +562,25 @@ formalsAndBody <- function(x) {
   }
 
   list(
-    formals(x),
-    body(utils::removeSource(x))
+    formals = formals(x),
+    body = body(remove_source(x))
   )
+}
+
+# Remove source refs from a function or language object. utils::removeSource()
+# does the same, but only gained support for language objects in R 3.6.0.
+remove_source <- function(x) {
+  if (is.function(x)) {
+    body(x) <- remove_source(body(x))
+    x
+  } else if (is.call(x)) {
+    attr(x, "srcref") <- NULL
+    attr(x, "wholeSrcref") <- NULL
+    attr(x, "srcfile") <- NULL
+
+    x[] <- lapply(x, remove_source)
+    x
+  } else {
+    x
+  }
 }

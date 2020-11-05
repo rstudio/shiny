@@ -441,7 +441,7 @@ withCache.shiny.render.function <- function(x, ..., cache = "app") {
         # cachedReactive() will be given the correct kind of object (a promise
         # vs. an actual value) in the case of a future cache hit.
         p <- withCallingHandlers(
-          withVisible(isolate(valueFunc())),
+          withVisible(isolate(valueFunc(...))),
           error = function(e) {
             cache$set(key_str, list(
               is_promise = FALSE,

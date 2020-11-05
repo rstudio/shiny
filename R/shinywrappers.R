@@ -30,6 +30,8 @@ markRenderFunction <- function(
   cacheable = TRUE,
   origRenderFunc = renderFunc
 ) {
+  force(renderFunc)
+
   # a mutable object that keeps track of whether `useRenderFunction` has been
   # executed (this usually only happens when rendering Shiny code snippets in
   # an interactive R Markdown document); its initial value is FALSE
@@ -746,7 +748,8 @@ renderDataTable <- function(expr, options = NULL, searchDelay = 500,
     )
   }
 
-  renderFunc <- markRenderFunction(dataTableOutput, renderFunc, outputArgs = outputArgs)
+  renderFunc <- markRenderFunction(dataTableOutput, renderFunc, outputArgs,
+    cacheable = FALSE, origRenderFunc = func)
 
   renderFunc <- snapshotPreprocessOutput(renderFunc, function(value) {
     # Remove the action field so that it's not saved in test snapshots. It

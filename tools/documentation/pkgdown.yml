@@ -118,7 +118,8 @@ reference:
       - observeEvent
       - reactiveVal
       - reactiveValues
-      - cachedReactive
+      - withCache
+      - withEvent
       - reactiveValuesToList
       - is.reactivevalues
       - isolate
@@ -177,6 +178,7 @@ reference:
       - applyInputHandlers
       - exprToFunction
       - installExprFunction
+      - quoToFunction
       - parseQueryString
       - getCurrentOutputInfo
       - getCurrentTheme

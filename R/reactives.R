@@ -978,7 +978,8 @@ reactive <- function(x, env = parent.frame(), quoted = FALSE,
   check_dots_empty()
 
   if (!missing(env) || !missing(quoted)) {
-    deprecatedEnvQuotedMessage()
+    # Will unquote this and start warning in a later version of Shiny.
+    # deprecatedEnvQuotedMessage()
     if (!quoted) {
       x <- enexpr(x)
     }
@@ -995,7 +996,12 @@ reactive <- function(x, env = parent.frame(), quoted = FALSE,
   label <- exprToLabel(get_expr(q), "reactive", label)
 
   o <- Observable$new(fun, label, domain, ..stacktraceon = ..stacktraceon)
-  structure(o$getValue, observable = o, class = c("reactiveExpr", "reactive", "function"))
+  structure(
+    o$getValue,
+    observable = o,
+    cacheHint = list(userExpr = remove_source(get_expr(q))),
+    class = c("reactiveExpr", "reactive", "function")
+  )
 }
 
 # Given the srcref to a reactive expression, attempts to figure out what the
@@ -1405,7 +1411,8 @@ observe <- function(x, env = parent.frame(), quoted = FALSE,
   if (!missing(env) || !missing(quoted)) {
     # Eventually we'll be able to get rid of this code path, and the env and
     # quoted arguments.
-    deprecatedEnvQuotedMessage()
+    # Will unquote this and start warning in a later version of Shiny.
+    # deprecatedEnvQuotedMessage()
     if (!quoted) {
       x <- enexpr(x)
     }

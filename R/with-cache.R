@@ -287,10 +287,9 @@ withCache.reactiveExpr <- function(x, ..., cache = "app") {
   keyFunc <- make_quos_func(enquos(...))
 
   valueFunc <- reactive_get_value_func(x)
-  # Hash the value expression now -- this will be added to the key later on, to
-  # reduce the chance of key collisions with other cachedReactives. Remove
-  # source refs because they can differ even though the code is the same.
-  valueExprHash <- digest(formalsAndBody(valueFunc), algo = "spookyhash")
+  # Hash cache hint now -- this will be added to the key later on, to reduce the
+  # chance of key collisions with other cachedReactives.
+  cacheHint <- digest(extractCacheHint(x), algo = "spookyhash")
   valueFunc <- wrapFunctionLabel(valueFunc, "cachedReactiveValueFunc", ..stacktraceon = TRUE)
 
   # Don't hold on to the reference for x, so that it can be GC'd
@@ -307,7 +306,7 @@ withCache.reactiveExpr <- function(x, ..., cache = "app") {
       keyFunc(),
       function(cacheKeyResult) {
         cache <- resolve_cache_object(cache, domain)
-        key_str <- digest(list(cacheKeyResult, valueExprHash), algo = "spookyhash")
+        key_str <- digest(list(cacheKeyResult, cacheHint), algo = "spookyhash")
         res <- cache$get(key_str)
 
         # Case 1: cache hit
@@ -544,15 +543,16 @@ extractCacheHint <- function(func) {
 
   if (isFALSE(cacheHint)) {
     stop(
-      "Cannot call `withCache()` on this render function because it is marked as not cacheable.",
+      "Cannot call `withCache()` on this object because it is marked as not cacheable.",
       call. = FALSE
     )
   }
 
   if (is.null(cacheHint)) {
     warning("No cacheHint found for this object. ",
-            "Caching may not work properly for this render function.")
+            "Caching may not work properly.")
   }
+
   cacheHint
 }
 

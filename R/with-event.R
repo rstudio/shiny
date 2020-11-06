@@ -85,7 +85,7 @@ withEvent.shiny.render.function <- function(x, ..., ignoreNULL = TRUE, ignoreIni
 
   initialized <- FALSE
 
-  res <- function() {
+  res <- function(...) {
     hybrid_chain(
       eventFunc(),
       function(value) {
@@ -96,7 +96,7 @@ withEvent.shiny.render.function <- function(x, ..., ignoreNULL = TRUE, ignoreIni
 
         req(!ignoreNULL || !isNullEvent(value))
 
-        isolate(valueFunc())
+        isolate(valueFunc(...))
       }
     )
   }

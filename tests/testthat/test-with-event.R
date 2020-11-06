@@ -48,3 +48,23 @@ test_that("withEvent does not prevent observers from being GC'd", {
   gc()
   expect_true(finalized)
 })
+
+
+test_that("ignoreNULL works", {
+  n <- 0
+  observe({ n <<- n+1 }) %>% withEvent(NULL, ignoreNULL = FALSE)
+  flushReact()
+  expect_identical(n, 1)
+
+  n <- 0
+  observe({ n <<- n+1 }) %>% withEvent(NULL, ignoreNULL = TRUE)
+  flushReact()
+  expect_identical(n, 0)
+
+  # Two NULLs in the `...` get aggregated into a list, so the result is not
+  # NULL.
+  n <- 0
+  observe({ n <<- n+1 }) %>% withEvent(NULL, NULL, ignoreNULL = TRUE)
+  flushReact()
+  expect_identical(n, 1)
+})

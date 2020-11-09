@@ -136,7 +136,7 @@
 #'
 #'
 #' @inheritParams renderPlot
-#' @inheritParams withCache
+#' @inheritParams bindCache
 #' @param cacheKeyExpr An expression that returns a cache key. This key should
 #'   be a unique identifier for a plot: the assumption is that if the cache key
 #'   is the same, then the plot will be the same.

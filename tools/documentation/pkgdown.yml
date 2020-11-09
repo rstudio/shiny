@@ -118,8 +118,8 @@ reference:
       - observeEvent
       - reactiveVal
       - reactiveValues
-      - withCache
-      - withEvent
+      - bindCache
+      - bindEvent
       - reactiveValuesToList
       - is.reactivevalues
       - isolate

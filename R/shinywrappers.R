@@ -19,7 +19,7 @@ utils::globalVariables('func', add = TRUE)
 #'   generated UIs, such as those created by Shiny code snippets embedded in R
 #'   Markdown documents).
 #' @param cacheHint One of `"auto"`, `FALSE`, or some other information to
-#'   identify this instance for caching using [withCache()]. If `"auto"`, it
+#'   identify this instance for caching using [bindCache()]. If `"auto"`, it
 #'   will try to automatically infer caching information. If `FALSE`, do not
 #'   allow caching for the object. Some render functions (such as [renderPlot])
 #'   contain internal state that makes them unsuitable for caching.
@@ -54,7 +54,7 @@ markRenderFunction <- function(
     origUserFunc <- attr(renderFunc, "wrappedFunc", exact = TRUE)
     # The result could be NULL, but don't warn now because it'll only affect
     # users if they try to use caching. We'll warn when someone calls
-    # withCache() on this object.
+    # bindCache() on this object.
     if (is.null(origUserFunc)) {
       cacheHint <- NULL
     } else {

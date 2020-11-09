@@ -21,7 +21,7 @@ generated UIs, such as those created by Shiny code snippets embedded in R
 Markdown documents).}
 
 \item{cacheHint}{One of \code{"auto"}, \code{FALSE}, or some other information to
-identify this instance for caching using \code{\link[=withCache]{withCache()}}. If \code{"auto"}, it
+identify this instance for caching using \code{\link[=bindCache]{bindCache()}}. If \code{"auto"}, it
 will try to automatically infer caching information. If \code{FALSE}, do not
 allow caching for the object. Some render functions (such as \link{renderPlot})
 contain internal state that makes them unsuitable for caching.}

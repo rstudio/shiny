@@ -1,5 +1,5 @@
 
-test_that("withCache reactive basic functionality", {
+test_that("bindCache reactive basic functionality", {
   cache <- cachem::cache_mem()
 
   k <- reactiveVal(0)
@@ -9,7 +9,7 @@ test_that("withCache reactive basic functionality", {
     x <- paste0(k(), "v")
     vals <<- c(vals, x)
     k()
-  }) %>% withCache({
+  }) %>% bindCache({
     x <- paste0(k(), "k")
     vals <<- c(vals, x)
     k()
@@ -47,7 +47,7 @@ test_that("withCache reactive basic functionality", {
   expect_identical(vals, c("1k","1v", "1o"))
 })
 
-test_that("withCache - multiple key expressions", {
+test_that("bindCache - multiple key expressions", {
   cache <- cachem::cache_mem()
 
   k1 <- reactiveVal(0)
@@ -59,7 +59,7 @@ test_that("withCache - multiple key expressions", {
     r_vals <<- c(r_vals, x)
     x
   }) %>%
-    withCache(k1(), k2(), cache = cache)
+    bindCache(k1(), k2(), cache = cache)
 
   o_vals <- character()
   o <- observe({
@@ -99,8 +99,8 @@ test_that("withCache - multiple key expressions", {
 })
 
 
-test_that("withCache reactive - original reactive can be GC'd", {
-  # withCache.reactive essentially extracts code from the original reactive and
+test_that("bindCache reactive - original reactive can be GC'd", {
+  # bindCache.reactive essentially extracts code from the original reactive and
   # then doesn't need the original anymore. We want to make sure the original
   # can be GC'd afterward (if no one else has a reference to it).
   cache <- memoryCache()
@@ -112,16 +112,16 @@ test_that("withCache reactive - original reactive can be GC'd", {
   finalized <- FALSE
   reg.finalizer(attr(r, "observable"), function(e) finalized <<- TRUE)
 
-  # r1 <- withCache(r, k(), cache = cache)
+  # r1 <- bindCache(r, k(), cache = cache)
   # Note: using pipe causes this to fail due to:
   # https://github.com/tidyverse/magrittr/issues/229
-  r1 <- r %>% withCache(k(), cache = cache)
+  r1 <- r %>% bindCache(k(), cache = cache)
   rm(r)
   gc()
   expect_true(finalized)
 })
 
-test_that("withCache reactive - value is isolated", {
+test_that("bindCache reactive - value is isolated", {
   # The value is isolated; the key is the one that dependencies are taken on.
   cache <- cachem::cache_mem()
 
@@ -133,7 +133,7 @@ test_that("withCache reactive - value is isolated", {
     x <- paste0(v(), "v")
     vals <<- c(vals, x)
     v()
-  }) %>% withCache({
+  }) %>% bindCache({
     x <- paste0(k(), "k")
     vals <<- c(vals, x)
     k()
@@ -182,7 +182,7 @@ test_that("withCache reactive - value is isolated", {
 # ============================================================================
 # Async key
 # ============================================================================
-test_that("withCache reactive with async key", {
+test_that("bindCache reactive with async key", {
   cache <- cachem::cache_mem()
   k <- reactiveVal(0)
 
@@ -191,7 +191,7 @@ test_that("withCache reactive with async key", {
     x <- paste0(k(), "v")
     vals <<- c(vals, x)
     k()
-  }) %>% withCache({
+  }) %>% bindCache({
     promises::promise(function(resolve, reject) {
       x <- paste0(k(), "k1")
       vals <<- c(vals, x)
@@ -241,7 +241,7 @@ test_that("withCache reactive with async key", {
 # ============================================================================
 # Async value
 # ============================================================================
-test_that("withCache reactives with async value", {
+test_that("bindCache reactives with async value", {
   # If the value expr returns a promise, it must return a promise every time,
   # even when the value is fetched in the cache. Similarly, if it returns a
   # non-promise value, then it needs to do that whether or not it's fetched from
@@ -264,7 +264,7 @@ test_that("withCache reactives with async value", {
       vals <<- c(vals, x)
       value
     })
-  }) %>% withCache({
+  }) %>% bindCache({
     x <- paste0(k(), "k")
     vals <<- c(vals, x)
     k()
@@ -307,7 +307,7 @@ test_that("withCache reactives with async value", {
 # ============================================================================
 # Async key and value
 # ============================================================================
-test_that("withCache reactives with async key and value", {
+test_that("bindCache reactives with async key and value", {
   # If the value expr returns a promise, it must return a promise every time,
   # even when the value is fetched in the cache. Similarly, if it returns a
   # non-promise value, then it needs to do that whether or not it's fetched from
@@ -330,7 +330,7 @@ test_that("withCache reactives with async key and value", {
       vals <<- c(vals, x)
       value
     })
-  }) %>% withCache({
+  }) %>% bindCache({
     promises::promise(function(resolve, reject) {
       x <- paste0(k(), "k1")
       vals <<- c(vals, x)
@@ -372,7 +372,7 @@ test_that("withCache reactives with async key and value", {
   expect_identical(vals, c("0k1", "0k2", "0o"))
 })
 
-test_that("withCache reactive key collisions", {
+test_that("bindCache reactive key collisions", {
   # =======================================
   # No collision with different value exprs
   # =======================================
@@ -387,7 +387,7 @@ test_that("withCache reactive key collisions", {
     r_vals <<- c(r_vals, val)
     val
   }) %>%
-    withCache(k(), cache = cache)
+    bindCache(k(), cache = cache)
 
   r_vals <- numeric()
   r2 <- reactive({
@@ -395,7 +395,7 @@ test_that("withCache reactive key collisions", {
     r_vals <<- c(r_vals, val)
     val
   }) %>%
-    withCache(k(), cache = cache)
+    bindCache(k(), cache = cache)
 
   o_vals <- numeric()
   o <- observe({
@@ -426,14 +426,14 @@ test_that("withCache reactive key collisions", {
     r_vals <<- c(r_vals, val)
     val
   }) %>%
-    withCache(k(), cache = cache)
+    bindCache(k(), cache = cache)
 
   r2 <- reactive({
     val <- k() * 10
     r_vals <<- c(r_vals, val)
     val
   }) %>%
-    withCache(k(), cache = cache)
+    bindCache(k(), cache = cache)
 
   o_vals <- numeric()
   o <- observe({
@@ -456,7 +456,7 @@ test_that("withCache reactive key collisions", {
 # ============================================================================
 # Error handling
 # ============================================================================
-test_that("withCache reactive error handling", {
+test_that("bindCache reactive error handling", {
   # ===================================
   # Error in key
   cache <- cachem::cache_mem()
@@ -467,7 +467,7 @@ test_that("withCache reactive error handling", {
   r <- reactive({
     x <- paste0(k(), "v")
     k()
-  }) %>% withCache({
+  }) %>% bindCache({
     x <- paste0(k(), "k")
     vals <<- c(vals, x)
     k()
@@ -502,7 +502,7 @@ test_that("withCache reactive error handling", {
   r <- reactive({
     x <- paste0(k(), "v")
     k()
-  }) %>% withCache({
+  }) %>% bindCache({
     x <- paste0(k(), "k")
     vals <<- c(vals, x)
     k()
@@ -535,7 +535,7 @@ test_that("withCache reactive error handling", {
     stop("foo")
     k()
   }) %>%
-    withCache({
+    bindCache({
       x <- paste0(k(), "k")
       vals <<- c(vals, x)
       k()
@@ -571,7 +571,7 @@ test_that("withCache reactive error handling", {
     vals <<- c(vals, x)
     req(FALSE)
     k()
-  }) %>% withCache({
+  }) %>% bindCache({
     x <- paste0(k(), "k")
     vals <<- c(vals, x)
     k()
@@ -595,7 +595,7 @@ test_that("withCache reactive error handling", {
 })
 
 
-test_that("withCache reactive error handling - async", {
+test_that("bindCache reactive error handling - async", {
   # ===================================
   # Error in key
   cache <- cachem::cache_mem()
@@ -611,7 +611,7 @@ test_that("withCache reactive error handling - async", {
       vals <<- c(vals, x)
       value
     })
-  }) %>% withCache({
+  }) %>% bindCache({
     promises::promise(function(resolve, reject) {
       x <- paste0(k(), "k1")
       vals <<- c(vals, x)
@@ -667,7 +667,7 @@ test_that("withCache reactive error handling - async", {
     x <- paste0(k(), "v")
     vals <<- c(vals, x)
     resolve(k())
-  }) %>% withCache({
+  }) %>% bindCache({
     promises::promise(function(resolve, reject) {
       x <- paste0(k(), "k1")
       vals <<- c(vals, x)
@@ -729,7 +729,7 @@ test_that("withCache reactive error handling - async", {
       stop("err", k())
       value
     })
-  }) %>% withCache({
+  }) %>% bindCache({
     promises::promise(function(resolve, reject) {
       x <- paste0(k(), "k1")
       vals <<- c(vals, x)
@@ -789,7 +789,7 @@ test_that("withCache reactive error handling - async", {
       value
     })
   }) %>%
-    withCache({
+    bindCache({
       promises::promise(function(resolve, reject) {
         x <- paste0(k(), "k1")
         vals <<- c(vals, x)
@@ -837,7 +837,7 @@ test_that("withCache reactive error handling - async", {
 # ============================================================================
 # Quosures
 # ============================================================================
-test_that("withCache quosure handling", {
+test_that("bindCache quosure handling", {
   cache <- cachem::cache_mem()
   res <- NULL
   key_env <- local({
@@ -855,7 +855,7 @@ test_that("withCache quosure handling", {
   })
 
   r <- reactive(!!value_env$expr) %>%
-    withCache(!!key_env$expr, cache = cache)
+    bindCache(!!key_env$expr, cache = cache)
 
   vals <- numeric()
   o <- observe({
@@ -881,11 +881,11 @@ test_that("withCache quosure handling", {
 # ============================================================================
 # Visibility
 # ============================================================================
-test_that("withCache visibility", {
+test_that("bindCache visibility", {
   cache <- cachem::cache_mem()
   k <- reactiveVal(0)
   res <- NULL
-  r <- withCache(k(), cache = cache,
+  r <- bindCache(k(), cache = cache,
     x = reactive({
       if (k() == 0) invisible(k())
       else          k()
@@ -911,7 +911,7 @@ test_that("withCache visibility", {
 })
 
 
-test_that("withCache reactive visibility - async", {
+test_that("bindCache reactive visibility - async", {
   # Skippping because of https://github.com/rstudio/promises/issues/58
   skip("Visibility currently not supported by promises")
   cache <- cachem::cache_mem()
@@ -923,7 +923,7 @@ test_that("withCache reactive visibility - async", {
       else          resolve(k())
     })
   }) %>%
-    withCache(k(), cache = cache)
+    bindCache(k(), cache = cache)
 
   o <- observe({
     r()$then(function(value) {
@@ -951,17 +951,17 @@ test_that("withCache reactive visibility - async", {
 
 
 # ============================================================================
-# withCache and render functions
+# bindCache and render functions
 # ============================================================================
 
-test_that("withCache renderFunction basic functionality", {
+test_that("bindCache renderFunction basic functionality", {
   m <- cachem::cache_mem()
   n <- 0 # Counter for how many times renderFunctions run.
   a <- 1
 
   # Two renderTexts with the same expression should share cache
-  t1 <- renderText({ n <<- n+1; a + 1 }) %>% withCache(a, cache = m)
-  t2 <- renderText({ n <<- n+1; a + 1 }) %>% withCache(a, cache = m)
+  t1 <- renderText({ n <<- n+1; a + 1 }) %>% bindCache(a, cache = m)
+  t2 <- renderText({ n <<- n+1; a + 1 }) %>% bindCache(a, cache = m)
   expect_identical(t1(), "2")
   expect_identical(t2(), "2")
   expect_identical(n, 1)
@@ -973,8 +973,8 @@ test_that("withCache renderFunction basic functionality", {
 
   # renderPrint with the same expression -- should run, and have a different
   # result.
-  p1 <- renderPrint({ n <<- n+1; a + 1 }) %>% withCache(a, cache = m)
-  p2 <- renderPrint({ n <<- n+1; a + 1 }) %>% withCache(a, cache = m)
+  p1 <- renderPrint({ n <<- n+1; a + 1 }) %>% bindCache(a, cache = m)
+  p2 <- renderPrint({ n <<- n+1; a + 1 }) %>% bindCache(a, cache = m)
   expect_identical(p1(), "[1] 3")
   expect_identical(p2(), "[1] 3")
   expect_identical(n, 3)
@@ -1004,7 +1004,7 @@ test_that("Custom render functions that call installExprFunction", {
   }
   n <- 0
   a <- 1
-  tc <- renderDouble({ n <<- n+1; a }) %>% withCache(a, cache = cachem::cache_mem())
+  tc <- renderDouble({ n <<- n+1; a }) %>% bindCache(a, cache = cachem::cache_mem())
   expect_identical(tc(), "1,1")
   expect_identical(tc(), "1,1")
   expect_identical(n, 1)
@@ -1025,7 +1025,7 @@ test_that("Custom render functions that call installExprFunction", {
   # Should work, because it went through createRenderFunction().
   n <- 0
   a <- 1
-  tc <- renderDouble({ n <<- n+1; a }) %>% withCache(a, cache = cachem::cache_mem())
+  tc <- renderDouble({ n <<- n+1; a }) %>% bindCache(a, cache = cachem::cache_mem())
   expect_identical(tc(), "1,1")
   expect_identical(tc(), "1,1")
   expect_identical(n, 1)
@@ -1045,7 +1045,7 @@ test_that("Custom render functions that call installExprFunction", {
       paste0(value, ",", value)
     })
   }
-  expect_warning(renderDouble({ n <<- n+1; a }) %>% withCache(a, cache = cachem::cache_mem()))
+  expect_warning(renderDouble({ n <<- n+1; a }) %>% bindCache(a, cache = cachem::cache_mem()))
 
   # installExprFunction + markRenderFunction (without cacheHint): warning
   # because the original function can't be automatically extracted (it was
@@ -1062,7 +1062,7 @@ test_that("Custom render functions that call installExprFunction", {
   }
   n <- 0
   a <- 1
-  tc <- renderDouble({ n <<- n+1; a }) %>% withCache(a, cache = cachem::cache_mem())
+  tc <- renderDouble({ n <<- n+1; a }) %>% bindCache(a, cache = cachem::cache_mem())
   extractCacheHint(renderDouble({ n <<- n+1; a }))
   expect_identical(tc(), "1,1")
   expect_identical(tc(), "1,1")
@@ -1081,7 +1081,7 @@ test_that("Custom render functions that call installExprFunction", {
       paste0(value, ",", value)
     })
   }
-  expect_warning(renderDouble({ n <<- n+1; a }) %>% withCache(a, cache = cachem::cache_mem()))
+  expect_warning(renderDouble({ n <<- n+1; a }) %>% bindCache(a, cache = cachem::cache_mem()))
 
 
   # quoToFunction + markRenderFunction (with cacheHint): OK
@@ -1099,7 +1099,7 @@ test_that("Custom render functions that call installExprFunction", {
   }
   n <- 0
   a <- 1
-  tc <- renderDouble({ n <<- n+1; a }) %>% withCache(a, cache = cachem::cache_mem())
+  tc <- renderDouble({ n <<- n+1; a }) %>% bindCache(a, cache = cachem::cache_mem())
   expect_identical(tc(), "1,1")
   expect_identical(tc(), "1,1")
   expect_identical(n, 1)
@@ -1114,18 +1114,18 @@ test_that("Custom render functions that call installExprFunction", {
     installExprFunction(expr, "func")
     func
   }
-  expect_error(renderTriple({ n <<- n+1; a }) %>% withCache(a, cache = cachem::cache_mem()))
+  expect_error(renderTriple({ n <<- n+1; a }) %>% bindCache(a, cache = cachem::cache_mem()))
 
   # quoToFunction + nothing: error
   renderTriple <- function(expr) {
     quoToFunction(enquo(expr), "renderTriple")
   }
-  expect_error(renderTriple({ n <<- n+1; a }) %>% withCache(a, cache = cachem::cache_mem()))
+  expect_error(renderTriple({ n <<- n+1; a }) %>% bindCache(a, cache = cachem::cache_mem()))
 })
 
 
 test_that("Custom render functions that call exprToFunction", {
-  # A render function that uses exprToFunction won't work with withCache(). It
+  # A render function that uses exprToFunction won't work with bindCache(). It
   # needs to use quoToFunction or installExprFunction.
 
   renderDouble <- function(expr, env = parent.frame(), quoted = FALSE) {
@@ -1134,14 +1134,14 @@ test_that("Custom render functions that call exprToFunction", {
   }
 
   m <- cachem::cache_mem()
-  # Should throw an error because withCache doesn't know how to deal with plain
+  # Should throw an error because bindCache doesn't know how to deal with plain
   # functions.
-  expect_error(renderDouble({ a }) %>% withCache(a, cache = m))
+  expect_error(renderDouble({ a }) %>% bindCache(a, cache = m))
 
   renderDouble <- function(expr, env = parent.frame(), quoted = FALSE) {
     func <- exprToFunction(expr, env, quoted)
   }
-  expect_error(renderDouble({ a }) %>% withCache(a, cache = m))
+  expect_error(renderDouble({ a }) %>% bindCache(a, cache = m))
 
   # exprToFunction + markRenderFunction: warning because exprToFunction
   # doesn't attach the original function as metadata.
@@ -1149,7 +1149,7 @@ test_that("Custom render functions that call exprToFunction", {
     func <- exprToFunction(expr, env, quoted)
     markRenderFunction(textOutput, func)
   }
-  expect_warning(renderDouble({ a }) %>% withCache(a, cache = m))
+  expect_warning(renderDouble({ a }) %>% bindCache(a, cache = m))
 
   # exprToFunction + createRenderFunction: warning because exprToFunction
   # doesn't attach the original function as metadata.
@@ -1157,14 +1157,14 @@ test_that("Custom render functions that call exprToFunction", {
     func <- exprToFunction(expr, env, quoted)
     createRenderFunction(func, outputFunc = textOutput)
   }
-  expect_warning(renderDouble({ a }) %>% withCache(a, cache = m))
+  expect_warning(renderDouble({ a }) %>% bindCache(a, cache = m))
 })
 
 
 test_that("Some render functions can't be cached", {
   cache <- cachem::cache_mem()
-  expect_error(renderDataTable({ cars }) %>% withCache(1, cache = m))
-  expect_error(renderPlot({ plot(1) }) %>% withCache(1, cache = m))
-  expect_error(renderCachedPlot({ plot(1) }, 1) %>% withCache(1, cache = m))
-  expect_error(renderImage({ cars }) %>% withCache(1, cache = m))
+  expect_error(renderDataTable({ cars }) %>% bindCache(1, cache = m))
+  expect_error(renderPlot({ plot(1) }) %>% bindCache(1, cache = m))
+  expect_error(renderCachedPlot({ plot(1) }, 1) %>% bindCache(1, cache = m))
+  expect_error(renderImage({ cars }) %>% bindCache(1, cache = m))
 })

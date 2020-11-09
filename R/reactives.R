@@ -2288,10 +2288,10 @@ observeEvent <- function(eventExpr, handlerExpr,
     priority = priority,
     domain = domain,
     autoDestroy = TRUE,
-    ..stacktraceon = FALSE # TODO: Does this go in the withEvent?
+    ..stacktraceon = FALSE # TODO: Does this go in the bindEvent?
   )
 
-  o <- withEvent(
+  o <- bindEvent(
     ignoreNULL = ignoreNULL,
     ignoreInit = ignoreInit,
     once = once,
@@ -2334,7 +2334,7 @@ eventReactive <- function(eventExpr, valueExpr,
     valueQuo <- enquo(valueExpr)
   }
 
-  invisible(withEvent(
+  invisible(bindEvent(
     ignoreNULL = ignoreNULL,
     ignoreInit = ignoreInit,
     !!eventQuo,

@@ -4,12 +4,12 @@ utils::globalVariables(".GenericCallEnv", add = TRUE)
 #'
 #' @description
 #'
-#' `withCache()` adds caching to the following kinds of objects used in Shiny:
+#' `bindCache()` adds caching to the following kinds of objects used in Shiny:
 #'
 #' * [reactive()]` expressions.
 #' * `render*` functions, like [renderText()], [renderTable()], and so on.
 #'
-#' It is often used in conjunction with [withEvent()].
+#' It is often used in conjunction with [bindEvent()].
 #'
 #'
 #' Ordinary [reactive()] expressions will cache their most recent value. This
@@ -17,7 +17,7 @@ utils::globalVariables(".GenericCallEnv", add = TRUE)
 #' once and the result can be used in multiple different places without needing
 #' to re-execute the code.
 #'
-#' When `withCache()` is used on a reactive expression, any number of previous
+#' When `bindCache()` is used on a reactive expression, any number of previous
 #' values can be cached. You must provide one or more expressions that are used
 #' to generate a _cache key_. The `...` expressions are put together in a list
 #' and hashed, and the result is used as the cache **key**.
@@ -29,7 +29,7 @@ utils::globalVariables(".GenericCallEnv", add = TRUE)
 #' the original reactive expression; a given key should not correspond to
 #' multiple possible values from the reactive expression.
 #'
-#' To use `withCache(), the key should be fast to compute, and the value should
+#' To use `bindCache(), the key should be fast to compute, and the value should
 #' expensive (so that it benefits from caching).  To see the value should be
 #' computed, a cached reactive evaluates the key, and then serializes and hashes
 #' the result. If the resulting hashed key is in the cache, then the cached
@@ -98,7 +98,7 @@ utils::globalVariables(".GenericCallEnv", add = TRUE)
 #' be invalidated, and the next time that someone calls `r()`, the key
 #' expression will need to be re-executed.
 #'
-#' Note that if the cached reactive is passed to [withEvent()], then the key
+#' Note that if the cached reactive is passed to [bindEvent()], then the key
 #' expression will no longer be reactive; instead, the event expression will
 #' be reactive.
 #'
@@ -144,7 +144,7 @@ utils::globalVariables(".GenericCallEnv", add = TRUE)
 #'   another session.
 #'
 #'   Finally, it is possible to pass in caching objects directly to
-#'   `withCache()`. This can be useful if, for example, you want to use a
+#'   `bindCache()`. This can be useful if, for example, you want to use a
 #'   particular type of cache with specific cached reactives.
 #'
 #'
@@ -171,11 +171,11 @@ utils::globalVariables(".GenericCallEnv", add = TRUE)
 #'   (the default), `"session"`, or a cache object like a [cachem::cache_disk()].
 #'   See the Cache Scoping section for more information.
 #'
-#' @seealso [withEvent()]
+#' @seealso [bindEvent()]
 #'
 #' @examples
 #' \dontrun{
-#' rc <- withCache(
+#' rc <- bindCache(
 #'   x = reactive({
 #'     Sys.sleep(2)   # Pretend this is expensive
 #'     input$x * 100
@@ -190,7 +190,7 @@ utils::globalVariables(".GenericCallEnv", add = TRUE)
 #'   Sys.sleep(2)
 #'   input$x * 100
 #' }) %>%
-#'   withCache(input$x)
+#'   bindCache(input$x)
 #'
 #' }
 #'
@@ -212,7 +212,7 @@ utils::globalVariables(".GenericCallEnv", add = TRUE)
 #'       Sys.sleep(2)
 #'       input$x * input$y
 #'     }) %>%
-#'       withCache(input$x, input$y)
+#'       bindCache(input$x, input$y)
 #'
 #'     output$txt <- renderText(r())
 #'   }
@@ -233,7 +233,7 @@ utils::globalVariables(".GenericCallEnv", add = TRUE)
 #'       Sys.sleep(2)
 #'       input$x * input$y
 #'     }) %>%
-#'       withCache(input$x, input$y)
+#'       bindCache(input$x, input$y)
 #'   }
 #' )
 #'
@@ -253,8 +253,8 @@ utils::globalVariables(".GenericCallEnv", add = TRUE)
 #'       Sys.sleep(2)
 #'       input$x * input$y
 #'     }) %>%
-#'       withCache(input$x, input$y) %>%
-#'       withEvent(input$go)
+#'       bindCache(input$x, input$y) %>%
+#'       bindEvent(input$go)
 #'       # The cached, eventified reactive takes a reactive dependency on
 #'       # input$go, but doesn't use it for the cache key. It uses input$x and
 #'       # input$y for the cache key, but doesn't take a reactive depdency on
@@ -267,20 +267,20 @@ utils::globalVariables(".GenericCallEnv", add = TRUE)
 #' }
 #'
 #'@export
-withCache <- function(x, ..., cache = "app") {
+bindCache <- function(x, ..., cache = "app") {
   check_dots_unnamed()
   force(cache)
 
-  UseMethod("withCache")
+  UseMethod("bindCache")
 }
 
 #' @export
-withCache.default <- function(x, ...) {
+bindCache.default <- function(x, ...) {
   stop("Don't know how to handle object with class ", paste(class(x), collapse = ", "))
 }
 
 #' @export
-withCache.reactiveExpr <- function(x, ..., cache = "app") {
+bindCache.reactiveExpr <- function(x, ..., cache = "app") {
   label <- exprToLabel(substitute(key), "cachedReactive")
   domain <- reactive_get_domain(x)
 
@@ -389,7 +389,7 @@ withCache.reactiveExpr <- function(x, ..., cache = "app") {
 }
 
 #' @export
-withCache.shiny.render.function <- function(x, ..., cache = "app") {
+bindCache.shiny.render.function <- function(x, ..., cache = "app") {
   keyFunc <- make_quos_func(enquos(...))
 
   cacheHint <- digest(extractCacheHint(x), algo = "spookyhash")
@@ -486,32 +486,32 @@ withCache.shiny.render.function <- function(x, ..., cache = "app") {
 }
 
 #' @export
-withCache.reactive.cache <- function(x, ...) {
-  stop("withCache() has already been called on the object.")
+bindCache.reactive.cache <- function(x, ...) {
+  stop("bindCache() has already been called on the object.")
 }
 
 #' @export
-withCache.shiny.render.function.cache <- withCache.reactive.cache
+bindCache.shiny.render.function.cache <- bindCache.reactive.cache
 
 #' @export
-withCache.reactive.event <- function(x, ...) {
-  stop("Can't call withCache() after calling withEvent() on an object. Maybe you wanted to call withEvent() after withCache()?")
+bindCache.reactive.event <- function(x, ...) {
+  stop("Can't call bindCache() after calling bindEvent() on an object. Maybe you wanted to call bindEvent() after bindCache()?")
 }
 
 #' @export
-withCache.shiny.render.function.event <- withCache.reactive.event
+bindCache.shiny.render.function.event <- bindCache.reactive.event
 
 #' @export
-withCache.Observer <- function(x, ...) {
-  stop("Can't withCache an observer, because observers exist for the side efects, not for their return values.")
+bindCache.Observer <- function(x, ...) {
+  stop("Can't bindCache an observer, because observers exist for the side efects, not for their return values.")
 }
 
 #' @export
-withCache.function <- function(x, ...) {
+bindCache.function <- function(x, ...) {
   stop(
     "Don't know how to add caching to a plain function. ",
     "If this is a render* function for Shiny, it may need to be updated. ",
-    "Please see ?shiny::withCache for more information."
+    "Please see ?shiny::bindCache for more information."
   )
 }
 
@@ -543,7 +543,7 @@ extractCacheHint <- function(func) {
 
   if (isFALSE(cacheHint)) {
     stop(
-      "Cannot call `withCache()` on this object because it is marked as not cacheable.",
+      "Cannot call `bindCache()` on this object because it is marked as not cacheable.",
       call. = FALSE
     )
   }

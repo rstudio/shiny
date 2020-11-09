@@ -124,6 +124,8 @@ Collate:
     'globals.R'
     'app-state.R'
     'app_template.R'
+    'bind-cache.R'
+    'bind-event.R'
     'bookmark-state-local.R'
     'stack.R'
     'bookmark-state.R'
@@ -200,8 +202,6 @@ Collate:
     'test.R'
     'update-input.R'
     'viewer.R'
-    'with-cache.R'
-    'with-event.R'
 RoxygenNote: 7.1.1
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)

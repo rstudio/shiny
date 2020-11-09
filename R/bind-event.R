@@ -3,7 +3,7 @@
 #' @description
 #'
 #' Modify an object to respond to "event-like" reactive inputs, values, and
-#' expressions. `withEvent()` can be used with reactive expressions, render
+#' expressions. `bindEvent()` can be used with reactive expressions, render
 #' functions, and observers. The resulting object takes a reactive dependency on
 #' the `...` arguments, and not on the original object's code. This can, for
 #' example, be used to make an observer execute only when a button is pressed.
@@ -21,7 +21,7 @@
 #'
 #'   These situations demand a more imperative, "event handling" style of
 #'   programming that is possible--but not particularly intuitive--using the
-#'   reactive programming primitives [observe()] and [isolate()]. `withEvent()`
+#'   reactive programming primitives [observe()] and [isolate()]. `bindEvent()`
 #'   provides a straightforward API for event handling that wraps `observe` and
 #'   `isolate`.
 #'
@@ -30,23 +30,23 @@
 #'   upstream reactive inputs change), that is an **event**, and it will cause
 #'   the original object's code to execute.
 #'
-#'   Use `withEvent()` with `observe()` whenever you want to *perform an action*
+#'   Use `bindEvent()` with `observe()` whenever you want to *perform an action*
 #'   in response to an event. (Note that "recalculate a value" does not
 #'   generally count as performing an action -- use [reactive()] for that.) The
 #'   first argument is observer whose code should be executed whenever the event
 #'   occurs.
 #'
-#'   Use `withEvent()` with `reactive()`to create a *calculated value* that only
+#'   Use `bindEvent()` with `reactive()`to create a *calculated value* that only
 #'   updates in response to an event. This is just like a normal [reactive
 #'   expression][reactive] except it ignores all the usual invalidations that
 #'   come from its reactive dependencies; it only invalidates in response to the
 #'   given event.
 #'
-#'   `withEvent()` is often used with [withCache()].
+#'   `bindEvent()` is often used with [bindCache()].
 #'
 #' @section ignoreNULL and ignoreInit:
 #'
-#'   `withEvent()` takes an `ignoreNULL` parameter that affects behavior when
+#'   `bindEvent()` takes an `ignoreNULL` parameter that affects behavior when
 #'   the event expression evaluates to `NULL` (or in the special case of an
 #'   [actionButton()], `0`). In these cases, if `ignoreNULL` is `TRUE`, then it
 #'   will raise a silent [validation][validate] error. This is useful behavior
@@ -56,7 +56,7 @@
 #'   perform the action/calculation and just let the user re-initiate it (like a
 #'   "Recalculate" button).
 #'
-#'   `withEvent()` also takes an `ignoreInit` argument. By default, reactive
+#'   `bindEvent()` also takes an `ignoreInit` argument. By default, reactive
 #'   expressions and observers will run on the first reactive flush after they
 #'   are created (except if, at that moment, the event expression evaluates to
 #'   `NULL` and `ignoreNULL` is `TRUE`). But when responding to a click of an
@@ -67,7 +67,7 @@
 #'   being triggered when it is created/initialized. Similarly, if you're
 #'   setting up a reactive that responds to a dynamically created button used to
 #'   refresh some data (which is then returned by that `reactive`), then you
-#'   should use `reactive(...) %>% withEvent(..., ignoreInit = TRUE)` if you
+#'   should use `reactive(...) %>% bindEvent(..., ignoreInit = TRUE)` if you
 #'   want to let the user decide if/when they want to refresh the data (since,
 #'   depending on the app, this may be a computationally expensive operation).
 #'
@@ -103,29 +103,29 @@
 
 #' @section Types of objects:
 #'
-#'   `withEvent()` can be used with reactive expressions, observers, and shiny
+#'   `bindEvent()` can be used with reactive expressions, observers, and shiny
 #'   render functions.
 #'
-#'   When `withEvent()` is used with `reactive()`, it creates a new reactive
+#'   When `bindEvent()` is used with `reactive()`, it creates a new reactive
 #'   expression object.
 #'
-#'   When `withEvent()` is used with `observe()`, it creats a new observer and
+#'   When `bindEvent()` is used with `observe()`, it creats a new observer and
 #'   calls the `$destroy()` method on the original observer, so that the
 #'   original observer will not execute.
 #'
 #' @section Combining event expressions and with caching:
 #'
-#'   In many cases, it makes sense to use `withEvent()` along with
-#'   `withCache()`, because they each can reduce the amount of work done on the
+#'   In many cases, it makes sense to use `bindEvent()` along with
+#'   `bindCache()`, because they each can reduce the amount of work done on the
 #'   server. For example, you could have [sliderInput]s `x` and `y` and a
 #'   `reactive()` that performs a time-consuming operation with those values.
-#'   Using `withCache()` can speed things up, especially if there are multiple
+#'   Using `bindCache()` can speed things up, especially if there are multiple
 #'   users. But it might make sense to also not do the computation until the
 #'   user sets both `x` and `y`, and then clicks on an [actionButton] named
 #'   `go`.
 #'
 #'   To use both caching and events, the object should first be passed to
-#'   `withCache()`, then `withEvent()`. For example:
+#'   `bindCache()`, then `bindEvent()`. For example:
 
 #'
 #'   ```
@@ -133,15 +133,15 @@
 #'       Sys.sleep(2)  # Pretend this is an expensive computation
 #'       input$x * input$y
 #'     }) %>%
-#'     withCache(input$x, input$y) %>%
-#'     withEvent(input$go)
+#'     bindCache(input$x, input$y) %>%
+#'     bindEvent(input$go)
 #'  ```
 
 #'
 #'
 #' Anything that consumes `r()` will take a reactive dependency on the event
-#' expression given to `withEvent()`, and not the cache key expression given to
-#' `withCache()`. In this case, it is just `input$go`.
+#' expression given to `bindEvent()`, and not the cache key expression given to
+#' `bindCache()`. In this case, it is just `input$go`.
 #'
 #' @param x An object to wrap so that is triggered only when a the specified
 #'   event occurs.
@@ -161,7 +161,7 @@
 #'   there are multiple expressions in the `...`, then it will take a dependency
 #'   on all of them.
 #' @export
-withEvent <- function(x, ..., ignoreNULL = TRUE, ignoreInit = FALSE,
+bindEvent <- function(x, ..., ignoreNULL = TRUE, ignoreInit = FALSE,
                       once = FALSE, label = NULL)
 {
   check_dots_unnamed()
@@ -169,18 +169,18 @@ withEvent <- function(x, ..., ignoreNULL = TRUE, ignoreInit = FALSE,
   force(ignoreInit)
   force(once)
 
-  UseMethod("withEvent")
+  UseMethod("bindEvent")
 }
 
 
 #' @export
-withEvent.default <- function(x, ...) {
+bindEvent.default <- function(x, ...) {
   stop("Don't know how to handle object with class ", paste(class(x), collapse = ", "))
 }
 
 
 #' @export
-withEvent.reactiveExpr <- function(x, ..., ignoreNULL = TRUE, ignoreInit = FALSE,
+bindEvent.reactiveExpr <- function(x, ..., ignoreNULL = TRUE, ignoreInit = FALSE,
   label = NULL)
 {
   domain <- reactive_get_domain(x)
@@ -221,7 +221,7 @@ withEvent.reactiveExpr <- function(x, ..., ignoreNULL = TRUE, ignoreInit = FALSE
 
 
 #' @export
-withEvent.shiny.render.function <- function(x, ..., ignoreNULL = TRUE, ignoreInit = FALSE) {
+bindEvent.shiny.render.function <- function(x, ..., ignoreNULL = TRUE, ignoreInit = FALSE) {
   eventFunc <- make_quos_func(enquos(...))
 
   valueFunc <- x
@@ -250,11 +250,11 @@ withEvent.shiny.render.function <- function(x, ..., ignoreNULL = TRUE, ignoreIni
 
 
 #' @export
-withEvent.Observer <- function(x, ..., ignoreNULL = TRUE, ignoreInit = FALSE,
+bindEvent.Observer <- function(x, ..., ignoreNULL = TRUE, ignoreInit = FALSE,
   once = FALSE, label = NULL)
 {
   if (isTRUE(x$.destroyed)) {
-    stop("Can't call withEvent() on an observer that has been destroyed.")
+    stop("Can't call bindEvent() on an observer that has been destroyed.")
   }
 
   eventFunc <- make_quos_func(enquos(...))
@@ -308,9 +308,9 @@ withEvent.Observer <- function(x, ..., ignoreNULL = TRUE, ignoreInit = FALSE,
 
 
 #' @export
-withEvent.reactive.event <-  function(x, ...) {
-  stop("withEvent() has already been called on the object.")
+bindEvent.reactive.event <-  function(x, ...) {
+  stop("bindEvent() has already been called on the object.")
 }
 
 #' @export
-withEvent.Observer.event <- withEvent.reactive.event
+bindEvent.Observer.event <- bindEvent.reactive.event

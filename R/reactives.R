@@ -979,7 +979,7 @@ reactive <- function(x, env = parent.frame(), quoted = FALSE,
 
   if (!missing(env) || !missing(quoted)) {
     # Will unquote this and start warning in a later version of Shiny.
-    # deprecatedEnvQuotedMessage()
+    deprecatedEnvQuotedMessage()
     if (!quoted) {
       x <- enexpr(x)
     }
@@ -1412,7 +1412,7 @@ observe <- function(x, env = parent.frame(), quoted = FALSE,
     # Eventually we'll be able to get rid of this code path, and the env and
     # quoted arguments.
     # Will unquote this and start warning in a later version of Shiny.
-    # deprecatedEnvQuotedMessage()
+    deprecatedEnvQuotedMessage()
     if (!quoted) {
       x <- enexpr(x)
     }
@@ -2591,13 +2591,4 @@ throttle <- function(r, millis, priority = 100, domain = getDefaultReactiveDomai
   eventReactive(v$trigger, {
     r()
   }, label = "throttle result", ignoreNULL = FALSE, domain = domain)
-}
-
-
-deprecatedEnvQuotedMessage <- function(env_arg = "env", quoted_arg = "quoted") {
-  shinyDeprecated(msg = paste(
-    sprintf("The `%s` and `%s` arguments are deprecated.", env_arg, quoted_arg),
-    "Please use quosures from rlang instead.",
-    "See https://github.com/rstudio/shiny/issues/3108 for more information."
-  ))
 }

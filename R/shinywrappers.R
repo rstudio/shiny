@@ -70,7 +70,7 @@ markRenderFunction <- function(
     }
   }
 
-  if (!is.null(cacheHint) && !isFALSE(cacheHint)) {
+  if (!is.null(cacheHint) && !is_false(cacheHint)) {
     if (!is.list(cacheHint)) {
       cacheHint <- list(cacheHint)
     }

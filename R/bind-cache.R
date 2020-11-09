@@ -588,7 +588,7 @@ make_quos_func <- function(quos) {
 extractCacheHint <- function(func) {
   cacheHint <- attr(func, "cacheHint", exact = TRUE)
 
-  if (isFALSE(cacheHint)) {
+  if (is_false(cacheHint)) {
     stop(
       "Cannot call `bindCache()` on this object because it is marked as not cacheable.",
       call. = FALSE

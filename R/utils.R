@@ -220,6 +220,11 @@ sort_c <- function(x, ...) {
   sort(x, method = "radix", ...)
 }
 
+# Base R isFALSE function was added in R 3.5.0.
+is_false <- function(x) {
+  identical(x, FALSE)
+}
+
 # Wrapper around list2env with a NULL check. In R <3.2.0, if an empty unnamed
 # list is passed to list2env(), it errors. But an empty named list is OK. For
 # R >=3.2.0, this wrapper is not necessary.
@@ -427,7 +432,8 @@ makeFunction <- function(args = pairlist(), body, env = parent.frame()) {
 #' Convert an expression to a function
 #'
 #' This is to be called from another function, because it will attempt to get
-#' an unquoted expression from two calls back.
+#' an unquoted expression from two calls back. Note: as of Shiny 1.6.0, it is
+#' recommended to use [quoToFunction()] instead.
 #'
 #' If expr is a quoted expression, then this just converts it to a function.
 #' If expr is a function, then this simply returns expr (and prints a
@@ -485,7 +491,8 @@ exprToFunction <- function(expr, env=parent.frame(), quoted=FALSE) {
 #' Install an expression as a function
 #'
 #' Installs an expression in the given environment as a function, and registers
-#' debug hooks so that breakpoints may be set in the function.
+#' debug hooks so that breakpoints may be set in the function. Note: as of
+#' Shiny 1.6.0, it is recommended to use [quoToFunction()] instead.
 #'
 #' This function can replace `exprToFunction` as follows: we may use
 #' `func <- exprToFunction(expr)` if we do not want the debug hooks, or
@@ -531,6 +538,44 @@ installExprFunction <- function(expr, name, eval.env = parent.frame(2),
   assign(name, func, envir = assign.env)
 }
 
+#' Convert a quosure to a function for a Shiny render function
+#'
+#' This takes a quosure and label, and wraps them into a function that should be
+#' passed to [createRenderFunction()] or [markRenderFunction()].
+#'
+#' This function was added in Shiny 1.6.0. Previously, it was recommended to use
+#' [installExprFunction()] or [exprToFunction()] in render functions, but now we
+#' recommend using [quoToFunction()], because it does not require `env` and
+#' `quoted` arguments -- that information is captured by quosures provided by
+#' \pkg{rlang}.
+#'
+#' @param q A quosure.
+#' @inheritParams installExprFunction
+#'
+#' @examples
+#' # A very simple render function
+#' renderTriple <- function(expr) {
+#'   func <- quoToFunction(rlang::enquo(expr), "renderTriple")
+#'
+#'   createRenderFunction(
+#'     func,
+#'     transform = function(value, session, name, ...) {
+#'       paste(rep(value, 3), collapse=", ")
+#'     },
+#'     outputFunc = textOutput
+#'   )
+#' }
+#'
+#' @export
+quoToFunction <- function(q, label, ..stacktraceon = FALSE) {
+  q <- as_quosure(q)
+  # Use new_function() instead of as_function(), because as_function() adds an
+  # extra parent environment. (This may not actually be a problem, though.)
+  func <- new_function(NULL, get_expr(q), get_env(q))
+  wrapFunctionLabel(func, label, ..stacktraceon = ..stacktraceon)
+}
+
+
 # Utility function for creating a debugging label, given an expression.
 # `expr` is a quoted expression.
 # `function_name` is the name of the calling function.
@@ -546,24 +591,6 @@ exprToLabel <- function(expr, function_name, label = NULL) {
   if (length(srcref) >= 2) attr(label, "srcref") <- srcref[[2]]
   attr(label, "srcfile") <- srcFileOfRef(srcref[[1]])
   label
-}
-
-# Remove the source ref attribute from a language object. Used in places where
-# we would use utils::removeSource(), but that function only worked on functions
-# until R 3.6. With 3.6 and later, it worked on language objects. removeSource()
-# is actually smarter than this function for handling language objects, since it
-# will recurse into the object, but this is good enough for our purposes.
-remove_srcref <- function(x) {
-  if (is.function(x)) {
-    return(utils::removeSource(x))
-  }
-  if (is.language(x)) {
-    attr(x, "srcref") <- NULL
-    attr(x, "srcfile") <- NULL
-    attr(x, "wholeSrcref") <- NULL
-    return(x)
-  }
-  stop("x must be a function or language object.")
 }
 
 #' Parse a GET query string from a URL
@@ -1621,18 +1648,17 @@ wrapFunctionLabel <- function(func, name, ..stacktraceon = FALSE) {
   assign(name, func, environment())
   registerDebugHook(name, environment(), name)
 
-  relabelWrapper <- eval(substitute(
-    function(...) {
-      # This `f` gets renamed to the value of `name`. Note that it may not
-      # print as the new name, because of source refs stored in the function.
-      if (..stacktraceon)
-        ..stacktraceon..(f(...))
-      else
-        f(...)
-    },
-    list(f = as.name(name))
-  ))
+  if (..stacktraceon) {
+    # We need to wrap the `...` in `!!quote(...)` so that R CMD check won't
+    # complain about "... may be used in an incorrect context"
+    body <- expr({ ..stacktraceon..((!!name)(!!quote(...))) })
+  } else {
+    body <- expr({ (!!name)(!!quote(...)) })
+  }
+  relabelWrapper <- new_function(pairlist2(... =), body, environment())
 
+  # Preserve the original function that was passed in; is used for caching.
+  attr(relabelWrapper, "wrappedFunc") <- func
   relabelWrapper
 }
 

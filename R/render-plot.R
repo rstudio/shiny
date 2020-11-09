@@ -171,7 +171,7 @@ renderPlot <- function(expr, width = 'auto', height = 'auto', res = 72, ...,
   outputFunc <- plotOutput
   if (!identical(height, 'auto')) formals(outputFunc)['height'] <- list(NULL)
 
-  markRenderFunction(outputFunc, renderFunc, outputArgs = outputArgs)
+  markRenderFunction(outputFunc, renderFunc, outputArgs, cacheHint = FALSE)
 }
 
 resizeSavedPlot <- function(name, session, result, width, height, alt, pixelratio, res, ...) {

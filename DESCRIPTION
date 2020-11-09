@@ -1,7 +1,7 @@
 Package: shiny
 Type: Package
 Title: Web Application Framework for R
-Version: 1.5.0.9004
+Version: 1.5.0.9005
 Authors@R: c(
     person("Winston", "Chang", role = c("aut", "cre"), email = "winston@rstudio.com"),
     person("Joe", "Cheng", role = "aut", email = "joe@rstudio.com"),
@@ -124,6 +124,8 @@ Collate:
     'globals.R'
     'app-state.R'
     'app_template.R'
+    'bind-cache.R'
+    'bind-event.R'
     'bookmark-state-local.R'
     'stack.R'
     'bookmark-state.R'
@@ -178,7 +180,6 @@ Collate:
     'priorityqueue.R'
     'progress.R'
     'react.R'
-    'reactive-cached.R'
     'reexports.R'
     'render-cached-plot.R'
     'render-plot.R'

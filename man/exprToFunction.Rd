@@ -16,7 +16,8 @@ calling environment two steps back.}
 }
 \description{
 This is to be called from another function, because it will attempt to get
-an unquoted expression from two calls back.
+an unquoted expression from two calls back. Note: as of Shiny 1.6.0, it is
+recommended to use \code{\link[=quoToFunction]{quoToFunction()}} instead.
 }
 \details{
 If expr is a quoted expression, then this just converts it to a function.

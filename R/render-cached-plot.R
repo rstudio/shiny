@@ -40,95 +40,6 @@
 #' if there are multiple plots that have the same `cacheKeyExpr`, they
 #' will not have cache key collisions.
 #'
-#' @section Cache scoping:
-#'
-#'   There are a number of different ways you may want to scope the cache. For
-#'   example, you may want each user session to have their own plot cache, or
-#'   you may want each run of the application to have a cache (shared among
-#'   possibly multiple simultaneous user sessions), or you may want to have a
-#'   cache that persists even after the application is shut down and started
-#'   again.
-#'
-#'   To control the scope of the cache, use the `cache` parameter. There
-#'   are two ways of having Shiny automatically create and clean up the disk
-#'   cache.
-#'
-#' \describe{
-#'   \item{1}{To scope the cache to one run of a Shiny application (shared
-#'     among possibly multiple user sessions), use `cache="app"`. This
-#'     is the default. The cache will be shared across multiple sessions, so
-#'     there is potentially a large performance benefit if there are many users
-#'     of the application. When the application stops running, the cache will
-#'     be deleted. If plots cannot be safely shared across users, this should
-#'     not be used.}
-#'   \item{2}{To scope the cache to one session, use `cache="session"`.
-#'     When a new user session starts --- in other words, when a web browser
-#'     visits the Shiny application --- a new cache will be created on disk
-#'     for that session. When the session ends, the cache will be deleted.
-#'     The cache will not be shared across multiple sessions.}
-#'  }
-#'
-#'   If either `"app"` or `"session"` is used, the cache will be 10 MB
-#'   in size, and will be stored stored in memory, using a
-#'   [cachem::cache_mem()] object. Note that the cache space will be shared
-#'   among all cached plots within a single application or session.
-#'
-#'   In some cases, you may want more control over the caching behavior. For
-#'   example, you may want to use a larger or smaller cache, share a cache
-#'   among multiple R processes, or you may want the cache to persist across
-#'   multiple runs of an application, or even across multiple R processes.
-#'
-#'   To use different settings for an application-scoped cache, you can call
-#'   [shinyOptions()] at the top of your app.R, server.R, or
-#'   global.R. For example, this will create a cache with 20 MB of space
-#'   instead of the default 10 MB:
-#'   \preformatted{
-#'   shinyOptions(cache = cachem::cache_mem(size = 20e6))
-#'   }
-#'
-#'   To use different settings for a session-scoped cache, you can call
-#'   [shinyOptions()] at the top of your server function. To use
-#'   the session-scoped cache, you must also call `renderCachedPlot` with
-#'   `cache="session"`. This will create a 20 MB cache for the session:
-#'   \preformatted{
-#'   function(input, output, session) {
-#'     shinyOptions(cache = cachem::cache_mem(size = 20e6))
-#'
-#'     output$plot <- renderCachedPlot(
-#'       ...,
-#'       cache = "session"
-#'     )
-#'   }
-#'   }
-#'
-#'   If you want to create a cache that is shared across multiple concurrent
-#'   R processes, you can use a [cachem::cache_disk()]. You can create an
-#'   application-level shared cache by putting this at the top of your app.R,
-#'   server.R, or global.R:
-#'   \preformatted{
-#'   shinyOptions(cache = cachem::cache_disk(file.path(dirname(tempdir()), "myapp-cache"))
-#'   }
-#'
-#'   This will create a subdirectory in your system temp directory named
-#'   `myapp-cache` (replace `myapp-cache` with a unique name of
-#'   your choosing). On most platforms, this directory will be removed when
-#'   your system reboots. This cache will persist across multiple starts and
-#'   stops of the R process, as long as you do not reboot.
-#'
-#'   To have the cache persist even across multiple reboots, you can create the
-#'   cache in a location outside of the temp directory. For example, it could
-#'   be a subdirectory of the application:
-#'   \preformatted{
-#'   shinyOptions(cache = cachem::cache_disk("./myapp-cache"))
-#'   }
-#'
-#'   In this case, resetting the cache will have to be done manually, by deleting
-#'   the directory.
-#'
-#'   You can also scope a cache to just one plot, or selected plots. To do that,
-#'   create a [cachem::cache_mem()] or [cachem::cache_disk()], and pass it
-#'   as the `cache` argument of `renderCachedPlot`.
-#'
 #' @section Interactive plots:
 #'
 #'   `renderCachedPlot` can be used to create interactive plots. See
@@ -136,7 +47,7 @@
 #'
 #'
 #' @inheritParams renderPlot
-#' @inheritParams cachedReactive
+#' @inheritParams bindCache
 #' @param cacheKeyExpr An expression that returns a cache key. This key should
 #'   be a unique identifier for a plot: the assumption is that if the cache key
 #'   is the same, then the plot will be the same.
@@ -152,7 +63,8 @@
 #'
 #' @seealso See [renderPlot()] for the regular, non-cached version of
 #'   this function. For more about configuring caches, see
-#'   [cachem::cache_mem()] and [cachem::cache_disk()].
+#'   [cachem::cache_mem()] and [cachem::cache_disk()]. For caching other types
+#'   of objects, see `bindCache()`.
 #'
 #'
 #' @examples
@@ -302,7 +214,7 @@ renderCachedPlot <- function(expr,
 
   # This ..stacktraceon is matched by a ..stacktraceoff.. when plotFunc
   # is called
-  installExprFunction(expr, "func", parent.frame(), quoted = FALSE, ..stacktraceon = TRUE)
+  func <- quoToFunction(enquo(expr), "renderCachedPlot", ..stacktraceon = TRUE)
   # This is so that the expr doesn't re-execute by itself; it needs to be
   # triggered by the cache key (or width/height) changing.
   isolatedFunc <- function() isolate(func())
@@ -314,10 +226,10 @@ renderCachedPlot <- function(expr,
             "'sizePolicy' is used instead.")
   }
 
-  cacheKeyExpr <- substitute(cacheKeyExpr)
+  cacheKeyExpr <- enquo(cacheKeyExpr)
   # The real cache key we'll use also includes width, height, res, pixelratio.
   # This is just the part supplied by the user.
-  userCacheKey <- reactive(cacheKeyExpr, env = parent.frame(), quoted = TRUE, label = "userCacheKey")
+  userCacheKey <- reactive(cacheKeyExpr, label = "userCacheKey")
 
   # The width and height of the plot to draw, given from sizePolicy. These
   # values get filled by an observer below.
@@ -546,7 +458,7 @@ renderCachedPlot <- function(expr,
   outputFunc <- plotOutput
   formals(outputFunc)['height'] <- list(NULL)
 
-  markRenderFunction(outputFunc, renderFunc, outputArgs = outputArgs)
+  markRenderFunction(outputFunc, renderFunc, outputArgs, cacheHint = FALSE)
 }
 
 

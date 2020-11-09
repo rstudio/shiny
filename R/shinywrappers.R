@@ -1,34 +1,91 @@
-utils::globalVariables('func')
+utils::globalVariables('func', add = TRUE)
 
 #' Mark a function as a render function
 #'
-#' Should be called by implementers of `renderXXX` functions in order to
-#' mark their return values as Shiny render functions, and to provide a hint to
-#' Shiny regarding what UI function is most commonly used with this type of
-#' render function. This can be used in R Markdown documents to create complete
-#' output widgets out of just the render function.
+#' Should be called by implementers of `renderXXX` functions in order to mark
+#' their return values as Shiny render functions, and to provide a hint to Shiny
+#' regarding what UI function is most commonly used with this type of render
+#' function. This can be used in R Markdown documents to create complete output
+#' widgets out of just the render function.
 #'
 #' @param uiFunc A function that renders Shiny UI. Must take a single argument:
 #'   an output ID.
 #' @param renderFunc A function that is suitable for assigning to a Shiny output
 #'   slot.
 #' @param outputArgs A list of arguments to pass to the `uiFunc`. Render
-#'   functions should include `outputArgs = list()` in their own parameter
-#'   list, and pass through the value to `markRenderFunction`, to allow
-#'   app authors to customize outputs. (Currently, this is only supported for
-#'   dynamically generated UIs, such as those created by Shiny code snippets
-#'   embedded in R Markdown documents).
+#'   functions should include `outputArgs = list()` in their own parameter list,
+#'   and pass through the value to `markRenderFunction`, to allow app authors to
+#'   customize outputs. (Currently, this is only supported for dynamically
+#'   generated UIs, such as those created by Shiny code snippets embedded in R
+#'   Markdown documents).
+#' @param cacheHint One of `"auto"`, `FALSE`, or some other information to
+#'   identify this instance for caching using [bindCache()]. If `"auto"`, it
+#'   will try to automatically infer caching information. If `FALSE`, do not
+#'   allow caching for the object. Some render functions (such as [renderPlot])
+#'   contain internal state that makes them unsuitable for caching.
 #' @return The `renderFunc` function, with annotations.
+#'
+#' @seealso [createRenderFunction()], [quoToFunction()]
 #' @export
-markRenderFunction <- function(uiFunc, renderFunc, outputArgs = list()) {
+markRenderFunction <- function(
+  uiFunc,
+  renderFunc,
+  outputArgs = list(),
+  cacheHint = "auto"
+) {
+  force(renderFunc)
+
   # a mutable object that keeps track of whether `useRenderFunction` has been
   # executed (this usually only happens when rendering Shiny code snippets in
   # an interactive R Markdown document); its initial value is FALSE
   hasExecuted <- Mutable$new()
   hasExecuted$set(FALSE)
 
-  origRenderFunc <- renderFunc
-  renderFunc <- function(...) {
+  if (is.null(uiFunc)) {
+    uiFunc <- function(id) {
+      pre(
+        "No UI/output function provided for render function. ",
+        "Please see ?shiny::markRenderFunction and ?shiny::createRenderFunction."
+      )
+    }
+  }
+
+  if (identical(cacheHint, "auto")) {
+    origUserFunc <- attr(renderFunc, "wrappedFunc", exact = TRUE)
+    # The result could be NULL, but don't warn now because it'll only affect
+    # users if they try to use caching. We'll warn when someone calls
+    # bindCache() on this object.
+    if (is.null(origUserFunc)) {
+      cacheHint <- NULL
+    } else {
+      # Add in the wrapper render function and they output function, because
+      # they can be useful for distinguishing two renderX functions that receive
+      # the same user expression but do different things with them (like
+      # renderText and renderPrint).
+      cacheHint <- list(
+        origUserFunc = origUserFunc,
+        renderFunc   = renderFunc,
+        outputFunc   = uiFunc
+      )
+    }
+  }
+
+  if (!is.null(cacheHint) && !is_false(cacheHint)) {
+    if (!is.list(cacheHint)) {
+      cacheHint <- list(cacheHint)
+    }
+    # For functions, remove the env and source refs because they can cause
+    #   spurious differences.
+    # For expressions, remove source refs.
+    # For everything else, do nothing.
+    cacheHint <- lapply(cacheHint, function(x) {
+      if      (is.function(x)) formalsAndBody(x)
+      else if (is.language(x)) remove_source(x)
+      else                     x
+    })
+  }
+
+  wrappedRenderFunc <- function(...) {
     # if the user provided something through `outputArgs` BUT the
     # `useRenderFunction` was not executed, then outputArgs will be ignored,
     # so throw a warning to let user know the correct usage
@@ -41,15 +98,18 @@ markRenderFunction <- function(uiFunc, renderFunc, outputArgs = list()) {
       # stop warning from happening again for the same object
       hasExecuted$set(TRUE)
     }
-    if (is.null(formals(origRenderFunc))) origRenderFunc()
-    else origRenderFunc(...)
+    if (is.null(formals(renderFunc))) renderFunc()
+    else renderFunc(...)
   }
 
-  structure(renderFunc,
-            class       = c("shiny.render.function", "function"),
-            outputFunc  = uiFunc,
-            outputArgs  = outputArgs,
-            hasExecuted = hasExecuted)
+  structure(
+    wrappedRenderFunc,
+    class       = c("shiny.render.function", "function"),
+    outputFunc  = uiFunc,
+    outputArgs  = outputArgs,
+    hasExecuted = hasExecuted,
+    cacheHint   = cacheHint
+  )
 }
 
 #' @export
@@ -58,6 +118,9 @@ print.shiny.render.function <- function(x, ...) {
 }
 
 #' Implement render functions
+#'
+#' This function is a wrapper for [markRenderFunction()] which provides support
+#' for async computation via promises.
 #'
 #' @param func A function without parameters, that returns user data. If the
 #'   returned value is a promise, then the render function will proceed in async
@@ -70,21 +133,34 @@ print.shiny.render.function <- function(x, ...) {
 #' @param outputFunc The UI function that is used (or most commonly used) with
 #'   this render function. This can be used in R Markdown documents to create
 #'   complete output widgets out of just the render function.
-#' @param outputArgs A list of arguments to pass to the `outputFunc`.
-#'   Render functions should include `outputArgs = list()` in their own
-#'   parameter list, and pass through the value as this argument, to allow app
-#'   authors to customize outputs. (Currently, this is only supported for
-#'   dynamically generated UIs, such as those created by Shiny code snippets
-#'   embedded in R Markdown documents).
+#' @inheritParams markRenderFunction
 #' @return An annotated render function, ready to be assigned to an
 #'   `output` slot.
 #'
+#' @seealso [quoToFunction()], [markRenderFunction()].
+#'
+#' @examples
+#' # A very simple render function
+#' renderTriple <- function(expr) {
+#'   func <- quoToFunction(rlang::enquo(expr), "renderTriple")
+#'
+#'   createRenderFunction(
+#'     func,
+#'     transform = function(value, session, name, ...) {
+#'       paste(rep(value, 3), collapse=", ")
+#'     },
+#'     outputFunc = textOutput
+#'   )
+#' }
+#'
 #' @export
 createRenderFunction <- function(
-  func, transform = function(value, session, name, ...) value,
-  outputFunc = NULL, outputArgs = NULL
+  func,
+  transform = function(value, session, name, ...) value,
+  outputFunc = NULL,
+  outputArgs = NULL,
+  cacheHint = "auto"
 ) {
-
   renderFunc <- function(shinysession, name, ...) {
     hybrid_chain(
       func(),
@@ -94,10 +170,14 @@ createRenderFunction <- function(
     )
   }
 
-  if (!is.null(outputFunc))
-    markRenderFunction(outputFunc, renderFunc, outputArgs = outputArgs)
-  else
-    renderFunc
+  # Hoist func's wrappedFunc attribute into renderFunc, so that when we pass
+  # renderFunc on to markRenderFunction, it is able to find the original user
+  # function.
+  if (identical(cacheHint, "auto")) {
+    attr(renderFunc, "wrappedFunc") <- attr(func, "wrappedFunc", exact = TRUE)
+  }
+
+  markRenderFunction(outputFunc, renderFunc, outputArgs, cacheHint)
 }
 
 useRenderFunction <- function(renderFunc, inline = FALSE) {
@@ -333,7 +413,10 @@ renderImage <- function(expr, env=parent.frame(), quoted=FALSE,
       c(src = session$fileUrl(name, file=imageinfo$src, contentType=contentType),
         extra_attr)
     },
-    imageOutput, outputArgs)
+    imageOutput,
+    outputArgs,
+    cacheHint = FALSE
+  )
 }
 
 # TODO: If we ever take a dependency on fs, it'd be great to replace this with
@@ -405,8 +488,17 @@ isTemp <- function(path, tempDir = tempdir(), mustExist) {
 #' @example res/text-example.R
 #' @export
 renderPrint <- function(expr, env = parent.frame(), quoted = FALSE,
-                        width = getOption('width'), outputArgs=list()) {
-  installExprFunction(expr, "func", env, quoted)
+                        width = getOption('width'), outputArgs=list())
+{
+  if (!missing(env) || !missing(quoted)) {
+    deprecatedEnvQuotedMessage()
+    if (!quoted) expr <- enexpr(expr)
+    q <- new_quosure(expr, env)
+  } else {
+    q <- enquo(expr)
+  }
+
+  func <- quoToFunction(q, "renderPrint")
 
   # Set a promise domain that sets the console width
   #   and captures output
@@ -432,7 +524,15 @@ renderPrint <- function(expr, env = parent.frame(), quoted = FALSE,
     )
   }
 
-  markRenderFunction(verbatimTextOutput, renderFunc, outputArgs = outputArgs)
+  markRenderFunction(
+    verbatimTextOutput,
+    renderFunc,
+    outputArgs,
+    cacheHint = list(
+      label = "renderPrint",
+      origUserExpr = body(func)
+    )
+  )
 }
 
 createRenderPrintPromiseDomain <- function(width) {
@@ -482,14 +582,24 @@ createRenderPrintPromiseDomain <- function(width) {
 #' @rdname renderPrint
 renderText <- function(expr, env=parent.frame(), quoted=FALSE,
                        outputArgs=list(), sep=" ") {
-  installExprFunction(expr, "func", env, quoted)
+
+  if (!missing(env) || !missing(quoted)) {
+    deprecatedEnvQuotedMessage()
+    if (!quoted) expr <- enexpr(expr)
+    q <- new_quosure(expr, env)
+  } else {
+    q <- enquo(expr)
+  }
+
+  func <- quoToFunction(q, "renderText")
 
   createRenderFunction(
     func,
     function(value, session, name, ...) {
       paste(utils::capture.output(cat(value, sep=sep)), collapse="\n")
     },
-    textOutput, outputArgs
+    textOutput,
+    outputArgs
   )
 }
 
@@ -603,7 +713,7 @@ downloadHandler <- function(filename, content, contentType=NA, outputArgs=list()
     shinysession$registerDownload(name, filename, contentType, content)
   }
   snapshotExclude(
-    markRenderFunction(downloadButton, renderFunc, outputArgs = outputArgs)
+    markRenderFunction(downloadButton, renderFunc, outputArgs, cacheHint = FALSE)
   )
 }
 
@@ -709,7 +819,8 @@ renderDataTable <- function(expr, options = NULL, searchDelay = 500,
     )
   }
 
-  renderFunc <- markRenderFunction(dataTableOutput, renderFunc, outputArgs = outputArgs)
+  renderFunc <- markRenderFunction(dataTableOutput, renderFunc, outputArgs,
+    cacheHint = FALSE)
 
   renderFunc <- snapshotPreprocessOutput(renderFunc, function(value) {
     # Remove the action field so that it's not saved in test snapshots. It

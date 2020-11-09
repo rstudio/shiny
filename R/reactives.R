@@ -947,6 +947,7 @@ Observable <- R6Class(
 #' @param domain See [domains].
 #' @param ..stacktraceon Advanced use only. For stack manipulation purposes; see
 #'   [stacktrace()].
+#' @param ... Not used.
 #' @return a function, wrapped in a S3 class "reactive"
 #'
 #' @examples
@@ -968,15 +969,39 @@ Observable <- R6Class(
 #' isolate(reactiveC())
 #' isolate(reactiveD())
 #' @export
-reactive <- function(x, env = parent.frame(), quoted = FALSE, label = NULL,
-                     domain = getDefaultReactiveDomain(),
-                     ..stacktraceon = TRUE) {
-  fun <- exprToFunction(x, env, quoted)
+reactive <- function(x, env = parent.frame(), quoted = FALSE,
+  ...,
+  label = NULL,
+  domain = getDefaultReactiveDomain(),
+  ..stacktraceon = TRUE)
+{
+  check_dots_empty()
+
+  if (!missing(env) || !missing(quoted)) {
+    # Will unquote this and start warning in a later version of Shiny.
+    deprecatedEnvQuotedMessage()
+    if (!quoted) {
+      x <- enexpr(x)
+    }
+    q <- new_quosure(x, env)
+  } else {
+    q <- enquo(x)
+  }
+
+  # Note: Unlike as_function(), new_function() won't work with nested
+  # quosures. However, it does have the advantage of preserving the
+  # parent.env() -- as_function will add one more layer in between.
+  fun <- new_function(NULL, get_expr(q), get_env(q))
   # Attach a label and a reference to the original user source for debugging
-  label <- exprToLabel(substitute(x), "reactive", label)
+  label <- exprToLabel(get_expr(q), "reactive", label)
 
   o <- Observable$new(fun, label, domain, ..stacktraceon = ..stacktraceon)
-  structure(o$getValue, observable = o, class = c("reactiveExpr", "reactive", "function"))
+  structure(
+    o$getValue,
+    observable = o,
+    cacheHint = list(userExpr = remove_source(get_expr(q))),
+    class = c("reactiveExpr", "reactive", "function")
+  )
 }
 
 # Given the srcref to a reactive expression, attempts to figure out what the
@@ -1046,6 +1071,14 @@ execCount <- function(x) {
     return(x$.execCount)
   else
     stop('Unexpected argument to execCount')
+}
+
+# Internal utility functions for extracting things out of reactives.
+reactive_get_value_func <- function(x) {
+  attr(x, "observable", exact = TRUE)$.origFunc
+}
+reactive_get_domain <- function(x) {
+  attr(x, "observable", exact = TRUE)$.domain
 }
 
 # Observer ------------------------------------------------------------------
@@ -1308,6 +1341,8 @@ Observer <- R6Class(
 #'   automatically destroyed when its domain (if any) ends.
 #' @param ..stacktraceon Advanced use only. For stack manipulation purposes; see
 #'   [stacktrace()].
+#' @param ... Not used.
+#'
 #' @return An observer reference class object. This object has the following
 #'   methods:
 #'   \describe{
@@ -1362,18 +1397,48 @@ Observer <- R6Class(
 #' # are at the console, you can force a flush with flushReact()
 #' shiny:::flushReact()
 #' @export
-observe <- function(x, env=parent.frame(), quoted=FALSE, label=NULL,
-                    suspended=FALSE, priority=0,
-                    domain=getDefaultReactiveDomain(), autoDestroy = TRUE,
-                    ..stacktraceon = TRUE) {
+observe <- function(x, env = parent.frame(), quoted = FALSE,
+  ...,
+  label = NULL,
+  suspended = FALSE,
+  priority = 0,
+  domain = getDefaultReactiveDomain(),
+  autoDestroy = TRUE,
+  ..stacktraceon = TRUE)
+{
+  check_dots_empty()
 
-  fun <- exprToFunction(x, env, quoted)
-  if (is.null(label))
-    label <- sprintf('observe(%s)', paste(deparse(body(fun)), collapse='\n'))
+  if (!missing(env) || !missing(quoted)) {
+    # Eventually we'll be able to get rid of this code path, and the env and
+    # quoted arguments.
+    # Will unquote this and start warning in a later version of Shiny.
+    deprecatedEnvQuotedMessage()
+    if (!quoted) {
+      x <- enexpr(x)
+    }
+    q <- new_quosure(x, env)
+  } else {
+    q <- enquo(x)
+  }
 
-  o <- Observer$new(fun, label=label, suspended=suspended, priority=priority,
-                    domain=domain, autoDestroy=autoDestroy,
-                    ..stacktraceon=..stacktraceon)
+  # Note: Unlike as_function(), new_function() won't work with nested
+  # quosures. However, it does have the advantage of preserving the
+  # parent.env() -- as_function will add one more layer in between.
+  fun <- new_function(NULL, get_expr(q), get_env(q))
+
+  if (is.null(label)) {
+    label <- sprintf('observe(%s)', paste(deparse(get_expr(q)), collapse='\n'))
+  }
+
+  o <- Observer$new(
+    fun,
+    label = label,
+    suspended = suspended,
+    priority = priority,
+    domain = domain,
+    autoDestroy = autoDestroy,
+    ..stacktraceon = ..stacktraceon
+  )
   invisible(o)
 }
 
@@ -2116,6 +2181,7 @@ maskReactiveContext <- function(expr) {
 #'   after the first time that the code in `handlerExpr` is run. This
 #'   pattern is useful when you want to subscribe to a event that should only
 #'   happen once.
+#' @param ... Currently not used.
 #'
 #' @return `observeEvent` returns an observer reference class object (see
 #'   [observe()]). `eventReactive` returns a reactive expression
@@ -2188,42 +2254,51 @@ maskReactiveContext <- function(expr) {
 observeEvent <- function(eventExpr, handlerExpr,
   event.env = parent.frame(), event.quoted = FALSE,
   handler.env = parent.frame(), handler.quoted = FALSE,
+  ...,
   label = NULL, suspended = FALSE, priority = 0,
   domain = getDefaultReactiveDomain(), autoDestroy = TRUE,
-  ignoreNULL = TRUE, ignoreInit = FALSE, once = FALSE) {
+  ignoreNULL = TRUE, ignoreInit = FALSE, once = FALSE)
+{
+  check_dots_empty()
 
-  eventFunc <- exprToFunction(eventExpr, event.env, event.quoted)
-  if (is.null(label))
-    label <- sprintf('observeEvent(%s)', paste(deparse(body(eventFunc)), collapse='\n'))
-  eventFunc <- wrapFunctionLabel(eventFunc, "observeEventExpr", ..stacktraceon = TRUE)
+  if (!missing(event.env) || !missing(event.quoted)) {
+    deprecatedEnvQuotedMessage("event.env", "event.quoted")
+    if (!event.quoted) {
+      eventExpr <- enexpr(eventExpr)
+    }
+    eventQuo <- new_quosure(eventExpr, event.env)
+  } else {
+    eventQuo <- enquo(eventExpr)
+  }
 
-  handlerFunc <- exprToFunction(handlerExpr, handler.env, handler.quoted)
-  handlerFunc <- wrapFunctionLabel(handlerFunc, "observeEventHandler", ..stacktraceon = TRUE)
+  if (!missing(handler.env) || !missing(handler.quoted)) {
+    deprecatedEnvQuotedMessage("handler.env", "handler.quoted")
+    if (!handler.quoted) {
+      handlerExpr <- enexpr(handlerExpr)
+    }
+    handlerExpr <- new_quosure(handlerExpr, handler.env)
+  } else {
+    handlerQuo <- enquo(handlerExpr)
+  }
 
-  initialized <- FALSE
+  handler <- observe(
+    !!handlerQuo,
+    label = "observeEventHandler",
+    suspended = suspended,
+    priority = priority,
+    domain = domain,
+    autoDestroy = TRUE,
+    ..stacktraceon = FALSE # TODO: Does this go in the bindEvent?
+  )
 
-  o <- observe({
-    hybrid_chain(
-      {eventFunc()},
-      function(value) {
-        if (ignoreInit && !initialized) {
-          initialized <<- TRUE
-          return()
-        }
-
-        if (ignoreNULL && isNullEvent(value)) {
-          return()
-        }
-
-        if (once) {
-          on.exit(o$destroy())
-        }
-
-        isolate(handlerFunc())
-      }
-    )
-  }, label = label, suspended = suspended, priority = priority, domain = domain,
-  autoDestroy = TRUE, ..stacktraceon = FALSE)
+  o <- bindEvent(
+    ignoreNULL = ignoreNULL,
+    ignoreInit = ignoreInit,
+    once = once,
+    label = label,
+    !!eventQuo,
+    x = handler
+  )
 
   invisible(o)
 }
@@ -2233,34 +2308,38 @@ observeEvent <- function(eventExpr, handlerExpr,
 eventReactive <- function(eventExpr, valueExpr,
   event.env = parent.frame(), event.quoted = FALSE,
   value.env = parent.frame(), value.quoted = FALSE,
+  ...,
   label = NULL, domain = getDefaultReactiveDomain(),
-  ignoreNULL = TRUE, ignoreInit = FALSE) {
+  ignoreNULL = TRUE, ignoreInit = FALSE)
+{
+  check_dots_empty()
 
-  eventFunc <- exprToFunction(eventExpr, event.env, event.quoted)
-  if (is.null(label))
-    label <- sprintf('eventReactive(%s)', paste(deparse(body(eventFunc)), collapse='\n'))
-  eventFunc <- wrapFunctionLabel(eventFunc, "eventReactiveExpr", ..stacktraceon = TRUE)
+  if (!missing(event.env) || !missing(event.quoted)) {
+    deprecatedEnvQuotedMessage("event.env", "event.quoted")
+    if (!event.quoted) {
+      eventExpr <- enexpr(eventExpr)
+    }
+    eventQuo <- new_quosure(eventExpr, event.env)
+  } else {
+    eventQuo <- enquo(eventExpr)
+  }
 
-  handlerFunc <- exprToFunction(valueExpr, value.env, value.quoted)
-  handlerFunc <- wrapFunctionLabel(handlerFunc, "eventReactiveHandler", ..stacktraceon = TRUE)
+  if (!missing(value.env) || !missing(value.quoted)) {
+    deprecatedEnvQuotedMessage("value.env", "handler.quoted")
+    if (!value.quoted) {
+      valueExpr <- enexpr(valueExpr)
+    }
+    valueQuo <- new_quosure(valueExpr, value.env)
+  } else {
+    valueQuo <- enquo(valueExpr)
+  }
 
-  initialized <- FALSE
-
-  invisible(reactive({
-    hybrid_chain(
-      eventFunc(),
-      function(value) {
-        if (ignoreInit && !initialized) {
-          initialized <<- TRUE
-          req(FALSE)
-        }
-
-        req(!ignoreNULL || !isNullEvent(value))
-
-        isolate(handlerFunc())
-      }
-    )
-  }, label = label, domain = domain, ..stacktraceon = FALSE))
+  invisible(bindEvent(
+    ignoreNULL = ignoreNULL,
+    ignoreInit = ignoreInit,
+    !!eventQuo,
+    x = reactive(!!valueQuo, domain = domain, label = "eventReactiveHandler")
+  ))
 }
 
 isNullEvent <- function(value) {

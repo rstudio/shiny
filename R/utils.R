@@ -549,7 +549,7 @@ installExprFunction <- function(expr, name, eval.env = parent.frame(2),
 #' `quoted` arguments -- that information is captured by quosures provided by
 #' \pkg{rlang}.
 #'
-#' @param quo A quosure.
+#' @param q A quosure.
 #' @inheritParams installExprFunction
 #'
 #' @examples
@@ -561,7 +561,7 @@ installExprFunction <- function(expr, name, eval.env = parent.frame(2),
 #'     func,
 #'     transform = function(value, session, name, ...) {
 #'       paste(rep(value, 3), collapse=", ")
-#'     }
+#'     },
 #'     outputFunc = textOutput
 #'   )
 #' }

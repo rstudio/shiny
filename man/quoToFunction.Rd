@@ -7,13 +7,13 @@
 quoToFunction(q, label, ..stacktraceon = FALSE)
 }
 \arguments{
+\item{q}{A quosure.}
+
 \item{label}{A label for the object to be shown in the debugger. Defaults to
 the name of the calling function.}
 
 \item{..stacktraceon}{Advanced use only. For stack manipulation purposes; see
 \code{\link[=stacktrace]{stacktrace()}}.}
-
-\item{quo}{A quosure.}
 }
 \description{
 This takes a quosure and label, and wraps them into a function that should be
@@ -35,7 +35,7 @@ renderTriple <- function(expr) {
     func,
     transform = function(value, session, name, ...) {
       paste(rep(value, 3), collapse=", ")
-    }
+    },
     outputFunc = textOutput
   )
 }

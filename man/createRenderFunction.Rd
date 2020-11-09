@@ -57,7 +57,7 @@ renderTriple <- function(expr) {
     func,
     transform = function(value, session, name, ...) {
       paste(rep(value, 3), collapse=", ")
-    }
+    },
     outputFunc = textOutput
   )
 }

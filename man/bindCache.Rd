@@ -18,11 +18,9 @@ See the Cache Scoping section for more information.}
 \description{
 \code{bindCache()} adds caching to the following kinds of objects used in Shiny:
 \itemize{
-\item \code{\link[=reactive]{reactive()}}` expressions.
-\item \verb{render*} functions, like \code{\link[=renderText]{renderText()}}, \code{\link[=renderTable]{renderTable()}}, and so on.
+\item \code{\link[=reactive]{reactive()}}\verb{expressions. *}render*` functions, like \code{\link[=renderText]{renderText()}},
+\code{\link[=renderTable]{renderTable()}}, and so on.
 }
-
-It is often used in conjunction with \code{\link[=bindEvent]{bindEvent()}}.
 
 Ordinary \code{\link[=reactive]{reactive()}} expressions will cache their most recent value. This
 can make computation more efficient, because time-consuming code can execute
@@ -30,9 +28,10 @@ once and the result can be used in multiple different places without needing
 to re-execute the code.
 
 When \code{bindCache()} is used on a reactive expression, any number of previous
-values can be cached. You must provide one or more expressions that are used
-to generate a \emph{cache key}. The \code{...} expressions are put together in a list
-and hashed, and the result is used as the cache \strong{key}.
+values can be cache (as long as they fit in the cache). You must provide one
+or more expressions that are used to generate a \emph{cache key}. The \code{...}
+expressions are put together in a list and hashed, and the result is used as
+the cache \strong{key}.
 
 There is also a \strong{value} expression, which is the expression passed to the
 original reactive.
@@ -41,21 +40,19 @@ For each possible \strong{key}, there should be one possible \strong{value} retu
 the original reactive expression; a given key should not correspond to
 multiple possible values from the reactive expression.
 
-To use `bindCache(), the key should be fast to compute, and the value should
-expensive (so that it benefits from caching).  To see the value should be
+To use \code{bindCache()}, the key should be fast to compute, and the value should
+expensive (so that it benefits from caching).  To see if the value should be
 computed, a cached reactive evaluates the key, and then serializes and hashes
 the result. If the resulting hashed key is in the cache, then the cached
 reactive simply retrieves the previously calculated value and returns it; if
 not, then the value is computed and the result is stored in the cache before
 being returned.
 
-The key should be fast to compute, and ideally it will return an object that
-is not too large, so that serializing and hashing the object is not
-expensive.
-
 In most cases, the key will contain any reactive inputs that are used by the
 value expression. It is also best to use non-reference objects, since the
 serialization of these objects may not capture relevant changes.
+
+\code{bindCache()} is often used in conjunction with \code{\link[=bindEvent]{bindEvent()}}.
 }
 \section{Cache keys and reactivity}{
 
@@ -89,11 +86,9 @@ cache key is not too expensive.
 
 Remember that the key is \emph{reactive}, so it is not re-executed every single
 time that someone accesses the cached reactive. It is only re-executed if
-it has been invalidated by one of the reactives it depends on.. For
-example, suppose we have this cached reactive:\if{html}{\out{<div class="NA">}}\preformatted{r <- cachedReactive(
- reactive(\{ input$x + input$y \}),
- input$x, input$y
-)
+it has been invalidated by one of the reactives it depends on. For
+example, suppose we have this cached reactive:\if{html}{\out{<div class="NA">}}\preformatted{r <- reactive(\{ input$x + input$y \}) \%>\%
+ bindCache(input$x, input$y)
 }\if{html}{\out{</div>}}
 
 In this case, the key expression is essentially \code{reactive(list(input$x, input$y))} (there's a bit more to it, but that's a good enough
@@ -106,16 +101,17 @@ be invalidated, and the next time that someone calls \code{r()}, the key
 expression will need to be re-executed.
 
 Note that if the cached reactive is passed to \code{\link[=bindEvent]{bindEvent()}}, then the key
-expression will no longer be reactive; instead, the event expression will
-be reactive.
+expression will no longer be reactive; instead, the event expression will be
+reactive.
 }
 
 \section{Async with cached reactives}{
 
 
 With a cached reactive expression, the key and/or value expression can be
-\emph{asynchronous}. In other words, they can be promises -- not regular R
-promises, but rather objects provided by the \pkg{promises}  package, which
+\emph{asynchronous}. In other words, they can be promises --- not regular R
+promises, but rather objects provided by the
+\href{https://rstudio.github.io/promises/}{\pkg{promises}}  package, which
 are similar to promises in JavaScript. (See \code{\link[promises:promise]{promises::promise()}} for more
 information.) You can also use \code{\link[future:future]{future::future()}} objects to run code in a
 separate process or even on a remote machine.
@@ -141,20 +137,62 @@ parameter's default value, \code{"app"}.
 With an app-level cache scope, one user can benefit from the work done for
 another user's session. In most cases, this is the best way to get
 performance improvements from caching. However, in some cases, this could
-leak information between sessions. For example, if a user sees that a cached
-reactive returns its value very quickly, they may be able to infer that
-someone else has already used it with the same values. Or if the cache key
-does not fully encompass the inputs used by the value, then data could leak
-between the sessions.
+leak information between sessions. For example, if the cache key does not
+fully encompass the inputs used by the value, then data could leak between
+the sessions. Or if a user sees that a cached reactive returns its value
+very quickly, they may be able to infer that someone else has already used
+it with the same values.
 
 It is also possible to scope the cache to the session, with
 \code{cache="session"}. This removes the risk of information leaking between
 sessions, but then one session cannot benefit from computations performed in
 another session.
 
-Finally, it is possible to pass in caching objects directly to
+It is possible to pass in caching objects directly to
 \code{bindCache()}. This can be useful if, for example, you want to use a
-particular type of cache with specific cached reactives.
+particular type of cache with specific cached reactives, or if you want to
+use a \code{\link[cachem:cache_disk]{cachem::cache_disk()}} that is shared across multiple processes and
+persists beyond the current R session.
+
+To use different settings for an application-scoped cache, you can call
+\code{\link[=shinyOptions]{shinyOptions()}} at the top of your app.R, server.R, or
+global.R. For example, this will create a cache with 500 MB of space
+instead of the default 200 MB:\preformatted{shinyOptions(cache = cachem::cache_mem(size = 500e6))
+}
+
+To use different settings for a session-scoped cache, you can set
+\code{self$cache} at the top of your server function. By default, it will create
+a 200 MB memory cache for each session , but you can replace it with
+something different. To use the session-scoped cache, you must also call
+\code{bindCache()} with \code{cache="session"}. This will create a 100 MB cache for
+the session:\preformatted{function(input, output, session) \{
+  session$cache <- cachem::cache_mem(size = 100e6)
+  ...
+\}
+}
+
+If you want to use a cache that is shared across multiple R processes, you
+can use a \code{\link[cachem:cache_disk]{cachem::cache_disk()}}. You can create a application-level shared
+cache by putting this at the top of your app.R, server.R, or global.R:\preformatted{shinyOptions(cache = cachem::cache_disk(file.path(dirname(tempdir()), "myapp-cache"))
+}
+
+This will create a subdirectory in your system temp directory named
+\code{myapp-cache} (replace \code{myapp-cache} with a unique name of
+your choosing). On most platforms, this directory will be removed when
+your system reboots. This cache will persist across multiple starts and
+stops of the R process, as long as you do not reboot.
+
+To have the cache persist even across multiple reboots, you can create the
+cache in a location outside of the temp directory. For example, it could
+be a subdirectory of the application:\preformatted{shinyOptions(cache = cachem::cache_disk("./myapp-cache"))
+}
+
+In this case, resetting the cache will have to be done manually, by deleting
+the directory.
+
+You can also scope a cache to just one item, or selected items. To do that,
+create a \code{\link[cachem:cache_mem]{cachem::cache_mem()}} or \code{\link[cachem:cache_disk]{cachem::cache_disk()}}, and pass it
+as the \code{cache} argument of \code{bindCache()}.
 }
 
 \section{Cache key internals}{
@@ -271,5 +309,5 @@ shinyApp(
 
 }
 \seealso{
-\code{\link[=bindEvent]{bindEvent()}}
+\code{\link[=bindEvent]{bindEvent()}}, \code{\link[=renderCachedPlot]{renderCachedPlot()}} for caching plots.
 }

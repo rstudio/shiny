@@ -628,6 +628,12 @@ remove_source <- function(x) {
     attr(x, "wholeSrcref") <- NULL
     attr(x, "srcfile") <- NULL
 
+    # `function` calls store the source ref as the fourth element.
+    # See https://github.com/r-lib/testthat/issues/1228
+    if (x[[1]] == quote(`function`)) {
+      x[[4]] <- NULL
+    }
+
     x[] <- lapply(x, remove_source)
     x
   } else {

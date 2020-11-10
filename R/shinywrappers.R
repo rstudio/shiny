@@ -271,7 +271,7 @@ markOutputAttrs <- function(renderFunc, snapshotExclude = NULL,
 #' @seealso For more details on how the images are generated, and how to control
 #'   the output, see [plotPNG()].
 #'
-#' @param expr An expression that returns a list.
+#' @param expr An expression or quosure that returns a list.
 #' @param env The environment in which to evaluate `expr`.
 #' @param quoted Is `expr` a quoted expression (with `quote()`)? This
 #'   is useful if you want to save an expression in a variable.
@@ -354,8 +354,17 @@ markOutputAttrs <- function(renderFunc, snapshotExclude = NULL,
 #' shinyApp(ui, server)
 #' }
 renderImage <- function(expr, env=parent.frame(), quoted=FALSE,
-                        deleteFile, outputArgs=list()) {
-  installExprFunction(expr, "func", env, quoted)
+                        deleteFile, outputArgs=list())
+{
+  if (!missing(env) || !missing(quoted)) {
+    deprecatedEnvQuotedMessage()
+    if (!quoted) expr <- enexpr(expr)
+    q <- new_quosure(expr, env)
+  } else {
+    q <- enquo(expr)
+  }
+
+  func <- quoToFunction(q, "renderImage")
 
   # missing() must be used directly within the function with the given arg
   if (missing(deleteFile)) {
@@ -476,7 +485,7 @@ isTemp <- function(path, tempDir = tempdir(), mustExist) {
 #' will actually be visible in the output. To display nothing, make your
 #' function return [invisible()].
 #'
-#' @param expr An expression to evaluate.
+#' @param expr An expression or quosure to evaluate.
 #' @param env The environment in which to evaluate `expr`. For expert use only.
 #' @param quoted Is `expr` a quoted expression (with `quote()`)? This
 #'   is useful if you want to save an expression in a variable.
@@ -610,8 +619,8 @@ renderText <- function(expr, env=parent.frame(), quoted=FALSE,
 #' The corresponding HTML output tag should be `div` and have the CSS class
 #' name `shiny-html-output` (or use [uiOutput()]).
 #'
-#' @param expr An expression that returns a Shiny tag object, [HTML()],
-#'   or a list of such objects.
+#' @param expr An expression or quosure that returns a Shiny tag object,
+#'   [HTML()], or a list of such objects.
 #' @param env The environment in which to evaluate `expr`.
 #' @param quoted Is `expr` a quoted expression (with `quote()`)? This
 #'   is useful if you want to save an expression in a variable.
@@ -641,8 +650,17 @@ renderText <- function(expr, env=parent.frame(), quoted=FALSE,
 #' }
 #'
 renderUI <- function(expr, env=parent.frame(), quoted=FALSE,
-                     outputArgs=list()) {
-  installExprFunction(expr, "func", env, quoted)
+                     outputArgs=list())
+{
+  if (!missing(env) || !missing(quoted)) {
+    deprecatedEnvQuotedMessage()
+    if (!quoted) expr <- enexpr(expr)
+    q <- new_quosure(expr, env)
+  } else {
+    q <- enquo(expr)
+  }
+
+  func <- quoToFunction(q, "renderUI")
 
   createRenderFunction(
     func,
@@ -731,7 +749,7 @@ downloadHandler <- function(filename, content, contentType=NA, outputArgs=list()
 #' character string. Note this only applies to the root-level elements of the
 #' options list, and the `I()` notation does not work for lower-level
 #' elements in the list.
-#' @param expr An expression that returns a data frame or a matrix.
+#' @param expr An expression or quosure that returns a data frame or a matrix.
 #' @param options A list of initialization options to be passed to DataTables,
 #'   or a function to return such a list.
 #' @param searchDelay The delay for searching, in milliseconds (to avoid too
@@ -784,8 +802,17 @@ downloadHandler <- function(filename, content, contentType=NA, outputArgs=list()
 renderDataTable <- function(expr, options = NULL, searchDelay = 500,
                             callback = 'function(oTable) {}', escape = TRUE,
                             env = parent.frame(), quoted = FALSE,
-                            outputArgs=list()) {
-  installExprFunction(expr, "func", env, quoted)
+                            outputArgs=list())
+{
+  if (!missing(env) || !missing(quoted)) {
+    deprecatedEnvQuotedMessage()
+    if (!quoted) expr <- enexpr(expr)
+    q <- new_quosure(expr, env)
+  } else {
+    q <- enquo(expr)
+  }
+
+  func <- quoToFunction(q, "renderDataTable")
 
   renderFunc <- function(shinysession, name, ...) {
     if (is.function(options)) options <- options()

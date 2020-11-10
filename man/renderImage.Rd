@@ -13,7 +13,7 @@ renderImage(
 )
 }
 \arguments{
-\item{expr}{An expression that returns a list.}
+\item{expr}{An expression or quosure that returns a list.}
 
 \item{env}{The environment in which to evaluate \code{expr}.}
 

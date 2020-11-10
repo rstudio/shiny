@@ -16,7 +16,7 @@ renderDataTable(
 )
 }
 \arguments{
-\item{expr}{An expression that returns a data frame or a matrix.}
+\item{expr}{An expression or quosure that returns a data frame or a matrix.}
 
 \item{options}{A list of initialization options to be passed to DataTables,
 or a function to return such a list.}

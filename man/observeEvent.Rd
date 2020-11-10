@@ -38,7 +38,7 @@ eventReactive(
 )
 }
 \arguments{
-\item{eventExpr}{A (quoted or unquoted) expression that represents the event;
+\item{eventExpr}{An expression or quosure that represents the event;
 this can be a simple reactive value like \code{input$click}, a call to a
 reactive expression like \code{dataset()}, or even a complex expression
 inside curly braces}

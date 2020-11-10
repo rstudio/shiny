@@ -935,8 +935,8 @@ Observable <- R6Class(
 #' See the [Shiny tutorial](https://shiny.rstudio.com/tutorial/) for
 #' more information about reactive expressions.
 #'
-#' @param x For `reactive`, an expression (quoted or unquoted). For
-#'   `is.reactive`, an object to test.
+#' @param x For `reactive`, an expression or quosure. For `is.reactive`, an
+#'   object to test.
 #' @param env The parent environment for the reactive expression. By default,
 #'   this is the calling environment, the same as when defining an ordinary
 #'   non-reactive expression.
@@ -1320,7 +1320,7 @@ Observer <- R6Class(
 #' when the [domain][domains] that owns them ends (e.g. when a Shiny
 #' session ends).
 #'
-#' @param x An expression (quoted or unquoted). Any return value will be
+#' @param x An expression or quosure. Any return value will be
 #'   ignored.
 #' @param env The parent environment for the reactive expression. By default,
 #'   this is the calling environment, the same as when defining an ordinary
@@ -2132,7 +2132,7 @@ maskReactiveContext <- function(expr) {
 #'   }
 #' }
 #'
-#' @param eventExpr A (quoted or unquoted) expression that represents the event;
+#' @param eventExpr An expression or quosure that represents the event;
 #'   this can be a simple reactive value like `input$click`, a call to a
 #'   reactive expression like `dataset()`, or even a complex expression
 #'   inside curly braces

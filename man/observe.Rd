@@ -18,7 +18,7 @@ observe(
 )
 }
 \arguments{
-\item{x}{An expression (quoted or unquoted). Any return value will be
+\item{x}{An expression or quosure. Any return value will be
 ignored.}
 
 \item{env}{The parent environment for the reactive expression. By default,

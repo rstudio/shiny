@@ -23,8 +23,8 @@ renderTable(
 )
 }
 \arguments{
-\item{expr}{An expression that returns an R object that can be used with
-\code{\link[xtable:xtable]{xtable::xtable()}}.}
+\item{expr}{An expression or quosure that returns an R object that can be
+used with \code{\link[xtable:xtable]{xtable::xtable()}}.}
 
 \item{striped, hover, bordered}{Logicals: if \code{TRUE}, apply the
 corresponding Bootstrap table format to the output table.}

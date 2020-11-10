@@ -21,7 +21,7 @@
 #'   [renderCachedPlot()] offers a way to cache generated plots to
 #'   expedite the rendering of identical plots.
 #'
-#' @param expr An expression that generates a plot.
+#' @param expr An expression or quosure that generates a plot.
 #' @param width,height Height and width can be specified in three ways:
 #'   * `"auto"`, the default, uses the size specified by [plotOutput()]
 #'      (i.e. the `offsetWidth`/`offsetHeight`` of the HTML element bound to
@@ -62,9 +62,17 @@ renderPlot <- function(expr, width = 'auto', height = 'auto', res = 72, ...,
                        env = parent.frame(), quoted = FALSE,
                        execOnResize = FALSE, outputArgs = list()
 ) {
+  if (!missing(env) || !missing(quoted)) {
+    deprecatedEnvQuotedMessage()
+    if (!quoted) expr <- enexpr(expr)
+    q <- new_quosure(expr, env)
+  } else {
+    q <- enquo(expr)
+  }
+
   # This ..stacktraceon is matched by a ..stacktraceoff.. when plotFunc
   # is called
-  installExprFunction(expr, "func", env, quoted, ..stacktraceon = TRUE)
+  func <- quoToFunction(q, "renderPlot", ..stacktraceon = TRUE)
 
   args <- list(...)
 

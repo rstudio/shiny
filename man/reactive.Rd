@@ -18,8 +18,8 @@ reactive(
 is.reactive(x)
 }
 \arguments{
-\item{x}{For \code{reactive}, an expression (quoted or unquoted). For
-\code{is.reactive}, an object to test.}
+\item{x}{For \code{reactive}, an expression or quosure. For \code{is.reactive}, an
+object to test.}
 
 \item{env}{The parent environment for the reactive expression. By default,
 this is the calling environment, the same as when defining an ordinary

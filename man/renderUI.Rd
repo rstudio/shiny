@@ -7,8 +7,8 @@
 renderUI(expr, env = parent.frame(), quoted = FALSE, outputArgs = list())
 }
 \arguments{
-\item{expr}{An expression that returns a Shiny tag object, \code{\link[=HTML]{HTML()}},
-or a list of such objects.}
+\item{expr}{An expression or quosure that returns a Shiny tag object,
+\code{\link[=HTML]{HTML()}}, or a list of such objects.}
 
 \item{env}{The environment in which to evaluate \code{expr}.}
 

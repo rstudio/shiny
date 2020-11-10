@@ -6,8 +6,8 @@
 #' The corresponding HTML output tag should be `div` and have the CSS
 #' class name `shiny-html-output`.
 #'
-#' @param expr An expression that returns an R object that can be used with
-#'   [xtable::xtable()].
+#' @param expr An expression or quosure that returns an R object that can be
+#'   used with [xtable::xtable()].
 #' @param striped,hover,bordered Logicals: if `TRUE`, apply the
 #'   corresponding Bootstrap table format to the output table.
 #' @param spacing The spacing between the rows of the table (`xs`
@@ -53,8 +53,17 @@ renderTable <- function(expr, striped = FALSE, hover = FALSE,
                         rownames = FALSE, colnames = TRUE,
                         digits = NULL, na = "NA", ...,
                         env = parent.frame(), quoted = FALSE,
-                        outputArgs=list()) {
-  installExprFunction(expr, "func", env, quoted)
+                        outputArgs = list())
+{
+  if (!missing(env) || !missing(quoted)) {
+    deprecatedEnvQuotedMessage()
+    if (!quoted) expr <- enexpr(expr)
+    q <- new_quosure(expr, env)
+  } else {
+    q <- enquo(expr)
+  }
+
+  func <- quoToFunction(q, "renderTable")
 
   if (!is.function(spacing)) spacing <- match.arg(spacing)
 

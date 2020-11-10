@@ -22,7 +22,7 @@ renderText(
 )
 }
 \arguments{
-\item{expr}{An expression to evaluate.}
+\item{expr}{An expression or quosure to evaluate.}
 
 \item{env}{The environment in which to evaluate \code{expr}. For expert use only.}
 

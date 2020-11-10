@@ -18,7 +18,7 @@ renderPlot(
 )
 }
 \arguments{
-\item{expr}{An expression that generates a plot.}
+\item{expr}{An expression or quosure that generates a plot.}
 
 \item{width, height}{Height and width can be specified in three ways:
 \itemize{

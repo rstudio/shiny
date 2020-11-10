@@ -18,7 +18,7 @@ renderCachedPlot(
 )
 }
 \arguments{
-\item{expr}{An expression that generates a plot.}
+\item{expr}{An expression or quosure that generates a plot.}
 
 \item{cacheKeyExpr}{An expression that returns a cache key. This key should
 be a unique identifier for a plot: the assumption is that if the cache key

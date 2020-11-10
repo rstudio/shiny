@@ -6,8 +6,6 @@
 \alias{withLogErrors}
 \alias{printError}
 \alias{printStackTrace}
-\alias{extractStackTrace}
-\alias{formatStackTrace}
 \alias{conditionStackTrace}
 \alias{conditionStackTrace<-}
 \alias{..stacktraceon..}
@@ -30,19 +28,6 @@ printError(
 
 printStackTrace(
   cond,
-  full = getOption("shiny.fullstacktrace", FALSE),
-  offset = getOption("shiny.stacktraceoffset", TRUE)
-)
-
-extractStackTrace(
-  calls,
-  full = getOption("shiny.fullstacktrace", FALSE),
-  offset = getOption("shiny.stacktraceoffset", TRUE)
-)
-
-formatStackTrace(
-  calls,
-  indent = "    ",
   full = getOption("shiny.fullstacktrace", FALSE),
   offset = getOption("shiny.stacktraceoffset", TRUE)
 )
@@ -71,8 +56,6 @@ left alone (traditional R treatment where the srcref is of the callsite).}
 
 \item{cond}{A condition that may have previously been annotated by
 \code{captureStackTraces} (or \code{withLogErrors}).}
-
-\item{indent}{A string to prefix every line of the stack trace.}
 
 \item{value}{The stack trace value to assign to the condition.}
 }
@@ -107,17 +90,6 @@ to \code{withLogErrors}.
 \code{printError} prints the error and stack trace (if any) using
 \code{warning(immediate.=TRUE)}. \code{printStackTrace} prints the stack
 trace only.
-
-\code{extractStackTrace} takes a list of calls (e.g. as returned
-from \code{conditionStackTrace(cond)}) and returns a data frame with one
-row for each stack frame and the columns \code{num} (stack frame number),
-\code{call} (a function name or similar), and \code{loc} (source file path
-and line number, if available). It was deprecated after shiny 1.0.5 because
-it doesn't support deep stack traces.
-
-\code{formatStackTrace} is similar to \code{extractStackTrace}, but
-it returns a preformatted character vector instead of a data frame. It was
-deprecated after shiny 1.0.5 because it doesn't support deep stack traces.
 
 \code{conditionStackTrace} and \verb{conditionStackTrace<-} are
 accessor functions for getting/setting stack traces on conditions.

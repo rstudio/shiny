@@ -14,8 +14,6 @@ NULL
 #'
 #' @param ... The contents of the document body.
 #' @param title The browser window title (defaults to the host URL of the page)
-#' @param responsive This option is deprecated; it is no longer optional with
-#'   Bootstrap 3.
 #' @param theme One of the following:
 #'   * `NULL` (the default), which implies a "stock" build of Bootstrap 3.
 #'   * A [bslib::bs_theme()] object. This can be used to replace a stock
@@ -33,11 +31,7 @@ NULL
 #'
 #' @seealso [fluidPage()], [fixedPage()]
 #' @export
-bootstrapPage <- function(..., title = NULL, responsive = NULL, theme = NULL, lang = NULL) {
-
-  if (!is.null(responsive)) {
-    shinyDeprecated("The 'responsive' argument is no longer used with Bootstrap 3.")
-  }
+bootstrapPage <- function(..., title = NULL, theme = NULL, lang = NULL) {
 
   ui <- tagList(
     bootstrapLib(theme),
@@ -360,7 +354,6 @@ collapseSizes <- function(padding) {
 #' @param collapsible `TRUE` to automatically collapse the navigation
 #'   elements into a menu when the width of the browser is less than 940 pixels
 #'   (useful for viewing on smaller touchscreen device)
-#' @param collapsable Deprecated; use `collapsible` instead.
 #' @param fluid `TRUE` to use a fluid layout. `FALSE` to use a fixed
 #'   layout.
 #' @param responsive This option is deprecated; it is no longer optional with
@@ -411,17 +404,11 @@ navbarPage <- function(title,
                        footer = NULL,
                        inverse = FALSE,
                        collapsible = FALSE,
-                       collapsable,
                        fluid = TRUE,
                        responsive = NULL,
                        theme = NULL,
                        windowTitle = title,
                        lang = NULL) {
-
-  if (!missing(collapsable)) {
-    shinyDeprecated("`collapsable` is deprecated; use `collapsible` instead.")
-    collapsible <- collapsable
-  }
 
   # alias title so we can avoid conflicts w/ title in withTags
   pageTitle <- title
@@ -682,8 +669,6 @@ tabPanelBody <- function(value, ..., icon = NULL) {
 #'   conjunction with [tabPanelBody()] and [updateTabsetPanel()] to control the
 #'   active tab via other input controls. (See example below)}
 #' }
-#' @param position This argument is deprecated; it has been discontinued in
-#'   Bootstrap 3.
 #' @return A tabset that can be passed to [mainPanel()]
 #'
 #' @seealso [tabPanel()], [updateTabsetPanel()],
@@ -732,14 +717,8 @@ tabPanelBody <- function(value, ..., icon = NULL) {
 tabsetPanel <- function(...,
                         id = NULL,
                         selected = NULL,
-                        type = c("tabs", "pills", "hidden"),
-                        position = NULL) {
-  if (!is.null(position)) {
-    shinyDeprecated(msg = paste("tabsetPanel: argument 'position' is deprecated;",
-                                "it has been discontinued in Bootstrap 3."),
-                    version = "0.10.2.2")
-  }
-
+                        type = c("tabs", "pills", "hidden"))
+{
   if (!is.null(id))
     selected <- restoreInput(id = id, default = selected)
 

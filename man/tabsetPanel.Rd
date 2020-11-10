@@ -8,8 +8,7 @@ tabsetPanel(
   ...,
   id = NULL,
   selected = NULL,
-  type = c("tabs", "pills", "hidden"),
-  position = NULL
+  type = c("tabs", "pills", "hidden")
 )
 }
 \arguments{
@@ -31,9 +30,6 @@ tab will be selected.}
 conjunction with \code{\link[=tabPanelBody]{tabPanelBody()}} and \code{\link[=updateTabsetPanel]{updateTabsetPanel()}} to control the
 active tab via other input controls. (See example below)}
 }}
-
-\item{position}{This argument is deprecated; it has been discontinued in
-Bootstrap 3.}
 }
 \value{
 A tabset that can be passed to \code{\link[=mainPanel]{mainPanel()}}

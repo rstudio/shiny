@@ -94,13 +94,6 @@ reactlogShow <- function(time = TRUE) {
   check_reactlog()
   reactlog::reactlog_show(reactlog(), time = time)
 }
-#' @describeIn reactlog This function is deprecated. You should use [reactlogShow()]
-#' @export
-# legacy purposes
-showReactLog <- function(time = TRUE) {
-  shinyDeprecated(new = "`reactlogShow`", version = "1.2.0")
-  reactlogShow(time = time)
-}
 #' @describeIn reactlog Resets the entire reactlog stack.  Useful for debugging and removing all prior reactive history.
 #' @export
 reactlogReset <- function() {

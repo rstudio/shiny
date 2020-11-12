@@ -630,7 +630,8 @@ remove_source <- function(x) {
 
     # `function` calls store the source ref as the fourth element.
     # See https://github.com/r-lib/testthat/issues/1228
-    if (x[[1]] == quote(`function`)) {
+    if (x[[1]] == quote(`function`) && length(x) == 4 &&
+        inherits(x[[4]], "srcref")) {
       x[[4]] <- NULL
     }
 

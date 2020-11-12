@@ -641,3 +641,8 @@ remove_source <- function(x) {
     x
   }
 }
+
+# Need this here until it is part of rlang.
+blast <- function(expr, env = caller_env()) {
+  eval_bare(enexpr(expr), env)
+}

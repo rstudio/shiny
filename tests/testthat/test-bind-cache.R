@@ -103,7 +103,7 @@ test_that("bindCache reactive - original reactive can be GC'd", {
   # bindCache.reactive essentially extracts code from the original reactive and
   # then doesn't need the original anymore. We want to make sure the original
   # can be GC'd afterward (if no one else has a reference to it).
-  cache <- memoryCache()
+  cache <- cachem::cache_mem()
   k <- reactiveVal(0)
 
   vals <- character()
@@ -112,9 +112,23 @@ test_that("bindCache reactive - original reactive can be GC'd", {
   finalized <- FALSE
   reg.finalizer(attr(r, "observable"), function(e) finalized <<- TRUE)
 
-  # r1 <- bindCache(r, k(), cache = cache)
-  # Note: using pipe causes this to fail due to:
-  # https://github.com/tidyverse/magrittr/issues/229
+  r1 <- r %>% bindCache(k(), cache = cache)
+  rm(r)
+  gc()
+  expect_true(finalized)
+
+
+  # Same, but when using rlang::blast() to insert a quosure
+  cache <- cachem::cache_mem()
+  k <- reactiveVal(0)
+
+  vals <- character()
+  exp <- rlang::quo({ k() })
+  r <- blast(reactive(!!exp))
+
+  finalized <- FALSE
+  reg.finalizer(attr(r, "observable"), function(e) finalized <<- TRUE)
+
   r1 <- r %>% bindCache(k(), cache = cache)
   rm(r)
   gc()
@@ -854,7 +868,7 @@ test_that("bindCache quosure handling", {
     environment()
   })
 
-  r <- reactive(!!value_env$expr) %>%
+  r <- blast(reactive(!!value_env$expr)) %>%
     bindCache(!!key_env$expr, cache = cache)
 
   vals <- numeric()

@@ -684,10 +684,12 @@ test_that("reactive() accepts quoted and unquoted expressions", {
   expect_true(is.function(isolate(fun())))
 
 
-  # Check that environment is correct - parent environment should be this one
+  # Check that environment is correct - parent of parent environment should be
+  # this one. Note that rlang::as_function() injects an intermediate
+  # environment.
   this_env <- environment()
   fun <- reactive(environment())
-  expect_identical(isolate(parent.env(fun())), this_env)
+  expect_identical(isolate(parent.env(parent.env(fun()))), this_env)
 
   # Sanity check: environment structure for a reactive() should be the same as for
   # a normal function
@@ -726,12 +728,13 @@ test_that("observe() accepts quoted and unquoted expressions", {
   expect_equal(valB, 4)
 
 
-  # Check that environment is correct - parent environment should be this one
+  # Check that environment is correct - parent of parent environment should be
+  # this one. rlang::as_function() injects one intermediate env.
   this_env <- environment()
   inside_env <- NULL
   fun <- observe(inside_env <<- environment())
   flushReact()
-  expect_identical(parent.env(inside_env), this_env)
+  expect_identical(parent.env(parent.env(inside_env)), this_env)
 })
 
 test_that("Observer priorities are respected", {

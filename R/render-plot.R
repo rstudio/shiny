@@ -62,9 +62,21 @@ renderPlot <- function(expr, width = 'auto', height = 'auto', res = 72, ...,
                        env = parent.frame(), quoted = FALSE,
                        execOnResize = FALSE, outputArgs = list()
 ) {
+  if (!missing(env) || !missing(quoted)) {
+    deprecatedEnvQuotedMessage()
+    if (!quoted) expr <- substitute(expr)
+    expr <- new_quosure(expr, env)
+
+  } else {
+    expr <- substitute(expr)
+    if (!is_quosure(expr)) {
+      expr <- new_quosure(expr, env = parent.frame())
+    }
+  }
+
   # This ..stacktraceon is matched by a ..stacktraceoff.. when plotFunc
   # is called
-  installExprFunction(expr, "func", env, quoted, ..stacktraceon = TRUE)
+  func <- quoToFunction(expr, "renderPlot", ..stacktraceon = TRUE)
 
   args <- list(...)
 

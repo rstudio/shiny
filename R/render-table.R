@@ -53,8 +53,21 @@ renderTable <- function(expr, striped = FALSE, hover = FALSE,
                         rownames = FALSE, colnames = TRUE,
                         digits = NULL, na = "NA", ...,
                         env = parent.frame(), quoted = FALSE,
-                        outputArgs=list()) {
-  installExprFunction(expr, "func", env, quoted)
+                        outputArgs=list())
+{
+  if (!missing(env) || !missing(quoted)) {
+    deprecatedEnvQuotedMessage()
+    if (!quoted) expr <- substitute(expr)
+    expr <- new_quosure(expr, env)
+
+  } else {
+    expr <- substitute(expr)
+    if (!is_quosure(expr)) {
+      expr <- new_quosure(expr, env = parent.frame())
+    }
+  }
+
+  func <- quoToFunction(expr, "renderTable")
 
   if (!is.function(spacing)) spacing <- match.arg(spacing)
 

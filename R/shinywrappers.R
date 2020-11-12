@@ -354,8 +354,21 @@ markOutputAttrs <- function(renderFunc, snapshotExclude = NULL,
 #' shinyApp(ui, server)
 #' }
 renderImage <- function(expr, env=parent.frame(), quoted=FALSE,
-                        deleteFile, outputArgs=list()) {
-  installExprFunction(expr, "func", env, quoted)
+                        deleteFile, outputArgs=list())
+{
+  if (!missing(env) || !missing(quoted)) {
+    deprecatedEnvQuotedMessage()
+    if (!quoted) expr <- substitute(expr)
+    expr <- new_quosure(expr, env)
+
+  } else {
+    expr <- substitute(expr)
+    if (!is_quosure(expr)) {
+      expr <- new_quosure(expr, env = parent.frame())
+    }
+  }
+
+  func <- quoToFunction(expr, "renderImage")
 
   # missing() must be used directly within the function with the given arg
   if (missing(deleteFile)) {
@@ -492,13 +505,17 @@ renderPrint <- function(expr, env = parent.frame(), quoted = FALSE,
 {
   if (!missing(env) || !missing(quoted)) {
     deprecatedEnvQuotedMessage()
-    if (!quoted) expr <- enexpr(expr)
-    q <- new_quosure(expr, env)
+    if (!quoted) expr <- substitute(expr)
+    expr <- new_quosure(expr, env)
+
   } else {
-    q <- enquo(expr)
+    expr <- substitute(expr)
+    if (!is_quosure(expr)) {
+      expr <- new_quosure(expr, env = parent.frame())
+    }
   }
 
-  func <- quoToFunction(q, "renderPrint")
+  func <- quoToFunction(expr, "renderPrint")
 
   # Set a promise domain that sets the console width
   #   and captures output
@@ -585,13 +602,17 @@ renderText <- function(expr, env=parent.frame(), quoted=FALSE,
 
   if (!missing(env) || !missing(quoted)) {
     deprecatedEnvQuotedMessage()
-    if (!quoted) expr <- enexpr(expr)
-    q <- new_quosure(expr, env)
+    if (!quoted) expr <- substitute(expr)
+    expr <- new_quosure(expr, env)
+
   } else {
-    q <- enquo(expr)
+    expr <- substitute(expr)
+    if (!is_quosure(expr)) {
+      expr <- new_quosure(expr, env = parent.frame())
+    }
   }
 
-  func <- quoToFunction(q, "renderText")
+  func <- quoToFunction(expr, "renderText")
 
   createRenderFunction(
     func,
@@ -640,9 +661,22 @@ renderText <- function(expr, env=parent.frame(), quoted=FALSE,
 #' shinyApp(ui, server)
 #' }
 #'
-renderUI <- function(expr, env=parent.frame(), quoted=FALSE,
-                     outputArgs=list()) {
-  installExprFunction(expr, "func", env, quoted)
+renderUI <- function(expr, env = parent.frame(), quoted = FALSE,
+                     outputArgs = list())
+{
+  if (!missing(env) || !missing(quoted)) {
+    deprecatedEnvQuotedMessage()
+    if (!quoted) expr <- substitute(expr)
+    expr <- new_quosure(expr, env)
+
+  } else {
+    expr <- substitute(expr)
+    if (!is_quosure(expr)) {
+      expr <- new_quosure(expr, env = parent.frame())
+    }
+  }
+
+  func <- quoToFunction(expr, "renderUI")
 
   createRenderFunction(
     func,
@@ -652,7 +686,8 @@ renderUI <- function(expr, env=parent.frame(), quoted=FALSE,
 
       processDeps(result, shinysession)
     },
-    uiOutput, outputArgs
+    uiOutput,
+    outputArgs
   )
 }
 
@@ -784,8 +819,21 @@ downloadHandler <- function(filename, content, contentType=NA, outputArgs=list()
 renderDataTable <- function(expr, options = NULL, searchDelay = 500,
                             callback = 'function(oTable) {}', escape = TRUE,
                             env = parent.frame(), quoted = FALSE,
-                            outputArgs=list()) {
-  installExprFunction(expr, "func", env, quoted)
+                            outputArgs=list())
+{
+  if (!missing(env) || !missing(quoted)) {
+    deprecatedEnvQuotedMessage()
+    if (!quoted) expr <- substitute(expr)
+    expr <- new_quosure(expr, env)
+
+  } else {
+    expr <- substitute(expr)
+    if (!is_quosure(expr)) {
+      expr <- new_quosure(expr, env = parent.frame())
+    }
+  }
+
+  func <- quoToFunction(expr, "renderDataTable")
 
   renderFunc <- function(shinysession, name, ...) {
     if (is.function(options)) options <- options()

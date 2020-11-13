@@ -118,13 +118,13 @@ test_that("bindCache reactive - original reactive can be GC'd", {
   expect_true(finalized)
 
 
-  # Same, but when using rlang::blast() to insert a quosure
+  # Same, but when using rlang::inject() to insert a quosure
   cache <- cachem::cache_mem()
   k <- reactiveVal(0)
 
   vals <- character()
   exp <- quo({ k() })
-  r <- blast(reactive(!!exp))
+  r <- inject(reactive(!!exp))
 
   finalized <- FALSE
   reg.finalizer(attr(r, "observable"), function(e) finalized <<- TRUE)
@@ -851,11 +851,11 @@ test_that("bindCache reactive error handling - async", {
 # ============================================================================
 # Quosures
 # ============================================================================
-test_that("bindCache quosures -- inlined with blast() at creation time", {
+test_that("bindCache quosures -- inlined with inject() at creation time", {
   cache <- cachem::cache_mem()
   res <- NULL
   a <- 1
-  r <- blast({
+  r <- inject({
     reactive({
         eval_tidy(quo(!!a))
       }) %>%

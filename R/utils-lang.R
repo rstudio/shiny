@@ -83,7 +83,7 @@ remove_source <- function(x) {
 }
 
 # Need this here until it is part of rlang.
-blast <- function(expr, env = parent.frame()) {
+inject <- function(expr, env = parent.frame()) {
   rlang::eval_bare(rlang::enexpr(expr), env)
 }
 
@@ -92,8 +92,8 @@ blast <- function(expr, env = parent.frame()) {
 # and the various render functions. It handles the following cases:
 # - The typical case where x is an unquoted expression, and `env` and `quoted`
 #   are not used.
-# - New-style metaprogramming cases, where rlang::blast() is used to inline a
-#   quosure into the AST, as in `blast(reactive(!!x))`.
+# - New-style metaprogramming cases, where rlang::inject() is used to inline a
+#   quosure into the AST, as in `inject(reactive(!!x))`.
 # - Old-style metaprogramming cases, where `env` and/or `quoted` are used.
 #
 # Much of the complexity is handling old-style metaprogramming cases. The code
@@ -114,7 +114,7 @@ blast <- function(expr, env = parent.frame()) {
 # }
 #
 # In the future, the calling functions will not need to have the `env` and
-# `quoted` arguments -- `rlang::blast()` and quosures can be used instead.
+# `quoted` arguments -- `rlang::inject()` and quosures can be used instead.
 # Instead of using this function, `get_quosure()`, the caller can instead use
 # just the following code:
 #
@@ -136,7 +136,7 @@ get_quosure <- function(x, env, quoted) {
   } else {
     x <- eval(substitute(substitute(x)), parent.frame())
 
-    # At this point, x can be a quosure if rlang::blast() is used, but the
+    # At this point, x can be a quosure if rlang::inject() is used, but the
     # typical case is that x is not a quosure.
     if (!is_quosure(x)) {
       x <- new_quosure(x, env = parent.frame(2L))

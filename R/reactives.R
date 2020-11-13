@@ -2244,7 +2244,7 @@ observeEvent <- function(eventExpr, handlerExpr,
   eventExpr   <- get_quosure(eventExpr,   event.env,   event.quoted)
   handlerExpr <- get_quosure(handlerExpr, handler.env, handler.quoted)
 
-  handler <- blast(observe(
+  handler <- inject(observe(
     !!handlerExpr,
     label = "observeEventHandler",
     suspended = suspended,
@@ -2254,7 +2254,7 @@ observeEvent <- function(eventExpr, handlerExpr,
     ..stacktraceon = FALSE # TODO: Does this go in the bindEvent?
   ))
 
-  o <- blast(bindEvent(
+  o <- inject(bindEvent(
     ignoreNULL = ignoreNULL,
     ignoreInit = ignoreInit,
     once = once,
@@ -2280,7 +2280,7 @@ eventReactive <- function(eventExpr, valueExpr,
   eventExpr <- get_quosure(eventExpr, event.env, event.quoted)
   valueExpr <- get_quosure(valueExpr, value.env, value.quoted)
 
-  invisible(blast(bindEvent(
+  invisible(inject(bindEvent(
     ignoreNULL = ignoreNULL,
     ignoreInit = ignoreInit,
     !!eventExpr,

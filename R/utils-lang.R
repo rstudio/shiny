@@ -6,7 +6,7 @@ dot_exprs <- function() {
     call        = sys.call(sys.parent()),
     expand.dots = FALSE,
     envir       = parent.frame(2L)
-  )$...
+  )[["..."]]
 }
 
 # Given a list of quoted expressions, return a function that will evaluate them
@@ -145,4 +145,3 @@ get_quosure <- function(x, env, quoted) {
 
   x
 }
-

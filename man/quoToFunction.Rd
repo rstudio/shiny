@@ -26,18 +26,6 @@ recommend using \code{\link[=quoToFunction]{quoToFunction()}}, because it does n
 \code{quoted} arguments -- that information is captured by quosures provided by
 \pkg{rlang}.
 }
-\examples{
-# A very simple render function
-renderTriple <- function(expr) {
-  func <- quoToFunction(rlang::enquo(expr), "renderTriple")
-
-  createRenderFunction(
-    func,
-    transform = function(value, session, name, ...) {
-      paste(rep(value, 3), collapse=", ")
-    },
-    outputFunc = textOutput
-  )
-}
-
+\seealso{
+\code{\link[=createRenderFunction]{createRenderFunction()}} for example usage.
 }

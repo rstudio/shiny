@@ -141,8 +141,12 @@ print.shiny.render.function <- function(x, ...) {
 #'
 #' @examples
 #' # A very simple render function
-#' renderTriple <- function(expr) {
-#'   func <- quoToFunction(rlang::enquo(expr), "renderTriple")
+#' renderTriple <- function(x) {
+#'   x <- substitute(x)
+#'   if (!rlang::is_quosure(x)) {
+#'     x <- rlang::new_quosure(x, env = parent.frame())
+#'   }
+#'   func <- quoToFunction(x, "renderTriple")
 #'
 #'   createRenderFunction(
 #'     func,
@@ -153,6 +157,11 @@ print.shiny.render.function <- function(x, ...) {
 #'   )
 #' }
 #'
+#' # Test render function from the console
+#' a <- 1
+#' r <- renderTriple({ a + 1 })
+#' a <- 2
+#' r()
 #' @export
 createRenderFunction <- function(
   func,

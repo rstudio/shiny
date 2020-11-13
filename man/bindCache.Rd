@@ -210,8 +210,62 @@ expressions, they will share the cached values. This is useful when using
 \code{cache="app"}: there may be multiple user sessions which create separate
 cached reactive objects (because they are created from the same code in the
 server function, but the server function is executed once for each user
-session), and those cached reactive objects across sessions can share values
-in the cache.
+session), and those cached reactive objects across sessions can share
+values in the cache.
+}
+
+\section{Developing render functions for caching}{
+
+
+If you write \code{render} functions (for example, \code{renderFoo()}), you may
+need to provide a \code{cacheHint}, so that \code{bindCache()} knows how to correctly
+cache the output.
+
+The potential problem is a cache collision. Consider the following:\preformatted{output$x1 <- renderText(\{ input$x \}) \%>\% bindCache(input$x)
+output$x2 <- renderText(\{ input$x * 2 \}) \%>\% bindCache(input$x)
+}
+
+Both \code{output$x1} and \code{output$x2} use \code{input$x} as part of their cache key,
+but if it were the only thing used in the cache key, then the two outputs
+would have a cache collision, and they would have the same output. To avoid
+this, a \emph{cache hint} is automatically added when \code{\link[=renderText]{renderText()}} calls
+\code{\link[=createRenderFunction]{createRenderFunction()}}. The cache hint is used as part of the actual
+cache key, in addition to the one passed to \code{bindCache()} by the user. The
+cache hint can be viewed by calling the internal Shiny function
+\code{extractCacheHint()}:\if{html}{\out{<div class="NA">}}\preformatted{r <- renderText(\{ input$x \})
+shiny:::extractCacheHint(r)
+}\if{html}{\out{</div>}}
+
+This returns a nested list containing an item, \verb{$origUserFunc$body}, which
+in this case is the expression which was passed to \code{renderText()}:
+\code{{ input$x }}. This (quoted)  expression is mixed into the actual cache
+key, and it is how \code{output$x1} does not have collisions with \code{output$x2}.
+
+For most developers of render functions, nothing extra needs to be done;
+the automatic inference of the cache hint is sufficient. Again, you can
+check it by calling \code{shiny:::extractCacheHint()}, and by testing the
+render function for cache collisions in a real application.
+
+In some cases, however, the automatic cache hint inference is not
+sufficient, and it is necessary to provide a cache hint. This is true
+for \code{renderPrint()}. Unlike \code{renderText()}, it wraps the user-provided
+expression in another function, before passing it to \code{\link[=markRenderFunction]{markRenderFunction()}}
+(instead of \code{\link[=createRenderFunction]{createRenderFunction()}}). Because the user code is wrapped in
+another function, markRenderFunction() is not able to automatically extract
+the user-provided code and use it in the cache key. Instead, \code{renderPrint}
+calls \code{markRenderFunction()}, it explicitly passes along a \code{cacheHint},
+which includes a label and the original user expression.
+}
+
+\section{Uncacheable objects}{
+
+
+Some render functions cannot be cached, typically because they have side
+effects or modify some external state, and they must re-execute each time
+in order to work properly.
+
+For developers of such code, they should call \code{\link[=createRenderFunction]{createRenderFunction()}} or
+\code{\link[=markRenderFunction]{markRenderFunction()}} with \code{cacheHint = FALSE}.
 }
 
 \examples{

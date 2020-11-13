@@ -194,7 +194,6 @@ utils::globalVariables(".GenericCallEnv", add = TRUE)
 #'   create a [cachem::cache_mem()] or [cachem::cache_disk()], and pass it
 #'   as the `cache` argument of `bindCache()`.
 #'
-#'
 #' @section Cache key internals:
 #'
 #'   The actual cache key that is used internally takes value from evaluating the
@@ -209,8 +208,66 @@ utils::globalVariables(".GenericCallEnv", add = TRUE)
 #'   `cache="app"`: there may be multiple user sessions which create separate
 #'   cached reactive objects (because they are created from the same code in the
 #'   server function, but the server function is executed once for each user
-#'   session), and those cached reactive objects across sessions can share values
-#'   in the cache.
+#'   session), and those cached reactive objects across sessions can share
+#'   values in the cache.
+
+#'
+#' @section Developing render functions for caching:
+#'
+#'   If you write `render` functions (for example, `renderFoo()`), you may
+#'   need to provide a `cacheHint`, so that `bindCache()` knows how to correctly
+#'   cache the output.
+#'
+#'   The potential problem is a cache collision. Consider the following:
+#'
+#'   ```
+#'   output$x1 <- renderText({ input$x }) %>% bindCache(input$x)
+#'   output$x2 <- renderText({ input$x * 2 }) %>% bindCache(input$x)
+#'   ```
+#'
+#'   Both `output$x1` and `output$x2` use `input$x` as part of their cache key,
+#'   but if it were the only thing used in the cache key, then the two outputs
+#'   would have a cache collision, and they would have the same output. To avoid
+#'   this, a _cache hint_ is automatically added when [renderText()] calls
+#'   [createRenderFunction()]. The cache hint is used as part of the actual
+#'   cache key, in addition to the one passed to `bindCache()` by the user. The
+#'   cache hint can be viewed by calling the internal Shiny function
+#'   `extractCacheHint()`:
+#'
+#'   ```
+#'   r <- renderText({ input$x })
+#'   shiny:::extractCacheHint(r)
+#'   ```
+#'
+#'   This returns a nested list containing an item, `$origUserFunc$body`, which
+#'   in this case is the expression which was passed to `renderText()`:
+#'   `{ input$x }`. This (quoted)  expression is mixed into the actual cache
+#'   key, and it is how `output$x1` does not have collisions with `output$x2`.
+#'
+#'   For most developers of render functions, nothing extra needs to be done;
+#'   the automatic inference of the cache hint is sufficient. Again, you can
+#'   check it by calling `shiny:::extractCacheHint()`, and by testing the
+#'   render function for cache collisions in a real application.
+#'
+#'   In some cases, however, the automatic cache hint inference is not
+#'   sufficient, and it is necessary to provide a cache hint. This is true
+#'   for `renderPrint()`. Unlike `renderText()`, it wraps the user-provided
+#'   expression in another function, before passing it to [markRenderFunction()]
+#'   (instead of [createRenderFunction()]). Because the user code is wrapped in
+#'   another function, markRenderFunction() is not able to automatically extract
+#'   the user-provided code and use it in the cache key. Instead, `renderPrint`
+#'   calls `markRenderFunction()`, it explicitly passes along a `cacheHint`,
+#'   which includes a label and the original user expression.
+#'
+#' @section Uncacheable objects:
+#'
+#'   Some render functions cannot be cached, typically because they have side
+#'   effects or modify some external state, and they must re-execute each time
+#'   in order to work properly.
+#'
+#'   For developers of such code, they should call [createRenderFunction()] or
+#'   [markRenderFunction()] with `cacheHint = FALSE`.
+#'
 #'
 #' @param x The object to add caching to.
 #' @param ... One or more expressions to use in the caching key.

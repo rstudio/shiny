@@ -58,7 +58,7 @@ shiny 1.5.0.9000
 
 * Shiny now uses `cache_mem` from the cachem package, instead of `memoryCache` and `diskCache`. (#3118)
 
-* Added support for `...` argument in `icon()`. (#3140)
+* Closed #3140: Added support for `...` argument in `icon()`. (#3143)
 
 ### Bug fixes
 

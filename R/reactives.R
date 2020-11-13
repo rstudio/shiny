@@ -1810,6 +1810,7 @@ reactivePoll <- function(intervalMillis, session, checkFunc, valueFunc) {
   rv <- reactiveValues(cookie = isolate(checkFunc()))
 
   re_finalized <- FALSE
+  env <- environment()
 
   o <- observe({
     # When no one holds a reference to the reactive returned from
@@ -1817,8 +1818,7 @@ reactivePoll <- function(intervalMillis, session, checkFunc, valueFunc) {
     # firing and hold onto resources.
     if (re_finalized) {
       o$destroy()
-      # Note that rlang::as_function() inserts an additional parent environment.
-      rm(o, envir = parent.env(parent.env(environment())))
+      rm(o, envir = env)
       return()
     }
 

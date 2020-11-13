@@ -194,7 +194,6 @@ utils::globalVariables(".GenericCallEnv", add = TRUE)
 #'   create a [cachem::cache_mem()] or [cachem::cache_disk()], and pass it
 #'   as the `cache` argument of `bindCache()`.
 #'
-#'
 #' @section Cache key internals:
 #'
 #'   The actual cache key that is used internally takes value from evaluating the
@@ -209,8 +208,66 @@ utils::globalVariables(".GenericCallEnv", add = TRUE)
 #'   `cache="app"`: there may be multiple user sessions which create separate
 #'   cached reactive objects (because they are created from the same code in the
 #'   server function, but the server function is executed once for each user
-#'   session), and those cached reactive objects across sessions can share values
-#'   in the cache.
+#'   session), and those cached reactive objects across sessions can share
+#'   values in the cache.
+
+#'
+#' @section Developing render functions for caching:
+#'
+#'   If you write `render` functions (for example, `renderFoo()`), you may
+#'   need to provide a `cacheHint`, so that `bindCache()` knows how to correctly
+#'   cache the output.
+#'
+#'   The potential problem is a cache collision. Consider the following:
+#'
+#'   ```
+#'   output$x1 <- renderText({ input$x }) %>% bindCache(input$x)
+#'   output$x2 <- renderText({ input$x * 2 }) %>% bindCache(input$x)
+#'   ```
+#'
+#'   Both `output$x1` and `output$x2` use `input$x` as part of their cache key,
+#'   but if it were the only thing used in the cache key, then the two outputs
+#'   would have a cache collision, and they would have the same output. To avoid
+#'   this, a _cache hint_ is automatically added when [renderText()] calls
+#'   [createRenderFunction()]. The cache hint is used as part of the actual
+#'   cache key, in addition to the one passed to `bindCache()` by the user. The
+#'   cache hint can be viewed by calling the internal Shiny function
+#'   `extractCacheHint()`:
+#'
+#'   ```
+#'   r <- renderText({ input$x })
+#'   shiny:::extractCacheHint(r)
+#'   ```
+#'
+#'   This returns a nested list containing an item, `$origUserFunc$body`, which
+#'   in this case is the expression which was passed to `renderText()`:
+#'   `{ input$x }`. This (quoted)  expression is mixed into the actual cache
+#'   key, and it is how `output$x1` does not have collisions with `output$x2`.
+#'
+#'   For most developers of render functions, nothing extra needs to be done;
+#'   the automatic inference of the cache hint is sufficient. Again, you can
+#'   check it by calling `shiny:::extractCacheHint()`, and by testing the
+#'   render function for cache collisions in a real application.
+#'
+#'   In some cases, however, the automatic cache hint inference is not
+#'   sufficient, and it is necessary to provide a cache hint. This is true
+#'   for `renderPrint()`. Unlike `renderText()`, it wraps the user-provided
+#'   expression in another function, before passing it to [markRenderFunction()]
+#'   (instead of [createRenderFunction()]). Because the user code is wrapped in
+#'   another function, markRenderFunction() is not able to automatically extract
+#'   the user-provided code and use it in the cache key. Instead, `renderPrint`
+#'   calls `markRenderFunction()`, it explicitly passes along a `cacheHint`,
+#'   which includes a label and the original user expression.
+#'
+#' @section Uncacheable objects:
+#'
+#'   Some render functions cannot be cached, typically because they have side
+#'   effects or modify some external state, and they must re-execute each time
+#'   in order to work properly.
+#'
+#'   For developers of such code, they should call [createRenderFunction()] or
+#'   [markRenderFunction()] with `cacheHint = FALSE`.
+#'
 #'
 #' @param x The object to add caching to.
 #' @param ... One or more expressions to use in the caching key.
@@ -331,7 +388,8 @@ bindCache.reactiveExpr <- function(x, ..., cache = "app") {
   label <- exprToLabel(substitute(key), "cachedReactive")
   domain <- reactive_get_domain(x)
 
-  keyFunc <- make_quos_func(enquos(...))
+  # Convert the ... to a function that returns their evaluated values.
+  keyFunc <- exprs_to_func(dot_exprs(), parent.frame())
 
   valueFunc <- reactive_get_value_func(x)
   # Hash cache hint now -- this will be added to the key later on, to reduce the
@@ -437,7 +495,7 @@ bindCache.reactiveExpr <- function(x, ..., cache = "app") {
 
 #' @export
 bindCache.shiny.render.function <- function(x, ..., cache = "app") {
-  keyFunc <- make_quos_func(enquos(...))
+  keyFunc <- exprs_to_func(dot_exprs(), parent.frame())
 
   cacheHint <- digest(extractCacheHint(x), algo = "spookyhash")
 
@@ -563,28 +621,6 @@ bindCache.function <- function(x, ...) {
 }
 
 
-
-# Given a list of quosures, return a function that will evaluate them and return
-# the list. If the list contains a single quosure, unwrap it from the list.
-make_quos_func <- function(quos) {
-  if (length(quos) == 0) {
-    stop("Need at least one expression in `...` to use as cache key or event.")
-  }
-  if (length(quos) == 1) {
-    # Special case for one key expr. This is needed for async to work -- that
-    # is, when the expr returns a promise. It needs to not be wrapped into a
-    # list for the hybrid_chain stuff to detect that it's a promise. (Plus,
-    # it's not even clear what it would mean to mix promises and non-promises
-    # in the key.)
-    quos <- quos[[1]]
-    function() { eval_tidy(quos) }
-
-  } else {
-    function() { lapply(quos, eval_tidy) }
-  }
-}
-
-
 extractCacheHint <- function(func) {
   cacheHint <- attr(func, "cacheHint", exact = TRUE)
 
@@ -601,42 +637,4 @@ extractCacheHint <- function(func) {
   }
 
   cacheHint
-}
-
-
-# Get the formals and body for a function, without source refs. This is used for
-# consistent hashing of the function.
-formalsAndBody <- function(x) {
-  if (is.null(x)) {
-    return(list())
-  }
-
-  list(
-    formals = formals(x),
-    body = body(remove_source(x))
-  )
-}
-
-# Remove source refs from a function or language object. utils::removeSource()
-# does the same, but only gained support for language objects in R 3.6.0.
-remove_source <- function(x) {
-  if (is.function(x)) {
-    body(x) <- remove_source(body(x))
-    x
-  } else if (is.call(x)) {
-    attr(x, "srcref") <- NULL
-    attr(x, "wholeSrcref") <- NULL
-    attr(x, "srcfile") <- NULL
-
-    # `function` calls store the source ref as the fourth element.
-    # See https://github.com/r-lib/testthat/issues/1228
-    if (x[[1]] == quote(`function`)) {
-      x[[4]] <- NULL
-    }
-
-    x[] <- lapply(x, remove_source)
-    x
-  } else {
-    x
-  }
 }

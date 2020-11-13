@@ -53,8 +53,10 @@ renderTable <- function(expr, striped = FALSE, hover = FALSE,
                         rownames = FALSE, colnames = TRUE,
                         digits = NULL, na = "NA", ...,
                         env = parent.frame(), quoted = FALSE,
-                        outputArgs=list()) {
-  installExprFunction(expr, "func", env, quoted)
+                        outputArgs=list())
+{
+  expr <- get_quosure(expr, env, quoted)
+  func <- quoToFunction(expr, "renderTable")
 
   if (!is.function(spacing)) spacing <- match.arg(spacing)
 

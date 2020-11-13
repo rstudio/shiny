@@ -659,6 +659,115 @@ test_that("suspended/resumed observers run at most once", {
 })
 
 
+test_that("reactive() accepts injected quosures", {
+  # Normal usage - no quosures
+  a <- 1
+  f <- reactive({ a + 10 })
+  a <- 2
+  expect_identical(isolate(f()), 12)
+
+  # quosures can be used in reactive()
+  a <- 1
+  f <- reactive({ rlang::eval_tidy(rlang::quo(!!a + 10)) })
+  a <- 2
+  expect_identical(isolate(f()), 12)
+
+  # inject() with quosures
+  a <- 1
+  exp <- rlang::quo(a + 10)
+  f <- inject(reactive(!!exp))
+  a <- 2
+  expect_identical(isolate(f()), 12)
+
+  # inject() with !!!
+  a <- 1
+  exp <- list(rlang::quo(a + 10))
+  f <- inject(reactive(!!!exp))
+  a <- 2
+  expect_identical(isolate(f()), 12)
+
+  # inject() with captured environment
+  a <- 1
+  exp <- local({
+    q <- rlang::quo(a + 10)
+    a <- 2
+    q
+  })
+  f <- inject(reactive(!! exp ))
+  a <- 3
+  expect_identical(isolate(f()), 12)
+
+  # inject() with nested quosures
+  a <- 1
+  y <- quo(a)
+  exp <- quo(!!y + 10)
+  a <- 2
+  f <- inject(reactive(!! exp ))
+  a <- 3
+  expect_identical(isolate(f()), 13)
+})
+
+test_that("observe() accepts injected quosures", {
+  # Normal usage - no quosures
+  val <- NULL
+  a <- 1
+  observe({ val <<- a + 10 })
+  a <- 2
+  flushReact()
+  expect_identical(val, 12)
+
+  # quosures can be used in reactive()
+  val <- NULL
+  a <- 1
+  f <- observe({ val <<- rlang::eval_tidy(rlang::quo(!!a + 10)) })
+  a <- 2
+  flushReact()
+  expect_identical(val, 12)
+
+  # inject() with quosures
+  val <- NULL
+  a <- 1
+  exp <- rlang::quo(val <<- a + 10)
+  f <- inject(observe(!!exp))
+  a <- 2
+  flushReact()
+  expect_identical(val, 12)
+
+  # inject() with !!!
+  val <- NULL
+  a <- 1
+  exp <- list(quo(val <<- a + 10))
+  f <- inject(observe(!!!exp))
+  a <- 2
+  flushReact()
+  expect_identical(val, 12)
+
+  # inject() with captured environment
+  val <- NULL
+  a <- 1
+  exp <- local({
+    q <- rlang::quo(val <<- a + 10)
+    a <- 2
+    q
+  })
+  f <- inject(observe(!! exp ))
+  a <- 3
+  flushReact()
+  expect_identical(val, 12)
+
+  # inject() with nested quosures
+  val <- NULL
+  a <- 1
+  y <- quo(a)
+  exp <- rlang::quo(val <<- !!y + 10)
+  a <- 2
+  f <- inject(observe(!!exp))
+  a <- 3
+  flushReact()
+  expect_identical(val, 13)
+})
+
+
 test_that("reactive() accepts quoted and unquoted expressions", {
   vals <- reactiveValues(A=1)
 
@@ -684,10 +793,12 @@ test_that("reactive() accepts quoted and unquoted expressions", {
   expect_true(is.function(isolate(fun())))
 
 
-  # Check that environment is correct - parent environment should be this one
+  # Check that environment is correct - parent of parent environment should be
+  # this one. Note that rlang::as_function() injects an intermediate
+  # environment.
   this_env <- environment()
   fun <- reactive(environment())
-  expect_identical(isolate(parent.env(fun())), this_env)
+  expect_identical(isolate(parent.env(parent.env(fun()))), this_env)
 
   # Sanity check: environment structure for a reactive() should be the same as for
   # a normal function
@@ -726,12 +837,13 @@ test_that("observe() accepts quoted and unquoted expressions", {
   expect_equal(valB, 4)
 
 
-  # Check that environment is correct - parent environment should be this one
+  # Check that environment is correct - parent of parent environment should be
+  # this one. rlang::as_function() injects one intermediate env.
   this_env <- environment()
   inside_env <- NULL
   fun <- observe(inside_env <<- environment())
   flushReact()
-  expect_identical(parent.env(inside_env), this_env)
+  expect_identical(parent.env(parent.env(inside_env)), this_env)
 })
 
 test_that("Observer priorities are respected", {

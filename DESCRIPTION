@@ -88,7 +88,7 @@ Imports:
     promises (>= 1.1.0),
     tools,
     crayon,
-    rlang (>= 0.4.0),
+    rlang (>= 0.4.8.9000),
     fastmap (>= 1.0.0),
     withr,
     commonmark (>= 1.7),
@@ -117,7 +117,8 @@ Remotes:
     rstudio/htmltools,
     rstudio/sass,
     rstudio/bslib,
-    r-lib/cachem
+    r-lib/cachem,
+    r-lib/rlang
 URL: http://shiny.rstudio.com
 BugReports: https://github.com/rstudio/shiny/issues
 Collate:
@@ -201,6 +202,7 @@ Collate:
     'test-server.R'
     'test.R'
     'update-input.R'
+    'utils-lang.R'
     'viewer.R'
 RoxygenNote: 7.1.1
 Encoding: UTF-8

@@ -185,7 +185,7 @@ bindEvent.reactiveExpr <- function(x, ..., ignoreNULL = TRUE, ignoreInit = FALSE
 {
   domain <- reactive_get_domain(x)
 
-  eventFunc <- make_quos_func(enquos(...))
+  eventFunc <- exprs_to_func(dot_exprs(), parent.frame())
 
   valueFunc <- reactive_get_value_func(x)
   valueFunc <- wrapFunctionLabel(valueFunc, "eventReactiveValueFunc", ..stacktraceon = TRUE)
@@ -222,7 +222,7 @@ bindEvent.reactiveExpr <- function(x, ..., ignoreNULL = TRUE, ignoreInit = FALSE
 
 #' @export
 bindEvent.shiny.render.function <- function(x, ..., ignoreNULL = TRUE, ignoreInit = FALSE) {
-  eventFunc <- make_quos_func(enquos(...))
+  eventFunc <- exprs_to_func(dot_exprs(), parent.frame())
 
   valueFunc <- x
 
@@ -257,7 +257,7 @@ bindEvent.Observer <- function(x, ..., ignoreNULL = TRUE, ignoreInit = FALSE,
     stop("Can't call bindEvent() on an observer that has been destroyed.")
   }
 
-  eventFunc <- make_quos_func(enquos(...))
+  eventFunc <- exprs_to_func(dot_exprs(), parent.frame())
   valueFunc <- x$.func
 
   if (is.null(label)) {

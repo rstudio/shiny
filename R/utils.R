@@ -551,20 +551,7 @@ installExprFunction <- function(expr, name, eval.env = parent.frame(2),
 #'
 #' @param q A quosure.
 #' @inheritParams installExprFunction
-#'
-#' @examples
-#' # A very simple render function
-#' renderTriple <- function(expr) {
-#'   func <- quoToFunction(rlang::enquo(expr), "renderTriple")
-#'
-#'   createRenderFunction(
-#'     func,
-#'     transform = function(value, session, name, ...) {
-#'       paste(rep(value, 3), collapse=", ")
-#'     },
-#'     outputFunc = textOutput
-#'   )
-#' }
+#' @seealso [createRenderFunction()] for example usage.
 #'
 #' @export
 quoToFunction <- function(q, label, ..stacktraceon = FALSE) {

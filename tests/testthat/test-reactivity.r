@@ -679,7 +679,14 @@ test_that("reactive() accepts injected quosures", {
   a <- 2
   expect_identical(isolate(f()), 12)
 
-  # blast with captured environment
+  # blast() can inject quosures with !!!
+  a <- 1
+  exp <- list(rlang::quo(a + 10))
+  f <- blast(reactive(!!!exp))
+  a <- 2
+  expect_identical(isolate(f()), 12)
+
+  # blast() with captured environment
   a <- 1
   exp <- local({
     q <- rlang::quo(a + 10)
@@ -689,6 +696,15 @@ test_that("reactive() accepts injected quosures", {
   f <- blast(reactive(!! exp ))
   a <- 3
   expect_identical(isolate(f()), 12)
+
+  # blast() with nested quosures
+  a <- 1
+  y <- quo(a)
+  exp <- quo(!!y + 10)
+  a <- 2
+  f <- blast(reactive(!! exp ))
+  a <- 3
+  expect_identical(isolate(f()), 13)
 })
 
 test_that("observe() accepts injected quosures", {
@@ -717,7 +733,16 @@ test_that("observe() accepts injected quosures", {
   flushReact()
   expect_identical(val, 12)
 
-  # blast with captured environment
+  # blast() can inject quosures with !!!
+  val <- NULL
+  a <- 1
+  exp <- list(quo(val <<- a + 10))
+  f <- blast(observe(!!!exp))
+  a <- 2
+  flushReact()
+  expect_identical(val, 12)
+
+  # blast() with captured environment
   val <- NULL
   a <- 1
   exp <- local({
@@ -729,6 +754,17 @@ test_that("observe() accepts injected quosures", {
   a <- 3
   flushReact()
   expect_identical(val, 12)
+
+  # blast() with nested quosures
+  val <- NULL
+  a <- 1
+  y <- quo(a)
+  exp <- rlang::quo(val <<- !!y + 10)
+  a <- 2
+  f <- blast(observe(!!exp))
+  a <- 3
+  flushReact()
+  expect_identical(val, 13)
 })
 
 

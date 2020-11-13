@@ -1179,3 +1179,52 @@ test_that("Some render functions can't be cached", {
   expect_error(renderCachedPlot({ plot(1) }, 1) %>% bindCache(1, cache = m))
   expect_error(renderImage({ cars }) %>% bindCache(1, cache = m))
 })
+
+
+test_that("cacheHint to avoid collisions", {
+  # Same function and expression -> same cache hint
+  expect_identical(
+    extractCacheHint(renderText({ a + 1 })),
+    extractCacheHint(renderText({ a + 1 })),
+  )
+  expect_identical(
+    extractCacheHint(renderPrint({ a + 1 })),
+    extractCacheHint(renderPrint({ a + 1 }))
+  )
+  expect_identical(
+    extractCacheHint(renderUI({ a + 1 })),
+    extractCacheHint(renderUI({ a + 1 }))
+  )
+  expect_identical(
+    extractCacheHint(renderTable({ a + 1 })),
+    extractCacheHint(renderTable({ a + 1 }))
+  )
+
+  # Different expressions -> different cache hint
+  expect_false(identical(
+    extractCacheHint(renderText({ a + 1 })),
+    extractCacheHint(renderText({ a + 2 }))
+  ))
+  expect_false(identical(
+    extractCacheHint(renderPrint({ a + 1 })),
+    extractCacheHint(renderPrint({ a + 2 }))
+  ))
+  expect_false(identical(
+    extractCacheHint(renderUI({ a + 1 })),
+    extractCacheHint(renderUI({ a + 2 }))
+  ))
+  expect_false(identical(
+    extractCacheHint(renderTable({ a + 1 })),
+    extractCacheHint(renderTable({ a + 2 }))
+  ))
+
+  # Different functions -> different cache hint
+  expect_false(identical(
+    extractCacheHint(renderText({ a + 1 })),
+    extractCacheHint(renderPrint({ a + 1 }))
+  ))
+  expect_false(identical(
+    extractCacheHint(renderText({ a + 1 })),
+    extractCacheHint(renderUI({ a + 1 }))
+  ))
+})

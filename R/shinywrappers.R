@@ -534,7 +534,7 @@ renderPrint <- function(expr, env = parent.frame(), quoted = FALSE,
     outputArgs,
     cacheHint = list(
       label = "renderPrint",
-      origUserExpr = body(func)
+      origUserExpr = get_expr(expr)
     )
   )
 }

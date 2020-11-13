@@ -356,18 +356,7 @@ markOutputAttrs <- function(renderFunc, snapshotExclude = NULL,
 renderImage <- function(expr, env=parent.frame(), quoted=FALSE,
                         deleteFile, outputArgs=list())
 {
-  if (!missing(env) || !missing(quoted)) {
-    deprecatedEnvQuotedMessage()
-    if (!quoted) expr <- substitute(expr)
-    expr <- new_quosure(expr, env)
-
-  } else {
-    expr <- substitute(expr)
-    if (!is_quosure(expr)) {
-      expr <- new_quosure(expr, env = parent.frame())
-    }
-  }
-
+  expr <- get_quosure(expr, env, quoted)
   func <- quoToFunction(expr, "renderImage")
 
   # missing() must be used directly within the function with the given arg
@@ -503,18 +492,7 @@ isTemp <- function(path, tempDir = tempdir(), mustExist) {
 renderPrint <- function(expr, env = parent.frame(), quoted = FALSE,
                         width = getOption('width'), outputArgs=list())
 {
-  if (!missing(env) || !missing(quoted)) {
-    deprecatedEnvQuotedMessage()
-    if (!quoted) expr <- substitute(expr)
-    expr <- new_quosure(expr, env)
-
-  } else {
-    expr <- substitute(expr)
-    if (!is_quosure(expr)) {
-      expr <- new_quosure(expr, env = parent.frame())
-    }
-  }
-
+  expr <- get_quosure(expr, env, quoted)
   func <- quoToFunction(expr, "renderPrint")
 
   # Set a promise domain that sets the console width
@@ -600,18 +578,7 @@ createRenderPrintPromiseDomain <- function(width) {
 renderText <- function(expr, env=parent.frame(), quoted=FALSE,
                        outputArgs=list(), sep=" ") {
 
-  if (!missing(env) || !missing(quoted)) {
-    deprecatedEnvQuotedMessage()
-    if (!quoted) expr <- substitute(expr)
-    expr <- new_quosure(expr, env)
-
-  } else {
-    expr <- substitute(expr)
-    if (!is_quosure(expr)) {
-      expr <- new_quosure(expr, env = parent.frame())
-    }
-  }
-
+  expr <- get_quosure(expr, env, quoted)
   func <- quoToFunction(expr, "renderText")
 
   createRenderFunction(
@@ -664,18 +631,7 @@ renderText <- function(expr, env=parent.frame(), quoted=FALSE,
 renderUI <- function(expr, env = parent.frame(), quoted = FALSE,
                      outputArgs = list())
 {
-  if (!missing(env) || !missing(quoted)) {
-    deprecatedEnvQuotedMessage()
-    if (!quoted) expr <- substitute(expr)
-    expr <- new_quosure(expr, env)
-
-  } else {
-    expr <- substitute(expr)
-    if (!is_quosure(expr)) {
-      expr <- new_quosure(expr, env = parent.frame())
-    }
-  }
-
+  expr <- get_quosure(expr, env, quoted)
   func <- quoToFunction(expr, "renderUI")
 
   createRenderFunction(
@@ -821,18 +777,7 @@ renderDataTable <- function(expr, options = NULL, searchDelay = 500,
                             env = parent.frame(), quoted = FALSE,
                             outputArgs=list())
 {
-  if (!missing(env) || !missing(quoted)) {
-    deprecatedEnvQuotedMessage()
-    if (!quoted) expr <- substitute(expr)
-    expr <- new_quosure(expr, env)
-
-  } else {
-    expr <- substitute(expr)
-    if (!is_quosure(expr)) {
-      expr <- new_quosure(expr, env = parent.frame())
-    }
-  }
-
+  expr <- get_quosure(expr, env, quoted)
   func <- quoToFunction(expr, "renderDataTable")
 
   renderFunc <- function(shinysession, name, ...) {

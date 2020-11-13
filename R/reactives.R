@@ -977,23 +977,7 @@ reactive <- function(x, env = parent.frame(), quoted = FALSE,
 {
   check_dots_empty()
 
-  if (!missing(env) || !missing(quoted)) {
-    deprecatedEnvQuotedMessage()
-    if (!quoted) {
-      x <- substitute(x)
-    }
-    x <- new_quosure(x, env)
-
-  } else {
-    x <- substitute(x)
-
-    # At this point, x can be a quosure if rlang::blast() is used, but the
-    # typical case is that x is not a quosure.
-    if (!is_quosure(x)) {
-      x <- new_quosure(x, env = parent.frame())
-    }
-  }
-
+  x <- get_quosure(x, env, quoted)
   fun <- as_function(x)
   # as_function returns a function that takes `...`. We need one that takes no
   # args.
@@ -1415,23 +1399,7 @@ observe <- function(x, env = parent.frame(), quoted = FALSE,
 {
   check_dots_empty()
 
-  if (!missing(env) || !missing(quoted)) {
-    deprecatedEnvQuotedMessage()
-    if (!quoted) {
-      x <- substitute(x)
-    }
-    x <- new_quosure(x, env)
-
-  } else {
-    x <- substitute(x)
-
-    # At this point, x can be a quosure if rlang::blast() is used, but the
-    # typical case is that x is not a quosure.
-    if (!is_quosure(x)) {
-      x <- new_quosure(x, env = parent.frame())
-    }
-  }
-
+  x <- get_quosure(x, env, quoted)
   fun <- as_function(x)
   # as_function returns a function that takes `...`. We need one that takes no
   # args.
@@ -2273,40 +2241,8 @@ observeEvent <- function(eventExpr, handlerExpr,
 {
   check_dots_empty()
 
-  if (!missing(event.env) || !missing(event.quoted)) {
-    deprecatedEnvQuotedMessage("event.env", "event.quoted")
-    if (!event.quoted) {
-      eventExpr <- substitute(eventExpr)
-    }
-    eventExpr <- new_quosure(eventExpr, event.env)
-
-  } else {
-    eventExpr <- substitute(eventExpr)
-
-    # At this point, x can be a quosure if rlang::blast() is used, but the
-    # typical case is that x is not a quosure.
-    if (!is_quosure(eventExpr)) {
-      eventExpr <- new_quosure(eventExpr, env = parent.frame())
-    }
-  }
-
-  if (!missing(handler.env) || !missing(handler.quoted)) {
-    deprecatedEnvQuotedMessage("handler.env", "handler.quoted")
-    if (!handler.quoted) {
-      handlerExpr <- substitute(handlerExpr)
-    }
-    handlerExpr <- new_quosure(handlerExpr, handler.env)
-
-  } else {
-    handlerExpr <- substitute(handlerExpr)
-
-    # At this point, x can be a quosure if rlang::blast() is used, but the
-    # typical case is that x is not a quosure.
-    if (!is_quosure(handlerExpr)) {
-      handlerExpr <- new_quosure(handlerExpr, env = parent.frame())
-    }
-  }
-
+  eventExpr   <- get_quosure(eventExpr,   event.env,   event.quoted)
+  handlerExpr <- get_quosure(handlerExpr, handler.env, handler.quoted)
 
   handler <- blast(observe(
     !!handlerExpr,
@@ -2341,39 +2277,8 @@ eventReactive <- function(eventExpr, valueExpr,
 {
   check_dots_empty()
 
-  if (!missing(event.env) || !missing(event.quoted)) {
-    deprecatedEnvQuotedMessage()
-    if (!event.quoted) {
-      eventExpr <- substitute(eventExpr)
-    }
-    eventExpr <- new_quosure(eventExpr, event.env)
-
-  } else {
-    eventExpr <- substitute(eventExpr)
-
-    # At this point, x can be a quosure if rlang::blast() is used, but the
-    # typical case is that x is not a quosure.
-    if (!is_quosure(eventExpr)) {
-      eventExpr <- new_quosure(eventExpr, env = parent.frame())
-    }
-  }
-
-  if (!missing(value.env) || !missing(value.quoted)) {
-    deprecatedEnvQuotedMessage()
-    if (!value.quoted) {
-      valueExpr <- substitute(valueExpr)
-    }
-    valueExpr <- new_quosure(valueExpr, value.env)
-
-  } else {
-    valueExpr <- substitute(valueExpr)
-
-    # At this point, x can be a quosure if rlang::blast() is used, but the
-    # typical case is that x is not a quosure.
-    if (!is_quosure(valueExpr)) {
-      valueExpr <- new_quosure(valueExpr, env = parent.frame())
-    }
-  }
+  eventExpr <- get_quosure(eventExpr, event.env, event.quoted)
+  valueExpr <- get_quosure(valueExpr, value.env, value.quoted)
 
   invisible(blast(bindEvent(
     ignoreNULL = ignoreNULL,

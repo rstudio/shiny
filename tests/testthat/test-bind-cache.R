@@ -123,7 +123,7 @@ test_that("bindCache reactive - original reactive can be GC'd", {
   k <- reactiveVal(0)
 
   vals <- character()
-  exp <- rlang::quo({ k() })
+  exp <- quo({ k() })
   r <- blast(reactive(!!exp))
 
   finalized <- FALSE

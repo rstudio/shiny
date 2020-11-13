@@ -55,18 +55,7 @@ renderTable <- function(expr, striped = FALSE, hover = FALSE,
                         env = parent.frame(), quoted = FALSE,
                         outputArgs=list())
 {
-  if (!missing(env) || !missing(quoted)) {
-    deprecatedEnvQuotedMessage()
-    if (!quoted) expr <- substitute(expr)
-    expr <- new_quosure(expr, env)
-
-  } else {
-    expr <- substitute(expr)
-    if (!is_quosure(expr)) {
-      expr <- new_quosure(expr, env = parent.frame())
-    }
-  }
-
+  expr <- get_quosure(expr, env, quoted)
   func <- quoToFunction(expr, "renderTable")
 
   if (!is.function(spacing)) spacing <- match.arg(spacing)

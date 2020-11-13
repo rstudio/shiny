@@ -564,51 +564,6 @@ bindCache.function <- function(x, ...) {
 }
 
 
-# Return the ... arguments of the caller, as a list of quoted expressions.
-dot_exprs <- function() {
-  match.call(
-    definition  = sys.function(sys.parent()),
-    call        = sys.call(sys.parent()),
-    expand.dots = FALSE,
-    envir       = parent.frame(2L)
-  )$...
-}
-
-# Given a list of quoted expressions, return a function that will evaluate them
-# and return a list of resulting values. If the list contains a single
-# expression, unwrap it from the list.
-exprs_to_func <- function(exprs, env) {
-  if (length(exprs) == 0) {
-    stop("Need at least one expression in `...` to use as cache key or event.")
-  }
-  if (length(exprs) == 1) {
-    # Special case for one expr. This is needed for async to work -- that is,
-    # when the expr returns a promise. It needs to not be wrapped into a list
-    # for the hybrid_chain stuff to detect that it's a promise. (Plus, it's not
-    # even clear what it would mean to mix promises and non-promises in the
-    # key.)
-    expr_to_func(exprs[[1]], env)
-
-  } else {
-    funcs <- lapply(exprs, expr_to_func, env = env)
-    function() {
-      lapply(funcs, function(f) f())
-    }
-  }
-}
-
-# Given a quoted expression or quosure, return a zero-arg function that
-# evaluates the expression in the given environment. (If it is a quosure, ignore
-# the env that's passed in.)
-expr_to_func <- function(expr, env) {
-  if (!is_quosure(expr)) {
-    expr <- new_quosure(expr, env)
-  }
-  f <- as_function(expr)
-  formals(f) <- list()
-  f
-}
-
 extractCacheHint <- function(func) {
   cacheHint <- attr(func, "cacheHint", exact = TRUE)
 
@@ -625,48 +580,4 @@ extractCacheHint <- function(func) {
   }
 
   cacheHint
-}
-
-
-# Get the formals and body for a function, without source refs. This is used for
-# consistent hashing of the function.
-formalsAndBody <- function(x) {
-  if (is.null(x)) {
-    return(list())
-  }
-
-  list(
-    formals = formals(x),
-    body = body(remove_source(x))
-  )
-}
-
-# Remove source refs from a function or language object. utils::removeSource()
-# does the same, but only gained support for language objects in R 3.6.0.
-remove_source <- function(x) {
-  if (is.function(x)) {
-    body(x) <- remove_source(body(x))
-    x
-  } else if (is.call(x)) {
-    attr(x, "srcref") <- NULL
-    attr(x, "wholeSrcref") <- NULL
-    attr(x, "srcfile") <- NULL
-
-    # `function` calls store the source ref as the fourth element.
-    # See https://github.com/r-lib/testthat/issues/1228
-    if (x[[1]] == quote(`function`) && length(x) == 4 &&
-        inherits(x[[4]], "srcref")) {
-      x[[4]] <- NULL
-    }
-
-    x[] <- lapply(x, remove_source)
-    x
-  } else {
-    x
-  }
-}
-
-# Need this here until it is part of rlang.
-blast <- function(expr, env = parent.frame()) {
-  rlang::eval_bare(rlang::enexpr(expr), env)
 }

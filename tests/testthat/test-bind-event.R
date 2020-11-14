@@ -68,3 +68,24 @@ test_that("ignoreNULL works", {
   flushReact()
   expect_identical(n, 1)
 })
+
+
+test_that("once=TRUE works", {
+  n <- 0
+  v <- reactiveVal(1)
+  observe({ n <<- n + 1 }) %>% bindEvent(v(), once = FALSE)
+  flushReact()
+  expect_identical(n, 1)
+  v(2)
+  flushReact()
+  expect_identical(n, 2)
+
+  n <- 0
+  v <- reactiveVal(1)
+  observe({ n <<- n + v() }) %>% bindEvent(v(), once = TRUE)
+  flushReact()
+  expect_identical(n, 1)
+  v(2)
+  flushReact()
+  expect_identical(n, 1)
+})

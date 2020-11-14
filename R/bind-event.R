@@ -287,7 +287,7 @@ bindEvent.Observer <- function(x, ..., ignoreNULL = TRUE, ignoreInit = FALSE,
           }
 
           if (once) {
-            on.exit(x$destroy())
+            on.exit(res$destroy())
           }
 
           req(!ignoreNULL || !isNullEvent(value))

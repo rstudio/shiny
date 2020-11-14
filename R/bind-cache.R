@@ -389,7 +389,7 @@ bindCache.reactiveExpr <- function(x, ..., cache = "app") {
   domain <- reactive_get_domain(x)
 
   # Convert the ... to a function that returns their evaluated values.
-  keyFunc <- exprs_to_func(dot_exprs(), parent.frame())
+  keyFunc <- quos_to_func(dots_quos())
 
   valueFunc <- reactive_get_value_func(x)
   # Hash cache hint now -- this will be added to the key later on, to reduce the
@@ -495,7 +495,7 @@ bindCache.reactiveExpr <- function(x, ..., cache = "app") {
 
 #' @export
 bindCache.shiny.render.function <- function(x, ..., cache = "app") {
-  keyFunc <- exprs_to_func(dot_exprs(), parent.frame())
+  keyFunc <- quos_to_func(dots_quos())
 
   cacheHint <- digest(extractCacheHint(x), algo = "spookyhash")
 

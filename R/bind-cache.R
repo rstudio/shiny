@@ -28,12 +28,12 @@ utils::globalVariables(".GenericCallEnv", add = TRUE)
 #' multiple possible values from the reactive expression.
 #'
 #' To use `bindCache()`, the key should be fast to compute, and the value should
-#' expensive (so that it benefits from caching).  To see if the value should be
-#' computed, a cached reactive evaluates the key, and then serializes and hashes
-#' the result. If the resulting hashed key is in the cache, then the cached
-#' reactive simply retrieves the previously calculated value and returns it; if
-#' not, then the value is computed and the result is stored in the cache before
-#' being returned.
+#' be slow to compute (so that it benefits from caching).  To determine if the
+#' value should be computed, a cached reactive evaluates the key, and then
+#' serializes and hashes the result. If the resulting hashed key is in the
+#' cache, then the cached reactive simply retrieves the previously calculated
+#' value and returns it; if not, then the value is computed and the result is
+#' stored in the cache before being returned.
 #'
 #' In most cases, the key will contain any reactive inputs that are used by the
 #' value expression. It is also best to use non-reference objects, since the

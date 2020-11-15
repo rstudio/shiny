@@ -591,6 +591,58 @@ bindCache.shiny.render.function <- function(x, ..., cache = "app") {
 }
 
 #' @export
+bindCache.shiny.renderPlot <- function(x, ...) {
+  dots_q <- dots_quos()
+
+  sizePolicy <- sizeGrowthRatio(width = 400, height = 400, growthRate = 1.2)
+
+  valueFunc <- x
+  plotFun <- function(...) {
+    hybrid_chain(
+      valueFunc(...),
+      function(img) {
+        message("emitting img tag")
+
+        # img <- result$plotObj$img
+        # Replace exact pixel dimensions; instead, the max-height and
+        # max-width will be set to 100% from CSS.
+        img$class <- "shiny-scalable"
+        img$width  <- NULL
+        img$height <- NULL
+
+        img
+      }
+    )
+  }
+
+  do.call(bindCache.shiny.render.function,
+    c(
+      plotFun,
+      dots_q,
+      quote({
+        info <- getCurrentOutputInfo()
+        width  <- info$width()
+        height <- info$height()
+        message(width, ", ", height, " => ",
+          paste0(sizePolicy(c(width, height)), collapse =", "))
+        sizePolicy(c(width, height))
+      })
+    )
+  )
+  # bindCache.shiny.render.function(plotFun,
+  #   ...,
+  #   {
+  #     info <- getCurrentOutputInfo()
+  #     width  <- info$width()
+  #     height <- info$height()
+  #     message(width, ", ", height, " => ",
+  #             paste0(sizePolicy(c(width, height)), collapse =", "))
+  #     sizePolicy(c(width, height))
+  #   }
+  # )
+}
+
+#' @export
 bindCache.reactive.cache <- function(x, ...) {
   stop("bindCache() has already been called on the object.")
 }

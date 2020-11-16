@@ -228,7 +228,7 @@ bindEvent.shiny.render.function <- function(x, ..., ignoreNULL = TRUE, ignoreIni
 
   initialized <- FALSE
 
-  res <- function(...) {
+  renderFunc <- function(...) {
     hybrid_chain(
       eventFunc(),
       function(value) {
@@ -244,8 +244,9 @@ bindEvent.shiny.render.function <- function(x, ..., ignoreNULL = TRUE, ignoreIni
     )
   }
 
-  class(res) <- c("shiny.render.function.event", class(res))
-  res
+  renderFunc <- addAttributes(renderFunc, renderFunctionAttributes(valueFunc))
+  class(renderFunc) <- c("shiny.render.function.event", class(valueFunc))
+  renderFunc
 }
 
 

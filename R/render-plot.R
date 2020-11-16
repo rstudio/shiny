@@ -180,7 +180,12 @@ renderPlot <- function(expr, width = 'auto', height = 'auto', res = 72, ...,
   outputFunc <- plotOutput
   if (!identical(height, 'auto')) formals(outputFunc)['height'] <- list(NULL)
 
-  markedFunc <- markRenderFunction(outputFunc, renderFunc, outputArgs)
+  markedFunc <- markRenderFunction(
+    outputFunc,
+    renderFunc,
+    outputArgs,
+    cacheHint = get_expr(expr)
+  )
   class(markedFunc) <- c("shiny.renderPlot", class(markedFunc))
   markedFunc
 }

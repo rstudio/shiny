@@ -504,7 +504,7 @@ bindCache.shiny.render.function <- function(x, ..., cache = "app") {
 
   valueFunc <- x
 
-  res <- function(...) {
+  renderFunc <- function(...) {
     domain <- getDefaultReactiveDomain()
 
     hybrid_chain(
@@ -589,10 +589,9 @@ bindCache.shiny.render.function <- function(x, ..., cache = "app") {
     )
   }
 
-  # TODO: Pass along attributes from original render func
-
-  class(res) <- c("shiny.render.function.cache", class(x))
-  res
+  renderFunc <- addAttributes(renderFunc, renderFunctionAttributes(valueFunc))
+  class(renderFunc) <- c("shiny.render.function.cache", class(valueFunc))
+  renderFunc
 }
 
 #' @export
@@ -668,6 +667,9 @@ bindCache.shiny.renderPlot <- function(x, ...,
       }
     )
   }
+
+  renderFunc <- addAttributes(renderFunc, renderFunctionAttributes(valueFunc))
+  class(renderFunc) <- class(valueFunc)
 
   bindCache.shiny.render.function(
     renderFunc,

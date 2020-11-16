@@ -229,6 +229,22 @@ as.tags.shiny.render.function <- function(x, ..., inline = FALSE) {
   useRenderFunction(x, inline = inline)
 }
 
+# Get relevant attributes from a render function object.
+renderFunctionAttributes <- function(x) {
+  attrs <- c("outputFunc", "outputArgs", "hasExecuted", "cacheHint")
+  names(attrs) <- attrs
+  lapply(attrs, function(name) attr(x, name, exact = TRUE))
+}
+
+# Add a named list of attributes to an object
+addAttributes <- function(x, attrs) {
+  nms <- names(attrs)
+  for (i in seq_along(attrs)) {
+    attr(x, nms[i]) <- attrs[[i]]
+  }
+  x
+}
+
 
 #' Mark a render function with attributes that will be used by the output
 #'

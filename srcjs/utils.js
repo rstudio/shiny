@@ -149,7 +149,7 @@ function makeBlob(parts) {
 
 function pixelRatio() {
   if (window.devicePixelRatio) {
-    return window.devicePixelRatio;
+    return Math.round(window.devicePixelRatio * 100) / 100;
   } else {
     return 1;
   }

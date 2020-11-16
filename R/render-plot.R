@@ -184,7 +184,7 @@ renderPlot <- function(expr, width = 'auto', height = 'auto', res = 72, ...,
     outputFunc,
     renderFunc,
     outputArgs,
-    cacheHint = get_expr(expr)
+    cacheHint = list(userExpr = get_expr(expr), res = res)
   )
   class(markedFunc) <- c("shiny.renderPlot", class(markedFunc))
   markedFunc

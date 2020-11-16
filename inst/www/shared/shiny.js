@@ -162,7 +162,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
   function pixelRatio() {
     if (window.devicePixelRatio) {
-      return window.devicePixelRatio;
+      return Math.round(window.devicePixelRatio * 100) / 100;
     } else {
       return 1;
     }

@@ -650,17 +650,13 @@ bindCache.shiny.renderPlot <- function(x, ...,
     })
   }
 
-  # Replace the getDims() function inside the renderPlot() so that the generated
-  # plot will be the dimensions specified by the sizePolicy; otherwise the plot
-  # would be the exact dimensions of the img element, which isn't what we want
-  # for cached plots.
-  environment(environment(x)$renderFunc)$getDims <- function() {
-    fitDims()
-  }
-
   renderFunc <- function(...) {
     hybrid_chain(
-      valueFunc(...),
+      # Pass in fitDims so that so that the generated plot will be the
+      # dimensions specified by the sizePolicy; otherwise the plot would be the
+      # exact dimensions of the img element, which isn't what we want for cached
+      # plots.
+      valueFunc(..., get_dims = fitDims),
       function(img) {
         # Replace exact pixel dimensions; instead, the max-height and max-width
         # will be set to 100% from CSS.

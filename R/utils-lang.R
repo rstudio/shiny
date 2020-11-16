@@ -1,21 +1,9 @@
 
 # Return the ... arguments of the caller, as a list of quosures. If any are
 # quosures inlined with inject(), don't change them.
-dots_quos <- function() {
-  caller_caller_env <- parent.frame(2L)
-
-  dots_exprs <- match.call(
-    definition  = sys.function(sys.parent()),
-    call        = sys.call(sys.parent()),
-    expand.dots = FALSE,
-    envir       = caller_caller_env
-  )[["..."]]
-
-  # Convert expressions to quosures
-  lapply(dots_exprs, function(x) {
-    if (!is_quosure(x)) new_quosure(x, caller_caller_env)
-    else                x
-  })
+enquos0 <- function(...) {
+  dots <- getNamespace('rlang')$captureDots()
+  lapply(dots, function(dot) as_quosure(dot$expr, dot$env))
 }
 
 # Given a list of quosures, return a function that will evaluate them and return

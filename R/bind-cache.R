@@ -390,7 +390,7 @@ bindCache.reactiveExpr <- function(x, ..., cache = "app") {
   domain <- reactive_get_domain(x)
 
   # Convert the ... to a function that returns their evaluated values.
-  keyFunc <- quos_to_func(dots_quos())
+  keyFunc <- quos_to_func(enquos0(...))
 
   valueFunc <- reactive_get_value_func(x)
   # Hash cache hint now -- this will be added to the key later on, to reduce the
@@ -498,7 +498,7 @@ bindCache.reactiveExpr <- function(x, ..., cache = "app") {
 bindCache.shiny.render.function <- function(x, ..., cache = "app") {
   check_dots_unnamed()
 
-  keyFunc <- quos_to_func(dots_quos())
+  keyFunc <- quos_to_func(enquos0(...))
 
   cacheHint <- digest(extractCacheHint(x), algo = "spookyhash")
 
@@ -601,8 +601,6 @@ bindCache.shiny.renderPlot <- function(x, ...,
 {
   check_dots_unnamed()
 
-  dots_q <- dots_quos()
-
   valueFunc <- x
 
   # Given the actual width/height of the image element in the browser, the
@@ -675,33 +673,20 @@ bindCache.shiny.renderPlot <- function(x, ...,
     )
   }
 
-  do.call(bindCache.shiny.render.function,
-    c(
-      renderFunc,
-      dots_q,
-      quote({
-        ensureResizeObserver()
-        session <- getDefaultReactiveDomain()
-        if (is.null(session) || is.null(fitDims())) {
-          req(FALSE)
-        }
-        pixelratio <- session$clientData$pixelratio %OR% 1
+  bindCache.shiny.render.function(
+    renderFunc,
+    ...,
+    {
+      ensureResizeObserver()
+      session <- getDefaultReactiveDomain()
+      if (is.null(session) || is.null(fitDims())) {
+        req(FALSE)
+      }
+      pixelratio <- session$clientData$pixelratio %OR% 1
 
-        list(fitDims(), pixelratio)
-      })
-    )
+      list(fitDims(), pixelratio)
+    }
   )
-  # bindCache.shiny.render.function(renderFunc,
-  #   ...,
-  #   {
-  #     info <- getCurrentOutputInfo()
-  #     width  <- info$width()
-  #     height <- info$height()
-  #     message(width, ", ", height, " => ",
-  #             paste0(sizePolicy(c(width, height)), collapse =", "))
-  #     sizePolicy(c(width, height))
-  #   }
-  # )
 }
 
 #' @export

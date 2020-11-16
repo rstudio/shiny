@@ -615,9 +615,9 @@ bindCache.shiny.renderPlot <- function(x, ...,
   # in getting the (same) image from the cache and sending it to the client
   # again. This resize observer prevents that.
   fitDims <- reactiveVal(NULL)
-  resizeObserver <- NULL
+  resizeObserverCreated <- FALSE
   ensureResizeObserver <- function() {
-    if (!is.null(resizeObserver))
+    if (resizeObserverCreated)
       return()
 
     # Reactive expressions that return the width and height of the img tag in
@@ -644,9 +644,15 @@ bindCache.shiny.renderPlot <- function(x, ...,
     # Run it once immediately, then set up the observer
     isolate(doResizeCheck())
 
-    resizeObserver <<- observe({
+    observe({
       doResizeCheck()
     })
+    # TODO: Make sure this observer gets GC'd if output$foo is replaced.
+    # Currently, if you reassign output$foo, the observer persists until the
+    # session ends. This is generally bad programming practice and should be
+    # rare, but still, we should try to clean up properly.
+
+    resizeObserverCreated <- TRUE
   }
 
   renderFunc <- function(...) {

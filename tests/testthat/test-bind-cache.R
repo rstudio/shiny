@@ -923,8 +923,8 @@ test_that("bindCache visibility", {
 
 
 test_that("bindCache reactive visibility - async", {
-  # Skippping because of https://github.com/rstudio/promises/issues/58
-  skip("Visibility currently not supported by promises")
+  skip_if_not_installed("promises", "1.1.1.9001")
+
   cache <- cachem::cache_mem()
   k <- reactiveVal(0)
   res <- NULL

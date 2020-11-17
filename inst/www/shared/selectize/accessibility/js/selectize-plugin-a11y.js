@@ -1,5 +1,5 @@
 /* global Selectize */
-Selectize.define("selectize-plugin-a11y", function (options) {
+function selectize_accessibility_plugin(options) {
   var self = this;
   var KEY_RETURN = 13;
 
@@ -145,7 +145,14 @@ Selectize.define("selectize-plugin-a11y", function (options) {
     var original = self.destroy;
     return function () {
       self.accessibility.liveRegion.$region.remove();
-      return original.apply(this, arguments);
+      var destroyed = original.apply(this, arguments);
+      // Redefine plugin after destroying the instance so that selectizeInput()'s
+      // receiveMessage() can call destroy and update the instance without
+      // needing to reload this plugin
+      Selectize.define("selectize-plugin-a11y", selectize_accessibility_plugin);
+      return destroyed;
     };
   })();
-});
+}
+
+Selectize.define("selectize-plugin-a11y", selectize_accessibility_plugin);

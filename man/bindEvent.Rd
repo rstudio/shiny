@@ -73,8 +73,8 @@ generally count as performing an action -- use \code{\link[=reactive]{reactive()
 first argument is observer whose code should be executed whenever the event
 occurs.
 
-Use \code{bindEvent()} with \code{reactive()}to create a \emph{calculated value} that only
-updates in response to an event. This is just like a normal \link[=reactive]{reactive expression} except it ignores all the usual invalidations that
+Use \code{bindEvent()} with \code{reactive()} to create a \emph{calculated value} that only
+updates in response to an event. This is just like a normal \href{reactive}{reactive expression} except it ignores all the usual invalidations that
 come from its reactive dependencies; it only invalidates in response to the
 given event.
 
@@ -147,7 +147,7 @@ render functions.
 When \code{bindEvent()} is used with \code{reactive()}, it creates a new reactive
 expression object.
 
-When \code{bindEvent()} is used with \code{observe()}, it creats a new observer and
+When \code{bindEvent()} is used with \code{observe()}, it creates a new observer and
 calls the \verb{$destroy()} method on the original observer, so that the
 original observer will not execute.
 }
@@ -157,7 +157,7 @@ original observer will not execute.
 
 In many cases, it makes sense to use \code{bindEvent()} along with
 \code{bindCache()}, because they each can reduce the amount of work done on the
-server. For example, you could have \link{sliderInput}s \code{x} and \code{y} and a
+server. For example, you could have \code{\link[=sliderInput]{sliderInput()}}s \code{x} and \code{y} and a
 \code{reactive()} that performs a time-consuming operation with those values.
 Using \code{bindCache()} can speed things up, especially if there are multiple
 users. But it might make sense to also not do the computation until the

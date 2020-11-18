@@ -40,7 +40,7 @@ can think of the cache key as the input(s) to a pure function. As such, one
 should take care to make sure the use of \code{bindCache()} is \emph{pure} in the same
 sense, namely:
 \enumerate{
-\item For a given key, the the return value is always the same.
+\item For a given key, the return value is always the same.
 \item Evaluation has no side-effects.
 }
 
@@ -244,15 +244,9 @@ reactive must therefore expect it to return a promise.
 
 
 If you've implemented your own \verb{render*()} function, you may need to
-provide information to \code{\link[=createRenderFunction]{createRenderFunction()}} (or
+provide a \code{cacheHint} to \code{\link[=createRenderFunction]{createRenderFunction()}} (or
 \code{\link[htmlwidgets:htmlwidgets-shiny]{htmlwidgets::shinyRenderWidget()}}, if you've authored an htmlwidget) in
-order for \code{bindCache()} to correctly compute a cache key. In general, it's
-best practice to provide a \code{label} id, the user's \code{expr}, as well as any
-other arguments that may influence the final value.
-
-If you write \code{render} functions (for example, \code{renderFoo()}), you may
-need to provide a \code{cacheHint}, so that \code{bindCache()} knows how to correctly
-cache the output.
+order for \code{bindCache()} to correctly compute a cache key.
 
 The potential problem is a cache collision. Consider the following:\preformatted{output$x1 <- renderText(\{ input$x \}) \%>\% bindCache(input$x)
 output$x2 <- renderText(\{ input$x * 2 \}) \%>\% bindCache(input$x)
@@ -289,7 +283,11 @@ the user-provided code and use it in the cache key. Instead, \code{renderPrint}
 calls \code{markRenderFunction()}, it explicitly passes along a \code{cacheHint},
 which includes a label and the original user expression.
 
-For \pkg{htmlwidgets}, it will be able to automatically infer a cache hint;
+In general, if you need to provide a \code{cacheHint}, it is best practice to
+provide a \code{label} id, the user's \code{expr}, as well as any other arguments
+that may influence the final value.
+
+For \pkg{htmlwidgets}, it will try to automatically infer a cache hint;
 again, you can inspect the cache hint with \code{shiny:::extractCacheHint()} and
 also test it in an application. If you do need to explicitly provide a
 cache hint, pass it to \code{shinyRenderWidget}. For example:\preformatted{renderMyWidget <- function(expr) \{

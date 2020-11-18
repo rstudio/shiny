@@ -30,7 +30,7 @@ utils::globalVariables(".GenericCallEnv", add = TRUE)
 #' should take care to make sure the use of `bindCache()` is _pure_ in the same
 #' sense, namely:
 #'
-#' 1. For a given key, the the return value is always the same.
+#' 1. For a given key, the return value is always the same.
 #' 2. Evaluation has no side-effects.
 #'
 #' In the example here, the `bindCache()` key consists of `input$x` and
@@ -254,15 +254,9 @@ utils::globalVariables(".GenericCallEnv", add = TRUE)
 #' @section Developing render functions for caching:
 #'
 #'   If you've implemented your own `render*()` function, you may need to
-#'   provide information to [createRenderFunction()] (or
+#'   provide a `cacheHint` to [createRenderFunction()] (or
 #'   [htmlwidgets::shinyRenderWidget()], if you've authored an htmlwidget) in
-#'   order for `bindCache()` to correctly compute a cache key. In general, it's
-#'   best practice to provide a `label` id, the user's `expr`, as well as any
-#'   other arguments that may influence the final value.
-#'
-#'   If you write `render` functions (for example, `renderFoo()`), you may
-#'   need to provide a `cacheHint`, so that `bindCache()` knows how to correctly
-#'   cache the output.
+#'   order for `bindCache()` to correctly compute a cache key.
 #'
 #'   The potential problem is a cache collision. Consider the following:
 #'
@@ -305,7 +299,11 @@ utils::globalVariables(".GenericCallEnv", add = TRUE)
 #'   calls `markRenderFunction()`, it explicitly passes along a `cacheHint`,
 #'   which includes a label and the original user expression.
 #'
-#'   For \pkg{htmlwidgets}, it will be able to automatically infer a cache hint;
+#'   In general, if you need to provide a `cacheHint`, it is best practice to
+#'   provide a `label` id, the user's `expr`, as well as any other arguments
+#'   that may influence the final value.
+#'
+#'   For \pkg{htmlwidgets}, it will try to automatically infer a cache hint;
 #'   again, you can inspect the cache hint with `shiny:::extractCacheHint()` and
 #'   also test it in an application. If you do need to explicitly provide a
 #'   cache hint, pass it to `shinyRenderWidget`. For example:

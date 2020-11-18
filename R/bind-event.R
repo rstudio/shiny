@@ -36,7 +36,7 @@
 #'   first argument is observer whose code should be executed whenever the event
 #'   occurs.
 #'
-#'   Use `bindEvent()` with `reactive()`to create a *calculated value* that only
+#'   Use `bindEvent()` with `reactive()` to create a *calculated value* that only
 #'   updates in response to an event. This is just like a normal [reactive
 #'   expression][reactive] except it ignores all the usual invalidations that
 #'   come from its reactive dependencies; it only invalidates in response to the
@@ -109,11 +109,11 @@
 #'   When `bindEvent()` is used with `reactive()`, it creates a new reactive
 #'   expression object.
 #'
-#'   When `bindEvent()` is used with `observe()`, it creats a new observer and
+#'   When `bindEvent()` is used with `observe()`, it creates a new observer and
 #'   calls the `$destroy()` method on the original observer, so that the
 #'   original observer will not execute.
 #'
-#' @section Combining event expressions and with caching:
+#' @section Combining events and caching:
 #'
 #'   In many cases, it makes sense to use `bindEvent()` along with
 #'   `bindCache()`, because they each can reduce the amount of work done on the
@@ -137,7 +137,6 @@
 #'     bindEvent(input$go)
 #'  ```
 
-#'
 #'
 #' Anything that consumes `r()` will take a reactive dependency on the event
 #' expression given to `bindEvent()`, and not the cache key expression given to

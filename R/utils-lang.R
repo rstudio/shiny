@@ -1,47 +1,35 @@
 
-# Return the ... arguments of the caller, as a list of quoted expressions.
-dot_exprs <- function() {
-  match.call(
-    definition  = sys.function(sys.parent()),
-    call        = sys.call(sys.parent()),
-    expand.dots = FALSE,
-    envir       = parent.frame(2L)
-  )[["..."]]
+# Return the ... arguments of the caller, as a list of quosures. If any are
+# quosures inlined with inject(), don't change them.
+enquos0 <- function(...) {
+  dots <- getNamespace('rlang')$captureDots()
+  lapply(dots, function(dot) as_quosure(dot$expr, dot$env))
 }
 
-# Given a list of quoted expressions, return a function that will evaluate them
-# and return a list of resulting values. If the list contains a single
-# expression, unwrap it from the list.
-exprs_to_func <- function(exprs, env) {
-  if (length(exprs) == 0) {
-    stop("Need at least one expression in `...` to use as cache key or event.")
+# Given a list of quosures, return a function that will evaluate them and return
+# a list of resulting values. If the list contains a single expression, unwrap
+# it from the list.
+quos_to_func <- function(qs) {
+  if (length(qs) == 0) {
+    stop("Need at least one item in `...` to use as cache key or event.")
   }
-  if (length(exprs) == 1) {
-    # Special case for one expr. This is needed for async to work -- that is,
-    # when the expr returns a promise. It needs to not be wrapped into a list
+
+  if (length(qs) == 1) {
+    # Special case for one quosure. This is needed for async to work -- that is,
+    # when the quosure returns a promise. It needs to not be wrapped into a list
     # for the hybrid_chain stuff to detect that it's a promise. (Plus, it's not
     # even clear what it would mean to mix promises and non-promises in the
     # key.)
-    expr_to_func(exprs[[1]], env)
+    qs <- qs[[1]]
+    function() {
+      eval_tidy(qs)
+    }
 
   } else {
-    funcs <- lapply(exprs, expr_to_func, env = env)
     function() {
-      lapply(funcs, function(f) f())
+      lapply(qs, eval_tidy)
     }
   }
-}
-
-# Given a quoted expression or quosure, return a zero-arg function that
-# evaluates the expression in the given environment. (If it is a quosure, ignore
-# the env that's passed in.)
-expr_to_func <- function(expr, env) {
-  if (!is_quosure(expr)) {
-    expr <- new_quosure(expr, env)
-  }
-  f <- as_function(expr)
-  formals(f) <- list()
-  f
 }
 
 # Get the formals and body for a function, without source refs. This is used for

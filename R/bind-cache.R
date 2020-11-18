@@ -372,7 +372,6 @@ utils::globalVariables(".GenericCallEnv", add = TRUE)
 #'
 #'@export
 bindCache <- function(x, ..., cache = "app") {
-  check_dots_unnamed()
   force(cache)
 
   UseMethod("bindCache")
@@ -385,11 +384,13 @@ bindCache.default <- function(x, ...) {
 
 #' @export
 bindCache.reactiveExpr <- function(x, ..., cache = "app") {
+  check_dots_unnamed()
+
   label <- exprToLabel(substitute(key), "cachedReactive")
   domain <- reactive_get_domain(x)
 
   # Convert the ... to a function that returns their evaluated values.
-  keyFunc <- exprs_to_func(dot_exprs(), parent.frame())
+  keyFunc <- quos_to_func(enquos0(...))
 
   valueFunc <- reactive_get_value_func(x)
   # Hash cache hint now -- this will be added to the key later on, to reduce the
@@ -495,13 +496,15 @@ bindCache.reactiveExpr <- function(x, ..., cache = "app") {
 
 #' @export
 bindCache.shiny.render.function <- function(x, ..., cache = "app") {
-  keyFunc <- exprs_to_func(dot_exprs(), parent.frame())
+  check_dots_unnamed()
+
+  keyFunc <- quos_to_func(enquos0(...))
 
   cacheHint <- digest(extractCacheHint(x), algo = "spookyhash")
 
   valueFunc <- x
 
-  res <- function(...) {
+  renderFunc <- function(...) {
     domain <- getDefaultReactiveDomain()
 
     hybrid_chain(
@@ -586,8 +589,108 @@ bindCache.shiny.render.function <- function(x, ..., cache = "app") {
     )
   }
 
-  class(res) <- c("shiny.render.function.cache", class(x))
-  res
+  renderFunc <- addAttributes(renderFunc, renderFunctionAttributes(valueFunc))
+  class(renderFunc) <- c("shiny.render.function.cache", class(valueFunc))
+  renderFunc
+}
+
+#' @export
+bindCache.shiny.renderPlot <- function(x, ...,
+  sizePolicy = sizeGrowthRatio(width = 400, height = 400, growthRate = 1.2))
+{
+  check_dots_unnamed()
+
+  valueFunc <- x
+
+  # Given the actual width/height of the image element in the browser, the
+  # resize observer computes the width/height using sizePolicy() and pushes
+  # those values into `fitWidth` and `fitHeight`. It's done this way so that the
+  # `fitWidth` and `fitHeight` only change (and cause invalidations of the key
+  # expression) when the rendered image size changes, and not every time the
+  # browser's <img> tag changes size.
+  #
+  # If the key expression were invalidated every time the image element changed
+  # size, even if the resulting key was the same (because `sizePolicy()` gave
+  # the same output for a slightly different img element size), it would result
+  # in getting the (same) image from the cache and sending it to the client
+  # again. This resize observer prevents that.
+  fitDims <- reactiveVal(NULL)
+  resizeObserverCreated <- FALSE
+  ensureResizeObserver <- function() {
+    if (resizeObserverCreated)
+      return()
+
+    # Reactive expressions that return the width and height of the img tag in
+    # the browser.
+    outputWidth  <- getCurrentOutputInfo()$width
+    outputHeight <- getCurrentOutputInfo()$height
+
+    doResizeCheck <- function() {
+      if (is.null(outputWidth) || is.null(outputHeight)) {
+        # If we got here, getCurrentOutputInfo() would have returned NULL. This
+        # means that something probably were executed in an unexpected order. If
+        # this happens in the observer, it means that the observer won't
+        # re-execute, since it won't have the necessary reactive dependencies.
+        stop("doResizeCheck unable to read current output info.")
+      }
+
+      width  <- outputWidth()  %OR% 0
+      height <- outputHeight() %OR% 0
+
+      rect <- sizePolicy(c(width, height))
+      fitDims(list(width = rect[1], height = rect[2]))
+    }
+
+    # Run it once immediately, then set up the observer
+    isolate(doResizeCheck())
+
+    observe({
+      doResizeCheck()
+    })
+    # TODO: Make sure this observer gets GC'd if output$foo is replaced.
+    # Currently, if you reassign output$foo, the observer persists until the
+    # session ends. This is generally bad programming practice and should be
+    # rare, but still, we should try to clean up properly.
+
+    resizeObserverCreated <- TRUE
+  }
+
+  renderFunc <- function(...) {
+    hybrid_chain(
+      # Pass in fitDims so that so that the generated plot will be the
+      # dimensions specified by the sizePolicy; otherwise the plot would be the
+      # exact dimensions of the img element, which isn't what we want for cached
+      # plots.
+      valueFunc(..., get_dims = fitDims),
+      function(img) {
+        # Replace exact pixel dimensions; instead, the max-height and max-width
+        # will be set to 100% from CSS.
+        img$class <- "shiny-scalable"
+        img$width  <- NULL
+        img$height <- NULL
+
+        img
+      }
+    )
+  }
+
+  renderFunc <- addAttributes(renderFunc, renderFunctionAttributes(valueFunc))
+  class(renderFunc) <- class(valueFunc)
+
+  bindCache.shiny.render.function(
+    renderFunc,
+    ...,
+    {
+      ensureResizeObserver()
+      session <- getDefaultReactiveDomain()
+      if (is.null(session) || is.null(fitDims())) {
+        req(FALSE)
+      }
+      pixelratio <- session$clientData$pixelratio %OR% 1
+
+      list(fitDims(), pixelratio)
+    }
+  )
 }
 
 #' @export

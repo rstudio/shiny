@@ -91,7 +91,9 @@ renderPlot <- function(expr, width = 'auto', height = 'auto', res = 72, ...,
   else
     altWrapper <- function() { alt }
 
-  getDims <- function() {
+  # This is the function that will be used as getDims by default, but it can be
+  # overridden (which happens when bindCache() is used).
+  getDimsDefault <- function() {
     width <- widthWrapper()
     height <- heightWrapper()
 
@@ -110,6 +112,7 @@ renderPlot <- function(expr, width = 'auto', height = 'auto', res = 72, ...,
   # the plotObj() reactive.
   session <- NULL
   outputName <- NULL
+  getDims <- NULL
 
   # Calls drawPlot, invoking the user-provided `func` (which may or may not
   # return a promise). The idea is that the (cached) return value from this
@@ -147,9 +150,13 @@ renderPlot <- function(expr, width = 'auto', height = 'auto', res = 72, ...,
 
   # This function is the one that's returned from renderPlot(), and gets
   # wrapped in an observer when the output value is assigned.
-  renderFunc <- function(shinysession, name, ...) {
+  # The `get_dims` parameter defaults to `getDimsDefault`. However, it can be
+  # overridden, so that `bindCache` can use a different version.
+  renderFunc <- function(shinysession, name, ..., get_dims = getDimsDefault) {
+
     outputName <<- name
     session <<- shinysession
+    if (is.null(getDims)) getDims <<- get_dims
 
     hybrid_chain(
       drawReactive(),
@@ -173,7 +180,14 @@ renderPlot <- function(expr, width = 'auto', height = 'auto', res = 72, ...,
   outputFunc <- plotOutput
   if (!identical(height, 'auto')) formals(outputFunc)['height'] <- list(NULL)
 
-  markRenderFunction(outputFunc, renderFunc, outputArgs, cacheHint = FALSE)
+  markedFunc <- markRenderFunction(
+    outputFunc,
+    renderFunc,
+    outputArgs,
+    cacheHint = list(userExpr = get_expr(expr), res = res)
+  )
+  class(markedFunc) <- c("shiny.renderPlot", class(markedFunc))
+  markedFunc
 }
 
 resizeSavedPlot <- function(name, session, result, width, height, alt, pixelratio, res, ...) {

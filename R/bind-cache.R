@@ -6,41 +6,72 @@ utils::globalVariables(".GenericCallEnv", add = TRUE)
 #'
 #' `bindCache()` adds caching to the following kinds of objects used in Shiny:
 #'
-#' * [reactive()]` expressions. * `render*` functions, like [renderText()],
-#' [renderTable()], and so on.
+#' * [reactive()]` expressions.
+#' * `render*` functions, like [renderText()], [renderTable()], and so on.
 #'
-#' Ordinary [reactive()] expressions will cache their most recent value. This
-#' can make computation more efficient, because time-consuming code can execute
-#' once and the result can be used in multiple different places without needing
-#' to re-execute the code.
+
+#' @details
 #'
-#' When `bindCache()` is used on a reactive expression, any number of previous
-#' values can be cache (as long as they fit in the cache). You must provide one
-#' or more expressions that are used to generate a _cache key_. The `...`
-#' expressions are put together in a list and hashed, and the result is used as
-#' the cache **key**.
+#' Ordinary [reactive()] expressions automatically cache their _most recent_
+#' value, which helps to avoid redundant computation in downstream reactives.
+#' This caching applies only to the most recent value, so prior values are not
+#' cached.
 #'
-#' There is also a **value** expression, which is the expression passed to the
-#' original reactive.
+#' With `bindCache()`, any number of previous values can be cached --- as long
+#' as they fit in the cache --- and they can be shared across or within user
+#' sessions. As a result, `bindCache()` can dramatically improve performance,
+#' but it does take additional effort to use properly.
+
+#' `bindCache()` requires one or more expressions that are used to generate a
+#' _cache key_ -- this key is used to determine if a computation has occurred
+#' before and hence can be retrieved from the cache. If you're familiar with the
+#' concept of memoizing pure functions (e.g., the \pkg{memoise} package), you
+#' can think of the cache key as the input(s) to a pure function. As such, one
+#' should take care to make sure the use of `bindCache()` is _pure_ in the same
+#' sense, namely:
 #'
-#' For each possible **key**, there should be one possible **value** returned by
-#' the original reactive expression; a given key should not correspond to
-#' multiple possible values from the reactive expression.
+#' 1. For a given key, the the return value is always the same.
+#' 2. Evaluation has no side-effects.
 #'
-#' To use `bindCache()`, the key should be fast to compute, and the value should
-#' expensive (so that it benefits from caching).  To see if the value should be
-#' computed, a cached reactive evaluates the key, and then serializes and hashes
-#' the result. If the resulting hashed key is in the cache, then the cached
-#' reactive simply retrieves the previously calculated value and returns it; if
-#' not, then the value is computed and the result is stored in the cache before
-#' being returned.
+#' In the example here, the `bindCache()` key consists of `input$x` and
+#' `input$y` combined, and the value is `input$x * input$y`. In this simple
+#' example, for any given key, there is only one possible returned value.
 #'
-#' In most cases, the key will contain any reactive inputs that are used by the
-#' value expression. It is also best to use non-reference objects, since the
-#' serialization of these objects may not capture relevant changes.
+#' ```
+#' r <- reactive({ input$x * input$y }) %>%
+#'   bindCache(input$x, input$y)
+#' ```
+
 #'
-#' `bindCache()` is often used in conjunction with [bindEvent()].
+#' The largest performance improvements occur when the cache key is fast to
+#' compute and the reactive expression is slow to compute. To see if the value
+#' should be computed, a cached reactive evaluates the key, and then serializes
+#' and hashes the result. If the resulting hashed key is in the cache, then the
+#' cached reactive simply retrieves the previously calculated value and returns
+#' it; if not, then the value is computed and the result is stored in the cache
+#' before being returned.
 #'
+#' To compute the cache key, `bindCache()` hashes the contents of `...`, so it's
+#' best to avoid including large objects in a cache key since that can result in
+#' slow hashing. It's also best to avoid reference objects like environments and
+#' R6 objects, since the serialization of these objects may not capture relevant
+#' changes.
+#'
+#' If you want to use a large object as part of a cache key, it may make sense
+#' to do some sort of reduction on the data that still captures information
+#' about whether a value can be retrieved from the cache. For example, if you
+#' have a large data set with timestamps, it might make sense to extract the
+#' most recent timestamp and return that. Then, instead of hashing the entire
+#' data object, the cached reactive only needs to hash the timestamp.
+#'
+#' r <- reactive({ compute(bigdata()) } %>%
+#'   bindCache({ extract_most_recent_time(bigdata()) })
+#'
+#' For computations that are vert slow, it often makes sense to pair
+#' [bindCache()] with [bindEvent()] so that no computation is performed until
+#' the user explicitly requests it (for more, see the Details section of
+#' [bindEvent()]).
+
 #'
 #' @section Cache keys and reactivity:
 #'
@@ -77,7 +108,7 @@ utils::globalVariables(".GenericCallEnv", add = TRUE)
 #'   example, suppose we have this cached reactive:
 #'
 #'   ```
-#'   r <- reactive({ input$x + input$y }) %>%
+#'   r <- reactive({ input$x * input$y }) %>%
 #'     bindCache(input$x, input$y)
 #'   ```
 #'
@@ -97,32 +128,12 @@ utils::globalVariables(".GenericCallEnv", add = TRUE)
 #' reactive.
 #'
 #'
-#' @section Async with cached reactives:
-#'
-#'   With a cached reactive expression, the key and/or value expression can be
-#'   _asynchronous_. In other words, they can be promises --- not regular R
-#'   promises, but rather objects provided by the
-#'   \href{https://rstudio.github.io/promises/}{\pkg{promises}}  package, which
-#'   are similar to promises in JavaScript. (See [promises::promise()] for more
-#'   information.) You can also use [future::future()] objects to run code in a
-#'   separate process or even on a remote machine.
-#'
-#'   If the value returns a promise, then anything that consumes the cached
-#'   reactive must expect it to return a promise.
-#'
-#'   Similarly, if the key is a promise (in other words, if it is asynchronous),
-#'   then the entire cached reactive must be asynchronous, since the key must be
-#'   computed asynchronously before it knows whether to compute the value or the
-#'   value is retrieved from the cache. Anything that consumes the cached
-#'   reactive must therefore expect it to return a promise.
-#'
-#'
 #' @section Cache scope:
 #'
-#'   By default, a cached reactive is scoped to the running application. That
-#'   means that it shares a cache with all user sessions connected to the
-#'   application (within the R process). This is done with the `cache`
-#'   parameter's default value, `"app"`.
+#'   By default, when `bindCache()` is used, it is scoped to the running
+#'   application. That means that it shares a cache with all user sessions
+#'   connected to the application (within the R process). This is done with the
+#'   `cache` parameter's default value, `"app"`.
 #'
 #'   With an app-level cache scope, one user can benefit from the work done for
 #'   another user's session. In most cases, this is the best way to get
@@ -155,10 +166,11 @@ utils::globalVariables(".GenericCallEnv", add = TRUE)
 #'
 #'   To use different settings for a session-scoped cache, you can set
 #'   `self$cache` at the top of your server function. By default, it will create
-#'   a 200 MB memory cache for each session , but you can replace it with
+#'   a 200 MB memory cache for each session, but you can replace it with
 #'   something different. To use the session-scoped cache, you must also call
 #'   `bindCache()` with `cache="session"`. This will create a 100 MB cache for
 #'   the session:
+#'
 #'   ```
 #'   function(input, output, session) {
 #'     session$cache <- cachem::cache_mem(size = 100e6)
@@ -187,6 +199,7 @@ utils::globalVariables(".GenericCallEnv", add = TRUE)
 #'   ```
 #'   shinyOptions(cache = cachem::cache_disk("./myapp-cache"))
 #'   ```
+#'
 #'   In this case, resetting the cache will have to be done manually, by deleting
 #'   the directory.
 #'
@@ -194,14 +207,17 @@ utils::globalVariables(".GenericCallEnv", add = TRUE)
 #'   create a [cachem::cache_mem()] or [cachem::cache_disk()], and pass it
 #'   as the `cache` argument of `bindCache()`.
 #'
-#' @section Cache key internals:
+
 #'
-#'   The actual cache key that is used internally takes value from evaluating the
-#'   key expression(s) and combines it with the (unevaluated) value expression.
+#' @section Computing cache keys:
 #'
-#'   This means that if there are two cached reactives which have the same result
-#'   from evaluating the key, but different value expressions, then they will not
-#'   need to worry about collisions.
+#'   The actual cache key that is used internally takes value from evaluating
+#'   the key expression(s) (from the `...` arguments) and combines it with the
+#'   (unevaluated) value expression.
+#'
+#'   This means that if there are two cached reactives which have the same
+#'   result from evaluating the key, but different value expressions, then they
+#'   will not need to worry about collisions.
 #'
 #'   However, if two cached reactives have identical key and value expressions
 #'   expressions, they will share the cached values. This is useful when using
@@ -211,8 +227,38 @@ utils::globalVariables(".GenericCallEnv", add = TRUE)
 #'   session), and those cached reactive objects across sessions can share
 #'   values in the cache.
 
+
+
+#'
+#' @section Async with cached reactives:
+#'
+#'   With a cached reactive expression, the key and/or value expression can be
+#'   _asynchronous_. In other words, they can be promises --- not regular R
+#'   promises, but rather objects provided by the
+#'   \href{https://rstudio.github.io/promises/}{\pkg{promises}}  package, which
+#'   are similar to promises in JavaScript. (See [promises::promise()] for more
+#'   information.) You can also use [future::future()] objects to run code in a
+#'   separate process or even on a remote machine.
+#'
+#'   If the value returns a promise, then anything that consumes the cached
+#'   reactive must expect it to return a promise.
+#'
+#'   Similarly, if the key is a promise (in other words, if it is asynchronous),
+#'   then the entire cached reactive must be asynchronous, since the key must be
+#'   computed asynchronously before it knows whether to compute the value or the
+#'   value is retrieved from the cache. Anything that consumes the cached
+#'   reactive must therefore expect it to return a promise.
+#'
+
 #'
 #' @section Developing render functions for caching:
+#'
+#'   If you've implemented your own `render*()` function, you may need to
+#'   provide information to [createRenderFunction()] (or
+#'   [htmlwidgets::shinyRenderWidget()], if you've authored an htmlwidget) in
+#'   order for `bindCache()` to correctly compute a cache key. In general, it's
+#'   best practice to provide a `label` id, the user's `expr`, as well as any
+#'   other arguments that may influence the final value.
 #'
 #'   If you write `render` functions (for example, `renderFoo()`), you may
 #'   need to provide a `cacheHint`, so that `bindCache()` knows how to correctly
@@ -258,6 +304,25 @@ utils::globalVariables(".GenericCallEnv", add = TRUE)
 #'   the user-provided code and use it in the cache key. Instead, `renderPrint`
 #'   calls `markRenderFunction()`, it explicitly passes along a `cacheHint`,
 #'   which includes a label and the original user expression.
+#'
+#'   For \pkg{htmlwidgets}, it will be able to automatically infer a cache hint;
+#'   again, you can inspect the cache hint with `shiny:::extractCacheHint()` and
+#'   also test it in an application. If you do need to explicitly provide a
+#'   cache hint, pass it to `shinyRenderWidget`. For example:
+#'
+#'   ```
+#'   renderMyWidget <- function(expr) {
+#'     expr <- substitute(expr)
+#'
+#'     htmlwidgets::shinyRenderWidget(expr,
+#'       myWidgetOutput,
+#'       quoted = TRUE,
+#'       env = parent.frame(),
+#'       cacheHint = list(label = "myWidget", userExpr = expr)
+#'     )
+#'   }
+#'   ```
+#'
 #'
 #' @section Uncacheable objects:
 #'

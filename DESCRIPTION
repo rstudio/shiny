@@ -85,7 +85,7 @@ Imports:
     R6 (>= 2.0),
     sourcetools,
     later (>= 1.0.0),
-    promises (>= 1.1.0),
+    promises (>= 1.1.1.9001),
     tools,
     crayon,
     rlang (>= 0.4.8.9000),
@@ -115,6 +115,7 @@ Suggests:
     sass
 Remotes:
     rstudio/htmltools,
+    rstudio/promises,
     rstudio/sass,
     rstudio/bslib,
     r-lib/cachem,

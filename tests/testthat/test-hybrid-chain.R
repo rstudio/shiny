@@ -27,9 +27,6 @@ test_that("hybrid_chain preserves visibility", {
 
 
 test_that("hybrid_chain preserves visibility - async", {
-  # Skippping because of https://github.com/rstudio/promises/issues/58
-  skip("Visibility currently not supported by promises")
-
   res <- NULL
   hybrid_chain(
     promise_resolve(1),

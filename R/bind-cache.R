@@ -4,26 +4,19 @@ utils::globalVariables(".GenericCallEnv", add = TRUE)
 #'
 #' @description
 #'
-#' `bindCache()` adds caching to the following kinds of objects used in Shiny:
-#'
-#' * [reactive()]` expressions.
-#' * `render*` functions, like [renderText()], [renderTable()], and so on.
-#'
-
-#' @details
+#' `bindCache()` adds caching [reactive()] expressions and `render*` functions
+#' (like [renderText()], [renderTable()], ...).
 #'
 #' Ordinary [reactive()] expressions automatically cache their _most recent_
-#' value, which helps to avoid redundant computation in downstream reactives.
-#' This caching applies only to the most recent value, so prior values are not
-#' cached.
+#' value, which helps to  avoid redundant computation in downstream reactives.
+#' `bindCache()` will cache all previous values (as long as they fit in the
+#' cache) and they can be shared across user sessions. This allows
+#' `bindCache()` to dramatically improve performance when used correctly.
 #'
-#' With `bindCache()`, any number of previous values can be cached --- as long
-#' as they fit in the cache --- and they can be shared across or within user
-#' sessions. As a result, `bindCache()` can dramatically improve performance,
-#' but it does take additional effort to use properly.
-
+#' @details
+#'
 #' `bindCache()` requires one or more expressions that are used to generate a
-#' _cache key_ -- this key is used to determine if a computation has occurred
+#' **cache key**, which is used to determine if a computation has occurred
 #' before and hence can be retrieved from the cache. If you're familiar with the
 #' concept of memoizing pure functions (e.g., the \pkg{memoise} package), you
 #' can think of the cache key as the input(s) to a pure function. As such, one
@@ -41,7 +34,6 @@ utils::globalVariables(".GenericCallEnv", add = TRUE)
 #' r <- reactive({ input$x * input$y }) %>%
 #'   bindCache(input$x, input$y)
 #' ```
-
 #'
 #' The largest performance improvements occur when the cache key is fast to
 #' compute and the reactive expression is slow to compute. To see if the value
@@ -64,14 +56,15 @@ utils::globalVariables(".GenericCallEnv", add = TRUE)
 #' most recent timestamp and return that. Then, instead of hashing the entire
 #' data object, the cached reactive only needs to hash the timestamp.
 #'
+#' ```
 #' r <- reactive({ compute(bigdata()) } %>%
 #'   bindCache({ extract_most_recent_time(bigdata()) })
+#' ```
 #'
 #' For computations that are vert slow, it often makes sense to pair
 #' [bindCache()] with [bindEvent()] so that no computation is performed until
 #' the user explicitly requests it (for more, see the Details section of
 #' [bindEvent()]).
-
 #'
 #' @section Cache keys and reactivity:
 #'

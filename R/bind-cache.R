@@ -12,7 +12,7 @@ utils::globalVariables(".GenericCallEnv", add = TRUE)
 #' `bindCache()` will cache all previous values (as long as they fit in the
 #' cache) and they can be shared across user sessions. This allows
 #' `bindCache()` to dramatically improve performance when used correctly.
-#'
+
 #' @details
 #'
 #' `bindCache()` requires one or more expressions that are used to generate a
@@ -35,6 +35,7 @@ utils::globalVariables(".GenericCallEnv", add = TRUE)
 #'   bindCache(input$x, input$y)
 #' ```
 #'
+
 #' The largest performance improvements occur when the cache key is fast to
 #' compute and the reactive expression is slow to compute. To see if the value
 #' should be computed, a cached reactive evaluates the key, and then serializes
@@ -65,7 +66,7 @@ utils::globalVariables(".GenericCallEnv", add = TRUE)
 #' [bindCache()] with [bindEvent()] so that no computation is performed until
 #' the user explicitly requests it (for more, see the Details section of
 #' [bindEvent()]).
-#'
+
 #' @section Cache keys and reactivity:
 #'
 #'   Because the **value** expression (from the original [reactive()]) is

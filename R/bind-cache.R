@@ -326,11 +326,29 @@ utils::globalVariables(".GenericCallEnv", add = TRUE)
 #'   [markRenderFunction()] with `cacheHint = FALSE`.
 #'
 #'
+#' @section Caching with `renderPlot()`:
+#'
+#'   When `bindCache()` is used with `renderPlot()`, the `height` and `width`
+#'   passed to the original `renderPlot()` are ignored. They are superseded by
+#'   `sizePolicy` argument passed to `bindCache. The default is:
+#'
+#'   ```
+#'   sizePolicy = sizeGrowthRatio(width = 400, height = 400, growthRate = 1.2)
+#'   ```
+#'
+#' `sizePolicy` must be a function that takes a two-element numeric vector as
+#' input, representing the width and height of the `<img>` element in the
+#' browser window, and it must return a two-element numeric vector, representing
+#' the pixel dimensions of the plot to generate. The purpose is to round the
+#' actual pixel dimensions from the browser to some other dimensions, so that
+#' this will not generate and cache images of every possible pixel dimension.
+#' See [sizeGrowthRatio()] for more information on the default sizing policy.
+#'
 #' @param x The object to add caching to.
 #' @param ... One or more expressions to use in the caching key.
 #' @param cache The scope of the cache, or a cache object. This can be `"app"`
-#'   (the default), `"session"`, or a cache object like a [cachem::cache_disk()].
-#'   See the Cache Scoping section for more information.
+#'   (the default), `"session"`, or a cache object like a
+#'   [cachem::cache_disk()]. See the Cache Scoping section for more information.
 #'
 #' @seealso [bindEvent()], [renderCachedPlot()] for caching plots.
 #'
@@ -427,7 +445,7 @@ utils::globalVariables(".GenericCallEnv", add = TRUE)
 #'
 #' }
 #'
-#'@export
+#' @export
 bindCache <- function(x, ..., cache = "app") {
   force(cache)
 

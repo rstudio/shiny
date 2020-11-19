@@ -34,8 +34,8 @@ information on the default sizing policy.}
 \item{res}{The resolution of the PNG, in pixels per inch.}
 
 \item{cache}{The scope of the cache, or a cache object. This can be \code{"app"}
-(the default), \code{"session"}, or a cache object like a \code{\link[cachem:cache_disk]{cachem::cache_disk()}}.
-See the Cache Scoping section for more information.}
+(the default), \code{"session"}, or a cache object like a
+\code{\link[cachem:cache_disk]{cachem::cache_disk()}}. See the Cache Scoping section for more information.}
 
 \item{...}{Arguments to be passed through to \code{\link[grDevices:png]{grDevices::png()}}.
 These can be used to set the width, height, background color, etc.}

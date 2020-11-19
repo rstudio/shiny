@@ -12,8 +12,8 @@ bindCache(x, ..., cache = "app")
 \item{...}{One or more expressions to use in the caching key.}
 
 \item{cache}{The scope of the cache, or a cache object. This can be \code{"app"}
-(the default), \code{"session"}, or a cache object like a \code{\link[cachem:cache_disk]{cachem::cache_disk()}}.
-See the Cache Scoping section for more information.}
+(the default), \code{"session"}, or a cache object like a
+\code{\link[cachem:cache_disk]{cachem::cache_disk()}}. See the Cache Scoping section for more information.}
 }
 \description{
 \code{bindCache()} adds caching \code{\link[=reactive]{reactive()}} expressions and \verb{render*} functions
@@ -305,6 +305,23 @@ in order to work properly.
 
 For developers of such code, they should call \code{\link[=createRenderFunction]{createRenderFunction()}} or
 \code{\link[=markRenderFunction]{markRenderFunction()}} with \code{cacheHint = FALSE}.
+}
+
+\section{Caching with \code{renderPlot()}}{
+
+
+When \code{bindCache()} is used with \code{renderPlot()}, the \code{height} and \code{width}
+passed to the original \code{renderPlot()} are ignored. They are superseded by
+\code{sizePolicy} argument passed to `bindCache. The default is:\preformatted{sizePolicy = sizeGrowthRatio(width = 400, height = 400, growthRate = 1.2)
+}
+
+\code{sizePolicy} must be a function that takes a two-element numeric vector as
+input, representing the width and height of the \verb{<img>} element in the
+browser window, and it must return a two-element numeric vector, representing
+the pixel dimensions of the plot to generate. The purpose is to round the
+actual pixel dimensions from the browser to some other dimensions, so that
+this will not generate and cache images of every possible pixel dimension.
+See \code{\link[=sizeGrowthRatio]{sizeGrowthRatio()}} for more information on the default sizing policy.
 }
 
 \examples{

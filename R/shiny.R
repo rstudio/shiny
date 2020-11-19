@@ -277,6 +277,18 @@ workerId <- local({
 #'   character vector, as in `input=c("x", "y")`. The format can be
 #'   "rds" or "json".
 #' }
+#' \item{setCurrentTheme(theme)}{
+#'   Sets the current [bootstrapLib()] theme, which updates the value of
+#'   [getCurrentTheme()], invalidates `session$getCurrentTheme()`, and calls
+#'   function(s) registered with [registerThemeDependency()] with provided
+#'   `theme`. If those function calls return [htmltools::htmlDependency()]s with
+#'   `stylesheet`s, then those stylesheets are "refreshed" (i.e., the new
+#'   stylesheets are inserted on the page and the old ones are disabled and
+#'   removed).
+#' }
+#' \item{getCurrentTheme()}{
+#'   A reactive read of the current [bootstrapLib()] theme.
+#' }
 #'
 #' @name session
 NULL

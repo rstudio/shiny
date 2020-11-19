@@ -16,24 +16,18 @@ bindCache(x, ..., cache = "app")
 See the Cache Scoping section for more information.}
 }
 \description{
-\code{bindCache()} adds caching to the following kinds of objects used in Shiny:
-\itemize{
-\item \code{\link[=reactive]{reactive()}}` expressions.
-\item \verb{render*} functions, like \code{\link[=renderText]{renderText()}}, \code{\link[=renderTable]{renderTable()}}, and so on.
-}
+\code{bindCache()} adds caching \code{\link[=reactive]{reactive()}} expressions and \verb{render*} functions
+(like \code{\link[=renderText]{renderText()}}, \code{\link[=renderTable]{renderTable()}}, ...).
+
+Ordinary \code{\link[=reactive]{reactive()}} expressions automatically cache their \emph{most recent}
+value, which helps to  avoid redundant computation in downstream reactives.
+\code{bindCache()} will cache all previous values (as long as they fit in the
+cache) and they can be shared across user sessions. This allows
+\code{bindCache()} to dramatically improve performance when used correctly.
 }
 \details{
-Ordinary \code{\link[=reactive]{reactive()}} expressions automatically cache their \emph{most recent}
-value, which helps to avoid redundant computation in downstream reactives.
-This caching applies only to the most recent value, so prior values are not
-cached.
-
-With \code{bindCache()}, any number of previous values can be cached --- as long
-as they fit in the cache --- and they can be shared across or within user
-sessions. As a result, \code{bindCache()} can dramatically improve performance,
-but it does take additional effort to use properly.
 \code{bindCache()} requires one or more expressions that are used to generate a
-\emph{cache key} -- this key is used to determine if a computation has occurred
+\strong{cache key}, which is used to determine if a computation has occurred
 before and hence can be retrieved from the cache. If you're familiar with the
 concept of memoizing pure functions (e.g., the \pkg{memoise} package), you
 can think of the cache key as the input(s) to a pure function. As such, one
@@ -69,10 +63,9 @@ to do some sort of reduction on the data that still captures information
 about whether a value can be retrieved from the cache. For example, if you
 have a large data set with timestamps, it might make sense to extract the
 most recent timestamp and return that. Then, instead of hashing the entire
-data object, the cached reactive only needs to hash the timestamp.
-
-r <- reactive({ compute(bigdata()) } \%>\%
-bindCache({ extract_most_recent_time(bigdata()) })
+data object, the cached reactive only needs to hash the timestamp.\if{html}{\out{<div class="NA">}}\preformatted{r <- reactive(\{ compute(bigdata()) \} \%>\%
+  bindCache(\{ extract_most_recent_time(bigdata()) \})
+}\if{html}{\out{</div>}}
 
 For computations that are vert slow, it often makes sense to pair
 \code{\link[=bindCache]{bindCache()}} with \code{\link[=bindEvent]{bindEvent()}} so that no computation is performed until

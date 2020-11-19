@@ -671,6 +671,7 @@ bindCache.shiny.render.function <- function(x, ..., cache = "app") {
 
 #' @export
 bindCache.shiny.renderPlot <- function(x, ...,
+  cache = "app",
   sizePolicy = sizeGrowthRatio(width = 400, height = 400, growthRate = 1.2))
 {
   check_dots_unnamed()
@@ -764,7 +765,8 @@ bindCache.shiny.renderPlot <- function(x, ...,
       pixelratio <- session$clientData$pixelratio %OR% 1
 
       list(fitDims(), pixelratio)
-    }
+    },
+    cache = cache
   )
 }
 

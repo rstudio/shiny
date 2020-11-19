@@ -261,7 +261,7 @@ ionRangeSliderDependencyCSS <- function(theme) {
     theme = theme,
     name = "ionRangeSlider",
     version = ionRangeSliderVersion,
-    cache_key_extra = utils::packageVersion("shiny")
+    cache_key_extra = shinyPackageVersion()
   )
 }
 

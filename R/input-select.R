@@ -233,48 +233,54 @@ selectizeIt <- function(inputId, select, options, nonempty = FALSE) {
 }
 
 
-selectizeVersion <- "0.12.4"
-
-selectizeDependency <- function(theme) {
-  list(
-    htmlDependency(
-      "selectize-js",
-      selectizeVersion,
-      src = c(href = "shared/selectize"),
-      script = c(
-        "js/selectize.min.js",
-        # Accessibility plugin for screen readers (https://github.com/SLMNBJ/selectize-plugin-a11y):
-        "accessibility/js/selectize-plugin-a11y.min.js"
-      )
-    ),
-    bslib::bs_dependency_defer(selectizeCSS)
-  )
+selectizeDependency <- function() {
+  bslib::bs_dependency_defer(selectizeDependencyFunc)
 }
 
-selectizeCSS <- function(theme) {
+selectizeDependencyFunc <- function(theme) {
+  selectizeVersion <- "0.12.4"
   if (!is_bs_theme(theme)) {
-    return(htmlDependency(
-      name = "selectize-css",
-      version = selectizeVersion,
-      src = c(href = "shared/selectize"),
-      stylesheet = "css/selectize.bootstrap3.css"
-    ))
+    return(selectizeStaticDependency(selectizeVersion))
   }
 
-  scss_file <- system.file(
-    package = "shiny", "www/shared/selectize/scss",
+  selectizeDir <- system.file(package = "shiny", "www/shared/selectize/")
+  stylesheet <- file.path(
+    selectizeDir, "scss",
     if ("3" %in% bslib::theme_version(theme)) {
       "selectize.bootstrap3.scss"
     } else {
       "selectize.bootstrap4.scss"
     }
   )
+  # It'd be cleaner to ship the JS in a separate, href-based,
+  # HTML dependency (which we currently do for other themable widgets),
+  # but DT, crosstalk, and maybe other pkgs include selectize JS/CSS
+  # in HTML dependency named selectize, so if we were to change that
+  # name, the JS/CSS would be loaded/included twice, which leads to
+  # strange issues, especially since we now include a 3rd party
+  # accessibility plugin https://github.com/rstudio/shiny/pull/3153
+  script <- file.path(
+    selectizeDir, c("js/selectize.min.js", "accessibility/js/selectize-plugin-a11y.min.js")
+  )
   bslib::bs_dependency(
-    input = sass::sass_file(scss_file),
+    input = sass::sass_file(stylesheet),
     theme = theme,
     name = "selectize",
     version = selectizeVersion,
-    cache_key_extra = utils::packageVersion("shiny")
+    cache_key_extra = shinyPackageVersion(),
+    .dep_args = list(script = script)
+  )
+}
+
+selectizeStaticDependency <- function(version) {
+  htmlDependency(
+    "selectize", version,
+    src = c(href = "shared/selectize"),
+    stylesheet = "css/selectize.bootstrap3.css",
+    script = c(
+      "js/selectize.min.js",
+      "accessibility/js/selectize-plugin-a11y.min.js"
+    )
   )
 }
 

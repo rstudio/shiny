@@ -1902,3 +1902,15 @@ is_available <- function(package, version = NULL) {
   }
   installed && isTRUE(utils::packageVersion(package) >= version)
 }
+
+
+# cached version of utils::packageVersion("shiny")
+shinyPackageVersion <- local({
+  version <- NULL
+  function() {
+    if (is.null(version)) {
+      version <<- utils::packageVersion("shiny")
+    }
+    version
+  }
+})

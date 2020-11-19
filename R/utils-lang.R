@@ -51,6 +51,10 @@ remove_source <- function(x) {
   if (is.function(x)) {
     body(x) <- remove_source(body(x))
     x
+
+  } else if (is_quosure(x)) {
+    rlang::quo_set_expr(x, remove_source(rlang::quo_get_expr(x)))
+
   } else if (is.call(x)) {
     attr(x, "srcref") <- NULL
     attr(x, "wholeSrcref") <- NULL
@@ -65,6 +69,7 @@ remove_source <- function(x) {
 
     x[] <- lapply(x, remove_source)
     x
+
   } else {
     x
   }

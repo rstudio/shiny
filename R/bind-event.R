@@ -183,14 +183,14 @@ bindEvent.reactiveExpr <- function(x, ..., ignoreNULL = TRUE, ignoreInit = FALSE
 {
   domain <- reactive_get_domain(x)
 
-  eventFunc <- quos_to_func(enquos0(...))
+  qs <- enquos0(...)
+  eventFunc <- quos_to_func(qs)
 
   valueFunc <- reactive_get_value_func(x)
   valueFunc <- wrapFunctionLabel(valueFunc, "eventReactiveValueFunc", ..stacktraceon = TRUE)
 
-  if (is.null(label)) {
-    label <- sprintf("eventReactive(%s)", paste(deparse(body(eventFunc)), collapse = "\n"))
-  }
+  label <- label %OR%
+    sprintf('bindEvent(%s, %s)', attr(x, "observable", exact = TRUE)$.label, quos_to_label(qs))
 
   # Don't hold on to the reference for x, so that it can be GC'd
   rm(x)
@@ -256,10 +256,13 @@ bindEvent.Observer <- function(x, ..., ignoreNULL = TRUE, ignoreInit = FALSE,
     stop("Cannot call bindEvent() on an Observer that has already been executed.")
   }
 
-  eventFunc <- quos_to_func(enquos0(...))
+  qs <- enquos0(...)
+  eventFunc <- quos_to_func(qs)
   valueFunc <- x$.func
 
-  x$.label <- label %OR% sprintf('bindEvent(%s)', x$.label)
+  # Note that because the observer will already have been logged by this point,
+  # this updated label won't show up in the reactlog.
+  x$.label <- label %OR% sprintf('bindEvent(%s, %s)', x$.label, quos_to_label(qs))
 
   initialized <- FALSE
 

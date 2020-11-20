@@ -2284,11 +2284,16 @@ eventReactive <- function(eventExpr, valueExpr,
   eventExpr <- get_quosure(eventExpr, event.env, event.quoted)
   valueExpr <- get_quosure(valueExpr, value.env, value.quoted)
 
+  if (is.null(label)) {
+    label <- sprintf('eventReactive(%s)', paste(deparse(get_expr(eventExpr)), collapse='\n'))
+  }
+
   invisible(inject(bindEvent(
     ignoreNULL = ignoreNULL,
     ignoreInit = ignoreInit,
+    label = label,
     !!eventExpr,
-    x = reactive(!!valueExpr, domain = domain, label = "eventReactiveHandler")
+    x = reactive(!!valueExpr, domain = domain, label = label)
   )))
 }
 

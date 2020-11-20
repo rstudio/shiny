@@ -24,6 +24,19 @@ quos_to_func <- function(qs) {
   }
 }
 
+# Given a list of quosures, return a string representation of the expressions.
+#
+# qs <- list(quo(a+1), quo({ b+2; b + 3 }))
+# quos_to_label(qs)
+# #> [1] "a + 1, {\n    b + 2\n    b + 3\n}"
+quos_to_label <- function(qs) {
+  res <- lapply(qs, function(q) {
+    paste(deparse(get_expr(q)), collapse = "\n")
+  })
+
+  paste(res, collapse = ", ")
+}
+
 # Get the formals and body for a function, without source refs. This is used for
 # consistent hashing of the function.
 formalsAndBody <- function(x) {

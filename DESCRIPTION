@@ -88,7 +88,7 @@ Imports:
     promises (>= 1.1.1.9001),
     tools,
     crayon,
-    rlang (>= 0.4.8.9000),
+    rlang (>= 0.4.8.9002),
     fastmap (>= 1.0.0),
     withr,
     commonmark (>= 1.7),

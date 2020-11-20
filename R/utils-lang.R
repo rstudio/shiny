@@ -1,11 +1,3 @@
-
-# Return the ... arguments of the caller, as a list of quosures. If any are
-# quosures inlined with inject(), don't change them.
-enquos0 <- function(...) {
-  dots <- getNamespace('rlang')$captureDots()
-  lapply(dots, function(dot) as_quosure(dot$expr, dot$env))
-}
-
 # Given a list of quosures, return a function that will evaluate them and return
 # a list of resulting values. If the list contains a single expression, unwrap
 # it from the list.
@@ -41,38 +33,8 @@ formalsAndBody <- function(x) {
 
   list(
     formals = formals(x),
-    body = body(remove_source(x))
+    body = body(zap_srcref(x))
   )
-}
-
-# Remove source refs from a function or language object. utils::removeSource()
-# does the same, but only gained support for language objects in R 3.6.0.
-remove_source <- function(x) {
-  if (is.function(x)) {
-    body(x) <- remove_source(body(x))
-    x
-  } else if (is.call(x)) {
-    attr(x, "srcref") <- NULL
-    attr(x, "wholeSrcref") <- NULL
-    attr(x, "srcfile") <- NULL
-
-    # `function` calls store the source ref as the fourth element.
-    # See https://github.com/r-lib/testthat/issues/1228
-    if (x[[1]] == quote(`function`) && length(x) == 4 &&
-        inherits(x[[4]], "srcref")) {
-      x[[4]] <- NULL
-    }
-
-    x[] <- lapply(x, remove_source)
-    x
-  } else {
-    x
-  }
-}
-
-# Need this here until it is part of rlang.
-inject <- function(expr, env = parent.frame()) {
-  rlang::eval_bare(rlang::enexpr(expr), env)
 }
 
 

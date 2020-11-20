@@ -277,6 +277,18 @@ workerId <- local({
 #'   character vector, as in `input=c("x", "y")`. The format can be
 #'   "rds" or "json".
 #' }
+#' \item{setCurrentTheme(theme)}{
+#'   Sets the current [bootstrapLib()] theme, which updates the value of
+#'   [getCurrentTheme()], invalidates `session$getCurrentTheme()`, and calls
+#'   function(s) registered with [registerThemeDependency()] with provided
+#'   `theme`. If those function calls return [htmltools::htmlDependency()]s with
+#'   `stylesheet`s, then those stylesheets are "refreshed" (i.e., the new
+#'   stylesheets are inserted on the page and the old ones are disabled and
+#'   removed).
+#' }
+#' \item{getCurrentTheme()}{
+#'   A reactive read of the current [bootstrapLib()] theme.
+#' }
 #'
 #' @name session
 NULL
@@ -368,6 +380,7 @@ ShinySession <- R6Class(
     currentOutputName = NULL,        # Name of the currently-running output
     outputInfo = list(),             # List of information for each output
     testSnapshotUrl = character(0),
+    currentThemeDependency = NULL,   # ReactiveVal for taking dependency on theme
 
     sendResponse = function(requestMsg, value) {
       if (is.null(requestMsg$tag)) {
@@ -713,6 +726,8 @@ ShinySession <- R6Class(
 
       private$testMode <- getShinyOption("testmode", default = FALSE)
       private$enableTestSnapshot()
+
+      private$currentThemeDependency <- reactiveVal(0)
 
       private$registerSessionEndCallbacks()
 
@@ -1288,6 +1303,11 @@ ShinySession <- R6Class(
       )
     },
 
+    getCurrentTheme = function() {
+      private$currentThemeDependency()
+      getShinyOption("bootstrapTheme")
+    },
+
     setCurrentTheme = function(theme) {
       # This function does three things: (1) sets theme as the current
       # bootstrapTheme, (2) re-executes any registered theme dependencies, and
@@ -1295,6 +1315,9 @@ ShinySession <- R6Class(
 
       # Note that this will automatically scope to the session.
       shinyOptions(bootstrapTheme = theme)
+
+      # Invalidate
+      private$currentThemeDependency(isolate(private$currentThemeDependency()) + 1)
 
       # Call any theme dependency functions and make sure we get a list of deps back
       funcs <- getShinyOption("themeDependencyFuncs", default = list())

@@ -109,9 +109,8 @@
 #'   When `bindEvent()` is used with `reactive()`, it creates a new reactive
 #'   expression object.
 #'
-#'   When `bindEvent()` is used with `observe()`, it creates a new observer and
-#'   calls the `$destroy()` method on the original observer, so that the
-#'   original observer will not execute.
+#'   When `bindEvent()` is used with `observe()`, it alters the observer in
+#'   place. It can only be used with observers which have not yet executed.
 #'
 #' @section Combining events and caching:
 #'
@@ -253,27 +252,21 @@ bindEvent.shiny.render.function <- function(x, ..., ignoreNULL = TRUE, ignoreIni
 bindEvent.Observer <- function(x, ..., ignoreNULL = TRUE, ignoreInit = FALSE,
   once = FALSE, label = NULL)
 {
-  if (isTRUE(x$.destroyed)) {
-    stop("Can't call bindEvent() on an observer that has been destroyed.")
+  if (x$.execCount > 0) {
+    stop("Cannot call bindEvent() on an Observer that has already been executed.")
   }
 
   eventFunc <- quos_to_func(enquos0(...))
   valueFunc <- x$.func
 
-  if (is.null(label)) {
-    label <- sprintf('observeEvent(%s)', paste(deparse(body(eventFunc)), collapse='\n'))
-  }
+  x$.label <- label %OR% sprintf('bindEvent(%s)', x$.label)
 
   initialized <- FALSE
 
-  res <- observe(
-    label       = label,
-    domain      = x$.domain,
-    priority    = x$.priority,
-    autoDestroy = x$.autoDestroy,
-    suspended   = x$.suspended,
+  x$.func <- wrapFunctionLabel(
+    name = x$.label,
     ..stacktraceon = FALSE,
-    {
+    func = function() {
       hybrid_chain(
         eventFunc(),
         function(value) {
@@ -287,7 +280,7 @@ bindEvent.Observer <- function(x, ..., ignoreNULL = TRUE, ignoreInit = FALSE,
           }
 
           if (once) {
-            on.exit(res$destroy())
+            on.exit(x$destroy())
           }
 
           req(!ignoreNULL || !isNullEvent(value))
@@ -298,12 +291,8 @@ bindEvent.Observer <- function(x, ..., ignoreNULL = TRUE, ignoreInit = FALSE,
     }
   )
 
-  x$destroy()
-  # Don't hold onto x, so that it can be gc'd
-  rm(x)
-
-  class(res) <- c("Observer.event", class(res))
-  invisible(res)
+  class(x) <- c("Observer.event", class(x))
+  invisible(x)
 }
 
 

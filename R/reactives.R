@@ -2244,9 +2244,13 @@ observeEvent <- function(eventExpr, handlerExpr,
   eventExpr   <- get_quosure(eventExpr,   event.env,   event.quoted)
   handlerExpr <- get_quosure(handlerExpr, handler.env, handler.quoted)
 
+  if (is.null(label)) {
+    label <- sprintf('observeEvent(%s)', paste(deparse(get_expr(eventExpr)), collapse='\n'))
+  }
+
   handler <- inject(observe(
     !!handlerExpr,
-    label = "observeEventHandler",
+    label = label,
     suspended = suspended,
     priority = priority,
     domain = domain,

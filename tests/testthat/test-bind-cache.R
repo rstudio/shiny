@@ -1078,7 +1078,7 @@ test_that("Custom render functions that call installExprFunction", {
   expect_identical(n, 1)
   expect_identical(
     extractCacheHint(renderDouble({ n <<- n+1; a })),
-    list(label = "renderDouble", userExpr = remove_source(quote({ n <<- n+1; a })))
+    list(label = "renderDouble", userExpr = zap_srcref(quote({ n <<- n+1; a })))
   )
 
 
@@ -1114,7 +1114,7 @@ test_that("Custom render functions that call installExprFunction", {
   expect_identical(n, 1)
   expect_identical(
     extractCacheHint(renderDouble({ n <<- n+1; a })),
-    list(remove_source(quote({ n <<- n + 1; a })))
+    list(zap_srcref(quote({ n <<- n + 1; a })))
   )
 
 

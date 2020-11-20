@@ -80,7 +80,7 @@ markRenderFunction <- function(
     # For everything else, do nothing.
     cacheHint <- lapply(cacheHint, function(x) {
       if      (is.function(x)) formalsAndBody(x)
-      else if (is.language(x)) remove_source(x)
+      else if (is.language(x)) zap_srcref(x)
       else                     x
     })
   }

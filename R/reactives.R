@@ -990,7 +990,7 @@ reactive <- function(x, env = parent.frame(), quoted = FALSE,
   structure(
     o$getValue,
     observable = o,
-    cacheHint = list(userExpr = remove_source(get_expr(x))),
+    cacheHint = list(userExpr = zap_srcref(get_expr(x))),
     class = c("reactiveExpr", "reactive", "function")
   )
 }

@@ -74,7 +74,7 @@ renderPage <- function(ui, showcase=0, testMode=FALSE) {
   if (testMode) {
     # Add code injection listener if in test mode
     shiny_deps[[length(shiny_deps) + 1]] <-
-      htmlDependency("shiny-testmode", utils::packageVersion("shiny"),
+      htmlDependency("shiny-testmode", shinyPackageVersion(),
                      c(href="shared"), script = "shiny-testmode.js")
   }
 
@@ -83,12 +83,11 @@ renderPage <- function(ui, showcase=0, testMode=FALSE) {
 }
 
 shinyDependencies <- function() {
-  version <- utils::packageVersion("shiny")
   list(
     bslib::bs_dependency_defer(shinyDependencyCSS),
     htmlDependency(
       name = "shiny-javascript",
-      version = version,
+      version = shinyPackageVersion(),
       src = c(href = "shared"),
       script = if (getOption("shiny.minified", TRUE)) "shiny.min.js" else "shiny.js"
     )
@@ -96,7 +95,7 @@ shinyDependencies <- function() {
 }
 
 shinyDependencyCSS <- function(theme) {
-  version <- utils::packageVersion("shiny")
+  version <- shinyPackageVersion()
 
   if (!is_bs_theme(theme)) {
     return(htmlDependency(

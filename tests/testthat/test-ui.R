@@ -60,3 +60,22 @@ test_that("selectInputUI has a select at an expected location", {
     }
   }
 })
+
+test_that("selectInputUI warns if value[2] < value[1] and reverts values", {
+  expect_warning(
+    object = {
+      si <- shiny::sliderInput(
+        inputId = "a",
+        label = "a",
+        min = 1,
+        max = 20,
+        value = c(10, 1)
+      )
+    },
+    regexp = "values were reverted"
+  )
+
+  varHtml <- si$children[[2]]$attribs
+  expect_equal(varHtml[["data-from"]], "1")
+  expect_equal(varHtml[["data-to"]], "10")
+})

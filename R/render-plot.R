@@ -70,26 +70,9 @@ renderPlot <- function(expr, width = 'auto', height = 'auto', res = 72, ...,
 
   args <- list(...)
 
-  if (is.reactive(width))
-    widthWrapper <- width
-  else if (is.function(width))
-    widthWrapper <- reactive({ width() })
-  else
-    widthWrapper <- function() { width }
-
-  if (is.reactive(height))
-    heightWrapper <- height
-  else if (is.function(height))
-    heightWrapper <- reactive({ height() })
-  else
-    heightWrapper <- function() { height }
-
-  if (is.reactive(alt))
-    altWrapper <- alt
-  else if (is.function(alt))
-    altWrapper <- reactive({ alt() })
-  else
-    altWrapper <- function() { alt }
+  widthWrapper <- coerceToReactive(width)
+  heightWrapper <- coerceToReactive(height)
+  altWrapper <- coerceToReactive(alt)
 
   # This is the function that will be used as getDims by default, but it can be
   # overridden (which happens when bindCache() is used).

@@ -60,26 +60,18 @@ renderTable <- function(expr, striped = FALSE, hover = FALSE,
 
   if (!is.function(spacing)) spacing <- match.arg(spacing)
 
-  # A small helper function to create a wrapper for an argument that was
-  # passed to renderTable()
-  createWrapper <- function(arg) {
-    if (is.function(arg)) wrapper <- arg
-    else wrapper <- function() arg
-    return(wrapper)
-  }
-
   # Create wrappers for most arguments so that functions can also be passed
   # in, rather than only literals (useful for shiny apps)
-  stripedWrapper <- createWrapper(striped)
-  hoverWrapper <- createWrapper(hover)
-  borderedWrapper <- createWrapper(bordered)
-  spacingWrapper <- createWrapper(spacing)
-  widthWrapper <- createWrapper(width)
-  alignWrapper <- createWrapper(align)
-  rownamesWrapper <- createWrapper(rownames)
-  colnamesWrapper <- createWrapper(colnames)
-  digitsWrapper <- createWrapper(digits)
-  naWrapper <- createWrapper(na)
+  stripedWrapper <- coerceToFunc(striped)
+  hoverWrapper <- coerceToFunc(hover)
+  borderedWrapper <- coerceToFunc(bordered)
+  spacingWrapper <- coerceToFunc(spacing)
+  widthWrapper <- coerceToFunc(width)
+  alignWrapper <- coerceToFunc(align)
+  rownamesWrapper <- coerceToFunc(rownames)
+  colnamesWrapper <- coerceToFunc(colnames)
+  digitsWrapper <- coerceToFunc(digits)
+  naWrapper <- coerceToFunc(na)
 
   dots <- list(...)  ## used later (but defined here because of scoping)
 

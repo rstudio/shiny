@@ -1728,11 +1728,20 @@ invalidateLater <- function(millis, session = getDefaultReactiveDomain()) {
 }
 
 coerceToFunc <- function(x) {
-  force(x);
-  if (is.function(x))
-    return(x)
-  else
-    return(function() x)
+  if (is.function(x)) {
+    x
+  } else {
+    function() x
+  }
+}
+coerceToReactive <- function(x) {
+  if (is.reactive(x)) {
+    x
+  } else if (is.function(x)) {
+    reactive(x())
+  } else {
+    function() x
+  }
 }
 
 #' Reactive polling

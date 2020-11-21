@@ -89,6 +89,10 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
                     version = "0.10.2.2")
   }
 
+  if (length(value) > 2) {
+    stop("'value' can have at most 2 elements (actual length is ", length(value), ")")
+  }
+
   dataType <- getSliderType(min, max, value)
 
   if (is.null(timeFormat)) {

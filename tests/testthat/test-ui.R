@@ -22,6 +22,21 @@ test_that("sliderInput steps don't have rounding errors", {
   expect_identical(findStepSize(-5.5, 4, NULL), 0.1)
 })
 
+test_that("sliderInput stops if length(value) > 2", {
+  expect_error(
+    object = {
+      sliderInput(
+        inputId = "a",
+        label = "a",
+        min = 1,
+        max = 10,
+        value = 1:10
+      )
+    },
+    regexp = "'value' can have at most 2 elements (actual length is 10)",
+    fixed = TRUE
+  )
+})
 
 test_that("selectInputUI has a select at an expected location", {
   for (multiple in c(TRUE, FALSE)) {

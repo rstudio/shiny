@@ -223,6 +223,11 @@ renderCachedPlot <- function(expr,
     cacheKeyExpr <- new_quosure(cacheKeyExpr, env = parent.frame())
   }
 
+  if (!is.null(width) || !is.null(height)) {
+    warning("Unused argument(s) 'width' and/or 'height'. ",
+            "'sizePolicy' is used instead.")
+  }
+
   inject(
     bindCache(
       renderPlot(!!expr, res = res, alt = alt, outputArgs = outputArgs, ...),

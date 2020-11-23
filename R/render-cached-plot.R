@@ -225,9 +225,10 @@ renderCachedPlot <- function(expr,
 
   inject(
     bindCache(
-      renderPlot(!!expr, res = res, alt = alt, outputArgs = outputArgs),
+      renderPlot(!!expr, res = res, alt = alt, outputArgs = outputArgs, ...),
       !!cacheKeyExpr,
-      sizePolicy = sizePolicy
+      sizePolicy = sizePolicy,
+      cache = cache
     )
   )
 }

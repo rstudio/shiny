@@ -692,26 +692,19 @@ bindCache.shiny.renderPlot <- function(x, ...,
   # again. This resize observer prevents that.
   fitDims <- reactiveVal(NULL)
   resizeObserverCreated <- FALSE
+  outputName <- NULL
   ensureResizeObserver <- function() {
     if (resizeObserverCreated)
       return()
 
-    # Reactive expressions that return the width and height of the img tag in
-    # the browser.
-    outputWidth  <- getCurrentOutputInfo()$width
-    outputHeight <- getCurrentOutputInfo()$height
-
     doResizeCheck <- function() {
-      if (is.null(outputWidth) || is.null(outputHeight)) {
-        # If we got here, getCurrentOutputInfo() would have returned NULL. This
-        # means that something probably were executed in an unexpected order. If
-        # this happens in the observer, it means that the observer won't
-        # re-execute, since it won't have the necessary reactive dependencies.
-        stop("doResizeCheck unable to read current output info.")
+      if (is.null(outputName)) {
+        outputName <<- getCurrentOutputInfo()$name
       }
+      session <- getDefaultReactiveDomain()
 
-      width  <- outputWidth()  %OR% 0
-      height <- outputHeight() %OR% 0
+      width  <- session$clientData[[paste0('output_', outputName, '_width')]]  %OR% 0
+      height <- session$clientData[[paste0('output_', outputName, '_height')]] %OR% 0
 
       rect <- sizePolicy(c(width, height))
       fitDims(list(width = rect[1], height = rect[2]))

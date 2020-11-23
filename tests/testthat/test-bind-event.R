@@ -33,20 +33,16 @@ test_that("bindEvent and observers", {
 })
 
 
-test_that("bindEvent does not prevent observers from being GC'd", {
+test_that("bindEvent alters observers in place", {
   v <- reactiveVal(1)
-  o <- observe({ message(v()) })
-
-  finalized <- FALSE
-  reg.finalizer(o, function(e) { finalized <<- TRUE })
-
-  # o1 shouldn't keep a reference to o (and prevent it from getting GC'd).
+  o <- observe({ v() })
   o1 <- bindEvent(o, v())
-  rm(o)
 
-  flushReact()
-  gc()
-  expect_true(finalized)
+  # o and o1 are the same object
+  expect_identical(o, o1)
+
+  # Can't call bindEvent twice on an observer
+  expect_error(bindEvent(o, v()))
 })
 
 

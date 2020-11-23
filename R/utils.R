@@ -1612,6 +1612,8 @@ URLencode <- function(value, reserved = FALSE) {
 # so that strings like "2016-08-9" are expanded to "2016-08-09"
 dateYMD <- function(date = NULL, argName = "value") {
   if (!length(date)) return(NULL)
+  # as.Date("") yields NA, but we want it to produce an error (so we get the warning)
+  date[!nzchar(date)] <- " "
   tryCatch(date <- format(as.Date(date), "%Y-%m-%d"),
     error = function(e) {
       warning(

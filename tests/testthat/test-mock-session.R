@@ -56,22 +56,25 @@ test_that("reactivePoll supported", {
   expect_equal(i, 2)
 })
 
-test_that("renderCachedPlot supported", {
-  session <- MockShinySession$new()
-  isolate({
-    # renderCachedPlot is sensitive to having the cache set for it before entering.
-    origCache <- getShinyOption("cache")
-    shinyOptions(cache = cachem::cache_mem())
-    on.exit(shinyOptions(cache = origCache), add=TRUE)
-
-    p <- renderCachedPlot({ plot(1,1) }, { Sys.time() })
-    plt <- p(session, "name")
-
-    # Should have a size defined
-    expect_equal(plt$coordmap$dims$width, 692) #FIXME: why isn't this respecting the clientdata sizes?
-    expect_equal(plt$coordmap$dims$height, 400)
-  })
-})
+# `renderCachedPlot()` is now implemented with `bindCache()`, and won't work by
+# calling `f(session, "name")`, because the key computation function is not
+# called with session and name.
+# test_that("renderCachedPlot supported", {
+#   session <- MockShinySession$new()
+#   isolate({
+#     # renderCachedPlot is sensitive to having the cache set for it before entering.
+#     origCache <- getShinyOption("cache")
+#     shinyOptions(cache = cachem::cache_mem())
+#     on.exit(shinyOptions(cache = origCache), add=TRUE)
+#
+#     p <- renderCachedPlot({ plot(1,1) }, { Sys.time() })
+#     plt <- p(session, "name")
+#
+#     # Should have a size defined
+#     expect_equal(plt$coordmap$dims$width, 692) #FIXME: why isn't this respecting the clientdata sizes?
+#     expect_equal(plt$coordmap$dims$height, 400)
+#   })
+# })
 
 test_that("renderDataTable supported", {
   session <- MockShinySession$new()

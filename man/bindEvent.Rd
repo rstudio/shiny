@@ -147,9 +147,8 @@ render functions.
 When \code{bindEvent()} is used with \code{reactive()}, it creates a new reactive
 expression object.
 
-When \code{bindEvent()} is used with \code{observe()}, it creates a new observer and
-calls the \verb{$destroy()} method on the original observer, so that the
-original observer will not execute.
+When \code{bindEvent()} is used with \code{observe()}, it alters the observer in
+place. It can only be used with observers which have not yet executed.
 }
 
 \section{Combining events and caching}{

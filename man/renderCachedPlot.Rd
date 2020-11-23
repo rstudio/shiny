@@ -55,7 +55,8 @@ interactive R Markdown document.}
 \code{sizePolicy}.}
 }
 \description{
-Renders a reactive plot, with plot images cached to disk.
+Renders a reactive plot, with plot images cached to disk. As of Shiny 1.6.0,
+this is a shortcut for using \code{\link[=bindCache]{bindCache()}} with \code{\link[=renderPlot]{renderPlot()}}.
 }
 \details{
 \code{expr} is an expression that generates a plot, similar to that in
@@ -237,8 +238,8 @@ server <- function(input, output, session) {
 }
 }
 \seealso{
-See \code{\link[=renderPlot]{renderPlot()}} for the regular, non-cached version of
-this function. For more about configuring caches, see
-\code{\link[cachem:cache_mem]{cachem::cache_mem()}} and \code{\link[cachem:cache_disk]{cachem::cache_disk()}}. For caching other types
-of objects, see \code{bindCache()}.
+See \code{\link[=renderPlot]{renderPlot()}} for the regular, non-cached version of this
+function. It can be used with \code{\link[=bindCache]{bindCache()}} to get the same effect as
+\code{renderCachedPlot()}. For more about configuring caches, see
+\code{\link[cachem:cache_mem]{cachem::cache_mem()}} and \code{\link[cachem:cache_disk]{cachem::cache_disk()}}.
 }

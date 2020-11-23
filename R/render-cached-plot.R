@@ -1,6 +1,7 @@
 #' Plot output with cached images
 #'
-#' Renders a reactive plot, with plot images cached to disk.
+#' Renders a reactive plot, with plot images cached to disk. As of Shiny 1.6.0,
+#' this is a shortcut for using [bindCache()] with [renderPlot()].
 #'
 #' `expr` is an expression that generates a plot, similar to that in
 #' `renderPlot`. Unlike with `renderPlot`, this expression does not
@@ -61,10 +62,10 @@
 #' @param width,height not used. They are specified via the argument
 #'   `sizePolicy`.
 #'
-#' @seealso See [renderPlot()] for the regular, non-cached version of
-#'   this function. For more about configuring caches, see
-#'   [cachem::cache_mem()] and [cachem::cache_disk()]. For caching other types
-#'   of objects, see `bindCache()`.
+#' @seealso See [renderPlot()] for the regular, non-cached version of this
+#'   function. It can be used with [bindCache()] to get the same effect as
+#'   `renderCachedPlot()`. For more about configuring caches, see
+#'   [cachem::cache_mem()] and [cachem::cache_disk()].
 #'
 #'
 #' @examples

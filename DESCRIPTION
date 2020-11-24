@@ -106,7 +106,7 @@ Suggests:
     ggplot2,
     reactlog (>= 1.0.0),
     magrittr,
-    shinytest,
+    shinytest (>= 1.4.0.9003),
     yaml,
     future,
     dygraphs,
@@ -118,6 +118,7 @@ Remotes:
     rstudio/promises,
     rstudio/sass,
     rstudio/bslib,
+    rstudio/shinytest,
     r-lib/cachem,
     r-lib/rlang
 URL: http://shiny.rstudio.com

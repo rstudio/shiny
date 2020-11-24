@@ -78,14 +78,16 @@ library(sass)
 library(bslib)
 css_dir <- file.path(dest_dir, "css")
 dir.create(css_dir, recursive = TRUE)
-bs_sass(
+sass_partial(
   sass_file(file.path(dest_dir, "scss", "build3.scss")),
-  theme = bs_theme(),
-  output = file.path(css_dir, "bootstrap-datepicker3.css")
+  bundle = bs_theme(),
+  output = file.path(css_dir, "bootstrap-datepicker3.css"),
+  write_attachments = FALSE
 )
-bs_sass(
+sass_partial(
   sass_file(file.path(dest_dir, "scss", "build3.scss")),
-  theme = bs_theme(),
+  bundle = bs_theme(),
   output = file.path(css_dir, "bootstrap-datepicker3.min.css"),
-  options = sass_options(output_style = "compressed")
+  options = sass_options(output_style = "compressed"),
+  write_attachments = FALSE
 )

@@ -205,3 +205,33 @@ test_that("Application directories are identified", {
     normalizePath(dirname(tests), winslash = "/")
   )
 })
+
+test_that("dateYMD works", {
+  expect_identical(dateYMD("2020-01-14"),"2020-01-14")
+  expect_identical(dateYMD("2020/01/14"),"2020-01-14")
+  expect_identical(
+    dateYMD(c("2020-01-14", "2019-11-05")),
+    c("2020-01-14", "2019-11-05")
+  )
+  expect_identical(
+    dateYMD(c("2020/01/14", "2019/11/05")),
+    c("2020-01-14", "2019-11-05")
+  )
+
+  expect_identical(
+    expect_warning(dateYMD("")),
+    NA_character_
+  )
+  expect_identical(
+    expect_warning(dateYMD(c(NA))),
+    NA_character_
+  )
+  expect_identical(
+    expect_warning(dateYMD(c("", NA))),
+    c(NA_character_, NA_character_)
+  )
+  expect_identical(
+    expect_warning(dateYMD(c("2019/11/05", NA))),
+    c("2019-11-05", NA_character_)
+  )
+})

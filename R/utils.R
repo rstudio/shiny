@@ -1605,16 +1605,18 @@ URLencode <- function(value, reserved = FALSE) {
   if (reserved) encodeURIComponent(value) else encodeURI(value)
 }
 
-# Make user-supplied dates are either NULL or can be coerced
-# to a yyyy-mm-dd formatted string. If a date is specified, this
-# function returns a string for consistency across locales.
-# Also, `as.Date()` is used to coerce strings to date objects
-# so that strings like "2016-08-9" are expanded to "2016-08-09"
+# Make sure user-supplied dates are either NULL or can be coerced to a
+# yyyy-mm-dd formatted string. If a date is specified, this function returns a
+# string for consistency across locales. Also, `as.Date()` is used to coerce
+# strings to date objects so that strings like "2016-08-9" are expanded to
+# "2016-08-09". If any of the values result in error or NA, then the input
+# `date` is returned unchanged.
 dateYMD <- function(date = NULL, argName = "value") {
   if (!length(date)) return(NULL)
   tryCatch({
-      date <- format(as.Date(date), "%Y-%m-%d")
-      if (any(is.na(date))) stop()
+      res <- format(as.Date(date), "%Y-%m-%d")
+      if (any(is.na(res))) stop()
+      date <- res
     },
     error = function(e) {
       warning(

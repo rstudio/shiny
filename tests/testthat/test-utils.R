@@ -220,18 +220,24 @@ test_that("dateYMD works", {
 
   expect_identical(
     expect_warning(dateYMD("")),
-    NA_character_
+    ""
   )
   expect_identical(
     expect_warning(dateYMD(c(NA))),
-    NA_character_
+    NA
   )
   expect_identical(
     expect_warning(dateYMD(c("", NA))),
-    c(NA_character_, NA_character_)
+    c("", NA)
   )
+
+  # If there are any bad values, the entire thing goes through unchanged
   expect_identical(
     expect_warning(dateYMD(c("2019/11/05", NA))),
-    c("2019-11-05", NA_character_)
+    c("2019/11/05", NA)
+  )
+  expect_identical(
+    expect_warning(dateYMD(c("2019/11/05", ""))),
+    c("2019/11/05", "")
   )
 })

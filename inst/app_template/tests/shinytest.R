@@ -1,3 +1,2 @@
 library(shinytest)
-expect_pass(testApp("../", compareImages = FALSE))
-
+expect_pass(testApp("../", suffix = osName()))

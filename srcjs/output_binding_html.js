@@ -129,7 +129,7 @@ function renderDependency(dep) {
           // Once the new <link> is loaded, schedule the old <link> to be removed
           // on the next tick which is needed to avoid FOUC
           link.attr("onload", () => {
-            setTimeout(() => removeSheet(oldSheet), 10);
+            setTimeout(() => removeSheet(oldSheet), 500);
           });
           $head.append(link);
         }
@@ -140,8 +140,8 @@ function renderDependency(dep) {
       // At the time of writing, that means we need to do sendImageSize() &
       // sendOutputHiddenState() again, which can be done by re-binding.
       /* global Shiny */
-      var bindDebouncer = new Debouncer(null, Shiny.bindAll, 10);
-      setTimeout(() => bindDebouncer.normalCall(), 10);
+      var bindDebouncer = new Debouncer(null, Shiny.bindAll, 100);
+      setTimeout(() => bindDebouncer.normalCall(), 100);
 
       // This inline <style> based approach works for IE11
       function refreshStyle(href, oldSheet) {
@@ -152,8 +152,8 @@ function renderDependency(dep) {
           var oldStyle = $head.find("style#" + id);
           var newStyle = $("<style>").attr("id", id).html(xhr.responseText);
           $head.append(newStyle);
-          setTimeout(() => oldStyle.remove(), 10);
-          setTimeout(() => removeSheet(oldSheet), 10);
+          setTimeout(() => oldStyle.remove(), 500);
+          setTimeout(() => removeSheet(oldSheet), 500);
         };
         xhr.send();
       }

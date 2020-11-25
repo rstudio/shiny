@@ -3980,10 +3980,10 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
             $head.append(newStyle);
             setTimeout(function () {
               return oldStyle.remove();
-            }, 10);
+            }, 500);
             setTimeout(function () {
               return removeSheet(oldSheet);
-            }, 10);
+            }, 500);
           };
 
           xhr.send();
@@ -4025,7 +4025,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
             link.attr("onload", function () {
               setTimeout(function () {
                 return removeSheet(oldSheet);
-              }, 10);
+              }, 500);
             });
             $head.append(link);
           }
@@ -4036,10 +4036,10 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
         /* global Shiny */
 
-        var bindDebouncer = new Debouncer(null, Shiny.bindAll, 10);
+        var bindDebouncer = new Debouncer(null, Shiny.bindAll, 100);
         setTimeout(function () {
           return bindDebouncer.normalCall();
-        }, 10);
+        }, 100);
       }
     }
 

@@ -2,10 +2,10 @@ diff --git a/inst/www/shared/datepicker/scss/build3.scss b/inst/www/shared/datep
 index b5388654..0dac6a62 100644
 --- a/inst/www/shared/datepicker/scss/build3.scss
 +++ b/inst/www/shared/datepicker/scss/build3.scss
-@@ -6,32 +6,48 @@
+@@ -6,32 +6,33 @@
  //
  // Variables and mixins copied from Bootstrap 3.3.5
- 
+
 -// Variables
 -$gray:                   lighten(#000, 33.5%); // #555
 -$gray-light:             lighten(#000, 46.7%); // #777
@@ -29,21 +29,13 @@ index b5388654..0dac6a62 100644
 +//$line-height-base:        1.428571429;
 +//$btn-link-disabled-color: $gray-light;
 +//$dropdown-bg:             #fff;
- 
+
 -$brand-primary:         darken(#428bca, 6.5%); // #337ab7
-+// Setup BS4 style color contrasting
-+$yiq-contrasted-threshold:  150 !default;
-+$yiq-text-dark:             #212529 !default;
-+$yiq-text-light:            #fff !default;
- 
+
 -$btn-primary-color:              #fff;
 -$btn-primary-bg:                 $brand-primary;
 -$btn-primary-border:             darken($btn-primary-bg, 5%);
-+@function color-yiq($color, $dark: $yiq-text-dark, $light: $yiq-text-light) {
-+  $r: red($color);
-+  $g: green($color);
-+  $b: blue($color);
- 
+
 -$btn-link-disabled-color:        $gray-light;
 -
 -$state-info-bg:           #d9edf7;
@@ -53,19 +45,12 @@ index b5388654..0dac6a62 100644
 -
 -$dropdown-bg:                   #fff;
 -$dropdown-border:               rgba(0,0,0,.15);
-+  $yiq: (($r * 299) + ($g * 587) + ($b * 114)) / 1000;
- 
-+  @if ($yiq >= $yiq-contrasted-threshold) {
-+    @return $dark;
-+  } @else {
-+    @return $light;
-+  }
-+}
- 
+
+
 -// Mixins
 +@mixin button-variant($background, $border) {
-+  $color: color-yiq($background);
- 
++  $color: color-contrast($background);
+
 -// Button variants
 -@mixin button-variant($color, $background, $border) {
    color: $color;
@@ -94,7 +79,7 @@ index b5388654..0dac6a62 100644
 -        border-color: darken($border, 12%);
 +    background-color: mix($background, $color, 90%);
 +        border-color: mix($border, $color, 88%);
- 
+
      &:hover,
      &:focus,
      &.focus {
@@ -114,7 +99,7 @@ index 3d1621e0..3e031b31 100644
  		}
  		&.day:hover,
  		&.focused {
-+		  color: color-yiq($gray-lighter);
++		  color: color-contrast($gray-lighter);
  			background: $gray-lighter;
  			cursor: pointer;
  		}
@@ -125,7 +110,7 @@ index 3d1621e0..3e031b31 100644
 -			@include button-variant(#000, $highlighted-bg, darken($highlighted-bg, 20%));
 +			@include button-variant($highlighted-bg, darken($highlighted-bg, 20%));
  			border-radius: 0;
- 
+
  			&.focused {
 @@ -109,7 +110,7 @@
  		}
@@ -133,7 +118,7 @@ index 3d1621e0..3e031b31 100644
  			$today-bg: lighten(orange, 30%);
 -			@include button-variant(#000, $today-bg, darken($today-bg, 20%));
 +			@include button-variant($today-bg, darken($today-bg, 20%));
- 
+
  			&.focused {
  				background: darken($today-bg, 10%);
 @@ -123,7 +124,7 @@
@@ -143,7 +128,7 @@ index 3d1621e0..3e031b31 100644
 -			@include button-variant(#000, $range-bg, darken($range-bg, 20%));
 +			@include button-variant($range-bg, darken($range-bg, 20%));
  			border-radius: 0;
- 
+
  			&.focused {
 @@ -138,7 +139,7 @@
  		}
@@ -151,7 +136,7 @@ index 3d1621e0..3e031b31 100644
  			$range-highlighted-bg: mix($state-info-bg, $gray-lighter, 50%);
 -			@include button-variant(#000, $range-highlighted-bg, darken($range-highlighted-bg, 20%));
 +			@include button-variant($range-highlighted-bg, darken($range-highlighted-bg, 20%));
- 
+
  			&.focused {
  				background: darken($range-highlighted-bg, 10%);
 @@ -152,7 +153,7 @@
@@ -160,7 +145,7 @@ index 3d1621e0..3e031b31 100644
  			$range-today-bg: mix(orange, $gray-lighter, 50%);
 -			@include button-variant(#000, $range-today-bg, darken($range-today-bg, 20%));
 +			@include button-variant($range-today-bg, darken($range-today-bg, 20%));
- 
+
  			&.disabled,
  			&.disabled:active {
 @@ -162,12 +163,12 @@
@@ -182,7 +167,7 @@ index 3d1621e0..3e031b31 100644
  			border-radius: 4px;
  			&:hover,
  			&.focused {
-+			  color: color-yiq($gray-lighter);
++			  color: color-contrast($gray-lighter);
  				background: $gray-lighter;
  			}
  			&.disabled,
@@ -200,8 +185,8 @@ index 3d1621e0..3e031b31 100644
  		cursor: pointer;
  		&:hover {
 -			background: $gray-lighter;
-+		  color: color-yiq($gray-lighter);
++		  color: color-contrast($gray-lighter);
 +		  background: $gray-lighter;
  		}
  	}
- 
+

@@ -1171,9 +1171,8 @@ test_that("Custom render functions that call exprToFunction", {
 
 
 test_that("Some render functions can't be cached", {
-  cache <- cachem::cache_mem()
+  m <- cachem::cache_mem()
   expect_error(renderDataTable({ cars }) %>% bindCache(1, cache = m))
-  expect_error(renderPlot({ plot(1) }) %>% bindCache(1, cache = m))
   expect_error(renderCachedPlot({ plot(1) }, 1) %>% bindCache(1, cache = m))
   expect_error(renderImage({ cars }) %>% bindCache(1, cache = m))
 })

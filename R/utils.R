@@ -120,13 +120,6 @@ isWholeNum <- function(x, tol = .Machine$double.eps^0.5) {
     x
 }
 
-`%AND%` <- function(x, y) {
-  if (!is.null(x) && !isTRUE(is.na(x)))
-    if (!is.null(y) && !isTRUE(is.na(y)))
-      return(y)
-  return(NULL)
-}
-
 `%.%` <- function(x, y) {
   paste(x, y, sep='')
 }

@@ -114,7 +114,7 @@ isWholeNum <- function(x, tol = .Machine$double.eps^0.5) {
 }
 
 `%OR%` <- function(x, y) {
-  if (is.null(x) || isTRUE(is.na(x)))
+  if (is.null(x))
     y
   else
     x

@@ -33,7 +33,7 @@ NULL
 #'   as.promise
 #' @importFrom rlang quo enquo as_function get_expr get_env new_function enquos
 #'   eval_tidy expr pairlist2 new_quosure enexpr as_quosure is_quosure inject
-#'   enquos0 zap_srcref
+#'   enquos0 zap_srcref %||%
 #' @importFrom ellipsis check_dots_empty check_dots_unnamed
 NULL
 
@@ -487,7 +487,7 @@ ShinySession <- R6Class(
           # The format of the response that will be sent back. Defaults to
           # "json" unless requested otherwise. The only other valid value is
           # "rds".
-          format <- params$format %OR% "json"
+          format <- params$format %||% "json"
 
           values <- list()
 
@@ -618,14 +618,14 @@ ShinySession <- R6Class(
     # function has been set, return the identity function.
     getSnapshotPreprocessOutput = function(name) {
       fun <- attr(private$.outputs[[name]], "snapshotPreprocess", exact = TRUE)
-      fun %OR% identity
+      fun %||% identity
     },
 
     # Get the snapshotPreprocessInput function for an input name. If no preprocess
     # function has been set, return the identity function.
     getSnapshotPreprocessInput = function(name) {
       fun <- private$.input$getMeta(name, "shiny.snapshot.preprocess")
-      fun %OR% identity
+      fun %||% identity
     },
 
     # See cycleStartAction
@@ -1411,7 +1411,7 @@ ShinySession <- R6Class(
         return(NULL)
       }
 
-      tmp_info <- private$outputInfo[[name]] %OR% list(name = name)
+      tmp_info <- private$outputInfo[[name]] %||% list(name = name)
 
       # cd_names() returns names of all items in clientData, without taking a
       # reactive dependency. It is a function and it's memoized, so that we do
@@ -1457,7 +1457,7 @@ ShinySession <- R6Class(
       # that string isn't a valid CSS color, will return NA)
       # https://github.com/rstudio/htmltools/issues/161
       parse_css_colors <- function(x) {
-        htmltools::parseCssColors(x %OR% "", mustWork = FALSE)
+        htmltools::parseCssColors(x %||% "", mustWork = FALSE)
       }
 
       bg <- paste0("output_", name, "_bg")
@@ -1919,7 +1919,7 @@ ShinySession <- R6Class(
                   }
                   return(httpResponse(
                     200,
-                    download$contentType %OR% getContentType(filename),
+                    download$contentType %||% getContentType(filename),
                     # owned=TRUE means tmpdata will be deleted after response completes
                     list(file=tmpdata, owned=TRUE),
                     c(

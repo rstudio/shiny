@@ -703,8 +703,8 @@ bindCache.shiny.renderPlot <- function(x, ...,
       }
       session <- getDefaultReactiveDomain()
 
-      width  <- session$clientData[[paste0('output_', outputName, '_width')]]  %OR% 0
-      height <- session$clientData[[paste0('output_', outputName, '_height')]] %OR% 0
+      width  <- session$clientData[[paste0('output_', outputName, '_width')]]  %||% 0
+      height <- session$clientData[[paste0('output_', outputName, '_height')]] %||% 0
 
       rect <- sizePolicy(c(width, height))
       fitDims(list(width = rect[1], height = rect[2]))
@@ -755,7 +755,7 @@ bindCache.shiny.renderPlot <- function(x, ...,
       if (is.null(session) || is.null(fitDims())) {
         req(FALSE)
       }
-      pixelratio <- session$clientData$pixelratio %OR% 1
+      pixelratio <- session$clientData$pixelratio %||% 1
 
       list(fitDims(), pixelratio)
     },

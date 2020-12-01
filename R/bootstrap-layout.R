@@ -440,7 +440,7 @@ verticalLayout <- function(..., fluid = TRUE) {
 flowLayout <- function(..., cellArgs = list()) {
 
   children <- list(...)
-  childIdx <- !nzchar(names(children) %OR% character(length(children)))
+  childIdx <- !nzchar(names(children) %||% character(length(children)))
   attribs <- children[!childIdx]
   children <- children[childIdx]
 
@@ -523,7 +523,7 @@ inputPanel <- function(...) {
 splitLayout <- function(..., cellWidths = NULL, cellArgs = list()) {
 
   children <- list(...)
-  childIdx <- !nzchar(names(children) %OR% character(length(children)))
+  childIdx <- !nzchar(names(children) %||% character(length(children)))
   attribs <- children[!childIdx]
   children <- children[childIdx]
   count <- length(children)

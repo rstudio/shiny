@@ -11,7 +11,7 @@ shinyDeprecated <- function(new=NULL, msg=NULL,
                             old=as.character(sys.call(sys.parent()))[1L],
                             version = NULL) {
 
-  if (getOption("shiny.deprecation.messages") %OR% TRUE == FALSE)
+  if (getOption("shiny.deprecation.messages") %||% TRUE == FALSE)
     return(invisible())
 
   if (is.null(msg)) {

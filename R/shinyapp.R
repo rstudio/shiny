@@ -569,7 +569,7 @@ as.tags.shiny.appobj <- function(x, ...) {
   # jcheng 06/06/2014: Unfortunate copy/paste between this function and
   # knit_print.shiny.appobj, but I am trying to make the most conservative
   # change possible due to upcoming release.
-  opts <- x$options %OR% list()
+  opts <- x$options %||% list()
   width <- if (is.null(opts$width)) "100%" else opts$width
   height <- if (is.null(opts$height)) "400" else opts$height
 

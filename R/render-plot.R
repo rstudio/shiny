@@ -123,7 +123,7 @@ renderPlot <- function(expr, width = 'auto', height = 'auto', res = 72, ...,
       {
         # If !execOnResize, don't invalidate when width/height changes.
         dims <- if (execOnResize) getDims() else isolate(getDims())
-        pixelratio <- session$clientData$pixelratio %OR% 1
+        pixelratio <- session$clientData$pixelratio %||% 1
         do.call("drawPlot", c(
           list(
             name = outputName,
@@ -162,7 +162,7 @@ renderPlot <- function(expr, width = 'auto', height = 'auto', res = 72, ...,
       drawReactive(),
       function(result) {
         dims <- getDims()
-        pixelratio <- session$clientData$pixelratio %OR% 1
+        pixelratio <- session$clientData$pixelratio %||% 1
         result <- do.call("resizeSavedPlot", c(
           list(name, shinysession, result, dims$width, dims$height, altWrapper(), pixelratio, res),
           args
@@ -626,8 +626,8 @@ find_panel_info_api <- function(b) {
 
     # First look for log base in scale, then coord; otherwise NULL.
     list(
-      x = get_log_base(xscale$trans) %OR% coord$xlog %OR% NULL,
-      y = get_log_base(yscale$trans) %OR% coord$ylog %OR% NULL
+      x = get_log_base(xscale$trans) %||% coord$xlog %||% NULL,
+      y = get_log_base(yscale$trans) %||% coord$ylog %||% NULL
     )
   }
 

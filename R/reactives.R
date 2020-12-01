@@ -2454,7 +2454,7 @@ debounce <- function(r, millis, priority = 100, domain = getDefaultReactiveDomai
     now <- getDomainTimeMs(domain)
     if (now >= v$when) {
       # Mod by 999999999 to get predictable overflow behavior
-      v$trigger <- isolate(v$trigger %OR% 0) %% 999999999 + 1
+      v$trigger <- isolate(v$trigger %||% 0) %% 999999999 + 1
       v$when <- NULL
     } else {
       invalidateLater(v$when - now)

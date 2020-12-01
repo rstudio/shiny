@@ -93,10 +93,10 @@ brushedPoints <- function(df, brush, xvar = NULL, yvar = NULL,
   use_y <- grepl("y", brush$direction)
 
   # Try to extract vars from brush object
-  xvar      <- xvar      %OR% brush$mapping$x
-  yvar      <- yvar      %OR% brush$mapping$y
-  panelvar1 <- panelvar1 %OR% brush$mapping$panelvar1
-  panelvar2 <- panelvar2 %OR% brush$mapping$panelvar2
+  xvar      <- xvar      %||% brush$mapping$x
+  yvar      <- yvar      %||% brush$mapping$y
+  panelvar1 <- panelvar1 %||% brush$mapping$panelvar1
+  panelvar2 <- panelvar2 %||% brush$mapping$panelvar2
 
   # Filter out x and y values
   keep_rows <- rep(TRUE, nrow(df))
@@ -231,10 +231,10 @@ nearPoints <- function(df, coordinfo, xvar = NULL, yvar = NULL,
   }
 
   # Try to extract vars from coordinfo object
-  xvar      <- xvar      %OR% coordinfo$mapping$x
-  yvar      <- yvar      %OR% coordinfo$mapping$y
-  panelvar1 <- panelvar1 %OR% coordinfo$mapping$panelvar1
-  panelvar2 <- panelvar2 %OR% coordinfo$mapping$panelvar2
+  xvar      <- xvar      %||% coordinfo$mapping$x
+  yvar      <- yvar      %||% coordinfo$mapping$y
+  panelvar1 <- panelvar1 %||% coordinfo$mapping$panelvar1
+  panelvar2 <- panelvar2 %||% coordinfo$mapping$panelvar2
 
   if (is.null(xvar))
     stop("nearPoints: not able to automatically infer `xvar` from coordinfo")

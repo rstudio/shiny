@@ -492,18 +492,20 @@ bindCache.reactiveExpr <- function(x, ..., cache = "app") {
 
         # Case 1: cache hit
         if (!is.key_missing(res)) {
-          if (res$is_promise) {
-            if (res$error) {
-              return(promise_reject(valueWithVisible(res)))
+          return(hybrid_chain(
+            {
+              # The first step is just to convert `res` to a promise or not, so
+              # that hybrid_chain() knows to propagate the promise-ness.
+              if (res$is_promise) promise_resolve(res)
+              else                res
+            },
+            function(res) {
+              if (res$error) {
+                stop(res$value)
+              }
+              valueWithVisible(res)
             }
-            return(promise_resolve(valueWithVisible(res)))
-
-          } else {
-            if (res$error) {
-              stop(res$value)
-            }
-            return(valueWithVisible(res))
-          }
+          ))
         }
 
         # Case 2: cache miss
@@ -591,18 +593,20 @@ bindCache.shiny.render.function <- function(x, ..., cache = "app") {
 
         # Case 1: cache hit
         if (!is.key_missing(res)) {
-          if (res$is_promise) {
-            if (res$error) {
-              return(promise_reject(valueWithVisible(res)))
+          return(hybrid_chain(
+            {
+              # The first step is just to convert `res` to a promise or not, so
+              # that hybrid_chain() knows to propagate the promise-ness.
+              if (res$is_promise) promise_resolve(res)
+              else                res
+            },
+            function(res) {
+              if (res$error) {
+                stop(res$value)
+              }
+              valueWithVisible(res)
             }
-            return(promise_resolve(valueWithVisible(res)))
-
-          } else {
-            if (res$error) {
-              stop(res$value)
-            }
-            return(valueWithVisible(res))
-          }
+          ))
         }
 
         # Case 2: cache miss

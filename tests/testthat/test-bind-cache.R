@@ -313,7 +313,7 @@ test_that("bindCache reactives with async value", {
   k(0)
   flushReact()
   expect_identical(vals, c("0k"))
-  later::run_now()
+  for (i in 1:2) later::run_now()
   expect_identical(vals, c("0k", "0o"))
 })
 

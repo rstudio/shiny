@@ -76,6 +76,15 @@ registerClient <- function(client) {
 #' @export
 #' @keywords internal
 shinyServer <- function(func) {
+  shinySoftDeprecated(
+    "0.10.0", "shinyServer()",
+    details = paste0(
+      "When removing `shinyServer()`, ",
+      "ensure that the last expression returned from server.R ",
+      "is the function normally supplied to `shinyServer(func)`."
+    )
+  )
+
   .globals$server <- list(func)
   invisible(func)
 }

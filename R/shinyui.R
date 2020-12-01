@@ -132,6 +132,15 @@ shinyDependencyCSS <- function(theme) {
 #' @keywords internal
 #' @export
 shinyUI <- function(ui) {
+  shinySoftDeprecated(
+    "0.10.0", "shinyUI()",
+    details = paste0(
+      "When removing `shinyUI()`, ",
+      "ensure that the last expression returned from ui.R is a user interface ",
+      "normally supplied to `shinyUI(ui)`."
+    )
+  )
+
   .globals$ui <- list(ui)
   ui
 }

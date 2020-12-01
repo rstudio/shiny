@@ -610,6 +610,10 @@ find_panel_info_api <- function(b) {
   coord  <- ggplot2::summarise_coord(b)
   layers <- ggplot2::summarise_layers(b)
 
+  `%NA_OR%` <- function(x, y) {
+    if (is.na(x)) y else x
+  }
+
   # Given x and y scale objects and a coord object, return a list that has
   # the bases of log transformations for x and y, or NULL if it's not a
   # log transform.
@@ -626,8 +630,8 @@ find_panel_info_api <- function(b) {
 
     # First look for log base in scale, then coord; otherwise NULL.
     list(
-      x = get_log_base(xscale$trans) %||% coord$xlog %||% NULL,
-      y = get_log_base(yscale$trans) %||% coord$ylog %||% NULL
+      x = get_log_base(xscale$trans) %NA_OR% coord$xlog %NA_OR% NULL,
+      y = get_log_base(yscale$trans) %NA_OR% coord$ylog %NA_OR% NULL
     )
   }
 

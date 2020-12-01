@@ -14,7 +14,7 @@ navbarPage(
   header = NULL,
   footer = NULL,
   inverse = FALSE,
-  collapsible = FALSE,
+  collapsible = deprecated(),
   collapsable,
   fluid = TRUE,
   responsive = NULL,

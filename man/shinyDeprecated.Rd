@@ -21,6 +21,9 @@ shinyDeprecated(
 \item{version}{The last version of Shiny before the item was deprecated.}
 }
 \description{
+\lifecycle{superseded} Please use \code{\link[=shinySoftDeprecated]{shinySoftDeprecated()}}
+}
+\details{
 To disable these messages, use \code{options(shiny.deprecation.messages=FALSE)}.
 }
 \keyword{internal}

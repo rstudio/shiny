@@ -56,7 +56,7 @@ by setting e.g. \code{options(shiny.autoreload.interval = 2000)} (every
 two seconds).}
 \item{shiny.deprecation.messages (defaults to \code{TRUE})}{This controls whether messages for
 deprecated functions in Shiny will be printed. See
-\code{\link[=shinyDeprecated]{shinyDeprecated()}} for more information.}
+\code{\link[=shinySoftDeprecated]{shinySoftDeprecated()}} for more information.}
 \item{shiny.error (defaults to \code{NULL})}{This can be a function which is called when an error
 occurs. For example, \code{options(shiny.error=recover)} will result a
 the debugger prompt when an error occurs.}

@@ -195,6 +195,7 @@ Collate:
     'server-resource-paths.R'
     'server.R'
     'shiny-options.R'
+    'shiny-package.R'
     'shinyapp.R'
     'shinyui.R'
     'shinywrappers.R'

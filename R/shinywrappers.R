@@ -909,7 +909,7 @@ NULL
 #' @rdname deprecatedReactives
 #' @export
 reactivePlot <- function(func, width='auto', height='auto', ...) {
-  shinyDeprecated(new="renderPlot")
+  shinySoftDeprecated("0.4.0", "reactivePlot()", "renderPlot()")
   renderPlot({ func() }, width=width, height=height, ...)
 }
 
@@ -919,7 +919,7 @@ reactivePlot <- function(func, width='auto', height='auto', ...) {
 #' @rdname deprecatedReactives
 #' @export
 reactiveTable <- function(func, ...) {
-  shinyDeprecated(new="renderTable")
+  shinySoftDeprecated("0.4.0", "reactiveTable()", "renderTable()")
   renderTable({ func() })
 }
 
@@ -929,7 +929,7 @@ reactiveTable <- function(func, ...) {
 #' @rdname deprecatedReactives
 #' @export
 reactivePrint <- function(func) {
-  shinyDeprecated(new="renderPrint")
+  shinySoftDeprecated("0.4.0", "reactivePrint()", "renderPrint()")
   renderPrint({ func() })
 }
 
@@ -939,7 +939,7 @@ reactivePrint <- function(func) {
 #' @rdname deprecatedReactives
 #' @export
 reactiveUI <- function(func) {
-  shinyDeprecated(new="renderUI")
+  shinySoftDeprecated("0.4.0", "reactiveUI()", "renderUI()")
   renderUI({ func() })
 }
 
@@ -949,6 +949,6 @@ reactiveUI <- function(func) {
 #' @rdname deprecatedReactives
 #' @export
 reactiveText <- function(func) {
-  shinyDeprecated(new="renderText")
+  shinySoftDeprecated("0.4.0", "reactiveText()", "renderText()")
   renderText({ func() })
 }

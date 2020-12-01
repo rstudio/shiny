@@ -666,11 +666,10 @@ names.reactivevalues <- function(x) {
 
 #' @export
 as.list.reactivevalues <- function(x, all.names=FALSE, ...) {
-  shinyDeprecated("reactiveValuesToList",
-    msg = paste("'as.list.reactivevalues' is deprecated. ",
-      "Use reactiveValuesToList instead.",
-      "\nPlease see ?reactiveValuesToList for more information.",
-      sep = ""))
+  shinySoftDeprecated(
+    "0.4.0", "as.list.reactivevalues()", "reactiveValuesToList()",
+    details = "Please see ?reactiveValuesToList for more information."
+  )
 
   reactiveValuesToList(x, all.names)
 }

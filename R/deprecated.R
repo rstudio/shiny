@@ -1,4 +1,50 @@
+
+
+rlang_inform <- function(..., msg = paste0(...), frequency = "regular", id = msg) {
+  rlang::inform(
+    message = msg,
+    .frequency = frequency,
+    .frequency_id = id
+  )
+}
+rlang_warn <- function(..., msg = paste0(...), frequency = "regular", id = msg) {
+  rlang::warn(
+    message = msg,
+    .frequency = frequency,
+    .frequency_id = id
+  )
+}
+
 #' Print message for deprecated functions in Shiny
+#'
+#' To disable these messages, use `options(shiny.deprecation.messages=FALSE)`.
+#'
+#' @inheritParams lifecycle::deprecate_soft()
+#' @keywords internal
+#' @describeIn shinySoftDeprecated If `isTRUE(getOption("shiny.deprecate.message"))`, pass arguments to [lifecycle::deprecate_soft()]
+shinySoftDeprecated <- function(
+  when, what, with = NULL, details = NULL, id = NULL,
+  env = rlang::caller_env(2)
+) {
+  if (getOption("shiny.deprecation.messages") %OR% TRUE == FALSE)
+    return(invisible())
+
+  lifecycle::deprecate_soft(when, what, with = with, details = details, id = id, env = env)
+}
+#' @describeIn shinySoftDeprecated Will pass along a message directly to [rlang::warn()] with `.frequency = "regular"`
+shinySoftDeprecatedMessage <- function(
+  ...
+) {
+  if (getOption("shiny.deprecation.messages") %OR% TRUE == FALSE)
+    return(invisible())
+
+  rlang_warn(..., frequency = "regular")
+}
+
+
+#' Print message for deprecated functions in Shiny
+#'
+#' \lifecycle{superseded} Please use [shinySoftDeprecated()]
 #'
 #' To disable these messages, use `options(shiny.deprecation.messages=FALSE)`.
 #'
@@ -27,7 +73,7 @@ shinyDeprecated <- function(new=NULL, msg=NULL,
   }
 
   # Similar to .Deprecated(), but print a message instead of warning
-  message(msg)
+  rlang_warn(msg, frequency = "always")
 }
 
 
@@ -59,7 +105,7 @@ diskCache <- function(
   exec_missing = FALSE,
   logfile = NULL)
 {
-  shinyDeprecated("cachem::cache_disk", version = "1.5.1")
+  shinySoftDeprecated("1.5.1", "diskCache()", "cachem::cache_disk()")
 
   cachem::cache_disk(
     dir = dir,
@@ -89,7 +135,7 @@ memoryCache <- function(
   exec_missing = FALSE,
   logfile = NULL)
 {
-  shinyDeprecated("cachem::cache_mem", version = "1.5.1")
+  shinySoftDeprecated("1.5.1", "diskCache()", "cachem::cache_mem()")
 
   cachem::cache_mem(
     max_size = max_size,

@@ -98,7 +98,8 @@ reactlogShow <- function(time = TRUE) {
 #' @export
 # legacy purposes
 showReactLog <- function(time = TRUE) {
-  shinyDeprecated(new = "`reactlogShow`", version = "1.2.0")
+  shinySoftDeprecated("1.2.0", "showReactLog()", "reactlogShow()")
+
   reactlogShow(time = time)
 }
 #' @describeIn reactlog Resets the entire reactlog stack.  Useful for debugging and removing all prior reactive history.

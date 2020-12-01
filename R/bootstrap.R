@@ -33,10 +33,13 @@ NULL
 #'
 #' @seealso [fluidPage()], [fixedPage()]
 #' @export
-bootstrapPage <- function(..., title = NULL, responsive = NULL, theme = NULL, lang = NULL) {
+bootstrapPage <- function(..., title = NULL, responsive = deprecated(), theme = NULL, lang = NULL) {
 
-  if (!is.null(responsive)) {
-    shinyDeprecated("The 'responsive' argument is no longer used with Bootstrap 3.")
+  if (lifecycle::is_present(responsive)) {
+    shinySoftDeprecated(
+      "0.10.2.2", "bootstrapPage(responsive=)",
+      details = "The 'responsive' argument is no longer used with the latest version of Bootstrap."
+    )
   }
 
   ui <- tagList(
@@ -410,7 +413,7 @@ navbarPage <- function(title,
                        header = NULL,
                        footer = NULL,
                        inverse = FALSE,
-                       collapsible = FALSE,
+                       collapsible = deprecated(),
                        collapsable,
                        fluid = TRUE,
                        responsive = NULL,
@@ -418,8 +421,8 @@ navbarPage <- function(title,
                        windowTitle = title,
                        lang = NULL) {
 
-  if (!missing(collapsable)) {
-    shinyDeprecated("`collapsable` is deprecated; use `collapsible` instead.")
+  if (lifecycle::is_present(collapsible)) {
+    shinySoftDeprecated("0.10.2.2", "navbarPage(collapsible =)", "navbarPage(collapsable =)")
     collapsible <- collapsable
   }
 
@@ -733,11 +736,12 @@ tabsetPanel <- function(...,
                         id = NULL,
                         selected = NULL,
                         type = c("tabs", "pills", "hidden"),
-                        position = NULL) {
-  if (!is.null(position)) {
-    shinyDeprecated(msg = paste("tabsetPanel: argument 'position' is deprecated;",
-                                "it has been discontinued in Bootstrap 3."),
-                    version = "0.10.2.2")
+                        position = deprecated()) {
+  if (lifecycle::is_present(position)) {
+    shinySoftDeprecated(
+      "0.10.2.2", "bootstrapPage(position =)",
+      details = "The 'position' argument is no longer used with the latest version of Bootstrap."
+    )
   }
 
   if (!is.null(id))

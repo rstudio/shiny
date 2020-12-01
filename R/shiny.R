@@ -2098,10 +2098,10 @@ ShinySession <- R6Class(
   ),
   active = list(
     session = function() {
-      shinyDeprecated(
-        msg = paste("Attempted to access deprecated shinysession$session object.",
-                    "Please just access the shinysession object directly."),
-        version = "0.11.1"
+      shinySoftDeprecatedMessage(
+        "Attempted to access deprecated shinysession$session object. ",
+        "Please just access the shinysession object directly. ",
+        "Deprecated as of shiny 0.11.1"
       )
       self
     }

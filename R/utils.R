@@ -113,24 +113,6 @@ isWholeNum <- function(x, tol = .Machine$double.eps^0.5) {
   abs(x - round(x)) < tol
 }
 
-`%OR%` <- function(x, y) {
-  if (is.null(x) || isTRUE(is.na(x)))
-    y
-  else
-    x
-}
-
-`%AND%` <- function(x, y) {
-  if (!is.null(x) && !isTRUE(is.na(x)))
-    if (!is.null(y) && !isTRUE(is.na(y)))
-      return(y)
-  return(NULL)
-}
-
-`%.%` <- function(x, y) {
-  paste(x, y, sep='')
-}
-
 # Given a vector or list, drop all the NULL items in it
 dropNulls <- function(x) {
   x[!vapply(x, is.null, FUN.VALUE=logical(1))]

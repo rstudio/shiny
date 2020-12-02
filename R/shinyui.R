@@ -142,7 +142,7 @@ uiHttpHandler <- function(ui, uiPattern = "^/$") {
 
   allowed_methods <- "GET"
   if (is.function(ui)) {
-    allowed_methods <- attr(ui, "http_methods_supported", exact = TRUE) %OR% allowed_methods
+    allowed_methods <- attr(ui, "http_methods_supported", exact = TRUE) %||% allowed_methods
   }
 
   function(req) {

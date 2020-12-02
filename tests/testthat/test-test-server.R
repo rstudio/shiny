@@ -566,7 +566,7 @@ test_that("validates server function", {
 # bindings are considered `fields`.
 get_mocked_publics <- function(instance, generator) {
   publics <- ls(instance, all.names = TRUE)
-  actives <- names(generator$active) %OR% character(0)
+  actives <- names(generator$active) %||% character(0)
   # Active bindings are considered fields.
   methods_or_fields <- publics[!(publics %in% actives)]
   methods <- character(0)

@@ -189,7 +189,7 @@ bindEvent.reactiveExpr <- function(x, ..., ignoreNULL = TRUE, ignoreInit = FALSE
   valueFunc <- reactive_get_value_func(x)
   valueFunc <- wrapFunctionLabel(valueFunc, "eventReactiveValueFunc", ..stacktraceon = TRUE)
 
-  label <- label %OR%
+  label <- label %||%
     sprintf('bindEvent(%s, %s)', attr(x, "observable", exact = TRUE)$.label, quos_to_label(qs))
 
   # Don't hold on to the reference for x, so that it can be GC'd
@@ -262,7 +262,7 @@ bindEvent.Observer <- function(x, ..., ignoreNULL = TRUE, ignoreInit = FALSE,
 
   # Note that because the observer will already have been logged by this point,
   # this updated label won't show up in the reactlog.
-  x$.label <- label %OR% sprintf('bindEvent(%s, %s)', x$.label, quos_to_label(qs))
+  x$.label <- label %||% sprintf('bindEvent(%s, %s)', x$.label, quos_to_label(qs))
 
   initialized <- FALSE
 

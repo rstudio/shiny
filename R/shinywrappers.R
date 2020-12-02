@@ -431,7 +431,7 @@ renderImage <- function(expr, env=parent.frame(), quoted=FALSE,
       }
 
       # If contentType not specified, autodetect based on extension
-      contentType <- imageinfo$contentType %OR% getContentType(imageinfo$src)
+      contentType <- imageinfo$contentType %||% getContentType(imageinfo$src)
 
       # Extra values are everything in imageinfo except 'src' and 'contentType'
       extra_attr <- imageinfo[!names(imageinfo) %in% c('src', 'contentType')]

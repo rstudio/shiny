@@ -473,9 +473,6 @@ bindCache.reactiveExpr <- function(x, ..., cache = "app") {
   cacheHint <- digest(extractCacheHint(x), algo = "spookyhash")
   valueFunc <- wrapFunctionLabel(valueFunc, "cachedReactiveValueFunc", ..stacktraceon = TRUE)
 
-  cacheWriteHook <- attr(x, "cacheWriteHook", exact = TRUE) %||% identity
-  cacheReadHook  <- attr(x, "cacheReadHook",  exact = TRUE) %||% identity
-
   # Don't hold on to the reference for x, so that it can be GC'd
   rm(x)
   # Hacky workaround for issue with `%>%` preventing GC:
@@ -489,7 +486,7 @@ bindCache.reactiveExpr <- function(x, ..., cache = "app") {
     cache <- resolve_cache_object(cache, domain)
     hybrid_chain(
       keyFunc(),
-      generateCacheFun(valueFunc, cache, cacheHint, cacheReadHook, cacheWriteHook)
+      generateCacheFun(valueFunc, cache, cacheHint, cacheReadHook = identity, cacheWriteHook = identity)
     )
   })
 

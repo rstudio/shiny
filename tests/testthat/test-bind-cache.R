@@ -193,56 +193,6 @@ test_that("bindCache reactive - value is isolated", {
 })
 
 
-
-test_that("cacheWriteHook and cacheReadHook for reactives", {
-  write_hook_n <- 0
-  read_hook_n  <- 0
-  n <- 0
-  v <- reactiveVal(1)
-
-  r <- reactive({ n <<- n+1; v() })
-  attr(r, "cacheWriteHook") <- function(value) {
-    write_hook_n <<- write_hook_n + 1
-    paste0(value, ",w")
-  }
-  attr(r, "cacheReadHook") <- function(value) {
-    read_hook_n <<- read_hook_n + 1
-    paste0(value, ",r")
-  }
-  r <- r %>% bindCache(v(), cache = cachem::cache_mem())
-
-  vals <<- character()
-  o <- observe({
-    vals <<- r()
-  })
-
-  # Writing to cache
-  flushReact()
-  expect_identical(vals, 1)
-  expect_identical(write_hook_n, 1)
-  expect_identical(read_hook_n, 0)
-
-  v(2)
-  flushReact()
-  expect_identical(vals, 2)
-  expect_identical(write_hook_n, 2)
-  expect_identical(read_hook_n, 0)
-
-  # Reading from cache
-  v(1)
-  flushReact()
-  expect_identical(vals, "1,w,r")
-  expect_identical(write_hook_n, 2)
-  expect_identical(read_hook_n, 1)
-
-  v(2)
-  flushReact()
-  expect_identical(vals, "2,w,r")
-  expect_identical(write_hook_n, 2)
-  expect_identical(read_hook_n, 2)
-})
-
-
 # ============================================================================
 # Async key
 # ============================================================================

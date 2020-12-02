@@ -97,10 +97,10 @@ brushedPoints <- function(df, brush, xvar = NULL, yvar = NULL,
   # the NULL replacement are here just to ease the transition in case anyone is
   # using NA. We can remove these checks in a future version of Shiny.
   # https://github.com/rstudio/shiny/pull/3172
-  if (is.na(xvar))      { xvar      <- NULL; warning("xvar should be NULL, not NA.") }
-  if (is.na(yvar))      { yvar      <- NULL; warning("yvar should be NULL, not NA.") }
-  if (is.na(panelvar1)) { panelvar1 <- NULL; warning("panelvar1 should be NULL, not NA.") }
-  if (is.na(panelvar2)) { panelvar2 <- NULL; warning("panelvar2 should be NULL, not NA.") }
+  if (is_na(xvar))      { xvar      <- NULL; warning("xvar should be NULL, not NA.") }
+  if (is_na(yvar))      { yvar      <- NULL; warning("yvar should be NULL, not NA.") }
+  if (is_na(panelvar1)) { panelvar1 <- NULL; warning("panelvar1 should be NULL, not NA.") }
+  if (is_na(panelvar2)) { panelvar2 <- NULL; warning("panelvar2 should be NULL, not NA.") }
 
   # Try to extract vars from brush object
   xvar      <- xvar      %||% brush$mapping$x
@@ -245,10 +245,10 @@ nearPoints <- function(df, coordinfo, xvar = NULL, yvar = NULL,
   # the NULL replacement are here just to ease the transition in case anyone is
   # using NA. We can remove these checks in a future version of Shiny.
   # https://github.com/rstudio/shiny/pull/3172
-  if (is.na(xvar))      { xvar      <- NULL; warning("xvar should be NULL, not NA.") }
-  if (is.na(yvar))      { yvar      <- NULL; warning("yvar should be NULL, not NA.") }
-  if (is.na(panelvar1)) { panelvar1 <- NULL; warning("panelvar1 should be NULL, not NA.") }
-  if (is.na(panelvar2)) { panelvar2 <- NULL; warning("panelvar2 should be NULL, not NA.") }
+  if (is_na(xvar))      { xvar      <- NULL; warning("xvar should be NULL, not NA.") }
+  if (is_na(yvar))      { yvar      <- NULL; warning("yvar should be NULL, not NA.") }
+  if (is_na(panelvar1)) { panelvar1 <- NULL; warning("panelvar1 should be NULL, not NA.") }
+  if (is_na(panelvar2)) { panelvar2 <- NULL; warning("panelvar2 should be NULL, not NA.") }
 
   # Try to extract vars from coordinfo object
   xvar      <- xvar      %||% coordinfo$mapping$x

@@ -486,88 +486,10 @@ bindCache.reactiveExpr <- function(x, ..., cache = "app") {
 
 
   res <- reactive(label = label, domain = domain, {
+    cache <- resolve_cache_object(cache, domain)
     hybrid_chain(
       keyFunc(),
-      function(cacheKeyResult) {
-        cache <- resolve_cache_object(cache, domain)
-        key_str <- digest(list(cacheKeyResult, cacheHint), algo = "spookyhash")
-        res <- cache$get(key_str)
-
-        # Case 1: cache hit
-        if (!is.key_missing(res)) {
-          return(hybrid_chain(
-            {
-              # The first step is just to convert `res` to a promise or not, so
-              # that hybrid_chain() knows to propagate the promise-ness.
-              if (res$is_promise) promise_resolve(res)
-              else                res
-            },
-            function(res) {
-              if (res$error) {
-                stop(res$value)
-              }
-
-              cacheReadHook(valueWithVisible(res))
-            }
-          ))
-        }
-
-        # Case 2: cache miss
-        #
-        # valueFunc() might return a promise, or an actual value. Normally we'd
-        # use a hybrid_chain() for this, but in this case, we need to have
-        # different behavior if it's a promise or not a promise -- the
-        # information about whether or not it's a promise needs to be stored in
-        # the cache. We need to handle both cases and record in the cache
-        # whether it's a promise or not, so that any consumer of the
-        # cachedReactive() will be given the correct kind of object (a promise
-        # vs. an actual value) in the case of a future cache hit.
-        p <- withCallingHandlers(
-          withVisible(isolate(valueFunc())),
-          error = function(e) {
-            cache$set(key_str, list(
-              is_promise = FALSE,
-              value      = e,
-              visible    = TRUE,
-              error      = TRUE
-            ))
-          }
-        )
-
-        if (is.promising(p$value)) {
-          p$value <- as.promise(p$value)
-          p$value <- p$value$
-            then(function(value) {
-              res <- withVisible(value)
-              cache$set(key_str, list(
-                is_promise = TRUE,
-                value      = cacheWriteHook(res$value),
-                visible    = res$visible,
-                error      = FALSE
-              ))
-              valueWithVisible(res)
-            })$
-            catch(function(e) {
-              cache$set(key_str, list(
-                is_promise = TRUE,
-                value      = e,
-                visible    = TRUE,
-                error      = TRUE
-              ))
-              stop(e)
-            })
-          valueWithVisible(p)
-        } else {
-          # result is an ordinary value, not a promise.
-          cache$set(key_str, list(
-            is_promise = FALSE,
-            value      = cacheWriteHook(p$value),
-            visible    = p$visible,
-            error      = FALSE
-          ))
-          return(valueWithVisible(p))
-        }
-      }
+      generateCacheFun(valueFunc, cache, cacheHint, cacheReadHook, cacheWriteHook)
     )
   })
 
@@ -590,89 +512,11 @@ bindCache.shiny.render.function <- function(x, ..., cache = "app") {
 
   renderFunc <- function(...) {
     domain <- getDefaultReactiveDomain()
+    cache <- resolve_cache_object(cache, domain)
 
     hybrid_chain(
       keyFunc(),
-      function(cacheKeyResult) {
-        cache <- resolve_cache_object(cache, domain)
-        key_str <- digest(list(cacheKeyResult, cacheHint), algo = "spookyhash")
-        res <- cache$get(key_str)
-
-        # Case 1: cache hit
-        if (!is.key_missing(res)) {
-          return(hybrid_chain(
-            {
-              # The first step is just to convert `res` to a promise or not, so
-              # that hybrid_chain() knows to propagate the promise-ness.
-              if (res$is_promise) promise_resolve(res)
-              else                res
-            },
-            function(res) {
-              if (res$error) {
-                stop(res$value)
-              }
-
-              cacheReadHook(valueWithVisible(res))
-            }
-          ))
-        }
-
-        # Case 2: cache miss
-        #
-        # valueFunc() might return a promise, or an actual value. Normally we'd
-        # use a hybrid_chain() for this, but in this case, we need to have
-        # different behavior if it's a promise or not a promise -- the
-        # information about whether or not it's a promise needs to be stored in
-        # the cache. We need to handle both cases and record in the cache
-        # whether it's a promise or not, so that any consumer of the
-        # cachedReactive() will be given the correct kind of object (a promise
-        # vs. an actual value) in the case of a future cache hit.
-        p <- withCallingHandlers(
-          withVisible(isolate(valueFunc(...))),
-          error = function(e) {
-            cache$set(key_str, list(
-              is_promise = FALSE,
-              value      = e,
-              visible    = TRUE,
-              error      = TRUE
-            ))
-          }
-        )
-
-        if (is.promising(p$value)) {
-          p$value <- as.promise(p$value)
-          p$value <- p$value$
-            then(function(value) {
-              res <- withVisible(value)
-              cache$set(key_str, list(
-                is_promise = TRUE,
-                value      = cacheWriteHook(res$value),
-                visible    = res$visible,
-                error      = FALSE
-              ))
-              valueWithVisible(res)
-            })$
-            catch(function(e) {
-              cache$set(key_str, list(
-                is_promise = TRUE,
-                value      = e,
-                visible    = TRUE,
-                error      = TRUE
-              ))
-              stop(e)
-            })
-          valueWithVisible(p)
-        } else {
-          # result is an ordinary value, not a promise.
-          cache$set(key_str, list(
-            is_promise = FALSE,
-            value      = cacheWriteHook(p$value),
-            visible    = p$visible,
-            error      = FALSE
-          ))
-          return(valueWithVisible(p))
-        }
-      }
+      generateCacheFun(valueFunc, cache, cacheHint, cacheReadHook, cacheWriteHook, ...)
     )
   }
 
@@ -805,6 +649,97 @@ bindCache.function <- function(x, ...) {
   )
 }
 
+# Returns a function which should be passed as a step in to hybrid_chain(). The
+# returned function takes a cache key as input and manages storing and retrieving
+# values from the cache, as well as executing the valueFunc if needed.
+generateCacheFun <- function(
+  valueFunc,
+  cache,
+  cacheHint,
+  cacheReadHook,
+  cacheWriteHook,
+  ...
+) {
+  function(cacheKeyResult) {
+    key_str <- digest(list(cacheKeyResult, cacheHint), algo = "spookyhash")
+    res <- cache$get(key_str)
+
+    # Case 1: cache hit
+    if (!is.key_missing(res)) {
+      return(hybrid_chain(
+        {
+          # The first step is just to convert `res` to a promise or not, so
+          # that hybrid_chain() knows to propagate the promise-ness.
+          if (res$is_promise) promise_resolve(res)
+          else                res
+        },
+        function(res) {
+          if (res$error) {
+            stop(res$value)
+          }
+
+          cacheReadHook(valueWithVisible(res))
+        }
+      ))
+    }
+
+    # Case 2: cache miss
+    #
+    # valueFunc() might return a promise, or an actual value. Normally we'd
+    # use a hybrid_chain() for this, but in this case, we need to have
+    # different behavior if it's a promise or not a promise -- the
+    # information about whether or not it's a promise needs to be stored in
+    # the cache. We need to handle both cases and record in the cache
+    # whether it's a promise or not, so that any consumer of the
+    # cachedReactive() will be given the correct kind of object (a promise
+    # vs. an actual value) in the case of a future cache hit.
+    p <- withCallingHandlers(
+      withVisible(isolate(valueFunc(...))),
+      error = function(e) {
+        cache$set(key_str, list(
+          is_promise = FALSE,
+          value      = e,
+          visible    = TRUE,
+          error      = TRUE
+        ))
+      }
+    )
+
+    if (is.promising(p$value)) {
+      p$value <- as.promise(p$value)
+      p$value <- p$value$
+        then(function(value) {
+          res <- withVisible(value)
+          cache$set(key_str, list(
+            is_promise = TRUE,
+            value      = cacheWriteHook(res$value),
+            visible    = res$visible,
+            error      = FALSE
+          ))
+          valueWithVisible(res)
+        })$
+        catch(function(e) {
+          cache$set(key_str, list(
+            is_promise = TRUE,
+            value      = e,
+            visible    = TRUE,
+            error      = TRUE
+          ))
+          stop(e)
+        })
+      valueWithVisible(p)
+    } else {
+      # result is an ordinary value, not a promise.
+      cache$set(key_str, list(
+        is_promise = FALSE,
+        value      = cacheWriteHook(p$value),
+        visible    = p$visible,
+        error      = FALSE
+      ))
+      return(valueWithVisible(p))
+    }
+  }
+}
 
 extractCacheHint <- function(func) {
   cacheHint <- attr(func, "cacheHint", exact = TRUE)

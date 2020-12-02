@@ -1,2 +1,2 @@
 library(shinytest)
-expect_pass(testApp("..", suffix = osName()))
+expect_pass(testApp("../", suffix = osName()))

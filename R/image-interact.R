@@ -92,6 +92,16 @@ brushedPoints <- function(df, brush, xvar = NULL, yvar = NULL,
   use_x <- grepl("x", brush$direction)
   use_y <- grepl("y", brush$direction)
 
+  # We transitioned to using %||% in Shiny 1.6.0. Previously, these vars could
+  # be NA, because the old %OR% operator recognized NA. These warnings and
+  # the NULL replacement are here just to ease the transition in case anyone is
+  # using NA. We can remove these checks in a future version of Shiny.
+  # https://github.com/rstudio/shiny/pull/3172
+  if (is.na(xvar))      { xvar      <- NULL; warning("xvar should be NULL, not NA.") }
+  if (is.na(yvar))      { yvar      <- NULL; warning("yvar should be NULL, not NA.") }
+  if (is.na(panelvar1)) { panelvar1 <- NULL; warning("panelvar1 should be NULL, not NA.") }
+  if (is.na(panelvar2)) { panelvar2 <- NULL; warning("panelvar2 should be NULL, not NA.") }
+
   # Try to extract vars from brush object
   xvar      <- xvar      %||% brush$mapping$x
   yvar      <- yvar      %||% brush$mapping$y
@@ -229,6 +239,16 @@ nearPoints <- function(df, coordinfo, xvar = NULL, yvar = NULL,
   if (is.null(coordinfo$x)) {
     stop("nearPoints requires a click/hover/double-click object with x and y values.")
   }
+
+  # We transitioned to using %||% in Shiny 1.6.0. Previously, these vars could
+  # be NA, because the old %OR% operator recognized NA. These warnings and
+  # the NULL replacement are here just to ease the transition in case anyone is
+  # using NA. We can remove these checks in a future version of Shiny.
+  # https://github.com/rstudio/shiny/pull/3172
+  if (is.na(xvar))      { xvar      <- NULL; warning("xvar should be NULL, not NA.") }
+  if (is.na(yvar))      { yvar      <- NULL; warning("yvar should be NULL, not NA.") }
+  if (is.na(panelvar1)) { panelvar1 <- NULL; warning("panelvar1 should be NULL, not NA.") }
+  if (is.na(panelvar2)) { panelvar2 <- NULL; warning("panelvar2 should be NULL, not NA.") }
 
   # Try to extract vars from coordinfo object
   xvar      <- xvar      %||% coordinfo$mapping$x

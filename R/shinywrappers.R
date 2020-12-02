@@ -895,6 +895,9 @@ checkDT9 <- function(options) {
 # Deprecated functions ------------------------------------------------------
 
 #' Deprecated reactive functions
+#'
+#' \lifecycle{superseded}
+#'
 #' @name deprecatedReactives
 #' @keywords internal
 NULL

@@ -29,6 +29,8 @@ reactiveText(func)
 \item{...}{Other arguments to pass on.}
 }
 \description{
+\lifecycle{superseded}
+
 \code{reactivePlot} has been replaced by \code{\link[=renderPlot]{renderPlot()}}.
 
 \code{reactiveTable} has been replaced by \code{\link[=renderTable]{renderTable()}}.

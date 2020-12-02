@@ -14,10 +14,10 @@ navbarPage(
   header = NULL,
   footer = NULL,
   inverse = FALSE,
-  collapsible = deprecated(),
-  collapsable,
+  collapsible = FALSE,
+  collapsable = deprecated(),
   fluid = TRUE,
-  responsive = NULL,
+  responsive = deprecated(),
   theme = NULL,
   windowTitle = title,
   lang = NULL

@@ -11,7 +11,7 @@ shinySoftDeprecated(
   with = NULL,
   details = NULL,
   id = NULL,
-  env = rlang::caller_env(2)
+  env = rlang::caller_env(1)
 )
 
 shinySoftDeprecatedMessage(...)
@@ -54,9 +54,9 @@ To disable these messages, use \code{options(shiny.deprecation.messages=FALSE)}.
 }
 \section{Functions}{
 \itemize{
-\item \code{shinySoftDeprecated}: If \code{isTRUE(getOption("shiny.deprecate.message"))}, pass arguments to \code{\link[lifecycle:deprecate_soft]{lifecycle::deprecate_soft()}}
+\item \code{shinySoftDeprecated}: Passes arguments to \code{\link[lifecycle:deprecate_soft]{lifecycle::deprecate_soft()}}
 
-\item \code{shinySoftDeprecatedMessage}: Will pass along a message directly to \code{\link[rlang:abort]{rlang::warn()}} with \code{.frequency = "regular"}
+\item \code{shinySoftDeprecatedMessage}: Passes along a message directly to \code{\link[rlang:abort]{rlang::warn()}} with \code{.frequency = "regular"}
 }}
 
 \keyword{internal}

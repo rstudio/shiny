@@ -5,7 +5,13 @@
 \alias{fluidRow}
 \title{Create a page with fluid layout}
 \usage{
-fluidPage(..., title = NULL, responsive = NULL, theme = NULL, lang = NULL)
+fluidPage(
+  ...,
+  title = NULL,
+  responsive = deprecated(),
+  theme = NULL,
+  lang = NULL
+)
 
 fluidRow(...)
 }

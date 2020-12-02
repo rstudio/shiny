@@ -1925,9 +1925,11 @@ ShinySession <- R6Class(
                     c(
                       'Content-Disposition' = ifelse(
                         dlmatches[3] == '',
-                        'attachment; filename="' %.%
-                          gsub('(["\\\\])', '\\\\\\1', filename) %.%  # yes, that many \'s
-                          '"',
+                        paste0(
+                          'attachment; filename="',
+                          gsub('(["\\\\])', '\\\\\\1', filename),
+                          '"'
+                        ),
                         'attachment'
                       ),
                       'Cache-Control'='no-cache')))

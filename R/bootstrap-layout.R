@@ -88,7 +88,7 @@
 #' }
 #' @rdname fluidPage
 #' @export
-fluidPage <- function(..., title = NULL, responsive = NULL, theme = NULL, lang = NULL) {
+fluidPage <- function(..., title = NULL, responsive = deprecated(), theme = NULL, lang = NULL) {
   bootstrapPage(div(class = "container-fluid", ...),
                 title = title,
                 responsive = responsive,
@@ -159,7 +159,7 @@ fluidRow <- function(...) {
 #'
 #' @rdname fixedPage
 #' @export
-fixedPage <- function(..., title = NULL, responsive = NULL, theme = NULL, lang = NULL) {
+fixedPage <- function(..., title = NULL, responsive = deprecated(), theme = NULL, lang = NULL) {
   bootstrapPage(div(class = "container", ...),
                 title = title,
                 responsive = responsive,

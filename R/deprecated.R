@@ -21,22 +21,24 @@ rlang_warn <- function(..., msg = paste0(...), frequency = "regular", id = msg) 
 #'
 #' @inheritParams lifecycle::deprecate_soft
 #' @keywords internal
-#' @describeIn soft-deprecated If `isTRUE(getOption("shiny.deprecate.message"))`, pass arguments to [lifecycle::deprecate_soft()]
+#' @describeIn soft-deprecated Passes arguments to [lifecycle::deprecate_soft()]
 shinySoftDeprecated <- function(
   when, what, with = NULL, details = NULL, id = NULL,
-  env = rlang::caller_env(2)
+  env = rlang::caller_env(1)
 ) {
-  if (getOption("shiny.deprecation.messages") %OR% TRUE == FALSE)
+  if (is_false(getOption("shiny.deprecation.messages"))) {
     return(invisible())
+  }
 
   lifecycle::deprecate_soft(when, what, with = with, details = details, id = id, env = env)
 }
-#' @describeIn soft-deprecated Will pass along a message directly to [rlang::warn()] with `.frequency = "regular"`
+#' @describeIn soft-deprecated Passes along a message directly to [rlang::warn()] with `.frequency = "regular"`
 shinySoftDeprecatedMessage <- function(
   ...
 ) {
-  if (getOption("shiny.deprecation.messages") %OR% TRUE == FALSE)
+  if (is_false(getOption("shiny.deprecation.messages"))) {
     return(invisible())
+  }
 
   rlang_warn(..., frequency = "regular")
 }

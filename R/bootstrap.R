@@ -413,16 +413,16 @@ navbarPage <- function(title,
                        header = NULL,
                        footer = NULL,
                        inverse = FALSE,
-                       collapsible = deprecated(),
-                       collapsable,
+                       collapsible = FALSE,
+                       collapsable = deprecated(),
                        fluid = TRUE,
-                       responsive = NULL,
+                       responsive = deprecated(),
                        theme = NULL,
                        windowTitle = title,
                        lang = NULL) {
 
-  if (lifecycle::is_present(collapsible)) {
-    shinySoftDeprecated("0.10.2.2", "navbarPage(collapsible =)", "navbarPage(collapsable =)")
+  if (lifecycle::is_present(collapsable)) {
+    shinySoftDeprecated("0.10.2.2", "navbarPage(collapsable =)", "navbarPage(collapsible =)")
     collapsible <- collapsable
   }
 

@@ -313,7 +313,7 @@ test_that("bindCache reactives with async value", {
   k(0)
   flushReact()
   expect_identical(vals, c("0k"))
-  later::run_now()
+  for (i in 1:2) later::run_now()
   expect_identical(vals, c("0k", "0o"))
 })
 
@@ -1132,6 +1132,41 @@ test_that("Custom render functions that call installExprFunction", {
   expect_error(renderTriple({ n <<- n+1; a }) %>% bindCache(a, cache = cachem::cache_mem()))
 })
 
+
+test_that("cacheWriteHook and cacheReadHook for render functions", {
+  write_hook_n <- 0
+  read_hook_n  <- 0
+
+  renderDouble <- function(expr) {
+    func <- quoToFunction(enquo(expr), "renderDouble")
+    createRenderFunction(
+      func,
+      transform = function(value, session, name, ...) paste0(value, ",", value),
+      cacheWriteHook = function(value) {
+        write_hook_n <<- write_hook_n + 1
+        paste0(value, ",w")
+      },
+      cacheReadHook = function(value) {
+        read_hook_n <<- read_hook_n + 1
+        paste0(value, ",r")
+      }
+    )
+  }
+
+  n <- 0
+  a <- 1
+  tc <- renderDouble({ n <<- n+1; a }) %>% bindCache(a, cache = cachem::cache_mem())
+  expect_identical(tc(), "1,1")
+  expect_identical(write_hook_n, 1)
+  expect_identical(read_hook_n, 0)
+  expect_identical(tc(), "1,1,w,r")
+  expect_identical(write_hook_n, 1)
+  expect_identical(read_hook_n, 1)
+  expect_identical(tc(), "1,1,w,r")
+  expect_identical(write_hook_n, 1)
+  expect_identical(read_hook_n, 2)
+  expect_identical(n, 1)
+})
 
 test_that("Custom render functions that call exprToFunction", {
   # A render function that uses exprToFunction won't work with bindCache(). It

@@ -9,7 +9,9 @@ createRenderFunction(
   transform = function(value, session, name, ...) value,
   outputFunc = NULL,
   outputArgs = NULL,
-  cacheHint = "auto"
+  cacheHint = "auto",
+  cacheWriteHook = NULL,
+  cacheReadHook = NULL
 )
 }
 \arguments{
@@ -39,6 +41,20 @@ identify this instance for caching using \code{\link[=bindCache]{bindCache()}}. 
 will try to automatically infer caching information. If \code{FALSE}, do not
 allow caching for the object. Some render functions (such as \link{renderPlot})
 contain internal state that makes them unsuitable for caching.}
+
+\item{cacheWriteHook}{Used if the render function is passed to \code{bindCache()}.
+This is an optional callback function to invoke before saving the value
+from the render function to the cache. This function must accept one
+argument, the value returned from \code{renderFunc}, and should return the value
+to store in the cache.}
+
+\item{cacheReadHook}{Used if the render function is passed to \code{bindCache()}.
+This is an optional callback function to invoke after reading a value from
+the cache (if there is a cache hit). The function will be passed one
+argument, the value retrieved from the cache. This can be useful when some
+side effect needs to occur for a render function to behave correctly. For
+example, some render functions call \code{\link[=createWebDependency]{createWebDependency()}} so that Shiny
+is able to serve JS and CSS resources.}
 }
 \value{
 An annotated render function, ready to be assigned to an

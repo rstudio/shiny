@@ -611,7 +611,7 @@ find_panel_info_api <- function(b) {
   layers <- ggplot2::summarise_layers(b)
 
   `%NA_OR%` <- function(x, y) {
-    if (is.na(x)) y else x
+    if (is_na(x)) y else x
   }
 
   # Given x and y scale objects and a coord object, return a list that has

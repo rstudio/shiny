@@ -473,6 +473,9 @@ bindCache.reactiveExpr <- function(x, ..., cache = "app") {
   cacheHint <- digest(extractCacheHint(x), algo = "spookyhash")
   valueFunc <- wrapFunctionLabel(valueFunc, "cachedReactiveValueFunc", ..stacktraceon = TRUE)
 
+  cacheWriteHook <- attr(x, "cacheWriteHook", exact = TRUE) %||% identity
+  cacheReadHook  <- attr(x, "cacheReadHook",  exact = TRUE) %||% identity
+
   # Don't hold on to the reference for x, so that it can be GC'd
   rm(x)
   # Hacky workaround for issue with `%>%` preventing GC:
@@ -503,7 +506,8 @@ bindCache.reactiveExpr <- function(x, ..., cache = "app") {
               if (res$error) {
                 stop(res$value)
               }
-              valueWithVisible(res)
+
+              cacheReadHook(valueWithVisible(res))
             }
           ))
         }
@@ -537,7 +541,7 @@ bindCache.reactiveExpr <- function(x, ..., cache = "app") {
               res <- withVisible(value)
               cache$set(key_str, list(
                 is_promise = TRUE,
-                value      = res$value,
+                value      = cacheWriteHook(res$value),
                 visible    = res$visible,
                 error      = FALSE
               ))
@@ -557,7 +561,7 @@ bindCache.reactiveExpr <- function(x, ..., cache = "app") {
           # result is an ordinary value, not a promise.
           cache$set(key_str, list(
             is_promise = FALSE,
-            value      = p$value,
+            value      = cacheWriteHook(p$value),
             visible    = p$visible,
             error      = FALSE
           ))
@@ -578,6 +582,9 @@ bindCache.shiny.render.function <- function(x, ..., cache = "app") {
   keyFunc <- quos_to_func(enquos0(...))
 
   cacheHint <- digest(extractCacheHint(x), algo = "spookyhash")
+
+  cacheWriteHook <- attr(x, "cacheWriteHook", exact = TRUE) %||% identity
+  cacheReadHook  <- attr(x, "cacheReadHook",  exact = TRUE) %||% identity
 
   valueFunc <- x
 
@@ -604,7 +611,8 @@ bindCache.shiny.render.function <- function(x, ..., cache = "app") {
               if (res$error) {
                 stop(res$value)
               }
-              valueWithVisible(res)
+
+              cacheReadHook(valueWithVisible(res))
             }
           ))
         }
@@ -638,7 +646,7 @@ bindCache.shiny.render.function <- function(x, ..., cache = "app") {
               res <- withVisible(value)
               cache$set(key_str, list(
                 is_promise = TRUE,
-                value      = res$value,
+                value      = cacheWriteHook(res$value),
                 visible    = res$visible,
                 error      = FALSE
               ))
@@ -658,7 +666,7 @@ bindCache.shiny.render.function <- function(x, ..., cache = "app") {
           # result is an ordinary value, not a promise.
           cache$set(key_str, list(
             is_promise = FALSE,
-            value      = p$value,
+            value      = cacheWriteHook(p$value),
             visible    = p$visible,
             error      = FALSE
           ))

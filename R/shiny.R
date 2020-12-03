@@ -1,4 +1,4 @@
-#' @include utils.R stack.R
+#' @include utils.R
 NULL
 
 #' Web Application Framework for R
@@ -691,7 +691,7 @@ ShinySession <- R6Class(
       private$.input      <- ReactiveValues$new(dedupe = FALSE, label = "input")
       private$.clientData <- ReactiveValues$new(dedupe = TRUE, label = "clientData")
       private$timingRecorder <- ShinyServerTimingRecorder$new()
-      self$progressStack <- Stack$new()
+      self$progressStack <- fastmap::faststack()
       self$files <- Map$new()
       self$downloads <- Map$new()
       self$userData <- new.env(parent = emptyenv())

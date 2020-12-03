@@ -259,7 +259,7 @@ MockShinySession <- R6Class(
       private$file_generators <- fastmap()
 
       private$timer <- MockableTimerCallbacks$new()
-      self$progressStack <- Stack$new()
+      self$progressStack <- fastmap::faststack()
 
       self$userData <- new.env(parent=emptyenv())
 

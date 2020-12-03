@@ -343,8 +343,8 @@ ShinySession <- R6Class(
     websocket = 'ANY',
     invalidatedOutputValues = 'Map',
     invalidatedOutputErrors = 'Map',
-    inputMessageQueue = list(), # A list of inputMessages to send when flushed
-    cycleStartActionQueue = list(), # A list of actions to perform to start a cycle
+    inputMessageQueue = 'fastqueue',     # A list of inputMessages to send when flushed
+    cycleStartActionQueue = 'fastqueue', # A list of actions to perform to start a cycle
     .outputs = list(),          # Keeps track of all the output observer objects
     .outputOptions = list(),     # Options for each of the output observer objects
     progressKeys = 'character',
@@ -622,9 +622,8 @@ ShinySession <- R6Class(
     startCycle = function() {
       # TODO: This should check for busyCount == 0L, and remove the checks from
       # the call sites
-      if (length(private$cycleStartActionQueue) > 0) {
-        head <- private$cycleStartActionQueue[[1L]]
-        private$cycleStartActionQueue <- private$cycleStartActionQueue[-1L]
+      if (private$cycleStartActionQueue$size() > 0) {
+        head <- private$cycleStartActionQueue$remove()
 
         # After we execute the current cycleStartAction (head), there may be
         # more items left on the queue. If the current busyCount > 0, then that
@@ -643,7 +642,7 @@ ShinySession <- R6Class(
         # busyCount, it's possible we're calling startCycle spuriously; that's
         # OK, it's essentially a no-op in that case.
         on.exit({
-          if (private$busyCount == 0L && length(private$cycleStartActionQueue) > 0L) {
+          if (private$busyCount == 0L && private$cycleStartActionQueue$size() > 0L) {
             later::later(function() {
               if (private$busyCount == 0L) {
                 private$startCycle()
@@ -681,6 +680,8 @@ ShinySession <- R6Class(
       self$closed <- FALSE
       # TODO: Put file upload context in user/app-specific dir if possible
 
+      private$inputMessageQueue     <- fastmap::fastqueue()
+      private$cycleStartActionQueue <- fastmap::fastqueue()
       private$invalidatedOutputValues <- Map$new()
       private$invalidatedOutputErrors <- Map$new()
       private$fileUploadContext <- FileUploadContext$new()
@@ -1210,7 +1211,7 @@ ShinySession <- R6Class(
           length(private$progressKeys) != 0 ||
           length(private$invalidatedOutputValues) != 0 ||
           length(private$invalidatedOutputErrors) != 0 ||
-          length(private$inputMessageQueue) != 0
+          private$inputMessageQueue$size() != 0
         )
       }
 
@@ -1242,8 +1243,8 @@ ShinySession <- R6Class(
         private$invalidatedOutputValues <- Map$new()
         errors <- as.list(private$invalidatedOutputErrors)
         private$invalidatedOutputErrors <- Map$new()
-        inputMessages <- private$inputMessageQueue
-        private$inputMessageQueue <- list()
+        inputMessages <- private$inputMessageQueue$as_list()
+        private$inputMessageQueue$reset()
 
         if (isTRUE(private$testMode)) {
           private$storeOutputValues(mergeVectors(values, errors))
@@ -1261,7 +1262,7 @@ ShinySession <- R6Class(
     # does not guarantee) inputs and reactive values from changing underneath
     # async observers as they run.
     cycleStartAction = function(callback) {
-      private$cycleStartActionQueue <- c(private$cycleStartActionQueue, list(callback))
+      private$cycleStartActionQueue$add(callback)
       # If no observers are running in this session, we're safe to proceed.
       # Otherwise, startCycle() will be called later, via decrementBusyCount().
       if (private$busyCount == 0L) {
@@ -1392,8 +1393,7 @@ ShinySession <- R6Class(
     sendInputMessage = function(inputId, message) {
       data <- list(id = inputId, message = message)
 
-      # Add to input message queue
-      private$inputMessageQueue[[length(private$inputMessageQueue) + 1]] <- data
+      private$inputMessageQueue$add(data)
       # Needed so that Shiny knows to actually flush the input message queue
       self$requestFlush()
     },

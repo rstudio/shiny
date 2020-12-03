@@ -1478,7 +1478,7 @@ ShinySession <- R6Class(
           # reactive and save it.
           tmp_info[[prop]] <- function() {
             if (is.null(r)) {
-              r <<- reactive({
+              r <<- reactive(label = prop_name, {
                 wrapfun(self$clientData[[prop_name]])
               })
             }

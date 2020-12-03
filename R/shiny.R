@@ -1411,46 +1411,20 @@ ShinySession <- R6Class(
         return(NULL)
       }
 
-      tmp_info <- private$outputInfo[[name]] %||% list(name = name)
+      if (!is.null(private$outputInfo[[name]])) {
+        return(private$outputInfo[[name]])
+      }
+
+      # The following code will only run the first time this function has been
+      # called for this output.
+
+      tmp_info <- list(name = name)
 
       # cd_names() returns names of all items in clientData, without taking a
       # reactive dependency. It is a function and it's memoized, so that we do
       # the (relatively) expensive isolate(names(...)) call only when needed,
       # and at most one time in this function.
-      .cd_names <- NULL
-      cd_names <- function() {
-        if (is.null(.cd_names)) {
-          .cd_names <<- isolate(names(self$clientData))
-        }
-        .cd_names
-      }
-
-      # If we don't already have width for this output info, see if it's
-      # present, and if so, add it.
-
-      # Note that all the following clientData values (which are reactiveValues)
-      # are wrapped in reactive() so that users can take a dependency on particular
-      # output info (i.e., just depend on width/height, or just depend on bg, fg, etc).
-      # To put it another way, if getCurrentOutputInfo() simply returned a list of values
-      # from self$clientData, than anything that calls getCurrentOutputInfo() would take
-      # a reactive dependency on all of these values.
-      if (! ("width" %in% names(tmp_info)) ) {
-        width_name  <- paste0("output_", name, "_width")
-        if (width_name %in% cd_names()) {
-          tmp_info$width <- reactive({
-            self$clientData[[width_name]]
-          })
-        }
-      }
-
-      if (! ("height" %in% names(tmp_info)) ) {
-        height_name  <- paste0("output_", name, "_height")
-        if (height_name %in% cd_names()) {
-          tmp_info$height <- reactive({
-            self$clientData[[height_name]]
-          })
-        }
-      }
+      cd_names <- isolate(names(self$clientData))
 
       # parseCssColors() currently errors out if you hand it any NAs
       # This'll make sure we're always working with a string (and if
@@ -1460,33 +1434,74 @@ ShinySession <- R6Class(
         htmltools::parseCssColors(x %||% "", mustWork = FALSE)
       }
 
-      bg <- paste0("output_", name, "_bg")
-      if (bg %in% cd_names()) {
-        tmp_info$bg <- reactive({
-          parse_css_colors(self$clientData[[bg]])
-        })
+
+      # This function conditionally adds an item to tmp_info (for "width", it
+      # would create tmp_info$width). It is added _if_ there is an entry in
+      # clientData like "output_foo_width", where "foo" is the name of the
+      # output. The first time `tmp_info$width()` is called, it creates a
+      # reactive expression that reads `clientData$output_foo_width`, saves it,
+      # then invokes that reactive. On subsequent calls, the reactive already
+      # exists, so it simply invokes it.
+      #
+      # The reason it creates the reactive only on first use is so that it
+      # doesn't spuriously create reactives.
+      #
+      # This function essentially generalizes the code below for names other
+      # than just "width".
+      #
+      # width_name <- paste0("output_", name, "_width")
+      # if (width_name %in% cd_names()) {
+      #   width_r <- NULL
+      #   tmp_info$width <- function() {
+      #     if (is.null(width_r)) {
+      #       width_r <<- reactive({
+      #         parse_css_colors(self$clientData[[width_name]])
+      #       })
+      #     }
+      #
+      #     width_r()
+      #   }
+      # }
+      add_conditional_reactive <- function(prop, wrapfun = identity) {
+        force(prop)
+        force(wrapfun)
+
+        prop_name <- paste0("output_", name, "_", prop)
+
+        # Only add tmp_info$width if clientData has "output_foo_width"
+        if (prop_name %in% cd_names) {
+          r <- NULL
+
+          # Turn it into a function that creates a reactive on the first
+          # invocation of getCurrentOutputInfo()$width() and saves it; future
+          # invocations of getCurrentOutputInfo()$width() use the existing
+          # reactive and save it.
+          tmp_info[[prop]] <- function() {
+            if (is.null(r)) {
+              r <<- reactive({
+                wrapfun(self$clientData[[prop_name]])
+              })
+            }
+
+            r()
+          }
+        }
       }
 
-      fg <- paste0("output_", name, "_fg")
-      if (fg %in% cd_names()) {
-        tmp_info$fg <- reactive({
-          parse_css_colors(self$clientData[[fg]])
-        })
-      }
 
-      accent <- paste0("output_", name, "_accent")
-      if (accent %in% cd_names()) {
-        tmp_info$accent <- reactive({
-          parse_css_colors(self$clientData[[accent]])
-        })
-      }
-
-      font <- paste0("output_", name, "_font")
-      if (font %in% cd_names()) {
-        tmp_info$font <- reactive({
-          self$clientData[[font]]
-        })
-      }
+      # Note that all the following clientData values (which are reactiveValues)
+      # are wrapped in reactive() so that users can take a dependency on
+      # particular output info (i.e., just depend on width/height, or just
+      # depend on bg, fg, etc). To put it another way, if getCurrentOutputInfo()
+      # simply returned a list of values from self$clientData, than anything
+      # that calls getCurrentOutputInfo() would take a reactive dependency on
+      # all of these values.
+      add_conditional_reactive("width")
+      add_conditional_reactive("height")
+      add_conditional_reactive("bg",     parse_css_colors)
+      add_conditional_reactive("fg",     parse_css_colors)
+      add_conditional_reactive("accent", parse_css_colors)
+      add_conditional_reactive("font")
 
       private$outputInfo[[name]] <- tmp_info
       private$outputInfo[[name]]

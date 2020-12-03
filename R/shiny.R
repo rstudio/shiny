@@ -628,6 +628,15 @@ ShinySession <- R6Class(
       fun %||% identity
     },
 
+    # Ensure that `private$currentThemeDependency` is initialized. We don't do
+    # this in the `initialize()` method because then the reactiveVal doesn't
+    # have a reactive domain, and can persist after the app has exited.
+    ensureCurrentThemeDependency = function() {
+      if (is.null(private$currentThemeDependency)) {
+        private$currentThemeDependency <- reactiveVal(0)
+      }
+    },
+
     # See cycleStartAction
     startCycle = function() {
       # TODO: This should check for busyCount == 0L, and remove the checks from
@@ -727,8 +736,6 @@ ShinySession <- R6Class(
 
       private$testMode <- getShinyOption("testmode", default = FALSE)
       private$enableTestSnapshot()
-
-      private$currentThemeDependency <- reactiveVal(0)
 
       private$registerSessionEndCallbacks()
 
@@ -1305,6 +1312,8 @@ ShinySession <- R6Class(
     },
 
     getCurrentTheme = function() {
+      private$ensureCurrentThemeDependency()
+
       private$currentThemeDependency()
       getShinyOption("bootstrapTheme")
     },
@@ -1313,6 +1322,8 @@ ShinySession <- R6Class(
       # This function does three things: (1) sets theme as the current
       # bootstrapTheme, (2) re-executes any registered theme dependencies, and
       # (3) sends the resulting dependencies to the client.
+
+      private$ensureCurrentThemeDependency()
 
       # Note that this will automatically scope to the session.
       shinyOptions(bootstrapTheme = theme)

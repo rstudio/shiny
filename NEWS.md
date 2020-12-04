@@ -30,6 +30,8 @@ shiny 1.5.0.9000
 
 * Closed #2844: Added `lang` argument to ui `*Page()` functions (e.g., `fluidPage`, `bootstrapPage`) that specifies document-level language within the app for the accessibility of screen readers and search-engine parsers. By default, it is set to empty string which is commonly recognized as a browser's default locale. (#2920)
 
+* Improved accessibility for `radioButtons()` and `checkboxGroupInput()`: All options are now grouped together semantically for assistive technologies. (thanks @jooyoungseo, #3187).
+
 ### Minor new features and improvements
 
 * New `reactiveConsole()` makes it easier to interactively experiment with reactivity at the console (#2518).

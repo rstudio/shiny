@@ -104,10 +104,14 @@ radioButtons <- function(inputId, label, choices = NULL, selected = NULL,
   divClass <- "form-group shiny-input-radiogroup shiny-input-container"
   if (inline) divClass <- paste(divClass, "shiny-input-container-inline")
 
+  inputLabel <- shinyInputLabel(inputId, label)
   tags$div(id = inputId,
     style = css(width = validateCssUnit(width)),
     class = divClass,
-    shinyInputLabel(inputId, label),
+    # https://www.w3.org/TR/2017/WD-wai-aria-practices-1.1-20170628/examples/radio/radio-1/radio-1.html
+    role = "radiogroup",
+    `aria-labelledby` = inputLabel$attribs$id,
+    inputLabel,
     options
   )
 }

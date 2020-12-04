@@ -131,7 +131,8 @@ brushOpts <- function(id, fill = "#9cf", stroke = "#036",
   )
 }
 
-getThematicOption <- function(...) {
-  if (system.file(package = "thematic") == "") return(NULL)
-  thematic::thematic_get_option(...)
+getThematicOption <- function(..., resolve = FALSE) {
+  if (is_available("thematic")) {
+    thematic::thematic_get_option(..., resolve = resolve)
+  }
 }

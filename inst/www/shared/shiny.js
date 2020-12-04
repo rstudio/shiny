@@ -1345,6 +1345,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         var inputBinding = $obj.data('shiny-input-binding'); // Dispatch the message to the appropriate input object
 
         if ($obj.length > 0) {
+          if (!$obj.attr("aria-live")) $obj.attr("aria-live", "polite");
           var el = $obj[0];
           var evt = jQuery.Event('shiny:updateinput');
           evt.message = message[i].message;
@@ -6113,6 +6114,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
           shinyapp.bindOutput(id, bindingAdapter);
           $el.data('shiny-output-binding', bindingAdapter);
           $el.addClass('shiny-bound-output');
+          if (!$el.attr("aria-live")) $el.attr("aria-live", "polite");
           $el.trigger({
             type: 'shiny:bound',
             binding: binding,

@@ -1031,9 +1031,9 @@ textOutput <- function(outputId, container = if (inline) span else div, inline =
 #' @rdname textOutput
 verbatimTextOutput <- function(outputId, placeholder = FALSE) {
   pre(id = outputId,
-      class = paste(c("shiny-text-output", if (!placeholder) "noplaceholder"),
-                    collapse = " ")
-      )
+    class = "shiny-text-output",
+    class = if (!placeholder) "noplaceholder"
+  )
 }
 
 
@@ -1045,7 +1045,9 @@ imageOutput <- function(outputId, width = "100%", height="400px",
                         inline = FALSE) {
 
   style <- if (!inline) {
-    paste("width:", validateCssUnit(width), ";", "height:", validateCssUnit(height))
+    # Using `css()` here instead of paste/sprintf so that NULL values will
+    # result in the property being dropped altogether
+    css(width = validateCssUnit(width), height = validateCssUnit(height))
   }
 
 

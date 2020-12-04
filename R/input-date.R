@@ -105,7 +105,7 @@ dateInput <- function(inputId, label, value = NULL, min = NULL, max = NULL,
 
   tags$div(id = inputId,
     class = "shiny-date-input form-group shiny-input-container",
-    style = if (!is.null(width)) paste0("width: ", validateCssUnit(width), ";"),
+    style = css(width = validateCssUnit(width)),
 
     shinyInputLabel(inputId, label),
     tags$input(type = "text",

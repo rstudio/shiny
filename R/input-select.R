@@ -116,7 +116,7 @@ selectInput <- function(inputId, label, choices, selected = NULL,
   # return label and select tag
   res <- div(
     class = "form-group shiny-input-container",
-    style = if (!is.null(width)) paste0("width: ", validateCssUnit(width), ";"),
+    style = css(width = validateCssUnit(width)),
     shinyInputLabel(inputId, label),
     div(selectTag)
   )

@@ -32,3 +32,14 @@ test_that("performance warning works", {
   expect_warning(updateSelectizeInput(session, "x", choices = as.character(1:1000), server = TRUE), NA)
   expect_warning(updateSelectizeInput(session, "x", choices = as.character(1:2000), server = TRUE), NA)
 })
+
+
+test_that("jqueryui is attached when drag_drop plugin is present", {
+  x <- selectizeInput("test", "test", choices = 1:3, multiple = TRUE, options = list(plugins = "drag_drop"))
+  deps <- htmltools::resolveDependencies(htmltools::htmlDependencies(x))
+  expect_length(deps, 2)
+  expect_setequal(
+    vapply(deps, `[[`, character(1), "name"),
+    c("selectize", "jqueryui")
+  )
+})

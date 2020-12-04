@@ -1484,7 +1484,7 @@ ShinySession <- R6Class(
           # invocation of getCurrentOutputInfo()$width() and saves it; future
           # invocations of getCurrentOutputInfo()$width() use the existing
           # reactive and save it.
-          tmp_info[[prop]] <- function() {
+          tmp_info[[prop]] <<- function() {
             if (is.null(r)) {
               r <<- reactive(label = prop_name, {
                 wrapfun(self$clientData[[prop_name]])

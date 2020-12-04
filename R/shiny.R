@@ -628,9 +628,10 @@ ShinySession <- R6Class(
       fun %||% identity
     },
 
-    # Ensure that `private$currentThemeDependency` is initialized. We don't do
-    # this in the `initialize()` method because then the reactiveVal doesn't
-    # have a reactive domain, and can persist after the app has exited.
+    # Used in getCurrentTheme()/setCurrentTheme() to ensure their reactive 
+    # dependency is initialized. Note that we don't initialize this reactiveVal()
+    # inside the initialize() method because at that point there isn't a
+    # reactive domain yet, and so it can persist after the app has exited.
     ensureCurrentThemeDependency = function() {
       if (is.null(private$currentThemeDependency)) {
         private$currentThemeDependency <- reactiveVal(0)
@@ -1315,7 +1316,7 @@ ShinySession <- R6Class(
       private$ensureCurrentThemeDependency()
 
       private$currentThemeDependency()
-      getShinyOption("bootstrapTheme")
+      getCurrentTheme()
     },
 
     setCurrentTheme = function(theme) {
@@ -1323,10 +1324,10 @@ ShinySession <- R6Class(
       # bootstrapTheme, (2) re-executes any registered theme dependencies, and
       # (3) sends the resulting dependencies to the client.
 
-      private$ensureCurrentThemeDependency()
-
       # Note that this will automatically scope to the session.
-      shinyOptions(bootstrapTheme = theme)
+      setCurrentTheme()
+      
+      private$ensureCurrentThemeDependency()
 
       # Invalidate
       private$currentThemeDependency(isolate(private$currentThemeDependency()) + 1)

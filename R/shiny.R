@@ -628,16 +628,6 @@ ShinySession <- R6Class(
       fun %||% identity
     },
 
-    # Used in getCurrentTheme()/setCurrentTheme() to ensure their reactive 
-    # dependency is initialized. Note that we don't initialize this reactiveVal()
-    # inside the initialize() method because at that point there isn't a
-    # reactive domain yet, and so it can persist after the app has exited.
-    ensureCurrentThemeDependency = function() {
-      if (is.null(private$currentThemeDependency)) {
-        private$currentThemeDependency <- reactiveVal(0)
-      }
-    },
-
     # See cycleStartAction
     startCycle = function() {
       # TODO: This should check for busyCount == 0L, and remove the checks from
@@ -737,6 +727,13 @@ ShinySession <- R6Class(
 
       private$testMode <- getShinyOption("testmode", default = FALSE)
       private$enableTestSnapshot()
+
+      # This `withReactiveDomain` is used only to satisfy the reactlog, so that
+      # it knows to scope this reactiveVal to this session.
+      # https://github.com/rstudio/shiny/pull/3182
+      withReactiveDomain(self,
+        private$currentThemeDependency <- reactiveVal(0)
+      )
 
       private$registerSessionEndCallbacks()
 
@@ -1313,8 +1310,6 @@ ShinySession <- R6Class(
     },
 
     getCurrentTheme = function() {
-      private$ensureCurrentThemeDependency()
-
       private$currentThemeDependency()
       getCurrentTheme()
     },
@@ -1325,9 +1320,7 @@ ShinySession <- R6Class(
       # (3) sends the resulting dependencies to the client.
 
       # Note that this will automatically scope to the session.
-      setCurrentTheme()
-      
-      private$ensureCurrentThemeDependency()
+      setCurrentTheme(theme)
 
       # Invalidate
       private$currentThemeDependency(isolate(private$currentThemeDependency()) + 1)

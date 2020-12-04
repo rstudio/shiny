@@ -13,7 +13,6 @@
 # Note that Map objects can't be saved in one R session and restored in
 # another, because they are based on fastmap, which uses an external pointer,
 # and external pointers can't be saved and restored in another session.
-#' @importFrom fastmap fastmap
 Map <- R6Class(
   'Map',
   portable = FALSE,

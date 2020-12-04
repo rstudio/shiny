@@ -340,10 +340,18 @@ test_that("Choices need not be provided, can be NULL or c()", {
 })
 
 # https://github.com/rstudio/shiny/pull/3187
-test_that("a11y compliant", {
+test_that("radioButtons() and checkboxGroupInput() accessibility", {
+  rb <- radioButtons("foo", "bar", c("a", "b"))
+  rb_lbl <- rb$children[[1]]
+  expect_equal(rb$attribs$role, "radiogroup")
+  expect_equal(rb_lbl$name, "label")
+  expect_true(!is.null(rb_lbl$attribs$id))
+  expect_equal(
+    rb$attribs$`aria-labelledby`, rb_lbl$attribs$id
+  )
+
   cbg <- checkboxGroupInput("foo", "bar", c("a", "b"))
   cbg_lbl <- cbg$children[[1]]
-
   expect_equal(cbg$attribs$role, "group")
   expect_equal(cbg_lbl$name, "label")
   expect_true(!is.null(cbg_lbl$attribs$id))

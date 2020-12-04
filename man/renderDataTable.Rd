@@ -4,9 +4,16 @@
 \alias{renderDataTable}
 \title{Table output with the JavaScript library DataTables}
 \usage{
-renderDataTable(expr, options = NULL, searchDelay = 500,
-  callback = "function(oTable) {}", escape = TRUE,
-  env = parent.frame(), quoted = FALSE, outputArgs = list())
+renderDataTable(
+  expr,
+  options = NULL,
+  searchDelay = 500,
+  callback = "function(oTable) {}",
+  escape = TRUE,
+  env = parent.frame(),
+  quoted = FALSE,
+  outputArgs = list()
+)
 }
 \arguments{
 \item{expr}{An expression that returns a data frame or a matrix.}
@@ -45,7 +52,7 @@ the server infrastructure.
 }
 \details{
 For the \code{options} argument, the character elements that have the class
-\code{"AsIs"} (usually returned from \code{\link[base:I]{base::I()}}) will be evaluated in
+\code{"AsIs"} (usually returned from \code{\link[base:AsIs]{base::I()}}) will be evaluated in
 JavaScript. This is useful when the type of the option value is not supported
 in JSON, e.g., a JavaScript function, which can be obtained by evaluating a
 character string. Note this only applies to the root-level elements of the

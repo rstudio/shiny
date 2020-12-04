@@ -21,11 +21,8 @@ almost always be used)}
 The return value, if any, from executing the module server function
 }
 \description{
-Shiny's module feature lets you break complicated UI and server logic into
-smaller, self-contained pieces. Compared to large monolithic Shiny apps,
-modules are easier to reuse and easier to reason about. See the article at
-\url{http://shiny.rstudio.com/articles/modules.html} to learn more.
-}
-\seealso{
-\url{http://shiny.rstudio.com/articles/modules.html}
+Note: As of Shiny 1.5.0, we recommend using \code{\link[=moduleServer]{moduleServer()}} instead of
+\code{\link[=callModule]{callModule()}}, because the syntax is a little easier
+to understand, and modules created with \code{moduleServer} can be tested with
+\code{\link[=testServer]{testServer()}}.
 }

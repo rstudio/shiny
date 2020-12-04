@@ -1,5 +1,11 @@
 context("reactivity")
 
+test_that("reactive and reactiveVal are functions", {
+  expect_s3_class(reactive({1}), "function")
+  expect_s3_class(reactiveVal(1), "function")
+})
+
+
 
 test_that("ReactiveVal", {
   val <- reactiveVal()
@@ -653,6 +659,115 @@ test_that("suspended/resumed observers run at most once", {
 })
 
 
+test_that("reactive() accepts injected quosures", {
+  # Normal usage - no quosures
+  a <- 1
+  f <- reactive({ a + 10 })
+  a <- 2
+  expect_identical(isolate(f()), 12)
+
+  # quosures can be used in reactive()
+  a <- 1
+  f <- reactive({ rlang::eval_tidy(rlang::quo(!!a + 10)) })
+  a <- 2
+  expect_identical(isolate(f()), 12)
+
+  # inject() with quosures
+  a <- 1
+  exp <- rlang::quo(a + 10)
+  f <- inject(reactive(!!exp))
+  a <- 2
+  expect_identical(isolate(f()), 12)
+
+  # inject() with !!!
+  a <- 1
+  exp <- list(rlang::quo(a + 10))
+  f <- inject(reactive(!!!exp))
+  a <- 2
+  expect_identical(isolate(f()), 12)
+
+  # inject() with captured environment
+  a <- 1
+  exp <- local({
+    q <- rlang::quo(a + 10)
+    a <- 2
+    q
+  })
+  f <- inject(reactive(!! exp ))
+  a <- 3
+  expect_identical(isolate(f()), 12)
+
+  # inject() with nested quosures
+  a <- 1
+  y <- quo(a)
+  exp <- quo(!!y + 10)
+  a <- 2
+  f <- inject(reactive(!! exp ))
+  a <- 3
+  expect_identical(isolate(f()), 13)
+})
+
+test_that("observe() accepts injected quosures", {
+  # Normal usage - no quosures
+  val <- NULL
+  a <- 1
+  observe({ val <<- a + 10 })
+  a <- 2
+  flushReact()
+  expect_identical(val, 12)
+
+  # quosures can be used in reactive()
+  val <- NULL
+  a <- 1
+  f <- observe({ val <<- rlang::eval_tidy(rlang::quo(!!a + 10)) })
+  a <- 2
+  flushReact()
+  expect_identical(val, 12)
+
+  # inject() with quosures
+  val <- NULL
+  a <- 1
+  exp <- rlang::quo(val <<- a + 10)
+  f <- inject(observe(!!exp))
+  a <- 2
+  flushReact()
+  expect_identical(val, 12)
+
+  # inject() with !!!
+  val <- NULL
+  a <- 1
+  exp <- list(quo(val <<- a + 10))
+  f <- inject(observe(!!!exp))
+  a <- 2
+  flushReact()
+  expect_identical(val, 12)
+
+  # inject() with captured environment
+  val <- NULL
+  a <- 1
+  exp <- local({
+    q <- rlang::quo(val <<- a + 10)
+    a <- 2
+    q
+  })
+  f <- inject(observe(!! exp ))
+  a <- 3
+  flushReact()
+  expect_identical(val, 12)
+
+  # inject() with nested quosures
+  val <- NULL
+  a <- 1
+  y <- quo(a)
+  exp <- rlang::quo(val <<- !!y + 10)
+  a <- 2
+  f <- inject(observe(!!exp))
+  a <- 3
+  flushReact()
+  expect_identical(val, 13)
+})
+
+
 test_that("reactive() accepts quoted and unquoted expressions", {
   vals <- reactiveValues(A=1)
 
@@ -678,10 +793,12 @@ test_that("reactive() accepts quoted and unquoted expressions", {
   expect_true(is.function(isolate(fun())))
 
 
-  # Check that environment is correct - parent environment should be this one
+  # Check that environment is correct - parent of parent environment should be
+  # this one. Note that rlang::as_function() injects an intermediate
+  # environment.
   this_env <- environment()
   fun <- reactive(environment())
-  expect_identical(isolate(parent.env(fun())), this_env)
+  expect_identical(isolate(parent.env(parent.env(fun()))), this_env)
 
   # Sanity check: environment structure for a reactive() should be the same as for
   # a normal function
@@ -720,12 +837,13 @@ test_that("observe() accepts quoted and unquoted expressions", {
   expect_equal(valB, 4)
 
 
-  # Check that environment is correct - parent environment should be this one
+  # Check that environment is correct - parent of parent environment should be
+  # this one. rlang::as_function() injects one intermediate env.
   this_env <- environment()
   inside_env <- NULL
   fun <- observe(inside_env <<- environment())
   flushReact()
-  expect_identical(parent.env(inside_env), this_env)
+  expect_identical(parent.env(parent.env(inside_env)), this_env)
 })
 
 test_that("Observer priorities are respected", {
@@ -1097,6 +1215,10 @@ test_that("event handling helpers take correct dependencies", {
 })
 
 run_debounce_throttle <- function(do_priming) {
+  # Some of the CRAN test machines are heavily loaded and so the timing for
+  # these tests isn't reliable. https://github.com/rstudio/shiny/pull/2789
+  skip_on_cran()
+
   # The changing of rv$a will be the (chatty) source of reactivity.
   rv <- reactiveValues(a = 0)
 
@@ -1365,4 +1487,121 @@ test_that("reactivePoll doesn't leak observer (#1548)", {
   }
 
   expect_equal(i, 3L)
+})
+
+test_that("reactivePoll prefers session$scheduleTask", {
+  called <- 0
+  session <- list(reactlog = function(...){}, onEnded = function(...){}, .scheduleTask = function(millis, cb){
+    expect_equal(millis, 50)
+    called <<- called + 1
+  })
+
+  count <- reactivePoll(50, session, function(){}, function(){})
+  observe({
+    count()
+  })
+
+  for (i in 1:4) {
+    Sys.sleep(0.05)
+    shiny:::flushReact()
+  }
+  expect_gt(called, 0)
+})
+
+test_that("invalidateLater prefers session$scheduleTask", {
+  called <- 0
+  session <- list(reactlog = function(...){}, onEnded = function(...){}, .scheduleTask = function(millis, cb){
+    expect_equal(millis, 10)
+    called <<- called + 1
+  })
+
+  observe({
+    invalidateLater(10, session)
+  })
+
+  for (i in 1:4) {
+    Sys.sleep(0.05)
+    shiny:::flushReact()
+  }
+  expect_gt(called, 0)
+})
+
+test_that("reactiveTimer prefers session$scheduleTask", {
+  called <- 0
+  session <- list(reactlog = function(...){}, onEnded = function(...){}, .scheduleTask = function(millis, cb){
+    expect_equal(millis, 10)
+    called <<- called + 1
+  })
+
+  rt <- reactiveTimer(10, session)
+  observe({
+    rt()
+  })
+
+  for (i in 1:4) {
+    Sys.sleep(0.05)
+    shiny:::flushReact()
+  }
+  expect_gt(called, 0)
+})
+
+
+test_that("Reactive expression visibility", {
+  res <- NULL
+  rv <- reactive(1)
+  o <- observe({
+    res <<- withVisible(rv())
+  })
+  flushReact()
+  expect_identical(res, list(value = 1, visible = TRUE))
+
+
+  res <- NULL
+  rv <- reactive(invisible(1))
+  o <- observe({
+    res <<- withVisible(rv())
+  })
+  flushReact()
+  expect_identical(res, list(value = 1, visible = FALSE))
+
+  # isolate
+  expect_identical(
+    withVisible(isolate(1)),
+    list(value = 1, visible = TRUE)
+  )
+  expect_identical(
+    withVisible(isolate(invisible(1))),
+    list(value = 1, visible = FALSE)
+  )
+})
+
+
+test_that("Reactive expression labels", {
+  r <- list()
+
+  # Automatic label
+  r$x <- reactive({
+    a+1;b+  2
+  })
+  # Printed output - uses expression, not `label`
+  expect_identical(
+    capture.output(print(r$x)),
+    c("reactive({", "    a + 1", "    b + 2", "}) ")
+  )
+  # Label used for debugging
+  expect_identical(
+    as.character(attr(r$x, "observable")$.label),
+    "r$x"
+  )
+
+  # With explicit label
+  r$y <- reactive({ a+1;b+  2 }, label = "hello")
+  expect_identical(
+    capture.output(print(r$y)),
+    c("reactive({", "    a + 1", "    b + 2", "}) ")
+  )
+  expect_identical(
+    as.character(attr(r$y, "observable")$.label),
+    "hello"
+  )
 })

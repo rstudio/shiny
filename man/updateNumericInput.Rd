@@ -4,8 +4,15 @@
 \alias{updateNumericInput}
 \title{Change the value of a number input on the client}
 \usage{
-updateNumericInput(session, inputId, label = NULL, value = NULL,
-  min = NULL, max = NULL, step = NULL)
+updateNumericInput(
+  session,
+  inputId,
+  label = NULL,
+  value = NULL,
+  min = NULL,
+  max = NULL,
+  step = NULL
+)
 }
 \arguments{
 \item{session}{The \code{session} object passed to function given to
@@ -15,13 +22,13 @@ updateNumericInput(session, inputId, label = NULL, value = NULL,
 
 \item{label}{The label to set for the input object.}
 
-\item{value}{The value to set for the input object.}
+\item{value}{Initial value.}
 
-\item{min}{Minimum value.}
+\item{min}{Minimum allowed value}
 
-\item{max}{Maximum value.}
+\item{max}{Maximum allowed value}
 
-\item{step}{Step size.}
+\item{step}{Interval to use when stepping between min and max}
 }
 \description{
 Change the value of a number input on the client

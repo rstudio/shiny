@@ -5,18 +5,37 @@
 \alias{eventReactive}
 \title{Event handler}
 \usage{
-observeEvent(eventExpr, handlerExpr, event.env = parent.frame(),
-  event.quoted = FALSE, handler.env = parent.frame(),
-  handler.quoted = FALSE, label = NULL, suspended = FALSE,
-  priority = 0, domain = getDefaultReactiveDomain(),
-  autoDestroy = TRUE, ignoreNULL = TRUE, ignoreInit = FALSE,
-  once = FALSE)
+observeEvent(
+  eventExpr,
+  handlerExpr,
+  event.env = parent.frame(),
+  event.quoted = FALSE,
+  handler.env = parent.frame(),
+  handler.quoted = FALSE,
+  ...,
+  label = NULL,
+  suspended = FALSE,
+  priority = 0,
+  domain = getDefaultReactiveDomain(),
+  autoDestroy = TRUE,
+  ignoreNULL = TRUE,
+  ignoreInit = FALSE,
+  once = FALSE
+)
 
-eventReactive(eventExpr, valueExpr, event.env = parent.frame(),
-  event.quoted = FALSE, value.env = parent.frame(),
-  value.quoted = FALSE, label = NULL,
-  domain = getDefaultReactiveDomain(), ignoreNULL = TRUE,
-  ignoreInit = FALSE)
+eventReactive(
+  eventExpr,
+  valueExpr,
+  event.env = parent.frame(),
+  event.quoted = FALSE,
+  value.env = parent.frame(),
+  value.quoted = FALSE,
+  ...,
+  label = NULL,
+  domain = getDefaultReactiveDomain(),
+  ignoreNULL = TRUE,
+  ignoreInit = FALSE
+)
 }
 \arguments{
 \item{eventExpr}{A (quoted or unquoted) expression that represents the event;
@@ -44,6 +63,8 @@ this is the calling environment.}
 default, this is \code{FALSE}. This is useful when you want to use an
 expression that is stored in a variable; to do so, it must be quoted with
 \code{quote()}.}
+
+\item{...}{Currently not used.}
 
 \item{label}{A label for the observer or reactive, useful for debugging.}
 
@@ -148,7 +169,7 @@ button, then \code{ignoreInit = TRUE} will guarantee that the action (in
 instead of also being triggered when it is created/initialized. Similarly,
 if you're setting up an \code{eventReactive} that responds to a dynamically
 created button used to refresh some data (then returned by that \code{eventReactive}),
-then you should use \code{eventReactive([...], ignoreInit = TRUE)} if you want
+then you should use \verb{eventReactive([...], ignoreInit = TRUE)} if you want
 to let the user decide if/when they want to refresh the data (since, depending
 on the app, this may be a computationally expensive operation).
 
@@ -202,7 +223,7 @@ if (interactive()) {
       # Take an action every time button is pressed;
       # here, we just print a message to the console
       observeEvent(input$button, {
-        cat("Showing", input$x, "rows\\n")
+        cat("Showing", input$x, "rows\n")
       })
       # Take a reactive dependency on input$button, but
       # not on any of the stuff inside the function

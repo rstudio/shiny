@@ -1,8 +1,11 @@
-# Shiny
+# shiny <img src="man/figures/logo.png" align="right" width=120 height=139 alt="" />
 
-*Travis:* [![Travis Build Status](https://travis-ci.org/rstudio/shiny.svg?branch=master)](https://travis-ci.org/rstudio/shiny)
+<!-- badges: start -->
+[![CRAN](https://www.r-pkg.org/badges/version/shiny)](https://CRAN.R-project.org/package=shiny)
+[![R build status](https://github.com/rstudio/shiny/workflows/R-CMD-check/badge.svg)](https://github.com/rstudio/shiny/actions)
+[![RStudio community](https://img.shields.io/badge/community-shiny-blue?style=social&logo=rstudio&logoColor=75AADB)](https://community.rstudio.com/new-topic?category=shiny&tags=shiny)
 
-*AppVeyor:* [![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/rstudio/shiny?branch=master&svg=true)](https://ci.appveyor.com/project/rstudio/shiny)
+<!-- badges: end -->
 
 Shiny is a new package from RStudio that makes it incredibly easy to build interactive web applications with R.
 
@@ -34,26 +37,14 @@ install.packages("shiny")
 To install the latest development builds directly from GitHub, run this instead:
 
 ```r
-if (!require("devtools"))
-  install.packages("devtools")
-devtools::install_github("rstudio/shiny")
+if (!require("remotes"))
+  install.packages("remotes")
+remotes::install_github("rstudio/shiny")
 ```
 
 ## Getting Started
 
 To learn more we highly recommend you check out the [Shiny Tutorial](http://shiny.rstudio.com/tutorial/). The tutorial explains the framework in-depth, walks you through building a simple application, and includes extensive annotated examples.
-
-## Bootstrap 3 migration
-
-Shiny versions 0.10.2.2 and below used the Bootstrap 2 web framework. After 0.10.2.2, Shiny switched to Bootstrap 3. For most users, the upgrade should be seamless. However, if you have have customized your HTML-generating code to use features specific to Bootstrap 2, you may need to update your code to work with Bootstrap 3.
-
-If you do not wish to update your code at this time, you can use the [shinybootstrap2](https://github.com/rstudio/shinybootstrap2) package for backward compatibility.
-
-If you prefer to install an older version of Shiny, you can do it using the devtools package:
-
-```R
-devtools::install_version("shiny", version = "0.10.2.2")
-```
 
 ## Development notes
 

@@ -110,6 +110,10 @@ dateInput <- function(inputId, label, value = NULL, min = NULL, max = NULL,
     shinyInputLabel(inputId, label),
     tags$input(type = "text",
                class = "form-control",
+               # `aria-labelledby` attribute is required for accessibility to avoid doubled labels (#2951).
+               `aria-labelledby` = paste0(inputId, "-label"),
+               # title attribute is announced for screen readers for date format.
+               title = paste("Date format:", format),
                `data-date-language` = language,
                `data-date-week-start` = weekstart,
                `data-date-format` = format,
@@ -124,19 +128,48 @@ dateInput <- function(inputId, label, value = NULL, min = NULL, max = NULL,
                `data-date-days-of-week-disabled` =
                    jsonlite::toJSON(daysofweekdisabled, null = 'null')
     ),
-    datePickerDependency
+    datePickerDependency()
   )
 }
 
-datePickerDependency <- htmlDependency(
-  "bootstrap-datepicker", "1.6.4", c(href = "shared/datepicker"),
-  script = "js/bootstrap-datepicker.min.js",
-  stylesheet = "css/bootstrap-datepicker3.min.css",
-  # Need to enable noConflict mode. See #1346.
-  head = "<script>
-(function() {
-  var datepicker = $.fn.datepicker.noConflict();
-  $.fn.bsDatepicker = datepicker;
-})();
-</script>"
-)
+
+datePickerVersion <- "1.9.0"
+
+datePickerDependency <- function(theme) {
+  list(
+    htmlDependency(
+      name = "bootstrap-datepicker-js",
+      version = datePickerVersion,
+      src = c(href = "shared/datepicker"),
+      script = "js/bootstrap-datepicker.min.js",
+      # Need to enable noConflict mode. See #1346.
+      head = "<script>(function() {
+        var datepicker = $.fn.datepicker.noConflict();
+        $.fn.bsDatepicker = datepicker;
+      })();
+     </script>"
+    ),
+    bslib::bs_dependency_defer(datePickerCSS)
+  )
+}
+
+datePickerCSS <- function(theme) {
+  if (!is_bs_theme(theme)) {
+    return(htmlDependency(
+      name = "bootstrap-datepicker-css",
+      version = datePickerVersion,
+      src = c(href = "shared/datepicker"),
+      stylesheet = "css/bootstrap-datepicker3.min.css"
+    ))
+  }
+
+  scss_file <- system.file(package = "shiny", "www/shared/datepicker/scss/build3.scss")
+
+  bslib::bs_dependency(
+    input = sass::sass_file(scss_file),
+    theme = theme,
+    name = "bootstrap-datepicker",
+    version = datePickerVersion,
+    cache_key_extra = shinyPackageVersion()
+  )
+}

@@ -5,7 +5,7 @@
 \alias{fixedRow}
 \title{Create a page with a fixed layout}
 \usage{
-fixedPage(..., title = NULL, responsive = NULL, theme = NULL)
+fixedPage(..., title = NULL, responsive = NULL, theme = NULL, lang = NULL)
 
 fixedRow(...)
 }
@@ -20,6 +20,10 @@ Bootstrap 3.}
 \item{theme}{Alternative Bootstrap stylesheet (normally a css file within the
 www directory). For example, to use the theme located at
 \code{www/bootstrap.css} you would use \code{theme = "bootstrap.css"}.}
+
+\item{lang}{ISO 639-1 language code for the HTML page, such as "en" or "ko".
+This will be used as the lang in the \code{<html>} tag, as in \code{<html lang="en">}.
+The default (NULL) results in an empty string.}
 }
 \value{
 A UI defintion that can be passed to the \link{shinyUI} function.
@@ -67,9 +71,13 @@ shinyApp(ui, server = function(input, output) { })
 \seealso{
 \code{\link[=column]{column()}}
 
-Other layout functions: \code{\link{fillPage}},
-  \code{\link{flowLayout}}, \code{\link{fluidPage}},
-  \code{\link{navbarPage}}, \code{\link{sidebarLayout}},
-  \code{\link{splitLayout}}, \code{\link{verticalLayout}}
+Other layout functions: 
+\code{\link{fillPage}()},
+\code{\link{flowLayout}()},
+\code{\link{fluidPage}()},
+\code{\link{navbarPage}()},
+\code{\link{sidebarLayout}()},
+\code{\link{splitLayout}()},
+\code{\link{verticalLayout}()}
 }
 \concept{layout functions}

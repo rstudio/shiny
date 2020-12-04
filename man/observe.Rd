@@ -4,10 +4,18 @@
 \alias{observe}
 \title{Create a reactive observer}
 \usage{
-observe(x, env = parent.frame(), quoted = FALSE, label = NULL,
-  suspended = FALSE, priority = 0,
-  domain = getDefaultReactiveDomain(), autoDestroy = TRUE,
-  ..stacktraceon = TRUE)
+observe(
+  x,
+  env = parent.frame(),
+  quoted = FALSE,
+  ...,
+  label = NULL,
+  suspended = FALSE,
+  priority = 0,
+  domain = getDefaultReactiveDomain(),
+  autoDestroy = TRUE,
+  ..stacktraceon = TRUE
+)
 }
 \arguments{
 \item{x}{An expression (quoted or unquoted). Any return value will be
@@ -20,6 +28,8 @@ non-reactive expression.}
 \item{quoted}{Is the expression quoted? By default, this is \code{FALSE}.
 This is useful when you want to use an expression that is stored in a
 variable; to do so, it must be quoted with \code{quote()}.}
+
+\item{...}{Not used.}
 
 \item{label}{A label for the observer, useful for debugging.}
 

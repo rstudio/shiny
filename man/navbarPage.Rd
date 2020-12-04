@@ -5,11 +5,23 @@
 \alias{navbarMenu}
 \title{Create a page with a top level navigation bar}
 \usage{
-navbarPage(title, ..., id = NULL, selected = NULL,
+navbarPage(
+  title,
+  ...,
+  id = NULL,
+  selected = NULL,
   position = c("static-top", "fixed-top", "fixed-bottom"),
-  header = NULL, footer = NULL, inverse = FALSE,
-  collapsible = FALSE, collapsable, fluid = TRUE, responsive = NULL,
-  theme = NULL, windowTitle = title)
+  header = NULL,
+  footer = NULL,
+  inverse = FALSE,
+  collapsible = FALSE,
+  collapsable,
+  fluid = TRUE,
+  responsive = NULL,
+  theme = NULL,
+  windowTitle = title,
+  lang = NULL
+)
 
 navbarMenu(title, ..., menuName = title, icon = NULL)
 }
@@ -21,7 +33,7 @@ navbarMenu(title, ..., menuName = title, icon = NULL)
 section headers. If the string is a set of dashes like \code{"----"} a
 horizontal separator will be displayed in the menu.}
 
-\item{id}{If provided, you can use \code{input$}\emph{\code{id}} in your
+\item{id}{If provided, you can use \verb{input$}\emph{\code{id}} in your
 server logic to determine which of the current tabs is active. The value
 will correspond to the \code{value} argument that is passed to
 \code{\link[=tabPanel]{tabPanel()}}.}
@@ -66,6 +78,10 @@ www directory). For example, to use the theme located at
 \item{windowTitle}{The title that should be displayed by the browser window.
 Useful if \code{title} is not a string.}
 
+\item{lang}{ISO 639-1 language code for the HTML page, such as "en" or "ko".
+This will be used as the lang in the \code{<html>} tag, as in \code{<html lang="en">}.
+The default (NULL) results in an empty string.}
+
 \item{menuName}{A name that identifies this \code{navbarMenu}. This
 is needed if you want to insert/remove or show/hide an entire
 \code{navbarMenu}.}
@@ -106,9 +122,13 @@ navbarPage("App Title",
 \code{\link[=updateNavbarPage]{updateNavbarPage()}}, \code{\link[=insertTab]{insertTab()}},
 \code{\link[=showTab]{showTab()}}
 
-Other layout functions: \code{\link{fillPage}},
-  \code{\link{fixedPage}}, \code{\link{flowLayout}},
-  \code{\link{fluidPage}}, \code{\link{sidebarLayout}},
-  \code{\link{splitLayout}}, \code{\link{verticalLayout}}
+Other layout functions: 
+\code{\link{fillPage}()},
+\code{\link{fixedPage}()},
+\code{\link{flowLayout}()},
+\code{\link{fluidPage}()},
+\code{\link{sidebarLayout}()},
+\code{\link{splitLayout}()},
+\code{\link{verticalLayout}()}
 }
 \concept{layout functions}

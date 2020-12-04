@@ -1,0 +1,192 @@
+diff --git a/inst/www/shared/datepicker/scss/build3.scss b/inst/www/shared/datepicker/scss/build3.scss
+index b5388654..0dac6a62 100644
+--- a/inst/www/shared/datepicker/scss/build3.scss
++++ b/inst/www/shared/datepicker/scss/build3.scss
+@@ -6,32 +6,33 @@
+ //
+ // Variables and mixins copied from Bootstrap 3.3.5
+
+-// Variables
+-$gray:                   lighten(#000, 33.5%); // #555
+-$gray-light:             lighten(#000, 46.7%); // #777
+-$gray-lighter:           lighten(#000, 93.5%); // #eee
++// These are BS3 variables that are used in datepicker3.scss. So, when compiling against
++// a BS3 bslib theme, these variables should already be defined. Here we set
++// *defaults* for these variables based on BS4 variables, so this scss can work for
++// both BS3 and BS4
++$gray:                mix($body-bg, $body-color, 33.5%) !default;
++$gray-light:          mix($body-bg, $body-color, 46.7%) !default;
++$gray-lighter:        mix($body-bg, $body-color, 90%) !default;
++$brand-primary:       $primary !default;
++$btn-primary-color:   $body-bg !default;
++$btn-primary-bg:      $primary !default;
++$btn-primary-border:  mix($body-color, $btn-primary-bg, 5%) !default;
++$state-info-bg:       mix($body-bg, $info, 80%) !default;
++$border-radius-base:  $border-radius !default;
++$dropdown-border:     $dropdown-border-color !default;
++// These variables are also used in datepicker3.scss, but we don't need to set them since
++// they're the same in BS3 and BS4
++//$line-height-base:        1.428571429;
++//$btn-link-disabled-color: $gray-light;
++//$dropdown-bg:             #fff;
+
+-$brand-primary:         darken(#428bca, 6.5%); // #337ab7
+
+-$btn-primary-color:              #fff;
+-$btn-primary-bg:                 $brand-primary;
+-$btn-primary-border:             darken($btn-primary-bg, 5%);
+
+-$btn-link-disabled-color:        $gray-light;
+-
+-$state-info-bg:           #d9edf7;
+-
+-$line-height-base:        1.428571429; // 20/14
+-$border-radius-base:      4px;
+-
+-$dropdown-bg:                   #fff;
+-$dropdown-border:               rgba(0,0,0,.15);
+
+
+-// Mixins
++@mixin button-variant($background, $border) {
++  $color: color-contrast($background);
+
+-// Button variants
+-@mixin button-variant($color, $background, $border) {
+   color: $color;
+   background-color: $background;
+   border-color: $border;
+@@ -39,26 +55,26 @@ $dropdown-border:               rgba(0,0,0,.15);
+   &:focus,
+   &.focus {
+     color: $color;
+-    background-color: darken($background, 10%);
+-        border-color: darken($border, 25%);
++    background-color: mix($background, $color, 90%);
++        border-color: mix($border, $color, 75%);
+   }
+   &:hover {
+     color: $color;
+-    background-color: darken($background, 10%);
+-        border-color: darken($border, 12%);
++    background-color: mix($background, $color, 50%);
++        border-color: mix($border, $color, 88%);
+   }
+   &:active,
+   &.active {
+     color: $color;
+-    background-color: darken($background, 10%);
+-        border-color: darken($border, 12%);
++    background-color: mix($background, $color, 90%);
++        border-color: mix($border, $color, 88%);
+
+     &:hover,
+     &:focus,
+     &.focus {
+       color: $color;
+-      background-color: darken($background, 17%);
+-          border-color: darken($border, 25%);
++      background-color: mix($background, $color, 83%);
++          border-color: mix($border, $color, 75%);
+     }
+   }
+   &.disabled,
+diff --git a/inst/www/shared/datepicker/scss/datepicker3.scss b/inst/www/shared/datepicker/scss/datepicker3.scss
+index 3d1621e0..3e031b31 100644
+--- a/inst/www/shared/datepicker/scss/datepicker3.scss
++++ b/inst/www/shared/datepicker/scss/datepicker3.scss
+@@ -83,6 +83,7 @@
+ 		}
+ 		&.day:hover,
+ 		&.focused {
++		  color: color-contrast($gray-lighter);
+ 			background: $gray-lighter;
+ 			cursor: pointer;
+ 		}
+@@ -94,7 +95,7 @@
+ 		}
+ 		&.highlighted {
+ 			$highlighted-bg: $state-info-bg;
+-			@include button-variant(#000, $highlighted-bg, darken($highlighted-bg, 20%));
++			@include button-variant($highlighted-bg, darken($highlighted-bg, 20%));
+ 			border-radius: 0;
+
+ 			&.focused {
+@@ -109,7 +110,7 @@
+ 		}
+ 		&.today {
+ 			$today-bg: lighten(orange, 30%);
+-			@include button-variant(#000, $today-bg, darken($today-bg, 20%));
++			@include button-variant($today-bg, darken($today-bg, 20%));
+
+ 			&.focused {
+ 				background: darken($today-bg, 10%);
+@@ -123,7 +124,7 @@
+ 		}
+ 		&.range {
+ 			$range-bg: $gray-lighter;
+-			@include button-variant(#000, $range-bg, darken($range-bg, 20%));
++			@include button-variant($range-bg, darken($range-bg, 20%));
+ 			border-radius: 0;
+
+ 			&.focused {
+@@ -138,7 +139,7 @@
+ 		}
+ 		&.range.highlighted {
+ 			$range-highlighted-bg: mix($state-info-bg, $gray-lighter, 50%);
+-			@include button-variant(#000, $range-highlighted-bg, darken($range-highlighted-bg, 20%));
++			@include button-variant($range-highlighted-bg, darken($range-highlighted-bg, 20%));
+
+ 			&.focused {
+ 				background: darken($range-highlighted-bg, 10%);
+@@ -152,7 +153,7 @@
+ 		}
+ 		&.range.today {
+ 			$range-today-bg: mix(orange, $gray-lighter, 50%);
+-			@include button-variant(#000, $range-today-bg, darken($range-today-bg, 20%));
++			@include button-variant($range-today-bg, darken($range-today-bg, 20%));
+
+ 			&.disabled,
+ 			&.disabled:active {
+@@ -162,12 +163,12 @@
+ 		}
+ 		&.selected,
+ 		&.selected.highlighted {
+-			@include button-variant(#fff, $gray-light, $gray);
++			@include button-variant($gray-light, $gray);
+ 			text-shadow: 0 -1px 0 rgba(0,0,0,.25);
+ 		}
+ 		&.active,
+ 		&.active.highlighted {
+-			@include button-variant($btn-primary-color, $btn-primary-bg, $btn-primary-border);
++			@include button-variant($btn-primary-bg, $btn-primary-border);
+ 			text-shadow: 0 -1px 0 rgba(0,0,0,.25);
+ 		}
+ 		span {
+@@ -181,6 +182,7 @@
+ 			border-radius: 4px;
+ 			&:hover,
+ 			&.focused {
++			  color: color-contrast($gray-lighter);
+ 				background: $gray-lighter;
+ 			}
+ 			&.disabled,
+@@ -193,7 +195,7 @@
+ 			&.active:hover,
+ 			&.active.disabled,
+ 			&.active.disabled:hover {
+-				@include button-variant($btn-primary-color, $btn-primary-bg, $btn-primary-border);
++				@include button-variant($btn-primary-bg, $btn-primary-border);
+ 				text-shadow: 0 -1px 0 rgba(0,0,0,.25);
+ 			}
+ 			&.old,
+@@ -213,7 +215,8 @@
+ 	tfoot tr th {
+ 		cursor: pointer;
+ 		&:hover {
+-			background: $gray-lighter;
++		  color: color-contrast($gray-lighter);
++		  background: $gray-lighter;
+ 		}
+ 	}
+

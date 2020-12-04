@@ -71,9 +71,24 @@ function registerDependency(name, version) {
   htmlDependencies[name] = version;
 }
 
+// Re-render stylesheet(s) if the dependency has specificially requested it
+// and it matches an existing dependency (name and version)
+function needsRestyle(dep) {
+  if (!dep.restyle) {
+    return false;
+  }
+  var names = Object.keys(htmlDependencies);
+  var idx = names.indexOf(dep.name);
+  if (idx === -1) {
+    return false;
+  }
+  return htmlDependencies[names[idx]] === dep.version;
+}
+
 // Client-side dependency resolution and rendering
 function renderDependency(dep) {
-  if (htmlDependencies.hasOwnProperty(dep.name))
+  var restyle = needsRestyle(dep);
+  if (htmlDependencies.hasOwnProperty(dep.name) && !restyle)
     return false;
 
   registerDependency(dep.name, dep.version);
@@ -82,7 +97,7 @@ function renderDependency(dep) {
 
   var $head = $("head").first();
 
-  if (dep.meta) {
+  if (dep.meta && !restyle) {
     var metas = $.map(asArray(dep.meta), function(obj, idx) {
       // only one named pair is expected in obj as it's already been decomposed
       var name = Object.keys(obj)[0];
@@ -92,21 +107,86 @@ function renderDependency(dep) {
   }
 
   if (dep.stylesheet) {
-    var stylesheets = $.map(asArray(dep.stylesheet), function(stylesheet) {
-      return $("<link rel='stylesheet' type='text/css'>")
-        .attr("href", href + "/" + encodeURI(stylesheet));
+    var links = $.map(asArray(dep.stylesheet), function(stylesheet) {
+      return $("<link rel='stylesheet' type='text/css'>").attr("href", href + "/" + encodeURI(stylesheet));
     });
-    $head.append(stylesheets);
+
+    if (!restyle) {
+      $head.append(links);
+    } else {
+      $.map(links, function(link) {
+        // Find any document.styleSheets that match this link's href
+        // so we can remove it after bringing in the new stylesheet
+        var oldSheet = findSheet(link.attr("href"));
+        // Add a timestamp to the href to prevent caching
+        var href = link.attr("href") + "?restyle=" + new Date().getTime();
+        // Use inline <style> approach for IE, otherwise use the more elegant
+        // <link> -based approach
+        if (browser.isIE) {
+          refreshStyle(href, oldSheet);
+        } else {
+          link.attr("href", href);
+          // Once the new <link> is loaded, schedule the old <link> to be removed
+          // on the next tick which is needed to avoid FOUC
+          link.attr("onload", () => {
+            setTimeout(() => removeSheet(oldSheet), 500);
+          });
+          $head.append(link);
+        }
+      });
+
+      // Once the new styles are applied, CSS values that are accessible server-side
+      // (e.g., getCurrentOutputInfo(), output visibility, etc) may become outdated.
+      // At the time of writing, that means we need to do sendImageSize() &
+      // sendOutputHiddenState() again, which can be done by re-binding.
+      /* global Shiny */
+      var bindDebouncer = new Debouncer(null, Shiny.bindAll, 100);
+      setTimeout(() => bindDebouncer.normalCall(), 100);
+
+      // This inline <style> based approach works for IE11
+      function refreshStyle(href, oldSheet) {
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', href);
+        xhr.onload = function() {
+          var id = "shiny_restyle_" + href.split("?restyle")[0].replace(/\W/g, '_');
+          var oldStyle = $head.find("style#" + id);
+          var newStyle = $("<style>").attr("id", id).html(xhr.responseText);
+          $head.append(newStyle);
+          setTimeout(() => oldStyle.remove(), 500);
+          setTimeout(() => removeSheet(oldSheet), 500);
+        };
+        xhr.send();
+      }
+
+      function findSheet(href) {
+        for (var i = 0; i < document.styleSheets.length; i++) {
+          var sheet = document.styleSheets[i];
+          // The sheet's href is a full URL
+          if (typeof sheet.href === "string" && sheet.href.indexOf(href) > -1) {
+            return sheet;
+          }
+        }
+        return null;
+      }
+
+      function removeSheet(sheet) {
+        if (!sheet) return;
+        sheet.disabled = true;
+        if (browser.isIE) sheet.cssText = "";
+        $(sheet.ownerNode).remove();
+      }
+
+    }
   }
 
-  if (dep.script) {
+  if (dep.script && !restyle) {
     var scripts = $.map(asArray(dep.script), function(scriptName) {
       return $("<script>").attr("src", href + "/" + encodeURI(scriptName));
     });
     $head.append(scripts);
   }
 
-  if (dep.attachment) {
+  if (dep.attachment && !restyle) {
     // dep.attachment might be a single string, an array, or an object.
     var attachments = dep.attachment;
     if (typeof(attachments) === "string")
@@ -129,7 +209,7 @@ function renderDependency(dep) {
     $head.append(attach);
   }
 
-  if (dep.head) {
+  if (dep.head && !restyle) {
     var $newHead = $("<head></head>");
     $newHead.html(dep.head);
     $head.append($newHead.children());

@@ -5,13 +5,30 @@
 \alias{fixedPanel}
 \title{Panel with absolute positioning}
 \usage{
-absolutePanel(..., top = NULL, left = NULL, right = NULL,
-  bottom = NULL, width = NULL, height = NULL, draggable = FALSE,
-  fixed = FALSE, cursor = c("auto", "move", "default", "inherit"))
+absolutePanel(
+  ...,
+  top = NULL,
+  left = NULL,
+  right = NULL,
+  bottom = NULL,
+  width = NULL,
+  height = NULL,
+  draggable = FALSE,
+  fixed = FALSE,
+  cursor = c("auto", "move", "default", "inherit")
+)
 
-fixedPanel(..., top = NULL, left = NULL, right = NULL,
-  bottom = NULL, width = NULL, height = NULL, draggable = FALSE,
-  cursor = c("auto", "move", "default", "inherit"))
+fixedPanel(
+  ...,
+  top = NULL,
+  left = NULL,
+  right = NULL,
+  bottom = NULL,
+  width = NULL,
+  height = NULL,
+  draggable = FALSE,
+  cursor = c("auto", "move", "default", "inherit")
+)
 }
 \arguments{
 \item{...}{Attributes (named arguments) or children (unnamed arguments) that
@@ -53,7 +70,7 @@ An HTML element or list of elements.
 Creates a panel whose contents are absolutely positioned.
 }
 \details{
-The \code{absolutePanel} function creates a \code{<div>} tag whose CSS
+The \code{absolutePanel} function creates a \verb{<div>} tag whose CSS
 position is set to \code{absolute} (or fixed if \code{fixed = TRUE}). The way
 absolute positioning works in HTML is that absolute coordinates are specified
 relative to its nearest parent element whose position is not set to

@@ -5,8 +5,16 @@
 \alias{varSelectizeInput}
 \title{Select variables from a data frame}
 \usage{
-varSelectInput(inputId, label, data, selected = NULL, multiple = FALSE,
-  selectize = TRUE, width = NULL, size = NULL)
+varSelectInput(
+  inputId,
+  label,
+  data,
+  selected = NULL,
+  multiple = FALSE,
+  selectize = TRUE,
+  width = NULL,
+  size = NULL
+)
 
 varSelectizeInput(inputId, ..., options = NULL, width = NULL)
 }
@@ -35,7 +43,7 @@ but when \code{size} is set, it will be a box instead.}
 \item{...}{Arguments passed to \code{varSelectInput()}.}
 
 \item{options}{A list of options. See the documentation of \pkg{selectize.js}
-for possible options (character option values inside \code{\link[base:I]{base::I()}} will
+for possible options (character option values inside \code{\link[base:AsIs]{base::I()}} will
 be treated as literal JavaScript code; see \code{\link[=renderDataTable]{renderDataTable()}}
 for details).}
 }
@@ -68,10 +76,10 @@ value when it is a single choice input and the empty string is not in the
 The resulting server \code{input} value will be returned as:
 \itemize{
 \item A symbol if \code{multiple = FALSE}. The \code{input} value should be
-used with rlang's \code{\link[rlang:!!]{rlang::!!()}}. For example,
+used with rlang's \code{\link[rlang:nse-force]{rlang::!!()}}. For example,
 \code{ggplot2::aes(!!input$variable)}.
 \item A list of symbols if \code{multiple = TRUE}. The \code{input} value
-should be used with rlang's \code{\link[rlang:!!!]{rlang::!!!()}} to expand
+should be used with rlang's \code{\link[rlang:nse-force]{rlang::!!!()}} to expand
 the symbol list as individual arguments. For example,
 \code{dplyr::select(mtcars, !!!input$variabls)} which is
 equivalent to \code{dplyr::select(mtcars, !!input$variabls[[1]], !!input$variabls[[2]], ..., !!input$variabls[[length(input$variabls)]])}.
@@ -119,13 +127,20 @@ shinyApp(
 \seealso{
 \code{\link[=updateSelectInput]{updateSelectInput()}}
 
-Other input elements: \code{\link{actionButton}},
-  \code{\link{checkboxGroupInput}},
-  \code{\link{checkboxInput}}, \code{\link{dateInput}},
-  \code{\link{dateRangeInput}}, \code{\link{fileInput}},
-  \code{\link{numericInput}}, \code{\link{passwordInput}},
-  \code{\link{radioButtons}}, \code{\link{selectInput}},
-  \code{\link{sliderInput}}, \code{\link{submitButton}},
-  \code{\link{textAreaInput}}, \code{\link{textInput}}
+Other input elements: 
+\code{\link{actionButton}()},
+\code{\link{checkboxGroupInput}()},
+\code{\link{checkboxInput}()},
+\code{\link{dateInput}()},
+\code{\link{dateRangeInput}()},
+\code{\link{fileInput}()},
+\code{\link{numericInput}()},
+\code{\link{passwordInput}()},
+\code{\link{radioButtons}()},
+\code{\link{selectInput}()},
+\code{\link{sliderInput}()},
+\code{\link{submitButton}()},
+\code{\link{textAreaInput}()},
+\code{\link{textInput}()}
 }
 \concept{input elements}

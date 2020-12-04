@@ -19,9 +19,6 @@ on a local connection (without Shiny Server or Connect).
 \item{clientData}{
 A \code{\link[=reactiveValues]{reactiveValues()}} object that contains information about the client.
 \itemize{
-\item{\code{allowDataUriScheme} is a logical value that indicates whether
-the browser is able to handle URIs that use the \code{data:} scheme.
-}
 \item{\code{pixelratio} reports the "device pixel ratio" from the web browser,
 or 1 if none is reported. The value is 2 for Apple Retina displays.
 }
@@ -174,10 +171,22 @@ possible to specify by name which values to return by providing a
 character vector, as in \code{input=c("x", "y")}. The format can be
 "rds" or "json".
 }
+\item{setCurrentTheme(theme)}{
+Sets the current \code{\link[=bootstrapLib]{bootstrapLib()}} theme, which updates the value of
+\code{\link[=getCurrentTheme]{getCurrentTheme()}}, invalidates \code{session$getCurrentTheme()}, and calls
+function(s) registered with \code{\link[=registerThemeDependency]{registerThemeDependency()}} with provided
+\code{theme}. If those function calls return \code{\link[htmltools:htmlDependency]{htmltools::htmlDependency()}}s with
+\code{stylesheet}s, then those stylesheets are "refreshed" (i.e., the new
+stylesheets are inserted on the page and the old ones are disabled and
+removed).
+}
+\item{getCurrentTheme()}{
+A reactive read of the current \code{\link[=bootstrapLib]{bootstrapLib()}} theme.
+}
 }
 \description{
 Shiny server functions can optionally include \code{session} as a parameter
-(e.g. \code{function(input, output, session)}). The session object is an
+(e.g. \verb{function(input, output, session)}). The session object is an
 environment that can be used to access information and functionality
 relating to the session. The following list describes the items available
 in the environment; they can be accessed using the \code{$} operator (for

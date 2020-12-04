@@ -24,7 +24,9 @@ withMathJax <- function(...) {
   )
 }
 
-renderPage <- function(ui, connection, showcase=0, testMode=FALSE) {
+renderPage <- function(ui, showcase=0, testMode=FALSE) {
+  lang <- getLang(ui)
+
   # If the ui is a NOT complete document (created by htmlTemplate()), then do some
   # preprocessing and make sure it's a complete document.
   if (!inherits(ui, "html_document")) {
@@ -38,7 +40,10 @@ renderPage <- function(ui, connection, showcase=0, testMode=FALSE) {
     # Put the body into the default template
     ui <- htmlTemplate(
       system.file("template", "default.html", package = "shiny"),
-      body = ui
+      lang = lang,
+      body = ui,
+      # this template is a complete HTML document
+      document_ = TRUE
     )
   }
 
@@ -46,7 +51,7 @@ renderPage <- function(ui, connection, showcase=0, testMode=FALSE) {
     version <- getOption("shiny.jquery.version", 3)
     if (version == 3) {
       return(htmlDependency(
-        "jquery", "3.4.1",
+        "jquery", "3.5.1",
         c(href = "shared"),
         script = "jquery.min.js"
       ))
@@ -61,23 +66,57 @@ renderPage <- function(ui, connection, showcase=0, testMode=FALSE) {
     stop("Unsupported version of jQuery: ", version)
   }
 
-  shiny_deps <- list(
-    htmlDependency("json2", "2014.02.04", c(href="shared"), script = "json2-min.js"),
-    jquery(),
-    htmlDependency("shiny", utils::packageVersion("shiny"), c(href="shared"),
-      script = if (getOption("shiny.minified", TRUE)) "shiny.min.js" else "shiny.js",
-      stylesheet = "shiny.css")
+  shiny_deps <- c(
+    list(jquery()),
+    shinyDependencies()
   )
 
   if (testMode) {
     # Add code injection listener if in test mode
     shiny_deps[[length(shiny_deps) + 1]] <-
-      htmlDependency("shiny-testmode", utils::packageVersion("shiny"),
-        c(href="shared"), script = "shiny-testmode.js")
+      htmlDependency("shiny-testmode", shinyPackageVersion(),
+                     c(href="shared"), script = "shiny-testmode.js")
   }
 
   html <- renderDocument(ui, shiny_deps, processDep = createWebDependency)
-  writeUTF8(html, con = connection)
+  enc2utf8(paste(collapse = "\n", html))
+}
+
+shinyDependencies <- function() {
+  list(
+    bslib::bs_dependency_defer(shinyDependencyCSS),
+    htmlDependency(
+      name = "shiny-javascript",
+      version = shinyPackageVersion(),
+      src = c(href = "shared"),
+      script = if (getOption("shiny.minified", TRUE)) "shiny.min.js" else "shiny.js"
+    )
+  )
+}
+
+shinyDependencyCSS <- function(theme) {
+  version <- shinyPackageVersion()
+
+  if (!is_bs_theme(theme)) {
+    return(htmlDependency(
+      name = "shiny-css",
+      version = version,
+      src = c(href = "shared"),
+      stylesheet = "shiny.min.css"
+    ))
+  }
+
+  scss_home <- system.file("www/shared/shiny_scss", package = "shiny")
+  scss_files <- file.path(scss_home, c("bootstrap.scss", "shiny.scss"))
+  scss_files <- lapply(scss_files, sass::sass_file)
+
+  bslib::bs_dependency(
+    input = scss_files,
+    theme = theme,
+    name = "shiny-sass",
+    version = version,
+    cache_key_extra = version
+  )
 }
 
 #' Create a Shiny UI handler
@@ -101,15 +140,17 @@ uiHttpHandler <- function(ui, uiPattern = "^/$") {
 
   force(ui)
 
+  allowed_methods <- "GET"
+  if (is.function(ui)) {
+    allowed_methods <- attr(ui, "http_methods_supported", exact = TRUE) %||% allowed_methods
+  }
+
   function(req) {
-    if (!identical(req$REQUEST_METHOD, 'GET'))
+    if (!isTRUE(req$REQUEST_METHOD %in% allowed_methods))
       return(NULL)
 
     if (!isTRUE(grepl(uiPattern, req$PATH_INFO)))
       return(NULL)
-
-    textConn <- file(open = "w+")
-    on.exit(close(textConn))
 
     showcaseMode <- .globals$showcaseDefault
     if (.globals$showcaseOverride) {
@@ -118,7 +159,7 @@ uiHttpHandler <- function(ui, uiPattern = "^/$") {
         showcaseMode <- mode
     }
 
-    testMode <- .globals$testMode %OR% FALSE
+    testMode <- getShinyOption("testmode", default = FALSE)
 
     # Create a restore context using query string
     bookmarkStore <- getShinyOption("bookmarkStore", default = "disable")
@@ -150,8 +191,11 @@ uiHttpHandler <- function(ui, uiPattern = "^/$") {
     if (is.null(uiValue))
       return(NULL)
 
-    renderPage(uiValue, textConn, showcaseMode, testMode)
-    html <- paste(readLines(textConn, encoding = 'UTF-8'), collapse='\n')
-    return(httpResponse(200, content=enc2utf8(html)))
+    if (inherits(uiValue, "httpResponse")) {
+      return(uiValue)
+    } else {
+      html <- renderPage(uiValue, showcaseMode, testMode)
+      return(httpResponse(200, content=html))
+    }
   }
 }

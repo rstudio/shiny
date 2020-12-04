@@ -18,44 +18,42 @@ shinyOptions(...)
 \item{...}{Options to set, with the form \code{name = value}.}
 }
 \description{
-\code{getShinyOption()} retrieves the value of a Shiny option. \code{shinyOptions()}
-sets the value of Shiny options; it can also be used to return a list of all
-currently-set Shiny options.
+There are two mechanisms for working with options for Shiny. One is the
+\code{\link[=options]{options()}} function, which is part of base R, and the other is the
+\code{shinyOptions()} function, which is in the Shiny package. The reason for
+these two mechanisms is has to do with legacy code and scoping.
+
+The \code{\link[=options]{options()}} function sets options globally, for the duration of the R
+process. The \code{\link[=getOption]{getOption()}} function retrieves the value of an option. All
+shiny related options of this type are prefixed with \code{"shiny."}.
+
+The \code{shinyOptions()} function sets the value of a shiny option, but unlike
+\code{options()}, it is not always global in scope; the options may be scoped
+globally, to an application, or to a user session in an application,
+depending on the context. The \code{getShinyOption()} function retrieves a value
+of a shiny option. Currently, the options set via \code{shinyOptions} are for
+internal use only.
 }
-\section{Scope}{
+\section{Options with \code{options()}}{
 
-There is a global option set which is available by default. When a Shiny
-application is run with \code{\link[=runApp]{runApp()}}, that option set is duplicated and the
-new option set is available for getting or setting values. If options
-are set from \code{global.R}, \code{app.R}, \code{ui.R}, or \code{server.R}, or if they are set
-from inside the server function, then the options will be scoped to the
-application. When the application exits, the new option set is discarded and
-the global option set is restored.
-}
-
-\section{Options}{
-
-There are a number of global options that affect Shiny's behavior. These can
-be set globally with \code{options()} or locally (for a single app) with
-\code{shinyOptions()}.
 
 \describe{
 \item{shiny.autoreload (defaults to \code{FALSE})}{If \code{TRUE} when a Shiny app is launched, the
 app directory will be continually monitored for changes to files that
 have the extensions: r, htm, html, js, css, png, jpg, jpeg, gif. If any
 changes are detected, all connected Shiny sessions are reloaded. This
-allows for fast feedback loops when tweaking Shiny UI.\preformatted{Since monitoring for changes is expensive (we simply poll for last
+allows for fast feedback loops when tweaking Shiny UI.
+
+Since monitoring for changes is expensive (we simply poll for last
 modified times), this feature is intended only for development.
 
 You can customize the file patterns Shiny will monitor by setting the
 shiny.autoreload.pattern option. For example, to monitor only ui.R:
-`options(shiny.autoreload.pattern = glob2rx("ui.R"))`
+\code{options(shiny.autoreload.pattern = glob2rx("ui.R"))}
 
 The default polling interval is 500 milliseconds. You can change this
-by setting e.g. `options(shiny.autoreload.interval = 2000)` (every
+by setting e.g. \code{options(shiny.autoreload.interval = 2000)} (every
 two seconds).}
-}
-
 \item{shiny.deprecation.messages (defaults to \code{TRUE})}{This controls whether messages for
 deprecated functions in Shiny will be printed. See
 \code{\link[=shinyDeprecated]{shinyDeprecated()}} for more information.}
@@ -70,7 +68,7 @@ be done 100\% correctly.}
 \code{\link[=runApp]{runApp()}} for more information.}
 \item{shiny.jquery.version (defaults to \code{3})}{The major version of jQuery to use.
 Currently only values of \code{3} or \code{1} are supported. If \code{1}, then jQuery 1.12.4 is used. If \code{3},
-then jQuery 3.4.1 is used.}
+then jQuery 3.5.1 is used.}
 \item{shiny.json.digits (defaults to \code{16})}{The number of digits to use when converting
 numbers to JSON format to send to the client web browser.}
 \item{shiny.launch.browser (defaults to \code{interactive()})}{A boolean which controls the default behavior
@@ -112,15 +110,44 @@ values are \code{"send"} (only print messages sent to the client),
 \code{"recv"} (only print messages received by the server), \code{TRUE}
 (print all messages), or \code{FALSE} (default; don't print any of these
 messages).}
+\item{shiny.autoload.r (defaults to \code{TRUE})}{If \code{TRUE}, then the R/
+of a shiny app will automatically be sourced.}
 \item{shiny.usecairo (defaults to \code{TRUE})}{This is used to disable graphical rendering by the
 Cairo package, if it is installed. See \code{\link[=plotPNG]{plotPNG()}} for more
 information.}
 }
 }
 
-\examples{
-\dontrun{
-shinyOptions(myOption = 10)
-getShinyOption("myOption")
+\section{Scoping for \code{shinyOptions()}}{
+
+
+There are three levels of scoping for \code{shinyOptions()}: global,
+application, and session.
+
+The global option set is available by default. Any calls to
+\code{shinyOptions()} and \code{getShinyOption()} outside of an app will access the
+global option set.
+
+When a Shiny application is run with \code{\link[=runApp]{runApp()}}, the global option set is
+duplicated and the new option set is available at the application level. If
+options are set from \code{global.R}, \code{app.R}, \code{ui.R}, or \code{server.R} (but
+outside of the server function), then the application-level options will be
+modified.
+
+Each time a user session is started, the application-level option set is
+duplicated, for that session. If the options are set from inside the server
+function, then they will be scoped to the session.
 }
+
+\section{Options with \code{shinyOptions()}}{
+
+
+There are a number of global options that affect Shiny's behavior. These
+can be set globally with \code{options()} or locally (for a single app) with
+\code{shinyOptions()}.
+
+\describe{ \item{cache}{A caching object that will be used by
+\code{\link[=renderCachedPlot]{renderCachedPlot()}}. If not specified, a \code{\link[cachem:cache_mem]{cachem::cache_mem()}} will be
+used.} }
 }
+

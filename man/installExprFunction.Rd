@@ -4,10 +4,16 @@
 \alias{installExprFunction}
 \title{Install an expression as a function}
 \usage{
-installExprFunction(expr, name, eval.env = parent.frame(2),
-  quoted = FALSE, assign.env = parent.frame(1),
-  label = deparse(sys.call(-1)[[1]]), wrappedWithLabel = TRUE,
-  ..stacktraceon = FALSE)
+installExprFunction(
+  expr,
+  name,
+  eval.env = parent.frame(2),
+  quoted = FALSE,
+  assign.env = parent.frame(1),
+  label = deparse(sys.call(-1)[[1]]),
+  wrappedWithLabel = TRUE,
+  ..stacktraceon = FALSE
+)
 }
 \arguments{
 \item{expr}{A quoted or unquoted expression}
@@ -29,7 +35,8 @@ the name of the calling function.}
 }
 \description{
 Installs an expression in the given environment as a function, and registers
-debug hooks so that breakpoints may be set in the function.
+debug hooks so that breakpoints may be set in the function. Note: as of
+Shiny 1.6.0, it is recommended to use \code{\link[=quoToFunction]{quoToFunction()}} instead.
 }
 \details{
 This function can replace \code{exprToFunction} as follows: we may use

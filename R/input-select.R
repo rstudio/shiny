@@ -12,6 +12,14 @@
 #' name will be treated as a placeholder prompt. For example:
 #' `selectInput("letter", "Letter", c("Choose one" = "", LETTERS))`
 #'
+#' **Performance note:** `selectInput()` and `selectizeInput()` can slow down
+#' significantly when thousands of choices are used; with legacy browsers like
+#' Internet Explorer, the user interface may hang for many seconds. For large
+#' numbers of choices, Shiny offers a "server-side selectize" option that
+#' massively improves performance and efficiency; see
+#' [this selectize article](https://shiny.rstudio.com/articles/selectize.html)
+#' on the Shiny Dev Center for details.
+#'
 #' @inheritParams textInput
 #' @param choices List of values to select from. If elements of the list are
 #'   named, then that name --- rather than the value --- is displayed to the
@@ -100,7 +108,7 @@ selectInput <- function(inputId, label, choices, selected = NULL,
     id = inputId,
     class = if (!selectize) "form-control",
     size = size,
-    selectOptions(choices, selected)
+    selectOptions(choices, selected, inputId, selectize)
   )
   if (multiple)
     selectTag$attribs$multiple <- "multiple"
@@ -125,16 +133,22 @@ firstChoice <- function(choices) {
 }
 
 # Create tags for each of the options; use <optgroup> if necessary.
-# This returns a HTML string instead of tags, because of the 'selected'
-# attribute.
-selectOptions <- function(choices, selected = NULL) {
+# This returns a HTML string instead of tags for performance reasons.
+selectOptions <- function(choices, selected = NULL, inputId, perfWarning = FALSE) {
+  if (length(choices) >= 1000) {
+    warning("The select input \"", inputId, "\" contains a large number of ",
+      "options; consider using server-side selectize for massively improved ",
+      "performance. See the Details section of the ?selectizeInput help topic.",
+      call. = FALSE)
+  }
+
   html <- mapply(choices, names(choices), FUN = function(choice, label) {
     if (is.list(choice)) {
       # If sub-list, create an optgroup and recurse into the sublist
       sprintf(
         '<optgroup label="%s">\n%s\n</optgroup>',
         htmlEscape(label, TRUE),
-        selectOptions(choice, selected)
+        selectOptions(choice, selected, inputId, perfWarning)
       )
 
     } else {
@@ -183,24 +197,24 @@ selectizeInput <- function(inputId, ..., options = NULL, width = NULL) {
 
 # given a select input and its id, selectize it
 selectizeIt <- function(inputId, select, options, nonempty = FALSE) {
+  # Make sure accessibility plugin is included
+  if (!('selectize-plugin-a11y' %in% options$plugins)) {
+    options$plugins <- c(options$plugins, list('selectize-plugin-a11y'))
+  }
+
   res <- checkAsIs(options)
 
-  selectizeDep <- htmlDependency(
-    "selectize", "0.11.2", c(href = "shared/selectize"),
-    stylesheet = "css/selectize.bootstrap3.css",
-    head = format(tagList(
-      HTML('<!--[if lt IE 9]>'),
-      tags$script(src = 'shared/selectize/js/es5-shim.min.js'),
-      HTML('<![endif]-->'),
-      tags$script(src = 'shared/selectize/js/selectize.min.js')
-    ))
-  )
+  deps <- list(selectizeDependency())
 
   if ('drag_drop' %in% options$plugins) {
-    selectizeDep <- list(selectizeDep, htmlDependency(
-      'jqueryui', '1.12.1', c(href = 'shared/jqueryui'),
-      script = 'jquery-ui.min.js'
-    ))
+    deps <- c(
+      deps,
+      list(htmlDependency(
+        'jqueryui', '1.12.1',
+        c(href = 'shared/jqueryui'),
+        script = 'jquery-ui.min.js'
+      ))
+    )
   }
 
   # Insert script on same level as <select> tag
@@ -214,14 +228,60 @@ selectizeIt <- function(inputId, select, options, nonempty = FALSE) {
     )
   )
 
-  attachDependencies(select, selectizeDep)
+  attachDependencies(select, deps)
 }
 
 
+selectizeDependency <- function() {
+  bslib::bs_dependency_defer(selectizeDependencyFunc)
+}
 
+selectizeDependencyFunc <- function(theme) {
+  selectizeVersion <- "0.12.4"
+  if (!is_bs_theme(theme)) {
+    return(selectizeStaticDependency(selectizeVersion))
+  }
 
+  selectizeDir <- system.file(package = "shiny", "www/shared/selectize/")
+  stylesheet <- file.path(
+    selectizeDir, "scss",
+    if ("3" %in% bslib::theme_version(theme)) {
+      "selectize.bootstrap3.scss"
+    } else {
+      "selectize.bootstrap4.scss"
+    }
+  )
+  # It'd be cleaner to ship the JS in a separate, href-based,
+  # HTML dependency (which we currently do for other themable widgets),
+  # but DT, crosstalk, and maybe other pkgs include selectize JS/CSS
+  # in HTML dependency named selectize, so if we were to change that
+  # name, the JS/CSS would be loaded/included twice, which leads to
+  # strange issues, especially since we now include a 3rd party
+  # accessibility plugin https://github.com/rstudio/shiny/pull/3153
+  script <- file.path(
+    selectizeDir, c("js/selectize.min.js", "accessibility/js/selectize-plugin-a11y.min.js")
+  )
+  bslib::bs_dependency(
+    input = sass::sass_file(stylesheet),
+    theme = theme,
+    name = "selectize",
+    version = selectizeVersion,
+    cache_key_extra = shinyPackageVersion(),
+    .dep_args = list(script = script)
+  )
+}
 
-
+selectizeStaticDependency <- function(version) {
+  htmlDependency(
+    "selectize", version,
+    src = c(href = "shared/selectize"),
+    stylesheet = "css/selectize.bootstrap3.css",
+    script = c(
+      "js/selectize.min.js",
+      "accessibility/js/selectize-plugin-a11y.min.js"
+    )
+  )
+}
 
 
 #' Select variables from a data frame

@@ -106,6 +106,16 @@ function initShiny() {
     inputs.setInput(name, value, opts);
   };
 
+  // By default, Shiny deduplicates input value changes; that is, if
+  // `setInputValue` is called with the same value as the input already
+  // has, the call is ignored (unless opts.priority = "event"). Calling
+  // `forgetLastInputValue` tells Shiny that the very next call to
+  // `setInputValue` for this input id shouldn't be ignored, even if it
+  // is a dupe of the existing value.
+  exports.forgetLastInputValue = function(name) {
+    inputsNoResend.forget(name);
+  };
+
   var boundInputs = {};
 
   function valueChangeCallback(binding, el, allowDeferred) {
@@ -288,6 +298,63 @@ function initShiny() {
       initialValues['.clientdata_output_' + id + '_height'] = this.offsetHeight;
     }
   });
+
+  function getComputedBgColor(el) {
+    if (!el) {
+      // Top of document, can't recurse further
+      return null;
+    }
+
+    let bgColor = getStyle(el, "background-color");
+    let m = bgColor.match(/^rgba\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)\s*\)$/);
+    if (bgColor === "transparent" || (m && parseFloat(m[4]) === 0)) {
+      // No background color on this element. See if it has a background image.
+      let bgImage = getStyle(el, "background-image");
+      if (bgImage && bgImage !== "none") {
+        // Failed to detect background color, since it has a background image
+        return null;
+      } else {
+        // Recurse
+        return getComputedBgColor(el.parentElement);
+      }
+    }
+    return bgColor;
+  }
+
+  // Compute the color property of an a tag, scoped within the element
+  function getComputedLinkColor(el) {
+    let a = document.createElement("a");
+    a.href = "/";
+    let div = document.createElement("div");
+    div.style.setProperty("position", "absolute", "important");
+    div.style.setProperty("top", "-1000px", "important");
+    div.style.setProperty("left", "0", "important");
+    div.style.setProperty("width", "30px", "important");
+    div.style.setProperty("height", "10px", "important");
+    div.appendChild(a);
+    el.appendChild(div);
+    let linkColor = getStyle(a, "color");
+    el.removeChild(div);
+    return linkColor;
+  }
+
+  function getComputedFont(el) {
+    let fontFamily = getStyle(el, "font-family");
+    let fontSize = getStyle(el, "font-size");
+    return {
+      families: fontFamily.replace(/"/g, '').split(", "),
+      size: fontSize
+    };
+  }
+
+  $('.shiny-image-output, .shiny-plot-output, .shiny-report-theme').each(function() {
+    var id = getIdFromEl(this);
+    initialValues['.clientdata_output_' + id + '_bg'] = getComputedBgColor(this);
+    initialValues['.clientdata_output_' + id + '_fg'] = getStyle(this, "color");
+    initialValues['.clientdata_output_' + id + '_accent'] = getComputedLinkColor(this);
+    initialValues['.clientdata_output_' + id + '_font'] = getComputedFont(this);
+  });
+
   function doSendImageSize() {
     $('.shiny-image-output, .shiny-plot-output, .shiny-report-size').each(function() {
       var id = getIdFromEl(this);
@@ -296,6 +363,15 @@ function initShiny() {
         inputs.setInput('.clientdata_output_' + id + '_height', this.offsetHeight);
       }
     });
+
+    $('.shiny-image-output, .shiny-plot-output, .shiny-report-theme').each(function() {
+      var id = getIdFromEl(this);
+      inputs.setInput('.clientdata_output_' + id + '_bg', getComputedBgColor(this));
+      inputs.setInput('.clientdata_output_' + id + '_fg', getStyle(this, "color"));
+      inputs.setInput('.clientdata_output_' + id + '_accent', getComputedLinkColor(this));
+      inputs.setInput('.clientdata_output_' + id + '_font', getComputedFont(this));
+    });
+
     $('.shiny-bound-output').each(function() {
       var $this = $(this), binding = $this.data('shiny-output-binding');
       $this.trigger({
@@ -473,9 +549,6 @@ function initShiny() {
       registerDependency(match[1], match[2]);
     }
   });
-
-  // IE8 and IE9 have some limitations with data URIs
-  initialValues['.clientdata_allowDataUriScheme'] = typeof WebSocket !== 'undefined';
 
   // We've collected all the initial values--start the server process!
   inputsNoResend.reset(initialValues);

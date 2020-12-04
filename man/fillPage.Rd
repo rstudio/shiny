@@ -4,8 +4,14 @@
 \alias{fillPage}
 \title{Create a page that fills the window}
 \usage{
-fillPage(..., padding = 0, title = NULL, bootstrap = TRUE,
-  theme = NULL)
+fillPage(
+  ...,
+  padding = 0,
+  title = NULL,
+  bootstrap = TRUE,
+  theme = NULL,
+  lang = NULL
+)
 }
 \arguments{
 \item{...}{Elements to include within the page.}
@@ -25,6 +31,10 @@ shown in the document).}
 \item{bootstrap}{If \code{TRUE}, load the Bootstrap CSS library.}
 
 \item{theme}{URL to alternative Bootstrap stylesheet.}
+
+\item{lang}{ISO 639-1 language code for the HTML page, such as "en" or "ko".
+This will be used as the lang in the \code{<html>} tag, as in \code{<html lang="en">}.
+The default (NULL) results in an empty string.}
 }
 \description{
 \code{fillPage} creates a page whose height and width always fill the
@@ -42,11 +52,11 @@ to the size of the window.
 
 For example, \code{fluidPage(plotOutput("plot", height = "100\%"))} will not
 work as expected; the plot element's effective height will be \code{0},
-because the plot's containing elements (\code{<div>} and \code{<body>}) have
+because the plot's containing elements (\verb{<div>} and \verb{<body>}) have
 \emph{automatic} height; that is, they determine their own height based on
 the height of their contained elements. However,
 \code{fillPage(plotOutput("plot", height = "100\%"))} will work because
-\code{fillPage} fixes the \code{<body>} height at 100\% of the window height.
+\code{fillPage} fixes the \verb{<body>} height at 100\% of the window height.
 
 Note that \code{fillPage(plotOutput("plot"))} will not cause the plot to fill
 the page. Like most Shiny output widgets, \code{plotOutput}'s default height
@@ -83,9 +93,13 @@ fillPage(
 )
 }
 \seealso{
-Other layout functions: \code{\link{fixedPage}},
-  \code{\link{flowLayout}}, \code{\link{fluidPage}},
-  \code{\link{navbarPage}}, \code{\link{sidebarLayout}},
-  \code{\link{splitLayout}}, \code{\link{verticalLayout}}
+Other layout functions: 
+\code{\link{fixedPage}()},
+\code{\link{flowLayout}()},
+\code{\link{fluidPage}()},
+\code{\link{navbarPage}()},
+\code{\link{sidebarLayout}()},
+\code{\link{splitLayout}()},
+\code{\link{verticalLayout}()}
 }
 \concept{layout functions}

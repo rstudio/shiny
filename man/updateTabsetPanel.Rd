@@ -19,7 +19,9 @@ updateNavlistPanel(session, inputId, selected = NULL)
 \item{inputId}{The id of the \code{tabsetPanel}, \code{navlistPanel},
 or \code{navbarPage} object.}
 
-\item{selected}{The name of the tab to make active.}
+\item{selected}{The \code{value} (or, if none was supplied, the \code{title})
+of the tab that should be selected by default. If \code{NULL}, the first
+tab will be selected.}
 }
 \description{
 Change the selected tab on the client

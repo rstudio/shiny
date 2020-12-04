@@ -696,6 +696,12 @@ var ShinyApp = function() {
     });
   });
 
+  addMessageHandler('frozen', function(message) {
+    for (let i = 0; i < message.ids.length; i++) {
+      exports.forgetLastInputValue(message.ids[i]);
+    }
+  });
+
   function getTabset(id) {
     var $tabset = $("#" + $escape(id));
     if ($tabset.length === 0)
@@ -1063,7 +1069,7 @@ var ShinyApp = function() {
         exports.notifications.show({
           html:
             `<div id="shiny-progress-${message.id}" class="shiny-progress-notification">` +
-              '<div class="progress progress-striped active" style="display: none;"><div class="progress-bar"></div></div>' +
+              '<div class="progress active" style="display: none;"><div class="progress-bar"></div></div>' +
               '<div class="progress-text">' +
                 '<span class="progress-message">message</span> ' +
                 '<span class="progress-detail"></span>' +
@@ -1087,7 +1093,7 @@ var ShinyApp = function() {
         var depth = $('.shiny-progress.open').length;
         // The 'bar' class is needed for backward compatibility with Bootstrap 2.
         var $progress = $('<div class="shiny-progress open">' +
-          '<div class="progress progress-striped active"><div class="progress-bar bar"></div></div>' +
+          '<div class="progress active"><div class="progress-bar bar"></div></div>' +
           '<div class="progress-text">' +
             '<span class="progress-message">message</span>' +
             '<span class="progress-detail"></span>' +

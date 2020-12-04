@@ -86,7 +86,7 @@ test_that("integration tests", {
     "renderTable", "func", "force", "withVisible", "withCallingHandlers",
     "domain$wrapSync", "promises::with_promise_domain",
     "captureStackTraces", "doTryCatch", "tryCatchOne", "tryCatchList",
-    "tryCatch", "do", "hybrid_chain", "origRenderFunc", "renderTable({     C() }, server = FALSE)",
+    "tryCatch", "do", "hybrid_chain", "renderFunc", "renderTable({     C() }, server = FALSE)",
     "..stacktraceon..", "contextFunc", "env$runWith", "force",
     "domain$wrapSync", "promises::with_promise_domain",
     "withReactiveDomain", "domain$wrapSync", "promises::with_promise_domain",

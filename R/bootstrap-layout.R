@@ -16,6 +16,7 @@
 #' @param theme Alternative Bootstrap stylesheet (normally a css file within the
 #'   www directory). For example, to use the theme located at
 #'   `www/bootstrap.css` you would use `theme = "bootstrap.css"`.
+#' @inheritParams bootstrapPage
 #'
 #' @return A UI defintion that can be passed to the [shinyUI] function.
 #'
@@ -87,11 +88,12 @@
 #' }
 #' @rdname fluidPage
 #' @export
-fluidPage <- function(..., title = NULL, responsive = NULL, theme = NULL) {
+fluidPage <- function(..., title = NULL, responsive = NULL, theme = NULL, lang = NULL) {
   bootstrapPage(div(class = "container-fluid", ...),
                 title = title,
                 responsive = responsive,
-                theme = theme)
+                theme = theme,
+                lang = lang)
 }
 
 
@@ -118,6 +120,7 @@ fluidRow <- function(...) {
 #' @param theme Alternative Bootstrap stylesheet (normally a css file within the
 #'   www directory). For example, to use the theme located at
 #'   `www/bootstrap.css` you would use `theme = "bootstrap.css"`.
+#' @inheritParams bootstrapPage
 #'
 #' @return A UI defintion that can be passed to the [shinyUI] function.
 #'
@@ -156,11 +159,12 @@ fluidRow <- function(...) {
 #'
 #' @rdname fixedPage
 #' @export
-fixedPage <- function(..., title = NULL, responsive = NULL, theme = NULL) {
+fixedPage <- function(..., title = NULL, responsive = NULL, theme = NULL, lang = NULL) {
   bootstrapPage(div(class = "container", ...),
                 title = title,
                 responsive = responsive,
-                theme = theme)
+                theme = theme,
+                lang = lang)
 }
 
 #' @rdname fixedPage
@@ -231,8 +235,12 @@ column <- function(width, ..., offset = 0) {
     stop("column width must be between 1 and 12")
 
   colClass <- paste0("col-sm-", width)
-  if (offset > 0)
-    colClass <- paste0(colClass, " col-sm-offset-", offset)
+  if (offset > 0) {
+    # offset-md-x is for bootstrap 4 forward compat
+    # (every size tier has been bumped up one level)
+    # https://github.com/twbs/bootstrap/blob/74b8fe7/docs/4.3/migration/index.html#L659
+    colClass <- paste0(colClass, " offset-md-", offset, " col-sm-offset-", offset)
+  }
   div(class = colClass, ...)
 }
 
@@ -351,6 +359,8 @@ sidebarLayout <- function(sidebarPanel,
 sidebarPanel <- function(..., width = 4) {
   div(class=paste0("col-sm-", width),
     tags$form(class="well",
+      # A11y semantic landmark for sidebar
+      role="complementary",
       ...
     )
   )
@@ -360,6 +370,8 @@ sidebarPanel <- function(..., width = 4) {
 #' @rdname sidebarLayout
 mainPanel <- function(..., width = 8) {
   div(class=paste0("col-sm-", width),
+    # A11y semantic landmark for main region
+    role="main",
     ...
   )
 }
@@ -428,7 +440,7 @@ verticalLayout <- function(..., fluid = TRUE) {
 flowLayout <- function(..., cellArgs = list()) {
 
   children <- list(...)
-  childIdx <- !nzchar(names(children) %OR% character(length(children)))
+  childIdx <- !nzchar(names(children) %||% character(length(children)))
   attribs <- children[!childIdx]
   children <- children[childIdx]
 
@@ -511,7 +523,7 @@ inputPanel <- function(...) {
 splitLayout <- function(..., cellWidths = NULL, cellArgs = list()) {
 
   children <- list(...)
-  childIdx <- !nzchar(names(children) %OR% character(length(children)))
+  childIdx <- !nzchar(names(children) %||% character(length(children)))
   attribs <- children[!childIdx]
   children <- children[childIdx]
   count <- length(children)
@@ -566,7 +578,7 @@ splitLayout <- function(..., cellWidths = NULL, cellArgs = list()) {
 #' @param flex Determines how space should be distributed to the cells. Can be a
 #'   single value like `1` or `2` to evenly distribute the available
 #'   space; or use a vector of numbers to specify the proportions. For example,
-#'   `flex = c(2, 3)` would cause the space to be split 40\%/60\% between
+#'   `flex = c(2, 3)` would cause the space to be split 40%/60% between
 #'   two cells. NA values will cause the corresponding cell to be sized
 #'   according to its contents (without growing or shrinking).
 #' @param width,height The total amount of width and height to use for the

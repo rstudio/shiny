@@ -44,14 +44,16 @@ shinyDeprecated <- function(
 }
 
 
-deprecatedEnvQuotedMessage <- function(env_arg = "env", quoted_arg = "quoted") {
-  # Enable this message in a future version of Shiny, perhaps in a dev_edition()
-  # mode.
-  # shinyDeprecated(msg = paste(
-  #   sprintf("The `%s` and `%s` arguments are deprecated.", env_arg, quoted_arg),
-  #   "Please use quosures from rlang instead.",
-  #   "See https://github.com/rstudio/shiny/issues/3108 for more information."
-  # ))
+deprecatedEnvQuotedMessage <- function() {
+  if (!in_shiny_dev_mode()) return(invisible())
+  if (is_false(getOption("shiny.deprecation.messages"))) return(invisible())
+
+  # manually
+  rlang_inform(msg = paste0(
+    "The `env` and `quoted` arguments are deprecated as of shiny 1.6.0.",
+    " Please use quosures from `rlang` instead.\n",
+    "See <https://github.com/rstudio/shiny/issues/3108> for more information."
+  ), frequency = "always")
 }
 
 

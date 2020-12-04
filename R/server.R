@@ -29,9 +29,9 @@ registerClient <- function(client) {
 
 #' Define Server Functionality
 #'
-#' \lifecycle{superseded}
+#' @description \lifecycle{superseded}
 #'
-#' Defines the server-side logic of the Shiny application. This generally
+#' @description Defines the server-side logic of the Shiny application. This generally
 #' involves creating functions that map user inputs to various kinds of output.
 #' In older versions of Shiny, it was necessary to call `shinyServer()` in
 #' the `server.R` file, but this is no longer required as of Shiny 0.10.

@@ -56,7 +56,7 @@ by setting e.g. \code{options(shiny.autoreload.interval = 2000)} (every
 two seconds).}
 \item{shiny.deprecation.messages (defaults to \code{TRUE})}{This controls whether messages for
 deprecated functions in Shiny will be printed. See
-\code{\link[=shinySoftDeprecated]{shinySoftDeprecated()}} for more information.}
+\code{\link[=shinyDeprecated]{shinyDeprecated()}} for more information.}
 \item{shiny.error (defaults to \code{NULL})}{This can be a function which is called when an error
 occurs. For example, \code{options(shiny.error=recover)} will result a
 the debugger prompt when an error occurs.}
@@ -116,6 +116,10 @@ of a shiny app will automatically be sourced.}
 Cairo package, if it is installed. See \code{\link[=plotPNG]{plotPNG()}} for more
 information.}
 }
+\item{shiny.devmode (defaults to \code{NULL})}{If \code{TRUE}, enables 'Shiny developer mode'.
+See \code{\link[=shiny_dev_mode]{shiny_dev_mode()}} for more details. }
+\item{shiny.devmode.verbose (defaults to \code{TRUE})}{If \code{TRUE}, will display messages printed
+about which options are being set. See \code{\link[=shiny_dev_mode]{shiny_dev_mode()}} for more details. }
 }
 
 \section{Scoping for \code{shinyOptions()}}{

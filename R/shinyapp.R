@@ -510,6 +510,8 @@ NULL
 #' @param x Object to convert to a Shiny app.
 #' @export
 as.shiny.appobj <- function(x) {
+  shiny_dev_mode(VAL, verbose = VAL2)
+
   UseMethod("as.shiny.appobj", x)
 }
 

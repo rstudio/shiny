@@ -64,6 +64,8 @@ shiny 1.5.0.9000
 
 * Closed #3140: Added support for `...` argument in `icon()`. (#3143)
 
+* Improved error messages when reading reactive values outside of a reactive domain (e.g., `reactiveVal()()`). (#3007)
+
 ### Bug fixes
 
 * Fixed #1942: Calling `runApp("app.R")` no longer ignores options passed into `shinyApp()`. This makes it possible for Shiny apps to specify what port/host should be used by default. (#2969)

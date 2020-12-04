@@ -574,7 +574,7 @@ bindCache.shiny.renderPlot <- function(x, ...,
     # session ends. This is generally bad programming practice and should be
     # rare, but still, we should try to clean up properly.
 
-    resizeObserverCreated <- TRUE
+    resizeObserverCreated <<- TRUE
   }
 
   renderFunc <- function(...) {

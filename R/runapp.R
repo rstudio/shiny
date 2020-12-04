@@ -125,6 +125,15 @@ runApp <- function(appDir=getwd(),
   appParts <- as.shiny.appobj(appDir)
 
   # ============================================================================
+  # Set up Shiny developer mode
+  # ============================================================================
+  # users can provide the options to this function before calling `runApp()`
+  shiny_dev_mode(
+    enable = getOption("shiny.devmode", default = NULL),
+    verbose = getOption("shiny.devmode.verbose", TRUE)
+  )
+
+  # ============================================================================
   # Initialize app state object
   # ============================================================================
   # This is so calls to getCurrentAppState() can be used to find (A) whether an

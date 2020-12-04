@@ -632,7 +632,7 @@ ShinySession <- R6Class(
     startCycle = function() {
       # TODO: This should check for busyCount == 0L, and remove the checks from
       # the call sites
-      if (length(private$cycleStartActionQueue) > 0) {
+      if (private$busyCount == 0L && length(private$cycleStartActionQueue) > 0) {
         head <- private$cycleStartActionQueue[[1L]]
         private$cycleStartActionQueue <- private$cycleStartActionQueue[-1L]
 
@@ -653,13 +653,7 @@ ShinySession <- R6Class(
         # busyCount, it's possible we're calling startCycle spuriously; that's
         # OK, it's essentially a no-op in that case.
         on.exit({
-          if (private$busyCount == 0L && length(private$cycleStartActionQueue) > 0L) {
-            later::later(function() {
-              if (private$busyCount == 0L) {
-                private$startCycle()
-              }
-            })
-          }
+          later::later(private$startCycle)
         }, add = TRUE)
 
         head()

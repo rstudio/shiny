@@ -131,8 +131,12 @@ brushOpts <- function(id, fill = "#9cf", stroke = "#036",
   )
 }
 
-getThematicOption <- function(..., resolve = FALSE) {
-  if (is_available("thematic")) {
-    thematic::thematic_get_option(..., resolve = resolve)
+getThematicOption <- function(name = "", default = NULL, resolve = FALSE) {
+  if (isNamespaceLoaded("thematic")) {
+    # TODO: use :: once thematic is on CRAN
+    tgo <- utils::getFromNamespace("thematic_get_option", "thematic")
+    tgo(name = name, default = default, resolve = resolve)
+  } else {
+    default
   }
 }

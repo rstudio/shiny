@@ -728,7 +728,12 @@ ShinySession <- R6Class(
       private$testMode <- getShinyOption("testmode", default = FALSE)
       private$enableTestSnapshot()
 
-      private$currentThemeDependency <- reactiveVal(0)
+      # This `withReactiveDomain` is used only to satisfy the reactlog, so that
+      # it knows to scope this reactiveVal to this session.
+      # https://github.com/rstudio/shiny/pull/3182
+      withReactiveDomain(self,
+        private$currentThemeDependency <- reactiveVal(0)
+      )
 
       private$registerSessionEndCallbacks()
 
@@ -1306,7 +1311,7 @@ ShinySession <- R6Class(
 
     getCurrentTheme = function() {
       private$currentThemeDependency()
-      getShinyOption("bootstrapTheme")
+      getCurrentTheme()
     },
 
     setCurrentTheme = function(theme) {
@@ -1315,7 +1320,7 @@ ShinySession <- R6Class(
       # (3) sends the resulting dependencies to the client.
 
       # Note that this will automatically scope to the session.
-      shinyOptions(bootstrapTheme = theme)
+      setCurrentTheme(theme)
 
       # Invalidate
       private$currentThemeDependency(isolate(private$currentThemeDependency()) + 1)

@@ -96,7 +96,7 @@ Imports:
     bslib (>= 0.2.2.9002),
     cachem,
     ellipsis,
-    lifecycle
+    lifecycle (>= 0.2.0)
 Suggests:
     datasets,
     Cairo (>= 1.5-5),

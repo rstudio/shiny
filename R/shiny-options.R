@@ -77,7 +77,7 @@ getShinyOption <- function(name, default = NULL) {
 #'   two seconds).}
 #' \item{shiny.deprecation.messages (defaults to `TRUE`)}{This controls whether messages for
 #'   deprecated functions in Shiny will be printed. See
-#'   [shinySoftDeprecated()] for more information.}
+#'   [shinyDeprecated()] for more information.}
 #' \item{shiny.error (defaults to `NULL`)}{This can be a function which is called when an error
 #'   occurs. For example, `options(shiny.error=recover)` will result a
 #'   the debugger prompt when an error occurs.}

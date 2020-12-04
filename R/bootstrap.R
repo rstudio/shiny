@@ -36,7 +36,7 @@ NULL
 bootstrapPage <- function(..., title = NULL, responsive = deprecated(), theme = NULL, lang = NULL) {
 
   if (lifecycle::is_present(responsive)) {
-    shinySoftDeprecated(
+    shinyDeprecated(
       "0.10.2.2", "bootstrapPage(responsive=)",
       details = "The 'responsive' argument is no longer used with the latest version of Bootstrap."
     )
@@ -422,7 +422,7 @@ navbarPage <- function(title,
                        lang = NULL) {
 
   if (lifecycle::is_present(collapsable)) {
-    shinySoftDeprecated("0.10.2.2", "navbarPage(collapsable =)", "navbarPage(collapsible =)")
+    shinyDeprecated("0.10.2.2", "navbarPage(collapsable =)", "navbarPage(collapsible =)")
     collapsible <- collapsable
   }
 
@@ -738,7 +738,7 @@ tabsetPanel <- function(...,
                         type = c("tabs", "pills", "hidden"),
                         position = deprecated()) {
   if (lifecycle::is_present(position)) {
-    shinySoftDeprecated(
+    shinyDeprecated(
       "0.10.2.2", "bootstrapPage(position =)",
       details = "The 'position' argument is no longer used with the latest version of Bootstrap."
     )

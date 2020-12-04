@@ -98,7 +98,7 @@ reactlogShow <- function(time = TRUE) {
 #' @export
 # legacy purposes
 showReactLog <- function(time = TRUE) {
-  shinySoftDeprecated("1.2.0", "showReactLog()", "reactlogShow()")
+  shinyDeprecated("1.2.0", "showReactLog()", "reactlogShow()")
 
   reactlogShow(time = time)
 }

@@ -373,7 +373,7 @@ extractStackTrace <- function(calls,
   full = getOption("shiny.fullstacktrace", FALSE),
   offset = getOption("shiny.stacktraceoffset", TRUE)) {
 
-  shinySoftDeprecated(
+  shinyDeprecated(
     "1.0.5", "extractStackTrace()",
     details = "Please contact the Shiny team if you were using this functionality."
   )
@@ -548,7 +548,7 @@ formatStackTrace <- function(calls, indent = "    ",
   full = getOption("shiny.fullstacktrace", FALSE),
   offset = getOption("shiny.stacktraceoffset", TRUE)) {
 
-  shinySoftDeprecated(
+  shinyDeprecated(
     "1.0.5", "formatStackTrace()",
     details = "Please contact the Shiny team if you were using this functionality."
   )

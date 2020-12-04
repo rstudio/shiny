@@ -76,7 +76,7 @@ registerClient <- function(client) {
 #' @export
 #' @keywords internal
 shinyServer <- function(func) {
-  shinySoftDeprecated(
+  shinyDeprecated(
     "0.10.0", "shinyServer()",
     details = paste0(
       "When removing `shinyServer()`, ",

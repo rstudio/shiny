@@ -81,13 +81,13 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
                         pre = NULL, post = NULL, timeFormat = NULL,
                         timezone = NULL, dragRange = TRUE) {
   if (!missing(format)) {
-    shinySoftDeprecated(
+    shinyDeprecated(
       "0.10.2.2", "sliderInput(format =)",
       details = "Use `sep`, `pre`, and `post` instead."
     )
   }
   if (!missing(locale)) {
-    shinySoftDeprecated(
+    shinyDeprecated(
       "0.10.2.2", "sliderInput(locale =)",
       details = "Use `sep`, `pre`, and `post` instead."
     )

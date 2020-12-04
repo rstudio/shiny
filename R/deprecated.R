@@ -19,9 +19,12 @@ rlang_warn <- function(..., msg = paste0(...), frequency = "always", id = msg) {
 #'
 #' To disable these messages, use `options(shiny.deprecation.messages=FALSE)`.
 #'
-#' @inheritParams lifecycle::deprecate_soft
+#' @param version Shiny version when the function was deprecated
+#' @param what Function with possible arguments
+#' @param with Possible function with arguments that should be used instead
+#' @param details Additional information to be added after a new line to the displayed message
 #' @keywords internal
-#' @describeIn shiny-deprecated Passes arguments to [lifecycle::deprecate_soft()]
+#' @describeIn shiny-deprecated Passes formatted message [rlang::inform()]
 shinyDeprecated <- function(
   version, what, with = NULL, details = NULL
 ) {

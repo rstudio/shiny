@@ -804,7 +804,10 @@ renderDataTable <- function(expr, options = NULL, searchDelay = 500,
 {
 
   if (in_shiny_dev_mode()) {
-
+    shinyDeprecated(
+      "0.11.1", "shiny::renderDataTable()", "DT::renderDataTable()",
+      details = "See <http://rstudio.github.io/DT/shiny.html> for more information"
+    )
   }
 
   expr <- get_quosure(expr, env, quoted)

@@ -29,6 +29,8 @@ registerClient <- function(client) {
 
 #' Define Server Functionality
 #'
+#' \lifecycle{superseded}
+#'
 #' Defines the server-side logic of the Shiny application. This generally
 #' involves creating functions that map user inputs to various kinds of output.
 #' In older versions of Shiny, it was necessary to call `shinyServer()` in
@@ -76,14 +78,16 @@ registerClient <- function(client) {
 #' @export
 #' @keywords internal
 shinyServer <- function(func) {
-  shinyDeprecated(
-    "0.10.0", "shinyServer()",
-    details = paste0(
-      "When removing `shinyServer()`, ",
-      "ensure that the last expression returned from server.R ",
-      "is the function normally supplied to `shinyServer(func)`."
+  if (in_shiny_dev_mode()) {
+    shinyDeprecated(
+      "0.10.0", "shinyServer()",
+      details = paste0(
+        "When removing `shinyServer()`, ",
+        "ensure that the last expression returned from server.R ",
+        "is the function normally supplied to `shinyServer(func)`."
+      )
     )
-  )
+  }
 
   .globals$server <- list(func)
   invisible(func)

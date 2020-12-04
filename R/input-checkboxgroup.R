@@ -94,14 +94,14 @@ checkboxGroupInput <- function(inputId, label, choices = NULL, selected = NULL,
     divClass <- paste(divClass, "shiny-input-container-inline")
 
   # return label and select tag
+  inputLabel <- shinyInputLabel(inputId, label)
   tags$div(id = inputId,
     style = if (!is.null(width)) paste0("width: ", validateCssUnit(width), ";"),
     class = divClass,
-    shinyInputLabel(inputId, label),
-    # The `aria-labelledby` is tied to id value in `shinyInputLabel()` to be announced to screen readers and in Braille
     # https://www.w3.org/TR/wai-aria-practices/examples/checkbox/checkbox-1/checkbox-1.html
-    `aria-labelledby` = paste0(inputId, "-label"),
-      role = "group",
+    role = "group",
+    `aria-labelledby` = inputLabel$attribs$id,
+    inputLabel,
     options
   )
 }

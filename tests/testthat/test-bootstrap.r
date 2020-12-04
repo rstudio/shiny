@@ -323,7 +323,7 @@ test_that("normalizeChoicesArgs does its job", {
 
 test_that("Choices need not be provided, can be NULL or c()", {
 
-  expected <- "<div id=\"cb\" class=\"form-group shiny-input-checkboxgroup shiny-input-container\" aria-labelledby=\"cb-label\" role=\"group\">\n  <label class=\"control-label\" id=\"cb-label\" for=\"cb\">Choose:</label>\n  <div class=\"shiny-options-group\"></div>\n</div>"
+  expected <- '<div id="cb" class="form-group shiny-input-checkboxgroup shiny-input-container" role="group" aria-labelledby="cb-label">\n  <label class="control-label" id="cb-label" for="cb">Choose:</label>\n  <div class="shiny-options-group"></div>\n</div>'
   noChoices <- checkboxGroupInput("cb", "Choose:")
   choicesNull <- checkboxGroupInput("cb", "Choose:", choices = NULL)
   choicesCharacter <- checkboxGroupInput("cb", "Choose:", choices = c())
@@ -337,4 +337,17 @@ test_that("Choices need not be provided, can be NULL or c()", {
   expect_identical(noChoices, allChoicesNull)
 
   expect_equal(expected, format(noChoices))
+})
+
+# https://github.com/rstudio/shiny/pull/3187
+test_that("a11y compliant", {
+  cbg <- checkboxGroupInput("foo", "bar", c("a", "b"))
+  cbg_lbl <- cbg$children[[1]]
+
+  expect_equal(cbg$attribs$role, "group")
+  expect_equal(cbg_lbl$name, "label")
+  expect_true(!is.null(cbg_lbl$attribs$id))
+  expect_equal(
+    cbg$attribs$`aria-labelledby`, cbg_lbl$attribs$id
+  )
 })

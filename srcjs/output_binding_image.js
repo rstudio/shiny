@@ -75,7 +75,7 @@ $.extend(imageOutputBinding, {
       opts.brushFill = getComputedLinkColor($el[0]);
     }
     if (opts.brushStroke === "auto") {
-      opts.brushStroke = window.getComputedStyle($el[0]).getPropertyValue("color");
+      opts.brushStroke = getStyle($el[0], "color");
     }
 
 

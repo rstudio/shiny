@@ -2466,7 +2466,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       }
 
       if (opts.brushStroke === "auto") {
-        opts.brushStroke = window.getComputedStyle($el[0]).getPropertyValue("color");
+        opts.brushStroke = getStyle($el[0], "color");
       } // Copy items from data to img. Don't set the coordmap as an attribute.
 
 

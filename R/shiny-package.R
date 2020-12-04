@@ -25,9 +25,6 @@
 #' @import mime
 NULL
 
-#' @import digest
-NULL
-
 # It's necessary to Depend on methods so Rscript doesn't fail. It's necessary
 # to import(methods) in NAMESPACE so R CMD check doesn't complain. This
 # approach isn't foolproof because Rscript -e pkgname::func() doesn't actually

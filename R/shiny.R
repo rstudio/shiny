@@ -1187,7 +1187,10 @@ ShinySession <- R6Class(
           private$.outputOptions[[name]] <- list()
       }
       else {
-        stop(paste("Unexpected", class(func), "output for", name))
+        rlang::abort(c(
+          paste0("Unexpected ", class(func)[[1]], " object for output$", name),
+          i = "Did you forget to use a render function?"
+        ))
       }
     },
     getOutput = function(name) {

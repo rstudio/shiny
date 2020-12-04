@@ -76,8 +76,10 @@ Progress <- R6Class(
       min = 0, max = 1,
       style = getShinyOption("progress.style", default = "notification"))
     {
+      if (is.null(session))
+        rlang::abort("Can only use Progress$new() inside a Shiny app")
       if (is.null(session$progressStack))
-        stop("'session' is not a ShinySession object.")
+        rlang::abort("`session` is not a ShinySession object.")
 
       private$session <- session
       private$id <- createUniqueId(8)

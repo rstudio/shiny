@@ -89,7 +89,7 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
                     version = "0.10.2.2")
   }
 
-  assert_slider_value(value = value, min = min, max = max, fun = "sliderInput")
+  check_slider_value(min, max, value, "sliderInput")
 
   dataType <- getSliderType(min, max, value)
 
@@ -299,13 +299,32 @@ findStepSize <- function(min, max, step) {
 }
 
 # Throw a warning if ever `value` is not in the [`min`, `max`] range
-assert_slider_value <- function(value, min, max, fun){
-  if (isTRUE(min(value) < min || max(value) > max)) {
-    warning(noBreaks. = TRUE, call. = FALSE,
-            sprintf(
-              "In %s(): Trying to set a `value` outside of the [`min`, `max`] range (`value` = %s, `min` = %s, `max = %s). `value`(s) will be constrained to [`min`, `max`].",
-              fun, paste(value, collapse = ","), min, max
-            )
+check_slider_value <- function(min, max, value, fun) {
+  if (is.null(min)   || is_na(min) ||
+      is.null(max)   || is_na(max) ||
+      is.null(value) || is_na(value))
+  {
+    stop(call. = FALSE,
+      sprintf("In %s(): `min`, `max`, and `value` cannot be NULL or NA.", fun)
+    )
+  }
+
+  if (!isTRUE(min(value) >= min)) {
+    warning(call. = FALSE,
+      sprintf(
+        "In %s(): `value` should be greater than or equal to `min` (value = %s, min = %s).",
+        fun, paste(value, collapse = ", "), min
+      )
+    )
+  }
+
+  if (!isTRUE(max(value) <= max)) {
+    warning(
+      noBreaks. = TRUE, call. = FALSE,
+      sprintf(
+        "In %s(): `value` should be less than or equal to `max` (value = %s, max = %s).",
+        fun, paste(value, collapse = ", "), max
+      )
     )
   }
 }

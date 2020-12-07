@@ -422,8 +422,6 @@ updateSliderInput <- function(session, inputId, label = NULL, value = NULL,
     if (!is.null(value)) value <- to_ms(value)
   }
 
-  assert_slider_value(value = value, min = min, max = max, fun = "updateSliderInput")
-
   message <- dropNulls(list(
     label = label,
     value = formatNoSci(value),

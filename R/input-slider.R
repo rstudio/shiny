@@ -89,7 +89,7 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
                     version = "0.10.2.2")
   }
 
-  check_slider_value(min, max, value, "sliderInput")
+  validate_slider_value(min, max, value, "sliderInput")
 
   dataType <- getSliderType(min, max, value)
 
@@ -299,7 +299,7 @@ findStepSize <- function(min, max, step) {
 }
 
 # Throw a warning if ever `value` is not in the [`min`, `max`] range
-check_slider_value <- function(min, max, value, fun) {
+validate_slider_value <- function(min, max, value, fun) {
   if (is.null(min)   || is_na(min) ||
       is.null(max)   || is_na(max) ||
       is.null(value) || is_na(value))

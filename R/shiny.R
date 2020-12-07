@@ -2532,3 +2532,17 @@ markdown <- function(mds, extensions = TRUE, .noWS = NULL, ...) {
   html <- rlang::exec(commonmark::markdown_html, glue::trim(mds), extensions = extensions, ...)
   htmltools::HTML(html, .noWS = .noWS)
 }
+
+
+# Check that an object is a ShinySession object, and give an informative error.
+# The default label is the caller function's name.
+validate_session_object <- function(session, label = as.character(sys.call(sys.parent())[[1]])) {
+  if (missing(session) || !inherits(session, "ShinySession")) {
+    stop(call. = FALSE,
+      sprintf(
+        "`session` must be a 'ShinySession' object. Did you forget to pass `session` to `%s()`?",
+        label
+      )
+    )
+  }
+}

@@ -76,6 +76,8 @@ shiny 1.5.0.9000
 
 * Fixed a bug that `textAreaInput()` doesn't work as expected for relative `width` (thanks to @shrektan). (#2049)
 
+* Closed #2910, #2909, #1552: `sliderInput()` warns if the `value` is outside of `min` and `max`, and errors if `value` is `NULL` or `NA`. (#3194)
+
 ### Library updates
 
 * Removed html5shiv and respond.js, which were used for IE 8 and IE 9 compatibility. (#2973)

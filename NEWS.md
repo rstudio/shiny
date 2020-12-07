@@ -62,6 +62,8 @@ shiny 1.5.0.9000
 
 * Closed #3140: Added support for `...` argument in `icon()`. (#3143)
 
+* Closed #629: All `update*` functions now have a default value for `session`, and issue an informative warning if it is missing. (#3195)
+
 ### Bug fixes
 
 * Fixed #2859: `renderPlot()` wasn't correctly setting `showtext::showtext_opts()`'s `dpi` setting with the correct resolution on high resolution displays; which means, if the font was rendered by showtext, font sizes would look smaller than they should on such displays. (#2941)

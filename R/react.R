@@ -206,7 +206,8 @@ getCurrentContext <- function() {
   .getReactiveEnvironment()$currentContext()
 }
 hasCurrentContext <- function() {
-  !is.null(.getReactiveEnvironment()$.currentContext)
+  !is.null(.getReactiveEnvironment()$.currentContext) ||
+    isTRUE(getOption("shiny.suppressMissingContextError"))
 }
 
 getDummyContext <- function() {

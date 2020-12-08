@@ -154,8 +154,14 @@ $.extend(dateInputBinding, {
     // https://github.com/eternicode/bootstrap-datepicker/issues/2010
     // https://github.com/rstudio/shiny/issues/2335
     var curValue = $(el).bsDatepicker('getUTCDate');
+
     $(el).bsDatepicker('setStartDate', null);
-    $(el).bsDatepicker('setUTCDate', curValue);
+    // If the new min is greater than the current date, unset the current date.
+    if (date !== undefined && this._dateAsUTC(date) > curValue ) {
+      $(el).bsDatepicker('clearDates');
+    } else {
+      $(el).bsDatepicker('setUTCDate', curValue);
+    }
     $(el).bsDatepicker('setStartDate', date);
   },
   // Given an unambiguous date string or a Date object, set the max (end) date
@@ -179,8 +185,14 @@ $.extend(dateInputBinding, {
 
     // Workaround for same issue as in _setMin.
     var curValue = $(el).bsDatepicker('getUTCDate');
+
     $(el).bsDatepicker('setEndDate', null);
-    $(el).bsDatepicker('setUTCDate', curValue);
+    // If the new min is greater than the current date, unset the current date.
+    if (date !== undefined && this._dateAsUTC(date) < curValue ) {
+      $(el).bsDatepicker('clearDates');
+    } else {
+      $(el).bsDatepicker('setUTCDate', curValue);
+    }
     $(el).bsDatepicker('setEndDate', date);
   },
   // Given a date string of format yyyy-mm-dd, return a Date object with

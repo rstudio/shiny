@@ -82,6 +82,7 @@ shiny 1.5.0.9000
 
 * Fixed #2859: `renderPlot()` wasn't correctly setting `showtext::showtext_opts()`'s `dpi` setting with the correct resolution on high resolution displays; which means, if the font was rendered by showtext, font sizes would look smaller than they should on such displays. (#2941)
 
+* Closed #2910, #2909, #1552: `sliderInput()` warns if the `value` is outside of `min` and `max`, and errors if `value` is `NULL` or `NA`. (#3194)
 
 ### Library updates
 

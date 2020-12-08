@@ -772,9 +772,9 @@ updateVarSelectInput <- function(session = getDefaultReactiveDomain(), inputId, 
 #' @rdname updateSelectInput
 #' @export
 updateVarSelectizeInput <- function(session = getDefaultReactiveDomain(), inputId, label = NULL,
-                                    data = NULL, selected = NULL, options = list(), server = FALSE) {
-
-  if (!"ShinySession" %in% class(session) ) stop(stopText)
+                                    data = NULL, selected = NULL, options = list(), server = FALSE)
+{
+  validate_session_object(session)
 
   if (is.null(data)) {
     choices <- NULL

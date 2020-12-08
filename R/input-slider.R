@@ -89,6 +89,8 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
                     version = "0.10.2.2")
   }
 
+  validate_slider_value(min, max, value, "sliderInput")
+
   dataType <- getSliderType(min, max, value)
 
   if (is.null(timeFormat)) {
@@ -293,6 +295,37 @@ findStepSize <- function(min, max, step) {
 
   } else {
     1
+  }
+}
+
+# Throw a warning if ever `value` is not in the [`min`, `max`] range
+validate_slider_value <- function(min, max, value, fun) {
+  if (length(min)   != 1 || is_na(min) ||
+      length(max)   != 1 || is_na(max) ||
+      length(value) <  1 || length(value) > 2 || any(is.na(value)))
+  {
+    stop(call. = FALSE,
+      sprintf("In %s(): `min`, `max`, and `value` cannot be NULL, NA, or empty.", fun)
+    )
+  }
+
+  if (min(value) < min) {
+    warning(call. = FALSE,
+      sprintf(
+        "In %s(): `value` should be greater than or equal to `min` (value = %s, min = %s).",
+        fun, paste(value, collapse = ", "), min
+      )
+    )
+  }
+
+  if (max(value) > max) {
+    warning(
+      noBreaks. = TRUE, call. = FALSE,
+      sprintf(
+        "In %s(): `value` should be less than or equal to `max` (value = %s, max = %s).",
+        fun, paste(value, collapse = ", "), max
+      )
+    )
   }
 }
 

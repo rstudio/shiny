@@ -300,16 +300,16 @@ findStepSize <- function(min, max, step) {
 
 # Throw a warning if ever `value` is not in the [`min`, `max`] range
 validate_slider_value <- function(min, max, value, fun) {
-  if (is.null(min)   || is_na(min) ||
-      is.null(max)   || is_na(max) ||
-      is.null(value) || is_na(value))
+  if (length(min)   != 1 || is_na(min) ||
+      length(max)   != 1 || is_na(max) ||
+      length(value) <  1 || length(value) > 2 || any(is.na(value)))
   {
     stop(call. = FALSE,
-      sprintf("In %s(): `min`, `max`, and `value` cannot be NULL or NA.", fun)
+      sprintf("In %s(): `min`, `max`, and `value` cannot be NULL, NA, or empty.", fun)
     )
   }
 
-  if (!isTRUE(min(value) >= min)) {
+  if (min(value) < min) {
     warning(call. = FALSE,
       sprintf(
         "In %s(): `value` should be greater than or equal to `min` (value = %s, min = %s).",
@@ -318,7 +318,7 @@ validate_slider_value <- function(min, max, value, fun) {
     )
   }
 
-  if (!isTRUE(max(value) <= max)) {
+  if (max(value) > max) {
     warning(
       noBreaks. = TRUE, call. = FALSE,
       sprintf(

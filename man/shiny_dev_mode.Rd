@@ -79,6 +79,15 @@ Shiny Developer Mode
 # Enable Shiny Developer mode
 shiny_dev_mode()
 in_shiny_dev_mode() # TRUE/FALSE?
+# Execute code in a temporary shiny dev mode
 with_shiny_dev_mode(TRUE, in_shiny_dev_mode()) # TRUE
+
+# Used within `shiny::runApp(launch.browser)`
+\dontrun{shiny_dev_mode_option(
+  "shiny.launch.browser",
+  "Always launching browser. To disable, call `options(shiny.launch.browser = interactive())`",
+  TRUE,
+  interactive()
+)}
 }
 \keyword{internal}

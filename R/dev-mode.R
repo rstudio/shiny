@@ -131,6 +131,7 @@
 #' @describeIn shiny_dev_mode A small function to set two options to enable/disable Shiny Developer Mode and whether or not to display Developer messages
 #' @param dev_mode Logical value which should be set to TRUE to enable Shiny Developer Mode
 #' @param verbose Logical value which should be set to display Shiny Developer messages
+#' @export
 #' @examples
 #' # Enable Shiny Developer mode
 #' shiny_dev_mode()
@@ -146,6 +147,7 @@ shiny_dev_mode <- function(
 
 
 #' @describeIn shiny_dev_mode Determines if Shiny is in Developer Mode
+#' @export
 #' @examples
 #' in_shiny_dev_mode() # TRUE/FALSE?
 in_shiny_dev_mode <- function() {
@@ -165,7 +167,9 @@ is_shiny_dev_mode_verbose <- function() {
 
 #' @describeIn shiny_dev_mode Temporarily set Shiny Developer Mode and Developer message verbosity
 #' @param code Code to execute with the temporary `options()` set
+#' @export
 #' @examples
+#' # Execute code in a temporary shiny dev mode
 #' with_shiny_dev_mode(TRUE, in_shiny_dev_mode()) # TRUE
 with_shiny_dev_mode <- function(
   dev_mode,
@@ -186,6 +190,16 @@ with_shiny_dev_mode <- function(
 #' @param on_msg Message to display once every 8 hours if `option` is not set and `in_shiny_dev_mode()` returns `TRUE`.
 #' @param on_value Default value to use when `option` is not set and `in_shiny_dev_mode()` returns `TRUE`.
 #' @param off_value Default value to use when `option` is not set and `in_shiny_dev_mode()` returns `FALSE`.
+#' @export
+#' @examples
+#'
+#' # Used within `shiny::runApp(launch.browser)`
+#' \dontrun{shiny_dev_mode_option(
+#'   "shiny.launch.browser",
+#'   "Always launching browser. To disable, call `options(shiny.launch.browser = interactive())`",
+#'   TRUE,
+#'   interactive()
+#' )}
 shiny_dev_mode_option <- function(
   option,
   on_msg,
@@ -216,7 +230,10 @@ shiny_dev_mode_msg <- function(
   .frequency = "once",
   .frequency_id = msg
 ) {
-  if (is_shiny_dev_mode_verbose()) {
+  if (
+    in_shiny_dev_mode() &&
+      isTRUE(getOption("shiny.devmode.verbose", TRUE))
+  ) {
     rlang::inform(
       message = paste0("shiny dev mode - ", msg),
       .frequency = frequency,

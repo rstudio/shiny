@@ -116,10 +116,10 @@ of a shiny app will automatically be sourced.}
 Cairo package, if it is installed. See \code{\link[=plotPNG]{plotPNG()}} for more
 information.}
 }
-\item{shiny.devmode (defaults to \code{NULL})}{If \code{TRUE}, enables 'Shiny developer mode'.
+\item{shiny.devmode (defaults to \code{NULL})}{
+If \code{TRUE}, \code{shiny_dev_mode(TRUE)} is called (enabling 'Shiny developer mode') prior to starting a Shiny app.
+If \code{FALSE}, \code{shiny_dev_mode(FALSE)} is called (resetting any 'Shiny developer mode' settings) prior to starting a Shiny app.
 See \code{\link[=shiny_dev_mode]{shiny_dev_mode()}} for more details. }
-\item{shiny.devmode.verbose (defaults to \code{TRUE})}{If \code{TRUE}, will display messages printed
-about which options are being set. See \code{\link[=shiny_dev_mode]{shiny_dev_mode()}} for more details. }
 }
 
 \section{Scoping for \code{shinyOptions()}}{

@@ -7,7 +7,7 @@
 runExample(
   example = NA,
   port = getOption("shiny.port"),
-  launch.browser = getOption("shiny.launch.browser", interactive()),
+  launch.browser = should_launch_browser(),
   host = getOption("shiny.host", "127.0.0.1"),
   display.mode = c("auto", "normal", "showcase")
 )

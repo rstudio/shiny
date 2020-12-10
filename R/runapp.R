@@ -83,8 +83,7 @@
 #' @export
 runApp <- function(appDir=getwd(),
                    port=getOption('shiny.port'),
-                   launch.browser=getOption('shiny.launch.browser',
-                                            interactive()),
+                   launch.browser = should_launch_browser(),
                    host=getOption('shiny.host', '127.0.0.1'),
                    workerId="", quiet=FALSE,
                    display.mode=c("auto", "normal", "showcase"),
@@ -470,8 +469,7 @@ stopApp <- function(returnValue = invisible()) {
 #' @export
 runExample <- function(example=NA,
                        port=getOption("shiny.port"),
-                       launch.browser=getOption('shiny.launch.browser',
-                                                interactive()),
+                       launch.browser = should_launch_browser(),
                        host=getOption('shiny.host', '127.0.0.1'),
                        display.mode=c("auto", "normal", "showcase")) {
   examplesDir <- system.file('examples', package='shiny')
@@ -570,4 +568,14 @@ decorateServerFunc <- function(appobj, serverFunc) {
     }
   }
   appobj
+}
+
+
+should_launch_browser <- function() {
+  shiny_dev_mode_option(
+    "shiny.launch.browser",
+    "Always launching browser. To disable, call `options(shiny.launch.browser = interactive())`",
+    TRUE,
+    interactive()
+  )
 }

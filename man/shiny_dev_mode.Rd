@@ -2,40 +2,83 @@
 % Please edit documentation in R/dev-mode.R
 \name{shiny_dev_mode}
 \alias{shiny_dev_mode}
-\title{Enable Shiny developer mode}
+\alias{in_shiny_dev_mode}
+\alias{with_shiny_dev_mode}
+\alias{shiny_dev_mode_option}
+\alias{shiny_dev_mode_msg}
+\title{Shiny Developer Mode}
 \usage{
 shiny_dev_mode(
-  enable = getOption("shiny.devmode", NULL),
+  dev_mode = getOption("shiny.devmode", TRUE),
   verbose = getOption("shiny.devmode.verbose", TRUE)
+)
+
+in_shiny_dev_mode()
+
+with_shiny_dev_mode(
+  dev_mode,
+  code,
+  verbose = getOption("shiny.devmode.verbose", TRUE)
+)
+
+shiny_dev_mode_option(option, on_msg, on_value = NULL, off_value = NULL)
+
+shiny_dev_mode_msg(
+  ...,
+  msg = paste0(...),
+  .frequency = "once",
+  .frequency_id = msg
 )
 }
 \arguments{
-\item{enable}{Value to set all Shiny developer settings. See details for logical values. If \code{NULL}, no action will be taken.
-\code{\link[=options]{options()}} set when \code{enable} is \code{TRUE}:
-\itemize{
-\item \code{shiny.devmode = TRUE}: Enable Shiny developer mode
-\item \code{shiny.launch.browser = TRUE}: Always launch the shiny application window
-\item \code{shiny.minified = FALSE}: Use \code{shiny.js} for easier debugging
-\item \code{shiny.autoreload = TRUE}: Autoreload when \verb{R/} files change
-\item \code{shiny.fullstacktrace = TRUE}: Display full error stack traces
-\item \code{sass.cache = FALSE }: Disable default \code{sass} caching
-}
+\item{dev_mode}{Logical value which should be set to TRUE to enable Shiny Developer Mode}
 
-If \code{enable} is \code{FALSE}, all \code{\link[=options]{options()}} described above will be set to \code{NULL} to allow for default behavior.}
+\item{verbose}{Logical value which should be set to display Shiny Developer messages}
 
-\item{verbose}{Value to enable printing output. To disable message output, set to \code{FALSE}.}
+\item{code}{Code to execute with the temporary \code{options()} set}
+
+\item{option}{Option to look for in \code{options()}}
+
+\item{on_msg}{Message to display once every 8 hours if \code{option} is not set and \code{in_shiny_dev_mode()} returns \code{TRUE}.}
+
+\item{on_value}{Default value to use when \code{option} is not set and \code{in_shiny_dev_mode()} returns \code{TRUE}.}
+
+\item{off_value}{Default value to use when \code{option} is not set and \code{in_shiny_dev_mode()} returns \code{FALSE}.}
+
+\item{...}{Values passed into \code{\link[=paste0]{paste0()}} to create \code{msg}}
+
+\item{msg}{Message to be displayed}
+
+\item{.frequency}{How frequently should the warning or message be
+displayed? By default (\code{"always"}) it is displayed at each
+time. If \code{"regularly"}, it is displayed once every 8 hours. If
+\code{"once"}, it is displayed once per session.}
+
+\item{.frequency_id}{A unique identifier for the warning or
+message. This is used when \code{.frequency} is supplied to recognise
+recurring conditions. This argument must be supplied if
+\code{.frequency} is not set to \code{"always"}.}
 }
 \description{
-Sets many options to be used by Shiny application developers.
+Shiny Developer Mode
 }
+\section{Functions}{
+\itemize{
+\item \code{shiny_dev_mode}: A small function to set two options to enable/disable Shiny Developer Mode and whether or not to display Developer messages
+
+\item \code{in_shiny_dev_mode}: Determines if Shiny is in Developer Mode
+
+\item \code{with_shiny_dev_mode}: Temporarily set Shiny Developer Mode and Developer message verbosity
+
+\item \code{shiny_dev_mode_option}: Helper method to retrieve an \code{options()} value. If the \code{option} is not set, \code{on_value} or \code{off_value} will be returned depending on the result of \code{in_shiny_dev_mode()}.  When Shiny Developer Mode is on, \code{on_msg} will be displayed using \code{shiny_dev_mode_msg()}
+
+\item \code{shiny_dev_mode_msg}: If Shiny Developer Mode is enabled, displays a message (\code{msg}) once every 8 hrs
+}}
+
 \examples{
-
-# To enable Shiny dev mode for an application,
-# place this line of code near the top of your Shiny application
-\dontrun{shiny_dev_mode(TRUE)}
-
-# To enable Shiny dev mode for all locally ran applications,
-# place this line of code within your `.Rprofile`.
-\dontrun{options(shiny.devmode = TRUE)}
-# (By only setting the option, `shiny` will not be loaded for every R session)
+# Enable Shiny Developer mode
+shiny_dev_mode()
+in_shiny_dev_mode() # TRUE/FALSE?
+with_shiny_dev_mode(TRUE, in_shiny_dev_mode()) # TRUE
 }
+\keyword{internal}

@@ -426,7 +426,7 @@ HandlerManager <- R6Class("HandlerManager",
 )
 
 maybeInjectAutoreload <- function(resp) {
-  if (getOption("shiny.autoreload", FALSE) &&
+  if (should_autoreload() &&
       isTRUE(grepl("^text/html($|;)", resp$content_type)) &&
       is.character(resp$content)) {
 
@@ -439,6 +439,14 @@ maybeInjectAutoreload <- function(resp) {
   }
 
   resp
+}
+should_autoreload <- function() {
+  shiny_dev_mode_option(
+    "shiny.autoreload",
+    "Turning on shiny autoreload. To disable, call `options(shiny.autoreload = FALSE)`",
+    TRUE,
+    FALSE
+  )
 }
 
 # Safely get the Content-Length of a Rook response, or NULL if the length cannot

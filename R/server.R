@@ -150,7 +150,7 @@ createAppHandlers <- function(httpHandlers, serverFuncSource) {
       }
 
       if (identical(ws$request$PATH_INFO, "/autoreload/")) {
-        if (!getOption("shiny.autoreload", FALSE)) {
+        if (!should_autoreload()) {
           ws$close()
           return(TRUE)
         }

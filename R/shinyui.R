@@ -89,7 +89,18 @@ shinyDependencies <- function() {
       name = "shiny-javascript",
       version = shinyPackageVersion(),
       src = c(href = "shared"),
-      script = if (getOption("shiny.minified", TRUE)) "shiny.min.js" else "shiny.js"
+      script =
+        if (isTRUE(
+          shiny_dev_mode_option(
+            "shiny.minified",
+            "Using full shiny javascript file. To use the minified version, call `options(shiny.minified = TRUE)`",
+            FALSE,
+            TRUE
+          )
+        ))
+          "shiny.min.js"
+        else
+          "shiny.js"
     )
   )
 }

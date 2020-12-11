@@ -141,7 +141,7 @@ Collate:
     'bootstrap.R'
     'cache-utils.R'
     'deprecated.R'
-    'dev-mode.R'
+    'devmode.R'
     'diagnose.R'
     'fileupload.R'
     'font-awesome.R'

@@ -10,7 +10,7 @@ check_suggested <- function(package, version = NULL) {
 
   msg <- paste0(
     sQuote(package),
-    if (is.na(version %OR% NA)) "" else paste0("(>= ", version, ")"),
+    if (is.na(version %||% NA)) "" else paste0("(>= ", version, ")"),
     " must be installed for this functionality."
   )
 

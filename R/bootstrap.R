@@ -212,7 +212,7 @@ bootstrapDependency <- function(theme) {
       "accessibility/js/bootstrap-accessibility.min.js"
     ),
     stylesheet = c(
-      theme %OR% "css/bootstrap.min.css",
+      theme %||% "css/bootstrap.min.css",
       # Safely adding accessibility plugin for screen readers and keyboard users; no break for sighted aspects (see https://github.com/paypal/bootstrap-accessibility-plugin)
       "accessibility/css/bootstrap-accessibility.css"
     ),
@@ -872,7 +872,7 @@ findAndMarkSelectedTab <- function(tabs, selected, foundSelected) {
         foundSelected <<- TRUE
         div <- markTabAsSelected(div)
       } else {
-        tabValue <- div$attribs$`data-value` %OR% div$attribs$title
+        tabValue <- div$attribs$`data-value` %||% div$attribs$title
         if (identical(selected, tabValue)) {
           foundSelected <<- TRUE
           div <- markTabAsSelected(div)
@@ -1035,9 +1035,9 @@ textOutput <- function(outputId, container = if (inline) span else div, inline =
 #' @rdname textOutput
 verbatimTextOutput <- function(outputId, placeholder = FALSE) {
   pre(id = outputId,
-      class = paste(c("shiny-text-output", if (!placeholder) "noplaceholder"),
-                    collapse = " ")
-      )
+    class = "shiny-text-output",
+    class = if (!placeholder) "noplaceholder"
+  )
 }
 
 
@@ -1049,7 +1049,9 @@ imageOutput <- function(outputId, width = "100%", height="400px",
                         inline = FALSE) {
 
   style <- if (!inline) {
-    paste("width:", validateCssUnit(width), ";", "height:", validateCssUnit(height))
+    # Using `css()` here instead of paste/sprintf so that NULL values will
+    # result in the property being dropped altogether
+    css(width = validateCssUnit(width), height = validateCssUnit(height))
   }
 
 

@@ -346,6 +346,23 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       labelNode.text(labelTxt);
       labelNode.removeClass("shiny-label-null");
     }
+  } // Compute the color property of an a tag, scoped within the element
+
+
+  function getComputedLinkColor(el) {
+    var a = document.createElement("a");
+    a.href = "/";
+    var div = document.createElement("div");
+    div.style.setProperty("position", "absolute", "important");
+    div.style.setProperty("top", "-1000px", "important");
+    div.style.setProperty("left", "0", "important");
+    div.style.setProperty("width", "30px", "important");
+    div.style.setProperty("height", "10px", "important");
+    div.appendChild(a);
+    el.appendChild(div);
+    var linkColor = window.getComputedStyle(a).getPropertyValue("color");
+    el.removeChild(div);
+    return linkColor;
   } //---------------------------------------------------------------------
   // Source file: ../srcjs/browser.js
 
@@ -1345,6 +1362,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         var inputBinding = $obj.data('shiny-input-binding'); // Dispatch the message to the appropriate input object
 
         if ($obj.length > 0) {
+          if (!$obj.attr("aria-live")) $obj.attr("aria-live", "polite");
           var el = $obj[0];
           var evt = jQuery.Event('shiny:updateinput');
           evt.message = message[i].message;
@@ -2441,7 +2459,16 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         brushDirection: OR($el.data('brush-direction'), 'xy'),
         brushResetOnNew: OR(strToBool($el.data('brush-reset-on-new')), false),
         coordmap: data.coordmap
-      }; // Copy items from data to img. Don't set the coordmap as an attribute.
+      };
+
+      if (opts.brushFill === "auto") {
+        opts.brushFill = getComputedLinkColor($el[0]);
+      }
+
+      if (opts.brushStroke === "auto") {
+        opts.brushStroke = getStyle($el[0], "color");
+      } // Copy items from data to img. Don't set the coordmap as an attribute.
+
 
       $.each(data, function (key, value) {
         if (value === null || key === 'coordmap') {
@@ -4879,12 +4906,17 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       };
     },
     initialize: function initialize(el) {
-      var $input = $(el).find('input');
+      var $input = $(el).find('input'); // The challenge with dates is that we want them to be at 00:00 in UTC so
+      // that we can do comparisons with them. However, the Date object itself
+      // does not carry timezone information, so we should call _floorDateTime()
+      // on Dates as soon as possible so that we know we're always working with
+      // consistent objects.
+
       var date = $input.data('initial-date'); // If initial_date is null, set to current date
 
       if (date === undefined || date === null) {
-        // Get local date, but as UTC
-        date = this._dateAsUTC(new Date());
+        // Get local date, but normalized to beginning of day in UTC.
+        date = this._floorDateTime(this._dateAsUTC(new Date()));
       }
 
       this.setValue(el, date); // Set the start and end dates, from min-date and max-date. These always
@@ -4929,26 +4961,24 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       date = this._newDate(date); // If date parsing fails, do nothing
 
       if (date === null) return;
-      date = this._UTCDateAsLocal(date);
-      if (isNaN(date)) return; // Workaround for https://github.com/eternicode/bootstrap-datepicker/issues/2010
-      // If the start date when there's a two-digit year format, it will set
-      // the date value to null. So we'll save the value, set the start
-      // date, and the restore the value.
+      if (isNaN(date)) return; // Workarounds for
+      // https://github.com/rstudio/shiny/issues/2335
 
-      var curValue = $(el).bsDatepicker('getUTCDate');
-      $(el).bsDatepicker('setStartDate', date);
-      $(el).bsDatepicker('setUTCDate', curValue); // Workaround for https://github.com/rstudio/shiny/issues/2335
-      // We only set the start date *after* the value in this special
-      // case so we don't effect the intended behavior of having a blank
-      // value when it falls outside the start date
+      var curValue = $(el).bsDatepicker('getUTCDate'); // Note that there's no `setUTCStartDate`, so we need to convert this Date.
+      // It starts at 00:00 UTC, and we convert it to 00:00 in local time, which
+      // is what's needed for `setStartDate`.
 
-      if (typeof date.toDateString !== 'function') return;
-      if (typeof curValue.toDateString !== 'function') return;
+      $(el).bsDatepicker('setStartDate', this._UTCDateAsLocal(date)); // If the new min is greater than the current date, unset the current date.
 
-      if (date.toDateString() === curValue.toDateString()) {
-        $(el).bsDatepicker('setStartDate', null);
+      if (date && curValue && date.getTime() > curValue.getTime()) {
+        $(el).bsDatepicker('clearDates');
+      } else {
+        // Setting the date needs to be done AFTER `setStartDate`, because the
+        // datepicker has a bug where calling `setStartDate` will clear the date
+        // internally (even though it will still be visible in the UI) when a
+        // 2-digit year format is used.
+        // https://github.com/eternicode/bootstrap-datepicker/issues/2010
         $(el).bsDatepicker('setUTCDate', curValue);
-        $(el).bsDatepicker('setStartDate', date);
       }
     },
     // Given an unambiguous date string or a Date object, set the max (end) date
@@ -4964,20 +4994,15 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       date = this._newDate(date); // If date parsing fails, do nothing
 
       if (date === null) return;
-      date = this._UTCDateAsLocal(date);
       if (isNaN(date)) return; // Workaround for same issue as in _setMin.
 
       var curValue = $(el).bsDatepicker('getUTCDate');
-      $(el).bsDatepicker('setEndDate', date);
-      $(el).bsDatepicker('setUTCDate', curValue); // Workaround for same issue as in _setMin.
+      $(el).bsDatepicker('setEndDate', this._UTCDateAsLocal(date)); // If the new min is greater than the current date, unset the current date.
 
-      if (typeof date.toDateString !== 'function') return;
-      if (typeof curValue.toDateString !== 'function') return;
-
-      if (date.toDateString() === curValue.toDateString()) {
-        $(el).bsDatepicker('setEndDate', null);
+      if (date && curValue && date.getTime() < curValue.getTime()) {
+        $(el).bsDatepicker('clearDates');
+      } else {
         $(el).bsDatepicker('setUTCDate', curValue);
-        $(el).bsDatepicker('setEndDate', date);
       }
     },
     // Given a date string of format yyyy-mm-dd, return a Date object with
@@ -4991,7 +5016,14 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       var d = parseDate(date); // If invalid date, return null
 
       if (isNaN(d)) return null;
-      return new Date(d.getTime());
+      return d;
+    },
+    // A Date can have any time during a day; this will return a new Date object
+    // set to 00:00 in UTC.
+    _floorDateTime: function _floorDateTime(date) {
+      date = new Date(date.getTime());
+      date.setUTCHours(0, 0, 0, 0);
+      return date;
     },
     // Given a Date object, return a Date object which has the same "clock time"
     // in UTC. For example, if input date is 2013-02-01 23:00:00 GMT-0600 (CST),
@@ -6113,6 +6145,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
           shinyapp.bindOutput(id, bindingAdapter);
           $el.data('shiny-output-binding', bindingAdapter);
           $el.addClass('shiny-bound-output');
+          if (!$el.attr("aria-live")) $el.attr("aria-live", "polite");
           $el.trigger({
             type: 'shiny:bound',
             binding: binding,
@@ -6394,23 +6427,6 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       }
 
       return bgColor;
-    } // Compute the color property of an a tag, scoped within the element
-
-
-    function getComputedLinkColor(el) {
-      var a = document.createElement("a");
-      a.href = "/";
-      var div = document.createElement("div");
-      div.style.setProperty("position", "absolute", "important");
-      div.style.setProperty("top", "-1000px", "important");
-      div.style.setProperty("left", "0", "important");
-      div.style.setProperty("width", "30px", "important");
-      div.style.setProperty("height", "10px", "important");
-      div.appendChild(a);
-      el.appendChild(div);
-      var linkColor = getStyle(a, "color");
-      el.removeChild(div);
-      return linkColor;
     }
 
     function getComputedFont(el) {

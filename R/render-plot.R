@@ -123,7 +123,7 @@ renderPlot <- function(expr, width = 'auto', height = 'auto', res = 72, ...,
       {
         # If !execOnResize, don't invalidate when width/height changes.
         dims <- if (execOnResize) getDims() else isolate(getDims())
-        pixelratio <- session$clientData$pixelratio %OR% 1
+        pixelratio <- session$clientData$pixelratio %||% 1
         do.call("drawPlot", c(
           list(
             name = outputName,
@@ -162,7 +162,7 @@ renderPlot <- function(expr, width = 'auto', height = 'auto', res = 72, ...,
       drawReactive(),
       function(result) {
         dims <- getDims()
-        pixelratio <- session$clientData$pixelratio %OR% 1
+        pixelratio <- session$clientData$pixelratio %||% 1
         result <- do.call("resizeSavedPlot", c(
           list(name, shinysession, result, dims$width, dims$height, altWrapper(), pixelratio, res),
           args
@@ -610,6 +610,10 @@ find_panel_info_api <- function(b) {
   coord  <- ggplot2::summarise_coord(b)
   layers <- ggplot2::summarise_layers(b)
 
+  `%NA_OR%` <- function(x, y) {
+    if (is_na(x)) y else x
+  }
+
   # Given x and y scale objects and a coord object, return a list that has
   # the bases of log transformations for x and y, or NULL if it's not a
   # log transform.
@@ -626,8 +630,8 @@ find_panel_info_api <- function(b) {
 
     # First look for log base in scale, then coord; otherwise NULL.
     list(
-      x = get_log_base(xscale$trans) %OR% coord$xlog %OR% NULL,
-      y = get_log_base(yscale$trans) %OR% coord$ylog %OR% NULL
+      x = get_log_base(xscale$trans) %NA_OR% coord$xlog %NA_OR% NULL,
+      y = get_log_base(yscale$trans) %NA_OR% coord$ylog %NA_OR% NULL
     )
   }
 

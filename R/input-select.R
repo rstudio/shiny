@@ -116,7 +116,7 @@ selectInput <- function(inputId, label, choices, selected = NULL,
   # return label and select tag
   res <- div(
     class = "form-group shiny-input-container",
-    style = if (!is.null(width)) paste0("width: ", validateCssUnit(width), ";"),
+    style = css(width = validateCssUnit(width)),
     shinyInputLabel(inputId, label),
     div(selectTag)
   )
@@ -204,17 +204,16 @@ selectizeIt <- function(inputId, select, options, nonempty = FALSE) {
 
   res <- checkAsIs(options)
 
-  selectizeDep <- selectizeDependency()
+  deps <- list(selectizeDependency())
 
   if ('drag_drop' %in% options$plugins) {
-    selectizeDep <- c(
-      selectizeDep,
-      htmlDependency(
-        'jqueryui',
-        '1.12.1',
+    deps <- c(
+      deps,
+      list(htmlDependency(
+        'jqueryui', '1.12.1',
         c(href = 'shared/jqueryui'),
         script = 'jquery-ui.min.js'
-      )
+      ))
     )
   }
 
@@ -229,7 +228,7 @@ selectizeIt <- function(inputId, select, options, nonempty = FALSE) {
     )
   )
 
-  attachDependencies(select, selectizeDep)
+  attachDependencies(select, deps)
 }
 
 

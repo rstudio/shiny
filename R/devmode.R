@@ -14,7 +14,7 @@
 #'
 #' @keywords internal
 #' @describeIn devmode Function to set two options to enable/disable Shiny Developer Mode and Developer messages
-#' @param dev_mode Logical value which should be set to `TRUE` to enable Shiny Developer Mode
+#' @param devmode Logical value which should be set to `TRUE` to enable Shiny Developer Mode
 #' @param verbose Logical value which should be set to `TRUE` display Shiny Developer messages
 #' @export
 #' @examples
@@ -22,11 +22,11 @@
 #' devmode()
 #'
 devmode <- function(
-  dev_mode = getOption("shiny.devmode", TRUE),
+  devmode = getOption("shiny.devmode", TRUE),
   verbose = getOption("shiny.devmode.verbose", TRUE)
 ) {
   options(
-    shiny.devmode = dev_mode,
+    shiny.devmode = devmode,
     shiny.devmode.verbose = verbose
   )
 }
@@ -85,13 +85,13 @@ in_devmode <- function() {
 #' with_devmode(TRUE, in_devmode()) # TRUE
 #'
 with_devmode <- function(
-  dev_mode,
+  devmode,
   code,
   verbose = getOption("shiny.devmode.verbose", TRUE)
 ) {
   withr::with_options(
     list(
-      shiny.devmode = dev_mode,
+      shiny.devmode = devmode,
       shiny.devmode.verbose = verbose
     ),
     code

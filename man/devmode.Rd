@@ -10,17 +10,13 @@
 \title{Shiny Developer Mode}
 \usage{
 devmode(
-  dev_mode = getOption("shiny.devmode", TRUE),
+  devmode = getOption("shiny.devmode", TRUE),
   verbose = getOption("shiny.devmode.verbose", TRUE)
 )
 
 in_devmode()
 
-with_devmode(
-  dev_mode,
-  code,
-  verbose = getOption("shiny.devmode.verbose", TRUE)
-)
+with_devmode(devmode, code, verbose = getOption("shiny.devmode.verbose", TRUE))
 
 devmode_inform(message, .frequency = "regularly", .frequency_id = message, ...)
 
@@ -29,7 +25,7 @@ register_devmode_option(option, message = NULL, on = NULL)
 get_devmode_option(option, default = NULL, on = waiver(), message = waiver())
 }
 \arguments{
-\item{dev_mode}{Logical value which should be set to \code{TRUE} to enable Shiny Developer Mode}
+\item{devmode}{Logical value which should be set to \code{TRUE} to enable Shiny Developer Mode}
 
 \item{verbose}{Logical value which should be set to \code{TRUE} display Shiny Developer messages}
 

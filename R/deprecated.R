@@ -1,20 +1,4 @@
 
-
-rlang_inform <- function(..., msg = paste0(...), frequency = "always", id = msg) {
-  rlang::inform(
-    message = msg,
-    .frequency = frequency,
-    .frequency_id = id
-  )
-}
-rlang_warn <- function(..., msg = paste0(...), frequency = "always", id = msg) {
-  rlang::warn(
-    message = msg,
-    .frequency = frequency,
-    .frequency_id = id
-  )
-}
-
 #' Print message for deprecated functions in Shiny
 #'
 #' To disable these messages, use `options(shiny.deprecation.messages=FALSE)`.

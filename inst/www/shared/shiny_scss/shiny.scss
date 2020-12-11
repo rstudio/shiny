@@ -8,7 +8,9 @@ $shiny-input-width:                 300px !default;
 $shiny-input-panel-bg:              #f5f5f5 !default;
 $shiny-input-panel-border:          1px solid #e3e3e3 !default;
 $shiny-input-panel-border-radius:   2px !default;
+$shiny-text-output-bg:              #f5f5f5 !default;
 $shiny-text-output-border-radius:   null !default;
+$shiny-text-output-border:          1px solid #ccc !default;
 $notification-bg-color:             #e8e8e8 !default;
 $notification-color:                #333 !default;
 $notification-border:               1px solid #ccc !default;
@@ -76,6 +78,8 @@ pre.shiny-text-output.noplaceholder:empty {
 */
 pre.shiny-text-output {
   word-wrap: normal;
+  background-color: $shiny-text-output-bg;
+  border: $shiny-text-output-border;
   @include border-radius-shim($shiny-text-output-border-radius);
 }
 

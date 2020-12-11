@@ -98,11 +98,17 @@ $.extend(dateInputBinding, {
   initialize: function(el) {
     var $input = $(el).find('input');
 
+    // The challenge with dates is that we want them to be at 00:00 in UTC so
+    // that we can do comparisons with them. However, the Date object itself
+    // does not carry timezone information, so we should call _floorDateTime()
+    // on Dates as soon as possible so that we know we're always working with
+    // consistent objects.
+
     var date = $input.data('initial-date');
     // If initial_date is null, set to current date
     if (date === undefined || date === null) {
-      // Get local date, but as UTC
-      date = this._dateAsUTC(new Date());
+      // Get local date, but normalized to beginning of day in UTC.
+      date = this._floorDateTime(this._dateAsUTC(new Date()));
     }
 
     this.setValue(el, date);
@@ -147,22 +153,28 @@ $.extend(dateInputBinding, {
     if (date === null)
       return;
 
-    date = this._UTCDateAsLocal(date);
     if (isNaN(date))
       return;
     // Workarounds for
-    // https://github.com/eternicode/bootstrap-datepicker/issues/2010
     // https://github.com/rstudio/shiny/issues/2335
     var curValue = $(el).bsDatepicker('getUTCDate');
 
-    $(el).bsDatepicker('setStartDate', null);
+    // Note that there's no `setUTCStartDate`, so we need to convert this Date.
+    // It starts at 00:00 UTC, and we convert it to 00:00 in local time, which
+    // is what's needed for `setStartDate`.
+    $(el).bsDatepicker('setStartDate', this._UTCDateAsLocal(date));
+
     // If the new min is greater than the current date, unset the current date.
-    if (date !== undefined && this._dateAsUTC(date) > curValue ) {
+    if (date && curValue && date.getTime() > curValue.getTime()) {
       $(el).bsDatepicker('clearDates');
     } else {
+      // Setting the date needs to be done AFTER `setStartDate`, because the
+      // datepicker has a bug where calling `setStartDate` will clear the date
+      // internally (even though it will still be visible in the UI) when a
+      // 2-digit year format is used.
+      // https://github.com/eternicode/bootstrap-datepicker/issues/2010
       $(el).bsDatepicker('setUTCDate', curValue);
     }
-    $(el).bsDatepicker('setStartDate', date);
   },
   // Given an unambiguous date string or a Date object, set the max (end) date
   // null will unset.
@@ -179,21 +191,20 @@ $.extend(dateInputBinding, {
     if (date === null)
       return;
 
-    date = this._UTCDateAsLocal(date);
     if (isNaN(date))
       return;
 
     // Workaround for same issue as in _setMin.
     var curValue = $(el).bsDatepicker('getUTCDate');
 
-    $(el).bsDatepicker('setEndDate', null);
+    $(el).bsDatepicker('setEndDate', this._UTCDateAsLocal(date));
+
     // If the new min is greater than the current date, unset the current date.
-    if (date !== undefined && this._dateAsUTC(date) < curValue ) {
+    if (date && curValue && date.getTime() < curValue.getTime()) {
       $(el).bsDatepicker('clearDates');
     } else {
       $(el).bsDatepicker('setUTCDate', curValue);
     }
-    $(el).bsDatepicker('setEndDate', date);
   },
   // Given a date string of format yyyy-mm-dd, return a Date object with
   // that date at 12AM UTC.
@@ -212,7 +223,14 @@ $.extend(dateInputBinding, {
     if (isNaN(d))
       return null;
 
-    return new Date(d.getTime());
+    return d;
+  },
+  // A Date can have any time during a day; this will return a new Date object
+  // set to 00:00 in UTC.
+  _floorDateTime: function(date) {
+    date = new Date(date.getTime());
+    date.setUTCHours(0, 0, 0, 0);
+    return date;
   },
   // Given a Date object, return a Date object which has the same "clock time"
   // in UTC. For example, if input date is 2013-02-01 23:00:00 GMT-0600 (CST),
@@ -224,7 +242,7 @@ $.extend(dateInputBinding, {
   // The inverse of _dateAsUTC. This is needed to adjust time zones because
   // some bootstrap-datepicker methods only take local dates as input, and not
   // UTC.
-    _UTCDateAsLocal: function(date) {
+  _UTCDateAsLocal: function(date) {
     return new Date(date.getTime() + date.getTimezoneOffset() * 60000);
   }
 });

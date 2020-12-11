@@ -14,7 +14,7 @@
 #' @importFrom rlang
 #'    quo enquo as_function get_expr get_env new_function enquos
 #'    eval_tidy expr pairlist2 new_quosure enexpr as_quosure is_quosure inject
-#'    enquos0 zap_srcref
+#'    enquos0 zap_srcref %||% is_na
 #'    is_false
 #' @importFrom ellipsis
 #'    check_dots_empty check_dots_unnamed

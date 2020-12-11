@@ -78,7 +78,7 @@ registerClient <- function(client) {
 #' @export
 #' @keywords internal
 shinyServer <- function(func) {
-  if (in_shiny_dev_mode()) {
+  if (in_devmode()) {
     shinyDeprecated(
       "0.10.0", "shinyServer()",
       details = paste0(
@@ -150,7 +150,7 @@ createAppHandlers <- function(httpHandlers, serverFuncSource) {
       }
 
       if (identical(ws$request$PATH_INFO, "/autoreload/")) {
-        if (!should_autoreload()) {
+        if (!get_devmode_option("shiny.autoreload", FALSE)) {
           ws$close()
           return(TRUE)
         }

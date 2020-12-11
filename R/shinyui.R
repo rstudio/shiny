@@ -91,10 +91,8 @@ shinyDependencies <- function() {
       src = c(href = "shared"),
       script =
         if (isTRUE(
-          shiny_dev_mode_option(
+          get_devmode_option(
             "shiny.minified",
-            "Using full shiny javascript file. To use the minified version, call `options(shiny.minified = TRUE)`",
-            FALSE,
             TRUE
           )
         ))
@@ -145,7 +143,7 @@ shinyDependencyCSS <- function(theme) {
 #' @keywords internal
 #' @export
 shinyUI <- function(ui) {
-  if (in_shiny_dev_mode()) {
+  if (in_devmode()) {
     shinyDeprecated(
       "0.10.0", "shinyUI()",
       details = paste0(

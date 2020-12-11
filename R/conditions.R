@@ -217,7 +217,7 @@ doCaptureStack <- function(e) {
 #' @rdname stacktrace
 #' @export
 withLogErrors <- function(expr,
-  full = should_display_full_stacktrace(),
+  full = get_devmode_option("shiny.fullstacktrace", FALSE),
   offset = getOption("shiny.stacktraceoffset", TRUE)) {
 
   withCallingHandlers(
@@ -264,7 +264,7 @@ withLogErrors <- function(expr,
 #' @rdname stacktrace
 #' @export
 printError <- function(cond,
-  full = should_display_full_stacktrace(),
+  full = get_devmode_option("shiny.fullstacktrace", FALSE),
   offset = getOption("shiny.stacktraceoffset", TRUE)) {
 
   warning(call. = FALSE, immediate. = TRUE, sprintf("Error in %s: %s",
@@ -276,7 +276,7 @@ printError <- function(cond,
 #' @rdname stacktrace
 #' @export
 printStackTrace <- function(cond,
-  full = should_display_full_stacktrace(),
+  full = get_devmode_option("shiny.fullstacktrace", FALSE),
   offset = getOption("shiny.stacktraceoffset", TRUE)) {
 
   should_drop <- !full
@@ -370,7 +370,7 @@ printStackTrace <- function(cond,
 #' @rdname stacktrace
 #' @export
 extractStackTrace <- function(calls,
-  full = should_display_full_stacktrace(),
+  full = get_devmode_option("shiny.fullstacktrace", FALSE),
   offset = getOption("shiny.stacktraceoffset", TRUE)) {
 
   shinyDeprecated(
@@ -545,7 +545,7 @@ offsetSrcrefs <- function(calls, offset = TRUE) {
 #' @rdname stacktrace
 #' @export
 formatStackTrace <- function(calls, indent = "    ",
-  full = should_display_full_stacktrace(),
+  full = get_devmode_option("shiny.fullstacktrace", FALSE),
   offset = getOption("shiny.stacktraceoffset", TRUE)) {
 
   shinyDeprecated(
@@ -627,12 +627,3 @@ conditionStackTrace <- function(cond) {
 ..stacktraceoff.. <- function(expr) expr
 
 ..stacktracefloor.. <- function(expr) expr
-
-should_display_full_stacktrace <- function() {
-  shiny_dev_mode_option(
-    "shiny.fullstacktrace",
-    "Turning on full stack trace. To disable, call `options(shiny.fullstacktrace = FALSE)",
-    TRUE,
-    FALSE
-  )
-}

@@ -83,7 +83,7 @@
 #' @export
 runApp <- function(appDir=getwd(),
                    port=getOption('shiny.port'),
-                   launch.browser = should_launch_browser(),
+                   launch.browser = getOption('shiny.launch.browser', interactive()),
                    host=getOption('shiny.host', '127.0.0.1'),
                    workerId="", quiet=FALSE,
                    display.mode=c("auto", "normal", "showcase"),
@@ -122,15 +122,6 @@ runApp <- function(appDir=getwd(),
   # Convert to Shiny app object
   # ============================================================================
   appParts <- as.shiny.appobj(appDir)
-
-  # ============================================================================
-  # Set up Shiny developer mode
-  # ============================================================================
-  # users can provide the options to this function before calling `runApp()`
-  shiny_dev_mode(
-    enable = getOption("shiny.devmode", default = NULL),
-    verbose = getOption("shiny.devmode.verbose", TRUE)
-  )
 
   # ============================================================================
   # Initialize app state object
@@ -469,7 +460,7 @@ stopApp <- function(returnValue = invisible()) {
 #' @export
 runExample <- function(example=NA,
                        port=getOption("shiny.port"),
-                       launch.browser = should_launch_browser(),
+                       launch.browser = getOption('shiny.launch.browser', interactive()),
                        host=getOption('shiny.host', '127.0.0.1'),
                        display.mode=c("auto", "normal", "showcase")) {
   examplesDir <- system.file('examples', package='shiny')
@@ -568,14 +559,4 @@ decorateServerFunc <- function(appobj, serverFunc) {
     }
   }
   appobj
-}
-
-
-should_launch_browser <- function() {
-  shiny_dev_mode_option(
-    "shiny.launch.browser",
-    "Always launching browser. To disable, call `options(shiny.launch.browser = interactive())`",
-    TRUE,
-    interactive()
-  )
 }

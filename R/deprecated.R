@@ -24,20 +24,21 @@ shinyDeprecated <- function(
   }
 
   # lifecycle::deprecate_soft(when, what, with = with, details = details, id = id, env = env)
-  rlang_inform(msg = msg, frequency = "always")
+  rlang::inform(message = msg, .frequency = "always", .frequency_id = msg)
 }
 
 
 deprecatedEnvQuotedMessage <- function() {
-  if (!in_shiny_dev_mode()) return(invisible())
+  if (!in_devmode()) return(invisible())
   if (is_false(getOption("shiny.deprecation.messages"))) return(invisible())
 
   # manually
-  rlang_inform(msg = paste0(
+  msg <- paste0(
     "The `env` and `quoted` arguments are deprecated as of shiny 1.6.0.",
     " Please use quosures from `rlang` instead.\n",
     "See <https://github.com/rstudio/shiny/issues/3108> for more information."
-  ), frequency = "always")
+  )
+  rlang::inform(message = msg, .frequency = "always", .frequency_id = msg)
 }
 
 

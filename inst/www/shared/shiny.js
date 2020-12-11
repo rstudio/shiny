@@ -4906,12 +4906,17 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       };
     },
     initialize: function initialize(el) {
-      var $input = $(el).find('input');
+      var $input = $(el).find('input'); // The challenge with dates is that we want them to be at 00:00 in UTC so
+      // that we can do comparisons with them. However, the Date object itself
+      // does not carry timezone information, so we should call _floorDateTime()
+      // on Dates as soon as possible so that we know we're always working with
+      // consistent objects.
+
       var date = $input.data('initial-date'); // If initial_date is null, set to current date
 
       if (date === undefined || date === null) {
-        // Get local date, but as UTC
-        date = this._dateAsUTC(new Date());
+        // Get local date, but normalized to beginning of day in UTC.
+        date = this._floorDateTime(this._dateAsUTC(new Date()));
       }
 
       this.setValue(el, date); // Set the start and end dates, from min-date and max-date. These always
@@ -4956,21 +4961,25 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       date = this._newDate(date); // If date parsing fails, do nothing
 
       if (date === null) return;
-      date = this._UTCDateAsLocal(date);
       if (isNaN(date)) return; // Workarounds for
-      // https://github.com/eternicode/bootstrap-datepicker/issues/2010
       // https://github.com/rstudio/shiny/issues/2335
 
-      var curValue = $(el).bsDatepicker('getUTCDate');
-      $(el).bsDatepicker('setStartDate', null); // If the new min is greater than the current date, unset the current date.
+      var curValue = $(el).bsDatepicker('getUTCDate'); // Note that there's no `setUTCStartDate`, so we need to convert this Date.
+      // It starts at 00:00 UTC, and we convert it to 00:00 in local time, which
+      // is what's needed for `setStartDate`.
 
-      if (date !== undefined && this._dateAsUTC(date) > curValue) {
+      $(el).bsDatepicker('setStartDate', this._UTCDateAsLocal(date)); // If the new min is greater than the current date, unset the current date.
+
+      if (date && curValue && date.getTime() > curValue.getTime()) {
         $(el).bsDatepicker('clearDates');
       } else {
+        // Setting the date needs to be done AFTER `setStartDate`, because the
+        // datepicker has a bug where calling `setStartDate` will clear the date
+        // internally (even though it will still be visible in the UI) when a
+        // 2-digit year format is used.
+        // https://github.com/eternicode/bootstrap-datepicker/issues/2010
         $(el).bsDatepicker('setUTCDate', curValue);
       }
-
-      $(el).bsDatepicker('setStartDate', date);
     },
     // Given an unambiguous date string or a Date object, set the max (end) date
     // null will unset.
@@ -4985,19 +4994,16 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       date = this._newDate(date); // If date parsing fails, do nothing
 
       if (date === null) return;
-      date = this._UTCDateAsLocal(date);
       if (isNaN(date)) return; // Workaround for same issue as in _setMin.
 
       var curValue = $(el).bsDatepicker('getUTCDate');
-      $(el).bsDatepicker('setEndDate', null); // If the new min is greater than the current date, unset the current date.
+      $(el).bsDatepicker('setEndDate', this._UTCDateAsLocal(date)); // If the new min is greater than the current date, unset the current date.
 
-      if (date !== undefined && this._dateAsUTC(date) < curValue) {
+      if (date && curValue && date.getTime() < curValue.getTime()) {
         $(el).bsDatepicker('clearDates');
       } else {
         $(el).bsDatepicker('setUTCDate', curValue);
       }
-
-      $(el).bsDatepicker('setEndDate', date);
     },
     // Given a date string of format yyyy-mm-dd, return a Date object with
     // that date at 12AM UTC.
@@ -5010,7 +5016,14 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       var d = parseDate(date); // If invalid date, return null
 
       if (isNaN(d)) return null;
-      return new Date(d.getTime());
+      return d;
+    },
+    // A Date can have any time during a day; this will return a new Date object
+    // set to 00:00 in UTC.
+    _floorDateTime: function _floorDateTime(date) {
+      date = new Date(date.getTime());
+      date.setUTCHours(0, 0, 0, 0);
+      return date;
     },
     // Given a Date object, return a Date object which has the same "clock time"
     // in UTC. For example, if input date is 2013-02-01 23:00:00 GMT-0600 (CST),

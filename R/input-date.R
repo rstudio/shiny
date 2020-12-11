@@ -141,7 +141,8 @@ datePickerDependency <- function(theme) {
       name = "bootstrap-datepicker-js",
       version = datePickerVersion,
       src = c(href = "shared/datepicker"),
-      script = "js/bootstrap-datepicker.min.js",
+      script = if (getOption("shiny.minified", TRUE)) "js/bootstrap-datepicker.min.js"
+               else                                   "js/bootstrap-datepicker.js",
       # Need to enable noConflict mode. See #1346.
       head = "<script>(function() {
         var datepicker = $.fn.datepicker.noConflict();

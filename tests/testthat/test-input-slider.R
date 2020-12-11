@@ -65,12 +65,18 @@ test_that("sliderInput validation", {
   x <- as.POSIXlt(Sys.time())
   expect_silent(sliderInput('s', 's', x-1, x+1, x))
   expect_silent(sliderInput('s', 's', x-1, x+1, x-1))
-  expect_silent(sliderInput('s', 's', x-1, x+1, c(x-1, x+1)))
 
   expect_warning(sliderInput('s', 's', x-1,  x+1,  x+2))
   expect_warning(sliderInput('s', 's', x-1,  x+1,  x-2))
-  expect_warning(sliderInput('s', 's', x-1,  x+1,  c(x-2, x)))
-  expect_warning(sliderInput('s', 's', x-1,  x+1,  c(x, x+2)))
+
+  if (getRversion() >= "4.0") {
+    expect_silent(sliderInput('s', 's', x-1, x+1, c(x-1, x+1)))
+    expect_warning(sliderInput('s', 's', x-1,  x+1,  c(x-2, x)))
+    expect_warning(sliderInput('s', 's', x-1,  x+1,  c(x, x+2)))
+  } else {
+    skip("c() doesn't work sensibly on POSIXlt objects with this version of R")
+  }
+
 
   expect_error(sliderInput('s', 's', x-1,  x+1))
   expect_error(sliderInput('s', 's', x-1,  x+1,  NULL))

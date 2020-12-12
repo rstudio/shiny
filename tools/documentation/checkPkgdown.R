@@ -35,7 +35,7 @@ local({
                        "pageWithSidebar", "headerPanel", "shiny.appobj",
                        "deprecatedReactives", "reexports", "makeReactiveBinding",
                        "reactiveConsole", "registerThemeDependency",
-                       "memoryCache", "diskCache", "shiny-deprecated")
+                       "memoryCache", "diskCache", "shinyDeprecated", "devmode")
 
   ## This test ensures that every documented topic is included in
   ## staticdocs/index.r, unless explicitly waived by specifying it

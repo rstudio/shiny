@@ -995,9 +995,9 @@ buildTabItem <- function(index, tabsetId, foundSelected, tabs = NULL,
 #' Render a reactive output variable as text within an application page.
 #' `textOutput()` is usually paired with [renderText()] and puts regular text
 #' in `<div>` or `<span>`; `verbatimTextOutput()` is usually paired with
-#' [renderPrint()] and provudes fixed-width text in a `<pre>`.
+#' [renderPrint()] and provides fixed-width text in a `<pre>`.
 #'
-#' In both funtions, text is HTML-escaped prior to rendering.
+#' In both functions, text is HTML-escaped prior to rendering.
 #'
 #' @param outputId output variable to read the value from
 #' @param container a function to generate an HTML element to contain the text

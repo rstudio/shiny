@@ -995,7 +995,7 @@ buildTabItem <- function(index, tabsetId, foundSelected, tabs = NULL,
 #' Render a reactive output variable as text within an application page.
 #' `textOutput()` is usually paired with [renderText()] and puts regular text
 #' in `<div>` or `<span>`; `verbatimTextOutput()` is usually paired with
-#' [renderPrint()] and provudes fixed-width text in a `<pre>`.
+#' [renderPrint()] and provides fixed-width text in a `<pre>`.
 #'
 #' In both funtions, text is HTML-escaped prior to rendering.
 #'
@@ -1003,7 +1003,7 @@ buildTabItem <- function(index, tabsetId, foundSelected, tabs = NULL,
 #' @param container a function to generate an HTML element to contain the text
 #' @param inline use an inline (`span()`) or block container (`div()`)
 #'   for the output
-#' @return A output element for use in UI.
+#' @return An output element for use in UI.
 #' @examples
 #' ## Only run this example in interactive R sessions
 #' if (interactive()) {
@@ -1026,7 +1026,7 @@ textOutput <- function(outputId, container = if (inline) span else div, inline =
 
 #' @param placeholder if the output is empty or `NULL`, should an empty
 #'   rectangle be displayed to serve as a placeholder? (does not affect
-#'   behavior when the the output in nonempty)
+#'   behavior when the output is nonempty)
 #' @export
 #' @rdname textOutput
 verbatimTextOutput <- function(outputId, placeholder = FALSE) {

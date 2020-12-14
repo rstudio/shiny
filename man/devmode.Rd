@@ -70,6 +70,8 @@ interactive and non-interactive sessions.}
 \lifecycle{experimental}
 
 Developer mode enables a number of options to make a developer's life easier, like enabling non-minified JS and printing messages about deprecated functions and options.
+
+Please see the function descriptions for more details.
 }
 \section{Functions}{
 \itemize{
@@ -83,7 +85,7 @@ Developer mode enables a number of options to make a developer's life easier, li
 
 \item \code{register_devmode_option}: Registers a Shiny Developer Mode option with an updated value and Developer message. This registration method allows package authors to write one message in a single location.
 
-For example, the following Developer Mode options are registered:\if{html}{\out{<div class="r">}}\preformatted{# Reload the Shiny app when a sourced R file changes
+For example, the following Shiny Developer Mode options are registered:\if{html}{\out{<div class="r">}}\preformatted{# Reload the Shiny app when a sourced R file changes
 register_devmode_option(
   "shiny.autoreload",
   "Turning on shiny autoreload. To disable, call `options(shiny.autoreload = FALSE)`",
@@ -124,32 +126,38 @@ register_devmode_option(
 
 The methods explained in this documentation file act independently from the rest of Shiny but are included to provide blue prints for your own packages. If your package already has (or willing to take) a dependency on Shiny, we recommend using the exported methods for consistent behavior.
 
-If your package should not take a dependency on Shiny, we recommending re-implementing two functions:
+If your package can not take a dependency on Shiny, we recommending re-implementing two functions:
+
 \enumerate{
-\item \code{in_devmode()}: This function should return \code{TRUE} if \code{getOption("shiny.devmode")} is set. In addition, we strongly recommend that it also checks to make sure \code{testthat} is not testing.  This can be achieved using:
-}\if{html}{\out{<div class="r">}}\preformatted{in_devmode <- function() \{
+\item \code{in_devmode()}: This function should return \code{TRUE} if \code{getOption("shiny.devmode")} is set. In addition, we strongly recommend that it also checks to make sure \code{testthat} is not testing.  This can be achieved using:\if{html}{\out{<div class="r">}}\preformatted{in_devmode <- function() \{
   isTRUE(getOption("shiny.devmode", FALSE)) &&
     !identical(Sys.getenv("TESTTHAT"), "true")
 \}
 }\if{html}{\out{</div>}}
-\enumerate{
+
 \item \code{get_devmode_option(option, default, on, message)}:
-This function should return the global \code{option} when it is set, similar to \code{getOption(option, default)}. When the global option \code{option} is not set, this function should return the default value (\code{default}) when \code{in_devmode()} is \code{FALSE} and the default Dev Mode value (\code{on}) when \code{in_devmode()} is \code{TRUE}. We strongly recommend displaying a message (\code{message}) to the developer once every 8 hours using \code{rlang::inform(message, .frequency = "regularly", .frequency_id = message)} if returning the \code{on} default Dev Mode option value. This will keep the author up to date as to which behaviors are being altered. To allow developers a chance to disable Dev Mode messages, the message should be skipped if \code{getOption("shiny.devmode.verbose", TRUE)} returns \code{FALSE}.
-}\if{html}{\out{<div class="r">}}\preformatted{get_devmode_option <- function(option, default = NULL, on = NULL, message = NULL) \{
+This function should return the global \code{option} when it is set, similar to \code{getOption(option, default)}. When the global option \code{option} is not set, this function should return the default value (\code{default}) when \code{in_devmode()} is \code{FALSE} and the default Dev Mode value (\code{on}) when \code{in_devmode()} is \code{TRUE}. We strongly recommend displaying a message (\code{message}) to the developer once every 8 hours using \code{rlang::inform(message, .frequency = "regularly", .frequency_id = message, .file = stderr())} if returning the \code{on} default Dev Mode option value. This will keep the author up to date as to which behaviors are being altered. To allow developers a chance to disable Dev Mode messages, the message should be skipped if \code{getOption("shiny.devmode.verbose", TRUE)} returns \code{FALSE}.\if{html}{\out{<div class="r">}}\preformatted{get_devmode_option <- function(option, default = NULL, on = NULL, message = NULL) \{
   if (!in_devmode()) \{
     # Dev Mode disabled, act like `getOption()`
     return(getOption(option, default = default))
   \}
   # Notify developer
   if (getOption("shiny.devmode.verbose", TRUE) && !is.null(message)) \{
-    rlang::inform(message = message, .frequency = "regularly", .frequency_id = message)
+    rlang::inform(
+      message = message,
+      .frequency = "regularly",
+      .frequency_id = message,
+      .file = stderr()
+    )
   \}
   # Return Dev Mode default value `on`
   getOption(option, default = on)
 \}
 }\if{html}{\out{</div>}}
 
-The remaining functions in this file are used for author convenience and are not recommended for all situations.
+}
+
+The remaining functions in this file are used for author convenience and are not recommended for all reimplementation situations.
 }
 
 \examples{

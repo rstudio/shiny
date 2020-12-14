@@ -120,7 +120,7 @@ devmode_inform <- function(
   }
 
   rlang::inform(
-    message = paste0("shiny dev mode - ", message),
+    message = paste0("shiny devmode - ", message),
     .frequency = .frequency,
     .frequency_id = .frequency_id,
     ...

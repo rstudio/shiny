@@ -732,7 +732,7 @@ ShinySession <- R6Class(
       # it knows to scope this reactiveVal to this session.
       # https://github.com/rstudio/shiny/pull/3182
       withReactiveDomain(self,
-        private$currentThemeDependency <- reactiveVal(0, label = "private$currentThemeDependency")
+        private$currentThemeDependency <- reactiveVal(0, label = "Theme Iteration")
       )
 
       private$registerSessionEndCallbacks()

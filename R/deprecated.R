@@ -24,7 +24,7 @@ shinyDeprecated <- function(
   }
 
   # lifecycle::deprecate_soft(when, what, with = with, details = details, id = id, env = env)
-  rlang::inform(message = msg, .frequency = "always", .frequency_id = msg)
+  rlang::inform(message = msg, .frequency = "always", .frequency_id = msg, .file = stderr())
 }
 
 
@@ -38,7 +38,7 @@ deprecatedEnvQuotedMessage <- function() {
     " Please use quosures from `rlang` instead.\n",
     "See <https://github.com/rstudio/shiny/issues/3108> for more information."
   )
-  rlang::inform(message = msg, .frequency = "always", .frequency_id = msg)
+  rlang::inform(message = msg, .frequency = "always", .frequency_id = msg, .file = stderr())
 }
 
 

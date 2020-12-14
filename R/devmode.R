@@ -106,6 +106,7 @@ devmode_inform <- function(
   message,
   .frequency = "regularly",
   .frequency_id = message,
+  .file = stderr(),
   ...
 ) {
 
@@ -123,6 +124,7 @@ devmode_inform <- function(
     message = paste0("shiny devmode - ", message),
     .frequency = .frequency,
     .frequency_id = .frequency_id,
+    .file = .file,
     ...
   )
 }

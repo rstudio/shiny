@@ -43,7 +43,6 @@ devmode <- function(
 #' ```r
 #' in_devmode <- function() {
 #'   isTRUE(getOption("shiny.devmode", FALSE)) &&
-#'     # !testthat::is_testing()
 #'     !identical(Sys.getenv("TESTTHAT"), "true")
 #' }
 #' ```

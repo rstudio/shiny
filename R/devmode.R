@@ -2,15 +2,7 @@
 #'
 #' @description \lifecycle{experimental}
 #'
-#' The methods described in this help file provide a way to change default shiny behavior when developing shiny applications (as compared to using a shiny application). For example, the following default option values are altered to have different behavior when Shiny Developer Mode is enabled:
-#'
-#' * `getOption("shiny.autoreload", default = TRUE)`: Reload the Shiny app when a sourced R file changes
-#' * `getOption("shiny.minified", default = FALSE`): Use the unminified Shiny JavaScript file, `shiny.js`
-#' * `getOption("shiny.fullstacktrace", default = TRUE`): Display the full stack trace when errors occur during Shiny app execution
-#'
-#' Other known, non-Shiny default option values that are changed when Shiny Developer Mode is enabled:
-#' * `getOption("sass.cache", default = FALSE)`: Disable `sass` caching by default. This will force `sass` to **always** compile its input values
-#'
+#' Developer mode enables a number of options to make a developer's life easier, like enabling non-minified JS and printing messages about deprecated functions and options.
 #'
 #' @keywords internal
 #' @describeIn devmode Function to set two options to enable/disable Shiny Developer Mode and Developer messages
@@ -48,7 +40,7 @@ devmode <- function(
 #' ```
 #'
 #' 2. `get_devmode_option(option, default, on, message)`:
-#' This function should return the global `option` when it is set, similar to `getOption(option, default)`. When the global option `option` is not set, this function should return the default value (`default`) when `in_devmode()` is `FALSE` and the default Dev Mode value (`on`) when `in_devmode()` is `TRUE`. We strongly recommend displaying a message (`message`) to the developer once every 8 hours using `rlang::inform(message, .frequency = "regularly", .frequency_id = message)` if returning the `on` default Dev Mode option value. This will keep the author up to date as to which behaviors are being altered. To allow developers a chance to disable Dev Mode messages, the message may be skipped if `getOption("shiny.devmode.verbose", TRUE)` returns `FALSE`.
+#' This function should return the global `option` when it is set, similar to `getOption(option, default)`. When the global option `option` is not set, this function should return the default value (`default`) when `in_devmode()` is `FALSE` and the default Dev Mode value (`on`) when `in_devmode()` is `TRUE`. We strongly recommend displaying a message (`message`) to the developer once every 8 hours using `rlang::inform(message, .frequency = "regularly", .frequency_id = message)` if returning the `on` default Dev Mode option value. This will keep the author up to date as to which behaviors are being altered. To allow developers a chance to disable Dev Mode messages, the message should be skipped if `getOption("shiny.devmode.verbose", TRUE)` returns `FALSE`.
 #'
 #' ```r
 #' get_devmode_option <- function(option, default = NULL, on = NULL, message = NULL) {
@@ -134,7 +126,44 @@ devmode_inform <- function(
 #' @include map.R
 registered_devmode_options <- Map$new()
 
-#' @describeIn devmode Registers a Shiny Developer Mode option with an updated value and Developer message. This registration method allows package authors to write one message in a single location
+#' @describeIn devmode Registers a Shiny Developer Mode option with an updated value and Developer message. This registration method allows package authors to write one message in a single location.
+#'
+#' For example, the following Developer Mode options are registered:
+#'
+#' ```r
+#' # Reload the Shiny app when a sourced R file changes
+#' register_devmode_option(
+#'   "shiny.autoreload",
+#'   "Turning on shiny autoreload. To disable, call `options(shiny.autoreload = FALSE)`",
+#'   on = TRUE
+#' )
+#'
+#' # Use the unminified Shiny JavaScript file, `shiny.js`
+#' register_devmode_option(
+#'   "shiny.minified",
+#'   "Using full shiny javascript file. To use the minified version, call `options(shiny.minified = TRUE)`",
+#'   on = FALSE
+#' )
+#'
+#' # Display the full stack trace when errors occur during Shiny app execution
+#' register_devmode_option(
+#'   "shiny.fullstacktrace",
+#'   "Turning on full stack trace. To disable, call `options(shiny.fullstacktrace = FALSE)`",
+#'   on = TRUE
+#' )
+#' ```
+#'
+#' Other known, non-Shiny Developer Mode options:
+#'
+#' * Sass:
+#' ```r
+#' # Display the full stack trace when errors occur during Shiny app execution
+#' register_devmode_option(
+#'   "sass.cache",
+#'   "Turning off sass cache. To use default caching, call `options(sass.cache = TRUE)`",
+#'   on = FALSE
+#' )
+#' ```
 #' @param option Option to look for in `options()`
 #' @param message Message to display once every 8 hours if `option` is not set and if `in_devmode()` returns `TRUE` and Dev Mode messages can be displayed. For `get_devmode_option()`, if `message = waiver()`, the registered `message` value be attempted to be displayed.
 #' @param on Default value to return if `in_devmode()` returns `TRUE`. For `get_devmode_option()`, if `on = waiver()`, the registered default `on` value will be used.
@@ -165,7 +194,9 @@ register_devmode_option <- function(
 }
 registered_devmode_options
 
-#' @describeIn  devmode Return a global option but allow the default value to be different if Shiny Developer Mode is enabled. This method is very similar to [getOption()] where the globally set option takes precedence. However, when the global option is not set, `default` will be returned when `in_devmode()` is `FALSE`, or `on` will be returned if `in_devmode()` is `TRUE`.
+#' @describeIn devmode Provides a consistent way to change default `getOption()` behavior when Developer Mode is enabled. This method is very similar to [getOption()] where the globally set option takes precedence. However, when the global option is not set, `default` will be returned when `in_devmode()` is `FALSE`, or `on` will be returned if `in_devmode()` is `TRUE`.
+#'
+#'
 #' @export
 #' @examples
 #' # Used within `shiny::runApp(launch.browser)`
@@ -247,6 +278,6 @@ register_devmode_option(
 
 register_devmode_option(
   "shiny.fullstacktrace",
-  "Turning on full stack trace. To disable, call `options(shiny.fullstacktrace = FALSE)",
+  "Turning on full stack trace. To disable, call `options(shiny.fullstacktrace = FALSE)`",
   TRUE
 )

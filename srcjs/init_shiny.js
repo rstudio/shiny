@@ -357,9 +357,10 @@ function initShiny() {
   // see a reasonable way to solve that issue
   // https://github.com/rstudio/shiny/issues/2998
   function maybeAddThemeObserver(el) {
-    var cl = el.classList;
-    if (cl.contains("shiny-theme-observer")) return;
+    var $el = $(el);
+    if ($el.data("shiny-theme-observer")) return;
 
+    var cl = el.classList;
     var reportTheme = cl.contains('shiny-image-output') || cl.contains('shiny-plot-output') || cl.contains('shiny-report-theme');
     if (!reportTheme) return;
 
@@ -367,7 +368,7 @@ function initShiny() {
     var observer = new MutationObserver(() => observerCallback.normalCall());
     var config = {attributes: true, attributeFilter: ['style', 'class']};
     observer.observe(el, config);
-    cl.add("shiny-theme-observer"); // TODO: remove this class on unbind?
+    $el.data("shiny-theme-observer", true); // TODO: remove this flag on unbind?
   }
 
   function doSendTheme(el) {

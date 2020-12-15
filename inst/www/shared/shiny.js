@@ -6462,8 +6462,9 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     // https://github.com/rstudio/shiny/issues/2998
 
     function maybeAddThemeObserver(el) {
+      var $el = $(el);
+      if ($el.data("shiny-theme-observer")) return;
       var cl = el.classList;
-      if (cl.contains("shiny-theme-observer")) return;
       var reportTheme = cl.contains('shiny-image-output') || cl.contains('shiny-plot-output') || cl.contains('shiny-report-theme');
       if (!reportTheme) return;
       var observerCallback = new Debouncer(null, function () {
@@ -6477,7 +6478,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         attributeFilter: ['style', 'class']
       };
       observer.observe(el, config);
-      cl.add("shiny-theme-observer"); // TODO: remove this class on unbind?
+      $el.data("shiny-theme-observer", true); // TODO: remove this flag on unbind?
     }
 
     function doSendTheme(el) {

@@ -6501,11 +6501,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         }
       });
       $('.shiny-image-output, .shiny-plot-output, .shiny-report-theme').each(function () {
-        var id = getIdFromEl(this);
-        inputs.setInput('.clientdata_output_' + id + '_bg', getComputedBgColor(this));
-        inputs.setInput('.clientdata_output_' + id + '_fg', getStyle(this, "color"));
-        inputs.setInput('.clientdata_output_' + id + '_accent', getComputedLinkColor(this));
-        inputs.setInput('.clientdata_output_' + id + '_font', getComputedFont(this));
+        doSendTheme(this);
       });
       $('.shiny-bound-output').each(function () {
         var $this = $(this),

@@ -6451,22 +6451,32 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       initialValues['.clientdata_output_' + id + '_accent'] = getComputedLinkColor(el);
       initialValues['.clientdata_output_' + id + '_font'] = getComputedFont(el);
       maybeAddThemeObserver(el);
-    }); // Resend computed styles if this element's class or style changes which is
-    // especially important for invalidating getCurrentOutputInfo() when error
-    // messages modify the containers CSS in a non-welcome way.
+    }); // Resend computed styles if *an output element's* class or style attribute changes.
+    // This gives us some level of confidence that getCurrentOutputInfo() will be
+    // properly invalidated if output container is mutated; but unfortunately,
+    // we don't have a reasonable way to detect change in *inherited* styles
+    // (other than session$setCurrentTheme())
     // https://github.com/rstudio/shiny/issues/3196
-    //
-    // Unfortunately, won't solve getCurrentOutputInfo() not invalidating
-    // if this element's ancestors change in a meaningful way, but I don't
-    // see a reasonable way to solve that issue
     // https://github.com/rstudio/shiny/issues/2998
 
     function maybeAddThemeObserver(el) {
-      var $el = $(el);
-      if ($el.data("shiny-theme-observer")) return;
+      if (!window.MutationObserver) {
+        return; // IE10 and lower
+      }
+
       var cl = el.classList;
       var reportTheme = cl.contains('shiny-image-output') || cl.contains('shiny-plot-output') || cl.contains('shiny-report-theme');
-      if (!reportTheme) return;
+
+      if (!reportTheme) {
+        return;
+      }
+
+      var $el = $(el);
+
+      if ($el.data("shiny-theme-observer")) {
+        return; // i.e., observer is already observing
+      }
+
       var observerCallback = new Debouncer(null, function () {
         return doSendTheme(el);
       }, 100);
@@ -6478,12 +6488,15 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         attributeFilter: ['style', 'class']
       };
       observer.observe(el, config);
-      $el.data("shiny-theme-observer", true); // TODO: remove this flag on unbind?
+      $el.data("shiny-theme-observer", observer);
     }
 
     function doSendTheme(el) {
       // Sending theme info on error isn't necessary (it'd add an unnecessary additional round-trip)
-      if (el.classList.contains("shiny-output-error")) return;
+      if (el.classList.contains("shiny-output-error")) {
+        return;
+      }
+
       var id = getIdFromEl(el);
       inputs.setInput('.clientdata_output_' + id + '_bg', getComputedBgColor(el));
       inputs.setInput('.clientdata_output_' + id + '_fg', getStyle(el, "color"));

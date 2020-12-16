@@ -1323,14 +1323,15 @@ ShinySession <- R6Class(
       # (3) sends the resulting dependencies to the client.
 
       # Make sure that the theme switching is just styles (e.g. bootswatch) rather than a different version
-      mismatched_bootstrap_versions <- bslib::theme_version(theme) != bslib::theme_version(getCurrentTheme())
-      if(mismatched_bootstrap_versions){
-        stop(paste0("Requested theme uses a different bootstrap version (",
-                    bslib::theme_version(theme),
-                    ") than the currently loaded theme (",
-                    bslib::theme_version(getCurrentTheme()),
-                    "). Dynamic switching of bootstrap versions is not supported."),
-             call. = FALSE)
+      current_version <- bslib::theme_version(getCurrentTheme()) 
+      next_version <- bslib::theme_version(theme)
+      if (!identical(current_version, next_version)) {
+        stop(
+          "Requested theme uses a different bootstrap version (",
+          next_version, ") than the currently loaded theme (", current_theme,
+           "). Dynamic switching of bootstrap versions is not supported.",
+           call. = FALSE
+         )
       }
 
       # Note that this will automatically scope to the session.

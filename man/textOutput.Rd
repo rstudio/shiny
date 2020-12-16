@@ -19,19 +19,19 @@ for the output}
 
 \item{placeholder}{if the output is empty or \code{NULL}, should an empty
 rectangle be displayed to serve as a placeholder? (does not affect
-behavior when the the output in nonempty)}
+behavior when the output is nonempty)}
 }
 \value{
-A output element for use in UI.
+An output element for use in UI.
 }
 \description{
 Render a reactive output variable as text within an application page.
 \code{textOutput()} is usually paired with \code{\link[=renderText]{renderText()}} and puts regular text
 in \verb{<div>} or \verb{<span>}; \code{verbatimTextOutput()} is usually paired with
-\code{\link[=renderPrint]{renderPrint()}} and provudes fixed-width text in a \verb{<pre>}.
+\code{\link[=renderPrint]{renderPrint()}} and provides fixed-width text in a \verb{<pre>}.
 }
 \details{
-In both funtions, text is HTML-escaped prior to rendering.
+In both functions, text is HTML-escaped prior to rendering.
 }
 \examples{
 ## Only run this example in interactive R sessions

@@ -26,9 +26,9 @@ devmode_inform(
   ...
 )
 
-register_devmode_option(option, message = NULL, on = NULL)
+register_devmode_option(name, devmode_message = NULL, devmode_default = NULL)
 
-get_devmode_option(option, default = NULL, on = waiver(), message = waiver())
+get_devmode_option(name, default = NULL, devmode_default, devmode_message)
 }
 \arguments{
 \item{devmode}{Logical value which should be set to \code{TRUE} to enable Shiny Developer Mode}
@@ -37,34 +37,21 @@ get_devmode_option(option, default = NULL, on = waiver(), message = waiver())
 
 \item{code}{Code to execute with the temporary Dev Mode options set}
 
-\item{message}{Message to display once every 8 hours if \code{option} is not set and if \code{in_devmode()} returns \code{TRUE} and Dev Mode messages can be displayed. For \code{get_devmode_option()}, if \code{message = waiver()}, the registered \code{message} value be attempted to be displayed.}
+\item{message}{Developer Mode message to be sent to \code{\link[rlang:abort]{rlang::inform()}}}
 
-\item{.frequency}{How frequently should the warning or message be
-displayed? By default (\code{"always"}) it is displayed at each
-time. If \code{"regularly"}, it is displayed once every 8 hours. If
-\code{"once"}, it is displayed once per session.}
+\item{.frequency}{Frequency of the Developer Mode message used with \code{\link[rlang:abort]{rlang::inform()}}. Defaults to once every 8 hours.}
 
-\item{.frequency_id}{A unique identifier for the warning or
-message. This is used when \code{.frequency} is supplied to recognise
-recurring conditions. This argument must be supplied if
-\code{.frequency} is not set to \code{"always"}.}
+\item{.frequency_id}{\code{\link[rlang:abort]{rlang::inform()}} message identifier. Defaults to \code{message}.}
 
-\item{.file}{Where the message is printed. This should be a
-connection or character string which will be passed to \code{\link[=cat]{cat()}}.
-
-By default, \code{inform()} prints to standard output in interactive
-sessions and standard error otherwise. This way IDEs can treat
-messages distinctly from warnings and errors, and R scripts can
-still filter out the messages easily by redirecting \code{stderr}. If
-a sink is active, either on output or on messages, messages are
-printed to \code{stderr}. This ensures consistency of behaviour in
-interactive and non-interactive sessions.}
+\item{.file}{Output connection for \code{\link[rlang:abort]{rlang::inform()}}. Defaults to \code{\link[=stderr]{stderr()}}}
 
 \item{...}{Parameters passed to \code{\link[rlang:abort]{rlang::inform()}}}
 
-\item{option}{Option to look for in \code{options()}}
+\item{name}{Name of option to look for in \code{options()}}
 
-\item{on}{Default value to return if \code{in_devmode()} returns \code{TRUE}. For \code{get_devmode_option()}, if \code{on = waiver()}, the registered default \code{on} value will be used.}
+\item{devmode_message}{Message to display once every 8 hours when utilizing the \code{devmode_default} value.  If \code{devmode_message} is missing, the registered \code{devmode_message} value be used.}
+
+\item{devmode_default}{Default value to return if \code{in_devmode()} returns \code{TRUE}. For \code{get_devmode_option()}, if \code{devmode_default} is missing, the registered \code{devmode_default} value will be used.}
 }
 \description{
 \lifecycle{experimental}
@@ -89,21 +76,21 @@ For example, the following Shiny Developer Mode options are registered:\if{html}
 register_devmode_option(
   "shiny.autoreload",
   "Turning on shiny autoreload. To disable, call `options(shiny.autoreload = FALSE)`",
-  on = TRUE
+  devmode_default = TRUE
 )
 
 # Use the unminified Shiny JavaScript file, `shiny.js`
 register_devmode_option(
   "shiny.minified",
   "Using full shiny javascript file. To use the minified version, call `options(shiny.minified = TRUE)`",
-  on = FALSE
+  devmode_default = FALSE
 )
 
 # Display the full stack trace when errors occur during Shiny app execution
 register_devmode_option(
   "shiny.fullstacktrace",
   "Turning on full stack trace. To disable, call `options(shiny.fullstacktrace = FALSE)`",
-  on = TRUE
+  devmode_default = TRUE
 )
 }\if{html}{\out{</div>}}
 
@@ -114,44 +101,74 @@ Other known, non-Shiny Developer Mode options:
 register_devmode_option(
   "sass.cache",
   "Turning off sass cache. To use default caching, call `options(sass.cache = TRUE)`",
-  on = FALSE
+  devmode_default = FALSE
 )
 }\if{html}{\out{</div>}}
 
-\item \code{get_devmode_option}: Provides a consistent way to change default \code{getOption()} behavior when Developer Mode is enabled. This method is very similar to \code{\link[=getOption]{getOption()}} where the globally set option takes precedence. However, when the global option is not set, \code{default} will be returned when \code{in_devmode()} is \code{FALSE}, or \code{on} will be returned if \code{in_devmode()} is \code{TRUE}.
+\item \code{get_devmode_option}: Provides a consistent way to change the expected \code{\link[=getOption]{getOption()}} behavior when Developer Mode is enabled. This method is very similar to \code{\link[=getOption]{getOption()}} where the globally set option takes precedence. \code{get_devmode_option()} is implemented as follows:
+\itemize{
+\item Get the global option \code{getOption(name)} value
+\item If option value is set, return the value
+\item If not in Dev Mode, return \code{default}
+\item Notify the developer that the default value is different
+\item Return the Dev Mode default value
+}
+
+\strong{Package developers:} Register your Dev Mode option using \code{register_devmode_option()} to avoid supplying the same \code{devmode_default} and \code{devmode_message} values throughout your package. (This requires a \pkg{shiny} dependency.)
 }}
 
 \section{Avoiding direct dependency on shiny}{
 
 
-The methods explained in this documentation file act independently from the rest of Shiny but are included to provide blue prints for your own packages. If your package already has (or willing to take) a dependency on Shiny, we recommend using the exported methods for consistent behavior.
+The methods explained in this help file act independently from the rest of Shiny but are included to provide blue prints for your own packages. If your package already has (or is willing to take) a dependency on \pkg{shiny}, we recommend using the exported Shiny methods for consistent behavior.
 
-If your package can not take a dependency on Shiny, we recommending re-implementing two functions:
+If your package can \emph{not} take a dependency on Shiny, we recommending re-implementing these two functions:
 
 \enumerate{
-\item \code{in_devmode()}: This function should return \code{TRUE} if \code{getOption("shiny.devmode")} is set. In addition, we strongly recommend that it also checks to make sure \code{testthat} is not testing.  This can be achieved using:\if{html}{\out{<div class="r">}}\preformatted{in_devmode <- function() \{
+\item \code{in_devmode()}:
+
+This function should return \code{TRUE} if \code{getOption("shiny.devmode")} is set. In addition, we strongly recommend that it also checks to make sure \code{testthat} is not testing.\if{html}{\out{<div class="r">}}\preformatted{in_devmode <- function() \{
   isTRUE(getOption("shiny.devmode", FALSE)) &&
     !identical(Sys.getenv("TESTTHAT"), "true")
 \}
 }\if{html}{\out{</div>}}
 
-\item \code{get_devmode_option(option, default, on, message)}:
-This function should return the global \code{option} when it is set, similar to \code{getOption(option, default)}. When the global option \code{option} is not set, this function should return the default value (\code{default}) when \code{in_devmode()} is \code{FALSE} and the default Dev Mode value (\code{on}) when \code{in_devmode()} is \code{TRUE}. We strongly recommend displaying a message (\code{message}) to the developer once every 8 hours using \code{rlang::inform(message, .frequency = "regularly", .frequency_id = message, .file = stderr())} if returning the \code{on} default Dev Mode option value. This will keep the author up to date as to which behaviors are being altered. To allow developers a chance to disable Dev Mode messages, the message should be skipped if \code{getOption("shiny.devmode.verbose", TRUE)} returns \code{FALSE}.\if{html}{\out{<div class="r">}}\preformatted{get_devmode_option <- function(option, default = NULL, on = NULL, message = NULL) \{
+\item \code{get_devmode_option(name, default, devmode_default, devmode_message)}:
+
+This function is similar to \code{getOption(name, default)}, but when the option is not set the default value changes depending on the Dev Mode.  \code{get_devmode_option()} should be implemented as follows:
+\itemize{
+\item If not in Dev Mode, return \code{getOption(name, default)}
+\item Get the global option \code{getOption(name)} value
+\item If option value is set, return the value
+\item Notify the developer that the default value is different
+\item Return the Dev Mode default value
+}
+
+When notifying the developer that the default value has changed, we strongly recommend displaying a message (\code{devmode_message}) to \code{stderr()} once every 8 hours using \code{\link[rlang:abort]{rlang::inform()}}. This will keep the author up to date as to which Dev Mode options are being altered. To allow developers a chance to disable Dev Mode messages, the message should be skipped if \code{getOption("shiny.devmode.verbose", TRUE)} is not \code{TRUE}.\if{html}{\out{<div class="r">}}\preformatted{get_devmode_option <- function(name, default = NULL, devmode_default, devmode_message) \{
   if (!in_devmode()) \{
     # Dev Mode disabled, act like `getOption()`
-    return(getOption(option, default = default))
+    return(getOption(name, default = default))
   \}
-  # Notify developer
-  if (getOption("shiny.devmode.verbose", TRUE) && !is.null(message)) \{
-    rlang::inform(
-      message = message,
-      .frequency = "regularly",
-      .frequency_id = message,
-      .file = stderr()
-    )
-  \}
-  # Return Dev Mode default value `on`
-  getOption(option, default = on)
+
+  # Dev Mode enabled, update the default value for `getOption()`
+  getOption(name, default = \{
+    # Notify developer
+    if (
+      !missing(devmode_message) &&
+      !is.null(devmode_message) &&
+      getOption("shiny.devmode.verbose", TRUE)
+    ) \{
+      rlang::inform(
+        message = devmode_message,
+        .frequency = "regularly",
+        .frequency_id = devmode_message,
+        .file = stderr()
+      )
+    \}
+
+    # Return Dev Mode default value `devmode_default`
+    devmode_default
+  \})
 \}
 }\if{html}{\out{</div>}}
 
@@ -173,11 +190,11 @@ with_devmode(TRUE, in_devmode()) # TRUE
 #   to default to `FALSE` when in Dev Mode
 \dontrun{register_devmode_option(
   "shiny.minified",
-  message = paste0(
+  devmode_message = paste0(
     "Using full shiny javascript file. ",
     "To use the minified version, call `options(shiny.minified = TRUE)`"
   ),
-  on = FALSE
+  devmode_default = FALSE
 )}
 
 # Used within `shiny::runApp(launch.browser)`

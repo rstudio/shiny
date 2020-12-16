@@ -29,12 +29,14 @@ devmode <- function(
 #' @describeIn devmode Determines if Shiny is in Developer Mode. If the `getOption("shiny.devmode")` is set to `TRUE` and not in testing inside `testthat`, then Shiny Developer Mode is enabled.
 #' @section Avoiding direct dependency on shiny:
 #'
-#' The methods explained in this documentation file act independently from the rest of Shiny but are included to provide blue prints for your own packages. If your package already has (or willing to take) a dependency on Shiny, we recommend using the exported methods for consistent behavior.
+#' The methods explained in this help file act independently from the rest of Shiny but are included to provide blue prints for your own packages. If your package already has (or is willing to take) a dependency on \pkg{shiny}, we recommend using the exported Shiny methods for consistent behavior.
 #'
-#' If your package can not take a dependency on Shiny, we recommending re-implementing two functions:
+#' If your package can _not_ take a dependency on Shiny, we recommending re-implementing these two functions:
 #'
 #' \enumerate{
-#' \item `in_devmode()`: This function should return `TRUE` if `getOption("shiny.devmode")` is set. In addition, we strongly recommend that it also checks to make sure `testthat` is not testing.  This can be achieved using:
+#' \item `in_devmode()`:
+#'
+#' This function should return `TRUE` if `getOption("shiny.devmode")` is set. In addition, we strongly recommend that it also checks to make sure `testthat` is not testing.
 #' ```r
 #' in_devmode <- function() {
 #'   isTRUE(getOption("shiny.devmode", FALSE)) &&
@@ -42,26 +44,43 @@ devmode <- function(
 #' }
 #' ```
 #'
-#' \item `get_devmode_option(option, default, on, message)`:
-#' This function should return the global `option` when it is set, similar to `getOption(option, default)`. When the global option `option` is not set, this function should return the default value (`default`) when `in_devmode()` is `FALSE` and the default Dev Mode value (`on`) when `in_devmode()` is `TRUE`. We strongly recommend displaying a message (`message`) to the developer once every 8 hours using `rlang::inform(message, .frequency = "regularly", .frequency_id = message, .file = stderr())` if returning the `on` default Dev Mode option value. This will keep the author up to date as to which behaviors are being altered. To allow developers a chance to disable Dev Mode messages, the message should be skipped if `getOption("shiny.devmode.verbose", TRUE)` returns `FALSE`.
+#' \item `get_devmode_option(name, default, devmode_default, devmode_message)`:
+#'
+#' This function is similar to `getOption(name, default)`, but when the option is not set the default value changes depending on the Dev Mode.  `get_devmode_option()` should be implemented as follows:
+#' * If not in Dev Mode, return `getOption(name, default)`
+#' * Get the global option `getOption(name)` value
+#' * If option value is set, return the value
+#' * Notify the developer that the default value is different
+#' * Return the Dev Mode default value
+#'
+#' When notifying the developer that the default value has changed, we strongly recommend displaying a message (`devmode_message`) to `stderr()` once every 8 hours using [rlang::inform()]. This will keep the author up to date as to which Dev Mode options are being altered. To allow developers a chance to disable Dev Mode messages, the message should be skipped if `getOption("shiny.devmode.verbose", TRUE)` is not `TRUE`.
 #'
 #' ```r
-#' get_devmode_option <- function(option, default = NULL, on = NULL, message = NULL) {
+#' get_devmode_option <- function(name, default = NULL, devmode_default, devmode_message) {
 #'   if (!in_devmode()) {
 #'     # Dev Mode disabled, act like `getOption()`
-#'     return(getOption(option, default = default))
+#'     return(getOption(name, default = default))
 #'   }
-#'   # Notify developer
-#'   if (getOption("shiny.devmode.verbose", TRUE) && !is.null(message)) {
-#'     rlang::inform(
-#'       message = message,
-#'       .frequency = "regularly",
-#'       .frequency_id = message,
-#'       .file = stderr()
-#'     )
-#'   }
-#'   # Return Dev Mode default value `on`
-#'   getOption(option, default = on)
+#'
+#'   # Dev Mode enabled, update the default value for `getOption()`
+#'   getOption(name, default = {
+#'     # Notify developer
+#'     if (
+#'       !missing(devmode_message) &&
+#'       !is.null(devmode_message) &&
+#'       getOption("shiny.devmode.verbose", TRUE)
+#'     ) {
+#'       rlang::inform(
+#'         message = devmode_message,
+#'         .frequency = "regularly",
+#'         .frequency_id = devmode_message,
+#'         .file = stderr()
+#'       )
+#'     }
+#'
+#'     # Return Dev Mode default value `devmode_default`
+#'     devmode_default
+#'   })
 #' }
 #' ```
 #' }
@@ -101,6 +120,10 @@ with_devmode <- function(
 
 #' @describeIn devmode If Shiny Developer Mode and verbosity are enabled, displays a message once every 8 hrs (by default)
 #' @inheritParams rlang::inform
+#' @param message Developer Mode message to be sent to [rlang::inform()]
+#' @param .frequency Frequency of the Developer Mode message used with [rlang::inform()]. Defaults to once every 8 hours.
+#' @param .frequency_id [rlang::inform()] message identifier. Defaults to `message`.
+#' @param .file Output connection for [rlang::inform()]. Defaults to [stderr()]
 #' @param ... Parameters passed to [rlang::inform()]
 devmode_inform <- function(
   message,
@@ -144,21 +167,21 @@ registered_devmode_options <- Map$new()
 #' register_devmode_option(
 #'   "shiny.autoreload",
 #'   "Turning on shiny autoreload. To disable, call `options(shiny.autoreload = FALSE)`",
-#'   on = TRUE
+#'   devmode_default = TRUE
 #' )
 #'
 #' # Use the unminified Shiny JavaScript file, `shiny.js`
 #' register_devmode_option(
 #'   "shiny.minified",
 #'   "Using full shiny javascript file. To use the minified version, call `options(shiny.minified = TRUE)`",
-#'   on = FALSE
+#'   devmode_default = FALSE
 #' )
 #'
 #' # Display the full stack trace when errors occur during Shiny app execution
 #' register_devmode_option(
 #'   "shiny.fullstacktrace",
 #'   "Turning on full stack trace. To disable, call `options(shiny.fullstacktrace = FALSE)`",
-#'   on = TRUE
+#'   devmode_default = TRUE
 #' )
 #' ```
 #'
@@ -170,42 +193,47 @@ registered_devmode_options <- Map$new()
 #' register_devmode_option(
 #'   "sass.cache",
 #'   "Turning off sass cache. To use default caching, call `options(sass.cache = TRUE)`",
-#'   on = FALSE
+#'   devmode_default = FALSE
 #' )
 #' ```
-#' @param option Option to look for in `options()`
-#' @param message Message to display once every 8 hours if `option` is not set and if `in_devmode()` returns `TRUE` and Dev Mode messages can be displayed. For `get_devmode_option()`, if `message = waiver()`, the registered `message` value be attempted to be displayed.
-#' @param on Default value to return if `in_devmode()` returns `TRUE`. For `get_devmode_option()`, if `on = waiver()`, the registered default `on` value will be used.
+#' @param name Name of option to look for in `options()`
+#' @param devmode_message Message to display once every 8 hours when utilizing the `devmode_default` value.  If `devmode_message` is missing, the registered `devmode_message` value be used.
+#' @param devmode_default Default value to return if `in_devmode()` returns `TRUE`. For `get_devmode_option()`, if `devmode_default` is missing, the registered `devmode_default` value will be used.
 #' @examples
 #' # Ex: Within shiny, we register the option "shiny.minified"
 #' #   to default to `FALSE` when in Dev Mode
 #' \dontrun{register_devmode_option(
 #'   "shiny.minified",
-#'   message = paste0(
+#'   devmode_message = paste0(
 #'     "Using full shiny javascript file. ",
 #'     "To use the minified version, call `options(shiny.minified = TRUE)`"
 #'   ),
-#'   on = FALSE
+#'   devmode_default = FALSE
 #' )}
 #'
 register_devmode_option <- function(
-  option,
-  message = NULL,
-  on = NULL
+  name,
+  devmode_message = NULL,
+  devmode_default = NULL
 ) {
-  if (!is.null(message)) {
-    stopifnot(length(message) == 1 && is.character(message))
+  if (!is.null(devmode_message)) {
+    stopifnot(length(devmode_message) == 1 && is.character(devmode_message))
   }
   registered_devmode_options$set(
-    option,
-    list(on = on, message = message)
+    name,
+    list(devmode_default = devmode_default, devmode_message = devmode_message)
   )
 }
-registered_devmode_options
 
-#' @describeIn devmode Provides a consistent way to change default `getOption()` behavior when Developer Mode is enabled. This method is very similar to [getOption()] where the globally set option takes precedence. However, when the global option is not set, `default` will be returned when `in_devmode()` is `FALSE`, or `on` will be returned if `in_devmode()` is `TRUE`.
+
+#' @describeIn devmode Provides a consistent way to change the expected [getOption()] behavior when Developer Mode is enabled. This method is very similar to [getOption()] where the globally set option takes precedence. `get_devmode_option()` is implemented as follows:
+#' * Get the global option `getOption(name)` value
+#' * If option value is set, return the value
+#' * If not in Dev Mode, return `default`
+#' * Notify the developer that the default value is different
+#' * Return the Dev Mode default value
 #'
-#'
+#' **Package developers:** Register your Dev Mode option using `register_devmode_option()` to avoid supplying the same `devmode_default` and `devmode_message` values throughout your package. (This requires a \pkg{shiny} dependency.)
 #' @export
 #' @examples
 #' # Used within `shiny::runApp(launch.browser)`
@@ -216,26 +244,26 @@ registered_devmode_options
 #' is_minified # FALSE
 #'
 get_devmode_option <- function(
-  option,
+  name,
   default = NULL,
-  on = waiver(),
-  message = waiver()
+  devmode_default,
+  devmode_message
 ) {
   getOption(
-    option,
+    name,
     local({
       if (!in_devmode()) {
         # typical case
         return(default)
       }
 
-      info <- registered_devmode_options$get(option)
+      info <- registered_devmode_options$get(name)
       if (is.null(info)) {
         # Not registered,
         # Warn and return default value
         rlang::warn(
           message = paste0(
-            "`get_devmode_option(option)` could not find `option = \"", option, "\"`. ",
+            "`get_devmode_option(name)` could not find `name = \"", name, "\"`. ",
             "Returning `default` value"
           )
         )
@@ -243,31 +271,21 @@ get_devmode_option <- function(
       }
 
       # display message
-      if (is_waiver(message)) {
+      if (missing(devmode_message)) {
         # no custom message found. Display default devmode message
-        message <- info$message
+        devmode_message <- info$devmode_message
       }
-      devmode_inform(message = message)
+      devmode_inform(devmode_message)
 
       # return registered on value
-      if (is_waiver(on)) {
+      if (missing(devmode_default)) {
         # use default devmode value
-        return(info$on)
+        return(info$devmode_default)
       }
 
-      # use provided `on` value
-      on
+      # use provided `devmode_default` value
+      devmode_default
     })
-  )
-}
-
-is_waiver <- function(x) {
-  inherits(x, "waiver")
-}
-waiver <- function() {
-  structure(
-    list(),
-    class = "waiver"
   )
 }
 

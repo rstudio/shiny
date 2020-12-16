@@ -249,6 +249,9 @@ get_devmode_option <- function(
   devmode_default,
   devmode_message
 ) {
+  # Must call `missing()` here. Fails to work inside `getOption()`
+  devmode_default_missing <- missing(devmode_default)
+  devmode_message_missing <- missing(devmode_message)
   getOption(
     name,
     local({
@@ -271,14 +274,14 @@ get_devmode_option <- function(
       }
 
       # display message
-      if (missing(devmode_message)) {
+      if (devmode_message_missing) {
         # no custom message found. Display default devmode message
         devmode_message <- info$devmode_message
       }
       devmode_inform(devmode_message)
 
       # return registered on value
-      if (missing(devmode_default)) {
+      if (devmode_default_missing) {
         # use default devmode value
         return(info$devmode_default)
       }

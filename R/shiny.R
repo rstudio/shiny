@@ -1327,11 +1327,11 @@ ShinySession <- R6Class(
       next_version <- bslib::theme_version(theme)
       if (!identical(current_version, next_version)) {
         stop(
-          "Requested theme uses a different bootstrap version (",
-          next_version, ") than the currently loaded theme (", current_theme,
-           "). Dynamic switching of bootstrap versions is not supported.",
-           call. = FALSE
-         )
+          "session$setCurrentTheme() cannot be used to change the Bootstrap version ",
+          "from ", current_version, " to ", next_version, ". ",
+          "Try setting `bs_theme(version = ", next_version, ")`."
+          call. = FALSE
+        )
       }
 
       # Note that this will automatically scope to the session.

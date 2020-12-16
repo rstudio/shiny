@@ -31,7 +31,7 @@ in \verb{<div>} or \verb{<span>}; \code{verbatimTextOutput()} is usually paired 
 \code{\link[=renderPrint]{renderPrint()}} and provides fixed-width text in a \verb{<pre>}.
 }
 \details{
-In both funtions, text is HTML-escaped prior to rendering.
+In both functions, text is HTML-escaped prior to rendering.
 }
 \examples{
 ## Only run this example in interactive R sessions

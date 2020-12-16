@@ -31,6 +31,12 @@ function initShiny() {
           continue;
         }
 
+        // If this element reports its CSS styles to getCurrentOutputInfo()
+        // then it should have a MutationObserver() to resend CSS if its
+        // style/class attributes change. This observer should already exist
+        // for _static_ UI, but not yet for _dynamic_ UI
+        maybeAddThemeObserver(el);
+
         var bindingAdapter = new OutputBindingAdapter(el, binding);
         shinyapp.bindOutput(id, bindingAdapter);
         $el.data('shiny-output-binding', bindingAdapter);
@@ -332,12 +338,56 @@ function initShiny() {
   }
 
   $('.shiny-image-output, .shiny-plot-output, .shiny-report-theme').each(function() {
-    var id = getIdFromEl(this);
-    initialValues['.clientdata_output_' + id + '_bg'] = getComputedBgColor(this);
-    initialValues['.clientdata_output_' + id + '_fg'] = getStyle(this, "color");
-    initialValues['.clientdata_output_' + id + '_accent'] = getComputedLinkColor(this);
-    initialValues['.clientdata_output_' + id + '_font'] = getComputedFont(this);
+    var el = this, id = getIdFromEl(el);
+    initialValues['.clientdata_output_' + id + '_bg'] = getComputedBgColor(el);
+    initialValues['.clientdata_output_' + id + '_fg'] = getStyle(el, "color");
+    initialValues['.clientdata_output_' + id + '_accent'] = getComputedLinkColor(el);
+    initialValues['.clientdata_output_' + id + '_font'] = getComputedFont(el);
+    maybeAddThemeObserver(el);
   });
+
+
+  // Resend computed styles if *an output element's* class or style attribute changes.
+  // This gives us some level of confidence that getCurrentOutputInfo() will be
+  // properly invalidated if output container is mutated; but unfortunately,
+  // we don't have a reasonable way to detect change in *inherited* styles
+  // (other than session$setCurrentTheme())
+  // https://github.com/rstudio/shiny/issues/3196
+  // https://github.com/rstudio/shiny/issues/2998
+  function maybeAddThemeObserver(el) {
+    if (!window.MutationObserver) {
+      return; // IE10 and lower
+    }
+
+    var cl = el.classList;
+    var reportTheme = cl.contains('shiny-image-output') || cl.contains('shiny-plot-output') || cl.contains('shiny-report-theme');
+    if (!reportTheme) {
+      return;
+    }
+
+    var $el = $(el);
+    if ($el.data("shiny-theme-observer")) {
+      return; // i.e., observer is already observing
+    }
+
+    var observerCallback = new Debouncer(null, () => doSendTheme(el), 100);
+    var observer = new MutationObserver(() => observerCallback.normalCall());
+    var config = {attributes: true, attributeFilter: ['style', 'class']};
+    observer.observe(el, config);
+    $el.data("shiny-theme-observer", observer);
+  }
+
+  function doSendTheme(el) {
+    // Sending theme info on error isn't necessary (it'd add an unnecessary additional round-trip)
+    if (el.classList.contains("shiny-output-error")) {
+      return;
+    }
+    var id = getIdFromEl(el);
+    inputs.setInput('.clientdata_output_' + id + '_bg', getComputedBgColor(el));
+    inputs.setInput('.clientdata_output_' + id + '_fg', getStyle(el, "color"));
+    inputs.setInput('.clientdata_output_' + id + '_accent', getComputedLinkColor(el));
+    inputs.setInput('.clientdata_output_' + id + '_font', getComputedFont(el));
+  }
 
   function doSendImageSize() {
     $('.shiny-image-output, .shiny-plot-output, .shiny-report-size').each(function() {
@@ -349,11 +399,7 @@ function initShiny() {
     });
 
     $('.shiny-image-output, .shiny-plot-output, .shiny-report-theme').each(function() {
-      var id = getIdFromEl(this);
-      inputs.setInput('.clientdata_output_' + id + '_bg', getComputedBgColor(this));
-      inputs.setInput('.clientdata_output_' + id + '_fg', getStyle(this, "color"));
-      inputs.setInput('.clientdata_output_' + id + '_accent', getComputedLinkColor(this));
-      inputs.setInput('.clientdata_output_' + id + '_font', getComputedFont(this));
+      doSendTheme(this);
     });
 
     $('.shiny-bound-output').each(function() {

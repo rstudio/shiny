@@ -19,7 +19,7 @@ $selectize-color-disabled: $input-bg !default;
 $selectize-color-item: mix($selectize-color-input, $selectize-color-text, 90%) !default;
 $selectize-color-item-border: $input-border-color !default;
 $selectize-color-item-active: $component-active-bg !default;
-$selectize-color-item-active-text: $component-active-color !default;
+$selectize-color-item-active-text: color-contrast($selectize-color-item-active) !default;
 $selectize-color-item-active-border: rgba(0,0,0,0) !default;
 $selectize-color-optgroup: $dropdown-bg !default;
 $selectize-color-optgroup-text: $dropdown-header-color !default;

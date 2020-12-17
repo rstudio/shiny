@@ -31,17 +31,21 @@ register_devmode_option(name, devmode_message = NULL, devmode_default = NULL)
 get_devmode_option(name, default = NULL, devmode_default, devmode_message)
 }
 \arguments{
-\item{devmode}{Logical value which should be set to \code{TRUE} to enable Shiny Developer Mode}
+\item{devmode}{Logical value which should be set to \code{TRUE} to enable Shiny
+Developer Mode}
 
-\item{verbose}{Logical value which should be set to \code{TRUE} display Shiny Developer messages}
+\item{verbose}{Logical value which should be set to \code{TRUE} display Shiny
+Developer messages}
 
 \item{code}{Code to execute with the temporary Dev Mode options set}
 
 \item{message}{Developer Mode message to be sent to \code{\link[rlang:abort]{rlang::inform()}}}
 
-\item{.frequency}{Frequency of the Developer Mode message used with \code{\link[rlang:abort]{rlang::inform()}}. Defaults to once every 8 hours.}
+\item{.frequency}{Frequency of the Developer Mode message used with
+\code{\link[rlang:abort]{rlang::inform()}}. Defaults to once every 8 hours.}
 
-\item{.frequency_id}{\code{\link[rlang:abort]{rlang::inform()}} message identifier. Defaults to \code{message}.}
+\item{.frequency_id}{\code{\link[rlang:abort]{rlang::inform()}} message identifier. Defaults to
+\code{message}.}
 
 \item{.file}{Output connection for \code{\link[rlang:abort]{rlang::inform()}}. Defaults to \code{\link[=stderr]{stderr()}}}
 
@@ -49,28 +53,41 @@ get_devmode_option(name, default = NULL, devmode_default, devmode_message)
 
 \item{name}{Name of option to look for in \code{options()}}
 
-\item{devmode_message}{Message to display once every 8 hours when utilizing the \code{devmode_default} value.  If \code{devmode_message} is missing, the registered \code{devmode_message} value be used.}
+\item{devmode_message}{Message to display once every 8 hours when utilizing
+the \code{devmode_default} value.  If \code{devmode_message} is missing, the
+registered \code{devmode_message} value be used.}
 
-\item{devmode_default}{Default value to return if \code{in_devmode()} returns \code{TRUE}. For \code{get_devmode_option()}, if \code{devmode_default} is missing, the registered \code{devmode_default} value will be used.}
+\item{devmode_default}{Default value to return if \code{in_devmode()} returns
+\code{TRUE}. For \code{get_devmode_option()}, if \code{devmode_default} is missing, the
+registered \code{devmode_default} value will be used.}
 }
 \description{
 \lifecycle{experimental}
 
-Developer mode enables a number of options to make a developer's life easier, like enabling non-minified JS and printing messages about deprecated functions and options.
+Developer mode enables a number of options to make a developer's life
+easier, like enabling non-minified JS and printing messages about
+deprecated functions and options.
 
 Please see the function descriptions for more details.
 }
 \section{Functions}{
 \itemize{
-\item \code{devmode}: Function to set two options to enable/disable Shiny Developer Mode and Developer messages
+\item \code{devmode}: Function to set two options to enable/disable Shiny
+Developer Mode and Developer messages
 
-\item \code{in_devmode}: Determines if Shiny is in Developer Mode. If the \code{getOption("shiny.devmode")} is set to \code{TRUE} and not in testing inside \code{testthat}, then Shiny Developer Mode is enabled.
+\item \code{in_devmode}: Determines if Shiny is in Developer Mode. If the
+\code{getOption("shiny.devmode")} is set to \code{TRUE} and not in testing inside
+\code{testthat}, then Shiny Developer Mode is enabled.
 
-\item \code{with_devmode}: Temporarily set Shiny Developer Mode and Developer message verbosity
+\item \code{with_devmode}: Temporarily set Shiny Developer Mode and Developer
+message verbosity
 
-\item \code{devmode_inform}: If Shiny Developer Mode and verbosity are enabled, displays a message once every 8 hrs (by default)
+\item \code{devmode_inform}: If Shiny Developer Mode and verbosity are enabled,
+displays a message once every 8 hrs (by default)
 
-\item \code{register_devmode_option}: Registers a Shiny Developer Mode option with an updated value and Developer message. This registration method allows package authors to write one message in a single location.
+\item \code{register_devmode_option}: Registers a Shiny Developer Mode option with an updated
+value and Developer message. This registration method allows package
+authors to write one message in a single location.
 
 For example, the following Shiny Developer Mode options are registered:\if{html}{\out{<div class="r">}}\preformatted{# Reload the Shiny app when a sourced R file changes
 register_devmode_option(
@@ -105,22 +122,38 @@ register_devmode_option(
 )
 }\if{html}{\out{</div>}}
 
-\item \code{get_devmode_option}: Provides a consistent way to change the expected \code{\link[=getOption]{getOption()}} behavior when Developer Mode is enabled. This method is very similar to \code{\link[=getOption]{getOption()}} where the globally set option takes precedence. See section "Avoiding direct dependency on shiny" for \code{get_devmode_option()} implementation details.
+\item \code{get_devmode_option}: Provides a consistent way to change the expected
+\code{\link[=getOption]{getOption()}} behavior when Developer Mode is enabled. This method is very
+similar to \code{\link[=getOption]{getOption()}} where the globally set option takes precedence.
+See section "Avoiding direct dependency on shiny" for
+\code{get_devmode_option()} implementation details.
 
-\strong{Package developers:} Register your Dev Mode option using \code{register_devmode_option()} to avoid supplying the same \code{devmode_default} and \code{devmode_message} values throughout your package. (This requires a \pkg{shiny} dependency.)
+\strong{Package developers:} Register your Dev Mode option using
+\code{register_devmode_option()} to avoid supplying the same \code{devmode_default}
+and \code{devmode_message} values throughout your package. (This requires a
+\pkg{shiny} dependency.)
 }}
 
 \section{Avoiding direct dependency on shiny}{
 
 
-The methods explained in this help file act independently from the rest of Shiny but are included to provide blue prints for your own packages. If your package already has (or is willing to take) a dependency on Shiny, we recommend using the exported Shiny methods for consistent behavior. Note that if you use exported Shiny methods, it will cause the Shiny package to load. This may be undesirable if your code will be used in (for example) R Markdown documents without \code{runtime: shiny}.
+The methods explained in this help file act independently from the rest of
+Shiny but are included to provide blue prints for your own packages. If
+your package already has (or is willing to take) a dependency on Shiny, we
+recommend using the exported Shiny methods for consistent behavior. Note
+that if you use exported Shiny methods, it will cause the Shiny package to
+load. This may be undesirable if your code will be used in (for example) R
+Markdown documents without \code{runtime: shiny}.
 
-If your package can \strong{not} take a dependency on Shiny, we recommending re-implementing these two functions:
+If your package can \strong{not} take a dependency on Shiny, we recommending
+re-implementing these two functions:
 
 \enumerate{
 \item \code{in_devmode()}:
 
-This function should return \code{TRUE} if \code{getOption("shiny.devmode")} is set. In addition, we strongly recommend that it also checks to make sure \code{testthat} is not testing.\if{html}{\out{<div class="r">}}\preformatted{in_devmode <- function() \{
+This function should return \code{TRUE} if \code{getOption("shiny.devmode")} is set.
+In addition, we strongly recommend that it also checks to make sure
+\code{testthat} is not testing.\if{html}{\out{<div class="r">}}\preformatted{in_devmode <- function() \{
   isTRUE(getOption("shiny.devmode", FALSE)) &&
     !identical(Sys.getenv("TESTTHAT"), "true")
 \}
@@ -128,7 +161,9 @@ This function should return \code{TRUE} if \code{getOption("shiny.devmode")} is 
 
 \item \code{get_devmode_option(name, default, devmode_default, devmode_message)}:
 
-This function is similar to \code{getOption(name, default)}, but when the option is not set, the default value changes depending on the Dev Mode.  \code{get_devmode_option()} should be implemented as follows:
+This function is similar to \code{getOption(name, default)}, but when the option
+is not set, the default value changes depending on the Dev Mode.
+\code{get_devmode_option()} should be implemented as follows:
 \itemize{
 \item If not in Dev Mode:
 \itemize{
@@ -149,7 +184,12 @@ This function is similar to \code{getOption(name, default)}, but when the option
 }
 }
 
-When notifying the developer that the default value has changed, we strongly recommend displaying a message (\code{devmode_message}) to \code{stderr()} once every 8 hours using \code{\link[rlang:abort]{rlang::inform()}}. This will keep the author up to date as to which Dev Mode options are being altered. To allow developers a chance to disable Dev Mode messages, the message should be skipped if \code{getOption("shiny.devmode.verbose", TRUE)} is not \code{TRUE}.\if{html}{\out{<div class="r">}}\preformatted{get_devmode_option <- function(name, default = NULL, devmode_default, devmode_message) \{
+When notifying the developer that the default value has changed, we strongly
+recommend displaying a message (\code{devmode_message}) to \code{stderr()} once every 8
+hours using \code{\link[rlang:abort]{rlang::inform()}}. This will keep the author up to date as to
+which Dev Mode options are being altered. To allow developers a chance to
+disable Dev Mode messages, the message should be skipped if
+\code{getOption("shiny.devmode.verbose", TRUE)} is not \code{TRUE}.\if{html}{\out{<div class="r">}}\preformatted{get_devmode_option <- function(name, default = NULL, devmode_default, devmode_message) \{
   if (!in_devmode()) \{
     # Dev Mode disabled, act like `getOption()`
     return(getOption(name, default = default))
@@ -179,7 +219,8 @@ When notifying the developer that the default value has changed, we strongly rec
 
 }
 
-The remaining functions in this file are used for author convenience and are not recommended for all reimplementation situations.
+The remaining functions in this file are used for author convenience and are
+not recommended for all reimplementation situations.
 }
 
 \examples{

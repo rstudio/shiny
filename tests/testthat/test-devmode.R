@@ -74,8 +74,8 @@ test_that("devmode can be turned on while _testing_ is disabled and check messag
     expect_devmode_option("shiny.fullstacktrace", TRUE, "Turning on full stack trace")
 
     # local values can be overwritten
-    expect_devmode_option("shiny.autoreload", "on", "Turning on shiny autoreload", on = "on")
-    expect_devmode_option("shiny.autoreload", TRUE, "custom msg", message = "custom msg")
+    expect_devmode_option("shiny.autoreload", "on", "Turning on shiny autoreload", devmode_default = "on")
+    expect_devmode_option("shiny.autoreload", TRUE, "custom msg", devmode_message = "custom msg")
 
   })
 

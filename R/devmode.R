@@ -2,7 +2,7 @@
 #'
 #' @description \lifecycle{experimental}
 #'
-#'   Developer mode enables a number of options to make a developer's life
+#'   Developer Mode enables a number of [options()] to make a developer's life
 #'   easier, like enabling non-minified JS and printing messages about
 #'   deprecated functions and options.
 #'

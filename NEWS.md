@@ -36,6 +36,8 @@ shiny 1.5.0.9000
 
 ### Minor new features and improvements
 
+* Added support for Shiny Developer Mode. Developer Mode enables a number of `options()` to make a developer's life easier, like enabling non-minified JS and printing messages about deprecated functions and options. See `?devmode()` for more details. (#3174)
+
 * New `reactiveConsole()` makes it easier to interactively experiment with reactivity at the console (#2518).
 
 * When UI is specified as a function (e.g. `ui <- function(req) { ... }`), the response can now be an HTTP response as returned from the (newly exported) `httpResponse()` function. (#2970)

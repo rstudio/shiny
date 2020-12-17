@@ -143,7 +143,7 @@ your package already has (or is willing to take) a dependency on Shiny, we
 recommend using the exported Shiny methods for consistent behavior. Note
 that if you use exported Shiny methods, it will cause the Shiny package to
 load. This may be undesirable if your code will be used in (for example) R
-Markdown documents without \code{runtime: shiny}.
+Markdown documents that do not have a Shiny runtime (\code{runtime: shiny}).
 
 If your package can \strong{not} take a dependency on Shiny, we recommending
 re-implementing these two functions:

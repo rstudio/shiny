@@ -42,7 +42,7 @@ devmode <- function(
 #'   recommend using the exported Shiny methods for consistent behavior. Note
 #'   that if you use exported Shiny methods, it will cause the Shiny package to
 #'   load. This may be undesirable if your code will be used in (for example) R
-#'   Markdown documents without `runtime: shiny`.
+#'   Markdown documents that do not have a Shiny runtime (`runtime: shiny`).
 #'
 #'   If your package can **not** take a dependency on Shiny, we recommending
 #'   re-implementing these two functions:

@@ -16,6 +16,7 @@
 #'    eval_tidy expr pairlist2 new_quosure enexpr as_quosure is_quosure inject
 #'    enquos0 zap_srcref %||% is_na
 #'    is_false
+#'    missing_arg is_missing maybe_missing
 #' @importFrom ellipsis
 #'    check_dots_empty check_dots_unnamed
 #' @import htmltools

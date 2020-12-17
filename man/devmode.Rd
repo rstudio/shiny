@@ -28,7 +28,12 @@ devmode_inform(
 
 register_devmode_option(name, devmode_message = NULL, devmode_default = NULL)
 
-get_devmode_option(name, default = NULL, devmode_default, devmode_message)
+get_devmode_option(
+  name,
+  default = NULL,
+  devmode_default = missing_arg(),
+  devmode_message = missing_arg()
+)
 }
 \arguments{
 \item{devmode}{Logical value which should be set to \code{TRUE} to enable Shiny

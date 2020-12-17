@@ -107,11 +107,23 @@ register_devmode_option(
 
 \item \code{get_devmode_option}: Provides a consistent way to change the expected \code{\link[=getOption]{getOption()}} behavior when Developer Mode is enabled. This method is very similar to \code{\link[=getOption]{getOption()}} where the globally set option takes precedence. \code{get_devmode_option()} is implemented as follows:
 \itemize{
-\item Get the global option \code{getOption(name)} value
-\item If option value is set, return the value
-\item If not in Dev Mode, return \code{default}
-\item Notify the developer that the default value is different
-\item Return the Dev Mode default value
+\item If not in Dev Mode:
+\itemize{
+\item Return \code{getOption(name, default)}.
+}
+\item If in Dev Mode:
+\itemize{
+\item Get the global option \code{getOption(name)} value.
+\item If the global option value is set:
+\itemize{
+\item Return the value.
+}
+\item If the global option value is not set:
+\itemize{
+\item Notify the developer that the Dev Mode default value will be used.
+\item Return the Dev Mode default value.
+}
+}
 }
 
 \strong{Package developers:} Register your Dev Mode option using \code{register_devmode_option()} to avoid supplying the same \code{devmode_default} and \code{devmode_message} values throughout your package. (This requires a \pkg{shiny} dependency.)
@@ -120,9 +132,9 @@ register_devmode_option(
 \section{Avoiding direct dependency on shiny}{
 
 
-The methods explained in this help file act independently from the rest of Shiny but are included to provide blue prints for your own packages. If your package already has (or is willing to take) a dependency on \pkg{shiny}, we recommend using the exported Shiny methods for consistent behavior.
+The methods explained in this help file act independently from the rest of Shiny but are included to provide blue prints for your own packages. If your package already has (or is willing to take) a dependency on Shiny, we recommend using the exported Shiny methods for consistent behavior. Note that if you use exported Shiny methods, it will cause the Shiny package to load. This may be undesirable if your code will be used in (for example) R Markdown documents without \code{runtime: shiny}.
 
-If your package can \emph{not} take a dependency on Shiny, we recommending re-implementing these two functions:
+If your package can \strong{not} take a dependency on Shiny, we recommending re-implementing these two functions:
 
 \enumerate{
 \item \code{in_devmode()}:
@@ -135,13 +147,25 @@ This function should return \code{TRUE} if \code{getOption("shiny.devmode")} is 
 
 \item \code{get_devmode_option(name, default, devmode_default, devmode_message)}:
 
-This function is similar to \code{getOption(name, default)}, but when the option is not set the default value changes depending on the Dev Mode.  \code{get_devmode_option()} should be implemented as follows:
+This function is similar to \code{getOption(name, default)}, but when the option is not set, the default value changes depending on the Dev Mode.  \code{get_devmode_option()} should be implemented as follows:
 \itemize{
-\item If not in Dev Mode, return \code{getOption(name, default)}
-\item Get the global option \code{getOption(name)} value
-\item If option value is set, return the value
-\item Notify the developer that the default value is different
-\item Return the Dev Mode default value
+\item If not in Dev Mode:
+\itemize{
+\item Return \code{getOption(name, default)}.
+}
+\item If in Dev Mode:
+\itemize{
+\item Get the global option \code{getOption(name)} value.
+\item If the global option value is set:
+\itemize{
+\item Return the value.
+}
+\item If the global option value is not set:
+\itemize{
+\item Notify the developer that the Dev Mode default value will be used.
+\item Return the Dev Mode default value.
+}
+}
 }
 
 When notifying the developer that the default value has changed, we strongly recommend displaying a message (\code{devmode_message}) to \code{stderr()} once every 8 hours using \code{\link[rlang:abort]{rlang::inform()}}. This will keep the author up to date as to which Dev Mode options are being altered. To allow developers a chance to disable Dev Mode messages, the message should be skipped if \code{getOption("shiny.devmode.verbose", TRUE)} is not \code{TRUE}.\if{html}{\out{<div class="r">}}\preformatted{get_devmode_option <- function(name, default = NULL, devmode_default, devmode_message) \{

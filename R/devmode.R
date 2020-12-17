@@ -29,9 +29,9 @@ devmode <- function(
 #' @describeIn devmode Determines if Shiny is in Developer Mode. If the `getOption("shiny.devmode")` is set to `TRUE` and not in testing inside `testthat`, then Shiny Developer Mode is enabled.
 #' @section Avoiding direct dependency on shiny:
 #'
-#' The methods explained in this help file act independently from the rest of Shiny but are included to provide blue prints for your own packages. If your package already has (or is willing to take) a dependency on \pkg{shiny}, we recommend using the exported Shiny methods for consistent behavior.
+#' The methods explained in this help file act independently from the rest of Shiny but are included to provide blue prints for your own packages. If your package already has (or is willing to take) a dependency on Shiny, we recommend using the exported Shiny methods for consistent behavior. Note that if you use exported Shiny methods, it will cause the Shiny package to load. This may be undesirable if your code will be used in (for example) R Markdown documents without `runtime: shiny`.
 #'
-#' If your package can _not_ take a dependency on Shiny, we recommending re-implementing these two functions:
+#' If your package can **not** take a dependency on Shiny, we recommending re-implementing these two functions:
 #'
 #' \enumerate{
 #' \item `in_devmode()`:
@@ -46,12 +46,16 @@ devmode <- function(
 #'
 #' \item `get_devmode_option(name, default, devmode_default, devmode_message)`:
 #'
-#' This function is similar to `getOption(name, default)`, but when the option is not set the default value changes depending on the Dev Mode.  `get_devmode_option()` should be implemented as follows:
-#' * If not in Dev Mode, return `getOption(name, default)`
-#' * Get the global option `getOption(name)` value
-#' * If option value is set, return the value
-#' * Notify the developer that the default value is different
-#' * Return the Dev Mode default value
+#' This function is similar to `getOption(name, default)`, but when the option is not set, the default value changes depending on the Dev Mode.  `get_devmode_option()` should be implemented as follows:
+#' * If not in Dev Mode:
+#'   * Return `getOption(name, default)`.
+#' * If in Dev Mode:
+#'   * Get the global option `getOption(name)` value.
+#'   * If the global option value is set:
+#'     * Return the value.
+#'   * If the global option value is not set:
+#'     * Notify the developer that the Dev Mode default value will be used.
+#'     * Return the Dev Mode default value.
 #'
 #' When notifying the developer that the default value has changed, we strongly recommend displaying a message (`devmode_message`) to `stderr()` once every 8 hours using [rlang::inform()]. This will keep the author up to date as to which Dev Mode options are being altered. To allow developers a chance to disable Dev Mode messages, the message should be skipped if `getOption("shiny.devmode.verbose", TRUE)` is not `TRUE`.
 #'
@@ -227,11 +231,15 @@ register_devmode_option <- function(
 
 
 #' @describeIn devmode Provides a consistent way to change the expected [getOption()] behavior when Developer Mode is enabled. This method is very similar to [getOption()] where the globally set option takes precedence. `get_devmode_option()` is implemented as follows:
-#' * Get the global option `getOption(name)` value
-#' * If option value is set, return the value
-#' * If not in Dev Mode, return `default`
-#' * Notify the developer that the default value is different
-#' * Return the Dev Mode default value
+#' * If not in Dev Mode:
+#'   * Return `getOption(name, default)`.
+#' * If in Dev Mode:
+#'   * Get the global option `getOption(name)` value.
+#'   * If the global option value is set:
+#'     * Return the value.
+#'   * If the global option value is not set:
+#'     * Notify the developer that the Dev Mode default value will be used.
+#'     * Return the Dev Mode default value.
 #'
 #' **Package developers:** Register your Dev Mode option using `register_devmode_option()` to avoid supplying the same `devmode_default` and `devmode_message` values throughout your package. (This requires a \pkg{shiny} dependency.)
 #' @export

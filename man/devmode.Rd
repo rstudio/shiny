@@ -105,26 +105,7 @@ register_devmode_option(
 )
 }\if{html}{\out{</div>}}
 
-\item \code{get_devmode_option}: Provides a consistent way to change the expected \code{\link[=getOption]{getOption()}} behavior when Developer Mode is enabled. This method is very similar to \code{\link[=getOption]{getOption()}} where the globally set option takes precedence. \code{get_devmode_option()} is implemented as follows:
-\itemize{
-\item If not in Dev Mode:
-\itemize{
-\item Return \code{getOption(name, default)}.
-}
-\item If in Dev Mode:
-\itemize{
-\item Get the global option \code{getOption(name)} value.
-\item If the global option value is set:
-\itemize{
-\item Return the value.
-}
-\item If the global option value is not set:
-\itemize{
-\item Notify the developer that the Dev Mode default value will be used.
-\item Return the Dev Mode default value.
-}
-}
-}
+\item \code{get_devmode_option}: Provides a consistent way to change the expected \code{\link[=getOption]{getOption()}} behavior when Developer Mode is enabled. This method is very similar to \code{\link[=getOption]{getOption()}} where the globally set option takes precedence. See section "Avoiding direct dependency on shiny" for \code{get_devmode_option()} implementation details.
 
 \strong{Package developers:} Register your Dev Mode option using \code{register_devmode_option()} to avoid supplying the same \code{devmode_default} and \code{devmode_message} values throughout your package. (This requires a \pkg{shiny} dependency.)
 }}

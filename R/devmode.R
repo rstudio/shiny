@@ -230,16 +230,7 @@ register_devmode_option <- function(
 }
 
 
-#' @describeIn devmode Provides a consistent way to change the expected [getOption()] behavior when Developer Mode is enabled. This method is very similar to [getOption()] where the globally set option takes precedence. `get_devmode_option()` is implemented as follows:
-#' * If not in Dev Mode:
-#'   * Return `getOption(name, default)`.
-#' * If in Dev Mode:
-#'   * Get the global option `getOption(name)` value.
-#'   * If the global option value is set:
-#'     * Return the value.
-#'   * If the global option value is not set:
-#'     * Notify the developer that the Dev Mode default value will be used.
-#'     * Return the Dev Mode default value.
+#' @describeIn devmode Provides a consistent way to change the expected [getOption()] behavior when Developer Mode is enabled. This method is very similar to [getOption()] where the globally set option takes precedence. See section "Avoiding direct dependency on shiny" for `get_devmode_option()` implementation details.
 #'
 #' **Package developers:** Register your Dev Mode option using `register_devmode_option()` to avoid supplying the same `devmode_default` and `devmode_message` values throughout your package. (This requires a \pkg{shiny} dependency.)
 #' @export

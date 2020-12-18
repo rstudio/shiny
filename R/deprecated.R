@@ -59,7 +59,7 @@ diskCache <- function(
   exec_missing = FALSE,
   logfile = NULL)
 {
-  shinyDeprecated("1.5.1", "diskCache()", "cachem::cache_disk()")
+  shinyDeprecated("1.6.0", "diskCache()", "cachem::cache_disk()")
 
   cachem::cache_disk(
     dir = dir,
@@ -89,7 +89,7 @@ memoryCache <- function(
   exec_missing = FALSE,
   logfile = NULL)
 {
-  shinyDeprecated("1.5.1", "diskCache()", "cachem::cache_mem()")
+  shinyDeprecated("1.6.0", "diskCache()", "cachem::cache_mem()")
 
   cachem::cache_mem(
     max_size = max_size,

@@ -1322,7 +1322,12 @@ ShinySession <- R6Class(
       # bootstrapTheme, (2) re-executes any registered theme dependencies, and
       # (3) sends the resulting dependencies to the client.
 
-      # Make sure that the theme switching is just styles (e.g. bootswatch) rather than a different version
+      if (!is_bs_theme(theme)) {
+        stop("`session$setCurrentTheme()` expects a `bslib::bs_theme()` object.", call. = FALSE)
+      }
+
+      # Switching Bootstrap versions has weird & complex consequences
+      # for the JS logic, so we forbid it
       current_version <- bslib::theme_version(getCurrentTheme())
       next_version <- bslib::theme_version(theme)
       if (!identical(current_version, next_version)) {

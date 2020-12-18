@@ -10,7 +10,7 @@ memoryCache(
   max_n = Inf,
   evict = c("lru", "fifo"),
   missing = key_missing(),
-  exec_missing = FALSE,
+  exec_missing = deprecated(),
   logfile = NULL
 )
 }

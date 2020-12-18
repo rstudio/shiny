@@ -56,10 +56,13 @@ diskCache <- function(
   evict = c("lru", "fifo"),
   destroy_on_finalize = FALSE,
   missing = key_missing(),
-  exec_missing = FALSE,
-  logfile = NULL)
-{
+  exec_missing = deprecated(),
+  logfile = NULL
+) {
   shinyDeprecated("1.6.0", "diskCache()", "cachem::cache_disk()")
+  if (lifecycle::is_present(exec_missing)) {
+    shinyDeprecated("1.6.0", "diskCache(exec_missing =)")
+  }
 
   cachem::cache_disk(
     dir = dir,
@@ -86,10 +89,13 @@ memoryCache <- function(
   max_n = Inf,
   evict = c("lru", "fifo"),
   missing = key_missing(),
-  exec_missing = FALSE,
+  exec_missing = deprecated(),
   logfile = NULL)
 {
   shinyDeprecated("1.6.0", "diskCache()", "cachem::cache_mem()")
+  if (lifecycle::is_present(exec_missing)) {
+    shinyDeprecated("1.6.0", "diskCache(exec_missing =)")
+  }
 
   cachem::cache_mem(
     max_size = max_size,

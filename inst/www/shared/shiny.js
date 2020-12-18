@@ -378,11 +378,11 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
     if (/\bQt\/5/.test(window.navigator.userAgent) && /Linux/.test(window.navigator.userAgent)) {
       $(document.documentElement).addClass('qt5');
-    } // Detect IE information
+    } // Detect IE and older (pre-Chromium) Edge
 
 
     var ua = window.navigator.userAgent;
-    var isIE = /MSIE|Trident/.test(ua);
+    var isIE = /MSIE|Trident/.test(ua) || ua.indexOf("Edge") > -1;
 
     function getIEVersion() {
       var msie = ua.indexOf('MSIE ');

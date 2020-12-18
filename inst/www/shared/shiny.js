@@ -382,7 +382,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
 
     var ua = window.navigator.userAgent;
-    var isIE = /MSIE|Trident/.test(ua) || ua.indexOf("Edge") > -1;
+    var isIE = /MSIE|Trident|Edge/.test(ua);
 
     function getIEVersion() {
       var msie = ua.indexOf('MSIE ');

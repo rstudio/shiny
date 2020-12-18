@@ -15,7 +15,7 @@ var browser = (function() {
 
   // Detect IE and older (pre-Chromium) Edge
   var ua = window.navigator.userAgent;
-  var isIE = /MSIE|Trident/.test(ua) || ua.indexOf("Edge") > -1;
+  var isIE = /MSIE|Trident|Edge/.test(ua);
 
   function getIEVersion() {
     var msie = ua.indexOf('MSIE ');

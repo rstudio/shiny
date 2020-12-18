@@ -5,7 +5,13 @@
 \alias{basicPage}
 \title{Create a Bootstrap page}
 \usage{
-bootstrapPage(..., title = NULL, responsive = NULL, theme = NULL, lang = NULL)
+bootstrapPage(
+  ...,
+  title = NULL,
+  responsive = deprecated(),
+  theme = NULL,
+  lang = NULL
+)
 
 basicPage(...)
 }

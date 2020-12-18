@@ -136,6 +136,12 @@ getShinyOption <- function(name, default = NULL) {
 #' \item{shiny.usecairo (defaults to `TRUE`)}{This is used to disable graphical rendering by the
 #'   Cairo package, if it is installed. See [plotPNG()] for more
 #'   information.}
+#' \item{shiny.devmode (defaults to `NULL`)}{Option to enable Shiny Developer Mode. When set,
+#'   different default `getOption(key)` values will be returned. See [devmode()] for more details.}
+### Not documenting as 'shiny.devmode.verbose' is for niche use only
+# ' \item{shiny.devmode.verbose (defaults to `TRUE`)}{If `TRUE`, will display messages printed
+# '   about which options are being set. See [devmode()] for more details. }
+### (end not documenting 'shiny.devmode.verbose')
 #' }
 #'
 #'

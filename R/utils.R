@@ -202,10 +202,6 @@ sort_c <- function(x, ...) {
   sort(x, method = "radix", ...)
 }
 
-# Base R isFALSE function was added in R 3.5.0.
-is_false <- function(x) {
-  identical(x, FALSE)
-}
 
 # Wrapper around list2env with a NULL check. In R <3.2.0, if an empty unnamed
 # list is passed to list2env(), it errors. But an empty named list is OK. For

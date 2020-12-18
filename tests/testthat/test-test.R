@@ -173,9 +173,7 @@ test_that("app template works with runTests", {
       ignore <- capture.output({
         # do not let an error here stop this test
         # string comparisons will be made below
-        test_result <- try({
-          runTests(tempTemplateDir)
-        }, silent = TRUE)
+        test_result <- runTests(tempTemplateDir, assert = FALSE)
       })
 
       expected_test_output <- paste0(
@@ -202,7 +200,10 @@ test_that("app template works with runTests", {
       } else {
         # be very verbose in the error output to help find root cause of failure
         cat("\nrunTests() output:\n", test_output, "\n\n")
-        cat("Expected print output:\n", expected_test_output, "\n")
+        cat("Expected print output:\n", expected_test_output, "\n\n")
+        cat("runTests() object:\n")
+        utils::str(test_result)
+        cat("\n")
         testthat::fail(paste0("runTests() output for '", random_folder, "' failed. Received:\n", test_output, "\n"))
       }
 

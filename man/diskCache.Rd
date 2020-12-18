@@ -12,7 +12,7 @@ diskCache(
   evict = c("lru", "fifo"),
   destroy_on_finalize = FALSE,
   missing = key_missing(),
-  exec_missing = FALSE,
+  exec_missing = deprecated(),
   logfile = NULL
 )
 }

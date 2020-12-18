@@ -15,9 +15,9 @@ navbarPage(
   footer = NULL,
   inverse = FALSE,
   collapsible = FALSE,
-  collapsable,
+  collapsable = deprecated(),
   fluid = TRUE,
-  responsive = NULL,
+  responsive = deprecated(),
   theme = NULL,
   windowTitle = title,
   lang = NULL

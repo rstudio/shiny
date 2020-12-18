@@ -83,8 +83,7 @@
 #' @export
 runApp <- function(appDir=getwd(),
                    port=getOption('shiny.port'),
-                   launch.browser=getOption('shiny.launch.browser',
-                                            interactive()),
+                   launch.browser = getOption('shiny.launch.browser', interactive()),
                    host=getOption('shiny.host', '127.0.0.1'),
                    workerId="", quiet=FALSE,
                    display.mode=c("auto", "normal", "showcase"),
@@ -461,8 +460,7 @@ stopApp <- function(returnValue = invisible()) {
 #' @export
 runExample <- function(example=NA,
                        port=getOption("shiny.port"),
-                       launch.browser=getOption('shiny.launch.browser',
-                                                interactive()),
+                       launch.browser = getOption('shiny.launch.browser', interactive()),
                        host=getOption('shiny.host', '127.0.0.1'),
                        display.mode=c("auto", "normal", "showcase")) {
   examplesDir <- system.file('examples', package='shiny')

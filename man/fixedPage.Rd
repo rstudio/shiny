@@ -5,7 +5,13 @@
 \alias{fixedRow}
 \title{Create a page with a fixed layout}
 \usage{
-fixedPage(..., title = NULL, responsive = NULL, theme = NULL, lang = NULL)
+fixedPage(
+  ...,
+  title = NULL,
+  responsive = deprecated(),
+  theme = NULL,
+  lang = NULL
+)
 
 fixedRow(...)
 }

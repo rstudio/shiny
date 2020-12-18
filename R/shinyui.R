@@ -89,7 +89,16 @@ shinyDependencies <- function() {
       name = "shiny-javascript",
       version = shinyPackageVersion(),
       src = c(href = "shared"),
-      script = if (getOption("shiny.minified", TRUE)) "shiny.min.js" else "shiny.js"
+      script =
+        if (isTRUE(
+          get_devmode_option(
+            "shiny.minified",
+            TRUE
+          )
+        ))
+          "shiny.min.js"
+        else
+          "shiny.js"
     )
   )
 }
@@ -121,7 +130,9 @@ shinyDependencyCSS <- function(theme) {
 
 #' Create a Shiny UI handler
 #'
-#' Historically this function was used in ui.R files to register a user
+#' @description \lifecycle{superseded}
+#'
+#' @description Historically this function was used in ui.R files to register a user
 #' interface with Shiny. It is no longer required as of Shiny 0.10; simply
 #' ensure that the last expression to be returned from ui.R is a user interface.
 #' This function is kept for backwards compatibility with older applications. It
@@ -132,6 +143,17 @@ shinyDependencyCSS <- function(theme) {
 #' @keywords internal
 #' @export
 shinyUI <- function(ui) {
+  if (in_devmode()) {
+    shinyDeprecated(
+      "0.10.0", "shinyUI()",
+      details = paste0(
+        "When removing `shinyUI()`, ",
+        "ensure that the last expression returned from ui.R is a user interface ",
+        "normally supplied to `shinyUI(ui)`."
+      )
+    )
+  }
+
   .globals$ui <- list(ui)
   ui
 }

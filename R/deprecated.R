@@ -1,44 +1,44 @@
+
 #' Print message for deprecated functions in Shiny
 #'
 #' To disable these messages, use `options(shiny.deprecation.messages=FALSE)`.
 #'
-#' @param new Name of replacement function.
-#' @param msg Message to print. If used, this will override the default message.
-#' @param old Name of deprecated function.
-#' @param version The last version of Shiny before the item was deprecated.
+#' @param version Shiny version when the function was deprecated
+#' @param what Function with possible arguments
+#' @param with Possible function with arguments that should be used instead
+#' @param details Additional information to be added after a new line to the displayed message
 #' @keywords internal
-shinyDeprecated <- function(new=NULL, msg=NULL,
-                            old=as.character(sys.call(sys.parent()))[1L],
-                            version = NULL) {
-
-  if (getOption("shiny.deprecation.messages") %||% TRUE == FALSE)
+shinyDeprecated <- function(
+  version, what, with = NULL, details = NULL
+) {
+  if (is_false(getOption("shiny.deprecation.messages"))) {
     return(invisible())
-
-  if (is.null(msg)) {
-    msg <- paste(old, "is deprecated.")
-    if (!is.null(new)) {
-      msg <- paste(msg, "Please use", new, "instead.",
-        "To disable this message, run options(shiny.deprecation.messages=FALSE)")
-    }
   }
 
-  if (!is.null(version)) {
-    msg <- paste0(msg, " (Last used in version ", version, ")")
+  msg <- paste0("`", what, "` is deprecated as of shiny ", version, ".")
+  if (!is.null(with)) {
+    msg <- paste0(msg, "\n", "Please use `", with, "` instead.")
+  }
+  if (!is.null(details)) {
+    msg <- paste0(msg, "\n", details)
   }
 
-  # Similar to .Deprecated(), but print a message instead of warning
-  message(msg)
+  # lifecycle::deprecate_soft(when, what, with = with, details = details, id = id, env = env)
+  rlang::inform(message = msg, .frequency = "always", .frequency_id = msg, .file = stderr())
 }
 
 
-deprecatedEnvQuotedMessage <- function(env_arg = "env", quoted_arg = "quoted") {
-  # Enable this message in a future version of Shiny, perhaps in a dev_edition()
-  # mode.
-  # shinyDeprecated(msg = paste(
-  #   sprintf("The `%s` and `%s` arguments are deprecated.", env_arg, quoted_arg),
-  #   "Please use quosures from rlang instead.",
-  #   "See https://github.com/rstudio/shiny/issues/3108 for more information."
-  # ))
+deprecatedEnvQuotedMessage <- function() {
+  if (!in_devmode()) return(invisible())
+  if (is_false(getOption("shiny.deprecation.messages"))) return(invisible())
+
+  # manually
+  msg <- paste0(
+    "The `env` and `quoted` arguments are deprecated as of shiny 1.6.0.",
+    " Please use quosures from `rlang` instead.\n",
+    "See <https://github.com/rstudio/shiny/issues/3108> for more information."
+  )
+  rlang::inform(message = msg, .frequency = "always", .frequency_id = msg, .file = stderr())
 }
 
 
@@ -56,10 +56,13 @@ diskCache <- function(
   evict = c("lru", "fifo"),
   destroy_on_finalize = FALSE,
   missing = key_missing(),
-  exec_missing = FALSE,
-  logfile = NULL)
-{
-  shinyDeprecated("cachem::cache_disk", version = "1.5.1")
+  exec_missing = deprecated(),
+  logfile = NULL
+) {
+  shinyDeprecated("1.6.0", "diskCache()", "cachem::cache_disk()")
+  if (lifecycle::is_present(exec_missing)) {
+    shinyDeprecated("1.6.0", "diskCache(exec_missing =)")
+  }
 
   cachem::cache_disk(
     dir = dir,
@@ -86,10 +89,13 @@ memoryCache <- function(
   max_n = Inf,
   evict = c("lru", "fifo"),
   missing = key_missing(),
-  exec_missing = FALSE,
+  exec_missing = deprecated(),
   logfile = NULL)
 {
-  shinyDeprecated("cachem::cache_mem", version = "1.5.1")
+  shinyDeprecated("1.6.0", "diskCache()", "cachem::cache_mem()")
+  if (lifecycle::is_present(exec_missing)) {
+    shinyDeprecated("1.6.0", "diskCache(exec_missing =)")
+  }
 
   cachem::cache_mem(
     max_size = max_size,

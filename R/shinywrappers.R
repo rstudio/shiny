@@ -821,6 +821,14 @@ renderDataTable <- function(expr, options = NULL, searchDelay = 500,
                             env = parent.frame(), quoted = FALSE,
                             outputArgs=list())
 {
+
+  if (in_devmode()) {
+    shinyDeprecated(
+      "0.11.1", "shiny::renderDataTable()", "DT::renderDataTable()",
+      details = "See <http://rstudio.github.io/DT/shiny.html> for more information"
+    )
+  }
+
   expr <- get_quosure(expr, env, quoted)
   func <- quoToFunction(expr, "renderDataTable")
 
@@ -914,6 +922,9 @@ checkDT9 <- function(options) {
 # Deprecated functions ------------------------------------------------------
 
 #' Deprecated reactive functions
+#'
+#' @description \lifecycle{superseded}
+#'
 #' @name deprecatedReactives
 #' @keywords internal
 NULL
@@ -928,7 +939,7 @@ NULL
 #' @rdname deprecatedReactives
 #' @export
 reactivePlot <- function(func, width='auto', height='auto', ...) {
-  shinyDeprecated(new="renderPlot")
+  shinyDeprecated("0.4.0", "reactivePlot()", "renderPlot()")
   renderPlot({ func() }, width=width, height=height, ...)
 }
 
@@ -938,7 +949,7 @@ reactivePlot <- function(func, width='auto', height='auto', ...) {
 #' @rdname deprecatedReactives
 #' @export
 reactiveTable <- function(func, ...) {
-  shinyDeprecated(new="renderTable")
+  shinyDeprecated("0.4.0", "reactiveTable()", "renderTable()")
   renderTable({ func() })
 }
 
@@ -948,7 +959,7 @@ reactiveTable <- function(func, ...) {
 #' @rdname deprecatedReactives
 #' @export
 reactivePrint <- function(func) {
-  shinyDeprecated(new="renderPrint")
+  shinyDeprecated("0.4.0", "reactivePrint()", "renderPrint()")
   renderPrint({ func() })
 }
 
@@ -958,7 +969,7 @@ reactivePrint <- function(func) {
 #' @rdname deprecatedReactives
 #' @export
 reactiveUI <- function(func) {
-  shinyDeprecated(new="renderUI")
+  shinyDeprecated("0.4.0", "reactiveUI()", "renderUI()")
   renderUI({ func() })
 }
 
@@ -968,6 +979,6 @@ reactiveUI <- function(func) {
 #' @rdname deprecatedReactives
 #' @export
 reactiveText <- function(func) {
-  shinyDeprecated(new="renderText")
+  shinyDeprecated("0.4.0", "reactiveText()", "renderText()")
   renderText({ func() })
 }

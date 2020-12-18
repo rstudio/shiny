@@ -426,7 +426,7 @@ HandlerManager <- R6Class("HandlerManager",
 )
 
 maybeInjectAutoreload <- function(resp) {
-  if (getOption("shiny.autoreload", FALSE) &&
+  if (get_devmode_option("shiny.autoreload", FALSE) &&
       isTRUE(grepl("^text/html($|;)", resp$content_type)) &&
       is.character(resp$content)) {
 

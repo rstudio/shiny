@@ -191,7 +191,6 @@ reference:
       - snapshotPreprocessOutput
       - markOutputAttrs
       - repeatable
-      - shinyDeprecated
       - serverInfo
       - onStop
       - httpResponse

@@ -9,8 +9,6 @@ wait_for_it <- function() {
 
 # Block until the promise is resolved/rejected. If resolved, return the value.
 # If rejected, throw (yes throw, not return) the error.
-#' @importFrom promises %...!%
-#' @importFrom promises %...>%
 extract <- function(promise) {
   promise_value <- NULL
   error <- NULL

@@ -29,7 +29,9 @@ registerClient <- function(client) {
 
 #' Define Server Functionality
 #'
-#' Defines the server-side logic of the Shiny application. This generally
+#' @description \lifecycle{superseded}
+#'
+#' @description Defines the server-side logic of the Shiny application. This generally
 #' involves creating functions that map user inputs to various kinds of output.
 #' In older versions of Shiny, it was necessary to call `shinyServer()` in
 #' the `server.R` file, but this is no longer required as of Shiny 0.10.
@@ -76,6 +78,17 @@ registerClient <- function(client) {
 #' @export
 #' @keywords internal
 shinyServer <- function(func) {
+  if (in_devmode()) {
+    shinyDeprecated(
+      "0.10.0", "shinyServer()",
+      details = paste0(
+        "When removing `shinyServer()`, ",
+        "ensure that the last expression returned from server.R ",
+        "is the function normally supplied to `shinyServer(func)`."
+      )
+    )
+  }
+
   .globals$server <- list(func)
   invisible(func)
 }
@@ -137,7 +150,7 @@ createAppHandlers <- function(httpHandlers, serverFuncSource) {
       }
 
       if (identical(ws$request$PATH_INFO, "/autoreload/")) {
-        if (!getOption("shiny.autoreload", FALSE)) {
+        if (!get_devmode_option("shiny.autoreload", FALSE)) {
           ws$close()
           return(TRUE)
         }

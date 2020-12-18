@@ -115,6 +115,8 @@ of a shiny app will automatically be sourced.}
 \item{shiny.usecairo (defaults to \code{TRUE})}{This is used to disable graphical rendering by the
 Cairo package, if it is installed. See \code{\link[=plotPNG]{plotPNG()}} for more
 information.}
+\item{shiny.devmode (defaults to \code{NULL})}{Option to enable Shiny Developer Mode. When set,
+different default \code{getOption(key)} values will be returned. See \code{\link[=devmode]{devmode()}} for more details.}
 }
 }
 

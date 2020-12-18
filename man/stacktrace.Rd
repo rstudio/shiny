@@ -18,32 +18,32 @@ captureStackTraces(expr)
 
 withLogErrors(
   expr,
-  full = getOption("shiny.fullstacktrace", FALSE),
+  full = get_devmode_option("shiny.fullstacktrace", FALSE),
   offset = getOption("shiny.stacktraceoffset", TRUE)
 )
 
 printError(
   cond,
-  full = getOption("shiny.fullstacktrace", FALSE),
+  full = get_devmode_option("shiny.fullstacktrace", FALSE),
   offset = getOption("shiny.stacktraceoffset", TRUE)
 )
 
 printStackTrace(
   cond,
-  full = getOption("shiny.fullstacktrace", FALSE),
+  full = get_devmode_option("shiny.fullstacktrace", FALSE),
   offset = getOption("shiny.stacktraceoffset", TRUE)
 )
 
 extractStackTrace(
   calls,
-  full = getOption("shiny.fullstacktrace", FALSE),
+  full = get_devmode_option("shiny.fullstacktrace", FALSE),
   offset = getOption("shiny.stacktraceoffset", TRUE)
 )
 
 formatStackTrace(
   calls,
   indent = "    ",
-  full = getOption("shiny.fullstacktrace", FALSE),
+  full = get_devmode_option("shiny.fullstacktrace", FALSE),
   offset = getOption("shiny.stacktraceoffset", TRUE)
 )
 

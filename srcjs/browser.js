@@ -13,9 +13,9 @@ var browser = (function() {
     $(document.documentElement).addClass('qt5');
   }
 
-  // Detect IE information
+  // Detect IE and older (pre-Chromium) Edge
   var ua = window.navigator.userAgent;
-  var isIE = /MSIE|Trident/.test(ua);
+  var isIE = /MSIE|Trident|Edge/.test(ua);
 
   function getIEVersion() {
     var msie = ua.indexOf('MSIE ');

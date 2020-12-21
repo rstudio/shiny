@@ -197,6 +197,12 @@ selectizeInput <- function(inputId, ..., options = NULL, width = NULL) {
 
 # given a select input and its id, selectize it
 selectizeIt <- function(inputId, select, options, nonempty = FALSE) {
+  if (length(options) == 0) {
+    # For NULL and empty unnamed list, replace with an empty named list, so that
+    # it will get translated to {} in JSON later on.
+    options <- empty_named_list()
+  }
+
   # Make sure accessibility plugin is included
   if (!('selectize-plugin-a11y' %in% options$plugins)) {
     options$plugins <- c(options$plugins, list('selectize-plugin-a11y'))
@@ -224,7 +230,7 @@ selectizeIt <- function(inputId, select, options, nonempty = FALSE) {
       type = 'application/json',
       `data-for` = inputId, `data-nonempty` = if (nonempty) '',
       `data-eval` = if (length(res$eval)) HTML(toJSON(res$eval)),
-      if (length(res$options)) HTML(toJSON(res$options)) else '{}'
+      HTML(toJSON(res$options))
     )
   )
 

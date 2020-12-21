@@ -37,6 +37,10 @@ Selectize.define("selectize-plugin-a11y", function (options) {
             if ($target.hasClass("dropdown-active")) {
               // open
               self.$control_input.attr("aria-expanded", "true");
+              // Assign a unique ID for each item. This is necessary for
+              // screen readers. In the selectize-plugin-a11y example, the
+              // random IDs are assigned when .selectize() is called, but we're
+              // doing it here to limit the scope of changes.
               var kids = self.$dropdown_content[0].children;
               for (i = 0; i < kids.length; i++) {
                 var attrs = kids[i].attributes;
@@ -119,7 +123,34 @@ Selectize.define("selectize-plugin-a11y", function (options) {
 
       self.$control.on("keydown", function (e) {
         if (e.keyCode === KEY_RETURN) {
-          $(this).click();
+
+          if (self.settings.openOnFocus) {
+            // This is the common case, where openOnFocus is true. When the user
+            // presses Enter to select an item, the default behavior is to close
+            // the dropdown and have the input lose focus. However, losing focus
+            // is poor behavior for accessibility.
+            //
+            // If `.focus()` is called after a selection is made, the default
+            // (when openOnFocus is true) is to show the dropdown, but this is
+            // annoying for sighted users, because they would expect the
+            // dropdown to not be visible after making a selection, and they
+            // then need to press Esc to make it go away.
+            //
+            // This workaround sets openOnFocus to false, then calls `.focus()`,
+            // then, after a delay, sets openOnFocus back to true. It seems that
+            // the `setTimeout()` must be called after `.focus()` for it to work
+            // reliably, even with a delay of up to 10. If it is called before
+            // `.focus()`, then after pressing Enter, the dropdown still
+            // appears. I think this is probably because `.focus()` in turn
+            // calls `setTimeout(, 0)` to do things, calling the functions in
+            // this order is necessary to ensure that the callbacks are invoked
+            // in the same order.
+            self.settings.openOnFocus = false;
+            self.focus();
+            setTimeout(function() { self.settings.openOnFocus = true; }, 0);
+          } else {
+            self.focus();
+          }
         }
       });
 

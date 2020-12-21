@@ -164,6 +164,10 @@ asNamed <- function(x) {
   x
 }
 
+empty_named_list <- function() {
+  list(a = 1)[0]
+}
+
 # Given two named vectors, join them together, and keep only the last element
 # with a given name in the resulting vector. If b has any elements with the same
 # name as elements in a, the element in a is dropped. Also, if there are any

@@ -96,6 +96,10 @@ jobs:
           git add man/\* NAMESPACE
           git commit -m 'Document (GitHub Actions)' || echo "No documentation changes to commit"
 
+      - name: Check documentation
+        run: |
+          ./tools/documentation/checkDocsCurrent.sh
+
       - uses: actions/setup-node@v1
         with:
           node-version: '12.x'

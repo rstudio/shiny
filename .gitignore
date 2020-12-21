@@ -10,3 +10,7 @@ shinyapps/
 README.html
 .*.Rnb.cached
 tools/yarn-error.log
+
+# GHA remotes installation
+.github/R-version
+.github/depends.Rds

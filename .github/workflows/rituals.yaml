@@ -99,12 +99,29 @@ jobs:
       - uses: actions/setup-node@v1
         with:
           node-version: '12.x'
+      # https://github.com/actions/cache/blame/ccf96194800dbb7b7094edcd5a7cf3ec3c270f10/examples.md#L185-L200
+      - name: Get yarn cache directory path
+        id: yarn-cache-dir-path
+        run: echo "::set-output name=dir::$(yarn cache dir)"
+      - name: yarn cache
+        uses: actions/cache@v1
+        id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+        with:
+          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
       - name: Build JS
         run: |
           yarn install --frozen-lockfile
           yarn build
           git add inst/assets
           git commit -m 'yarn build (GitHub Actions)' || echo "No yarn changes to commit"
+
+      - name: Check node build
+        run: |
+          ./tools/checkJSCurrent.sh
+
 
       - name: Code Coverage
         run: |

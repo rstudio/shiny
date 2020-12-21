@@ -67,7 +67,7 @@ jobs:
         run: |
           pak::local_system_requirements(execute = TRUE)
 
-        - name: Install dependencies
+      - name: Install dependencies
         shell: Rscript {0}
         run: |
           pak::pkg_install("curl") # install before installing deps

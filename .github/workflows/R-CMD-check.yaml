@@ -45,38 +45,36 @@ jobs:
       - uses: actions/checkout@v2
 
       - uses: r-lib/actions/setup-r@master
+        id: install-r
         with:
           r-version: ${{ matrix.config.r }}
 
       - uses: r-lib/actions/setup-pandoc@master
 
-      - name: Query dependencies
-        run: |
-          install.packages('remotes')
-          saveRDS(remotes::dev_package_deps(dependencies = TRUE), ".github/depends.Rds", version = 2)
-          writeLines(sprintf("R-%i.%i", getRversion()$major, getRversion()$minor), ".github/R-version")
+      - name: Install pak and query dependencies
         shell: Rscript {0}
+        run: |
+          install.packages("pak", repos = "https://r-lib.github.io/p/pak/dev/")
+          saveRDS(pak::pkg_deps_tree("local::.", dependencies = TRUE), ".github/r-depends.rds")
 
       - name: Cache R packages
-        if: runner.os != 'Windows'
         uses: actions/cache@v2
         with:
           path: ${{ env.R_LIBS_USER }}
-          key: ${{ runner.os }}-${{ hashFiles('.github/R-version') }}-1-${{ hashFiles('.github/depends.Rds') }}
-          restore-keys: ${{ runner.os }}-${{ hashFiles('.github/R-version') }}-1-
+          key: ${{ runner.os }}-${{ steps.install-r.outputs.installed-r-version }}-1-${{ hashFiles('.github/r-depends.rds') }}
+          restore-keys: ${{ runner.os }}-${{ steps.install-r.outputs.installed-r-version }}-1-
 
       - name: Install system dependencies
         if: runner.os == 'Linux'
+        shell: Rscript {0}
         run: |
-          while read -r cmd
-          do
-            eval sudo $cmd
-          done < <(Rscript -e 'writeLines(remotes::system_requirements("ubuntu", "16.04"))')
+          pak::local_system_requirements(execute = TRUE)
 
       - name: Install dependencies
         run: |
-          remotes::install_deps(dependencies = TRUE)
-          remotes::install_cran("rcmdcheck")
+          pak::pkg_install("curl") # install before installing deps
+          pak::local_install_dev_deps(upgrade = TRUE)
+          pak::pkg_install("rcmdcheck")
         shell: Rscript {0}
 
       - name: Find PhantomJS path
@@ -87,8 +85,8 @@ jobs:
         uses: actions/cache@v1
         with:
           path: ${{ steps.phantomjs.outputs.path }}
-          key: ${{ runner.os }}-phantomjs
-          restore-keys: ${{ runner.os }}-phantomjs
+          key: ${{ matrix.config.os }}-phantomjs
+          restore-keys: ${{ matrix.config.os }}-phantomjs
       - name: Install PhantomJS
         run: >
           Rscript
@@ -116,7 +114,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v2
         with:
-          name: ${{ runner.os }}-r${{ matrix.config.r }}-results
+          name: ${{ matrix.config.os }}-r${{ matrix.config.r }}-results
           path: check
 
       - name: Fix path for Windows caching

@@ -128,12 +128,6 @@ jobs:
           ./tools/checkJSCurrent.sh
 
 
-      - name: Code Coverage
-        shell: Rscript {0}
-        run: |
-          remotes::install_cran("covr")
-          covr::codecov(token = "${{secrets.CODECOV_TOKEN}}")
-
       - name: Git Push (PR)
         uses: r-lib/actions/pr-push@master
         if: github.event_name == 'pull_request'

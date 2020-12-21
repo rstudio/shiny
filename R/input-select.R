@@ -197,7 +197,9 @@ selectizeInput <- function(inputId, ..., options = NULL, width = NULL) {
 
 # given a select input and its id, selectize it
 selectizeIt <- function(inputId, select, options, nonempty = FALSE) {
-  if (is.null(options)) {
+  if (length(options) == 0) {
+    # For NULL and empty unnamed list, replace with an empty named list, so that
+    # it will get translated to {} in JSON later on.
     options <- empty_named_list()
   }
 

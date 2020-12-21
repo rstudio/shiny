@@ -1,0 +1,122 @@
+on:
+  push:
+    branches:
+      - master
+      - ghactions
+  pull_request:
+    branches:
+      - master
+
+name: Rituals
+
+jobs:
+  # # added so that the workflow doesn't fail.
+  # always_runner:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Always run
+  #       run: echo "This job is used to prevent the workflow status from showing as failed when all other jobs are skipped"
+
+  Rituals:
+    name: Rituals
+    # if: false
+    runs-on: ${{ matrix.config.os }}
+
+
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+        - { os: ubuntu-16.04, r: '4.0', rspm: "https://packagemanager.rstudio.com/all/__linux__/xenial/latest"}
+
+    env:
+      R_REMOTES_NO_ERRORS_FROM_WARNINGS: true
+      RSPM: ${{ matrix.config.rspm }}
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+
+    steps:
+      - uses: actions/checkout@v1
+
+      - uses: r-lib/actions/pr-fetch@master
+        name: Git Pull (PR)
+        if: github.event_name == 'pull_request'
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: r-lib/actions/setup-r@master
+        with:
+          r-version: ${{ matrix.config.r }}
+
+      - uses: r-lib/actions/setup-pandoc@master
+
+      - name: Git Config
+        run: |
+          git config user.name "${GITHUB_ACTOR}"
+          git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+
+
+      - name: Query dependencies
+        run: |
+          install.packages('remotes')
+          saveRDS(remotes::dev_package_deps(dependencies = TRUE), ".github/depends.Rds", version = 2)
+          writeLines(sprintf("R-%i.%i", getRversion()$major, getRversion()$minor), ".github/R-version")
+        shell: Rscript {0}
+
+      - name: Cache R packages
+        if: runner.os != 'Windows'
+        uses: actions/cache@v2
+        with:
+          path: ${{ env.R_LIBS_USER }}
+          key: ${{ runner.os }}-${{ hashFiles('.github/R-version') }}-1-${{ hashFiles('.github/depends.Rds') }}
+          restore-keys: ${{ runner.os }}-${{ hashFiles('.github/R-version') }}-1-
+
+      - name: Install system dependencies
+        if: runner.os == 'Linux'
+        run: |
+          while read -r cmd
+          do
+            eval sudo $cmd
+          done < <(Rscript -e 'writeLines(remotes::system_requirements("ubuntu", "16.04"))')
+      - name: Install dependencies
+        run: |
+          remotes::install_deps(dependencies = TRUE)
+        shell: Rscript {0}
+
+      - name: Session info
+        run: |
+          options(width = 100)
+          pkgs <- installed.packages()[, "Package"]
+          sessioninfo::session_info(pkgs, include_base = TRUE)
+        shell: Rscript {0}
+
+      - name: Document
+        run: |
+          Rscript -e 'remotes::install_cran("roxygen2")'
+          Rscript -e 'roxygen2::roxygenise()'
+          git add man/\* NAMESPACE
+          git commit -m 'Document (GitHub Actions)' || echo "No documentation changes to commit"
+
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '12.x'
+      - name: Build JS
+        run: |
+          yarn install --frozen-lockfile
+          yarn build
+          git add inst/assets
+          git commit -m 'yarn build (GitHub Actions)' || echo "No yarn changes to commit"
+
+      - name: Code Coverage
+        run: |
+          Rscript -e 'remotes::install_cran("covr")'
+          Rscript -e 'covr::codecov(token = "${{secrets.CODECOV_TOKEN}}")'
+
+      - name: Git Push (PR)
+        uses: r-lib/actions/pr-push@master
+        if: github.event_name == 'pull_request'
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Git Push (MASTER)
+        if: github.event_name == 'push'
+        run: |
+          git push https://${{github.actor}}:${{secrets.GITHUB_TOKEN}}@github.com/${{github.repository}}.git HEAD:${{ github.ref }} || echo "No changes to push"

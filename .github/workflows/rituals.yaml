@@ -54,13 +54,12 @@ jobs:
           git config user.name "${GITHUB_ACTOR}"
           git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
 
-
       - name: Query dependencies
+        shell: Rscript {0}
         run: |
           install.packages('remotes')
           saveRDS(remotes::dev_package_deps(dependencies = TRUE), ".github/depends.Rds", version = 2)
           writeLines(sprintf("R-%i.%i", getRversion()$major, getRversion()$minor), ".github/R-version")
-        shell: Rscript {0}
 
       - name: Cache R packages
         if: runner.os != 'Windows'
@@ -78,21 +77,22 @@ jobs:
             eval sudo $cmd
           done < <(Rscript -e 'writeLines(remotes::system_requirements("ubuntu", "16.04"))')
       - name: Install dependencies
+        shell: Rscript {0}
         run: |
           remotes::install_deps(dependencies = TRUE)
-        shell: Rscript {0}
+          remotes::install_cran("sessioninfo")
+          remotes::install_cran("devtools")
 
       - name: Session info
+        shell: Rscript {0}
         run: |
           options(width = 100)
           pkgs <- installed.packages()[, "Package"]
           sessioninfo::session_info(pkgs, include_base = TRUE)
-        shell: Rscript {0}
 
       - name: Document
         run: |
-          Rscript -e 'remotes::install_cran("roxygen2")'
-          Rscript -e 'roxygen2::roxygenise()'
+          Rscript -e 'devtools::document()'
           git add man/\* NAMESPACE
           git commit -m 'Document (GitHub Actions)' || echo "No documentation changes to commit"
 
@@ -128,9 +128,10 @@ jobs:
 
 
       - name: Code Coverage
+        shell: Rscript {0}
         run: |
-          Rscript -e 'remotes::install_cran("covr")'
-          Rscript -e 'covr::codecov(token = "${{secrets.CODECOV_TOKEN}}")'
+          remotes::install_cran("covr")
+          covr::codecov(token = "${{secrets.CODECOV_TOKEN}}")
 
       - name: Git Push (PR)
         uses: r-lib/actions/pr-push@master

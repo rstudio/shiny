@@ -12,4 +12,4 @@ README.html
 tools/yarn-error.log
 
 # GHA remotes installation
-.github/r-depends.Rds
+.github/r-depends.rds

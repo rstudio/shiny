@@ -67,6 +67,13 @@ jobs:
         run: |
           pak::local_system_requirements(execute = TRUE)
 
+      # Install Cairo system dependencies
+      - name: Mac systemdeps
+        if: runner.os == 'macOS'
+        run: |
+          brew cask install xquartz
+          brew install cairo
+
       - name: Install dependencies
         shell: Rscript {0}
         run: |

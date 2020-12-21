@@ -117,9 +117,10 @@ jobs:
             ${{ runner.os }}-yarn-
       - name: Build JS
         run: |
+          cd tools
           yarn install --frozen-lockfile
           yarn build
-          git add inst/assets
+          git add ../inst
           git commit -m 'yarn build (GitHub Actions)' || echo "No yarn changes to commit"
 
       - name: Check node build

@@ -125,7 +125,10 @@ shinyAppDir <- function(appDir, options=list()) {
   } else if (file.exists.ci(appDir, "app.R")) {
     shinyAppDir_appR("app.R", appDir, options = options)
   } else {
-    stop("App dir must contain either app.R or server.R.")
+    rlang::abort(
+      "App dir must contain either app.R or server.R.",
+      class = "shiny_app_dir_missing_file"
+    )
   }
 }
 

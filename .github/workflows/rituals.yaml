@@ -37,7 +37,6 @@ jobs:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: r-lib/actions/setup-r@master
-        id: install-r
         with:
           r-version: ${{ matrix.config.r }}
 
@@ -48,40 +47,34 @@ jobs:
           git config user.name "${GITHUB_ACTOR}"
           git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
 
-      - name: Install pak and query dependencies
+      - name: Query dependencies
         shell: Rscript {0}
         run: |
-          install.packages("pak", repos = "https://r-lib.github.io/p/pak/dev/")
-          saveRDS(pak::pkg_deps_tree("local::.", dependencies = TRUE), ".github/r-depends.rds")
+          install.packages('remotes')
+          saveRDS(remotes::dev_package_deps(dependencies = TRUE), ".github/depends.Rds", version = 2)
+          writeLines(sprintf("R-%i.%i", getRversion()$major, getRversion()$minor), ".github/R-version")
 
       - name: Cache R packages
         uses: actions/cache@v2
         with:
           path: ${{ env.R_LIBS_USER }}
-          key: ${{ matrix.config.os }}-${{ steps.install-r.outputs.installed-r-version }}-1-${{ hashFiles('.github/r-depends.rds') }}
-          restore-keys: ${{ matrix.config.os }}-${{ steps.install-r.outputs.installed-r-version }}-1-
+          key: ${{ matrix.config.os }}-${{ hashFiles('.github/R-version') }}-1-${{ hashFiles('.github/depends.Rds') }}
+          restore-keys: ${{ matrix.config.os }}-${{ hashFiles('.github/R-version') }}-1-
 
       - name: Install system dependencies
         if: runner.os == 'Linux'
-        shell: Rscript {0}
         run: |
-          pak::local_system_requirements(execute = TRUE)
-
-      # Install Cairo system dependencies
-      - name: Mac systemdeps
-        if: runner.os == 'macOS'
-        run: |
-          brew cask install xquartz
-          brew install cairo
-
+          while read -r cmd
+          do
+            eval sudo $cmd
+          done < <(Rscript -e 'writeLines(remotes::system_requirements("ubuntu", "16.04"))')
       - name: Install dependencies
         shell: Rscript {0}
         run: |
-          pak::pkg_install("curl") # install before installing deps
-          pak::local_install_dev_deps(upgrade = TRUE)
-          pak::pkg_install("rcmdcheck")
-          pak::pkg_install("sessioninfo")
-          pak::pkg_install("devtools")
+          remotes::install_cran("curl") # install before installing deps
+          remotes::install_deps(dependencies = TRUE)
+          remotes::install_cran("sessioninfo")
+          remotes::install_cran("devtools")
 
       - name: Session info
         shell: Rscript {0}

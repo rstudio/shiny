@@ -44,17 +44,17 @@ Developer messages}
 
 \item{code}{Code to execute with the temporary Dev Mode options set}
 
-\item{message}{Developer Mode message to be sent to \code{\link[rlang:abort]{rlang::inform()}}}
+\item{message}{Developer Mode message to be sent to \code{\link[rlang:inform]{rlang::inform()}}}
 
 \item{.frequency}{Frequency of the Developer Mode message used with
-\code{\link[rlang:abort]{rlang::inform()}}. Defaults to once every 8 hours.}
+\code{\link[rlang:inform]{rlang::inform()}}. Defaults to once every 8 hours.}
 
-\item{.frequency_id}{\code{\link[rlang:abort]{rlang::inform()}} message identifier. Defaults to
+\item{.frequency_id}{\code{\link[rlang:inform]{rlang::inform()}} message identifier. Defaults to
 \code{message}.}
 
-\item{.file}{Output connection for \code{\link[rlang:abort]{rlang::inform()}}. Defaults to \code{\link[=stderr]{stderr()}}}
+\item{.file}{Output connection for \code{\link[rlang:inform]{rlang::inform()}}. Defaults to \code{\link[=stderr]{stderr()}}}
 
-\item{...}{Parameters passed to \code{\link[rlang:abort]{rlang::inform()}}}
+\item{...}{Parameters passed to \code{\link[rlang:inform]{rlang::inform()}}}
 
 \item{name}{Name of option to look for in \code{options()}}
 
@@ -191,7 +191,7 @@ is not set, the default value changes depending on the Dev Mode.
 
 When notifying the developer that the default value has changed, we strongly
 recommend displaying a message (\code{devmode_message}) to \code{stderr()} once every 8
-hours using \code{\link[rlang:abort]{rlang::inform()}}. This will keep the author up to date as to
+hours using \code{\link[rlang:inform]{rlang::inform()}}. This will keep the author up to date as to
 which Dev Mode options are being altered. To allow developers a chance to
 disable Dev Mode messages, the message should be skipped if
 \code{getOption("shiny.devmode.verbose", TRUE)} is not \code{TRUE}.\if{html}{\out{<div class="r">}}\preformatted{get_devmode_option <- function(name, default = NULL, devmode_default, devmode_message) \{

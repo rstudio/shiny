@@ -67,7 +67,7 @@ data object, the cached reactive only needs to hash the timestamp.\if{html}{\out
   bindCache(\{ extract_most_recent_time(bigdata()) \})
 }\if{html}{\out{</div>}}
 
-For computations that are vert slow, it often makes sense to pair
+For computations that are very slow, it often makes sense to pair
 \code{\link[=bindCache]{bindCache()}} with \code{\link[=bindEvent]{bindEvent()}} so that no computation is performed until
 the user explicitly requests it (for more, see the Details section of
 \code{\link[=bindEvent]{bindEvent()}}).
@@ -154,7 +154,7 @@ persists beyond the current R session.
 To use different settings for an application-scoped cache, you can call
 \code{\link[=shinyOptions]{shinyOptions()}} at the top of your app.R, server.R, or
 global.R. For example, this will create a cache with 500 MB of space
-instead of the default 200 MB:\preformatted{shinyOptions(cache = cachem::cache_mem(size = 500e6))
+instead of the default 200 MB:\preformatted{shinyOptions(cache = cachem::cache_mem(max_size = 500e6))
 }
 
 To use different settings for a session-scoped cache, you can set
@@ -163,7 +163,7 @@ a 200 MB memory cache for each session, but you can replace it with
 something different. To use the session-scoped cache, you must also call
 \code{bindCache()} with \code{cache="session"}. This will create a 100 MB cache for
 the session:\preformatted{function(input, output, session) \{
-  session$cache <- cachem::cache_mem(size = 100e6)
+  session$cache <- cachem::cache_mem(max_size = 100e6)
   ...
 \}
 }
@@ -238,7 +238,7 @@ reactive must therefore expect it to return a promise.
 
 If you've implemented your own \verb{render*()} function, you may need to
 provide a \code{cacheHint} to \code{\link[=createRenderFunction]{createRenderFunction()}} (or
-\code{\link[htmlwidgets:htmlwidgets-shiny]{htmlwidgets::shinyRenderWidget()}}, if you've authored an htmlwidget) in
+\code{\link[htmlwidgets:shinyRenderWidget]{htmlwidgets::shinyRenderWidget()}}, if you've authored an htmlwidget) in
 order for \code{bindCache()} to correctly compute a cache key.
 
 The potential problem is a cache collision. Consider the following:\preformatted{output$x1 <- renderText(\{ input$x \}) \%>\% bindCache(input$x)

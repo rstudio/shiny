@@ -38,7 +38,7 @@ way.
 }
 \details{
 For output, it will try to use the following devices, in this order:
-quartz (via \code{\link[grDevices:png]{grDevices::png()}}), then \code{\link[Cairo:Cairo]{Cairo::CairoPNG()}},
+quartz (via \code{\link[grDevices:png]{grDevices::png()}}), then \code{\link[Cairo:CairoPNG]{Cairo::CairoPNG()}},
 and finally \code{\link[grDevices:png]{grDevices::png()}}. This is in order of quality of
 output. Notably, plain \code{png} output on Linux and Windows may not
 antialias some point shapes, resulting in poor quality output.

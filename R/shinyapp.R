@@ -113,7 +113,10 @@ shinyApp <- function(ui, server, onStart=NULL, options=list(),
 #' @export
 shinyAppDir <- function(appDir, options=list()) {
   if (!utils::file_test('-d', appDir)) {
-    stop("No Shiny application exists at the path \"", appDir, "\"")
+    rlang::abort(
+      paste0("No Shiny application exists at the path \"", appDir, "\""),
+      class = "invalidShinyAppDir"
+    )
   }
 
   # In case it's a relative path, convert to absolute (so we're not adversely
@@ -127,7 +130,7 @@ shinyAppDir <- function(appDir, options=list()) {
   } else {
     rlang::abort(
       "App dir must contain either app.R or server.R.",
-      class = "shiny_app_dir_missing_file"
+      class = "invalidShinyAppDir"
     )
   }
 }

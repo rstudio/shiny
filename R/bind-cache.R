@@ -62,7 +62,7 @@ utils::globalVariables(".GenericCallEnv", add = TRUE)
 #'   bindCache({ extract_most_recent_time(bigdata()) })
 #' ```
 #'
-#' For computations that are vert slow, it often makes sense to pair
+#' For computations that are very slow, it often makes sense to pair
 #' [bindCache()] with [bindEvent()] so that no computation is performed until
 #' the user explicitly requests it (for more, see the Details section of
 #' [bindEvent()]).
@@ -155,7 +155,7 @@ utils::globalVariables(".GenericCallEnv", add = TRUE)
 #'   instead of the default 200 MB:
 #'
 #'   ```
-#'   shinyOptions(cache = cachem::cache_mem(size = 500e6))
+#'   shinyOptions(cache = cachem::cache_mem(max_size = 500e6))
 #'   ```
 #'
 #'   To use different settings for a session-scoped cache, you can set
@@ -167,7 +167,7 @@ utils::globalVariables(".GenericCallEnv", add = TRUE)
 #'
 #'   ```
 #'   function(input, output, session) {
-#'     session$cache <- cachem::cache_mem(size = 100e6)
+#'     session$cache <- cachem::cache_mem(max_size = 100e6)
 #'     ...
 #'   }
 #'   ```

@@ -62,7 +62,7 @@ utils::globalVariables(".GenericCallEnv", add = TRUE)
 #'   bindCache({ extract_most_recent_time(bigdata()) })
 #' ```
 #'
-#' For computations that are vert slow, it often makes sense to pair
+#' For computations that are very slow, it often makes sense to pair
 #' [bindCache()] with [bindEvent()] so that no computation is performed until
 #' the user explicitly requests it (for more, see the Details section of
 #' [bindEvent()]).

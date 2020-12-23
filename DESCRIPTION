@@ -119,7 +119,6 @@ Remotes:
     rstudio/promises,
     rstudio/sass,
     rstudio/bslib,
-    rstudio/webdriver,
     rstudio/shinytest,
     r-lib/cachem
 URL: http://shiny.rstudio.com

@@ -70,12 +70,14 @@ jobs:
         run: |
           pak::local_system_requirements(execute = TRUE)
 
-      # Install Cairo system dependencies
+      # xquartz and cairo are needed for Cairo package.
+      # harfbuzz and fribidi are needed for textshaping package.
       - name: Mac systemdeps
         if: runner.os == 'macOS'
         run: |
           brew cask install xquartz
           brew install cairo
+          brew install harfbuzz fribidi
 
       - name: Install dependencies
         run: |

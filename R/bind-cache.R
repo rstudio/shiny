@@ -155,7 +155,7 @@ utils::globalVariables(".GenericCallEnv", add = TRUE)
 #'   instead of the default 200 MB:
 #'
 #'   ```
-#'   shinyOptions(cache = cachem::cache_mem(size = 500e6))
+#'   shinyOptions(cache = cachem::cache_mem(max_size = 500e6))
 #'   ```
 #'
 #'   To use different settings for a session-scoped cache, you can set
@@ -167,7 +167,7 @@ utils::globalVariables(".GenericCallEnv", add = TRUE)
 #'
 #'   ```
 #'   function(input, output, session) {
-#'     session$cache <- cachem::cache_mem(size = 100e6)
+#'     session$cache <- cachem::cache_mem(max_size = 100e6)
 #'     ...
 #'   }
 #'   ```

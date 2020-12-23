@@ -238,7 +238,7 @@ reactive must therefore expect it to return a promise.
 
 If you've implemented your own \verb{render*()} function, you may need to
 provide a \code{cacheHint} to \code{\link[=createRenderFunction]{createRenderFunction()}} (or
-\code{\link[htmlwidgets:shinyRenderWidget]{htmlwidgets::shinyRenderWidget()}}, if you've authored an htmlwidget) in
+\code{\link[htmlwidgets:htmlwidgets-shiny]{htmlwidgets::shinyRenderWidget()}}, if you've authored an htmlwidget) in
 order for \code{bindCache()} to correctly compute a cache key.
 
 The potential problem is a cache collision. Consider the following:\preformatted{output$x1 <- renderText(\{ input$x \}) \%>\% bindCache(input$x)

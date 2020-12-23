@@ -30,7 +30,7 @@ value of \code{evict}. Use \code{Inf} for no limit of number of items.}
 when a cache pruning occurs. Currently, \code{"lru"} and \code{"fifo"} are supported.}
 
 \item{missing}{A value to return when \code{get(key)} is called but the key is not
-present in the cache. The default is a \code{\link[cachem:key_missing]{key_missing()}} object. It is
+present in the cache. The default is a \code{\link[cachem:reexports]{key_missing()}} object. It is
 actually an expression that is evaluated each time there is a cache miss.
 See section Missing keys for more information.}
 

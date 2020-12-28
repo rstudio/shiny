@@ -62,24 +62,15 @@ jobs:
           restore-keys: ${{ matrix.config.os }}-${{ steps.install-r.outputs.installed-r-version }}-1-
 
       - name: Install system dependencies
-        if: runner.os == 'Linux'
+        # if: runner.os == 'Linux'
         shell: Rscript {0}
         run: |
           pak::local_system_requirements(execute = TRUE)
 
-      # Install Cairo system dependencies
-      - name: Mac systemdeps
-        if: runner.os == 'macOS'
-        run: |
-          brew cask install xquartz
-          brew install cairo
-
       - name: Install dependencies
         shell: Rscript {0}
         run: |
-          pak::pkg_install("curl") # install before installing deps
           pak::local_install_dev_deps(upgrade = TRUE)
-          pak::pkg_install("rcmdcheck")
           pak::pkg_install("sessioninfo")
           pak::pkg_install("devtools")
 

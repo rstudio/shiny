@@ -58,7 +58,7 @@ bootstrapPage <- function(..., title = NULL, responsive = deprecated(), theme = 
   # the tagList() contents to avoid breaking user code that makes assumptions
   # about the return value https://github.com/rstudio/shiny/issues/3235
   if (is_bs_theme(theme)) {
-    ui <- tagList(bootstrapLib(theme), ui)
+    ui <- do.call(tagList, c(bootstrapLib(theme), ui))
   } else {
     ui <- attachDependencies(ui, bootstrapLib())
   }

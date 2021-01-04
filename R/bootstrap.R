@@ -43,19 +43,27 @@ bootstrapPage <- function(..., title = NULL, responsive = deprecated(), theme = 
   }
 
   ui <- tagList(
-    bootstrapLib(theme),
     if (!is.null(title)) tags$head(tags$title(title)),
-    # TODO: throw better error when length > 1?
     if (is.character(theme)) {
-      tags$head(tags$link(rel="stylesheet", type="text/css", href = theme))
+      if (length(theme) > 1) stop("`theme` must point to a single CSS file, not multiple files.")
+      tags$head(tags$link(rel="stylesheet", type="text/css", href=theme))
     },
     # remainder of tags passed to the function
     list(...)
   )
 
-  ui <- setLang(ui, lang)
+  # If theme is a bslib::bs_theme() object, bootstrapLib() needs to come first
+  # (so other tags, when rendered via tagFunction(), know about the relevant
+  # theme). However, if theme is anything else, we intentionally avoid changing
+  # the tagList() contents to avoid breaking user code that makes assumptions
+  # about the return value https://github.com/rstudio/shiny/issues/3235
+  if (is_bs_theme(theme)) {
+    ui <- tagList(bootstrapLib(theme), ui)
+  } else {
+    ui <- attachDependencies(ui, bootstrapLib())
+  }
 
-  return(ui)
+  setLang(ui, lang)
 }
 
 setLang <- function(ui, lang) {

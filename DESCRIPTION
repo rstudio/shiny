@@ -1,7 +1,7 @@
 Package: shiny
 Type: Package
 Title: Web Application Framework for R
-Version: 1.5.0.9007
+Version: 1.6.0
 Authors@R: c(
     person("Winston", "Chang", role = c("aut", "cre"), email = "winston@rstudio.com"),
     person("Joe", "Cheng", role = "aut", email = "joe@rstudio.com"),
@@ -114,13 +114,6 @@ Suggests:
     ragg,
     showtext,
     sass
-Remotes:
-    rstudio/htmltools,
-    rstudio/promises,
-    rstudio/sass,
-    rstudio/bslib,
-    rstudio/shinytest,
-    r-lib/cachem
 URL: http://shiny.rstudio.com
 BugReports: https://github.com/rstudio/shiny/issues
 Collate:

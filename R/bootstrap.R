@@ -42,7 +42,7 @@ bootstrapPage <- function(..., title = NULL, responsive = deprecated(), theme = 
     )
   }
 
-  ui <- tagList(
+  args <- list(
     if (!is.null(title)) tags$head(tags$title(title)),
     if (is.character(theme)) {
       if (length(theme) > 1) stop("`theme` must point to a single CSS file, not multiple files.")
@@ -58,8 +58,10 @@ bootstrapPage <- function(..., title = NULL, responsive = deprecated(), theme = 
   # the tagList() contents to avoid breaking user code that makes assumptions
   # about the return value https://github.com/rstudio/shiny/issues/3235
   if (is_bs_theme(theme)) {
-    ui <- do.call(tagList, c(bootstrapLib(theme), ui))
+    args <- c(bootstrapLib(theme), args)
+    ui <- do.call(tagList, args)
   } else {
+    ui <- do.call(tagList, args)
     ui <- attachDependencies(ui, bootstrapLib())
   }
 

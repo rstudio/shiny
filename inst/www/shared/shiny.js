@@ -9,7 +9,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 (function () {
   var $ = jQuery;
   var exports = window.Shiny = window.Shiny || {};
-  exports.version = "1.5.0.9006"; // Version number inserted by Grunt
+  exports.version = "1.5.0.9007"; // Version number inserted by Grunt
 
   var origPushState = window.history.pushState;
 

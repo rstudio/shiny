@@ -114,7 +114,7 @@ $font-family: Arial, sans-serif !default;
     border: $handle_border;
     background-color: $handle_color;
     box-shadow: $handle_box_shadow;
-    @include border-radius-shim($handle_width);
+    border-radius: $handle_width;
 
     &.state_hover,
     &:hover {

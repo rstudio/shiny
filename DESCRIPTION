@@ -121,7 +121,7 @@ Remotes:
     rstudio/bslib,
     rstudio/shinytest,
     r-lib/cachem
-URL: http://shiny.rstudio.com
+URL: https://shiny.rstudio.com/
 BugReports: https://github.com/rstudio/shiny/issues
 Collate:
     'globals.R'

@@ -777,7 +777,7 @@ Sometimes in a Shiny app, arbitrary HTML UI may need to be created on-the-fly in
 
 See [this simple demo app](https://gallery.shinyapps.io/111-insert-ui/) of how one could use `insertUI` and `removeUI` to insert and remove text elements using a queue. Also see [this other app](https://gallery.shinyapps.io/insertUI/) that demonstrates how to insert and remove a few common Shiny input objects. Finally, [this app](https://gallery.shinyapps.io/insertUI-modules/) shows how to dynamically insert modules using `insertUI`.
 
-For more, read [our article](http://shiny.rstudio.com/articles/dynamic-ui.html) about dynamic UI generation and the reference documentation about [`insertUI`](http://shiny.rstudio.com/reference/shiny/latest/insertUI.html) and [`removeUI`](http://shiny.rstudio.com/reference/shiny/latest/removeUI.html).
+For more, read [our article](https://shiny.rstudio.com/articles/dynamic-ui.html) about dynamic UI generation and the reference documentation about [`insertUI`](https://shiny.rstudio.com/reference/shiny/latest/insertUI.html) and [`removeUI`](https://shiny.rstudio.com/reference/shiny/latest/insertUI.html).
 
 ## Documentation for connecting to an external database
 

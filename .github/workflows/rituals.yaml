@@ -73,6 +73,7 @@ jobs:
           pak::local_install_dev_deps(upgrade = TRUE)
           pak::pkg_install("sessioninfo")
           pak::pkg_install("devtools")
+          pak::pkg_install("r-lib/urlchecker")
 
       - name: Session info
         shell: Rscript {0}
@@ -80,6 +81,21 @@ jobs:
           options(width = 100)
           pkgs <- installed.packages()[, "Package"]
           sessioninfo::session_info(pkgs, include_base = TRUE)
+
+      - name: Url redirects
+        run: |
+          Rscript -e 'urlchecker::url_update()'
+          # throw an error if man files were updated
+          if [ -n "$(git status --porcelain man)" ]
+          then
+            git status --porcelain
+            >&2 echo "Updated links found in files above"
+            >&2 echo 'Run `urlchecker::url_update()` to fix links locally'
+            exit 1
+          fi
+          # Add locally changed urls
+          git add .
+          git commit -m 'Update links (GitHub Actions)' || echo "No link changes to commit"
 
       - name: Document
         run: |

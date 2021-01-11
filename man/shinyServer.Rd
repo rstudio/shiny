@@ -31,7 +31,7 @@ the Shiny application's page. It must take an \code{input} and an
 optional \code{session} parameter, which is used when greater control is
 needed.
 
-See the \href{http://rstudio.github.com/shiny/tutorial/}{tutorial} for more
+See the \href{https://rstudio.github.io/shiny/tutorial/}{tutorial} for more
 on how to write a server function.
 }
 \examples{

@@ -18,7 +18,7 @@ that file path. (Reactive values and functions may be used from this
 function.)}
 
 \item{contentType}{A string of the download's
-\href{http://en.wikipedia.org/wiki/Internet_media_type}{content type}, for
+\href{https://en.wikipedia.org/wiki/Internet_media_type}{content type}, for
 example \code{"text/csv"} or \code{"image/png"}. If \code{NULL} or
 \code{NA}, the content type will be guessed based on the filename
 extension, or \code{application/octet-stream} if the extension is unknown.}

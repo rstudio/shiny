@@ -1331,7 +1331,7 @@ shiny 0.9.0
 
 * Added `theme` parameter to page building functions for specifying alternate bootstrap css styles.
 
-* Added `icon()` function for embedding icons from the [font awesome](https://fontawesome.com?from=io) icon library
+* Added `icon()` function for embedding icons from the [font awesome](https://fontawesome.com) icon library
 
 * Added `makeReactiveBinding` function to turn a "regular" variable into a reactive one (i.e. reading the variable makes the current reactive context dependent on it, and setting the variable is a source of reactivity).
 

@@ -1552,7 +1552,7 @@ downloadLink <- function(outputId, label="Download", class=NULL, ...) {
 #' @return An icon element
 #'
 #' @seealso For lists of available icons, see
-#'   [http://fontawesome.io/icons](http://fontawesome.io/icons) and
+#'   [https://fontawesome.com/icons](https://fontawesome.com/icons) and
 #'   [https://getbootstrap.com/components/#glyphicons](https://getbootstrap.com/components/#glyphicons).
 #'
 #'

@@ -27,6 +27,9 @@ test_that("hybrid_chain preserves visibility", {
 
 
 test_that("hybrid_chain preserves visibility - async", {
+  # only test if promises handles visibility
+  skip_if_not_installed("promises", "1.1.1.9001")
+
   res <- NULL
   hybrid_chain(
     promise_resolve(1),

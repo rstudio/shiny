@@ -85,7 +85,7 @@ Imports:
     R6 (>= 2.0),
     sourcetools,
     later (>= 1.0.0),
-    promises (>= 1.1.1.9001),
+    promises (>= 1.1.0),
     tools,
     crayon,
     rlang (>= 0.4.9),

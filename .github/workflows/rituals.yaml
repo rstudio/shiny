@@ -73,7 +73,6 @@ jobs:
           pak::local_install_dev_deps(upgrade = TRUE)
           pak::pkg_install("sessioninfo")
           pak::pkg_install("devtools")
-          pak::pkg_install("r-lib/urlchecker")
 
       - name: Session info
         shell: Rscript {0}
@@ -83,8 +82,10 @@ jobs:
           sessioninfo::session_info(pkgs, include_base = TRUE)
 
       - name: Url redirects
+        # only perform if in an RC branch (`rc-vX.Y.Z`)
+        if: ${{ github.event_name == 'push' && contains(github.ref, '/rc-v'}}
         run: |
-          Rscript -e 'urlchecker::url_update()'
+          Rscript -e 'pak::pkg_install("r-lib/urlchecker"); urlchecker::url_update()'
           # throw an error if man files were updated
           if [ -n "$(git status --porcelain man)" ]
           then

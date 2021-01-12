@@ -83,7 +83,7 @@ jobs:
 
       - name: Url redirects
         # only perform if in an RC branch (`rc-vX.Y.Z`)
-        if: ${{ github.event_name == 'push' && contains(github.ref, '/rc-v'}}
+        if: ${{ github.event_name == 'push' && contains(github.ref, '/rc-v') }}
         run: |
           Rscript -e 'pak::pkg_install("r-lib/urlchecker"); urlchecker::url_update()'
           # throw an error if man files were updated

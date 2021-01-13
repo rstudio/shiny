@@ -50,7 +50,7 @@ alternative to low-level row and column functions you can also use
 higher-level layout functions like \code{\link[=sidebarLayout]{sidebarLayout()}}.
 }
 \note{
-See the \href{http://shiny.rstudio.com/articles/layout-guide.html}{ Shiny-Application-Layout-Guide} for additional details on laying out fluid
+See the \href{https://shiny.rstudio.com/articles/layout-guide.html}{ Shiny-Application-Layout-Guide} for additional details on laying out fluid
 pages.
 }
 \examples{

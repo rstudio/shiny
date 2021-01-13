@@ -4,7 +4,7 @@ NULL
 #' Create a Bootstrap page
 #'
 #' Create a Shiny UI page that loads the CSS and JavaScript for
-#' [Bootstrap](http://getbootstrap.com/), and has no content in the page
+#' [Bootstrap](https://getbootstrap.com/), and has no content in the page
 #' body (other than what you provide).
 #'
 #' This function is primarily intended for users who are proficient in HTML/CSS,
@@ -1539,12 +1539,12 @@ downloadLink <- function(outputId, label="Download", class=NULL, ...) {
 #' @param name Name of icon. Icons are drawn from the
 #'   [Font Awesome Free](https://fontawesome.com/) (currently icons from
 #'   the v5.13.0 set are supported with the v4 naming convention) and
-#'   [Glyphicons](http://getbootstrap.com/components/#glyphicons)
+#'   [Glyphicons](https://getbootstrap.com/components/#glyphicons)
 #'   libraries. Note that the "fa-" and "glyphicon-" prefixes should not be used
 #'   in icon names (i.e. the "fa-calendar" icon should be referred to as
 #'   "calendar")
 #' @param class Additional classes to customize the style of the icon (see the
-#'   [usage examples](http://fontawesome.io/examples/) for details on
+#'   [usage examples](https://fontawesome.com/how-to-use) for details on
 #'   supported styles).
 #' @param lib Icon library to use ("font-awesome" or "glyphicon")
 #' @param ... Arguments passed to the `<i>` tag of [htmltools::tags]
@@ -1552,8 +1552,8 @@ downloadLink <- function(outputId, label="Download", class=NULL, ...) {
 #' @return An icon element
 #'
 #' @seealso For lists of available icons, see
-#'   [http://fontawesome.io/icons/](http://fontawesome.io/icons/) and
-#'   [http://getbootstrap.com/components/#glyphicons](http://getbootstrap.com/components/#glyphicons).
+#'   [https://fontawesome.com/icons](https://fontawesome.com/icons) and
+#'   [https://getbootstrap.com/components/#glyphicons](https://getbootstrap.com/components/#glyphicons).
 #'
 #'
 #' @examples

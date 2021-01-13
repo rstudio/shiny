@@ -710,7 +710,7 @@ renderUI <- function(expr, env = parent.frame(), quoted = FALSE,
 #'   that file path. (Reactive values and functions may be used from this
 #'   function.)
 #' @param contentType A string of the download's
-#'   [content type](http://en.wikipedia.org/wiki/Internet_media_type), for
+#'   [content type](https://en.wikipedia.org/wiki/Internet_media_type), for
 #'   example `"text/csv"` or `"image/png"`. If `NULL` or
 #'   `NA`, the content type will be guessed based on the filename
 #'   extension, or `application/octet-stream` if the extension is unknown.
@@ -773,7 +773,7 @@ downloadHandler <- function(filename, content, contentType=NA, outputArgs=list()
 #'   frequent search requests).
 #' @param callback A JavaScript function to be applied to the DataTable object.
 #'   This is useful for DataTables plug-ins, which often require the DataTable
-#'   instance to be available (<http://datatables.net/extensions/>).
+#'   instance to be available (<https://datatables.net/extensions/>).
 #' @param escape Whether to escape HTML entities in the table: `TRUE` means
 #'   to escape the whole table, and `FALSE` means not to escape it.
 #'   Alternatively, you can specify numeric column indices or column names to
@@ -784,14 +784,14 @@ downloadHandler <- function(filename, content, contentType=NA, outputArgs=list()
 #'   call to [dataTableOutput()] when `renderDataTable` is used
 #'   in an interactive R Markdown document.
 #'
-#' @references <http://datatables.net>
+#' @references <https://datatables.net>
 #' @note This function only provides the server-side version of DataTables
 #'   (using R to process the data object on the server side). There is a
 #'   separate package \pkg{DT} (<https://github.com/rstudio/DT>) that allows
 #'   you to create both server-side and client-side DataTables, and supports
 #'   additional DataTables features. Consider using `DT::renderDataTable()`
 #'   and `DT::dataTableOutput()` (see
-#'   <http://rstudio.github.io/DT/shiny.html> for more information).
+#'   <https://rstudio.github.io/DT/shiny.html> for more information).
 #' @export
 #' @inheritParams renderPlot
 #' @examples
@@ -825,7 +825,7 @@ renderDataTable <- function(expr, options = NULL, searchDelay = 500,
   if (in_devmode()) {
     shinyDeprecated(
       "0.11.1", "shiny::renderDataTable()", "DT::renderDataTable()",
-      details = "See <http://rstudio.github.io/DT/shiny.html> for more information"
+      details = "See <https://rstudio.github.io/DT/shiny.html> for more information"
     )
   }
 

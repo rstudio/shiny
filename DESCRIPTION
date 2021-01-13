@@ -114,7 +114,7 @@ Suggests:
     ragg,
     showtext,
     sass
-URL: http://shiny.rstudio.com
+URL: https://shiny.rstudio.com/
 BugReports: https://github.com/rstudio/shiny/issues
 Collate:
     'globals.R'

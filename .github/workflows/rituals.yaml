@@ -81,6 +81,23 @@ jobs:
           pkgs <- installed.packages()[, "Package"]
           sessioninfo::session_info(pkgs, include_base = TRUE)
 
+      - name: Url redirects
+        # only perform if in an RC branch (`rc-vX.Y.Z`)
+        if: ${{ github.event_name == 'push' && contains(github.ref, '/rc-v') }}
+        run: |
+          Rscript -e 'pak::pkg_install("r-lib/urlchecker"); urlchecker::url_update()'
+          # throw an error if man files were updated
+          if [ -n "$(git status --porcelain man)" ]
+          then
+            git status --porcelain
+            >&2 echo "Updated links found in files above"
+            >&2 echo 'Run `urlchecker::url_update()` to fix links locally'
+            exit 1
+          fi
+          # Add locally changed urls
+          git add .
+          git commit -m 'Update links (GitHub Actions)' || echo "No link changes to commit"
+
       - name: Document
         run: |
           Rscript -e 'devtools::document()'

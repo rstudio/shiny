@@ -49,7 +49,7 @@ registerClient <- function(client) {
 #' optional `session` parameter, which is used when greater control is
 #' needed.
 #'
-#' See the [tutorial](http://rstudio.github.com/shiny/tutorial/) for more
+#' See the [tutorial](https://rstudio.github.io/shiny/tutorial/) for more
 #' on how to write a server function.
 #'
 #' @param func The server function for this application. See the details section

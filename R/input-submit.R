@@ -10,7 +10,7 @@
 #' [actionButton()] instead of `submitButton` when you
 #' want to delay a reaction.
 #' See [this
-#' article](http://shiny.rstudio.com/articles/action-buttons.html) for more information (including a demo of how to "translate"
+#' article](https://shiny.rstudio.com/articles/action-buttons.html) for more information (including a demo of how to "translate"
 #' code using a `submitButton` to code using an `actionButton`).
 #'
 #' In essence, the presence of a submit button stops all inputs from

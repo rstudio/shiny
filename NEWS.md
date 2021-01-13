@@ -2,6 +2,20 @@
 shiny 1.5.0.9000
 ================
 
+This release focuses on improvements in three main areas:
+
+1. Better theming (and Bootstrap 4) support:
+  * The `theme` argument of `fluidPage()`, `navbarPage()`, and `bootstrapPage()` all now understand `bslib::bs_theme()` objects, which can be used to opt-into Bootstrap 4, use any Bootswatch theme, and/or implement custom themes without writing any CSS. 
+  * The `session` object now includes `$setCurrentTheme()` and `$getCurrentTheme()` methods to dynamically update (or obtain) the page's `theme` after initial load, which is useful for things such as [adding a dark mode switch to an app](https://rstudio.github.io/bslib/articles/theming.html#dynamic-theming-in-shiny) or some other "real-time" theming tool like `bslib::bs_themer()`.
+  * For more details, see [`{bslib}`'s website](https://rstudio.github.io/bslib)
+
+2. Caching of `reactive()` and `render*()` (e.g. `renderText()`, `renderTable()`, etc) expressions.
+  * Such expressions automatically cache their _most recent value_, which helps to avoid redundant computation within a single "flush" of reactivity. The new `bindCache()` function can be used to cache _all previous values_ (as long as they fit in the cache). This cache may be optionally scoped within and/or across user sessions, possibly leading to huge performance gains, especially when deployed at scale across user sessions.
+  * For more details, see `help(bindCache, package = "shiny")`
+  
+3. Various improvements to accessibility for screen-reader and keyboard users.
+  * For more details, see the accessibility section below.
+
 ## Full changelog
 
 ### Breaking changes
@@ -11,7 +25,7 @@ shiny 1.5.0.9000
 * Subtle changes, and some soft-deprecations, have come to `freezeReactiveValue` and `freezeReactiveVal` (#3055). These functions have been fragile at best in previous releases (issues #1791, #2463, #2946). In this release, we've solved all the problems we know about with `freezeReactiveValue(input, "x")`, by 1) invalidating `input$x` and set it to `NULL` whenever we freeze, and 2) ensuring that, after a freeze, even if the effect of `renderUI` or `updateXXXInput` is to set `input$x` to the same value it already has, this will result in an invalidation (whereas by default, Shiny filters out such spurious assignments).
 
   Similar problems may exist when using `freezeReactiveVal`, and when using `freezeReactiveValue` with non-`input` reactive values objects. But support for those was added mostly for symmetry with `freezeReactiveValue(input)`, and given the above issues, it's not clear to us how you could have used these successfully in the past, or why you would even want to. For this release, we're soft-deprecating both of those uses, but we're more than willing to un-deprecate if it turns out people are using these; if that includes you, please join the conversation at https://github.com/rstudio/shiny/issues/3063. In the meantime, you can squelch the deprecation messages for these functions specifically, by setting `options(shiny.deprecation.messages.freeze = FALSE)`.
-
+  
 ### Accessibility
 
 * Added [bootstrap accessibility plugin](https://github.com/paypal/bootstrap-accessibility-plugin) under the hood to improve accessibility of shiny apps for screen-reader and keyboard users: the enhancements include better navigations for alert, tooltip, popover, modal dialog, dropdown, tab Panel, collapse, and carousel elements. (#2911)

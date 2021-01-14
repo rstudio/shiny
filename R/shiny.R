@@ -193,6 +193,14 @@ workerId <- local({
 #'   An environment for app authors and module/package authors to store whatever
 #'   session-specific data they want.
 #' }
+#' \item{user}{
+#'   User's log-in information. Useful for identifying users on hosted platforms
+#'   such as RStudio Connect and Shiny Server.
+#' }
+#' \item{groups}{
+#'   The `user`'s relevant group information. Useful for determining what
+#'   privileges the user should or shouldn't have.
+#' }
 #' \item{resetBrush(brushId)}{
 #'   Resets/clears the brush with the given `brushId`, if it exists on
 #'   any `imageOutput` or `plotOutput` in the app.

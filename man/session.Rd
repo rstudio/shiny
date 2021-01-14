@@ -104,6 +104,14 @@ This is the request that was used to initiate the websocket connection
 An environment for app authors and module/package authors to store whatever
 session-specific data they want.
 }
+\item{user}{
+User's log-in information. Useful for identifying users on hosted platforms
+such as RStudio Connect and Shiny Server.
+}
+\item{groups}{
+The \code{user}'s relevant group information. Useful for determining what
+privileges the user should or shouldn't have.
+}
 \item{resetBrush(brushId)}{
 Resets/clears the brush with the given \code{brushId}, if it exists on
 any \code{imageOutput} or \code{plotOutput} in the app.

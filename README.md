@@ -7,24 +7,19 @@
 
 <!-- badges: end -->
 
-Shiny is a new package from RStudio that makes it incredibly easy to build interactive web applications with R.
-
-For an introduction and examples, visit the [Shiny Dev Center](https://shiny.rstudio.com/).
-
-If you have general questions about using Shiny, please use the [RStudio Community website](https://community.rstudio.com). For bug reports, please use the [issue tracker](https://github.com/rstudio/shiny/issues).
+Easily build rich and productive interactive web apps in R &mdash; no HTML/CSS/JavaScript required.
 
 ## Features
 
-* Build useful web applications with only a few lines of code&mdash;no JavaScript required.
-* Shiny applications are automatically "live" in the same way that spreadsheets are live. Outputs change instantly as users modify inputs, without requiring a reload of the browser.
-* Shiny user interfaces can be built entirely using R, or can be written directly in HTML, CSS, and JavaScript for more flexibility.
-* Works in any R environment (Console R, Rgui for Windows or Mac, ESS, StatET, RStudio, etc.).
-* Attractive default UI theme based on [Bootstrap](https://getbootstrap.com/).
-* A highly customizable slider widget with built-in support for animation.
-* Prebuilt output widgets for displaying plots, tables, and printed output of R objects.
-* Fast bidirectional communication between the web browser and R using the [httpuv](https://github.com/rstudio/httpuv) package.
-* Uses a [reactive](https://en.wikipedia.org/wiki/Reactive_programming) programming model that eliminates messy event handling code, so you can focus on the code that really matters.
-* Develop and redistribute your own Shiny widgets that other developers can easily drop into their own applications (coming soon!).
+* An intuitive and extensible [reactive](https://en.wikipedia.org/wiki/Reactive_programming) programming model which makes it easy to transform existing R code into a "live app" where outputs automatically react to new user input.
+  * This programming model naturally leads to more efficient and simpler code then the alternative (i.e., event-based programming) because, when Shiny receives new user input, it intelligently finds the minimal amount of work necessary to update output(s).
+* A prebuilt set of highly sophisticated, customizable, and easy-to-use widgets (e.g., plots, tables, sliders, dropdowns, date pickers, and more).
+* An attractive default look based on [Bootstrap](https://getbootstrap.com/) which can also be easily customized with the [bslib](https://github.com/rstudio/bslib) package or avoided entirely with more direct R bindings to HTML/CSS/JavaScript.
+* Seamless integration with [R Markdown](https://beta.rstudioconnect.com/content/2671/Combining-Shiny-R-Markdown.html), making it easy to embed numerous applications natively within a larger dynamic document.
+* Tools for improving and monitoring performance, including native support for [async programming](https://blog.rstudio.com/2018/06/26/shiny-1-1-0/), [caching](https://talks.cpsievert.me/20201117), [load testing](https://rstudio.github.io/shinyloadtest/), and [more](https://support.rstudio.com/hc/en-us/articles/231874748-Scaling-and-Performance-Tuning-in-RStudio-Connect).
+* [A framework](https://shiny.rstudio.com/articles/modules.html) for reducing code duplication and complexity.
+* An ability to [bookmark application state](https://shiny.rstudio.com/articles/bookmarking-state.html) and/or [generate code to reproduce its output](https://github.com/rstudio/shinymeta).
+* A rich ecosystem of extension packages for more [custom widgets](http://www.htmlwidgets.org/), [input validation](https://github.com/rstudio/shinyvalidate), [unit testing](https://github.com/rstudio/shinytest), and more.
 
 ## Installation
 
@@ -44,13 +39,11 @@ remotes::install_github("rstudio/shiny")
 
 ## Getting Started
 
-To learn more we highly recommend you check out the [Shiny Tutorial](https://shiny.rstudio.com/tutorial/). The tutorial explains the framework in-depth, walks you through building a simple application, and includes extensive annotated examples.
+There are currently two great places to get started with learning fundamental Shiny concepts, both the [Shiny Tutorial](https://shiny.rstudio.com/tutorial/) and the [Mastering Shiny](https://mastering-shiny.org/) book. The latter is more up-to-date with modern Shiny features, whereas the former takes a deeper, more visual, dive into fundamental concepts. 
 
-## Development notes
+For inspiration from other Shiny users, you may also want to consider checking out the [Shiny User Gallery](https://shiny.rstudio.com/gallery/).
 
-The Javascript code in Shiny is minified using tools that run on Node.js. See the tools/ directory for more information.
-
-## Guidelines for contributing
+## Contributing
 
 We welcome contributions to the **shiny** package. Please see our [CONTRIBUTING.md](https://github.com/rstudio/shiny/blob/master/.github/CONTRIBUTING.md) file for detailed guidelines of how to contribute.
 

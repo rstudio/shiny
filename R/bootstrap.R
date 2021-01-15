@@ -224,7 +224,7 @@ bootstrapDependency <- function(theme) {
     stylesheet = c(
       theme %||% "css/bootstrap.min.css",
       # Safely adding accessibility plugin for screen readers and keyboard users; no break for sighted aspects (see https://github.com/paypal/bootstrap-accessibility-plugin)
-      "accessibility/css/bootstrap-accessibility.css"
+      "accessibility/css/bootstrap-accessibility.min.css"
     ),
     meta = list(viewport = "width=device-width, initial-scale=1")
   )

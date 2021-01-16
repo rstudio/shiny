@@ -168,7 +168,7 @@ theme_version <- function(...) {
 
 bslib_func <- function(name) {
   assert_bslib_available()
-  getFromNamespace(name, "bslib")
+  utils::getFromNamespace(name, "bslib")
 }
 
 assert_bslib_available <- function() {

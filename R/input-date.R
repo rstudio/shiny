@@ -150,7 +150,7 @@ datePickerDependency <- function(theme) {
       })();
      </script>"
     ),
-    bslib::bs_dependency_defer(datePickerCSS)
+    bs_dependency_defer(datePickerCSS)
   )
 }
 
@@ -166,7 +166,7 @@ datePickerCSS <- function(theme) {
 
   scss_file <- system.file(package = "shiny", "www/shared/datepicker/scss/build3.scss")
 
-  bslib::bs_dependency(
+  bs_dependency(
     input = sass::sass_file(scss_file),
     theme = theme,
     name = "bootstrap-datepicker",

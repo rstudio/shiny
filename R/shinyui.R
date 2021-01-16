@@ -84,7 +84,7 @@ renderPage <- function(ui, showcase=0, testMode=FALSE) {
 
 shinyDependencies <- function() {
   list(
-    bslib::bs_dependency_defer(shinyDependencyCSS),
+    bs_dependency_defer(shinyDependencyCSS),
     htmlDependency(
       name = "shiny-javascript",
       version = shinyPackageVersion(),
@@ -119,7 +119,7 @@ shinyDependencyCSS <- function(theme) {
   scss_files <- file.path(scss_home, c("bootstrap.scss", "shiny.scss"))
   scss_files <- lapply(scss_files, sass::sass_file)
 
-  bslib::bs_dependency(
+  bs_dependency(
     input = scss_files,
     theme = theme,
     name = "shiny-sass",

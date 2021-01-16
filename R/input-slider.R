@@ -230,7 +230,7 @@ ionRangeSliderDependency <- function() {
       src = c(href = "shared/strftime"),
       script = "strftime-min.js"
     ),
-    bslib::bs_dependency_defer(ionRangeSliderDependencyCSS)
+    bs_dependency_defer(ionRangeSliderDependencyCSS)
   )
 }
 
@@ -252,7 +252,7 @@ ionRangeSliderDependencyCSS <- function(theme) {
       bg = "if(alpha($input-bg)==0, $body-bg, $input-bg)",
       fg = sprintf(
         "if(alpha($input-color)==0, $%s, $input-color)",
-        if ("3" %in% bslib::theme_version(theme)) "text-color" else "body-color"
+        if ("3" %in% theme_version(theme)) "text-color" else "body-color"
       ),
       accent = "$component-active-bg",
       `font-family` = "$font-family-base"
@@ -262,7 +262,7 @@ ionRangeSliderDependencyCSS <- function(theme) {
     )
   )
 
-  bslib::bs_dependency(
+  bs_dependency(
     input = sass_input,
     theme = theme,
     name = "ionRangeSlider",

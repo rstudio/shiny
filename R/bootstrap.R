@@ -18,7 +18,7 @@ NULL
 #'   Bootstrap 3.
 #' @param theme One of the following:
 #'   * `NULL` (the default), which implies a "stock" build of Bootstrap 3.
-#'   * A [bslib::bs_theme()] object. This can be used to replace a stock
+#'   * A `bslib::bs_theme()` object. This can be used to replace a stock
 #'   build of Bootstrap 3 with a customized version of Bootstrap 3 or higher.
 #'   * A character string pointing to an alternative Bootstrap stylesheet
 #'   (normally a css file within the www directory, e.g. `www/bootstrap.css`).
@@ -132,20 +132,55 @@ bootstrapLib <- function(theme = NULL) {
       #)
     }
 
-    bslib::bs_theme_dependencies(theme)
+    bs_theme_deps(theme)
   })
+}
+
+# ------------------------------------------------------------------
+# bslib helper functions. Once bslib is accepted on CRAN, we should
+# import (or suggest) bslib and change these to `::`
+# ------------------------------------------------------------------
+
+# Copy/pasted from bslib::is_bs_theme to avoid a dependency on bslib in v1.6
+# (We might want to keep this as is since this'll prevent bslib from getting
+# loaded unnecessarily)
+is_bs_theme <- function(x) {
+  inherit(x, "bs_theme")
 }
 
 # This is defined outside of bootstrapLib() because registerThemeDependency()
 # wants a non-anonymous function with a single argument
-bs_theme_deps <- function(theme) {
-  bslib::bs_theme_dependencies(theme)
+bs_theme_deps <- function(...) {
+  bslib_func("bs_theme_dependencies")(...)
 }
 
-is_bs_theme <- function(x) {
-  is_available("bslib", "0.2.0.9000") &&
-    bslib::is_bs_theme(x)
+bs_dependency_defer <- function(...) {
+  bslib_func("bs_dependency_defer")(...)
 }
+
+bs_dependency <- function(...) {
+  bslib_func("bs_dependency")(...)
+}
+
+theme_version <- function(...) {
+  bslib_func("theme_version")(...)
+}
+
+bslib_func <- function(name) {
+  assert_bslib_available()
+  getFromNamespace(name, "bslib")
+}
+
+assert_bslib_available <- function() {
+  if (!is_available("bslib", "0.2.3.9000")) {
+    stop(
+      "The bslib package is required for this functionality.",
+      "Install it with install.packages('bslib')",
+      call. = FALSE
+    )
+  }
+}
+
 
 #' Obtain Shiny's Bootstrap Sass theme
 #'

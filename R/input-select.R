@@ -239,7 +239,7 @@ selectizeIt <- function(inputId, select, options, nonempty = FALSE) {
 
 
 selectizeDependency <- function() {
-  bslib::bs_dependency_defer(selectizeDependencyFunc)
+  bs_dependency_defer(selectizeDependencyFunc)
 }
 
 selectizeDependencyFunc <- function(theme) {
@@ -251,7 +251,7 @@ selectizeDependencyFunc <- function(theme) {
   selectizeDir <- system.file(package = "shiny", "www/shared/selectize/")
   stylesheet <- file.path(
     selectizeDir, "scss",
-    if ("3" %in% bslib::theme_version(theme)) {
+    if ("3" %in% theme_version(theme)) {
       "selectize.bootstrap3.scss"
     } else {
       "selectize.bootstrap4.scss"
@@ -267,7 +267,7 @@ selectizeDependencyFunc <- function(theme) {
   script <- file.path(
     selectizeDir, c("js/selectize.min.js", "accessibility/js/selectize-plugin-a11y.min.js")
   )
-  bslib::bs_dependency(
+  bs_dependency(
     input = sass::sass_file(stylesheet),
     theme = theme,
     name = "selectize",

@@ -1318,8 +1318,8 @@ ShinySession <- R6Class(
 
       # Switching Bootstrap versions has weird & complex consequences
       # for the JS logic, so we forbid it
-      current_version <- bslib::theme_version(getCurrentTheme())
-      next_version <- bslib::theme_version(theme)
+      current_version <- theme_version(getCurrentTheme())
+      next_version <- theme_version(theme)
       if (!identical(current_version, next_version)) {
         stop(
           "session$setCurrentTheme() cannot be used to change the Bootstrap version ",

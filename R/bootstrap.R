@@ -145,7 +145,7 @@ bootstrapLib <- function(theme = NULL) {
 # (We might want to keep this as is since this'll prevent bslib from getting
 # loaded unnecessarily)
 is_bs_theme <- function(x) {
-  inherit(x, "bs_theme")
+  inherits(x, "bs_theme")
 }
 
 # This is defined outside of bootstrapLib() because registerThemeDependency()

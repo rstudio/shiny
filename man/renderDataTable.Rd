@@ -19,13 +19,15 @@ renderDataTable(
 )
 }
 \arguments{
+\item{outputId}{output variable to read the table from}
+
 \item{expr}{An expression that returns a data frame or a matrix.}
 
 \item{options}{A list of initialization options to be passed to DataTables,
 or a function to return such a list.  You can find a complete list of
-options at \url{https://datatables.net/reference/option/}
+options at \url{https://datatables.net/reference/option/}.
 
-Any top-level strings with class \code{"AsIs"} (as created by \code{\link[=]{()}}) will be
+Any top-level strings with class \code{"AsIs"} (as created by \code{\link[=I]{I()}}) will be
 evaluated in JavaScript. This is useful when the type of the option value
 is not supported in JSON, e.g., a JavaScript function, which can be
 obtained by  evaluating a character string. This only applies to the
@@ -37,7 +39,7 @@ frequent search requests).}
 
 \item{callback}{A JavaScript function to be applied to the DataTable object.
 This is useful for DataTables plug-ins, which often require the DataTable
-instance to be available (\url{https://datatables.net/extensions/}).}
+instance to be available.}
 
 \item{escape}{Whether to escape HTML entities in the table: \code{TRUE} means
 to escape the whole table, and \code{FALSE} means not to escape it.
@@ -48,11 +50,11 @@ third), or \code{c('Species', 'Sepal.Length')}.}
 
 \item{env}{The environment in which to evaluate \code{expr}.}
 
-\item{quoted}{Is \code{expr} a quoted expression (with \code{quote()})? This
-is useful if you want to save an expression in a variable.}
+\item{quoted}{Is \code{expr} a quoted expression (with \code{quote()})?
+This is useful if you want to save an expression in a variable.}
 
 \item{outputArgs}{A list of arguments to be passed through to the implicit
-call to dataTableOutput() when \code{renderDataTable()} is used
+call to \code{dataTableOutput()} when \code{renderDataTable()} is used
 in an interactive R Markdown document.}
 }
 \description{
@@ -62,10 +64,10 @@ library. Paging, searching, filtering, and sorting can be done on the R side
 using Shiny as the server infrastructure.
 
 This function only provides the server-side version of DataTables (using R
-to process the data object on the server side). There is a separate package
-\pkg{DT} (\url{https://github.com/rstudio/DT}) that allows you to create both
-server-side and client-side DataTables, and supports additional DataTables
-features. Learn more at \url{https://rstudio.github.io/DT/shiny.html}.
+to process the data object on the server side). There is a separate
+\href{https://github.com/rstudio/DT}{DT} that allows you to create both
+server-side and client-side DataTables, and supports additional features.
+Learn more at \url{https://rstudio.github.io/DT/shiny.html}.
 }
 \examples{
 ## Only run this example in interactive R sessions

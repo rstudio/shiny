@@ -761,17 +761,18 @@ downloadHandler <- function(filename, content, contentType=NA, outputArgs=list()
 #' using Shiny as the server infrastructure.
 #'
 #' This function only provides the server-side version of DataTables (using R
-#' to process the data object on the server side). There is a separate package
-#' \pkg{DT} (<https://github.com/rstudio/DT>) that allows you to create both
-#' server-side and client-side DataTables, and supports additional DataTables
-#' features. Learn more at <https://rstudio.github.io/DT/shiny.html>.
+#' to process the data object on the server side). There is a separate
+#' [DT](https://github.com/rstudio/DT) that allows you to create both
+#' server-side and client-side DataTables, and supports additional features.
+#' Learn more at <https://rstudio.github.io/DT/shiny.html>.
 #'
 #' @param expr An expression that returns a data frame or a matrix.
+#' @inheritParams renderTable
 #' @param options A list of initialization options to be passed to DataTables,
 #'   or a function to return such a list.  You can find a complete list of
-#'   options at <https://datatables.net/reference/option/>
+#'   options at <https://datatables.net/reference/option/>.
 #'
-#'   Any top-level strings with class `"AsIs"` (as created by [()]) will be
+#'   Any top-level strings with class `"AsIs"` (as created by [I()]) will be
 #'   evaluated in JavaScript. This is useful when the type of the option value
 #'   is not supported in JSON, e.g., a JavaScript function, which can be
 #'   obtained by  evaluating a character string. This only applies to the
@@ -781,7 +782,7 @@ downloadHandler <- function(filename, content, contentType=NA, outputArgs=list()
 #'   frequent search requests).
 #' @param callback A JavaScript function to be applied to the DataTable object.
 #'   This is useful for DataTables plug-ins, which often require the DataTable
-#'   instance to be available (<https://datatables.net/extensions/>).
+#'   instance to be available.
 #' @param escape Whether to escape HTML entities in the table: `TRUE` means
 #'   to escape the whole table, and `FALSE` means not to escape it.
 #'   Alternatively, you can specify numeric column indices or column names to
@@ -789,7 +790,7 @@ downloadHandler <- function(filename, content, contentType=NA, outputArgs=list()
 #'   `c(1, 3, 4)`, or `c(-1, -3)` (all columns except the first and
 #'   third), or `c('Species', 'Sepal.Length')`.
 #' @param outputArgs A list of arguments to be passed through to the implicit
-#'   call to dataTableOutput() when `renderDataTable()` is used
+#'   call to `dataTableOutput()` when `renderDataTable()` is used
 #'   in an interactive R Markdown document.
 #' @export
 #' @inheritParams renderPlot

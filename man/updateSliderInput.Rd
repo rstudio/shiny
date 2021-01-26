@@ -24,19 +24,21 @@ updateSliderInput(
 
 \item{label}{The label to set for the input object.}
 
-\item{value}{The initial value of the slider. A numeric vector of length one
-will create a regular slider; a numeric vector of length two will create a
-double-ended range slider. A warning will be issued if the value doesn't
-fit between \code{min} and \code{max}.}
+\item{value}{The initial value of the slider, either a number, a date
+(class Date), or a date-time (class POSIXt). A length one vector will
+create a regular slider; a length two vector will create a double-ended
+range slider. Must lie between \code{min} and \code{max}.}
 
-\item{min}{The minimum value (inclusive) that can be selected.}
+\item{min}{The minimum and maximum values (inclusive) that can be
+selected.}
 
-\item{max}{The maximum value (inclusive) that can be selected.}
+\item{max}{The minimum and maximum values (inclusive) that can be
+selected.}
 
 \item{step}{Specifies the interval between each selectable value on the
-slider (if \code{NULL}, a heuristic is used to determine the step size). If
-the values are dates, \code{step} is in days; if the values are times
-(POSIXt), \code{step} is in seconds.}
+slider. Either \code{NULL}, the default, which uses a heuristic to determine the
+step size or a single number. If the values are dates, \code{step} is in days;
+if the values are date-times, \code{step} is in seconds.}
 
 \item{timeFormat}{Only used if the values are Date or POSIXt objects. A time
 format string, to be passed to the Javascript strftime library. See

@@ -74,7 +74,6 @@ reference:
       - htmlOutput
       - plotOutput
       - outputOptions
-      - tableOutput
       - textOutput
       - downloadButton
       - Progress

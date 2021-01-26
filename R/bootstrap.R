@@ -1360,49 +1360,8 @@ plotOutput <- function(outputId, width = "100%", height="400px",
   res
 }
 
-#' Create a table output element
-#'
-#' Render a [renderTable()] or [renderDataTable()] within an
-#' application page. `renderTable` uses a standard HTML table, while
-#' `renderDataTable` uses the DataTables Javascript library to create an
-#' interactive table with more features.
-#'
 #' @param outputId output variable to read the table from
-#' @return A table output element that can be included in a panel
-#'
-#' @seealso [renderTable()], [renderDataTable()].
-#' @examples
-#' ## Only run this example in interactive R sessions
-#' if (interactive()) {
-#'   # table example
-#'   shinyApp(
-#'     ui = fluidPage(
-#'       fluidRow(
-#'         column(12,
-#'           tableOutput('table')
-#'         )
-#'       )
-#'     ),
-#'     server = function(input, output) {
-#'       output$table <- renderTable(iris)
-#'     }
-#'   )
-#'
-#'
-#'   # DataTables example
-#'   shinyApp(
-#'     ui = fluidPage(
-#'       fluidRow(
-#'         column(12,
-#'           dataTableOutput('table')
-#'         )
-#'       )
-#'     ),
-#'     server = function(input, output) {
-#'       output$table <- renderDataTable(iris)
-#'     }
-#'   )
-#' }
+#' @rdname renderTable
 #' @export
 tableOutput <- function(outputId) {
   div(id = outputId, class="shiny-html-output")
@@ -1420,7 +1379,7 @@ dataTableDependency <- list(
   )
 )
 
-#' @rdname tableOutput
+#' @rdname renderDataTable
 #' @export
 dataTableOutput <- function(outputId) {
   attachDependencies(

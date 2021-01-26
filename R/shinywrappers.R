@@ -752,23 +752,31 @@ downloadHandler <- function(filename, content, contentType=NA, outputArgs=list()
   )
 }
 
-#' Table output with the JavaScript library DataTables
+#' Table output with the JavaScript DataTables library
 #'
+#' @description
 #' Makes a reactive version of the given function that returns a data frame (or
-#' matrix), which will be rendered with the DataTables library. Paging,
-#' searching, filtering, and sorting can be done on the R side using Shiny as
-#' the server infrastructure.
+#' matrix), which will be rendered with the [DataTables](https://datatables.net)
+#' library. Paging, searching, filtering, and sorting can be done on the R side
+#' using Shiny as the server infrastructure.
 #'
-#' For the `options` argument, the character elements that have the class
-#' `"AsIs"` (usually returned from [base::I()]) will be evaluated in
-#' JavaScript. This is useful when the type of the option value is not supported
-#' in JSON, e.g., a JavaScript function, which can be obtained by evaluating a
-#' character string. Note this only applies to the root-level elements of the
-#' options list, and the `I()` notation does not work for lower-level
-#' elements in the list.
+#' This function only provides the server-side version of DataTables (using R
+#' to process the data object on the server side). There is a separate package
+#' \pkg{DT} (<https://github.com/rstudio/DT>) that allows you to create both
+#' server-side and client-side DataTables, and supports additional DataTables
+#' features. Learn more at <https://rstudio.github.io/DT/shiny.html>.
+#'
 #' @param expr An expression that returns a data frame or a matrix.
 #' @param options A list of initialization options to be passed to DataTables,
-#'   or a function to return such a list.
+#'   or a function to return such a list.  You can find a complete list of
+#'   options at <https://datatables.net/reference/option/>
+#'
+#'   Any top-level strings with class `"AsIs"` (as created by [()]) will be
+#'   evaluated in JavaScript. This is useful when the type of the option value
+#'   is not supported in JSON, e.g., a JavaScript function, which can be
+#'   obtained by  evaluating a character string. This only applies to the
+#'   root-level elements of options list, and does not worked for lower-level
+#'   elements in the list.
 #' @param searchDelay The delay for searching, in milliseconds (to avoid too
 #'   frequent search requests).
 #' @param callback A JavaScript function to be applied to the DataTable object.
@@ -781,17 +789,8 @@ downloadHandler <- function(filename, content, contentType=NA, outputArgs=list()
 #'   `c(1, 3, 4)`, or `c(-1, -3)` (all columns except the first and
 #'   third), or `c('Species', 'Sepal.Length')`.
 #' @param outputArgs A list of arguments to be passed through to the implicit
-#'   call to [dataTableOutput()] when `renderDataTable` is used
+#'   call to dataTableOutput() when `renderDataTable()` is used
 #'   in an interactive R Markdown document.
-#'
-#' @references <https://datatables.net>
-#' @note This function only provides the server-side version of DataTables
-#'   (using R to process the data object on the server side). There is a
-#'   separate package \pkg{DT} (<https://github.com/rstudio/DT>) that allows
-#'   you to create both server-side and client-side DataTables, and supports
-#'   additional DataTables features. Consider using `DT::renderDataTable()`
-#'   and `DT::dataTableOutput()` (see
-#'   <https://rstudio.github.io/DT/shiny.html> for more information).
 #' @export
 #' @inheritParams renderPlot
 #' @examples

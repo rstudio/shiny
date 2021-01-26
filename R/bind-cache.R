@@ -470,7 +470,7 @@ bindCache.reactiveExpr <- function(x, ..., cache = "app") {
   valueFunc <- reactive_get_value_func(x)
   # Hash cache hint now -- this will be added to the key later on, to reduce the
   # chance of key collisions with other cachedReactives.
-  cacheHint <- digest(extractCacheHint(x), algo = "spookyhash")
+  cacheHint <- rlang::hash(extractCacheHint(x))
   valueFunc <- wrapFunctionLabel(valueFunc, "cachedReactiveValueFunc", ..stacktraceon = TRUE)
 
   # Don't hold on to the reference for x, so that it can be GC'd
@@ -500,7 +500,7 @@ bindCache.shiny.render.function <- function(x, ..., cache = "app") {
 
   keyFunc <- quos_to_func(enquos0(...))
 
-  cacheHint <- digest(extractCacheHint(x), algo = "spookyhash")
+  cacheHint <- rlang::hash(extractCacheHint(x))
 
   cacheWriteHook <- attr(x, "cacheWriteHook", exact = TRUE) %||% identity
   cacheReadHook  <- attr(x, "cacheReadHook",  exact = TRUE) %||% identity
@@ -658,7 +658,7 @@ generateCacheFun <- function(
   ...
 ) {
   function(cacheKeyResult) {
-    key_str <- digest(list(cacheKeyResult, cacheHint), algo = "spookyhash")
+    key_str <- rlang::hash(list(cacheKeyResult, cacheHint))
     res <- cache$get(key_str)
 
     # Case 1: cache hit

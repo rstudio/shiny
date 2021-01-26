@@ -9,7 +9,7 @@
 #' changes.
 #'
 #' `cacheKeyExpr` is an expression which, when evaluated, returns an object
-#' which will be serialized and hashed using the [digest::digest()]
+#' which will be serialized and hashed using the [rlang::hash()]
 #' function to generate a string that will be used as a cache key. This key is
 #' used to identify the contents of the plot: if the cache key is the same as a
 #' previous time, it assumes that the plot is the same and can be retrieved from
@@ -33,7 +33,7 @@
 #' to normal R objects before returning them. Your expression could even
 #' serialize and hash that information in an efficient way and return a string,
 #' which will in turn be hashed (very quickly) by the
-#' [digest::digest()] function.
+#' [rlang::hash()] function.
 #'
 #' Internally, the result from `cacheKeyExpr` is combined with the name of
 #' the output (if you assign it to `output$plot1`, it will be combined

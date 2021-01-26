@@ -1,6 +1,18 @@
 shiny 1.6.0.9000
 ================
 
+## Full changelog
+
+### Breaking changes
+
+### Minor new features and improvements
+
+* Switched from `digest::digest()` to `rlang::hash()` for hashing. (#3264)
+
+### Bug fixes
+
+### Library updates
+
 
 shiny 1.6.0
 ===========

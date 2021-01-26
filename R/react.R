@@ -5,7 +5,7 @@ processId <- local({
   cached <- NULL
   function() {
     if (is.null(cached)) {
-      cached <<- digest::digest(list(
+      cached <<- rlang::hash(list(
         Sys.info(),
         Sys.time()
       ))

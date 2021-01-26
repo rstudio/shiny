@@ -7,7 +7,6 @@
 #' @importFrom fastmap fastmap
 #' @importFrom promises %...!%
 #' @importFrom promises %...>%
-#' @importFrom digest digest
 #' @importFrom promises
 #'    promise promise_resolve promise_reject is.promising
 #'    as.promise

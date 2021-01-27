@@ -3,9 +3,10 @@
 #  that obtain and patch in https://github.com/rstudio/bslib
 library(rprojroot)
 library(sass)
-library(htmltools)
 
-src <- find_package_root_file("../bslib/inst/lib/bs-a11y-p/")
+if (packageVersion("bslib") < "0.2.4") stop ("`bslib >= 0.2.4` is required to update a11y plugin")
+
+src <- system.file("lib/bs-a11y-p/", package = "bslib")
 target <- find_package_root_file("inst/www/shared/bootstrap/accessibility/")
 
 # bslib makes hover/focus outlines transparent by default, which is what we want to do

@@ -112,7 +112,7 @@ test_that("runTests handles the absence of tests", {
   expect_message(res <- runTests(test_path("../test-helpers/app6-empty-tests")), "No test runners found in")
   expect_equal(res$file, character(0))
   expect_equal(res$pass, logical(0))
-  expect_equivalent(res$result, list())
+  expect_equal(res$result, I(list()))
   expect_s3_class(res, "shiny_runtests")
 })
 
@@ -123,12 +123,12 @@ test_that("runTests runs as expected without rewiring", {
     "Shiny App Test Results\\n\\* Success\\n  - app1-standard/tests/runner1\\.R\\n  - app1-standard/tests/runner2\\.R"
   )
 
-  expect_equivalent(df, data.frame(
+  expect_equal(df, data.frame(
     file = file.path(appDir, "tests", c("runner1.R", "runner2.R")),
     pass = c(TRUE, TRUE),
     result = I(list(1, NULL)),
     stringsAsFactors = FALSE
-  ))
+  ), ignore_attr = TRUE)
   expect_s3_class(df, "shiny_runtests")
 })
 

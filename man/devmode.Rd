@@ -256,4 +256,3 @@ is_minified <- with_devmode(TRUE, {
 is_minified # FALSE
 
 }
-\keyword{internal}

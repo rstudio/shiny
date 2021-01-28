@@ -95,9 +95,8 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
     )
   }
 
-  validate_slider_value(min, max, value, "sliderInput")
-
   dataType <- getSliderType(min, max, value)
+  validate_slider_value(min, max, value, "sliderInput")
 
   if (is.null(timeFormat)) {
     timeFormat <- switch(dataType, date = "%F", datetime = "%F %T", number = NULL)
@@ -302,6 +301,23 @@ findStepSize <- function(min, max, step) {
   } else {
     1
   }
+}
+
+getSliderType <- function(min, max, value) {
+  vals <- dropNulls(list(value, min, max))
+  if (length(vals) == 0) return("")
+  type <- unique(lapply(vals, function(x) {
+    if      (inherits(x, "Date"))   "date"
+    else if (inherits(x, "POSIXt")) "datetime"
+    else                            "number"
+  }))
+  if (length(type) > 1) {
+    rlang::abort(c(
+      "Type mismatch for `min`, `max`, and `value`.",
+      i = "All values must have same type: either numeric, Date, or POSIXt."
+    ))
+  }
+  type[[1]]
 }
 
 # Throw a warning if ever `value` is not in the [`min`, `max`] range

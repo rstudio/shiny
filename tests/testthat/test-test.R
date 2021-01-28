@@ -25,7 +25,9 @@ test_that("runTests works", {
 
   runTestsSpy <- rewire(runTests, sourceUTF8 = sourceStub, loadSupport=loadSupportStub)
 
-  res <- runTestsSpy(test_path("../test-helpers/app1-standard"), assert = FALSE)
+  res <- suppressMessages(
+    runTestsSpy(test_path("../test-helpers/app1-standard"), assert = FALSE)
+  )
 
   # Should have seen two calls to each test runner
   expect_length(calls, 2)
@@ -135,7 +137,7 @@ test_that("runTests runs as expected without rewiring", {
 test_that("app template works with runTests", {
 
   # testthat::skip_on_cran()
-  testthat::skip_if_not_installed("shinytest", "1.3.1.9000")
+  suppressWarnings(testthat::skip_if_not_installed("shinytest", "1.3.1.9000"))
   testthat::skip_if(!shinytest::dependenciesInstalled(), "shinytest dependencies not installed. Call `shinytest::installDependencies()`")
 
   # test all combos

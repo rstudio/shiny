@@ -8,7 +8,6 @@
 #'
 #'   Please see the function descriptions for more details.
 #'
-#' @keywords internal
 #' @describeIn devmode Function to set two options to enable/disable Shiny
 #'   Developer Mode and Developer messages
 #' @param devmode Logical value which should be set to `TRUE` to enable Shiny

@@ -1,6 +1,6 @@
 library(shiny)
 library(testthat)
-library(future)
+library(future, warn.conflicts = FALSE)
 library(promises)
 
 test_that("handles observers", {

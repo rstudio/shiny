@@ -117,7 +117,7 @@ test_that("runTests handles the absence of tests", {
 })
 
 test_that("runTests runs as expected without rewiring", {
-  appDir <- file.path("..", "test-helpers", "app1-standard")
+  appDir <- test_path(file.path("..", "test-helpers", "app1-standard"))
   df <- testthat::expect_output(
     print(runTests(appDir = appDir, assert = FALSE)),
     "Shiny App Test Results\\n\\* Success\\n  - app1-standard/tests/runner1\\.R\\n  - app1-standard/tests/runner2\\.R"
@@ -134,7 +134,7 @@ test_that("runTests runs as expected without rewiring", {
 
 test_that("app template works with runTests", {
 
-  testthat::skip_on_cran()
+  # testthat::skip_on_cran()
   testthat::skip_if_not_installed("shinytest", "1.3.1.9000")
   testthat::skip_if(!shinytest::dependenciesInstalled(), "shinytest dependencies not installed. Call `shinytest::installDependencies()`")
 
@@ -156,57 +156,21 @@ test_that("app template works with runTests", {
     )
   ))
 
-  for (combo in combos) {local({
+  for (combo in combos) {
     random_folder <- paste0("shinyAppTemplate-", paste0(combo, collapse = "_"))
-    tempTemplateDir <- file.path(tempdir(), random_folder)
-    shinyAppTemplate(tempTemplateDir, combo)
+    tempTemplateDir <- file.path(tempfile(), random_folder)
+    suppressMessages(shinyAppTemplate(tempTemplateDir, combo))
     on.exit(unlink(tempTemplateDir, recursive = TRUE), add = TRUE)
 
     if (any(c("all", "shinytest", "testthat") %in% combo)) {
-
-      # suppress all output messages
-      ignore <- capture.output({
-        # do not let an error here stop this test
-        # string comparisons will be made below
-        test_result <- runTests(tempTemplateDir, assert = FALSE)
-      })
-
-      expected_test_output <- paste0(
-        c(
-          "Shiny App Test Results",
-          "* Success",
-          if (any(c("all", "shinytest") %in% combo))
-            paste0("  - ", file.path(random_folder, "tests", "shinytest.R")),
-          if (any(c("all", "testthat") %in% combo))
-            paste0("  - ", file.path(random_folder, "tests", "testthat.R"))
-        ),
-        collapse = "\n"
-      )
-
-      test_output <- paste0(
-        capture.output({
-          print(test_result)
-        }),
-        collapse = "\n"
-      )
-
-      if (identical(expected_test_output, test_output)) {
-        testthat::succeed()
-      } else {
-        # be very verbose in the error output to help find root cause of failure
-        cat("\nrunTests() output:\n", test_output, "\n\n")
-        cat("Expected print output:\n", expected_test_output, "\n\n")
-        cat("runTests() object:\n")
-        utils::str(test_result)
-        cat("\n")
-        testthat::fail(paste0("runTests() output for '", random_folder, "' failed. Received:\n", test_output, "\n"))
-      }
-
+      suppressMessages(capture.output({
+        out <- runTests(tempTemplateDir, assert = FALSE)
+      }))
+      expect_snapshot(out)
     } else {
       expect_error(
-        runTests(tempTemplateDir)
+        suppressMessages(runTests(tempTemplateDir))
       )
     }
-  })}
-
+  }
 })

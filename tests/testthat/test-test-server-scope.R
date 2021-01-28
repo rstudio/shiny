@@ -71,7 +71,7 @@ test_that("Shadowing can be mitigated with unquote", {
   }, envir = globalenv())
 
   testServer(module, {
-    expect_is(inc, "function")
+    expect_type(inc, "closure")
     expect_false(identical(inc, !!inc))
     !!inc()
   })

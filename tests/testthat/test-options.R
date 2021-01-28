@@ -63,13 +63,13 @@ test_that("Capturing options at creation time", {
 
   # Running second app will cause the option to be restored while it's running,
   # and in our onStart, we save it into value2.
-  runApp(s2, launch.browser = FALSE)
+  runApp(s2, launch.browser = FALSE, quiet = TRUE)
   expect_identical(value, NULL)
   expect_identical(value2, 456)
   expect_identical(getShinyOption("bookmarkStore"), NULL)
 
   # Same, for first app and value1.
-  runApp(s, launch.browser = FALSE)
+  runApp(s, launch.browser = FALSE, quiet = TRUE)
   expect_identical(value, 123)
   expect_identical(value2, 456)
   expect_identical(getShinyOption("bookmarkStore"), NULL)
@@ -100,7 +100,7 @@ test_that("Option scoping", {
   )
 
   # Run the app
-  runApp(s, launch.browser = FALSE)
+  runApp(s, launch.browser = FALSE, quiet = TRUE)
   values["global_out"] <- list(getShinyOption("foo"))
 
   expect_identical(
@@ -183,7 +183,7 @@ test_that("Unsetting app-level option NULL won't affect global option", {
     }
   )
 
-  runApp(s, launch.browser = FALSE)
+  runApp(s, launch.browser = FALSE, quiet = TRUE)
   expect_identical(getShinyOption("foo"), 1)
   expect_identical(value, NULL)
 })

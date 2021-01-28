@@ -1,6 +1,3 @@
-
-context ("runTests")
-
 test_that("runTests works", {
   calls <- list()
   # Tracks the working directory we were in as of the last call
@@ -135,8 +132,6 @@ test_that("runTests runs as expected without rewiring", {
   expect_s3_class(df, "shiny_runtests")
 })
 
-
-context("shinyAppTemplate + runTests")
 test_that("app template works with runTests", {
 
   testthat::skip_on_cran()

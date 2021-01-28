@@ -1,5 +1,3 @@
-context("utils")
-
 test_that("Private randomness works at startup", {
 
   if (exists(".Random.seed", envir = .GlobalEnv))

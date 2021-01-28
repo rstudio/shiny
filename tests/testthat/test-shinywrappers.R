@@ -1,5 +1,3 @@
-context("shinywrappers")
-
 test_that("isTemp passes sanity checks", {
   t <- tempfile(fileext = ".txt")
   writeLines("hello", t)

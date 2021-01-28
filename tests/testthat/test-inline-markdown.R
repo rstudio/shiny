@@ -1,5 +1,3 @@
-context("inline-markdown")
-
 test_that("Markdown without newlines translates", {
   expect_equivalent(markdown("# a top level"), HTML("<h1>a top level</h1>\n"))
   expect_equivalent(markdown("## a subheading"), HTML("<h2>a subheading</h2>\n"))
@@ -30,7 +28,7 @@ test_that("Additional options are respected", {
 test_that("Multiline markdown works properly", {
   essay <- "
    # The [Louisiana Purchase](https://en.wikipedia.org/wiki/Louisiana_Purchase)
-   
+
    Larry Sellers
    Mrs. Jamtoss
    History Period 4

@@ -1,5 +1,3 @@
-context("modules")
-
 test_that("Namespace qualifying", {
   expect_equivalent(NS(NULL, "one"), "one")
   expect_equivalent(NS(NULL)("one"), "one")

@@ -1,5 +1,3 @@
-context("testServer scope")
-
 library(shiny)
 library(testthat)
 

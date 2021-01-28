@@ -1,5 +1,3 @@
-context("actionButton")
-
 test_that("Action button accepts class arguments", {
   make_button <- function(class) {
     if (missing(class)) {

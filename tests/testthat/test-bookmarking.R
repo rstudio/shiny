@@ -1,5 +1,3 @@
-context("bookmarking")
-
 test_that("Inputs and values in query string", {
   # Normal format
   vals <- RestoreContext$new("?_inputs_&a=1&b=2&_values_&x=3")$asList()

@@ -1,5 +1,3 @@
-context("Stack")
-
 test_that("Basic operations", {
   s <- Stack$new()
   expect_identical(s$size(), 0L)

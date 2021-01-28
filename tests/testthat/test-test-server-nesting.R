@@ -1,5 +1,3 @@
-context("testServer nesting")
-
 library(shiny)
 library(testthat)
 

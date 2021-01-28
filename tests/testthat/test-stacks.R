@@ -1,5 +1,3 @@
-context("stacks")
-
 causeError <- function(full) {
   A <- function() {
     stop("foo")

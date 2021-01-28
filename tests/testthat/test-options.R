@@ -1,6 +1,3 @@
-context("options")
-
-
 test_that("Shared secret", {
   op <- options(shiny.sharedSecret = "This is a secret string")
   on.exit(options(op))

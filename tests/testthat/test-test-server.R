@@ -1,5 +1,3 @@
-context("testServer")
-
 library(shiny)
 library(testthat)
 library(future)

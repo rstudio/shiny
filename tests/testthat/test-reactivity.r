@@ -887,7 +887,9 @@ test_that("Observers fire in consistent order across platforms", {
   })
 
   for (i in 1:20) {
-    v(isolate(v()) + 1); shiny:::flushReact()
+    suppressMessages({
+      v(isolate(v()) + 1); shiny:::flushReact()
+    })
   }
 
   expected_order <- list()

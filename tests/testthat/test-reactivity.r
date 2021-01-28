@@ -1155,7 +1155,7 @@ test_that("Flush completes even when errors occur", {
   vals$x <- 0
   suppress_stacktrace(
     # Errors in reactive are translated to warnings in observers by default
-    expect_warning(flushReact())
+    expect_warning(expect_warning(flushReact()))
   )
   # Both observers should run up until the reactive that errors
   expect_true(all(c(n11, n12, n21, n22) == c(2,1,2,1)))

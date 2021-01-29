@@ -1,6 +1,3 @@
-
-context("app")
-
 test_that("files are loaded into the right env", {
   renv <- new.env(parent=environment())
   genv <- new.env(parent=environment())

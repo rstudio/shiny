@@ -1,5 +1,3 @@
-context("MockShinySession")
-
 test_that("invalidateLater supported", {
   session <- MockShinySession$new()
   i <- 0

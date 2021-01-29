@@ -1,5 +1,3 @@
-context("reactivity")
-
 test_that("reactive and reactiveVal are functions", {
   expect_s3_class(reactive({1}), "function")
   expect_s3_class(reactiveVal(1), "function")
@@ -889,7 +887,9 @@ test_that("Observers fire in consistent order across platforms", {
   })
 
   for (i in 1:20) {
-    v(isolate(v()) + 1); shiny:::flushReact()
+    suppressMessages({
+      v(isolate(v()) + 1); shiny:::flushReact()
+    })
   }
 
   expected_order <- list()
@@ -1155,7 +1155,7 @@ test_that("Flush completes even when errors occur", {
   vals$x <- 0
   suppress_stacktrace(
     # Errors in reactive are translated to warnings in observers by default
-    expect_warning(flushReact())
+    expect_warning(expect_warning(flushReact()))
   )
   # Both observers should run up until the reactive that errors
   expect_true(all(c(n11, n12, n21, n22) == c(2,1,2,1)))

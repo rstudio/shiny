@@ -1,5 +1,3 @@
-context("timer")
-
 test_that("Scheduling works", {
   ran <- FALSE
   fun <- function() {

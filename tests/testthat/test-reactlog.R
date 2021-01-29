@@ -1,6 +1,3 @@
-
-context("reactlog")
-
 keyValList <- function(key, value) {
   ret <- list()
   ret[[key]] <- value

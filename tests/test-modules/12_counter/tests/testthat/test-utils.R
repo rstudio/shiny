@@ -1,5 +1,3 @@
-context("utils")
-
 # Test the lexical_sort function from R/utils.R
 test_that("Lexical sorting works", {
   expect_equal(lexical_sort(c(1, 2, 3)), c(1, 2, 3))

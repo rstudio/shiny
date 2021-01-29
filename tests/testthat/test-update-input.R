@@ -1,5 +1,3 @@
-context("Update input controls")
-
 test_that("Radio buttons and checkboxes work with modules", {
   createModuleSession <- function(moduleId) {
     session <- as.environment(list(

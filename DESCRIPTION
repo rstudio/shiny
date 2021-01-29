@@ -99,7 +99,7 @@ Imports:
 Suggests:
     datasets,
     Cairo (>= 1.5-5),
-    testthat (>= 2.1.1),
+    testthat (>= 3.0.0),
     knitr (>= 1.6),
     markdown,
     rmarkdown,
@@ -203,3 +203,4 @@ RoxygenNote: 7.1.1
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RdMacros: lifecycle
+Config/testthat/edition: 3

@@ -150,7 +150,6 @@ with_devmode <- function(
 
 #' @describeIn devmode If Shiny Developer Mode and verbosity are enabled,
 #'   displays a message once every 8 hrs (by default)
-#' @inheritParams rlang::inform
 #' @param message Developer Mode message to be sent to [rlang::inform()]
 #' @param .frequency Frequency of the Developer Mode message used with
 #'   [rlang::inform()]. Defaults to once every 8 hours.
@@ -232,11 +231,14 @@ registered_devmode_options <- Map$new()
 #' )
 #' ```
 #' @param name Name of option to look for in `options()`
+#' @param default Default value to return if `in_devmode()` returns
+#'   `TRUE` and the specified option is not set in [`options()`].
 #' @param devmode_message Message to display once every 8 hours when utilizing
 #'   the `devmode_default` value.  If `devmode_message` is missing, the
 #'   registered `devmode_message` value be used.
 #' @param devmode_default Default value to return if `in_devmode()` returns
-#'   `TRUE`. For `get_devmode_option()`, if `devmode_default` is missing, the
+#'   `TRUE` and the specified option is not set in [`options()`]. For
+#'   `get_devmode_option()`, if `devmode_default` is missing, the
 #'   registered `devmode_default` value will be used.
 #' @examples
 #' # Ex: Within shiny, we register the option "shiny.minified"

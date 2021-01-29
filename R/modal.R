@@ -43,7 +43,7 @@ removeModal <- function(session = getDefaultReactiveDomain()) {
 #' @param title An optional title for the dialog.
 #' @param footer UI for footer. Use `NULL` for no footer.
 #' @param size One of `"s"` for small, `"m"` (the default) for medium,
-#'   or `"l"` for large.
+#'   `"l"` for large or `"xl"` for extra-large.
 #' @param easyClose If `TRUE`, the modal dialog can be dismissed by
 #'   clicking outside the dialog box, or be pressing the Escape key. If
 #'   `FALSE` (the default), the modal dialog can't be dismissed in those
@@ -151,7 +151,7 @@ removeModal <- function(session = getDefaultReactiveDomain()) {
 #' }
 #' @export
 modalDialog <- function(..., title = NULL, footer = modalButton("Dismiss"),
-  size = c("m", "s", "l"), easyClose = FALSE, fade = TRUE) {
+  size = c("m", "s", "l", "xl"), easyClose = FALSE, fade = TRUE) {
 
   size <- match.arg(size)
 
@@ -162,7 +162,7 @@ modalDialog <- function(..., title = NULL, footer = modalButton("Dismiss"),
 
     div(
       class = "modal-dialog",
-      class = switch(size, s = "modal-sm", m = NULL, l = "modal-lg"),
+      class = switch(size, s = "modal-sm", m = NULL, l = "modal-lg", xl = "modal-xl"),
       div(class = "modal-content",
         if (!is.null(title)) div(class = "modal-header",
           tags$h4(class = "modal-title", title)

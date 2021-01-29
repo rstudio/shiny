@@ -6,6 +6,9 @@
 #'   easier, like enabling non-minified JS and printing messages about
 #'   deprecated functions and options.
 #'
+#'   Shiny Developer Mode can be enabled by calling `devmode(TRUE)` and disabled
+#'   by calling `devmode(FALSE)`.
+#'
 #'   Please see the function descriptions for more details.
 #'
 #' @describeIn devmode Function to set two options to enable/disable Shiny

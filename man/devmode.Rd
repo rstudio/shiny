@@ -77,6 +77,9 @@ Developer Mode enables a number of \code{\link[=options]{options()}} to make a d
 easier, like enabling non-minified JS and printing messages about
 deprecated functions and options.
 
+Shiny Developer Mode can be enabled by calling \code{devmode(TRUE)} and disabled
+by calling \code{devmode(FALSE)}.
+
 Please see the function descriptions for more details.
 }
 \section{Functions}{

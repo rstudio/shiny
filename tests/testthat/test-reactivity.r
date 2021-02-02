@@ -1259,8 +1259,8 @@ test_that("debounce/throttle work properly (with priming)", {
     expect_identical(isolate(tr()), 0)
   }
 
-  # Pump timer and reactives for about 1.4 seconds
-  stopAt <- Sys.time() + 1.4
+  # Pump timer and reactives for about 1.3 seconds
+  stopAt <- Sys.time() + 1.3
   while (Sys.time() < stopAt) {
     timerCallbacks$executeElapsed()
     flushReact()
@@ -1338,8 +1338,8 @@ test_that("debounce/throttle work properly (without priming)", {
     expect_identical(isolate(tr()), 0)
   }
 
-  # Pump timer and reactives for about 1.4 seconds
-  stopAt <- Sys.time() + 1.4
+  # Pump timer and reactives for about 1.3 seconds
+  stopAt <- Sys.time() + 1.3
   while (Sys.time() < stopAt) {
     timerCallbacks$executeElapsed()
     flushReact()

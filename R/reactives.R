@@ -627,7 +627,7 @@ is.reactivevalues <- function(x) inherits(x, 'reactivevalues')
   if (!hasCurrentContext()) {
     rlang::abort(c(
       paste0("Can't access reactive value '", name, "' outside of reactive consumer."),
-      i = "Do you need to wrap inside reactive() or observer()?"
+      i = "Do you need to wrap inside reactive() or observe()?"
     ))
   }
 

@@ -9,6 +9,8 @@ shiny 1.6.0.9000
 
 * Switched from `digest::digest()` to `rlang::hash()` for hashing. (#3264)
 
+* Switched from internal `Stack` class to `fastmap::faststack()`, and used `fastmap::fastqueue()`. (#3176)
+
 ### Bug fixes
 
 ### Library updates

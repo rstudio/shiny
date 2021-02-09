@@ -1,6 +1,3 @@
-#' @include stack.R
-NULL
-
 ShinySaveState <- R6Class("ShinySaveState",
   public = list(
     input = NULL,
@@ -447,8 +444,8 @@ RestoreInputSet <- R6Class("RestoreInputSet",
   )
 )
 
-
-restoreCtxStack <- Stack$new()
+# This is a fastmap::faststack(); value is assigned in .onLoad().
+restoreCtxStack <- NULL
 
 withRestoreContext <- function(ctx, expr) {
   restoreCtxStack$push(ctx)

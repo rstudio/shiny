@@ -56,6 +56,10 @@ register_upgrade_message <- function(pkg, version) {
   # the private seed during load.
   withPrivateSeed(set.seed(NULL))
 
+  # Create this at the top level, but since the object is from a different
+  # package, we don't want to bake it into the built binary package.
+  restoreCtxStack <<- fastmap::faststack()
+
   # Make sure these methods are available to knitr if shiny is loaded but not
   # attached.
   register_s3_method("knitr", "knit_print", "reactive")

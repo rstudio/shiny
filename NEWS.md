@@ -15,6 +15,8 @@ shiny 1.6.0.9000
 
 ### Library updates
 
+* Closed #3286: Updated to Font-Awesome 5.15.2. (#3288)
+
 
 shiny 1.6.0
 ===========

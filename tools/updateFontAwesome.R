@@ -12,7 +12,7 @@ library(jsonlite)
 # =============================================================================
 # Download and unzip to temp dir
 # =============================================================================
-version <- "5.13.0"
+version <- "5.15.2"
 
 zip_file <- file.path(tempdir(), paste0("font-awesome-", version, ".zip"))
 
@@ -100,7 +100,7 @@ v4_icon_df <- data.frame(
 )
 
 # Get info on icons in version 5.
-metadata <- fromJSON(find_package_root_file("data-raw", "fontawesome", "icons.json"))
+metadata <- fromJSON(file.path(source_dir, "metadata", "icons.json"))
 styles <- lapply(metadata, `[[`, "styles")
 
 icon_df <- data.frame(

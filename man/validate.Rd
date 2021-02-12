@@ -29,53 +29,38 @@ parameter is not needed if \code{message} is provided, but must be provided
 otherwise.}
 }
 \description{
-For an output rendering function (e.g. \code{\link[=renderPlot]{renderPlot()}}), you may
-need to check that certain input values are available and valid before you
-can render the output. \code{validate} gives you a convenient mechanism for
-doing so.
+\code{validate()} provides convenient mechanism for validating that an output
+has all the inputs necessary for successful rendering. It takes any number
+of (unnamed) arguments, each representing a condition to test. If any
+of condition fails (i.e. is not \link[=isTruthy]{"truthy"}), a special type of
+error is signaled to stop execution. If this error is not handled by
+application-specific code, it is displayed to the user by Shiny.
+
+If you use \code{validate()} in a \code{\link[=reactive]{reactive()}} validation failures will
+automatically propagate to outputs that use the reactive.
 }
-\details{
-The \code{validate} function takes any number of (unnamed) arguments, each of
-which represents a condition to test. If any of the conditions represent
-failure, then a special type of error is signaled which stops execution. If
-this error is not handled by application-specific code, it is displayed to
-the user by Shiny.
+\section{\code{need()}}{
 
-An easy way to provide arguments to \code{validate} is to use the \code{need}
-function, which takes an expression and a string; if the expression is
-considered a failure, then the string will be used as the error message. The
-\code{need} function considers its expression to be a failure if it is any of
-the following:
+An easy way to provide arguments to \code{validate()} is to use \code{need()}, which
+takes an expression and a string. If the expression is not
+\link[=isTruthy]{"truthy"} then the string will be used as the error message.
 
-\itemize{
-\item{\code{FALSE}}
-\item{\code{NULL}}
-\item{\code{""}}
-\item{An empty atomic vector}
-\item{An atomic vector that contains only missing values}
-\item{A logical vector that contains all \code{FALSE} or missing values}
-\item{An object of class \code{"try-error"}}
-\item{A value that represents an unclicked \code{\link[=actionButton]{actionButton()}}}
+If "truthiness" is flexible for your use case, you'll need to explicitly
+generate a logical values. For example, if you want allow \code{NA} but not
+\code{NULL}, you can \code{!is.null(input$foo)}.
+
+If you need validation logic that differs significantly from \code{need()}, you
+can create your own validation test functions. A passing test should return
+\code{NULL}. A failing test should return either a string providing the error
+to display to the user, or if the failure should happen silently, \code{FALSE}.
+
+Alternatively you can use \code{validate()} within an \code{if} statement, which is
+particularly useful for more complex conditions:\preformatted{if (input$x < 0 && input$choice == "positive") \{
+  validate("If choice is positive then x must be greater than 0")
+\}
+}
 }
 
-If any of these values happen to be valid, you can explicitly turn them to
-logical values. For example, if you allow \code{NA} but not \code{NULL}, you
-can use the condition \code{!is.null(input$foo)}, because \code{!is.null(NA) == TRUE}.
-
-If you need validation logic that differs significantly from \code{need}, you
-can create other validation test functions. A passing test should return
-\code{NULL}. A failing test should return an error message as a
-single-element character vector, or if the failure should happen silently,
-\code{FALSE}.
-
-Because validation failure is signaled as an error, you can use
-\code{validate} in reactive expressions, and validation failures will
-automatically propagate to outputs that use the reactive expression. In
-other words, if reactive expression \code{a} needs \code{input$x}, and two
-outputs use \code{a} (and thus depend indirectly on \code{input$x}), it's
-not necessary for the outputs to validate \code{input$x} explicitly, as long
-as \code{a} does validate it.
-}
 \examples{
 ## Only run examples in interactive R sessions
 if (interactive()) {

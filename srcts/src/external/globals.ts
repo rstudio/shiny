@@ -8,4 +8,6 @@ declare global {
 const WindowShiny = (window.Shiny = window.Shiny || {});
 const jQuery: JQueryStatic = window.jQuery;
 
-export { jQuery, jQuery as $, WindowShiny };
+const userAgent = window.navigator.userAgent;
+
+export { jQuery, jQuery as $, WindowShiny, userAgent };

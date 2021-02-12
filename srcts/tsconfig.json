@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "lib": [
+      "DOM",
+      "ES5",
+      "ES2015.Promise"
+    ],
+    "preserveConstEnums": true
+  },
+  "include": [
+    "src/index.ts",
+    "src/**/*"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}

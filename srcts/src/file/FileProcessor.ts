@@ -22,8 +22,12 @@ const FileProcessor = function (files) {
   this.onFile = function (file, cont) {
     setTimeout(cont, 0);
   };
-  this.onComplete = function () {};
-  this.onAbort = function () {};
+  this.onComplete = function () {
+    return;
+  };
+  this.onAbort = function () {
+    return;
+  };
   // End callbacks
 
   // Aborts processing, unless it's already completed
@@ -36,13 +40,12 @@ const FileProcessor = function (files) {
 
   // Returns a bound function that will call this.$run one time.
   this.$getRun = function () {
-    const self = this;
     let called = false;
 
-    return function () {
+    return () => {
       if (called) return;
       called = true;
-      self.$run();
+      this.$run();
     };
   };
 

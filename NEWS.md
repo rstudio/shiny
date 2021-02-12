@@ -5,6 +5,8 @@ shiny 1.6.0.9000
 
 ### Breaking changes
 
+* The `format` and `locale` arguments to `sliderInput()` have been removed. They have been deprecated since 0.10.2.2 (released on 2014-12-08).
+
 ### Minor new features and improvements
 
 * Switched from `digest::digest()` to `rlang::hash()` for hashing. (#3264)

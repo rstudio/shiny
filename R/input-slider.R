@@ -19,8 +19,6 @@
 #'   number of digits (for example, 1 will round to the nearest 10, and -2 will
 #'   round to the nearest .01). Any rounding will be applied after snapping to
 #'   the nearest step.
-#' @param format Deprecated.
-#' @param locale Deprecated.
 #' @param ticks `FALSE` to hide tick marks, `TRUE` to show them
 #'   according to some simple heuristics.
 #' @param animate `TRUE` to show simple animation controls with default
@@ -78,23 +76,9 @@
 #'
 #' @export
 sliderInput <- function(inputId, label, min, max, value, step = NULL,
-                        round = FALSE, format = NULL, locale = NULL,
-                        ticks = TRUE, animate = FALSE, width = NULL, sep = ",",
-                        pre = NULL, post = NULL, timeFormat = NULL,
-                        timezone = NULL, dragRange = TRUE) {
-  if (!missing(format)) {
-    shinyDeprecated(
-      "0.10.2.2", "sliderInput(format =)",
-      details = "Use `sep`, `pre`, and `post` instead."
-    )
-  }
-  if (!missing(locale)) {
-    shinyDeprecated(
-      "0.10.2.2", "sliderInput(locale =)",
-      details = "Use `sep`, `pre`, and `post` instead."
-    )
-  }
-
+                        round = FALSE, ticks = TRUE, animate = FALSE,
+                        width = NULL, sep = ",", pre = NULL, post = NULL,
+                        timeFormat = NULL, timezone = NULL, dragRange = TRUE) {
   validate_slider_value(min, max, value, "sliderInput")
 
   dataType <- getSliderType(min, max, value)

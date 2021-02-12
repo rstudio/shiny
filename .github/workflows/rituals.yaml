@@ -125,9 +125,8 @@ jobs:
             ${{ matrix.config.os }}-yarn-
       - name: Build JS
         run: |
-          cd tools
-          yarn install --frozen-lockfile
-          yarn build
+          cd srcts
+          yarn install --frozen-lockfile && yarn build
           git add ../inst
           git commit -m 'yarn build (GitHub Actions)' || echo "No yarn changes to commit"
 

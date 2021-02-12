@@ -1538,6 +1538,11 @@ icon <- function(name, class = NULL, lib = "font-awesome", ...) {
          paste0('"', names(prefixes), '"', collapse = ", "))
   }
 
+  # Use the `fontawesome::fa_i()` function for FontAwesome icons
+  if (lib == "font-awesome") {
+    return(fontawesome::fa_i(name = name, class = class, ...))
+  }
+
   # build the icon class (allow name to be null so that other functions
   # e.g. buildTabset can pass an explicit class value)
   iconClass <- ""
@@ -1552,17 +1557,6 @@ icon <- function(name, class = NULL, lib = "font-awesome", ...) {
     iconClass <- paste(iconClass, class)
 
   iconTag <- tags$i(class = iconClass, role = "presentation", `aria-label` = paste(name, "icon"), ...)
-
-  # font-awesome needs an additional dependency (glyphicon is in bootstrap)
-  if (lib == "font-awesome") {
-    htmlDependencies(iconTag) <- htmlDependency(
-      "font-awesome", "5.13.0", "www/shared/fontawesome", package = "shiny",
-      stylesheet = c(
-        "css/all.min.css",
-        "css/v4-shims.min.css"
-      )
-    )
-  }
 
   htmltools::browsable(iconTag)
 }

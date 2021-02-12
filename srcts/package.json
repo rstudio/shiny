@@ -31,10 +31,11 @@
     "typescript": "^4"
   },
   "scripts": {
-    "build": "yarn build_shiny && yarn replace_shiny_version",
-    "build_shiny": "yarn lint && yarn typescript-check && parcel build -d ../inst/www/shared --no-minify -o shiny.js src/index.ts",
-    "watch": "yarn lint && yarn typescript-check && parcel run -d ../inst/www/shared -o shiny.js srcjs/index.ts",
-    "replace_shiny_version": "replace \"@VERSION@\" \"`node -e 'console.log(require(\"readcontrol\").readSync(\"../DESCRIPTION\").version)'`\" ../inst/www/shared/ -r --include=\"*.js,*.js.map\" --silent",
+    "build": "yarn build_shiny",
+    "pre_parcel": "yarn replace_shiny_version && yarn lint && yarn typescript-check",
+    "build_shiny": "yarn pre_parcel && parcel build -d ../inst/www/shared --no-minify -o shiny.js src/index.ts",
+    "watch": "yarn pre_parcel && parcel run -d ../inst/www/shared -o shiny.js srcjs/index.ts",
+    "replace_shiny_version": "replace --silent '\"[^\"]+\"; // @VERSION@' \"\\\"`node -e 'console.log(require(\"readcontrol\").readSync(\"../DESCRIPTION\").version)'`\\\"; // @VERSION@\" src/shiny.ts",
     "test": "jest",
     "lint": "eslint --fix --ext .ts src",
     "lint-check": "eslint --ext .ts src",

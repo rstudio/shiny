@@ -1,8 +1,5 @@
-import {readSync as dsfReadSync} from "readcontrol"
-import {Shiny} from "./external/globals"
+import { WindowShiny } from "./external/globals";
 
-const VERSION = dsfReadSync("../../DESCRIPTION")
+WindowShiny.VERSION = "1.6.0.9000"; // @VERSION@
 
-Shiny.VERSION = VERSION
-
-export {Shiny}
+export { WindowShiny as Shiny };

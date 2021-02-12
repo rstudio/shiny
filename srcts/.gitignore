@@ -1,4 +1,2 @@
-node_modules
 node_modules/
-node_modules*/
-temp_concat/
+.cache

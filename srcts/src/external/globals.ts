@@ -5,7 +5,7 @@ declare global {
   }
 }
 
-const Shiny = (window.Shiny = window.Shiny || {});
+const WindowShiny = (window.Shiny = window.Shiny || {});
 const jQuery: JQueryStatic = window.jQuery;
 
-export { jQuery, jQuery as $, Shiny };
+export { jQuery, jQuery as $, WindowShiny };

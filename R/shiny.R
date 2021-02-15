@@ -1385,7 +1385,7 @@ ShinySession <- R6Class(
       }
       private$write(c(as.raw(length(typeBytes)), typeBytes, message))
     },
-    sendCustomMessage = function(type, message) {
+    sendCustomMessage = function(type, message = TRUE) {
       data <- list()
       data[[type]] <- message
       private$sendMessage(custom = data)

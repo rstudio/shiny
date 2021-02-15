@@ -476,9 +476,9 @@ var ShinyApp = function() {
     if (typeof(handler) !== 'function') {
       throw('handler must be a function.');
     }
-    if (handler.length !== 1) {
-      throw('handler must be a function that takes one argument.');
-    }
+    //if (handler.length !== 1) {
+    //  throw('handler must be a function that takes one argument.');
+    //}
 
     customMessageHandlerOrder.push(type);
     customMessageHandlers[type] = handler;

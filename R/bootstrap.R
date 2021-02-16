@@ -1525,21 +1525,36 @@ downloadLink <- function(outputId, label="Download", class=NULL, ...) {
 #'   tabPanel("Table", icon = icon("table"))
 #' )
 #' @export
-icon <- function(name, class = NULL, lib = "font-awesome", ...) {
+icon <- function(name,
+                 class = NULL,
+                 lib = "font-awesome-svg",
+                 ...) {
+
   prefixes <- list(
-    "font-awesome" = "fa",
+    "font-awesome-svg" = "fa",
+    "font-awesome-i" = "fa",
     "glyphicon" = "glyphicon"
   )
   prefix <- prefixes[[lib]]
 
-  # determine stylesheet
+  # Stop function if `lib` value is not allowed
   if (is.null(prefix)) {
-    stop("Unknown font library '", lib, "' specified. Must be one of ",
-         paste0('"', names(prefixes), '"', collapse = ", "))
+    stop(
+      "Unknown font library '", lib, "' specified. Must be one of ",
+      paste0('"', names(prefixes), '"', collapse = ", "),
+      call. = FALSE
+    )
+  }
+
+  # Use the `fontawesome::fa()` function for FontAwesome icons
+  # with font-awesome-svg
+  if (lib == "font-awesome-svg") {
+    return(fontawesome::fa(name = name))
   }
 
   # Use the `fontawesome::fa_i()` function for FontAwesome icons
-  if (lib == "font-awesome") {
+  # with font-awesome-i
+  if (lib == "font-awesome-i") {
     return(fontawesome::fa_i(name = name, class = class, ...))
   }
 
@@ -1548,13 +1563,12 @@ icon <- function(name, class = NULL, lib = "font-awesome", ...) {
   iconClass <- ""
   if (!is.null(name)) {
     prefix_class <- prefix
-    if (prefix_class == "fa" && name %in% font_awesome_brands) {
-      prefix_class <- "fab"
-    }
     iconClass <- paste0(prefix_class, " ", prefix, "-", name)
   }
-  if (!is.null(class))
+
+  if (!is.null(class)) {
     iconClass <- paste(iconClass, class)
+  }
 
   iconTag <- tags$i(class = iconClass, role = "presentation", `aria-label` = paste(name, "icon"), ...)
 

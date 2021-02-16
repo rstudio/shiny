@@ -1495,25 +1495,29 @@ downloadLink <- function(outputId, label="Download", class=NULL, ...) {
 #' of a button, or as an icon for a [tabPanel()] within a
 #' [navbarPage()].
 #'
-#' @param name Name of icon. Icons are drawn from the
-#'   [Font Awesome Free](https://fontawesome.com/) (currently icons from
-#'   the v5.13.0 set are supported with the v4 naming convention) and
-#'   [Glyphicons](https://getbootstrap.com/components/#glyphicons)
-#'   libraries. Note that the "fa-" and "glyphicon-" prefixes should not be used
-#'   in icon names (i.e. the "fa-calendar" icon should be referred to as
-#'   "calendar")
-#' @param class Additional classes to customize the style of the icon (see the
-#'   [usage examples](https://fontawesome.com/how-to-use) for details on
-#'   supported styles).
-#' @param lib Icon library to use ("font-awesome" or "glyphicon")
-#' @param ... Arguments passed to the `<i>` tag of [htmltools::tags]
+#' @param name The name of the icon. Icons are drawn from the [Font Awesome
+#'   Free](https://fontawesome.com/) (currently icons from the v5.13.0 set are
+#'   supported with the v4 naming convention) and
+#'   [Glyphicons](https://getbootstrap.com/docs/3.3/components/#glyphicons)
+#'   libraries. Note that the `"fa-"` and `"glyphicon-"` prefixes should not be
+#'   used in icon names (i.e. the `"fa-calendar"` icon should be referred to as
+#'   `"calendar"`).
+#' @param class Additional classes to customize the style of a Font Awesome icon
+#'   (see the [usage examples](https://fontawesome.com/how-to-use) for details
+#'   on supported styles). This is only used for the `lib = "font-awesome-i"`
+#'   option.
+#' @param lib The icon library to use. If drawing from the Font Awesome library
+#'   of icons, this can be either `"font-awesome-svg"` or `"font-awesome-i"`
+#'   (which either use SVG icons or a font file to render the icon). The third
+#'   option is or `"glyphicon"` to use icons from the Glyphicons library.
+#' @param ... Arguments passed to the `<i>` tag of [htmltools::tags]. This is
+#'   only used for the `lib = "font-awesome-i"` option.
 #'
-#' @return An icon element
+#' @return An icon element.
 #'
 #' @seealso For lists of available icons, see
 #'   [https://fontawesome.com/icons](https://fontawesome.com/icons) and
-#'   [https://getbootstrap.com/components/#glyphicons](https://getbootstrap.com/components/#glyphicons).
-#'
+#'   [https://getbootstrap.com/docs/3.3/components/#glyphicons](https://getbootstrap.com/docs/3.3/components/#glyphicons).
 #'
 #' @examples
 #' # add an icon to a submit button

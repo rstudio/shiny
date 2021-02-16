@@ -44,8 +44,8 @@ function main() {
   };
 
   (function () {
-    this.normalCall = this.immediateCall = function () {
-      this.func.apply(this.target, arguments);
+    this.normalCall = this.immediateCall = function (...args) {
+      this.func.apply(this.target, args);
     };
   }.call(Invoker.prototype));
 
@@ -59,11 +59,11 @@ function main() {
   };
 
   (function () {
-    this.normalCall = function () {
+    this.normalCall = function (...args) {
       const self = this;
 
       this.$clearTimer();
-      this.args = arguments;
+      this.args = args;
 
       this.timerId = setTimeout(function () {
         // IE8 doesn't reliably clear timeout, so this additional
@@ -73,9 +73,9 @@ function main() {
         self.$invoke();
       }, this.delayMs);
     };
-    this.immediateCall = function () {
+    this.immediateCall = function (...args) {
       this.$clearTimer();
-      this.args = arguments;
+      this.args = args;
       this.$invoke();
     };
     this.isPending = function () {
@@ -103,10 +103,10 @@ function main() {
   };
 
   (function () {
-    this.normalCall = function () {
+    this.normalCall = function (...args) {
       const self = this;
 
-      this.args = arguments;
+      this.args = args;
       if (this.timerId === null) {
         this.$invoke();
         this.timerId = setTimeout(function () {
@@ -118,9 +118,9 @@ function main() {
         }, this.delayMs);
       }
     };
-    this.immediateCall = function () {
+    this.immediateCall = function (...args) {
       this.$clearTimer();
-      this.args = arguments;
+      this.args = args;
       this.$invoke();
     };
     this.isPending = function () {
@@ -154,9 +154,8 @@ function main() {
     let timerId = null;
     let self, args;
 
-    return function () {
+    return function (...args) {
       self = this;
-      args = arguments;
       if (timerId !== null) {
         clearTimeout(timerId);
         timerId = null;
@@ -186,7 +185,7 @@ function main() {
     let timerId = null;
     let self, args;
 
-    function throttled() {
+    function throttled(...argumentVals) {
       self = null;
       args = null;
       if (timerId === null) {
@@ -201,13 +200,13 @@ function main() {
             throttled.apply(self, args);
           }
         }, threshold);
-        func.apply(this, arguments);
+        func.apply(this, argumentVals);
       } else {
         // Something executed recently. Don't do anything
         // except set up target/arguments to be called later
         executionPending = true;
         self = this;
-        args = arguments;
+        args = argumentVals;
       }
     }
     return throttled;
@@ -6923,7 +6922,7 @@ function main() {
     // the handler only when e's namespace matches. For example, if the
     // namespace is "bs", it would match when e.namespace is "bs" or "bs.tab".
     // If the namespace is "bs.tab", it would match for "bs.tab", but not "bs".
-    function filterEventsByNamespace(namespace, handler) {
+    function filterEventsByNamespace(namespace, handler, ...args) {
       namespace = namespace.split(".");
 
       return function (e) {
@@ -6934,7 +6933,7 @@ function main() {
           if (eventNamespace.indexOf(namespace[i]) === -1) return;
         }
 
-        handler.apply(this, arguments);
+        handler.apply(this, [namespace, handler, ...args]);
       };
     }
 

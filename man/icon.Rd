@@ -4,27 +4,31 @@
 \alias{icon}
 \title{Create an icon}
 \usage{
-icon(name, class = NULL, lib = "font-awesome", ...)
+icon(name, class = NULL, lib = "font-awesome-svg", ...)
 }
 \arguments{
-\item{name}{Name of icon. Icons are drawn from the
-\href{https://fontawesome.com/}{Font Awesome Free} (currently icons from
-the v5.13.0 set are supported with the v4 naming convention) and
-\href{https://getbootstrap.com/components/#glyphicons}{Glyphicons}
-libraries. Note that the "fa-" and "glyphicon-" prefixes should not be used
-in icon names (i.e. the "fa-calendar" icon should be referred to as
-"calendar")}
+\item{name}{The name of the icon. Icons are drawn from the \href{https://fontawesome.com/}{Font Awesome Free} (currently icons from the v5.13.0 set are
+supported with the v4 naming convention) and
+\href{https://getbootstrap.com/docs/3.3/components/#glyphicons}{Glyphicons}
+libraries. Note that the \code{"fa-"} and \code{"glyphicon-"} prefixes should not be
+used in icon names (i.e. the \code{"fa-calendar"} icon should be referred to as
+\code{"calendar"}).}
 
-\item{class}{Additional classes to customize the style of the icon (see the
-\href{https://fontawesome.com/how-to-use}{usage examples} for details on
-supported styles).}
+\item{class}{Additional classes to customize the style of a Font Awesome icon
+(see the \href{https://fontawesome.com/how-to-use}{usage examples} for details
+on supported styles). This is only used for the \code{lib = "font-awesome-i"}
+option.}
 
-\item{lib}{Icon library to use ("font-awesome" or "glyphicon")}
+\item{lib}{The icon library to use. If drawing from the Font Awesome library
+of icons, this can be either \code{"font-awesome-svg"} or \code{"font-awesome-i"}
+(which either use SVG icons or a font file to render the icon). The third
+option is or \code{"glyphicon"} to use icons from the Glyphicons library.}
 
-\item{...}{Arguments passed to the \verb{<i>} tag of \link[htmltools:builder]{htmltools::tags}}
+\item{...}{Arguments passed to the \verb{<i>} tag of \link[htmltools:builder]{htmltools::tags}. This is
+only used for the \code{lib = "font-awesome-i"} option.}
 }
 \value{
-An icon element
+An icon element.
 }
 \description{
 Create an icon for use within a page. Icons can appear on their own, inside
@@ -44,5 +48,5 @@ navbarPage("App Title",
 \seealso{
 For lists of available icons, see
 \url{https://fontawesome.com/icons} and
-\url{https://getbootstrap.com/components/#glyphicons}.
+\url{https://getbootstrap.com/docs/3.3/components/#glyphicons}.
 }

@@ -1,7 +1,12 @@
+# Approach
+* Move everything into a single ts file. This will allow for the functions to find themselves
+  * Except the utils.js already converted
+* After merging this PR, each _file_ will be pulled out as possible into smaller files
+
 
 # Rules
-* Import at top
-* Export at bottom
+* Put Imports at top
+* Put Exports at bottom
 * Any `window.***` calls are done in `./external` folder only.
   * Add exported values / function if necessary.
   * This helps keep each file self contained. Trying not to have random inputs from anywhere

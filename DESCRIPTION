@@ -44,8 +44,6 @@ Authors@R: c(
     comment = "Bootstrap-datepicker library"),
     person("Andrew", "Rowls", role = c("ctb", "cph"),
     comment = "Bootstrap-datepicker library"),
-    person("Dave", "Gandy", role = c("ctb", "cph"),
-    comment = "Font-Awesome font"),
     person("Brian", "Reavis", role = c("ctb", "cph"),
     comment = "selectize.js library"),
     person("Salmen", "Bejaoui", role = c("ctb", "cph"),

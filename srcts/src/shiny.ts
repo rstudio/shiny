@@ -1,7 +1,9 @@
 import { WindowShiny } from "./external/globals";
 import { $escape, compareVersion } from "./utils";
 
-WindowShiny.VERSION = "1.6.0.9000"; // @VERSION@
+// Tell TS to ignore this line as the _true_ value is defined at compile time
+// @ts-ignore
+WindowShiny.VERSION = SHINY_VERSION;
 
 WindowShiny.$escape = $escape;
 WindowShiny.compareVersion = compareVersion;

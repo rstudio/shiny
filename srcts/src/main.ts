@@ -1,3 +1,4 @@
+// @ ts-nocheck
 /* eslint "@typescript-eslint/no-unused-vars": 0 */
 /* eslint "@typescript-eslint/no-this-alias": 0 */
 /* eslint "@typescript-eslint/no-empty-function": 0 */
@@ -29,6 +30,8 @@ import {
   getComputedLinkColor,
   blob,
 } from "./utils";
+
+import { makeBlob } from "./utils/blob";
 
 import { isQt, isIE, IEVersion } from "./external/browser";
 
@@ -539,7 +542,7 @@ function main() {
           if (!/^([$#!&-;=?-[\]_a-z~]|%[0-9a-fA-F]{2})+$/.test(defaultPath)) {
             defaultPath = encodeURI(defaultPath);
             // Bizarrely, QtWebKit requires us to encode these characters *twice*
-            if (browser.isQt) {
+            if (isQt) {
               defaultPath = encodeURI(defaultPath);
             }
           }
@@ -2301,7 +2304,7 @@ function main() {
 
         $el.on("mousedown.image_output", clickInfo.mousedown);
 
-        if (browser.isIE && browser.IEVersion === 8) {
+        if (isIE && IEVersion === 8) {
           $el.on("dblclick.image_output", clickInfo.dblclickIE8);
         }
 
@@ -2695,8 +2698,9 @@ function main() {
       const matches = []; // Panels that match
       const dists = []; // Distance of offset to each matching panel
       let b;
+      let i;
 
-      for (let i = 0; i < coordmap.panels.length; i++) {
+      for (i = 0; i < coordmap.panels.length; i++) {
         b = coordmap.panels[i].range;
 
         if (
@@ -4050,7 +4054,7 @@ function main() {
         let removeSheet = function (sheet) {
           if (!sheet) return;
           sheet.disabled = true;
-          if (browser.isIE) sheet.cssText = "";
+          if (isIE) sheet.cssText = "";
           $(sheet.ownerNode).remove();
         };
 
@@ -4063,7 +4067,7 @@ function main() {
           // Use inline <style> approach for IE, otherwise use the more elegant
           // <link> -based approach
 
-          if (browser.isIE) {
+          if (isIE) {
             refreshStyle(href, oldSheet);
           } else {
             link.attr("href", href);
@@ -5076,7 +5080,9 @@ function main() {
       // { parts: ['mm', 'dd', 'yy'], separators: ['', '/', '/' ,''] }
       let str = "";
 
-      for (let i = 0; i < format.parts.length; i++) {
+      let i;
+
+      for (i = 0; i < format.parts.length; i++) {
         str += format.separators[i] + format.parts[i];
       }
       str += format.separators[i];

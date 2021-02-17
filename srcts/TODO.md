@@ -16,10 +16,9 @@
 * es6 shiny.js
   * √ Pass in version before compilation
     (* Can be run many times safely)
-  * Convert each js file to ts
-  * validate polyfills are working by finding them in the code
-  * delete 'old' folder
-  * delete 'shiny-es5' files
+  * √ Move all shiny files in order to main.ts
+  * √ validate polyfills are working by finding them in the code
+  * √ delete 'old' folder
 * es6 other shiny files (ex: showcasemode)
 * Document package.json scripts
 * Produce minified shiny js
@@ -32,3 +31,5 @@
 * remove any `: any` types
 * fix all `// eslint-disable-next-line no-prototype-builtins` lines
 * Convert FileProcessor to a true class definition
+* Minify showcase mode and other shiny js files
+* delete 'shiny-es5' files

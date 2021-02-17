@@ -27,6 +27,7 @@
 
 # Later TODO
 
+* Remove parcel from package.json and only use esbuild
 * break up `./utils` into many files
 * remove any `: any` types
 * fix all `// eslint-disable-next-line no-prototype-builtins` lines

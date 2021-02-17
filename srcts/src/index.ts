@@ -1,13 +1,13 @@
 import "babel-polyfill";
 
-import { main as disable_main } from "./jquery/disable";
-import { main as history_main } from "./external/history";
+import { main as jquery_main } from "./jquery";
+import { main as history_main } from "./window/history";
 import { Shiny } from "./shiny";
 
 import { main } from "./main";
 
 history_main();
-disable_main();
+jquery_main();
 
 main();
 

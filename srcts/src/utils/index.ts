@@ -1,4 +1,4 @@
-import { devicePixelRatio } from "../external/pixelRatio";
+import { devicePixelRatio } from "../window/pixelRatio";
 import * as blob from "./blob";
 
 function escapeHTML(str: string): string {

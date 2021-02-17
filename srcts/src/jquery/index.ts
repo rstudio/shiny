@@ -1,4 +1,5 @@
-import { $ } from "../external/globals";
+import {jQuery, $} from "../window/globals"
+
 
 function main(): void {
   // disable form submissions
@@ -7,4 +8,4 @@ function main(): void {
   });
 }
 
-export { main };
+export {jQuery, $, main}

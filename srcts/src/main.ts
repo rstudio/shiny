@@ -6,7 +6,7 @@
 /* eslint "prefer-const": 0 */
 /* eslint "no-constant-condition": 0 */
 
-import { $, jQuery } from "./external/globals";
+import { $, jQuery } from "./window/globals";
 
 import {
   escapeHTML,
@@ -33,9 +33,7 @@ import {
   blob,
 } from "./utils";
 
-import { makeBlob } from "./utils/blob";
-
-import { isQt, isIE, IEVersion } from "./external/browser";
+import { isQt, isIE, IEVersion } from "./window/browser";
 
 import { FileProcessor } from "./file/FileProcessor";
 
@@ -758,7 +756,7 @@ function main() {
 
         payload.push(uint32_to_buf(0x01020202)); // signature
 
-        const jsonBuf = makeBlob([msg]);
+        const jsonBuf = blob.makeBlob([msg]);
 
         payload.push(uint32_to_buf(jsonBuf.size));
         payload.push(jsonBuf);
@@ -770,7 +768,7 @@ function main() {
           payload.push(blobs[i]);
         }
 
-        msg = makeBlob(payload);
+        msg = blob.makeBlob(payload);
       }
 
       this.$sendMsg(msg);

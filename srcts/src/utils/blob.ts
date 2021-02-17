@@ -1,4 +1,4 @@
-import { BlobBuilder } from "../external/BlobBuilder";
+import { BlobBuilder } from "../window/BlobBuilder";
 
 function makeBlob(parts: any): any {
   // Browser compatibility is a mess right now. The code as written works in

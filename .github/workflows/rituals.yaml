@@ -127,8 +127,8 @@ jobs:
         run: |
           cd srcts
           yarn install --frozen-lockfile && yarn build
-          git add ../inst
-          git commit -m 'yarn build (GitHub Actions)' || echo "No yarn changes to commit"
+          git add ./src && git commit -m 'yarn lint (GitHub Actions)' || echo "No yarn lint changes to commit"
+          git add ../inst && git commit -m 'yarn build (GitHub Actions)' || echo "No yarn build changes to commit"
 
       - name: Check node build
         run: |

@@ -37,7 +37,7 @@ of a button, or as an icon for a \code{\link[=tabPanel]{tabPanel()}} within a
 }
 \examples{
 # add an icon to a submit button
-submitButton("Update View", icon = icon("refresh"))
+submitButton("Update View", icon = icon("redo"))
 
 navbarPage("App Title",
   tabPanel("Plot", icon = icon("bar-chart-o")),

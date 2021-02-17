@@ -47,7 +47,7 @@ if (interactive()) {
 shinyApp(
   ui = basicPage(
     numericInput("num", label = "Make changes", value = 1),
-    submitButton("Update View", icon("refresh")),
+    submitButton("Update View", icon("redo")),
     helpText("When you click the button above, you should see",
              "the output below update to reflect the value you",
              "entered at the top:"),

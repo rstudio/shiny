@@ -11,4 +11,4 @@ disable_main();
 
 main();
 
-window.console.log(Shiny.version);
+window.console.log("Shiny version: ", Shiny.VERSION);

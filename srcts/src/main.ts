@@ -6,6 +6,8 @@
 /* eslint "prefer-const": 0 */
 /* eslint "no-constant-condition": 0 */
 
+import { $, jQuery } from "./external/globals";
+
 import {
   escapeHTML,
   randomId,
@@ -529,7 +531,7 @@ function main() {
       const self = this;
 
       const createSocketFunc =
-        exports.createSocket ||
+        Shiny.createSocket ||
         function () {
           let protocol = "ws:";
 
@@ -685,14 +687,14 @@ function main() {
       ) {
         const delay = reconnectDelay.next();
 
-        exports.showReconnectDialog(delay);
+        Shiny.showReconnectDialog(delay);
         this.$scheduleReconnect(delay);
       }
     };
 
     this.onConnected = function () {
       $("#shiny-disconnected-overlay").remove();
-      exports.hideReconnectDialog();
+      Shiny.hideReconnectDialog();
       reconnectDelay.reset();
     };
 
@@ -979,7 +981,7 @@ function main() {
       customMessageHandlers[type] = handler;
     }
 
-    exports.addCustomMessageHandler = addCustomMessageHandler;
+    Shiny.addCustomMessageHandler = addCustomMessageHandler;
 
     this.dispatchMessage = function (data) {
       let msgObj = {};
@@ -1093,15 +1095,15 @@ function main() {
     });
 
     addMessageHandler("notification", function (message) {
-      if (message.type === "show") exports.notifications.show(message.message);
+      if (message.type === "show") Shiny.notifications.show(message.message);
       else if (message.type === "remove")
-        exports.notifications.remove(message.message);
+        Shiny.notifications.remove(message.message);
       else throw "Unkown notification type: " + message.type;
     });
 
     addMessageHandler("modal", function (message) {
-      if (message.type === "show") exports.modal.show(message.message);
-      else if (message.type === "remove") exports.modal.remove();
+      if (message.type === "show") Shiny.modal.show(message.message);
+      else if (message.type === "remove") Shiny.modal.remove();
       // For 'remove', message content isn't used
       else throw "Unkown modal type: " + message.type;
     });
@@ -1128,8 +1130,8 @@ function main() {
     addMessageHandler("custom", function (message) {
       // For old-style custom messages - should deprecate and migrate to new
       // method
-      if (exports.oncustommessage) {
-        exports.oncustommessage(message);
+      if (Shiny.oncustommessage) {
+        Shiny.oncustommessage(message);
       }
 
       // Send messages.foo and messages.bar to appropriate handlers
@@ -1145,7 +1147,7 @@ function main() {
         workerId: message.workerId,
         sessionId: message.sessionId,
       };
-      if (message.user) exports.user = message.user;
+      if (message.user) Shiny.user = message.user;
       $(document).trigger("shiny:sessioninitialized");
     });
 
@@ -1185,10 +1187,10 @@ function main() {
             message.selector +
             '") could not be found in the DOM.'
         );
-        exports.renderHtml(message.content.html, $([]), message.content.deps);
+        Shiny.renderHtml(message.content.html, $([]), message.content.deps);
       } else {
         targets.each(function (i, target) {
-          exports.renderContent(target, message.content, message.where);
+          Shiny.renderContent(target, message.content, message.where);
           return message.multiple;
         });
       }
@@ -1198,7 +1200,7 @@ function main() {
       const els = $(message.selector);
 
       els.each(function (i, el) {
-        exports.unbindAll(el, true);
+        Shiny.unbindAll(el, true);
         $(el).remove();
         // If `multiple` is false, returning false terminates the function
         // and no other elements are removed; if `multiple` is true,
@@ -1209,7 +1211,7 @@ function main() {
 
     addMessageHandler("frozen", function (message) {
       for (let i = 0; i < message.ids.length; i++) {
-        exports.forgetLastInputValue(message.ids[i]);
+        Shiny.forgetLastInputValue(message.ids[i]);
       }
     });
 
@@ -1337,7 +1339,7 @@ function main() {
         }
       }
 
-      exports.renderContent($liTag[0], {
+      Shiny.renderContent($liTag[0], {
         html: $liTag.html(),
         deps: message.liTag.deps,
       });
@@ -1372,7 +1374,7 @@ function main() {
       // lower-level functions that renderContent uses. Like if we pre-process
       // the value of message.divTag.html for singletons, we could do that, then
       // render dependencies, then do $tabContent.append($divTag).
-      exports.renderContent(
+      Shiny.renderContent(
         $tabContent[0],
         { html: "", deps: message.divTag.deps },
         "beforeend"
@@ -1386,7 +1388,7 @@ function main() {
         // and not the whole tag. That's fine in this case because we control the
         // R code that generates this HTML, and we know that the element is not
         // a script tag.
-        exports.renderContent(el, el.innerHTML || el.textContent);
+        Shiny.renderContent(el, el.innerHTML || el.textContent);
       });
 
       if (message.select) {
@@ -1517,7 +1519,7 @@ function main() {
       ensureTabsetHasVisibleTab($tabset);
 
       function removeEl($el) {
-        exports.unbindAll($el, true);
+        Shiny.unbindAll($el, true);
         $el.remove();
       }
     });
@@ -1593,7 +1595,7 @@ function main() {
     });
 
     addMessageHandler("resetBrush", function (message) {
-      exports.resetBrush(message.brushId);
+      Shiny.resetBrush(message.brushId);
     });
 
     // Progress reporting ====================================================
@@ -1622,7 +1624,7 @@ function main() {
 
           // Progress bar starts hidden; will be made visible if a value is provided
           // during updates.
-          exports.notifications.show({
+          Shiny.notifications.show({
             html:
               `<div id="shiny-progress-${message.id}" class="shiny-progress-notification">` +
               '<div class="progress active" style="display: none;"><div class="progress-bar"></div></div>' +
@@ -1722,7 +1724,7 @@ function main() {
       // Close page-level progress bar
       close: function (message) {
         if (message.style === "notification") {
-          exports.notifications.remove(message.id);
+          Shiny.notifications.remove(message.id);
         } else if (message.style === "old") {
           const $progress = $("#" + message.id + ".shiny-progress");
 
@@ -1741,7 +1743,7 @@ function main() {
       },
     };
 
-    exports.progressHandlers = progressHandlers;
+    Shiny.progressHandlers = progressHandlers;
 
     // Returns a URL which can be queried to get values from inside the server
     // function. This is enabled with `options(shiny.testmode=TRUE)`.
@@ -1765,7 +1767,7 @@ function main() {
     };
   }.call(ShinyApp.prototype));
 
-  exports.showReconnectDialog = (function () {
+  Shiny.showReconnectDialog = (function () {
     let reconnectTime = null;
 
     function updateTime() {
@@ -1798,7 +1800,7 @@ function main() {
       const action =
         '<a id="shiny-reconnect-now" href="#" onclick="Shiny.shinyapp.reconnect();">Try now</a>';
 
-      exports.notifications.show({
+      Shiny.notifications.show({
         id: "reconnect",
         html: html,
         action: action,
@@ -1811,12 +1813,12 @@ function main() {
     };
   })();
 
-  exports.hideReconnectDialog = function () {
-    exports.notifications.remove("reconnect");
+  Shiny.hideReconnectDialog = function () {
+    Shiny.notifications.remove("reconnect");
   };
 
   // "notifications.js"
-  exports.notifications = (function () {
+  Shiny.notifications = (function () {
     // Milliseconds to fade in or out
     const fadeDuration = 250;
 
@@ -1845,7 +1847,7 @@ function main() {
         `<div class="shiny-notification-content-action">${action}</div>`;
       const $content = $notification.find(".shiny-notification-content");
 
-      exports.renderContent($content, { html: newHtml, deps: deps });
+      Shiny.renderContent($content, { html: newHtml, deps: deps });
 
       // Remove any existing classes of the form 'shiny-notification-xxxx'.
       // The xxxx would be strings like 'warning'.
@@ -1884,7 +1886,7 @@ function main() {
 
     function remove(id) {
       _get(id).fadeOut(fadeDuration, function () {
-        exports.unbindAll(this);
+        Shiny.unbindAll(this);
         $(this).remove();
 
         // If no more notifications, remove the panel from the DOM.
@@ -1983,7 +1985,7 @@ function main() {
   })();
 
   // "modal.js"
-  exports.modal = {
+  Shiny.modal = {
     // Show a modal dialog. This is meant to handle two types of cases: one is
     // that the content is a Bootstrap modal dialog, and the other is that the
     // content is non-Bootstrap. Bootstrap modals require some special handling,
@@ -2005,7 +2007,7 @@ function main() {
         // modal is hidden, remove the entire thing, including wrapper.
         $modal.on("hidden.bs.modal", function (e) {
           if (e.target === $("#shiny-modal")[0]) {
-            exports.unbindAll($modal);
+            Shiny.unbindAll($modal);
             $modal.remove();
           }
         });
@@ -2026,7 +2028,7 @@ function main() {
       });
 
       // Set/replace contents of wrapper with html.
-      exports.renderContent($modal, { html: html, deps: deps });
+      Shiny.renderContent($modal, { html: html, deps: deps });
     },
 
     remove: function () {
@@ -2041,7 +2043,7 @@ function main() {
         $modal.find(".modal").modal("hide");
       } else {
         // If not a Bootstrap modal dialog, simply unbind and remove it.
-        exports.unbindAll($modal);
+        Shiny.unbindAll($modal);
         $modal.remove();
       }
     },
@@ -2088,11 +2090,11 @@ function main() {
     };
   }.call(BindingRegistry.prototype));
 
-  const inputBindings = (exports.inputBindings = new BindingRegistry());
-  const outputBindings = (exports.outputBindings = new BindingRegistry());
+  const inputBindings = (Shiny.inputBindings = new BindingRegistry());
+  const outputBindings = (Shiny.outputBindings = new BindingRegistry());
 
   // "output_binding.js"
-  const OutputBinding = (exports.OutputBinding = function () {});
+  const OutputBinding = (Shiny.OutputBinding = function () {});
 
   (function () {
     // Returns a jQuery object or element array that contains the
@@ -2761,7 +2763,7 @@ function main() {
 
       return function (e) {
         if (e === null) {
-          exports.setInputValue(inputId, null);
+          Shiny.setInputValue(inputId, null);
           return;
         }
         const coords = {};
@@ -2770,7 +2772,7 @@ function main() {
 
         if (!coordmap.isInPanelCss(coords_css)) {
           if (nullOutside) {
-            exports.setInputValue(inputId, null);
+            Shiny.setInputValue(inputId, null);
             return;
           }
           if (clip) return;
@@ -2778,7 +2780,7 @@ function main() {
           coords.coords_css = coords_css;
           coords.coords_img = coordmap.scaleCssToImg(coords_css);
 
-          exports.setInputValue(inputId, coords, { priority: "event" });
+          Shiny.setInputValue(inputId, coords, { priority: "event" });
           return;
         }
         const panel = coordmap.getPanelCss(coords_css);
@@ -2804,7 +2806,7 @@ function main() {
         coords.range = panel.range;
         coords.log = panel.log;
 
-        exports.setInputValue(inputId, coords, { priority: "event" });
+        Shiny.setInputValue(inputId, coords, { priority: "event" });
       };
     };
   };
@@ -3055,7 +3057,7 @@ function main() {
 
       // We're in a new or reset state
       if (isNaN(coords.xmin)) {
-        exports.setInputValue(inputId, null);
+        Shiny.setInputValue(inputId, null);
         // Must tell other brushes to clear.
         imageOutputBinding.find(document).trigger("shiny-internal:brushed", {
           brushId: inputId,
@@ -3088,7 +3090,7 @@ function main() {
       coords.outputId = outputId;
 
       // Send data to server
-      exports.setInputValue(inputId, coords);
+      Shiny.setInputValue(inputId, coords);
 
       $el.data("mostRecentBrush", true);
       imageOutputBinding
@@ -3818,8 +3820,8 @@ function main() {
     };
   };
 
-  exports.resetBrush = function (brushId) {
-    exports.setInputValue(brushId, null);
+  Shiny.resetBrush = function (brushId) {
+    Shiny.setInputValue(brushId, null);
     imageOutputBinding.find(document).trigger("shiny-internal:brushed", {
       brushId: brushId,
       outputId: null,
@@ -3895,16 +3897,16 @@ function main() {
       return $(scope).find(".shiny-html-output");
     },
     onValueError: function (el, err) {
-      exports.unbindAll(el);
+      Shiny.unbindAll(el);
       this.renderError(el, err);
     },
     renderValue: function (el, data) {
-      exports.renderContent(el, data);
+      Shiny.renderContent(el, data);
     },
   });
   outputBindings.register(htmlOutputBinding, "shiny.htmlOutput");
 
-  const renderDependencies = (exports.renderDependencies = function (
+  const renderDependencies = (Shiny.renderDependencies = function (
     dependencies
   ) {
     if (dependencies) {
@@ -3917,9 +3919,9 @@ function main() {
   // Render HTML in a DOM element, add dependencies, and bind Shiny
   // inputs/outputs. `content` can be null, a string, or an object with
   // properties 'html' and 'deps'.
-  exports.renderContent = function (el, content, where = "replace") {
+  Shiny.renderContent = function (el, content, where = "replace") {
     if (where === "replace") {
-      exports.unbindAll(el);
+      Shiny.unbindAll(el);
     }
 
     let html;
@@ -3934,13 +3936,13 @@ function main() {
       dependencies = content.deps || [];
     }
 
-    exports.renderHtml(html, el, dependencies, where);
+    Shiny.renderHtml(html, el, dependencies, where);
 
     let scope = el;
 
     if (where === "replace") {
-      exports.initializeInputs(el);
-      exports.bindAll(el);
+      Shiny.initializeInputs(el);
+      Shiny.bindAll(el);
     } else {
       const $parent = $(el).parent();
 
@@ -3952,13 +3954,13 @@ function main() {
           if ($grandparent.length > 0) scope = $grandparent;
         }
       }
-      exports.initializeInputs(scope);
-      exports.bindAll(scope);
+      Shiny.initializeInputs(scope);
+      Shiny.bindAll(scope);
     }
   };
 
   // Render HTML in a DOM element, inserting singletons into head as needed
-  exports.renderHtml = function (html, el, dependencies, where = "replace") {
+  Shiny.renderHtml = function (html, el, dependencies, where = "replace") {
     renderDependencies(dependencies);
     return singletons.renderHtml(html, el, where);
   };
@@ -4247,7 +4249,7 @@ function main() {
       return $(scope).find(".shiny-datatable-output");
     },
     onValueError: function (el, err) {
-      exports.unbindAll(el);
+      Shiny.unbindAll(el);
       this.renderError(el, err);
     },
     renderValue: function (el, data) {
@@ -4389,7 +4391,7 @@ function main() {
   }.call(OutputBindingAdapter.prototype));
 
   // "input_binding.js"
-  const InputBinding = (exports.InputBinding = function () {});
+  const InputBinding = (Shiny.InputBinding = function () {});
 
   (function () {
     // Returns a jQuery object or element array that contains the
@@ -6126,7 +6128,7 @@ function main() {
     // Start the new upload and put the uploader in 'currentUploader'.
     $el.data(
       "currentUploader",
-      new FileUploader(exports.shinyapp, fileInputBinding.getId(el), files, el)
+      new FileUploader(Shiny.shinyapp, fileInputBinding.getId(el), files, el)
     );
   }
 
@@ -6146,7 +6148,7 @@ function main() {
     // Start the new upload and put the uploader in 'currentUploader'.
     $el.data(
       "currentUploader",
-      new FileUploader(exports.shinyapp, id, files, evt.target)
+      new FileUploader(Shiny.shinyapp, id, files, evt.target)
     );
   }
 
@@ -6360,7 +6362,7 @@ function main() {
 
   // "init_shiny.js"
   function initShiny() {
-    const shinyapp = (exports.shinyapp = new ShinyApp());
+    const shinyapp = (Shiny.shinyapp = new ShinyApp());
 
     function bindOutputs(scope = document) {
       scope = $(scope);
@@ -6470,11 +6472,7 @@ function main() {
 
     inputs = new InputValidateDecorator(inputs);
 
-    exports.setInputValue = exports.onInputChange = function (
-      name,
-      value,
-      opts
-    ) {
+    Shiny.setInputValue = Shiny.onInputChange = function (name, value, opts) {
       opts = addDefaultInputOpts(opts);
       inputs.setInput(name, value, opts);
     };
@@ -6485,7 +6483,7 @@ function main() {
     // `forgetLastInputValue` tells Shiny that the very next call to
     // `setInputValue` for this input id shouldn't be ignored, even if it
     // is a dupe of the existing value.
-    exports.forgetLastInputValue = function (name) {
+    Shiny.forgetLastInputValue = function (name) {
       inputsNoResend.forget(name);
     };
 
@@ -6610,7 +6608,7 @@ function main() {
       unbindInputs(scope, includeSelf);
       unbindOutputs(scope, includeSelf);
     }
-    exports.bindAll = function (scope) {
+    Shiny.bindAll = function (scope) {
       // _bindAll returns input values; it doesn't send them to the server.
       // export.bindAll needs to send the values to the server.
       const currentInputItems = _bindAll(scope);
@@ -6625,7 +6623,7 @@ function main() {
       // any such HTML may contain iframes as well.
       initDeferredIframes();
     };
-    exports.unbindAll = unbindAll;
+    Shiny.unbindAll = unbindAll;
 
     // Calls .initialize() for all of the input objects in all input bindings,
     // in the given scope.
@@ -6646,7 +6644,7 @@ function main() {
         }
       }
     }
-    exports.initializeInputs = initializeInputs;
+    Shiny.initializeInputs = initializeInputs;
 
     function getIdFromEl(el) {
       const $el = $(el);
@@ -7095,9 +7093,9 @@ function main() {
       return;
     const url =
       "reactlog?w=" +
-      window.escape(exports.shinyapp.config.workerId) +
+      window.escape(Shiny.shinyapp.config.workerId) +
       "&s=" +
-      window.escape(exports.shinyapp.config.sessionId);
+      window.escape(Shiny.shinyapp.config.sessionId);
 
     window.open(url);
     e.preventDefault();
@@ -7126,9 +7124,9 @@ function main() {
 
     const url =
       "reactlog/mark?w=" +
-      window.escape(exports.shinyapp.config.workerId) +
+      window.escape(Shiny.shinyapp.config.workerId) +
       "&s=" +
-      window.escape(exports.shinyapp.config.sessionId);
+      window.escape(Shiny.shinyapp.config.sessionId);
 
     // send notification
     $.get(url, function (result) {
@@ -7137,7 +7135,7 @@ function main() {
       const html =
         '<span id="shiny-reactlog-mark-text">Marked time point in reactlog</span>';
 
-      exports.notifications.show({
+      Shiny.notifications.show({
         html: html,
         closeButton: true,
       });

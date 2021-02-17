@@ -20,7 +20,7 @@ jobs:
       fail-fast: false
       matrix:
         config:
-        - { os: ubuntu-16.04, r: '4.0', rspm: "https://packagemanager.rstudio.com/all/__linux__/xenial/latest"}
+        - { os: ubuntu-16.04, r: '4.0', node: "14.x", rspm: "https://packagemanager.rstudio.com/all/__linux__/xenial/latest"}
 
     env:
       R_REMOTES_NO_ERRORS_FROM_WARNINGS: true
@@ -110,7 +110,7 @@ jobs:
 
       - uses: actions/setup-node@v1
         with:
-          node-version: '12.x'
+          node-version: ${{ matrix.config.node }}
       # https://github.com/actions/cache/blame/ccf96194800dbb7b7094edcd5a7cf3ec3c270f10/examples.md#L185-L200
       - name: Get yarn cache directory path
         id: yarn-cache-dir-path
@@ -120,9 +120,9 @@ jobs:
         id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
         with:
           path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
-          key: ${{ matrix.config.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          key: ${{ matrix.config.os }}-${{ matrix.config.node }}-yarn-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
-            ${{ matrix.config.os }}-yarn-
+            ${{ matrix.config.os }}-${{ matrix.config.node }}-yarn-
       - name: Build JS
         run: |
           cd srcts

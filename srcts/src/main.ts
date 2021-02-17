@@ -1,3 +1,10 @@
+/* eslint "@typescript-eslint/no-unused-vars": 0 */
+/* eslint "@typescript-eslint/no-this-alias": 0 */
+/* eslint "@typescript-eslint/no-empty-function": 0 */
+/* eslint "no-prototype-builtins": 0 */
+/* eslint "prefer-const": 0 */
+/* eslint "no-constant-condition": 0 */
+
 import {
   escapeHTML,
   randomId,
@@ -26,6 +33,8 @@ import {
 import { isQt, isIE, IEVersion } from "./external/browser";
 
 import { FileProcessor } from "./file/FileProcessor";
+
+import { Shiny } from "./shiny";
 
 function main() {
   // "_start.js"
@@ -114,7 +123,7 @@ function main() {
           // check is needed
           if (self.timerId === null) return;
           self.$clearTimer();
-          if (self.args) self.normalCall.apply(self, self.args);
+          if (args.length > 0) self.normalCall.apply(self, ...args);
         }, this.delayMs);
       }
     };
@@ -853,12 +862,13 @@ function main() {
     // Otherwise, returns a new object with keys in subComponents removed and
     // renamed as necessary.
     function narrowScope(scope, nsPrefix) {
-      return nsPrefix
-        ? {
+      if (nsPrefix) {
+        return {
           input: narrowScopeComponent(scope.input, nsPrefix),
-            output: narrowScopeComponent(scope.output, nsPrefix),
-          }
-        : scope;
+          output: narrowScopeComponent(scope.output, nsPrefix),
+        };
+      }
+      return scope;
     }
 
     this.$updateConditionals = function () {
@@ -931,7 +941,7 @@ function main() {
     // Adds Shiny (internal) message handler
     function addMessageHandler(type, handler) {
       if (messageHandlers[type]) {
-        throw "handler for message of type \"" + type + "\" already added.";
+        throw 'handler for message of type "' + type + '" already added.';
       }
       if (typeof handler !== "function") {
         throw "handler must be a function.";
@@ -1170,7 +1180,7 @@ function main() {
         console.warn(
           'The selector you chose ("' +
             message.selector +
-            "\") could not be found in the DOM."
+            '") could not be found in the DOM.'
         );
         exports.renderHtml(message.content.html, $([]), message.content.deps);
       } else {
@@ -1585,7 +1595,7 @@ function main() {
 
     // Progress reporting ====================================================
 
-    var progressHandlers = {
+    const progressHandlers = {
       // Progress for a particular object
       binding: function (message) {
         const key = message.id;
@@ -1614,7 +1624,7 @@ function main() {
               `<div id="shiny-progress-${message.id}" class="shiny-progress-notification">` +
               '<div class="progress active" style="display: none;"><div class="progress-bar"></div></div>' +
               '<div class="progress-text">' +
-              "<span class=\"progress-message\">message</span> " +
+              '<span class="progress-message">message</span> ' +
               '<span class="progress-detail"></span>' +
               "</div>" +
               "</div>",
@@ -1636,8 +1646,8 @@ function main() {
           const depth = $(".shiny-progress.open").length;
           // The 'bar' class is needed for backward compatibility with Bootstrap 2.
           const $progress = $(
-            "<div class=\"shiny-progress open\">" +
-              "<div class=\"progress active\"><div class=\"progress-bar bar\"></div></div>" +
+            '<div class="shiny-progress open">' +
+              '<div class="progress active"><div class="progress-bar bar"></div></div>' +
               '<div class="progress-text">' +
               '<span class="progress-message">message</span>' +
               '<span class="progress-detail"></span>' +
@@ -1672,7 +1682,7 @@ function main() {
         if (message.style === "notification") {
           // For new-style (starting in Shiny 0.14) progress indicators that use
           // the notification API.
-          var $progress = $("#shiny-progress-" + message.id);
+          const $progress = $("#shiny-progress-" + message.id);
 
           if ($progress.length === 0) return;
 
@@ -1689,7 +1699,7 @@ function main() {
         } else if (message.style === "old") {
           // For old-style (Shiny <=0.13.2) progress indicators.
 
-          var $progress = $("#" + message.id + ".shiny-progress");
+          const $progress = $("#" + message.id + ".shiny-progress");
 
           if (typeof message.message !== "undefined") {
             $progress.find(".progress-message").text(message.message);
@@ -1854,7 +1864,7 @@ function main() {
 
       if (closeButton && $close.length === 0) {
         $notification.append(
-          "<div class=\"shiny-notification-close\">&times;</div>"
+          '<div class="shiny-notification-close">&times;</div>'
         );
       } else if (!closeButton && $close.length !== 0) {
         $close.remove();
@@ -1909,7 +1919,7 @@ function main() {
 
       if ($panel.length > 0) return $panel;
 
-      $(document.body).append("<div id=\"shiny-notification-panel\">");
+      $(document.body).append('<div id="shiny-notification-panel">');
 
       return $panel;
     }
@@ -1923,7 +1933,7 @@ function main() {
         $notification = $(
           `<div id="shiny-notification-${id}" class="shiny-notification">` +
             '<div class="shiny-notification-close">&times;</div>' +
-            "<div class=\"shiny-notification-content\"></div>" +
+            '<div class="shiny-notification-content"></div>' +
             "</div>"
         );
 
@@ -1985,7 +1995,7 @@ function main() {
       let $modal = $("#shiny-modal-wrapper");
 
       if ($modal.length === 0) {
-        $modal = $("<div id=\"shiny-modal-wrapper\"></div>");
+        $modal = $('<div id="shiny-modal-wrapper"></div>');
         $(document.body).append($modal);
 
         // If the wrapper's content is a Bootstrap modal, then when the inner
@@ -2403,7 +2413,7 @@ function main() {
   });
   outputBindings.register(imageOutputBinding, "shiny.imageOutput");
 
-  var imageutils = {};
+  const imageutils = {};
 
   imageutils.disableDrag = function ($el, $img) {
     // Make image non-draggable (Chrome, Safari)
@@ -2686,7 +2696,7 @@ function main() {
       const dists = []; // Distance of offset to each matching panel
       let b;
 
-      for (var i = 0; i < coordmap.panels.length; i++) {
+      for (let i = 0; i < coordmap.panels.length; i++) {
         b = coordmap.panels[i].range;
 
         if (
@@ -4004,6 +4014,46 @@ function main() {
       if (!restyle) {
         $head.append(links);
       } else {
+        // This inline <style> based approach works for IE11
+        let refreshStyle = function (href, oldSheet) {
+          const xhr = new XMLHttpRequest();
+
+          xhr.open("GET", href);
+          xhr.onload = function () {
+            const id =
+              "shiny_restyle_" + href.split("?restyle")[0].replace(/\W/g, "_");
+            const oldStyle = $head.find("style#" + id);
+            const newStyle = $("<style>").attr("id", id).html(xhr.responseText);
+
+            $head.append(newStyle);
+            setTimeout(() => oldStyle.remove(), 500);
+            setTimeout(() => removeSheet(oldSheet), 500);
+          };
+          xhr.send();
+        };
+
+        let findSheet = function (href) {
+          for (let i = 0; i < document.styleSheets.length; i++) {
+            const sheet = document.styleSheets[i];
+            // The sheet's href is a full URL
+
+            if (
+              typeof sheet.href === "string" &&
+              sheet.href.indexOf(href) > -1
+            ) {
+              return sheet;
+            }
+          }
+          return null;
+        };
+
+        let removeSheet = function (sheet) {
+          if (!sheet) return;
+          sheet.disabled = true;
+          if (browser.isIE) sheet.cssText = "";
+          $(sheet.ownerNode).remove();
+        };
+
         $.map(links, function (link) {
           // Find any document.styleSheets that match this link's href
           // so we can remove it after bringing in the new stylesheet
@@ -4034,46 +4084,6 @@ function main() {
         const bindDebouncer = new Debouncer(null, Shiny.bindAll, 100);
 
         setTimeout(() => bindDebouncer.normalCall(), 100);
-
-        // This inline <style> based approach works for IE11
-        function refreshStyle(href, oldSheet) {
-          const xhr = new XMLHttpRequest();
-
-          xhr.open("GET", href);
-          xhr.onload = function () {
-            const id =
-              "shiny_restyle_" + href.split("?restyle")[0].replace(/\W/g, "_");
-            const oldStyle = $head.find("style#" + id);
-            const newStyle = $("<style>").attr("id", id).html(xhr.responseText);
-
-            $head.append(newStyle);
-            setTimeout(() => oldStyle.remove(), 500);
-            setTimeout(() => removeSheet(oldSheet), 500);
-          };
-          xhr.send();
-        }
-
-        function findSheet(href) {
-          for (let i = 0; i < document.styleSheets.length; i++) {
-            const sheet = document.styleSheets[i];
-            // The sheet's href is a full URL
-
-            if (
-              typeof sheet.href === "string" &&
-              sheet.href.indexOf(href) > -1
-            ) {
-              return sheet;
-            }
-          }
-          return null;
-        }
-
-        function removeSheet(sheet) {
-          if (!sheet) return;
-          sheet.disabled = true;
-          if (browser.isIE) sheet.cssText = "";
-          $(sheet.ownerNode).remove();
-        }
       }
     }
 
@@ -4119,7 +4129,7 @@ function main() {
     return true;
   }
 
-  var singletons = {
+  const singletons = {
     knownSingletons: {},
     renderHtml: function (html, el, where) {
       const processed = this._processHtml(html);
@@ -4253,7 +4263,7 @@ function main() {
         footer = $.map(colnames, function (x) {
           // placeholder needs to be escaped (and HTML tags are stripped off)
           return (
-            "<th><input type=\"text\" placeholder=\"" +
+            '<th><input type="text" placeholder="' +
             escapeHTML(x.replace(/(<([^>]+)>)/gi, "")) +
             '" /></th>'
           );
@@ -4443,7 +4453,7 @@ function main() {
       // is to prevent textInputBinding from accidentally picking up
       // this hidden element as a shiny input (#2396)
 
-      return $inputs.not("input[type=\"text\"][id$=\"-selectized\"]");
+      return $inputs.not('input[type="text"][id$="-selectized"]');
     },
     getId: function (el) {
       return InputBinding.prototype.getId.call(this, el) || el.name;
@@ -4493,7 +4503,7 @@ function main() {
     _getLabelNode: function (el) {
       return $(el)
         .parent()
-        .find("label[for=\"" + $escape(el.id) + "\"]");
+        .find('label[for="' + $escape(el.id) + '"]');
     },
   });
   inputBindings.register(textInputBinding, "shiny.textInput");
@@ -4513,7 +4523,7 @@ function main() {
 
   $.extend(passwordInputBinding, textInputBinding, {
     find: function (scope) {
-      return $(scope).find("input[type=\"password\"]");
+      return $(scope).find('input[type="password"]');
     },
     getType: function (el) {
       return "shiny.password";
@@ -4526,7 +4536,7 @@ function main() {
 
   $.extend(numberInputBinding, textInputBinding, {
     find: function (scope) {
-      return $(scope).find("input[type=\"number\"]");
+      return $(scope).find('input[type="number"]');
     },
     getValue: function (el) {
       const numberVal = $(el).val();
@@ -4567,7 +4577,7 @@ function main() {
     _getLabelNode: function (el) {
       return $(el)
         .parent()
-        .find("label[for=\"" + $escape(el.id) + "\"]");
+        .find('label[for="' + $escape(el.id) + '"]');
     },
   });
   inputBindings.register(numberInputBinding, "shiny.numberInput");
@@ -4577,7 +4587,7 @@ function main() {
 
   $.extend(checkboxInputBinding, {
     find: function (scope) {
-      return $(scope).find("input[type=\"checkbox\"]");
+      return $(scope).find('input[type="checkbox"]');
     },
     getValue: function (el) {
       return el.checked;
@@ -4734,7 +4744,7 @@ function main() {
       }
       const sliderFeatures = ["min", "max", "step"];
 
-      for (var i = 0; i < sliderFeatures.length; i++) {
+      for (let i = 0; i < sliderFeatures.length; i++) {
         const feats = sliderFeatures[i];
 
         if (data.hasOwnProperty(feats)) {
@@ -4746,7 +4756,7 @@ function main() {
 
       const domElements = ["data-type", "time-format", "timezone"];
 
-      for (var i = 0; i < domElements.length; i++) {
+      for (let i = 0; i < domElements.length; i++) {
         const elem = domElements[i];
 
         if (data.hasOwnProperty(elem)) {
@@ -4789,7 +4799,7 @@ function main() {
     _getLabelNode: function (el) {
       return $(el)
         .parent()
-        .find("label[for=\"" + $escape(el.id) + "\"]");
+        .find('label[for="' + $escape(el.id) + '"]');
     },
     // Number of values; 1 for single slider, 2 for range slider
     _numValues: function (el) {
@@ -5058,7 +5068,7 @@ function main() {
       }
     },
     _getLabelNode: function (el) {
-      return $(el).find("label[for=\"" + $escape(el.id) + "\"]");
+      return $(el).find('label[for="' + $escape(el.id) + '"]');
     },
     // Given a format object from a date picker, return a string
     _formatToString: function (format) {
@@ -5066,7 +5076,7 @@ function main() {
       // { parts: ['mm', 'dd', 'yy'], separators: ['', '/', '/' ,''] }
       let str = "";
 
-      for (var i = 0; i < format.parts.length; i++) {
+      for (let i = 0; i < format.parts.length; i++) {
         str += format.separators[i] + format.parts[i];
       }
       str += format.separators[i];
@@ -5325,7 +5335,7 @@ function main() {
       $(el).off(".dateRangeInputBinding");
     },
     _getLabelNode: function (el) {
-      return $(el).find("label[for=\"" + $escape(el.id) + "\"]");
+      return $(el).find('label[for="' + $escape(el.id) + '"]');
     },
   });
   inputBindings.register(dateRangeInputBinding, "shiny.dateRangeInput");
@@ -5400,7 +5410,7 @@ function main() {
       if (data.hasOwnProperty("config")) {
         $el
           .parent()
-          .find("script[data-for=\"" + $escape(el.id) + "\"]")
+          .find('script[data-for="' + $escape(el.id) + '"]')
           .replaceWith(data.config);
         this._selectize(el, true);
       }
@@ -5494,7 +5504,7 @@ function main() {
       return $(el)
         .parent()
         .parent()
-        .find("label[for=\"" + escaped_id + "\"]");
+        .find('label[for="' + escaped_id + '"]');
     },
     // Return true if it's a selectize input, false if it's a regular select input.
     _is_selectize: function (el) {
@@ -5590,14 +5600,14 @@ function main() {
     setValue: function (el, value) {
       if ($.isArray(value) && value.length === 0) {
         // Removing all checked item if the sent data is empty
-        $("input:radio[name=\"" + $escape(el.id) + "\"]").prop("checked", false);
+        $('input:radio[name="' + $escape(el.id) + '"]').prop("checked", false);
       } else {
         $(
-          "input:radio[name=\"" +
+          'input:radio[name="' +
             $escape(el.id) +
-            "\"][value=\"" +
+            '"][value="' +
             $escape(value) +
-            "\"]"
+            '"]'
         ).prop("checked", true);
       }
     },
@@ -5647,7 +5657,7 @@ function main() {
     _getLabelNode: function (el) {
       return $(el)
         .parent()
-        .find("label[for=\"" + $escape(el.id) + "\"]");
+        .find('label[for="' + $escape(el.id) + '"]');
     },
     // Given an input DOM object, get the associated label. Handles labels
     // that wrap the input as well as labels associated with 'for' attribute.
@@ -5691,27 +5701,27 @@ function main() {
     },
     setValue: function (el, value) {
       // Clear all checkboxes
-      $("input:checkbox[name=\"" + $escape(el.id) + "\"]").prop("checked", false);
+      $('input:checkbox[name="' + $escape(el.id) + '"]').prop("checked", false);
 
       // Accept array
       if (value instanceof Array) {
         for (let i = 0; i < value.length; i++) {
           $(
-            "input:checkbox[name=\"" +
+            'input:checkbox[name="' +
               $escape(el.id) +
-              "\"][value=\"" +
+              '"][value="' +
               $escape(value[i]) +
-              "\"]"
+              '"]'
           ).prop("checked", true);
         }
         // Else assume it's a single value
       } else {
         $(
-          "input:checkbox[name=\"" +
+          'input:checkbox[name="' +
             $escape(el.id) +
-            "\"][value=\"" +
+            '"][value="' +
             $escape(value) +
-            "\"]"
+            '"]'
         ).prop("checked", true);
       }
     },
@@ -5759,7 +5769,7 @@ function main() {
     },
     // Get the DOM element that contains the top-level label
     _getLabelNode: function (el) {
-      return $(el).find("label[for=\"" + $escape(el.id) + "\"]");
+      return $(el).find('label[for="' + $escape(el.id) + '"]');
     },
     // Given an input DOM object, get the associated label. Handles labels
     // that wrap the input as well as labels associated with 'for' attribute.
@@ -6140,11 +6150,11 @@ function main() {
   // the page.
   let $fileInputs = $();
 
-  var fileInputBinding = new InputBinding();
+  const fileInputBinding = new InputBinding();
 
   $.extend(fileInputBinding, {
     find: function (scope) {
-      return $(scope).find("input[type=\"file\"]");
+      return $(scope).find('input[type="file"]');
     },
     getId: function (el) {
       return InputBinding.prototype.getId.call(this, el) || el.name;
@@ -6441,7 +6451,7 @@ function main() {
       // If there is a submit button on the page, use defer decorator
       inputs = inputsDefer;
 
-      $("input[type=\"submit\"], button[type=\"submit\"]").each(function () {
+      $('input[type="submit"], button[type="submit"]').each(function () {
         $(this).click(function (event) {
           event.preventDefault();
           inputsDefer.submit();
@@ -6500,11 +6510,11 @@ function main() {
       const inputItems = {};
 
       for (let i = 0; i < bindings.length; i++) {
-        var binding = bindings[i].binding;
+        const binding = bindings[i].binding;
         const matches = binding.find(scope) || [];
 
         for (let j = 0; j < matches.length; j++) {
-          var el = matches[j];
+          const el = matches[j];
           const id = binding.getId(el);
 
           // Check if ID is falsy, or if already bound
@@ -7016,7 +7026,7 @@ function main() {
     // The server needs to know what singletons were rendered as part of
     // the page loading
     const singletonText = (initialValues[".clientdata_singletons"] = $(
-      "script[type=\"application/shiny-singletons\"]"
+      'script[type="application/shiny-singletons"]'
     ).text());
 
     singletons.registerNames(singletonText.split(/,/));

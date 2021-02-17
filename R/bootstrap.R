@@ -1521,7 +1521,7 @@ downloadLink <- function(outputId, label="Download", class=NULL, ...) {
 #'
 #' @examples
 #' # add an icon to a submit button
-#' submitButton("Update View", icon = icon("refresh"))
+#' submitButton("Update View", icon = icon("redo"))
 #'
 #' navbarPage("App Title",
 #'   tabPanel("Plot", icon = icon("bar-chart-o")),

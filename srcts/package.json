@@ -13,6 +13,7 @@
     "@typescript-eslint/eslint-plugin": "^4",
     "@typescript-eslint/parser": "^4",
     "babel-polyfill": "^6.26.0",
+    "esbuild": "^0.8.46",
     "eslint": "^7",
     "eslint-config-prettier": "^7",
     "eslint-plugin-jest": "^24",
@@ -31,17 +32,20 @@
     "typescript": "^4"
   },
   "scripts": {
-    "build": "yarn build_shiny",
-    "pre_parcel": "yarn replace_shiny_version && yarn lint && yarn typescript-check",
-    "build_shiny": "yarn pre_parcel && parcel build -d ../inst/www/shared --no-minify -o shiny.js src/index.ts",
-    "watch": "yarn pre_parcel && parcel run -d ../inst/www/shared -o shiny.js srcjs/index.ts",
+    "postinstall": "yarn run build",
+    "build": "yarn run build_shiny",
+    "prebuild": "yarn run replace_shiny_version && yarn run lint && yarn run typescript-check",
+    "build_shiny": "yarn run pre_parcel && yarn run bundle_shiny",
+    "bundle_shiny": "esbuild src/index.ts --bundle --outfile=../inst/www/shared/shiny.js --define:SHINY_VERSION=\"\\\"`node -e 'console.log(require(\"readcontrol\").readSync(\"../DESCRIPTION\").version)'`\\\"\"",
+    "bundle_shiny_parcel": "parcel build -d ../inst/www/shared --no-minify -o shiny.js src/index.ts",
+    "watch_parcel": "yarn run pre_parcel && parcel run -d ../inst/www/shared -o shiny.js srcjs/index.ts",
     "replace_shiny_version": "replace --silent '\"[^\"]+\"; // @VERSION@' \"\\\"`node -e 'console.log(require(\"readcontrol\").readSync(\"../DESCRIPTION\").version)'`\\\"; // @VERSION@\" src/shiny.ts",
     "test": "jest",
     "lint": "eslint --fix --ext .ts src",
     "lint-check": "eslint --ext .ts src",
     "typescript-check": "tsc -p tsconfig.json --noEmit",
     "type-check": "type-coverage -p tsconfig.json --detail --at-least 85",
-    "checks": "yarn typescript-check && yarn type-check && yarn lint-check"
+    "checks": "yarn run typescript-check && yarn run type-check && yarn run lint-check"
   },
   "dependencies": {
     "lodash": "^4",

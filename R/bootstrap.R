@@ -1531,8 +1531,7 @@ icon <- function(name,
                  ...) {
 
   prefixes <- list(
-    "font-awesome-svg" = "fa",
-    "font-awesome-i" = "fa",
+    "font-awesome" = "fa",
     "glyphicon" = "glyphicon"
   )
   prefix <- prefixes[[lib]]

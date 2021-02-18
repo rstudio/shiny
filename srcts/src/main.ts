@@ -6,7 +6,7 @@
 /* eslint "prefer-const": 0 */
 /* eslint "no-constant-condition": 0 */
 
-import { $, jQuery } from "./window/globals";
+import { $, jQuery } from "./jquery";
 
 import {
   escapeHTML,
@@ -30,10 +30,10 @@ import {
   compareVersion,
   updateLabel,
   getComputedLinkColor,
-  blob,
+  makeBlob,
 } from "./utils";
 
-import { isQt, isIE, IEVersion } from "./window/browser";
+import { isQt, isIE, IEVersion } from "./utils/browser";
 
 import { FileProcessor } from "./file/FileProcessor";
 
@@ -542,7 +542,7 @@ function main() {
           if (!/^([$#!&-;=?-[\]_a-z~]|%[0-9a-fA-F]{2})+$/.test(defaultPath)) {
             defaultPath = encodeURI(defaultPath);
             // Bizarrely, QtWebKit requires us to encode these characters *twice*
-            if (isQt) {
+            if (isQt()) {
               defaultPath = encodeURI(defaultPath);
             }
           }
@@ -756,7 +756,7 @@ function main() {
 
         payload.push(uint32_to_buf(0x01020202)); // signature
 
-        const jsonBuf = blob.makeBlob([msg]);
+        const jsonBuf = makeBlob([msg]);
 
         payload.push(uint32_to_buf(jsonBuf.size));
         payload.push(jsonBuf);
@@ -768,7 +768,7 @@ function main() {
           payload.push(blobs[i]);
         }
 
-        msg = blob.makeBlob(payload);
+        msg = makeBlob(payload);
       }
 
       this.$sendMsg(msg);
@@ -2304,7 +2304,7 @@ function main() {
 
         $el.on("mousedown.image_output", clickInfo.mousedown);
 
-        if (isIE && IEVersion === 8) {
+        if (isIE() && IEVersion() === 8) {
           $el.on("dblclick.image_output", clickInfo.dblclickIE8);
         }
 
@@ -4054,7 +4054,7 @@ function main() {
         let removeSheet = function (sheet) {
           if (!sheet) return;
           sheet.disabled = true;
-          if (isIE) sheet.cssText = "";
+          if (isIE()) sheet.cssText = "";
           $(sheet.ownerNode).remove();
         };
 
@@ -4067,7 +4067,7 @@ function main() {
           // Use inline <style> approach for IE, otherwise use the more elegant
           // <link> -based approach
 
-          if (isIE) {
+          if (isIE()) {
             refreshStyle(href, oldSheet);
           } else {
             link.attr("href", href);

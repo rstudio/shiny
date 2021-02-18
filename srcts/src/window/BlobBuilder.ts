@@ -1,7 +1,15 @@
-const BlobBuilder =
-  window.BlobBuilder ||
-  window.WebKitBlobBuilder ||
-  window.MozBlobBuilder ||
-  window.MSBlobBuilder;
+function windowBlobBuilder() {
+  const blob =
+    /* eslint "@typescript-eslint/ban-ts-comment": 0 */
+    // @ts-ignore
+    window.BlobBuilder ||
+    // @ts-ignore
+    window.WebKitBlobBuilder ||
+    // @ts-ignore
+    window.MozBlobBuilder ||
+    window.MSBlobBuilder;
 
-export { BlobBuilder };
+  return blob;
+}
+
+export { windowBlobBuilder };

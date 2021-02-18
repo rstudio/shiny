@@ -1,5 +1,6 @@
 import { devicePixelRatio } from "../window/pixelRatio";
-import * as blob from "./blob";
+import { $ } from "../jquery";
+import { makeBlob } from "./blob";
 
 function escapeHTML(str: string): string {
   const escaped = {
@@ -379,5 +380,5 @@ export {
   compareVersion,
   updateLabel,
   getComputedLinkColor,
-  blob,
+  makeBlob,
 };

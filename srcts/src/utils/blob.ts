@@ -1,6 +1,13 @@
-import { BlobBuilder } from "../window/BlobBuilder";
+import { $ } from "../jquery";
 
-function makeBlob(parts: any): any {
+let BlobBuilder;
+
+function setBlobBuilder(BlobBuilder_: MSBlobBuilder): void {
+  BlobBuilder = BlobBuilder_;
+  return;
+}
+
+function makeBlob(parts: BlobPart[]): Blob {
   // Browser compatibility is a mess right now. The code as written works in
   // a variety of modern browsers, but sadly gives a deprecation warning
   // message on the console in current versions (as of this writing) of
@@ -31,4 +38,4 @@ function makeBlob(parts: any): any {
   }
 }
 
-export { makeBlob };
+export { makeBlob, setBlobBuilder };

@@ -1,4 +1,6 @@
-function main(): void {
+import { $ } from "../jquery";
+
+function track_history(): void {
   const origPushState = window.history.pushState;
 
   window.history.pushState = function (...args) {
@@ -9,4 +11,4 @@ function main(): void {
   };
 }
 
-export { main };
+export { track_history };

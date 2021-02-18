@@ -1492,8 +1492,7 @@ downloadLink <- function(outputId, label="Download", class=NULL, ...) {
 #' Create an icon
 #'
 #' Create an icon for use within a page. Icons can appear on their own, inside
-#' of a button, or as an icon for a [tabPanel()] within a
-#' [navbarPage()].
+#' of a button, or as an icon for a [tabPanel()] within a [navbarPage()].
 #'
 #' @param name The name of the icon. Icons are drawn from the [Font Awesome
 #'   Free](https://fontawesome.com/) (currently icons from the v5.13.0 set are
@@ -1502,16 +1501,13 @@ downloadLink <- function(outputId, label="Download", class=NULL, ...) {
 #'   libraries. Note that the `"fa-"` and `"glyphicon-"` prefixes should not be
 #'   used in icon names (i.e. the `"fa-calendar"` icon should be referred to as
 #'   `"calendar"`).
-#' @param class Additional classes to customize the style of a Font Awesome icon
-#'   (see the [usage examples](https://fontawesome.com/how-to-use) for details
-#'   on supported styles). This is only used for the `lib = "font-awesome-i"`
-#'   option.
+#' @param class Additional classes to customize the style of an icon (see the
+#'   [usage examples](https://fontawesome.com/how-to-use) for details on
+#'   supported styles).
 #' @param lib The icon library to use. If drawing from the Font Awesome library
-#'   of icons, this can be either `"font-awesome-svg"` or `"font-awesome-i"`
-#'   (which either use SVG icons or a font file to render the icon). The third
-#'   option is or `"glyphicon"` to use icons from the Glyphicons library.
-#' @param ... Arguments passed to the `<i>` tag of [htmltools::tags]. This is
-#'   only used for the `lib = "font-awesome-i"` option.
+#'   of icons, this should be `"font-awesome"`. The other option is or
+#'   `"glyphicon"` to use icons from the Glyphicons library.
+#' @param ... Arguments passed to the `<i>` tag of [htmltools::tags].
 #'
 #' @return An icon element.
 #'
@@ -1531,7 +1527,7 @@ downloadLink <- function(outputId, label="Download", class=NULL, ...) {
 #' @export
 icon <- function(name,
                  class = NULL,
-                 lib = "font-awesome-svg",
+                 lib = "font-awesome",
                  ...) {
 
   prefixes <- list(
@@ -1550,15 +1546,9 @@ icon <- function(name,
     )
   }
 
-  # Use the `fontawesome::fa()` function for FontAwesome icons
-  # with font-awesome-svg
-  if (lib == "font-awesome-svg") {
-    return(fontawesome::fa(name = name))
-  }
-
   # Use the `fontawesome::fa_i()` function for FontAwesome icons
-  # with font-awesome-i
-  if (lib == "font-awesome-i") {
+  # with font-awesome
+  if (lib == "font-awesome") {
     return(fontawesome::fa_i(name = name, class = class, ...))
   }
 

@@ -2580,3 +2580,137 @@ throttle <- function(r, millis, priority = 100, domain = getDefaultReactiveDomai
     r()
   }, label = "throttle result", ignoreNULL = FALSE, domain = domain)
 }
+
+
+# Conditional reactive --------------------
+
+# conditionalReactive
+
+#' Reactive expression that only fires when changed
+#'
+#' Prevents triggering an update when an upstream reactive is invalidated, but produces the same value.
+#'
+#' Normal use of \code{\link[shiny]{reactive}} will fire every time its upstream
+#' reactives are invalidated - even if the resulting value is the same.
+#' This function allows the use of a method to determine whether the current reactive
+#' should be invalidated (\code{checkFun})
+#'
+#' This function enables the  puts in some checks to prevent repeated firing
+#' and some options when the reactive's value is \code{NULL} or code{NA}.
+#'
+#' \code{NULL}s can also be aptly handled by \code{\link{req}(!is.null(x()))},
+#' where \code{x} is your reactive.
+#'
+#' @seealso
+#' \code{\link{req}}, \code{\link{validate}} for ensuring proper values in place before continuing.
+#' \code{\link{bindCache}} to re-use results from previous calculations.
+#'
+#' @export
+#' @param x A reactive.
+#' @param checkFunc A function that checks for equality. Receives 2 arguments, the new and then the old value. Must return \code{TRUE} for the conditional to fire.
+#' @param fire.on.NULL,fire.on.NA When new reactive's value is \code{NULL} or \code{NA}, should an update be triggered?
+#'   When \code{'change'}, the new and old values are passed to \code{checkFun} to determine the outcome.
+#'
+#' @param label A label for the reactive expression, useful for debugging.
+#'
+#' @section Strategies for handling \code{NULL}s and \code{NA}s:
+#'
+#' When \code{fire.on.NULL} or \code{fire.on.NA} is \code{"never"},
+#' if the reactive's new value is \code{NULL} or \code{NA} (respectively), an update is \emph{never} triggered,
+#' regardless of the reactive's previous value.
+#'
+#' When \code{fire.on.NULL} or \code{fire.on.NA} is \code{"always"},
+#' if the reactive's new value is \code{NULL} or \code{NA} (respectively), an update is \emph{always} triggered,
+#' regardless of the reactive's previous value.
+#'
+#' See following table how changes are handled for \code{NULL} and \code{fire.on.NULL}. Here, \code{value} may be \code{NA}.
+#' \tabular{lccc}{
+#'  Change: \tab "never" \tab "always" \tab "change" \cr
+#'  \code{NULL --> NULL} \tab no \tab yes \tab passed on to \code{checkFun} \cr
+#'  \code{NULL --> value} \tab yes \tab yes \tab passed on to \code{checkFun} \cr
+#'  \code{value --> NULL} \tab no \tab yes \tab passed on to \code{checkFun} \cr
+#' }
+#'
+#' See following table how changes are handled for \code{NA}s and \code{fire.on.NA}.
+#' \tabular{lccc}{
+#'  Change: \tab "never" \tab "always" \tab "change" \cr
+#'  \code{NULL --> value} \tab passed on to \code{checkFun} \tab passed on to \code{checkFun} \tab passed on to \code{checkFun} \cr
+#'  \code{NULL --> all(is.na)} \tab no \tab yes \tab passed on to \code{checkFun} \cr
+#'  \code{all(is.na) --> value} \tab passed on to \code{checkFun} \tab passed on to \code{checkFun} \tab passed on to \code{checkFun} \cr
+#'  \code{all(is.na) --> all(is.na)}  \tab no \tab yes \tab passed on to \code{checkFun} \cr
+#'  \code{value --> value} \tab passed on to \code{checkFun} \tab passed on to \code{checkFun} \tab passed on to \code{checkFun} \cr
+#'  \code{value --> all(is.na)}  \tab no \tab yes \tab passed on to \code{checkFun} \cr
+#' }
+#'
+#' @examples
+#' \dontrun{
+#'   # wrap inputs in reactive
+#'   x <- conditionalReactive(reactive(input$x))
+#'
+#'   values <- reactiveValues(A=1)
+#'
+#'   reactiveB <- reactive({
+#'      values$A + (runif(1) > 0.5)
+#'   })
+#'
+#'   # do not re-calculate when reactiveB is updated to same value
+#'   output$res <- renderText({
+#'     val <- conditionalReactive(reactiveB())()
+#'
+#'     Sys.sleep(3) ## some time consuming calculations
+#'     val
+#'   })
+#'   # see bindCache for simple manners to re-use results from reactive expressions.
+#' }
+conditionalReactive <- function(x, checkFunc=NULL, fire.on.NULL=c('never','change','always'), fire.on.NA=c('never','change','always'), label=NULL) {
+  fire.on.NULL <- match.arg(fire.on.NULL)
+  fire.on.NA <- match.arg(fire.on.NA)
+  if (is.null(checkFunc)) checkFunc <- default.checkFunc
+
+  if (!is.reactive(x))
+    stop('The expression in `x` must be a reactive. If an input, wrap in an reactive, i.e. `reactive(input$x)`.')
+
+  rv <- reactiveVal(isolate(x()), label=label)
+
+  re_finalized <- FALSE
+
+  o <- observe({
+    if (re_finalized) {
+      o$destroy()
+      rm(o, envir = parent.env(environment()))
+      return()
+    }
+
+    newval <- x()
+
+    if (is.null(newval) && fire.on.NULL == 'never') return()
+    if (!is.null(newval) && fire.on.NA == 'never' && all(is.na(newval))) return() ## all(is.na(NULL)) is apparently TRUE
+
+    if (is.null(newval) && fire.on.NULL == 'always' ||
+        !is.null(newval) && fire.on.NA == 'always' && all(is.na(newval))) {
+      rv(1) ## triggers an invalidation
+      rv(newval)
+      return()
+    }
+
+    old <- isolate(rv())
+
+    if (is.null(old) && fire.on.NULL == 'never' || checkFunc(newval, old)) rv(newval)
+  })
+
+  reg.finalizer(attr(x, "observable"), function(e) {
+    re_finalized <<- TRUE
+  })
+  return(rv)
+}
+
+# Default method for checking equality for conditionalReactive.
+# All behaviour regarding whether to ignore/accept all NULLs and NAs is handled in
+# conditionalReactive.
+default.checkFunc <- function(x,y) {
+  if (is.null(x) && is.null(y)) return(FALSE)
+  if (xor(is.null(x), is.null(y))) return(TRUE)
+  if (all(is.na(x)) && all(is.na(y))) return(FALSE)
+  if (length(x) != length(y)) return(TRUE)
+  return(all(x != y, na.rm=TRUE))
+}

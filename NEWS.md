@@ -13,6 +13,8 @@ shiny 1.6.0.9000
 
 * Switched from internal `Stack` class to `fastmap::faststack()`, and used `fastmap::fastqueue()`. (#3176)
 
+* Adding `conditionalReactive` for controlling reactives based on the (in-)equality between previous and new value.
+
 ### Bug fixes
 
 ### Library updates

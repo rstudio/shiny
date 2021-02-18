@@ -1,10 +1,3 @@
-declare global {
-  interface Window {
-    Shiny: any;
-    jQuery: JQueryStatic;
-  }
-}
-
 /* eslint "@typescript-eslint/ban-ts-comment": 0 */
 // @ts-ignore
 const WindowShiny = (window.Shiny = window.Shiny || {});

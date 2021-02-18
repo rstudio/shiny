@@ -9,4 +9,4 @@ init();
 
 main();
 
-window.console.log("Shiny version: ", Shiny.VERSION);
+window.console.log("Shiny version: ", Shiny.version);

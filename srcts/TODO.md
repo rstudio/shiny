@@ -30,7 +30,7 @@
 # Later TODO
 
 * After merging this PR, each _file_ will be pulled out as possible into smaller files
-* √ Remove parcel from package.json and only use esbuild
+* Remove parcel from package.json and only use esbuild
 * Break up `./utils` into many files
 * Remove any `: any` types
 * Fix all `// eslint-disable-next-line no-prototype-builtins` lines

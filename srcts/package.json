@@ -36,7 +36,7 @@
     "build": "yarn run build_shiny && yarn run bundle_shiny_minified",
     "prebuild": "yarn run lint && yarn run typescript-check",
     "build_shiny": "yarn run prebuild && yarn run bundle_shiny",
-    "esbuild_": "esbuild --bundle --define:SHINY_VERSION=\"\\\"`node -e 'console.log(require(\"readcontrol\").readSync(\"../DESCRIPTION\").version)'`\\\"\"",
+    "esbuild_": "echo 'building' && esbuild --bundle --define:SHINY_VERSION=\"\\\"`node -e 'console.log(require(\"readcontrol\").readSync(\"../DESCRIPTION\").version)'`\\\"\"",
     "bundle_shiny": "yarn run esbuild_ src/index.ts --sourcemap --outfile=../inst/www/shared/shiny.js",
     "bundle_shiny_minified": "yarn run esbuild_ src/index.ts --minify --sourcemap --outfile=../inst/www/shared/shiny.min.js",
     "bundle_shiny_parcel": "parcel build -d ../inst/www/shared --no-minify -o shiny.js src/index.ts",

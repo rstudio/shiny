@@ -4033,6 +4033,10 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
           sheet.disabled = true;
           if (browser.isIE) sheet.cssText = "";
           $(sheet.ownerNode).remove();
+          $(document).trigger({
+            type: 'shiny:restyle',
+            oldSheet: sheet
+          });
         };
 
         $.map(links, function (link) {

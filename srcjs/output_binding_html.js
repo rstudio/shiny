@@ -174,6 +174,9 @@ function renderDependency(dep) {
         sheet.disabled = true;
         if (browser.isIE) sheet.cssText = "";
         $(sheet.ownerNode).remove();
+        $(document).trigger({
+          type: 'shiny:restyle', oldSheet: sheet
+        });
       }
 
     }

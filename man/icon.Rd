@@ -4,7 +4,7 @@
 \alias{icon}
 \title{Create an icon}
 \usage{
-icon(name, class = NULL, lib = "font-awesome-svg", ...)
+icon(name, class = NULL, lib = "font-awesome", ...)
 }
 \arguments{
 \item{name}{The name of the icon. Icons are drawn from the \href{https://fontawesome.com/}{Font Awesome Free} (currently icons from the v5.13.0 set are
@@ -14,26 +14,22 @@ libraries. Note that the \code{"fa-"} and \code{"glyphicon-"} prefixes should no
 used in icon names (i.e. the \code{"fa-calendar"} icon should be referred to as
 \code{"calendar"}).}
 
-\item{class}{Additional classes to customize the style of a Font Awesome icon
-(see the \href{https://fontawesome.com/how-to-use}{usage examples} for details
-on supported styles). This is only used for the \code{lib = "font-awesome-i"}
-option.}
+\item{class}{Additional classes to customize the style of an icon (see the
+\href{https://fontawesome.com/how-to-use}{usage examples} for details on
+supported styles).}
 
 \item{lib}{The icon library to use. If drawing from the Font Awesome library
-of icons, this can be either \code{"font-awesome-svg"} or \code{"font-awesome-i"}
-(which either use SVG icons or a font file to render the icon). The third
-option is or \code{"glyphicon"} to use icons from the Glyphicons library.}
+of icons, this should be \code{"font-awesome"}. The other option is or
+\code{"glyphicon"} to use icons from the Glyphicons library.}
 
-\item{...}{Arguments passed to the \verb{<i>} tag of \link[htmltools:builder]{htmltools::tags}. This is
-only used for the \code{lib = "font-awesome-i"} option.}
+\item{...}{Arguments passed to the \verb{<i>} tag of \link[htmltools:builder]{htmltools::tags}.}
 }
 \value{
 An icon element.
 }
 \description{
 Create an icon for use within a page. Icons can appear on their own, inside
-of a button, or as an icon for a \code{\link[=tabPanel]{tabPanel()}} within a
-\code{\link[=navbarPage]{navbarPage()}}.
+of a button, or as an icon for a \code{\link[=tabPanel]{tabPanel()}} within a \code{\link[=navbarPage]{navbarPage()}}.
 }
 \examples{
 # add an icon to a submit button

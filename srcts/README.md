@@ -109,6 +109,16 @@ For this to work you must first install `xdotool` using your distribution's pack
 find ../srcts/ | entr bash -c './node_modules/grunt/bin/grunt && xdotool search --onlyvisible --class Chrome windowfocus key ctrl+r'
 ``` -->
 
+## Other `./package.json` scripts
+
+The scripts described below are inteded for developer use. All other scripts are means to an end.
+
+* `yarn run watch`: Watch `./src` for changes and rebuild `../inst/www/shared/shiny.js` and its sourcemap
+* `yarn run build`: Build `shiny.js` and `shiny.min.js` in `../inst/www/shared`. Both files will have a corresponding sourcemap
+* `yarn run lint`: Fix all TypeScript lints using [`eslint`](https://eslint.org/) and [`prettier`](https://prettier.io/)
+* `yarn run test`: Run all TypeScript tests
+
+
 ## Development in VSCode
 
 VSCode does not like to develop TypeScript in a subfolder. To leverage full VSCode capabilities, it is recommended to open the `./srcts` folder as the root folder of a project. This will enable VSCode to readily find all of the compilation and linting configuration files.

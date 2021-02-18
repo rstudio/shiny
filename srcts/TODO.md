@@ -22,10 +22,10 @@
 * √ Produce minified shiny js
 * √ Disable $ from being found without an import
   * √ Using a patch with yarn v2
-* Document `./package.json` scripts
-* Set up initial jest tests
+* √ Document `./package.json` scripts
 * Verify that `babel` is configurable
   * Meaning targeting browsers
+* Set up initial jest tests
 
 # Later TODO
 

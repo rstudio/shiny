@@ -1,4 +1,4 @@
-function windowBlobBuilder() {
+function windowBlobBuilder(): MSBlobBuilder {
   const blob =
     /* eslint "@typescript-eslint/ban-ts-comment": 0 */
     // @ts-ignore
@@ -9,7 +9,7 @@ function windowBlobBuilder() {
     window.MozBlobBuilder ||
     window.MSBlobBuilder;
 
-  return blob;
+  return blob as MSBlobBuilder;
 }
 
 export { windowBlobBuilder };

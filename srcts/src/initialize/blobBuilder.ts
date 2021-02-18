@@ -1,7 +1,7 @@
 import { setBlobBuilder } from "../utils/blob";
 import { windowBlobBuilder } from "../window/blobBuilder";
 
-function initBlobBuilder() {
+function initBlobBuilder(): void {
   setBlobBuilder(windowBlobBuilder());
 }
 

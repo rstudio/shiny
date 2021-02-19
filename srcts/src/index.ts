@@ -1,5 +1,3 @@
-import "babel-polyfill";
-
 import { init } from "./initialize";
 import { Shiny } from "./shiny";
 

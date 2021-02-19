@@ -1540,8 +1540,7 @@ icon <- function(name,
   if (is.null(prefix)) {
     stop(
       "Unknown font library '", lib, "' specified. Must be one of ",
-      paste0('"', names(prefixes), '"', collapse = ", "),
-      call. = FALSE
+      paste0('"', names(prefixes), '"', collapse = ", ")
     )
   }
 

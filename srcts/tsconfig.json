@@ -2,6 +2,7 @@
   "compilerOptions": {
     "target": "ES5",
     "preserveConstEnums": false,
+    "allowJs": true,
   },
   "include": [
     "src/index.ts",

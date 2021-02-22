@@ -1945,12 +1945,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/jquery@patch:@types/jquery@^3.5.5#./patch/types_jquery-1.patch::locator=root-workspace-0b6124%40workspace%3A.":
+"@types/jquery@patch:@types/jquery@^3.5.5#./patch/types-jquery.patch::locator=root-workspace-0b6124%40workspace%3A.":
   version: 3.5.5
-  resolution: "@types/jquery@patch:@types/jquery@npm%3A3.5.5#./patch/types_jquery-1.patch::version=3.5.5&hash=f9eb37&locator=root-workspace-0b6124%40workspace%3A."
+  resolution: "@types/jquery@patch:@types/jquery@npm%3A3.5.5#./patch/types-jquery.patch::version=3.5.5&hash=8c80d5&locator=root-workspace-0b6124%40workspace%3A."
   dependencies:
     "@types/sizzle": "*"
-  checksum: e26cddb26116ae0f58ddd464619d3703bab478c6b3a2a210367cba5f40d3f7cad9a01e8f9a75c34bb4ce8f6ffa6e3489634fd9764056ea8d5c28d3f85bbc9f2f
+  checksum: 92609fc997980ab3bcbb90f9d1731ec1da1f27deda3c21d64b8ca382be496f22a212066cea22913a6962402807861897cb66545dfb66146d9f145c4920ec1ea7
   languageName: node
   linkType: hard
 
@@ -9296,7 +9296,7 @@ fsevents@^2.1.2:
     "@babel/preset-typescript": ^7.12.17
     "@babel/runtime": ^7.12.18
     "@types/jest": ^26
-    "@types/jquery": "patch:@types/jquery@^3.5.5#./patch/types_jquery-1.patch"
+    "@types/jquery": "patch:@types/jquery@^3.5.5#./patch/types-jquery.patch"
     "@types/lodash": ^4
     "@typescript-eslint/eslint-plugin": ^4
     "@typescript-eslint/parser": ^4

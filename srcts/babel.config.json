@@ -8,5 +8,8 @@
         "corejs": "3.9"
       }
     ]
+  ],
+  "ignore":[
+    "node_modules/core-js"
   ]
 }

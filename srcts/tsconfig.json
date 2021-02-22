@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "target": "ES5",
-    "preserveConstEnums": true
+    "preserveConstEnums": false,
   },
   "include": [
     "src/index.ts",

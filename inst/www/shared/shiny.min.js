@@ -1458,10 +1458,10 @@
     }
     scopeExprToFunc2.call;
     function scopeExprToFunc2(expr) {
-      var expr_escaped = expr.replace(/[\\"']/g, "\\$&").replace(/\u0000/g, "\\0").replace(/\n/g, "\\n").replace(/\r/g, "\\r").replace(/[\b]/g, "\\b");
+      var exprEscaped = expr.replace(/[\\"']/g, "\\$&").replace(/\u0000/g, "\\0").replace(/\n/g, "\\n").replace(/\r/g, "\\r").replace(/[\b]/g, "\\b");
       var func;
       try {
-        func = new Function("with (this) {\n        try {\n          return (".concat(expr, ");\n        } catch (e) {\n          console.error('Error evaluating expression: ").concat(expr_escaped, "');\n          throw e;\n        }\n      }"));
+        func = new Function("with (this) {\n        try {\n          return (".concat(expr, ");\n        } catch (e) {\n          console.error('Error evaluating expression: ").concat(exprEscaped, "');\n          throw e;\n        }\n      }"));
       } catch (e) {
         console.error("Error parsing expression: " + expr);
         throw e;
@@ -7230,14 +7230,14 @@
   var $ = jQuery;
 
   // src/initialize/disableForm.ts
-  function disable_form() {
+  function disableFormSubmission() {
     $(document).on("submit", "form:not([action])", function(e) {
       e.preventDefault();
     });
   }
 
   // src/initialize/history.ts
-  function track_history() {
+  function trackHistory() {
     var origPushState = window.history.pushState;
     window.history.pushState = function() {
       for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
@@ -7311,7 +7311,7 @@
     }
     return -1;
   }
-  function determine_browser_info() {
+  function determineBrowserInfo() {
     if (/\bQt\//.test(userAgent)) {
       $(document.documentElement).addClass("qt");
       setIsQt(true);
@@ -7356,9 +7356,9 @@
 
   // src/initialize/index.ts
   function init() {
-    determine_browser_info();
-    track_history();
-    disable_form();
+    determineBrowserInfo();
+    trackHistory();
+    disableFormSubmission();
     initBlobBuilder();
   }
 

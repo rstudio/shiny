@@ -23,6 +23,8 @@ rules:
     - off
   "@typescript-eslint/no-explicit-any":
     - off
+  camelcase:
+    - error
   default-case:
     - error
   indent:

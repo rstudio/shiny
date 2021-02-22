@@ -141,7 +141,7 @@ function pixelRatio(): number {
 scopeExprToFunc.call;
 function scopeExprToFunc(expr: string): (scope: any) => any {
   /*jshint evil: true */
-  const expr_escaped = expr
+  const exprEscaped = expr
     .replace(/[\\"']/g, "\\$&")
     // eslint-disable-next-line no-control-regex
     .replace(/\u0000/g, "\\0")
@@ -158,7 +158,7 @@ function scopeExprToFunc(expr: string): (scope: any) => any {
         try {
           return (${expr});
         } catch (e) {
-          console.error('Error evaluating expression: ${expr_escaped}');
+          console.error('Error evaluating expression: ${exprEscaped}');
           throw e;
         }
       }`

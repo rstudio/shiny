@@ -27,7 +27,7 @@ function getIEVersion() {
   return -1;
 }
 
-function determine_browser_info() {
+function determineBrowserInfo() {
   // For easy handling of Qt quirks using CSS
 
   if (/\bQt\//.test(userAgent)) {
@@ -48,4 +48,4 @@ function determine_browser_info() {
   setIEVersion(getIEVersion());
 }
 
-export { determine_browser_info };
+export { determineBrowserInfo };

@@ -1,5 +1,6 @@
 /* eslint "@typescript-eslint/ban-ts-comment": 0 */
 // @ts-nocheck
+/* eslint "camelcase": 0 */
 /* eslint "@typescript-eslint/no-unused-vars": 0 */
 /* eslint "@typescript-eslint/no-this-alias": 0 */
 /* eslint "@typescript-eslint/no-empty-function": 0 */

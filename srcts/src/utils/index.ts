@@ -37,7 +37,7 @@ function strToBool(str: string): boolean | undefined {
 
 // A wrapper for getComputedStyle that is compatible with older browsers.
 // This is significantly faster than jQuery's .css() function.
-function getStyle(el: any, styleProp: string): string | undefined {
+function getStyle(el: Element, styleProp: string): string | undefined {
   let x = undefined;
 
   if (el.currentStyle) x = el.currentStyle[styleProp];

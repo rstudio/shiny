@@ -3,6 +3,7 @@
     "target": "ES5",
     "preserveConstEnums": false,
     "allowJs": true,
+    "isolatedModules": true
   },
   "include": [
     "src/index.ts",

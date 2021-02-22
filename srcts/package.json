@@ -27,7 +27,7 @@
     "lint-staged": "^10",
     "parcel": "^1.12.3",
     "parcel-bundler": "^1.12.3",
-    "phantomjs": "^2.1.7",
+    "phantomjs-prebuilt": "^2.1.16",
     "prettier": "2",
     "readcontrol": "^1.0.0",
     "replace": "^1.2.0",

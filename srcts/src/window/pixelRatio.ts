@@ -1,5 +1,5 @@
-function devicePixelRatio(): number {
+function windowDevicePixelRatio(): number {
   return window.devicePixelRatio;
 }
 
-export { devicePixelRatio };
+export { windowDevicePixelRatio };

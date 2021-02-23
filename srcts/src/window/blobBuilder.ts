@@ -1,10 +1,12 @@
 function windowBlobBuilder(): MSBlobBuilder {
   const blob =
-    /* eslint "@typescript-eslint/ban-ts-comment": 0 */
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     window.BlobBuilder ||
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     window.WebKitBlobBuilder ||
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     window.MozBlobBuilder ||
     window.MSBlobBuilder;

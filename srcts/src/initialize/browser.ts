@@ -1,7 +1,7 @@
-import { userAgent } from "../window/globals";
 import { $ } from "../jquery";
 
 import { isIE, setIsQt, setIsIE, setIEVersion } from "../utils/browser";
+import { userAgent } from "../utils/userAgent";
 
 function getIEVersion() {
   const msie = userAgent.indexOf("MSIE ");
@@ -27,7 +27,7 @@ function getIEVersion() {
   return -1;
 }
 
-function determineBrowserInfo() {
+function determineBrowserInfo(): void {
   // For easy handling of Qt quirks using CSS
 
   if (/\bQt\//.test(userAgent)) {

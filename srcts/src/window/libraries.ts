@@ -1,5 +1,3 @@
-/* eslint "@typescript-eslint/ban-ts-comment": 0 */
-
 // Why this file is just an extension of JQuery with no import/exports
 // https://stackoverflow.com/a/30961346/591574
 
@@ -10,11 +8,11 @@
 //   bsDatepicker(method: string): string | number | Date | null;
 // }
 
-// @ts-ignore
-const WindowShiny = (window.Shiny = window.Shiny || {});
-// @ts-ignore
-const jQuery: JQueryStatic = window.jQuery;
+function windowShiny(): any {
+  return (window as any)["Shiny"] || {};
+}
+function windowJQuery(): JQueryStatic {
+  return (window as any)["jQuery"] as JQueryStatic;
+}
 
-const userAgent = window.navigator.userAgent;
-
-export { jQuery, jQuery as $, WindowShiny, userAgent };
+export { windowShiny, windowJQuery };

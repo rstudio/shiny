@@ -1,6 +1,7 @@
-// import { jQuery, $ } from "../window/globals";
+let jQuery: JQueryStatic;
 
-const jQuery = (window as any)["jQuery"];
-const $: JQueryStatic = jQuery;
+function setJQuery(jQuery_: JQueryStatic): void {
+  jQuery = jQuery_;
+}
 
-export { jQuery, $ };
+export { jQuery, jQuery as $, setJQuery };

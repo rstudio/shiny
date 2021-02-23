@@ -2,23 +2,23 @@ let isQtVal = false;
 let isIEVal = false;
 let IEVersionVal = -1;
 
-function setIsQt(isQt: boolean) {
+function setIsQt(isQt: boolean): void {
   isQtVal = isQt;
 }
-function setIsIE(isIE: boolean) {
+function setIsIE(isIE: boolean): void {
   isIEVal = isIE;
 }
-function setIEVersion(IEVersion_: number) {
+function setIEVersion(IEVersion_: number): void {
   IEVersionVal = IEVersion_;
 }
 
-function isQt() {
+function isQt(): boolean {
   return isQtVal;
 }
-function isIE() {
+function isIE(): boolean {
   return isIEVal;
 }
-function IEVersion() {
+function IEVersion(): number {
   return IEVersionVal;
 }
 

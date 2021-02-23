@@ -1,4 +1,4 @@
-import { devicePixelRatio } from "../window/pixelRatio";
+import { windowDevicePixelRatio } from "../window/pixelRatio";
 import { $ } from "../jquery";
 import { makeBlob } from "./blob";
 
@@ -130,8 +130,8 @@ function makeResizeFilter(
 }
 
 function pixelRatio(): number {
-  if (devicePixelRatio()) {
-    return Math.round(window.devicePixelRatio * 100) / 100;
+  if (windowDevicePixelRatio()) {
+    return Math.round(windowDevicePixelRatio() * 100) / 100;
   } else {
     return 1;
   }

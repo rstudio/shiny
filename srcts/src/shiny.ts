@@ -1,12 +1,25 @@
-import { WindowShiny } from "./window/globals";
 import { $escape, compareVersion } from "./utils";
 
-// Tell TS to ignore this line as the _true_ value is defined at compile time
-/* eslint "@typescript-eslint/ban-ts-comment": 0 */
-// @ts-ignore
-WindowShiny.version = SHINY_VERSION;
+interface ShinyType {
+  version: string;
+  $escape: any;
+  compareVersion: any;
+}
 
-WindowShiny.$escape = $escape;
-WindowShiny.compareVersion = compareVersion;
+let Shiny: any;
 
-export { WindowShiny as Shiny };
+function setShiny(Shiny_: ShinyType): void {
+  Shiny = Shiny_;
+
+  // Tell TS to ignore this line as the _true_ value is defined at compile time
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+  Shiny.version = SHINY_VERSION;
+
+  Shiny.$escape = $escape;
+  Shiny.compareVersion = compareVersion;
+}
+
+export { Shiny, setShiny };
+
+export type { ShinyType };

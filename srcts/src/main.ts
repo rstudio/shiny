@@ -41,7 +41,7 @@ import { FileProcessor } from "./file/FileProcessor";
 
 import { Shiny } from "./shiny";
 
-function main() {
+function main(): void {
   // "_start.js"
   // √
 

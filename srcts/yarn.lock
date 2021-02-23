@@ -4274,21 +4274,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-esbuild-plugin-babel@^0.2.2:
-  version: 0.2.2
-  resolution: "esbuild-plugin-babel@npm:0.2.2"
+"esbuild-plugin-babel@npm:0.2.3":
+  version: 0.2.3
+  resolution: "esbuild-plugin-babel@npm:0.2.3"
   peerDependencies:
     "@babel/core": ^7.0.0
-  checksum: 3c125dbbd4ad4e87f2254b310f3d7b770a18390e673d4c8423961bb6a4818132e7a44f37a31903fc251c3b26bdb742e143be95736e33f642b2495158be135998
-  languageName: node
-  linkType: hard
-
-"esbuild-plugin-babel@patch:esbuild-plugin-babel@^0.2.2#./patch/esbuild-babel.patch::locator=root-workspace-0b6124%40workspace%3A.":
-  version: 0.2.2
-  resolution: "esbuild-plugin-babel@patch:esbuild-plugin-babel@npm%3A0.2.2#./patch/esbuild-babel.patch::version=0.2.2&hash=d374f2&locator=root-workspace-0b6124%40workspace%3A."
-  peerDependencies:
-    "@babel/core": ^7.0.0
-  checksum: c1a697adb909cfcd6778cfc9374321efefacc67b01a86872ea396f0b217c1a1f3b021661fedf57328e72383164782154c8d94e0dc53d663da2f431ab6c44e7ca
+  checksum: d3485d2c45742a7a36c040656f99c7326cfc34df758c46fd270a7c6e6475daf7bdcf82871e772cccee0819db11263ce373b6dc99a790b6f25173a695144ec31f
   languageName: node
   linkType: hard
 
@@ -9303,7 +9294,7 @@ fsevents@^2.1.2:
     browserslist: ^4.16.3
     core-js: ^3.9
     esbuild: ^0.8.50
-    esbuild-plugin-babel: "patch:esbuild-plugin-babel@^0.2.2#./patch/esbuild-babel.patch"
+    esbuild-plugin-babel: 0.2.3
     eslint: ^7
     eslint-config-prettier: ^7
     eslint-plugin-jest: ^24

@@ -109,19 +109,30 @@ For this to work you must first install `xdotool` using your distribution's pack
 find ../srcts/ | entr bash -c './node_modules/grunt/bin/grunt && xdotool search --onlyvisible --class Chrome windowfocus key ctrl+r'
 ``` -->
 
-## Other `./package.json` scripts
-
-The scripts described below are inteded for developer use. All other scripts are means to an end.
-
-* `yarn run watch`: Watch `./src` for changes and rebuild `../inst/www/shared/shiny.js` and its sourcemap
-* `yarn run build`: Build `shiny.js` and `shiny.min.js` in `../inst/www/shared`. Both files will have a corresponding sourcemap
-* `yarn run lint`: Fix all TypeScript lints using [`eslint`](https://eslint.org/) and [`prettier`](https://prettier.io/)
-* `yarn run test`: Run all TypeScript tests
 
 
 ## Development in VSCode
 
 VSCode does not like to develop TypeScript in a subfolder. To leverage full VSCode capabilities, it is recommended to open the `./srcts` folder as the root folder of a project. This will enable VSCode to readily find all of the compilation and linting configuration files.
+
+## Config files
+
+* `.browserslistrc`: Used with `browserslist` and `core-js` to determine which polyfills should be incorporated.
+* `.eslintrc.yml`: Used with `eslint` and `prettier` to determine how the TypeScript files should be formatted and which lint failures should cause warnings, errors, or be ignored.
+* `.prettierrc.yml`: Used by `prettier` to know how to adjust code when a file is saved in VSCode or within `eslint`'s linting process.
+* `yarnrc.yml`: Notifies `yarn` to use `yarn` v2, install `./node_modules` folder for esbuild, and any plugins that may be used.
+* `babel.config.json`: Used within `babel` transpilation of TypeScript -> JavaScript -> polyfilled JavaScript. `core-js` polyfills are only added as necessary and the `core-js` library is directly ignored to [avoid being processed by `babel`](https://github.com/zloirock/core-js/issues/743#issuecomment-571983318).
+* `esbuild.config.mjs`: Script that will build `shiny.js` and `shiny.min.js` with their sourcemaps
+* `jest.config.js`: Used to configure `jest` testing
+* `package.json`: Contains useful scripts that can be run by `yarn` via `yarn run SCRIPTNAME`. The scripts described below are inteded for developer use. All other scripts are means to an end.
+  * `yarn run watch`: Watch `./src` for changes and rebuild the JavaScript files.
+  * `yarn run build`: Build `shiny.js` and `shiny.min.js` in `../inst/www/shared`. Both files will have a corresponding sourcemap
+  * `yarn run lint`: Fix all TypeScript lints using [`eslint`](https://eslint.org/) and [`prettier`](https://prettier.io/)
+  * `yarn run test`: Run all TypeScript tests
+* `tsconfig.json`: Used by TypeScript.
+  * `target: ES5`: Compile to es5, so babel has an easier job.
+  * `preserveConstEnums: false`: Do no preserve enum values into the final code. (If true, produces bloat / unused code)
+  * `isolatedModules: true`: Requested by esbuild. This allows for esbuild to compile the files in parallel.
 
 # Updating web libraries
 ## `@types/jquery`
@@ -132,11 +143,11 @@ To overcome this, a patch is used to remove the two variable declarations. Yarn 
 
 If in the future the variables are not declared anymore, the patch may be removed and `@types/jquery` can be imported directly.
 
-## `babel-polyfill`
+## `core-js`
 
-To update the version of `babel-polyfill`:
+To update the version of `core-js`:
 
-* Check if there is a newer version available by running `yarn outdated babel-polyfill`. (If there's no output, then you have the latest version.)
-* Run `yarn add --dev babel-polyfill --exact`.
+* Check if there is a newer version available by running `yarn outdated core-js`. (If there's no output, then you have the latest version.)
+* Run `yarn add --dev core-js --exact`.
 * Edit R/shinyui.R. The `renderPage` function has an `htmlDependency` for
   `babel-polyfill`. Update this to the new version number.

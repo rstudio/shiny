@@ -32,7 +32,6 @@
     "readcontrol": "^1.0.0",
     "replace": "^1.2.0",
     "ts-jest": "^26",
-    "ts-polyfill": "^3.8.2",
     "type-coverage": "^2",
     "typescript": "^4"
   },

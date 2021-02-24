@@ -1077,7 +1077,8 @@ var ShinyApp = function() {
               '</div>' +
             '</div>',
           id: message.id,
-          duration: null
+          duration: null,
+          closeButton: message.closeButton
         });
 
       } else if (message.style === "old") {

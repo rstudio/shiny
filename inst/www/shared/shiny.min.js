@@ -1296,326 +1296,6 @@
     };
   });
 
-  // src/utils/index.ts
-  var require_utils = __commonJS(function(exports2) {
-    __markAsModule(exports2);
-    __export(exports2, {
-      $escape: function() {
-        return $escape3;
-      },
-      _equal: function() {
-        return _equal;
-      },
-      asArray: function() {
-        return asArray2;
-      },
-      compareVersion: function() {
-        return compareVersion2;
-      },
-      equal: function() {
-        return equal2;
-      },
-      escapeHTML: function() {
-        return escapeHTML2;
-      },
-      formatDateUTC: function() {
-        return formatDateUTC2;
-      },
-      getComputedLinkColor: function() {
-        return getComputedLinkColor2;
-      },
-      getStyle: function() {
-        return getStyle2;
-      },
-      isnan: function() {
-        return isnan2;
-      },
-      makeBlob: function() {
-        return makeBlob2;
-      },
-      makeResizeFilter: function() {
-        return makeResizeFilter2;
-      },
-      mapValues: function() {
-        return mapValues2;
-      },
-      mergeSort: function() {
-        return mergeSort2;
-      },
-      padZeros: function() {
-        return padZeros;
-      },
-      parseDate: function() {
-        return parseDate2;
-      },
-      pixelRatio: function() {
-        return pixelRatio2;
-      },
-      randomId: function() {
-        return randomId2;
-      },
-      roundSignif: function() {
-        return roundSignif2;
-      },
-      scopeExprToFunc: function() {
-        return scopeExprToFunc2;
-      },
-      strToBool: function() {
-        return strToBool2;
-      },
-      updateLabel: function() {
-        return updateLabel2;
-      }
-    });
-    var import_es_regexp_exec = __toModule(require_es_regexp_exec());
-    function escapeHTML2(str) {
-      var escaped = {
-        "&": "&amp;",
-        "<": "&lt;",
-        ">": "&gt;",
-        '"': "&quot;",
-        "'": "&#039;",
-        "/": "&#x2F;"
-      };
-      return str.replace(/[&<>'"/]/g, function(m) {
-        return escaped[m];
-      });
-    }
-    function randomId2() {
-      return Math.floor(4294967296 + Math.random() * 64424509440).toString(16);
-    }
-    function strToBool2(str) {
-      if (!str || !str.toLowerCase)
-        return void 0;
-      switch (str.toLowerCase()) {
-        case "true":
-          return true;
-        case "false":
-          return false;
-        default:
-          return void 0;
-      }
-    }
-    function getStyle2(el, styleProp) {
-      var x = void 0;
-      if (el.currentStyle)
-        x = el.currentStyle[styleProp];
-      else if (window.getComputedStyle) {
-        var style = document.defaultView.getComputedStyle(el, null);
-        if (style)
-          x = style.getPropertyValue(styleProp);
-      }
-      return x;
-    }
-    function padZeros(n, digits) {
-      var str = n.toString();
-      while (str.length < digits) {
-        str = "0" + str;
-      }
-      return str;
-    }
-    function roundSignif2(x) {
-      var digits = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : 1;
-      if (digits < 1)
-        throw "Significant digits must be at least 1.";
-      return parseFloat(x.toPrecision(digits));
-    }
-    function parseDate2(dateString) {
-      var date = new Date(dateString);
-      if (date.toString() === "Invalid Date") {
-        date = new Date(dateString.replace(/-/g, "/"));
-      }
-      return date;
-    }
-    function formatDateUTC2(date) {
-      if (date instanceof Date) {
-        return date.getUTCFullYear() + "-" + padZeros(date.getUTCMonth() + 1, 2) + "-" + padZeros(date.getUTCDate(), 2);
-      } else {
-        return null;
-      }
-    }
-    function makeResizeFilter2(el, func) {
-      var lastSize = {};
-      return function() {
-        var size = {
-          w: el.offsetWidth,
-          h: el.offsetHeight
-        };
-        if (size.w === 0 && size.h === 0)
-          return;
-        if (size.w === lastSize.w && size.h === lastSize.h)
-          return;
-        lastSize = size;
-        func(size.w, size.h);
-      };
-    }
-    function pixelRatio2() {
-      if (windowDevicePixelRatio()) {
-        return Math.round(windowDevicePixelRatio() * 100) / 100;
-      } else {
-        return 1;
-      }
-    }
-    scopeExprToFunc2.call;
-    function scopeExprToFunc2(expr) {
-      var exprEscaped = expr.replace(/[\\"']/g, "\\$&").replace(/\u0000/g, "\\0").replace(/\n/g, "\\n").replace(/\r/g, "\\r").replace(/[\b]/g, "\\b");
-      var func;
-      try {
-        func = new Function("with (this) {\n        try {\n          return (".concat(expr, ");\n        } catch (e) {\n          console.error('Error evaluating expression: ").concat(exprEscaped, "');\n          throw e;\n        }\n      }"));
-      } catch (e) {
-        console.error("Error parsing expression: " + expr);
-        throw e;
-      }
-      return function(scope) {
-        return func.call(scope);
-      };
-    }
-    function asArray2(value) {
-      if (value === null || value === void 0)
-        return [];
-      if (Array.isArray(value))
-        return value;
-      return [value];
-    }
-    function mergeSort2(list, sortfunc) {
-      function merge(sortfunc2, a, b) {
-        var ia = 0;
-        var ib = 0;
-        var sorted = [];
-        while (ia < a.length && ib < b.length) {
-          if (sortfunc2(a[ia], b[ib]) <= 0) {
-            sorted.push(a[ia++]);
-          } else {
-            sorted.push(b[ib++]);
-          }
-        }
-        while (ia < a.length) {
-          sorted.push(a[ia++]);
-        }
-        while (ib < b.length) {
-          sorted.push(b[ib++]);
-        }
-        return sorted;
-      }
-      list = list.slice(0);
-      for (var chunkSize = 1; chunkSize < list.length; chunkSize *= 2) {
-        for (var i = 0; i < list.length; i += chunkSize * 2) {
-          var listA = list.slice(i, i + chunkSize);
-          var listB = list.slice(i + chunkSize, i + chunkSize * 2);
-          var merged = merge(sortfunc, listA, listB);
-          var args = [i, merged.length];
-          Array.prototype.push.apply(args, merged);
-          Array.prototype.splice.apply(list, args);
-        }
-      }
-      return list;
-    }
-    var $escape3 = exports2.$escape = function(val) {
-      return val.replace(/([!"#$%&'()*+,./:;<=>?@[\\\]^`{|}~])/g, "\\$1");
-    };
-    function mapValues2(obj, f) {
-      var newObj = {};
-      for (var _key in obj) {
-        if (obj.hasOwnProperty(_key))
-          newObj[_key] = f(obj[_key], _key, obj);
-      }
-      return newObj;
-    }
-    function isnan2(x) {
-      return typeof x === "number" && isNaN(x);
-    }
-    function _equal(x, y) {
-      if (jQuery.type(x) === "object" && jQuery.type(y) === "object") {
-        if (Object.keys(x).length !== Object.keys(y).length)
-          return false;
-        for (var prop in x) {
-          if (!y.hasOwnProperty(prop) || !_equal(x[prop], y[prop]))
-            return false;
-        }
-        return true;
-      } else if (jQuery.type(x) === "array" && jQuery.type(y) === "array") {
-        if (x.length !== y.length)
-          return false;
-        for (var i = 0; i < x.length; i++) {
-          if (!_equal(x[i], y[i]))
-            return false;
-        }
-        return true;
-      } else {
-        return x === y;
-      }
-    }
-    function equal2() {
-      if (arguments.length < 2)
-        throw new Error("equal requires at least two arguments.");
-      for (var i = 0; i < arguments.length - 1; i++) {
-        if (!_equal(i < 0 || arguments.length <= i ? void 0 : arguments[i], i + 1 < 0 || arguments.length <= i + 1 ? void 0 : arguments[i + 1]))
-          return false;
-      }
-      return true;
-    }
-    var compareVersion2 = function compareVersion3(a, op, b) {
-      function versionParts(ver) {
-        return (ver + "").replace(/-/, ".").replace(/(\.0)+[^.]*$/, "").split(".");
-      }
-      function cmpVersion(a2, b2) {
-        a2 = versionParts(a2);
-        b2 = versionParts(b2);
-        var len = Math.min(a2.length, b2.length);
-        var cmp;
-        for (var i = 0; i < len; i++) {
-          cmp = parseInt(a2[i], 10) - parseInt(b2[i], 10);
-          if (cmp !== 0) {
-            return cmp;
-          }
-        }
-        return a2.length - b2.length;
-      }
-      var diff = cmpVersion(a, b);
-      if (op === "==")
-        return diff === 0;
-      else if (op === ">=")
-        return diff >= 0;
-      else if (op === ">")
-        return diff > 0;
-      else if (op === "<=")
-        return diff <= 0;
-      else if (op === "<")
-        return diff < 0;
-      else
-        throw "Unknown operator: ".concat(op);
-    };
-    function updateLabel2(labelTxt, labelNode) {
-      if (typeof labelTxt === "undefined")
-        return;
-      if (labelNode.length !== 1) {
-        throw new Error("labelNode must be of length 1");
-      }
-      var emptyLabel = Array.isArray(labelTxt) && labelTxt.length === 0;
-      if (emptyLabel) {
-        labelNode.addClass("shiny-label-null");
-      } else {
-        labelNode.text(labelTxt);
-        labelNode.removeClass("shiny-label-null");
-      }
-    }
-    function getComputedLinkColor2(el) {
-      var a = document.createElement("a");
-      a.href = "/";
-      var div = document.createElement("div");
-      div.style.setProperty("position", "absolute", "important");
-      div.style.setProperty("top", "-1000px", "important");
-      div.style.setProperty("left", "0", "important");
-      div.style.setProperty("width", "30px", "important");
-      div.style.setProperty("height", "10px", "important");
-      div.appendChild(a);
-      el.appendChild(div);
-      var linkColor = window.getComputedStyle(a).getPropertyValue("color");
-      el.removeChild(div);
-      return linkColor;
-    }
-  });
-
   // node_modules/core-js/internals/function-bind-context.js
   var require_function_bind_context = __commonJS(function(exports2, module2) {
     var aFunction = require_a_function();
@@ -2428,8 +2108,7 @@
         return main;
       }
     });
-    var import_es_regexp_exec = __toModule(require_es_regexp_exec());
-    var import_utils2 = __toModule(require_utils());
+    var import_es_regexp_exec2 = __toModule(require_es_regexp_exec());
     function _typeof(obj) {
       "@babel/helpers - typeof";
       if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
@@ -2956,14 +2635,14 @@
             };
             var payload = [];
             payload.push(uint32_to_buf(16908802));
-            var jsonBuf = import_utils2.makeBlob([msg]);
+            var jsonBuf = makeBlob([msg]);
             payload.push(uint32_to_buf(jsonBuf.size));
             payload.push(jsonBuf);
             for (var i = 0; i < blobs.length; i++) {
               payload.push(uint32_to_buf(blobs[i].byteLength || blobs[i].size || 0));
               payload.push(blobs[i]);
             }
-            msg = import_utils2.makeBlob(payload);
+            msg = makeBlob(payload);
           }
           this.$sendMsg(msg);
         };
@@ -3066,7 +2745,7 @@
             var condFunc = el.data("data-display-if-func");
             if (!condFunc) {
               var condExpr = el.attr("data-display-if");
-              condFunc = import_utils2.scopeExprToFunc(condExpr);
+              condFunc = scopeExprToFunc(condExpr);
               el.data("data-display-if-func", condFunc);
             }
             var nsPrefix = el.attr("data-ns-prefix");
@@ -3171,7 +2850,7 @@
         });
         addMessageHandler("inputMessages", function(message) {
           for (var i = 0; i < message.length; i++) {
-            var $obj = jQuery(".shiny-bound-input#" + import_utils2.$escape(message[i].id));
+            var $obj = jQuery(".shiny-bound-input#" + $escape(message[i].id));
             var inputBinding = $obj.data("shiny-input-binding");
             if ($obj.length > 0) {
               if (!$obj.attr("aria-live"))
@@ -3297,18 +2976,18 @@
           }
         });
         function getTabset(id) {
-          var $tabset = jQuery("#" + import_utils2.$escape(id));
+          var $tabset = jQuery("#" + $escape(id));
           if ($tabset.length === 0)
             throw "There is no tabsetPanel (or navbarPage or navlistPanel) with id equal to '" + id + "'";
           return $tabset;
         }
         function getTabContent($tabset) {
           var tabsetId = $tabset.attr("data-tabsetid");
-          var $tabContent = jQuery("div.tab-content[data-tabsetid='" + import_utils2.$escape(tabsetId) + "']");
+          var $tabContent = jQuery("div.tab-content[data-tabsetid='" + $escape(tabsetId) + "']");
           return $tabContent;
         }
         function getTargetTabs($tabset, $tabContent, target) {
-          var dataValue = "[data-value='" + import_utils2.$escape(target) + "']";
+          var dataValue = "[data-value='" + $escape(target) + "']";
           var $aTag = $tabset.find("a" + dataValue);
           var $liTag = $aTag.parent();
           if ($liTag.length === 0) {
@@ -3323,7 +3002,7 @@
             $dropdownLiTags.each(function(i, el) {
               $liTags.push(jQuery(el));
             });
-            var selector = "div.tab-pane[id^='tab-" + import_utils2.$escape(dropdownId) + "']";
+            var selector = "div.tab-pane[id^='tab-" + $escape(dropdownId) + "']";
             var $dropdownDivs = $tabContent.find(selector);
             $dropdownDivs.each(function(i, el) {
               $divTags.push(jQuery(el));
@@ -3406,7 +3085,7 @@
           }
           function getDropdown() {
             if (message.menuName !== null) {
-              var $dropdownATag = jQuery("a.dropdown-toggle[data-value='" + import_utils2.$escape(message.menuName) + "']");
+              var $dropdownATag = jQuery("a.dropdown-toggle[data-value='" + $escape(message.menuName) + "']");
               if ($dropdownATag.length === 0) {
                 throw "There is no navbarMenu with menuName equal to '" + message.menuName + "'";
               }
@@ -3607,7 +3286,7 @@
           if (fullUrl) {
             url = loc.origin + loc.pathname.replace(/\/[^/]*$/, "");
           }
-          url += "/session/" + encodeURIComponent(this.config.sessionId) + "/dataobj/shinytest?w=" + encodeURIComponent(this.config.workerId) + "&nonce=" + import_utils2.randomId();
+          url += "/session/" + encodeURIComponent(this.config.sessionId) + "/dataobj/shinytest?w=" + encodeURIComponent(this.config.workerId) + "&nonce=" + randomId();
           return url;
         };
       }).call(ShinyApp.prototype);
@@ -3650,7 +3329,7 @@
         function show() {
           var _ref3 = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : {}, _ref3$html = _ref3.html, html = _ref3$html === void 0 ? "" : _ref3$html, _ref3$action = _ref3.action, action = _ref3$action === void 0 ? "" : _ref3$action, _ref3$deps = _ref3.deps, deps = _ref3$deps === void 0 ? [] : _ref3$deps, _ref3$duration = _ref3.duration, duration = _ref3$duration === void 0 ? 5e3 : _ref3$duration, _ref3$id = _ref3.id, id = _ref3$id === void 0 ? null : _ref3$id, _ref3$closeButton = _ref3.closeButton, closeButton = _ref3$closeButton === void 0 ? true : _ref3$closeButton, _ref3$type = _ref3.type, type = _ref3$type === void 0 ? null : _ref3$type;
           if (!id)
-            id = import_utils2.randomId();
+            id = randomId();
           _createPanel();
           var $notification = _get(id);
           if ($notification.length === 0)
@@ -3691,7 +3370,7 @@
         function _get(id) {
           if (!id)
             return null;
-          return _getPanel().find("#shiny-notification-" + import_utils2.$escape(id));
+          return _getPanel().find("#shiny-notification-" + $escape(id));
         }
         function _ids() {
           return _getPanel().find(".shiny-notification").map(function() {
@@ -3808,7 +3487,7 @@
           return bindingObj.priority;
         };
         this.getBindings = function() {
-          return import_utils2.mergeSort(this.bindings, function(a, b) {
+          return mergeSort(this.bindings, function(a, b) {
             return b.priority - a.priority;
           });
         };
@@ -3839,7 +3518,7 @@
           }
           var errClass = "shiny-output-error";
           if (err.type !== null) {
-            errClass = errClass + " " + jQuery.map(import_utils2.asArray(err.type), function(type) {
+            errClass = errClass + " " + jQuery.map(asArray(err.type), function(type) {
               return errClass + "-" + type;
             }).join(" ");
           }
@@ -3897,31 +3576,31 @@
           }
           var opts = {
             clickId: $el.data("click-id"),
-            clickClip: OR(import_utils2.strToBool($el.data("click-clip")), true),
+            clickClip: OR(strToBool($el.data("click-clip")), true),
             dblclickId: $el.data("dblclick-id"),
-            dblclickClip: OR(import_utils2.strToBool($el.data("dblclick-clip")), true),
+            dblclickClip: OR(strToBool($el.data("dblclick-clip")), true),
             dblclickDelay: OR($el.data("dblclick-delay"), 400),
             hoverId: $el.data("hover-id"),
-            hoverClip: OR(import_utils2.strToBool($el.data("hover-clip")), true),
+            hoverClip: OR(strToBool($el.data("hover-clip")), true),
             hoverDelayType: OR($el.data("hover-delay-type"), "debounce"),
             hoverDelay: OR($el.data("hover-delay"), 300),
-            hoverNullOutside: OR(import_utils2.strToBool($el.data("hover-null-outside")), false),
+            hoverNullOutside: OR(strToBool($el.data("hover-null-outside")), false),
             brushId: $el.data("brush-id"),
-            brushClip: OR(import_utils2.strToBool($el.data("brush-clip")), true),
+            brushClip: OR(strToBool($el.data("brush-clip")), true),
             brushDelayType: OR($el.data("brush-delay-type"), "debounce"),
             brushDelay: OR($el.data("brush-delay"), 300),
             brushFill: OR($el.data("brush-fill"), "#666"),
             brushStroke: OR($el.data("brush-stroke"), "#000"),
             brushOpacity: OR($el.data("brush-opacity"), 0.3),
             brushDirection: OR($el.data("brush-direction"), "xy"),
-            brushResetOnNew: OR(import_utils2.strToBool($el.data("brush-reset-on-new")), false),
+            brushResetOnNew: OR(strToBool($el.data("brush-reset-on-new")), false),
             coordmap: data.coordmap
           };
           if (opts.brushFill === "auto") {
-            opts.brushFill = import_utils2.getComputedLinkColor($el[0]);
+            opts.brushFill = getComputedLinkColor($el[0]);
           }
           if (opts.brushStroke === "auto") {
-            opts.brushStroke = import_utils2.getStyle($el[0], "color");
+            opts.brushStroke = getStyle($el[0], "color");
           }
           jQuery.each(data, function(key, value) {
             if (value === null || key === "coordmap") {
@@ -4060,7 +3739,7 @@
           var xscaler = scaler1D(d.left, d.right, r.left, r.right, xlog);
           var yscaler = scaler1D(d.bottom, d.top, r.bottom, r.top, ylog);
           panel2.scaleDataToImg = function(val, clip) {
-            return import_utils2.mapValues(val, function(value, key) {
+            return mapValues(val, function(value, key) {
               var prefix = key.substring(0, 1);
               if (prefix === "x") {
                 return xscaler.scale(value, clip);
@@ -4071,7 +3750,7 @@
             });
           };
           panel2.scaleImgToData = function(val, clip) {
-            return import_utils2.mapValues(val, function(value, key) {
+            return mapValues(val, function(value, key) {
               var prefix = key.substring(0, 1);
               if (prefix === "x") {
                 return xscaler.scaleInv(value, clip);
@@ -4131,7 +3810,7 @@
         };
         coordmap.scaleCssToImg = function(offset_css) {
           var pixel_scaling = coordmap.imgToCssScalingRatio();
-          var result = import_utils2.mapValues(offset_css, function(value, key) {
+          var result = mapValues(offset_css, function(value, key) {
             var prefix = key.substring(0, 1);
             if (prefix === "x") {
               return offset_css[key] / pixel_scaling.x;
@@ -4144,7 +3823,7 @@
         };
         coordmap.scaleImgToCss = function(offset_img) {
           var pixel_scaling = coordmap.imgToCssScalingRatio();
-          var result = import_utils2.mapValues(offset_img, function(value, key) {
+          var result = mapValues(offset_img, function(value, key) {
             var prefix = key.substring(0, 1);
             if (prefix === "x") {
               return offset_img[key] * pixel_scaling.x;
@@ -4604,7 +4283,7 @@
             return;
           for (var i = 0; i < coordmap.panels.length; i++) {
             var curPanel = coordmap.panels[i];
-            if (import_utils2.equal(oldPanel.mapping, curPanel.mapping) && import_utils2.equal(oldPanel.panel_vars, curPanel.panel_vars)) {
+            if (equal(oldPanel.mapping, curPanel.mapping) && equal(oldPanel.panel_vars, curPanel.panel_vars)) {
               state.panel = coordmap.panels[i];
               break;
             }
@@ -4620,7 +4299,7 @@
         function onResize() {
           var bounds_data = boundsData();
           for (var val in bounds_data) {
-            if (import_utils2.isnan(bounds_data[val]))
+            if (isnan(bounds_data[val]))
               return;
           }
           boundsData(bounds_data);
@@ -4705,8 +4384,8 @@
           var min_data = state.panel.scaleImgToData(cssToImg(min_css));
           var max_data = state.panel.scaleImgToData(cssToImg(max_css));
           state.boundsData = imageutils.findBox(min_data, max_data);
-          state.boundsData = import_utils2.mapValues(state.boundsData, function(val) {
-            return import_utils2.roundSignif(val, 14);
+          state.boundsData = mapValues(state.boundsData, function(val) {
+            return roundSignif(val, 14);
           });
           $div.data("bounds-data", state.boundsData);
           $div.data("panel", state.panel);
@@ -4717,8 +4396,8 @@
             return jQuery.extend({}, state.boundsData);
           }
           var box_css = imgToCss(state.panel.scaleDataToImg(box_data));
-          box_css = import_utils2.mapValues(box_css, function(val) {
-            return import_utils2.roundSignif(val, 13);
+          box_css = mapValues(box_css, function(val) {
+            return roundSignif(val, 13);
           });
           boundsCss({
             xmin: Math.min(box_css.xmin, box_css.xmax),
@@ -5020,14 +4699,14 @@
         var href = dep.src.href;
         var $head = jQuery("head").first();
         if (dep.meta && !restyle) {
-          var metas = jQuery.map(import_utils2.asArray(dep.meta), function(obj, idx) {
+          var metas = jQuery.map(asArray(dep.meta), function(obj, idx) {
             var name = Object.keys(obj)[0];
             return jQuery("<meta>").attr("name", name).attr("content", obj[name]);
           });
           $head.append(metas);
         }
         if (dep.stylesheet) {
-          var links = jQuery.map(import_utils2.asArray(dep.stylesheet), function(stylesheet) {
+          var links = jQuery.map(asArray(dep.stylesheet), function(stylesheet) {
             return jQuery("<link rel='stylesheet' type='text/css'>").attr("href", href + "/" + encodeURI(stylesheet));
           });
           if (!restyle) {
@@ -5089,7 +4768,7 @@
           }
         }
         if (dep.script && !restyle) {
-          var scripts = jQuery.map(import_utils2.asArray(dep.script), function(scriptName) {
+          var scripts = jQuery.map(asArray(dep.script), function(scriptName) {
             return jQuery("<script>").attr("src", href + "/" + encodeURI(scriptName));
           });
           $head.append(scripts);
@@ -5224,7 +4903,7 @@
           var footer = "";
           if (_data.options === null || _data.options.searching !== false) {
             footer = jQuery.map(colnames, function(x) {
-              return '<th><input type="text" placeholder="' + import_utils2.escapeHTML(x.replace(/(<([^>]+)>)/gi, "")) + '" /></th>';
+              return '<th><input type="text" placeholder="' + escapeHTML(x.replace(/(<([^>]+)>)/gi, "")) + '" /></th>';
             }).join("");
             footer = "<tfoot>" + footer + "</tfoot>";
           }
@@ -5276,7 +4955,7 @@
         this.el = el;
         this.binding = binding;
         if (binding.resize) {
-          this.onResize = import_utils2.makeResizeFilter(el, function(width, height) {
+          this.onResize = makeResizeFilter(el, function(width, height) {
             binding.resize(el, width, height);
           });
         }
@@ -5359,7 +5038,7 @@
         receiveMessage: function receiveMessage(el, data) {
           if (data.hasOwnProperty("value"))
             this.setValue(el, data.value);
-          import_utils2.updateLabel(data.label, this._getLabelNode(el));
+          updateLabel(data.label, this._getLabelNode(el));
           if (data.hasOwnProperty("placeholder"))
             el.placeholder = data.placeholder;
           jQuery(el).trigger("change");
@@ -5378,7 +5057,7 @@
           };
         },
         _getLabelNode: function _getLabelNode(el) {
-          return jQuery(el).parent().find('label[for="' + import_utils2.$escape(el.id) + '"]');
+          return jQuery(el).parent().find('label[for="' + $escape(el.id) + '"]');
         }
       });
       inputBindings.register(textInputBinding, "shiny.textInput");
@@ -5428,7 +5107,7 @@
             el.max = data.max;
           if (data.hasOwnProperty("step"))
             el.step = data.step;
-          import_utils2.updateLabel(data.label, this._getLabelNode(el));
+          updateLabel(data.label, this._getLabelNode(el));
           jQuery(el).trigger("change");
         },
         getState: function getState(el) {
@@ -5441,7 +5120,7 @@
           };
         },
         _getLabelNode: function _getLabelNode(el) {
-          return jQuery(el).parent().find('label[for="' + import_utils2.$escape(el.id) + '"]');
+          return jQuery(el).parent().find('label[for="' + $escape(el.id) + '"]');
         }
       });
       inputBindings.register(numberInputBinding, "shiny.numberInput");
@@ -5531,7 +5210,7 @@
           var dataType = $el.data("data-type");
           if (dataType === "date") {
             convert = function convert2(val) {
-              return import_utils2.formatDateUTC(new Date(+val));
+              return formatDateUTC(new Date(+val));
             };
           } else if (dataType === "datetime") {
             convert = function convert2(val) {
@@ -5595,7 +5274,7 @@
               msg[feats] = data[feats];
             }
           }
-          import_utils2.updateLabel(data.label, this._getLabelNode(el));
+          updateLabel(data.label, this._getLabelNode(el));
           var domElements = ["data-type", "time-format", "timezone"];
           for (var _i = 0; _i < domElements.length; _i++) {
             var elem = domElements[_i];
@@ -5633,7 +5312,7 @@
           $el.ionRangeSlider(opts);
         },
         _getLabelNode: function _getLabelNode(el) {
-          return jQuery(el).parent().find('label[for="' + import_utils2.$escape(el.id) + '"]');
+          return jQuery(el).parent().find('label[for="' + $escape(el.id) + '"]');
         },
         _numValues: function _numValues(el) {
           if (jQuery(el).data("ionRangeSlider").options.type === "double")
@@ -5658,7 +5337,7 @@
       jQuery(document).on("click", ".slider-animate-button", function(evt) {
         evt.preventDefault();
         var self2 = jQuery(this);
-        var target = jQuery("#" + import_utils2.$escape(self2.attr("data-target-id")));
+        var target = jQuery("#" + $escape(self2.attr("data-target-id")));
         var startLabel = "Play";
         var stopLabel = "Pause";
         var loop = self2.attr("data-loop") !== void 0 && !/^\s*false\s*$/i.test(self2.attr("data-loop"));
@@ -5745,7 +5424,7 @@
         },
         getValue: function getValue(el) {
           var date = jQuery(el).find("input").bsDatepicker("getUTCDate");
-          return import_utils2.formatDateUTC(date);
+          return formatDateUTC(date);
         },
         setValue: function setValue(el, value) {
           if (value === null) {
@@ -5762,8 +5441,8 @@
           var $input = $el.find("input");
           var min4 = $input.data("datepicker").startDate;
           var max4 = $input.data("datepicker").endDate;
-          min4 = min4 === -Infinity ? null : import_utils2.formatDateUTC(min4);
-          max4 = max4 === Infinity ? null : import_utils2.formatDateUTC(max4);
+          min4 = min4 === -Infinity ? null : formatDateUTC(min4);
+          max4 = max4 === Infinity ? null : formatDateUTC(max4);
           var startview = $input.data("datepicker").startViewMode;
           if (startview === 2)
             startview = "decade";
@@ -5785,7 +5464,7 @@
         },
         receiveMessage: function receiveMessage(el, data) {
           var $input = jQuery(el).find("input");
-          import_utils2.updateLabel(data.label, this._getLabelNode(el));
+          updateLabel(data.label, this._getLabelNode(el));
           if (data.hasOwnProperty("min"))
             this._setMin($input[0], data.min);
           if (data.hasOwnProperty("max"))
@@ -5826,7 +5505,7 @@
           }
         },
         _getLabelNode: function _getLabelNode(el) {
-          return jQuery(el).find('label[for="' + import_utils2.$escape(el.id) + '"]');
+          return jQuery(el).find('label[for="' + $escape(el.id) + '"]');
         },
         _formatToString: function _formatToString(format) {
           var str = "";
@@ -5882,7 +5561,7 @@
             return date;
           if (!date)
             return null;
-          var d = import_utils2.parseDate(date);
+          var d = parseDate(date);
           if (isNaN(d))
             return null;
           return d;
@@ -5909,7 +5588,7 @@
           var $inputs = jQuery(el).find("input");
           var start = $inputs.eq(0).bsDatepicker("getUTCDate");
           var end = $inputs.eq(1).bsDatepicker("getUTCDate");
-          return [import_utils2.formatDateUTC(start), import_utils2.formatDateUTC(end)];
+          return [formatDateUTC(start), formatDateUTC(end)];
         },
         setValue: function setValue(el, value) {
           if (!(value instanceof Object)) {
@@ -5940,8 +5619,8 @@
           var $endinput = $inputs.eq(1);
           var min4 = $startinput.bsDatepicker("getStartDate");
           var max4 = $startinput.bsDatepicker("getEndDate");
-          min4 = min4 === -Infinity ? null : import_utils2.formatDateUTC(min4);
-          max4 = max4 === Infinity ? null : import_utils2.formatDateUTC(max4);
+          min4 = min4 === -Infinity ? null : formatDateUTC(min4);
+          max4 = max4 === Infinity ? null : formatDateUTC(max4);
           var startview = $startinput.data("datepicker").startView;
           if (startview === 2)
             startview = "decade";
@@ -5966,7 +5645,7 @@
           var $inputs = $el.find("input");
           var $startinput = $inputs.eq(0);
           var $endinput = $inputs.eq(1);
-          import_utils2.updateLabel(data.label, this._getLabelNode(el));
+          updateLabel(data.label, this._getLabelNode(el));
           if (data.hasOwnProperty("min")) {
             this._setMin($startinput[0], data.min);
             this._setMin($endinput[0], data.min);
@@ -6011,7 +5690,7 @@
           jQuery(el).off(".dateRangeInputBinding");
         },
         _getLabelNode: function _getLabelNode(el) {
-          return jQuery(el).find('label[for="' + import_utils2.$escape(el.id) + '"]');
+          return jQuery(el).find('label[for="' + $escape(el.id) + '"]');
         }
       });
       inputBindings.register(dateRangeInputBinding, "shiny.dateRangeInput");
@@ -6071,7 +5750,7 @@
             this._selectize(el);
           }
           if (data.hasOwnProperty("config")) {
-            $el.parent().find('script[data-for="' + import_utils2.$escape(el.id) + '"]').replaceWith(data.config);
+            $el.parent().find('script[data-for="' + $escape(el.id) + '"]').replaceWith(data.config);
             this._selectize(el, true);
           }
           if (data.hasOwnProperty("url")) {
@@ -6119,7 +5798,7 @@
           } else if (data.hasOwnProperty("value")) {
             this.setValue(el, data.value);
           }
-          import_utils2.updateLabel(data.label, this._getLabelNode(el));
+          updateLabel(data.label, this._getLabelNode(el));
           jQuery(el).trigger("change");
         },
         subscribe: function subscribe(el, callback) {
@@ -6138,21 +5817,21 @@
           this._selectize(el);
         },
         _getLabelNode: function _getLabelNode(el) {
-          var escaped_id = import_utils2.$escape(el.id);
+          var escaped_id = $escape(el.id);
           if (this._is_selectize(el)) {
             escaped_id += "-selectized";
           }
           return jQuery(el).parent().parent().find('label[for="' + escaped_id + '"]');
         },
         _is_selectize: function _is_selectize(el) {
-          var config = jQuery(el).parent().find('script[data-for="' + import_utils2.$escape(el.id) + '"]');
+          var config = jQuery(el).parent().find('script[data-for="' + $escape(el.id) + '"]');
           return config.length > 0;
         },
         _selectize: function _selectize(el, update) {
           if (!jQuery.fn.selectize)
             return void 0;
           var $el = jQuery(el);
-          var config = $el.parent().find('script[data-for="' + import_utils2.$escape(el.id) + '"]');
+          var config = $el.parent().find('script[data-for="' + $escape(el.id) + '"]');
           if (config.length === 0)
             return void 0;
           var options = jQuery.extend({
@@ -6165,14 +5844,14 @@
             options = jQuery.extend(options, {
               onItemRemove: function onItemRemove(value) {
                 if (this.getValue() === "")
-                  jQuery("select#" + import_utils2.$escape(el.id)).empty().append(jQuery("<option/>", {
+                  jQuery("select#" + $escape(el.id)).empty().append(jQuery("<option/>", {
                     value: value,
                     selected: true
                   })).trigger("change");
               },
               onDropdownClose: function onDropdownClose($dropdown) {
                 if (this.getValue() === "")
-                  this.setValue(jQuery("select#" + import_utils2.$escape(el.id)).val());
+                  this.setValue(jQuery("select#" + $escape(el.id)).val());
               }
             });
           } else {
@@ -6198,7 +5877,7 @@
           return jQuery(scope).find(".shiny-input-radiogroup");
         },
         getValue: function getValue(el) {
-          var checked_items = jQuery('input:radio[name="' + import_utils2.$escape(el.id) + '"]:checked');
+          var checked_items = jQuery('input:radio[name="' + $escape(el.id) + '"]:checked');
           if (checked_items.length === 0) {
             return null;
           }
@@ -6206,13 +5885,13 @@
         },
         setValue: function setValue(el, value) {
           if (jQuery.isArray(value) && value.length === 0) {
-            jQuery('input:radio[name="' + import_utils2.$escape(el.id) + '"]').prop("checked", false);
+            jQuery('input:radio[name="' + $escape(el.id) + '"]').prop("checked", false);
           } else {
-            jQuery('input:radio[name="' + import_utils2.$escape(el.id) + '"][value="' + import_utils2.$escape(value) + '"]').prop("checked", true);
+            jQuery('input:radio[name="' + $escape(el.id) + '"][value="' + $escape(value) + '"]').prop("checked", true);
           }
         },
         getState: function getState(el) {
-          var $objs = jQuery('input:radio[name="' + import_utils2.$escape(el.id) + '"]');
+          var $objs = jQuery('input:radio[name="' + $escape(el.id) + '"]');
           var options = new Array($objs.length);
           for (var i = 0; i < options.length; i++) {
             options[i] = {
@@ -6235,7 +5914,7 @@
           }
           if (data.hasOwnProperty("value"))
             this.setValue(el, data.value);
-          import_utils2.updateLabel(data.label, this._getLabelNode(el));
+          updateLabel(data.label, this._getLabelNode(el));
           jQuery(el).trigger("change");
         },
         subscribe: function subscribe(el, callback) {
@@ -6247,7 +5926,7 @@
           jQuery(el).off(".radioInputBinding");
         },
         _getLabelNode: function _getLabelNode(el) {
-          return jQuery(el).parent().find('label[for="' + import_utils2.$escape(el.id) + '"]');
+          return jQuery(el).parent().find('label[for="' + $escape(el.id) + '"]');
         },
         _getLabel: function _getLabel(obj) {
           if (obj.parentNode.tagName === "LABEL") {
@@ -6269,7 +5948,7 @@
           return jQuery(scope).find(".shiny-input-checkboxgroup");
         },
         getValue: function getValue(el) {
-          var $objs = jQuery('input:checkbox[name="' + import_utils2.$escape(el.id) + '"]:checked');
+          var $objs = jQuery('input:checkbox[name="' + $escape(el.id) + '"]:checked');
           var values = new Array($objs.length);
           for (var i = 0; i < $objs.length; i++) {
             values[i] = $objs[i].value;
@@ -6277,17 +5956,17 @@
           return values;
         },
         setValue: function setValue(el, value) {
-          jQuery('input:checkbox[name="' + import_utils2.$escape(el.id) + '"]').prop("checked", false);
+          jQuery('input:checkbox[name="' + $escape(el.id) + '"]').prop("checked", false);
           if (value instanceof Array) {
             for (var i = 0; i < value.length; i++) {
-              jQuery('input:checkbox[name="' + import_utils2.$escape(el.id) + '"][value="' + import_utils2.$escape(value[i]) + '"]').prop("checked", true);
+              jQuery('input:checkbox[name="' + $escape(el.id) + '"][value="' + $escape(value[i]) + '"]').prop("checked", true);
             }
           } else {
-            jQuery('input:checkbox[name="' + import_utils2.$escape(el.id) + '"][value="' + import_utils2.$escape(value) + '"]').prop("checked", true);
+            jQuery('input:checkbox[name="' + $escape(el.id) + '"][value="' + $escape(value) + '"]').prop("checked", true);
           }
         },
         getState: function getState(el) {
-          var $objs = jQuery('input:checkbox[name="' + import_utils2.$escape(el.id) + '"]');
+          var $objs = jQuery('input:checkbox[name="' + $escape(el.id) + '"]');
           var options = new Array($objs.length);
           for (var i = 0; i < options.length; i++) {
             options[i] = {
@@ -6310,7 +5989,7 @@
           }
           if (data.hasOwnProperty("value"))
             this.setValue(el, data.value);
-          import_utils2.updateLabel(data.label, this._getLabelNode(el));
+          updateLabel(data.label, this._getLabelNode(el));
           jQuery(el).trigger("change");
         },
         subscribe: function subscribe(el, callback) {
@@ -6322,7 +6001,7 @@
           jQuery(el).off(".checkboxGroupInputBinding");
         },
         _getLabelNode: function _getLabelNode(el) {
-          return jQuery(el).find('label[for="' + import_utils2.$escape(el.id) + '"]');
+          return jQuery(el).find('label[for="' + $escape(el.id) + '"]');
         },
         _getLabel: function _getLabel(obj) {
           if (obj.parentNode.tagName === "LABEL") {
@@ -6548,10 +6227,10 @@
           this.$bar().text(file ? file.name : "");
         };
         this.$container = function() {
-          return jQuery("#" + import_utils2.$escape(this.id) + "_progress.shiny-file-input-progress");
+          return jQuery("#" + $escape(this.id) + "_progress.shiny-file-input-progress");
         };
         this.$bar = function() {
-          return jQuery("#" + import_utils2.$escape(this.id) + "_progress.shiny-file-input-progress .progress-bar");
+          return jQuery("#" + $escape(this.id) + "_progress.shiny-file-input-progress .progress-bar");
         };
         this.$setVisible = function(visible) {
           this.$container().css("visibility", visible ? "visible" : "hidden");
@@ -6967,7 +6646,7 @@
             return bindingAdapter.getId();
         }
         initializeInputs(document);
-        var initialValues = import_utils2.mapValues(_bindAll(document), function(x) {
+        var initialValues = mapValues(_bindAll(document), function(x) {
           return x.value;
         });
         jQuery(".shiny-image-output, .shiny-plot-output, .shiny-report-size").each(function() {
@@ -6981,10 +6660,10 @@
           if (!el) {
             return null;
           }
-          var bgColor = import_utils2.getStyle(el, "background-color");
+          var bgColor = getStyle(el, "background-color");
           var m = bgColor.match(/^rgba\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)\s*\)$/);
           if (bgColor === "transparent" || m && parseFloat(m[4]) === 0) {
-            var bgImage = import_utils2.getStyle(el, "background-image");
+            var bgImage = getStyle(el, "background-image");
             if (bgImage && bgImage !== "none") {
               return null;
             } else {
@@ -6994,8 +6673,8 @@
           return bgColor;
         }
         function getComputedFont(el) {
-          var fontFamily = import_utils2.getStyle(el, "font-family");
-          var fontSize = import_utils2.getStyle(el, "font-size");
+          var fontFamily = getStyle(el, "font-family");
+          var fontSize = getStyle(el, "font-size");
           return {
             families: fontFamily.replace(/"/g, "").split(", "),
             size: fontSize
@@ -7004,8 +6683,8 @@
         jQuery(".shiny-image-output, .shiny-plot-output, .shiny-report-theme").each(function() {
           var el = this, id = getIdFromEl(el);
           initialValues[".clientdata_output_" + id + "_bg"] = getComputedBgColor(el);
-          initialValues[".clientdata_output_" + id + "_fg"] = import_utils2.getStyle(el, "color");
-          initialValues[".clientdata_output_" + id + "_accent"] = import_utils2.getComputedLinkColor(el);
+          initialValues[".clientdata_output_" + id + "_fg"] = getStyle(el, "color");
+          initialValues[".clientdata_output_" + id + "_accent"] = getComputedLinkColor(el);
           initialValues[".clientdata_output_" + id + "_font"] = getComputedFont(el);
           maybeAddThemeObserver(el);
         });
@@ -7041,8 +6720,8 @@
           }
           var id = getIdFromEl(el);
           inputs.setInput(".clientdata_output_" + id + "_bg", getComputedBgColor(el));
-          inputs.setInput(".clientdata_output_" + id + "_fg", import_utils2.getStyle(el, "color"));
-          inputs.setInput(".clientdata_output_" + id + "_accent", import_utils2.getComputedLinkColor(el));
+          inputs.setInput(".clientdata_output_" + id + "_fg", getStyle(el, "color"));
+          inputs.setInput(".clientdata_output_" + id + "_accent", getComputedLinkColor(el));
           inputs.setInput(".clientdata_output_" + id + "_font", getComputedFont(el));
         }
         function doSendImageSize() {
@@ -7077,7 +6756,7 @@
         function isHidden(obj) {
           if (obj === null || obj.offsetWidth !== 0 || obj.offsetHeight !== 0) {
             return false;
-          } else if (import_utils2.getStyle(obj, "display") === "none") {
+          } else if (getStyle(obj, "display") === "none") {
             return true;
           } else {
             return isHidden(obj.parentNode);
@@ -7148,9 +6827,9 @@
         });
         jQuery(document.body).on("shown.sendImageSize", "*", sendImageSize);
         jQuery(document.body).on("shown.sendOutputHiddenState hidden.sendOutputHiddenState", "*", sendOutputHiddenState);
-        initialValues[".clientdata_pixelratio"] = import_utils2.pixelRatio();
+        initialValues[".clientdata_pixelratio"] = pixelRatio();
         jQuery(window).resize(function() {
-          inputs.setInput(".clientdata_pixelratio", import_utils2.pixelRatio());
+          inputs.setInput(".clientdata_pixelratio", pixelRatio());
         });
         initialValues[".clientdata_url_protocol"] = window.location.protocol;
         initialValues[".clientdata_url_hostname"] = window.location.hostname;
@@ -7551,6 +7230,9 @@
     parseFloat: parseFloatImplementation
   });
 
+  // src/utils/index.ts
+  var import_es_regexp_exec = __toModule(require_es_regexp_exec());
+
   // node_modules/core-js/modules/es.regexp.to-string.js
   "use strict";
   var redefine2 = require_redefine();
@@ -7777,7 +7459,7 @@
     BlobBuilder = BlobBuilder_;
     return;
   }
-  function makeBlob2(parts) {
+  function makeBlob(parts) {
     try {
       return new Blob(parts);
     } catch (e) {
@@ -7789,14 +7471,261 @@
     }
   }
 
+  // src/utils/index.ts
+  function escapeHTML(str) {
+    var escaped = {
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#039;",
+      "/": "&#x2F;"
+    };
+    return str.replace(/[&<>'"/]/g, function(m) {
+      return escaped[m];
+    });
+  }
+  function randomId() {
+    return Math.floor(4294967296 + Math.random() * 64424509440).toString(16);
+  }
+  function strToBool(str) {
+    if (!str || !str.toLowerCase)
+      return void 0;
+    switch (str.toLowerCase()) {
+      case "true":
+        return true;
+      case "false":
+        return false;
+      default:
+        return void 0;
+    }
+  }
+  function getStyle(el, styleProp) {
+    var x = void 0;
+    if (el.currentStyle)
+      x = el.currentStyle[styleProp];
+    else if (window.getComputedStyle) {
+      var style = document.defaultView.getComputedStyle(el, null);
+      if (style)
+        x = style.getPropertyValue(styleProp);
+    }
+    return x;
+  }
+  function padZeros(n, digits) {
+    var str = n.toString();
+    while (str.length < digits) {
+      str = "0" + str;
+    }
+    return str;
+  }
+  function roundSignif(x) {
+    var digits = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : 1;
+    if (digits < 1)
+      throw "Significant digits must be at least 1.";
+    return parseFloat(x.toPrecision(digits));
+  }
+  function parseDate(dateString) {
+    var date = new Date(dateString);
+    if (date.toString() === "Invalid Date") {
+      date = new Date(dateString.replace(/-/g, "/"));
+    }
+    return date;
+  }
+  function formatDateUTC(date) {
+    if (date instanceof Date) {
+      return date.getUTCFullYear() + "-" + padZeros(date.getUTCMonth() + 1, 2) + "-" + padZeros(date.getUTCDate(), 2);
+    } else {
+      return null;
+    }
+  }
+  function makeResizeFilter(el, func) {
+    var lastSize = {};
+    return function() {
+      var size = {
+        w: el.offsetWidth,
+        h: el.offsetHeight
+      };
+      if (size.w === 0 && size.h === 0)
+        return;
+      if (size.w === lastSize.w && size.h === lastSize.h)
+        return;
+      lastSize = size;
+      func(size.w, size.h);
+    };
+  }
+  function pixelRatio() {
+    if (windowDevicePixelRatio()) {
+      return Math.round(windowDevicePixelRatio() * 100) / 100;
+    } else {
+      return 1;
+    }
+  }
+  scopeExprToFunc.call;
+  function scopeExprToFunc(expr) {
+    var exprEscaped = expr.replace(/[\\"']/g, "\\$&").replace(/\u0000/g, "\\0").replace(/\n/g, "\\n").replace(/\r/g, "\\r").replace(/[\b]/g, "\\b");
+    var func;
+    try {
+      func = new Function("with (this) {\n        try {\n          return (".concat(expr, ");\n        } catch (e) {\n          console.error('Error evaluating expression: ").concat(exprEscaped, "');\n          throw e;\n        }\n      }"));
+    } catch (e) {
+      console.error("Error parsing expression: " + expr);
+      throw e;
+    }
+    return function(scope) {
+      return func.call(scope);
+    };
+  }
+  function asArray(value) {
+    if (value === null || value === void 0)
+      return [];
+    if (Array.isArray(value))
+      return value;
+    return [value];
+  }
+  function mergeSort(list, sortfunc) {
+    function merge(sortfunc2, a, b) {
+      var ia = 0;
+      var ib = 0;
+      var sorted = [];
+      while (ia < a.length && ib < b.length) {
+        if (sortfunc2(a[ia], b[ib]) <= 0) {
+          sorted.push(a[ia++]);
+        } else {
+          sorted.push(b[ib++]);
+        }
+      }
+      while (ia < a.length) {
+        sorted.push(a[ia++]);
+      }
+      while (ib < b.length) {
+        sorted.push(b[ib++]);
+      }
+      return sorted;
+    }
+    list = list.slice(0);
+    for (var chunkSize = 1; chunkSize < list.length; chunkSize *= 2) {
+      for (var i = 0; i < list.length; i += chunkSize * 2) {
+        var listA = list.slice(i, i + chunkSize);
+        var listB = list.slice(i + chunkSize, i + chunkSize * 2);
+        var merged = merge(sortfunc, listA, listB);
+        var args = [i, merged.length];
+        Array.prototype.push.apply(args, merged);
+        Array.prototype.splice.apply(list, args);
+      }
+    }
+    return list;
+  }
+  var $escape = function $escape2(val) {
+    return val.replace(/([!"#$%&'()*+,./:;<=>?@[\\\]^`{|}~])/g, "\\$1");
+  };
+  function mapValues(obj, f) {
+    var newObj = {};
+    for (var _key in obj) {
+      if (obj.hasOwnProperty(_key))
+        newObj[_key] = f(obj[_key], _key, obj);
+    }
+    return newObj;
+  }
+  function isnan(x) {
+    return typeof x === "number" && isNaN(x);
+  }
+  function _equal(x, y) {
+    if (jQuery.type(x) === "object" && jQuery.type(y) === "object") {
+      if (Object.keys(x).length !== Object.keys(y).length)
+        return false;
+      for (var prop in x) {
+        if (!y.hasOwnProperty(prop) || !_equal(x[prop], y[prop]))
+          return false;
+      }
+      return true;
+    } else if (jQuery.type(x) === "array" && jQuery.type(y) === "array") {
+      if (x.length !== y.length)
+        return false;
+      for (var i = 0; i < x.length; i++) {
+        if (!_equal(x[i], y[i]))
+          return false;
+      }
+      return true;
+    } else {
+      return x === y;
+    }
+  }
+  function equal() {
+    if (arguments.length < 2)
+      throw new Error("equal requires at least two arguments.");
+    for (var i = 0; i < arguments.length - 1; i++) {
+      if (!_equal(i < 0 || arguments.length <= i ? void 0 : arguments[i], i + 1 < 0 || arguments.length <= i + 1 ? void 0 : arguments[i + 1]))
+        return false;
+    }
+    return true;
+  }
+  var compareVersion = function compareVersion2(a, op, b) {
+    function versionParts(ver) {
+      return (ver + "").replace(/-/, ".").replace(/(\.0)+[^.]*$/, "").split(".");
+    }
+    function cmpVersion(a2, b2) {
+      a2 = versionParts(a2);
+      b2 = versionParts(b2);
+      var len = Math.min(a2.length, b2.length);
+      var cmp;
+      for (var i = 0; i < len; i++) {
+        cmp = parseInt(a2[i], 10) - parseInt(b2[i], 10);
+        if (cmp !== 0) {
+          return cmp;
+        }
+      }
+      return a2.length - b2.length;
+    }
+    var diff = cmpVersion(a, b);
+    if (op === "==")
+      return diff === 0;
+    else if (op === ">=")
+      return diff >= 0;
+    else if (op === ">")
+      return diff > 0;
+    else if (op === "<=")
+      return diff <= 0;
+    else if (op === "<")
+      return diff < 0;
+    else
+      throw "Unknown operator: ".concat(op);
+  };
+  function updateLabel(labelTxt, labelNode) {
+    if (typeof labelTxt === "undefined")
+      return;
+    if (labelNode.length !== 1) {
+      throw new Error("labelNode must be of length 1");
+    }
+    var emptyLabel = Array.isArray(labelTxt) && labelTxt.length === 0;
+    if (emptyLabel) {
+      labelNode.addClass("shiny-label-null");
+    } else {
+      labelNode.text(labelTxt);
+      labelNode.removeClass("shiny-label-null");
+    }
+  }
+  function getComputedLinkColor(el) {
+    var a = document.createElement("a");
+    a.href = "/";
+    var div = document.createElement("div");
+    div.style.setProperty("position", "absolute", "important");
+    div.style.setProperty("top", "-1000px", "important");
+    div.style.setProperty("left", "0", "important");
+    div.style.setProperty("width", "30px", "important");
+    div.style.setProperty("height", "10px", "important");
+    div.appendChild(a);
+    el.appendChild(div);
+    var linkColor = window.getComputedStyle(a).getPropertyValue("color");
+    el.removeChild(div);
+    return linkColor;
+  }
+
   // src/shiny.ts
-  var import_utils = __toModule(require_utils());
   var Shiny;
   function setShiny(Shiny_) {
     Shiny = Shiny_;
     Shiny.version = "1.6.0.9000";
-    Shiny.$escape = import_utils.$escape;
-    Shiny.compareVersion = import_utils.compareVersion;
+    Shiny.$escape = $escape;
+    Shiny.compareVersion = compareVersion;
   }
 
   // src/window/blobBuilder.ts

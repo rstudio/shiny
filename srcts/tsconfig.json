@@ -2,7 +2,8 @@
   "compilerOptions": {
     "target": "ES5",
     "preserveConstEnums": false,
-    "isolatedModules": true
+    "isolatedModules": true,
+    "esModuleInterop": true
   },
   "include": [
     "src/index.ts",

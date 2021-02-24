@@ -1,31 +1,21 @@
-diff --git a/index.d.ts b/index.d.ts
-index cba9887578e142aae4f2f7f1cb456e38fc66df3e..c4c97456d56e799ee50629453d3687dbd15566b2 100644
---- a/index.d.ts
-+++ b/index.d.ts
-@@ -31,5 +31,3 @@
- /// <reference path="JQuery.d.ts" />
- /// <reference path="misc.d.ts" />
- /// <reference path="legacy.d.ts" />
--
--export = jQuery;
 diff --git a/misc.d.ts b/misc.d.ts
-index 126d374477db459e1a251f5af548e88b46f43cdd..9ae79d77a3ca9e8f0c7c25ba35fec283dd3c9c54 100644
+index 126d374477db459e1a251f5af548e88b46f43cdd..948cfb287b0bfa6057f3ccbcd013579aef07a29a 100644
 --- a/misc.d.ts
 +++ b/misc.d.ts
-@@ -6617,9 +6617,6 @@ $( "#checkMetaKey" ).click(function( event ) {
-     type _Falsy = false | null | undefined | 0 | '' | typeof document.all;
+@@ -6618,7 +6618,7 @@ $( "#checkMetaKey" ).click(function( event ) {
  }
 
--declare const jQuery: JQueryStatic;
+ declare const jQuery: JQueryStatic;
 -declare const $: JQueryStatic;
--
++// declare const $: JQueryStatic;
+
  type _Event = Event;
  type _UIEvent = UIEvent;
- type _MouseEvent = MouseEvent;
-@@ -6643,6 +6640,4 @@ interface SymbolConstructor {
+@@ -6643,6 +6643,6 @@ interface SymbolConstructor {
      readonly toStringTag: symbol;
  }
 
 -declare var Symbol: SymbolConstructor;
--
++// declare var Symbol: SymbolConstructor;
+
  // #endregion

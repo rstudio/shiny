@@ -183,7 +183,11 @@ function renderDependency(dep) {
     var scripts = $.map(asArray(dep.script), function(scriptName) {
       return $("<script>").attr("src", href + "/" + encodeURI(scriptName));
     });
-    $head.append(scripts);
+    // avoid jQuery’s magic eval()
+    scripts.forEach(function(e) {
+      e[0].async = false;
+      document.head.appendChild(e[0]);
+    });
   }
 
   if (dep.attachment && !restyle) {

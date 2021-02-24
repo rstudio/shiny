@@ -224,9 +224,9 @@ function mergeSort<T>(
 }
 
 // Escape jQuery selector metacharacters: !"#$%&'()*+,./:;<=>?@[\]^`{|}~
-const $escape = (exports.$escape = function (val) {
+const $escape = function (val: string): string {
   return val.replace(/([!"#$%&'()*+,./:;<=>?@[\\\]^`{|}~])/g, "\\$1");
-});
+};
 
 // Maps a function over an object, preserving keys. Like the mapValues
 // function from lodash.

@@ -28,5 +28,5 @@ console.log("Building shiny.min.js");
 await esbuild.build({
   ...opts,
   outfile: outdir + "shiny.min.js",
-  minify: false,
+  minify: true,
 });

@@ -20,7 +20,9 @@ let opts = {
   target: "es5",
   sourcemap: true,
   define: {
-    SHINY_VERSION: `"${readcontrol.readSync("../DESCRIPTION").version}"`,
+    "process.env.SHINY_VERSION": `"${
+      readcontrol.readSync("../DESCRIPTION").version
+    }"`,
   },
 };
 

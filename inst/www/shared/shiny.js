@@ -38,6 +38,11 @@
     return __exportStar(__markAsModule(__defProp(module2 != null ? __create(__getProtoOf(module2)) : {}, "default", {value: module2, enumerable: true})), module2);
   };
 
+  // globals:jquery
+  var require_jquery = __commonJS(function(exports2, module2) {
+    module2.exports = window.jQuery;
+  });
+
   // node_modules/core-js/internals/global.js
   var require_global = __commonJS(function(exports2, module2) {
     var check = function(it) {
@@ -834,8 +839,8 @@
   var require_engine_v8_version = __commonJS(function(exports2, module2) {
     var global5 = require_global();
     var userAgent = require_engine_user_agent();
-    var process = global5.process;
-    var versions = process && process.versions;
+    var process2 = global5.process;
+    var versions = process2 && process2.versions;
     var v8 = versions && versions.v8;
     var match;
     var version;
@@ -1061,9 +1066,9 @@
   // node_modules/core-js/modules/es.regexp.exec.js
   var require_es_regexp_exec = __commonJS(function() {
     "use strict";
-    var $20 = require_export();
+    var $25 = require_export();
     var exec = require_regexp_exec();
-    $20({target: "RegExp", proto: true, forced: /./.exec !== exec}, {
+    $25({target: "RegExp", proto: true, forced: /./.exec !== exec}, {
       exec: exec
     });
   });
@@ -2109,6 +2114,7 @@
       }
     });
     var import_es_regexp_exec2 = __toModule(require_es_regexp_exec());
+    var import_jquery6 = __toModule(require_jquery());
     function _typeof(obj) {
       "@babel/helpers - typeof";
       if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
@@ -2130,6 +2136,7 @@
       }
       return obj;
     }
+    jQuery = import_jquery6.default;
     function main() {
       var Invoker = function Invoker(target, func) {
         this.target = target;
@@ -2307,7 +2314,7 @@
           this.reentrant = true;
           try {
             this.timerId = null;
-            jQuery.each(this.lastChanceCallback, function(i, callback) {
+            import_jquery6.default.each(this.lastChanceCallback, function(i, callback) {
               callback();
             });
             var currentData = this.pendingData;
@@ -2366,7 +2373,7 @@
           evt.binding = opts.binding;
           evt.el = opts.el;
           evt.priority = opts.priority;
-          jQuery(opts.el).trigger(evt);
+          import_jquery6.default(opts.el).trigger(evt);
           if (!evt.isDefaultPrevented()) {
             var name = evt.name;
             if (evt.inputType !== "")
@@ -2443,7 +2450,7 @@
         };
       }).call(InputValidateDecorator.prototype);
       function addDefaultInputOpts(opts) {
-        opts = jQuery.extend({
+        opts = import_jquery6.default.extend({
           priority: "immediate",
           binding: null,
           el: null
@@ -2486,7 +2493,7 @@
             throw "Connect was already called on this application object";
           this.$socket = this.createSocket();
           this.$initialInput = initialInput;
-          jQuery.extend(this.$inputValues, initialInput);
+          import_jquery6.default.extend(this.$inputValues, initialInput);
           this.$updateConditionals();
         };
         this.isConnected = function() {
@@ -2498,7 +2505,7 @@
           if (this.isConnected())
             throw "Attempted to reconnect, but already connected.";
           this.$socket = this.createSocket();
-          this.$initialInput = jQuery.extend({}, this.$inputValues);
+          this.$initialInput = import_jquery6.default.extend({}, this.$inputValues);
           this.$updateConditionals();
         };
         this.createSocket = function() {
@@ -2525,7 +2532,7 @@
           var hasOpened = false;
           socket.onopen = function() {
             hasOpened = true;
-            jQuery(document).trigger({
+            import_jquery6.default(document).trigger({
               type: "shiny:connected",
               socket: socket
             });
@@ -2544,7 +2551,7 @@
           };
           socket.onclose = function() {
             if (hasOpened) {
-              jQuery(document).trigger({
+              import_jquery6.default(document).trigger({
                 type: "shiny:disconnected",
                 socket: socket
               });
@@ -2561,7 +2568,7 @@
             data: values
           });
           this.$sendMsg(msg);
-          jQuery.extend(this.$inputValues, values);
+          import_jquery6.default.extend(this.$inputValues, values);
           this.$updateConditionals();
         };
         this.$notifyDisconnected = function() {
@@ -2596,9 +2603,9 @@
           };
         }();
         this.onDisconnected = function() {
-          var $overlay = jQuery("#shiny-disconnected-overlay");
+          var $overlay = import_jquery6.default("#shiny-disconnected-overlay");
           if ($overlay.length === 0) {
-            jQuery(document.body).append('<div id="shiny-disconnected-overlay"></div>');
+            import_jquery6.default(document.body).append('<div id="shiny-disconnected-overlay"></div>');
           }
           if (this.$allowReconnect === true && this.$socket.allowReconnect === true || this.$allowReconnect === "force") {
             var delay = reconnectDelay.next();
@@ -2607,7 +2614,7 @@
           }
         };
         this.onConnected = function() {
-          jQuery("#shiny-disconnected-overlay").remove();
+          import_jquery6.default("#shiny-disconnected-overlay").remove();
           Shiny.hideReconnectDialog();
           reconnectDelay.reset();
         };
@@ -2663,7 +2670,7 @@
           evt.name = name;
           evt.error = error;
           evt.binding = binding;
-          jQuery(binding ? binding.el : document).trigger(evt);
+          import_jquery6.default(binding ? binding.el : document).trigger(evt);
           if (!evt.isDefaultPrevented() && binding && binding.onValueError) {
             binding.onValueError(evt.error);
           }
@@ -2675,12 +2682,12 @@
           evt.value = value;
           evt.binding = binding;
           if (this.$values[name] === value) {
-            jQuery(binding ? binding.el : document).trigger(evt);
+            import_jquery6.default(binding ? binding.el : document).trigger(evt);
             return void 0;
           }
           this.$values[name] = value;
           delete this.$errors[name];
-          jQuery(binding ? binding.el : document).trigger(evt);
+          import_jquery6.default(binding ? binding.el : document).trigger(evt);
           if (!evt.isDefaultPrevented() && binding) {
             binding.onValueChange(evt.value);
           }
@@ -2712,7 +2719,7 @@
           }).map(function(k) {
             return _defineProperty({}, k.substring(nsPrefix.length), scopeComponent[k]);
           }).reduce(function(obj, pair) {
-            return jQuery.extend(obj, pair);
+            return import_jquery6.default.extend(obj, pair);
           }, {});
         }
         function narrowScope(scope, nsPrefix) {
@@ -2725,7 +2732,7 @@
           return scope;
         }
         this.$updateConditionals = function() {
-          jQuery(document).trigger({
+          import_jquery6.default(document).trigger({
             type: "shiny:conditional"
           });
           var inputs = {};
@@ -2739,9 +2746,9 @@
             input: inputs,
             output: this.$values
           };
-          var conditionals = jQuery(document).find("[data-display-if]");
+          var conditionals = import_jquery6.default(document).find("[data-display-if]");
           for (var i = 0; i < conditionals.length; i++) {
-            var el = jQuery(conditionals[i]);
+            var el = import_jquery6.default(conditionals[i]);
             var condFunc = el.data("data-display-if-func");
             if (!condFunc) {
               var condExpr = el.attr("data-display-if");
@@ -2818,7 +2825,7 @@
           }
           var evt = jQuery.Event("shiny:message");
           evt.message = msgObj;
-          jQuery(document).trigger(evt);
+          import_jquery6.default(document).trigger(evt);
           if (evt.isDefaultPrevented())
             return;
           this._sendMessagesToHandlers(evt.message, messageHandlers, messageHandlerOrder);
@@ -2850,7 +2857,7 @@
         });
         addMessageHandler("inputMessages", function(message) {
           for (var i = 0; i < message.length; i++) {
-            var $obj = jQuery(".shiny-bound-input#" + $escape(message[i].id));
+            var $obj = import_jquery6.default(".shiny-bound-input#" + $escape(message[i].id));
             var inputBinding = $obj.data("shiny-input-binding");
             if ($obj.length > 0) {
               if (!$obj.attr("aria-live"))
@@ -2859,7 +2866,7 @@
               var evt = jQuery.Event("shiny:updateinput");
               evt.message = message[i].message;
               evt.binding = inputBinding;
-              jQuery(el).trigger(evt);
+              import_jquery6.default(el).trigger(evt);
               if (!evt.isDefaultPrevented())
                 inputBinding.receiveMessage(el, evt.message);
             }
@@ -2928,21 +2935,21 @@
           };
           if (message.user)
             Shiny.user = message.user;
-          jQuery(document).trigger("shiny:sessioninitialized");
+          import_jquery6.default(document).trigger("shiny:sessioninitialized");
         });
         addMessageHandler("busy", function(message) {
           if (message === "busy") {
-            jQuery(document.documentElement).addClass("shiny-busy");
-            jQuery(document).trigger("shiny:busy");
+            import_jquery6.default(document.documentElement).addClass("shiny-busy");
+            import_jquery6.default(document).trigger("shiny:busy");
           } else if (message === "idle") {
-            jQuery(document.documentElement).removeClass("shiny-busy");
-            jQuery(document).trigger("shiny:idle");
+            import_jquery6.default(document.documentElement).removeClass("shiny-busy");
+            import_jquery6.default(document).trigger("shiny:idle");
           }
         });
         addMessageHandler("recalculating", function(message) {
           if (message.hasOwnProperty("name") && message.hasOwnProperty("status")) {
             var binding = this.$bindings[message.name];
-            jQuery(binding ? binding.el : null).trigger({
+            import_jquery6.default(binding ? binding.el : null).trigger({
               type: "shiny:" + message.status
             });
           }
@@ -2951,10 +2958,10 @@
           window.location.reload();
         });
         addMessageHandler("shiny-insert-ui", function(message) {
-          var targets = jQuery(message.selector);
+          var targets = import_jquery6.default(message.selector);
           if (targets.length === 0) {
             console.warn('The selector you chose ("' + message.selector + '") could not be found in the DOM.');
-            Shiny.renderHtml(message.content.html, jQuery([]), message.content.deps);
+            Shiny.renderHtml(message.content.html, import_jquery6.default([]), message.content.deps);
           } else {
             targets.each(function(i, target) {
               Shiny.renderContent(target, message.content, message.where);
@@ -2963,10 +2970,10 @@
           }
         });
         addMessageHandler("shiny-remove-ui", function(message) {
-          var els = jQuery(message.selector);
+          var els = import_jquery6.default(message.selector);
           els.each(function(i, el) {
             Shiny.unbindAll(el, true);
-            jQuery(el).remove();
+            import_jquery6.default(el).remove();
             return message.multiple;
           });
         });
@@ -2976,14 +2983,14 @@
           }
         });
         function getTabset(id) {
-          var $tabset = jQuery("#" + $escape(id));
+          var $tabset = import_jquery6.default("#" + $escape(id));
           if ($tabset.length === 0)
             throw "There is no tabsetPanel (or navbarPage or navlistPanel) with id equal to '" + id + "'";
           return $tabset;
         }
         function getTabContent($tabset) {
           var tabsetId = $tabset.attr("data-tabsetid");
-          var $tabContent = jQuery("div.tab-content[data-tabsetid='" + $escape(tabsetId) + "']");
+          var $tabContent = import_jquery6.default("div.tab-content[data-tabsetid='" + $escape(tabsetId) + "']");
           return $tabContent;
         }
         function getTargetTabs($tabset, $tabContent, target) {
@@ -3000,12 +3007,12 @@
             var dropdownId = $dropdownTabset.attr("data-tabsetid");
             var $dropdownLiTags = $dropdownTabset.find("a[data-toggle='tab']").parent("li");
             $dropdownLiTags.each(function(i, el) {
-              $liTags.push(jQuery(el));
+              $liTags.push(import_jquery6.default(el));
             });
             var selector = "div.tab-pane[id^='tab-" + $escape(dropdownId) + "']";
             var $dropdownDivs = $tabContent.find(selector);
             $dropdownDivs.each(function(i, el) {
-              $divTags.push(jQuery(el));
+              $divTags.push(import_jquery6.default(el));
             });
           } else {
             $divTags.push($tabContent.find("div" + dataValue));
@@ -3021,8 +3028,8 @@
           var $tabset = $parentTabset;
           var $tabContent = getTabContent($tabset);
           var tabsetId = $parentTabset.attr("data-tabsetid");
-          var $divTag = jQuery(message.divTag.html);
-          var $liTag = jQuery(message.liTag.html);
+          var $divTag = import_jquery6.default(message.divTag.html);
+          var $liTag = import_jquery6.default(message.liTag.html);
           var $aTag = $liTag.find("> a");
           var target = null;
           var $targetLiTag = null;
@@ -3074,7 +3081,7 @@
           function getTabIndex($tabset2, tabsetId2) {
             var existingTabIds = [0];
             $tabset2.find("> li").each(function() {
-              var $tab = jQuery(this).find("> a[data-toggle='tab']");
+              var $tab = import_jquery6.default(this).find("> a[data-toggle='tab']");
               if ($tab.length > 0) {
                 var href = $tab.attr("href").replace(/.*(?=#[^\s]+$)/, "");
                 var _index = href.replace("#tab-" + tabsetId2 + "-", "");
@@ -3085,7 +3092,7 @@
           }
           function getDropdown() {
             if (message.menuName !== null) {
-              var $dropdownATag = jQuery("a.dropdown-toggle[data-value='" + $escape(message.menuName) + "']");
+              var $dropdownATag = import_jquery6.default("a.dropdown-toggle[data-value='" + $escape(message.menuName) + "']");
               if ($dropdownATag.length === 0) {
                 throw "There is no navbarMenu with menuName equal to '" + message.menuName + "'";
               }
@@ -3123,15 +3130,15 @@
         }
         function tabApplyFunction(target, func) {
           var liTags = arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : false;
-          jQuery.each(target, function(key, el) {
+          import_jquery6.default.each(target, function(key, el) {
             if (key === "$liTag") {
               func(el);
             } else if (key === "$divTags") {
-              jQuery.each(el, function(i, div) {
+              import_jquery6.default.each(el, function(i, div) {
                 func(div);
               });
             } else if (liTags && key === "$liTags") {
-              jQuery.each(el, function(i, div) {
+              import_jquery6.default.each(el, function(i, div) {
                 func(div);
               });
             }
@@ -3189,7 +3196,7 @@
           if (window.location.hash !== oldHash)
             what = "hash";
           if (what === "hash")
-            jQuery(document).trigger("hashchange");
+            import_jquery6.default(document).trigger("hashchange");
         });
         addMessageHandler("resetBrush", function(message) {
           Shiny.resetBrush(message.brushId);
@@ -3199,7 +3206,7 @@
             var key = message.id;
             var binding2 = this.$bindings[key];
             if (binding2) {
-              jQuery(binding2.el).trigger({
+              import_jquery6.default(binding2.el).trigger({
                 type: "shiny:outputinvalidated",
                 binding: binding2,
                 name: key
@@ -3216,13 +3223,13 @@
                 duration: null
               });
             } else if (message.style === "old") {
-              var $container = jQuery(".shiny-progress-container");
+              var $container = import_jquery6.default(".shiny-progress-container");
               if ($container.length === 0) {
-                $container = jQuery('<div class="shiny-progress-container"></div>');
-                jQuery(document.body).append($container);
+                $container = import_jquery6.default('<div class="shiny-progress-container"></div>');
+                import_jquery6.default(document.body).append($container);
               }
-              var depth = jQuery(".shiny-progress.open").length;
-              var $progress = jQuery('<div class="shiny-progress open"><div class="progress active"><div class="progress-bar bar"></div></div><div class="progress-text"><span class="progress-message">message</span><span class="progress-detail"></span></div></div>');
+              var depth = import_jquery6.default(".shiny-progress.open").length;
+              var $progress = import_jquery6.default('<div class="shiny-progress open"><div class="progress active"><div class="progress-bar bar"></div></div><div class="progress-text"><span class="progress-message">message</span><span class="progress-detail"></span></div></div>');
               $progress.attr("id", message.id);
               $container.append($progress);
               var $progressBar = $progress.find(".progress");
@@ -3234,7 +3241,7 @@
           },
           update: function update(message) {
             if (message.style === "notification") {
-              var $progress = jQuery("#shiny-progress-" + message.id);
+              var $progress = import_jquery6.default("#shiny-progress-" + message.id);
               if ($progress.length === 0)
                 return;
               if (typeof message.message !== "undefined") {
@@ -3248,7 +3255,7 @@
                 $progress.find(".progress-bar").width(message.value * 100 + "%");
               }
             } else if (message.style === "old") {
-              var _$progress = jQuery("#" + message.id + ".shiny-progress");
+              var _$progress = import_jquery6.default("#" + message.id + ".shiny-progress");
               if (typeof message.message !== "undefined") {
                 _$progress.find(".progress-message").text(message.message);
               }
@@ -3266,13 +3273,13 @@
             if (message.style === "notification") {
               Shiny.notifications.remove(message.id);
             } else if (message.style === "old") {
-              var $progress = jQuery("#" + message.id + ".shiny-progress");
+              var $progress = import_jquery6.default("#" + message.id + ".shiny-progress");
               $progress.removeClass("open");
               $progress.fadeOut({
                 complete: function complete() {
                   $progress.remove();
-                  if (jQuery(".shiny-progress").length === 0)
-                    jQuery(".shiny-progress-container").remove();
+                  if (import_jquery6.default(".shiny-progress").length === 0)
+                    import_jquery6.default(".shiny-progress-container").remove();
                 }
               });
             }
@@ -3293,7 +3300,7 @@
       Shiny.showReconnectDialog = function() {
         var reconnectTime = null;
         function updateTime() {
-          var $time = jQuery("#shiny-reconnect-time");
+          var $time = import_jquery6.default("#shiny-reconnect-time");
           if ($time.length === 0)
             return;
           var seconds = Math.floor((reconnectTime - new Date().getTime()) / 1e3);
@@ -3306,7 +3313,7 @@
         }
         return function(delay) {
           reconnectTime = new Date().getTime() + delay;
-          if (jQuery("#shiny-reconnect-text").length > 0)
+          if (import_jquery6.default("#shiny-reconnect-text").length > 0)
             return;
           var html = '<span id="shiny-reconnect-text">Attempting to reconnect</span><span id="shiny-reconnect-time"></span>';
           var action = '<a id="shiny-reconnect-now" href="#" onclick="Shiny.shinyapp.reconnect();">Try now</a>';
@@ -3361,7 +3368,7 @@
         function remove(id) {
           _get(id).fadeOut(fadeDuration, function() {
             Shiny.unbindAll(this);
-            jQuery(this).remove();
+            import_jquery6.default(this).remove();
             if (_ids().length === 0) {
               _getPanel().remove();
             }
@@ -3378,19 +3385,19 @@
           }).get();
         }
         function _getPanel() {
-          return jQuery("#shiny-notification-panel");
+          return import_jquery6.default("#shiny-notification-panel");
         }
         function _createPanel() {
           var $panel = _getPanel();
           if ($panel.length > 0)
             return $panel;
-          jQuery(document.body).append('<div id="shiny-notification-panel">');
+          import_jquery6.default(document.body).append('<div id="shiny-notification-panel">');
           return $panel;
         }
         function _create(id) {
           var $notification = _get(id);
           if ($notification.length === 0) {
-            $notification = jQuery('<div id="shiny-notification-'.concat(id, '" class="shiny-notification">') + '<div class="shiny-notification-close">&times;</div><div class="shiny-notification-content"></div></div>');
+            $notification = import_jquery6.default('<div id="shiny-notification-'.concat(id, '" class="shiny-notification">') + '<div class="shiny-notification-close">&times;</div><div class="shiny-notification-content"></div></div>');
             $notification.find(".shiny-notification-close").on("click", function(e) {
               e.preventDefault();
               e.stopPropagation();
@@ -3422,20 +3429,20 @@
       Shiny.modal = {
         show: function show() {
           var _ref4 = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : {}, _ref4$html = _ref4.html, html = _ref4$html === void 0 ? "" : _ref4$html, _ref4$deps = _ref4.deps, deps = _ref4$deps === void 0 ? [] : _ref4$deps;
-          jQuery(".modal-backdrop").remove();
-          var $modal = jQuery("#shiny-modal-wrapper");
+          import_jquery6.default(".modal-backdrop").remove();
+          var $modal = import_jquery6.default("#shiny-modal-wrapper");
           if ($modal.length === 0) {
-            $modal = jQuery('<div id="shiny-modal-wrapper"></div>');
-            jQuery(document.body).append($modal);
+            $modal = import_jquery6.default('<div id="shiny-modal-wrapper"></div>');
+            import_jquery6.default(document.body).append($modal);
             $modal.on("hidden.bs.modal", function(e) {
-              if (e.target === jQuery("#shiny-modal")[0]) {
+              if (e.target === import_jquery6.default("#shiny-modal")[0]) {
                 Shiny.unbindAll($modal);
                 $modal.remove();
               }
             });
           }
           $modal.on("keydown.shinymodal", function(e) {
-            if (jQuery("#shiny-modal").data("keyboard") === false)
+            if (import_jquery6.default("#shiny-modal").data("keyboard") === false)
               return;
             if (e.keyCode === 27) {
               e.stopPropagation();
@@ -3448,7 +3455,7 @@
           });
         },
         remove: function remove() {
-          var $modal = jQuery("#shiny-modal-wrapper");
+          var $modal = import_jquery6.default("#shiny-modal-wrapper");
           $modal.off("keydown.shinymodal");
           if ($modal.find(".modal").length > 0) {
             $modal.find(".modal").modal("hide");
@@ -3513,54 +3520,54 @@
         this.renderError = function(el, err) {
           this.clearError(el);
           if (err.message === "") {
-            jQuery(el).empty();
+            import_jquery6.default(el).empty();
             return;
           }
           var errClass = "shiny-output-error";
           if (err.type !== null) {
-            errClass = errClass + " " + jQuery.map(asArray(err.type), function(type) {
+            errClass = errClass + " " + import_jquery6.default.map(asArray(err.type), function(type) {
               return errClass + "-" + type;
             }).join(" ");
           }
-          jQuery(el).addClass(errClass).text(err.message);
+          import_jquery6.default(el).addClass(errClass).text(err.message);
         };
         this.clearError = function(el) {
-          jQuery(el).attr("class", function(i, c) {
+          import_jquery6.default(el).attr("class", function(i, c) {
             return c.replace(/(^|\s)shiny-output-error\S*/g, "");
           });
         };
         this.showProgress = function(el, show) {
           var RECALC_CLASS = "recalculating";
           if (show)
-            jQuery(el).addClass(RECALC_CLASS);
+            import_jquery6.default(el).addClass(RECALC_CLASS);
           else
-            jQuery(el).removeClass(RECALC_CLASS);
+            import_jquery6.default(el).removeClass(RECALC_CLASS);
         };
       }).call(OutputBinding.prototype);
       var textOutputBinding = new OutputBinding();
-      jQuery.extend(textOutputBinding, {
+      import_jquery6.default.extend(textOutputBinding, {
         find: function find2(scope) {
-          return jQuery(scope).find(".shiny-text-output");
+          return import_jquery6.default(scope).find(".shiny-text-output");
         },
         renderValue: function renderValue(el, data) {
-          jQuery(el).text(data);
+          import_jquery6.default(el).text(data);
         }
       });
       outputBindings.register(textOutputBinding, "shiny.textOutput");
       var imageOutputBinding = new OutputBinding();
-      jQuery.extend(imageOutputBinding, {
+      import_jquery6.default.extend(imageOutputBinding, {
         find: function find2(scope) {
-          return jQuery(scope).find(".shiny-image-output, .shiny-plot-output");
+          return import_jquery6.default(scope).find(".shiny-image-output, .shiny-plot-output");
         },
         renderValue: function renderValue(el, data) {
           var outputId = this.getId(el);
-          var $el = jQuery(el);
+          var $el = import_jquery6.default(el);
           var img;
           var $img = $el.find("img");
           if ($img.length === 0) {
             img = document.createElement("img");
             $el.append(img);
-            $img = jQuery(img);
+            $img = import_jquery6.default(img);
           } else {
             img = $img[0];
             $img.trigger("reset");
@@ -3602,7 +3609,7 @@
           if (opts.brushStroke === "auto") {
             opts.brushStroke = getStyle($el[0], "color");
           }
-          jQuery.each(data, function(key, value) {
+          import_jquery6.default.each(data, function(key, value) {
             if (value === null || key === "coordmap") {
               return;
             }
@@ -3674,17 +3681,17 @@
           });
         },
         renderError: function renderError(el, err) {
-          jQuery(el).find("img").trigger("reset");
+          import_jquery6.default(el).find("img").trigger("reset");
           OutputBinding.prototype.renderError.call(this, el, err);
         },
         clearError: function clearError(el) {
-          jQuery(el).contents().filter(function() {
+          import_jquery6.default(el).contents().filter(function() {
             return this.tagName !== "IMG" && this.id !== el.id + "_brush";
           }).remove();
           OutputBinding.prototype.clearError.call(this, el);
         },
         resize: function resize(el, width, height) {
-          jQuery(el).find("img").trigger("resize");
+          import_jquery6.default(el).find("img").trigger("resize");
         }
       });
       outputBindings.register(imageOutputBinding, "shiny.imageOutput");
@@ -3931,7 +3938,7 @@
             coords.coords_css = coords_css;
             coords.coords_img = coords_img;
             coords.img_css_ratio = coordmap.cssToImgScalingRatio();
-            jQuery.extend(coords, panel.panel_vars);
+            import_jquery6.default.extend(coords, panel.panel_vars);
             coords.mapping = panel.mapping;
             coords.domain = panel.domain;
             coords.range = panel.range;
@@ -3971,7 +3978,7 @@
         var clickTimer = null;
         var pending_e = null;
         function triggerEvent(newEventType, e) {
-          var e2 = jQuery.Event(newEventType, {
+          var e2 = import_jquery6.default.Event(newEventType, {
             which: e.which,
             pageX: e.pageX,
             pageY: e.pageY
@@ -4084,7 +4091,7 @@
             return;
           }
           var panel = brush.getPanel();
-          jQuery.extend(coords, panel.panel_vars);
+          import_jquery6.default.extend(coords, panel.panel_vars);
           coords.coords_css = brush.boundsCss();
           coords.coords_img = coordmap.scaleCssToImg(coords.coords_css);
           coords.img_css_ratio = coordmap.cssToImgScalingRatio();
@@ -4120,15 +4127,15 @@
           brush.down(offset_css);
           if (brush.isInResizeArea(offset_css)) {
             brush.startResizing(offset_css);
-            jQuery(document).on("mousemove.image_brush", mousemoveResizing).on("mouseup.image_brush", mouseupResizing);
+            import_jquery6.default(document).on("mousemove.image_brush", mousemoveResizing).on("mouseup.image_brush", mouseupResizing);
           } else if (brush.isInsideBrush(offset_css)) {
             brush.startDragging(offset_css);
             setCursorStyle("grabbing");
-            jQuery(document).on("mousemove.image_brush", mousemoveDragging).on("mouseup.image_brush", mouseupDragging);
+            import_jquery6.default(document).on("mousemove.image_brush", mousemoveDragging).on("mouseup.image_brush", mouseupDragging);
           } else {
             var panel = coordmap.getPanelCss(offset_css, expandPixels);
             brush.startBrushing(panel.clipImg(coordmap.scaleCssToImg(offset_css)));
-            jQuery(document).on("mousemove.image_brush", mousemoveBrushing).on("mouseup.image_brush", mouseupBrushing);
+            import_jquery6.default(document).on("mousemove.image_brush", mousemoveBrushing).on("mouseup.image_brush", mouseupBrushing);
           }
         }
         function mousemove(e) {
@@ -4169,7 +4176,7 @@
         function mouseupBrushing(e) {
           if (e.which !== 1)
             return;
-          jQuery(document).off("mousemove.image_brush").off("mouseup.image_brush");
+          import_jquery6.default(document).off("mousemove.image_brush").off("mouseup.image_brush");
           brush.up(coordmap.mouseOffsetCss(e));
           brush.stopBrushing();
           setCursorStyle("crosshair");
@@ -4184,7 +4191,7 @@
         function mouseupDragging(e) {
           if (e.which !== 1)
             return;
-          jQuery(document).off("mousemove.image_brush").off("mouseup.image_brush");
+          import_jquery6.default(document).off("mousemove.image_brush").off("mouseup.image_brush");
           brush.up(coordmap.mouseOffsetCss(e));
           brush.stopDragging();
           setCursorStyle("grabbable");
@@ -4194,7 +4201,7 @@
         function mouseupResizing(e) {
           if (e.which !== 1)
             return;
-          jQuery(document).off("mousemove.image_brush").off("mouseup.image_brush");
+          import_jquery6.default(document).off("mousemove.image_brush").off("mouseup.image_brush");
           brush.up(coordmap.mouseOffsetCss(e));
           brush.stopResizing();
           if (brushInfoSender.isPending())
@@ -4343,7 +4350,7 @@
         }
         function boundsCss(box_css) {
           if (box_css === void 0) {
-            return jQuery.extend({}, state.boundsCss);
+            return import_jquery6.default.extend({}, state.boundsCss);
           }
           var min_css = {
             x: box_css.xmin,
@@ -4393,7 +4400,7 @@
         }
         function boundsData(box_data) {
           if (box_data === void 0) {
-            return jQuery.extend({}, state.boundsData);
+            return import_jquery6.default.extend({}, state.boundsData);
           }
           var box_css = imgToCss(state.panel.scaleDataToImg(box_data));
           box_css = mapValues(box_css, function(val) {
@@ -4413,7 +4420,7 @@
         function addDiv() {
           if ($div)
             $div.remove();
-          $div = jQuery(document.createElement("div")).attr("id", el.id + "_brush").css({
+          $div = import_jquery6.default(document.createElement("div")).attr("id", el.id + "_brush").css({
             "background-color": opts.brushFill,
             opacity: opts.brushOpacity,
             "pointer-events": "none",
@@ -4485,7 +4492,7 @@
         }
         function startDragging() {
           state.dragging = true;
-          state.changeStartBounds = jQuery.extend({}, state.boundsCss);
+          state.changeStartBounds = import_jquery6.default.extend({}, state.boundsCss);
         }
         function dragTo(offset_css) {
           var dx = offset_css.x - state.down.x;
@@ -4522,7 +4529,7 @@
         }
         function startResizing() {
           state.resizing = true;
-          state.changeStartBounds = jQuery.extend({}, state.boundsCss);
+          state.changeStartBounds = import_jquery6.default.extend({}, state.boundsCss);
           state.resizeSides = whichResizeSides(state.down);
         }
         function resizeTo(offset_css) {
@@ -4617,9 +4624,9 @@
         };
       }
       var htmlOutputBinding = new OutputBinding();
-      jQuery.extend(htmlOutputBinding, {
+      import_jquery6.default.extend(htmlOutputBinding, {
         find: function find2(scope) {
-          return jQuery(scope).find(".shiny-html-output");
+          return import_jquery6.default(scope).find(".shiny-html-output");
         },
         onValueError: function onValueError(el, err) {
           Shiny.unbindAll(el);
@@ -4632,7 +4639,7 @@
       outputBindings.register(htmlOutputBinding, "shiny.htmlOutput");
       var renderDependencies = Shiny.renderDependencies = function(dependencies) {
         if (dependencies) {
-          jQuery.each(dependencies, function(i, dep) {
+          import_jquery6.default.each(dependencies, function(i, dep) {
             renderDependency(dep);
           });
         }
@@ -4658,7 +4665,7 @@
           Shiny.initializeInputs(el);
           Shiny.bindAll(el);
         } else {
-          var $parent = jQuery(el).parent();
+          var $parent = import_jquery6.default(el).parent();
           if ($parent.length > 0) {
             scope = $parent;
             if (where === "beforeBegin" || where === "afterEnd") {
@@ -4697,17 +4704,17 @@
           return false;
         registerDependency(dep.name, dep.version);
         var href = dep.src.href;
-        var $head = jQuery("head").first();
+        var $head = import_jquery6.default("head").first();
         if (dep.meta && !restyle) {
-          var metas = jQuery.map(asArray(dep.meta), function(obj, idx) {
+          var metas = import_jquery6.default.map(asArray(dep.meta), function(obj, idx) {
             var name = Object.keys(obj)[0];
-            return jQuery("<meta>").attr("name", name).attr("content", obj[name]);
+            return import_jquery6.default("<meta>").attr("name", name).attr("content", obj[name]);
           });
           $head.append(metas);
         }
         if (dep.stylesheet) {
-          var links = jQuery.map(asArray(dep.stylesheet), function(stylesheet) {
-            return jQuery("<link rel='stylesheet' type='text/css'>").attr("href", href + "/" + encodeURI(stylesheet));
+          var links = import_jquery6.default.map(asArray(dep.stylesheet), function(stylesheet) {
+            return import_jquery6.default("<link rel='stylesheet' type='text/css'>").attr("href", href + "/" + encodeURI(stylesheet));
           });
           if (!restyle) {
             $head.append(links);
@@ -4718,7 +4725,7 @@
               xhr.onload = function() {
                 var id = "shiny_restyle_" + href2.split("?restyle")[0].replace(/\W/g, "_");
                 var oldStyle = $head.find("style#" + id);
-                var newStyle = jQuery("<style>").attr("id", id).html(xhr.responseText);
+                var newStyle = import_jquery6.default("<style>").attr("id", id).html(xhr.responseText);
                 $head.append(newStyle);
                 setTimeout(function() {
                   return oldStyle.remove();
@@ -4744,9 +4751,9 @@
               sheet.disabled = true;
               if (isIE())
                 sheet.cssText = "";
-              jQuery(sheet.ownerNode).remove();
+              import_jquery6.default(sheet.ownerNode).remove();
             };
-            jQuery.map(links, function(link) {
+            import_jquery6.default.map(links, function(link) {
               var oldSheet = findSheet(link.attr("href"));
               var href2 = link.attr("href") + "?restyle=" + new Date().getTime();
               if (isIE()) {
@@ -4768,8 +4775,8 @@
           }
         }
         if (dep.script && !restyle) {
-          var scripts = jQuery.map(asArray(dep.script), function(scriptName) {
-            return jQuery("<script>").attr("src", href + "/" + encodeURI(scriptName));
+          var scripts = import_jquery6.default.map(asArray(dep.script), function(scriptName) {
+            return import_jquery6.default("<script>").attr("src", href + "/" + encodeURI(scriptName));
           });
           $head.append(scripts);
         }
@@ -4777,20 +4784,20 @@
           var attachments = dep.attachment;
           if (typeof attachments === "string")
             attachments = [attachments];
-          if (jQuery.isArray(attachments)) {
+          if (import_jquery6.default.isArray(attachments)) {
             var tmp = {};
-            jQuery.each(attachments, function(index, attachment) {
+            import_jquery6.default.each(attachments, function(index, attachment) {
               tmp[index + 1 + ""] = attachment;
             });
             attachments = tmp;
           }
-          var attach = jQuery.map(attachments, function(attachment, key) {
-            return jQuery("<link rel='attachment'>").attr("id", dep.name + "-" + key + "-attachment").attr("href", href + "/" + encodeURI(attachment));
+          var attach = import_jquery6.default.map(attachments, function(attachment, key) {
+            return import_jquery6.default("<link rel='attachment'>").attr("id", dep.name + "-" + key + "-attachment").attr("href", href + "/" + encodeURI(attachment));
           });
           $head.append(attach);
         }
         if (dep.head && !restyle) {
-          var $newHead = jQuery("<head></head>");
+          var $newHead = import_jquery6.default("<head></head>");
           $newHead.html(dep.head);
           $head.append($newHead.children());
         }
@@ -4803,14 +4810,14 @@
           this._addToHead(processed.head);
           this.register(processed.singletons);
           if (where === "replace") {
-            jQuery(el).html(processed.html);
+            import_jquery6.default(el).html(processed.html);
           } else {
             el.insertAdjacentHTML(where, processed.html);
           }
           return processed;
         },
         register: function register(s) {
-          jQuery.extend(this.knownSingletons, s);
+          import_jquery6.default.extend(this.knownSingletons, s);
         },
         registerNames: function registerNames(s) {
           if (typeof s === "string") {
@@ -4823,8 +4830,8 @@
         },
         _addToHead: function _addToHead(head) {
           if (head.length > 0) {
-            var tempDiv = jQuery("<div>" + head + "</div>")[0];
-            var $head = jQuery("head");
+            var tempDiv = import_jquery6.default("<div>" + head + "</div>")[0];
+            var $head = import_jquery6.default("head");
             while (tempDiv.hasChildNodes()) {
               $head.append(tempDiv.firstChild);
             }
@@ -4867,42 +4874,42 @@
         _reHead: /<head(?:\s[^>]*)?>([\s\S]*?)<\/head>/
       };
       var downloadLinkOutputBinding = new OutputBinding();
-      jQuery.extend(downloadLinkOutputBinding, {
+      import_jquery6.default.extend(downloadLinkOutputBinding, {
         find: function find2(scope) {
-          return jQuery(scope).find("a.shiny-download-link");
+          return import_jquery6.default(scope).find("a.shiny-download-link");
         },
         renderValue: function renderValue(el, data) {
-          jQuery(el).attr("href", data);
+          import_jquery6.default(el).attr("href", data);
         }
       });
       outputBindings.register(downloadLinkOutputBinding, "shiny.downloadLink");
-      jQuery(document).on("click.shinyDownloadLink", "a.shiny-download-link", function(e) {
+      import_jquery6.default(document).on("click.shinyDownloadLink", "a.shiny-download-link", function(e) {
         var evt = jQuery.Event("shiny:filedownload");
         evt.name = this.id;
         evt.href = this.href;
-        jQuery(document).trigger(evt);
+        import_jquery6.default(document).trigger(evt);
       });
       var datatableOutputBinding = new OutputBinding();
-      jQuery.extend(datatableOutputBinding, {
+      import_jquery6.default.extend(datatableOutputBinding, {
         find: function find2(scope) {
-          return jQuery(scope).find(".shiny-datatable-output");
+          return import_jquery6.default(scope).find(".shiny-datatable-output");
         },
         onValueError: function onValueError(el, err) {
           Shiny.unbindAll(el);
           this.renderError(el, err);
         },
         renderValue: function renderValue(el, _data) {
-          var $el = jQuery(el).empty();
+          var $el = import_jquery6.default(el).empty();
           if (!_data || !_data.colnames)
             return;
-          var colnames = jQuery.makeArray(_data.colnames);
-          var header = jQuery.map(colnames, function(x) {
+          var colnames = import_jquery6.default.makeArray(_data.colnames);
+          var header = import_jquery6.default.map(colnames, function(x) {
             return "<th>" + x + "</th>";
           }).join("");
           header = "<thead><tr>" + header + "</tr></thead>";
           var footer = "";
           if (_data.options === null || _data.options.searching !== false) {
-            footer = jQuery.map(colnames, function(x) {
+            footer = import_jquery6.default.map(colnames, function(x) {
               return '<th><input type="text" placeholder="' + escapeHTML(x.replace(/(<([^>]+)>)/gi, "")) + '" /></th>';
             }).join("");
             footer = "<tfoot>" + footer + "</tfoot>";
@@ -4910,11 +4917,11 @@
           var content = '<table class="table table-striped table-hover">' + header + footer + "</table>";
           $el.append(content);
           if (_data.evalOptions)
-            jQuery.each(_data.evalOptions, function(i, x) {
+            import_jquery6.default.each(_data.evalOptions, function(i, x) {
               _data.options[x] = eval("(" + _data.options[x] + ")");
             });
           var searchCI = _data.options === null || typeof _data.options.search === "undefined" || _data.options.search.caseInsensitive !== false;
-          var oTable = jQuery(el).children("table").DataTable(jQuery.extend({
+          var oTable = import_jquery6.default(el).children("table").DataTable(import_jquery6.default.extend({
             processing: true,
             serverSide: true,
             order: [],
@@ -4939,7 +4946,7 @@
           }));
           var searchInputs = $el.find("tfoot input");
           if (searchInputs.length > 0) {
-            jQuery.each(oTable.settings()[0].aoColumns, function(i, x) {
+            import_jquery6.default.each(oTable.settings()[0].aoColumns, function(i, x) {
               if (!x.bSearchable)
                 searchInputs.eq(i).hide();
             });
@@ -5010,9 +5017,9 @@
         };
       }).call(InputBinding.prototype);
       var textInputBinding = new InputBinding();
-      jQuery.extend(textInputBinding, {
+      import_jquery6.default.extend(textInputBinding, {
         find: function find2(scope) {
-          var $inputs = jQuery(scope).find('input[type="text"], input[type="search"], input[type="url"], input[type="email"]');
+          var $inputs = import_jquery6.default(scope).find('input[type="text"], input[type="search"], input[type="url"], input[type="email"]');
           return $inputs.not('input[type="text"][id$="-selectized"]');
         },
         getId: function getId(el) {
@@ -5025,15 +5032,15 @@
           el.value = value;
         },
         subscribe: function subscribe(el, callback) {
-          jQuery(el).on("keyup.textInputBinding input.textInputBinding", function(event) {
+          import_jquery6.default(el).on("keyup.textInputBinding input.textInputBinding", function(event) {
             callback(true);
           });
-          jQuery(el).on("change.textInputBinding", function(event) {
+          import_jquery6.default(el).on("change.textInputBinding", function(event) {
             callback(false);
           });
         },
         unsubscribe: function unsubscribe(el) {
-          jQuery(el).off(".textInputBinding");
+          import_jquery6.default(el).off(".textInputBinding");
         },
         receiveMessage: function receiveMessage(el, data) {
           if (data.hasOwnProperty("value"))
@@ -5041,7 +5048,7 @@
           updateLabel(data.label, this._getLabelNode(el));
           if (data.hasOwnProperty("placeholder"))
             el.placeholder = data.placeholder;
-          jQuery(el).trigger("change");
+          import_jquery6.default(el).trigger("change");
         },
         getState: function getState(el) {
           return {
@@ -5057,21 +5064,21 @@
           };
         },
         _getLabelNode: function _getLabelNode(el) {
-          return jQuery(el).parent().find('label[for="' + $escape(el.id) + '"]');
+          return import_jquery6.default(el).parent().find('label[for="' + $escape(el.id) + '"]');
         }
       });
       inputBindings.register(textInputBinding, "shiny.textInput");
       var textareaInputBinding = {};
-      jQuery.extend(textareaInputBinding, textInputBinding, {
+      import_jquery6.default.extend(textareaInputBinding, textInputBinding, {
         find: function find2(scope) {
-          return jQuery(scope).find("textarea");
+          return import_jquery6.default(scope).find("textarea");
         }
       });
       inputBindings.register(textareaInputBinding, "shiny.textareaInput");
       var passwordInputBinding = {};
-      jQuery.extend(passwordInputBinding, textInputBinding, {
+      import_jquery6.default.extend(passwordInputBinding, textInputBinding, {
         find: function find2(scope) {
-          return jQuery(scope).find('input[type="password"]');
+          return import_jquery6.default(scope).find('input[type="password"]');
         },
         getType: function getType(el) {
           return "shiny.password";
@@ -5079,12 +5086,12 @@
       });
       inputBindings.register(passwordInputBinding, "shiny.passwordInput");
       var numberInputBinding = {};
-      jQuery.extend(numberInputBinding, textInputBinding, {
+      import_jquery6.default.extend(numberInputBinding, textInputBinding, {
         find: function find2(scope) {
-          return jQuery(scope).find('input[type="number"]');
+          return import_jquery6.default(scope).find('input[type="number"]');
         },
         getValue: function getValue(el) {
-          var numberVal = jQuery(el).val();
+          var numberVal = import_jquery6.default(el).val();
           if (/^\s*$/.test(numberVal))
             return null;
           else if (!isNaN(numberVal))
@@ -5108,7 +5115,7 @@
           if (data.hasOwnProperty("step"))
             el.step = data.step;
           updateLabel(data.label, this._getLabelNode(el));
-          jQuery(el).trigger("change");
+          import_jquery6.default(el).trigger("change");
         },
         getState: function getState(el) {
           return {
@@ -5120,14 +5127,14 @@
           };
         },
         _getLabelNode: function _getLabelNode(el) {
-          return jQuery(el).parent().find('label[for="' + $escape(el.id) + '"]');
+          return import_jquery6.default(el).parent().find('label[for="' + $escape(el.id) + '"]');
         }
       });
       inputBindings.register(numberInputBinding, "shiny.numberInput");
       var checkboxInputBinding = new InputBinding();
-      jQuery.extend(checkboxInputBinding, {
+      import_jquery6.default.extend(checkboxInputBinding, {
         find: function find2(scope) {
-          return jQuery(scope).find('input[type="checkbox"]');
+          return import_jquery6.default(scope).find('input[type="checkbox"]');
         },
         getValue: function getValue(el) {
           return el.checked;
@@ -5136,16 +5143,16 @@
           el.checked = value;
         },
         subscribe: function subscribe(el, callback) {
-          jQuery(el).on("change.checkboxInputBinding", function(event) {
+          import_jquery6.default(el).on("change.checkboxInputBinding", function(event) {
             callback(true);
           });
         },
         unsubscribe: function unsubscribe(el) {
-          jQuery(el).off(".checkboxInputBinding");
+          import_jquery6.default(el).off(".checkboxInputBinding");
         },
         getState: function getState(el) {
           return {
-            label: jQuery(el).parent().find("span").text(),
+            label: import_jquery6.default(el).parent().find("span").text(),
             value: el.checked
           };
         },
@@ -5153,8 +5160,8 @@
           if (data.hasOwnProperty("value"))
             el.checked = data.value;
           if (data.hasOwnProperty("label"))
-            jQuery(el).parent().find("span").text(data.label);
-          jQuery(el).trigger("change");
+            import_jquery6.default(el).parent().find("span").text(data.label);
+          import_jquery6.default(el).trigger("change");
         }
       });
       inputBindings.register(checkboxInputBinding, "shiny.checkboxInput");
@@ -5188,14 +5195,14 @@
         return prettify;
       }
       var sliderInputBinding = {};
-      jQuery.extend(sliderInputBinding, textInputBinding, {
+      import_jquery6.default.extend(sliderInputBinding, textInputBinding, {
         find: function find2(scope) {
-          if (!jQuery.fn.ionRangeSlider)
+          if (!import_jquery6.default.fn.ionRangeSlider)
             return [];
-          return jQuery(scope).find("input.js-range-slider");
+          return import_jquery6.default(scope).find("input.js-range-slider");
         },
         getType: function getType(el) {
-          var dataType = jQuery(el).data("data-type");
+          var dataType = import_jquery6.default(el).data("data-type");
           if (dataType === "date")
             return "shiny.date";
           else if (dataType === "datetime")
@@ -5204,8 +5211,8 @@
             return false;
         },
         getValue: function getValue(el) {
-          var $el = jQuery(el);
-          var result = jQuery(el).data("ionRangeSlider").result;
+          var $el = import_jquery6.default(el);
+          var result = import_jquery6.default(el).data("ionRangeSlider").result;
           var convert;
           var dataType = $el.data("data-type");
           if (dataType === "date") {
@@ -5228,7 +5235,7 @@
           }
         },
         setValue: function setValue(el, value) {
-          var $el = jQuery(el);
+          var $el = import_jquery6.default(el);
           var slider = $el.data("ionRangeSlider");
           $el.data("immediate", true);
           try {
@@ -5248,15 +5255,15 @@
           }
         },
         subscribe: function subscribe(el, callback) {
-          jQuery(el).on("change.sliderInputBinding", function(event) {
-            callback(!jQuery(el).data("immediate") && !jQuery(el).data("animating"));
+          import_jquery6.default(el).on("change.sliderInputBinding", function(event) {
+            callback(!import_jquery6.default(el).data("immediate") && !import_jquery6.default(el).data("animating"));
           });
         },
         unsubscribe: function unsubscribe(el) {
-          jQuery(el).off(".sliderInputBinding");
+          import_jquery6.default(el).off(".sliderInputBinding");
         },
         receiveMessage: function receiveMessage(el, data) {
-          var $el = jQuery(el);
+          var $el = import_jquery6.default(el);
           var slider = $el.data("ionRangeSlider");
           var msg = {};
           if (data.hasOwnProperty("value")) {
@@ -5304,7 +5311,7 @@
         },
         initialize: function initialize(el) {
           var opts = {};
-          var $el = jQuery(el);
+          var $el = import_jquery6.default(el);
           var dataType = $el.data("data-type");
           var timeFormat = $el.data("time-format");
           var timezone = $el.data("timezone");
@@ -5312,10 +5319,10 @@
           $el.ionRangeSlider(opts);
         },
         _getLabelNode: function _getLabelNode(el) {
-          return jQuery(el).parent().find('label[for="' + $escape(el.id) + '"]');
+          return import_jquery6.default(el).parent().find('label[for="' + $escape(el.id) + '"]');
         },
         _numValues: function _numValues(el) {
-          if (jQuery(el).data("ionRangeSlider").options.type === "double")
+          if (import_jquery6.default(el).data("ionRangeSlider").options.type === "double")
             return 2;
           else
             return 1;
@@ -5334,10 +5341,10 @@
         else
           return "";
       }
-      jQuery(document).on("click", ".slider-animate-button", function(evt) {
+      import_jquery6.default(document).on("click", ".slider-animate-button", function(evt) {
         evt.preventDefault();
-        var self2 = jQuery(this);
-        var target = jQuery("#" + $escape(self2.attr("data-target-id")));
+        var self2 = import_jquery6.default(this);
+        var target = import_jquery6.default("#" + $escape(self2.attr("data-target-id")));
         var startLabel = "Play";
         var stopLabel = "Pause";
         var loop = self2.attr("data-loop") !== void 0 && !/^\s*false\s*$/i.test(self2.attr("data-loop"));
@@ -5415,29 +5422,29 @@
         }
       });
       var dateInputBinding = new InputBinding();
-      jQuery.extend(dateInputBinding, {
+      import_jquery6.default.extend(dateInputBinding, {
         find: function find2(scope) {
-          return jQuery(scope).find(".shiny-date-input");
+          return import_jquery6.default(scope).find(".shiny-date-input");
         },
         getType: function getType(el) {
           return "shiny.date";
         },
         getValue: function getValue(el) {
-          var date = jQuery(el).find("input").bsDatepicker("getUTCDate");
+          var date = import_jquery6.default(el).find("input").bsDatepicker("getUTCDate");
           return formatDateUTC(date);
         },
         setValue: function setValue(el, value) {
           if (value === null) {
-            jQuery(el).find("input").val("").bsDatepicker("update");
+            import_jquery6.default(el).find("input").val("").bsDatepicker("update");
             return;
           }
           var date = this._newDate(value);
           if (isNaN(date))
             return;
-          jQuery(el).find("input").bsDatepicker("setUTCDate", date);
+          import_jquery6.default(el).find("input").bsDatepicker("setUTCDate", date);
         },
         getState: function getState(el) {
-          var $el = jQuery(el);
+          var $el = import_jquery6.default(el);
           var $input = $el.find("input");
           var min4 = $input.data("datepicker").startDate;
           var max4 = $input.data("datepicker").endDate;
@@ -5463,7 +5470,7 @@
           };
         },
         receiveMessage: function receiveMessage(el, data) {
-          var $input = jQuery(el).find("input");
+          var $input = import_jquery6.default(el).find("input");
           updateLabel(data.label, this._getLabelNode(el));
           if (data.hasOwnProperty("min"))
             this._setMin($input[0], data.min);
@@ -5471,18 +5478,18 @@
             this._setMax($input[0], data.max);
           if (data.hasOwnProperty("value"))
             this.setValue(el, data.value);
-          jQuery(el).trigger("change");
+          import_jquery6.default(el).trigger("change");
         },
         subscribe: function subscribe(el, callback) {
-          jQuery(el).on("keyup.dateInputBinding input.dateInputBinding", function(event) {
+          import_jquery6.default(el).on("keyup.dateInputBinding input.dateInputBinding", function(event) {
             callback(true);
           });
-          jQuery(el).on("changeDate.dateInputBinding change.dateInputBinding", function(event) {
+          import_jquery6.default(el).on("changeDate.dateInputBinding change.dateInputBinding", function(event) {
             callback(false);
           });
         },
         unsubscribe: function unsubscribe(el) {
-          jQuery(el).off(".dateInputBinding");
+          import_jquery6.default(el).off(".dateInputBinding");
         },
         getRatePolicy: function getRatePolicy() {
           return {
@@ -5491,7 +5498,7 @@
           };
         },
         initialize: function initialize(el) {
-          var $input = jQuery(el).find("input");
+          var $input = import_jquery6.default(el).find("input");
           var date = $input.data("initial-date");
           if (date === void 0 || date === null) {
             date = this._floorDateTime(this._dateAsUTC(new Date()));
@@ -5505,7 +5512,7 @@
           }
         },
         _getLabelNode: function _getLabelNode(el) {
-          return jQuery(el).find('label[for="' + $escape(el.id) + '"]');
+          return import_jquery6.default(el).find('label[for="' + $escape(el.id) + '"]');
         },
         _formatToString: function _formatToString(format) {
           var str = "";
@@ -5520,7 +5527,7 @@
           if (date === void 0)
             return;
           if (date === null) {
-            jQuery(el).bsDatepicker("setStartDate", null);
+            import_jquery6.default(el).bsDatepicker("setStartDate", null);
             return;
           }
           date = this._newDate(date);
@@ -5528,19 +5535,19 @@
             return;
           if (isNaN(date))
             return;
-          var curValue = jQuery(el).bsDatepicker("getUTCDate");
-          jQuery(el).bsDatepicker("setStartDate", this._UTCDateAsLocal(date));
+          var curValue = import_jquery6.default(el).bsDatepicker("getUTCDate");
+          import_jquery6.default(el).bsDatepicker("setStartDate", this._UTCDateAsLocal(date));
           if (date && curValue && date.getTime() > curValue.getTime()) {
-            jQuery(el).bsDatepicker("clearDates");
+            import_jquery6.default(el).bsDatepicker("clearDates");
           } else {
-            jQuery(el).bsDatepicker("setUTCDate", curValue);
+            import_jquery6.default(el).bsDatepicker("setUTCDate", curValue);
           }
         },
         _setMax: function _setMax(el, date) {
           if (date === void 0)
             return;
           if (date === null) {
-            jQuery(el).bsDatepicker("setEndDate", null);
+            import_jquery6.default(el).bsDatepicker("setEndDate", null);
             return;
           }
           date = this._newDate(date);
@@ -5548,12 +5555,12 @@
             return;
           if (isNaN(date))
             return;
-          var curValue = jQuery(el).bsDatepicker("getUTCDate");
-          jQuery(el).bsDatepicker("setEndDate", this._UTCDateAsLocal(date));
+          var curValue = import_jquery6.default(el).bsDatepicker("getUTCDate");
+          import_jquery6.default(el).bsDatepicker("setEndDate", this._UTCDateAsLocal(date));
           if (date && curValue && date.getTime() < curValue.getTime()) {
-            jQuery(el).bsDatepicker("clearDates");
+            import_jquery6.default(el).bsDatepicker("clearDates");
           } else {
-            jQuery(el).bsDatepicker("setUTCDate", curValue);
+            import_jquery6.default(el).bsDatepicker("setUTCDate", curValue);
           }
         },
         _newDate: function _newDate(date) {
@@ -5580,12 +5587,12 @@
       });
       inputBindings.register(dateInputBinding, "shiny.dateInput");
       var dateRangeInputBinding = {};
-      jQuery.extend(dateRangeInputBinding, dateInputBinding, {
+      import_jquery6.default.extend(dateRangeInputBinding, dateInputBinding, {
         find: function find2(scope) {
-          return jQuery(scope).find(".shiny-date-range-input");
+          return import_jquery6.default(scope).find(".shiny-date-range-input");
         },
         getValue: function getValue(el) {
-          var $inputs = jQuery(el).find("input");
+          var $inputs = import_jquery6.default(el).find("input");
           var start = $inputs.eq(0).bsDatepicker("getUTCDate");
           var end = $inputs.eq(1).bsDatepicker("getUTCDate");
           return [formatDateUTC(start), formatDateUTC(end)];
@@ -5594,7 +5601,7 @@
           if (!(value instanceof Object)) {
             return;
           }
-          var $inputs = jQuery(el).find("input");
+          var $inputs = import_jquery6.default(el).find("input");
           if (value.start !== void 0) {
             if (value.start === null) {
               $inputs.eq(0).val("").bsDatepicker("update");
@@ -5613,7 +5620,7 @@
           }
         },
         getState: function getState(el) {
-          var $el = jQuery(el);
+          var $el = import_jquery6.default(el);
           var $inputs = $el.find("input");
           var $startinput = $inputs.eq(0);
           var $endinput = $inputs.eq(1);
@@ -5641,7 +5648,7 @@
           };
         },
         receiveMessage: function receiveMessage(el, data) {
-          var $el = jQuery(el);
+          var $el = import_jquery6.default(el);
           var $inputs = $el.find("input");
           var $startinput = $inputs.eq(0);
           var $endinput = $inputs.eq(1);
@@ -5659,7 +5666,7 @@
           $el.trigger("change");
         },
         initialize: function initialize(el) {
-          var $el = jQuery(el);
+          var $el = import_jquery6.default(el);
           var $inputs = $el.find("input");
           var $startinput = $inputs.eq(0);
           var $endinput = $inputs.eq(1);
@@ -5679,28 +5686,28 @@
           this._setMax($endinput[0], $endinput.data("max-date"));
         },
         subscribe: function subscribe(el, callback) {
-          jQuery(el).on("keyup.dateRangeInputBinding input.dateRangeInputBinding", function(event) {
+          import_jquery6.default(el).on("keyup.dateRangeInputBinding input.dateRangeInputBinding", function(event) {
             callback(true);
           });
-          jQuery(el).on("changeDate.dateRangeInputBinding change.dateRangeInputBinding", function(event) {
+          import_jquery6.default(el).on("changeDate.dateRangeInputBinding change.dateRangeInputBinding", function(event) {
             callback(false);
           });
         },
         unsubscribe: function unsubscribe(el) {
-          jQuery(el).off(".dateRangeInputBinding");
+          import_jquery6.default(el).off(".dateRangeInputBinding");
         },
         _getLabelNode: function _getLabelNode(el) {
-          return jQuery(el).find('label[for="' + $escape(el.id) + '"]');
+          return import_jquery6.default(el).find('label[for="' + $escape(el.id) + '"]');
         }
       });
       inputBindings.register(dateRangeInputBinding, "shiny.dateRangeInput");
       var selectInputBinding = new InputBinding();
-      jQuery.extend(selectInputBinding, {
+      import_jquery6.default.extend(selectInputBinding, {
         find: function find2(scope) {
-          return jQuery(scope).find("select");
+          return import_jquery6.default(scope).find("select");
         },
         getType: function getType(el) {
-          var $el = jQuery(el);
+          var $el = import_jquery6.default(el);
           if (!$el.hasClass("symbol")) {
             return null;
           }
@@ -5714,11 +5721,11 @@
           return InputBinding.prototype.getId.call(this, el) || el.name;
         },
         getValue: function getValue(el) {
-          return jQuery(el).val();
+          return import_jquery6.default(el).val();
         },
         setValue: function setValue(el, value) {
           if (!this._is_selectize(el)) {
-            jQuery(el).val(value);
+            import_jquery6.default(el).val(value);
           } else {
             var selectize = this._selectize(el);
             if (selectize) {
@@ -5741,7 +5748,7 @@
           };
         },
         receiveMessage: function receiveMessage(el, data) {
-          var $el = jQuery(el), selectize;
+          var $el = import_jquery6.default(el), selectize;
           if (data.hasOwnProperty("options")) {
             selectize = this._selectize(el);
             if (selectize)
@@ -5759,7 +5766,7 @@
             var loaded = false;
             selectize.settings.load = function(query, callback) {
               var settings = selectize.settings;
-              jQuery.ajax({
+              import_jquery6.default.ajax({
                 url: data.url,
                 data: {
                   query: query,
@@ -5773,7 +5780,7 @@
                   callback();
                 },
                 success: function success(res) {
-                  jQuery.each(res, function(index, elem) {
+                  import_jquery6.default.each(res, function(index, elem) {
                     var optgroupId = elem[settings.optgroupField || "optgroup"];
                     var optgroup = {};
                     optgroup[settings.optgroupLabelField || "label"] = optgroupId;
@@ -5799,11 +5806,11 @@
             this.setValue(el, data.value);
           }
           updateLabel(data.label, this._getLabelNode(el));
-          jQuery(el).trigger("change");
+          import_jquery6.default(el).trigger("change");
         },
         subscribe: function subscribe(el, callback) {
           var _this = this;
-          jQuery(el).on("change.selectInputBinding", function(event) {
+          import_jquery6.default(el).on("change.selectInputBinding", function(event) {
             if (el.nonempty && _this.getValue(el) === "") {
               return;
             }
@@ -5811,7 +5818,7 @@
           });
         },
         unsubscribe: function unsubscribe(el) {
-          jQuery(el).off(".selectInputBinding");
+          import_jquery6.default(el).off(".selectInputBinding");
         },
         initialize: function initialize(el) {
           this._selectize(el);
@@ -5821,49 +5828,49 @@
           if (this._is_selectize(el)) {
             escaped_id += "-selectized";
           }
-          return jQuery(el).parent().parent().find('label[for="' + escaped_id + '"]');
+          return import_jquery6.default(el).parent().parent().find('label[for="' + escaped_id + '"]');
         },
         _is_selectize: function _is_selectize(el) {
-          var config = jQuery(el).parent().find('script[data-for="' + $escape(el.id) + '"]');
+          var config = import_jquery6.default(el).parent().find('script[data-for="' + $escape(el.id) + '"]');
           return config.length > 0;
         },
         _selectize: function _selectize(el, update) {
-          if (!jQuery.fn.selectize)
+          if (!import_jquery6.default.fn.selectize)
             return void 0;
-          var $el = jQuery(el);
+          var $el = import_jquery6.default(el);
           var config = $el.parent().find('script[data-for="' + $escape(el.id) + '"]');
           if (config.length === 0)
             return void 0;
-          var options = jQuery.extend({
+          var options = import_jquery6.default.extend({
             labelField: "label",
             valueField: "value",
             searchField: ["label"]
           }, JSON.parse(config.html()));
           if (typeof config.data("nonempty") !== "undefined") {
             el.nonempty = true;
-            options = jQuery.extend(options, {
+            options = import_jquery6.default.extend(options, {
               onItemRemove: function onItemRemove(value) {
                 if (this.getValue() === "")
-                  jQuery("select#" + $escape(el.id)).empty().append(jQuery("<option/>", {
+                  import_jquery6.default("select#" + $escape(el.id)).empty().append(import_jquery6.default("<option/>", {
                     value: value,
                     selected: true
                   })).trigger("change");
               },
               onDropdownClose: function onDropdownClose($dropdown) {
                 if (this.getValue() === "")
-                  this.setValue(jQuery("select#" + $escape(el.id)).val());
+                  this.setValue(import_jquery6.default("select#" + $escape(el.id)).val());
               }
             });
           } else {
             el.nonempty = false;
           }
           if (config.data("eval") instanceof Array)
-            jQuery.each(config.data("eval"), function(i, x) {
+            import_jquery6.default.each(config.data("eval"), function(i, x) {
               options[x] = eval("(" + options[x] + ")");
             });
           var control = $el.selectize(options)[0].selectize;
           if (update) {
-            var settings = jQuery.extend(control.settings, options);
+            var settings = import_jquery6.default.extend(control.settings, options);
             control.destroy();
             control = $el.selectize(settings)[0].selectize;
           }
@@ -5872,26 +5879,26 @@
       });
       inputBindings.register(selectInputBinding, "shiny.selectInput");
       var radioInputBinding = new InputBinding();
-      jQuery.extend(radioInputBinding, {
+      import_jquery6.default.extend(radioInputBinding, {
         find: function find2(scope) {
-          return jQuery(scope).find(".shiny-input-radiogroup");
+          return import_jquery6.default(scope).find(".shiny-input-radiogroup");
         },
         getValue: function getValue(el) {
-          var checked_items = jQuery('input:radio[name="' + $escape(el.id) + '"]:checked');
+          var checked_items = import_jquery6.default('input:radio[name="' + $escape(el.id) + '"]:checked');
           if (checked_items.length === 0) {
             return null;
           }
           return checked_items.val();
         },
         setValue: function setValue(el, value) {
-          if (jQuery.isArray(value) && value.length === 0) {
-            jQuery('input:radio[name="' + $escape(el.id) + '"]').prop("checked", false);
+          if (import_jquery6.default.isArray(value) && value.length === 0) {
+            import_jquery6.default('input:radio[name="' + $escape(el.id) + '"]').prop("checked", false);
           } else {
-            jQuery('input:radio[name="' + $escape(el.id) + '"][value="' + $escape(value) + '"]').prop("checked", true);
+            import_jquery6.default('input:radio[name="' + $escape(el.id) + '"][value="' + $escape(value) + '"]').prop("checked", true);
           }
         },
         getState: function getState(el) {
-          var $objs = jQuery('input:radio[name="' + $escape(el.id) + '"]');
+          var $objs = import_jquery6.default('input:radio[name="' + $escape(el.id) + '"]');
           var options = new Array($objs.length);
           for (var i = 0; i < options.length; i++) {
             options[i] = {
@@ -5906,7 +5913,7 @@
           };
         },
         receiveMessage: function receiveMessage(el, data) {
-          var $el = jQuery(el);
+          var $el = import_jquery6.default(el);
           if (data.hasOwnProperty("options")) {
             $el.find("div.shiny-options-group").remove();
             $el.find("label.radio").remove();
@@ -5915,40 +5922,40 @@
           if (data.hasOwnProperty("value"))
             this.setValue(el, data.value);
           updateLabel(data.label, this._getLabelNode(el));
-          jQuery(el).trigger("change");
+          import_jquery6.default(el).trigger("change");
         },
         subscribe: function subscribe(el, callback) {
-          jQuery(el).on("change.radioInputBinding", function(event) {
+          import_jquery6.default(el).on("change.radioInputBinding", function(event) {
             callback();
           });
         },
         unsubscribe: function unsubscribe(el) {
-          jQuery(el).off(".radioInputBinding");
+          import_jquery6.default(el).off(".radioInputBinding");
         },
         _getLabelNode: function _getLabelNode(el) {
-          return jQuery(el).parent().find('label[for="' + $escape(el.id) + '"]');
+          return import_jquery6.default(el).parent().find('label[for="' + $escape(el.id) + '"]');
         },
         _getLabel: function _getLabel(obj) {
           if (obj.parentNode.tagName === "LABEL") {
-            return jQuery(obj.parentNode).find("span").text().trim();
+            return import_jquery6.default(obj.parentNode).find("span").text().trim();
           }
           return null;
         },
         _setLabel: function _setLabel(obj, value) {
           if (obj.parentNode.tagName === "LABEL") {
-            jQuery(obj.parentNode).find("span").text(value);
+            import_jquery6.default(obj.parentNode).find("span").text(value);
           }
           return null;
         }
       });
       inputBindings.register(radioInputBinding, "shiny.radioInput");
       var checkboxGroupInputBinding = new InputBinding();
-      jQuery.extend(checkboxGroupInputBinding, {
+      import_jquery6.default.extend(checkboxGroupInputBinding, {
         find: function find2(scope) {
-          return jQuery(scope).find(".shiny-input-checkboxgroup");
+          return import_jquery6.default(scope).find(".shiny-input-checkboxgroup");
         },
         getValue: function getValue(el) {
-          var $objs = jQuery('input:checkbox[name="' + $escape(el.id) + '"]:checked');
+          var $objs = import_jquery6.default('input:checkbox[name="' + $escape(el.id) + '"]:checked');
           var values = new Array($objs.length);
           for (var i = 0; i < $objs.length; i++) {
             values[i] = $objs[i].value;
@@ -5956,17 +5963,17 @@
           return values;
         },
         setValue: function setValue(el, value) {
-          jQuery('input:checkbox[name="' + $escape(el.id) + '"]').prop("checked", false);
+          import_jquery6.default('input:checkbox[name="' + $escape(el.id) + '"]').prop("checked", false);
           if (value instanceof Array) {
             for (var i = 0; i < value.length; i++) {
-              jQuery('input:checkbox[name="' + $escape(el.id) + '"][value="' + $escape(value[i]) + '"]').prop("checked", true);
+              import_jquery6.default('input:checkbox[name="' + $escape(el.id) + '"][value="' + $escape(value[i]) + '"]').prop("checked", true);
             }
           } else {
-            jQuery('input:checkbox[name="' + $escape(el.id) + '"][value="' + $escape(value) + '"]').prop("checked", true);
+            import_jquery6.default('input:checkbox[name="' + $escape(el.id) + '"][value="' + $escape(value) + '"]').prop("checked", true);
           }
         },
         getState: function getState(el) {
-          var $objs = jQuery('input:checkbox[name="' + $escape(el.id) + '"]');
+          var $objs = import_jquery6.default('input:checkbox[name="' + $escape(el.id) + '"]');
           var options = new Array($objs.length);
           for (var i = 0; i < options.length; i++) {
             options[i] = {
@@ -5981,7 +5988,7 @@
           };
         },
         receiveMessage: function receiveMessage(el, data) {
-          var $el = jQuery(el);
+          var $el = import_jquery6.default(el);
           if (data.hasOwnProperty("options")) {
             $el.find("div.shiny-options-group").remove();
             $el.find("label.checkbox").remove();
@@ -5990,50 +5997,50 @@
           if (data.hasOwnProperty("value"))
             this.setValue(el, data.value);
           updateLabel(data.label, this._getLabelNode(el));
-          jQuery(el).trigger("change");
+          import_jquery6.default(el).trigger("change");
         },
         subscribe: function subscribe(el, callback) {
-          jQuery(el).on("change.checkboxGroupInputBinding", function(event) {
+          import_jquery6.default(el).on("change.checkboxGroupInputBinding", function(event) {
             callback();
           });
         },
         unsubscribe: function unsubscribe(el) {
-          jQuery(el).off(".checkboxGroupInputBinding");
+          import_jquery6.default(el).off(".checkboxGroupInputBinding");
         },
         _getLabelNode: function _getLabelNode(el) {
-          return jQuery(el).find('label[for="' + $escape(el.id) + '"]');
+          return import_jquery6.default(el).find('label[for="' + $escape(el.id) + '"]');
         },
         _getLabel: function _getLabel(obj) {
           if (obj.parentNode.tagName === "LABEL") {
-            return jQuery(obj.parentNode).find("span").text().trim();
+            return import_jquery6.default(obj.parentNode).find("span").text().trim();
           }
           return null;
         },
         _setLabel: function _setLabel(obj, value) {
           if (obj.parentNode.tagName === "LABEL") {
-            jQuery(obj.parentNode).find("span").text(value);
+            import_jquery6.default(obj.parentNode).find("span").text(value);
           }
           return null;
         }
       });
       inputBindings.register(checkboxGroupInputBinding, "shiny.checkboxGroupInput");
       var actionButtonInputBinding = new InputBinding();
-      jQuery.extend(actionButtonInputBinding, {
+      import_jquery6.default.extend(actionButtonInputBinding, {
         find: function find2(scope) {
-          return jQuery(scope).find(".action-button");
+          return import_jquery6.default(scope).find(".action-button");
         },
         getValue: function getValue(el) {
-          return jQuery(el).data("val") || 0;
+          return import_jquery6.default(el).data("val") || 0;
         },
         setValue: function setValue(el, value) {
-          jQuery(el).data("val", value);
+          import_jquery6.default(el).data("val", value);
         },
         getType: function getType(el) {
           return "shiny.action";
         },
         subscribe: function subscribe(el, callback) {
-          jQuery(el).on("click.actionButtonInputBinding", function(e) {
-            var $el = jQuery(this);
+          import_jquery6.default(el).on("click.actionButtonInputBinding", function(e) {
+            var $el = import_jquery6.default(this);
             var val = $el.data("val") || 0;
             $el.data("val", val + 1);
             callback();
@@ -6045,13 +6052,13 @@
           };
         },
         receiveMessage: function receiveMessage(el, data) {
-          var $el = jQuery(el);
+          var $el = import_jquery6.default(el);
           var label = $el.text();
           var icon = "";
           if ($el.find("i[class]").length > 0) {
             var icon_html = $el.find("i[class]")[0];
             if (icon_html === $el.children()[0]) {
-              icon = jQuery(icon_html).prop("outerHTML");
+              icon = import_jquery6.default(icon_html).prop("outerHTML");
             }
           }
           if (data.hasOwnProperty("label"))
@@ -6064,20 +6071,20 @@
           $el.html(icon + " " + label);
         },
         unsubscribe: function unsubscribe(el) {
-          jQuery(el).off(".actionButtonInputBinding");
+          import_jquery6.default(el).off(".actionButtonInputBinding");
         }
       });
       inputBindings.register(actionButtonInputBinding, "shiny.actionButtonInput");
-      jQuery(document).on("click", "a.action-button", function(e) {
+      import_jquery6.default(document).on("click", "a.action-button", function(e) {
         e.preventDefault();
       });
       var bootstrapTabInputBinding = new InputBinding();
-      jQuery.extend(bootstrapTabInputBinding, {
+      import_jquery6.default.extend(bootstrapTabInputBinding, {
         find: function find2(scope) {
-          return jQuery(scope).find("ul.nav.shiny-tab-input");
+          return import_jquery6.default(scope).find("ul.nav.shiny-tab-input");
         },
         getValue: function getValue(el) {
-          var anchor = jQuery(el).find("li:not(.dropdown).active").children("a");
+          var anchor = import_jquery6.default(el).find("li:not(.dropdown).active").children("a");
           if (anchor.length === 1)
             return this._getTabName(anchor);
           return null;
@@ -6086,10 +6093,10 @@
           var self2 = this;
           var success = false;
           if (value) {
-            var anchors = jQuery(el).find("li:not(.dropdown)").children("a");
+            var anchors = import_jquery6.default(el).find("li:not(.dropdown)").children("a");
             anchors.each(function() {
-              if (self2._getTabName(jQuery(this)) === value) {
-                jQuery(this).tab("show");
+              if (self2._getTabName(import_jquery6.default(this)) === value) {
+                import_jquery6.default(this).tab("show");
                 success = true;
                 return false;
               }
@@ -6097,7 +6104,7 @@
             });
           }
           if (!success) {
-            jQuery(el).trigger("change");
+            import_jquery6.default(el).trigger("change");
           }
         },
         getState: function getState(el) {
@@ -6108,15 +6115,15 @@
         receiveMessage: function receiveMessage(el, data) {
           if (data.hasOwnProperty("value"))
             this.setValue(el, data.value);
-          jQuery(el).trigger("change");
+          import_jquery6.default(el).trigger("change");
         },
         subscribe: function subscribe(el, callback) {
-          jQuery(el).on("change shown.bootstrapTabInputBinding shown.bs.tab.bootstrapTabInputBinding", function(event) {
+          import_jquery6.default(el).on("change shown.bootstrapTabInputBinding shown.bs.tab.bootstrapTabInputBinding", function(event) {
             callback();
           });
         },
         unsubscribe: function unsubscribe(el) {
-          jQuery(el).off(".bootstrapTabInputBinding");
+          import_jquery6.default(el).off(".bootstrapTabInputBinding");
         },
         _getTabName: function _getTabName(anchor) {
           return anchor.attr("data-value") || anchor.text();
@@ -6129,7 +6136,7 @@
         this.el = el;
         FileProcessor.call(this, files);
       };
-      jQuery.extend(FileUploader.prototype, FileProcessor.prototype);
+      import_jquery6.default.extend(FileUploader.prototype, FileProcessor.prototype);
       (function() {
         this.makeRequest = function(method, args, onSuccess, onFailure, blobs) {
           this.shinyapp.makeRequest(method, args, onSuccess, onFailure, blobs);
@@ -6142,10 +6149,10 @@
           this.onProgress(null, 0);
           this.totalBytes = 0;
           this.progressBytes = 0;
-          jQuery.each(files, function(i, file) {
+          import_jquery6.default.each(files, function(i, file) {
             self2.totalBytes += file.size;
           });
-          var fileInfo = jQuery.map(files, function(file, i) {
+          var fileInfo = import_jquery6.default.map(files, function(file, i) {
             return {
               name: file.name,
               size: file.size,
@@ -6163,11 +6170,11 @@
         this.onFile = function(file, cont) {
           var self2 = this;
           this.onProgress(file, 0);
-          jQuery.ajax(this.uploadUrl, {
+          import_jquery6.default.ajax(this.uploadUrl, {
             type: "POST",
             cache: false,
             xhr: function xhr() {
-              var xhrVal = jQuery.ajaxSettings.xhr();
+              var xhrVal = import_jquery6.default.ajaxSettings.xhr();
               if (xhrVal.upload) {
                 xhrVal.upload.onprogress = function(e) {
                   if (e.lengthComputable) {
@@ -6191,7 +6198,7 @@
         };
         this.onComplete = function() {
           var self2 = this;
-          var fileInfo = jQuery.map(this.files, function(file, i) {
+          var fileInfo = import_jquery6.default.map(this.files, function(file, i) {
             return {
               name: file.name,
               size: file.size,
@@ -6204,12 +6211,12 @@
           evt.binding = fileInputBinding;
           evt.el = this.el;
           evt.inputType = "shiny.fileupload";
-          jQuery(document).trigger(evt);
+          import_jquery6.default(document).trigger(evt);
           this.makeRequest("uploadEnd", [this.jobId, this.id], function(response) {
             self2.$setActive(false);
             self2.onProgress(null, 1);
             self2.$bar().text("Upload complete");
-            jQuery(evt.el).val("");
+            import_jquery6.default(evt.el).val("");
           }, function(error) {
             self2.onError(error);
           });
@@ -6227,10 +6234,10 @@
           this.$bar().text(file ? file.name : "");
         };
         this.$container = function() {
-          return jQuery("#" + $escape(this.id) + "_progress.shiny-file-input-progress");
+          return import_jquery6.default("#" + $escape(this.id) + "_progress.shiny-file-input-progress");
         };
         this.$bar = function() {
-          return jQuery("#" + $escape(this.id) + "_progress.shiny-file-input-progress .progress-bar");
+          return import_jquery6.default("#" + $escape(this.id) + "_progress.shiny-file-input-progress .progress-bar");
         };
         this.$setVisible = function(visible) {
           this.$container().css("visibility", visible ? "visible" : "hidden");
@@ -6261,13 +6268,13 @@
         $el.removeAttr("data-restore");
       }
       function uploadDroppedFilesIE10Plus(el, files) {
-        var $el = jQuery(el);
+        var $el = import_jquery6.default(el);
         abortCurrentUpload($el);
         setFileText($el, files);
         $el.data("currentUploader", new FileUploader(Shiny.shinyapp, fileInputBinding.getId(el), files, el));
       }
       function uploadFiles(evt) {
-        var $el = jQuery(evt.target);
+        var $el = import_jquery6.default(evt.target);
         abortCurrentUpload($el);
         var files = evt.target.files;
         var id = fileInputBinding.getId(evt.target);
@@ -6276,26 +6283,26 @@
         setFileText($el, files);
         $el.data("currentUploader", new FileUploader(Shiny.shinyapp, id, files, evt.target));
       }
-      var $fileInputs = jQuery();
+      var $fileInputs = import_jquery6.default();
       var fileInputBinding = new InputBinding();
-      jQuery.extend(fileInputBinding, {
+      import_jquery6.default.extend(fileInputBinding, {
         find: function find2(scope) {
-          return jQuery(scope).find('input[type="file"]');
+          return import_jquery6.default(scope).find('input[type="file"]');
         },
         getId: function getId(el) {
           return InputBinding.prototype.getId.call(this, el) || el.name;
         },
         getValue: function getValue(el) {
-          var data = jQuery(el).attr("data-restore");
+          var data = import_jquery6.default(el).attr("data-restore");
           if (data) {
             data = JSON.parse(data);
-            var $fileText = jQuery(el).closest("div.input-group").find("input[type=text]");
+            var $fileText = import_jquery6.default(el).closest("div.input-group").find("input[type=text]");
             if (data.name.length === 1) {
               $fileText.val(data.name[0]);
             } else {
               $fileText.val(data.name.length + " files");
             }
-            var $progress = jQuery(el).closest("div.form-group").find(".progress");
+            var $progress = import_jquery6.default(el).closest("div.form-group").find(".progress");
             var $bar = $progress.find(".progress-bar");
             $progress.removeClass("active");
             $bar.width("100%");
@@ -6311,10 +6318,10 @@
           return "shiny.file";
         },
         _zoneOf: function _zoneOf(el) {
-          return jQuery(el).closest("div.input-group");
+          return import_jquery6.default(el).closest("div.input-group");
         },
         _enableDraghover: function _enableDraghover(el) {
-          var $el = jQuery(el), childCounter = 0;
+          var $el = import_jquery6.default(el), childCounter = 0;
           $el.on({
             "dragenter.draghover": function dragenterDraghover(e) {
               if (childCounter++ === 0) {
@@ -6341,7 +6348,7 @@
           return $el;
         },
         _disableDraghover: function _disableDraghover(el) {
-          return jQuery(el).off(".draghover");
+          return import_jquery6.default(el).off(".draghover");
         },
         _ZoneClass: {
           ACTIVE: "shiny-file-input-active",
@@ -6349,7 +6356,7 @@
         },
         _enableDocumentEvents: function _enableDocumentEvents() {
           var _this2 = this;
-          var $doc = jQuery("html"), _this$_ZoneClass = this._ZoneClass, ACTIVE = _this$_ZoneClass.ACTIVE, OVER = _this$_ZoneClass.OVER;
+          var $doc = import_jquery6.default("html"), _this$_ZoneClass = this._ZoneClass, ACTIVE = _this$_ZoneClass.ACTIVE, OVER = _this$_ZoneClass.OVER;
           this._enableDraghover($doc).on({
             "draghover:enter.draghover": function draghoverEnterDraghover(e) {
               _this2._zoneOf($fileInputs).addClass(ACTIVE);
@@ -6363,7 +6370,7 @@
           });
         },
         _disableDocumentEvents: function _disableDocumentEvents() {
-          var $doc = jQuery("html");
+          var $doc = import_jquery6.default("html");
           $doc.off(".draghover");
           this._disableDraghover($doc);
         },
@@ -6378,7 +6385,7 @@
           return true;
         },
         _handleDrop: function _handleDrop(e, el) {
-          var files = e.originalEvent.dataTransfer.files, $el = jQuery(el);
+          var files = e.originalEvent.dataTransfer.files, $el = import_jquery6.default(el);
           if (files === void 0 || files === null) {
             console.log("Dropping files is not supported on this browser. (no FileList)");
           } else if (!this._canSetFiles(files)) {
@@ -6392,7 +6399,7 @@
         },
         subscribe: function subscribe(el, callback) {
           var _this3 = this;
-          jQuery(el).on("change.fileInputBinding", uploadFiles);
+          import_jquery6.default(el).on("change.fileInputBinding", uploadFiles);
           if ($fileInputs.length === 0)
             this._enableDocumentEvents();
           $fileInputs = $fileInputs.add(el);
@@ -6411,7 +6418,7 @@
           });
         },
         unsubscribe: function unsubscribe(el) {
-          var $el = jQuery(el), $zone = this._zoneOf(el);
+          var $el = import_jquery6.default(el), $zone = this._zoneOf(el);
           $zone.removeClass(this._ZoneClass.OVER).removeClass(this._ZoneClass.ACTIVE);
           this._disableDraghover($zone);
           $el.off(".fileInputBinding");
@@ -6426,7 +6433,7 @@
         var shinyapp = Shiny.shinyapp = new ShinyApp();
         function bindOutputs() {
           var scope = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : document;
-          scope = jQuery(scope);
+          scope = import_jquery6.default(scope);
           var bindings = outputBindings.getBindings();
           for (var i = 0; i < bindings.length; i++) {
             var binding = bindings[i].binding;
@@ -6436,9 +6443,9 @@
               var id = binding.getId(el);
               if (!id)
                 continue;
-              if (!jQuery.contains(document, el))
+              if (!import_jquery6.default.contains(document, el))
                 continue;
-              var $el = jQuery(el);
+              var $el = import_jquery6.default(el);
               if ($el.hasClass("shiny-bound-output")) {
                 continue;
               }
@@ -6462,12 +6469,12 @@
         function unbindOutputs() {
           var scope = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : document;
           var includeSelf = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : false;
-          var outputs = jQuery(scope).find(".shiny-bound-output");
-          if (includeSelf && jQuery(scope).hasClass("shiny-bound-output")) {
+          var outputs = import_jquery6.default(scope).find(".shiny-bound-output");
+          if (includeSelf && import_jquery6.default(scope).hasClass("shiny-bound-output")) {
             outputs.push(scope);
           }
           for (var i = 0; i < outputs.length; i++) {
-            var $el = jQuery(outputs[i]);
+            var $el = import_jquery6.default(outputs[i]);
             var bindingAdapter = $el.data("shiny-output-binding");
             if (!bindingAdapter)
               continue;
@@ -6490,10 +6497,10 @@
         var inputsRate = new InputRateDecorator(inputsEvent);
         var inputsDefer = new InputDeferDecorator(inputsEvent);
         var inputs;
-        if (jQuery('input[type="submit"], button[type="submit"]').length > 0) {
+        if (import_jquery6.default('input[type="submit"], button[type="submit"]').length > 0) {
           inputs = inputsDefer;
-          jQuery('input[type="submit"], button[type="submit"]').each(function() {
-            jQuery(this).click(function(event) {
+          import_jquery6.default('input[type="submit"], button[type="submit"]').each(function() {
+            import_jquery6.default(this).click(function(event) {
               event.preventDefault();
               inputsDefer.submit();
             });
@@ -6555,8 +6562,8 @@
                 };
               }();
               binding.subscribe(el, thisCallback);
-              jQuery(el).data("shiny-input-binding", binding);
-              jQuery(el).addClass("shiny-bound-input");
+              import_jquery6.default(el).data("shiny-input-binding", binding);
+              import_jquery6.default(el).addClass("shiny-bound-input");
               var ratePolicy = binding.getRatePolicy(el);
               if (ratePolicy !== null) {
                 inputsRate.setRatePolicy(effectiveId, ratePolicy.policy, ratePolicy.delay);
@@ -6565,7 +6572,7 @@
                 binding: binding,
                 node: el
               };
-              jQuery(el).trigger({
+              import_jquery6.default(el).trigger({
                 type: "shiny:bound",
                 binding: binding,
                 bindingType: "input"
@@ -6585,20 +6592,20 @@
         function unbindInputs() {
           var scope = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : document;
           var includeSelf = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : false;
-          var inputs2 = jQuery(scope).find(".shiny-bound-input");
-          if (includeSelf && jQuery(scope).hasClass("shiny-bound-input")) {
+          var inputs2 = import_jquery6.default(scope).find(".shiny-bound-input");
+          if (includeSelf && import_jquery6.default(scope).hasClass("shiny-bound-input")) {
             inputs2.push(scope);
           }
           for (var i = 0; i < inputs2.length; i++) {
             var el = inputs2[i];
-            var binding = jQuery(el).data("shiny-input-binding");
+            var binding = import_jquery6.default(el).data("shiny-input-binding");
             if (!binding)
               continue;
             var id = binding.getId(el);
-            jQuery(el).removeClass("shiny-bound-input");
+            import_jquery6.default(el).removeClass("shiny-bound-input");
             delete boundInputs[id];
             binding.unsubscribe(el);
-            jQuery(el).trigger({
+            import_jquery6.default(el).trigger({
               type: "shiny:unbound",
               binding: binding,
               bindingType: "input"
@@ -6616,7 +6623,7 @@
         }
         Shiny.bindAll = function(scope) {
           var currentInputItems = _bindAll(scope);
-          jQuery.each(currentInputItems, function(name, item) {
+          import_jquery6.default.each(currentInputItems, function(name, item) {
             inputs.setInput(name, item.value, item.opts);
           });
           initDeferredIframes();
@@ -6638,7 +6645,7 @@
         }
         Shiny.initializeInputs = initializeInputs;
         function getIdFromEl(el) {
-          var $el = jQuery(el);
+          var $el = import_jquery6.default(el);
           var bindingAdapter = $el.data("shiny-output-binding");
           if (!bindingAdapter)
             return null;
@@ -6649,7 +6656,7 @@
         var initialValues = mapValues(_bindAll(document), function(x) {
           return x.value;
         });
-        jQuery(".shiny-image-output, .shiny-plot-output, .shiny-report-size").each(function() {
+        import_jquery6.default(".shiny-image-output, .shiny-plot-output, .shiny-report-size").each(function() {
           var id = getIdFromEl(this);
           if (this.offsetWidth !== 0 || this.offsetHeight !== 0) {
             initialValues[".clientdata_output_" + id + "_width"] = this.offsetWidth;
@@ -6680,7 +6687,7 @@
             size: fontSize
           };
         }
-        jQuery(".shiny-image-output, .shiny-plot-output, .shiny-report-theme").each(function() {
+        import_jquery6.default(".shiny-image-output, .shiny-plot-output, .shiny-report-theme").each(function() {
           var el = this, id = getIdFromEl(el);
           initialValues[".clientdata_output_" + id + "_bg"] = getComputedBgColor(el);
           initialValues[".clientdata_output_" + id + "_fg"] = getStyle(el, "color");
@@ -6697,7 +6704,7 @@
           if (!reportTheme) {
             return;
           }
-          var $el = jQuery(el);
+          var $el = import_jquery6.default(el);
           if ($el.data("shiny-theme-observer")) {
             return;
           }
@@ -6725,18 +6732,18 @@
           inputs.setInput(".clientdata_output_" + id + "_font", getComputedFont(el));
         }
         function doSendImageSize() {
-          jQuery(".shiny-image-output, .shiny-plot-output, .shiny-report-size").each(function() {
+          import_jquery6.default(".shiny-image-output, .shiny-plot-output, .shiny-report-size").each(function() {
             var id = getIdFromEl(this);
             if (this.offsetWidth !== 0 || this.offsetHeight !== 0) {
               inputs.setInput(".clientdata_output_" + id + "_width", this.offsetWidth);
               inputs.setInput(".clientdata_output_" + id + "_height", this.offsetHeight);
             }
           });
-          jQuery(".shiny-image-output, .shiny-plot-output, .shiny-report-theme").each(function() {
+          import_jquery6.default(".shiny-image-output, .shiny-plot-output, .shiny-report-theme").each(function() {
             doSendTheme(this);
           });
-          jQuery(".shiny-bound-output").each(function() {
-            var $this = jQuery(this), binding = $this.data("shiny-output-binding");
+          import_jquery6.default(".shiny-bound-output").each(function() {
+            var $this = import_jquery6.default(this), binding = $this.data("shiny-output-binding");
             $this.trigger({
               type: "shiny:visualchange",
               visible: !isHidden(this),
@@ -6763,7 +6770,7 @@
           }
         }
         var lastKnownVisibleOutputs = {};
-        jQuery(".shiny-bound-output").each(function() {
+        import_jquery6.default(".shiny-bound-output").each(function() {
           var id = getIdFromEl(this);
           if (isHidden(this)) {
             initialValues[".clientdata_output_" + id + "_hidden"] = true;
@@ -6774,7 +6781,7 @@
         });
         function doSendOutputHiddenState() {
           var visibleOutputs = {};
-          jQuery(".shiny-bound-output").each(function() {
+          import_jquery6.default(".shiny-bound-output").each(function() {
             var id = getIdFromEl(this);
             delete lastKnownVisibleOutputs[id];
             var hidden = isHidden(this), evt = {
@@ -6787,7 +6794,7 @@
               visibleOutputs[id] = true;
               inputs.setInput(".clientdata_output_" + id + "_hidden", false);
             }
-            var $this = jQuery(this);
+            var $this = import_jquery6.default(this);
             evt.binding = $this.data("shiny-output-binding");
             $this.trigger(evt);
           });
@@ -6819,16 +6826,16 @@
             handler.apply(this, [namespace, handler].concat(args));
           };
         }
-        jQuery(window).resize(debounce(500, sendImageSize));
+        import_jquery6.default(window).resize(debounce(500, sendImageSize));
         var bs3classes = ["modal", "dropdown", "tab", "tooltip", "popover", "collapse"];
-        jQuery.each(bs3classes, function(idx, classname) {
-          jQuery(document.body).on("shown.bs." + classname + ".sendImageSize", "*", filterEventsByNamespace("bs", sendImageSize));
-          jQuery(document.body).on("shown.bs." + classname + ".sendOutputHiddenState hidden.bs." + classname + ".sendOutputHiddenState", "*", filterEventsByNamespace("bs", sendOutputHiddenState));
+        import_jquery6.default.each(bs3classes, function(idx, classname) {
+          import_jquery6.default(document.body).on("shown.bs." + classname + ".sendImageSize", "*", filterEventsByNamespace("bs", sendImageSize));
+          import_jquery6.default(document.body).on("shown.bs." + classname + ".sendOutputHiddenState hidden.bs." + classname + ".sendOutputHiddenState", "*", filterEventsByNamespace("bs", sendOutputHiddenState));
         });
-        jQuery(document.body).on("shown.sendImageSize", "*", sendImageSize);
-        jQuery(document.body).on("shown.sendOutputHiddenState hidden.sendOutputHiddenState", "*", sendOutputHiddenState);
+        import_jquery6.default(document.body).on("shown.sendImageSize", "*", sendImageSize);
+        import_jquery6.default(document.body).on("shown.sendOutputHiddenState hidden.sendOutputHiddenState", "*", sendOutputHiddenState);
         initialValues[".clientdata_pixelratio"] = pixelRatio();
-        jQuery(window).resize(function() {
+        import_jquery6.default(window).resize(function() {
           inputs.setInput(".clientdata_pixelratio", pixelRatio());
         });
         initialValues[".clientdata_url_protocol"] = window.location.protocol;
@@ -6836,21 +6843,21 @@
         initialValues[".clientdata_url_port"] = window.location.port;
         initialValues[".clientdata_url_pathname"] = window.location.pathname;
         initialValues[".clientdata_url_search"] = window.location.search;
-        jQuery(window).on("pushstate", function(e) {
+        import_jquery6.default(window).on("pushstate", function(e) {
           inputs.setInput(".clientdata_url_search", window.location.search);
         });
-        jQuery(window).on("popstate", function(e) {
+        import_jquery6.default(window).on("popstate", function(e) {
           inputs.setInput(".clientdata_url_search", window.location.search);
         });
         initialValues[".clientdata_url_hash_initial"] = window.location.hash;
         initialValues[".clientdata_url_hash"] = window.location.hash;
-        jQuery(window).on("hashchange", function(e) {
+        import_jquery6.default(window).on("hashchange", function(e) {
           inputs.setInput(".clientdata_url_hash", window.location.hash);
         });
-        var singletonText = initialValues[".clientdata_singletons"] = jQuery('script[type="application/shiny-singletons"]').text();
+        var singletonText = initialValues[".clientdata_singletons"] = import_jquery6.default('script[type="application/shiny-singletons"]').text();
         singletons.registerNames(singletonText.split(/,/));
-        var dependencyText = jQuery('script[type="application/html-dependencies"]').text();
-        jQuery.each(dependencyText.split(/;/), function(i, depStr) {
+        var dependencyText = import_jquery6.default('script[type="application/html-dependencies"]').text();
+        import_jquery6.default.each(dependencyText.split(/;/), function(i, depStr) {
           var match = /\s*^(.+)\[(.+)\]\s*$/.exec(depStr);
           if (match) {
             registerDependency(match[1], match[2]);
@@ -6858,7 +6865,7 @@
         });
         inputsNoResend.reset(initialValues);
         shinyapp.connect(initialValues);
-        jQuery(document).one("shiny:connected", function() {
+        import_jquery6.default(document).one("shiny:connected", function() {
           initDeferredIframes();
         });
       }
@@ -6866,29 +6873,29 @@
         if (!window.Shiny || !window.Shiny.shinyapp || !window.Shiny.shinyapp.isConnected()) {
           return;
         }
-        jQuery(".shiny-frame-deferred").each(function(i, el) {
-          var $el = jQuery(el);
+        import_jquery6.default(".shiny-frame-deferred").each(function(i, el) {
+          var $el = import_jquery6.default(el);
           $el.removeClass("shiny-frame-deferred");
           $el.attr("src", $el.attr("data-deferred-src"));
           $el.attr("data-deferred-src", null);
         });
       }
-      jQuery(function() {
+      import_jquery6.default(function() {
         setTimeout(initShiny, 1);
       });
-      jQuery(document).on("keydown", function(e) {
+      import_jquery6.default(document).on("keydown", function(e) {
         if (e.which !== 114 || !e.ctrlKey && !e.metaKey || e.shiftKey || e.altKey)
           return;
         var url = "reactlog?w=" + window.escape(Shiny.shinyapp.config.workerId) + "&s=" + window.escape(Shiny.shinyapp.config.sessionId);
         window.open(url);
         e.preventDefault();
       });
-      jQuery(document).on("keydown", function(e) {
+      import_jquery6.default(document).on("keydown", function(e) {
         if (!(e.which === 115 && (e.ctrlKey || e.metaKey) && !e.shiftKey && !e.altKey || e.which === 114 && (e.ctrlKey || e.metaKey) && e.shiftKey && !e.altKey)) {
           return;
         }
         var url = "reactlog/mark?w=" + window.escape(Shiny.shinyapp.config.workerId) + "&s=" + window.escape(Shiny.shinyapp.config.sessionId);
-        jQuery.get(url, function(result) {
+        import_jquery6.default.get(url, function(result) {
           if (result !== "marked")
             return;
           var html = '<span id="shiny-reactlog-mark-text">Marked time point in reactlog</span>';
@@ -6904,20 +6911,16 @@
     }
   });
 
-  // src/jquery/index.ts
-  var jQuery;
-  function setJQuery(jQuery_) {
-    jQuery = jQuery_;
-  }
-
   // src/initialize/disableForm.ts
+  var import_jquery = __toModule(require_jquery());
   function disableFormSubmission() {
-    jQuery(document).on("submit", "form:not([action])", function(e) {
+    import_jquery.default(document).on("submit", "form:not([action])", function(e) {
       e.preventDefault();
     });
   }
 
   // src/initialize/history.ts
+  var import_jquery2 = __toModule(require_jquery());
   function trackHistory() {
     var origPushState = window.history.pushState;
     window.history.pushState = function() {
@@ -6925,31 +6928,34 @@
         args[_key] = arguments[_key];
       }
       var result = origPushState.apply(this, args);
-      jQuery(document).trigger("pushstate");
+      import_jquery2.default(document).trigger("pushstate");
       return result;
     };
   }
 
   // node_modules/core-js/modules/es.array.index-of.js
   "use strict";
-  var $2 = require_export();
+  var $4 = require_export();
   var $indexOf = require_array_includes().indexOf;
   var arrayMethodIsStrict = require_array_method_is_strict();
   var nativeIndexOf = [].indexOf;
   var NEGATIVE_ZERO = !!nativeIndexOf && 1 / [1].indexOf(1, -0) < 0;
   var STRICT_METHOD = arrayMethodIsStrict("indexOf");
-  $2({target: "Array", proto: true, forced: NEGATIVE_ZERO || !STRICT_METHOD}, {
+  $4({target: "Array", proto: true, forced: NEGATIVE_ZERO || !STRICT_METHOD}, {
     indexOf: function indexOf(searchElement) {
       return NEGATIVE_ZERO ? nativeIndexOf.apply(this, arguments) || 0 : $indexOf(this, searchElement, arguments.length > 1 ? arguments[1] : void 0);
     }
   });
 
   // node_modules/core-js/modules/es.parse-int.js
-  var $3 = require_export();
+  var $5 = require_export();
   var parseIntImplementation = require_number_parse_int();
-  $3({global: true, forced: parseInt != parseIntImplementation}, {
+  $5({global: true, forced: parseInt != parseIntImplementation}, {
     parseInt: parseIntImplementation
   });
+
+  // src/initialize/browser.ts
+  var import_jquery3 = __toModule(require_jquery());
 
   // src/utils/browser.ts
   var isQtVal = false;
@@ -6995,13 +7001,13 @@
   }
   function determineBrowserInfo() {
     if (/\bQt\//.test(userAgentVal)) {
-      jQuery(document.documentElement).addClass("qt");
+      import_jquery3.default(document.documentElement).addClass("qt");
       setIsQt(true);
     } else {
       setIsQt(false);
     }
     if (/\bQt\/5/.test(userAgentVal) && /Linux/.test(userAgentVal)) {
-      jQuery(document.documentElement).addClass("qt5");
+      import_jquery3.default(document.documentElement).addClass("qt5");
     }
     setIsIE(/MSIE|Trident|Edge/.test(userAgentVal));
     setIEVersion(getIEVersion());
@@ -7011,13 +7017,10 @@
   function windowShiny() {
     return window["Shiny"] || {};
   }
-  function windowJQuery() {
-    return window["jQuery"];
-  }
 
   // node_modules/core-js/modules/es.array.concat.js
   "use strict";
-  var $4 = require_export();
+  var $7 = require_export();
   var fails = require_fails();
   var isArray = require_is_array();
   var isObject = require_is_object();
@@ -7044,7 +7047,7 @@
     return spreadable !== void 0 ? !!spreadable : isArray(O);
   };
   var FORCED = !IS_CONCAT_SPREADABLE_SUPPORT || !SPECIES_SUPPORT;
-  $4({target: "Array", proto: true, forced: FORCED}, {
+  $7({target: "Array", proto: true, forced: FORCED}, {
     concat: function concat(arg) {
       var O = toObject(this);
       var A = arraySpeciesCreate(O, 0);
@@ -7072,7 +7075,7 @@
 
   // node_modules/core-js/modules/es.array.slice.js
   "use strict";
-  var $5 = require_export();
+  var $8 = require_export();
   var isObject2 = require_is_object();
   var isArray2 = require_is_array();
   var toAbsoluteIndex = require_to_absolute_index();
@@ -7085,7 +7088,7 @@
   var SPECIES = wellKnownSymbol2("species");
   var nativeSlice = [].slice;
   var max = Math.max;
-  $5({target: "Array", proto: true, forced: !HAS_SPECIES_SUPPORT}, {
+  $8({target: "Array", proto: true, forced: !HAS_SPECIES_SUPPORT}, {
     slice: function slice(start, end) {
       var O = toIndexedObject(this);
       var length = toLength2(O.length);
@@ -7116,7 +7119,7 @@
 
   // node_modules/core-js/modules/es.array.splice.js
   "use strict";
-  var $6 = require_export();
+  var $9 = require_export();
   var toAbsoluteIndex2 = require_to_absolute_index();
   var toInteger = require_to_integer();
   var toLength3 = require_to_length();
@@ -7129,7 +7132,7 @@
   var min = Math.min;
   var MAX_SAFE_INTEGER2 = 9007199254740991;
   var MAXIMUM_ALLOWED_LENGTH_EXCEEDED = "Maximum allowed length exceeded";
-  $6({target: "Array", proto: true, forced: !HAS_SPECIES_SUPPORT2}, {
+  $9({target: "Array", proto: true, forced: !HAS_SPECIES_SUPPORT2}, {
     splice: function splice(start, deleteCount) {
       var O = toObject2(this);
       var len = toLength3(O.length);
@@ -7186,7 +7189,7 @@
 
   // node_modules/core-js/modules/es.number.to-precision.js
   "use strict";
-  var $7 = require_export();
+  var $10 = require_export();
   var fails2 = require_fails();
   var thisNumberValue = require_this_number_value();
   var nativeToPrecision = 1 .toPrecision;
@@ -7195,21 +7198,21 @@
   }) || !fails2(function() {
     nativeToPrecision.call({});
   });
-  $7({target: "Number", proto: true, forced: FORCED2}, {
+  $10({target: "Number", proto: true, forced: FORCED2}, {
     toPrecision: function toPrecision(precision) {
       return precision === void 0 ? nativeToPrecision.call(thisNumberValue(this)) : nativeToPrecision.call(thisNumberValue(this), precision);
     }
   });
 
   // node_modules/core-js/modules/es.object.keys.js
-  var $8 = require_export();
+  var $11 = require_export();
   var toObject3 = require_to_object();
   var nativeKeys = require_object_keys();
   var fails3 = require_fails();
   var FAILS_ON_PRIMITIVES = fails3(function() {
     nativeKeys(1);
   });
-  $8({target: "Object", stat: true, forced: FAILS_ON_PRIMITIVES}, {
+  $11({target: "Object", stat: true, forced: FAILS_ON_PRIMITIVES}, {
     keys: function keys(it) {
       return nativeKeys(toObject3(it));
     }
@@ -7224,9 +7227,9 @@
   }
 
   // node_modules/core-js/modules/es.parse-float.js
-  var $9 = require_export();
+  var $12 = require_export();
   var parseFloatImplementation = require_number_parse_float();
-  $9({global: true, forced: parseFloat != parseFloatImplementation}, {
+  $12({global: true, forced: parseFloat != parseFloatImplementation}, {
     parseFloat: parseFloatImplementation
   });
 
@@ -7448,12 +7451,16 @@
     ];
   }, !SUPPORTS_Y);
 
+  // src/utils/index.ts
+  var import_jquery5 = __toModule(require_jquery());
+
   // src/window/pixelRatio.ts
   function windowDevicePixelRatio() {
     return window.devicePixelRatio;
   }
 
   // src/utils/blob.ts
+  var import_jquery4 = __toModule(require_jquery());
   var BlobBuilder;
   function setBlobBuilder(BlobBuilder_) {
     BlobBuilder = BlobBuilder_;
@@ -7464,7 +7471,7 @@
       return new Blob(parts);
     } catch (e) {
       var blobBuilder = new BlobBuilder();
-      jQuery.each(parts, function(i, part) {
+      import_jquery4.default.each(parts, function(i, part) {
         blobBuilder.append(part);
       });
       return blobBuilder.getBlob();
@@ -7629,7 +7636,7 @@
     return typeof x === "number" && isNaN(x);
   }
   function _equal(x, y) {
-    if (jQuery.type(x) === "object" && jQuery.type(y) === "object") {
+    if (import_jquery5.default.type(x) === "object" && import_jquery5.default.type(y) === "object") {
       if (Object.keys(x).length !== Object.keys(y).length)
         return false;
       for (var prop in x) {
@@ -7637,7 +7644,7 @@
           return false;
       }
       return true;
-    } else if (jQuery.type(x) === "array" && jQuery.type(y) === "array") {
+    } else if (import_jquery5.default.type(x) === "array" && import_jquery5.default.type(y) === "array") {
       if (x.length !== y.length)
         return false;
       for (var i = 0; i < x.length; i++) {
@@ -7741,7 +7748,6 @@
 
   // src/initialize/index.ts
   function init() {
-    setJQuery(windowJQuery());
     setShiny(windowShiny());
     setUserAgent(windowUserAgent());
     determineBrowserInfo();
@@ -7752,11 +7758,11 @@
 
   // node_modules/core-js/modules/es.array.filter.js
   "use strict";
-  var $10 = require_export();
+  var $15 = require_export();
   var $filter = require_array_iteration().filter;
   var arrayMethodHasSpeciesSupport4 = require_array_method_has_species_support();
   var HAS_SPECIES_SUPPORT3 = arrayMethodHasSpeciesSupport4("filter");
-  $10({target: "Array", proto: true, forced: !HAS_SPECIES_SUPPORT3}, {
+  $15({target: "Array", proto: true, forced: !HAS_SPECIES_SUPPORT3}, {
     filter: function filter(callbackfn) {
       return $filter(this, callbackfn, arguments.length > 1 ? arguments[1] : void 0);
     }
@@ -7764,7 +7770,7 @@
 
   // node_modules/core-js/modules/es.array.find.js
   "use strict";
-  var $11 = require_export();
+  var $16 = require_export();
   var $find = require_array_iteration().find;
   var addToUnscopables = require_add_to_unscopables();
   var FIND = "find";
@@ -7773,7 +7779,7 @@
     Array(1)[FIND](function() {
       SKIPS_HOLES = false;
     });
-  $11({target: "Array", proto: true, forced: SKIPS_HOLES}, {
+  $16({target: "Array", proto: true, forced: SKIPS_HOLES}, {
     find: function find(callbackfn) {
       return $find(this, callbackfn, arguments.length > 1 ? arguments[1] : void 0);
     }
@@ -7782,22 +7788,22 @@
 
   // node_modules/core-js/modules/es.array.for-each.js
   "use strict";
-  var $12 = require_export();
+  var $17 = require_export();
   var forEach = require_array_for_each();
-  $12({target: "Array", proto: true, forced: [].forEach != forEach}, {
+  $17({target: "Array", proto: true, forced: [].forEach != forEach}, {
     forEach: forEach
   });
 
   // node_modules/core-js/modules/es.array.join.js
   "use strict";
-  var $13 = require_export();
+  var $18 = require_export();
   var IndexedObject = require_indexed_object();
   var toIndexedObject2 = require_to_indexed_object();
   var arrayMethodIsStrict2 = require_array_method_is_strict();
   var nativeJoin = [].join;
   var ES3_STRINGS = IndexedObject != Object;
   var STRICT_METHOD2 = arrayMethodIsStrict2("join", ",");
-  $13({target: "Array", proto: true, forced: ES3_STRINGS || !STRICT_METHOD2}, {
+  $18({target: "Array", proto: true, forced: ES3_STRINGS || !STRICT_METHOD2}, {
     join: function join(separator) {
       return nativeJoin.call(toIndexedObject2(this), separator === void 0 ? "," : separator);
     }
@@ -7805,11 +7811,11 @@
 
   // node_modules/core-js/modules/es.array.map.js
   "use strict";
-  var $14 = require_export();
+  var $19 = require_export();
   var $map = require_array_iteration().map;
   var arrayMethodHasSpeciesSupport5 = require_array_method_has_species_support();
   var HAS_SPECIES_SUPPORT4 = arrayMethodHasSpeciesSupport5("map");
-  $14({target: "Array", proto: true, forced: !HAS_SPECIES_SUPPORT4}, {
+  $19({target: "Array", proto: true, forced: !HAS_SPECIES_SUPPORT4}, {
     map: function map(callbackfn) {
       return $map(this, callbackfn, arguments.length > 1 ? arguments[1] : void 0);
     }
@@ -7817,14 +7823,14 @@
 
   // node_modules/core-js/modules/es.array.reduce.js
   "use strict";
-  var $15 = require_export();
+  var $20 = require_export();
   var $reduce = require_array_reduce().left;
   var arrayMethodIsStrict3 = require_array_method_is_strict();
   var CHROME_VERSION = require_engine_v8_version();
   var IS_NODE = require_engine_is_node();
   var STRICT_METHOD3 = arrayMethodIsStrict3("reduce");
   var CHROME_BUG = !IS_NODE && CHROME_VERSION > 79 && CHROME_VERSION < 83;
-  $15({target: "Array", proto: true, forced: !STRICT_METHOD3 || CHROME_BUG}, {
+  $20({target: "Array", proto: true, forced: !STRICT_METHOD3 || CHROME_BUG}, {
     reduce: function reduce(callbackfn) {
       return $reduce(this, callbackfn, arguments.length, arguments.length > 1 ? arguments[1] : void 0);
     }
@@ -7832,21 +7838,21 @@
 
   // node_modules/core-js/modules/es.array-buffer.constructor.js
   "use strict";
-  var $16 = require_export();
+  var $21 = require_export();
   var global2 = require_global();
   var arrayBufferModule = require_array_buffer();
   var setSpecies = require_set_species();
   var ARRAY_BUFFER = "ArrayBuffer";
   var ArrayBuffer2 = arrayBufferModule[ARRAY_BUFFER];
   var NativeArrayBuffer = global2[ARRAY_BUFFER];
-  $16({global: true, forced: NativeArrayBuffer !== ArrayBuffer2}, {
+  $21({global: true, forced: NativeArrayBuffer !== ArrayBuffer2}, {
     ArrayBuffer: ArrayBuffer2
   });
   setSpecies(ARRAY_BUFFER);
 
   // node_modules/core-js/modules/es.array-buffer.slice.js
   "use strict";
-  var $17 = require_export();
+  var $22 = require_export();
   var fails6 = require_fails();
   var ArrayBufferModule = require_array_buffer();
   var anObject4 = require_an_object();
@@ -7859,7 +7865,7 @@
   var INCORRECT_SLICE = fails6(function() {
     return !new ArrayBuffer3(2).slice(1, void 0).byteLength;
   });
-  $17({target: "ArrayBuffer", proto: true, unsafe: true, forced: INCORRECT_SLICE}, {
+  $22({target: "ArrayBuffer", proto: true, unsafe: true, forced: INCORRECT_SLICE}, {
     slice: function slice2(start, end) {
       if (nativeArrayBufferSlice !== void 0 && end === void 0) {
         return nativeArrayBufferSlice.call(anObject4(this), start);
@@ -7879,10 +7885,10 @@
   });
 
   // node_modules/core-js/modules/es.data-view.js
-  var $18 = require_export();
+  var $23 = require_export();
   var ArrayBufferModule2 = require_array_buffer();
   var NATIVE_ARRAY_BUFFER = require_array_buffer_native();
-  $18({global: true, forced: !NATIVE_ARRAY_BUFFER}, {
+  $23({global: true, forced: !NATIVE_ARRAY_BUFFER}, {
     DataView: ArrayBufferModule2.DataView
   });
 
@@ -8058,10 +8064,10 @@
 
   // node_modules/core-js/modules/es.string.trim.js
   "use strict";
-  var $19 = require_export();
+  var $24 = require_export();
   var $trim = require_string_trim().trim;
   var forcedStringTrimMethod = require_string_trim_forced();
-  $19({target: "String", proto: true, forced: forcedStringTrimMethod("trim")}, {
+  $24({target: "String", proto: true, forced: forcedStringTrimMethod("trim")}, {
     trim: function trim2() {
       return $trim(this);
     }

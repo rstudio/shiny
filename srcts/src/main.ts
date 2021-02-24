@@ -8,7 +8,8 @@
 /* eslint "prefer-const": 0 */
 /* eslint "no-constant-condition": 0 */
 
-import { $, jQuery } from "./jquery";
+import $ from "jquery";
+jQuery = $;
 
 import {
   escapeHTML,

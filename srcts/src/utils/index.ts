@@ -1,5 +1,5 @@
+import $ from "jquery";
 import { windowDevicePixelRatio } from "../window/pixelRatio";
-import { $ } from "../jquery";
 import { makeBlob } from "./blob";
 
 function escapeHTML(str: string): string {

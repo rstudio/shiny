@@ -1,4 +1,4 @@
-import { $ } from "../jquery";
+import $ from "jquery";
 
 import { isIE, setIsQt, setIsIE, setIEVersion } from "../utils/browser";
 import { userAgent } from "../utils/userAgent";

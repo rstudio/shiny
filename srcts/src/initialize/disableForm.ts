@@ -1,4 +1,4 @@
-import { $ } from "../jquery";
+import $ from "jquery";
 
 function disableFormSubmission(): void {
   // disable form submissions

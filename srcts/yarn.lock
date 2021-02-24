@@ -4336,6 +4336,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"esbuild-plugin-globals@npm:^0.1.1":
+  version: 0.1.1
+  resolution: "esbuild-plugin-globals@npm:0.1.1"
+  checksum: 8f867cd3ad539166a2cf49c5e2496a67771a4700c8a794a651c59518cb0042f82cae64c3776023c1954c1b11338b457dda9cf6a43d24a011d81e92a9f3b61558
+  languageName: node
+  linkType: hard
+
 "esbuild@npm:^0.8.50":
   version: 0.8.50
   resolution: "esbuild@npm:0.8.50"
@@ -9281,6 +9288,7 @@ fsevents@^2.1.2:
     core-js: ^3.9
     esbuild: ^0.8.50
     esbuild-plugin-babel: 0.2.3
+    esbuild-plugin-globals: ^0.1.1
     eslint: ^7
     eslint-config-prettier: ^7
     eslint-plugin-jest: ^24

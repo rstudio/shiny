@@ -21,6 +21,7 @@
     "browserslist": "^4.16.3",
     "esbuild": "^0.8.50",
     "esbuild-plugin-babel": "0.2.3",
+    "esbuild-plugin-globals": "^0.1.1",
     "eslint": "^7",
     "eslint-config-prettier": "^7",
     "eslint-plugin-jest": "^24",

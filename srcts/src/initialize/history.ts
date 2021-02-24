@@ -1,4 +1,4 @@
-import { $ } from "../jquery";
+import $ from "jquery";
 
 function trackHistory(): void {
   const origPushState = window.history.pushState;

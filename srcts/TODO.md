@@ -48,3 +48,12 @@
 * Completely remove `parcel` from `./package.json` and only use `esbuild`
 * Delete 'shiny-es5' files
 * Delete 'old' folder
+
+
+# Eventual TODO
+* Use yarn PnP
+  * Use [esbuild](https://github.com/yarnpkg/berry/tree/master/packages/esbuild-plugin-pnp#yarnpkgesbuild-plugin-pnp)
+  * Remove `./.yarnrc.yaml` `nodeLinker` key
+  * TODO - Figure out how to call the esbuild command with the missing packages. Currently Yarn can't ifnd `esbuild` and suggests `esbuild-X.Y.Z-SHA` (or something other than `esbuild`) which does not make sense.
+    * Calling `yarn node esbuild.config.mjs` does not work
+    * Calling `yarn pnpify node esbuild.config.mjs` does not work

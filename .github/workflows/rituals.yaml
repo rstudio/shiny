@@ -131,7 +131,7 @@ jobs:
           git add ./src && git commit -m 'yarn lint (GitHub Actions)' || echo "No yarn lint changes to commit"
           git add ../inst && git commit -m 'yarn build (GitHub Actions)' || echo "No yarn build changes to commit"
 
-      - name: Check node build
+      - name: Check JS build is latest
         run: |
           ./tools/checkJSCurrent.sh
 
@@ -145,3 +145,9 @@ jobs:
         if: github.event_name == 'push'
         run: |
           git push https://${{github.actor}}:${{secrets.GITHUB_TOKEN}}@github.com/${{github.repository}}.git HEAD:${{ github.ref }} || echo "No changes to push"
+
+      # Execute after pushing, as no updated files will be produced
+      - name: Test TypeScript code
+        run: |
+          cd srcts
+          yarn test

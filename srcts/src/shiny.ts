@@ -6,7 +6,7 @@ interface ShinyType {
   compareVersion: any;
 }
 
-let Shiny: any;
+let Shiny: ShinyType;
 
 function setShiny(Shiny_: ShinyType): void {
   Shiny = Shiny_;

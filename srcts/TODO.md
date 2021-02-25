@@ -53,8 +53,8 @@
 
 # Eventual TODO
 * Use yarn PnP
+  * See `./patch/yarn_pnp.patch`
   * Use [esbuild](https://github.com/yarnpkg/berry/tree/master/packages/esbuild-plugin-pnp#yarnpkgesbuild-plugin-pnp)
-  * Remove `./.yarnrc.yaml` `nodeLinker` key
-  * TODO - Figure out how to call the esbuild command with the missing packages. Currently Yarn can't ifnd `esbuild` and suggests `esbuild-X.Y.Z-SHA` (or something other than `esbuild`) which does not make sense.
-    * Calling `yarn node esbuild.config.mjs` does not work
-    * Calling `yarn pnpify node esbuild.config.mjs` does not work
+  * Known problems:
+    * `@yarnpkg/esbuild-plugin-pnp@0.0.1` gives full file paths, not relative file paths
+    * `@testing-library/jest-dom/extend-expect` can not be found.

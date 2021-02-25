@@ -37,7 +37,7 @@ To avoid finding and determining which is the best `node` version to use, use a 
 npx n stable
 
 # View installed versions
-n ls
+npx n ls
 ```
 
 ## Adding packages

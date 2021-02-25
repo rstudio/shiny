@@ -11,8 +11,9 @@ let Shiny: ShinyType;
 function setShiny(Shiny_: ShinyType): void {
   Shiny = Shiny_;
 
-  // Tell TS to ignore this line as the _true_ value is defined at compile time
-  Shiny.version = process.env.SHINY_VERSION || "developement";
+  // `process.env.SHINY_VERSION` is overwritten to the Shiny version at build time.
+  // During testing, the `Shiny.version` will be `"development"`
+  Shiny.version = process.env.SHINY_VERSION || "development";
 
   Shiny.$escape = $escape;
   Shiny.compareVersion = compareVersion;

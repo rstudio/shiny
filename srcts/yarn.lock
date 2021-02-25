@@ -2044,6 +2044,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/node@npm:^14.14.31":
+  version: 14.14.31
+  resolution: "@types/node@npm:14.14.31"
+  checksum: 635dc8a0898a923621e02ca179e17baa39fdfa44f0096fcc1b7046c9b32317e74a99956a7b45ca0e8069874f51f4e7873a418239a318a4b6e7936f6510ac5992
+  languageName: node
+  linkType: hard
+
 "@types/normalize-package-data@npm:^2.4.0":
   version: 2.4.0
   resolution: "@types/normalize-package-data@npm:2.4.0"
@@ -9282,6 +9289,7 @@ fsevents@^2.1.2:
     "@types/jest": ^26
     "@types/jquery": "patch:@types/jquery@^3.5.5#./patch/types-jquery.patch"
     "@types/lodash": ^4
+    "@types/node": ^14.14.31
     "@typescript-eslint/eslint-plugin": ^4
     "@typescript-eslint/parser": ^4
     browserslist: ^4.16.3

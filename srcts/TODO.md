@@ -35,6 +35,7 @@
   * √ Use targeting browsers
   * √ Verify it works on phantomjs / shinytest
 * √ Set up initial jest tests
+* √ Use a global shim to avoid importing jquery directly, but make testing easy to test
 
 # Later TODO
 

@@ -62,13 +62,51 @@ Periodically, it's good to upgrade the packages to a recent version. There's two
 
 3. To see all outdated packages, run `yarn outdated`
 
-# Bundling the TypeScript
+# Configure TypeScript
+
+The JavaScript community likes to build many small, effective packages that do minimal work. The unfortunate side effect is needing a config file for everything.
+
+## Config files
+
+* `.browserslistrc`
+  * Used with `browserslist` and `core-js` to determine which polyfills should be incorporated.
+* `.eslintrc.yml`
+  * Used with `eslint` and `prettier` to determine how the TypeScript files should be formatted and which lint failures should cause warnings, errors, or be ignored.
+* `.prettierrc.yml`
+  * Used by `prettier` to know how to adjust code when a file is saved in VSCode or within `eslint`'s linting process.
+* `yarnrc.yml`
+  * Notifies `yarn` to use `yarn` v2, install `./node_modules` folder for `esbuild`, and any CLI plugins.
+* `babel.config.json`
+  * Used within `babel` transpilation of TypeScript -> JavaScript -> polyfilled JavaScript.
+  * Noteable options set:
+    * `"useBuiltIns": "usage"` - `core-js` polyfills are only added as they are _used_.
+    * `"corejs": "3.9"` - This number should match the installed `core-js` number.
+    * `"ignore":["node_modules/core-js"]` - The `core-js` library is directly ignored to [avoid being processed by `babel`](https://github.com/zloirock/core-js/issues/743#issuecomment-571983318).
+* `esbuild.config.mjs`
+  * Script that will build `shiny.js` and `shiny.min.js` with their sourcemaps
+* `jest.config.js`
+  * Used to configure [`jest` testing](https://jestjs.io/)
+* `package.json`
+  * Contains useful scripts that can be run by `yarn` via `yarn run SCRIPTNAME`.
+  * The scripts described below are inteded for developer use. All other scripts are means to an end.
+    * `yarn run watch` - Watch `./src` for changes and rebuild the JavaScript files.
+    * `yarn run build` - Build `shiny.js` and `shiny.min.js` in `../inst/www/shared`. Both files will have a corresponding sourcemap
+    * `yarn run lint` - Fix all TypeScript lints using [`eslint`](https://eslint.org/) and [`prettier`](https://prettier.io/)
+    * `yarn run test` - Run all TypeScript tests
+* `tsconfig.json` -
+  * TypeScript config file
+  * Notable options set:
+    * `target: ES5` - Compile to es5, so babel has an easier job.
+    * `preserveConstEnums: false` - Do no preserve enum values into the final code. (If true, produces bloat / unused code)
+    * `isolatedModules: true` & `esModuleInterop: true` - Requested by `esbuild`. This [allows for `esbuild`](https://esbuild.github.io/content-types/#typescript) to safely compile the files in parallel
+
+
+
+## Bundle TypeScript
 
 [esbuild](https://esbuild.github.io/) is a build tool that (for Shiny's purposes) compiles the TypeScript into a single JavaScript file.
 
-## Using `esbuild`
-
-To run all default build tasks, simply go into the `./srcts` directory and run:
+To run all build tasks, from within the `./srcts` directory, run:
 
 ```bash
 yarn build
@@ -81,6 +119,10 @@ yarn watch
 ```
 
 Both JavaScript files will produce a sourcemap (`**.js.map`) that the browser will understand.  This will help you debug Shiny's JavaScript code within the browser and point back to the original TypeScript files.
+
+### GitHub Actions
+
+On push to the `master` branch or push to a Pull Request to the `master` branch, a GitHub Action will be run to make sure the bundled JavaScript code is up to date. If the source code does not compile to the exact same file, it will be committed an pushed back to the outdated branch. (This makes it so the full build tools are not necessary for small tweaks and comments. 🎉)
 
 <!-- #### Auto build and browser refresh
 
@@ -106,27 +148,8 @@ find ../srcts/ | entr bash -c './node_modules/grunt/bin/grunt && xdotool search 
 
 VSCode does not like to develop TypeScript with the configuration files in a subfolder. To leverage full VSCode capabilities, it is recommended to open the `./srcts` folder as the root folder of a VSCode project. This will enable VSCode to readily find all of the configuration files.
 
-## Config files
-
-* `.browserslistrc`: Used with `browserslist` and `core-js` to determine which polyfills should be incorporated.
-* `.eslintrc.yml`: Used with `eslint` and `prettier` to determine how the TypeScript files should be formatted and which lint failures should cause warnings, errors, or be ignored.
-* `.prettierrc.yml`: Used by `prettier` to know how to adjust code when a file is saved in VSCode or within `eslint`'s linting process.
-* `yarnrc.yml`: Notifies `yarn` to use `yarn` v2, install `./node_modules` folder for esbuild, and any plugins that may be used.
-* `babel.config.json`: Used within `babel` transpilation of TypeScript -> JavaScript -> polyfilled JavaScript. `core-js` polyfills are only added as necessary and the `core-js` library is directly ignored to [avoid being processed by `babel`](https://github.com/zloirock/core-js/issues/743#issuecomment-571983318).
-* `esbuild.config.mjs`: Script that will build `shiny.js` and `shiny.min.js` with their sourcemaps
-* `jest.config.js`: Used to configure `jest` testing
-* `package.json`: Contains useful scripts that can be run by `yarn` via `yarn run SCRIPTNAME`. The scripts described below are inteded for developer use. All other scripts are means to an end.
-  * `yarn run watch`: Watch `./src` for changes and rebuild the JavaScript files.
-  * `yarn run build`: Build `shiny.js` and `shiny.min.js` in `../inst/www/shared`. Both files will have a corresponding sourcemap
-  * `yarn run lint`: Fix all TypeScript lints using [`eslint`](https://eslint.org/) and [`prettier`](https://prettier.io/)
-  * `yarn run test`: Run all TypeScript tests
-* `tsconfig.json`: Used by TypeScript.
-  * `target: ES5`: Compile to es5, so babel has an easier job.
-  * `preserveConstEnums: false`: Do no preserve enum values into the final code. (If true, produces bloat / unused code)
-  * `isolatedModules: true`: Requested by esbuild. This allows for esbuild to compile the files in parallel.
-
-# Updating web libraries
-## `@types/jquery`
+# Updating dependencies
+### `@types/jquery`
 
 As of v3.5.5, `@types/jquery` produces a globally available constant of `$` and `jQuery`. This is problematic as TypeScript is there to enforce that all variables are accounted for. Declaring that these two variables exist globally removes the requirement to import `$` (or `jQuery`). This is bad for Shiny as the `$` would not be enforced to the "within package" `$`.
 
@@ -134,9 +157,9 @@ To overcome this, a patch is used to remove the globally defined `$` (and `Symbo
 
 If in the future where the variables are not globally declared anymore, the patch may be removed and `@types/jquery` can be imported directly.
 
-In regular code files, remember to only use `"./jquery"` module and not `"jquery"` directly to avoid double importing jQuery on the browser.
+A global module plugin is used by `esbuild` to swap out a real `jquery` module to just return `window.jQuery`. This allows for tests and core code to behave the same way.
 
-## `core-js`
+### `core-js`
 
 To update the version of `core-js`:
 

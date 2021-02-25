@@ -3,28 +3,27 @@ function escapeHTML(str) {
     "&": "&amp;",
     "<": "&lt;",
     ">": "&gt;",
-    '"': "&quot;",
+    "\"": "&quot;",
     "'": "&#039;",
-    "/": "&#x2F;"
+    "/": "&#x2F;",
   };
 
-  return str.replace(/[&<>'"\/]/g, function(m) {
+  return str.replace(/[&<>'"\/]/g, function (m) {
     return escaped[m];
   });
 }
 
 function randomId() {
-  return Math.floor(0x100000000 + (Math.random() * 0xF00000000)).toString(16);
+  return Math.floor(0x100000000 + Math.random() * 0xf00000000).toString(16);
 }
 
 function strToBool(str) {
-  if (!str || !str.toLowerCase)
-    return undefined;
+  if (!str || !str.toLowerCase) return undefined;
 
-  switch(str.toLowerCase()) {
-    case 'true':
+  switch (str.toLowerCase()) {
+    case "true":
       return true;
-    case 'false':
+    case "false":
       return false;
     default:
       return undefined;
@@ -35,15 +34,15 @@ function strToBool(str) {
 // This is significantly faster than jQuery's .css() function.
 function getStyle(el, styleProp) {
   var x;
-  if (el.currentStyle)
-    x = el.currentStyle[styleProp];
+
+  if (el.currentStyle) x = el.currentStyle[styleProp];
   else if (window.getComputedStyle) {
     // getComputedStyle can return null when we're inside a hidden iframe on
     // Firefox; don't attempt to retrieve style props in this case.
     // https://bugzilla.mozilla.org/show_bug.cgi?id=548397
     var style = document.defaultView.getComputedStyle(el, null);
-    if (style)
-      x = style.getPropertyValue(styleProp);
+
+    if (style) x = style.getPropertyValue(styleProp);
   }
   return x;
 }
@@ -51,15 +50,14 @@ function getStyle(el, styleProp) {
 // Convert a number to a string with leading zeros
 function padZeros(n, digits) {
   var str = n.toString();
-  while (str.length < digits)
-    str = "0" + str;
+
+  while (str.length < digits) str = "0" + str;
   return str;
 }
 
 // Round to a specified number of significant digits.
 function roundSignif(x, digits = 1) {
-  if (digits < 1)
-    throw "Significant digits must be at least 1.";
+  if (digits < 1) throw "Significant digits must be at least 1.";
 
   // This converts to a string and back to a number, which is inelegant, but
   // is less prone to FP rounding error than an alternate method which used
@@ -71,8 +69,8 @@ function roundSignif(x, digits = 1) {
 // IE8 and QTWebKit don't support YYYY-MM-DD, but they support YYYY/MM/DD
 function parseDate(dateString) {
   var date = new Date(dateString);
-  if (isNaN(date))
-    date = new Date(dateString.replace(/-/g, "/"));
+
+  if (isNaN(date)) date = new Date(dateString.replace(/-/g, "/"));
   return date;
 }
 
@@ -80,15 +78,17 @@ function parseDate(dateString) {
 // UTC date. This may be a day off from the date in the local time zone.
 function formatDateUTC(date) {
   if (date instanceof Date) {
-    return date.getUTCFullYear() + '-' +
-           padZeros(date.getUTCMonth()+1, 2) + '-' +
-           padZeros(date.getUTCDate(), 2);
-
+    return (
+      date.getUTCFullYear() +
+      "-" +
+      padZeros(date.getUTCMonth() + 1, 2) +
+      "-" +
+      padZeros(date.getUTCDate(), 2)
+    );
   } else {
     return null;
   }
 }
-
 
 // Given an element and a function(width, height), returns a function(). When
 // the output function is called, it calls the input function with the offset
@@ -101,22 +101,24 @@ function formatDateUTC(date) {
 // elements that haven't actually changed size or aren't visible anyway.
 function makeResizeFilter(el, func) {
   var lastSize = {};
-  return function() {
+
+  return function () {
     var size = { w: el.offsetWidth, h: el.offsetHeight };
-    if (size.w === 0 && size.h === 0)
-      return;
-    if (size.w === lastSize.w && size.h === lastSize.h)
-      return;
+
+    if (size.w === 0 && size.h === 0) return;
+    if (size.w === lastSize.w && size.h === lastSize.h) return;
     lastSize = size;
     func(size.w, size.h);
   };
 }
 
-var _BlobBuilder = window.BlobBuilder || window.WebKitBlobBuilder ||
-    window.MozBlobBuilder || window.MSBlobBuilder;
+var _BlobBuilder =
+  window.BlobBuilder ||
+  window.WebKitBlobBuilder ||
+  window.MozBlobBuilder ||
+  window.MSBlobBuilder;
 
 function makeBlob(parts) {
-
   // Browser compatibility is a mess right now. The code as written works in
   // a variety of modern browsers, but sadly gives a deprecation warning
   // message on the console in current versions (as of this writing) of
@@ -137,10 +139,10 @@ function makeBlob(parts) {
 
   try {
     return new Blob(parts);
-  }
-  catch (e) {
+  } catch (e) {
     var blobBuilder = new _BlobBuilder();
-    $.each(parts, function(i, part) {
+
+    $.each(parts, function (i, part) {
       blobBuilder.append(part);
     });
     return blobBuilder.getBlob();
@@ -162,12 +164,12 @@ function pixelRatio() {
 function scopeExprToFunc(expr) {
   /*jshint evil: true */
   var expr_escaped = expr
-    .replace(/[\\"']/g, '\\$&')
-    .replace(/\u0000/g, '\\0')
-    .replace(/\n/g, '\\n')
-    .replace(/\r/g, '\\r')
+    .replace(/[\\"']/g, "\\$&")
+    .replace(/\u0000/g, "\\0")
+    .replace(/\n/g, "\\n")
+    .replace(/\r/g, "\\r")
     // \b has a special meaning; need [\b] to match backspace char.
-    .replace(/[\b]/g, '\\b');
+    .replace(/[\b]/g, "\\b");
 
   try {
     var func = new Function(
@@ -185,17 +187,14 @@ function scopeExprToFunc(expr) {
     throw e;
   }
 
-
-  return function(scope) {
+  return function (scope) {
     return func.call(scope);
   };
 }
 
 function asArray(value) {
-  if (value === null || value === undefined)
-    return [];
-  if ($.isArray(value))
-    return value;
+  if (value === null || value === undefined) return [];
+  if ($.isArray(value)) return value;
   return [value];
 }
 
@@ -206,18 +205,16 @@ function mergeSort(list, sortfunc) {
     var ia = 0;
     var ib = 0;
     var sorted = [];
+
     while (ia < a.length && ib < b.length) {
       if (sortfunc(a[ia], b[ib]) <= 0) {
         sorted.push(a[ia++]);
-      }
-      else {
+      } else {
         sorted.push(b[ib++]);
       }
     }
-    while (ia < a.length)
-      sorted.push(a[ia++]);
-    while (ib < b.length)
-      sorted.push(b[ib++]);
+    while (ia < a.length) sorted.push(a[ia++]);
+    while (ib < b.length) sorted.push(b[ib++]);
     return sorted;
   }
 
@@ -230,6 +227,7 @@ function mergeSort(list, sortfunc) {
       var listB = list.slice(i + chunkSize, i + chunkSize * 2);
       var merged = merge(sortfunc, listA, listB);
       var args = [i, merged.length];
+
       Array.prototype.push.apply(args, merged);
       Array.prototype.splice.apply(list, args);
     }
@@ -239,17 +237,17 @@ function mergeSort(list, sortfunc) {
 }
 
 // Escape jQuery selector metacharacters: !"#$%&'()*+,./:;<=>?@[\]^`{|}~
-var $escape = exports.$escape = function(val) {
-  return val.replace(/([!"#$%&'()*+,.\/:;<=>?@\[\\\]^`{|}~])/g, '\\$1');
-};
+var $escape = (exports.$escape = function (val) {
+  return val.replace(/([!"#$%&'()*+,.\/:;<=>?@\[\\\]^`{|}~])/g, "\\$1");
+});
 
 // Maps a function over an object, preserving keys. Like the mapValues
 // function from lodash.
 function mapValues(obj, f) {
   const newObj = {};
+
   for (let key in obj) {
-    if (obj.hasOwnProperty(key))
-      newObj[key] = f(obj[key], key, obj);
+    if (obj.hasOwnProperty(key)) newObj[key] = f(obj[key], key, obj);
   }
   return newObj;
 }
@@ -257,7 +255,7 @@ function mapValues(obj, f) {
 // This is does the same as Number.isNaN, but that function unfortunately does
 // not exist in any version of IE.
 function isnan(x) {
-  return typeof(x) === 'number' && isNaN(x);
+  return typeof x === "number" && isNaN(x);
 }
 
 // Binary equality function used by the equal function.
@@ -265,16 +263,14 @@ function _equal(x, y) {
   if ($.type(x) === "object" && $.type(y) === "object") {
     if (Object.keys(x).length !== Object.keys(y).length) return false;
     for (let prop in x)
-      if (!y.hasOwnProperty(prop) || !_equal(x[prop], y[prop]))
-        return false;
+      if (!y.hasOwnProperty(prop) || !_equal(x[prop], y[prop])) return false;
     return true;
   } else if ($.type(x) === "array" && $.type(y) === "array") {
     if (x.length !== y.length) return false;
-    for (let i = 0; i < x.length; i++)
-      if (!_equal(x[i], y[i])) return false;
+    for (let i = 0; i < x.length; i++) if (!_equal(x[i], y[i])) return false;
     return true;
   } else {
-    return (x === y);
+    return x === y;
   }
 }
 
@@ -284,17 +280,17 @@ function _equal(x, y) {
 //
 // Objects other than objects and arrays are tested for equality using ===.
 function equal(...args) {
-  if (args.length < 2) throw new Error("equal requires at least two arguments.");
-  for (let i = 0; i < args.length-1; i++) {
-    if (!_equal(args[i], args[i+1]))
-      return false;
+  if (args.length < 2)
+    throw new Error("equal requires at least two arguments.");
+  for (let i = 0; i < args.length - 1; i++) {
+    if (!_equal(args[i], args[i + 1])) return false;
   }
   return true;
-};
+}
 
 // Compare version strings like "1.0.1", "1.4-2". `op` must be a string like
 // "==" or "<".
-exports.compareVersion = function(a, op, b) {
+exports.compareVersion = function (a, op, b) {
   function versionParts(ver) {
     return (ver + "")
       .replace(/-/, ".")
@@ -308,9 +304,9 @@ exports.compareVersion = function(a, op, b) {
     var len = Math.min(a.length, b.length);
     var cmp;
 
-    for(var i=0; i<len; i++) {
+    for (var i = 0; i < len; i++) {
       cmp = parseInt(a[i], 10) - parseInt(b[i], 10);
-      if(cmp !== 0) {
+      if (cmp !== 0) {
         return cmp;
       }
     }
@@ -319,14 +315,13 @@ exports.compareVersion = function(a, op, b) {
 
   var diff = cmpVersion(a, b);
 
-  if (op === "==")      return (diff === 0);
-  else if (op === ">=") return (diff >=  0);
-  else if (op === ">")  return (diff >   0);
-  else if (op === "<=") return (diff <=  0);
-  else if (op === "<")  return (diff <   0);
-  else                  throw `Unknown operator: ${op}`;
+  if (op === "==") return diff === 0;
+  else if (op === ">=") return diff >= 0;
+  else if (op === ">") return diff > 0;
+  else if (op === "<=") return diff <= 0;
+  else if (op === "<") return diff < 0;
+  else throw `Unknown operator: ${op}`;
 };
-
 
 function updateLabel(labelTxt, labelNode) {
   // Only update if label was specified in the update method
@@ -344,15 +339,15 @@ function updateLabel(labelTxt, labelNode) {
     labelNode.text(labelTxt);
     labelNode.removeClass("shiny-label-null");
   }
-
 }
-
 
 // Compute the color property of an a tag, scoped within the element
 function getComputedLinkColor(el) {
   let a = document.createElement("a");
+
   a.href = "/";
   let div = document.createElement("div");
+
   div.style.setProperty("position", "absolute", "important");
   div.style.setProperty("top", "-1000px", "important");
   div.style.setProperty("left", "0", "important");
@@ -361,6 +356,7 @@ function getComputedLinkColor(el) {
   div.appendChild(a);
   el.appendChild(div);
   let linkColor = window.getComputedStyle(a).getPropertyValue("color");
+
   el.removeChild(div);
   return linkColor;
 }

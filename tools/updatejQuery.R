@@ -6,7 +6,7 @@ jq_cdn_download <- function(version) {
   )
 }
 
-jq_cdn_download("3.5.1")
+jq_cdn_download("3.6.0")
 
 download.file(
   "https://raw.githubusercontent.com/jquery/jquery/master/AUTHORS.txt",

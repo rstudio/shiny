@@ -4,7 +4,10 @@ $.extend(bootstrapTabInputBinding, {
     return $(scope).find('ul.nav.shiny-tab-input');
   },
   getValue: function(el) {
-    var anchor = $(el).find('li:not(.dropdown).active').children('a');
+    let anchor = isBS3() ?
+      $(el).find('li:not(.dropdown).active').children('a') :
+      $(el).find('.nav-link:not(.dropdown-toggle).active, .dropdown-menu > .dropdown-item.active');
+
     if (anchor.length === 1)
       return this._getTabName(anchor);
 
@@ -14,7 +17,9 @@ $.extend(bootstrapTabInputBinding, {
     let self = this;
     let success = false;
     if (value) {
-      let anchors = $(el).find('li:not(.dropdown)').children('a');
+      let anchors = isBS3() ?
+        $(el).find('li:not(.dropdown).active').children('a') :
+        $(el).find('.nav-link:not(.dropdown-toggle), .dropdown-menu > .dropdown-item');
       anchors.each(function() {
         if (self._getTabName($(this)) === value) {
           $(this).tab('show');

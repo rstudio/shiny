@@ -363,6 +363,14 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     var linkColor = window.getComputedStyle(a).getPropertyValue("color");
     el.removeChild(div);
     return linkColor;
+  }
+
+  function isBS3() {
+    if (!$.fn.tooltip) {
+      return false;
+    }
+
+    return $.fn.tooltip.Constructor.VERSION.match(/^3\./);
   } //---------------------------------------------------------------------
   // Source file: ../srcjs/browser.js
 
@@ -1495,8 +1503,9 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
     function getTargetTabs($tabset, $tabContent, target) {
       var dataValue = "[data-value='" + $escape(target) + "']";
-      var $aTag = $tabset.find("a" + dataValue);
-      var $liTag = $aTag.parent();
+      var $aTag = $tabset.find("a" + dataValue); // BS4 introduced a.dropdown-item
+
+      var $liTag = $aTag.hasClass("dropdown-item") ? $aTag : $aTag.parent();
 
       if ($liTag.length === 0) {
         throw "There is no tabPanel (or navbarMenu) with value" + " (or menuName) equal to '" + target + "'";
@@ -1509,7 +1518,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         // dropdown
         var $dropdownTabset = $aTag.find("+ ul.dropdown-menu");
         var dropdownId = $dropdownTabset.attr("data-tabsetid");
-        var $dropdownLiTags = $dropdownTabset.find("a[data-toggle='tab']").parent("li");
+        var $dropdownLiTags = isBS3() ? $dropdownTabset.find("a[data-toggle='tab']").parent("li") : $dropdownTabset.find(".dropdown-item");
         $dropdownLiTags.each(function (i, el) {
           $liTags.push($(el));
         });
@@ -1545,7 +1554,13 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
       if (message.target !== null) {
         target = getTargetTabs($tabset, $tabContent, message.target);
-        $targetLiTag = target.$liTag;
+        $targetLiTag = target.$liTag; // If the target is a (BS4) .dropdown-item, then we can't insert
+        // <li class='nav-item'><a class='nav-link'>...</a></li>,
+        // instead, we need <a class='dropdown-item'>...</a>
+
+        if ($targetLiTag.hasClass("dropdown-item")) {
+          $liTag = $aTag.removeClass("nav-link").addClass("dropdown-item");
+        }
       } // If the item is to be placed inside a navbarMenu (dropdown),
       // change the value of $tabset from the parent's ul tag to the
       // dropdown's ul tag
@@ -1568,7 +1583,13 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       if ($aTag.attr("data-toggle") === "tab") {
         var index = getTabIndex($tabset, tabsetId);
         var tabId = "tab-" + tabsetId + "-" + index;
-        $liTag.find("> a").attr("href", "#" + tabId);
+
+        if ($liTag.hasClass("dropdown-item")) {
+          $liTag.attr("href", "#" + tabId);
+        } else {
+          $liTag.find("> a").attr("href", "#" + tabId);
+        }
+
         $divTag.attr("id", tabId);
       } // actually insert the item into the right place
 
@@ -1655,10 +1676,10 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       function getTabIndex($tabset, tabsetId) {
         // The 0 is to ensure this works for empty tabsetPanels as well
         var existingTabIds = [0]; // loop through all existing tabs, find the one with highest id
-        // (since this is based on a numeric counter), and increment
+        // (since this is based on a numeric co unter), and increment
 
-        $tabset.find("> li").each(function () {
-          var $tab = $(this).find("> a[data-toggle='tab']");
+        $tabset.find("a[data-toggle='tab']").each(function () {
+          var $tab = $(this);
 
           if ($tab.length > 0) {
             // remove leading url if it exists. (copy of bootstrap url stripper)
@@ -5668,7 +5689,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       return $(scope).find('ul.nav.shiny-tab-input');
     },
     getValue: function getValue(el) {
-      var anchor = $(el).find('li:not(.dropdown).active').children('a');
+      var anchor = isBS3() ? $(el).find('li:not(.dropdown).active').children('a') : $(el).find('.nav-link:not(.dropdown-toggle).active, .dropdown-menu > .dropdown-item.active');
       if (anchor.length === 1) return this._getTabName(anchor);
       return null;
     },
@@ -5677,7 +5698,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       var success = false;
 
       if (value) {
-        var anchors = $(el).find('li:not(.dropdown)').children('a');
+        var anchors = isBS3() ? $(el).find('li:not(.dropdown).active').children('a') : $(el).find('.nav-link:not(.dropdown-toggle), .dropdown-menu > .dropdown-item');
         anchors.each(function () {
           if (self._getTabName($(this)) === value) {
             $(this).tab('show');

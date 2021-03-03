@@ -721,7 +721,8 @@ var ShinyApp = function() {
   function getTargetTabs($tabset, $tabContent, target) {
     var dataValue = "[data-value='" + $escape(target) + "']";
     var $aTag = $tabset.find("a" + dataValue);
-    var $liTag = $aTag.parent();
+    // BS4 introduced a.dropdown-item
+    var $liTag = $aTag.hasClass("dropdown-item") ? $aTag : $aTag.parent();
     if ($liTag.length === 0) {
       throw "There is no tabPanel (or navbarMenu) with value" +
             " (or menuName) equal to '" + target + "'";
@@ -734,7 +735,10 @@ var ShinyApp = function() {
       var $dropdownTabset = $aTag.find("+ ul.dropdown-menu");
       var dropdownId = $dropdownTabset.attr("data-tabsetid");
 
-      var $dropdownLiTags = $dropdownTabset.find("a[data-toggle='tab']").parent("li");
+      var $dropdownLiTags = isBS3() ?
+        $dropdownTabset.find("a[data-toggle='tab']").parent("li") :
+        $dropdownTabset.find(".dropdown-item");
+
       $dropdownLiTags.each(function (i, el) {
         $liTags.push($(el));
       });
@@ -743,7 +747,6 @@ var ShinyApp = function() {
       $dropdownDivs.each(function (i, el) {
         $divTags.push($(el));
       });
-
     }
     else {
       // regular tab
@@ -769,6 +772,12 @@ var ShinyApp = function() {
     if (message.target !== null) {
       target = getTargetTabs($tabset, $tabContent, message.target);
       $targetLiTag = target.$liTag;
+      // If the target is a (BS4) .dropdown-item, then we can't insert
+      // <li class='nav-item'><a class='nav-link'>...</a></li>,
+      // instead, we need <a class='dropdown-item'>...</a>
+      if ($targetLiTag.hasClass("dropdown-item")) {
+        $liTag = $aTag.removeClass("nav-link").addClass("dropdown-item");
+      }
     }
 
     // If the item is to be placed inside a navbarMenu (dropdown),
@@ -791,7 +800,11 @@ var ShinyApp = function() {
     if ($aTag.attr("data-toggle") === "tab") {
       var index = getTabIndex($tabset, tabsetId);
       var tabId = "tab-" + tabsetId + "-" + index;
-      $liTag.find("> a").attr("href", "#" + tabId);
+      if ($liTag.hasClass("dropdown-item")) {
+        $liTag.attr("href", "#" + tabId);
+      } else {
+        $liTag.find("> a").attr("href", "#" + tabId);
+      }
       $divTag.attr("id", tabId);
     }
 
@@ -872,9 +885,9 @@ var ShinyApp = function() {
       // The 0 is to ensure this works for empty tabsetPanels as well
       var existingTabIds = [0];
       // loop through all existing tabs, find the one with highest id
-      // (since this is based on a numeric counter), and increment
-      $tabset.find("> li").each(function() {
-        var $tab = $(this).find("> a[data-toggle='tab']");
+      // (since this is based on a numeric co unter), and increment
+      $tabset.find("a[data-toggle='tab']").each(function() {
+        var $tab = $(this);
         if ($tab.length > 0) {
           // remove leading url if it exists. (copy of bootstrap url stripper)
           var href = $tab.attr("href").replace(/.*(?=#[^\s]+$)/, '');

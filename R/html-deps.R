@@ -50,7 +50,7 @@ processDeps <- function(tags, session) {
   names(dependencies) <- NULL
 
   list(
-    html = doRenderTags(ui),
+    html = doRenderTags(tagList(ui)), # TODO: doRenderTags() shouldn't fail on a tagFunction()
     deps = dependencies
   )
 }

@@ -440,10 +440,11 @@ navbarPage <- function(title,
   pageTitle <- title
 
   # navbar class based on options
+  # TODO: tagFunction() the navbar logic?
   navbarClass <- "navbar navbar-default"
   position <- match.arg(position)
   if (!is.null(position))
-    navbarClass <- paste(navbarClass, " navbar-", position, sep = "")
+    navbarClass <- paste0(navbarClass, " navbar-", position)
   if (inverse)
     navbarClass <- paste(navbarClass, "navbar-inverse")
 
@@ -451,21 +452,15 @@ navbarPage <- function(title,
     selected <- restoreInput(id = id, default = selected)
 
   # build the tabset
-  tabs <- list(...)
-  tabset <- buildTabset(tabs, "nav navbar-nav", NULL, id, selected)
+  tabs <- collectTabs(...)
+  tabset <- buildTabset(tabs, "nav navbar-nav", id = id, selected = selected)
 
-  # function to return plain or fluid class name
-  className <- function(name) {
-    if (fluid)
-      paste(name, "-fluid", sep="")
-    else
-      name
-  }
+  containerClass <- paste0("container", if (fluid) "-fluid")
 
   # built the container div dynamically to support optional collapsibility
   if (collapsible) {
-    navId <- paste("navbar-collapse-", p_randomInt(1000, 10000), sep="")
-    containerDiv <- div(class=className("container"),
+    navId <- paste0("navbar-collapse-", p_randomInt(1000, 10000))
+    containerDiv <- div(class=containerClass,
       div(class="navbar-header",
         tags$button(type="button", class="navbar-toggle collapsed",
           `data-toggle`="collapse", `data-target`=paste0("#", navId),
@@ -479,7 +474,7 @@ navbarPage <- function(title,
       div(class="navbar-collapse collapse", id=navId, tabset$navList)
     )
   } else {
-    containerDiv <- div(class=className("container"),
+    containerDiv <- div(class=containerClass,
       div(class="navbar-header",
         span(class="navbar-brand", pageTitle)
       ),
@@ -488,7 +483,7 @@ navbarPage <- function(title,
   }
 
   # build the main tab content div
-  contentDiv <- div(class=className("container"))
+  contentDiv <- div(class=containerClass)
   if (!is.null(header))
     contentDiv <- tagAppendChild(contentDiv, div(class="row", header))
   contentDiv <- tagAppendChild(contentDiv, tabset$content)
@@ -515,9 +510,19 @@ navbarPage <- function(title,
 navbarMenu <- function(title, ..., menuName = title, icon = NULL) {
   structure(list(title = title,
                  menuName = menuName,
-                 tabs = list(...),
+                 tabs = list2(...),
                  iconClass = iconClass(icon)),
             class = "shiny.navbarmenu")
+}
+
+#' @rdname tabPanel
+#' @export
+tabPanelMenu <- function(title, ..., menuName = title, icon = NULL) {
+  navbarMenu(title = title, ..., menuName = menuName, icon = icon)
+}
+
+isTabPanelMenu <- function(x) {
+  inherits(x, "shiny.navbarmenu")
 }
 
 #' Create a well panel
@@ -660,6 +665,13 @@ tabPanel <- function(title, ..., value = title, icon = NULL) {
     ...
   )
 }
+
+isTabPanel <- function(x) {
+  if (!inherits(x, "shiny.tag")) return(FALSE)
+  class <- tagGetAttribute(x, "class") %||% ""
+  "tab-pane" %in% strsplit(class, "\\s+")[[1]]
+}
+
 #' @export
 #' @describeIn tabPanel Create a tab panel that drops the title argument.
 #'   This function should be used within `tabsetPanel(type = "hidden")`. See [tabsetPanel()] for example usage.
@@ -757,11 +769,10 @@ tabsetPanel <- function(...,
   if (!is.null(id))
     selected <- restoreInput(id = id, default = selected)
 
-  # build the tabset
-  tabs <- list(...)
+  # collect and assert ... are tabPanel()s
   type <- match.arg(type)
-
-  tabset <- buildTabset(tabs, paste0("nav nav-", type), NULL, id, selected)
+  tabs <- collectTabs(...)
+  tabset <- buildTabset(tabs, paste0("nav nav-", type), id = id, selected = selected)
 
   # create the content
   first <- tabset$navList
@@ -820,25 +831,20 @@ navlistPanel <- function(...,
                          fluid = TRUE,
                          widths = c(4, 8)) {
 
-  # text filter for headers
-  textFilter <- function(text) {
-      tags$li(class="navbar-brand", text)
-  }
-
   if (!is.null(id))
     selected <- restoreInput(id = id, default = selected)
 
   # build the tabset
-  tabs <- list(...)
-  tabset <- buildTabset(tabs,
-                        "nav nav-pills nav-stacked",
-                        textFilter,
-                        id,
-                        selected)
+  tabs <- collectTabs(..., allowStrings = TRUE)
+  tabset <- buildTabset(
+    tabs, "nav nav-pills nav-stacked",
+    textFilter = function(text) tags$li(class = "navbar-brand", text),
+    id = id, selected = selected
+  )
 
   # create the columns
   columns <- list(
-    column(widths[[1]], class=ifelse(well, "well", ""), tabset$navList),
+    column(widths[[1]], class = if (well) "well", tabset$navList),
     column(widths[[2]], tabset$content)
   )
 
@@ -864,13 +870,13 @@ containsSelectedTab <- function(tabs) {
 }
 
 findAndMarkSelectedTab <- function(tabs, selected, foundSelected) {
-  tabs <- lapply(tabs, function(div) {
-    if (foundSelected || is.character(div)) {
+  tabs <- lapply(tabs, function(x) {
+    if (foundSelected || is.character(x)) {
       # Strings are not selectable items
 
-    } else if (inherits(div, "shiny.navbarmenu")) {
+    } else if (isTabPanelMenu(x)) {
       # Recur for navbarMenus
-      res <- findAndMarkSelectedTab(div$tabs, selected, foundSelected)
+      res <- findAndMarkSelectedTab(x$tabs, selected, foundSelected)
       div$tabs <- res$tabs
       foundSelected <<- res$foundSelected
 
@@ -880,16 +886,16 @@ findAndMarkSelectedTab <- function(tabs, selected, foundSelected) {
       # mark first available item as selected
       if (is.null(selected)) {
         foundSelected <<- TRUE
-        div <- markTabAsSelected(div)
+        x <- markTabAsSelected(x)
       } else {
-        tabValue <- div$attribs$`data-value` %||% div$attribs$title
+        tabValue <- x$attribs$`data-value` %||% x$attribs$title
         if (identical(selected, tabValue)) {
           foundSelected <<- TRUE
-          div <- markTabAsSelected(div)
+          x <- markTabAsSelected(x)
         }
       }
     }
-    return(div)
+    return(x)
   })
   return(list(tabs = tabs, foundSelected = foundSelected))
 }
@@ -938,10 +944,10 @@ buildTabset <- function(tabs, ulClass, textFilter = NULL, id = NULL,
             tabs = tabs, textFilter = textFilter)
 
   tabNavList <- tags$ul(class = ulClass, id = id,
-                  `data-tabsetid` = tabsetId, lapply(tabs, "[[", 1))
+                  `data-tabsetid` = tabsetId, !!!lapply(tabs, "[[", 1))
 
   tabContent <- tags$div(class = "tab-content",
-                  `data-tabsetid` = tabsetId, lapply(tabs, "[[", 2))
+                  `data-tabsetid` = tabsetId, !!!lapply(tabs, "[[", 2))
 
   list(navList = tabNavList, content = tabContent)
 }
@@ -953,54 +959,153 @@ buildTabset <- function(tabs, ulClass, textFilter = NULL, id = NULL,
 buildTabItem <- function(index, tabsetId, foundSelected, tabs = NULL,
                          divTag = NULL, textFilter = NULL) {
 
-  divTag <- if (!is.null(divTag)) divTag else tabs[[index]]
+  divTag <- divTag %||% tabs[[index]]
 
   if (is.character(divTag) && !is.null(textFilter)) {
     # text item: pass it to the textFilter if it exists
     liTag <- textFilter(divTag)
     divTag <- NULL
 
-  } else if (inherits(divTag, "shiny.navbarmenu")) {
+  } else if (isTabPanelMenu(divTag)) {
     # navbarMenu item: build the child tabset
     tabset <- buildTabset(divTag$tabs, "dropdown-menu",
       navbarMenuTextFilter, foundSelected = foundSelected)
 
     # if this navbarMenu contains a selected item, mark it active
-    containsSelected <- containsSelectedTab(divTag$tabs)
-    liTag <- tags$li(
-      class = paste0("dropdown", if (containsSelected) " active"),
-      tags$a(href = "#",
-        class = "dropdown-toggle", `data-toggle` = "dropdown",
-        `data-value` = divTag$menuName,
-        getIcon(iconClass = divTag$iconClass),
-        divTag$title, tags$b(class = "caret")
-      ),
-      tabset$navList   # inner tabPanels items
-    )
+    title <- divTag$title
+    value <- divTag$menuName
+    icon <- getIcon(iconClass = divTag$iconClass)
+    active <- containsSelectedTab(divTag$tabs)
+    liTag <- tagFunction(function() {
+      if ("3" %in% getBootstrapVersion()) {
+        bs3NavItemDropdown(title, value, icon, active, tabset$navList)
+      } else {
+        # Bootstrap 4 is much more strict dropdown navs classes :eye-roll:
+        # Namely, the .dropdown-menu shouldn't contain .nav-link/.nav-item
+        # classes and should instead be a (top-level!) .dropdown-item
+        # (or else the .tab('show') method won't update the .active classes properly)
+        items <- tabset$navList
+        items$children <- lapply(items$children, function(x) {
+          # x should be a tagFunction() due to the else block below
+          x <- if (inherits(x, "shiny.tag.function")) x() else x
+          # Replace <li class="nav-item"><a class="nav-link"></a></li>
+          #    with <a class="dropdown-item"></a>
+          navItem <- x$children[[1]]
+          navItem$attribs$class <- "dropdown-item"
+          navItem
+        })
+        bs4NavItemDropdown(title, value, icon, active, items)
+      }
+    })
+
     # list of tab content divs from the child tabset
     divTag <- tabset$content$children
 
   } else {
     # tabPanel item: create the tab's liTag and divTag
-    tabId <- paste("tab", tabsetId, index, sep = "-")
-    liTag <- tags$li(
-               tags$a(
-                 href = paste("#", tabId, sep = ""),
-                 `data-toggle` = "tab",
-                 `data-value` = divTag$attribs$`data-value`,
-                 getIcon(iconClass = divTag$attribs$`data-icon-class`),
-                 divTag$attribs$title
-               )
-    )
-    # if this tabPanel is selected item, mark it active
-    if (isTabSelected(divTag)) {
-      liTag$attribs$class <- "active"
-      divTag$attribs$class <- "tab-pane active"
-    }
-    divTag$attribs$id <- tabId
+    id <- paste("tab", tabsetId, index, sep = "-")
+    title <- tagGetAttribute(divTag, "title")
+    value <- tagGetAttribute(divTag, "data-value")
+    icon <- getIcon(iconClass = tagGetAttribute(divTag, "data-icon-class"))
+    active <- isTabSelected(divTag)
+    liTag <- tagFunction(function() {
+      if ("3" %in% getBootstrapVersion()) {
+        bs3NavItem(id, title, value, icon, active)
+      } else {
+        bs4NavItem(id, title, value, icon, active)
+      }
+    })
+    divTag <- tagAppendAttributes(divTag, class = if (active) "active")
+    divTag$attribs$id <- id
     divTag$attribs$title <- NULL
   }
   return(list(liTag = liTag, divTag = divTag))
+}
+
+# Verify sensible input to tabsetPanel()/navbarPage()/navlistPanel()
+collectTabs <- function(..., allowStrings = FALSE) {
+  tabs <- list2(...)
+  lapply(tabs, function(x) {
+    if (isTabPanelMenu(x) || isTabPanel(x)) {
+      return(x)
+    }
+    if (!allowStrings) {
+      abort("... must be a collection of tabPanel()s and/or tabPanelMenu()s")
+    }
+    if (is.character(x) && length(x) == 1) {
+      return(x)
+    }
+    abort("... must be a collection of tabPanel()s, tabPanelMenu()s, or character strings")
+  })
+}
+
+# purely for use inside a tagFunction() context
+getBootstrapVersion <- function() {
+  theme <- getCurrentTheme()
+  bslib::theme_version(theme) %||% "3"
+}
+
+bs3NavItemDropdown <- function(title, value, icon, active, items) {
+  tags$li(
+    class = "dropdown",
+    class = if (active) "active", # BS3
+    tags$a(
+      href = "#",
+      class = "dropdown-toggle",
+      `data-toggle` = "dropdown",
+      `data-value` = value,
+      icon,
+      title, tags$b(class = "caret")
+    ),
+    items
+  )
+}
+
+bs3NavItem <- function(id, title, value, icon, active) {
+  tags$li(
+    class = if (active) "active",
+    tags$a(
+      href = paste0("#", id),
+      `data-toggle` = "tab",
+      `data-value` = value,
+      icon,
+      title
+    )
+  )
+}
+
+bs4NavItemDropdown <- function(title, value, icon, active, items) {
+  tags$li(
+    class = "dropdown",
+    class = "nav-item",
+    tags$a(
+      href = "#",
+      class = "dropdown-toggle",
+      class = "nav-link",
+      class = if (active) "active",
+      `data-toggle` = "dropdown",
+      `data-value` = value,
+      icon,
+      title,
+      tags$b(class = "caret") # TODO: can be removed?
+    ),
+    items
+  )
+}
+
+bs4NavItem <- function(id, title, value, icon, active) {
+  tags$li(
+    class = "nav-item",
+    tags$a(
+      class = "nav-link",
+      class = if (active) "active",
+      href = paste0("#", id),
+      `data-toggle` = "tab",
+      `data-value` = value,
+      icon,
+      title
+    )
+  )
 }
 
 

@@ -6614,10 +6614,10 @@ fsevents@^2.1.2:
   languageName: node
   linkType: hard
 
-"jquery@npm:3.5.1":
-  version: 3.5.1
-  resolution: "jquery@npm:3.5.1"
-  checksum: c50818c84837902a60938c85786feb612f346a9918f7285409d605449460790b3815ad8aaf5806f19e89f1a79b27d327802b421ab354fe213f3fd1801e3562e6
+"jquery@npm:3.6.0":
+  version: 3.6.0
+  resolution: "jquery@npm:3.6.0"
+  checksum: a0a819022a1bdff5efa79bbd9d4d7352de5bd32dabe42108e6ec0797238dba36c09c108e0eea2724f5d03acc1b30ee87d76bec80e15b9510106532292ebe6ba4
   languageName: node
   linkType: hard
 
@@ -9303,7 +9303,7 @@ fsevents@^2.1.2:
     eslint-plugin-jest-dom: ^3.6.5
     eslint-plugin-prettier: ^3
     jest: ^26
-    jquery: 3.5.1
+    jquery: 3.6.0
     lodash: ^4
     parcel: ^1.12.3
     parcel-bundler: ^1.12.3

@@ -29,7 +29,7 @@
     "eslint-plugin-jest-dom": "^3.6.5",
     "eslint-plugin-prettier": "^3",
     "jest": "^26",
-    "jquery": "3.5.1",
+    "jquery": "3.6.0",
     "parcel": "^1.12.3",
     "parcel-bundler": "^1.12.3",
     "phantomjs-prebuilt": "^2.1.16",

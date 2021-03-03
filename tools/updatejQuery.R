@@ -1,10 +1,14 @@
 version <- "3.6.0"
 
 jq_cdn_download <- function(version) {
-  srcs <- c(".min.js", ".min.map", ".js")
-  download.file(
-    file.path("https://code.jquery.com", paste0("jquery-", version, srcs)),
-    file.path("inst", "www", "shared",  paste0("jquery", srcs))
+  Map(
+    src = c(".min.js", ".min.map", ".js"),
+    f = function(src) {
+      download.file(
+        file.path("https://code.jquery.com", paste0("jquery-", version, src)),
+        file.path("inst", "www", "shared",  paste0("jquery", src))
+      )
+    }
   )
 }
 

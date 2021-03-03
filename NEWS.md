@@ -21,6 +21,7 @@ shiny 1.6.0.9000
 
 * Closed #3286: Updated to Font-Awesome 5.15.2. (#3288)
 
+* Updated to jQuery 3.6.0. (#3311)
 
 shiny 1.6.0
 ===========

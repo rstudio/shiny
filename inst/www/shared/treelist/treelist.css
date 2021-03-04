@@ -1,0 +1,66 @@
+.treelist-nav {
+  font-weight: 600;
+}
+
+@media (min-width: 768px) {
+  .treelist-nav {
+    position: sticky;
+    top: 5rem;
+    display: block !important;
+    height: calc(100vh - 7rem);
+    padding-left: .25rem;
+    margin-left: -.25rem;
+    overflow-y: auto;
+  }
+}
+
+.treelist-nav a {
+  display: inline-flex;
+  align-items: center;
+  padding: .1875rem .5rem;
+  margin-top: .125rem;
+  color: rgba(0, 0, 0, 0.65);
+  border-radius: 0.25rem;
+}
+
+.treelist-nav a:hover, .treelist-nav a:focus {
+  color: rgba(0, 0, 0, 0.85);
+  text-decoration: none;
+  background-color: rgba(0, 123, 255, 0.1);
+}
+
+.treelist-nav a:only-child {
+  margin-left: 1.25rem;
+}
+
+.treelist-nav a:not(:only-child)::before {
+  width: 1.25em;
+  line-height: 0;
+  content: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='rgba%28%23000,.5%29' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M5 14l6-6-6-6'/%3e%3c/svg%3e");
+  transition: transform 0.35s ease;
+  transform-origin: .5em 50%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .treelist-nav a:not(:only-child)::before {
+    transition: none;
+  }
+}
+
+.treelist-nav a:not(:only-child):not(.collapsed) {
+  color: rgba(0, 0, 0, 0.85);
+}
+
+.treelist-nav a:not(:only-child):not(.collapsed)::before {
+  transform: rotate(90deg);
+}
+
+.treelist-nav a + ul {
+  font-size: 0.875rem;
+  font-weight: 400;
+}
+
+.treelist-nav .active {
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.85);
+}

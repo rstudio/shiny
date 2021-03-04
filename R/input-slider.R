@@ -212,7 +212,7 @@ ionRangeSliderDependency <- function() {
       script = "js/ion.rangeSlider.min.js"
     ),
     htmlDependency(
-      "strftime", "0.9.2",
+      "strftime", version_strftime,
       src = c(href = "shared/strftime"),
       script = "strftime-min.js"
     ),

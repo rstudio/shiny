@@ -1,9 +1,19 @@
+import {
+  inputBindings,
+  InputBinding,
+  outputBindings,
+  OutputBinding,
+} from "./bindings";
 import { $escape, compareVersion } from "./utils";
 
 interface ShinyType {
   version: string;
   $escape: any;
   compareVersion: any;
+  inputBindings: typeof inputBindings;
+  InputBinding: typeof InputBinding;
+  outputBindings: typeof outputBindings;
+  OutputBinding: typeof OutputBinding;
 }
 
 let Shiny: ShinyType;
@@ -17,6 +27,8 @@ function setShiny(Shiny_: ShinyType): void {
 
   Shiny.$escape = $escape;
   Shiny.compareVersion = compareVersion;
+  Shiny.inputBindings = inputBindings;
+  Shiny.outputBindings = outputBindings;
 }
 
 export { Shiny, setShiny };

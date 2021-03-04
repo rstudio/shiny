@@ -211,7 +211,7 @@ registerThemeDependency <- function(func) {
 
 bootstrapDependency <- function(theme) {
   htmlDependency(
-    "bootstrap", "3.4.1",
+    "bootstrap", bootstrapVersion,
     c(
       href = "shared/bootstrap",
       file = system.file("www/shared/bootstrap", package = "shiny")
@@ -229,6 +229,8 @@ bootstrapDependency <- function(theme) {
     meta = list(viewport = "width=device-width, initial-scale=1")
   )
 }
+
+bootstrapVersion <- "3.4.1"
 
 
 #' @rdname bootstrapPage
@@ -452,8 +454,7 @@ navbarPage <- function(title,
     selected <- restoreInput(id = id, default = selected)
 
   # build the tabset
-  tabs <- collectTabs(..., caller = "navbarPage")
-  tabset <- buildTabset(tabs, "nav navbar-nav", id = id, selected = selected)
+  tabset <- buildTabset(..., ulClass = "nav navbar-nav", id = id, selected = selected)
 
   containerClass <- paste0("container", if (fluid) "-fluid")
 
@@ -771,8 +772,7 @@ tabsetPanel <- function(...,
 
   # collect and assert ... are tabPanel()s
   type <- match.arg(type)
-  tabs <- collectTabs(..., caller = "tabsetPanel")
-  tabset <- buildTabset(tabs, paste0("nav nav-", type), id = id, selected = selected)
+  tabset <- buildTabset(..., ulClass = paste0("nav nav-", type), id = id, selected = selected)
 
   # create the content
   first <- tabset$navList
@@ -835,9 +835,8 @@ navlistPanel <- function(...,
     selected <- restoreInput(id = id, default = selected)
 
   # build the tabset
-  tabs <- collectTabs(..., caller = "navlistPanel")
   tabset <- buildTabset(
-    tabs, "nav nav-pills nav-stacked",
+    ..., ulClass = "nav nav-pills nav-stacked",
     textFilter = function(text) tags$li(class = "navbar-brand", text),
     id = id, selected = selected
   )
@@ -921,9 +920,10 @@ navbarMenuTextFilter <- function(text) {
 
 # This function is called internally by navbarPage, tabsetPanel
 # and navlistPanel
-buildTabset <- function(tabs, ulClass, textFilter = NULL, id = NULL,
+buildTabset <- function(..., ulClass, textFilter = NULL, id = NULL,
                         selected = NULL, foundSelected = FALSE) {
 
+  tabs <- list2(...)
   res <- findAndMarkSelectedTab(tabs, selected, foundSelected)
   tabs <- res$tabs
   foundSelected <- res$foundSelected
@@ -944,10 +944,10 @@ buildTabset <- function(tabs, ulClass, textFilter = NULL, id = NULL,
             tabs = tabs, textFilter = textFilter)
 
   tabNavList <- tags$ul(class = ulClass, id = id,
-                  `data-tabsetid` = tabsetId, !!!lapply(tabs, "[[", 1))
+                  `data-tabsetid` = tabsetId, !!!lapply(tabs, "[[", "liTag"))
 
   tabContent <- tags$div(class = "tab-content",
-                  `data-tabsetid` = tabsetId, !!!lapply(tabs, "[[", 2))
+                  `data-tabsetid` = tabsetId, !!!lapply(tabs, "[[", "divTag"))
 
   list(navList = tabNavList, content = tabContent)
 }
@@ -961,23 +961,63 @@ buildTabItem <- function(index, tabsetId, foundSelected, tabs = NULL,
 
   divTag <- divTag %||% tabs[[index]]
 
+  # Handles navlistPanel() headers and dropdown dividers
   if (is.character(divTag) && !is.null(textFilter)) {
-    # text item: pass it to the textFilter if it exists
-    liTag <- textFilter(divTag)
-    divTag <- NULL
+    return(list(liTag = textFilter(divTag), divTag = NULL))
+  }
 
-  } else if (isTabPanelMenu(divTag)) {
-    # navbarMenu item: build the child tabset
-    tabset <- buildTabset(divTag$tabs, "dropdown-menu",
-      navbarMenuTextFilter, foundSelected = foundSelected)
+  if (isTabPanelMenu(divTag)) {
+    # tabPanelMenu item: build the child tabset
+    tabset <- buildTabset(
+      !!!divTag$tabs, ulClass = "dropdown-menu",
+      textFilter = navbarMenuTextFilter,
+      foundSelected = foundSelected
+    )
+    return(buildDropdown(divTag, tabset))
+  }
 
-    # if this navbarMenu contains a selected item, mark it active
-    title <- divTag$title
-    value <- divTag$menuName
-    icon <- getIcon(iconClass = divTag$iconClass)
-    active <- containsSelectedTab(divTag$tabs)
-    liTag <- tagFunction(function() {
-      if ("3" %in% getBootstrapVersion()) {
+  if (isTabPanel(divTag)) {
+    return(buildNavItem(divTag, tabsetId, index))
+  }
+
+  warning(
+    "Expected a collection tabPanel()s",
+    if (is.null(textFilter)) " and tabPanelMenus().",
+    if (!is.null(textFilter)) ", tabPanelMenus(), and/or character strings.",
+    call. = FALSE
+  )
+
+  return(list(liTag = NULL, divTag = divTag))
+}
+
+buildNavItem <- function(divTag, tabsetId, index) {
+  id <- paste("tab", tabsetId, index, sep = "-")
+  title <- tagGetAttribute(divTag, "title")
+  value <- tagGetAttribute(divTag, "data-value")
+  icon <- getIcon(iconClass = tagGetAttribute(divTag, "data-icon-class"))
+  active <- isTabSelected(divTag)
+  divTag <- tagAppendAttributes(divTag, class = if (active) "active")
+  divTag$attribs$id <- id
+  divTag$attribs$title <- NULL
+  list(
+    divTag = divTag,
+    liTag = tagFunction(function() {
+      navItem <- if (isBS3()) bs3NavItem else bs4NavItem
+      navItem(id, title, value, icon, active)
+    })
+  )
+}
+
+buildDropdown <- function(divTag, tabset) {
+  title <- divTag$title
+  value <- divTag$menuName
+  icon <- getIcon(iconClass = divTag$iconClass)
+  active <- containsSelectedTab(divTag$tabs)
+  list(
+    # list of tab content divs from the child tabset
+    divTag = tabset$content$children,
+    liTag = tagFunction(function() {
+      if (isBS3()) {
         bs3NavItemDropdown(title, value, icon, active, tabset$navList)
       } else {
         # In BS4, dropdown nav anchors can't be wrapped in a <li> tag
@@ -998,56 +1038,16 @@ buildTabItem <- function(index, tabsetId, foundSelected, tabs = NULL,
         bs4NavItemDropdown(title, value, icon, active, items)
       }
     })
-
-    # list of tab content divs from the child tabset
-    divTag <- tabset$content$children
-
-  } else {
-    # tabPanel item: create the tab's liTag and divTag
-    id <- paste("tab", tabsetId, index, sep = "-")
-    title <- tagGetAttribute(divTag, "title")
-    value <- tagGetAttribute(divTag, "data-value")
-    icon <- getIcon(iconClass = tagGetAttribute(divTag, "data-icon-class"))
-    active <- isTabSelected(divTag)
-    liTag <- tagFunction(function() {
-      if ("3" %in% getBootstrapVersion()) {
-        bs3NavItem(id, title, value, icon, active)
-      } else {
-        bs4NavItem(id, title, value, icon, active)
-      }
-    })
-    divTag <- tagAppendAttributes(divTag, class = if (active) "active")
-    divTag$attribs$id <- id
-    divTag$attribs$title <- NULL
-  }
-  return(list(liTag = liTag, divTag = divTag))
+  )
 }
 
-# Verify sensible input to tabsetPanel()/navbarPage()/navlistPanel()
-collectTabs <- function(..., caller) {
-  tabs <- list2(...)
-  allowStrings <- identical(caller, "navlistPanel")
-  lapply(tabs, function(x) {
-    if (allowStrings && is.character(x) && length(x) == 1) {
-      return(x)
-    }
-    if (isTabPanelMenu(x) || isTabPanel(x)) {
-      return(x)
-    }
-    warning(
-      caller, "()'s ... should be a collection of tabPanel()s",
-      if (!allowStrings) " and tabPanelMenus().",
-      if (allowStrings) ", tabPanelMenus(), and/or character strings.",
-      call. = FALSE
-    )
-    x
-  })
-}
-
-# purely for use inside a tagFunction() context
-getBootstrapVersion <- function() {
+# The relevant Bootstrap major version -- purely for use inside
+# a tagFunction() context (i.e., executed at print-time)
+isBS3 <- function() {
   theme <- getCurrentTheme()
-  bslib::theme_version(theme) %||% "3"
+  version <- bslib::theme_version(theme) %||%
+    strsplit(bootstrapVersion, ".", fixed = TRUE)[[1]][[1]]
+  "3" %in% version
 }
 
 bs3NavItemDropdown <- function(title, value, icon, active, items) {
@@ -1113,7 +1113,7 @@ bs4NavItem <- function(id, title, value, icon, active) {
   )
 }
 
-# TODO: something like this should like in htmltools
+# TODO: something like this should exist in htmltools
 tagHasClass <- function(x, class) {
   if (!inherits(x, "shiny.tag")) return(FALSE)
   classes <- unlist(x$attribs[names(x$attribs) %in% "class"], use.names = FALSE)

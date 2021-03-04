@@ -1,6 +1,7 @@
 import $ from "jquery";
 import { windowDevicePixelRatio } from "../window/pixelRatio";
 import { makeBlob } from "./blob";
+import { hasOwnProperty } from "./Object";
 
 function escapeHTML(str: string): string {
   const escaped = {
@@ -186,7 +187,7 @@ function asArray<T>(value: T | Array<T> | null | undefined): Array<T> {
 // bindings by priority and insertion order.
 function mergeSort<T>(
   list: Array<T>,
-  sortfunc: (a: any, b: any) => boolean
+  sortfunc: (a: any, b: any) => boolean | number
 ): Array<T> {
   function merge(sortfunc, a, b) {
     let ia = 0;
@@ -384,4 +385,5 @@ export {
   updateLabel,
   getComputedLinkColor,
   makeBlob,
+  hasOwnProperty,
 };

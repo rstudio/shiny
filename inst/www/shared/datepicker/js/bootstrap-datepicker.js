@@ -660,7 +660,7 @@
 				visualPadding = 10,
 				container = $(this.o.container),
 				windowWidth = container.width(),
-				scrollTop = this.o.container === 'body:first' ? $(document).scrollTop() : container.scrollTop(),
+				scrollTop = this.o.container === 'body' ? $(document).scrollTop() : container.scrollTop(),
 				appendOffset = container.offset();
 
 			var parentsZindex = [0];
@@ -675,7 +675,7 @@
 			var left = offset.left - appendOffset.left;
 			var top = offset.top - appendOffset.top;
 
-			if (this.o.container !== 'body:first') {
+			if (this.o.container !== 'body') {
 				top += scrollTop;
 			}
 
@@ -1709,7 +1709,7 @@
 		enableOnReadonly: true,
 		showOnFocus: true,
 		zIndexOffset: 10,
-		container: 'body:first',
+		container: 'body',
 		immediateUpdates: false,
 		title: '',
 		templates: {

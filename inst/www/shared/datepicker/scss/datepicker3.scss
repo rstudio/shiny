@@ -1,5 +1,15 @@
+// Both BS3 and BS4 define a border radius mixin, but just in case
+// we're trying to compile this without bootstrapSass
+@mixin border-radius-shim($radius) {
+  @if mixin-exists("border-radius") {
+    @include border-radius($radius);
+  } @else {
+    border-radius: $radius;
+  }
+}
+
 .datepicker {
-	border-radius: $border-radius-base;
+	@include border-radius-shim($border-radius-base);
 	&-inline {
 		width: 220px;
 	}
@@ -64,7 +74,7 @@
 				text-align: center;
 				width: 30px;
 				height: 30px;
-				border-radius: 4px;
+				@include border-radius-shim(4px);
 				border: none;
 			}
 		}
@@ -83,6 +93,7 @@
 		}
 		&.day:hover,
 		&.focused {
+		  color: color-contrast($gray-lighter);
 			background: $gray-lighter;
 			cursor: pointer;
 		}
@@ -94,7 +105,7 @@
 		}
 		&.highlighted {
 			$highlighted-bg: $state-info-bg;
-			@include button-variant(#000, $highlighted-bg, darken($highlighted-bg, 20%));
+			@include button-variant($highlighted-bg, darken($highlighted-bg, 20%));
 			border-radius: 0;
 
 			&.focused {
@@ -109,7 +120,7 @@
 		}
 		&.today {
 			$today-bg: lighten(orange, 30%);
-			@include button-variant(#000, $today-bg, darken($today-bg, 20%));
+			@include button-variant($today-bg, darken($today-bg, 20%));
 
 			&.focused {
 				background: darken($today-bg, 10%);
@@ -123,7 +134,7 @@
 		}
 		&.range {
 			$range-bg: $gray-lighter;
-			@include button-variant(#000, $range-bg, darken($range-bg, 20%));
+			@include button-variant($range-bg, darken($range-bg, 20%));
 			border-radius: 0;
 
 			&.focused {
@@ -138,7 +149,7 @@
 		}
 		&.range.highlighted {
 			$range-highlighted-bg: mix($state-info-bg, $gray-lighter, 50%);
-			@include button-variant(#000, $range-highlighted-bg, darken($range-highlighted-bg, 20%));
+			@include button-variant($range-highlighted-bg, darken($range-highlighted-bg, 20%));
 
 			&.focused {
 				background: darken($range-highlighted-bg, 10%);
@@ -152,7 +163,7 @@
 		}
 		&.range.today {
 			$range-today-bg: mix(orange, $gray-lighter, 50%);
-			@include button-variant(#000, $range-today-bg, darken($range-today-bg, 20%));
+			@include button-variant($range-today-bg, darken($range-today-bg, 20%));
 
 			&.disabled,
 			&.disabled:active {
@@ -162,12 +173,12 @@
 		}
 		&.selected,
 		&.selected.highlighted {
-			@include button-variant(#fff, $gray-light, $gray);
+			@include button-variant($gray-light, $gray);
 			text-shadow: 0 -1px 0 rgba(0,0,0,.25);
 		}
 		&.active,
 		&.active.highlighted {
-			@include button-variant($btn-primary-color, $btn-primary-bg, $btn-primary-border);
+			@include button-variant($btn-primary-bg, $btn-primary-border);
 			text-shadow: 0 -1px 0 rgba(0,0,0,.25);
 		}
 		span {
@@ -178,9 +189,10 @@
 			float: left;
 			margin: 1%;
 			cursor: pointer;
-			border-radius: 4px;
+			@include border-radius-shim(4px);
 			&:hover,
 			&.focused {
+			  color: color-contrast($gray-lighter);
 				background: $gray-lighter;
 			}
 			&.disabled,
@@ -193,7 +205,7 @@
 			&.active:hover,
 			&.active.disabled,
 			&.active.disabled:hover {
-				@include button-variant($btn-primary-color, $btn-primary-bg, $btn-primary-border);
+				@include button-variant($btn-primary-bg, $btn-primary-border);
 				text-shadow: 0 -1px 0 rgba(0,0,0,.25);
 			}
 			&.old,
@@ -213,7 +225,8 @@
 	tfoot tr th {
 		cursor: pointer;
 		&:hover {
-			background: $gray-lighter;
+		  color: color-contrast($gray-lighter);
+		  background: $gray-lighter;
 		}
 	}
 
@@ -240,10 +253,10 @@
 		text-align: center;
 	}
 	input:first-child {
-		border-radius: 3px 0 0 3px;
+	  @include border-radius-shim(3px 0 0 3px);
 	}
 	input:last-child {
-		border-radius: 0 3px 3px 0;
+		@include border-radius-shim(0 3px 3px 0);
 	}
 	.input-group-addon {
 		width: auto;

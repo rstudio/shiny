@@ -44,6 +44,7 @@ dir.create(scss_dir, recursive = TRUE)
 src <- file.path(unzipped, paste0("bootstrap-datepicker-", version))
 system(paste0("npx less2sass ", src))
 
+
 # Copy over just the bootstrap
 sass_files <- file.path(src, c("less/datepicker3.scss", "build/build3.scss"))
 file.copy(sass_files, scss_dir)
@@ -62,15 +63,17 @@ invisible(lapply(
 
 # Apply patches to source
 patch_dir <- rprojroot::find_package_root_file("tools/datepicker-patches")
-for (patch in list.files(patch_dir, full.names = TRUE)) {
-  tryCatch(
-    {
-      message(sprintf("Applying %s", basename(patch)))
-      system(sprintf("git apply %s", patch))
-    },
-    error = function(e) quit(save = "no", status = 1)
-  )
-}
+withr::with_dir(find_package_root_file(), {
+  for (patch in list.files(patch_dir, full.names = TRUE)) {
+    tryCatch(
+      {
+        message(sprintf("Applying %s", basename(patch)))
+        system(sprintf("git apply %s", patch))
+      },
+      error = function(e) quit(save = "no", status = 1)
+    )
+  }
+})
 
 # Compile to CSS
 library(sass)

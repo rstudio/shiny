@@ -1961,12 +1961,37 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/bootstrap-datepicker@npm:0.0.14":
+  version: 0.0.14
+  resolution: "@types/bootstrap-datepicker@npm:0.0.14"
+  dependencies:
+    "@types/jquery": "*"
+  checksum: 636469da864a3266ab0ab9853c95e4164454d5556d53af9cfe860534d35db98f053929184e0397ce488cb8ebc539b000c3ba8bda31bc5be3540fa33f1839ee8d
+  languageName: node
+  linkType: hard
+
+"@types/bootstrap@npm:3.4.0":
+  version: 3.4.0
+  resolution: "@types/bootstrap@npm:3.4.0"
+  dependencies:
+    "@types/jquery": "*"
+  checksum: ed7156f24340598a2dff8a2d8f72f096771125642cd9dd5121185d96ad1b14d6ce778ef490be2edc994f1c2a8fad4666af7a5f8c8b64855b29221a19b622533c
+  languageName: node
+  linkType: hard
+
 "@types/graceful-fs@npm:^4.1.2":
   version: 4.1.5
   resolution: "@types/graceful-fs@npm:4.1.5"
   dependencies:
     "@types/node": "*"
   checksum: ab79ec306d51775542b94bd768162e85fe2a0d47bd2f6033e2aad65bfcae399614ee7662a1370091fc508a8b639e3de0abf6b7232c9fb52047f207ba114ff390
+  languageName: node
+  linkType: hard
+
+"@types/ion-rangeslider@npm:2.3.0":
+  version: 2.3.0
+  resolution: "@types/ion-rangeslider@npm:2.3.0"
+  checksum: 397abcd07dd85aa7a554a0fc4075ab56ea6926a6fcee0914f664231e337176750e7221e0a10335bb1022e4ce83983877601b6e0af993cc5adba54c359d49affd
   languageName: node
   linkType: hard
 
@@ -2005,7 +2030,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/jquery@^3.5.5":
+"@types/jquery@^3.5.5, @types/jquery@npm:*":
   version: 3.5.5
   resolution: "@types/jquery@npm:3.5.5"
   dependencies:
@@ -2069,6 +2094,13 @@ __metadata:
   version: 1.5.4
   resolution: "@types/q@npm:1.5.4"
   checksum: 1a19cf2c41648b862bd25a4c26ba33dc7206f14fcf50c5b78031b59090d21176e703cd10aff8af409eafbefcebb288607d30af765ee3859637cf3fae6e875648
+  languageName: node
+  linkType: hard
+
+"@types/selectize@npm:0.12.34":
+  version: 0.12.34
+  resolution: "@types/selectize@npm:0.12.34"
+  checksum: 111ea48537c03747e2ba85cdd8705aa632a20cf743bb8308c57415f29c7af15a4c009ea816f9cdc77976ae41d26881916fa80eaf930d86beb360b03fbc798bd0
   languageName: node
   linkType: hard
 
@@ -2390,6 +2422,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"ansicolors@npm:~0.2.1":
+  version: 0.2.1
+  resolution: "ansicolors@npm:0.2.1"
+  checksum: 6a5cb0750569d3ac340ee873122065ddb6ac21d0d71f3800653b5af1203369470e811fc7e2aeee2435c93e05e62e4a458376a964002904310cd6730f08f73c18
+  languageName: node
+  linkType: hard
+
 "anymatch@npm:^2.0.0":
   version: 2.0.0
   resolution: "anymatch@npm:2.0.0"
@@ -2551,6 +2590,15 @@ __metadata:
   version: 1.0.1
   resolution: "async-limiter@npm:1.0.1"
   checksum: d123312ace75c07399ddc58e06cc028dacce35f71cdf59cf9b22f6c31dde221c22285e6185ede823ecb67f3b3065e26205eb9f74fcbba3f12ce7a2c2b09d7763
+  languageName: node
+  linkType: hard
+
+"async@npm:^2.6.0":
+  version: 2.6.3
+  resolution: "async@npm:2.6.3"
+  dependencies:
+    lodash: ^4.17.14
+  checksum: 5c30ec6f3d64308dd96d56dae16a00a23b9e6278fe8f66492837896d958508698648c59c53457d3fdf05fd04484e16538efeca2be38337cd78df0284e764ab34
   languageName: node
   linkType: hard
 
@@ -2775,6 +2823,15 @@ __metadata:
   version: 1.0.0
   resolution: "boolbase@npm:1.0.0"
   checksum: e827963c416fdb1dbcd57e066a43c40829518f4dcdc9f58ed04519daeebb610adacbb6cf102518bda9f08be593c5b1b49a83e36bf6b7d91b3403f7e35510eeae
+  languageName: node
+  linkType: hard
+
+"bootstrap-datepicker@npm:1.9.0":
+  version: 1.9.0
+  resolution: "bootstrap-datepicker@npm:1.9.0"
+  dependencies:
+    jquery: ">=1.7.1 <4.0.0"
+  checksum: b3e98e978f1297b55f8c48907c5706077956f455d060d31dcdbd3cd10a9e3a4ac568497ae341a7c1df22acfdc3071e52213440c2244017af1c9b1e8fd8c739e9
   languageName: node
   linkType: hard
 
@@ -3100,6 +3157,18 @@ __metadata:
   dependencies:
     rsvp: ^4.8.4
   checksum: 9dd81108a087a90430e5abbad45a195123647718cf19faa58b76db519a1d79975ab13685e55de16dbdee1da3f8e4c522e7b6dc7aa7614c65dc58ad27588f7887
+  languageName: node
+  linkType: hard
+
+"cardinal@npm:^1.0.0":
+  version: 1.0.0
+  resolution: "cardinal@npm:1.0.0"
+  dependencies:
+    ansicolors: ~0.2.1
+    redeyed: ~1.0.0
+  bin:
+    cdl: ./bin/cdl.js
+  checksum: 6a3a17b4916f15ad1ba90ba1147372b3748ce250d4c731fafce654cdfd7bf1b9bc86dc8e6c0c0774e4775038ad08ba0b7ec68c2138da451afc3435ddf779b87d
   languageName: node
   linkType: hard
 
@@ -3824,6 +3893,13 @@ __metadata:
   dependencies:
     cssom: ~0.3.6
   checksum: a778180d2f5eef44742b7083997a0ad6e59eee016724ceac4d6229e48842d3c5ebbb55dc02c555f793bdc486254f6eef8d2049c1815e8fc74514e3eb827d49ec
+  languageName: node
+  linkType: hard
+
+"csv-parse@npm:^4.6.5":
+  version: 4.15.3
+  resolution: "csv-parse@npm:4.15.3"
+  checksum: 7b125fd77f757c8ab605f107dffbd60a91a0a423d2c44b89f20ba050d11e7c5ae2130b58a05216caccea5f5ffee8f2fb9863c8a14ec580ed7532a268a362eb60
   languageName: node
   linkType: hard
 
@@ -4583,6 +4659,16 @@ __metadata:
     esparse: ./bin/esparse.js
     esvalidate: ./bin/esvalidate.js
   checksum: 5df45a3d9c95c36800d028ba76d8d4e04e199932b58c2939f462f859fd583e7d39b4a12d3f97986cf272a28a5fe5948ee6e49e36ef63f67b5b48d82a635c5081
+  languageName: node
+  linkType: hard
+
+"esprima@npm:~3.0.0":
+  version: 3.0.0
+  resolution: "esprima@npm:3.0.0"
+  bin:
+    esparse: ./bin/esparse.js
+    esvalidate: ./bin/esvalidate.js
+  checksum: 0d2a4cb8c737660ef0b0f5d8cee035b16dc6034e0dee75300eed5b71006291eebc8496821d1ced62fe56796fd5a5c30f8b7476a5df309e65c11a603c91f982a9
   languageName: node
   linkType: hard
 
@@ -5566,6 +5652,13 @@ fsevents@^2.1.2:
   languageName: node
   linkType: hard
 
+"humanize@npm:^0.0.9":
+  version: 0.0.9
+  resolution: "humanize@npm:0.0.9"
+  checksum: 17c49115cd81b4fe8d4a0e13caf5c963cc15556bd1dc0e2674f5b20224cac71c923157b60b2942a20ec6c73940027f7c01dc12cbd5baeeb95ca338af87e98e6e
+  languageName: node
+  linkType: hard
+
 "iconv-lite@npm:0.4.24":
   version: 0.4.24
   resolution: "iconv-lite@npm:0.4.24"
@@ -5684,6 +5777,15 @@ fsevents@^2.1.2:
   version: 2.0.3
   resolution: "inherits@npm:2.0.3"
   checksum: 9488f9433effbc24474f6baee8014e5337c7f99305ecb4204fa5864ae7655c24225780d87fc65ed8d3d374715a18c5dc8c69fe3bf9745cde2e7acd0ac068a07b
+  languageName: node
+  linkType: hard
+
+"ion-rangeslider@npm:2.3.1":
+  version: 2.3.1
+  resolution: "ion-rangeslider@npm:2.3.1"
+  peerDependencies:
+    jquery: ">=1.8"
+  checksum: 8399461d5903e3c98b3749afd1f822a9f3133c68c0188d98703b6d2f188ec7fe895a5602971143c0101b4d11de651e35bcdc42c06ac0bf038a5623741f934e25
   languageName: node
   linkType: hard
 
@@ -6614,7 +6716,7 @@ fsevents@^2.1.2:
   languageName: node
   linkType: hard
 
-"jquery@npm:3.6.0":
+"jquery@npm:3.6.0, jquery@npm:>=1.7.1 <4.0.0":
   version: 3.6.0
   resolution: "jquery@npm:3.6.0"
   checksum: a0a819022a1bdff5efa79bbd9d4d7352de5bd32dabe42108e6ec0797238dba36c09c108e0eea2724f5d03acc1b30ee87d76bec80e15b9510106532292ebe6ba4
@@ -6969,6 +7071,13 @@ fsevents@^2.1.2:
   languageName: node
   linkType: hard
 
+"lodash@npm:^4.17.14":
+  version: 4.17.21
+  resolution: "lodash@npm:4.17.21"
+  checksum: 4983720b9abca930a4a46f18db163d7dad8dd00dbed6db0cc7b499b33b717cce69f80928b27bbb1ff2cbd3b19d251ee90669a8b5ea466072ca81c2ebe91e7468
+  languageName: node
+  linkType: hard
+
 "log-symbols@npm:^2.2.0":
   version: 2.2.0
   resolution: "log-symbols@npm:2.2.0"
@@ -7125,6 +7234,13 @@ fsevents@^2.1.2:
   languageName: node
   linkType: hard
 
+"microplugin@npm:0.0.3":
+  version: 0.0.3
+  resolution: "microplugin@npm:0.0.3"
+  checksum: e78b9c5ee03443ae7cc13516c8a9a2457340a3a6e9ba0a7ce61485d0df74014ab6ac29e6cc9ddf7afdc86e340900dd1222efc4451121107f8a4d615c1aaea5c2
+  languageName: node
+  linkType: hard
+
 "miller-rabin@npm:^4.0.0":
   version: 4.0.1
   resolution: "miller-rabin@npm:4.0.1"
@@ -7210,6 +7326,13 @@ fsevents@^2.1.2:
   version: 1.2.5
   resolution: "minimist@npm:1.2.5"
   checksum: b77b8590147a4e217ff34266236bc39de23b52e6e33054076991ff674c7397a1380a7bde11111916f16f003a94aaa7e4f3d92595a32189644ff607fabc65a5b6
+  languageName: node
+  linkType: hard
+
+"minimist@npm:~0.0.1":
+  version: 0.0.10
+  resolution: "minimist@npm:0.0.10"
+  checksum: 2e45f013789db167eaffc5954531cd6adc9d1bcf86498b1a1de87f8aa4a3bb8ff393226107046a3e681e04e3ca8997156c9d7cf3a03a223ed5b535ae71d2e66e
   languageName: node
   linkType: hard
 
@@ -7667,6 +7790,16 @@ fsevents@^2.1.2:
   dependencies:
     is-wsl: ^1.1.0
   checksum: 0ea3b6550fbbc530a57f958baf5d44253a435d67ad88b4af1df8b3a98693f7c70b71d72f29b09a02d15e94654ec3875aae8cf4fccbf8e4e326671a02f66058d3
+  languageName: node
+  linkType: hard
+
+"optimist@npm:^0.6.1":
+  version: 0.6.1
+  resolution: "optimist@npm:0.6.1"
+  dependencies:
+    minimist: ~0.0.1
+    wordwrap: ~0.0.2
+  checksum: 14cb755f3864ce3459219e1c6a7cd043c7de14f0e6ec5acfc774728e9974a50ae153ebebfcf8a3d38f7bf273e120c6aae735b99d17377fa2c2e867df33402c16
   languageName: node
   linkType: hard
 
@@ -8929,6 +9062,15 @@ fsevents@^2.1.2:
   languageName: node
   linkType: hard
 
+"redeyed@npm:~1.0.0":
+  version: 1.0.1
+  resolution: "redeyed@npm:1.0.1"
+  dependencies:
+    esprima: ~3.0.0
+  checksum: 8e214b71567f70caa9c5a57733da308cc964fddfab1aff48ad4fbc1444a4c407b01ecafcd993cccbee7c0bb1fd35ed8adaa0b356c9baeda52094cf55609016b6
+  languageName: node
+  linkType: hard
+
 "regenerate-unicode-properties@npm:^8.2.0":
   version: 8.2.0
   resolution: "regenerate-unicode-properties@npm:8.2.0"
@@ -9286,12 +9428,17 @@ fsevents@^2.1.2:
     "@testing-library/dom": ^7.29.6
     "@testing-library/jest-dom": ^5.11.9
     "@testing-library/user-event": ^12.7.3
+    "@types/bootstrap": 3.4.0
+    "@types/bootstrap-datepicker": 0.0.14
+    "@types/ion-rangeslider": 2.3.0
     "@types/jest": ^26
     "@types/jquery": "patch:@types/jquery@^3.5.5#./patch/types-jquery.patch"
     "@types/lodash": ^4
     "@types/node": ^14.14.31
+    "@types/selectize": 0.12.34
     "@typescript-eslint/eslint-plugin": ^4
     "@typescript-eslint/parser": ^4
+    bootstrap-datepicker: 1.9.0
     browserslist: ^4.16.3
     core-js: ^3.9
     esbuild: ^0.8.50
@@ -9302,6 +9449,7 @@ fsevents@^2.1.2:
     eslint-plugin-jest: ^24
     eslint-plugin-jest-dom: ^3.6.5
     eslint-plugin-prettier: ^3
+    ion-rangeslider: 2.3.1
     jest: ^26
     jquery: 3.6.0
     lodash: ^4
@@ -9311,6 +9459,8 @@ fsevents@^2.1.2:
     prettier: 2
     readcontrol: ^1.0.0
     replace: ^1.2.0
+    selectize: 0.12.4
+    strftime: 0.9.2
     ts-jest: ^26
     type-coverage: ^2
     typescript: ^4
@@ -9405,6 +9555,16 @@ fsevents@^2.1.2:
   dependencies:
     xmlchars: ^2.2.0
   checksum: 6ad14be68da9b84af0fa3de346fd78bd3a8e8a73a462e2852279a1fff1e2619988919294001abe3ecef3783f9498962a0619d960ccca4ec2ca914526fde1acc2
+  languageName: node
+  linkType: hard
+
+"selectize@npm:0.12.4":
+  version: 0.12.4
+  resolution: "selectize@npm:0.12.4"
+  dependencies:
+    microplugin: 0.0.3
+    sifter: ^0.5.1
+  checksum: 26a866b0c64f18341fda70f27a45df9fa979956289bde91b9c6b2999385fc3daa23659fb7414acae963173d8f3a4e2301797e836b7dd0a46bbb8256cdb121d95
   languageName: node
   linkType: hard
 
@@ -9574,6 +9734,21 @@ fsevents@^2.1.2:
   version: 0.1.1
   resolution: "shellwords@npm:0.1.1"
   checksum: 3559ff550917ece921d252edf42eb54827540e9676e537137ace236df8f9b78e48c542ae0b3f8876fea0faf5826c97629d5b8cb9ac7dee287260e9804fb8132c
+  languageName: node
+  linkType: hard
+
+"sifter@npm:^0.5.1":
+  version: 0.5.4
+  resolution: "sifter@npm:0.5.4"
+  dependencies:
+    async: ^2.6.0
+    cardinal: ^1.0.0
+    csv-parse: ^4.6.5
+    humanize: ^0.0.9
+    optimist: ^0.6.1
+  bin:
+    sifter: ./bin/sifter.js
+  checksum: 58fffb41937b364d9a43468e29d83ffdf7f80f804756a514ea7de832d6aba6ff8d850eaf949ea91074b6240b5fb4403f04ec0d559e20f08885dcbb097f2ae927
   languageName: node
   linkType: hard
 
@@ -9884,6 +10059,13 @@ fsevents@^2.1.2:
     to-arraybuffer: ^1.0.0
     xtend: ^4.0.0
   checksum: 7ef9e10567b1a49d6c05730427280ef7623a6b407df3981d5d14d30d56225c4d64857d7473ab8eca93dbcaaf897e4f4fda8b5b482cf26255e26f1a31d696c1b8
+  languageName: node
+  linkType: hard
+
+"strftime@npm:0.9.2":
+  version: 0.9.2
+  resolution: "strftime@npm:0.9.2"
+  checksum: 3b59b37d53121f73a6c67d03de11d5fdfebbd1a338d65b0af2938e5db6c9090454826fe73d09da001cf9af45317eee4d93e1442eb7dc9e44702bf673bc589dc5
   languageName: node
   linkType: hard
 
@@ -10959,6 +11141,13 @@ typescript@^4:
   version: 1.2.3
   resolution: "word-wrap@npm:1.2.3"
   checksum: 6526abd75d4409c76d1989cf2fbf6080b903db29824be3d17d0a0b8f6221486c76a021174eda2616cf311199787983c34bae3c5e7b51d2ad7476f2066cddb75a
+  languageName: node
+  linkType: hard
+
+"wordwrap@npm:~0.0.2":
+  version: 0.0.3
+  resolution: "wordwrap@npm:0.0.3"
+  checksum: e8c84baa721bd7bc13a88e52e1bc25dd4d14accedafe04d24fbc400ba74ae6d620ac4eff5425d5cab342d1ff43f74396272492039b7d7a804bffd2039a153ff0
   languageName: node
   linkType: hard
 

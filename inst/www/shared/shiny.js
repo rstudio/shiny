@@ -1503,9 +1503,9 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
     function getTargetTabs($tabset, $tabContent, target) {
       var dataValue = "[data-value='" + $escape(target) + "']";
-      var $aTag = $tabset.find("a" + dataValue); // BS4 introduced a.dropdown-item
+      var $aTag = $tabset.find("a" + dataValue); // BS3 dropdown anchors are wrapped in <li>, but they can't be in BS4
 
-      var $liTag = $aTag.hasClass("dropdown-item") ? $aTag : $aTag.parent();
+      var $liTag = $aTag.parent("li").length > 0 ? $aTag.parent("li") : $aTag;
 
       if ($liTag.length === 0) {
         throw "There is no tabPanel (or navbarMenu) with value" + " (or menuName) equal to '" + target + "'";
@@ -1518,7 +1518,12 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         // dropdown
         var $dropdownTabset = $aTag.find("+ ul.dropdown-menu");
         var dropdownId = $dropdownTabset.attr("data-tabsetid");
-        var $dropdownLiTags = isBS3() ? $dropdownTabset.find("a[data-toggle='tab']").parent("li") : $dropdownTabset.find(".dropdown-item");
+        var $dropdownLiTags = $dropdownTabset.find("a[data-toggle='tab']"); // BS3 dropdown anchors are wrapped in <li>, but they can't be in BS4
+
+        if ($dropdownLiTags.parent("li").length > 0) {
+          $dropdownLiTags = $dropdownLiTags.parent("li");
+        }
+
         $dropdownLiTags.each(function (i, el) {
           $liTags.push($(el));
         });
@@ -1676,7 +1681,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       function getTabIndex($tabset, tabsetId) {
         // The 0 is to ensure this works for empty tabsetPanels as well
         var existingTabIds = [0]; // loop through all existing tabs, find the one with highest id
-        // (since this is based on a numeric co unter), and increment
+        // (since this is based on a numeric counter), and increment
 
         $tabset.find("a[data-toggle='tab']").each(function () {
           var $tab = $(this);
@@ -5689,7 +5694,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       return $(scope).find('ul.nav.shiny-tab-input');
     },
     getValue: function getValue(el) {
-      var anchor = isBS3() ? $(el).find('li:not(.dropdown).active').children('a') : $(el).find('.nav-link:not(.dropdown-toggle).active, .dropdown-menu > .dropdown-item.active');
+      var anchor = isBS3() ? $(el).find('li:not(.dropdown).active > a') : $(el).find('li:not(.dropdown) > a.active');
       if (anchor.length === 1) return this._getTabName(anchor);
       return null;
     },
@@ -5698,7 +5703,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       var success = false;
 
       if (value) {
-        var anchors = isBS3() ? $(el).find('li:not(.dropdown).active').children('a') : $(el).find('.nav-link:not(.dropdown-toggle), .dropdown-menu > .dropdown-item');
+        var anchors = isBS3() ? $(el).find('li:not(.dropdown) > a') : $(el).find('li:not(.dropdown) > a, .nav-item.dropdown .dropdown-item');
         anchors.each(function () {
           if (self._getTabName($(this)) === value) {
             $(this).tab('show');

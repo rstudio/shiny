@@ -5,8 +5,8 @@ $.extend(bootstrapTabInputBinding, {
   },
   getValue: function(el) {
     let anchor = isBS3() ?
-      $(el).find('li:not(.dropdown).active').children('a') :
-      $(el).find('.nav-link:not(.dropdown-toggle).active, .dropdown-menu > .dropdown-item.active');
+      $(el).find('li:not(.dropdown).active > a'):
+      $(el).find('li:not(.dropdown) > a.active');
 
     if (anchor.length === 1)
       return this._getTabName(anchor);
@@ -18,8 +18,8 @@ $.extend(bootstrapTabInputBinding, {
     let success = false;
     if (value) {
       let anchors = isBS3() ?
-        $(el).find('li:not(.dropdown).active').children('a') :
-        $(el).find('.nav-link:not(.dropdown-toggle), .dropdown-menu > .dropdown-item');
+        $(el).find('li:not(.dropdown) > a') :
+        $(el).find('li:not(.dropdown) > a, .nav-item.dropdown .dropdown-item');
       anchors.each(function() {
         if (self._getTabName($(this)) === value) {
           $(this).tab('show');

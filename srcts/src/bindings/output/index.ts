@@ -1,6 +1,7 @@
 import $ from "jquery";
 import { asArray } from "../../utils";
 
+import { TextOutputBinding } from "./text";
 import { BindingRegistry } from "../registry";
 
 class OutputBinding {
@@ -63,5 +64,7 @@ class OutputBinding {
 }
 
 const outputBindings = new BindingRegistry();
+
+outputBindings.register(new TextOutputBinding(), "shiny.textOutput");
 
 export { outputBindings, OutputBinding };

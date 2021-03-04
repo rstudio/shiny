@@ -452,7 +452,7 @@ navbarPage <- function(title,
     selected <- restoreInput(id = id, default = selected)
 
   # build the tabset
-  tabs <- collectTabs(...)
+  tabs <- collectTabs(..., caller = "navbarPage")
   tabset <- buildTabset(tabs, "nav navbar-nav", id = id, selected = selected)
 
   containerClass <- paste0("container", if (fluid) "-fluid")
@@ -771,7 +771,7 @@ tabsetPanel <- function(...,
 
   # collect and assert ... are tabPanel()s
   type <- match.arg(type)
-  tabs <- collectTabs(...)
+  tabs <- collectTabs(..., caller = "tabsetPanel")
   tabset <- buildTabset(tabs, paste0("nav nav-", type), id = id, selected = selected)
 
   # create the content
@@ -835,7 +835,7 @@ navlistPanel <- function(...,
     selected <- restoreInput(id = id, default = selected)
 
   # build the tabset
-  tabs <- collectTabs(..., allowStrings = TRUE)
+  tabs <- collectTabs(..., caller = "navlistPanel")
   tabset <- buildTabset(
     tabs, "nav nav-pills nav-stacked",
     textFilter = function(text) tags$li(class = "navbar-brand", text),
@@ -1023,19 +1023,23 @@ buildTabItem <- function(index, tabsetId, foundSelected, tabs = NULL,
 }
 
 # Verify sensible input to tabsetPanel()/navbarPage()/navlistPanel()
-collectTabs <- function(..., allowStrings = FALSE) {
+collectTabs <- function(..., caller) {
   tabs <- list2(...)
+  allowStrings <- identical(caller, "navlistPanel")
   lapply(tabs, function(x) {
+    if (allowStrings && is.character(x) && length(x) == 1) {
+      return(x)
+    }
     if (isTabPanelMenu(x) || isTabPanel(x)) {
       return(x)
     }
-    if (!allowStrings) {
-      abort("... must be a collection of tabPanel()s and/or tabPanelMenu()s")
-    }
-    if (is.character(x) && length(x) == 1) {
-      return(x)
-    }
-    abort("... must be a collection of tabPanel()s, tabPanelMenu()s, or character strings")
+    warning(
+      caller, "()'s ... should be a collection of tabPanel()s",
+      if (!allowStrings) " and tabPanelMenus().",
+      if (allowStrings) ", tabPanelMenus(), and/or character strings.",
+      call. = FALSE
+    )
+    x
   })
 }
 

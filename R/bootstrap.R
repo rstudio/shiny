@@ -980,19 +980,20 @@ buildTabItem <- function(index, tabsetId, foundSelected, tabs = NULL,
       if ("3" %in% getBootstrapVersion()) {
         bs3NavItemDropdown(title, value, icon, active, tabset$navList)
       } else {
-        # Bootstrap 4 is much more strict dropdown navs classes :eye-roll:
-        # Namely, the .dropdown-menu shouldn't contain .nav-link/.nav-item
-        # classes and should instead be a (top-level!) .dropdown-item
-        # (or else the .tab('show') method won't update the .active classes properly)
+        # In BS4, dropdown nav anchors can't be wrapped in a <li> tag
+        # and also need .nav-link replaced with .dropdown-item to be
+        # styled sensibly
         items <- tabset$navList
         items$children <- lapply(items$children, function(x) {
           # x should be a tagFunction() due to the else block below
           x <- if (inherits(x, "shiny.tag.function")) x() else x
           # Replace <li class="nav-item"><a class="nav-link"></a></li>
           #    with <a class="dropdown-item"></a>
-          navItem <- x$children[[1]]
-          navItem$attribs$class <- "dropdown-item"
-          navItem
+          if (tagHasClass(x, "nav-item")) {
+            x <- x$children[[1]]
+            x$attribs$class <- "dropdown-item"
+          }
+          x
         })
         bs4NavItemDropdown(title, value, icon, active, items)
       }
@@ -1112,6 +1113,14 @@ bs4NavItem <- function(id, title, value, icon, active) {
   )
 }
 
+# TODO: something like this should like in htmltools
+tagHasClass <- function(x, class) {
+  if (!inherits(x, "shiny.tag")) return(FALSE)
+  classes <- unlist(x$attribs[names(x$attribs) %in% "class"], use.names = FALSE)
+  if (!length(classes)) return(FALSE)
+  classes <- unlist(strsplit(classes, split = "\\s+"), use.names = FALSE)
+  isTRUE(class %in% classes)
+}
 
 #' Create a text output element
 #'

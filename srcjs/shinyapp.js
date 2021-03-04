@@ -721,8 +721,9 @@ var ShinyApp = function() {
   function getTargetTabs($tabset, $tabContent, target) {
     var dataValue = "[data-value='" + $escape(target) + "']";
     var $aTag = $tabset.find("a" + dataValue);
+    var $liTag = $aTag.parent("li");
     // BS3 dropdown anchors are wrapped in <li>, but they can't be in BS4
-    var $liTag = $aTag.parent("li").length > 0 ?  $aTag.parent("li") : $aTag;
+    if ($liTag.length === 0) $liTag = $aTag;
     if ($liTag.length === 0) {
       throw "There is no tabPanel (or navbarMenu) with value" +
             " (or menuName) equal to '" + target + "'";
@@ -748,6 +749,7 @@ var ShinyApp = function() {
       $dropdownDivs.each(function (i, el) {
         $divTags.push($(el));
       });
+
     }
     else {
       // regular tab
@@ -801,11 +803,10 @@ var ShinyApp = function() {
     if ($aTag.attr("data-toggle") === "tab") {
       var index = getTabIndex($tabset, tabsetId);
       var tabId = "tab-" + tabsetId + "-" + index;
-      if ($liTag.hasClass("dropdown-item")) {
-        $liTag.attr("href", "#" + tabId);
-      } else {
-        $liTag.find("> a").attr("href", "#" + tabId);
-      }
+      var anchor = $liTag.find("> a");
+      // BS3 dropdown anchors are wrapped in <li>, but they can't be in BS4
+      if (anchor.length === 0) anchor = $liTag;
+      anchor.attr("href", "#" + tabId);
       $divTag.attr("id", tabId);
     }
 

@@ -877,7 +877,7 @@ findAndMarkSelectedTab <- function(tabs, selected, foundSelected) {
     } else if (isTabPanelMenu(x)) {
       # Recur for navbarMenus
       res <- findAndMarkSelectedTab(x$tabs, selected, foundSelected)
-      div$tabs <- res$tabs
+      x$tabs <- res$tabs
       foundSelected <<- res$foundSelected
 
     } else {

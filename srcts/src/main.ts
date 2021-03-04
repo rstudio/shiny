@@ -42,6 +42,8 @@ import { FileProcessor, FileUploader } from "./file/FileProcessor";
 
 import { Shiny } from "./shiny";
 
+import { inputBindings, outputBindings } from "./bindings";
+
 function main(): void {
   // "_start.js"
   // √
@@ -2054,99 +2056,11 @@ function main(): void {
   // √
 
   // "binding_registry.js"
-  const BindingRegistry = function () {
-    this.bindings = [];
-    this.bindingNames = {};
-  };
+  // √; ./bindings/registry.ts
 
-  (function () {
-    this.register = function (binding, bindingName, priority) {
-      const bindingObj = { binding: binding, priority: priority || 0 };
 
-      this.bindings.unshift(bindingObj);
-      if (bindingName) {
-        this.bindingNames[bindingName] = bindingObj;
-        binding.name = bindingName;
-      }
-    };
-    this.setPriority = function (bindingName, priority) {
-      const bindingObj = this.bindingNames[bindingName];
-
-      if (!bindingObj)
-        throw "Tried to set priority on unknown binding " + bindingName;
-      bindingObj.priority = priority || 0;
-    };
-    this.getPriority = function (bindingName) {
-      const bindingObj = this.bindingNames[bindingName];
-
-      if (!bindingObj) return false;
-      return bindingObj.priority;
-    };
-    this.getBindings = function () {
-      // Sort the bindings. The ones with higher priority are consulted
-      // first; ties are broken by most-recently-registered.
-      return mergeSort(this.bindings, function (a, b) {
-        return b.priority - a.priority;
-      });
-    };
-  }.call(BindingRegistry.prototype));
-
-  const inputBindings = (Shiny.inputBindings = new BindingRegistry());
-  const outputBindings = (Shiny.outputBindings = new BindingRegistry());
 
   // "output_binding.js"
-  const OutputBinding = (Shiny.OutputBinding = function () {});
-
-  (function () {
-    // Returns a jQuery object or element array that contains the
-    // descendants of scope that match this binding
-    this.find = function (scope) {
-      throw "Not implemented";
-    };
-
-    this.getId = function (el) {
-      return el["data-input-id"] || el.id;
-    };
-
-    this.onValueChange = function (el, data) {
-      this.clearError(el);
-      this.renderValue(el, data);
-    };
-    this.onValueError = function (el, err) {
-      this.renderError(el, err);
-    };
-    this.renderError = function (el, err) {
-      this.clearError(el);
-      if (err.message === "") {
-        // not really error, but we just need to wait (e.g. action buttons)
-        $(el).empty();
-        return;
-      }
-      let errClass = "shiny-output-error";
-
-      if (err.type !== null) {
-        // use the classes of the error condition as CSS class names
-        errClass =
-          errClass +
-          " " +
-          $.map(asArray(err.type), function (type) {
-            return errClass + "-" + type;
-          }).join(" ");
-      }
-      $(el).addClass(errClass).text(err.message);
-    };
-    this.clearError = function (el) {
-      $(el).attr("class", function (i, c) {
-        return c.replace(/(^|\s)shiny-output-error\S*/g, "");
-      });
-    };
-    this.showProgress = function (el, show) {
-      const RECALC_CLASS = "recalculating";
-
-      if (show) $(el).addClass(RECALC_CLASS);
-      else $(el).removeClass(RECALC_CLASS);
-    };
-  }.call(OutputBinding.prototype));
 
   // "output_binding_text.js"
   const textOutputBinding = new OutputBinding();

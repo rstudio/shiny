@@ -14,6 +14,7 @@ let opts = {
   plugins: [
     globalsPlugin({
       jquery: "window.jQuery",
+      strftime: "window.strftime",
     }),
     babel(),
   ],

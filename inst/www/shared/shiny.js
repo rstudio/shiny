@@ -5692,7 +5692,8 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       return $(scope).find('ul.nav.shiny-tab-input');
     },
     getValue: function getValue(el) {
-      var anchor = isBS3() ? $(el).find('li:not(.dropdown).active > a') : $(el).find('li:not(.dropdown) > a.active');
+      debugger;
+      var anchor = isBS3() ? $(el).find('li:not(.dropdown).active > a') : $(el).find('.nav-link:not(.dropdown-toggle).active, .dropdown-menu > .dropdown-item.active');
       if (anchor.length === 1) return this._getTabName(anchor);
       return null;
     },
@@ -5701,7 +5702,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       var success = false;
 
       if (value) {
-        var anchors = isBS3() ? $(el).find('li:not(.dropdown) > a') : $(el).find('li:not(.dropdown) > a, .nav-item.dropdown .dropdown-item');
+        var anchors = isBS3() ? $(el).find('li:not(.dropdown) > a') : $(el).find('.nav-link:not(.dropdown-toggle), .dropdown-menu > .dropdown-item');
         anchors.each(function () {
           if (self._getTabName($(this)) === value) {
             $(this).tab('show');

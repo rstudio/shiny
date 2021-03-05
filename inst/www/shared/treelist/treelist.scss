@@ -1,17 +1,20 @@
-// Styling derives from Bootstrap 5's sidebar
-// TODO: consider building off of list-groups instead?
+// Inspired by BS5's sidebar nav
 // https://github.com/twbs/bootstrap/blob/548be2e/site/assets/scss/_sidebar.scss#L7
+// As well as
+// https://chniter.github.io/bstreeview/
+
 $black: $text-color !default; // BS3compat
 $link-decoration: none !default;
 $link-hover-decoration: underline !default;
-$sidebar-collapse-icon: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'><path fill='none' stroke='rgba(#{$black},.5)' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M5 14l6-6-6-6'/></svg>") !default;
+
+$sidebar-collapse-icon-color: rgba($black, 0.5) !default;
+$sidebar-collapse-icon: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'><path fill='none' stroke='#{$sidebar-collapse-icon-color}' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M5 14l6-6-6-6'/></svg>") !default;
 
 $treelist-anchor-color: rgba($black, .65) !default;
 $treelist-active-bg: rgba($component-active-bg, .1) !default;
 $treelist-active-color: rgba($black, .85) !default;
 
 .treelist-nav {
-  font-weight: 600;
 
   @include media-breakpoint-up(md) {
     position: sticky;
@@ -19,61 +22,55 @@ $treelist-active-color: rgba($black, .85) !default;
     // Override collapse behaviors
     display: block !important;
     height: subtract(100vh, 7rem);
-    // Prevent focus styles to be cut off:
-    padding-left: .25rem;
-    margin-left: -.25rem;
     overflow-y: auto;
   }
 
-  a {
-    display: inline-flex;
-    align-items: center;
-    padding: .1875rem .5rem;
-    margin-top: .125rem;
-    color: $treelist-anchor-color;
-    text-decoration: if($link-decoration == none, null, none);
-    @include border-radius(.25rem);
+  // Prevent focus styles to be cut off:
+  padding-left: .25rem;
+  margin-left: -.25rem;
 
-    &:hover,
-    &:focus {
-      color: $treelist-active-color;
-      text-decoration: if($link-hover-decoration == underline, none, null);
+  .treelist-item {
+    border: $border-width solid $border-color;
+    @include border-radius($border-radius);
+    &.active {
+      font-weight: 600;
       background-color: $treelist-active-bg;
+      color: $treelist-active-color;
+    }
+    // TODO: why does this apply to the entire item container?
+    &:not(.active):hover {
+      background-color: rgba($black, .1);
     }
 
-    // Indent if there's no submenu
-    &:only-child {
-      margin-left: 1.25rem;
-    }
-
-    // Add chevron if there's a submenu
-    &:not(:only-child) {
-      &::before {
-        width: 1.25em;
-        line-height: 0; // Align in the middle
-        content: escape-svg($sidebar-collapse-icon);
-        @include transition(transform .35s ease);
-        transform-origin: .5em 50%;
+    a {
+      display: block;
+      padding: .1875rem .5rem;
+      margin-top: .125rem;
+      color: $treelist-anchor-color;
+      text-decoration: none;
+      i {
+        padding-right: 1.25rem;
       }
-
-      &:not(.collapsed) {
-        color: $treelist-active-color;
-
+      // Add chevron if there's a submenu
+      &[data-toggle="collapse"] {
         &::before {
-          transform: rotate(90deg);
+          width: 1.25em;
+          line-height: 0; // Align in the middle
+          content: escape-svg($sidebar-collapse-icon);
+          @include transition(transform .35s ease);
+          transform-origin: .5em 50%;
         }
+
+        &:not(.collapsed) {
+          color: $treelist-active-color;
+
+          &::before {
+            transform: rotate(90deg);
+          }
+        }
+
       }
-    }
 
-    // Adjust font size and font weights in submenu
-    + ul {
-      @include font-size(.875rem);
-      font-weight: 400;
     }
-  }
-
-  .active {
-    font-weight: 600;
-    color: $treelist-active-color;
   }
 }

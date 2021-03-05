@@ -980,14 +980,26 @@ buildTabItem <- function(index, tabsetId, foundSelected, tabs = NULL,
     return(buildNavItem(divTag, tabsetId, index))
   }
 
-  warning(
+  # The behavior is undefined at this point, so construct a condition message
+  msg <- paste0(
     "Expected a collection tabPanel()s",
     if (is.null(textFilter)) " and tabPanelMenus().",
-    if (!is.null(textFilter)) ", tabPanelMenus(), and/or character strings.",
-    call. = FALSE
+    if (!is.null(textFilter)) ", tabPanelMenus(), and/or character strings."
   )
 
-  return(list(liTag = NULL, divTag = divTag))
+  # Luckily this case has never worked, so it's safe to throw here
+  # https://github.com/rstudio/shiny/issues/3313
+  if (!inherits(divTag, "shiny.tag"))  {
+    stop(msg, call. = FALSE)
+  }
+
+  # Unfortunately, this 'off-label' use case creates an 'empty' nav and includes
+  # the divTag content on every tab. There shouldn't be any reason to be relying on
+  # this behavior since we now have pre/post arguments, so throw a warning, but still
+  # support the use case since we don't make breaking changes
+  warning(msg, call. = FALSE)
+
+  return(buildNavItem(divTag, tabsetId, index))
 }
 
 buildNavItem <- function(divTag, tabsetId, index) {

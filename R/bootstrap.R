@@ -929,7 +929,7 @@ navbarMenuTextFilter <- function(text) {
 buildTabset <- function(..., ulClass, textFilter = NULL, id = NULL,
                         selected = NULL, foundSelected = FALSE) {
 
-  tabs <- list2(...)
+  tabs <- dropNulls(list2(...))
   res <- findAndMarkSelectedTab(tabs, selected, foundSelected)
   tabs <- res$tabs
   foundSelected <- res$foundSelected

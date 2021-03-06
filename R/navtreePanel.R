@@ -1,12 +1,14 @@
 #' @export
-treelistPanel <- function(..., id = NULL,
+navtreePanel <- function(..., id = NULL,
                           selected = NULL,
                           fluid = TRUE,
-                          widths = c(4, 8)) {
+                          widths = c(3, 9)) {
+  # TODO: how to incorporate this into a sidebar layout?
+
   if (!is.null(id))
     selected <- restoreInput(id = id, default = selected)
 
-  tabset <- buildTreePanel(..., ulClass = "treelist-nav", id = id, selected = selected)
+  tabset <- buildTreePanel(..., ulClass = "nav nav-navtree", id = id, selected = selected)
 
   row <- if (fluid) fluidRow else fixedRow
 
@@ -14,16 +16,16 @@ treelistPanel <- function(..., id = NULL,
   # 1. consider using flexbox instead for layout
   # 2. how to integrate with a sidebar?
   row(
-    class = "treelist-container",
+    class = "navtree-container",
     column(widths[[1]], tabset$navList),
     column(widths[[2]], tabset$content),
-    bslib::bs_dependency_defer(treelistCssDependency)
+    bslib::bs_dependency_defer(navtreeCssDependency)
   )
 }
 
 # Algorithm inspired by buildTabset() but we need different HTML/CSS,
 # and menus are rendered as collapse toggles instead of Bootstrap dropdowns
-buildTreePanel <- function(..., ulClass, id = NULL, selected = NULL, foundSelected = FALSE) {
+buildTreePanel <- function(..., ulClass, id = NULL, selected = NULL, foundSelected = FALSE, depth = 0) {
 
   tabs <- list2(...)
   res <- findAndMarkSelectedTab(tabs, selected, foundSelected)
@@ -31,8 +33,7 @@ buildTreePanel <- function(..., ulClass, id = NULL, selected = NULL, foundSelect
   foundSelected <- res$foundSelected
 
   # add input class if we have an id
-  # TODO: write another binding?
-  #if (!is.null(id)) ulClass <- paste(ulClass, "shiny-tab-input")
+  if (!is.null(id)) ulClass <- paste(ulClass, "shiny-tab-input")
 
   if (anyNamed(tabs)) {
     nms <- names(tabs)
@@ -46,7 +47,7 @@ buildTreePanel <- function(..., ulClass, id = NULL, selected = NULL, foundSelect
     seq_len(length(tabs)), buildTreeItem,
     tabsetId = tabsetId,
     foundSelected = foundSelected,
-    tabs = tabs
+    tabs = tabs, depth = depth
   )
 
   list(
@@ -63,31 +64,33 @@ buildTreePanel <- function(..., ulClass, id = NULL, selected = NULL, foundSelect
   )
 }
 
-buildTreeItem <- function(index, tabsetId, foundSelected, tabs = NULL, divTag = NULL) {
+buildTreeItem <- function(index, tabsetId, foundSelected, tabs = NULL, divTag = NULL, depth = 0) {
   divTag <- divTag %||% tabs[[index]]
+
+  subMenuPadding <- if (depth > 0) css(padding_left = paste0(depth * 1.25, "rem"))
 
   if (isTabPanelMenu(divTag)) {
     # TODO: allow the collapse icon to be configured?
     icon <- getIcon(iconClass = divTag$iconClass)
     if (!is.null(icon)) {
-      warning("Configurable icons are not yet supported in treelistPanel().")
+      warning("Configurable icons are not yet supported in navtreePanel().")
     }
     tabset <- buildTreePanel(
-      !!!divTag$tabs, ulClass = "treelist-nav", #TODO: do we want this class on every panel?
-      foundSelected = foundSelected
+      !!!divTag$tabs, ulClass = "nav nav-navtree",
+      foundSelected = foundSelected, depth = depth + 1
     )
     # Sort of like .dropdown in the tabsetPanel() case,
     # but utilizes collapsing (which is recursive) instead of dropdown
     active <- containsSelectedTab(divTag$tabs)
     menuId <- paste0("collapse-", p_randomInt(1000, 10000))
     liTag <- tags$li(
-      class = "treelist-item",
       tags$a(
         class = if (!active) "collapsed",
         "data-toggle" = "collapse",
         "data-value" = divTag$menuName,
         "data-target" = paste0("#", menuId),
         role = "button",
+        style = subMenuPadding,
         getIcon(iconClass = divTag$iconClass),
         divTag$title
       ),
@@ -102,40 +105,51 @@ buildTreeItem <- function(index, tabsetId, foundSelected, tabs = NULL, divTag = 
   }
 
   if (isTabPanel(divTag)) {
-    id <- paste("tab", tabsetId, index, sep = "-")
-    title <- tagGetAttribute(divTag, "title")
-    value <- tagGetAttribute(divTag, "data-value")
-    icon <- getIcon(iconClass = tagGetAttribute(divTag, "data-icon-class"))
-    active <- isTabSelected(divTag)
-    liTag <- bs3NavItem(id, title, value, icon, active)
-    liTag <- tagAppendAttributes(liTag, class = "treelist-item")
-    divTag <- tagAppendAttributes(divTag, class = if (active) "active")
-    divTag$attribs$id <- id
-    divTag$attribs$title <- NULL
-    return(list(liTag = liTag, divTag = divTag))
+    # Borrow from the usual nav logic so we get the right
+    # li.active vs li > a.active (BS4) markup
+    navItem <- buildNavItem(divTag, tabsetId, index)
+    liTag <- navItem$liTag
+    return(
+      list(
+        divTag = navItem$divTag,
+        liTag = tagFunction(function() {
+          # Incoming liTag should be a tagFunction()
+          liTag <- if (inherits(liTag, "shiny.tag.function")) liTag() else liTag
+
+          # Add padding for sub menu anchors
+          liTag$children[[1]] <- tagAppendAttributes(
+            liTag$children[[1]], style = subMenuPadding
+          )
+
+          liTag
+        })
+      )
+    )
   }
 
-  abort("treelistPanel() items must be tabPanel()s and/or tabPanelMenu()s")
+  abort("navtreePanel() items must be tabPanel()s and/or tabPanelMenu()s")
 }
 
 
-treelistCssDependency <- function(theme) {
-  name <- "treelistPanel"
+navtreeCssDependency <- function(theme) {
+  name <- "navtreePanel"
   version <- packageVersion("shiny")
   if (!is_bs_theme(theme)) {
     htmlDependency(
       name = name, version = version,
-      src = c(href = "shared/treelist"),
-      stylesheet = "treelist.css"
+      src = c(href = "shared/navtree"),
+      stylesheet = "navtree.css",
+      script = "navtree.js"
     )
   } else {
-    scss <- system.file(package = "shiny", "www/shared/treelist/treelist.scss")
+    navtree <- system.file(package = "shiny", "www/shared/navtree")
     bslib::bs_dependency(
-      sass::sass_file(scss),
+      sass::sass_file(file.path(navtree, "navtree.scss")),
       theme = theme,
       name = name,
       version = version,
-      cache_key_extra = version
+      cache_key_extra = version,
+      .dep_args = list(script = file.path(navtree, "navtree.js"))
     )
   }
 }

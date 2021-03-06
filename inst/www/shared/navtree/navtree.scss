@@ -3,20 +3,21 @@
 // As well as
 // https://chniter.github.io/bstreeview/
 
-$black: $text-color !default; // BS3compat
+$body-color: $text-color !default; // BS3compat
 $link-decoration: none !default;
 $link-hover-decoration: underline !default;
 
-$sidebar-collapse-icon-color: rgba($black, 0.5) !default;
+$sidebar-collapse-icon-color: rgba($body-color, 0.5) !default;
 $sidebar-collapse-icon: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'><path fill='none' stroke='#{$sidebar-collapse-icon-color}' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M5 14l6-6-6-6'/></svg>") !default;
 
-$treelist-anchor-color: rgba($black, .65) !default;
-$treelist-active-bg: rgba($component-active-bg, .1) !default;
-$treelist-active-color: rgba($black, .85) !default;
+$navtree-anchor-color: rgba($body-color, .65) !default;
+$navtree-active-bg: rgba($component-active-bg, .3) !default;
+$navtree-active-color: rgba($body-color, .85) !default;
 
-.treelist-nav {
+.nav-navtree {
 
-  @include media-breakpoint-up(md) {
+  // TODO: integrate layout with a larger sidebar layout container?
+  @include media-breakpoint-up(lg) {
     position: sticky;
     top: 5rem;
     // Override collapse behaviors
@@ -25,31 +26,27 @@ $treelist-active-color: rgba($black, .85) !default;
     overflow-y: auto;
   }
 
-  // Prevent focus styles to be cut off:
-  padding-left: .25rem;
-  margin-left: -.25rem;
-
-  .treelist-item {
-    border: $border-width solid $border-color;
-    @include border-radius($border-radius);
-    &.active {
+  li {
+    // Handle both li.active (BS3) and li > a.active (BS4)
+    &.active, > a.active, a:focus {
       font-weight: 600;
-      background-color: $treelist-active-bg;
-      color: $treelist-active-color;
+      background-color: $navtree-active-bg !important;
+      color: $navtree-active-color;
     }
-    // TODO: why does this apply to the entire item container?
-    &:not(.active):hover {
-      background-color: rgba($black, .1);
+    &:not(.active) > a:not(.active):hover {
+      background-color: rgba($body-color, .1);
     }
 
     a {
-      display: block;
+      display: inline-flex !important; // Needed for centering/transforming the collapse icon
+      align-items: center !important;
+      width: 100% !important;
       padding: .1875rem .5rem;
-      margin-top: .125rem;
-      color: $treelist-anchor-color;
-      text-decoration: none;
+      border: $border-width solid $border-color !important;
+      color: $navtree-anchor-color !important;
+      text-decoration: none !important;
       i {
-        padding-right: 1.25rem;
+        padding-right: 1.25rem !important;
       }
       // Add chevron if there's a submenu
       &[data-toggle="collapse"] {
@@ -59,18 +56,18 @@ $treelist-active-color: rgba($black, .85) !default;
           content: escape-svg($sidebar-collapse-icon);
           @include transition(transform .35s ease);
           transform-origin: .5em 50%;
+          padding-right: 1rem;
         }
 
         &:not(.collapsed) {
-          color: $treelist-active-color;
-
+          color: $navtree-active-color;
           &::before {
             transform: rotate(90deg);
           }
         }
-
       }
+    } // a
 
-    }
-  }
-}
+  } // li
+
+} // nav

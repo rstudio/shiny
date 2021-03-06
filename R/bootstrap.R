@@ -710,6 +710,7 @@ tabPanelBody <- function(value, ..., icon = NULL) {
 #' }
 #' @param position This argument is deprecated; it has been discontinued in
 #'   Bootstrap 3.
+#' @inheritParams navbarPage
 #' @return A tabset that can be passed to [mainPanel()]
 #'
 #' @seealso [tabPanel()], [updateTabsetPanel()],
@@ -759,6 +760,8 @@ tabsetPanel <- function(...,
                         id = NULL,
                         selected = NULL,
                         type = c("tabs", "pills", "hidden"),
+                        header = NULL,
+                        footer = NULL,
                         position = deprecated()) {
   if (lifecycle::is_present(position)) {
     shinyDeprecated(
@@ -770,16 +773,18 @@ tabsetPanel <- function(...,
   if (!is.null(id))
     selected <- restoreInput(id = id, default = selected)
 
-  # collect and assert ... are tabPanel()s
   type <- match.arg(type)
   tabset <- buildTabset(..., ulClass = paste0("nav nav-", type), id = id, selected = selected)
 
-  # create the content
-  first <- tabset$navList
-  second <- tabset$content
-
-  # create the tab div
-  tags$div(class = "tabbable", first, second)
+  tags$div(
+    class = "tabbable",
+    !!!dropNulls(list(
+      tabset$navList,
+      header,
+      tabset$content,
+      footer
+    ))
+  )
 }
 
 #' Create a navigation list panel
@@ -799,8 +804,10 @@ tabsetPanel <- function(...,
 #'   navigation list.
 #' @param fluid `TRUE` to use fluid layout; `FALSE` to use fixed
 #'   layout.
-#' @param widths Column withs of the navigation list and tabset content areas
+#' @param widths Column widths of the navigation list and tabset content areas
 #'   respectively.
+#' @inheritParams tabsetPanel
+#' @inheritParams navbarPage
 #'
 #' @details You can include headers within the `navlistPanel` by including
 #'   plain text elements in the list. Versions of Shiny before 0.11 supported
@@ -827,6 +834,8 @@ tabsetPanel <- function(...,
 navlistPanel <- function(...,
                          id = NULL,
                          selected = NULL,
+                         header = NULL,
+                         footer = NULL,
                          well = TRUE,
                          fluid = TRUE,
                          widths = c(4, 8)) {
@@ -834,24 +843,21 @@ navlistPanel <- function(...,
   if (!is.null(id))
     selected <- restoreInput(id = id, default = selected)
 
-  # build the tabset
   tabset <- buildTabset(
     ..., ulClass = "nav nav-pills nav-stacked",
     textFilter = function(text) tags$li(class = "navbar-brand", text),
     id = id, selected = selected
   )
 
-  # create the columns
-  columns <- list(
-    column(widths[[1]], class = if (well) "well", tabset$navList),
-    column(widths[[2]], tabset$content)
-  )
+  row <- if (fluid) fluidRow else fixedRow
 
-  # return the row
-  if (fluid)
-    fluidRow(columns)
-  else
-    fixedRow(columns)
+  row(
+    column(widths[[1]], class = if (well) "well", tabset$navList),
+    column(
+      widths[[2]],
+      !!!dropNulls(list(header, tabset$content, footer))
+    )
+  )
 }
 
 # Helpers to build tabsetPanels (& Co.) and their elements
@@ -982,9 +988,10 @@ buildTabItem <- function(index, tabsetId, foundSelected, tabs = NULL,
 
   # The behavior is undefined at this point, so construct a condition message
   msg <- paste0(
-    "Expected a collection tabPanel()s",
-    if (is.null(textFilter)) " and tabPanelMenus().",
-    if (!is.null(textFilter)) ", tabPanelMenus(), and/or character strings."
+    "Expected a collection `tabPanel()`s",
+    if (is.null(textFilter)) " and `tabPanelMenus()`.",
+    if (!is.null(textFilter)) ", `tabPanelMenus()`, and/or character strings.",
+    " Consider using `header` or `footer` if you wish to place content above (or below) every panel's contents"
   )
 
   # Luckily this case has never worked, so it's safe to throw here

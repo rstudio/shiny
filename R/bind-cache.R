@@ -4,7 +4,7 @@ utils::globalVariables(".GenericCallEnv", add = TRUE)
 #'
 #' @description
 #'
-#' `bindCache()` adds caching [reactive()] expressions and `render*` functions
+#' `bindCache()` adds caching to [reactive()] expressions and `render*` functions
 #' (like [renderText()], [renderTable()], ...).
 #'
 #' Ordinary [reactive()] expressions automatically cache their _most recent_
@@ -18,7 +18,7 @@ utils::globalVariables(".GenericCallEnv", add = TRUE)
 #' `bindCache()` requires one or more expressions that are used to generate a
 #' **cache key**, which is used to determine if a computation has occurred
 #' before and hence can be retrieved from the cache. If you're familiar with the
-#' concept of memoizing pure functions (e.g., the \pkg{memoise} package), you
+#' concept of memoizing pure functions (e.g., the \href{https://memoise.r-lib.org/}{\pkg{memoise}} package), you
 #' can think of the cache key as the input(s) to a pure function. As such, one
 #' should take care to make sure the use of `bindCache()` is _pure_ in the same
 #' sense, namely:
@@ -26,7 +26,7 @@ utils::globalVariables(".GenericCallEnv", add = TRUE)
 #' 1. For a given key, the return value is always the same.
 #' 2. Evaluation has no side-effects.
 #'
-#' In the example here, the `bindCache()` key consists of `input$x` and
+#' In the example below, the `bindCache()` key consists of `input$x` and
 #' `input$y` combined, and the value is `input$x * input$y`. In this simple
 #' example, for any given key, there is only one possible returned value.
 #'
@@ -37,7 +37,7 @@ utils::globalVariables(".GenericCallEnv", add = TRUE)
 #'
 
 #' The largest performance improvements occur when the cache key is fast to
-#' compute and the reactive expression is slow to compute. To see if the value
+#' compute and the reactive expression is slow to compute. To determine if the value
 #' should be computed, a cached reactive evaluates the key, and then serializes
 #' and hashes the result. If the resulting hashed key is in the cache, then the
 #' cached reactive simply retrieves the previously calculated value and returns
@@ -159,7 +159,7 @@ utils::globalVariables(".GenericCallEnv", add = TRUE)
 #'   ```
 #'
 #'   To use different settings for a session-scoped cache, you can set
-#'   `self$cache` at the top of your server function. By default, it will create
+#'   `session$cache` at the top of your server function. By default, it will create
 #'   a 200 MB memory cache for each session, but you can replace it with
 #'   something different. To use the session-scoped cache, you must also call
 #'   `bindCache()` with `cache="session"`. This will create a 100 MB cache for
@@ -347,7 +347,7 @@ utils::globalVariables(".GenericCallEnv", add = TRUE)
 #'
 #'   When `bindCache()` is used with `renderPlot()`, the `height` and `width`
 #'   passed to the original `renderPlot()` are ignored. They are superseded by
-#'   `sizePolicy` argument passed to `bindCache. The default is:
+#'   `sizePolicy` argument passed to `bindCache()`. The default is:
 #'
 #'   ```
 #'   sizePolicy = sizeGrowthRatio(width = 400, height = 400, growthRate = 1.2)

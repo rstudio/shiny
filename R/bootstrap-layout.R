@@ -13,9 +13,6 @@
 #'   Can also be set as a side effect of the [titlePanel()] function.
 #' @param responsive This option is deprecated; it is no longer optional with
 #'   Bootstrap 3.
-#' @param theme Alternative Bootstrap stylesheet (normally a css file within the
-#'   www directory). For example, to use the theme located at
-#'   `www/bootstrap.css` you would use `theme = "bootstrap.css"`.
 #' @inheritParams bootstrapPage
 #'
 #' @return A UI defintion that can be passed to the [shinyUI] function.
@@ -117,9 +114,6 @@ fluidRow <- function(...) {
 #' @param title The browser window title (defaults to the host URL of the page)
 #' @param responsive This option is deprecated; it is no longer optional with
 #'   Bootstrap 3.
-#' @param theme Alternative Bootstrap stylesheet (normally a css file within the
-#'   www directory). For example, to use the theme located at
-#'   `www/bootstrap.css` you would use `theme = "bootstrap.css"`.
 #' @inheritParams bootstrapPage
 #'
 #' @return A UI defintion that can be passed to the [shinyUI] function.

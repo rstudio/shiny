@@ -5,14 +5,23 @@ shiny 1.6.0.9000
 
 ### Breaking changes
 
+* The `format` and `locale` arguments to `sliderInput()` have been removed. They have been deprecated since 0.10.2.2 (released on 2014-12-08).
+
 ### Minor new features and improvements
 
+* Shiny's core JavaScript code was converted to TypeScript. For the latest development information, please see the [README.md in `./srcts`](https://github.com/rstudio/shiny/tree/master/srcts). (#3296)
+
 * Switched from `digest::digest()` to `rlang::hash()` for hashing. (#3264)
+
+* Switched from internal `Stack` class to `fastmap::faststack()`, and used `fastmap::fastqueue()`. (#3176)
 
 ### Bug fixes
 
 ### Library updates
 
+* Closed #3286: Updated to Font-Awesome 5.15.2. (#3288)
+
+* Updated to jQuery 3.6.0. (#3311)
 
 shiny 1.6.0
 ===========

@@ -236,8 +236,14 @@ reactive must therefore expect it to return a promise.
 \section{Developing render functions for caching}{
 
 
-If you've implemented your own \verb{render*()} function, you may need to
-provide a \code{cacheHint} to \code{\link[=createRenderFunction]{createRenderFunction()}} (or
+If you've implemented your own \verb{render*()} function, it may just work with
+\code{bindCache()}, but it is possible that you will need to make some
+modifications. These modifications involve helping \code{bindCache()} avoid
+cache collisions, dealing with internal state that may be set by the,
+\code{render} function, and modifying the data as it goes in and comes out of
+the cache.
+
+You may need to provide a \code{cacheHint} to \code{\link[=createRenderFunction]{createRenderFunction()}} (or
 \code{\link[htmlwidgets:htmlwidgets-shiny]{htmlwidgets::shinyRenderWidget()}}, if you've authored an htmlwidget) in
 order for \code{bindCache()} to correctly compute a cache key.
 
@@ -271,10 +277,10 @@ sufficient, and it is necessary to provide a cache hint. This is true
 for \code{renderPrint()}. Unlike \code{renderText()}, it wraps the user-provided
 expression in another function, before passing it to \code{\link[=markRenderFunction]{markRenderFunction()}}
 (instead of \code{\link[=createRenderFunction]{createRenderFunction()}}). Because the user code is wrapped in
-another function, markRenderFunction() is not able to automatically extract
-the user-provided code and use it in the cache key. Instead, \code{renderPrint}
-calls \code{markRenderFunction()}, it explicitly passes along a \code{cacheHint},
-which includes a label and the original user expression.
+another function, \code{markRenderFunction()} is not able to automatically
+extract the user-provided code and use it in the cache key. Instead,
+\code{renderPrint} calls \code{markRenderFunction()}, it explicitly passes along a
+\code{cacheHint}, which includes a label and the original user expression.
 
 In general, if you need to provide a \code{cacheHint}, it is best practice to
 provide a \code{label} id, the user's \code{expr}, as well as any other arguments
@@ -294,6 +300,18 @@ cache hint, pass it to \code{shinyRenderWidget}. For example:\preformatted{rende
   )
 \}
 }
+
+If your \code{render} function sets any internal state, you may find it useful
+in your call to \code{\link[=createRenderFunction]{createRenderFunction()}} or \code{\link[=markRenderFunction]{markRenderFunction()}} to use
+the \code{cacheWriteHook} and/or \code{cacheReadHook} parameters. These hooks are
+functions that run just before the object is stored in the cache, and just
+after the object is retrieved from the cache. They can modify the data
+that is stored and retrieved; this can be useful if extra information needs
+to be stored in the cache. They can also be used to modify the state of the
+application; for example, it can call \code{\link[=createWebDependency]{createWebDependency()}} to make
+JS/CSS resources available if the cached object is loaded in a different R
+process. (See the source of \code{htmlwidgets::shinyRenderWidget} for an example
+of this.)
 }
 
 \section{Uncacheable objects}{

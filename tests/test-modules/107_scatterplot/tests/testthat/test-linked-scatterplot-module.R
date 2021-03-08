@@ -1,6 +1,3 @@
-
-context("linkedScatterServer")
-
 testServer(
   linkedScatterServer,
   args = list(

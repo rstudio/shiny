@@ -1,5 +1,3 @@
-context("bootstrap")
-
 test_that("CSS unit validation", {
   # On error, return NA; on success, return result
   validateCssUnit_wrap <- function(x) {

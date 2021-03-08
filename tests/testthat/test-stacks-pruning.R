@@ -1,5 +1,3 @@
-context("stack pruning")
-
 capture <- function() {
   list(
     calls = sys.calls(),

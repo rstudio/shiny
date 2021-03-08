@@ -1,4 +1,3 @@
-context("plot-coordmap")
 library(ggplot2)
 
 # Sort a list by the names of its keys

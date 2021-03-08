@@ -1,5 +1,3 @@
-context("exampleModuleServer")
-
 # See ?testServer for more information
 testServer(exampleModuleServer, {
   # Set initial value of a button

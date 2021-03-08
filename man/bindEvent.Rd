@@ -43,6 +43,12 @@ expressions. \code{bindEvent()} can be used with reactive expressions, render
 functions, and observers. The resulting object takes a reactive dependency on
 the \code{...} arguments, and not on the original object's code. This can, for
 example, be used to make an observer execute only when a button is pressed.
+
+\code{bindEvent()} was added in Shiny 1.6.0. When it is used with \code{\link[=reactive]{reactive()}} and
+\code{\link[=observe]{observe()}}, it does the same thing as \code{\link[=eventReactive]{eventReactive()}} and
+\code{\link[=observeEvent]{observeEvent()}}. However, \code{bindEvent()} is more flexible: it can be combined
+with \code{\link[=bindCache]{bindCache()}}, and it can also be used with \code{render} functions (like
+\code{\link[=renderText]{renderText()}} and \code{\link[=renderPlot]{renderPlot()}}).
 }
 \section{Details}{
 
@@ -68,15 +74,16 @@ upstream reactive inputs change), that is an \strong{event}, and it will cause
 the original object's code to execute.
 
 Use \code{bindEvent()} with \code{observe()} whenever you want to \emph{perform an action}
-in response to an event. (Note that "recalculate a value" does not
-generally count as performing an action -- use \code{\link[=reactive]{reactive()}} for that.) The
-first argument is observer whose code should be executed whenever the event
-occurs.
+in response to an event. (This does the same thing as \code{\link[=observeEvent]{observeEvent()}},
+which was available in Shiny prior to version 1.6.0.) Note that
+"recalculate a value" does not generally count as performing an action --
+use \code{\link[=reactive]{reactive()}} for that.
 
-Use \code{bindEvent()} with \code{reactive()} to create a \emph{calculated value} that only
-updates in response to an event. This is just like a normal \link[=reactive]{reactive expression} except it ignores all the usual invalidations that
+Use \code{bindEvent()} with \code{reactive()} to create a \emph{calculated value} that
+only updates in response to an event. This is just like a normal \link[=reactive]{reactive expression} except it ignores all the usual invalidations that
 come from its reactive dependencies; it only invalidates in response to the
-given event.
+given event. (This does the same thing as \code{\link[=eventReactive]{eventReactive()}}, which was
+available in Shiny prior to version 1.6.0.)
 
 \code{bindEvent()} is often used with \code{\link[=bindCache]{bindCache()}}.
 }

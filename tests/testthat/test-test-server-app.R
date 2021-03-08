@@ -1,5 +1,3 @@
-context("testServer app")
-
 library(shiny)
 library(testthat)
 

@@ -63,8 +63,12 @@ the \code{devmode_default} value.  If \code{devmode_message} is missing, the
 registered \code{devmode_message} value be used.}
 
 \item{devmode_default}{Default value to return if \code{in_devmode()} returns
-\code{TRUE}. For \code{get_devmode_option()}, if \code{devmode_default} is missing, the
+\code{TRUE} and the specified option is not set in \code{\link[=options]{options()}}. For
+\code{get_devmode_option()}, if \code{devmode_default} is missing, the
 registered \code{devmode_default} value will be used.}
+
+\item{default}{Default value to return if \code{in_devmode()} returns
+\code{TRUE} and the specified option is not set in \code{\link[=options]{options()}}.}
 }
 \description{
 \lifecycle{experimental}
@@ -72,6 +76,9 @@ registered \code{devmode_default} value will be used.}
 Developer Mode enables a number of \code{\link[=options]{options()}} to make a developer's life
 easier, like enabling non-minified JS and printing messages about
 deprecated functions and options.
+
+Shiny Developer Mode can be enabled by calling \code{devmode(TRUE)} and disabled
+by calling \code{devmode(FALSE)}.
 
 Please see the function descriptions for more details.
 }
@@ -256,4 +263,3 @@ is_minified <- with_devmode(TRUE, {
 is_minified # FALSE
 
 }
-\keyword{internal}

@@ -1,5 +1,3 @@
-context("utils")
-
 test_that("Private randomness works at startup", {
 
   if (exists(".Random.seed", envir = .GlobalEnv))
@@ -113,7 +111,7 @@ test_that("need() works as expected", {
 test_that("req works", {
   expect_error(req(TRUE, FALSE))
   expect_error(req(TRUE, stop("boom")))
-  expect_equivalent(req(1, TRUE), 1)
+  expect_equal(req(1, TRUE), 1)
 
   # req arguments short circuit when a falsy value is found
   value <- 0

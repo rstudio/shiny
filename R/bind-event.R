@@ -8,6 +8,12 @@
 #' the `...` arguments, and not on the original object's code. This can, for
 #' example, be used to make an observer execute only when a button is pressed.
 #'
+#' `bindEvent()` was added in Shiny 1.6.0. When it is used with [reactive()] and
+#' [observe()], it does the same thing as [eventReactive()] and
+#' [observeEvent()]. However, `bindEvent()` is more flexible: it can be combined
+#' with [bindCache()], and it can also be used with `render` functions (like
+#' [renderText()] and [renderPlot()]).
+#'
 #' @section Details:
 #'
 #'   Shiny's reactive programming framework is primarily designed for calculated
@@ -31,16 +37,17 @@
 #'   the original object's code to execute.
 #'
 #'   Use `bindEvent()` with `observe()` whenever you want to *perform an action*
-#'   in response to an event. (Note that "recalculate a value" does not
-#'   generally count as performing an action -- use [reactive()] for that.) The
-#'   first argument is observer whose code should be executed whenever the event
-#'   occurs.
+#'   in response to an event. (This does the same thing as [observeEvent()],
+#'   which was available in Shiny prior to version 1.6.0.) Note that
+#'   "recalculate a value" does not generally count as performing an action --
+#'   use [reactive()] for that.
 #'
-#'   Use `bindEvent()` with `reactive()` to create a *calculated value* that only
-#'   updates in response to an event. This is just like a normal [reactive
+#'   Use `bindEvent()` with `reactive()` to create a *calculated value* that
+#'   only updates in response to an event. This is just like a normal [reactive
 #'   expression][reactive] except it ignores all the usual invalidations that
 #'   come from its reactive dependencies; it only invalidates in response to the
-#'   given event.
+#'   given event. (This does the same thing as [eventReactive()], which was
+#'   available in Shiny prior to version 1.6.0.)
 #'
 #'   `bindEvent()` is often used with [bindCache()].
 #'

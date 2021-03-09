@@ -568,7 +568,7 @@ ReactiveValues <- R6Class(
 #' @seealso [isolate()] and [is.reactivevalues()].
 #' @export
 reactiveValues <- function(...) {
-  args <- list(...)
+  args <- rlang::list2(...)
   if ((length(args) > 0) && (is.null(names(args)) || any(names(args) == "")))
     rlang::abort("All arguments passed to reactiveValues() must be named.")
 
@@ -1915,7 +1915,7 @@ reactivePoll <- function(intervalMillis, session, checkFunc, valueFunc) {
 #' @export
 reactiveFileReader <- function(intervalMillis, session, filePath, readFunc, ...) {
   filePath <- coerceToFunc(filePath)
-  extraArgs <- list(...)
+  extraArgs <- rlang::list2(...)
 
   reactivePoll(
     intervalMillis, session,

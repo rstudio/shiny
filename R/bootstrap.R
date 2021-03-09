@@ -49,7 +49,7 @@ bootstrapPage <- function(..., title = NULL, responsive = deprecated(), theme = 
       tags$head(tags$link(rel="stylesheet", type="text/css", href=theme))
     },
     # remainder of tags passed to the function
-    list(...)
+    rlang::list2(...)
   )
 
   # If theme is a bslib::bs_theme() object, bootstrapLib() needs to come first
@@ -447,7 +447,7 @@ navbarPage <- function(title,
     selected <- restoreInput(id = id, default = selected)
 
   # build the tabset
-  tabs <- list(...)
+  tabs <- rlang::list2(...)
   tabset <- buildTabset(tabs, "nav navbar-nav", NULL, id, selected)
 
   # function to return plain or fluid class name
@@ -511,7 +511,7 @@ navbarPage <- function(title,
 navbarMenu <- function(title, ..., menuName = title, icon = NULL) {
   structure(list(title = title,
                  menuName = menuName,
-                 tabs = list(...),
+                 tabs = rlang::list2(...),
                  iconClass = iconClass(icon)),
             class = "shiny.navbarmenu")
 }
@@ -754,7 +754,7 @@ tabsetPanel <- function(...,
     selected <- restoreInput(id = id, default = selected)
 
   # build the tabset
-  tabs <- list(...)
+  tabs <- rlang::list2(...)
   type <- match.arg(type)
 
   tabset <- buildTabset(tabs, paste0("nav nav-", type), NULL, id, selected)
@@ -825,7 +825,7 @@ navlistPanel <- function(...,
     selected <- restoreInput(id = id, default = selected)
 
   # build the tabset
-  tabs <- list(...)
+  tabs <- rlang::list2(...)
   tabset <- buildTabset(tabs,
                         "nav nav-pills nav-stacked",
                         textFilter,

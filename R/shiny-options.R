@@ -178,7 +178,7 @@ getShinyOption <- function(name, default = NULL) {
 #' @aliases shiny-options
 #' @export
 shinyOptions <- function(...) {
-  newOpts <- list(...)
+  newOpts <- rlang::list2(...)
 
   if (length(newOpts) > 0) {
     # If we're within a session, modify at the session level.

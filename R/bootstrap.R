@@ -163,6 +163,15 @@ getCurrentTheme <- function() {
   getShinyOption("bootstrapTheme", default = NULL)
 }
 
+getCurrentVersion <- function() {
+  theme <- getCurrentTheme()
+  if (bslib::is_bs_theme(theme)) {
+    bslib::theme_version(theme)
+  } else {
+    strsplit(bootstrapVersion, ".", fixed = TRUE)[[1]][[1]]
+  }
+}
+
 setCurrentTheme <- function(theme) {
   shinyOptions(bootstrapTheme = theme)
 }
@@ -756,6 +765,7 @@ tabsetPanel <- function(...,
                         type = c("tabs", "pills", "hidden"),
                         header = NULL,
                         footer = NULL,
+                        card = FALSE,
                         position = deprecated()) {
   if (lifecycle::is_present(position)) {
     shinyDeprecated(
@@ -770,15 +780,36 @@ tabsetPanel <- function(...,
   type <- match.arg(type)
   tabset <- buildTabset(..., ulClass = paste0("nav nav-", type), id = id, selected = selected)
 
-  tags$div(
-    class = "tabbable",
-    !!!dropNulls(list(
-      tabset$navList,
-      header,
-      tabset$content,
-      footer
-    ))
-  )
+  nav <- tabset$navList
+  if (card) {
+    nav <- tags$div(
+      class = "card-header",
+      tagAppendAttributes(
+        nav, class = paste0("card-header-", type)
+      ),
+      tagFunction(function() {
+        if (getCurrentVersion() >= 4) {
+          return(NULL)
+        }
+        warning(
+          "`tabsetPanel(card = TRUE)` requires Bootstrap 4 or higher, ",
+          "so the app has been upgraded from Bootstrap 3 to 4. ",
+          "To remove this warning, either supply `theme = bslib::bs_theme()` ",
+          "to the app's page layout or set `card = FALSE`.",
+          call. = FALSE
+        )
+        bootstrapLib(bslib::bs_theme(version = 4))
+      })
+    )
+  }
+
+  tabs <- tags$div(class = "tabbable", class = if (card) "card", nav)
+  content <- dropNulls(list(header, tabset$content, footer))
+  if (card) {
+    tagAppendChild(tabs, tags$div(class = "card-body", !!!content))
+  } else {
+    tagAppendChildren(tabs, content)
+  }
 }
 
 #' Create a navigation list panel
@@ -1015,7 +1046,7 @@ buildNavItem <- function(divTag, tabsetId, index) {
   list(
     divTag = divTag,
     liTag = tagFunction(function() {
-      navItem <- if (isBS3()) bs3NavItem else bs4NavItem
+      navItem <- if ("3" %in% getCurrentVersion()) bs3NavItem else bs4NavItem
       navItem(id, title, value, icon, active)
     })
   )
@@ -1030,7 +1061,7 @@ buildDropdown <- function(divTag, tabset) {
     # list of tab content divs from the child tabset
     divTag = tabset$content$children,
     liTag = tagFunction(function() {
-      if (isBS3()) {
+      if ("3" %in% getCurrentVersion()) {
         bs3NavItemDropdown(title, value, icon, active, tabset$navList)
       } else {
         # In BS4, dropdown nav anchors can't be wrapped in a <li> tag
@@ -1054,14 +1085,6 @@ buildDropdown <- function(divTag, tabset) {
   )
 }
 
-# The relevant Bootstrap major version -- purely for use inside
-# a tagFunction() context (i.e., executed at print-time)
-isBS3 <- function() {
-  theme <- getCurrentTheme()
-  version <- bslib::theme_version(theme) %||%
-    strsplit(bootstrapVersion, ".", fixed = TRUE)[[1]][[1]]
-  "3" %in% version
-}
 
 bs3NavItemDropdown <- function(title, value, icon, active, items) {
   tags$li(

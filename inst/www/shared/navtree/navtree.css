@@ -1,11 +1,5 @@
-@media (min-width: 992px) {
-  .nav-navtree {
-    position: sticky;
-    top: 5rem;
-    display: block !important;
-    height: calc(100vh - 7rem);
-    overflow-y: auto;
-  }
+.nav-navtree {
+  display: block !important;
 }
 
 .nav-navtree li.active, .nav-navtree li > a.active, .nav-navtree li a:focus {

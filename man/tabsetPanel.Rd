@@ -35,9 +35,6 @@ active tab via other input controls. (See example below)}
 \item{position}{This argument is deprecated; it has been discontinued in
 Bootstrap 3.}
 }
-\value{
-A tabset that can be passed to \code{\link[=mainPanel]{mainPanel()}}
-}
 \description{
 Create a tabset that contains \code{\link[=tabPanel]{tabPanel()}} elements. Tabsets are
 useful for dividing output into multiple independently viewable sections.

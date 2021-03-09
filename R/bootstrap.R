@@ -342,20 +342,13 @@ collapseSizes <- function(padding) {
 #' Create a page with a top level navigation bar
 #'
 #' Create a page that contains a top level navigation bar that can be used to
-#' toggle a set of [tabPanel()] elements.
+#' toggle a set of [tabPanel()] elements. `navbarMenu()` can be used to create
+#' an embedded menu within the navbar that in turns includes additional
+#' `tabPanels`.
 #'
+#' @inheritParams navlistPanel
+#' @inheritParams bootstrapPage
 #' @param title The title to display in the navbar
-#' @param ... [tabPanel()] elements to include in the page. The
-#'   `navbarMenu` function also accepts strings, which will be used as menu
-#'   section headers. If the string is a set of dashes like `"----"` a
-#'   horizontal separator will be displayed in the menu.
-#' @param id If provided, you can use `input$`*`id`* in your
-#'   server logic to determine which of the current tabs is active. The value
-#'   will correspond to the `value` argument that is passed to
-#'   [tabPanel()].
-#' @param selected The `value` (or, if none was supplied, the `title`)
-#'   of the tab that should be selected by default. If `NULL`, the first
-#'   tab will be selected.
 #' @param position Determines whether the navbar should be displayed at the top
 #'   of the page with normal scrolling behavior (`"static-top"`), pinned at
 #'   the top (`"fixed-top"`), or pinned at the bottom
@@ -373,26 +366,13 @@ collapseSizes <- function(padding) {
 #'   elements into a menu when the width of the browser is less than 940 pixels
 #'   (useful for viewing on smaller touchscreen device)
 #' @param collapsable Deprecated; use `collapsible` instead.
-#' @param fluid `TRUE` to use a fluid layout. `FALSE` to use a fixed
-#'   layout.
-#' @param responsive This option is deprecated; it is no longer optional with
-#'   Bootstrap 3.
 #' @param windowTitle The title that should be displayed by the browser window.
 #'   Useful if `title` is not a string.
-#' @inheritParams bootstrapPage
 #' @param icon Optional icon to appear on a `navbarMenu` tab.
 #'
-#' @return A UI defintion that can be passed to the [shinyUI] function.
-#'
-#' @details The `navbarMenu` function can be used to create an embedded
-#'   menu within the navbar that in turns includes additional tabPanels (see
-#'   example below).
-#'
-#' @seealso [tabPanel()], [tabsetPanel()],
-#'   [updateNavbarPage()], [insertTab()],
-#'   [showTab()]
-#'
+#' @seealso [updateNavbarPage()], [insertTab()], [showTab()]
 #' @family layout functions
+#' @family tab layouts
 #'
 #' @examples
 #' navbarPage("App Title",
@@ -623,6 +603,10 @@ helpText <- function(...) {
 
 #' Create a tab panel
 #'
+#' `tabPanel()` creates a tab panel that can be included within a
+#' [tabsetPanel()], [navListPanel()], or [navbarPage()]. `tabPanelBody()`
+#' drops the `title`, making it most suitable for use within
+#' `tabsetPanel(type = "hidden")`.
 #'
 #' @param title Display title for tab
 #' @param ... UI elements to include within the tab
@@ -631,9 +615,8 @@ helpText <- function(...) {
 #'   `id`, then the title will be used.
 #' @param icon Optional icon to appear on the tab. This attribute is only
 #' valid when using a `tabPanel` within a [navbarPage()].
-#' @return A tab that can be passed to [tabsetPanel()]
 #'
-#' @seealso [tabsetPanel()]
+#' @family tab layouts
 #'
 #' @examples
 #' # Show a tabset that includes a plot, summary, and
@@ -646,7 +629,6 @@ helpText <- function(...) {
 #'   )
 #' )
 #' @export
-#' @describeIn tabPanel Create a tab panel that can be included within a [tabsetPanel()] or a [navbarPage()].
 tabPanel <- function(title, ..., value = title, icon = NULL) {
   div(
     class = "tab-pane",
@@ -657,8 +639,7 @@ tabPanel <- function(title, ..., value = title, icon = NULL) {
   )
 }
 #' @export
-#' @describeIn tabPanel Create a tab panel that drops the title argument.
-#'   This function should be used within `tabsetPanel(type = "hidden")`. See [tabsetPanel()] for example usage.
+#' @rdname tabPanel
 tabPanelBody <- function(value, ..., icon = NULL) {
   if (
     !is.character(value) ||
@@ -693,10 +674,8 @@ tabPanelBody <- function(value, ..., icon = NULL) {
 #' }
 #' @param position This argument is deprecated; it has been discontinued in
 #'   Bootstrap 3.
-#' @return A tabset that can be passed to [mainPanel()]
-#'
-#' @seealso [tabPanel()], [updateTabsetPanel()],
-#'   [insertTab()], [showTab()]
+#' @seealso [updateTabsetPanel()], [insertTab()], [showTab()]
+#' @family tab layouts
 #'
 #' @examples
 #' # Show a tabset that includes a plot, summary, and
@@ -772,29 +751,20 @@ tabsetPanel <- function(...,
 #' Create a navigation list panel that provides a list of links on the left
 #' which navigate to a set of tabPanels displayed to the right.
 #'
-#' @param ... [tabPanel()] elements to include in the navlist
-#' @param id If provided, you can use `input$`*`id`* in your
-#'   server logic to determine which of the current navlist items is active. The
-#'   value will correspond to the `value` argument that is passed to
-#'   [tabPanel()].
-#' @param selected The `value` (or, if none was supplied, the `title`)
-#'   of the navigation item that should be selected by default. If `NULL`,
-#'   the first navigation will be selected.
+#' @inheritParams tabsetPanel
+#' @param ... [tabPanel()] elements to include in the navbar.
+#'   Plain strings will be converted to headers.
 #' @param well `TRUE` to place a well (gray rounded rectangle) around the
 #'   navigation list.
 #' @param fluid `TRUE` to use fluid layout; `FALSE` to use fixed
 #'   layout.
-#' @param widths Column withs of the navigation list and tabset content areas
+#' @param widths Column widths of the navigation list and tabset content areas
 #'   respectively.
 #'
-#' @details You can include headers within the `navlistPanel` by including
-#'   plain text elements in the list. Versions of Shiny before 0.11 supported
-#'   separators with "------", but as of 0.11, separators were no longer
-#'   supported. This is because version 0.11 switched to Bootstrap 3, which
-#'   doesn't support separators.
+#' @details
 #'
-#' @seealso [tabPanel()], [updateNavlistPanel()],
-#'    [insertTab()], [showTab()]
+#' @seealso [updateTabsetPanel()], [insertTab()], [showTab()]
+#' @family tab layouts
 #'
 #' @examples
 #' fluidPage(

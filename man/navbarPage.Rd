@@ -28,10 +28,8 @@ navbarMenu(title, ..., menuName = title, icon = NULL)
 \arguments{
 \item{title}{The title to display in the navbar}
 
-\item{...}{\code{\link[=tabPanel]{tabPanel()}} elements to include in the page. The
-\code{navbarMenu} function also accepts strings, which will be used as menu
-section headers. If the string is a set of dashes like \code{"----"} a
-horizontal separator will be displayed in the menu.}
+\item{...}{\code{\link[=tabPanel]{tabPanel()}} elements to include in the navbar.
+Plain strings will be converted to headers.}
 
 \item{id}{If provided, you can use \verb{input$}\emph{\code{id}} in your
 server logic to determine which of the current tabs is active. The value
@@ -65,7 +63,7 @@ elements into a menu when the width of the browser is less than 940 pixels
 
 \item{collapsable}{Deprecated; use \code{collapsible} instead.}
 
-\item{fluid}{\code{TRUE} to use a fluid layout. \code{FALSE} to use a fixed
+\item{fluid}{\code{TRUE} to use fluid layout; \code{FALSE} to use fixed
 layout.}
 
 \item{responsive}{This option is deprecated; it is no longer optional with
@@ -93,17 +91,11 @@ is needed if you want to insert/remove or show/hide an entire
 
 \item{icon}{Optional icon to appear on a \code{navbarMenu} tab.}
 }
-\value{
-A UI defintion that can be passed to the \link{shinyUI} function.
-}
 \description{
 Create a page that contains a top level navigation bar that can be used to
-toggle a set of \code{\link[=tabPanel]{tabPanel()}} elements.
-}
-\details{
-The \code{navbarMenu} function can be used to create an embedded
-menu within the navbar that in turns includes additional tabPanels (see
-example below).
+toggle a set of \code{\link[=tabPanel]{tabPanel()}} elements. \code{navbarMenu()} can be used to create
+an embedded menu within the navbar that in turns includes additional
+\code{tabPanels}.
 }
 \examples{
 navbarPage("App Title",
@@ -123,9 +115,7 @@ navbarPage("App Title",
 )
 }
 \seealso{
-\code{\link[=tabPanel]{tabPanel()}}, \code{\link[=tabsetPanel]{tabsetPanel()}},
-\code{\link[=updateNavbarPage]{updateNavbarPage()}}, \code{\link[=insertTab]{insertTab()}},
-\code{\link[=showTab]{showTab()}}
+\code{\link[=updateNavbarPage]{updateNavbarPage()}}, \code{\link[=insertTab]{insertTab()}}, \code{\link[=showTab]{showTab()}}
 
 Other layout functions: 
 \code{\link{fillPage}()},
@@ -135,5 +125,11 @@ Other layout functions:
 \code{\link{sidebarLayout}()},
 \code{\link{splitLayout}()},
 \code{\link{verticalLayout}()}
+
+Other tab layouts: 
+\code{\link{navlistPanel}()},
+\code{\link{tabPanel}()},
+\code{\link{tabsetPanel}()}
 }
 \concept{layout functions}
+\concept{tab layouts}

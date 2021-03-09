@@ -14,16 +14,17 @@ navlistPanel(
 )
 }
 \arguments{
-\item{...}{\code{\link[=tabPanel]{tabPanel()}} elements to include in the navlist}
+\item{...}{\code{\link[=tabPanel]{tabPanel()}} elements to include in the navbar.
+Plain strings will be converted to headers.}
 
 \item{id}{If provided, you can use \verb{input$}\emph{\code{id}} in your
-server logic to determine which of the current navlist items is active. The
-value will correspond to the \code{value} argument that is passed to
+server logic to determine which of the current tabs is active. The value
+will correspond to the \code{value} argument that is passed to
 \code{\link[=tabPanel]{tabPanel()}}.}
 
 \item{selected}{The \code{value} (or, if none was supplied, the \code{title})
-of the navigation item that should be selected by default. If \code{NULL},
-the first navigation will be selected.}
+of the tab that should be selected by default. If \code{NULL}, the first
+tab will be selected.}
 
 \item{well}{\code{TRUE} to place a well (gray rounded rectangle) around the
 navigation list.}
@@ -31,7 +32,7 @@ navigation list.}
 \item{fluid}{\code{TRUE} to use fluid layout; \code{FALSE} to use fixed
 layout.}
 
-\item{widths}{Column withs of the navigation list and tabset content areas
+\item{widths}{Column widths of the navigation list and tabset content areas
 respectively.}
 }
 \description{
@@ -39,11 +40,7 @@ Create a navigation list panel that provides a list of links on the left
 which navigate to a set of tabPanels displayed to the right.
 }
 \details{
-You can include headers within the \code{navlistPanel} by including
-plain text elements in the list. Versions of Shiny before 0.11 supported
-separators with "------", but as of 0.11, separators were no longer
-supported. This is because version 0.11 switched to Bootstrap 3, which
-doesn't support separators.
+
 }
 \examples{
 fluidPage(
@@ -59,6 +56,11 @@ fluidPage(
 )
 }
 \seealso{
-\code{\link[=tabPanel]{tabPanel()}}, \code{\link[=updateNavlistPanel]{updateNavlistPanel()}},
-\code{\link[=insertTab]{insertTab()}}, \code{\link[=showTab]{showTab()}}
+\code{\link[=updateTabsetPanel]{updateTabsetPanel()}}, \code{\link[=insertTab]{insertTab()}}, \code{\link[=showTab]{showTab()}}
+
+Other tab layouts: 
+\code{\link{navbarPage}()},
+\code{\link{tabPanel}()},
+\code{\link{tabsetPanel}()}
 }
+\concept{tab layouts}

@@ -22,15 +22,11 @@ that this tab is selected. If omitted and \code{tabsetPanel} has an
 valid when using a \code{tabPanel} within a \code{\link[=navbarPage]{navbarPage()}}.}
 }
 \description{
-Create a tab panel that can be included within a \code{\link[=tabsetPanel]{tabsetPanel()}},
-\code{\link[=navListPanel]{navListPanel()}}, or \code{\link[=navbarPage]{navbarPage()}}.
+\code{tabPanel()} creates a tab panel that can be included within a
+\code{\link[=tabsetPanel]{tabsetPanel()}}, \code{\link[=navListPanel]{navListPanel()}}, or \code{\link[=navbarPage]{navbarPage()}}. \code{tabPanelBody()}
+drops the \code{title}, making it most suitable for use within
+\code{tabsetPanel(type = "hidden")}.
 }
-\section{Functions}{
-\itemize{
-\item \code{tabPanelBody}: Create a tab panel that drops the title argument.
-This function should be used within \code{tabsetPanel(type = "hidden")}. See \code{\link[=tabsetPanel]{tabsetPanel()}} for example usage.
-}}
-
 \examples{
 # Show a tabset that includes a plot, summary, and
 # table view of the generated distribution

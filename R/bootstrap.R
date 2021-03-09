@@ -621,8 +621,10 @@ helpText <- function(...) {
 
 #' Create a tab panel
 #'
-#' Create a tab panel that can be included within a [tabsetPanel()],
-#' [navListPanel()], or [navbarPage()].
+#' `tabPanel()` creates a tab panel that can be included within a
+#' [tabsetPanel()], [navListPanel()], or [navbarPage()]. `tabPanelBody()`
+#' drops the `title`, making it most suitable for use within
+#' `tabsetPanel(type = "hidden")`.
 #'
 #' @param title Display title for tab
 #' @param ... UI elements to include within the tab
@@ -655,8 +657,7 @@ tabPanel <- function(title, ..., value = title, icon = NULL) {
   )
 }
 #' @export
-#' @describeIn tabPanel Create a tab panel that drops the title argument.
-#'   This function should be used within `tabsetPanel(type = "hidden")`. See [tabsetPanel()] for example usage.
+#' @rdname tabPanel
 tabPanelBody <- function(value, ..., icon = NULL) {
   if (
     !is.character(value) ||

@@ -67,7 +67,7 @@ buildTreeItem <- function(index, tabsetId, foundSelected, tabs = NULL, divTag = 
 
   subMenuPadding <- if (depth > 0) css(padding_left = paste0(depth * 1.25, "rem"))
 
-  if (isTabPanelMenu(divTag)) {
+  if (isNavbarMenu(divTag)) {
     icon <- getIcon(iconClass = divTag$iconClass)
     if (!is.null(icon)) {
       warning("Configurable icons are not yet supported in navtreePanel().")

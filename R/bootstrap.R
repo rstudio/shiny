@@ -516,13 +516,7 @@ navbarMenu <- function(title, ..., menuName = title, icon = NULL) {
             class = "shiny.navbarmenu")
 }
 
-#' @rdname tabPanel
-#' @export
-tabPanelMenu <- function(title, ..., menuName = title, icon = NULL) {
-  navbarMenu(title = title, ..., menuName = menuName, icon = icon)
-}
-
-isTabPanelMenu <- function(x) {
+isNavbarMenu <- function(x) {
   inherits(x, "shiny.navbarmenu")
 }
 
@@ -879,7 +873,7 @@ findAndMarkSelectedTab <- function(tabs, selected, foundSelected) {
     if (foundSelected || is.character(x)) {
       # Strings are not selectable items
 
-    } else if (isTabPanelMenu(x)) {
+    } else if (isNavbarMenu(x)) {
       # Recur for navbarMenus
       res <- findAndMarkSelectedTab(x$tabs, selected, foundSelected)
       x$tabs <- res$tabs
@@ -972,7 +966,7 @@ buildTabItem <- function(index, tabsetId, foundSelected, tabs = NULL,
     return(list(liTag = textFilter(divTag), divTag = NULL))
   }
 
-  if (isTabPanelMenu(divTag)) {
+  if (isNavbarMenu(divTag)) {
     # tabPanelMenu item: build the child tabset
     tabset <- buildTabset(
       !!!divTag$tabs, ulClass = "dropdown-menu",

@@ -23,6 +23,7 @@ $.extend(bootstrapTabInputBinding, {
       anchors.each(function() {
         if (self._getTabName($(this)) === value) {
           $(this).tab('show');
+          $(this).parents(".collapse").collapse('show');
           success = true;
           return false; // Break out of each()
         }
@@ -44,7 +45,9 @@ $.extend(bootstrapTabInputBinding, {
     $(el).trigger("change");
   },
   subscribe: function(el, callback) {
+    var deactivateOtherTabs = this._deactivateOtherTabs;
     $(el).on('change shown.bootstrapTabInputBinding shown.bs.tab.bootstrapTabInputBinding', function(event) {
+      deactivateOtherTabs(event);
       callback();
     });
   },
@@ -53,6 +56,16 @@ $.extend(bootstrapTabInputBinding, {
   },
   _getTabName: function(anchor) {
     return anchor.attr('data-value') || anchor.text();
+  },
+  // nav-navtree is built on a combination of Bootstrap's tab &
+  // collapse components, but the tab component isn't smart enough to
+  // know about the deactive when are activated. Note that this logic is
+  // very similar to shinydashboard's deactivateOtherTabs() (in tab.js)
+  _deactivateOtherTabs: function(event) {
+    var tgt = $(event.target);
+    var nav =  tgt.parents(".nav-navtree");
+    nav.find("li").not(tgt).removeClass("active"); // BS3
+    nav.find("li > a").not(tgt).removeClass("active"); // BS4
   }
 });
 inputBindings.register(bootstrapTabInputBinding, 'shiny.bootstrapTabInput');

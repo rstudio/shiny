@@ -1660,7 +1660,30 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         // a script tag.
 
         exports.renderContent(el, el.innerHTML || el.textContent);
-      });
+      }); // If we're inserting a navbarMenu() into a navtreePanel() target, we need
+      // to transform buildTabset() output (i.e., a .dropdown component) to
+      // buildTreePanel() output (i.e., a .collapse component), because
+      // insertTab() et al. doesn't know about the relevant tabset container
+
+      if ($tabset.hasClass("nav-navtree") && $liTag.hasClass("dropdown")) {
+        var collapseId = "collapse-" + tabsetId + "-" + index; // TODO: index is undefined?
+
+        $tabset.find(".dropdown").each(function (i, el) {
+          var $el = $(el).removeClass("dropdown nav-item");
+          $el.find(".dropdown-toggle").removeClass("dropdown-toggle nav-link").addClass(message.select ? "" : "collapsed").attr("data-toggle", "collapse").attr("data-target", "#" + collapseId);
+          var collapse = $("<div>").addClass("collapse" + (message.select ? " show" : "")).attr("id", collapseId);
+          var menu = $el.find(".dropdown-menu").removeClass("dropdown-menu").addClass("nav nav-navtree").wrap(collapse);
+          var depth = $el.parents(".nav-navtree").length - 1;
+
+          if (depth > 0) {
+            $el.find("a").css("padding-left", depth + "rem");
+          }
+
+          if (menu.find("li").length === 0) {
+            menu.find("a").removeClass("dropdown-item").addClass("nav-link").wrap("<li class='nav-item'></li>");
+          }
+        });
+      }
 
       if (message.select) {
         $liTag.find("a").tab("show");
@@ -5692,7 +5715,6 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       return $(scope).find('ul.nav.shiny-tab-input');
     },
     getValue: function getValue(el) {
-      debugger;
       var anchor = isBS3() ? $(el).find('li:not(.dropdown).active > a') : $(el).find('.nav-link:not(.dropdown-toggle).active, .dropdown-menu > .dropdown-item.active');
       if (anchor.length === 1) return this._getTabName(anchor);
       return null;
@@ -5706,6 +5728,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         anchors.each(function () {
           if (self._getTabName($(this)) === value) {
             $(this).tab('show');
+            $(this).parents(".collapse").collapse('show');
             success = true;
             return false; // Break out of each()
           }
@@ -5730,7 +5753,9 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       $(el).trigger("change");
     },
     subscribe: function subscribe(el, callback) {
+      var deactivateOtherTabs = this._deactivateOtherTabs;
       $(el).on('change shown.bootstrapTabInputBinding shown.bs.tab.bootstrapTabInputBinding', function (event) {
+        deactivateOtherTabs(event);
         callback();
       });
     },
@@ -5739,6 +5764,17 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     },
     _getTabName: function _getTabName(anchor) {
       return anchor.attr('data-value') || anchor.text();
+    },
+    // nav-navtree is built on a combination of Bootstrap's tab &
+    // collapse components, but the tab component isn't smart enough to
+    // know about the deactive when are activated. Note that this logic is
+    // very similar to shinydashboard's deactivateOtherTabs() (in tab.js)
+    _deactivateOtherTabs: function _deactivateOtherTabs(event) {
+      var tgt = $(event.target);
+      var nav = tgt.parents(".nav-navtree");
+      nav.find("li").not(tgt).removeClass("active"); // BS3
+
+      nav.find("li > a").not(tgt).removeClass("active"); // BS4
     }
   });
   inputBindings.register(bootstrapTabInputBinding, 'shiny.bootstrapTabInput'); //---------------------------------------------------------------------

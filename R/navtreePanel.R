@@ -2,6 +2,7 @@
 navtreePanel <- function(..., id = NULL,
                           selected = NULL,
                           fluid = TRUE,
+                         # Also allow for string to determine padding in a flex layout?
                           widths = c(3, 9)) {
   # TODO: how to incorporate this into a sidebar layout?
 
@@ -12,9 +13,6 @@ navtreePanel <- function(..., id = NULL,
 
   row <- if (fluid) fluidRow else fixedRow
 
-  # TODO:
-  # 1. consider using flexbox instead for layout
-  # 2. how to integrate with a sidebar?
   row(
     class = "navtree-container",
     column(widths[[1]], tabset$navList),
@@ -70,7 +68,6 @@ buildTreeItem <- function(index, tabsetId, foundSelected, tabs = NULL, divTag = 
   subMenuPadding <- if (depth > 0) css(padding_left = paste0(depth * 1.25, "rem"))
 
   if (isTabPanelMenu(divTag)) {
-    # TODO: allow the collapse icon to be configured?
     icon <- getIcon(iconClass = divTag$iconClass)
     if (!is.null(icon)) {
       warning("Configurable icons are not yet supported in navtreePanel().")
@@ -135,9 +132,12 @@ navtreeCssDependency <- function(theme) {
   name <- "navtreePanel"
   version <- packageVersion("shiny")
   if (!is_bs_theme(theme)) {
+    # TODO: Should we allow navtreePanel() to be statically rendered?
+    # Can/should we move away from href="shared/*"?
     htmlDependency(
       name = name, version = version,
-      src = c(href = "shared/navtree"),
+      src = c(href = "shared/navtree", file = "www/shared/navtree"),
+      package = "shiny",
       stylesheet = "navtree.css",
       script = "navtree.js"
     )

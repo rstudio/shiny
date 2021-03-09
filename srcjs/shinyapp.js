@@ -870,6 +870,44 @@ var ShinyApp = function() {
       exports.renderContent(el, el.innerHTML || el.textContent);
     });
 
+    // If we're inserting a navbarMenu() into a navtreePanel() target, we need
+    // to transform buildTabset() output (i.e., a .dropdown component) to
+    // buildTreePanel() output (i.e., a .collapse component), because
+    // insertTab() et al. doesn't know about the relevant tabset container
+    if ($tabset.hasClass("nav-navtree") && $liTag.hasClass("dropdown")) {
+      var collapseId = "collapse-" + tabsetId + "-" + index; // TODO: index is undefined?
+      $tabset.find(".dropdown").each(function(i, el) {
+        var $el = $(el).removeClass("dropdown nav-item");
+
+        $el.find(".dropdown-toggle")
+          .removeClass("dropdown-toggle nav-link")
+          .addClass(message.select ? "" : "collapsed")
+          .attr("data-toggle", "collapse")
+          .attr("data-target", "#" + collapseId);
+
+        var collapse = $("<div>")
+          .addClass("collapse" + (message.select ? " show" : ""))
+          .attr("id", collapseId);
+
+        var menu = $el.find(".dropdown-menu")
+          .removeClass("dropdown-menu")
+          .addClass("nav nav-navtree")
+          .wrap(collapse);
+
+        var depth = $el.parents(".nav-navtree").length - 1;
+        if (depth > 0) {
+          $el.find("a").css("padding-left", depth + "rem");
+        }
+
+        if (menu.find("li").length === 0) {
+          menu.find("a")
+            .removeClass("dropdown-item")
+            .addClass("nav-link")
+            .wrap("<li class='nav-item'></li>");
+        }
+      });
+    }
+
     if (message.select) {
       $liTag.find("a").tab("show");
     }

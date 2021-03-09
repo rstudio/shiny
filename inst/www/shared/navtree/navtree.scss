@@ -10,21 +10,14 @@ $link-hover-decoration: underline !default;
 $sidebar-collapse-icon-color: rgba($body-color, 0.5) !default;
 $sidebar-collapse-icon: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'><path fill='none' stroke='#{$sidebar-collapse-icon-color}' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M5 14l6-6-6-6'/></svg>") !default;
 
+// TODO: make this more configurable from the R side?
 $navtree-anchor-color: rgba($body-color, .65) !default;
 $navtree-active-bg: rgba($component-active-bg, .3) !default;
 $navtree-active-color: rgba($body-color, .85) !default;
 
 .nav-navtree {
-
-  // TODO: integrate layout with a larger sidebar layout container?
-  @include media-breakpoint-up(lg) {
-    position: sticky;
-    top: 5rem;
-    // Override collapse behaviors
-    display: block !important;
-    height: subtract(100vh, 7rem);
-    overflow-y: auto;
-  }
+  // Override collapse behaviors
+  display: block !important;
 
   li {
     // Handle both li.active (BS3) and li > a.active (BS4)

@@ -21,16 +21,12 @@ that this tab is selected. If omitted and \code{tabsetPanel} has an
 \item{icon}{Optional icon to appear on the tab. This attribute is only
 valid when using a \code{tabPanel} within a \code{\link[=navbarPage]{navbarPage()}}.}
 }
-\value{
-A tab that can be passed to \code{\link[=tabsetPanel]{tabsetPanel()}}
-}
 \description{
-Create a tab panel
+Create a tab panel that can be included within a \code{\link[=tabsetPanel]{tabsetPanel()}},
+\code{\link[=navListPanel]{navListPanel()}}, or \code{\link[=navbarPage]{navbarPage()}}.
 }
 \section{Functions}{
 \itemize{
-\item \code{tabPanel}: Create a tab panel that can be included within a \code{\link[=tabsetPanel]{tabsetPanel()}} or a \code{\link[=navbarPage]{navbarPage()}}.
-
 \item \code{tabPanelBody}: Create a tab panel that drops the title argument.
 This function should be used within \code{tabsetPanel(type = "hidden")}. See \code{\link[=tabsetPanel]{tabsetPanel()}} for example usage.
 }}
@@ -47,5 +43,9 @@ mainPanel(
 )
 }
 \seealso{
-\code{\link[=tabsetPanel]{tabsetPanel()}}
+Other tab layouts: 
+\code{\link{navbarPage}()},
+\code{\link{navlistPanel}()},
+\code{\link{tabsetPanel}()}
 }
+\concept{tab layouts}

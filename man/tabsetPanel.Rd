@@ -83,6 +83,11 @@ if (interactive()) {
 }
 }
 \seealso{
-\code{\link[=tabPanel]{tabPanel()}}, \code{\link[=updateTabsetPanel]{updateTabsetPanel()}},
-\code{\link[=insertTab]{insertTab()}}, \code{\link[=showTab]{showTab()}}
+\code{\link[=updateTabsetPanel]{updateTabsetPanel()}}, \code{\link[=insertTab]{insertTab()}}, \code{\link[=showTab]{showTab()}}
+
+Other tab layouts: 
+\code{\link{navbarPage}()},
+\code{\link{navlistPanel}()},
+\code{\link{tabPanel}()}
 }
+\concept{tab layouts}

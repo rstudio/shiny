@@ -388,11 +388,9 @@ collapseSizes <- function(padding) {
 #'   menu within the navbar that in turns includes additional tabPanels (see
 #'   example below).
 #'
-#' @seealso [tabPanel()], [tabsetPanel()],
-#'   [updateNavbarPage()], [insertTab()],
-#'   [showTab()]
-#'
+#' @seealso [updateNavbarPage()], [insertTab()], [showTab()]
 #' @family layout functions
+#' @family tab layouts
 #'
 #' @examples
 #' navbarPage("App Title",
@@ -623,6 +621,8 @@ helpText <- function(...) {
 
 #' Create a tab panel
 #'
+#' Create a tab panel that can be included within a [tabsetPanel()],
+#' [navListPanel()], or [navbarPage()].
 #'
 #' @param title Display title for tab
 #' @param ... UI elements to include within the tab
@@ -631,9 +631,8 @@ helpText <- function(...) {
 #'   `id`, then the title will be used.
 #' @param icon Optional icon to appear on the tab. This attribute is only
 #' valid when using a `tabPanel` within a [navbarPage()].
-#' @return A tab that can be passed to [tabsetPanel()]
 #'
-#' @seealso [tabsetPanel()]
+#' @family tab layouts
 #'
 #' @examples
 #' # Show a tabset that includes a plot, summary, and
@@ -646,7 +645,6 @@ helpText <- function(...) {
 #'   )
 #' )
 #' @export
-#' @describeIn tabPanel Create a tab panel that can be included within a [tabsetPanel()] or a [navbarPage()].
 tabPanel <- function(title, ..., value = title, icon = NULL) {
   div(
     class = "tab-pane",
@@ -695,8 +693,8 @@ tabPanelBody <- function(value, ..., icon = NULL) {
 #'   Bootstrap 3.
 #' @return A tabset that can be passed to [mainPanel()]
 #'
-#' @seealso [tabPanel()], [updateTabsetPanel()],
-#'   [insertTab()], [showTab()]
+#' @seealso [updateTabsetPanel()], [insertTab()], [showTab()]
+#' @family tab layouts
 #'
 #' @examples
 #' # Show a tabset that includes a plot, summary, and
@@ -793,8 +791,8 @@ tabsetPanel <- function(...,
 #'   supported. This is because version 0.11 switched to Bootstrap 3, which
 #'   doesn't support separators.
 #'
-#' @seealso [tabPanel()], [updateNavlistPanel()],
-#'    [insertTab()], [showTab()]
+#' @seealso [updateTabsetPanel()], [insertTab()], [showTab()]
+#' @family tab layouts
 #'
 #' @examples
 #' fluidPage(

@@ -123,9 +123,7 @@ navbarPage("App Title",
 )
 }
 \seealso{
-\code{\link[=tabPanel]{tabPanel()}}, \code{\link[=tabsetPanel]{tabsetPanel()}},
-\code{\link[=updateNavbarPage]{updateNavbarPage()}}, \code{\link[=insertTab]{insertTab()}},
-\code{\link[=showTab]{showTab()}}
+\code{\link[=updateNavbarPage]{updateNavbarPage()}}, \code{\link[=insertTab]{insertTab()}}, \code{\link[=showTab]{showTab()}}
 
 Other layout functions: 
 \code{\link{fillPage}()},
@@ -135,5 +133,11 @@ Other layout functions:
 \code{\link{sidebarLayout}()},
 \code{\link{splitLayout}()},
 \code{\link{verticalLayout}()}
+
+Other tab layouts: 
+\code{\link{navlistPanel}()},
+\code{\link{tabPanel}()},
+\code{\link{tabsetPanel}()}
 }
 \concept{layout functions}
+\concept{tab layouts}

@@ -59,6 +59,11 @@ fluidPage(
 )
 }
 \seealso{
-\code{\link[=tabPanel]{tabPanel()}}, \code{\link[=updateNavlistPanel]{updateNavlistPanel()}},
-\code{\link[=insertTab]{insertTab()}}, \code{\link[=showTab]{showTab()}}
+\code{\link[=updateTabsetPanel]{updateTabsetPanel()}}, \code{\link[=insertTab]{insertTab()}}, \code{\link[=showTab]{showTab()}}
+
+Other tab layouts: 
+\code{\link{navbarPage}()},
+\code{\link{tabPanel}()},
+\code{\link{tabsetPanel}()}
 }
+\concept{tab layouts}

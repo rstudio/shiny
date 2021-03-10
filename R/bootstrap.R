@@ -433,6 +433,7 @@ navbarPage <- function(title,
                        position = c("static-top", "fixed-top", "fixed-bottom"),
                        header = NULL,
                        footer = NULL,
+                       right = NULL,
                        inverse = FALSE,
                        collapsible = FALSE,
                        collapsable = deprecated(),
@@ -462,8 +463,40 @@ navbarPage <- function(title,
   if (!is.null(id))
     selected <- restoreInput(id = id, default = selected)
 
+  ulClass <- "nav navbar-nav"
+
+  # Although the "correct" way to implement left/right nav is to
+  # put each nav inside it's own <ul> container, that would significantly
+  # complicate buildTabset() logic, and could potentially break
+  # user code. Instead, we apply some CSS trickery to .shiny-navbar-right
+  # that works for any version of bootstrap
+  if (!is.null(right)) {
+    # right understands a singular nav item or a list of them
+    if (isNavLike(right)) {
+      right <- list(right)
+    }
+    if (!all(vapply(right, isNavLike, logical(1)))) {
+      stop(
+        "`navbarPage(right=)` expects a list of nav-like objects ",
+        "(e.g., `tabPanel()`, `navbarMenu()`, `navLink()`, `navForm()`).",
+        call. = FALSE
+      )
+    }
+    ulClass <- paste(ulClass, "shiny-navbar-right")
+  }
+
   # build the tabset
-  tabset <- buildTabset(..., ulClass = "nav navbar-nav", id = id, selected = selected)
+  tabset <- buildTabset(..., !!!right, ulClass = ulClass, id = id, selected = selected)
+
+  # Add a special class to each right-aligned nav item
+  if (!is.null(right)) {
+    nLeft <- length(list(...))
+    idx <- seq.int(nLeft + 1, nLeft + length(right))
+    tabset$navList$children[idx] <- lapply(
+       tabset$navList$children[idx], tagAppendAttributes,
+       class = "nav-item-right"
+    )
+  }
 
   containerClass <- paste0("container", if (fluid) "-fluid")
 
@@ -501,7 +534,7 @@ navbarPage <- function(title,
     contentDiv <- tagAppendChild(contentDiv, div(class="row", footer))
 
   # build the page
-  bootstrapPage(
+  page <- bootstrapPage(
     title = windowTitle,
     responsive = responsive,
     theme = theme,
@@ -509,6 +542,35 @@ navbarPage <- function(title,
     tags$nav(class=navbarClass, role="navigation", containerDiv),
     contentDiv
   )
+
+  if (length(right) > 0) {
+    page <- attachDependencies(
+      page, bslib::bs_dependency_defer(navbarPageDeps),
+      append = TRUE
+    )
+  }
+
+  page
+}
+
+
+navbarPageDeps <- function(theme) {
+  name <- "navbarPage"
+  version <- packageVersion("shiny")
+
+  if (!bslib::is_bs_theme(theme)) {
+    htmlDependency(
+      name, version,
+      src = c(href = "shared/navbarPage"),
+      stylesheet = "navbarPage.min.css"
+    )
+  } else {
+    scss <- system.file("www/shared/navbarPage/navbarPage.scss", package = "shiny")
+    bslib::bs_dependency(
+      sass::sass_file(scss), theme,
+      name, version, cache_key_extra = version
+    )
+  }
 }
 
 #' @param menuName A name that identifies this `navbarMenu`. This
@@ -671,9 +733,40 @@ tabPanel <- function(title, ..., value = title, icon = NULL) {
 }
 
 isTabPanel <- function(x) {
+  tagHasClass(x, "tab-pane")
+}
+
+tagHasClass <- function(x, class) {
   if (!inherits(x, "shiny.tag")) return(FALSE)
-  class <- tagGetAttribute(x, "class") %||% ""
-  "tab-pane" %in% strsplit(class, "\\s+")[[1]]
+  classes <- tagGetAttribute(x, "class") %||% ""
+  class %in% strsplit(classes, "\\s+")[[1]]
+}
+
+#' @export
+navLink <- function(title, href, target = "_blank", ...) {
+  link <- tags$a(title, href = href, target = target, ...)
+  class(link) <- c("shiny_nav_link", class(link))
+  link
+}
+
+isNavLink <- function(x) {
+  inherits(x, "shiny_nav_link")
+}
+
+#' @export
+navForm <- function(...) {
+  form <- tags$form(class = "form-inline", ...)
+  class(form) <- c("shiny_nav_form", class(form))
+  form
+}
+
+isNavForm <- function(x) {
+  inherits(x, "shiny_nav_form")
+}
+
+
+isNavLike <- function(x) {
+  isTabPanel(x) || isNavbarMenu(x) || isNavLink(x) || isNavForm(x)
 }
 
 #' @export
@@ -1009,6 +1102,18 @@ buildTabItem <- function(index, tabsetId, foundSelected, tabs = NULL,
 
   if (isTabPanel(divTag)) {
     return(buildNavItem(divTag, tabsetId, index))
+  }
+
+  if (isNavLink(divTag)) {
+    return(
+      list(liTag = tags$li(class = "nav-item", divTag), divTag = NULL)
+    )
+  }
+
+  if (isNavForm(divTag)) {
+    return(
+      list(liTag = divTag, divTag = NULL)
+    )
   }
 
   # The behavior is undefined at this point, so construct a condition message

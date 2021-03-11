@@ -4068,7 +4068,18 @@ function main(): void {
         // sendOutputHiddenState() again, which can be done by re-binding.
         /* global Shiny */
         let scheduleCssReport = function () {
-          window.requestAnimationFrame(Shiny.bindAll);
+          let start;
+          let sendCssInfo = function (timestamp) {
+            if (start === undefined) start = timestamp;
+            const elapsed = timestamp - start;
+
+            Shiny.bindAll();
+            if (elapsed < 10000) {
+              window.requestAnimationFrame(sendCssInfo);
+            }
+          };
+
+          window.requestAnimationFrame(sendCssInfo);
         };
 
         $.map(links, function (link) {

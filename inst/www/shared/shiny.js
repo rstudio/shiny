@@ -4755,7 +4755,17 @@
               import_jquery6.default(sheet.ownerNode).remove();
             };
             var scheduleCssReport = function scheduleCssReport2() {
-              window.requestAnimationFrame(Shiny.bindAll);
+              var start;
+              var sendCssInfo = function sendCssInfo2(timestamp) {
+                if (start === void 0)
+                  start = timestamp;
+                var elapsed = timestamp - start;
+                Shiny.bindAll();
+                if (elapsed < 1e4) {
+                  window.requestAnimationFrame(sendCssInfo2);
+                }
+              };
+              window.requestAnimationFrame(sendCssInfo);
             };
             import_jquery6.default.map(links, function(link) {
               var oldSheet = findSheet(link.attr("href"));

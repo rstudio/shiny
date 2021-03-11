@@ -4022,7 +4022,7 @@ function main(): void {
         $head.append(links);
       } else {
         // This inline <style> based approach works for IE11
-        let refreshStyle = function (href, oldSheet) {
+        let refreshStyle = function (href, oldSheet, onload) {
           const xhr = new XMLHttpRequest();
 
           xhr.open("GET", href);
@@ -4035,6 +4035,7 @@ function main(): void {
             $head.append(newStyle);
             setTimeout(() => oldStyle.remove(), 500);
             setTimeout(() => removeSheet(oldSheet), 500);
+            onload();
           };
           xhr.send();
         };
@@ -4061,6 +4062,17 @@ function main(): void {
           $(sheet.ownerNode).remove();
         };
 
+        // When new styles are loaded/applied, CSS values that are accessible server-side
+        // (e.g., getCurrentOutputInfo(), output visibility, etc) may need to become invalidated.
+        // At the time of writing, that means we need to do sendImageSize() &
+        // sendOutputHiddenState() again, which can be done by re-binding.
+        /* global Shiny */
+        let scheduleCssReport = function () {
+          const bindDebouncer = new Debouncer(null, Shiny.bindAll, 100);
+
+          setTimeout(() => bindDebouncer.normalCall(), 100);
+        };
+
         $.map(links, function (link) {
           // Find any document.styleSheets that match this link's href
           // so we can remove it after bringing in the new stylesheet
@@ -4071,26 +4083,18 @@ function main(): void {
           // <link> -based approach
 
           if (isIE()) {
-            refreshStyle(href, oldSheet);
+            refreshStyle(href, oldSheet, scheduleCssReport);
           } else {
             link.attr("href", href);
             // Once the new <link> is loaded, schedule the old <link> to be removed
             // on the next tick which is needed to avoid FOUC
             link.attr("onload", () => {
+              scheduleCssReport();
               setTimeout(() => removeSheet(oldSheet), 500);
             });
             $head.append(link);
           }
         });
-
-        // Once the new styles are applied, CSS values that are accessible server-side
-        // (e.g., getCurrentOutputInfo(), output visibility, etc) may become outdated.
-        // At the time of writing, that means we need to do sendImageSize() &
-        // sendOutputHiddenState() again, which can be done by re-binding.
-        /* global Shiny */
-        const bindDebouncer = new Debouncer(null, Shiny.bindAll, 100);
-
-        setTimeout(() => bindDebouncer.normalCall(), 100);
       }
     }
 

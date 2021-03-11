@@ -4719,7 +4719,7 @@
           if (!restyle) {
             $head.append(links);
           } else {
-            var refreshStyle = function refreshStyle2(href2, oldSheet) {
+            var refreshStyle = function refreshStyle2(href2, oldSheet, onload) {
               var xhr = new XMLHttpRequest();
               xhr.open("GET", href2);
               xhr.onload = function() {
@@ -4733,6 +4733,7 @@
                 setTimeout(function() {
                   return removeSheet(oldSheet);
                 }, 500);
+                onload();
               };
               xhr.send();
             };
@@ -4753,14 +4754,21 @@
                 sheet.cssText = "";
               import_jquery6.default(sheet.ownerNode).remove();
             };
+            var scheduleCssReport = function scheduleCssReport2() {
+              var bindDebouncer = new Debouncer(null, Shiny.bindAll, 100);
+              setTimeout(function() {
+                return bindDebouncer.normalCall();
+              }, 100);
+            };
             import_jquery6.default.map(links, function(link) {
               var oldSheet = findSheet(link.attr("href"));
               var href2 = link.attr("href") + "?restyle=" + new Date().getTime();
               if (isIE()) {
-                refreshStyle(href2, oldSheet);
+                refreshStyle(href2, oldSheet, scheduleCssReport);
               } else {
                 link.attr("href", href2);
                 link.attr("onload", function() {
+                  scheduleCssReport();
                   setTimeout(function() {
                     return removeSheet(oldSheet);
                   }, 500);
@@ -4768,10 +4776,6 @@
                 $head.append(link);
               }
             });
-            var bindDebouncer = new Debouncer(null, Shiny.bindAll, 100);
-            setTimeout(function() {
-              return bindDebouncer.normalCall();
-            }, 100);
           }
         }
         if (dep.script && !restyle) {

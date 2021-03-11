@@ -4068,9 +4068,7 @@ function main(): void {
         // sendOutputHiddenState() again, which can be done by re-binding.
         /* global Shiny */
         let scheduleCssReport = function () {
-          const bindDebouncer = new Debouncer(null, Shiny.bindAll, 100);
-
-          setTimeout(() => bindDebouncer.normalCall(), 100);
+          setTimeout(() => Shiny.bindAll(), 100);
         };
 
         $.map(links, function (link) {

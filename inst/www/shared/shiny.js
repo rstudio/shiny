@@ -4754,28 +4754,21 @@
                 sheet.cssText = "";
               import_jquery6.default(sheet.ownerNode).remove();
             };
-            var scheduleCssReport = function scheduleCssReport2() {
-              var start;
-              var sendCssInfo = function sendCssInfo2(timestamp) {
-                if (start === void 0)
-                  start = timestamp;
-                var elapsed = timestamp - start;
-                Shiny.bindAll();
-                if (elapsed < 1e4) {
-                  window.requestAnimationFrame(sendCssInfo2);
-                }
-              };
-              window.requestAnimationFrame(sendCssInfo);
+            var scheduleCssReporter = function scheduleCssReporter2() {
+              var handle = setInterval(Shiny.bindAll, 100);
+              setTimeout(function() {
+                return clearInterval(handle);
+              }, 1e4);
             };
             import_jquery6.default.map(links, function(link) {
               var oldSheet = findSheet(link.attr("href"));
               var href2 = link.attr("href") + "?restyle=" + new Date().getTime();
               if (isIE()) {
-                refreshStyle(href2, oldSheet, scheduleCssReport);
+                refreshStyle(href2, oldSheet, scheduleCssReporter);
               } else {
                 link.attr("href", href2);
                 link.attr("onload", function() {
-                  scheduleCssReport();
+                  scheduleCssReporter();
                   setTimeout(function() {
                     return removeSheet(oldSheet);
                   }, 500);

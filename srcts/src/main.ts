@@ -4062,24 +4062,15 @@ function main(): void {
           $(sheet.ownerNode).remove();
         };
 
-        // When new styles are loaded/applied, CSS values that are accessible server-side
-        // (e.g., getCurrentOutputInfo(), output visibility, etc) may need to become invalidated.
-        // At the time of writing, that means we need to do sendImageSize() &
-        // sendOutputHiddenState() again, which can be done by re-binding.
+        // There doesn't appear to be proper way to wait until new styles have been
+        // _applied everywhere_ so we repeatedly call bindAll() every .1s for 10 seconds.
+        // (bindAll() is used as an indirect way of calling doSendTheme() which resends CSS
+        // info stored in input values accessible to shiny::getCurrentOutputInfo()).
         /* global Shiny */
-        let scheduleCssReport = function () {
-          let start;
-          let sendCssInfo = function (timestamp) {
-            if (start === undefined) start = timestamp;
-            const elapsed = timestamp - start;
+        let scheduleCssReporter = function () {
+          let handle = setInterval(Shiny.bindAll, 100);
 
-            Shiny.bindAll();
-            if (elapsed < 10000) {
-              window.requestAnimationFrame(sendCssInfo);
-            }
-          };
-
-          window.requestAnimationFrame(sendCssInfo);
+          setTimeout(() => clearInterval(handle), 10000);
         };
 
         $.map(links, function (link) {
@@ -4092,13 +4083,13 @@ function main(): void {
           // <link> -based approach
 
           if (isIE()) {
-            refreshStyle(href, oldSheet, scheduleCssReport);
+            refreshStyle(href, oldSheet, scheduleCssReporter);
           } else {
             link.attr("href", href);
             // Once the new <link> is loaded, schedule the old <link> to be removed
             // on the next tick which is needed to avoid FOUC
             link.attr("onload", () => {
-              scheduleCssReport();
+              scheduleCssReporter();
               setTimeout(() => removeSheet(oldSheet), 500);
             });
             $head.append(link);

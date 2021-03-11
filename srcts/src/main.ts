@@ -6614,6 +6614,7 @@ function main(): void {
       unbindOutputs(scope, includeSelf);
     }
     Shiny.bindAll = function (scope) {
+      console.log("bind");
       // _bindAll returns input values; it doesn't send them to the server.
       // export.bindAll needs to send the values to the server.
       const currentInputItems = _bindAll(scope);
@@ -6790,6 +6791,8 @@ function main(): void {
         return;
       }
       const id = getIdFromEl(el);
+
+      console.log(getStyle(el, "color"));
 
       inputs.setInput(
         ".clientdata_output_" + id + "_bg",

@@ -4755,16 +4755,7 @@
               import_jquery6.default(sheet.ownerNode).remove();
             };
             var scheduleCssReport = function scheduleCssReport2() {
-              var bindDebouncer = new Debouncer(null, Shiny.bindAll, 100);
-              setTimeout(function() {
-                return bindDebouncer.normalCall();
-              }, 100);
-              setTimeout(function() {
-                return bindDebouncer.normalCall();
-              }, 500);
-              setTimeout(function() {
-                return bindDebouncer.normalCall();
-              }, 1e3);
+              window.requestAnimationFrame(Shiny.bindAll);
             };
             import_jquery6.default.map(links, function(link) {
               var oldSheet = findSheet(link.attr("href"));

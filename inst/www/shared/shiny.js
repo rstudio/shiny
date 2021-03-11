@@ -6626,7 +6626,6 @@
           unbindOutputs(scope, includeSelf);
         }
         Shiny.bindAll = function(scope) {
-          console.log("bind");
           var currentInputItems = _bindAll(scope);
           import_jquery6.default.each(currentInputItems, function(name, item) {
             inputs.setInput(name, item.value, item.opts);
@@ -6731,7 +6730,6 @@
             return;
           }
           var id = getIdFromEl(el);
-          console.log(getStyle(el, "color"));
           inputs.setInput(".clientdata_output_" + id + "_bg", getComputedBgColor(el));
           inputs.setInput(".clientdata_output_" + id + "_fg", getStyle(el, "color"));
           inputs.setInput(".clientdata_output_" + id + "_accent", getComputedLinkColor(el));

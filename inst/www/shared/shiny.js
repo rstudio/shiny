@@ -2128,9 +2128,6 @@
       }
       return _typeof(obj);
     }
-    function _readOnlyError(name) {
-      throw new TypeError('"' + name + '" is read-only');
-    }
     function _defineProperty(obj, key, value) {
       if (key in obj) {
         Object.defineProperty(obj, key, {value: value, enumerable: true, configurable: true, writable: true});
@@ -3045,7 +3042,7 @@
             target = getTargetTabs($tabset, $tabContent, message.target);
             $targetLiTag = target.$liTag;
             if ($targetLiTag.hasClass("dropdown-item")) {
-              $liTag = (_readOnlyError("$liTag"), $aTag.removeClass("nav-link").addClass("dropdown-item"));
+              $liTag = $aTag.removeClass("nav-link").addClass("dropdown-item");
             }
           }
           var dropdown = getDropdown();

@@ -1291,7 +1291,7 @@ function main(): void {
       let tabsetId = $parentTabset.attr("data-tabsetid");
 
       const $divTag = $(message.divTag.html);
-      const $liTag = $(message.liTag.html);
+      let $liTag = $(message.liTag.html);
       const $aTag = $liTag.find("> a");
 
       // Unless the item is being prepended/appended, the target tab

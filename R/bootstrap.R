@@ -1012,8 +1012,8 @@ buildTabItem <- function(index, tabsetId, foundSelected, tabs = NULL,
   # The behavior is undefined at this point, so construct a condition message
   msg <- paste0(
     "Expected a collection `tabPanel()`s",
-    if (is.null(textFilter)) " and `tabPanelMenus()`.",
-    if (!is.null(textFilter)) ", `tabPanelMenus()`, and/or character strings.",
+    if (is.null(textFilter)) " and `navbarMenu()`.",
+    if (!is.null(textFilter)) ", `navbarMenu()`, and/or character strings.",
     " Consider using `header` or `footer` if you wish to place content above (or below) every panel's contents"
   )
 

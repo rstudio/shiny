@@ -573,24 +573,6 @@ navbarPageDeps <- function(theme) {
   }
 }
 
-#' @param menuName A name that identifies this `navbarMenu`. This
-#'   is needed if you want to insert/remove or show/hide an entire
-#'   `navbarMenu`.
-#'
-#' @rdname navbarPage
-#' @export
-navbarMenu <- function(title, ..., menuName = title, icon = NULL) {
-  structure(list(title = title,
-                 menuName = menuName,
-                 tabs = list2(...),
-                 iconClass = iconClass(icon)),
-            class = "shiny.navbarmenu")
-}
-
-isNavbarMenu <- function(x) {
-  inherits(x, "shiny.navbarmenu")
-}
-
 #' Create a well panel
 #'
 #' Creates a panel with a slightly inset border and grey background. Equivalent
@@ -696,32 +678,61 @@ helpText <- function(...) {
 }
 
 
-#' Create a tab panel
+#' Create navigation items
 #'
+#' Create "nav items" for use inside "nav containers" (e.g., [tabsetPanel()] or
+#' [navbarPage()]). Individual items are created with one of either `tabPanel()`
+#' (navigate to a panel of content), `navLink()` (navigate to remote content),
+#' or `navForm()` (for custom inline navigation, like search forms). Any
+#' collection of nav items can be grouped together in a menu with
+#' `navbarMenu()`.
 #'
-#' @param title Display title for tab
-#' @param ... UI elements to include within the tab
-#' @param value The value that should be sent when `tabsetPanel` reports
-#'   that this tab is selected. If omitted and `tabsetPanel` has an
-#'   `id`, then the title will be used.
-#' @param icon Optional icon to appear on the tab. This attribute is only
-#' valid when using a `tabPanel` within a [navbarPage()].
-#' @return A tab that can be passed to [tabsetPanel()]
+#' @param title `[character(1)]`\cr A display title for the nav item.
+#' @param ... `[UI elements]`\cr
+#'   * For `tabPanel()`/`tabPanelBody()`: content to display when the tab is
+#'     active.
+#'   * For `navLink()`: arguments to the [a()] tag.
+#'   * For `navForm()`: the input form to place inline in the nav container.
+#' @param value `[character(1)]`\cr A value associate with a `tabPanel()` to
+#'   determine when it is selected. This value may be supplied to the relevant
+#'   nav container's `selected` argument to show the tab immediately on page
+#'   load. This value is also useful for programmatically updating the selected
+#'   tab via [updateTabsetPanel()], [showTab()], etc (updating selected tabs
+#'   this way is often useful for showing/hiding panels of content via other UI
+#'   controls like [radioButtons()] -- in this scenario, consider using
+#'   [tabPanelBody()] with `tabsetPanel(type = "hidden")`).
+#' @param icon An [icon()] to appear to the left of the nav item's `title`.
+#' @return A nav item that may be passed to a nav container (e.g. [tabsetPanel()]
+#'  or [navbarPage()]).
 #'
-#' @seealso [tabsetPanel()]
+#' @seealso [tabsetPanel()], [navbarPage()], [navlistPanel()]
 #'
 #' @examples
-#' # Show a tabset that includes a plot, summary, and
-#' # table view of the generated distribution
-#' mainPanel(
-#'   tabsetPanel(
-#'     tabPanel("Plot", plotOutput("plot")),
-#'     tabPanel("Summary", verbatimTextOutput("summary")),
-#'     tabPanel("Table", tableOutput("table"))
+#'
+#' panels <- list(
+#'   tabPanel("Plot", "plot"),
+#'   tabPanel("Summary", "summary"),
+#'   tabPanel("Table", "table"),
+#'   navbarMenu(
+#'     "External links",
+#'     navLink("Shiny", "https://github.com/rstudio/shiny", icon("github"))
 #'   )
 #' )
+#'
+#' if (interactive()) {
+#'   shinyApp(
+#'     fluidPage(tabsetPanel(!!!panels, card = TRUE)),
+#'     function(...) {}
+#'   )
+#'   left <- panels[1:3]
+#'   # TODO: why doesn't this work?
+#'   shinyApp(
+#'     navbarPage("Title", !!!left, right = panels[[4]]),
+#'     function(...) {}
+#'   )
+#' }
+#'
 #' @export
-#' @describeIn tabPanel Create a tab panel that can be included within a [tabsetPanel()] or a [navbarPage()].
 tabPanel <- function(title, ..., value = title, icon = NULL) {
   div(
     class = "tab-pane",
@@ -730,6 +741,20 @@ tabPanel <- function(title, ..., value = title, icon = NULL) {
     `data-icon-class` = iconClass(icon),
     ...
   )
+}
+
+#' @rdname tabPanel
+#' @export
+tabPanelBody <- function(value, ..., icon = NULL) {
+  if (
+    !is.character(value) ||
+    length(value) != 1 ||
+    any(is.na(value)) ||
+    nchar(value) == 0
+  ) {
+    stop("`value` must be a single, non-empty string value")
+  }
+  tabPanel(title = NULL, ..., value = value, icon = icon)
 }
 
 isTabPanel <- function(x) {
@@ -742,9 +767,14 @@ tagHasClass <- function(x, class) {
   class %in% strsplit(classes, "\\s+")[[1]]
 }
 
+#' @rdname tabPanel
 #' @export
-navLink <- function(title, href, target = "_blank", ...) {
-  link <- tags$a(title, href = href, target = target, ...)
+navLink <- function(title, href, ..., icon = NULL, target = "_blank") {
+  args <- list2(
+    href = href, target = target,
+    icon, title, ...
+  )
+  link <- tags$a(!!!dropNulls(args))
   class(link) <- c("shiny_nav_link", class(link))
   link
 }
@@ -753,6 +783,7 @@ isNavLink <- function(x) {
   inherits(x, "shiny_nav_link")
 }
 
+#' @rdname tabPanel
 #' @export
 navForm <- function(...) {
   form <- tags$form(class = "form-inline", ...)
@@ -764,25 +795,28 @@ isNavForm <- function(x) {
   inherits(x, "shiny_nav_form")
 }
 
-
 isNavLike <- function(x) {
   isTabPanel(x) || isNavbarMenu(x) || isNavLink(x) || isNavForm(x)
 }
 
+#' @param menuName `[character(1)]`\cr A value that identifies the
+#'   `navbarMenu()`. Required for using `insertTab()`, `removeTab()`,
+#'   etc with an entire `navbarMenu()`.
+#'
+#' @rdname tabPanel
 #' @export
-#' @describeIn tabPanel Create a tab panel that drops the title argument.
-#'   This function should be used within `tabsetPanel(type = "hidden")`. See [tabsetPanel()] for example usage.
-tabPanelBody <- function(value, ..., icon = NULL) {
-  if (
-    !is.character(value) ||
-    length(value) != 1 ||
-    any(is.na(value)) ||
-    nchar(value) == 0
-  ) {
-    stop("`value` must be a single, non-empty string value")
-  }
-  tabPanel(title = NULL, ..., value = value, icon = icon)
+navbarMenu <- function(title, ..., menuName = title, icon = NULL) {
+  structure(list(title = title,
+                 menuName = menuName,
+                 tabs = list2(...),
+                 iconClass = iconClass(icon)),
+            class = "shiny.navbarmenu")
 }
+
+isNavbarMenu <- function(x) {
+  inherits(x, "shiny.navbarmenu")
+}
+
 
 #' Create a tabset panel
 #'

@@ -3,49 +3,85 @@
 \name{tabPanel}
 \alias{tabPanel}
 \alias{tabPanelBody}
-\title{Create a tab panel}
+\alias{navLink}
+\alias{navForm}
+\alias{navbarMenu}
+\title{Create navigation items}
 \usage{
 tabPanel(title, ..., value = title, icon = NULL)
 
 tabPanelBody(value, ..., icon = NULL)
+
+navLink(title, href, ..., icon = NULL, target = "_blank")
+
+navForm(...)
+
+navbarMenu(title, ..., menuName = title, icon = NULL)
 }
 \arguments{
-\item{title}{Display title for tab}
+\item{title}{\verb{[character(1)]}\cr A display title for the nav item.}
 
-\item{...}{UI elements to include within the tab}
-
-\item{value}{The value that should be sent when \code{tabsetPanel} reports
-that this tab is selected. If omitted and \code{tabsetPanel} has an
-\code{id}, then the title will be used.}
-
-\item{icon}{Optional icon to appear on the tab. This attribute is only
-valid when using a \code{tabPanel} within a \code{\link[=navbarPage]{navbarPage()}}.}
-}
-\value{
-A tab that can be passed to \code{\link[=tabsetPanel]{tabsetPanel()}}
-}
-\description{
-Create a tab panel
-}
-\section{Functions}{
+\item{...}{\verb{[UI elements]}\cr
 \itemize{
-\item \code{tabPanel}: Create a tab panel that can be included within a \code{\link[=tabsetPanel]{tabsetPanel()}} or a \code{\link[=navbarPage]{navbarPage()}}.
-
-\item \code{tabPanelBody}: Create a tab panel that drops the title argument.
-This function should be used within \code{tabsetPanel(type = "hidden")}. See \code{\link[=tabsetPanel]{tabsetPanel()}} for example usage.
+\item For \code{tabPanel()}/\code{tabPanelBody()}: content to display when the tab is
+active.
+\item For \code{navLink()}: arguments to the \code{\link[=a]{a()}} tag.
+\item For \code{navForm()}: the input form to place inline in the nav container.
 }}
 
+\item{value}{\verb{[character(1)]}\cr A value associate with a \code{tabPanel()} to
+determine when it is selected. This value may be supplied to the relevant
+nav container's \code{selected} argument to show the tab immediately on page
+load. This value is also useful for programmatically updating the selected
+tab via \code{\link[=updateTabsetPanel]{updateTabsetPanel()}}, \code{\link[=showTab]{showTab()}}, etc (updating selected tabs
+this way is often useful for showing/hiding panels of content via other UI
+controls like \code{\link[=radioButtons]{radioButtons()}} -- in this scenario, consider using
+\code{\link[=tabPanelBody]{tabPanelBody()}} with \code{tabsetPanel(type = "hidden")}).}
+
+\item{icon}{An \code{\link[=icon]{icon()}} to appear to the left of the nav item's \code{title}.}
+
+\item{menuName}{\verb{[character(1)]}\cr A value that identifies the
+\code{navbarMenu()}. Required for using \code{insertTab()}, \code{removeTab()},
+etc with an entire \code{navbarMenu()}.}
+}
+\value{
+A nav item that may be passed to a nav container (e.g. \code{\link[=tabsetPanel]{tabsetPanel()}}
+or \code{\link[=navbarPage]{navbarPage()}}).
+}
+\description{
+Create "nav items" for use inside "nav containers" (e.g., \code{\link[=tabsetPanel]{tabsetPanel()}} or
+\code{\link[=navbarPage]{navbarPage()}}). Individual items are created with one of either \code{tabPanel()}
+(navigate to a panel of content), \code{navLink()} (navigate to remote content),
+or \code{navForm()} (for custom inline navigation, like search forms). Any
+collection of nav items can be grouped together in a menu with
+\code{navbarMenu()}.
+}
 \examples{
-# Show a tabset that includes a plot, summary, and
-# table view of the generated distribution
-mainPanel(
-  tabsetPanel(
-    tabPanel("Plot", plotOutput("plot")),
-    tabPanel("Summary", verbatimTextOutput("summary")),
-    tabPanel("Table", tableOutput("table"))
+
+panels <- list(
+  tabPanel("Plot", "plot"),
+  tabPanel("Summary", "summary"),
+  tabPanel("Table", "table"),
+  navbarMenu(
+    "External links",
+    navLink("Shiny", "https://github.com/rstudio/shiny", icon("github"))
   )
 )
+
+if (interactive()) {
+  shinyApp(
+    fluidPage(tabsetPanel(!!!panels, card = TRUE)),
+    function(...) {}
+  )
+  left <- panels[1:3]
+  # TODO: why doesn't this work?
+  shinyApp(
+    navbarPage("Title", !!!left, right = panels[[4]]),
+    function(...) {}
+  )
+}
+
 }
 \seealso{
-\code{\link[=tabsetPanel]{tabsetPanel()}}
+\code{\link[=tabsetPanel]{tabsetPanel()}}, \code{\link[=navbarPage]{navbarPage()}}, \code{\link[=navlistPanel]{navlistPanel()}}
 }

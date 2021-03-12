@@ -490,7 +490,7 @@ navbarPage <- function(title,
 
   # Add a special class to each right-aligned nav item
   if (!is.null(right)) {
-    nLeft <- length(list(...))
+    nLeft <- length(list2(...))
     idx <- seq.int(nLeft + 1, nLeft + length(right))
     tabset$navList$children[idx] <- lapply(
        tabset$navList$children[idx], tagAppendAttributes,
@@ -724,10 +724,8 @@ helpText <- function(...) {
 #'     fluidPage(tabsetPanel(!!!panels, card = TRUE)),
 #'     function(...) {}
 #'   )
-#'   left <- panels[1:3]
-#'   # TODO: why doesn't this work?
 #'   shinyApp(
-#'     navbarPage("Title", !!!left, right = panels[[4]]),
+#'     navbarPage("Title", !!!panels[1:3], right = panels[[4]]),
 #'     function(...) {}
 #'   )
 #' }

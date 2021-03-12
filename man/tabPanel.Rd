@@ -73,10 +73,8 @@ if (interactive()) {
     fluidPage(tabsetPanel(!!!panels, card = TRUE)),
     function(...) {}
   )
-  left <- panels[1:3]
-  # TODO: why doesn't this work?
   shinyApp(
-    navbarPage("Title", !!!left, right = panels[[4]]),
+    navbarPage("Title", !!!panels[1:3], right = panels[[4]]),
     function(...) {}
   )
 }

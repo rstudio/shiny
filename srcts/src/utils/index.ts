@@ -361,6 +361,17 @@ function getComputedLinkColor(el: HTMLElement): string {
   return linkColor;
 }
 
+function isBS3(): boolean {
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+  if (!$.fn.tooltip) {
+    return false;
+  }
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+  return $.fn.tooltip.Constructor.VERSION.match(/^3\./);
+}
+
 export {
   escapeHTML,
   randomId,
@@ -384,4 +395,5 @@ export {
   updateLabel,
   getComputedLinkColor,
   makeBlob,
+  isBS3,
 };

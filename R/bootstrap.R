@@ -294,7 +294,6 @@ basicPage <- function(...) {
 #' @param title The title to use for the browser window/tab (it will not be
 #'   shown in the document).
 #' @param bootstrap If `TRUE`, load the Bootstrap CSS library.
-#' @param theme URL to alternative Bootstrap stylesheet.
 #' @inheritParams bootstrapPage
 #'
 #' @family layout functions
@@ -389,9 +388,6 @@ collapseSizes <- function(padding) {
 #'   layout.
 #' @param responsive This option is deprecated; it is no longer optional with
 #'   Bootstrap 3.
-#' @param theme Alternative Bootstrap stylesheet (normally a css file within the
-#'   www directory). For example, to use the theme located at
-#'   `www/bootstrap.css` you would use `theme = "bootstrap.css"`.
 #' @param windowTitle The title that should be displayed by the browser window.
 #'   Useful if `title` is not a string.
 #' @inheritParams bootstrapPage

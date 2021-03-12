@@ -9,6 +9,8 @@ shiny 1.6.0.9000
 
 ### Minor new features and improvements
 
+* Shiny's core JavaScript code was converted to TypeScript. For the latest development information, please see the [README.md in `./srcts`](https://github.com/rstudio/shiny/tree/master/srcts). (#3296)
+
 * Switched from `digest::digest()` to `rlang::hash()` for hashing. (#3264)
 
 * Switched from internal `Stack` class to `fastmap::faststack()`, and used `fastmap::fastqueue()`. (#3176)
@@ -19,6 +21,7 @@ shiny 1.6.0.9000
 
 * Closed #3286: Updated to Font-Awesome 5.15.2. (#3288)
 
+* Updated to jQuery 3.6.0. (#3311)
 
 shiny 1.6.0
 ===========

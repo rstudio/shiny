@@ -197,6 +197,7 @@ Collate:
     'test.R'
     'update-input.R'
     'utils-lang.R'
+    'version_jquery.R'
     'viewer.R'
 RoxygenNote: 7.1.1
 Encoding: UTF-8

@@ -68,7 +68,10 @@ jqueryDependency <- function() {
   if (version == 3) {
     return(htmlDependency(
       "jquery", version_jquery,
-      src = "www/shared",
+      src = c(
+        href = "shared",
+        file = "www/shared"
+      ),
       package = "shiny",
       script = "jquery.min.js"
     ))
@@ -76,7 +79,10 @@ jqueryDependency <- function() {
   if (version == 1) {
     return(htmlDependency(
       "jquery", "1.12.4",
-      src = "www/shared/legacy",
+      src = c(
+        href = "shared/legacy",
+        file = "www/shared/legacy"
+      ),
       package = "shiny",
       script = "jquery.min.js"
     ))

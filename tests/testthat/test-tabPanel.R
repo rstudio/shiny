@@ -1,4 +1,80 @@
+# tabsetPanel() et al. use p_randomInt() to generate ids (which uses withPrivateSeed()),
+# so we need to fix Shiny's private seed in order to make their HTML output deterministic
+navlist_panel <- function(...) {
+  withPrivateSeed(set.seed(100))
+  navlistPanel(...)
+}
+navbar_page <- function(...) {
+  withPrivateSeed(set.seed(100))
+  navbarPage(...)
+}
+tabset_panel <- function(...) {
+  withPrivateSeed(set.seed(100))
+  tabsetPanel(...)
+}
 
+expect_snapshot_bslib <- function(x, ...) {
+  expect_snapshot(bslib_tags(x), ...)
+}
+
+# Simulates the UI tags that would be produced by
+# shinyApp(bootstrapPage(theme), function(...) {})
+bslib_tags <- function(ui, theme = bslib::bs_theme()) {
+  old_theme <- getCurrentTheme()
+  on.exit(setCurrentTheme(old_theme), add = TRUE)
+  setCurrentTheme(theme)
+  htmltools::renderTags(ui)$html
+}
+
+panels <- list(
+  tabPanel("A", "a"),
+  tabPanel("B", "b", icon = icon("github")),
+  navbarMenu("Menu", tabPanel("C", "c"))
+)
+
+test_that("tabsetPanel() markup is correct", {
+  default <- tabset_panel(!!!panels)
+  pills <- tabset_panel(
+    !!!panels, type = "pills", selected = "B",
+    header = div(class = "content-header"),
+    footer = div(class = "content-footer")
+  )
+  # BS3
+  expect_snapshot(default)
+  expect_snapshot(pills)
+  # BS4
+  expect_snapshot_bslib(default)
+  expect_snapshot_bslib(pills)
+  card <- tabset_panel(!!!panels, card = TRUE)
+  expect_snapshot_bslib(card)
+})
+
+test_that("navbarPage() markup is correct", {
+  nav_page <- navbar_page("Title", !!!panels)
+  expect_snapshot(nav_page)
+  expect_snapshot_bslib(nav_page)
+})
+
+# navlistPanel() can handle strings, but the others can't
+test_that("String input is handled properly", {
+  nav_list <- navlist_panel(!!!c(list("A header"), panels))
+  expect_snapshot(nav_list)
+  expect_snapshot_bslib(nav_list)
+  expect_error(
+    tabsetPanel(!!!c(list("A header"), panels)),
+    "tabPanel"
+  )
+})
+
+test_that("Shiny.tag input produces a warning", {
+  panels3 <- c(list(div("A div")), panels)
+  tab_tags <- expect_warning(tabset_panel(!!!panels3))
+  # Carson March 12th, 2021: Yes, he 'empty nav' output here isn't
+  # sensible (which is why we now throw a warning), but it's probably
+  # too late to change the behavior (it could break user code to do
+  # anything different)
+  expect_snapshot(tab_tags)
+})
 
 test_that("tabPanelBody validates it's input", {
   expect_silent(tabPanelBody("a", "content1", "content2", icon = icon("table")))

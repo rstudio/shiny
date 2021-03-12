@@ -707,6 +707,7 @@ tabPanelBody <- function(value, ..., icon = NULL) {
 #'   conjunction with [tabPanelBody()] and [updateTabsetPanel()] to control the
 #'   active tab via other input controls. (See example below)}
 #' }
+#' @param card whether to wrap the navigation controls and content into an 'output card'. This functionality currently requires a [bslib::bs_theme()] in the page layout with `version = 4` or higher.
 #' @param position This argument is deprecated; it has been discontinued in
 #'   Bootstrap 3.
 #' @inheritParams navbarPage

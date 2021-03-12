@@ -41,6 +41,8 @@ tabPanels.}
 \item{footer}{Tag or list of tags to display as a common footer below all
 tabPanels}
 
+\item{card}{whether to wrap the navigation controls and content into an 'output card'. This functionality currently requires a \code{\link[bslib:bs_theme]{bslib::bs_theme()}} in the page layout with \code{version = 4} or higher.}
+
 \item{position}{This argument is deprecated; it has been discontinued in
 Bootstrap 3.}
 }

@@ -784,22 +784,20 @@ tabsetPanel <- function(...,
   if (card) {
     nav <- tags$div(
       class = "card-header",
-      tagAppendAttributes(
-        nav, class = paste0("card-header-", type)
-      ),
       tagFunction(function() {
         if (getCurrentVersion() >= 4) {
           return(NULL)
         }
-        warning(
-          "`tabsetPanel(card = TRUE)` requires Bootstrap 4 or higher, ",
-          "so the app has been upgraded from Bootstrap 3 to 4. ",
-          "To remove this warning, either supply `theme = bslib::bs_theme()` ",
-          "to the app's page layout or set `card = FALSE`.",
+        stop(
+          "`tabsetPanel(card = TRUE)` requires Bootstrap 4 or higher. ",
+          "Please supply `bslib::bs_theme()` to the UI's page layout function ",
+          "(e.g., `fluidPage(theme = bslib::bs_theme())`).",
           call. = FALSE
         )
-        bootstrapLib(bslib::bs_theme(version = 4))
-      })
+      }),
+      tagAppendAttributes(
+        nav, class = paste0("card-header-", type)
+      )
     )
   }
 

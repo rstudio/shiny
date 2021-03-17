@@ -88,9 +88,9 @@ rewire_namespace_handler <- function(pkgname, symbolname, value) {
 # R3.6 changed the RNGkind() default. This restores the old default
 # before calling set.seed() so we can have consistent random results
 # across R versions.
-set_seed <- function(x) {
+with_private_seed <- function(x) {
   kind <- RNGkind()
-  on.exit(do.call(RNGkind, as.list(kind)))
+  on.exit(do.call(RNGkind, as.list(kind)), add = TRUE)
   suppressWarnings(RNGversion("3.5.0"))
-  set.seed(x)
+  withPrivateSeed(x)
 }

@@ -1,15 +1,15 @@
 # tabsetPanel() et al. use p_randomInt() to generate ids (which uses withPrivateSeed()),
 # so we need to fix Shiny's private seed in order to make their HTML output deterministic
 navlist_panel <- function(...) {
-  withPrivateSeed(set_seed(100))
+  with_private_seed(set.seed(100))
   navlistPanel(...)
 }
 navbar_page <- function(...) {
-  withPrivateSeed(set_seed(100))
+  with_private_seed(set.seed(100))
   navbarPage(...)
 }
 tabset_panel <- function(...) {
-  withPrivateSeed(set_seed(100))
+  with_private_seed(set.seed(100))
   tabsetPanel(...)
 }
 

@@ -83,3 +83,11 @@ rewire_namespace_handler <- function(pkgname, symbolname, value) {
     }
   }
 }
+
+
+# R3.6 changed the default for sample.kind from Rounding to Rejection.
+# Here we fix it so that the unit tests produce consistent results
+# across R versions.
+set_seed <- function(x) {
+  suppressWarnings(set.seed(x, sample.kind = "Rounding"))
+}

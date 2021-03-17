@@ -1,20 +1,28 @@
 # tabsetPanel() et al. use p_randomInt() to generate ids (which uses withPrivateSeed()),
 # so we need to fix Shiny's private seed in order to make their HTML output deterministic
 navlist_panel <- function(...) {
-  with_private_seed(set.seed(100))
+
+  withPrivateSeed(set.seed(100))
   navlistPanel(...)
 }
 navbar_page <- function(...) {
-  with_private_seed(set.seed(100))
+  withPrivateSeed(set.seed(100))
   navbarPage(...)
 }
 tabset_panel <- function(...) {
-  with_private_seed(set.seed(100))
+  withPrivateSeed(set.seed(100))
   tabsetPanel(...)
 }
 
+expect_snapshot2 <- function(...) {
+  if (getRversion() < "3.6.0") {
+    skip("Skipping non-deterministic snapshots on R < 3.6")
+  }
+  expect_snapshot(...)
+}
+
 expect_snapshot_bslib <- function(x, ...) {
-  expect_snapshot(bslib_tags(x), ...)
+  expect_snapshot2(bslib_tags(x), ...)
 }
 
 # Simulates the UI tags that would be produced by
@@ -33,6 +41,7 @@ panels <- list(
 )
 
 test_that("tabsetPanel() markup is correct", {
+
   default <- tabset_panel(!!!panels)
   pills <- tabset_panel(
     !!!panels, type = "pills", selected = "B",
@@ -40,8 +49,8 @@ test_that("tabsetPanel() markup is correct", {
     footer = div(class = "content-footer")
   )
   # BS3
-  expect_snapshot(default)
-  expect_snapshot(pills)
+  expect_snapshot2(default)
+  expect_snapshot2(pills)
   # BS4
   expect_snapshot_bslib(default)
   expect_snapshot_bslib(pills)
@@ -51,14 +60,14 @@ test_that("tabsetPanel() markup is correct", {
 
 test_that("navbarPage() markup is correct", {
   nav_page <- navbar_page("Title", !!!panels)
-  expect_snapshot(nav_page)
+  expect_snapshot2(nav_page)
   expect_snapshot_bslib(nav_page)
 })
 
 # navlistPanel() can handle strings, but the others can't
 test_that("String input is handled properly", {
   nav_list <- navlist_panel(!!!c(list("A header"), panels))
-  expect_snapshot(nav_list)
+  expect_snapshot2(nav_list)
   expect_snapshot_bslib(nav_list)
   expect_error(
     tabsetPanel(!!!c(list("A header"), panels)),
@@ -73,7 +82,7 @@ test_that("Shiny.tag input produces a warning", {
   # sensible (which is why we now throw a warning), but it's probably
   # too late to change the behavior (it could break user code to do
   # anything different)
-  expect_snapshot(tab_tags)
+  expect_snapshot2(tab_tags)
 })
 
 test_that("tabPanelBody validates it's input", {

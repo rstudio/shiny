@@ -85,9 +85,12 @@ rewire_namespace_handler <- function(pkgname, symbolname, value) {
 }
 
 
-# R3.6 changed the default for sample.kind from Rounding to Rejection.
-# Here we fix it so that the unit tests produce consistent results
+# R3.6 changed the RNGkind() default. This restores the old default
+# before calling set.seed() so we can have consistent random results
 # across R versions.
 set_seed <- function(x) {
-  suppressWarnings(set.seed(x, sample.kind = "Rounding"))
+  kind <- RNGkind()
+  on.exit(do.call(RNGkind, as.list(kind)))
+  suppressWarnings(RNGversion("3.5.0"))
+  set.seed(x)
 }

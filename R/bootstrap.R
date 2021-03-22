@@ -778,12 +778,6 @@ isTabPanel <- function(x) {
   tagHasClass(x, "tab-pane")
 }
 
-tagHasClass <- function(x, class) {
-  if (!inherits(x, "shiny.tag")) return(FALSE)
-  classes <- tagGetAttribute(x, "class") %||% ""
-  class %in% strsplit(classes, "\\s+")[[1]]
-}
-
 #' @rdname tabPanel
 #' @export
 navLink <- function(title, href, ..., icon = NULL, target = "_blank") {
@@ -814,24 +808,6 @@ isNavForm <- function(x) {
 
 isNavLike <- function(x) {
   isTabPanel(x) || isNavbarMenu(x) || isNavLink(x) || isNavForm(x)
-}
-
-#' @param menuName `[character(1)]`\cr A value that identifies the
-#'   `navbarMenu()`. Required for using `insertTab()`, `removeTab()`,
-#'   etc with an entire `navbarMenu()`.
-#'
-#' @rdname tabPanel
-#' @export
-navbarMenu <- function(title, ..., menuName = title, icon = NULL) {
-  structure(list(title = title,
-                 menuName = menuName,
-                 tabs = list2(...),
-                 iconClass = iconClass(icon)),
-            class = "shiny.navbarmenu")
-}
-
-isNavbarMenu <- function(x) {
-  inherits(x, "shiny.navbarmenu")
 }
 
 
@@ -1148,8 +1124,8 @@ buildTabItem <- function(index, tabsetId, foundSelected, tabs = NULL,
   # The behavior is undefined at this point, so construct a condition message
   msg <- paste0(
     "Expected a collection `tabPanel()`s",
-    if (is.null(textFilter)) " and `tabPanelMenus()`.",
-    if (!is.null(textFilter)) ", `tabPanelMenus()`, and/or character strings.",
+    if (is.null(textFilter)) " and `navbarMenu()`.",
+    if (!is.null(textFilter)) ", `navbarMenu()`, and/or character strings.",
     " Consider using `header` or `footer` if you wish to place content above (or below) every panel's contents"
   )
 

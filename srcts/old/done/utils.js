@@ -360,10 +360,3 @@ function getComputedLinkColor(el) {
   el.removeChild(div);
   return linkColor;
 }
-
-function isBS3() {
-  if (!$.fn.tooltip) {
-    return false;
-  }
-  return $.fn.tooltip.Constructor.VERSION.match(/^3\./);
-}

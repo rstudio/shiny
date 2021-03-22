@@ -294,7 +294,6 @@ basicPage <- function(...) {
 #' @param title The title to use for the browser window/tab (it will not be
 #'   shown in the document).
 #' @param bootstrap If `TRUE`, load the Bootstrap CSS library.
-#' @param theme URL to alternative Bootstrap stylesheet.
 #' @inheritParams bootstrapPage
 #'
 #' @family layout functions
@@ -389,9 +388,6 @@ collapseSizes <- function(padding) {
 #'   layout.
 #' @param responsive This option is deprecated; it is no longer optional with
 #'   Bootstrap 3.
-#' @param theme Alternative Bootstrap stylesheet (normally a css file within the
-#'   www directory). For example, to use the theme located at
-#'   `www/bootstrap.css` you would use `theme = "bootstrap.css"`.
 #' @param windowTitle The title that should be displayed by the browser window.
 #'   Useful if `title` is not a string.
 #' @inheritParams bootstrapPage
@@ -553,7 +549,6 @@ navbarPage <- function(title,
   page
 }
 
-
 navbarPageDeps <- function(theme) {
   name <- "navbarPage"
   version <- packageVersion("shiny")
@@ -571,6 +566,24 @@ navbarPageDeps <- function(theme) {
       name, version, cache_key_extra = version
     )
   }
+}
+
+#' @param menuName A name that identifies this `navbarMenu`. This
+#'   is needed if you want to insert/remove or show/hide an entire
+#'   `navbarMenu`.
+#'
+#' @rdname navbarPage
+#' @export
+navbarMenu <- function(title, ..., menuName = title, icon = NULL) {
+  structure(list(title = title,
+                 menuName = menuName,
+                 tabs = list2(...),
+                 iconClass = iconClass(icon)),
+            class = "shiny.navbarmenu")
+}
+
+isNavbarMenu <- function(x) {
+  inherits(x, "shiny.navbarmenu")
 }
 
 #' Create a well panel
@@ -741,6 +754,12 @@ tabPanel <- function(title, ..., value = title, icon = NULL) {
   )
 }
 
+isTabPanel <- function(x) {
+  if (!inherits(x, "shiny.tag")) return(FALSE)
+  class <- tagGetAttribute(x, "class") %||% ""
+  "tab-pane" %in% strsplit(class, "\\s+")[[1]]
+}
+
 #' @rdname tabPanel
 #' @export
 tabPanelBody <- function(value, ..., icon = NULL) {
@@ -890,7 +909,6 @@ tabsetPanel <- function(...,
                         type = c("tabs", "pills", "hidden"),
                         header = NULL,
                         footer = NULL,
-                        card = FALSE,
                         position = deprecated()) {
   if (lifecycle::is_present(position)) {
     shinyDeprecated(
@@ -905,36 +923,15 @@ tabsetPanel <- function(...,
   type <- match.arg(type)
   tabset <- buildTabset(..., ulClass = paste0("nav nav-", type), id = id, selected = selected)
 
-  nav <- tabset$navList
-  if (card) {
-    nav <- tags$div(
-      class = "card-header",
-      tagAppendAttributes(
-        nav, class = paste0("card-header-", type)
-      ),
-      tagFunction(function() {
-        if (getCurrentVersion() >= 4) {
-          return(NULL)
-        }
-        warning(
-          "`tabsetPanel(card = TRUE)` requires Bootstrap 4 or higher, ",
-          "so the app has been upgraded from Bootstrap 3 to 4. ",
-          "To remove this warning, either supply `theme = bslib::bs_theme()` ",
-          "to the app's page layout or set `card = FALSE`.",
-          call. = FALSE
-        )
-        bootstrapLib(bslib::bs_theme(version = 4))
-      })
-    )
-  }
-
-  tabs <- tags$div(class = "tabbable", class = if (card) "card", nav)
-  content <- dropNulls(list(header, tabset$content, footer))
-  if (card) {
-    tagAppendChild(tabs, tags$div(class = "card-body", !!!content))
-  } else {
-    tagAppendChildren(tabs, content)
-  }
+  tags$div(
+    class = "tabbable",
+    !!!dropNulls(list(
+      tabset$navList,
+      header,
+      tabset$content,
+      footer
+    ))
+  )
 }
 
 #' Create a navigation list panel

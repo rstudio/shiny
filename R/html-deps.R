@@ -49,6 +49,12 @@ processDeps <- function(tags, session) {
   )
   names(dependencies) <- NULL
 
+  # If ui is a tagFunction() (e.g., insertTab() et al),
+  # then doRenderTags() won't work...
+  if (inherits(ui, "shiny.tag.function")) {
+    ui <- renderTags(ui)$html
+  }
+
   list(
     html = doRenderTags(tagList(ui)), # TODO: doRenderTags() shouldn't fail on a tagFunction()
     deps = dependencies

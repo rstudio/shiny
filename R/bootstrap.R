@@ -49,7 +49,7 @@ bootstrapPage <- function(..., title = NULL, responsive = deprecated(), theme = 
       tags$head(tags$link(rel="stylesheet", type="text/css", href=theme))
     },
     # remainder of tags passed to the function
-    rlang::list2(...)
+    list2(...)
   )
 
   # If theme is a bslib::bs_theme() object, bootstrapLib() needs to come first

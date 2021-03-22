@@ -16,7 +16,7 @@ tabset_panel <- function(...) {
 
 expect_snapshot2 <- function(...) {
   if (getRversion() < "3.6.0") {
-    skip("Skipping non-deterministic snapshots on R < 3.6")
+    skip("Skipping snapshots on R < 3.6 because of different RNG method")
   }
   expect_snapshot(...)
 }

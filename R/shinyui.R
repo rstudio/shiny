@@ -51,7 +51,7 @@ renderPage <- function(ui, showcase=0, testMode=FALSE) {
     version <- getOption("shiny.jquery.version", 3)
     if (version == 3) {
       return(htmlDependency(
-        "jquery", "3.5.1",
+        "jquery", version_jquery,
         c(href = "shared"),
         script = "jquery.min.js"
       ))

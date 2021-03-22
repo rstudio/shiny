@@ -1,0 +1,51 @@
+root: true
+env:
+  browser: true
+  es6: true
+extends:
+  - 'eslint:recommended'
+  - 'plugin:@typescript-eslint/recommended'
+  - 'plugin:jest/recommended'
+  - 'prettier/@typescript-eslint'
+  - 'plugin:prettier/recommended'
+  - 'plugin:jest-dom/recommended'
+globals:
+  Atomics: readonly
+  SharedArrayBuffer: readonly
+parser: '@typescript-eslint/parser'
+parserOptions:
+  ecmaVersion: 2018
+  sourceType: module
+plugins:
+  - '@typescript-eslint'
+  - prettier
+  - jest-dom
+rules:
+  "@typescript-eslint/explicit-function-return-type":
+    - off
+  "@typescript-eslint/no-explicit-any":
+    - off
+  camelcase:
+    - error
+  default-case:
+    - error
+  indent:
+    - error
+    - 2
+    - SwitchCase: 1
+  linebreak-style:
+    - error
+    - unix
+  quotes:
+    - error
+    - double
+    - avoid-escape
+  semi:
+    - error
+    - always
+  newline-after-var:
+    - error
+    - always
+  dot-location:
+    - error
+    - property

@@ -5,7 +5,6 @@
 \alias{tabPanelBody}
 \alias{navLink}
 \alias{navForm}
-\alias{navbarMenu}
 \title{Create navigation items}
 \usage{
 tabPanel(title, ..., value = title, icon = NULL)
@@ -15,8 +14,6 @@ tabPanelBody(value, ..., icon = NULL)
 navLink(title, href, ..., icon = NULL, target = "_blank")
 
 navForm(...)
-
-navbarMenu(title, ..., menuName = title, icon = NULL)
 }
 \arguments{
 \item{title}{\verb{[character(1)]}\cr A display title for the nav item.}
@@ -39,10 +36,6 @@ controls like \code{\link[=radioButtons]{radioButtons()}} -- in this scenario, c
 \code{\link[=tabPanelBody]{tabPanelBody()}} with \code{tabsetPanel(type = "hidden")}).}
 
 \item{icon}{An \code{\link[=icon]{icon()}} to appear to the left of the nav item's \code{title}.}
-
-\item{menuName}{\verb{[character(1)]}\cr A value that identifies the
-\code{navbarMenu()}. Required for using \code{insertTab()}, \code{removeTab()},
-etc with an entire \code{navbarMenu()}.}
 }
 \value{
 A nav item that may be passed to a nav container (e.g. \code{\link[=tabsetPanel]{tabsetPanel()}}

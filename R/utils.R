@@ -1176,7 +1176,7 @@ reactiveStop <- function(message = "", class = NULL) {
 #'
 #' }
 validate <- function(..., errorClass = character(0)) {
-  results <- sapply(rlang::list2(...), function(x) {
+  results <- sapply(list2(...), function(x) {
     # Detect NULL or NA
     if (is.null(x))
       return(NA_character_)

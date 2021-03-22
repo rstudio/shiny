@@ -80,7 +80,7 @@ Imports:
     mime (>= 0.3),
     jsonlite (>= 0.9.16),
     xtable,
-    htmltools (>= 0.5.1.9000),
+    htmltools (>= 0.5.0.9001),
     R6 (>= 2.0),
     sourcetools,
     later (>= 1.0.0),
@@ -204,4 +204,3 @@ Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RdMacros: lifecycle
 Config/testthat/edition: 3
-Remotes: rstudio/htmltools

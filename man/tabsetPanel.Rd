@@ -11,7 +11,6 @@ tabsetPanel(
   type = c("tabs", "pills", "hidden"),
   header = NULL,
   footer = NULL,
-  card = FALSE,
   position = deprecated()
 )
 }

@@ -707,6 +707,7 @@ tabPanelBody <- function(value, ..., icon = NULL) {
 #'   conjunction with [tabPanelBody()] and [updateTabsetPanel()] to control the
 #'   active tab via other input controls. (See example below)}
 #' }
+#' @param card whether to wrap the navigation controls and content into an 'output card'. This functionality currently requires a [bslib::bs_theme()] in the page layout with `version = 4` or higher.
 #' @param position This argument is deprecated; it has been discontinued in
 #'   Bootstrap 3.
 #' @inheritParams navbarPage
@@ -761,6 +762,7 @@ tabsetPanel <- function(...,
                         type = c("tabs", "pills", "hidden"),
                         header = NULL,
                         footer = NULL,
+                        card = FALSE,
                         position = deprecated()) {
   if (lifecycle::is_present(position)) {
     shinyDeprecated(
@@ -775,15 +777,34 @@ tabsetPanel <- function(...,
   type <- match.arg(type)
   tabset <- buildTabset(..., ulClass = paste0("nav nav-", type), id = id, selected = selected)
 
-  tags$div(
-    class = "tabbable",
-    !!!dropNulls(list(
-      tabset$navList,
-      header,
-      tabset$content,
-      footer
-    ))
-  )
+  nav <- tabset$navList
+  if (card) {
+    nav <- tags$div(
+      class = "card-header",
+      tagFunction(function() {
+        if (getCurrentVersion() >= 4) {
+          return(NULL)
+        }
+        stop(
+          "`tabsetPanel(card = TRUE)` requires Bootstrap 4 or higher. ",
+          "Please supply `bslib::bs_theme()` to the UI's page layout function ",
+          "(e.g., `fluidPage(theme = bslib::bs_theme())`).",
+          call. = FALSE
+        )
+      }),
+      tagAppendAttributes(
+        nav, class = paste0("card-header-", type)
+      )
+    )
+  }
+
+  tabs <- tags$div(class = "tabbable", class = if (card) "card", nav)
+  content <- dropNulls(list(header, tabset$content, footer))
+  if (card) {
+    tagAppendChild(tabs, tags$div(class = "card-body", !!!content))
+  } else {
+    tagAppendChildren(tabs, content)
+  }
 }
 
 #' Create a navigation list panel

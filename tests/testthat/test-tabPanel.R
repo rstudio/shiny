@@ -54,6 +54,8 @@ test_that("tabsetPanel() markup is correct", {
   # BS4
   expect_snapshot_bslib(default)
   expect_snapshot_bslib(pills)
+  card <- tabset_panel(!!!panels, card = TRUE)
+  expect_snapshot_bslib(card)
 })
 
 test_that("navbarPage() markup is correct", {

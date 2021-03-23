@@ -497,6 +497,7 @@ navbarPage <- function(title,
     contentDiv <- tagAppendChild(contentDiv, div(class="row", footer))
 
   # build the page
+  # TODO: newNavContainer()?
   bootstrapPage(
     title = windowTitle,
     responsive = responsive,
@@ -775,15 +776,107 @@ tabsetPanel <- function(...,
   type <- match.arg(type)
   tabset <- buildTabset(..., ulClass = paste0("nav nav-", type), id = id, selected = selected)
 
-  tags$div(
-    class = "tabbable",
-    !!!dropNulls(list(
-      tabset$navList,
-      header,
-      tabset$content,
-      footer
-    ))
+
+  content <- dropNulls(
+    list(header, tabset$content, footer)
   )
+  res <- tags$div(
+    class = "tabbable",
+    tabset$navList,
+    !!!content
+  )
+  newNavContainer(res, tabset$navList, content)
+}
+
+
+newNavContainer <- function(x, nav, content) {
+  class(x) <- c("shinyNavContainer", class(x))
+  attr(x, "navList") <- nav
+  attr(x, "navContent") <- content
+  x
+}
+
+#' @export
+getNavList <- function(x) {
+  UseMethod("getNavList")
+}
+
+#' @export
+getNavList.shinyNavContainer <- function(x) {
+  attr(x, "navList")
+}
+
+#' @export
+getNavContent <- function(x) {
+  UseMethod("getNavContent")
+}
+
+#' @export
+getNavContent.shinyNavContainer <- function(x) {
+  attr(x, "navContent")
+}
+
+#' Create a card
+#'
+#' A wrapper for Bootstrap 4+'s `card` component.
+#'
+#' @param ... UI elements for the `card()`'s body.
+#' @param header UI elements for the `card()`'s header.
+#' @param footer UI elements for the `card()`'s footer.
+#' @return The newly created card container.
+#' @export
+#' @examples
+#'
+#' tabs <- tabsetPanel(
+#'   tabPanel("A", "a"),
+#'   tabPanel("B", "b")
+#' )
+#' ui <- fluidPage(
+#'   theme = bslib::bs_theme(),
+#'   card(
+#'     getNavContent(tabs),
+#'     header = getNavList(tabs)
+#'   )
+#' )
+#'
+#' if (interactive()) {
+#'   shinyApp(ui, function(...) {})
+#' }
+card <- function(..., header = NULL, footer = NULL) {
+  card <- div(class = "card")
+  if (length(header)) {
+    if (tagHasClass(header, "nav-tabs")) {
+      header <- tagAppendAttributes(
+        header, class = "card-header-tabs"
+      )
+    }
+    if (tagHasClass(header, "nav-pills")) {
+      header <- tagAppendAttributes(
+        header, class = "card-header-pills"
+      )
+    }
+    card <- tagAppendChild(
+      card, div(class = "card-header", header)
+    )
+  }
+  card <- tagAppendChild(
+    card, div(class = "card-body", ...)
+  )
+  if (length(footer)) {
+    card <- tagAppendChild(
+      card, div(class = "card-footer", footer)
+    )
+  }
+  tagFunction(function() {
+    if (getCurrentVersion() >= 4) {
+      return(card)
+    }
+    stop(
+      "card() requires Bootstrap 4 or higher. ",
+      "Please supply `bslib::bs_theme()` to the UI's page layout function ",
+      "(e.g., `fluidPage(theme = bslib::bs_theme())`).",
+    )
+  })
 }
 
 #' Create a navigation list panel
@@ -850,6 +943,7 @@ navlistPanel <- function(...,
 
   row <- if (fluid) fluidRow else fixedRow
 
+  # TODO: newNavContainer()?
   row(
     column(widths[[1]], class = if (well) "well", tabset$navList),
     column(

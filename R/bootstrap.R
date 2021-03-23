@@ -498,7 +498,7 @@ navbarPage <- function(title,
     contentDiv <- tagAppendChild(contentDiv, div(class="row", footer))
 
   # build the page
-  page <- bootstrapPage(
+  bootstrapPage(
     title = windowTitle,
     responsive = responsive,
     theme = theme,
@@ -506,30 +506,6 @@ navbarPage <- function(title,
     tags$nav(class=navbarClass, role="navigation", containerDiv),
     contentDiv
   )
-
-  attachDependencies(
-    page, bslib::bs_dependency_defer(navbarPageDeps),
-    append = TRUE
-  )
-}
-
-navbarPageDeps <- function(theme) {
-  name <- "navbarPage"
-  version <- packageVersion("shiny")
-
-  if (!bslib::is_bs_theme(theme)) {
-    htmlDependency(
-      name, version,
-      src = c(href = "shared/navbarPage"),
-      stylesheet = "navbarPage.min.css"
-    )
-  } else {
-    scss <- system.file("www/shared/navbarPage/navbarPage.scss", package = "shiny")
-    bslib::bs_dependency(
-      sass::sass_file(scss), theme,
-      name, version, cache_key_extra = version
-    )
-  }
 }
 
 #' @param menuName A name that identifies this `navbarMenu`. This

@@ -13,13 +13,17 @@ navtreePanel <- function(..., id = NULL,
 
   row <- if (fluid) fluidRow else fixedRow
 
-  row(
-    class = "navtree-container",
-    column(widths[[1]], tabset$navList),
-    column(widths[[2]], tabset$content),
+  navList <- attachDependencies(
+    tabset$navList,
     bslib::bs_dependency_defer(navtreeCssDependency)
   )
+
+  row(
+    column(widths[[1]], navList),
+    column(widths[[2]], tabset$content)
+  )
 }
+
 
 # Algorithm inspired by buildTabset() but we need different HTML/CSS,
 # and menus are rendered as collapse toggles instead of Bootstrap dropdowns

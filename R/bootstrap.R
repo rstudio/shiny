@@ -429,7 +429,6 @@ navbarPage <- function(title,
                        position = c("static-top", "fixed-top", "fixed-bottom"),
                        header = NULL,
                        footer = NULL,
-                       right = NULL,
                        inverse = FALSE,
                        collapsible = FALSE,
                        collapsable = deprecated(),
@@ -511,6 +510,7 @@ navbarPage <- function(title,
 #' @param menuName A name that identifies this `navbarMenu`. This
 #'   is needed if you want to insert/remove or show/hide an entire
 #'   `navbarMenu`.
+#' @param align how to align the dropdown menu.
 #'
 #' @rdname navbarPage
 #' @export
@@ -720,15 +720,6 @@ isTabPanel <- function(x) {
   tagHasClass(x, "tab-pane")
 }
 
-#' @export
-navSpacer <- function() {
-  div(class = "nav-spacer")
-}
-
-isNavSpacer <- function(x) {
-  tagHasClass(x, "nav-spacer")
-}
-
 #' @rdname tabPanel
 #' @export
 navItem <- function(...) {
@@ -741,8 +732,14 @@ isNavItem <- function(x) {
   inherits(x, "shiny_nav_item")
 }
 
-isNavLike <- function(x) {
-  isTabPanel(x) || isNavbarMenu(x) || isNavItem(x)
+#' @rdname tabPanel
+#' @export
+navSpacer <- function() {
+  div(class = "nav-spacer")
+}
+
+isNavSpacer <- function(x) {
+  tagHasClass(x, "nav-spacer")
 }
 
 
@@ -1048,11 +1045,7 @@ buildTabItem <- function(index, tabsetId, foundSelected, tabs = NULL,
     return(buildNavItem(divTag, tabsetId, index))
   }
 
-  if (isNavSpacer(divTag)) {
-    return(list(liTag = divTag, divTag = NULL))
-  }
-
-  if (isNavItem(divTag)) {
+  if (isNavItem(divTag) || isNavSpacer(divTag)) {
     return(
       list(liTag = divTag, divTag = NULL)
     )

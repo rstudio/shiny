@@ -13,7 +13,6 @@ navbarPage(
   position = c("static-top", "fixed-top", "fixed-bottom"),
   header = NULL,
   footer = NULL,
-  right = NULL,
   inverse = FALSE,
   collapsible = FALSE,
   collapsable = deprecated(),
@@ -99,6 +98,8 @@ is needed if you want to insert/remove or show/hide an entire
 \code{navbarMenu}.}
 
 \item{icon}{Optional icon to appear on a \code{navbarMenu} tab.}
+
+\item{align}{how to align the dropdown menu.}
 }
 \value{
 A UI defintion that can be passed to the \link{shinyUI} function.

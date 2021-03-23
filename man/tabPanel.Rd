@@ -4,6 +4,7 @@
 \alias{tabPanel}
 \alias{tabPanelBody}
 \alias{navItem}
+\alias{navSpacer}
 \title{Create navigation items}
 \usage{
 tabPanel(title, ..., value = title, icon = NULL)
@@ -11,6 +12,8 @@ tabPanel(title, ..., value = title, icon = NULL)
 tabPanelBody(value, ..., icon = NULL)
 
 navItem(...)
+
+navSpacer()
 }
 \arguments{
 \item{title}{\verb{[character(1)]}\cr A display title for the nav item.}

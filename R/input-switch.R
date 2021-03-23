@@ -31,39 +31,35 @@ switchInput <- function(inputId, label, value = FALSE, width = NULL) {
 
   inputTag <- tags$input(
     id = inputId, type = "checkbox",
-    class = "custom-control-input",
-    # TODO: checkboxInput() could do this too
     checked = if (isTRUE(value)) "checked"
   )
 
-  labelTag <- tagAppendAttributes(
-    # TODO: checkboxInput() should do this too (for accessibility)?
-    shinyInputLabel(inputId, label),
-    class = "custom-control-label"
-  )
+  # TODO: checkboxInput() should do this too (for accessibility)?
+  labelTag <- shinyInputLabel(inputId, label)
 
-  div(
-    class = "shiny-input-container",
-    style = css(width = validateCssUnit(width)),
+  tagFunction(function() {
+    if (getCurrentVersion() < 4) {
+      stop(
+        "switchInput() requires Bootstrap 4 or higher. ",
+        "Please supply `bslib::bs_theme()` to the UI's page layout function ",
+        "(e.g., `fluidPage(theme = bslib::bs_theme())`).",
+        call. = FALSE
+      )
+    }
+
+    isBS4 <- getCurrentVersion() == 4
     div(
-      class = "custom-control custom-switch",
-      inputTag, labelTag
-    ),
-    tagFunction(function() {
-      if (getCurrentVersion() < 4) {
-        stop(
-          "switchInput() requires Bootstrap 4 or higher. ",
-          "Please supply `bslib::bs_theme()` to the UI's page layout function ",
-          "(e.g., `fluidPage(theme = bslib::bs_theme())`).",
-          call. = FALSE
+      class = "shiny-input-container",
+      style = css(width = validateCssUnit(width)),
+      div(
+        class = if (isBS4) "custom-control custom-switch" else "form-check form-switch",
+        tagAppendAttributes(
+          inputTag, class = if (isBS4) "custom-control-input" else "form-check-input"
+        ),
+        tagAppendAttributes(
+          labelTag, class = if (isBS4) "custom-control-label" else "form-check-label"
         )
-      }
-    })
-  )
+      )
+    )
+  })
 }
-
-
-
-
-#' @export
-updateSwitchInput <- updateCheckboxInput

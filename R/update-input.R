@@ -115,6 +115,12 @@ updateCheckboxInput <- function(session = getDefaultReactiveDomain(), inputId, l
   session$sendInputMessage(inputId, message)
 }
 
+#' @rdname updateCheckboxInput
+#' @export
+updateSwitchInput <- function(session = getDefaultReactiveDomain(), inputId, label = NULL, value = NULL) {
+  updateCheckboxInput(session = session, inputId = inputId, label = label, value = value)
+}
+
 
 #' Change the label or icon of an action button on the client
 #'

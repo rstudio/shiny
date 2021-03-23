@@ -2,9 +2,17 @@
 % Please edit documentation in R/update-input.R
 \name{updateCheckboxInput}
 \alias{updateCheckboxInput}
+\alias{updateSwitchInput}
 \title{Change the value of a checkbox input on the client}
 \usage{
 updateCheckboxInput(
+  session = getDefaultReactiveDomain(),
+  inputId,
+  label = NULL,
+  value = NULL
+)
+
+updateSwitchInput(
   session = getDefaultReactiveDomain(),
   inputId,
   label = NULL,

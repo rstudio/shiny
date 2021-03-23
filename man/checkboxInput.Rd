@@ -57,6 +57,7 @@ Other input elements:
 \code{\link{selectInput}()},
 \code{\link{sliderInput}()},
 \code{\link{submitButton}()},
+\code{\link{switchInput}()},
 \code{\link{textAreaInput}()},
 \code{\link{textInput}()},
 \code{\link{varSelectInput}()}

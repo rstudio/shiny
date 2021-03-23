@@ -156,6 +156,7 @@ Collate:
     'input-select.R'
     'input-slider.R'
     'input-submit.R'
+    'input-switch.R'
     'input-text.R'
     'input-textarea.R'
     'input-utils.R'

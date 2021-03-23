@@ -151,6 +151,7 @@ Other input elements:
 \code{\link{radioButtons}()},
 \code{\link{selectInput}()},
 \code{\link{submitButton}()},
+\code{\link{switchInput}()},
 \code{\link{textAreaInput}()},
 \code{\link{textInput}()},
 \code{\link{varSelectInput}()}

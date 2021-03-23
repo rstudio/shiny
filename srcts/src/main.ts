@@ -4627,7 +4627,7 @@ function main(): void {
     },
     getState: function (el) {
       return {
-        label: $(el).parent().find("span").text(),
+        label: $(el).parent().find("span, label").text(),
         value: el.checked,
       };
     },
@@ -4637,7 +4637,7 @@ function main(): void {
       // checkboxInput()'s label works different from other
       // input labels...the label container should always exist
       if (data.hasOwnProperty("label"))
-        $(el).parent().find("span").text(data.label);
+        $(el).parent().find("span, label").text(data.label);
 
       $(el).trigger("change");
     },

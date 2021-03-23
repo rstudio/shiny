@@ -5163,7 +5163,7 @@
         },
         getState: function getState(el) {
           return {
-            label: import_jquery6.default(el).parent().find("span").text(),
+            label: import_jquery6.default(el).parent().find("span, label").text(),
             value: el.checked
           };
         },
@@ -5171,7 +5171,7 @@
           if (data.hasOwnProperty("value"))
             el.checked = data.value;
           if (data.hasOwnProperty("label"))
-            import_jquery6.default(el).parent().find("span").text(data.label);
+            import_jquery6.default(el).parent().find("span, label").text(data.label);
           import_jquery6.default(el).trigger("change");
         }
       });

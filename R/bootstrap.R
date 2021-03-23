@@ -637,17 +637,15 @@ helpText <- function(...) {
 #'
 #' Create "nav items" for use inside "nav containers" (e.g., [tabsetPanel()] or
 #' [navbarPage()]). Individual items are created with one of either `tabPanel()`
-#' (navigate to a panel of content), `navLink()` (navigate to remote content),
-#' or `navForm()` (for custom inline navigation, like search forms). Any
-#' collection of nav items can be grouped together in a menu with
-#' `navbarMenu()`.
+#' or `navItem()`. Any collection of nav items can be grouped together in a menu
+#' with `navbarMenu()`.
 #'
 #' @param title `[character(1)]`\cr A display title for the nav item.
 #' @param ... `[UI elements]`\cr
 #'   * For `tabPanel()`/`tabPanelBody()`: content to display when the tab is
 #'     active.
-#'   * For `navLink()`: arguments to the [a()] tag.
-#'   * For `navForm()`: the input form to place inline in the nav container.
+#'   * For `navItem()`: UI elements to place inside the nav (e.g., hyperlinks
+#'   [a()], [actionButton()]s, [textInput()], etc).
 #' @param value `[character(1)]`\cr A value associate with a `tabPanel()` to
 #'   determine when it is selected. This value may be supplied to the relevant
 #'   nav container's `selected` argument to show the tab immediately on page
@@ -664,26 +662,44 @@ helpText <- function(...) {
 #'
 #' @examples
 #'
-#' panels <- list(
-#'   tabPanel("Plot", "plot"),
-#'   tabPanel("Summary", "summary"),
-#'   tabPanel("Table", "table"),
+#' navItems <- list(
+#'   tabPanel("a", "tab a"),
+#'   tabPanel("b", "tab b"),
+#'   navItem(
+#'     tags$a(icon("github"), "Shiny", href = "https://github.com/rstudio/shiny", target = #' "_blank")
+#'   ),
+#'   navSpacer(),
 #'   navbarMenu(
-#'     "External links",
-#'     navLink("Shiny", "https://github.com/rstudio/shiny", icon("github"))
+#'     "Other links", align = "right",
+#'     tabPanel("b", "tab b"),
+#'     navItem(
+#'       tags$a(icon("r-project"), "RStudio", href = "https://rstudio.com", target = #' "_blank")
+#'     )
 #'   )
 #' )
 #'
-#' if (interactive()) {
-#'   shinyApp(
-#'     fluidPage(tabsetPanel(!!!panels, card = TRUE)),
-#'     function(...) {}
+#' navbar <- navbarPage(
+#'   title = "Title",
+#'   theme = bslib::bs_theme("navbar-bg" = "#0062cc"),
+#'   !!!navItems
+#' )
+#' if (interactive()) shinyApp(navbar, function(...) {})
+#'
+#'
+#' tabset <- fluidPage(
+#'   theme = bslib::bs_theme(),
+#'   tabsetPanel(
+#'     !!!navItems, type = "pills"
 #'   )
-#'   shinyApp(
-#'     navbarPage("Title", !!!panels[1:3], right = panels[[4]]),
-#'     function(...) {}
-#'   )
-#' }
+#' )
+#' if (interactive()) shinyApp(tabset, function(...) {})
+#'
+#' navlist <- fluidPage(
+#'   theme = bslib::bs_theme(),
+#'   tags$head(tags$style(".tab-content * {height: 100vh}")),
+#'   navlistPanel(!!!navItems)
+#' )
+#' if (interactive()) shinyApp(navlist, function(...) {})
 #'
 #' @export
 tabPanel <- function(title, ..., value = title, icon = NULL) {

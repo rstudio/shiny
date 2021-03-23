@@ -22,8 +22,8 @@ navSpacer()
 \itemize{
 \item For \code{tabPanel()}/\code{tabPanelBody()}: content to display when the tab is
 active.
-\item For \code{navLink()}: arguments to the \code{\link[=a]{a()}} tag.
-\item For \code{navForm()}: the input form to place inline in the nav container.
+\item For \code{navItem()}: UI elements to place inside the nav (e.g., hyperlinks
+\code{\link[=a]{a()}}, \code{\link[=actionButton]{actionButton()}}s, \code{\link[=textInput]{textInput()}}, etc).
 }}
 
 \item{value}{\verb{[character(1)]}\cr A value associate with a \code{tabPanel()} to
@@ -44,33 +44,49 @@ or \code{\link[=navbarPage]{navbarPage()}}).
 \description{
 Create "nav items" for use inside "nav containers" (e.g., \code{\link[=tabsetPanel]{tabsetPanel()}} or
 \code{\link[=navbarPage]{navbarPage()}}). Individual items are created with one of either \code{tabPanel()}
-(navigate to a panel of content), \code{navLink()} (navigate to remote content),
-or \code{navForm()} (for custom inline navigation, like search forms). Any
-collection of nav items can be grouped together in a menu with
-\code{navbarMenu()}.
+or \code{navItem()}. Any collection of nav items can be grouped together in a menu
+with \code{navbarMenu()}.
 }
 \examples{
 
-panels <- list(
-  tabPanel("Plot", "plot"),
-  tabPanel("Summary", "summary"),
-  tabPanel("Table", "table"),
+navItems <- list(
+  tabPanel("a", "tab a"),
+  tabPanel("b", "tab b"),
+  navItem(
+    tags$a(icon("github"), "Shiny", href = "https://github.com/rstudio/shiny", target = #' "_blank")
+  ),
+  navSpacer(),
   navbarMenu(
-    "External links",
-    navLink("Shiny", "https://github.com/rstudio/shiny", icon("github"))
+    "Other links", align = "right",
+    tabPanel("b", "tab b"),
+    navItem(
+      tags$a(icon("r-project"), "RStudio", href = "https://rstudio.com", target = #' "_blank")
+    )
   )
 )
 
-if (interactive()) {
-  shinyApp(
-    fluidPage(tabsetPanel(!!!panels, card = TRUE)),
-    function(...) {}
+navbar <- navbarPage(
+  title = "Title",
+  theme = bslib::bs_theme("navbar-bg" = "#0062cc"),
+  !!!navItems
+)
+if (interactive()) shinyApp(navbar, function(...) {})
+
+
+tabset <- fluidPage(
+  theme = bslib::bs_theme(),
+  tabsetPanel(
+    !!!navItems, type = "pills"
   )
-  shinyApp(
-    navbarPage("Title", !!!panels[1:3], right = panels[[4]]),
-    function(...) {}
-  )
-}
+)
+if (interactive()) shinyApp(tabset, function(...) {})
+
+navlist <- fluidPage(
+  theme = bslib::bs_theme(),
+  tags$head(tags$style(".tab-content * {height: 100vh}")),
+  navlistPanel(!!!navItems)
+)
+if (interactive()) shinyApp(navlist, function(...) {})
 
 }
 \seealso{

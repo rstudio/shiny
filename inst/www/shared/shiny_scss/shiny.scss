@@ -441,20 +441,32 @@ pre.shiny-text-output {
   display: none !important;
 }
 
-/* navSpacer() */
+/* CSS behind navSpacer() */
 @mixin nav-spacer() {
   .nav {
     /* Make sure nav container is flexbox (they aren't in BS3) */
     display: flex !important;
     display: -webkit-flex !important;
-    float: none !important;
-    > .nav-spacer {
-      margin-left: auto !important;
+    // Logic for horizontal nav (e.g., navbarPage(), tabsetPanel())
+    &:not(.nav-stacked, .flex-column) {
+      float: none !important;
+      > .nav-spacer {
+        margin-left: auto !important;
+      }
+      /* .form-inline doesn't vertically align in BS3? */
+      > .form-inline {
+        margin-top: auto;
+        margin-bottom: auto;
+      }
     }
-    /* .form-inline doesn't vertically align in BS3? */
-    > .form-inline {
-      margin-top: auto;
-      margin-bottom: auto;
+    // Logic for vertical nav (e.g., navbarPage(), tabsetPanel())
+    &.nav-stacked {
+      flex-direction: column;
+      -webkit-flex-direction: column;
+      height: 100%;
+      > .nav-spacer {
+        margin-top: auto !important;
+      }
     }
   }
 }

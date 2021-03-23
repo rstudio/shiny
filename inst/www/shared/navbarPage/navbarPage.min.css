@@ -1,1 +1,1 @@
-@media (min-width: 768px){.shiny-navbar-right{display:flex !important;display:-webkit-flex !important;float:none !important}.shiny-navbar-right>.nav-item-right{margin-left:auto !important}.shiny-navbar-right>.nav-item-right~.nav-item-right{margin-left:unset !important}.shiny-navbar-right>.form-inline{margin-top:auto;margin-bottom:auto}}
+@media (min-width: 768px){.navbar-nav{display:flex !important;display:-webkit-flex !important;float:none !important}.navbar-nav>.nav-spacer{margin-left:auto !important}.navbar-nav>.form-inline{margin-top:auto;margin-bottom:auto}}

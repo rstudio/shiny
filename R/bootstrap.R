@@ -459,40 +459,8 @@ navbarPage <- function(title,
   if (!is.null(id))
     selected <- restoreInput(id = id, default = selected)
 
-  ulClass <- "nav navbar-nav"
-
-  # Although the "correct" way to implement left/right nav is to
-  # put each nav inside it's own <ul> container, that would significantly
-  # complicate buildTabset() logic, and could potentially break
-  # user code. Instead, we apply some CSS trickery to .shiny-navbar-right
-  # that works for any version of bootstrap
-  if (!is.null(right)) {
-    # right understands a singular nav item or a list of them
-    if (isNavLike(right)) {
-      right <- list(right)
-    }
-    if (!all(vapply(right, isNavLike, logical(1)))) {
-      stop(
-        "`navbarPage(right=)` expects a list of nav-like objects ",
-        "(e.g., `tabPanel()`, `navbarMenu()`, `navLink()`, `navForm()`).",
-        call. = FALSE
-      )
-    }
-    ulClass <- paste(ulClass, "shiny-navbar-right")
-  }
-
   # build the tabset
-  tabset <- buildTabset(..., !!!right, ulClass = ulClass, id = id, selected = selected)
-
-  # Add a special class to each right-aligned nav item
-  if (!is.null(right)) {
-    nLeft <- length(list2(...))
-    idx <- seq.int(nLeft + 1, nLeft + length(right))
-    tabset$navList$children[idx] <- lapply(
-       tabset$navList$children[idx], tagAppendAttributes,
-       class = "nav-item-right"
-    )
-  }
+  tabset <- buildTabset(..., ulClass = "nav navbar-nav", id = id, selected = selected)
 
   containerClass <- paste0("container", if (fluid) "-fluid")
 
@@ -539,14 +507,10 @@ navbarPage <- function(title,
     contentDiv
   )
 
-  if (length(right) > 0) {
-    page <- attachDependencies(
-      page, bslib::bs_dependency_defer(navbarPageDeps),
-      append = TRUE
-    )
-  }
-
-  page
+  attachDependencies(
+    page, bslib::bs_dependency_defer(navbarPageDeps),
+    append = TRUE
+  )
 }
 
 navbarPageDeps <- function(theme) {
@@ -574,11 +538,13 @@ navbarPageDeps <- function(theme) {
 #'
 #' @rdname navbarPage
 #' @export
-navbarMenu <- function(title, ..., menuName = title, icon = NULL) {
+navbarMenu <- function(title, ..., menuName = title, icon = NULL,
+                       align = c("left", "right")) {
   structure(list(title = title,
                  menuName = menuName,
                  tabs = list2(...),
-                 iconClass = iconClass(icon)),
+                 iconClass = iconClass(icon),
+                 align = match.arg(align)),
             class = "shiny.navbarmenu")
 }
 
@@ -778,36 +744,29 @@ isTabPanel <- function(x) {
   tagHasClass(x, "tab-pane")
 }
 
-#' @rdname tabPanel
 #' @export
-navLink <- function(title, href, ..., icon = NULL, target = "_blank") {
-  args <- list2(
-    href = href, target = target,
-    icon, title, ...
-  )
-  link <- tags$a(!!!dropNulls(args))
-  class(link) <- c("shiny_nav_link", class(link))
-  link
+navSpacer <- function() {
+  div(class = "nav-spacer")
 }
 
-isNavLink <- function(x) {
-  inherits(x, "shiny_nav_link")
+isNavSpacer <- function(x) {
+  tagHasClass(x, "nav-spacer")
 }
 
 #' @rdname tabPanel
 #' @export
-navForm <- function(...) {
-  form <- tags$form(class = "form-inline", ...)
-  class(form) <- c("shiny_nav_form", class(form))
-  form
+navItem <- function(...) {
+  item <- tags$li(class = "nav-item form-inline", ...)
+  class(item) <- c("shiny_nav_item", class(item))
+  item
 }
 
-isNavForm <- function(x) {
-  inherits(x, "shiny_nav_form")
+isNavItem <- function(x) {
+  inherits(x, "shiny_nav_item")
 }
 
 isNavLike <- function(x) {
-  isTabPanel(x) || isNavbarMenu(x) || isNavLink(x) || isNavForm(x)
+  isTabPanel(x) || isNavbarMenu(x) || isNavItem(x)
 }
 
 
@@ -1097,8 +1056,12 @@ buildTabItem <- function(index, tabsetId, foundSelected, tabs = NULL,
 
   if (isNavbarMenu(divTag)) {
     # tabPanelMenu item: build the child tabset
+    ulClass <- "dropdown-menu"
+    if (identical(divTag$align, "right")) {
+      ulClass <- paste(ulClass, "dropdown-menu-right")
+    }
     tabset <- buildTabset(
-      !!!divTag$tabs, ulClass = "dropdown-menu",
+      !!!divTag$tabs, ulClass = ulClass,
       textFilter = navbarMenuTextFilter,
       foundSelected = foundSelected
     )
@@ -1109,13 +1072,11 @@ buildTabItem <- function(index, tabsetId, foundSelected, tabs = NULL,
     return(buildNavItem(divTag, tabsetId, index))
   }
 
-  if (isNavLink(divTag)) {
-    return(
-      list(liTag = tags$li(class = "nav-item", divTag), divTag = NULL)
-    )
+  if (isNavSpacer(divTag)) {
+    return(list(liTag = divTag, divTag = NULL))
   }
 
-  if (isNavForm(divTag)) {
+  if (isNavItem(divTag)) {
     return(
       list(liTag = divTag, divTag = NULL)
     )

@@ -3,17 +3,14 @@
 \name{tabPanel}
 \alias{tabPanel}
 \alias{tabPanelBody}
-\alias{navLink}
-\alias{navForm}
+\alias{navItem}
 \title{Create navigation items}
 \usage{
 tabPanel(title, ..., value = title, icon = NULL)
 
 tabPanelBody(value, ..., icon = NULL)
 
-navLink(title, href, ..., icon = NULL, target = "_blank")
-
-navForm(...)
+navItem(...)
 }
 \arguments{
 \item{title}{\verb{[character(1)]}\cr A display title for the nav item.}

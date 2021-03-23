@@ -1,15 +1,11 @@
 @mixin navbar-nav() {
-  .shiny-navbar-right {
+  .navbar-nav {
     /* Make sure nav container is flexbox (they aren't in BS3) */
     display: flex !important;
     display: -webkit-flex !important;
     float: none !important;
-    /* Set the 1st navbarPage(right=) item to mr-auto */
-    > .nav-item-right {
+    > .nav-spacer {
       margin-left: auto !important;
-      ~ .nav-item-right {
-        margin-left: unset !important;
-      }
     }
     /* .form-inline doesn't vertically align in BS3? */
     > .form-inline {

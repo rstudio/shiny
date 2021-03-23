@@ -24,7 +24,13 @@ navbarPage(
   lang = NULL
 )
 
-navbarMenu(title, ..., menuName = title, icon = NULL)
+navbarMenu(
+  title,
+  ...,
+  menuName = title,
+  icon = NULL,
+  align = c("left", "right")
+)
 }
 \arguments{
 \item{title}{The title to display in the navbar}

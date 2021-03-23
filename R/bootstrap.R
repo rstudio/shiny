@@ -666,14 +666,14 @@ helpText <- function(...) {
 #'   tabPanel("a", "tab a"),
 #'   tabPanel("b", "tab b"),
 #'   navItem(
-#'     tags$a(icon("github"), "Shiny", href = "https://github.com/rstudio/shiny", target = #' "_blank")
+#'     tags$a(icon("github"), "Shiny", href = "https://github.com/rstudio/shiny", target = "_blank")
 #'   ),
 #'   navSpacer(),
 #'   navbarMenu(
 #'     "Other links", align = "right",
 #'     tabPanel("b", "tab b"),
 #'     navItem(
-#'       tags$a(icon("r-project"), "RStudio", href = "https://rstudio.com", target = #' "_blank")
+#'       tags$a(icon("r-project"), "RStudio", href = "https://rstudio.com", target = "_blank")
 #'     )
 #'   )
 #' )

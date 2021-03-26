@@ -91,6 +91,10 @@ getLang <- function(ui) {
 #' @export
 bootstrapLib <- function(theme = NULL) {
   tagFunction(function() {
+    if (isRunning()) {
+      setCurrentTheme(theme)
+    }
+
     # If we're not compiling Bootstrap Sass (from bslib), return the
     # static Bootstrap build.
     if (!is_bs_theme(theme)) {
@@ -112,7 +116,6 @@ bootstrapLib <- function(theme = NULL) {
     # Note also that since this is shinyOptions() (and not options()), the
     # option is automatically reset when the app (or session) exits
     if (isRunning()) {
-      setCurrentTheme(theme)
       registerThemeDependency(bs_theme_deps)
 
     } else {

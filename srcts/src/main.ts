@@ -1480,13 +1480,14 @@ function main(): void {
 
     // If the given tabset has no active tabs, select the first one
     function ensureTabsetHasVisibleTab($tabset) {
-      if ($tabset.find("li.active").not(".dropdown").length === 0) {
+      const inputBinding = $tabset.data("shiny-input-binding");
+
+      if (!inputBinding.getValue($tabset)) {
         // Note: destTabValue may be null. We still want to proceed
         // through the below logic and setValue so that the input
         // value for the tabset gets updated (i.e. input$tabsetId
         // should be null if there are no tabs).
         const destTabValue = getFirstTab($tabset);
-        const inputBinding = $tabset.data("shiny-input-binding");
         const evt = jQuery.Event("shiny:updateinput");
 
         evt.binding = inputBinding;

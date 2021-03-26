@@ -1482,6 +1482,9 @@ function main(): void {
     function ensureTabsetHasVisibleTab($tabset) {
       const inputBinding = $tabset.data("shiny-input-binding");
 
+
+      // Use the getValue() method to avoid duplicating the CSS selector
+      // for querying the DOM for the currently active tab
       if (!inputBinding.getValue($tabset)) {
         // Note: destTabValue may be null. We still want to proceed
         // through the below logic and setValue so that the input

@@ -955,7 +955,7 @@ findAndMarkSelectedTab <- function(tabs, selected, foundSelected) {
       x$tabs <- res$tabs
       foundSelected <<- res$foundSelected
 
-    } else {
+    } else if (isTabPanel(x)) {
       # Base case: regular tab item. If the `selected` argument is
       # provided, check for a match in the existing tabs; else,
       # mark first available item as selected

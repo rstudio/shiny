@@ -974,9 +974,8 @@ buildTabItem <- function(index, tabsetId, foundSelected, tabs = NULL,
     return(list(liTag = textFilter(divTag), divTag = NULL))
   }
 
-  # build the child tabset
-  # TODO: add a warning if depth goes >2 ?
   if (isNavbarMenu(divTag)) {
+    # tabPanelMenu item: build the child tabset
     tabset <- buildTabset(
       !!!divTag$tabs, ulClass = "dropdown-menu",
       textFilter = navbarMenuTextFilter,

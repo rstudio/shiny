@@ -56,7 +56,7 @@ processDeps <- function(tags, session) {
   }
 
   list(
-    html = doRenderTags(tagList(ui)), # TODO: doRenderTags() shouldn't fail on a tagFunction()
+    html = doRenderTags(ui),
     deps = dependencies
   )
 }

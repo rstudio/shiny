@@ -7787,7 +7787,7 @@
   var Shiny;
   function setShiny(Shiny_) {
     Shiny = Shiny_;
-    Shiny.version = "1.6.0.9000";
+    Shiny.version = "1.6.0.9001";
     Shiny.$escape = $escape;
     Shiny.compareVersion = compareVersion;
   }

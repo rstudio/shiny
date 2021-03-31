@@ -735,10 +735,6 @@ tabPanelBody <- function(value, ..., icon = NULL) {
   tabPanel(title = NULL, ..., value = value, icon = icon)
 }
 
-isTabPanel <- function(x) {
-  tagHasClass(x, "tab-pane")
-}
-
 #' @rdname tabPanel
 #' @export
 navItem <- function(...) {

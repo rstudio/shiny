@@ -721,9 +721,7 @@ var ShinyApp = function() {
   function getTargetTabs($tabset, $tabContent, target) {
     var dataValue = "[data-value='" + $escape(target) + "']";
     var $aTag = $tabset.find("a" + dataValue);
-    var $liTag = $aTag.parent("li");
-    // BS3 dropdown anchors are wrapped in <li>, but they can't be in BS4
-    if ($liTag.length === 0) $liTag = $aTag;
+    var $liTag = $aTag.parent();
     if ($liTag.length === 0) {
       throw "There is no tabPanel (or navbarMenu) with value" +
             " (or menuName) equal to '" + target + "'";
@@ -736,11 +734,7 @@ var ShinyApp = function() {
       var $dropdownTabset = $aTag.find("+ ul.dropdown-menu");
       var dropdownId = $dropdownTabset.attr("data-tabsetid");
 
-      var $dropdownLiTags = $dropdownTabset.find("a[data-toggle='tab']");
-      // BS3 dropdown anchors are wrapped in <li>, but they can't be in BS4
-      if ($dropdownLiTags.parent("li").length > 0) {
-        $dropdownLiTags = $dropdownLiTags.parent("li");
-      }
+      var $dropdownLiTags = $dropdownTabset.find("a[data-toggle='tab']").parent("li");
       $dropdownLiTags.each(function (i, el) {
         $liTags.push($(el));
       });
@@ -775,12 +769,6 @@ var ShinyApp = function() {
     if (message.target !== null) {
       target = getTargetTabs($tabset, $tabContent, message.target);
       $targetLiTag = target.$liTag;
-      // If the target is a (BS4) .dropdown-item, then we can't insert
-      // <li class='nav-item'><a class='nav-link'>...</a></li>,
-      // instead, we need <a class='dropdown-item'>...</a>
-      if ($targetLiTag.hasClass("dropdown-item")) {
-        $liTag = $aTag.removeClass("nav-link").addClass("dropdown-item");
-      }
     }
 
     // If the item is to be placed inside a navbarMenu (dropdown),
@@ -803,10 +791,7 @@ var ShinyApp = function() {
     if ($aTag.attr("data-toggle") === "tab") {
       var index = getTabIndex($tabset, tabsetId);
       var tabId = "tab-" + tabsetId + "-" + index;
-      var anchor = $liTag.find("> a");
-      // BS3 dropdown anchors are wrapped in <li>, but they can't be in BS4
-      if (anchor.length === 0) anchor = $liTag;
-      anchor.attr("href", "#" + tabId);
+      $liTag.find("> a").attr("href", "#" + tabId);
       $divTag.attr("id", tabId);
     }
 
@@ -870,44 +855,6 @@ var ShinyApp = function() {
       exports.renderContent(el, el.innerHTML || el.textContent);
     });
 
-    // If we're inserting a navbarMenu() into a navtreePanel() target, we need
-    // to transform buildTabset() output (i.e., a .dropdown component) to
-    // buildTreePanel() output (i.e., a .collapse component), because
-    // insertTab() et al. doesn't know about the relevant tabset container
-    if ($tabset.hasClass("nav-navtree") && $liTag.hasClass("dropdown")) {
-      var collapseId = "collapse-" + tabsetId + "-" + index; // TODO: index is undefined?
-      $tabset.find(".dropdown").each(function(i, el) {
-        var $el = $(el).removeClass("dropdown nav-item");
-
-        $el.find(".dropdown-toggle")
-          .removeClass("dropdown-toggle nav-link")
-          .addClass(message.select ? "" : "collapsed")
-          .attr("data-toggle", "collapse")
-          .attr("data-target", "#" + collapseId);
-
-        var collapse = $("<div>")
-          .addClass("collapse" + (message.select ? " show" : ""))
-          .attr("id", collapseId);
-
-        var menu = $el.find(".dropdown-menu")
-          .removeClass("dropdown-menu")
-          .addClass("nav nav-navtree")
-          .wrap(collapse);
-
-        var depth = $el.parents(".nav-navtree").length - 1;
-        if (depth > 0) {
-          $el.find("a").css("padding-left", depth + "rem");
-        }
-
-        if (menu.find("li").length === 0) {
-          menu.find("a")
-            .removeClass("dropdown-item")
-            .addClass("nav-link")
-            .wrap("<li class='nav-item'></li>");
-        }
-      });
-    }
-
     if (message.select) {
       $liTag.find("a").tab("show");
     }
@@ -926,8 +873,8 @@ var ShinyApp = function() {
       var existingTabIds = [0];
       // loop through all existing tabs, find the one with highest id
       // (since this is based on a numeric counter), and increment
-      $tabset.find("a[data-toggle='tab']").each(function() {
-        var $tab = $(this);
+      $tabset.find("> li").each(function() {
+        var $tab = $(this).find("> a[data-toggle='tab']");
         if ($tab.length > 0) {
           // remove leading url if it exists. (copy of bootstrap url stripper)
           var href = $tab.attr("href").replace(/.*(?=#[^\s]+$)/, '');

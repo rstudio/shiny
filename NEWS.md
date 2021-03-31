@@ -9,6 +9,8 @@ shiny 1.6.0.9000
 
 ### New features and improvements
 
+* All uses of `list(...)` have been replaced with `rlang::list2(...)`. This means that you can use trailing `,` without error and use rlang's `!!!` operator to "splice" a list of argument values into `...`. We think this'll be particularly useful for passing a list of `tabPanel()` to their consumers (i.e., `tabsetPanel()`, `navbarPage()`, etc). For example, `tabs <- list(tabPanel("A", "a"), tabPanel("B", "b")); navbarPage(!!!tabs)`. (#3315 and #3328)
+
 * Numerous improvements tabset panels (i.e., `tabPanel()`, `navbarMenu()`, `tabsetPanel()`, `navbarPage()`, etc) (#3315):
   * Closed #3322: `tabsetPanel()` and `navlistPanel()` gain `header`/`footer` arguments (inspired by `navbarPage()`'s already existing `header`/`footer`), making it easier to include content that should appear on every tab.
   * Closed #3313 and #1823: More informative error when non-`tabPanel()`/`shiny.tag` objects are supplied to `...`.

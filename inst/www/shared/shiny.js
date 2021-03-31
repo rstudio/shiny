@@ -3143,9 +3143,9 @@
           }
         });
         function ensureTabsetHasVisibleTab($tabset) {
-          if ($tabset.find("li.active").not(".dropdown").length === 0) {
+          var inputBinding = $tabset.data("shiny-input-binding");
+          if (!inputBinding.getValue($tabset)) {
             var destTabValue = getFirstTab($tabset);
-            var inputBinding = $tabset.data("shiny-input-binding");
             var evt = jQuery.Event("shiny:updateinput");
             evt.binding = inputBinding;
             $tabset.trigger(evt);

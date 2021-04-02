@@ -96,3 +96,19 @@ test_that("tabPanelBody validates it's input", {
   expect_error(tabPanelBody(""), "single, non-empty string")
   expect_error(tabPanelBody(letters[1:2]), "single, non-empty string")
 })
+
+
+# https://github.com/rstudio/shiny/issues/3352
+test_that("tabItem titles can contain tag objects", {
+  title <- tagList(tags$i("Hello"), "world")
+  x <- tabsetPanel(tabPanel(title, "tab content"))
+  x <- renderTags(x)
+
+  # Result should contain (with different whitespace):
+  #   "<a ....> <i>Hello</i> world"
+  # As opposed to:
+  #   "<a ....>&lt;i&gt;Hello&lt;/i&gt; world
+  expect_true(
+    grepl("<a [^>]+>\\s*<i>Hello</i>\\s+world", x$html)
+  )
+})

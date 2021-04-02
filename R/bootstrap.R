@@ -1016,7 +1016,7 @@ buildNavItem <- function(divTag, tabsetId, index) {
   # Get title attribute directory (not via tagGetAttribute()) so that contents
   # don't get passed to as.character().
   # https://github.com/rstudio/shiny/issues/3352
-  title <- divTag$attribs$title
+  title <- divTag$attribs[["title"]]
   value <- divTag$attribs[["data-value"]]
   icon <- getIcon(iconClass = divTag$attribs[["data-icon-class"]])
   active <- isTabSelected(divTag)

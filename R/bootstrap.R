@@ -43,6 +43,7 @@ bootstrapPage <- function(..., title = NULL, responsive = deprecated(), theme = 
   }
 
   args <- list(
+    jqueryDependency(),
     if (!is.null(title)) tags$head(tags$title(title)),
     if (is.character(theme)) {
       if (length(theme) > 1) stop("`theme` must point to a single CSS file, not multiple files.")

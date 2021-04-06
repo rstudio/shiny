@@ -2175,7 +2175,7 @@ ShinySession <- R6Class(
   if (getOption("shiny.allowoutputreads", FALSE)) {
     .subset2(x, 'impl')$getOutput(name)
   } else {
-    rlang::abort(paste0("Can't read output '", output, "'"))
+    rlang::abort(paste0("Can't read output '", name, "'"))
   }
 }
 

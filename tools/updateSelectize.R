@@ -1,35 +1,58 @@
 #!/usr/bin/env Rscript
 library(rprojroot)
+library(withr)
+library(brio)
 
 ## -----------------------------------------------------------------
 ## First, download the main selectize.js and css
 ## -----------------------------------------------------------------
 
-version <- "0.12.4"
-dest_dir <- find_package_root_file("inst/www/shared/selectize")
+version <- "0.13.3"
 tag <- paste0("v", version)
-dest_file <- file.path(tempdir(), paste0("selectize.js-", version, ".zip"))
 url <- sprintf("https://github.com/selectize/selectize.js/archive/%s.zip", tag)
+zip <- file.path(tempdir(), paste0("selectize.js-", version, ".zip"))
 
-download.file(url, dest_file)
-unzipped <- tempdir()
-unzip(dest_file, exdir = unzipped)
+download.file(url, zip)
+unzip(zip, exdir = tempdir())
 
-unlink(dest_dir, recursive = TRUE)
+target <- find_package_root_file("inst/www/shared/selectize")
+unlink(target, recursive = TRUE)
+dir.create(target, recursive = TRUE)
 
-dir.create(file.path(dest_dir, "js"), recursive = TRUE)
-file.copy(
-  file.path(unzipped, paste0("selectize.js-", version), "dist", "js", "standalone", "selectize.min.js"),
-  file.path(dest_dir, "js"),
-  overwrite = TRUE
-)
+with_dir(target, {
+  lapply(c("js", "css", "scss", "plugins"), dir.create)
+})
 
-dir.create(file.path(dest_dir, "css"), recursive = TRUE)
-file.copy(
-  file.path(unzipped, paste0("selectize.js-", version), "dist", "css", "selectize.bootstrap3.css"),
-  file.path(dest_dir, "css"),
-  overwrite = TRUE
-)
+with_dir(tempdir(), {
+  root <- paste0("selectize.js-", version)
+  file.copy(
+    file.path(root, "dist", "js", "standalone", "selectize.min.js"),
+    file.path(target, "js")
+  )
+  file.copy(
+    file.path(root, "dist", "css", "selectize.bootstrap3.css"),
+    file.path(target, "css")
+  )
+  file.copy(
+    file.path(root, "src", "scss"),
+    target, recursive = TRUE
+  )
+  file.copy(
+    file.path(root, "src", "plugins"),
+    target, recursive = TRUE
+  )
+  plugin_files <- dir(file.path(target, "plugins"), recursive = TRUE, full.names = TRUE)
+  file.remove(plugin_files[!grepl("\\.scss$", plugin_files)])
+})
+
+# Remove all Sass imports of Bootstrap since we handle that via bslib
+sass_files <- dir(target, pattern = "\\.scss$", recursive = TRUE, full.names = TRUE)
+lapply(sass_files, function(f) {
+  src <- readLines(f)
+  src <- src[!grepl("@import .*/node_modules/bootstrap", src)]
+  writeLines(src, f)
+})
+
 
 ## -----------------------------------------------------------------
 ## Second, download accessibility plugin
@@ -37,64 +60,21 @@ file.copy(
 
 version <- "927d81e9ea86acac1724d57b2ce9f3c962fd34c4"
 url <- sprintf("https://github.com/SLMNBJ/selectize-plugin-a11y/archive/%s.zip", version)
-dest_file <- file.path(tempdir(), paste0("selectize-plugin-a11y-", version, ".zip"))
-download.file(url, dest_file)
+zip <- file.path(tempdir(), paste0("selectize-plugin-a11y-", version, ".zip"))
 
-unzipped <- tempdir()
-unzip(dest_file, exdir = unzipped)
+download.file(url, zip)
+unzip(zip, exdir = tempdir())
 
-dir.create(file.path(dest_dir, "accessibility", "js"), recursive = TRUE)
-file.copy(
-  file.path(unzipped, paste0("selectize-plugin-a11y-", version), "selectize-plugin-a11y.js"),
-  file.path(dest_dir, "accessibility", "js"),
-  overwrite = TRUE
-)
+with_dir(target, {
+  dir.create("accessibility/js", recursive = TRUE)
+})
 
-tmpdir <- tempdir()
-
-## -----------------------------------------------------------------
-## Third, download Bootstrap 4 SASS port of selectize less
-## This is using a specific sha because this hasn't been included in an official release
-## https://github.com/papakay/selectize-bootstrap-4-style/pull/19
-## -----------------------------------------------------------------
-
-version <- "5013be4e97a14bef47bc8badcc78e6762815ef38"
-zip_src <- sprintf("https://github.com/papakay/selectize-bootstrap-4-style/archive/%s.zip", version)
-zip_target <- file.path(tmpdir, "select-bs4.zip")
-download.file(zip_src, zip_target)
-unzip(zip_target, exdir = dirname(zip_target))
-target <- "inst/www/shared/selectize/scss"
-unlink(target, recursive = TRUE)
-dir.create(target)
-file.rename(
-  file.path(tmpdir, sprintf("selectize-bootstrap-4-style-%s/src/selectize", version)),
-  target
-)
-
-# Remove the unnecessary imports of Bootstrap
-scss_file <- "inst/www/shared/selectize/scss/selectize.bootstrap4.scss"
-scss <- readLines(scss_file)
-scss <- scss[!grepl('@import\\s+"\\.\\./bootstrap', scss)]
-writeLines(scss, scss_file)
-
-## -----------------------------------------------------------------
-## Fourth, download Bootstrap 3 SASS port
-## https://github.com/herschel666/selectize-scss
-## Note that the base selectize.scss, as well as the plugins, are identical
-## to the BS4 port, so we only need the selectize.bootstrap3.scss file
-## -----------------------------------------------------------------
-
-version <- "0.10.1"
-zip_src <- sprintf("https://github.com/herschel666/selectize-scss/archive/v%s.zip", version)
-zip_target <- file.path(tmpdir, "select-bs3.zip")
-download.file(zip_src, zip_target)
-unzip(zip_target, exdir = dirname(zip_target))
-target <- "inst/www/shared/selectize/scss/selectize.bootstrap3.scss"
-file.rename(
-  file.path(tmpdir, sprintf("selectize-scss-%s/src/selectize.bootstrap3.scss", version)),
-  target
-)
-
+with_dir(tempdir(), {
+  file.copy(
+    file.path(paste0("selectize-plugin-a11y-", version), "selectize-plugin-a11y.js"),
+    file.path(target, "accessibility/js")
+  )
+})
 
 # =============================================================================
 # Apply patches

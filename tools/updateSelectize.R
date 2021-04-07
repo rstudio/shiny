@@ -41,17 +41,21 @@ with_dir(tempdir(), {
     file.path(root, "src", "plugins"),
     target, recursive = TRUE
   )
-  plugin_files <- dir(file.path(target, "plugins"), recursive = TRUE, full.names = TRUE)
-  file.remove(plugin_files[!grepl("\\.scss$", plugin_files)])
+  file.remove(
+    dir(
+      file.path(target, "plugins"), pattern = "\\.scss$",
+      recursive = TRUE, full.names = TRUE
+    )
+  )
 })
 
 # Remove all Sass imports of Bootstrap since we handle that via bslib
 sass_files <- dir(target, pattern = "\\.scss$", recursive = TRUE, full.names = TRUE)
-lapply(sass_files, function(f) {
+invisible(lapply(sass_files, function(f) {
   src <- readLines(f)
   src <- src[!grepl("@import .*/node_modules/bootstrap", src)]
   writeLines(src, f)
-})
+}))
 
 
 ## -----------------------------------------------------------------
@@ -89,9 +93,21 @@ for (patch in list.files(patch_dir, full.names = TRUE)) {
   tryCatch(
     {
       message(sprintf("Applying %s", basename(patch)))
-      withr::with_dir(find_package_root_file(), system(sprintf("git apply %s", patch)))
+      rej_pre <- dir(pattern = "\\.rej$", recursive = TRUE)
+      system(sprintf("git apply --reject --whitespace=fix '%s'", patch))
+      rej_post <- dir(pattern = "\\.rej$", recursive = TRUE)
+      if (length(rej_post) > length(rej_pre)) {
+        stop(
+          "Running `git apply --reject` generated `.rej` files.\n",
+          "Please fix the relevant conflicts inside ", patch, "\n",
+          "An 'easy' way to do this is to first `git add` the new source changes, ",
+          "then manually make the relevant changes from the patch file,",
+          "then `git diff` to get the relevant diff output and update the patch diff with the new diff."
+        )
+      }
     },
     error = function(e) {
+      stop(conditionMessage(e))
       quit(save = "no", status = 1)
     }
   )
@@ -100,4 +116,4 @@ for (patch in list.files(patch_dir, full.names = TRUE)) {
 # =============================================================================
 # Generate minified js
 # =============================================================================
-withr::with_dir(find_package_root_file("tools"), system("yarn grunt"))
+#withr::with_dir(find_package_root_file("tools"), system("yarn grunt"))

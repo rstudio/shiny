@@ -4,7 +4,7 @@ $select-font-family: inherit !default;
 $select-font-size: inherit !default;
 $select-line-height: $input-btn-line-height !default; //formerly line-height-computed
 
-$select-color-text: gray("800") !default; //$gray-800
+$select-color-text: $input-color !default; //$gray-800
 $select-color-highlight: rgba(255, 237, 40, 0.4) !default;
 $select-color-input: $input-bg !default;
 $select-color-input-full: $input-bg !default;
@@ -14,12 +14,13 @@ $select-color-input-error-focus: darken(
   10%
 ) !default;
 $select-color-disabled: $input-bg !default;
-$select-color-item: #efefef !default;
-$select-color-item-border: $border-color !default;
+$select-color-item: mix($select-color-input, $select-color-text, 90%) !default;
+$select-color-item-border: $input-border-color !default;
 $select-color-item-active: $component-active-bg !default;
-$select-color-item-active-text: #fff !default;
+$select-color-item-active-text: color-contrast($select-color-item-active) !default;
 $select-color-item-active-border: rgba(0, 0, 0, 0) !default;
 $select-color-optgroup: $dropdown-bg !default;
+$select-color-dropdown-text: $dropdown-link-color !default;
 $select-color-optgroup-text: $dropdown-header-color !default;
 $select-color-optgroup-border: $dropdown-divider-bg !default;
 $select-color-dropdown: $dropdown-bg !default;
@@ -63,6 +64,7 @@ $select-arrow-offset: calc(#{$select-padding-x} + 5px) !default;
   margin: 2px 0 0 0;
   z-index: $zindex-dropdown;
   background: $select-color-dropdown;
+  color: $select-color-dropdown-text;
   border: 1px solid $dropdown-border-color; //$dropdown-fallback-border
   border-radius: $border-radius;
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.175);

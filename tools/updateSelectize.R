@@ -124,4 +124,4 @@ for (patch in list.files(patch_dir, full.names = TRUE)) {
 # =============================================================================
 # Generate minified js
 # =============================================================================
-#withr::with_dir(find_package_root_file("tools"), system("yarn grunt"))
+withr::with_dir(find_package_root_file("srcts"), system("yarn build"))

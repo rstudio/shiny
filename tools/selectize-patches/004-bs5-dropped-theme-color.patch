@@ -1,0 +1,13 @@
+diff --git a/inst/www/shared/selectize/scss/selectize.bootstrap4.scss b/inst/www/shared/selectize/scss/selectize.bootstrap4.scss
+index 41d635b1..ae97fea4 100644
+--- a/inst/www/shared/selectize/scss/selectize.bootstrap4.scss
++++ b/inst/www/shared/selectize/scss/selectize.bootstrap4.scss
+@@ -8,7 +8,7 @@ $select-color-text: $input-color !default; //$gray-800
+ $select-color-highlight: rgba(255, 237, 40, 0.4) !default;
+ $select-color-input: $input-bg !default;
+ $select-color-input-full: $input-bg !default;
+-$select-color-input-error: theme-color("danger") !default;
++$select-color-input-error: $danger !default;
+ $select-color-input-error-focus: darken(
+   $select-color-input-error,
+   10%

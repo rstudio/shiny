@@ -37,15 +37,13 @@ with_dir(tempdir(), {
     file.path(root, "src", "scss"),
     target, recursive = TRUE
   )
-  file.copy(
-    file.path(root, "src", "plugins"),
-    target, recursive = TRUE
+  plugin_scss <- dir(
+    file.path(root, "src", "plugins"), pattern = "\\.scss$", recursive = TRUE
   )
-  file.remove(
-    dir(
-      file.path(target, "plugins"), pattern = "\\.scss$",
-      recursive = TRUE, full.names = TRUE
-    )
+  lapply(file.path(target, "plugins", dirname(plugin_scss)), dir.create)
+  file.copy(
+    file.path(root, "src", "plugins", plugin_scss),
+    file.path(target, "plugins", plugin_scss)
   )
 })
 
@@ -56,6 +54,16 @@ invisible(lapply(sass_files, function(f) {
   src <- src[!grepl("@import .*/node_modules/bootstrap", src)]
   writeLines(src, f)
 }))
+
+
+# Add rudimentary Bootstrap 5 support
+# https://github.com/selectize/selectize.js/issues/1584
+writeLines(
+  "$input-line-height-sm: $form-select-line-height !default;
+  @import 'selectize.bootstrap4';
+  .selectize-control{padding:0;}",
+  file.path(target, "scss", "selectize.bootstrap5.scss")
+)
 
 
 ## -----------------------------------------------------------------

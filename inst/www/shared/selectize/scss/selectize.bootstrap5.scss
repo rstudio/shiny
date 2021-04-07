@@ -1,7 +1,3 @@
-@import 'selectize.bootstrap4';
-.selectize-control {
-    padding: 0;
-}
-.selectize-input {
-    border: none;
-}
+$input-line-height-sm: $form-select-line-height !default;
+  @import 'selectize.bootstrap4';
+  .selectize-control{padding:0;}

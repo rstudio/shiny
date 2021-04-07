@@ -8,7 +8,7 @@ $select-color-text: $input-color !default; //$gray-800
 $select-color-highlight: rgba(255, 237, 40, 0.4) !default;
 $select-color-input: $input-bg !default;
 $select-color-input-full: $input-bg !default;
-$select-color-input-error: theme-color("danger") !default;
+$select-color-input-error: $danger !default;
 $select-color-input-error-focus: darken(
   $select-color-input-error,
   10%

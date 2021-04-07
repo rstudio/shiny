@@ -1,5 +1,7 @@
 import {readdirSync, unlinkSync, writeFileSync} from "fs";
 import esbuild from "esbuild";
+import globalsPlugin from "esbuild-plugin-globals";
+
 // import process from "process";
 // let watch = process.argv.length >= 3 && process.argv[2] == "--watch";
 
@@ -9,7 +11,6 @@ let outdir = instdir + "/www/shared/";
 let opts = {
   bundle: false,
   watch: false,
-  plugins: [],
   target: "es5",
   sourcemap: false,
 };
@@ -27,6 +28,11 @@ writeFileSync(tmpfile,
 ${require_files}`)
 await esbuild.build({
   ...opts,
+  plugins:[
+    globalsPlugin({
+      jquery: "window.jQuery",
+    })
+  ],
   bundle: true,
   entryPoints: [tmpfile],
   outfile: instdir + "www/shared/datepicker/js/bootstrap-datepicker.min.js",

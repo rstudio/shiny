@@ -94,7 +94,7 @@ get_quosure <- function(x, env, quoted) {
     if (!quoted) {
       x <- eval(substitute(substitute(x)), parent.frame())
     }
-    if (!rlang::is_quosure(x)) {
+    if (!is_quosure(x)) {
       x <- new_quosure(x, env)
     }
 

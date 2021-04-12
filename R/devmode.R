@@ -233,6 +233,7 @@ registered_devmode_options <- Map$new()
 #'   devmode_default = FALSE
 #' )
 #' ```
+#'
 #' @param name Name of option to look for in `options()`
 #' @param default Default value to return if `in_devmode()` returns
 #'   `TRUE` and the specified option is not set in [`options()`].

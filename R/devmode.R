@@ -243,6 +243,7 @@ registered_devmode_options <- Map$new()
 #'   `TRUE` and the specified option is not set in [`options()`]. For
 #'   `get_devmode_option()`, if `devmode_default` is missing, the
 #'   registered `devmode_default` value will be used.
+#' @export
 #' @examples
 #' # Ex: Within shiny, we register the option "shiny.minified"
 #' #   to default to `FALSE` when in Dev Mode

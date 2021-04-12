@@ -34,12 +34,8 @@ renderPage <- function(ui, showcase=0, testMode=FALSE) {
       ui <- showcaseUI(ui)
 
     # Wrap ui in body tag if it doesn't already have a single top-level body tag.
-    if (!(inherits(ui, "shiny.tag") && ui$name == "body")) {
-      ui <- tags$body(
-          ui,
-          tags$template(id = "shiny-disconnected-overlay-template")
-      )
-    }
+    if (!(inherits(ui, "shiny.tag") && ui$name == "body"))
+      ui <- tags$body(ui)
 
     # Put the body into the default template
     ui <- htmlTemplate(

@@ -676,6 +676,13 @@ function main(): void {
 
       if ($overlay.length === 0) {
         $(document.body).append('<div id="shiny-disconnected-overlay"></div>');
+        const $overlayTemplate = $("#shiny-disconnected-overlay-template");
+
+        if ($overlayTemplate.length !== 0) {
+          $("#shiny-disconnected-overlay").append(
+            $overlayTemplate.contents().clone(true)
+          );
+        }
       }
 
       // To try a reconnect, both the app (this.$allowReconnect) and the

@@ -153,7 +153,7 @@
 }
 
 .irs {
-  font-family: Arial, sans-serif;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
 .irs--shiny {
@@ -167,7 +167,7 @@
 .irs--shiny .irs-line {
   top: 25px;
   height: 8px;
-  background: linear-gradient(to bottom, #dedede -50%, white 150%);
+  background: linear-gradient(to bottom, #dedede -50%, #fff 150%);
   background-color: #ededed;
   border: 1px solid #cccccc;
   border-radius: 8px;
@@ -176,9 +176,9 @@
 .irs--shiny .irs-bar {
   top: 25px;
   height: 8px;
-  border-top: 1px solid #428bca;
-  border-bottom: 1px solid #428bca;
-  background: #428bca;
+  border-top: 1px solid #337ab7;
+  border-bottom: 1px solid #337ab7;
+  background: #337ab7;
 }
 
 .irs--shiny .irs-bar--single {
@@ -207,14 +207,13 @@
 }
 
 .irs--shiny .irs-handle.state_hover, .irs--shiny .irs-handle:hover {
-  background: white;
+  background: #fff;
 }
 
 .irs--shiny .irs-min,
 .irs--shiny .irs-max {
   top: 0;
   padding: 1px 3px;
-  color: #333333;
   text-shadow: none;
   background-color: rgba(0, 0, 0, 0.1);
   border-radius: 3px;
@@ -233,7 +232,7 @@
   color: #fff;
   text-shadow: none;
   padding: 1px 3px;
-  background-color: #428bca;
+  background-color: #337ab7;
   border-radius: 3px;
   font-size: 11px;
   line-height: 1.333;
@@ -250,12 +249,11 @@
 }
 
 .irs--shiny .irs-grid-pol {
-  background-color: black;
+  background-color: #000;
 }
 
 .irs--shiny .irs-grid-text {
   bottom: 5px;
-  color: #1a1a1a;
 }
 
 .irs--shiny .irs-grid-pol.small {

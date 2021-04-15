@@ -1,0 +1,50 @@
+.nav-navtree {
+  display: block !important;
+}
+
+.nav-navtree li.active, .nav-navtree li > a.active, .nav-navtree li a:focus {
+  font-weight: 600;
+  background-color: rgba(0, 123, 255, 0.3) !important;
+  color: rgba(33, 37, 41, 0.85);
+}
+
+.nav-navtree li:not(.active) > a:not(.active):hover {
+  background-color: rgba(33, 37, 41, 0.1);
+}
+
+.nav-navtree li a {
+  display: inline-flex !important;
+  align-items: center !important;
+  width: 100% !important;
+  padding: .1875rem .5rem;
+  border: 1px solid #dee2e6 !important;
+  color: rgba(33, 37, 41, 0.65) !important;
+  text-decoration: none !important;
+}
+
+.nav-navtree li a i {
+  padding-right: 1.25rem !important;
+}
+
+.nav-navtree li a[data-toggle="collapse"]::before {
+  width: 1.25em;
+  line-height: 0;
+  content: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='rgba%2833, 37, 41, 0.5%29' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M5 14l6-6-6-6'/%3e%3c/svg%3e");
+  transition: transform 0.35s ease;
+  transform-origin: .5em 50%;
+  padding-right: 1rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-navtree li a[data-toggle="collapse"]::before {
+    transition: none;
+  }
+}
+
+.nav-navtree li a[data-toggle="collapse"]:not(.collapsed) {
+  color: rgba(33, 37, 41, 0.85);
+}
+
+.nav-navtree li a[data-toggle="collapse"]:not(.collapsed)::before {
+  transform: rotate(90deg);
+}

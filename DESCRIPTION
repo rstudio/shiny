@@ -170,6 +170,7 @@ Collate:
     'mock-session.R'
     'modal.R'
     'modules.R'
+    'navtreePanel.R'
     'notifications.R'
     'priorityqueue.R'
     'progress.R'

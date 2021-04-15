@@ -1407,6 +1407,50 @@ function main(): void {
         Shiny.renderContent(el, el.innerHTML || el.textContent);
       });
 
+      // If we're inserting a navbarMenu() into a navtreePanel() target, we need
+      // to transform buildTabset() output (i.e., a .dropdown component) to
+      // buildTreePanel() output (i.e., a .collapse component), because
+      // insertTab() et al. doesn't know about the relevant tabset container
+      if ($tabset.hasClass("nav-navtree") && $liTag.hasClass("dropdown")) {
+        let collapseId =
+          "collapse-" + tabsetId + "-" + getTabIndex($tabset, tabsetId);
+
+        $tabset.find(".dropdown").each(function (i, el) {
+          let $el = $(el).removeClass("dropdown nav-item");
+
+          $el
+            .find(".dropdown-toggle")
+            .removeClass("dropdown-toggle nav-link")
+            .addClass(message.select ? "" : "collapsed")
+            .attr("data-toggle", "collapse")
+            .attr("data-target", "#" + collapseId);
+
+          let collapse = $("<div>")
+            .addClass("collapse" + (message.select ? " show" : ""))
+            .attr("id", collapseId);
+
+          let menu = $el
+            .find(".dropdown-menu")
+            .removeClass("dropdown-menu")
+            .addClass("nav nav-navtree")
+            .wrap(collapse);
+
+          let depth = $el.parents(".nav-navtree").length - 1;
+
+          if (depth > 0) {
+            $el.find("a").css("padding-left", depth + "rem");
+          }
+
+          if (menu.find("li").length === 0) {
+            menu
+              .find("a")
+              .removeClass("dropdown-item")
+              .addClass("nav-link")
+              .wrap("<li class='nav-item'></li>");
+          }
+        });
+      }
+
       if (message.select) {
         $liTag.find("a").tab("show");
       }
@@ -5925,6 +5969,8 @@ function main(): void {
         anchors.each(function () {
           if (self._getTabName($(this)) === value) {
             $(this).tab("show");
+            // navtreePanel()'s navbarMenu() uses collapsing -- expand the menu when activated!
+            $(this).parents(".collapse").collapse("show");
             success = true;
             return false; // Break out of each()
           }
@@ -5945,9 +5991,12 @@ function main(): void {
       $(el).trigger("change");
     },
     subscribe: function (el, callback) {
+      let deactivateOtherTabs = this._deactivateOtherTabs;
+
       $(el).on(
         "change shown.bootstrapTabInputBinding shown.bs.tab.bootstrapTabInputBinding",
         function (event) {
+          deactivateOtherTabs(event);
           callback();
         }
       );
@@ -5957,6 +6006,17 @@ function main(): void {
     },
     _getTabName: function (anchor) {
       return anchor.attr("data-value") || anchor.text();
+    },
+    // nav-navtree is built on a combination of Bootstrap's tab &
+    // collapse components, but the tab component isn't smart enough to
+    // know about the deactive when are activated. Note that this logic is
+    // very similar to shinydashboard's deactivateOtherTabs() (in tab.js)
+    _deactivateOtherTabs: function (event) {
+      let tgt = $(event.target);
+      let nav = tgt.parents(".nav-navtree");
+
+      nav.find("li").not(tgt).removeClass("active"); // BS3
+      nav.find("li > a").not(tgt).removeClass("active"); // BS4
     },
   });
   inputBindings.register(bootstrapTabInputBinding, "shiny.bootstrapTabInput");

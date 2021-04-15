@@ -3086,6 +3086,22 @@
             $tabContent[0].appendChild(el);
             Shiny.renderContent(el, el.innerHTML || el.textContent);
           });
+          if ($tabset.hasClass("nav-navtree") && $liTag.hasClass("dropdown")) {
+            var collapseId = "collapse-" + tabsetId + "-" + getTabIndex($tabset, tabsetId);
+            $tabset.find(".dropdown").each(function(i, el) {
+              var $el = import_jquery6.default(el).removeClass("dropdown nav-item");
+              $el.find(".dropdown-toggle").removeClass("dropdown-toggle nav-link").addClass(message.select ? "" : "collapsed").attr("data-toggle", "collapse").attr("data-target", "#" + collapseId);
+              var collapse = import_jquery6.default("<div>").addClass("collapse" + (message.select ? " show" : "")).attr("id", collapseId);
+              var menu = $el.find(".dropdown-menu").removeClass("dropdown-menu").addClass("nav nav-navtree").wrap(collapse);
+              var depth = $el.parents(".nav-navtree").length - 1;
+              if (depth > 0) {
+                $el.find("a").css("padding-left", depth + "rem");
+              }
+              if (menu.find("li").length === 0) {
+                menu.find("a").removeClass("dropdown-item").addClass("nav-link").wrap("<li class='nav-item'></li>");
+              }
+            });
+          }
           if (message.select) {
             $liTag.find("a").tab("show");
           }
@@ -6108,6 +6124,7 @@
             anchors.each(function() {
               if (self2._getTabName(import_jquery6.default(this)) === value) {
                 import_jquery6.default(this).tab("show");
+                import_jquery6.default(this).parents(".collapse").collapse("show");
                 success = true;
                 return false;
               }
@@ -6129,7 +6146,9 @@
           import_jquery6.default(el).trigger("change");
         },
         subscribe: function subscribe(el, callback) {
+          var deactivateOtherTabs = this._deactivateOtherTabs;
           import_jquery6.default(el).on("change shown.bootstrapTabInputBinding shown.bs.tab.bootstrapTabInputBinding", function(event) {
+            deactivateOtherTabs(event);
             callback();
           });
         },
@@ -6138,6 +6157,12 @@
         },
         _getTabName: function _getTabName(anchor) {
           return anchor.attr("data-value") || anchor.text();
+        },
+        _deactivateOtherTabs: function _deactivateOtherTabs(event) {
+          var tgt = import_jquery6.default(event.target);
+          var nav = tgt.parents(".nav-navtree");
+          nav.find("li").not(tgt).removeClass("active");
+          nav.find("li > a").not(tgt).removeClass("active");
         }
       });
       inputBindings.register(bootstrapTabInputBinding, "shiny.bootstrapTabInput");

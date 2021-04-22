@@ -1034,7 +1034,7 @@ buildNavItem <- function(divTag, tabsetId, index) {
             addClass("nav-item")$
             find("a")$
             addClass(c("nav-link", if (active) "active"))$
-            asTags(selected = FALSE)
+            root()
         } else {
           tagAppendAttributes(x, class = if (active) "active")
         }
@@ -1063,7 +1063,7 @@ buildDropdown <- function(divTag, tabset) {
           find(".nav-link")$
           removeClass("nav-link")$
           addClass("dropdown-item")$
-          asTags(selected = FALSE)
+          root()
       } else {
         x
       }

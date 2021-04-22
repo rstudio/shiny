@@ -538,9 +538,7 @@ installExprFunction <- function(expr, name, eval.env = parent.frame(2),
 #' @export
 quoToFunction <- function(q, label, ..stacktraceon = FALSE) {
   q <- as_quosure(q)
-  # Use new_function() instead of as_function(), because as_function() adds an
-  # extra parent environment. (This may not actually be a problem, though.)
-  func <- new_function(NULL, get_expr(q), get_env(q))
+  func <- as_function(q)
   wrapFunctionLabel(func, label, ..stacktraceon = ..stacktraceon)
 }
 

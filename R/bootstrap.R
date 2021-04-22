@@ -1026,7 +1026,7 @@ buildNavItem <- function(divTag, tabsetId, index) {
   divTag$attribs$title <- NULL
   list(
     divTag = divTag,
-    liTag = tagRenderHook(
+    liTag = tagAddRenderHook(
       liTag(id, title, value, icon),
       function(x) {
         if (isTRUE(getCurrentVersion() >= 4)) {
@@ -1054,7 +1054,7 @@ liTag <- function(id, title, value, icon) {
 
 buildDropdown <- function(divTag, tabset) {
 
-  navList <- tagRenderHook(
+  navList <- tagAddRenderHook(
     tabset$navList,
     function(x) {
       if (isTRUE(getCurrentVersion() >= 4)) {

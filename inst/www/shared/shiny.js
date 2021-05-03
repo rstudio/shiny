@@ -7777,10 +7777,10 @@
     return linkColor;
   }
   function isBS3() {
-    if (!import_jquery5.default.fn.tooltip) {
+    if (!import_jquery5.default.fn.tab) {
       return false;
     }
-    return import_jquery5.default.fn.tooltip.Constructor.VERSION.match(/^3\./);
+    return import_jquery5.default.fn.tab.Constructor.VERSION.match(/^3\./);
   }
 
   // src/shiny.ts

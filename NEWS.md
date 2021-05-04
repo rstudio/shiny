@@ -17,7 +17,7 @@ shiny 1.6.0.9000
   * Closed #3321: New informative warning when `shiny.tag` object(s) are supplied to `...`. In this case we will continue to create an "empty" nav item and include the content on every tab, but the warning will mention the (new) `header`/`footer` args, which is likely what the user wants.
   * Closed #3320: The HTML markup that `tabPanel()` et. al generate (for Bootstrap nav) is now Bootstrap 4+ compliant when used with `theme = bslib::bs_theme()`.
   * Closed #1928: `NULL` values are now dropped instead of producing an empty nav item.
-  
+
 ### Other improvements
 
 * Shiny's core JavaScript code was converted to TypeScript. For the latest development information, please see the [README.md in `./srcts`](https://github.com/rstudio/shiny/tree/master/srcts). (#3296)
@@ -27,6 +27,10 @@ shiny 1.6.0.9000
 * Switched from internal `Stack` class to `fastmap::faststack()`, and used `fastmap::fastqueue()`. (#3176)
 
 ### Bug fixes
+
+* Closed #3374: `quoToFunction()` now works correctly with nested quosures; and as a result, quasi-quotation with rendering function (e.g., `renderPrint()`, `renderPlot()`, etc) now works as expected with nested quosures. (#3373) 
+
+* Exported `register_devmode_option()`. This method was described in the documentation for `devmode()` but was never exported. See `?devmode()` for more details on how to register Shiny Developer options using `register_devmode_option()`. (#3364)
 
 ### Library updates
 

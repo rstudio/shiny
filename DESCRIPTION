@@ -3,11 +3,11 @@ Type: Package
 Title: Web Application Framework for R
 Version: 1.6.0.9000
 Authors@R: c(
-    person("Winston", "Chang", role = c("aut", "cre"), email = "winston@rstudio.com"),
+    person("Winston", "Chang", role = c("aut", "cre"), email = "winston@rstudio.com", comment = c(ORCID = "0000-0002-1576-2126")),
     person("Joe", "Cheng", role = "aut", email = "joe@rstudio.com"),
     person("JJ", "Allaire", role = "aut", email = "jj@rstudio.com"),
-    person("Carson", "Sievert", role = "aut", email = "carson@rstudio.com"),
-    person("Barret", "Schloerke", role = "aut", email = "barret@rstudio.com"),
+    person("Carson", "Sievert", role = "aut", email = "carson@rstudio.com", comment = c(ORCID = "0000-0002-4958-2844")),
+    person("Barret", "Schloerke", role = "aut", email = "barret@rstudio.com", comment = c(ORCID = "0000-0001-9986-114X")),
     person("Yihui", "Xie", role = "aut", email = "yihui@rstudio.com"),
     person("Jeff", "Allen", role = "aut", email = "jeff@rstudio.com"),
     person("Jonathan", "McPherson", role = "aut", email = "jonathan@rstudio.com"),

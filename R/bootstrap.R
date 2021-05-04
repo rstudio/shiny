@@ -167,7 +167,7 @@ getCurrentTheme <- function() {
   getShinyOption("bootstrapTheme", default = NULL)
 }
 
-getCurrentVersion <- function() {
+getCurrentThemeVersion <- function() {
   theme <- getCurrentTheme()
   if (bslib::is_bs_theme(theme)) {
     bslib::theme_version(theme)
@@ -1029,7 +1029,7 @@ buildNavItem <- function(divTag, tabsetId, index) {
     liTag = tagAddRenderHook(
       liTag(id, title, value, icon),
       function(x) {
-        if (isTRUE(getCurrentVersion() >= 4)) {
+        if (isTRUE(getCurrentThemeVersion() >= 4)) {
           tagQuery(x)$
             addClass("nav-item")$
             find("a")$
@@ -1057,7 +1057,7 @@ buildDropdown <- function(divTag, tabset) {
   navList <- tagAddRenderHook(
     tabset$navList,
     function(x) {
-      if (isTRUE(getCurrentVersion() >= 4)) {
+      if (isTRUE(getCurrentThemeVersion() >= 4)) {
         tagQuery(x)$
           removeClass("nav-item")$
           find(".nav-link")$

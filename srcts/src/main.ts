@@ -4081,12 +4081,11 @@ function main(): void {
         };
 
         // There doesn't appear to be proper way to wait until new styles have been
-        // _applied everywhere_ so we repeatedly call bindAll() every .1s for 10 seconds.
-        // (bindAll() is used as an indirect way of calling doSendTheme() which resends CSS
-        // info stored in input values accessible to shiny::getCurrentOutputInfo()).
+        // _applied everywhere_ so we repeatedly call sendImageSize() (which also
+        // sends colors and fonts) every .1s for 10 seconds.
         /* global Shiny */
         let scheduleCssReporter = function () {
-          let handle = setInterval(Shiny.bindAll, 100);
+          let handle = setInterval(sendImageSize, 100);
 
           setTimeout(() => clearInterval(handle), 10000);
         };
@@ -6393,6 +6392,8 @@ function main(): void {
   });
   inputBindings.register(fileInputBinding, "shiny.fileInputBinding");
 
+  let sendImageSize;
+
   // "init_shiny.js"
   function initShiny() {
     const shinyapp = (Shiny.shinyapp = new ShinyApp());
@@ -6875,9 +6876,9 @@ function main(): void {
     }
     const sendImageSizeDebouncer = new Debouncer(null, doSendImageSize, 0);
 
-    function sendImageSize() {
+    sendImageSize = function () {
       sendImageSizeDebouncer.normalCall();
-    }
+    };
     // Make sure sendImageSize actually gets called before the inputBatchSender
     // sends data to the server.
     inputBatchSender.lastChanceCallback.push(function () {

@@ -4766,7 +4766,7 @@
               import_jquery6.default(sheet.ownerNode).remove();
             };
             var scheduleCssReporter = function scheduleCssReporter2() {
-              var handle = setInterval(Shiny.bindAll, 100);
+              var handle = setInterval(sendImageSize, 100);
               setTimeout(function() {
                 return clearInterval(handle);
               }, 1e4);
@@ -6444,6 +6444,7 @@
         }
       });
       inputBindings.register(fileInputBinding, "shiny.fileInputBinding");
+      var sendImageSize;
       function initShiny() {
         var shinyapp = Shiny.shinyapp = new ShinyApp();
         function bindOutputs() {
@@ -6768,9 +6769,9 @@
           });
         }
         var sendImageSizeDebouncer = new Debouncer(null, doSendImageSize, 0);
-        function sendImageSize() {
+        sendImageSize = function sendImageSize() {
           sendImageSizeDebouncer.normalCall();
-        }
+        };
         inputBatchSender.lastChanceCallback.push(function() {
           if (sendImageSizeDebouncer.isPending())
             sendImageSizeDebouncer.immediateCall();

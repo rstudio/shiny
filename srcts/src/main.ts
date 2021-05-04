@@ -34,6 +34,7 @@ import {
   updateLabel,
   getComputedLinkColor,
   makeBlob,
+  isBS3,
 } from "./utils";
 
 import { isQt, isIE, IEVersion } from "./utils/browser";
@@ -1241,8 +1242,10 @@ function main(): void {
     function getTargetTabs($tabset, $tabContent, target) {
       const dataValue = "[data-value='" + $escape(target) + "']";
       const $aTag = $tabset.find("a" + dataValue);
-      const $liTag = $aTag.parent();
+      let $liTag = $aTag.parent("li");
+      // BS3 dropdown anchors are wrapped in <li>, but they can't be in BS4
 
+      if ($liTag.length === 0) $liTag = $aTag;
       if ($liTag.length === 0) {
         throw (
           "There is no tabPanel (or navbarMenu) with value" +
@@ -1259,10 +1262,12 @@ function main(): void {
         const $dropdownTabset = $aTag.find("+ ul.dropdown-menu");
         const dropdownId = $dropdownTabset.attr("data-tabsetid");
 
-        const $dropdownLiTags = $dropdownTabset
-          .find("a[data-toggle='tab']")
-          .parent("li");
+        let $dropdownLiTags = $dropdownTabset.find("a[data-toggle='tab']");
+        // BS3 dropdown anchors are wrapped in <li>, but they can't be in BS4
 
+        if ($dropdownLiTags.parent("li").length > 0) {
+          $dropdownLiTags = $dropdownLiTags.parent("li");
+        }
         $dropdownLiTags.each(function (i, el) {
           $liTags.push($(el));
         });
@@ -1286,7 +1291,7 @@ function main(): void {
       let tabsetId = $parentTabset.attr("data-tabsetid");
 
       const $divTag = $(message.divTag.html);
-      const $liTag = $(message.liTag.html);
+      let $liTag = $(message.liTag.html);
       const $aTag = $liTag.find("> a");
 
       // Unless the item is being prepended/appended, the target tab
@@ -1297,6 +1302,12 @@ function main(): void {
       if (message.target !== null) {
         target = getTargetTabs($tabset, $tabContent, message.target);
         $targetLiTag = target.$liTag;
+        // If the target is a (BS4) .dropdown-item, then we can't insert
+        // <li class='nav-item'><a class='nav-link'>...</a></li>,
+        // instead, we need <a class='dropdown-item'>...</a>
+        if ($targetLiTag.hasClass("dropdown-item")) {
+          $liTag = $aTag.removeClass("nav-link").addClass("dropdown-item");
+        }
       }
 
       // If the item is to be placed inside a navbarMenu (dropdown),
@@ -1321,7 +1332,11 @@ function main(): void {
         const index = getTabIndex($tabset, tabsetId);
         const tabId = "tab-" + tabsetId + "-" + index;
 
-        $liTag.find("> a").attr("href", "#" + tabId);
+        let anchor = $liTag.find("> a");
+        // BS3 dropdown anchors are wrapped in <li>, but they can't be in BS4
+
+        if (anchor.length === 0) anchor = $liTag;
+        anchor.attr("href", "#" + tabId);
         $divTag.attr("id", tabId);
       }
 
@@ -1411,8 +1426,8 @@ function main(): void {
         // loop through all existing tabs, find the one with highest id
         // (since this is based on a numeric counter), and increment
 
-        $tabset.find("> li").each(function () {
-          const $tab = $(this).find("> a[data-toggle='tab']");
+        $tabset.find("a[data-toggle='tab']").each(function () {
+          const $tab = $(this);
 
           if ($tab.length > 0) {
             // remove leading url if it exists. (copy of bootstrap url stripper)
@@ -1465,13 +1480,16 @@ function main(): void {
 
     // If the given tabset has no active tabs, select the first one
     function ensureTabsetHasVisibleTab($tabset) {
-      if ($tabset.find("li.active").not(".dropdown").length === 0) {
+      const inputBinding = $tabset.data("shiny-input-binding");
+
+      // Use the getValue() method to avoid duplicating the CSS selector
+      // for querying the DOM for the currently active tab
+      if (!inputBinding.getValue($tabset)) {
         // Note: destTabValue may be null. We still want to proceed
         // through the below logic and setValue so that the input
         // value for the tabset gets updated (i.e. input$tabsetId
         // should be null if there are no tabs).
         const destTabValue = getFirstTab($tabset);
-        const inputBinding = $tabset.data("shiny-input-binding");
         const evt = jQuery.Event("shiny:updateinput");
 
         evt.binding = inputBinding;
@@ -5885,7 +5903,12 @@ function main(): void {
       return $(scope).find("ul.nav.shiny-tab-input");
     },
     getValue: function (el) {
-      const anchor = $(el).find("li:not(.dropdown).active").children("a");
+      // prettier-ignore
+      let anchor = isBS3()
+        ? $(el).find("li:not(.dropdown).active > a")
+        : $(el).find(
+          ".nav-link:not(.dropdown-toggle).active, .dropdown-menu > .dropdown-item.active"
+        );
 
       if (anchor.length === 1) return this._getTabName(anchor);
 
@@ -5896,7 +5919,12 @@ function main(): void {
       let success = false;
 
       if (value) {
-        const anchors = $(el).find("li:not(.dropdown)").children("a");
+        // prettier-ignore
+        let anchors = isBS3()
+          ? $(el).find("li:not(.dropdown) > a")
+          : $(el).find(
+            ".nav-link:not(.dropdown-toggle), .dropdown-menu > .dropdown-item"
+          );
 
         anchors.each(function () {
           if (self._getTabName($(this)) === value) {

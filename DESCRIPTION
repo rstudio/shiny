@@ -80,7 +80,7 @@ Imports:
     mime (>= 0.3),
     jsonlite (>= 0.9.16),
     xtable,
-    htmltools (>= 0.5.1.9002),
+    htmltools (>= 0.5.1.9003),
     R6 (>= 2.0),
     sourcetools,
     later (>= 1.0.0),

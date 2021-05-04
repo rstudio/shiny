@@ -6392,6 +6392,8 @@ function main(): void {
   });
   inputBindings.register(fileInputBinding, "shiny.fileInputBinding");
 
+  // This function gets defined in initShiny() and 'hoisted' so it can be reused
+  // (to send CSS info) inside of Shiny.renderDependencies()
   let sendImageSize;
 
   // "init_shiny.js"

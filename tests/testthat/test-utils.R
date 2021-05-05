@@ -239,3 +239,15 @@ test_that("dateYMD works", {
     c("2019/11/05", "")
   )
 })
+
+test_that("quoToFunction handles nested quosures", {
+  quo_inner <- local({
+    x <- 1
+    rlang::quo(x)
+  })
+
+  quo_outer <- rlang::quo(!!quo_inner + 1)
+
+  func <- quoToFunction(quo_outer, "foo")
+  expect_identical(func(), 2)
+})

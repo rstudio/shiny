@@ -3,11 +3,11 @@ Type: Package
 Title: Web Application Framework for R
 Version: 1.6.0.9000
 Authors@R: c(
-    person("Winston", "Chang", role = c("aut", "cre"), email = "winston@rstudio.com"),
+    person("Winston", "Chang", role = c("aut", "cre"), email = "winston@rstudio.com", comment = c(ORCID = "0000-0002-1576-2126")),
     person("Joe", "Cheng", role = "aut", email = "joe@rstudio.com"),
     person("JJ", "Allaire", role = "aut", email = "jj@rstudio.com"),
-    person("Carson", "Sievert", role = "aut", email = "carson@rstudio.com"),
-    person("Barret", "Schloerke", role = "aut", email = "barret@rstudio.com"),
+    person("Carson", "Sievert", role = "aut", email = "carson@rstudio.com", comment = c(ORCID = "0000-0002-4958-2844")),
+    person("Barret", "Schloerke", role = "aut", email = "barret@rstudio.com", comment = c(ORCID = "0000-0001-9986-114X")),
     person("Yihui", "Xie", role = "aut", email = "yihui@rstudio.com"),
     person("Jeff", "Allen", role = "aut", email = "jeff@rstudio.com"),
     person("Jonathan", "McPherson", role = "aut", email = "jonathan@rstudio.com"),
@@ -79,7 +79,7 @@ Imports:
     jsonlite (>= 0.9.16),
     xtable,
     fontawesome (>= 0.1.0),
-    htmltools (>= 0.5.0.9001),
+    htmltools (>= 0.5.1.9003),
     R6 (>= 2.0),
     sourcetools,
     later (>= 1.0.0),
@@ -91,7 +91,7 @@ Imports:
     withr,
     commonmark (>= 1.7),
     glue (>= 1.3.2),
-    bslib (>= 0.2.2.9002),
+    bslib (>= 0.2.4.9003),
     cachem,
     ellipsis,
     lifecycle (>= 0.2.0)
@@ -112,6 +112,10 @@ Suggests:
     ragg,
     showtext,
     sass
+Remotes:
+    r-lib/rlang,
+    rstudio/bslib,
+    rstudio/htmltools
 URL: https://shiny.rstudio.com/
 BugReports: https://github.com/rstudio/shiny/issues
 Collate:
@@ -195,6 +199,7 @@ Collate:
     'test.R'
     'update-input.R'
     'utils-lang.R'
+    'version_jquery.R'
     'viewer.R'
 RoxygenNote: 7.1.1
 Encoding: UTF-8

@@ -12,7 +12,7 @@
 ^\.travis\.yml$
 ^staticdocs$
 ^tools$
-^srcjs$
+^srcts$
 ^CONTRIBUTING.md$
 ^cran-comments.md$
 ^.*\.o$

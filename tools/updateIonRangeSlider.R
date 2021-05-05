@@ -66,4 +66,4 @@ sass(
 
 
 # Finally, run yarn build so the JS patches propogate to the minified files
-withr::with_dir(rprojroot::find_package_root_file("tools"), system("yarn build"))
+withr::with_dir(rprojroot::find_package_root_file("tools"), system("yarn bundle_external_libs"))

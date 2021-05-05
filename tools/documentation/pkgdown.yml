@@ -169,6 +169,7 @@ reference:
       - devmode
       - shinyAppTemplate
       - req
+      - isTruthy
       - validate
       - session
       - shinyOptions

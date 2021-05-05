@@ -2175,7 +2175,7 @@ ShinySession <- R6Class(
   if (getOption("shiny.allowoutputreads", FALSE)) {
     .subset2(x, 'impl')$getOutput(name)
   } else {
-    stop("Reading from shinyoutput object is not allowed.")
+    rlang::abort(paste0("Can't read output '", name, "'"))
   }
 }
 
@@ -2184,12 +2184,12 @@ ShinySession <- R6Class(
 
 #' @export
 `[.shinyoutput` <- function(values, name) {
-  stop("Single-bracket indexing of shinyoutput object is not allowed.")
+  rlang::abort("Can't index shinyoutput with `[`.")
 }
 
 #' @export
 `[<-.shinyoutput` <- function(values, name, value) {
-  stop("Single-bracket indexing of shinyoutput object is not allowed.")
+  rlang::abort("Can't index shinyoutput with `[[`.")
 }
 
 #' Set options for an output object.

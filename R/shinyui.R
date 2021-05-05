@@ -47,27 +47,8 @@ renderPage <- function(ui, showcase=0, testMode=FALSE) {
     )
   }
 
-  jquery <- function() {
-    version <- getOption("shiny.jquery.version", 3)
-    if (version == 3) {
-      return(htmlDependency(
-        "jquery", "3.5.1",
-        c(href = "shared"),
-        script = "jquery.min.js"
-      ))
-    }
-    if (version == 1) {
-      return(htmlDependency(
-        "jquery", "1.12.4",
-        c(href = "shared/legacy"),
-        script = "jquery.min.js"
-      ))
-    }
-    stop("Unsupported version of jQuery: ", version)
-  }
-
   shiny_deps <- c(
-    list(jquery()),
+    list(jqueryDependency()),
     shinyDependencies()
   )
 
@@ -80,6 +61,33 @@ renderPage <- function(ui, showcase=0, testMode=FALSE) {
 
   html <- renderDocument(ui, shiny_deps, processDep = createWebDependency)
   enc2utf8(paste(collapse = "\n", html))
+}
+
+jqueryDependency <- function() {
+  version <- getOption("shiny.jquery.version", 3)
+  if (version == 3) {
+    return(htmlDependency(
+      "jquery", version_jquery,
+      src = c(
+        href = "shared",
+        file = "www/shared"
+      ),
+      package = "shiny",
+      script = "jquery.min.js"
+    ))
+  }
+  if (version == 1) {
+    return(htmlDependency(
+      "jquery", "1.12.4",
+      src = c(
+        href = "shared/legacy",
+        file = "www/shared/legacy"
+      ),
+      package = "shiny",
+      script = "jquery.min.js"
+    ))
+  }
+  stop("Unsupported version of jQuery: ", version)
 }
 
 shinyDependencies <- function() {

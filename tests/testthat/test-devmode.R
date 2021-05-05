@@ -23,6 +23,7 @@ test_that("devmode can be turned on while _testing_ is disabled and check messag
   withr::local_envvar(list(
     TESTTHAT = "false"
   ))
+  skip_if_not_installed("rlang", "0.4.11.9000")
   # force inform to always generate signal
   options(rlib_message_verbosity = "verbose")
 

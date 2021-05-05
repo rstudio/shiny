@@ -1046,8 +1046,10 @@ buildNavItem <- function(divTag, tabsetId, index) {
 liTag <- function(id, title, value, icon) {
   tags$li(
     tags$a(
-      `data-toggle` = "tab", `data-value` = value,
-      href = paste0("#", id), icon, title
+      href = paste0("#", id),
+      `data-toggle` = "tab",
+      `data-value` = value,
+       icon, title
     )
   )
 }

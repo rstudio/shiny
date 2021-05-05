@@ -6,10 +6,10 @@
       <div class="tabbable">
         <ul class="nav nav-tabs" data-tabsetid="4785">
           <li class="active">
-            <a data-toggle="tab" data-value="A" href="#tab-4785-1">A</a>
+            <a href="#tab-4785-1" data-toggle="tab" data-value="A">A</a>
           </li>
           <li>
-            <a data-toggle="tab" data-value="B" href="#tab-4785-2">
+            <a href="#tab-4785-2" data-toggle="tab" data-value="B">
               <i class=" fab fa-github fa-fw" role="presentation" aria-label=" icon"></i>
               B
             </a>
@@ -21,7 +21,7 @@
             </a>
             <ul class="dropdown-menu" data-tabsetid="1502">
               <li>
-                <a data-toggle="tab" data-value="C" href="#tab-1502-1">C</a>
+                <a href="#tab-1502-1" data-toggle="tab" data-value="C">C</a>
               </li>
             </ul>
           </li>
@@ -41,10 +41,10 @@
       <div class="tabbable">
         <ul class="nav nav-pills" data-tabsetid="4785">
           <li>
-            <a data-toggle="tab" data-value="A" href="#tab-4785-1">A</a>
+            <a href="#tab-4785-1" data-toggle="tab" data-value="A">A</a>
           </li>
           <li class="active">
-            <a data-toggle="tab" data-value="B" href="#tab-4785-2">
+            <a href="#tab-4785-2" data-toggle="tab" data-value="B">
               <i class=" fab fa-github fa-fw" role="presentation" aria-label=" icon"></i>
               B
             </a>
@@ -56,7 +56,7 @@
             </a>
             <ul class="dropdown-menu" data-tabsetid="1502">
               <li>
-                <a data-toggle="tab" data-value="C" href="#tab-1502-1">C</a>
+                <a href="#tab-1502-1" data-toggle="tab" data-value="C">C</a>
               </li>
             </ul>
           </li>
@@ -78,10 +78,10 @@
       <div class="tabbable">
         <ul class="nav nav-tabs" data-tabsetid="4785">
           <li class="nav-item">
-            <a data-toggle="tab" data-value="A" href="#tab-4785-1" class="nav-link active">A</a>
+            <a href="#tab-4785-1" data-toggle="tab" data-value="A" class="nav-link active">A</a>
           </li>
           <li class="nav-item">
-            <a data-toggle="tab" data-value="B" href="#tab-4785-2" class="nav-link">
+            <a href="#tab-4785-2" data-toggle="tab" data-value="B" class="nav-link">
               <i class=" fab fa-github fa-fw" role="presentation" aria-label=" icon"></i>
               B
             </a>
@@ -93,7 +93,7 @@
             </a>
             <ul class="dropdown-menu" data-tabsetid="1502">
               <li class="nav-item">
-                <a data-toggle="tab" data-value="C" href="#tab-1502-1" class="dropdown-item">C</a>
+                <a href="#tab-1502-1" data-toggle="tab" data-value="C" class="dropdown-item">C</a>
               </li>
             </ul>
           </li>
@@ -113,10 +113,10 @@
       <div class="tabbable">
         <ul class="nav nav-pills" data-tabsetid="4785">
           <li class="nav-item">
-            <a data-toggle="tab" data-value="A" href="#tab-4785-1" class="nav-link">A</a>
+            <a href="#tab-4785-1" data-toggle="tab" data-value="A" class="nav-link">A</a>
           </li>
           <li class="nav-item">
-            <a data-toggle="tab" data-value="B" href="#tab-4785-2" class="nav-link active">
+            <a href="#tab-4785-2" data-toggle="tab" data-value="B" class="nav-link active">
               <i class=" fab fa-github fa-fw" role="presentation" aria-label=" icon"></i>
               B
             </a>
@@ -128,7 +128,7 @@
             </a>
             <ul class="dropdown-menu" data-tabsetid="1502">
               <li class="nav-item">
-                <a data-toggle="tab" data-value="C" href="#tab-1502-1" class="dropdown-item">C</a>
+                <a href="#tab-1502-1" data-toggle="tab" data-value="C" class="dropdown-item">C</a>
               </li>
             </ul>
           </li>
@@ -154,10 +154,10 @@
           </div>
           <ul class="nav navbar-nav" data-tabsetid="4785">
             <li class="active">
-              <a data-toggle="tab" data-value="A" href="#tab-4785-1">A</a>
+              <a href="#tab-4785-1" data-toggle="tab" data-value="A">A</a>
             </li>
             <li>
-              <a data-toggle="tab" data-value="B" href="#tab-4785-2">
+              <a href="#tab-4785-2" data-toggle="tab" data-value="B">
                 <i class=" fab fa-github fa-fw" role="presentation" aria-label=" icon"></i>
                 B
               </a>
@@ -169,7 +169,7 @@
               </a>
               <ul class="dropdown-menu" data-tabsetid="1502">
                 <li>
-                  <a data-toggle="tab" data-value="C" href="#tab-1502-1">C</a>
+                  <a href="#tab-1502-1" data-toggle="tab" data-value="C">C</a>
                 </li>
               </ul>
             </li>
@@ -196,10 +196,10 @@
           </div>
           <ul class="nav navbar-nav" data-tabsetid="4785">
             <li class="nav-item">
-              <a data-toggle="tab" data-value="A" href="#tab-4785-1" class="nav-link active">A</a>
+              <a href="#tab-4785-1" data-toggle="tab" data-value="A" class="nav-link active">A</a>
             </li>
             <li class="nav-item">
-              <a data-toggle="tab" data-value="B" href="#tab-4785-2" class="nav-link">
+              <a href="#tab-4785-2" data-toggle="tab" data-value="B" class="nav-link">
                 <i class=" fab fa-github fa-fw" role="presentation" aria-label=" icon"></i>
                 B
               </a>
@@ -211,7 +211,7 @@
               </a>
               <ul class="dropdown-menu" data-tabsetid="1502">
                 <li class="nav-item">
-                  <a data-toggle="tab" data-value="C" href="#tab-1502-1" class="dropdown-item">C</a>
+                  <a href="#tab-1502-1" data-toggle="tab" data-value="C" class="dropdown-item">C</a>
                 </li>
               </ul>
             </li>
@@ -236,10 +236,10 @@
           <ul class="nav nav-pills nav-stacked" data-tabsetid="4785">
             <li class="navbar-brand">A header</li>
             <li class="active">
-              <a data-toggle="tab" data-value="A" href="#tab-4785-2">A</a>
+              <a href="#tab-4785-2" data-toggle="tab" data-value="A">A</a>
             </li>
             <li>
-              <a data-toggle="tab" data-value="B" href="#tab-4785-3">
+              <a href="#tab-4785-3" data-toggle="tab" data-value="B">
                 <i class=" fab fa-github fa-fw" role="presentation" aria-label=" icon"></i>
                 B
               </a>
@@ -251,7 +251,7 @@
               </a>
               <ul class="dropdown-menu" data-tabsetid="1502">
                 <li>
-                  <a data-toggle="tab" data-value="C" href="#tab-1502-1">C</a>
+                  <a href="#tab-1502-1" data-toggle="tab" data-value="C">C</a>
                 </li>
               </ul>
             </li>
@@ -276,10 +276,10 @@
           <ul class="nav nav-pills nav-stacked" data-tabsetid="4785">
             <li class="navbar-brand">A header</li>
             <li class="nav-item">
-              <a data-toggle="tab" data-value="A" href="#tab-4785-2" class="nav-link active">A</a>
+              <a href="#tab-4785-2" data-toggle="tab" data-value="A" class="nav-link active">A</a>
             </li>
             <li class="nav-item">
-              <a data-toggle="tab" data-value="B" href="#tab-4785-3" class="nav-link">
+              <a href="#tab-4785-3" data-toggle="tab" data-value="B" class="nav-link">
                 <i class=" fab fa-github fa-fw" role="presentation" aria-label=" icon"></i>
                 B
               </a>
@@ -291,7 +291,7 @@
               </a>
               <ul class="dropdown-menu" data-tabsetid="1502">
                 <li class="nav-item">
-                  <a data-toggle="tab" data-value="C" href="#tab-1502-1" class="dropdown-item">C</a>
+                  <a href="#tab-1502-1" data-toggle="tab" data-value="C" class="dropdown-item">C</a>
                 </li>
               </ul>
             </li>
@@ -314,13 +314,13 @@
       <div class="tabbable">
         <ul class="nav nav-tabs" data-tabsetid="4785">
           <li class="active">
-            <a data-toggle="tab" href="#tab-4785-1"></a>
+            <a href="#tab-4785-1" data-toggle="tab"></a>
           </li>
           <li>
-            <a data-toggle="tab" data-value="A" href="#tab-4785-2">A</a>
+            <a href="#tab-4785-2" data-toggle="tab" data-value="A">A</a>
           </li>
           <li>
-            <a data-toggle="tab" data-value="B" href="#tab-4785-3">
+            <a href="#tab-4785-3" data-toggle="tab" data-value="B">
               <i class=" fab fa-github fa-fw" role="presentation" aria-label=" icon"></i>
               B
             </a>
@@ -332,7 +332,7 @@
             </a>
             <ul class="dropdown-menu" data-tabsetid="1502">
               <li>
-                <a data-toggle="tab" data-value="C" href="#tab-1502-1">C</a>
+                <a href="#tab-1502-1" data-toggle="tab" data-value="C">C</a>
               </li>
             </ul>
           </li>

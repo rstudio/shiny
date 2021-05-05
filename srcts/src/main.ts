@@ -4133,7 +4133,7 @@ function main(): void {
               const css_string =
                 "#" + dummy_id + " { " +
                 "color: #a7c920 !important; " + // An arbitrary color for the transition
-                "transition: 0.1s all; " +
+                "transition: 0.1s all !important; " +
                 "visibility: hidden !important; " +
                 "position: absolute !important; " +
                 "top: -1000px !important; " +

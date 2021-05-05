@@ -1085,7 +1085,18 @@ buildDropdown <- function(divTag, tabset) {
       divTag$title,
       tags$b(class = "caret")
     ),
-    navList
+    navList,
+    .renderHook = function(x) {
+      if (isTRUE(getCurrentThemeVersion() >= 4)) {
+        tagQuery(x)$
+          addClass("nav-item")$
+          find(".dropdown-toggle")$
+          addClass("nav-link")$
+          allTags()
+      } else {
+        x
+      }
+    }
   )
 
   list(

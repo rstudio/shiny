@@ -4765,12 +4765,6 @@
                 sheet.cssText = "";
               import_jquery6.default(sheet.ownerNode).remove();
             };
-            var scheduleCssReporter = function scheduleCssReporter2() {
-              var handle = setInterval(sendImageSize, 100);
-              setTimeout(function() {
-                return clearInterval(handle);
-              }, 1e4);
-            };
             import_jquery6.default.map(links, function(link) {
               var oldSheet = findSheet(link.attr("href"));
               var href2 = link.attr("href") + "?restyle=" + new Date().getTime();
@@ -4779,10 +4773,21 @@
               } else {
                 link.attr("href", href2);
                 link.attr("onload", function() {
-                  scheduleCssReporter();
-                  setTimeout(function() {
-                    return removeSheet(oldSheet);
-                  }, 500);
+                  var dummy_id = "dummy-" + Math.floor(Math.random() * 99999999);
+                  var css_string = "#" + dummy_id + " { color: #" + Math.floor(Math.random() * 16777215).toString(16) + "; transition: 0.2s all; visibility: hidden; position: fixed; top: 0; left: 0; }";
+                  var base64_css_string = "data:text/css;base64," + btoa(css_string);
+                  var dummy_link = document.createElement("link");
+                  dummy_link.rel = "stylesheet";
+                  dummy_link.type = "text/css";
+                  dummy_link.href = base64_css_string;
+                  var $dummy_el = import_jquery6.default("<div id=" + dummy_id + "></div>");
+                  import_jquery6.default(document.body).append($dummy_el);
+                  $dummy_el.one("transitionend", function() {
+                    sendImageSize();
+                    removeSheet(oldSheet);
+                    $dummy_el.remove();
+                  });
+                  $head.append(dummy_link);
                 });
                 $head.append(link);
               }

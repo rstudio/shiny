@@ -4080,16 +4080,6 @@ function main(): void {
           $(sheet.ownerNode).remove();
         };
 
-        // There doesn't appear to be proper way to wait until new styles have been
-        // _applied everywhere_ so we repeatedly call sendImageSize() (which also
-        // sends colors and fonts) every .1s for 10 seconds.
-        /* global Shiny */
-        let scheduleCssReporter = function () {
-          let handle = setInterval(sendImageSize, 100);
-
-          setTimeout(() => clearInterval(handle), 10000);
-        };
-
         $.map(links, function (link) {
           // Find any document.styleSheets that match this link's href
           // so we can remove it after bringing in the new stylesheet
@@ -4106,8 +4096,33 @@ function main(): void {
             // Once the new <link> is loaded, schedule the old <link> to be removed
             // on the next tick which is needed to avoid FOUC
             link.attr("onload", () => {
-              scheduleCssReporter();
-              setTimeout(() => removeSheet(oldSheet), 500);
+              const dummy_id = "dummy-" + Math.floor(Math.random() * 99999999);
+              const css_string =
+                "#" + dummy_id +
+                " { color: #" +
+                Math.floor(Math.random() * 16777215).toString(16) + "; " +
+                "transition: 0.2s all; " +
+                "visibility: hidden; " +
+                "position: fixed; top: 0; left: 0; }";
+              const base64_css_string =
+                "data:text/css;base64," + btoa(css_string);
+
+              let dummy_link = document.createElement("link");
+
+              dummy_link.rel = "stylesheet";
+              dummy_link.type = "text/css";
+              dummy_link.href = base64_css_string;
+
+              let $dummy_el = $("<div id=" + dummy_id + "></div>")
+              $(document.body).append($dummy_el);
+              $dummy_el
+                .one("transitionend", () => {
+                  sendImageSize();
+                  removeSheet(oldSheet);
+                  $dummy_el.remove();
+                });
+
+              $head.append(dummy_link);
             });
             $head.append(link);
           }

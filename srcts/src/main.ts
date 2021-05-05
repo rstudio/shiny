@@ -4077,6 +4077,8 @@ function main(): void {
           return null;
         };
 
+        // Removes the stylesheet from document.styleSheets, and also removes
+        // the owning <link> element, if present.
         let removeSheet = function (sheet) {
           if (!sheet) return;
           sheet.disabled = true;
@@ -4088,6 +4090,7 @@ function main(): void {
           // Find any document.styleSheets that match this link's href
           // so we can remove it after bringing in the new stylesheet
           const oldSheet = findSheet(link.attr("href"));
+
           // Add a timestamp to the href to prevent caching
           const href = link.attr("href") + "?restyle=" + new Date().getTime();
           // Use inline <style> approach for IE, otherwise use the more elegant
@@ -4136,7 +4139,7 @@ function main(): void {
               let $dummy_el = $("<div id='" + dummy_id + "'></div>")
               $dummy_el.one("transitionend", () => {
                 $dummy_el.remove();
-                $dummy_link.remove();
+                removeSheet(findSheet($dummy_link.attr("href")));
                 sendImageSize();
                 removeSheet(oldSheet);
               });

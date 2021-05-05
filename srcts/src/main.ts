@@ -4040,7 +4040,7 @@ function main(): void {
         $head.append(links);
       } else {
         // This inline <style> based approach works for IE11
-        let refreshStyle = function (href, oldSheet, onload) {
+        let refreshStyle = function (href, oldSheet) {
           const xhr = new XMLHttpRequest();
 
           xhr.open("GET", href);
@@ -4051,9 +4051,10 @@ function main(): void {
             const newStyle = $("<style>").attr("id", id).html(xhr.responseText);
 
             $head.append(newStyle);
-            setTimeout(() => oldStyle.remove(), 500);
-            setTimeout(() => removeSheet(oldSheet), 500);
-            onload();
+
+            oldStyle.remove();
+            removeSheet(oldSheet);
+            sendImageSize();
           };
           xhr.send();
         };
@@ -4090,7 +4091,7 @@ function main(): void {
           // <link> -based approach
 
           if (isIE()) {
-            refreshStyle(href, oldSheet, scheduleCssReporter);
+            refreshStyle(href, oldSheet);
           } else {
 
             link.attr("href", href);

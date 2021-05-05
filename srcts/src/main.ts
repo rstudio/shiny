@@ -4087,7 +4087,6 @@ function main(): void {
           if (isIE()) {
             refreshStyle(href, oldSheet);
           } else {
-
             link.attr("href", href);
 
             // This part is a bit tricky. The link's onload callback will be
@@ -4117,7 +4116,9 @@ function main(): void {
             link.attr("onload", () => {
               const dummy_id = "dummy-" + Math.floor(Math.random() * 999999999);
               const css_string =
-                "#" + dummy_id + " { " +
+                "#" +
+                dummy_id +
+                " { " +
                 "color: #a7c920 !important; " + // An arbitrary color for the transition
                 "transition: 0.1s all !important; " +
                 "visibility: hidden !important; " +
@@ -4128,9 +4129,11 @@ function main(): void {
                 "data:text/css;base64," + btoa(css_string);
 
               let $dummy_link = $("<link rel='stylesheet' type='text/css' />");
+
               $dummy_link.attr("href", base64_css_string);
 
-              let $dummy_el = $("<div id='" + dummy_id + "'></div>")
+              let $dummy_el = $("<div id='" + dummy_id + "'></div>");
+
               $dummy_el.one("transitionend", () => {
                 $dummy_el.remove();
                 removeSheet(findSheet($dummy_link.attr("href")));

@@ -4765,12 +4765,6 @@
                 sheet.cssText = "";
               import_jquery6.default(sheet.ownerNode).remove();
             };
-            var scheduleCssReporter = function scheduleCssReporter2() {
-              var handle = setInterval(sendImageSize, 100);
-              setTimeout(function() {
-                return clearInterval(handle);
-              }, 1e4);
-            };
             import_jquery6.default.map(links, function(link) {
               var oldSheet = findSheet(link.attr("href"));
               var href2 = link.attr("href") + "?restyle=" + new Date().getTime();
@@ -4779,10 +4773,22 @@
               } else {
                 link.attr("href", href2);
                 link.attr("onload", function() {
-                  scheduleCssReporter();
+                  var dummy_id = "dummy-" + Math.floor(Math.random() * 999999999);
+                  var css_string = "#" + dummy_id + " { color: #a7c920; transition: 0.1s all; visibility: hidden; position: absolute !important; top: -1000px !important; left: 0 !important; }";
+                  var base64_css_string = "data:text/css;base64," + btoa(css_string);
+                  var $dummy_link = import_jquery6.default("<link rel='stylesheet' type='text/css' />");
+                  $dummy_link.attr("href", base64_css_string);
+                  var $dummy_el = import_jquery6.default("<div id='" + dummy_id + "'></div>");
+                  $dummy_el.one("transitionend", function() {
+                    $dummy_el.remove();
+                    $dummy_link.remove();
+                    sendImageSize();
+                    removeSheet(oldSheet);
+                  });
+                  import_jquery6.default(document.body).append($dummy_el);
                   setTimeout(function() {
-                    return removeSheet(oldSheet);
-                  }, 500);
+                    return $head.append($dummy_link);
+                  }, 0);
                 });
                 $head.append(link);
               }

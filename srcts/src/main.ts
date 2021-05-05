@@ -4080,16 +4080,6 @@ function main(): void {
           $(sheet.ownerNode).remove();
         };
 
-        // There doesn't appear to be proper way to wait until new styles have been
-        // _applied everywhere_ so we repeatedly call sendImageSize() (which also
-        // sends colors and fonts) every .1s for 10 seconds.
-        /* global Shiny */
-        let scheduleCssReporter = function () {
-          let handle = setInterval(sendImageSize, 100);
-
-          setTimeout(() => clearInterval(handle), 10000);
-        };
-
         $.map(links, function (link) {
           // Find any document.styleSheets that match this link's href
           // so we can remove it after bringing in the new stylesheet
@@ -4102,13 +4092,58 @@ function main(): void {
           if (isIE()) {
             refreshStyle(href, oldSheet, scheduleCssReporter);
           } else {
+
             link.attr("href", href);
-            // Once the new <link> is loaded, schedule the old <link> to be removed
-            // on the next tick which is needed to avoid FOUC
+
+            // This part is a bit tricky. The link's onload callback will be
+            // invoked after the file is loaded, but it can be _before_ the
+            // styles are actually applied. The amount of time it takes for the
+            // style to be applied is not predictable. We need to make sure the
+            // styles are applied before we send updated size/style information
+            // to the server.
+            //
+            // We do this by adding _another_ link, with CSS content
+            // base64-encoded and inlined into the href. We also add a dummy DOM
+            // element that the CSS applies to. The dummy CSS includes a
+            // transition, and when the `transitionend` event happens, we call
+            // sendImageSize() and remove the old sheet. We also remove the
+            // dummy DOM element and dummy CSS content.
+            //
+            // The reason this works is because (we assume) that if multiple
+            // <link> tags are added, they will be applied in the same order
+            // that they are loaded. This seems to be true in the browsers we
+            // have tested.
             link.attr("onload", () => {
-              scheduleCssReporter();
-              setTimeout(() => removeSheet(oldSheet), 500);
+              const dummy_id = "dummy-" + Math.floor(Math.random() * 999999999);
+              const css_string =
+                "#" + dummy_id + " { " +
+                "color: #a7c920; " +       // An arbitrary color for the transition
+                "transition: 0.1s all; " +
+                "visibility: hidden; " +
+                "position: absolute !important; " +
+                "top: -1000px !important; " +
+                "left: 0 !important; }";
+              const base64_css_string =
+                "data:text/css;base64," + btoa(css_string);
+
+              let $dummy_link = $("<link rel='stylesheet' type='text/css' />");
+              $dummy_link.attr("href", base64_css_string);
+
+              let $dummy_el = $("<div id='" + dummy_id + "'></div>")
+              $dummy_el.one("transitionend", () => {
+                $dummy_el.remove();
+                $dummy_link.remove();
+                sendImageSize();
+                removeSheet(oldSheet);
+              });
+              $(document.body).append($dummy_el);
+
+              // Need to add the CSS with a setTimeout 0, to ensure that it
+              // takes effect _after_ the DOM element has been added. This is
+              // necessary to ensure that the transition actually occurs.
+              setTimeout(() => $head.append($dummy_link), 0);
             });
+
             $head.append(link);
           }
         });

@@ -4052,6 +4052,9 @@ function main(): void {
 
             $head.append(newStyle);
 
+            // We can remove the old styles and send update image information
+            // immediately because the new styles should have been applied
+            // synchronously.
             oldStyle.remove();
             removeSheet(oldSheet);
             sendImageSize();

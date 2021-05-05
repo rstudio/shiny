@@ -4740,7 +4740,7 @@
                 $head.append(newStyle);
                 oldStyle.remove();
                 removeSheet(oldSheet);
-                sendImageSize();
+                sendImageSize2();
               };
               xhr.send();
             };
@@ -4770,16 +4770,16 @@
                 link.attr("href", href2);
                 link.attr("onload", function() {
                   var dummy_id = "dummy-" + Math.floor(Math.random() * 999999999);
-                  var css_string = "#" + dummy_id + " { color: #a7c920; transition: 0.1s all; visibility: hidden; position: absolute !important; top: -1000px !important; left: 0 !important; }";
+                  var css_string = "#" + dummy_id + " { color: #a7c920 !important; transition: 0.1s all !important; visibility: hidden !important; position: absolute !important; top: -1000px !important; left: 0 !important; }";
                   var base64_css_string = "data:text/css;base64," + btoa(css_string);
                   var $dummy_link = import_jquery6.default("<link rel='stylesheet' type='text/css' />");
                   $dummy_link.attr("href", base64_css_string);
                   var $dummy_el = import_jquery6.default("<div id='" + dummy_id + "'></div>");
                   $dummy_el.one("transitionend", function() {
                     $dummy_el.remove();
-                    $dummy_link.remove();
-                    sendImageSize();
+                    removeSheet(findSheet($dummy_link.attr("href")));
                     removeSheet(oldSheet);
+                    sendImageSize2();
                   });
                   import_jquery6.default(document.body).append($dummy_el);
                   setTimeout(function() {
@@ -6447,6 +6447,7 @@
       });
       inputBindings.register(fileInputBinding, "shiny.fileInputBinding");
       var sendImageSize;
+      var sendImageSize2;
       function initShiny() {
         var shinyapp = Shiny.shinyapp = new ShinyApp();
         function bindOutputs() {
@@ -6778,6 +6779,7 @@
           if (sendImageSizeDebouncer.isPending())
             sendImageSizeDebouncer.immediateCall();
         });
+        sendImageSize2 = debounce(200, sendImageSize);
         function isHidden(obj) {
           if (obj === null || obj.offsetWidth !== 0 || obj.offsetHeight !== 0) {
             return false;

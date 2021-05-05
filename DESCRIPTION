@@ -113,6 +113,8 @@ Suggests:
     ragg,
     showtext,
     sass
+Remotes:
+    r-lib/rlang
 URL: https://shiny.rstudio.com/
 BugReports: https://github.com/rstudio/shiny/issues
 Collate:

@@ -3925,6 +3925,9 @@ function main(): void {
   });
   outputBindings.register(htmlOutputBinding, "shiny.htmlOutput");
 
+  // -----------------------------------------------------------------------
+  // Functions handling HTML dependencies
+  // -----------------------------------------------------------------------
   const renderDependencies = (Shiny.renderDependencies = function (
     dependencies
   ) {
@@ -4057,7 +4060,7 @@ function main(): void {
             // synchronously.
             oldStyle.remove();
             removeSheet(oldSheet);
-            sendImageSize();
+            sendImageSize2();
           };
           xhr.send();
         };
@@ -4140,8 +4143,8 @@ function main(): void {
               $dummy_el.one("transitionend", () => {
                 $dummy_el.remove();
                 removeSheet(findSheet($dummy_link.attr("href")));
-                sendImageSize();
                 removeSheet(oldSheet);
+                sendImageSize2();
               });
               $(document.body).append($dummy_el);
 
@@ -6437,6 +6440,7 @@ function main(): void {
   // This function gets defined in initShiny() and 'hoisted' so it can be reused
   // (to send CSS info) inside of Shiny.renderDependencies()
   let sendImageSize;
+  let sendImageSize2;
 
   // "init_shiny.js"
   function initShiny() {
@@ -6929,6 +6933,9 @@ function main(): void {
       if (sendImageSizeDebouncer.isPending())
         sendImageSizeDebouncer.immediateCall();
     });
+
+    // A version of sendImageSize which debounces for longer.
+    sendImageSize2 = debounce(200, sendImageSize);
 
     // Return true if the object or one of its ancestors in the DOM tree has
     // style='display:none'; otherwise return false.

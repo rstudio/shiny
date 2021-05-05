@@ -4730,7 +4730,7 @@
           if (!restyle) {
             $head.append(links);
           } else {
-            var refreshStyle = function refreshStyle2(href2, oldSheet, onload) {
+            var refreshStyle = function refreshStyle2(href2, oldSheet) {
               var xhr = new XMLHttpRequest();
               xhr.open("GET", href2);
               xhr.onload = function() {
@@ -4738,13 +4738,9 @@
                 var oldStyle = $head.find("style#" + id);
                 var newStyle = import_jquery6.default("<style>").attr("id", id).html(xhr.responseText);
                 $head.append(newStyle);
-                setTimeout(function() {
-                  return oldStyle.remove();
-                }, 500);
-                setTimeout(function() {
-                  return removeSheet(oldSheet);
-                }, 500);
-                onload();
+                oldStyle.remove();
+                removeSheet(oldSheet);
+                sendImageSize();
               };
               xhr.send();
             };
@@ -4769,7 +4765,7 @@
               var oldSheet = findSheet(link.attr("href"));
               var href2 = link.attr("href") + "?restyle=" + new Date().getTime();
               if (isIE()) {
-                refreshStyle(href2, oldSheet, scheduleCssReporter);
+                refreshStyle(href2, oldSheet);
               } else {
                 link.attr("href", href2);
                 link.attr("onload", function() {

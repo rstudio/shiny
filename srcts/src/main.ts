@@ -4055,9 +4055,8 @@ function main(): void {
 
             $head.append(newStyle);
 
-            // We can remove the old styles and send update image information
-            // immediately because the new styles should have been applied
-            // synchronously.
+            // We can remove the old styles immediately because the new styles
+            // should have been applied synchronously.
             oldStyle.remove();
             removeSheet(oldSheet);
             sendImageSize2();
@@ -4116,13 +4115,19 @@ function main(): void {
             // base64-encoded and inlined into the href. We also add a dummy DOM
             // element that the CSS applies to. The dummy CSS includes a
             // transition, and when the `transitionend` event happens, we call
-            // sendImageSize() and remove the old sheet. We also remove the
+            // sendImageSize2() and remove the old sheet. We also remove the
             // dummy DOM element and dummy CSS content.
             //
             // The reason this works is because (we assume) that if multiple
             // <link> tags are added, they will be applied in the same order
             // that they are loaded. This seems to be true in the browsers we
             // have tested.
+            //
+            // Because it is common for multiple stylesheets to arrive close
+            // together, but not on exactly the same tick, we call
+            // sendImageSize2(), which is debounced. Otherwise, it can result in
+            // the same plot being redrawn multiple times with different
+            // styling.
             link.attr("onload", () => {
               const dummy_id = "dummy-" + Math.floor(Math.random() * 999999999);
               const css_string =

@@ -1600,7 +1600,7 @@ downloadLink <- function(outputId, label="Download", class=NULL, ...) {
 #' @param name Name of icon. Icons are drawn from the
 #'   [Font Awesome Free](https://fontawesome.com/) (currently icons from
 #'   the v5.13.0 set are supported with the v4 naming convention) and
-#'   [Glyphicons](https://getbootstrap.com/components/#glyphicons)
+#'   [Glyphicons](https://getbootstrap.com/docs/3.4/components/)
 #'   libraries. Note that the "fa-" and "glyphicon-" prefixes should not be used
 #'   in icon names (i.e. the "fa-calendar" icon should be referred to as
 #'   "calendar")

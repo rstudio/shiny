@@ -1,5 +1,3 @@
-context("reactivity")
-
 test_that("reactive and reactiveVal are functions", {
   expect_s3_class(reactive({1}), "function")
   expect_s3_class(reactiveVal(1), "function")
@@ -659,6 +657,115 @@ test_that("suspended/resumed observers run at most once", {
 })
 
 
+test_that("reactive() accepts injected quosures", {
+  # Normal usage - no quosures
+  a <- 1
+  f <- reactive({ a + 10 })
+  a <- 2
+  expect_identical(isolate(f()), 12)
+
+  # quosures can be used in reactive()
+  a <- 1
+  f <- reactive({ rlang::eval_tidy(rlang::quo(!!a + 10)) })
+  a <- 2
+  expect_identical(isolate(f()), 12)
+
+  # inject() with quosures
+  a <- 1
+  exp <- rlang::quo(a + 10)
+  f <- inject(reactive(!!exp))
+  a <- 2
+  expect_identical(isolate(f()), 12)
+
+  # inject() with !!!
+  a <- 1
+  exp <- list(rlang::quo(a + 10))
+  f <- inject(reactive(!!!exp))
+  a <- 2
+  expect_identical(isolate(f()), 12)
+
+  # inject() with captured environment
+  a <- 1
+  exp <- local({
+    q <- rlang::quo(a + 10)
+    a <- 2
+    q
+  })
+  f <- inject(reactive(!! exp ))
+  a <- 3
+  expect_identical(isolate(f()), 12)
+
+  # inject() with nested quosures
+  a <- 1
+  y <- quo(a)
+  exp <- quo(!!y + 10)
+  a <- 2
+  f <- inject(reactive(!! exp ))
+  a <- 3
+  expect_identical(isolate(f()), 13)
+})
+
+test_that("observe() accepts injected quosures", {
+  # Normal usage - no quosures
+  val <- NULL
+  a <- 1
+  observe({ val <<- a + 10 })
+  a <- 2
+  flushReact()
+  expect_identical(val, 12)
+
+  # quosures can be used in reactive()
+  val <- NULL
+  a <- 1
+  f <- observe({ val <<- rlang::eval_tidy(rlang::quo(!!a + 10)) })
+  a <- 2
+  flushReact()
+  expect_identical(val, 12)
+
+  # inject() with quosures
+  val <- NULL
+  a <- 1
+  exp <- rlang::quo(val <<- a + 10)
+  f <- inject(observe(!!exp))
+  a <- 2
+  flushReact()
+  expect_identical(val, 12)
+
+  # inject() with !!!
+  val <- NULL
+  a <- 1
+  exp <- list(quo(val <<- a + 10))
+  f <- inject(observe(!!!exp))
+  a <- 2
+  flushReact()
+  expect_identical(val, 12)
+
+  # inject() with captured environment
+  val <- NULL
+  a <- 1
+  exp <- local({
+    q <- rlang::quo(val <<- a + 10)
+    a <- 2
+    q
+  })
+  f <- inject(observe(!! exp ))
+  a <- 3
+  flushReact()
+  expect_identical(val, 12)
+
+  # inject() with nested quosures
+  val <- NULL
+  a <- 1
+  y <- quo(a)
+  exp <- rlang::quo(val <<- !!y + 10)
+  a <- 2
+  f <- inject(observe(!!exp))
+  a <- 3
+  flushReact()
+  expect_identical(val, 13)
+})
+
+
 test_that("reactive() accepts quoted and unquoted expressions", {
   vals <- reactiveValues(A=1)
 
@@ -684,10 +791,12 @@ test_that("reactive() accepts quoted and unquoted expressions", {
   expect_true(is.function(isolate(fun())))
 
 
-  # Check that environment is correct - parent environment should be this one
+  # Check that environment is correct - parent of parent environment should be
+  # this one. Note that rlang::as_function() injects an intermediate
+  # environment.
   this_env <- environment()
   fun <- reactive(environment())
-  expect_identical(isolate(parent.env(fun())), this_env)
+  expect_identical(isolate(parent.env(parent.env(fun()))), this_env)
 
   # Sanity check: environment structure for a reactive() should be the same as for
   # a normal function
@@ -726,12 +835,13 @@ test_that("observe() accepts quoted and unquoted expressions", {
   expect_equal(valB, 4)
 
 
-  # Check that environment is correct - parent environment should be this one
+  # Check that environment is correct - parent of parent environment should be
+  # this one. rlang::as_function() injects one intermediate env.
   this_env <- environment()
   inside_env <- NULL
   fun <- observe(inside_env <<- environment())
   flushReact()
-  expect_identical(parent.env(inside_env), this_env)
+  expect_identical(parent.env(parent.env(inside_env)), this_env)
 })
 
 test_that("Observer priorities are respected", {
@@ -777,7 +887,9 @@ test_that("Observers fire in consistent order across platforms", {
   })
 
   for (i in 1:20) {
-    v(isolate(v()) + 1); shiny:::flushReact()
+    suppressMessages({
+      v(isolate(v()) + 1); shiny:::flushReact()
+    })
   }
 
   expected_order <- list()
@@ -1043,7 +1155,7 @@ test_that("Flush completes even when errors occur", {
   vals$x <- 0
   suppress_stacktrace(
     # Errors in reactive are translated to warnings in observers by default
-    expect_warning(flushReact())
+    expect_warning(expect_warning(flushReact()))
   )
   # Both observers should run up until the reactive that errors
   expect_true(all(c(n11, n12, n21, n22) == c(2,1,2,1)))
@@ -1102,7 +1214,9 @@ test_that("event handling helpers take correct dependencies", {
   expect_equal(execCount(o2), 2)
 })
 
-run_debounce_throttle <- function(do_priming) {
+
+test_that("debounce/throttle work properly (with priming)", {
+  do_priming <- TRUE
   # Some of the CRAN test machines are heavily loaded and so the timing for
   # these tests isn't reliable. https://github.com/rstudio/shiny/pull/2789
   skip_on_cran()
@@ -1145,8 +1259,8 @@ run_debounce_throttle <- function(do_priming) {
     expect_identical(isolate(tr()), 0)
   }
 
-  # Pump timer and reactives for about 1.4 seconds
-  stopAt <- Sys.time() + 1.4
+  # Pump timer and reactives for about 1.3 seconds
+  stopAt <- Sys.time() + 1.3
   while (Sys.time() < stopAt) {
     timerCallbacks$executeElapsed()
     flushReact()
@@ -1177,13 +1291,85 @@ run_debounce_throttle <- function(do_priming) {
   isolate(expect_identical(rv$a, dr()))
   expect_identical(tr_fired, 4)
   isolate(expect_identical(rv$a, tr()))
-}
-
-test_that("debounce/throttle work properly (with priming)", {
-  run_debounce_throttle(TRUE)
 })
+
+# Identical to test block above, but with do_priming set to FALSE.
 test_that("debounce/throttle work properly (without priming)", {
-  run_debounce_throttle(FALSE)
+  do_priming <- FALSE
+  # Some of the CRAN test machines are heavily loaded and so the timing for
+  # these tests isn't reliable. https://github.com/rstudio/shiny/pull/2789
+  skip_on_cran()
+
+  # The changing of rv$a will be the (chatty) source of reactivity.
+  rv <- reactiveValues(a = 0)
+
+  # This observer will be what changes rv$a.
+  src <- observe({
+    invalidateLater(100)
+    rv$a <- isolate(rv$a) + 1
+  })
+  on.exit(src$destroy(), add = TRUE)
+
+  # Make a debounced reactive to test.
+  dr <- debounce(reactive(rv$a), 500)
+
+  # Make a throttled reactive to test.
+  tr <- throttle(reactive(rv$a), 500)
+
+  # Keep track of how often dr/tr are fired
+  dr_fired <- 0
+  dr_monitor <- observeEvent(dr(), {
+    dr_fired <<- dr_fired + 1
+  })
+  on.exit(dr_monitor$destroy(), add = TRUE)
+
+  tr_fired <- 0
+  tr_monitor <- observeEvent(tr(), {
+    tr_fired <<- tr_fired + 1
+  })
+  on.exit(tr_monitor$destroy(), add = TRUE)
+
+  # Starting values are both 0. Earlier I found that the tests behaved
+  # differently if I accessed the values of dr/tr before the first call to
+  # flushReact(). That bug was fixed, but to ensure that similar bugs don't
+  # appear undetected, we run this test with and without do_priming.
+  if (do_priming) {
+    expect_identical(isolate(dr()), 0)
+    expect_identical(isolate(tr()), 0)
+  }
+
+  # Pump timer and reactives for about 1.3 seconds
+  stopAt <- Sys.time() + 1.3
+  while (Sys.time() < stopAt) {
+    timerCallbacks$executeElapsed()
+    flushReact()
+    Sys.sleep(0.001)
+  }
+
+  # dr() should not have had time to fire, other than the initial run, since
+  # there haven't been long enough gaps between invalidations.
+  expect_identical(dr_fired, 1)
+  # The value of dr() should not have updated either.
+  expect_identical(isolate(dr()), 0)
+
+  # tr() however, has had time to fire multiple times and update its value.
+  expect_identical(tr_fired, 3)
+  expect_identical(isolate(tr()), 10)
+
+  # Now let some time pass without any more updates.
+  src$destroy() # No more updates
+  stopAt <- Sys.time() + 1
+  while (Sys.time() < stopAt) {
+    timerCallbacks$executeElapsed()
+    flushReact()
+    Sys.sleep(0.001)
+  }
+
+  # dr should've fired, and we should have converged on the right answer.
+  expect_identical(dr_fired, 2)
+  isolate(expect_identical(rv$a, dr()))
+  expect_identical(tr_fired, 4)
+  isolate(expect_identical(rv$a, tr()))
 })
 
 test_that("reactive domain works across async handlers", {

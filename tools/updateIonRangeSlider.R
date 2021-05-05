@@ -57,10 +57,13 @@ for (patch in list.files(patch_dir, full.names = TRUE)) {
 library(sass)
 dir.create(file.path(target, "css"))
 sass(
-  sass_file(file.path(target, "scss", "shiny.scss")),
+  list(
+    sass::sass_file(system.file("sass-utils/color-contrast.scss", package = "bslib")),
+    sass_file(file.path(target, "scss", "shiny.scss"))
+  ),
   output = file.path(target, "css", "ion.rangeSlider.css")
 )
 
 
 # Finally, run yarn build so the JS patches propogate to the minified files
-withr::with_dir(rprojroot::find_package_root_file("tools"), system("yarn build"))
+withr::with_dir(rprojroot::find_package_root_file("tools"), system("yarn bundle_external_libs"))

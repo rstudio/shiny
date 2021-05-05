@@ -5,7 +5,13 @@
 \alias{fixedRow}
 \title{Create a page with a fixed layout}
 \usage{
-fixedPage(..., title = NULL, responsive = NULL, theme = NULL, lang = NULL)
+fixedPage(
+  ...,
+  title = NULL,
+  responsive = deprecated(),
+  theme = NULL,
+  lang = NULL
+)
 
 fixedRow(...)
 }
@@ -17,9 +23,14 @@ fixedRow(...)
 \item{responsive}{This option is deprecated; it is no longer optional with
 Bootstrap 3.}
 
-\item{theme}{Alternative Bootstrap stylesheet (normally a css file within the
-www directory). For example, to use the theme located at
-\code{www/bootstrap.css} you would use \code{theme = "bootstrap.css"}.}
+\item{theme}{One of the following:
+\itemize{
+\item \code{NULL} (the default), which implies a "stock" build of Bootstrap 3.
+\item A \code{\link[bslib:bs_theme]{bslib::bs_theme()}} object. This can be used to replace a stock
+build of Bootstrap 3 with a customized version of Bootstrap 3 or higher.
+\item A character string pointing to an alternative Bootstrap stylesheet
+(normally a css file within the www directory, e.g. \code{www/bootstrap.css}).
+}}
 
 \item{lang}{ISO 639-1 language code for the HTML page, such as "en" or "ko".
 This will be used as the lang in the \code{<html>} tag, as in \code{<html lang="en">}.
@@ -45,7 +56,7 @@ layout functions like \code{sidebarLayout}, rather, all layout must be done
 with \code{fixedRow} and \code{column}.
 }
 \note{
-See the \href{http://shiny.rstudio.com/articles/layout-guide.html}{ Shiny Application Layout Guide} for additional details on laying out fixed
+See the \href{https://shiny.rstudio.com/articles/layout-guide.html}{ Shiny Application Layout Guide} for additional details on laying out fixed
 pages.
 }
 \examples{

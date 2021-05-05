@@ -88,8 +88,8 @@ getShinyOption <- function(name, default = NULL) {
 #' \item{shiny.host (defaults to `"127.0.0.1"`)}{The IP address that Shiny should listen on. See
 #'   [runApp()] for more information.}
 #' \item{shiny.jquery.version (defaults to `3`)}{The major version of jQuery to use.
-#' Currently only values of `3` or `1` are supported. If `1`, then jQuery 1.12.4 is used. If `3`,
-#' then jQuery 3.5.1 is used.}
+#'   Currently only values of `3` or `1` are supported. If `1`, then jQuery 1.12.4 is used. If `3`,
+#'   then jQuery `r version_jquery` is used.}
 #' \item{shiny.json.digits (defaults to `16`)}{The number of digits to use when converting
 #'   numbers to JSON format to send to the client web browser.}
 #' \item{shiny.launch.browser (defaults to `interactive()`)}{A boolean which controls the default behavior
@@ -136,6 +136,12 @@ getShinyOption <- function(name, default = NULL) {
 #' \item{shiny.usecairo (defaults to `TRUE`)}{This is used to disable graphical rendering by the
 #'   Cairo package, if it is installed. See [plotPNG()] for more
 #'   information.}
+#' \item{shiny.devmode (defaults to `NULL`)}{Option to enable Shiny Developer Mode. When set,
+#'   different default `getOption(key)` values will be returned. See [devmode()] for more details.}
+### Not documenting as 'shiny.devmode.verbose' is for niche use only
+# ' \item{shiny.devmode.verbose (defaults to `TRUE`)}{If `TRUE`, will display messages printed
+# '   about which options are being set. See [devmode()] for more details. }
+### (end not documenting 'shiny.devmode.verbose')
 #' }
 #'
 #'
@@ -172,7 +178,7 @@ getShinyOption <- function(name, default = NULL) {
 #' @aliases shiny-options
 #' @export
 shinyOptions <- function(...) {
-  newOpts <- list(...)
+  newOpts <- list2(...)
 
   if (length(newOpts) > 0) {
     # If we're within a session, modify at the session level.

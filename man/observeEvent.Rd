@@ -112,7 +112,11 @@ that is stored in a variable; to do so, it must be quoted with \code{quote()}.}
 object (see \code{\link[=reactive]{reactive()}}).
 }
 \description{
-Respond to "event-like" reactive inputs, values, and expressions.
+Respond to "event-like" reactive inputs, values, and expressions. As of Shiny
+1.6.0, we recommend using \code{\link[=bindEvent]{bindEvent()}} instead of \code{eventReactive()} and
+\code{observeEvent()}. This is because \code{bindEvent()} can be composed with
+\code{\link[=bindCache]{bindCache()}}, and because it can also be used with \code{render} functions (like
+\code{\link[=renderText]{renderText()}} and \code{\link[=renderPlot]{renderPlot()}}).
 }
 \details{
 Shiny's reactive programming framework is primarily designed for calculated
@@ -135,13 +139,17 @@ Use \code{observeEvent} whenever you want to \emph{perform an action} in
 response to an event. (Note that "recalculate a value" does not generally
 count as performing an action--see \code{eventReactive} for that.) The first
 argument is the event you want to respond to, and the second argument is a
-function that should be called whenever the event occurs.
+function that should be called whenever the event occurs. Note that
+\code{observeEvent()} is equivalent to using \code{observe() \%>\% bindEvent()} and as of
+Shiny 1.6.0, we recommend the latter.
 
 Use \code{eventReactive} to create a \emph{calculated value} that only
 updates in response to an event. This is just like a normal
 \link[=reactive]{reactive expression} except it ignores all the usual
 invalidations that come from its reactive dependencies; it only invalidates
-in response to the given event.
+in response to the given event. Note that
+\code{eventReactive()} is equivalent to using \code{reactive() \%>\% bindEvent()} and as of
+Shiny 1.6.0, we recommend the latter.
 }
 \section{ignoreNULL and ignoreInit}{
 
@@ -206,7 +214,7 @@ created (because  \code{ignoreInit = TRUE}). After that,
 }
 
 \examples{
-## Only run this example in interactive R sessions
+## Only run examples in interactive R sessions
 if (interactive()) {
 
   ## App 1: Sample usage
@@ -225,6 +233,12 @@ if (interactive()) {
       observeEvent(input$button, {
         cat("Showing", input$x, "rows\n")
       })
+      # The observeEvent() above is equivalent to:
+      # observe({
+      #    cat("Showing", input$x, "rows\n")
+      #   }) \%>\%
+      #   bindEvent(input$button)
+
       # Take a reactive dependency on input$button, but
       # not on any of the stuff inside the function
       df <- eventReactive(input$button, {
@@ -244,6 +258,12 @@ if (interactive()) {
         print(paste("This will only be printed once; all",
               "subsequent button clicks won't do anything"))
       }, once = TRUE)
+      # The observeEvent() above is equivalent to:
+      # observe({
+      #   print(paste("This will only be printed once; all",
+      #         "subsequent button clicks won't do anything"))
+      #   }) \%>\%
+      #   bindEvent(input$go, once = TRUE)
     }
   )
 

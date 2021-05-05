@@ -1,9 +1,9 @@
 diff --git a/inst/www/shared/ionrangeslider/scss/shiny.scss b/inst/www/shared/ionrangeslider/scss/shiny.scss
 new file mode 100644
-index 00000000..3356cb6d
+index 00000000..4a0fccc1
 --- /dev/null
 +++ b/inst/www/shared/ionrangeslider/scss/shiny.scss
-@@ -0,0 +1,182 @@
+@@ -0,0 +1,174 @@
 +/* 'shiny' skin for Ion.RangeSlider, largely based on the 'big' skin, but with smaller dimensions, grayscale grid text, and without gradients
 +© RStudio, Inc, 2014
 +© Denis Ineshin, 2014  https://github.com/IonDen
@@ -12,25 +12,17 @@ index 00000000..3356cb6d
 +
 +@import "_base";
 +
-+////////////////////////////////////////////////////////////////////////////
-+// Setup BS4 style color contrasting
-+$yiq-contrasted-threshold:  150 !default;
-+$yiq-text-dark:             #212529 !default;
-+$yiq-text-light:            #fff !default;
-+
-+@function color-yiq($color, $dark: $yiq-text-dark, $light: $yiq-text-light) {
-+  $r: red($color);
-+  $g: green($color);
-+  $b: blue($color);
-+
-+  $yiq: (($r * 299) + ($g * 587) + ($b * 114)) / 1000;
-+
-+  @if ($yiq >= $yiq-contrasted-threshold) {
-+    @return $dark;
++// Both BS3 and BS4 define a border radius mixin, but just in case
++// we're trying to compile this without bootstrapSass
++@mixin border-radius-shim($radius) {
++  @if mixin-exists("border-radius") {
++    @include border-radius($radius);
 +  } @else {
-+    @return $light;
++    border-radius: $radius;
 +  }
 +}
++
++
 +////////////////////////////////////////////////////////////////////////////
 +
 +// Re-define font-family on .irs to make it configurable
@@ -72,7 +64,7 @@ index 00000000..3356cb6d
 +  $minmax_line_height: 1.333 !default;
 +
 +  $fromto_bg_color:    $accent !default;
-+  $fromto_color:       color-yiq($fromto_bg_color) !default;
++  $fromto_color:       color-contrast($fromto_bg_color) !default;
 +  $fromto_font_size:   11px !default;
 +  $fromto_line_height: 1.333 !default;
 +
@@ -93,7 +85,7 @@ index 00000000..3356cb6d
 +    background: $line_bg;
 +    background-color: $line_bg_color;
 +    border: $line_border;
-+    border-radius: $line_height;
++    @include border-radius-shim($line_height);
 +  }
 +
 +  .#{$name}-bar {
@@ -104,7 +96,7 @@ index 00000000..3356cb6d
 +    background: $bar_color;
 +
 +    &--single {
-+      border-radius: $line_height 0 0 $line_height;
++      @include border-radius-shim($line_height 0 0 $line_height);
 +    }
 +  }
 +
@@ -113,7 +105,7 @@ index 00000000..3356cb6d
 +    top: 38px;
 +    height: 2px;
 +    background: rgba($fg, 0.3);
-+    border-radius: 5px;
++    @include border-radius-shim(5px);
 +  }
 +  .lt-ie9 .#{$name}-shadow {
 +    filter: alpha(opacity=30);
@@ -143,7 +135,7 @@ index 00000000..3356cb6d
 +    color: $minmax_text_color;
 +    text-shadow: none;
 +    background-color: $minmax_bg_color;
-+    border-radius: $custom_radius;
++    @include border-radius-shim($custom_radius);
 +    font-size: $minmax_font_size;
 +    line-height: $minmax_line_height;
 +  }
@@ -160,7 +152,7 @@ index 00000000..3356cb6d
 +    text-shadow: none;
 +    padding: 1px 3px;
 +    background-color: $fromto_bg_color;
-+    border-radius: $custom_radius;
++    @include border-radius-shim($custom_radius);
 +    font-size: $fromto_font_size;
 +    line-height: $fromto_line_height;
 +  }

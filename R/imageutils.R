@@ -4,12 +4,12 @@ startPNG <- function(filename, width, height, res, ...) {
   # to use ragg (say, instead of showtext, for custom font rendering).
   # In the next shiny release, this option will likely be superseded in
   # favor of a fully customizable graphics device option
-  if ((getOption('shiny.useragg') %OR% FALSE) && is_available("ragg")) {
+  if ((getOption('shiny.useragg') %||% FALSE) && is_available("ragg")) {
     pngfun <- ragg::agg_png
   } else if (capabilities("aqua")) {
     # i.e., png(type = 'quartz')
     pngfun <- grDevices::png
-  } else if ((getOption('shiny.usecairo') %OR% TRUE) && is_available("Cairo")) {
+  } else if ((getOption('shiny.usecairo') %||% TRUE) && is_available("Cairo")) {
     pngfun <- Cairo::CairoPNG
   } else {
     # i.e., png(type = 'cairo')
@@ -23,8 +23,7 @@ startPNG <- function(filename, width, height, res, ...) {
   # devices allow their bg arg to be overridden by par(bg=...), which thematic does prior
   # to plot-time, but it shouldn't hurt to inform other the device directly as well
   if (is.null(args$bg) && isNamespaceLoaded("thematic")) {
-    # TODO: use :: once thematic is on CRAN
-    args$bg <- utils::getFromNamespace("thematic_get_option", "thematic")("bg", "white")
+    args$bg <- getThematicOption("bg", "white")
     # auto vals aren't resolved until plot time, so if we see one, resolve it
     if (isTRUE("auto" == args$bg)) {
       args$bg <- getCurrentOutputInfo()[["bg"]]()
@@ -95,7 +94,6 @@ plotPNG <- function(func, filename=tempfile(fileext='.png'),
   filename
 }
 
-#' @importFrom grDevices dev.set dev.cur
 createGraphicsDevicePromiseDomain <- function(which = dev.cur()) {
   force(which)
 

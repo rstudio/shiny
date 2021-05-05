@@ -47,34 +47,15 @@ renderPage <- function(ui, showcase=0, testMode=FALSE) {
     )
   }
 
-  jquery <- function() {
-    version <- getOption("shiny.jquery.version", 3)
-    if (version == 3) {
-      return(htmlDependency(
-        "jquery", "3.5.1",
-        c(href = "shared"),
-        script = "jquery.min.js"
-      ))
-    }
-    if (version == 1) {
-      return(htmlDependency(
-        "jquery", "1.12.4",
-        c(href = "shared/legacy"),
-        script = "jquery.min.js"
-      ))
-    }
-    stop("Unsupported version of jQuery: ", version)
-  }
-
   shiny_deps <- c(
-    list(jquery()),
+    list(jqueryDependency()),
     shinyDependencies()
   )
 
   if (testMode) {
     # Add code injection listener if in test mode
     shiny_deps[[length(shiny_deps) + 1]] <-
-      htmlDependency("shiny-testmode", utils::packageVersion("shiny"),
+      htmlDependency("shiny-testmode", shinyPackageVersion(),
                      c(href="shared"), script = "shiny-testmode.js")
   }
 
@@ -82,21 +63,56 @@ renderPage <- function(ui, showcase=0, testMode=FALSE) {
   enc2utf8(paste(collapse = "\n", html))
 }
 
+jqueryDependency <- function() {
+  version <- getOption("shiny.jquery.version", 3)
+  if (version == 3) {
+    return(htmlDependency(
+      "jquery", version_jquery,
+      src = c(
+        href = "shared",
+        file = "www/shared"
+      ),
+      package = "shiny",
+      script = "jquery.min.js"
+    ))
+  }
+  if (version == 1) {
+    return(htmlDependency(
+      "jquery", "1.12.4",
+      src = c(
+        href = "shared/legacy",
+        file = "www/shared/legacy"
+      ),
+      package = "shiny",
+      script = "jquery.min.js"
+    ))
+  }
+  stop("Unsupported version of jQuery: ", version)
+}
+
 shinyDependencies <- function() {
-  version <- utils::packageVersion("shiny")
   list(
     bslib::bs_dependency_defer(shinyDependencyCSS),
     htmlDependency(
       name = "shiny-javascript",
-      version = version,
+      version = shinyPackageVersion(),
       src = c(href = "shared"),
-      script = if (getOption("shiny.minified", TRUE)) "shiny.min.js" else "shiny.js"
+      script =
+        if (isTRUE(
+          get_devmode_option(
+            "shiny.minified",
+            TRUE
+          )
+        ))
+          "shiny.min.js"
+        else
+          "shiny.js"
     )
   )
 }
 
 shinyDependencyCSS <- function(theme) {
-  version <- utils::packageVersion("shiny")
+  version <- shinyPackageVersion()
 
   if (!is_bs_theme(theme)) {
     return(htmlDependency(
@@ -122,7 +138,9 @@ shinyDependencyCSS <- function(theme) {
 
 #' Create a Shiny UI handler
 #'
-#' Historically this function was used in ui.R files to register a user
+#' @description \lifecycle{superseded}
+#'
+#' @description Historically this function was used in ui.R files to register a user
 #' interface with Shiny. It is no longer required as of Shiny 0.10; simply
 #' ensure that the last expression to be returned from ui.R is a user interface.
 #' This function is kept for backwards compatibility with older applications. It
@@ -133,6 +151,17 @@ shinyDependencyCSS <- function(theme) {
 #' @keywords internal
 #' @export
 shinyUI <- function(ui) {
+  if (in_devmode()) {
+    shinyDeprecated(
+      "0.10.0", "shinyUI()",
+      details = paste0(
+        "When removing `shinyUI()`, ",
+        "ensure that the last expression returned from ui.R is a user interface ",
+        "normally supplied to `shinyUI(ui)`."
+      )
+    )
+  }
+
   .globals$ui <- list(ui)
   ui
 }
@@ -143,7 +172,7 @@ uiHttpHandler <- function(ui, uiPattern = "^/$") {
 
   allowed_methods <- "GET"
   if (is.function(ui)) {
-    allowed_methods <- attr(ui, "http_methods_supported", exact = TRUE) %OR% allowed_methods
+    allowed_methods <- attr(ui, "http_methods_supported", exact = TRUE) %||% allowed_methods
   }
 
   function(req) {

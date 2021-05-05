@@ -1,5 +1,3 @@
-context("stacks")
-
 causeError <- function(full) {
   A <- function() {
     stop("foo")
@@ -25,7 +23,7 @@ causeError <- function(full) {
     silent = TRUE)
   cond <- attr(res, "condition", exact = TRUE)
 
-  df <- extractStackTrace(conditionStackTrace(cond), full = full)
+  suppressMessages(df <- extractStackTrace(conditionStackTrace(cond), full = full))
   df$loc <- cleanLocs(df$loc)
   # Compensate for this test being called from different call sites;
   # whack the

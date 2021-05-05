@@ -10,7 +10,7 @@ check_suggested <- function(package, version = NULL) {
 
   msg <- paste0(
     sQuote(package),
-    if (is.na(version %OR% NA)) "" else paste0("(>= ", version, ")"),
+    if (is.na(version %||% NA)) "" else paste0("(>= ", version, ")"),
     " must be installed for this functionality."
   )
 
@@ -94,6 +94,7 @@ reactlogShow <- function(time = TRUE) {
   check_reactlog()
   reactlog::reactlog_show(reactlog(), time = time)
 }
+
 #' @describeIn reactlog Resets the entire reactlog stack.  Useful for debugging and removing all prior reactive history.
 #' @export
 reactlogReset <- function() {
@@ -204,7 +205,7 @@ RLog <- R6Class(
     reset = function() {
       .globals$reactIdCounter <- 0L
 
-      self$logStack <- Stack$new()
+      self$logStack <- fastmap::faststack()
       self$msg <- MessageLogger$new(option = private$msgOption)
 
       # setup dummy and missing react information
@@ -552,5 +553,4 @@ MessageLogger = R6Class(
   )
 )
 
-#' @include stack.R
 rLog <- RLog$new("shiny.reactlog", "shiny.reactlog.console")

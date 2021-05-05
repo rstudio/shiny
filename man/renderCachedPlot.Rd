@@ -34,8 +34,8 @@ information on the default sizing policy.}
 \item{res}{The resolution of the PNG, in pixels per inch.}
 
 \item{cache}{The scope of the cache, or a cache object. This can be \code{"app"}
-(the default), \code{"session"}, or a cache object like a \code{\link[cachem:cache_disk]{cachem::cache_disk()}}.
-See the Cache Scoping section for more information.}
+(the default), \code{"session"}, or a cache object like a
+\code{\link[cachem:cache_disk]{cachem::cache_disk()}}. See the Cache Scoping section for more information.}
 
 \item{...}{Arguments to be passed through to \code{\link[grDevices:png]{grDevices::png()}}.
 These can be used to set the width, height, background color, etc.}
@@ -55,7 +55,8 @@ interactive R Markdown document.}
 \code{sizePolicy}.}
 }
 \description{
-Renders a reactive plot, with plot images cached to disk.
+Renders a reactive plot, with plot images cached to disk. As of Shiny 1.6.0,
+this is a shortcut for using \code{\link[=bindCache]{bindCache()}} with \code{\link[=renderPlot]{renderPlot()}}.
 }
 \details{
 \code{expr} is an expression that generates a plot, similar to that in
@@ -64,7 +65,7 @@ take reactive dependencies. It is re-executed only when the cache key
 changes.
 
 \code{cacheKeyExpr} is an expression which, when evaluated, returns an object
-which will be serialized and hashed using the \code{\link[digest:digest]{digest::digest()}}
+which will be serialized and hashed using the \code{\link[rlang:hash]{rlang::hash()}}
 function to generate a string that will be used as a cache key. This key is
 used to identify the contents of the plot: if the cache key is the same as a
 previous time, it assumes that the plot is the same and can be retrieved from
@@ -88,7 +89,7 @@ extracting out the important parts of the objects, and/or by converting them
 to normal R objects before returning them. Your expression could even
 serialize and hash that information in an efficient way and return a string,
 which will in turn be hashed (very quickly) by the
-\code{\link[digest:digest]{digest::digest()}} function.
+\code{\link[rlang:hash]{rlang::hash()}} function.
 
 Internally, the result from \code{cacheKeyExpr} is combined with the name of
 the output (if you assign it to \code{output$plot1}, it will be combined
@@ -237,8 +238,8 @@ server <- function(input, output, session) {
 }
 }
 \seealso{
-See \code{\link[=renderPlot]{renderPlot()}} for the regular, non-cached version of
-this function. For more about configuring caches, see
-\code{\link[cachem:cache_mem]{cachem::cache_mem()}} and \code{\link[cachem:cache_disk]{cachem::cache_disk()}}. For caching other types
-of objects, see \code{bindCache()}.
+See \code{\link[=renderPlot]{renderPlot()}} for the regular, non-cached version of this
+function. It can be used with \code{\link[=bindCache]{bindCache()}} to get the same effect as
+\code{renderCachedPlot()}. For more about configuring caches, see
+\code{\link[cachem:cache_mem]{cachem::cache_mem()}} and \code{\link[cachem:cache_disk]{cachem::cache_disk()}}.
 }

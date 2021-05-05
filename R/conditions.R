@@ -217,7 +217,7 @@ doCaptureStack <- function(e) {
 #' @rdname stacktrace
 #' @export
 withLogErrors <- function(expr,
-  full = getOption("shiny.fullstacktrace", FALSE),
+  full = get_devmode_option("shiny.fullstacktrace", FALSE),
   offset = getOption("shiny.stacktraceoffset", TRUE)) {
 
   withCallingHandlers(
@@ -264,7 +264,7 @@ withLogErrors <- function(expr,
 #' @rdname stacktrace
 #' @export
 printError <- function(cond,
-  full = getOption("shiny.fullstacktrace", FALSE),
+  full = get_devmode_option("shiny.fullstacktrace", FALSE),
   offset = getOption("shiny.stacktraceoffset", TRUE)) {
 
   warning(call. = FALSE, immediate. = TRUE, sprintf("Error in %s: %s",
@@ -276,7 +276,7 @@ printError <- function(cond,
 #' @rdname stacktrace
 #' @export
 printStackTrace <- function(cond,
-  full = getOption("shiny.fullstacktrace", FALSE),
+  full = get_devmode_option("shiny.fullstacktrace", FALSE),
   offset = getOption("shiny.stacktraceoffset", TRUE)) {
 
   should_drop <- !full
@@ -455,7 +455,6 @@ offsetSrcrefs <- function(calls, offset = TRUE) {
     # E.g. for "foo [bar.R:10]", line 10 of bar.R will be part of
     # the definition of foo().
     srcrefs <- c(utils::tail(srcrefs, -1), list(NULL))
-
     calls <- setSrcRefs(calls, srcrefs)
   }
 

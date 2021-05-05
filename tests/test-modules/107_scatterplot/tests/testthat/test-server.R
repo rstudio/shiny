@@ -1,5 +1,3 @@
-context("app")
-
 testServer(expr = {
   # Init count... 0
   expect_equal(sum(df()$selected_), 0)

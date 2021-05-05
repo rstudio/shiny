@@ -1,33 +1,26 @@
 #!/usr/bin/env Rscript
-# Retrieves a particular version of bootstrap-accessibility-plugin:
-#  https://github.com/paypal/bootstrap-accessibility-plugin
-# Since the last version release has been too behind the latest commit, we will use a specific sha instead.
-
-
+# Copies over source from https://github.com/paypal/bootstrap-accessibility-plugin
+#  that obtain and patch in https://github.com/rstudio/bslib
 library(rprojroot)
+library(sass)
 
-sha   <- "fbbf870eafc1ee5d4547fabbeea71778ddbe2166"
-dest_dir  <- rprojroot::find_package_root_file("inst/www/shared/bootstrap/accessibility")
+if (packageVersion("bslib") < "0.2.4") stop ("`bslib >= 0.2.4` is required to update a11y plugin")
 
-min_js_url       <- sprintf("https://raw.githubusercontent.com/paypal/bootstrap-accessibility-plugin/%s/plugins/js/bootstrap-accessibility.min.js", sha)
-css_url       <- sprintf("https://raw.githubusercontent.com/paypal/bootstrap-accessibility-plugin/%s/plugins/css/bootstrap-accessibility.css", sha)
-url <- c(min_js_url, css_url)
+src <- system.file("lib/bs-a11y-p/", package = "bslib")
+target <- find_package_root_file("inst/www/shared/bootstrap/accessibility/")
 
-# Downloading each required file:
-lapply(url, function(x) {download.file(x, file.path(tempdir(), basename(x)))})
-
-# Copying js files:
-dir.create(file.path(dest_dir, "js"), recursive = TRUE)
-file.copy(
-  file.path(tempdir(), "bootstrap-accessibility.min.js"),
-  file.path(dest_dir, "js"),
-  overwrite = TRUE
+# bslib makes hover/focus outlines transparent by default, which is what we want to do
+# to avoid such a jarring difference in visual appearance for things like tabsetPanel()
+sass(
+  sass_file(file.path(src, "src", "sass", "bootstrap-accessibility.scss")),
+  output = file.path(target, "css", "bootstrap-accessibility.min.css"),
+  options = sass_options(output_style = "compressed")
 )
 
-# Copying css file:
-dir.create(file.path(dest_dir, "css"), recursive = TRUE)
+# bslib also patches the JS source to make sure it runs when the document is ready
+# instead of executing immediately
 file.copy(
-  file.path(tempdir(), "bootstrap-accessibility.css"),
-  file.path(dest_dir, "css"),
+  file.path(src, "plugins/js/bootstrap-accessibility.min.js"),
+  file.path(target, "js/bootstrap-accessibility.min.js"),
   overwrite = TRUE
 )

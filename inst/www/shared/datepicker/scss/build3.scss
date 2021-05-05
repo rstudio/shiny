@@ -26,27 +26,12 @@ $dropdown-border:     $dropdown-border-color !default;
 //$btn-link-disabled-color: $gray-light;
 //$dropdown-bg:             #fff;
 
-// Setup BS4 style color contrasting
-$yiq-contrasted-threshold:  150 !default;
-$yiq-text-dark:             #212529 !default;
-$yiq-text-light:            #fff !default;
 
-@function color-yiq($color, $dark: $yiq-text-dark, $light: $yiq-text-light) {
-  $r: red($color);
-  $g: green($color);
-  $b: blue($color);
 
-  $yiq: (($r * 299) + ($g * 587) + ($b * 114)) / 1000;
 
-  @if ($yiq >= $yiq-contrasted-threshold) {
-    @return $dark;
-  } @else {
-    @return $light;
-  }
-}
 
 @mixin button-variant($background, $border) {
-  $color: color-yiq($background);
+  $color: color-contrast($background);
 
   color: $color;
   background-color: $background;

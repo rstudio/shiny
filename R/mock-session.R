@@ -9,8 +9,6 @@ wait_for_it <- function() {
 
 # Block until the promise is resolved/rejected. If resolved, return the value.
 # If rejected, throw (yes throw, not return) the error.
-#' @importFrom promises %...!%
-#' @importFrom promises %...>%
 extract <- function(promise) {
   promise_value <- NULL
   error <- NULL
@@ -156,6 +154,7 @@ makeExtraMethods <- function() {
     "sendInsertUI",
     "sendModal",
     "setCurrentTheme",
+    "getCurrentTheme",
     "sendNotification",
     "sendProgress",
     "sendRemoveTab",
@@ -260,7 +259,7 @@ MockShinySession <- R6Class(
       private$file_generators <- fastmap()
 
       private$timer <- MockableTimerCallbacks$new()
-      self$progressStack <- Stack$new()
+      self$progressStack <- fastmap::faststack()
 
       self$userData <- new.env(parent=emptyenv())
 

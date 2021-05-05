@@ -1,6 +1,3 @@
-
-context("mymoduleServer")
-
 testServer(mymoduleServer, {
   # Set initial value of a button
   session$setInputs(button = 0)

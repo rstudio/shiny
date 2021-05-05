@@ -8,6 +8,12 @@
 #' the `...` arguments, and not on the original object's code. This can, for
 #' example, be used to make an observer execute only when a button is pressed.
 #'
+#' `bindEvent()` was added in Shiny 1.6.0. When it is used with [reactive()] and
+#' [observe()], it does the same thing as [eventReactive()] and
+#' [observeEvent()]. However, `bindEvent()` is more flexible: it can be combined
+#' with [bindCache()], and it can also be used with `render` functions (like
+#' [renderText()] and [renderPlot()]).
+#'
 #' @section Details:
 #'
 #'   Shiny's reactive programming framework is primarily designed for calculated
@@ -31,16 +37,17 @@
 #'   the original object's code to execute.
 #'
 #'   Use `bindEvent()` with `observe()` whenever you want to *perform an action*
-#'   in response to an event. (Note that "recalculate a value" does not
-#'   generally count as performing an action -- use [reactive()] for that.) The
-#'   first argument is observer whose code should be executed whenever the event
-#'   occurs.
+#'   in response to an event. (This does the same thing as [observeEvent()],
+#'   which was available in Shiny prior to version 1.6.0.) Note that
+#'   "recalculate a value" does not generally count as performing an action --
+#'   use [reactive()] for that.
 #'
-#'   Use `bindEvent()` with `reactive()`to create a *calculated value* that only
-#'   updates in response to an event. This is just like a normal [reactive
+#'   Use `bindEvent()` with `reactive()` to create a *calculated value* that
+#'   only updates in response to an event. This is just like a normal [reactive
 #'   expression][reactive] except it ignores all the usual invalidations that
 #'   come from its reactive dependencies; it only invalidates in response to the
-#'   given event.
+#'   given event. (This does the same thing as [eventReactive()], which was
+#'   available in Shiny prior to version 1.6.0.)
 #'
 #'   `bindEvent()` is often used with [bindCache()].
 #'
@@ -109,11 +116,10 @@
 #'   When `bindEvent()` is used with `reactive()`, it creates a new reactive
 #'   expression object.
 #'
-#'   When `bindEvent()` is used with `observe()`, it creats a new observer and
-#'   calls the `$destroy()` method on the original observer, so that the
-#'   original observer will not execute.
+#'   When `bindEvent()` is used with `observe()`, it alters the observer in
+#'   place. It can only be used with observers which have not yet executed.
 #'
-#' @section Combining event expressions and with caching:
+#' @section Combining events and caching:
 #'
 #'   In many cases, it makes sense to use `bindEvent()` along with
 #'   `bindCache()`, because they each can reduce the amount of work done on the
@@ -137,7 +143,6 @@
 #'     bindEvent(input$go)
 #'  ```
 
-#'
 #'
 #' Anything that consumes `r()` will take a reactive dependency on the event
 #' expression given to `bindEvent()`, and not the cache key expression given to
@@ -185,14 +190,14 @@ bindEvent.reactiveExpr <- function(x, ..., ignoreNULL = TRUE, ignoreInit = FALSE
 {
   domain <- reactive_get_domain(x)
 
-  eventFunc <- make_quos_func(enquos(...))
+  qs <- enquos0(...)
+  eventFunc <- quos_to_func(qs)
 
   valueFunc <- reactive_get_value_func(x)
   valueFunc <- wrapFunctionLabel(valueFunc, "eventReactiveValueFunc", ..stacktraceon = TRUE)
 
-  if (is.null(label)) {
-    label <- sprintf("eventReactive(%s)", paste(deparse(body(eventFunc)), collapse = "\n"))
-  }
+  label <- label %||%
+    sprintf('bindEvent(%s, %s)', attr(x, "observable", exact = TRUE)$.label, quos_to_label(qs))
 
   # Don't hold on to the reference for x, so that it can be GC'd
   rm(x)
@@ -222,13 +227,13 @@ bindEvent.reactiveExpr <- function(x, ..., ignoreNULL = TRUE, ignoreInit = FALSE
 
 #' @export
 bindEvent.shiny.render.function <- function(x, ..., ignoreNULL = TRUE, ignoreInit = FALSE) {
-  eventFunc <- make_quos_func(enquos(...))
+  eventFunc <- quos_to_func(enquos0(...))
 
   valueFunc <- x
 
   initialized <- FALSE
 
-  res <- function(...) {
+  renderFunc <- function(...) {
     hybrid_chain(
       eventFunc(),
       function(value) {
@@ -244,8 +249,9 @@ bindEvent.shiny.render.function <- function(x, ..., ignoreNULL = TRUE, ignoreIni
     )
   }
 
-  class(res) <- c("shiny.render.function.event", class(res))
-  res
+  renderFunc <- addAttributes(renderFunc, renderFunctionAttributes(valueFunc))
+  class(renderFunc) <- c("shiny.render.function.event", class(valueFunc))
+  renderFunc
 }
 
 
@@ -253,27 +259,24 @@ bindEvent.shiny.render.function <- function(x, ..., ignoreNULL = TRUE, ignoreIni
 bindEvent.Observer <- function(x, ..., ignoreNULL = TRUE, ignoreInit = FALSE,
   once = FALSE, label = NULL)
 {
-  if (isTRUE(x$.destroyed)) {
-    stop("Can't call bindEvent() on an observer that has been destroyed.")
+  if (x$.execCount > 0) {
+    stop("Cannot call bindEvent() on an Observer that has already been executed.")
   }
 
-  eventFunc <- make_quos_func(enquos(...))
+  qs <- enquos0(...)
+  eventFunc <- quos_to_func(qs)
   valueFunc <- x$.func
 
-  if (is.null(label)) {
-    label <- sprintf('observeEvent(%s)', paste(deparse(body(eventFunc)), collapse='\n'))
-  }
+  # Note that because the observer will already have been logged by this point,
+  # this updated label won't show up in the reactlog.
+  x$.label <- label %||% sprintf('bindEvent(%s, %s)', x$.label, quos_to_label(qs))
 
   initialized <- FALSE
 
-  res <- observe(
-    label       = label,
-    domain      = x$.domain,
-    priority    = x$.priority,
-    autoDestroy = x$.autoDestroy,
-    suspended   = x$.suspended,
+  x$.func <- wrapFunctionLabel(
+    name = x$.label,
     ..stacktraceon = FALSE,
-    {
+    func = function() {
       hybrid_chain(
         eventFunc(),
         function(value) {
@@ -298,12 +301,8 @@ bindEvent.Observer <- function(x, ..., ignoreNULL = TRUE, ignoreInit = FALSE,
     }
   )
 
-  x$destroy()
-  # Don't hold onto x, so that it can be gc'd
-  rm(x)
-
-  class(res) <- c("Observer.event", class(res))
-  invisible(res)
+  class(x) <- c("Observer.event", class(x))
+  invisible(x)
 }
 
 

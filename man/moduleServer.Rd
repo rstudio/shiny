@@ -22,7 +22,7 @@ The return value, if any, from executing the module server function
 Shiny's module feature lets you break complicated UI and server logic into
 smaller, self-contained pieces. Compared to large monolithic Shiny apps,
 modules are easier to reuse and easier to reason about. See the article at
-\url{http://shiny.rstudio.com/articles/modules.html} to learn more.
+\url{https://shiny.rstudio.com/articles/modules.html} to learn more.
 }
 \details{
 Starting in Shiny 1.5.0, we recommend using \code{moduleServer} instead of
@@ -103,5 +103,5 @@ if (interactive()) {
 
 }
 \seealso{
-\url{http://shiny.rstudio.com/articles/modules.html}
+\url{https://shiny.rstudio.com/articles/modules.html}
 }

@@ -103,7 +103,7 @@ test_that("bindCache reactive - original reactive can be GC'd", {
   # bindCache.reactive essentially extracts code from the original reactive and
   # then doesn't need the original anymore. We want to make sure the original
   # can be GC'd afterward (if no one else has a reference to it).
-  cache <- memoryCache()
+  cache <- cachem::cache_mem()
   k <- reactiveVal(0)
 
   vals <- character()
@@ -112,9 +112,23 @@ test_that("bindCache reactive - original reactive can be GC'd", {
   finalized <- FALSE
   reg.finalizer(attr(r, "observable"), function(e) finalized <<- TRUE)
 
-  # r1 <- bindCache(r, k(), cache = cache)
-  # Note: using pipe causes this to fail due to:
-  # https://github.com/tidyverse/magrittr/issues/229
+  r1 <- r %>% bindCache(k(), cache = cache)
+  rm(r)
+  gc()
+  expect_true(finalized)
+
+
+  # Same, but when using rlang::inject() to insert a quosure
+  cache <- cachem::cache_mem()
+  k <- reactiveVal(0)
+
+  vals <- character()
+  exp <- quo({ k() })
+  r <- inject(reactive(!!exp))
+
+  finalized <- FALSE
+  reg.finalizer(attr(r, "observable"), function(e) finalized <<- TRUE)
+
   r1 <- r %>% bindCache(k(), cache = cache)
   rm(r)
   gc()
@@ -299,7 +313,7 @@ test_that("bindCache reactives with async value", {
   k(0)
   flushReact()
   expect_identical(vals, c("0k"))
-  later::run_now()
+  for (i in 1:2) later::run_now()
   expect_identical(vals, c("0k", "0o"))
 })
 
@@ -837,44 +851,41 @@ test_that("bindCache reactive error handling - async", {
 # ============================================================================
 # Quosures
 # ============================================================================
-test_that("bindCache quosure handling", {
+test_that("bindCache quosures -- inlined with inject() at creation time", {
   cache <- cachem::cache_mem()
   res <- NULL
-  key_env <- local({
-    v <- reactiveVal(1)
-    expr <- rlang::quo(v())
-    environment()
+  a <- 1
+  r <- inject({
+    reactive({
+        eval_tidy(quo(!!a))
+      }) %>%
+      bindCache({
+        x <- eval_tidy(quo(!!a)) + 10
+        res <<- x
+        x
+      }, cache = cache)
   })
+  a <- 2
+  expect_identical(isolate(r()), 1)
+  expect_identical(res, 11)
+})
 
-  value_env <- local({
-    v <- reactiveVal(10)
-    expr <- rlang::quo({
-      v()
-    })
-    environment()
-  })
 
-  r <- reactive(!!value_env$expr) %>%
-    bindCache(!!key_env$expr, cache = cache)
-
-  vals <- numeric()
-  o <- observe({
-    x <- r()
-    vals <<- c(vals, x)
-  })
-
-  flushReact()
-  expect_identical(vals, 10)
-
-  # Changing v() in value env doesn't cause anything to happen
-  value_env$v(20)
-  flushReact()
-  expect_identical(vals, 10)
-
-  # Changing v() in key env causes invalidation
-  key_env$v(20)
-  flushReact()
-  expect_identical(vals, c(10, 20))
+test_that("bindCache quosures -- unwrapped at execution time", {
+  cache <- cachem::cache_mem()
+  res <- NULL
+  a <- 1
+  r <- reactive({
+      eval_tidy(quo(!!a))
+    }) %>%
+    bindCache({
+      x <- eval_tidy(quo(!!a)) + 10
+      res <<- x
+      x
+    }, cache = cache)
+  a <- 2
+  expect_identical(isolate(r()), 2)
+  expect_identical(res, 12)
 })
 
 
@@ -912,8 +923,9 @@ test_that("bindCache visibility", {
 
 
 test_that("bindCache reactive visibility - async", {
-  # Skippping because of https://github.com/rstudio/promises/issues/58
-  skip("Visibility currently not supported by promises")
+  # only test if promises handles visibility
+  skip_if_not_installed("promises", "1.1.1.9001")
+
   cache <- cachem::cache_mem()
   k <- reactiveVal(0)
   res <- NULL
@@ -1069,7 +1081,7 @@ test_that("Custom render functions that call installExprFunction", {
   expect_identical(n, 1)
   expect_identical(
     extractCacheHint(renderDouble({ n <<- n+1; a })),
-    list(label = "renderDouble", userExpr = remove_source(quote({ n <<- n+1; a })))
+    list(label = "renderDouble", userExpr = zap_srcref(quote({ n <<- n+1; a })))
   )
 
 
@@ -1105,7 +1117,7 @@ test_that("Custom render functions that call installExprFunction", {
   expect_identical(n, 1)
   expect_identical(
     extractCacheHint(renderDouble({ n <<- n+1; a })),
-    list(remove_source(quote({ n <<- n + 1; a })))
+    list(zap_srcref(quote({ n <<- n + 1; a })))
   )
 
 
@@ -1123,6 +1135,41 @@ test_that("Custom render functions that call installExprFunction", {
   expect_error(renderTriple({ n <<- n+1; a }) %>% bindCache(a, cache = cachem::cache_mem()))
 })
 
+
+test_that("cacheWriteHook and cacheReadHook for render functions", {
+  write_hook_n <- 0
+  read_hook_n  <- 0
+
+  renderDouble <- function(expr) {
+    func <- quoToFunction(enquo(expr), "renderDouble")
+    createRenderFunction(
+      func,
+      transform = function(value, session, name, ...) paste0(value, ",", value),
+      cacheWriteHook = function(value) {
+        write_hook_n <<- write_hook_n + 1
+        paste0(value, ",w")
+      },
+      cacheReadHook = function(value) {
+        read_hook_n <<- read_hook_n + 1
+        paste0(value, ",r")
+      }
+    )
+  }
+
+  n <- 0
+  a <- 1
+  tc <- renderDouble({ n <<- n+1; a }) %>% bindCache(a, cache = cachem::cache_mem())
+  expect_identical(tc(), "1,1")
+  expect_identical(write_hook_n, 1)
+  expect_identical(read_hook_n, 0)
+  expect_identical(tc(), "1,1,w,r")
+  expect_identical(write_hook_n, 1)
+  expect_identical(read_hook_n, 1)
+  expect_identical(tc(), "1,1,w,r")
+  expect_identical(write_hook_n, 1)
+  expect_identical(read_hook_n, 2)
+  expect_identical(n, 1)
+})
 
 test_that("Custom render functions that call exprToFunction", {
   # A render function that uses exprToFunction won't work with bindCache(). It
@@ -1162,9 +1209,57 @@ test_that("Custom render functions that call exprToFunction", {
 
 
 test_that("Some render functions can't be cached", {
-  cache <- cachem::cache_mem()
+  m <- cachem::cache_mem()
   expect_error(renderDataTable({ cars }) %>% bindCache(1, cache = m))
-  expect_error(renderPlot({ plot(1) }) %>% bindCache(1, cache = m))
   expect_error(renderCachedPlot({ plot(1) }, 1) %>% bindCache(1, cache = m))
   expect_error(renderImage({ cars }) %>% bindCache(1, cache = m))
+})
+
+
+test_that("cacheHint to avoid collisions", {
+  # Same function and expression -> same cache hint
+  expect_identical(
+    extractCacheHint(renderText({ a + 1 })),
+    extractCacheHint(renderText({ a + 1 })),
+  )
+  expect_identical(
+    extractCacheHint(renderPrint({ a + 1 })),
+    extractCacheHint(renderPrint({ a + 1 }))
+  )
+  expect_identical(
+    extractCacheHint(renderUI({ a + 1 })),
+    extractCacheHint(renderUI({ a + 1 }))
+  )
+  expect_identical(
+    extractCacheHint(renderTable({ a + 1 })),
+    extractCacheHint(renderTable({ a + 1 }))
+  )
+
+  # Different expressions -> different cache hint
+  expect_false(identical(
+    extractCacheHint(renderText({ a + 1 })),
+    extractCacheHint(renderText({ a + 2 }))
+  ))
+  expect_false(identical(
+    extractCacheHint(renderPrint({ a + 1 })),
+    extractCacheHint(renderPrint({ a + 2 }))
+  ))
+  expect_false(identical(
+    extractCacheHint(renderUI({ a + 1 })),
+    extractCacheHint(renderUI({ a + 2 }))
+  ))
+  expect_false(identical(
+    extractCacheHint(renderTable({ a + 1 })),
+    extractCacheHint(renderTable({ a + 2 }))
+  ))
+
+  # Different functions -> different cache hint
+  expect_false(identical(
+    extractCacheHint(renderText({ a + 1 })),
+    extractCacheHint(renderPrint({ a + 1 }))
+  ))
+  expect_false(identical(
+    extractCacheHint(renderText({ a + 1 })),
+    extractCacheHint(renderUI({ a + 1 }))
+  ))
 })

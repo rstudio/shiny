@@ -13,9 +13,6 @@
 #'   Can also be set as a side effect of the [titlePanel()] function.
 #' @param responsive This option is deprecated; it is no longer optional with
 #'   Bootstrap 3.
-#' @param theme Alternative Bootstrap stylesheet (normally a css file within the
-#'   www directory). For example, to use the theme located at
-#'   `www/bootstrap.css` you would use `theme = "bootstrap.css"`.
 #' @inheritParams bootstrapPage
 #'
 #' @return A UI defintion that can be passed to the [shinyUI] function.
@@ -26,7 +23,7 @@
 #'   higher-level layout functions like [sidebarLayout()].
 #'
 #' @note See the [
-#'   Shiny-Application-Layout-Guide](http://shiny.rstudio.com/articles/layout-guide.html) for additional details on laying out fluid
+#'   Shiny-Application-Layout-Guide](https://shiny.rstudio.com/articles/layout-guide.html) for additional details on laying out fluid
 #'   pages.
 #'
 #' @family layout functions
@@ -88,7 +85,7 @@
 #' }
 #' @rdname fluidPage
 #' @export
-fluidPage <- function(..., title = NULL, responsive = NULL, theme = NULL, lang = NULL) {
+fluidPage <- function(..., title = NULL, responsive = deprecated(), theme = NULL, lang = NULL) {
   bootstrapPage(div(class = "container-fluid", ...),
                 title = title,
                 responsive = responsive,
@@ -117,9 +114,6 @@ fluidRow <- function(...) {
 #' @param title The browser window title (defaults to the host URL of the page)
 #' @param responsive This option is deprecated; it is no longer optional with
 #'   Bootstrap 3.
-#' @param theme Alternative Bootstrap stylesheet (normally a css file within the
-#'   www directory). For example, to use the theme located at
-#'   `www/bootstrap.css` you would use `theme = "bootstrap.css"`.
 #' @inheritParams bootstrapPage
 #'
 #' @return A UI defintion that can be passed to the [shinyUI] function.
@@ -131,7 +125,7 @@ fluidRow <- function(...) {
 #'   with `fixedRow` and `column`.
 #'
 #' @note See the [
-#'   Shiny Application Layout Guide](http://shiny.rstudio.com/articles/layout-guide.html) for additional details on laying out fixed
+#'   Shiny Application Layout Guide](https://shiny.rstudio.com/articles/layout-guide.html) for additional details on laying out fixed
 #'   pages.
 #'
 #' @family layout functions
@@ -159,7 +153,7 @@ fluidRow <- function(...) {
 #'
 #' @rdname fixedPage
 #' @export
-fixedPage <- function(..., title = NULL, responsive = NULL, theme = NULL, lang = NULL) {
+fixedPage <- function(..., title = NULL, responsive = deprecated(), theme = NULL, lang = NULL) {
   bootstrapPage(div(class = "container", ...),
                 title = title,
                 responsive = responsive,
@@ -402,7 +396,7 @@ mainPanel <- function(..., width = 8) {
 #' }
 #' @export
 verticalLayout <- function(..., fluid = TRUE) {
-  lapply(list(...), function(row) {
+  lapply(list2(...), function(row) {
     col <- column(12, row)
     if (fluid)
       fluidRow(col)
@@ -439,8 +433,8 @@ verticalLayout <- function(..., fluid = TRUE) {
 #' @export
 flowLayout <- function(..., cellArgs = list()) {
 
-  children <- list(...)
-  childIdx <- !nzchar(names(children) %OR% character(length(children)))
+  children <- list2(...)
+  childIdx <- !nzchar(names(children) %||% character(length(children)))
   attribs <- children[!childIdx]
   children <- children[childIdx]
 
@@ -522,8 +516,8 @@ inputPanel <- function(...) {
 #' @export
 splitLayout <- function(..., cellWidths = NULL, cellArgs = list()) {
 
-  children <- list(...)
-  childIdx <- !nzchar(names(children) %OR% character(length(children)))
+  children <- list2(...)
+  childIdx <- !nzchar(names(children) %||% character(length(children)))
   attribs <- children[!childIdx]
   children <- children[childIdx]
   count <- length(children)
@@ -620,7 +614,7 @@ fillCol <- function(..., flex = 1, width = "100%", height = "100%") {
 }
 
 flexfill <- function(..., direction, flex, width = width, height = height) {
-  children <- list(...)
+  children <- list2(...)
   attrs <- list()
 
   if (!is.null(names(children))) {
@@ -700,38 +694,4 @@ flexfill <- function(..., direction, flex, width = width, height = height) {
     }, SIMPLIFY = FALSE, USE.NAMES = FALSE)
   )
   do.call(tags$div, c(attrs, divArgs))
-}
-
-css <- function(..., collapse_ = "") {
-  props <- list(...)
-  if (length(props) == 0) {
-    return("")
-  }
-
-  if (is.null(names(props)) || any(names(props) == "")) {
-    stop("cssList expects all arguments to be named")
-  }
-
-  # Necessary to make factors show up as level names, not numbers
-  props[] <- lapply(props, paste, collapse = " ")
-
-  # Drop null args
-  props <- props[!sapply(props, empty)]
-  if (length(props) == 0) {
-    return("")
-  }
-
-  # Replace all '.' and '_' in property names to '-'
-  names(props) <- gsub("[._]", "-", tolower(gsub("([A-Z])", "-\\1", names(props))))
-
-  # Create "!important" suffix for each property whose name ends with !, then
-  # remove the ! from the property name
-  important <- ifelse(grepl("!$", names(props), perl = TRUE), " !important", "")
-  names(props) <- sub("!$", "", names(props), perl = TRUE)
-
-  paste0(names(props), ":", props, important, ";", collapse = collapse_)
-}
-
-empty <- function(x) {
-  length(x) == 0 || (is.character(x) && !any(nzchar(x)))
 }

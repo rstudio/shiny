@@ -74,7 +74,6 @@ reference:
       - htmlOutput
       - plotOutput
       - outputOptions
-      - tableOutput
       - textOutput
       - downloadButton
       - Progress
@@ -167,8 +166,10 @@ reference:
   - title: Utility functions
     desc: Miscellaneous utilities that may be useful to advanced users or when extending Shiny.
     contents:
+      - devmode
       - shinyAppTemplate
       - req
+      - isTruthy
       - validate
       - session
       - shinyOptions
@@ -191,7 +192,6 @@ reference:
       - snapshotPreprocessOutput
       - markOutputAttrs
       - repeatable
-      - shinyDeprecated
       - serverInfo
       - onStop
       - httpResponse

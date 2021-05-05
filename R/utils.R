@@ -113,24 +113,6 @@ isWholeNum <- function(x, tol = .Machine$double.eps^0.5) {
   abs(x - round(x)) < tol
 }
 
-`%OR%` <- function(x, y) {
-  if (is.null(x) || isTRUE(is.na(x)))
-    y
-  else
-    x
-}
-
-`%AND%` <- function(x, y) {
-  if (!is.null(x) && !isTRUE(is.na(x)))
-    if (!is.null(y) && !isTRUE(is.na(y)))
-      return(y)
-  return(NULL)
-}
-
-`%.%` <- function(x, y) {
-  paste(x, y, sep='')
-}
-
 # Given a vector or list, drop all the NULL items in it
 dropNulls <- function(x) {
   x[!vapply(x, is.null, FUN.VALUE=logical(1))]
@@ -182,6 +164,10 @@ asNamed <- function(x) {
   x
 }
 
+empty_named_list <- function() {
+  list(a = 1)[0]
+}
+
 # Given two named vectors, join them together, and keep only the last element
 # with a given name in the resulting vector. If b has any elements with the same
 # name as elements in a, the element in a is dropped. Also, if there are any
@@ -220,10 +206,6 @@ sort_c <- function(x, ...) {
   sort(x, method = "radix", ...)
 }
 
-# Base R isFALSE function was added in R 3.5.0.
-is_false <- function(x) {
-  identical(x, FALSE)
-}
 
 # Wrapper around list2env with a NULL check. In R <3.2.0, if an empty unnamed
 # list is passed to list2env(), it errors. But an empty named list is OK. For
@@ -551,27 +533,15 @@ installExprFunction <- function(expr, name, eval.env = parent.frame(2),
 #'
 #' @param q A quosure.
 #' @inheritParams installExprFunction
-#'
-#' @examples
-#' # A very simple render function
-#' renderTriple <- function(expr) {
-#'   func <- quoToFunction(rlang::enquo(expr), "renderTriple")
-#'
-#'   createRenderFunction(
-#'     func,
-#'     transform = function(value, session, name, ...) {
-#'       paste(rep(value, 3), collapse=", ")
-#'     },
-#'     outputFunc = textOutput
-#'   )
-#' }
+#' @seealso [createRenderFunction()] for example usage.
 #'
 #' @export
 quoToFunction <- function(q, label, ..stacktraceon = FALSE) {
   q <- as_quosure(q)
-  # Use new_function() instead of as_function(), because as_function() adds an
-  # extra parent environment. (This may not actually be a problem, though.)
-  func <- new_function(NULL, get_expr(q), get_env(q))
+  func <- as_function(q)
+  # as_function returns a function that takes `...`. We want one that takes no
+  # args.
+  formals(func) <- list()
   wrapFunctionLabel(func, label, ..stacktraceon = ..stacktraceon)
 }
 
@@ -1142,52 +1112,39 @@ reactiveStop <- function(message = "", class = NULL) {
 
 #' Validate input values and other conditions
 #'
-#' For an output rendering function (e.g. [renderPlot()]), you may
-#' need to check that certain input values are available and valid before you
-#' can render the output. `validate` gives you a convenient mechanism for
-#' doing so.
+#' @description
+#' `validate()` provides convenient mechanism for validating that an output
+#' has all the inputs necessary for successful rendering. It takes any number
+#' of (unnamed) arguments, each representing a condition to test. If any
+#' of condition fails (i.e. is not ["truthy"][isTruthy]), a special type of
+#' error is signaled to stop execution. If this error is not handled by
+#' application-specific code, it is displayed to the user by Shiny.
 #'
-#' The `validate` function takes any number of (unnamed) arguments, each of
-#' which represents a condition to test. If any of the conditions represent
-#' failure, then a special type of error is signaled which stops execution. If
-#' this error is not handled by application-specific code, it is displayed to
-#' the user by Shiny.
+#' If you use `validate()` in a [reactive()] validation failures will
+#' automatically propagate to outputs that use the reactive.
 #'
-#' An easy way to provide arguments to `validate` is to use the `need`
-#' function, which takes an expression and a string; if the expression is
-#' considered a failure, then the string will be used as the error message. The
-#' `need` function considers its expression to be a failure if it is any of
-#' the following:
+#' @section `need()`:
+#' An easy way to provide arguments to `validate()` is to use `need()`, which
+#' takes an expression and a string. If the expression is not
+#' ["truthy"][isTruthy] then the string will be used as the error message.
 #'
-#' \itemize{
-#'   \item{`FALSE`}
-#'   \item{`NULL`}
-#'   \item{`""`}
-#'   \item{An empty atomic vector}
-#'   \item{An atomic vector that contains only missing values}
-#'   \item{A logical vector that contains all `FALSE` or missing values}
-#'   \item{An object of class `"try-error"`}
-#'   \item{A value that represents an unclicked [actionButton()]}
+#' If "truthiness" is flexible for your use case, you'll need to explicitly
+#' generate a logical values. For example, if you want allow `NA` but not
+#' `NULL`, you can `!is.null(input$foo)`.
+#'
+#' If you need validation logic that differs significantly from `need()`, you
+#' can create your own validation test functions. A passing test should return
+#' `NULL`. A failing test should return either a string providing the error
+#' to display to the user, or if the failure should happen silently, `FALSE`.
+#'
+#' Alternatively you can use `validate()` within an `if` statement, which is
+#' particularly useful for more complex conditions:
+#'
+#' ```
+#' if (input$x < 0 && input$choice == "positive") {
+#'   validate("If choice is positive then x must be greater than 0")
 #' }
-#'
-#' If any of these values happen to be valid, you can explicitly turn them to
-#' logical values. For example, if you allow `NA` but not `NULL`, you
-#' can use the condition `!is.null(input$foo)`, because `!is.null(NA)
-#' == TRUE`.
-#'
-#' If you need validation logic that differs significantly from `need`, you
-#' can create other validation test functions. A passing test should return
-#' `NULL`. A failing test should return an error message as a
-#' single-element character vector, or if the failure should happen silently,
-#' `FALSE`.
-#'
-#' Because validation failure is signaled as an error, you can use
-#' `validate` in reactive expressions, and validation failures will
-#' automatically propagate to outputs that use the reactive expression. In
-#' other words, if reactive expression `a` needs `input$x`, and two
-#' outputs use `a` (and thus depend indirectly on `input$x`), it's
-#' not necessary for the outputs to validate `input$x` explicitly, as long
-#' as `a` does validate it.
+#' ```
 #'
 #' @param ... A list of tests. Each test should equal `NULL` for success,
 #'   `FALSE` for silent failure, or a string for failure with an error
@@ -1220,7 +1177,7 @@ reactiveStop <- function(message = "", class = NULL) {
 #'
 #' }
 validate <- function(..., errorClass = character(0)) {
-  results <- sapply(list(...), function(x) {
+  results <- sapply(list2(...), function(x) {
     # Detect NULL or NA
     if (is.null(x))
       return(NA_character_)
@@ -1264,7 +1221,7 @@ need <- function(expr, message = paste(label, "must be provided"), label) {
 
 #' Check for required values
 #'
-#' Ensure that values are available ("truthy"--see Details) before proceeding
+#' Ensure that values are available (["truthy"][isTruthy]) before proceeding
 #' with a calculation or action. If any of the given values is not truthy, the
 #' operation is stopped by raising a "silent" exception (not logged by Shiny,
 #' nor displayed in the Shiny app's UI).
@@ -1273,11 +1230,13 @@ need <- function(expr, message = paste(label, "must be provided"), label) {
 #' is to call it like a statement (ignoring its return value) before attempting
 #' operations using the required values:
 #'
-#' \preformatted{rv <- reactiveValues(state = FALSE)
+#' ```
+#' rv <- reactiveValues(state = FALSE)
 #' r <- reactive({
 #'   req(input$a, input$b, rv$state)
 #'   # Code that uses input$a, input$b, and/or rv$state...
-#' })}
+#' })
+#' ```
 #'
 #' In this example, if `r()` is called and any of `input$a`,
 #' `input$b`, and `rv$state` are `NULL`, `FALSE`, `""`,
@@ -1286,54 +1245,21 @@ need <- function(expr, message = paste(label, "must be provided"), label) {
 #'
 #' The second is to use it to wrap an expression that must be truthy:
 #'
-#' \preformatted{output$plot <- renderPlot({
+#' ```
+#' output$plot <- renderPlot({
 #'   if (req(input$plotType) == "histogram") {
 #'     hist(dataset())
 #'   } else if (input$plotType == "scatter") {
 #'     qplot(dataset(), aes(x = x, y = y))
 #'   }
-#' })}
+#' })
+#' ```
 #'
 #' In this example, `req(input$plotType)` first checks that
 #' `input$plotType` is truthy, and if so, returns it. This is a convenient
 #' way to check for a value "inline" with its first use.
 #'
-#' **Truthy and falsy values**
-#'
-#' The terms "truthy" and "falsy" generally indicate whether a value, when
-#' coerced to a [base::logical()], is `TRUE` or `FALSE`. We use
-#' the term a little loosely here; our usage tries to match the intuitive
-#' notions of "Is this value missing or available?", or "Has the user provided
-#' an answer?", or in the case of action buttons, "Has the button been
-#' clicked?".
-#'
-#' For example, a `textInput` that has not been filled out by the user has
-#' a value of `""`, so that is considered a falsy value.
-#'
-#' To be precise, `req` considers a value truthy *unless* it is one
-#' of:
-#'
-#' \itemize{
-#'   \item{`FALSE`}
-#'   \item{`NULL`}
-#'   \item{`""`}
-#'   \item{An empty atomic vector}
-#'   \item{An atomic vector that contains only missing values}
-#'   \item{A logical vector that contains all `FALSE` or missing values}
-#'   \item{An object of class `"try-error"`}
-#'   \item{A value that represents an unclicked [actionButton()]}
-#' }
-#'
-#' Note in particular that the value `0` is considered truthy, even though
-#' `as.logical(0)` is `FALSE`.
-#'
-#' If the built-in rules for truthiness do not match your requirements, you can
-#' always work around them. Since `FALSE` is falsy, you can simply provide
-#' the results of your own checks to `req`:
-#'
-#' `req(input$a != 0)`
-#'
-#' **Using `req(FALSE)`**
+#' @section Using `req(FALSE)`:
 #'
 #' You can use `req(FALSE)` (i.e. no condition) if you've already performed
 #' all the checks you needed to by that point and just want to stop the reactive
@@ -1341,7 +1267,7 @@ need <- function(expr, message = paste(label, "must be provided"), label) {
 #' if you have a complicated condition to check for (or perhaps if you'd like to
 #' divide your condition into nested `if` statements).
 #'
-#' **Using `cancelOutput = TRUE`**
+#' @section Using `cancelOutput = TRUE`:
 #'
 #' When `req(..., cancelOutput = TRUE)` is used, the "silent" exception is
 #' also raised, but it is treated slightly differently if one or more outputs are
@@ -1360,7 +1286,6 @@ need <- function(expr, message = paste(label, "must be provided"), label) {
 #' @param cancelOutput If `TRUE` and an output is being evaluated, stop
 #'   processing as usual but instead of clearing the output, leave it in
 #'   whatever state it happens to be in.
-#' @param x An expression whose truthiness value we want to determine
 #' @return The first value that was passed in.
 #' @export
 #' @examples
@@ -1450,14 +1375,40 @@ cancelOutput <- function() {
 #
 # Can be used to facilitate short-circuit eval on dots.
 dotloop <- function(fun_, ...) {
-  for (i in 1:(nargs()-1)) {
+  for (i in seq_len(nargs() - 1)) {
     fun_(eval(as.symbol(paste0("..", i))))
   }
   invisible()
 }
 
+#' Truthy and falsy values
+#'
+#' The terms "truthy" and "falsy" generally indicate whether a value, when
+#' coerced to a [base::logical()], is `TRUE` or `FALSE`. We use
+#' the term a little loosely here; our usage tries to match the intuitive
+#' notions of "Is this value missing or available?", or "Has the user provided
+#' an answer?", or in the case of action buttons, "Has the button been
+#' clicked?".
+#'
+#' For example, a `textInput` that has not been filled out by the user has
+#' a value of `""`, so that is considered a falsy value.
+#'
+#' To be precise, a value is truthy *unless* it is one of:
+#'
+#' * `FALSE`
+#' * `NULL`
+#' * `""`
+#' * An empty atomic vector
+#' * An atomic vector that contains only missing values
+#' * A logical vector that contains all `FALSE` or missing values
+#' * An object of class `"try-error"`
+#' * A value that represents an unclicked [actionButton()]
+#'
+#' Note in particular that the value `0` is considered truthy, even though
+#' `as.logical(0)` is `FALSE`.
+#'
+#' @param x An expression whose truthiness value we want to determine
 #' @export
-#' @rdname req
 isTruthy <- function(x) {
   if (inherits(x, 'try-error'))
     return(FALSE)
@@ -1534,7 +1485,7 @@ checkEncoding <- function(file) {
   if (identical(charToRaw(readChar(file, 3L, TRUE)), charToRaw('\UFEFF'))) {
     warning('You should not include the Byte Order Mark (BOM) in ', file, '. ',
             'Please re-save it in UTF-8 without BOM. See ',
-            'http://shiny.rstudio.com/articles/unicode.html for more info.')
+            'https://shiny.rstudio.com/articles/unicode.html for more info.')
     return('UTF-8-BOM')
   }
   x <- readChar(file, size, useBytes = TRUE)
@@ -1618,14 +1569,19 @@ URLencode <- function(value, reserved = FALSE) {
   if (reserved) encodeURIComponent(value) else encodeURI(value)
 }
 
-# Make user-supplied dates are either NULL or can be coerced
-# to a yyyy-mm-dd formatted string. If a date is specified, this
-# function returns a string for consistency across locales.
-# Also, `as.Date()` is used to coerce strings to date objects
-# so that strings like "2016-08-9" are expanded to "2016-08-09"
+# Make sure user-supplied dates are either NULL or can be coerced to a
+# yyyy-mm-dd formatted string. If a date is specified, this function returns a
+# string for consistency across locales. Also, `as.Date()` is used to coerce
+# strings to date objects so that strings like "2016-08-9" are expanded to
+# "2016-08-09". If any of the values result in error or NA, then the input
+# `date` is returned unchanged.
 dateYMD <- function(date = NULL, argName = "value") {
   if (!length(date)) return(NULL)
-  tryCatch(date <- format(as.Date(date), "%Y-%m-%d"),
+  tryCatch({
+      res <- format(as.Date(date), "%Y-%m-%d")
+      if (any(is.na(res))) stop()
+      date <- res
+    },
     error = function(e) {
       warning(
         "Couldn't coerce the `", argName,
@@ -1805,7 +1761,10 @@ getSliderType <- function(min, max, value) {
     else                            "number"
   }))
   if (length(type) > 1) {
-    stop("Type mismatch for `min`, `max`, and `value`. Each must be Date, POSIXt, or number.")
+    rlang::abort(c(
+      "Type mismatch for `min`, `max`, and `value`.",
+      "All values must either be numeric, Date, or POSIXt."
+    ))
   }
   type[[1]]
 }
@@ -1915,3 +1874,15 @@ is_available <- function(package, version = NULL) {
   }
   installed && isTRUE(utils::packageVersion(package) >= version)
 }
+
+
+# cached version of utils::packageVersion("shiny")
+shinyPackageVersion <- local({
+  version <- NULL
+  function() {
+    if (is.null(version)) {
+      version <<- utils::packageVersion("shiny")
+    }
+    version
+  }
+})

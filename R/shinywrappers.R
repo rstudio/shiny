@@ -23,6 +23,18 @@ utils::globalVariables('func', add = TRUE)
 #'   will try to automatically infer caching information. If `FALSE`, do not
 #'   allow caching for the object. Some render functions (such as [renderPlot])
 #'   contain internal state that makes them unsuitable for caching.
+#' @param cacheWriteHook Used if the render function is passed to `bindCache()`.
+#'   This is an optional callback function to invoke before saving the value
+#'   from the render function to the cache. This function must accept one
+#'   argument, the value returned from `renderFunc`, and should return the value
+#'   to store in the cache.
+#' @param cacheReadHook Used if the render function is passed to `bindCache()`.
+#'   This is an optional callback function to invoke after reading a value from
+#'   the cache (if there is a cache hit). The function will be passed one
+#'   argument, the value retrieved from the cache. This can be useful when some
+#'   side effect needs to occur for a render function to behave correctly. For
+#'   example, some render functions call [createWebDependency()] so that Shiny
+#'   is able to serve JS and CSS resources.
 #' @return The `renderFunc` function, with annotations.
 #'
 #' @seealso [createRenderFunction()], [quoToFunction()]
@@ -31,7 +43,9 @@ markRenderFunction <- function(
   uiFunc,
   renderFunc,
   outputArgs = list(),
-  cacheHint = "auto"
+  cacheHint = "auto",
+  cacheWriteHook = NULL,
+  cacheReadHook = NULL
 ) {
   force(renderFunc)
 
@@ -80,7 +94,7 @@ markRenderFunction <- function(
     # For everything else, do nothing.
     cacheHint <- lapply(cacheHint, function(x) {
       if      (is.function(x)) formalsAndBody(x)
-      else if (is.language(x)) remove_source(x)
+      else if (is.language(x)) zap_srcref(x)
       else                     x
     })
   }
@@ -104,11 +118,13 @@ markRenderFunction <- function(
 
   structure(
     wrappedRenderFunc,
-    class       = c("shiny.render.function", "function"),
-    outputFunc  = uiFunc,
-    outputArgs  = outputArgs,
-    hasExecuted = hasExecuted,
-    cacheHint   = cacheHint
+    class          = c("shiny.render.function", "function"),
+    outputFunc     = uiFunc,
+    outputArgs     = outputArgs,
+    hasExecuted    = hasExecuted,
+    cacheHint      = cacheHint,
+    cacheWriteHook = cacheWriteHook,
+    cacheReadHook  = cacheReadHook
   )
 }
 
@@ -141,8 +157,12 @@ print.shiny.render.function <- function(x, ...) {
 #'
 #' @examples
 #' # A very simple render function
-#' renderTriple <- function(expr) {
-#'   func <- quoToFunction(rlang::enquo(expr), "renderTriple")
+#' renderTriple <- function(x) {
+#'   x <- substitute(x)
+#'   if (!rlang::is_quosure(x)) {
+#'     x <- rlang::new_quosure(x, env = parent.frame())
+#'   }
+#'   func <- quoToFunction(x, "renderTriple")
 #'
 #'   createRenderFunction(
 #'     func,
@@ -153,13 +173,20 @@ print.shiny.render.function <- function(x, ...) {
 #'   )
 #' }
 #'
+#' # Test render function from the console
+#' a <- 1
+#' r <- renderTriple({ a + 1 })
+#' a <- 2
+#' r()
 #' @export
 createRenderFunction <- function(
   func,
   transform = function(value, session, name, ...) value,
   outputFunc = NULL,
   outputArgs = NULL,
-  cacheHint = "auto"
+  cacheHint = "auto",
+  cacheWriteHook = NULL,
+  cacheReadHook = NULL
 ) {
   renderFunc <- function(shinysession, name, ...) {
     hybrid_chain(
@@ -177,7 +204,8 @@ createRenderFunction <- function(
     attr(renderFunc, "wrappedFunc") <- attr(func, "wrappedFunc", exact = TRUE)
   }
 
-  markRenderFunction(outputFunc, renderFunc, outputArgs, cacheHint)
+  markRenderFunction(outputFunc, renderFunc, outputArgs, cacheHint,
+                     cacheWriteHook, cacheReadHook)
 }
 
 useRenderFunction <- function(renderFunc, inline = FALSE) {
@@ -218,6 +246,22 @@ useRenderFunction <- function(renderFunc, inline = FALSE) {
 #' @method as.tags shiny.render.function
 as.tags.shiny.render.function <- function(x, ..., inline = FALSE) {
   useRenderFunction(x, inline = inline)
+}
+
+# Get relevant attributes from a render function object.
+renderFunctionAttributes <- function(x) {
+  attrs <- c("outputFunc", "outputArgs", "hasExecuted", "cacheHint")
+  names(attrs) <- attrs
+  lapply(attrs, function(name) attr(x, name, exact = TRUE))
+}
+
+# Add a named list of attributes to an object
+addAttributes <- function(x, attrs) {
+  nms <- names(attrs)
+  for (i in seq_along(attrs)) {
+    attr(x, nms[i]) <- attrs[[i]]
+  }
+  x
 }
 
 
@@ -354,8 +398,10 @@ markOutputAttrs <- function(renderFunc, snapshotExclude = NULL,
 #' shinyApp(ui, server)
 #' }
 renderImage <- function(expr, env=parent.frame(), quoted=FALSE,
-                        deleteFile, outputArgs=list()) {
-  installExprFunction(expr, "func", env, quoted)
+                        deleteFile, outputArgs=list())
+{
+  expr <- get_quosure(expr, env, quoted)
+  func <- quoToFunction(expr, "renderImage")
 
   # missing() must be used directly within the function with the given arg
   if (missing(deleteFile)) {
@@ -404,7 +450,7 @@ renderImage <- function(expr, env=parent.frame(), quoted=FALSE,
       }
 
       # If contentType not specified, autodetect based on extension
-      contentType <- imageinfo$contentType %OR% getContentType(imageinfo$src)
+      contentType <- imageinfo$contentType %||% getContentType(imageinfo$src)
 
       # Extra values are everything in imageinfo except 'src' and 'contentType'
       extra_attr <- imageinfo[!names(imageinfo) %in% c('src', 'contentType')]
@@ -490,15 +536,8 @@ isTemp <- function(path, tempDir = tempdir(), mustExist) {
 renderPrint <- function(expr, env = parent.frame(), quoted = FALSE,
                         width = getOption('width'), outputArgs=list())
 {
-  if (!missing(env) || !missing(quoted)) {
-    deprecatedEnvQuotedMessage()
-    if (!quoted) expr <- enexpr(expr)
-    q <- new_quosure(expr, env)
-  } else {
-    q <- enquo(expr)
-  }
-
-  func <- quoToFunction(q, "renderPrint")
+  expr <- get_quosure(expr, env, quoted)
+  func <- quoToFunction(expr, "renderPrint")
 
   # Set a promise domain that sets the console width
   #   and captures output
@@ -530,7 +569,7 @@ renderPrint <- function(expr, env = parent.frame(), quoted = FALSE,
     outputArgs,
     cacheHint = list(
       label = "renderPrint",
-      origUserExpr = body(func)
+      origUserExpr = get_expr(expr)
     )
   )
 }
@@ -583,15 +622,8 @@ createRenderPrintPromiseDomain <- function(width) {
 renderText <- function(expr, env=parent.frame(), quoted=FALSE,
                        outputArgs=list(), sep=" ") {
 
-  if (!missing(env) || !missing(quoted)) {
-    deprecatedEnvQuotedMessage()
-    if (!quoted) expr <- enexpr(expr)
-    q <- new_quosure(expr, env)
-  } else {
-    q <- enquo(expr)
-  }
-
-  func <- quoToFunction(q, "renderText")
+  expr <- get_quosure(expr, env, quoted)
+  func <- quoToFunction(expr, "renderText")
 
   createRenderFunction(
     func,
@@ -640,9 +672,11 @@ renderText <- function(expr, env=parent.frame(), quoted=FALSE,
 #' shinyApp(ui, server)
 #' }
 #'
-renderUI <- function(expr, env=parent.frame(), quoted=FALSE,
-                     outputArgs=list()) {
-  installExprFunction(expr, "func", env, quoted)
+renderUI <- function(expr, env = parent.frame(), quoted = FALSE,
+                     outputArgs = list())
+{
+  expr <- get_quosure(expr, env, quoted)
+  func <- quoToFunction(expr, "renderUI")
 
   createRenderFunction(
     func,
@@ -652,7 +686,8 @@ renderUI <- function(expr, env=parent.frame(), quoted=FALSE,
 
       processDeps(result, shinysession)
     },
-    uiOutput, outputArgs
+    uiOutput,
+    outputArgs
   )
 }
 
@@ -675,7 +710,7 @@ renderUI <- function(expr, env=parent.frame(), quoted=FALSE,
 #'   that file path. (Reactive values and functions may be used from this
 #'   function.)
 #' @param contentType A string of the download's
-#'   [content type](http://en.wikipedia.org/wiki/Internet_media_type), for
+#'   [content type](https://en.wikipedia.org/wiki/Internet_media_type), for
 #'   example `"text/csv"` or `"image/png"`. If `NULL` or
 #'   `NA`, the content type will be guessed based on the filename
 #'   extension, or `application/octet-stream` if the extension is unknown.
@@ -717,28 +752,37 @@ downloadHandler <- function(filename, content, contentType=NA, outputArgs=list()
   )
 }
 
-#' Table output with the JavaScript library DataTables
+#' Table output with the JavaScript DataTables library
 #'
+#' @description
 #' Makes a reactive version of the given function that returns a data frame (or
-#' matrix), which will be rendered with the DataTables library. Paging,
-#' searching, filtering, and sorting can be done on the R side using Shiny as
-#' the server infrastructure.
+#' matrix), which will be rendered with the [DataTables](https://datatables.net)
+#' library. Paging, searching, filtering, and sorting can be done on the R side
+#' using Shiny as the server infrastructure.
 #'
-#' For the `options` argument, the character elements that have the class
-#' `"AsIs"` (usually returned from [base::I()]) will be evaluated in
-#' JavaScript. This is useful when the type of the option value is not supported
-#' in JSON, e.g., a JavaScript function, which can be obtained by evaluating a
-#' character string. Note this only applies to the root-level elements of the
-#' options list, and the `I()` notation does not work for lower-level
-#' elements in the list.
+#' This function only provides the server-side version of DataTables (using R
+#' to process the data object on the server side). There is a separate
+#' [DT](https://github.com/rstudio/DT) that allows you to create both
+#' server-side and client-side DataTables, and supports additional features.
+#' Learn more at <https://rstudio.github.io/DT/shiny.html>.
+#'
 #' @param expr An expression that returns a data frame or a matrix.
+#' @inheritParams renderTable
 #' @param options A list of initialization options to be passed to DataTables,
-#'   or a function to return such a list.
+#'   or a function to return such a list.  You can find a complete list of
+#'   options at <https://datatables.net/reference/option/>.
+#'
+#'   Any top-level strings with class `"AsIs"` (as created by [I()]) will be
+#'   evaluated in JavaScript. This is useful when the type of the option value
+#'   is not supported in JSON, e.g., a JavaScript function, which can be
+#'   obtained by  evaluating a character string. This only applies to the
+#'   root-level elements of options list, and does not worked for lower-level
+#'   elements in the list.
 #' @param searchDelay The delay for searching, in milliseconds (to avoid too
 #'   frequent search requests).
 #' @param callback A JavaScript function to be applied to the DataTable object.
 #'   This is useful for DataTables plug-ins, which often require the DataTable
-#'   instance to be available (<http://datatables.net/extensions/>).
+#'   instance to be available.
 #' @param escape Whether to escape HTML entities in the table: `TRUE` means
 #'   to escape the whole table, and `FALSE` means not to escape it.
 #'   Alternatively, you can specify numeric column indices or column names to
@@ -746,17 +790,8 @@ downloadHandler <- function(filename, content, contentType=NA, outputArgs=list()
 #'   `c(1, 3, 4)`, or `c(-1, -3)` (all columns except the first and
 #'   third), or `c('Species', 'Sepal.Length')`.
 #' @param outputArgs A list of arguments to be passed through to the implicit
-#'   call to [dataTableOutput()] when `renderDataTable` is used
+#'   call to `dataTableOutput()` when `renderDataTable()` is used
 #'   in an interactive R Markdown document.
-#'
-#' @references <http://datatables.net>
-#' @note This function only provides the server-side version of DataTables
-#'   (using R to process the data object on the server side). There is a
-#'   separate package \pkg{DT} (<https://github.com/rstudio/DT>) that allows
-#'   you to create both server-side and client-side DataTables, and supports
-#'   additional DataTables features. Consider using `DT::renderDataTable()`
-#'   and `DT::dataTableOutput()` (see
-#'   <http://rstudio.github.io/DT/shiny.html> for more information).
 #' @export
 #' @inheritParams renderPlot
 #' @examples
@@ -784,8 +819,18 @@ downloadHandler <- function(filename, content, contentType=NA, outputArgs=list()
 renderDataTable <- function(expr, options = NULL, searchDelay = 500,
                             callback = 'function(oTable) {}', escape = TRUE,
                             env = parent.frame(), quoted = FALSE,
-                            outputArgs=list()) {
-  installExprFunction(expr, "func", env, quoted)
+                            outputArgs=list())
+{
+
+  if (in_devmode()) {
+    shinyDeprecated(
+      "0.11.1", "shiny::renderDataTable()", "DT::renderDataTable()",
+      details = "See <https://rstudio.github.io/DT/shiny.html> for more information"
+    )
+  }
+
+  expr <- get_quosure(expr, env, quoted)
+  func <- quoToFunction(expr, "renderDataTable")
 
   renderFunc <- function(shinysession, name, ...) {
     if (is.function(options)) options <- options()

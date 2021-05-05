@@ -36,7 +36,7 @@ index 3e031b31..758f7301 100644
 +			@include border-radius-shim(4px);
  			&:hover,
  			&.focused {
- 			  color: color-yiq($gray-lighter);
+ 			  color: color-contrast($gray-lighter);
 @@ -243,10 +253,10 @@
  		text-align: center;
  	}

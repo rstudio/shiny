@@ -93,7 +93,7 @@
 		}
 		&.day:hover,
 		&.focused {
-		  color: color-yiq($gray-lighter);
+		  color: color-contrast($gray-lighter);
 			background: $gray-lighter;
 			cursor: pointer;
 		}
@@ -192,7 +192,7 @@
 			@include border-radius-shim(4px);
 			&:hover,
 			&.focused {
-			  color: color-yiq($gray-lighter);
+			  color: color-contrast($gray-lighter);
 				background: $gray-lighter;
 			}
 			&.disabled,
@@ -225,7 +225,7 @@
 	tfoot tr th {
 		cursor: pointer;
 		&:hover {
-		  color: color-yiq($gray-lighter);
+		  color: color-contrast($gray-lighter);
 		  background: $gray-lighter;
 		}
 	}

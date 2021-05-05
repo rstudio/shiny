@@ -4,7 +4,7 @@ NULL
 #' Create a Bootstrap page
 #'
 #' Create a Shiny UI page that loads the CSS and JavaScript for
-#' [Bootstrap](http://getbootstrap.com/), and has no content in the page
+#' [Bootstrap](https://getbootstrap.com/), and has no content in the page
 #' body (other than what you provide).
 #'
 #' This function is primarily intended for users who are proficient in HTML/CSS,
@@ -33,20 +33,31 @@ NULL
 #' @export
 bootstrapPage <- function(..., title = NULL, theme = NULL, lang = NULL) {
 
-  ui <- tagList(
-    bootstrapLib(theme),
+  args <- list(
+    jqueryDependency(),
     if (!is.null(title)) tags$head(tags$title(title)),
-    # TODO: throw better error when length > 1?
     if (is.character(theme)) {
-      tags$head(tags$link(rel="stylesheet", type="text/css", href = theme))
+      if (length(theme) > 1) stop("`theme` must point to a single CSS file, not multiple files.")
+      tags$head(tags$link(rel="stylesheet", type="text/css", href=theme))
     },
     # remainder of tags passed to the function
-    list(...)
+    list2(...)
   )
 
-  ui <- setLang(ui, lang)
+  # If theme is a bslib::bs_theme() object, bootstrapLib() needs to come first
+  # (so other tags, when rendered via tagFunction(), know about the relevant
+  # theme). However, if theme is anything else, we intentionally avoid changing
+  # the tagList() contents to avoid breaking user code that makes assumptions
+  # about the return value https://github.com/rstudio/shiny/issues/3235
+  if (is_bs_theme(theme)) {
+    args <- c(bootstrapLib(theme), args)
+    ui <- do.call(tagList, args)
+  } else {
+    ui <- do.call(tagList, args)
+    ui <- attachDependencies(ui, bootstrapLib())
+  }
 
-  return(ui)
+  setLang(ui, lang)
 }
 
 setLang <- function(ui, lang) {
@@ -72,6 +83,10 @@ getLang <- function(ui) {
 #' @export
 bootstrapLib <- function(theme = NULL) {
   tagFunction(function() {
+    if (isRunning()) {
+      setCurrentTheme(theme)
+    }
+
     # If we're not compiling Bootstrap Sass (from bslib), return the
     # static Bootstrap build.
     if (!is_bs_theme(theme)) {
@@ -93,7 +108,6 @@ bootstrapLib <- function(theme = NULL) {
     # Note also that since this is shinyOptions() (and not options()), the
     # option is automatically reset when the app (or session) exits
     if (isRunning()) {
-      setCurrentTheme(theme)
       registerThemeDependency(bs_theme_deps)
 
     } else {
@@ -144,6 +158,15 @@ getCurrentTheme <- function() {
   getShinyOption("bootstrapTheme", default = NULL)
 }
 
+getCurrentThemeVersion <- function() {
+  theme <- getCurrentTheme()
+  if (bslib::is_bs_theme(theme)) {
+    bslib::theme_version(theme)
+  } else {
+    strsplit(bootstrapVersion, ".", fixed = TRUE)[[1]][[1]]
+  }
+}
+
 setCurrentTheme <- function(theme) {
   shinyOptions(bootstrapTheme = theme)
 }
@@ -192,7 +215,7 @@ registerThemeDependency <- function(func) {
 
 bootstrapDependency <- function(theme) {
   htmlDependency(
-    "bootstrap", "3.4.1",
+    "bootstrap", bootstrapVersion,
     c(
       href = "shared/bootstrap",
       file = system.file("www/shared/bootstrap", package = "shiny")
@@ -203,13 +226,15 @@ bootstrapDependency <- function(theme) {
       "accessibility/js/bootstrap-accessibility.min.js"
     ),
     stylesheet = c(
-      theme %OR% "css/bootstrap.min.css",
+      theme %||% "css/bootstrap.min.css",
       # Safely adding accessibility plugin for screen readers and keyboard users; no break for sighted aspects (see https://github.com/paypal/bootstrap-accessibility-plugin)
-      "accessibility/css/bootstrap-accessibility.css"
+      "accessibility/css/bootstrap-accessibility.min.css"
     ),
     meta = list(viewport = "width=device-width, initial-scale=1")
   )
 }
+
+bootstrapVersion <- "3.4.1"
 
 
 #' @rdname bootstrapPage
@@ -264,7 +289,6 @@ basicPage <- function(...) {
 #' @param title The title to use for the browser window/tab (it will not be
 #'   shown in the document).
 #' @param bootstrap If `TRUE`, load the Bootstrap CSS library.
-#' @param theme URL to alternative Bootstrap stylesheet.
 #' @inheritParams bootstrapPage
 #'
 #' @family layout functions
@@ -358,9 +382,6 @@ collapseSizes <- function(padding) {
 #'   layout.
 #' @param responsive This option is deprecated; it is no longer optional with
 #'   Bootstrap 3.
-#' @param theme Alternative Bootstrap stylesheet (normally a css file within the
-#'   www directory). For example, to use the theme located at
-#'   `www/bootstrap.css` you would use `theme = "bootstrap.css"`.
 #' @param windowTitle The title that should be displayed by the browser window.
 #'   Useful if `title` is not a string.
 #' @inheritParams bootstrapPage
@@ -405,7 +426,7 @@ navbarPage <- function(title,
                        inverse = FALSE,
                        collapsible = FALSE,
                        fluid = TRUE,
-                       responsive = NULL,
+                       responsive = deprecated(),
                        theme = NULL,
                        windowTitle = title,
                        lang = NULL) {
@@ -414,10 +435,11 @@ navbarPage <- function(title,
   pageTitle <- title
 
   # navbar class based on options
+  # TODO: tagFunction() the navbar logic?
   navbarClass <- "navbar navbar-default"
   position <- match.arg(position)
   if (!is.null(position))
-    navbarClass <- paste(navbarClass, " navbar-", position, sep = "")
+    navbarClass <- paste0(navbarClass, " navbar-", position)
   if (inverse)
     navbarClass <- paste(navbarClass, "navbar-inverse")
 
@@ -425,21 +447,14 @@ navbarPage <- function(title,
     selected <- restoreInput(id = id, default = selected)
 
   # build the tabset
-  tabs <- list(...)
-  tabset <- buildTabset(tabs, "nav navbar-nav", NULL, id, selected)
+  tabset <- buildTabset(..., ulClass = "nav navbar-nav", id = id, selected = selected)
 
-  # function to return plain or fluid class name
-  className <- function(name) {
-    if (fluid)
-      paste(name, "-fluid", sep="")
-    else
-      name
-  }
+  containerClass <- paste0("container", if (fluid) "-fluid")
 
   # built the container div dynamically to support optional collapsibility
   if (collapsible) {
-    navId <- paste("navbar-collapse-", p_randomInt(1000, 10000), sep="")
-    containerDiv <- div(class=className("container"),
+    navId <- paste0("navbar-collapse-", p_randomInt(1000, 10000))
+    containerDiv <- div(class=containerClass,
       div(class="navbar-header",
         tags$button(type="button", class="navbar-toggle collapsed",
           `data-toggle`="collapse", `data-target`=paste0("#", navId),
@@ -453,7 +468,7 @@ navbarPage <- function(title,
       div(class="navbar-collapse collapse", id=navId, tabset$navList)
     )
   } else {
-    containerDiv <- div(class=className("container"),
+    containerDiv <- div(class=containerClass,
       div(class="navbar-header",
         span(class="navbar-brand", pageTitle)
       ),
@@ -462,7 +477,7 @@ navbarPage <- function(title,
   }
 
   # build the main tab content div
-  contentDiv <- div(class=className("container"))
+  contentDiv <- div(class=containerClass)
   if (!is.null(header))
     contentDiv <- tagAppendChild(contentDiv, div(class="row", header))
   contentDiv <- tagAppendChild(contentDiv, tabset$content)
@@ -489,9 +504,13 @@ navbarPage <- function(title,
 navbarMenu <- function(title, ..., menuName = title, icon = NULL) {
   structure(list(title = title,
                  menuName = menuName,
-                 tabs = list(...),
+                 tabs = list2(...),
                  iconClass = iconClass(icon)),
             class = "shiny.navbarmenu")
+}
+
+isNavbarMenu <- function(x) {
+  inherits(x, "shiny.navbarmenu")
 }
 
 #' Create a well panel
@@ -634,6 +653,13 @@ tabPanel <- function(title, ..., value = title, icon = NULL) {
     ...
   )
 }
+
+isTabPanel <- function(x) {
+  if (!inherits(x, "shiny.tag")) return(FALSE)
+  class <- tagGetAttribute(x, "class") %||% ""
+  "tab-pane" %in% strsplit(class, "\\s+")[[1]]
+}
+
 #' @export
 #' @describeIn tabPanel Create a tab panel that drops the title argument.
 #'   This function should be used within `tabsetPanel(type = "hidden")`. See [tabsetPanel()] for example usage.
@@ -669,6 +695,7 @@ tabPanelBody <- function(value, ..., icon = NULL) {
 #'   conjunction with [tabPanelBody()] and [updateTabsetPanel()] to control the
 #'   active tab via other input controls. (See example below)}
 #' }
+#' @inheritParams navbarPage
 #' @return A tabset that can be passed to [mainPanel()]
 #'
 #' @seealso [tabPanel()], [updateTabsetPanel()],
@@ -717,23 +744,25 @@ tabPanelBody <- function(value, ..., icon = NULL) {
 tabsetPanel <- function(...,
                         id = NULL,
                         selected = NULL,
-                        type = c("tabs", "pills", "hidden"))
-{
+                        type = c("tabs", "pills", "hidden"),
+                        header = NULL,
+                        footer = NULL) {
+
   if (!is.null(id))
     selected <- restoreInput(id = id, default = selected)
 
-  # build the tabset
-  tabs <- list(...)
   type <- match.arg(type)
+  tabset <- buildTabset(..., ulClass = paste0("nav nav-", type), id = id, selected = selected)
 
-  tabset <- buildTabset(tabs, paste0("nav nav-", type), NULL, id, selected)
-
-  # create the content
-  first <- tabset$navList
-  second <- tabset$content
-
-  # create the tab div
-  tags$div(class = "tabbable", first, second)
+  tags$div(
+    class = "tabbable",
+    !!!dropNulls(list(
+      tabset$navList,
+      header,
+      tabset$content,
+      footer
+    ))
+  )
 }
 
 #' Create a navigation list panel
@@ -753,8 +782,10 @@ tabsetPanel <- function(...,
 #'   navigation list.
 #' @param fluid `TRUE` to use fluid layout; `FALSE` to use fixed
 #'   layout.
-#' @param widths Column withs of the navigation list and tabset content areas
+#' @param widths Column widths of the navigation list and tabset content areas
 #'   respectively.
+#' @inheritParams tabsetPanel
+#' @inheritParams navbarPage
 #'
 #' @details You can include headers within the `navlistPanel` by including
 #'   plain text elements in the list. Versions of Shiny before 0.11 supported
@@ -781,37 +812,30 @@ tabsetPanel <- function(...,
 navlistPanel <- function(...,
                          id = NULL,
                          selected = NULL,
+                         header = NULL,
+                         footer = NULL,
                          well = TRUE,
                          fluid = TRUE,
                          widths = c(4, 8)) {
 
-  # text filter for headers
-  textFilter <- function(text) {
-      tags$li(class="navbar-brand", text)
-  }
-
   if (!is.null(id))
     selected <- restoreInput(id = id, default = selected)
 
-  # build the tabset
-  tabs <- list(...)
-  tabset <- buildTabset(tabs,
-                        "nav nav-pills nav-stacked",
-                        textFilter,
-                        id,
-                        selected)
-
-  # create the columns
-  columns <- list(
-    column(widths[[1]], class=ifelse(well, "well", ""), tabset$navList),
-    column(widths[[2]], tabset$content)
+  tabset <- buildTabset(
+    ..., ulClass = "nav nav-pills nav-stacked",
+    textFilter = function(text) tags$li(class = "navbar-brand", text),
+    id = id, selected = selected
   )
 
-  # return the row
-  if (fluid)
-    fluidRow(columns)
-  else
-    fixedRow(columns)
+  row <- if (fluid) fluidRow else fixedRow
+
+  row(
+    column(widths[[1]], class = if (well) "well", tabset$navList),
+    column(
+      widths[[2]],
+      !!!dropNulls(list(header, tabset$content, footer))
+    )
+  )
 }
 
 # Helpers to build tabsetPanels (& Co.) and their elements
@@ -829,14 +853,14 @@ containsSelectedTab <- function(tabs) {
 }
 
 findAndMarkSelectedTab <- function(tabs, selected, foundSelected) {
-  tabs <- lapply(tabs, function(div) {
-    if (foundSelected || is.character(div)) {
+  tabs <- lapply(tabs, function(x) {
+    if (foundSelected || is.character(x)) {
       # Strings are not selectable items
 
-    } else if (inherits(div, "shiny.navbarmenu")) {
+    } else if (isNavbarMenu(x)) {
       # Recur for navbarMenus
-      res <- findAndMarkSelectedTab(div$tabs, selected, foundSelected)
-      div$tabs <- res$tabs
+      res <- findAndMarkSelectedTab(x$tabs, selected, foundSelected)
+      x$tabs <- res$tabs
       foundSelected <<- res$foundSelected
 
     } else {
@@ -845,16 +869,16 @@ findAndMarkSelectedTab <- function(tabs, selected, foundSelected) {
       # mark first available item as selected
       if (is.null(selected)) {
         foundSelected <<- TRUE
-        div <- markTabAsSelected(div)
+        x <- markTabAsSelected(x)
       } else {
-        tabValue <- div$attribs$`data-value` %OR% div$attribs$title
+        tabValue <- x$attribs$`data-value` %||% x$attribs$title
         if (identical(selected, tabValue)) {
           foundSelected <<- TRUE
-          div <- markTabAsSelected(div)
+          x <- markTabAsSelected(x)
         }
       }
     }
-    return(div)
+    return(x)
   })
   return(list(tabs = tabs, foundSelected = foundSelected))
 }
@@ -880,9 +904,10 @@ navbarMenuTextFilter <- function(text) {
 
 # This function is called internally by navbarPage, tabsetPanel
 # and navlistPanel
-buildTabset <- function(tabs, ulClass, textFilter = NULL, id = NULL,
+buildTabset <- function(..., ulClass, textFilter = NULL, id = NULL,
                         selected = NULL, foundSelected = FALSE) {
 
+  tabs <- dropNulls(list2(...))
   res <- findAndMarkSelectedTab(tabs, selected, foundSelected)
   tabs <- res$tabs
   foundSelected <- res$foundSelected
@@ -903,10 +928,10 @@ buildTabset <- function(tabs, ulClass, textFilter = NULL, id = NULL,
             tabs = tabs, textFilter = textFilter)
 
   tabNavList <- tags$ul(class = ulClass, id = id,
-                  `data-tabsetid` = tabsetId, lapply(tabs, "[[", 1))
+                  `data-tabsetid` = tabsetId, !!!lapply(tabs, "[[", "liTag"))
 
   tabContent <- tags$div(class = "tab-content",
-                  `data-tabsetid` = tabsetId, lapply(tabs, "[[", 2))
+                  `data-tabsetid` = tabsetId, !!!lapply(tabs, "[[", "divTag"))
 
   list(navList = tabNavList, content = tabContent)
 }
@@ -918,71 +943,158 @@ buildTabset <- function(tabs, ulClass, textFilter = NULL, id = NULL,
 buildTabItem <- function(index, tabsetId, foundSelected, tabs = NULL,
                          divTag = NULL, textFilter = NULL) {
 
-  divTag <- if (!is.null(divTag)) divTag else tabs[[index]]
+  divTag <- divTag %||% tabs[[index]]
 
+  # Handles navlistPanel() headers and dropdown dividers
   if (is.character(divTag) && !is.null(textFilter)) {
-    # text item: pass it to the textFilter if it exists
-    liTag <- textFilter(divTag)
-    divTag <- NULL
-
-  } else if (inherits(divTag, "shiny.navbarmenu")) {
-    # navbarMenu item: build the child tabset
-    tabset <- buildTabset(divTag$tabs, "dropdown-menu",
-      navbarMenuTextFilter, foundSelected = foundSelected)
-
-    # if this navbarMenu contains a selected item, mark it active
-    containsSelected <- containsSelectedTab(divTag$tabs)
-    liTag <- tags$li(
-      class = paste0("dropdown", if (containsSelected) " active"),
-      tags$a(href = "#",
-        class = "dropdown-toggle", `data-toggle` = "dropdown",
-        `data-value` = divTag$menuName,
-        getIcon(iconClass = divTag$iconClass),
-        divTag$title, tags$b(class = "caret")
-      ),
-      tabset$navList   # inner tabPanels items
-    )
-    # list of tab content divs from the child tabset
-    divTag <- tabset$content$children
-
-  } else {
-    # tabPanel item: create the tab's liTag and divTag
-    tabId <- paste("tab", tabsetId, index, sep = "-")
-    liTag <- tags$li(
-               tags$a(
-                 href = paste("#", tabId, sep = ""),
-                 `data-toggle` = "tab",
-                 `data-value` = divTag$attribs$`data-value`,
-                 getIcon(iconClass = divTag$attribs$`data-icon-class`),
-                 divTag$attribs$title
-               )
-    )
-    # if this tabPanel is selected item, mark it active
-    if (isTabSelected(divTag)) {
-      liTag$attribs$class <- "active"
-      divTag$attribs$class <- "tab-pane active"
-    }
-    divTag$attribs$id <- tabId
-    divTag$attribs$title <- NULL
+    return(list(liTag = textFilter(divTag), divTag = NULL))
   }
-  return(list(liTag = liTag, divTag = divTag))
+
+  if (isNavbarMenu(divTag)) {
+    # tabPanelMenu item: build the child tabset
+    tabset <- buildTabset(
+      !!!divTag$tabs, ulClass = "dropdown-menu",
+      textFilter = navbarMenuTextFilter,
+      foundSelected = foundSelected
+    )
+    return(buildDropdown(divTag, tabset))
+  }
+
+  if (isTabPanel(divTag)) {
+    return(buildNavItem(divTag, tabsetId, index))
+  }
+
+  # The behavior is undefined at this point, so construct a condition message
+  msg <- paste0(
+    "Expected a collection `tabPanel()`s",
+    if (is.null(textFilter)) " and `navbarMenu()`.",
+    if (!is.null(textFilter)) ", `navbarMenu()`, and/or character strings.",
+    " Consider using `header` or `footer` if you wish to place content above (or below) every panel's contents"
+  )
+
+  # Luckily this case has never worked, so it's safe to throw here
+  # https://github.com/rstudio/shiny/issues/3313
+  if (!inherits(divTag, "shiny.tag"))  {
+    stop(msg, call. = FALSE)
+  }
+
+  # Unfortunately, this 'off-label' use case creates an 'empty' nav and includes
+  # the divTag content on every tab. There shouldn't be any reason to be relying on
+  # this behavior since we now have pre/post arguments, so throw a warning, but still
+  # support the use case since we don't make breaking changes
+  warning(msg, call. = FALSE)
+
+  return(buildNavItem(divTag, tabsetId, index))
 }
 
+buildNavItem <- function(divTag, tabsetId, index) {
+  id <- paste("tab", tabsetId, index, sep = "-")
+  # Get title attribute directory (not via tagGetAttribute()) so that contents
+  # don't get passed to as.character().
+  # https://github.com/rstudio/shiny/issues/3352
+  title <- divTag$attribs[["title"]]
+  value <- divTag$attribs[["data-value"]]
+  icon <- getIcon(iconClass = divTag$attribs[["data-icon-class"]])
+  active <- isTabSelected(divTag)
+  divTag <- tagAppendAttributes(divTag, class = if (active) "active")
+  divTag$attribs$id <- id
+  divTag$attribs$title <- NULL
+  list(
+    divTag = divTag,
+    liTag = tagAddRenderHook(
+      liTag(id, title, value, icon),
+      function(x) {
+        if (isTRUE(getCurrentThemeVersion() >= 4)) {
+          tagQuery(x)$
+            addClass("nav-item")$
+            find("a")$
+            addClass(c("nav-link", if (active) "active"))$
+            allTags()
+        } else {
+          tagAppendAttributes(x, class = if (active) "active")
+        }
+      }
+    )
+  )
+}
+
+liTag <- function(id, title, value, icon) {
+  tags$li(
+    tags$a(
+      href = paste0("#", id),
+      `data-toggle` = "tab",
+      `data-value` = value,
+       icon, title
+    )
+  )
+}
+
+buildDropdown <- function(divTag, tabset) {
+
+  navList <- tagAddRenderHook(
+    tabset$navList,
+    function(x) {
+      if (isTRUE(getCurrentThemeVersion() >= 4)) {
+        tagQuery(x)$
+          find(".nav-item")$
+          removeClass("nav-item")$
+          find(".nav-link")$
+          removeClass("nav-link")$
+          addClass("dropdown-item")$
+          allTags()
+      } else {
+        x
+      }
+    }
+  )
+
+  active <- containsSelectedTab(divTag$tabs)
+
+  dropdown <- tags$li(
+    class = "dropdown",
+    tags$a(
+      href = "#",
+      class = "dropdown-toggle",
+      `data-toggle` = "dropdown",
+      `data-value` = divTag$menuName,
+      getIcon(iconClass = divTag$iconClass),
+      divTag$title,
+      tags$b(class = "caret")
+    ),
+    navList,
+    .renderHook = function(x) {
+      if (isTRUE(getCurrentThemeVersion() >= 4)) {
+        tagQuery(x)$
+          addClass("nav-item")$
+          find(".dropdown-toggle")$
+          addClass("nav-link")$
+          allTags()
+      } else {
+        x
+      }
+    }
+  )
+
+  list(
+    divTag = tabset$content$children,
+    liTag = dropdown
+  )
+}
 
 #' Create a text output element
 #'
 #' Render a reactive output variable as text within an application page.
 #' `textOutput()` is usually paired with [renderText()] and puts regular text
 #' in `<div>` or `<span>`; `verbatimTextOutput()` is usually paired with
-#' [renderPrint()] and provudes fixed-width text in a `<pre>`.
+#' [renderPrint()] and provides fixed-width text in a `<pre>`.
 #'
-#' In both funtions, text is HTML-escaped prior to rendering.
+#' In both functions, text is HTML-escaped prior to rendering.
 #'
 #' @param outputId output variable to read the value from
 #' @param container a function to generate an HTML element to contain the text
 #' @param inline use an inline (`span()`) or block container (`div()`)
 #'   for the output
-#' @return A output element for use in UI.
+#' @return An output element for use in UI.
 #' @examples
 #' ## Only run this example in interactive R sessions
 #' if (interactive()) {
@@ -1005,14 +1117,14 @@ textOutput <- function(outputId, container = if (inline) span else div, inline =
 
 #' @param placeholder if the output is empty or `NULL`, should an empty
 #'   rectangle be displayed to serve as a placeholder? (does not affect
-#'   behavior when the the output in nonempty)
+#'   behavior when the output is nonempty)
 #' @export
 #' @rdname textOutput
 verbatimTextOutput <- function(outputId, placeholder = FALSE) {
   pre(id = outputId,
-      class = paste(c("shiny-text-output", if (!placeholder) "noplaceholder"),
-                    collapse = " ")
-      )
+    class = "shiny-text-output",
+    class = if (!placeholder) "noplaceholder"
+  )
 }
 
 
@@ -1024,7 +1136,9 @@ imageOutput <- function(outputId, width = "100%", height="400px",
                         inline = FALSE) {
 
   style <- if (!inline) {
-    paste("width:", validateCssUnit(width), ";", "height:", validateCssUnit(height))
+    # Using `css()` here instead of paste/sprintf so that NULL values will
+    # result in the property being dropped altogether
+    css(width = validateCssUnit(width), height = validateCssUnit(height))
   }
 
 
@@ -1323,49 +1437,8 @@ plotOutput <- function(outputId, width = "100%", height="400px",
   res
 }
 
-#' Create a table output element
-#'
-#' Render a [renderTable()] or [renderDataTable()] within an
-#' application page. `renderTable` uses a standard HTML table, while
-#' `renderDataTable` uses the DataTables Javascript library to create an
-#' interactive table with more features.
-#'
 #' @param outputId output variable to read the table from
-#' @return A table output element that can be included in a panel
-#'
-#' @seealso [renderTable()], [renderDataTable()].
-#' @examples
-#' ## Only run this example in interactive R sessions
-#' if (interactive()) {
-#'   # table example
-#'   shinyApp(
-#'     ui = fluidPage(
-#'       fluidRow(
-#'         column(12,
-#'           tableOutput('table')
-#'         )
-#'       )
-#'     ),
-#'     server = function(input, output) {
-#'       output$table <- renderTable(iris)
-#'     }
-#'   )
-#'
-#'
-#'   # DataTables example
-#'   shinyApp(
-#'     ui = fluidPage(
-#'       fluidRow(
-#'         column(12,
-#'           dataTableOutput('table')
-#'         )
-#'       )
-#'     ),
-#'     server = function(input, output) {
-#'       output$table <- renderDataTable(iris)
-#'     }
-#'   )
-#' }
+#' @rdname renderTable
 #' @export
 tableOutput <- function(outputId) {
   div(id = outputId, class="shiny-html-output")
@@ -1383,7 +1456,7 @@ dataTableDependency <- list(
   )
 )
 
-#' @rdname tableOutput
+#' @rdname renderDataTable
 #' @export
 dataTableOutput <- function(outputId) {
   attachDependencies(
@@ -1502,20 +1575,21 @@ downloadLink <- function(outputId, label="Download", class=NULL, ...) {
 #' @param name Name of icon. Icons are drawn from the
 #'   [Font Awesome Free](https://fontawesome.com/) (currently icons from
 #'   the v5.13.0 set are supported with the v4 naming convention) and
-#'   [Glyphicons](http://getbootstrap.com/components/#glyphicons)
+#'   [Glyphicons](https://getbootstrap.com/components/#glyphicons)
 #'   libraries. Note that the "fa-" and "glyphicon-" prefixes should not be used
 #'   in icon names (i.e. the "fa-calendar" icon should be referred to as
 #'   "calendar")
 #' @param class Additional classes to customize the style of the icon (see the
-#'   [usage examples](http://fontawesome.io/examples/) for details on
+#'   [usage examples](https://fontawesome.com/how-to-use) for details on
 #'   supported styles).
 #' @param lib Icon library to use ("font-awesome" or "glyphicon")
+#' @param ... Arguments passed to the `<i>` tag of [htmltools::tags]
 #'
 #' @return An icon element
 #'
 #' @seealso For lists of available icons, see
-#'   [http://fontawesome.io/icons/](http://fontawesome.io/icons/) and
-#'   [http://getbootstrap.com/components/#glyphicons](http://getbootstrap.com/components/#glyphicons).
+#'   [https://fontawesome.com/icons](https://fontawesome.com/icons) and
+#'   [https://getbootstrap.com/components/#glyphicons](https://getbootstrap.com/components/#glyphicons).
 #'
 #'
 #' @examples
@@ -1528,7 +1602,7 @@ downloadLink <- function(outputId, label="Download", class=NULL, ...) {
 #'   tabPanel("Table", icon = icon("table"))
 #' )
 #' @export
-icon <- function(name, class = NULL, lib = "font-awesome") {
+icon <- function(name, class = NULL, lib = "font-awesome", ...) {
   prefixes <- list(
     "font-awesome" = "fa",
     "glyphicon" = "glyphicon"
@@ -1554,7 +1628,7 @@ icon <- function(name, class = NULL, lib = "font-awesome") {
   if (!is.null(class))
     iconClass <- paste(iconClass, class)
 
-  iconTag <- tags$i(class = iconClass, role = "presentation", `aria-label` = paste(name, "icon"))
+  iconTag <- tags$i(class = iconClass, role = "presentation", `aria-label` = paste(name, "icon"), ...)
 
   # font-awesome needs an additional dependency (glyphicon is in bootstrap)
   if (lib == "font-awesome") {

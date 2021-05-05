@@ -12,47 +12,65 @@ bindCache(x, ..., cache = "app")
 \item{...}{One or more expressions to use in the caching key.}
 
 \item{cache}{The scope of the cache, or a cache object. This can be \code{"app"}
-(the default), \code{"session"}, or a cache object like a \code{\link[cachem:cache_disk]{cachem::cache_disk()}}.
-See the Cache Scoping section for more information.}
+(the default), \code{"session"}, or a cache object like a
+\code{\link[cachem:cache_disk]{cachem::cache_disk()}}. See the Cache Scoping section for more information.}
 }
 \description{
-\code{bindCache()} adds caching to the following kinds of objects used in Shiny:
-\itemize{
-\item \code{\link[=reactive]{reactive()}}\verb{expressions. *}render*` functions, like \code{\link[=renderText]{renderText()}},
-\code{\link[=renderTable]{renderTable()}}, and so on.
+\code{bindCache()} adds caching \code{\link[=reactive]{reactive()}} expressions and \verb{render*} functions
+(like \code{\link[=renderText]{renderText()}}, \code{\link[=renderTable]{renderTable()}}, ...).
+
+Ordinary \code{\link[=reactive]{reactive()}} expressions automatically cache their \emph{most recent}
+value, which helps to  avoid redundant computation in downstream reactives.
+\code{bindCache()} will cache all previous values (as long as they fit in the
+cache) and they can be shared across user sessions. This allows
+\code{bindCache()} to dramatically improve performance when used correctly.
+}
+\details{
+\code{bindCache()} requires one or more expressions that are used to generate a
+\strong{cache key}, which is used to determine if a computation has occurred
+before and hence can be retrieved from the cache. If you're familiar with the
+concept of memoizing pure functions (e.g., the \pkg{memoise} package), you
+can think of the cache key as the input(s) to a pure function. As such, one
+should take care to make sure the use of \code{bindCache()} is \emph{pure} in the same
+sense, namely:
+\enumerate{
+\item For a given key, the return value is always the same.
+\item Evaluation has no side-effects.
 }
 
-Ordinary \code{\link[=reactive]{reactive()}} expressions will cache their most recent value. This
-can make computation more efficient, because time-consuming code can execute
-once and the result can be used in multiple different places without needing
-to re-execute the code.
+In the example here, the \code{bindCache()} key consists of \code{input$x} and
+\code{input$y} combined, and the value is \code{input$x * input$y}. In this simple
+example, for any given key, there is only one possible returned value.\if{html}{\out{<div class="NA">}}\preformatted{r <- reactive(\{ input$x * input$y \}) \%>\%
+  bindCache(input$x, input$y)
+}\if{html}{\out{</div>}}
 
-When \code{bindCache()} is used on a reactive expression, any number of previous
-values can be cache (as long as they fit in the cache). You must provide one
-or more expressions that are used to generate a \emph{cache key}. The \code{...}
-expressions are put together in a list and hashed, and the result is used as
-the cache \strong{key}.
+The largest performance improvements occur when the cache key is fast to
+compute and the reactive expression is slow to compute. To see if the value
+should be computed, a cached reactive evaluates the key, and then serializes
+and hashes the result. If the resulting hashed key is in the cache, then the
+cached reactive simply retrieves the previously calculated value and returns
+it; if not, then the value is computed and the result is stored in the cache
+before being returned.
 
-There is also a \strong{value} expression, which is the expression passed to the
-original reactive.
+To compute the cache key, \code{bindCache()} hashes the contents of \code{...}, so it's
+best to avoid including large objects in a cache key since that can result in
+slow hashing. It's also best to avoid reference objects like environments and
+R6 objects, since the serialization of these objects may not capture relevant
+changes.
 
-For each possible \strong{key}, there should be one possible \strong{value} returned by
-the original reactive expression; a given key should not correspond to
-multiple possible values from the reactive expression.
+If you want to use a large object as part of a cache key, it may make sense
+to do some sort of reduction on the data that still captures information
+about whether a value can be retrieved from the cache. For example, if you
+have a large data set with timestamps, it might make sense to extract the
+most recent timestamp and return that. Then, instead of hashing the entire
+data object, the cached reactive only needs to hash the timestamp.\if{html}{\out{<div class="NA">}}\preformatted{r <- reactive(\{ compute(bigdata()) \} \%>\%
+  bindCache(\{ extract_most_recent_time(bigdata()) \})
+}\if{html}{\out{</div>}}
 
-To use \code{bindCache()}, the key should be fast to compute, and the value should
-expensive (so that it benefits from caching).  To see if the value should be
-computed, a cached reactive evaluates the key, and then serializes and hashes
-the result. If the resulting hashed key is in the cache, then the cached
-reactive simply retrieves the previously calculated value and returns it; if
-not, then the value is computed and the result is stored in the cache before
-being returned.
-
-In most cases, the key will contain any reactive inputs that are used by the
-value expression. It is also best to use non-reference objects, since the
-serialization of these objects may not capture relevant changes.
-
-\code{bindCache()} is often used in conjunction with \code{\link[=bindEvent]{bindEvent()}}.
+For computations that are very slow, it often makes sense to pair
+\code{\link[=bindCache]{bindCache()}} with \code{\link[=bindEvent]{bindEvent()}} so that no computation is performed until
+the user explicitly requests it (for more, see the Details section of
+\code{\link[=bindEvent]{bindEvent()}}).
 }
 \section{Cache keys and reactivity}{
 
@@ -87,7 +105,7 @@ cache key is not too expensive.
 Remember that the key is \emph{reactive}, so it is not re-executed every single
 time that someone accesses the cached reactive. It is only re-executed if
 it has been invalidated by one of the reactives it depends on. For
-example, suppose we have this cached reactive:\if{html}{\out{<div class="NA">}}\preformatted{r <- reactive(\{ input$x + input$y \}) \%>\%
+example, suppose we have this cached reactive:\if{html}{\out{<div class="NA">}}\preformatted{r <- reactive(\{ input$x * input$y \}) \%>\%
  bindCache(input$x, input$y)
 }\if{html}{\out{</div>}}
 
@@ -105,34 +123,13 @@ expression will no longer be reactive; instead, the event expression will be
 reactive.
 }
 
-\section{Async with cached reactives}{
-
-
-With a cached reactive expression, the key and/or value expression can be
-\emph{asynchronous}. In other words, they can be promises --- not regular R
-promises, but rather objects provided by the
-\href{https://rstudio.github.io/promises/}{\pkg{promises}}  package, which
-are similar to promises in JavaScript. (See \code{\link[promises:promise]{promises::promise()}} for more
-information.) You can also use \code{\link[future:future]{future::future()}} objects to run code in a
-separate process or even on a remote machine.
-
-If the value returns a promise, then anything that consumes the cached
-reactive must expect it to return a promise.
-
-Similarly, if the key is a promise (in other words, if it is asynchronous),
-then the entire cached reactive must be asynchronous, since the key must be
-computed asynchronously before it knows whether to compute the value or the
-value is retrieved from the cache. Anything that consumes the cached
-reactive must therefore expect it to return a promise.
-}
-
 \section{Cache scope}{
 
 
-By default, a cached reactive is scoped to the running application. That
-means that it shares a cache with all user sessions connected to the
-application (within the R process). This is done with the \code{cache}
-parameter's default value, \code{"app"}.
+By default, when \code{bindCache()} is used, it is scoped to the running
+application. That means that it shares a cache with all user sessions
+connected to the application (within the R process). This is done with the
+\code{cache} parameter's default value, \code{"app"}.
 
 With an app-level cache scope, one user can benefit from the work done for
 another user's session. In most cases, this is the best way to get
@@ -157,16 +154,16 @@ persists beyond the current R session.
 To use different settings for an application-scoped cache, you can call
 \code{\link[=shinyOptions]{shinyOptions()}} at the top of your app.R, server.R, or
 global.R. For example, this will create a cache with 500 MB of space
-instead of the default 200 MB:\preformatted{shinyOptions(cache = cachem::cache_mem(size = 500e6))
+instead of the default 200 MB:\preformatted{shinyOptions(cache = cachem::cache_mem(max_size = 500e6))
 }
 
 To use different settings for a session-scoped cache, you can set
 \code{self$cache} at the top of your server function. By default, it will create
-a 200 MB memory cache for each session , but you can replace it with
+a 200 MB memory cache for each session, but you can replace it with
 something different. To use the session-scoped cache, you must also call
 \code{bindCache()} with \code{cache="session"}. This will create a 100 MB cache for
 the session:\preformatted{function(input, output, session) \{
-  session$cache <- cachem::cache_mem(size = 100e6)
+  session$cache <- cachem::cache_mem(max_size = 100e6)
   ...
 \}
 }
@@ -195,23 +192,154 @@ create a \code{\link[cachem:cache_mem]{cachem::cache_mem()}} or \code{\link[cach
 as the \code{cache} argument of \code{bindCache()}.
 }
 
-\section{Cache key internals}{
+\section{Computing cache keys}{
 
 
-The actual cache key that is used internally takes value from evaluating the
-key expression(s) and combines it with the (unevaluated) value expression.
+The actual cache key that is used internally takes value from evaluating
+the key expression(s) (from the \code{...} arguments) and combines it with the
+(unevaluated) value expression.
 
-This means that if there are two cached reactives which have the same result
-from evaluating the key, but different value expressions, then they will not
-need to worry about collisions.
+This means that if there are two cached reactives which have the same
+result from evaluating the key, but different value expressions, then they
+will not need to worry about collisions.
 
 However, if two cached reactives have identical key and value expressions
 expressions, they will share the cached values. This is useful when using
 \code{cache="app"}: there may be multiple user sessions which create separate
 cached reactive objects (because they are created from the same code in the
 server function, but the server function is executed once for each user
-session), and those cached reactive objects across sessions can share values
-in the cache.
+session), and those cached reactive objects across sessions can share
+values in the cache.
+}
+
+\section{Async with cached reactives}{
+
+
+With a cached reactive expression, the key and/or value expression can be
+\emph{asynchronous}. In other words, they can be promises --- not regular R
+promises, but rather objects provided by the
+\href{https://rstudio.github.io/promises/}{\pkg{promises}}  package, which
+are similar to promises in JavaScript. (See \code{\link[promises:promise]{promises::promise()}} for more
+information.) You can also use \code{\link[future:future]{future::future()}} objects to run code in a
+separate process or even on a remote machine.
+
+If the value returns a promise, then anything that consumes the cached
+reactive must expect it to return a promise.
+
+Similarly, if the key is a promise (in other words, if it is asynchronous),
+then the entire cached reactive must be asynchronous, since the key must be
+computed asynchronously before it knows whether to compute the value or the
+value is retrieved from the cache. Anything that consumes the cached
+reactive must therefore expect it to return a promise.
+}
+
+\section{Developing render functions for caching}{
+
+
+If you've implemented your own \verb{render*()} function, it may just work with
+\code{bindCache()}, but it is possible that you will need to make some
+modifications. These modifications involve helping \code{bindCache()} avoid
+cache collisions, dealing with internal state that may be set by the,
+\code{render} function, and modifying the data as it goes in and comes out of
+the cache.
+
+You may need to provide a \code{cacheHint} to \code{\link[=createRenderFunction]{createRenderFunction()}} (or
+\code{\link[htmlwidgets:htmlwidgets-shiny]{htmlwidgets::shinyRenderWidget()}}, if you've authored an htmlwidget) in
+order for \code{bindCache()} to correctly compute a cache key.
+
+The potential problem is a cache collision. Consider the following:\preformatted{output$x1 <- renderText(\{ input$x \}) \%>\% bindCache(input$x)
+output$x2 <- renderText(\{ input$x * 2 \}) \%>\% bindCache(input$x)
+}
+
+Both \code{output$x1} and \code{output$x2} use \code{input$x} as part of their cache key,
+but if it were the only thing used in the cache key, then the two outputs
+would have a cache collision, and they would have the same output. To avoid
+this, a \emph{cache hint} is automatically added when \code{\link[=renderText]{renderText()}} calls
+\code{\link[=createRenderFunction]{createRenderFunction()}}. The cache hint is used as part of the actual
+cache key, in addition to the one passed to \code{bindCache()} by the user. The
+cache hint can be viewed by calling the internal Shiny function
+\code{extractCacheHint()}:\if{html}{\out{<div class="NA">}}\preformatted{r <- renderText(\{ input$x \})
+shiny:::extractCacheHint(r)
+}\if{html}{\out{</div>}}
+
+This returns a nested list containing an item, \verb{$origUserFunc$body}, which
+in this case is the expression which was passed to \code{renderText()}:
+\code{{ input$x }}. This (quoted)  expression is mixed into the actual cache
+key, and it is how \code{output$x1} does not have collisions with \code{output$x2}.
+
+For most developers of render functions, nothing extra needs to be done;
+the automatic inference of the cache hint is sufficient. Again, you can
+check it by calling \code{shiny:::extractCacheHint()}, and by testing the
+render function for cache collisions in a real application.
+
+In some cases, however, the automatic cache hint inference is not
+sufficient, and it is necessary to provide a cache hint. This is true
+for \code{renderPrint()}. Unlike \code{renderText()}, it wraps the user-provided
+expression in another function, before passing it to \code{\link[=markRenderFunction]{markRenderFunction()}}
+(instead of \code{\link[=createRenderFunction]{createRenderFunction()}}). Because the user code is wrapped in
+another function, \code{markRenderFunction()} is not able to automatically
+extract the user-provided code and use it in the cache key. Instead,
+\code{renderPrint} calls \code{markRenderFunction()}, it explicitly passes along a
+\code{cacheHint}, which includes a label and the original user expression.
+
+In general, if you need to provide a \code{cacheHint}, it is best practice to
+provide a \code{label} id, the user's \code{expr}, as well as any other arguments
+that may influence the final value.
+
+For \pkg{htmlwidgets}, it will try to automatically infer a cache hint;
+again, you can inspect the cache hint with \code{shiny:::extractCacheHint()} and
+also test it in an application. If you do need to explicitly provide a
+cache hint, pass it to \code{shinyRenderWidget}. For example:\preformatted{renderMyWidget <- function(expr) \{
+  expr <- substitute(expr)
+
+  htmlwidgets::shinyRenderWidget(expr,
+    myWidgetOutput,
+    quoted = TRUE,
+    env = parent.frame(),
+    cacheHint = list(label = "myWidget", userExpr = expr)
+  )
+\}
+}
+
+If your \code{render} function sets any internal state, you may find it useful
+in your call to \code{\link[=createRenderFunction]{createRenderFunction()}} or \code{\link[=markRenderFunction]{markRenderFunction()}} to use
+the \code{cacheWriteHook} and/or \code{cacheReadHook} parameters. These hooks are
+functions that run just before the object is stored in the cache, and just
+after the object is retrieved from the cache. They can modify the data
+that is stored and retrieved; this can be useful if extra information needs
+to be stored in the cache. They can also be used to modify the state of the
+application; for example, it can call \code{\link[=createWebDependency]{createWebDependency()}} to make
+JS/CSS resources available if the cached object is loaded in a different R
+process. (See the source of \code{htmlwidgets::shinyRenderWidget} for an example
+of this.)
+}
+
+\section{Uncacheable objects}{
+
+
+Some render functions cannot be cached, typically because they have side
+effects or modify some external state, and they must re-execute each time
+in order to work properly.
+
+For developers of such code, they should call \code{\link[=createRenderFunction]{createRenderFunction()}} or
+\code{\link[=markRenderFunction]{markRenderFunction()}} with \code{cacheHint = FALSE}.
+}
+
+\section{Caching with \code{renderPlot()}}{
+
+
+When \code{bindCache()} is used with \code{renderPlot()}, the \code{height} and \code{width}
+passed to the original \code{renderPlot()} are ignored. They are superseded by
+\code{sizePolicy} argument passed to `bindCache. The default is:\preformatted{sizePolicy = sizeGrowthRatio(width = 400, height = 400, growthRate = 1.2)
+}
+
+\code{sizePolicy} must be a function that takes a two-element numeric vector as
+input, representing the width and height of the \verb{<img>} element in the
+browser window, and it must return a two-element numeric vector, representing
+the pixel dimensions of the plot to generate. The purpose is to round the
+actual pixel dimensions from the browser to some other dimensions, so that
+this will not generate and cache images of every possible pixel dimension.
+See \code{\link[=sizeGrowthRatio]{sizeGrowthRatio()}} for more information on the default sizing policy.
 }
 
 \examples{

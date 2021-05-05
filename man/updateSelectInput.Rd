@@ -8,7 +8,7 @@
 \title{Change the value of a select input on the client}
 \usage{
 updateSelectInput(
-  session,
+  session = getDefaultReactiveDomain(),
   inputId,
   label = NULL,
   choices = NULL,
@@ -16,7 +16,7 @@ updateSelectInput(
 )
 
 updateSelectizeInput(
-  session,
+  session = getDefaultReactiveDomain(),
   inputId,
   label = NULL,
   choices = NULL,
@@ -26,7 +26,7 @@ updateSelectizeInput(
 )
 
 updateVarSelectInput(
-  session,
+  session = getDefaultReactiveDomain(),
   inputId,
   label = NULL,
   data = NULL,
@@ -34,7 +34,7 @@ updateVarSelectInput(
 )
 
 updateVarSelectizeInput(
-  session,
+  session = getDefaultReactiveDomain(),
   inputId,
   label = NULL,
   data = NULL,
@@ -45,7 +45,7 @@ updateVarSelectizeInput(
 }
 \arguments{
 \item{session}{The \code{session} object passed to function given to
-\code{shinyServer}.}
+\code{shinyServer}. Default is \code{getDefaultReactiveDomain()}.}
 
 \item{inputId}{The id of the input object.}
 

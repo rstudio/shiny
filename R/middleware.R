@@ -309,7 +309,7 @@ HandlerManager <- R6Class("HandlerManager",
     createHttpuvApp = function() {
       list(
         onHeaders = function(req) {
-          maxSize <- getOption('shiny.maxRequestSize') %OR% (5 * 1024 * 1024)
+          maxSize <- getOption('shiny.maxRequestSize') %||% (5 * 1024 * 1024)
           if (maxSize <= 0)
             return(NULL)
 
@@ -426,7 +426,7 @@ HandlerManager <- R6Class("HandlerManager",
 )
 
 maybeInjectAutoreload <- function(resp) {
-  if (getOption("shiny.autoreload", FALSE) &&
+  if (get_devmode_option("shiny.autoreload", FALSE) &&
       isTRUE(grepl("^text/html($|;)", resp$content_type)) &&
       is.character(resp$content)) {
 

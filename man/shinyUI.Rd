@@ -13,6 +13,8 @@ shinyUI(ui)
 The user interface definition, without modifications or side effects.
 }
 \description{
+\lifecycle{superseded}
+
 Historically this function was used in ui.R files to register a user
 interface with Shiny. It is no longer required as of Shiny 0.10; simply
 ensure that the last expression to be returned from ui.R is a user interface.

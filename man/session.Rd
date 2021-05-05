@@ -104,6 +104,14 @@ This is the request that was used to initiate the websocket connection
 An environment for app authors and module/package authors to store whatever
 session-specific data they want.
 }
+\item{user}{
+User's log-in information. Useful for identifying users on hosted platforms
+such as RStudio Connect and Shiny Server.
+}
+\item{groups}{
+The \code{user}'s relevant group information. Useful for determining what
+privileges the user should or shouldn't have.
+}
 \item{resetBrush(brushId)}{
 Resets/clears the brush with the given \code{brushId}, if it exists on
 any \code{imageOutput} or \code{plotOutput} in the app.
@@ -170,6 +178,18 @@ export arguments, TRUE means to return all of these values. It is also
 possible to specify by name which values to return by providing a
 character vector, as in \code{input=c("x", "y")}. The format can be
 "rds" or "json".
+}
+\item{setCurrentTheme(theme)}{
+Sets the current \code{\link[=bootstrapLib]{bootstrapLib()}} theme, which updates the value of
+\code{\link[=getCurrentTheme]{getCurrentTheme()}}, invalidates \code{session$getCurrentTheme()}, and calls
+function(s) registered with \code{\link[=registerThemeDependency]{registerThemeDependency()}} with provided
+\code{theme}. If those function calls return \code{\link[htmltools:htmlDependency]{htmltools::htmlDependency()}}s with
+\code{stylesheet}s, then those stylesheets are "refreshed" (i.e., the new
+stylesheets are inserted on the page and the old ones are disabled and
+removed).
+}
+\item{getCurrentTheme()}{
+A reactive read of the current \code{\link[=bootstrapLib]{bootstrapLib()}} theme.
 }
 }
 \description{

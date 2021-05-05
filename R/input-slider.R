@@ -1,24 +1,24 @@
 #' Slider Input Widget
 #'
-#' Constructs a slider widget to select a numeric value from a range.
+#' Constructs a slider widget to select a number, date, or date-time from a
+#' range.
 #'
 #' @inheritParams textInput
-#' @param min The minimum value (inclusive) that can be selected.
-#' @param max The maximum value (inclusive) that can be selected.
-#' @param value The initial value of the slider. A numeric vector of length one
-#'   will create a regular slider; a numeric vector of length two will create a
-#'   double-ended range slider. A warning will be issued if the value doesn't
-#'   fit between `min` and `max`.
+#' @param min,max The minimum and maximum values (inclusive) that can be
+#'   selected.
+#' @param value The initial value of the slider, either a number, a date
+#'   (class Date), or a date-time (class POSIXt). A length one vector will
+#'   create a regular slider; a length two vector will create a double-ended
+#'   range slider. Must lie between `min` and `max`.
 #' @param step Specifies the interval between each selectable value on the
-#'   slider (if `NULL`, a heuristic is used to determine the step size). If
-#'   the values are dates, `step` is in days; if the values are times
-#'   (POSIXt), `step` is in seconds.
+#'   slider. Either `NULL`, the default, which uses a heuristic to determine the
+#'   step size or a single number. If the values are dates, `step` is in days;
+#'   if the values are date-times, `step` is in seconds.
 #' @param round `TRUE` to round all values to the nearest integer;
 #'   `FALSE` if no rounding is desired; or an integer to round to that
 #'   number of digits (for example, 1 will round to the nearest 10, and -2 will
 #'   round to the nearest .01). Any rounding will be applied after snapping to
 #'   the nearest step.
-#' @param ... Reserved for future use.
 #' @param ticks `FALSE` to hide tick marks, `TRUE` to show them
 #'   according to some simple heuristics.
 #' @param animate `TRUE` to show simple animation controls with default
@@ -71,15 +71,15 @@
 #' }
 #'
 #' @section Server value:
-#' A number, or in the case of slider range, a vector of two numbers.
+#' A number, date, or date-time (depending on the class of `value`), or
+#' in the case of slider range, a vector of two numbers/dates/date-times.
 #'
 #' @export
 sliderInput <- function(inputId, label, min, max, value, step = NULL,
-                        round = FALSE, ...,
-                        ticks = TRUE, animate = FALSE, width = NULL, sep = ",",
-                        pre = NULL, post = NULL, timeFormat = NULL,
-                        timezone = NULL, dragRange = TRUE) {
-  check_dots_empty()
+                        round = FALSE, ticks = TRUE, animate = FALSE,
+                        width = NULL, sep = ",", pre = NULL, post = NULL,
+                        timeFormat = NULL, timezone = NULL, dragRange = TRUE) {
+  validate_slider_value(min, max, value, "sliderInput")
 
   dataType <- getSliderType(min, max, value)
 
@@ -167,7 +167,7 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
   })
 
   sliderTag <- div(class = "form-group shiny-input-container",
-    style = if (!is.null(width)) paste0("width: ", validateCssUnit(width), ";"),
+    style = css(width = validateCssUnit(width)),
     shinyInputLabel(inputId, label),
     do.call(tags$input, sliderProps)
   )
@@ -253,7 +253,7 @@ ionRangeSliderDependencyCSS <- function(theme) {
     theme = theme,
     name = "ionRangeSlider",
     version = ionRangeSliderVersion,
-    cache_key_extra = utils::packageVersion("shiny")
+    cache_key_extra = shinyPackageVersion()
   )
 }
 
@@ -285,6 +285,37 @@ findStepSize <- function(min, max, step) {
 
   } else {
     1
+  }
+}
+
+# Throw a warning if ever `value` is not in the [`min`, `max`] range
+validate_slider_value <- function(min, max, value, fun) {
+  if (length(min)   != 1 || is_na(min) ||
+      length(max)   != 1 || is_na(max) ||
+      length(value) <  1 || length(value) > 2 || any(is.na(value)))
+  {
+    stop(call. = FALSE,
+      sprintf("In %s(): `min`, `max`, and `value` cannot be NULL, NA, or empty.", fun)
+    )
+  }
+
+  if (min(value) < min) {
+    warning(call. = FALSE,
+      sprintf(
+        "In %s(): `value` should be greater than or equal to `min` (value = %s, min = %s).",
+        fun, paste(value, collapse = ", "), min
+      )
+    )
+  }
+
+  if (max(value) > max) {
+    warning(
+      noBreaks. = TRUE, call. = FALSE,
+      sprintf(
+        "In %s(): `value` should be less than or equal to `max` (value = %s, max = %s).",
+        fun, paste(value, collapse = ", "), max
+      )
+    )
   }
 }
 

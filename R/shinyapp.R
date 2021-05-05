@@ -113,7 +113,10 @@ shinyApp <- function(ui, server, onStart=NULL, options=list(),
 #' @export
 shinyAppDir <- function(appDir, options=list()) {
   if (!utils::file_test('-d', appDir)) {
-    stop("No Shiny application exists at the path \"", appDir, "\"")
+    rlang::abort(
+      paste0("No Shiny application exists at the path \"", appDir, "\""),
+      class = "invalidShinyAppDir"
+    )
   }
 
   # In case it's a relative path, convert to absolute (so we're not adversely
@@ -125,7 +128,10 @@ shinyAppDir <- function(appDir, options=list()) {
   } else if (file.exists.ci(appDir, "app.R")) {
     shinyAppDir_appR("app.R", appDir, options = options)
   } else {
-    stop("App dir must contain either app.R or server.R.")
+    rlang::abort(
+      "App dir must contain either app.R or server.R.",
+      class = "invalidShinyAppDir"
+    )
   }
 }
 
@@ -569,7 +575,7 @@ as.tags.shiny.appobj <- function(x, ...) {
   # jcheng 06/06/2014: Unfortunate copy/paste between this function and
   # knit_print.shiny.appobj, but I am trying to make the most conservative
   # change possible due to upcoming release.
-  opts <- x$options %OR% list()
+  opts <- x$options %||% list()
   width <- if (is.null(opts$width)) "100%" else opts$width
   height <- if (is.null(opts$height)) "400" else opts$height
 

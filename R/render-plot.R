@@ -62,9 +62,11 @@ renderPlot <- function(expr, width = 'auto', height = 'auto', res = 72, ...,
                        env = parent.frame(), quoted = FALSE,
                        execOnResize = FALSE, outputArgs = list()
 ) {
+
+  expr <- get_quosure(expr, env, quoted)
   # This ..stacktraceon is matched by a ..stacktraceoff.. when plotFunc
   # is called
-  installExprFunction(expr, "func", env, quoted, ..stacktraceon = TRUE)
+  func <- quoToFunction(expr, "renderPlot", ..stacktraceon = TRUE)
 
   args <- list(...)
 
@@ -89,7 +91,9 @@ renderPlot <- function(expr, width = 'auto', height = 'auto', res = 72, ...,
   else
     altWrapper <- function() { alt }
 
-  getDims <- function() {
+  # This is the function that will be used as getDims by default, but it can be
+  # overridden (which happens when bindCache() is used).
+  getDimsDefault <- function() {
     width <- widthWrapper()
     height <- heightWrapper()
 
@@ -108,6 +112,7 @@ renderPlot <- function(expr, width = 'auto', height = 'auto', res = 72, ...,
   # the plotObj() reactive.
   session <- NULL
   outputName <- NULL
+  getDims <- NULL
 
   # Calls drawPlot, invoking the user-provided `func` (which may or may not
   # return a promise). The idea is that the (cached) return value from this
@@ -118,7 +123,7 @@ renderPlot <- function(expr, width = 'auto', height = 'auto', res = 72, ...,
       {
         # If !execOnResize, don't invalidate when width/height changes.
         dims <- if (execOnResize) getDims() else isolate(getDims())
-        pixelratio <- session$clientData$pixelratio %OR% 1
+        pixelratio <- session$clientData$pixelratio %||% 1
         do.call("drawPlot", c(
           list(
             name = outputName,
@@ -145,15 +150,19 @@ renderPlot <- function(expr, width = 'auto', height = 'auto', res = 72, ...,
 
   # This function is the one that's returned from renderPlot(), and gets
   # wrapped in an observer when the output value is assigned.
-  renderFunc <- function(shinysession, name, ...) {
+  # The `get_dims` parameter defaults to `getDimsDefault`. However, it can be
+  # overridden, so that `bindCache` can use a different version.
+  renderFunc <- function(shinysession, name, ..., get_dims = getDimsDefault) {
+
     outputName <<- name
     session <<- shinysession
+    if (is.null(getDims)) getDims <<- get_dims
 
     hybrid_chain(
       drawReactive(),
       function(result) {
         dims <- getDims()
-        pixelratio <- session$clientData$pixelratio %OR% 1
+        pixelratio <- session$clientData$pixelratio %||% 1
         result <- do.call("resizeSavedPlot", c(
           list(name, shinysession, result, dims$width, dims$height, altWrapper(), pixelratio, res),
           args
@@ -171,7 +180,14 @@ renderPlot <- function(expr, width = 'auto', height = 'auto', res = 72, ...,
   outputFunc <- plotOutput
   if (!identical(height, 'auto')) formals(outputFunc)['height'] <- list(NULL)
 
-  markRenderFunction(outputFunc, renderFunc, outputArgs, cacheHint = FALSE)
+  markedFunc <- markRenderFunction(
+    outputFunc,
+    renderFunc,
+    outputArgs,
+    cacheHint = list(userExpr = get_expr(expr), res = res)
+  )
+  class(markedFunc) <- c("shiny.renderPlot", class(markedFunc))
+  markedFunc
 }
 
 resizeSavedPlot <- function(name, session, result, width, height, alt, pixelratio, res, ...) {
@@ -594,6 +610,10 @@ find_panel_info_api <- function(b) {
   coord  <- ggplot2::summarise_coord(b)
   layers <- ggplot2::summarise_layers(b)
 
+  `%NA_OR%` <- function(x, y) {
+    if (is_na(x)) y else x
+  }
+
   # Given x and y scale objects and a coord object, return a list that has
   # the bases of log transformations for x and y, or NULL if it's not a
   # log transform.
@@ -610,8 +630,8 @@ find_panel_info_api <- function(b) {
 
     # First look for log base in scale, then coord; otherwise NULL.
     list(
-      x = get_log_base(xscale$trans) %OR% coord$xlog %OR% NULL,
-      y = get_log_base(yscale$trans) %OR% coord$ylog %OR% NULL
+      x = get_log_base(xscale$trans) %NA_OR% coord$xlog %NA_OR% NULL,
+      y = get_log_base(yscale$trans) %NA_OR% coord$ylog %NA_OR% NULL
     )
   }
 

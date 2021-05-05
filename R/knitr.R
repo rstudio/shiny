@@ -25,7 +25,7 @@ shiny_rmd_warning <- function() {
 
 #' @rdname knitr_methods
 knit_print.shiny.appobj <- function(x, ...) {
-  opts <- x$options %OR% list()
+  opts <- x$options %||% list()
   width <- if (is.null(opts$width)) "100%" else opts$width
   height <- if (is.null(opts$height)) "400" else opts$height
 

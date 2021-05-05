@@ -1,6 +1,7 @@
 #' Plot output with cached images
 #'
-#' Renders a reactive plot, with plot images cached to disk.
+#' Renders a reactive plot, with plot images cached to disk. As of Shiny 1.6.0,
+#' this is a shortcut for using [bindCache()] with [renderPlot()].
 #'
 #' `expr` is an expression that generates a plot, similar to that in
 #' `renderPlot`. Unlike with `renderPlot`, this expression does not
@@ -8,7 +9,7 @@
 #' changes.
 #'
 #' `cacheKeyExpr` is an expression which, when evaluated, returns an object
-#' which will be serialized and hashed using the [digest::digest()]
+#' which will be serialized and hashed using the [rlang::hash()]
 #' function to generate a string that will be used as a cache key. This key is
 #' used to identify the contents of the plot: if the cache key is the same as a
 #' previous time, it assumes that the plot is the same and can be retrieved from
@@ -32,7 +33,7 @@
 #' to normal R objects before returning them. Your expression could even
 #' serialize and hash that information in an efficient way and return a string,
 #' which will in turn be hashed (very quickly) by the
-#' [digest::digest()] function.
+#' [rlang::hash()] function.
 #'
 #' Internally, the result from `cacheKeyExpr` is combined with the name of
 #' the output (if you assign it to `output$plot1`, it will be combined
@@ -61,10 +62,10 @@
 #' @param width,height not used. They are specified via the argument
 #'   `sizePolicy`.
 #'
-#' @seealso See [renderPlot()] for the regular, non-cached version of
-#'   this function. For more about configuring caches, see
-#'   [cachem::cache_mem()] and [cachem::cache_disk()]. For caching other types
-#'   of objects, see `bindCache()`.
+#' @seealso See [renderPlot()] for the regular, non-cached version of this
+#'   function. It can be used with [bindCache()] to get the same effect as
+#'   `renderCachedPlot()`. For more about configuring caches, see
+#'   [cachem::cache_mem()] and [cachem::cache_disk()].
 #'
 #'
 #' @examples
@@ -212,253 +213,29 @@ renderCachedPlot <- function(expr,
   height = NULL
 ) {
 
-  # This ..stacktraceon is matched by a ..stacktraceoff.. when plotFunc
-  # is called
-  func <- quoToFunction(enquo(expr), "renderCachedPlot", ..stacktraceon = TRUE)
-  # This is so that the expr doesn't re-execute by itself; it needs to be
-  # triggered by the cache key (or width/height) changing.
-  isolatedFunc <- function() isolate(func())
+  expr <- substitute(expr)
+  if (!is_quosure(expr)) {
+    expr <- new_quosure(expr, env = parent.frame())
+  }
 
-  args <- list(...)
+  cacheKeyExpr <- substitute(cacheKeyExpr)
+  if (!is_quosure(cacheKeyExpr)) {
+    cacheKeyExpr <- new_quosure(cacheKeyExpr, env = parent.frame())
+  }
 
   if (!is.null(width) || !is.null(height)) {
     warning("Unused argument(s) 'width' and/or 'height'. ",
             "'sizePolicy' is used instead.")
   }
 
-  cacheKeyExpr <- enquo(cacheKeyExpr)
-  # The real cache key we'll use also includes width, height, res, pixelratio.
-  # This is just the part supplied by the user.
-  userCacheKey <- reactive(cacheKeyExpr, label = "userCacheKey")
-
-  # The width and height of the plot to draw, given from sizePolicy. These
-  # values get filled by an observer below.
-  fitDims <- reactiveValues(width = NULL, height = NULL)
-
-  # Make sure alt param to be reactive function
-  if (is.reactive(alt))
-    altWrapper <- alt
-  else if (is.function(alt))
-    altWrapper <- reactive({ alt() })
-  else
-    altWrapper <- function() { alt }
-
-  resizeObserver <- NULL
-  ensureResizeObserver <- function() {
-    if (!is.null(resizeObserver))
-      return()
-
-    # Given the actual width/height of the image in the browser, this gets the
-    # width/height from sizePolicy() and pushes those values into `fitDims`.
-    # It's done this way so that the `fitDims` only change (and cause
-    # invalidations) when the rendered image size changes, and not every time
-    # the browser's <img> tag changes size.
-    doResizeCheck <- function() {
-      width  <- session$clientData[[paste0('output_', outputName, '_width')]]
-      height <- session$clientData[[paste0('output_', outputName, '_height')]]
-
-      if (is.null(width)) width <- 0
-      if (is.null(height)) height <- 0
-
-      rect <- sizePolicy(c(width, height))
-      fitDims$width  <- rect[1]
-      fitDims$height <- rect[2]
-    }
-
-    # Run it once immediately, then set up the observer
-    isolate(doResizeCheck())
-
-    resizeObserver <<- observe(doResizeCheck())
-  }
-
-  # Vars to store session and output, so that they can be accessed from
-  # the plotObj() reactive.
-  session <- NULL
-  outputName <- NULL
-
-
-  drawReactive <- reactive(label = "plotObj", {
-    hybrid_chain(
-      # Depend on the user cache key, even though we don't use the value. When
-      # it changes, it can cause the drawReactive to re-execute. (Though
-      # drawReactive will not necessarily re-execute --- it must be called from
-      # renderFunc, which happens only if there's a cache miss.)
-      userCacheKey(),
-      function(userCacheKeyValue) {
-        # Get width/height, but don't depend on them.
-        isolate({
-          width  <- fitDims$width
-          height <- fitDims$height
-          # Make sure alt text to be reactive function
-          alt <- altWrapper()
-        })
-
-        pixelratio <- session$clientData$pixelratio %OR% 1
-
-        do.call("drawPlot", c(
-          list(
-            name = outputName,
-            session = session,
-            func = isolatedFunc,
-            width = width,
-            height = height,
-            alt = alt,
-            pixelratio = pixelratio,
-            res = res
-          ),
-          args
-        ))
-      },
-      catch = function(reason) {
-        # Non-isolating read. A common reason for errors in plotting is because
-        # the dimensions are too small. By taking a dependency on width/height,
-        # we can try again if the plot output element changes size.
-        fitDims$width
-        fitDims$height
-
-        # Propagate the error
-        stop(reason)
-      }
+  inject(
+    bindCache(
+      renderPlot(!!expr, res = res, alt = alt, outputArgs = outputArgs, ...),
+      !!cacheKeyExpr,
+      sizePolicy = sizePolicy,
+      cache = cache
     )
-  })
-
-
-  # This function is the one that's returned from renderPlot(), and gets
-  # wrapped in an observer when the output value is assigned.
-  renderFunc <- function(shinysession, name, ...) {
-    outputName <<- name
-    session <<- shinysession
-    cache <<- resolve_cache_object(cache, session)
-    ensureResizeObserver()
-
-    hybrid_chain(
-      # This use of the userCacheKey() sets up the reactive dependency that
-      # causes plot re-draw events. These may involve pulling from the cache,
-      # replaying a display list, or re-executing user code.
-      userCacheKey(),
-      function(userCacheKeyResult) {
-        width  <- fitDims$width
-        height <- fitDims$height
-        alt <- altWrapper()
-        pixelratio <- session$clientData$pixelratio %OR% 1
-
-        key <- digest::digest(
-          list(outputName, userCacheKeyResult, width, height, res, pixelratio),
-          "spookyhash"
-        )
-
-        plotObj <- cache$get(key)
-
-        # First look in cache.
-        # Case 1. cache hit.
-        if (!is.key_missing(plotObj)) {
-          return(list(
-            cacheHit = TRUE,
-            key = key,
-            plotObj = plotObj,
-            width = width,
-            height = height,
-            alt = alt,
-            pixelratio = pixelratio
-          ))
-        }
-
-        # If not in cache, hybrid_chain call to drawReactive
-        #
-        # Two more possible cases:
-        #   2. drawReactive will re-execute and return a plot that's the
-        #      correct size.
-        #   3. It will not re-execute, but it will return the previous value,
-        #      which is the wrong size. It will include a valid display list
-        #      which can be used by resizeSavedPlot.
-        hybrid_chain(
-          drawReactive(),
-          function(drawReactiveResult) {
-            # Pass along the key for caching in the next stage
-            list(
-              cacheHit = FALSE,
-              key = key,
-              plotObj = drawReactiveResult,
-              width = width,
-              height = height,
-              alt = alt,
-              pixelratio = pixelratio
-            )
-          }
-        )
-      },
-      function(possiblyAsyncResult) {
-        hybrid_chain(possiblyAsyncResult, function(result) {
-          width      <- result$width
-          height     <- result$height
-          alt        <- result$alt
-          pixelratio <- result$pixelratio
-
-          # Three possibilities when we get here:
-          # 1. There was a cache hit. No need to set a value in the cache.
-          # 2. There was a cache miss, and the plotObj is already the correct
-          #    size (because drawReactive re-executed). In this case, we need
-          #    to cache it.
-          # 3. There was a cache miss, and the plotObj was not the corect size.
-          #    In this case, we need to replay the display list, and then cache
-          #    the result.
-          if (!result$cacheHit) {
-            # If the image is already the correct size, this just returns the
-            # object unchanged.
-            result$plotObj <- do.call("resizeSavedPlot", c(
-              list(
-                name,
-                shinysession,
-                result$plotObj,
-                width,
-                height,
-                alt,
-                pixelratio,
-                res
-              ),
-              args
-            ))
-
-            # Save a cached copy of the plotObj. The recorded displaylist for
-            # the plot can't be serialized and restored properly within the same
-            # R session, so we NULL it out before saving. (The image data and
-            # other metadata be saved and restored just fine.) Displaylists can
-            # also be very large (~1.5MB for a basic ggplot), and they would not
-            # be commonly used. Note that displaylist serialization was fixed in
-            # revision 74506 (2e6c669), and should be in R 3.6. A cache_mem
-            # doesn't need to serialize objects, so it could actually save a
-            # display list, but for the reasons listed previously, it's
-            # generally not worth it.
-            # The plotResult is not the same as the recordedPlot (it is used to
-            # retrieve coordmap information for ggplot2 objects) but it is only
-            # used in conjunction with the recordedPlot, and we'll remove it
-            # because it can be quite large.
-            result$plotObj$plotResult <- NULL
-            result$plotObj$recordedPlot <- NULL
-            cache$set(result$key, result$plotObj)
-          }
-
-          img <- result$plotObj$img
-          # Replace exact pixel dimensions; instead, the max-height and
-          # max-width will be set to 100% from CSS.
-          img$class <- "shiny-scalable"
-          img$width  <- NULL
-          img$height <- NULL
-
-          img
-        })
-      }
-    )
-  }
-
-  # If renderPlot isn't going to adapt to the height of the div, then the
-  # div needs to adapt to the height of renderPlot. By default, plotOutput
-  # sets the height to 400px, so to make it adapt we need to override it
-  # with NULL.
-  outputFunc <- plotOutput
-  formals(outputFunc)['height'] <- list(NULL)
-
-  markRenderFunction(outputFunc, renderFunc, outputArgs, cacheHint = FALSE)
+  )
 }
 
 

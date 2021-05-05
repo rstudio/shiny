@@ -105,7 +105,7 @@ dateInput <- function(inputId, label, value = NULL, min = NULL, max = NULL,
 
   tags$div(id = inputId,
     class = "shiny-date-input form-group shiny-input-container",
-    style = if (!is.null(width)) paste0("width: ", validateCssUnit(width), ";"),
+    style = css(width = validateCssUnit(width)),
 
     shinyInputLabel(inputId, label),
     tags$input(type = "text",
@@ -141,7 +141,8 @@ datePickerDependency <- function(theme) {
       name = "bootstrap-datepicker-js",
       version = datePickerVersion,
       src = c(href = "shared/datepicker"),
-      script = "js/bootstrap-datepicker.min.js",
+      script = if (getOption("shiny.minified", TRUE)) "js/bootstrap-datepicker.min.js"
+               else                                   "js/bootstrap-datepicker.js",
       # Need to enable noConflict mode. See #1346.
       head = "<script>(function() {
         var datepicker = $.fn.datepicker.noConflict();
@@ -170,6 +171,6 @@ datePickerCSS <- function(theme) {
     theme = theme,
     name = "bootstrap-datepicker",
     version = datePickerVersion,
-    cache_key_extra = utils::packageVersion("shiny")
+    cache_key_extra = shinyPackageVersion()
   )
 }

@@ -54,7 +54,7 @@ actionButton <- function(inputId, label, icon = NULL, width = NULL, ...) {
   value <- restoreInput(id = inputId, default = NULL)
 
   tags$button(id=inputId,
-    style = if (!is.null(width)) paste0("width: ", validateCssUnit(width), ";"),
+    style = css(width = validateCssUnit(width)),
     type="button",
     class="btn btn-default action-button",
     `data-val` = value,

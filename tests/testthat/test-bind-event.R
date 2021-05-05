@@ -33,20 +33,16 @@ test_that("bindEvent and observers", {
 })
 
 
-test_that("bindEvent does not prevent observers from being GC'd", {
+test_that("bindEvent alters observers in place", {
   v <- reactiveVal(1)
-  o <- observe({ message(v()) })
-
-  finalized <- FALSE
-  reg.finalizer(o, function(e) { finalized <<- TRUE })
-
-  # o1 shouldn't keep a reference to o (and prevent it from getting GC'd).
+  o <- observe({ v() })
   o1 <- bindEvent(o, v())
-  rm(o)
 
-  flushReact()
-  gc()
-  expect_true(finalized)
+  # o and o1 are the same object
+  expect_identical(o, o1)
+
+  # Can't call bindEvent twice on an observer
+  expect_error(bindEvent(o, v()))
 })
 
 
@@ -65,6 +61,27 @@ test_that("ignoreNULL works", {
   # NULL.
   n <- 0
   observe({ n <<- n+1 }) %>% bindEvent(NULL, NULL, ignoreNULL = TRUE)
+  flushReact()
+  expect_identical(n, 1)
+})
+
+
+test_that("once=TRUE works", {
+  n <- 0
+  v <- reactiveVal(1)
+  observe({ n <<- n + 1 }) %>% bindEvent(v(), once = FALSE)
+  flushReact()
+  expect_identical(n, 1)
+  v(2)
+  flushReact()
+  expect_identical(n, 2)
+
+  n <- 0
+  v <- reactiveVal(1)
+  observe({ n <<- n + v() }) %>% bindEvent(v(), once = TRUE)
+  flushReact()
+  expect_identical(n, 1)
+  v(2)
   flushReact()
   expect_identical(n, 1)
 })

@@ -4121,9 +4121,9 @@ function main(): void {
               const dummy_id = "dummy-" + Math.floor(Math.random() * 999999999);
               const css_string =
                 "#" + dummy_id + " { " +
-                "color: #a7c920; " +       // An arbitrary color for the transition
+                "color: #a7c920 !important; " + // An arbitrary color for the transition
                 "transition: 0.1s all; " +
-                "visibility: hidden; " +
+                "visibility: hidden !important; " +
                 "position: absolute !important; " +
                 "top: -1000px !important; " +
                 "left: 0 !important; }";

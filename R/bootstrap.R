@@ -1061,6 +1061,7 @@ buildDropdown <- function(divTag, tabset) {
     function(x) {
       if (isTRUE(getCurrentThemeVersion() >= 4)) {
         tagQuery(x)$
+          find(".nav-item")$
           removeClass("nav-item")$
           find(".nav-link")$
           removeClass("nav-link")$

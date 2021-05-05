@@ -92,7 +92,7 @@
               <b class="caret"></b>
             </a>
             <ul class="dropdown-menu" data-tabsetid="1502">
-              <li class="nav-item">
+              <li>
                 <a href="#tab-1502-1" data-toggle="tab" data-value="C" class="dropdown-item">C</a>
               </li>
             </ul>
@@ -127,7 +127,7 @@
               <b class="caret"></b>
             </a>
             <ul class="dropdown-menu" data-tabsetid="1502">
-              <li class="nav-item">
+              <li>
                 <a href="#tab-1502-1" data-toggle="tab" data-value="C" class="dropdown-item">C</a>
               </li>
             </ul>
@@ -210,7 +210,7 @@
                 <b class="caret"></b>
               </a>
               <ul class="dropdown-menu" data-tabsetid="1502">
-                <li class="nav-item">
+                <li>
                   <a href="#tab-1502-1" data-toggle="tab" data-value="C" class="dropdown-item">C</a>
                 </li>
               </ul>
@@ -290,7 +290,7 @@
                 <b class="caret"></b>
               </a>
               <ul class="dropdown-menu" data-tabsetid="1502">
-                <li class="nav-item">
+                <li>
                   <a href="#tab-1502-1" data-toggle="tab" data-value="C" class="dropdown-item">C</a>
                 </li>
               </ul>

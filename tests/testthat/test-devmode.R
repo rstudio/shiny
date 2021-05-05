@@ -24,7 +24,7 @@ test_that("devmode can be turned on while _testing_ is disabled and check messag
     TESTTHAT = "false"
   ))
   # force inform to always generate signal
-  options(`rlang:::message_always` = TRUE)
+  options(rlib_message_verbosity = "verbose")
 
   expect_equal(getOption("shiny.devmode", "default"), "default")
   expect_equal(getOption("shiny.devmode.verbose", "default"), "default")

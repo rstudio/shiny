@@ -3911,6 +3911,9 @@ function main(): void {
   });
   outputBindings.register(htmlOutputBinding, "shiny.htmlOutput");
 
+  // -----------------------------------------------------------------------
+  // Functions handling HTML dependencies
+  // -----------------------------------------------------------------------
   const renderDependencies = (Shiny.renderDependencies = function (
     dependencies
   ) {
@@ -4037,8 +4040,12 @@ function main(): void {
             const newStyle = $("<style>").attr("id", id).html(xhr.responseText);
 
             $head.append(newStyle);
-            setTimeout(() => oldStyle.remove(), 500);
-            setTimeout(() => removeSheet(oldSheet), 500);
+
+            // We can remove the old styles immediately because the new styles
+            // should have been applied synchronously.
+            oldStyle.remove();
+            removeSheet(oldSheet);
+            sendImageSize2();
           };
           xhr.send();
         };
@@ -4058,6 +4065,8 @@ function main(): void {
           return null;
         };
 
+        // Removes the stylesheet from document.styleSheets, and also removes
+        // the owning <link> element, if present.
         let removeSheet = function (sheet) {
           if (!sheet) return;
           sheet.disabled = true;
@@ -4069,6 +4078,7 @@ function main(): void {
           // Find any document.styleSheets that match this link's href
           // so we can remove it after bringing in the new stylesheet
           const oldSheet = findSheet(link.attr("href"));
+
           // Add a timestamp to the href to prevent caching
           const href = link.attr("href") + "?restyle=" + new Date().getTime();
           // Use inline <style> approach for IE, otherwise use the more elegant
@@ -4078,23 +4088,69 @@ function main(): void {
             refreshStyle(href, oldSheet);
           } else {
             link.attr("href", href);
-            // Once the new <link> is loaded, schedule the old <link> to be removed
-            // on the next tick which is needed to avoid FOUC
+
+            // This part is a bit tricky. The link's onload callback will be
+            // invoked after the file is loaded, but it can be _before_ the
+            // styles are actually applied. The amount of time it takes for the
+            // style to be applied is not predictable. We need to make sure the
+            // styles are applied before we send updated size/style information
+            // to the server.
+            //
+            // We do this by adding _another_ link, with CSS content
+            // base64-encoded and inlined into the href. We also add a dummy DOM
+            // element that the CSS applies to. The dummy CSS includes a
+            // transition, and when the `transitionend` event happens, we call
+            // sendImageSize2() and remove the old sheet. We also remove the
+            // dummy DOM element and dummy CSS content.
+            //
+            // The reason this works is because (we assume) that if multiple
+            // <link> tags are added, they will be applied in the same order
+            // that they are loaded. This seems to be true in the browsers we
+            // have tested.
+            //
+            // Because it is common for multiple stylesheets to arrive close
+            // together, but not on exactly the same tick, we call
+            // sendImageSize2(), which is debounced. Otherwise, it can result in
+            // the same plot being redrawn multiple times with different
+            // styling.
             link.attr("onload", () => {
-              setTimeout(() => removeSheet(oldSheet), 500);
+              const dummy_id = "dummy-" + Math.floor(Math.random() * 999999999);
+              const css_string =
+                "#" +
+                dummy_id +
+                " { " +
+                "color: #a7c920 !important; " + // An arbitrary color for the transition
+                "transition: 0.1s all !important; " +
+                "visibility: hidden !important; " +
+                "position: absolute !important; " +
+                "top: -1000px !important; " +
+                "left: 0 !important; }";
+              const base64_css_string =
+                "data:text/css;base64," + btoa(css_string);
+
+              let $dummy_link = $("<link rel='stylesheet' type='text/css' />");
+
+              $dummy_link.attr("href", base64_css_string);
+
+              let $dummy_el = $("<div id='" + dummy_id + "'></div>");
+
+              $dummy_el.one("transitionend", () => {
+                $dummy_el.remove();
+                removeSheet(findSheet($dummy_link.attr("href")));
+                removeSheet(oldSheet);
+                sendImageSize2();
+              });
+              $(document.body).append($dummy_el);
+
+              // Need to add the CSS with a setTimeout 0, to ensure that it
+              // takes effect _after_ the DOM element has been added. This is
+              // necessary to ensure that the transition actually occurs.
+              setTimeout(() => $head.append($dummy_link), 0);
             });
+
             $head.append(link);
           }
         });
-
-        // Once the new styles are applied, CSS values that are accessible server-side
-        // (e.g., getCurrentOutputInfo(), output visibility, etc) may become outdated.
-        // At the time of writing, that means we need to do sendImageSize() &
-        // sendOutputHiddenState() again, which can be done by re-binding.
-        /* global Shiny */
-        const bindDebouncer = new Debouncer(null, Shiny.bindAll, 100);
-
-        setTimeout(() => bindDebouncer.normalCall(), 100);
       }
     }
 
@@ -6375,6 +6431,11 @@ function main(): void {
   });
   inputBindings.register(fileInputBinding, "shiny.fileInputBinding");
 
+  // This function gets defined in initShiny() and 'hoisted' so it can be reused
+  // (to send CSS info) inside of Shiny.renderDependencies()
+  let sendImageSize;
+  let sendImageSize2;
+
   // "init_shiny.js"
   function initShiny() {
     const shinyapp = (Shiny.shinyapp = new ShinyApp());
@@ -6857,15 +6918,18 @@ function main(): void {
     }
     const sendImageSizeDebouncer = new Debouncer(null, doSendImageSize, 0);
 
-    function sendImageSize() {
+    sendImageSize = function () {
       sendImageSizeDebouncer.normalCall();
-    }
+    };
     // Make sure sendImageSize actually gets called before the inputBatchSender
     // sends data to the server.
     inputBatchSender.lastChanceCallback.push(function () {
       if (sendImageSizeDebouncer.isPending())
         sendImageSizeDebouncer.immediateCall();
     });
+
+    // A version of sendImageSize which debounces for longer.
+    sendImageSize2 = debounce(200, sendImageSize);
 
     // Return true if the object or one of its ancestors in the DOM tree has
     // style='display:none'; otherwise return false.

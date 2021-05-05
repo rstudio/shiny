@@ -2996,9 +2996,7 @@
         function getTargetTabs($tabset, $tabContent, target) {
           var dataValue = "[data-value='" + $escape(target) + "']";
           var $aTag = $tabset.find("a" + dataValue);
-          var $liTag = $aTag.parent("li");
-          if ($liTag.length === 0)
-            $liTag = $aTag;
+          var $liTag = $aTag.parent();
           if ($liTag.length === 0) {
             throw "There is no tabPanel (or navbarMenu) with value (or menuName) equal to '" + target + "'";
           }
@@ -3008,9 +3006,7 @@
             var $dropdownTabset = $aTag.find("+ ul.dropdown-menu");
             var dropdownId = $dropdownTabset.attr("data-tabsetid");
             var $dropdownLiTags = $dropdownTabset.find("a[data-toggle='tab']");
-            if ($dropdownLiTags.parent("li").length > 0) {
-              $dropdownLiTags = $dropdownLiTags.parent("li");
-            }
+            parent("li");
             $dropdownLiTags.each(function(i, el) {
               $liTags.push(import_jquery6.default(el));
             });
@@ -3041,9 +3037,6 @@
           if (message.target !== null) {
             target = getTargetTabs($tabset, $tabContent, message.target);
             $targetLiTag = target.$liTag;
-            if ($targetLiTag.hasClass("dropdown-item")) {
-              $liTag = $aTag.removeClass("nav-link").addClass("dropdown-item");
-            }
           }
           var dropdown = getDropdown();
           if (dropdown !== null) {
@@ -3055,10 +3048,7 @@
           if ($aTag.attr("data-toggle") === "tab") {
             var index = getTabIndex($tabset, tabsetId);
             var tabId = "tab-" + tabsetId + "-" + index;
-            var anchor = $liTag.find("> a");
-            if (anchor.length === 0)
-              anchor = $liTag;
-            anchor.attr("href", "#" + tabId);
+            $liTag.find("> a").attr("href", "#" + tabId);
             $divTag.attr("id", tabId);
           }
           if (message.position === "before") {

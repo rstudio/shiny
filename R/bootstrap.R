@@ -167,7 +167,7 @@ getCurrentTheme <- function() {
   getShinyOption("bootstrapTheme", default = NULL)
 }
 
-getCurrentVersion <- function() {
+getCurrentThemeVersion <- function() {
   theme <- getCurrentTheme()
   if (bslib::is_bs_theme(theme)) {
     bslib::theme_version(theme)
@@ -1026,117 +1026,84 @@ buildNavItem <- function(divTag, tabsetId, index) {
   divTag$attribs$title <- NULL
   list(
     divTag = divTag,
-    liTag = tagFunction(function() {
-      navItem <- if ("3" %in% getCurrentVersion()) bs3NavItem else bs4NavItem
-      navItem(id, title, value, icon, active)
-    })
+    liTag = tagAddRenderHook(
+      liTag(id, title, value, icon),
+      function(x) {
+        if (isTRUE(getCurrentThemeVersion() >= 4)) {
+          tagQuery(x)$
+            addClass("nav-item")$
+            find("a")$
+            addClass(c("nav-link", if (active) "active"))$
+            allTags()
+        } else {
+          tagAppendAttributes(x, class = if (active) "active")
+        }
+      }
+    )
+  )
+}
+
+liTag <- function(id, title, value, icon) {
+  tags$li(
+    tags$a(
+      href = paste0("#", id),
+      `data-toggle` = "tab",
+      `data-value` = value,
+       icon, title
+    )
   )
 }
 
 buildDropdown <- function(divTag, tabset) {
-  title <- divTag$title
-  value <- divTag$menuName
-  icon <- getIcon(iconClass = divTag$iconClass)
-  active <- containsSelectedTab(divTag$tabs)
-  list(
-    # list of tab content divs from the child tabset
-    divTag = tabset$content$children,
-    liTag = tagFunction(function() {
-      if ("3" %in% getCurrentVersion()) {
-        bs3NavItemDropdown(title, value, icon, active, tabset$navList)
+
+  navList <- tagAddRenderHook(
+    tabset$navList,
+    function(x) {
+      if (isTRUE(getCurrentThemeVersion() >= 4)) {
+        tagQuery(x)$
+          find(".nav-item")$
+          removeClass("nav-item")$
+          find(".nav-link")$
+          removeClass("nav-link")$
+          addClass("dropdown-item")$
+          allTags()
       } else {
-        # In BS4, dropdown nav anchors can't be wrapped in a <li> tag
-        # and also need .nav-link replaced with .dropdown-item to be
-        # styled sensibly
-        items <- tabset$navList
-        items$children <- lapply(items$children, function(x) {
-          # x should be a tagFunction() due to the else block below
-          x <- if (inherits(x, "shiny.tag.function")) x() else x
-          # Replace <li class="nav-item"><a class="nav-link"></a></li>
-          #    with <a class="dropdown-item"></a>
-          if (tagHasClass(x, "nav-item")) {
-            x <- x$children[[1]]
-            x$attribs$class <- "dropdown-item"
-          }
-          x
-        })
-        bs4NavItemDropdown(title, value, icon, active, items)
+        x
       }
-    })
+    }
   )
-}
 
+  active <- containsSelectedTab(divTag$tabs)
 
-bs3NavItemDropdown <- function(title, value, icon, active, items) {
-  tags$li(
+  dropdown <- tags$li(
     class = "dropdown",
-    class = if (active) "active", # BS3
     tags$a(
       href = "#",
       class = "dropdown-toggle",
       `data-toggle` = "dropdown",
-      `data-value` = value,
-      icon,
-      title, tags$b(class = "caret")
+      `data-value` = divTag$menuName,
+      getIcon(iconClass = divTag$iconClass),
+      divTag$title,
+      tags$b(class = "caret")
     ),
-    items
+    navList,
+    .renderHook = function(x) {
+      if (isTRUE(getCurrentThemeVersion() >= 4)) {
+        tagQuery(x)$
+          addClass("nav-item")$
+          find(".dropdown-toggle")$
+          addClass("nav-link")$
+          allTags()
+      } else {
+        x
+      }
+    }
   )
-}
 
-bs3NavItem <- function(id, title, value, icon, active) {
-  tags$li(
-    class = if (active) "active",
-    tags$a(
-      href = paste0("#", id),
-      `data-toggle` = "tab",
-      `data-value` = value,
-      icon,
-      title
-    )
+  list(
+    divTag = tabset$content$children,
+    liTag = dropdown
   )
-}
-
-bs4NavItemDropdown <- function(title, value, icon, active, items) {
-  tags$li(
-    class = "dropdown",
-    class = "nav-item",
-    tags$a(
-      href = "#",
-      class = "dropdown-toggle",
-      class = "nav-link",
-      class = if (active) "active",
-      `data-toggle` = "dropdown",
-      `data-value` = value,
-      icon,
-      title,
-      tags$b(class = "caret") # TODO: can be removed?
-    ),
-    items
-  )
-}
-
-bs4NavItem <- function(id, title, value, icon, active) {
-  tags$li(
-    class = "nav-item",
-    tags$a(
-      class = "nav-link",
-      class = if (active) "active",
-      href = paste0("#", id),
-      `data-toggle` = "tab",
-      `data-value` = value,
-      icon,
-      title
-    )
-  )
-}
-
-# TODO: something like this should exist in htmltools
-tagHasClass <- function(x, class) {
-  if (!inherits(x, "shiny.tag")) return(FALSE)
-  classes <- unlist(x$attribs[names(x$attribs) %in% "class"], use.names = FALSE)
-  if (!length(classes)) return(FALSE)
-  classes <- unlist(strsplit(classes, split = "\\s+"), use.names = FALSE)
-  isTRUE(class %in% classes)
 }
 
 #' Create a text output element

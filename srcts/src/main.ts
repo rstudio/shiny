@@ -1242,10 +1242,8 @@ function main(): void {
     function getTargetTabs($tabset, $tabContent, target) {
       const dataValue = "[data-value='" + $escape(target) + "']";
       const $aTag = $tabset.find("a" + dataValue);
-      let $liTag = $aTag.parent("li");
-      // BS3 dropdown anchors are wrapped in <li>, but they can't be in BS4
+      let $liTag = $aTag.parent();
 
-      if ($liTag.length === 0) $liTag = $aTag;
       if ($liTag.length === 0) {
         throw (
           "There is no tabPanel (or navbarMenu) with value" +
@@ -1262,12 +1260,10 @@ function main(): void {
         const $dropdownTabset = $aTag.find("+ ul.dropdown-menu");
         const dropdownId = $dropdownTabset.attr("data-tabsetid");
 
-        let $dropdownLiTags = $dropdownTabset.find("a[data-toggle='tab']");
-        // BS3 dropdown anchors are wrapped in <li>, but they can't be in BS4
+        const $dropdownLiTags = $dropdownTabset.find("a[data-toggle='tab']");
 
-        if ($dropdownLiTags.parent("li").length > 0) {
-          $dropdownLiTags = $dropdownLiTags.parent("li");
-        }
+        parent("li");
+
         $dropdownLiTags.each(function (i, el) {
           $liTags.push($(el));
         });
@@ -1291,7 +1287,7 @@ function main(): void {
       let tabsetId = $parentTabset.attr("data-tabsetid");
 
       const $divTag = $(message.divTag.html);
-      let $liTag = $(message.liTag.html);
+      const $liTag = $(message.liTag.html);
       const $aTag = $liTag.find("> a");
 
       // Unless the item is being prepended/appended, the target tab
@@ -1302,12 +1298,6 @@ function main(): void {
       if (message.target !== null) {
         target = getTargetTabs($tabset, $tabContent, message.target);
         $targetLiTag = target.$liTag;
-        // If the target is a (BS4) .dropdown-item, then we can't insert
-        // <li class='nav-item'><a class='nav-link'>...</a></li>,
-        // instead, we need <a class='dropdown-item'>...</a>
-        if ($targetLiTag.hasClass("dropdown-item")) {
-          $liTag = $aTag.removeClass("nav-link").addClass("dropdown-item");
-        }
       }
 
       // If the item is to be placed inside a navbarMenu (dropdown),
@@ -1332,11 +1322,7 @@ function main(): void {
         const index = getTabIndex($tabset, tabsetId);
         const tabId = "tab-" + tabsetId + "-" + index;
 
-        let anchor = $liTag.find("> a");
-        // BS3 dropdown anchors are wrapped in <li>, but they can't be in BS4
-
-        if (anchor.length === 0) anchor = $liTag;
-        anchor.attr("href", "#" + tabId);
+        $liTag.find("> a").attr("href", "#" + tabId);
         $divTag.attr("id", tabId);
       }
 

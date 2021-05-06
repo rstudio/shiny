@@ -26,6 +26,8 @@ shiny 1.6.0.9000
 
 * Switched from internal `Stack` class to `fastmap::faststack()`, and used `fastmap::fastqueue()`. (#3176)
 
+* Some long-deprecated functions and function parameters were removed. (#3137)
+
 ### Bug fixes
 
 * Closed #3374: `quoToFunction()` now works correctly with nested quosures; and as a result, quasi-quotation with rendering function (e.g., `renderPrint()`, `renderPlot()`, etc) now works as expected with nested quosures. (#3373) 

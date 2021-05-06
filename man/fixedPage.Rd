@@ -5,13 +5,7 @@
 \alias{fixedRow}
 \title{Create a page with a fixed layout}
 \usage{
-fixedPage(
-  ...,
-  title = NULL,
-  responsive = deprecated(),
-  theme = NULL,
-  lang = NULL
-)
+fixedPage(..., title = NULL, theme = NULL, lang = NULL)
 
 fixedRow(...)
 }
@@ -19,9 +13,6 @@ fixedRow(...)
 \item{...}{Elements to include within the container}
 
 \item{title}{The browser window title (defaults to the host URL of the page)}
-
-\item{responsive}{This option is deprecated; it is no longer optional with
-Bootstrap 3.}
 
 \item{theme}{One of the following:
 \itemize{

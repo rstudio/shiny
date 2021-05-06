@@ -15,9 +15,7 @@ navbarPage(
   footer = NULL,
   inverse = FALSE,
   collapsible = FALSE,
-  collapsable = deprecated(),
   fluid = TRUE,
-  responsive = deprecated(),
   theme = NULL,
   windowTitle = title,
   lang = NULL
@@ -63,13 +61,8 @@ navigation bar}
 elements into a menu when the width of the browser is less than 940 pixels
 (useful for viewing on smaller touchscreen device)}
 
-\item{collapsable}{Deprecated; use \code{collapsible} instead.}
-
 \item{fluid}{\code{TRUE} to use a fluid layout. \code{FALSE} to use a fixed
 layout.}
-
-\item{responsive}{This option is deprecated; it is no longer optional with
-Bootstrap 3.}
 
 \item{theme}{One of the following:
 \itemize{

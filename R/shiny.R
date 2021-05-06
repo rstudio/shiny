@@ -2127,18 +2127,6 @@ ShinySession <- R6Class(
         })
       }
     }
-  ),
-  active = list(
-    session = function() {
-      shinyDeprecated(
-        "0.11.1", "shinysession$session",
-        details = paste0(
-          "Attempted to access deprecated shinysession$session object. ",
-          "Please just access the shinysession object directly."
-        )
-      )
-      self
-    }
   )
 )
 

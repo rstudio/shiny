@@ -10,8 +10,7 @@ tabsetPanel(
   selected = NULL,
   type = c("tabs", "pills", "hidden"),
   header = NULL,
-  footer = NULL,
-  position = deprecated()
+  footer = NULL
 )
 }
 \arguments{
@@ -39,9 +38,6 @@ tabPanels.}
 
 \item{footer}{Tag or list of tags to display as a common footer below all
 tabPanels}
-
-\item{position}{This argument is deprecated; it has been discontinued in
-Bootstrap 3.}
 }
 \value{
 A tabset that can be passed to \code{\link[=mainPanel]{mainPanel()}}

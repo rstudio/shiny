@@ -115,7 +115,7 @@ Suggests:
 Remotes:
     r-lib/rlang,
     rstudio/bslib,
-    rstudio/htmltools
+    rstudio/htmltools#212
 URL: https://shiny.rstudio.com/
 BugReports: https://github.com/rstudio/shiny/issues
 Collate:

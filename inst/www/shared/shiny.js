@@ -4728,12 +4728,9 @@
                 var oldStyle = $head.find("style#" + id);
                 var newStyle = import_jquery6.default("<style>").attr("id", id).html(xhr.responseText);
                 $head.append(newStyle);
-                setTimeout(function() {
-                  return oldStyle.remove();
-                }, 500);
-                setTimeout(function() {
-                  return removeSheet(oldSheet);
-                }, 500);
+                oldStyle.remove();
+                removeSheet(oldSheet);
+                sendImageSize2();
               };
               xhr.send();
             };
@@ -4762,17 +4759,26 @@
               } else {
                 link.attr("href", href2);
                 link.attr("onload", function() {
+                  var dummy_id = "dummy-" + Math.floor(Math.random() * 999999999);
+                  var css_string = "#" + dummy_id + " { color: #a7c920 !important; transition: 0.1s all !important; visibility: hidden !important; position: absolute !important; top: -1000px !important; left: 0 !important; }";
+                  var base64_css_string = "data:text/css;base64," + btoa(css_string);
+                  var $dummy_link = import_jquery6.default("<link rel='stylesheet' type='text/css' />");
+                  $dummy_link.attr("href", base64_css_string);
+                  var $dummy_el = import_jquery6.default("<div id='" + dummy_id + "'></div>");
+                  $dummy_el.one("transitionend", function() {
+                    $dummy_el.remove();
+                    removeSheet(findSheet($dummy_link.attr("href")));
+                    removeSheet(oldSheet);
+                    sendImageSize2();
+                  });
+                  import_jquery6.default(document.body).append($dummy_el);
                   setTimeout(function() {
-                    return removeSheet(oldSheet);
-                  }, 500);
+                    return $head.append($dummy_link);
+                  }, 0);
                 });
                 $head.append(link);
               }
             });
-            var bindDebouncer = new Debouncer(null, Shiny.bindAll, 100);
-            setTimeout(function() {
-              return bindDebouncer.normalCall();
-            }, 100);
           }
         }
         if (dep.script && !restyle) {
@@ -6430,6 +6436,8 @@
         }
       });
       inputBindings.register(fileInputBinding, "shiny.fileInputBinding");
+      var sendImageSize;
+      var sendImageSize2;
       function initShiny() {
         var shinyapp = Shiny.shinyapp = new ShinyApp();
         function bindOutputs() {
@@ -6754,13 +6762,14 @@
           });
         }
         var sendImageSizeDebouncer = new Debouncer(null, doSendImageSize, 0);
-        function sendImageSize() {
+        sendImageSize = function sendImageSize() {
           sendImageSizeDebouncer.normalCall();
-        }
+        };
         inputBatchSender.lastChanceCallback.push(function() {
           if (sendImageSizeDebouncer.isPending())
             sendImageSizeDebouncer.immediateCall();
         });
+        sendImageSize2 = debounce(200, sendImageSize);
         function isHidden(obj) {
           if (obj === null || obj.offsetWidth !== 0 || obj.offsetHeight !== 0) {
             return false;

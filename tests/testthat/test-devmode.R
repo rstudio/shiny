@@ -11,20 +11,22 @@ test_that("devmode can not be turned on while testing", {
 
 test_that("devmode can be turned on while _testing_ is disabled and check messages", {
 
+  skip_if_not_installed("rlang", "0.4.11.9000")
+
   # disable all existing options
   withr::local_options(list(
     shiny.devmode = NULL,
     shiny.devmode.verbose = NULL,
     shiny.autoreload = NULL,
     shiny.minified = NULL,
-    shiny.fullstacktrace = NULL
+    shiny.fullstacktrace = NULL,
+    # force inform to always generate signal
+    rlib_message_verbosity = "verbose"
   ))
   # "turn off" testing to allow for devmode to activate
   withr::local_envvar(list(
     TESTTHAT = "false"
   ))
-  # force inform to always generate signal
-  options(rlib_message_verbosity = "verbose")
 
   expect_equal(getOption("shiny.devmode", "default"), "default")
   expect_equal(getOption("shiny.devmode.verbose", "default"), "default")

@@ -14,8 +14,6 @@ NULL
 #'
 #' @param ... The contents of the document body.
 #' @param title The browser window title (defaults to the host URL of the page)
-#' @param responsive This option is deprecated; it is no longer optional with
-#'   Bootstrap 3.
 #' @param theme One of the following:
 #'   * `NULL` (the default), which implies a "stock" build of Bootstrap 3.
 #'   * A [bslib::bs_theme()] object. This can be used to replace a stock
@@ -33,14 +31,7 @@ NULL
 #'
 #' @seealso [fluidPage()], [fixedPage()]
 #' @export
-bootstrapPage <- function(..., title = NULL, responsive = deprecated(), theme = NULL, lang = NULL) {
-
-  if (lifecycle::is_present(responsive)) {
-    shinyDeprecated(
-      "0.10.2.2", "bootstrapPage(responsive=)",
-      details = "The 'responsive' argument is no longer used with the latest version of Bootstrap."
-    )
-  }
+bootstrapPage <- function(..., title = NULL, theme = NULL, lang = NULL) {
 
   args <- list(
     jqueryDependency(),
@@ -387,11 +378,8 @@ collapseSizes <- function(padding) {
 #' @param collapsible `TRUE` to automatically collapse the navigation
 #'   elements into a menu when the width of the browser is less than 940 pixels
 #'   (useful for viewing on smaller touchscreen device)
-#' @param collapsable Deprecated; use `collapsible` instead.
 #' @param fluid `TRUE` to use a fluid layout. `FALSE` to use a fixed
 #'   layout.
-#' @param responsive This option is deprecated; it is no longer optional with
-#'   Bootstrap 3.
 #' @param windowTitle The title that should be displayed by the browser window.
 #'   Useful if `title` is not a string.
 #' @inheritParams bootstrapPage
@@ -435,17 +423,10 @@ navbarPage <- function(title,
                        footer = NULL,
                        inverse = FALSE,
                        collapsible = FALSE,
-                       collapsable = deprecated(),
                        fluid = TRUE,
-                       responsive = deprecated(),
                        theme = NULL,
                        windowTitle = title,
                        lang = NULL) {
-
-  if (lifecycle::is_present(collapsable)) {
-    shinyDeprecated("0.10.2.2", "navbarPage(collapsable =)", "navbarPage(collapsible =)")
-    collapsible <- collapsable
-  }
 
   # alias title so we can avoid conflicts w/ title in withTags
   pageTitle <- title
@@ -503,7 +484,6 @@ navbarPage <- function(title,
   # build the page
   bootstrapPage(
     title = windowTitle,
-    responsive = responsive,
     theme = theme,
     lang = lang,
     tags$nav(class=navbarClass, role="navigation", containerDiv),
@@ -711,8 +691,6 @@ tabPanelBody <- function(value, ..., icon = NULL) {
 #'   conjunction with [tabPanelBody()] and [updateTabsetPanel()] to control the
 #'   active tab via other input controls. (See example below)}
 #' }
-#' @param position This argument is deprecated; it has been discontinued in
-#'   Bootstrap 3.
 #' @inheritParams navbarPage
 #' @return A tabset that can be passed to [mainPanel()]
 #'
@@ -764,14 +742,7 @@ tabsetPanel <- function(...,
                         selected = NULL,
                         type = c("tabs", "pills", "hidden"),
                         header = NULL,
-                        footer = NULL,
-                        position = deprecated()) {
-  if (lifecycle::is_present(position)) {
-    shinyDeprecated(
-      "0.10.2.2", "bootstrapPage(position =)",
-      details = "The 'position' argument is no longer used with the latest version of Bootstrap."
-    )
-  }
+                        footer = NULL) {
 
   if (!is.null(id))
     selected <- restoreInput(id = id, default = selected)

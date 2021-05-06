@@ -380,8 +380,6 @@ collapseSizes <- function(padding) {
 #'   (useful for viewing on smaller touchscreen device)
 #' @param fluid `TRUE` to use a fluid layout. `FALSE` to use a fixed
 #'   layout.
-#' @param responsive This option is deprecated; it is no longer optional with
-#'   Bootstrap 3.
 #' @param windowTitle The title that should be displayed by the browser window.
 #'   Useful if `title` is not a string.
 #' @inheritParams bootstrapPage
@@ -426,7 +424,6 @@ navbarPage <- function(title,
                        inverse = FALSE,
                        collapsible = FALSE,
                        fluid = TRUE,
-                       responsive = deprecated(),
                        theme = NULL,
                        windowTitle = title,
                        lang = NULL) {
@@ -487,7 +484,6 @@ navbarPage <- function(title,
   # build the page
   bootstrapPage(
     title = windowTitle,
-    responsive = responsive,
     theme = theme,
     lang = lang,
     tags$nav(class=navbarClass, role="navigation", containerDiv),

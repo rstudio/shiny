@@ -16,7 +16,6 @@ navbarPage(
   inverse = FALSE,
   collapsible = FALSE,
   fluid = TRUE,
-  responsive = deprecated(),
   theme = NULL,
   windowTitle = title,
   lang = NULL
@@ -64,9 +63,6 @@ elements into a menu when the width of the browser is less than 940 pixels
 
 \item{fluid}{\code{TRUE} to use a fluid layout. \code{FALSE} to use a fixed
 layout.}
-
-\item{responsive}{This option is deprecated; it is no longer optional with
-Bootstrap 3.}
 
 \item{theme}{One of the following:
 \itemize{

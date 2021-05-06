@@ -7,11 +7,10 @@
 icon(name, class = NULL, lib = "font-awesome", ...)
 }
 \arguments{
-\item{name}{The name of the icon. Icons are drawn from the \href{https://fontawesome.com/}{Font Awesome Free} (currently icons from the v5.13.0 set are
-supported with the v4 naming convention) and
+\item{name}{The name of the icon. Icons are drawn from the \href{https://fontawesome.com/}{Font Awesome Free} and
 \href{https://getbootstrap.com/docs/3.3/components/#glyphicons}{Glyphicons}
 libraries. Note that the \code{"fa-"} and \code{"glyphicon-"} prefixes should not be
-used in icon names (i.e. the \code{"fa-calendar"} icon should be referred to as
+used in icon names (i.e., the \code{"fa-calendar"} icon should be referred to as
 \code{"calendar"}).}
 
 \item{class}{Additional classes to customize the style of an icon (see the
@@ -19,8 +18,8 @@ used in icon names (i.e. the \code{"fa-calendar"} icon should be referred to as
 supported styles).}
 
 \item{lib}{The icon library to use. If drawing from the Font Awesome library
-of icons, this should be \code{"font-awesome"}. The other option is or
-\code{"glyphicon"} to use icons from the Glyphicons library.}
+of icons, this should be \code{"font-awesome"}. The other option, \code{"glyphicon"},
+uses icons from the Glyphicons library.}
 
 \item{...}{Arguments passed to the \verb{<i>} tag of \link[htmltools:builder]{htmltools::tags}.}
 }

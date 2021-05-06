@@ -1597,18 +1597,17 @@ downloadLink <- function(outputId, label="Download", class=NULL, ...) {
 #' of a button, or as an icon for a [tabPanel()] within a [navbarPage()].
 #'
 #' @param name The name of the icon. Icons are drawn from the [Font Awesome
-#'   Free](https://fontawesome.com/) (currently icons from the v5.13.0 set are
-#'   supported with the v4 naming convention) and
+#'   Free](https://fontawesome.com/) and
 #'   [Glyphicons](https://getbootstrap.com/docs/3.3/components/#glyphicons)
 #'   libraries. Note that the `"fa-"` and `"glyphicon-"` prefixes should not be
-#'   used in icon names (i.e. the `"fa-calendar"` icon should be referred to as
+#'   used in icon names (i.e., the `"fa-calendar"` icon should be referred to as
 #'   `"calendar"`).
 #' @param class Additional classes to customize the style of an icon (see the
 #'   [usage examples](https://fontawesome.com/how-to-use) for details on
 #'   supported styles).
 #' @param lib The icon library to use. If drawing from the Font Awesome library
-#'   of icons, this should be `"font-awesome"`. The other option is or
-#'   `"glyphicon"` to use icons from the Glyphicons library.
+#'   of icons, this should be `"font-awesome"`. The other option, `"glyphicon"`,
+#'   uses icons from the Glyphicons library.
 #' @param ... Arguments passed to the `<i>` tag of [htmltools::tags].
 #'
 #' @return An icon element.

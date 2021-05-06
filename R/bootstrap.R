@@ -1602,6 +1602,18 @@ icon <- function(name,
                  lib = "font-awesome",
                  ...) {
 
+  # Required <i> tag for tabset panel logic that calls `as.character(icon(NULL))`
+  if (is.null(name)) {
+
+    return(
+      htmltools::tags$i(
+        class = "",
+        role = "presentation",
+        `aria-label` = " icon"
+      )
+    )
+  }
+
   prefixes <- list(
     "font-awesome" = "fa",
     "glyphicon" = "glyphicon"
@@ -1634,7 +1646,13 @@ icon <- function(name,
     iconClass <- paste(iconClass, class)
   }
 
-  iconTag <- tags$i(class = iconClass, role = "presentation", `aria-label` = paste(name, "icon"), ...)
+  iconTag <-
+    htmltools::tags$i(
+      class = iconClass,
+      role = "presentation",
+      `aria-label` = paste(name, "icon"),
+      ...
+    )
 
   htmltools::browsable(iconTag)
 }

@@ -29,7 +29,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v1
-        if: github.event_name == 'push'
 
       - uses: r-lib/actions/pr-fetch@master
         name: Git Pull (PR)

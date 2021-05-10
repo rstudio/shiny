@@ -3005,8 +3005,7 @@
           if ($aTag.attr("data-toggle") === "dropdown") {
             var $dropdownTabset = $aTag.find("+ ul.dropdown-menu");
             var dropdownId = $dropdownTabset.attr("data-tabsetid");
-            var $dropdownLiTags = $dropdownTabset.find("a[data-toggle='tab']");
-            parent("li");
+            var $dropdownLiTags = $dropdownTabset.find("a[data-toggle='tab']").parent("li");
             $dropdownLiTags.each(function(i, el) {
               $liTags.push(import_jquery6.default(el));
             });

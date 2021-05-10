@@ -1260,9 +1260,9 @@ function main(): void {
         const $dropdownTabset = $aTag.find("+ ul.dropdown-menu");
         const dropdownId = $dropdownTabset.attr("data-tabsetid");
 
-        const $dropdownLiTags = $dropdownTabset.find("a[data-toggle='tab']");
-
-        parent("li");
+        const $dropdownLiTags = $dropdownTabset
+          .find("a[data-toggle='tab']")
+          .parent("li");
 
         $dropdownLiTags.each(function (i, el) {
           $liTags.push($(el));

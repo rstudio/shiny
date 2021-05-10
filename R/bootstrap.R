@@ -641,13 +641,10 @@ helpText <- function(...) {
 #' @export
 #' @describeIn tabPanel Create a tab panel that can be included within a [tabsetPanel()] or a [navbarPage()].
 tabPanel <- function(title, ..., value = title, icon = NULL) {
-  div(
-    class = "tab-pane",
-    title = title,
-    `data-value` = value,
-    `data-icon` = prepTabIcon(icon),
-    ...
-  )
+  pane <- div(class = "tab-pane", `data-value` = value, ...)
+  pane[["_shiny_title"]] <- title
+  pane[["_shiny_icon"]] <- prepTabIcon(icon)
+  pane
 }
 
 isTabPanel <- function(x) {
@@ -991,18 +988,18 @@ buildTabItem <- function(index, tabsetId, foundSelected, tabs = NULL,
 
 buildNavItem <- function(divTag, tabsetId, index) {
   id <- paste("tab", tabsetId, index, sep = "-")
-  title <- tagGetAttribute(divTag, "title")
-  value <- tagGetAttribute(divTag, "data-value")
-  icon <- tagGetAttribute(divTag, "data-icon")
   active <- isTabSelected(divTag)
   divTag <- tagAppendAttributes(divTag, class = if (active) "active")
   divTag$attribs$id <- id
-  divTag$attribs$title <- NULL
-  divTag$attribs[["data-icon"]] <- NULL
+  liTag <- liTag(
+    id, divTag[["_shiny_title"]],
+    tagGetAttribute(divTag, "data-value"),
+    divTag[["_shiny_icon"]]
+  )
   list(
     divTag = divTag,
     liTag = tagAddRenderHook(
-      liTag(id, title, value, icon),
+      liTag,
       function(x) {
         if (isTRUE(getCurrentThemeVersion() >= 4)) {
           tagQuery(x)$

@@ -79,7 +79,7 @@ Imports:
     jsonlite (>= 0.9.16),
     xtable,
     fontawesome (>= 0.2.1),
-    htmltools (>= 0.5.1.9004),
+    htmltools (>= 0.5.1.9003),
     R6 (>= 2.0),
     sourcetools,
     later (>= 1.0.0),
@@ -115,7 +115,7 @@ Suggests:
 Remotes:
     r-lib/rlang,
     rstudio/bslib,
-    rstudio/htmltools#212
+    rstudio/htmltools
 URL: https://shiny.rstudio.com/
 BugReports: https://github.com/rstudio/shiny/issues
 Collate:

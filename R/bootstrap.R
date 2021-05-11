@@ -498,10 +498,14 @@ navbarPage <- function(title,
 #' @rdname navbarPage
 #' @export
 navbarMenu <- function(title, ..., menuName = title, icon = NULL) {
+  icon <- prepTabIcon(icon)
   structure(list(title = title,
                  menuName = menuName,
                  tabs = list2(...),
-                 icon = prepTabIcon(icon)),
+                 # Here for legacy reasons
+                 # https://github.com/cran/miniUI/blob/74c87d3/R/layout.R#L369
+                 iconClass = tagGetAttribute(icon, "class"),
+                 icon = icon),
             class = "shiny.navbarmenu")
 }
 
@@ -641,8 +645,16 @@ helpText <- function(...) {
 #' @export
 #' @describeIn tabPanel Create a tab panel that can be included within a [tabsetPanel()] or a [navbarPage()].
 tabPanel <- function(title, ..., value = title, icon = NULL) {
-  pane <- div(class = "tab-pane", `data-value` = value, ...)
-  pane[["_shiny_title"]] <- title
+  icon <- prepTabIcon(icon)
+  pane <- div(
+    class = "tab-pane",
+    title = title,
+    `data-value` = value,
+    # Here for legacy reasons
+    # https://github.com/cran/miniUI/blob/74c87d/R/layout.R#L395
+    `data-icon-class` = tagGetAttribute(icon, "class"),
+    ...
+  )
   pane[["_shiny_icon"]] <- prepTabIcon(icon)
   pane
 }
@@ -988,18 +1000,19 @@ buildTabItem <- function(index, tabsetId, foundSelected, tabs = NULL,
 
 buildNavItem <- function(divTag, tabsetId, index) {
   id <- paste("tab", tabsetId, index, sep = "-")
+  # Get title attribute directory (not via tagGetAttribute()) so that contents
+  # don't get passed to as.character().
+  # https://github.com/rstudio/shiny/issues/3352
+  title <- divTag$attribs[["title"]]
+  value <- divTag$attribs[["data-value"]]
   active <- isTabSelected(divTag)
   divTag <- tagAppendAttributes(divTag, class = if (active) "active")
   divTag$attribs$id <- id
-  liTag <- liTag(
-    id, divTag[["_shiny_title"]],
-    tagGetAttribute(divTag, "data-value"),
-    divTag[["_shiny_icon"]]
-  )
+  divTag$attribs$title <- NULL
   list(
     divTag = divTag,
     liTag = tagAddRenderHook(
-      liTag,
+      liTag(id, title, value, divTag[["_shiny_icon"]]),
       function(x) {
         if (isTRUE(getCurrentThemeVersion() >= 4)) {
           tagQuery(x)$

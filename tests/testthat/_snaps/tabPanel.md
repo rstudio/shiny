@@ -10,7 +10,7 @@
           </li>
           <li>
             <a href="#tab-4785-2" data-toggle="tab" data-value="B">
-              <i class="fab fa-github fa-fw" role="presentation" aria-label="github icon"></i>
+              <i aria-label="github icon" class="fab fa-github fa-fw fa-fw" role="presentation"></i>
               B
             </a>
           </li>
@@ -28,7 +28,7 @@
         </ul>
         <div class="tab-content" data-tabsetid="4785">
           <div class="tab-pane active" data-value="A" id="tab-4785-1">a</div>
-          <div class="tab-pane" data-value="B" id="tab-4785-2">b</div>
+          <div class="tab-pane" data-value="B" data-icon-class="fab fa-github fa-fw" id="tab-4785-2">b</div>
           <div class="tab-pane" data-value="C" id="tab-1502-1">c</div>
         </div>
       </div>
@@ -45,7 +45,7 @@
           </li>
           <li class="active">
             <a href="#tab-4785-2" data-toggle="tab" data-value="B">
-              <i class="fab fa-github fa-fw" role="presentation" aria-label="github icon"></i>
+              <i aria-label="github icon" class="fab fa-github fa-fw fa-fw" role="presentation"></i>
               B
             </a>
           </li>
@@ -64,7 +64,7 @@
         <div class="content-header"></div>
         <div class="tab-content" data-tabsetid="4785">
           <div class="tab-pane" data-value="A" id="tab-4785-1">a</div>
-          <div class="tab-pane active" data-value="B" id="tab-4785-2">b</div>
+          <div class="tab-pane active" data-icon-class="fab fa-github fa-fw" data-value="B" id="tab-4785-2">b</div>
           <div class="tab-pane" data-value="C" id="tab-1502-1">c</div>
         </div>
         <div class="content-footer"></div>
@@ -82,7 +82,7 @@
           </li>
           <li class="nav-item">
             <a href="#tab-4785-2" data-toggle="tab" data-value="B" class="nav-link">
-              <i class="fab fa-github fa-fw" role="presentation" aria-label="github icon"></i>
+              <i aria-label="github icon" class="fab fa-github fa-fw fa-fw" role="presentation"></i>
               B
             </a>
           </li>
@@ -100,7 +100,7 @@
         </ul>
         <div class="tab-content" data-tabsetid="4785">
           <div class="tab-pane active" data-value="A" id="tab-4785-1">a</div>
-          <div class="tab-pane" data-value="B" id="tab-4785-2">b</div>
+          <div class="tab-pane" data-value="B" data-icon-class="fab fa-github fa-fw" id="tab-4785-2">b</div>
           <div class="tab-pane" data-value="C" id="tab-1502-1">c</div>
         </div>
       </div>
@@ -117,7 +117,7 @@
           </li>
           <li class="nav-item">
             <a href="#tab-4785-2" data-toggle="tab" data-value="B" class="nav-link active">
-              <i class="fab fa-github fa-fw" role="presentation" aria-label="github icon"></i>
+              <i aria-label="github icon" class="fab fa-github fa-fw fa-fw" role="presentation"></i>
               B
             </a>
           </li>
@@ -136,7 +136,7 @@
         <div class="content-header"></div>
         <div class="tab-content" data-tabsetid="4785">
           <div class="tab-pane" data-value="A" id="tab-4785-1">a</div>
-          <div class="tab-pane active" data-value="B" id="tab-4785-2">b</div>
+          <div class="tab-pane active" data-icon-class="fab fa-github fa-fw" data-value="B" id="tab-4785-2">b</div>
           <div class="tab-pane" data-value="C" id="tab-1502-1">c</div>
         </div>
         <div class="content-footer"></div>
@@ -158,7 +158,7 @@
             </li>
             <li>
               <a href="#tab-4785-2" data-toggle="tab" data-value="B">
-                <i class="fab fa-github fa-fw" role="presentation" aria-label="github icon"></i>
+                <i aria-label="github icon" class="fab fa-github fa-fw fa-fw" role="presentation"></i>
                 B
               </a>
             </li>
@@ -179,7 +179,7 @@
       <div class="container-fluid">
         <div class="tab-content" data-tabsetid="4785">
           <div class="tab-pane active" data-value="A" id="tab-4785-1">a</div>
-          <div class="tab-pane" data-value="B" id="tab-4785-2">b</div>
+          <div class="tab-pane" data-value="B" data-icon-class="fab fa-github fa-fw" id="tab-4785-2">b</div>
           <div class="tab-pane" data-value="C" id="tab-1502-1">c</div>
         </div>
       </div>
@@ -200,7 +200,7 @@
             </li>
             <li class="nav-item">
               <a href="#tab-4785-2" data-toggle="tab" data-value="B" class="nav-link">
-                <i class="fab fa-github fa-fw" role="presentation" aria-label="github icon"></i>
+                <i aria-label="github icon" class="fab fa-github fa-fw fa-fw" role="presentation"></i>
                 B
               </a>
             </li>
@@ -221,7 +221,7 @@
       <div class="container-fluid">
         <div class="tab-content" data-tabsetid="4785">
           <div class="tab-pane active" data-value="A" id="tab-4785-1">a</div>
-          <div class="tab-pane" data-value="B" id="tab-4785-2">b</div>
+          <div class="tab-pane" data-value="B" data-icon-class="fab fa-github fa-fw" id="tab-4785-2">b</div>
           <div class="tab-pane" data-value="C" id="tab-1502-1">c</div>
         </div>
       </div>
@@ -240,7 +240,7 @@
             </li>
             <li>
               <a href="#tab-4785-3" data-toggle="tab" data-value="B">
-                <i class="fab fa-github fa-fw" role="presentation" aria-label="github icon"></i>
+                <i aria-label="github icon" class="fab fa-github fa-fw fa-fw" role="presentation"></i>
                 B
               </a>
             </li>
@@ -260,7 +260,7 @@
         <div class="col-sm-8">
           <div class="tab-content" data-tabsetid="4785">
             <div class="tab-pane active" data-value="A" id="tab-4785-2">a</div>
-            <div class="tab-pane" data-value="B" id="tab-4785-3">b</div>
+            <div class="tab-pane" data-value="B" data-icon-class="fab fa-github fa-fw" id="tab-4785-3">b</div>
             <div class="tab-pane" data-value="C" id="tab-1502-1">c</div>
           </div>
         </div>
@@ -280,7 +280,7 @@
             </li>
             <li class="nav-item">
               <a href="#tab-4785-3" data-toggle="tab" data-value="B" class="nav-link">
-                <i class="fab fa-github fa-fw" role="presentation" aria-label="github icon"></i>
+                <i aria-label="github icon" class="fab fa-github fa-fw fa-fw" role="presentation"></i>
                 B
               </a>
             </li>
@@ -300,7 +300,7 @@
         <div class="col-sm-8">
           <div class="tab-content" data-tabsetid="4785">
             <div class="tab-pane active" data-value="A" id="tab-4785-2">a</div>
-            <div class="tab-pane" data-value="B" id="tab-4785-3">b</div>
+            <div class="tab-pane" data-value="B" data-icon-class="fab fa-github fa-fw" id="tab-4785-3">b</div>
             <div class="tab-pane" data-value="C" id="tab-1502-1">c</div>
           </div>
         </div>
@@ -321,7 +321,7 @@
           </li>
           <li>
             <a href="#tab-4785-3" data-toggle="tab" data-value="B">
-              <i class="fab fa-github fa-fw" role="presentation" aria-label="github icon"></i>
+              <i aria-label="github icon" class="fab fa-github fa-fw fa-fw" role="presentation"></i>
               B
             </a>
           </li>
@@ -340,7 +340,7 @@
         <div class="tab-content" data-tabsetid="4785">
           <div class="active" id="tab-4785-1">A div</div>
           <div class="tab-pane" data-value="A" id="tab-4785-2">a</div>
-          <div class="tab-pane" data-value="B" id="tab-4785-3">b</div>
+          <div class="tab-pane" data-value="B" data-icon-class="fab fa-github fa-fw" id="tab-4785-3">b</div>
           <div class="tab-pane" data-value="C" id="tab-1502-1">c</div>
         </div>
       </div>

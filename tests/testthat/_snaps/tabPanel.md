@@ -10,7 +10,7 @@
           </li>
           <li>
             <a href="#tab-4785-2" data-toggle="tab" data-value="B">
-              <i aria-label="github icon" class="fab fa-github fa-fw fa-fw" role="presentation"></i>
+              <i aria-label="github icon" class="fab fa-github fa-fw" role="presentation"></i>
               B
             </a>
           </li>
@@ -45,7 +45,7 @@
           </li>
           <li class="active">
             <a href="#tab-4785-2" data-toggle="tab" data-value="B">
-              <i aria-label="github icon" class="fab fa-github fa-fw fa-fw" role="presentation"></i>
+              <i aria-label="github icon" class="fab fa-github fa-fw" role="presentation"></i>
               B
             </a>
           </li>
@@ -82,7 +82,7 @@
           </li>
           <li class="nav-item">
             <a href="#tab-4785-2" data-toggle="tab" data-value="B" class="nav-link">
-              <i aria-label="github icon" class="fab fa-github fa-fw fa-fw" role="presentation"></i>
+              <i aria-label="github icon" class="fab fa-github fa-fw" role="presentation"></i>
               B
             </a>
           </li>
@@ -117,7 +117,7 @@
           </li>
           <li class="nav-item">
             <a href="#tab-4785-2" data-toggle="tab" data-value="B" class="nav-link active">
-              <i aria-label="github icon" class="fab fa-github fa-fw fa-fw" role="presentation"></i>
+              <i aria-label="github icon" class="fab fa-github fa-fw" role="presentation"></i>
               B
             </a>
           </li>
@@ -158,7 +158,7 @@
             </li>
             <li>
               <a href="#tab-4785-2" data-toggle="tab" data-value="B">
-                <i aria-label="github icon" class="fab fa-github fa-fw fa-fw" role="presentation"></i>
+                <i aria-label="github icon" class="fab fa-github fa-fw" role="presentation"></i>
                 B
               </a>
             </li>
@@ -200,7 +200,7 @@
             </li>
             <li class="nav-item">
               <a href="#tab-4785-2" data-toggle="tab" data-value="B" class="nav-link">
-                <i aria-label="github icon" class="fab fa-github fa-fw fa-fw" role="presentation"></i>
+                <i aria-label="github icon" class="fab fa-github fa-fw" role="presentation"></i>
                 B
               </a>
             </li>
@@ -240,7 +240,7 @@
             </li>
             <li>
               <a href="#tab-4785-3" data-toggle="tab" data-value="B">
-                <i aria-label="github icon" class="fab fa-github fa-fw fa-fw" role="presentation"></i>
+                <i aria-label="github icon" class="fab fa-github fa-fw" role="presentation"></i>
                 B
               </a>
             </li>
@@ -280,7 +280,7 @@
             </li>
             <li class="nav-item">
               <a href="#tab-4785-3" data-toggle="tab" data-value="B" class="nav-link">
-                <i aria-label="github icon" class="fab fa-github fa-fw fa-fw" role="presentation"></i>
+                <i aria-label="github icon" class="fab fa-github fa-fw" role="presentation"></i>
                 B
               </a>
             </li>
@@ -321,7 +321,7 @@
           </li>
           <li>
             <a href="#tab-4785-3" data-toggle="tab" data-value="B">
-              <i aria-label="github icon" class="fab fa-github fa-fw fa-fw" role="presentation"></i>
+              <i aria-label="github icon" class="fab fa-github fa-fw" role="presentation"></i>
               B
             </a>
           </li>

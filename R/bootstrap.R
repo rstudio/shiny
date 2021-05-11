@@ -655,7 +655,7 @@ tabPanel <- function(title, ..., value = title, icon = NULL) {
     `data-icon-class` = tagGetAttribute(icon, "class"),
     ...
   )
-  pane[["_shiny_icon"]] <- prepTabIcon(icon)
+  pane[["_shiny_icon"]] <- icon
   pane
 }
 

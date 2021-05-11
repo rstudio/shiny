@@ -655,7 +655,7 @@ tabPanel <- function(title, ..., value = title, icon = NULL) {
     `data-icon-class` = tagGetAttribute(icon, "class"),
     ...
   )
-  pane[["_shiny_icon"]] <- icon
+  attr(pane, "_shiny_icon") <- icon
   pane
 }
 
@@ -898,7 +898,7 @@ prepTabIcon <- function(x = NULL) {
     )
   }
 
-  is_fa <- grepl("fa-", tagGetAttribute(x, "class"), fixed = TRUE)
+  is_fa <- grepl("fa-", tagGetAttribute(x, "class") %||% "", fixed = TRUE)
   if (!is_fa) {
     return(x)
   }
@@ -1012,7 +1012,7 @@ buildNavItem <- function(divTag, tabsetId, index) {
   list(
     divTag = divTag,
     liTag = tagAddRenderHook(
-      liTag(id, title, value, divTag[["_shiny_icon"]]),
+      liTag(id, title, value, attr(divTag, "_shiny_icon")),
       function(x) {
         if (isTRUE(getCurrentThemeVersion() >= 4)) {
           tagQuery(x)$

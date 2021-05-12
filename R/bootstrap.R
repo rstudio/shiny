@@ -1623,7 +1623,7 @@ icon <- function(name, class = NULL, lib = "font-awesome", ...) {
     "none" = iconTag(name, class = class, ...),
     "font-awesome" = fontawesome::fa_i(name = name, class = class, ...),
     "glyphicon" = iconTag(
-      name, class = "glyphicon", paste0("glyphicon-", name),
+      name, class = "glyphicon", class = paste0("glyphicon-", name),
       class = class, ...
     ),
     stop("Unknown icon library: ", lib, ". See `?icon` for supported libraries.")

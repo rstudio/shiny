@@ -44,8 +44,6 @@ Authors@R: c(
     comment = "Bootstrap-datepicker library"),
     person("Andrew", "Rowls", role = c("ctb", "cph"),
     comment = "Bootstrap-datepicker library"),
-    person("Dave", "Gandy", role = c("ctb", "cph"),
-    comment = "Font-Awesome font"),
     person("Brian", "Reavis", role = c("ctb", "cph"),
     comment = "selectize.js library"),
     person("Salmen", "Bejaoui", role = c("ctb", "cph"),
@@ -80,6 +78,7 @@ Imports:
     mime (>= 0.3),
     jsonlite (>= 0.9.16),
     xtable,
+    fontawesome (>= 0.2.1),
     htmltools (>= 0.5.1.9003),
     R6 (>= 2.0),
     sourcetools,
@@ -138,7 +137,6 @@ Collate:
     'devmode.R'
     'diagnose.R'
     'fileupload.R'
-    'font-awesome.R'
     'graph.R'
     'reactives.R'
     'reactive-domains.R'

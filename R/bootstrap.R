@@ -498,10 +498,14 @@ navbarPage <- function(title,
 #' @rdname navbarPage
 #' @export
 navbarMenu <- function(title, ..., menuName = title, icon = NULL) {
+  icon <- prepTabIcon(icon)
   structure(list(title = title,
                  menuName = menuName,
                  tabs = list2(...),
-                 iconClass = iconClass(icon)),
+                 # Here for legacy reasons
+                 # https://github.com/cran/miniUI/blob/74c87d3/R/layout.R#L369
+                 iconClass = tagGetAttribute(icon, "class"),
+                 icon = icon),
             class = "shiny.navbarmenu")
 }
 
@@ -641,13 +645,18 @@ helpText <- function(...) {
 #' @export
 #' @describeIn tabPanel Create a tab panel that can be included within a [tabsetPanel()] or a [navbarPage()].
 tabPanel <- function(title, ..., value = title, icon = NULL) {
-  div(
+  icon <- prepTabIcon(icon)
+  pane <- div(
     class = "tab-pane",
     title = title,
     `data-value` = value,
-    `data-icon-class` = iconClass(icon),
+    # Here for legacy reasons
+    # https://github.com/cran/miniUI/blob/74c87d/R/layout.R#L395
+    `data-icon-class` = tagGetAttribute(icon, "class"),
     ...
   )
+  attr(pane, "_shiny_icon") <- icon
+  pane
 }
 
 isTabPanel <- function(x) {
@@ -879,17 +888,23 @@ findAndMarkSelectedTab <- function(tabs, selected, foundSelected) {
   return(list(tabs = tabs, foundSelected = foundSelected))
 }
 
-# Returns the icon object (or NULL if none), provided either a
-# tabPanel, OR the icon class
-getIcon <- function(tab = NULL, iconClass = NULL) {
-  if (!is.null(tab)) iconClass <- tab$attribs$`data-icon-class`
-  if (!is.null(iconClass)) {
-    if (grepl("fa-", iconClass, fixed = TRUE)) {
-      # for font-awesome we specify fixed-width
-      iconClass <- paste(iconClass, "fa-fw")
-    }
-    icon(name = NULL, class = iconClass)
-  } else NULL
+prepTabIcon <- function(x = NULL) {
+  if (is.null(x)) return(NULL)
+  if (!inherits(x, "shiny.tag")) {
+    stop(
+      "`icon` must be a `shiny.tag` object. ",
+      "Try passing `icon()` (or `tags$i()`) to the `icon` parameter.",
+      call. = FALSE
+    )
+  }
+
+  is_fa <- grepl("fa-", tagGetAttribute(x, "class") %||% "", fixed = TRUE)
+  if (!is_fa) {
+    return(x)
+  }
+
+  # for font-awesome we specify fixed-width
+  tagAppendAttributes(x, class = "fa-fw")
 }
 
 # Text filter for navbarMenu's (plain text) separators
@@ -990,7 +1005,6 @@ buildNavItem <- function(divTag, tabsetId, index) {
   # https://github.com/rstudio/shiny/issues/3352
   title <- divTag$attribs[["title"]]
   value <- divTag$attribs[["data-value"]]
-  icon <- getIcon(iconClass = divTag$attribs[["data-icon-class"]])
   active <- isTabSelected(divTag)
   divTag <- tagAppendAttributes(divTag, class = if (active) "active")
   divTag$attribs$id <- id
@@ -998,7 +1012,7 @@ buildNavItem <- function(divTag, tabsetId, index) {
   list(
     divTag = divTag,
     liTag = tagAddRenderHook(
-      liTag(id, title, value, icon),
+      liTag(id, title, value, attr(divTag, "_shiny_icon")),
       function(x) {
         if (isTRUE(getCurrentThemeVersion() >= 4)) {
           tagQuery(x)$
@@ -1053,7 +1067,7 @@ buildDropdown <- function(divTag, tabset) {
       class = "dropdown-toggle",
       `data-toggle` = "dropdown",
       `data-value` = divTag$menuName,
-      getIcon(iconClass = divTag$iconClass),
+      divTag$icon,
       divTag$title,
       tags$b(class = "caret")
     ),
@@ -1565,32 +1579,31 @@ downloadLink <- function(outputId, label="Download", class=NULL, ...) {
 #' Create an icon
 #'
 #' Create an icon for use within a page. Icons can appear on their own, inside
-#' of a button, or as an icon for a [tabPanel()] within a
-#' [navbarPage()].
+#' of a button, and/or used with [tabPanel()] and [navbarMenu()].
 #'
-#' @param name Name of icon. Icons are drawn from the
-#'   [Font Awesome Free](https://fontawesome.com/) (currently icons from
-#'   the v5.13.0 set are supported with the v4 naming convention) and
-#'   [Glyphicons](https://getbootstrap.com/components/#glyphicons)
-#'   libraries. Note that the "fa-" and "glyphicon-" prefixes should not be used
-#'   in icon names (i.e. the "fa-calendar" icon should be referred to as
-#'   "calendar")
-#' @param class Additional classes to customize the style of the icon (see the
+#' @param name The name of the icon. A name from either [Font
+#'   Awesome](https://fontawesome.com/) (when `lib="font-awesome"`) or
+#'   [Bootstrap
+#'   Glyphicons](https://getbootstrap.com/docs/3.3/components/#glyphicons) (when
+#'   `lib="glyphicon"`) may be provided. Note that the `"fa-"` and
+#'   `"glyphicon-"` prefixes should not appear in name (i.e., the
+#'   `"fa-calendar"` icon should be referred to as `"calendar"`). A `name` of
+#'   `NULL` may also be provided to get a raw `<i>` tag with no library attached
+#'   to it.
+#' @param class Additional classes to customize the style of an icon (see the
 #'   [usage examples](https://fontawesome.com/how-to-use) for details on
 #'   supported styles).
-#' @param lib Icon library to use ("font-awesome" or "glyphicon")
-#' @param ... Arguments passed to the `<i>` tag of [htmltools::tags]
+#' @param lib The icon library to use. Either `"font-awesome"` or `"glyphicon"`.
+#' @param ... Arguments passed to the `<i>` tag of [htmltools::tags].
 #'
-#' @return An icon element
+#' @return An `<i>` (icon) HTML tag.
 #'
-#' @seealso For lists of available icons, see
-#'   [https://fontawesome.com/icons](https://fontawesome.com/icons) and
-#'   [https://getbootstrap.com/components/#glyphicons](https://getbootstrap.com/components/#glyphicons).
-#'
+#' @seealso For lists of available icons, see <https://fontawesome.com/icons>
+#'   and <https://getbootstrap.com/docs/3.3/components/#glyphicons>
 #'
 #' @examples
 #' # add an icon to a submit button
-#' submitButton("Update View", icon = icon("refresh"))
+#' submitButton("Update View", icon = icon("redo"))
 #'
 #' navbarPage("App Title",
 #'   tabPanel("Plot", icon = icon("bar-chart-o")),
@@ -1599,48 +1612,26 @@ downloadLink <- function(outputId, label="Download", class=NULL, ...) {
 #' )
 #' @export
 icon <- function(name, class = NULL, lib = "font-awesome", ...) {
-  prefixes <- list(
-    "font-awesome" = "fa",
-    "glyphicon" = "glyphicon"
+
+  # A NULL name allows for a generic <i> not tied to any library
+  if (is.null(name)) {
+    lib <- "none"
+  }
+
+  switch(
+    lib %||% "",
+    "none" = iconTag(name, class = class, ...),
+    "font-awesome" = fontawesome::fa_i(name = name, class = class, ...),
+    "glyphicon" = iconTag(
+      name, class = "glyphicon", class = paste0("glyphicon-", name),
+      class = class, ...
+    ),
+    stop("Unknown icon library: ", lib, ". See `?icon` for supported libraries.")
   )
-  prefix <- prefixes[[lib]]
-
-  # determine stylesheet
-  if (is.null(prefix)) {
-    stop("Unknown font library '", lib, "' specified. Must be one of ",
-         paste0('"', names(prefixes), '"', collapse = ", "))
-  }
-
-  # build the icon class (allow name to be null so that other functions
-  # e.g. buildTabset can pass an explicit class value)
-  iconClass <- ""
-  if (!is.null(name)) {
-    prefix_class <- prefix
-    if (prefix_class == "fa" && name %in% font_awesome_brands) {
-      prefix_class <- "fab"
-    }
-    iconClass <- paste0(prefix_class, " ", prefix, "-", name)
-  }
-  if (!is.null(class))
-    iconClass <- paste(iconClass, class)
-
-  iconTag <- tags$i(class = iconClass, role = "presentation", `aria-label` = paste(name, "icon"), ...)
-
-  # font-awesome needs an additional dependency (glyphicon is in bootstrap)
-  if (lib == "font-awesome") {
-    htmlDependencies(iconTag) <- htmlDependency(
-      "font-awesome", "5.13.0", "www/shared/fontawesome", package = "shiny",
-      stylesheet = c(
-        "css/all.min.css",
-        "css/v4-shims.min.css"
-      )
-    )
-  }
-
-  htmltools::browsable(iconTag)
 }
 
-# Helper funtion to extract the class from an icon
-iconClass <- function(icon) {
-  if (!is.null(icon)) icon$attribs$class
+iconTag <- function(name, ...) {
+  htmltools::browsable(
+    tags$i(..., role = "presentation", `aria-label` = paste(name, "icon"))
+  )
 }

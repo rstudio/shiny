@@ -17,6 +17,8 @@ shiny 1.6.0.9000
   * Closed #3321: New informative warning when `shiny.tag` object(s) are supplied to `...`. In this case we will continue to create an "empty" nav item and include the content on every tab, but the warning will mention the (new) `header`/`footer` args, which is likely what the user wants.
   * Closed #3320: The HTML markup that `tabPanel()` et. al generate (for Bootstrap nav) is now Bootstrap 4+ compliant when used with `theme = bslib::bs_theme()`.
   * Closed #1928: `NULL` values are now dropped instead of producing an empty nav item.
+  
+* `icon(lib="fontawesome")` is now powered by the `{fontawesome}` package, which will make it easier to use the latest FA icons in the future (by updating the `{fontawesome}` package). (#3302)
 
 ### Other improvements
 

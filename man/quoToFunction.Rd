@@ -12,20 +12,14 @@ quoToFunction(q, label, ..stacktraceon = FALSE)
 \item{label}{A label for the object to be shown in the debugger. Defaults to
 the name of the calling function.}
 
-\item{..stacktraceon}{Advanced use only. For stack manipulation purposes; see
-\code{\link[=stacktrace]{stacktrace()}}.}
+\item{..stacktraceon}{Advanced use only. For stack
+manipulation purposes; see \code{\link[=stacktrace]{stacktrace()}}.}
 }
 \description{
-This takes a quosure and label, and wraps them into a function that should be
-passed to \code{\link[=createRenderFunction]{createRenderFunction()}} or \code{\link[=markRenderFunction]{markRenderFunction()}}.
-}
-\details{
-This function was added in Shiny 1.6.0. Previously, it was recommended to use
-\code{\link[=installExprFunction]{installExprFunction()}} or \code{\link[=exprToFunction]{exprToFunction()}} in render functions, but now we
-recommend using \code{\link[=quoToFunction]{quoToFunction()}}, because it does not require \code{env} and
-\code{quoted} arguments -- that information is captured by quosures provided by
-\pkg{rlang}.
+Superceded by \code{\link[=exprToFunction]{exprToFunction()}}: use that function instead for a simpler
+and more robust implementation of custom render functions.
 }
 \seealso{
 \code{\link[=createRenderFunction]{createRenderFunction()}} for example usage.
 }
+\keyword{internal}

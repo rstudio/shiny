@@ -51,12 +51,7 @@ is able to serve JS and CSS resources.}
 The \code{renderFunc} function, with annotations.
 }
 \description{
-Should be called by implementers of \code{renderXXX} functions in order to mark
-their return values as Shiny render functions, and to provide a hint to Shiny
-regarding what UI function is most commonly used with this type of render
-function. This can be used in R Markdown documents to create complete output
-widgets out of just the render function.
+Superceded by \code{\link[=createRenderFunction]{createRenderFunction()}}, use that function instead to support
+async computation.
 }
-\seealso{
-\code{\link[=createRenderFunction]{createRenderFunction()}}, \code{\link[=quoToFunction]{quoToFunction()}}
-}
+\keyword{internal}

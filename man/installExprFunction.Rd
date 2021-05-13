@@ -16,35 +16,25 @@ installExprFunction(
 )
 }
 \arguments{
-\item{expr}{A quoted or unquoted expression}
+\item{expr}{A user-supplied reactive expression (or quosure).}
 
 \item{name}{The name the function should be given}
 
 \item{eval.env}{The desired environment for the function. Defaults to the
 calling environment two steps back.}
 
-\item{quoted}{Is the expression quoted?}
+\item{quoted}{Is \code{expr} quoted?}
 
 \item{assign.env}{The environment in which the function should be assigned.}
 
 \item{label}{A label for the object to be shown in the debugger. Defaults to
 the name of the calling function.}
 
-\item{wrappedWithLabel, ..stacktraceon}{Advanced use only. For stack manipulation purposes; see
-\code{\link[=stacktrace]{stacktrace()}}.}
+\item{wrappedWithLabel, ..stacktraceon}{Advanced use only. For stack
+manipulation purposes; see \code{\link[=stacktrace]{stacktrace()}}.}
 }
 \description{
-Installs an expression in the given environment as a function, and registers
-debug hooks so that breakpoints may be set in the function. Note: as of
-Shiny 1.6.0, it is recommended to use \code{\link[=quoToFunction]{quoToFunction()}} instead.
+Superceded by \code{\link[=exprToFunction]{exprToFunction()}}: use that function instead for a more
+intuitive way to pass reactive expressions to \code{\link[=createRenderFunction]{createRenderFunction()}}.
 }
-\details{
-This function can replace \code{exprToFunction} as follows: we may use
-\code{func <- exprToFunction(expr)} if we do not want the debug hooks, or
-\code{installExprFunction(expr, "func")} if we do. Both approaches create a
-function named \code{func} in the current environment.
-}
-\seealso{
-Wraps \code{\link[=exprToFunction]{exprToFunction()}}; see that method's documentation
-for more documentation and examples.
-}
+\keyword{internal}

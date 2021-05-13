@@ -2,11 +2,8 @@ utils::globalVariables('func', add = TRUE)
 
 #' Mark a function as a render function
 #'
-#' Should be called by implementers of `renderXXX` functions in order to mark
-#' their return values as Shiny render functions, and to provide a hint to Shiny
-#' regarding what UI function is most commonly used with this type of render
-#' function. This can be used in R Markdown documents to create complete output
-#' widgets out of just the render function.
+#' Superceded by [createRenderFunction()], use that function instead to support
+#' async computation.
 #'
 #' @param uiFunc A function that renders Shiny UI. Must take a single argument:
 #'   an output ID.
@@ -37,8 +34,8 @@ utils::globalVariables('func', add = TRUE)
 #'   is able to serve JS and CSS resources.
 #' @return The `renderFunc` function, with annotations.
 #'
-#' @seealso [createRenderFunction()], [quoToFunction()]
 #' @export
+#' @keywords internal
 markRenderFunction <- function(
   uiFunc,
   renderFunc,
@@ -133,14 +130,19 @@ print.shiny.render.function <- function(x, ...) {
   cat_line("<shiny.render.function>")
 }
 
-#' Implement render functions
+#' Implement custom render functions
 #'
-#' This function is a wrapper for [markRenderFunction()] which provides support
-#' for async computation via promises.
+#' Functions for implementing custom `renderXXX()` functions. In most cases,
+#' these functions won't need to be used directly since most custom rendering
+#' functions nowadays can [simply wrap a call to
+#' `htmlwidgets::shinyRenderWidget()`](http://www.htmlwidgets.org/develop_intro.html).
+#' That said, custom `renderXXX()` functions that either: (1) don't want to use
+#' htmlwidgets and/or (2) want to compute on the user-supplied reactive
+#' expression should use of these functions for their implementation.
 #'
-#' @param func A function without parameters, that returns user data. If the
-#'   returned value is a promise, then the render function will proceed in async
-#'   mode.
+#' @param func A function (with no parameters) which wraps a user's reactive
+#'   expression (i.e., the result of `exprToFunction()`). If the returned value
+#'   is a promise, then the render function will proceed in async mode.
 #' @param transform A function that takes four arguments: `value`,
 #'   `session`, `name`, and `...` (for future-proofing). This
 #'   function will be invoked each time a value is returned from `func`,
@@ -150,20 +152,11 @@ print.shiny.render.function <- function(x, ...) {
 #'   this render function. This can be used in R Markdown documents to create
 #'   complete output widgets out of just the render function.
 #' @inheritParams markRenderFunction
-#' @return An annotated render function, ready to be assigned to an
-#'   `output` slot.
-#'
-#' @seealso [quoToFunction()], [markRenderFunction()].
 #'
 #' @examples
-#' # A very simple render function
+#' # A basic custom render function
 #' renderTriple <- function(x) {
-#'   x <- substitute(x)
-#'   if (!rlang::is_quosure(x)) {
-#'     x <- rlang::new_quosure(x, env = parent.frame())
-#'   }
-#'   func <- quoToFunction(x, "renderTriple")
-#'
+#'   func <- exprToFunction(x)
 #'   createRenderFunction(
 #'     func,
 #'     transform = function(value, session, name, ...) {

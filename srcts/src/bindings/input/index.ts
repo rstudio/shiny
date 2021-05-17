@@ -1,4 +1,5 @@
 import { BindingRegistry } from "../registry";
+
 import { CheckboxInputBinding } from "./checkbox";
 import { CheckboxGroupInputBinding } from "./checkboxgroup";
 import { NumberInputBinding } from "./number";
@@ -94,6 +95,30 @@ class InputBinding {
   }
 }
 
+//// NOTES FOR FUTURE DEV
+// Turn register systemin into something that is intialized for every instance.
+// "Have a new instance for every item, not an instance that does work on every item"
+//
+// * Keep register as is for historical purposes
+// make a new register function that would take a class
+// these class could be constructed at build time
+// store the constructed obj on the ele and retrieve
+
+// Then the classes could store their information within their local class, rather than on the element
+// VERY CLEAN!!!
+
+// to invoke methods, it would be something like `el.shinyClass.METHOD(x,y,z)`
+// * See https://github.com/rstudio/shinyvalidate/blob/c8becd99c01fac1bac03b50e2140f49fca39e7f4/srcjs/shinyvalidate.js#L157-L167
+// these methods would be added using a new method like `inputBindings.registerClass(ClassObj, name)`
+
+// things to watch out for:
+// * unbind, then rebind. Maybe we stash the local content.
+
+// Updates:
+// * Feel free to alter method names on classes. (And make them private)
+//// END NOTES FOR FUTURE DEV
+
+// TODO-barret make this an init method
 const inputBindings = new BindingRegistry();
 
 inputBindings.register(new TextInputBinding(), "shiny.textInput");

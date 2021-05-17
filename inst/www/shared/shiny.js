@@ -1198,6 +1198,26 @@
     };
   });
 
+  // node_modules/core-js/internals/regexp-exec-abstract.js
+  var require_regexp_exec_abstract = __commonJS(function(exports2, module2) {
+    var classof2 = require_classof_raw();
+    var regexpExec2 = require_regexp_exec();
+    module2.exports = function(R, S) {
+      var exec = R.exec;
+      if (typeof exec === "function") {
+        var result = exec.call(R, S);
+        if (typeof result !== "object") {
+          throw TypeError("RegExp exec method returned something other than an Object or null");
+        }
+        return result;
+      }
+      if (classof2(R) !== "RegExp") {
+        throw TypeError("RegExp#exec called on incompatible receiver");
+      }
+      return regexpExec2.call(R, S);
+    };
+  });
+
   // node_modules/core-js/internals/get-substitution.js
   var require_get_substitution = __commonJS(function(exports2, module2) {
     var toObject4 = require_to_object();
@@ -1243,26 +1263,6 @@
         }
         return capture === void 0 ? "" : capture;
       });
-    };
-  });
-
-  // node_modules/core-js/internals/regexp-exec-abstract.js
-  var require_regexp_exec_abstract = __commonJS(function(exports2, module2) {
-    var classof2 = require_classof_raw();
-    var regexpExec2 = require_regexp_exec();
-    module2.exports = function(R, S) {
-      var exec = R.exec;
-      if (typeof exec === "function") {
-        var result = exec.call(R, S);
-        if (typeof result !== "object") {
-          throw TypeError("RegExp exec method returned something other than an Object or null");
-        }
-        return result;
-      }
-      if (classof2(R) !== "RegExp") {
-        throw TypeError("RegExp#exec called on incompatible receiver");
-      }
-      return regexpExec2.call(R, S);
     };
   });
 
@@ -3080,8 +3080,8 @@
           }
           function getTabIndex($tabset2, tabsetId2) {
             var existingTabIds = [0];
-            $tabset2.find("> li").each(function() {
-              var $tab = import_jquery6.default(this).find("> a[data-toggle='tab']");
+            $tabset2.find("a[data-toggle='tab']").each(function() {
+              var $tab = import_jquery6.default(this);
               if ($tab.length > 0) {
                 var href = $tab.attr("href").replace(/.*(?=#[^\s]+$)/, "");
                 var _index = href.replace("#tab-" + tabsetId2 + "-", "");
@@ -3116,9 +3116,9 @@
           }
         });
         function ensureTabsetHasVisibleTab($tabset) {
-          if ($tabset.find("li.active").not(".dropdown").length === 0) {
+          var inputBinding = $tabset.data("shiny-input-binding");
+          if (!inputBinding.getValue($tabset)) {
             var destTabValue = getFirstTab($tabset);
-            var inputBinding = $tabset.data("shiny-input-binding");
             var evt = jQuery.Event("shiny:updateinput");
             evt.binding = inputBinding;
             $tabset.trigger(evt);
@@ -4727,12 +4727,9 @@
                 var oldStyle = $head.find("style#" + id);
                 var newStyle = import_jquery6.default("<style>").attr("id", id).html(xhr.responseText);
                 $head.append(newStyle);
-                setTimeout(function() {
-                  return oldStyle.remove();
-                }, 500);
-                setTimeout(function() {
-                  return removeSheet(oldSheet);
-                }, 500);
+                oldStyle.remove();
+                removeSheet(oldSheet);
+                sendImageSize2();
               };
               xhr.send();
             };
@@ -4761,17 +4758,26 @@
               } else {
                 link.attr("href", href2);
                 link.attr("onload", function() {
+                  var dummy_id = "dummy-" + Math.floor(Math.random() * 999999999);
+                  var css_string = "#" + dummy_id + " { color: #a7c920 !important; transition: 0.1s all !important; visibility: hidden !important; position: absolute !important; top: -1000px !important; left: 0 !important; }";
+                  var base64_css_string = "data:text/css;base64," + btoa(css_string);
+                  var $dummy_link = import_jquery6.default("<link rel='stylesheet' type='text/css' />");
+                  $dummy_link.attr("href", base64_css_string);
+                  var $dummy_el = import_jquery6.default("<div id='" + dummy_id + "'></div>");
+                  $dummy_el.one("transitionend", function() {
+                    $dummy_el.remove();
+                    removeSheet(findSheet($dummy_link.attr("href")));
+                    removeSheet(oldSheet);
+                    sendImageSize2();
+                  });
+                  import_jquery6.default(document.body).append($dummy_el);
                   setTimeout(function() {
-                    return removeSheet(oldSheet);
-                  }, 500);
+                    return $head.append($dummy_link);
+                  }, 0);
                 });
                 $head.append(link);
               }
             });
-            var bindDebouncer = new Debouncer(null, Shiny.bindAll, 100);
-            setTimeout(function() {
-              return bindDebouncer.normalCall();
-            }, 100);
           }
         }
         if (dep.script && !restyle) {
@@ -6084,7 +6090,7 @@
           return import_jquery6.default(scope).find("ul.nav.shiny-tab-input");
         },
         getValue: function getValue(el) {
-          var anchor = import_jquery6.default(el).find("li:not(.dropdown).active").children("a");
+          var anchor = isBS3() ? import_jquery6.default(el).find("li:not(.dropdown).active > a") : import_jquery6.default(el).find(".nav-link:not(.dropdown-toggle).active, .dropdown-menu > .dropdown-item.active");
           if (anchor.length === 1)
             return this._getTabName(anchor);
           return null;
@@ -6093,7 +6099,7 @@
           var self2 = this;
           var success = false;
           if (value) {
-            var anchors = import_jquery6.default(el).find("li:not(.dropdown)").children("a");
+            var anchors = isBS3() ? import_jquery6.default(el).find("li:not(.dropdown) > a") : import_jquery6.default(el).find(".nav-link:not(.dropdown-toggle), .dropdown-menu > .dropdown-item");
             anchors.each(function() {
               if (self2._getTabName(import_jquery6.default(this)) === value) {
                 import_jquery6.default(this).tab("show");
@@ -6429,6 +6435,8 @@
         }
       });
       inputBindings.register(fileInputBinding, "shiny.fileInputBinding");
+      var sendImageSize;
+      var sendImageSize2;
       function initShiny() {
         var shinyapp = Shiny.shinyapp = new ShinyApp();
         function bindOutputs() {
@@ -6753,13 +6761,14 @@
           });
         }
         var sendImageSizeDebouncer = new Debouncer(null, doSendImageSize, 0);
-        function sendImageSize() {
+        sendImageSize = function sendImageSize() {
           sendImageSizeDebouncer.normalCall();
-        }
+        };
         inputBatchSender.lastChanceCallback.push(function() {
           if (sendImageSizeDebouncer.isPending())
             sendImageSizeDebouncer.immediateCall();
         });
+        sendImageSize2 = debounce(200, sendImageSize);
         function isHidden(obj) {
           if (obj === null || obj.offsetWidth !== 0 || obj.offsetHeight !== 0) {
             return false;
@@ -7259,28 +7268,68 @@
     }, {unsafe: true});
   }
 
-  // node_modules/core-js/modules/es.string.replace.js
+  // node_modules/core-js/modules/es.string.match.js
   "use strict";
   var fixRegExpWellKnownSymbolLogic = require_fix_regexp_well_known_symbol_logic();
   var anObject2 = require_an_object();
   var toLength4 = require_to_length();
-  var toInteger2 = require_to_integer();
   var requireObjectCoercible = require_require_object_coercible();
   var advanceStringIndex = require_advance_string_index();
-  var getSubstitution = require_get_substitution();
   var regExpExec = require_regexp_exec_abstract();
+  fixRegExpWellKnownSymbolLogic("match", 1, function(MATCH, nativeMatch, maybeCallNative) {
+    return [
+      function match(regexp) {
+        var O = requireObjectCoercible(this);
+        var matcher = regexp == void 0 ? void 0 : regexp[MATCH];
+        return matcher !== void 0 ? matcher.call(regexp, O) : new RegExp(regexp)[MATCH](String(O));
+      },
+      function(regexp) {
+        var res = maybeCallNative(nativeMatch, regexp, this);
+        if (res.done)
+          return res.value;
+        var rx = anObject2(regexp);
+        var S = String(this);
+        if (!rx.global)
+          return regExpExec(rx, S);
+        var fullUnicode = rx.unicode;
+        rx.lastIndex = 0;
+        var A = [];
+        var n = 0;
+        var result;
+        while ((result = regExpExec(rx, S)) !== null) {
+          var matchStr = String(result[0]);
+          A[n] = matchStr;
+          if (matchStr === "")
+            rx.lastIndex = advanceStringIndex(S, toLength4(rx.lastIndex), fullUnicode);
+          n++;
+        }
+        return n === 0 ? null : A;
+      }
+    ];
+  });
+
+  // node_modules/core-js/modules/es.string.replace.js
+  "use strict";
+  var fixRegExpWellKnownSymbolLogic2 = require_fix_regexp_well_known_symbol_logic();
+  var anObject3 = require_an_object();
+  var toLength5 = require_to_length();
+  var toInteger2 = require_to_integer();
+  var requireObjectCoercible2 = require_require_object_coercible();
+  var advanceStringIndex2 = require_advance_string_index();
+  var getSubstitution = require_get_substitution();
+  var regExpExec2 = require_regexp_exec_abstract();
   var max3 = Math.max;
   var min2 = Math.min;
   var maybeToString = function(it) {
     return it === void 0 ? it : String(it);
   };
-  fixRegExpWellKnownSymbolLogic("replace", 2, function(REPLACE, nativeReplace, maybeCallNative, reason) {
+  fixRegExpWellKnownSymbolLogic2("replace", 2, function(REPLACE, nativeReplace, maybeCallNative, reason) {
     var REGEXP_REPLACE_SUBSTITUTES_UNDEFINED_CAPTURE = reason.REGEXP_REPLACE_SUBSTITUTES_UNDEFINED_CAPTURE;
     var REPLACE_KEEPS_$0 = reason.REPLACE_KEEPS_$0;
     var UNSAFE_SUBSTITUTE = REGEXP_REPLACE_SUBSTITUTES_UNDEFINED_CAPTURE ? "$" : "$0";
     return [
       function replace(searchValue, replaceValue) {
-        var O = requireObjectCoercible(this);
+        var O = requireObjectCoercible2(this);
         var replacer = searchValue == void 0 ? void 0 : searchValue[REPLACE];
         return replacer !== void 0 ? replacer.call(searchValue, O, replaceValue) : nativeReplace.call(String(O), searchValue, replaceValue);
       },
@@ -7290,7 +7339,7 @@
           if (res.done)
             return res.value;
         }
-        var rx = anObject2(regexp);
+        var rx = anObject3(regexp);
         var S = String(this);
         var functionalReplace = typeof replaceValue === "function";
         if (!functionalReplace)
@@ -7302,7 +7351,7 @@
         }
         var results = [];
         while (true) {
-          var result = regExpExec(rx, S);
+          var result = regExpExec2(rx, S);
           if (result === null)
             break;
           results.push(result);
@@ -7310,7 +7359,7 @@
             break;
           var matchStr = String(result[0]);
           if (matchStr === "")
-            rx.lastIndex = advanceStringIndex(S, toLength4(rx.lastIndex), fullUnicode);
+            rx.lastIndex = advanceStringIndex2(S, toLength5(rx.lastIndex), fullUnicode);
         }
         var accumulatedResult = "";
         var nextSourcePosition = 0;
@@ -7342,13 +7391,13 @@
 
   // node_modules/core-js/modules/es.string.split.js
   "use strict";
-  var fixRegExpWellKnownSymbolLogic2 = require_fix_regexp_well_known_symbol_logic();
+  var fixRegExpWellKnownSymbolLogic3 = require_fix_regexp_well_known_symbol_logic();
   var isRegExp = require_is_regexp();
-  var anObject3 = require_an_object();
-  var requireObjectCoercible2 = require_require_object_coercible();
+  var anObject4 = require_an_object();
+  var requireObjectCoercible3 = require_require_object_coercible();
   var speciesConstructor = require_species_constructor();
-  var advanceStringIndex2 = require_advance_string_index();
-  var toLength5 = require_to_length();
+  var advanceStringIndex3 = require_advance_string_index();
+  var toLength6 = require_to_length();
   var callRegExpExec = require_regexp_exec_abstract();
   var regexpExec = require_regexp_exec();
   var fails5 = require_fails();
@@ -7358,11 +7407,11 @@
   var SUPPORTS_Y = !fails5(function() {
     return !RegExp(MAX_UINT32, "y");
   });
-  fixRegExpWellKnownSymbolLogic2("split", 2, function(SPLIT, nativeSplit, maybeCallNative) {
+  fixRegExpWellKnownSymbolLogic3("split", 2, function(SPLIT, nativeSplit, maybeCallNative) {
     var internalSplit;
     if ("abbc".split(/(b)*/)[1] == "c" || "test".split(/(?:)/, -1).length != 4 || "ab".split(/(?:ab)*/).length != 2 || ".".split(/(.?)(.?)/).length != 4 || ".".split(/()()/).length > 1 || "".split(/.?/).length) {
       internalSplit = function(separator, limit) {
-        var string = String(requireObjectCoercible2(this));
+        var string = String(requireObjectCoercible3(this));
         var lim = limit === void 0 ? MAX_UINT32 : limit >>> 0;
         if (lim === 0)
           return [];
@@ -7405,7 +7454,7 @@
       internalSplit = nativeSplit;
     return [
       function split(separator, limit) {
-        var O = requireObjectCoercible2(this);
+        var O = requireObjectCoercible3(this);
         var splitter = separator == void 0 ? void 0 : separator[SPLIT];
         return splitter !== void 0 ? splitter.call(separator, O, limit) : internalSplit.call(String(O), separator, limit);
       },
@@ -7413,7 +7462,7 @@
         var res = maybeCallNative(internalSplit, regexp, this, limit, internalSplit !== nativeSplit);
         if (res.done)
           return res.value;
-        var rx = anObject3(regexp);
+        var rx = anObject4(regexp);
         var S = String(this);
         var C = speciesConstructor(rx, RegExp);
         var unicodeMatching = rx.unicode;
@@ -7431,8 +7480,8 @@
           splitter.lastIndex = SUPPORTS_Y ? q : 0;
           var z = callRegExpExec(splitter, SUPPORTS_Y ? S : S.slice(q));
           var e;
-          if (z === null || (e = min3(toLength5(splitter.lastIndex + (SUPPORTS_Y ? 0 : q)), S.length)) === p) {
-            q = advanceStringIndex2(S, q, unicodeMatching);
+          if (z === null || (e = min3(toLength6(splitter.lastIndex + (SUPPORTS_Y ? 0 : q)), S.length)) === p) {
+            q = advanceStringIndex3(S, q, unicodeMatching);
           } else {
             A.push(S.slice(p, q));
             if (A.length === lim)
@@ -7725,6 +7774,12 @@
     el.removeChild(div);
     return linkColor;
   }
+  function isBS3() {
+    if (!import_jquery5.default.fn.tab) {
+      return false;
+    }
+    return import_jquery5.default.fn.tab.Constructor.VERSION.match(/^3\./);
+  }
 
   // src/shiny.ts
   var Shiny;
@@ -7855,9 +7910,9 @@
   var $22 = require_export();
   var fails6 = require_fails();
   var ArrayBufferModule = require_array_buffer();
-  var anObject4 = require_an_object();
+  var anObject5 = require_an_object();
   var toAbsoluteIndex3 = require_to_absolute_index();
-  var toLength6 = require_to_length();
+  var toLength7 = require_to_length();
   var speciesConstructor2 = require_species_constructor();
   var ArrayBuffer3 = ArrayBufferModule.ArrayBuffer;
   var DataView2 = ArrayBufferModule.DataView;
@@ -7868,12 +7923,12 @@
   $22({target: "ArrayBuffer", proto: true, unsafe: true, forced: INCORRECT_SLICE}, {
     slice: function slice2(start, end) {
       if (nativeArrayBufferSlice !== void 0 && end === void 0) {
-        return nativeArrayBufferSlice.call(anObject4(this), start);
+        return nativeArrayBufferSlice.call(anObject5(this), start);
       }
-      var length = anObject4(this).byteLength;
+      var length = anObject5(this).byteLength;
       var first = toAbsoluteIndex3(start, length);
       var fin = toAbsoluteIndex3(end === void 0 ? length : end, length);
-      var result = new (speciesConstructor2(this, ArrayBuffer3))(toLength6(fin - first));
+      var result = new (speciesConstructor2(this, ArrayBuffer3))(toLength7(fin - first));
       var viewSource = new DataView2(this);
       var viewTarget = new DataView2(result);
       var index = 0;
@@ -7990,46 +8045,6 @@
   var keys2;
   var j;
   var key;
-
-  // node_modules/core-js/modules/es.string.match.js
-  "use strict";
-  var fixRegExpWellKnownSymbolLogic3 = require_fix_regexp_well_known_symbol_logic();
-  var anObject5 = require_an_object();
-  var toLength7 = require_to_length();
-  var requireObjectCoercible3 = require_require_object_coercible();
-  var advanceStringIndex3 = require_advance_string_index();
-  var regExpExec2 = require_regexp_exec_abstract();
-  fixRegExpWellKnownSymbolLogic3("match", 1, function(MATCH, nativeMatch, maybeCallNative) {
-    return [
-      function match(regexp) {
-        var O = requireObjectCoercible3(this);
-        var matcher = regexp == void 0 ? void 0 : regexp[MATCH];
-        return matcher !== void 0 ? matcher.call(regexp, O) : new RegExp(regexp)[MATCH](String(O));
-      },
-      function(regexp) {
-        var res = maybeCallNative(nativeMatch, regexp, this);
-        if (res.done)
-          return res.value;
-        var rx = anObject5(regexp);
-        var S = String(this);
-        if (!rx.global)
-          return regExpExec2(rx, S);
-        var fullUnicode = rx.unicode;
-        rx.lastIndex = 0;
-        var A = [];
-        var n = 0;
-        var result;
-        while ((result = regExpExec2(rx, S)) !== null) {
-          var matchStr = String(result[0]);
-          A[n] = matchStr;
-          if (matchStr === "")
-            rx.lastIndex = advanceStringIndex3(S, toLength7(rx.lastIndex), fullUnicode);
-          n++;
-        }
-        return n === 0 ? null : A;
-      }
-    ];
-  });
 
   // node_modules/core-js/modules/es.string.search.js
   "use strict";

@@ -50,10 +50,11 @@
   },
   "scripts": {
     "watch": "yarn run build_shiny --watch",
-    "build": "yarn run build_shiny",
+    "build": "yarn run build_shiny && yarn run bundle_external_libs",
     "setup_build_shiny": "yarn run lint && yarn run typescript-check",
     "build_shiny": "yarn run setup_build_shiny && yarn run bundle_shiny",
     "bundle_shiny": "node esbuild.config.mjs",
+    "bundle_external_libs": "node esbuild.external_libs.mjs",
     "bundle_shiny_parcel2": "parcel build -d ../inst/www/shared --no-minify -o shiny.js src/index.ts",
     "watch_parcel2": "yarn run setup_build_shiny && parcel run -d ../inst/www/shared -o shiny.js srcjs/index.ts",
     "replace_shiny_version2": "replace --silent '\"[^\"]+\"; // @VERSION@' \"\\\"`node -e 'console.log(require(\"readcontrol\").readSync(\"../DESCRIPTION\").version)'`\\\"; // @VERSION@\" src/shiny.ts",

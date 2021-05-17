@@ -33,7 +33,7 @@ local({
   # TODO .. or check that pkgdown::build_reference_index() does not produce warnings
   known_unindexed <- c("shiny-package", "stacktrace", "knitr_methods",
                        "pageWithSidebar", "headerPanel", "shiny.appobj",
-                       "deprecatedReactives", "reexports", "makeReactiveBinding",
+                       "reexports", "makeReactiveBinding",
                        "reactiveConsole", "registerThemeDependency",
                        "memoryCache", "diskCache", "shinyDeprecated")
 

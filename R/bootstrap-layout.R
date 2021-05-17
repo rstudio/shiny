@@ -11,8 +11,6 @@
 #' @param ... Elements to include within the page
 #' @param title The browser window title (defaults to the host URL of the page).
 #'   Can also be set as a side effect of the [titlePanel()] function.
-#' @param responsive This option is deprecated; it is no longer optional with
-#'   Bootstrap 3.
 #' @inheritParams bootstrapPage
 #'
 #' @return A UI defintion that can be passed to the [shinyUI] function.
@@ -85,10 +83,9 @@
 #' }
 #' @rdname fluidPage
 #' @export
-fluidPage <- function(..., title = NULL, responsive = deprecated(), theme = NULL, lang = NULL) {
+fluidPage <- function(..., title = NULL, theme = NULL, lang = NULL) {
   bootstrapPage(div(class = "container-fluid", ...),
                 title = title,
-                responsive = responsive,
                 theme = theme,
                 lang = lang)
 }
@@ -112,8 +109,6 @@ fluidRow <- function(...) {
 #'
 #' @param ... Elements to include within the container
 #' @param title The browser window title (defaults to the host URL of the page)
-#' @param responsive This option is deprecated; it is no longer optional with
-#'   Bootstrap 3.
 #' @inheritParams bootstrapPage
 #'
 #' @return A UI defintion that can be passed to the [shinyUI] function.
@@ -153,10 +148,9 @@ fluidRow <- function(...) {
 #'
 #' @rdname fixedPage
 #' @export
-fixedPage <- function(..., title = NULL, responsive = deprecated(), theme = NULL, lang = NULL) {
+fixedPage <- function(..., title = NULL, theme = NULL, lang = NULL) {
   bootstrapPage(div(class = "container", ...),
                 title = title,
-                responsive = responsive,
                 theme = theme,
                 lang = lang)
 }
@@ -396,7 +390,7 @@ mainPanel <- function(..., width = 8) {
 #' }
 #' @export
 verticalLayout <- function(..., fluid = TRUE) {
-  lapply(list(...), function(row) {
+  lapply(list2(...), function(row) {
     col <- column(12, row)
     if (fluid)
       fluidRow(col)
@@ -433,7 +427,7 @@ verticalLayout <- function(..., fluid = TRUE) {
 #' @export
 flowLayout <- function(..., cellArgs = list()) {
 
-  children <- list(...)
+  children <- list2(...)
   childIdx <- !nzchar(names(children) %||% character(length(children)))
   attribs <- children[!childIdx]
   children <- children[childIdx]
@@ -516,7 +510,7 @@ inputPanel <- function(...) {
 #' @export
 splitLayout <- function(..., cellWidths = NULL, cellArgs = list()) {
 
-  children <- list(...)
+  children <- list2(...)
   childIdx <- !nzchar(names(children) %||% character(length(children)))
   attribs <- children[!childIdx]
   children <- children[childIdx]
@@ -614,7 +608,7 @@ fillCol <- function(..., flex = 1, width = "100%", height = "100%") {
 }
 
 flexfill <- function(..., direction, flex, width = width, height = height) {
-  children <- list(...)
+  children <- list2(...)
   attrs <- list()
 
   if (!is.null(names(children))) {

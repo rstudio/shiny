@@ -3,15 +3,12 @@
 \name{reactlog}
 \alias{reactlog}
 \alias{reactlogShow}
-\alias{showReactLog}
 \alias{reactlogReset}
 \title{Reactive Log Visualizer}
 \usage{
 reactlog()
 
 reactlogShow(time = TRUE)
-
-showReactLog(time = TRUE)
 
 reactlogReset()
 }
@@ -58,8 +55,6 @@ of the source code of your reactive expressions and observers.
 \link[reactlog:reactlog_show]{reactlog::reactlog_show} to later display the reactlog graph.
 
 \item \code{reactlogShow}: Display a full reactlog graph for all sessions.
-
-\item \code{showReactLog}: This function is deprecated. You should use \code{\link[=reactlogShow]{reactlogShow()}}
 
 \item \code{reactlogReset}: Resets the entire reactlog stack.  Useful for debugging and removing all prior reactive history.
 }}

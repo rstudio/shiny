@@ -9,7 +9,8 @@ tabsetPanel(
   id = NULL,
   selected = NULL,
   type = c("tabs", "pills", "hidden"),
-  position = deprecated()
+  header = NULL,
+  footer = NULL
 )
 }
 \arguments{
@@ -32,8 +33,11 @@ conjunction with \code{\link[=tabPanelBody]{tabPanelBody()}} and \code{\link[=up
 active tab via other input controls. (See example below)}
 }}
 
-\item{position}{This argument is deprecated; it has been discontinued in
-Bootstrap 3.}
+\item{header}{Tag or list of tags to display as a common header above all
+tabPanels.}
+
+\item{footer}{Tag or list of tags to display as a common footer below all
+tabPanels}
 }
 \value{
 A tabset that can be passed to \code{\link[=mainPanel]{mainPanel()}}

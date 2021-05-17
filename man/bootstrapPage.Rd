@@ -5,13 +5,7 @@
 \alias{basicPage}
 \title{Create a Bootstrap page}
 \usage{
-bootstrapPage(
-  ...,
-  title = NULL,
-  responsive = deprecated(),
-  theme = NULL,
-  lang = NULL
-)
+bootstrapPage(..., title = NULL, theme = NULL, lang = NULL)
 
 basicPage(...)
 }
@@ -19,9 +13,6 @@ basicPage(...)
 \item{...}{The contents of the document body.}
 
 \item{title}{The browser window title (defaults to the host URL of the page)}
-
-\item{responsive}{This option is deprecated; it is no longer optional with
-Bootstrap 3.}
 
 \item{theme}{One of the following:
 \itemize{

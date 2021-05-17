@@ -26,11 +26,11 @@ class FileProcessor {
   }
 
   // Begin callbacks. Subclassers/cloners may override any or all of these.
-  onBegin(files: any, cont: () => void): void {
+  onBegin(files, cont: () => void): void {
     files;
     setTimeout(cont, 0);
   }
-  onFile(file: any, cont: () => void): void {
+  onFile(file, cont: () => void): void {
     file;
     setTimeout(cont, 0);
   }

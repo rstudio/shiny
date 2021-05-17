@@ -1,6 +1,14 @@
 import $ from "jquery";
 import { OutputBinding } from ".";
 import {
+  createBrushHandler,
+  createClickHandler,
+  createClickInfo,
+  createHoverHandler,
+  disableDrag,
+  initCoordmap,
+} from "../../imageutils";
+import {
   strToBool,
   getComputedLinkColor,
   getStyle,
@@ -140,11 +148,11 @@ class ImageOutputBinding extends OutputBinding {
     // height and width
     $img.off("load.shiny_image_interaction");
     $img.one("load.shiny_image_interaction", function () {
-      imageutils.initCoordmap($el, opts.coordmap);
+      initCoordmap($el, opts.coordmap);
 
       // This object listens for mousedowns, and triggers mousedown2 and dblclick2
       // events as appropriate.
-      const clickInfo = imageutils.createClickInfo(
+      const clickInfo = createClickInfo(
         $el,
         opts.dblclickId,
         opts.dblclickDelay
@@ -160,9 +168,9 @@ class ImageOutputBinding extends OutputBinding {
       // Register the various event handlers
       // ----------------------------------------------------------
       if (opts.clickId) {
-        imageutils.disableDrag($el, $img);
+        disableDrag($el, $img);
 
-        const clickHandler = imageutils.createClickHandler(
+        const clickHandler = createClickHandler(
           opts.clickId,
           opts.clickClip,
           opts.coordmap
@@ -178,11 +186,11 @@ class ImageOutputBinding extends OutputBinding {
       }
 
       if (opts.dblclickId) {
-        imageutils.disableDrag($el, $img);
+        disableDrag($el, $img);
 
         // We'll use the clickHandler's mousedown function, but register it to
         // our custom 'dblclick2' event.
-        const dblclickHandler = imageutils.createClickHandler(
+        const dblclickHandler = createClickHandler(
           opts.dblclickId,
           opts.clickClip,
           opts.coordmap
@@ -195,9 +203,9 @@ class ImageOutputBinding extends OutputBinding {
       }
 
       if (opts.hoverId) {
-        imageutils.disableDrag($el, $img);
+        disableDrag($el, $img);
 
-        const hoverHandler = imageutils.createHoverHandler(
+        const hoverHandler = createHoverHandler(
           opts.hoverId,
           opts.hoverDelay,
           opts.hoverDelayType,
@@ -214,9 +222,9 @@ class ImageOutputBinding extends OutputBinding {
       }
 
       if (opts.brushId) {
-        imageutils.disableDrag($el, $img);
+        disableDrag($el, $img);
 
-        const brushHandler = imageutils.createBrushHandler(
+        const brushHandler = createBrushHandler(
           opts.brushId,
           $el,
           opts,

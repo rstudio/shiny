@@ -231,11 +231,11 @@ const $escape = function (val: string): string {
 
 // Maps a function over an object, preserving keys. Like the mapValues
 // function from lodash.
-function mapValues(
-  obj: Record<string, unknown>,
-  f: (value: unknown, key: string, obj: Record<string, unknown>) => unknown
-): Record<string, unknown> {
-  const newObj: Record<string, unknown> = {};
+function mapValues<V, R>(
+  obj: Record<string, V>,
+  f: (value: V, key: string, obj: Record<string, V>) => R
+): Record<string, R> {
+  const newObj: Record<string, R> = {};
 
   for (const key in obj) {
     // eslint-disable-next-line no-prototype-builtins

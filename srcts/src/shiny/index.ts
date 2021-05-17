@@ -6,6 +6,10 @@ import {
 } from "../bindings";
 import { resetBrush } from "../imageutils/resetBrush";
 import { $escape, compareVersion } from "../utils";
+import {
+  show as showNotification,
+  remove as removeNotification,
+} from "./notifications";
 
 interface ShinyType {
   version: string;
@@ -16,6 +20,7 @@ interface ShinyType {
   outputBindings: typeof outputBindings;
   OutputBinding: typeof OutputBinding;
   resetBrush: typeof resetBrush;
+  notifications;
 }
 
 let Shiny: ShinyType;
@@ -32,6 +37,7 @@ function setShiny(Shiny_: ShinyType): void {
   Shiny.inputBindings = inputBindings;
   Shiny.outputBindings = outputBindings;
   Shiny.resetBrush = resetBrush;
+  Shiny.notifications = { showNotification, removeNotification };
 }
 
 export { Shiny, setShiny };

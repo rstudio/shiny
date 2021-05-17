@@ -1,13 +1,18 @@
 import $ from "jquery";
 import { InputBinding } from ".";
-import { hasOwnProperty } from "../../utils";
+import { hasOwnProperty, isBS3 } from "../../utils";
 
 class BootstrapTabInputBinding extends InputBinding {
   find(scope: HTMLElement): JQuery<HTMLElement> {
     return $(scope).find("ul.nav.shiny-tab-input");
   }
   getValue(el: HTMLElement): string | null {
-    const anchor = $(el).find("li:not(.dropdown).active").children("a");
+    // prettier-ignore
+    const anchor = isBS3()
+      ? $(el).find("li:not(.dropdown).active > a")
+      : $(el).find(
+        ".nav-link:not(.dropdown-toggle).active, .dropdown-menu > .dropdown-item.active"
+      );
 
     if (anchor.length === 1) return this._getTabName(anchor);
 
@@ -20,7 +25,12 @@ class BootstrapTabInputBinding extends InputBinding {
     let success = false;
 
     if (value) {
-      const anchors = $(el).find("li:not(.dropdown)").children("a");
+      // prettier-ignore
+      const anchors = isBS3()
+        ? $(el).find("li:not(.dropdown) > a")
+        : $(el).find(
+          ".nav-link:not(.dropdown-toggle), .dropdown-menu > .dropdown-item"
+        );
 
       anchors.each(function () {
         if (self._getTabName($(this)) === value) {

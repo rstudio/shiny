@@ -3,8 +3,9 @@ import {
   InputBinding,
   outputBindings,
   OutputBinding,
-} from "./bindings";
-import { $escape, compareVersion } from "./utils";
+} from "../bindings";
+import { resetBrush } from "../imageutils/resetBrush";
+import { $escape, compareVersion } from "../utils";
 
 interface ShinyType {
   version: string;
@@ -14,6 +15,7 @@ interface ShinyType {
   InputBinding: typeof InputBinding;
   outputBindings: typeof outputBindings;
   OutputBinding: typeof OutputBinding;
+  resetBrush: typeof resetBrush;
 }
 
 let Shiny: ShinyType;
@@ -29,6 +31,7 @@ function setShiny(Shiny_: ShinyType): void {
   Shiny.compareVersion = compareVersion;
   Shiny.inputBindings = inputBindings;
   Shiny.outputBindings = outputBindings;
+  Shiny.resetBrush = resetBrush;
 }
 
 export { Shiny, setShiny };

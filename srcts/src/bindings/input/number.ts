@@ -61,6 +61,7 @@ class NumberInputBinding extends TextInputBinding {
       step: Number(el.step),
     };
   }
+
   _getLabelNode(el: HTMLElement): JQuery<HTMLElement> {
     return $(el)
       .parent()

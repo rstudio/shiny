@@ -1,5 +1,4 @@
 import $ from "jquery";
-import { hasOwnProperty } from "../utils";
 import { splitInputNameType } from "./splitInputNameType";
 
 class InputEventDecorator {
@@ -9,7 +8,7 @@ class InputEventDecorator {
     this.target = target;
   }
 
-  setInput(nameType, value, opts) {
+  setInput(nameType, value, opts): void {
     const evt = jQuery.Event("shiny:inputchanged");
 
     const input = splitInputNameType(nameType);

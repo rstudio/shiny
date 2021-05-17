@@ -84,7 +84,7 @@
   * What matters is that `false` is returned, or nothing is returned. Replaced `return true;` with `return;`
 * Questions
   * Why does `receiveMessage(data)` sometimes have a `label`?
-  *
+  * Should we have a update datatables script?
 
 
 # Later TODO

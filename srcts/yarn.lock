@@ -1979,6 +1979,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/datatables.net@npm:^1.10.19":
+  version: 1.10.19
+  resolution: "@types/datatables.net@npm:1.10.19"
+  dependencies:
+    "@types/jquery": "*"
+  checksum: d1b1dc1eaba0044aa4251dd32d77436093c874d487509c04805d998f2696992c1b1bda5df1875d220806ffae77668c989fafc742f597277757702e0a371a1f96
+  languageName: node
+  linkType: hard
+
 "@types/graceful-fs@npm:^4.1.2":
   version: 4.1.5
   resolution: "@types/graceful-fs@npm:4.1.5"
@@ -9430,6 +9439,7 @@ fsevents@^2.1.2:
     "@testing-library/user-event": ^12.7.3
     "@types/bootstrap": 3.4.0
     "@types/bootstrap-datepicker": 0.0.14
+    "@types/datatables.net": ^1.10.19
     "@types/ion-rangeslider": 2.3.0
     "@types/jest": ^26
     "@types/jquery": "patch:@types/jquery@^3.5.5#./patch/types-jquery.patch"

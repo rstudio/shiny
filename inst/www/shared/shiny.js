@@ -4781,8 +4781,16 @@
           }
         }
         if (dep.script && !restyle) {
-          var scripts = import_jquery6.default.map(asArray(dep.script), function(scriptName) {
-            return import_jquery6.default("<script>").attr("src", href + "/" + encodeURI(scriptName));
+          var scripts_attrs = asArray(dep.script);
+          var scripts = import_jquery6.default.map(scripts_attrs, function(x) {
+            var attrs = typeof x === "string" ? "src" : Object.keys(x);
+            var script = import_jquery6.default("<script>");
+            for (var i = 0; i < attrs.length; i++) {
+              var nm = attrs[i];
+              var val = x[nm];
+              nm === "src" ? script.attr("src", href + "/" + encodeURI(val)) : script.attr(nm, val);
+            }
+            return script;
           });
           $head.append(scripts);
         }

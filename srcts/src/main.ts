@@ -4155,8 +4155,22 @@ function main(): void {
     }
 
     if (dep.script && !restyle) {
-      const scripts = $.map(asArray(dep.script), function (scriptName) {
-        return $("<script>").attr("src", href + "/" + encodeURI(scriptName));
+      const scripts_attrs = asArray(dep.script);
+      const scripts = $.map(scripts_attrs, function (x) {
+        // htmlDependency()'s script arg may be a list of attributes
+        const attrs = typeof x === "string" ? "src" : Object.keys(x);
+        let script = $("<script>");
+
+        for (let i = 0; i < attrs.length; i++) {
+          const nm = attrs[i];
+          const val = x[nm];
+
+          nm === "src"
+            ? script.attr("src", href + "/" + encodeURI(val))
+            : script.attr(nm, val);
+        }
+
+        return script;
       });
 
       $head.append(scripts);

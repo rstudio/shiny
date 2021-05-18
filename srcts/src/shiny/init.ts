@@ -10,6 +10,7 @@ import {
   InputValidateDecorator,
 } from "../inputPolicies";
 import { addDefaultInputOpts } from "../inputPolicies/inputValidateDecorator";
+import { registerDependency } from "./render";
 import { ShinyApp } from "./shinyapp";
 import { registerNames as singletonsRegisterNames } from "./singletons";
 
@@ -681,7 +682,7 @@ function initShiny(Shiny: ShinyType): void {
     'script[type="application/shiny-singletons"]'
   ).text());
 
-  singletons.registerNames(singletonText.split(/,/));
+  singletonsRegisterNames(singletonText.split(/,/));
 
   const dependencyText = $(
     'script[type="application/html-dependencies"]'

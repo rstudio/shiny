@@ -68,7 +68,7 @@ function renderHtml(
 
 const htmlDependencies = {};
 
-function registerDependency(name, version) {
+function registerDependency(name, version): void {
   htmlDependencies[name] = version;
 }
 
@@ -286,4 +286,4 @@ function renderDependency(dep) {
   return true;
 }
 
-export { renderDependencies, renderContent, renderHtml };
+export { renderDependencies, renderContent, renderHtml, registerDependency };

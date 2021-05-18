@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function main(): void {
   // "_start.js"
   // √
@@ -90,3 +91,5 @@ function main(): void {
   // "_end.js"
   // √
 }
+
+export {};

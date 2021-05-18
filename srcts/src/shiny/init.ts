@@ -11,6 +11,7 @@ import {
 } from "../inputPolicies";
 import { addDefaultInputOpts } from "../inputPolicies/inputValidateDecorator";
 import { ShinyApp } from "./shinyapp";
+import { registerNames as singletonsRegisterNames } from "./singletons";
 
 // This function gets defined in initShiny() and 'hoisted' so it can be reused
 // (to send CSS info) inside of Shiny.renderDependencies()
@@ -700,6 +701,8 @@ function initShiny(Shiny: ShinyType): void {
   $(document).one("shiny:connected", function () {
     initDeferredIframes();
   });
+
+  window.console.log("Shiny version: ", Shiny.version);
 } // function initShiny()
 
 // Give any deferred iframes a chance to load.

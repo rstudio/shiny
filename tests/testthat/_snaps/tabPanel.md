@@ -87,7 +87,7 @@
             </a>
           </li>
           <li class="dropdown nav-item">
-            <a href="#" class="dropdown-toggle nav-link" data-toggle="dropdown" data-value="Menu">
+            <a href="#" data-toggle="dropdown" data-value="Menu" class="dropdown-toggle nav-link">
               Menu
               <b class="caret"></b>
             </a>
@@ -122,7 +122,7 @@
             </a>
           </li>
           <li class="dropdown nav-item">
-            <a href="#" class="dropdown-toggle nav-link" data-toggle="dropdown" data-value="Menu">
+            <a href="#" data-toggle="dropdown" data-value="Menu" class="dropdown-toggle nav-link">
               Menu
               <b class="caret"></b>
             </a>
@@ -205,7 +205,7 @@
               </a>
             </li>
             <li class="dropdown nav-item">
-              <a href="#" class="dropdown-toggle nav-link" data-toggle="dropdown" data-value="Menu">
+              <a href="#" data-toggle="dropdown" data-value="Menu" class="dropdown-toggle nav-link">
                 Menu
                 <b class="caret"></b>
               </a>
@@ -285,7 +285,7 @@
               </a>
             </li>
             <li class="dropdown nav-item">
-              <a href="#" class="dropdown-toggle nav-link" data-toggle="dropdown" data-value="Menu">
+              <a href="#" data-toggle="dropdown" data-value="Menu" class="dropdown-toggle nav-link">
                 Menu
                 <b class="caret"></b>
               </a>

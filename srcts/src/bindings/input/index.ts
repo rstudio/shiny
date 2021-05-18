@@ -119,7 +119,7 @@ class InputBinding {
 //// END NOTES FOR FUTURE DEV
 
 // TODO-barret make this an init method
-const inputBindings = new BindingRegistry();
+const inputBindings = new BindingRegistry<InputBinding>();
 
 inputBindings.register(new TextInputBinding(), "shiny.textInput");
 inputBindings.register(new TextareaInputBinding(), "shiny.textareaInput");

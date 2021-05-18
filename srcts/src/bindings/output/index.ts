@@ -13,7 +13,7 @@ class OutputBinding {
 
   // Returns a jQuery object or element array that contains the
   // descendants of scope that match this binding
-  find(scope: HTMLElement): void {
+  find(scope: HTMLElement): JQuery<HTMLElement> {
     throw "Not implemented";
     scope;
   }
@@ -67,7 +67,7 @@ class OutputBinding {
   }
 }
 
-const outputBindings = new BindingRegistry();
+const outputBindings = new BindingRegistry<OutputBinding>();
 
 outputBindings.register(new TextOutputBinding(), "shiny.textOutput");
 outputBindings.register(new DownloadLinkOutputBinding(), "shiny.downloadLink");

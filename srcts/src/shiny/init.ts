@@ -1,6 +1,7 @@
 import $ from "jquery";
 import { ShinyType } from ".";
-import { outputBindings } from "../bindings";
+import { inputBindings, outputBindings } from "../bindings";
+import { OutputBindingAdapter } from "../bindings/output_adapter";
 import {
   InputBatchSender,
   InputDeferDecorator,

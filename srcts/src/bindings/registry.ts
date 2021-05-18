@@ -1,25 +1,20 @@
-import { InputBinding, OutputBinding } from ".";
 import { mergeSort } from "../utils";
 
-// type BindingType = OutputBinding | InputBinding;
+interface BindingInterface {
+  name: string;
+}
 
-interface BindingType {
-  binding: InputBinding | OutputBinding;
+interface BindingObjType<BindingType> {
+  binding: BindingType;
   priority: number;
   name?: string;
 }
 
-type BindingsType = Array<BindingType>;
+class BindingRegistry<BindingType extends BindingInterface> {
+  bindings: Array<BindingObjType<BindingType>> = [];
+  bindingNames: Record<string, BindingObjType<BindingType>> = {};
 
-class BindingRegistry {
-  bindings: BindingsType = [];
-  bindingNames: Record<string, BindingType> = {};
-
-  register(
-    binding: InputBinding | OutputBinding,
-    bindingName: string,
-    priority = 0
-  ): void {
+  register(binding: BindingType, bindingName: string, priority = 0): void {
     const bindingObj = { binding, priority };
 
     this.bindings.unshift(bindingObj);
@@ -44,7 +39,7 @@ class BindingRegistry {
     return bindingObj.priority;
   }
 
-  getBindings(): BindingsType {
+  getBindings(): Array<BindingObjType<BindingType>> {
     // Sort the bindings. The ones with higher priority are consulted
     // first; ties are broken by most-recently-registered.
     return mergeSort(this.bindings, function (a, b) {

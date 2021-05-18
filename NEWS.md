@@ -36,8 +36,7 @@ shiny 1.6.0.9000
 
 * Exported `register_devmode_option()`. This method was described in the documentation for `devmode()` but was never exported. See `?devmode()` for more details on how to register Shiny Developer options using `register_devmode_option()`. (#3364)
 
-* Restored the previous behavior of automatically guessing the `Content-Type` header for
-  `downloadHandler` functions when no explicit `contentType` argument is supplied.
+* Restored the previous behavior of automatically guessing the `Content-Type` header for `downloadHandler` functions when no explicit `contentType` argument is supplied. (#3393)
 
 ### Library updates
 

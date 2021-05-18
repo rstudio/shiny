@@ -12,6 +12,9 @@ import {
 } from "./notifications";
 import { show as showModal, remove as removeModal } from "./modal";
 import { showReconnectDialog, hideReconnectDialog } from "./reconnectDialog";
+import { renderContent, renderDependencies, renderHtml } from "./render";
+import { initShiny } from "./init";
+import { ShinyApp } from "./shinyapp";
 
 interface ShinyType {
   version: string;
@@ -28,11 +31,17 @@ interface ShinyType {
   };
   modal: { show: typeof showModal; remove: typeof removeModal };
   createSocket: null | (() => WebSocket);
+  shinyapp: ShinyApp;
   addCustomMessageHandler;
   progressHandlers;
   showReconnectDialog;
   hideReconnectDialog;
   user: string;
+  renderDependencies;
+  renderContent;
+  renderHtml;
+  setInputValue
+  onInputChange:
 }
 
 let Shiny: ShinyType;
@@ -53,9 +62,19 @@ function setShiny(Shiny_: ShinyType): void {
   Shiny.modal = { show: showModal, remove: removeModal };
 
   Shiny.addCustomMessageHandler;
-  Shiny.progressHandlers = shinyapp.progressHandlers;
   Shiny.showReconnectDialog = showReconnectDialog;
   Shiny.hideReconnectDialog = hideReconnectDialog;
+  Shiny.renderDependencies = renderDependencies;
+  Shiny.renderContent = renderContent;
+  Shiny.renderHtml = renderHtml;
+
+  $(function () {
+    // Init Shiny a little later than document ready, so user code can
+    // run first (i.e. to register bindings)
+    setTimeout(function () {
+      initShiny(Shiny);
+    }, 1);
+  });
 }
 
 function getCreateSocket(): ShinyType["createSocket"] {

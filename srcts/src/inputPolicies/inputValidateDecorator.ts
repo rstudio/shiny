@@ -1,7 +1,13 @@
 import $ from "jquery";
 
 // Merge opts with defaults, and return a new object.
-function addDefaultInputOpts(opts) {
+function addDefaultInputOpts(
+  opts
+): {
+  priority: "immeidate" | "deferred" | "event";
+  binding: null;
+  el: null;
+} {
   opts = $.extend(
     {
       priority: "immediate",
@@ -41,4 +47,4 @@ class InputValidateDecorator {
   };
 }
 
-export { InputValidateDecorator };
+export { InputValidateDecorator, addDefaultInputOpts };

@@ -1,11 +1,13 @@
 import { hasOwnProperty } from "../utils";
 import { splitInputNameType } from "./splitInputNameType";
 
+type lastSentValuesType = Record<string, Record<string, string>>;
+
 class InputNoResendDecorator {
   target;
-  lastSentValues: Record<string, Record<string, string>>;
+  lastSentValues: lastSentValuesType;
 
-  constructor(target, initialValues) {
+  constructor(target, initialValues: lastSentValuesType = {}) {
     this.target = target;
     this.reset(initialValues);
   }

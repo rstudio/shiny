@@ -11,6 +11,7 @@ import {
   remove as removeNotification,
 } from "./notifications";
 import { show as showModal, remove as removeModal } from "./modal";
+import { showReconnectDialog, hideReconnectDialog } from "./reconnectDialog";
 
 interface ShinyType {
   version: string;
@@ -26,6 +27,12 @@ interface ShinyType {
     remove: typeof removeNotification;
   };
   modal: { show: typeof showModal; remove: typeof removeModal };
+  createSocket: null | (() => WebSocket);
+  addCustomMessageHandler;
+  progressHandlers;
+  showReconnectDialog;
+  hideReconnectDialog;
+  user: string;
 }
 
 let Shiny: ShinyType;
@@ -44,8 +51,17 @@ function setShiny(Shiny_: ShinyType): void {
   Shiny.resetBrush = resetBrush;
   Shiny.notifications = { show: showNotification, remove: removeNotification };
   Shiny.modal = { show: showModal, remove: removeModal };
+
+  Shiny.addCustomMessageHandler;
+  Shiny.progressHandlers = shinyapp.progressHandlers;
+  Shiny.showReconnectDialog = showReconnectDialog;
+  Shiny.hideReconnectDialog = hideReconnectDialog;
 }
 
-export { Shiny, setShiny };
+function getCreateSocket(): ShinyType["createSocket"] {
+  return Shiny.createSocket;
+}
+
+export { Shiny, setShiny, getCreateSocket };
 
 export type { ShinyType };

@@ -11,7 +11,7 @@ interface ShinyEventInputChanged extends JQuery.Event {
 
 function triggerFileInputChanged(
   name: string,
-  value: any,
+  value,
   binding: FileInputBinding,
   el: HTMLElement,
   inputType: string,
@@ -19,11 +19,11 @@ function triggerFileInputChanged(
 ): ShinyEventInputChanged {
   const evt = $.Event("shiny:inputchanged") as ShinyEventInputChanged;
 
-  evt.name = this.id;
+  evt.name = name;
   evt.value = value;
   evt.binding = binding;
-  evt.el = this.el;
-  evt.inputType = "shiny.fileupload";
+  evt.el = el;
+  evt.inputType = inputType;
 
   $(onEl).trigger(evt);
 

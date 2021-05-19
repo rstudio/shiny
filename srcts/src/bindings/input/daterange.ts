@@ -1,4 +1,5 @@
 import $ from "jquery";
+import { InputBinding } from ".";
 
 import {
   $escape,
@@ -6,9 +7,18 @@ import {
   hasOwnProperty,
   updateLabel,
 } from "../../utils";
-import { DateInputBinding } from "./date";
+import {
+  getRatePolicy,
+  _formatToString,
+  _setMin,
+  _setMax,
+  _newDate,
+  _floorDateTime,
+  _dateAsUTC,
+  _UTCDateAsLocal,
+} from "./date";
 
-class DateRangeInputBinding extends DateInputBinding {
+class DateRangeInputBinding extends InputBinding {
   find(scope: HTMLElement): JQuery<HTMLElement> {
     return $(scope).find(".shiny-date-range-input");
   }
@@ -37,7 +47,7 @@ class DateRangeInputBinding extends DateInputBinding {
       if (value.start === null) {
         $inputs.eq(0).val("").bsDatepicker("update");
       } else {
-        const start = this._newDate(value.start);
+        const start = _newDate(value.start);
 
         $inputs.eq(0).bsDatepicker("setUTCDate", start);
       }
@@ -46,7 +56,7 @@ class DateRangeInputBinding extends DateInputBinding {
       if (value.end === null) {
         $inputs.eq(1).val("").bsDatepicker("update");
       } else {
-        const end = this._newDate(value.end);
+        const end = _newDate(value.end);
 
         $inputs.eq(1).bsDatepicker("setUTCDate", end);
       }
@@ -93,7 +103,7 @@ class DateRangeInputBinding extends DateInputBinding {
       min: min,
       max: max,
       weekstart: $startinput.data("datepicker").weekStart,
-      format: this._formatToString($startinput.data("datepicker").format),
+      format: _formatToString($startinput.data("datepicker").format),
       language: $startinput.data("datepicker").language,
       startview: startview,
     };
@@ -115,13 +125,13 @@ class DateRangeInputBinding extends DateInputBinding {
     updateLabel(data.label, this._getLabelNode(el));
 
     if (hasOwnProperty(data, "min")) {
-      this._setMin($startinput[0], data.min);
-      this._setMin($endinput[0], data.min);
+      _setMin($startinput[0], data.min);
+      _setMin($endinput[0], data.min);
     }
 
     if (hasOwnProperty(data, "max")) {
-      this._setMax($startinput[0], data.max);
-      this._setMax($endinput[0], data.max);
+      _setMax($startinput[0], data.max);
+      _setMax($endinput[0], data.max);
     }
 
     // Must set value only after min and max have been set. If new value is
@@ -131,6 +141,8 @@ class DateRangeInputBinding extends DateInputBinding {
 
     $el.trigger("change");
   }
+  getRatePolicy = getRatePolicy;
+
   initialize(el: HTMLElement): void {
     const $el = $(el);
     const $inputs = $el.find("input");
@@ -141,10 +153,9 @@ class DateRangeInputBinding extends DateInputBinding {
     let end = $endinput.data("initial-date");
 
     // If empty/null, use local date, but as UTC
-    if (start === undefined || start === null)
-      start = this._dateAsUTC(new Date());
+    if (start === undefined || start === null) start = _dateAsUTC(new Date());
 
-    if (end === undefined || end === null) end = this._dateAsUTC(new Date());
+    if (end === undefined || end === null) end = _dateAsUTC(new Date());
 
     this.setValue(el, { start: start, end: end });
 
@@ -152,10 +163,10 @@ class DateRangeInputBinding extends DateInputBinding {
     // // use yyyy-mm-dd format, instead of bootstrap-datepicker's built-in
     // // support for date-startdate and data-enddate, which use the current
     // // date format.
-    this._setMin($startinput[0], $startinput.data("min-date"));
-    this._setMin($endinput[0], $startinput.data("min-date"));
-    this._setMax($startinput[0], $endinput.data("max-date"));
-    this._setMax($endinput[0], $endinput.data("max-date"));
+    _setMin($startinput[0], $startinput.data("min-date"));
+    _setMin($endinput[0], $startinput.data("min-date"));
+    _setMax($startinput[0], $endinput.data("max-date"));
+    _setMax($endinput[0], $endinput.data("max-date"));
   }
   subscribe(el: HTMLElement, callback: (x: boolean) => void): void {
     $(el).on(
@@ -181,6 +192,14 @@ class DateRangeInputBinding extends DateInputBinding {
   _getLabelNode(el: HTMLElement): JQuery<HTMLElement> {
     return $(el).find('label[for="' + $escape(el.id) + '"]');
   }
+
+  _formatToString = _formatToString;
+  _setMin = _setMin;
+  _setMax = _setMax;
+  _newDate = _newDate;
+  _floorDateTime = _floorDateTime;
+  _dateAsUTC = _dateAsUTC;
+  _UTCDateAsLocal = _UTCDateAsLocal;
 }
 
 export { DateRangeInputBinding };

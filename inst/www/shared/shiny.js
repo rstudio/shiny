@@ -4783,12 +4783,20 @@
         if (dep.script && !restyle) {
           var scripts_attrs = asArray(dep.script);
           var scripts = import_jquery6.default.map(scripts_attrs, function(x) {
-            var attrs = typeof x === "string" ? "src" : Object.keys(x);
-            var script = import_jquery6.default("<script>");
+            var script = document.createElement("script");
+            if (typeof x === "string") {
+              x = {
+                src: x
+              };
+            }
+            var attrs = Object.keys(x);
             for (var i = 0; i < attrs.length; i++) {
-              var nm = attrs[i];
-              var val = x[nm];
-              nm === "src" ? script.attr("src", href + "/" + encodeURI(val)) : script.attr(nm, val);
+              var attr = attrs[i];
+              var val = x[attr];
+              if (attr === "src") {
+                val = href + "/" + encodeURI(val);
+              }
+              val ? script.setAttribute(attr, val) : script.toggleAttribute(attr);
             }
             return script;
           });

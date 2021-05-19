@@ -4157,17 +4157,23 @@ function main(): void {
     if (dep.script && !restyle) {
       const scripts_attrs = asArray(dep.script);
       const scripts = $.map(scripts_attrs, function (x) {
+        let script = document.createElement("script");
+
         // htmlDependency()'s script arg may be a list of attributes
-        const attrs = typeof x === "string" ? "src" : Object.keys(x);
-        let script = $("<script>");
+        if (typeof x === "string") {
+          x = { src: x };
+        }
+        const attrs = Object.keys(x);
 
         for (let i = 0; i < attrs.length; i++) {
-          const nm = attrs[i];
-          const val = x[nm];
+          const attr = attrs[i];
+          let val = x[attr];
 
-          nm === "src"
-            ? script.attr("src", href + "/" + encodeURI(val))
-            : script.attr(nm, val);
+          if (attr === "src") {
+            val = href + "/" + encodeURI(val);
+          }
+          // If val isn't truthy (e.g., null), consider it a boolean attribute
+          val ? script.setAttribute(attr, val) : script.toggleAttribute(attr);
         }
 
         return script;

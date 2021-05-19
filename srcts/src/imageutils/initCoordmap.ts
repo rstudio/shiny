@@ -19,7 +19,7 @@ function findScalingRatio($el: JQuery<HTMLElement>) {
   };
 }
 
-function findOrigin($el: JQuery<HTMLElement>) {
+function findOrigin($el: JQuery<HTMLElement>): OffsetType {
   const offset = $el.offset();
   const scalingRatio = findScalingRatio($el);
 
@@ -66,6 +66,21 @@ function findDims($el: JQuery<HTMLElement>) {
 
 type OffsetCssType = Record<string, number>;
 type OffsetImgType = Record<string, number>;
+
+type Coords = {
+  // eslint-disable-next-line camelcase
+  coords_css: OffsetType;
+  // eslint-disable-next-line camelcase
+  coords_img: OffsetType;
+  x?: number;
+  y?: number;
+  // eslint-disable-next-line camelcase
+  img_css_ratio?: OffsetType;
+  mapping?: PanelType["mapping"];
+  domain?: PanelType["domain"];
+  range?: PanelType["range"];
+  log?: PanelType["log"];
+};
 
 type CoordmapType = {
   panels: Array<PanelType>;
@@ -164,7 +179,10 @@ function initCoordmap($el: JQuery<HTMLElement>, coordmap: CoordmapType): void {
   // "xmin", "y", and "ymax" -- anything that starts with "x" and "y". If the
   // img content is 1000 pixels wide, but is scaled to 400 pixels on screen,
   // and the input is x:400, then this will return x:1000.
-  coordmap.scaleCssToImg = function (offsetCss) {
+  function scaleCssToImg(offsetCss: BoundsType): BoundsType;
+  function scaleCssToImg(offsetCss: OffsetType): OffsetType;
+  function scaleCssToImg(offsetCss: OffsetCssType): OffsetImgType;
+  function scaleCssToImg(offsetCss) {
     const pixelScaling = coordmap.imgToCssScalingRatio();
 
     const result = mapValues(offsetCss, (value, key) => {
@@ -179,13 +197,16 @@ function initCoordmap($el: JQuery<HTMLElement>, coordmap: CoordmapType): void {
     });
 
     return result;
-  };
+  }
+  coordmap.scaleCssToImg = scaleCssToImg;
 
   // Given an offset in an img, in source image pixels, return the
   // corresponding offset in CSS pixels. If the img content is 1000 pixels
   // wide, but is scaled to 400 pixels on screen, and the input is x:1000,
   // then this will return x:400.
+  function scaleImgToCss(offsetImg: BoundsType): BoundsType;
   function scaleImgToCss(offsetImg: OffsetType): OffsetType;
+  function scaleImgToCss(offsetImg: OffsetImgType): OffsetCssType;
   function scaleImgToCss(
     offsetImg: Record<string, number>
   ): Record<string, number> {
@@ -313,7 +334,6 @@ function initCoordmap($el: JQuery<HTMLElement>, coordmap: CoordmapType): void {
         Shiny.setInputValue(inputId, null);
         return;
       }
-      const coords = {};
       const coordsCss = coordmap.mouseOffsetCss(e);
       // If outside of plotting region
 
@@ -324,8 +344,12 @@ function initCoordmap($el: JQuery<HTMLElement>, coordmap: CoordmapType): void {
         }
         if (clip) return;
 
-        coords.coords_css = coordsCss;
-        coords.coords_img = coordmap.scaleCssToImg(coordsCss);
+        const coords: Coords = {
+          // eslint-disable-next-line camelcase
+          coords_css: coordsCss,
+          // eslint-disable-next-line camelcase
+          coords_img: coordmap.scaleCssToImg(coordsCss),
+        };
 
         Shiny.setInputValue(inputId, coords, { priority: "event" });
         return;
@@ -335,12 +359,16 @@ function initCoordmap($el: JQuery<HTMLElement>, coordmap: CoordmapType): void {
       const coordsImg = coordmap.scaleCssToImg(coordsCss);
       const coordsData = panel.scaleImgToData(coordsImg);
 
-      coords.x = coordsData.x;
-      coords.y = coordsData.y;
-      coords.coords_css = coordsCss;
-      coords.coords_img = coordsImg;
-
-      coords.img_css_ratio = coordmap.cssToImgScalingRatio();
+      const coords: Coords = {
+        x: coordsData.x,
+        y: coordsData.y,
+        // eslint-disable-next-line camelcase
+        coords_css: coordsCss,
+        // eslint-disable-next-line camelcase
+        coords_img: coordsImg,
+        // eslint-disable-next-line camelcase
+        img_css_ratio: coordmap.cssToImgScalingRatio(),
+      };
 
       // Add the panel (facet) variables, if present
       $.extend(coords, panel.panel_vars);

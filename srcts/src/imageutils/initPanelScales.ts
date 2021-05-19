@@ -65,24 +65,24 @@ type PanelType = {
     left: number;
     right: number;
   };
-  log: {
+  log?: {
     x?: number;
     y?: number;
   };
   mapping: Record<string, string>;
   // eslint-disable-next-line camelcase
-  panel_vars: Record<string, number | string>;
+  panel_vars?: Record<string, number | string>;
 
-  scaleDataToImg: (
+  scaleDataToImg?: (
     val: Record<string, number>,
     clip?: boolean
   ) => Record<string, number>;
-  scaleImgToData: {
+  scaleImgToData?: {
     (val: OffsetType, clip?: boolean): OffsetType;
     (val: Record<string, number>, clip?: boolean): Record<string, number>;
   };
 
-  clipImg: (offsetImg: { x: number; y: number }) => { x: number; y: number };
+  clipImg?: (offsetImg: { x: number; y: number }) => { x: number; y: number };
 };
 
 // Modify panel, adding scale and inverse-scale functions that take objects

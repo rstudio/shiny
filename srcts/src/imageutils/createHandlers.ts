@@ -1,6 +1,9 @@
 import $ from "jquery";
+import { createBrush } from ".";
+import { imageOutputBinding } from "../bindings/output/image";
 import { Shiny } from "../shiny";
 import { Debouncer, Throttler } from "../time";
+import { BoundsType } from "./createBrush";
 import { CoordmapType } from "./initCoordmap";
 
 // ----------------------------------------------------------
@@ -15,14 +18,34 @@ type CreateHandlerType = {
   mouseout?: (e: MouseEvent) => void;
   mousedown?: (e: MouseEvent) => void;
   onResetImg: () => void;
-  onResize: null | () => void;
-}
+  onResize?: () => void;
+};
 
-function createClickHandler(
-  inputId,
-  clip,
-  coordmap
-): CreateHandlerType {
+type BrushInfo = {
+  xmin: number;
+  xmax: number;
+  ymin: number;
+  ymax: number;
+  //  // Add the panel (facet) variables, if present
+  // $.extend(coords, panel.panel_vars);
+
+  // eslint-disable-next-line camelcase
+  coords_css: BoundsType;
+  // eslint-disable-next-line camelcase
+  coords_img: BoundsType;
+  img_css_ratio = coordmap.cssToImgScalingRatio();
+  // // Add variable name mappings
+  // coords.mapping = panel.mapping;
+  // // Add scaling information
+  // coords.domain = panel.domain;
+  // coords.range = panel.range;
+  // coords.log = panel.log;
+  // coords.direction = opts.brushDirection;
+  // coords.brushId = inputId;
+  // coords.outputId = outputId;
+};
+
+function createClickHandler(inputId, clip, coordmap): CreateHandlerType {
   const clickInfoSender = coordmap.mouseCoordinateSender(inputId, clip);
 
   return {
@@ -65,7 +88,10 @@ function createHoverHandler(
     mouseout = function () {
       hoverInfoSender.normalCall(null);
     };
-  else mouseout = function () {};
+  else
+    mouseout = function () {
+      // do nothing
+    };
 
   return {
     mousemove: function (e) {
@@ -81,13 +107,13 @@ function createHoverHandler(
 
 // Returns a brush handler object. This has three public functions:
 // mousedown, mousemove, and onResetImg.
-function createBrushHandler (inputId, $el, opts, coordmap, outputId) {
+function createBrushHandler(inputId, $el, opts, coordmap, outputId) {
   // Parameter: expand the area in which a brush can be started, by this
   // many pixels in all directions. (This should probably be a brush option)
   const expandPixels = 20;
 
   // Represents the state of the brush
-  const brush = imageutils.createBrush($el, opts, coordmap, expandPixels);
+  const brush = createBrush($el, opts, coordmap, expandPixels);
 
   // Brush IDs can span multiple image/plot outputs. When an output is brushed,
   // if a brush with the same ID is active on a different image/plot, it must
@@ -121,7 +147,7 @@ function createBrushHandler (inputId, $el, opts, coordmap, outputId) {
   }
 
   function sendBrushInfo() {
-    const coords = brush.boundsData();
+    const coords: BrushInfo = brush.boundsData();
 
     // We're in a new or reset state
     if (isNaN(coords.xmin)) {
@@ -182,7 +208,7 @@ function createBrushHandler (inputId, $el, opts, coordmap, outputId) {
     if (e.which !== 1) return;
 
     // In general, brush uses css pixels, and coordmap uses img pixels.
-    const offset_css = coordmap.mouseOffsetCss(e);
+    const offset_css = mouseOffsetCss(e);
 
     // Ignore mousedown events outside of plotting region, expanded by
     // a number of pixels specified in expandPixels.
@@ -361,7 +387,6 @@ function createBrushHandler (inputId, $el, opts, coordmap, outputId) {
     onResetImg: onResetImg,
     onResize: onResize,
   };
-};
+}
 
-
-export {createClickHandler, createHoverHandler, createBrushHandler}
+export { createClickHandler, createHoverHandler, createBrushHandler };

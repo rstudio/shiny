@@ -1,9 +1,10 @@
 import $ from "jquery";
-import { findOrigin } from "../imageutils/initCoordmap";
-import { OffsetType } from ".";
-import { isnan, roundSignif } from "../utils";
+import { CoordmapType, findOrigin } from "../imageutils/initCoordmap";
+import { findBox, OffsetType, shiftToRange } from ".";
+import { equal, isnan, mapValues, roundSignif } from "../utils";
 import { Offset } from "bootstrap";
 import { StatsBase } from "fs";
+import { PanelType } from "./initPanelScales";
 
 type BoundsType = {
   xmin: number;
@@ -14,15 +15,48 @@ type BoundsType = {
 type BoundsCss = BoundsType;
 type BoundsData = BoundsType;
 
+type ImageState = {
+  brushing?: boolean;
+  dragging?: boolean;
+  resizing?: boolean;
+
+  // Offset of last mouse down and up events (in CSS pixels)
+  down?: OffsetType;
+  up?: OffsetType;
+
+  // Which side(s) we're currently resizing
+  resizeSides?: {
+    left: boolean;
+    right: boolean;
+    top: boolean;
+    bottom: boolean;
+  };
+
+  boundsCss?: BoundsCss;
+  boundsData?: BoundsData;
+
+  // Panel object that the brush is in
+  panel?: PanelType;
+
+  // The bounds at the start of a drag/resize (in CSS pixels)
+  changeStartBounds?: BoundsType;
+};
+
+type OptsType = {
+  brushDirection: "x" | "y" | "xy";
+  brushClip: boolean;
+  brushFill: string;
+  brushOpacity: string;
+  brushStroke: string;
+};
+
 type BrushType = {
   reset: () => void;
 
   importOldBrush: () => void;
   isInsideBrush: (offsetCss: OffsetType) => boolean;
   isInResizeArea: (offsetCss: OffsetType) => boolean;
-  whichResizeSides: (
-    offsetCss: OffsetType
-  ) => { left: boolean; right: boolean; top: boolean; bottom: boolean };
+  whichResizeSides: (offsetCss: OffsetType) => ImageState["resizeSides"];
 
   // A callback when the wrapper div or img is resized.
   onResize: () => void;
@@ -30,40 +64,57 @@ type BrushType = {
   // TODO define this type as both a getter and a setter interfaces.
   // boundsCss: (boxCss: BoundsCss) => void;
   // boundsCss: () => BoundsCss;
-  boundsCss: (boxCss: BoundsCss) => BoundsCss | void;
-  boundsData: (boxData: BoundsData) => BoundsData | void;
+  boundsCss: {
+    (boxCss: BoundsCss): void;
+    (): BoundsCss;
+  };
+  boundsData: {
+    (boxData: BoundsData): void;
+    (): BoundsData;
+  };
 
-  getPanel: () => State.panel;
+  getPanel: () => ImageState["panel"];
 
-  down: down;
-  up: up;
+  down: {
+    (): ImageState["down"];
+    (offsetCss): void;
+  };
+  up: {
+    (): ImageState["up"];
+    (offsetCss): void;
+  };
 
-  isBrushing: isBrushing;
-  startBrushing: startBrushing;
-  brushTo: brushTo;
-  stopBrushing: stopBrushing;
+  isBrushing: () => ImageState["brushing"];
+  startBrushing: () => void;
+  brushTo: (offsetCss: OffsetType) => void;
+  stopBrushing: () => void;
 
-  isDragging: isDragging;
-  startDragging: startDragging;
-  dragTo: dragTo;
-  stopDragging: stopDragging;
+  isDragging: () => ImageState["dragging"];
+  startDragging: () => void;
+  dragTo: (offsetCss: OffsetType) => void;
+  stopDragging: () => void;
 
-  isResizing: isResizing;
-  startResizing: startResizing;
-  resizeTo: resizeTo;
-  stopResizing: stopResizing;
+  isResizing: () => ImageState["resizing"];
+  startResizing: () => void;
+  resizeTo: (offsetCss: OffsetType) => void;
+  stopResizing: () => void;
 };
 
 // Returns an object that represents the state of the brush. This gets wrapped
 // in a brushHandler, which provides various event listeners.
-function createBrush($el, opts, coordmap, expandPixels) {
+function createBrush(
+  $el: JQuery<HTMLElement>,
+  opts: OptsType,
+  coordmap: CoordmapType,
+  expandPixels: number
+): BrushType {
   // Number of pixels outside of brush to allow start resizing
   const resizeExpand = 10;
 
   const el = $el[0];
   let $div = null; // The div representing the brush
 
-  const state = {};
+  const state: ImageState = {};
 
   // Aliases for conciseness
   const cssToImg = coordmap.scaleCssToImg;
@@ -166,14 +217,14 @@ function createBrush($el, opts, coordmap, expandPixels) {
   // wrapper div/img being resized; elsewhere, "resize" refers to the brush
   // div being resized.
   function onResize() {
-    const boundsData = boundsData();
+    const boundsDataVal = boundsData();
     // Check to see if we have valid boundsData
 
-    for (const val in boundsData) {
-      if (isnan(boundsData[val])) return;
+    for (const val in boundsDataVal) {
+      if (isnan(boundsDataVal[val])) return;
     }
 
-    boundsData(boundsData);
+    boundsData(boundsDataVal);
     updateDiv();
   }
 
@@ -239,7 +290,9 @@ function createBrush($el, opts, coordmap, expandPixels) {
   // outside of it. This knows whether we're brushing in the x, y, or xy
   // directions, and sets bounds accordingly. If no box is passed in, just
   // return current bounds.
-  function boundsCss(boxCss) {
+  function boundsCss(): ImageState["boundsCss"];
+  function boundsCss(boxCss: BoundsCss): void;
+  function boundsCss(boxCss?: BoundsCss) {
     if (boxCss === undefined) {
       return $.extend({}, state.boundsCss);
     }
@@ -248,7 +301,7 @@ function createBrush($el, opts, coordmap, expandPixels) {
     let maxCss = { x: boxCss.xmax, y: boxCss.ymax };
 
     const panel = state.panel;
-    const panelBounds_img = panel.range;
+    const panelBoundsImg = panel.range;
 
     if (opts.brushClip) {
       minCss = imgToCss(panel.clipImg(cssToImg(minCss)));
@@ -259,11 +312,11 @@ function createBrush($el, opts, coordmap, expandPixels) {
       // No change
     } else if (opts.brushDirection === "x") {
       // Extend top and bottom of plotting area
-      minCss.y = imgToCss({ y: panelBounds_img.top }).y;
-      maxCss.y = imgToCss({ y: panelBounds_img.bottom }).y;
+      minCss.y = imgToCss({ y: panelBoundsImg.top }).y;
+      maxCss.y = imgToCss({ y: panelBoundsImg.bottom }).y;
     } else if (opts.brushDirection === "y") {
-      minCss.x = imgToCss({ x: panelBounds_img.left }).x;
-      maxCss.x = imgToCss({ x: panelBounds_img.right }).x;
+      minCss.x = imgToCss({ x: panelBoundsImg.left }).x;
+      maxCss.x = imgToCss({ x: panelBoundsImg.right }).x;
     }
 
     state.boundsCss = {
@@ -279,12 +332,12 @@ function createBrush($el, opts, coordmap, expandPixels) {
     // For reversed scales, the min and max can be reversed, so use findBox
     // to ensure correct order.
 
-    state.boundsData = imageutils.findBox(minData, maxData);
+    state.boundsData = findBox(minData, maxData);
     // Round to 14 significant digits to avoid spurious changes in FP values
     // (#1634).
     state.boundsData = mapValues(state.boundsData, (val) =>
       roundSignif(val, 14)
-    );
+    ) as BoundsData;
 
     // We also need to attach the data bounds and panel as data attributes, so
     // that if the image is re-sent, we can grab the data bounds to create a new
@@ -295,7 +348,11 @@ function createBrush($el, opts, coordmap, expandPixels) {
   }
 
   // Get or set the bounds of the brush using coordinates in the data space.
-  function boundsData(boxData) {
+  function boundsData(): ImageState["boundsData"];
+  function boundsData(
+    boxData: Parameters<PanelType["scaleDataToImg"]>[0]
+  ): void;
+  function boundsData(boxData?: Parameters<PanelType["scaleDataToImg"]>[0]) {
     if (boxData === undefined) {
       return $.extend({}, state.boundsData);
     }
@@ -374,17 +431,17 @@ function createBrush($el, opts, coordmap, expandPixels) {
       .outerHeight(b.ymax - b.ymin + 1);
   }
 
-  function down(offset_css) {
-    if (offset_css === undefined) return state.down;
+  function down(offsetCss?: OffsetType) {
+    if (offsetCss === undefined) return state.down;
 
-    state.down = offset_css;
+    state.down = offsetCss;
     return undefined;
   }
 
-  function up(offset_css) {
-    if (offset_css === undefined) return state.up;
+  function up(offsetCss?: OffsetType) {
+    if (offsetCss === undefined) return state.up;
 
-    state.up = offset_css;
+    state.up = offsetCss;
     return undefined;
   }
 
@@ -397,12 +454,12 @@ function createBrush($el, opts, coordmap, expandPixels) {
     addDiv();
     state.panel = coordmap.getPanelCss(state.down, expandPixels);
 
-    boundsCss(imageutils.findBox(state.down, state.down));
+    boundsCss(findBox(state.down, state.down));
     updateDiv();
   }
 
-  function brushTo(offset_css) {
-    boundsCss(imageutils.findBox(state.down, offset_css));
+  function brushTo(offsetCss: OffsetType) {
+    boundsCss(findBox(state.down, offsetCss));
     $div.show();
     updateDiv();
   }
@@ -410,7 +467,7 @@ function createBrush($el, opts, coordmap, expandPixels) {
   function stopBrushing() {
     state.brushing = false;
     // Save the final bounding box of the brush
-    boundsCss(imageutils.findBox(state.down, state.up));
+    boundsCss(findBox(state.down, state.up));
   }
 
   function isDragging() {
@@ -422,14 +479,14 @@ function createBrush($el, opts, coordmap, expandPixels) {
     state.changeStartBounds = $.extend({}, state.boundsCss);
   }
 
-  function dragTo(offset_css) {
+  function dragTo(offsetCss: OffsetType) {
     // How far the brush was dragged
-    const dx = offset_css.x - state.down.x;
-    const dy = offset_css.y - state.down.y;
+    const dx = offsetCss.x - state.down.x;
+    const dy = offsetCss.y - state.down.y;
 
     // Calculate what new positions would be, before clipping.
     const start = state.changeStartBounds;
-    let newBounds_css = {
+    let newBoundsCss = {
       xmin: start.xmin + dx,
       xmax: start.xmax + dx,
       ymin: start.ymin + dy,
@@ -438,34 +495,34 @@ function createBrush($el, opts, coordmap, expandPixels) {
 
     // Clip to the plotting area
     if (opts.brushClip) {
-      const panelBounds_img = state.panel.range;
-      const newBounds_img = cssToImg(newBounds_css);
+      const panelBoundsImg = state.panel.range;
+      const newBoundsImg = cssToImg(newBoundsCss);
 
       // Convert to format for shiftToRange
-      let xvals_img = [newBounds_img.xmin, newBounds_img.xmax];
-      let yvals_img = [newBounds_img.ymin, newBounds_img.ymax];
+      let xvalsImg = [newBoundsImg.xmin, newBoundsImg.xmax];
+      let yvalsImg = [newBoundsImg.ymin, newBoundsImg.ymax];
 
-      xvals_img = imageutils.shiftToRange(
-        xvals_img,
-        panelBounds_img.left,
-        panelBounds_img.right
+      xvalsImg = shiftToRange(
+        xvalsImg,
+        panelBoundsImg.left,
+        panelBoundsImg.right
       );
-      yvals_img = imageutils.shiftToRange(
-        yvals_img,
-        panelBounds_img.top,
-        panelBounds_img.bottom
+      yvalsImg = shiftToRange(
+        yvalsImg,
+        panelBoundsImg.top,
+        panelBoundsImg.bottom
       );
 
       // Convert back to bounds format
-      newBounds_css = imgToCss({
-        xmin: xvals_img[0],
-        xmax: xvals_img[1],
-        ymin: yvals_img[0],
-        ymax: yvals_img[1],
+      newBoundsCss = imgToCss({
+        xmin: xvalsImg[0],
+        xmax: xvalsImg[1],
+        ymin: yvalsImg[0],
+        ymax: yvalsImg[1],
       });
     }
 
-    boundsCss(newBounds_css);
+    boundsCss(newBoundsCss);
     updateDiv();
   }
 
@@ -483,56 +540,56 @@ function createBrush($el, opts, coordmap, expandPixels) {
     state.resizeSides = whichResizeSides(state.down);
   }
 
-  function resizeTo(offset_css) {
+  function resizeTo(offsetCss: OffsetType) {
     // How far the brush was dragged
-    const d_css = {
-      x: offset_css.x - state.down.x,
-      y: offset_css.y - state.down.y,
+    const dCss = {
+      x: offsetCss.x - state.down.x,
+      y: offsetCss.y - state.down.y,
     };
 
-    const d_img = cssToImg(d_css);
+    const dImg = cssToImg(dCss);
 
     // Calculate what new positions would be, before clipping.
-    const b_img = cssToImg(state.changeStartBounds);
-    const panelBounds_img = state.panel.range;
+    const bImg = cssToImg(state.changeStartBounds);
+    const panelBoundsImg = state.panel.range;
 
     if (state.resizeSides.left) {
-      const xmin_img = imageutils.shiftToRange(
-        b_img.xmin + d_img.x,
-        panelBounds_img.left,
-        b_img.xmax
+      const xminImg = shiftToRange(
+        bImg.xmin + dImg.x,
+        panelBoundsImg.left,
+        bImg.xmax
       )[0];
 
-      b_img.xmin = xmin_img;
+      bImg.xmin = xminImg;
     } else if (state.resizeSides.right) {
-      const xmax_img = imageutils.shiftToRange(
-        b_img.xmax + d_img.x,
-        b_img.xmin,
-        panelBounds_img.right
+      const xmaxImg = shiftToRange(
+        bImg.xmax + dImg.x,
+        bImg.xmin,
+        panelBoundsImg.right
       )[0];
 
-      b_img.xmax = xmax_img;
+      bImg.xmax = xmaxImg;
     }
 
     if (state.resizeSides.top) {
-      const ymin_img = imageutils.shiftToRange(
-        b_img.ymin + d_img.y,
-        panelBounds_img.top,
-        b_img.ymax
+      const yminImg = shiftToRange(
+        bImg.ymin + dImg.y,
+        panelBoundsImg.top,
+        bImg.ymax
       )[0];
 
-      b_img.ymin = ymin_img;
+      bImg.ymin = yminImg;
     } else if (state.resizeSides.bottom) {
-      const ymax_img = imageutils.shiftToRange(
-        b_img.ymax + d_img.y,
-        b_img.ymin,
-        panelBounds_img.bottom
+      const ymaxImg = shiftToRange(
+        bImg.ymax + dImg.y,
+        bImg.ymin,
+        panelBoundsImg.bottom
       )[0];
 
-      b_img.ymax = ymax_img;
+      bImg.ymax = ymaxImg;
     }
 
-    boundsCss(imgToCss(b_img));
+    boundsCss(imgToCss(bImg));
     updateDiv();
   }
 
@@ -575,3 +632,5 @@ function createBrush($el, opts, coordmap, expandPixels) {
 }
 
 export { createBrush };
+
+export type { BoundsType };

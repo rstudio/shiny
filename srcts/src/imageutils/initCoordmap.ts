@@ -1,5 +1,7 @@
 import $ from "jquery";
+import { OffsetType } from ".";
 import { mapValues } from "../utils";
+import { BoundsType } from "./createBrush";
 import { initPanelScales, PanelType } from "./initPanelScales";
 
 // -----------------------------------------------------------------------
@@ -72,8 +74,16 @@ type CoordmapType = {
     width: number;
   };
   mouseOffsetCss: (evt: MouseEvent) => { x: number; y: number };
-  scaleCssToImg: (offsetCss: OffsetCssType) => OffsetImgType;
-  scaleImgToCss: (offsetImg: OffsetImgType) => OffsetCssType;
+  scaleCssToImg: {
+    (offsetCss: BoundsType): BoundsType;
+    (offsetCss: OffsetType): OffsetType;
+    (offsetCss: OffsetCssType): OffsetImgType;
+  };
+  scaleImgToCss: {
+    (offsetImg: BoundsType): BoundsType;
+    (offsetImg: OffsetType): OffsetType;
+    (offsetImg: OffsetImgType): OffsetCssType;
+  };
   imgToCssScalingRatio: () => { x: number; y: number };
   cssToImgScalingRatio: () => { x: number; y: number };
 
@@ -175,7 +185,10 @@ function initCoordmap($el: JQuery<HTMLElement>, coordmap: CoordmapType): void {
   // corresponding offset in CSS pixels. If the img content is 1000 pixels
   // wide, but is scaled to 400 pixels on screen, and the input is x:1000,
   // then this will return x:400.
-  coordmap.scaleImgToCss = function (offsetImg) {
+  function scaleImgToCss(offsetImg: OffsetType): OffsetType;
+  function scaleImgToCss(
+    offsetImg: Record<string, number>
+  ): Record<string, number> {
     const pixelScaling = coordmap.imgToCssScalingRatio();
 
     const result = mapValues(offsetImg, (value, key) => {
@@ -190,7 +203,8 @@ function initCoordmap($el: JQuery<HTMLElement>, coordmap: CoordmapType): void {
     });
 
     return result;
-  };
+  }
+  coordmap.scaleImgToCss = scaleImgToCss;
 
   // Returns the x and y ratio the image content is scaled to on screen. If
   // the image data is 1000 pixels wide and is scaled to 300 pixels on screen,

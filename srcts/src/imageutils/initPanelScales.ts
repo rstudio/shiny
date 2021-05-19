@@ -1,5 +1,6 @@
 // Map a value x from a domain to a range. If clip is true, clip it to the
 
+import { OffsetType } from ".";
 import { mapValues } from "../utils";
 
 // range.
@@ -9,7 +10,7 @@ function mapLinear(
   domainMax: number,
   rangeMin: number,
   rangeMax: number,
-  clip: boolean
+  clip = true
 ) {
   // By default, clip to range
   clip = clip || true;
@@ -42,7 +43,7 @@ function scaler1D(
       return mapLinear(val, domainMin, domainMax, rangeMin, rangeMax, clip);
     },
 
-    scaleInv: function (val: number, clip: boolean) {
+    scaleInv: function (val: number, clip?: boolean) {
       let res = mapLinear(val, rangeMin, rangeMax, domainMin, domainMax, clip);
 
       if (logbase) res = Math.pow(logbase, res);
@@ -68,16 +69,18 @@ type PanelType = {
     x?: number;
     y?: number;
   };
-  mapping: {};
+  mapping: Record<string, string>;
+  // eslint-disable-next-line camelcase
+  panel_vars: Record<string, number | string>;
 
   scaleDataToImg: (
     val: Record<string, number>,
-    clip: boolean
+    clip?: boolean
   ) => Record<string, number>;
-  scaleImgToData: (
-    val: Record<string, number>,
-    clip: boolean
-  ) => Record<string, number>;
+  scaleImgToData: {
+    (val: OffsetType, clip?: boolean): OffsetType;
+    (val: Record<string, number>, clip?: boolean): Record<string, number>;
+  };
 
   clipImg: (offsetImg: { x: number; y: number }) => { x: number; y: number };
 };
@@ -108,7 +111,8 @@ function addScaleFuns(panel: PanelType) {
     });
   };
 
-  panel.scaleImgToData = function (val, clip) {
+  function scaleImgToData(val: OffsetType, clip?: boolean);
+  function scaleImgToData(val: Record<string, number>, clip?: boolean) {
     return mapValues(val, (value, key) => {
       const prefix = key.substring(0, 1);
 
@@ -119,7 +123,8 @@ function addScaleFuns(panel: PanelType) {
       }
       return null;
     });
-  };
+  }
+  panel.scaleImgToData = scaleImgToData;
 
   // Given a scaled offset (in img pixels), clip it to the nearest panel region.
   panel.clipImg = function (offsetImg) {

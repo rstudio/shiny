@@ -15,7 +15,7 @@
     "@testing-library/user-event": "^12.7.3",
     "@types/bootstrap": "3.4.0",
     "@types/bootstrap-datepicker": "0.0.14",
-    "@types/datatables.net": "^1.10.21",
+    "@types/datatables.net": "^1.10.19",
     "@types/ion-rangeslider": "2.3.0",
     "@types/jest": "^26",
     "@types/jquery": "patch:@types/jquery@^3.5.5#./patch/types-jquery.patch",

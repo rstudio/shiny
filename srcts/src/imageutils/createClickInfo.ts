@@ -90,6 +90,8 @@ function createClickInfo(
   // IE8 needs a special hack because when you do a double-click it doesn't
   // trigger the click event twice - it directly triggers dblclick.
   function dblclickIE8(e: MouseEvent) {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     e.which = 1; // In IE8, e.which is 0 instead of 1. ???
     triggerEvent("dblclick2", e);
   }

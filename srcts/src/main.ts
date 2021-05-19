@@ -4173,7 +4173,7 @@ function main(): void {
             val = href + "/" + encodeURI(val);
           }
           // If val isn't truthy (e.g., null), consider it a boolean attribute
-          script.setAttribute(attr, val ? val : "")
+          script.setAttribute(attr, val ? val : "");
         }
 
         return script;

@@ -4796,7 +4796,7 @@
               if (attr === "src") {
                 val = href + "/" + encodeURI(val);
               }
-              val ? script.setAttribute(attr, val) : script.toggleAttribute(attr);
+              script.setAttribute(attr, val ? val : "");
             }
             return script;
           });

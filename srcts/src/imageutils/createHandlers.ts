@@ -1,10 +1,11 @@
 import $ from "jquery";
-import { createBrush } from ".";
+import { createBrush, OffsetType } from ".";
 import { imageOutputBinding } from "../bindings/output/image";
 import { Shiny } from "../shiny";
 import { Debouncer, Throttler } from "../time";
-import { BoundsType } from "./createBrush";
+import { BoundsCss, BoundsType, BrushOptsType } from "./createBrush";
 import { CoordmapType } from "./initCoordmap";
+import { PanelType } from "./initPanelScales";
 
 // ----------------------------------------------------------
 // Handler creators for click, hover, brush.
@@ -26,26 +27,32 @@ type BrushInfo = {
   xmax: number;
   ymin: number;
   ymax: number;
-  //  // Add the panel (facet) variables, if present
-  // $.extend(coords, panel.panel_vars);
-
   // eslint-disable-next-line camelcase
-  coords_css: BoundsType;
+  coords_css?: BoundsCss;
   // eslint-disable-next-line camelcase
-  coords_img: BoundsType;
-  img_css_ratio = coordmap.cssToImgScalingRatio();
-  // // Add variable name mappings
-  // coords.mapping = panel.mapping;
-  // // Add scaling information
-  // coords.domain = panel.domain;
-  // coords.range = panel.range;
-  // coords.log = panel.log;
-  // coords.direction = opts.brushDirection;
-  // coords.brushId = inputId;
-  // coords.outputId = outputId;
+  coords_img?: BoundsType;
+  x?: number;
+  y?: number;
+  // eslint-disable-next-line camelcase
+  img_css_ratio?: OffsetType;
+  mapping?: PanelType["mapping"];
+  domain?: PanelType["domain"];
+  range?: PanelType["range"];
+  log?: PanelType["log"];
+  direction?: BrushOptsType["brushDirection"];
+  brushId?: string;
+  outputId?: string;
 };
 
-function createClickHandler(inputId, clip, coordmap): CreateHandlerType {
+type InputIdType = Parameters<CoordmapType["mouseCoordinateSender"]>[0];
+type ClipType = Parameters<CoordmapType["mouseCoordinateSender"]>[1];
+type NullOutsideType = Parameters<CoordmapType["mouseCoordinateSender"]>[2];
+
+function createClickHandler(
+  inputId: InputIdType,
+  clip: ClipType,
+  coordmap: CoordmapType
+): CreateHandlerType {
   const clickInfoSender = coordmap.mouseCoordinateSender(inputId, clip);
 
   return {
@@ -62,11 +69,11 @@ function createClickHandler(inputId, clip, coordmap): CreateHandlerType {
 }
 
 function createHoverHandler(
-  inputId: string,
+  inputId: InputIdType,
   delay: number,
   delayType: "throttle" | string,
-  clip: boolean,
-  nullOutside: boolean,
+  clip: ClipType,
+  nullOutside: NullOutsideType,
   coordmap: CoordmapType
 ): CreateHandlerType {
   const sendHoverInfo = coordmap.mouseCoordinateSender(
@@ -107,7 +114,13 @@ function createHoverHandler(
 
 // Returns a brush handler object. This has three public functions:
 // mousedown, mousemove, and onResetImg.
-function createBrushHandler(inputId, $el, opts, coordmap, outputId) {
+function createBrushHandler(
+  inputId: InputIdType,
+  $el: JQuery<HTMLElement>,
+  opts: BrushOptsType,
+  coordmap: CoordmapType,
+  outputId: BrushInfo["outputId"]
+): CreateHandlerType {
   // Parameter: expand the area in which a brush can be started, by this
   // many pixels in all directions. (This should probably be a brush option)
   const expandPixels = 20;
@@ -165,9 +178,12 @@ function createBrushHandler(inputId, $el, opts, coordmap, outputId) {
     // Add the panel (facet) variables, if present
     $.extend(coords, panel.panel_vars);
 
+    // eslint-disable-next-line camelcase
     coords.coords_css = brush.boundsCss();
+    // eslint-disable-next-line camelcase
     coords.coords_img = coordmap.scaleCssToImg(coords.coords_css);
 
+    // eslint-disable-next-line camelcase
     coords.img_css_ratio = coordmap.cssToImgScalingRatio();
 
     // Add variable name mappings
@@ -198,7 +214,7 @@ function createBrushHandler(inputId, $el, opts, coordmap, outputId) {
     brushInfoSender = new Debouncer(null, sendBrushInfo, opts.brushDelay);
   }
 
-  function mousedown(e) {
+  function mousedown(e: MouseEvent) {
     // This can happen when mousedown inside the graphic, then mouseup
     // outside, then mousedown inside. Just ignore the second
     // mousedown.
@@ -208,55 +224,76 @@ function createBrushHandler(inputId, $el, opts, coordmap, outputId) {
     if (e.which !== 1) return;
 
     // In general, brush uses css pixels, and coordmap uses img pixels.
-    const offset_css = mouseOffsetCss(e);
+    const offsetCss = coordmap.mouseOffsetCss(e);
 
     // Ignore mousedown events outside of plotting region, expanded by
     // a number of pixels specified in expandPixels.
-    if (opts.brushClip && !coordmap.isInPanelCss(offset_css, expandPixels))
+    if (opts.brushClip && !coordmap.isInPanelCss(offsetCss, expandPixels))
       return;
 
     brush.up({ x: NaN, y: NaN });
-    brush.down(offset_css);
+    brush.down(offsetCss);
 
-    if (brush.isInResizeArea(offset_css)) {
-      brush.startResizing(offset_css);
+    if (brush.isInResizeArea(offsetCss)) {
+      // TODO-barret this variable is not respected
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      brush.startResizing(offsetCss);
 
       // Attach the move and up handlers to the window so that they respond
       // even when the mouse is moved outside of the image.
       $(document)
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         .on("mousemove.image_brush", mousemoveResizing)
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         .on("mouseup.image_brush", mouseupResizing);
-    } else if (brush.isInsideBrush(offset_css)) {
-      brush.startDragging(offset_css);
+    } else if (brush.isInsideBrush(offsetCss)) {
+      // TODO-barret this variable is not respected
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      brush.startDragging(offsetCss);
       setCursorStyle("grabbing");
 
       // Attach the move and up handlers to the window so that they respond
       // even when the mouse is moved outside of the image.
       $(document)
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         .on("mousemove.image_brush", mousemoveDragging)
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         .on("mouseup.image_brush", mouseupDragging);
     } else {
-      const panel = coordmap.getPanelCss(offset_css, expandPixels);
+      const panel = coordmap.getPanelCss(offsetCss, expandPixels);
 
-      brush.startBrushing(panel.clipImg(coordmap.scaleCssToImg(offset_css)));
+      // TODO-barret start brushing does not take any args
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      brush.startBrushing(panel.clipImg(coordmap.scaleCssToImg(offsetCss)));
 
       // Attach the move and up handlers to the window so that they respond
       // even when the mouse is moved outside of the image.
       $(document)
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         .on("mousemove.image_brush", mousemoveBrushing)
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         .on("mouseup.image_brush", mouseupBrushing);
     }
   }
 
   // This sets the cursor style when it's in the el
-  function mousemove(e) {
+  function mousemove(e: MouseEvent) {
     // In general, brush uses css pixels, and coordmap uses img pixels.
-    const offset_css = coordmap.mouseOffsetCss(e);
+    const offsetCss = coordmap.mouseOffsetCss(e);
 
     if (!(brush.isBrushing() || brush.isDragging() || brush.isResizing())) {
       // Set the cursor depending on where it is
-      if (brush.isInResizeArea(offset_css)) {
-        const r = brush.whichResizeSides(offset_css);
+      if (brush.isInResizeArea(offsetCss)) {
+        const r = brush.whichResizeSides(offsetCss);
 
         if ((r.left && r.top) || (r.right && r.bottom)) {
           setCursorStyle("nwse-resize");
@@ -267,9 +304,9 @@ function createBrushHandler(inputId, $el, opts, coordmap, outputId) {
         } else if (r.top || r.bottom) {
           setCursorStyle("ns-resize");
         }
-      } else if (brush.isInsideBrush(offset_css)) {
+      } else if (brush.isInsideBrush(offsetCss)) {
         setCursorStyle("grabbable");
-      } else if (coordmap.isInPanelCss(offset_css, expandPixels)) {
+      } else if (coordmap.isInPanelCss(offsetCss, expandPixels)) {
         setCursorStyle("crosshair");
       } else {
         setCursorStyle(null);
@@ -278,23 +315,23 @@ function createBrushHandler(inputId, $el, opts, coordmap, outputId) {
   }
 
   // mousemove handlers while brushing or dragging
-  function mousemoveBrushing(e) {
+  function mousemoveBrushing(e: MouseEvent) {
     brush.brushTo(coordmap.mouseOffsetCss(e));
     brushInfoSender.normalCall();
   }
 
-  function mousemoveDragging(e) {
+  function mousemoveDragging(e: MouseEvent) {
     brush.dragTo(coordmap.mouseOffsetCss(e));
     brushInfoSender.normalCall();
   }
 
-  function mousemoveResizing(e) {
+  function mousemoveResizing(e: MouseEvent) {
     brush.resizeTo(coordmap.mouseOffsetCss(e));
     brushInfoSender.normalCall();
   }
 
   // mouseup handlers while brushing or dragging
-  function mouseupBrushing(e) {
+  function mouseupBrushing(e: MouseEvent) {
     // Listen for left mouse button only
     if (e.which !== 1) return;
 
@@ -319,7 +356,7 @@ function createBrushHandler(inputId, $el, opts, coordmap, outputId) {
     if (brushInfoSender.isPending()) brushInfoSender.immediateCall();
   }
 
-  function mouseupDragging(e) {
+  function mouseupDragging(e: MouseEvent) {
     // Listen for left mouse button only
     if (e.which !== 1) return;
 
@@ -333,7 +370,7 @@ function createBrushHandler(inputId, $el, opts, coordmap, outputId) {
     if (brushInfoSender.isPending()) brushInfoSender.immediateCall();
   }
 
-  function mouseupResizing(e) {
+  function mouseupResizing(e: MouseEvent) {
     // Listen for left mouse button only
     if (e.which !== 1) return;
 
@@ -390,3 +427,4 @@ function createBrushHandler(inputId, $el, opts, coordmap, outputId) {
 }
 
 export { createClickHandler, createHoverHandler, createBrushHandler };
+export type { BrushInfo };

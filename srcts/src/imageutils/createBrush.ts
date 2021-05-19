@@ -42,12 +42,15 @@ type ImageState = {
   changeStartBounds?: BoundsType;
 };
 
-type OptsType = {
+type BrushOptsType = {
   brushDirection: "x" | "y" | "xy";
   brushClip: boolean;
   brushFill: string;
   brushOpacity: string;
   brushStroke: string;
+  brushDelayType?: "throttle" | "debounce";
+  brushDelay?: number;
+  brushResetOnNew?: boolean;
 };
 
 type BrushType = {
@@ -104,7 +107,7 @@ type BrushType = {
 // in a brushHandler, which provides various event listeners.
 function createBrush(
   $el: JQuery<HTMLElement>,
-  opts: OptsType,
+  opts: BrushOptsType,
   coordmap: CoordmapType,
   expandPixels: number
 ): BrushType {
@@ -633,4 +636,4 @@ function createBrush(
 
 export { createBrush };
 
-export type { BoundsType };
+export type { BoundsType, BrushOptsType, BoundsCss };

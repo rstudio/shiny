@@ -88,7 +88,7 @@ type CoordmapType = {
     height: number;
     width: number;
   };
-  mouseOffsetCss: (evt: MouseEvent) => { x: number; y: number };
+  mouseOffsetCss: (evt: MouseEvent) => OffsetType;
   scaleCssToImg: {
     (offsetCss: BoundsType): BoundsType;
     (offsetCss: OffsetType): OffsetType;
@@ -99,16 +99,16 @@ type CoordmapType = {
     (offsetImg: OffsetType): OffsetType;
     (offsetImg: OffsetImgType): OffsetCssType;
   };
-  imgToCssScalingRatio: () => { x: number; y: number };
-  cssToImgScalingRatio: () => { x: number; y: number };
+  imgToCssScalingRatio: () => OffsetType;
+  cssToImgScalingRatio: () => OffsetType;
 
   getPanelCss: (offsetCss: OffsetCssType, expand?: number) => PanelType;
   isInPanelCss: (offsetCss: OffsetCssType, expand?: number) => boolean;
 
   mouseCoordinateSender: (
     inputId: string,
-    clip: boolean,
-    nullOutside: boolean
+    clip?: boolean,
+    nullOutside?: boolean
   ) => (e: MouseEvent) => void;
 };
 
@@ -325,10 +325,11 @@ function initCoordmap($el: JQuery<HTMLElement>, coordmap: CoordmapType): void {
 
   // Returns a function that sends mouse coordinates, scaled to data space.
   // If that function is passed a null event, it will send null.
-  coordmap.mouseCoordinateSender = function (inputId, clip, nullOutside) {
-    if (clip === undefined) clip = true;
-    if (nullOutside === undefined) nullOutside = false;
-
+  coordmap.mouseCoordinateSender = function (
+    inputId,
+    clip = true,
+    nullOutside = false
+  ) {
     return function (e) {
       if (e === null) {
         Shiny.setInputValue(inputId, null);

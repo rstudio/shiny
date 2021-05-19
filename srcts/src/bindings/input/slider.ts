@@ -1,6 +1,6 @@
 import $ from "jquery";
 import strftime from "strftime";
-import { NameValueHTMLElement } from ".";
+// import { NameValueHTMLElement } from ".";
 import {
   formatDateUTC,
   updateLabel,
@@ -10,9 +10,9 @@ import {
 
 import { TextInputBinding } from "./text";
 
-interface SliderHTMLElement extends NameValueHTMLElement {
-  checked?: any;
-}
+// interface SliderHTMLElement extends NameValueHTMLElement {
+//   checked?: any;
+// }
 
 type legacySliderType = {
   canStepNext: () => boolean;

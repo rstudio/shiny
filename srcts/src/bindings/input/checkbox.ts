@@ -13,7 +13,7 @@ class CheckboxInputBinding extends InputBinding {
   getValue(el: CheckedHTMLElement): any {
     return el.checked;
   }
-  setValue(el: CheckedHTMLElement, value: any): void {
+  setValue(el: CheckedHTMLElement, value): void {
     el.checked = value;
   }
   subscribe(el: HTMLElement, callback: (x: boolean) => void): void {

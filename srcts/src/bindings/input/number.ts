@@ -31,7 +31,7 @@ class NumberInputBinding extends TextInputBinding {
 
     return numberVal; // If other string like "1e6", send it unchanged
   }
-  setValue(el: NumberHTMLElement, value: any): void {
+  setValue(el: NumberHTMLElement, value): void {
     el.value = value;
   }
   getType(el: NumberHTMLElement): string {

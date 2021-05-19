@@ -6,7 +6,7 @@ class HtmlOutputBinding extends OutputBinding {
   find(scope: HTMLElement): JQuery<HTMLElement> {
     return $(scope).find(".shiny-html-output");
   }
-  onValueError(el: HTMLElement, err) {
+  onValueError(el: HTMLElement, err): void {
     Shiny.unbindAll(el);
     this.renderError(el, err);
   }

@@ -29,7 +29,7 @@ class TextInputBinding extends InputBinding {
   getValue(el: TextHTMLElement): any {
     return el.value;
   }
-  setValue(el: TextHTMLElement, value: any): void {
+  setValue(el: TextHTMLElement, value): void {
     el.value = value;
   }
 

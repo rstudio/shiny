@@ -43,7 +43,7 @@ createWebDependency <- function(dependency, scrubFile = TRUE) {
 # This implementation is very similar to renderTags(), but ignores
 # <head> handling (it should only be used after the user session has started)
 processDeps <- function(tags, session) {
-  tags <- getFromNamespace("tagify", "htmltools")(tags)
+  tags <- utils::getFromNamespace("tagify", "htmltools")(tags)
   ui <- takeSingletons(tags, session$singletons, desingleton = FALSE)$ui
   ui <- surroundSingletons(ui)
   dependencies <- lapply(

@@ -1,7 +1,5 @@
-import $ from "jquery";
 import { InputPolicy, priorityType } from ".";
 import { Debouncer, Invoker, Throttler } from "../time";
-import { hasOwnProperty } from "../utils";
 import { splitInputNameType } from "./splitInputNameType";
 
 class InputRateDecorator extends InputPolicy {

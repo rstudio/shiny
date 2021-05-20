@@ -1,5 +1,6 @@
 import $ from "jquery";
 import { OffsetType } from ".";
+import { shinySetInputValue } from "../shiny/init";
 import { mapValues } from "../utils";
 import { BoundsType } from "./createBrush";
 import { initPanelScales, PanelType } from "./initPanelScales";
@@ -332,7 +333,7 @@ function initCoordmap($el: JQuery<HTMLElement>, coordmap: CoordmapType): void {
   ) {
     return function (e) {
       if (e === null) {
-        Shiny.setInputValue(inputId, null);
+        shinySetInputValue(inputId, null);
         return;
       }
       const coordsCss = coordmap.mouseOffsetCss(e);
@@ -340,7 +341,7 @@ function initCoordmap($el: JQuery<HTMLElement>, coordmap: CoordmapType): void {
 
       if (!coordmap.isInPanelCss(coordsCss)) {
         if (nullOutside) {
-          Shiny.setInputValue(inputId, null);
+          shinySetInputValue(inputId, null);
           return;
         }
         if (clip) return;
@@ -352,7 +353,7 @@ function initCoordmap($el: JQuery<HTMLElement>, coordmap: CoordmapType): void {
           coords_img: coordmap.scaleCssToImg(coordsCss),
         };
 
-        Shiny.setInputValue(inputId, coords, { priority: "event" });
+        shinySetInputValue(inputId, coords, { priority: "event" });
         return;
       }
       const panel = coordmap.getPanelCss(coordsCss);
@@ -382,7 +383,7 @@ function initCoordmap($el: JQuery<HTMLElement>, coordmap: CoordmapType): void {
       coords.range = panel.range;
       coords.log = panel.log;
 
-      Shiny.setInputValue(inputId, coords, { priority: "event" });
+      shinySetInputValue(inputId, coords, { priority: "event" });
     };
   };
 }

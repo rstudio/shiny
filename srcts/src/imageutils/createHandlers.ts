@@ -2,6 +2,7 @@ import $ from "jquery";
 import { createBrush, OffsetType } from ".";
 import { imageOutputBinding } from "../bindings/output/image";
 import { Shiny } from "../shiny";
+import { shinySetInputValue } from "../shiny/init";
 import { Debouncer, Throttler } from "../time";
 import { BoundsCss, BoundsType, BrushOptsType } from "./createBrush";
 import { CoordmapType } from "./initCoordmap";
@@ -164,7 +165,7 @@ function createBrushHandler(
 
     // We're in a new or reset state
     if (isNaN(coords.xmin)) {
-      Shiny.setInputValue(inputId, null);
+      shinySetInputValue(inputId, null);
       // Must tell other brushes to clear.
       imageOutputBinding.find(document).trigger("shiny-internal:brushed", {
         brushId: inputId,
@@ -200,7 +201,7 @@ function createBrushHandler(
     coords.outputId = outputId;
 
     // Send data to server
-    Shiny.setInputValue(inputId, coords);
+    shinySetInputValue(inputId, coords);
 
     $el.data("mostRecentBrush", true);
     imageOutputBinding.find(document).trigger("shiny-internal:brushed", coords);

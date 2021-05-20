@@ -1,8 +1,7 @@
 import $ from "jquery";
 import { bindAll } from "lodash";
 import { ShinyType } from ".";
-import { inputBindings, outputBindings } from "../bindings";
-import { OutputBindingAdapter } from "../bindings/output_adapter";
+import { inputBindings } from "../bindings";
 import {
   InputBatchSender,
   InputDeferDecorator,
@@ -24,8 +23,23 @@ import { registerNames as singletonsRegisterNames } from "./singletons";
 let sendImageSize;
 let sendImageSize2;
 
+let fullShinyObj_: ShinyType = null;
+
+function fullShinyObj(): ShinyType {
+  return fullShinyObj_;
+}
+
+function shinySetInputValue(
+  name: string,
+  value: unknown,
+  opts?: { priority?: priorityType }
+): void {
+  fullShinyObj_.setInputValue(name, value, opts);
+}
+
 // "init_shiny.js"
 function initShiny(Shiny: ShinyType): void {
+  fullShinyObj_ = Shiny;
   const shinyapp = (Shiny.shinyapp = new ShinyApp());
 
   Shiny.progressHandlers = shinyapp.progressHandlers;
@@ -57,9 +71,14 @@ function initShiny(Shiny: ShinyType): void {
 
   const inputs = new InputValidateDecorator(target);
 
-  Shiny.setInputValue = Shiny.onInputChange = function (name, value, opts) {
-    opts = addDefaultInputOpts(opts);
-    inputs.setInput(name, value, opts);
+  Shiny.setInputValue = Shiny.onInputChange = function (
+    name: string,
+    value: unknown,
+    opts?: { priority?: priorityType }
+  ): void {
+    const newOpts = addDefaultInputOpts(opts);
+
+    inputs.setInput(name, value, newOpts);
   };
 
   // By default, Shiny deduplicates input value changes; that is, if
@@ -519,4 +538,11 @@ function initDeferredIframes() {
   });
 }
 
-export { sendImageSize, sendImageSize2, initShiny, initDeferredIframes };
+export {
+  sendImageSize,
+  sendImageSize2,
+  initShiny,
+  initDeferredIframes,
+  shinySetInputValue,
+  fullShinyObj,
+};

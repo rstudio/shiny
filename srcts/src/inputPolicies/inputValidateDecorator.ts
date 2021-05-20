@@ -3,7 +3,7 @@ import { InputPolicy, priorityType } from ".";
 
 // Merge opts with defaults, and return a new object.
 function addDefaultInputOpts<T>(
-  opts: T & {
+  opts?: T & {
     priority?: priorityType;
   }
 ): T & {

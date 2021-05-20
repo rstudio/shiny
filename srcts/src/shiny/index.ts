@@ -1,3 +1,5 @@
+import $ from "jquery";
+
 import {
   inputBindings,
   InputBinding,
@@ -15,6 +17,7 @@ import { showReconnectDialog, hideReconnectDialog } from "./reconnectDialog";
 import { renderContent, renderDependencies, renderHtml } from "./render";
 import { initShiny } from "./init";
 import { ShinyApp } from "./shinyapp";
+import { priorityType } from "../inputPolicies";
 
 interface ShinyType {
   version: string;
@@ -30,7 +33,7 @@ interface ShinyType {
     remove: typeof removeNotification;
   };
   modal: { show: typeof showModal; remove: typeof removeModal };
-  createSocket: null | (() => WebSocket);
+  createSocket?: () => WebSocket;
   shinyapp: ShinyApp;
   addCustomMessageHandler;
   progressHandlers;
@@ -40,8 +43,16 @@ interface ShinyType {
   renderDependencies;
   renderContent;
   renderHtml;
-  setInputValue
-  onInputChange:
+  setInputValue?: (
+    name: string,
+    value: unknown,
+    opts?: { priority?: priorityType }
+  ) => void;
+  onInputChange?: (
+    name: string,
+    value: unknown,
+    opts: { priority?: priorityType }
+  ) => void;
 }
 
 let Shiny: ShinyType;
@@ -77,10 +88,6 @@ function setShiny(Shiny_: ShinyType): void {
   });
 }
 
-function getCreateSocket(): ShinyType["createSocket"] {
-  return Shiny.createSocket;
-}
-
-export { Shiny, setShiny, getCreateSocket };
+export { Shiny, setShiny };
 
 export type { ShinyType };

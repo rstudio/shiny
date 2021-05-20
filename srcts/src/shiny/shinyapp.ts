@@ -1,6 +1,6 @@
 import $ from "jquery";
 import { $escape, hasOwnProperty, makeBlob } from "../utils";
-import { getCreateSocket as shinyDotCreateSocket } from "../shiny";
+import { fullShinyObj } from "./init";
 import { isQt } from "../utils/browser";
 import {
   show as showNotification,
@@ -76,7 +76,7 @@ class ShinyApp {
     const self = this;
 
     const createSocketFunc: () => WebSocket =
-      shinyDotCreateSocket() ||
+      fullShinyObj().createSocket ||
       function () {
         let protocol = "ws:";
 

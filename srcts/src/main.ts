@@ -4155,8 +4155,24 @@ function main(): void {
     }
 
     if (dep.script && !restyle) {
-      const scripts = $.map(asArray(dep.script), function (scriptName) {
-        return $("<script>").attr("src", href + "/" + encodeURI(scriptName));
+      const scripts_attrs = asArray(dep.script);
+      const scripts = $.map(scripts_attrs, function (x) {
+        let script = document.createElement("script");
+
+        // htmlDependency()'s script arg can be a character vector or a list()
+        if (typeof x === "string") {
+          x = { src: x };
+        }
+
+        for (let [attr, val] of Object.entries(x)) {
+          if (attr === "src") {
+            val = href + "/" + encodeURI(val);
+          }
+          // If val isn't truthy (e.g., null), consider it a boolean attribute
+          script.setAttribute(attr, val ? val : "");
+        }
+
+        return script;
       });
 
       $head.append(scripts);

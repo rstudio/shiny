@@ -343,7 +343,7 @@ custom_print.ggplot <- function(x) {
 
   # ggplot2::get_alt_text() was added in v3.3.4
   # https://github.com/tidyverse/ggplot2/pull/4482
-  get_alt <- asNamespace("ggplot2")$get_alt_text
+  get_alt <- getNamespace("ggplot2")$get_alt_text
   if (is.function(get_alt)) {
     res$alt_text <- get_alt(x)
   }

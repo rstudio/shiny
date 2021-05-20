@@ -3,6 +3,8 @@ import { initDeferredIframes } from "./init";
 
 const boundInputs = {};
 
+type bindScope = HTMLElement;
+
 // todo make sure allowDeferred can NOT be supplied and still work
 function valueChangeCallback(inputs, binding, el, allowDeferred) {
   let id = binding.getId(el);
@@ -23,7 +25,7 @@ function valueChangeCallback(inputs, binding, el, allowDeferred) {
   }
 }
 
-function bindInputs(inputs, scope = document) {
+function bindInputs(inputs, scope: bindScope = document.documentElement) {
   const bindings = inputBindings.getBindings();
 
   const inputItems = {};
@@ -90,7 +92,7 @@ function bindInputs(inputs, scope = document) {
   return inputItems;
 }
 
-function bindOutputs(scope = document) {
+function bindOutputs(scope: bindScope = document.documentElement) {
   const $scope = $(scope);
 
   const bindings = outputBindings.getBindings();
@@ -109,7 +111,7 @@ function bindOutputs(scope = document) {
       // In some uncommon cases, elements that are later in the
       // matches array can be removed from the document by earlier
       // iterations. See https://github.com/rstudio/shiny/issues/1399
-      if (!$.contains(document, el)) continue;
+      if (!$.contains(document.documentElement, el)) continue;
 
       const $el = $(el);
 
@@ -144,7 +146,10 @@ function bindOutputs(scope = document) {
   setTimeout(sendOutputHiddenState, 0);
 }
 
-function unbindInputs(scope = document, includeSelf = false) {
+function unbindInputs(
+  scope: bindScope = document.documentElement,
+  includeSelf = false
+) {
   const inputs = $(scope).find(".shiny-bound-input");
 
   if (includeSelf && $(scope).hasClass("shiny-bound-input")) {
@@ -168,7 +173,10 @@ function unbindInputs(scope = document, includeSelf = false) {
     });
   }
 }
-function unbindOutputs(scope = document, includeSelf = false) {
+function unbindOutputs(
+  scope: bindScope = document.documentElement,
+  includeSelf = false
+) {
   const outputs = $(scope).find(".shiny-bound-output");
 
   if (includeSelf && $(scope).hasClass("shiny-bound-output")) {
@@ -197,17 +205,17 @@ function unbindOutputs(scope = document, includeSelf = false) {
   setTimeout(sendOutputHiddenState, 0);
 }
 
-function _bindAll(inputs, scope) {
+function _bindAll(inputs, scope: bindScope) {
   bindOutputs(scope);
   return bindInputs(inputs, scope);
 }
-function unbindAll(scope, includeSelf = false): void {
+function unbindAll(scope: bindScope, includeSelf = false): void {
   unbindInputs(scope, includeSelf);
   unbindOutputs(scope, includeSelf);
 }
-function bindAll(inputs, scope): void {
+function bindAll(inputs, scope: bindScope): void {
   // _bindAll returns input values; it doesn't send them to the server.
-  // export.bindAll needs to send the values to the server.
+  // Shiny.bindAll needs to send the values to the server.
   const currentInputItems = _bindAll(inputs, scope);
 
   $.each(currentInputItems, function (name, item) {
@@ -221,4 +229,6 @@ function bindAll(inputs, scope): void {
   initDeferredIframes();
 }
 
-export { unbindAll, bindAll };
+export { unbindAll, bindAll, _bindAll };
+
+export type { bindScope };

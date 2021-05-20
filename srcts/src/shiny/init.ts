@@ -1,5 +1,4 @@
 import $ from "jquery";
-import { bindAll } from "lodash";
 import { ShinyType } from ".";
 import { inputBindings } from "../bindings";
 import {
@@ -13,7 +12,13 @@ import {
 } from "../inputPolicies";
 import { addDefaultInputOpts } from "../inputPolicies/inputValidateDecorator";
 import { debounce, Debouncer } from "../time";
-import { getComputedLinkColor, pixelRatio } from "../utils";
+import {
+  getComputedLinkColor,
+  getStyle,
+  mapValues,
+  pixelRatio,
+} from "../utils";
+import { bindAll, bindScope, _bindAll } from "./bind";
 import { registerDependency } from "./render";
 import { ShinyApp } from "./shinyapp";
 import { registerNames as singletonsRegisterNames } from "./singletons";
@@ -35,6 +40,15 @@ function shinySetInputValue(
   opts?: { priority?: priorityType }
 ): void {
   fullShinyObj_.setInputValue(name, value, opts);
+}
+function shinyForgetLastInputValue(name: string): void {
+  fullShinyObj_.forgetLastInputValue(name);
+}
+function shinyBindAll(scope: bindScope): void {
+  fullShinyObj_.bindAll(scope);
+}
+function shinyInitializeInputs(scope: bindScope): void {
+  fullShinyObj_.initializeInputs(scope);
 }
 
 // "init_shiny.js"
@@ -91,13 +105,13 @@ function initShiny(Shiny: ShinyType): void {
     inputsNoResend.forget(name);
   };
 
-  Shiny.bindAll = function (scope) {
+  Shiny.bindAll = function (scope: bindScope) {
     bindAll(inputs, scope);
   };
 
   // Calls .initialize() for all of the input objects in all input bindings,
   // in the given scope.
-  function initializeInputs(scope = document) {
+  function initializeInputs(scope = document.documentElement) {
     const bindings = inputBindings.getBindings();
 
     // Iterate over all bindings
@@ -125,7 +139,7 @@ function initShiny(Shiny: ShinyType): void {
   }
 
   // Initialize all input objects in the document, before binding
-  initializeInputs(document);
+  initializeInputs(document.documentElement);
 
   // The input values returned by _bindAll() each have a structure like this:
   //   { value: 123, opts: { ... } }
@@ -134,7 +148,10 @@ function initShiny(Shiny: ShinyType): void {
   // initialValues object for the duration of the session, and the opts may
   // have a reference to the DOM element, which would prevent it from being
   // GC'd.
-  const initialValues = mapValues(_bindAll(document), (x) => x.value);
+  const initialValues = mapValues(
+    _bindAll(inputs, document.documentElement),
+    (x) => x.value
+  );
 
   // The server needs to know the size of each image and plot output element,
   // in case it is auto-sizing
@@ -189,8 +206,9 @@ function initShiny(Shiny: ShinyType): void {
 
   $(".shiny-image-output, .shiny-plot-output, .shiny-report-theme").each(
     function () {
-      const el = this,
-        id = getIdFromEl(el);
+      // eslint-disable-next-line @typescript-eslint/no-this-alias
+      const el = this;
+      const id = getIdFromEl(el);
 
       initialValues[".clientdata_output_" + id + "_bg"] = getComputedBgColor(
         el
@@ -513,7 +531,7 @@ function initShiny(Shiny: ShinyType): void {
 } // function initShiny()
 
 // Give any deferred iframes a chance to load.
-function initDeferredIframes() {
+function initDeferredIframes(): void {
   if (
     !window.Shiny ||
     !window.Shiny.shinyapp ||
@@ -543,6 +561,9 @@ export {
   sendImageSize2,
   initShiny,
   initDeferredIframes,
-  shinySetInputValue,
   fullShinyObj,
+  shinySetInputValue,
+  shinyForgetLastInputValue,
+  shinyBindAll,
+  shinyInitializeInputs,
 };

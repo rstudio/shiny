@@ -46,7 +46,7 @@ class InputValidateDecorator {
   setInput = function (
     nameType: string,
     value: unknown,
-    opts: { priority?: priorityType }
+    opts?: { priority?: priorityType }
   ): void {
     if (!nameType) throw "Can't set input with empty name.";
 

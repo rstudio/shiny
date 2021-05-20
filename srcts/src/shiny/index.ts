@@ -15,14 +15,19 @@ import {
 import { show as showModal, remove as removeModal } from "./modal";
 import { showReconnectDialog, hideReconnectDialog } from "./reconnectDialog";
 import { renderContent, renderDependencies, renderHtml } from "./render";
-import { initShiny } from "./init";
+import {
+  initShiny,
+  shinyBindAll,
+  shinyForgetLastInputValue,
+  shinySetInputValue,
+  shinyInitializeInputs,
+} from "./init";
 import { ShinyApp } from "./shinyapp";
-import { priorityType } from "../inputPolicies";
 
 interface ShinyType {
   version: string;
-  $escape: any;
-  compareVersion: any;
+  $escape: typeof $escape;
+  compareVersion: typeof compareVersion;
   inputBindings: typeof inputBindings;
   InputBinding: typeof InputBinding;
   outputBindings: typeof outputBindings;
@@ -34,25 +39,20 @@ interface ShinyType {
   };
   modal: { show: typeof showModal; remove: typeof removeModal };
   createSocket?: () => WebSocket;
-  shinyapp: ShinyApp;
-  addCustomMessageHandler;
-  progressHandlers;
-  showReconnectDialog;
-  hideReconnectDialog;
+  showReconnectDialog: typeof showReconnectDialog;
+  hideReconnectDialog: typeof hideReconnectDialog;
+  renderDependencies: typeof renderDependencies;
+  renderContent: typeof renderContent;
+  renderHtml: typeof renderHtml;
   user: string;
-  renderDependencies;
-  renderContent;
-  renderHtml;
-  setInputValue?: (
-    name: string,
-    value: unknown,
-    opts?: { priority?: priorityType }
-  ) => void;
-  onInputChange?: (
-    name: string,
-    value: unknown,
-    opts: { priority?: priorityType }
-  ) => void;
+  shinyapp?: ShinyApp;
+  progressHandlers?: ShinyApp["progressHandlers"];
+  addCustomMessageHandler?: ShinyApp["addCustomMessageHandler"];
+  setInputValue?: typeof shinySetInputValue;
+  onInputChange?: typeof shinySetInputValue;
+  forgetLastInputValue?: typeof shinyForgetLastInputValue;
+  bindAll?: typeof shinyBindAll;
+  initializeInputs?: typeof shinyInitializeInputs;
 }
 
 let Shiny: ShinyType;
@@ -72,7 +72,7 @@ function setShiny(Shiny_: ShinyType): void {
   Shiny.notifications = { show: showNotification, remove: removeNotification };
   Shiny.modal = { show: showModal, remove: removeModal };
 
-  Shiny.addCustomMessageHandler;
+  // Shiny.addCustomMessageHandler;
   Shiny.showReconnectDialog = showReconnectDialog;
   Shiny.hideReconnectDialog = hideReconnectDialog;
   Shiny.renderDependencies = renderDependencies;

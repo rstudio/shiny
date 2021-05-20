@@ -1,12 +1,14 @@
 import $ from "jquery";
+import { InputPolicy, priorityType } from ".";
+import { Debouncer, Invoker, Throttler } from "../time";
 import { hasOwnProperty } from "../utils";
 import { splitInputNameType } from "./splitInputNameType";
 
-class InputRateDecorator {
-  target;
+class InputRateDecorator extends InputPolicy {
   inputRatePolicies = {};
 
-  constructor(target) {
+  constructor(target: InputPolicy) {
+    super();
     this.target = target;
   }
 
@@ -16,7 +18,11 @@ class InputRateDecorator {
   // However, $ensureInit() and $doSetInput() are meant to be passed just
   // the input name (i.e., inputId), which is why we distinguish between
   // nameType and name.
-  setInput(nameType, value, opts): void {
+  setInput(
+    nameType: string,
+    value: unknown,
+    opts: { priority: priorityType }
+  ): void {
     const { name: inputName } = splitInputNameType(nameType);
 
     this.$ensureInit(inputName);
@@ -25,7 +31,11 @@ class InputRateDecorator {
       this.inputRatePolicies[inputName].immediateCall(nameType, value, opts);
     else this.inputRatePolicies[inputName].normalCall(nameType, value, opts);
   }
-  setRatePolicy(nameType, mode, millis): void {
+  setRatePolicy(
+    nameType: string,
+    mode: "direct" | "debounce" | "throttle",
+    millis?: number
+  ): void {
     const { name: inputName } = splitInputNameType(nameType);
 
     if (mode === "direct") {
@@ -44,10 +54,14 @@ class InputRateDecorator {
       );
     }
   }
-  $ensureInit(name): void {
+  private $ensureInit(name: string): void {
     if (!(name in this.inputRatePolicies)) this.setRatePolicy(name, "direct");
   }
-  $doSetInput(nameType, value, opts): void {
+  private $doSetInput(
+    nameType: string,
+    value: unknown,
+    opts: { priority: priorityType }
+  ): void {
     this.target.setInput(nameType, value, opts);
   }
 }

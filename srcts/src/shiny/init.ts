@@ -10,6 +10,7 @@ import {
   InputNoResendDecorator,
   InputRateDecorator,
   InputValidateDecorator,
+  priorityType,
 } from "../inputPolicies";
 import { addDefaultInputOpts } from "../inputPolicies/inputValidateDecorator";
 import { debounce, Debouncer } from "../time";
@@ -37,11 +38,11 @@ function initShiny(Shiny: ShinyType): void {
   const inputsRate = new InputRateDecorator(inputsEvent);
   const inputsDefer = new InputDeferDecorator(inputsEvent);
 
-  let inputs;
+  let target;
 
   if ($('input[type="submit"], button[type="submit"]').length > 0) {
     // If there is a submit button on the page, use defer decorator
-    inputs = inputsDefer;
+    target = inputsDefer;
 
     $('input[type="submit"], button[type="submit"]').each(function () {
       $(this).click(function (event) {
@@ -51,10 +52,10 @@ function initShiny(Shiny: ShinyType): void {
     });
   } else {
     // By default, use rate decorator
-    inputs = inputsRate;
+    target = inputsRate;
   }
 
-  inputs = new InputValidateDecorator(inputs);
+  const inputs = new InputValidateDecorator(target);
 
   Shiny.setInputValue = Shiny.onInputChange = function (name, value, opts) {
     opts = addDefaultInputOpts(opts);

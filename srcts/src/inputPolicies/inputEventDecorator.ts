@@ -1,14 +1,18 @@
 import $ from "jquery";
+import { InputPolicy, priorityType } from ".";
 import { splitInputNameType } from "./splitInputNameType";
 
-class InputEventDecorator {
-  target;
-
-  constructor(target) {
+class InputEventDecorator extends InputPolicy {
+  constructor(target: InputPolicy) {
+    super();
     this.target = target;
   }
 
-  setInput(nameType, value, opts): void {
+  setInput(
+    nameType: string,
+    value: unknown,
+    opts: { el: HTMLElement; priority: priorityType }
+  ): void {
     const evt = jQuery.Event("shiny:inputchanged");
 
     const input = splitInputNameType(nameType);

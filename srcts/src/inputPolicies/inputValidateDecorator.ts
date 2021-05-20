@@ -1,14 +1,17 @@
 import $ from "jquery";
+import { InputPolicy, priorityType } from ".";
 
 // Merge opts with defaults, and return a new object.
-function addDefaultInputOpts(
-  opts
-): {
-  priority: "immeidate" | "deferred" | "event";
-  binding: null;
-  el: null;
+function addDefaultInputOpts<T>(
+  opts: T & {
+    priority?: priorityType;
+  }
+): T & {
+  priority: priorityType;
+  binding: unknown;
+  el: HTMLElement | null;
 } {
-  opts = $.extend(
+  const newOpts = $.extend(
     {
       priority: "immediate",
       binding: null,
@@ -17,33 +20,39 @@ function addDefaultInputOpts(
     opts
   );
 
-  if (opts && typeof opts.priority !== "undefined") {
-    switch (opts.priority) {
+  if (newOpts && typeof newOpts.priority !== "undefined") {
+    switch (newOpts.priority) {
       case "deferred":
       case "immediate":
       case "event":
         break;
       default:
-        throw new Error("Unexpected input value mode: '" + opts.priority + "'");
+        throw new Error(
+          "Unexpected input value mode: '" + newOpts.priority + "'"
+        );
     }
   }
 
-  return opts;
+  return newOpts;
 }
 
 class InputValidateDecorator {
   target;
 
-  constructor(target) {
+  constructor(target: InputPolicy) {
     this.target = target;
   }
 
-  setInput = function (nameType, value, opts): void {
+  setInput = function (
+    nameType: string,
+    value: unknown,
+    opts: { priority?: priorityType }
+  ): void {
     if (!nameType) throw "Can't set input with empty name.";
 
-    opts = addDefaultInputOpts(opts);
+    const newOpts = addDefaultInputOpts(opts);
 
-    this.target.setInput(nameType, value, opts);
+    this.target.setInput(nameType, value, newOpts);
   };
 }
 

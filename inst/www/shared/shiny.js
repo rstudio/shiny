@@ -1066,9 +1066,9 @@
   // node_modules/core-js/modules/es.regexp.exec.js
   var require_es_regexp_exec = __commonJS(function() {
     "use strict";
-    var $25 = require_export();
+    var $26 = require_export();
     var exec = require_regexp_exec();
-    $25({target: "RegExp", proto: true, forced: /./.exec !== exec}, {
+    $26({target: "RegExp", proto: true, forced: /./.exec !== exec}, {
       exec: exec
     });
   });
@@ -2049,6 +2049,35 @@
     };
   });
 
+  // node_modules/core-js/internals/object-to-array.js
+  var require_object_to_array = __commonJS(function(exports2, module2) {
+    var DESCRIPTORS3 = require_descriptors();
+    var objectKeys = require_object_keys();
+    var toIndexedObject3 = require_to_indexed_object();
+    var propertyIsEnumerable = require_object_property_is_enumerable().f;
+    var createMethod = function(TO_ENTRIES) {
+      return function(it) {
+        var O = toIndexedObject3(it);
+        var keys2 = objectKeys(O);
+        var length = keys2.length;
+        var i = 0;
+        var result = [];
+        var key;
+        while (length > i) {
+          key = keys2[i++];
+          if (!DESCRIPTORS3 || propertyIsEnumerable.call(O, key)) {
+            result.push(TO_ENTRIES ? [key, O[key]] : O[key]);
+          }
+        }
+        return result;
+      };
+    };
+    module2.exports = {
+      entries: createMethod(true),
+      values: createMethod(false)
+    };
+  });
+
   // node_modules/core-js/internals/same-value.js
   var require_same_value = __commonJS(function(exports2, module2) {
     module2.exports = Object.is || function is(x, y) {
@@ -2115,6 +2144,64 @@
     });
     var import_es_regexp_exec2 = __toModule(require_es_regexp_exec());
     var import_jquery6 = __toModule(require_jquery());
+    function _slicedToArray(arr, i) {
+      return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest();
+    }
+    function _nonIterableRest() {
+      throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+    }
+    function _unsupportedIterableToArray(o, minLen) {
+      if (!o)
+        return;
+      if (typeof o === "string")
+        return _arrayLikeToArray(o, minLen);
+      var n = Object.prototype.toString.call(o).slice(8, -1);
+      if (n === "Object" && o.constructor)
+        n = o.constructor.name;
+      if (n === "Map" || n === "Set")
+        return Array.from(o);
+      if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n))
+        return _arrayLikeToArray(o, minLen);
+    }
+    function _arrayLikeToArray(arr, len) {
+      if (len == null || len > arr.length)
+        len = arr.length;
+      for (var i = 0, arr2 = new Array(len); i < len; i++) {
+        arr2[i] = arr[i];
+      }
+      return arr2;
+    }
+    function _iterableToArrayLimit(arr, i) {
+      if (typeof Symbol === "undefined" || !(Symbol.iterator in Object(arr)))
+        return;
+      var _arr = [];
+      var _n = true;
+      var _d = false;
+      var _e = void 0;
+      try {
+        for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {
+          _arr.push(_s.value);
+          if (i && _arr.length === i)
+            break;
+        }
+      } catch (err) {
+        _d = true;
+        _e = err;
+      } finally {
+        try {
+          if (!_n && _i["return"] != null)
+            _i["return"]();
+        } finally {
+          if (_d)
+            throw _e;
+        }
+      }
+      return _arr;
+    }
+    function _arrayWithHoles(arr) {
+      if (Array.isArray(arr))
+        return arr;
+    }
     function _typeof(obj) {
       "@babel/helpers - typeof";
       if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
@@ -4789,10 +4876,8 @@
                 src: x
               };
             }
-            var attrs = Object.keys(x);
-            for (var i = 0; i < attrs.length; i++) {
-              var attr = attrs[i];
-              var val = x[attr];
+            for (var _i = 0, _Object$entries = Object.entries(x); _i < _Object$entries.length; _i++) {
+              var _Object$entries$_i = _slicedToArray(_Object$entries[_i], 2), attr = _Object$entries$_i[0], val = _Object$entries$_i[1];
               if (attr === "src") {
                 val = href + "/" + encodeURI(val);
               }
@@ -5305,8 +5390,8 @@
           }
           updateLabel(data.label, this._getLabelNode(el));
           var domElements = ["data-type", "time-format", "timezone"];
-          for (var _i = 0; _i < domElements.length; _i++) {
-            var elem = domElements[_i];
+          for (var _i2 = 0; _i2 < domElements.length; _i2++) {
+            var elem = domElements[_i2];
             if (data.hasOwnProperty(elem)) {
               $el.data(elem, data[elem]);
             }
@@ -8062,6 +8147,15 @@
   var j;
   var key;
 
+  // node_modules/core-js/modules/es.object.entries.js
+  var $24 = require_export();
+  var $entries = require_object_to_array().entries;
+  $24({target: "Object", stat: true}, {
+    entries: function entries(O) {
+      return $entries(O);
+    }
+  });
+
   // node_modules/core-js/modules/es.string.search.js
   "use strict";
   var fixRegExpWellKnownSymbolLogic4 = require_fix_regexp_well_known_symbol_logic();
@@ -8095,10 +8189,10 @@
 
   // node_modules/core-js/modules/es.string.trim.js
   "use strict";
-  var $24 = require_export();
+  var $25 = require_export();
   var $trim = require_string_trim().trim;
   var forcedStringTrimMethod = require_string_trim_forced();
-  $24({target: "String", proto: true, forced: forcedStringTrimMethod("trim")}, {
+  $25({target: "String", proto: true, forced: forcedStringTrimMethod("trim")}, {
     trim: function trim2() {
       return $trim(this);
     }

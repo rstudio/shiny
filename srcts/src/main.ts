@@ -4159,16 +4159,12 @@ function main(): void {
       const scripts = $.map(scripts_attrs, function (x) {
         let script = document.createElement("script");
 
-        // htmlDependency()'s script arg may be a list of attributes
+        // htmlDependency()'s script arg can be a character vector or a list()
         if (typeof x === "string") {
           x = { src: x };
         }
-        const attrs = Object.keys(x);
 
-        for (let i = 0; i < attrs.length; i++) {
-          const attr = attrs[i];
-          let val = x[attr];
-
+        for (let [attr, val] of Object.entries(x)) {
           if (attr === "src") {
             val = href + "/" + encodeURI(val);
           }

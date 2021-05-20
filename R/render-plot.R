@@ -36,12 +36,13 @@
 #' @param res Resolution of resulting plot, in pixels per inch. This value is
 #'   passed to [grDevices::png()]. Note that this affects the resolution of PNG
 #'   rendering in R; it won't change the actual ppi of the browser.
-#' @param alt Alternate text for the HTML `<img>` tag
-#'   if it cannot be displayed or viewed (i.e., the user uses a screen reader).
-#'   In addition to a character string, the value may be a reactive expression
-#'   (or a function referencing reactive values) that returns a character string.
-#'   NULL or "" is not recommended because those should be limited to decorative images
-#'   (the default is "Plot object").
+#' @param alt Alternate text for the HTML `<img>` tag if it cannot be displayed
+#'   or viewed (i.e., the user uses a screen reader). In addition to a character
+#'   string, the value may be a reactive expression (or a function referencing
+#'   reactive values) that returns a character string. By default,
+#'   `ggplot2::get_alt_text()` is used to get a sensible default for `ggplot2`
+#'   plots (other plots default to `"Plot Object"`). `NULL` or `""` is not
+#'   recommended because those should be limited to decorative images.
 #' @param ... Arguments to be passed through to [grDevices::png()].
 #'   These can be used to set the width, height, background color, etc.
 #' @param env The environment in which to evaluate `expr`.
@@ -58,7 +59,7 @@
 #'   interactive R Markdown document.
 #' @export
 renderPlot <- function(expr, width = 'auto', height = 'auto', res = 72, ...,
-                       alt = "Plot object",
+                       alt = NA,
                        env = parent.frame(), quoted = FALSE,
                        execOnResize = FALSE, outputArgs = list()
 ) {
@@ -212,7 +213,7 @@ resizeSavedPlot <- function(name, session, result, width, height, alt, pixelrati
     src = session$fileUrl(name, outfile, contentType = "image/png"),
     width = width,
     height = height,
-    alt = alt,
+    alt = result$alt,
     coordmap = coordmap,
     error = attr(coordmap, "error", exact = TRUE)
   )
@@ -288,6 +289,7 @@ drawPlot <- function(name, session, func, width, height, alt, pixelratio, res, .
               recordedPlot = grDevices::recordPlot(),
               coordmap = getCoordmap(value, width*pixelratio, height*pixelratio, res*pixelratio),
               pixelratio = pixelratio,
+              alt = if (anyNA(alt)) autoAltText(value) else alt,
               res = res
             )
           }
@@ -302,10 +304,10 @@ drawPlot <- function(name, session, func, width, height, alt, pixelratio, res, .
     ),
     function(result) {
       result$img <- dropNulls(list(
-        src = session$fileUrl(name, outfile, contentType='image/png'),
+        src = session$fileUrl(name, outfile, contentType = 'image/png'),
         width = width,
         height = height,
-        alt = alt,
+        alt = result$alt,
         coordmap = result$coordmap,
         # Get coordmap error message if present
         error = attr(result$coordmap, "error", exact = TRUE)
@@ -333,10 +335,34 @@ custom_print.ggplot <- function(x) {
   gtable <- ggplot2::ggplot_gtable(build)
   grid::grid.draw(gtable)
 
-  structure(list(
+  res <- list(
     build = build,
     gtable = gtable
-  ), class = "ggplot_build_gtable")
+  )
+  class(res) <- "ggplot_build_gtable"
+
+  # ggplot2::get_alt_text() was added in v3.3.4
+  # https://github.com/tidyverse/ggplot2/pull/4482
+  get_alt <- asNamespace("ggplot2")$get_alt_text
+  if (is.function(get_alt)) {
+    res$alt_text <- get_alt(x)
+  }
+
+  res
+}
+
+# Infer alt text description from renderPlot() value
+# (currently just ggplot2 is supported)
+autoAltText <- function(x, default = "Plot Object") {
+  # Since, inside renderPlot(), custom_print.ggplot()
+  # overrides print.ggplot, this class indicates a ggplot()
+  # value, and should have this field populated if
+  # ggplot2::get_alt_text() is available
+  if (inherits(x, "ggplot_build_gtable")) {
+    x$alt_text %||% default
+  } else {
+    default
+  }
 }
 
 # The coordmap extraction functions below return something like the examples

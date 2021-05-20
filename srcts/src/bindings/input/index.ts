@@ -15,11 +15,6 @@ import { ActionButtonInputBinding } from "./actionbutton";
 import { BootstrapTabInputBinding } from "./tabinput";
 import { FileInputBinding } from "./fileinput";
 
-interface NameValueHTMLElement extends HTMLElement {
-  name: string;
-  value: any;
-}
-
 class InputBinding {
   name: string;
 
@@ -147,5 +142,4 @@ const fileInputBinding = new FileInputBinding();
 
 inputBindings.register(fileInputBinding, "shiny.fileInputBinding");
 
-export type { NameValueHTMLElement };
 export { inputBindings, InputBinding, fileInputBinding };

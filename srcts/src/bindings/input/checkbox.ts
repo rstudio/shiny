@@ -1,10 +1,8 @@
 import $ from "jquery";
-import { InputBinding, NameValueHTMLElement } from ".";
+import { InputBinding } from ".";
 import { hasOwnProperty } from "../../utils";
 
-interface CheckedHTMLElement extends NameValueHTMLElement {
-  checked?: any;
-}
+type CheckedHTMLElement = HTMLInputElement;
 
 class CheckboxInputBinding extends InputBinding {
   find(scope: HTMLElement): JQuery<HTMLElement> {
@@ -13,7 +11,7 @@ class CheckboxInputBinding extends InputBinding {
   getValue(el: CheckedHTMLElement): any {
     return el.checked;
   }
-  setValue(el: CheckedHTMLElement, value): void {
+  setValue(el: CheckedHTMLElement, value: boolean): void {
     el.checked = value;
   }
   subscribe(el: HTMLElement, callback: (x: boolean) => void): void {

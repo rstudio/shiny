@@ -218,7 +218,7 @@ class FileInputBinding extends InputBinding {
     }
     return true;
   }
-  _handleDrop(e: DragEvent, el: FileInputHTMLElement): void {
+  _handleDrop(e: JQuery.TriggeredEvent, el: FileInputHTMLElement): void {
     const files = e.originalEvent.dataTransfer.files,
       $el = $(el);
 

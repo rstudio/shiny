@@ -8,7 +8,7 @@ import {
   hasOwnProperty,
 } from "../../utils";
 
-import { TextInputBinding } from "./text";
+import { TextHTMLElement, TextInputBinding } from "./text";
 
 // interface SliderHTMLElement extends NameValueHTMLElement {
 //   checked?: any;
@@ -82,7 +82,9 @@ class SliderInputBinding extends TextInputBinding {
     else if (dataType === "datetime") return "shiny.datetime";
     else return false;
   }
-  getValue(el): number | string | [number | string, number | string] {
+  getValue(
+    el: TextHTMLElement
+  ): number | string | [number | string, number | string] {
     const $el = $(el);
     const result = $(el).data("ionRangeSlider").result;
 
@@ -214,7 +216,9 @@ class SliderInputBinding extends TextInputBinding {
     };
   }
   // TODO-barret Why not implemented?
-  getState(el: any): void {
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+  getState(el: TextHTMLElement): void {
     // empty
     el;
   }

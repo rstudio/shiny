@@ -1,12 +1,10 @@
 import $ from "jquery";
 
-import { InputBinding, NameValueHTMLElement } from ".";
+import { InputBinding } from ".";
 import { $escape, hasOwnProperty, updateLabel } from "../../utils";
+import { CheckedHTMLElement } from "./checkbox";
 
-interface CheckboxGroupHTMLElement extends NameValueHTMLElement {
-  checked?: any;
-}
-
+type CheckboxGroupHTMLElement = CheckedHTMLElement;
 type ValueLabelObject = {
   value: any;
   label: string;
@@ -17,13 +15,13 @@ class CheckboxGroupInputBinding extends InputBinding {
     return $(scope).find(".shiny-input-checkboxgroup");
   }
 
-  getValue(el: CheckboxGroupHTMLElement): Array<NameValueHTMLElement> {
+  getValue(el: CheckboxGroupHTMLElement): Array<CheckboxGroupHTMLElement> {
     // Select the checkbox objects that have name equal to the grouping div's id
     const $objs = $('input:checkbox[name="' + $escape(el.id) + '"]:checked');
     const values = new Array($objs.length);
 
     for (let i = 0; i < $objs.length; i++) {
-      values[i] = ($objs[i] as NameValueHTMLElement).value;
+      values[i] = ($objs[i] as CheckboxGroupHTMLElement).value;
     }
     return values;
   }
@@ -58,7 +56,7 @@ class CheckboxGroupInputBinding extends InputBinding {
   ): { label: string; value: any; options: Array<ValueLabelObject> } {
     const $objs = $(
       'input:checkbox[name="' + $escape(el.id) + '"]'
-    ) as JQuery<NameValueHTMLElement>;
+    ) as JQuery<CheckboxGroupHTMLElement>;
 
     // Store options in an array of objects, each with with value and label
     const options = new Array($objs.length);

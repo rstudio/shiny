@@ -2,11 +2,12 @@ import $ from "jquery";
 import { $escape, updateLabel, hasOwnProperty } from "../../utils";
 
 import { InputBinding } from "../input";
-import { NameValueHTMLElement } from ".";
 
-interface TextHTMLElement extends NameValueHTMLElement {
-  placeholder: any;
-}
+// interface TextHTMLElement extends NameValueHTMLElement {
+//   placeholder: any;
+// }
+
+type TextHTMLElement = HTMLInputElement;
 
 class TextInputBinding extends InputBinding {
   find(scope: HTMLElement): JQuery<HTMLElement> | Array<HTMLElement> {
@@ -91,3 +92,5 @@ class TextInputBinding extends InputBinding {
 }
 
 export { TextInputBinding };
+
+export type { TextHTMLElement };

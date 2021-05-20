@@ -1,13 +1,8 @@
 import $ from "jquery";
-import { NameValueHTMLElement } from ".";
 import { $escape, hasOwnProperty, updateLabel } from "../../utils";
 import { TextInputBinding } from "./text";
 
-interface NumberHTMLElement extends NameValueHTMLElement {
-  min?: any;
-  max?: any;
-  step?: any;
-}
+type NumberHTMLElement = HTMLInputElement;
 
 class NumberInputBinding extends TextInputBinding {
   find(scope: HTMLElement): JQuery<HTMLElement> {
@@ -31,8 +26,8 @@ class NumberInputBinding extends TextInputBinding {
 
     return numberVal; // If other string like "1e6", send it unchanged
   }
-  setValue(el: NumberHTMLElement, value): void {
-    el.value = value;
+  setValue(el: NumberHTMLElement, value: number): void {
+    el.value = "" + value;
   }
   getType(el: NumberHTMLElement): string {
     return "shiny.number";

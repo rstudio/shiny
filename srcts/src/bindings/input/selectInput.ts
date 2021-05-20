@@ -2,10 +2,7 @@ import $ from "jquery";
 import { InputBinding } from ".";
 import { $escape, hasOwnProperty, updateLabel } from "../../utils";
 
-interface SelectHTMLElement extends HTMLElement {
-  name: string;
-  nonempty: boolean;
-}
+type SelectHTMLElement = HTMLSelectElement & { nonempty: boolean };
 
 class SelectInputBinding extends InputBinding {
   find(scope: HTMLElement): JQuery<HTMLElement> {
@@ -42,7 +39,7 @@ class SelectInputBinding extends InputBinding {
     }
   }
   getState(
-    el: any
+    el
   ): {
     label: JQuery<HTMLElement>;
     value: string | number | string[];

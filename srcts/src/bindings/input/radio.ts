@@ -1,10 +1,8 @@
 import $ from "jquery";
-import { InputBinding, NameValueHTMLElement } from ".";
+import { InputBinding } from ".";
 import { $escape, hasOwnProperty, updateLabel } from "../../utils";
 
-interface RadioHTMLElement extends NameValueHTMLElement {
-  checked?: any;
-}
+type RadioHTMLElement = HTMLInputElement;
 
 type ValueLabelObject = {
   value: any;

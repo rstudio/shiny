@@ -22,7 +22,7 @@ import {
   shinySetInputValue,
   shinyInitializeInputs,
 } from "./init";
-import { ShinyApp } from "./shinyapp";
+import { HandlerType, ShinyApp } from "./shinyapp";
 import { unbindAll } from "./bind";
 
 interface ShinyType {
@@ -55,6 +55,10 @@ interface ShinyType {
   bindAll?: typeof shinyBindAll;
   unbindAll?: typeof unbindAll;
   initializeInputs?: typeof shinyInitializeInputs;
+
+  // Eventually deprecate
+  // For old-style custom messages - should deprecate and migrate to new
+  oncustommessage?: HandlerType;
 }
 
 let Shiny: ShinyType;

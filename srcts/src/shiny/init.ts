@@ -1,6 +1,6 @@
 import $ from "jquery";
 import { ShinyType } from ".";
-import { inputBindings } from "../bindings";
+import { InputBinding, inputBindings } from "../bindings";
 import { OutputBindingAdapter } from "../bindings/output_adapter";
 import {
   InputBatchSender,
@@ -21,7 +21,7 @@ import {
 } from "../utils";
 import { bindAll, bindScope, unbindAll, _bindAll } from "./bind";
 import { registerDependency } from "./render";
-import { ShinyApp } from "./shinyapp";
+import { HandlerType, ShinyApp } from "./shinyapp";
 import { registerNames as singletonsRegisterNames } from "./singletons";
 
 // This function gets defined in initShiny() and 'hoisted' so it can be reused
@@ -45,18 +45,21 @@ function shinySetInputValue(
 function shinyShinyApp(): ShinyApp {
   return fullShinyObj_.shinyapp;
 }
+function setShinyUser(user: string): void {
+  fullShinyObj_.user = user;
+}
 function shinyForgetLastInputValue(name: string): void {
   fullShinyObj_.forgetLastInputValue(name);
 }
 function shinyBindAll(scope: bindScope): void {
   fullShinyObj_.bindAll(scope);
 }
-function shinyInitializeInputs(scope: bindScope): void {
+function shinyInitializeInputs(scope: HTMLElement | JQuery<HTMLElement>): void {
   fullShinyObj_.initializeInputs(scope);
 }
 
 function shinyAppBindOutput(id: string, binding: OutputBindingAdapter): void {
-  return fullShinyObj_.shinyapp.bindOutput(id, binding);
+  fullShinyObj_.shinyapp.bindOutput(id, binding);
 }
 
 function shinyAppUnbindOutput(
@@ -64,6 +67,10 @@ function shinyAppUnbindOutput(
   binding: OutputBindingAdapter
 ): boolean {
   return fullShinyObj_.shinyapp.unbindOutput(id, binding);
+}
+
+function getShinyOnCustomMessage(): null | HandlerType {
+  return fullShinyObj_.oncustommessage;
 }
 
 // "init_shiny.js"
@@ -121,7 +128,7 @@ function initShiny(Shiny: ShinyType): void {
   };
 
   Shiny.bindAll = function (scope: bindScope) {
-    bindAll(inputs, scope);
+    bindAll({ inputs, inputsRate }, scope);
   };
   Shiny.unbindAll = unbindAll;
 
@@ -133,13 +140,17 @@ function initShiny(Shiny: ShinyType): void {
     // Iterate over all bindings
     for (let i = 0; i < bindings.length; i++) {
       const binding = bindings[i].binding;
-      const inputObjects = binding.find(scope) || [];
+      const inputObjects = binding.find(scope);
 
-      // Iterate over all input objects for this binding
-      for (let j = 0; j < inputObjects.length; j++) {
-        if (!inputObjects[j]._shiny_initialized) {
-          inputObjects[j]._shiny_initialized = true;
-          binding.initialize(inputObjects[j]);
+      if (inputObjects) {
+        // Iterate over all input objects for this binding
+        for (let j = 0; j < inputObjects.length; j++) {
+          const $inputObjectJ = $(inputObjects[j]);
+
+          if (!$inputObjectJ.data("_shiny_initialized")) {
+            $inputObjectJ.data("_shiny_initialized", true);
+            binding.initialize(inputObjects[j]);
+          }
         }
       }
     }
@@ -587,4 +598,6 @@ export {
   maybeAddThemeObserver,
   shinyAppBindOutput,
   shinyAppUnbindOutput,
+  getShinyOnCustomMessage,
+  setShinyUser,
 };

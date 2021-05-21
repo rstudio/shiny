@@ -10,7 +10,7 @@ import { InputBinding } from "../input";
 type TextHTMLElement = HTMLInputElement;
 
 class TextInputBinding extends InputBinding {
-  find(scope: HTMLElement): JQuery<HTMLElement> | Array<HTMLElement> {
+  find(scope: HTMLElement): JQuery<HTMLElement> {
     const $inputs = $(scope).find(
       'input[type="text"], input[type="search"], input[type="url"], input[type="email"]'
     );

@@ -1,13 +1,32 @@
 import $ from "jquery";
-import { $escape, hasOwnProperty, makeBlob } from "../utils";
-import { fullShinyObj, shinyUnbindAll } from "./init";
+import {
+  $escape,
+  hasOwnProperty,
+  makeBlob,
+  randomId,
+  scopeExprToFunc,
+} from "../utils";
+import {
+  fullShinyObj,
+  getShinyOnCustomMessage,
+  setShinyUser,
+  shinyForgetLastInputValue,
+  shinyUnbindAll,
+} from "./init";
 import { isQt } from "../utils/browser";
 import {
   show as showNotification,
   remove as removeNotification,
 } from "./notifications";
 import { show as showModal, remove as removeModal } from "./notifications";
-import { renderContent } from "./render";
+import { renderContent, renderHtml, RenderWhereType } from "./render";
+import { hideReconnectDialog, showReconnectDialog } from "./reconnectDialog";
+import { resetBrush } from "../imageutils/resetBrush";
+import { OutputBindingAdapter } from "../bindings/output_adapter";
+
+type HandlerType = (
+  msg: Record<string, unknown> | Array<unknown> | boolean | string
+) => void;
 
 class ShinyApp {
   $socket = null;
@@ -24,7 +43,7 @@ class ShinyApp {
   $initialInput = {};
 
   // Output bindings
-  $bindings = {};
+  $bindings: Record<string, OutputBindingAdapter> = {};
 
   // Cached values/errors
   $values = {};
@@ -43,7 +62,7 @@ class ShinyApp {
     this.init();
   }
 
-  connect(initialInput): void {
+  connect(initialInput: unknown): void {
     if (this.$socket)
       throw "Connect was already called on this application object";
 
@@ -74,11 +93,9 @@ class ShinyApp {
   }
 
   createSocket(): WebSocket {
-    const self = this;
-
     const createSocketFunc: () => WebSocket =
       fullShinyObj().createSocket ||
-      function () {
+      (() => {
         let protocol = "ws:";
 
         if (window.location.protocol === "https:") protocol = "wss:";
@@ -104,12 +121,12 @@ class ShinyApp {
         ws.binaryType = "arraybuffer";
 
         return ws;
-      };
+      });
 
     const socket = createSocketFunc();
     let hasOpened = false;
 
-    socket.onopen = function () {
+    socket.onopen = () => {
       hasOpened = true;
 
       $(document).trigger({
@@ -117,27 +134,27 @@ class ShinyApp {
         socket: socket,
       });
 
-      self.onConnected();
+      this.onConnected();
 
       socket.send(
         JSON.stringify({
           method: "init",
-          data: self.$initialInput,
+          data: this.$initialInput,
         })
       );
 
-      while (self.$pendingMessages.length) {
-        const msg = self.$pendingMessages.shift();
+      while (this.$pendingMessages.length) {
+        const msg = this.$pendingMessages.shift();
 
         socket.send(msg);
       }
     };
-    socket.onmessage = function (e) {
-      self.dispatchMessage(e.data);
+    socket.onmessage = (e) => {
+      this.dispatchMessage(e.data);
     };
     // Called when a successfully-opened websocket is closed, or when an
     // attempt to open a connection fails.
-    socket.onclose = function () {
+    socket.onclose = () => {
       // These things are needed only if we've successfully opened the
       // websocket.
       if (hasOpened) {
@@ -146,16 +163,16 @@ class ShinyApp {
           socket: socket,
         });
 
-        self.$notifyDisconnected();
+        this.$notifyDisconnected();
       }
 
-      self.onDisconnected(); // Must be run before self.$removeSocket()
-      self.$removeSocket();
+      this.onDisconnected(); // Must be run before this.$removeSocket()
+      this.$removeSocket();
     };
     return socket;
   }
 
-  sendInput(values): void {
+  sendInput(values: unknown): void {
     const msg = JSON.stringify({
       method: "update",
       data: values,
@@ -177,7 +194,7 @@ class ShinyApp {
     this.$socket = null;
   }
 
-  $scheduleReconnect(delay): void {
+  $scheduleReconnect(delay: Parameters<typeof setTimeout>[1]): void {
     this.scheduledReconnect = setTimeout(() => {
       this.reconnect();
     }, delay);
@@ -230,14 +247,14 @@ class ShinyApp {
     ) {
       const delay = this.reconnectDelay.next();
 
-      Shiny.showReconnectDialog(delay);
+      showReconnectDialog(delay);
       this.$scheduleReconnect(delay);
     }
   }
 
   onConnected(): void {
     $("#shiny-disconnected-overlay").remove();
-    Shiny.hideReconnectDialog();
+    hideReconnectDialog();
     this.reconnectDelay.reset();
   }
 
@@ -264,7 +281,13 @@ class ShinyApp {
   // @param blobs Optionally, an array of Blob, ArrayBuffer, or string
   //   objects that will be made available to the server as part of the
   //   request. Strings will be encoded using UTF-8.
-  makeRequest(method, args, onSuccess, onError, blobs): void {
+  makeRequest(
+    method: string,
+    args: Array<unknown>,
+    onSuccess: (value: unknown) => void,
+    onError: (err: string) => void,
+    blobs: Array<Blob | ArrayBuffer | string>
+  ): void {
     let requestId = this.$nextRequestId;
 
     while (this.$activeRequests[requestId]) {
@@ -307,8 +330,14 @@ class ShinyApp {
       payload.push(jsonBuf);
 
       for (let i = 0; i < blobs.length; i++) {
-        payload.push(uint32ToBuf(blobs[i].byteLength || blobs[i].size || 0));
-        payload.push(blobs[i]);
+        const blob = blobs[i];
+
+        payload.push(
+          uint32ToBuf(
+            (blob as ArrayBuffer).byteLength || (blob as Blob).size || 0
+          )
+        );
+        payload.push(blob);
       }
 
       msg = (makeBlob(payload) as unknown) as string;
@@ -325,7 +354,7 @@ class ShinyApp {
     }
   }
 
-  receiveError(name, error): void {
+  receiveError(name: string, error: string): void {
     if (this.$errors[name] === error) return;
 
     this.$errors[name] = error;
@@ -343,7 +372,7 @@ class ShinyApp {
     }
   }
 
-  receiveOutput(name, value): void {
+  receiveOutput<T>(name: string, value: T): T {
     const binding = this.$bindings[name];
     const evt = jQuery.Event("shiny:value");
 
@@ -368,7 +397,7 @@ class ShinyApp {
     return value;
   }
 
-  bindOutput(id, binding): void {
+  bindOutput(id: string, binding: OutputBindingAdapter): OutputBindingAdapter {
     if (!id) throw "Can't bind an element with no ID";
     if (this.$bindings[id]) throw "Duplicate binding for ID " + id;
     this.$bindings[id] = binding;
@@ -380,7 +409,7 @@ class ShinyApp {
     return binding;
   }
 
-  unbindOutput(id, binding): boolean {
+  unbindOutput(id: string, binding: OutputBindingAdapter): boolean {
     if (this.$bindings[id] === binding) {
       delete this.$bindings[id];
       return true;
@@ -392,7 +421,10 @@ class ShinyApp {
   // Narrows a scopeComponent -- an input or output object -- to one constrained
   // by nsPrefix. Returns a new object with keys removed and renamed as
   // necessary.
-  private narrowScopeComponent(scopeComponent, nsPrefix) {
+  private narrowScopeComponent<T>(
+    scopeComponent: Record<string, T>,
+    nsPrefix: string | null
+  ) {
     return Object.keys(scopeComponent)
       .filter((k) => k.indexOf(nsPrefix) === 0)
       .map((k) => ({ [k.substring(nsPrefix.length)]: scopeComponent[k] }))
@@ -406,7 +438,7 @@ class ShinyApp {
   //
   // Otherwise, returns a new object with keys in subComponents removed and
   // renamed as necessary.
-  private narrowScope(scope, nsPrefix) {
+  private narrowScope(scope, nsPrefix: string) {
     if (nsPrefix) {
       return {
         input: this.narrowScopeComponent(scope.input, nsPrefix),
@@ -426,7 +458,7 @@ class ShinyApp {
     // Input keys use "name:type" format; we don't want the user to
     // have to know about the type suffix when referring to inputs.
     for (const name in this.$inputValues) {
-      if (this.$inputValues.hasOwnProperty(name)) {
+      if (hasOwnProperty(this.$inputValues, name)) {
         const shortName = name.replace(/:.*/, "");
 
         inputs[shortName] = this.$inputValues[name];
@@ -484,7 +516,7 @@ class ShinyApp {
   private customMessageHandlers = {};
 
   // Adds Shiny (internal) message handler
-  private addMessageHandler(type, handler) {
+  private addMessageHandler(type: string, handler: HandlerType) {
     if (this.messageHandlers[type]) {
       throw 'handler for message of type "' + type + '" already added.';
     }
@@ -499,7 +531,7 @@ class ShinyApp {
   }
 
   // Adds custom message handler - this one is exposed to the user
-  addCustomMessageHandler(type, handler): void {
+  addCustomMessageHandler(type: string, handler: HandlerType): void {
     // Remove any previously defined handlers so that only the most recent one
     // will be called
     if (this.customMessageHandlers[type]) {
@@ -524,7 +556,7 @@ class ShinyApp {
   // // Added in shiny init method
   // Shiny.addCustomMessageHandler = addCustomMessageHandler;
 
-  dispatchMessage(data): void {
+  dispatchMessage(data: string | ArrayBufferLike): void {
     let msgObj: any = {};
 
     if (typeof data === "string") {
@@ -563,7 +595,11 @@ class ShinyApp {
 
   // A function for sending messages to the appropriate handlers.
   // - msgObj: the object containing messages, with format {msgObj.foo, msObj.bar
-  _sendMessagesToHandlers(msgObj, handlers, handlerOrder): void {
+  _sendMessagesToHandlers(
+    msgObj: Record<string, unknown>,
+    handlers: Record<string, HandlerType>,
+    handlerOrder: Array<string>
+  ): void {
     // Dispatch messages to handlers, if handler is present
     for (let i = 0; i < handlerOrder.length; i++) {
       const msgType = handlerOrder[i];
@@ -579,101 +615,139 @@ class ShinyApp {
   // Message handlers =====================================================
 
   private init() {
-    this.addMessageHandler("values", function (message) {
-      for (const name in this.$bindings) {
-        if (hasOwnProperty(this.$bindings, name))
-          this.$bindings[name].showProgress(false);
-      }
+    this.addMessageHandler(
+      "values",
+      function (message: Record<string, unknown>) {
+        for (const name in this.$bindings) {
+          if (hasOwnProperty(this.$bindings, name))
+            this.$bindings[name].showProgress(false);
+        }
 
-      for (const key in message) {
-        if (hasOwnProperty(message, key)) this.receiveOutput(key, message[key]);
-      }
-    });
-
-    this.addMessageHandler("errors", function (message) {
-      for (const key in message) {
-        if (hasOwnProperty(message, key)) this.receiveError(key, message[key]);
-      }
-    });
-
-    this.addMessageHandler("inputMessages", function (message) {
-      // inputMessages should be an array
-      for (let i = 0; i < message.length; i++) {
-        const $obj = $(".shiny-bound-input#" + $escape(message[i].id));
-        const inputBinding = $obj.data("shiny-input-binding");
-
-        // Dispatch the message to the appropriate input object
-        if ($obj.length > 0) {
-          if (!$obj.attr("aria-live")) $obj.attr("aria-live", "polite");
-          const el = $obj[0];
-          const evt = jQuery.Event("shiny:updateinput");
-
-          evt.message = message[i].message;
-          evt.binding = inputBinding;
-          $(el).trigger(evt);
-          if (!evt.isDefaultPrevented())
-            inputBinding.receiveMessage(el, evt.message);
+        for (const key in message) {
+          if (hasOwnProperty(message, key))
+            this.receiveOutput(key, message[key]);
         }
       }
-    });
+    );
 
-    this.addMessageHandler("javascript", function (message) {
+    this.addMessageHandler(
+      "errors",
+      function (message: Record<string, unknown>) {
+        for (const key in message) {
+          if (hasOwnProperty(message, key))
+            this.receiveError(key, message[key]);
+        }
+      }
+    );
+
+    this.addMessageHandler(
+      "inputMessages",
+      function (message: Array<{ id: string; message: any }>) {
+        // inputMessages should be an array
+        for (let i = 0; i < message.length; i++) {
+          const $obj = $(".shiny-bound-input#" + $escape(message[i].id));
+          const inputBinding = $obj.data("shiny-input-binding");
+
+          // Dispatch the message to the appropriate input object
+          if ($obj.length > 0) {
+            if (!$obj.attr("aria-live")) $obj.attr("aria-live", "polite");
+            const el = $obj[0];
+            const evt = jQuery.Event("shiny:updateinput");
+
+            evt.message = message[i].message;
+            evt.binding = inputBinding;
+            $(el).trigger(evt);
+            if (!evt.isDefaultPrevented())
+              inputBinding.receiveMessage(el, evt.message);
+          }
+        }
+      }
+    );
+
+    this.addMessageHandler("javascript", function (message: string) {
       /*jshint evil: true */
       eval(message);
     });
 
-    this.addMessageHandler("console", function (message) {
+    this.addMessageHandler("console", function (message: Array<unknown>) {
       for (let i = 0; i < message.length; i++) {
         if (console.log) console.log(message[i]);
       }
     });
 
-    this.addMessageHandler("progress", function (message) {
-      if (message.type && message.message) {
-        const handler = this.progressHandlers[message.type];
+    this.addMessageHandler(
+      "progress",
+      function (message: { type: string; message: unknown }) {
+        if (message.type && message.message) {
+          const handler = this.progressHandlers[message.type];
 
-        if (handler) handler.call(this, message.message);
+          if (handler) handler.call(this, message.message);
+        }
       }
-    });
+    );
 
-    this.addMessageHandler("notification", function (message) {
-      if (message.type === "show") showNotification(message.message);
-      else if (message.type === "remove") removeNotification(message.message);
-      else throw "Unkown notification type: " + message.type;
-    });
-
-    this.addMessageHandler("modal", function (message) {
-      if (message.type === "show") showModal(message.message);
-      else if (message.type === "remove") removeModal();
-      // For 'remove', message content isn't used
-      else throw "Unkown modal type: " + message.type;
-    });
-
-    this.addMessageHandler("response", function (message) {
-      const requestId = message.tag;
-      const request = this.$activeRequests[requestId];
-
-      if (request) {
-        delete this.$activeRequests[requestId];
-        if ("value" in message) request.onSuccess(message.value);
-        else request.onError(message.error);
+    this.addMessageHandler(
+      "notification",
+      function (
+        message:
+          | { type: "show"; message: Parameters<typeof showNotification>[0] }
+          | { type: "remove"; message: string }
+      ) {
+        if (message.type === "show") showNotification(message.message);
+        else if (message.type === "remove") removeNotification(message.message);
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        else throw "Unkown notification type: " + message.type;
       }
-    });
+    );
 
-    this.addMessageHandler("allowReconnect", function (message) {
-      if (message === true || message === false || message === "force") {
-        this.$allowReconnect = message;
-      } else {
-        throw "Invalid value for allowReconnect: " + message;
+    this.addMessageHandler(
+      "modal",
+      function (
+        message:
+          | { type: "show"; message: Parameters<typeof showModal>[0] }
+          | { type: "remove" }
+      ) {
+        if (message.type === "show") showModal(message.message);
+        else if (message.type === "remove") removeModal();
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        // For 'remove', message content isn't used
+        else throw "Unkown modal type: " + message.type;
       }
-    });
+    );
+
+    this.addMessageHandler(
+      "response",
+      function (message: { tag: string; value?: unknown; error?: string }) {
+        const requestId = message.tag;
+        const request = this.$activeRequests[requestId];
+
+        if (request) {
+          delete this.$activeRequests[requestId];
+          if ("value" in message) request.onSuccess(message.value);
+          else request.onError(message.error);
+        }
+      }
+    );
+
+    this.addMessageHandler(
+      "allowReconnect",
+      function (message: true | false | "force") {
+        if (message === true || message === false || message === "force") {
+          this.$allowReconnect = message;
+        } else {
+          throw "Invalid value for allowReconnect: " + message;
+        }
+      }
+    );
 
     this.addMessageHandler("custom", function (message) {
       // For old-style custom messages - should deprecate and migrate to new
       // method
-      if (Shiny.oncustommessage) {
-        Shiny.oncustommessage(message);
-      }
+      const shinyOnCustomMessage = getShinyOnCustomMessage();
+
+      if (shinyOnCustomMessage) shinyOnCustomMessage(message);
 
       // Send messages.foo and messages.bar to appropriate handlers
       this._sendMessagesToHandlers(
@@ -683,16 +757,23 @@ class ShinyApp {
       );
     });
 
-    this.addMessageHandler("config", function (message) {
-      this.config = {
-        workerId: message.workerId,
-        sessionId: message.sessionId,
-      };
-      if (message.user) Shiny.user = message.user;
-      $(document).trigger("shiny:sessioninitialized");
-    });
+    this.addMessageHandler(
+      "config",
+      function (message: {
+        workerId: string;
+        sessionId: string;
+        user?: string;
+      }) {
+        this.config = {
+          workerId: message.workerId,
+          sessionId: message.sessionId,
+        };
+        if (message.user) setShinyUser(message.user);
+        $(document).trigger("shiny:sessioninitialized");
+      }
+    );
 
-    this.addMessageHandler("busy", function (message) {
+    this.addMessageHandler("busy", function (message: "busy" | "idle") {
       if (message === "busy") {
         $(document.documentElement).addClass("shiny-busy");
         $(document).trigger("shiny:busy");
@@ -702,61 +783,81 @@ class ShinyApp {
       }
     });
 
-    this.addMessageHandler("recalculating", function (message) {
-      if (message.hasOwnProperty("name") && message.hasOwnProperty("status")) {
-        const binding = this.$bindings[message.name];
+    this.addMessageHandler(
+      "recalculating",
+      function (message: { name?: string; status?: string }) {
+        if (
+          hasOwnProperty(message, "name") &&
+          hasOwnProperty(message, "status")
+        ) {
+          const binding = this.$bindings[message.name];
 
-        $(binding ? binding.el : null).trigger({
-          type: "shiny:" + message.status,
-        });
+          $(binding ? binding.el : null).trigger({
+            type: "shiny:" + message.status,
+          });
+        }
       }
-    });
+    );
 
-    this.addMessageHandler("reload", function (message) {
+    this.addMessageHandler("reload", function () {
       window.location.reload();
     });
 
-    this.addMessageHandler("shiny-insert-ui", function (message) {
-      const targets = $(message.selector);
+    this.addMessageHandler(
+      "shiny-insert-ui",
+      function (message: {
+        selector: HTMLElement;
+        content: { html: any; deps: any };
+        multiple: false | void;
+        where: RenderWhereType;
+      }) {
+        const targets = $(message.selector);
 
-      if (targets.length === 0) {
-        // render the HTML and deps to a null target, so
-        // the side-effect of rendering the deps, singletons,
-        // and <head> still occur
-        console.warn(
-          'The selector you chose ("' +
-            message.selector +
-            '") could not be found in the DOM.'
-        );
-        Shiny.renderHtml(message.content.html, $([]), message.content.deps);
-      } else {
-        targets.each(function (i, target) {
-          renderContent(target, message.content, message.where);
+        if (targets.length === 0) {
+          // render the HTML and deps to a null target, so
+          // the side-effect of rendering the deps, singletons,
+          // and <head> still occur
+          console.warn(
+            'The selector you chose ("' +
+              message.selector +
+              '") could not be found in the DOM.'
+          );
+          renderHtml(message.content.html, $([]), message.content.deps);
+        } else {
+          targets.each(function (i, target) {
+            renderContent(target, message.content, message.where);
+            return message.multiple;
+          });
+        }
+      }
+    );
+
+    this.addMessageHandler(
+      "shiny-remove-ui",
+      function (message: { selector: HTMLElement; multiple: false | void }) {
+        const els = $(message.selector);
+
+        els.each(function (i, el) {
+          shinyUnbindAll(el, true);
+          $(el).remove();
+          // If `multiple` is false, returning false terminates the function
+          // and no other elements are removed; if `multiple` is true,
+          // returning true continues removing all remaining elements.
           return message.multiple;
         });
       }
-    });
+    );
 
-    this.addMessageHandler("shiny-remove-ui", function (message) {
-      const els = $(message.selector);
-
-      els.each(function (i, el) {
-        shinyUnbindAll(el, true);
-        $(el).remove();
-        // If `multiple` is false, returning false terminates the function
-        // and no other elements are removed; if `multiple` is true,
-        // returning true continues removing all remaining elements.
-        return message.multiple;
-      });
-    });
-
-    this.addMessageHandler("frozen", function (message) {
-      for (let i = 0; i < message.ids.length; i++) {
-        Shiny.forgetLastInputValue(message.ids[i]);
+    this.addMessageHandler(
+      "frozen",
+      function (message: { ids: Array<string> }) {
+        for (let i = 0; i < message.ids.length; i++) {
+          shinyForgetLastInputValue(message.ids[i]);
+        }
       }
-    });
+    );
 
-    function getTabset(id) {
+    function getTabset(id: string) {
       const $tabset = $("#" + $escape(id));
 
       if ($tabset.length === 0)
@@ -769,7 +870,7 @@ class ShinyApp {
       return $tabset;
     }
 
-    function getTabContent($tabset) {
+    function getTabContent($tabset: JQuery<HTMLElement>) {
       const tabsetId = $tabset.attr("data-tabsetid");
       const $tabContent = $(
         "div.tab-content[data-tabsetid='" + $escape(tabsetId) + "']"
@@ -778,7 +879,11 @@ class ShinyApp {
       return $tabContent;
     }
 
-    function getTargetTabs($tabset, $tabContent, target) {
+    function getTargetTabs(
+      $tabset: JQuery<HTMLElement>,
+      $tabContent: JQuery<HTMLElement>,
+      target: string
+    ) {
       const dataValue = "[data-value='" + $escape(target) + "']";
       const $aTag = $tabset.find("a" + dataValue);
       const $liTag = $aTag.parent();
@@ -819,123 +924,130 @@ class ShinyApp {
       return { $liTag: $liTag, $liTags: $liTags, $divTags: $divTags };
     }
 
-    this.addMessageHandler("shiny-insert-tab", function (message) {
-      const $parentTabset = getTabset(message.inputId);
-      let $tabset = $parentTabset;
-      const $tabContent = getTabContent($tabset);
-      let tabsetId = $parentTabset.attr("data-tabsetid");
+    this.addMessageHandler(
+      "shiny-insert-tab",
+      function (message: {
+        inputId: string;
+        divTag: { html: HTMLElement };
+        liTag: { html: HTMLElement };
+        target?: string;
+      }) {
+        const $parentTabset = getTabset(message.inputId);
+        let $tabset = $parentTabset;
+        const $tabContent = getTabContent($tabset);
+        let tabsetId = $parentTabset.attr("data-tabsetid");
 
-      const $divTag = $(message.divTag.html);
-      const $liTag = $(message.liTag.html);
-      const $aTag = $liTag.find("> a");
+        const $divTag = $(message.divTag.html);
+        const $liTag = $(message.liTag.html);
+        const $aTag = $liTag.find("> a");
 
-      // Unless the item is being prepended/appended, the target tab
-      // must be provided
-      let target = null;
-      let $targetLiTag = null;
+        // Unless the item is being prepended/appended, the target tab
+        // must be provided
+        let target = null;
+        let $targetLiTag = null;
 
-      if (message.target !== null) {
-        target = getTargetTabs($tabset, $tabContent, message.target);
-        $targetLiTag = target.$liTag;
-      }
-
-      // If the item is to be placed inside a navbarMenu (dropdown),
-      // change the value of $tabset from the parent's ul tag to the
-      // dropdown's ul tag
-      const dropdown = getDropdown();
-
-      if (dropdown !== null) {
-        if ($aTag.attr("data-toggle") === "dropdown")
-          throw "Cannot insert a navbarMenu inside another one";
-        $tabset = dropdown.$tabset;
-        tabsetId = dropdown.id;
-      }
-
-      // For regular tab items, fix the href (of the li > a tag)
-      // and the id (of the div tag). This does not apply to plain
-      // text items (which function as dividers and headers inside
-      // navbarMenus) and whole navbarMenus (since those get
-      // constructed from scratch on the R side and therefore
-      // there are no ids that need matching)
-      if ($aTag.attr("data-toggle") === "tab") {
-        const index = getTabIndex($tabset, tabsetId);
-        const tabId = "tab-" + tabsetId + "-" + index;
-
-        $liTag.find("> a").attr("href", "#" + tabId);
-        $divTag.attr("id", tabId);
-      }
-
-      // actually insert the item into the right place
-      if (message.position === "before") {
-        if ($targetLiTag) {
-          $targetLiTag.before($liTag);
-        } else {
-          $tabset.append($liTag);
+        if (message.target !== null) {
+          target = getTargetTabs($tabset, $tabContent, message.target);
+          $targetLiTag = target.$liTag;
         }
-      } else if (message.position === "after") {
-        if ($targetLiTag) {
-          $targetLiTag.after($liTag);
-        } else {
-          $tabset.prepend($liTag);
+
+        // If the item is to be placed inside a navbarMenu (dropdown),
+        // change the value of $tabset from the parent's ul tag to the
+        // dropdown's ul tag
+        const dropdown = getDropdown();
+
+        if (dropdown !== null) {
+          if ($aTag.attr("data-toggle") === "dropdown")
+            throw "Cannot insert a navbarMenu inside another one";
+          $tabset = dropdown.$tabset;
+          tabsetId = dropdown.id;
         }
-      }
 
-      renderContent($liTag[0], {
-        html: $liTag.html(),
-        deps: message.liTag.deps,
-      });
-      // jcheng 2017-07-28: This next part might look a little insane versus the
-      // more obvious `$tabContent.append($divTag);`, but there's a method to the
-      // madness.
-      //
-      // 1) We need to load the dependencies, and this needs to happen before
-      //    any scripts in $divTag get a chance to run.
-      // 2) The scripts in $divTag need to run only once.
-      // 3) The contents of $divTag need to be sent through renderContent so that
-      //    singletons may be registered and/or obeyed, and so that inputs/outputs
-      //    may be bound.
-      //
-      // Add to these constraints these facts:
-      //
-      // A) The (non-jQuery) DOM manipulation functions don't cause scripts to
-      //    run, but the jQuery functions all do.
-      // B) renderContent must be called on an element that's attached to the
-      //    document.
-      // C) $divTag may be of length > 1 (e.g. navbarMenu). I also noticed text
-      //    elements consisting of just "\n" being included in the nodeset of
-      //    $divTag.
-      // D) renderContent has a bug where only position "replace" (the default)
-      //    uses the jQuery functions, so other positions like "beforeend" will
-      //    prevent child script tags from running.
-      //
-      // In theory the same problem exists for $liTag but since that content is
-      // much less likely to include arbitrary scripts, we're skipping it.
-      //
-      // This code could be nicer if we didn't use renderContent, but rather the
-      // lower-level functions that renderContent uses. Like if we pre-process
-      // the value of message.divTag.html for singletons, we could do that, then
-      // render dependencies, then do $tabContent.append($divTag).
-      renderContent(
-        $tabContent[0],
-        { html: "", deps: message.divTag.deps },
-        "beforeend"
-      );
-      $divTag.get().forEach((el) => {
-        // Must not use jQuery for appending el to the doc, we don't want any
-        // scripts to run (since they will run when renderContent takes a crack).
-        $tabContent[0].appendChild(el);
-        // If `el` itself is a script tag, this approach won't work (the script
-        // won't be run), since we're only sending innerHTML through renderContent
-        // and not the whole tag. That's fine in this case because we control the
-        // R code that generates this HTML, and we know that the element is not
-        // a script tag.
-        renderContent(el, el.innerHTML || el.textContent);
-      });
+        // For regular tab items, fix the href (of the li > a tag)
+        // and the id (of the div tag). This does not apply to plain
+        // text items (which function as dividers and headers inside
+        // navbarMenus) and whole navbarMenus (since those get
+        // constructed from scratch on the R side and therefore
+        // there are no ids that need matching)
+        if ($aTag.attr("data-toggle") === "tab") {
+          const index = getTabIndex($tabset, tabsetId);
+          const tabId = "tab-" + tabsetId + "-" + index;
 
-      if (message.select) {
-        $liTag.find("a").tab("show");
-      }
-      /* Barbara -- August 2017
+          $liTag.find("> a").attr("href", "#" + tabId);
+          $divTag.attr("id", tabId);
+        }
+
+        // actually insert the item into the right place
+        if (message.position === "before") {
+          if ($targetLiTag) {
+            $targetLiTag.before($liTag);
+          } else {
+            $tabset.append($liTag);
+          }
+        } else if (message.position === "after") {
+          if ($targetLiTag) {
+            $targetLiTag.after($liTag);
+          } else {
+            $tabset.prepend($liTag);
+          }
+        }
+
+        renderContent($liTag[0], {
+          html: $liTag.html(),
+          deps: message.liTag.deps,
+        });
+        // jcheng 2017-07-28: This next part might look a little insane versus the
+        // more obvious `$tabContent.append($divTag);`, but there's a method to the
+        // madness.
+        //
+        // 1) We need to load the dependencies, and this needs to happen before
+        //    any scripts in $divTag get a chance to run.
+        // 2) The scripts in $divTag need to run only once.
+        // 3) The contents of $divTag need to be sent through renderContent so that
+        //    singletons may be registered and/or obeyed, and so that inputs/outputs
+        //    may be bound.
+        //
+        // Add to these constraints these facts:
+        //
+        // A) The (non-jQuery) DOM manipulation functions don't cause scripts to
+        //    run, but the jQuery functions all do.
+        // B) renderContent must be called on an element that's attached to the
+        //    document.
+        // C) $divTag may be of length > 1 (e.g. navbarMenu). I also noticed text
+        //    elements consisting of just "\n" being included in the nodeset of
+        //    $divTag.
+        // D) renderContent has a bug where only position "replace" (the default)
+        //    uses the jQuery functions, so other positions like "beforeend" will
+        //    prevent child script tags from running.
+        //
+        // In theory the same problem exists for $liTag but since that content is
+        // much less likely to include arbitrary scripts, we're skipping it.
+        //
+        // This code could be nicer if we didn't use renderContent, but rather the
+        // lower-level functions that renderContent uses. Like if we pre-process
+        // the value of message.divTag.html for singletons, we could do that, then
+        // render dependencies, then do $tabContent.append($divTag).
+        renderContent(
+          $tabContent[0],
+          { html: "", deps: message.divTag.deps },
+          "beforeend"
+        );
+        $divTag.get().forEach((el) => {
+          // Must not use jQuery for appending el to the doc, we don't want any
+          // scripts to run (since they will run when renderContent takes a crack).
+          $tabContent[0].appendChild(el);
+          // If `el` itself is a script tag, this approach won't work (the script
+          // won't be run), since we're only sending innerHTML through renderContent
+          // and not the whole tag. That's fine in this case because we control the
+          // R code that generates this HTML, and we know that the element is not
+          // a script tag.
+          renderContent(el, el.innerHTML || el.textContent);
+        });
+
+        if (message.select) {
+          $liTag.find("a").tab("show");
+        }
+        /* Barbara -- August 2017
   Note: until now, the number of tabs in a tabsetPanel (or navbarPage
   or navlistPanel) was always fixed. So, an easy way to give an id to
   a tab was simply incrementing a counter. (Just like it was easy to
@@ -944,63 +1056,66 @@ class ShinyApp {
   fix the dummy id given to the tab in the R side -- there, we always
   set the tab id (counter dummy) to "id" and the tabset id to "tsid")
   */
-      function getTabIndex($tabset, tabsetId) {
-        // The 0 is to ensure this works for empty tabsetPanels as well
-        const existingTabIds = [0];
-        // loop through all existing tabs, find the one with highest id
-        // (since this is based on a numeric counter), and increment
+        function getTabIndex($tabset, tabsetId) {
+          // The 0 is to ensure this works for empty tabsetPanels as well
+          const existingTabIds = [0];
+          // loop through all existing tabs, find the one with highest id
+          // (since this is based on a numeric counter), and increment
 
-        $tabset.find("a[data-toggle='tab']").each(function () {
-          const $tab = $(this);
+          $tabset.find("a[data-toggle='tab']").each(function () {
+            const $tab = $(this);
 
-          if ($tab.length > 0) {
-            // remove leading url if it exists. (copy of bootstrap url stripper)
-            const href = $tab.attr("href").replace(/.*(?=#[^\s]+$)/, "");
-            // remove tab id to get the index
-            const index = href.replace("#tab-" + tabsetId + "-", "");
+            if ($tab.length > 0) {
+              // remove leading url if it exists. (copy of bootstrap url stripper)
+              const href = $tab.attr("href").replace(/.*(?=#[^\s]+$)/, "");
+              // remove tab id to get the index
+              const index = href.replace("#tab-" + tabsetId + "-", "");
 
-            existingTabIds.push(Number(index));
-          }
-        });
-        return Math.max.apply(null, existingTabIds) + 1;
-      }
-
-      // Finds out if the item will be placed inside a navbarMenu
-      // (dropdown). If so, returns the dropdown tabset (ul tag)
-      // and the dropdown tabsetid (to be used to fix the tab ID)
-      function getDropdown() {
-        if (message.menuName !== null) {
-          // menuName is only provided if the user wants to prepend
-          // or append an item inside a navbarMenu (dropdown)
-          const $dropdownATag = $(
-            "a.dropdown-toggle[data-value='" + $escape(message.menuName) + "']"
-          );
-
-          if ($dropdownATag.length === 0) {
-            throw (
-              "There is no navbarMenu with menuName equal to '" +
-              message.menuName +
-              "'"
-            );
-          }
-          const $dropdownTabset = $dropdownATag.find("+ ul.dropdown-menu");
-          const dropdownId = $dropdownTabset.attr("data-tabsetid");
-
-          return { $tabset: $dropdownTabset, id: dropdownId };
-        } else if (message.target !== null) {
-          // if our item is to be placed next to a tab that is inside
-          // a navbarMenu, our item will also be inside
-          const $uncleTabset = $targetLiTag.parent("ul");
-
-          if ($uncleTabset.hasClass("dropdown-menu")) {
-            const uncleId = $uncleTabset.attr("data-tabsetid");
-
-            return { $tabset: $uncleTabset, id: uncleId };
-          }
+              existingTabIds.push(Number(index));
+            }
+          });
+          return Math.max.apply(null, existingTabIds) + 1;
         }
-        return null;
+
+        // Finds out if the item will be placed inside a navbarMenu
+        // (dropdown). If so, returns the dropdown tabset (ul tag)
+        // and the dropdown tabsetid (to be used to fix the tab ID)
+        function getDropdown() {
+          if (message.menuName !== null) {
+            // menuName is only provided if the user wants to prepend
+            // or append an item inside a navbarMenu (dropdown)
+            const $dropdownATag = $(
+              "a.dropdown-toggle[data-value='" +
+                $escape(message.menuName) +
+                "']"
+            );
+
+            if ($dropdownATag.length === 0) {
+              throw (
+                "There is no navbarMenu with menuName equal to '" +
+                message.menuName +
+                "'"
+              );
+            }
+            const $dropdownTabset = $dropdownATag.find("+ ul.dropdown-menu");
+            const dropdownId = $dropdownTabset.attr("data-tabsetid");
+
+            return { $tabset: $dropdownTabset, id: dropdownId };
+          } else if (message.target !== null) {
+            // if our item is to be placed next to a tab that is inside
+            // a navbarMenu, our item will also be inside
+            const $uncleTabset = $targetLiTag.parent("ul");
+
+            if ($uncleTabset.hasClass("dropdown-menu")) {
+              const uncleId = $uncleTabset.attr("data-tabsetid");
+
+              return { $tabset: $uncleTabset, id: uncleId };
+            }
+          }
+          return null;
+        }
       }
-    });
+    );
 
     // If the given tabset has no active tabs, select the first one
     function ensureTabsetHasVisibleTab($tabset) {
@@ -1052,62 +1167,74 @@ class ShinyApp {
       });
     }
 
-    this.addMessageHandler("shiny-remove-tab", function (message) {
-      const $tabset = getTabset(message.inputId);
-      const $tabContent = getTabContent($tabset);
-      const target = getTargetTabs($tabset, $tabContent, message.target);
+    this.addMessageHandler(
+      "shiny-remove-tab",
+      function (message: { inputId: string; target: string }) {
+        const $tabset = getTabset(message.inputId);
+        const $tabContent = getTabContent($tabset);
+        const target = getTargetTabs($tabset, $tabContent, message.target);
 
-      tabApplyFunction(target, removeEl);
+        tabApplyFunction(target, removeEl);
 
-      ensureTabsetHasVisibleTab($tabset);
+        ensureTabsetHasVisibleTab($tabset);
 
-      function removeEl($el) {
-        shinyUnbindAll($el, true);
-        $el.remove();
-      }
-    });
-
-    this.addMessageHandler("shiny-change-tab-visibility", function (message) {
-      const $tabset = getTabset(message.inputId);
-      const $tabContent = getTabContent($tabset);
-      const target = getTargetTabs($tabset, $tabContent, message.target);
-
-      tabApplyFunction(target, changeVisibility, true);
-
-      ensureTabsetHasVisibleTab($tabset);
-
-      function changeVisibility($el) {
-        if (message.type === "show") $el.css("display", "");
-        else if (message.type === "hide") {
-          $el.hide();
-          $el.removeClass("active");
+        function removeEl($el) {
+          shinyUnbindAll($el, true);
+          $el.remove();
         }
       }
-    });
+    );
 
-    this.addMessageHandler("updateQueryString", function (message) {
-      // leave the bookmarking code intact
-      if (message.mode === "replace") {
-        window.history.replaceState(null, null, message.queryString);
-        return;
+    this.addMessageHandler(
+      "shiny-change-tab-visibility",
+      function (message: {
+        inputId: string;
+        target: string;
+        type: "show" | "hide" | null;
+      }) {
+        const $tabset = getTabset(message.inputId);
+        const $tabContent = getTabContent($tabset);
+        const target = getTargetTabs($tabset, $tabContent, message.target);
+
+        tabApplyFunction(target, changeVisibility, true);
+
+        ensureTabsetHasVisibleTab($tabset);
+
+        function changeVisibility($el) {
+          if (message.type === "show") $el.css("display", "");
+          else if (message.type === "hide") {
+            $el.hide();
+            $el.removeClass("active");
+          }
+        }
       }
+    );
 
-      let what = null;
+    this.addMessageHandler(
+      "updateQueryString",
+      function (message: { mode: "replace" | null; queryString: string }) {
+        // leave the bookmarking code intact
+        if (message.mode === "replace") {
+          window.history.replaceState(null, null, message.queryString);
+          return;
+        }
 
-      if (message.queryString.charAt(0) === "#") what = "hash";
-      else if (message.queryString.charAt(0) === "?") what = "query";
-      else
-        throw (
-          "The 'query' string must start with either '?' " +
-          "(to update the query string) or with '#' (to " +
-          "update the hash)."
-        );
+        let what = null;
 
-      const path = window.location.pathname;
-      const oldQS = window.location.search;
-      const oldHash = window.location.hash;
+        if (message.queryString.charAt(0) === "#") what = "hash";
+        else if (message.queryString.charAt(0) === "?") what = "query";
+        else
+          throw (
+            "The 'query' string must start with either '?' " +
+            "(to update the query string) or with '#' (to " +
+            "update the hash)."
+          );
 
-      /* Barbara -- December 2016
+        const path = window.location.pathname;
+        const oldQS = window.location.search;
+        const oldHash = window.location.hash;
+
+        /* Barbara -- December 2016
   Note: we could check if the new QS and/or hash are different
   from the old one(s) and, if not, we could choose not to push
   a new state (whether or not we would replace it is moot/
@@ -1117,36 +1244,40 @@ class ShinyApp {
   that check isn't even performed as of right now.
   */
 
-      let relURL = path;
+        let relURL = path;
 
-      if (what === "query") relURL += message.queryString;
-      else relURL += oldQS + message.queryString; // leave old QS if it exists
-      window.history.pushState(null, null, relURL);
+        if (what === "query") relURL += message.queryString;
+        else relURL += oldQS + message.queryString; // leave old QS if it exists
+        window.history.pushState(null, null, relURL);
 
-      // for the case when message.queryString has both a query string
-      // and a hash (`what = "hash"` allows us to trigger the
-      // hashchange event)
-      if (message.queryString.indexOf("#") !== -1) what = "hash";
+        // for the case when message.queryString has both a query string
+        // and a hash (`what = "hash"` allows us to trigger the
+        // hashchange event)
+        if (message.queryString.indexOf("#") !== -1) what = "hash";
 
-      // for the case when there was a hash before, but there isn't
-      // any hash now (e.g. for when only the query string is updated)
-      if (window.location.hash !== oldHash) what = "hash";
+        // for the case when there was a hash before, but there isn't
+        // any hash now (e.g. for when only the query string is updated)
+        if (window.location.hash !== oldHash) what = "hash";
 
-      // This event needs to be triggered manually because pushState() never
-      // causes a hashchange event to be fired,
-      if (what === "hash") $(document).trigger("hashchange");
-    });
+        // This event needs to be triggered manually because pushState() never
+        // causes a hashchange event to be fired,
+        if (what === "hash") $(document).trigger("hashchange");
+      }
+    );
 
-    this.addMessageHandler("resetBrush", function (message) {
-      Shiny.resetBrush(message.brushId);
-    });
+    this.addMessageHandler(
+      "resetBrush",
+      function (message: { brushId: Parameters<typeof resetBrush>[0] }) {
+        resetBrush(message.brushId);
+      }
+    );
   }
 
   // Progress reporting ====================================================
 
   progressHandlers = {
     // Progress for a particular object
-    binding: function (message) {
+    binding: function (message: { id: string }): void {
       const key = message.id;
       const binding = this.$bindings[key];
 
@@ -1161,7 +1292,10 @@ class ShinyApp {
     },
 
     // Open a page-level progress bar
-    open: function (message) {
+    open: function (message: {
+      style: "notification" | "old";
+      id: string;
+    }): void {
       if (message.style === "notification") {
         // For new-style (starting in Shiny 0.14) progress indicators that use
         // the notification API.
@@ -1225,7 +1359,13 @@ class ShinyApp {
     },
 
     // Update page-level progress bar
-    update: function (message): void {
+    update: function (message: {
+      style: "notification" | "old";
+      id: string;
+      message?: string;
+      detail?: string;
+      value?: number;
+    }): void {
       if (message.style === "notification") {
         // For new-style (starting in Shiny 0.14) progress indicators that use
         // the notification API.
@@ -1264,7 +1404,7 @@ class ShinyApp {
     },
 
     // Close page-level progress bar
-    close: function (message): void {
+    close: function (message: { style: "notification"; id: string }): void {
       if (message.style === "notification") {
         removeNotification(message.id);
       } else if (message.style === "old") {
@@ -1311,3 +1451,4 @@ class ShinyApp {
 }
 
 export { ShinyApp };
+export type { HandlerType };

@@ -13,10 +13,16 @@ function renderDependencies(dependencies): void {
   }
 }
 
+type RenderWhereType = "beforeBegin" | "afterEnd" | "replace";
+
 // Render HTML in a DOM element, add dependencies, and bind Shiny
 // inputs/outputs. `content` can be null, a string, or an object with
 // properties 'html' and 'deps'.
-function renderContent(el, content, where = "replace"): void {
+function renderContent(
+  el: HTMLElement,
+  content: null | string | { html: any; deps?: any },
+  where: RenderWhereType
+): void {
   if (where === "replace") {
     shinyUnbindAll(el);
   }
@@ -35,7 +41,7 @@ function renderContent(el, content, where = "replace"): void {
 
   renderHtml(html, el, dependencies, where);
 
-  let scope = el;
+  let scope: JQuery<HTMLElement> | HTMLElement = el;
 
   if (where === "replace") {
     shinyInitializeInputs(el);
@@ -61,7 +67,7 @@ function renderHtml(
   html,
   el,
   dependencies,
-  where = "replace"
+  where: RenderWhereType = "replace"
 ): ReturnType<typeof singletonsRenderHtml> {
   renderDependencies(dependencies);
   return singletonsRenderHtml(html, el, where);
@@ -205,10 +211,10 @@ function renderDependency(dep) {
           // the same plot being redrawn multiple times with different
           // styling.
           link.attr("onload", () => {
-            const dummy_id = "dummy-" + Math.floor(Math.random() * 999999999);
-            const css_string =
+            const dummyId = "dummy-" + Math.floor(Math.random() * 999999999);
+            const cssString =
               "#" +
-              dummy_id +
+              dummyId +
               " { " +
               "color: #a7c920 !important; " + // An arbitrary color for the transition
               "transition: 0.1s all !important; " +
@@ -216,27 +222,26 @@ function renderDependency(dep) {
               "position: absolute !important; " +
               "top: -1000px !important; " +
               "left: 0 !important; }";
-            const base64_css_string =
-              "data:text/css;base64," + btoa(css_string);
+            const base64CssString = "data:text/css;base64," + btoa(cssString);
 
-            const $dummy_link = $("<link rel='stylesheet' type='text/css' />");
+            const $dummyLink = $("<link rel='stylesheet' type='text/css' />");
 
-            $dummy_link.attr("href", base64_css_string);
+            $dummyLink.attr("href", base64CssString);
 
-            const $dummy_el = $("<div id='" + dummy_id + "'></div>");
+            const $dummyEl = $("<div id='" + dummyId + "'></div>");
 
-            $dummy_el.one("transitionend", () => {
-              $dummy_el.remove();
-              removeSheet(findSheet($dummy_link.attr("href")));
+            $dummyEl.one("transitionend", () => {
+              $dummyEl.remove();
+              removeSheet(findSheet($dummyLink.attr("href")));
               removeSheet(oldSheet);
               sendImageSize2();
             });
-            $(document.body).append($dummy_el);
+            $(document.body).append($dummyEl);
 
             // Need to add the CSS with a setTimeout 0, to ensure that it
             // takes effect _after_ the DOM element has been added. This is
             // necessary to ensure that the transition actually occurs.
-            setTimeout(() => $head.append($dummy_link), 0);
+            setTimeout(() => $head.append($dummyLink), 0);
           });
 
           $head.append(link);
@@ -288,3 +293,4 @@ function renderDependency(dep) {
 }
 
 export { renderDependencies, renderContent, renderHtml, registerDependency };
+export type { RenderWhereType };

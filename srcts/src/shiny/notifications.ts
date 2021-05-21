@@ -67,7 +67,8 @@ function show({
   return id;
 }
 
-function remove(id: string): void {
+// TODO-barret - Should `id` be required? (some places do not supply one)
+function remove(id?: string): void {
   _get(id).fadeOut(fadeDuration, function () {
     shinyUnbindAll(this);
     $(this).remove();
@@ -80,7 +81,7 @@ function remove(id: string): void {
 }
 
 // Returns an individual notification DOM object (wrapped in jQuery).
-function _get(id) {
+function _get(id?: string) {
   if (!id) return null;
   return _getPanel().find("#shiny-notification-" + $escape(id));
 }

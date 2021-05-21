@@ -17,7 +17,7 @@ import {
 import { isIE, IEVersion } from "../../utils/browser";
 
 class ImageOutputBinding extends OutputBinding {
-  find(scope: HTMLElement | Document): JQuery<HTMLElement> {
+  find(scope: HTMLElement): JQuery<HTMLElement> {
     return $(scope).find(".shiny-image-output, .shiny-plot-output");
   }
 

@@ -77,11 +77,12 @@ class TextInputBinding extends InputBinding {
     };
   }
 
-  getRatePolicy(): { policy: string; delay: number } {
+  getRatePolicy(el: HTMLElement): { policy: "debounce"; delay: 250 } {
     return {
       policy: "debounce",
       delay: 250,
     };
+    el;
   }
 
   _getLabelNode(el: HTMLElement): JQuery<HTMLElement> {

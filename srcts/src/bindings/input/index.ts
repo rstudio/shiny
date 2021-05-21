@@ -14,13 +14,16 @@ import { SelectInputBinding } from "./selectInput";
 import { ActionButtonInputBinding } from "./actionbutton";
 import { BootstrapTabInputBinding } from "./tabinput";
 import { FileInputBinding } from "./fileinput";
+import { RatePolicyModes } from "../../inputPolicies/inputRateDecorator";
 
 class InputBinding {
   name: string;
 
   // Returns a jQuery object or element array that contains the
   // descendants of scope that match this binding
-  find(scope: HTMLElement): JQuery<HTMLElement> | Array<HTMLElement> {
+  find(
+    scope: JQuery<HTMLElement> | HTMLElement
+  ): JQuery<HTMLElement> | Array<HTMLElement> {
     throw "Not implemented";
     // add so that typescript isn't mad about an unused var
     scope;
@@ -32,8 +35,9 @@ class InputBinding {
 
   // Gives the input a type in case the server needs to know it
   // to deserialize the JSON correctly
-  getTypefunction(): false {
+  getType(el: HTMLElement): string | false {
     return false;
+    el;
   }
   getValue(el: HTMLElement): any {
     throw "Not implemented";
@@ -69,8 +73,11 @@ class InputBinding {
     data;
   }
 
-  getRatePolicy(): { policy: string; delay: number } | null {
+  getRatePolicy(
+    el: HTMLElement
+  ): { policy: RatePolicyModes; delay: number } | null {
     return null;
+    el;
   }
 
   // Some input objects need initialization before being bound. This is

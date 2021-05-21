@@ -6,7 +6,7 @@ class DownloadLinkOutputBinding extends OutputBinding {
   find(scope: HTMLElement): JQuery<HTMLElement> {
     return $(scope).find("a.shiny-download-link");
   }
-  renderValue(el: HTMLElement, data: any): void {
+  renderValue(el: HTMLElement, data: string): void {
     $(el).attr("href", data);
   }
 }

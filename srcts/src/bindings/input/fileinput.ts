@@ -1,7 +1,7 @@
 import $ from "jquery";
 import { InputBinding } from ".";
 import { FileUploader } from "../../file/FileProcessor";
-import { Shiny } from "../../shiny";
+import { shinyShinyApp } from "../../shiny/init";
 
 // NOTE On Safari, at least version 10.1.2, *if the developer console is open*,
 // setting the input's value will behave strangely because of a Safari bug. The
@@ -39,7 +39,7 @@ function uploadDroppedFilesIE10Plus(el: FileInputHTMLElement, files): void {
   // Start the new upload and put the uploader in 'currentUploader'.
   $el.data(
     "currentUploader",
-    new FileUploader(Shiny.shinyapp, fileInputBindingGetId(el), files, el)
+    new FileUploader(shinyShinyApp(), fileInputBindingGetId(el), files, el)
   );
 }
 
@@ -59,7 +59,7 @@ function uploadFiles(evt: Event): void {
   // Start the new upload and put the uploader in 'currentUploader'.
   $el.data(
     "currentUploader",
-    new FileUploader(Shiny.shinyapp, id, files, evt.target)
+    new FileUploader(shinyShinyApp(), id, files, evt.target)
   );
 }
 

@@ -2,6 +2,7 @@ import { InputPolicy, priorityType } from ".";
 import { Debouncer, Invoker, Throttler } from "../time";
 import { splitInputNameType } from "./splitInputNameType";
 
+type RatePolicyModes = "direct" | "debounce" | "throttle";
 class InputRateDecorator extends InputPolicy {
   inputRatePolicies = {};
 
@@ -31,7 +32,7 @@ class InputRateDecorator extends InputPolicy {
   }
   setRatePolicy(
     nameType: string,
-    mode: "direct" | "debounce" | "throttle",
+    mode: RatePolicyModes,
     millis?: number
   ): void {
     const { name: inputName } = splitInputNameType(nameType);
@@ -65,3 +66,5 @@ class InputRateDecorator extends InputPolicy {
 }
 
 export { InputRateDecorator };
+
+export type { RatePolicyModes };

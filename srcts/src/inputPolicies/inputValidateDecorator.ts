@@ -1,15 +1,19 @@
 import $ from "jquery";
 import { InputPolicy, priorityType } from ".";
 
+type MaybeInputOpts = {
+  priority?: priorityType;
+  binding?: unknown;
+  el?: HTMLElement;
+};
+
 // Merge opts with defaults, and return a new object.
 function addDefaultInputOpts<T>(
-  opts?: T & {
-    priority?: priorityType;
-  }
+  opts?: T & MaybeInputOpts
 ): T & {
   priority: priorityType;
   binding: unknown;
-  el: HTMLElement | null;
+  el?: HTMLElement;
 } {
   const newOpts = $.extend(
     {
@@ -43,10 +47,10 @@ class InputValidateDecorator {
     this.target = target;
   }
 
-  setInput = function (
+  setInput = function <T>(
     nameType: string,
     value: unknown,
-    opts?: { priority?: priorityType }
+    opts?: T & MaybeInputOpts
   ): void {
     if (!nameType) throw "Can't set input with empty name.";
 

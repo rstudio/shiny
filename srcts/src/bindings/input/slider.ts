@@ -75,7 +75,7 @@ class SliderInputBinding extends TextInputBinding {
     return $(scope).find("input.js-range-slider");
   }
 
-  getType(el: HTMLElement): string | boolean {
+  getType(el: HTMLElement): string | false {
     const dataType = $(el).data("data-type");
 
     if (dataType === "date") return "shiny.date";
@@ -209,11 +209,12 @@ class SliderInputBinding extends TextInputBinding {
       $el.data("immediate", false);
     }
   }
-  getRatePolicy(): { policy: string; delay: number } {
+  getRatePolicy(el: HTMLElement): { policy: "debounce"; delay: 250 } {
     return {
       policy: "debounce",
       delay: 250,
     };
+    el;
   }
   // TODO-barret Why not implemented?
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment

@@ -16,7 +16,7 @@ declare global {
   }
 }
 
-function getRatePolicy(): { policy: string; delay: number } {
+function getRatePolicy(): { policy: "debounce"; delay: 250 } {
   return {
     policy: "debounce",
     delay: 250,

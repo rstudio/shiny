@@ -1,7 +1,7 @@
 import $ from "jquery";
 
 import { OutputBinding } from ".";
-import { Shiny } from "../../shiny";
+import { shinyUnbindAll } from "../../shiny/init";
 import { debounce } from "../../time";
 import { escapeHTML } from "../../utils";
 
@@ -10,7 +10,7 @@ class DatatableOutputBinding extends OutputBinding {
     return $(scope).find(".shiny-datatable-output");
   }
   onValueError(el: HTMLElement, err): void {
-    Shiny.unbindAll(el);
+    shinyUnbindAll(el);
     this.renderError(el, err);
   }
   renderValue(

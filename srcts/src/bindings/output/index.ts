@@ -13,7 +13,7 @@ class OutputBinding {
 
   // Returns a jQuery object or element array that contains the
   // descendants of scope that match this binding
-  find(scope: HTMLElement): JQuery<HTMLElement> {
+  find(scope: JQuery<HTMLElement> | HTMLElement): JQuery<HTMLElement> {
     throw "Not implemented";
     scope;
   }

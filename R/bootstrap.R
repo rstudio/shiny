@@ -50,7 +50,7 @@ bootstrapPage <- function(..., title = NULL, theme = NULL, lang = NULL) {
   # the tagList() contents to avoid breaking user code that makes assumptions
   # about the return value https://github.com/rstudio/shiny/issues/3235
   if (is_bs_theme(theme)) {
-    args <- c(bootstrapLib(theme), args)
+    args <- list(bootstrapLib(theme), args)
     ui <- do.call(tagList, args)
   } else {
     ui <- do.call(tagList, args)
@@ -82,53 +82,25 @@ getLang <- function(ui) {
 #' @inheritParams bootstrapPage
 #' @export
 bootstrapLib <- function(theme = NULL) {
-  tagFunction(function() {
-    if (isRunning()) {
+  # To support static rendering of version dependent markup (e.g.,
+  # tabsetPanel()), we setCurrentTheme() at the start of the render (since
+  # bootstrapLib() comes first in bootstrapPage()), and cleanup afterwards if
+  # shiny isn't running (in that case, since setCurrentTheme() uses
+  # shinyOptions(), state will be automatically be restored when the app exits)
+  oldTheme <- NULL
+  tagList(
+    .renderHook = function(x) {
+      oldTheme <<- getCurrentTheme()
       setCurrentTheme(theme)
+      # For refreshing Bootstrap CSS when session$setCurrentTheme() happens
+      if (isRunning()) registerThemeDependency(bs_theme_deps)
+      bslib::bs_theme_dependencies(theme)
+    },
+    .postRenderHook = function(x) {
+      if (!isRunning()) setCurrentTheme(oldTheme)
+      NULL
     }
-
-    # If we're not compiling Bootstrap Sass (from bslib), return the
-    # static Bootstrap build.
-    if (!is_bs_theme(theme)) {
-      # We'll enter here if `theme` is the path to a .css file, like that
-      # provided by `shinythemes::shinytheme("darkly")`.
-      return(bootstrapDependency(theme))
-    }
-
-    # Make bootstrap Sass available so other tagFunction()s (e.g.,
-    # sliderInput() et al) can resolve their HTML dependencies at render time
-    # using getCurrentTheme(). Note that we're making an implicit assumption
-    # that this tagFunction() executes *before* all other tagFunction()s; but
-    # that should be fine considering that, DOM tree order is preorder,
-    # depth-first traversal, and at least in the bootstrapPage(theme) case, we
-    # have control over the relative ordering.
-    # https://dom.spec.whatwg.org/#concept-tree
-    # https://stackoverflow.com/a/16113998/1583084
-    #
-    # Note also that since this is shinyOptions() (and not options()), the
-    # option is automatically reset when the app (or session) exits
-    if (isRunning()) {
-      registerThemeDependency(bs_theme_deps)
-
-    } else {
-      # Technically, this a potential issue (someone trying to execute/render
-      # bootstrapLib outside of a Shiny app), but it seems that, in that case,
-      # you likely have other problems, since sliderInput() et al. already assume
-      # that Shiny is the one doing the rendering
-      #warning(
-      #  "It appears `shiny::bootstrapLib()` was rendered outside of an Shiny ",
-      #  "application context, likely by calling `as.tags()`, `as.character()`, ",
-      #  "or `print()` directly on `bootstrapLib()` or UI components that may ",
-      #  "depend on it (e.g., `fluidPage()`, etc). For 'themable' UI components ",
-      #  "(e.g., `sliderInput()`, `selectInput()`, `dateInput()`, etc) to style ",
-      #  "themselves based on the Bootstrap theme, make sure `bootstrapLib()` is ",
-      #  "provided directly to the UI and that the UI is provided direction to ",
-      #  "`shinyApp()` (or `runApp()`)", call. = FALSE
-      #)
-    }
-
-    bslib::bs_theme_dependencies(theme)
-  })
+  )
 }
 
 # This is defined outside of bootstrapLib() because registerThemeDependency()

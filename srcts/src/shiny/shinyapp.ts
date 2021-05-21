@@ -1,12 +1,13 @@
 import $ from "jquery";
 import { $escape, hasOwnProperty, makeBlob } from "../utils";
-import { fullShinyObj } from "./init";
+import { fullShinyObj, shinyUnbindAll } from "./init";
 import { isQt } from "../utils/browser";
 import {
   show as showNotification,
   remove as removeNotification,
 } from "./notifications";
 import { show as showModal, remove as removeModal } from "./notifications";
+import { renderContent } from "./render";
 
 class ShinyApp {
   $socket = null;
@@ -730,7 +731,7 @@ class ShinyApp {
         Shiny.renderHtml(message.content.html, $([]), message.content.deps);
       } else {
         targets.each(function (i, target) {
-          Shiny.renderContent(target, message.content, message.where);
+          renderContent(target, message.content, message.where);
           return message.multiple;
         });
       }
@@ -740,7 +741,7 @@ class ShinyApp {
       const els = $(message.selector);
 
       els.each(function (i, el) {
-        Shiny.unbindAll(el, true);
+        shinyUnbindAll(el, true);
         $(el).remove();
         // If `multiple` is false, returning false terminates the function
         // and no other elements are removed; if `multiple` is true,
@@ -879,7 +880,7 @@ class ShinyApp {
         }
       }
 
-      Shiny.renderContent($liTag[0], {
+      renderContent($liTag[0], {
         html: $liTag.html(),
         deps: message.liTag.deps,
       });
@@ -914,7 +915,7 @@ class ShinyApp {
       // lower-level functions that renderContent uses. Like if we pre-process
       // the value of message.divTag.html for singletons, we could do that, then
       // render dependencies, then do $tabContent.append($divTag).
-      Shiny.renderContent(
+      renderContent(
         $tabContent[0],
         { html: "", deps: message.divTag.deps },
         "beforeend"
@@ -928,7 +929,7 @@ class ShinyApp {
         // and not the whole tag. That's fine in this case because we control the
         // R code that generates this HTML, and we know that the element is not
         // a script tag.
-        Shiny.renderContent(el, el.innerHTML || el.textContent);
+        renderContent(el, el.innerHTML || el.textContent);
       });
 
       if (message.select) {
@@ -1061,7 +1062,7 @@ class ShinyApp {
       ensureTabsetHasVisibleTab($tabset);
 
       function removeEl($el) {
-        Shiny.unbindAll($el, true);
+        shinyUnbindAll($el, true);
         $el.remove();
       }
     });

@@ -1,4 +1,6 @@
 import $ from "jquery";
+import { shinyShinyApp } from "./init";
+import { show as showNotification } from "./notifications";
 
 function initReactlog(): void {
   $(document).on("keydown", function (e) {
@@ -6,9 +8,9 @@ function initReactlog(): void {
       return;
     const url =
       "reactlog?w=" +
-      window.escape(Shiny.shinyapp.config.workerId) +
+      window.escape(shinyShinyApp().config.workerId) +
       "&s=" +
-      window.escape(Shiny.shinyapp.config.sessionId);
+      window.escape(shinyShinyApp().config.sessionId);
 
     window.open(url);
     e.preventDefault();
@@ -37,9 +39,9 @@ function initReactlog(): void {
 
     const url =
       "reactlog/mark?w=" +
-      window.escape(Shiny.shinyapp.config.workerId) +
+      window.escape(shinyShinyApp().config.workerId) +
       "&s=" +
-      window.escape(Shiny.shinyapp.config.sessionId);
+      window.escape(shinyShinyApp().config.sessionId);
 
     // send notification
     $.get(url, function (result) {
@@ -48,7 +50,7 @@ function initReactlog(): void {
       const html =
         '<span id="shiny-reactlog-mark-text">Marked time point in reactlog</span>';
 
-      Shiny.notifications.show({
+      showNotification({
         html: html,
         closeButton: true,
       });

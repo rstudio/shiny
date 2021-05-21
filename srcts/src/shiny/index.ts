@@ -23,6 +23,7 @@ import {
   shinyInitializeInputs,
 } from "./init";
 import { ShinyApp } from "./shinyapp";
+import { unbindAll } from "./bind";
 
 interface ShinyType {
   version: string;
@@ -52,6 +53,7 @@ interface ShinyType {
   onInputChange?: typeof shinySetInputValue;
   forgetLastInputValue?: typeof shinyForgetLastInputValue;
   bindAll?: typeof shinyBindAll;
+  unbindAll?: typeof unbindAll;
   initializeInputs?: typeof shinyInitializeInputs;
 }
 

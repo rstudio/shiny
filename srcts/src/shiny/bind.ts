@@ -1,9 +1,17 @@
 import $ from "jquery";
-import { initDeferredIframes } from "./init";
+import { InputBinding, inputBindings, outputBindings } from "../bindings";
+import { OutputBindingAdapter } from "../bindings/output_adapter";
+import { InputRateDecorator, InputValidateDecorator } from "../inputPolicies";
+import {
+  initDeferredIframes,
+  maybeAddThemeObserver,
+  shinyAppBindOutput,
+  shinyAppUnbindOutput,
+} from "./init";
 
 const boundInputs = {};
 
-type bindScope = HTMLElement;
+type bindScope = HTMLElement | JQuery<HTMLElement>;
 
 // todo make sure allowDeferred can NOT be supplied and still work
 function valueChangeCallback(inputs, binding, el, allowDeferred) {
@@ -25,7 +33,21 @@ function valueChangeCallback(inputs, binding, el, allowDeferred) {
   }
 }
 
-function bindInputs(inputs, scope: bindScope = document.documentElement) {
+type bindInputsCtx = {
+  inputs: InputValidateDecorator;
+  inputsRate: InputRateDecorator;
+};
+function bindInputs(
+  shinyCtx: bindInputsCtx,
+  scope: bindScope = document.documentElement
+): Record<
+  string,
+  {
+    value: unknown;
+    opts: { immediate: boolean; binding: InputBinding; el: HTMLElement };
+  }
+> {
+  const { inputs, inputsRate } = shinyCtx;
   const bindings = inputBindings.getBindings();
 
   const inputItems = {};
@@ -92,7 +114,7 @@ function bindInputs(inputs, scope: bindScope = document.documentElement) {
   return inputItems;
 }
 
-function bindOutputs(scope: bindScope = document.documentElement) {
+function bindOutputs(scope: bindScope = document.documentElement): void {
   const $scope = $(scope);
 
   const bindings = outputBindings.getBindings();
@@ -129,7 +151,7 @@ function bindOutputs(scope: bindScope = document.documentElement) {
 
       const bindingAdapter = new OutputBindingAdapter(el, binding);
 
-      shinyapp.bindOutput(id, bindingAdapter);
+      shinyAppBindOutput(id, bindingAdapter);
       $el.data("shiny-output-binding", bindingAdapter);
       $el.addClass("shiny-bound-output");
       if (!$el.attr("aria-live")) $el.attr("aria-live", "polite");
@@ -153,6 +175,8 @@ function unbindInputs(
   const inputs = $(scope).find(".shiny-bound-input");
 
   if (includeSelf && $(scope).hasClass("shiny-bound-input")) {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     inputs.push(scope);
   }
 
@@ -190,7 +214,7 @@ function unbindOutputs(
     if (!bindingAdapter) continue;
     const id = bindingAdapter.binding.getId(outputs[i]);
 
-    shinyapp.unbindOutput(id, bindingAdapter);
+    shinyAppUnbindOutput(id, bindingAdapter);
     $el.removeClass("shiny-bound-output");
     $el.removeData("shiny-output-binding");
     $el.trigger({
@@ -205,18 +229,23 @@ function unbindOutputs(
   setTimeout(sendOutputHiddenState, 0);
 }
 
-function _bindAll(inputs, scope: bindScope) {
+function _bindAll(
+  shinyCtx: bindInputsCtx,
+  scope: bindScope
+): ReturnType<typeof bindInputs> {
   bindOutputs(scope);
-  return bindInputs(inputs, scope);
+  return bindInputs(shinyCtx, scope);
 }
 function unbindAll(scope: bindScope, includeSelf = false): void {
   unbindInputs(scope, includeSelf);
   unbindOutputs(scope, includeSelf);
 }
-function bindAll(inputs, scope: bindScope): void {
+function bindAll(shinyCtx: bindInputsCtx, scope: bindScope): void {
   // _bindAll returns input values; it doesn't send them to the server.
   // Shiny.bindAll needs to send the values to the server.
-  const currentInputItems = _bindAll(inputs, scope);
+  const currentInputItems = _bindAll(shinyCtx, scope);
+
+  const inputs = shinyCtx.inputs;
 
   $.each(currentInputItems, function (name, item) {
     inputs.setInput(name, item.value, item.opts);

@@ -1,6 +1,8 @@
 import $ from "jquery";
 
-import { randomId } from "../utils";
+import { $escape, randomId } from "../utils";
+import { shinyUnbindAll } from "./init";
+import { renderContent } from "./render";
 
 // Milliseconds to fade in or out
 const fadeDuration = 250;
@@ -30,7 +32,7 @@ function show({
     `<div class="shiny-notification-content-action">${action}</div>`;
   const $content = $notification.find(".shiny-notification-content");
 
-  Shiny.renderContent($content, { html: newHtml, deps: deps });
+  renderContent($content, { html: newHtml, deps: deps });
 
   // Remove any existing classes of the form 'shiny-notification-xxxx'.
   // The xxxx would be strings like 'warning'.
@@ -67,7 +69,7 @@ function show({
 
 function remove(id: string): void {
   _get(id).fadeOut(fadeDuration, function () {
-    Shiny.unbindAll(this);
+    shinyUnbindAll(this);
     $(this).remove();
 
     // If no more notifications, remove the panel from the DOM.

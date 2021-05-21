@@ -1,6 +1,7 @@
 import $ from "jquery";
 import { ShinyType } from ".";
 import { inputBindings } from "../bindings";
+import { OutputBindingAdapter } from "../bindings/output_adapter";
 import {
   InputBatchSender,
   InputDeferDecorator,
@@ -18,7 +19,7 @@ import {
   mapValues,
   pixelRatio,
 } from "../utils";
-import { bindAll, bindScope, _bindAll } from "./bind";
+import { bindAll, bindScope, unbindAll, _bindAll } from "./bind";
 import { registerDependency } from "./render";
 import { ShinyApp } from "./shinyapp";
 import { registerNames as singletonsRegisterNames } from "./singletons";
@@ -41,6 +42,9 @@ function shinySetInputValue(
 ): void {
   fullShinyObj_.setInputValue(name, value, opts);
 }
+function shinyShinyApp(): ShinyApp {
+  return fullShinyObj_.shinyapp;
+}
 function shinyForgetLastInputValue(name: string): void {
   fullShinyObj_.forgetLastInputValue(name);
 }
@@ -49,6 +53,17 @@ function shinyBindAll(scope: bindScope): void {
 }
 function shinyInitializeInputs(scope: bindScope): void {
   fullShinyObj_.initializeInputs(scope);
+}
+
+function shinyAppBindOutput(id: string, binding: OutputBindingAdapter): void {
+  return fullShinyObj_.shinyapp.bindOutput(id, binding);
+}
+
+function shinyAppUnbindOutput(
+  id: string,
+  binding: OutputBindingAdapter
+): boolean {
+  return fullShinyObj_.shinyapp.unbindOutput(id, binding);
 }
 
 // "init_shiny.js"
@@ -108,6 +123,7 @@ function initShiny(Shiny: ShinyType): void {
   Shiny.bindAll = function (scope: bindScope) {
     bindAll(inputs, scope);
   };
+  Shiny.unbindAll = unbindAll;
 
   // Calls .initialize() for all of the input objects in all input bindings,
   // in the given scope.
@@ -221,42 +237,6 @@ function initShiny(Shiny: ShinyType): void {
       maybeAddThemeObserver(el);
     }
   );
-
-  // Resend computed styles if *an output element's* class or style attribute changes.
-  // This gives us some level of confidence that getCurrentOutputInfo() will be
-  // properly invalidated if output container is mutated; but unfortunately,
-  // we don't have a reasonable way to detect change in *inherited* styles
-  // (other than session$setCurrentTheme())
-  // https://github.com/rstudio/shiny/issues/3196
-  // https://github.com/rstudio/shiny/issues/2998
-  function maybeAddThemeObserver(el) {
-    if (!window.MutationObserver) {
-      return; // IE10 and lower
-    }
-
-    const cl = el.classList;
-    const reportTheme =
-      cl.contains("shiny-image-output") ||
-      cl.contains("shiny-plot-output") ||
-      cl.contains("shiny-report-theme");
-
-    if (!reportTheme) {
-      return;
-    }
-
-    const $el = $(el);
-
-    if ($el.data("shiny-theme-observer")) {
-      return; // i.e., observer is already observing
-    }
-
-    const observerCallback = new Debouncer(null, () => doSendTheme(el), 100);
-    const observer = new MutationObserver(() => observerCallback.normalCall());
-    const config = { attributes: true, attributeFilter: ["style", "class"] };
-
-    observer.observe(el, config);
-    $el.data("shiny-theme-observer", observer);
-  }
 
   function doSendTheme(el) {
     // Sending theme info on error isn't necessary (it'd add an unnecessary additional round-trip)
@@ -556,14 +536,55 @@ function initDeferredIframes(): void {
   });
 }
 
+// Resend computed styles if *an output element's* class or style attribute changes.
+// This gives us some level of confidence that getCurrentOutputInfo() will be
+// properly invalidated if output container is mutated; but unfortunately,
+// we don't have a reasonable way to detect change in *inherited* styles
+// (other than session$setCurrentTheme())
+// https://github.com/rstudio/shiny/issues/3196
+// https://github.com/rstudio/shiny/issues/2998
+function maybeAddThemeObserver(el) {
+  if (!window.MutationObserver) {
+    return; // IE10 and lower
+  }
+
+  const cl = el.classList;
+  const reportTheme =
+    cl.contains("shiny-image-output") ||
+    cl.contains("shiny-plot-output") ||
+    cl.contains("shiny-report-theme");
+
+  if (!reportTheme) {
+    return;
+  }
+
+  const $el = $(el);
+
+  if ($el.data("shiny-theme-observer")) {
+    return; // i.e., observer is already observing
+  }
+
+  const observerCallback = new Debouncer(null, () => doSendTheme(el), 100);
+  const observer = new MutationObserver(() => observerCallback.normalCall());
+  const config = { attributes: true, attributeFilter: ["style", "class"] };
+
+  observer.observe(el, config);
+  $el.data("shiny-theme-observer", observer);
+}
+
 export {
   sendImageSize,
   sendImageSize2,
   initShiny,
   initDeferredIframes,
   fullShinyObj,
+  shinyShinyApp,
   shinySetInputValue,
   shinyForgetLastInputValue,
   shinyBindAll,
+  unbindAll as shinyUnbindAll,
   shinyInitializeInputs,
+  maybeAddThemeObserver,
+  shinyAppBindOutput,
+  shinyAppUnbindOutput,
 };

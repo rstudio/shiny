@@ -1,6 +1,7 @@
 import $ from "jquery";
 import { asArray, hasOwnProperty } from "../utils";
 import { isIE } from "../utils/browser";
+import { shinyBindAll, shinyInitializeInputs, shinyUnbindAll } from "./init";
 
 import { renderHtml as singletonsRenderHtml } from "./singletons";
 
@@ -17,7 +18,7 @@ function renderDependencies(dependencies): void {
 // properties 'html' and 'deps'.
 function renderContent(el, content, where = "replace"): void {
   if (where === "replace") {
-    Shiny.unbindAll(el);
+    shinyUnbindAll(el);
   }
 
   let html;
@@ -37,8 +38,8 @@ function renderContent(el, content, where = "replace"): void {
   let scope = el;
 
   if (where === "replace") {
-    Shiny.initializeInputs(el);
-    Shiny.bindAll(el);
+    shinyInitializeInputs(el);
+    shinyBindAll(el);
   } else {
     const $parent = $(el).parent();
 
@@ -50,8 +51,8 @@ function renderContent(el, content, where = "replace"): void {
         if ($grandparent.length > 0) scope = $grandparent;
       }
     }
-    Shiny.initializeInputs(scope);
-    Shiny.bindAll(scope);
+    shinyInitializeInputs(scope);
+    shinyBindAll(scope);
   }
 }
 

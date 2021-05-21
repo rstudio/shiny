@@ -1,4 +1,6 @@
 import $ from "jquery";
+import { shinyUnbindAll } from "./init";
+import { renderContent } from "./render";
 
 // Show a modal dialog. This is meant to handle two types of cases: one is
 // that the content is a Bootstrap modal dialog, and the other is that the
@@ -21,7 +23,7 @@ function show({ html = "", deps = [] } = {}): void {
     // modal is hidden, remove the entire thing, including wrapper.
     $modal.on("hidden.bs.modal", function (e) {
       if (e.target === $("#shiny-modal")[0]) {
-        Shiny.unbindAll($modal);
+        shinyUnbindAll($modal);
         $modal.remove();
       }
     });
@@ -42,7 +44,7 @@ function show({ html = "", deps = [] } = {}): void {
   });
 
   // Set/replace contents of wrapper with html.
-  Shiny.renderContent($modal, { html: html, deps: deps });
+  renderContent($modal, { html: html, deps: deps });
 }
 
 function remove(): void {
@@ -57,7 +59,7 @@ function remove(): void {
     $modal.find(".modal").modal("hide");
   } else {
     // If not a Bootstrap modal dialog, simply unbind and remove it.
-    Shiny.unbindAll($modal);
+    shinyUnbindAll($modal);
     $modal.remove();
   }
 }

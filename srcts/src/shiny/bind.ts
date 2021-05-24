@@ -8,6 +8,7 @@ import {
   shinyAppBindOutput,
   shinyAppUnbindOutput,
 } from "./init";
+import { sendImageSizeFns } from "./sendImageSize";
 
 const boundInputs = {};
 
@@ -164,7 +165,7 @@ function bindOutputs(scope: bindScope = document.documentElement): void {
   }
 
   // Send later in case DOM layout isn't final yet.
-  setTimeout(sendImageSize, 0);
+  setTimeout(sendImageSizeFns.regular, 0);
   setTimeout(sendOutputHiddenState, 0);
 }
 
@@ -225,7 +226,7 @@ function unbindOutputs(
   }
 
   // Send later in case DOM layout isn't final yet.
-  setTimeout(sendImageSize, 0);
+  setTimeout(sendImageSizeFns.regular, 0);
   setTimeout(sendOutputHiddenState, 0);
 }
 

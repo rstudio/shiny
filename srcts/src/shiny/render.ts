@@ -2,6 +2,7 @@ import $ from "jquery";
 import { asArray, hasOwnProperty } from "../utils";
 import { isIE } from "../utils/browser";
 import { shinyBindAll, shinyInitializeInputs, shinyUnbindAll } from "./init";
+import { sendImageSizeFns } from "./sendImageSize";
 
 import { renderHtml as singletonsRenderHtml } from "./singletons";
 
@@ -145,7 +146,7 @@ function renderDependency(dep) {
           // should have been applied synchronously.
           oldStyle.remove();
           removeSheet(oldSheet);
-          sendImageSize2();
+          sendImageSizeFns.transitioned();
         };
         xhr.send();
       };
@@ -197,7 +198,7 @@ function renderDependency(dep) {
           // base64-encoded and inlined into the href. We also add a dummy DOM
           // element that the CSS applies to. The dummy CSS includes a
           // transition, and when the `transitionend` event happens, we call
-          // sendImageSize2() and remove the old sheet. We also remove the
+          // sendImageSizeFns.transitioned() and remove the old sheet. We also remove the
           // dummy DOM element and dummy CSS content.
           //
           // The reason this works is because (we assume) that if multiple
@@ -207,7 +208,7 @@ function renderDependency(dep) {
           //
           // Because it is common for multiple stylesheets to arrive close
           // together, but not on exactly the same tick, we call
-          // sendImageSize2(), which is debounced. Otherwise, it can result in
+          // sendImageSizeFns.transitioned(), which is debounced. Otherwise, it can result in
           // the same plot being redrawn multiple times with different
           // styling.
           link.attr("onload", () => {
@@ -234,7 +235,7 @@ function renderDependency(dep) {
               $dummyEl.remove();
               removeSheet(findSheet($dummyLink.attr("href")));
               removeSheet(oldSheet);
-              sendImageSize2();
+              sendImageSizeFns.transitioned();
             });
             $(document.body).append($dummyEl);
 

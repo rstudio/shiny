@@ -21,13 +21,9 @@ import {
 } from "../utils";
 import { bindAll, bindScope, unbindAll, _bindAll } from "./bind";
 import { registerDependency } from "./render";
+import { sendImageSizeFns } from "./sendImageSize";
 import { HandlerType, ShinyApp } from "./shinyapp";
 import { registerNames as singletonsRegisterNames } from "./singletons";
-
-// This function gets defined in initShiny() and 'hoisted' so it can be reused
-// (to send CSS info) inside of Shiny.renderDependencies()
-let sendImageSize;
-let sendImageSize2;
 
 let fullShinyObj_: ShinyType = null;
 
@@ -301,20 +297,8 @@ function initShiny(Shiny: ShinyType): void {
       binding.onResize();
     });
   }
-  const sendImageSizeDebouncer = new Debouncer(null, doSendImageSize, 0);
 
-  sendImageSize = function () {
-    sendImageSizeDebouncer.normalCall();
-  };
-  // Make sure sendImageSize actually gets called before the inputBatchSender
-  // sends data to the server.
-  inputBatchSender.lastChanceCallback.push(function () {
-    if (sendImageSizeDebouncer.isPending())
-      sendImageSizeDebouncer.immediateCall();
-  });
-
-  // A version of sendImageSize which debounces for longer.
-  sendImageSize2 = debounce(200, sendImageSize);
+  sendImageSizeFns.setImageSend(inputBatchSender, doSendImageSize);
 
   // Return true if the object or one of its ancestors in the DOM tree has
   // style='display:none'; otherwise return false.
@@ -419,7 +403,7 @@ function initShiny(Shiny: ShinyType): void {
   // resized, or because a tab was shown/hidden (hidden elements report size
   // of 0x0). It's OK to over-report sizes because the input pipeline will
   // filter out values that haven't changed.
-  $(window).resize(debounce(500, sendImageSize));
+  $(window).resize(debounce(500, sendImageSizeFns.regular));
   // Need to register callbacks for each Bootstrap 3 class.
   const bs3classes = [
     "modal",
@@ -434,7 +418,7 @@ function initShiny(Shiny: ShinyType): void {
     $(document.body).on(
       "shown.bs." + classname + ".sendImageSize",
       "*",
-      filterEventsByNamespace("bs", sendImageSize)
+      filterEventsByNamespace("bs", sendImageSizeFns.regular)
     );
     $(document.body).on(
       "shown.bs." +
@@ -450,7 +434,7 @@ function initShiny(Shiny: ShinyType): void {
 
   // This is needed for Bootstrap 2 compatibility and for non-Bootstrap
   // related shown/hidden events (like conditionalPanel)
-  $(document.body).on("shown.sendImageSize", "*", sendImageSize);
+  $(document.body).on("shown.sendImageSize", "*", sendImageSizeFns.regular);
   $(document.body).on(
     "shown.sendOutputHiddenState hidden.sendOutputHiddenState",
     "*",
@@ -554,7 +538,7 @@ function initDeferredIframes(): void {
 // (other than session$setCurrentTheme())
 // https://github.com/rstudio/shiny/issues/3196
 // https://github.com/rstudio/shiny/issues/2998
-function maybeAddThemeObserver(el) {
+function maybeAddThemeObserver(el: HTMLElement): void {
   if (!window.MutationObserver) {
     return; // IE10 and lower
   }
@@ -584,8 +568,6 @@ function maybeAddThemeObserver(el) {
 }
 
 export {
-  sendImageSize,
-  sendImageSize2,
   initShiny,
   initDeferredIframes,
   fullShinyObj,

@@ -1,4 +1,5 @@
 import $ from "jquery";
+import { bindScope } from "./bind";
 
 const _reSingleton = /<!--(SHINY.SINGLETON\[([\w]+)\])-->([\s\S]*?)<!--\/\1-->/;
 const _reHead = /<head(?:\s[^>]*)?>([\s\S]*?)<\/head>/;
@@ -7,7 +8,7 @@ const knownSingletons = {};
 
 function renderHtml(
   html,
-  el,
+  el: bindScope,
   where
 ): {
   html: any;
@@ -21,7 +22,16 @@ function renderHtml(
   if (where === "replace") {
     $(el).html(processed.html);
   } else {
-    el.insertAdjacentHTML(where, processed.html);
+    let elElements: Array<HTMLElement>;
+
+    if (el instanceof HTMLElement) {
+      elElements = [el];
+    } else {
+      elElements = el.toArray();
+    }
+    $.each(elElements, (i, el) => {
+      el.insertAdjacentHTML(where, processed.html);
+    });
   }
   return processed;
 }
@@ -43,10 +53,11 @@ function registerNames(s): void {
 // Inserts new content into document head
 function _addToHead(head) {
   if (head.length > 0) {
-    const tempDiv = $("<div>" + head + "</div>")[0];
+    const tempDiv = $("<div>" + head + "</div>").get(0);
     const $head = $("head");
 
     while (tempDiv.hasChildNodes()) {
+      // @ts-expect-error; TODO-barret; IDK how this function works. Seems like it would add the first child forever.
       $head.append(tempDiv.firstChild);
     }
   }

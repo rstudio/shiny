@@ -267,8 +267,15 @@ class ImageOutputBinding extends OutputBinding {
     OutputBinding.prototype.clearError.call(this, el);
   }
 
-  resize(el: HTMLElement, width, height): void {
+  resize(
+    el: HTMLElement,
+    width: string | number,
+    height: string | number
+  ): void {
     $(el).find("img").trigger("resize");
+    return;
+    width;
+    height;
   }
 }
 

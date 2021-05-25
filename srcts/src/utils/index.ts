@@ -41,9 +41,7 @@ function strToBool(str: string): boolean | undefined {
 function getStyle(el: Element, styleProp: string): string | undefined {
   let x = undefined;
 
-  // Old, IE 5+ attribute only - https://developer.mozilla.org/en-US/docs/Web/API/Element/currentStyle
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
+  // @ts-expect-error; Old, IE 5+ attribute only - https://developer.mozilla.org/en-US/docs/Web/API/Element/currentStyle
   if (el.currentStyle) x = el.currentStyle[styleProp];
   else if (window.getComputedStyle) {
     // getComputedStyle can return null when we're inside a hidden iframe on
@@ -363,13 +361,10 @@ function getComputedLinkColor(el: HTMLElement): string {
 }
 
 function isBS3(): boolean {
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
   if (!$.fn.tab) {
     return false;
   }
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
+  // @ts-expect-error; TODO-barret; IDK how to tell TypeScript that `.Constructor` might exist
   return $.fn.tab.Constructor.VERSION.match(/^3\./);
 }
 

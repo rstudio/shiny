@@ -16,6 +16,7 @@ import { debounce, Debouncer } from "../time";
 import {
   getComputedLinkColor,
   getStyle,
+  hasOwnProperty,
   mapValues,
   pixelRatio,
 } from "../utils";
@@ -50,7 +51,10 @@ function shinyForgetLastInputValue(name: string): void {
 function shinyBindAll(scope: bindScope): void {
   fullShinyObj_.bindAll(scope);
 }
-function shinyInitializeInputs(scope: HTMLElement | JQuery<HTMLElement>): void {
+function shinyUnbindAll(scope: bindScope): void {
+  fullShinyObj_.unbindAll(scope);
+}
+function shinyInitializeInputs(scope: bindScope): void {
   fullShinyObj_.initializeInputs(scope);
 }
 
@@ -124,13 +128,21 @@ function initShiny(Shiny: ShinyType): void {
   };
 
   Shiny.bindAll = function (scope: bindScope) {
-    bindAll({ inputs, inputsRate }, scope);
+    bindAll(
+      { inputs, inputsRate, sendOutputHiddenState, maybeAddThemeObserver },
+      scope
+    );
   };
-  Shiny.unbindAll = unbindAll;
+  Shiny.unbindAll = function (scope: bindScope) {
+    unbindAll(
+      { inputs, inputsRate, sendOutputHiddenState, maybeAddThemeObserver },
+      scope
+    );
+  };
 
   // Calls .initialize() for all of the input objects in all input bindings,
   // in the given scope.
-  function initializeInputs(scope = document.documentElement) {
+  function initializeInputs(scope: bindScope = document.documentElement) {
     const bindings = inputBindings.getBindings();
 
     // Iterate over all bindings
@@ -153,7 +165,7 @@ function initShiny(Shiny: ShinyType): void {
   }
   Shiny.initializeInputs = initializeInputs;
 
-  function getIdFromEl(el) {
+  function getIdFromEl(el: HTMLElement) {
     const $el = $(el);
     const bindingAdapter = $el.data("shiny-output-binding");
 
@@ -172,7 +184,10 @@ function initShiny(Shiny: ShinyType): void {
   // have a reference to the DOM element, which would prevent it from being
   // GC'd.
   const initialValues = mapValues(
-    _bindAll(inputs, document.documentElement),
+    _bindAll(
+      { inputs, inputsRate, sendOutputHiddenState, maybeAddThemeObserver },
+      document.documentElement
+    ),
     (x) => x.value
   );
 
@@ -245,6 +260,42 @@ function initShiny(Shiny: ShinyType): void {
     }
   );
 
+  // Resend computed styles if *an output element's* class or style attribute changes.
+  // This gives us some level of confidence that getCurrentOutputInfo() will be
+  // properly invalidated if output container is mutated; but unfortunately,
+  // we don't have a reasonable way to detect change in *inherited* styles
+  // (other than session$setCurrentTheme())
+  // https://github.com/rstudio/shiny/issues/3196
+  // https://github.com/rstudio/shiny/issues/2998
+  function maybeAddThemeObserver(el: HTMLElement): void {
+    if (!window.MutationObserver) {
+      return; // IE10 and lower
+    }
+
+    const cl = el.classList;
+    const reportTheme =
+      cl.contains("shiny-image-output") ||
+      cl.contains("shiny-plot-output") ||
+      cl.contains("shiny-report-theme");
+
+    if (!reportTheme) {
+      return;
+    }
+
+    const $el = $(el);
+
+    if ($el.data("shiny-theme-observer")) {
+      return; // i.e., observer is already observing
+    }
+
+    const observerCallback = new Debouncer(null, () => doSendTheme(el), 100);
+    const observer = new MutationObserver(() => observerCallback.normalCall());
+    const config = { attributes: true, attributeFilter: ["style", "class"] };
+
+    observer.observe(el, config);
+    $el.data("shiny-theme-observer", observer);
+  }
+
   function doSendTheme(el) {
     // Sending theme info on error isn't necessary (it'd add an unnecessary additional round-trip)
     if (el.classList.contains("shiny-output-error")) {
@@ -291,6 +342,7 @@ function initShiny(Shiny: ShinyType): void {
 
       $this.trigger({
         type: "shiny:visualchange",
+        // @ts-expect-error; Can not remove info on a established, malformed Event object
         visible: !isHidden(this),
         binding: binding,
       });
@@ -349,12 +401,14 @@ function initShiny(Shiny: ShinyType): void {
       }
       const $this = $(this);
 
+      // @ts-expect-error; Can not remove info on a established, malformed Event object
       evt.binding = $this.data("shiny-output-binding");
+      // @ts-expect-error; Can not remove info on a established, malformed Event object
       $this.trigger(evt);
     });
     // Anything left in lastKnownVisibleOutputs is orphaned
     for (const name in lastKnownVisibleOutputs) {
-      if (lastKnownVisibleOutputs.hasOwnProperty(name))
+      if (hasOwnProperty(lastKnownVisibleOutputs, name))
         inputs.setInput(".clientdata_output_" + name + "_hidden", true);
     }
     // Update the visible outputs for next time
@@ -507,9 +561,14 @@ function initShiny(Shiny: ShinyType): void {
 
 // Give any deferred iframes a chance to load.
 function initDeferredIframes(): void {
+  // TODO-barret; This method uses `window.Shiny`. Could be replaced with `fullShinyObj_.shinyapp?.isConnected()`,
+  // but that would not use `window.Shiny`. Is it a problem???
   if (
+    // @ts-expect-error; Do not want to define `window.Shiny` as a type to discourage usage of `window.Shiny`
     !window.Shiny ||
+    // @ts-expect-error; Do not want to define `window.Shiny` as a type to discourage usage of `window.Shiny`
     !window.Shiny.shinyapp ||
+    // @ts-expect-error; Do not want to define `window.Shiny` as a type to discourage usage of `window.Shiny`
     !window.Shiny.shinyapp.isConnected()
   ) {
     // If somehow we accidentally call this before the server connection is
@@ -531,42 +590,6 @@ function initDeferredIframes(): void {
   });
 }
 
-// Resend computed styles if *an output element's* class or style attribute changes.
-// This gives us some level of confidence that getCurrentOutputInfo() will be
-// properly invalidated if output container is mutated; but unfortunately,
-// we don't have a reasonable way to detect change in *inherited* styles
-// (other than session$setCurrentTheme())
-// https://github.com/rstudio/shiny/issues/3196
-// https://github.com/rstudio/shiny/issues/2998
-function maybeAddThemeObserver(el: HTMLElement): void {
-  if (!window.MutationObserver) {
-    return; // IE10 and lower
-  }
-
-  const cl = el.classList;
-  const reportTheme =
-    cl.contains("shiny-image-output") ||
-    cl.contains("shiny-plot-output") ||
-    cl.contains("shiny-report-theme");
-
-  if (!reportTheme) {
-    return;
-  }
-
-  const $el = $(el);
-
-  if ($el.data("shiny-theme-observer")) {
-    return; // i.e., observer is already observing
-  }
-
-  const observerCallback = new Debouncer(null, () => doSendTheme(el), 100);
-  const observer = new MutationObserver(() => observerCallback.normalCall());
-  const config = { attributes: true, attributeFilter: ["style", "class"] };
-
-  observer.observe(el, config);
-  $el.data("shiny-theme-observer", observer);
-}
-
 export {
   initShiny,
   initDeferredIframes,
@@ -575,9 +598,8 @@ export {
   shinySetInputValue,
   shinyForgetLastInputValue,
   shinyBindAll,
-  unbindAll as shinyUnbindAll,
+  shinyUnbindAll,
   shinyInitializeInputs,
-  maybeAddThemeObserver,
   shinyAppBindOutput,
   shinyAppUnbindOutput,
   getShinyOnCustomMessage,

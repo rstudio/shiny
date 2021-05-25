@@ -2,23 +2,21 @@ import $ from "jquery";
 import { triggerFileInputChanged } from "../events/shiny_inputchanged";
 import { $escape } from "../utils";
 import { fileInputBinding } from "../bindings/input";
+import { ShinyApp } from "../shiny/shinyapp";
 
 // Generic driver class for doing chunk-wise asynchronous processing of a
 // FileList object. Subclass/clone it and override the `on*` functions to
 // make it do something useful.
 class FileProcessor {
-  files: any;
-  fileIndex: number;
-  aborted: true | false;
-  completed: true | false;
+  files: FileList;
+  fileIndex = -1;
+  // Currently need to use small chunk size because R-Websockets can't
+  // handle continuation frames
+  aborted = false;
+  completed = false;
 
   constructor(files: FileList) {
     this.files = files;
-    this.fileIndex = -1;
-    // Currently need to use small chunk size because R-Websockets can't
-    // handle continuation frames
-    this.aborted = false;
-    this.completed = false;
 
     // TODO: Register error/abort callbacks
 
@@ -26,11 +24,11 @@ class FileProcessor {
   }
 
   // Begin callbacks. Subclassers/cloners may override any or all of these.
-  onBegin(files, cont: () => void): void {
+  onBegin(files: FileList, cont: () => void): void {
     files;
     setTimeout(cont, 0);
   }
-  onFile(file, cont: () => void): void {
+  onFile(file: File, cont: () => void): void {
     file;
     setTimeout(cont, 0);
   }
@@ -100,7 +98,12 @@ class FileUploader extends FileProcessor {
   progressBytes: number;
   totalBytes: number;
 
-  constructor(shinyapp: any, id: string, files: FileList, el: HTMLElement) {
+  constructor(
+    shinyapp: ShinyApp,
+    id: string,
+    files: FileList,
+    el: HTMLElement
+  ) {
     super(files);
     this.shinyapp = shinyapp;
     this.id = id;
@@ -181,7 +184,7 @@ class FileUploader extends FileProcessor {
     });
   }
   onComplete(): void {
-    const fileInfo = $.map(this.files, function (file, i) {
+    const fileInfo = $.map(this.files, function (file: File, i) {
       return {
         name: file.name,
         size: file.size,

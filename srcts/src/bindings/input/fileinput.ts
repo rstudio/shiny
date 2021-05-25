@@ -28,7 +28,7 @@ function abortCurrentUpload($el: JQuery<EventTarget>) {
   $el.removeAttr("data-restore");
 }
 
-function uploadDroppedFilesIE10Plus(el: FileInputHTMLElement, files): void {
+function uploadDroppedFilesIE10Plus(el: HTMLInputElement, files): void {
   const $el = $(el);
 
   abortCurrentUpload($el);
@@ -43,7 +43,7 @@ function uploadDroppedFilesIE10Plus(el: FileInputHTMLElement, files): void {
   );
 }
 
-function uploadFiles(evt: Event): void {
+function uploadFiles(evt: JQuery.DragEvent): void {
   const $el = $(evt.target);
 
   abortCurrentUpload($el);
@@ -70,12 +70,7 @@ function uploadFiles(evt: Event): void {
 // TODO-barret ; Should this be an internal class property?
 let $fileInputs = $();
 
-interface FileInputHTMLElement extends HTMLElement {
-  name: string;
-  files: FileList;
-}
-
-function fileInputBindingGetId(el: FileInputHTMLElement): string {
+function fileInputBindingGetId(el: HTMLInputElement): string {
   return InputBinding.prototype.getId.call(this, el) || el.name;
 }
 
@@ -83,7 +78,7 @@ class FileInputBinding extends InputBinding {
   find(scope: HTMLElement): JQuery<HTMLElement> {
     return $(scope).find('input[type="file"]');
   }
-  getId(el: FileInputHTMLElement): string {
+  getId(el: HTMLInputElement): string {
     return fileInputBindingGetId(el);
   }
   getValue(el: HTMLElement): { name?: string } | null {
@@ -218,7 +213,7 @@ class FileInputBinding extends InputBinding {
     }
     return true;
   }
-  _handleDrop(e: JQuery.TriggeredEvent, el: FileInputHTMLElement): void {
+  _handleDrop(e: JQuery.DragEventBase, el: HTMLInputElement): void {
     const files = e.originalEvent.dataTransfer.files,
       $el = $(el);
 
@@ -245,7 +240,7 @@ class FileInputBinding extends InputBinding {
       $el.trigger("change");
     }
   }
-  subscribe(el: FileInputHTMLElement, callback: (x: boolean) => void): void {
+  subscribe(el: HTMLInputElement, callback: (x: boolean) => void): void {
     callback;
 
     $(el).on("change.fileInputBinding", uploadFiles);

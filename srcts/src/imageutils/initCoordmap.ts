@@ -89,7 +89,7 @@ type CoordmapType = {
     height: number;
     width: number;
   };
-  mouseOffsetCss: (evt: MouseEvent) => OffsetType;
+  mouseOffsetCss: (evt: JQuery.MouseEventBase) => OffsetType;
   scaleCssToImg: {
     (offsetCss: BoundsType): BoundsType;
     (offsetCss: OffsetType): OffsetType;
@@ -110,7 +110,7 @@ type CoordmapType = {
     inputId: string,
     clip?: boolean,
     nullOutside?: boolean
-  ) => (e: MouseEvent) => void;
+  ) => (e: JQuery.MouseDownEvent) => void;
 };
 
 // This adds functions to the coordmap object to handle various

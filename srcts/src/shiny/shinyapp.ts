@@ -692,11 +692,10 @@ class ShinyApp {
         message:
           | { type: "show"; message: Parameters<typeof showNotification>[0] }
           | { type: "remove"; message: string }
+          | { type: void }
       ) {
         if (message.type === "show") showNotification(message.message);
         else if (message.type === "remove") removeNotification(message.message);
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
         else throw "Unkown notification type: " + message.type;
       }
     );
@@ -707,12 +706,11 @@ class ShinyApp {
         message:
           | { type: "show"; message: Parameters<typeof showModal>[0] }
           | { type: "remove" }
+          | { type: void }
       ) {
         if (message.type === "show") showModal(message.message);
-        else if (message.type === "remove") removeModal();
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
         // For 'remove', message content isn't used
+        else if (message.type === "remove") removeModal();
         else throw "Unkown modal type: " + message.type;
       }
     );
@@ -822,7 +820,7 @@ class ShinyApp {
               message.selector +
               '") could not be found in the DOM.'
           );
-          renderHtml(message.content.html, $([]), message.content.deps);
+          renderHtml(message.content.html, $([]).get(0), message.content.deps);
         } else {
           targets.each(function (i, target) {
             renderContent(target, message.content, message.where);

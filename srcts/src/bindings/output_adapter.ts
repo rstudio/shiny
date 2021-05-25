@@ -1,11 +1,19 @@
 import { makeResizeFilter } from "../utils";
 import { OutputBinding } from "./output";
 
+interface OutpuBindingWithResize extends OutputBinding {
+  resize?: (
+    el: HTMLElement,
+    width: string | number,
+    height: string | number
+  ) => void;
+}
+
 class OutputBindingAdapter {
   el: HTMLElement;
   binding: OutputBinding;
 
-  constructor(el: HTMLElement, binding: OutputBinding) {
+  constructor(el: HTMLElement, binding: OutpuBindingWithResize) {
     this.el = el;
     this.binding = binding;
 

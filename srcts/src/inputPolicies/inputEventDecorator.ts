@@ -1,5 +1,7 @@
 import $ from "jquery";
 import { InputPolicy, priorityType } from ".";
+import { InputBinding } from "../bindings";
+import { ShinyEventInputChanged } from "../events/shiny_inputchanged";
 import { splitInputNameType } from "./splitInputNameType";
 
 class InputEventDecorator extends InputPolicy {
@@ -11,9 +13,13 @@ class InputEventDecorator extends InputPolicy {
   setInput(
     nameType: string,
     value: unknown,
-    opts: { el: HTMLElement; priority: priorityType }
+    opts: {
+      el: HTMLElement;
+      priority: priorityType;
+      binding: InputBinding;
+    }
   ): void {
-    const evt = jQuery.Event("shiny:inputchanged");
+    const evt = jQuery.Event("shiny:inputchanged") as ShinyEventInputChanged;
 
     const input = splitInputNameType(nameType);
 

@@ -4,7 +4,6 @@ import { OutputBindingAdapter } from "../bindings/output_adapter";
 import { InputRateDecorator, InputValidateDecorator } from "../inputPolicies";
 import {
   initDeferredIframes,
-  maybeAddThemeObserver,
   shinyAppBindOutput,
   shinyAppUnbindOutput,
 } from "./init";
@@ -37,6 +36,8 @@ function valueChangeCallback(inputs, binding, el, allowDeferred) {
 type bindInputsCtx = {
   inputs: InputValidateDecorator;
   inputsRate: InputRateDecorator;
+  sendOutputHiddenState: () => void;
+  maybeAddThemeObserver: (el: HTMLElement) => void;
 };
 function bindInputs(
   shinyCtx: bindInputsCtx,
@@ -106,6 +107,7 @@ function bindInputs(
 
       $(el).trigger({
         type: "shiny:bound",
+        // @ts-expect-error; Can not remove info on a established, malformed Event object
         binding: binding,
         bindingType: "input",
       });
@@ -115,7 +117,10 @@ function bindInputs(
   return inputItems;
 }
 
-function bindOutputs(scope: bindScope = document.documentElement): void {
+function bindOutputs(
+  { sendOutputHiddenState, maybeAddThemeObserver }: bindInputsCtx,
+  scope: bindScope = document.documentElement
+): void {
   const $scope = $(scope);
 
   const bindings = outputBindings.getBindings();
@@ -158,6 +163,7 @@ function bindOutputs(scope: bindScope = document.documentElement): void {
       if (!$el.attr("aria-live")) $el.attr("aria-live", "polite");
       $el.trigger({
         type: "shiny:bound",
+        // @ts-expect-error; Can not remove info on a established, malformed Event object
         binding: binding,
         bindingType: "output",
       });
@@ -173,11 +179,11 @@ function unbindInputs(
   scope: bindScope = document.documentElement,
   includeSelf = false
 ) {
-  const inputs = $(scope).find(".shiny-bound-input");
+  const inputs: Array<HTMLElement | JQuery<HTMLElement>> = $(scope)
+    .find(".shiny-bound-input")
+    .toArray();
 
   if (includeSelf && $(scope).hasClass("shiny-bound-input")) {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
     inputs.push(scope);
   }
 
@@ -193,16 +199,20 @@ function unbindInputs(
     binding.unsubscribe(el);
     $(el).trigger({
       type: "shiny:unbound",
+      // @ts-expect-error; Can not remove info on a established, malformed Event object
       binding: binding,
       bindingType: "input",
     });
   }
 }
 function unbindOutputs(
+  { sendOutputHiddenState }: bindInputsCtx,
   scope: bindScope = document.documentElement,
   includeSelf = false
 ) {
-  const outputs = $(scope).find(".shiny-bound-output");
+  const outputs: Array<HTMLElement | JQuery<HTMLElement>> = $(scope)
+    .find(".shiny-bound-output")
+    .toArray();
 
   if (includeSelf && $(scope).hasClass("shiny-bound-output")) {
     outputs.push(scope);
@@ -220,6 +230,7 @@ function unbindOutputs(
     $el.removeData("shiny-output-binding");
     $el.trigger({
       type: "shiny:unbound",
+      // @ts-expect-error; Can not remove info on a established, malformed Event object
       binding: bindingAdapter.binding,
       bindingType: "output",
     });
@@ -234,12 +245,16 @@ function _bindAll(
   shinyCtx: bindInputsCtx,
   scope: bindScope
 ): ReturnType<typeof bindInputs> {
-  bindOutputs(scope);
+  bindOutputs(shinyCtx, scope);
   return bindInputs(shinyCtx, scope);
 }
-function unbindAll(scope: bindScope, includeSelf = false): void {
+function unbindAll(
+  shinyCtx: bindInputsCtx,
+  scope: bindScope,
+  includeSelf = false
+): void {
   unbindInputs(scope, includeSelf);
-  unbindOutputs(scope, includeSelf);
+  unbindOutputs(shinyCtx, scope, includeSelf);
 }
 function bindAll(shinyCtx: bindInputsCtx, scope: bindScope): void {
   // _bindAll returns input values; it doesn't send them to the server.

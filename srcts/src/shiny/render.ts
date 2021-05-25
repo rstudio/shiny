@@ -1,6 +1,7 @@
 import $ from "jquery";
 import { asArray, hasOwnProperty } from "../utils";
 import { isIE } from "../utils/browser";
+import { bindScope } from "./bind";
 import { shinyBindAll, shinyInitializeInputs, shinyUnbindAll } from "./init";
 import { sendImageSizeFns } from "./sendImageSize";
 
@@ -20,9 +21,9 @@ type RenderWhereType = "beforeBegin" | "afterEnd" | "replace";
 // inputs/outputs. `content` can be null, a string, or an object with
 // properties 'html' and 'deps'.
 function renderContent(
-  el: HTMLElement,
+  el: bindScope,
   content: null | string | { html: any; deps?: any },
-  where: RenderWhereType
+  where?: RenderWhereType
 ): void {
   if (where === "replace") {
     shinyUnbindAll(el);
@@ -42,7 +43,7 @@ function renderContent(
 
   renderHtml(html, el, dependencies, where);
 
-  let scope: JQuery<HTMLElement> | HTMLElement = el;
+  let scope: bindScope = el;
 
   if (where === "replace") {
     shinyInitializeInputs(el);
@@ -66,7 +67,7 @@ function renderContent(
 // Render HTML in a DOM element, inserting singletons into head as needed
 function renderHtml(
   html,
-  el,
+  el: bindScope,
   dependencies,
   where: RenderWhereType = "replace"
 ): ReturnType<typeof singletonsRenderHtml> {

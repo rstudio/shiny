@@ -15,13 +15,14 @@ import { ActionButtonInputBinding } from "./actionbutton";
 import { BootstrapTabInputBinding } from "./tabinput";
 import { FileInputBinding } from "./fileinput";
 import { RatePolicyModes } from "../../inputPolicies/inputRateDecorator";
+import { bindScope } from "../../shiny/bind";
 
 class InputBinding {
   name: string;
 
   // Returns a jQuery object or element array that contains the
   // descendants of scope that match this binding
-  find(scope: JQuery<HTMLElement> | HTMLElement): JQuery<HTMLElement> {
+  find(scope: bindScope): JQuery<HTMLElement> {
     throw "Not implemented";
     // add so that typescript isn't mad about an unused var
     scope;

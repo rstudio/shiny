@@ -68,9 +68,12 @@ function getTypePrettifyer(
 }
 
 class SliderInputBinding extends TextInputBinding {
-  find(scope: HTMLElement): JQuery<HTMLElement> | Array<HTMLElement> {
+  find(scope: HTMLElement): JQuery<HTMLElement> {
     // Check if ionRangeSlider plugin is loaded
-    if (!$.fn.ionRangeSlider) return [];
+    if (!$.fn.ionRangeSlider) {
+      // Return empty set of _found_ items
+      return $();
+    }
 
     return $(scope).find("input.js-range-slider");
   }
@@ -216,10 +219,8 @@ class SliderInputBinding extends TextInputBinding {
     };
     el;
   }
-  // TODO-barret Why not implemented?
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
-  getState(el: TextHTMLElement): void {
+  // @ts-expect-error; TODO-barret Why not implemented?
+  getState(el: HTMLInputElement): void {
     // empty
     el;
   }

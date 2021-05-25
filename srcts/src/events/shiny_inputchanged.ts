@@ -1,5 +1,6 @@
 import $ from "jquery";
 import { FileInputBinding } from "../bindings/input/fileinput";
+import { priorityType } from "../inputPolicies";
 
 interface ShinyEventInputChanged extends JQuery.Event {
   name: string;
@@ -7,6 +8,7 @@ interface ShinyEventInputChanged extends JQuery.Event {
   binding: any;
   el: HTMLElement;
   inputType: string;
+  priority: priorityType;
 }
 
 function triggerFileInputChanged(

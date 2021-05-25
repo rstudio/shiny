@@ -11,15 +11,18 @@ function createClickInfo(
   dblclickId: string,
   dblclickDelay: number
 ): {
-  mousedown: (e: MouseEvent) => void;
-  dblclickIE8: (e: MouseEvent) => void;
+  mousedown: (e: JQuery.MouseDownEvent) => void;
+  dblclickIE8: (e: JQuery.DoubleClickEvent) => void;
 } {
   let clickTimer = null;
-  let pendingE = null; // A pending mousedown2 event
+  let pendingE: JQuery.MouseDownEvent = null; // A pending mousedown2 event
 
   // Create a new event of type eventType (like 'mousedown2'), and trigger
   // it with the information stored in this.e.
-  function triggerEvent(newEventType: string, e: MouseEvent) {
+  function triggerEvent(
+    newEventType: string,
+    e: JQuery.MouseDownEvent | JQuery.DoubleClickEvent
+  ) {
     // Extract important info from e and construct a new event with type
     // eventType.
     const e2 = $.Event(newEventType, {
@@ -43,7 +46,7 @@ function createClickInfo(
 
   // Set a timer to trigger a mousedown2 event, using information from the
   // last recorded mousdown event.
-  function scheduleMousedown2(e: MouseEvent) {
+  function scheduleMousedown2(e: JQuery.MouseDownEvent) {
     pendingE = e;
 
     clickTimer = setTimeout(function () {
@@ -51,7 +54,7 @@ function createClickInfo(
     }, dblclickDelay);
   }
 
-  function mousedown(e: MouseEvent) {
+  function mousedown(e: JQuery.MouseDownEvent) {
     // Listen for left mouse button only
     if (e.which !== 1) return;
 
@@ -89,9 +92,7 @@ function createClickInfo(
 
   // IE8 needs a special hack because when you do a double-click it doesn't
   // trigger the click event twice - it directly triggers dblclick.
-  function dblclickIE8(e: MouseEvent) {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
+  function dblclickIE8(e: JQuery.DoubleClickEvent) {
     e.which = 1; // In IE8, e.which is 0 instead of 1. ???
     triggerEvent("dblclick2", e);
   }

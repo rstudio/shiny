@@ -16,9 +16,9 @@ import { PanelType } from "./initPanelScales";
 // ----------------------------------------------------------
 
 type CreateHandlerType = {
-  mousemove?: (e: MouseEvent) => void;
-  mouseout?: (e: MouseEvent) => void;
-  mousedown?: (e: MouseEvent) => void;
+  mousemove?: (e: JQuery.MouseMoveEvent) => void;
+  mouseout?: (e: JQuery.MouseOutEvent) => void;
+  mousedown?: (e: JQuery.MouseDownEvent) => void;
   onResetImg: () => void;
   onResize?: () => void;
 };
@@ -167,10 +167,12 @@ function createBrushHandler(
     if (isNaN(coords.xmin)) {
       shinySetInputValue(inputId, null);
       // Must tell other brushes to clear.
-      imageOutputBinding.find(document).trigger("shiny-internal:brushed", {
-        brushId: inputId,
-        outputId: null,
-      });
+      imageOutputBinding
+        .find(document.documentElement)
+        .trigger("shiny-internal:brushed", {
+          brushId: inputId,
+          outputId: null,
+        });
       return;
     }
 
@@ -204,7 +206,9 @@ function createBrushHandler(
     shinySetInputValue(inputId, coords);
 
     $el.data("mostRecentBrush", true);
-    imageOutputBinding.find(document).trigger("shiny-internal:brushed", coords);
+    imageOutputBinding
+      .find(document.documentElement)
+      .trigger("shiny-internal:brushed", coords);
   }
 
   let brushInfoSender;
@@ -215,7 +219,7 @@ function createBrushHandler(
     brushInfoSender = new Debouncer(null, sendBrushInfo, opts.brushDelay);
   }
 
-  function mousedown(e: MouseEvent) {
+  function mousedown(e: JQuery.MouseDownEvent) {
     // This can happen when mousedown inside the graphic, then mouseup
     // outside, then mousedown inside. Just ignore the second
     // mousedown.
@@ -236,58 +240,41 @@ function createBrushHandler(
     brush.down(offsetCss);
 
     if (brush.isInResizeArea(offsetCss)) {
-      // TODO-barret this variable is not respected
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
+      // @ts-expect-error; TODO-barret; Remove the variable? it is not used
       brush.startResizing(offsetCss);
 
       // Attach the move and up handlers to the window so that they respond
       // even when the mouse is moved outside of the image.
       $(document)
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
         .on("mousemove.image_brush", mousemoveResizing)
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
         .on("mouseup.image_brush", mouseupResizing);
     } else if (brush.isInsideBrush(offsetCss)) {
-      // TODO-barret this variable is not respected
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
+      // @ts-expect-error; TODO-barret this variable is not respected
       brush.startDragging(offsetCss);
       setCursorStyle("grabbing");
 
       // Attach the move and up handlers to the window so that they respond
       // even when the mouse is moved outside of the image.
       $(document)
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
         .on("mousemove.image_brush", mousemoveDragging)
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
         .on("mouseup.image_brush", mouseupDragging);
     } else {
       const panel = coordmap.getPanelCss(offsetCss, expandPixels);
 
-      // TODO-barret start brushing does not take any args
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
+      // @ts-expect-error; TODO-barret start brushing does not take any args; Either change the function to ignore, or do not send to function;
       brush.startBrushing(panel.clipImg(coordmap.scaleCssToImg(offsetCss)));
 
       // Attach the move and up handlers to the window so that they respond
       // even when the mouse is moved outside of the image.
       $(document)
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
         .on("mousemove.image_brush", mousemoveBrushing)
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
         .on("mouseup.image_brush", mouseupBrushing);
     }
   }
 
   // This sets the cursor style when it's in the el
-  function mousemove(e: MouseEvent) {
+  function mousemove(e: JQuery.MouseMoveEvent) {
     // In general, brush uses css pixels, and coordmap uses img pixels.
     const offsetCss = coordmap.mouseOffsetCss(e);
 
@@ -316,23 +303,23 @@ function createBrushHandler(
   }
 
   // mousemove handlers while brushing or dragging
-  function mousemoveBrushing(e: MouseEvent) {
+  function mousemoveBrushing(e: JQuery.MouseMoveEvent) {
     brush.brushTo(coordmap.mouseOffsetCss(e));
     brushInfoSender.normalCall();
   }
 
-  function mousemoveDragging(e: MouseEvent) {
+  function mousemoveDragging(e: JQuery.MouseMoveEvent) {
     brush.dragTo(coordmap.mouseOffsetCss(e));
     brushInfoSender.normalCall();
   }
 
-  function mousemoveResizing(e: MouseEvent) {
+  function mousemoveResizing(e: JQuery.MouseMoveEvent) {
     brush.resizeTo(coordmap.mouseOffsetCss(e));
     brushInfoSender.normalCall();
   }
 
   // mouseup handlers while brushing or dragging
-  function mouseupBrushing(e: MouseEvent) {
+  function mouseupBrushing(e: JQuery.MouseUpEvent) {
     // Listen for left mouse button only
     if (e.which !== 1) return;
 
@@ -357,7 +344,7 @@ function createBrushHandler(
     if (brushInfoSender.isPending()) brushInfoSender.immediateCall();
   }
 
-  function mouseupDragging(e: MouseEvent) {
+  function mouseupDragging(e: JQuery.MouseUpEvent) {
     // Listen for left mouse button only
     if (e.which !== 1) return;
 
@@ -371,7 +358,7 @@ function createBrushHandler(
     if (brushInfoSender.isPending()) brushInfoSender.immediateCall();
   }
 
-  function mouseupResizing(e: MouseEvent) {
+  function mouseupResizing(e: JQuery.MouseUpEvent) {
     // Listen for left mouse button only
     if (e.which !== 1) return;
 

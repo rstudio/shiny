@@ -1,14 +1,35 @@
 import $ from "jquery";
+import { InputBinding } from "../bindings";
 import { FileInputBinding } from "../bindings/input/fileinput";
+import { OutputBindingAdapter } from "../bindings/output_adapter";
 import { priorityType } from "../inputPolicies";
 
-interface ShinyEventInputChanged extends JQuery.Event {
+interface ShinyEventCommon extends JQuery.Event {
   name: string;
-  value: any;
-  binding: any;
+  value;
   el: HTMLElement;
+}
+interface ShinyEventInputChanged extends ShinyEventCommon {
+  value;
+  binding: InputBinding;
   inputType: string;
   priority: priorityType;
+}
+interface ShinyEventUpdateInput extends ShinyEventCommon {
+  message: any;
+  binding: InputBinding;
+}
+interface ShinyEventValue extends ShinyEventCommon {
+  value;
+  binding: OutputBindingAdapter;
+}
+
+interface ShinyEventError extends ShinyEventCommon {
+  binding: OutputBindingAdapter;
+  error: string;
+}
+interface ShinyEventMessage extends JQuery.Event {
+  message: any;
 }
 
 function triggerFileInputChanged(
@@ -32,5 +53,11 @@ function triggerFileInputChanged(
   return evt;
 }
 
-export type { ShinyEventInputChanged };
+export type {
+  ShinyEventInputChanged,
+  ShinyEventError,
+  ShinyEventValue,
+  ShinyEventMessage,
+  ShinyEventUpdateInput,
+};
 export { triggerFileInputChanged };

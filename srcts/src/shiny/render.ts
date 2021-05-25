@@ -265,22 +265,27 @@ function renderDependency(dep) {
     let attachments = dep.attachment;
 
     if (typeof attachments === "string") attachments = [attachments];
-    if ($.isArray(attachments)) {
+    if (Array.isArray(attachments)) {
       // The contract for attachments is that arrays of attachments are
       // addressed using 1-based indexes. Convert this array to an object.
       const tmp = {};
 
       $.each(attachments, function (index, attachment) {
-        tmp[index + 1 + ""] = attachment;
+        const key = index + 1 + "";
+
+        tmp[key] = attachment;
       });
       attachments = tmp;
     }
 
-    const attach = $.map(attachments, function (attachment, key) {
-      return $("<link rel='attachment'>")
-        .attr("id", dep.name + "-" + key + "-attachment")
-        .attr("href", href + "/" + encodeURI(attachment));
-    });
+    const attach = $.map(
+      attachments,
+      function (attachment, key: string | number) {
+        return $("<link rel='attachment'>")
+          .attr("id", dep.name + "-" + key + "-attachment")
+          .attr("href", href + "/" + encodeURI(attachment));
+      }
+    );
 
     $head.append(attach);
   }

@@ -41,9 +41,7 @@ class RadioInputBinding extends InputBinding {
       ).prop("checked", true);
     }
   }
-  getState(
-    el: RadioHTMLElement
-  ): {
+  getState(el: RadioHTMLElement): {
     label: string;
     value: string | number | string[];
     options: Array<ValueLabelObject>;

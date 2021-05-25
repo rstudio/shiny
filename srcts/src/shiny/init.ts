@@ -1,6 +1,6 @@
 import $ from "jquery";
 import { ShinyType } from ".";
-import { InputBinding, inputBindings } from "../bindings";
+import { inputBindings } from "../bindings";
 import { OutputBindingAdapter } from "../bindings/output_adapter";
 import {
   InputBatchSender,
@@ -51,8 +51,8 @@ function shinyForgetLastInputValue(name: string): void {
 function shinyBindAll(scope: bindScope): void {
   fullShinyObj_.bindAll(scope);
 }
-function shinyUnbindAll(scope: bindScope): void {
-  fullShinyObj_.unbindAll(scope);
+function shinyUnbindAll(scope: bindScope, includeSelf = false): void {
+  fullShinyObj_.unbindAll(scope, includeSelf);
 }
 function shinyInitializeInputs(scope: bindScope): void {
   fullShinyObj_.initializeInputs(scope);
@@ -133,10 +133,11 @@ function initShiny(Shiny: ShinyType): void {
       scope
     );
   };
-  Shiny.unbindAll = function (scope: bindScope) {
+  Shiny.unbindAll = function (scope: bindScope, includeSelf = false) {
     unbindAll(
       { inputs, inputsRate, sendOutputHiddenState, maybeAddThemeObserver },
-      scope
+      scope,
+      includeSelf
     );
   };
 
@@ -199,9 +200,8 @@ function initShiny(Shiny: ShinyType): void {
 
       if (this.offsetWidth !== 0 || this.offsetHeight !== 0) {
         initialValues[".clientdata_output_" + id + "_width"] = this.offsetWidth;
-        initialValues[
-          ".clientdata_output_" + id + "_height"
-        ] = this.offsetHeight;
+        initialValues[".clientdata_output_" + id + "_height"] =
+          this.offsetHeight;
       }
     }
   );
@@ -248,13 +248,11 @@ function initShiny(Shiny: ShinyType): void {
       const el = this;
       const id = getIdFromEl(el);
 
-      initialValues[".clientdata_output_" + id + "_bg"] = getComputedBgColor(
-        el
-      );
+      initialValues[".clientdata_output_" + id + "_bg"] =
+        getComputedBgColor(el);
       initialValues[".clientdata_output_" + id + "_fg"] = getStyle(el, "color");
-      initialValues[
-        ".clientdata_output_" + id + "_accent"
-      ] = getComputedLinkColor(el);
+      initialValues[".clientdata_output_" + id + "_accent"] =
+        getComputedLinkColor(el);
       initialValues[".clientdata_output_" + id + "_font"] = getComputedFont(el);
       maybeAddThemeObserver(el);
     }

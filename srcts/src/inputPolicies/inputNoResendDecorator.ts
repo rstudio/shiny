@@ -18,9 +18,8 @@ class InputNoResendDecorator extends InputPolicy {
     value: unknown,
     opts: { priority: priorityType }
   ): void {
-    const { name: inputName, inputType: inputType } = splitInputNameType(
-      nameType
-    );
+    const { name: inputName, inputType: inputType } =
+      splitInputNameType(nameType);
     const jsonValue = JSON.stringify(value);
 
     if (

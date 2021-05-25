@@ -8,9 +8,7 @@ type MaybeInputOpts = {
 };
 
 // Merge opts with defaults, and return a new object.
-function addDefaultInputOpts<T>(
-  opts?: T & MaybeInputOpts
-): T & {
+function addDefaultInputOpts<T>(opts?: T & MaybeInputOpts): T & {
   priority: priorityType;
   binding: unknown;
   el?: HTMLElement;

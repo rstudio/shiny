@@ -1,6 +1,7 @@
-function splitInputNameType(
-  nameType: string
-): { name: string; inputType: string | "" } {
+function splitInputNameType(nameType: string): {
+  name: string;
+  inputType: string | "";
+} {
   const name2 = nameType.split(":");
 
   return {

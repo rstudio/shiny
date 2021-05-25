@@ -67,9 +67,11 @@ class TextInputBinding extends InputBinding {
     $(el).trigger("change");
   }
 
-  getState(
-    el: TextHTMLElement
-  ): { label: string; value: any; placeholder: any } {
+  getState(el: TextHTMLElement): {
+    label: string;
+    value: any;
+    placeholder: any;
+  } {
     return {
       label: this._getLabelNode(el).text(),
       value: el.value,

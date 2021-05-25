@@ -23,6 +23,13 @@ import { renderContent, renderHtml, RenderWhereType } from "./render";
 import { hideReconnectDialog, showReconnectDialog } from "./reconnectDialog";
 import { resetBrush } from "../imageutils/resetBrush";
 import { OutputBindingAdapter } from "../bindings/output_adapter";
+import {
+  ShinyEventError,
+  ShinyEventMessage,
+  ShinyEventValue,
+  ShinyEventUpdateInput,
+} from "../events/shiny_inputchanged";
+import { InputBinding } from "../bindings";
 
 type HandlerType = (
   msg: Record<string, unknown> | Array<unknown> | boolean | string
@@ -131,6 +138,7 @@ class ShinyApp {
 
       $(document).trigger({
         type: "shiny:connected",
+        // @ts-expect-error; Can not remove info on a established, malformed Event object
         socket: socket,
       });
 
@@ -160,6 +168,7 @@ class ShinyApp {
       if (hasOpened) {
         $(document).trigger({
           type: "shiny:disconnected",
+          // @ts-expect-error; Can not remove info on a established, malformed Event object
           socket: socket,
         });
 
@@ -340,7 +349,7 @@ class ShinyApp {
         payload.push(blob);
       }
 
-      msg = (makeBlob(payload) as unknown) as string;
+      msg = makeBlob(payload) as unknown as string;
     }
 
     this.$sendMsg(msg);
@@ -361,7 +370,7 @@ class ShinyApp {
     delete this.$values[name];
 
     const binding = this.$bindings[name];
-    const evt = jQuery.Event("shiny:error");
+    const evt: ShinyEventError = jQuery.Event("shiny:error");
 
     evt.name = name;
     evt.error = error;
@@ -374,7 +383,7 @@ class ShinyApp {
 
   receiveOutput<T>(name: string, value: T): T {
     const binding = this.$bindings[name];
-    const evt = jQuery.Event("shiny:value");
+    const evt: ShinyEventValue = jQuery.Event("shiny:value");
 
     evt.name = name;
     evt.value = value;
@@ -449,6 +458,7 @@ class ShinyApp {
   }
 
   $updateConditionals(): void {
+    // @ts-expect-error; TODO-barret; Could this be transformed into `.trigger(TYPE)`?
     $(document).trigger({
       type: "shiny:conditional",
     });
@@ -577,7 +587,7 @@ class ShinyApp {
       msgObj.custom[type] = data;
     }
 
-    const evt = jQuery.Event("shiny:message");
+    const evt: ShinyEventMessage = jQuery.Event("shiny:message");
 
     evt.message = msgObj;
     $(document).trigger(evt);
@@ -646,13 +656,14 @@ class ShinyApp {
         // inputMessages should be an array
         for (let i = 0; i < message.length; i++) {
           const $obj = $(".shiny-bound-input#" + $escape(message[i].id));
-          const inputBinding = $obj.data("shiny-input-binding");
+          const inputBinding: InputBinding = $obj.data("shiny-input-binding");
 
           // Dispatch the message to the appropriate input object
           if ($obj.length > 0) {
             if (!$obj.attr("aria-live")) $obj.attr("aria-live", "polite");
             const el = $obj[0];
-            const evt = jQuery.Event("shiny:updateinput");
+            const evt: ShinyEventUpdateInput =
+              jQuery.Event("shiny:updateinput");
 
             evt.message = message[i].message;
             evt.binding = inputBinding;
@@ -790,6 +801,7 @@ class ShinyApp {
         ) {
           const binding = this.$bindings[message.name];
 
+          // @ts-expect-error; TODO-barret; Could this be transformed into `.trigger(TYPE)`?
           $(binding ? binding.el : null).trigger({
             type: "shiny:" + message.status,
           });
@@ -926,9 +938,12 @@ class ShinyApp {
       "shiny-insert-tab",
       function (message: {
         inputId: string;
-        divTag: { html: HTMLElement };
-        liTag: { html: HTMLElement };
+        divTag: { html: HTMLElement; deps };
+        liTag: { html: HTMLElement; deps };
         target?: string;
+        position: "before" | "after" | void;
+        select: boolean;
+        menuName: string;
       }) {
         const $parentTabset = getTabset(message.inputId);
         let $tabset = $parentTabset;
@@ -1028,6 +1043,7 @@ class ShinyApp {
         renderContent(
           $tabContent[0],
           { html: "", deps: message.divTag.deps },
+          // @ts-expect-error; TODO-barret; There is no usage of beforeend
           "beforeend"
         );
         $divTag.get().forEach((el) => {
@@ -1127,7 +1143,7 @@ class ShinyApp {
         // value for the tabset gets updated (i.e. input$tabsetId
         // should be null if there are no tabs).
         const destTabValue = getFirstTab($tabset);
-        const evt = jQuery.Event("shiny:updateinput");
+        const evt: ShinyEventUpdateInput = jQuery.Event("shiny:updateinput");
 
         evt.binding = inputBinding;
         $tabset.trigger(evt);
@@ -1282,6 +1298,7 @@ class ShinyApp {
       if (binding) {
         $(binding.el).trigger({
           type: "shiny:outputinvalidated",
+          // @ts-expect-error; Can not remove info on a established, malformed Event object
           binding: binding,
           name: key,
         });

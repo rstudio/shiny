@@ -62,9 +62,7 @@ class DateRangeInputBinding extends InputBinding {
       }
     }
   }
-  getState(
-    el: HTMLElement
-  ): {
+  getState(el: HTMLElement): {
     label: string;
     value: [string, string];
     valueString: [string, string];

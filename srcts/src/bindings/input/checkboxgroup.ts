@@ -51,9 +51,11 @@ class CheckboxGroupInputBinding extends InputBinding {
       ).prop("checked", true);
     }
   }
-  getState(
-    el: CheckboxGroupHTMLElement
-  ): { label: string; value: any; options: Array<ValueLabelObject> } {
+  getState(el: CheckboxGroupHTMLElement): {
+    label: string;
+    value: any;
+    options: Array<ValueLabelObject>;
+  } {
     const $objs = $(
       'input:checkbox[name="' + $escape(el.id) + '"]'
     ) as JQuery<CheckboxGroupHTMLElement>;

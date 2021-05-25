@@ -30,6 +30,7 @@ import {
   ShinyEventUpdateInput,
 } from "../events/shiny_inputchanged";
 import { InputBinding } from "../bindings";
+import { indirectEval } from "../utils/eval";
 
 type HandlerType = (
   msg: Record<string, unknown> | Array<unknown> | boolean | string
@@ -680,7 +681,7 @@ class ShinyApp {
 
     this.addMessageHandler("javascript", function (message: string) {
       /*jshint evil: true */
-      eval(message);
+      indirectEval(message);
     });
 
     this.addMessageHandler("console", function (message: Array<unknown>) {

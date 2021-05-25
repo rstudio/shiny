@@ -4,6 +4,7 @@ import { OutputBinding } from ".";
 import { shinyUnbindAll } from "../../shiny/init";
 import { debounce } from "../../time";
 import { escapeHTML } from "../../utils";
+import { indirectEval } from "../../utils/eval";
 
 class DatatableOutputBinding extends OutputBinding {
   find(scope: HTMLElement): JQuery<HTMLElement> {
@@ -63,7 +64,7 @@ class DatatableOutputBinding extends OutputBinding {
     if (data.evalOptions)
       $.each(data.evalOptions, function (i, x) {
         /*jshint evil: true */
-        data.options[x] = eval("(" + data.options[x] + ")");
+        data.options[x] = indirectEval("(" + data.options[x] + ")");
       });
 
     // caseInsensitive searching? default true
@@ -97,7 +98,7 @@ class DatatableOutputBinding extends OutputBinding {
 
     if (typeof data.callback === "string") {
       /*jshint evil: true */
-      const callback = eval("(" + data.callback + ")");
+      const callback = indirectEval("(" + data.callback + ")");
 
       if (typeof callback === "function") callback(oTable);
     }

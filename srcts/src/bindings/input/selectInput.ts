@@ -1,6 +1,7 @@
 import $ from "jquery";
 import { InputBinding } from ".";
 import { $escape, hasOwnProperty, updateLabel } from "../../utils";
+import { indirectEval } from "../../utils/eval";
 
 type SelectHTMLElement = HTMLSelectElement & { nonempty: boolean };
 
@@ -38,7 +39,9 @@ class SelectInputBinding extends InputBinding {
       }
     }
   }
-  getState(el): {
+  getState(
+    el
+  ): {
     label: JQuery<HTMLElement>;
     value: string | number | string[];
     options: Array<{ value: string; label: string }>;
@@ -241,7 +244,7 @@ class SelectInputBinding extends InputBinding {
     if (config.data("eval") instanceof Array)
       $.each(config.data("eval"), function (i, x) {
         /*jshint evil: true*/
-        options[x] = eval("(" + options[x] + ")");
+        options[x] = indirectEval("(" + options[x] + ")");
       });
     let control = $el.selectize(options)[0].selectize;
     // .selectize() does not really update settings; must destroy and rebuild

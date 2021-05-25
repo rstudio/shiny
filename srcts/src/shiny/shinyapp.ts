@@ -349,7 +349,9 @@ class ShinyApp {
         payload.push(blob);
       }
 
-      msg = makeBlob(payload) as unknown as string;
+      const blob = makeBlob(payload) as unknown;
+
+      msg = blob as string;
     }
 
     this.$sendMsg(msg);
@@ -662,8 +664,9 @@ class ShinyApp {
           if ($obj.length > 0) {
             if (!$obj.attr("aria-live")) $obj.attr("aria-live", "polite");
             const el = $obj[0];
-            const evt: ShinyEventUpdateInput =
-              jQuery.Event("shiny:updateinput");
+            const evt: ShinyEventUpdateInput = jQuery.Event(
+              "shiny:updateinput"
+            );
 
             evt.message = message[i].message;
             evt.binding = inputBinding;

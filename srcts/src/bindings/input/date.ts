@@ -35,7 +35,7 @@ function _newDate(date: Date | never): Date | null {
   const d = parseDate(date);
 
   // If invalid date, return null
-  if (isNaN(d as unknown as number)) return null;
+  if (isNaN(d.valueOf())) return null;
 
   return d;
 }
@@ -94,7 +94,7 @@ function _setMin(el: HTMLElement, date: Date): void {
   // If date parsing fails, do nothing
   if (date === null) return;
 
-  if (isNaN(date as unknown as number)) return;
+  if (isNaN(date.valueOf())) return;
   // Workarounds for
   // https://github.com/rstudio/shiny/issues/2335
   const curValue = $(el).bsDatepicker("getUTCDate");
@@ -130,7 +130,7 @@ function _setMax(el: HTMLElement, date: Date): void {
   // If date parsing fails, do nothing
   if (date === null) return;
 
-  if (isNaN(date as unknown as number)) return;
+  if (isNaN(date.valueOf())) return;
 
   // Workaround for same issue as in _setMin.
   const curValue = $(el).bsDatepicker("getUTCDate");
@@ -171,11 +171,13 @@ class DateInputBinding extends InputBinding {
     const date = _newDate(value);
     // If date is invalid, do nothing
 
-    if (isNaN(date as unknown as number)) return;
+    if (isNaN(date.valueOf())) return;
 
     $(el).find("input").bsDatepicker("setUTCDate", date);
   }
-  getState(el: HTMLElement): {
+  getState(
+    el: HTMLElement
+  ): {
     label: string;
     value: string | null;
     valueString: string | number | string[];

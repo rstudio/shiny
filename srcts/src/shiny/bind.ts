@@ -1,6 +1,7 @@
 import $ from "jquery";
-import { InputBinding, inputBindings, outputBindings } from "../bindings";
+import { InputBinding, OutputBinding } from "../bindings";
 import { OutputBindingAdapter } from "../bindings/output_adapter";
+import { BindingRegistry } from "../bindings/registry";
 import { InputRateDecorator, InputValidateDecorator } from "../inputPolicies";
 import {
   initDeferredIframes,
@@ -36,6 +37,8 @@ function valueChangeCallback(inputs, binding, el, allowDeferred) {
 type bindInputsCtx = {
   inputs: InputValidateDecorator;
   inputsRate: InputRateDecorator;
+  inputBindings: BindingRegistry<InputBinding>;
+  outputBindings: BindingRegistry<OutputBinding>;
   sendOutputHiddenState: () => void;
   maybeAddThemeObserver: (el: HTMLElement) => void;
 };
@@ -49,7 +52,7 @@ function bindInputs(
     opts: { immediate: boolean; binding: InputBinding; el: HTMLElement };
   }
 > {
-  const { inputs, inputsRate } = shinyCtx;
+  const { inputs, inputsRate, inputBindings } = shinyCtx;
   const bindings = inputBindings.getBindings();
 
   const inputItems = {};
@@ -118,7 +121,11 @@ function bindInputs(
 }
 
 function bindOutputs(
-  { sendOutputHiddenState, maybeAddThemeObserver }: bindInputsCtx,
+  {
+    sendOutputHiddenState,
+    maybeAddThemeObserver,
+    outputBindings,
+  }: bindInputsCtx,
   scope: bindScope = document.documentElement
 ): void {
   const $scope = $(scope);
@@ -276,4 +283,4 @@ function bindAll(shinyCtx: bindInputsCtx, scope: bindScope): void {
 
 export { unbindAll, bindAll, _bindAll };
 
-export type { bindScope };
+export type { bindScope, bindInputsCtx };

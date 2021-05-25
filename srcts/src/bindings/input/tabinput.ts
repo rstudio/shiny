@@ -1,5 +1,5 @@
 import $ from "jquery";
-import { InputBinding } from ".";
+import { InputBinding } from "./InputBinding";
 import { hasOwnProperty, isBS3 } from "../../utils";
 
 class BootstrapTabInputBinding extends InputBinding {

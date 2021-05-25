@@ -1,8 +1,8 @@
 import $ from "jquery";
 import { triggerFileInputChanged } from "../events/shiny_inputchanged";
 import { $escape } from "../utils";
-import { fileInputBinding } from "../bindings/input";
 import { ShinyApp } from "../shiny/shinyapp";
+import { getFileInputBinding } from "../shiny/init";
 
 // Generic driver class for doing chunk-wise asynchronous processing of a
 // FileList object. Subclass/clone it and override the `on*` functions to
@@ -198,7 +198,7 @@ class FileUploader extends FileProcessor {
     const evt = triggerFileInputChanged(
       this.id,
       fileInfo,
-      fileInputBinding,
+      getFileInputBinding(),
       this.el,
       "shiny.fileupload",
       document

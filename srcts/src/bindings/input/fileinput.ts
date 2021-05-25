@@ -1,5 +1,5 @@
 import $ from "jquery";
-import { InputBinding } from ".";
+import { InputBinding } from "./InputBinding";
 import { FileUploader } from "../../file/FileProcessor";
 import { shinyShinyApp } from "../../shiny/init";
 

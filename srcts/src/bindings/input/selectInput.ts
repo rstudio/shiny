@@ -1,5 +1,5 @@
 import $ from "jquery";
-import { InputBinding } from ".";
+import { InputBinding } from "./InputBinding";
 import { $escape, hasOwnProperty, updateLabel } from "../../utils";
 import { indirectEval } from "../../utils/eval";
 
@@ -39,16 +39,22 @@ class SelectInputBinding extends InputBinding {
       }
     }
   }
-  getState(el): {
+  getState(el: SelectHTMLElement): {
     label: JQuery<HTMLElement>;
     value: string | number | string[];
     options: Array<{ value: string; label: string }>;
   } {
     // Store options in an array of objects, each with with value and label
-    const options = new Array(el.length);
+    const options: Array<{ value: string; label: string }> = new Array(
+      el.length
+    );
 
     for (let i = 0; i < el.length; i++) {
-      options[i] = { value: el[i].value, label: el[i].label };
+      options[i] = {
+        // TODO-barret; Is this a safe assumption?; Are there no Option Groups?
+        value: (el[i] as HTMLOptionElement).value,
+        label: el[i].label,
+      };
     }
 
     return {

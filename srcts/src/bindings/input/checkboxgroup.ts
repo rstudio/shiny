@@ -1,6 +1,6 @@
 import $ from "jquery";
 
-import { InputBinding } from ".";
+import { InputBinding } from "./InputBinding";
 import { $escape, hasOwnProperty, updateLabel } from "../../utils";
 import { CheckedHTMLElement } from "./checkbox";
 

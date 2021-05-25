@@ -1,5 +1,4 @@
 import $ from "jquery";
-import { InputBinding } from ".";
 
 import {
   $escape,

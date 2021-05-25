@@ -1,6 +1,6 @@
 import $ from "jquery";
 
-import { OutputBinding } from ".";
+import { OutputBinding } from "./OutputBinding";
 import { shinyUnbindAll } from "../../shiny/init";
 import { renderContent } from "../../shiny/render";
 

@@ -1,7 +1,7 @@
 import $ from "jquery";
 import { $escape, updateLabel, hasOwnProperty } from "../../utils";
 
-import { InputBinding } from "../input";
+import { InputBinding } from "./InputBinding";
 
 // interface TextHTMLElement extends NameValueHTMLElement {
 //   placeholder: any;

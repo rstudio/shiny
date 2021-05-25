@@ -1,4 +1,4 @@
-import { InputPolicy, priorityType } from ".";
+import { priorityType, InputPolicy } from "./InputPolicy";
 import { hasOwnProperty } from "../utils";
 
 class InputDeferDecorator extends InputPolicy {

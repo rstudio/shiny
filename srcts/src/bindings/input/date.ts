@@ -1,5 +1,5 @@
 import $ from "jquery";
-import { InputBinding } from ".";
+import { InputBinding } from "./InputBinding";
 import {
   formatDateUTC,
   updateLabel,

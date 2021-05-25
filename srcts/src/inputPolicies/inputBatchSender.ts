@@ -1,5 +1,5 @@
 import $ from "jquery";
-import { InputPolicy, priorityType } from ".";
+import { priorityType, InputPolicy } from "./InputPolicy";
 import { ShinyApp } from "../shiny/shinyapp";
 
 // Schedules data to be sent to shinyapp at the next setTimeout(0).

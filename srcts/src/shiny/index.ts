@@ -1,11 +1,6 @@
 import $ from "jquery";
 
-import {
-  inputBindings,
-  InputBinding,
-  outputBindings,
-  OutputBinding,
-} from "../bindings";
+import { InputBinding, OutputBinding } from "../bindings";
 import { resetBrush } from "../imageutils/resetBrush";
 import { $escape, compareVersion } from "../utils";
 import {
@@ -22,16 +17,19 @@ import {
   shinySetInputValue,
   shinyInitializeInputs,
   shinyUnbindAll,
+  setFileInputBinding,
 } from "./init";
 import { HandlerType, ShinyApp } from "./shinyapp";
+import { initInputBindings } from "../bindings/input";
+import { initOutputBindings } from "../bindings/output";
 
 interface ShinyType {
   version: string;
   $escape: typeof $escape;
   compareVersion: typeof compareVersion;
-  inputBindings: typeof inputBindings;
+  inputBindings: ReturnType<typeof initInputBindings>["inputBindings"];
   InputBinding: typeof InputBinding;
-  outputBindings: typeof outputBindings;
+  outputBindings: ReturnType<typeof initOutputBindings>["outputBindings"];
   OutputBinding: typeof OutputBinding;
   resetBrush: typeof resetBrush;
   notifications: {
@@ -69,6 +67,12 @@ function setShiny(Shiny_: ShinyType): void {
   // `process.env.SHINY_VERSION` is overwritten to the Shiny version at build time.
   // During testing, the `Shiny.version` will be `"development"`
   Shiny.version = process.env.SHINY_VERSION || "development";
+
+  const { inputBindings, fileInputBinding } = initInputBindings();
+  const { outputBindings } = initOutputBindings();
+
+  // set variable to be retrieved later
+  setFileInputBinding(fileInputBinding);
 
   Shiny.$escape = $escape;
   Shiny.compareVersion = compareVersion;

@@ -1,5 +1,5 @@
 import $ from "jquery";
-import { InputPolicy, priorityType } from ".";
+import { priorityType, InputPolicy } from "./InputPolicy";
 
 type MaybeInputOpts = {
   priority?: priorityType;

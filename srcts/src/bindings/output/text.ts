@@ -1,5 +1,5 @@
 import $ from "jquery";
-import { OutputBinding } from "../output";
+import { OutputBinding } from "./OutputBinding";
 
 // const textOutputBinding = new OutputBinding();
 

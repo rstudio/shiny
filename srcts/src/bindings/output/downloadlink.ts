@@ -1,6 +1,6 @@
 import $ from "jquery";
 
-import { OutputBinding } from ".";
+import { OutputBinding } from "./OutputBinding";
 
 class DownloadLinkOutputBinding extends OutputBinding {
   find(scope: HTMLElement): JQuery<HTMLElement> {

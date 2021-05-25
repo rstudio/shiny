@@ -1,6 +1,6 @@
 import $ from "jquery";
 import { ShinyType } from ".";
-import { inputBindings } from "../bindings";
+import { FileInputBinding } from "../bindings/input/fileinput";
 import { OutputBindingAdapter } from "../bindings/output_adapter";
 import {
   InputBatchSender,
@@ -20,7 +20,7 @@ import {
   mapValues,
   pixelRatio,
 } from "../utils";
-import { bindAll, bindScope, unbindAll, _bindAll } from "./bind";
+import { bindAll, bindInputsCtx, bindScope, unbindAll, _bindAll } from "./bind";
 import { registerDependency } from "./render";
 import { sendImageSizeFns } from "./sendImageSize";
 import { HandlerType, ShinyApp } from "./shinyapp";
@@ -71,6 +71,15 @@ function shinyAppUnbindOutput(
 
 function getShinyOnCustomMessage(): null | HandlerType {
   return fullShinyObj_.oncustommessage;
+}
+
+let fileInputBinding_: FileInputBinding;
+
+function getFileInputBinding(): FileInputBinding {
+  return fileInputBinding_;
+}
+function setFileInputBinding(fileInputBinding: FileInputBinding): void {
+  fileInputBinding_ = fileInputBinding;
 }
 
 // "init_shiny.js"
@@ -127,18 +136,26 @@ function initShiny(Shiny: ShinyType): void {
     inputsNoResend.forget(name);
   };
 
+  // MUST be called after `setShiny()`
+  const inputBindings = Shiny.inputBindings;
+  const outputBindings = Shiny.outputBindings;
+
+  function shinyBindCtx(): bindInputsCtx {
+    return {
+      inputs,
+      inputsRate,
+      sendOutputHiddenState,
+      maybeAddThemeObserver,
+      inputBindings,
+      outputBindings,
+    };
+  }
+
   Shiny.bindAll = function (scope: bindScope) {
-    bindAll(
-      { inputs, inputsRate, sendOutputHiddenState, maybeAddThemeObserver },
-      scope
-    );
+    bindAll(shinyBindCtx(), scope);
   };
   Shiny.unbindAll = function (scope: bindScope, includeSelf = false) {
-    unbindAll(
-      { inputs, inputsRate, sendOutputHiddenState, maybeAddThemeObserver },
-      scope,
-      includeSelf
-    );
+    unbindAll(shinyBindCtx(), scope, includeSelf);
   };
 
   // Calls .initialize() for all of the input objects in all input bindings,
@@ -185,10 +202,7 @@ function initShiny(Shiny: ShinyType): void {
   // have a reference to the DOM element, which would prevent it from being
   // GC'd.
   const initialValues = mapValues(
-    _bindAll(
-      { inputs, inputsRate, sendOutputHiddenState, maybeAddThemeObserver },
-      document.documentElement
-    ),
+    _bindAll(shinyBindCtx(), document.documentElement),
     (x) => x.value
   );
 
@@ -602,4 +616,6 @@ export {
   shinyAppUnbindOutput,
   getShinyOnCustomMessage,
   setShinyUser,
+  setFileInputBinding,
+  getFileInputBinding,
 };

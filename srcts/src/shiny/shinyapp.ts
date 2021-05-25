@@ -36,8 +36,12 @@ type HandlerType = (
   msg: Record<string, unknown> | Array<unknown> | boolean | string
 ) => void;
 
+type ShinyWebSocket = WebSocket & {
+  allowReconnect?: boolean;
+};
+
 class ShinyApp {
-  $socket = null;
+  $socket: ShinyWebSocket = null;
 
   config: {
     workerId: string;
@@ -100,8 +104,8 @@ class ShinyApp {
     this.$updateConditionals();
   }
 
-  createSocket(): WebSocket {
-    const createSocketFunc: () => WebSocket =
+  createSocket(): ShinyWebSocket {
+    const createSocketFunc: () => ShinyWebSocket =
       fullShinyObj().createSocket ||
       (() => {
         let protocol = "ws:";
@@ -122,7 +126,7 @@ class ShinyApp {
         if (!/\/$/.test(defaultPath)) defaultPath += "/";
         defaultPath += "websocket/";
 
-        const ws = new WebSocket(
+        const ws: ShinyWebSocket = new WebSocket(
           protocol + "//" + window.location.host + defaultPath
         );
 
@@ -746,10 +750,14 @@ class ShinyApp {
     this.addMessageHandler(
       "allowReconnect",
       function (message: true | false | "force") {
-        if (message === true || message === false || message === "force") {
-          this.$allowReconnect = message;
-        } else {
-          throw "Invalid value for allowReconnect: " + message;
+        switch (message) {
+          case true:
+          case false:
+          case "force":
+            this.$allowReconnect = message;
+            break;
+          default:
+            throw "Invalid value for allowReconnect: " + message;
         }
       }
     );

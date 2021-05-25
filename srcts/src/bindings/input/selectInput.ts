@@ -39,9 +39,7 @@ class SelectInputBinding extends InputBinding {
       }
     }
   }
-  getState(
-    el
-  ): {
+  getState(el): {
     label: JQuery<HTMLElement>;
     value: string | number | string[];
     options: Array<{ value: string; label: string }>;

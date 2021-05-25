@@ -665,9 +665,8 @@ class ShinyApp {
           if ($obj.length > 0) {
             if (!$obj.attr("aria-live")) $obj.attr("aria-live", "polite");
             const el = $obj[0];
-            const evt: ShinyEventUpdateInput = jQuery.Event(
-              "shiny:updateinput"
-            );
+            const evt: ShinyEventUpdateInput =
+              jQuery.Event("shiny:updateinput");
 
             evt.message = message[i].message;
             evt.binding = inputBinding;

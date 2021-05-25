@@ -175,9 +175,7 @@ class DateInputBinding extends InputBinding {
 
     $(el).find("input").bsDatepicker("setUTCDate", date);
   }
-  getState(
-    el: HTMLElement
-  ): {
+  getState(el: HTMLElement): {
     label: string;
     value: string | null;
     valueString: string | number | string[];

@@ -69,6 +69,13 @@ jobs:
         shell: Rscript {0}
         run: |
           pak::local_system_requirements(execute = TRUE)
+      
+      # https://stackoverflow.com/a/66568545/591574
+      #> fatal error: 'X11/Intrinsic.h' file not found
+      - name: Install Cairo macOS R devel dependency
+        if: runner.os == 'macOS' && matrix.config.r == 'devel'
+        run: |
+          brew install libxt
 
       # xquartz and cairo are needed for Cairo package.
       # harfbuzz and fribidi are needed for textshaping package.

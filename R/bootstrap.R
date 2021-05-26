@@ -380,8 +380,10 @@ collapseSizes <- function(padding) {
 #'   (useful for viewing on smaller touchscreen device)
 #' @param fluid `TRUE` to use a fluid layout. `FALSE` to use a fixed
 #'   layout.
-#' @param windowTitle The title that should be displayed by the browser window.
-#'   Useful if `title` is not a string.
+#' @param windowTitle the browser window title (as a character string). The
+#'   default value, `NA`, means to use any character strings that appear in
+#'   `title` (if none are found, the host URL of the page is displayed by
+#'   default).
 #' @inheritParams bootstrapPage
 #' @param icon Optional icon to appear on a `navbarMenu` tab.
 #'
@@ -425,7 +427,7 @@ navbarPage <- function(title,
                        collapsible = FALSE,
                        fluid = TRUE,
                        theme = NULL,
-                       windowTitle = title,
+                       windowTitle = NA,
                        lang = NULL) {
   bslib::navbar_page(
     ..., title = title, id = id, selected = selected,

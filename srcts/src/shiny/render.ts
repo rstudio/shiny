@@ -1,4 +1,5 @@
 import $ from "jquery";
+import { stringify } from "querystring";
 import { asArray, hasOwnProperty } from "../utils";
 import { isIE } from "../utils/browser";
 import { bindScope } from "./bind";
@@ -253,8 +254,26 @@ function renderDependency(dep) {
   }
 
   if (dep.script && !restyle) {
-    const scripts = $.map(asArray(dep.script), function (scriptName) {
-      return $("<script>").attr("src", href + "/" + encodeURI(scriptName));
+    const scriptsAttrs = asArray(dep.script);
+    const scripts = $.map(scriptsAttrs, function (x) {
+      const script = document.createElement("script");
+
+      // htmlDependency()'s script arg can be a character vector or a list()
+      if (typeof x === "string") {
+        x = { src: x };
+      }
+
+      // Can not destructure Object.entries into both a `const` and a `let` variable.
+      // eslint-disable-next-line prefer-const
+      for (let [attr, val] of Object.entries(x as Record<string, string>)) {
+        if (attr === "src") {
+          val = href + "/" + encodeURI(val);
+        }
+        // If val isn't truthy (e.g., null), consider it a boolean attribute
+        script.setAttribute(attr, val ? val : "");
+      }
+
+      return script;
     });
 
     $head.append(scripts);

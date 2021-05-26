@@ -427,18 +427,15 @@ navbarPage <- function(title,
                        theme = NULL,
                        windowTitle = title,
                        lang = NULL) {
-  bootstrapPage(
-    title = windowTitle,
+  bslib::navbar_page(
+    ..., title = title, id = id, selected = selected,
+    position = match.arg(position),
+    header = header, footer = footer,
+    inverse = inverse, collapsible = collapsible,
+    fluid = fluid,
     theme = theme,
-    lang = lang,
-    # Splice in the tagList() so internal structure doesn't change
-    !!!bslib::navs_bar(
-      ..., title = title, id = id, selected = selected,
-      position = match.arg(position),
-      header = header, footer = footer,
-      inverse = inverse, collapsible = collapsible,
-      fluid = fluid
-    )
+    window_title = windowTitle,
+    lang = lang
   )
 }
 

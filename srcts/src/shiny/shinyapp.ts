@@ -40,6 +40,51 @@ type ShinyWebSocket = WebSocket & {
   allowReconnect?: boolean;
 };
 
+//// 2021/03 - TypeScript conversion note:
+// These four variables were moved from being internally defined to being defined globally within the file.
+// Before the TypeScript conversion, the values where attached to `window.Shiny.addCustomMessageHandler()`.
+// This prevents multiple instances of `ShinyApp` from existing independently. :-/
+// This behavior is also exhibited on `Shiny.progressHandlers`, however there are no instances of use on GitHub. So moving the assignment to within `initShiny()`.
+
+// Records insertion order of handlers. Maps number to name. This is so
+// we can dispatch messages to handlers in the order that handlers were
+// added.
+const messageHandlerOrder = [];
+// Keep track of handlers by name. Maps name to handler function.
+const messageHandlers = {};
+
+// Two categories of message handlers: those that are from Shiny, and those
+// that are added by the user. The Shiny ones handle messages in
+// msgObj.values, msgObj.errors, and so on. The user ones handle messages
+// in msgObj.custom.foo and msgObj.custom.bar.
+const customMessageHandlerOrder = [];
+const customMessageHandlers = {};
+
+// Adds custom message handler - this one is exposed to the user
+function addCustomMessageHandler(type: string, handler: HandlerType): void {
+  // Remove any previously defined handlers so that only the most recent one
+  // will be called
+  if (customMessageHandlers[type]) {
+    const typeIdx = customMessageHandlerOrder.indexOf(type);
+
+    if (typeIdx !== -1) {
+      customMessageHandlerOrder.splice(typeIdx, 1);
+      delete customMessageHandlers[type];
+    }
+  }
+  if (typeof handler !== "function") {
+    throw "handler must be a function.";
+  }
+  if (handler.length !== 1) {
+    throw "handler must be a function that takes one argument.";
+  }
+
+  customMessageHandlerOrder.push(type);
+  customMessageHandlers[type] = handler;
+}
+
+//// End message handler variables
+
 class ShinyApp {
   $socket: ShinyWebSocket = null;
 
@@ -518,23 +563,9 @@ class ShinyApp {
 
   // Message handler management functions =================================
 
-  // Records insertion order of handlers. Maps number to name. This is so
-  // we can dispatch messages to handlers in the order that handlers were
-  // added.
-  private messageHandlerOrder = [];
-  // Keep track of handlers by name. Maps name to handler function.
-  private messageHandlers = {};
-
-  // Two categories of message handlers: those that are from Shiny, and those
-  // that are added by the user. The Shiny ones handle messages in
-  // msgObj.values, msgObj.errors, and so on. The user ones handle messages
-  // in msgObj.custom.foo and msgObj.custom.bar.
-  private customMessageHandlerOrder = [];
-  private customMessageHandlers = {};
-
   // Adds Shiny (internal) message handler
   private addMessageHandler(type: string, handler: HandlerType) {
-    if (this.messageHandlers[type]) {
+    if (messageHandlers[type]) {
       throw 'handler for message of type "' + type + '" already added.';
     }
     if (typeof handler !== "function") {
@@ -543,31 +574,8 @@ class ShinyApp {
     if (handler.length !== 1) {
       throw "handler must be a function that takes one argument.";
     }
-    this.messageHandlerOrder.push(type);
-    this.messageHandlers[type] = handler;
-  }
-
-  // Adds custom message handler - this one is exposed to the user
-  addCustomMessageHandler(type: string, handler: HandlerType): void {
-    // Remove any previously defined handlers so that only the most recent one
-    // will be called
-    if (this.customMessageHandlers[type]) {
-      const typeIdx = this.customMessageHandlerOrder.indexOf(type);
-
-      if (typeIdx !== -1) {
-        this.customMessageHandlerOrder.splice(typeIdx, 1);
-        delete this.customMessageHandlers[type];
-      }
-    }
-    if (typeof handler !== "function") {
-      throw "handler must be a function.";
-    }
-    if (handler.length !== 1) {
-      throw "handler must be a function that takes one argument.";
-    }
-
-    this.customMessageHandlerOrder.push(type);
-    this.customMessageHandlers[type] = handler;
+    messageHandlerOrder.push(type);
+    messageHandlers[type] = handler;
   }
 
   // // Added in shiny init method
@@ -603,8 +611,8 @@ class ShinyApp {
     // Send msgObj.foo and msgObj.bar to appropriate handlers
     this._sendMessagesToHandlers(
       evt.message,
-      this.messageHandlers,
-      this.messageHandlerOrder
+      messageHandlers,
+      messageHandlerOrder
     );
 
     this.$updateConditionals();
@@ -772,8 +780,8 @@ class ShinyApp {
       // Send messages.foo and messages.bar to appropriate handlers
       this._sendMessagesToHandlers(
         message,
-        this.customMessageHandlers,
-        this.customMessageHandlerOrder
+        customMessageHandlers,
+        customMessageHandlerOrder
       );
     });
 
@@ -820,8 +828,10 @@ class ShinyApp {
       }
     );
 
-    this.addMessageHandler("reload", function () {
+    this.addMessageHandler("reload", function (message: never) {
       window.location.reload();
+      return;
+      message;
     });
 
     this.addMessageHandler(
@@ -1451,7 +1461,8 @@ class ShinyApp {
     },
   };
 
-  // Added in shiny ini
+  //// 2021/03: TypeScript Conversion
+  // Added in `./shiny/init.ts` as there are no instances of progressHandlers being used right away on GitHub
   // Shiny.progressHandlers = this.progressHandlers;
 
   // Returns a URL which can be queried to get values from inside the server
@@ -1476,5 +1487,5 @@ class ShinyApp {
   }
 }
 
-export { ShinyApp };
+export { ShinyApp, addCustomMessageHandler };
 export type { HandlerType };

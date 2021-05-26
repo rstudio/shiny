@@ -19,7 +19,7 @@ import {
   shinyUnbindAll,
   setFileInputBinding,
 } from "./init";
-import { HandlerType, ShinyApp } from "./shinyapp";
+import { addCustomMessageHandler, HandlerType, ShinyApp } from "./shinyapp";
 import { initInputBindings } from "../bindings/input";
 import { initOutputBindings } from "../bindings/output";
 
@@ -44,9 +44,9 @@ interface ShinyType {
   renderContent: typeof renderContent;
   renderHtml: typeof renderHtml;
   user: string;
-  shinyapp?: ShinyApp;
   progressHandlers?: ShinyApp["progressHandlers"];
-  addCustomMessageHandler?: ShinyApp["addCustomMessageHandler"];
+  addCustomMessageHandler: typeof addCustomMessageHandler;
+  shinyapp?: ShinyApp;
   setInputValue?: typeof shinySetInputValue;
   onInputChange?: typeof shinySetInputValue;
   forgetLastInputValue?: typeof shinyForgetLastInputValue;
@@ -82,7 +82,7 @@ function setShiny(Shiny_: ShinyType): void {
   Shiny.notifications = { show: showNotification, remove: removeNotification };
   Shiny.modal = { show: showModal, remove: removeModal };
 
-  // Shiny.addCustomMessageHandler;
+  Shiny.addCustomMessageHandler = addCustomMessageHandler;
   Shiny.showReconnectDialog = showReconnectDialog;
   Shiny.hideReconnectDialog = hideReconnectDialog;
   Shiny.renderDependencies = renderDependencies;

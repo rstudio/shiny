@@ -32,6 +32,11 @@ function fullShinyObj(): ShinyType {
   return fullShinyObj_;
 }
 
+//// 2021/03: TypeScript Conversion note
+// These methods are here due to the delayed initialization of `Shiny.shinyapp`. I
+// In theory, there could be multiple instances of `shinyapp`. In practice (and implementation), this is not possible and is a 1:1 coupling with `window.Shiny`.
+// To avoid calls to a large Shiny object, helper methods are created to wrap around calling the fully instantiated window.Shiny value.
+// TODO-barret; Why is `initShiny()` delayed? Is this to allow users to shim in some code? Why can't it be defined in the init method (maybe w/ an extra trigger call?)
 function shinySetInputValue(
   name: string,
   value: unknown,
@@ -88,8 +93,6 @@ function initShiny(Shiny: ShinyType): void {
   const shinyapp = (Shiny.shinyapp = new ShinyApp());
 
   Shiny.progressHandlers = shinyapp.progressHandlers;
-
-  Shiny.addCustomMessageHandler = shinyapp.addCustomMessageHandler;
 
   const inputBatchSender = new InputBatchSender(shinyapp);
   const inputsNoResend = new InputNoResendDecorator(inputBatchSender);

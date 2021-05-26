@@ -94,9 +94,9 @@ bootstrapLib <- function(theme = NULL) {
       setCurrentTheme(theme)
       # For refreshing Bootstrap CSS when session$setCurrentTheme() happens
       if (isRunning()) registerThemeDependency(bs_theme_deps)
-      bslib::bs_theme_dependencies(theme)
+      attachDependencies(x, bslib::bs_theme_dependencies(theme))
     },
-    .postRenderHook = function(x) {
+    .postRenderHook = function() {
       if (!isRunning()) setCurrentTheme(oldTheme)
       NULL
     }

@@ -1,5 +1,5 @@
 import $ from "jquery";
-import { shinyUnbindAll } from "./init";
+import { shinyUnbindAll } from "./initedMethods";
 import { renderContent } from "./render";
 
 // Show a modal dialog. This is meant to handle two types of cases: one is

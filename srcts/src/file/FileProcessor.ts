@@ -2,7 +2,7 @@ import $ from "jquery";
 import { triggerFileInputChanged } from "../events/shiny_inputchanged";
 import { $escape } from "../utils";
 import { ShinyApp } from "../shiny/shinyapp";
-import { getFileInputBinding } from "../shiny/init";
+import { getFileInputBinding } from "../shiny/initedMethods";
 
 // Generic driver class for doing chunk-wise asynchronous processing of a
 // FileList object. Subclass/clone it and override the `on*` functions to

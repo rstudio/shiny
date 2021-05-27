@@ -1,9 +1,12 @@
 import $ from "jquery";
-import { stringify } from "querystring";
 import { asArray, hasOwnProperty } from "../utils";
 import { isIE } from "../utils/browser";
 import { bindScope } from "./bind";
-import { shinyBindAll, shinyInitializeInputs, shinyUnbindAll } from "./init";
+import {
+  shinyBindAll,
+  shinyInitializeInputs,
+  shinyUnbindAll,
+} from "./initedMethods";
 import { sendImageSizeFns } from "./sendImageSize";
 
 import { renderHtml as singletonsRenderHtml } from "./singletons";

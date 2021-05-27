@@ -10,15 +10,15 @@ import {
 import { show as showModal, remove as removeModal } from "./modal";
 import { showReconnectDialog, hideReconnectDialog } from "./reconnectDialog";
 import { renderContent, renderDependencies, renderHtml } from "./render";
+import { initShiny } from "./init";
 import {
-  initShiny,
   shinyBindAll,
   shinyForgetLastInputValue,
   shinySetInputValue,
   shinyInitializeInputs,
   shinyUnbindAll,
   setFileInputBinding,
-} from "./init";
+} from "./initedMethods";
 import { addCustomMessageHandler, HandlerType, ShinyApp } from "./shinyapp";
 import { initInputBindings } from "../bindings/input";
 import { initOutputBindings } from "../bindings/output";

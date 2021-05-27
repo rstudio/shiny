@@ -1,13 +1,12 @@
 import $ from "jquery";
-import { InputBinding, OutputBinding } from "../bindings";
+import type { InputBinding, OutputBinding } from "../bindings";
 import { OutputBindingAdapter } from "../bindings/output_adapter";
-import { BindingRegistry } from "../bindings/registry";
-import { InputRateDecorator, InputValidateDecorator } from "../inputPolicies";
-import {
-  initDeferredIframes,
-  shinyAppBindOutput,
-  shinyAppUnbindOutput,
-} from "./init";
+import type { BindingRegistry } from "../bindings/registry";
+import type {
+  InputRateDecorator,
+  InputValidateDecorator,
+} from "../inputPolicies";
+import { shinyAppBindOutput, shinyAppUnbindOutput } from "./initedMethods";
 import { sendImageSizeFns } from "./sendImageSize";
 
 const boundInputs = {};
@@ -41,6 +40,7 @@ type bindInputsCtx = {
   outputBindings: BindingRegistry<OutputBinding>;
   sendOutputHiddenState: () => void;
   maybeAddThemeObserver: (el: HTMLElement) => void;
+  initDeferredIframes: () => void;
 };
 function bindInputs(
   shinyCtx: bindInputsCtx,
@@ -278,7 +278,7 @@ function bindAll(shinyCtx: bindInputsCtx, scope: bindScope): void {
   // is a convenient place to hang it. bindAll will be called anytime new HTML
   // appears that might contain inputs/outputs; it's reasonable to assume that
   // any such HTML may contain iframes as well.
-  initDeferredIframes();
+  shinyCtx.initDeferredIframes();
 }
 
 export { unbindAll, bindAll, _bindAll };

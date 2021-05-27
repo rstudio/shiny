@@ -1,7 +1,5 @@
 import $ from "jquery";
 import { ShinyType } from ".";
-import { FileInputBinding } from "../bindings/input/fileinput";
-import { OutputBindingAdapter } from "../bindings/output_adapter";
 import {
   InputBatchSender,
   InputDeferDecorator,
@@ -21,75 +19,15 @@ import {
   pixelRatio,
 } from "../utils";
 import { bindAll, bindInputsCtx, bindScope, unbindAll, _bindAll } from "./bind";
+import { setShinyObj } from "./initedMethods";
 import { registerDependency } from "./render";
 import { sendImageSizeFns } from "./sendImageSize";
-import { HandlerType, ShinyApp } from "./shinyapp";
+import { ShinyApp } from "./shinyapp";
 import { registerNames as singletonsRegisterNames } from "./singletons";
-
-let fullShinyObj_: ShinyType = null;
-
-function fullShinyObj(): ShinyType {
-  return fullShinyObj_;
-}
-
-//// 2021/03: TypeScript Conversion note
-// These methods are here due to the delayed initialization of `Shiny.shinyapp`. I
-// In theory, there could be multiple instances of `shinyapp`. In practice (and implementation), this is not possible and is a 1:1 coupling with `window.Shiny`.
-// To avoid calls to a large Shiny object, helper methods are created to wrap around calling the fully instantiated window.Shiny value.
-// TODO-barret; Why is `initShiny()` delayed? Is this to allow users to shim in some code? Why can't it be defined in the init method (maybe w/ an extra trigger call?)
-function shinySetInputValue(
-  name: string,
-  value: unknown,
-  opts?: { priority?: priorityType }
-): void {
-  fullShinyObj_.setInputValue(name, value, opts);
-}
-function shinyShinyApp(): ShinyApp {
-  return fullShinyObj_.shinyapp;
-}
-function setShinyUser(user: string): void {
-  fullShinyObj_.user = user;
-}
-function shinyForgetLastInputValue(name: string): void {
-  fullShinyObj_.forgetLastInputValue(name);
-}
-function shinyBindAll(scope: bindScope): void {
-  fullShinyObj_.bindAll(scope);
-}
-function shinyUnbindAll(scope: bindScope, includeSelf = false): void {
-  fullShinyObj_.unbindAll(scope, includeSelf);
-}
-function shinyInitializeInputs(scope: bindScope): void {
-  fullShinyObj_.initializeInputs(scope);
-}
-
-function shinyAppBindOutput(id: string, binding: OutputBindingAdapter): void {
-  fullShinyObj_.shinyapp.bindOutput(id, binding);
-}
-
-function shinyAppUnbindOutput(
-  id: string,
-  binding: OutputBindingAdapter
-): boolean {
-  return fullShinyObj_.shinyapp.unbindOutput(id, binding);
-}
-
-function getShinyOnCustomMessage(): null | HandlerType {
-  return fullShinyObj_.oncustommessage;
-}
-
-let fileInputBinding_: FileInputBinding;
-
-function getFileInputBinding(): FileInputBinding {
-  return fileInputBinding_;
-}
-function setFileInputBinding(fileInputBinding: FileInputBinding): void {
-  fileInputBinding_ = fileInputBinding;
-}
 
 // "init_shiny.js"
 function initShiny(Shiny: ShinyType): void {
-  fullShinyObj_ = Shiny;
+  setShinyObj(Shiny);
   const shinyapp = (Shiny.shinyapp = new ShinyApp());
 
   Shiny.progressHandlers = shinyapp.progressHandlers;
@@ -151,6 +89,7 @@ function initShiny(Shiny: ShinyType): void {
       maybeAddThemeObserver,
       inputBindings,
       outputBindings,
+      initDeferredIframes,
     };
   }
 
@@ -605,20 +544,4 @@ function initDeferredIframes(): void {
   });
 }
 
-export {
-  initShiny,
-  initDeferredIframes,
-  fullShinyObj,
-  shinyShinyApp,
-  shinySetInputValue,
-  shinyForgetLastInputValue,
-  shinyBindAll,
-  shinyUnbindAll,
-  shinyInitializeInputs,
-  shinyAppBindOutput,
-  shinyAppUnbindOutput,
-  getShinyOnCustomMessage,
-  setShinyUser,
-  setFileInputBinding,
-  getFileInputBinding,
-};
+export { initShiny };

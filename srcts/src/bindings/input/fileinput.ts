@@ -1,7 +1,7 @@
 import $ from "jquery";
 import { InputBinding } from "./InputBinding";
 import { FileUploader } from "../../file/FileProcessor";
-import { shinyShinyApp } from "../../shiny/init";
+import { shinyShinyApp } from "../../shiny/initedMethods";
 
 // NOTE On Safari, at least version 10.1.2, *if the developer console is open*,
 // setting the input's value will behave strangely because of a Safari bug. The

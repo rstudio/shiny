@@ -1,7 +1,7 @@
 import $ from "jquery";
 
 import { OutputBinding } from "./OutputBinding";
-import { shinyUnbindAll } from "../../shiny/init";
+import { shinyUnbindAll } from "../../shiny/initedMethods";
 import { debounce } from "../../time";
 import { escapeHTML } from "../../utils";
 import { indirectEval } from "../../utils/eval";

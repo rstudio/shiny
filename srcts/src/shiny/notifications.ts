@@ -1,7 +1,7 @@
 import $ from "jquery";
 
 import { $escape, randomId } from "../utils";
-import { shinyUnbindAll } from "./init";
+import { shinyUnbindAll } from "./initedMethods";
 import { renderContent } from "./render";
 
 // Milliseconds to fade in or out

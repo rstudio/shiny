@@ -1,7 +1,7 @@
 import $ from "jquery";
 import { createBrush } from ".";
 import { imageOutputBinding } from "../bindings/output/image";
-import { shinySetInputValue } from "../shiny/init";
+import { shinySetInputValue } from "../shiny/initedMethods";
 import { Debouncer, Throttler } from "../time";
 import { BrushOptsType } from "./createBrush";
 import {

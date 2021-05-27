@@ -1,5 +1,5 @@
 import { imageOutputBinding } from "../bindings/output/image";
-import { shinySetInputValue } from "../shiny/init";
+import { shinySetInputValue } from "../shiny/initedMethods";
 
 function resetBrush(brushId: string): void {
   shinySetInputValue(brushId, null);

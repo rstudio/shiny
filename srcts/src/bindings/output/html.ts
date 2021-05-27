@@ -1,7 +1,7 @@
 import $ from "jquery";
 
 import { OutputBinding } from "./OutputBinding";
-import { shinyUnbindAll } from "../../shiny/init";
+import { shinyUnbindAll } from "../../shiny/initedMethods";
 import { renderContent } from "../../shiny/render";
 
 class HtmlOutputBinding extends OutputBinding {

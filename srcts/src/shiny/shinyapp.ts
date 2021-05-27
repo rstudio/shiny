@@ -7,12 +7,12 @@ import {
   scopeExprToFunc,
 } from "../utils";
 import {
-  fullShinyObj,
+  getShinyCreateWebsocket,
   getShinyOnCustomMessage,
   setShinyUser,
   shinyForgetLastInputValue,
   shinyUnbindAll,
-} from "./init";
+} from "./initedMethods";
 import { isQt } from "../utils/browser";
 import {
   show as showNotification,
@@ -23,12 +23,12 @@ import { renderContent, renderHtml, RenderWhereType } from "./render";
 import { hideReconnectDialog, showReconnectDialog } from "./reconnectDialog";
 import { resetBrush } from "../imageutils/resetBrush";
 import { OutputBindingAdapter } from "../bindings/output_adapter";
-import {
+import type {
   ShinyEventError,
   ShinyEventMessage,
   ShinyEventValue,
   ShinyEventUpdateInput,
-} from "../events/shiny_inputchanged";
+} from "../events/shinyEvents";
 import { InputBinding } from "../bindings";
 import { indirectEval } from "../utils/eval";
 
@@ -151,7 +151,7 @@ class ShinyApp {
 
   createSocket(): ShinyWebSocket {
     const createSocketFunc: () => ShinyWebSocket =
-      fullShinyObj().createSocket ||
+      getShinyCreateWebsocket() ||
       (() => {
         let protocol = "ws:";
 

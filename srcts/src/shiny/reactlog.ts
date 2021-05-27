@@ -1,5 +1,5 @@
 import $ from "jquery";
-import { shinyShinyApp } from "./init";
+import { shinyShinyApp } from "./initedMethods";
 import { show as showNotification } from "./notifications";
 
 function initReactlog(): void {

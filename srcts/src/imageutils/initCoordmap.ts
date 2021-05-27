@@ -1,9 +1,10 @@
 import $ from "jquery";
-import { shinySetInputValue } from "../shiny/init";
+import { shinySetInputValue } from "../shiny/initedMethods";
 import { mapValues } from "../utils";
 import {
   BoundsType,
   CoordmapType,
+  Coords,
   OffsetCssType,
   OffsetImgType,
   OffsetType,

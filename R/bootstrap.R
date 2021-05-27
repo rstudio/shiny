@@ -82,10 +82,15 @@ getLang <- function(ui) {
 #' @inheritParams bootstrapPage
 #' @export
 bootstrapLib <- function(theme = NULL) {
-  # To support static rendering of version dependent markup (e.g.,
-  # tabsetPanel()), we setCurrentTheme() at the start of the render (since
-  # bootstrapLib() comes first in bootstrapPage()), and cleanup afterwards if
-  # shiny isn't running (in that case, since setCurrentTheme() uses
+  # In the non-bslib case, return static HTML dependencies
+  if (!is_bs_theme(theme)) {
+    return(bootstrapDependency(theme))
+  }
+  # To support static rendering of Bootstrap version dependent markup (e.g.,
+  # tabsetPanel()), setCurrentTheme() at the start of the render (since
+  # bootstrapLib() comes first in bootstrapPage(), all other UI should then know
+  # what version of Bootstrap is being used). Then restore state after render as
+  # long as shiny isn't running (in that case, since setCurrentTheme() uses
   # shinyOptions(), state will be automatically be restored when the app exits)
   oldTheme <- NULL
   tagList(

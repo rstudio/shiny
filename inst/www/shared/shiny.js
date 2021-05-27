@@ -750,53 +750,128 @@
     } : $parseInt;
   });
 
-  // node_modules/core-js/internals/a-function.js
-  var require_a_function = __commonJS(function(exports, module) {
-    module.exports = function(it) {
-      if (typeof it != "function") {
-        throw TypeError(String(it) + " is not a function");
-      }
-      return it;
+  // node_modules/core-js/internals/regexp-flags.js
+  var require_regexp_flags = __commonJS(function(exports, module) {
+    "use strict";
+    var anObject10 = require_an_object();
+    module.exports = function() {
+      var that = anObject10(this);
+      var result = "";
+      if (that.global)
+        result += "g";
+      if (that.ignoreCase)
+        result += "i";
+      if (that.multiline)
+        result += "m";
+      if (that.dotAll)
+        result += "s";
+      if (that.unicode)
+        result += "u";
+      if (that.sticky)
+        result += "y";
+      return result;
     };
   });
 
-  // node_modules/core-js/internals/function-bind-context.js
-  var require_function_bind_context = __commonJS(function(exports, module) {
-    var aFunction2 = require_a_function();
-    module.exports = function(fn, that, length) {
-      aFunction2(fn);
-      if (that === void 0)
-        return fn;
-      switch (length) {
-        case 0:
-          return function() {
-            return fn.call(that);
-          };
-        case 1:
-          return function(a) {
-            return fn.call(that, a);
-          };
-        case 2:
-          return function(a, b) {
-            return fn.call(that, a, b);
-          };
-        case 3:
-          return function(a, b, c) {
-            return fn.call(that, a, b, c);
-          };
-      }
-      return function() {
-        return fn.apply(that, arguments);
+  // node_modules/core-js/internals/regexp-sticky-helpers.js
+  var require_regexp_sticky_helpers = __commonJS(function(exports) {
+    "use strict";
+    var fails11 = require_fails();
+    function RE(s, f) {
+      return RegExp(s, f);
+    }
+    exports.UNSUPPORTED_Y = fails11(function() {
+      var re = RE("a", "y");
+      re.lastIndex = 2;
+      return re.exec("abcd") != null;
+    });
+    exports.BROKEN_CARET = fails11(function() {
+      var re = RE("^r", "gy");
+      re.lastIndex = 2;
+      return re.exec("str") != null;
+    });
+  });
+
+  // node_modules/core-js/internals/regexp-exec.js
+  var require_regexp_exec = __commonJS(function(exports, module) {
+    "use strict";
+    var regexpFlags = require_regexp_flags();
+    var stickyHelpers2 = require_regexp_sticky_helpers();
+    var shared2 = require_shared();
+    var nativeExec = RegExp.prototype.exec;
+    var nativeReplace = shared2("native-string-replace", String.prototype.replace);
+    var patchedExec = nativeExec;
+    var UPDATES_LAST_INDEX_WRONG = function() {
+      var re1 = /a/;
+      var re2 = /b*/g;
+      nativeExec.call(re1, "a");
+      nativeExec.call(re2, "a");
+      return re1.lastIndex !== 0 || re2.lastIndex !== 0;
+    }();
+    var UNSUPPORTED_Y2 = stickyHelpers2.UNSUPPORTED_Y || stickyHelpers2.BROKEN_CARET;
+    var NPCG_INCLUDED = /()??/.exec("")[1] !== void 0;
+    var PATCH = UPDATES_LAST_INDEX_WRONG || NPCG_INCLUDED || UNSUPPORTED_Y2;
+    if (PATCH) {
+      patchedExec = function exec(str) {
+        var re = this;
+        var lastIndex, reCopy, match, i;
+        var sticky = UNSUPPORTED_Y2 && re.sticky;
+        var flags2 = regexpFlags.call(re);
+        var source = re.source;
+        var charsAdded = 0;
+        var strCopy = str;
+        if (sticky) {
+          flags2 = flags2.replace("y", "");
+          if (flags2.indexOf("g") === -1) {
+            flags2 += "g";
+          }
+          strCopy = String(str).slice(re.lastIndex);
+          if (re.lastIndex > 0 && (!re.multiline || re.multiline && str[re.lastIndex - 1] !== "\n")) {
+            source = "(?: " + source + ")";
+            strCopy = " " + strCopy;
+            charsAdded++;
+          }
+          reCopy = new RegExp("^(?:" + source + ")", flags2);
+        }
+        if (NPCG_INCLUDED) {
+          reCopy = new RegExp("^" + source + "$(?!\\s)", flags2);
+        }
+        if (UPDATES_LAST_INDEX_WRONG)
+          lastIndex = re.lastIndex;
+        match = nativeExec.call(sticky ? reCopy : re, strCopy);
+        if (sticky) {
+          if (match) {
+            match.input = match.input.slice(charsAdded);
+            match[0] = match[0].slice(charsAdded);
+            match.index = re.lastIndex;
+            re.lastIndex += match[0].length;
+          } else
+            re.lastIndex = 0;
+        } else if (UPDATES_LAST_INDEX_WRONG && match) {
+          re.lastIndex = re.global ? match.index + match[0].length : lastIndex;
+        }
+        if (NPCG_INCLUDED && match && match.length > 1) {
+          nativeReplace.call(match[0], reCopy, function() {
+            for (i = 1; i < arguments.length - 2; i++) {
+              if (arguments[i] === void 0)
+                match[i] = void 0;
+            }
+          });
+        }
+        return match;
       };
-    };
+    }
+    module.exports = patchedExec;
   });
 
-  // node_modules/core-js/internals/is-array.js
-  var require_is_array = __commonJS(function(exports, module) {
-    var classof2 = require_classof_raw();
-    module.exports = Array.isArray || function isArray4(arg) {
-      return classof2(arg) == "Array";
-    };
+  // node_modules/core-js/modules/es.regexp.exec.js
+  var require_es_regexp_exec = __commonJS(function() {
+    "use strict";
+    var $72 = require_export();
+    var exec = require_regexp_exec();
+    $72({target: "RegExp", proto: true, forced: /./.exec !== exec}, {
+      exec: exec
+    });
   });
 
   // node_modules/core-js/internals/engine-user-agent.js
@@ -866,6 +941,289 @@
     };
   });
 
+  // node_modules/core-js/internals/fix-regexp-well-known-symbol-logic.js
+  var require_fix_regexp_well_known_symbol_logic = __commonJS(function(exports, module) {
+    "use strict";
+    require_es_regexp_exec();
+    var redefine5 = require_redefine();
+    var regexpExec2 = require_regexp_exec();
+    var fails11 = require_fails();
+    var wellKnownSymbol5 = require_well_known_symbol();
+    var createNonEnumerableProperty4 = require_create_non_enumerable_property();
+    var SPECIES2 = wellKnownSymbol5("species");
+    var RegExpPrototype2 = RegExp.prototype;
+    var REPLACE_SUPPORTS_NAMED_GROUPS = !fails11(function() {
+      var re = /./;
+      re.exec = function() {
+        var result = [];
+        result.groups = {a: "7"};
+        return result;
+      };
+      return "".replace(re, "$<a>") !== "7";
+    });
+    var REPLACE_KEEPS_$0 = function() {
+      return "a".replace(/./, "$0") === "$0";
+    }();
+    var REPLACE = wellKnownSymbol5("replace");
+    var REGEXP_REPLACE_SUBSTITUTES_UNDEFINED_CAPTURE = function() {
+      if (/./[REPLACE]) {
+        return /./[REPLACE]("a", "$0") === "";
+      }
+      return false;
+    }();
+    var SPLIT_WORKS_WITH_OVERWRITTEN_EXEC = !fails11(function() {
+      var re = /(?:)/;
+      var originalExec = re.exec;
+      re.exec = function() {
+        return originalExec.apply(this, arguments);
+      };
+      var result = "ab".split(re);
+      return result.length !== 2 || result[0] !== "a" || result[1] !== "b";
+    });
+    module.exports = function(KEY, length, exec, sham) {
+      var SYMBOL2 = wellKnownSymbol5(KEY);
+      var DELEGATES_TO_SYMBOL = !fails11(function() {
+        var O = {};
+        O[SYMBOL2] = function() {
+          return 7;
+        };
+        return ""[KEY](O) != 7;
+      });
+      var DELEGATES_TO_EXEC = DELEGATES_TO_SYMBOL && !fails11(function() {
+        var execCalled = false;
+        var re = /a/;
+        if (KEY === "split") {
+          re = {};
+          re.constructor = {};
+          re.constructor[SPECIES2] = function() {
+            return re;
+          };
+          re.flags = "";
+          re[SYMBOL2] = /./[SYMBOL2];
+        }
+        re.exec = function() {
+          execCalled = true;
+          return null;
+        };
+        re[SYMBOL2]("");
+        return !execCalled;
+      });
+      if (!DELEGATES_TO_SYMBOL || !DELEGATES_TO_EXEC || KEY === "replace" && !(REPLACE_SUPPORTS_NAMED_GROUPS && REPLACE_KEEPS_$0 && !REGEXP_REPLACE_SUBSTITUTES_UNDEFINED_CAPTURE) || KEY === "split" && !SPLIT_WORKS_WITH_OVERWRITTEN_EXEC) {
+        var nativeRegExpMethod = /./[SYMBOL2];
+        var methods = exec(SYMBOL2, ""[KEY], function(nativeMethod, regexp, str, arg2, forceStringMethod) {
+          var $exec = regexp.exec;
+          if ($exec === regexpExec2 || $exec === RegExpPrototype2.exec) {
+            if (DELEGATES_TO_SYMBOL && !forceStringMethod) {
+              return {done: true, value: nativeRegExpMethod.call(regexp, str, arg2)};
+            }
+            return {done: true, value: nativeMethod.call(str, regexp, arg2)};
+          }
+          return {done: false};
+        }, {
+          REPLACE_KEEPS_$0: REPLACE_KEEPS_$0,
+          REGEXP_REPLACE_SUBSTITUTES_UNDEFINED_CAPTURE: REGEXP_REPLACE_SUBSTITUTES_UNDEFINED_CAPTURE
+        });
+        var stringMethod = methods[0];
+        var regexMethod = methods[1];
+        redefine5(String.prototype, KEY, stringMethod);
+        redefine5(RegExpPrototype2, SYMBOL2, length == 2 ? function(string, arg) {
+          return regexMethod.call(string, this, arg);
+        } : function(string) {
+          return regexMethod.call(string, this);
+        });
+      }
+      if (sham)
+        createNonEnumerableProperty4(RegExpPrototype2[SYMBOL2], "sham", true);
+    };
+  });
+
+  // node_modules/core-js/internals/string-multibyte.js
+  var require_string_multibyte = __commonJS(function(exports, module) {
+    var toInteger3 = require_to_integer();
+    var requireObjectCoercible5 = require_require_object_coercible();
+    var createMethod = function(CONVERT_TO_STRING) {
+      return function($this, pos) {
+        var S = String(requireObjectCoercible5($this));
+        var position = toInteger3(pos);
+        var size = S.length;
+        var first, second;
+        if (position < 0 || position >= size)
+          return CONVERT_TO_STRING ? "" : void 0;
+        first = S.charCodeAt(position);
+        return first < 55296 || first > 56319 || position + 1 === size || (second = S.charCodeAt(position + 1)) < 56320 || second > 57343 ? CONVERT_TO_STRING ? S.charAt(position) : first : CONVERT_TO_STRING ? S.slice(position, position + 2) : (first - 55296 << 10) + (second - 56320) + 65536;
+      };
+    };
+    module.exports = {
+      codeAt: createMethod(false),
+      charAt: createMethod(true)
+    };
+  });
+
+  // node_modules/core-js/internals/advance-string-index.js
+  var require_advance_string_index = __commonJS(function(exports, module) {
+    "use strict";
+    var charAt2 = require_string_multibyte().charAt;
+    module.exports = function(S, index, unicode) {
+      return index + (unicode ? charAt2(S, index).length : 1);
+    };
+  });
+
+  // node_modules/core-js/internals/get-substitution.js
+  var require_get_substitution = __commonJS(function(exports, module) {
+    var toObject6 = require_to_object();
+    var floor = Math.floor;
+    var replace = "".replace;
+    var SUBSTITUTION_SYMBOLS = /\$([$&'`]|\d{1,2}|<[^>]*>)/g;
+    var SUBSTITUTION_SYMBOLS_NO_NAMED = /\$([$&'`]|\d{1,2})/g;
+    module.exports = function(matched, str, position, captures, namedCaptures, replacement) {
+      var tailPos = position + matched.length;
+      var m = captures.length;
+      var symbols = SUBSTITUTION_SYMBOLS_NO_NAMED;
+      if (namedCaptures !== void 0) {
+        namedCaptures = toObject6(namedCaptures);
+        symbols = SUBSTITUTION_SYMBOLS;
+      }
+      return replace.call(replacement, symbols, function(match, ch) {
+        var capture;
+        switch (ch.charAt(0)) {
+          case "$":
+            return "$";
+          case "&":
+            return matched;
+          case "`":
+            return str.slice(0, position);
+          case "'":
+            return str.slice(tailPos);
+          case "<":
+            capture = namedCaptures[ch.slice(1, -1)];
+            break;
+          default:
+            var n = +ch;
+            if (n === 0)
+              return match;
+            if (n > m) {
+              var f = floor(n / 10);
+              if (f === 0)
+                return match;
+              if (f <= m)
+                return captures[f - 1] === void 0 ? ch.charAt(1) : captures[f - 1] + ch.charAt(1);
+              return match;
+            }
+            capture = captures[n - 1];
+        }
+        return capture === void 0 ? "" : capture;
+      });
+    };
+  });
+
+  // node_modules/core-js/internals/regexp-exec-abstract.js
+  var require_regexp_exec_abstract = __commonJS(function(exports, module) {
+    var classof2 = require_classof_raw();
+    var regexpExec2 = require_regexp_exec();
+    module.exports = function(R, S) {
+      var exec = R.exec;
+      if (typeof exec === "function") {
+        var result = exec.call(R, S);
+        if (typeof result !== "object") {
+          throw TypeError("RegExp exec method returned something other than an Object or null");
+        }
+        return result;
+      }
+      if (classof2(R) !== "RegExp") {
+        throw TypeError("RegExp#exec called on incompatible receiver");
+      }
+      return regexpExec2.call(R, S);
+    };
+  });
+
+  // node_modules/core-js/internals/to-string-tag-support.js
+  var require_to_string_tag_support = __commonJS(function(exports, module) {
+    var wellKnownSymbol5 = require_well_known_symbol();
+    var TO_STRING_TAG2 = wellKnownSymbol5("toStringTag");
+    var test = {};
+    test[TO_STRING_TAG2] = "z";
+    module.exports = String(test) === "[object z]";
+  });
+
+  // node_modules/core-js/internals/classof.js
+  var require_classof = __commonJS(function(exports, module) {
+    var TO_STRING_TAG_SUPPORT2 = require_to_string_tag_support();
+    var classofRaw = require_classof_raw();
+    var wellKnownSymbol5 = require_well_known_symbol();
+    var TO_STRING_TAG2 = wellKnownSymbol5("toStringTag");
+    var CORRECT_ARGUMENTS = classofRaw(function() {
+      return arguments;
+    }()) == "Arguments";
+    var tryGet = function(it, key) {
+      try {
+        return it[key];
+      } catch (error) {
+      }
+    };
+    module.exports = TO_STRING_TAG_SUPPORT2 ? classofRaw : function(it) {
+      var O, tag, result;
+      return it === void 0 ? "Undefined" : it === null ? "Null" : typeof (tag = tryGet(O = Object(it), TO_STRING_TAG2)) == "string" ? tag : CORRECT_ARGUMENTS ? classofRaw(O) : (result = classofRaw(O)) == "Object" && typeof O.callee == "function" ? "Arguments" : result;
+    };
+  });
+
+  // node_modules/core-js/internals/object-to-string.js
+  var require_object_to_string = __commonJS(function(exports, module) {
+    "use strict";
+    var TO_STRING_TAG_SUPPORT2 = require_to_string_tag_support();
+    var classof2 = require_classof();
+    module.exports = TO_STRING_TAG_SUPPORT2 ? {}.toString : function toString2() {
+      return "[object " + classof2(this) + "]";
+    };
+  });
+
+  // node_modules/core-js/internals/number-parse-float.js
+  var require_number_parse_float = __commonJS(function(exports, module) {
+    var global8 = require_global();
+    var trim3 = require_string_trim().trim;
+    var whitespaces = require_whitespaces();
+    var $parseFloat = global8.parseFloat;
+    var FORCED5 = 1 / $parseFloat(whitespaces + "-0") !== -Infinity;
+    module.exports = FORCED5 ? function parseFloat2(string) {
+      var trimmedString = trim3(String(string));
+      var result = $parseFloat(trimmedString);
+      return result === 0 && trimmedString.charAt(0) == "-" ? -0 : result;
+    } : $parseFloat;
+  });
+
+  // node_modules/core-js/internals/this-number-value.js
+  var require_this_number_value = __commonJS(function(exports, module) {
+    var classof2 = require_classof_raw();
+    module.exports = function(value) {
+      if (typeof value != "number" && classof2(value) != "Number") {
+        throw TypeError("Incorrect invocation");
+      }
+      return +value;
+    };
+  });
+
+  // node_modules/core-js/internals/is-array.js
+  var require_is_array = __commonJS(function(exports, module) {
+    var classof2 = require_classof_raw();
+    module.exports = Array.isArray || function isArray4(arg) {
+      return classof2(arg) == "Array";
+    };
+  });
+
+  // node_modules/core-js/internals/create-property.js
+  var require_create_property = __commonJS(function(exports, module) {
+    "use strict";
+    var toPrimitive3 = require_to_primitive();
+    var definePropertyModule2 = require_object_define_property();
+    var createPropertyDescriptor2 = require_create_property_descriptor();
+    module.exports = function(object, key, value) {
+      var propertyKey = toPrimitive3(key);
+      if (propertyKey in object)
+        definePropertyModule2.f(object, propertyKey, createPropertyDescriptor2(0, value));
+      else
+        object[propertyKey] = value;
+    };
+  });
+
   // node_modules/core-js/internals/array-species-create.js
   var require_array_species_create = __commonJS(function(exports, module) {
     var isObject7 = require_is_object();
@@ -885,6 +1243,99 @@
         }
       }
       return new (C === void 0 ? Array : C)(length === 0 ? 0 : length);
+    };
+  });
+
+  // node_modules/core-js/internals/array-method-has-species-support.js
+  var require_array_method_has_species_support = __commonJS(function(exports, module) {
+    var fails11 = require_fails();
+    var wellKnownSymbol5 = require_well_known_symbol();
+    var V8_VERSION2 = require_engine_v8_version();
+    var SPECIES2 = wellKnownSymbol5("species");
+    module.exports = function(METHOD_NAME) {
+      return V8_VERSION2 >= 51 || !fails11(function() {
+        var array = [];
+        var constructor = array.constructor = {};
+        constructor[SPECIES2] = function() {
+          return {foo: 1};
+        };
+        return array[METHOD_NAME](Boolean).foo !== 1;
+      });
+    };
+  });
+
+  // node_modules/core-js/internals/object-keys.js
+  var require_object_keys = __commonJS(function(exports, module) {
+    var internalObjectKeys = require_object_keys_internal();
+    var enumBugKeys = require_enum_bug_keys();
+    module.exports = Object.keys || function keys2(O) {
+      return internalObjectKeys(O, enumBugKeys);
+    };
+  });
+
+  // node_modules/core-js/internals/is-regexp.js
+  var require_is_regexp = __commonJS(function(exports, module) {
+    var isObject7 = require_is_object();
+    var classof2 = require_classof_raw();
+    var wellKnownSymbol5 = require_well_known_symbol();
+    var MATCH = wellKnownSymbol5("match");
+    module.exports = function(it) {
+      var isRegExp2;
+      return isObject7(it) && ((isRegExp2 = it[MATCH]) !== void 0 ? !!isRegExp2 : classof2(it) == "RegExp");
+    };
+  });
+
+  // node_modules/core-js/internals/a-function.js
+  var require_a_function = __commonJS(function(exports, module) {
+    module.exports = function(it) {
+      if (typeof it != "function") {
+        throw TypeError(String(it) + " is not a function");
+      }
+      return it;
+    };
+  });
+
+  // node_modules/core-js/internals/species-constructor.js
+  var require_species_constructor = __commonJS(function(exports, module) {
+    var anObject10 = require_an_object();
+    var aFunction2 = require_a_function();
+    var wellKnownSymbol5 = require_well_known_symbol();
+    var SPECIES2 = wellKnownSymbol5("species");
+    module.exports = function(O, defaultConstructor) {
+      var C = anObject10(O).constructor;
+      var S;
+      return C === void 0 || (S = anObject10(C)[SPECIES2]) == void 0 ? defaultConstructor : aFunction2(S);
+    };
+  });
+
+  // node_modules/core-js/internals/function-bind-context.js
+  var require_function_bind_context = __commonJS(function(exports, module) {
+    var aFunction2 = require_a_function();
+    module.exports = function(fn, that, length) {
+      aFunction2(fn);
+      if (that === void 0)
+        return fn;
+      switch (length) {
+        case 0:
+          return function() {
+            return fn.call(that);
+          };
+        case 1:
+          return function(a) {
+            return fn.call(that, a);
+          };
+        case 2:
+          return function(a, b) {
+            return fn.call(that, a, b);
+          };
+        case 3:
+          return function(a, b, c) {
+            return fn.call(that, a, b, c);
+          };
+      }
+      return function() {
+        return fn.apply(that, arguments);
+      };
     };
   });
 
@@ -952,15 +1403,6 @@
       find: createMethod(5),
       findIndex: createMethod(6),
       filterOut: createMethod(7)
-    };
-  });
-
-  // node_modules/core-js/internals/object-keys.js
-  var require_object_keys = __commonJS(function(exports, module) {
-    var internalObjectKeys = require_object_keys_internal();
-    var enumBugKeys = require_enum_bug_keys();
-    module.exports = Object.keys || function keys2(O) {
-      return internalObjectKeys(O, enumBugKeys);
     };
   });
 
@@ -1068,24 +1510,6 @@
     }
     module.exports = function(key) {
       ArrayPrototype[UNSCOPABLES][key] = true;
-    };
-  });
-
-  // node_modules/core-js/internals/array-method-has-species-support.js
-  var require_array_method_has_species_support = __commonJS(function(exports, module) {
-    var fails11 = require_fails();
-    var wellKnownSymbol5 = require_well_known_symbol();
-    var V8_VERSION2 = require_engine_v8_version();
-    var SPECIES2 = wellKnownSymbol5("species");
-    module.exports = function(METHOD_NAME) {
-      return V8_VERSION2 >= 51 || !fails11(function() {
-        var array = [];
-        var constructor = array.constructor = {};
-        constructor[SPECIES2] = function() {
-          return {foo: 1};
-        };
-        return array[METHOD_NAME](Boolean).foo !== 1;
-      });
     };
   });
 
@@ -1233,46 +1657,6 @@
       if (it && !has5(it = STATIC ? it : it.prototype, TO_STRING_TAG2)) {
         defineProperty5(it, TO_STRING_TAG2, {configurable: true, value: TAG});
       }
-    };
-  });
-
-  // node_modules/core-js/internals/to-string-tag-support.js
-  var require_to_string_tag_support = __commonJS(function(exports, module) {
-    var wellKnownSymbol5 = require_well_known_symbol();
-    var TO_STRING_TAG2 = wellKnownSymbol5("toStringTag");
-    var test = {};
-    test[TO_STRING_TAG2] = "z";
-    module.exports = String(test) === "[object z]";
-  });
-
-  // node_modules/core-js/internals/classof.js
-  var require_classof = __commonJS(function(exports, module) {
-    var TO_STRING_TAG_SUPPORT2 = require_to_string_tag_support();
-    var classofRaw = require_classof_raw();
-    var wellKnownSymbol5 = require_well_known_symbol();
-    var TO_STRING_TAG2 = wellKnownSymbol5("toStringTag");
-    var CORRECT_ARGUMENTS = classofRaw(function() {
-      return arguments;
-    }()) == "Arguments";
-    var tryGet = function(it, key) {
-      try {
-        return it[key];
-      } catch (error) {
-      }
-    };
-    module.exports = TO_STRING_TAG_SUPPORT2 ? classofRaw : function(it) {
-      var O, tag, result;
-      return it === void 0 ? "Undefined" : it === null ? "Null" : typeof (tag = tryGet(O = Object(it), TO_STRING_TAG2)) == "string" ? tag : CORRECT_ARGUMENTS ? classofRaw(O) : (result = classofRaw(O)) == "Object" && typeof O.callee == "function" ? "Arguments" : result;
-    };
-  });
-
-  // node_modules/core-js/internals/object-to-string.js
-  var require_object_to_string = __commonJS(function(exports, module) {
-    "use strict";
-    var TO_STRING_TAG_SUPPORT2 = require_to_string_tag_support();
-    var classof2 = require_classof();
-    module.exports = TO_STRING_TAG_SUPPORT2 ? {}.toString : function toString2() {
-      return "[object " + classof2(this) + "]";
     };
   });
 
@@ -1481,28 +1865,6 @@
     addToUnscopables2("entries");
   });
 
-  // node_modules/core-js/internals/string-multibyte.js
-  var require_string_multibyte = __commonJS(function(exports, module) {
-    var toInteger3 = require_to_integer();
-    var requireObjectCoercible5 = require_require_object_coercible();
-    var createMethod = function(CONVERT_TO_STRING) {
-      return function($this, pos) {
-        var S = String(requireObjectCoercible5($this));
-        var position = toInteger3(pos);
-        var size = S.length;
-        var first, second;
-        if (position < 0 || position >= size)
-          return CONVERT_TO_STRING ? "" : void 0;
-        first = S.charCodeAt(position);
-        return first < 55296 || first > 56319 || position + 1 === size || (second = S.charCodeAt(position + 1)) < 56320 || second > 57343 ? CONVERT_TO_STRING ? S.charAt(position) : first : CONVERT_TO_STRING ? S.slice(position, position + 2) : (first - 55296 << 10) + (second - 56320) + 65536;
-      };
-    };
-    module.exports = {
-      codeAt: createMethod(false),
-      charAt: createMethod(true)
-    };
-  });
-
   // node_modules/core-js/internals/dom-iterables.js
   var require_dom_iterables = __commonJS(function(exports, module) {
     module.exports = {
@@ -1540,365 +1902,39 @@
     };
   });
 
-  // node_modules/core-js/internals/regexp-flags.js
-  var require_regexp_flags = __commonJS(function(exports, module) {
-    "use strict";
-    var anObject10 = require_an_object();
-    module.exports = function() {
-      var that = anObject10(this);
-      var result = "";
-      if (that.global)
-        result += "g";
-      if (that.ignoreCase)
-        result += "i";
-      if (that.multiline)
-        result += "m";
-      if (that.dotAll)
-        result += "s";
-      if (that.unicode)
-        result += "u";
-      if (that.sticky)
-        result += "y";
-      return result;
-    };
-  });
-
-  // node_modules/core-js/internals/regexp-sticky-helpers.js
-  var require_regexp_sticky_helpers = __commonJS(function(exports) {
-    "use strict";
+  // node_modules/core-js/internals/string-trim-forced.js
+  var require_string_trim_forced = __commonJS(function(exports, module) {
     var fails11 = require_fails();
-    function RE(s, f) {
-      return RegExp(s, f);
-    }
-    exports.UNSUPPORTED_Y = fails11(function() {
-      var re = RE("a", "y");
-      re.lastIndex = 2;
-      return re.exec("abcd") != null;
-    });
-    exports.BROKEN_CARET = fails11(function() {
-      var re = RE("^r", "gy");
-      re.lastIndex = 2;
-      return re.exec("str") != null;
-    });
-  });
-
-  // node_modules/core-js/internals/regexp-exec.js
-  var require_regexp_exec = __commonJS(function(exports, module) {
-    "use strict";
-    var regexpFlags = require_regexp_flags();
-    var stickyHelpers2 = require_regexp_sticky_helpers();
-    var shared2 = require_shared();
-    var nativeExec = RegExp.prototype.exec;
-    var nativeReplace = shared2("native-string-replace", String.prototype.replace);
-    var patchedExec = nativeExec;
-    var UPDATES_LAST_INDEX_WRONG = function() {
-      var re1 = /a/;
-      var re2 = /b*/g;
-      nativeExec.call(re1, "a");
-      nativeExec.call(re2, "a");
-      return re1.lastIndex !== 0 || re2.lastIndex !== 0;
-    }();
-    var UNSUPPORTED_Y2 = stickyHelpers2.UNSUPPORTED_Y || stickyHelpers2.BROKEN_CARET;
-    var NPCG_INCLUDED = /()??/.exec("")[1] !== void 0;
-    var PATCH = UPDATES_LAST_INDEX_WRONG || NPCG_INCLUDED || UNSUPPORTED_Y2;
-    if (PATCH) {
-      patchedExec = function exec(str) {
-        var re = this;
-        var lastIndex, reCopy, match, i;
-        var sticky = UNSUPPORTED_Y2 && re.sticky;
-        var flags2 = regexpFlags.call(re);
-        var source = re.source;
-        var charsAdded = 0;
-        var strCopy = str;
-        if (sticky) {
-          flags2 = flags2.replace("y", "");
-          if (flags2.indexOf("g") === -1) {
-            flags2 += "g";
-          }
-          strCopy = String(str).slice(re.lastIndex);
-          if (re.lastIndex > 0 && (!re.multiline || re.multiline && str[re.lastIndex - 1] !== "\n")) {
-            source = "(?: " + source + ")";
-            strCopy = " " + strCopy;
-            charsAdded++;
-          }
-          reCopy = new RegExp("^(?:" + source + ")", flags2);
-        }
-        if (NPCG_INCLUDED) {
-          reCopy = new RegExp("^" + source + "$(?!\\s)", flags2);
-        }
-        if (UPDATES_LAST_INDEX_WRONG)
-          lastIndex = re.lastIndex;
-        match = nativeExec.call(sticky ? reCopy : re, strCopy);
-        if (sticky) {
-          if (match) {
-            match.input = match.input.slice(charsAdded);
-            match[0] = match[0].slice(charsAdded);
-            match.index = re.lastIndex;
-            re.lastIndex += match[0].length;
-          } else
-            re.lastIndex = 0;
-        } else if (UPDATES_LAST_INDEX_WRONG && match) {
-          re.lastIndex = re.global ? match.index + match[0].length : lastIndex;
-        }
-        if (NPCG_INCLUDED && match && match.length > 1) {
-          nativeReplace.call(match[0], reCopy, function() {
-            for (i = 1; i < arguments.length - 2; i++) {
-              if (arguments[i] === void 0)
-                match[i] = void 0;
-            }
-          });
-        }
-        return match;
-      };
-    }
-    module.exports = patchedExec;
-  });
-
-  // node_modules/core-js/modules/es.regexp.exec.js
-  var require_es_regexp_exec = __commonJS(function() {
-    "use strict";
-    var $72 = require_export();
-    var exec = require_regexp_exec();
-    $72({target: "RegExp", proto: true, forced: /./.exec !== exec}, {
-      exec: exec
-    });
-  });
-
-  // node_modules/core-js/internals/fix-regexp-well-known-symbol-logic.js
-  var require_fix_regexp_well_known_symbol_logic = __commonJS(function(exports, module) {
-    "use strict";
-    require_es_regexp_exec();
-    var redefine5 = require_redefine();
-    var regexpExec2 = require_regexp_exec();
-    var fails11 = require_fails();
-    var wellKnownSymbol5 = require_well_known_symbol();
-    var createNonEnumerableProperty4 = require_create_non_enumerable_property();
-    var SPECIES2 = wellKnownSymbol5("species");
-    var RegExpPrototype2 = RegExp.prototype;
-    var REPLACE_SUPPORTS_NAMED_GROUPS = !fails11(function() {
-      var re = /./;
-      re.exec = function() {
-        var result = [];
-        result.groups = {a: "7"};
-        return result;
-      };
-      return "".replace(re, "$<a>") !== "7";
-    });
-    var REPLACE_KEEPS_$0 = function() {
-      return "a".replace(/./, "$0") === "$0";
-    }();
-    var REPLACE = wellKnownSymbol5("replace");
-    var REGEXP_REPLACE_SUBSTITUTES_UNDEFINED_CAPTURE = function() {
-      if (/./[REPLACE]) {
-        return /./[REPLACE]("a", "$0") === "";
-      }
-      return false;
-    }();
-    var SPLIT_WORKS_WITH_OVERWRITTEN_EXEC = !fails11(function() {
-      var re = /(?:)/;
-      var originalExec = re.exec;
-      re.exec = function() {
-        return originalExec.apply(this, arguments);
-      };
-      var result = "ab".split(re);
-      return result.length !== 2 || result[0] !== "a" || result[1] !== "b";
-    });
-    module.exports = function(KEY, length, exec, sham) {
-      var SYMBOL2 = wellKnownSymbol5(KEY);
-      var DELEGATES_TO_SYMBOL = !fails11(function() {
-        var O = {};
-        O[SYMBOL2] = function() {
-          return 7;
-        };
-        return ""[KEY](O) != 7;
-      });
-      var DELEGATES_TO_EXEC = DELEGATES_TO_SYMBOL && !fails11(function() {
-        var execCalled = false;
-        var re = /a/;
-        if (KEY === "split") {
-          re = {};
-          re.constructor = {};
-          re.constructor[SPECIES2] = function() {
-            return re;
-          };
-          re.flags = "";
-          re[SYMBOL2] = /./[SYMBOL2];
-        }
-        re.exec = function() {
-          execCalled = true;
-          return null;
-        };
-        re[SYMBOL2]("");
-        return !execCalled;
-      });
-      if (!DELEGATES_TO_SYMBOL || !DELEGATES_TO_EXEC || KEY === "replace" && !(REPLACE_SUPPORTS_NAMED_GROUPS && REPLACE_KEEPS_$0 && !REGEXP_REPLACE_SUBSTITUTES_UNDEFINED_CAPTURE) || KEY === "split" && !SPLIT_WORKS_WITH_OVERWRITTEN_EXEC) {
-        var nativeRegExpMethod = /./[SYMBOL2];
-        var methods = exec(SYMBOL2, ""[KEY], function(nativeMethod, regexp, str, arg2, forceStringMethod) {
-          var $exec = regexp.exec;
-          if ($exec === regexpExec2 || $exec === RegExpPrototype2.exec) {
-            if (DELEGATES_TO_SYMBOL && !forceStringMethod) {
-              return {done: true, value: nativeRegExpMethod.call(regexp, str, arg2)};
-            }
-            return {done: true, value: nativeMethod.call(str, regexp, arg2)};
-          }
-          return {done: false};
-        }, {
-          REPLACE_KEEPS_$0: REPLACE_KEEPS_$0,
-          REGEXP_REPLACE_SUBSTITUTES_UNDEFINED_CAPTURE: REGEXP_REPLACE_SUBSTITUTES_UNDEFINED_CAPTURE
-        });
-        var stringMethod = methods[0];
-        var regexMethod = methods[1];
-        redefine5(String.prototype, KEY, stringMethod);
-        redefine5(RegExpPrototype2, SYMBOL2, length == 2 ? function(string, arg) {
-          return regexMethod.call(string, this, arg);
-        } : function(string) {
-          return regexMethod.call(string, this);
-        });
-      }
-      if (sham)
-        createNonEnumerableProperty4(RegExpPrototype2[SYMBOL2], "sham", true);
-    };
-  });
-
-  // node_modules/core-js/internals/advance-string-index.js
-  var require_advance_string_index = __commonJS(function(exports, module) {
-    "use strict";
-    var charAt2 = require_string_multibyte().charAt;
-    module.exports = function(S, index, unicode) {
-      return index + (unicode ? charAt2(S, index).length : 1);
-    };
-  });
-
-  // node_modules/core-js/internals/get-substitution.js
-  var require_get_substitution = __commonJS(function(exports, module) {
-    var toObject6 = require_to_object();
-    var floor = Math.floor;
-    var replace = "".replace;
-    var SUBSTITUTION_SYMBOLS = /\$([$&'`]|\d{1,2}|<[^>]*>)/g;
-    var SUBSTITUTION_SYMBOLS_NO_NAMED = /\$([$&'`]|\d{1,2})/g;
-    module.exports = function(matched, str, position, captures, namedCaptures, replacement) {
-      var tailPos = position + matched.length;
-      var m = captures.length;
-      var symbols = SUBSTITUTION_SYMBOLS_NO_NAMED;
-      if (namedCaptures !== void 0) {
-        namedCaptures = toObject6(namedCaptures);
-        symbols = SUBSTITUTION_SYMBOLS;
-      }
-      return replace.call(replacement, symbols, function(match, ch) {
-        var capture;
-        switch (ch.charAt(0)) {
-          case "$":
-            return "$";
-          case "&":
-            return matched;
-          case "`":
-            return str.slice(0, position);
-          case "'":
-            return str.slice(tailPos);
-          case "<":
-            capture = namedCaptures[ch.slice(1, -1)];
-            break;
-          default:
-            var n = +ch;
-            if (n === 0)
-              return match;
-            if (n > m) {
-              var f = floor(n / 10);
-              if (f === 0)
-                return match;
-              if (f <= m)
-                return captures[f - 1] === void 0 ? ch.charAt(1) : captures[f - 1] + ch.charAt(1);
-              return match;
-            }
-            capture = captures[n - 1];
-        }
-        return capture === void 0 ? "" : capture;
-      });
-    };
-  });
-
-  // node_modules/core-js/internals/regexp-exec-abstract.js
-  var require_regexp_exec_abstract = __commonJS(function(exports, module) {
-    var classof2 = require_classof_raw();
-    var regexpExec2 = require_regexp_exec();
-    module.exports = function(R, S) {
-      var exec = R.exec;
-      if (typeof exec === "function") {
-        var result = exec.call(R, S);
-        if (typeof result !== "object") {
-          throw TypeError("RegExp exec method returned something other than an Object or null");
-        }
-        return result;
-      }
-      if (classof2(R) !== "RegExp") {
-        throw TypeError("RegExp#exec called on incompatible receiver");
-      }
-      return regexpExec2.call(R, S);
-    };
-  });
-
-  // node_modules/core-js/internals/number-parse-float.js
-  var require_number_parse_float = __commonJS(function(exports, module) {
-    var global8 = require_global();
-    var trim3 = require_string_trim().trim;
     var whitespaces = require_whitespaces();
-    var $parseFloat = global8.parseFloat;
-    var FORCED5 = 1 / $parseFloat(whitespaces + "-0") !== -Infinity;
-    module.exports = FORCED5 ? function parseFloat2(string) {
-      var trimmedString = trim3(String(string));
-      var result = $parseFloat(trimmedString);
-      return result === 0 && trimmedString.charAt(0) == "-" ? -0 : result;
-    } : $parseFloat;
-  });
-
-  // node_modules/core-js/internals/this-number-value.js
-  var require_this_number_value = __commonJS(function(exports, module) {
-    var classof2 = require_classof_raw();
-    module.exports = function(value) {
-      if (typeof value != "number" && classof2(value) != "Number") {
-        throw TypeError("Incorrect invocation");
-      }
-      return +value;
+    var non = "\u200B\x85\u180E";
+    module.exports = function(METHOD_NAME) {
+      return fails11(function() {
+        return !!whitespaces[METHOD_NAME]() || non[METHOD_NAME]() != non || whitespaces[METHOD_NAME].name !== METHOD_NAME;
+      });
     };
   });
 
-  // node_modules/core-js/internals/create-property.js
-  var require_create_property = __commonJS(function(exports, module) {
-    "use strict";
-    var toPrimitive3 = require_to_primitive();
-    var definePropertyModule2 = require_object_define_property();
-    var createPropertyDescriptor2 = require_create_property_descriptor();
-    module.exports = function(object, key, value) {
-      var propertyKey = toPrimitive3(key);
-      if (propertyKey in object)
-        definePropertyModule2.f(object, propertyKey, createPropertyDescriptor2(0, value));
-      else
-        object[propertyKey] = value;
-    };
-  });
-
-  // node_modules/core-js/internals/is-regexp.js
-  var require_is_regexp = __commonJS(function(exports, module) {
+  // node_modules/core-js/internals/inherit-if-required.js
+  var require_inherit_if_required = __commonJS(function(exports, module) {
     var isObject7 = require_is_object();
-    var classof2 = require_classof_raw();
-    var wellKnownSymbol5 = require_well_known_symbol();
-    var MATCH = wellKnownSymbol5("match");
-    module.exports = function(it) {
-      var isRegExp2;
-      return isObject7(it) && ((isRegExp2 = it[MATCH]) !== void 0 ? !!isRegExp2 : classof2(it) == "RegExp");
+    var setPrototypeOf2 = require_object_set_prototype_of();
+    module.exports = function($this, dummy, Wrapper) {
+      var NewTarget, NewTargetPrototype;
+      if (setPrototypeOf2 && typeof (NewTarget = dummy.constructor) == "function" && NewTarget !== Wrapper && isObject7(NewTargetPrototype = NewTarget.prototype) && NewTargetPrototype !== Wrapper.prototype)
+        setPrototypeOf2($this, NewTargetPrototype);
+      return $this;
     };
   });
 
-  // node_modules/core-js/internals/species-constructor.js
-  var require_species_constructor = __commonJS(function(exports, module) {
-    var anObject10 = require_an_object();
-    var aFunction2 = require_a_function();
-    var wellKnownSymbol5 = require_well_known_symbol();
-    var SPECIES2 = wellKnownSymbol5("species");
-    module.exports = function(O, defaultConstructor) {
-      var C = anObject10(O).constructor;
-      var S;
-      return C === void 0 || (S = anObject10(C)[SPECIES2]) == void 0 ? defaultConstructor : aFunction2(S);
+  // globals:strftime
+  var require_strftime = __commonJS(function(exports, module) {
+    module.exports = window.strftime;
+  });
+
+  // node_modules/core-js/internals/same-value.js
+  var require_same_value = __commonJS(function(exports, module) {
+    module.exports = Object.is || function is(x, y) {
+      return x === y ? x !== 0 || 1 / x === 1 / y : x != x && y != y;
     };
   });
 
@@ -2063,13 +2099,6 @@
       } catch (error) {
       }
       return ITERATION_SUPPORT;
-    };
-  });
-
-  // node_modules/core-js/internals/same-value.js
-  var require_same_value = __commonJS(function(exports, module) {
-    module.exports = Object.is || function is(x, y) {
-      return x === y ? x !== 0 || 1 / x === 1 / y : x != x && y != y;
     };
   });
 
@@ -2524,35 +2553,6 @@
     } : [].forEach;
   });
 
-  // node_modules/core-js/internals/inherit-if-required.js
-  var require_inherit_if_required = __commonJS(function(exports, module) {
-    var isObject7 = require_is_object();
-    var setPrototypeOf2 = require_object_set_prototype_of();
-    module.exports = function($this, dummy, Wrapper) {
-      var NewTarget, NewTargetPrototype;
-      if (setPrototypeOf2 && typeof (NewTarget = dummy.constructor) == "function" && NewTarget !== Wrapper && isObject7(NewTargetPrototype = NewTarget.prototype) && NewTargetPrototype !== Wrapper.prototype)
-        setPrototypeOf2($this, NewTargetPrototype);
-      return $this;
-    };
-  });
-
-  // node_modules/core-js/internals/string-trim-forced.js
-  var require_string_trim_forced = __commonJS(function(exports, module) {
-    var fails11 = require_fails();
-    var whitespaces = require_whitespaces();
-    var non = "\u200B\x85\u180E";
-    module.exports = function(METHOD_NAME) {
-      return fails11(function() {
-        return !!whitespaces[METHOD_NAME]() || non[METHOD_NAME]() != non || whitespaces[METHOD_NAME].name !== METHOD_NAME;
-      });
-    };
-  });
-
-  // globals:strftime
-  var require_strftime = __commonJS(function(exports, module) {
-    module.exports = window.strftime;
-  });
-
   // src/initialize/disableForm.ts
   var import_jquery = __toModule(require_jquery());
   function disableFormSubmission() {
@@ -2666,24 +2666,6 @@
   // src/shiny/index.ts
   var import_jquery43 = __toModule(require_jquery());
 
-  // node_modules/core-js/modules/es.array.find.js
-  "use strict";
-  var $6 = require_export();
-  var $find = require_array_iteration().find;
-  var addToUnscopables = require_add_to_unscopables();
-  var FIND = "find";
-  var SKIPS_HOLES = true;
-  if (FIND in [])
-    Array(1)[FIND](function() {
-      SKIPS_HOLES = false;
-    });
-  $6({target: "Array", proto: true, forced: SKIPS_HOLES}, {
-    find: function find(callbackfn) {
-      return $find(this, callbackfn, arguments.length > 1 ? arguments[1] : void 0);
-    }
-  });
-  addToUnscopables(FIND);
-
   // node_modules/core-js/modules/es.function.name.js
   var DESCRIPTORS = require_descriptors();
   var defineProperty = require_object_define_property().f;
@@ -2704,537 +2686,13 @@
     });
   }
 
-  // node_modules/core-js/modules/es.array.filter.js
-  "use strict";
-  var $7 = require_export();
-  var $filter = require_array_iteration().filter;
-  var arrayMethodHasSpeciesSupport = require_array_method_has_species_support();
-  var HAS_SPECIES_SUPPORT = arrayMethodHasSpeciesSupport("filter");
-  $7({target: "Array", proto: true, forced: !HAS_SPECIES_SUPPORT}, {
-    filter: function filter(callbackfn) {
-      return $filter(this, callbackfn, arguments.length > 1 ? arguments[1] : void 0);
-    }
-  });
-
-  // node_modules/core-js/modules/es.object.set-prototype-of.js
-  var $8 = require_export();
-  var setPrototypeOf = require_object_set_prototype_of();
-  $8({target: "Object", stat: true}, {
-    setPrototypeOf: setPrototypeOf
-  });
-
-  // node_modules/core-js/modules/es.object.get-prototype-of.js
-  var $9 = require_export();
-  var fails = require_fails();
-  var toObject = require_to_object();
-  var nativeGetPrototypeOf = require_object_get_prototype_of();
-  var CORRECT_PROTOTYPE_GETTER = require_correct_prototype_getter();
-  var FAILS_ON_PRIMITIVES = fails(function() {
-    nativeGetPrototypeOf(1);
-  });
-  $9({target: "Object", stat: true, forced: FAILS_ON_PRIMITIVES, sham: !CORRECT_PROTOTYPE_GETTER}, {
-    getPrototypeOf: function getPrototypeOf(it) {
-      return nativeGetPrototypeOf(toObject(it));
-    }
-  });
-
-  // node_modules/core-js/modules/es.reflect.construct.js
-  var $10 = require_export();
-  var getBuiltIn = require_get_built_in();
-  var aFunction = require_a_function();
-  var anObject = require_an_object();
-  var isObject = require_is_object();
-  var create = require_object_create();
-  var bind = require_function_bind();
-  var fails2 = require_fails();
-  var nativeConstruct = getBuiltIn("Reflect", "construct");
-  var NEW_TARGET_BUG = fails2(function() {
-    function F() {
-    }
-    return !(nativeConstruct(function() {
-    }, [], F) instanceof F);
-  });
-  var ARGS_BUG = !fails2(function() {
-    nativeConstruct(function() {
-    });
-  });
-  var FORCED = NEW_TARGET_BUG || ARGS_BUG;
-  $10({target: "Reflect", stat: true, forced: FORCED, sham: FORCED}, {
-    construct: function construct(Target, args) {
-      aFunction(Target);
-      anObject(args);
-      var newTarget = arguments.length < 3 ? Target : aFunction(arguments[2]);
-      if (ARGS_BUG && !NEW_TARGET_BUG)
-        return nativeConstruct(Target, args, newTarget);
-      if (Target == newTarget) {
-        switch (args.length) {
-          case 0:
-            return new Target();
-          case 1:
-            return new Target(args[0]);
-          case 2:
-            return new Target(args[0], args[1]);
-          case 3:
-            return new Target(args[0], args[1], args[2]);
-          case 4:
-            return new Target(args[0], args[1], args[2], args[3]);
-        }
-        var $args = [null];
-        $args.push.apply($args, args);
-        return new (bind.apply(Target, $args))();
-      }
-      var proto = newTarget.prototype;
-      var instance = create(isObject(proto) ? proto : Object.prototype);
-      var result = Function.apply.call(Target, instance, args);
-      return isObject(result) ? result : instance;
-    }
-  });
-
-  // node_modules/core-js/modules/es.symbol.js
-  "use strict";
-  var $11 = require_export();
-  var global2 = require_global();
-  var getBuiltIn2 = require_get_built_in();
-  var IS_PURE = require_is_pure();
-  var DESCRIPTORS2 = require_descriptors();
-  var NATIVE_SYMBOL = require_native_symbol();
-  var USE_SYMBOL_AS_UID = require_use_symbol_as_uid();
-  var fails3 = require_fails();
-  var has = require_has();
-  var isArray = require_is_array();
-  var isObject2 = require_is_object();
-  var anObject2 = require_an_object();
-  var toObject2 = require_to_object();
-  var toIndexedObject = require_to_indexed_object();
-  var toPrimitive = require_to_primitive();
-  var createPropertyDescriptor = require_create_property_descriptor();
-  var nativeObjectCreate = require_object_create();
-  var objectKeys = require_object_keys();
-  var getOwnPropertyNamesModule = require_object_get_own_property_names();
-  var getOwnPropertyNamesExternal = require_object_get_own_property_names_external();
-  var getOwnPropertySymbolsModule = require_object_get_own_property_symbols();
-  var getOwnPropertyDescriptorModule = require_object_get_own_property_descriptor();
-  var definePropertyModule = require_object_define_property();
-  var propertyIsEnumerableModule = require_object_property_is_enumerable();
-  var createNonEnumerableProperty = require_create_non_enumerable_property();
-  var redefine = require_redefine();
-  var shared = require_shared();
-  var sharedKey = require_shared_key();
-  var hiddenKeys = require_hidden_keys();
-  var uid = require_uid();
-  var wellKnownSymbol = require_well_known_symbol();
-  var wrappedWellKnownSymbolModule = require_well_known_symbol_wrapped();
-  var defineWellKnownSymbol = require_define_well_known_symbol();
-  var setToStringTag = require_set_to_string_tag();
-  var InternalStateModule = require_internal_state();
-  var $forEach = require_array_iteration().forEach;
-  var HIDDEN = sharedKey("hidden");
-  var SYMBOL = "Symbol";
-  var PROTOTYPE = "prototype";
-  var TO_PRIMITIVE = wellKnownSymbol("toPrimitive");
-  var setInternalState = InternalStateModule.set;
-  var getInternalState = InternalStateModule.getterFor(SYMBOL);
-  var ObjectPrototype = Object[PROTOTYPE];
-  var $Symbol = global2.Symbol;
-  var $stringify = getBuiltIn2("JSON", "stringify");
-  var nativeGetOwnPropertyDescriptor = getOwnPropertyDescriptorModule.f;
-  var nativeDefineProperty = definePropertyModule.f;
-  var nativeGetOwnPropertyNames = getOwnPropertyNamesExternal.f;
-  var nativePropertyIsEnumerable = propertyIsEnumerableModule.f;
-  var AllSymbols = shared("symbols");
-  var ObjectPrototypeSymbols = shared("op-symbols");
-  var StringToSymbolRegistry = shared("string-to-symbol-registry");
-  var SymbolToStringRegistry = shared("symbol-to-string-registry");
-  var WellKnownSymbolsStore = shared("wks");
-  var QObject = global2.QObject;
-  var USE_SETTER = !QObject || !QObject[PROTOTYPE] || !QObject[PROTOTYPE].findChild;
-  var setSymbolDescriptor = DESCRIPTORS2 && fails3(function() {
-    return nativeObjectCreate(nativeDefineProperty({}, "a", {
-      get: function() {
-        return nativeDefineProperty(this, "a", {value: 7}).a;
-      }
-    })).a != 7;
-  }) ? function(O, P, Attributes) {
-    var ObjectPrototypeDescriptor = nativeGetOwnPropertyDescriptor(ObjectPrototype, P);
-    if (ObjectPrototypeDescriptor)
-      delete ObjectPrototype[P];
-    nativeDefineProperty(O, P, Attributes);
-    if (ObjectPrototypeDescriptor && O !== ObjectPrototype) {
-      nativeDefineProperty(ObjectPrototype, P, ObjectPrototypeDescriptor);
-    }
-  } : nativeDefineProperty;
-  var wrap = function(tag, description) {
-    var symbol = AllSymbols[tag] = nativeObjectCreate($Symbol[PROTOTYPE]);
-    setInternalState(symbol, {
-      type: SYMBOL,
-      tag: tag,
-      description: description
-    });
-    if (!DESCRIPTORS2)
-      symbol.description = description;
-    return symbol;
-  };
-  var isSymbol = USE_SYMBOL_AS_UID ? function(it) {
-    return typeof it == "symbol";
-  } : function(it) {
-    return Object(it) instanceof $Symbol;
-  };
-  var $defineProperty = function defineProperty2(O, P, Attributes) {
-    if (O === ObjectPrototype)
-      $defineProperty(ObjectPrototypeSymbols, P, Attributes);
-    anObject2(O);
-    var key = toPrimitive(P, true);
-    anObject2(Attributes);
-    if (has(AllSymbols, key)) {
-      if (!Attributes.enumerable) {
-        if (!has(O, HIDDEN))
-          nativeDefineProperty(O, HIDDEN, createPropertyDescriptor(1, {}));
-        O[HIDDEN][key] = true;
-      } else {
-        if (has(O, HIDDEN) && O[HIDDEN][key])
-          O[HIDDEN][key] = false;
-        Attributes = nativeObjectCreate(Attributes, {enumerable: createPropertyDescriptor(0, false)});
-      }
-      return setSymbolDescriptor(O, key, Attributes);
-    }
-    return nativeDefineProperty(O, key, Attributes);
-  };
-  var $defineProperties = function defineProperties(O, Properties) {
-    anObject2(O);
-    var properties = toIndexedObject(Properties);
-    var keys2 = objectKeys(properties).concat($getOwnPropertySymbols(properties));
-    $forEach(keys2, function(key) {
-      if (!DESCRIPTORS2 || $propertyIsEnumerable.call(properties, key))
-        $defineProperty(O, key, properties[key]);
-    });
-    return O;
-  };
-  var $create = function create2(O, Properties) {
-    return Properties === void 0 ? nativeObjectCreate(O) : $defineProperties(nativeObjectCreate(O), Properties);
-  };
-  var $propertyIsEnumerable = function propertyIsEnumerable(V) {
-    var P = toPrimitive(V, true);
-    var enumerable = nativePropertyIsEnumerable.call(this, P);
-    if (this === ObjectPrototype && has(AllSymbols, P) && !has(ObjectPrototypeSymbols, P))
-      return false;
-    return enumerable || !has(this, P) || !has(AllSymbols, P) || has(this, HIDDEN) && this[HIDDEN][P] ? enumerable : true;
-  };
-  var $getOwnPropertyDescriptor = function getOwnPropertyDescriptor(O, P) {
-    var it = toIndexedObject(O);
-    var key = toPrimitive(P, true);
-    if (it === ObjectPrototype && has(AllSymbols, key) && !has(ObjectPrototypeSymbols, key))
-      return;
-    var descriptor = nativeGetOwnPropertyDescriptor(it, key);
-    if (descriptor && has(AllSymbols, key) && !(has(it, HIDDEN) && it[HIDDEN][key])) {
-      descriptor.enumerable = true;
-    }
-    return descriptor;
-  };
-  var $getOwnPropertyNames = function getOwnPropertyNames(O) {
-    var names = nativeGetOwnPropertyNames(toIndexedObject(O));
-    var result = [];
-    $forEach(names, function(key) {
-      if (!has(AllSymbols, key) && !has(hiddenKeys, key))
-        result.push(key);
-    });
-    return result;
-  };
-  var $getOwnPropertySymbols = function getOwnPropertySymbols(O) {
-    var IS_OBJECT_PROTOTYPE = O === ObjectPrototype;
-    var names = nativeGetOwnPropertyNames(IS_OBJECT_PROTOTYPE ? ObjectPrototypeSymbols : toIndexedObject(O));
-    var result = [];
-    $forEach(names, function(key) {
-      if (has(AllSymbols, key) && (!IS_OBJECT_PROTOTYPE || has(ObjectPrototype, key))) {
-        result.push(AllSymbols[key]);
-      }
-    });
-    return result;
-  };
-  if (!NATIVE_SYMBOL) {
-    $Symbol = function Symbol2() {
-      if (this instanceof $Symbol)
-        throw TypeError("Symbol is not a constructor");
-      var description = !arguments.length || arguments[0] === void 0 ? void 0 : String(arguments[0]);
-      var tag = uid(description);
-      var setter = function(value) {
-        if (this === ObjectPrototype)
-          setter.call(ObjectPrototypeSymbols, value);
-        if (has(this, HIDDEN) && has(this[HIDDEN], tag))
-          this[HIDDEN][tag] = false;
-        setSymbolDescriptor(this, tag, createPropertyDescriptor(1, value));
-      };
-      if (DESCRIPTORS2 && USE_SETTER)
-        setSymbolDescriptor(ObjectPrototype, tag, {configurable: true, set: setter});
-      return wrap(tag, description);
-    };
-    redefine($Symbol[PROTOTYPE], "toString", function toString2() {
-      return getInternalState(this).tag;
-    });
-    redefine($Symbol, "withoutSetter", function(description) {
-      return wrap(uid(description), description);
-    });
-    propertyIsEnumerableModule.f = $propertyIsEnumerable;
-    definePropertyModule.f = $defineProperty;
-    getOwnPropertyDescriptorModule.f = $getOwnPropertyDescriptor;
-    getOwnPropertyNamesModule.f = getOwnPropertyNamesExternal.f = $getOwnPropertyNames;
-    getOwnPropertySymbolsModule.f = $getOwnPropertySymbols;
-    wrappedWellKnownSymbolModule.f = function(name) {
-      return wrap(wellKnownSymbol(name), name);
-    };
-    if (DESCRIPTORS2) {
-      nativeDefineProperty($Symbol[PROTOTYPE], "description", {
-        configurable: true,
-        get: function description() {
-          return getInternalState(this).description;
-        }
-      });
-      if (!IS_PURE) {
-        redefine(ObjectPrototype, "propertyIsEnumerable", $propertyIsEnumerable, {unsafe: true});
-      }
-    }
-  }
-  $11({global: true, wrap: true, forced: !NATIVE_SYMBOL, sham: !NATIVE_SYMBOL}, {
-    Symbol: $Symbol
-  });
-  $forEach(objectKeys(WellKnownSymbolsStore), function(name) {
-    defineWellKnownSymbol(name);
-  });
-  $11({target: SYMBOL, stat: true, forced: !NATIVE_SYMBOL}, {
-    for: function(key) {
-      var string = String(key);
-      if (has(StringToSymbolRegistry, string))
-        return StringToSymbolRegistry[string];
-      var symbol = $Symbol(string);
-      StringToSymbolRegistry[string] = symbol;
-      SymbolToStringRegistry[symbol] = string;
-      return symbol;
-    },
-    keyFor: function keyFor(sym) {
-      if (!isSymbol(sym))
-        throw TypeError(sym + " is not a symbol");
-      if (has(SymbolToStringRegistry, sym))
-        return SymbolToStringRegistry[sym];
-    },
-    useSetter: function() {
-      USE_SETTER = true;
-    },
-    useSimple: function() {
-      USE_SETTER = false;
-    }
-  });
-  $11({target: "Object", stat: true, forced: !NATIVE_SYMBOL, sham: !DESCRIPTORS2}, {
-    create: $create,
-    defineProperty: $defineProperty,
-    defineProperties: $defineProperties,
-    getOwnPropertyDescriptor: $getOwnPropertyDescriptor
-  });
-  $11({target: "Object", stat: true, forced: !NATIVE_SYMBOL}, {
-    getOwnPropertyNames: $getOwnPropertyNames,
-    getOwnPropertySymbols: $getOwnPropertySymbols
-  });
-  $11({target: "Object", stat: true, forced: fails3(function() {
-    getOwnPropertySymbolsModule.f(1);
-  })}, {
-    getOwnPropertySymbols: function getOwnPropertySymbols2(it) {
-      return getOwnPropertySymbolsModule.f(toObject2(it));
-    }
-  });
-  if ($stringify) {
-    FORCED_JSON_STRINGIFY = !NATIVE_SYMBOL || fails3(function() {
-      var symbol = $Symbol();
-      return $stringify([symbol]) != "[null]" || $stringify({a: symbol}) != "{}" || $stringify(Object(symbol)) != "{}";
-    });
-    $11({target: "JSON", stat: true, forced: FORCED_JSON_STRINGIFY}, {
-      stringify: function stringify(it, replacer, space) {
-        var args = [it];
-        var index = 1;
-        var $replacer;
-        while (arguments.length > index)
-          args.push(arguments[index++]);
-        $replacer = replacer;
-        if (!isObject2(replacer) && it === void 0 || isSymbol(it))
-          return;
-        if (!isArray(replacer))
-          replacer = function(key, value) {
-            if (typeof $replacer == "function")
-              value = $replacer.call(this, key, value);
-            if (!isSymbol(value))
-              return value;
-          };
-        args[1] = replacer;
-        return $stringify.apply(null, args);
-      }
-    });
-  }
-  var FORCED_JSON_STRINGIFY;
-  if (!$Symbol[PROTOTYPE][TO_PRIMITIVE]) {
-    createNonEnumerableProperty($Symbol[PROTOTYPE], TO_PRIMITIVE, $Symbol[PROTOTYPE].valueOf);
-  }
-  setToStringTag($Symbol, SYMBOL);
-  hiddenKeys[HIDDEN] = true;
-
-  // node_modules/core-js/modules/es.symbol.description.js
-  "use strict";
-  var $12 = require_export();
-  var DESCRIPTORS3 = require_descriptors();
-  var global3 = require_global();
-  var has2 = require_has();
-  var isObject3 = require_is_object();
-  var defineProperty3 = require_object_define_property().f;
-  var copyConstructorProperties = require_copy_constructor_properties();
-  var NativeSymbol = global3.Symbol;
-  if (DESCRIPTORS3 && typeof NativeSymbol == "function" && (!("description" in NativeSymbol.prototype) || NativeSymbol().description !== void 0)) {
-    EmptyStringDescriptionStore = {};
-    SymbolWrapper = function Symbol2() {
-      var description = arguments.length < 1 || arguments[0] === void 0 ? void 0 : String(arguments[0]);
-      var result = this instanceof SymbolWrapper ? new NativeSymbol(description) : description === void 0 ? NativeSymbol() : NativeSymbol(description);
-      if (description === "")
-        EmptyStringDescriptionStore[result] = true;
-      return result;
-    };
-    copyConstructorProperties(SymbolWrapper, NativeSymbol);
-    symbolPrototype = SymbolWrapper.prototype = NativeSymbol.prototype;
-    symbolPrototype.constructor = SymbolWrapper;
-    symbolToString = symbolPrototype.toString;
-    native = String(NativeSymbol("test")) == "Symbol(test)";
-    regexp = /^Symbol\((.*)\)[^)]+$/;
-    defineProperty3(symbolPrototype, "description", {
-      configurable: true,
-      get: function description() {
-        var symbol = isObject3(this) ? this.valueOf() : this;
-        var string = symbolToString.call(symbol);
-        if (has2(EmptyStringDescriptionStore, symbol))
-          return "";
-        var desc = native ? string.slice(7, -1) : string.replace(regexp, "$1");
-        return desc === "" ? void 0 : desc;
-      }
-    });
-    $12({global: true, forced: true}, {
-      Symbol: SymbolWrapper
-    });
-  }
-  var EmptyStringDescriptionStore;
-  var SymbolWrapper;
-  var symbolPrototype;
-  var symbolToString;
-  var native;
-  var regexp;
-
-  // node_modules/core-js/modules/es.object.to-string.js
-  var TO_STRING_TAG_SUPPORT = require_to_string_tag_support();
-  var redefine2 = require_redefine();
-  var toString = require_object_to_string();
-  if (!TO_STRING_TAG_SUPPORT) {
-    redefine2(Object.prototype, "toString", toString, {unsafe: true});
-  }
-
-  // node_modules/core-js/modules/es.symbol.iterator.js
-  var defineWellKnownSymbol2 = require_define_well_known_symbol();
-  defineWellKnownSymbol2("iterator");
-
-  // src/bindings/output/image.ts
-  var import_es_array_iterator = __toModule(require_es_array_iterator());
-
-  // node_modules/core-js/modules/es.string.iterator.js
-  "use strict";
-  var charAt = require_string_multibyte().charAt;
-  var InternalStateModule2 = require_internal_state();
-  var defineIterator = require_define_iterator();
-  var STRING_ITERATOR = "String Iterator";
-  var setInternalState2 = InternalStateModule2.set;
-  var getInternalState2 = InternalStateModule2.getterFor(STRING_ITERATOR);
-  defineIterator(String, "String", function(iterated) {
-    setInternalState2(this, {
-      type: STRING_ITERATOR,
-      string: String(iterated),
-      index: 0
-    });
-  }, function next() {
-    var state = getInternalState2(this);
-    var string = state.string;
-    var index = state.index;
-    var point;
-    if (index >= string.length)
-      return {value: void 0, done: true};
-    point = charAt(string, index);
-    state.index += point.length;
-    return {value: point, done: false};
-  });
-
-  // node_modules/core-js/modules/web.dom-collections.iterator.js
-  var global4 = require_global();
-  var DOMIterables = require_dom_iterables();
-  var ArrayIteratorMethods = require_es_array_iterator();
-  var createNonEnumerableProperty2 = require_create_non_enumerable_property();
-  var wellKnownSymbol2 = require_well_known_symbol();
-  var ITERATOR = wellKnownSymbol2("iterator");
-  var TO_STRING_TAG = wellKnownSymbol2("toStringTag");
-  var ArrayValues = ArrayIteratorMethods.values;
-  for (var COLLECTION_NAME in DOMIterables) {
-    Collection = global4[COLLECTION_NAME];
-    CollectionPrototype = Collection && Collection.prototype;
-    if (CollectionPrototype) {
-      if (CollectionPrototype[ITERATOR] !== ArrayValues)
-        try {
-          createNonEnumerableProperty2(CollectionPrototype, ITERATOR, ArrayValues);
-        } catch (error) {
-          CollectionPrototype[ITERATOR] = ArrayValues;
-        }
-      if (!CollectionPrototype[TO_STRING_TAG]) {
-        createNonEnumerableProperty2(CollectionPrototype, TO_STRING_TAG, COLLECTION_NAME);
-      }
-      if (DOMIterables[COLLECTION_NAME])
-        for (METHOD_NAME in ArrayIteratorMethods) {
-          if (CollectionPrototype[METHOD_NAME] !== ArrayIteratorMethods[METHOD_NAME])
-            try {
-              createNonEnumerableProperty2(CollectionPrototype, METHOD_NAME, ArrayIteratorMethods[METHOD_NAME]);
-            } catch (error) {
-              CollectionPrototype[METHOD_NAME] = ArrayIteratorMethods[METHOD_NAME];
-            }
-        }
-    }
-  }
-  var Collection;
-  var CollectionPrototype;
-  var METHOD_NAME;
-
-  // src/bindings/output/image.ts
-  var import_jquery11 = __toModule(require_jquery());
-
-  // node_modules/core-js/modules/es.array.join.js
-  "use strict";
-  var $13 = require_export();
-  var IndexedObject = require_indexed_object();
-  var toIndexedObject2 = require_to_indexed_object();
-  var arrayMethodIsStrict2 = require_array_method_is_strict();
-  var nativeJoin = [].join;
-  var ES3_STRINGS = IndexedObject != Object;
-  var STRICT_METHOD2 = arrayMethodIsStrict2("join", ",");
-  $13({target: "Array", proto: true, forced: ES3_STRINGS || !STRICT_METHOD2}, {
-    join: function join(separator) {
-      return nativeJoin.call(toIndexedObject2(this), separator === void 0 ? "," : separator);
-    }
-  });
-
-  // node_modules/core-js/modules/es.array.map.js
-  "use strict";
-  var $14 = require_export();
-  var $map = require_array_iteration().map;
-  var arrayMethodHasSpeciesSupport2 = require_array_method_has_species_support();
-  var HAS_SPECIES_SUPPORT2 = arrayMethodHasSpeciesSupport2("map");
-  $14({target: "Array", proto: true, forced: !HAS_SPECIES_SUPPORT2}, {
-    map: function map(callbackfn) {
-      return $map(this, callbackfn, arguments.length > 1 ? arguments[1] : void 0);
-    }
-  });
-
-  // src/bindings/output/OutputBinding.ts
-  var import_es_regexp_exec2 = __toModule(require_es_regexp_exec());
+  // src/utils/index.ts
+  var import_es_regexp_exec = __toModule(require_es_regexp_exec());
 
   // node_modules/core-js/modules/es.string.replace.js
   "use strict";
   var fixRegExpWellKnownSymbolLogic = require_fix_regexp_well_known_symbol_logic();
-  var anObject3 = require_an_object();
+  var anObject = require_an_object();
   var toLength = require_to_length();
   var toInteger = require_to_integer();
   var requireObjectCoercible = require_require_object_coercible();
@@ -3262,7 +2720,7 @@
           if (res.done)
             return res.value;
         }
-        var rx = anObject3(regexp);
+        var rx = anObject(regexp);
         var S = String(this);
         var functionalReplace = typeof replaceValue === "function";
         if (!functionalReplace)
@@ -3312,28 +2770,30 @@
     ];
   });
 
-  // src/bindings/output/OutputBinding.ts
-  var import_jquery6 = __toModule(require_jquery());
-
-  // src/utils/index.ts
-  var import_es_regexp_exec = __toModule(require_es_regexp_exec());
+  // node_modules/core-js/modules/es.object.to-string.js
+  var TO_STRING_TAG_SUPPORT = require_to_string_tag_support();
+  var redefine = require_redefine();
+  var toString = require_object_to_string();
+  if (!TO_STRING_TAG_SUPPORT) {
+    redefine(Object.prototype, "toString", toString, {unsafe: true});
+  }
 
   // node_modules/core-js/modules/es.regexp.to-string.js
   "use strict";
-  var redefine3 = require_redefine();
-  var anObject4 = require_an_object();
-  var fails4 = require_fails();
+  var redefine2 = require_redefine();
+  var anObject2 = require_an_object();
+  var fails = require_fails();
   var flags = require_regexp_flags();
   var TO_STRING = "toString";
   var RegExpPrototype = RegExp.prototype;
   var nativeToString = RegExpPrototype[TO_STRING];
-  var NOT_GENERIC = fails4(function() {
+  var NOT_GENERIC = fails(function() {
     return nativeToString.call({source: "a", flags: "b"}) != "/a/b";
   });
   var INCORRECT_NAME = nativeToString.name != TO_STRING;
   if (NOT_GENERIC || INCORRECT_NAME) {
-    redefine3(RegExp.prototype, TO_STRING, function toString2() {
-      var R = anObject4(this);
+    redefine2(RegExp.prototype, TO_STRING, function toString2() {
+      var R = anObject2(this);
       var p = String(R.source);
       var rf = R.flags;
       var f = String(rf === void 0 && R instanceof RegExp && !("flags" in RegExpPrototype) ? flags.call(R) : rf);
@@ -3342,24 +2802,24 @@
   }
 
   // node_modules/core-js/modules/es.parse-float.js
-  var $15 = require_export();
+  var $6 = require_export();
   var parseFloatImplementation = require_number_parse_float();
-  $15({global: true, forced: parseFloat != parseFloatImplementation}, {
+  $6({global: true, forced: parseFloat != parseFloatImplementation}, {
     parseFloat: parseFloatImplementation
   });
 
   // node_modules/core-js/modules/es.number.to-precision.js
   "use strict";
-  var $16 = require_export();
-  var fails5 = require_fails();
+  var $7 = require_export();
+  var fails2 = require_fails();
   var thisNumberValue = require_this_number_value();
   var nativeToPrecision = 1 .toPrecision;
-  var FORCED2 = fails5(function() {
+  var FORCED = fails2(function() {
     return nativeToPrecision.call(1, void 0) !== "1";
-  }) || !fails5(function() {
+  }) || !fails2(function() {
     nativeToPrecision.call({});
   });
-  $16({target: "Number", proto: true, forced: FORCED2}, {
+  $7({target: "Number", proto: true, forced: FORCED}, {
     toPrecision: function toPrecision(precision) {
       return precision === void 0 ? nativeToPrecision.call(thisNumberValue(this)) : nativeToPrecision.call(thisNumberValue(this), precision);
     }
@@ -3367,36 +2827,36 @@
 
   // node_modules/core-js/modules/es.array.concat.js
   "use strict";
-  var $17 = require_export();
-  var fails6 = require_fails();
-  var isArray2 = require_is_array();
-  var isObject4 = require_is_object();
-  var toObject3 = require_to_object();
+  var $8 = require_export();
+  var fails3 = require_fails();
+  var isArray = require_is_array();
+  var isObject = require_is_object();
+  var toObject = require_to_object();
   var toLength2 = require_to_length();
   var createProperty = require_create_property();
   var arraySpeciesCreate = require_array_species_create();
-  var arrayMethodHasSpeciesSupport3 = require_array_method_has_species_support();
-  var wellKnownSymbol3 = require_well_known_symbol();
+  var arrayMethodHasSpeciesSupport = require_array_method_has_species_support();
+  var wellKnownSymbol = require_well_known_symbol();
   var V8_VERSION = require_engine_v8_version();
-  var IS_CONCAT_SPREADABLE = wellKnownSymbol3("isConcatSpreadable");
+  var IS_CONCAT_SPREADABLE = wellKnownSymbol("isConcatSpreadable");
   var MAX_SAFE_INTEGER = 9007199254740991;
   var MAXIMUM_ALLOWED_INDEX_EXCEEDED = "Maximum allowed index exceeded";
-  var IS_CONCAT_SPREADABLE_SUPPORT = V8_VERSION >= 51 || !fails6(function() {
+  var IS_CONCAT_SPREADABLE_SUPPORT = V8_VERSION >= 51 || !fails3(function() {
     var array = [];
     array[IS_CONCAT_SPREADABLE] = false;
     return array.concat()[0] !== array;
   });
-  var SPECIES_SUPPORT = arrayMethodHasSpeciesSupport3("concat");
+  var SPECIES_SUPPORT = arrayMethodHasSpeciesSupport("concat");
   var isConcatSpreadable = function(O) {
-    if (!isObject4(O))
+    if (!isObject(O))
       return false;
     var spreadable = O[IS_CONCAT_SPREADABLE];
-    return spreadable !== void 0 ? !!spreadable : isArray2(O);
+    return spreadable !== void 0 ? !!spreadable : isArray(O);
   };
-  var FORCED3 = !IS_CONCAT_SPREADABLE_SUPPORT || !SPECIES_SUPPORT;
-  $17({target: "Array", proto: true, forced: FORCED3}, {
+  var FORCED2 = !IS_CONCAT_SPREADABLE_SUPPORT || !SPECIES_SUPPORT;
+  $8({target: "Array", proto: true, forced: FORCED2}, {
     concat: function concat(arg) {
-      var O = toObject3(this);
+      var O = toObject(this);
       var A = arraySpeciesCreate(O, 0);
       var n = 0;
       var i, k, length, len, E;
@@ -3422,31 +2882,31 @@
 
   // node_modules/core-js/modules/es.array.slice.js
   "use strict";
-  var $18 = require_export();
-  var isObject5 = require_is_object();
-  var isArray3 = require_is_array();
+  var $9 = require_export();
+  var isObject2 = require_is_object();
+  var isArray2 = require_is_array();
   var toAbsoluteIndex = require_to_absolute_index();
   var toLength3 = require_to_length();
-  var toIndexedObject3 = require_to_indexed_object();
+  var toIndexedObject = require_to_indexed_object();
   var createProperty2 = require_create_property();
-  var wellKnownSymbol4 = require_well_known_symbol();
-  var arrayMethodHasSpeciesSupport4 = require_array_method_has_species_support();
-  var HAS_SPECIES_SUPPORT3 = arrayMethodHasSpeciesSupport4("slice");
-  var SPECIES = wellKnownSymbol4("species");
+  var wellKnownSymbol2 = require_well_known_symbol();
+  var arrayMethodHasSpeciesSupport2 = require_array_method_has_species_support();
+  var HAS_SPECIES_SUPPORT = arrayMethodHasSpeciesSupport2("slice");
+  var SPECIES = wellKnownSymbol2("species");
   var nativeSlice = [].slice;
   var max2 = Math.max;
-  $18({target: "Array", proto: true, forced: !HAS_SPECIES_SUPPORT3}, {
+  $9({target: "Array", proto: true, forced: !HAS_SPECIES_SUPPORT}, {
     slice: function slice(start, end) {
-      var O = toIndexedObject3(this);
+      var O = toIndexedObject(this);
       var length = toLength3(O.length);
       var k = toAbsoluteIndex(start, length);
       var fin = toAbsoluteIndex(end === void 0 ? length : end, length);
       var Constructor, result, n;
-      if (isArray3(O)) {
+      if (isArray2(O)) {
         Constructor = O.constructor;
-        if (typeof Constructor == "function" && (Constructor === Array || isArray3(Constructor.prototype))) {
+        if (typeof Constructor == "function" && (Constructor === Array || isArray2(Constructor.prototype))) {
           Constructor = void 0;
-        } else if (isObject5(Constructor)) {
+        } else if (isObject2(Constructor)) {
           Constructor = Constructor[SPECIES];
           if (Constructor === null)
             Constructor = void 0;
@@ -3466,22 +2926,22 @@
 
   // node_modules/core-js/modules/es.array.splice.js
   "use strict";
-  var $19 = require_export();
+  var $10 = require_export();
   var toAbsoluteIndex2 = require_to_absolute_index();
   var toInteger2 = require_to_integer();
   var toLength4 = require_to_length();
-  var toObject4 = require_to_object();
+  var toObject2 = require_to_object();
   var arraySpeciesCreate2 = require_array_species_create();
   var createProperty3 = require_create_property();
-  var arrayMethodHasSpeciesSupport5 = require_array_method_has_species_support();
-  var HAS_SPECIES_SUPPORT4 = arrayMethodHasSpeciesSupport5("splice");
+  var arrayMethodHasSpeciesSupport3 = require_array_method_has_species_support();
+  var HAS_SPECIES_SUPPORT2 = arrayMethodHasSpeciesSupport3("splice");
   var max3 = Math.max;
   var min2 = Math.min;
   var MAX_SAFE_INTEGER2 = 9007199254740991;
   var MAXIMUM_ALLOWED_LENGTH_EXCEEDED = "Maximum allowed length exceeded";
-  $19({target: "Array", proto: true, forced: !HAS_SPECIES_SUPPORT4}, {
+  $10({target: "Array", proto: true, forced: !HAS_SPECIES_SUPPORT2}, {
     splice: function splice(start, deleteCount) {
-      var O = toObject4(this);
+      var O = toObject2(this);
       var len = toLength4(O.length);
       var actualStart = toAbsoluteIndex2(start, len);
       var argumentsLength = arguments.length;
@@ -3535,16 +2995,16 @@
   });
 
   // node_modules/core-js/modules/es.object.keys.js
-  var $20 = require_export();
-  var toObject5 = require_to_object();
+  var $11 = require_export();
+  var toObject3 = require_to_object();
   var nativeKeys = require_object_keys();
-  var fails7 = require_fails();
-  var FAILS_ON_PRIMITIVES2 = fails7(function() {
+  var fails4 = require_fails();
+  var FAILS_ON_PRIMITIVES = fails4(function() {
     nativeKeys(1);
   });
-  $20({target: "Object", stat: true, forced: FAILS_ON_PRIMITIVES2}, {
+  $11({target: "Object", stat: true, forced: FAILS_ON_PRIMITIVES}, {
     keys: function keys(it) {
-      return nativeKeys(toObject5(it));
+      return nativeKeys(toObject3(it));
     }
   });
 
@@ -3552,7 +3012,7 @@
   "use strict";
   var fixRegExpWellKnownSymbolLogic2 = require_fix_regexp_well_known_symbol_logic();
   var isRegExp = require_is_regexp();
-  var anObject5 = require_an_object();
+  var anObject3 = require_an_object();
   var requireObjectCoercible2 = require_require_object_coercible();
   var speciesConstructor = require_species_constructor();
   var advanceStringIndex2 = require_advance_string_index();
@@ -3619,7 +3079,7 @@
         var res = maybeCallNative(internalSplit, regexp, this, limit, internalSplit !== nativeSplit);
         if (res.done)
           return res.value;
-        var rx = anObject5(regexp);
+        var rx = anObject3(regexp);
         var S = String(this);
         var C = speciesConstructor(rx, RegExp);
         var unicodeMatching = rx.unicode;
@@ -3660,7 +3120,7 @@
   // node_modules/core-js/modules/es.string.match.js
   "use strict";
   var fixRegExpWellKnownSymbolLogic3 = require_fix_regexp_well_known_symbol_logic();
-  var anObject6 = require_an_object();
+  var anObject4 = require_an_object();
   var toLength6 = require_to_length();
   var requireObjectCoercible3 = require_require_object_coercible();
   var advanceStringIndex3 = require_advance_string_index();
@@ -3676,7 +3136,7 @@
         var res = maybeCallNative(nativeMatch, regexp, this);
         if (res.done)
           return res.value;
-        var rx = anObject6(regexp);
+        var rx = anObject4(regexp);
         var S = String(this);
         if (!rx.global)
           return regExpExec2(rx, S);
@@ -3983,7 +3443,7 @@
     return import_jquery5.default.fn.tab.Constructor.VERSION.match(/^3\./);
   }
 
-  // src/bindings/output/OutputBinding.ts
+  // src/bindings/registry.ts
   function _classCallCheck(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
       throw new TypeError("Cannot call a class as a function");
@@ -4014,23 +3474,94 @@
     }
     return obj;
   }
-  var OutputBinding = /* @__PURE__ */ function() {
-    function OutputBinding2() {
-      _classCallCheck(this, OutputBinding2);
-      _defineProperty(this, "name", void 0);
+  var BindingRegistry = /* @__PURE__ */ function() {
+    function BindingRegistry2() {
+      _classCallCheck(this, BindingRegistry2);
+      _defineProperty(this, "bindings", []);
+      _defineProperty(this, "bindingNames", {});
     }
-    _createClass(OutputBinding2, [{
+    _createClass(BindingRegistry2, [{
+      key: "register",
+      value: function register2(binding, bindingName) {
+        var priority = arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : 0;
+        var bindingObj = {
+          binding: binding,
+          priority: priority
+        };
+        this.bindings.unshift(bindingObj);
+        if (bindingName) {
+          this.bindingNames[bindingName] = bindingObj;
+          binding.name = bindingName;
+        }
+      }
+    }, {
+      key: "setPriority",
+      value: function setPriority(bindingName, priority) {
+        var bindingObj = this.bindingNames[bindingName];
+        if (!bindingObj)
+          throw "Tried to set priority on unknown binding " + bindingName;
+        bindingObj.priority = priority || 0;
+      }
+    }, {
+      key: "getPriority",
+      value: function getPriority(bindingName) {
+        var bindingObj = this.bindingNames[bindingName];
+        if (!bindingObj)
+          return false;
+        return bindingObj.priority;
+      }
+    }, {
+      key: "getBindings",
+      value: function getBindings() {
+        return mergeSort(this.bindings, function(a, b) {
+          return b.priority - a.priority;
+        });
+      }
+    }]);
+    return BindingRegistry2;
+  }();
+
+  // src/bindings/input/InputBinding.ts
+  function _classCallCheck2(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+  function _defineProperties2(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor)
+        descriptor.writable = true;
+      Object.defineProperty(target, descriptor.key, descriptor);
+    }
+  }
+  function _createClass2(Constructor, protoProps, staticProps) {
+    if (protoProps)
+      _defineProperties2(Constructor.prototype, protoProps);
+    if (staticProps)
+      _defineProperties2(Constructor, staticProps);
+    return Constructor;
+  }
+  function _defineProperty2(obj, key, value) {
+    if (key in obj) {
+      Object.defineProperty(obj, key, {value: value, enumerable: true, configurable: true, writable: true});
+    } else {
+      obj[key] = value;
+    }
+    return obj;
+  }
+  var InputBinding = /* @__PURE__ */ function() {
+    function InputBinding2() {
+      _classCallCheck2(this, InputBinding2);
+      _defineProperty2(this, "name", void 0);
+    }
+    _createClass2(InputBinding2, [{
       key: "find",
       value: function find2(scope) {
         throw "Not implemented";
         scope;
-      }
-    }, {
-      key: "renderValue",
-      value: function renderValue(el, data) {
-        throw "Not implemented";
-        el;
-        data;
       }
     }, {
       key: "getId",
@@ -4038,57 +3569,3498 @@
         return el["data-input-id"] || el.id;
       }
     }, {
-      key: "onValueChange",
-      value: function onValueChange(el, data) {
-        this.clearError(el);
-        this.renderValue(el, data);
+      key: "getType",
+      value: function getType(el) {
+        return false;
+        el;
       }
     }, {
-      key: "onValueError",
-      value: function onValueError(el, err) {
-        this.renderError(el, err);
+      key: "getValue",
+      value: function getValue(el) {
+        throw "Not implemented";
+        el;
       }
     }, {
-      key: "renderError",
-      value: function renderError(el, err) {
-        this.clearError(el);
-        if (err.message === "") {
-          (0, import_jquery6.default)(el).empty();
+      key: "subscribe",
+      value: function subscribe(el, callback) {
+        el;
+        callback;
+      }
+    }, {
+      key: "unsubscribe",
+      value: function unsubscribe(el) {
+        el;
+      }
+    }, {
+      key: "receiveMessage",
+      value: function receiveMessage(el, data) {
+        throw "Not implemented";
+        el;
+        data;
+      }
+    }, {
+      key: "getState",
+      value: function getState(el, data) {
+        throw "Not implemented";
+        el;
+        data;
+      }
+    }, {
+      key: "getRatePolicy",
+      value: function getRatePolicy(el) {
+        return null;
+        el;
+      }
+    }, {
+      key: "initialize",
+      value: function initialize(el) {
+        el;
+      }
+    }, {
+      key: "dispose",
+      value: function dispose(el) {
+        el;
+      }
+    }]);
+    return InputBinding2;
+  }();
+
+  // node_modules/core-js/modules/es.array.find.js
+  "use strict";
+  var $14 = require_export();
+  var $find = require_array_iteration().find;
+  var addToUnscopables = require_add_to_unscopables();
+  var FIND = "find";
+  var SKIPS_HOLES = true;
+  if (FIND in [])
+    Array(1)[FIND](function() {
+      SKIPS_HOLES = false;
+    });
+  $14({target: "Array", proto: true, forced: SKIPS_HOLES}, {
+    find: function find(callbackfn) {
+      return $find(this, callbackfn, arguments.length > 1 ? arguments[1] : void 0);
+    }
+  });
+  addToUnscopables(FIND);
+
+  // node_modules/core-js/modules/es.object.set-prototype-of.js
+  var $15 = require_export();
+  var setPrototypeOf = require_object_set_prototype_of();
+  $15({target: "Object", stat: true}, {
+    setPrototypeOf: setPrototypeOf
+  });
+
+  // node_modules/core-js/modules/es.object.get-prototype-of.js
+  var $16 = require_export();
+  var fails5 = require_fails();
+  var toObject4 = require_to_object();
+  var nativeGetPrototypeOf = require_object_get_prototype_of();
+  var CORRECT_PROTOTYPE_GETTER = require_correct_prototype_getter();
+  var FAILS_ON_PRIMITIVES2 = fails5(function() {
+    nativeGetPrototypeOf(1);
+  });
+  $16({target: "Object", stat: true, forced: FAILS_ON_PRIMITIVES2, sham: !CORRECT_PROTOTYPE_GETTER}, {
+    getPrototypeOf: function getPrototypeOf(it) {
+      return nativeGetPrototypeOf(toObject4(it));
+    }
+  });
+
+  // node_modules/core-js/modules/es.reflect.construct.js
+  var $17 = require_export();
+  var getBuiltIn = require_get_built_in();
+  var aFunction = require_a_function();
+  var anObject5 = require_an_object();
+  var isObject3 = require_is_object();
+  var create = require_object_create();
+  var bind = require_function_bind();
+  var fails6 = require_fails();
+  var nativeConstruct = getBuiltIn("Reflect", "construct");
+  var NEW_TARGET_BUG = fails6(function() {
+    function F() {
+    }
+    return !(nativeConstruct(function() {
+    }, [], F) instanceof F);
+  });
+  var ARGS_BUG = !fails6(function() {
+    nativeConstruct(function() {
+    });
+  });
+  var FORCED3 = NEW_TARGET_BUG || ARGS_BUG;
+  $17({target: "Reflect", stat: true, forced: FORCED3, sham: FORCED3}, {
+    construct: function construct(Target, args) {
+      aFunction(Target);
+      anObject5(args);
+      var newTarget = arguments.length < 3 ? Target : aFunction(arguments[2]);
+      if (ARGS_BUG && !NEW_TARGET_BUG)
+        return nativeConstruct(Target, args, newTarget);
+      if (Target == newTarget) {
+        switch (args.length) {
+          case 0:
+            return new Target();
+          case 1:
+            return new Target(args[0]);
+          case 2:
+            return new Target(args[0], args[1]);
+          case 3:
+            return new Target(args[0], args[1], args[2]);
+          case 4:
+            return new Target(args[0], args[1], args[2], args[3]);
+        }
+        var $args = [null];
+        $args.push.apply($args, args);
+        return new (bind.apply(Target, $args))();
+      }
+      var proto = newTarget.prototype;
+      var instance = create(isObject3(proto) ? proto : Object.prototype);
+      var result = Function.apply.call(Target, instance, args);
+      return isObject3(result) ? result : instance;
+    }
+  });
+
+  // node_modules/core-js/modules/es.symbol.js
+  "use strict";
+  var $18 = require_export();
+  var global2 = require_global();
+  var getBuiltIn2 = require_get_built_in();
+  var IS_PURE = require_is_pure();
+  var DESCRIPTORS2 = require_descriptors();
+  var NATIVE_SYMBOL = require_native_symbol();
+  var USE_SYMBOL_AS_UID = require_use_symbol_as_uid();
+  var fails7 = require_fails();
+  var has = require_has();
+  var isArray3 = require_is_array();
+  var isObject4 = require_is_object();
+  var anObject6 = require_an_object();
+  var toObject5 = require_to_object();
+  var toIndexedObject2 = require_to_indexed_object();
+  var toPrimitive = require_to_primitive();
+  var createPropertyDescriptor = require_create_property_descriptor();
+  var nativeObjectCreate = require_object_create();
+  var objectKeys = require_object_keys();
+  var getOwnPropertyNamesModule = require_object_get_own_property_names();
+  var getOwnPropertyNamesExternal = require_object_get_own_property_names_external();
+  var getOwnPropertySymbolsModule = require_object_get_own_property_symbols();
+  var getOwnPropertyDescriptorModule = require_object_get_own_property_descriptor();
+  var definePropertyModule = require_object_define_property();
+  var propertyIsEnumerableModule = require_object_property_is_enumerable();
+  var createNonEnumerableProperty = require_create_non_enumerable_property();
+  var redefine3 = require_redefine();
+  var shared = require_shared();
+  var sharedKey = require_shared_key();
+  var hiddenKeys = require_hidden_keys();
+  var uid = require_uid();
+  var wellKnownSymbol3 = require_well_known_symbol();
+  var wrappedWellKnownSymbolModule = require_well_known_symbol_wrapped();
+  var defineWellKnownSymbol = require_define_well_known_symbol();
+  var setToStringTag = require_set_to_string_tag();
+  var InternalStateModule = require_internal_state();
+  var $forEach = require_array_iteration().forEach;
+  var HIDDEN = sharedKey("hidden");
+  var SYMBOL = "Symbol";
+  var PROTOTYPE = "prototype";
+  var TO_PRIMITIVE = wellKnownSymbol3("toPrimitive");
+  var setInternalState = InternalStateModule.set;
+  var getInternalState = InternalStateModule.getterFor(SYMBOL);
+  var ObjectPrototype = Object[PROTOTYPE];
+  var $Symbol = global2.Symbol;
+  var $stringify = getBuiltIn2("JSON", "stringify");
+  var nativeGetOwnPropertyDescriptor = getOwnPropertyDescriptorModule.f;
+  var nativeDefineProperty = definePropertyModule.f;
+  var nativeGetOwnPropertyNames = getOwnPropertyNamesExternal.f;
+  var nativePropertyIsEnumerable = propertyIsEnumerableModule.f;
+  var AllSymbols = shared("symbols");
+  var ObjectPrototypeSymbols = shared("op-symbols");
+  var StringToSymbolRegistry = shared("string-to-symbol-registry");
+  var SymbolToStringRegistry = shared("symbol-to-string-registry");
+  var WellKnownSymbolsStore = shared("wks");
+  var QObject = global2.QObject;
+  var USE_SETTER = !QObject || !QObject[PROTOTYPE] || !QObject[PROTOTYPE].findChild;
+  var setSymbolDescriptor = DESCRIPTORS2 && fails7(function() {
+    return nativeObjectCreate(nativeDefineProperty({}, "a", {
+      get: function() {
+        return nativeDefineProperty(this, "a", {value: 7}).a;
+      }
+    })).a != 7;
+  }) ? function(O, P, Attributes) {
+    var ObjectPrototypeDescriptor = nativeGetOwnPropertyDescriptor(ObjectPrototype, P);
+    if (ObjectPrototypeDescriptor)
+      delete ObjectPrototype[P];
+    nativeDefineProperty(O, P, Attributes);
+    if (ObjectPrototypeDescriptor && O !== ObjectPrototype) {
+      nativeDefineProperty(ObjectPrototype, P, ObjectPrototypeDescriptor);
+    }
+  } : nativeDefineProperty;
+  var wrap = function(tag, description) {
+    var symbol = AllSymbols[tag] = nativeObjectCreate($Symbol[PROTOTYPE]);
+    setInternalState(symbol, {
+      type: SYMBOL,
+      tag: tag,
+      description: description
+    });
+    if (!DESCRIPTORS2)
+      symbol.description = description;
+    return symbol;
+  };
+  var isSymbol = USE_SYMBOL_AS_UID ? function(it) {
+    return typeof it == "symbol";
+  } : function(it) {
+    return Object(it) instanceof $Symbol;
+  };
+  var $defineProperty = function defineProperty2(O, P, Attributes) {
+    if (O === ObjectPrototype)
+      $defineProperty(ObjectPrototypeSymbols, P, Attributes);
+    anObject6(O);
+    var key = toPrimitive(P, true);
+    anObject6(Attributes);
+    if (has(AllSymbols, key)) {
+      if (!Attributes.enumerable) {
+        if (!has(O, HIDDEN))
+          nativeDefineProperty(O, HIDDEN, createPropertyDescriptor(1, {}));
+        O[HIDDEN][key] = true;
+      } else {
+        if (has(O, HIDDEN) && O[HIDDEN][key])
+          O[HIDDEN][key] = false;
+        Attributes = nativeObjectCreate(Attributes, {enumerable: createPropertyDescriptor(0, false)});
+      }
+      return setSymbolDescriptor(O, key, Attributes);
+    }
+    return nativeDefineProperty(O, key, Attributes);
+  };
+  var $defineProperties = function defineProperties(O, Properties) {
+    anObject6(O);
+    var properties = toIndexedObject2(Properties);
+    var keys2 = objectKeys(properties).concat($getOwnPropertySymbols(properties));
+    $forEach(keys2, function(key) {
+      if (!DESCRIPTORS2 || $propertyIsEnumerable.call(properties, key))
+        $defineProperty(O, key, properties[key]);
+    });
+    return O;
+  };
+  var $create = function create2(O, Properties) {
+    return Properties === void 0 ? nativeObjectCreate(O) : $defineProperties(nativeObjectCreate(O), Properties);
+  };
+  var $propertyIsEnumerable = function propertyIsEnumerable(V) {
+    var P = toPrimitive(V, true);
+    var enumerable = nativePropertyIsEnumerable.call(this, P);
+    if (this === ObjectPrototype && has(AllSymbols, P) && !has(ObjectPrototypeSymbols, P))
+      return false;
+    return enumerable || !has(this, P) || !has(AllSymbols, P) || has(this, HIDDEN) && this[HIDDEN][P] ? enumerable : true;
+  };
+  var $getOwnPropertyDescriptor = function getOwnPropertyDescriptor(O, P) {
+    var it = toIndexedObject2(O);
+    var key = toPrimitive(P, true);
+    if (it === ObjectPrototype && has(AllSymbols, key) && !has(ObjectPrototypeSymbols, key))
+      return;
+    var descriptor = nativeGetOwnPropertyDescriptor(it, key);
+    if (descriptor && has(AllSymbols, key) && !(has(it, HIDDEN) && it[HIDDEN][key])) {
+      descriptor.enumerable = true;
+    }
+    return descriptor;
+  };
+  var $getOwnPropertyNames = function getOwnPropertyNames(O) {
+    var names = nativeGetOwnPropertyNames(toIndexedObject2(O));
+    var result = [];
+    $forEach(names, function(key) {
+      if (!has(AllSymbols, key) && !has(hiddenKeys, key))
+        result.push(key);
+    });
+    return result;
+  };
+  var $getOwnPropertySymbols = function getOwnPropertySymbols(O) {
+    var IS_OBJECT_PROTOTYPE = O === ObjectPrototype;
+    var names = nativeGetOwnPropertyNames(IS_OBJECT_PROTOTYPE ? ObjectPrototypeSymbols : toIndexedObject2(O));
+    var result = [];
+    $forEach(names, function(key) {
+      if (has(AllSymbols, key) && (!IS_OBJECT_PROTOTYPE || has(ObjectPrototype, key))) {
+        result.push(AllSymbols[key]);
+      }
+    });
+    return result;
+  };
+  if (!NATIVE_SYMBOL) {
+    $Symbol = function Symbol2() {
+      if (this instanceof $Symbol)
+        throw TypeError("Symbol is not a constructor");
+      var description = !arguments.length || arguments[0] === void 0 ? void 0 : String(arguments[0]);
+      var tag = uid(description);
+      var setter = function(value) {
+        if (this === ObjectPrototype)
+          setter.call(ObjectPrototypeSymbols, value);
+        if (has(this, HIDDEN) && has(this[HIDDEN], tag))
+          this[HIDDEN][tag] = false;
+        setSymbolDescriptor(this, tag, createPropertyDescriptor(1, value));
+      };
+      if (DESCRIPTORS2 && USE_SETTER)
+        setSymbolDescriptor(ObjectPrototype, tag, {configurable: true, set: setter});
+      return wrap(tag, description);
+    };
+    redefine3($Symbol[PROTOTYPE], "toString", function toString2() {
+      return getInternalState(this).tag;
+    });
+    redefine3($Symbol, "withoutSetter", function(description) {
+      return wrap(uid(description), description);
+    });
+    propertyIsEnumerableModule.f = $propertyIsEnumerable;
+    definePropertyModule.f = $defineProperty;
+    getOwnPropertyDescriptorModule.f = $getOwnPropertyDescriptor;
+    getOwnPropertyNamesModule.f = getOwnPropertyNamesExternal.f = $getOwnPropertyNames;
+    getOwnPropertySymbolsModule.f = $getOwnPropertySymbols;
+    wrappedWellKnownSymbolModule.f = function(name) {
+      return wrap(wellKnownSymbol3(name), name);
+    };
+    if (DESCRIPTORS2) {
+      nativeDefineProperty($Symbol[PROTOTYPE], "description", {
+        configurable: true,
+        get: function description() {
+          return getInternalState(this).description;
+        }
+      });
+      if (!IS_PURE) {
+        redefine3(ObjectPrototype, "propertyIsEnumerable", $propertyIsEnumerable, {unsafe: true});
+      }
+    }
+  }
+  $18({global: true, wrap: true, forced: !NATIVE_SYMBOL, sham: !NATIVE_SYMBOL}, {
+    Symbol: $Symbol
+  });
+  $forEach(objectKeys(WellKnownSymbolsStore), function(name) {
+    defineWellKnownSymbol(name);
+  });
+  $18({target: SYMBOL, stat: true, forced: !NATIVE_SYMBOL}, {
+    for: function(key) {
+      var string = String(key);
+      if (has(StringToSymbolRegistry, string))
+        return StringToSymbolRegistry[string];
+      var symbol = $Symbol(string);
+      StringToSymbolRegistry[string] = symbol;
+      SymbolToStringRegistry[symbol] = string;
+      return symbol;
+    },
+    keyFor: function keyFor(sym) {
+      if (!isSymbol(sym))
+        throw TypeError(sym + " is not a symbol");
+      if (has(SymbolToStringRegistry, sym))
+        return SymbolToStringRegistry[sym];
+    },
+    useSetter: function() {
+      USE_SETTER = true;
+    },
+    useSimple: function() {
+      USE_SETTER = false;
+    }
+  });
+  $18({target: "Object", stat: true, forced: !NATIVE_SYMBOL, sham: !DESCRIPTORS2}, {
+    create: $create,
+    defineProperty: $defineProperty,
+    defineProperties: $defineProperties,
+    getOwnPropertyDescriptor: $getOwnPropertyDescriptor
+  });
+  $18({target: "Object", stat: true, forced: !NATIVE_SYMBOL}, {
+    getOwnPropertyNames: $getOwnPropertyNames,
+    getOwnPropertySymbols: $getOwnPropertySymbols
+  });
+  $18({target: "Object", stat: true, forced: fails7(function() {
+    getOwnPropertySymbolsModule.f(1);
+  })}, {
+    getOwnPropertySymbols: function getOwnPropertySymbols2(it) {
+      return getOwnPropertySymbolsModule.f(toObject5(it));
+    }
+  });
+  if ($stringify) {
+    FORCED_JSON_STRINGIFY = !NATIVE_SYMBOL || fails7(function() {
+      var symbol = $Symbol();
+      return $stringify([symbol]) != "[null]" || $stringify({a: symbol}) != "{}" || $stringify(Object(symbol)) != "{}";
+    });
+    $18({target: "JSON", stat: true, forced: FORCED_JSON_STRINGIFY}, {
+      stringify: function stringify(it, replacer, space) {
+        var args = [it];
+        var index = 1;
+        var $replacer;
+        while (arguments.length > index)
+          args.push(arguments[index++]);
+        $replacer = replacer;
+        if (!isObject4(replacer) && it === void 0 || isSymbol(it))
           return;
+        if (!isArray3(replacer))
+          replacer = function(key, value) {
+            if (typeof $replacer == "function")
+              value = $replacer.call(this, key, value);
+            if (!isSymbol(value))
+              return value;
+          };
+        args[1] = replacer;
+        return $stringify.apply(null, args);
+      }
+    });
+  }
+  var FORCED_JSON_STRINGIFY;
+  if (!$Symbol[PROTOTYPE][TO_PRIMITIVE]) {
+    createNonEnumerableProperty($Symbol[PROTOTYPE], TO_PRIMITIVE, $Symbol[PROTOTYPE].valueOf);
+  }
+  setToStringTag($Symbol, SYMBOL);
+  hiddenKeys[HIDDEN] = true;
+
+  // node_modules/core-js/modules/es.symbol.description.js
+  "use strict";
+  var $19 = require_export();
+  var DESCRIPTORS3 = require_descriptors();
+  var global3 = require_global();
+  var has2 = require_has();
+  var isObject5 = require_is_object();
+  var defineProperty3 = require_object_define_property().f;
+  var copyConstructorProperties = require_copy_constructor_properties();
+  var NativeSymbol = global3.Symbol;
+  if (DESCRIPTORS3 && typeof NativeSymbol == "function" && (!("description" in NativeSymbol.prototype) || NativeSymbol().description !== void 0)) {
+    EmptyStringDescriptionStore = {};
+    SymbolWrapper = function Symbol2() {
+      var description = arguments.length < 1 || arguments[0] === void 0 ? void 0 : String(arguments[0]);
+      var result = this instanceof SymbolWrapper ? new NativeSymbol(description) : description === void 0 ? NativeSymbol() : NativeSymbol(description);
+      if (description === "")
+        EmptyStringDescriptionStore[result] = true;
+      return result;
+    };
+    copyConstructorProperties(SymbolWrapper, NativeSymbol);
+    symbolPrototype = SymbolWrapper.prototype = NativeSymbol.prototype;
+    symbolPrototype.constructor = SymbolWrapper;
+    symbolToString = symbolPrototype.toString;
+    native = String(NativeSymbol("test")) == "Symbol(test)";
+    regexp = /^Symbol\((.*)\)[^)]+$/;
+    defineProperty3(symbolPrototype, "description", {
+      configurable: true,
+      get: function description() {
+        var symbol = isObject5(this) ? this.valueOf() : this;
+        var string = symbolToString.call(symbol);
+        if (has2(EmptyStringDescriptionStore, symbol))
+          return "";
+        var desc = native ? string.slice(7, -1) : string.replace(regexp, "$1");
+        return desc === "" ? void 0 : desc;
+      }
+    });
+    $19({global: true, forced: true}, {
+      Symbol: SymbolWrapper
+    });
+  }
+  var EmptyStringDescriptionStore;
+  var SymbolWrapper;
+  var symbolPrototype;
+  var symbolToString;
+  var native;
+  var regexp;
+
+  // node_modules/core-js/modules/es.symbol.iterator.js
+  var defineWellKnownSymbol2 = require_define_well_known_symbol();
+  defineWellKnownSymbol2("iterator");
+
+  // src/bindings/input/checkbox.ts
+  var import_es_array_iterator = __toModule(require_es_array_iterator());
+
+  // node_modules/core-js/modules/es.string.iterator.js
+  "use strict";
+  var charAt = require_string_multibyte().charAt;
+  var InternalStateModule2 = require_internal_state();
+  var defineIterator = require_define_iterator();
+  var STRING_ITERATOR = "String Iterator";
+  var setInternalState2 = InternalStateModule2.set;
+  var getInternalState2 = InternalStateModule2.getterFor(STRING_ITERATOR);
+  defineIterator(String, "String", function(iterated) {
+    setInternalState2(this, {
+      type: STRING_ITERATOR,
+      string: String(iterated),
+      index: 0
+    });
+  }, function next() {
+    var state = getInternalState2(this);
+    var string = state.string;
+    var index = state.index;
+    var point;
+    if (index >= string.length)
+      return {value: void 0, done: true};
+    point = charAt(string, index);
+    state.index += point.length;
+    return {value: point, done: false};
+  });
+
+  // node_modules/core-js/modules/web.dom-collections.iterator.js
+  var global4 = require_global();
+  var DOMIterables = require_dom_iterables();
+  var ArrayIteratorMethods = require_es_array_iterator();
+  var createNonEnumerableProperty2 = require_create_non_enumerable_property();
+  var wellKnownSymbol4 = require_well_known_symbol();
+  var ITERATOR = wellKnownSymbol4("iterator");
+  var TO_STRING_TAG = wellKnownSymbol4("toStringTag");
+  var ArrayValues = ArrayIteratorMethods.values;
+  for (var COLLECTION_NAME in DOMIterables) {
+    Collection = global4[COLLECTION_NAME];
+    CollectionPrototype = Collection && Collection.prototype;
+    if (CollectionPrototype) {
+      if (CollectionPrototype[ITERATOR] !== ArrayValues)
+        try {
+          createNonEnumerableProperty2(CollectionPrototype, ITERATOR, ArrayValues);
+        } catch (error) {
+          CollectionPrototype[ITERATOR] = ArrayValues;
         }
-        var errClass = "shiny-output-error";
-        if (err.type !== null) {
-          errClass = errClass + " " + import_jquery6.default.map(asArray(err.type), function(type) {
-            return errClass + "-" + type;
-          }).join(" ");
+      if (!CollectionPrototype[TO_STRING_TAG]) {
+        createNonEnumerableProperty2(CollectionPrototype, TO_STRING_TAG, COLLECTION_NAME);
+      }
+      if (DOMIterables[COLLECTION_NAME])
+        for (METHOD_NAME in ArrayIteratorMethods) {
+          if (CollectionPrototype[METHOD_NAME] !== ArrayIteratorMethods[METHOD_NAME])
+            try {
+              createNonEnumerableProperty2(CollectionPrototype, METHOD_NAME, ArrayIteratorMethods[METHOD_NAME]);
+            } catch (error) {
+              CollectionPrototype[METHOD_NAME] = ArrayIteratorMethods[METHOD_NAME];
+            }
         }
-        (0, import_jquery6.default)(el).addClass(errClass).text(err.message);
+    }
+  }
+  var Collection;
+  var CollectionPrototype;
+  var METHOD_NAME;
+
+  // src/bindings/input/checkbox.ts
+  var import_jquery6 = __toModule(require_jquery());
+  function _typeof(obj) {
+    "@babel/helpers - typeof";
+    if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
+      _typeof = function _typeof27(obj2) {
+        return typeof obj2;
+      };
+    } else {
+      _typeof = function _typeof27(obj2) {
+        return obj2 && typeof Symbol === "function" && obj2.constructor === Symbol && obj2 !== Symbol.prototype ? "symbol" : typeof obj2;
+      };
+    }
+    return _typeof(obj);
+  }
+  function _classCallCheck3(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+  function _defineProperties3(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor)
+        descriptor.writable = true;
+      Object.defineProperty(target, descriptor.key, descriptor);
+    }
+  }
+  function _createClass3(Constructor, protoProps, staticProps) {
+    if (protoProps)
+      _defineProperties3(Constructor.prototype, protoProps);
+    if (staticProps)
+      _defineProperties3(Constructor, staticProps);
+    return Constructor;
+  }
+  function _inherits(subClass, superClass) {
+    if (typeof superClass !== "function" && superClass !== null) {
+      throw new TypeError("Super expression must either be null or a function");
+    }
+    subClass.prototype = Object.create(superClass && superClass.prototype, {constructor: {value: subClass, writable: true, configurable: true}});
+    if (superClass)
+      _setPrototypeOf(subClass, superClass);
+  }
+  function _setPrototypeOf(o, p) {
+    _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf26(o2, p2) {
+      o2.__proto__ = p2;
+      return o2;
+    };
+    return _setPrototypeOf(o, p);
+  }
+  function _createSuper(Derived) {
+    var hasNativeReflectConstruct = _isNativeReflectConstruct();
+    return function _createSuperInternal() {
+      var Super = _getPrototypeOf(Derived), result;
+      if (hasNativeReflectConstruct) {
+        var NewTarget = _getPrototypeOf(this).constructor;
+        result = Reflect.construct(Super, arguments, NewTarget);
+      } else {
+        result = Super.apply(this, arguments);
+      }
+      return _possibleConstructorReturn(this, result);
+    };
+  }
+  function _possibleConstructorReturn(self2, call) {
+    if (call && (_typeof(call) === "object" || typeof call === "function")) {
+      return call;
+    }
+    return _assertThisInitialized(self2);
+  }
+  function _assertThisInitialized(self2) {
+    if (self2 === void 0) {
+      throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+    }
+    return self2;
+  }
+  function _isNativeReflectConstruct() {
+    if (typeof Reflect === "undefined" || !Reflect.construct)
+      return false;
+    if (Reflect.construct.sham)
+      return false;
+    if (typeof Proxy === "function")
+      return true;
+    try {
+      Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function() {
+      }));
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+  function _getPrototypeOf(o) {
+    _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf26(o2) {
+      return o2.__proto__ || Object.getPrototypeOf(o2);
+    };
+    return _getPrototypeOf(o);
+  }
+  var CheckboxInputBinding = /* @__PURE__ */ function(_InputBinding) {
+    _inherits(CheckboxInputBinding2, _InputBinding);
+    var _super = _createSuper(CheckboxInputBinding2);
+    function CheckboxInputBinding2() {
+      _classCallCheck3(this, CheckboxInputBinding2);
+      return _super.apply(this, arguments);
+    }
+    _createClass3(CheckboxInputBinding2, [{
+      key: "find",
+      value: function find2(scope) {
+        return (0, import_jquery6.default)(scope).find('input[type="checkbox"]');
       }
     }, {
-      key: "clearError",
-      value: function clearError(el) {
-        (0, import_jquery6.default)(el).attr("class", function(i, c) {
-          return c.replace(/(^|\s)shiny-output-error\S*/g, "");
+      key: "getValue",
+      value: function getValue(el) {
+        return el.checked;
+      }
+    }, {
+      key: "setValue",
+      value: function setValue(el, value) {
+        el.checked = value;
+      }
+    }, {
+      key: "subscribe",
+      value: function subscribe(el, callback) {
+        (0, import_jquery6.default)(el).on("change.checkboxInputBinding", function() {
+          callback(true);
         });
       }
     }, {
-      key: "showProgress",
-      value: function showProgress(el, show3) {
-        var RECALC_CLASS = "recalculating";
-        if (show3)
-          (0, import_jquery6.default)(el).addClass(RECALC_CLASS);
-        else
-          (0, import_jquery6.default)(el).removeClass(RECALC_CLASS);
+      key: "unsubscribe",
+      value: function unsubscribe(el) {
+        (0, import_jquery6.default)(el).off(".checkboxInputBinding");
+      }
+    }, {
+      key: "getState",
+      value: function getState(el) {
+        return {
+          label: (0, import_jquery6.default)(el).parent().find("span").text(),
+          value: el.checked
+        };
+      }
+    }, {
+      key: "receiveMessage",
+      value: function receiveMessage(el, data) {
+        if (hasOwnProperty(data, "value"))
+          el.checked = data.value;
+        if (hasOwnProperty(data, "label"))
+          (0, import_jquery6.default)(el).parent().find("span").text(data.label);
+        (0, import_jquery6.default)(el).trigger("change");
       }
     }]);
-    return OutputBinding2;
-  }();
+    return CheckboxInputBinding2;
+  }(InputBinding);
 
-  // src/imageutils/createBrush.ts
-  var import_jquery8 = __toModule(require_jquery());
+  // node_modules/core-js/modules/es.string.trim.js
+  "use strict";
+  var $21 = require_export();
+  var $trim = require_string_trim().trim;
+  var forcedStringTrimMethod = require_string_trim_forced();
+  $21({target: "String", proto: true, forced: forcedStringTrimMethod("trim")}, {
+    trim: function trim() {
+      return $trim(this);
+    }
+  });
 
-  // src/imageutils/initCoordmap.ts
+  // src/bindings/input/checkboxgroup.ts
+  var import_es_array_iterator2 = __toModule(require_es_array_iterator());
   var import_jquery7 = __toModule(require_jquery());
+  function _typeof2(obj) {
+    "@babel/helpers - typeof";
+    if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
+      _typeof2 = function _typeof27(obj2) {
+        return typeof obj2;
+      };
+    } else {
+      _typeof2 = function _typeof27(obj2) {
+        return obj2 && typeof Symbol === "function" && obj2.constructor === Symbol && obj2 !== Symbol.prototype ? "symbol" : typeof obj2;
+      };
+    }
+    return _typeof2(obj);
+  }
+  function _classCallCheck4(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+  function _defineProperties4(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor)
+        descriptor.writable = true;
+      Object.defineProperty(target, descriptor.key, descriptor);
+    }
+  }
+  function _createClass4(Constructor, protoProps, staticProps) {
+    if (protoProps)
+      _defineProperties4(Constructor.prototype, protoProps);
+    if (staticProps)
+      _defineProperties4(Constructor, staticProps);
+    return Constructor;
+  }
+  function _inherits2(subClass, superClass) {
+    if (typeof superClass !== "function" && superClass !== null) {
+      throw new TypeError("Super expression must either be null or a function");
+    }
+    subClass.prototype = Object.create(superClass && superClass.prototype, {constructor: {value: subClass, writable: true, configurable: true}});
+    if (superClass)
+      _setPrototypeOf2(subClass, superClass);
+  }
+  function _setPrototypeOf2(o, p) {
+    _setPrototypeOf2 = Object.setPrototypeOf || function _setPrototypeOf26(o2, p2) {
+      o2.__proto__ = p2;
+      return o2;
+    };
+    return _setPrototypeOf2(o, p);
+  }
+  function _createSuper2(Derived) {
+    var hasNativeReflectConstruct = _isNativeReflectConstruct2();
+    return function _createSuperInternal() {
+      var Super = _getPrototypeOf2(Derived), result;
+      if (hasNativeReflectConstruct) {
+        var NewTarget = _getPrototypeOf2(this).constructor;
+        result = Reflect.construct(Super, arguments, NewTarget);
+      } else {
+        result = Super.apply(this, arguments);
+      }
+      return _possibleConstructorReturn2(this, result);
+    };
+  }
+  function _possibleConstructorReturn2(self2, call) {
+    if (call && (_typeof2(call) === "object" || typeof call === "function")) {
+      return call;
+    }
+    return _assertThisInitialized2(self2);
+  }
+  function _assertThisInitialized2(self2) {
+    if (self2 === void 0) {
+      throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+    }
+    return self2;
+  }
+  function _isNativeReflectConstruct2() {
+    if (typeof Reflect === "undefined" || !Reflect.construct)
+      return false;
+    if (Reflect.construct.sham)
+      return false;
+    if (typeof Proxy === "function")
+      return true;
+    try {
+      Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function() {
+      }));
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+  function _getPrototypeOf2(o) {
+    _getPrototypeOf2 = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf26(o2) {
+      return o2.__proto__ || Object.getPrototypeOf(o2);
+    };
+    return _getPrototypeOf2(o);
+  }
+  var CheckboxGroupInputBinding = /* @__PURE__ */ function(_InputBinding) {
+    _inherits2(CheckboxGroupInputBinding2, _InputBinding);
+    var _super = _createSuper2(CheckboxGroupInputBinding2);
+    function CheckboxGroupInputBinding2() {
+      _classCallCheck4(this, CheckboxGroupInputBinding2);
+      return _super.apply(this, arguments);
+    }
+    _createClass4(CheckboxGroupInputBinding2, [{
+      key: "find",
+      value: function find2(scope) {
+        return (0, import_jquery7.default)(scope).find(".shiny-input-checkboxgroup");
+      }
+    }, {
+      key: "getValue",
+      value: function getValue(el) {
+        var $objs = (0, import_jquery7.default)('input:checkbox[name="' + $escape(el.id) + '"]:checked');
+        var values = new Array($objs.length);
+        for (var i = 0; i < $objs.length; i++) {
+          values[i] = $objs[i].value;
+        }
+        return values;
+      }
+    }, {
+      key: "setValue",
+      value: function setValue(el, value) {
+        (0, import_jquery7.default)('input:checkbox[name="' + $escape(el.id) + '"]').prop("checked", false);
+        if (value instanceof Array) {
+          for (var i = 0; i < value.length; i++) {
+            (0, import_jquery7.default)('input:checkbox[name="' + $escape(el.id) + '"][value="' + $escape(value[i]) + '"]').prop("checked", true);
+          }
+        } else {
+          (0, import_jquery7.default)('input:checkbox[name="' + $escape(el.id) + '"][value="' + $escape(value) + '"]').prop("checked", true);
+        }
+      }
+    }, {
+      key: "getState",
+      value: function getState(el) {
+        var $objs = (0, import_jquery7.default)('input:checkbox[name="' + $escape(el.id) + '"]');
+        var options = new Array($objs.length);
+        for (var i = 0; i < options.length; i++) {
+          options[i] = {
+            value: $objs[i].value,
+            label: this._getLabel($objs[i])
+          };
+        }
+        return {
+          label: this._getLabelNode(el).text(),
+          value: this.getValue(el),
+          options: options
+        };
+      }
+    }, {
+      key: "receiveMessage",
+      value: function receiveMessage(el, data) {
+        var $el = (0, import_jquery7.default)(el);
+        if (hasOwnProperty(data, "options")) {
+          $el.find("div.shiny-options-group").remove();
+          $el.find("label.checkbox").remove();
+          $el.append(data.options);
+        }
+        if (hasOwnProperty(data, "value"))
+          this.setValue(el, data.value);
+        updateLabel(data.label, this._getLabelNode(el));
+        (0, import_jquery7.default)(el).trigger("change");
+      }
+    }, {
+      key: "subscribe",
+      value: function subscribe(el, callback) {
+        (0, import_jquery7.default)(el).on("change.checkboxGroupInputBinding", function() {
+          callback(false);
+        });
+      }
+    }, {
+      key: "unsubscribe",
+      value: function unsubscribe(el) {
+        (0, import_jquery7.default)(el).off(".checkboxGroupInputBinding");
+      }
+    }, {
+      key: "_getLabelNode",
+      value: function _getLabelNode(el) {
+        return (0, import_jquery7.default)(el).find('label[for="' + $escape(el.id) + '"]');
+      }
+    }, {
+      key: "_getLabel",
+      value: function _getLabel(obj) {
+        if (obj.parentNode.tagName === "LABEL") {
+          return (0, import_jquery7.default)(obj.parentNode).find("span").text().trim();
+        }
+        return null;
+      }
+    }, {
+      key: "_setLabel",
+      value: function _setLabel(obj, value) {
+        if (obj.parentNode.tagName === "LABEL") {
+          (0, import_jquery7.default)(obj.parentNode).find("span").text(value);
+        }
+        return null;
+      }
+    }]);
+    return CheckboxGroupInputBinding2;
+  }(InputBinding);
+
+  // node_modules/core-js/modules/es.number.constructor.js
+  "use strict";
+  var DESCRIPTORS4 = require_descriptors();
+  var global5 = require_global();
+  var isForced = require_is_forced();
+  var redefine4 = require_redefine();
+  var has3 = require_has();
+  var classof = require_classof_raw();
+  var inheritIfRequired = require_inherit_if_required();
+  var toPrimitive2 = require_to_primitive();
+  var fails8 = require_fails();
+  var create3 = require_object_create();
+  var getOwnPropertyNames2 = require_object_get_own_property_names().f;
+  var getOwnPropertyDescriptor2 = require_object_get_own_property_descriptor().f;
+  var defineProperty4 = require_object_define_property().f;
+  var trim2 = require_string_trim().trim;
+  var NUMBER = "Number";
+  var NativeNumber = global5[NUMBER];
+  var NumberPrototype = NativeNumber.prototype;
+  var BROKEN_CLASSOF = classof(create3(NumberPrototype)) == NUMBER;
+  var toNumber = function(argument) {
+    var it = toPrimitive2(argument, false);
+    var first, third, radix, maxCode, digits, length, index, code;
+    if (typeof it == "string" && it.length > 2) {
+      it = trim2(it);
+      first = it.charCodeAt(0);
+      if (first === 43 || first === 45) {
+        third = it.charCodeAt(2);
+        if (third === 88 || third === 120)
+          return NaN;
+      } else if (first === 48) {
+        switch (it.charCodeAt(1)) {
+          case 66:
+          case 98:
+            radix = 2;
+            maxCode = 49;
+            break;
+          case 79:
+          case 111:
+            radix = 8;
+            maxCode = 55;
+            break;
+          default:
+            return +it;
+        }
+        digits = it.slice(2);
+        length = digits.length;
+        for (index = 0; index < length; index++) {
+          code = digits.charCodeAt(index);
+          if (code < 48 || code > maxCode)
+            return NaN;
+        }
+        return parseInt(digits, radix);
+      }
+    }
+    return +it;
+  };
+  if (isForced(NUMBER, !NativeNumber(" 0o1") || !NativeNumber("0b1") || NativeNumber("+0x1"))) {
+    NumberWrapper = function Number2(value) {
+      var it = arguments.length < 1 ? 0 : value;
+      var dummy = this;
+      return dummy instanceof NumberWrapper && (BROKEN_CLASSOF ? fails8(function() {
+        NumberPrototype.valueOf.call(dummy);
+      }) : classof(dummy) != NUMBER) ? inheritIfRequired(new NativeNumber(toNumber(it)), dummy, NumberWrapper) : toNumber(it);
+    };
+    for (keys2 = DESCRIPTORS4 ? getOwnPropertyNames2(NativeNumber) : "MAX_VALUE,MIN_VALUE,NaN,NEGATIVE_INFINITY,POSITIVE_INFINITY,EPSILON,isFinite,isInteger,isNaN,isSafeInteger,MAX_SAFE_INTEGER,MIN_SAFE_INTEGER,parseFloat,parseInt,isInteger,fromString,range".split(","), j = 0; keys2.length > j; j++) {
+      if (has3(NativeNumber, key = keys2[j]) && !has3(NumberWrapper, key)) {
+        defineProperty4(NumberWrapper, key, getOwnPropertyDescriptor2(NativeNumber, key));
+      }
+    }
+    NumberWrapper.prototype = NumberPrototype;
+    NumberPrototype.constructor = NumberWrapper;
+    redefine4(global5, NUMBER, NumberWrapper);
+  }
+  var NumberWrapper;
+  var keys2;
+  var j;
+  var key;
+
+  // src/bindings/input/number.ts
+  var import_es_array_iterator4 = __toModule(require_es_array_iterator());
+  var import_jquery9 = __toModule(require_jquery());
+
+  // node_modules/core-js/modules/es.reflect.get.js
+  var $23 = require_export();
+  var isObject6 = require_is_object();
+  var anObject7 = require_an_object();
+  var has4 = require_has();
+  var getOwnPropertyDescriptorModule2 = require_object_get_own_property_descriptor();
+  var getPrototypeOf2 = require_object_get_prototype_of();
+  function get(target, propertyKey) {
+    var receiver = arguments.length < 3 ? target : arguments[2];
+    var descriptor, prototype;
+    if (anObject7(target) === receiver)
+      return target[propertyKey];
+    if (descriptor = getOwnPropertyDescriptorModule2.f(target, propertyKey))
+      return has4(descriptor, "value") ? descriptor.value : descriptor.get === void 0 ? void 0 : descriptor.get.call(receiver);
+    if (isObject6(prototype = getPrototypeOf2(target)))
+      return get(prototype, propertyKey, receiver);
+  }
+  $23({target: "Reflect", stat: true}, {
+    get: get
+  });
+
+  // node_modules/core-js/modules/es.object.get-own-property-descriptor.js
+  var $24 = require_export();
+  var fails9 = require_fails();
+  var toIndexedObject3 = require_to_indexed_object();
+  var nativeGetOwnPropertyDescriptor2 = require_object_get_own_property_descriptor().f;
+  var DESCRIPTORS5 = require_descriptors();
+  var FAILS_ON_PRIMITIVES3 = fails9(function() {
+    nativeGetOwnPropertyDescriptor2(1);
+  });
+  var FORCED4 = !DESCRIPTORS5 || FAILS_ON_PRIMITIVES3;
+  $24({target: "Object", stat: true, forced: FORCED4, sham: !DESCRIPTORS5}, {
+    getOwnPropertyDescriptor: function getOwnPropertyDescriptor3(it, key) {
+      return nativeGetOwnPropertyDescriptor2(toIndexedObject3(it), key);
+    }
+  });
+
+  // src/bindings/input/text.ts
+  var import_es_array_iterator3 = __toModule(require_es_array_iterator());
+  var import_jquery8 = __toModule(require_jquery());
+  function _typeof3(obj) {
+    "@babel/helpers - typeof";
+    if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
+      _typeof3 = function _typeof27(obj2) {
+        return typeof obj2;
+      };
+    } else {
+      _typeof3 = function _typeof27(obj2) {
+        return obj2 && typeof Symbol === "function" && obj2.constructor === Symbol && obj2 !== Symbol.prototype ? "symbol" : typeof obj2;
+      };
+    }
+    return _typeof3(obj);
+  }
+  function _classCallCheck5(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+  function _defineProperties5(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor)
+        descriptor.writable = true;
+      Object.defineProperty(target, descriptor.key, descriptor);
+    }
+  }
+  function _createClass5(Constructor, protoProps, staticProps) {
+    if (protoProps)
+      _defineProperties5(Constructor.prototype, protoProps);
+    if (staticProps)
+      _defineProperties5(Constructor, staticProps);
+    return Constructor;
+  }
+  function _get(target, property, receiver) {
+    if (typeof Reflect !== "undefined" && Reflect.get) {
+      _get = Reflect.get;
+    } else {
+      _get = function _get3(target2, property2, receiver2) {
+        var base = _superPropBase(target2, property2);
+        if (!base)
+          return;
+        var desc = Object.getOwnPropertyDescriptor(base, property2);
+        if (desc.get) {
+          return desc.get.call(receiver2);
+        }
+        return desc.value;
+      };
+    }
+    return _get(target, property, receiver || target);
+  }
+  function _superPropBase(object, property) {
+    while (!Object.prototype.hasOwnProperty.call(object, property)) {
+      object = _getPrototypeOf3(object);
+      if (object === null)
+        break;
+    }
+    return object;
+  }
+  function _inherits3(subClass, superClass) {
+    if (typeof superClass !== "function" && superClass !== null) {
+      throw new TypeError("Super expression must either be null or a function");
+    }
+    subClass.prototype = Object.create(superClass && superClass.prototype, {constructor: {value: subClass, writable: true, configurable: true}});
+    if (superClass)
+      _setPrototypeOf3(subClass, superClass);
+  }
+  function _setPrototypeOf3(o, p) {
+    _setPrototypeOf3 = Object.setPrototypeOf || function _setPrototypeOf26(o2, p2) {
+      o2.__proto__ = p2;
+      return o2;
+    };
+    return _setPrototypeOf3(o, p);
+  }
+  function _createSuper3(Derived) {
+    var hasNativeReflectConstruct = _isNativeReflectConstruct3();
+    return function _createSuperInternal() {
+      var Super = _getPrototypeOf3(Derived), result;
+      if (hasNativeReflectConstruct) {
+        var NewTarget = _getPrototypeOf3(this).constructor;
+        result = Reflect.construct(Super, arguments, NewTarget);
+      } else {
+        result = Super.apply(this, arguments);
+      }
+      return _possibleConstructorReturn3(this, result);
+    };
+  }
+  function _possibleConstructorReturn3(self2, call) {
+    if (call && (_typeof3(call) === "object" || typeof call === "function")) {
+      return call;
+    }
+    return _assertThisInitialized3(self2);
+  }
+  function _assertThisInitialized3(self2) {
+    if (self2 === void 0) {
+      throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+    }
+    return self2;
+  }
+  function _isNativeReflectConstruct3() {
+    if (typeof Reflect === "undefined" || !Reflect.construct)
+      return false;
+    if (Reflect.construct.sham)
+      return false;
+    if (typeof Proxy === "function")
+      return true;
+    try {
+      Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function() {
+      }));
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+  function _getPrototypeOf3(o) {
+    _getPrototypeOf3 = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf26(o2) {
+      return o2.__proto__ || Object.getPrototypeOf(o2);
+    };
+    return _getPrototypeOf3(o);
+  }
+  var TextInputBinding = /* @__PURE__ */ function(_InputBinding) {
+    _inherits3(TextInputBinding2, _InputBinding);
+    var _super = _createSuper3(TextInputBinding2);
+    function TextInputBinding2() {
+      _classCallCheck5(this, TextInputBinding2);
+      return _super.apply(this, arguments);
+    }
+    _createClass5(TextInputBinding2, [{
+      key: "find",
+      value: function find2(scope) {
+        var $inputs = (0, import_jquery8.default)(scope).find('input[type="text"], input[type="search"], input[type="url"], input[type="email"]');
+        return $inputs.not('input[type="text"][id$="-selectized"]');
+      }
+    }, {
+      key: "getId",
+      value: function getId(el) {
+        return _get(_getPrototypeOf3(TextInputBinding2.prototype), "getId", this).call(this, el) || el.name;
+      }
+    }, {
+      key: "getValue",
+      value: function getValue(el) {
+        return el.value;
+      }
+    }, {
+      key: "setValue",
+      value: function setValue(el, value) {
+        el.value = value;
+      }
+    }, {
+      key: "subscribe",
+      value: function subscribe(el, callback) {
+        (0, import_jquery8.default)(el).on("keyup.textInputBinding input.textInputBinding", function() {
+          callback(true);
+        });
+        (0, import_jquery8.default)(el).on("change.textInputBinding", function() {
+          callback(false);
+        });
+      }
+    }, {
+      key: "unsubscribe",
+      value: function unsubscribe(el) {
+        (0, import_jquery8.default)(el).off(".textInputBinding");
+      }
+    }, {
+      key: "receiveMessage",
+      value: function receiveMessage(el, data) {
+        if (hasOwnProperty(data, "value"))
+          this.setValue(el, data.value);
+        updateLabel(data.label, this._getLabelNode(el));
+        if (hasOwnProperty(data, "placeholder"))
+          el.placeholder = data.placeholder;
+        (0, import_jquery8.default)(el).trigger("change");
+      }
+    }, {
+      key: "getState",
+      value: function getState(el) {
+        return {
+          label: this._getLabelNode(el).text(),
+          value: el.value,
+          placeholder: el.placeholder
+        };
+      }
+    }, {
+      key: "getRatePolicy",
+      value: function getRatePolicy(el) {
+        return {
+          policy: "debounce",
+          delay: 250
+        };
+        el;
+      }
+    }, {
+      key: "_getLabelNode",
+      value: function _getLabelNode(el) {
+        return (0, import_jquery8.default)(el).parent().find('label[for="' + $escape(el.id) + '"]');
+      }
+    }]);
+    return TextInputBinding2;
+  }(InputBinding);
+
+  // src/bindings/input/number.ts
+  function _typeof4(obj) {
+    "@babel/helpers - typeof";
+    if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
+      _typeof4 = function _typeof27(obj2) {
+        return typeof obj2;
+      };
+    } else {
+      _typeof4 = function _typeof27(obj2) {
+        return obj2 && typeof Symbol === "function" && obj2.constructor === Symbol && obj2 !== Symbol.prototype ? "symbol" : typeof obj2;
+      };
+    }
+    return _typeof4(obj);
+  }
+  function _classCallCheck6(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+  function _defineProperties6(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor)
+        descriptor.writable = true;
+      Object.defineProperty(target, descriptor.key, descriptor);
+    }
+  }
+  function _createClass6(Constructor, protoProps, staticProps) {
+    if (protoProps)
+      _defineProperties6(Constructor.prototype, protoProps);
+    if (staticProps)
+      _defineProperties6(Constructor, staticProps);
+    return Constructor;
+  }
+  function _inherits4(subClass, superClass) {
+    if (typeof superClass !== "function" && superClass !== null) {
+      throw new TypeError("Super expression must either be null or a function");
+    }
+    subClass.prototype = Object.create(superClass && superClass.prototype, {constructor: {value: subClass, writable: true, configurable: true}});
+    if (superClass)
+      _setPrototypeOf4(subClass, superClass);
+  }
+  function _setPrototypeOf4(o, p) {
+    _setPrototypeOf4 = Object.setPrototypeOf || function _setPrototypeOf26(o2, p2) {
+      o2.__proto__ = p2;
+      return o2;
+    };
+    return _setPrototypeOf4(o, p);
+  }
+  function _createSuper4(Derived) {
+    var hasNativeReflectConstruct = _isNativeReflectConstruct4();
+    return function _createSuperInternal() {
+      var Super = _getPrototypeOf4(Derived), result;
+      if (hasNativeReflectConstruct) {
+        var NewTarget = _getPrototypeOf4(this).constructor;
+        result = Reflect.construct(Super, arguments, NewTarget);
+      } else {
+        result = Super.apply(this, arguments);
+      }
+      return _possibleConstructorReturn4(this, result);
+    };
+  }
+  function _possibleConstructorReturn4(self2, call) {
+    if (call && (_typeof4(call) === "object" || typeof call === "function")) {
+      return call;
+    }
+    return _assertThisInitialized4(self2);
+  }
+  function _assertThisInitialized4(self2) {
+    if (self2 === void 0) {
+      throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+    }
+    return self2;
+  }
+  function _isNativeReflectConstruct4() {
+    if (typeof Reflect === "undefined" || !Reflect.construct)
+      return false;
+    if (Reflect.construct.sham)
+      return false;
+    if (typeof Proxy === "function")
+      return true;
+    try {
+      Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function() {
+      }));
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+  function _getPrototypeOf4(o) {
+    _getPrototypeOf4 = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf26(o2) {
+      return o2.__proto__ || Object.getPrototypeOf(o2);
+    };
+    return _getPrototypeOf4(o);
+  }
+  var NumberInputBinding = /* @__PURE__ */ function(_TextInputBinding) {
+    _inherits4(NumberInputBinding2, _TextInputBinding);
+    var _super = _createSuper4(NumberInputBinding2);
+    function NumberInputBinding2() {
+      _classCallCheck6(this, NumberInputBinding2);
+      return _super.apply(this, arguments);
+    }
+    _createClass6(NumberInputBinding2, [{
+      key: "find",
+      value: function find2(scope) {
+        return (0, import_jquery9.default)(scope).find('input[type="number"]');
+      }
+    }, {
+      key: "getValue",
+      value: function getValue(el) {
+        var numberVal = (0, import_jquery9.default)(el).val();
+        if (typeof numberVal == "string") {
+          if (/^\s*$/.test(numberVal))
+            return null;
+        }
+        var numberValue = +numberVal;
+        if (!isNaN(numberValue)) {
+          return numberValue;
+        }
+        return numberVal;
+      }
+    }, {
+      key: "setValue",
+      value: function setValue(el, value) {
+        el.value = "" + value;
+      }
+    }, {
+      key: "getType",
+      value: function getType(el) {
+        return "shiny.number";
+        el;
+      }
+    }, {
+      key: "receiveMessage",
+      value: function receiveMessage(el, data) {
+        if (hasOwnProperty(data, "value"))
+          el.value = data.value;
+        if (hasOwnProperty(data, "min"))
+          el.min = data.min;
+        if (hasOwnProperty(data, "max"))
+          el.max = data.max;
+        if (hasOwnProperty(data, "step"))
+          el.step = data.step;
+        updateLabel(data.label, this._getLabelNode(el));
+        (0, import_jquery9.default)(el).trigger("change");
+      }
+    }, {
+      key: "getState",
+      value: function getState(el) {
+        return {
+          label: this._getLabelNode(el).text(),
+          value: this.getValue(el),
+          min: Number(el.min),
+          max: Number(el.max),
+          step: Number(el.step)
+        };
+      }
+    }, {
+      key: "_getLabelNode",
+      value: function _getLabelNode(el) {
+        return (0, import_jquery9.default)(el).parent().find('label[for="' + $escape(el.id) + '"]');
+      }
+    }]);
+    return NumberInputBinding2;
+  }(TextInputBinding);
+
+  // src/bindings/input/password.ts
+  var import_es_array_iterator5 = __toModule(require_es_array_iterator());
+  var import_jquery10 = __toModule(require_jquery());
+  function _typeof5(obj) {
+    "@babel/helpers - typeof";
+    if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
+      _typeof5 = function _typeof27(obj2) {
+        return typeof obj2;
+      };
+    } else {
+      _typeof5 = function _typeof27(obj2) {
+        return obj2 && typeof Symbol === "function" && obj2.constructor === Symbol && obj2 !== Symbol.prototype ? "symbol" : typeof obj2;
+      };
+    }
+    return _typeof5(obj);
+  }
+  function _classCallCheck7(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+  function _defineProperties7(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor)
+        descriptor.writable = true;
+      Object.defineProperty(target, descriptor.key, descriptor);
+    }
+  }
+  function _createClass7(Constructor, protoProps, staticProps) {
+    if (protoProps)
+      _defineProperties7(Constructor.prototype, protoProps);
+    if (staticProps)
+      _defineProperties7(Constructor, staticProps);
+    return Constructor;
+  }
+  function _inherits5(subClass, superClass) {
+    if (typeof superClass !== "function" && superClass !== null) {
+      throw new TypeError("Super expression must either be null or a function");
+    }
+    subClass.prototype = Object.create(superClass && superClass.prototype, {constructor: {value: subClass, writable: true, configurable: true}});
+    if (superClass)
+      _setPrototypeOf5(subClass, superClass);
+  }
+  function _setPrototypeOf5(o, p) {
+    _setPrototypeOf5 = Object.setPrototypeOf || function _setPrototypeOf26(o2, p2) {
+      o2.__proto__ = p2;
+      return o2;
+    };
+    return _setPrototypeOf5(o, p);
+  }
+  function _createSuper5(Derived) {
+    var hasNativeReflectConstruct = _isNativeReflectConstruct5();
+    return function _createSuperInternal() {
+      var Super = _getPrototypeOf5(Derived), result;
+      if (hasNativeReflectConstruct) {
+        var NewTarget = _getPrototypeOf5(this).constructor;
+        result = Reflect.construct(Super, arguments, NewTarget);
+      } else {
+        result = Super.apply(this, arguments);
+      }
+      return _possibleConstructorReturn5(this, result);
+    };
+  }
+  function _possibleConstructorReturn5(self2, call) {
+    if (call && (_typeof5(call) === "object" || typeof call === "function")) {
+      return call;
+    }
+    return _assertThisInitialized5(self2);
+  }
+  function _assertThisInitialized5(self2) {
+    if (self2 === void 0) {
+      throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+    }
+    return self2;
+  }
+  function _isNativeReflectConstruct5() {
+    if (typeof Reflect === "undefined" || !Reflect.construct)
+      return false;
+    if (Reflect.construct.sham)
+      return false;
+    if (typeof Proxy === "function")
+      return true;
+    try {
+      Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function() {
+      }));
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+  function _getPrototypeOf5(o) {
+    _getPrototypeOf5 = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf26(o2) {
+      return o2.__proto__ || Object.getPrototypeOf(o2);
+    };
+    return _getPrototypeOf5(o);
+  }
+  var PasswordInputBinding = /* @__PURE__ */ function(_TextInputBinding) {
+    _inherits5(PasswordInputBinding2, _TextInputBinding);
+    var _super = _createSuper5(PasswordInputBinding2);
+    function PasswordInputBinding2() {
+      _classCallCheck7(this, PasswordInputBinding2);
+      return _super.apply(this, arguments);
+    }
+    _createClass7(PasswordInputBinding2, [{
+      key: "find",
+      value: function find2(scope) {
+        return (0, import_jquery10.default)(scope).find('input[type="password"]');
+      }
+    }, {
+      key: "getType",
+      value: function getType(el) {
+        return "shiny.password";
+        el;
+      }
+    }]);
+    return PasswordInputBinding2;
+  }(TextInputBinding);
+
+  // src/bindings/input/textarea.ts
+  var import_es_array_iterator6 = __toModule(require_es_array_iterator());
+  var import_jquery11 = __toModule(require_jquery());
+  function _typeof6(obj) {
+    "@babel/helpers - typeof";
+    if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
+      _typeof6 = function _typeof27(obj2) {
+        return typeof obj2;
+      };
+    } else {
+      _typeof6 = function _typeof27(obj2) {
+        return obj2 && typeof Symbol === "function" && obj2.constructor === Symbol && obj2 !== Symbol.prototype ? "symbol" : typeof obj2;
+      };
+    }
+    return _typeof6(obj);
+  }
+  function _classCallCheck8(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+  function _defineProperties8(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor)
+        descriptor.writable = true;
+      Object.defineProperty(target, descriptor.key, descriptor);
+    }
+  }
+  function _createClass8(Constructor, protoProps, staticProps) {
+    if (protoProps)
+      _defineProperties8(Constructor.prototype, protoProps);
+    if (staticProps)
+      _defineProperties8(Constructor, staticProps);
+    return Constructor;
+  }
+  function _inherits6(subClass, superClass) {
+    if (typeof superClass !== "function" && superClass !== null) {
+      throw new TypeError("Super expression must either be null or a function");
+    }
+    subClass.prototype = Object.create(superClass && superClass.prototype, {constructor: {value: subClass, writable: true, configurable: true}});
+    if (superClass)
+      _setPrototypeOf6(subClass, superClass);
+  }
+  function _setPrototypeOf6(o, p) {
+    _setPrototypeOf6 = Object.setPrototypeOf || function _setPrototypeOf26(o2, p2) {
+      o2.__proto__ = p2;
+      return o2;
+    };
+    return _setPrototypeOf6(o, p);
+  }
+  function _createSuper6(Derived) {
+    var hasNativeReflectConstruct = _isNativeReflectConstruct6();
+    return function _createSuperInternal() {
+      var Super = _getPrototypeOf6(Derived), result;
+      if (hasNativeReflectConstruct) {
+        var NewTarget = _getPrototypeOf6(this).constructor;
+        result = Reflect.construct(Super, arguments, NewTarget);
+      } else {
+        result = Super.apply(this, arguments);
+      }
+      return _possibleConstructorReturn6(this, result);
+    };
+  }
+  function _possibleConstructorReturn6(self2, call) {
+    if (call && (_typeof6(call) === "object" || typeof call === "function")) {
+      return call;
+    }
+    return _assertThisInitialized6(self2);
+  }
+  function _assertThisInitialized6(self2) {
+    if (self2 === void 0) {
+      throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+    }
+    return self2;
+  }
+  function _isNativeReflectConstruct6() {
+    if (typeof Reflect === "undefined" || !Reflect.construct)
+      return false;
+    if (Reflect.construct.sham)
+      return false;
+    if (typeof Proxy === "function")
+      return true;
+    try {
+      Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function() {
+      }));
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+  function _getPrototypeOf6(o) {
+    _getPrototypeOf6 = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf26(o2) {
+      return o2.__proto__ || Object.getPrototypeOf(o2);
+    };
+    return _getPrototypeOf6(o);
+  }
+  var TextareaInputBinding = /* @__PURE__ */ function(_TextInputBinding) {
+    _inherits6(TextareaInputBinding2, _TextInputBinding);
+    var _super = _createSuper6(TextareaInputBinding2);
+    function TextareaInputBinding2() {
+      _classCallCheck8(this, TextareaInputBinding2);
+      return _super.apply(this, arguments);
+    }
+    _createClass8(TextareaInputBinding2, [{
+      key: "find",
+      value: function find2(scope) {
+        return (0, import_jquery11.default)(scope).find("textarea");
+      }
+    }]);
+    return TextareaInputBinding2;
+  }(TextInputBinding);
+
+  // src/bindings/input/radio.ts
+  var import_es_array_iterator7 = __toModule(require_es_array_iterator());
+  var import_jquery12 = __toModule(require_jquery());
+  function _typeof7(obj) {
+    "@babel/helpers - typeof";
+    if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
+      _typeof7 = function _typeof27(obj2) {
+        return typeof obj2;
+      };
+    } else {
+      _typeof7 = function _typeof27(obj2) {
+        return obj2 && typeof Symbol === "function" && obj2.constructor === Symbol && obj2 !== Symbol.prototype ? "symbol" : typeof obj2;
+      };
+    }
+    return _typeof7(obj);
+  }
+  function _classCallCheck9(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+  function _defineProperties9(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor)
+        descriptor.writable = true;
+      Object.defineProperty(target, descriptor.key, descriptor);
+    }
+  }
+  function _createClass9(Constructor, protoProps, staticProps) {
+    if (protoProps)
+      _defineProperties9(Constructor.prototype, protoProps);
+    if (staticProps)
+      _defineProperties9(Constructor, staticProps);
+    return Constructor;
+  }
+  function _inherits7(subClass, superClass) {
+    if (typeof superClass !== "function" && superClass !== null) {
+      throw new TypeError("Super expression must either be null or a function");
+    }
+    subClass.prototype = Object.create(superClass && superClass.prototype, {constructor: {value: subClass, writable: true, configurable: true}});
+    if (superClass)
+      _setPrototypeOf7(subClass, superClass);
+  }
+  function _setPrototypeOf7(o, p) {
+    _setPrototypeOf7 = Object.setPrototypeOf || function _setPrototypeOf26(o2, p2) {
+      o2.__proto__ = p2;
+      return o2;
+    };
+    return _setPrototypeOf7(o, p);
+  }
+  function _createSuper7(Derived) {
+    var hasNativeReflectConstruct = _isNativeReflectConstruct7();
+    return function _createSuperInternal() {
+      var Super = _getPrototypeOf7(Derived), result;
+      if (hasNativeReflectConstruct) {
+        var NewTarget = _getPrototypeOf7(this).constructor;
+        result = Reflect.construct(Super, arguments, NewTarget);
+      } else {
+        result = Super.apply(this, arguments);
+      }
+      return _possibleConstructorReturn7(this, result);
+    };
+  }
+  function _possibleConstructorReturn7(self2, call) {
+    if (call && (_typeof7(call) === "object" || typeof call === "function")) {
+      return call;
+    }
+    return _assertThisInitialized7(self2);
+  }
+  function _assertThisInitialized7(self2) {
+    if (self2 === void 0) {
+      throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+    }
+    return self2;
+  }
+  function _isNativeReflectConstruct7() {
+    if (typeof Reflect === "undefined" || !Reflect.construct)
+      return false;
+    if (Reflect.construct.sham)
+      return false;
+    if (typeof Proxy === "function")
+      return true;
+    try {
+      Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function() {
+      }));
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+  function _getPrototypeOf7(o) {
+    _getPrototypeOf7 = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf26(o2) {
+      return o2.__proto__ || Object.getPrototypeOf(o2);
+    };
+    return _getPrototypeOf7(o);
+  }
+  var RadioInputBinding = /* @__PURE__ */ function(_InputBinding) {
+    _inherits7(RadioInputBinding2, _InputBinding);
+    var _super = _createSuper7(RadioInputBinding2);
+    function RadioInputBinding2() {
+      _classCallCheck9(this, RadioInputBinding2);
+      return _super.apply(this, arguments);
+    }
+    _createClass9(RadioInputBinding2, [{
+      key: "find",
+      value: function find2(scope) {
+        return (0, import_jquery12.default)(scope).find(".shiny-input-radiogroup");
+      }
+    }, {
+      key: "getValue",
+      value: function getValue(el) {
+        var checkedItems = (0, import_jquery12.default)('input:radio[name="' + $escape(el.id) + '"]:checked');
+        if (checkedItems.length === 0) {
+          return null;
+        }
+        return checkedItems.val();
+      }
+    }, {
+      key: "setValue",
+      value: function setValue(el, value) {
+        if (import_jquery12.default.isArray(value) && value.length === 0) {
+          (0, import_jquery12.default)('input:radio[name="' + $escape(el.id) + '"]').prop("checked", false);
+        } else {
+          (0, import_jquery12.default)('input:radio[name="' + $escape(el.id) + '"][value="' + $escape(value) + '"]').prop("checked", true);
+        }
+      }
+    }, {
+      key: "getState",
+      value: function getState(el) {
+        var $objs = (0, import_jquery12.default)('input:radio[name="' + $escape(el.id) + '"]');
+        var options = new Array($objs.length);
+        for (var i = 0; i < options.length; i++) {
+          options[i] = {
+            value: $objs[i].value,
+            label: this._getLabel($objs[i])
+          };
+        }
+        return {
+          label: this._getLabelNode(el).text(),
+          value: this.getValue(el),
+          options: options
+        };
+      }
+    }, {
+      key: "receiveMessage",
+      value: function receiveMessage(el, data) {
+        var $el = (0, import_jquery12.default)(el);
+        if (hasOwnProperty(data, "options")) {
+          $el.find("div.shiny-options-group").remove();
+          $el.find("label.radio").remove();
+          $el.append(data.options);
+        }
+        if (hasOwnProperty(data, "value"))
+          this.setValue(el, data.value);
+        updateLabel(data.label, this._getLabelNode(el));
+        (0, import_jquery12.default)(el).trigger("change");
+      }
+    }, {
+      key: "subscribe",
+      value: function subscribe(el, callback) {
+        (0, import_jquery12.default)(el).on("change.radioInputBinding", function() {
+          callback(false);
+        });
+      }
+    }, {
+      key: "unsubscribe",
+      value: function unsubscribe(el) {
+        (0, import_jquery12.default)(el).off(".radioInputBinding");
+      }
+    }, {
+      key: "_getLabelNode",
+      value: function _getLabelNode(el) {
+        return (0, import_jquery12.default)(el).parent().find('label[for="' + $escape(el.id) + '"]');
+      }
+    }, {
+      key: "_getLabel",
+      value: function _getLabel(obj) {
+        if (obj.parentNode.tagName === "LABEL") {
+          return (0, import_jquery12.default)(obj.parentNode).find("span").text().trim();
+        }
+        return null;
+      }
+    }, {
+      key: "_setLabel",
+      value: function _setLabel(obj, value) {
+        if (obj.parentNode.tagName === "LABEL") {
+          (0, import_jquery12.default)(obj.parentNode).find("span").text(value);
+        }
+        return null;
+      }
+    }]);
+    return RadioInputBinding2;
+  }(InputBinding);
+
+  // src/bindings/input/date.ts
+  var import_es_array_iterator8 = __toModule(require_es_array_iterator());
+  var import_jquery13 = __toModule(require_jquery());
+  function _typeof8(obj) {
+    "@babel/helpers - typeof";
+    if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
+      _typeof8 = function _typeof27(obj2) {
+        return typeof obj2;
+      };
+    } else {
+      _typeof8 = function _typeof27(obj2) {
+        return obj2 && typeof Symbol === "function" && obj2.constructor === Symbol && obj2 !== Symbol.prototype ? "symbol" : typeof obj2;
+      };
+    }
+    return _typeof8(obj);
+  }
+  function _classCallCheck10(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+  function _defineProperties10(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor)
+        descriptor.writable = true;
+      Object.defineProperty(target, descriptor.key, descriptor);
+    }
+  }
+  function _createClass10(Constructor, protoProps, staticProps) {
+    if (protoProps)
+      _defineProperties10(Constructor.prototype, protoProps);
+    if (staticProps)
+      _defineProperties10(Constructor, staticProps);
+    return Constructor;
+  }
+  function _inherits8(subClass, superClass) {
+    if (typeof superClass !== "function" && superClass !== null) {
+      throw new TypeError("Super expression must either be null or a function");
+    }
+    subClass.prototype = Object.create(superClass && superClass.prototype, {constructor: {value: subClass, writable: true, configurable: true}});
+    if (superClass)
+      _setPrototypeOf8(subClass, superClass);
+  }
+  function _setPrototypeOf8(o, p) {
+    _setPrototypeOf8 = Object.setPrototypeOf || function _setPrototypeOf26(o2, p2) {
+      o2.__proto__ = p2;
+      return o2;
+    };
+    return _setPrototypeOf8(o, p);
+  }
+  function _createSuper8(Derived) {
+    var hasNativeReflectConstruct = _isNativeReflectConstruct8();
+    return function _createSuperInternal() {
+      var Super = _getPrototypeOf8(Derived), result;
+      if (hasNativeReflectConstruct) {
+        var NewTarget = _getPrototypeOf8(this).constructor;
+        result = Reflect.construct(Super, arguments, NewTarget);
+      } else {
+        result = Super.apply(this, arguments);
+      }
+      return _possibleConstructorReturn8(this, result);
+    };
+  }
+  function _possibleConstructorReturn8(self2, call) {
+    if (call && (_typeof8(call) === "object" || typeof call === "function")) {
+      return call;
+    }
+    return _assertThisInitialized8(self2);
+  }
+  function _assertThisInitialized8(self2) {
+    if (self2 === void 0) {
+      throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+    }
+    return self2;
+  }
+  function _isNativeReflectConstruct8() {
+    if (typeof Reflect === "undefined" || !Reflect.construct)
+      return false;
+    if (Reflect.construct.sham)
+      return false;
+    if (typeof Proxy === "function")
+      return true;
+    try {
+      Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function() {
+      }));
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+  function _getPrototypeOf8(o) {
+    _getPrototypeOf8 = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf26(o2) {
+      return o2.__proto__ || Object.getPrototypeOf(o2);
+    };
+    return _getPrototypeOf8(o);
+  }
+  var DateInputBindingBase = /* @__PURE__ */ function(_InputBinding) {
+    _inherits8(DateInputBindingBase2, _InputBinding);
+    var _super = _createSuper8(DateInputBindingBase2);
+    function DateInputBindingBase2() {
+      _classCallCheck10(this, DateInputBindingBase2);
+      return _super.apply(this, arguments);
+    }
+    _createClass10(DateInputBindingBase2, [{
+      key: "find",
+      value: function find2(scope) {
+        return (0, import_jquery13.default)(scope).find(".shiny-date-input");
+      }
+    }, {
+      key: "getType",
+      value: function getType(el) {
+        return "shiny.date";
+        el;
+      }
+    }, {
+      key: "subscribe",
+      value: function subscribe(el, callback) {
+        (0, import_jquery13.default)(el).on("keyup.dateInputBinding input.dateInputBinding", function() {
+          callback(true);
+        });
+        (0, import_jquery13.default)(el).on("changeDate.dateInputBinding change.dateInputBinding", function() {
+          callback(false);
+        });
+      }
+    }, {
+      key: "unsubscribe",
+      value: function unsubscribe(el) {
+        (0, import_jquery13.default)(el).off(".dateInputBinding");
+      }
+    }, {
+      key: "getRatePolicy",
+      value: function getRatePolicy() {
+        return {
+          policy: "debounce",
+          delay: 250
+        };
+      }
+    }, {
+      key: "setValue",
+      value: function setValue(el, data) {
+        throw "not implemented";
+        el;
+        data;
+      }
+    }, {
+      key: "initialize",
+      value: function initialize(el) {
+        var $input = (0, import_jquery13.default)(el).find("input");
+        var date = $input.data("initial-date");
+        if (date === void 0 || date === null) {
+          date = this._floorDateTime(this._dateAsUTC(new Date()));
+        }
+        this.setValue(el, date);
+        if ($input.data("min-date") !== void 0) {
+          this._setMin($input[0], $input.data("min-date"));
+        }
+        if ($input.data("max-date") !== void 0) {
+          this._setMax($input[0], $input.data("max-date"));
+        }
+      }
+    }, {
+      key: "_getLabelNode",
+      value: function _getLabelNode(el) {
+        return (0, import_jquery13.default)(el).find('label[for="' + $escape(el.id) + '"]');
+      }
+    }, {
+      key: "_formatToString",
+      value: function _formatToString(format) {
+        var str = "";
+        var i;
+        for (i = 0; i < format.parts.length; i++) {
+          str += format.separators[i] + format.parts[i];
+        }
+        str += format.separators[i];
+        return str;
+      }
+    }, {
+      key: "_setMin",
+      value: function _setMin(el, date) {
+        if (date === void 0)
+          return;
+        if (date === null) {
+          (0, import_jquery13.default)(el).bsDatepicker("setStartDate", null);
+          return;
+        }
+        date = this._newDate(date);
+        if (date === null)
+          return;
+        if (isNaN(date.valueOf()))
+          return;
+        var curValue = (0, import_jquery13.default)(el).bsDatepicker("getUTCDate");
+        (0, import_jquery13.default)(el).bsDatepicker("setStartDate", this._UTCDateAsLocal(date));
+        if (date && curValue && date.getTime() > curValue.getTime()) {
+          (0, import_jquery13.default)(el).bsDatepicker("clearDates");
+        } else {
+          (0, import_jquery13.default)(el).bsDatepicker("setUTCDate", curValue);
+        }
+      }
+    }, {
+      key: "_setMax",
+      value: function _setMax(el, date) {
+        if (date === void 0)
+          return;
+        if (date === null) {
+          (0, import_jquery13.default)(el).bsDatepicker("setEndDate", null);
+          return;
+        }
+        date = this._newDate(date);
+        if (date === null)
+          return;
+        if (isNaN(date.valueOf()))
+          return;
+        var curValue = (0, import_jquery13.default)(el).bsDatepicker("getUTCDate");
+        (0, import_jquery13.default)(el).bsDatepicker("setEndDate", this._UTCDateAsLocal(date));
+        if (date && curValue && date.getTime() < curValue.getTime()) {
+          (0, import_jquery13.default)(el).bsDatepicker("clearDates");
+        } else {
+          (0, import_jquery13.default)(el).bsDatepicker("setUTCDate", curValue);
+        }
+      }
+    }, {
+      key: "_newDate",
+      value: function _newDate(date) {
+        if (date instanceof Date)
+          return date;
+        if (!date)
+          return null;
+        var d = parseDate(date);
+        if (isNaN(d.valueOf()))
+          return null;
+        return d;
+      }
+    }, {
+      key: "_floorDateTime",
+      value: function _floorDateTime(date) {
+        date = new Date(date.getTime());
+        date.setUTCHours(0, 0, 0, 0);
+        return date;
+      }
+    }, {
+      key: "_dateAsUTC",
+      value: function _dateAsUTC(date) {
+        return new Date(date.getTime() - date.getTimezoneOffset() * 6e4);
+      }
+    }, {
+      key: "_UTCDateAsLocal",
+      value: function _UTCDateAsLocal(date) {
+        return new Date(date.getTime() + date.getTimezoneOffset() * 6e4);
+      }
+    }]);
+    return DateInputBindingBase2;
+  }(InputBinding);
+  var DateInputBinding = /* @__PURE__ */ function(_DateInputBindingBase) {
+    _inherits8(DateInputBinding2, _DateInputBindingBase);
+    var _super2 = _createSuper8(DateInputBinding2);
+    function DateInputBinding2() {
+      _classCallCheck10(this, DateInputBinding2);
+      return _super2.apply(this, arguments);
+    }
+    _createClass10(DateInputBinding2, [{
+      key: "getValue",
+      value: function getValue(el) {
+        var date = (0, import_jquery13.default)(el).find("input").bsDatepicker("getUTCDate");
+        return formatDateUTC(date);
+      }
+    }, {
+      key: "setValue",
+      value: function setValue(el, value) {
+        if (value === null) {
+          (0, import_jquery13.default)(el).find("input").val("").bsDatepicker("update");
+          return;
+        }
+        var date = this._newDate(value);
+        if (isNaN(date.valueOf()))
+          return;
+        (0, import_jquery13.default)(el).find("input").bsDatepicker("setUTCDate", date);
+      }
+    }, {
+      key: "getState",
+      value: function getState(el) {
+        var $el = (0, import_jquery13.default)(el);
+        var $input = $el.find("input");
+        var min4 = $input.data("datepicker").startDate;
+        var max4 = $input.data("datepicker").endDate;
+        min4 = min4 === -Infinity ? null : formatDateUTC(min4);
+        max4 = max4 === Infinity ? null : formatDateUTC(max4);
+        var startview = $input.data("datepicker").startViewMode;
+        if (startview === 2)
+          startview = "decade";
+        else if (startview === 1)
+          startview = "year";
+        else if (startview === 0)
+          startview = "month";
+        return {
+          label: this._getLabelNode(el).text(),
+          value: this.getValue(el),
+          valueString: $input.val(),
+          min: min4,
+          max: max4,
+          language: $input.data("datepicker").language,
+          weekstart: $input.data("datepicker").weekStart,
+          format: this._formatToString($input.data("datepicker").format),
+          startview: startview
+        };
+      }
+    }, {
+      key: "receiveMessage",
+      value: function receiveMessage(el, data) {
+        var $input = (0, import_jquery13.default)(el).find("input");
+        updateLabel(data.label, this._getLabelNode(el));
+        if (hasOwnProperty(data, "min"))
+          this._setMin($input[0], data.min);
+        if (hasOwnProperty(data, "max"))
+          this._setMax($input[0], data.max);
+        if (hasOwnProperty(data, "value"))
+          this.setValue(el, data.value);
+        (0, import_jquery13.default)(el).trigger("change");
+      }
+    }]);
+    return DateInputBinding2;
+  }(DateInputBindingBase);
+
+  // src/bindings/input/slider.ts
+  var import_es_regexp_exec2 = __toModule(require_es_regexp_exec());
+  var import_es_array_iterator9 = __toModule(require_es_array_iterator());
+  var import_jquery14 = __toModule(require_jquery());
+  var import_strftime = __toModule(require_strftime());
+  function _typeof9(obj) {
+    "@babel/helpers - typeof";
+    if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
+      _typeof9 = function _typeof27(obj2) {
+        return typeof obj2;
+      };
+    } else {
+      _typeof9 = function _typeof27(obj2) {
+        return obj2 && typeof Symbol === "function" && obj2.constructor === Symbol && obj2 !== Symbol.prototype ? "symbol" : typeof obj2;
+      };
+    }
+    return _typeof9(obj);
+  }
+  function _classCallCheck11(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+  function _defineProperties11(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor)
+        descriptor.writable = true;
+      Object.defineProperty(target, descriptor.key, descriptor);
+    }
+  }
+  function _createClass11(Constructor, protoProps, staticProps) {
+    if (protoProps)
+      _defineProperties11(Constructor.prototype, protoProps);
+    if (staticProps)
+      _defineProperties11(Constructor, staticProps);
+    return Constructor;
+  }
+  function _inherits9(subClass, superClass) {
+    if (typeof superClass !== "function" && superClass !== null) {
+      throw new TypeError("Super expression must either be null or a function");
+    }
+    subClass.prototype = Object.create(superClass && superClass.prototype, {constructor: {value: subClass, writable: true, configurable: true}});
+    if (superClass)
+      _setPrototypeOf9(subClass, superClass);
+  }
+  function _setPrototypeOf9(o, p) {
+    _setPrototypeOf9 = Object.setPrototypeOf || function _setPrototypeOf26(o2, p2) {
+      o2.__proto__ = p2;
+      return o2;
+    };
+    return _setPrototypeOf9(o, p);
+  }
+  function _createSuper9(Derived) {
+    var hasNativeReflectConstruct = _isNativeReflectConstruct9();
+    return function _createSuperInternal() {
+      var Super = _getPrototypeOf9(Derived), result;
+      if (hasNativeReflectConstruct) {
+        var NewTarget = _getPrototypeOf9(this).constructor;
+        result = Reflect.construct(Super, arguments, NewTarget);
+      } else {
+        result = Super.apply(this, arguments);
+      }
+      return _possibleConstructorReturn9(this, result);
+    };
+  }
+  function _possibleConstructorReturn9(self2, call) {
+    if (call && (_typeof9(call) === "object" || typeof call === "function")) {
+      return call;
+    }
+    return _assertThisInitialized9(self2);
+  }
+  function _assertThisInitialized9(self2) {
+    if (self2 === void 0) {
+      throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+    }
+    return self2;
+  }
+  function _isNativeReflectConstruct9() {
+    if (typeof Reflect === "undefined" || !Reflect.construct)
+      return false;
+    if (Reflect.construct.sham)
+      return false;
+    if (typeof Proxy === "function")
+      return true;
+    try {
+      Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function() {
+      }));
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+  function _getPrototypeOf9(o) {
+    _getPrototypeOf9 = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf26(o2) {
+      return o2.__proto__ || Object.getPrototypeOf(o2);
+    };
+    return _getPrototypeOf9(o);
+  }
+  function forceIonSliderUpdate(slider) {
+    if (slider.$cache && slider.$cache.input)
+      slider.$cache.input.trigger("change");
+    else
+      console.log("Couldn't force ion slider to update");
+  }
+  function getTypePrettifyer(dataType, timeFormat, timezone) {
+    var timeFormatter;
+    var prettify;
+    if (dataType === "date") {
+      timeFormatter = import_strftime.default.utc();
+      prettify = function prettify2(num) {
+        return timeFormatter(timeFormat, new Date(num));
+      };
+    } else if (dataType === "datetime") {
+      if (timezone)
+        timeFormatter = import_strftime.default.timezone(timezone);
+      else
+        timeFormatter = import_strftime.default;
+      prettify = function prettify2(num) {
+        return timeFormatter(timeFormat, new Date(num));
+      };
+    } else {
+      prettify = function prettify2(num) {
+        return formatNumber(num, this.prettify_separator);
+      };
+    }
+    return prettify;
+  }
+  var SliderInputBinding = /* @__PURE__ */ function(_TextInputBinding) {
+    _inherits9(SliderInputBinding2, _TextInputBinding);
+    var _super = _createSuper9(SliderInputBinding2);
+    function SliderInputBinding2() {
+      _classCallCheck11(this, SliderInputBinding2);
+      return _super.apply(this, arguments);
+    }
+    _createClass11(SliderInputBinding2, [{
+      key: "find",
+      value: function find2(scope) {
+        if (!import_jquery14.default.fn.ionRangeSlider) {
+          return (0, import_jquery14.default)();
+        }
+        return (0, import_jquery14.default)(scope).find("input.js-range-slider");
+      }
+    }, {
+      key: "getType",
+      value: function getType(el) {
+        var dataType = (0, import_jquery14.default)(el).data("data-type");
+        if (dataType === "date")
+          return "shiny.date";
+        else if (dataType === "datetime")
+          return "shiny.datetime";
+        else
+          return false;
+      }
+    }, {
+      key: "getValue",
+      value: function getValue(el) {
+        var $el = (0, import_jquery14.default)(el);
+        var result = (0, import_jquery14.default)(el).data("ionRangeSlider").result;
+        var convert;
+        var dataType = $el.data("data-type");
+        if (dataType === "date") {
+          convert = function convert2(val) {
+            return formatDateUTC(new Date(Number(val)));
+          };
+        } else if (dataType === "datetime") {
+          convert = function convert2(val) {
+            return Number(val) / 1e3;
+          };
+        } else {
+          convert = function convert2(val) {
+            return Number(val);
+          };
+        }
+        if (this._numValues(el) === 2) {
+          return [convert(result.from), convert(result.to)];
+        } else {
+          return convert(result.from);
+        }
+      }
+    }, {
+      key: "setValue",
+      value: function setValue(el, value) {
+        var $el = (0, import_jquery14.default)(el);
+        var slider = $el.data("ionRangeSlider");
+        $el.data("immediate", true);
+        try {
+          if (this._numValues(el) === 2 && value instanceof Array) {
+            slider.update({
+              from: value[0],
+              to: value[1]
+            });
+          } else {
+            slider.update({
+              from: value
+            });
+          }
+          forceIonSliderUpdate(slider);
+        } finally {
+          $el.data("immediate", false);
+        }
+      }
+    }, {
+      key: "subscribe",
+      value: function subscribe(el, callback) {
+        (0, import_jquery14.default)(el).on("change.sliderInputBinding", function() {
+          callback(!(0, import_jquery14.default)(el).data("immediate") && !(0, import_jquery14.default)(el).data("animating"));
+        });
+      }
+    }, {
+      key: "unsubscribe",
+      value: function unsubscribe(el) {
+        (0, import_jquery14.default)(el).off(".sliderInputBinding");
+      }
+    }, {
+      key: "receiveMessage",
+      value: function receiveMessage(el, data) {
+        var $el = (0, import_jquery14.default)(el);
+        var slider = $el.data("ionRangeSlider");
+        var msg = {};
+        if (hasOwnProperty(data, "value")) {
+          if (this._numValues(el) === 2 && data.value instanceof Array) {
+            msg.from = data.value[0];
+            msg.to = data.value[1];
+          } else {
+            msg.from = data.value;
+          }
+        }
+        var sliderFeatures = ["min", "max", "step"];
+        for (var i = 0; i < sliderFeatures.length; i++) {
+          var feats = sliderFeatures[i];
+          if (hasOwnProperty(data, feats)) {
+            msg[feats] = data[feats];
+          }
+        }
+        updateLabel(data.label, this._getLabelNode(el));
+        var domElements = ["data-type", "time-format", "timezone"];
+        for (var _i = 0; _i < domElements.length; _i++) {
+          var elem = domElements[_i];
+          if (hasOwnProperty(data, elem)) {
+            $el.data(elem, data[elem]);
+          }
+        }
+        var dataType = $el.data("data-type");
+        var timeFormat = $el.data("time-format");
+        var timezone = $el.data("timezone");
+        msg.prettify = getTypePrettifyer(dataType, timeFormat, timezone);
+        $el.data("immediate", true);
+        try {
+          slider.update(msg);
+          forceIonSliderUpdate(slider);
+        } finally {
+          $el.data("immediate", false);
+        }
+      }
+    }, {
+      key: "getRatePolicy",
+      value: function getRatePolicy(el) {
+        return {
+          policy: "debounce",
+          delay: 250
+        };
+        el;
+      }
+    }, {
+      key: "getState",
+      value: function getState(el) {
+        el;
+      }
+    }, {
+      key: "initialize",
+      value: function initialize(el) {
+        var $el = (0, import_jquery14.default)(el);
+        var dataType = $el.data("data-type");
+        var timeFormat = $el.data("time-format");
+        var timezone = $el.data("timezone");
+        var opts = {
+          prettify: getTypePrettifyer(dataType, timeFormat, timezone)
+        };
+        $el.ionRangeSlider(opts);
+      }
+    }, {
+      key: "_getLabelNode",
+      value: function _getLabelNode(el) {
+        return (0, import_jquery14.default)(el).parent().find('label[for="' + $escape(el.id) + '"]');
+      }
+    }, {
+      key: "_numValues",
+      value: function _numValues(el) {
+        if ((0, import_jquery14.default)(el).data("ionRangeSlider").options.type === "double")
+          return 2;
+        else
+          return 1;
+      }
+    }]);
+    return SliderInputBinding2;
+  }(TextInputBinding);
+  function formatNumber(num) {
+    var thousandSep = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : ",";
+    var decimalSep = arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : ".";
+    var parts = num.toString().split(".");
+    parts[0] = parts[0].replace(/(\d{1,3}(?=(?:\d\d\d)+(?!\d)))/g, "$1" + thousandSep);
+    if (parts.length === 1)
+      return parts[0];
+    else if (parts.length === 2)
+      return parts[0] + decimalSep + parts[1];
+    else
+      return "";
+  }
+  (0, import_jquery14.default)(document).on("click", ".slider-animate-button", function(evt) {
+    evt.preventDefault();
+    var self2 = (0, import_jquery14.default)(this);
+    var target = (0, import_jquery14.default)("#" + $escape(self2.attr("data-target-id")));
+    var startLabel = "Play";
+    var stopLabel = "Pause";
+    var loop = self2.attr("data-loop") !== void 0 && !/^\s*false\s*$/i.test(self2.attr("data-loop"));
+    var animInterval = self2.attr("data-interval");
+    if (isNaN(animInterval))
+      animInterval = 1500;
+    else
+      animInterval = Number(animInterval);
+    if (!target.data("animTimer")) {
+      var timer;
+      if (target.hasClass("jslider")) {
+        var slider = target.slider();
+        if (!slider.canStepNext())
+          slider.resetToStart();
+        timer = setInterval(function() {
+          if (loop && !slider.canStepNext()) {
+            slider.resetToStart();
+          } else {
+            slider.stepNext();
+            if (!loop && !slider.canStepNext()) {
+              self2.click();
+            }
+          }
+        }, animInterval);
+      } else {
+        var _slider = target.data("ionRangeSlider");
+        var sliderCanStep = function sliderCanStep2() {
+          if (_slider.options.type === "double")
+            return _slider.result.to < _slider.result.max;
+          else
+            return _slider.result.from < _slider.result.max;
+        };
+        var sliderReset = function sliderReset2() {
+          var val = {
+            from: _slider.result.min
+          };
+          if (_slider.options.type === "double")
+            val.to = val.from + (_slider.result.to - _slider.result.from);
+          _slider.update(val);
+          forceIonSliderUpdate(_slider);
+        };
+        var sliderStep = function sliderStep2() {
+          var val = {
+            from: Math.min(_slider.result.max, _slider.result.from + _slider.options.step)
+          };
+          if (_slider.options.type === "double")
+            val.to = Math.min(_slider.result.max, _slider.result.to + _slider.options.step);
+          _slider.update(val);
+          forceIonSliderUpdate(_slider);
+        };
+        if (!sliderCanStep())
+          sliderReset();
+        timer = setInterval(function() {
+          if (loop && !sliderCanStep()) {
+            sliderReset();
+          } else {
+            sliderStep();
+            if (!loop && !sliderCanStep()) {
+              self2.click();
+            }
+          }
+        }, animInterval);
+      }
+      target.data("animTimer", timer);
+      self2.attr("title", stopLabel);
+      self2.addClass("playing");
+      target.data("animating", true);
+    } else {
+      clearTimeout(target.data("animTimer"));
+      target.removeData("animTimer");
+      self2.attr("title", startLabel);
+      self2.removeClass("playing");
+      target.removeData("animating");
+    }
+  });
+
+  // src/bindings/input/daterange.ts
+  var import_es_array_iterator10 = __toModule(require_es_array_iterator());
+  var import_jquery15 = __toModule(require_jquery());
+  function _typeof10(obj) {
+    "@babel/helpers - typeof";
+    if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
+      _typeof10 = function _typeof27(obj2) {
+        return typeof obj2;
+      };
+    } else {
+      _typeof10 = function _typeof27(obj2) {
+        return obj2 && typeof Symbol === "function" && obj2.constructor === Symbol && obj2 !== Symbol.prototype ? "symbol" : typeof obj2;
+      };
+    }
+    return _typeof10(obj);
+  }
+  function _classCallCheck12(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+  function _defineProperties12(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor)
+        descriptor.writable = true;
+      Object.defineProperty(target, descriptor.key, descriptor);
+    }
+  }
+  function _createClass12(Constructor, protoProps, staticProps) {
+    if (protoProps)
+      _defineProperties12(Constructor.prototype, protoProps);
+    if (staticProps)
+      _defineProperties12(Constructor, staticProps);
+    return Constructor;
+  }
+  function _inherits10(subClass, superClass) {
+    if (typeof superClass !== "function" && superClass !== null) {
+      throw new TypeError("Super expression must either be null or a function");
+    }
+    subClass.prototype = Object.create(superClass && superClass.prototype, {constructor: {value: subClass, writable: true, configurable: true}});
+    if (superClass)
+      _setPrototypeOf10(subClass, superClass);
+  }
+  function _setPrototypeOf10(o, p) {
+    _setPrototypeOf10 = Object.setPrototypeOf || function _setPrototypeOf26(o2, p2) {
+      o2.__proto__ = p2;
+      return o2;
+    };
+    return _setPrototypeOf10(o, p);
+  }
+  function _createSuper10(Derived) {
+    var hasNativeReflectConstruct = _isNativeReflectConstruct10();
+    return function _createSuperInternal() {
+      var Super = _getPrototypeOf10(Derived), result;
+      if (hasNativeReflectConstruct) {
+        var NewTarget = _getPrototypeOf10(this).constructor;
+        result = Reflect.construct(Super, arguments, NewTarget);
+      } else {
+        result = Super.apply(this, arguments);
+      }
+      return _possibleConstructorReturn10(this, result);
+    };
+  }
+  function _possibleConstructorReturn10(self2, call) {
+    if (call && (_typeof10(call) === "object" || typeof call === "function")) {
+      return call;
+    }
+    return _assertThisInitialized10(self2);
+  }
+  function _assertThisInitialized10(self2) {
+    if (self2 === void 0) {
+      throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+    }
+    return self2;
+  }
+  function _isNativeReflectConstruct10() {
+    if (typeof Reflect === "undefined" || !Reflect.construct)
+      return false;
+    if (Reflect.construct.sham)
+      return false;
+    if (typeof Proxy === "function")
+      return true;
+    try {
+      Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function() {
+      }));
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+  function _getPrototypeOf10(o) {
+    _getPrototypeOf10 = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf26(o2) {
+      return o2.__proto__ || Object.getPrototypeOf(o2);
+    };
+    return _getPrototypeOf10(o);
+  }
+  var DateRangeInputBinding = /* @__PURE__ */ function(_DateInputBindingBase) {
+    _inherits10(DateRangeInputBinding2, _DateInputBindingBase);
+    var _super = _createSuper10(DateRangeInputBinding2);
+    function DateRangeInputBinding2() {
+      _classCallCheck12(this, DateRangeInputBinding2);
+      return _super.apply(this, arguments);
+    }
+    _createClass12(DateRangeInputBinding2, [{
+      key: "find",
+      value: function find2(scope) {
+        return (0, import_jquery15.default)(scope).find(".shiny-date-range-input");
+      }
+    }, {
+      key: "getValue",
+      value: function getValue(el) {
+        var $inputs = (0, import_jquery15.default)(el).find("input");
+        var start = $inputs.eq(0).bsDatepicker("getUTCDate");
+        var end = $inputs.eq(1).bsDatepicker("getUTCDate");
+        return [formatDateUTC(start), formatDateUTC(end)];
+      }
+    }, {
+      key: "setValue",
+      value: function setValue(el, value) {
+        if (!(value instanceof Object)) {
+          return;
+        }
+        var $inputs = (0, import_jquery15.default)(el).find("input");
+        if (value.start !== void 0) {
+          if (value.start === null) {
+            $inputs.eq(0).val("").bsDatepicker("update");
+          } else {
+            var start = this._newDate(value.start);
+            $inputs.eq(0).bsDatepicker("setUTCDate", start);
+          }
+        }
+        if (value.end !== void 0) {
+          if (value.end === null) {
+            $inputs.eq(1).val("").bsDatepicker("update");
+          } else {
+            var end = this._newDate(value.end);
+            $inputs.eq(1).bsDatepicker("setUTCDate", end);
+          }
+        }
+      }
+    }, {
+      key: "getState",
+      value: function getState(el) {
+        var $el = (0, import_jquery15.default)(el);
+        var $inputs = $el.find("input");
+        var $startinput = $inputs.eq(0);
+        var $endinput = $inputs.eq(1);
+        var min4 = $startinput.bsDatepicker("getStartDate");
+        var max4 = $startinput.bsDatepicker("getEndDate");
+        min4 = min4 === -Infinity ? null : formatDateUTC(min4);
+        max4 = max4 === Infinity ? null : formatDateUTC(max4);
+        var startview = $startinput.data("datepicker").startView;
+        if (startview === 2)
+          startview = "decade";
+        else if (startview === 1)
+          startview = "year";
+        else if (startview === 0)
+          startview = "month";
+        return {
+          label: this._getLabelNode(el).text(),
+          value: this.getValue(el),
+          valueString: [$startinput.val(), $endinput.val()],
+          min: min4,
+          max: max4,
+          weekstart: $startinput.data("datepicker").weekStart,
+          format: this._formatToString($startinput.data("datepicker").format),
+          language: $startinput.data("datepicker").language,
+          startview: startview
+        };
+      }
+    }, {
+      key: "receiveMessage",
+      value: function receiveMessage(el, data) {
+        var $el = (0, import_jquery15.default)(el);
+        var $inputs = $el.find("input");
+        var $startinput = $inputs.eq(0);
+        var $endinput = $inputs.eq(1);
+        updateLabel(data.label, this._getLabelNode(el));
+        if (hasOwnProperty(data, "min")) {
+          this._setMin($startinput[0], data.min);
+          this._setMin($endinput[0], data.min);
+        }
+        if (hasOwnProperty(data, "max")) {
+          this._setMax($startinput[0], data.max);
+          this._setMax($endinput[0], data.max);
+        }
+        if (hasOwnProperty(data, "value"))
+          this.setValue(el, data.value);
+        $el.trigger("change");
+      }
+    }, {
+      key: "initialize",
+      value: function initialize(el) {
+        var $el = (0, import_jquery15.default)(el);
+        var $inputs = $el.find("input");
+        var $startinput = $inputs.eq(0);
+        var $endinput = $inputs.eq(1);
+        var start = $startinput.data("initial-date");
+        var end = $endinput.data("initial-date");
+        if (start === void 0 || start === null)
+          start = this._dateAsUTC(new Date());
+        if (end === void 0 || end === null)
+          end = this._dateAsUTC(new Date());
+        this.setValue(el, {
+          start: start,
+          end: end
+        });
+        this._setMin($startinput[0], $startinput.data("min-date"));
+        this._setMin($endinput[0], $startinput.data("min-date"));
+        this._setMax($startinput[0], $endinput.data("max-date"));
+        this._setMax($endinput[0], $endinput.data("max-date"));
+      }
+    }, {
+      key: "subscribe",
+      value: function subscribe(el, callback) {
+        (0, import_jquery15.default)(el).on("keyup.dateRangeInputBinding input.dateRangeInputBinding", function() {
+          callback(true);
+        });
+        (0, import_jquery15.default)(el).on("changeDate.dateRangeInputBinding change.dateRangeInputBinding", function() {
+          callback(false);
+        });
+      }
+    }, {
+      key: "unsubscribe",
+      value: function unsubscribe(el) {
+        (0, import_jquery15.default)(el).off(".dateRangeInputBinding");
+      }
+    }, {
+      key: "_getLabelNode",
+      value: function _getLabelNode(el) {
+        return (0, import_jquery15.default)(el).find('label[for="' + $escape(el.id) + '"]');
+      }
+    }]);
+    return DateRangeInputBinding2;
+  }(DateInputBindingBase);
+
+  // src/bindings/input/selectInput.ts
+  var import_es_array_iterator11 = __toModule(require_es_array_iterator());
+  var import_jquery16 = __toModule(require_jquery());
+
+  // src/utils/eval.ts
+  var indirectEval = eval;
+
+  // src/bindings/input/selectInput.ts
+  function _typeof11(obj) {
+    "@babel/helpers - typeof";
+    if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
+      _typeof11 = function _typeof27(obj2) {
+        return typeof obj2;
+      };
+    } else {
+      _typeof11 = function _typeof27(obj2) {
+        return obj2 && typeof Symbol === "function" && obj2.constructor === Symbol && obj2 !== Symbol.prototype ? "symbol" : typeof obj2;
+      };
+    }
+    return _typeof11(obj);
+  }
+  function _classCallCheck13(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+  function _defineProperties13(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor)
+        descriptor.writable = true;
+      Object.defineProperty(target, descriptor.key, descriptor);
+    }
+  }
+  function _createClass13(Constructor, protoProps, staticProps) {
+    if (protoProps)
+      _defineProperties13(Constructor.prototype, protoProps);
+    if (staticProps)
+      _defineProperties13(Constructor, staticProps);
+    return Constructor;
+  }
+  function _inherits11(subClass, superClass) {
+    if (typeof superClass !== "function" && superClass !== null) {
+      throw new TypeError("Super expression must either be null or a function");
+    }
+    subClass.prototype = Object.create(superClass && superClass.prototype, {constructor: {value: subClass, writable: true, configurable: true}});
+    if (superClass)
+      _setPrototypeOf11(subClass, superClass);
+  }
+  function _setPrototypeOf11(o, p) {
+    _setPrototypeOf11 = Object.setPrototypeOf || function _setPrototypeOf26(o2, p2) {
+      o2.__proto__ = p2;
+      return o2;
+    };
+    return _setPrototypeOf11(o, p);
+  }
+  function _createSuper11(Derived) {
+    var hasNativeReflectConstruct = _isNativeReflectConstruct11();
+    return function _createSuperInternal() {
+      var Super = _getPrototypeOf11(Derived), result;
+      if (hasNativeReflectConstruct) {
+        var NewTarget = _getPrototypeOf11(this).constructor;
+        result = Reflect.construct(Super, arguments, NewTarget);
+      } else {
+        result = Super.apply(this, arguments);
+      }
+      return _possibleConstructorReturn11(this, result);
+    };
+  }
+  function _possibleConstructorReturn11(self2, call) {
+    if (call && (_typeof11(call) === "object" || typeof call === "function")) {
+      return call;
+    }
+    return _assertThisInitialized11(self2);
+  }
+  function _assertThisInitialized11(self2) {
+    if (self2 === void 0) {
+      throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+    }
+    return self2;
+  }
+  function _isNativeReflectConstruct11() {
+    if (typeof Reflect === "undefined" || !Reflect.construct)
+      return false;
+    if (Reflect.construct.sham)
+      return false;
+    if (typeof Proxy === "function")
+      return true;
+    try {
+      Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function() {
+      }));
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+  function _getPrototypeOf11(o) {
+    _getPrototypeOf11 = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf26(o2) {
+      return o2.__proto__ || Object.getPrototypeOf(o2);
+    };
+    return _getPrototypeOf11(o);
+  }
+  var SelectInputBinding = /* @__PURE__ */ function(_InputBinding) {
+    _inherits11(SelectInputBinding2, _InputBinding);
+    var _super = _createSuper11(SelectInputBinding2);
+    function SelectInputBinding2() {
+      _classCallCheck13(this, SelectInputBinding2);
+      return _super.apply(this, arguments);
+    }
+    _createClass13(SelectInputBinding2, [{
+      key: "find",
+      value: function find2(scope) {
+        return (0, import_jquery16.default)(scope).find("select");
+      }
+    }, {
+      key: "getType",
+      value: function getType(el) {
+        var $el = (0, import_jquery16.default)(el);
+        if (!$el.hasClass("symbol")) {
+          return null;
+        }
+        if ($el.attr("multiple") === "multiple") {
+          return "shiny.symbolList";
+        } else {
+          return "shiny.symbol";
+        }
+      }
+    }, {
+      key: "getId",
+      value: function getId(el) {
+        return InputBinding.prototype.getId.call(this, el) || el.name;
+      }
+    }, {
+      key: "getValue",
+      value: function getValue(el) {
+        return (0, import_jquery16.default)(el).val();
+      }
+    }, {
+      key: "setValue",
+      value: function setValue(el, value) {
+        if (!this._is_selectize(el)) {
+          (0, import_jquery16.default)(el).val(value);
+        } else {
+          var selectize = this._selectize(el);
+          if (selectize) {
+            selectize.setValue(value);
+          }
+        }
+      }
+    }, {
+      key: "getState",
+      value: function getState(el) {
+        var options = new Array(el.length);
+        for (var i = 0; i < el.length; i++) {
+          options[i] = {
+            value: el[i].value,
+            label: el[i].label
+          };
+        }
+        return {
+          label: this._getLabelNode(el),
+          value: this.getValue(el),
+          options: options
+        };
+      }
+    }, {
+      key: "receiveMessage",
+      value: function receiveMessage(el, data) {
+        var $el = (0, import_jquery16.default)(el);
+        var selectize;
+        if (hasOwnProperty(data, "options")) {
+          selectize = this._selectize(el);
+          if (selectize)
+            selectize.destroy();
+          $el.empty().append(data.options);
+          this._selectize(el);
+        }
+        if (hasOwnProperty(data, "config")) {
+          $el.parent().find('script[data-for="' + $escape(el.id) + '"]').replaceWith(data.config);
+          this._selectize(el, true);
+        }
+        if (hasOwnProperty(data, "url")) {
+          selectize = this._selectize(el);
+          selectize.clearOptions();
+          var loaded = false;
+          selectize.settings.load = function(query, callback) {
+            var settings = selectize.settings;
+            import_jquery16.default.ajax({
+              url: data.url,
+              data: {
+                query: query,
+                field: JSON.stringify([settings.searchField]),
+                value: settings.valueField,
+                conju: settings.searchConjunction,
+                maxop: settings.maxOptions
+              },
+              type: "GET",
+              error: function error() {
+                callback();
+              },
+              success: function success(res) {
+                import_jquery16.default.each(res, function(index, elem) {
+                  var optgroupId = elem[settings.optgroupField || "optgroup"];
+                  var optgroup = {};
+                  optgroup[settings.optgroupLabelField || "label"] = optgroupId;
+                  optgroup[settings.optgroupValueField || "value"] = optgroupId;
+                  selectize.addOptionGroup(optgroupId, optgroup);
+                });
+                callback(res);
+                if (!loaded) {
+                  if (hasOwnProperty(data, "value")) {
+                    selectize.setValue(data.value);
+                  } else if (settings.maxItems === 1) {
+                    selectize.setValue(res[0].value);
+                  }
+                }
+                loaded = true;
+              }
+            });
+          };
+          selectize.load(function(callback) {
+            selectize.settings.load.apply(selectize, ["", callback]);
+          });
+        } else if (hasOwnProperty(data, "value")) {
+          this.setValue(el, data.value);
+        }
+        updateLabel(data.label, this._getLabelNode(el));
+        (0, import_jquery16.default)(el).trigger("change");
+      }
+    }, {
+      key: "subscribe",
+      value: function subscribe(el, callback) {
+        var _this = this;
+        (0, import_jquery16.default)(el).on("change.selectInputBinding", function() {
+          if (el.nonempty && _this.getValue(el) === "") {
+            return;
+          }
+          callback(false);
+        });
+      }
+    }, {
+      key: "unsubscribe",
+      value: function unsubscribe(el) {
+        (0, import_jquery16.default)(el).off(".selectInputBinding");
+      }
+    }, {
+      key: "initialize",
+      value: function initialize(el) {
+        this._selectize(el);
+      }
+    }, {
+      key: "_getLabelNode",
+      value: function _getLabelNode(el) {
+        var escapedId = $escape(el.id);
+        if (this._is_selectize(el)) {
+          escapedId += "-selectized";
+        }
+        return (0, import_jquery16.default)(el).parent().parent().find('label[for="' + escapedId + '"]');
+      }
+    }, {
+      key: "_is_selectize",
+      value: function _is_selectize(el) {
+        var config = (0, import_jquery16.default)(el).parent().find('script[data-for="' + $escape(el.id) + '"]');
+        return config.length > 0;
+      }
+    }, {
+      key: "_selectize",
+      value: function _selectize(el) {
+        var update = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : false;
+        if (!import_jquery16.default.fn.selectize)
+          return void 0;
+        var $el = (0, import_jquery16.default)(el);
+        var config = $el.parent().find('script[data-for="' + $escape(el.id) + '"]');
+        if (config.length === 0)
+          return void 0;
+        var options = import_jquery16.default.extend({
+          labelField: "label",
+          valueField: "value",
+          searchField: ["label"]
+        }, JSON.parse(config.html()));
+        if (typeof config.data("nonempty") !== "undefined") {
+          el.nonempty = true;
+          options = import_jquery16.default.extend(options, {
+            onItemRemove: function onItemRemove(value) {
+              if (this.getValue() === "")
+                (0, import_jquery16.default)("select#" + $escape(el.id)).empty().append((0, import_jquery16.default)("<option/>", {
+                  value: value,
+                  selected: true
+                })).trigger("change");
+            },
+            onDropdownClose: function onDropdownClose() {
+              if (this.getValue() === "")
+                this.setValue((0, import_jquery16.default)("select#" + $escape(el.id)).val());
+            }
+          });
+        } else {
+          el.nonempty = false;
+        }
+        if (config.data("eval") instanceof Array)
+          import_jquery16.default.each(config.data("eval"), function(i, x) {
+            options[x] = indirectEval("(" + options[x] + ")");
+          });
+        var control = $el.selectize(options)[0].selectize;
+        if (update) {
+          var settings = import_jquery16.default.extend(control.settings, options);
+          control.destroy();
+          control = $el.selectize(settings)[0].selectize;
+        }
+        return control;
+      }
+    }]);
+    return SelectInputBinding2;
+  }(InputBinding);
+
+  // src/bindings/input/actionbutton.ts
+  var import_es_array_iterator12 = __toModule(require_es_array_iterator());
+  var import_jquery17 = __toModule(require_jquery());
+  function _typeof12(obj) {
+    "@babel/helpers - typeof";
+    if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
+      _typeof12 = function _typeof27(obj2) {
+        return typeof obj2;
+      };
+    } else {
+      _typeof12 = function _typeof27(obj2) {
+        return obj2 && typeof Symbol === "function" && obj2.constructor === Symbol && obj2 !== Symbol.prototype ? "symbol" : typeof obj2;
+      };
+    }
+    return _typeof12(obj);
+  }
+  function _classCallCheck14(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+  function _defineProperties14(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor)
+        descriptor.writable = true;
+      Object.defineProperty(target, descriptor.key, descriptor);
+    }
+  }
+  function _createClass14(Constructor, protoProps, staticProps) {
+    if (protoProps)
+      _defineProperties14(Constructor.prototype, protoProps);
+    if (staticProps)
+      _defineProperties14(Constructor, staticProps);
+    return Constructor;
+  }
+  function _inherits12(subClass, superClass) {
+    if (typeof superClass !== "function" && superClass !== null) {
+      throw new TypeError("Super expression must either be null or a function");
+    }
+    subClass.prototype = Object.create(superClass && superClass.prototype, {constructor: {value: subClass, writable: true, configurable: true}});
+    if (superClass)
+      _setPrototypeOf12(subClass, superClass);
+  }
+  function _setPrototypeOf12(o, p) {
+    _setPrototypeOf12 = Object.setPrototypeOf || function _setPrototypeOf26(o2, p2) {
+      o2.__proto__ = p2;
+      return o2;
+    };
+    return _setPrototypeOf12(o, p);
+  }
+  function _createSuper12(Derived) {
+    var hasNativeReflectConstruct = _isNativeReflectConstruct12();
+    return function _createSuperInternal() {
+      var Super = _getPrototypeOf12(Derived), result;
+      if (hasNativeReflectConstruct) {
+        var NewTarget = _getPrototypeOf12(this).constructor;
+        result = Reflect.construct(Super, arguments, NewTarget);
+      } else {
+        result = Super.apply(this, arguments);
+      }
+      return _possibleConstructorReturn12(this, result);
+    };
+  }
+  function _possibleConstructorReturn12(self2, call) {
+    if (call && (_typeof12(call) === "object" || typeof call === "function")) {
+      return call;
+    }
+    return _assertThisInitialized12(self2);
+  }
+  function _assertThisInitialized12(self2) {
+    if (self2 === void 0) {
+      throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+    }
+    return self2;
+  }
+  function _isNativeReflectConstruct12() {
+    if (typeof Reflect === "undefined" || !Reflect.construct)
+      return false;
+    if (Reflect.construct.sham)
+      return false;
+    if (typeof Proxy === "function")
+      return true;
+    try {
+      Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function() {
+      }));
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+  function _getPrototypeOf12(o) {
+    _getPrototypeOf12 = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf26(o2) {
+      return o2.__proto__ || Object.getPrototypeOf(o2);
+    };
+    return _getPrototypeOf12(o);
+  }
+  var ActionButtonInputBinding = /* @__PURE__ */ function(_InputBinding) {
+    _inherits12(ActionButtonInputBinding2, _InputBinding);
+    var _super = _createSuper12(ActionButtonInputBinding2);
+    function ActionButtonInputBinding2() {
+      _classCallCheck14(this, ActionButtonInputBinding2);
+      return _super.apply(this, arguments);
+    }
+    _createClass14(ActionButtonInputBinding2, [{
+      key: "find",
+      value: function find2(scope) {
+        return (0, import_jquery17.default)(scope).find(".action-button");
+      }
+    }, {
+      key: "getValue",
+      value: function getValue(el) {
+        return (0, import_jquery17.default)(el).data("val") || 0;
+      }
+    }, {
+      key: "setValue",
+      value: function setValue(el, value) {
+        (0, import_jquery17.default)(el).data("val", value);
+      }
+    }, {
+      key: "getType",
+      value: function getType(el) {
+        return "shiny.action";
+        el;
+      }
+    }, {
+      key: "subscribe",
+      value: function subscribe(el, callback) {
+        (0, import_jquery17.default)(el).on("click.actionButtonInputBinding", function() {
+          var $el = (0, import_jquery17.default)(this);
+          var val = $el.data("val") || 0;
+          $el.data("val", val + 1);
+          callback(false);
+        });
+      }
+    }, {
+      key: "getState",
+      value: function getState(el) {
+        return {
+          value: this.getValue(el)
+        };
+      }
+    }, {
+      key: "receiveMessage",
+      value: function receiveMessage(el, data) {
+        var $el = (0, import_jquery17.default)(el);
+        var label = $el.text();
+        var icon = "";
+        if ($el.find("i[class]").length > 0) {
+          var iconHtml = $el.find("i[class]")[0];
+          if (iconHtml === $el.children()[0]) {
+            icon = (0, import_jquery17.default)(iconHtml).prop("outerHTML");
+          }
+        }
+        if (hasOwnProperty(data, "label"))
+          label = data.label;
+        if (hasOwnProperty(data, "icon")) {
+          icon = data.icon;
+          if (icon.length === 0)
+            icon = "";
+        }
+        $el.html(icon + " " + label);
+      }
+    }, {
+      key: "unsubscribe",
+      value: function unsubscribe(el) {
+        (0, import_jquery17.default)(el).off(".actionButtonInputBinding");
+      }
+    }]);
+    return ActionButtonInputBinding2;
+  }(InputBinding);
+  (0, import_jquery17.default)(document).on("click", "a.action-button", function(e) {
+    e.preventDefault();
+  });
+
+  // src/bindings/input/tabinput.ts
+  var import_es_array_iterator13 = __toModule(require_es_array_iterator());
+  var import_jquery18 = __toModule(require_jquery());
+  function _typeof13(obj) {
+    "@babel/helpers - typeof";
+    if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
+      _typeof13 = function _typeof27(obj2) {
+        return typeof obj2;
+      };
+    } else {
+      _typeof13 = function _typeof27(obj2) {
+        return obj2 && typeof Symbol === "function" && obj2.constructor === Symbol && obj2 !== Symbol.prototype ? "symbol" : typeof obj2;
+      };
+    }
+    return _typeof13(obj);
+  }
+  function _classCallCheck15(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+  function _defineProperties15(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor)
+        descriptor.writable = true;
+      Object.defineProperty(target, descriptor.key, descriptor);
+    }
+  }
+  function _createClass15(Constructor, protoProps, staticProps) {
+    if (protoProps)
+      _defineProperties15(Constructor.prototype, protoProps);
+    if (staticProps)
+      _defineProperties15(Constructor, staticProps);
+    return Constructor;
+  }
+  function _inherits13(subClass, superClass) {
+    if (typeof superClass !== "function" && superClass !== null) {
+      throw new TypeError("Super expression must either be null or a function");
+    }
+    subClass.prototype = Object.create(superClass && superClass.prototype, {constructor: {value: subClass, writable: true, configurable: true}});
+    if (superClass)
+      _setPrototypeOf13(subClass, superClass);
+  }
+  function _setPrototypeOf13(o, p) {
+    _setPrototypeOf13 = Object.setPrototypeOf || function _setPrototypeOf26(o2, p2) {
+      o2.__proto__ = p2;
+      return o2;
+    };
+    return _setPrototypeOf13(o, p);
+  }
+  function _createSuper13(Derived) {
+    var hasNativeReflectConstruct = _isNativeReflectConstruct13();
+    return function _createSuperInternal() {
+      var Super = _getPrototypeOf13(Derived), result;
+      if (hasNativeReflectConstruct) {
+        var NewTarget = _getPrototypeOf13(this).constructor;
+        result = Reflect.construct(Super, arguments, NewTarget);
+      } else {
+        result = Super.apply(this, arguments);
+      }
+      return _possibleConstructorReturn13(this, result);
+    };
+  }
+  function _possibleConstructorReturn13(self2, call) {
+    if (call && (_typeof13(call) === "object" || typeof call === "function")) {
+      return call;
+    }
+    return _assertThisInitialized13(self2);
+  }
+  function _assertThisInitialized13(self2) {
+    if (self2 === void 0) {
+      throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+    }
+    return self2;
+  }
+  function _isNativeReflectConstruct13() {
+    if (typeof Reflect === "undefined" || !Reflect.construct)
+      return false;
+    if (Reflect.construct.sham)
+      return false;
+    if (typeof Proxy === "function")
+      return true;
+    try {
+      Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function() {
+      }));
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+  function _getPrototypeOf13(o) {
+    _getPrototypeOf13 = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf26(o2) {
+      return o2.__proto__ || Object.getPrototypeOf(o2);
+    };
+    return _getPrototypeOf13(o);
+  }
+  var BootstrapTabInputBinding = /* @__PURE__ */ function(_InputBinding) {
+    _inherits13(BootstrapTabInputBinding2, _InputBinding);
+    var _super = _createSuper13(BootstrapTabInputBinding2);
+    function BootstrapTabInputBinding2() {
+      _classCallCheck15(this, BootstrapTabInputBinding2);
+      return _super.apply(this, arguments);
+    }
+    _createClass15(BootstrapTabInputBinding2, [{
+      key: "find",
+      value: function find2(scope) {
+        return (0, import_jquery18.default)(scope).find("ul.nav.shiny-tab-input");
+      }
+    }, {
+      key: "getValue",
+      value: function getValue(el) {
+        var anchor = isBS3() ? (0, import_jquery18.default)(el).find("li:not(.dropdown).active > a") : (0, import_jquery18.default)(el).find(".nav-link:not(.dropdown-toggle).active, .dropdown-menu > .dropdown-item.active");
+        if (anchor.length === 1)
+          return this._getTabName(anchor);
+        return null;
+      }
+    }, {
+      key: "setValue",
+      value: function setValue(el, value) {
+        var self2 = this;
+        var success = false;
+        if (value) {
+          var anchors = isBS3() ? (0, import_jquery18.default)(el).find("li:not(.dropdown) > a") : (0, import_jquery18.default)(el).find(".nav-link:not(.dropdown-toggle), .dropdown-menu > .dropdown-item");
+          anchors.each(function() {
+            if (self2._getTabName((0, import_jquery18.default)(this)) === value) {
+              (0, import_jquery18.default)(this).tab("show");
+              success = true;
+              return false;
+            }
+            return;
+          });
+        }
+        if (!success) {
+          (0, import_jquery18.default)(el).trigger("change");
+        }
+      }
+    }, {
+      key: "getState",
+      value: function getState(el) {
+        return {
+          value: this.getValue(el)
+        };
+      }
+    }, {
+      key: "receiveMessage",
+      value: function receiveMessage(el, data) {
+        if (hasOwnProperty(data, "value"))
+          this.setValue(el, data.value);
+        (0, import_jquery18.default)(el).trigger("change");
+      }
+    }, {
+      key: "subscribe",
+      value: function subscribe(el, callback) {
+        (0, import_jquery18.default)(el).on("change shown.bootstrapTabInputBinding shown.bs.tab.bootstrapTabInputBinding", function() {
+          callback(false);
+        });
+      }
+    }, {
+      key: "unsubscribe",
+      value: function unsubscribe(el) {
+        (0, import_jquery18.default)(el).off(".bootstrapTabInputBinding");
+      }
+    }, {
+      key: "_getTabName",
+      value: function _getTabName(anchor) {
+        return anchor.attr("data-value") || anchor.text();
+      }
+    }]);
+    return BootstrapTabInputBinding2;
+  }(InputBinding);
+
+  // src/bindings/input/fileinput.ts
+  var import_es_array_iterator15 = __toModule(require_es_array_iterator());
+  var import_jquery21 = __toModule(require_jquery());
+
+  // node_modules/core-js/modules/es.array.map.js
+  "use strict";
+  var $36 = require_export();
+  var $map = require_array_iteration().map;
+  var arrayMethodHasSpeciesSupport4 = require_array_method_has_species_support();
+  var HAS_SPECIES_SUPPORT3 = arrayMethodHasSpeciesSupport4("map");
+  $36({target: "Array", proto: true, forced: !HAS_SPECIES_SUPPORT3}, {
+    map: function map(callbackfn) {
+      return $map(this, callbackfn, arguments.length > 1 ? arguments[1] : void 0);
+    }
+  });
+
+  // src/file/FileProcessor.ts
+  var import_es_array_iterator14 = __toModule(require_es_array_iterator());
+  var import_jquery20 = __toModule(require_jquery());
+
+  // src/events/shiny_inputchanged.ts
+  var import_jquery19 = __toModule(require_jquery());
+  function triggerFileInputChanged(name, value, binding, el, inputType, onEl) {
+    var evt = import_jquery19.default.Event("shiny:inputchanged");
+    evt.name = name;
+    evt.value = value;
+    evt.binding = binding;
+    evt.el = el;
+    evt.inputType = inputType;
+    (0, import_jquery19.default)(onEl).trigger(evt);
+    return evt;
+  }
 
   // src/shiny/initedMethods.ts
   var fullShinyObj_ = null;
@@ -4136,6 +7108,2116 @@
   function getShinyCreateWebsocket() {
     return fullShinyObj_.createSocket;
   }
+
+  // src/file/FileProcessor.ts
+  function _typeof14(obj) {
+    "@babel/helpers - typeof";
+    if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
+      _typeof14 = function _typeof27(obj2) {
+        return typeof obj2;
+      };
+    } else {
+      _typeof14 = function _typeof27(obj2) {
+        return obj2 && typeof Symbol === "function" && obj2.constructor === Symbol && obj2 !== Symbol.prototype ? "symbol" : typeof obj2;
+      };
+    }
+    return _typeof14(obj);
+  }
+  function _inherits14(subClass, superClass) {
+    if (typeof superClass !== "function" && superClass !== null) {
+      throw new TypeError("Super expression must either be null or a function");
+    }
+    subClass.prototype = Object.create(superClass && superClass.prototype, {constructor: {value: subClass, writable: true, configurable: true}});
+    if (superClass)
+      _setPrototypeOf14(subClass, superClass);
+  }
+  function _setPrototypeOf14(o, p) {
+    _setPrototypeOf14 = Object.setPrototypeOf || function _setPrototypeOf26(o2, p2) {
+      o2.__proto__ = p2;
+      return o2;
+    };
+    return _setPrototypeOf14(o, p);
+  }
+  function _createSuper14(Derived) {
+    var hasNativeReflectConstruct = _isNativeReflectConstruct14();
+    return function _createSuperInternal() {
+      var Super = _getPrototypeOf14(Derived), result;
+      if (hasNativeReflectConstruct) {
+        var NewTarget = _getPrototypeOf14(this).constructor;
+        result = Reflect.construct(Super, arguments, NewTarget);
+      } else {
+        result = Super.apply(this, arguments);
+      }
+      return _possibleConstructorReturn14(this, result);
+    };
+  }
+  function _possibleConstructorReturn14(self2, call) {
+    if (call && (_typeof14(call) === "object" || typeof call === "function")) {
+      return call;
+    }
+    return _assertThisInitialized14(self2);
+  }
+  function _assertThisInitialized14(self2) {
+    if (self2 === void 0) {
+      throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+    }
+    return self2;
+  }
+  function _isNativeReflectConstruct14() {
+    if (typeof Reflect === "undefined" || !Reflect.construct)
+      return false;
+    if (Reflect.construct.sham)
+      return false;
+    if (typeof Proxy === "function")
+      return true;
+    try {
+      Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function() {
+      }));
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+  function _getPrototypeOf14(o) {
+    _getPrototypeOf14 = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf26(o2) {
+      return o2.__proto__ || Object.getPrototypeOf(o2);
+    };
+    return _getPrototypeOf14(o);
+  }
+  function _classCallCheck16(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+  function _defineProperties16(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor)
+        descriptor.writable = true;
+      Object.defineProperty(target, descriptor.key, descriptor);
+    }
+  }
+  function _createClass16(Constructor, protoProps, staticProps) {
+    if (protoProps)
+      _defineProperties16(Constructor.prototype, protoProps);
+    if (staticProps)
+      _defineProperties16(Constructor, staticProps);
+    return Constructor;
+  }
+  function _defineProperty3(obj, key, value) {
+    if (key in obj) {
+      Object.defineProperty(obj, key, {value: value, enumerable: true, configurable: true, writable: true});
+    } else {
+      obj[key] = value;
+    }
+    return obj;
+  }
+  var FileProcessor = /* @__PURE__ */ function() {
+    function FileProcessor2(files) {
+      var exec$run = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : true;
+      _classCallCheck16(this, FileProcessor2);
+      _defineProperty3(this, "files", void 0);
+      _defineProperty3(this, "fileIndex", -1);
+      _defineProperty3(this, "aborted", false);
+      _defineProperty3(this, "completed", false);
+      this.files = files;
+      if (exec$run) {
+        this.$run();
+      }
+    }
+    _createClass16(FileProcessor2, [{
+      key: "onBegin",
+      value: function onBegin(files, cont) {
+        files;
+        setTimeout(cont, 0);
+      }
+    }, {
+      key: "onFile",
+      value: function onFile(file, cont) {
+        file;
+        setTimeout(cont, 0);
+      }
+    }, {
+      key: "onComplete",
+      value: function onComplete() {
+        return;
+      }
+    }, {
+      key: "onAbort",
+      value: function onAbort() {
+        return;
+      }
+    }, {
+      key: "abort",
+      value: function abort() {
+        if (this.completed || this.aborted)
+          return;
+        this.aborted = true;
+        this.onAbort();
+      }
+    }, {
+      key: "$getRun",
+      value: function $getRun() {
+        var _this = this;
+        var called = false;
+        return function() {
+          if (called)
+            return;
+          called = true;
+          _this.$run();
+        };
+      }
+    }, {
+      key: "$run",
+      value: function $run() {
+        if (this.aborted || this.completed)
+          return;
+        if (this.fileIndex < 0) {
+          this.fileIndex = 0;
+          this.onBegin(this.files, this.$getRun());
+          return;
+        }
+        if (this.fileIndex === this.files.length) {
+          this.completed = true;
+          this.onComplete();
+          return;
+        }
+        var file = this.files[this.fileIndex++];
+        this.onFile(file, this.$getRun());
+      }
+    }]);
+    return FileProcessor2;
+  }();
+  var FileUploader = /* @__PURE__ */ function(_FileProcessor) {
+    _inherits14(FileUploader2, _FileProcessor);
+    var _super = _createSuper14(FileUploader2);
+    function FileUploader2(shinyapp, id, files, el) {
+      var _this2;
+      _classCallCheck16(this, FileUploader2);
+      _this2 = _super.call(this, files, false);
+      _defineProperty3(_assertThisInitialized14(_this2), "shinyapp", void 0);
+      _defineProperty3(_assertThisInitialized14(_this2), "id", void 0);
+      _defineProperty3(_assertThisInitialized14(_this2), "el", void 0);
+      _defineProperty3(_assertThisInitialized14(_this2), "jobId", void 0);
+      _defineProperty3(_assertThisInitialized14(_this2), "uploadUrl", void 0);
+      _defineProperty3(_assertThisInitialized14(_this2), "progressBytes", void 0);
+      _defineProperty3(_assertThisInitialized14(_this2), "totalBytes", void 0);
+      _this2.shinyapp = shinyapp;
+      _this2.id = id;
+      _this2.el = el;
+      _this2.$run();
+      return _this2;
+    }
+    _createClass16(FileUploader2, [{
+      key: "makeRequest",
+      value: function makeRequest(method, args, onSuccess, onFailure, blobs) {
+        this.shinyapp.makeRequest(method, args, onSuccess, onFailure, blobs);
+      }
+    }, {
+      key: "onBegin",
+      value: function onBegin(files, cont) {
+        var _this3 = this;
+        this.$setError(null);
+        this.$setActive(true);
+        this.$setVisible(true);
+        this.onProgress(null, 0);
+        this.totalBytes = 0;
+        this.progressBytes = 0;
+        import_jquery20.default.each(files, function(i, file) {
+          _this3.totalBytes += file.size;
+        });
+        var fileInfo = import_jquery20.default.map(files, function(file, i) {
+          return {
+            name: file.name,
+            size: file.size,
+            type: file.type
+          };
+          i;
+        });
+        this.makeRequest("uploadInit", [fileInfo], function(response) {
+          _this3.jobId = response.jobId;
+          _this3.uploadUrl = response.uploadUrl;
+          cont();
+        }, function(error) {
+          _this3.onError(error);
+        }, void 0);
+      }
+    }, {
+      key: "onFile",
+      value: function onFile(file, cont) {
+        var _this4 = this;
+        this.onProgress(file, 0);
+        import_jquery20.default.ajax(this.uploadUrl, {
+          type: "POST",
+          cache: false,
+          xhr: function xhr() {
+            var xhrVal = import_jquery20.default.ajaxSettings.xhr();
+            if (xhrVal.upload) {
+              xhrVal.upload.onprogress = function(e) {
+                if (e.lengthComputable) {
+                  _this4.onProgress(file, (_this4.progressBytes + e.loaded) / _this4.totalBytes);
+                }
+              };
+            }
+            return xhrVal;
+          },
+          data: file,
+          contentType: "application/octet-stream",
+          processData: false,
+          success: function success() {
+            _this4.progressBytes += file.size;
+            cont();
+          },
+          error: function error(jqXHR, textStatus, errorThrown) {
+            errorThrown;
+            _this4.onError(jqXHR.responseText || textStatus);
+          }
+        });
+      }
+    }, {
+      key: "onComplete",
+      value: function onComplete() {
+        var _this5 = this;
+        var fileInfo = import_jquery20.default.map(this.files, function(file, i) {
+          return {
+            name: file.name,
+            size: file.size,
+            type: file.type
+          };
+        });
+        var evt = triggerFileInputChanged(this.id, fileInfo, getFileInputBinding(), this.el, "shiny.fileupload", document);
+        this.makeRequest("uploadEnd", [this.jobId, this.id], function(response) {
+          response;
+          _this5.$setActive(false);
+          _this5.onProgress(null, 1);
+          _this5.$bar().text("Upload complete");
+          (0, import_jquery20.default)(evt.el).val("");
+        }, function(error) {
+          _this5.onError(error);
+        }, void 0);
+        this.$bar().text("Finishing upload");
+      }
+    }, {
+      key: "onError",
+      value: function onError(message) {
+        this.$setError(message || "");
+        this.$setActive(false);
+      }
+    }, {
+      key: "onAbort",
+      value: function onAbort() {
+        this.$setVisible(false);
+      }
+    }, {
+      key: "onProgress",
+      value: function onProgress(file, completed) {
+        this.$bar().width(Math.round(completed * 100) + "%");
+        this.$bar().text(file ? file.name : "");
+      }
+    }, {
+      key: "$container",
+      value: function $container() {
+        return (0, import_jquery20.default)("#" + $escape(this.id) + "_progress.shiny-file-input-progress");
+      }
+    }, {
+      key: "$bar",
+      value: function $bar() {
+        return (0, import_jquery20.default)("#" + $escape(this.id) + "_progress.shiny-file-input-progress .progress-bar");
+      }
+    }, {
+      key: "$setVisible",
+      value: function $setVisible(visible) {
+        this.$container().css("visibility", visible ? "visible" : "hidden");
+      }
+    }, {
+      key: "$setError",
+      value: function $setError(error) {
+        this.$bar().toggleClass("progress-bar-danger", error !== null);
+        if (error !== null) {
+          this.onProgress(null, 1);
+          this.$bar().text(error);
+        }
+      }
+    }, {
+      key: "$setActive",
+      value: function $setActive(active) {
+        this.$container().toggleClass("active", !!active);
+      }
+    }]);
+    return FileUploader2;
+  }(FileProcessor);
+
+  // src/bindings/input/fileinput.ts
+  function _typeof15(obj) {
+    "@babel/helpers - typeof";
+    if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
+      _typeof15 = function _typeof27(obj2) {
+        return typeof obj2;
+      };
+    } else {
+      _typeof15 = function _typeof27(obj2) {
+        return obj2 && typeof Symbol === "function" && obj2.constructor === Symbol && obj2 !== Symbol.prototype ? "symbol" : typeof obj2;
+      };
+    }
+    return _typeof15(obj);
+  }
+  function _classCallCheck17(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+  function _defineProperties17(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor)
+        descriptor.writable = true;
+      Object.defineProperty(target, descriptor.key, descriptor);
+    }
+  }
+  function _createClass17(Constructor, protoProps, staticProps) {
+    if (protoProps)
+      _defineProperties17(Constructor.prototype, protoProps);
+    if (staticProps)
+      _defineProperties17(Constructor, staticProps);
+    return Constructor;
+  }
+  function _inherits15(subClass, superClass) {
+    if (typeof superClass !== "function" && superClass !== null) {
+      throw new TypeError("Super expression must either be null or a function");
+    }
+    subClass.prototype = Object.create(superClass && superClass.prototype, {constructor: {value: subClass, writable: true, configurable: true}});
+    if (superClass)
+      _setPrototypeOf15(subClass, superClass);
+  }
+  function _setPrototypeOf15(o, p) {
+    _setPrototypeOf15 = Object.setPrototypeOf || function _setPrototypeOf26(o2, p2) {
+      o2.__proto__ = p2;
+      return o2;
+    };
+    return _setPrototypeOf15(o, p);
+  }
+  function _createSuper15(Derived) {
+    var hasNativeReflectConstruct = _isNativeReflectConstruct15();
+    return function _createSuperInternal() {
+      var Super = _getPrototypeOf15(Derived), result;
+      if (hasNativeReflectConstruct) {
+        var NewTarget = _getPrototypeOf15(this).constructor;
+        result = Reflect.construct(Super, arguments, NewTarget);
+      } else {
+        result = Super.apply(this, arguments);
+      }
+      return _possibleConstructorReturn15(this, result);
+    };
+  }
+  function _possibleConstructorReturn15(self2, call) {
+    if (call && (_typeof15(call) === "object" || typeof call === "function")) {
+      return call;
+    }
+    return _assertThisInitialized15(self2);
+  }
+  function _assertThisInitialized15(self2) {
+    if (self2 === void 0) {
+      throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+    }
+    return self2;
+  }
+  function _isNativeReflectConstruct15() {
+    if (typeof Reflect === "undefined" || !Reflect.construct)
+      return false;
+    if (Reflect.construct.sham)
+      return false;
+    if (typeof Proxy === "function")
+      return true;
+    try {
+      Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function() {
+      }));
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+  function _getPrototypeOf15(o) {
+    _getPrototypeOf15 = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf26(o2) {
+      return o2.__proto__ || Object.getPrototypeOf(o2);
+    };
+    return _getPrototypeOf15(o);
+  }
+  var _ZoneClass = {
+    ACTIVE: "shiny-file-input-active",
+    OVER: "shiny-file-input-over"
+  };
+  function setFileText($el, files) {
+    var $fileText = $el.closest("div.input-group").find("input[type=text]");
+    if (files.length === 1) {
+      $fileText.val(files[0].name);
+    } else {
+      $fileText.val(files.length + " files");
+    }
+  }
+  function abortCurrentUpload($el) {
+    var uploader = $el.data("currentUploader");
+    if (uploader)
+      uploader.abort();
+    $el.removeAttr("data-restore");
+  }
+  function uploadDroppedFilesIE10Plus(el, files) {
+    var $el = (0, import_jquery21.default)(el);
+    abortCurrentUpload($el);
+    setFileText($el, files);
+    $el.data("currentUploader", new FileUploader(shinyShinyApp(), fileInputBindingGetId(el), files, el));
+  }
+  function uploadFiles(evt) {
+    var $el = (0, import_jquery21.default)(evt.target);
+    abortCurrentUpload($el);
+    var files = evt.target.files;
+    var id = fileInputBindingGetId(evt.target);
+    if (files.length === 0)
+      return;
+    setFileText($el, files);
+    $el.data("currentUploader", new FileUploader(shinyShinyApp(), id, files, evt.target));
+  }
+  var $fileInputs = (0, import_jquery21.default)();
+  function fileInputBindingGetId(el) {
+    return InputBinding.prototype.getId.call(this, el) || el.name;
+  }
+  var FileInputBinding = /* @__PURE__ */ function(_InputBinding) {
+    _inherits15(FileInputBinding2, _InputBinding);
+    var _super = _createSuper15(FileInputBinding2);
+    function FileInputBinding2() {
+      _classCallCheck17(this, FileInputBinding2);
+      return _super.apply(this, arguments);
+    }
+    _createClass17(FileInputBinding2, [{
+      key: "find",
+      value: function find2(scope) {
+        return (0, import_jquery21.default)(scope).find('input[type="file"]');
+      }
+    }, {
+      key: "getId",
+      value: function getId(el) {
+        return fileInputBindingGetId(el);
+      }
+    }, {
+      key: "getValue",
+      value: function getValue(el) {
+        var data = (0, import_jquery21.default)(el).attr("data-restore");
+        if (data) {
+          var dataParsed = JSON.parse(data);
+          var $fileText = (0, import_jquery21.default)(el).closest("div.input-group").find("input[type=text]");
+          if (dataParsed.name.length === 1) {
+            $fileText.val(dataParsed.name[0]);
+          } else {
+            $fileText.val(dataParsed.name.length + " files");
+          }
+          var $progress = (0, import_jquery21.default)(el).closest("div.form-group").find(".progress");
+          var $bar = $progress.find(".progress-bar");
+          $progress.removeClass("active");
+          $bar.width("100%");
+          $bar.css("visibility", "visible");
+          return dataParsed;
+        } else {
+          return null;
+        }
+      }
+    }, {
+      key: "setValue",
+      value: function setValue(el, value) {
+        el;
+        value;
+      }
+    }, {
+      key: "getType",
+      value: function getType(el) {
+        return "shiny.file";
+        el;
+      }
+    }, {
+      key: "_zoneOf",
+      value: function _zoneOf(el) {
+        return (0, import_jquery21.default)(el).closest("div.input-group");
+      }
+    }, {
+      key: "_enableDraghover",
+      value: function _enableDraghover(el) {
+        var $el = (0, import_jquery21.default)(el);
+        var childCounter = 0;
+        $el.on({
+          "dragenter.draghover": function dragenterDraghover(e) {
+            if (childCounter++ === 0) {
+              $el.trigger("draghover:enter", e);
+            }
+          },
+          "dragleave.draghover": function dragleaveDraghover(e) {
+            if (--childCounter === 0) {
+              $el.trigger("draghover:leave", e);
+            }
+            if (childCounter < 0) {
+              console.error("draghover childCounter is negative somehow");
+            }
+          },
+          "dragover.draghover": function dragoverDraghover(e) {
+            e.preventDefault();
+          },
+          "drop.draghover": function dropDraghover(e) {
+            childCounter = 0;
+            $el.trigger("draghover:drop", e);
+            e.preventDefault();
+          }
+        });
+        return $el;
+      }
+    }, {
+      key: "_disableDraghover",
+      value: function _disableDraghover(el) {
+        return (0, import_jquery21.default)(el).off(".draghover");
+      }
+    }, {
+      key: "_enableDocumentEvents",
+      value: function _enableDocumentEvents() {
+        var _this = this;
+        var $doc = (0, import_jquery21.default)("html"), ACTIVE = _ZoneClass.ACTIVE, OVER = _ZoneClass.OVER;
+        this._enableDraghover($doc).on({
+          "draghover:enter.draghover": function draghoverEnterDraghover() {
+            _this._zoneOf($fileInputs).addClass(ACTIVE);
+          },
+          "draghover:leave.draghover": function draghoverLeaveDraghover() {
+            _this._zoneOf($fileInputs).removeClass(ACTIVE);
+          },
+          "draghover:drop.draghover": function draghoverDropDraghover() {
+            _this._zoneOf($fileInputs).removeClass(OVER).removeClass(ACTIVE);
+          }
+        });
+      }
+    }, {
+      key: "_disableDocumentEvents",
+      value: function _disableDocumentEvents() {
+        var $doc = (0, import_jquery21.default)("html");
+        $doc.off(".draghover");
+        this._disableDraghover($doc);
+      }
+    }, {
+      key: "_canSetFiles",
+      value: function _canSetFiles(fileList) {
+        var testEl = document.createElement("input");
+        testEl.type = "file";
+        try {
+          testEl.files = fileList;
+        } catch (e) {
+          return false;
+        }
+        return true;
+      }
+    }, {
+      key: "_handleDrop",
+      value: function _handleDrop(e, el) {
+        var files = e.originalEvent.dataTransfer.files, $el = (0, import_jquery21.default)(el);
+        if (files === void 0 || files === null) {
+          console.log("Dropping files is not supported on this browser. (no FileList)");
+        } else if (!this._canSetFiles(files)) {
+          $el.val("");
+          uploadDroppedFilesIE10Plus(el, files);
+        } else {
+          $el.val("");
+          el.files = e.originalEvent.dataTransfer.files;
+          $el.trigger("change");
+        }
+      }
+    }, {
+      key: "subscribe",
+      value: function subscribe(el, callback) {
+        var _this2 = this;
+        callback;
+        (0, import_jquery21.default)(el).on("change.fileInputBinding", uploadFiles);
+        if ($fileInputs.length === 0)
+          this._enableDocumentEvents();
+        $fileInputs = $fileInputs.add(el);
+        var $zone = this._zoneOf(el), OVER = _ZoneClass.OVER;
+        this._enableDraghover($zone).on({
+          "draghover:enter.draghover": function draghoverEnterDraghover(e) {
+            e;
+            $zone.addClass(OVER);
+          },
+          "draghover:leave.draghover": function draghoverLeaveDraghover(e) {
+            $zone.removeClass(OVER);
+            e.stopPropagation();
+          },
+          "draghover:drop.draghover": function draghoverDropDraghover(e, dropEvent) {
+            e;
+            _this2._handleDrop(dropEvent, el);
+          }
+        });
+      }
+    }, {
+      key: "unsubscribe",
+      value: function unsubscribe(el) {
+        var $el = (0, import_jquery21.default)(el), $zone = this._zoneOf(el);
+        $zone.removeClass(_ZoneClass.OVER).removeClass(_ZoneClass.ACTIVE);
+        this._disableDraghover($zone);
+        $el.off(".fileInputBinding");
+        $zone.off(".draghover");
+        $fileInputs = $fileInputs.not(el);
+        if ($fileInputs.length === 0)
+          this._disableDocumentEvents();
+      }
+    }]);
+    return FileInputBinding2;
+  }(InputBinding);
+
+  // src/bindings/input/index.ts
+  function initInputBindings() {
+    var inputBindings = new BindingRegistry();
+    inputBindings.register(new TextInputBinding(), "shiny.textInput");
+    inputBindings.register(new TextareaInputBinding(), "shiny.textareaInput");
+    inputBindings.register(new PasswordInputBinding(), "shiny.passwordInput");
+    inputBindings.register(new NumberInputBinding(), "shiny.numberInput");
+    inputBindings.register(new CheckboxInputBinding(), "shiny.checkboxInput");
+    inputBindings.register(new CheckboxGroupInputBinding(), "shiny.checkboxGroupInput");
+    inputBindings.register(new RadioInputBinding(), "shiny.radioInput");
+    inputBindings.register(new SliderInputBinding(), "shiny.sliderInput");
+    inputBindings.register(new DateInputBinding(), "shiny.dateInput");
+    inputBindings.register(new DateRangeInputBinding(), "shiny.dateRangeInput");
+    inputBindings.register(new SelectInputBinding(), "shiny.selectInput");
+    inputBindings.register(new ActionButtonInputBinding(), "shiny.actionButtonInput");
+    inputBindings.register(new BootstrapTabInputBinding(), "shiny.bootstrapTabInput");
+    var fileInputBinding = new FileInputBinding();
+    inputBindings.register(fileInputBinding, "shiny.fileInputBinding");
+    return {
+      inputBindings: inputBindings,
+      fileInputBinding: fileInputBinding
+    };
+  }
+
+  // src/bindings/output/text.ts
+  var import_es_array_iterator16 = __toModule(require_es_array_iterator());
+  var import_jquery23 = __toModule(require_jquery());
+
+  // node_modules/core-js/modules/es.array.join.js
+  "use strict";
+  var $40 = require_export();
+  var IndexedObject = require_indexed_object();
+  var toIndexedObject4 = require_to_indexed_object();
+  var arrayMethodIsStrict2 = require_array_method_is_strict();
+  var nativeJoin = [].join;
+  var ES3_STRINGS = IndexedObject != Object;
+  var STRICT_METHOD2 = arrayMethodIsStrict2("join", ",");
+  $40({target: "Array", proto: true, forced: ES3_STRINGS || !STRICT_METHOD2}, {
+    join: function join(separator) {
+      return nativeJoin.call(toIndexedObject4(this), separator === void 0 ? "," : separator);
+    }
+  });
+
+  // src/bindings/output/OutputBinding.ts
+  var import_es_regexp_exec3 = __toModule(require_es_regexp_exec());
+  var import_jquery22 = __toModule(require_jquery());
+  function _classCallCheck18(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+  function _defineProperties18(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor)
+        descriptor.writable = true;
+      Object.defineProperty(target, descriptor.key, descriptor);
+    }
+  }
+  function _createClass18(Constructor, protoProps, staticProps) {
+    if (protoProps)
+      _defineProperties18(Constructor.prototype, protoProps);
+    if (staticProps)
+      _defineProperties18(Constructor, staticProps);
+    return Constructor;
+  }
+  function _defineProperty4(obj, key, value) {
+    if (key in obj) {
+      Object.defineProperty(obj, key, {value: value, enumerable: true, configurable: true, writable: true});
+    } else {
+      obj[key] = value;
+    }
+    return obj;
+  }
+  var OutputBinding = /* @__PURE__ */ function() {
+    function OutputBinding2() {
+      _classCallCheck18(this, OutputBinding2);
+      _defineProperty4(this, "name", void 0);
+    }
+    _createClass18(OutputBinding2, [{
+      key: "find",
+      value: function find2(scope) {
+        throw "Not implemented";
+        scope;
+      }
+    }, {
+      key: "renderValue",
+      value: function renderValue(el, data) {
+        throw "Not implemented";
+        el;
+        data;
+      }
+    }, {
+      key: "getId",
+      value: function getId(el) {
+        return el["data-input-id"] || el.id;
+      }
+    }, {
+      key: "onValueChange",
+      value: function onValueChange(el, data) {
+        this.clearError(el);
+        this.renderValue(el, data);
+      }
+    }, {
+      key: "onValueError",
+      value: function onValueError(el, err) {
+        this.renderError(el, err);
+      }
+    }, {
+      key: "renderError",
+      value: function renderError(el, err) {
+        this.clearError(el);
+        if (err.message === "") {
+          (0, import_jquery22.default)(el).empty();
+          return;
+        }
+        var errClass = "shiny-output-error";
+        if (err.type !== null) {
+          errClass = errClass + " " + import_jquery22.default.map(asArray(err.type), function(type) {
+            return errClass + "-" + type;
+          }).join(" ");
+        }
+        (0, import_jquery22.default)(el).addClass(errClass).text(err.message);
+      }
+    }, {
+      key: "clearError",
+      value: function clearError(el) {
+        (0, import_jquery22.default)(el).attr("class", function(i, c) {
+          return c.replace(/(^|\s)shiny-output-error\S*/g, "");
+        });
+      }
+    }, {
+      key: "showProgress",
+      value: function showProgress(el, show3) {
+        var RECALC_CLASS = "recalculating";
+        if (show3)
+          (0, import_jquery22.default)(el).addClass(RECALC_CLASS);
+        else
+          (0, import_jquery22.default)(el).removeClass(RECALC_CLASS);
+      }
+    }]);
+    return OutputBinding2;
+  }();
+
+  // src/bindings/output/text.ts
+  function _typeof16(obj) {
+    "@babel/helpers - typeof";
+    if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
+      _typeof16 = function _typeof27(obj2) {
+        return typeof obj2;
+      };
+    } else {
+      _typeof16 = function _typeof27(obj2) {
+        return obj2 && typeof Symbol === "function" && obj2.constructor === Symbol && obj2 !== Symbol.prototype ? "symbol" : typeof obj2;
+      };
+    }
+    return _typeof16(obj);
+  }
+  function _classCallCheck19(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+  function _defineProperties19(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor)
+        descriptor.writable = true;
+      Object.defineProperty(target, descriptor.key, descriptor);
+    }
+  }
+  function _createClass19(Constructor, protoProps, staticProps) {
+    if (protoProps)
+      _defineProperties19(Constructor.prototype, protoProps);
+    if (staticProps)
+      _defineProperties19(Constructor, staticProps);
+    return Constructor;
+  }
+  function _inherits16(subClass, superClass) {
+    if (typeof superClass !== "function" && superClass !== null) {
+      throw new TypeError("Super expression must either be null or a function");
+    }
+    subClass.prototype = Object.create(superClass && superClass.prototype, {constructor: {value: subClass, writable: true, configurable: true}});
+    if (superClass)
+      _setPrototypeOf16(subClass, superClass);
+  }
+  function _setPrototypeOf16(o, p) {
+    _setPrototypeOf16 = Object.setPrototypeOf || function _setPrototypeOf26(o2, p2) {
+      o2.__proto__ = p2;
+      return o2;
+    };
+    return _setPrototypeOf16(o, p);
+  }
+  function _createSuper16(Derived) {
+    var hasNativeReflectConstruct = _isNativeReflectConstruct16();
+    return function _createSuperInternal() {
+      var Super = _getPrototypeOf16(Derived), result;
+      if (hasNativeReflectConstruct) {
+        var NewTarget = _getPrototypeOf16(this).constructor;
+        result = Reflect.construct(Super, arguments, NewTarget);
+      } else {
+        result = Super.apply(this, arguments);
+      }
+      return _possibleConstructorReturn16(this, result);
+    };
+  }
+  function _possibleConstructorReturn16(self2, call) {
+    if (call && (_typeof16(call) === "object" || typeof call === "function")) {
+      return call;
+    }
+    return _assertThisInitialized16(self2);
+  }
+  function _assertThisInitialized16(self2) {
+    if (self2 === void 0) {
+      throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+    }
+    return self2;
+  }
+  function _isNativeReflectConstruct16() {
+    if (typeof Reflect === "undefined" || !Reflect.construct)
+      return false;
+    if (Reflect.construct.sham)
+      return false;
+    if (typeof Proxy === "function")
+      return true;
+    try {
+      Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function() {
+      }));
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+  function _getPrototypeOf16(o) {
+    _getPrototypeOf16 = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf26(o2) {
+      return o2.__proto__ || Object.getPrototypeOf(o2);
+    };
+    return _getPrototypeOf16(o);
+  }
+  var TextOutputBinding = /* @__PURE__ */ function(_OutputBinding) {
+    _inherits16(TextOutputBinding2, _OutputBinding);
+    var _super = _createSuper16(TextOutputBinding2);
+    function TextOutputBinding2() {
+      _classCallCheck19(this, TextOutputBinding2);
+      return _super.apply(this, arguments);
+    }
+    _createClass19(TextOutputBinding2, [{
+      key: "find",
+      value: function find2(scope) {
+        return (0, import_jquery23.default)(scope).find(".shiny-text-output");
+      }
+    }, {
+      key: "renderValue",
+      value: function renderValue(el, data) {
+        (0, import_jquery23.default)(el).text(data);
+      }
+    }]);
+    return TextOutputBinding2;
+  }(OutputBinding);
+
+  // src/bindings/output/downloadlink.ts
+  var import_es_array_iterator17 = __toModule(require_es_array_iterator());
+  var import_jquery24 = __toModule(require_jquery());
+  function _typeof17(obj) {
+    "@babel/helpers - typeof";
+    if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
+      _typeof17 = function _typeof27(obj2) {
+        return typeof obj2;
+      };
+    } else {
+      _typeof17 = function _typeof27(obj2) {
+        return obj2 && typeof Symbol === "function" && obj2.constructor === Symbol && obj2 !== Symbol.prototype ? "symbol" : typeof obj2;
+      };
+    }
+    return _typeof17(obj);
+  }
+  function _classCallCheck20(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+  function _defineProperties20(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor)
+        descriptor.writable = true;
+      Object.defineProperty(target, descriptor.key, descriptor);
+    }
+  }
+  function _createClass20(Constructor, protoProps, staticProps) {
+    if (protoProps)
+      _defineProperties20(Constructor.prototype, protoProps);
+    if (staticProps)
+      _defineProperties20(Constructor, staticProps);
+    return Constructor;
+  }
+  function _inherits17(subClass, superClass) {
+    if (typeof superClass !== "function" && superClass !== null) {
+      throw new TypeError("Super expression must either be null or a function");
+    }
+    subClass.prototype = Object.create(superClass && superClass.prototype, {constructor: {value: subClass, writable: true, configurable: true}});
+    if (superClass)
+      _setPrototypeOf17(subClass, superClass);
+  }
+  function _setPrototypeOf17(o, p) {
+    _setPrototypeOf17 = Object.setPrototypeOf || function _setPrototypeOf26(o2, p2) {
+      o2.__proto__ = p2;
+      return o2;
+    };
+    return _setPrototypeOf17(o, p);
+  }
+  function _createSuper17(Derived) {
+    var hasNativeReflectConstruct = _isNativeReflectConstruct17();
+    return function _createSuperInternal() {
+      var Super = _getPrototypeOf17(Derived), result;
+      if (hasNativeReflectConstruct) {
+        var NewTarget = _getPrototypeOf17(this).constructor;
+        result = Reflect.construct(Super, arguments, NewTarget);
+      } else {
+        result = Super.apply(this, arguments);
+      }
+      return _possibleConstructorReturn17(this, result);
+    };
+  }
+  function _possibleConstructorReturn17(self2, call) {
+    if (call && (_typeof17(call) === "object" || typeof call === "function")) {
+      return call;
+    }
+    return _assertThisInitialized17(self2);
+  }
+  function _assertThisInitialized17(self2) {
+    if (self2 === void 0) {
+      throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+    }
+    return self2;
+  }
+  function _isNativeReflectConstruct17() {
+    if (typeof Reflect === "undefined" || !Reflect.construct)
+      return false;
+    if (Reflect.construct.sham)
+      return false;
+    if (typeof Proxy === "function")
+      return true;
+    try {
+      Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function() {
+      }));
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+  function _getPrototypeOf17(o) {
+    _getPrototypeOf17 = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf26(o2) {
+      return o2.__proto__ || Object.getPrototypeOf(o2);
+    };
+    return _getPrototypeOf17(o);
+  }
+  var DownloadLinkOutputBinding = /* @__PURE__ */ function(_OutputBinding) {
+    _inherits17(DownloadLinkOutputBinding2, _OutputBinding);
+    var _super = _createSuper17(DownloadLinkOutputBinding2);
+    function DownloadLinkOutputBinding2() {
+      _classCallCheck20(this, DownloadLinkOutputBinding2);
+      return _super.apply(this, arguments);
+    }
+    _createClass20(DownloadLinkOutputBinding2, [{
+      key: "find",
+      value: function find2(scope) {
+        return (0, import_jquery24.default)(scope).find("a.shiny-download-link");
+      }
+    }, {
+      key: "renderValue",
+      value: function renderValue(el, data) {
+        (0, import_jquery24.default)(el).attr("href", data);
+      }
+    }]);
+    return DownloadLinkOutputBinding2;
+  }(OutputBinding);
+  (0, import_jquery24.default)(document).on("click.shinyDownloadLink", "a.shiny-download-link", function(e) {
+    e;
+    var evt = jQuery.Event("shiny:filedownload");
+    evt.name = this.id;
+    evt.href = this.href;
+    (0, import_jquery24.default)(document).trigger(evt);
+  });
+
+  // src/bindings/output/datatable.ts
+  var import_es_regexp_exec4 = __toModule(require_es_regexp_exec());
+
+  // node_modules/core-js/modules/es.string.search.js
+  "use strict";
+  var fixRegExpWellKnownSymbolLogic4 = require_fix_regexp_well_known_symbol_logic();
+  var anObject8 = require_an_object();
+  var requireObjectCoercible4 = require_require_object_coercible();
+  var sameValue = require_same_value();
+  var regExpExec3 = require_regexp_exec_abstract();
+  fixRegExpWellKnownSymbolLogic4("search", 1, function(SEARCH, nativeSearch, maybeCallNative) {
+    return [
+      function search(regexp) {
+        var O = requireObjectCoercible4(this);
+        var searcher = regexp == void 0 ? void 0 : regexp[SEARCH];
+        return searcher !== void 0 ? searcher.call(regexp, O) : new RegExp(regexp)[SEARCH](String(O));
+      },
+      function(regexp) {
+        var res = maybeCallNative(nativeSearch, regexp, this);
+        if (res.done)
+          return res.value;
+        var rx = anObject8(regexp);
+        var S = String(this);
+        var previousLastIndex = rx.lastIndex;
+        if (!sameValue(previousLastIndex, 0))
+          rx.lastIndex = 0;
+        var result = regExpExec3(rx, S);
+        if (!sameValue(rx.lastIndex, previousLastIndex))
+          rx.lastIndex = previousLastIndex;
+        return result === null ? -1 : result.index;
+      }
+    ];
+  });
+
+  // src/bindings/output/datatable.ts
+  var import_es_array_iterator18 = __toModule(require_es_array_iterator());
+  var import_jquery25 = __toModule(require_jquery());
+
+  // src/time/debounce.ts
+  function _classCallCheck21(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+  function _defineProperties21(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor)
+        descriptor.writable = true;
+      Object.defineProperty(target, descriptor.key, descriptor);
+    }
+  }
+  function _createClass21(Constructor, protoProps, staticProps) {
+    if (protoProps)
+      _defineProperties21(Constructor.prototype, protoProps);
+    if (staticProps)
+      _defineProperties21(Constructor, staticProps);
+    return Constructor;
+  }
+  function _defineProperty5(obj, key, value) {
+    if (key in obj) {
+      Object.defineProperty(obj, key, {value: value, enumerable: true, configurable: true, writable: true});
+    } else {
+      obj[key] = value;
+    }
+    return obj;
+  }
+  var Debouncer = /* @__PURE__ */ function() {
+    function Debouncer2(target, func, delayMs) {
+      _classCallCheck21(this, Debouncer2);
+      _defineProperty5(this, "target", void 0);
+      _defineProperty5(this, "func", void 0);
+      _defineProperty5(this, "delayMs", void 0);
+      _defineProperty5(this, "timerId", void 0);
+      _defineProperty5(this, "args", void 0);
+      this.target = target;
+      this.func = func;
+      this.delayMs = delayMs;
+      this.timerId = null;
+      this.args = null;
+    }
+    _createClass21(Debouncer2, [{
+      key: "normalCall",
+      value: function normalCall() {
+        var _this = this;
+        this.$clearTimer();
+        for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+          args[_key] = arguments[_key];
+        }
+        this.args = args;
+        this.timerId = setTimeout(function() {
+          if (_this.timerId === null)
+            return;
+          _this.$clearTimer();
+          _this.$invoke();
+        }, this.delayMs);
+      }
+    }, {
+      key: "immediateCall",
+      value: function immediateCall() {
+        this.$clearTimer();
+        for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+          args[_key2] = arguments[_key2];
+        }
+        this.args = args;
+        this.$invoke();
+      }
+    }, {
+      key: "isPending",
+      value: function isPending() {
+        return this.timerId !== null;
+      }
+    }, {
+      key: "$clearTimer",
+      value: function $clearTimer() {
+        if (this.timerId !== null) {
+          clearTimeout(this.timerId);
+          this.timerId = null;
+        }
+      }
+    }, {
+      key: "$invoke",
+      value: function $invoke() {
+        this.func.apply(this.target, this.args);
+        this.args = null;
+      }
+    }]);
+    return Debouncer2;
+  }();
+  function debounce(threshold, func) {
+    var timerId = null;
+    return function() {
+      var _this2 = this;
+      for (var _len3 = arguments.length, args = new Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
+        args[_key3] = arguments[_key3];
+      }
+      if (timerId !== null) {
+        clearTimeout(timerId);
+        timerId = null;
+      }
+      timerId = setTimeout(function() {
+        if (timerId === null)
+          return;
+        timerId = null;
+        func.apply(_this2, args);
+      }, threshold);
+    };
+  }
+
+  // src/time/invoke.ts
+  function _classCallCheck22(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+  function _defineProperties22(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor)
+        descriptor.writable = true;
+      Object.defineProperty(target, descriptor.key, descriptor);
+    }
+  }
+  function _createClass22(Constructor, protoProps, staticProps) {
+    if (protoProps)
+      _defineProperties22(Constructor.prototype, protoProps);
+    if (staticProps)
+      _defineProperties22(Constructor, staticProps);
+    return Constructor;
+  }
+  function _defineProperty6(obj, key, value) {
+    if (key in obj) {
+      Object.defineProperty(obj, key, {value: value, enumerable: true, configurable: true, writable: true});
+    } else {
+      obj[key] = value;
+    }
+    return obj;
+  }
+  var Invoker = /* @__PURE__ */ function() {
+    function Invoker2(target, func) {
+      _classCallCheck22(this, Invoker2);
+      _defineProperty6(this, "target", void 0);
+      _defineProperty6(this, "func", void 0);
+      this.target = target;
+      this.func = func;
+    }
+    _createClass22(Invoker2, [{
+      key: "normalCall",
+      value: function normalCall() {
+        for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+          args[_key] = arguments[_key];
+        }
+        this.func.apply(this.target, args);
+      }
+    }, {
+      key: "immediateCall",
+      value: function immediateCall() {
+        for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+          args[_key2] = arguments[_key2];
+        }
+        this.func.apply(this.target, args);
+      }
+    }]);
+    return Invoker2;
+  }();
+
+  // src/time/throttle.ts
+  function _classCallCheck23(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+  function _defineProperties23(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor)
+        descriptor.writable = true;
+      Object.defineProperty(target, descriptor.key, descriptor);
+    }
+  }
+  function _createClass23(Constructor, protoProps, staticProps) {
+    if (protoProps)
+      _defineProperties23(Constructor.prototype, protoProps);
+    if (staticProps)
+      _defineProperties23(Constructor, staticProps);
+    return Constructor;
+  }
+  function _defineProperty7(obj, key, value) {
+    if (key in obj) {
+      Object.defineProperty(obj, key, {value: value, enumerable: true, configurable: true, writable: true});
+    } else {
+      obj[key] = value;
+    }
+    return obj;
+  }
+  var Throttler = /* @__PURE__ */ function() {
+    function Throttler2(target, func, delayMs) {
+      _classCallCheck23(this, Throttler2);
+      _defineProperty7(this, "target", void 0);
+      _defineProperty7(this, "func", void 0);
+      _defineProperty7(this, "delayMs", void 0);
+      _defineProperty7(this, "timerId", void 0);
+      _defineProperty7(this, "args", void 0);
+      this.target = target;
+      this.func = func;
+      this.delayMs = delayMs;
+      this.timerId = null;
+      this.args = null;
+    }
+    _createClass23(Throttler2, [{
+      key: "normalCall",
+      value: function normalCall() {
+        var _this = this;
+        for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+          args[_key] = arguments[_key];
+        }
+        this.args = args;
+        if (this.timerId === null) {
+          this.$invoke();
+          this.timerId = setTimeout(function() {
+            var _this$normalCall;
+            if (_this.timerId === null)
+              return;
+            _this.$clearTimer();
+            if (args.length > 0)
+              (_this$normalCall = _this.normalCall).apply.apply(_this$normalCall, [_this].concat(args));
+          }, this.delayMs);
+        }
+      }
+    }, {
+      key: "immediateCall",
+      value: function immediateCall() {
+        this.$clearTimer();
+        for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+          args[_key2] = arguments[_key2];
+        }
+        this.args = args;
+        this.$invoke();
+      }
+    }, {
+      key: "isPending",
+      value: function isPending() {
+        return this.timerId !== null;
+      }
+    }, {
+      key: "$clearTimer",
+      value: function $clearTimer() {
+        if (this.timerId !== null) {
+          clearTimeout(this.timerId);
+          this.timerId = null;
+        }
+      }
+    }, {
+      key: "$invoke",
+      value: function $invoke() {
+        this.func.apply(this.target, this.args);
+        this.args = null;
+      }
+    }]);
+    return Throttler2;
+  }();
+
+  // src/bindings/output/datatable.ts
+  function _typeof18(obj) {
+    "@babel/helpers - typeof";
+    if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
+      _typeof18 = function _typeof27(obj2) {
+        return typeof obj2;
+      };
+    } else {
+      _typeof18 = function _typeof27(obj2) {
+        return obj2 && typeof Symbol === "function" && obj2.constructor === Symbol && obj2 !== Symbol.prototype ? "symbol" : typeof obj2;
+      };
+    }
+    return _typeof18(obj);
+  }
+  function _classCallCheck24(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+  function _defineProperties24(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor)
+        descriptor.writable = true;
+      Object.defineProperty(target, descriptor.key, descriptor);
+    }
+  }
+  function _createClass24(Constructor, protoProps, staticProps) {
+    if (protoProps)
+      _defineProperties24(Constructor.prototype, protoProps);
+    if (staticProps)
+      _defineProperties24(Constructor, staticProps);
+    return Constructor;
+  }
+  function _inherits18(subClass, superClass) {
+    if (typeof superClass !== "function" && superClass !== null) {
+      throw new TypeError("Super expression must either be null or a function");
+    }
+    subClass.prototype = Object.create(superClass && superClass.prototype, {constructor: {value: subClass, writable: true, configurable: true}});
+    if (superClass)
+      _setPrototypeOf18(subClass, superClass);
+  }
+  function _setPrototypeOf18(o, p) {
+    _setPrototypeOf18 = Object.setPrototypeOf || function _setPrototypeOf26(o2, p2) {
+      o2.__proto__ = p2;
+      return o2;
+    };
+    return _setPrototypeOf18(o, p);
+  }
+  function _createSuper18(Derived) {
+    var hasNativeReflectConstruct = _isNativeReflectConstruct18();
+    return function _createSuperInternal() {
+      var Super = _getPrototypeOf18(Derived), result;
+      if (hasNativeReflectConstruct) {
+        var NewTarget = _getPrototypeOf18(this).constructor;
+        result = Reflect.construct(Super, arguments, NewTarget);
+      } else {
+        result = Super.apply(this, arguments);
+      }
+      return _possibleConstructorReturn18(this, result);
+    };
+  }
+  function _possibleConstructorReturn18(self2, call) {
+    if (call && (_typeof18(call) === "object" || typeof call === "function")) {
+      return call;
+    }
+    return _assertThisInitialized18(self2);
+  }
+  function _assertThisInitialized18(self2) {
+    if (self2 === void 0) {
+      throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+    }
+    return self2;
+  }
+  function _isNativeReflectConstruct18() {
+    if (typeof Reflect === "undefined" || !Reflect.construct)
+      return false;
+    if (Reflect.construct.sham)
+      return false;
+    if (typeof Proxy === "function")
+      return true;
+    try {
+      Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function() {
+      }));
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+  function _getPrototypeOf18(o) {
+    _getPrototypeOf18 = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf26(o2) {
+      return o2.__proto__ || Object.getPrototypeOf(o2);
+    };
+    return _getPrototypeOf18(o);
+  }
+  var DatatableOutputBinding = /* @__PURE__ */ function(_OutputBinding) {
+    _inherits18(DatatableOutputBinding2, _OutputBinding);
+    var _super = _createSuper18(DatatableOutputBinding2);
+    function DatatableOutputBinding2() {
+      _classCallCheck24(this, DatatableOutputBinding2);
+      return _super.apply(this, arguments);
+    }
+    _createClass24(DatatableOutputBinding2, [{
+      key: "find",
+      value: function find2(scope) {
+        return (0, import_jquery25.default)(scope).find(".shiny-datatable-output");
+      }
+    }, {
+      key: "onValueError",
+      value: function onValueError(el, err) {
+        shinyUnbindAll(el);
+        this.renderError(el, err);
+      }
+    }, {
+      key: "renderValue",
+      value: function renderValue(el, _data) {
+        var $el = (0, import_jquery25.default)(el).empty();
+        if (!_data || !_data.colnames)
+          return;
+        var colnames = import_jquery25.default.makeArray(_data.colnames);
+        var header = import_jquery25.default.map(colnames, function(x) {
+          return "<th>" + x + "</th>";
+        }).join("");
+        header = "<thead><tr>" + header + "</tr></thead>";
+        var footer = "";
+        if (_data.options === null || _data.options.searching !== false) {
+          footer = import_jquery25.default.map(colnames, function(x) {
+            return '<th><input type="text" placeholder="' + escapeHTML(x.replace(/(<([^>]+)>)/gi, "")) + '" /></th>';
+          }).join("");
+          footer = "<tfoot>" + footer + "</tfoot>";
+        }
+        var content = '<table class="table table-striped table-hover">' + header + footer + "</table>";
+        $el.append(content);
+        if (_data.evalOptions)
+          import_jquery25.default.each(_data.evalOptions, function(i, x) {
+            _data.options[x] = indirectEval("(" + _data.options[x] + ")");
+          });
+        var searchCI = _data.options === null || typeof _data.options.search === "undefined" || _data.options.search.caseInsensitive !== false;
+        var oTable = (0, import_jquery25.default)(el).children("table").DataTable(import_jquery25.default.extend({
+          processing: true,
+          serverSide: true,
+          order: [],
+          orderClasses: false,
+          pageLength: 25,
+          ajax: {
+            url: _data.action,
+            type: "POST",
+            data: function data(d) {
+              d.search.caseInsensitive = searchCI;
+              d.escape = _data.escape;
+            }
+          }
+        }, _data.options));
+        if (typeof _data.callback === "string") {
+          var callback = indirectEval("(" + _data.callback + ")");
+          if (typeof callback === "function")
+            callback(oTable);
+        }
+        $el.find("label input").first().unbind("keyup").keyup(debounce(_data.searchDelay, function() {
+          oTable.search(this.value).draw();
+        }));
+        var searchInputs = $el.find("tfoot input");
+        if (searchInputs.length > 0) {
+          import_jquery25.default.each(oTable.settings()[0].aoColumns, function(i, x) {
+            if (!x.bSearchable)
+              searchInputs.eq(i).hide();
+          });
+          searchInputs.keyup(debounce(_data.searchDelay, function() {
+            oTable.column(searchInputs.index(this)).search(this.value).draw();
+          }));
+        }
+        $el.parents(".tab-content").css("overflow", "visible");
+      }
+    }]);
+    return DatatableOutputBinding2;
+  }(OutputBinding);
+
+  // src/bindings/output/html.ts
+  var import_es_array_iterator20 = __toModule(require_es_array_iterator());
+  var import_jquery28 = __toModule(require_jquery());
+
+  // src/shiny/render.ts
+  var import_es_regexp_exec6 = __toModule(require_es_regexp_exec());
+
+  // node_modules/core-js/modules/es.object.entries.js
+  var $45 = require_export();
+  var $entries = require_object_to_array().entries;
+  $45({target: "Object", stat: true}, {
+    entries: function entries(O) {
+      return $entries(O);
+    }
+  });
+
+  // src/shiny/render.ts
+  var import_es_array_iterator19 = __toModule(require_es_array_iterator());
+
+  // node_modules/core-js/modules/es.array.from.js
+  var $46 = require_export();
+  var from = require_array_from();
+  var checkCorrectnessOfIteration = require_check_correctness_of_iteration();
+  var INCORRECT_ITERATION = !checkCorrectnessOfIteration(function(iterable) {
+    Array.from(iterable);
+  });
+  $46({target: "Array", stat: true, forced: INCORRECT_ITERATION}, {
+    from: from
+  });
+
+  // src/shiny/render.ts
+  var import_jquery27 = __toModule(require_jquery());
+
+  // src/shiny/sendImageSize.ts
+  function _classCallCheck25(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+  function _defineProperties25(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor)
+        descriptor.writable = true;
+      Object.defineProperty(target, descriptor.key, descriptor);
+    }
+  }
+  function _createClass25(Constructor, protoProps, staticProps) {
+    if (protoProps)
+      _defineProperties25(Constructor.prototype, protoProps);
+    if (staticProps)
+      _defineProperties25(Constructor, staticProps);
+    return Constructor;
+  }
+  function _defineProperty8(obj, key, value) {
+    if (key in obj) {
+      Object.defineProperty(obj, key, {value: value, enumerable: true, configurable: true, writable: true});
+    } else {
+      obj[key] = value;
+    }
+    return obj;
+  }
+  var SendImageSize = /* @__PURE__ */ function() {
+    function SendImageSize2() {
+      _classCallCheck25(this, SendImageSize2);
+      _defineProperty8(this, "regular", void 0);
+      _defineProperty8(this, "transitioned", void 0);
+    }
+    _createClass25(SendImageSize2, [{
+      key: "setImageSend",
+      value: function setImageSend(inputBatchSender, doSendImageSize) {
+        var sendImageSizeDebouncer = new Debouncer(null, doSendImageSize, 0);
+        this.regular = function() {
+          sendImageSizeDebouncer.normalCall();
+        };
+        inputBatchSender.lastChanceCallback.push(function() {
+          if (sendImageSizeDebouncer.isPending())
+            sendImageSizeDebouncer.immediateCall();
+        });
+        this.transitioned = debounce(200, this.regular);
+        return sendImageSizeDebouncer;
+      }
+    }]);
+    return SendImageSize2;
+  }();
+  var sendImageSizeFns = new SendImageSize();
+
+  // src/shiny/singletons.ts
+  var import_es_regexp_exec5 = __toModule(require_es_regexp_exec());
+  var import_jquery26 = __toModule(require_jquery());
+  var _reSingleton = /<!--(SHINY.SINGLETON\[([\w]+)\])-->([\s\S]*?)<!--\/\1-->/;
+  var _reHead = /<head(?:\s[^>]*)?>([\s\S]*?)<\/head>/;
+  var knownSingletons = {};
+  function renderHtml(html, el, where) {
+    var processed = _processHtml(html);
+    _addToHead(processed.head);
+    register(processed.singletons);
+    if (where === "replace") {
+      (0, import_jquery26.default)(el).html(processed.html);
+    } else {
+      var elElements;
+      if (el instanceof HTMLElement) {
+        elElements = [el];
+      } else {
+        elElements = el.toArray();
+      }
+      import_jquery26.default.each(elElements, function(i, el2) {
+        el2.insertAdjacentHTML(where, processed.html);
+      });
+    }
+    return processed;
+  }
+  function register(s) {
+    import_jquery26.default.extend(knownSingletons, s);
+  }
+  function registerNames(s) {
+    if (typeof s === "string") {
+      knownSingletons[s] = true;
+    } else if (s instanceof Array) {
+      for (var i = 0; i < s.length; i++) {
+        knownSingletons[s[i]] = true;
+      }
+    }
+  }
+  function _addToHead(head) {
+    if (head.length > 0) {
+      var tempDiv = (0, import_jquery26.default)("<div>" + head + "</div>").get(0);
+      var $head = (0, import_jquery26.default)("head");
+      while (tempDiv.hasChildNodes()) {
+        $head.append(tempDiv.firstChild);
+      }
+    }
+  }
+  function _processHtml(val) {
+    var newSingletons = {};
+    var newVal;
+    var findNewPayload = function findNewPayload2(match, p1, sig, payload) {
+      if (knownSingletons[sig] || newSingletons[sig])
+        return "";
+      newSingletons[sig] = true;
+      return payload;
+    };
+    while (true) {
+      newVal = val.replace(_reSingleton, findNewPayload);
+      if (val.length === newVal.length)
+        break;
+      val = newVal;
+    }
+    var heads = [];
+    var headAddPayload = function headAddPayload2(match, payload) {
+      heads.push(payload);
+      return "";
+    };
+    while (true) {
+      newVal = val.replace(_reHead, headAddPayload);
+      if (val.length === newVal.length)
+        break;
+      val = newVal;
+    }
+    return {
+      html: val,
+      head: heads.join("\n"),
+      singletons: newSingletons
+    };
+  }
+
+  // src/shiny/render.ts
+  function _slicedToArray(arr, i) {
+    return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest();
+  }
+  function _nonIterableRest() {
+    throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+  }
+  function _unsupportedIterableToArray(o, minLen) {
+    if (!o)
+      return;
+    if (typeof o === "string")
+      return _arrayLikeToArray(o, minLen);
+    var n = Object.prototype.toString.call(o).slice(8, -1);
+    if (n === "Object" && o.constructor)
+      n = o.constructor.name;
+    if (n === "Map" || n === "Set")
+      return Array.from(o);
+    if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n))
+      return _arrayLikeToArray(o, minLen);
+  }
+  function _arrayLikeToArray(arr, len) {
+    if (len == null || len > arr.length)
+      len = arr.length;
+    for (var i = 0, arr2 = new Array(len); i < len; i++) {
+      arr2[i] = arr[i];
+    }
+    return arr2;
+  }
+  function _iterableToArrayLimit(arr, i) {
+    var _i = arr && (typeof Symbol !== "undefined" && arr[Symbol.iterator] || arr["@@iterator"]);
+    if (_i == null)
+      return;
+    var _arr = [];
+    var _n = true;
+    var _d = false;
+    var _s, _e;
+    try {
+      for (_i = _i.call(arr); !(_n = (_s = _i.next()).done); _n = true) {
+        _arr.push(_s.value);
+        if (i && _arr.length === i)
+          break;
+      }
+    } catch (err) {
+      _d = true;
+      _e = err;
+    } finally {
+      try {
+        if (!_n && _i["return"] != null)
+          _i["return"]();
+      } finally {
+        if (_d)
+          throw _e;
+      }
+    }
+    return _arr;
+  }
+  function _arrayWithHoles(arr) {
+    if (Array.isArray(arr))
+      return arr;
+  }
+  function _typeof19(obj) {
+    "@babel/helpers - typeof";
+    if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
+      _typeof19 = function _typeof27(obj2) {
+        return typeof obj2;
+      };
+    } else {
+      _typeof19 = function _typeof27(obj2) {
+        return obj2 && typeof Symbol === "function" && obj2.constructor === Symbol && obj2 !== Symbol.prototype ? "symbol" : typeof obj2;
+      };
+    }
+    return _typeof19(obj);
+  }
+  function renderDependencies(dependencies) {
+    if (dependencies) {
+      import_jquery27.default.each(dependencies, function(i, dep) {
+        renderDependency(dep);
+      });
+    }
+  }
+  function renderContent(el, content, where) {
+    if (where === "replace") {
+      shinyUnbindAll(el);
+    }
+    var html;
+    var dependencies = [];
+    if (content === null) {
+      html = "";
+    } else if (typeof content === "string") {
+      html = content;
+    } else if (_typeof19(content) === "object") {
+      html = content.html;
+      dependencies = content.deps || [];
+    }
+    renderHtml2(html, el, dependencies, where);
+    var scope = el;
+    if (where === "replace") {
+      shinyInitializeInputs(el);
+      shinyBindAll(el);
+    } else {
+      var $parent = (0, import_jquery27.default)(el).parent();
+      if ($parent.length > 0) {
+        scope = $parent;
+        if (where === "beforeBegin" || where === "afterEnd") {
+          var $grandparent = $parent.parent();
+          if ($grandparent.length > 0)
+            scope = $grandparent;
+        }
+      }
+      shinyInitializeInputs(scope);
+      shinyBindAll(scope);
+    }
+  }
+  function renderHtml2(html, el, dependencies) {
+    var where = arguments.length > 3 && arguments[3] !== void 0 ? arguments[3] : "replace";
+    renderDependencies(dependencies);
+    return renderHtml(html, el, where);
+  }
+  var htmlDependencies = {};
+  function registerDependency(name, version) {
+    htmlDependencies[name] = version;
+  }
+  function needsRestyle(dep) {
+    if (!dep.restyle) {
+      return false;
+    }
+    var names = Object.keys(htmlDependencies);
+    var idx = names.indexOf(dep.name);
+    if (idx === -1) {
+      return false;
+    }
+    return htmlDependencies[names[idx]] === dep.version;
+  }
+  function renderDependency(dep) {
+    var restyle = needsRestyle(dep);
+    if (hasOwnProperty(htmlDependencies, dep.name) && !restyle)
+      return false;
+    registerDependency(dep.name, dep.version);
+    var href = dep.src.href;
+    var $head = (0, import_jquery27.default)("head").first();
+    if (dep.meta && !restyle) {
+      var metas = import_jquery27.default.map(asArray(dep.meta), function(obj, idx) {
+        var name = Object.keys(obj)[0];
+        return (0, import_jquery27.default)("<meta>").attr("name", name).attr("content", obj[name]);
+      });
+      $head.append(metas);
+    }
+    if (dep.stylesheet) {
+      var links = import_jquery27.default.map(asArray(dep.stylesheet), function(stylesheet) {
+        return (0, import_jquery27.default)("<link rel='stylesheet' type='text/css'>").attr("href", href + "/" + encodeURI(stylesheet));
+      });
+      if (!restyle) {
+        $head.append(links);
+      } else {
+        var refreshStyle = function refreshStyle2(href2, oldSheet) {
+          var xhr = new XMLHttpRequest();
+          xhr.open("GET", href2);
+          xhr.onload = function() {
+            var id = "shiny_restyle_" + href2.split("?restyle")[0].replace(/\W/g, "_");
+            var oldStyle = $head.find("style#" + id);
+            var newStyle = (0, import_jquery27.default)("<style>").attr("id", id).html(xhr.responseText);
+            $head.append(newStyle);
+            oldStyle.remove();
+            removeSheet(oldSheet);
+            sendImageSizeFns.transitioned();
+          };
+          xhr.send();
+        };
+        var findSheet = function findSheet2(href2) {
+          for (var i = 0; i < document.styleSheets.length; i++) {
+            var sheet = document.styleSheets[i];
+            if (typeof sheet.href === "string" && sheet.href.indexOf(href2) > -1) {
+              return sheet;
+            }
+          }
+          return null;
+        };
+        var removeSheet = function removeSheet2(sheet) {
+          if (!sheet)
+            return;
+          sheet.disabled = true;
+          if (isIE())
+            sheet.cssText = "";
+          (0, import_jquery27.default)(sheet.ownerNode).remove();
+        };
+        import_jquery27.default.map(links, function(link) {
+          var oldSheet = findSheet(link.attr("href"));
+          var href2 = link.attr("href") + "?restyle=" + new Date().getTime();
+          if (isIE()) {
+            refreshStyle(href2, oldSheet);
+          } else {
+            link.attr("href", href2);
+            link.attr("onload", function() {
+              var dummyId = "dummy-" + Math.floor(Math.random() * 999999999);
+              var cssString = "#" + dummyId + " { color: #a7c920 !important; transition: 0.1s all !important; visibility: hidden !important; position: absolute !important; top: -1000px !important; left: 0 !important; }";
+              var base64CssString = "data:text/css;base64," + btoa(cssString);
+              var $dummyLink = (0, import_jquery27.default)("<link rel='stylesheet' type='text/css' />");
+              $dummyLink.attr("href", base64CssString);
+              var $dummyEl = (0, import_jquery27.default)("<div id='" + dummyId + "'></div>");
+              $dummyEl.one("transitionend", function() {
+                $dummyEl.remove();
+                removeSheet(findSheet($dummyLink.attr("href")));
+                removeSheet(oldSheet);
+                sendImageSizeFns.transitioned();
+              });
+              (0, import_jquery27.default)(document.body).append($dummyEl);
+              setTimeout(function() {
+                return $head.append($dummyLink);
+              }, 0);
+            });
+            $head.append(link);
+          }
+        });
+      }
+    }
+    if (dep.script && !restyle) {
+      var scriptsAttrs = asArray(dep.script);
+      var scripts = import_jquery27.default.map(scriptsAttrs, function(x) {
+        var script = document.createElement("script");
+        if (typeof x === "string") {
+          x = {
+            src: x
+          };
+        }
+        for (var _i = 0, _Object$entries = Object.entries(x); _i < _Object$entries.length; _i++) {
+          var _Object$entries$_i = _slicedToArray(_Object$entries[_i], 2), attr = _Object$entries$_i[0], val = _Object$entries$_i[1];
+          if (attr === "src") {
+            val = href + "/" + encodeURI(val);
+          }
+          script.setAttribute(attr, val ? val : "");
+        }
+        return script;
+      });
+      $head.append(scripts);
+    }
+    if (dep.attachment && !restyle) {
+      var attachments = dep.attachment;
+      if (typeof attachments === "string")
+        attachments = [attachments];
+      if (Array.isArray(attachments)) {
+        var tmp = {};
+        import_jquery27.default.each(attachments, function(index, attachment) {
+          var key = index + 1 + "";
+          tmp[key] = attachment;
+        });
+        attachments = tmp;
+      }
+      var attach = import_jquery27.default.map(attachments, function(attachment, key) {
+        return (0, import_jquery27.default)("<link rel='attachment'>").attr("id", dep.name + "-" + key + "-attachment").attr("href", href + "/" + encodeURI(attachment));
+      });
+      $head.append(attach);
+    }
+    if (dep.head && !restyle) {
+      var $newHead = (0, import_jquery27.default)("<head></head>");
+      $newHead.html(dep.head);
+      $head.append($newHead.children());
+    }
+    return true;
+  }
+
+  // src/bindings/output/html.ts
+  function _typeof20(obj) {
+    "@babel/helpers - typeof";
+    if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
+      _typeof20 = function _typeof27(obj2) {
+        return typeof obj2;
+      };
+    } else {
+      _typeof20 = function _typeof27(obj2) {
+        return obj2 && typeof Symbol === "function" && obj2.constructor === Symbol && obj2 !== Symbol.prototype ? "symbol" : typeof obj2;
+      };
+    }
+    return _typeof20(obj);
+  }
+  function _classCallCheck26(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+  function _defineProperties26(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor)
+        descriptor.writable = true;
+      Object.defineProperty(target, descriptor.key, descriptor);
+    }
+  }
+  function _createClass26(Constructor, protoProps, staticProps) {
+    if (protoProps)
+      _defineProperties26(Constructor.prototype, protoProps);
+    if (staticProps)
+      _defineProperties26(Constructor, staticProps);
+    return Constructor;
+  }
+  function _inherits19(subClass, superClass) {
+    if (typeof superClass !== "function" && superClass !== null) {
+      throw new TypeError("Super expression must either be null or a function");
+    }
+    subClass.prototype = Object.create(superClass && superClass.prototype, {constructor: {value: subClass, writable: true, configurable: true}});
+    if (superClass)
+      _setPrototypeOf19(subClass, superClass);
+  }
+  function _setPrototypeOf19(o, p) {
+    _setPrototypeOf19 = Object.setPrototypeOf || function _setPrototypeOf26(o2, p2) {
+      o2.__proto__ = p2;
+      return o2;
+    };
+    return _setPrototypeOf19(o, p);
+  }
+  function _createSuper19(Derived) {
+    var hasNativeReflectConstruct = _isNativeReflectConstruct19();
+    return function _createSuperInternal() {
+      var Super = _getPrototypeOf19(Derived), result;
+      if (hasNativeReflectConstruct) {
+        var NewTarget = _getPrototypeOf19(this).constructor;
+        result = Reflect.construct(Super, arguments, NewTarget);
+      } else {
+        result = Super.apply(this, arguments);
+      }
+      return _possibleConstructorReturn19(this, result);
+    };
+  }
+  function _possibleConstructorReturn19(self2, call) {
+    if (call && (_typeof20(call) === "object" || typeof call === "function")) {
+      return call;
+    }
+    return _assertThisInitialized19(self2);
+  }
+  function _assertThisInitialized19(self2) {
+    if (self2 === void 0) {
+      throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+    }
+    return self2;
+  }
+  function _isNativeReflectConstruct19() {
+    if (typeof Reflect === "undefined" || !Reflect.construct)
+      return false;
+    if (Reflect.construct.sham)
+      return false;
+    if (typeof Proxy === "function")
+      return true;
+    try {
+      Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function() {
+      }));
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+  function _getPrototypeOf19(o) {
+    _getPrototypeOf19 = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf26(o2) {
+      return o2.__proto__ || Object.getPrototypeOf(o2);
+    };
+    return _getPrototypeOf19(o);
+  }
+  var HtmlOutputBinding = /* @__PURE__ */ function(_OutputBinding) {
+    _inherits19(HtmlOutputBinding2, _OutputBinding);
+    var _super = _createSuper19(HtmlOutputBinding2);
+    function HtmlOutputBinding2() {
+      _classCallCheck26(this, HtmlOutputBinding2);
+      return _super.apply(this, arguments);
+    }
+    _createClass26(HtmlOutputBinding2, [{
+      key: "find",
+      value: function find2(scope) {
+        return (0, import_jquery28.default)(scope).find(".shiny-html-output");
+      }
+    }, {
+      key: "onValueError",
+      value: function onValueError(el, err) {
+        shinyUnbindAll(el);
+        this.renderError(el, err);
+      }
+    }, {
+      key: "renderValue",
+      value: function renderValue(el, data) {
+        renderContent(el, data);
+      }
+    }]);
+    return HtmlOutputBinding2;
+  }(OutputBinding);
+
+  // node_modules/core-js/modules/es.array.filter.js
+  "use strict";
+  var $50 = require_export();
+  var $filter = require_array_iteration().filter;
+  var arrayMethodHasSpeciesSupport5 = require_array_method_has_species_support();
+  var HAS_SPECIES_SUPPORT4 = arrayMethodHasSpeciesSupport5("filter");
+  $50({target: "Array", proto: true, forced: !HAS_SPECIES_SUPPORT4}, {
+    filter: function filter(callbackfn) {
+      return $filter(this, callbackfn, arguments.length > 1 ? arguments[1] : void 0);
+    }
+  });
+
+  // src/bindings/output/image.ts
+  var import_es_array_iterator21 = __toModule(require_es_array_iterator());
+  var import_jquery33 = __toModule(require_jquery());
+
+  // src/imageutils/createBrush.ts
+  var import_jquery30 = __toModule(require_jquery());
+
+  // src/imageutils/initCoordmap.ts
+  var import_jquery29 = __toModule(require_jquery());
 
   // src/imageutils/initPanelScales.ts
   function mapLinear(x, domainMin, domainMax, rangeMin, rangeMax) {
@@ -4406,7 +9488,7 @@
           coords_img: coordsImg,
           img_css_ratio: coordmap.cssToImgScalingRatio()
         };
-        import_jquery7.default.extend(coords, panel.panel_vars);
+        import_jquery29.default.extend(coords, panel.panel_vars);
         coords.mapping = panel.mapping;
         coords.domain = panel.domain;
         coords.range = panel.range;
@@ -4566,7 +9648,7 @@
     }
     function boundsCss(boxCss) {
       if (boxCss === void 0) {
-        return import_jquery8.default.extend({}, state.boundsCss);
+        return import_jquery30.default.extend({}, state.boundsCss);
       }
       var minCss = {
         x: boxCss.xmin,
@@ -4616,7 +9698,7 @@
     }
     function boundsData(boxData) {
       if (boxData === void 0) {
-        return import_jquery8.default.extend({}, state.boundsData);
+        return import_jquery30.default.extend({}, state.boundsData);
       }
       var boxCss = imgToCss(state.panel.scaleDataToImg(boxData));
       boxCss = mapValues(boxCss, function(val) {
@@ -4636,7 +9718,7 @@
     function addDiv() {
       if ($div)
         $div.remove();
-      $div = (0, import_jquery8.default)(document.createElement("div")).attr("id", el.id + "_brush").css({
+      $div = (0, import_jquery30.default)(document.createElement("div")).attr("id", el.id + "_brush").css({
         "background-color": opts.brushFill,
         opacity: opts.brushOpacity,
         "pointer-events": "none",
@@ -4708,7 +9790,7 @@
     }
     function startDragging() {
       state.dragging = true;
-      state.changeStartBounds = import_jquery8.default.extend({}, state.boundsCss);
+      state.changeStartBounds = import_jquery30.default.extend({}, state.boundsCss);
     }
     function dragTo(offsetCss) {
       var dx = offsetCss.x - state.down.x;
@@ -4745,7 +9827,7 @@
     }
     function startResizing() {
       state.resizing = true;
-      state.changeStartBounds = import_jquery8.default.extend({}, state.boundsCss);
+      state.changeStartBounds = import_jquery30.default.extend({}, state.boundsCss);
       state.resizeSides = whichResizeSides(state.down);
     }
     function resizeTo(offsetCss) {
@@ -4804,12 +9886,12 @@
   }
 
   // src/imageutils/createClickInfo.ts
-  var import_jquery9 = __toModule(require_jquery());
+  var import_jquery31 = __toModule(require_jquery());
   function createClickInfo($el, dblclickId, dblclickDelay) {
     var clickTimer = null;
     var pendingE = null;
     function triggerEvent(newEventType, e) {
-      var e2 = import_jquery9.default.Event(newEventType, {
+      var e2 = import_jquery31.default.Event(newEventType, {
         which: e.which,
         pageX: e.pageX,
         pageY: e.pageY
@@ -4859,279 +9941,7 @@
   }
 
   // src/imageutils/createHandlers.ts
-  var import_jquery10 = __toModule(require_jquery());
-
-  // src/time/debounce.ts
-  function _classCallCheck2(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  }
-  function _defineProperties2(target, props) {
-    for (var i = 0; i < props.length; i++) {
-      var descriptor = props[i];
-      descriptor.enumerable = descriptor.enumerable || false;
-      descriptor.configurable = true;
-      if ("value" in descriptor)
-        descriptor.writable = true;
-      Object.defineProperty(target, descriptor.key, descriptor);
-    }
-  }
-  function _createClass2(Constructor, protoProps, staticProps) {
-    if (protoProps)
-      _defineProperties2(Constructor.prototype, protoProps);
-    if (staticProps)
-      _defineProperties2(Constructor, staticProps);
-    return Constructor;
-  }
-  function _defineProperty2(obj, key, value) {
-    if (key in obj) {
-      Object.defineProperty(obj, key, {value: value, enumerable: true, configurable: true, writable: true});
-    } else {
-      obj[key] = value;
-    }
-    return obj;
-  }
-  var Debouncer = /* @__PURE__ */ function() {
-    function Debouncer2(target, func, delayMs) {
-      _classCallCheck2(this, Debouncer2);
-      _defineProperty2(this, "target", void 0);
-      _defineProperty2(this, "func", void 0);
-      _defineProperty2(this, "delayMs", void 0);
-      _defineProperty2(this, "timerId", void 0);
-      _defineProperty2(this, "args", void 0);
-      this.target = target;
-      this.func = func;
-      this.delayMs = delayMs;
-      this.timerId = null;
-      this.args = null;
-    }
-    _createClass2(Debouncer2, [{
-      key: "normalCall",
-      value: function normalCall() {
-        var _this = this;
-        this.$clearTimer();
-        for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-          args[_key] = arguments[_key];
-        }
-        this.args = args;
-        this.timerId = setTimeout(function() {
-          if (_this.timerId === null)
-            return;
-          _this.$clearTimer();
-          _this.$invoke();
-        }, this.delayMs);
-      }
-    }, {
-      key: "immediateCall",
-      value: function immediateCall() {
-        this.$clearTimer();
-        for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-          args[_key2] = arguments[_key2];
-        }
-        this.args = args;
-        this.$invoke();
-      }
-    }, {
-      key: "isPending",
-      value: function isPending() {
-        return this.timerId !== null;
-      }
-    }, {
-      key: "$clearTimer",
-      value: function $clearTimer() {
-        if (this.timerId !== null) {
-          clearTimeout(this.timerId);
-          this.timerId = null;
-        }
-      }
-    }, {
-      key: "$invoke",
-      value: function $invoke() {
-        this.func.apply(this.target, this.args);
-        this.args = null;
-      }
-    }]);
-    return Debouncer2;
-  }();
-  function debounce(threshold, func) {
-    var timerId = null;
-    return function() {
-      var _this2 = this;
-      for (var _len3 = arguments.length, args = new Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
-        args[_key3] = arguments[_key3];
-      }
-      if (timerId !== null) {
-        clearTimeout(timerId);
-        timerId = null;
-      }
-      timerId = setTimeout(function() {
-        if (timerId === null)
-          return;
-        timerId = null;
-        func.apply(_this2, args);
-      }, threshold);
-    };
-  }
-
-  // src/time/invoke.ts
-  function _classCallCheck3(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  }
-  function _defineProperties3(target, props) {
-    for (var i = 0; i < props.length; i++) {
-      var descriptor = props[i];
-      descriptor.enumerable = descriptor.enumerable || false;
-      descriptor.configurable = true;
-      if ("value" in descriptor)
-        descriptor.writable = true;
-      Object.defineProperty(target, descriptor.key, descriptor);
-    }
-  }
-  function _createClass3(Constructor, protoProps, staticProps) {
-    if (protoProps)
-      _defineProperties3(Constructor.prototype, protoProps);
-    if (staticProps)
-      _defineProperties3(Constructor, staticProps);
-    return Constructor;
-  }
-  function _defineProperty3(obj, key, value) {
-    if (key in obj) {
-      Object.defineProperty(obj, key, {value: value, enumerable: true, configurable: true, writable: true});
-    } else {
-      obj[key] = value;
-    }
-    return obj;
-  }
-  var Invoker = /* @__PURE__ */ function() {
-    function Invoker2(target, func) {
-      _classCallCheck3(this, Invoker2);
-      _defineProperty3(this, "target", void 0);
-      _defineProperty3(this, "func", void 0);
-      this.target = target;
-      this.func = func;
-    }
-    _createClass3(Invoker2, [{
-      key: "normalCall",
-      value: function normalCall() {
-        for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-          args[_key] = arguments[_key];
-        }
-        this.func.apply(this.target, args);
-      }
-    }, {
-      key: "immediateCall",
-      value: function immediateCall() {
-        for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-          args[_key2] = arguments[_key2];
-        }
-        this.func.apply(this.target, args);
-      }
-    }]);
-    return Invoker2;
-  }();
-
-  // src/time/throttle.ts
-  function _classCallCheck4(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  }
-  function _defineProperties4(target, props) {
-    for (var i = 0; i < props.length; i++) {
-      var descriptor = props[i];
-      descriptor.enumerable = descriptor.enumerable || false;
-      descriptor.configurable = true;
-      if ("value" in descriptor)
-        descriptor.writable = true;
-      Object.defineProperty(target, descriptor.key, descriptor);
-    }
-  }
-  function _createClass4(Constructor, protoProps, staticProps) {
-    if (protoProps)
-      _defineProperties4(Constructor.prototype, protoProps);
-    if (staticProps)
-      _defineProperties4(Constructor, staticProps);
-    return Constructor;
-  }
-  function _defineProperty4(obj, key, value) {
-    if (key in obj) {
-      Object.defineProperty(obj, key, {value: value, enumerable: true, configurable: true, writable: true});
-    } else {
-      obj[key] = value;
-    }
-    return obj;
-  }
-  var Throttler = /* @__PURE__ */ function() {
-    function Throttler2(target, func, delayMs) {
-      _classCallCheck4(this, Throttler2);
-      _defineProperty4(this, "target", void 0);
-      _defineProperty4(this, "func", void 0);
-      _defineProperty4(this, "delayMs", void 0);
-      _defineProperty4(this, "timerId", void 0);
-      _defineProperty4(this, "args", void 0);
-      this.target = target;
-      this.func = func;
-      this.delayMs = delayMs;
-      this.timerId = null;
-      this.args = null;
-    }
-    _createClass4(Throttler2, [{
-      key: "normalCall",
-      value: function normalCall() {
-        var _this = this;
-        for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-          args[_key] = arguments[_key];
-        }
-        this.args = args;
-        if (this.timerId === null) {
-          this.$invoke();
-          this.timerId = setTimeout(function() {
-            var _this$normalCall;
-            if (_this.timerId === null)
-              return;
-            _this.$clearTimer();
-            if (args.length > 0)
-              (_this$normalCall = _this.normalCall).apply.apply(_this$normalCall, [_this].concat(args));
-          }, this.delayMs);
-        }
-      }
-    }, {
-      key: "immediateCall",
-      value: function immediateCall() {
-        this.$clearTimer();
-        for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-          args[_key2] = arguments[_key2];
-        }
-        this.args = args;
-        this.$invoke();
-      }
-    }, {
-      key: "isPending",
-      value: function isPending() {
-        return this.timerId !== null;
-      }
-    }, {
-      key: "$clearTimer",
-      value: function $clearTimer() {
-        if (this.timerId !== null) {
-          clearTimeout(this.timerId);
-          this.timerId = null;
-        }
-      }
-    }, {
-      key: "$invoke",
-      value: function $invoke() {
-        this.func.apply(this.target, this.args);
-        this.args = null;
-      }
-    }]);
-    return Throttler2;
-  }();
-
-  // src/imageutils/createHandlers.ts
+  var import_jquery32 = __toModule(require_jquery());
   function createClickHandler(inputId, clip, coordmap) {
     var clickInfoSender = coordmap.mouseCoordinateSender(inputId, clip);
     return {
@@ -5197,7 +10007,7 @@
         return;
       }
       var panel = brush.getPanel();
-      import_jquery10.default.extend(coords, panel.panel_vars);
+      import_jquery32.default.extend(coords, panel.panel_vars);
       coords.coords_css = brush.boundsCss();
       coords.coords_img = coordmap.scaleCssToImg(coords.coords_css);
       coords.img_css_ratio = coordmap.cssToImgScalingRatio();
@@ -5233,15 +10043,15 @@
       brush.down(offsetCss);
       if (brush.isInResizeArea(offsetCss)) {
         brush.startResizing(offsetCss);
-        (0, import_jquery10.default)(document).on("mousemove.image_brush", mousemoveResizing).on("mouseup.image_brush", mouseupResizing);
+        (0, import_jquery32.default)(document).on("mousemove.image_brush", mousemoveResizing).on("mouseup.image_brush", mouseupResizing);
       } else if (brush.isInsideBrush(offsetCss)) {
         brush.startDragging(offsetCss);
         setCursorStyle("grabbing");
-        (0, import_jquery10.default)(document).on("mousemove.image_brush", mousemoveDragging).on("mouseup.image_brush", mouseupDragging);
+        (0, import_jquery32.default)(document).on("mousemove.image_brush", mousemoveDragging).on("mouseup.image_brush", mouseupDragging);
       } else {
         var panel = coordmap.getPanelCss(offsetCss, expandPixels);
         brush.startBrushing(panel.clipImg(coordmap.scaleCssToImg(offsetCss)));
-        (0, import_jquery10.default)(document).on("mousemove.image_brush", mousemoveBrushing).on("mouseup.image_brush", mouseupBrushing);
+        (0, import_jquery32.default)(document).on("mousemove.image_brush", mousemoveBrushing).on("mouseup.image_brush", mouseupBrushing);
       }
     }
     function mousemove(e) {
@@ -5282,7 +10092,7 @@
     function mouseupBrushing(e) {
       if (e.which !== 1)
         return;
-      (0, import_jquery10.default)(document).off("mousemove.image_brush").off("mouseup.image_brush");
+      (0, import_jquery32.default)(document).off("mousemove.image_brush").off("mouseup.image_brush");
       brush.up(coordmap.mouseOffsetCss(e));
       brush.stopBrushing();
       setCursorStyle("crosshair");
@@ -5297,7 +10107,7 @@
     function mouseupDragging(e) {
       if (e.which !== 1)
         return;
-      (0, import_jquery10.default)(document).off("mousemove.image_brush").off("mouseup.image_brush");
+      (0, import_jquery32.default)(document).off("mousemove.image_brush").off("mouseup.image_brush");
       brush.up(coordmap.mouseOffsetCss(e));
       brush.stopDragging();
       setCursorStyle("grabbable");
@@ -5307,7 +10117,7 @@
     function mouseupResizing(e) {
       if (e.which !== 1)
         return;
-      (0, import_jquery10.default)(document).off("mousemove.image_brush").off("mouseup.image_brush");
+      (0, import_jquery32.default)(document).off("mousemove.image_brush").off("mouseup.image_brush");
       brush.up(coordmap.mouseOffsetCss(e));
       brush.stopResizing();
       if (brushInfoSender.isPending())
@@ -5353,25 +10163,25 @@
   }
 
   // src/bindings/output/image.ts
-  function _typeof(obj) {
+  function _typeof21(obj) {
     "@babel/helpers - typeof";
     if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
-      _typeof = function _typeof27(obj2) {
+      _typeof21 = function _typeof27(obj2) {
         return typeof obj2;
       };
     } else {
-      _typeof = function _typeof27(obj2) {
+      _typeof21 = function _typeof27(obj2) {
         return obj2 && typeof Symbol === "function" && obj2.constructor === Symbol && obj2 !== Symbol.prototype ? "symbol" : typeof obj2;
       };
     }
-    return _typeof(obj);
+    return _typeof21(obj);
   }
-  function _classCallCheck5(instance, Constructor) {
+  function _classCallCheck27(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
       throw new TypeError("Cannot call a class as a function");
     }
   }
-  function _defineProperties5(target, props) {
+  function _defineProperties27(target, props) {
     for (var i = 0; i < props.length; i++) {
       var descriptor = props[i];
       descriptor.enumerable = descriptor.enumerable || false;
@@ -5381,54 +10191,54 @@
       Object.defineProperty(target, descriptor.key, descriptor);
     }
   }
-  function _createClass5(Constructor, protoProps, staticProps) {
+  function _createClass27(Constructor, protoProps, staticProps) {
     if (protoProps)
-      _defineProperties5(Constructor.prototype, protoProps);
+      _defineProperties27(Constructor.prototype, protoProps);
     if (staticProps)
-      _defineProperties5(Constructor, staticProps);
+      _defineProperties27(Constructor, staticProps);
     return Constructor;
   }
-  function _inherits(subClass, superClass) {
+  function _inherits20(subClass, superClass) {
     if (typeof superClass !== "function" && superClass !== null) {
       throw new TypeError("Super expression must either be null or a function");
     }
     subClass.prototype = Object.create(superClass && superClass.prototype, {constructor: {value: subClass, writable: true, configurable: true}});
     if (superClass)
-      _setPrototypeOf(subClass, superClass);
+      _setPrototypeOf20(subClass, superClass);
   }
-  function _setPrototypeOf(o, p) {
-    _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf26(o2, p2) {
+  function _setPrototypeOf20(o, p) {
+    _setPrototypeOf20 = Object.setPrototypeOf || function _setPrototypeOf26(o2, p2) {
       o2.__proto__ = p2;
       return o2;
     };
-    return _setPrototypeOf(o, p);
+    return _setPrototypeOf20(o, p);
   }
-  function _createSuper(Derived) {
-    var hasNativeReflectConstruct = _isNativeReflectConstruct();
+  function _createSuper20(Derived) {
+    var hasNativeReflectConstruct = _isNativeReflectConstruct20();
     return function _createSuperInternal() {
-      var Super = _getPrototypeOf(Derived), result;
+      var Super = _getPrototypeOf20(Derived), result;
       if (hasNativeReflectConstruct) {
-        var NewTarget = _getPrototypeOf(this).constructor;
+        var NewTarget = _getPrototypeOf20(this).constructor;
         result = Reflect.construct(Super, arguments, NewTarget);
       } else {
         result = Super.apply(this, arguments);
       }
-      return _possibleConstructorReturn(this, result);
+      return _possibleConstructorReturn20(this, result);
     };
   }
-  function _possibleConstructorReturn(self2, call) {
-    if (call && (_typeof(call) === "object" || typeof call === "function")) {
+  function _possibleConstructorReturn20(self2, call) {
+    if (call && (_typeof21(call) === "object" || typeof call === "function")) {
       return call;
     }
-    return _assertThisInitialized(self2);
+    return _assertThisInitialized20(self2);
   }
-  function _assertThisInitialized(self2) {
+  function _assertThisInitialized20(self2) {
     if (self2 === void 0) {
       throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
     }
     return self2;
   }
-  function _isNativeReflectConstruct() {
+  function _isNativeReflectConstruct20() {
     if (typeof Reflect === "undefined" || !Reflect.construct)
       return false;
     if (Reflect.construct.sham)
@@ -5443,35 +10253,35 @@
       return false;
     }
   }
-  function _getPrototypeOf(o) {
-    _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf26(o2) {
+  function _getPrototypeOf20(o) {
+    _getPrototypeOf20 = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf26(o2) {
       return o2.__proto__ || Object.getPrototypeOf(o2);
     };
-    return _getPrototypeOf(o);
+    return _getPrototypeOf20(o);
   }
   var ImageOutputBinding = /* @__PURE__ */ function(_OutputBinding) {
-    _inherits(ImageOutputBinding2, _OutputBinding);
-    var _super = _createSuper(ImageOutputBinding2);
+    _inherits20(ImageOutputBinding2, _OutputBinding);
+    var _super = _createSuper20(ImageOutputBinding2);
     function ImageOutputBinding2() {
-      _classCallCheck5(this, ImageOutputBinding2);
+      _classCallCheck27(this, ImageOutputBinding2);
       return _super.apply(this, arguments);
     }
-    _createClass5(ImageOutputBinding2, [{
+    _createClass27(ImageOutputBinding2, [{
       key: "find",
       value: function find2(scope) {
-        return (0, import_jquery11.default)(scope).find(".shiny-image-output, .shiny-plot-output");
+        return (0, import_jquery33.default)(scope).find(".shiny-image-output, .shiny-plot-output");
       }
     }, {
       key: "renderValue",
       value: function renderValue(el, data) {
         var outputId = this.getId(el);
-        var $el = (0, import_jquery11.default)(el);
+        var $el = (0, import_jquery33.default)(el);
         var img;
         var $img = $el.find("img");
         if ($img.length === 0) {
           img = document.createElement("img");
           $el.append(img);
-          $img = (0, import_jquery11.default)(img);
+          $img = (0, import_jquery33.default)(img);
         } else {
           img = $img[0];
           $img.trigger("reset");
@@ -5513,7 +10323,7 @@
         if (opts.brushStroke === "auto") {
           opts.brushStroke = getStyle($el[0], "color");
         }
-        import_jquery11.default.each(data, function(key, value) {
+        import_jquery33.default.each(data, function(key, value) {
           if (value === null || key === "coordmap") {
             return;
           }
@@ -5587,13 +10397,13 @@
     }, {
       key: "renderError",
       value: function renderError(el, err) {
-        (0, import_jquery11.default)(el).find("img").trigger("reset");
+        (0, import_jquery33.default)(el).find("img").trigger("reset");
         OutputBinding.prototype.renderError.call(this, el, err);
       }
     }, {
       key: "clearError",
       value: function clearError(el) {
-        (0, import_jquery11.default)(el).contents().filter(function() {
+        (0, import_jquery33.default)(el).contents().filter(function() {
           return this.tagName !== "IMG" && this.id !== el.id + "_brush";
         }).remove();
         OutputBinding.prototype.clearError.call(this, el);
@@ -5601,7 +10411,7 @@
     }, {
       key: "resize",
       value: function resize(el, width, height) {
-        (0, import_jquery11.default)(el).find("img").trigger("resize");
+        (0, import_jquery33.default)(el).find("img").trigger("resize");
         return;
         width;
         height;
@@ -5610,6 +10420,19 @@
     return ImageOutputBinding2;
   }(OutputBinding);
   var imageOutputBinding = new ImageOutputBinding();
+
+  // src/bindings/output/index.ts
+  function initOutputBindings() {
+    var outputBindings = new BindingRegistry();
+    outputBindings.register(new TextOutputBinding(), "shiny.textOutput");
+    outputBindings.register(new DownloadLinkOutputBinding(), "shiny.downloadLink");
+    outputBindings.register(new DatatableOutputBinding(), "shiny.datatableOutput");
+    outputBindings.register(new HtmlOutputBinding(), "shiny.htmlOutput");
+    outputBindings.register(imageOutputBinding, "shiny.imageOutput");
+    return {
+      outputBindings: outputBindings
+    };
+  }
 
   // src/imageutils/resetBrush.ts
   function resetBrush(brushId) {
@@ -5621,441 +10444,15 @@
   }
 
   // src/shiny/notifications.ts
-  var import_es_regexp_exec5 = __toModule(require_es_regexp_exec());
-  var import_jquery14 = __toModule(require_jquery());
-
-  // src/shiny/render.ts
-  var import_es_regexp_exec4 = __toModule(require_es_regexp_exec());
-
-  // node_modules/core-js/modules/es.object.entries.js
-  var $29 = require_export();
-  var $entries = require_object_to_array().entries;
-  $29({target: "Object", stat: true}, {
-    entries: function entries(O) {
-      return $entries(O);
-    }
-  });
-
-  // src/shiny/render.ts
-  var import_es_array_iterator2 = __toModule(require_es_array_iterator());
-
-  // node_modules/core-js/modules/es.array.from.js
-  var $30 = require_export();
-  var from = require_array_from();
-  var checkCorrectnessOfIteration = require_check_correctness_of_iteration();
-  var INCORRECT_ITERATION = !checkCorrectnessOfIteration(function(iterable) {
-    Array.from(iterable);
-  });
-  $30({target: "Array", stat: true, forced: INCORRECT_ITERATION}, {
-    from: from
-  });
-
-  // src/shiny/render.ts
-  var import_jquery13 = __toModule(require_jquery());
-
-  // src/shiny/sendImageSize.ts
-  function _classCallCheck6(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  }
-  function _defineProperties6(target, props) {
-    for (var i = 0; i < props.length; i++) {
-      var descriptor = props[i];
-      descriptor.enumerable = descriptor.enumerable || false;
-      descriptor.configurable = true;
-      if ("value" in descriptor)
-        descriptor.writable = true;
-      Object.defineProperty(target, descriptor.key, descriptor);
-    }
-  }
-  function _createClass6(Constructor, protoProps, staticProps) {
-    if (protoProps)
-      _defineProperties6(Constructor.prototype, protoProps);
-    if (staticProps)
-      _defineProperties6(Constructor, staticProps);
-    return Constructor;
-  }
-  function _defineProperty5(obj, key, value) {
-    if (key in obj) {
-      Object.defineProperty(obj, key, {value: value, enumerable: true, configurable: true, writable: true});
-    } else {
-      obj[key] = value;
-    }
-    return obj;
-  }
-  var SendImageSize = /* @__PURE__ */ function() {
-    function SendImageSize2() {
-      _classCallCheck6(this, SendImageSize2);
-      _defineProperty5(this, "regular", void 0);
-      _defineProperty5(this, "transitioned", void 0);
-    }
-    _createClass6(SendImageSize2, [{
-      key: "setImageSend",
-      value: function setImageSend(inputBatchSender, doSendImageSize) {
-        var sendImageSizeDebouncer = new Debouncer(null, doSendImageSize, 0);
-        this.regular = function() {
-          sendImageSizeDebouncer.normalCall();
-        };
-        inputBatchSender.lastChanceCallback.push(function() {
-          if (sendImageSizeDebouncer.isPending())
-            sendImageSizeDebouncer.immediateCall();
-        });
-        this.transitioned = debounce(200, this.regular);
-        return sendImageSizeDebouncer;
-      }
-    }]);
-    return SendImageSize2;
-  }();
-  var sendImageSizeFns = new SendImageSize();
-
-  // src/shiny/singletons.ts
-  var import_es_regexp_exec3 = __toModule(require_es_regexp_exec());
-  var import_jquery12 = __toModule(require_jquery());
-  var _reSingleton = /<!--(SHINY.SINGLETON\[([\w]+)\])-->([\s\S]*?)<!--\/\1-->/;
-  var _reHead = /<head(?:\s[^>]*)?>([\s\S]*?)<\/head>/;
-  var knownSingletons = {};
-  function renderHtml(html, el, where) {
-    var processed = _processHtml(html);
-    _addToHead(processed.head);
-    register(processed.singletons);
-    if (where === "replace") {
-      (0, import_jquery12.default)(el).html(processed.html);
-    } else {
-      var elElements;
-      if (el instanceof HTMLElement) {
-        elElements = [el];
-      } else {
-        elElements = el.toArray();
-      }
-      import_jquery12.default.each(elElements, function(i, el2) {
-        el2.insertAdjacentHTML(where, processed.html);
-      });
-    }
-    return processed;
-  }
-  function register(s) {
-    import_jquery12.default.extend(knownSingletons, s);
-  }
-  function registerNames(s) {
-    if (typeof s === "string") {
-      knownSingletons[s] = true;
-    } else if (s instanceof Array) {
-      for (var i = 0; i < s.length; i++) {
-        knownSingletons[s[i]] = true;
-      }
-    }
-  }
-  function _addToHead(head) {
-    if (head.length > 0) {
-      var tempDiv = (0, import_jquery12.default)("<div>" + head + "</div>").get(0);
-      var $head = (0, import_jquery12.default)("head");
-      while (tempDiv.hasChildNodes()) {
-        $head.append(tempDiv.firstChild);
-      }
-    }
-  }
-  function _processHtml(val) {
-    var newSingletons = {};
-    var newVal;
-    var findNewPayload = function findNewPayload2(match, p1, sig, payload) {
-      if (knownSingletons[sig] || newSingletons[sig])
-        return "";
-      newSingletons[sig] = true;
-      return payload;
-    };
-    while (true) {
-      newVal = val.replace(_reSingleton, findNewPayload);
-      if (val.length === newVal.length)
-        break;
-      val = newVal;
-    }
-    var heads = [];
-    var headAddPayload = function headAddPayload2(match, payload) {
-      heads.push(payload);
-      return "";
-    };
-    while (true) {
-      newVal = val.replace(_reHead, headAddPayload);
-      if (val.length === newVal.length)
-        break;
-      val = newVal;
-    }
-    return {
-      html: val,
-      head: heads.join("\n"),
-      singletons: newSingletons
-    };
-  }
-
-  // src/shiny/render.ts
-  function _slicedToArray(arr, i) {
-    return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest();
-  }
-  function _nonIterableRest() {
-    throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
-  }
-  function _unsupportedIterableToArray(o, minLen) {
-    if (!o)
-      return;
-    if (typeof o === "string")
-      return _arrayLikeToArray(o, minLen);
-    var n = Object.prototype.toString.call(o).slice(8, -1);
-    if (n === "Object" && o.constructor)
-      n = o.constructor.name;
-    if (n === "Map" || n === "Set")
-      return Array.from(o);
-    if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n))
-      return _arrayLikeToArray(o, minLen);
-  }
-  function _arrayLikeToArray(arr, len) {
-    if (len == null || len > arr.length)
-      len = arr.length;
-    for (var i = 0, arr2 = new Array(len); i < len; i++) {
-      arr2[i] = arr[i];
-    }
-    return arr2;
-  }
-  function _iterableToArrayLimit(arr, i) {
-    var _i = arr && (typeof Symbol !== "undefined" && arr[Symbol.iterator] || arr["@@iterator"]);
-    if (_i == null)
-      return;
-    var _arr = [];
-    var _n = true;
-    var _d = false;
-    var _s, _e;
-    try {
-      for (_i = _i.call(arr); !(_n = (_s = _i.next()).done); _n = true) {
-        _arr.push(_s.value);
-        if (i && _arr.length === i)
-          break;
-      }
-    } catch (err) {
-      _d = true;
-      _e = err;
-    } finally {
-      try {
-        if (!_n && _i["return"] != null)
-          _i["return"]();
-      } finally {
-        if (_d)
-          throw _e;
-      }
-    }
-    return _arr;
-  }
-  function _arrayWithHoles(arr) {
-    if (Array.isArray(arr))
-      return arr;
-  }
-  function _typeof2(obj) {
-    "@babel/helpers - typeof";
-    if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
-      _typeof2 = function _typeof27(obj2) {
-        return typeof obj2;
-      };
-    } else {
-      _typeof2 = function _typeof27(obj2) {
-        return obj2 && typeof Symbol === "function" && obj2.constructor === Symbol && obj2 !== Symbol.prototype ? "symbol" : typeof obj2;
-      };
-    }
-    return _typeof2(obj);
-  }
-  function renderDependencies(dependencies) {
-    if (dependencies) {
-      import_jquery13.default.each(dependencies, function(i, dep) {
-        renderDependency(dep);
-      });
-    }
-  }
-  function renderContent(el, content, where) {
-    if (where === "replace") {
-      shinyUnbindAll(el);
-    }
-    var html;
-    var dependencies = [];
-    if (content === null) {
-      html = "";
-    } else if (typeof content === "string") {
-      html = content;
-    } else if (_typeof2(content) === "object") {
-      html = content.html;
-      dependencies = content.deps || [];
-    }
-    renderHtml2(html, el, dependencies, where);
-    var scope = el;
-    if (where === "replace") {
-      shinyInitializeInputs(el);
-      shinyBindAll(el);
-    } else {
-      var $parent = (0, import_jquery13.default)(el).parent();
-      if ($parent.length > 0) {
-        scope = $parent;
-        if (where === "beforeBegin" || where === "afterEnd") {
-          var $grandparent = $parent.parent();
-          if ($grandparent.length > 0)
-            scope = $grandparent;
-        }
-      }
-      shinyInitializeInputs(scope);
-      shinyBindAll(scope);
-    }
-  }
-  function renderHtml2(html, el, dependencies) {
-    var where = arguments.length > 3 && arguments[3] !== void 0 ? arguments[3] : "replace";
-    renderDependencies(dependencies);
-    return renderHtml(html, el, where);
-  }
-  var htmlDependencies = {};
-  function registerDependency(name, version) {
-    htmlDependencies[name] = version;
-  }
-  function needsRestyle(dep) {
-    if (!dep.restyle) {
-      return false;
-    }
-    var names = Object.keys(htmlDependencies);
-    var idx = names.indexOf(dep.name);
-    if (idx === -1) {
-      return false;
-    }
-    return htmlDependencies[names[idx]] === dep.version;
-  }
-  function renderDependency(dep) {
-    var restyle = needsRestyle(dep);
-    if (hasOwnProperty(htmlDependencies, dep.name) && !restyle)
-      return false;
-    registerDependency(dep.name, dep.version);
-    var href = dep.src.href;
-    var $head = (0, import_jquery13.default)("head").first();
-    if (dep.meta && !restyle) {
-      var metas = import_jquery13.default.map(asArray(dep.meta), function(obj, idx) {
-        var name = Object.keys(obj)[0];
-        return (0, import_jquery13.default)("<meta>").attr("name", name).attr("content", obj[name]);
-      });
-      $head.append(metas);
-    }
-    if (dep.stylesheet) {
-      var links = import_jquery13.default.map(asArray(dep.stylesheet), function(stylesheet) {
-        return (0, import_jquery13.default)("<link rel='stylesheet' type='text/css'>").attr("href", href + "/" + encodeURI(stylesheet));
-      });
-      if (!restyle) {
-        $head.append(links);
-      } else {
-        var refreshStyle = function refreshStyle2(href2, oldSheet) {
-          var xhr = new XMLHttpRequest();
-          xhr.open("GET", href2);
-          xhr.onload = function() {
-            var id = "shiny_restyle_" + href2.split("?restyle")[0].replace(/\W/g, "_");
-            var oldStyle = $head.find("style#" + id);
-            var newStyle = (0, import_jquery13.default)("<style>").attr("id", id).html(xhr.responseText);
-            $head.append(newStyle);
-            oldStyle.remove();
-            removeSheet(oldSheet);
-            sendImageSizeFns.transitioned();
-          };
-          xhr.send();
-        };
-        var findSheet = function findSheet2(href2) {
-          for (var i = 0; i < document.styleSheets.length; i++) {
-            var sheet = document.styleSheets[i];
-            if (typeof sheet.href === "string" && sheet.href.indexOf(href2) > -1) {
-              return sheet;
-            }
-          }
-          return null;
-        };
-        var removeSheet = function removeSheet2(sheet) {
-          if (!sheet)
-            return;
-          sheet.disabled = true;
-          if (isIE())
-            sheet.cssText = "";
-          (0, import_jquery13.default)(sheet.ownerNode).remove();
-        };
-        import_jquery13.default.map(links, function(link) {
-          var oldSheet = findSheet(link.attr("href"));
-          var href2 = link.attr("href") + "?restyle=" + new Date().getTime();
-          if (isIE()) {
-            refreshStyle(href2, oldSheet);
-          } else {
-            link.attr("href", href2);
-            link.attr("onload", function() {
-              var dummyId = "dummy-" + Math.floor(Math.random() * 999999999);
-              var cssString = "#" + dummyId + " { color: #a7c920 !important; transition: 0.1s all !important; visibility: hidden !important; position: absolute !important; top: -1000px !important; left: 0 !important; }";
-              var base64CssString = "data:text/css;base64," + btoa(cssString);
-              var $dummyLink = (0, import_jquery13.default)("<link rel='stylesheet' type='text/css' />");
-              $dummyLink.attr("href", base64CssString);
-              var $dummyEl = (0, import_jquery13.default)("<div id='" + dummyId + "'></div>");
-              $dummyEl.one("transitionend", function() {
-                $dummyEl.remove();
-                removeSheet(findSheet($dummyLink.attr("href")));
-                removeSheet(oldSheet);
-                sendImageSizeFns.transitioned();
-              });
-              (0, import_jquery13.default)(document.body).append($dummyEl);
-              setTimeout(function() {
-                return $head.append($dummyLink);
-              }, 0);
-            });
-            $head.append(link);
-          }
-        });
-      }
-    }
-    if (dep.script && !restyle) {
-      var scriptsAttrs = asArray(dep.script);
-      var scripts = import_jquery13.default.map(scriptsAttrs, function(x) {
-        var script = document.createElement("script");
-        if (typeof x === "string") {
-          x = {
-            src: x
-          };
-        }
-        for (var _i = 0, _Object$entries = Object.entries(x); _i < _Object$entries.length; _i++) {
-          var _Object$entries$_i = _slicedToArray(_Object$entries[_i], 2), attr = _Object$entries$_i[0], val = _Object$entries$_i[1];
-          if (attr === "src") {
-            val = href + "/" + encodeURI(val);
-          }
-          script.setAttribute(attr, val ? val : "");
-        }
-        return script;
-      });
-      $head.append(scripts);
-    }
-    if (dep.attachment && !restyle) {
-      var attachments = dep.attachment;
-      if (typeof attachments === "string")
-        attachments = [attachments];
-      if (Array.isArray(attachments)) {
-        var tmp = {};
-        import_jquery13.default.each(attachments, function(index, attachment) {
-          var key = index + 1 + "";
-          tmp[key] = attachment;
-        });
-        attachments = tmp;
-      }
-      var attach = import_jquery13.default.map(attachments, function(attachment, key) {
-        return (0, import_jquery13.default)("<link rel='attachment'>").attr("id", dep.name + "-" + key + "-attachment").attr("href", href + "/" + encodeURI(attachment));
-      });
-      $head.append(attach);
-    }
-    if (dep.head && !restyle) {
-      var $newHead = (0, import_jquery13.default)("<head></head>");
-      $newHead.html(dep.head);
-      $head.append($newHead.children());
-    }
-    return true;
-  }
-
-  // src/shiny/notifications.ts
+  var import_es_regexp_exec7 = __toModule(require_es_regexp_exec());
+  var import_jquery34 = __toModule(require_jquery());
   var fadeDuration = 250;
   function show() {
     var _ref = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : {}, _ref$html = _ref.html, html = _ref$html === void 0 ? "" : _ref$html, _ref$action = _ref.action, action = _ref$action === void 0 ? "" : _ref$action, _ref$deps = _ref.deps, deps = _ref$deps === void 0 ? [] : _ref$deps, _ref$duration = _ref.duration, duration = _ref$duration === void 0 ? 5e3 : _ref$duration, _ref$id = _ref.id, id = _ref$id === void 0 ? null : _ref$id, _ref$closeButton = _ref.closeButton, closeButton = _ref$closeButton === void 0 ? true : _ref$closeButton, _ref$type = _ref.type, type = _ref$type === void 0 ? null : _ref$type;
     if (!id)
       id = randomId();
     _createPanel();
-    var $notification = _get(id);
+    var $notification = _get2(id);
     if ($notification.length === 0)
       $notification = _create(id);
     var newHtml = '<div class="shiny-notification-content-text">'.concat(html, "</div>") + '<div class="shiny-notification-content-action">'.concat(action, "</div>");
@@ -6083,15 +10480,15 @@
     return id;
   }
   function remove(id) {
-    _get(id).fadeOut(fadeDuration, function() {
+    _get2(id).fadeOut(fadeDuration, function() {
       shinyUnbindAll(this);
-      (0, import_jquery14.default)(this).remove();
+      (0, import_jquery34.default)(this).remove();
       if (_ids().length === 0) {
         _getPanel().remove();
       }
     });
   }
-  function _get(id) {
+  function _get2(id) {
     if (!id)
       return null;
     return _getPanel().find("#shiny-notification-" + $escape(id));
@@ -6102,19 +10499,19 @@
     }).get();
   }
   function _getPanel() {
-    return (0, import_jquery14.default)("#shiny-notification-panel");
+    return (0, import_jquery34.default)("#shiny-notification-panel");
   }
   function _createPanel() {
     var $panel = _getPanel();
     if ($panel.length > 0)
       return $panel;
-    (0, import_jquery14.default)(document.body).append('<div id="shiny-notification-panel">');
+    (0, import_jquery34.default)(document.body).append('<div id="shiny-notification-panel">');
     return $panel;
   }
   function _create(id) {
-    var $notification = _get(id);
+    var $notification = _get2(id);
     if ($notification.length === 0) {
-      $notification = (0, import_jquery14.default)('<div id="shiny-notification-'.concat(id, '" class="shiny-notification">') + '<div class="shiny-notification-close">&times;</div><div class="shiny-notification-content"></div></div>');
+      $notification = (0, import_jquery34.default)('<div id="shiny-notification-'.concat(id, '" class="shiny-notification">') + '<div class="shiny-notification-close">&times;</div><div class="shiny-notification-content"></div></div>');
       $notification.find(".shiny-notification-close").on("click", function(e) {
         e.preventDefault();
         e.stopPropagation();
@@ -6129,10 +10526,10 @@
     var removalCallback = setTimeout(function() {
       remove(id);
     }, delay);
-    _get(id).data("removalCallback", removalCallback);
+    _get2(id).data("removalCallback", removalCallback);
   }
   function _clearRemovalCallback(id) {
-    var $notification = _get(id);
+    var $notification = _get2(id);
     var oldRemovalCallback = $notification.data("removalCallback");
     if (oldRemovalCallback) {
       clearTimeout(oldRemovalCallback);
@@ -6140,23 +10537,23 @@
   }
 
   // src/shiny/modal.ts
-  var import_jquery15 = __toModule(require_jquery());
+  var import_jquery35 = __toModule(require_jquery());
   function show2() {
     var _ref = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : {}, _ref$html = _ref.html, html = _ref$html === void 0 ? "" : _ref$html, _ref$deps = _ref.deps, deps = _ref$deps === void 0 ? [] : _ref$deps;
-    (0, import_jquery15.default)(".modal-backdrop").remove();
-    var $modal = (0, import_jquery15.default)("#shiny-modal-wrapper");
+    (0, import_jquery35.default)(".modal-backdrop").remove();
+    var $modal = (0, import_jquery35.default)("#shiny-modal-wrapper");
     if ($modal.length === 0) {
-      $modal = (0, import_jquery15.default)('<div id="shiny-modal-wrapper"></div>');
-      (0, import_jquery15.default)(document.body).append($modal);
+      $modal = (0, import_jquery35.default)('<div id="shiny-modal-wrapper"></div>');
+      (0, import_jquery35.default)(document.body).append($modal);
       $modal.on("hidden.bs.modal", function(e) {
-        if (e.target === (0, import_jquery15.default)("#shiny-modal")[0]) {
+        if (e.target === (0, import_jquery35.default)("#shiny-modal")[0]) {
           shinyUnbindAll($modal);
           $modal.remove();
         }
       });
     }
     $modal.on("keydown.shinymodal", function(e) {
-      if ((0, import_jquery15.default)("#shiny-modal").data("keyboard") === false)
+      if ((0, import_jquery35.default)("#shiny-modal").data("keyboard") === false)
         return;
       if (e.keyCode === 27) {
         e.stopPropagation();
@@ -6169,7 +10566,7 @@
     });
   }
   function remove2() {
-    var $modal = (0, import_jquery15.default)("#shiny-modal-wrapper");
+    var $modal = (0, import_jquery35.default)("#shiny-modal-wrapper");
     $modal.off("keydown.shinymodal");
     if ($modal.find(".modal").length > 0) {
       $modal.find(".modal").modal("hide");
@@ -6180,9 +10577,9 @@
   }
 
   // src/shiny/reconnectDialog.ts
-  var import_jquery16 = __toModule(require_jquery());
+  var import_jquery36 = __toModule(require_jquery());
   function updateTime(reconnectTime) {
-    var $time = (0, import_jquery16.default)("#shiny-reconnect-time");
+    var $time = (0, import_jquery36.default)("#shiny-reconnect-time");
     if ($time.length === 0)
       return;
     var seconds = Math.floor((reconnectTime - new Date().getTime()) / 1e3);
@@ -6197,7 +10594,7 @@
   }
   function showReconnectDialog(delay) {
     var reconnectTime = new Date().getTime() + delay;
-    if ((0, import_jquery16.default)("#shiny-reconnect-text").length > 0)
+    if ((0, import_jquery36.default)("#shiny-reconnect-text").length > 0)
       return;
     var html = '<span id="shiny-reconnect-text">Attempting to reconnect</span><span id="shiny-reconnect-time"></span>';
     var action = '<a id="shiny-reconnect-now" href="#" onclick="Shiny.shinyapp.reconnect();">Try now</a>';
@@ -6216,53 +10613,20 @@
   }
 
   // src/shiny/init.ts
-  var import_es_regexp_exec8 = __toModule(require_es_regexp_exec());
-
-  // node_modules/core-js/modules/es.string.search.js
-  "use strict";
-  var fixRegExpWellKnownSymbolLogic4 = require_fix_regexp_well_known_symbol_logic();
-  var anObject7 = require_an_object();
-  var requireObjectCoercible4 = require_require_object_coercible();
-  var sameValue = require_same_value();
-  var regExpExec3 = require_regexp_exec_abstract();
-  fixRegExpWellKnownSymbolLogic4("search", 1, function(SEARCH, nativeSearch, maybeCallNative) {
-    return [
-      function search(regexp) {
-        var O = requireObjectCoercible4(this);
-        var searcher = regexp == void 0 ? void 0 : regexp[SEARCH];
-        return searcher !== void 0 ? searcher.call(regexp, O) : new RegExp(regexp)[SEARCH](String(O));
-      },
-      function(regexp) {
-        var res = maybeCallNative(nativeSearch, regexp, this);
-        if (res.done)
-          return res.value;
-        var rx = anObject7(regexp);
-        var S = String(this);
-        var previousLastIndex = rx.lastIndex;
-        if (!sameValue(previousLastIndex, 0))
-          rx.lastIndex = 0;
-        var result = regExpExec3(rx, S);
-        if (!sameValue(rx.lastIndex, previousLastIndex))
-          rx.lastIndex = previousLastIndex;
-        return result === null ? -1 : result.index;
-      }
-    ];
-  });
-
-  // src/shiny/init.ts
-  var import_jquery22 = __toModule(require_jquery());
+  var import_es_regexp_exec10 = __toModule(require_es_regexp_exec());
+  var import_jquery42 = __toModule(require_jquery());
 
   // src/inputPolicies/inputBatchSender.ts
-  var import_es_array_iterator3 = __toModule(require_es_array_iterator());
-  var import_jquery17 = __toModule(require_jquery());
+  var import_es_array_iterator22 = __toModule(require_es_array_iterator());
+  var import_jquery37 = __toModule(require_jquery());
 
   // src/inputPolicies/InputPolicy.ts
-  function _classCallCheck7(instance, Constructor) {
+  function _classCallCheck28(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
       throw new TypeError("Cannot call a class as a function");
     }
   }
-  function _defineProperties7(target, props) {
+  function _defineProperties28(target, props) {
     for (var i = 0; i < props.length; i++) {
       var descriptor = props[i];
       descriptor.enumerable = descriptor.enumerable || false;
@@ -6272,14 +10636,14 @@
       Object.defineProperty(target, descriptor.key, descriptor);
     }
   }
-  function _createClass7(Constructor, protoProps, staticProps) {
+  function _createClass28(Constructor, protoProps, staticProps) {
     if (protoProps)
-      _defineProperties7(Constructor.prototype, protoProps);
+      _defineProperties28(Constructor.prototype, protoProps);
     if (staticProps)
-      _defineProperties7(Constructor, staticProps);
+      _defineProperties28(Constructor, staticProps);
     return Constructor;
   }
-  function _defineProperty6(obj, key, value) {
+  function _defineProperty9(obj, key, value) {
     if (key in obj) {
       Object.defineProperty(obj, key, {value: value, enumerable: true, configurable: true, writable: true});
     } else {
@@ -6289,10 +10653,10 @@
   }
   var InputPolicy = /* @__PURE__ */ function() {
     function InputPolicy2() {
-      _classCallCheck7(this, InputPolicy2);
-      _defineProperty6(this, "target", void 0);
+      _classCallCheck28(this, InputPolicy2);
+      _defineProperty9(this, "target", void 0);
     }
-    _createClass7(InputPolicy2, [{
+    _createClass28(InputPolicy2, [{
       key: "setInput",
       value: function setInput(name, value, opts) {
         throw "not implemented";
@@ -6305,25 +10669,25 @@
   }();
 
   // src/inputPolicies/inputBatchSender.ts
-  function _typeof3(obj) {
+  function _typeof22(obj) {
     "@babel/helpers - typeof";
     if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
-      _typeof3 = function _typeof27(obj2) {
+      _typeof22 = function _typeof27(obj2) {
         return typeof obj2;
       };
     } else {
-      _typeof3 = function _typeof27(obj2) {
+      _typeof22 = function _typeof27(obj2) {
         return obj2 && typeof Symbol === "function" && obj2.constructor === Symbol && obj2 !== Symbol.prototype ? "symbol" : typeof obj2;
       };
     }
-    return _typeof3(obj);
+    return _typeof22(obj);
   }
-  function _classCallCheck8(instance, Constructor) {
+  function _classCallCheck29(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
       throw new TypeError("Cannot call a class as a function");
     }
   }
-  function _defineProperties8(target, props) {
+  function _defineProperties29(target, props) {
     for (var i = 0; i < props.length; i++) {
       var descriptor = props[i];
       descriptor.enumerable = descriptor.enumerable || false;
@@ -6333,54 +10697,54 @@
       Object.defineProperty(target, descriptor.key, descriptor);
     }
   }
-  function _createClass8(Constructor, protoProps, staticProps) {
+  function _createClass29(Constructor, protoProps, staticProps) {
     if (protoProps)
-      _defineProperties8(Constructor.prototype, protoProps);
+      _defineProperties29(Constructor.prototype, protoProps);
     if (staticProps)
-      _defineProperties8(Constructor, staticProps);
+      _defineProperties29(Constructor, staticProps);
     return Constructor;
   }
-  function _inherits2(subClass, superClass) {
+  function _inherits21(subClass, superClass) {
     if (typeof superClass !== "function" && superClass !== null) {
       throw new TypeError("Super expression must either be null or a function");
     }
     subClass.prototype = Object.create(superClass && superClass.prototype, {constructor: {value: subClass, writable: true, configurable: true}});
     if (superClass)
-      _setPrototypeOf2(subClass, superClass);
+      _setPrototypeOf21(subClass, superClass);
   }
-  function _setPrototypeOf2(o, p) {
-    _setPrototypeOf2 = Object.setPrototypeOf || function _setPrototypeOf26(o2, p2) {
+  function _setPrototypeOf21(o, p) {
+    _setPrototypeOf21 = Object.setPrototypeOf || function _setPrototypeOf26(o2, p2) {
       o2.__proto__ = p2;
       return o2;
     };
-    return _setPrototypeOf2(o, p);
+    return _setPrototypeOf21(o, p);
   }
-  function _createSuper2(Derived) {
-    var hasNativeReflectConstruct = _isNativeReflectConstruct2();
+  function _createSuper21(Derived) {
+    var hasNativeReflectConstruct = _isNativeReflectConstruct21();
     return function _createSuperInternal() {
-      var Super = _getPrototypeOf2(Derived), result;
+      var Super = _getPrototypeOf21(Derived), result;
       if (hasNativeReflectConstruct) {
-        var NewTarget = _getPrototypeOf2(this).constructor;
+        var NewTarget = _getPrototypeOf21(this).constructor;
         result = Reflect.construct(Super, arguments, NewTarget);
       } else {
         result = Super.apply(this, arguments);
       }
-      return _possibleConstructorReturn2(this, result);
+      return _possibleConstructorReturn21(this, result);
     };
   }
-  function _possibleConstructorReturn2(self2, call) {
-    if (call && (_typeof3(call) === "object" || typeof call === "function")) {
+  function _possibleConstructorReturn21(self2, call) {
+    if (call && (_typeof22(call) === "object" || typeof call === "function")) {
       return call;
     }
-    return _assertThisInitialized2(self2);
+    return _assertThisInitialized21(self2);
   }
-  function _assertThisInitialized2(self2) {
+  function _assertThisInitialized21(self2) {
     if (self2 === void 0) {
       throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
     }
     return self2;
   }
-  function _isNativeReflectConstruct2() {
+  function _isNativeReflectConstruct21() {
     if (typeof Reflect === "undefined" || !Reflect.construct)
       return false;
     if (Reflect.construct.sham)
@@ -6395,13 +10759,13 @@
       return false;
     }
   }
-  function _getPrototypeOf2(o) {
-    _getPrototypeOf2 = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf26(o2) {
+  function _getPrototypeOf21(o) {
+    _getPrototypeOf21 = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf26(o2) {
       return o2.__proto__ || Object.getPrototypeOf(o2);
     };
-    return _getPrototypeOf2(o);
+    return _getPrototypeOf21(o);
   }
-  function _defineProperty7(obj, key, value) {
+  function _defineProperty10(obj, key, value) {
     if (key in obj) {
       Object.defineProperty(obj, key, {value: value, enumerable: true, configurable: true, writable: true});
     } else {
@@ -6410,21 +10774,21 @@
     return obj;
   }
   var InputBatchSender = /* @__PURE__ */ function(_InputPolicy) {
-    _inherits2(InputBatchSender2, _InputPolicy);
-    var _super = _createSuper2(InputBatchSender2);
+    _inherits21(InputBatchSender2, _InputPolicy);
+    var _super = _createSuper21(InputBatchSender2);
     function InputBatchSender2(shinyapp) {
       var _this;
-      _classCallCheck8(this, InputBatchSender2);
+      _classCallCheck29(this, InputBatchSender2);
       _this = _super.call(this);
-      _defineProperty7(_assertThisInitialized2(_this), "shinyapp", void 0);
-      _defineProperty7(_assertThisInitialized2(_this), "timerId", null);
-      _defineProperty7(_assertThisInitialized2(_this), "pendingData", {});
-      _defineProperty7(_assertThisInitialized2(_this), "reentrant", false);
-      _defineProperty7(_assertThisInitialized2(_this), "lastChanceCallback", []);
+      _defineProperty10(_assertThisInitialized21(_this), "shinyapp", void 0);
+      _defineProperty10(_assertThisInitialized21(_this), "timerId", null);
+      _defineProperty10(_assertThisInitialized21(_this), "pendingData", {});
+      _defineProperty10(_assertThisInitialized21(_this), "reentrant", false);
+      _defineProperty10(_assertThisInitialized21(_this), "lastChanceCallback", []);
       _this.shinyapp = shinyapp;
       return _this;
     }
-    _createClass8(InputBatchSender2, [{
+    _createClass29(InputBatchSender2, [{
       key: "setInput",
       value: function setInput(nameType, value, opts) {
         this.pendingData[nameType] = value;
@@ -6445,7 +10809,7 @@
         this.reentrant = true;
         try {
           this.timerId = null;
-          import_jquery17.default.each(this.lastChanceCallback, function(i, callback) {
+          import_jquery37.default.each(this.lastChanceCallback, function(i, callback) {
             callback();
           });
           var currentData = this.pendingData;
@@ -6460,10 +10824,10 @@
   }(InputPolicy);
 
   // src/inputPolicies/inputNoResendDecorator.ts
-  var import_es_array_iterator4 = __toModule(require_es_array_iterator());
+  var import_es_array_iterator23 = __toModule(require_es_array_iterator());
 
   // src/inputPolicies/splitInputNameType.ts
-  var import_es_regexp_exec6 = __toModule(require_es_regexp_exec());
+  var import_es_regexp_exec8 = __toModule(require_es_regexp_exec());
   function splitInputNameType(nameType) {
     var name2 = nameType.split(":");
     return {
@@ -6473,25 +10837,25 @@
   }
 
   // src/inputPolicies/inputNoResendDecorator.ts
-  function _typeof4(obj) {
+  function _typeof23(obj) {
     "@babel/helpers - typeof";
     if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
-      _typeof4 = function _typeof27(obj2) {
+      _typeof23 = function _typeof27(obj2) {
         return typeof obj2;
       };
     } else {
-      _typeof4 = function _typeof27(obj2) {
+      _typeof23 = function _typeof27(obj2) {
         return obj2 && typeof Symbol === "function" && obj2.constructor === Symbol && obj2 !== Symbol.prototype ? "symbol" : typeof obj2;
       };
     }
-    return _typeof4(obj);
+    return _typeof23(obj);
   }
-  function _classCallCheck9(instance, Constructor) {
+  function _classCallCheck30(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
       throw new TypeError("Cannot call a class as a function");
     }
   }
-  function _defineProperties9(target, props) {
+  function _defineProperties30(target, props) {
     for (var i = 0; i < props.length; i++) {
       var descriptor = props[i];
       descriptor.enumerable = descriptor.enumerable || false;
@@ -6501,54 +10865,54 @@
       Object.defineProperty(target, descriptor.key, descriptor);
     }
   }
-  function _createClass9(Constructor, protoProps, staticProps) {
+  function _createClass30(Constructor, protoProps, staticProps) {
     if (protoProps)
-      _defineProperties9(Constructor.prototype, protoProps);
+      _defineProperties30(Constructor.prototype, protoProps);
     if (staticProps)
-      _defineProperties9(Constructor, staticProps);
+      _defineProperties30(Constructor, staticProps);
     return Constructor;
   }
-  function _inherits3(subClass, superClass) {
+  function _inherits22(subClass, superClass) {
     if (typeof superClass !== "function" && superClass !== null) {
       throw new TypeError("Super expression must either be null or a function");
     }
     subClass.prototype = Object.create(superClass && superClass.prototype, {constructor: {value: subClass, writable: true, configurable: true}});
     if (superClass)
-      _setPrototypeOf3(subClass, superClass);
+      _setPrototypeOf22(subClass, superClass);
   }
-  function _setPrototypeOf3(o, p) {
-    _setPrototypeOf3 = Object.setPrototypeOf || function _setPrototypeOf26(o2, p2) {
+  function _setPrototypeOf22(o, p) {
+    _setPrototypeOf22 = Object.setPrototypeOf || function _setPrototypeOf26(o2, p2) {
       o2.__proto__ = p2;
       return o2;
     };
-    return _setPrototypeOf3(o, p);
+    return _setPrototypeOf22(o, p);
   }
-  function _createSuper3(Derived) {
-    var hasNativeReflectConstruct = _isNativeReflectConstruct3();
+  function _createSuper22(Derived) {
+    var hasNativeReflectConstruct = _isNativeReflectConstruct22();
     return function _createSuperInternal() {
-      var Super = _getPrototypeOf3(Derived), result;
+      var Super = _getPrototypeOf22(Derived), result;
       if (hasNativeReflectConstruct) {
-        var NewTarget = _getPrototypeOf3(this).constructor;
+        var NewTarget = _getPrototypeOf22(this).constructor;
         result = Reflect.construct(Super, arguments, NewTarget);
       } else {
         result = Super.apply(this, arguments);
       }
-      return _possibleConstructorReturn3(this, result);
+      return _possibleConstructorReturn22(this, result);
     };
   }
-  function _possibleConstructorReturn3(self2, call) {
-    if (call && (_typeof4(call) === "object" || typeof call === "function")) {
+  function _possibleConstructorReturn22(self2, call) {
+    if (call && (_typeof23(call) === "object" || typeof call === "function")) {
       return call;
     }
-    return _assertThisInitialized3(self2);
+    return _assertThisInitialized22(self2);
   }
-  function _assertThisInitialized3(self2) {
+  function _assertThisInitialized22(self2) {
     if (self2 === void 0) {
       throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
     }
     return self2;
   }
-  function _isNativeReflectConstruct3() {
+  function _isNativeReflectConstruct22() {
     if (typeof Reflect === "undefined" || !Reflect.construct)
       return false;
     if (Reflect.construct.sham)
@@ -6563,13 +10927,13 @@
       return false;
     }
   }
-  function _getPrototypeOf3(o) {
-    _getPrototypeOf3 = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf26(o2) {
+  function _getPrototypeOf22(o) {
+    _getPrototypeOf22 = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf26(o2) {
       return o2.__proto__ || Object.getPrototypeOf(o2);
     };
-    return _getPrototypeOf3(o);
+    return _getPrototypeOf22(o);
   }
-  function _defineProperty8(obj, key, value) {
+  function _defineProperty11(obj, key, value) {
     if (key in obj) {
       Object.defineProperty(obj, key, {value: value, enumerable: true, configurable: true, writable: true});
     } else {
@@ -6578,19 +10942,19 @@
     return obj;
   }
   var InputNoResendDecorator = /* @__PURE__ */ function(_InputPolicy) {
-    _inherits3(InputNoResendDecorator2, _InputPolicy);
-    var _super = _createSuper3(InputNoResendDecorator2);
+    _inherits22(InputNoResendDecorator2, _InputPolicy);
+    var _super = _createSuper22(InputNoResendDecorator2);
     function InputNoResendDecorator2(target) {
       var _this;
       var initialValues = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : {};
-      _classCallCheck9(this, InputNoResendDecorator2);
+      _classCallCheck30(this, InputNoResendDecorator2);
       _this = _super.call(this);
-      _defineProperty8(_assertThisInitialized3(_this), "lastSentValues", void 0);
+      _defineProperty11(_assertThisInitialized22(_this), "lastSentValues", void 0);
       _this.target = target;
       _this.reset(initialValues);
       return _this;
     }
-    _createClass9(InputNoResendDecorator2, [{
+    _createClass30(InputNoResendDecorator2, [{
       key: "setInput",
       value: function setInput(nameType, value, opts) {
         var _splitInputNameType = splitInputNameType(nameType), inputName = _splitInputNameType.name, inputType = _splitInputNameType.inputType;
@@ -6630,27 +10994,27 @@
   }(InputPolicy);
 
   // src/inputPolicies/inputEventDecorator.ts
-  var import_es_array_iterator5 = __toModule(require_es_array_iterator());
-  var import_jquery18 = __toModule(require_jquery());
-  function _typeof5(obj) {
+  var import_es_array_iterator24 = __toModule(require_es_array_iterator());
+  var import_jquery38 = __toModule(require_jquery());
+  function _typeof24(obj) {
     "@babel/helpers - typeof";
     if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
-      _typeof5 = function _typeof27(obj2) {
+      _typeof24 = function _typeof27(obj2) {
         return typeof obj2;
       };
     } else {
-      _typeof5 = function _typeof27(obj2) {
+      _typeof24 = function _typeof27(obj2) {
         return obj2 && typeof Symbol === "function" && obj2.constructor === Symbol && obj2 !== Symbol.prototype ? "symbol" : typeof obj2;
       };
     }
-    return _typeof5(obj);
+    return _typeof24(obj);
   }
-  function _classCallCheck10(instance, Constructor) {
+  function _classCallCheck31(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
       throw new TypeError("Cannot call a class as a function");
     }
   }
-  function _defineProperties10(target, props) {
+  function _defineProperties31(target, props) {
     for (var i = 0; i < props.length; i++) {
       var descriptor = props[i];
       descriptor.enumerable = descriptor.enumerable || false;
@@ -6660,54 +11024,54 @@
       Object.defineProperty(target, descriptor.key, descriptor);
     }
   }
-  function _createClass10(Constructor, protoProps, staticProps) {
+  function _createClass31(Constructor, protoProps, staticProps) {
     if (protoProps)
-      _defineProperties10(Constructor.prototype, protoProps);
+      _defineProperties31(Constructor.prototype, protoProps);
     if (staticProps)
-      _defineProperties10(Constructor, staticProps);
+      _defineProperties31(Constructor, staticProps);
     return Constructor;
   }
-  function _inherits4(subClass, superClass) {
+  function _inherits23(subClass, superClass) {
     if (typeof superClass !== "function" && superClass !== null) {
       throw new TypeError("Super expression must either be null or a function");
     }
     subClass.prototype = Object.create(superClass && superClass.prototype, {constructor: {value: subClass, writable: true, configurable: true}});
     if (superClass)
-      _setPrototypeOf4(subClass, superClass);
+      _setPrototypeOf23(subClass, superClass);
   }
-  function _setPrototypeOf4(o, p) {
-    _setPrototypeOf4 = Object.setPrototypeOf || function _setPrototypeOf26(o2, p2) {
+  function _setPrototypeOf23(o, p) {
+    _setPrototypeOf23 = Object.setPrototypeOf || function _setPrototypeOf26(o2, p2) {
       o2.__proto__ = p2;
       return o2;
     };
-    return _setPrototypeOf4(o, p);
+    return _setPrototypeOf23(o, p);
   }
-  function _createSuper4(Derived) {
-    var hasNativeReflectConstruct = _isNativeReflectConstruct4();
+  function _createSuper23(Derived) {
+    var hasNativeReflectConstruct = _isNativeReflectConstruct23();
     return function _createSuperInternal() {
-      var Super = _getPrototypeOf4(Derived), result;
+      var Super = _getPrototypeOf23(Derived), result;
       if (hasNativeReflectConstruct) {
-        var NewTarget = _getPrototypeOf4(this).constructor;
+        var NewTarget = _getPrototypeOf23(this).constructor;
         result = Reflect.construct(Super, arguments, NewTarget);
       } else {
         result = Super.apply(this, arguments);
       }
-      return _possibleConstructorReturn4(this, result);
+      return _possibleConstructorReturn23(this, result);
     };
   }
-  function _possibleConstructorReturn4(self2, call) {
-    if (call && (_typeof5(call) === "object" || typeof call === "function")) {
+  function _possibleConstructorReturn23(self2, call) {
+    if (call && (_typeof24(call) === "object" || typeof call === "function")) {
       return call;
     }
-    return _assertThisInitialized4(self2);
+    return _assertThisInitialized23(self2);
   }
-  function _assertThisInitialized4(self2) {
+  function _assertThisInitialized23(self2) {
     if (self2 === void 0) {
       throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
     }
     return self2;
   }
-  function _isNativeReflectConstruct4() {
+  function _isNativeReflectConstruct23() {
     if (typeof Reflect === "undefined" || !Reflect.construct)
       return false;
     if (Reflect.construct.sham)
@@ -6722,23 +11086,23 @@
       return false;
     }
   }
-  function _getPrototypeOf4(o) {
-    _getPrototypeOf4 = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf26(o2) {
+  function _getPrototypeOf23(o) {
+    _getPrototypeOf23 = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf26(o2) {
       return o2.__proto__ || Object.getPrototypeOf(o2);
     };
-    return _getPrototypeOf4(o);
+    return _getPrototypeOf23(o);
   }
   var InputEventDecorator = /* @__PURE__ */ function(_InputPolicy) {
-    _inherits4(InputEventDecorator2, _InputPolicy);
-    var _super = _createSuper4(InputEventDecorator2);
+    _inherits23(InputEventDecorator2, _InputPolicy);
+    var _super = _createSuper23(InputEventDecorator2);
     function InputEventDecorator2(target) {
       var _this;
-      _classCallCheck10(this, InputEventDecorator2);
+      _classCallCheck31(this, InputEventDecorator2);
       _this = _super.call(this);
       _this.target = target;
       return _this;
     }
-    _createClass10(InputEventDecorator2, [{
+    _createClass31(InputEventDecorator2, [{
       key: "setInput",
       value: function setInput(nameType, value, opts) {
         var evt = jQuery.Event("shiny:inputchanged");
@@ -6749,7 +11113,7 @@
         evt.binding = opts.binding;
         evt.el = opts.el;
         evt.priority = opts.priority;
-        (0, import_jquery18.default)(opts.el).trigger(evt);
+        (0, import_jquery38.default)(opts.el).trigger(evt);
         if (!evt.isDefaultPrevented()) {
           var name = evt.name;
           if (evt.inputType !== "")
@@ -6764,26 +11128,26 @@
   }(InputPolicy);
 
   // src/inputPolicies/inputRateDecorator.ts
-  var import_es_array_iterator6 = __toModule(require_es_array_iterator());
-  function _typeof6(obj) {
+  var import_es_array_iterator25 = __toModule(require_es_array_iterator());
+  function _typeof25(obj) {
     "@babel/helpers - typeof";
     if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
-      _typeof6 = function _typeof27(obj2) {
+      _typeof25 = function _typeof27(obj2) {
         return typeof obj2;
       };
     } else {
-      _typeof6 = function _typeof27(obj2) {
+      _typeof25 = function _typeof27(obj2) {
         return obj2 && typeof Symbol === "function" && obj2.constructor === Symbol && obj2 !== Symbol.prototype ? "symbol" : typeof obj2;
       };
     }
-    return _typeof6(obj);
+    return _typeof25(obj);
   }
-  function _classCallCheck11(instance, Constructor) {
+  function _classCallCheck32(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
       throw new TypeError("Cannot call a class as a function");
     }
   }
-  function _defineProperties11(target, props) {
+  function _defineProperties32(target, props) {
     for (var i = 0; i < props.length; i++) {
       var descriptor = props[i];
       descriptor.enumerable = descriptor.enumerable || false;
@@ -6793,54 +11157,54 @@
       Object.defineProperty(target, descriptor.key, descriptor);
     }
   }
-  function _createClass11(Constructor, protoProps, staticProps) {
+  function _createClass32(Constructor, protoProps, staticProps) {
     if (protoProps)
-      _defineProperties11(Constructor.prototype, protoProps);
+      _defineProperties32(Constructor.prototype, protoProps);
     if (staticProps)
-      _defineProperties11(Constructor, staticProps);
+      _defineProperties32(Constructor, staticProps);
     return Constructor;
   }
-  function _inherits5(subClass, superClass) {
+  function _inherits24(subClass, superClass) {
     if (typeof superClass !== "function" && superClass !== null) {
       throw new TypeError("Super expression must either be null or a function");
     }
     subClass.prototype = Object.create(superClass && superClass.prototype, {constructor: {value: subClass, writable: true, configurable: true}});
     if (superClass)
-      _setPrototypeOf5(subClass, superClass);
+      _setPrototypeOf24(subClass, superClass);
   }
-  function _setPrototypeOf5(o, p) {
-    _setPrototypeOf5 = Object.setPrototypeOf || function _setPrototypeOf26(o2, p2) {
+  function _setPrototypeOf24(o, p) {
+    _setPrototypeOf24 = Object.setPrototypeOf || function _setPrototypeOf26(o2, p2) {
       o2.__proto__ = p2;
       return o2;
     };
-    return _setPrototypeOf5(o, p);
+    return _setPrototypeOf24(o, p);
   }
-  function _createSuper5(Derived) {
-    var hasNativeReflectConstruct = _isNativeReflectConstruct5();
+  function _createSuper24(Derived) {
+    var hasNativeReflectConstruct = _isNativeReflectConstruct24();
     return function _createSuperInternal() {
-      var Super = _getPrototypeOf5(Derived), result;
+      var Super = _getPrototypeOf24(Derived), result;
       if (hasNativeReflectConstruct) {
-        var NewTarget = _getPrototypeOf5(this).constructor;
+        var NewTarget = _getPrototypeOf24(this).constructor;
         result = Reflect.construct(Super, arguments, NewTarget);
       } else {
         result = Super.apply(this, arguments);
       }
-      return _possibleConstructorReturn5(this, result);
+      return _possibleConstructorReturn24(this, result);
     };
   }
-  function _possibleConstructorReturn5(self2, call) {
-    if (call && (_typeof6(call) === "object" || typeof call === "function")) {
+  function _possibleConstructorReturn24(self2, call) {
+    if (call && (_typeof25(call) === "object" || typeof call === "function")) {
       return call;
     }
-    return _assertThisInitialized5(self2);
+    return _assertThisInitialized24(self2);
   }
-  function _assertThisInitialized5(self2) {
+  function _assertThisInitialized24(self2) {
     if (self2 === void 0) {
       throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
     }
     return self2;
   }
-  function _isNativeReflectConstruct5() {
+  function _isNativeReflectConstruct24() {
     if (typeof Reflect === "undefined" || !Reflect.construct)
       return false;
     if (Reflect.construct.sham)
@@ -6855,13 +11219,13 @@
       return false;
     }
   }
-  function _getPrototypeOf5(o) {
-    _getPrototypeOf5 = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf26(o2) {
+  function _getPrototypeOf24(o) {
+    _getPrototypeOf24 = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf26(o2) {
       return o2.__proto__ || Object.getPrototypeOf(o2);
     };
-    return _getPrototypeOf5(o);
+    return _getPrototypeOf24(o);
   }
-  function _defineProperty9(obj, key, value) {
+  function _defineProperty12(obj, key, value) {
     if (key in obj) {
       Object.defineProperty(obj, key, {value: value, enumerable: true, configurable: true, writable: true});
     } else {
@@ -6870,17 +11234,17 @@
     return obj;
   }
   var InputRateDecorator = /* @__PURE__ */ function(_InputPolicy) {
-    _inherits5(InputRateDecorator2, _InputPolicy);
-    var _super = _createSuper5(InputRateDecorator2);
+    _inherits24(InputRateDecorator2, _InputPolicy);
+    var _super = _createSuper24(InputRateDecorator2);
     function InputRateDecorator2(target) {
       var _this;
-      _classCallCheck11(this, InputRateDecorator2);
+      _classCallCheck32(this, InputRateDecorator2);
       _this = _super.call(this);
-      _defineProperty9(_assertThisInitialized5(_this), "inputRatePolicies", {});
+      _defineProperty12(_assertThisInitialized24(_this), "inputRatePolicies", {});
       _this.target = target;
       return _this;
     }
-    _createClass11(InputRateDecorator2, [{
+    _createClass32(InputRateDecorator2, [{
       key: "setInput",
       value: function setInput(nameType, value, opts) {
         var _splitInputNameType = splitInputNameType(nameType), inputName = _splitInputNameType.name;
@@ -6918,26 +11282,26 @@
   }(InputPolicy);
 
   // src/inputPolicies/inputDeferDecorator.ts
-  var import_es_array_iterator7 = __toModule(require_es_array_iterator());
-  function _typeof7(obj) {
+  var import_es_array_iterator26 = __toModule(require_es_array_iterator());
+  function _typeof26(obj) {
     "@babel/helpers - typeof";
     if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
-      _typeof7 = function _typeof27(obj2) {
+      _typeof26 = function _typeof27(obj2) {
         return typeof obj2;
       };
     } else {
-      _typeof7 = function _typeof27(obj2) {
+      _typeof26 = function _typeof27(obj2) {
         return obj2 && typeof Symbol === "function" && obj2.constructor === Symbol && obj2 !== Symbol.prototype ? "symbol" : typeof obj2;
       };
     }
-    return _typeof7(obj);
+    return _typeof26(obj);
   }
-  function _classCallCheck12(instance, Constructor) {
+  function _classCallCheck33(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
       throw new TypeError("Cannot call a class as a function");
     }
   }
-  function _defineProperties12(target, props) {
+  function _defineProperties33(target, props) {
     for (var i = 0; i < props.length; i++) {
       var descriptor = props[i];
       descriptor.enumerable = descriptor.enumerable || false;
@@ -6947,54 +11311,54 @@
       Object.defineProperty(target, descriptor.key, descriptor);
     }
   }
-  function _createClass12(Constructor, protoProps, staticProps) {
+  function _createClass33(Constructor, protoProps, staticProps) {
     if (protoProps)
-      _defineProperties12(Constructor.prototype, protoProps);
+      _defineProperties33(Constructor.prototype, protoProps);
     if (staticProps)
-      _defineProperties12(Constructor, staticProps);
+      _defineProperties33(Constructor, staticProps);
     return Constructor;
   }
-  function _inherits6(subClass, superClass) {
+  function _inherits25(subClass, superClass) {
     if (typeof superClass !== "function" && superClass !== null) {
       throw new TypeError("Super expression must either be null or a function");
     }
     subClass.prototype = Object.create(superClass && superClass.prototype, {constructor: {value: subClass, writable: true, configurable: true}});
     if (superClass)
-      _setPrototypeOf6(subClass, superClass);
+      _setPrototypeOf25(subClass, superClass);
   }
-  function _setPrototypeOf6(o, p) {
-    _setPrototypeOf6 = Object.setPrototypeOf || function _setPrototypeOf26(o2, p2) {
+  function _setPrototypeOf25(o, p) {
+    _setPrototypeOf25 = Object.setPrototypeOf || function _setPrototypeOf26(o2, p2) {
       o2.__proto__ = p2;
       return o2;
     };
-    return _setPrototypeOf6(o, p);
+    return _setPrototypeOf25(o, p);
   }
-  function _createSuper6(Derived) {
-    var hasNativeReflectConstruct = _isNativeReflectConstruct6();
+  function _createSuper25(Derived) {
+    var hasNativeReflectConstruct = _isNativeReflectConstruct25();
     return function _createSuperInternal() {
-      var Super = _getPrototypeOf6(Derived), result;
+      var Super = _getPrototypeOf25(Derived), result;
       if (hasNativeReflectConstruct) {
-        var NewTarget = _getPrototypeOf6(this).constructor;
+        var NewTarget = _getPrototypeOf25(this).constructor;
         result = Reflect.construct(Super, arguments, NewTarget);
       } else {
         result = Super.apply(this, arguments);
       }
-      return _possibleConstructorReturn6(this, result);
+      return _possibleConstructorReturn25(this, result);
     };
   }
-  function _possibleConstructorReturn6(self2, call) {
-    if (call && (_typeof7(call) === "object" || typeof call === "function")) {
+  function _possibleConstructorReturn25(self2, call) {
+    if (call && (_typeof26(call) === "object" || typeof call === "function")) {
       return call;
     }
-    return _assertThisInitialized6(self2);
+    return _assertThisInitialized25(self2);
   }
-  function _assertThisInitialized6(self2) {
+  function _assertThisInitialized25(self2) {
     if (self2 === void 0) {
       throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
     }
     return self2;
   }
-  function _isNativeReflectConstruct6() {
+  function _isNativeReflectConstruct25() {
     if (typeof Reflect === "undefined" || !Reflect.construct)
       return false;
     if (Reflect.construct.sham)
@@ -7009,13 +11373,13 @@
       return false;
     }
   }
-  function _getPrototypeOf6(o) {
-    _getPrototypeOf6 = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf26(o2) {
+  function _getPrototypeOf25(o) {
+    _getPrototypeOf25 = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf26(o2) {
       return o2.__proto__ || Object.getPrototypeOf(o2);
     };
-    return _getPrototypeOf6(o);
+    return _getPrototypeOf25(o);
   }
-  function _defineProperty10(obj, key, value) {
+  function _defineProperty13(obj, key, value) {
     if (key in obj) {
       Object.defineProperty(obj, key, {value: value, enumerable: true, configurable: true, writable: true});
     } else {
@@ -7024,17 +11388,17 @@
     return obj;
   }
   var InputDeferDecorator = /* @__PURE__ */ function(_InputPolicy) {
-    _inherits6(InputDeferDecorator2, _InputPolicy);
-    var _super = _createSuper6(InputDeferDecorator2);
+    _inherits25(InputDeferDecorator2, _InputPolicy);
+    var _super = _createSuper25(InputDeferDecorator2);
     function InputDeferDecorator2(target) {
       var _this;
-      _classCallCheck12(this, InputDeferDecorator2);
+      _classCallCheck33(this, InputDeferDecorator2);
       _this = _super.call(this);
-      _defineProperty10(_assertThisInitialized6(_this), "pendingInput", {});
+      _defineProperty13(_assertThisInitialized25(_this), "pendingInput", {});
       _this.target = target;
       return _this;
     }
-    _createClass12(InputDeferDecorator2, [{
+    _createClass33(InputDeferDecorator2, [{
       key: "setInput",
       value: function setInput(nameType, value, opts) {
         if (/^\./.test(nameType))
@@ -7060,13 +11424,13 @@
   }(InputPolicy);
 
   // src/inputPolicies/inputValidateDecorator.ts
-  var import_jquery19 = __toModule(require_jquery());
-  function _classCallCheck13(instance, Constructor) {
+  var import_jquery39 = __toModule(require_jquery());
+  function _classCallCheck34(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
       throw new TypeError("Cannot call a class as a function");
     }
   }
-  function _defineProperty11(obj, key, value) {
+  function _defineProperty14(obj, key, value) {
     if (key in obj) {
       Object.defineProperty(obj, key, {value: value, enumerable: true, configurable: true, writable: true});
     } else {
@@ -7075,7 +11439,7 @@
     return obj;
   }
   function addDefaultInputOpts(opts) {
-    var newOpts = import_jquery19.default.extend({
+    var newOpts = import_jquery39.default.extend({
       priority: "immediate",
       binding: null,
       el: null
@@ -7093,9 +11457,9 @@
     return newOpts;
   }
   var InputValidateDecorator = function InputValidateDecorator2(target) {
-    _classCallCheck13(this, InputValidateDecorator2);
-    _defineProperty11(this, "target", void 0);
-    _defineProperty11(this, "setInput", function(nameType, value, opts) {
+    _classCallCheck34(this, InputValidateDecorator2);
+    _defineProperty14(this, "target", void 0);
+    _defineProperty14(this, "setInput", function(nameType, value, opts) {
       if (!nameType)
         throw "Can't set input with empty name.";
       var newOpts = addDefaultInputOpts(opts);
@@ -7105,15 +11469,15 @@
   };
 
   // src/shiny/bind.ts
-  var import_jquery20 = __toModule(require_jquery());
+  var import_jquery40 = __toModule(require_jquery());
 
   // src/bindings/output_adapter.ts
-  function _classCallCheck14(instance, Constructor) {
+  function _classCallCheck35(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
       throw new TypeError("Cannot call a class as a function");
     }
   }
-  function _defineProperties13(target, props) {
+  function _defineProperties34(target, props) {
     for (var i = 0; i < props.length; i++) {
       var descriptor = props[i];
       descriptor.enumerable = descriptor.enumerable || false;
@@ -7123,14 +11487,14 @@
       Object.defineProperty(target, descriptor.key, descriptor);
     }
   }
-  function _createClass13(Constructor, protoProps, staticProps) {
+  function _createClass34(Constructor, protoProps, staticProps) {
     if (protoProps)
-      _defineProperties13(Constructor.prototype, protoProps);
+      _defineProperties34(Constructor.prototype, protoProps);
     if (staticProps)
-      _defineProperties13(Constructor, staticProps);
+      _defineProperties34(Constructor, staticProps);
     return Constructor;
   }
-  function _defineProperty12(obj, key, value) {
+  function _defineProperty15(obj, key, value) {
     if (key in obj) {
       Object.defineProperty(obj, key, {value: value, enumerable: true, configurable: true, writable: true});
     } else {
@@ -7140,9 +11504,9 @@
   }
   var OutputBindingAdapter = /* @__PURE__ */ function() {
     function OutputBindingAdapter2(el, binding) {
-      _classCallCheck14(this, OutputBindingAdapter2);
-      _defineProperty12(this, "el", void 0);
-      _defineProperty12(this, "binding", void 0);
+      _classCallCheck35(this, OutputBindingAdapter2);
+      _defineProperty15(this, "el", void 0);
+      _defineProperty15(this, "binding", void 0);
       this.el = el;
       this.binding = binding;
       if (binding.resize) {
@@ -7151,7 +11515,7 @@
         });
       }
     }
-    _createClass13(OutputBindingAdapter2, [{
+    _createClass34(OutputBindingAdapter2, [{
       key: "getId",
       value: function getId() {
         return this.binding.getId(this.el);
@@ -7227,8 +11591,8 @@
           };
         }();
         binding.subscribe(el, thisCallback);
-        (0, import_jquery20.default)(el).data("shiny-input-binding", binding);
-        (0, import_jquery20.default)(el).addClass("shiny-bound-input");
+        (0, import_jquery40.default)(el).data("shiny-input-binding", binding);
+        (0, import_jquery40.default)(el).addClass("shiny-bound-input");
         var ratePolicy = binding.getRatePolicy(el);
         if (ratePolicy !== null) {
           inputsRate.setRatePolicy(effectiveId, ratePolicy.policy, ratePolicy.delay);
@@ -7237,7 +11601,7 @@
           binding: binding,
           node: el
         };
-        (0, import_jquery20.default)(el).trigger({
+        (0, import_jquery40.default)(el).trigger({
           type: "shiny:bound",
           binding: binding,
           bindingType: "input"
@@ -7257,7 +11621,7 @@
   function bindOutputs(_ref) {
     var sendOutputHiddenState = _ref.sendOutputHiddenState, maybeAddThemeObserver = _ref.maybeAddThemeObserver, outputBindings = _ref.outputBindings;
     var scope = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : document.documentElement;
-    var $scope = (0, import_jquery20.default)(scope);
+    var $scope = (0, import_jquery40.default)(scope);
     var bindings = outputBindings.getBindings();
     for (var i = 0; i < bindings.length; i++) {
       var binding = bindings[i].binding;
@@ -7267,9 +11631,9 @@
         var id = binding.getId(_el);
         if (!id)
           continue;
-        if (!import_jquery20.default.contains(document.documentElement, _el))
+        if (!import_jquery40.default.contains(document.documentElement, _el))
           continue;
-        var $el = (0, import_jquery20.default)(_el);
+        var $el = (0, import_jquery40.default)(_el);
         if ($el.hasClass("shiny-bound-output")) {
           continue;
         }
@@ -7293,20 +11657,20 @@
   function unbindInputs() {
     var scope = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : document.documentElement;
     var includeSelf = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : false;
-    var inputs = (0, import_jquery20.default)(scope).find(".shiny-bound-input").toArray();
-    if (includeSelf && (0, import_jquery20.default)(scope).hasClass("shiny-bound-input")) {
+    var inputs = (0, import_jquery40.default)(scope).find(".shiny-bound-input").toArray();
+    if (includeSelf && (0, import_jquery40.default)(scope).hasClass("shiny-bound-input")) {
       inputs.push(scope);
     }
     for (var i = 0; i < inputs.length; i++) {
       var _el2 = inputs[i];
-      var binding = (0, import_jquery20.default)(_el2).data("shiny-input-binding");
+      var binding = (0, import_jquery40.default)(_el2).data("shiny-input-binding");
       if (!binding)
         continue;
       var id = binding.getId(_el2);
-      (0, import_jquery20.default)(_el2).removeClass("shiny-bound-input");
+      (0, import_jquery40.default)(_el2).removeClass("shiny-bound-input");
       delete boundInputs[id];
       binding.unsubscribe(_el2);
-      (0, import_jquery20.default)(_el2).trigger({
+      (0, import_jquery40.default)(_el2).trigger({
         type: "shiny:unbound",
         binding: binding,
         bindingType: "input"
@@ -7317,12 +11681,12 @@
     var sendOutputHiddenState = _ref2.sendOutputHiddenState;
     var scope = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : document.documentElement;
     var includeSelf = arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : false;
-    var outputs = (0, import_jquery20.default)(scope).find(".shiny-bound-output").toArray();
-    if (includeSelf && (0, import_jquery20.default)(scope).hasClass("shiny-bound-output")) {
+    var outputs = (0, import_jquery40.default)(scope).find(".shiny-bound-output").toArray();
+    if (includeSelf && (0, import_jquery40.default)(scope).hasClass("shiny-bound-output")) {
       outputs.push(scope);
     }
     for (var i = 0; i < outputs.length; i++) {
-      var $el = (0, import_jquery20.default)(outputs[i]);
+      var $el = (0, import_jquery40.default)(outputs[i]);
       var bindingAdapter = $el.data("shiny-output-binding");
       if (!bindingAdapter)
         continue;
@@ -7351,7 +11715,7 @@
   function bindAll(shinyCtx, scope) {
     var currentInputItems = _bindAll(shinyCtx, scope);
     var inputs = shinyCtx.inputs;
-    import_jquery20.default.each(currentInputItems, function(name, item) {
+    import_jquery40.default.each(currentInputItems, function(name, item) {
       inputs.setInput(name, item.value, item.opts);
     });
     shinyCtx.initDeferredIframes();
@@ -7359,39 +11723,39 @@
 
   // node_modules/core-js/modules/es.array-buffer.constructor.js
   "use strict";
-  var $40 = require_export();
-  var global5 = require_global();
+  var $63 = require_export();
+  var global6 = require_global();
   var arrayBufferModule = require_array_buffer();
   var setSpecies = require_set_species();
   var ARRAY_BUFFER = "ArrayBuffer";
   var ArrayBuffer2 = arrayBufferModule[ARRAY_BUFFER];
-  var NativeArrayBuffer = global5[ARRAY_BUFFER];
-  $40({global: true, forced: NativeArrayBuffer !== ArrayBuffer2}, {
+  var NativeArrayBuffer = global6[ARRAY_BUFFER];
+  $63({global: true, forced: NativeArrayBuffer !== ArrayBuffer2}, {
     ArrayBuffer: ArrayBuffer2
   });
   setSpecies(ARRAY_BUFFER);
 
   // node_modules/core-js/modules/es.array-buffer.slice.js
   "use strict";
-  var $41 = require_export();
-  var fails8 = require_fails();
+  var $64 = require_export();
+  var fails10 = require_fails();
   var ArrayBufferModule = require_array_buffer();
-  var anObject8 = require_an_object();
+  var anObject9 = require_an_object();
   var toAbsoluteIndex3 = require_to_absolute_index();
   var toLength7 = require_to_length();
   var speciesConstructor2 = require_species_constructor();
   var ArrayBuffer3 = ArrayBufferModule.ArrayBuffer;
   var DataView2 = ArrayBufferModule.DataView;
   var nativeArrayBufferSlice = ArrayBuffer3.prototype.slice;
-  var INCORRECT_SLICE = fails8(function() {
+  var INCORRECT_SLICE = fails10(function() {
     return !new ArrayBuffer3(2).slice(1, void 0).byteLength;
   });
-  $41({target: "ArrayBuffer", proto: true, unsafe: true, forced: INCORRECT_SLICE}, {
+  $64({target: "ArrayBuffer", proto: true, unsafe: true, forced: INCORRECT_SLICE}, {
     slice: function slice2(start, end) {
       if (nativeArrayBufferSlice !== void 0 && end === void 0) {
-        return nativeArrayBufferSlice.call(anObject8(this), start);
+        return nativeArrayBufferSlice.call(anObject9(this), start);
       }
-      var length = anObject8(this).byteLength;
+      var length = anObject9(this).byteLength;
       var first = toAbsoluteIndex3(start, length);
       var fin = toAbsoluteIndex3(end === void 0 ? length : end, length);
       var result = new (speciesConstructor2(this, ArrayBuffer3))(toLength7(fin - first));
@@ -7406,46 +11770,46 @@
   });
 
   // node_modules/core-js/modules/es.data-view.js
-  var $42 = require_export();
+  var $65 = require_export();
   var ArrayBufferModule2 = require_array_buffer();
   var NATIVE_ARRAY_BUFFER = require_array_buffer_native();
-  $42({global: true, forced: !NATIVE_ARRAY_BUFFER}, {
+  $65({global: true, forced: !NATIVE_ARRAY_BUFFER}, {
     DataView: ArrayBufferModule2.DataView
   });
 
   // node_modules/core-js/modules/es.array.reduce.js
   "use strict";
-  var $43 = require_export();
+  var $66 = require_export();
   var $reduce = require_array_reduce().left;
   var arrayMethodIsStrict3 = require_array_method_is_strict();
   var CHROME_VERSION = require_engine_v8_version();
   var IS_NODE = require_engine_is_node();
   var STRICT_METHOD3 = arrayMethodIsStrict3("reduce");
   var CHROME_BUG = !IS_NODE && CHROME_VERSION > 79 && CHROME_VERSION < 83;
-  $43({target: "Array", proto: true, forced: !STRICT_METHOD3 || CHROME_BUG}, {
+  $66({target: "Array", proto: true, forced: !STRICT_METHOD3 || CHROME_BUG}, {
     reduce: function reduce(callbackfn) {
       return $reduce(this, callbackfn, arguments.length, arguments.length > 1 ? arguments[1] : void 0);
     }
   });
 
   // src/shiny/shinyapp.ts
-  var import_es_regexp_exec7 = __toModule(require_es_regexp_exec());
+  var import_es_regexp_exec9 = __toModule(require_es_regexp_exec());
 
   // node_modules/core-js/modules/es.array.for-each.js
   "use strict";
-  var $44 = require_export();
+  var $67 = require_export();
   var forEach = require_array_for_each();
-  $44({target: "Array", proto: true, forced: [].forEach != forEach}, {
+  $67({target: "Array", proto: true, forced: [].forEach != forEach}, {
     forEach: forEach
   });
 
   // node_modules/core-js/modules/web.dom-collections.for-each.js
-  var global6 = require_global();
+  var global7 = require_global();
   var DOMIterables2 = require_dom_iterables();
   var forEach2 = require_array_for_each();
   var createNonEnumerableProperty3 = require_create_non_enumerable_property();
   for (var COLLECTION_NAME in DOMIterables2) {
-    Collection = global6[COLLECTION_NAME];
+    Collection = global7[COLLECTION_NAME];
     CollectionPrototype = Collection && Collection.prototype;
     if (CollectionPrototype && CollectionPrototype.forEach !== forEach2)
       try {
@@ -7457,98 +11821,14 @@
   var Collection;
   var CollectionPrototype;
 
-  // node_modules/core-js/modules/es.number.constructor.js
-  "use strict";
-  var DESCRIPTORS4 = require_descriptors();
-  var global7 = require_global();
-  var isForced = require_is_forced();
-  var redefine4 = require_redefine();
-  var has3 = require_has();
-  var classof = require_classof_raw();
-  var inheritIfRequired = require_inherit_if_required();
-  var toPrimitive2 = require_to_primitive();
-  var fails9 = require_fails();
-  var create3 = require_object_create();
-  var getOwnPropertyNames2 = require_object_get_own_property_names().f;
-  var getOwnPropertyDescriptor2 = require_object_get_own_property_descriptor().f;
-  var defineProperty4 = require_object_define_property().f;
-  var trim = require_string_trim().trim;
-  var NUMBER = "Number";
-  var NativeNumber = global7[NUMBER];
-  var NumberPrototype = NativeNumber.prototype;
-  var BROKEN_CLASSOF = classof(create3(NumberPrototype)) == NUMBER;
-  var toNumber = function(argument) {
-    var it = toPrimitive2(argument, false);
-    var first, third, radix, maxCode, digits, length, index, code;
-    if (typeof it == "string" && it.length > 2) {
-      it = trim(it);
-      first = it.charCodeAt(0);
-      if (first === 43 || first === 45) {
-        third = it.charCodeAt(2);
-        if (third === 88 || third === 120)
-          return NaN;
-      } else if (first === 48) {
-        switch (it.charCodeAt(1)) {
-          case 66:
-          case 98:
-            radix = 2;
-            maxCode = 49;
-            break;
-          case 79:
-          case 111:
-            radix = 8;
-            maxCode = 55;
-            break;
-          default:
-            return +it;
-        }
-        digits = it.slice(2);
-        length = digits.length;
-        for (index = 0; index < length; index++) {
-          code = digits.charCodeAt(index);
-          if (code < 48 || code > maxCode)
-            return NaN;
-        }
-        return parseInt(digits, radix);
-      }
-    }
-    return +it;
-  };
-  if (isForced(NUMBER, !NativeNumber(" 0o1") || !NativeNumber("0b1") || NativeNumber("+0x1"))) {
-    NumberWrapper = function Number2(value) {
-      var it = arguments.length < 1 ? 0 : value;
-      var dummy = this;
-      return dummy instanceof NumberWrapper && (BROKEN_CLASSOF ? fails9(function() {
-        NumberPrototype.valueOf.call(dummy);
-      }) : classof(dummy) != NUMBER) ? inheritIfRequired(new NativeNumber(toNumber(it)), dummy, NumberWrapper) : toNumber(it);
-    };
-    for (keys2 = DESCRIPTORS4 ? getOwnPropertyNames2(NativeNumber) : "MAX_VALUE,MIN_VALUE,NaN,NEGATIVE_INFINITY,POSITIVE_INFINITY,EPSILON,isFinite,isInteger,isNaN,isSafeInteger,MAX_SAFE_INTEGER,MIN_SAFE_INTEGER,parseFloat,parseInt,isInteger,fromString,range".split(","), j = 0; keys2.length > j; j++) {
-      if (has3(NativeNumber, key = keys2[j]) && !has3(NumberWrapper, key)) {
-        defineProperty4(NumberWrapper, key, getOwnPropertyDescriptor2(NativeNumber, key));
-      }
-    }
-    NumberWrapper.prototype = NumberPrototype;
-    NumberPrototype.constructor = NumberWrapper;
-    redefine4(global7, NUMBER, NumberWrapper);
-  }
-  var NumberWrapper;
-  var keys2;
-  var j;
-  var key;
-
   // src/shiny/shinyapp.ts
-  var import_jquery21 = __toModule(require_jquery());
-
-  // src/utils/eval.ts
-  var indirectEval = eval;
-
-  // src/shiny/shinyapp.ts
-  function _classCallCheck15(instance, Constructor) {
+  var import_jquery41 = __toModule(require_jquery());
+  function _classCallCheck36(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
       throw new TypeError("Cannot call a class as a function");
     }
   }
-  function _defineProperties14(target, props) {
+  function _defineProperties35(target, props) {
     for (var i = 0; i < props.length; i++) {
       var descriptor = props[i];
       descriptor.enumerable = descriptor.enumerable || false;
@@ -7558,14 +11838,14 @@
       Object.defineProperty(target, descriptor.key, descriptor);
     }
   }
-  function _createClass14(Constructor, protoProps, staticProps) {
+  function _createClass35(Constructor, protoProps, staticProps) {
     if (protoProps)
-      _defineProperties14(Constructor.prototype, protoProps);
+      _defineProperties35(Constructor.prototype, protoProps);
     if (staticProps)
-      _defineProperties14(Constructor, staticProps);
+      _defineProperties35(Constructor, staticProps);
     return Constructor;
   }
-  function _defineProperty13(obj, key, value) {
+  function _defineProperty16(obj, key, value) {
     if (key in obj) {
       Object.defineProperty(obj, key, {value: value, enumerable: true, configurable: true, writable: true});
     } else {
@@ -7596,21 +11876,21 @@
   }
   var ShinyApp = /* @__PURE__ */ function() {
     function ShinyApp2() {
-      _classCallCheck15(this, ShinyApp2);
-      _defineProperty13(this, "$socket", null);
-      _defineProperty13(this, "config", null);
-      _defineProperty13(this, "$inputValues", {});
-      _defineProperty13(this, "$initialInput", {});
-      _defineProperty13(this, "$bindings", {});
-      _defineProperty13(this, "$values", {});
-      _defineProperty13(this, "$errors", {});
-      _defineProperty13(this, "$conditionals", {});
-      _defineProperty13(this, "$pendingMessages", []);
-      _defineProperty13(this, "$activeRequests", {});
-      _defineProperty13(this, "$nextRequestId", 0);
-      _defineProperty13(this, "$allowReconnect", false);
-      _defineProperty13(this, "scheduledReconnect", null);
-      _defineProperty13(this, "reconnectDelay", function() {
+      _classCallCheck36(this, ShinyApp2);
+      _defineProperty16(this, "$socket", null);
+      _defineProperty16(this, "config", null);
+      _defineProperty16(this, "$inputValues", {});
+      _defineProperty16(this, "$initialInput", {});
+      _defineProperty16(this, "$bindings", {});
+      _defineProperty16(this, "$values", {});
+      _defineProperty16(this, "$errors", {});
+      _defineProperty16(this, "$conditionals", {});
+      _defineProperty16(this, "$pendingMessages", []);
+      _defineProperty16(this, "$activeRequests", {});
+      _defineProperty16(this, "$nextRequestId", 0);
+      _defineProperty16(this, "$allowReconnect", false);
+      _defineProperty16(this, "scheduledReconnect", null);
+      _defineProperty16(this, "reconnectDelay", function() {
         var attempts = 0;
         var delays = [1500, 1500, 2500, 2500, 5500, 5500, 10500];
         return {
@@ -7627,12 +11907,12 @@
           }
         };
       }());
-      _defineProperty13(this, "progressHandlers", {
+      _defineProperty16(this, "progressHandlers", {
         binding: function binding(message) {
           var key = message.id;
           var binding2 = this.$bindings[key];
           if (binding2) {
-            (0, import_jquery21.default)(binding2.el).trigger({
+            (0, import_jquery41.default)(binding2.el).trigger({
               type: "shiny:outputinvalidated",
               binding: binding2,
               name: key
@@ -7649,13 +11929,13 @@
               duration: null
             });
           } else if (message.style === "old") {
-            var $container = (0, import_jquery21.default)(".shiny-progress-container");
+            var $container = (0, import_jquery41.default)(".shiny-progress-container");
             if ($container.length === 0) {
-              $container = (0, import_jquery21.default)('<div class="shiny-progress-container"></div>');
-              (0, import_jquery21.default)(document.body).append($container);
+              $container = (0, import_jquery41.default)('<div class="shiny-progress-container"></div>');
+              (0, import_jquery41.default)(document.body).append($container);
             }
-            var depth = (0, import_jquery21.default)(".shiny-progress.open").length;
-            var $progress = (0, import_jquery21.default)('<div class="shiny-progress open"><div class="progress active"><div class="progress-bar bar"></div></div><div class="progress-text"><span class="progress-message">message</span><span class="progress-detail"></span></div></div>');
+            var depth = (0, import_jquery41.default)(".shiny-progress.open").length;
+            var $progress = (0, import_jquery41.default)('<div class="shiny-progress open"><div class="progress active"><div class="progress-bar bar"></div></div><div class="progress-text"><span class="progress-message">message</span><span class="progress-detail"></span></div></div>');
             $progress.attr("id", message.id);
             $container.append($progress);
             var $progressBar = $progress.find(".progress");
@@ -7667,7 +11947,7 @@
         },
         update: function update(message) {
           if (message.style === "notification") {
-            var $progress = (0, import_jquery21.default)("#shiny-progress-" + message.id);
+            var $progress = (0, import_jquery41.default)("#shiny-progress-" + message.id);
             if ($progress.length === 0)
               return;
             if (typeof message.message !== "undefined") {
@@ -7681,7 +11961,7 @@
               $progress.find(".progress-bar").width(message.value * 100 + "%");
             }
           } else if (message.style === "old") {
-            var _$progress = (0, import_jquery21.default)("#" + message.id + ".shiny-progress");
+            var _$progress = (0, import_jquery41.default)("#" + message.id + ".shiny-progress");
             if (typeof message.message !== "undefined") {
               _$progress.find(".progress-message").text(message.message);
             }
@@ -7699,13 +11979,13 @@
           if (message.style === "notification") {
             remove(message.id);
           } else if (message.style === "old") {
-            var $progress = (0, import_jquery21.default)("#" + message.id + ".shiny-progress");
+            var $progress = (0, import_jquery41.default)("#" + message.id + ".shiny-progress");
             $progress.removeClass("open");
             $progress.fadeOut({
               complete: function complete() {
                 $progress.remove();
-                if ((0, import_jquery21.default)(".shiny-progress").length === 0)
-                  (0, import_jquery21.default)(".shiny-progress-container").remove();
+                if ((0, import_jquery41.default)(".shiny-progress").length === 0)
+                  (0, import_jquery41.default)(".shiny-progress-container").remove();
               }
             });
           }
@@ -7713,14 +11993,14 @@
       });
       this.init();
     }
-    _createClass14(ShinyApp2, [{
+    _createClass35(ShinyApp2, [{
       key: "connect",
       value: function connect(initialInput) {
         if (this.$socket)
           throw "Connect was already called on this application object";
         this.$socket = this.createSocket();
         this.$initialInput = initialInput;
-        import_jquery21.default.extend(this.$inputValues, initialInput);
+        import_jquery41.default.extend(this.$inputValues, initialInput);
         this.$updateConditionals();
       }
     }, {
@@ -7735,7 +12015,7 @@
         if (this.isConnected())
           throw "Attempted to reconnect, but already connected.";
         this.$socket = this.createSocket();
-        this.$initialInput = import_jquery21.default.extend({}, this.$inputValues);
+        this.$initialInput = import_jquery41.default.extend({}, this.$inputValues);
         this.$updateConditionals();
       }
     }, {
@@ -7764,7 +12044,7 @@
         var hasOpened = false;
         socket.onopen = function() {
           hasOpened = true;
-          (0, import_jquery21.default)(document).trigger({
+          (0, import_jquery41.default)(document).trigger({
             type: "shiny:connected",
             socket: socket
           });
@@ -7783,7 +12063,7 @@
         };
         socket.onclose = function() {
           if (hasOpened) {
-            (0, import_jquery21.default)(document).trigger({
+            (0, import_jquery41.default)(document).trigger({
               type: "shiny:disconnected",
               socket: socket
             });
@@ -7802,7 +12082,7 @@
           data: values
         });
         this.$sendMsg(msg);
-        import_jquery21.default.extend(this.$inputValues, values);
+        import_jquery41.default.extend(this.$inputValues, values);
         this.$updateConditionals();
       }
     }, {
@@ -7828,9 +12108,9 @@
     }, {
       key: "onDisconnected",
       value: function onDisconnected() {
-        var $overlay = (0, import_jquery21.default)("#shiny-disconnected-overlay");
+        var $overlay = (0, import_jquery41.default)("#shiny-disconnected-overlay");
         if ($overlay.length === 0) {
-          (0, import_jquery21.default)(document.body).append('<div id="shiny-disconnected-overlay"></div>');
+          (0, import_jquery41.default)(document.body).append('<div id="shiny-disconnected-overlay"></div>');
         }
         if (this.$allowReconnect === true && this.$socket.allowReconnect === true || this.$allowReconnect === "force") {
           var delay = this.reconnectDelay.next();
@@ -7841,7 +12121,7 @@
     }, {
       key: "onConnected",
       value: function onConnected() {
-        (0, import_jquery21.default)("#shiny-disconnected-overlay").remove();
+        (0, import_jquery41.default)("#shiny-disconnected-overlay").remove();
         hideReconnectDialog();
         this.reconnectDelay.reset();
       }
@@ -7905,7 +12185,7 @@
         evt.name = name;
         evt.error = error;
         evt.binding = binding;
-        (0, import_jquery21.default)(binding ? binding.el : document).trigger(evt);
+        (0, import_jquery41.default)(binding ? binding.el : document).trigger(evt);
         if (!evt.isDefaultPrevented() && binding && binding.onValueError) {
           binding.onValueError(evt.error);
         }
@@ -7919,12 +12199,12 @@
         evt.value = value;
         evt.binding = binding;
         if (this.$values[name] === value) {
-          (0, import_jquery21.default)(binding ? binding.el : document).trigger(evt);
+          (0, import_jquery41.default)(binding ? binding.el : document).trigger(evt);
           return void 0;
         }
         this.$values[name] = value;
         delete this.$errors[name];
-        (0, import_jquery21.default)(binding ? binding.el : document).trigger(evt);
+        (0, import_jquery41.default)(binding ? binding.el : document).trigger(evt);
         if (!evt.isDefaultPrevented() && binding) {
           binding.onValueChange(evt.value);
         }
@@ -7960,9 +12240,9 @@
         return Object.keys(scopeComponent).filter(function(k) {
           return k.indexOf(nsPrefix) === 0;
         }).map(function(k) {
-          return _defineProperty13({}, k.substring(nsPrefix.length), scopeComponent[k]);
+          return _defineProperty16({}, k.substring(nsPrefix.length), scopeComponent[k]);
         }).reduce(function(obj, pair) {
-          return import_jquery21.default.extend(obj, pair);
+          return import_jquery41.default.extend(obj, pair);
         }, {});
       }
     }, {
@@ -7979,7 +12259,7 @@
     }, {
       key: "$updateConditionals",
       value: function $updateConditionals() {
-        (0, import_jquery21.default)(document).trigger({
+        (0, import_jquery41.default)(document).trigger({
           type: "shiny:conditional"
         });
         var inputs = {};
@@ -7993,9 +12273,9 @@
           input: inputs,
           output: this.$values
         };
-        var conditionals = (0, import_jquery21.default)(document).find("[data-display-if]");
+        var conditionals = (0, import_jquery41.default)(document).find("[data-display-if]");
         for (var i = 0; i < conditionals.length; i++) {
-          var el = (0, import_jquery21.default)(conditionals[i]);
+          var el = (0, import_jquery41.default)(conditionals[i]);
           var condFunc = el.data("data-display-if-func");
           if (!condFunc) {
             var condExpr = el.attr("data-display-if");
@@ -8054,7 +12334,7 @@
         }
         var evt = jQuery.Event("shiny:message");
         evt.message = msgObj;
-        (0, import_jquery21.default)(document).trigger(evt);
+        (0, import_jquery41.default)(document).trigger(evt);
         if (evt.isDefaultPrevented())
           return;
         this._sendMessagesToHandlers(evt.message, messageHandlers, messageHandlerOrder);
@@ -8091,7 +12371,7 @@
         });
         this.addMessageHandler("inputMessages", function(message) {
           for (var i = 0; i < message.length; i++) {
-            var $obj = (0, import_jquery21.default)(".shiny-bound-input#" + $escape(message[i].id));
+            var $obj = (0, import_jquery41.default)(".shiny-bound-input#" + $escape(message[i].id));
             var inputBinding = $obj.data("shiny-input-binding");
             if ($obj.length > 0) {
               if (!$obj.attr("aria-live"))
@@ -8100,7 +12380,7 @@
               var evt = jQuery.Event("shiny:updateinput");
               evt.message = message[i].message;
               evt.binding = inputBinding;
-              (0, import_jquery21.default)(el).trigger(evt);
+              (0, import_jquery41.default)(el).trigger(evt);
               if (!evt.isDefaultPrevented())
                 inputBinding.receiveMessage(el, evt.message);
             }
@@ -8173,21 +12453,21 @@
           };
           if (message.user)
             setShinyUser(message.user);
-          (0, import_jquery21.default)(document).trigger("shiny:sessioninitialized");
+          (0, import_jquery41.default)(document).trigger("shiny:sessioninitialized");
         });
         this.addMessageHandler("busy", function(message) {
           if (message === "busy") {
-            (0, import_jquery21.default)(document.documentElement).addClass("shiny-busy");
-            (0, import_jquery21.default)(document).trigger("shiny:busy");
+            (0, import_jquery41.default)(document.documentElement).addClass("shiny-busy");
+            (0, import_jquery41.default)(document).trigger("shiny:busy");
           } else if (message === "idle") {
-            (0, import_jquery21.default)(document.documentElement).removeClass("shiny-busy");
-            (0, import_jquery21.default)(document).trigger("shiny:idle");
+            (0, import_jquery41.default)(document.documentElement).removeClass("shiny-busy");
+            (0, import_jquery41.default)(document).trigger("shiny:idle");
           }
         });
         this.addMessageHandler("recalculating", function(message) {
           if (hasOwnProperty(message, "name") && hasOwnProperty(message, "status")) {
             var binding = this.$bindings[message.name];
-            (0, import_jquery21.default)(binding ? binding.el : null).trigger({
+            (0, import_jquery41.default)(binding ? binding.el : null).trigger({
               type: "shiny:" + message.status
             });
           }
@@ -8198,10 +12478,10 @@
           message;
         });
         this.addMessageHandler("shiny-insert-ui", function(message) {
-          var targets = (0, import_jquery21.default)(message.selector);
+          var targets = (0, import_jquery41.default)(message.selector);
           if (targets.length === 0) {
             console.warn('The selector you chose ("' + message.selector + '") could not be found in the DOM.');
-            renderHtml2(message.content.html, (0, import_jquery21.default)([]).get(0), message.content.deps);
+            renderHtml2(message.content.html, (0, import_jquery41.default)([]).get(0), message.content.deps);
           } else {
             targets.each(function(i, target) {
               renderContent(target, message.content, message.where);
@@ -8210,10 +12490,10 @@
           }
         });
         this.addMessageHandler("shiny-remove-ui", function(message) {
-          var els = (0, import_jquery21.default)(message.selector);
+          var els = (0, import_jquery41.default)(message.selector);
           els.each(function(i, el) {
             shinyUnbindAll(el, true);
-            (0, import_jquery21.default)(el).remove();
+            (0, import_jquery41.default)(el).remove();
             return message.multiple;
           });
         });
@@ -8223,14 +12503,14 @@
           }
         });
         function getTabset(id) {
-          var $tabset = (0, import_jquery21.default)("#" + $escape(id));
+          var $tabset = (0, import_jquery41.default)("#" + $escape(id));
           if ($tabset.length === 0)
             throw "There is no tabsetPanel (or navbarPage or navlistPanel) with id equal to '" + id + "'";
           return $tabset;
         }
         function getTabContent($tabset) {
           var tabsetId = $tabset.attr("data-tabsetid");
-          var $tabContent = (0, import_jquery21.default)("div.tab-content[data-tabsetid='" + $escape(tabsetId) + "']");
+          var $tabContent = (0, import_jquery41.default)("div.tab-content[data-tabsetid='" + $escape(tabsetId) + "']");
           return $tabContent;
         }
         function getTargetTabs($tabset, $tabContent, target) {
@@ -8247,12 +12527,12 @@
             var dropdownId = $dropdownTabset.attr("data-tabsetid");
             var $dropdownLiTags = $dropdownTabset.find("a[data-toggle='tab']").parent("li");
             $dropdownLiTags.each(function(i, el) {
-              $liTags.push((0, import_jquery21.default)(el));
+              $liTags.push((0, import_jquery41.default)(el));
             });
             var selector = "div.tab-pane[id^='tab-" + $escape(dropdownId) + "']";
             var $dropdownDivs = $tabContent.find(selector);
             $dropdownDivs.each(function(i, el) {
-              $divTags.push((0, import_jquery21.default)(el));
+              $divTags.push((0, import_jquery41.default)(el));
             });
           } else {
             $divTags.push($tabContent.find("div" + dataValue));
@@ -8268,8 +12548,8 @@
           var $tabset = $parentTabset;
           var $tabContent = getTabContent($tabset);
           var tabsetId = $parentTabset.attr("data-tabsetid");
-          var $divTag = (0, import_jquery21.default)(message.divTag.html);
-          var $liTag = (0, import_jquery21.default)(message.liTag.html);
+          var $divTag = (0, import_jquery41.default)(message.divTag.html);
+          var $liTag = (0, import_jquery41.default)(message.liTag.html);
           var $aTag = $liTag.find("> a");
           var target = null;
           var $targetLiTag = null;
@@ -8321,7 +12601,7 @@
           function getTabIndex($tabset2, tabsetId2) {
             var existingTabIds = [0];
             $tabset2.find("a[data-toggle='tab']").each(function() {
-              var $tab = (0, import_jquery21.default)(this);
+              var $tab = (0, import_jquery41.default)(this);
               if ($tab.length > 0) {
                 var href = $tab.attr("href").replace(/.*(?=#[^\s]+$)/, "");
                 var _index = href.replace("#tab-" + tabsetId2 + "-", "");
@@ -8332,7 +12612,7 @@
           }
           function getDropdown() {
             if (message.menuName !== null) {
-              var $dropdownATag = (0, import_jquery21.default)("a.dropdown-toggle[data-value='" + $escape(message.menuName) + "']");
+              var $dropdownATag = (0, import_jquery41.default)("a.dropdown-toggle[data-value='" + $escape(message.menuName) + "']");
               if ($dropdownATag.length === 0) {
                 throw "There is no navbarMenu with menuName equal to '" + message.menuName + "'";
               }
@@ -8370,15 +12650,15 @@
         }
         function tabApplyFunction(target, func) {
           var liTags = arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : false;
-          import_jquery21.default.each(target, function(key, el) {
+          import_jquery41.default.each(target, function(key, el) {
             if (key === "$liTag") {
               func(el);
             } else if (key === "$divTags") {
-              import_jquery21.default.each(el, function(i, div) {
+              import_jquery41.default.each(el, function(i, div) {
                 func(div);
               });
             } else if (liTags && key === "$liTags") {
-              import_jquery21.default.each(el, function(i, div) {
+              import_jquery41.default.each(el, function(i, div) {
                 func(div);
               });
             }
@@ -8436,7 +12716,7 @@
           if (window.location.hash !== oldHash)
             what = "hash";
           if (what === "hash")
-            (0, import_jquery21.default)(document).trigger("hashchange");
+            (0, import_jquery41.default)(document).trigger("hashchange");
         });
         this.addMessageHandler("resetBrush", function(message) {
           resetBrush(message.brushId);
@@ -8469,10 +12749,10 @@
     var inputsRate = new InputRateDecorator(inputsEvent);
     var inputsDefer = new InputDeferDecorator(inputsEvent);
     var target;
-    if ((0, import_jquery22.default)('input[type="submit"], button[type="submit"]').length > 0) {
+    if ((0, import_jquery42.default)('input[type="submit"], button[type="submit"]').length > 0) {
       target = inputsDefer;
-      (0, import_jquery22.default)('input[type="submit"], button[type="submit"]').each(function() {
-        (0, import_jquery22.default)(this).click(function(event) {
+      (0, import_jquery42.default)('input[type="submit"], button[type="submit"]').each(function() {
+        (0, import_jquery42.default)(this).click(function(event) {
           event.preventDefault();
           inputsDefer.submit();
         });
@@ -8516,7 +12796,7 @@
         var inputObjects = binding.find(scope);
         if (inputObjects) {
           for (var j = 0; j < inputObjects.length; j++) {
-            var $inputObjectJ = (0, import_jquery22.default)(inputObjects[j]);
+            var $inputObjectJ = (0, import_jquery42.default)(inputObjects[j]);
             if (!$inputObjectJ.data("_shiny_initialized")) {
               $inputObjectJ.data("_shiny_initialized", true);
               binding.initialize(inputObjects[j]);
@@ -8527,7 +12807,7 @@
     }
     Shiny2.initializeInputs = initializeInputs;
     function getIdFromEl(el) {
-      var $el = (0, import_jquery22.default)(el);
+      var $el = (0, import_jquery42.default)(el);
       var bindingAdapter = $el.data("shiny-output-binding");
       if (!bindingAdapter)
         return null;
@@ -8538,7 +12818,7 @@
     var initialValues = mapValues(_bindAll(shinyBindCtx(), document.documentElement), function(x) {
       return x.value;
     });
-    (0, import_jquery22.default)(".shiny-image-output, .shiny-plot-output, .shiny-report-size").each(function() {
+    (0, import_jquery42.default)(".shiny-image-output, .shiny-plot-output, .shiny-report-size").each(function() {
       var id = getIdFromEl(this);
       if (this.offsetWidth !== 0 || this.offsetHeight !== 0) {
         initialValues[".clientdata_output_" + id + "_width"] = this.offsetWidth;
@@ -8569,7 +12849,7 @@
         size: fontSize
       };
     }
-    (0, import_jquery22.default)(".shiny-image-output, .shiny-plot-output, .shiny-report-theme").each(function() {
+    (0, import_jquery42.default)(".shiny-image-output, .shiny-plot-output, .shiny-report-theme").each(function() {
       var el = this;
       var id = getIdFromEl(el);
       initialValues[".clientdata_output_" + id + "_bg"] = getComputedBgColor(el);
@@ -8587,7 +12867,7 @@
       if (!reportTheme) {
         return;
       }
-      var $el = (0, import_jquery22.default)(el);
+      var $el = (0, import_jquery42.default)(el);
       if ($el.data("shiny-theme-observer")) {
         return;
       }
@@ -8615,18 +12895,18 @@
       inputs.setInput(".clientdata_output_" + id + "_font", getComputedFont(el));
     }
     function doSendImageSize() {
-      (0, import_jquery22.default)(".shiny-image-output, .shiny-plot-output, .shiny-report-size").each(function() {
+      (0, import_jquery42.default)(".shiny-image-output, .shiny-plot-output, .shiny-report-size").each(function() {
         var id = getIdFromEl(this);
         if (this.offsetWidth !== 0 || this.offsetHeight !== 0) {
           inputs.setInput(".clientdata_output_" + id + "_width", this.offsetWidth);
           inputs.setInput(".clientdata_output_" + id + "_height", this.offsetHeight);
         }
       });
-      (0, import_jquery22.default)(".shiny-image-output, .shiny-plot-output, .shiny-report-theme").each(function() {
+      (0, import_jquery42.default)(".shiny-image-output, .shiny-plot-output, .shiny-report-theme").each(function() {
         doSendTheme(this);
       });
-      (0, import_jquery22.default)(".shiny-bound-output").each(function() {
-        var $this = (0, import_jquery22.default)(this), binding = $this.data("shiny-output-binding");
+      (0, import_jquery42.default)(".shiny-bound-output").each(function() {
+        var $this = (0, import_jquery42.default)(this), binding = $this.data("shiny-output-binding");
         $this.trigger({
           type: "shiny:visualchange",
           visible: !isHidden(this),
@@ -8646,7 +12926,7 @@
       }
     }
     var lastKnownVisibleOutputs = {};
-    (0, import_jquery22.default)(".shiny-bound-output").each(function() {
+    (0, import_jquery42.default)(".shiny-bound-output").each(function() {
       var id = getIdFromEl(this);
       if (isHidden(this)) {
         initialValues[".clientdata_output_" + id + "_hidden"] = true;
@@ -8657,7 +12937,7 @@
     });
     function doSendOutputHiddenState() {
       var visibleOutputs = {};
-      (0, import_jquery22.default)(".shiny-bound-output").each(function() {
+      (0, import_jquery42.default)(".shiny-bound-output").each(function() {
         var id = getIdFromEl(this);
         delete lastKnownVisibleOutputs[id];
         var hidden = isHidden(this), evt = {
@@ -8670,7 +12950,7 @@
           visibleOutputs[id] = true;
           inputs.setInput(".clientdata_output_" + id + "_hidden", false);
         }
-        var $this = (0, import_jquery22.default)(this);
+        var $this = (0, import_jquery42.default)(this);
         evt.binding = $this.data("shiny-output-binding");
         $this.trigger(evt);
       });
@@ -8702,16 +12982,16 @@
         handler.apply(this, [namespace, handler].concat(args));
       };
     }
-    (0, import_jquery22.default)(window).resize(debounce(500, sendImageSizeFns.regular));
+    (0, import_jquery42.default)(window).resize(debounce(500, sendImageSizeFns.regular));
     var bs3classes = ["modal", "dropdown", "tab", "tooltip", "popover", "collapse"];
-    import_jquery22.default.each(bs3classes, function(idx, classname) {
-      (0, import_jquery22.default)(document.body).on("shown.bs." + classname + ".sendImageSize", "*", filterEventsByNamespace("bs", sendImageSizeFns.regular));
-      (0, import_jquery22.default)(document.body).on("shown.bs." + classname + ".sendOutputHiddenState hidden.bs." + classname + ".sendOutputHiddenState", "*", filterEventsByNamespace("bs", sendOutputHiddenState));
+    import_jquery42.default.each(bs3classes, function(idx, classname) {
+      (0, import_jquery42.default)(document.body).on("shown.bs." + classname + ".sendImageSize", "*", filterEventsByNamespace("bs", sendImageSizeFns.regular));
+      (0, import_jquery42.default)(document.body).on("shown.bs." + classname + ".sendOutputHiddenState hidden.bs." + classname + ".sendOutputHiddenState", "*", filterEventsByNamespace("bs", sendOutputHiddenState));
     });
-    (0, import_jquery22.default)(document.body).on("shown.sendImageSize", "*", sendImageSizeFns.regular);
-    (0, import_jquery22.default)(document.body).on("shown.sendOutputHiddenState hidden.sendOutputHiddenState", "*", sendOutputHiddenState);
+    (0, import_jquery42.default)(document.body).on("shown.sendImageSize", "*", sendImageSizeFns.regular);
+    (0, import_jquery42.default)(document.body).on("shown.sendOutputHiddenState hidden.sendOutputHiddenState", "*", sendOutputHiddenState);
     initialValues[".clientdata_pixelratio"] = pixelRatio();
-    (0, import_jquery22.default)(window).resize(function() {
+    (0, import_jquery42.default)(window).resize(function() {
       inputs.setInput(".clientdata_pixelratio", pixelRatio());
     });
     initialValues[".clientdata_url_protocol"] = window.location.protocol;
@@ -8719,21 +12999,21 @@
     initialValues[".clientdata_url_port"] = window.location.port;
     initialValues[".clientdata_url_pathname"] = window.location.pathname;
     initialValues[".clientdata_url_search"] = window.location.search;
-    (0, import_jquery22.default)(window).on("pushstate", function(e) {
+    (0, import_jquery42.default)(window).on("pushstate", function(e) {
       inputs.setInput(".clientdata_url_search", window.location.search);
     });
-    (0, import_jquery22.default)(window).on("popstate", function(e) {
+    (0, import_jquery42.default)(window).on("popstate", function(e) {
       inputs.setInput(".clientdata_url_search", window.location.search);
     });
     initialValues[".clientdata_url_hash_initial"] = window.location.hash;
     initialValues[".clientdata_url_hash"] = window.location.hash;
-    (0, import_jquery22.default)(window).on("hashchange", function(e) {
+    (0, import_jquery42.default)(window).on("hashchange", function(e) {
       inputs.setInput(".clientdata_url_hash", window.location.hash);
     });
-    var singletonText = initialValues[".clientdata_singletons"] = (0, import_jquery22.default)('script[type="application/shiny-singletons"]').text();
+    var singletonText = initialValues[".clientdata_singletons"] = (0, import_jquery42.default)('script[type="application/shiny-singletons"]').text();
     registerNames(singletonText.split(/,/));
-    var dependencyText = (0, import_jquery22.default)('script[type="application/html-dependencies"]').text();
-    import_jquery22.default.each(dependencyText.split(/;/), function(i, depStr) {
+    var dependencyText = (0, import_jquery42.default)('script[type="application/html-dependencies"]').text();
+    import_jquery42.default.each(dependencyText.split(/;/), function(i, depStr) {
       var match = /\s*^(.+)\[(.+)\]\s*$/.exec(depStr);
       if (match) {
         registerDependency(match[1], match[2]);
@@ -8741,7 +13021,7 @@
     });
     inputsNoResend.reset(initialValues);
     shinyapp.connect(initialValues);
-    (0, import_jquery22.default)(document).one("shiny:connected", function() {
+    (0, import_jquery42.default)(document).one("shiny:connected", function() {
       initDeferredIframes();
     });
     window.console.log("Shiny version: ", Shiny2.version);
@@ -8750,4300 +13030,12 @@
     if (!window.Shiny || !window.Shiny.shinyapp || !window.Shiny.shinyapp.isConnected()) {
       return;
     }
-    (0, import_jquery22.default)(".shiny-frame-deferred").each(function(i, el) {
-      var $el = (0, import_jquery22.default)(el);
+    (0, import_jquery42.default)(".shiny-frame-deferred").each(function(i, el) {
+      var $el = (0, import_jquery42.default)(el);
       $el.removeClass("shiny-frame-deferred");
       $el.attr("src", $el.attr("data-deferred-src"));
       $el.attr("data-deferred-src", null);
     });
-  }
-
-  // src/bindings/registry.ts
-  function _classCallCheck16(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  }
-  function _defineProperties15(target, props) {
-    for (var i = 0; i < props.length; i++) {
-      var descriptor = props[i];
-      descriptor.enumerable = descriptor.enumerable || false;
-      descriptor.configurable = true;
-      if ("value" in descriptor)
-        descriptor.writable = true;
-      Object.defineProperty(target, descriptor.key, descriptor);
-    }
-  }
-  function _createClass15(Constructor, protoProps, staticProps) {
-    if (protoProps)
-      _defineProperties15(Constructor.prototype, protoProps);
-    if (staticProps)
-      _defineProperties15(Constructor, staticProps);
-    return Constructor;
-  }
-  function _defineProperty14(obj, key, value) {
-    if (key in obj) {
-      Object.defineProperty(obj, key, {value: value, enumerable: true, configurable: true, writable: true});
-    } else {
-      obj[key] = value;
-    }
-    return obj;
-  }
-  var BindingRegistry = /* @__PURE__ */ function() {
-    function BindingRegistry2() {
-      _classCallCheck16(this, BindingRegistry2);
-      _defineProperty14(this, "bindings", []);
-      _defineProperty14(this, "bindingNames", {});
-    }
-    _createClass15(BindingRegistry2, [{
-      key: "register",
-      value: function register2(binding, bindingName) {
-        var priority = arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : 0;
-        var bindingObj = {
-          binding: binding,
-          priority: priority
-        };
-        this.bindings.unshift(bindingObj);
-        if (bindingName) {
-          this.bindingNames[bindingName] = bindingObj;
-          binding.name = bindingName;
-        }
-      }
-    }, {
-      key: "setPriority",
-      value: function setPriority(bindingName, priority) {
-        var bindingObj = this.bindingNames[bindingName];
-        if (!bindingObj)
-          throw "Tried to set priority on unknown binding " + bindingName;
-        bindingObj.priority = priority || 0;
-      }
-    }, {
-      key: "getPriority",
-      value: function getPriority(bindingName) {
-        var bindingObj = this.bindingNames[bindingName];
-        if (!bindingObj)
-          return false;
-        return bindingObj.priority;
-      }
-    }, {
-      key: "getBindings",
-      value: function getBindings() {
-        return mergeSort(this.bindings, function(a, b) {
-          return b.priority - a.priority;
-        });
-      }
-    }]);
-    return BindingRegistry2;
-  }();
-
-  // src/bindings/input/InputBinding.ts
-  function _classCallCheck17(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  }
-  function _defineProperties16(target, props) {
-    for (var i = 0; i < props.length; i++) {
-      var descriptor = props[i];
-      descriptor.enumerable = descriptor.enumerable || false;
-      descriptor.configurable = true;
-      if ("value" in descriptor)
-        descriptor.writable = true;
-      Object.defineProperty(target, descriptor.key, descriptor);
-    }
-  }
-  function _createClass16(Constructor, protoProps, staticProps) {
-    if (protoProps)
-      _defineProperties16(Constructor.prototype, protoProps);
-    if (staticProps)
-      _defineProperties16(Constructor, staticProps);
-    return Constructor;
-  }
-  function _defineProperty15(obj, key, value) {
-    if (key in obj) {
-      Object.defineProperty(obj, key, {value: value, enumerable: true, configurable: true, writable: true});
-    } else {
-      obj[key] = value;
-    }
-    return obj;
-  }
-  var InputBinding = /* @__PURE__ */ function() {
-    function InputBinding2() {
-      _classCallCheck17(this, InputBinding2);
-      _defineProperty15(this, "name", void 0);
-    }
-    _createClass16(InputBinding2, [{
-      key: "find",
-      value: function find2(scope) {
-        throw "Not implemented";
-        scope;
-      }
-    }, {
-      key: "getId",
-      value: function getId(el) {
-        return el["data-input-id"] || el.id;
-      }
-    }, {
-      key: "getType",
-      value: function getType(el) {
-        return false;
-        el;
-      }
-    }, {
-      key: "getValue",
-      value: function getValue(el) {
-        throw "Not implemented";
-        el;
-      }
-    }, {
-      key: "subscribe",
-      value: function subscribe(el, callback) {
-        el;
-        callback;
-      }
-    }, {
-      key: "unsubscribe",
-      value: function unsubscribe(el) {
-        el;
-      }
-    }, {
-      key: "receiveMessage",
-      value: function receiveMessage(el, data) {
-        throw "Not implemented";
-        el;
-        data;
-      }
-    }, {
-      key: "getState",
-      value: function getState(el, data) {
-        throw "Not implemented";
-        el;
-        data;
-      }
-    }, {
-      key: "getRatePolicy",
-      value: function getRatePolicy(el) {
-        return null;
-        el;
-      }
-    }, {
-      key: "initialize",
-      value: function initialize(el) {
-        el;
-      }
-    }, {
-      key: "dispose",
-      value: function dispose(el) {
-        el;
-      }
-    }]);
-    return InputBinding2;
-  }();
-
-  // src/bindings/input/checkbox.ts
-  var import_es_array_iterator8 = __toModule(require_es_array_iterator());
-  var import_jquery23 = __toModule(require_jquery());
-  function _typeof8(obj) {
-    "@babel/helpers - typeof";
-    if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
-      _typeof8 = function _typeof27(obj2) {
-        return typeof obj2;
-      };
-    } else {
-      _typeof8 = function _typeof27(obj2) {
-        return obj2 && typeof Symbol === "function" && obj2.constructor === Symbol && obj2 !== Symbol.prototype ? "symbol" : typeof obj2;
-      };
-    }
-    return _typeof8(obj);
-  }
-  function _classCallCheck18(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  }
-  function _defineProperties17(target, props) {
-    for (var i = 0; i < props.length; i++) {
-      var descriptor = props[i];
-      descriptor.enumerable = descriptor.enumerable || false;
-      descriptor.configurable = true;
-      if ("value" in descriptor)
-        descriptor.writable = true;
-      Object.defineProperty(target, descriptor.key, descriptor);
-    }
-  }
-  function _createClass17(Constructor, protoProps, staticProps) {
-    if (protoProps)
-      _defineProperties17(Constructor.prototype, protoProps);
-    if (staticProps)
-      _defineProperties17(Constructor, staticProps);
-    return Constructor;
-  }
-  function _inherits7(subClass, superClass) {
-    if (typeof superClass !== "function" && superClass !== null) {
-      throw new TypeError("Super expression must either be null or a function");
-    }
-    subClass.prototype = Object.create(superClass && superClass.prototype, {constructor: {value: subClass, writable: true, configurable: true}});
-    if (superClass)
-      _setPrototypeOf7(subClass, superClass);
-  }
-  function _setPrototypeOf7(o, p) {
-    _setPrototypeOf7 = Object.setPrototypeOf || function _setPrototypeOf26(o2, p2) {
-      o2.__proto__ = p2;
-      return o2;
-    };
-    return _setPrototypeOf7(o, p);
-  }
-  function _createSuper7(Derived) {
-    var hasNativeReflectConstruct = _isNativeReflectConstruct7();
-    return function _createSuperInternal() {
-      var Super = _getPrototypeOf7(Derived), result;
-      if (hasNativeReflectConstruct) {
-        var NewTarget = _getPrototypeOf7(this).constructor;
-        result = Reflect.construct(Super, arguments, NewTarget);
-      } else {
-        result = Super.apply(this, arguments);
-      }
-      return _possibleConstructorReturn7(this, result);
-    };
-  }
-  function _possibleConstructorReturn7(self2, call) {
-    if (call && (_typeof8(call) === "object" || typeof call === "function")) {
-      return call;
-    }
-    return _assertThisInitialized7(self2);
-  }
-  function _assertThisInitialized7(self2) {
-    if (self2 === void 0) {
-      throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
-    }
-    return self2;
-  }
-  function _isNativeReflectConstruct7() {
-    if (typeof Reflect === "undefined" || !Reflect.construct)
-      return false;
-    if (Reflect.construct.sham)
-      return false;
-    if (typeof Proxy === "function")
-      return true;
-    try {
-      Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function() {
-      }));
-      return true;
-    } catch (e) {
-      return false;
-    }
-  }
-  function _getPrototypeOf7(o) {
-    _getPrototypeOf7 = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf26(o2) {
-      return o2.__proto__ || Object.getPrototypeOf(o2);
-    };
-    return _getPrototypeOf7(o);
-  }
-  var CheckboxInputBinding = /* @__PURE__ */ function(_InputBinding) {
-    _inherits7(CheckboxInputBinding2, _InputBinding);
-    var _super = _createSuper7(CheckboxInputBinding2);
-    function CheckboxInputBinding2() {
-      _classCallCheck18(this, CheckboxInputBinding2);
-      return _super.apply(this, arguments);
-    }
-    _createClass17(CheckboxInputBinding2, [{
-      key: "find",
-      value: function find2(scope) {
-        return (0, import_jquery23.default)(scope).find('input[type="checkbox"]');
-      }
-    }, {
-      key: "getValue",
-      value: function getValue(el) {
-        return el.checked;
-      }
-    }, {
-      key: "setValue",
-      value: function setValue(el, value) {
-        el.checked = value;
-      }
-    }, {
-      key: "subscribe",
-      value: function subscribe(el, callback) {
-        (0, import_jquery23.default)(el).on("change.checkboxInputBinding", function() {
-          callback(true);
-        });
-      }
-    }, {
-      key: "unsubscribe",
-      value: function unsubscribe(el) {
-        (0, import_jquery23.default)(el).off(".checkboxInputBinding");
-      }
-    }, {
-      key: "getState",
-      value: function getState(el) {
-        return {
-          label: (0, import_jquery23.default)(el).parent().find("span").text(),
-          value: el.checked
-        };
-      }
-    }, {
-      key: "receiveMessage",
-      value: function receiveMessage(el, data) {
-        if (hasOwnProperty(data, "value"))
-          el.checked = data.value;
-        if (hasOwnProperty(data, "label"))
-          (0, import_jquery23.default)(el).parent().find("span").text(data.label);
-        (0, import_jquery23.default)(el).trigger("change");
-      }
-    }]);
-    return CheckboxInputBinding2;
-  }(InputBinding);
-
-  // node_modules/core-js/modules/es.string.trim.js
-  "use strict";
-  var $48 = require_export();
-  var $trim = require_string_trim().trim;
-  var forcedStringTrimMethod = require_string_trim_forced();
-  $48({target: "String", proto: true, forced: forcedStringTrimMethod("trim")}, {
-    trim: function trim2() {
-      return $trim(this);
-    }
-  });
-
-  // src/bindings/input/checkboxgroup.ts
-  var import_es_array_iterator9 = __toModule(require_es_array_iterator());
-  var import_jquery24 = __toModule(require_jquery());
-  function _typeof9(obj) {
-    "@babel/helpers - typeof";
-    if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
-      _typeof9 = function _typeof27(obj2) {
-        return typeof obj2;
-      };
-    } else {
-      _typeof9 = function _typeof27(obj2) {
-        return obj2 && typeof Symbol === "function" && obj2.constructor === Symbol && obj2 !== Symbol.prototype ? "symbol" : typeof obj2;
-      };
-    }
-    return _typeof9(obj);
-  }
-  function _classCallCheck19(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  }
-  function _defineProperties18(target, props) {
-    for (var i = 0; i < props.length; i++) {
-      var descriptor = props[i];
-      descriptor.enumerable = descriptor.enumerable || false;
-      descriptor.configurable = true;
-      if ("value" in descriptor)
-        descriptor.writable = true;
-      Object.defineProperty(target, descriptor.key, descriptor);
-    }
-  }
-  function _createClass18(Constructor, protoProps, staticProps) {
-    if (protoProps)
-      _defineProperties18(Constructor.prototype, protoProps);
-    if (staticProps)
-      _defineProperties18(Constructor, staticProps);
-    return Constructor;
-  }
-  function _inherits8(subClass, superClass) {
-    if (typeof superClass !== "function" && superClass !== null) {
-      throw new TypeError("Super expression must either be null or a function");
-    }
-    subClass.prototype = Object.create(superClass && superClass.prototype, {constructor: {value: subClass, writable: true, configurable: true}});
-    if (superClass)
-      _setPrototypeOf8(subClass, superClass);
-  }
-  function _setPrototypeOf8(o, p) {
-    _setPrototypeOf8 = Object.setPrototypeOf || function _setPrototypeOf26(o2, p2) {
-      o2.__proto__ = p2;
-      return o2;
-    };
-    return _setPrototypeOf8(o, p);
-  }
-  function _createSuper8(Derived) {
-    var hasNativeReflectConstruct = _isNativeReflectConstruct8();
-    return function _createSuperInternal() {
-      var Super = _getPrototypeOf8(Derived), result;
-      if (hasNativeReflectConstruct) {
-        var NewTarget = _getPrototypeOf8(this).constructor;
-        result = Reflect.construct(Super, arguments, NewTarget);
-      } else {
-        result = Super.apply(this, arguments);
-      }
-      return _possibleConstructorReturn8(this, result);
-    };
-  }
-  function _possibleConstructorReturn8(self2, call) {
-    if (call && (_typeof9(call) === "object" || typeof call === "function")) {
-      return call;
-    }
-    return _assertThisInitialized8(self2);
-  }
-  function _assertThisInitialized8(self2) {
-    if (self2 === void 0) {
-      throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
-    }
-    return self2;
-  }
-  function _isNativeReflectConstruct8() {
-    if (typeof Reflect === "undefined" || !Reflect.construct)
-      return false;
-    if (Reflect.construct.sham)
-      return false;
-    if (typeof Proxy === "function")
-      return true;
-    try {
-      Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function() {
-      }));
-      return true;
-    } catch (e) {
-      return false;
-    }
-  }
-  function _getPrototypeOf8(o) {
-    _getPrototypeOf8 = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf26(o2) {
-      return o2.__proto__ || Object.getPrototypeOf(o2);
-    };
-    return _getPrototypeOf8(o);
-  }
-  var CheckboxGroupInputBinding = /* @__PURE__ */ function(_InputBinding) {
-    _inherits8(CheckboxGroupInputBinding2, _InputBinding);
-    var _super = _createSuper8(CheckboxGroupInputBinding2);
-    function CheckboxGroupInputBinding2() {
-      _classCallCheck19(this, CheckboxGroupInputBinding2);
-      return _super.apply(this, arguments);
-    }
-    _createClass18(CheckboxGroupInputBinding2, [{
-      key: "find",
-      value: function find2(scope) {
-        return (0, import_jquery24.default)(scope).find(".shiny-input-checkboxgroup");
-      }
-    }, {
-      key: "getValue",
-      value: function getValue(el) {
-        var $objs = (0, import_jquery24.default)('input:checkbox[name="' + $escape(el.id) + '"]:checked');
-        var values = new Array($objs.length);
-        for (var i = 0; i < $objs.length; i++) {
-          values[i] = $objs[i].value;
-        }
-        return values;
-      }
-    }, {
-      key: "setValue",
-      value: function setValue(el, value) {
-        (0, import_jquery24.default)('input:checkbox[name="' + $escape(el.id) + '"]').prop("checked", false);
-        if (value instanceof Array) {
-          for (var i = 0; i < value.length; i++) {
-            (0, import_jquery24.default)('input:checkbox[name="' + $escape(el.id) + '"][value="' + $escape(value[i]) + '"]').prop("checked", true);
-          }
-        } else {
-          (0, import_jquery24.default)('input:checkbox[name="' + $escape(el.id) + '"][value="' + $escape(value) + '"]').prop("checked", true);
-        }
-      }
-    }, {
-      key: "getState",
-      value: function getState(el) {
-        var $objs = (0, import_jquery24.default)('input:checkbox[name="' + $escape(el.id) + '"]');
-        var options = new Array($objs.length);
-        for (var i = 0; i < options.length; i++) {
-          options[i] = {
-            value: $objs[i].value,
-            label: this._getLabel($objs[i])
-          };
-        }
-        return {
-          label: this._getLabelNode(el).text(),
-          value: this.getValue(el),
-          options: options
-        };
-      }
-    }, {
-      key: "receiveMessage",
-      value: function receiveMessage(el, data) {
-        var $el = (0, import_jquery24.default)(el);
-        if (hasOwnProperty(data, "options")) {
-          $el.find("div.shiny-options-group").remove();
-          $el.find("label.checkbox").remove();
-          $el.append(data.options);
-        }
-        if (hasOwnProperty(data, "value"))
-          this.setValue(el, data.value);
-        updateLabel(data.label, this._getLabelNode(el));
-        (0, import_jquery24.default)(el).trigger("change");
-      }
-    }, {
-      key: "subscribe",
-      value: function subscribe(el, callback) {
-        (0, import_jquery24.default)(el).on("change.checkboxGroupInputBinding", function() {
-          callback(false);
-        });
-      }
-    }, {
-      key: "unsubscribe",
-      value: function unsubscribe(el) {
-        (0, import_jquery24.default)(el).off(".checkboxGroupInputBinding");
-      }
-    }, {
-      key: "_getLabelNode",
-      value: function _getLabelNode(el) {
-        return (0, import_jquery24.default)(el).find('label[for="' + $escape(el.id) + '"]');
-      }
-    }, {
-      key: "_getLabel",
-      value: function _getLabel(obj) {
-        if (obj.parentNode.tagName === "LABEL") {
-          return (0, import_jquery24.default)(obj.parentNode).find("span").text().trim();
-        }
-        return null;
-      }
-    }, {
-      key: "_setLabel",
-      value: function _setLabel(obj, value) {
-        if (obj.parentNode.tagName === "LABEL") {
-          (0, import_jquery24.default)(obj.parentNode).find("span").text(value);
-        }
-        return null;
-      }
-    }]);
-    return CheckboxGroupInputBinding2;
-  }(InputBinding);
-
-  // src/bindings/input/number.ts
-  var import_es_array_iterator11 = __toModule(require_es_array_iterator());
-  var import_jquery26 = __toModule(require_jquery());
-
-  // node_modules/core-js/modules/es.reflect.get.js
-  var $50 = require_export();
-  var isObject6 = require_is_object();
-  var anObject9 = require_an_object();
-  var has4 = require_has();
-  var getOwnPropertyDescriptorModule2 = require_object_get_own_property_descriptor();
-  var getPrototypeOf2 = require_object_get_prototype_of();
-  function get(target, propertyKey) {
-    var receiver = arguments.length < 3 ? target : arguments[2];
-    var descriptor, prototype;
-    if (anObject9(target) === receiver)
-      return target[propertyKey];
-    if (descriptor = getOwnPropertyDescriptorModule2.f(target, propertyKey))
-      return has4(descriptor, "value") ? descriptor.value : descriptor.get === void 0 ? void 0 : descriptor.get.call(receiver);
-    if (isObject6(prototype = getPrototypeOf2(target)))
-      return get(prototype, propertyKey, receiver);
-  }
-  $50({target: "Reflect", stat: true}, {
-    get: get
-  });
-
-  // node_modules/core-js/modules/es.object.get-own-property-descriptor.js
-  var $51 = require_export();
-  var fails10 = require_fails();
-  var toIndexedObject4 = require_to_indexed_object();
-  var nativeGetOwnPropertyDescriptor2 = require_object_get_own_property_descriptor().f;
-  var DESCRIPTORS5 = require_descriptors();
-  var FAILS_ON_PRIMITIVES3 = fails10(function() {
-    nativeGetOwnPropertyDescriptor2(1);
-  });
-  var FORCED4 = !DESCRIPTORS5 || FAILS_ON_PRIMITIVES3;
-  $51({target: "Object", stat: true, forced: FORCED4, sham: !DESCRIPTORS5}, {
-    getOwnPropertyDescriptor: function getOwnPropertyDescriptor3(it, key) {
-      return nativeGetOwnPropertyDescriptor2(toIndexedObject4(it), key);
-    }
-  });
-
-  // src/bindings/input/text.ts
-  var import_es_array_iterator10 = __toModule(require_es_array_iterator());
-  var import_jquery25 = __toModule(require_jquery());
-  function _typeof10(obj) {
-    "@babel/helpers - typeof";
-    if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
-      _typeof10 = function _typeof27(obj2) {
-        return typeof obj2;
-      };
-    } else {
-      _typeof10 = function _typeof27(obj2) {
-        return obj2 && typeof Symbol === "function" && obj2.constructor === Symbol && obj2 !== Symbol.prototype ? "symbol" : typeof obj2;
-      };
-    }
-    return _typeof10(obj);
-  }
-  function _classCallCheck20(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  }
-  function _defineProperties19(target, props) {
-    for (var i = 0; i < props.length; i++) {
-      var descriptor = props[i];
-      descriptor.enumerable = descriptor.enumerable || false;
-      descriptor.configurable = true;
-      if ("value" in descriptor)
-        descriptor.writable = true;
-      Object.defineProperty(target, descriptor.key, descriptor);
-    }
-  }
-  function _createClass19(Constructor, protoProps, staticProps) {
-    if (protoProps)
-      _defineProperties19(Constructor.prototype, protoProps);
-    if (staticProps)
-      _defineProperties19(Constructor, staticProps);
-    return Constructor;
-  }
-  function _get2(target, property, receiver) {
-    if (typeof Reflect !== "undefined" && Reflect.get) {
-      _get2 = Reflect.get;
-    } else {
-      _get2 = function _get3(target2, property2, receiver2) {
-        var base = _superPropBase(target2, property2);
-        if (!base)
-          return;
-        var desc = Object.getOwnPropertyDescriptor(base, property2);
-        if (desc.get) {
-          return desc.get.call(receiver2);
-        }
-        return desc.value;
-      };
-    }
-    return _get2(target, property, receiver || target);
-  }
-  function _superPropBase(object, property) {
-    while (!Object.prototype.hasOwnProperty.call(object, property)) {
-      object = _getPrototypeOf9(object);
-      if (object === null)
-        break;
-    }
-    return object;
-  }
-  function _inherits9(subClass, superClass) {
-    if (typeof superClass !== "function" && superClass !== null) {
-      throw new TypeError("Super expression must either be null or a function");
-    }
-    subClass.prototype = Object.create(superClass && superClass.prototype, {constructor: {value: subClass, writable: true, configurable: true}});
-    if (superClass)
-      _setPrototypeOf9(subClass, superClass);
-  }
-  function _setPrototypeOf9(o, p) {
-    _setPrototypeOf9 = Object.setPrototypeOf || function _setPrototypeOf26(o2, p2) {
-      o2.__proto__ = p2;
-      return o2;
-    };
-    return _setPrototypeOf9(o, p);
-  }
-  function _createSuper9(Derived) {
-    var hasNativeReflectConstruct = _isNativeReflectConstruct9();
-    return function _createSuperInternal() {
-      var Super = _getPrototypeOf9(Derived), result;
-      if (hasNativeReflectConstruct) {
-        var NewTarget = _getPrototypeOf9(this).constructor;
-        result = Reflect.construct(Super, arguments, NewTarget);
-      } else {
-        result = Super.apply(this, arguments);
-      }
-      return _possibleConstructorReturn9(this, result);
-    };
-  }
-  function _possibleConstructorReturn9(self2, call) {
-    if (call && (_typeof10(call) === "object" || typeof call === "function")) {
-      return call;
-    }
-    return _assertThisInitialized9(self2);
-  }
-  function _assertThisInitialized9(self2) {
-    if (self2 === void 0) {
-      throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
-    }
-    return self2;
-  }
-  function _isNativeReflectConstruct9() {
-    if (typeof Reflect === "undefined" || !Reflect.construct)
-      return false;
-    if (Reflect.construct.sham)
-      return false;
-    if (typeof Proxy === "function")
-      return true;
-    try {
-      Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function() {
-      }));
-      return true;
-    } catch (e) {
-      return false;
-    }
-  }
-  function _getPrototypeOf9(o) {
-    _getPrototypeOf9 = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf26(o2) {
-      return o2.__proto__ || Object.getPrototypeOf(o2);
-    };
-    return _getPrototypeOf9(o);
-  }
-  var TextInputBinding = /* @__PURE__ */ function(_InputBinding) {
-    _inherits9(TextInputBinding2, _InputBinding);
-    var _super = _createSuper9(TextInputBinding2);
-    function TextInputBinding2() {
-      _classCallCheck20(this, TextInputBinding2);
-      return _super.apply(this, arguments);
-    }
-    _createClass19(TextInputBinding2, [{
-      key: "find",
-      value: function find2(scope) {
-        var $inputs = (0, import_jquery25.default)(scope).find('input[type="text"], input[type="search"], input[type="url"], input[type="email"]');
-        return $inputs.not('input[type="text"][id$="-selectized"]');
-      }
-    }, {
-      key: "getId",
-      value: function getId(el) {
-        return _get2(_getPrototypeOf9(TextInputBinding2.prototype), "getId", this).call(this, el) || el.name;
-      }
-    }, {
-      key: "getValue",
-      value: function getValue(el) {
-        return el.value;
-      }
-    }, {
-      key: "setValue",
-      value: function setValue(el, value) {
-        el.value = value;
-      }
-    }, {
-      key: "subscribe",
-      value: function subscribe(el, callback) {
-        (0, import_jquery25.default)(el).on("keyup.textInputBinding input.textInputBinding", function() {
-          callback(true);
-        });
-        (0, import_jquery25.default)(el).on("change.textInputBinding", function() {
-          callback(false);
-        });
-      }
-    }, {
-      key: "unsubscribe",
-      value: function unsubscribe(el) {
-        (0, import_jquery25.default)(el).off(".textInputBinding");
-      }
-    }, {
-      key: "receiveMessage",
-      value: function receiveMessage(el, data) {
-        if (hasOwnProperty(data, "value"))
-          this.setValue(el, data.value);
-        updateLabel(data.label, this._getLabelNode(el));
-        if (hasOwnProperty(data, "placeholder"))
-          el.placeholder = data.placeholder;
-        (0, import_jquery25.default)(el).trigger("change");
-      }
-    }, {
-      key: "getState",
-      value: function getState(el) {
-        return {
-          label: this._getLabelNode(el).text(),
-          value: el.value,
-          placeholder: el.placeholder
-        };
-      }
-    }, {
-      key: "getRatePolicy",
-      value: function getRatePolicy(el) {
-        return {
-          policy: "debounce",
-          delay: 250
-        };
-        el;
-      }
-    }, {
-      key: "_getLabelNode",
-      value: function _getLabelNode(el) {
-        return (0, import_jquery25.default)(el).parent().find('label[for="' + $escape(el.id) + '"]');
-      }
-    }]);
-    return TextInputBinding2;
-  }(InputBinding);
-
-  // src/bindings/input/number.ts
-  function _typeof11(obj) {
-    "@babel/helpers - typeof";
-    if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
-      _typeof11 = function _typeof27(obj2) {
-        return typeof obj2;
-      };
-    } else {
-      _typeof11 = function _typeof27(obj2) {
-        return obj2 && typeof Symbol === "function" && obj2.constructor === Symbol && obj2 !== Symbol.prototype ? "symbol" : typeof obj2;
-      };
-    }
-    return _typeof11(obj);
-  }
-  function _classCallCheck21(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  }
-  function _defineProperties20(target, props) {
-    for (var i = 0; i < props.length; i++) {
-      var descriptor = props[i];
-      descriptor.enumerable = descriptor.enumerable || false;
-      descriptor.configurable = true;
-      if ("value" in descriptor)
-        descriptor.writable = true;
-      Object.defineProperty(target, descriptor.key, descriptor);
-    }
-  }
-  function _createClass20(Constructor, protoProps, staticProps) {
-    if (protoProps)
-      _defineProperties20(Constructor.prototype, protoProps);
-    if (staticProps)
-      _defineProperties20(Constructor, staticProps);
-    return Constructor;
-  }
-  function _inherits10(subClass, superClass) {
-    if (typeof superClass !== "function" && superClass !== null) {
-      throw new TypeError("Super expression must either be null or a function");
-    }
-    subClass.prototype = Object.create(superClass && superClass.prototype, {constructor: {value: subClass, writable: true, configurable: true}});
-    if (superClass)
-      _setPrototypeOf10(subClass, superClass);
-  }
-  function _setPrototypeOf10(o, p) {
-    _setPrototypeOf10 = Object.setPrototypeOf || function _setPrototypeOf26(o2, p2) {
-      o2.__proto__ = p2;
-      return o2;
-    };
-    return _setPrototypeOf10(o, p);
-  }
-  function _createSuper10(Derived) {
-    var hasNativeReflectConstruct = _isNativeReflectConstruct10();
-    return function _createSuperInternal() {
-      var Super = _getPrototypeOf10(Derived), result;
-      if (hasNativeReflectConstruct) {
-        var NewTarget = _getPrototypeOf10(this).constructor;
-        result = Reflect.construct(Super, arguments, NewTarget);
-      } else {
-        result = Super.apply(this, arguments);
-      }
-      return _possibleConstructorReturn10(this, result);
-    };
-  }
-  function _possibleConstructorReturn10(self2, call) {
-    if (call && (_typeof11(call) === "object" || typeof call === "function")) {
-      return call;
-    }
-    return _assertThisInitialized10(self2);
-  }
-  function _assertThisInitialized10(self2) {
-    if (self2 === void 0) {
-      throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
-    }
-    return self2;
-  }
-  function _isNativeReflectConstruct10() {
-    if (typeof Reflect === "undefined" || !Reflect.construct)
-      return false;
-    if (Reflect.construct.sham)
-      return false;
-    if (typeof Proxy === "function")
-      return true;
-    try {
-      Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function() {
-      }));
-      return true;
-    } catch (e) {
-      return false;
-    }
-  }
-  function _getPrototypeOf10(o) {
-    _getPrototypeOf10 = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf26(o2) {
-      return o2.__proto__ || Object.getPrototypeOf(o2);
-    };
-    return _getPrototypeOf10(o);
-  }
-  var NumberInputBinding = /* @__PURE__ */ function(_TextInputBinding) {
-    _inherits10(NumberInputBinding2, _TextInputBinding);
-    var _super = _createSuper10(NumberInputBinding2);
-    function NumberInputBinding2() {
-      _classCallCheck21(this, NumberInputBinding2);
-      return _super.apply(this, arguments);
-    }
-    _createClass20(NumberInputBinding2, [{
-      key: "find",
-      value: function find2(scope) {
-        return (0, import_jquery26.default)(scope).find('input[type="number"]');
-      }
-    }, {
-      key: "getValue",
-      value: function getValue(el) {
-        var numberVal = (0, import_jquery26.default)(el).val();
-        if (typeof numberVal == "string") {
-          if (/^\s*$/.test(numberVal))
-            return null;
-        }
-        if (typeof numberVal == "number") {
-          if (!isNaN(numberVal))
-            return +numberVal;
-        }
-        return numberVal;
-      }
-    }, {
-      key: "setValue",
-      value: function setValue(el, value) {
-        el.value = "" + value;
-      }
-    }, {
-      key: "getType",
-      value: function getType(el) {
-        return "shiny.number";
-        el;
-      }
-    }, {
-      key: "receiveMessage",
-      value: function receiveMessage(el, data) {
-        if (hasOwnProperty(data, "value"))
-          el.value = data.value;
-        if (hasOwnProperty(data, "min"))
-          el.min = data.min;
-        if (hasOwnProperty(data, "max"))
-          el.max = data.max;
-        if (hasOwnProperty(data, "step"))
-          el.step = data.step;
-        updateLabel(data.label, this._getLabelNode(el));
-        (0, import_jquery26.default)(el).trigger("change");
-      }
-    }, {
-      key: "getState",
-      value: function getState(el) {
-        return {
-          label: this._getLabelNode(el).text(),
-          value: this.getValue(el),
-          min: Number(el.min),
-          max: Number(el.max),
-          step: Number(el.step)
-        };
-      }
-    }, {
-      key: "_getLabelNode",
-      value: function _getLabelNode(el) {
-        return (0, import_jquery26.default)(el).parent().find('label[for="' + $escape(el.id) + '"]');
-      }
-    }]);
-    return NumberInputBinding2;
-  }(TextInputBinding);
-
-  // src/bindings/input/password.ts
-  var import_es_array_iterator12 = __toModule(require_es_array_iterator());
-  var import_jquery27 = __toModule(require_jquery());
-  function _typeof12(obj) {
-    "@babel/helpers - typeof";
-    if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
-      _typeof12 = function _typeof27(obj2) {
-        return typeof obj2;
-      };
-    } else {
-      _typeof12 = function _typeof27(obj2) {
-        return obj2 && typeof Symbol === "function" && obj2.constructor === Symbol && obj2 !== Symbol.prototype ? "symbol" : typeof obj2;
-      };
-    }
-    return _typeof12(obj);
-  }
-  function _classCallCheck22(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  }
-  function _defineProperties21(target, props) {
-    for (var i = 0; i < props.length; i++) {
-      var descriptor = props[i];
-      descriptor.enumerable = descriptor.enumerable || false;
-      descriptor.configurable = true;
-      if ("value" in descriptor)
-        descriptor.writable = true;
-      Object.defineProperty(target, descriptor.key, descriptor);
-    }
-  }
-  function _createClass21(Constructor, protoProps, staticProps) {
-    if (protoProps)
-      _defineProperties21(Constructor.prototype, protoProps);
-    if (staticProps)
-      _defineProperties21(Constructor, staticProps);
-    return Constructor;
-  }
-  function _inherits11(subClass, superClass) {
-    if (typeof superClass !== "function" && superClass !== null) {
-      throw new TypeError("Super expression must either be null or a function");
-    }
-    subClass.prototype = Object.create(superClass && superClass.prototype, {constructor: {value: subClass, writable: true, configurable: true}});
-    if (superClass)
-      _setPrototypeOf11(subClass, superClass);
-  }
-  function _setPrototypeOf11(o, p) {
-    _setPrototypeOf11 = Object.setPrototypeOf || function _setPrototypeOf26(o2, p2) {
-      o2.__proto__ = p2;
-      return o2;
-    };
-    return _setPrototypeOf11(o, p);
-  }
-  function _createSuper11(Derived) {
-    var hasNativeReflectConstruct = _isNativeReflectConstruct11();
-    return function _createSuperInternal() {
-      var Super = _getPrototypeOf11(Derived), result;
-      if (hasNativeReflectConstruct) {
-        var NewTarget = _getPrototypeOf11(this).constructor;
-        result = Reflect.construct(Super, arguments, NewTarget);
-      } else {
-        result = Super.apply(this, arguments);
-      }
-      return _possibleConstructorReturn11(this, result);
-    };
-  }
-  function _possibleConstructorReturn11(self2, call) {
-    if (call && (_typeof12(call) === "object" || typeof call === "function")) {
-      return call;
-    }
-    return _assertThisInitialized11(self2);
-  }
-  function _assertThisInitialized11(self2) {
-    if (self2 === void 0) {
-      throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
-    }
-    return self2;
-  }
-  function _isNativeReflectConstruct11() {
-    if (typeof Reflect === "undefined" || !Reflect.construct)
-      return false;
-    if (Reflect.construct.sham)
-      return false;
-    if (typeof Proxy === "function")
-      return true;
-    try {
-      Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function() {
-      }));
-      return true;
-    } catch (e) {
-      return false;
-    }
-  }
-  function _getPrototypeOf11(o) {
-    _getPrototypeOf11 = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf26(o2) {
-      return o2.__proto__ || Object.getPrototypeOf(o2);
-    };
-    return _getPrototypeOf11(o);
-  }
-  var PasswordInputBinding = /* @__PURE__ */ function(_TextInputBinding) {
-    _inherits11(PasswordInputBinding2, _TextInputBinding);
-    var _super = _createSuper11(PasswordInputBinding2);
-    function PasswordInputBinding2() {
-      _classCallCheck22(this, PasswordInputBinding2);
-      return _super.apply(this, arguments);
-    }
-    _createClass21(PasswordInputBinding2, [{
-      key: "find",
-      value: function find2(scope) {
-        return (0, import_jquery27.default)(scope).find('input[type="password"]');
-      }
-    }, {
-      key: "getType",
-      value: function getType(el) {
-        return "shiny.password";
-        el;
-      }
-    }]);
-    return PasswordInputBinding2;
-  }(TextInputBinding);
-
-  // src/bindings/input/textarea.ts
-  var import_es_array_iterator13 = __toModule(require_es_array_iterator());
-  var import_jquery28 = __toModule(require_jquery());
-  function _typeof13(obj) {
-    "@babel/helpers - typeof";
-    if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
-      _typeof13 = function _typeof27(obj2) {
-        return typeof obj2;
-      };
-    } else {
-      _typeof13 = function _typeof27(obj2) {
-        return obj2 && typeof Symbol === "function" && obj2.constructor === Symbol && obj2 !== Symbol.prototype ? "symbol" : typeof obj2;
-      };
-    }
-    return _typeof13(obj);
-  }
-  function _classCallCheck23(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  }
-  function _defineProperties22(target, props) {
-    for (var i = 0; i < props.length; i++) {
-      var descriptor = props[i];
-      descriptor.enumerable = descriptor.enumerable || false;
-      descriptor.configurable = true;
-      if ("value" in descriptor)
-        descriptor.writable = true;
-      Object.defineProperty(target, descriptor.key, descriptor);
-    }
-  }
-  function _createClass22(Constructor, protoProps, staticProps) {
-    if (protoProps)
-      _defineProperties22(Constructor.prototype, protoProps);
-    if (staticProps)
-      _defineProperties22(Constructor, staticProps);
-    return Constructor;
-  }
-  function _inherits12(subClass, superClass) {
-    if (typeof superClass !== "function" && superClass !== null) {
-      throw new TypeError("Super expression must either be null or a function");
-    }
-    subClass.prototype = Object.create(superClass && superClass.prototype, {constructor: {value: subClass, writable: true, configurable: true}});
-    if (superClass)
-      _setPrototypeOf12(subClass, superClass);
-  }
-  function _setPrototypeOf12(o, p) {
-    _setPrototypeOf12 = Object.setPrototypeOf || function _setPrototypeOf26(o2, p2) {
-      o2.__proto__ = p2;
-      return o2;
-    };
-    return _setPrototypeOf12(o, p);
-  }
-  function _createSuper12(Derived) {
-    var hasNativeReflectConstruct = _isNativeReflectConstruct12();
-    return function _createSuperInternal() {
-      var Super = _getPrototypeOf12(Derived), result;
-      if (hasNativeReflectConstruct) {
-        var NewTarget = _getPrototypeOf12(this).constructor;
-        result = Reflect.construct(Super, arguments, NewTarget);
-      } else {
-        result = Super.apply(this, arguments);
-      }
-      return _possibleConstructorReturn12(this, result);
-    };
-  }
-  function _possibleConstructorReturn12(self2, call) {
-    if (call && (_typeof13(call) === "object" || typeof call === "function")) {
-      return call;
-    }
-    return _assertThisInitialized12(self2);
-  }
-  function _assertThisInitialized12(self2) {
-    if (self2 === void 0) {
-      throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
-    }
-    return self2;
-  }
-  function _isNativeReflectConstruct12() {
-    if (typeof Reflect === "undefined" || !Reflect.construct)
-      return false;
-    if (Reflect.construct.sham)
-      return false;
-    if (typeof Proxy === "function")
-      return true;
-    try {
-      Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function() {
-      }));
-      return true;
-    } catch (e) {
-      return false;
-    }
-  }
-  function _getPrototypeOf12(o) {
-    _getPrototypeOf12 = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf26(o2) {
-      return o2.__proto__ || Object.getPrototypeOf(o2);
-    };
-    return _getPrototypeOf12(o);
-  }
-  var TextareaInputBinding = /* @__PURE__ */ function(_TextInputBinding) {
-    _inherits12(TextareaInputBinding2, _TextInputBinding);
-    var _super = _createSuper12(TextareaInputBinding2);
-    function TextareaInputBinding2() {
-      _classCallCheck23(this, TextareaInputBinding2);
-      return _super.apply(this, arguments);
-    }
-    _createClass22(TextareaInputBinding2, [{
-      key: "find",
-      value: function find2(scope) {
-        return (0, import_jquery28.default)(scope).find("textarea");
-      }
-    }]);
-    return TextareaInputBinding2;
-  }(TextInputBinding);
-
-  // src/bindings/input/radio.ts
-  var import_es_array_iterator14 = __toModule(require_es_array_iterator());
-  var import_jquery29 = __toModule(require_jquery());
-  function _typeof14(obj) {
-    "@babel/helpers - typeof";
-    if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
-      _typeof14 = function _typeof27(obj2) {
-        return typeof obj2;
-      };
-    } else {
-      _typeof14 = function _typeof27(obj2) {
-        return obj2 && typeof Symbol === "function" && obj2.constructor === Symbol && obj2 !== Symbol.prototype ? "symbol" : typeof obj2;
-      };
-    }
-    return _typeof14(obj);
-  }
-  function _classCallCheck24(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  }
-  function _defineProperties23(target, props) {
-    for (var i = 0; i < props.length; i++) {
-      var descriptor = props[i];
-      descriptor.enumerable = descriptor.enumerable || false;
-      descriptor.configurable = true;
-      if ("value" in descriptor)
-        descriptor.writable = true;
-      Object.defineProperty(target, descriptor.key, descriptor);
-    }
-  }
-  function _createClass23(Constructor, protoProps, staticProps) {
-    if (protoProps)
-      _defineProperties23(Constructor.prototype, protoProps);
-    if (staticProps)
-      _defineProperties23(Constructor, staticProps);
-    return Constructor;
-  }
-  function _inherits13(subClass, superClass) {
-    if (typeof superClass !== "function" && superClass !== null) {
-      throw new TypeError("Super expression must either be null or a function");
-    }
-    subClass.prototype = Object.create(superClass && superClass.prototype, {constructor: {value: subClass, writable: true, configurable: true}});
-    if (superClass)
-      _setPrototypeOf13(subClass, superClass);
-  }
-  function _setPrototypeOf13(o, p) {
-    _setPrototypeOf13 = Object.setPrototypeOf || function _setPrototypeOf26(o2, p2) {
-      o2.__proto__ = p2;
-      return o2;
-    };
-    return _setPrototypeOf13(o, p);
-  }
-  function _createSuper13(Derived) {
-    var hasNativeReflectConstruct = _isNativeReflectConstruct13();
-    return function _createSuperInternal() {
-      var Super = _getPrototypeOf13(Derived), result;
-      if (hasNativeReflectConstruct) {
-        var NewTarget = _getPrototypeOf13(this).constructor;
-        result = Reflect.construct(Super, arguments, NewTarget);
-      } else {
-        result = Super.apply(this, arguments);
-      }
-      return _possibleConstructorReturn13(this, result);
-    };
-  }
-  function _possibleConstructorReturn13(self2, call) {
-    if (call && (_typeof14(call) === "object" || typeof call === "function")) {
-      return call;
-    }
-    return _assertThisInitialized13(self2);
-  }
-  function _assertThisInitialized13(self2) {
-    if (self2 === void 0) {
-      throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
-    }
-    return self2;
-  }
-  function _isNativeReflectConstruct13() {
-    if (typeof Reflect === "undefined" || !Reflect.construct)
-      return false;
-    if (Reflect.construct.sham)
-      return false;
-    if (typeof Proxy === "function")
-      return true;
-    try {
-      Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function() {
-      }));
-      return true;
-    } catch (e) {
-      return false;
-    }
-  }
-  function _getPrototypeOf13(o) {
-    _getPrototypeOf13 = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf26(o2) {
-      return o2.__proto__ || Object.getPrototypeOf(o2);
-    };
-    return _getPrototypeOf13(o);
-  }
-  var RadioInputBinding = /* @__PURE__ */ function(_InputBinding) {
-    _inherits13(RadioInputBinding2, _InputBinding);
-    var _super = _createSuper13(RadioInputBinding2);
-    function RadioInputBinding2() {
-      _classCallCheck24(this, RadioInputBinding2);
-      return _super.apply(this, arguments);
-    }
-    _createClass23(RadioInputBinding2, [{
-      key: "find",
-      value: function find2(scope) {
-        return (0, import_jquery29.default)(scope).find(".shiny-input-radiogroup");
-      }
-    }, {
-      key: "getValue",
-      value: function getValue(el) {
-        var checkedItems = (0, import_jquery29.default)('input:radio[name="' + $escape(el.id) + '"]:checked');
-        if (checkedItems.length === 0) {
-          return null;
-        }
-        return checkedItems.val();
-      }
-    }, {
-      key: "setValue",
-      value: function setValue(el, value) {
-        if (import_jquery29.default.isArray(value) && value.length === 0) {
-          (0, import_jquery29.default)('input:radio[name="' + $escape(el.id) + '"]').prop("checked", false);
-        } else {
-          (0, import_jquery29.default)('input:radio[name="' + $escape(el.id) + '"][value="' + $escape(value) + '"]').prop("checked", true);
-        }
-      }
-    }, {
-      key: "getState",
-      value: function getState(el) {
-        var $objs = (0, import_jquery29.default)('input:radio[name="' + $escape(el.id) + '"]');
-        var options = new Array($objs.length);
-        for (var i = 0; i < options.length; i++) {
-          options[i] = {
-            value: $objs[i].value,
-            label: this._getLabel($objs[i])
-          };
-        }
-        return {
-          label: this._getLabelNode(el).text(),
-          value: this.getValue(el),
-          options: options
-        };
-      }
-    }, {
-      key: "receiveMessage",
-      value: function receiveMessage(el, data) {
-        var $el = (0, import_jquery29.default)(el);
-        if (hasOwnProperty(data, "options")) {
-          $el.find("div.shiny-options-group").remove();
-          $el.find("label.radio").remove();
-          $el.append(data.options);
-        }
-        if (hasOwnProperty(data, "value"))
-          this.setValue(el, data.value);
-        updateLabel(data.label, this._getLabelNode(el));
-        (0, import_jquery29.default)(el).trigger("change");
-      }
-    }, {
-      key: "subscribe",
-      value: function subscribe(el, callback) {
-        (0, import_jquery29.default)(el).on("change.radioInputBinding", function() {
-          callback(false);
-        });
-      }
-    }, {
-      key: "unsubscribe",
-      value: function unsubscribe(el) {
-        (0, import_jquery29.default)(el).off(".radioInputBinding");
-      }
-    }, {
-      key: "_getLabelNode",
-      value: function _getLabelNode(el) {
-        return (0, import_jquery29.default)(el).parent().find('label[for="' + $escape(el.id) + '"]');
-      }
-    }, {
-      key: "_getLabel",
-      value: function _getLabel(obj) {
-        if (obj.parentNode.tagName === "LABEL") {
-          return (0, import_jquery29.default)(obj.parentNode).find("span").text().trim();
-        }
-        return null;
-      }
-    }, {
-      key: "_setLabel",
-      value: function _setLabel(obj, value) {
-        if (obj.parentNode.tagName === "LABEL") {
-          (0, import_jquery29.default)(obj.parentNode).find("span").text(value);
-        }
-        return null;
-      }
-    }]);
-    return RadioInputBinding2;
-  }(InputBinding);
-
-  // src/bindings/input/date.ts
-  var import_es_array_iterator15 = __toModule(require_es_array_iterator());
-  var import_jquery30 = __toModule(require_jquery());
-  function _typeof15(obj) {
-    "@babel/helpers - typeof";
-    if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
-      _typeof15 = function _typeof27(obj2) {
-        return typeof obj2;
-      };
-    } else {
-      _typeof15 = function _typeof27(obj2) {
-        return obj2 && typeof Symbol === "function" && obj2.constructor === Symbol && obj2 !== Symbol.prototype ? "symbol" : typeof obj2;
-      };
-    }
-    return _typeof15(obj);
-  }
-  function _classCallCheck25(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  }
-  function _defineProperties24(target, props) {
-    for (var i = 0; i < props.length; i++) {
-      var descriptor = props[i];
-      descriptor.enumerable = descriptor.enumerable || false;
-      descriptor.configurable = true;
-      if ("value" in descriptor)
-        descriptor.writable = true;
-      Object.defineProperty(target, descriptor.key, descriptor);
-    }
-  }
-  function _createClass24(Constructor, protoProps, staticProps) {
-    if (protoProps)
-      _defineProperties24(Constructor.prototype, protoProps);
-    if (staticProps)
-      _defineProperties24(Constructor, staticProps);
-    return Constructor;
-  }
-  function _inherits14(subClass, superClass) {
-    if (typeof superClass !== "function" && superClass !== null) {
-      throw new TypeError("Super expression must either be null or a function");
-    }
-    subClass.prototype = Object.create(superClass && superClass.prototype, {constructor: {value: subClass, writable: true, configurable: true}});
-    if (superClass)
-      _setPrototypeOf14(subClass, superClass);
-  }
-  function _setPrototypeOf14(o, p) {
-    _setPrototypeOf14 = Object.setPrototypeOf || function _setPrototypeOf26(o2, p2) {
-      o2.__proto__ = p2;
-      return o2;
-    };
-    return _setPrototypeOf14(o, p);
-  }
-  function _createSuper14(Derived) {
-    var hasNativeReflectConstruct = _isNativeReflectConstruct14();
-    return function _createSuperInternal() {
-      var Super = _getPrototypeOf14(Derived), result;
-      if (hasNativeReflectConstruct) {
-        var NewTarget = _getPrototypeOf14(this).constructor;
-        result = Reflect.construct(Super, arguments, NewTarget);
-      } else {
-        result = Super.apply(this, arguments);
-      }
-      return _possibleConstructorReturn14(this, result);
-    };
-  }
-  function _possibleConstructorReturn14(self2, call) {
-    if (call && (_typeof15(call) === "object" || typeof call === "function")) {
-      return call;
-    }
-    return _assertThisInitialized14(self2);
-  }
-  function _assertThisInitialized14(self2) {
-    if (self2 === void 0) {
-      throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
-    }
-    return self2;
-  }
-  function _isNativeReflectConstruct14() {
-    if (typeof Reflect === "undefined" || !Reflect.construct)
-      return false;
-    if (Reflect.construct.sham)
-      return false;
-    if (typeof Proxy === "function")
-      return true;
-    try {
-      Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function() {
-      }));
-      return true;
-    } catch (e) {
-      return false;
-    }
-  }
-  function _getPrototypeOf14(o) {
-    _getPrototypeOf14 = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf26(o2) {
-      return o2.__proto__ || Object.getPrototypeOf(o2);
-    };
-    return _getPrototypeOf14(o);
-  }
-  var DateInputBindingBase = /* @__PURE__ */ function(_InputBinding) {
-    _inherits14(DateInputBindingBase2, _InputBinding);
-    var _super = _createSuper14(DateInputBindingBase2);
-    function DateInputBindingBase2() {
-      _classCallCheck25(this, DateInputBindingBase2);
-      return _super.apply(this, arguments);
-    }
-    _createClass24(DateInputBindingBase2, [{
-      key: "find",
-      value: function find2(scope) {
-        return (0, import_jquery30.default)(scope).find(".shiny-date-input");
-      }
-    }, {
-      key: "getType",
-      value: function getType(el) {
-        return "shiny.date";
-        el;
-      }
-    }, {
-      key: "subscribe",
-      value: function subscribe(el, callback) {
-        (0, import_jquery30.default)(el).on("keyup.dateInputBinding input.dateInputBinding", function() {
-          callback(true);
-        });
-        (0, import_jquery30.default)(el).on("changeDate.dateInputBinding change.dateInputBinding", function() {
-          callback(false);
-        });
-      }
-    }, {
-      key: "unsubscribe",
-      value: function unsubscribe(el) {
-        (0, import_jquery30.default)(el).off(".dateInputBinding");
-      }
-    }, {
-      key: "getRatePolicy",
-      value: function getRatePolicy() {
-        return {
-          policy: "debounce",
-          delay: 250
-        };
-      }
-    }, {
-      key: "setValue",
-      value: function setValue(el, data) {
-        throw "not implemented";
-        el;
-        data;
-      }
-    }, {
-      key: "initialize",
-      value: function initialize(el) {
-        var $input = (0, import_jquery30.default)(el).find("input");
-        var date = $input.data("initial-date");
-        if (date === void 0 || date === null) {
-          date = this._floorDateTime(this._dateAsUTC(new Date()));
-        }
-        this.setValue(el, date);
-        if ($input.data("min-date") !== void 0) {
-          this._setMin($input[0], $input.data("min-date"));
-        }
-        if ($input.data("max-date") !== void 0) {
-          this._setMax($input[0], $input.data("max-date"));
-        }
-      }
-    }, {
-      key: "_getLabelNode",
-      value: function _getLabelNode(el) {
-        return (0, import_jquery30.default)(el).find('label[for="' + $escape(el.id) + '"]');
-      }
-    }, {
-      key: "_formatToString",
-      value: function _formatToString(format) {
-        var str = "";
-        var i;
-        for (i = 0; i < format.parts.length; i++) {
-          str += format.separators[i] + format.parts[i];
-        }
-        str += format.separators[i];
-        return str;
-      }
-    }, {
-      key: "_setMin",
-      value: function _setMin(el, date) {
-        if (date === void 0)
-          return;
-        if (date === null) {
-          (0, import_jquery30.default)(el).bsDatepicker("setStartDate", null);
-          return;
-        }
-        date = this._newDate(date);
-        if (date === null)
-          return;
-        if (isNaN(date.valueOf()))
-          return;
-        var curValue = (0, import_jquery30.default)(el).bsDatepicker("getUTCDate");
-        (0, import_jquery30.default)(el).bsDatepicker("setStartDate", this._UTCDateAsLocal(date));
-        if (date && curValue && date.getTime() > curValue.getTime()) {
-          (0, import_jquery30.default)(el).bsDatepicker("clearDates");
-        } else {
-          (0, import_jquery30.default)(el).bsDatepicker("setUTCDate", curValue);
-        }
-      }
-    }, {
-      key: "_setMax",
-      value: function _setMax(el, date) {
-        if (date === void 0)
-          return;
-        if (date === null) {
-          (0, import_jquery30.default)(el).bsDatepicker("setEndDate", null);
-          return;
-        }
-        date = this._newDate(date);
-        if (date === null)
-          return;
-        if (isNaN(date.valueOf()))
-          return;
-        var curValue = (0, import_jquery30.default)(el).bsDatepicker("getUTCDate");
-        (0, import_jquery30.default)(el).bsDatepicker("setEndDate", this._UTCDateAsLocal(date));
-        if (date && curValue && date.getTime() < curValue.getTime()) {
-          (0, import_jquery30.default)(el).bsDatepicker("clearDates");
-        } else {
-          (0, import_jquery30.default)(el).bsDatepicker("setUTCDate", curValue);
-        }
-      }
-    }, {
-      key: "_newDate",
-      value: function _newDate(date) {
-        if (date instanceof Date)
-          return date;
-        if (!date)
-          return null;
-        var d = parseDate(date);
-        if (isNaN(d.valueOf()))
-          return null;
-        return d;
-      }
-    }, {
-      key: "_floorDateTime",
-      value: function _floorDateTime(date) {
-        date = new Date(date.getTime());
-        date.setUTCHours(0, 0, 0, 0);
-        return date;
-      }
-    }, {
-      key: "_dateAsUTC",
-      value: function _dateAsUTC(date) {
-        return new Date(date.getTime() - date.getTimezoneOffset() * 6e4);
-      }
-    }, {
-      key: "_UTCDateAsLocal",
-      value: function _UTCDateAsLocal(date) {
-        return new Date(date.getTime() + date.getTimezoneOffset() * 6e4);
-      }
-    }]);
-    return DateInputBindingBase2;
-  }(InputBinding);
-  var DateInputBinding = /* @__PURE__ */ function(_DateInputBindingBase) {
-    _inherits14(DateInputBinding2, _DateInputBindingBase);
-    var _super2 = _createSuper14(DateInputBinding2);
-    function DateInputBinding2() {
-      _classCallCheck25(this, DateInputBinding2);
-      return _super2.apply(this, arguments);
-    }
-    _createClass24(DateInputBinding2, [{
-      key: "getValue",
-      value: function getValue(el) {
-        var date = (0, import_jquery30.default)(el).find("input").bsDatepicker("getUTCDate");
-        return formatDateUTC(date);
-      }
-    }, {
-      key: "setValue",
-      value: function setValue(el, value) {
-        if (value === null) {
-          (0, import_jquery30.default)(el).find("input").val("").bsDatepicker("update");
-          return;
-        }
-        var date = this._newDate(value);
-        if (isNaN(date.valueOf()))
-          return;
-        (0, import_jquery30.default)(el).find("input").bsDatepicker("setUTCDate", date);
-      }
-    }, {
-      key: "getState",
-      value: function getState(el) {
-        var $el = (0, import_jquery30.default)(el);
-        var $input = $el.find("input");
-        var min4 = $input.data("datepicker").startDate;
-        var max4 = $input.data("datepicker").endDate;
-        min4 = min4 === -Infinity ? null : formatDateUTC(min4);
-        max4 = max4 === Infinity ? null : formatDateUTC(max4);
-        var startview = $input.data("datepicker").startViewMode;
-        if (startview === 2)
-          startview = "decade";
-        else if (startview === 1)
-          startview = "year";
-        else if (startview === 0)
-          startview = "month";
-        return {
-          label: this._getLabelNode(el).text(),
-          value: this.getValue(el),
-          valueString: $input.val(),
-          min: min4,
-          max: max4,
-          language: $input.data("datepicker").language,
-          weekstart: $input.data("datepicker").weekStart,
-          format: this._formatToString($input.data("datepicker").format),
-          startview: startview
-        };
-      }
-    }, {
-      key: "receiveMessage",
-      value: function receiveMessage(el, data) {
-        var $input = (0, import_jquery30.default)(el).find("input");
-        updateLabel(data.label, this._getLabelNode(el));
-        if (hasOwnProperty(data, "min"))
-          this._setMin($input[0], data.min);
-        if (hasOwnProperty(data, "max"))
-          this._setMax($input[0], data.max);
-        if (hasOwnProperty(data, "value"))
-          this.setValue(el, data.value);
-        (0, import_jquery30.default)(el).trigger("change");
-      }
-    }]);
-    return DateInputBinding2;
-  }(DateInputBindingBase);
-
-  // src/bindings/input/slider.ts
-  var import_es_regexp_exec9 = __toModule(require_es_regexp_exec());
-  var import_es_array_iterator16 = __toModule(require_es_array_iterator());
-  var import_jquery31 = __toModule(require_jquery());
-  var import_strftime = __toModule(require_strftime());
-  function _typeof16(obj) {
-    "@babel/helpers - typeof";
-    if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
-      _typeof16 = function _typeof27(obj2) {
-        return typeof obj2;
-      };
-    } else {
-      _typeof16 = function _typeof27(obj2) {
-        return obj2 && typeof Symbol === "function" && obj2.constructor === Symbol && obj2 !== Symbol.prototype ? "symbol" : typeof obj2;
-      };
-    }
-    return _typeof16(obj);
-  }
-  function _classCallCheck26(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  }
-  function _defineProperties25(target, props) {
-    for (var i = 0; i < props.length; i++) {
-      var descriptor = props[i];
-      descriptor.enumerable = descriptor.enumerable || false;
-      descriptor.configurable = true;
-      if ("value" in descriptor)
-        descriptor.writable = true;
-      Object.defineProperty(target, descriptor.key, descriptor);
-    }
-  }
-  function _createClass25(Constructor, protoProps, staticProps) {
-    if (protoProps)
-      _defineProperties25(Constructor.prototype, protoProps);
-    if (staticProps)
-      _defineProperties25(Constructor, staticProps);
-    return Constructor;
-  }
-  function _inherits15(subClass, superClass) {
-    if (typeof superClass !== "function" && superClass !== null) {
-      throw new TypeError("Super expression must either be null or a function");
-    }
-    subClass.prototype = Object.create(superClass && superClass.prototype, {constructor: {value: subClass, writable: true, configurable: true}});
-    if (superClass)
-      _setPrototypeOf15(subClass, superClass);
-  }
-  function _setPrototypeOf15(o, p) {
-    _setPrototypeOf15 = Object.setPrototypeOf || function _setPrototypeOf26(o2, p2) {
-      o2.__proto__ = p2;
-      return o2;
-    };
-    return _setPrototypeOf15(o, p);
-  }
-  function _createSuper15(Derived) {
-    var hasNativeReflectConstruct = _isNativeReflectConstruct15();
-    return function _createSuperInternal() {
-      var Super = _getPrototypeOf15(Derived), result;
-      if (hasNativeReflectConstruct) {
-        var NewTarget = _getPrototypeOf15(this).constructor;
-        result = Reflect.construct(Super, arguments, NewTarget);
-      } else {
-        result = Super.apply(this, arguments);
-      }
-      return _possibleConstructorReturn15(this, result);
-    };
-  }
-  function _possibleConstructorReturn15(self2, call) {
-    if (call && (_typeof16(call) === "object" || typeof call === "function")) {
-      return call;
-    }
-    return _assertThisInitialized15(self2);
-  }
-  function _assertThisInitialized15(self2) {
-    if (self2 === void 0) {
-      throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
-    }
-    return self2;
-  }
-  function _isNativeReflectConstruct15() {
-    if (typeof Reflect === "undefined" || !Reflect.construct)
-      return false;
-    if (Reflect.construct.sham)
-      return false;
-    if (typeof Proxy === "function")
-      return true;
-    try {
-      Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function() {
-      }));
-      return true;
-    } catch (e) {
-      return false;
-    }
-  }
-  function _getPrototypeOf15(o) {
-    _getPrototypeOf15 = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf26(o2) {
-      return o2.__proto__ || Object.getPrototypeOf(o2);
-    };
-    return _getPrototypeOf15(o);
-  }
-  function forceIonSliderUpdate(slider) {
-    if (slider.$cache && slider.$cache.input)
-      slider.$cache.input.trigger("change");
-    else
-      console.log("Couldn't force ion slider to update");
-  }
-  function getTypePrettifyer(dataType, timeFormat, timezone) {
-    var timeFormatter;
-    var prettify;
-    if (dataType === "date") {
-      timeFormatter = import_strftime.default.utc();
-      prettify = function prettify2(num) {
-        return timeFormatter(timeFormat, new Date(num));
-      };
-    } else if (dataType === "datetime") {
-      if (timezone)
-        timeFormatter = import_strftime.default.timezone(timezone);
-      else
-        timeFormatter = import_strftime.default;
-      prettify = function prettify2(num) {
-        return timeFormatter(timeFormat, new Date(num));
-      };
-    } else {
-      prettify = function prettify2(num) {
-        return formatNumber(num, this.prettify_separator);
-      };
-    }
-    return prettify;
-  }
-  var SliderInputBinding = /* @__PURE__ */ function(_TextInputBinding) {
-    _inherits15(SliderInputBinding2, _TextInputBinding);
-    var _super = _createSuper15(SliderInputBinding2);
-    function SliderInputBinding2() {
-      _classCallCheck26(this, SliderInputBinding2);
-      return _super.apply(this, arguments);
-    }
-    _createClass25(SliderInputBinding2, [{
-      key: "find",
-      value: function find2(scope) {
-        if (!import_jquery31.default.fn.ionRangeSlider) {
-          return (0, import_jquery31.default)();
-        }
-        return (0, import_jquery31.default)(scope).find("input.js-range-slider");
-      }
-    }, {
-      key: "getType",
-      value: function getType(el) {
-        var dataType = (0, import_jquery31.default)(el).data("data-type");
-        if (dataType === "date")
-          return "shiny.date";
-        else if (dataType === "datetime")
-          return "shiny.datetime";
-        else
-          return false;
-      }
-    }, {
-      key: "getValue",
-      value: function getValue(el) {
-        var $el = (0, import_jquery31.default)(el);
-        var result = (0, import_jquery31.default)(el).data("ionRangeSlider").result;
-        var convert;
-        var dataType = $el.data("data-type");
-        if (dataType === "date") {
-          convert = function convert2(val) {
-            return formatDateUTC(new Date(Number(val)));
-          };
-        } else if (dataType === "datetime") {
-          convert = function convert2(val) {
-            return Number(val) / 1e3;
-          };
-        } else {
-          convert = function convert2(val) {
-            return Number(val);
-          };
-        }
-        if (this._numValues(el) === 2) {
-          return [convert(result.from), convert(result.to)];
-        } else {
-          return convert(result.from);
-        }
-      }
-    }, {
-      key: "setValue",
-      value: function setValue(el, value) {
-        var $el = (0, import_jquery31.default)(el);
-        var slider = $el.data("ionRangeSlider");
-        $el.data("immediate", true);
-        try {
-          if (this._numValues(el) === 2 && value instanceof Array) {
-            slider.update({
-              from: value[0],
-              to: value[1]
-            });
-          } else {
-            slider.update({
-              from: value
-            });
-          }
-          forceIonSliderUpdate(slider);
-        } finally {
-          $el.data("immediate", false);
-        }
-      }
-    }, {
-      key: "subscribe",
-      value: function subscribe(el, callback) {
-        (0, import_jquery31.default)(el).on("change.sliderInputBinding", function() {
-          callback(!(0, import_jquery31.default)(el).data("immediate") && !(0, import_jquery31.default)(el).data("animating"));
-        });
-      }
-    }, {
-      key: "unsubscribe",
-      value: function unsubscribe(el) {
-        (0, import_jquery31.default)(el).off(".sliderInputBinding");
-      }
-    }, {
-      key: "receiveMessage",
-      value: function receiveMessage(el, data) {
-        var $el = (0, import_jquery31.default)(el);
-        var slider = $el.data("ionRangeSlider");
-        var msg = {};
-        if (hasOwnProperty(data, "value")) {
-          if (this._numValues(el) === 2 && data.value instanceof Array) {
-            msg.from = data.value[0];
-            msg.to = data.value[1];
-          } else {
-            msg.from = data.value;
-          }
-        }
-        var sliderFeatures = ["min", "max", "step"];
-        for (var i = 0; i < sliderFeatures.length; i++) {
-          var feats = sliderFeatures[i];
-          if (hasOwnProperty(data, feats)) {
-            msg[feats] = data[feats];
-          }
-        }
-        updateLabel(data.label, this._getLabelNode(el));
-        var domElements = ["data-type", "time-format", "timezone"];
-        for (var _i = 0; _i < domElements.length; _i++) {
-          var elem = domElements[_i];
-          if (hasOwnProperty(data, elem)) {
-            $el.data(elem, data[elem]);
-          }
-        }
-        var dataType = $el.data("data-type");
-        var timeFormat = $el.data("time-format");
-        var timezone = $el.data("timezone");
-        msg.prettify = getTypePrettifyer(dataType, timeFormat, timezone);
-        $el.data("immediate", true);
-        try {
-          slider.update(msg);
-          forceIonSliderUpdate(slider);
-        } finally {
-          $el.data("immediate", false);
-        }
-      }
-    }, {
-      key: "getRatePolicy",
-      value: function getRatePolicy(el) {
-        return {
-          policy: "debounce",
-          delay: 250
-        };
-        el;
-      }
-    }, {
-      key: "getState",
-      value: function getState(el) {
-        el;
-      }
-    }, {
-      key: "initialize",
-      value: function initialize(el) {
-        var $el = (0, import_jquery31.default)(el);
-        var dataType = $el.data("data-type");
-        var timeFormat = $el.data("time-format");
-        var timezone = $el.data("timezone");
-        var opts = {
-          prettify: getTypePrettifyer(dataType, timeFormat, timezone)
-        };
-        $el.ionRangeSlider(opts);
-      }
-    }, {
-      key: "_getLabelNode",
-      value: function _getLabelNode(el) {
-        return (0, import_jquery31.default)(el).parent().find('label[for="' + $escape(el.id) + '"]');
-      }
-    }, {
-      key: "_numValues",
-      value: function _numValues(el) {
-        if ((0, import_jquery31.default)(el).data("ionRangeSlider").options.type === "double")
-          return 2;
-        else
-          return 1;
-      }
-    }]);
-    return SliderInputBinding2;
-  }(TextInputBinding);
-  function formatNumber(num) {
-    var thousandSep = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : ",";
-    var decimalSep = arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : ".";
-    var parts = num.toString().split(".");
-    parts[0] = parts[0].replace(/(\d{1,3}(?=(?:\d\d\d)+(?!\d)))/g, "$1" + thousandSep);
-    if (parts.length === 1)
-      return parts[0];
-    else if (parts.length === 2)
-      return parts[0] + decimalSep + parts[1];
-    else
-      return "";
-  }
-  (0, import_jquery31.default)(document).on("click", ".slider-animate-button", function(evt) {
-    evt.preventDefault();
-    var self2 = (0, import_jquery31.default)(this);
-    var target = (0, import_jquery31.default)("#" + $escape(self2.attr("data-target-id")));
-    var startLabel = "Play";
-    var stopLabel = "Pause";
-    var loop = self2.attr("data-loop") !== void 0 && !/^\s*false\s*$/i.test(self2.attr("data-loop"));
-    var animInterval = self2.attr("data-interval");
-    if (isNaN(animInterval))
-      animInterval = 1500;
-    else
-      animInterval = Number(animInterval);
-    if (!target.data("animTimer")) {
-      var timer;
-      if (target.hasClass("jslider")) {
-        var slider = target.slider();
-        if (!slider.canStepNext())
-          slider.resetToStart();
-        timer = setInterval(function() {
-          if (loop && !slider.canStepNext()) {
-            slider.resetToStart();
-          } else {
-            slider.stepNext();
-            if (!loop && !slider.canStepNext()) {
-              self2.click();
-            }
-          }
-        }, animInterval);
-      } else {
-        var _slider = target.data("ionRangeSlider");
-        var sliderCanStep = function sliderCanStep2() {
-          if (_slider.options.type === "double")
-            return _slider.result.to < _slider.result.max;
-          else
-            return _slider.result.from < _slider.result.max;
-        };
-        var sliderReset = function sliderReset2() {
-          var val = {
-            from: _slider.result.min
-          };
-          if (_slider.options.type === "double")
-            val.to = val.from + (_slider.result.to - _slider.result.from);
-          _slider.update(val);
-          forceIonSliderUpdate(_slider);
-        };
-        var sliderStep = function sliderStep2() {
-          var val = {
-            from: Math.min(_slider.result.max, _slider.result.from + _slider.options.step)
-          };
-          if (_slider.options.type === "double")
-            val.to = Math.min(_slider.result.max, _slider.result.to + _slider.options.step);
-          _slider.update(val);
-          forceIonSliderUpdate(_slider);
-        };
-        if (!sliderCanStep())
-          sliderReset();
-        timer = setInterval(function() {
-          if (loop && !sliderCanStep()) {
-            sliderReset();
-          } else {
-            sliderStep();
-            if (!loop && !sliderCanStep()) {
-              self2.click();
-            }
-          }
-        }, animInterval);
-      }
-      target.data("animTimer", timer);
-      self2.attr("title", stopLabel);
-      self2.addClass("playing");
-      target.data("animating", true);
-    } else {
-      clearTimeout(target.data("animTimer"));
-      target.removeData("animTimer");
-      self2.attr("title", startLabel);
-      self2.removeClass("playing");
-      target.removeData("animating");
-    }
-  });
-
-  // src/bindings/input/daterange.ts
-  var import_es_array_iterator17 = __toModule(require_es_array_iterator());
-  var import_jquery32 = __toModule(require_jquery());
-  function _typeof17(obj) {
-    "@babel/helpers - typeof";
-    if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
-      _typeof17 = function _typeof27(obj2) {
-        return typeof obj2;
-      };
-    } else {
-      _typeof17 = function _typeof27(obj2) {
-        return obj2 && typeof Symbol === "function" && obj2.constructor === Symbol && obj2 !== Symbol.prototype ? "symbol" : typeof obj2;
-      };
-    }
-    return _typeof17(obj);
-  }
-  function _classCallCheck27(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  }
-  function _defineProperties26(target, props) {
-    for (var i = 0; i < props.length; i++) {
-      var descriptor = props[i];
-      descriptor.enumerable = descriptor.enumerable || false;
-      descriptor.configurable = true;
-      if ("value" in descriptor)
-        descriptor.writable = true;
-      Object.defineProperty(target, descriptor.key, descriptor);
-    }
-  }
-  function _createClass26(Constructor, protoProps, staticProps) {
-    if (protoProps)
-      _defineProperties26(Constructor.prototype, protoProps);
-    if (staticProps)
-      _defineProperties26(Constructor, staticProps);
-    return Constructor;
-  }
-  function _inherits16(subClass, superClass) {
-    if (typeof superClass !== "function" && superClass !== null) {
-      throw new TypeError("Super expression must either be null or a function");
-    }
-    subClass.prototype = Object.create(superClass && superClass.prototype, {constructor: {value: subClass, writable: true, configurable: true}});
-    if (superClass)
-      _setPrototypeOf16(subClass, superClass);
-  }
-  function _setPrototypeOf16(o, p) {
-    _setPrototypeOf16 = Object.setPrototypeOf || function _setPrototypeOf26(o2, p2) {
-      o2.__proto__ = p2;
-      return o2;
-    };
-    return _setPrototypeOf16(o, p);
-  }
-  function _createSuper16(Derived) {
-    var hasNativeReflectConstruct = _isNativeReflectConstruct16();
-    return function _createSuperInternal() {
-      var Super = _getPrototypeOf16(Derived), result;
-      if (hasNativeReflectConstruct) {
-        var NewTarget = _getPrototypeOf16(this).constructor;
-        result = Reflect.construct(Super, arguments, NewTarget);
-      } else {
-        result = Super.apply(this, arguments);
-      }
-      return _possibleConstructorReturn16(this, result);
-    };
-  }
-  function _possibleConstructorReturn16(self2, call) {
-    if (call && (_typeof17(call) === "object" || typeof call === "function")) {
-      return call;
-    }
-    return _assertThisInitialized16(self2);
-  }
-  function _assertThisInitialized16(self2) {
-    if (self2 === void 0) {
-      throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
-    }
-    return self2;
-  }
-  function _isNativeReflectConstruct16() {
-    if (typeof Reflect === "undefined" || !Reflect.construct)
-      return false;
-    if (Reflect.construct.sham)
-      return false;
-    if (typeof Proxy === "function")
-      return true;
-    try {
-      Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function() {
-      }));
-      return true;
-    } catch (e) {
-      return false;
-    }
-  }
-  function _getPrototypeOf16(o) {
-    _getPrototypeOf16 = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf26(o2) {
-      return o2.__proto__ || Object.getPrototypeOf(o2);
-    };
-    return _getPrototypeOf16(o);
-  }
-  var DateRangeInputBinding = /* @__PURE__ */ function(_DateInputBindingBase) {
-    _inherits16(DateRangeInputBinding2, _DateInputBindingBase);
-    var _super = _createSuper16(DateRangeInputBinding2);
-    function DateRangeInputBinding2() {
-      _classCallCheck27(this, DateRangeInputBinding2);
-      return _super.apply(this, arguments);
-    }
-    _createClass26(DateRangeInputBinding2, [{
-      key: "find",
-      value: function find2(scope) {
-        return (0, import_jquery32.default)(scope).find(".shiny-date-range-input");
-      }
-    }, {
-      key: "getValue",
-      value: function getValue(el) {
-        var $inputs = (0, import_jquery32.default)(el).find("input");
-        var start = $inputs.eq(0).bsDatepicker("getUTCDate");
-        var end = $inputs.eq(1).bsDatepicker("getUTCDate");
-        return [formatDateUTC(start), formatDateUTC(end)];
-      }
-    }, {
-      key: "setValue",
-      value: function setValue(el, value) {
-        if (!(value instanceof Object)) {
-          return;
-        }
-        var $inputs = (0, import_jquery32.default)(el).find("input");
-        if (value.start !== void 0) {
-          if (value.start === null) {
-            $inputs.eq(0).val("").bsDatepicker("update");
-          } else {
-            var start = this._newDate(value.start);
-            $inputs.eq(0).bsDatepicker("setUTCDate", start);
-          }
-        }
-        if (value.end !== void 0) {
-          if (value.end === null) {
-            $inputs.eq(1).val("").bsDatepicker("update");
-          } else {
-            var end = this._newDate(value.end);
-            $inputs.eq(1).bsDatepicker("setUTCDate", end);
-          }
-        }
-      }
-    }, {
-      key: "getState",
-      value: function getState(el) {
-        var $el = (0, import_jquery32.default)(el);
-        var $inputs = $el.find("input");
-        var $startinput = $inputs.eq(0);
-        var $endinput = $inputs.eq(1);
-        var min4 = $startinput.bsDatepicker("getStartDate");
-        var max4 = $startinput.bsDatepicker("getEndDate");
-        min4 = min4 === -Infinity ? null : formatDateUTC(min4);
-        max4 = max4 === Infinity ? null : formatDateUTC(max4);
-        var startview = $startinput.data("datepicker").startView;
-        if (startview === 2)
-          startview = "decade";
-        else if (startview === 1)
-          startview = "year";
-        else if (startview === 0)
-          startview = "month";
-        return {
-          label: this._getLabelNode(el).text(),
-          value: this.getValue(el),
-          valueString: [$startinput.val(), $endinput.val()],
-          min: min4,
-          max: max4,
-          weekstart: $startinput.data("datepicker").weekStart,
-          format: this._formatToString($startinput.data("datepicker").format),
-          language: $startinput.data("datepicker").language,
-          startview: startview
-        };
-      }
-    }, {
-      key: "receiveMessage",
-      value: function receiveMessage(el, data) {
-        var $el = (0, import_jquery32.default)(el);
-        var $inputs = $el.find("input");
-        var $startinput = $inputs.eq(0);
-        var $endinput = $inputs.eq(1);
-        updateLabel(data.label, this._getLabelNode(el));
-        if (hasOwnProperty(data, "min")) {
-          this._setMin($startinput[0], data.min);
-          this._setMin($endinput[0], data.min);
-        }
-        if (hasOwnProperty(data, "max")) {
-          this._setMax($startinput[0], data.max);
-          this._setMax($endinput[0], data.max);
-        }
-        if (hasOwnProperty(data, "value"))
-          this.setValue(el, data.value);
-        $el.trigger("change");
-      }
-    }, {
-      key: "initialize",
-      value: function initialize(el) {
-        var $el = (0, import_jquery32.default)(el);
-        var $inputs = $el.find("input");
-        var $startinput = $inputs.eq(0);
-        var $endinput = $inputs.eq(1);
-        var start = $startinput.data("initial-date");
-        var end = $endinput.data("initial-date");
-        if (start === void 0 || start === null)
-          start = this._dateAsUTC(new Date());
-        if (end === void 0 || end === null)
-          end = this._dateAsUTC(new Date());
-        this.setValue(el, {
-          start: start,
-          end: end
-        });
-        this._setMin($startinput[0], $startinput.data("min-date"));
-        this._setMin($endinput[0], $startinput.data("min-date"));
-        this._setMax($startinput[0], $endinput.data("max-date"));
-        this._setMax($endinput[0], $endinput.data("max-date"));
-      }
-    }, {
-      key: "subscribe",
-      value: function subscribe(el, callback) {
-        (0, import_jquery32.default)(el).on("keyup.dateRangeInputBinding input.dateRangeInputBinding", function() {
-          callback(true);
-        });
-        (0, import_jquery32.default)(el).on("changeDate.dateRangeInputBinding change.dateRangeInputBinding", function() {
-          callback(false);
-        });
-      }
-    }, {
-      key: "unsubscribe",
-      value: function unsubscribe(el) {
-        (0, import_jquery32.default)(el).off(".dateRangeInputBinding");
-      }
-    }, {
-      key: "_getLabelNode",
-      value: function _getLabelNode(el) {
-        return (0, import_jquery32.default)(el).find('label[for="' + $escape(el.id) + '"]');
-      }
-    }]);
-    return DateRangeInputBinding2;
-  }(DateInputBindingBase);
-
-  // src/bindings/input/selectInput.ts
-  var import_es_array_iterator18 = __toModule(require_es_array_iterator());
-  var import_jquery33 = __toModule(require_jquery());
-  function _typeof18(obj) {
-    "@babel/helpers - typeof";
-    if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
-      _typeof18 = function _typeof27(obj2) {
-        return typeof obj2;
-      };
-    } else {
-      _typeof18 = function _typeof27(obj2) {
-        return obj2 && typeof Symbol === "function" && obj2.constructor === Symbol && obj2 !== Symbol.prototype ? "symbol" : typeof obj2;
-      };
-    }
-    return _typeof18(obj);
-  }
-  function _classCallCheck28(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  }
-  function _defineProperties27(target, props) {
-    for (var i = 0; i < props.length; i++) {
-      var descriptor = props[i];
-      descriptor.enumerable = descriptor.enumerable || false;
-      descriptor.configurable = true;
-      if ("value" in descriptor)
-        descriptor.writable = true;
-      Object.defineProperty(target, descriptor.key, descriptor);
-    }
-  }
-  function _createClass27(Constructor, protoProps, staticProps) {
-    if (protoProps)
-      _defineProperties27(Constructor.prototype, protoProps);
-    if (staticProps)
-      _defineProperties27(Constructor, staticProps);
-    return Constructor;
-  }
-  function _inherits17(subClass, superClass) {
-    if (typeof superClass !== "function" && superClass !== null) {
-      throw new TypeError("Super expression must either be null or a function");
-    }
-    subClass.prototype = Object.create(superClass && superClass.prototype, {constructor: {value: subClass, writable: true, configurable: true}});
-    if (superClass)
-      _setPrototypeOf17(subClass, superClass);
-  }
-  function _setPrototypeOf17(o, p) {
-    _setPrototypeOf17 = Object.setPrototypeOf || function _setPrototypeOf26(o2, p2) {
-      o2.__proto__ = p2;
-      return o2;
-    };
-    return _setPrototypeOf17(o, p);
-  }
-  function _createSuper17(Derived) {
-    var hasNativeReflectConstruct = _isNativeReflectConstruct17();
-    return function _createSuperInternal() {
-      var Super = _getPrototypeOf17(Derived), result;
-      if (hasNativeReflectConstruct) {
-        var NewTarget = _getPrototypeOf17(this).constructor;
-        result = Reflect.construct(Super, arguments, NewTarget);
-      } else {
-        result = Super.apply(this, arguments);
-      }
-      return _possibleConstructorReturn17(this, result);
-    };
-  }
-  function _possibleConstructorReturn17(self2, call) {
-    if (call && (_typeof18(call) === "object" || typeof call === "function")) {
-      return call;
-    }
-    return _assertThisInitialized17(self2);
-  }
-  function _assertThisInitialized17(self2) {
-    if (self2 === void 0) {
-      throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
-    }
-    return self2;
-  }
-  function _isNativeReflectConstruct17() {
-    if (typeof Reflect === "undefined" || !Reflect.construct)
-      return false;
-    if (Reflect.construct.sham)
-      return false;
-    if (typeof Proxy === "function")
-      return true;
-    try {
-      Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function() {
-      }));
-      return true;
-    } catch (e) {
-      return false;
-    }
-  }
-  function _getPrototypeOf17(o) {
-    _getPrototypeOf17 = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf26(o2) {
-      return o2.__proto__ || Object.getPrototypeOf(o2);
-    };
-    return _getPrototypeOf17(o);
-  }
-  var SelectInputBinding = /* @__PURE__ */ function(_InputBinding) {
-    _inherits17(SelectInputBinding2, _InputBinding);
-    var _super = _createSuper17(SelectInputBinding2);
-    function SelectInputBinding2() {
-      _classCallCheck28(this, SelectInputBinding2);
-      return _super.apply(this, arguments);
-    }
-    _createClass27(SelectInputBinding2, [{
-      key: "find",
-      value: function find2(scope) {
-        return (0, import_jquery33.default)(scope).find("select");
-      }
-    }, {
-      key: "getType",
-      value: function getType(el) {
-        var $el = (0, import_jquery33.default)(el);
-        if (!$el.hasClass("symbol")) {
-          return null;
-        }
-        if ($el.attr("multiple") === "multiple") {
-          return "shiny.symbolList";
-        } else {
-          return "shiny.symbol";
-        }
-      }
-    }, {
-      key: "getId",
-      value: function getId(el) {
-        return InputBinding.prototype.getId.call(this, el) || el.name;
-      }
-    }, {
-      key: "getValue",
-      value: function getValue(el) {
-        return (0, import_jquery33.default)(el).val();
-      }
-    }, {
-      key: "setValue",
-      value: function setValue(el, value) {
-        if (!this._is_selectize(el)) {
-          (0, import_jquery33.default)(el).val(value);
-        } else {
-          var selectize = this._selectize(el);
-          if (selectize) {
-            selectize.setValue(value);
-          }
-        }
-      }
-    }, {
-      key: "getState",
-      value: function getState(el) {
-        var options = new Array(el.length);
-        for (var i = 0; i < el.length; i++) {
-          options[i] = {
-            value: el[i].value,
-            label: el[i].label
-          };
-        }
-        return {
-          label: this._getLabelNode(el),
-          value: this.getValue(el),
-          options: options
-        };
-      }
-    }, {
-      key: "receiveMessage",
-      value: function receiveMessage(el, data) {
-        var $el = (0, import_jquery33.default)(el);
-        var selectize;
-        if (hasOwnProperty(data, "options")) {
-          selectize = this._selectize(el);
-          if (selectize)
-            selectize.destroy();
-          $el.empty().append(data.options);
-          this._selectize(el);
-        }
-        if (hasOwnProperty(data, "config")) {
-          $el.parent().find('script[data-for="' + $escape(el.id) + '"]').replaceWith(data.config);
-          this._selectize(el, true);
-        }
-        if (hasOwnProperty(data, "url")) {
-          selectize = this._selectize(el);
-          selectize.clearOptions();
-          var loaded = false;
-          selectize.settings.load = function(query, callback) {
-            var settings = selectize.settings;
-            import_jquery33.default.ajax({
-              url: data.url,
-              data: {
-                query: query,
-                field: JSON.stringify([settings.searchField]),
-                value: settings.valueField,
-                conju: settings.searchConjunction,
-                maxop: settings.maxOptions
-              },
-              type: "GET",
-              error: function error() {
-                callback();
-              },
-              success: function success(res) {
-                import_jquery33.default.each(res, function(index, elem) {
-                  var optgroupId = elem[settings.optgroupField || "optgroup"];
-                  var optgroup = {};
-                  optgroup[settings.optgroupLabelField || "label"] = optgroupId;
-                  optgroup[settings.optgroupValueField || "value"] = optgroupId;
-                  selectize.addOptionGroup(optgroupId, optgroup);
-                });
-                callback(res);
-                if (!loaded) {
-                  if (hasOwnProperty(data, "value")) {
-                    selectize.setValue(data.value);
-                  } else if (settings.maxItems === 1) {
-                    selectize.setValue(res[0].value);
-                  }
-                }
-                loaded = true;
-              }
-            });
-          };
-          selectize.load(function(callback) {
-            selectize.settings.load.apply(selectize, ["", callback]);
-          });
-        } else if (hasOwnProperty(data, "value")) {
-          this.setValue(el, data.value);
-        }
-        updateLabel(data.label, this._getLabelNode(el));
-        (0, import_jquery33.default)(el).trigger("change");
-      }
-    }, {
-      key: "subscribe",
-      value: function subscribe(el, callback) {
-        var _this = this;
-        (0, import_jquery33.default)(el).on("change.selectInputBinding", function() {
-          if (el.nonempty && _this.getValue(el) === "") {
-            return;
-          }
-          callback(false);
-        });
-      }
-    }, {
-      key: "unsubscribe",
-      value: function unsubscribe(el) {
-        (0, import_jquery33.default)(el).off(".selectInputBinding");
-      }
-    }, {
-      key: "initialize",
-      value: function initialize(el) {
-        this._selectize(el);
-      }
-    }, {
-      key: "_getLabelNode",
-      value: function _getLabelNode(el) {
-        var escapedId = $escape(el.id);
-        if (this._is_selectize(el)) {
-          escapedId += "-selectized";
-        }
-        return (0, import_jquery33.default)(el).parent().parent().find('label[for="' + escapedId + '"]');
-      }
-    }, {
-      key: "_is_selectize",
-      value: function _is_selectize(el) {
-        var config = (0, import_jquery33.default)(el).parent().find('script[data-for="' + $escape(el.id) + '"]');
-        return config.length > 0;
-      }
-    }, {
-      key: "_selectize",
-      value: function _selectize(el) {
-        var update = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : false;
-        if (!import_jquery33.default.fn.selectize)
-          return void 0;
-        var $el = (0, import_jquery33.default)(el);
-        var config = $el.parent().find('script[data-for="' + $escape(el.id) + '"]');
-        if (config.length === 0)
-          return void 0;
-        var options = import_jquery33.default.extend({
-          labelField: "label",
-          valueField: "value",
-          searchField: ["label"]
-        }, JSON.parse(config.html()));
-        if (typeof config.data("nonempty") !== "undefined") {
-          el.nonempty = true;
-          options = import_jquery33.default.extend(options, {
-            onItemRemove: function onItemRemove(value) {
-              if (this.getValue() === "")
-                (0, import_jquery33.default)("select#" + $escape(el.id)).empty().append((0, import_jquery33.default)("<option/>", {
-                  value: value,
-                  selected: true
-                })).trigger("change");
-            },
-            onDropdownClose: function onDropdownClose() {
-              if (this.getValue() === "")
-                this.setValue((0, import_jquery33.default)("select#" + $escape(el.id)).val());
-            }
-          });
-        } else {
-          el.nonempty = false;
-        }
-        if (config.data("eval") instanceof Array)
-          import_jquery33.default.each(config.data("eval"), function(i, x) {
-            options[x] = indirectEval("(" + options[x] + ")");
-          });
-        var control = $el.selectize(options)[0].selectize;
-        if (update) {
-          var settings = import_jquery33.default.extend(control.settings, options);
-          control.destroy();
-          control = $el.selectize(settings)[0].selectize;
-        }
-        return control;
-      }
-    }]);
-    return SelectInputBinding2;
-  }(InputBinding);
-
-  // src/bindings/input/actionbutton.ts
-  var import_es_array_iterator19 = __toModule(require_es_array_iterator());
-  var import_jquery34 = __toModule(require_jquery());
-  function _typeof19(obj) {
-    "@babel/helpers - typeof";
-    if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
-      _typeof19 = function _typeof27(obj2) {
-        return typeof obj2;
-      };
-    } else {
-      _typeof19 = function _typeof27(obj2) {
-        return obj2 && typeof Symbol === "function" && obj2.constructor === Symbol && obj2 !== Symbol.prototype ? "symbol" : typeof obj2;
-      };
-    }
-    return _typeof19(obj);
-  }
-  function _classCallCheck29(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  }
-  function _defineProperties28(target, props) {
-    for (var i = 0; i < props.length; i++) {
-      var descriptor = props[i];
-      descriptor.enumerable = descriptor.enumerable || false;
-      descriptor.configurable = true;
-      if ("value" in descriptor)
-        descriptor.writable = true;
-      Object.defineProperty(target, descriptor.key, descriptor);
-    }
-  }
-  function _createClass28(Constructor, protoProps, staticProps) {
-    if (protoProps)
-      _defineProperties28(Constructor.prototype, protoProps);
-    if (staticProps)
-      _defineProperties28(Constructor, staticProps);
-    return Constructor;
-  }
-  function _inherits18(subClass, superClass) {
-    if (typeof superClass !== "function" && superClass !== null) {
-      throw new TypeError("Super expression must either be null or a function");
-    }
-    subClass.prototype = Object.create(superClass && superClass.prototype, {constructor: {value: subClass, writable: true, configurable: true}});
-    if (superClass)
-      _setPrototypeOf18(subClass, superClass);
-  }
-  function _setPrototypeOf18(o, p) {
-    _setPrototypeOf18 = Object.setPrototypeOf || function _setPrototypeOf26(o2, p2) {
-      o2.__proto__ = p2;
-      return o2;
-    };
-    return _setPrototypeOf18(o, p);
-  }
-  function _createSuper18(Derived) {
-    var hasNativeReflectConstruct = _isNativeReflectConstruct18();
-    return function _createSuperInternal() {
-      var Super = _getPrototypeOf18(Derived), result;
-      if (hasNativeReflectConstruct) {
-        var NewTarget = _getPrototypeOf18(this).constructor;
-        result = Reflect.construct(Super, arguments, NewTarget);
-      } else {
-        result = Super.apply(this, arguments);
-      }
-      return _possibleConstructorReturn18(this, result);
-    };
-  }
-  function _possibleConstructorReturn18(self2, call) {
-    if (call && (_typeof19(call) === "object" || typeof call === "function")) {
-      return call;
-    }
-    return _assertThisInitialized18(self2);
-  }
-  function _assertThisInitialized18(self2) {
-    if (self2 === void 0) {
-      throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
-    }
-    return self2;
-  }
-  function _isNativeReflectConstruct18() {
-    if (typeof Reflect === "undefined" || !Reflect.construct)
-      return false;
-    if (Reflect.construct.sham)
-      return false;
-    if (typeof Proxy === "function")
-      return true;
-    try {
-      Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function() {
-      }));
-      return true;
-    } catch (e) {
-      return false;
-    }
-  }
-  function _getPrototypeOf18(o) {
-    _getPrototypeOf18 = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf26(o2) {
-      return o2.__proto__ || Object.getPrototypeOf(o2);
-    };
-    return _getPrototypeOf18(o);
-  }
-  var ActionButtonInputBinding = /* @__PURE__ */ function(_InputBinding) {
-    _inherits18(ActionButtonInputBinding2, _InputBinding);
-    var _super = _createSuper18(ActionButtonInputBinding2);
-    function ActionButtonInputBinding2() {
-      _classCallCheck29(this, ActionButtonInputBinding2);
-      return _super.apply(this, arguments);
-    }
-    _createClass28(ActionButtonInputBinding2, [{
-      key: "find",
-      value: function find2(scope) {
-        return (0, import_jquery34.default)(scope).find(".action-button");
-      }
-    }, {
-      key: "getValue",
-      value: function getValue(el) {
-        return (0, import_jquery34.default)(el).data("val") || 0;
-      }
-    }, {
-      key: "setValue",
-      value: function setValue(el, value) {
-        (0, import_jquery34.default)(el).data("val", value);
-      }
-    }, {
-      key: "getType",
-      value: function getType(el) {
-        return "shiny.action";
-        el;
-      }
-    }, {
-      key: "subscribe",
-      value: function subscribe(el, callback) {
-        (0, import_jquery34.default)(el).on("click.actionButtonInputBinding", function() {
-          var $el = (0, import_jquery34.default)(this);
-          var val = $el.data("val") || 0;
-          $el.data("val", val + 1);
-          callback(false);
-        });
-      }
-    }, {
-      key: "getState",
-      value: function getState(el) {
-        return {
-          value: this.getValue(el)
-        };
-      }
-    }, {
-      key: "receiveMessage",
-      value: function receiveMessage(el, data) {
-        var $el = (0, import_jquery34.default)(el);
-        var label = $el.text();
-        var icon = "";
-        if ($el.find("i[class]").length > 0) {
-          var iconHtml = $el.find("i[class]")[0];
-          if (iconHtml === $el.children()[0]) {
-            icon = (0, import_jquery34.default)(iconHtml).prop("outerHTML");
-          }
-        }
-        if (hasOwnProperty(data, "label"))
-          label = data.label;
-        if (hasOwnProperty(data, "icon")) {
-          icon = data.icon;
-          if (icon.length === 0)
-            icon = "";
-        }
-        $el.html(icon + " " + label);
-      }
-    }, {
-      key: "unsubscribe",
-      value: function unsubscribe(el) {
-        (0, import_jquery34.default)(el).off(".actionButtonInputBinding");
-      }
-    }]);
-    return ActionButtonInputBinding2;
-  }(InputBinding);
-  (0, import_jquery34.default)(document).on("click", "a.action-button", function(e) {
-    e.preventDefault();
-  });
-
-  // src/bindings/input/tabinput.ts
-  var import_es_array_iterator20 = __toModule(require_es_array_iterator());
-  var import_jquery35 = __toModule(require_jquery());
-  function _typeof20(obj) {
-    "@babel/helpers - typeof";
-    if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
-      _typeof20 = function _typeof27(obj2) {
-        return typeof obj2;
-      };
-    } else {
-      _typeof20 = function _typeof27(obj2) {
-        return obj2 && typeof Symbol === "function" && obj2.constructor === Symbol && obj2 !== Symbol.prototype ? "symbol" : typeof obj2;
-      };
-    }
-    return _typeof20(obj);
-  }
-  function _classCallCheck30(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  }
-  function _defineProperties29(target, props) {
-    for (var i = 0; i < props.length; i++) {
-      var descriptor = props[i];
-      descriptor.enumerable = descriptor.enumerable || false;
-      descriptor.configurable = true;
-      if ("value" in descriptor)
-        descriptor.writable = true;
-      Object.defineProperty(target, descriptor.key, descriptor);
-    }
-  }
-  function _createClass29(Constructor, protoProps, staticProps) {
-    if (protoProps)
-      _defineProperties29(Constructor.prototype, protoProps);
-    if (staticProps)
-      _defineProperties29(Constructor, staticProps);
-    return Constructor;
-  }
-  function _inherits19(subClass, superClass) {
-    if (typeof superClass !== "function" && superClass !== null) {
-      throw new TypeError("Super expression must either be null or a function");
-    }
-    subClass.prototype = Object.create(superClass && superClass.prototype, {constructor: {value: subClass, writable: true, configurable: true}});
-    if (superClass)
-      _setPrototypeOf19(subClass, superClass);
-  }
-  function _setPrototypeOf19(o, p) {
-    _setPrototypeOf19 = Object.setPrototypeOf || function _setPrototypeOf26(o2, p2) {
-      o2.__proto__ = p2;
-      return o2;
-    };
-    return _setPrototypeOf19(o, p);
-  }
-  function _createSuper19(Derived) {
-    var hasNativeReflectConstruct = _isNativeReflectConstruct19();
-    return function _createSuperInternal() {
-      var Super = _getPrototypeOf19(Derived), result;
-      if (hasNativeReflectConstruct) {
-        var NewTarget = _getPrototypeOf19(this).constructor;
-        result = Reflect.construct(Super, arguments, NewTarget);
-      } else {
-        result = Super.apply(this, arguments);
-      }
-      return _possibleConstructorReturn19(this, result);
-    };
-  }
-  function _possibleConstructorReturn19(self2, call) {
-    if (call && (_typeof20(call) === "object" || typeof call === "function")) {
-      return call;
-    }
-    return _assertThisInitialized19(self2);
-  }
-  function _assertThisInitialized19(self2) {
-    if (self2 === void 0) {
-      throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
-    }
-    return self2;
-  }
-  function _isNativeReflectConstruct19() {
-    if (typeof Reflect === "undefined" || !Reflect.construct)
-      return false;
-    if (Reflect.construct.sham)
-      return false;
-    if (typeof Proxy === "function")
-      return true;
-    try {
-      Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function() {
-      }));
-      return true;
-    } catch (e) {
-      return false;
-    }
-  }
-  function _getPrototypeOf19(o) {
-    _getPrototypeOf19 = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf26(o2) {
-      return o2.__proto__ || Object.getPrototypeOf(o2);
-    };
-    return _getPrototypeOf19(o);
-  }
-  var BootstrapTabInputBinding = /* @__PURE__ */ function(_InputBinding) {
-    _inherits19(BootstrapTabInputBinding2, _InputBinding);
-    var _super = _createSuper19(BootstrapTabInputBinding2);
-    function BootstrapTabInputBinding2() {
-      _classCallCheck30(this, BootstrapTabInputBinding2);
-      return _super.apply(this, arguments);
-    }
-    _createClass29(BootstrapTabInputBinding2, [{
-      key: "find",
-      value: function find2(scope) {
-        return (0, import_jquery35.default)(scope).find("ul.nav.shiny-tab-input");
-      }
-    }, {
-      key: "getValue",
-      value: function getValue(el) {
-        var anchor = isBS3() ? (0, import_jquery35.default)(el).find("li:not(.dropdown).active > a") : (0, import_jquery35.default)(el).find(".nav-link:not(.dropdown-toggle).active, .dropdown-menu > .dropdown-item.active");
-        if (anchor.length === 1)
-          return this._getTabName(anchor);
-        return null;
-      }
-    }, {
-      key: "setValue",
-      value: function setValue(el, value) {
-        var self2 = this;
-        var success = false;
-        if (value) {
-          var anchors = isBS3() ? (0, import_jquery35.default)(el).find("li:not(.dropdown) > a") : (0, import_jquery35.default)(el).find(".nav-link:not(.dropdown-toggle), .dropdown-menu > .dropdown-item");
-          anchors.each(function() {
-            if (self2._getTabName((0, import_jquery35.default)(this)) === value) {
-              (0, import_jquery35.default)(this).tab("show");
-              success = true;
-              return false;
-            }
-            return;
-          });
-        }
-        if (!success) {
-          (0, import_jquery35.default)(el).trigger("change");
-        }
-      }
-    }, {
-      key: "getState",
-      value: function getState(el) {
-        return {
-          value: this.getValue(el)
-        };
-      }
-    }, {
-      key: "receiveMessage",
-      value: function receiveMessage(el, data) {
-        if (hasOwnProperty(data, "value"))
-          this.setValue(el, data.value);
-        (0, import_jquery35.default)(el).trigger("change");
-      }
-    }, {
-      key: "subscribe",
-      value: function subscribe(el, callback) {
-        (0, import_jquery35.default)(el).on("change shown.bootstrapTabInputBinding shown.bs.tab.bootstrapTabInputBinding", function() {
-          callback(false);
-        });
-      }
-    }, {
-      key: "unsubscribe",
-      value: function unsubscribe(el) {
-        (0, import_jquery35.default)(el).off(".bootstrapTabInputBinding");
-      }
-    }, {
-      key: "_getTabName",
-      value: function _getTabName(anchor) {
-        return anchor.attr("data-value") || anchor.text();
-      }
-    }]);
-    return BootstrapTabInputBinding2;
-  }(InputBinding);
-
-  // src/bindings/input/fileinput.ts
-  var import_es_array_iterator22 = __toModule(require_es_array_iterator());
-  var import_jquery38 = __toModule(require_jquery());
-
-  // src/file/FileProcessor.ts
-  var import_es_array_iterator21 = __toModule(require_es_array_iterator());
-  var import_jquery37 = __toModule(require_jquery());
-
-  // src/events/shiny_inputchanged.ts
-  var import_jquery36 = __toModule(require_jquery());
-  function triggerFileInputChanged(name, value, binding, el, inputType, onEl) {
-    var evt = import_jquery36.default.Event("shiny:inputchanged");
-    evt.name = name;
-    evt.value = value;
-    evt.binding = binding;
-    evt.el = el;
-    evt.inputType = inputType;
-    (0, import_jquery36.default)(onEl).trigger(evt);
-    return evt;
-  }
-
-  // src/file/FileProcessor.ts
-  function _typeof21(obj) {
-    "@babel/helpers - typeof";
-    if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
-      _typeof21 = function _typeof27(obj2) {
-        return typeof obj2;
-      };
-    } else {
-      _typeof21 = function _typeof27(obj2) {
-        return obj2 && typeof Symbol === "function" && obj2.constructor === Symbol && obj2 !== Symbol.prototype ? "symbol" : typeof obj2;
-      };
-    }
-    return _typeof21(obj);
-  }
-  function _inherits20(subClass, superClass) {
-    if (typeof superClass !== "function" && superClass !== null) {
-      throw new TypeError("Super expression must either be null or a function");
-    }
-    subClass.prototype = Object.create(superClass && superClass.prototype, {constructor: {value: subClass, writable: true, configurable: true}});
-    if (superClass)
-      _setPrototypeOf20(subClass, superClass);
-  }
-  function _setPrototypeOf20(o, p) {
-    _setPrototypeOf20 = Object.setPrototypeOf || function _setPrototypeOf26(o2, p2) {
-      o2.__proto__ = p2;
-      return o2;
-    };
-    return _setPrototypeOf20(o, p);
-  }
-  function _createSuper20(Derived) {
-    var hasNativeReflectConstruct = _isNativeReflectConstruct20();
-    return function _createSuperInternal() {
-      var Super = _getPrototypeOf20(Derived), result;
-      if (hasNativeReflectConstruct) {
-        var NewTarget = _getPrototypeOf20(this).constructor;
-        result = Reflect.construct(Super, arguments, NewTarget);
-      } else {
-        result = Super.apply(this, arguments);
-      }
-      return _possibleConstructorReturn20(this, result);
-    };
-  }
-  function _possibleConstructorReturn20(self2, call) {
-    if (call && (_typeof21(call) === "object" || typeof call === "function")) {
-      return call;
-    }
-    return _assertThisInitialized20(self2);
-  }
-  function _assertThisInitialized20(self2) {
-    if (self2 === void 0) {
-      throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
-    }
-    return self2;
-  }
-  function _isNativeReflectConstruct20() {
-    if (typeof Reflect === "undefined" || !Reflect.construct)
-      return false;
-    if (Reflect.construct.sham)
-      return false;
-    if (typeof Proxy === "function")
-      return true;
-    try {
-      Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function() {
-      }));
-      return true;
-    } catch (e) {
-      return false;
-    }
-  }
-  function _getPrototypeOf20(o) {
-    _getPrototypeOf20 = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf26(o2) {
-      return o2.__proto__ || Object.getPrototypeOf(o2);
-    };
-    return _getPrototypeOf20(o);
-  }
-  function _classCallCheck31(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  }
-  function _defineProperties30(target, props) {
-    for (var i = 0; i < props.length; i++) {
-      var descriptor = props[i];
-      descriptor.enumerable = descriptor.enumerable || false;
-      descriptor.configurable = true;
-      if ("value" in descriptor)
-        descriptor.writable = true;
-      Object.defineProperty(target, descriptor.key, descriptor);
-    }
-  }
-  function _createClass30(Constructor, protoProps, staticProps) {
-    if (protoProps)
-      _defineProperties30(Constructor.prototype, protoProps);
-    if (staticProps)
-      _defineProperties30(Constructor, staticProps);
-    return Constructor;
-  }
-  function _defineProperty16(obj, key, value) {
-    if (key in obj) {
-      Object.defineProperty(obj, key, {value: value, enumerable: true, configurable: true, writable: true});
-    } else {
-      obj[key] = value;
-    }
-    return obj;
-  }
-  var FileProcessor = /* @__PURE__ */ function() {
-    function FileProcessor2(files) {
-      _classCallCheck31(this, FileProcessor2);
-      _defineProperty16(this, "files", void 0);
-      _defineProperty16(this, "fileIndex", -1);
-      _defineProperty16(this, "aborted", false);
-      _defineProperty16(this, "completed", false);
-      this.files = files;
-      this.$run();
-    }
-    _createClass30(FileProcessor2, [{
-      key: "onBegin",
-      value: function onBegin(files, cont) {
-        files;
-        setTimeout(cont, 0);
-      }
-    }, {
-      key: "onFile",
-      value: function onFile(file, cont) {
-        file;
-        setTimeout(cont, 0);
-      }
-    }, {
-      key: "onComplete",
-      value: function onComplete() {
-        return;
-      }
-    }, {
-      key: "onAbort",
-      value: function onAbort() {
-        return;
-      }
-    }, {
-      key: "abort",
-      value: function abort() {
-        if (this.completed || this.aborted)
-          return;
-        this.aborted = true;
-        this.onAbort();
-      }
-    }, {
-      key: "$getRun",
-      value: function $getRun() {
-        var _this = this;
-        var called = false;
-        return function() {
-          if (called)
-            return;
-          called = true;
-          _this.$run();
-        };
-      }
-    }, {
-      key: "$run",
-      value: function $run() {
-        if (this.aborted || this.completed)
-          return;
-        if (this.fileIndex < 0) {
-          this.fileIndex = 0;
-          this.onBegin(this.files, this.$getRun());
-          return;
-        }
-        if (this.fileIndex === this.files.length) {
-          this.completed = true;
-          this.onComplete();
-          return;
-        }
-        var file = this.files[this.fileIndex++];
-        this.onFile(file, this.$getRun());
-      }
-    }]);
-    return FileProcessor2;
-  }();
-  var FileUploader = /* @__PURE__ */ function(_FileProcessor) {
-    _inherits20(FileUploader2, _FileProcessor);
-    var _super = _createSuper20(FileUploader2);
-    function FileUploader2(shinyapp, id, files, el) {
-      var _this2;
-      _classCallCheck31(this, FileUploader2);
-      _this2 = _super.call(this, files);
-      _defineProperty16(_assertThisInitialized20(_this2), "shinyapp", void 0);
-      _defineProperty16(_assertThisInitialized20(_this2), "id", void 0);
-      _defineProperty16(_assertThisInitialized20(_this2), "el", void 0);
-      _defineProperty16(_assertThisInitialized20(_this2), "jobId", void 0);
-      _defineProperty16(_assertThisInitialized20(_this2), "uploadUrl", void 0);
-      _defineProperty16(_assertThisInitialized20(_this2), "progressBytes", void 0);
-      _defineProperty16(_assertThisInitialized20(_this2), "totalBytes", void 0);
-      _this2.shinyapp = shinyapp;
-      _this2.id = id;
-      _this2.el = el;
-      return _this2;
-    }
-    _createClass30(FileUploader2, [{
-      key: "makeRequest",
-      value: function makeRequest(method, args, onSuccess, onFailure, blobs) {
-        this.shinyapp.makeRequest(method, args, onSuccess, onFailure, blobs);
-      }
-    }, {
-      key: "onBegin",
-      value: function onBegin(files, cont) {
-        var _this3 = this;
-        this.$setError(null);
-        this.$setActive(true);
-        this.$setVisible(true);
-        this.onProgress(null, 0);
-        this.totalBytes = 0;
-        this.progressBytes = 0;
-        import_jquery37.default.each(files, function(i, file) {
-          _this3.totalBytes += file.size;
-        });
-        var fileInfo = import_jquery37.default.map(files, function(file, i) {
-          return {
-            name: file.name,
-            size: file.size,
-            type: file.type
-          };
-          i;
-        });
-        this.makeRequest("uploadInit", [fileInfo], function(response) {
-          _this3.jobId = response.jobId;
-          _this3.uploadUrl = response.uploadUrl;
-          cont();
-        }, function(error) {
-          _this3.onError(error);
-        }, void 0);
-      }
-    }, {
-      key: "onFile",
-      value: function onFile(file, cont) {
-        var _this4 = this;
-        this.onProgress(file, 0);
-        import_jquery37.default.ajax(this.uploadUrl, {
-          type: "POST",
-          cache: false,
-          xhr: function xhr() {
-            var xhrVal = import_jquery37.default.ajaxSettings.xhr();
-            if (xhrVal.upload) {
-              xhrVal.upload.onprogress = function(e) {
-                if (e.lengthComputable) {
-                  _this4.onProgress(file, (_this4.progressBytes + e.loaded) / _this4.totalBytes);
-                }
-              };
-            }
-            return xhrVal;
-          },
-          data: file,
-          contentType: "application/octet-stream",
-          processData: false,
-          success: function success() {
-            _this4.progressBytes += file.size;
-            cont();
-          },
-          error: function error(jqXHR, textStatus, errorThrown) {
-            errorThrown;
-            _this4.onError(jqXHR.responseText || textStatus);
-          }
-        });
-      }
-    }, {
-      key: "onComplete",
-      value: function onComplete() {
-        var _this5 = this;
-        var fileInfo = import_jquery37.default.map(this.files, function(file, i) {
-          return {
-            name: file.name,
-            size: file.size,
-            type: file.type
-          };
-        });
-        var evt = triggerFileInputChanged(this.id, fileInfo, getFileInputBinding(), this.el, "shiny.fileupload", document);
-        this.makeRequest("uploadEnd", [this.jobId, this.id], function(response) {
-          response;
-          _this5.$setActive(false);
-          _this5.onProgress(null, 1);
-          _this5.$bar().text("Upload complete");
-          (0, import_jquery37.default)(evt.el).val("");
-        }, function(error) {
-          _this5.onError(error);
-        }, void 0);
-        this.$bar().text("Finishing upload");
-      }
-    }, {
-      key: "onError",
-      value: function onError(message) {
-        this.$setError(message || "");
-        this.$setActive(false);
-      }
-    }, {
-      key: "onAbort",
-      value: function onAbort() {
-        this.$setVisible(false);
-      }
-    }, {
-      key: "onProgress",
-      value: function onProgress(file, completed) {
-        this.$bar().width(Math.round(completed * 100) + "%");
-        this.$bar().text(file ? file.name : "");
-      }
-    }, {
-      key: "$container",
-      value: function $container() {
-        return (0, import_jquery37.default)("#" + $escape(this.id) + "_progress.shiny-file-input-progress");
-      }
-    }, {
-      key: "$bar",
-      value: function $bar() {
-        return (0, import_jquery37.default)("#" + $escape(this.id) + "_progress.shiny-file-input-progress .progress-bar");
-      }
-    }, {
-      key: "$setVisible",
-      value: function $setVisible(visible) {
-        this.$container().css("visibility", visible ? "visible" : "hidden");
-      }
-    }, {
-      key: "$setError",
-      value: function $setError(error) {
-        this.$bar().toggleClass("progress-bar-danger", error !== null);
-        if (error !== null) {
-          this.onProgress(null, 1);
-          this.$bar().text(error);
-        }
-      }
-    }, {
-      key: "$setActive",
-      value: function $setActive(active) {
-        this.$container().toggleClass("active", !!active);
-      }
-    }]);
-    return FileUploader2;
-  }(FileProcessor);
-
-  // src/bindings/input/fileinput.ts
-  function _typeof22(obj) {
-    "@babel/helpers - typeof";
-    if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
-      _typeof22 = function _typeof27(obj2) {
-        return typeof obj2;
-      };
-    } else {
-      _typeof22 = function _typeof27(obj2) {
-        return obj2 && typeof Symbol === "function" && obj2.constructor === Symbol && obj2 !== Symbol.prototype ? "symbol" : typeof obj2;
-      };
-    }
-    return _typeof22(obj);
-  }
-  function _classCallCheck32(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  }
-  function _defineProperties31(target, props) {
-    for (var i = 0; i < props.length; i++) {
-      var descriptor = props[i];
-      descriptor.enumerable = descriptor.enumerable || false;
-      descriptor.configurable = true;
-      if ("value" in descriptor)
-        descriptor.writable = true;
-      Object.defineProperty(target, descriptor.key, descriptor);
-    }
-  }
-  function _createClass31(Constructor, protoProps, staticProps) {
-    if (protoProps)
-      _defineProperties31(Constructor.prototype, protoProps);
-    if (staticProps)
-      _defineProperties31(Constructor, staticProps);
-    return Constructor;
-  }
-  function _inherits21(subClass, superClass) {
-    if (typeof superClass !== "function" && superClass !== null) {
-      throw new TypeError("Super expression must either be null or a function");
-    }
-    subClass.prototype = Object.create(superClass && superClass.prototype, {constructor: {value: subClass, writable: true, configurable: true}});
-    if (superClass)
-      _setPrototypeOf21(subClass, superClass);
-  }
-  function _setPrototypeOf21(o, p) {
-    _setPrototypeOf21 = Object.setPrototypeOf || function _setPrototypeOf26(o2, p2) {
-      o2.__proto__ = p2;
-      return o2;
-    };
-    return _setPrototypeOf21(o, p);
-  }
-  function _createSuper21(Derived) {
-    var hasNativeReflectConstruct = _isNativeReflectConstruct21();
-    return function _createSuperInternal() {
-      var Super = _getPrototypeOf21(Derived), result;
-      if (hasNativeReflectConstruct) {
-        var NewTarget = _getPrototypeOf21(this).constructor;
-        result = Reflect.construct(Super, arguments, NewTarget);
-      } else {
-        result = Super.apply(this, arguments);
-      }
-      return _possibleConstructorReturn21(this, result);
-    };
-  }
-  function _possibleConstructorReturn21(self2, call) {
-    if (call && (_typeof22(call) === "object" || typeof call === "function")) {
-      return call;
-    }
-    return _assertThisInitialized21(self2);
-  }
-  function _assertThisInitialized21(self2) {
-    if (self2 === void 0) {
-      throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
-    }
-    return self2;
-  }
-  function _isNativeReflectConstruct21() {
-    if (typeof Reflect === "undefined" || !Reflect.construct)
-      return false;
-    if (Reflect.construct.sham)
-      return false;
-    if (typeof Proxy === "function")
-      return true;
-    try {
-      Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function() {
-      }));
-      return true;
-    } catch (e) {
-      return false;
-    }
-  }
-  function _getPrototypeOf21(o) {
-    _getPrototypeOf21 = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf26(o2) {
-      return o2.__proto__ || Object.getPrototypeOf(o2);
-    };
-    return _getPrototypeOf21(o);
-  }
-  function _defineProperty17(obj, key, value) {
-    if (key in obj) {
-      Object.defineProperty(obj, key, {value: value, enumerable: true, configurable: true, writable: true});
-    } else {
-      obj[key] = value;
-    }
-    return obj;
-  }
-  function setFileText($el, files) {
-    var $fileText = $el.closest("div.input-group").find("input[type=text]");
-    if (files.length === 1) {
-      $fileText.val(files[0].name);
-    } else {
-      $fileText.val(files.length + " files");
-    }
-  }
-  function abortCurrentUpload($el) {
-    var uploader = $el.data("currentUploader");
-    if (uploader)
-      uploader.abort();
-    $el.removeAttr("data-restore");
-  }
-  function uploadDroppedFilesIE10Plus(el, files) {
-    var $el = (0, import_jquery38.default)(el);
-    abortCurrentUpload($el);
-    setFileText($el, files);
-    $el.data("currentUploader", new FileUploader(shinyShinyApp(), fileInputBindingGetId(el), files, el));
-  }
-  function uploadFiles(evt) {
-    var $el = (0, import_jquery38.default)(evt.target);
-    abortCurrentUpload($el);
-    var files = evt.target.files;
-    var id = fileInputBindingGetId(evt.target);
-    if (files.length === 0)
-      return;
-    setFileText($el, files);
-    $el.data("currentUploader", new FileUploader(shinyShinyApp(), id, files, evt.target));
-  }
-  var $fileInputs = (0, import_jquery38.default)();
-  function fileInputBindingGetId(el) {
-    return InputBinding.prototype.getId.call(this, el) || el.name;
-  }
-  var FileInputBinding = /* @__PURE__ */ function(_InputBinding) {
-    _inherits21(FileInputBinding2, _InputBinding);
-    var _super = _createSuper21(FileInputBinding2);
-    function FileInputBinding2() {
-      var _this;
-      _classCallCheck32(this, FileInputBinding2);
-      for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-        args[_key] = arguments[_key];
-      }
-      _this = _super.call.apply(_super, [this].concat(args));
-      _defineProperty17(_assertThisInitialized21(_this), "_ZoneClass", void 0);
-      return _this;
-    }
-    _createClass31(FileInputBinding2, [{
-      key: "find",
-      value: function find2(scope) {
-        return (0, import_jquery38.default)(scope).find('input[type="file"]');
-      }
-    }, {
-      key: "getId",
-      value: function getId(el) {
-        return fileInputBindingGetId(el);
-      }
-    }, {
-      key: "getValue",
-      value: function getValue(el) {
-        var data = (0, import_jquery38.default)(el).attr("data-restore");
-        if (data) {
-          var dataParsed = JSON.parse(data);
-          var $fileText = (0, import_jquery38.default)(el).closest("div.input-group").find("input[type=text]");
-          if (dataParsed.name.length === 1) {
-            $fileText.val(dataParsed.name[0]);
-          } else {
-            $fileText.val(dataParsed.name.length + " files");
-          }
-          var $progress = (0, import_jquery38.default)(el).closest("div.form-group").find(".progress");
-          var $bar = $progress.find(".progress-bar");
-          $progress.removeClass("active");
-          $bar.width("100%");
-          $bar.css("visibility", "visible");
-          return dataParsed;
-        } else {
-          return null;
-        }
-      }
-    }, {
-      key: "setValue",
-      value: function setValue(el, value) {
-        el;
-        value;
-      }
-    }, {
-      key: "getType",
-      value: function getType(el) {
-        return "shiny.file";
-        el;
-      }
-    }, {
-      key: "_zoneOf",
-      value: function _zoneOf(el) {
-        return (0, import_jquery38.default)(el).closest("div.input-group");
-      }
-    }, {
-      key: "_enableDraghover",
-      value: function _enableDraghover(el) {
-        var $el = (0, import_jquery38.default)(el);
-        var childCounter = 0;
-        $el.on({
-          "dragenter.draghover": function dragenterDraghover(e) {
-            if (childCounter++ === 0) {
-              $el.trigger("draghover:enter", e);
-            }
-          },
-          "dragleave.draghover": function dragleaveDraghover(e) {
-            if (--childCounter === 0) {
-              $el.trigger("draghover:leave", e);
-            }
-            if (childCounter < 0) {
-              console.error("draghover childCounter is negative somehow");
-            }
-          },
-          "dragover.draghover": function dragoverDraghover(e) {
-            e.preventDefault();
-          },
-          "drop.draghover": function dropDraghover(e) {
-            childCounter = 0;
-            $el.trigger("draghover:drop", e);
-            e.preventDefault();
-          }
-        });
-        return $el;
-      }
-    }, {
-      key: "_disableDraghover",
-      value: function _disableDraghover(el) {
-        return (0, import_jquery38.default)(el).off(".draghover");
-      }
-    }, {
-      key: "_enableDocumentEvents",
-      value: function _enableDocumentEvents() {
-        var _this2 = this;
-        var $doc = (0, import_jquery38.default)("html"), _this$_ZoneClass = this._ZoneClass, ACTIVE = _this$_ZoneClass.ACTIVE, OVER = _this$_ZoneClass.OVER;
-        this._enableDraghover($doc).on({
-          "draghover:enter.draghover": function draghoverEnterDraghover() {
-            _this2._zoneOf($fileInputs).addClass(ACTIVE);
-          },
-          "draghover:leave.draghover": function draghoverLeaveDraghover() {
-            _this2._zoneOf($fileInputs).removeClass(ACTIVE);
-          },
-          "draghover:drop.draghover": function draghoverDropDraghover() {
-            _this2._zoneOf($fileInputs).removeClass(OVER).removeClass(ACTIVE);
-          }
-        });
-      }
-    }, {
-      key: "_disableDocumentEvents",
-      value: function _disableDocumentEvents() {
-        var $doc = (0, import_jquery38.default)("html");
-        $doc.off(".draghover");
-        this._disableDraghover($doc);
-      }
-    }, {
-      key: "_canSetFiles",
-      value: function _canSetFiles(fileList) {
-        var testEl = document.createElement("input");
-        testEl.type = "file";
-        try {
-          testEl.files = fileList;
-        } catch (e) {
-          return false;
-        }
-        return true;
-      }
-    }, {
-      key: "_handleDrop",
-      value: function _handleDrop(e, el) {
-        var files = e.originalEvent.dataTransfer.files, $el = (0, import_jquery38.default)(el);
-        if (files === void 0 || files === null) {
-          console.log("Dropping files is not supported on this browser. (no FileList)");
-        } else if (!this._canSetFiles(files)) {
-          $el.val("");
-          uploadDroppedFilesIE10Plus(el, files);
-        } else {
-          $el.val("");
-          el.files = e.originalEvent.dataTransfer.files;
-          $el.trigger("change");
-        }
-      }
-    }, {
-      key: "subscribe",
-      value: function subscribe(el, callback) {
-        var _this3 = this;
-        callback;
-        (0, import_jquery38.default)(el).on("change.fileInputBinding", uploadFiles);
-        if ($fileInputs.length === 0)
-          this._enableDocumentEvents();
-        $fileInputs = $fileInputs.add(el);
-        var $zone = this._zoneOf(el), OVER = this._ZoneClass.OVER;
-        this._enableDraghover($zone).on({
-          "draghover:enter.draghover": function draghoverEnterDraghover(e) {
-            e;
-            $zone.addClass(OVER);
-          },
-          "draghover:leave.draghover": function draghoverLeaveDraghover(e) {
-            $zone.removeClass(OVER);
-            e.stopPropagation();
-          },
-          "draghover:drop.draghover": function draghoverDropDraghover(e, dropEvent) {
-            e;
-            _this3._handleDrop(dropEvent, el);
-          }
-        });
-      }
-    }, {
-      key: "unsubscribe",
-      value: function unsubscribe(el) {
-        var $el = (0, import_jquery38.default)(el), $zone = this._zoneOf(el);
-        $zone.removeClass(this._ZoneClass.OVER).removeClass(this._ZoneClass.ACTIVE);
-        this._disableDraghover($zone);
-        $el.off(".fileInputBinding");
-        $zone.off(".draghover");
-        $fileInputs = $fileInputs.not(el);
-        if ($fileInputs.length === 0)
-          this._disableDocumentEvents();
-      }
-    }]);
-    return FileInputBinding2;
-  }(InputBinding);
-
-  // src/bindings/input/index.ts
-  function initInputBindings() {
-    var inputBindings = new BindingRegistry();
-    inputBindings.register(new TextInputBinding(), "shiny.textInput");
-    inputBindings.register(new TextareaInputBinding(), "shiny.textareaInput");
-    inputBindings.register(new PasswordInputBinding(), "shiny.passwordInput");
-    inputBindings.register(new NumberInputBinding(), "shiny.numberInput");
-    inputBindings.register(new CheckboxInputBinding(), "shiny.checkboxInput");
-    inputBindings.register(new CheckboxGroupInputBinding(), "shiny.checkboxGroupInput");
-    inputBindings.register(new RadioInputBinding(), "shiny.radioInput");
-    inputBindings.register(new SliderInputBinding(), "shiny.sliderInput");
-    inputBindings.register(new DateInputBinding(), "shiny.dateInput");
-    inputBindings.register(new DateRangeInputBinding(), "shiny.dateRangeInput");
-    inputBindings.register(new SelectInputBinding(), "shiny.selectInput");
-    inputBindings.register(new ActionButtonInputBinding(), "shiny.actionButtonInput");
-    inputBindings.register(new BootstrapTabInputBinding(), "shiny.bootstrapTabInput");
-    var fileInputBinding = new FileInputBinding();
-    inputBindings.register(fileInputBinding, "shiny.fileInputBinding");
-    return {
-      inputBindings: inputBindings,
-      fileInputBinding: fileInputBinding
-    };
-  }
-
-  // src/bindings/output/text.ts
-  var import_es_array_iterator23 = __toModule(require_es_array_iterator());
-  var import_jquery39 = __toModule(require_jquery());
-  function _typeof23(obj) {
-    "@babel/helpers - typeof";
-    if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
-      _typeof23 = function _typeof27(obj2) {
-        return typeof obj2;
-      };
-    } else {
-      _typeof23 = function _typeof27(obj2) {
-        return obj2 && typeof Symbol === "function" && obj2.constructor === Symbol && obj2 !== Symbol.prototype ? "symbol" : typeof obj2;
-      };
-    }
-    return _typeof23(obj);
-  }
-  function _classCallCheck33(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  }
-  function _defineProperties32(target, props) {
-    for (var i = 0; i < props.length; i++) {
-      var descriptor = props[i];
-      descriptor.enumerable = descriptor.enumerable || false;
-      descriptor.configurable = true;
-      if ("value" in descriptor)
-        descriptor.writable = true;
-      Object.defineProperty(target, descriptor.key, descriptor);
-    }
-  }
-  function _createClass32(Constructor, protoProps, staticProps) {
-    if (protoProps)
-      _defineProperties32(Constructor.prototype, protoProps);
-    if (staticProps)
-      _defineProperties32(Constructor, staticProps);
-    return Constructor;
-  }
-  function _inherits22(subClass, superClass) {
-    if (typeof superClass !== "function" && superClass !== null) {
-      throw new TypeError("Super expression must either be null or a function");
-    }
-    subClass.prototype = Object.create(superClass && superClass.prototype, {constructor: {value: subClass, writable: true, configurable: true}});
-    if (superClass)
-      _setPrototypeOf22(subClass, superClass);
-  }
-  function _setPrototypeOf22(o, p) {
-    _setPrototypeOf22 = Object.setPrototypeOf || function _setPrototypeOf26(o2, p2) {
-      o2.__proto__ = p2;
-      return o2;
-    };
-    return _setPrototypeOf22(o, p);
-  }
-  function _createSuper22(Derived) {
-    var hasNativeReflectConstruct = _isNativeReflectConstruct22();
-    return function _createSuperInternal() {
-      var Super = _getPrototypeOf22(Derived), result;
-      if (hasNativeReflectConstruct) {
-        var NewTarget = _getPrototypeOf22(this).constructor;
-        result = Reflect.construct(Super, arguments, NewTarget);
-      } else {
-        result = Super.apply(this, arguments);
-      }
-      return _possibleConstructorReturn22(this, result);
-    };
-  }
-  function _possibleConstructorReturn22(self2, call) {
-    if (call && (_typeof23(call) === "object" || typeof call === "function")) {
-      return call;
-    }
-    return _assertThisInitialized22(self2);
-  }
-  function _assertThisInitialized22(self2) {
-    if (self2 === void 0) {
-      throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
-    }
-    return self2;
-  }
-  function _isNativeReflectConstruct22() {
-    if (typeof Reflect === "undefined" || !Reflect.construct)
-      return false;
-    if (Reflect.construct.sham)
-      return false;
-    if (typeof Proxy === "function")
-      return true;
-    try {
-      Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function() {
-      }));
-      return true;
-    } catch (e) {
-      return false;
-    }
-  }
-  function _getPrototypeOf22(o) {
-    _getPrototypeOf22 = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf26(o2) {
-      return o2.__proto__ || Object.getPrototypeOf(o2);
-    };
-    return _getPrototypeOf22(o);
-  }
-  var TextOutputBinding = /* @__PURE__ */ function(_OutputBinding) {
-    _inherits22(TextOutputBinding2, _OutputBinding);
-    var _super = _createSuper22(TextOutputBinding2);
-    function TextOutputBinding2() {
-      _classCallCheck33(this, TextOutputBinding2);
-      return _super.apply(this, arguments);
-    }
-    _createClass32(TextOutputBinding2, [{
-      key: "find",
-      value: function find2(scope) {
-        return (0, import_jquery39.default)(scope).find(".shiny-text-output");
-      }
-    }, {
-      key: "renderValue",
-      value: function renderValue(el, data) {
-        (0, import_jquery39.default)(el).text(data);
-      }
-    }]);
-    return TextOutputBinding2;
-  }(OutputBinding);
-
-  // src/bindings/output/downloadlink.ts
-  var import_es_array_iterator24 = __toModule(require_es_array_iterator());
-  var import_jquery40 = __toModule(require_jquery());
-  function _typeof24(obj) {
-    "@babel/helpers - typeof";
-    if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
-      _typeof24 = function _typeof27(obj2) {
-        return typeof obj2;
-      };
-    } else {
-      _typeof24 = function _typeof27(obj2) {
-        return obj2 && typeof Symbol === "function" && obj2.constructor === Symbol && obj2 !== Symbol.prototype ? "symbol" : typeof obj2;
-      };
-    }
-    return _typeof24(obj);
-  }
-  function _classCallCheck34(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  }
-  function _defineProperties33(target, props) {
-    for (var i = 0; i < props.length; i++) {
-      var descriptor = props[i];
-      descriptor.enumerable = descriptor.enumerable || false;
-      descriptor.configurable = true;
-      if ("value" in descriptor)
-        descriptor.writable = true;
-      Object.defineProperty(target, descriptor.key, descriptor);
-    }
-  }
-  function _createClass33(Constructor, protoProps, staticProps) {
-    if (protoProps)
-      _defineProperties33(Constructor.prototype, protoProps);
-    if (staticProps)
-      _defineProperties33(Constructor, staticProps);
-    return Constructor;
-  }
-  function _inherits23(subClass, superClass) {
-    if (typeof superClass !== "function" && superClass !== null) {
-      throw new TypeError("Super expression must either be null or a function");
-    }
-    subClass.prototype = Object.create(superClass && superClass.prototype, {constructor: {value: subClass, writable: true, configurable: true}});
-    if (superClass)
-      _setPrototypeOf23(subClass, superClass);
-  }
-  function _setPrototypeOf23(o, p) {
-    _setPrototypeOf23 = Object.setPrototypeOf || function _setPrototypeOf26(o2, p2) {
-      o2.__proto__ = p2;
-      return o2;
-    };
-    return _setPrototypeOf23(o, p);
-  }
-  function _createSuper23(Derived) {
-    var hasNativeReflectConstruct = _isNativeReflectConstruct23();
-    return function _createSuperInternal() {
-      var Super = _getPrototypeOf23(Derived), result;
-      if (hasNativeReflectConstruct) {
-        var NewTarget = _getPrototypeOf23(this).constructor;
-        result = Reflect.construct(Super, arguments, NewTarget);
-      } else {
-        result = Super.apply(this, arguments);
-      }
-      return _possibleConstructorReturn23(this, result);
-    };
-  }
-  function _possibleConstructorReturn23(self2, call) {
-    if (call && (_typeof24(call) === "object" || typeof call === "function")) {
-      return call;
-    }
-    return _assertThisInitialized23(self2);
-  }
-  function _assertThisInitialized23(self2) {
-    if (self2 === void 0) {
-      throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
-    }
-    return self2;
-  }
-  function _isNativeReflectConstruct23() {
-    if (typeof Reflect === "undefined" || !Reflect.construct)
-      return false;
-    if (Reflect.construct.sham)
-      return false;
-    if (typeof Proxy === "function")
-      return true;
-    try {
-      Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function() {
-      }));
-      return true;
-    } catch (e) {
-      return false;
-    }
-  }
-  function _getPrototypeOf23(o) {
-    _getPrototypeOf23 = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf26(o2) {
-      return o2.__proto__ || Object.getPrototypeOf(o2);
-    };
-    return _getPrototypeOf23(o);
-  }
-  var DownloadLinkOutputBinding = /* @__PURE__ */ function(_OutputBinding) {
-    _inherits23(DownloadLinkOutputBinding2, _OutputBinding);
-    var _super = _createSuper23(DownloadLinkOutputBinding2);
-    function DownloadLinkOutputBinding2() {
-      _classCallCheck34(this, DownloadLinkOutputBinding2);
-      return _super.apply(this, arguments);
-    }
-    _createClass33(DownloadLinkOutputBinding2, [{
-      key: "find",
-      value: function find2(scope) {
-        return (0, import_jquery40.default)(scope).find("a.shiny-download-link");
-      }
-    }, {
-      key: "renderValue",
-      value: function renderValue(el, data) {
-        (0, import_jquery40.default)(el).attr("href", data);
-      }
-    }]);
-    return DownloadLinkOutputBinding2;
-  }(OutputBinding);
-  (0, import_jquery40.default)(document).on("click.shinyDownloadLink", "a.shiny-download-link", function(e) {
-    e;
-    var evt = jQuery.Event("shiny:filedownload");
-    evt.name = this.id;
-    evt.href = this.href;
-    (0, import_jquery40.default)(document).trigger(evt);
-  });
-
-  // src/bindings/output/datatable.ts
-  var import_es_regexp_exec10 = __toModule(require_es_regexp_exec());
-  var import_es_array_iterator25 = __toModule(require_es_array_iterator());
-  var import_jquery41 = __toModule(require_jquery());
-  function _typeof25(obj) {
-    "@babel/helpers - typeof";
-    if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
-      _typeof25 = function _typeof27(obj2) {
-        return typeof obj2;
-      };
-    } else {
-      _typeof25 = function _typeof27(obj2) {
-        return obj2 && typeof Symbol === "function" && obj2.constructor === Symbol && obj2 !== Symbol.prototype ? "symbol" : typeof obj2;
-      };
-    }
-    return _typeof25(obj);
-  }
-  function _classCallCheck35(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  }
-  function _defineProperties34(target, props) {
-    for (var i = 0; i < props.length; i++) {
-      var descriptor = props[i];
-      descriptor.enumerable = descriptor.enumerable || false;
-      descriptor.configurable = true;
-      if ("value" in descriptor)
-        descriptor.writable = true;
-      Object.defineProperty(target, descriptor.key, descriptor);
-    }
-  }
-  function _createClass34(Constructor, protoProps, staticProps) {
-    if (protoProps)
-      _defineProperties34(Constructor.prototype, protoProps);
-    if (staticProps)
-      _defineProperties34(Constructor, staticProps);
-    return Constructor;
-  }
-  function _inherits24(subClass, superClass) {
-    if (typeof superClass !== "function" && superClass !== null) {
-      throw new TypeError("Super expression must either be null or a function");
-    }
-    subClass.prototype = Object.create(superClass && superClass.prototype, {constructor: {value: subClass, writable: true, configurable: true}});
-    if (superClass)
-      _setPrototypeOf24(subClass, superClass);
-  }
-  function _setPrototypeOf24(o, p) {
-    _setPrototypeOf24 = Object.setPrototypeOf || function _setPrototypeOf26(o2, p2) {
-      o2.__proto__ = p2;
-      return o2;
-    };
-    return _setPrototypeOf24(o, p);
-  }
-  function _createSuper24(Derived) {
-    var hasNativeReflectConstruct = _isNativeReflectConstruct24();
-    return function _createSuperInternal() {
-      var Super = _getPrototypeOf24(Derived), result;
-      if (hasNativeReflectConstruct) {
-        var NewTarget = _getPrototypeOf24(this).constructor;
-        result = Reflect.construct(Super, arguments, NewTarget);
-      } else {
-        result = Super.apply(this, arguments);
-      }
-      return _possibleConstructorReturn24(this, result);
-    };
-  }
-  function _possibleConstructorReturn24(self2, call) {
-    if (call && (_typeof25(call) === "object" || typeof call === "function")) {
-      return call;
-    }
-    return _assertThisInitialized24(self2);
-  }
-  function _assertThisInitialized24(self2) {
-    if (self2 === void 0) {
-      throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
-    }
-    return self2;
-  }
-  function _isNativeReflectConstruct24() {
-    if (typeof Reflect === "undefined" || !Reflect.construct)
-      return false;
-    if (Reflect.construct.sham)
-      return false;
-    if (typeof Proxy === "function")
-      return true;
-    try {
-      Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function() {
-      }));
-      return true;
-    } catch (e) {
-      return false;
-    }
-  }
-  function _getPrototypeOf24(o) {
-    _getPrototypeOf24 = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf26(o2) {
-      return o2.__proto__ || Object.getPrototypeOf(o2);
-    };
-    return _getPrototypeOf24(o);
-  }
-  var DatatableOutputBinding = /* @__PURE__ */ function(_OutputBinding) {
-    _inherits24(DatatableOutputBinding2, _OutputBinding);
-    var _super = _createSuper24(DatatableOutputBinding2);
-    function DatatableOutputBinding2() {
-      _classCallCheck35(this, DatatableOutputBinding2);
-      return _super.apply(this, arguments);
-    }
-    _createClass34(DatatableOutputBinding2, [{
-      key: "find",
-      value: function find2(scope) {
-        return (0, import_jquery41.default)(scope).find(".shiny-datatable-output");
-      }
-    }, {
-      key: "onValueError",
-      value: function onValueError(el, err) {
-        shinyUnbindAll(el);
-        this.renderError(el, err);
-      }
-    }, {
-      key: "renderValue",
-      value: function renderValue(el, _data) {
-        var $el = (0, import_jquery41.default)(el).empty();
-        if (!_data || !_data.colnames)
-          return;
-        var colnames = import_jquery41.default.makeArray(_data.colnames);
-        var header = import_jquery41.default.map(colnames, function(x) {
-          return "<th>" + x + "</th>";
-        }).join("");
-        header = "<thead><tr>" + header + "</tr></thead>";
-        var footer = "";
-        if (_data.options === null || _data.options.searching !== false) {
-          footer = import_jquery41.default.map(colnames, function(x) {
-            return '<th><input type="text" placeholder="' + escapeHTML(x.replace(/(<([^>]+)>)/gi, "")) + '" /></th>';
-          }).join("");
-          footer = "<tfoot>" + footer + "</tfoot>";
-        }
-        var content = '<table class="table table-striped table-hover">' + header + footer + "</table>";
-        $el.append(content);
-        if (_data.evalOptions)
-          import_jquery41.default.each(_data.evalOptions, function(i, x) {
-            _data.options[x] = indirectEval("(" + _data.options[x] + ")");
-          });
-        var searchCI = _data.options === null || typeof _data.options.search === "undefined" || _data.options.search.caseInsensitive !== false;
-        var oTable = (0, import_jquery41.default)(el).children("table").DataTable(import_jquery41.default.extend({
-          processing: true,
-          serverSide: true,
-          order: [],
-          orderClasses: false,
-          pageLength: 25,
-          ajax: {
-            url: _data.action,
-            type: "POST",
-            data: function data(d) {
-              d.search.caseInsensitive = searchCI;
-              d.escape = _data.escape;
-            }
-          }
-        }, _data.options));
-        if (typeof _data.callback === "string") {
-          var callback = indirectEval("(" + _data.callback + ")");
-          if (typeof callback === "function")
-            callback(oTable);
-        }
-        $el.find("label input").first().unbind("keyup").keyup(debounce(_data.searchDelay, function() {
-          oTable.search(this.value).draw();
-        }));
-        var searchInputs = $el.find("tfoot input");
-        if (searchInputs.length > 0) {
-          import_jquery41.default.each(oTable.settings()[0].aoColumns, function(i, x) {
-            if (!x.bSearchable)
-              searchInputs.eq(i).hide();
-          });
-          searchInputs.keyup(debounce(_data.searchDelay, function() {
-            oTable.column(searchInputs.index(this)).search(this.value).draw();
-          }));
-        }
-        $el.parents(".tab-content").css("overflow", "visible");
-      }
-    }]);
-    return DatatableOutputBinding2;
-  }(OutputBinding);
-
-  // src/bindings/output/html.ts
-  var import_es_array_iterator26 = __toModule(require_es_array_iterator());
-  var import_jquery42 = __toModule(require_jquery());
-  function _typeof26(obj) {
-    "@babel/helpers - typeof";
-    if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
-      _typeof26 = function _typeof27(obj2) {
-        return typeof obj2;
-      };
-    } else {
-      _typeof26 = function _typeof27(obj2) {
-        return obj2 && typeof Symbol === "function" && obj2.constructor === Symbol && obj2 !== Symbol.prototype ? "symbol" : typeof obj2;
-      };
-    }
-    return _typeof26(obj);
-  }
-  function _classCallCheck36(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  }
-  function _defineProperties35(target, props) {
-    for (var i = 0; i < props.length; i++) {
-      var descriptor = props[i];
-      descriptor.enumerable = descriptor.enumerable || false;
-      descriptor.configurable = true;
-      if ("value" in descriptor)
-        descriptor.writable = true;
-      Object.defineProperty(target, descriptor.key, descriptor);
-    }
-  }
-  function _createClass35(Constructor, protoProps, staticProps) {
-    if (protoProps)
-      _defineProperties35(Constructor.prototype, protoProps);
-    if (staticProps)
-      _defineProperties35(Constructor, staticProps);
-    return Constructor;
-  }
-  function _inherits25(subClass, superClass) {
-    if (typeof superClass !== "function" && superClass !== null) {
-      throw new TypeError("Super expression must either be null or a function");
-    }
-    subClass.prototype = Object.create(superClass && superClass.prototype, {constructor: {value: subClass, writable: true, configurable: true}});
-    if (superClass)
-      _setPrototypeOf25(subClass, superClass);
-  }
-  function _setPrototypeOf25(o, p) {
-    _setPrototypeOf25 = Object.setPrototypeOf || function _setPrototypeOf26(o2, p2) {
-      o2.__proto__ = p2;
-      return o2;
-    };
-    return _setPrototypeOf25(o, p);
-  }
-  function _createSuper25(Derived) {
-    var hasNativeReflectConstruct = _isNativeReflectConstruct25();
-    return function _createSuperInternal() {
-      var Super = _getPrototypeOf25(Derived), result;
-      if (hasNativeReflectConstruct) {
-        var NewTarget = _getPrototypeOf25(this).constructor;
-        result = Reflect.construct(Super, arguments, NewTarget);
-      } else {
-        result = Super.apply(this, arguments);
-      }
-      return _possibleConstructorReturn25(this, result);
-    };
-  }
-  function _possibleConstructorReturn25(self2, call) {
-    if (call && (_typeof26(call) === "object" || typeof call === "function")) {
-      return call;
-    }
-    return _assertThisInitialized25(self2);
-  }
-  function _assertThisInitialized25(self2) {
-    if (self2 === void 0) {
-      throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
-    }
-    return self2;
-  }
-  function _isNativeReflectConstruct25() {
-    if (typeof Reflect === "undefined" || !Reflect.construct)
-      return false;
-    if (Reflect.construct.sham)
-      return false;
-    if (typeof Proxy === "function")
-      return true;
-    try {
-      Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function() {
-      }));
-      return true;
-    } catch (e) {
-      return false;
-    }
-  }
-  function _getPrototypeOf25(o) {
-    _getPrototypeOf25 = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf26(o2) {
-      return o2.__proto__ || Object.getPrototypeOf(o2);
-    };
-    return _getPrototypeOf25(o);
-  }
-  var HtmlOutputBinding = /* @__PURE__ */ function(_OutputBinding) {
-    _inherits25(HtmlOutputBinding2, _OutputBinding);
-    var _super = _createSuper25(HtmlOutputBinding2);
-    function HtmlOutputBinding2() {
-      _classCallCheck36(this, HtmlOutputBinding2);
-      return _super.apply(this, arguments);
-    }
-    _createClass35(HtmlOutputBinding2, [{
-      key: "find",
-      value: function find2(scope) {
-        return (0, import_jquery42.default)(scope).find(".shiny-html-output");
-      }
-    }, {
-      key: "onValueError",
-      value: function onValueError(el, err) {
-        shinyUnbindAll(el);
-        this.renderError(el, err);
-      }
-    }, {
-      key: "renderValue",
-      value: function renderValue(el, data) {
-        renderContent(el, data);
-      }
-    }]);
-    return HtmlOutputBinding2;
-  }(OutputBinding);
-
-  // src/bindings/output/index.ts
-  function initOutputBindings() {
-    var outputBindings = new BindingRegistry();
-    outputBindings.register(new TextOutputBinding(), "shiny.textOutput");
-    outputBindings.register(new DownloadLinkOutputBinding(), "shiny.downloadLink");
-    outputBindings.register(new DatatableOutputBinding(), "shiny.datatableOutput");
-    outputBindings.register(new HtmlOutputBinding(), "shiny.htmlOutput");
-    outputBindings.register(imageOutputBinding, "shiny.imageOutput");
-    return {
-      outputBindings: outputBindings
-    };
   }
 
   // src/shiny/index.ts
@@ -13057,7 +13049,9 @@
     Shiny.$escape = $escape;
     Shiny.compareVersion = compareVersion;
     Shiny.inputBindings = inputBindings;
+    Shiny.InputBinding = InputBinding;
     Shiny.outputBindings = outputBindings;
+    Shiny.OutputBinding = OutputBinding;
     Shiny.resetBrush = resetBrush;
     Shiny.notifications = {
       show: show,

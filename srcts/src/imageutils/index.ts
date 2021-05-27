@@ -11,12 +11,6 @@ import { initCoordmap } from "./initCoordmap";
 import { initPanelScales } from "./initPanelScales";
 import { shiftToRange } from "./shiftToRange";
 
-type OffsetType = {
-  x: number;
-  y: number;
-};
-
-export type { OffsetType };
 export {
   disableDrag,
   initPanelScales,

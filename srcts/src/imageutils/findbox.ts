@@ -1,7 +1,7 @@
 // Given two sets of x/y coordinates, return an object representing the min
 // and max x and y values. (This could be generalized to any number of
 
-import { OffsetType } from ".";
+import { OffsetType } from "./imageTypes";
 
 // points).
 function findBox(

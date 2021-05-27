@@ -1,9 +1,14 @@
 import $ from "jquery";
-import { OffsetType } from ".";
 import { shinySetInputValue } from "../shiny/init";
 import { mapValues } from "../utils";
-import { BoundsType } from "./createBrush";
-import { initPanelScales, PanelType } from "./initPanelScales";
+import {
+  BoundsType,
+  CoordmapType,
+  OffsetCssType,
+  OffsetImgType,
+  OffsetType,
+} from "./imageTypes";
+import { initPanelScales } from "./initPanelScales";
 
 // -----------------------------------------------------------------------
 // Utility functions for finding dimensions and locations of DOM elements
@@ -64,54 +69,6 @@ function findDims($el: JQuery<HTMLElement>) {
     y: contentRatio.y * boundingRect.height,
   };
 }
-
-type OffsetCssType = Record<string, number>;
-type OffsetImgType = Record<string, number>;
-
-type Coords = {
-  // eslint-disable-next-line camelcase
-  coords_css: OffsetType;
-  // eslint-disable-next-line camelcase
-  coords_img: OffsetType;
-  x?: number;
-  y?: number;
-  // eslint-disable-next-line camelcase
-  img_css_ratio?: OffsetType;
-  mapping?: PanelType["mapping"];
-  domain?: PanelType["domain"];
-  range?: PanelType["range"];
-  log?: PanelType["log"];
-};
-
-type CoordmapType = {
-  panels: Array<PanelType>;
-  dims: {
-    height: number;
-    width: number;
-  };
-  mouseOffsetCss: (evt: JQuery.MouseEventBase) => OffsetType;
-  scaleCssToImg: {
-    (offsetCss: BoundsType): BoundsType;
-    (offsetCss: OffsetType): OffsetType;
-    (offsetCss: OffsetCssType): OffsetImgType;
-  };
-  scaleImgToCss: {
-    (offsetImg: BoundsType): BoundsType;
-    (offsetImg: OffsetType): OffsetType;
-    (offsetImg: OffsetImgType): OffsetCssType;
-  };
-  imgToCssScalingRatio: () => OffsetType;
-  cssToImgScalingRatio: () => OffsetType;
-
-  getPanelCss: (offsetCss: OffsetCssType, expand?: number) => PanelType;
-  isInPanelCss: (offsetCss: OffsetCssType, expand?: number) => boolean;
-
-  mouseCoordinateSender: (
-    inputId: string,
-    clip?: boolean,
-    nullOutside?: boolean
-  ) => (e: JQuery.MouseDownEvent) => void;
-};
 
 // This adds functions to the coordmap object to handle various
 // coordinate-mapping tasks, and send information to the server. The input

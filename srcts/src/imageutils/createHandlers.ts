@@ -1,11 +1,17 @@
 import $ from "jquery";
-import { createBrush, OffsetType } from ".";
+import { createBrush } from ".";
 import { imageOutputBinding } from "../bindings/output/image";
 import { shinySetInputValue } from "../shiny/init";
 import { Debouncer, Throttler } from "../time";
-import { BoundsCss, BoundsType, BrushOptsType } from "./createBrush";
-import { CoordmapType } from "./initCoordmap";
-import { PanelType } from "./initPanelScales";
+import { BrushOptsType } from "./createBrush";
+import {
+  BrushInfo,
+  ClipType,
+  CreateHandlerType,
+  CoordmapType,
+  NullOutsideType,
+  InputIdType,
+} from "./imageTypes";
 
 // ----------------------------------------------------------
 // Handler creators for click, hover, brush.
@@ -13,40 +19,6 @@ import { PanelType } from "./initPanelScales";
 // members are callbacks that are meant to be bound to events on $el with
 // the same name (like 'mousedown').
 // ----------------------------------------------------------
-
-type CreateHandlerType = {
-  mousemove?: (e: JQuery.MouseMoveEvent) => void;
-  mouseout?: (e: JQuery.MouseOutEvent) => void;
-  mousedown?: (e: JQuery.MouseDownEvent) => void;
-  onResetImg: () => void;
-  onResize?: () => void;
-};
-
-type BrushInfo = {
-  xmin: number;
-  xmax: number;
-  ymin: number;
-  ymax: number;
-  // eslint-disable-next-line camelcase
-  coords_css?: BoundsCss;
-  // eslint-disable-next-line camelcase
-  coords_img?: BoundsType;
-  x?: number;
-  y?: number;
-  // eslint-disable-next-line camelcase
-  img_css_ratio?: OffsetType;
-  mapping?: PanelType["mapping"];
-  domain?: PanelType["domain"];
-  range?: PanelType["range"];
-  log?: PanelType["log"];
-  direction?: BrushOptsType["brushDirection"];
-  brushId?: string;
-  outputId?: string;
-};
-
-type InputIdType = Parameters<CoordmapType["mouseCoordinateSender"]>[0];
-type ClipType = Parameters<CoordmapType["mouseCoordinateSender"]>[1];
-type NullOutsideType = Parameters<CoordmapType["mouseCoordinateSender"]>[2];
 
 function createClickHandler(
   inputId: InputIdType,

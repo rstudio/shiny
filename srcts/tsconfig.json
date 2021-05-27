@@ -2,7 +2,6 @@
   "declaration": true,
   "compilerOptions": {
     "target": "ES5",
-    "preserveConstEnums": false,
     "isolatedModules": true,
     "esModuleInterop": true
   },

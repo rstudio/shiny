@@ -15,12 +15,13 @@ class FileProcessor {
   aborted = false;
   completed = false;
 
-  constructor(files: FileList) {
+  constructor(files: FileList, exec$run = true) {
     this.files = files;
 
     // TODO: Register error/abort callbacks
-
-    this.$run();
+    if (exec$run) {
+      this.$run();
+    }
   }
 
   // Begin callbacks. Subclassers/cloners may override any or all of these.
@@ -104,10 +105,12 @@ class FileUploader extends FileProcessor {
     files: FileList,
     el: HTMLElement
   ) {
-    super(files);
+    // Init super with files, do not execute `this.$run()` before setting variables
+    super(files, false);
     this.shinyapp = shinyapp;
     this.id = id;
     this.el = el;
+    this.$run();
   }
 
   makeRequest(method, args, onSuccess, onFailure, blobs): void {
@@ -260,4 +263,4 @@ class FileUploader extends FileProcessor {
   }
 }
 
-export { FileProcessor, FileUploader };
+export { FileUploader };

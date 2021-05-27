@@ -27,7 +27,7 @@
     "@typescript-eslint/parser": "^4.25.0",
     "bootstrap-datepicker": "1.9.0",
     "browserslist": "^4.16.6",
-    "esbuild": "^0.8.57",
+    "esbuild": "^0.12.4",
     "esbuild-plugin-babel": "0.2.3",
     "esbuild-plugin-globals": "^0.1.1",
     "eslint": "^7.27.0",
@@ -70,7 +70,7 @@
     "checks": "yarn run lint && yarn run typescript-check && yarn run type-check && yarn run import-check"
   },
   "dependencies": {
-    "core-js": "^3.12.1",
+    "core-js": "^3.13.0",
     "lodash": "^4.17.21",
     "util-inspect": "https://github.com/deecewan/browser-util-inspect#c0b4350df4378ffd743e8c36dd3898ce3992823e"
   }

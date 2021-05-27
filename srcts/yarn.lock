@@ -4289,10 +4289,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"core-js@npm:^3.12.1":
-  version: 3.12.1
-  resolution: "core-js@npm:3.12.1"
-  checksum: 8b1d05579e7ddeafcd390001cc893540275fa3e658a00ae57f88954411a25bdfe583debb1929c6a50e40631cc07f2092490ea2284b35ffb922b23d7677060f28
+"core-js@npm:^3.13.0":
+  version: 3.13.0
+  resolution: "core-js@npm:3.13.0"
+  checksum: ec1fb8ee6692353c1c4eec0ac6cf58010e927458a373a33f1a4a9cc89391130dd378de4ad6e4e51b68ee6ea9bc622ae7ed82eeac6cea6076f2115e7ec632c6e5
   languageName: node
   linkType: hard
 
@@ -5329,12 +5329,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"esbuild@npm:^0.8.57":
-  version: 0.8.57
-  resolution: "esbuild@npm:0.8.57"
+"esbuild@npm:^0.12.4":
+  version: 0.12.4
+  resolution: "esbuild@npm:0.12.4"
   bin:
     esbuild: bin/esbuild
-  checksum: 0942950a21a30b57a324380cfedcb425cc1245412e720593415afa0d4f1b7c5f931aa6330937dc1353c754d45c1e5ff7dbc52eb514f54d85517114971300b454
+  checksum: 77170f047aa2816d29a0b51acf7c69b58182698425bc8b61b5103a8fbf00720bbd35e18ae9203fae3837f490e3c22b709b8994931f7b79ee6f9c5fcffb131226
   languageName: node
   linkType: hard
 
@@ -10774,8 +10774,8 @@ fsevents@^2.1.2:
     "@typescript-eslint/parser": ^4.25.0
     bootstrap-datepicker: 1.9.0
     browserslist: ^4.16.6
-    core-js: ^3.12.1
-    esbuild: ^0.8.57
+    core-js: ^3.13.0
+    esbuild: ^0.12.4
     esbuild-plugin-babel: 0.2.3
     esbuild-plugin-globals: ^0.1.1
     eslint: ^7.27.0

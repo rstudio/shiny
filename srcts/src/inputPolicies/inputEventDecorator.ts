@@ -1,5 +1,6 @@
 import $ from "jquery";
-import type { priorityType, InputPolicy } from "./InputPolicy";
+import type { priorityType } from "./InputPolicy";
+import { InputPolicy } from "./InputPolicy";
 import type { InputBinding } from "../bindings";
 import type { ShinyEventInputChanged } from "../events/shinyEvents";
 import { splitInputNameType } from "./splitInputNameType";

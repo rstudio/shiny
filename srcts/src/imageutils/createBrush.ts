@@ -1,15 +1,59 @@
 import $ from "jquery";
-import { CoordmapType, findOrigin } from "../imageutils/initCoordmap";
-import { findBox, shiftToRange } from ".";
+import type { CoordmapType } from "./initCoordmap";
+import { findOrigin } from "./initCoordmap";
 import { equal, isnan, mapValues, roundSignif } from "../utils";
-import {
-  BoundsCss,
-  BoundsData,
-  BrushOptsType,
-  ImageState,
-  OffsetType,
-  PanelType,
-} from "./imageTypes";
+import type { PanelType } from "./initPanelScales";
+
+import type { OffsetType } from "./findbox";
+import { findBox } from "./findbox";
+import { shiftToRange } from "./shiftToRange";
+
+type BoundsType = {
+  xmin: number;
+  xmax: number;
+  ymin: number;
+  ymax: number;
+};
+type BoundsCss = BoundsType;
+type BoundsData = BoundsType;
+
+type ImageState = {
+  brushing?: boolean;
+  dragging?: boolean;
+  resizing?: boolean;
+
+  // Offset of last mouse down and up events (in CSS pixels)
+  down?: OffsetType;
+  up?: OffsetType;
+
+  // Which side(s) we're currently resizing
+  resizeSides?: {
+    left: boolean;
+    right: boolean;
+    top: boolean;
+    bottom: boolean;
+  };
+
+  boundsCss?: BoundsCss;
+  boundsData?: BoundsData;
+
+  // Panel object that the brush is in
+  panel?: PanelType;
+
+  // The bounds at the start of a drag/resize (in CSS pixels)
+  changeStartBounds?: BoundsType;
+};
+
+type BrushOptsType = {
+  brushDirection: "x" | "y" | "xy";
+  brushClip: boolean;
+  brushFill: string;
+  brushOpacity: string;
+  brushStroke: string;
+  brushDelayType?: "throttle" | "debounce";
+  brushDelay?: number;
+  brushResetOnNew?: boolean;
+};
 
 type BrushType = {
   reset: () => void;
@@ -594,4 +638,4 @@ function createBrush(
 
 export { createBrush };
 
-export type { BrushOptsType, BoundsCss };
+export type { BoundsType, BrushOptsType, BoundsCss };

@@ -1902,13 +1902,6 @@
     };
   });
 
-  // node_modules/core-js/internals/same-value.js
-  var require_same_value = __commonJS(function(exports, module) {
-    module.exports = Object.is || function is(x, y) {
-      return x === y ? x !== 0 || 1 / x === 1 / y : x != x && y != y;
-    };
-  });
-
   // node_modules/core-js/internals/object-to-array.js
   var require_object_to_array = __commonJS(function(exports, module) {
     var DESCRIPTORS6 = require_descriptors();
@@ -2070,6 +2063,13 @@
       } catch (error) {
       }
       return ITERATION_SUPPORT;
+    };
+  });
+
+  // node_modules/core-js/internals/same-value.js
+  var require_same_value = __commonJS(function(exports, module) {
+    module.exports = Object.is || function is(x, y) {
+      return x === y ? x !== 0 || 1 / x === 1 / y : x != x && y != y;
     };
   });
 
@@ -3133,7 +3133,7 @@
   defineWellKnownSymbol2("iterator");
 
   // src/bindings/output/image.ts
-  var import_es_array_iterator7 = __toModule(require_es_array_iterator());
+  var import_es_array_iterator = __toModule(require_es_array_iterator());
 
   // node_modules/core-js/modules/es.string.iterator.js
   "use strict";
@@ -3199,7 +3199,7 @@
   var METHOD_NAME;
 
   // src/bindings/output/image.ts
-  var import_jquery21 = __toModule(require_jquery());
+  var import_jquery11 = __toModule(require_jquery());
 
   // node_modules/core-js/modules/es.array.join.js
   "use strict";
@@ -4085,3083 +4085,15 @@
   }();
 
   // src/imageutils/createBrush.ts
-  var import_jquery18 = __toModule(require_jquery());
+  var import_jquery8 = __toModule(require_jquery());
 
   // src/imageutils/initCoordmap.ts
-  var import_jquery17 = __toModule(require_jquery());
-
-  // src/shiny/init.ts
-  var import_es_regexp_exec8 = __toModule(require_es_regexp_exec());
-
-  // node_modules/core-js/modules/es.string.search.js
-  "use strict";
-  var fixRegExpWellKnownSymbolLogic4 = require_fix_regexp_well_known_symbol_logic();
-  var anObject7 = require_an_object();
-  var requireObjectCoercible4 = require_require_object_coercible();
-  var sameValue = require_same_value();
-  var regExpExec3 = require_regexp_exec_abstract();
-  fixRegExpWellKnownSymbolLogic4("search", 1, function(SEARCH, nativeSearch, maybeCallNative) {
-    return [
-      function search(regexp) {
-        var O = requireObjectCoercible4(this);
-        var searcher = regexp == void 0 ? void 0 : regexp[SEARCH];
-        return searcher !== void 0 ? searcher.call(regexp, O) : new RegExp(regexp)[SEARCH](String(O));
-      },
-      function(regexp) {
-        var res = maybeCallNative(nativeSearch, regexp, this);
-        if (res.done)
-          return res.value;
-        var rx = anObject7(regexp);
-        var S = String(this);
-        var previousLastIndex = rx.lastIndex;
-        if (!sameValue(previousLastIndex, 0))
-          rx.lastIndex = 0;
-        var result = regExpExec3(rx, S);
-        if (!sameValue(rx.lastIndex, previousLastIndex))
-          rx.lastIndex = previousLastIndex;
-        return result === null ? -1 : result.index;
-      }
-    ];
-  });
-
-  // src/shiny/init.ts
-  var import_jquery16 = __toModule(require_jquery());
-
-  // src/inputPolicies/inputBatchSender.ts
-  var import_es_array_iterator = __toModule(require_es_array_iterator());
   var import_jquery7 = __toModule(require_jquery());
 
-  // src/inputPolicies/InputPolicy.ts
-  function _classCallCheck2(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  }
-  function _defineProperties2(target, props) {
-    for (var i = 0; i < props.length; i++) {
-      var descriptor = props[i];
-      descriptor.enumerable = descriptor.enumerable || false;
-      descriptor.configurable = true;
-      if ("value" in descriptor)
-        descriptor.writable = true;
-      Object.defineProperty(target, descriptor.key, descriptor);
-    }
-  }
-  function _createClass2(Constructor, protoProps, staticProps) {
-    if (protoProps)
-      _defineProperties2(Constructor.prototype, protoProps);
-    if (staticProps)
-      _defineProperties2(Constructor, staticProps);
-    return Constructor;
-  }
-  function _defineProperty2(obj, key, value) {
-    if (key in obj) {
-      Object.defineProperty(obj, key, {value: value, enumerable: true, configurable: true, writable: true});
-    } else {
-      obj[key] = value;
-    }
-    return obj;
-  }
-  var InputPolicy = /* @__PURE__ */ function() {
-    function InputPolicy2() {
-      _classCallCheck2(this, InputPolicy2);
-      _defineProperty2(this, "target", void 0);
-    }
-    _createClass2(InputPolicy2, [{
-      key: "setInput",
-      value: function setInput(name, value, opts) {
-        throw "not implemented";
-        name;
-        value;
-        opts;
-      }
-    }]);
-    return InputPolicy2;
-  }();
-
-  // src/inputPolicies/inputBatchSender.ts
-  function _typeof(obj) {
-    "@babel/helpers - typeof";
-    if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
-      _typeof = function _typeof27(obj2) {
-        return typeof obj2;
-      };
-    } else {
-      _typeof = function _typeof27(obj2) {
-        return obj2 && typeof Symbol === "function" && obj2.constructor === Symbol && obj2 !== Symbol.prototype ? "symbol" : typeof obj2;
-      };
-    }
-    return _typeof(obj);
-  }
-  function _classCallCheck3(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  }
-  function _defineProperties3(target, props) {
-    for (var i = 0; i < props.length; i++) {
-      var descriptor = props[i];
-      descriptor.enumerable = descriptor.enumerable || false;
-      descriptor.configurable = true;
-      if ("value" in descriptor)
-        descriptor.writable = true;
-      Object.defineProperty(target, descriptor.key, descriptor);
-    }
-  }
-  function _createClass3(Constructor, protoProps, staticProps) {
-    if (protoProps)
-      _defineProperties3(Constructor.prototype, protoProps);
-    if (staticProps)
-      _defineProperties3(Constructor, staticProps);
-    return Constructor;
-  }
-  function _inherits(subClass, superClass) {
-    if (typeof superClass !== "function" && superClass !== null) {
-      throw new TypeError("Super expression must either be null or a function");
-    }
-    subClass.prototype = Object.create(superClass && superClass.prototype, {constructor: {value: subClass, writable: true, configurable: true}});
-    if (superClass)
-      _setPrototypeOf(subClass, superClass);
-  }
-  function _setPrototypeOf(o, p) {
-    _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf26(o2, p2) {
-      o2.__proto__ = p2;
-      return o2;
-    };
-    return _setPrototypeOf(o, p);
-  }
-  function _createSuper(Derived) {
-    var hasNativeReflectConstruct = _isNativeReflectConstruct();
-    return function _createSuperInternal() {
-      var Super = _getPrototypeOf(Derived), result;
-      if (hasNativeReflectConstruct) {
-        var NewTarget = _getPrototypeOf(this).constructor;
-        result = Reflect.construct(Super, arguments, NewTarget);
-      } else {
-        result = Super.apply(this, arguments);
-      }
-      return _possibleConstructorReturn(this, result);
-    };
-  }
-  function _possibleConstructorReturn(self2, call) {
-    if (call && (_typeof(call) === "object" || typeof call === "function")) {
-      return call;
-    }
-    return _assertThisInitialized(self2);
-  }
-  function _assertThisInitialized(self2) {
-    if (self2 === void 0) {
-      throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
-    }
-    return self2;
-  }
-  function _isNativeReflectConstruct() {
-    if (typeof Reflect === "undefined" || !Reflect.construct)
-      return false;
-    if (Reflect.construct.sham)
-      return false;
-    if (typeof Proxy === "function")
-      return true;
-    try {
-      Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function() {
-      }));
-      return true;
-    } catch (e) {
-      return false;
-    }
-  }
-  function _getPrototypeOf(o) {
-    _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf26(o2) {
-      return o2.__proto__ || Object.getPrototypeOf(o2);
-    };
-    return _getPrototypeOf(o);
-  }
-  function _defineProperty3(obj, key, value) {
-    if (key in obj) {
-      Object.defineProperty(obj, key, {value: value, enumerable: true, configurable: true, writable: true});
-    } else {
-      obj[key] = value;
-    }
-    return obj;
-  }
-  var InputBatchSender = /* @__PURE__ */ function(_InputPolicy) {
-    _inherits(InputBatchSender2, _InputPolicy);
-    var _super = _createSuper(InputBatchSender2);
-    function InputBatchSender2(shinyapp) {
-      var _this;
-      _classCallCheck3(this, InputBatchSender2);
-      _this = _super.call(this);
-      _defineProperty3(_assertThisInitialized(_this), "shinyapp", void 0);
-      _defineProperty3(_assertThisInitialized(_this), "timerId", null);
-      _defineProperty3(_assertThisInitialized(_this), "pendingData", {});
-      _defineProperty3(_assertThisInitialized(_this), "reentrant", false);
-      _defineProperty3(_assertThisInitialized(_this), "lastChanceCallback", []);
-      _this.shinyapp = shinyapp;
-      return _this;
-    }
-    _createClass3(InputBatchSender2, [{
-      key: "setInput",
-      value: function setInput(nameType, value, opts) {
-        this.pendingData[nameType] = value;
-        if (!this.reentrant) {
-          if (opts.priority === "event") {
-            this.$sendNow();
-          } else if (!this.timerId) {
-            this.timerId = setTimeout(this.$sendNow.bind(this), 0);
-          }
-        }
-      }
-    }, {
-      key: "$sendNow",
-      value: function $sendNow() {
-        if (this.reentrant) {
-          console.trace("Unexpected reentrancy in InputBatchSender!");
-        }
-        this.reentrant = true;
-        try {
-          this.timerId = null;
-          import_jquery7.default.each(this.lastChanceCallback, function(i, callback) {
-            callback();
-          });
-          var currentData = this.pendingData;
-          this.pendingData = {};
-          this.shinyapp.sendInput(currentData);
-        } finally {
-          this.reentrant = false;
-        }
-      }
-    }]);
-    return InputBatchSender2;
-  }(InputPolicy);
-
-  // src/inputPolicies/inputNoResendDecorator.ts
-  var import_es_array_iterator2 = __toModule(require_es_array_iterator());
-
-  // src/inputPolicies/splitInputNameType.ts
-  var import_es_regexp_exec3 = __toModule(require_es_regexp_exec());
-  function splitInputNameType(nameType) {
-    var name2 = nameType.split(":");
-    return {
-      name: name2[0],
-      inputType: name2.length > 1 ? name2[1] : ""
-    };
-  }
-
-  // src/inputPolicies/inputNoResendDecorator.ts
-  function _typeof2(obj) {
-    "@babel/helpers - typeof";
-    if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
-      _typeof2 = function _typeof27(obj2) {
-        return typeof obj2;
-      };
-    } else {
-      _typeof2 = function _typeof27(obj2) {
-        return obj2 && typeof Symbol === "function" && obj2.constructor === Symbol && obj2 !== Symbol.prototype ? "symbol" : typeof obj2;
-      };
-    }
-    return _typeof2(obj);
-  }
-  function _classCallCheck4(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  }
-  function _defineProperties4(target, props) {
-    for (var i = 0; i < props.length; i++) {
-      var descriptor = props[i];
-      descriptor.enumerable = descriptor.enumerable || false;
-      descriptor.configurable = true;
-      if ("value" in descriptor)
-        descriptor.writable = true;
-      Object.defineProperty(target, descriptor.key, descriptor);
-    }
-  }
-  function _createClass4(Constructor, protoProps, staticProps) {
-    if (protoProps)
-      _defineProperties4(Constructor.prototype, protoProps);
-    if (staticProps)
-      _defineProperties4(Constructor, staticProps);
-    return Constructor;
-  }
-  function _inherits2(subClass, superClass) {
-    if (typeof superClass !== "function" && superClass !== null) {
-      throw new TypeError("Super expression must either be null or a function");
-    }
-    subClass.prototype = Object.create(superClass && superClass.prototype, {constructor: {value: subClass, writable: true, configurable: true}});
-    if (superClass)
-      _setPrototypeOf2(subClass, superClass);
-  }
-  function _setPrototypeOf2(o, p) {
-    _setPrototypeOf2 = Object.setPrototypeOf || function _setPrototypeOf26(o2, p2) {
-      o2.__proto__ = p2;
-      return o2;
-    };
-    return _setPrototypeOf2(o, p);
-  }
-  function _createSuper2(Derived) {
-    var hasNativeReflectConstruct = _isNativeReflectConstruct2();
-    return function _createSuperInternal() {
-      var Super = _getPrototypeOf2(Derived), result;
-      if (hasNativeReflectConstruct) {
-        var NewTarget = _getPrototypeOf2(this).constructor;
-        result = Reflect.construct(Super, arguments, NewTarget);
-      } else {
-        result = Super.apply(this, arguments);
-      }
-      return _possibleConstructorReturn2(this, result);
-    };
-  }
-  function _possibleConstructorReturn2(self2, call) {
-    if (call && (_typeof2(call) === "object" || typeof call === "function")) {
-      return call;
-    }
-    return _assertThisInitialized2(self2);
-  }
-  function _assertThisInitialized2(self2) {
-    if (self2 === void 0) {
-      throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
-    }
-    return self2;
-  }
-  function _isNativeReflectConstruct2() {
-    if (typeof Reflect === "undefined" || !Reflect.construct)
-      return false;
-    if (Reflect.construct.sham)
-      return false;
-    if (typeof Proxy === "function")
-      return true;
-    try {
-      Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function() {
-      }));
-      return true;
-    } catch (e) {
-      return false;
-    }
-  }
-  function _getPrototypeOf2(o) {
-    _getPrototypeOf2 = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf26(o2) {
-      return o2.__proto__ || Object.getPrototypeOf(o2);
-    };
-    return _getPrototypeOf2(o);
-  }
-  function _defineProperty4(obj, key, value) {
-    if (key in obj) {
-      Object.defineProperty(obj, key, {value: value, enumerable: true, configurable: true, writable: true});
-    } else {
-      obj[key] = value;
-    }
-    return obj;
-  }
-  var InputNoResendDecorator = /* @__PURE__ */ function(_InputPolicy) {
-    _inherits2(InputNoResendDecorator2, _InputPolicy);
-    var _super = _createSuper2(InputNoResendDecorator2);
-    function InputNoResendDecorator2(target) {
-      var _this;
-      var initialValues = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : {};
-      _classCallCheck4(this, InputNoResendDecorator2);
-      _this = _super.call(this);
-      _defineProperty4(_assertThisInitialized2(_this), "lastSentValues", void 0);
-      _this.target = target;
-      _this.reset(initialValues);
-      return _this;
-    }
-    _createClass4(InputNoResendDecorator2, [{
-      key: "setInput",
-      value: function setInput(nameType, value, opts) {
-        var _splitInputNameType = splitInputNameType(nameType), inputName = _splitInputNameType.name, inputType = _splitInputNameType.inputType;
-        var jsonValue = JSON.stringify(value);
-        if (opts.priority !== "event" && this.lastSentValues[inputName] && this.lastSentValues[inputName].jsonValue === jsonValue && this.lastSentValues[inputName].inputType === inputType) {
-          return;
-        }
-        this.lastSentValues[inputName] = {
-          jsonValue: jsonValue,
-          inputType: inputType
-        };
-        this.target.setInput(nameType, value, opts);
-      }
-    }, {
-      key: "reset",
-      value: function reset() {
-        var values = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : {};
-        var cacheValues = {};
-        for (var inputName in values) {
-          if (hasOwnProperty(values, inputName)) {
-            var _splitInputNameType2 = splitInputNameType(inputName), name = _splitInputNameType2.name, inputType = _splitInputNameType2.inputType;
-            cacheValues[name] = {
-              jsonValue: JSON.stringify(values[inputName]),
-              inputType: inputType
-            };
-          }
-        }
-        this.lastSentValues = cacheValues;
-      }
-    }, {
-      key: "forget",
-      value: function forget(name) {
-        delete this.lastSentValues[name];
-      }
-    }]);
-    return InputNoResendDecorator2;
-  }(InputPolicy);
-
-  // src/inputPolicies/inputEventDecorator.ts
-  var import_es_array_iterator3 = __toModule(require_es_array_iterator());
-  var import_jquery8 = __toModule(require_jquery());
-  function _typeof3(obj) {
-    "@babel/helpers - typeof";
-    if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
-      _typeof3 = function _typeof27(obj2) {
-        return typeof obj2;
-      };
-    } else {
-      _typeof3 = function _typeof27(obj2) {
-        return obj2 && typeof Symbol === "function" && obj2.constructor === Symbol && obj2 !== Symbol.prototype ? "symbol" : typeof obj2;
-      };
-    }
-    return _typeof3(obj);
-  }
-  function _classCallCheck5(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  }
-  function _defineProperties5(target, props) {
-    for (var i = 0; i < props.length; i++) {
-      var descriptor = props[i];
-      descriptor.enumerable = descriptor.enumerable || false;
-      descriptor.configurable = true;
-      if ("value" in descriptor)
-        descriptor.writable = true;
-      Object.defineProperty(target, descriptor.key, descriptor);
-    }
-  }
-  function _createClass5(Constructor, protoProps, staticProps) {
-    if (protoProps)
-      _defineProperties5(Constructor.prototype, protoProps);
-    if (staticProps)
-      _defineProperties5(Constructor, staticProps);
-    return Constructor;
-  }
-  function _inherits3(subClass, superClass) {
-    if (typeof superClass !== "function" && superClass !== null) {
-      throw new TypeError("Super expression must either be null or a function");
-    }
-    subClass.prototype = Object.create(superClass && superClass.prototype, {constructor: {value: subClass, writable: true, configurable: true}});
-    if (superClass)
-      _setPrototypeOf3(subClass, superClass);
-  }
-  function _setPrototypeOf3(o, p) {
-    _setPrototypeOf3 = Object.setPrototypeOf || function _setPrototypeOf26(o2, p2) {
-      o2.__proto__ = p2;
-      return o2;
-    };
-    return _setPrototypeOf3(o, p);
-  }
-  function _createSuper3(Derived) {
-    var hasNativeReflectConstruct = _isNativeReflectConstruct3();
-    return function _createSuperInternal() {
-      var Super = _getPrototypeOf3(Derived), result;
-      if (hasNativeReflectConstruct) {
-        var NewTarget = _getPrototypeOf3(this).constructor;
-        result = Reflect.construct(Super, arguments, NewTarget);
-      } else {
-        result = Super.apply(this, arguments);
-      }
-      return _possibleConstructorReturn3(this, result);
-    };
-  }
-  function _possibleConstructorReturn3(self2, call) {
-    if (call && (_typeof3(call) === "object" || typeof call === "function")) {
-      return call;
-    }
-    return _assertThisInitialized3(self2);
-  }
-  function _assertThisInitialized3(self2) {
-    if (self2 === void 0) {
-      throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
-    }
-    return self2;
-  }
-  function _isNativeReflectConstruct3() {
-    if (typeof Reflect === "undefined" || !Reflect.construct)
-      return false;
-    if (Reflect.construct.sham)
-      return false;
-    if (typeof Proxy === "function")
-      return true;
-    try {
-      Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function() {
-      }));
-      return true;
-    } catch (e) {
-      return false;
-    }
-  }
-  function _getPrototypeOf3(o) {
-    _getPrototypeOf3 = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf26(o2) {
-      return o2.__proto__ || Object.getPrototypeOf(o2);
-    };
-    return _getPrototypeOf3(o);
-  }
-  var InputEventDecorator = /* @__PURE__ */ function(_InputPolicy) {
-    _inherits3(InputEventDecorator2, _InputPolicy);
-    var _super = _createSuper3(InputEventDecorator2);
-    function InputEventDecorator2(target) {
-      var _this;
-      _classCallCheck5(this, InputEventDecorator2);
-      _this = _super.call(this);
-      _this.target = target;
-      return _this;
-    }
-    _createClass5(InputEventDecorator2, [{
-      key: "setInput",
-      value: function setInput(nameType, value, opts) {
-        var evt = jQuery.Event("shiny:inputchanged");
-        var input = splitInputNameType(nameType);
-        evt.name = input.name;
-        evt.inputType = input.inputType;
-        evt.value = value;
-        evt.binding = opts.binding;
-        evt.el = opts.el;
-        evt.priority = opts.priority;
-        (0, import_jquery8.default)(opts.el).trigger(evt);
-        if (!evt.isDefaultPrevented()) {
-          var name = evt.name;
-          if (evt.inputType !== "")
-            name += ":" + evt.inputType;
-          this.target.setInput(name, evt.value, {
-            priority: opts.priority
-          });
-        }
-      }
-    }]);
-    return InputEventDecorator2;
-  }(InputPolicy);
-
-  // src/inputPolicies/inputRateDecorator.ts
-  var import_es_array_iterator4 = __toModule(require_es_array_iterator());
-
-  // src/time/debounce.ts
-  function _classCallCheck6(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  }
-  function _defineProperties6(target, props) {
-    for (var i = 0; i < props.length; i++) {
-      var descriptor = props[i];
-      descriptor.enumerable = descriptor.enumerable || false;
-      descriptor.configurable = true;
-      if ("value" in descriptor)
-        descriptor.writable = true;
-      Object.defineProperty(target, descriptor.key, descriptor);
-    }
-  }
-  function _createClass6(Constructor, protoProps, staticProps) {
-    if (protoProps)
-      _defineProperties6(Constructor.prototype, protoProps);
-    if (staticProps)
-      _defineProperties6(Constructor, staticProps);
-    return Constructor;
-  }
-  function _defineProperty5(obj, key, value) {
-    if (key in obj) {
-      Object.defineProperty(obj, key, {value: value, enumerable: true, configurable: true, writable: true});
-    } else {
-      obj[key] = value;
-    }
-    return obj;
-  }
-  var Debouncer = /* @__PURE__ */ function() {
-    function Debouncer2(target, func, delayMs) {
-      _classCallCheck6(this, Debouncer2);
-      _defineProperty5(this, "target", void 0);
-      _defineProperty5(this, "func", void 0);
-      _defineProperty5(this, "delayMs", void 0);
-      _defineProperty5(this, "timerId", void 0);
-      _defineProperty5(this, "args", void 0);
-      this.target = target;
-      this.func = func;
-      this.delayMs = delayMs;
-      this.timerId = null;
-      this.args = null;
-    }
-    _createClass6(Debouncer2, [{
-      key: "normalCall",
-      value: function normalCall() {
-        var _this = this;
-        this.$clearTimer();
-        for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-          args[_key] = arguments[_key];
-        }
-        this.args = args;
-        this.timerId = setTimeout(function() {
-          if (_this.timerId === null)
-            return;
-          _this.$clearTimer();
-          _this.$invoke();
-        }, this.delayMs);
-      }
-    }, {
-      key: "immediateCall",
-      value: function immediateCall() {
-        this.$clearTimer();
-        for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-          args[_key2] = arguments[_key2];
-        }
-        this.args = args;
-        this.$invoke();
-      }
-    }, {
-      key: "isPending",
-      value: function isPending() {
-        return this.timerId !== null;
-      }
-    }, {
-      key: "$clearTimer",
-      value: function $clearTimer() {
-        if (this.timerId !== null) {
-          clearTimeout(this.timerId);
-          this.timerId = null;
-        }
-      }
-    }, {
-      key: "$invoke",
-      value: function $invoke() {
-        this.func.apply(this.target, this.args);
-        this.args = null;
-      }
-    }]);
-    return Debouncer2;
-  }();
-  function debounce(threshold, func) {
-    var timerId = null;
-    return function() {
-      var _this2 = this;
-      for (var _len3 = arguments.length, args = new Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
-        args[_key3] = arguments[_key3];
-      }
-      if (timerId !== null) {
-        clearTimeout(timerId);
-        timerId = null;
-      }
-      timerId = setTimeout(function() {
-        if (timerId === null)
-          return;
-        timerId = null;
-        func.apply(_this2, args);
-      }, threshold);
-    };
-  }
-
-  // src/time/invoke.ts
-  function _classCallCheck7(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  }
-  function _defineProperties7(target, props) {
-    for (var i = 0; i < props.length; i++) {
-      var descriptor = props[i];
-      descriptor.enumerable = descriptor.enumerable || false;
-      descriptor.configurable = true;
-      if ("value" in descriptor)
-        descriptor.writable = true;
-      Object.defineProperty(target, descriptor.key, descriptor);
-    }
-  }
-  function _createClass7(Constructor, protoProps, staticProps) {
-    if (protoProps)
-      _defineProperties7(Constructor.prototype, protoProps);
-    if (staticProps)
-      _defineProperties7(Constructor, staticProps);
-    return Constructor;
-  }
-  function _defineProperty6(obj, key, value) {
-    if (key in obj) {
-      Object.defineProperty(obj, key, {value: value, enumerable: true, configurable: true, writable: true});
-    } else {
-      obj[key] = value;
-    }
-    return obj;
-  }
-  var Invoker = /* @__PURE__ */ function() {
-    function Invoker2(target, func) {
-      _classCallCheck7(this, Invoker2);
-      _defineProperty6(this, "target", void 0);
-      _defineProperty6(this, "func", void 0);
-      this.target = target;
-      this.func = func;
-    }
-    _createClass7(Invoker2, [{
-      key: "normalCall",
-      value: function normalCall() {
-        for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-          args[_key] = arguments[_key];
-        }
-        this.func.apply(this.target, args);
-      }
-    }, {
-      key: "immediateCall",
-      value: function immediateCall() {
-        for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-          args[_key2] = arguments[_key2];
-        }
-        this.func.apply(this.target, args);
-      }
-    }]);
-    return Invoker2;
-  }();
-
-  // src/time/throttle.ts
-  function _classCallCheck8(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  }
-  function _defineProperties8(target, props) {
-    for (var i = 0; i < props.length; i++) {
-      var descriptor = props[i];
-      descriptor.enumerable = descriptor.enumerable || false;
-      descriptor.configurable = true;
-      if ("value" in descriptor)
-        descriptor.writable = true;
-      Object.defineProperty(target, descriptor.key, descriptor);
-    }
-  }
-  function _createClass8(Constructor, protoProps, staticProps) {
-    if (protoProps)
-      _defineProperties8(Constructor.prototype, protoProps);
-    if (staticProps)
-      _defineProperties8(Constructor, staticProps);
-    return Constructor;
-  }
-  function _defineProperty7(obj, key, value) {
-    if (key in obj) {
-      Object.defineProperty(obj, key, {value: value, enumerable: true, configurable: true, writable: true});
-    } else {
-      obj[key] = value;
-    }
-    return obj;
-  }
-  var Throttler = /* @__PURE__ */ function() {
-    function Throttler2(target, func, delayMs) {
-      _classCallCheck8(this, Throttler2);
-      _defineProperty7(this, "target", void 0);
-      _defineProperty7(this, "func", void 0);
-      _defineProperty7(this, "delayMs", void 0);
-      _defineProperty7(this, "timerId", void 0);
-      _defineProperty7(this, "args", void 0);
-      this.target = target;
-      this.func = func;
-      this.delayMs = delayMs;
-      this.timerId = null;
-      this.args = null;
-    }
-    _createClass8(Throttler2, [{
-      key: "normalCall",
-      value: function normalCall() {
-        var _this = this;
-        for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-          args[_key] = arguments[_key];
-        }
-        this.args = args;
-        if (this.timerId === null) {
-          this.$invoke();
-          this.timerId = setTimeout(function() {
-            var _this$normalCall;
-            if (_this.timerId === null)
-              return;
-            _this.$clearTimer();
-            if (args.length > 0)
-              (_this$normalCall = _this.normalCall).apply.apply(_this$normalCall, [_this].concat(args));
-          }, this.delayMs);
-        }
-      }
-    }, {
-      key: "immediateCall",
-      value: function immediateCall() {
-        this.$clearTimer();
-        for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-          args[_key2] = arguments[_key2];
-        }
-        this.args = args;
-        this.$invoke();
-      }
-    }, {
-      key: "isPending",
-      value: function isPending() {
-        return this.timerId !== null;
-      }
-    }, {
-      key: "$clearTimer",
-      value: function $clearTimer() {
-        if (this.timerId !== null) {
-          clearTimeout(this.timerId);
-          this.timerId = null;
-        }
-      }
-    }, {
-      key: "$invoke",
-      value: function $invoke() {
-        this.func.apply(this.target, this.args);
-        this.args = null;
-      }
-    }]);
-    return Throttler2;
-  }();
-
-  // src/inputPolicies/inputRateDecorator.ts
-  function _typeof4(obj) {
-    "@babel/helpers - typeof";
-    if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
-      _typeof4 = function _typeof27(obj2) {
-        return typeof obj2;
-      };
-    } else {
-      _typeof4 = function _typeof27(obj2) {
-        return obj2 && typeof Symbol === "function" && obj2.constructor === Symbol && obj2 !== Symbol.prototype ? "symbol" : typeof obj2;
-      };
-    }
-    return _typeof4(obj);
-  }
-  function _classCallCheck9(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  }
-  function _defineProperties9(target, props) {
-    for (var i = 0; i < props.length; i++) {
-      var descriptor = props[i];
-      descriptor.enumerable = descriptor.enumerable || false;
-      descriptor.configurable = true;
-      if ("value" in descriptor)
-        descriptor.writable = true;
-      Object.defineProperty(target, descriptor.key, descriptor);
-    }
-  }
-  function _createClass9(Constructor, protoProps, staticProps) {
-    if (protoProps)
-      _defineProperties9(Constructor.prototype, protoProps);
-    if (staticProps)
-      _defineProperties9(Constructor, staticProps);
-    return Constructor;
-  }
-  function _inherits4(subClass, superClass) {
-    if (typeof superClass !== "function" && superClass !== null) {
-      throw new TypeError("Super expression must either be null or a function");
-    }
-    subClass.prototype = Object.create(superClass && superClass.prototype, {constructor: {value: subClass, writable: true, configurable: true}});
-    if (superClass)
-      _setPrototypeOf4(subClass, superClass);
-  }
-  function _setPrototypeOf4(o, p) {
-    _setPrototypeOf4 = Object.setPrototypeOf || function _setPrototypeOf26(o2, p2) {
-      o2.__proto__ = p2;
-      return o2;
-    };
-    return _setPrototypeOf4(o, p);
-  }
-  function _createSuper4(Derived) {
-    var hasNativeReflectConstruct = _isNativeReflectConstruct4();
-    return function _createSuperInternal() {
-      var Super = _getPrototypeOf4(Derived), result;
-      if (hasNativeReflectConstruct) {
-        var NewTarget = _getPrototypeOf4(this).constructor;
-        result = Reflect.construct(Super, arguments, NewTarget);
-      } else {
-        result = Super.apply(this, arguments);
-      }
-      return _possibleConstructorReturn4(this, result);
-    };
-  }
-  function _possibleConstructorReturn4(self2, call) {
-    if (call && (_typeof4(call) === "object" || typeof call === "function")) {
-      return call;
-    }
-    return _assertThisInitialized4(self2);
-  }
-  function _assertThisInitialized4(self2) {
-    if (self2 === void 0) {
-      throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
-    }
-    return self2;
-  }
-  function _isNativeReflectConstruct4() {
-    if (typeof Reflect === "undefined" || !Reflect.construct)
-      return false;
-    if (Reflect.construct.sham)
-      return false;
-    if (typeof Proxy === "function")
-      return true;
-    try {
-      Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function() {
-      }));
-      return true;
-    } catch (e) {
-      return false;
-    }
-  }
-  function _getPrototypeOf4(o) {
-    _getPrototypeOf4 = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf26(o2) {
-      return o2.__proto__ || Object.getPrototypeOf(o2);
-    };
-    return _getPrototypeOf4(o);
-  }
-  function _defineProperty8(obj, key, value) {
-    if (key in obj) {
-      Object.defineProperty(obj, key, {value: value, enumerable: true, configurable: true, writable: true});
-    } else {
-      obj[key] = value;
-    }
-    return obj;
-  }
-  var InputRateDecorator = /* @__PURE__ */ function(_InputPolicy) {
-    _inherits4(InputRateDecorator2, _InputPolicy);
-    var _super = _createSuper4(InputRateDecorator2);
-    function InputRateDecorator2(target) {
-      var _this;
-      _classCallCheck9(this, InputRateDecorator2);
-      _this = _super.call(this);
-      _defineProperty8(_assertThisInitialized4(_this), "inputRatePolicies", {});
-      _this.target = target;
-      return _this;
-    }
-    _createClass9(InputRateDecorator2, [{
-      key: "setInput",
-      value: function setInput(nameType, value, opts) {
-        var _splitInputNameType = splitInputNameType(nameType), inputName = _splitInputNameType.name;
-        this.$ensureInit(inputName);
-        if (opts.priority !== "deferred")
-          this.inputRatePolicies[inputName].immediateCall(nameType, value, opts);
-        else
-          this.inputRatePolicies[inputName].normalCall(nameType, value, opts);
-      }
-    }, {
-      key: "setRatePolicy",
-      value: function setRatePolicy(nameType, mode, millis) {
-        var _splitInputNameType2 = splitInputNameType(nameType), inputName = _splitInputNameType2.name;
-        if (mode === "direct") {
-          this.inputRatePolicies[inputName] = new Invoker(this, this.$doSetInput);
-        } else if (mode === "debounce") {
-          this.inputRatePolicies[inputName] = new Debouncer(this, this.$doSetInput, millis);
-        } else if (mode === "throttle") {
-          this.inputRatePolicies[inputName] = new Throttler(this, this.$doSetInput, millis);
-        }
-      }
-    }, {
-      key: "$ensureInit",
-      value: function $ensureInit(name) {
-        if (!(name in this.inputRatePolicies))
-          this.setRatePolicy(name, "direct");
-      }
-    }, {
-      key: "$doSetInput",
-      value: function $doSetInput(nameType, value, opts) {
-        this.target.setInput(nameType, value, opts);
-      }
-    }]);
-    return InputRateDecorator2;
-  }(InputPolicy);
-
-  // src/inputPolicies/inputDeferDecorator.ts
-  var import_es_array_iterator5 = __toModule(require_es_array_iterator());
-  function _typeof5(obj) {
-    "@babel/helpers - typeof";
-    if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
-      _typeof5 = function _typeof27(obj2) {
-        return typeof obj2;
-      };
-    } else {
-      _typeof5 = function _typeof27(obj2) {
-        return obj2 && typeof Symbol === "function" && obj2.constructor === Symbol && obj2 !== Symbol.prototype ? "symbol" : typeof obj2;
-      };
-    }
-    return _typeof5(obj);
-  }
-  function _classCallCheck10(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  }
-  function _defineProperties10(target, props) {
-    for (var i = 0; i < props.length; i++) {
-      var descriptor = props[i];
-      descriptor.enumerable = descriptor.enumerable || false;
-      descriptor.configurable = true;
-      if ("value" in descriptor)
-        descriptor.writable = true;
-      Object.defineProperty(target, descriptor.key, descriptor);
-    }
-  }
-  function _createClass10(Constructor, protoProps, staticProps) {
-    if (protoProps)
-      _defineProperties10(Constructor.prototype, protoProps);
-    if (staticProps)
-      _defineProperties10(Constructor, staticProps);
-    return Constructor;
-  }
-  function _inherits5(subClass, superClass) {
-    if (typeof superClass !== "function" && superClass !== null) {
-      throw new TypeError("Super expression must either be null or a function");
-    }
-    subClass.prototype = Object.create(superClass && superClass.prototype, {constructor: {value: subClass, writable: true, configurable: true}});
-    if (superClass)
-      _setPrototypeOf5(subClass, superClass);
-  }
-  function _setPrototypeOf5(o, p) {
-    _setPrototypeOf5 = Object.setPrototypeOf || function _setPrototypeOf26(o2, p2) {
-      o2.__proto__ = p2;
-      return o2;
-    };
-    return _setPrototypeOf5(o, p);
-  }
-  function _createSuper5(Derived) {
-    var hasNativeReflectConstruct = _isNativeReflectConstruct5();
-    return function _createSuperInternal() {
-      var Super = _getPrototypeOf5(Derived), result;
-      if (hasNativeReflectConstruct) {
-        var NewTarget = _getPrototypeOf5(this).constructor;
-        result = Reflect.construct(Super, arguments, NewTarget);
-      } else {
-        result = Super.apply(this, arguments);
-      }
-      return _possibleConstructorReturn5(this, result);
-    };
-  }
-  function _possibleConstructorReturn5(self2, call) {
-    if (call && (_typeof5(call) === "object" || typeof call === "function")) {
-      return call;
-    }
-    return _assertThisInitialized5(self2);
-  }
-  function _assertThisInitialized5(self2) {
-    if (self2 === void 0) {
-      throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
-    }
-    return self2;
-  }
-  function _isNativeReflectConstruct5() {
-    if (typeof Reflect === "undefined" || !Reflect.construct)
-      return false;
-    if (Reflect.construct.sham)
-      return false;
-    if (typeof Proxy === "function")
-      return true;
-    try {
-      Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function() {
-      }));
-      return true;
-    } catch (e) {
-      return false;
-    }
-  }
-  function _getPrototypeOf5(o) {
-    _getPrototypeOf5 = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf26(o2) {
-      return o2.__proto__ || Object.getPrototypeOf(o2);
-    };
-    return _getPrototypeOf5(o);
-  }
-  function _defineProperty9(obj, key, value) {
-    if (key in obj) {
-      Object.defineProperty(obj, key, {value: value, enumerable: true, configurable: true, writable: true});
-    } else {
-      obj[key] = value;
-    }
-    return obj;
-  }
-  var InputDeferDecorator = /* @__PURE__ */ function(_InputPolicy) {
-    _inherits5(InputDeferDecorator2, _InputPolicy);
-    var _super = _createSuper5(InputDeferDecorator2);
-    function InputDeferDecorator2(target) {
-      var _this;
-      _classCallCheck10(this, InputDeferDecorator2);
-      _this = _super.call(this);
-      _defineProperty9(_assertThisInitialized5(_this), "pendingInput", {});
-      _this.target = target;
-      return _this;
-    }
-    _createClass10(InputDeferDecorator2, [{
-      key: "setInput",
-      value: function setInput(nameType, value, opts) {
-        if (/^\./.test(nameType))
-          this.target.setInput(nameType, value, opts);
-        else
-          this.pendingInput[nameType] = {
-            value: value,
-            opts: opts
-          };
-      }
-    }, {
-      key: "submit",
-      value: function submit() {
-        for (var nameType in this.pendingInput) {
-          if (hasOwnProperty(this.pendingInput, nameType)) {
-            var _this$pendingInput$na = this.pendingInput[nameType], value = _this$pendingInput$na.value, opts = _this$pendingInput$na.opts;
-            this.target.setInput(nameType, value, opts);
-          }
-        }
-      }
-    }]);
-    return InputDeferDecorator2;
-  }(InputPolicy);
-
-  // src/inputPolicies/inputValidateDecorator.ts
-  var import_jquery9 = __toModule(require_jquery());
-  function _classCallCheck11(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  }
-  function _defineProperty10(obj, key, value) {
-    if (key in obj) {
-      Object.defineProperty(obj, key, {value: value, enumerable: true, configurable: true, writable: true});
-    } else {
-      obj[key] = value;
-    }
-    return obj;
-  }
-  function addDefaultInputOpts(opts) {
-    var newOpts = import_jquery9.default.extend({
-      priority: "immediate",
-      binding: null,
-      el: null
-    }, opts);
-    if (newOpts && typeof newOpts.priority !== "undefined") {
-      switch (newOpts.priority) {
-        case "deferred":
-        case "immediate":
-        case "event":
-          break;
-        default:
-          throw new Error("Unexpected input value mode: '" + newOpts.priority + "'");
-      }
-    }
-    return newOpts;
-  }
-  var InputValidateDecorator = function InputValidateDecorator2(target) {
-    _classCallCheck11(this, InputValidateDecorator2);
-    _defineProperty10(this, "target", void 0);
-    _defineProperty10(this, "setInput", function(nameType, value, opts) {
-      if (!nameType)
-        throw "Can't set input with empty name.";
-      var newOpts = addDefaultInputOpts(opts);
-      this.target.setInput(nameType, value, newOpts);
-    });
-    this.target = target;
-  };
-
-  // src/shiny/bind.ts
-  var import_jquery10 = __toModule(require_jquery());
-
-  // src/bindings/output_adapter.ts
-  function _classCallCheck12(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  }
-  function _defineProperties11(target, props) {
-    for (var i = 0; i < props.length; i++) {
-      var descriptor = props[i];
-      descriptor.enumerable = descriptor.enumerable || false;
-      descriptor.configurable = true;
-      if ("value" in descriptor)
-        descriptor.writable = true;
-      Object.defineProperty(target, descriptor.key, descriptor);
-    }
-  }
-  function _createClass11(Constructor, protoProps, staticProps) {
-    if (protoProps)
-      _defineProperties11(Constructor.prototype, protoProps);
-    if (staticProps)
-      _defineProperties11(Constructor, staticProps);
-    return Constructor;
-  }
-  function _defineProperty11(obj, key, value) {
-    if (key in obj) {
-      Object.defineProperty(obj, key, {value: value, enumerable: true, configurable: true, writable: true});
-    } else {
-      obj[key] = value;
-    }
-    return obj;
-  }
-  var OutputBindingAdapter = /* @__PURE__ */ function() {
-    function OutputBindingAdapter2(el, binding) {
-      _classCallCheck12(this, OutputBindingAdapter2);
-      _defineProperty11(this, "el", void 0);
-      _defineProperty11(this, "binding", void 0);
-      this.el = el;
-      this.binding = binding;
-      if (binding.resize) {
-        this.onResize = makeResizeFilter(el, function(width, height) {
-          binding.resize(el, width, height);
-        });
-      }
-    }
-    _createClass11(OutputBindingAdapter2, [{
-      key: "getId",
-      value: function getId() {
-        return this.binding.getId(this.el);
-      }
-    }, {
-      key: "onValueChange",
-      value: function onValueChange(data) {
-        this.binding.onValueChange(this.el, data);
-      }
-    }, {
-      key: "onValueError",
-      value: function onValueError(err) {
-        this.binding.onValueError(this.el, err);
-      }
-    }, {
-      key: "showProgress",
-      value: function showProgress(show3) {
-        this.binding.showProgress(this.el, show3);
-      }
-    }, {
-      key: "onResize",
-      value: function onResize() {
-      }
-    }]);
-    return OutputBindingAdapter2;
-  }();
-
-  // src/shiny/sendImageSize.ts
-  function _classCallCheck13(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  }
-  function _defineProperties12(target, props) {
-    for (var i = 0; i < props.length; i++) {
-      var descriptor = props[i];
-      descriptor.enumerable = descriptor.enumerable || false;
-      descriptor.configurable = true;
-      if ("value" in descriptor)
-        descriptor.writable = true;
-      Object.defineProperty(target, descriptor.key, descriptor);
-    }
-  }
-  function _createClass12(Constructor, protoProps, staticProps) {
-    if (protoProps)
-      _defineProperties12(Constructor.prototype, protoProps);
-    if (staticProps)
-      _defineProperties12(Constructor, staticProps);
-    return Constructor;
-  }
-  function _defineProperty12(obj, key, value) {
-    if (key in obj) {
-      Object.defineProperty(obj, key, {value: value, enumerable: true, configurable: true, writable: true});
-    } else {
-      obj[key] = value;
-    }
-    return obj;
-  }
-  var SendImageSize = /* @__PURE__ */ function() {
-    function SendImageSize2() {
-      _classCallCheck13(this, SendImageSize2);
-      _defineProperty12(this, "regular", void 0);
-      _defineProperty12(this, "transitioned", void 0);
-    }
-    _createClass12(SendImageSize2, [{
-      key: "setImageSend",
-      value: function setImageSend(inputBatchSender, doSendImageSize) {
-        var sendImageSizeDebouncer = new Debouncer(null, doSendImageSize, 0);
-        this.regular = function() {
-          sendImageSizeDebouncer.normalCall();
-        };
-        inputBatchSender.lastChanceCallback.push(function() {
-          if (sendImageSizeDebouncer.isPending())
-            sendImageSizeDebouncer.immediateCall();
-        });
-        this.transitioned = debounce(200, this.regular);
-        return sendImageSizeDebouncer;
-      }
-    }]);
-    return SendImageSize2;
-  }();
-  var sendImageSizeFns = new SendImageSize();
-
-  // src/shiny/bind.ts
-  var boundInputs = {};
-  function valueChangeCallback(inputs, binding, el, allowDeferred) {
-    var id = binding.getId(el);
-    if (id) {
-      var value = binding.getValue(el);
-      var type = binding.getType(el);
-      if (type)
-        id = id + ":" + type;
-      var opts = {
-        priority: allowDeferred ? "deferred" : "immediate",
-        binding: binding,
-        el: el
-      };
-      inputs.setInput(id, value, opts);
-    }
-  }
-  function bindInputs(shinyCtx) {
-    var scope = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : document.documentElement;
-    var inputs = shinyCtx.inputs, inputsRate = shinyCtx.inputsRate, inputBindings = shinyCtx.inputBindings;
-    var bindings = inputBindings.getBindings();
-    var inputItems = {};
-    var _loop = function _loop2(i2) {
-      var binding = bindings[i2].binding;
-      var matches = binding.find(scope) || [];
-      var _loop22 = function _loop23(j2) {
-        var el = matches[j2];
-        var id = binding.getId(el);
-        if (!id || boundInputs[id])
-          return "continue";
-        var type = binding.getType(el);
-        var effectiveId = type ? id + ":" + type : id;
-        inputItems[effectiveId] = {
-          value: binding.getValue(el),
-          opts: {
-            immediate: true,
-            binding: binding,
-            el: el
-          }
-        };
-        var thisCallback = function() {
-          var thisBinding = binding;
-          var thisEl = el;
-          return function(allowDeferred) {
-            valueChangeCallback(inputs, thisBinding, thisEl, allowDeferred);
-          };
-        }();
-        binding.subscribe(el, thisCallback);
-        (0, import_jquery10.default)(el).data("shiny-input-binding", binding);
-        (0, import_jquery10.default)(el).addClass("shiny-bound-input");
-        var ratePolicy = binding.getRatePolicy(el);
-        if (ratePolicy !== null) {
-          inputsRate.setRatePolicy(effectiveId, ratePolicy.policy, ratePolicy.delay);
-        }
-        boundInputs[id] = {
-          binding: binding,
-          node: el
-        };
-        (0, import_jquery10.default)(el).trigger({
-          type: "shiny:bound",
-          binding: binding,
-          bindingType: "input"
-        });
-      };
-      for (var j = 0; j < matches.length; j++) {
-        var _ret = _loop22(j);
-        if (_ret === "continue")
-          continue;
-      }
-    };
-    for (var i = 0; i < bindings.length; i++) {
-      _loop(i);
-    }
-    return inputItems;
-  }
-  function bindOutputs(_ref) {
-    var sendOutputHiddenState = _ref.sendOutputHiddenState, maybeAddThemeObserver = _ref.maybeAddThemeObserver, outputBindings = _ref.outputBindings;
-    var scope = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : document.documentElement;
-    var $scope = (0, import_jquery10.default)(scope);
-    var bindings = outputBindings.getBindings();
-    for (var i = 0; i < bindings.length; i++) {
-      var binding = bindings[i].binding;
-      var matches = binding.find($scope) || [];
-      for (var j = 0; j < matches.length; j++) {
-        var _el = matches[j];
-        var id = binding.getId(_el);
-        if (!id)
-          continue;
-        if (!import_jquery10.default.contains(document.documentElement, _el))
-          continue;
-        var $el = (0, import_jquery10.default)(_el);
-        if ($el.hasClass("shiny-bound-output")) {
-          continue;
-        }
-        maybeAddThemeObserver(_el);
-        var bindingAdapter = new OutputBindingAdapter(_el, binding);
-        shinyAppBindOutput(id, bindingAdapter);
-        $el.data("shiny-output-binding", bindingAdapter);
-        $el.addClass("shiny-bound-output");
-        if (!$el.attr("aria-live"))
-          $el.attr("aria-live", "polite");
-        $el.trigger({
-          type: "shiny:bound",
-          binding: binding,
-          bindingType: "output"
-        });
-      }
-    }
-    setTimeout(sendImageSizeFns.regular, 0);
-    setTimeout(sendOutputHiddenState, 0);
-  }
-  function unbindInputs() {
-    var scope = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : document.documentElement;
-    var includeSelf = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : false;
-    var inputs = (0, import_jquery10.default)(scope).find(".shiny-bound-input").toArray();
-    if (includeSelf && (0, import_jquery10.default)(scope).hasClass("shiny-bound-input")) {
-      inputs.push(scope);
-    }
-    for (var i = 0; i < inputs.length; i++) {
-      var _el2 = inputs[i];
-      var binding = (0, import_jquery10.default)(_el2).data("shiny-input-binding");
-      if (!binding)
-        continue;
-      var id = binding.getId(_el2);
-      (0, import_jquery10.default)(_el2).removeClass("shiny-bound-input");
-      delete boundInputs[id];
-      binding.unsubscribe(_el2);
-      (0, import_jquery10.default)(_el2).trigger({
-        type: "shiny:unbound",
-        binding: binding,
-        bindingType: "input"
-      });
-    }
-  }
-  function unbindOutputs(_ref2) {
-    var sendOutputHiddenState = _ref2.sendOutputHiddenState;
-    var scope = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : document.documentElement;
-    var includeSelf = arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : false;
-    var outputs = (0, import_jquery10.default)(scope).find(".shiny-bound-output").toArray();
-    if (includeSelf && (0, import_jquery10.default)(scope).hasClass("shiny-bound-output")) {
-      outputs.push(scope);
-    }
-    for (var i = 0; i < outputs.length; i++) {
-      var $el = (0, import_jquery10.default)(outputs[i]);
-      var bindingAdapter = $el.data("shiny-output-binding");
-      if (!bindingAdapter)
-        continue;
-      var id = bindingAdapter.binding.getId(outputs[i]);
-      shinyAppUnbindOutput(id, bindingAdapter);
-      $el.removeClass("shiny-bound-output");
-      $el.removeData("shiny-output-binding");
-      $el.trigger({
-        type: "shiny:unbound",
-        binding: bindingAdapter.binding,
-        bindingType: "output"
-      });
-    }
-    setTimeout(sendImageSizeFns.regular, 0);
-    setTimeout(sendOutputHiddenState, 0);
-  }
-  function _bindAll(shinyCtx, scope) {
-    bindOutputs(shinyCtx, scope);
-    return bindInputs(shinyCtx, scope);
-  }
-  function unbindAll(shinyCtx, scope) {
-    var includeSelf = arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : false;
-    unbindInputs(scope, includeSelf);
-    unbindOutputs(shinyCtx, scope, includeSelf);
-  }
-  function bindAll(shinyCtx, scope) {
-    var currentInputItems = _bindAll(shinyCtx, scope);
-    var inputs = shinyCtx.inputs;
-    import_jquery10.default.each(currentInputItems, function(name, item) {
-      inputs.setInput(name, item.value, item.opts);
-    });
-    initDeferredIframes();
-  }
-
-  // src/shiny/render.ts
-  var import_es_regexp_exec5 = __toModule(require_es_regexp_exec());
-
-  // node_modules/core-js/modules/es.object.entries.js
-  var $28 = require_export();
-  var $entries = require_object_to_array().entries;
-  $28({target: "Object", stat: true}, {
-    entries: function entries(O) {
-      return $entries(O);
-    }
-  });
-
-  // src/shiny/render.ts
-  var import_es_array_iterator6 = __toModule(require_es_array_iterator());
-
-  // node_modules/core-js/modules/es.array.from.js
-  var $29 = require_export();
-  var from = require_array_from();
-  var checkCorrectnessOfIteration = require_check_correctness_of_iteration();
-  var INCORRECT_ITERATION = !checkCorrectnessOfIteration(function(iterable) {
-    Array.from(iterable);
-  });
-  $29({target: "Array", stat: true, forced: INCORRECT_ITERATION}, {
-    from: from
-  });
-
-  // src/shiny/render.ts
-  var import_jquery12 = __toModule(require_jquery());
-
-  // src/shiny/singletons.ts
-  var import_es_regexp_exec4 = __toModule(require_es_regexp_exec());
-  var import_jquery11 = __toModule(require_jquery());
-  var _reSingleton = /<!--(SHINY.SINGLETON\[([\w]+)\])-->([\s\S]*?)<!--\/\1-->/;
-  var _reHead = /<head(?:\s[^>]*)?>([\s\S]*?)<\/head>/;
-  var knownSingletons = {};
-  function renderHtml(html, el, where) {
-    var processed = _processHtml(html);
-    _addToHead(processed.head);
-    register(processed.singletons);
-    if (where === "replace") {
-      (0, import_jquery11.default)(el).html(processed.html);
-    } else {
-      var elElements;
-      if (el instanceof HTMLElement) {
-        elElements = [el];
-      } else {
-        elElements = el.toArray();
-      }
-      import_jquery11.default.each(elElements, function(i, el2) {
-        el2.insertAdjacentHTML(where, processed.html);
-      });
-    }
-    return processed;
-  }
-  function register(s) {
-    import_jquery11.default.extend(knownSingletons, s);
-  }
-  function registerNames(s) {
-    if (typeof s === "string") {
-      knownSingletons[s] = true;
-    } else if (s instanceof Array) {
-      for (var i = 0; i < s.length; i++) {
-        knownSingletons[s[i]] = true;
-      }
-    }
-  }
-  function _addToHead(head) {
-    if (head.length > 0) {
-      var tempDiv = (0, import_jquery11.default)("<div>" + head + "</div>").get(0);
-      var $head = (0, import_jquery11.default)("head");
-      while (tempDiv.hasChildNodes()) {
-        $head.append(tempDiv.firstChild);
-      }
-    }
-  }
-  function _processHtml(val) {
-    var newSingletons = {};
-    var newVal;
-    var findNewPayload = function findNewPayload2(match, p1, sig, payload) {
-      if (knownSingletons[sig] || newSingletons[sig])
-        return "";
-      newSingletons[sig] = true;
-      return payload;
-    };
-    while (true) {
-      newVal = val.replace(_reSingleton, findNewPayload);
-      if (val.length === newVal.length)
-        break;
-      val = newVal;
-    }
-    var heads = [];
-    var headAddPayload = function headAddPayload2(match, payload) {
-      heads.push(payload);
-      return "";
-    };
-    while (true) {
-      newVal = val.replace(_reHead, headAddPayload);
-      if (val.length === newVal.length)
-        break;
-      val = newVal;
-    }
-    return {
-      html: val,
-      head: heads.join("\n"),
-      singletons: newSingletons
-    };
-  }
-
-  // src/shiny/render.ts
-  function _slicedToArray(arr, i) {
-    return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest();
-  }
-  function _nonIterableRest() {
-    throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
-  }
-  function _unsupportedIterableToArray(o, minLen) {
-    if (!o)
-      return;
-    if (typeof o === "string")
-      return _arrayLikeToArray(o, minLen);
-    var n = Object.prototype.toString.call(o).slice(8, -1);
-    if (n === "Object" && o.constructor)
-      n = o.constructor.name;
-    if (n === "Map" || n === "Set")
-      return Array.from(o);
-    if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n))
-      return _arrayLikeToArray(o, minLen);
-  }
-  function _arrayLikeToArray(arr, len) {
-    if (len == null || len > arr.length)
-      len = arr.length;
-    for (var i = 0, arr2 = new Array(len); i < len; i++) {
-      arr2[i] = arr[i];
-    }
-    return arr2;
-  }
-  function _iterableToArrayLimit(arr, i) {
-    var _i = arr && (typeof Symbol !== "undefined" && arr[Symbol.iterator] || arr["@@iterator"]);
-    if (_i == null)
-      return;
-    var _arr = [];
-    var _n = true;
-    var _d = false;
-    var _s, _e;
-    try {
-      for (_i = _i.call(arr); !(_n = (_s = _i.next()).done); _n = true) {
-        _arr.push(_s.value);
-        if (i && _arr.length === i)
-          break;
-      }
-    } catch (err) {
-      _d = true;
-      _e = err;
-    } finally {
-      try {
-        if (!_n && _i["return"] != null)
-          _i["return"]();
-      } finally {
-        if (_d)
-          throw _e;
-      }
-    }
-    return _arr;
-  }
-  function _arrayWithHoles(arr) {
-    if (Array.isArray(arr))
-      return arr;
-  }
-  function _typeof6(obj) {
-    "@babel/helpers - typeof";
-    if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
-      _typeof6 = function _typeof27(obj2) {
-        return typeof obj2;
-      };
-    } else {
-      _typeof6 = function _typeof27(obj2) {
-        return obj2 && typeof Symbol === "function" && obj2.constructor === Symbol && obj2 !== Symbol.prototype ? "symbol" : typeof obj2;
-      };
-    }
-    return _typeof6(obj);
-  }
-  function renderDependencies(dependencies) {
-    if (dependencies) {
-      import_jquery12.default.each(dependencies, function(i, dep) {
-        renderDependency(dep);
-      });
-    }
-  }
-  function renderContent(el, content, where) {
-    if (where === "replace") {
-      shinyUnbindAll(el);
-    }
-    var html;
-    var dependencies = [];
-    if (content === null) {
-      html = "";
-    } else if (typeof content === "string") {
-      html = content;
-    } else if (_typeof6(content) === "object") {
-      html = content.html;
-      dependencies = content.deps || [];
-    }
-    renderHtml2(html, el, dependencies, where);
-    var scope = el;
-    if (where === "replace") {
-      shinyInitializeInputs(el);
-      shinyBindAll(el);
-    } else {
-      var $parent = (0, import_jquery12.default)(el).parent();
-      if ($parent.length > 0) {
-        scope = $parent;
-        if (where === "beforeBegin" || where === "afterEnd") {
-          var $grandparent = $parent.parent();
-          if ($grandparent.length > 0)
-            scope = $grandparent;
-        }
-      }
-      shinyInitializeInputs(scope);
-      shinyBindAll(scope);
-    }
-  }
-  function renderHtml2(html, el, dependencies) {
-    var where = arguments.length > 3 && arguments[3] !== void 0 ? arguments[3] : "replace";
-    renderDependencies(dependencies);
-    return renderHtml(html, el, where);
-  }
-  var htmlDependencies = {};
-  function registerDependency(name, version) {
-    htmlDependencies[name] = version;
-  }
-  function needsRestyle(dep) {
-    if (!dep.restyle) {
-      return false;
-    }
-    var names = Object.keys(htmlDependencies);
-    var idx = names.indexOf(dep.name);
-    if (idx === -1) {
-      return false;
-    }
-    return htmlDependencies[names[idx]] === dep.version;
-  }
-  function renderDependency(dep) {
-    var restyle = needsRestyle(dep);
-    if (hasOwnProperty(htmlDependencies, dep.name) && !restyle)
-      return false;
-    registerDependency(dep.name, dep.version);
-    var href = dep.src.href;
-    var $head = (0, import_jquery12.default)("head").first();
-    if (dep.meta && !restyle) {
-      var metas = import_jquery12.default.map(asArray(dep.meta), function(obj, idx) {
-        var name = Object.keys(obj)[0];
-        return (0, import_jquery12.default)("<meta>").attr("name", name).attr("content", obj[name]);
-      });
-      $head.append(metas);
-    }
-    if (dep.stylesheet) {
-      var links = import_jquery12.default.map(asArray(dep.stylesheet), function(stylesheet) {
-        return (0, import_jquery12.default)("<link rel='stylesheet' type='text/css'>").attr("href", href + "/" + encodeURI(stylesheet));
-      });
-      if (!restyle) {
-        $head.append(links);
-      } else {
-        var refreshStyle = function refreshStyle2(href2, oldSheet) {
-          var xhr = new XMLHttpRequest();
-          xhr.open("GET", href2);
-          xhr.onload = function() {
-            var id = "shiny_restyle_" + href2.split("?restyle")[0].replace(/\W/g, "_");
-            var oldStyle = $head.find("style#" + id);
-            var newStyle = (0, import_jquery12.default)("<style>").attr("id", id).html(xhr.responseText);
-            $head.append(newStyle);
-            oldStyle.remove();
-            removeSheet(oldSheet);
-            sendImageSizeFns.transitioned();
-          };
-          xhr.send();
-        };
-        var findSheet = function findSheet2(href2) {
-          for (var i = 0; i < document.styleSheets.length; i++) {
-            var sheet = document.styleSheets[i];
-            if (typeof sheet.href === "string" && sheet.href.indexOf(href2) > -1) {
-              return sheet;
-            }
-          }
-          return null;
-        };
-        var removeSheet = function removeSheet2(sheet) {
-          if (!sheet)
-            return;
-          sheet.disabled = true;
-          if (isIE())
-            sheet.cssText = "";
-          (0, import_jquery12.default)(sheet.ownerNode).remove();
-        };
-        import_jquery12.default.map(links, function(link) {
-          var oldSheet = findSheet(link.attr("href"));
-          var href2 = link.attr("href") + "?restyle=" + new Date().getTime();
-          if (isIE()) {
-            refreshStyle(href2, oldSheet);
-          } else {
-            link.attr("href", href2);
-            link.attr("onload", function() {
-              var dummyId = "dummy-" + Math.floor(Math.random() * 999999999);
-              var cssString = "#" + dummyId + " { color: #a7c920 !important; transition: 0.1s all !important; visibility: hidden !important; position: absolute !important; top: -1000px !important; left: 0 !important; }";
-              var base64CssString = "data:text/css;base64," + btoa(cssString);
-              var $dummyLink = (0, import_jquery12.default)("<link rel='stylesheet' type='text/css' />");
-              $dummyLink.attr("href", base64CssString);
-              var $dummyEl = (0, import_jquery12.default)("<div id='" + dummyId + "'></div>");
-              $dummyEl.one("transitionend", function() {
-                $dummyEl.remove();
-                removeSheet(findSheet($dummyLink.attr("href")));
-                removeSheet(oldSheet);
-                sendImageSizeFns.transitioned();
-              });
-              (0, import_jquery12.default)(document.body).append($dummyEl);
-              setTimeout(function() {
-                return $head.append($dummyLink);
-              }, 0);
-            });
-            $head.append(link);
-          }
-        });
-      }
-    }
-    if (dep.script && !restyle) {
-      var scriptsAttrs = asArray(dep.script);
-      var scripts = import_jquery12.default.map(scriptsAttrs, function(x) {
-        var script = document.createElement("script");
-        if (typeof x === "string") {
-          x = {
-            src: x
-          };
-        }
-        for (var _i = 0, _Object$entries = Object.entries(x); _i < _Object$entries.length; _i++) {
-          var _Object$entries$_i = _slicedToArray(_Object$entries[_i], 2), attr = _Object$entries$_i[0], val = _Object$entries$_i[1];
-          if (attr === "src") {
-            val = href + "/" + encodeURI(val);
-          }
-          script.setAttribute(attr, val ? val : "");
-        }
-        return script;
-      });
-      $head.append(scripts);
-    }
-    if (dep.attachment && !restyle) {
-      var attachments = dep.attachment;
-      if (typeof attachments === "string")
-        attachments = [attachments];
-      if (Array.isArray(attachments)) {
-        var tmp = {};
-        import_jquery12.default.each(attachments, function(index, attachment) {
-          var key = index + 1 + "";
-          tmp[key] = attachment;
-        });
-        attachments = tmp;
-      }
-      var attach = import_jquery12.default.map(attachments, function(attachment, key) {
-        return (0, import_jquery12.default)("<link rel='attachment'>").attr("id", dep.name + "-" + key + "-attachment").attr("href", href + "/" + encodeURI(attachment));
-      });
-      $head.append(attach);
-    }
-    if (dep.head && !restyle) {
-      var $newHead = (0, import_jquery12.default)("<head></head>");
-      $newHead.html(dep.head);
-      $head.append($newHead.children());
-    }
-    return true;
-  }
-
-  // node_modules/core-js/modules/es.array-buffer.constructor.js
-  "use strict";
-  var $32 = require_export();
-  var global5 = require_global();
-  var arrayBufferModule = require_array_buffer();
-  var setSpecies = require_set_species();
-  var ARRAY_BUFFER = "ArrayBuffer";
-  var ArrayBuffer2 = arrayBufferModule[ARRAY_BUFFER];
-  var NativeArrayBuffer = global5[ARRAY_BUFFER];
-  $32({global: true, forced: NativeArrayBuffer !== ArrayBuffer2}, {
-    ArrayBuffer: ArrayBuffer2
-  });
-  setSpecies(ARRAY_BUFFER);
-
-  // node_modules/core-js/modules/es.array-buffer.slice.js
-  "use strict";
-  var $33 = require_export();
-  var fails8 = require_fails();
-  var ArrayBufferModule = require_array_buffer();
-  var anObject8 = require_an_object();
-  var toAbsoluteIndex3 = require_to_absolute_index();
-  var toLength7 = require_to_length();
-  var speciesConstructor2 = require_species_constructor();
-  var ArrayBuffer3 = ArrayBufferModule.ArrayBuffer;
-  var DataView2 = ArrayBufferModule.DataView;
-  var nativeArrayBufferSlice = ArrayBuffer3.prototype.slice;
-  var INCORRECT_SLICE = fails8(function() {
-    return !new ArrayBuffer3(2).slice(1, void 0).byteLength;
-  });
-  $33({target: "ArrayBuffer", proto: true, unsafe: true, forced: INCORRECT_SLICE}, {
-    slice: function slice2(start, end) {
-      if (nativeArrayBufferSlice !== void 0 && end === void 0) {
-        return nativeArrayBufferSlice.call(anObject8(this), start);
-      }
-      var length = anObject8(this).byteLength;
-      var first = toAbsoluteIndex3(start, length);
-      var fin = toAbsoluteIndex3(end === void 0 ? length : end, length);
-      var result = new (speciesConstructor2(this, ArrayBuffer3))(toLength7(fin - first));
-      var viewSource = new DataView2(this);
-      var viewTarget = new DataView2(result);
-      var index = 0;
-      while (first < fin) {
-        viewTarget.setUint8(index++, viewSource.getUint8(first++));
-      }
-      return result;
-    }
-  });
-
-  // node_modules/core-js/modules/es.data-view.js
-  var $34 = require_export();
-  var ArrayBufferModule2 = require_array_buffer();
-  var NATIVE_ARRAY_BUFFER = require_array_buffer_native();
-  $34({global: true, forced: !NATIVE_ARRAY_BUFFER}, {
-    DataView: ArrayBufferModule2.DataView
-  });
-
-  // node_modules/core-js/modules/es.array.reduce.js
-  "use strict";
-  var $35 = require_export();
-  var $reduce = require_array_reduce().left;
-  var arrayMethodIsStrict3 = require_array_method_is_strict();
-  var CHROME_VERSION = require_engine_v8_version();
-  var IS_NODE = require_engine_is_node();
-  var STRICT_METHOD3 = arrayMethodIsStrict3("reduce");
-  var CHROME_BUG = !IS_NODE && CHROME_VERSION > 79 && CHROME_VERSION < 83;
-  $35({target: "Array", proto: true, forced: !STRICT_METHOD3 || CHROME_BUG}, {
-    reduce: function reduce(callbackfn) {
-      return $reduce(this, callbackfn, arguments.length, arguments.length > 1 ? arguments[1] : void 0);
-    }
-  });
-
-  // src/shiny/shinyapp.ts
-  var import_es_regexp_exec7 = __toModule(require_es_regexp_exec());
-
-  // node_modules/core-js/modules/es.array.for-each.js
-  "use strict";
-  var $36 = require_export();
-  var forEach = require_array_for_each();
-  $36({target: "Array", proto: true, forced: [].forEach != forEach}, {
-    forEach: forEach
-  });
-
-  // node_modules/core-js/modules/web.dom-collections.for-each.js
-  var global6 = require_global();
-  var DOMIterables2 = require_dom_iterables();
-  var forEach2 = require_array_for_each();
-  var createNonEnumerableProperty3 = require_create_non_enumerable_property();
-  for (var COLLECTION_NAME in DOMIterables2) {
-    Collection = global6[COLLECTION_NAME];
-    CollectionPrototype = Collection && Collection.prototype;
-    if (CollectionPrototype && CollectionPrototype.forEach !== forEach2)
-      try {
-        createNonEnumerableProperty3(CollectionPrototype, "forEach", forEach2);
-      } catch (error) {
-        CollectionPrototype.forEach = forEach2;
-      }
-  }
-  var Collection;
-  var CollectionPrototype;
-
-  // node_modules/core-js/modules/es.number.constructor.js
-  "use strict";
-  var DESCRIPTORS4 = require_descriptors();
-  var global7 = require_global();
-  var isForced = require_is_forced();
-  var redefine4 = require_redefine();
-  var has3 = require_has();
-  var classof = require_classof_raw();
-  var inheritIfRequired = require_inherit_if_required();
-  var toPrimitive2 = require_to_primitive();
-  var fails9 = require_fails();
-  var create3 = require_object_create();
-  var getOwnPropertyNames2 = require_object_get_own_property_names().f;
-  var getOwnPropertyDescriptor2 = require_object_get_own_property_descriptor().f;
-  var defineProperty4 = require_object_define_property().f;
-  var trim = require_string_trim().trim;
-  var NUMBER = "Number";
-  var NativeNumber = global7[NUMBER];
-  var NumberPrototype = NativeNumber.prototype;
-  var BROKEN_CLASSOF = classof(create3(NumberPrototype)) == NUMBER;
-  var toNumber = function(argument) {
-    var it = toPrimitive2(argument, false);
-    var first, third, radix, maxCode, digits, length, index, code;
-    if (typeof it == "string" && it.length > 2) {
-      it = trim(it);
-      first = it.charCodeAt(0);
-      if (first === 43 || first === 45) {
-        third = it.charCodeAt(2);
-        if (third === 88 || third === 120)
-          return NaN;
-      } else if (first === 48) {
-        switch (it.charCodeAt(1)) {
-          case 66:
-          case 98:
-            radix = 2;
-            maxCode = 49;
-            break;
-          case 79:
-          case 111:
-            radix = 8;
-            maxCode = 55;
-            break;
-          default:
-            return +it;
-        }
-        digits = it.slice(2);
-        length = digits.length;
-        for (index = 0; index < length; index++) {
-          code = digits.charCodeAt(index);
-          if (code < 48 || code > maxCode)
-            return NaN;
-        }
-        return parseInt(digits, radix);
-      }
-    }
-    return +it;
-  };
-  if (isForced(NUMBER, !NativeNumber(" 0o1") || !NativeNumber("0b1") || NativeNumber("+0x1"))) {
-    NumberWrapper = function Number2(value) {
-      var it = arguments.length < 1 ? 0 : value;
-      var dummy = this;
-      return dummy instanceof NumberWrapper && (BROKEN_CLASSOF ? fails9(function() {
-        NumberPrototype.valueOf.call(dummy);
-      }) : classof(dummy) != NUMBER) ? inheritIfRequired(new NativeNumber(toNumber(it)), dummy, NumberWrapper) : toNumber(it);
-    };
-    for (keys2 = DESCRIPTORS4 ? getOwnPropertyNames2(NativeNumber) : "MAX_VALUE,MIN_VALUE,NaN,NEGATIVE_INFINITY,POSITIVE_INFINITY,EPSILON,isFinite,isInteger,isNaN,isSafeInteger,MAX_SAFE_INTEGER,MIN_SAFE_INTEGER,parseFloat,parseInt,isInteger,fromString,range".split(","), j = 0; keys2.length > j; j++) {
-      if (has3(NativeNumber, key = keys2[j]) && !has3(NumberWrapper, key)) {
-        defineProperty4(NumberWrapper, key, getOwnPropertyDescriptor2(NativeNumber, key));
-      }
-    }
-    NumberWrapper.prototype = NumberPrototype;
-    NumberPrototype.constructor = NumberWrapper;
-    redefine4(global7, NUMBER, NumberWrapper);
-  }
-  var NumberWrapper;
-  var keys2;
-  var j;
-  var key;
-
-  // src/shiny/shinyapp.ts
-  var import_jquery15 = __toModule(require_jquery());
-
-  // src/shiny/notifications.ts
-  var import_es_regexp_exec6 = __toModule(require_es_regexp_exec());
-  var import_jquery13 = __toModule(require_jquery());
-  var fadeDuration = 250;
-  function show() {
-    var _ref = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : {}, _ref$html = _ref.html, html = _ref$html === void 0 ? "" : _ref$html, _ref$action = _ref.action, action = _ref$action === void 0 ? "" : _ref$action, _ref$deps = _ref.deps, deps = _ref$deps === void 0 ? [] : _ref$deps, _ref$duration = _ref.duration, duration = _ref$duration === void 0 ? 5e3 : _ref$duration, _ref$id = _ref.id, id = _ref$id === void 0 ? null : _ref$id, _ref$closeButton = _ref.closeButton, closeButton = _ref$closeButton === void 0 ? true : _ref$closeButton, _ref$type = _ref.type, type = _ref$type === void 0 ? null : _ref$type;
-    if (!id)
-      id = randomId();
-    _createPanel();
-    var $notification = _get(id);
-    if ($notification.length === 0)
-      $notification = _create(id);
-    var newHtml = '<div class="shiny-notification-content-text">'.concat(html, "</div>") + '<div class="shiny-notification-content-action">'.concat(action, "</div>");
-    var $content = $notification.find(".shiny-notification-content");
-    renderContent($content, {
-      html: newHtml,
-      deps: deps
-    });
-    var classes = $notification.attr("class").split(/\s+/).filter(function(cls) {
-      return cls.match(/^shiny-notification-/);
-    }).join(" ");
-    $notification.removeClass(classes);
-    if (type && type !== "default")
-      $notification.addClass("shiny-notification-" + type);
-    var $close = $notification.find(".shiny-notification-close");
-    if (closeButton && $close.length === 0) {
-      $notification.append('<div class="shiny-notification-close">&times;</div>');
-    } else if (!closeButton && $close.length !== 0) {
-      $close.remove();
-    }
-    if (duration)
-      _addRemovalCallback(id, duration);
-    else
-      _clearRemovalCallback(id);
-    return id;
-  }
-  function remove(id) {
-    _get(id).fadeOut(fadeDuration, function() {
-      shinyUnbindAll(this);
-      (0, import_jquery13.default)(this).remove();
-      if (_ids().length === 0) {
-        _getPanel().remove();
-      }
-    });
-  }
-  function _get(id) {
-    if (!id)
-      return null;
-    return _getPanel().find("#shiny-notification-" + $escape(id));
-  }
-  function _ids() {
-    return _getPanel().find(".shiny-notification").map(function() {
-      return this.id.replace(/shiny-notification-/, "");
-    }).get();
-  }
-  function _getPanel() {
-    return (0, import_jquery13.default)("#shiny-notification-panel");
-  }
-  function _createPanel() {
-    var $panel = _getPanel();
-    if ($panel.length > 0)
-      return $panel;
-    (0, import_jquery13.default)(document.body).append('<div id="shiny-notification-panel">');
-    return $panel;
-  }
-  function _create(id) {
-    var $notification = _get(id);
-    if ($notification.length === 0) {
-      $notification = (0, import_jquery13.default)('<div id="shiny-notification-'.concat(id, '" class="shiny-notification">') + '<div class="shiny-notification-close">&times;</div><div class="shiny-notification-content"></div></div>');
-      $notification.find(".shiny-notification-close").on("click", function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        remove(id);
-      });
-      _getPanel().append($notification);
-    }
-    return $notification;
-  }
-  function _addRemovalCallback(id, delay) {
-    _clearRemovalCallback(id);
-    var removalCallback = setTimeout(function() {
-      remove(id);
-    }, delay);
-    _get(id).data("removalCallback", removalCallback);
-  }
-  function _clearRemovalCallback(id) {
-    var $notification = _get(id);
-    var oldRemovalCallback = $notification.data("removalCallback");
-    if (oldRemovalCallback) {
-      clearTimeout(oldRemovalCallback);
-    }
-  }
-
-  // src/shiny/reconnectDialog.ts
-  var import_jquery14 = __toModule(require_jquery());
-  function updateTime(reconnectTime) {
-    var $time = (0, import_jquery14.default)("#shiny-reconnect-time");
-    if ($time.length === 0)
-      return;
-    var seconds = Math.floor((reconnectTime - new Date().getTime()) / 1e3);
-    if (seconds > 0) {
-      $time.text(" in " + seconds + "s");
-    } else {
-      $time.text("...");
-    }
-    setTimeout(function() {
-      updateTime(reconnectTime);
-    }, 1e3);
-  }
-  function showReconnectDialog(delay) {
-    var reconnectTime = new Date().getTime() + delay;
-    if ((0, import_jquery14.default)("#shiny-reconnect-text").length > 0)
-      return;
-    var html = '<span id="shiny-reconnect-text">Attempting to reconnect</span><span id="shiny-reconnect-time"></span>';
-    var action = '<a id="shiny-reconnect-now" href="#" onclick="Shiny.shinyapp.reconnect();">Try now</a>';
-    show({
-      id: "reconnect",
-      html: html,
-      action: action,
-      duration: null,
-      closeButton: false,
-      type: "warning"
-    });
-    updateTime(reconnectTime);
-  }
-  function hideReconnectDialog() {
-    remove("reconnect");
-  }
-
-  // src/utils/eval.ts
-  var indirectEval = eval;
-
-  // src/shiny/shinyapp.ts
-  function _classCallCheck14(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  }
-  function _defineProperties13(target, props) {
-    for (var i = 0; i < props.length; i++) {
-      var descriptor = props[i];
-      descriptor.enumerable = descriptor.enumerable || false;
-      descriptor.configurable = true;
-      if ("value" in descriptor)
-        descriptor.writable = true;
-      Object.defineProperty(target, descriptor.key, descriptor);
-    }
-  }
-  function _createClass13(Constructor, protoProps, staticProps) {
-    if (protoProps)
-      _defineProperties13(Constructor.prototype, protoProps);
-    if (staticProps)
-      _defineProperties13(Constructor, staticProps);
-    return Constructor;
-  }
-  function _defineProperty13(obj, key, value) {
-    if (key in obj) {
-      Object.defineProperty(obj, key, {value: value, enumerable: true, configurable: true, writable: true});
-    } else {
-      obj[key] = value;
-    }
-    return obj;
-  }
-  var messageHandlerOrder = [];
-  var messageHandlers = {};
-  var customMessageHandlerOrder = [];
-  var customMessageHandlers = {};
-  function addCustomMessageHandler(type, handler) {
-    if (customMessageHandlers[type]) {
-      var typeIdx = customMessageHandlerOrder.indexOf(type);
-      if (typeIdx !== -1) {
-        customMessageHandlerOrder.splice(typeIdx, 1);
-        delete customMessageHandlers[type];
-      }
-    }
-    if (typeof handler !== "function") {
-      throw "handler must be a function.";
-    }
-    if (handler.length !== 1) {
-      throw "handler must be a function that takes one argument.";
-    }
-    customMessageHandlerOrder.push(type);
-    customMessageHandlers[type] = handler;
-  }
-  var ShinyApp = /* @__PURE__ */ function() {
-    function ShinyApp2() {
-      _classCallCheck14(this, ShinyApp2);
-      _defineProperty13(this, "$socket", null);
-      _defineProperty13(this, "config", null);
-      _defineProperty13(this, "$inputValues", {});
-      _defineProperty13(this, "$initialInput", {});
-      _defineProperty13(this, "$bindings", {});
-      _defineProperty13(this, "$values", {});
-      _defineProperty13(this, "$errors", {});
-      _defineProperty13(this, "$conditionals", {});
-      _defineProperty13(this, "$pendingMessages", []);
-      _defineProperty13(this, "$activeRequests", {});
-      _defineProperty13(this, "$nextRequestId", 0);
-      _defineProperty13(this, "$allowReconnect", false);
-      _defineProperty13(this, "scheduledReconnect", null);
-      _defineProperty13(this, "reconnectDelay", function() {
-        var attempts = 0;
-        var delays = [1500, 1500, 2500, 2500, 5500, 5500, 10500];
-        return {
-          next: function next2() {
-            var i = attempts;
-            if (i >= delays.length) {
-              i = delays.length - 1;
-            }
-            attempts++;
-            return delays[i];
-          },
-          reset: function reset() {
-            attempts = 0;
-          }
-        };
-      }());
-      _defineProperty13(this, "progressHandlers", {
-        binding: function binding(message) {
-          var key = message.id;
-          var binding2 = this.$bindings[key];
-          if (binding2) {
-            (0, import_jquery15.default)(binding2.el).trigger({
-              type: "shiny:outputinvalidated",
-              binding: binding2,
-              name: key
-            });
-            if (binding2.showProgress)
-              binding2.showProgress(true);
-          }
-        },
-        open: function open(message) {
-          if (message.style === "notification") {
-            show({
-              html: '<div id="shiny-progress-'.concat(message.id, '" class="shiny-progress-notification">') + '<div class="progress active" style="display: none;"><div class="progress-bar"></div></div><div class="progress-text"><span class="progress-message">message</span> <span class="progress-detail"></span></div></div>',
-              id: message.id,
-              duration: null
-            });
-          } else if (message.style === "old") {
-            var $container = (0, import_jquery15.default)(".shiny-progress-container");
-            if ($container.length === 0) {
-              $container = (0, import_jquery15.default)('<div class="shiny-progress-container"></div>');
-              (0, import_jquery15.default)(document.body).append($container);
-            }
-            var depth = (0, import_jquery15.default)(".shiny-progress.open").length;
-            var $progress = (0, import_jquery15.default)('<div class="shiny-progress open"><div class="progress active"><div class="progress-bar bar"></div></div><div class="progress-text"><span class="progress-message">message</span><span class="progress-detail"></span></div></div>');
-            $progress.attr("id", message.id);
-            $container.append($progress);
-            var $progressBar = $progress.find(".progress");
-            $progressBar.css("top", depth * $progressBar.height() + "px");
-            var $progressText = $progress.find(".progress-text");
-            $progressText.css("top", 3 * $progressBar.height() + depth * $progressText.outerHeight() + "px");
-            $progress.hide();
-          }
-        },
-        update: function update(message) {
-          if (message.style === "notification") {
-            var $progress = (0, import_jquery15.default)("#shiny-progress-" + message.id);
-            if ($progress.length === 0)
-              return;
-            if (typeof message.message !== "undefined") {
-              $progress.find(".progress-message").text(message.message);
-            }
-            if (typeof message.detail !== "undefined") {
-              $progress.find(".progress-detail").text(message.detail);
-            }
-            if (typeof message.value !== "undefined" && message.value !== null) {
-              $progress.find(".progress").show();
-              $progress.find(".progress-bar").width(message.value * 100 + "%");
-            }
-          } else if (message.style === "old") {
-            var _$progress = (0, import_jquery15.default)("#" + message.id + ".shiny-progress");
-            if (typeof message.message !== "undefined") {
-              _$progress.find(".progress-message").text(message.message);
-            }
-            if (typeof message.detail !== "undefined") {
-              _$progress.find(".progress-detail").text(message.detail);
-            }
-            if (typeof message.value !== "undefined" && message.value !== null) {
-              _$progress.find(".progress").show();
-              _$progress.find(".bar").width(message.value * 100 + "%");
-            }
-            _$progress.fadeIn();
-          }
-        },
-        close: function close(message) {
-          if (message.style === "notification") {
-            remove(message.id);
-          } else if (message.style === "old") {
-            var $progress = (0, import_jquery15.default)("#" + message.id + ".shiny-progress");
-            $progress.removeClass("open");
-            $progress.fadeOut({
-              complete: function complete() {
-                $progress.remove();
-                if ((0, import_jquery15.default)(".shiny-progress").length === 0)
-                  (0, import_jquery15.default)(".shiny-progress-container").remove();
-              }
-            });
-          }
-        }
-      });
-      this.init();
-    }
-    _createClass13(ShinyApp2, [{
-      key: "connect",
-      value: function connect(initialInput) {
-        if (this.$socket)
-          throw "Connect was already called on this application object";
-        this.$socket = this.createSocket();
-        this.$initialInput = initialInput;
-        import_jquery15.default.extend(this.$inputValues, initialInput);
-        this.$updateConditionals();
-      }
-    }, {
-      key: "isConnected",
-      value: function isConnected() {
-        return !!this.$socket;
-      }
-    }, {
-      key: "reconnect",
-      value: function reconnect() {
-        clearTimeout(this.scheduledReconnect);
-        if (this.isConnected())
-          throw "Attempted to reconnect, but already connected.";
-        this.$socket = this.createSocket();
-        this.$initialInput = import_jquery15.default.extend({}, this.$inputValues);
-        this.$updateConditionals();
-      }
-    }, {
-      key: "createSocket",
-      value: function createSocket() {
-        var _this = this;
-        var createSocketFunc = fullShinyObj().createSocket || function() {
-          var protocol = "ws:";
-          if (window.location.protocol === "https:")
-            protocol = "wss:";
-          var defaultPath = window.location.pathname;
-          if (!/^([$#!&-;=?-[\]_a-z~]|%[0-9a-fA-F]{2})+$/.test(defaultPath)) {
-            defaultPath = encodeURI(defaultPath);
-            if (isQt()) {
-              defaultPath = encodeURI(defaultPath);
-            }
-          }
-          if (!/\/$/.test(defaultPath))
-            defaultPath += "/";
-          defaultPath += "websocket/";
-          var ws = new WebSocket(protocol + "//" + window.location.host + defaultPath);
-          ws.binaryType = "arraybuffer";
-          return ws;
-        };
-        var socket = createSocketFunc();
-        var hasOpened = false;
-        socket.onopen = function() {
-          hasOpened = true;
-          (0, import_jquery15.default)(document).trigger({
-            type: "shiny:connected",
-            socket: socket
-          });
-          _this.onConnected();
-          socket.send(JSON.stringify({
-            method: "init",
-            data: _this.$initialInput
-          }));
-          while (_this.$pendingMessages.length) {
-            var _msg = _this.$pendingMessages.shift();
-            socket.send(_msg);
-          }
-        };
-        socket.onmessage = function(e) {
-          _this.dispatchMessage(e.data);
-        };
-        socket.onclose = function() {
-          if (hasOpened) {
-            (0, import_jquery15.default)(document).trigger({
-              type: "shiny:disconnected",
-              socket: socket
-            });
-            _this.$notifyDisconnected();
-          }
-          _this.onDisconnected();
-          _this.$removeSocket();
-        };
-        return socket;
-      }
-    }, {
-      key: "sendInput",
-      value: function sendInput(values) {
-        var msg = JSON.stringify({
-          method: "update",
-          data: values
-        });
-        this.$sendMsg(msg);
-        import_jquery15.default.extend(this.$inputValues, values);
-        this.$updateConditionals();
-      }
-    }, {
-      key: "$notifyDisconnected",
-      value: function $notifyDisconnected() {
-        if (window.parent) {
-          window.parent.postMessage("disconnected", "*");
-        }
-      }
-    }, {
-      key: "$removeSocket",
-      value: function $removeSocket() {
-        this.$socket = null;
-      }
-    }, {
-      key: "$scheduleReconnect",
-      value: function $scheduleReconnect(delay) {
-        var _this2 = this;
-        this.scheduledReconnect = setTimeout(function() {
-          _this2.reconnect();
-        }, delay);
-      }
-    }, {
-      key: "onDisconnected",
-      value: function onDisconnected() {
-        var $overlay = (0, import_jquery15.default)("#shiny-disconnected-overlay");
-        if ($overlay.length === 0) {
-          (0, import_jquery15.default)(document.body).append('<div id="shiny-disconnected-overlay"></div>');
-        }
-        if (this.$allowReconnect === true && this.$socket.allowReconnect === true || this.$allowReconnect === "force") {
-          var delay = this.reconnectDelay.next();
-          showReconnectDialog(delay);
-          this.$scheduleReconnect(delay);
-        }
-      }
-    }, {
-      key: "onConnected",
-      value: function onConnected() {
-        (0, import_jquery15.default)("#shiny-disconnected-overlay").remove();
-        hideReconnectDialog();
-        this.reconnectDelay.reset();
-      }
-    }, {
-      key: "makeRequest",
-      value: function makeRequest(method, args, onSuccess, onError, blobs) {
-        var requestId = this.$nextRequestId;
-        while (this.$activeRequests[requestId]) {
-          requestId = (requestId + 1) % 1e9;
-        }
-        this.$nextRequestId = requestId + 1;
-        this.$activeRequests[requestId] = {
-          onSuccess: onSuccess,
-          onError: onError
-        };
-        var msg = JSON.stringify({
-          method: method,
-          args: args,
-          tag: requestId
-        });
-        if (blobs) {
-          var uint32ToBuf = function uint32ToBuf2(val) {
-            var buffer = new ArrayBuffer(4);
-            var view = new DataView(buffer);
-            view.setUint32(0, val, true);
-            return buffer;
-          };
-          var payload = [];
-          payload.push(uint32ToBuf(16908802));
-          var jsonBuf = makeBlob([msg]);
-          payload.push(uint32ToBuf(jsonBuf.size));
-          payload.push(jsonBuf);
-          for (var i = 0; i < blobs.length; i++) {
-            var _blob = blobs[i];
-            payload.push(uint32ToBuf(_blob.byteLength || _blob.size || 0));
-            payload.push(_blob);
-          }
-          var blob = makeBlob(payload);
-          msg = blob;
-        }
-        this.$sendMsg(msg);
-      }
-    }, {
-      key: "$sendMsg",
-      value: function $sendMsg(msg) {
-        if (!this.$socket.readyState) {
-          this.$pendingMessages.push(msg);
-        } else {
-          this.$socket.send(msg);
-        }
-      }
-    }, {
-      key: "receiveError",
-      value: function receiveError(name, error) {
-        if (this.$errors[name] === error)
-          return;
-        this.$errors[name] = error;
-        delete this.$values[name];
-        var binding = this.$bindings[name];
-        var evt = jQuery.Event("shiny:error");
-        evt.name = name;
-        evt.error = error;
-        evt.binding = binding;
-        (0, import_jquery15.default)(binding ? binding.el : document).trigger(evt);
-        if (!evt.isDefaultPrevented() && binding && binding.onValueError) {
-          binding.onValueError(evt.error);
-        }
-      }
-    }, {
-      key: "receiveOutput",
-      value: function receiveOutput(name, value) {
-        var binding = this.$bindings[name];
-        var evt = jQuery.Event("shiny:value");
-        evt.name = name;
-        evt.value = value;
-        evt.binding = binding;
-        if (this.$values[name] === value) {
-          (0, import_jquery15.default)(binding ? binding.el : document).trigger(evt);
-          return void 0;
-        }
-        this.$values[name] = value;
-        delete this.$errors[name];
-        (0, import_jquery15.default)(binding ? binding.el : document).trigger(evt);
-        if (!evt.isDefaultPrevented() && binding) {
-          binding.onValueChange(evt.value);
-        }
-        return value;
-      }
-    }, {
-      key: "bindOutput",
-      value: function bindOutput(id, binding) {
-        if (!id)
-          throw "Can't bind an element with no ID";
-        if (this.$bindings[id])
-          throw "Duplicate binding for ID " + id;
-        this.$bindings[id] = binding;
-        if (this.$values[id] !== void 0)
-          binding.onValueChange(this.$values[id]);
-        else if (this.$errors[id] !== void 0)
-          binding.onValueError(this.$errors[id]);
-        return binding;
-      }
-    }, {
-      key: "unbindOutput",
-      value: function unbindOutput(id, binding) {
-        if (this.$bindings[id] === binding) {
-          delete this.$bindings[id];
-          return true;
-        } else {
-          return false;
-        }
-      }
-    }, {
-      key: "narrowScopeComponent",
-      value: function narrowScopeComponent(scopeComponent, nsPrefix) {
-        return Object.keys(scopeComponent).filter(function(k) {
-          return k.indexOf(nsPrefix) === 0;
-        }).map(function(k) {
-          return _defineProperty13({}, k.substring(nsPrefix.length), scopeComponent[k]);
-        }).reduce(function(obj, pair) {
-          return import_jquery15.default.extend(obj, pair);
-        }, {});
-      }
-    }, {
-      key: "narrowScope",
-      value: function narrowScope(scope, nsPrefix) {
-        if (nsPrefix) {
-          return {
-            input: this.narrowScopeComponent(scope.input, nsPrefix),
-            output: this.narrowScopeComponent(scope.output, nsPrefix)
-          };
-        }
-        return scope;
-      }
-    }, {
-      key: "$updateConditionals",
-      value: function $updateConditionals() {
-        (0, import_jquery15.default)(document).trigger({
-          type: "shiny:conditional"
-        });
-        var inputs = {};
-        for (var name in this.$inputValues) {
-          if (hasOwnProperty(this.$inputValues, name)) {
-            var shortName = name.replace(/:.*/, "");
-            inputs[shortName] = this.$inputValues[name];
-          }
-        }
-        var scope = {
-          input: inputs,
-          output: this.$values
-        };
-        var conditionals = (0, import_jquery15.default)(document).find("[data-display-if]");
-        for (var i = 0; i < conditionals.length; i++) {
-          var el = (0, import_jquery15.default)(conditionals[i]);
-          var condFunc = el.data("data-display-if-func");
-          if (!condFunc) {
-            var condExpr = el.attr("data-display-if");
-            condFunc = scopeExprToFunc(condExpr);
-            el.data("data-display-if-func", condFunc);
-          }
-          var nsPrefix = el.attr("data-ns-prefix");
-          var nsScope = this.narrowScope(scope, nsPrefix);
-          var show3 = condFunc(nsScope);
-          var showing = el.css("display") !== "none";
-          if (show3 !== showing) {
-            if (show3) {
-              el.trigger("show");
-              el.show();
-              el.trigger("shown");
-            } else {
-              el.trigger("hide");
-              el.hide();
-              el.trigger("hidden");
-            }
-          }
-        }
-      }
-    }, {
-      key: "addMessageHandler",
-      value: function addMessageHandler(type, handler) {
-        if (messageHandlers[type]) {
-          throw 'handler for message of type "' + type + '" already added.';
-        }
-        if (typeof handler !== "function") {
-          throw "handler must be a function.";
-        }
-        if (handler.length !== 1) {
-          throw "handler must be a function that takes one argument.";
-        }
-        messageHandlerOrder.push(type);
-        messageHandlers[type] = handler;
-      }
-    }, {
-      key: "dispatchMessage",
-      value: function dispatchMessage(data) {
-        var msgObj = {};
-        if (typeof data === "string") {
-          msgObj = JSON.parse(data);
-        } else {
-          var len = new DataView(data, 0, 1).getUint8(0);
-          var typedv = new DataView(data, 1, len);
-          var typebuf = [];
-          for (var i = 0; i < len; i++) {
-            typebuf.push(String.fromCharCode(typedv.getUint8(i)));
-          }
-          var type = typebuf.join("");
-          data = data.slice(len + 1);
-          msgObj.custom = {};
-          msgObj.custom[type] = data;
-        }
-        var evt = jQuery.Event("shiny:message");
-        evt.message = msgObj;
-        (0, import_jquery15.default)(document).trigger(evt);
-        if (evt.isDefaultPrevented())
-          return;
-        this._sendMessagesToHandlers(evt.message, messageHandlers, messageHandlerOrder);
-        this.$updateConditionals();
-      }
-    }, {
-      key: "_sendMessagesToHandlers",
-      value: function _sendMessagesToHandlers(msgObj, handlers, handlerOrder) {
-        for (var i = 0; i < handlerOrder.length; i++) {
-          var msgType = handlerOrder[i];
-          if (hasOwnProperty(msgObj, msgType)) {
-            handlers[msgType].call(this, msgObj[msgType]);
-          }
-        }
-      }
-    }, {
-      key: "init",
-      value: function init2() {
-        this.addMessageHandler("values", function(message) {
-          for (var name in this.$bindings) {
-            if (hasOwnProperty(this.$bindings, name))
-              this.$bindings[name].showProgress(false);
-          }
-          for (var key in message) {
-            if (hasOwnProperty(message, key))
-              this.receiveOutput(key, message[key]);
-          }
-        });
-        this.addMessageHandler("errors", function(message) {
-          for (var key in message) {
-            if (hasOwnProperty(message, key))
-              this.receiveError(key, message[key]);
-          }
-        });
-        this.addMessageHandler("inputMessages", function(message) {
-          for (var i = 0; i < message.length; i++) {
-            var $obj = (0, import_jquery15.default)(".shiny-bound-input#" + $escape(message[i].id));
-            var inputBinding = $obj.data("shiny-input-binding");
-            if ($obj.length > 0) {
-              if (!$obj.attr("aria-live"))
-                $obj.attr("aria-live", "polite");
-              var el = $obj[0];
-              var evt = jQuery.Event("shiny:updateinput");
-              evt.message = message[i].message;
-              evt.binding = inputBinding;
-              (0, import_jquery15.default)(el).trigger(evt);
-              if (!evt.isDefaultPrevented())
-                inputBinding.receiveMessage(el, evt.message);
-            }
-          }
-        });
-        this.addMessageHandler("javascript", function(message) {
-          indirectEval(message);
-        });
-        this.addMessageHandler("console", function(message) {
-          for (var i = 0; i < message.length; i++) {
-            if (console.log)
-              console.log(message[i]);
-          }
-        });
-        this.addMessageHandler("progress", function(message) {
-          if (message.type && message.message) {
-            var handler = this.progressHandlers[message.type];
-            if (handler)
-              handler.call(this, message.message);
-          }
-        });
-        this.addMessageHandler("notification", function(message) {
-          if (message.type === "show")
-            show(message.message);
-          else if (message.type === "remove")
-            remove(message.message);
-          else
-            throw "Unkown notification type: " + message.type;
-        });
-        this.addMessageHandler("modal", function(message) {
-          if (message.type === "show")
-            show(message.message);
-          else if (message.type === "remove")
-            remove();
-          else
-            throw "Unkown modal type: " + message.type;
-        });
-        this.addMessageHandler("response", function(message) {
-          var requestId = message.tag;
-          var request = this.$activeRequests[requestId];
-          if (request) {
-            delete this.$activeRequests[requestId];
-            if ("value" in message)
-              request.onSuccess(message.value);
-            else
-              request.onError(message.error);
-          }
-        });
-        this.addMessageHandler("allowReconnect", function(message) {
-          switch (message) {
-            case true:
-            case false:
-            case "force":
-              this.$allowReconnect = message;
-              break;
-            default:
-              throw "Invalid value for allowReconnect: " + message;
-          }
-        });
-        this.addMessageHandler("custom", function(message) {
-          var shinyOnCustomMessage = getShinyOnCustomMessage();
-          if (shinyOnCustomMessage)
-            shinyOnCustomMessage(message);
-          this._sendMessagesToHandlers(message, customMessageHandlers, customMessageHandlerOrder);
-        });
-        this.addMessageHandler("config", function(message) {
-          this.config = {
-            workerId: message.workerId,
-            sessionId: message.sessionId
-          };
-          if (message.user)
-            setShinyUser(message.user);
-          (0, import_jquery15.default)(document).trigger("shiny:sessioninitialized");
-        });
-        this.addMessageHandler("busy", function(message) {
-          if (message === "busy") {
-            (0, import_jquery15.default)(document.documentElement).addClass("shiny-busy");
-            (0, import_jquery15.default)(document).trigger("shiny:busy");
-          } else if (message === "idle") {
-            (0, import_jquery15.default)(document.documentElement).removeClass("shiny-busy");
-            (0, import_jquery15.default)(document).trigger("shiny:idle");
-          }
-        });
-        this.addMessageHandler("recalculating", function(message) {
-          if (hasOwnProperty(message, "name") && hasOwnProperty(message, "status")) {
-            var binding = this.$bindings[message.name];
-            (0, import_jquery15.default)(binding ? binding.el : null).trigger({
-              type: "shiny:" + message.status
-            });
-          }
-        });
-        this.addMessageHandler("reload", function(message) {
-          window.location.reload();
-          return;
-          message;
-        });
-        this.addMessageHandler("shiny-insert-ui", function(message) {
-          var targets = (0, import_jquery15.default)(message.selector);
-          if (targets.length === 0) {
-            console.warn('The selector you chose ("' + message.selector + '") could not be found in the DOM.');
-            renderHtml2(message.content.html, (0, import_jquery15.default)([]).get(0), message.content.deps);
-          } else {
-            targets.each(function(i, target) {
-              renderContent(target, message.content, message.where);
-              return message.multiple;
-            });
-          }
-        });
-        this.addMessageHandler("shiny-remove-ui", function(message) {
-          var els = (0, import_jquery15.default)(message.selector);
-          els.each(function(i, el) {
-            shinyUnbindAll(el, true);
-            (0, import_jquery15.default)(el).remove();
-            return message.multiple;
-          });
-        });
-        this.addMessageHandler("frozen", function(message) {
-          for (var i = 0; i < message.ids.length; i++) {
-            shinyForgetLastInputValue(message.ids[i]);
-          }
-        });
-        function getTabset(id) {
-          var $tabset = (0, import_jquery15.default)("#" + $escape(id));
-          if ($tabset.length === 0)
-            throw "There is no tabsetPanel (or navbarPage or navlistPanel) with id equal to '" + id + "'";
-          return $tabset;
-        }
-        function getTabContent($tabset) {
-          var tabsetId = $tabset.attr("data-tabsetid");
-          var $tabContent = (0, import_jquery15.default)("div.tab-content[data-tabsetid='" + $escape(tabsetId) + "']");
-          return $tabContent;
-        }
-        function getTargetTabs($tabset, $tabContent, target) {
-          var dataValue = "[data-value='" + $escape(target) + "']";
-          var $aTag = $tabset.find("a" + dataValue);
-          var $liTag = $aTag.parent();
-          if ($liTag.length === 0) {
-            throw "There is no tabPanel (or navbarMenu) with value (or menuName) equal to '" + target + "'";
-          }
-          var $liTags = [];
-          var $divTags = [];
-          if ($aTag.attr("data-toggle") === "dropdown") {
-            var $dropdownTabset = $aTag.find("+ ul.dropdown-menu");
-            var dropdownId = $dropdownTabset.attr("data-tabsetid");
-            var $dropdownLiTags = $dropdownTabset.find("a[data-toggle='tab']").parent("li");
-            $dropdownLiTags.each(function(i, el) {
-              $liTags.push((0, import_jquery15.default)(el));
-            });
-            var selector = "div.tab-pane[id^='tab-" + $escape(dropdownId) + "']";
-            var $dropdownDivs = $tabContent.find(selector);
-            $dropdownDivs.each(function(i, el) {
-              $divTags.push((0, import_jquery15.default)(el));
-            });
-          } else {
-            $divTags.push($tabContent.find("div" + dataValue));
-          }
-          return {
-            $liTag: $liTag,
-            $liTags: $liTags,
-            $divTags: $divTags
-          };
-        }
-        this.addMessageHandler("shiny-insert-tab", function(message) {
-          var $parentTabset = getTabset(message.inputId);
-          var $tabset = $parentTabset;
-          var $tabContent = getTabContent($tabset);
-          var tabsetId = $parentTabset.attr("data-tabsetid");
-          var $divTag = (0, import_jquery15.default)(message.divTag.html);
-          var $liTag = (0, import_jquery15.default)(message.liTag.html);
-          var $aTag = $liTag.find("> a");
-          var target = null;
-          var $targetLiTag = null;
-          if (message.target !== null) {
-            target = getTargetTabs($tabset, $tabContent, message.target);
-            $targetLiTag = target.$liTag;
-          }
-          var dropdown = getDropdown();
-          if (dropdown !== null) {
-            if ($aTag.attr("data-toggle") === "dropdown")
-              throw "Cannot insert a navbarMenu inside another one";
-            $tabset = dropdown.$tabset;
-            tabsetId = dropdown.id;
-          }
-          if ($aTag.attr("data-toggle") === "tab") {
-            var index = getTabIndex($tabset, tabsetId);
-            var tabId = "tab-" + tabsetId + "-" + index;
-            $liTag.find("> a").attr("href", "#" + tabId);
-            $divTag.attr("id", tabId);
-          }
-          if (message.position === "before") {
-            if ($targetLiTag) {
-              $targetLiTag.before($liTag);
-            } else {
-              $tabset.append($liTag);
-            }
-          } else if (message.position === "after") {
-            if ($targetLiTag) {
-              $targetLiTag.after($liTag);
-            } else {
-              $tabset.prepend($liTag);
-            }
-          }
-          renderContent($liTag[0], {
-            html: $liTag.html(),
-            deps: message.liTag.deps
-          });
-          renderContent($tabContent[0], {
-            html: "",
-            deps: message.divTag.deps
-          }, "beforeend");
-          $divTag.get().forEach(function(el) {
-            $tabContent[0].appendChild(el);
-            renderContent(el, el.innerHTML || el.textContent);
-          });
-          if (message.select) {
-            $liTag.find("a").tab("show");
-          }
-          function getTabIndex($tabset2, tabsetId2) {
-            var existingTabIds = [0];
-            $tabset2.find("a[data-toggle='tab']").each(function() {
-              var $tab = (0, import_jquery15.default)(this);
-              if ($tab.length > 0) {
-                var href = $tab.attr("href").replace(/.*(?=#[^\s]+$)/, "");
-                var _index = href.replace("#tab-" + tabsetId2 + "-", "");
-                existingTabIds.push(Number(_index));
-              }
-            });
-            return Math.max.apply(null, existingTabIds) + 1;
-          }
-          function getDropdown() {
-            if (message.menuName !== null) {
-              var $dropdownATag = (0, import_jquery15.default)("a.dropdown-toggle[data-value='" + $escape(message.menuName) + "']");
-              if ($dropdownATag.length === 0) {
-                throw "There is no navbarMenu with menuName equal to '" + message.menuName + "'";
-              }
-              var $dropdownTabset = $dropdownATag.find("+ ul.dropdown-menu");
-              var dropdownId = $dropdownTabset.attr("data-tabsetid");
-              return {
-                $tabset: $dropdownTabset,
-                id: dropdownId
-              };
-            } else if (message.target !== null) {
-              var $uncleTabset = $targetLiTag.parent("ul");
-              if ($uncleTabset.hasClass("dropdown-menu")) {
-                var uncleId = $uncleTabset.attr("data-tabsetid");
-                return {
-                  $tabset: $uncleTabset,
-                  id: uncleId
-                };
-              }
-            }
-            return null;
-          }
-        });
-        function ensureTabsetHasVisibleTab($tabset) {
-          var inputBinding = $tabset.data("shiny-input-binding");
-          if (!inputBinding.getValue($tabset)) {
-            var destTabValue = getFirstTab($tabset);
-            var evt = jQuery.Event("shiny:updateinput");
-            evt.binding = inputBinding;
-            $tabset.trigger(evt);
-            inputBinding.setValue($tabset[0], destTabValue);
-          }
-        }
-        function getFirstTab($ul) {
-          return $ul.find("li:visible a[data-toggle='tab']").first().attr("data-value") || null;
-        }
-        function tabApplyFunction(target, func) {
-          var liTags = arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : false;
-          import_jquery15.default.each(target, function(key, el) {
-            if (key === "$liTag") {
-              func(el);
-            } else if (key === "$divTags") {
-              import_jquery15.default.each(el, function(i, div) {
-                func(div);
-              });
-            } else if (liTags && key === "$liTags") {
-              import_jquery15.default.each(el, function(i, div) {
-                func(div);
-              });
-            }
-          });
-        }
-        this.addMessageHandler("shiny-remove-tab", function(message) {
-          var $tabset = getTabset(message.inputId);
-          var $tabContent = getTabContent($tabset);
-          var target = getTargetTabs($tabset, $tabContent, message.target);
-          tabApplyFunction(target, removeEl);
-          ensureTabsetHasVisibleTab($tabset);
-          function removeEl($el) {
-            shinyUnbindAll($el, true);
-            $el.remove();
-          }
-        });
-        this.addMessageHandler("shiny-change-tab-visibility", function(message) {
-          var $tabset = getTabset(message.inputId);
-          var $tabContent = getTabContent($tabset);
-          var target = getTargetTabs($tabset, $tabContent, message.target);
-          tabApplyFunction(target, changeVisibility, true);
-          ensureTabsetHasVisibleTab($tabset);
-          function changeVisibility($el) {
-            if (message.type === "show")
-              $el.css("display", "");
-            else if (message.type === "hide") {
-              $el.hide();
-              $el.removeClass("active");
-            }
-          }
-        });
-        this.addMessageHandler("updateQueryString", function(message) {
-          if (message.mode === "replace") {
-            window.history.replaceState(null, null, message.queryString);
-            return;
-          }
-          var what = null;
-          if (message.queryString.charAt(0) === "#")
-            what = "hash";
-          else if (message.queryString.charAt(0) === "?")
-            what = "query";
-          else
-            throw "The 'query' string must start with either '?' (to update the query string) or with '#' (to update the hash).";
-          var path = window.location.pathname;
-          var oldQS = window.location.search;
-          var oldHash = window.location.hash;
-          var relURL = path;
-          if (what === "query")
-            relURL += message.queryString;
-          else
-            relURL += oldQS + message.queryString;
-          window.history.pushState(null, null, relURL);
-          if (message.queryString.indexOf("#") !== -1)
-            what = "hash";
-          if (window.location.hash !== oldHash)
-            what = "hash";
-          if (what === "hash")
-            (0, import_jquery15.default)(document).trigger("hashchange");
-        });
-        this.addMessageHandler("resetBrush", function(message) {
-          resetBrush(message.brushId);
-        });
-      }
-    }, {
-      key: "getTestSnapshotBaseUrl",
-      value: function getTestSnapshotBaseUrl() {
-        var _ref2 = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : {}, _ref2$fullUrl = _ref2.fullUrl, fullUrl = _ref2$fullUrl === void 0 ? true : _ref2$fullUrl;
-        var loc = window.location;
-        var url = "";
-        if (fullUrl) {
-          url = loc.origin + loc.pathname.replace(/\/[^/]*$/, "");
-        }
-        url += "/session/" + encodeURIComponent(this.config.sessionId) + "/dataobj/shinytest?w=" + encodeURIComponent(this.config.workerId) + "&nonce=" + randomId();
-        return url;
-      }
-    }]);
-    return ShinyApp2;
-  }();
-
-  // src/shiny/init.ts
+  // src/shiny/initedMethods.ts
   var fullShinyObj_ = null;
-  function fullShinyObj() {
-    return fullShinyObj_;
+  function setShinyObj(shiny) {
+    fullShinyObj_ = shiny;
   }
   function shinySetInputValue(name, value, opts) {
     fullShinyObj_.setInputValue(name, value, opts);
@@ -7201,302 +4133,8 @@
   function setFileInputBinding(fileInputBinding) {
     fileInputBinding_ = fileInputBinding;
   }
-  function initShiny(Shiny2) {
-    fullShinyObj_ = Shiny2;
-    var shinyapp = Shiny2.shinyapp = new ShinyApp();
-    Shiny2.progressHandlers = shinyapp.progressHandlers;
-    var inputBatchSender = new InputBatchSender(shinyapp);
-    var inputsNoResend = new InputNoResendDecorator(inputBatchSender);
-    var inputsEvent = new InputEventDecorator(inputsNoResend);
-    var inputsRate = new InputRateDecorator(inputsEvent);
-    var inputsDefer = new InputDeferDecorator(inputsEvent);
-    var target;
-    if ((0, import_jquery16.default)('input[type="submit"], button[type="submit"]').length > 0) {
-      target = inputsDefer;
-      (0, import_jquery16.default)('input[type="submit"], button[type="submit"]').each(function() {
-        (0, import_jquery16.default)(this).click(function(event) {
-          event.preventDefault();
-          inputsDefer.submit();
-        });
-      });
-    } else {
-      target = inputsRate;
-    }
-    var inputs = new InputValidateDecorator(target);
-    Shiny2.setInputValue = Shiny2.onInputChange = function(name, value, opts) {
-      var newOpts = addDefaultInputOpts(opts);
-      inputs.setInput(name, value, newOpts);
-    };
-    Shiny2.forgetLastInputValue = function(name) {
-      inputsNoResend.forget(name);
-    };
-    var inputBindings = Shiny2.inputBindings;
-    var outputBindings = Shiny2.outputBindings;
-    function shinyBindCtx() {
-      return {
-        inputs: inputs,
-        inputsRate: inputsRate,
-        sendOutputHiddenState: sendOutputHiddenState,
-        maybeAddThemeObserver: maybeAddThemeObserver,
-        inputBindings: inputBindings,
-        outputBindings: outputBindings
-      };
-    }
-    Shiny2.bindAll = function(scope) {
-      bindAll(shinyBindCtx(), scope);
-    };
-    Shiny2.unbindAll = function(scope) {
-      var includeSelf = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : false;
-      unbindAll(shinyBindCtx(), scope, includeSelf);
-    };
-    function initializeInputs() {
-      var scope = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : document.documentElement;
-      var bindings = inputBindings.getBindings();
-      for (var i = 0; i < bindings.length; i++) {
-        var binding = bindings[i].binding;
-        var inputObjects = binding.find(scope);
-        if (inputObjects) {
-          for (var j = 0; j < inputObjects.length; j++) {
-            var $inputObjectJ = (0, import_jquery16.default)(inputObjects[j]);
-            if (!$inputObjectJ.data("_shiny_initialized")) {
-              $inputObjectJ.data("_shiny_initialized", true);
-              binding.initialize(inputObjects[j]);
-            }
-          }
-        }
-      }
-    }
-    Shiny2.initializeInputs = initializeInputs;
-    function getIdFromEl(el) {
-      var $el = (0, import_jquery16.default)(el);
-      var bindingAdapter = $el.data("shiny-output-binding");
-      if (!bindingAdapter)
-        return null;
-      else
-        return bindingAdapter.getId();
-    }
-    initializeInputs(document.documentElement);
-    var initialValues = mapValues(_bindAll(shinyBindCtx(), document.documentElement), function(x) {
-      return x.value;
-    });
-    (0, import_jquery16.default)(".shiny-image-output, .shiny-plot-output, .shiny-report-size").each(function() {
-      var id = getIdFromEl(this);
-      if (this.offsetWidth !== 0 || this.offsetHeight !== 0) {
-        initialValues[".clientdata_output_" + id + "_width"] = this.offsetWidth;
-        initialValues[".clientdata_output_" + id + "_height"] = this.offsetHeight;
-      }
-    });
-    function getComputedBgColor(el) {
-      if (!el) {
-        return null;
-      }
-      var bgColor = getStyle(el, "background-color");
-      var m = bgColor.match(/^rgba\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)\s*\)$/);
-      if (bgColor === "transparent" || m && parseFloat(m[4]) === 0) {
-        var bgImage = getStyle(el, "background-image");
-        if (bgImage && bgImage !== "none") {
-          return null;
-        } else {
-          return getComputedBgColor(el.parentElement);
-        }
-      }
-      return bgColor;
-    }
-    function getComputedFont(el) {
-      var fontFamily = getStyle(el, "font-family");
-      var fontSize = getStyle(el, "font-size");
-      return {
-        families: fontFamily.replace(/"/g, "").split(", "),
-        size: fontSize
-      };
-    }
-    (0, import_jquery16.default)(".shiny-image-output, .shiny-plot-output, .shiny-report-theme").each(function() {
-      var el = this;
-      var id = getIdFromEl(el);
-      initialValues[".clientdata_output_" + id + "_bg"] = getComputedBgColor(el);
-      initialValues[".clientdata_output_" + id + "_fg"] = getStyle(el, "color");
-      initialValues[".clientdata_output_" + id + "_accent"] = getComputedLinkColor(el);
-      initialValues[".clientdata_output_" + id + "_font"] = getComputedFont(el);
-      maybeAddThemeObserver(el);
-    });
-    function maybeAddThemeObserver(el) {
-      if (!window.MutationObserver) {
-        return;
-      }
-      var cl = el.classList;
-      var reportTheme = cl.contains("shiny-image-output") || cl.contains("shiny-plot-output") || cl.contains("shiny-report-theme");
-      if (!reportTheme) {
-        return;
-      }
-      var $el = (0, import_jquery16.default)(el);
-      if ($el.data("shiny-theme-observer")) {
-        return;
-      }
-      var observerCallback = new Debouncer(null, function() {
-        return doSendTheme(el);
-      }, 100);
-      var observer = new MutationObserver(function() {
-        return observerCallback.normalCall();
-      });
-      var config = {
-        attributes: true,
-        attributeFilter: ["style", "class"]
-      };
-      observer.observe(el, config);
-      $el.data("shiny-theme-observer", observer);
-    }
-    function doSendTheme(el) {
-      if (el.classList.contains("shiny-output-error")) {
-        return;
-      }
-      var id = getIdFromEl(el);
-      inputs.setInput(".clientdata_output_" + id + "_bg", getComputedBgColor(el));
-      inputs.setInput(".clientdata_output_" + id + "_fg", getStyle(el, "color"));
-      inputs.setInput(".clientdata_output_" + id + "_accent", getComputedLinkColor(el));
-      inputs.setInput(".clientdata_output_" + id + "_font", getComputedFont(el));
-    }
-    function doSendImageSize() {
-      (0, import_jquery16.default)(".shiny-image-output, .shiny-plot-output, .shiny-report-size").each(function() {
-        var id = getIdFromEl(this);
-        if (this.offsetWidth !== 0 || this.offsetHeight !== 0) {
-          inputs.setInput(".clientdata_output_" + id + "_width", this.offsetWidth);
-          inputs.setInput(".clientdata_output_" + id + "_height", this.offsetHeight);
-        }
-      });
-      (0, import_jquery16.default)(".shiny-image-output, .shiny-plot-output, .shiny-report-theme").each(function() {
-        doSendTheme(this);
-      });
-      (0, import_jquery16.default)(".shiny-bound-output").each(function() {
-        var $this = (0, import_jquery16.default)(this), binding = $this.data("shiny-output-binding");
-        $this.trigger({
-          type: "shiny:visualchange",
-          visible: !isHidden(this),
-          binding: binding
-        });
-        binding.onResize();
-      });
-    }
-    sendImageSizeFns.setImageSend(inputBatchSender, doSendImageSize);
-    function isHidden(obj) {
-      if (obj === null || obj.offsetWidth !== 0 || obj.offsetHeight !== 0) {
-        return false;
-      } else if (getStyle(obj, "display") === "none") {
-        return true;
-      } else {
-        return isHidden(obj.parentNode);
-      }
-    }
-    var lastKnownVisibleOutputs = {};
-    (0, import_jquery16.default)(".shiny-bound-output").each(function() {
-      var id = getIdFromEl(this);
-      if (isHidden(this)) {
-        initialValues[".clientdata_output_" + id + "_hidden"] = true;
-      } else {
-        lastKnownVisibleOutputs[id] = true;
-        initialValues[".clientdata_output_" + id + "_hidden"] = false;
-      }
-    });
-    function doSendOutputHiddenState() {
-      var visibleOutputs = {};
-      (0, import_jquery16.default)(".shiny-bound-output").each(function() {
-        var id = getIdFromEl(this);
-        delete lastKnownVisibleOutputs[id];
-        var hidden = isHidden(this), evt = {
-          type: "shiny:visualchange",
-          visible: !hidden
-        };
-        if (hidden) {
-          inputs.setInput(".clientdata_output_" + id + "_hidden", true);
-        } else {
-          visibleOutputs[id] = true;
-          inputs.setInput(".clientdata_output_" + id + "_hidden", false);
-        }
-        var $this = (0, import_jquery16.default)(this);
-        evt.binding = $this.data("shiny-output-binding");
-        $this.trigger(evt);
-      });
-      for (var name in lastKnownVisibleOutputs) {
-        if (hasOwnProperty(lastKnownVisibleOutputs, name))
-          inputs.setInput(".clientdata_output_" + name + "_hidden", true);
-      }
-      lastKnownVisibleOutputs = visibleOutputs;
-    }
-    var sendOutputHiddenStateDebouncer = new Debouncer(null, doSendOutputHiddenState, 0);
-    function sendOutputHiddenState() {
-      sendOutputHiddenStateDebouncer.normalCall();
-    }
-    inputBatchSender.lastChanceCallback.push(function() {
-      if (sendOutputHiddenStateDebouncer.isPending())
-        sendOutputHiddenStateDebouncer.immediateCall();
-    });
-    function filterEventsByNamespace(namespace, handler) {
-      for (var _len = arguments.length, args = new Array(_len > 2 ? _len - 2 : 0), _key = 2; _key < _len; _key++) {
-        args[_key - 2] = arguments[_key];
-      }
-      namespace = namespace.split(".");
-      return function(e) {
-        var eventNamespace = e.namespace.split(".");
-        for (var i = 0; i < namespace.length; i++) {
-          if (eventNamespace.indexOf(namespace[i]) === -1)
-            return;
-        }
-        handler.apply(this, [namespace, handler].concat(args));
-      };
-    }
-    (0, import_jquery16.default)(window).resize(debounce(500, sendImageSizeFns.regular));
-    var bs3classes = ["modal", "dropdown", "tab", "tooltip", "popover", "collapse"];
-    import_jquery16.default.each(bs3classes, function(idx, classname) {
-      (0, import_jquery16.default)(document.body).on("shown.bs." + classname + ".sendImageSize", "*", filterEventsByNamespace("bs", sendImageSizeFns.regular));
-      (0, import_jquery16.default)(document.body).on("shown.bs." + classname + ".sendOutputHiddenState hidden.bs." + classname + ".sendOutputHiddenState", "*", filterEventsByNamespace("bs", sendOutputHiddenState));
-    });
-    (0, import_jquery16.default)(document.body).on("shown.sendImageSize", "*", sendImageSizeFns.regular);
-    (0, import_jquery16.default)(document.body).on("shown.sendOutputHiddenState hidden.sendOutputHiddenState", "*", sendOutputHiddenState);
-    initialValues[".clientdata_pixelratio"] = pixelRatio();
-    (0, import_jquery16.default)(window).resize(function() {
-      inputs.setInput(".clientdata_pixelratio", pixelRatio());
-    });
-    initialValues[".clientdata_url_protocol"] = window.location.protocol;
-    initialValues[".clientdata_url_hostname"] = window.location.hostname;
-    initialValues[".clientdata_url_port"] = window.location.port;
-    initialValues[".clientdata_url_pathname"] = window.location.pathname;
-    initialValues[".clientdata_url_search"] = window.location.search;
-    (0, import_jquery16.default)(window).on("pushstate", function(e) {
-      inputs.setInput(".clientdata_url_search", window.location.search);
-    });
-    (0, import_jquery16.default)(window).on("popstate", function(e) {
-      inputs.setInput(".clientdata_url_search", window.location.search);
-    });
-    initialValues[".clientdata_url_hash_initial"] = window.location.hash;
-    initialValues[".clientdata_url_hash"] = window.location.hash;
-    (0, import_jquery16.default)(window).on("hashchange", function(e) {
-      inputs.setInput(".clientdata_url_hash", window.location.hash);
-    });
-    var singletonText = initialValues[".clientdata_singletons"] = (0, import_jquery16.default)('script[type="application/shiny-singletons"]').text();
-    registerNames(singletonText.split(/,/));
-    var dependencyText = (0, import_jquery16.default)('script[type="application/html-dependencies"]').text();
-    import_jquery16.default.each(dependencyText.split(/;/), function(i, depStr) {
-      var match = /\s*^(.+)\[(.+)\]\s*$/.exec(depStr);
-      if (match) {
-        registerDependency(match[1], match[2]);
-      }
-    });
-    inputsNoResend.reset(initialValues);
-    shinyapp.connect(initialValues);
-    (0, import_jquery16.default)(document).one("shiny:connected", function() {
-      initDeferredIframes();
-    });
-    window.console.log("Shiny version: ", Shiny2.version);
-  }
-  function initDeferredIframes() {
-    if (!window.Shiny || !window.Shiny.shinyapp || !window.Shiny.shinyapp.isConnected()) {
-      return;
-    }
-    (0, import_jquery16.default)(".shiny-frame-deferred").each(function(i, el) {
-      var $el = (0, import_jquery16.default)(el);
-      $el.removeClass("shiny-frame-deferred");
-      $el.attr("src", $el.attr("data-deferred-src"));
-      $el.attr("data-deferred-src", null);
-    });
+  function getShinyCreateWebsocket() {
+    return fullShinyObj_.createSocket;
   }
 
   // src/imageutils/initPanelScales.ts
@@ -7768,7 +4406,7 @@
           coords_img: coordsImg,
           img_css_ratio: coordmap.cssToImgScalingRatio()
         };
-        import_jquery17.default.extend(coords, panel.panel_vars);
+        import_jquery7.default.extend(coords, panel.panel_vars);
         coords.mapping = panel.mapping;
         coords.domain = panel.domain;
         coords.range = panel.range;
@@ -7778,6 +4416,35 @@
         });
       };
     };
+  }
+
+  // src/imageutils/findbox.ts
+  function findBox(offset1, offset2) {
+    return {
+      xmin: Math.min(offset1.x, offset2.x),
+      xmax: Math.max(offset1.x, offset2.x),
+      ymin: Math.min(offset1.y, offset2.y),
+      ymax: Math.max(offset1.y, offset2.y)
+    };
+  }
+
+  // src/imageutils/shiftToRange.ts
+  function shiftToRange(vals, min4, max4) {
+    if (!(vals instanceof Array))
+      vals = [vals];
+    var maxval = Math.max.apply(null, vals);
+    var minval = Math.min.apply(null, vals);
+    var shiftAmount = 0;
+    if (maxval > max4) {
+      shiftAmount = max4 - maxval;
+    } else if (minval < min4) {
+      shiftAmount = min4 - minval;
+    }
+    var newvals = [];
+    for (var i = 0; i < vals.length; i++) {
+      newvals[i] = vals[i] + shiftAmount;
+    }
+    return newvals;
   }
 
   // src/imageutils/createBrush.ts
@@ -7899,7 +4566,7 @@
     }
     function boundsCss(boxCss) {
       if (boxCss === void 0) {
-        return import_jquery18.default.extend({}, state.boundsCss);
+        return import_jquery8.default.extend({}, state.boundsCss);
       }
       var minCss = {
         x: boxCss.xmin,
@@ -7949,7 +4616,7 @@
     }
     function boundsData(boxData) {
       if (boxData === void 0) {
-        return import_jquery18.default.extend({}, state.boundsData);
+        return import_jquery8.default.extend({}, state.boundsData);
       }
       var boxCss = imgToCss(state.panel.scaleDataToImg(boxData));
       boxCss = mapValues(boxCss, function(val) {
@@ -7969,7 +4636,7 @@
     function addDiv() {
       if ($div)
         $div.remove();
-      $div = (0, import_jquery18.default)(document.createElement("div")).attr("id", el.id + "_brush").css({
+      $div = (0, import_jquery8.default)(document.createElement("div")).attr("id", el.id + "_brush").css({
         "background-color": opts.brushFill,
         opacity: opts.brushOpacity,
         "pointer-events": "none",
@@ -8041,7 +4708,7 @@
     }
     function startDragging() {
       state.dragging = true;
-      state.changeStartBounds = import_jquery18.default.extend({}, state.boundsCss);
+      state.changeStartBounds = import_jquery8.default.extend({}, state.boundsCss);
     }
     function dragTo(offsetCss) {
       var dx = offsetCss.x - state.down.x;
@@ -8078,7 +4745,7 @@
     }
     function startResizing() {
       state.resizing = true;
-      state.changeStartBounds = import_jquery18.default.extend({}, state.boundsCss);
+      state.changeStartBounds = import_jquery8.default.extend({}, state.boundsCss);
       state.resizeSides = whichResizeSides(state.down);
     }
     function resizeTo(offsetCss) {
@@ -8137,12 +4804,12 @@
   }
 
   // src/imageutils/createClickInfo.ts
-  var import_jquery19 = __toModule(require_jquery());
+  var import_jquery9 = __toModule(require_jquery());
   function createClickInfo($el, dblclickId, dblclickDelay) {
     var clickTimer = null;
     var pendingE = null;
     function triggerEvent(newEventType, e) {
-      var e2 = import_jquery19.default.Event(newEventType, {
+      var e2 = import_jquery9.default.Event(newEventType, {
         which: e.which,
         pageX: e.pageX,
         pageY: e.pageY
@@ -8192,7 +4859,279 @@
   }
 
   // src/imageutils/createHandlers.ts
-  var import_jquery20 = __toModule(require_jquery());
+  var import_jquery10 = __toModule(require_jquery());
+
+  // src/time/debounce.ts
+  function _classCallCheck2(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+  function _defineProperties2(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor)
+        descriptor.writable = true;
+      Object.defineProperty(target, descriptor.key, descriptor);
+    }
+  }
+  function _createClass2(Constructor, protoProps, staticProps) {
+    if (protoProps)
+      _defineProperties2(Constructor.prototype, protoProps);
+    if (staticProps)
+      _defineProperties2(Constructor, staticProps);
+    return Constructor;
+  }
+  function _defineProperty2(obj, key, value) {
+    if (key in obj) {
+      Object.defineProperty(obj, key, {value: value, enumerable: true, configurable: true, writable: true});
+    } else {
+      obj[key] = value;
+    }
+    return obj;
+  }
+  var Debouncer = /* @__PURE__ */ function() {
+    function Debouncer2(target, func, delayMs) {
+      _classCallCheck2(this, Debouncer2);
+      _defineProperty2(this, "target", void 0);
+      _defineProperty2(this, "func", void 0);
+      _defineProperty2(this, "delayMs", void 0);
+      _defineProperty2(this, "timerId", void 0);
+      _defineProperty2(this, "args", void 0);
+      this.target = target;
+      this.func = func;
+      this.delayMs = delayMs;
+      this.timerId = null;
+      this.args = null;
+    }
+    _createClass2(Debouncer2, [{
+      key: "normalCall",
+      value: function normalCall() {
+        var _this = this;
+        this.$clearTimer();
+        for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+          args[_key] = arguments[_key];
+        }
+        this.args = args;
+        this.timerId = setTimeout(function() {
+          if (_this.timerId === null)
+            return;
+          _this.$clearTimer();
+          _this.$invoke();
+        }, this.delayMs);
+      }
+    }, {
+      key: "immediateCall",
+      value: function immediateCall() {
+        this.$clearTimer();
+        for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+          args[_key2] = arguments[_key2];
+        }
+        this.args = args;
+        this.$invoke();
+      }
+    }, {
+      key: "isPending",
+      value: function isPending() {
+        return this.timerId !== null;
+      }
+    }, {
+      key: "$clearTimer",
+      value: function $clearTimer() {
+        if (this.timerId !== null) {
+          clearTimeout(this.timerId);
+          this.timerId = null;
+        }
+      }
+    }, {
+      key: "$invoke",
+      value: function $invoke() {
+        this.func.apply(this.target, this.args);
+        this.args = null;
+      }
+    }]);
+    return Debouncer2;
+  }();
+  function debounce(threshold, func) {
+    var timerId = null;
+    return function() {
+      var _this2 = this;
+      for (var _len3 = arguments.length, args = new Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
+        args[_key3] = arguments[_key3];
+      }
+      if (timerId !== null) {
+        clearTimeout(timerId);
+        timerId = null;
+      }
+      timerId = setTimeout(function() {
+        if (timerId === null)
+          return;
+        timerId = null;
+        func.apply(_this2, args);
+      }, threshold);
+    };
+  }
+
+  // src/time/invoke.ts
+  function _classCallCheck3(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+  function _defineProperties3(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor)
+        descriptor.writable = true;
+      Object.defineProperty(target, descriptor.key, descriptor);
+    }
+  }
+  function _createClass3(Constructor, protoProps, staticProps) {
+    if (protoProps)
+      _defineProperties3(Constructor.prototype, protoProps);
+    if (staticProps)
+      _defineProperties3(Constructor, staticProps);
+    return Constructor;
+  }
+  function _defineProperty3(obj, key, value) {
+    if (key in obj) {
+      Object.defineProperty(obj, key, {value: value, enumerable: true, configurable: true, writable: true});
+    } else {
+      obj[key] = value;
+    }
+    return obj;
+  }
+  var Invoker = /* @__PURE__ */ function() {
+    function Invoker2(target, func) {
+      _classCallCheck3(this, Invoker2);
+      _defineProperty3(this, "target", void 0);
+      _defineProperty3(this, "func", void 0);
+      this.target = target;
+      this.func = func;
+    }
+    _createClass3(Invoker2, [{
+      key: "normalCall",
+      value: function normalCall() {
+        for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+          args[_key] = arguments[_key];
+        }
+        this.func.apply(this.target, args);
+      }
+    }, {
+      key: "immediateCall",
+      value: function immediateCall() {
+        for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+          args[_key2] = arguments[_key2];
+        }
+        this.func.apply(this.target, args);
+      }
+    }]);
+    return Invoker2;
+  }();
+
+  // src/time/throttle.ts
+  function _classCallCheck4(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+  function _defineProperties4(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor)
+        descriptor.writable = true;
+      Object.defineProperty(target, descriptor.key, descriptor);
+    }
+  }
+  function _createClass4(Constructor, protoProps, staticProps) {
+    if (protoProps)
+      _defineProperties4(Constructor.prototype, protoProps);
+    if (staticProps)
+      _defineProperties4(Constructor, staticProps);
+    return Constructor;
+  }
+  function _defineProperty4(obj, key, value) {
+    if (key in obj) {
+      Object.defineProperty(obj, key, {value: value, enumerable: true, configurable: true, writable: true});
+    } else {
+      obj[key] = value;
+    }
+    return obj;
+  }
+  var Throttler = /* @__PURE__ */ function() {
+    function Throttler2(target, func, delayMs) {
+      _classCallCheck4(this, Throttler2);
+      _defineProperty4(this, "target", void 0);
+      _defineProperty4(this, "func", void 0);
+      _defineProperty4(this, "delayMs", void 0);
+      _defineProperty4(this, "timerId", void 0);
+      _defineProperty4(this, "args", void 0);
+      this.target = target;
+      this.func = func;
+      this.delayMs = delayMs;
+      this.timerId = null;
+      this.args = null;
+    }
+    _createClass4(Throttler2, [{
+      key: "normalCall",
+      value: function normalCall() {
+        var _this = this;
+        for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+          args[_key] = arguments[_key];
+        }
+        this.args = args;
+        if (this.timerId === null) {
+          this.$invoke();
+          this.timerId = setTimeout(function() {
+            var _this$normalCall;
+            if (_this.timerId === null)
+              return;
+            _this.$clearTimer();
+            if (args.length > 0)
+              (_this$normalCall = _this.normalCall).apply.apply(_this$normalCall, [_this].concat(args));
+          }, this.delayMs);
+        }
+      }
+    }, {
+      key: "immediateCall",
+      value: function immediateCall() {
+        this.$clearTimer();
+        for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+          args[_key2] = arguments[_key2];
+        }
+        this.args = args;
+        this.$invoke();
+      }
+    }, {
+      key: "isPending",
+      value: function isPending() {
+        return this.timerId !== null;
+      }
+    }, {
+      key: "$clearTimer",
+      value: function $clearTimer() {
+        if (this.timerId !== null) {
+          clearTimeout(this.timerId);
+          this.timerId = null;
+        }
+      }
+    }, {
+      key: "$invoke",
+      value: function $invoke() {
+        this.func.apply(this.target, this.args);
+        this.args = null;
+      }
+    }]);
+    return Throttler2;
+  }();
+
+  // src/imageutils/createHandlers.ts
   function createClickHandler(inputId, clip, coordmap) {
     var clickInfoSender = coordmap.mouseCoordinateSender(inputId, clip);
     return {
@@ -8258,7 +5197,7 @@
         return;
       }
       var panel = brush.getPanel();
-      import_jquery20.default.extend(coords, panel.panel_vars);
+      import_jquery10.default.extend(coords, panel.panel_vars);
       coords.coords_css = brush.boundsCss();
       coords.coords_img = coordmap.scaleCssToImg(coords.coords_css);
       coords.img_css_ratio = coordmap.cssToImgScalingRatio();
@@ -8294,15 +5233,15 @@
       brush.down(offsetCss);
       if (brush.isInResizeArea(offsetCss)) {
         brush.startResizing(offsetCss);
-        (0, import_jquery20.default)(document).on("mousemove.image_brush", mousemoveResizing).on("mouseup.image_brush", mouseupResizing);
+        (0, import_jquery10.default)(document).on("mousemove.image_brush", mousemoveResizing).on("mouseup.image_brush", mouseupResizing);
       } else if (brush.isInsideBrush(offsetCss)) {
         brush.startDragging(offsetCss);
         setCursorStyle("grabbing");
-        (0, import_jquery20.default)(document).on("mousemove.image_brush", mousemoveDragging).on("mouseup.image_brush", mouseupDragging);
+        (0, import_jquery10.default)(document).on("mousemove.image_brush", mousemoveDragging).on("mouseup.image_brush", mouseupDragging);
       } else {
         var panel = coordmap.getPanelCss(offsetCss, expandPixels);
         brush.startBrushing(panel.clipImg(coordmap.scaleCssToImg(offsetCss)));
-        (0, import_jquery20.default)(document).on("mousemove.image_brush", mousemoveBrushing).on("mouseup.image_brush", mouseupBrushing);
+        (0, import_jquery10.default)(document).on("mousemove.image_brush", mousemoveBrushing).on("mouseup.image_brush", mouseupBrushing);
       }
     }
     function mousemove(e) {
@@ -8343,7 +5282,7 @@
     function mouseupBrushing(e) {
       if (e.which !== 1)
         return;
-      (0, import_jquery20.default)(document).off("mousemove.image_brush").off("mouseup.image_brush");
+      (0, import_jquery10.default)(document).off("mousemove.image_brush").off("mouseup.image_brush");
       brush.up(coordmap.mouseOffsetCss(e));
       brush.stopBrushing();
       setCursorStyle("crosshair");
@@ -8358,7 +5297,7 @@
     function mouseupDragging(e) {
       if (e.which !== 1)
         return;
-      (0, import_jquery20.default)(document).off("mousemove.image_brush").off("mouseup.image_brush");
+      (0, import_jquery10.default)(document).off("mousemove.image_brush").off("mouseup.image_brush");
       brush.up(coordmap.mouseOffsetCss(e));
       brush.stopDragging();
       setCursorStyle("grabbable");
@@ -8368,7 +5307,7 @@
     function mouseupResizing(e) {
       if (e.which !== 1)
         return;
-      (0, import_jquery20.default)(document).off("mousemove.image_brush").off("mouseup.image_brush");
+      (0, import_jquery10.default)(document).off("mousemove.image_brush").off("mouseup.image_brush");
       brush.up(coordmap.mouseOffsetCss(e));
       brush.stopResizing();
       if (brushInfoSender.isPending())
@@ -8413,55 +5352,26 @@
     });
   }
 
-  // src/imageutils/findbox.ts
-  function findBox(offset1, offset2) {
-    return {
-      xmin: Math.min(offset1.x, offset2.x),
-      xmax: Math.max(offset1.x, offset2.x),
-      ymin: Math.min(offset1.y, offset2.y),
-      ymax: Math.max(offset1.y, offset2.y)
-    };
-  }
-
-  // src/imageutils/shiftToRange.ts
-  function shiftToRange(vals, min4, max4) {
-    if (!(vals instanceof Array))
-      vals = [vals];
-    var maxval = Math.max.apply(null, vals);
-    var minval = Math.min.apply(null, vals);
-    var shiftAmount = 0;
-    if (maxval > max4) {
-      shiftAmount = max4 - maxval;
-    } else if (minval < min4) {
-      shiftAmount = min4 - minval;
-    }
-    var newvals = [];
-    for (var i = 0; i < vals.length; i++) {
-      newvals[i] = vals[i] + shiftAmount;
-    }
-    return newvals;
-  }
-
   // src/bindings/output/image.ts
-  function _typeof7(obj) {
+  function _typeof(obj) {
     "@babel/helpers - typeof";
     if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
-      _typeof7 = function _typeof27(obj2) {
+      _typeof = function _typeof27(obj2) {
         return typeof obj2;
       };
     } else {
-      _typeof7 = function _typeof27(obj2) {
+      _typeof = function _typeof27(obj2) {
         return obj2 && typeof Symbol === "function" && obj2.constructor === Symbol && obj2 !== Symbol.prototype ? "symbol" : typeof obj2;
       };
     }
-    return _typeof7(obj);
+    return _typeof(obj);
   }
-  function _classCallCheck15(instance, Constructor) {
+  function _classCallCheck5(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
       throw new TypeError("Cannot call a class as a function");
     }
   }
-  function _defineProperties14(target, props) {
+  function _defineProperties5(target, props) {
     for (var i = 0; i < props.length; i++) {
       var descriptor = props[i];
       descriptor.enumerable = descriptor.enumerable || false;
@@ -8471,54 +5381,54 @@
       Object.defineProperty(target, descriptor.key, descriptor);
     }
   }
-  function _createClass14(Constructor, protoProps, staticProps) {
+  function _createClass5(Constructor, protoProps, staticProps) {
     if (protoProps)
-      _defineProperties14(Constructor.prototype, protoProps);
+      _defineProperties5(Constructor.prototype, protoProps);
     if (staticProps)
-      _defineProperties14(Constructor, staticProps);
+      _defineProperties5(Constructor, staticProps);
     return Constructor;
   }
-  function _inherits6(subClass, superClass) {
+  function _inherits(subClass, superClass) {
     if (typeof superClass !== "function" && superClass !== null) {
       throw new TypeError("Super expression must either be null or a function");
     }
     subClass.prototype = Object.create(superClass && superClass.prototype, {constructor: {value: subClass, writable: true, configurable: true}});
     if (superClass)
-      _setPrototypeOf6(subClass, superClass);
+      _setPrototypeOf(subClass, superClass);
   }
-  function _setPrototypeOf6(o, p) {
-    _setPrototypeOf6 = Object.setPrototypeOf || function _setPrototypeOf26(o2, p2) {
+  function _setPrototypeOf(o, p) {
+    _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf26(o2, p2) {
       o2.__proto__ = p2;
       return o2;
     };
-    return _setPrototypeOf6(o, p);
+    return _setPrototypeOf(o, p);
   }
-  function _createSuper6(Derived) {
-    var hasNativeReflectConstruct = _isNativeReflectConstruct6();
+  function _createSuper(Derived) {
+    var hasNativeReflectConstruct = _isNativeReflectConstruct();
     return function _createSuperInternal() {
-      var Super = _getPrototypeOf6(Derived), result;
+      var Super = _getPrototypeOf(Derived), result;
       if (hasNativeReflectConstruct) {
-        var NewTarget = _getPrototypeOf6(this).constructor;
+        var NewTarget = _getPrototypeOf(this).constructor;
         result = Reflect.construct(Super, arguments, NewTarget);
       } else {
         result = Super.apply(this, arguments);
       }
-      return _possibleConstructorReturn6(this, result);
+      return _possibleConstructorReturn(this, result);
     };
   }
-  function _possibleConstructorReturn6(self2, call) {
-    if (call && (_typeof7(call) === "object" || typeof call === "function")) {
+  function _possibleConstructorReturn(self2, call) {
+    if (call && (_typeof(call) === "object" || typeof call === "function")) {
       return call;
     }
-    return _assertThisInitialized6(self2);
+    return _assertThisInitialized(self2);
   }
-  function _assertThisInitialized6(self2) {
+  function _assertThisInitialized(self2) {
     if (self2 === void 0) {
       throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
     }
     return self2;
   }
-  function _isNativeReflectConstruct6() {
+  function _isNativeReflectConstruct() {
     if (typeof Reflect === "undefined" || !Reflect.construct)
       return false;
     if (Reflect.construct.sham)
@@ -8533,35 +5443,35 @@
       return false;
     }
   }
-  function _getPrototypeOf6(o) {
-    _getPrototypeOf6 = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf26(o2) {
+  function _getPrototypeOf(o) {
+    _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf26(o2) {
       return o2.__proto__ || Object.getPrototypeOf(o2);
     };
-    return _getPrototypeOf6(o);
+    return _getPrototypeOf(o);
   }
   var ImageOutputBinding = /* @__PURE__ */ function(_OutputBinding) {
-    _inherits6(ImageOutputBinding2, _OutputBinding);
-    var _super = _createSuper6(ImageOutputBinding2);
+    _inherits(ImageOutputBinding2, _OutputBinding);
+    var _super = _createSuper(ImageOutputBinding2);
     function ImageOutputBinding2() {
-      _classCallCheck15(this, ImageOutputBinding2);
+      _classCallCheck5(this, ImageOutputBinding2);
       return _super.apply(this, arguments);
     }
-    _createClass14(ImageOutputBinding2, [{
+    _createClass5(ImageOutputBinding2, [{
       key: "find",
       value: function find2(scope) {
-        return (0, import_jquery21.default)(scope).find(".shiny-image-output, .shiny-plot-output");
+        return (0, import_jquery11.default)(scope).find(".shiny-image-output, .shiny-plot-output");
       }
     }, {
       key: "renderValue",
       value: function renderValue(el, data) {
         var outputId = this.getId(el);
-        var $el = (0, import_jquery21.default)(el);
+        var $el = (0, import_jquery11.default)(el);
         var img;
         var $img = $el.find("img");
         if ($img.length === 0) {
           img = document.createElement("img");
           $el.append(img);
-          $img = (0, import_jquery21.default)(img);
+          $img = (0, import_jquery11.default)(img);
         } else {
           img = $img[0];
           $img.trigger("reset");
@@ -8603,7 +5513,7 @@
         if (opts.brushStroke === "auto") {
           opts.brushStroke = getStyle($el[0], "color");
         }
-        import_jquery21.default.each(data, function(key, value) {
+        import_jquery11.default.each(data, function(key, value) {
           if (value === null || key === "coordmap") {
             return;
           }
@@ -8677,13 +5587,13 @@
     }, {
       key: "renderError",
       value: function renderError(el, err) {
-        (0, import_jquery21.default)(el).find("img").trigger("reset");
+        (0, import_jquery11.default)(el).find("img").trigger("reset");
         OutputBinding.prototype.renderError.call(this, el, err);
       }
     }, {
       key: "clearError",
       value: function clearError(el) {
-        (0, import_jquery21.default)(el).contents().filter(function() {
+        (0, import_jquery11.default)(el).contents().filter(function() {
           return this.tagName !== "IMG" && this.id !== el.id + "_brush";
         }).remove();
         OutputBinding.prototype.clearError.call(this, el);
@@ -8691,7 +5601,7 @@
     }, {
       key: "resize",
       value: function resize(el, width, height) {
-        (0, import_jquery21.default)(el).find("img").trigger("resize");
+        (0, import_jquery11.default)(el).find("img").trigger("resize");
         return;
         width;
         height;
@@ -8710,24 +5620,543 @@
     });
   }
 
+  // src/shiny/notifications.ts
+  var import_es_regexp_exec5 = __toModule(require_es_regexp_exec());
+  var import_jquery14 = __toModule(require_jquery());
+
+  // src/shiny/render.ts
+  var import_es_regexp_exec4 = __toModule(require_es_regexp_exec());
+
+  // node_modules/core-js/modules/es.object.entries.js
+  var $29 = require_export();
+  var $entries = require_object_to_array().entries;
+  $29({target: "Object", stat: true}, {
+    entries: function entries(O) {
+      return $entries(O);
+    }
+  });
+
+  // src/shiny/render.ts
+  var import_es_array_iterator2 = __toModule(require_es_array_iterator());
+
+  // node_modules/core-js/modules/es.array.from.js
+  var $30 = require_export();
+  var from = require_array_from();
+  var checkCorrectnessOfIteration = require_check_correctness_of_iteration();
+  var INCORRECT_ITERATION = !checkCorrectnessOfIteration(function(iterable) {
+    Array.from(iterable);
+  });
+  $30({target: "Array", stat: true, forced: INCORRECT_ITERATION}, {
+    from: from
+  });
+
+  // src/shiny/render.ts
+  var import_jquery13 = __toModule(require_jquery());
+
+  // src/shiny/sendImageSize.ts
+  function _classCallCheck6(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+  function _defineProperties6(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor)
+        descriptor.writable = true;
+      Object.defineProperty(target, descriptor.key, descriptor);
+    }
+  }
+  function _createClass6(Constructor, protoProps, staticProps) {
+    if (protoProps)
+      _defineProperties6(Constructor.prototype, protoProps);
+    if (staticProps)
+      _defineProperties6(Constructor, staticProps);
+    return Constructor;
+  }
+  function _defineProperty5(obj, key, value) {
+    if (key in obj) {
+      Object.defineProperty(obj, key, {value: value, enumerable: true, configurable: true, writable: true});
+    } else {
+      obj[key] = value;
+    }
+    return obj;
+  }
+  var SendImageSize = /* @__PURE__ */ function() {
+    function SendImageSize2() {
+      _classCallCheck6(this, SendImageSize2);
+      _defineProperty5(this, "regular", void 0);
+      _defineProperty5(this, "transitioned", void 0);
+    }
+    _createClass6(SendImageSize2, [{
+      key: "setImageSend",
+      value: function setImageSend(inputBatchSender, doSendImageSize) {
+        var sendImageSizeDebouncer = new Debouncer(null, doSendImageSize, 0);
+        this.regular = function() {
+          sendImageSizeDebouncer.normalCall();
+        };
+        inputBatchSender.lastChanceCallback.push(function() {
+          if (sendImageSizeDebouncer.isPending())
+            sendImageSizeDebouncer.immediateCall();
+        });
+        this.transitioned = debounce(200, this.regular);
+        return sendImageSizeDebouncer;
+      }
+    }]);
+    return SendImageSize2;
+  }();
+  var sendImageSizeFns = new SendImageSize();
+
+  // src/shiny/singletons.ts
+  var import_es_regexp_exec3 = __toModule(require_es_regexp_exec());
+  var import_jquery12 = __toModule(require_jquery());
+  var _reSingleton = /<!--(SHINY.SINGLETON\[([\w]+)\])-->([\s\S]*?)<!--\/\1-->/;
+  var _reHead = /<head(?:\s[^>]*)?>([\s\S]*?)<\/head>/;
+  var knownSingletons = {};
+  function renderHtml(html, el, where) {
+    var processed = _processHtml(html);
+    _addToHead(processed.head);
+    register(processed.singletons);
+    if (where === "replace") {
+      (0, import_jquery12.default)(el).html(processed.html);
+    } else {
+      var elElements;
+      if (el instanceof HTMLElement) {
+        elElements = [el];
+      } else {
+        elElements = el.toArray();
+      }
+      import_jquery12.default.each(elElements, function(i, el2) {
+        el2.insertAdjacentHTML(where, processed.html);
+      });
+    }
+    return processed;
+  }
+  function register(s) {
+    import_jquery12.default.extend(knownSingletons, s);
+  }
+  function registerNames(s) {
+    if (typeof s === "string") {
+      knownSingletons[s] = true;
+    } else if (s instanceof Array) {
+      for (var i = 0; i < s.length; i++) {
+        knownSingletons[s[i]] = true;
+      }
+    }
+  }
+  function _addToHead(head) {
+    if (head.length > 0) {
+      var tempDiv = (0, import_jquery12.default)("<div>" + head + "</div>").get(0);
+      var $head = (0, import_jquery12.default)("head");
+      while (tempDiv.hasChildNodes()) {
+        $head.append(tempDiv.firstChild);
+      }
+    }
+  }
+  function _processHtml(val) {
+    var newSingletons = {};
+    var newVal;
+    var findNewPayload = function findNewPayload2(match, p1, sig, payload) {
+      if (knownSingletons[sig] || newSingletons[sig])
+        return "";
+      newSingletons[sig] = true;
+      return payload;
+    };
+    while (true) {
+      newVal = val.replace(_reSingleton, findNewPayload);
+      if (val.length === newVal.length)
+        break;
+      val = newVal;
+    }
+    var heads = [];
+    var headAddPayload = function headAddPayload2(match, payload) {
+      heads.push(payload);
+      return "";
+    };
+    while (true) {
+      newVal = val.replace(_reHead, headAddPayload);
+      if (val.length === newVal.length)
+        break;
+      val = newVal;
+    }
+    return {
+      html: val,
+      head: heads.join("\n"),
+      singletons: newSingletons
+    };
+  }
+
+  // src/shiny/render.ts
+  function _slicedToArray(arr, i) {
+    return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest();
+  }
+  function _nonIterableRest() {
+    throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+  }
+  function _unsupportedIterableToArray(o, minLen) {
+    if (!o)
+      return;
+    if (typeof o === "string")
+      return _arrayLikeToArray(o, minLen);
+    var n = Object.prototype.toString.call(o).slice(8, -1);
+    if (n === "Object" && o.constructor)
+      n = o.constructor.name;
+    if (n === "Map" || n === "Set")
+      return Array.from(o);
+    if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n))
+      return _arrayLikeToArray(o, minLen);
+  }
+  function _arrayLikeToArray(arr, len) {
+    if (len == null || len > arr.length)
+      len = arr.length;
+    for (var i = 0, arr2 = new Array(len); i < len; i++) {
+      arr2[i] = arr[i];
+    }
+    return arr2;
+  }
+  function _iterableToArrayLimit(arr, i) {
+    var _i = arr && (typeof Symbol !== "undefined" && arr[Symbol.iterator] || arr["@@iterator"]);
+    if (_i == null)
+      return;
+    var _arr = [];
+    var _n = true;
+    var _d = false;
+    var _s, _e;
+    try {
+      for (_i = _i.call(arr); !(_n = (_s = _i.next()).done); _n = true) {
+        _arr.push(_s.value);
+        if (i && _arr.length === i)
+          break;
+      }
+    } catch (err) {
+      _d = true;
+      _e = err;
+    } finally {
+      try {
+        if (!_n && _i["return"] != null)
+          _i["return"]();
+      } finally {
+        if (_d)
+          throw _e;
+      }
+    }
+    return _arr;
+  }
+  function _arrayWithHoles(arr) {
+    if (Array.isArray(arr))
+      return arr;
+  }
+  function _typeof2(obj) {
+    "@babel/helpers - typeof";
+    if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
+      _typeof2 = function _typeof27(obj2) {
+        return typeof obj2;
+      };
+    } else {
+      _typeof2 = function _typeof27(obj2) {
+        return obj2 && typeof Symbol === "function" && obj2.constructor === Symbol && obj2 !== Symbol.prototype ? "symbol" : typeof obj2;
+      };
+    }
+    return _typeof2(obj);
+  }
+  function renderDependencies(dependencies) {
+    if (dependencies) {
+      import_jquery13.default.each(dependencies, function(i, dep) {
+        renderDependency(dep);
+      });
+    }
+  }
+  function renderContent(el, content, where) {
+    if (where === "replace") {
+      shinyUnbindAll(el);
+    }
+    var html;
+    var dependencies = [];
+    if (content === null) {
+      html = "";
+    } else if (typeof content === "string") {
+      html = content;
+    } else if (_typeof2(content) === "object") {
+      html = content.html;
+      dependencies = content.deps || [];
+    }
+    renderHtml2(html, el, dependencies, where);
+    var scope = el;
+    if (where === "replace") {
+      shinyInitializeInputs(el);
+      shinyBindAll(el);
+    } else {
+      var $parent = (0, import_jquery13.default)(el).parent();
+      if ($parent.length > 0) {
+        scope = $parent;
+        if (where === "beforeBegin" || where === "afterEnd") {
+          var $grandparent = $parent.parent();
+          if ($grandparent.length > 0)
+            scope = $grandparent;
+        }
+      }
+      shinyInitializeInputs(scope);
+      shinyBindAll(scope);
+    }
+  }
+  function renderHtml2(html, el, dependencies) {
+    var where = arguments.length > 3 && arguments[3] !== void 0 ? arguments[3] : "replace";
+    renderDependencies(dependencies);
+    return renderHtml(html, el, where);
+  }
+  var htmlDependencies = {};
+  function registerDependency(name, version) {
+    htmlDependencies[name] = version;
+  }
+  function needsRestyle(dep) {
+    if (!dep.restyle) {
+      return false;
+    }
+    var names = Object.keys(htmlDependencies);
+    var idx = names.indexOf(dep.name);
+    if (idx === -1) {
+      return false;
+    }
+    return htmlDependencies[names[idx]] === dep.version;
+  }
+  function renderDependency(dep) {
+    var restyle = needsRestyle(dep);
+    if (hasOwnProperty(htmlDependencies, dep.name) && !restyle)
+      return false;
+    registerDependency(dep.name, dep.version);
+    var href = dep.src.href;
+    var $head = (0, import_jquery13.default)("head").first();
+    if (dep.meta && !restyle) {
+      var metas = import_jquery13.default.map(asArray(dep.meta), function(obj, idx) {
+        var name = Object.keys(obj)[0];
+        return (0, import_jquery13.default)("<meta>").attr("name", name).attr("content", obj[name]);
+      });
+      $head.append(metas);
+    }
+    if (dep.stylesheet) {
+      var links = import_jquery13.default.map(asArray(dep.stylesheet), function(stylesheet) {
+        return (0, import_jquery13.default)("<link rel='stylesheet' type='text/css'>").attr("href", href + "/" + encodeURI(stylesheet));
+      });
+      if (!restyle) {
+        $head.append(links);
+      } else {
+        var refreshStyle = function refreshStyle2(href2, oldSheet) {
+          var xhr = new XMLHttpRequest();
+          xhr.open("GET", href2);
+          xhr.onload = function() {
+            var id = "shiny_restyle_" + href2.split("?restyle")[0].replace(/\W/g, "_");
+            var oldStyle = $head.find("style#" + id);
+            var newStyle = (0, import_jquery13.default)("<style>").attr("id", id).html(xhr.responseText);
+            $head.append(newStyle);
+            oldStyle.remove();
+            removeSheet(oldSheet);
+            sendImageSizeFns.transitioned();
+          };
+          xhr.send();
+        };
+        var findSheet = function findSheet2(href2) {
+          for (var i = 0; i < document.styleSheets.length; i++) {
+            var sheet = document.styleSheets[i];
+            if (typeof sheet.href === "string" && sheet.href.indexOf(href2) > -1) {
+              return sheet;
+            }
+          }
+          return null;
+        };
+        var removeSheet = function removeSheet2(sheet) {
+          if (!sheet)
+            return;
+          sheet.disabled = true;
+          if (isIE())
+            sheet.cssText = "";
+          (0, import_jquery13.default)(sheet.ownerNode).remove();
+        };
+        import_jquery13.default.map(links, function(link) {
+          var oldSheet = findSheet(link.attr("href"));
+          var href2 = link.attr("href") + "?restyle=" + new Date().getTime();
+          if (isIE()) {
+            refreshStyle(href2, oldSheet);
+          } else {
+            link.attr("href", href2);
+            link.attr("onload", function() {
+              var dummyId = "dummy-" + Math.floor(Math.random() * 999999999);
+              var cssString = "#" + dummyId + " { color: #a7c920 !important; transition: 0.1s all !important; visibility: hidden !important; position: absolute !important; top: -1000px !important; left: 0 !important; }";
+              var base64CssString = "data:text/css;base64," + btoa(cssString);
+              var $dummyLink = (0, import_jquery13.default)("<link rel='stylesheet' type='text/css' />");
+              $dummyLink.attr("href", base64CssString);
+              var $dummyEl = (0, import_jquery13.default)("<div id='" + dummyId + "'></div>");
+              $dummyEl.one("transitionend", function() {
+                $dummyEl.remove();
+                removeSheet(findSheet($dummyLink.attr("href")));
+                removeSheet(oldSheet);
+                sendImageSizeFns.transitioned();
+              });
+              (0, import_jquery13.default)(document.body).append($dummyEl);
+              setTimeout(function() {
+                return $head.append($dummyLink);
+              }, 0);
+            });
+            $head.append(link);
+          }
+        });
+      }
+    }
+    if (dep.script && !restyle) {
+      var scriptsAttrs = asArray(dep.script);
+      var scripts = import_jquery13.default.map(scriptsAttrs, function(x) {
+        var script = document.createElement("script");
+        if (typeof x === "string") {
+          x = {
+            src: x
+          };
+        }
+        for (var _i = 0, _Object$entries = Object.entries(x); _i < _Object$entries.length; _i++) {
+          var _Object$entries$_i = _slicedToArray(_Object$entries[_i], 2), attr = _Object$entries$_i[0], val = _Object$entries$_i[1];
+          if (attr === "src") {
+            val = href + "/" + encodeURI(val);
+          }
+          script.setAttribute(attr, val ? val : "");
+        }
+        return script;
+      });
+      $head.append(scripts);
+    }
+    if (dep.attachment && !restyle) {
+      var attachments = dep.attachment;
+      if (typeof attachments === "string")
+        attachments = [attachments];
+      if (Array.isArray(attachments)) {
+        var tmp = {};
+        import_jquery13.default.each(attachments, function(index, attachment) {
+          var key = index + 1 + "";
+          tmp[key] = attachment;
+        });
+        attachments = tmp;
+      }
+      var attach = import_jquery13.default.map(attachments, function(attachment, key) {
+        return (0, import_jquery13.default)("<link rel='attachment'>").attr("id", dep.name + "-" + key + "-attachment").attr("href", href + "/" + encodeURI(attachment));
+      });
+      $head.append(attach);
+    }
+    if (dep.head && !restyle) {
+      var $newHead = (0, import_jquery13.default)("<head></head>");
+      $newHead.html(dep.head);
+      $head.append($newHead.children());
+    }
+    return true;
+  }
+
+  // src/shiny/notifications.ts
+  var fadeDuration = 250;
+  function show() {
+    var _ref = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : {}, _ref$html = _ref.html, html = _ref$html === void 0 ? "" : _ref$html, _ref$action = _ref.action, action = _ref$action === void 0 ? "" : _ref$action, _ref$deps = _ref.deps, deps = _ref$deps === void 0 ? [] : _ref$deps, _ref$duration = _ref.duration, duration = _ref$duration === void 0 ? 5e3 : _ref$duration, _ref$id = _ref.id, id = _ref$id === void 0 ? null : _ref$id, _ref$closeButton = _ref.closeButton, closeButton = _ref$closeButton === void 0 ? true : _ref$closeButton, _ref$type = _ref.type, type = _ref$type === void 0 ? null : _ref$type;
+    if (!id)
+      id = randomId();
+    _createPanel();
+    var $notification = _get(id);
+    if ($notification.length === 0)
+      $notification = _create(id);
+    var newHtml = '<div class="shiny-notification-content-text">'.concat(html, "</div>") + '<div class="shiny-notification-content-action">'.concat(action, "</div>");
+    var $content = $notification.find(".shiny-notification-content");
+    renderContent($content, {
+      html: newHtml,
+      deps: deps
+    });
+    var classes = $notification.attr("class").split(/\s+/).filter(function(cls) {
+      return cls.match(/^shiny-notification-/);
+    }).join(" ");
+    $notification.removeClass(classes);
+    if (type && type !== "default")
+      $notification.addClass("shiny-notification-" + type);
+    var $close = $notification.find(".shiny-notification-close");
+    if (closeButton && $close.length === 0) {
+      $notification.append('<div class="shiny-notification-close">&times;</div>');
+    } else if (!closeButton && $close.length !== 0) {
+      $close.remove();
+    }
+    if (duration)
+      _addRemovalCallback(id, duration);
+    else
+      _clearRemovalCallback(id);
+    return id;
+  }
+  function remove(id) {
+    _get(id).fadeOut(fadeDuration, function() {
+      shinyUnbindAll(this);
+      (0, import_jquery14.default)(this).remove();
+      if (_ids().length === 0) {
+        _getPanel().remove();
+      }
+    });
+  }
+  function _get(id) {
+    if (!id)
+      return null;
+    return _getPanel().find("#shiny-notification-" + $escape(id));
+  }
+  function _ids() {
+    return _getPanel().find(".shiny-notification").map(function() {
+      return this.id.replace(/shiny-notification-/, "");
+    }).get();
+  }
+  function _getPanel() {
+    return (0, import_jquery14.default)("#shiny-notification-panel");
+  }
+  function _createPanel() {
+    var $panel = _getPanel();
+    if ($panel.length > 0)
+      return $panel;
+    (0, import_jquery14.default)(document.body).append('<div id="shiny-notification-panel">');
+    return $panel;
+  }
+  function _create(id) {
+    var $notification = _get(id);
+    if ($notification.length === 0) {
+      $notification = (0, import_jquery14.default)('<div id="shiny-notification-'.concat(id, '" class="shiny-notification">') + '<div class="shiny-notification-close">&times;</div><div class="shiny-notification-content"></div></div>');
+      $notification.find(".shiny-notification-close").on("click", function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        remove(id);
+      });
+      _getPanel().append($notification);
+    }
+    return $notification;
+  }
+  function _addRemovalCallback(id, delay) {
+    _clearRemovalCallback(id);
+    var removalCallback = setTimeout(function() {
+      remove(id);
+    }, delay);
+    _get(id).data("removalCallback", removalCallback);
+  }
+  function _clearRemovalCallback(id) {
+    var $notification = _get(id);
+    var oldRemovalCallback = $notification.data("removalCallback");
+    if (oldRemovalCallback) {
+      clearTimeout(oldRemovalCallback);
+    }
+  }
+
   // src/shiny/modal.ts
-  var import_jquery22 = __toModule(require_jquery());
+  var import_jquery15 = __toModule(require_jquery());
   function show2() {
     var _ref = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : {}, _ref$html = _ref.html, html = _ref$html === void 0 ? "" : _ref$html, _ref$deps = _ref.deps, deps = _ref$deps === void 0 ? [] : _ref$deps;
-    (0, import_jquery22.default)(".modal-backdrop").remove();
-    var $modal = (0, import_jquery22.default)("#shiny-modal-wrapper");
+    (0, import_jquery15.default)(".modal-backdrop").remove();
+    var $modal = (0, import_jquery15.default)("#shiny-modal-wrapper");
     if ($modal.length === 0) {
-      $modal = (0, import_jquery22.default)('<div id="shiny-modal-wrapper"></div>');
-      (0, import_jquery22.default)(document.body).append($modal);
+      $modal = (0, import_jquery15.default)('<div id="shiny-modal-wrapper"></div>');
+      (0, import_jquery15.default)(document.body).append($modal);
       $modal.on("hidden.bs.modal", function(e) {
-        if (e.target === (0, import_jquery22.default)("#shiny-modal")[0]) {
+        if (e.target === (0, import_jquery15.default)("#shiny-modal")[0]) {
           shinyUnbindAll($modal);
           $modal.remove();
         }
       });
     }
     $modal.on("keydown.shinymodal", function(e) {
-      if ((0, import_jquery22.default)("#shiny-modal").data("keyboard") === false)
+      if ((0, import_jquery15.default)("#shiny-modal").data("keyboard") === false)
         return;
       if (e.keyCode === 27) {
         e.stopPropagation();
@@ -8740,7 +6169,7 @@
     });
   }
   function remove2() {
-    var $modal = (0, import_jquery22.default)("#shiny-modal-wrapper");
+    var $modal = (0, import_jquery15.default)("#shiny-modal-wrapper");
     $modal.off("keydown.shinymodal");
     if ($modal.find(".modal").length > 0) {
       $modal.find(".modal").modal("hide");
@@ -8748,6 +6177,2585 @@
       shinyUnbindAll($modal);
       $modal.remove();
     }
+  }
+
+  // src/shiny/reconnectDialog.ts
+  var import_jquery16 = __toModule(require_jquery());
+  function updateTime(reconnectTime) {
+    var $time = (0, import_jquery16.default)("#shiny-reconnect-time");
+    if ($time.length === 0)
+      return;
+    var seconds = Math.floor((reconnectTime - new Date().getTime()) / 1e3);
+    if (seconds > 0) {
+      $time.text(" in " + seconds + "s");
+    } else {
+      $time.text("...");
+    }
+    setTimeout(function() {
+      updateTime(reconnectTime);
+    }, 1e3);
+  }
+  function showReconnectDialog(delay) {
+    var reconnectTime = new Date().getTime() + delay;
+    if ((0, import_jquery16.default)("#shiny-reconnect-text").length > 0)
+      return;
+    var html = '<span id="shiny-reconnect-text">Attempting to reconnect</span><span id="shiny-reconnect-time"></span>';
+    var action = '<a id="shiny-reconnect-now" href="#" onclick="Shiny.shinyapp.reconnect();">Try now</a>';
+    show({
+      id: "reconnect",
+      html: html,
+      action: action,
+      duration: null,
+      closeButton: false,
+      type: "warning"
+    });
+    updateTime(reconnectTime);
+  }
+  function hideReconnectDialog() {
+    remove("reconnect");
+  }
+
+  // src/shiny/init.ts
+  var import_es_regexp_exec8 = __toModule(require_es_regexp_exec());
+
+  // node_modules/core-js/modules/es.string.search.js
+  "use strict";
+  var fixRegExpWellKnownSymbolLogic4 = require_fix_regexp_well_known_symbol_logic();
+  var anObject7 = require_an_object();
+  var requireObjectCoercible4 = require_require_object_coercible();
+  var sameValue = require_same_value();
+  var regExpExec3 = require_regexp_exec_abstract();
+  fixRegExpWellKnownSymbolLogic4("search", 1, function(SEARCH, nativeSearch, maybeCallNative) {
+    return [
+      function search(regexp) {
+        var O = requireObjectCoercible4(this);
+        var searcher = regexp == void 0 ? void 0 : regexp[SEARCH];
+        return searcher !== void 0 ? searcher.call(regexp, O) : new RegExp(regexp)[SEARCH](String(O));
+      },
+      function(regexp) {
+        var res = maybeCallNative(nativeSearch, regexp, this);
+        if (res.done)
+          return res.value;
+        var rx = anObject7(regexp);
+        var S = String(this);
+        var previousLastIndex = rx.lastIndex;
+        if (!sameValue(previousLastIndex, 0))
+          rx.lastIndex = 0;
+        var result = regExpExec3(rx, S);
+        if (!sameValue(rx.lastIndex, previousLastIndex))
+          rx.lastIndex = previousLastIndex;
+        return result === null ? -1 : result.index;
+      }
+    ];
+  });
+
+  // src/shiny/init.ts
+  var import_jquery22 = __toModule(require_jquery());
+
+  // src/inputPolicies/inputBatchSender.ts
+  var import_es_array_iterator3 = __toModule(require_es_array_iterator());
+  var import_jquery17 = __toModule(require_jquery());
+
+  // src/inputPolicies/InputPolicy.ts
+  function _classCallCheck7(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+  function _defineProperties7(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor)
+        descriptor.writable = true;
+      Object.defineProperty(target, descriptor.key, descriptor);
+    }
+  }
+  function _createClass7(Constructor, protoProps, staticProps) {
+    if (protoProps)
+      _defineProperties7(Constructor.prototype, protoProps);
+    if (staticProps)
+      _defineProperties7(Constructor, staticProps);
+    return Constructor;
+  }
+  function _defineProperty6(obj, key, value) {
+    if (key in obj) {
+      Object.defineProperty(obj, key, {value: value, enumerable: true, configurable: true, writable: true});
+    } else {
+      obj[key] = value;
+    }
+    return obj;
+  }
+  var InputPolicy = /* @__PURE__ */ function() {
+    function InputPolicy2() {
+      _classCallCheck7(this, InputPolicy2);
+      _defineProperty6(this, "target", void 0);
+    }
+    _createClass7(InputPolicy2, [{
+      key: "setInput",
+      value: function setInput(name, value, opts) {
+        throw "not implemented";
+        name;
+        value;
+        opts;
+      }
+    }]);
+    return InputPolicy2;
+  }();
+
+  // src/inputPolicies/inputBatchSender.ts
+  function _typeof3(obj) {
+    "@babel/helpers - typeof";
+    if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
+      _typeof3 = function _typeof27(obj2) {
+        return typeof obj2;
+      };
+    } else {
+      _typeof3 = function _typeof27(obj2) {
+        return obj2 && typeof Symbol === "function" && obj2.constructor === Symbol && obj2 !== Symbol.prototype ? "symbol" : typeof obj2;
+      };
+    }
+    return _typeof3(obj);
+  }
+  function _classCallCheck8(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+  function _defineProperties8(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor)
+        descriptor.writable = true;
+      Object.defineProperty(target, descriptor.key, descriptor);
+    }
+  }
+  function _createClass8(Constructor, protoProps, staticProps) {
+    if (protoProps)
+      _defineProperties8(Constructor.prototype, protoProps);
+    if (staticProps)
+      _defineProperties8(Constructor, staticProps);
+    return Constructor;
+  }
+  function _inherits2(subClass, superClass) {
+    if (typeof superClass !== "function" && superClass !== null) {
+      throw new TypeError("Super expression must either be null or a function");
+    }
+    subClass.prototype = Object.create(superClass && superClass.prototype, {constructor: {value: subClass, writable: true, configurable: true}});
+    if (superClass)
+      _setPrototypeOf2(subClass, superClass);
+  }
+  function _setPrototypeOf2(o, p) {
+    _setPrototypeOf2 = Object.setPrototypeOf || function _setPrototypeOf26(o2, p2) {
+      o2.__proto__ = p2;
+      return o2;
+    };
+    return _setPrototypeOf2(o, p);
+  }
+  function _createSuper2(Derived) {
+    var hasNativeReflectConstruct = _isNativeReflectConstruct2();
+    return function _createSuperInternal() {
+      var Super = _getPrototypeOf2(Derived), result;
+      if (hasNativeReflectConstruct) {
+        var NewTarget = _getPrototypeOf2(this).constructor;
+        result = Reflect.construct(Super, arguments, NewTarget);
+      } else {
+        result = Super.apply(this, arguments);
+      }
+      return _possibleConstructorReturn2(this, result);
+    };
+  }
+  function _possibleConstructorReturn2(self2, call) {
+    if (call && (_typeof3(call) === "object" || typeof call === "function")) {
+      return call;
+    }
+    return _assertThisInitialized2(self2);
+  }
+  function _assertThisInitialized2(self2) {
+    if (self2 === void 0) {
+      throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+    }
+    return self2;
+  }
+  function _isNativeReflectConstruct2() {
+    if (typeof Reflect === "undefined" || !Reflect.construct)
+      return false;
+    if (Reflect.construct.sham)
+      return false;
+    if (typeof Proxy === "function")
+      return true;
+    try {
+      Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function() {
+      }));
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+  function _getPrototypeOf2(o) {
+    _getPrototypeOf2 = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf26(o2) {
+      return o2.__proto__ || Object.getPrototypeOf(o2);
+    };
+    return _getPrototypeOf2(o);
+  }
+  function _defineProperty7(obj, key, value) {
+    if (key in obj) {
+      Object.defineProperty(obj, key, {value: value, enumerable: true, configurable: true, writable: true});
+    } else {
+      obj[key] = value;
+    }
+    return obj;
+  }
+  var InputBatchSender = /* @__PURE__ */ function(_InputPolicy) {
+    _inherits2(InputBatchSender2, _InputPolicy);
+    var _super = _createSuper2(InputBatchSender2);
+    function InputBatchSender2(shinyapp) {
+      var _this;
+      _classCallCheck8(this, InputBatchSender2);
+      _this = _super.call(this);
+      _defineProperty7(_assertThisInitialized2(_this), "shinyapp", void 0);
+      _defineProperty7(_assertThisInitialized2(_this), "timerId", null);
+      _defineProperty7(_assertThisInitialized2(_this), "pendingData", {});
+      _defineProperty7(_assertThisInitialized2(_this), "reentrant", false);
+      _defineProperty7(_assertThisInitialized2(_this), "lastChanceCallback", []);
+      _this.shinyapp = shinyapp;
+      return _this;
+    }
+    _createClass8(InputBatchSender2, [{
+      key: "setInput",
+      value: function setInput(nameType, value, opts) {
+        this.pendingData[nameType] = value;
+        if (!this.reentrant) {
+          if (opts.priority === "event") {
+            this.$sendNow();
+          } else if (!this.timerId) {
+            this.timerId = setTimeout(this.$sendNow.bind(this), 0);
+          }
+        }
+      }
+    }, {
+      key: "$sendNow",
+      value: function $sendNow() {
+        if (this.reentrant) {
+          console.trace("Unexpected reentrancy in InputBatchSender!");
+        }
+        this.reentrant = true;
+        try {
+          this.timerId = null;
+          import_jquery17.default.each(this.lastChanceCallback, function(i, callback) {
+            callback();
+          });
+          var currentData = this.pendingData;
+          this.pendingData = {};
+          this.shinyapp.sendInput(currentData);
+        } finally {
+          this.reentrant = false;
+        }
+      }
+    }]);
+    return InputBatchSender2;
+  }(InputPolicy);
+
+  // src/inputPolicies/inputNoResendDecorator.ts
+  var import_es_array_iterator4 = __toModule(require_es_array_iterator());
+
+  // src/inputPolicies/splitInputNameType.ts
+  var import_es_regexp_exec6 = __toModule(require_es_regexp_exec());
+  function splitInputNameType(nameType) {
+    var name2 = nameType.split(":");
+    return {
+      name: name2[0],
+      inputType: name2.length > 1 ? name2[1] : ""
+    };
+  }
+
+  // src/inputPolicies/inputNoResendDecorator.ts
+  function _typeof4(obj) {
+    "@babel/helpers - typeof";
+    if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
+      _typeof4 = function _typeof27(obj2) {
+        return typeof obj2;
+      };
+    } else {
+      _typeof4 = function _typeof27(obj2) {
+        return obj2 && typeof Symbol === "function" && obj2.constructor === Symbol && obj2 !== Symbol.prototype ? "symbol" : typeof obj2;
+      };
+    }
+    return _typeof4(obj);
+  }
+  function _classCallCheck9(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+  function _defineProperties9(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor)
+        descriptor.writable = true;
+      Object.defineProperty(target, descriptor.key, descriptor);
+    }
+  }
+  function _createClass9(Constructor, protoProps, staticProps) {
+    if (protoProps)
+      _defineProperties9(Constructor.prototype, protoProps);
+    if (staticProps)
+      _defineProperties9(Constructor, staticProps);
+    return Constructor;
+  }
+  function _inherits3(subClass, superClass) {
+    if (typeof superClass !== "function" && superClass !== null) {
+      throw new TypeError("Super expression must either be null or a function");
+    }
+    subClass.prototype = Object.create(superClass && superClass.prototype, {constructor: {value: subClass, writable: true, configurable: true}});
+    if (superClass)
+      _setPrototypeOf3(subClass, superClass);
+  }
+  function _setPrototypeOf3(o, p) {
+    _setPrototypeOf3 = Object.setPrototypeOf || function _setPrototypeOf26(o2, p2) {
+      o2.__proto__ = p2;
+      return o2;
+    };
+    return _setPrototypeOf3(o, p);
+  }
+  function _createSuper3(Derived) {
+    var hasNativeReflectConstruct = _isNativeReflectConstruct3();
+    return function _createSuperInternal() {
+      var Super = _getPrototypeOf3(Derived), result;
+      if (hasNativeReflectConstruct) {
+        var NewTarget = _getPrototypeOf3(this).constructor;
+        result = Reflect.construct(Super, arguments, NewTarget);
+      } else {
+        result = Super.apply(this, arguments);
+      }
+      return _possibleConstructorReturn3(this, result);
+    };
+  }
+  function _possibleConstructorReturn3(self2, call) {
+    if (call && (_typeof4(call) === "object" || typeof call === "function")) {
+      return call;
+    }
+    return _assertThisInitialized3(self2);
+  }
+  function _assertThisInitialized3(self2) {
+    if (self2 === void 0) {
+      throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+    }
+    return self2;
+  }
+  function _isNativeReflectConstruct3() {
+    if (typeof Reflect === "undefined" || !Reflect.construct)
+      return false;
+    if (Reflect.construct.sham)
+      return false;
+    if (typeof Proxy === "function")
+      return true;
+    try {
+      Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function() {
+      }));
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+  function _getPrototypeOf3(o) {
+    _getPrototypeOf3 = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf26(o2) {
+      return o2.__proto__ || Object.getPrototypeOf(o2);
+    };
+    return _getPrototypeOf3(o);
+  }
+  function _defineProperty8(obj, key, value) {
+    if (key in obj) {
+      Object.defineProperty(obj, key, {value: value, enumerable: true, configurable: true, writable: true});
+    } else {
+      obj[key] = value;
+    }
+    return obj;
+  }
+  var InputNoResendDecorator = /* @__PURE__ */ function(_InputPolicy) {
+    _inherits3(InputNoResendDecorator2, _InputPolicy);
+    var _super = _createSuper3(InputNoResendDecorator2);
+    function InputNoResendDecorator2(target) {
+      var _this;
+      var initialValues = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : {};
+      _classCallCheck9(this, InputNoResendDecorator2);
+      _this = _super.call(this);
+      _defineProperty8(_assertThisInitialized3(_this), "lastSentValues", void 0);
+      _this.target = target;
+      _this.reset(initialValues);
+      return _this;
+    }
+    _createClass9(InputNoResendDecorator2, [{
+      key: "setInput",
+      value: function setInput(nameType, value, opts) {
+        var _splitInputNameType = splitInputNameType(nameType), inputName = _splitInputNameType.name, inputType = _splitInputNameType.inputType;
+        var jsonValue = JSON.stringify(value);
+        if (opts.priority !== "event" && this.lastSentValues[inputName] && this.lastSentValues[inputName].jsonValue === jsonValue && this.lastSentValues[inputName].inputType === inputType) {
+          return;
+        }
+        this.lastSentValues[inputName] = {
+          jsonValue: jsonValue,
+          inputType: inputType
+        };
+        this.target.setInput(nameType, value, opts);
+      }
+    }, {
+      key: "reset",
+      value: function reset() {
+        var values = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : {};
+        var cacheValues = {};
+        for (var inputName in values) {
+          if (hasOwnProperty(values, inputName)) {
+            var _splitInputNameType2 = splitInputNameType(inputName), name = _splitInputNameType2.name, inputType = _splitInputNameType2.inputType;
+            cacheValues[name] = {
+              jsonValue: JSON.stringify(values[inputName]),
+              inputType: inputType
+            };
+          }
+        }
+        this.lastSentValues = cacheValues;
+      }
+    }, {
+      key: "forget",
+      value: function forget(name) {
+        delete this.lastSentValues[name];
+      }
+    }]);
+    return InputNoResendDecorator2;
+  }(InputPolicy);
+
+  // src/inputPolicies/inputEventDecorator.ts
+  var import_es_array_iterator5 = __toModule(require_es_array_iterator());
+  var import_jquery18 = __toModule(require_jquery());
+  function _typeof5(obj) {
+    "@babel/helpers - typeof";
+    if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
+      _typeof5 = function _typeof27(obj2) {
+        return typeof obj2;
+      };
+    } else {
+      _typeof5 = function _typeof27(obj2) {
+        return obj2 && typeof Symbol === "function" && obj2.constructor === Symbol && obj2 !== Symbol.prototype ? "symbol" : typeof obj2;
+      };
+    }
+    return _typeof5(obj);
+  }
+  function _classCallCheck10(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+  function _defineProperties10(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor)
+        descriptor.writable = true;
+      Object.defineProperty(target, descriptor.key, descriptor);
+    }
+  }
+  function _createClass10(Constructor, protoProps, staticProps) {
+    if (protoProps)
+      _defineProperties10(Constructor.prototype, protoProps);
+    if (staticProps)
+      _defineProperties10(Constructor, staticProps);
+    return Constructor;
+  }
+  function _inherits4(subClass, superClass) {
+    if (typeof superClass !== "function" && superClass !== null) {
+      throw new TypeError("Super expression must either be null or a function");
+    }
+    subClass.prototype = Object.create(superClass && superClass.prototype, {constructor: {value: subClass, writable: true, configurable: true}});
+    if (superClass)
+      _setPrototypeOf4(subClass, superClass);
+  }
+  function _setPrototypeOf4(o, p) {
+    _setPrototypeOf4 = Object.setPrototypeOf || function _setPrototypeOf26(o2, p2) {
+      o2.__proto__ = p2;
+      return o2;
+    };
+    return _setPrototypeOf4(o, p);
+  }
+  function _createSuper4(Derived) {
+    var hasNativeReflectConstruct = _isNativeReflectConstruct4();
+    return function _createSuperInternal() {
+      var Super = _getPrototypeOf4(Derived), result;
+      if (hasNativeReflectConstruct) {
+        var NewTarget = _getPrototypeOf4(this).constructor;
+        result = Reflect.construct(Super, arguments, NewTarget);
+      } else {
+        result = Super.apply(this, arguments);
+      }
+      return _possibleConstructorReturn4(this, result);
+    };
+  }
+  function _possibleConstructorReturn4(self2, call) {
+    if (call && (_typeof5(call) === "object" || typeof call === "function")) {
+      return call;
+    }
+    return _assertThisInitialized4(self2);
+  }
+  function _assertThisInitialized4(self2) {
+    if (self2 === void 0) {
+      throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+    }
+    return self2;
+  }
+  function _isNativeReflectConstruct4() {
+    if (typeof Reflect === "undefined" || !Reflect.construct)
+      return false;
+    if (Reflect.construct.sham)
+      return false;
+    if (typeof Proxy === "function")
+      return true;
+    try {
+      Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function() {
+      }));
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+  function _getPrototypeOf4(o) {
+    _getPrototypeOf4 = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf26(o2) {
+      return o2.__proto__ || Object.getPrototypeOf(o2);
+    };
+    return _getPrototypeOf4(o);
+  }
+  var InputEventDecorator = /* @__PURE__ */ function(_InputPolicy) {
+    _inherits4(InputEventDecorator2, _InputPolicy);
+    var _super = _createSuper4(InputEventDecorator2);
+    function InputEventDecorator2(target) {
+      var _this;
+      _classCallCheck10(this, InputEventDecorator2);
+      _this = _super.call(this);
+      _this.target = target;
+      return _this;
+    }
+    _createClass10(InputEventDecorator2, [{
+      key: "setInput",
+      value: function setInput(nameType, value, opts) {
+        var evt = jQuery.Event("shiny:inputchanged");
+        var input = splitInputNameType(nameType);
+        evt.name = input.name;
+        evt.inputType = input.inputType;
+        evt.value = value;
+        evt.binding = opts.binding;
+        evt.el = opts.el;
+        evt.priority = opts.priority;
+        (0, import_jquery18.default)(opts.el).trigger(evt);
+        if (!evt.isDefaultPrevented()) {
+          var name = evt.name;
+          if (evt.inputType !== "")
+            name += ":" + evt.inputType;
+          this.target.setInput(name, evt.value, {
+            priority: opts.priority
+          });
+        }
+      }
+    }]);
+    return InputEventDecorator2;
+  }(InputPolicy);
+
+  // src/inputPolicies/inputRateDecorator.ts
+  var import_es_array_iterator6 = __toModule(require_es_array_iterator());
+  function _typeof6(obj) {
+    "@babel/helpers - typeof";
+    if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
+      _typeof6 = function _typeof27(obj2) {
+        return typeof obj2;
+      };
+    } else {
+      _typeof6 = function _typeof27(obj2) {
+        return obj2 && typeof Symbol === "function" && obj2.constructor === Symbol && obj2 !== Symbol.prototype ? "symbol" : typeof obj2;
+      };
+    }
+    return _typeof6(obj);
+  }
+  function _classCallCheck11(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+  function _defineProperties11(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor)
+        descriptor.writable = true;
+      Object.defineProperty(target, descriptor.key, descriptor);
+    }
+  }
+  function _createClass11(Constructor, protoProps, staticProps) {
+    if (protoProps)
+      _defineProperties11(Constructor.prototype, protoProps);
+    if (staticProps)
+      _defineProperties11(Constructor, staticProps);
+    return Constructor;
+  }
+  function _inherits5(subClass, superClass) {
+    if (typeof superClass !== "function" && superClass !== null) {
+      throw new TypeError("Super expression must either be null or a function");
+    }
+    subClass.prototype = Object.create(superClass && superClass.prototype, {constructor: {value: subClass, writable: true, configurable: true}});
+    if (superClass)
+      _setPrototypeOf5(subClass, superClass);
+  }
+  function _setPrototypeOf5(o, p) {
+    _setPrototypeOf5 = Object.setPrototypeOf || function _setPrototypeOf26(o2, p2) {
+      o2.__proto__ = p2;
+      return o2;
+    };
+    return _setPrototypeOf5(o, p);
+  }
+  function _createSuper5(Derived) {
+    var hasNativeReflectConstruct = _isNativeReflectConstruct5();
+    return function _createSuperInternal() {
+      var Super = _getPrototypeOf5(Derived), result;
+      if (hasNativeReflectConstruct) {
+        var NewTarget = _getPrototypeOf5(this).constructor;
+        result = Reflect.construct(Super, arguments, NewTarget);
+      } else {
+        result = Super.apply(this, arguments);
+      }
+      return _possibleConstructorReturn5(this, result);
+    };
+  }
+  function _possibleConstructorReturn5(self2, call) {
+    if (call && (_typeof6(call) === "object" || typeof call === "function")) {
+      return call;
+    }
+    return _assertThisInitialized5(self2);
+  }
+  function _assertThisInitialized5(self2) {
+    if (self2 === void 0) {
+      throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+    }
+    return self2;
+  }
+  function _isNativeReflectConstruct5() {
+    if (typeof Reflect === "undefined" || !Reflect.construct)
+      return false;
+    if (Reflect.construct.sham)
+      return false;
+    if (typeof Proxy === "function")
+      return true;
+    try {
+      Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function() {
+      }));
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+  function _getPrototypeOf5(o) {
+    _getPrototypeOf5 = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf26(o2) {
+      return o2.__proto__ || Object.getPrototypeOf(o2);
+    };
+    return _getPrototypeOf5(o);
+  }
+  function _defineProperty9(obj, key, value) {
+    if (key in obj) {
+      Object.defineProperty(obj, key, {value: value, enumerable: true, configurable: true, writable: true});
+    } else {
+      obj[key] = value;
+    }
+    return obj;
+  }
+  var InputRateDecorator = /* @__PURE__ */ function(_InputPolicy) {
+    _inherits5(InputRateDecorator2, _InputPolicy);
+    var _super = _createSuper5(InputRateDecorator2);
+    function InputRateDecorator2(target) {
+      var _this;
+      _classCallCheck11(this, InputRateDecorator2);
+      _this = _super.call(this);
+      _defineProperty9(_assertThisInitialized5(_this), "inputRatePolicies", {});
+      _this.target = target;
+      return _this;
+    }
+    _createClass11(InputRateDecorator2, [{
+      key: "setInput",
+      value: function setInput(nameType, value, opts) {
+        var _splitInputNameType = splitInputNameType(nameType), inputName = _splitInputNameType.name;
+        this.$ensureInit(inputName);
+        if (opts.priority !== "deferred")
+          this.inputRatePolicies[inputName].immediateCall(nameType, value, opts);
+        else
+          this.inputRatePolicies[inputName].normalCall(nameType, value, opts);
+      }
+    }, {
+      key: "setRatePolicy",
+      value: function setRatePolicy(nameType, mode, millis) {
+        var _splitInputNameType2 = splitInputNameType(nameType), inputName = _splitInputNameType2.name;
+        if (mode === "direct") {
+          this.inputRatePolicies[inputName] = new Invoker(this, this.$doSetInput);
+        } else if (mode === "debounce") {
+          this.inputRatePolicies[inputName] = new Debouncer(this, this.$doSetInput, millis);
+        } else if (mode === "throttle") {
+          this.inputRatePolicies[inputName] = new Throttler(this, this.$doSetInput, millis);
+        }
+      }
+    }, {
+      key: "$ensureInit",
+      value: function $ensureInit(name) {
+        if (!(name in this.inputRatePolicies))
+          this.setRatePolicy(name, "direct");
+      }
+    }, {
+      key: "$doSetInput",
+      value: function $doSetInput(nameType, value, opts) {
+        this.target.setInput(nameType, value, opts);
+      }
+    }]);
+    return InputRateDecorator2;
+  }(InputPolicy);
+
+  // src/inputPolicies/inputDeferDecorator.ts
+  var import_es_array_iterator7 = __toModule(require_es_array_iterator());
+  function _typeof7(obj) {
+    "@babel/helpers - typeof";
+    if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
+      _typeof7 = function _typeof27(obj2) {
+        return typeof obj2;
+      };
+    } else {
+      _typeof7 = function _typeof27(obj2) {
+        return obj2 && typeof Symbol === "function" && obj2.constructor === Symbol && obj2 !== Symbol.prototype ? "symbol" : typeof obj2;
+      };
+    }
+    return _typeof7(obj);
+  }
+  function _classCallCheck12(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+  function _defineProperties12(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor)
+        descriptor.writable = true;
+      Object.defineProperty(target, descriptor.key, descriptor);
+    }
+  }
+  function _createClass12(Constructor, protoProps, staticProps) {
+    if (protoProps)
+      _defineProperties12(Constructor.prototype, protoProps);
+    if (staticProps)
+      _defineProperties12(Constructor, staticProps);
+    return Constructor;
+  }
+  function _inherits6(subClass, superClass) {
+    if (typeof superClass !== "function" && superClass !== null) {
+      throw new TypeError("Super expression must either be null or a function");
+    }
+    subClass.prototype = Object.create(superClass && superClass.prototype, {constructor: {value: subClass, writable: true, configurable: true}});
+    if (superClass)
+      _setPrototypeOf6(subClass, superClass);
+  }
+  function _setPrototypeOf6(o, p) {
+    _setPrototypeOf6 = Object.setPrototypeOf || function _setPrototypeOf26(o2, p2) {
+      o2.__proto__ = p2;
+      return o2;
+    };
+    return _setPrototypeOf6(o, p);
+  }
+  function _createSuper6(Derived) {
+    var hasNativeReflectConstruct = _isNativeReflectConstruct6();
+    return function _createSuperInternal() {
+      var Super = _getPrototypeOf6(Derived), result;
+      if (hasNativeReflectConstruct) {
+        var NewTarget = _getPrototypeOf6(this).constructor;
+        result = Reflect.construct(Super, arguments, NewTarget);
+      } else {
+        result = Super.apply(this, arguments);
+      }
+      return _possibleConstructorReturn6(this, result);
+    };
+  }
+  function _possibleConstructorReturn6(self2, call) {
+    if (call && (_typeof7(call) === "object" || typeof call === "function")) {
+      return call;
+    }
+    return _assertThisInitialized6(self2);
+  }
+  function _assertThisInitialized6(self2) {
+    if (self2 === void 0) {
+      throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+    }
+    return self2;
+  }
+  function _isNativeReflectConstruct6() {
+    if (typeof Reflect === "undefined" || !Reflect.construct)
+      return false;
+    if (Reflect.construct.sham)
+      return false;
+    if (typeof Proxy === "function")
+      return true;
+    try {
+      Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function() {
+      }));
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+  function _getPrototypeOf6(o) {
+    _getPrototypeOf6 = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf26(o2) {
+      return o2.__proto__ || Object.getPrototypeOf(o2);
+    };
+    return _getPrototypeOf6(o);
+  }
+  function _defineProperty10(obj, key, value) {
+    if (key in obj) {
+      Object.defineProperty(obj, key, {value: value, enumerable: true, configurable: true, writable: true});
+    } else {
+      obj[key] = value;
+    }
+    return obj;
+  }
+  var InputDeferDecorator = /* @__PURE__ */ function(_InputPolicy) {
+    _inherits6(InputDeferDecorator2, _InputPolicy);
+    var _super = _createSuper6(InputDeferDecorator2);
+    function InputDeferDecorator2(target) {
+      var _this;
+      _classCallCheck12(this, InputDeferDecorator2);
+      _this = _super.call(this);
+      _defineProperty10(_assertThisInitialized6(_this), "pendingInput", {});
+      _this.target = target;
+      return _this;
+    }
+    _createClass12(InputDeferDecorator2, [{
+      key: "setInput",
+      value: function setInput(nameType, value, opts) {
+        if (/^\./.test(nameType))
+          this.target.setInput(nameType, value, opts);
+        else
+          this.pendingInput[nameType] = {
+            value: value,
+            opts: opts
+          };
+      }
+    }, {
+      key: "submit",
+      value: function submit() {
+        for (var nameType in this.pendingInput) {
+          if (hasOwnProperty(this.pendingInput, nameType)) {
+            var _this$pendingInput$na = this.pendingInput[nameType], value = _this$pendingInput$na.value, opts = _this$pendingInput$na.opts;
+            this.target.setInput(nameType, value, opts);
+          }
+        }
+      }
+    }]);
+    return InputDeferDecorator2;
+  }(InputPolicy);
+
+  // src/inputPolicies/inputValidateDecorator.ts
+  var import_jquery19 = __toModule(require_jquery());
+  function _classCallCheck13(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+  function _defineProperty11(obj, key, value) {
+    if (key in obj) {
+      Object.defineProperty(obj, key, {value: value, enumerable: true, configurable: true, writable: true});
+    } else {
+      obj[key] = value;
+    }
+    return obj;
+  }
+  function addDefaultInputOpts(opts) {
+    var newOpts = import_jquery19.default.extend({
+      priority: "immediate",
+      binding: null,
+      el: null
+    }, opts);
+    if (newOpts && typeof newOpts.priority !== "undefined") {
+      switch (newOpts.priority) {
+        case "deferred":
+        case "immediate":
+        case "event":
+          break;
+        default:
+          throw new Error("Unexpected input value mode: '" + newOpts.priority + "'");
+      }
+    }
+    return newOpts;
+  }
+  var InputValidateDecorator = function InputValidateDecorator2(target) {
+    _classCallCheck13(this, InputValidateDecorator2);
+    _defineProperty11(this, "target", void 0);
+    _defineProperty11(this, "setInput", function(nameType, value, opts) {
+      if (!nameType)
+        throw "Can't set input with empty name.";
+      var newOpts = addDefaultInputOpts(opts);
+      this.target.setInput(nameType, value, newOpts);
+    });
+    this.target = target;
+  };
+
+  // src/shiny/bind.ts
+  var import_jquery20 = __toModule(require_jquery());
+
+  // src/bindings/output_adapter.ts
+  function _classCallCheck14(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+  function _defineProperties13(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor)
+        descriptor.writable = true;
+      Object.defineProperty(target, descriptor.key, descriptor);
+    }
+  }
+  function _createClass13(Constructor, protoProps, staticProps) {
+    if (protoProps)
+      _defineProperties13(Constructor.prototype, protoProps);
+    if (staticProps)
+      _defineProperties13(Constructor, staticProps);
+    return Constructor;
+  }
+  function _defineProperty12(obj, key, value) {
+    if (key in obj) {
+      Object.defineProperty(obj, key, {value: value, enumerable: true, configurable: true, writable: true});
+    } else {
+      obj[key] = value;
+    }
+    return obj;
+  }
+  var OutputBindingAdapter = /* @__PURE__ */ function() {
+    function OutputBindingAdapter2(el, binding) {
+      _classCallCheck14(this, OutputBindingAdapter2);
+      _defineProperty12(this, "el", void 0);
+      _defineProperty12(this, "binding", void 0);
+      this.el = el;
+      this.binding = binding;
+      if (binding.resize) {
+        this.onResize = makeResizeFilter(el, function(width, height) {
+          binding.resize(el, width, height);
+        });
+      }
+    }
+    _createClass13(OutputBindingAdapter2, [{
+      key: "getId",
+      value: function getId() {
+        return this.binding.getId(this.el);
+      }
+    }, {
+      key: "onValueChange",
+      value: function onValueChange(data) {
+        this.binding.onValueChange(this.el, data);
+      }
+    }, {
+      key: "onValueError",
+      value: function onValueError(err) {
+        this.binding.onValueError(this.el, err);
+      }
+    }, {
+      key: "showProgress",
+      value: function showProgress(show3) {
+        this.binding.showProgress(this.el, show3);
+      }
+    }, {
+      key: "onResize",
+      value: function onResize() {
+      }
+    }]);
+    return OutputBindingAdapter2;
+  }();
+
+  // src/shiny/bind.ts
+  var boundInputs = {};
+  function valueChangeCallback(inputs, binding, el, allowDeferred) {
+    var id = binding.getId(el);
+    if (id) {
+      var value = binding.getValue(el);
+      var type = binding.getType(el);
+      if (type)
+        id = id + ":" + type;
+      var opts = {
+        priority: allowDeferred ? "deferred" : "immediate",
+        binding: binding,
+        el: el
+      };
+      inputs.setInput(id, value, opts);
+    }
+  }
+  function bindInputs(shinyCtx) {
+    var scope = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : document.documentElement;
+    var inputs = shinyCtx.inputs, inputsRate = shinyCtx.inputsRate, inputBindings = shinyCtx.inputBindings;
+    var bindings = inputBindings.getBindings();
+    var inputItems = {};
+    var _loop = function _loop2(i2) {
+      var binding = bindings[i2].binding;
+      var matches = binding.find(scope) || [];
+      var _loop22 = function _loop23(j2) {
+        var el = matches[j2];
+        var id = binding.getId(el);
+        if (!id || boundInputs[id])
+          return "continue";
+        var type = binding.getType(el);
+        var effectiveId = type ? id + ":" + type : id;
+        inputItems[effectiveId] = {
+          value: binding.getValue(el),
+          opts: {
+            immediate: true,
+            binding: binding,
+            el: el
+          }
+        };
+        var thisCallback = function() {
+          var thisBinding = binding;
+          var thisEl = el;
+          return function(allowDeferred) {
+            valueChangeCallback(inputs, thisBinding, thisEl, allowDeferred);
+          };
+        }();
+        binding.subscribe(el, thisCallback);
+        (0, import_jquery20.default)(el).data("shiny-input-binding", binding);
+        (0, import_jquery20.default)(el).addClass("shiny-bound-input");
+        var ratePolicy = binding.getRatePolicy(el);
+        if (ratePolicy !== null) {
+          inputsRate.setRatePolicy(effectiveId, ratePolicy.policy, ratePolicy.delay);
+        }
+        boundInputs[id] = {
+          binding: binding,
+          node: el
+        };
+        (0, import_jquery20.default)(el).trigger({
+          type: "shiny:bound",
+          binding: binding,
+          bindingType: "input"
+        });
+      };
+      for (var j = 0; j < matches.length; j++) {
+        var _ret = _loop22(j);
+        if (_ret === "continue")
+          continue;
+      }
+    };
+    for (var i = 0; i < bindings.length; i++) {
+      _loop(i);
+    }
+    return inputItems;
+  }
+  function bindOutputs(_ref) {
+    var sendOutputHiddenState = _ref.sendOutputHiddenState, maybeAddThemeObserver = _ref.maybeAddThemeObserver, outputBindings = _ref.outputBindings;
+    var scope = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : document.documentElement;
+    var $scope = (0, import_jquery20.default)(scope);
+    var bindings = outputBindings.getBindings();
+    for (var i = 0; i < bindings.length; i++) {
+      var binding = bindings[i].binding;
+      var matches = binding.find($scope) || [];
+      for (var j = 0; j < matches.length; j++) {
+        var _el = matches[j];
+        var id = binding.getId(_el);
+        if (!id)
+          continue;
+        if (!import_jquery20.default.contains(document.documentElement, _el))
+          continue;
+        var $el = (0, import_jquery20.default)(_el);
+        if ($el.hasClass("shiny-bound-output")) {
+          continue;
+        }
+        maybeAddThemeObserver(_el);
+        var bindingAdapter = new OutputBindingAdapter(_el, binding);
+        shinyAppBindOutput(id, bindingAdapter);
+        $el.data("shiny-output-binding", bindingAdapter);
+        $el.addClass("shiny-bound-output");
+        if (!$el.attr("aria-live"))
+          $el.attr("aria-live", "polite");
+        $el.trigger({
+          type: "shiny:bound",
+          binding: binding,
+          bindingType: "output"
+        });
+      }
+    }
+    setTimeout(sendImageSizeFns.regular, 0);
+    setTimeout(sendOutputHiddenState, 0);
+  }
+  function unbindInputs() {
+    var scope = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : document.documentElement;
+    var includeSelf = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : false;
+    var inputs = (0, import_jquery20.default)(scope).find(".shiny-bound-input").toArray();
+    if (includeSelf && (0, import_jquery20.default)(scope).hasClass("shiny-bound-input")) {
+      inputs.push(scope);
+    }
+    for (var i = 0; i < inputs.length; i++) {
+      var _el2 = inputs[i];
+      var binding = (0, import_jquery20.default)(_el2).data("shiny-input-binding");
+      if (!binding)
+        continue;
+      var id = binding.getId(_el2);
+      (0, import_jquery20.default)(_el2).removeClass("shiny-bound-input");
+      delete boundInputs[id];
+      binding.unsubscribe(_el2);
+      (0, import_jquery20.default)(_el2).trigger({
+        type: "shiny:unbound",
+        binding: binding,
+        bindingType: "input"
+      });
+    }
+  }
+  function unbindOutputs(_ref2) {
+    var sendOutputHiddenState = _ref2.sendOutputHiddenState;
+    var scope = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : document.documentElement;
+    var includeSelf = arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : false;
+    var outputs = (0, import_jquery20.default)(scope).find(".shiny-bound-output").toArray();
+    if (includeSelf && (0, import_jquery20.default)(scope).hasClass("shiny-bound-output")) {
+      outputs.push(scope);
+    }
+    for (var i = 0; i < outputs.length; i++) {
+      var $el = (0, import_jquery20.default)(outputs[i]);
+      var bindingAdapter = $el.data("shiny-output-binding");
+      if (!bindingAdapter)
+        continue;
+      var id = bindingAdapter.binding.getId(outputs[i]);
+      shinyAppUnbindOutput(id, bindingAdapter);
+      $el.removeClass("shiny-bound-output");
+      $el.removeData("shiny-output-binding");
+      $el.trigger({
+        type: "shiny:unbound",
+        binding: bindingAdapter.binding,
+        bindingType: "output"
+      });
+    }
+    setTimeout(sendImageSizeFns.regular, 0);
+    setTimeout(sendOutputHiddenState, 0);
+  }
+  function _bindAll(shinyCtx, scope) {
+    bindOutputs(shinyCtx, scope);
+    return bindInputs(shinyCtx, scope);
+  }
+  function unbindAll(shinyCtx, scope) {
+    var includeSelf = arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : false;
+    unbindInputs(scope, includeSelf);
+    unbindOutputs(shinyCtx, scope, includeSelf);
+  }
+  function bindAll(shinyCtx, scope) {
+    var currentInputItems = _bindAll(shinyCtx, scope);
+    var inputs = shinyCtx.inputs;
+    import_jquery20.default.each(currentInputItems, function(name, item) {
+      inputs.setInput(name, item.value, item.opts);
+    });
+    shinyCtx.initDeferredIframes();
+  }
+
+  // node_modules/core-js/modules/es.array-buffer.constructor.js
+  "use strict";
+  var $40 = require_export();
+  var global5 = require_global();
+  var arrayBufferModule = require_array_buffer();
+  var setSpecies = require_set_species();
+  var ARRAY_BUFFER = "ArrayBuffer";
+  var ArrayBuffer2 = arrayBufferModule[ARRAY_BUFFER];
+  var NativeArrayBuffer = global5[ARRAY_BUFFER];
+  $40({global: true, forced: NativeArrayBuffer !== ArrayBuffer2}, {
+    ArrayBuffer: ArrayBuffer2
+  });
+  setSpecies(ARRAY_BUFFER);
+
+  // node_modules/core-js/modules/es.array-buffer.slice.js
+  "use strict";
+  var $41 = require_export();
+  var fails8 = require_fails();
+  var ArrayBufferModule = require_array_buffer();
+  var anObject8 = require_an_object();
+  var toAbsoluteIndex3 = require_to_absolute_index();
+  var toLength7 = require_to_length();
+  var speciesConstructor2 = require_species_constructor();
+  var ArrayBuffer3 = ArrayBufferModule.ArrayBuffer;
+  var DataView2 = ArrayBufferModule.DataView;
+  var nativeArrayBufferSlice = ArrayBuffer3.prototype.slice;
+  var INCORRECT_SLICE = fails8(function() {
+    return !new ArrayBuffer3(2).slice(1, void 0).byteLength;
+  });
+  $41({target: "ArrayBuffer", proto: true, unsafe: true, forced: INCORRECT_SLICE}, {
+    slice: function slice2(start, end) {
+      if (nativeArrayBufferSlice !== void 0 && end === void 0) {
+        return nativeArrayBufferSlice.call(anObject8(this), start);
+      }
+      var length = anObject8(this).byteLength;
+      var first = toAbsoluteIndex3(start, length);
+      var fin = toAbsoluteIndex3(end === void 0 ? length : end, length);
+      var result = new (speciesConstructor2(this, ArrayBuffer3))(toLength7(fin - first));
+      var viewSource = new DataView2(this);
+      var viewTarget = new DataView2(result);
+      var index = 0;
+      while (first < fin) {
+        viewTarget.setUint8(index++, viewSource.getUint8(first++));
+      }
+      return result;
+    }
+  });
+
+  // node_modules/core-js/modules/es.data-view.js
+  var $42 = require_export();
+  var ArrayBufferModule2 = require_array_buffer();
+  var NATIVE_ARRAY_BUFFER = require_array_buffer_native();
+  $42({global: true, forced: !NATIVE_ARRAY_BUFFER}, {
+    DataView: ArrayBufferModule2.DataView
+  });
+
+  // node_modules/core-js/modules/es.array.reduce.js
+  "use strict";
+  var $43 = require_export();
+  var $reduce = require_array_reduce().left;
+  var arrayMethodIsStrict3 = require_array_method_is_strict();
+  var CHROME_VERSION = require_engine_v8_version();
+  var IS_NODE = require_engine_is_node();
+  var STRICT_METHOD3 = arrayMethodIsStrict3("reduce");
+  var CHROME_BUG = !IS_NODE && CHROME_VERSION > 79 && CHROME_VERSION < 83;
+  $43({target: "Array", proto: true, forced: !STRICT_METHOD3 || CHROME_BUG}, {
+    reduce: function reduce(callbackfn) {
+      return $reduce(this, callbackfn, arguments.length, arguments.length > 1 ? arguments[1] : void 0);
+    }
+  });
+
+  // src/shiny/shinyapp.ts
+  var import_es_regexp_exec7 = __toModule(require_es_regexp_exec());
+
+  // node_modules/core-js/modules/es.array.for-each.js
+  "use strict";
+  var $44 = require_export();
+  var forEach = require_array_for_each();
+  $44({target: "Array", proto: true, forced: [].forEach != forEach}, {
+    forEach: forEach
+  });
+
+  // node_modules/core-js/modules/web.dom-collections.for-each.js
+  var global6 = require_global();
+  var DOMIterables2 = require_dom_iterables();
+  var forEach2 = require_array_for_each();
+  var createNonEnumerableProperty3 = require_create_non_enumerable_property();
+  for (var COLLECTION_NAME in DOMIterables2) {
+    Collection = global6[COLLECTION_NAME];
+    CollectionPrototype = Collection && Collection.prototype;
+    if (CollectionPrototype && CollectionPrototype.forEach !== forEach2)
+      try {
+        createNonEnumerableProperty3(CollectionPrototype, "forEach", forEach2);
+      } catch (error) {
+        CollectionPrototype.forEach = forEach2;
+      }
+  }
+  var Collection;
+  var CollectionPrototype;
+
+  // node_modules/core-js/modules/es.number.constructor.js
+  "use strict";
+  var DESCRIPTORS4 = require_descriptors();
+  var global7 = require_global();
+  var isForced = require_is_forced();
+  var redefine4 = require_redefine();
+  var has3 = require_has();
+  var classof = require_classof_raw();
+  var inheritIfRequired = require_inherit_if_required();
+  var toPrimitive2 = require_to_primitive();
+  var fails9 = require_fails();
+  var create3 = require_object_create();
+  var getOwnPropertyNames2 = require_object_get_own_property_names().f;
+  var getOwnPropertyDescriptor2 = require_object_get_own_property_descriptor().f;
+  var defineProperty4 = require_object_define_property().f;
+  var trim = require_string_trim().trim;
+  var NUMBER = "Number";
+  var NativeNumber = global7[NUMBER];
+  var NumberPrototype = NativeNumber.prototype;
+  var BROKEN_CLASSOF = classof(create3(NumberPrototype)) == NUMBER;
+  var toNumber = function(argument) {
+    var it = toPrimitive2(argument, false);
+    var first, third, radix, maxCode, digits, length, index, code;
+    if (typeof it == "string" && it.length > 2) {
+      it = trim(it);
+      first = it.charCodeAt(0);
+      if (first === 43 || first === 45) {
+        third = it.charCodeAt(2);
+        if (third === 88 || third === 120)
+          return NaN;
+      } else if (first === 48) {
+        switch (it.charCodeAt(1)) {
+          case 66:
+          case 98:
+            radix = 2;
+            maxCode = 49;
+            break;
+          case 79:
+          case 111:
+            radix = 8;
+            maxCode = 55;
+            break;
+          default:
+            return +it;
+        }
+        digits = it.slice(2);
+        length = digits.length;
+        for (index = 0; index < length; index++) {
+          code = digits.charCodeAt(index);
+          if (code < 48 || code > maxCode)
+            return NaN;
+        }
+        return parseInt(digits, radix);
+      }
+    }
+    return +it;
+  };
+  if (isForced(NUMBER, !NativeNumber(" 0o1") || !NativeNumber("0b1") || NativeNumber("+0x1"))) {
+    NumberWrapper = function Number2(value) {
+      var it = arguments.length < 1 ? 0 : value;
+      var dummy = this;
+      return dummy instanceof NumberWrapper && (BROKEN_CLASSOF ? fails9(function() {
+        NumberPrototype.valueOf.call(dummy);
+      }) : classof(dummy) != NUMBER) ? inheritIfRequired(new NativeNumber(toNumber(it)), dummy, NumberWrapper) : toNumber(it);
+    };
+    for (keys2 = DESCRIPTORS4 ? getOwnPropertyNames2(NativeNumber) : "MAX_VALUE,MIN_VALUE,NaN,NEGATIVE_INFINITY,POSITIVE_INFINITY,EPSILON,isFinite,isInteger,isNaN,isSafeInteger,MAX_SAFE_INTEGER,MIN_SAFE_INTEGER,parseFloat,parseInt,isInteger,fromString,range".split(","), j = 0; keys2.length > j; j++) {
+      if (has3(NativeNumber, key = keys2[j]) && !has3(NumberWrapper, key)) {
+        defineProperty4(NumberWrapper, key, getOwnPropertyDescriptor2(NativeNumber, key));
+      }
+    }
+    NumberWrapper.prototype = NumberPrototype;
+    NumberPrototype.constructor = NumberWrapper;
+    redefine4(global7, NUMBER, NumberWrapper);
+  }
+  var NumberWrapper;
+  var keys2;
+  var j;
+  var key;
+
+  // src/shiny/shinyapp.ts
+  var import_jquery21 = __toModule(require_jquery());
+
+  // src/utils/eval.ts
+  var indirectEval = eval;
+
+  // src/shiny/shinyapp.ts
+  function _classCallCheck15(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+  function _defineProperties14(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor)
+        descriptor.writable = true;
+      Object.defineProperty(target, descriptor.key, descriptor);
+    }
+  }
+  function _createClass14(Constructor, protoProps, staticProps) {
+    if (protoProps)
+      _defineProperties14(Constructor.prototype, protoProps);
+    if (staticProps)
+      _defineProperties14(Constructor, staticProps);
+    return Constructor;
+  }
+  function _defineProperty13(obj, key, value) {
+    if (key in obj) {
+      Object.defineProperty(obj, key, {value: value, enumerable: true, configurable: true, writable: true});
+    } else {
+      obj[key] = value;
+    }
+    return obj;
+  }
+  var messageHandlerOrder = [];
+  var messageHandlers = {};
+  var customMessageHandlerOrder = [];
+  var customMessageHandlers = {};
+  function addCustomMessageHandler(type, handler) {
+    if (customMessageHandlers[type]) {
+      var typeIdx = customMessageHandlerOrder.indexOf(type);
+      if (typeIdx !== -1) {
+        customMessageHandlerOrder.splice(typeIdx, 1);
+        delete customMessageHandlers[type];
+      }
+    }
+    if (typeof handler !== "function") {
+      throw "handler must be a function.";
+    }
+    if (handler.length !== 1) {
+      throw "handler must be a function that takes one argument.";
+    }
+    customMessageHandlerOrder.push(type);
+    customMessageHandlers[type] = handler;
+  }
+  var ShinyApp = /* @__PURE__ */ function() {
+    function ShinyApp2() {
+      _classCallCheck15(this, ShinyApp2);
+      _defineProperty13(this, "$socket", null);
+      _defineProperty13(this, "config", null);
+      _defineProperty13(this, "$inputValues", {});
+      _defineProperty13(this, "$initialInput", {});
+      _defineProperty13(this, "$bindings", {});
+      _defineProperty13(this, "$values", {});
+      _defineProperty13(this, "$errors", {});
+      _defineProperty13(this, "$conditionals", {});
+      _defineProperty13(this, "$pendingMessages", []);
+      _defineProperty13(this, "$activeRequests", {});
+      _defineProperty13(this, "$nextRequestId", 0);
+      _defineProperty13(this, "$allowReconnect", false);
+      _defineProperty13(this, "scheduledReconnect", null);
+      _defineProperty13(this, "reconnectDelay", function() {
+        var attempts = 0;
+        var delays = [1500, 1500, 2500, 2500, 5500, 5500, 10500];
+        return {
+          next: function next2() {
+            var i = attempts;
+            if (i >= delays.length) {
+              i = delays.length - 1;
+            }
+            attempts++;
+            return delays[i];
+          },
+          reset: function reset() {
+            attempts = 0;
+          }
+        };
+      }());
+      _defineProperty13(this, "progressHandlers", {
+        binding: function binding(message) {
+          var key = message.id;
+          var binding2 = this.$bindings[key];
+          if (binding2) {
+            (0, import_jquery21.default)(binding2.el).trigger({
+              type: "shiny:outputinvalidated",
+              binding: binding2,
+              name: key
+            });
+            if (binding2.showProgress)
+              binding2.showProgress(true);
+          }
+        },
+        open: function open(message) {
+          if (message.style === "notification") {
+            show({
+              html: '<div id="shiny-progress-'.concat(message.id, '" class="shiny-progress-notification">') + '<div class="progress active" style="display: none;"><div class="progress-bar"></div></div><div class="progress-text"><span class="progress-message">message</span> <span class="progress-detail"></span></div></div>',
+              id: message.id,
+              duration: null
+            });
+          } else if (message.style === "old") {
+            var $container = (0, import_jquery21.default)(".shiny-progress-container");
+            if ($container.length === 0) {
+              $container = (0, import_jquery21.default)('<div class="shiny-progress-container"></div>');
+              (0, import_jquery21.default)(document.body).append($container);
+            }
+            var depth = (0, import_jquery21.default)(".shiny-progress.open").length;
+            var $progress = (0, import_jquery21.default)('<div class="shiny-progress open"><div class="progress active"><div class="progress-bar bar"></div></div><div class="progress-text"><span class="progress-message">message</span><span class="progress-detail"></span></div></div>');
+            $progress.attr("id", message.id);
+            $container.append($progress);
+            var $progressBar = $progress.find(".progress");
+            $progressBar.css("top", depth * $progressBar.height() + "px");
+            var $progressText = $progress.find(".progress-text");
+            $progressText.css("top", 3 * $progressBar.height() + depth * $progressText.outerHeight() + "px");
+            $progress.hide();
+          }
+        },
+        update: function update(message) {
+          if (message.style === "notification") {
+            var $progress = (0, import_jquery21.default)("#shiny-progress-" + message.id);
+            if ($progress.length === 0)
+              return;
+            if (typeof message.message !== "undefined") {
+              $progress.find(".progress-message").text(message.message);
+            }
+            if (typeof message.detail !== "undefined") {
+              $progress.find(".progress-detail").text(message.detail);
+            }
+            if (typeof message.value !== "undefined" && message.value !== null) {
+              $progress.find(".progress").show();
+              $progress.find(".progress-bar").width(message.value * 100 + "%");
+            }
+          } else if (message.style === "old") {
+            var _$progress = (0, import_jquery21.default)("#" + message.id + ".shiny-progress");
+            if (typeof message.message !== "undefined") {
+              _$progress.find(".progress-message").text(message.message);
+            }
+            if (typeof message.detail !== "undefined") {
+              _$progress.find(".progress-detail").text(message.detail);
+            }
+            if (typeof message.value !== "undefined" && message.value !== null) {
+              _$progress.find(".progress").show();
+              _$progress.find(".bar").width(message.value * 100 + "%");
+            }
+            _$progress.fadeIn();
+          }
+        },
+        close: function close(message) {
+          if (message.style === "notification") {
+            remove(message.id);
+          } else if (message.style === "old") {
+            var $progress = (0, import_jquery21.default)("#" + message.id + ".shiny-progress");
+            $progress.removeClass("open");
+            $progress.fadeOut({
+              complete: function complete() {
+                $progress.remove();
+                if ((0, import_jquery21.default)(".shiny-progress").length === 0)
+                  (0, import_jquery21.default)(".shiny-progress-container").remove();
+              }
+            });
+          }
+        }
+      });
+      this.init();
+    }
+    _createClass14(ShinyApp2, [{
+      key: "connect",
+      value: function connect(initialInput) {
+        if (this.$socket)
+          throw "Connect was already called on this application object";
+        this.$socket = this.createSocket();
+        this.$initialInput = initialInput;
+        import_jquery21.default.extend(this.$inputValues, initialInput);
+        this.$updateConditionals();
+      }
+    }, {
+      key: "isConnected",
+      value: function isConnected() {
+        return !!this.$socket;
+      }
+    }, {
+      key: "reconnect",
+      value: function reconnect() {
+        clearTimeout(this.scheduledReconnect);
+        if (this.isConnected())
+          throw "Attempted to reconnect, but already connected.";
+        this.$socket = this.createSocket();
+        this.$initialInput = import_jquery21.default.extend({}, this.$inputValues);
+        this.$updateConditionals();
+      }
+    }, {
+      key: "createSocket",
+      value: function createSocket() {
+        var _this = this;
+        var createSocketFunc = getShinyCreateWebsocket() || function() {
+          var protocol = "ws:";
+          if (window.location.protocol === "https:")
+            protocol = "wss:";
+          var defaultPath = window.location.pathname;
+          if (!/^([$#!&-;=?-[\]_a-z~]|%[0-9a-fA-F]{2})+$/.test(defaultPath)) {
+            defaultPath = encodeURI(defaultPath);
+            if (isQt()) {
+              defaultPath = encodeURI(defaultPath);
+            }
+          }
+          if (!/\/$/.test(defaultPath))
+            defaultPath += "/";
+          defaultPath += "websocket/";
+          var ws = new WebSocket(protocol + "//" + window.location.host + defaultPath);
+          ws.binaryType = "arraybuffer";
+          return ws;
+        };
+        var socket = createSocketFunc();
+        var hasOpened = false;
+        socket.onopen = function() {
+          hasOpened = true;
+          (0, import_jquery21.default)(document).trigger({
+            type: "shiny:connected",
+            socket: socket
+          });
+          _this.onConnected();
+          socket.send(JSON.stringify({
+            method: "init",
+            data: _this.$initialInput
+          }));
+          while (_this.$pendingMessages.length) {
+            var _msg = _this.$pendingMessages.shift();
+            socket.send(_msg);
+          }
+        };
+        socket.onmessage = function(e) {
+          _this.dispatchMessage(e.data);
+        };
+        socket.onclose = function() {
+          if (hasOpened) {
+            (0, import_jquery21.default)(document).trigger({
+              type: "shiny:disconnected",
+              socket: socket
+            });
+            _this.$notifyDisconnected();
+          }
+          _this.onDisconnected();
+          _this.$removeSocket();
+        };
+        return socket;
+      }
+    }, {
+      key: "sendInput",
+      value: function sendInput(values) {
+        var msg = JSON.stringify({
+          method: "update",
+          data: values
+        });
+        this.$sendMsg(msg);
+        import_jquery21.default.extend(this.$inputValues, values);
+        this.$updateConditionals();
+      }
+    }, {
+      key: "$notifyDisconnected",
+      value: function $notifyDisconnected() {
+        if (window.parent) {
+          window.parent.postMessage("disconnected", "*");
+        }
+      }
+    }, {
+      key: "$removeSocket",
+      value: function $removeSocket() {
+        this.$socket = null;
+      }
+    }, {
+      key: "$scheduleReconnect",
+      value: function $scheduleReconnect(delay) {
+        var _this2 = this;
+        this.scheduledReconnect = setTimeout(function() {
+          _this2.reconnect();
+        }, delay);
+      }
+    }, {
+      key: "onDisconnected",
+      value: function onDisconnected() {
+        var $overlay = (0, import_jquery21.default)("#shiny-disconnected-overlay");
+        if ($overlay.length === 0) {
+          (0, import_jquery21.default)(document.body).append('<div id="shiny-disconnected-overlay"></div>');
+        }
+        if (this.$allowReconnect === true && this.$socket.allowReconnect === true || this.$allowReconnect === "force") {
+          var delay = this.reconnectDelay.next();
+          showReconnectDialog(delay);
+          this.$scheduleReconnect(delay);
+        }
+      }
+    }, {
+      key: "onConnected",
+      value: function onConnected() {
+        (0, import_jquery21.default)("#shiny-disconnected-overlay").remove();
+        hideReconnectDialog();
+        this.reconnectDelay.reset();
+      }
+    }, {
+      key: "makeRequest",
+      value: function makeRequest(method, args, onSuccess, onError, blobs) {
+        var requestId = this.$nextRequestId;
+        while (this.$activeRequests[requestId]) {
+          requestId = (requestId + 1) % 1e9;
+        }
+        this.$nextRequestId = requestId + 1;
+        this.$activeRequests[requestId] = {
+          onSuccess: onSuccess,
+          onError: onError
+        };
+        var msg = JSON.stringify({
+          method: method,
+          args: args,
+          tag: requestId
+        });
+        if (blobs) {
+          var uint32ToBuf = function uint32ToBuf2(val) {
+            var buffer = new ArrayBuffer(4);
+            var view = new DataView(buffer);
+            view.setUint32(0, val, true);
+            return buffer;
+          };
+          var payload = [];
+          payload.push(uint32ToBuf(16908802));
+          var jsonBuf = makeBlob([msg]);
+          payload.push(uint32ToBuf(jsonBuf.size));
+          payload.push(jsonBuf);
+          for (var i = 0; i < blobs.length; i++) {
+            var _blob = blobs[i];
+            payload.push(uint32ToBuf(_blob.byteLength || _blob.size || 0));
+            payload.push(_blob);
+          }
+          var blob = makeBlob(payload);
+          msg = blob;
+        }
+        this.$sendMsg(msg);
+      }
+    }, {
+      key: "$sendMsg",
+      value: function $sendMsg(msg) {
+        if (!this.$socket.readyState) {
+          this.$pendingMessages.push(msg);
+        } else {
+          this.$socket.send(msg);
+        }
+      }
+    }, {
+      key: "receiveError",
+      value: function receiveError(name, error) {
+        if (this.$errors[name] === error)
+          return;
+        this.$errors[name] = error;
+        delete this.$values[name];
+        var binding = this.$bindings[name];
+        var evt = jQuery.Event("shiny:error");
+        evt.name = name;
+        evt.error = error;
+        evt.binding = binding;
+        (0, import_jquery21.default)(binding ? binding.el : document).trigger(evt);
+        if (!evt.isDefaultPrevented() && binding && binding.onValueError) {
+          binding.onValueError(evt.error);
+        }
+      }
+    }, {
+      key: "receiveOutput",
+      value: function receiveOutput(name, value) {
+        var binding = this.$bindings[name];
+        var evt = jQuery.Event("shiny:value");
+        evt.name = name;
+        evt.value = value;
+        evt.binding = binding;
+        if (this.$values[name] === value) {
+          (0, import_jquery21.default)(binding ? binding.el : document).trigger(evt);
+          return void 0;
+        }
+        this.$values[name] = value;
+        delete this.$errors[name];
+        (0, import_jquery21.default)(binding ? binding.el : document).trigger(evt);
+        if (!evt.isDefaultPrevented() && binding) {
+          binding.onValueChange(evt.value);
+        }
+        return value;
+      }
+    }, {
+      key: "bindOutput",
+      value: function bindOutput(id, binding) {
+        if (!id)
+          throw "Can't bind an element with no ID";
+        if (this.$bindings[id])
+          throw "Duplicate binding for ID " + id;
+        this.$bindings[id] = binding;
+        if (this.$values[id] !== void 0)
+          binding.onValueChange(this.$values[id]);
+        else if (this.$errors[id] !== void 0)
+          binding.onValueError(this.$errors[id]);
+        return binding;
+      }
+    }, {
+      key: "unbindOutput",
+      value: function unbindOutput(id, binding) {
+        if (this.$bindings[id] === binding) {
+          delete this.$bindings[id];
+          return true;
+        } else {
+          return false;
+        }
+      }
+    }, {
+      key: "narrowScopeComponent",
+      value: function narrowScopeComponent(scopeComponent, nsPrefix) {
+        return Object.keys(scopeComponent).filter(function(k) {
+          return k.indexOf(nsPrefix) === 0;
+        }).map(function(k) {
+          return _defineProperty13({}, k.substring(nsPrefix.length), scopeComponent[k]);
+        }).reduce(function(obj, pair) {
+          return import_jquery21.default.extend(obj, pair);
+        }, {});
+      }
+    }, {
+      key: "narrowScope",
+      value: function narrowScope(scope, nsPrefix) {
+        if (nsPrefix) {
+          return {
+            input: this.narrowScopeComponent(scope.input, nsPrefix),
+            output: this.narrowScopeComponent(scope.output, nsPrefix)
+          };
+        }
+        return scope;
+      }
+    }, {
+      key: "$updateConditionals",
+      value: function $updateConditionals() {
+        (0, import_jquery21.default)(document).trigger({
+          type: "shiny:conditional"
+        });
+        var inputs = {};
+        for (var name in this.$inputValues) {
+          if (hasOwnProperty(this.$inputValues, name)) {
+            var shortName = name.replace(/:.*/, "");
+            inputs[shortName] = this.$inputValues[name];
+          }
+        }
+        var scope = {
+          input: inputs,
+          output: this.$values
+        };
+        var conditionals = (0, import_jquery21.default)(document).find("[data-display-if]");
+        for (var i = 0; i < conditionals.length; i++) {
+          var el = (0, import_jquery21.default)(conditionals[i]);
+          var condFunc = el.data("data-display-if-func");
+          if (!condFunc) {
+            var condExpr = el.attr("data-display-if");
+            condFunc = scopeExprToFunc(condExpr);
+            el.data("data-display-if-func", condFunc);
+          }
+          var nsPrefix = el.attr("data-ns-prefix");
+          var nsScope = this.narrowScope(scope, nsPrefix);
+          var show3 = condFunc(nsScope);
+          var showing = el.css("display") !== "none";
+          if (show3 !== showing) {
+            if (show3) {
+              el.trigger("show");
+              el.show();
+              el.trigger("shown");
+            } else {
+              el.trigger("hide");
+              el.hide();
+              el.trigger("hidden");
+            }
+          }
+        }
+      }
+    }, {
+      key: "addMessageHandler",
+      value: function addMessageHandler(type, handler) {
+        if (messageHandlers[type]) {
+          throw 'handler for message of type "' + type + '" already added.';
+        }
+        if (typeof handler !== "function") {
+          throw "handler must be a function.";
+        }
+        if (handler.length !== 1) {
+          throw "handler must be a function that takes one argument.";
+        }
+        messageHandlerOrder.push(type);
+        messageHandlers[type] = handler;
+      }
+    }, {
+      key: "dispatchMessage",
+      value: function dispatchMessage(data) {
+        var msgObj = {};
+        if (typeof data === "string") {
+          msgObj = JSON.parse(data);
+        } else {
+          var len = new DataView(data, 0, 1).getUint8(0);
+          var typedv = new DataView(data, 1, len);
+          var typebuf = [];
+          for (var i = 0; i < len; i++) {
+            typebuf.push(String.fromCharCode(typedv.getUint8(i)));
+          }
+          var type = typebuf.join("");
+          data = data.slice(len + 1);
+          msgObj.custom = {};
+          msgObj.custom[type] = data;
+        }
+        var evt = jQuery.Event("shiny:message");
+        evt.message = msgObj;
+        (0, import_jquery21.default)(document).trigger(evt);
+        if (evt.isDefaultPrevented())
+          return;
+        this._sendMessagesToHandlers(evt.message, messageHandlers, messageHandlerOrder);
+        this.$updateConditionals();
+      }
+    }, {
+      key: "_sendMessagesToHandlers",
+      value: function _sendMessagesToHandlers(msgObj, handlers, handlerOrder) {
+        for (var i = 0; i < handlerOrder.length; i++) {
+          var msgType = handlerOrder[i];
+          if (hasOwnProperty(msgObj, msgType)) {
+            handlers[msgType].call(this, msgObj[msgType]);
+          }
+        }
+      }
+    }, {
+      key: "init",
+      value: function init2() {
+        this.addMessageHandler("values", function(message) {
+          for (var name in this.$bindings) {
+            if (hasOwnProperty(this.$bindings, name))
+              this.$bindings[name].showProgress(false);
+          }
+          for (var key in message) {
+            if (hasOwnProperty(message, key))
+              this.receiveOutput(key, message[key]);
+          }
+        });
+        this.addMessageHandler("errors", function(message) {
+          for (var key in message) {
+            if (hasOwnProperty(message, key))
+              this.receiveError(key, message[key]);
+          }
+        });
+        this.addMessageHandler("inputMessages", function(message) {
+          for (var i = 0; i < message.length; i++) {
+            var $obj = (0, import_jquery21.default)(".shiny-bound-input#" + $escape(message[i].id));
+            var inputBinding = $obj.data("shiny-input-binding");
+            if ($obj.length > 0) {
+              if (!$obj.attr("aria-live"))
+                $obj.attr("aria-live", "polite");
+              var el = $obj[0];
+              var evt = jQuery.Event("shiny:updateinput");
+              evt.message = message[i].message;
+              evt.binding = inputBinding;
+              (0, import_jquery21.default)(el).trigger(evt);
+              if (!evt.isDefaultPrevented())
+                inputBinding.receiveMessage(el, evt.message);
+            }
+          }
+        });
+        this.addMessageHandler("javascript", function(message) {
+          indirectEval(message);
+        });
+        this.addMessageHandler("console", function(message) {
+          for (var i = 0; i < message.length; i++) {
+            if (console.log)
+              console.log(message[i]);
+          }
+        });
+        this.addMessageHandler("progress", function(message) {
+          if (message.type && message.message) {
+            var handler = this.progressHandlers[message.type];
+            if (handler)
+              handler.call(this, message.message);
+          }
+        });
+        this.addMessageHandler("notification", function(message) {
+          if (message.type === "show")
+            show(message.message);
+          else if (message.type === "remove")
+            remove(message.message);
+          else
+            throw "Unkown notification type: " + message.type;
+        });
+        this.addMessageHandler("modal", function(message) {
+          if (message.type === "show")
+            show(message.message);
+          else if (message.type === "remove")
+            remove();
+          else
+            throw "Unkown modal type: " + message.type;
+        });
+        this.addMessageHandler("response", function(message) {
+          var requestId = message.tag;
+          var request = this.$activeRequests[requestId];
+          if (request) {
+            delete this.$activeRequests[requestId];
+            if ("value" in message)
+              request.onSuccess(message.value);
+            else
+              request.onError(message.error);
+          }
+        });
+        this.addMessageHandler("allowReconnect", function(message) {
+          switch (message) {
+            case true:
+            case false:
+            case "force":
+              this.$allowReconnect = message;
+              break;
+            default:
+              throw "Invalid value for allowReconnect: " + message;
+          }
+        });
+        this.addMessageHandler("custom", function(message) {
+          var shinyOnCustomMessage = getShinyOnCustomMessage();
+          if (shinyOnCustomMessage)
+            shinyOnCustomMessage(message);
+          this._sendMessagesToHandlers(message, customMessageHandlers, customMessageHandlerOrder);
+        });
+        this.addMessageHandler("config", function(message) {
+          this.config = {
+            workerId: message.workerId,
+            sessionId: message.sessionId
+          };
+          if (message.user)
+            setShinyUser(message.user);
+          (0, import_jquery21.default)(document).trigger("shiny:sessioninitialized");
+        });
+        this.addMessageHandler("busy", function(message) {
+          if (message === "busy") {
+            (0, import_jquery21.default)(document.documentElement).addClass("shiny-busy");
+            (0, import_jquery21.default)(document).trigger("shiny:busy");
+          } else if (message === "idle") {
+            (0, import_jquery21.default)(document.documentElement).removeClass("shiny-busy");
+            (0, import_jquery21.default)(document).trigger("shiny:idle");
+          }
+        });
+        this.addMessageHandler("recalculating", function(message) {
+          if (hasOwnProperty(message, "name") && hasOwnProperty(message, "status")) {
+            var binding = this.$bindings[message.name];
+            (0, import_jquery21.default)(binding ? binding.el : null).trigger({
+              type: "shiny:" + message.status
+            });
+          }
+        });
+        this.addMessageHandler("reload", function(message) {
+          window.location.reload();
+          return;
+          message;
+        });
+        this.addMessageHandler("shiny-insert-ui", function(message) {
+          var targets = (0, import_jquery21.default)(message.selector);
+          if (targets.length === 0) {
+            console.warn('The selector you chose ("' + message.selector + '") could not be found in the DOM.');
+            renderHtml2(message.content.html, (0, import_jquery21.default)([]).get(0), message.content.deps);
+          } else {
+            targets.each(function(i, target) {
+              renderContent(target, message.content, message.where);
+              return message.multiple;
+            });
+          }
+        });
+        this.addMessageHandler("shiny-remove-ui", function(message) {
+          var els = (0, import_jquery21.default)(message.selector);
+          els.each(function(i, el) {
+            shinyUnbindAll(el, true);
+            (0, import_jquery21.default)(el).remove();
+            return message.multiple;
+          });
+        });
+        this.addMessageHandler("frozen", function(message) {
+          for (var i = 0; i < message.ids.length; i++) {
+            shinyForgetLastInputValue(message.ids[i]);
+          }
+        });
+        function getTabset(id) {
+          var $tabset = (0, import_jquery21.default)("#" + $escape(id));
+          if ($tabset.length === 0)
+            throw "There is no tabsetPanel (or navbarPage or navlistPanel) with id equal to '" + id + "'";
+          return $tabset;
+        }
+        function getTabContent($tabset) {
+          var tabsetId = $tabset.attr("data-tabsetid");
+          var $tabContent = (0, import_jquery21.default)("div.tab-content[data-tabsetid='" + $escape(tabsetId) + "']");
+          return $tabContent;
+        }
+        function getTargetTabs($tabset, $tabContent, target) {
+          var dataValue = "[data-value='" + $escape(target) + "']";
+          var $aTag = $tabset.find("a" + dataValue);
+          var $liTag = $aTag.parent();
+          if ($liTag.length === 0) {
+            throw "There is no tabPanel (or navbarMenu) with value (or menuName) equal to '" + target + "'";
+          }
+          var $liTags = [];
+          var $divTags = [];
+          if ($aTag.attr("data-toggle") === "dropdown") {
+            var $dropdownTabset = $aTag.find("+ ul.dropdown-menu");
+            var dropdownId = $dropdownTabset.attr("data-tabsetid");
+            var $dropdownLiTags = $dropdownTabset.find("a[data-toggle='tab']").parent("li");
+            $dropdownLiTags.each(function(i, el) {
+              $liTags.push((0, import_jquery21.default)(el));
+            });
+            var selector = "div.tab-pane[id^='tab-" + $escape(dropdownId) + "']";
+            var $dropdownDivs = $tabContent.find(selector);
+            $dropdownDivs.each(function(i, el) {
+              $divTags.push((0, import_jquery21.default)(el));
+            });
+          } else {
+            $divTags.push($tabContent.find("div" + dataValue));
+          }
+          return {
+            $liTag: $liTag,
+            $liTags: $liTags,
+            $divTags: $divTags
+          };
+        }
+        this.addMessageHandler("shiny-insert-tab", function(message) {
+          var $parentTabset = getTabset(message.inputId);
+          var $tabset = $parentTabset;
+          var $tabContent = getTabContent($tabset);
+          var tabsetId = $parentTabset.attr("data-tabsetid");
+          var $divTag = (0, import_jquery21.default)(message.divTag.html);
+          var $liTag = (0, import_jquery21.default)(message.liTag.html);
+          var $aTag = $liTag.find("> a");
+          var target = null;
+          var $targetLiTag = null;
+          if (message.target !== null) {
+            target = getTargetTabs($tabset, $tabContent, message.target);
+            $targetLiTag = target.$liTag;
+          }
+          var dropdown = getDropdown();
+          if (dropdown !== null) {
+            if ($aTag.attr("data-toggle") === "dropdown")
+              throw "Cannot insert a navbarMenu inside another one";
+            $tabset = dropdown.$tabset;
+            tabsetId = dropdown.id;
+          }
+          if ($aTag.attr("data-toggle") === "tab") {
+            var index = getTabIndex($tabset, tabsetId);
+            var tabId = "tab-" + tabsetId + "-" + index;
+            $liTag.find("> a").attr("href", "#" + tabId);
+            $divTag.attr("id", tabId);
+          }
+          if (message.position === "before") {
+            if ($targetLiTag) {
+              $targetLiTag.before($liTag);
+            } else {
+              $tabset.append($liTag);
+            }
+          } else if (message.position === "after") {
+            if ($targetLiTag) {
+              $targetLiTag.after($liTag);
+            } else {
+              $tabset.prepend($liTag);
+            }
+          }
+          renderContent($liTag[0], {
+            html: $liTag.html(),
+            deps: message.liTag.deps
+          });
+          renderContent($tabContent[0], {
+            html: "",
+            deps: message.divTag.deps
+          }, "beforeend");
+          $divTag.get().forEach(function(el) {
+            $tabContent[0].appendChild(el);
+            renderContent(el, el.innerHTML || el.textContent);
+          });
+          if (message.select) {
+            $liTag.find("a").tab("show");
+          }
+          function getTabIndex($tabset2, tabsetId2) {
+            var existingTabIds = [0];
+            $tabset2.find("a[data-toggle='tab']").each(function() {
+              var $tab = (0, import_jquery21.default)(this);
+              if ($tab.length > 0) {
+                var href = $tab.attr("href").replace(/.*(?=#[^\s]+$)/, "");
+                var _index = href.replace("#tab-" + tabsetId2 + "-", "");
+                existingTabIds.push(Number(_index));
+              }
+            });
+            return Math.max.apply(null, existingTabIds) + 1;
+          }
+          function getDropdown() {
+            if (message.menuName !== null) {
+              var $dropdownATag = (0, import_jquery21.default)("a.dropdown-toggle[data-value='" + $escape(message.menuName) + "']");
+              if ($dropdownATag.length === 0) {
+                throw "There is no navbarMenu with menuName equal to '" + message.menuName + "'";
+              }
+              var $dropdownTabset = $dropdownATag.find("+ ul.dropdown-menu");
+              var dropdownId = $dropdownTabset.attr("data-tabsetid");
+              return {
+                $tabset: $dropdownTabset,
+                id: dropdownId
+              };
+            } else if (message.target !== null) {
+              var $uncleTabset = $targetLiTag.parent("ul");
+              if ($uncleTabset.hasClass("dropdown-menu")) {
+                var uncleId = $uncleTabset.attr("data-tabsetid");
+                return {
+                  $tabset: $uncleTabset,
+                  id: uncleId
+                };
+              }
+            }
+            return null;
+          }
+        });
+        function ensureTabsetHasVisibleTab($tabset) {
+          var inputBinding = $tabset.data("shiny-input-binding");
+          if (!inputBinding.getValue($tabset)) {
+            var destTabValue = getFirstTab($tabset);
+            var evt = jQuery.Event("shiny:updateinput");
+            evt.binding = inputBinding;
+            $tabset.trigger(evt);
+            inputBinding.setValue($tabset[0], destTabValue);
+          }
+        }
+        function getFirstTab($ul) {
+          return $ul.find("li:visible a[data-toggle='tab']").first().attr("data-value") || null;
+        }
+        function tabApplyFunction(target, func) {
+          var liTags = arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : false;
+          import_jquery21.default.each(target, function(key, el) {
+            if (key === "$liTag") {
+              func(el);
+            } else if (key === "$divTags") {
+              import_jquery21.default.each(el, function(i, div) {
+                func(div);
+              });
+            } else if (liTags && key === "$liTags") {
+              import_jquery21.default.each(el, function(i, div) {
+                func(div);
+              });
+            }
+          });
+        }
+        this.addMessageHandler("shiny-remove-tab", function(message) {
+          var $tabset = getTabset(message.inputId);
+          var $tabContent = getTabContent($tabset);
+          var target = getTargetTabs($tabset, $tabContent, message.target);
+          tabApplyFunction(target, removeEl);
+          ensureTabsetHasVisibleTab($tabset);
+          function removeEl($el) {
+            shinyUnbindAll($el, true);
+            $el.remove();
+          }
+        });
+        this.addMessageHandler("shiny-change-tab-visibility", function(message) {
+          var $tabset = getTabset(message.inputId);
+          var $tabContent = getTabContent($tabset);
+          var target = getTargetTabs($tabset, $tabContent, message.target);
+          tabApplyFunction(target, changeVisibility, true);
+          ensureTabsetHasVisibleTab($tabset);
+          function changeVisibility($el) {
+            if (message.type === "show")
+              $el.css("display", "");
+            else if (message.type === "hide") {
+              $el.hide();
+              $el.removeClass("active");
+            }
+          }
+        });
+        this.addMessageHandler("updateQueryString", function(message) {
+          if (message.mode === "replace") {
+            window.history.replaceState(null, null, message.queryString);
+            return;
+          }
+          var what = null;
+          if (message.queryString.charAt(0) === "#")
+            what = "hash";
+          else if (message.queryString.charAt(0) === "?")
+            what = "query";
+          else
+            throw "The 'query' string must start with either '?' (to update the query string) or with '#' (to update the hash).";
+          var path = window.location.pathname;
+          var oldQS = window.location.search;
+          var oldHash = window.location.hash;
+          var relURL = path;
+          if (what === "query")
+            relURL += message.queryString;
+          else
+            relURL += oldQS + message.queryString;
+          window.history.pushState(null, null, relURL);
+          if (message.queryString.indexOf("#") !== -1)
+            what = "hash";
+          if (window.location.hash !== oldHash)
+            what = "hash";
+          if (what === "hash")
+            (0, import_jquery21.default)(document).trigger("hashchange");
+        });
+        this.addMessageHandler("resetBrush", function(message) {
+          resetBrush(message.brushId);
+        });
+      }
+    }, {
+      key: "getTestSnapshotBaseUrl",
+      value: function getTestSnapshotBaseUrl() {
+        var _ref2 = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : {}, _ref2$fullUrl = _ref2.fullUrl, fullUrl = _ref2$fullUrl === void 0 ? true : _ref2$fullUrl;
+        var loc = window.location;
+        var url = "";
+        if (fullUrl) {
+          url = loc.origin + loc.pathname.replace(/\/[^/]*$/, "");
+        }
+        url += "/session/" + encodeURIComponent(this.config.sessionId) + "/dataobj/shinytest?w=" + encodeURIComponent(this.config.workerId) + "&nonce=" + randomId();
+        return url;
+      }
+    }]);
+    return ShinyApp2;
+  }();
+
+  // src/shiny/init.ts
+  function initShiny(Shiny2) {
+    setShinyObj(Shiny2);
+    var shinyapp = Shiny2.shinyapp = new ShinyApp();
+    Shiny2.progressHandlers = shinyapp.progressHandlers;
+    var inputBatchSender = new InputBatchSender(shinyapp);
+    var inputsNoResend = new InputNoResendDecorator(inputBatchSender);
+    var inputsEvent = new InputEventDecorator(inputsNoResend);
+    var inputsRate = new InputRateDecorator(inputsEvent);
+    var inputsDefer = new InputDeferDecorator(inputsEvent);
+    var target;
+    if ((0, import_jquery22.default)('input[type="submit"], button[type="submit"]').length > 0) {
+      target = inputsDefer;
+      (0, import_jquery22.default)('input[type="submit"], button[type="submit"]').each(function() {
+        (0, import_jquery22.default)(this).click(function(event) {
+          event.preventDefault();
+          inputsDefer.submit();
+        });
+      });
+    } else {
+      target = inputsRate;
+    }
+    var inputs = new InputValidateDecorator(target);
+    Shiny2.setInputValue = Shiny2.onInputChange = function(name, value, opts) {
+      var newOpts = addDefaultInputOpts(opts);
+      inputs.setInput(name, value, newOpts);
+    };
+    Shiny2.forgetLastInputValue = function(name) {
+      inputsNoResend.forget(name);
+    };
+    var inputBindings = Shiny2.inputBindings;
+    var outputBindings = Shiny2.outputBindings;
+    function shinyBindCtx() {
+      return {
+        inputs: inputs,
+        inputsRate: inputsRate,
+        sendOutputHiddenState: sendOutputHiddenState,
+        maybeAddThemeObserver: maybeAddThemeObserver,
+        inputBindings: inputBindings,
+        outputBindings: outputBindings,
+        initDeferredIframes: initDeferredIframes
+      };
+    }
+    Shiny2.bindAll = function(scope) {
+      bindAll(shinyBindCtx(), scope);
+    };
+    Shiny2.unbindAll = function(scope) {
+      var includeSelf = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : false;
+      unbindAll(shinyBindCtx(), scope, includeSelf);
+    };
+    function initializeInputs() {
+      var scope = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : document.documentElement;
+      var bindings = inputBindings.getBindings();
+      for (var i = 0; i < bindings.length; i++) {
+        var binding = bindings[i].binding;
+        var inputObjects = binding.find(scope);
+        if (inputObjects) {
+          for (var j = 0; j < inputObjects.length; j++) {
+            var $inputObjectJ = (0, import_jquery22.default)(inputObjects[j]);
+            if (!$inputObjectJ.data("_shiny_initialized")) {
+              $inputObjectJ.data("_shiny_initialized", true);
+              binding.initialize(inputObjects[j]);
+            }
+          }
+        }
+      }
+    }
+    Shiny2.initializeInputs = initializeInputs;
+    function getIdFromEl(el) {
+      var $el = (0, import_jquery22.default)(el);
+      var bindingAdapter = $el.data("shiny-output-binding");
+      if (!bindingAdapter)
+        return null;
+      else
+        return bindingAdapter.getId();
+    }
+    initializeInputs(document.documentElement);
+    var initialValues = mapValues(_bindAll(shinyBindCtx(), document.documentElement), function(x) {
+      return x.value;
+    });
+    (0, import_jquery22.default)(".shiny-image-output, .shiny-plot-output, .shiny-report-size").each(function() {
+      var id = getIdFromEl(this);
+      if (this.offsetWidth !== 0 || this.offsetHeight !== 0) {
+        initialValues[".clientdata_output_" + id + "_width"] = this.offsetWidth;
+        initialValues[".clientdata_output_" + id + "_height"] = this.offsetHeight;
+      }
+    });
+    function getComputedBgColor(el) {
+      if (!el) {
+        return null;
+      }
+      var bgColor = getStyle(el, "background-color");
+      var m = bgColor.match(/^rgba\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)\s*\)$/);
+      if (bgColor === "transparent" || m && parseFloat(m[4]) === 0) {
+        var bgImage = getStyle(el, "background-image");
+        if (bgImage && bgImage !== "none") {
+          return null;
+        } else {
+          return getComputedBgColor(el.parentElement);
+        }
+      }
+      return bgColor;
+    }
+    function getComputedFont(el) {
+      var fontFamily = getStyle(el, "font-family");
+      var fontSize = getStyle(el, "font-size");
+      return {
+        families: fontFamily.replace(/"/g, "").split(", "),
+        size: fontSize
+      };
+    }
+    (0, import_jquery22.default)(".shiny-image-output, .shiny-plot-output, .shiny-report-theme").each(function() {
+      var el = this;
+      var id = getIdFromEl(el);
+      initialValues[".clientdata_output_" + id + "_bg"] = getComputedBgColor(el);
+      initialValues[".clientdata_output_" + id + "_fg"] = getStyle(el, "color");
+      initialValues[".clientdata_output_" + id + "_accent"] = getComputedLinkColor(el);
+      initialValues[".clientdata_output_" + id + "_font"] = getComputedFont(el);
+      maybeAddThemeObserver(el);
+    });
+    function maybeAddThemeObserver(el) {
+      if (!window.MutationObserver) {
+        return;
+      }
+      var cl = el.classList;
+      var reportTheme = cl.contains("shiny-image-output") || cl.contains("shiny-plot-output") || cl.contains("shiny-report-theme");
+      if (!reportTheme) {
+        return;
+      }
+      var $el = (0, import_jquery22.default)(el);
+      if ($el.data("shiny-theme-observer")) {
+        return;
+      }
+      var observerCallback = new Debouncer(null, function() {
+        return doSendTheme(el);
+      }, 100);
+      var observer = new MutationObserver(function() {
+        return observerCallback.normalCall();
+      });
+      var config = {
+        attributes: true,
+        attributeFilter: ["style", "class"]
+      };
+      observer.observe(el, config);
+      $el.data("shiny-theme-observer", observer);
+    }
+    function doSendTheme(el) {
+      if (el.classList.contains("shiny-output-error")) {
+        return;
+      }
+      var id = getIdFromEl(el);
+      inputs.setInput(".clientdata_output_" + id + "_bg", getComputedBgColor(el));
+      inputs.setInput(".clientdata_output_" + id + "_fg", getStyle(el, "color"));
+      inputs.setInput(".clientdata_output_" + id + "_accent", getComputedLinkColor(el));
+      inputs.setInput(".clientdata_output_" + id + "_font", getComputedFont(el));
+    }
+    function doSendImageSize() {
+      (0, import_jquery22.default)(".shiny-image-output, .shiny-plot-output, .shiny-report-size").each(function() {
+        var id = getIdFromEl(this);
+        if (this.offsetWidth !== 0 || this.offsetHeight !== 0) {
+          inputs.setInput(".clientdata_output_" + id + "_width", this.offsetWidth);
+          inputs.setInput(".clientdata_output_" + id + "_height", this.offsetHeight);
+        }
+      });
+      (0, import_jquery22.default)(".shiny-image-output, .shiny-plot-output, .shiny-report-theme").each(function() {
+        doSendTheme(this);
+      });
+      (0, import_jquery22.default)(".shiny-bound-output").each(function() {
+        var $this = (0, import_jquery22.default)(this), binding = $this.data("shiny-output-binding");
+        $this.trigger({
+          type: "shiny:visualchange",
+          visible: !isHidden(this),
+          binding: binding
+        });
+        binding.onResize();
+      });
+    }
+    sendImageSizeFns.setImageSend(inputBatchSender, doSendImageSize);
+    function isHidden(obj) {
+      if (obj === null || obj.offsetWidth !== 0 || obj.offsetHeight !== 0) {
+        return false;
+      } else if (getStyle(obj, "display") === "none") {
+        return true;
+      } else {
+        return isHidden(obj.parentNode);
+      }
+    }
+    var lastKnownVisibleOutputs = {};
+    (0, import_jquery22.default)(".shiny-bound-output").each(function() {
+      var id = getIdFromEl(this);
+      if (isHidden(this)) {
+        initialValues[".clientdata_output_" + id + "_hidden"] = true;
+      } else {
+        lastKnownVisibleOutputs[id] = true;
+        initialValues[".clientdata_output_" + id + "_hidden"] = false;
+      }
+    });
+    function doSendOutputHiddenState() {
+      var visibleOutputs = {};
+      (0, import_jquery22.default)(".shiny-bound-output").each(function() {
+        var id = getIdFromEl(this);
+        delete lastKnownVisibleOutputs[id];
+        var hidden = isHidden(this), evt = {
+          type: "shiny:visualchange",
+          visible: !hidden
+        };
+        if (hidden) {
+          inputs.setInput(".clientdata_output_" + id + "_hidden", true);
+        } else {
+          visibleOutputs[id] = true;
+          inputs.setInput(".clientdata_output_" + id + "_hidden", false);
+        }
+        var $this = (0, import_jquery22.default)(this);
+        evt.binding = $this.data("shiny-output-binding");
+        $this.trigger(evt);
+      });
+      for (var name in lastKnownVisibleOutputs) {
+        if (hasOwnProperty(lastKnownVisibleOutputs, name))
+          inputs.setInput(".clientdata_output_" + name + "_hidden", true);
+      }
+      lastKnownVisibleOutputs = visibleOutputs;
+    }
+    var sendOutputHiddenStateDebouncer = new Debouncer(null, doSendOutputHiddenState, 0);
+    function sendOutputHiddenState() {
+      sendOutputHiddenStateDebouncer.normalCall();
+    }
+    inputBatchSender.lastChanceCallback.push(function() {
+      if (sendOutputHiddenStateDebouncer.isPending())
+        sendOutputHiddenStateDebouncer.immediateCall();
+    });
+    function filterEventsByNamespace(namespace, handler) {
+      for (var _len = arguments.length, args = new Array(_len > 2 ? _len - 2 : 0), _key = 2; _key < _len; _key++) {
+        args[_key - 2] = arguments[_key];
+      }
+      namespace = namespace.split(".");
+      return function(e) {
+        var eventNamespace = e.namespace.split(".");
+        for (var i = 0; i < namespace.length; i++) {
+          if (eventNamespace.indexOf(namespace[i]) === -1)
+            return;
+        }
+        handler.apply(this, [namespace, handler].concat(args));
+      };
+    }
+    (0, import_jquery22.default)(window).resize(debounce(500, sendImageSizeFns.regular));
+    var bs3classes = ["modal", "dropdown", "tab", "tooltip", "popover", "collapse"];
+    import_jquery22.default.each(bs3classes, function(idx, classname) {
+      (0, import_jquery22.default)(document.body).on("shown.bs." + classname + ".sendImageSize", "*", filterEventsByNamespace("bs", sendImageSizeFns.regular));
+      (0, import_jquery22.default)(document.body).on("shown.bs." + classname + ".sendOutputHiddenState hidden.bs." + classname + ".sendOutputHiddenState", "*", filterEventsByNamespace("bs", sendOutputHiddenState));
+    });
+    (0, import_jquery22.default)(document.body).on("shown.sendImageSize", "*", sendImageSizeFns.regular);
+    (0, import_jquery22.default)(document.body).on("shown.sendOutputHiddenState hidden.sendOutputHiddenState", "*", sendOutputHiddenState);
+    initialValues[".clientdata_pixelratio"] = pixelRatio();
+    (0, import_jquery22.default)(window).resize(function() {
+      inputs.setInput(".clientdata_pixelratio", pixelRatio());
+    });
+    initialValues[".clientdata_url_protocol"] = window.location.protocol;
+    initialValues[".clientdata_url_hostname"] = window.location.hostname;
+    initialValues[".clientdata_url_port"] = window.location.port;
+    initialValues[".clientdata_url_pathname"] = window.location.pathname;
+    initialValues[".clientdata_url_search"] = window.location.search;
+    (0, import_jquery22.default)(window).on("pushstate", function(e) {
+      inputs.setInput(".clientdata_url_search", window.location.search);
+    });
+    (0, import_jquery22.default)(window).on("popstate", function(e) {
+      inputs.setInput(".clientdata_url_search", window.location.search);
+    });
+    initialValues[".clientdata_url_hash_initial"] = window.location.hash;
+    initialValues[".clientdata_url_hash"] = window.location.hash;
+    (0, import_jquery22.default)(window).on("hashchange", function(e) {
+      inputs.setInput(".clientdata_url_hash", window.location.hash);
+    });
+    var singletonText = initialValues[".clientdata_singletons"] = (0, import_jquery22.default)('script[type="application/shiny-singletons"]').text();
+    registerNames(singletonText.split(/,/));
+    var dependencyText = (0, import_jquery22.default)('script[type="application/html-dependencies"]').text();
+    import_jquery22.default.each(dependencyText.split(/;/), function(i, depStr) {
+      var match = /\s*^(.+)\[(.+)\]\s*$/.exec(depStr);
+      if (match) {
+        registerDependency(match[1], match[2]);
+      }
+    });
+    inputsNoResend.reset(initialValues);
+    shinyapp.connect(initialValues);
+    (0, import_jquery22.default)(document).one("shiny:connected", function() {
+      initDeferredIframes();
+    });
+    window.console.log("Shiny version: ", Shiny2.version);
+  }
+  function initDeferredIframes() {
+    if (!window.Shiny || !window.Shiny.shinyapp || !window.Shiny.shinyapp.isConnected()) {
+      return;
+    }
+    (0, import_jquery22.default)(".shiny-frame-deferred").each(function(i, el) {
+      var $el = (0, import_jquery22.default)(el);
+      $el.removeClass("shiny-frame-deferred");
+      $el.attr("src", $el.attr("data-deferred-src"));
+      $el.attr("data-deferred-src", null);
+    });
   }
 
   // src/bindings/registry.ts

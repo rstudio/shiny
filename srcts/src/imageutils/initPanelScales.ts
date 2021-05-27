@@ -1,7 +1,7 @@
 // Map a value x from a domain to a range. If clip is true, clip it to the
 
+import { OffsetType } from "./findbox";
 import { mapValues } from "../utils";
-import { OffsetType, PanelType } from "./imageTypes";
 
 // range.
 function mapLinear(
@@ -51,6 +51,39 @@ function scaler1D(
     },
   };
 }
+
+type PanelType = {
+  domain: {
+    top: number;
+    bottom: number;
+    left: number;
+    right: number;
+  };
+  range: {
+    top: number;
+    bottom: number;
+    left: number;
+    right: number;
+  };
+  log?: {
+    x?: number;
+    y?: number;
+  };
+  mapping: Record<string, string>;
+  // eslint-disable-next-line camelcase
+  panel_vars?: Record<string, number | string>;
+
+  scaleDataToImg?: (
+    val: Record<string, number>,
+    clip?: boolean
+  ) => Record<string, number>;
+  scaleImgToData?: {
+    (val: OffsetType, clip?: boolean): OffsetType;
+    (val: Record<string, number>, clip?: boolean): Record<string, number>;
+  };
+
+  clipImg?: (offsetImg: { x: number; y: number }) => { x: number; y: number };
+};
 
 // Modify panel, adding scale and inverse-scale functions that take objects
 // like {x:1, y:3}, and also add clip function.

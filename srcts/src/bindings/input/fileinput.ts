@@ -3,6 +3,11 @@ import { InputBinding } from "./InputBinding";
 import { FileUploader } from "../../file/FileProcessor";
 import { shinyShinyApp } from "../../shiny/initedMethods";
 
+const _ZoneClass = {
+  ACTIVE: "shiny-file-input-active",
+  OVER: "shiny-file-input-over",
+};
+
 // NOTE On Safari, at least version 10.1.2, *if the developer console is open*,
 // setting the input's value will behave strangely because of a Safari bug. The
 // uploaded file's name will appear over the placeholder value, instead of
@@ -170,13 +175,9 @@ class FileInputBinding extends InputBinding {
   _disableDraghover(el: JQuery<HTMLElement>): JQuery<HTMLElement> {
     return $(el).off(".draghover");
   }
-  _ZoneClass: {
-    ACTIVE: "shiny-file-input-active";
-    OVER: "shiny-file-input-over";
-  };
   _enableDocumentEvents(): void {
     const $doc = $("html"),
-      { ACTIVE, OVER } = this._ZoneClass;
+      { ACTIVE, OVER } = _ZoneClass;
 
     this._enableDraghover($doc).on({
       "draghover:enter.draghover":
@@ -248,7 +249,7 @@ class FileInputBinding extends InputBinding {
     if ($fileInputs.length === 0) this._enableDocumentEvents();
     $fileInputs = $fileInputs.add(el);
     const $zone = this._zoneOf(el),
-      { OVER } = this._ZoneClass;
+      { OVER } = _ZoneClass;
 
     this._enableDraghover($zone).on({
       "draghover:enter.draghover": (e) => {
@@ -272,7 +273,7 @@ class FileInputBinding extends InputBinding {
     const $el = $(el),
       $zone = this._zoneOf(el);
 
-    $zone.removeClass(this._ZoneClass.OVER).removeClass(this._ZoneClass.ACTIVE);
+    $zone.removeClass(_ZoneClass.OVER).removeClass(_ZoneClass.ACTIVE);
 
     this._disableDraghover($zone);
     $el.off(".fileInputBinding");

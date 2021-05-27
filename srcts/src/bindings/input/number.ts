@@ -18,10 +18,11 @@ class NumberInputBinding extends TextInputBinding {
         return null;
     }
 
-    if (typeof numberVal == "number") {
-      if (!isNaN(numberVal))
-        // If valid Javascript number string, coerce to number
-        return +numberVal;
+    // If valid Javascript number string, coerce to number
+    const numberValue = +numberVal;
+
+    if (!isNaN(numberValue)) {
+      return numberValue;
     }
 
     return numberVal; // If other string like "1e6", send it unchanged

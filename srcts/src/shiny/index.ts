@@ -77,7 +77,9 @@ function setShiny(Shiny_: ShinyType): void {
   Shiny.$escape = $escape;
   Shiny.compareVersion = compareVersion;
   Shiny.inputBindings = inputBindings;
+  Shiny.InputBinding = InputBinding;
   Shiny.outputBindings = outputBindings;
+  Shiny.OutputBinding = OutputBinding;
   Shiny.resetBrush = resetBrush;
   Shiny.notifications = { show: showNotification, remove: removeNotification };
   Shiny.modal = { show: showModal, remove: removeModal };

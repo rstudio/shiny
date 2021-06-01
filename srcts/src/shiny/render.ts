@@ -27,7 +27,7 @@ type RenderWhereType = "beforeBegin" | "afterEnd" | "replace";
 function renderContent(
   el: bindScope,
   content: null | string | { html: any; deps?: any },
-  where?: RenderWhereType
+  where: RenderWhereType = "replace"
 ): void {
   if (where === "replace") {
     shinyUnbindAll(el);

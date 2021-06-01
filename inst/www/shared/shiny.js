@@ -9127,7 +9127,8 @@
       });
     }
   }
-  function renderContent(el, content, where) {
+  function renderContent(el, content) {
+    var where = arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : "replace";
     if (where === "replace") {
       shinyUnbindAll(el);
     }

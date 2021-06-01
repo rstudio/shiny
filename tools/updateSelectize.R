@@ -58,10 +58,11 @@ invisible(lapply(sass_files, function(f) {
 
 # Add rudimentary Bootstrap 5 support
 # https://github.com/selectize/selectize.js/issues/1584
-writeLines(
-  "$input-line-height-sm: $form-select-line-height !default;
-  @import 'selectize.bootstrap4';
-  .selectize-control{padding:0;}",
+writeLines(c(
+    "$input-line-height-sm: $form-select-line-height !default;",
+    "@import 'selectize.bootstrap4';",
+    ".selectize-control{padding:0;}"
+  ),
   file.path(target, "scss", "selectize.bootstrap5.scss")
 )
 

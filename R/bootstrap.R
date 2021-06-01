@@ -429,7 +429,7 @@ navbarPage <- function(title,
                        theme = NULL,
                        windowTitle = NA,
                        lang = NULL) {
-  bslib::page_navbar(
+  remove_first_class(bslib::page_navbar(
     ..., title = title, id = id, selected = selected,
     position = match.arg(position),
     header = header, footer = footer,
@@ -438,7 +438,7 @@ navbarPage <- function(title,
     theme = theme,
     window_title = windowTitle,
     lang = lang
-  )
+  ))
 }
 
 #' @param menuName A name that identifies this `navbarMenu`. This

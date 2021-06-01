@@ -20,7 +20,7 @@ async function buildFile(
 
   const onRebuild = function (error, result) {
     if (error) {
-      console.error("Watch build failed:", error);
+      console.error(printName, "watch build failed:\n", error);
     } else {
       console.log("√ -", printName, "-", new Date().toJSON());
     }

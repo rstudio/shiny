@@ -7,9 +7,8 @@ library(brio)
 ## First, download the main selectize.js and css
 ## -----------------------------------------------------------------
 
-version <- "0.13.3"
-tag <- paste0("v", version)
-url <- sprintf("https://github.com/selectize/selectize.js/archive/%s.zip", tag)
+version <- "efcd689fc1590bc085aee728bcda71373f6bd0ff"
+url <- sprintf("https://github.com/selectize/selectize.js/archive/%s.zip", version)
 zip <- file.path(tempdir(), paste0("selectize.js-", version, ".zip"))
 
 download.file(url, zip)

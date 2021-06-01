@@ -14,12 +14,22 @@ import { TextHTMLElement, TextInputBinding } from "./text";
 //   checked?: any;
 // }
 
+type TimeFormatter = (fmt: string, dt: Date) => string;
 type legacySliderType = {
   canStepNext: () => boolean;
   stepNext: () => void;
   resetToStart: () => void;
 };
+
+// MUST use window.strftime as the javascript dependency is dynamic
+// and could be needed after shiny has initialized.
 declare global {
+  interface Window {
+    strftime: {
+      utc: () => TimeFormatter;
+      timezone: (timezone: string) => TimeFormatter;
+    } & TimeFormatter;
+  }
   interface JQuery {
     // Backward compatible code for old-style jsliders (Shiny <= 0.10.2.2),
     slider: () => legacySliderType;
@@ -39,17 +49,17 @@ function getTypePrettifyer(
   timeFormat: string,
   timezone: string
 ) {
-  let timeFormatter: (fmt: string, dt: Date) => string;
+  let timeFormatter: TimeFormatter;
   let prettify: prettifyType;
 
   if (dataType === "date") {
-    timeFormatter = strftime.utc();
+    timeFormatter = window.strftime.utc();
     prettify = function (num) {
       return timeFormatter(timeFormat, new Date(num));
     };
   } else if (dataType === "datetime") {
-    if (timezone) timeFormatter = strftime.timezone(timezone);
-    else timeFormatter = strftime;
+    if (timezone) timeFormatter = window.strftime.timezone(timezone);
+    else timeFormatter = window.strftime;
 
     prettify = function (num) {
       return timeFormatter(timeFormat, new Date(num));

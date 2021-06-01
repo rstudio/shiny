@@ -46,7 +46,8 @@ async function buildFile(
     plugins: [
       globalsPlugin({
         jquery: "window.jQuery",
-        strftime: "window.strftime",
+        //// Loaded dynamically. MUST use `window.strftime` within code
+        // strftime: "window.strftime",
       }),
       babel(),
     ],

@@ -2120,13 +2120,6 @@
     }
   });
 
-  // globals:strftime
-  var require_strftime = __commonJS({
-    "globals:strftime": function(exports, module) {
-      module.exports = window.strftime;
-    }
-  });
-
   // node_modules/core-js/internals/same-value.js
   var require_same_value = __commonJS({
     "node_modules/core-js/internals/same-value.js": function(exports, module) {
@@ -5970,7 +5963,6 @@
   var import_es_regexp_exec2 = __toModule(require_es_regexp_exec());
   var import_es_array_iterator9 = __toModule(require_es_array_iterator());
   var import_jquery14 = __toModule(require_jquery());
-  var import_strftime = __toModule(require_strftime());
   function _typeof9(obj) {
     "@babel/helpers - typeof";
     if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
@@ -6077,15 +6069,15 @@
     var timeFormatter;
     var prettify;
     if (dataType === "date") {
-      timeFormatter = import_strftime.default.utc();
+      timeFormatter = window.strftime.utc();
       prettify = function prettify2(num) {
         return timeFormatter(timeFormat, new Date(num));
       };
     } else if (dataType === "datetime") {
       if (timezone)
-        timeFormatter = import_strftime.default.timezone(timezone);
+        timeFormatter = window.strftime.timezone(timezone);
       else
-        timeFormatter = import_strftime.default;
+        timeFormatter = window.strftime;
       prettify = function prettify2(num) {
         return timeFormatter(timeFormat, new Date(num));
       };
@@ -12647,9 +12639,9 @@
         });
         this.addMessageHandler("modal", function(message) {
           if (message.type === "show")
-            show(message.message);
+            show2(message.message);
           else if (message.type === "remove")
-            remove();
+            remove2();
           else
             throw "Unkown modal type: " + message.type;
         });

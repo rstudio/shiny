@@ -429,7 +429,7 @@ navbarPage <- function(title,
                        theme = NULL,
                        windowTitle = NA,
                        lang = NULL) {
-  bslib::navbar_page(
+  bslib::page_navbar(
     ..., title = title, id = id, selected = selected,
     position = match.arg(position),
     header = header, footer = footer,

@@ -3,11 +3,8 @@ import $ from "jquery";
 import { InputBinding, OutputBinding } from "../bindings";
 import { resetBrush } from "../imageutils/resetBrush";
 import { $escape, compareVersion } from "../utils";
-import {
-  show as showNotification,
-  remove as removeNotification,
-} from "./notifications";
-import { show as showModal, remove as removeModal } from "./modal";
+import { showNotification, removeNotification } from "./notifications";
+import { showModal, removeModal } from "./modal";
 import { showReconnectDialog, hideReconnectDialog } from "./reconnectDialog";
 import { renderContent, renderDependencies, renderHtml } from "./render";
 import { initShiny } from "./init";

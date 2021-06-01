@@ -162,4 +162,4 @@ function _clearRemovalCallback(id) {
   }
 }
 
-export { show, remove };
+export { show as showNotification, remove as removeNotification };

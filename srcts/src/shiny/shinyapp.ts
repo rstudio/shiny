@@ -14,11 +14,8 @@ import {
   shinyUnbindAll,
 } from "./initedMethods";
 import { isQt } from "../utils/browser";
-import {
-  show as showNotification,
-  remove as removeNotification,
-} from "./notifications";
-import { show as showModal, remove as removeModal } from "./notifications";
+import { showNotification, removeNotification } from "./notifications";
+import { showModal, removeModal } from "./modal";
 import { renderContent, renderHtml, RenderWhereType } from "./render";
 import { hideReconnectDialog, showReconnectDialog } from "./reconnectDialog";
 import { resetBrush } from "../imageutils/resetBrush";

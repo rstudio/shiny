@@ -64,4 +64,4 @@ function remove(): void {
   }
 }
 
-export { show, remove };
+export { show as showModal, remove as removeModal };

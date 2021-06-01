@@ -1,6 +1,6 @@
 import $ from "jquery";
 import { shinyShinyApp } from "./initedMethods";
-import { show as showNotification } from "./notifications";
+import { showNotification } from "./notifications";
 
 function initReactlog(): void {
   $(document).on("keydown", function (e) {

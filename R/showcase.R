@@ -83,7 +83,7 @@ navTabsHelper <- function(files, prefix = "") {
     with(tags,
       li(class=if (tolower(file) %in% c("app.r", "server.r")) "active" else "",
          a(href=paste("#", gsub(".", "_", file, fixed=TRUE), "_code", sep=""),
-           "data-toggle"="tab", paste0(prefix, file)))
+           "data-toggle"="tab", "data-bs-toggle"="tab", paste0(prefix, file)))
     )
   })
 }
@@ -92,7 +92,7 @@ navTabsDropdown <- function(files) {
   if (length(files) > 0) {
     with(tags,
       li(role="presentation", class="dropdown",
-        a(class="dropdown-toggle", `data-toggle`="dropdown", href="#",
+        a(class="dropdown-toggle", `data-toggle`="dropdown", `data-bs-toggle`="dropdown", href="#",
           role="button", `aria-haspopup`="true", `aria-expanded`="false",
           "www", span(class="caret")
         ),

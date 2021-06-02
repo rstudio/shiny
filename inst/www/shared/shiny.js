@@ -7195,7 +7195,7 @@
     }, {
       key: "getValue",
       value: function getValue(el) {
-        var anchor = isBS3() ? (0, import_jquery18.default)(el).find("li:not(.dropdown).active > a") : (0, import_jquery18.default)(el).find(".nav-link:not(.dropdown-toggle).active, .dropdown-menu > .dropdown-item.active");
+        var anchor = isBS3() ? (0, import_jquery18.default)(el).find("li:not(.dropdown).active > a") : (0, import_jquery18.default)(el).find(".nav-link:not(.dropdown-toggle).active, .dropdown-menu > > .dropdown-item.active");
         if (anchor.length === 1)
           return this._getTabName(anchor);
         return null;
@@ -7206,7 +7206,7 @@
         var self2 = this;
         var success = false;
         if (value) {
-          var anchors = isBS3() ? (0, import_jquery18.default)(el).find("li:not(.dropdown) > a") : (0, import_jquery18.default)(el).find(".nav-link:not(.dropdown-toggle), .dropdown-menu > .dropdown-item");
+          var anchors = isBS3() ? (0, import_jquery18.default)(el).find("li:not(.dropdown) > a") : (0, import_jquery18.default)(el).find(".nav-link:not(.dropdown-toggle), .dropdown-menu > > .dropdown-item");
           anchors.each(function() {
             if (self2._getTabName((0, import_jquery18.default)(this)) === value) {
               (0, import_jquery18.default)(this).tab("show");

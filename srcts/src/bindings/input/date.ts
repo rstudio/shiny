@@ -110,16 +110,20 @@ class DateInputBindingBase extends InputBinding {
   }
   // Given an unambiguous date string or a Date object, set the min (start) date.
   // null will unset. undefined will result in no change,
-  _setMin(el: HTMLElement, date: Date): void {
+  _setMin(el: HTMLElement, date: Date | undefined | null): void {
     if (date === undefined) return;
     if (date === null) {
       $(el).bsDatepicker("setStartDate", null);
       return;
     }
 
-    date = this._newDate(date);
+    const parsedDate = this._newDate(date);
+
     // If date parsing fails, do nothing
-    if (date === null) return;
+    if (parsedDate === null) return;
+
+    // (Assign back to date as a Date object)
+    date = parsedDate as Date;
 
     if (isNaN(date.valueOf())) return;
     // Workarounds for
@@ -152,9 +156,12 @@ class DateInputBindingBase extends InputBinding {
       return;
     }
 
-    date = this._newDate(date);
+    const parsedDate = this._newDate(date);
+
     // If date parsing fails, do nothing
-    if (date === null) return;
+    if (parsedDate === null) return;
+
+    date = parsedDate as Date;
 
     if (isNaN(date.valueOf())) return;
 
@@ -173,7 +180,7 @@ class DateInputBindingBase extends InputBinding {
   // Given a date string of format yyyy-mm-dd, return a Date object with
   // that date at 12AM UTC.
   // If date is a Date object, return it unchanged.
-  _newDate(date: Date | never): Date | null {
+  _newDate(date: Date | string | never): Date | void {
     if (date instanceof Date) return date;
     if (!date) return null;
 
@@ -226,8 +233,12 @@ class DateInputBinding extends DateInputBindingBase {
 
     const date = this._newDate(value);
 
+    if (date === null) {
+      return;
+    }
+
     // If date is invalid, do nothing
-    if (isNaN(date.valueOf())) return;
+    if (isNaN((date as Date).valueOf())) return;
 
     $(el).find("input").bsDatepicker("setUTCDate", date);
   }

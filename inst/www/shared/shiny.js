@@ -5822,9 +5822,10 @@
           (0, import_jquery13.default)(el).bsDatepicker("setStartDate", null);
           return;
         }
-        date = this._newDate(date);
-        if (date === null)
+        var parsedDate = this._newDate(date);
+        if (parsedDate === null)
           return;
+        date = parsedDate;
         if (isNaN(date.valueOf()))
           return;
         var curValue = (0, import_jquery13.default)(el).bsDatepicker("getUTCDate");
@@ -5844,9 +5845,10 @@
           (0, import_jquery13.default)(el).bsDatepicker("setEndDate", null);
           return;
         }
-        date = this._newDate(date);
-        if (date === null)
+        var parsedDate = this._newDate(date);
+        if (parsedDate === null)
           return;
+        date = parsedDate;
         if (isNaN(date.valueOf()))
           return;
         var curValue = (0, import_jquery13.default)(el).bsDatepicker("getUTCDate");
@@ -5910,6 +5912,9 @@
           return;
         }
         var date = this._newDate(value);
+        if (date === null) {
+          return;
+        }
         if (isNaN(date.valueOf()))
           return;
         (0, import_jquery13.default)(el).find("input").bsDatepicker("setUTCDate", date);

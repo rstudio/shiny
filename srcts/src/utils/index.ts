@@ -364,12 +364,7 @@ function getComputedLinkColor(el: HTMLElement): string {
 function isBS3(): boolean {
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
-  if (!$.fn.tab) {
-    return false;
-  }
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
-  return $.fn.tab.Constructor.VERSION.match(/^3\./);
+  return !window.bootstrap;
 }
 
 export {

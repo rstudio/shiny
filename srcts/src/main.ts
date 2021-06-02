@@ -5958,7 +5958,7 @@ function main(): void {
     },
     getValue: function (el) {
       // prettier-ignore
-      // For future... These selectors may not work for nested anchors
+      // The BS4+ selectors may not work as is for dropdowns within dropdowns, but BS3+ dropped support for those anyway
       let anchor = isBS3()
         ? $(el).find("li:not(.dropdown).active > a")
         : $(el).find(
@@ -5975,7 +5975,7 @@ function main(): void {
 
       if (value) {
         // prettier-ignore
-        // For future... These selectors may not work for nested anchors
+      // The BS4+ selectors may not work as is for dropdowns within dropdowns, but BS3+ dropped support for those anyway
         let anchors = isBS3()
           ? $(el).find("li:not(.dropdown) > a")
           : $(el).find(

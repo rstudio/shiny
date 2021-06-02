@@ -5975,7 +5975,7 @@ function main(): void {
 
       if (value) {
         // prettier-ignore
-      // The BS4+ selectors may not work as is for dropdowns within dropdowns, but BS3+ dropped support for those anyway
+        // The BS4+ selectors may not work as is for dropdowns within dropdowns, but BS3+ dropped support for those anyway
         let anchors = isBS3()
           ? $(el).find("li:not(.dropdown) > a")
           : $(el).find(

@@ -6191,7 +6191,7 @@
           return import_jquery6.default(scope).find("ul.nav.shiny-tab-input");
         },
         getValue: function getValue(el) {
-          var anchor = isBS3() ? import_jquery6.default(el).find("li:not(.dropdown).active > a") : import_jquery6.default(el).find(".nav-link:not(.dropdown-toggle).active, .dropdown-menu > .dropdown-item.active");
+          var anchor = isBS3() ? import_jquery6.default(el).find("li:not(.dropdown).active > a") : import_jquery6.default(el).find(".nav-link:not(.dropdown-toggle).active, .dropdown-menu .dropdown-item.active");
           if (anchor.length === 1)
             return this._getTabName(anchor);
           return null;
@@ -6200,7 +6200,7 @@
           var self2 = this;
           var success = false;
           if (value) {
-            var anchors = isBS3() ? import_jquery6.default(el).find("li:not(.dropdown) > a") : import_jquery6.default(el).find(".nav-link:not(.dropdown-toggle), .dropdown-menu > .dropdown-item");
+            var anchors = isBS3() ? import_jquery6.default(el).find("li:not(.dropdown) > a") : import_jquery6.default(el).find(".nav-link:not(.dropdown-toggle), .dropdown-menu .dropdown-item");
             anchors.each(function() {
               if (self2._getTabName(import_jquery6.default(this)) === value) {
                 import_jquery6.default(this).tab("show");
@@ -7843,7 +7843,7 @@
   var Shiny;
   function setShiny(Shiny_) {
     Shiny = Shiny_;
-    Shiny.version = "1.6.0.9000";
+    Shiny.version = "1.6.0.9001";
     Shiny.$escape = $escape;
     Shiny.compareVersion = compareVersion;
   }

@@ -9,16 +9,16 @@ shiny 1.6.0.9000
 
 ### New features and improvements
 
-* All uses of `list(...)` have been replaced with `rlang::list2(...)`. This means that you can use trailing `,` without error and use rlang's `!!!` operator to "splice" a list of argument values into `...`. We think this'll be particularly useful for passing a list of `tabPanel()` to their consumers (i.e., `tabsetPanel()`, `navbarPage()`, etc). For example, `tabs <- list(tabPanel("A", "a"), tabPanel("B", "b")); navbarPage(!!!tabs)`. (#3315 and #3328)
+* Bootstrap 5 support. (#3410 and rstudio/bslib#304)
+  * As explained [here](https://rstudio.github.io/bslib/index.html#basic-usage), to opt-in to Bootstrap 5, provide `bslib::bs_theme(version = 5)` to a page layout function with a `theme` argument (e.g., `fluidPage()`, `navbarPage()`, etc).
 
-* Numerous improvements tabset panels (i.e., `tabPanel()`, `navbarMenu()`, `tabsetPanel()`, `navbarPage()`, etc) (#3315):
-  * Closed #3322: `tabsetPanel()` and `navlistPanel()` gain `header`/`footer` arguments (inspired by `navbarPage()`'s already existing `header`/`footer`), making it easier to include content that should appear on every tab.
-  * Closed #3313 and #1823: More informative error when non-`tabPanel()`/`shiny.tag` objects are supplied to `...`.
-  * Closed #3321: New informative warning when `shiny.tag` object(s) are supplied to `...`. In this case we will continue to create an "empty" nav item and include the content on every tab, but the warning will mention the (new) `header`/`footer` args, which is likely what the user wants.
-  * Closed #3320: The HTML markup that `tabPanel()` et. al generate (for Bootstrap nav) is now Bootstrap 4+ compliant when used with `theme = bslib::bs_theme()`.
-  * Closed #1928: `NULL` values are now dropped instead of producing an empty nav item.
+* Closed #3322, #3313, #1823, #3321, #3320, #1928, and #2310: Various improvements to `navbarPage()`, `tabsetPanel()`, `tabPanel()`, `navbarMenu()`, etc. Also, these functions are now powered by the `{bslib}` package's new `nav()` API (consider using `{bslib}`'s API to create better looking and more fully featured navs). (#3388)
+
+* All uses of `list(...)` have been replaced with `rlang::list2(...)`. This means that you can use trailing `,` without error and use rlang's `!!!` operator to "splice" a list of argument values into `...`. We think this'll be particularly useful for passing a list of `tabPanel()` to their consumers (i.e., `tabsetPanel()`, `navbarPage()`, etc). For example, `tabs <- list(tabPanel("A", "a"), tabPanel("B", "b")); navbarPage(!!!tabs)`. (#3315 and #3328)
   
 * `icon(lib="fontawesome")` is now powered by the `{fontawesome}` package, which will make it easier to use the latest FA icons in the future (by updating the `{fontawesome}` package). (#3302)
+
+* `modalDialog()` gains support for `size = "xl"`. (#3410)
 
 ### Other improvements
 

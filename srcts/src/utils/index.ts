@@ -361,11 +361,8 @@ function getComputedLinkColor(el: HTMLElement): string {
 }
 
 function isBS3(): boolean {
-  if (!$.fn.tab) {
-    return false;
-  }
-  // @ts-expect-error; TODO-barret; IDK how to tell TypeScript that `.Constructor` might exist
-  return $.fn.tab.Constructor.VERSION.match(/^3\./);
+  // @ts-expect-error; Check if `window.bootstrap` exists
+  return !window.bootstrap;
 }
 
 export {

@@ -3344,46 +3344,6 @@
     ];
   }, UNSUPPORTED_Y);
 
-  // node_modules/core-js/modules/es.string.match.js
-  "use strict";
-  var fixRegExpWellKnownSymbolLogic3 = require_fix_regexp_well_known_symbol_logic();
-  var anObject4 = require_an_object();
-  var toLength6 = require_to_length();
-  var requireObjectCoercible3 = require_require_object_coercible();
-  var advanceStringIndex3 = require_advance_string_index();
-  var regExpExec2 = require_regexp_exec_abstract();
-  fixRegExpWellKnownSymbolLogic3("match", 1, function(MATCH, nativeMatch, maybeCallNative) {
-    return [
-      function match(regexp) {
-        var O = requireObjectCoercible3(this);
-        var matcher = regexp == void 0 ? void 0 : regexp[MATCH];
-        return matcher !== void 0 ? matcher.call(regexp, O) : new RegExp(regexp)[MATCH](String(O));
-      },
-      function(regexp) {
-        var res = maybeCallNative(nativeMatch, regexp, this);
-        if (res.done)
-          return res.value;
-        var rx = anObject4(regexp);
-        var S = String(this);
-        if (!rx.global)
-          return regExpExec2(rx, S);
-        var fullUnicode = rx.unicode;
-        rx.lastIndex = 0;
-        var A = [];
-        var n = 0;
-        var result;
-        while ((result = regExpExec2(rx, S)) !== null) {
-          var matchStr = String(result[0]);
-          A[n] = matchStr;
-          if (matchStr === "")
-            rx.lastIndex = advanceStringIndex3(S, toLength6(rx.lastIndex), fullUnicode);
-          n++;
-        }
-        return n === 0 ? null : A;
-      }
-    ];
-  });
-
   // src/utils/index.ts
   var import_jquery5 = __toModule(require_jquery());
 
@@ -3664,10 +3624,7 @@
     return linkColor;
   }
   function isBS3() {
-    if (!import_jquery5.default.fn.tab) {
-      return false;
-    }
-    return import_jquery5.default.fn.tab.Constructor.VERSION.match(/^3\./);
+    return !window.bootstrap;
   }
 
   // src/bindings/registry.ts
@@ -3896,7 +3853,7 @@
   var $17 = require_export();
   var getBuiltIn = require_get_built_in();
   var aFunction = require_a_function();
-  var anObject5 = require_an_object();
+  var anObject4 = require_an_object();
   var isObject3 = require_is_object();
   var create = require_object_create();
   var bind = require_function_bind();
@@ -3916,7 +3873,7 @@
   $17({ target: "Reflect", stat: true, forced: FORCED3, sham: FORCED3 }, {
     construct: function construct(Target, args) {
       aFunction(Target);
-      anObject5(args);
+      anObject4(args);
       var newTarget = arguments.length < 3 ? Target : aFunction(arguments[2]);
       if (ARGS_BUG && !NEW_TARGET_BUG)
         return nativeConstruct(Target, args, newTarget);
@@ -3957,7 +3914,7 @@
   var has = require_has();
   var isArray3 = require_is_array();
   var isObject4 = require_is_object();
-  var anObject6 = require_an_object();
+  var anObject5 = require_an_object();
   var toObject5 = require_to_object();
   var toIndexedObject2 = require_to_indexed_object();
   var toPrimitive = require_to_primitive();
@@ -4036,9 +3993,9 @@
   var $defineProperty = function defineProperty2(O, P, Attributes) {
     if (O === ObjectPrototype)
       $defineProperty(ObjectPrototypeSymbols, P, Attributes);
-    anObject6(O);
+    anObject5(O);
     var key = toPrimitive(P, true);
-    anObject6(Attributes);
+    anObject5(Attributes);
     if (has(AllSymbols, key)) {
       if (!Attributes.enumerable) {
         if (!has(O, HIDDEN))
@@ -4054,7 +4011,7 @@
     return nativeDefineProperty(O, key, Attributes);
   };
   var $defineProperties = function defineProperties(O, Properties) {
-    anObject6(O);
+    anObject5(O);
     var properties = toIndexedObject2(Properties);
     var keys2 = objectKeys(properties).concat($getOwnPropertySymbols(properties));
     $forEach(keys2, function(key) {
@@ -4795,14 +4752,14 @@
   // node_modules/core-js/modules/es.reflect.get.js
   var $23 = require_export();
   var isObject6 = require_is_object();
-  var anObject7 = require_an_object();
+  var anObject6 = require_an_object();
   var has4 = require_has();
   var getOwnPropertyDescriptorModule2 = require_object_get_own_property_descriptor();
   var getPrototypeOf2 = require_object_get_prototype_of();
   function get(target, propertyKey) {
     var receiver = arguments.length < 3 ? target : arguments[2];
     var descriptor, prototype;
-    if (anObject7(target) === receiver)
+    if (anObject6(target) === receiver)
       return target[propertyKey];
     if (descriptor = getOwnPropertyDescriptorModule2.f(target, propertyKey))
       return has4(descriptor, "value") ? descriptor.value : descriptor.get === void 0 ? void 0 : descriptor.get.call(receiver);
@@ -7200,7 +7157,7 @@
     }, {
       key: "getValue",
       value: function getValue(el) {
-        var anchor = isBS3() ? (0, import_jquery18.default)(el).find("li:not(.dropdown).active > a") : (0, import_jquery18.default)(el).find(".nav-link:not(.dropdown-toggle).active, .dropdown-menu > > .dropdown-item.active");
+        var anchor = isBS3() ? (0, import_jquery18.default)(el).find("li:not(.dropdown).active > a") : (0, import_jquery18.default)(el).find(".nav-link:not(.dropdown-toggle).active, .dropdown-menu .dropdown-item.active");
         if (anchor.length === 1)
           return this._getTabName(anchor);
         return null;
@@ -7211,7 +7168,7 @@
         var self2 = this;
         var success = false;
         if (value) {
-          var anchors = isBS3() ? (0, import_jquery18.default)(el).find("li:not(.dropdown) > a") : (0, import_jquery18.default)(el).find(".nav-link:not(.dropdown-toggle), .dropdown-menu > > .dropdown-item");
+          var anchors = isBS3() ? (0, import_jquery18.default)(el).find("li:not(.dropdown) > a") : (0, import_jquery18.default)(el).find(".nav-link:not(.dropdown-toggle), .dropdown-menu .dropdown-item");
           anchors.each(function() {
             if (self2._getTabName((0, import_jquery18.default)(this)) === value) {
               (0, import_jquery18.default)(this).tab("show");
@@ -8394,15 +8351,15 @@
 
   // node_modules/core-js/modules/es.string.search.js
   "use strict";
-  var fixRegExpWellKnownSymbolLogic4 = require_fix_regexp_well_known_symbol_logic();
-  var anObject8 = require_an_object();
-  var requireObjectCoercible4 = require_require_object_coercible();
+  var fixRegExpWellKnownSymbolLogic3 = require_fix_regexp_well_known_symbol_logic();
+  var anObject7 = require_an_object();
+  var requireObjectCoercible3 = require_require_object_coercible();
   var sameValue = require_same_value();
-  var regExpExec3 = require_regexp_exec_abstract();
-  fixRegExpWellKnownSymbolLogic4("search", 1, function(SEARCH, nativeSearch, maybeCallNative) {
+  var regExpExec2 = require_regexp_exec_abstract();
+  fixRegExpWellKnownSymbolLogic3("search", 1, function(SEARCH, nativeSearch, maybeCallNative) {
     return [
       function search(regexp) {
-        var O = requireObjectCoercible4(this);
+        var O = requireObjectCoercible3(this);
         var searcher = regexp == void 0 ? void 0 : regexp[SEARCH];
         return searcher !== void 0 ? searcher.call(regexp, O) : new RegExp(regexp)[SEARCH](String(O));
       },
@@ -8410,12 +8367,12 @@
         var res = maybeCallNative(nativeSearch, regexp, this);
         if (res.done)
           return res.value;
-        var rx = anObject8(regexp);
+        var rx = anObject7(regexp);
         var S = String(this);
         var previousLastIndex = rx.lastIndex;
         if (!sameValue(previousLastIndex, 0))
           rx.lastIndex = 0;
-        var result = regExpExec3(rx, S);
+        var result = regExpExec2(rx, S);
         if (!sameValue(rx.lastIndex, previousLastIndex))
           rx.lastIndex = previousLastIndex;
         return result === null ? -1 : result.index;
@@ -10677,6 +10634,48 @@
 
   // src/shiny/notifications.ts
   var import_es_regexp_exec7 = __toModule(require_es_regexp_exec());
+
+  // node_modules/core-js/modules/es.string.match.js
+  "use strict";
+  var fixRegExpWellKnownSymbolLogic4 = require_fix_regexp_well_known_symbol_logic();
+  var anObject8 = require_an_object();
+  var toLength6 = require_to_length();
+  var requireObjectCoercible4 = require_require_object_coercible();
+  var advanceStringIndex3 = require_advance_string_index();
+  var regExpExec3 = require_regexp_exec_abstract();
+  fixRegExpWellKnownSymbolLogic4("match", 1, function(MATCH, nativeMatch, maybeCallNative) {
+    return [
+      function match(regexp) {
+        var O = requireObjectCoercible4(this);
+        var matcher = regexp == void 0 ? void 0 : regexp[MATCH];
+        return matcher !== void 0 ? matcher.call(regexp, O) : new RegExp(regexp)[MATCH](String(O));
+      },
+      function(regexp) {
+        var res = maybeCallNative(nativeMatch, regexp, this);
+        if (res.done)
+          return res.value;
+        var rx = anObject8(regexp);
+        var S = String(this);
+        if (!rx.global)
+          return regExpExec3(rx, S);
+        var fullUnicode = rx.unicode;
+        rx.lastIndex = 0;
+        var A = [];
+        var n = 0;
+        var result;
+        while ((result = regExpExec3(rx, S)) !== null) {
+          var matchStr = String(result[0]);
+          A[n] = matchStr;
+          if (matchStr === "")
+            rx.lastIndex = advanceStringIndex3(S, toLength6(rx.lastIndex), fullUnicode);
+          n++;
+        }
+        return n === 0 ? null : A;
+      }
+    ];
+  });
+
+  // src/shiny/notifications.ts
   var import_jquery34 = __toModule(require_jquery());
   var fadeDuration = 250;
   function show() {
@@ -13274,7 +13273,7 @@
   var Shiny;
   function setShiny(Shiny_) {
     Shiny = Shiny_;
-    Shiny.version = "1.6.0.9020";
+    Shiny.version = "1.6.0.9021";
     var _initInputBindings = initInputBindings(), inputBindings = _initInputBindings.inputBindings, fileInputBinding = _initInputBindings.fileInputBinding;
     var _initOutputBindings = initOutputBindings(), outputBindings = _initOutputBindings.outputBindings;
     setFileInputBinding(fileInputBinding);

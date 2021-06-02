@@ -79,6 +79,17 @@ scss <- readLines(scss_file)
 scss <- scss[!grepl('@import\\s+"\\.\\./bootstrap', scss)]
 writeLines(scss, scss_file)
 
+# Support Bootstrap 5 as well
+# https://github.com/selectize/selectize.js/issues/1584
+writeLines(
+  c(
+    "$input-line-height-sm: $form-select-line-height !default;",
+    "@import 'selectize.bootstrap4';",
+    ".selectize-control{padding:0;}"
+  ),
+  file.path(target, "selectize.bootstrap5.scss")
+)
+
 ## -----------------------------------------------------------------
 ## Fourth, download Bootstrap 3 SASS port
 ## https://github.com/herschel666/selectize-scss
@@ -120,7 +131,7 @@ for (patch in list.files(patch_dir, full.names = TRUE)) {
 }
 
 # =============================================================================
-# Generate minified js
+# Add versions to files
 # =============================================================================
 writeLines(
   c(

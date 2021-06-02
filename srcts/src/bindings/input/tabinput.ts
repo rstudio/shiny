@@ -8,10 +8,11 @@ class BootstrapTabInputBinding extends InputBinding {
   }
   getValue(el: HTMLElement): string | null {
     // prettier-ignore
+    // The BS4+ selectors may not work as is for dropdowns within dropdowns, but BS3+ dropped support for those anyway
     const anchor = isBS3()
       ? $(el).find("li:not(.dropdown).active > a")
       : $(el).find(
-        ".nav-link:not(.dropdown-toggle).active, .dropdown-menu > > .dropdown-item.active"
+        ".nav-link:not(.dropdown-toggle).active, .dropdown-menu .dropdown-item.active"
       );
 
     if (anchor.length === 1) return this._getTabName(anchor);
@@ -26,10 +27,11 @@ class BootstrapTabInputBinding extends InputBinding {
 
     if (value) {
       // prettier-ignore
+      // The BS4+ selectors may not work as is for dropdowns within dropdowns, but BS3+ dropped support for those anyway
       const anchors = isBS3()
         ? $(el).find("li:not(.dropdown) > a")
         : $(el).find(
-          ".nav-link:not(.dropdown-toggle), .dropdown-menu > > .dropdown-item"
+          ".nav-link:not(.dropdown-toggle), .dropdown-menu .dropdown-item"
         );
 
       anchors.each(function () {

@@ -74,10 +74,9 @@ class InputBinding {
     el;
     data;
   }
-  getState(el: HTMLElement, data: any): any {
+  getState(el: HTMLElement): any {
     throw "Not implemented";
     el;
-    data;
   }
 
   getRatePolicy(

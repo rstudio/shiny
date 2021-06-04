@@ -2,6 +2,7 @@ import $ from "jquery";
 import { InputBinding } from "./InputBinding";
 import { hasOwnProperty, isBS3 } from "../../utils";
 
+type TabInputReceiveMessageData = { value?: string };
 class BootstrapTabInputBinding extends InputBinding {
   find(scope: HTMLElement): JQuery<HTMLElement> {
     return $(scope).find("ul.nav.shiny-tab-input");
@@ -52,7 +53,7 @@ class BootstrapTabInputBinding extends InputBinding {
   getState(el: HTMLElement): { value: string | null } {
     return { value: this.getValue(el) };
   }
-  receiveMessage(el: HTMLElement, data: { value?: string }): void {
+  receiveMessage(el: HTMLElement, data: TabInputReceiveMessageData): void {
     if (hasOwnProperty(data, "value")) this.setValue(el, data.value);
     $(el).trigger("change");
   }
@@ -74,3 +75,4 @@ class BootstrapTabInputBinding extends InputBinding {
 }
 
 export { BootstrapTabInputBinding };
+export type { TabInputReceiveMessageData };

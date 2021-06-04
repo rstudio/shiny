@@ -9,6 +9,12 @@ type ValueLabelObject = {
   label: string;
 };
 
+type RadioReceiveMessageData = {
+  value?: string;
+  options?: Array<ValueLabelObject>;
+  label: string;
+};
+
 class RadioInputBinding extends InputBinding {
   find(scope: HTMLElement): JQuery<HTMLElement> {
     return $(scope).find(".shiny-input-radiogroup");
@@ -63,14 +69,7 @@ class RadioInputBinding extends InputBinding {
       options: options,
     };
   }
-  receiveMessage(
-    el: RadioHTMLElement,
-    data: {
-      value?: string;
-      options?: Array<ValueLabelObject>;
-      label: string;
-    }
-  ): void {
+  receiveMessage(el: RadioHTMLElement, data: RadioReceiveMessageData): void {
     const $el = $(el);
     // This will replace all the options
 
@@ -126,3 +125,4 @@ class RadioInputBinding extends InputBinding {
 }
 
 export { RadioInputBinding };
+export type { RadioReceiveMessageData };

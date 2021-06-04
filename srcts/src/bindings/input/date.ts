@@ -16,6 +16,13 @@ declare global {
   }
 }
 
+type DateReceiveMessageData = {
+  label: string;
+  min?: Date;
+  max?: Date;
+  value?: Date;
+};
+
 class DateInputBindingBase extends InputBinding {
   find(scope: HTMLElement): JQuery<HTMLElement> {
     return $(scope).find(".shiny-date-input");
@@ -283,10 +290,7 @@ class DateInputBinding extends DateInputBindingBase {
       startview: startview,
     };
   }
-  receiveMessage(
-    el: HTMLElement,
-    data: { label: string; min?: Date; max?: Date; value?: Date }
-  ): void {
+  receiveMessage(el: HTMLElement, data: DateReceiveMessageData): void {
     const $input = $(el).find("input");
 
     updateLabel(data.label, this._getLabelNode(el));
@@ -305,3 +309,4 @@ class DateInputBinding extends DateInputBindingBase {
 }
 
 export { DateInputBinding, DateInputBindingBase };
+export type { DateReceiveMessageData };

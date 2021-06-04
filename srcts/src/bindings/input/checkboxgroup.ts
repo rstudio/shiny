@@ -9,6 +9,11 @@ type ValueLabelObject = {
   value: any;
   label: string;
 };
+type CheckboxGroupReceiveMessageData = {
+  options?: any;
+  value?: any;
+  label: string;
+};
 
 class CheckboxGroupInputBinding extends InputBinding {
   find(scope: HTMLElement): JQuery<HTMLElement> {
@@ -75,7 +80,7 @@ class CheckboxGroupInputBinding extends InputBinding {
   }
   receiveMessage(
     el: CheckboxGroupHTMLElement,
-    data: { options?: any; value?: any; label: string }
+    data: CheckboxGroupReceiveMessageData
   ): void {
     const $el = $(el);
 
@@ -133,3 +138,4 @@ class CheckboxGroupInputBinding extends InputBinding {
 }
 
 export { CheckboxGroupInputBinding };
+export type { CheckboxGroupReceiveMessageData };

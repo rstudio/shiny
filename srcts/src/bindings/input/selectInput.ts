@@ -5,6 +5,14 @@ import { indirectEval } from "../../utils/eval";
 
 type SelectHTMLElement = HTMLSelectElement & { nonempty: boolean };
 
+type SelectInputReceiveMessageData = {
+  label: string;
+  options?: any;
+  config?: any;
+  url?: string;
+  value?: string;
+};
+
 class SelectInputBinding extends InputBinding {
   find(scope: HTMLElement): JQuery<HTMLElement> {
     return $(scope).find("select");
@@ -65,13 +73,7 @@ class SelectInputBinding extends InputBinding {
   }
   receiveMessage(
     el: SelectHTMLElement,
-    data: {
-      label: string;
-      options?: any;
-      config?: any;
-      url?: string;
-      value?: string;
-    }
+    data: SelectInputReceiveMessageData
   ): void {
     const $el = $(el);
     let selectize;
@@ -265,3 +267,4 @@ class SelectInputBinding extends InputBinding {
 }
 
 export { SelectInputBinding };
+export type { SelectInputReceiveMessageData };

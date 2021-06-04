@@ -1,4 +1,7 @@
-import { InputBinding } from "../bindings/input/InputBinding";
+import {
+  InputBinding,
+  receiveMessageDataType,
+} from "../bindings/input/InputBinding";
 import { OutputBindingAdapter } from "../bindings/output_adapter";
 import { priorityType } from "../inputPolicies/InputPolicy";
 
@@ -14,7 +17,7 @@ interface ShinyEventInputChanged extends ShinyEventCommon {
   priority: priorityType;
 }
 interface ShinyEventUpdateInput extends ShinyEventCommon {
-  message: any;
+  message: receiveMessageDataType;
   binding: InputBinding;
 }
 interface ShinyEventValue extends ShinyEventCommon {

@@ -21,6 +21,14 @@ type legacySliderType = {
   resetToStart: () => void;
 };
 
+type SliderReceiveMessageData = {
+  label: string;
+  value?: Array<string | number> | string | number;
+  min?: number;
+  max?: number;
+  step?: number;
+};
+
 // MUST use window.strftime as the javascript dependency is dynamic
 // and could be needed after shiny has initialized.
 declare global {
@@ -154,16 +162,7 @@ class SliderInputBinding extends TextInputBinding {
   unsubscribe(el: HTMLElement): void {
     $(el).off(".sliderInputBinding");
   }
-  receiveMessage(
-    el: HTMLElement,
-    data: {
-      label: string;
-      value?: Array<string | number> | string | number;
-      min?: number;
-      max?: number;
-      step?: number;
-    }
-  ): void {
+  receiveMessage(el: HTMLElement, data: SliderReceiveMessageData): void {
     const $el = $(el);
     const slider = $el.data("ionRangeSlider");
     const msg: {
@@ -389,3 +388,4 @@ $(document).on("click", ".slider-animate-button", function (evt: Event) {
 });
 
 export { SliderInputBinding };
+export type { SliderReceiveMessageData };

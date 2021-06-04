@@ -4,6 +4,8 @@ import { hasOwnProperty } from "../../utils";
 
 type CheckedHTMLElement = HTMLInputElement;
 
+type CheckboxReceiveMessageData = { value?: any; label?: string };
+
 class CheckboxInputBinding extends InputBinding {
   find(scope: HTMLElement): JQuery<HTMLElement> {
     return $(scope).find('input[type="checkbox"]');
@@ -30,7 +32,7 @@ class CheckboxInputBinding extends InputBinding {
   }
   receiveMessage(
     el: CheckedHTMLElement,
-    data: { value?: any; label?: string }
+    data: CheckboxReceiveMessageData
   ): void {
     if (hasOwnProperty(data, "value")) el.checked = data.value;
 
@@ -43,5 +45,5 @@ class CheckboxInputBinding extends InputBinding {
   }
 }
 
-export type { CheckedHTMLElement };
 export { CheckboxInputBinding };
+export type { CheckedHTMLElement, CheckboxReceiveMessageData };

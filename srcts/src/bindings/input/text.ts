@@ -8,6 +8,7 @@ import { InputBinding } from "./InputBinding";
 // }
 
 type TextHTMLElement = HTMLInputElement;
+type TextReceiveMessageData = { label: string; value?: any; placeholder?: any };
 
 class TextInputBinding extends InputBinding {
   find(scope: HTMLElement): JQuery<HTMLElement> {
@@ -54,10 +55,7 @@ class TextInputBinding extends InputBinding {
     $(el).off(".textInputBinding");
   }
 
-  receiveMessage(
-    el: TextHTMLElement,
-    data: { label: string; value?: any; placeholder?: any }
-  ): void {
+  receiveMessage(el: TextHTMLElement, data: TextReceiveMessageData): void {
     if (hasOwnProperty(data, "value")) this.setValue(el, data.value);
 
     updateLabel(data.label, this._getLabelNode(el));
@@ -96,4 +94,4 @@ class TextInputBinding extends InputBinding {
 
 export { TextInputBinding };
 
-export type { TextHTMLElement };
+export type { TextHTMLElement, TextReceiveMessageData };

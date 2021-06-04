@@ -3,6 +3,8 @@ import { InputBinding } from "./InputBinding";
 
 import { hasOwnProperty } from "../../utils";
 
+type ActionButtonReceiveMessageData = { label?: string; icon?: string };
+
 class ActionButtonInputBinding extends InputBinding {
   find(scope: HTMLElement): JQuery<HTMLElement> {
     return $(scope).find(".action-button");
@@ -34,10 +36,7 @@ class ActionButtonInputBinding extends InputBinding {
   getState(el: HTMLElement): { value: number } {
     return { value: this.getValue(el) };
   }
-  receiveMessage(
-    el: HTMLElement,
-    data: { label?: string; icon?: string }
-  ): void {
+  receiveMessage(el: HTMLElement, data: ActionButtonReceiveMessageData): void {
     const $el = $(el);
 
     // retrieve current label and icon
@@ -79,3 +78,4 @@ $(document).on("click", "a.action-button", function (e) {
 });
 
 export { ActionButtonInputBinding };
+export type { ActionButtonReceiveMessageData };

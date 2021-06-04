@@ -4,6 +4,14 @@ import { TextInputBinding } from "./text";
 
 type NumberHTMLElement = HTMLInputElement;
 
+type NumberReceiveMessageData = {
+  label: string;
+  value?: any;
+  min?: any;
+  max?: any;
+  step?: any;
+};
+
 class NumberInputBinding extends TextInputBinding {
   find(scope: HTMLElement): JQuery<HTMLElement> {
     return $(scope).find('input[type="number"]');
@@ -34,10 +42,7 @@ class NumberInputBinding extends TextInputBinding {
     return "shiny.number";
     el;
   }
-  receiveMessage(
-    el: NumberHTMLElement,
-    data: { label: string; value?: any; min?: any; max?: any; step?: any }
-  ): void {
+  receiveMessage(el: NumberHTMLElement, data: NumberReceiveMessageData): void {
     if (hasOwnProperty(data, "value")) el.value = data.value;
     if (hasOwnProperty(data, "min")) el.min = data.min;
     if (hasOwnProperty(data, "max")) el.max = data.max;
@@ -66,3 +71,4 @@ class NumberInputBinding extends TextInputBinding {
 }
 
 export { NumberInputBinding };
+export type { NumberReceiveMessageData };

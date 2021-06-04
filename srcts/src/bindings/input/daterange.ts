@@ -8,6 +8,13 @@ import {
 } from "../../utils";
 import { DateInputBindingBase } from "./date";
 
+type DateRangeReceiveMessageData = {
+  label: string;
+  min?: Date;
+  max?: Date;
+  value?: { start?: Date; end?: Date };
+};
+
 class DateRangeInputBinding extends DateInputBindingBase {
   find(scope: HTMLElement): JQuery<HTMLElement> {
     return $(scope).find(".shiny-date-range-input");
@@ -96,15 +103,7 @@ class DateRangeInputBinding extends DateInputBindingBase {
       startview: startview,
     };
   }
-  receiveMessage(
-    el: HTMLElement,
-    data: {
-      label: string;
-      min?: Date;
-      max?: Date;
-      value?: { start?: Date; end?: Date };
-    }
-  ): void {
+  receiveMessage(el: HTMLElement, data: DateRangeReceiveMessageData): void {
     const $el = $(el);
     const $inputs = $el.find("input");
     const $startinput = $inputs.eq(0);
@@ -183,3 +182,4 @@ class DateRangeInputBinding extends DateInputBindingBase {
 }
 
 export { DateRangeInputBinding };
+export type { DateRangeReceiveMessageData };

@@ -2693,6 +2693,10 @@
           var $overlay = import_jquery6.default("#shiny-disconnected-overlay");
           if ($overlay.length === 0) {
             import_jquery6.default(document.body).append('<div id="shiny-disconnected-overlay"></div>');
+            var $overlayTemplate = import_jquery6.default("#shiny-disconnected-overlay-template");
+            if ($overlayTemplate.length !== 0) {
+              import_jquery6.default("#shiny-disconnected-overlay").append($overlayTemplate.contents().clone(true));
+            }
           }
           if (this.$allowReconnect === true && this.$socket.allowReconnect === true || this.$allowReconnect === "force") {
             var delay = reconnectDelay.next();

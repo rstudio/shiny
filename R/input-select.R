@@ -208,6 +208,15 @@ selectizeIt <- function(inputId, select, options, nonempty = FALSE) {
     options$plugins <- c(options$plugins, list('selectize-plugin-a11y'))
   }
 
+  # to prevent clipping of the selectize drop-down we set the dropdownParent
+  # to "body". This might be necessary if e.g. overflow-x: scroll is set
+  # on it's container, which forces overflow-y to 'auto' (as per
+  # https://developer.mozilla.org/en-US/docs/Web/CSS/overflow-y). Discussion
+  # of usage here: https://github.com/selectize/selectize.js/issues/192
+  if (is.null(options$dropdownParent)) {
+    options$dropdownParent <- "body"
+  }
+
   res <- checkAsIs(options)
 
   deps <- list(selectizeDependency())

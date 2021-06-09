@@ -5,7 +5,7 @@ import { $escape, hasOwnProperty, updateLabel } from "../../utils";
 type RadioHTMLElement = HTMLInputElement;
 
 type ValueLabelObject = {
-  value: any;
+  value: HTMLInputElement["value"];
   label: string;
 };
 

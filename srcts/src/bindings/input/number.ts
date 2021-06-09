@@ -6,10 +6,10 @@ type NumberHTMLElement = HTMLInputElement;
 
 type NumberReceiveMessageData = {
   label: string;
-  value?: any;
-  min?: any;
-  max?: any;
-  step?: any;
+  value?: string | null;
+  min?: string | null;
+  max?: string | null;
+  step?: string | null;
 };
 
 class NumberInputBinding extends TextInputBindingBase {

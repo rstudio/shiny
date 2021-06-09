@@ -47,19 +47,8 @@
 
 # Round #2
 * Convert registered bindings
-  * input
-    * actionbutton
-    * checkbox
-    * checkboxgroup
-    * date
-    * number
-    * password
-    * radio
-    * selectInput
-    * slider
-    * text
-    * textarea
-  * output
+  * √ Input bindings
+  * √ Output bindings
 * Add default value to `subscribe(callback)` callback function of `false`. B/c if the value was not provided, it was not truthy, therefore equivalent to `false`.
   * √ radio
   * √ checkboxgroup
@@ -80,8 +69,8 @@
 * Convert usage of `+x` to `Number(x)`
   * https://stackoverflow.com/a/15872631/591574
   * √ slider.getValue()
-* Adjust tabinput.ts `setValue()` to return either `false | void`, not `false | true`.
   * √ number.getValue()
+* √ Adjust tabinput.ts `setValue()` to return either `false | void`, not `false | true`.
   * What matters is that `false` is returned, or nothing is returned. Replaced `return true;` with `return;`
 * Questions
   * Why does `receiveMessage(data)` sometimes have a `label`?
@@ -93,8 +82,8 @@
 * Use --strictNullChecks in tsconfig.json
 
 * Make `_*()` methods `private *()`
-* Each _file_ will be pulled out as possible into smaller files in separate PRs
-* Convert `FileProcessor` to a true class definition
+* √ Each _file_ will be pulled out as possible into smaller files in separate PRs
+* √ Convert `FileProcessor` to a true class definition
 * Break up `./utils` into many files
   * Remove any `: any` types
 * Make `@typescript-eslint/explicit-module-boundary-types` an error

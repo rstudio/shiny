@@ -193,6 +193,7 @@ class FileUploader extends FileProcessor {
         size: file.size,
         type: file.type,
       };
+      i;
     });
 
     // Trigger shiny:inputchanged. Unlike a normal shiny:inputchanged event,

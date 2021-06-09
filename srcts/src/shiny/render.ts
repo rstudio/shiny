@@ -118,6 +118,7 @@ function renderDependency(dep) {
       const name = Object.keys(obj)[0];
 
       return $("<meta>").attr("name", name).attr("content", obj[name]);
+      idx;
     });
 
     $head.append(metas);

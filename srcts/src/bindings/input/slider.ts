@@ -1,5 +1,4 @@
 import $ from "jquery";
-import strftime from "strftime";
 // import { NameValueHTMLElement } from ".";
 import {
   formatDateUTC,

@@ -3784,10 +3784,9 @@
       }
     }, {
       key: "getState",
-      value: function getState(el, data) {
+      value: function getState(el) {
         throw "Not implemented";
         el;
-        data;
       }
     }, {
       key: "getRatePolicy",

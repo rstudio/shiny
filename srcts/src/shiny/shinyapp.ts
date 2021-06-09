@@ -37,6 +37,12 @@ type ShinyWebSocket = WebSocket & {
   allowReconnect?: boolean;
 };
 
+type errorsMessageValue = {
+  message: string;
+  call: Array<string>;
+  type?: Array<string>;
+};
+
 //// 2021/03 - TypeScript conversion note:
 // These four variables were moved from being internally defined to being defined globally within the file.
 // Before the TypeScript conversion, the values where attached to `window.Shiny.addCustomMessageHandler()`.
@@ -101,7 +107,7 @@ class ShinyApp {
 
   // Cached values/errors
   $values = {};
-  $errors = {};
+  $errors: Record<string, errorsMessageValue> = {};
 
   // Conditional bindings (show/hide element based on expression)
   $conditionals = {};
@@ -412,7 +418,7 @@ class ShinyApp {
     }
   }
 
-  receiveError(name: string, error: string): void {
+  receiveError(name: string, error: errorsMessageValue): void {
     if (this.$errors[name] === error) return;
 
     this.$errors[name] = error;
@@ -637,24 +643,20 @@ class ShinyApp {
   // Message handlers =====================================================
 
   private init() {
-    this.addMessageHandler(
-      "values",
-      function (message: Record<string, unknown>) {
-        for (const name in this.$bindings) {
-          if (hasOwnProperty(this.$bindings, name))
-            this.$bindings[name].showProgress(false);
-        }
-
-        for (const key in message) {
-          if (hasOwnProperty(message, key))
-            this.receiveOutput(key, message[key]);
-        }
+    this.addMessageHandler("values", function (message: Record<string, any>) {
+      for (const name in this.$bindings) {
+        if (hasOwnProperty(this.$bindings, name))
+          this.$bindings[name].showProgress(false);
       }
-    );
+
+      for (const key in message) {
+        if (hasOwnProperty(message, key)) this.receiveOutput(key, message[key]);
+      }
+    });
 
     this.addMessageHandler(
       "errors",
-      function (message: Record<string, unknown>) {
+      function (message: Record<string, errorsMessageValue>) {
         for (const key in message) {
           if (hasOwnProperty(message, key))
             this.receiveError(key, message[key]);
@@ -692,7 +694,7 @@ class ShinyApp {
       indirectEval(message);
     });
 
-    this.addMessageHandler("console", function (message: Array<unknown>) {
+    this.addMessageHandler("console", function (message: Array<any>) {
       for (let i = 0; i < message.length; i++) {
         if (console.log) console.log(message[i]);
       }
@@ -700,7 +702,7 @@ class ShinyApp {
 
     this.addMessageHandler(
       "progress",
-      function (message: { type: string; message: unknown }) {
+      function (message: { type: string; message: any }) {
         if (message.type && message.message) {
           const handler = this.progressHandlers[message.type];
 
@@ -740,7 +742,7 @@ class ShinyApp {
 
     this.addMessageHandler(
       "response",
-      function (message: { tag: string; value?: unknown; error?: string }) {
+      function (message: { tag: string; value?: any; error?: string }) {
         const requestId = message.tag;
         const request = this.$activeRequests[requestId];
 
@@ -1485,4 +1487,4 @@ class ShinyApp {
 }
 
 export { ShinyApp, addCustomMessageHandler };
-export type { HandlerType };
+export type { HandlerType, errorsMessageValue };

@@ -5,12 +5,13 @@ import { shinyUnbindAll } from "../../shiny/initedMethods";
 import { debounce } from "../../time";
 import { escapeHTML } from "../../utils";
 import { indirectEval } from "../../utils/eval";
+import type { errorsMessageValue } from "../../shiny/shinyapp";
 
 class DatatableOutputBinding extends OutputBinding {
   find(scope: HTMLElement): JQuery<HTMLElement> {
     return $(scope).find(".shiny-datatable-output");
   }
-  onValueError(el: HTMLElement, err): void {
+  onValueError(el: HTMLElement, err: errorsMessageValue): void {
     shinyUnbindAll(el);
     this.renderError(el, err);
   }

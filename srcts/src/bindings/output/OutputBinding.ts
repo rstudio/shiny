@@ -1,5 +1,6 @@
 import $ from "jquery";
 import { asArray } from "../../utils";
+import type { errorsMessageValue } from "../../shiny/shinyapp";
 
 class OutputBinding {
   name: string;
@@ -24,10 +25,10 @@ class OutputBinding {
     this.clearError(el);
     this.renderValue(el, data);
   }
-  onValueError(el: HTMLElement, err): void {
+  onValueError(el: HTMLElement, err: errorsMessageValue): void {
     this.renderError(el, err);
   }
-  renderError(el: HTMLElement, err): void {
+  renderError(el: HTMLElement, err: errorsMessageValue): void {
     this.clearError(el);
     if (err.message === "") {
       // not really error, but we just need to wait (e.g. action buttons)

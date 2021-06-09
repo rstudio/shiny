@@ -1,9 +1,10 @@
-import {
+import type {
   InputBinding,
   receiveMessageDataType,
 } from "../bindings/input/InputBinding";
-import { OutputBindingAdapter } from "../bindings/output_adapter";
-import { priorityType } from "../inputPolicies/InputPolicy";
+import type { OutputBindingAdapter } from "../bindings/output_adapter";
+import type { priorityType } from "../inputPolicies/InputPolicy";
+import type { errorsMessageValue } from "../shiny/shinyapp";
 
 interface ShinyEventCommon extends JQuery.Event {
   name: string;
@@ -27,7 +28,7 @@ interface ShinyEventValue extends ShinyEventCommon {
 
 interface ShinyEventError extends ShinyEventCommon {
   binding: OutputBindingAdapter;
-  error: string;
+  error: errorsMessageValue;
 }
 interface ShinyEventMessage extends JQuery.Event {
   message: any;

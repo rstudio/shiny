@@ -18,9 +18,9 @@ declare global {
 
 type DateReceiveMessageData = {
   label: string;
-  min?: Date;
-  max?: Date;
-  value?: Date;
+  min?: Date | null;
+  max?: Date | null;
+  value?: Date | null;
 };
 
 class DateInputBindingBase extends InputBinding {

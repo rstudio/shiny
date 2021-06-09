@@ -17,7 +17,7 @@ class NumberInputBinding extends TextInputBinding {
     return $(scope).find('input[type="number"]');
   }
 
-  getValue(el: HTMLElement): string | number | string[] {
+  getValue(el: NumberHTMLElement): string | number | string[] {
     const numberVal = $(el).val();
 
     if (typeof numberVal == "string") {
@@ -63,7 +63,7 @@ class NumberInputBinding extends TextInputBinding {
     };
   }
 
-  _getLabelNode(el: HTMLElement): JQuery<HTMLElement> {
+  _getLabelNode(el: NumberHTMLElement): JQuery<HTMLElement> {
     return $(el)
       .parent()
       .find('label[for="' + $escape(el.id) + '"]');

@@ -262,13 +262,16 @@ class ImageOutputBinding extends OutputBinding {
     OutputBinding.prototype.renderError.call(this, el, err);
   }
 
-  clearError(el): void {
+  clearError(el: HTMLElement): void {
     // Remove all elements except img and the brush; this is usually just
     // error messages.
     $(el)
       .contents()
       .filter(function () {
-        return this.tagName !== "IMG" && this.id !== el.id + "_brush";
+        return !(
+          this instanceof HTMLElement &&
+          (this.tagName === "IMG" || this.id === el.id + "_brush")
+        );
       })
       .remove();
 

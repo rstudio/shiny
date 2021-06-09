@@ -74,7 +74,7 @@ function roundSignif(x: number, digits = 1): number {
 
 // Take a string with format "YYYY-MM-DD" and return a Date object.
 // IE8 and QTWebKit don't support YYYY-MM-DD, but they support YYYY/MM/DD
-function parseDate(dateString: any): Date {
+function parseDate(dateString: string): Date {
   let date = new Date(dateString);
 
   if (date.toString() === "Invalid Date") {
@@ -85,7 +85,7 @@ function parseDate(dateString: any): Date {
 
 // Given a Date object, return a string in yyyy-mm-dd format, using the
 // UTC date. This may be a day off from the date in the local time zone.
-function formatDateUTC(date: any): null | string {
+function formatDateUTC(date: Date | null): null | string {
   if (date instanceof Date) {
     return (
       date.getUTCFullYear() +
@@ -249,7 +249,7 @@ function isnan(x: unknown): boolean {
 }
 
 // Binary equality function used by the equal function.
-function _equal(x: any, y: any): boolean {
+function _equal(x: unknown, y: unknown): boolean {
   if ($.type(x) === "object" && $.type(y) === "object") {
     if (Object.keys(x).length !== Object.keys(y).length) return false;
     for (const prop in x) {
@@ -258,8 +258,11 @@ function _equal(x: any, y: any): boolean {
     }
     return true;
   } else if ($.type(x) === "array" && $.type(y) === "array") {
-    if (x.length !== y.length) return false;
-    for (let i = 0; i < x.length; i++) if (!_equal(x[i], y[i])) return false;
+    const xa = x as Array<unknown>;
+    const ya = y as Array<unknown>;
+
+    if (xa.length !== ya.length) return false;
+    for (let i = 0; i < xa.length; i++) if (!_equal(xa[i], ya[i])) return false;
     return true;
   } else {
     return x === y;
@@ -271,7 +274,7 @@ function _equal(x: any, y: any): boolean {
 // necessary.
 //
 // Objects other than objects and arrays are tested for equality using ===.
-function equal(...args): boolean {
+function equal(...args: Array<unknown>): boolean {
   if (args.length < 2)
     throw new Error("equal requires at least two arguments.");
   for (let i = 0; i < args.length - 1; i++) {

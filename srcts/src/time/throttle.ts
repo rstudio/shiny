@@ -1,12 +1,12 @@
 class Throttler {
-  target: any;
+  target: unknown;
   func: (...args: Array<any>) => void;
   delayMs: number;
   timerId: NodeJS.Timeout;
   args: Array<any>;
 
   constructor(
-    target: any,
+    target: unknown,
     func: (...args: Array<any>) => void,
     delayMs: number
   ) {

@@ -27,7 +27,7 @@ class NumberInputBinding extends TextInputBinding {
     }
 
     // If valid Javascript number string, coerce to number
-    const numberValue = +numberVal;
+    const numberValue = Number(numberVal);
 
     if (!isNaN(numberValue)) {
       return numberValue;

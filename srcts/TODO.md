@@ -81,6 +81,7 @@
   * https://stackoverflow.com/a/15872631/591574
   * √ slider.getValue()
 * Adjust tabinput.ts `setValue()` to return either `false | void`, not `false | true`.
+  * √ number.getValue()
   * What matters is that `false` is returned, or nothing is returned. Replaced `return true;` with `return;`
 * Questions
   * Why does `receiveMessage(data)` sometimes have a `label`?

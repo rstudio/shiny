@@ -5106,7 +5106,7 @@
           if (/^\s*$/.test(numberVal))
             return null;
         }
-        var numberValue = +numberVal;
+        var numberValue = Number(numberVal);
         if (!isNaN(numberValue)) {
           return numberValue;
         }

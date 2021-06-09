@@ -11,8 +11,9 @@ import {
 declare global {
   interface JQuery {
     // Adjustment of https://github.com/DefinitelyTyped/DefinitelyTyped/blob/1626e0bac175121ec2e9f766a770e03a91843c31/types/bootstrap-datepicker/index.d.ts#L113-L114
-    bsDatepicker(methodName: string): any;
-    bsDatepicker(methodName: string, params: any): any;
+    bsDatepicker(methodName: "getUTCDate"): Date;
+    bsDatepicker(methodName: string): void;
+    bsDatepicker(methodName: string, params: null | Date): void;
   }
 }
 
@@ -187,7 +188,7 @@ class DateInputBindingBase extends InputBinding {
   // Given a date string of format yyyy-mm-dd, return a Date object with
   // that date at 12AM UTC.
   // If date is a Date object, return it unchanged.
-  _newDate(date: Date | string | never): Date | void {
+  _newDate(date: Date | string | never): Date | null {
     if (date instanceof Date) return date;
     if (!date) return null;
 

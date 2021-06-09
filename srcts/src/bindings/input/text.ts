@@ -10,7 +10,7 @@ import { InputBinding } from "./InputBinding";
 type TextHTMLElement = HTMLInputElement;
 type TextReceiveMessageData = { label: string; value?: any; placeholder?: any };
 
-class TextInputBinding extends InputBinding {
+class TextInputBindingBase extends InputBinding {
   find(scope: HTMLElement): JQuery<HTMLElement> {
     const $inputs = $(scope).find(
       'input[type="text"], input[type="search"], input[type="url"], input[type="email"]'
@@ -31,8 +31,10 @@ class TextInputBinding extends InputBinding {
   getValue(el: TextHTMLElement): any {
     return el.value;
   }
-  setValue(el: TextHTMLElement, value): void {
-    el.value = value;
+  setValue(el: TextHTMLElement, value: unknown): void {
+    throw "not implemented";
+    el;
+    value;
   }
 
   subscribe(el: TextHTMLElement, callback: (x: boolean) => void): void {
@@ -92,6 +94,12 @@ class TextInputBinding extends InputBinding {
   }
 }
 
-export { TextInputBinding };
+class TextInputBinding extends TextInputBindingBase {
+  setValue(el: TextHTMLElement, value: string): void {
+    el.value = value;
+  }
+}
+
+export { TextInputBinding, TextInputBindingBase };
 
 export type { TextHTMLElement, TextReceiveMessageData };

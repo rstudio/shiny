@@ -1,6 +1,6 @@
 import $ from "jquery";
 import { $escape, hasOwnProperty, updateLabel } from "../../utils";
-import { TextInputBinding } from "./text";
+import { TextInputBindingBase } from "./text";
 
 type NumberHTMLElement = HTMLInputElement;
 
@@ -12,7 +12,7 @@ type NumberReceiveMessageData = {
   step?: any;
 };
 
-class NumberInputBinding extends TextInputBinding {
+class NumberInputBinding extends TextInputBindingBase {
   find(scope: HTMLElement): JQuery<HTMLElement> {
     return $(scope).find('input[type="number"]');
   }

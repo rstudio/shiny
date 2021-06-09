@@ -251,10 +251,14 @@ function isnan(x: unknown): boolean {
 // Binary equality function used by the equal function.
 function _equal(x: unknown, y: unknown): boolean {
   if ($.type(x) === "object" && $.type(y) === "object") {
-    if (Object.keys(x).length !== Object.keys(y).length) return false;
-    for (const prop in x) {
+    const xo = x as Record<string, unknown>;
+    const yo = y as Record<string, unknown>;
+
+    if (Object.keys(xo).length !== Object.keys(yo).length) return false;
+    for (const prop in xo) {
       // eslint-disable-next-line no-prototype-builtins
-      if (!y.hasOwnProperty(prop) || !_equal(x[prop], y[prop])) return false;
+      if (!hasOwnProperty(yo, prop) || !_equal(xo[prop], yo[prop]))
+        return false;
     }
     return true;
   } else if ($.type(x) === "array" && $.type(y) === "array") {

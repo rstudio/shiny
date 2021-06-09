@@ -9,6 +9,8 @@ import { windowBlobBuilder } from "../window/blobBuilder";
 import { setUserAgent } from "../utils/userAgent";
 import { windowUserAgent } from "../window/userAgent";
 
+import { initReactlog } from "../shiny/reactlog";
+
 function init(): void {
   setShiny(windowShiny());
   setUserAgent(windowUserAgent()); // before determineBrowserInfo()
@@ -19,6 +21,8 @@ function init(): void {
   disableFormSubmission();
 
   setBlobBuilder(windowBlobBuilder());
+
+  initReactlog();
 }
 
 export { init };

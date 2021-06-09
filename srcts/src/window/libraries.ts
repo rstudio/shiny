@@ -1,5 +1,9 @@
 function windowShiny(): any {
-  return (window as any)["Shiny"] || {};
+  // immediately init shiny on the window
+  if (!(window as any)["Shiny"]) {
+    (window as any)["Shiny"] = {};
+  }
+  return (window as any)["Shiny"];
 }
 
 export { windowShiny };

@@ -1,6 +1,7 @@
 import $ from "jquery";
 import { windowDevicePixelRatio } from "../window/pixelRatio";
 import { makeBlob } from "./blob";
+import { hasOwnProperty } from "./Object";
 
 function escapeHTML(str: string): string {
   const escaped = {
@@ -40,9 +41,7 @@ function strToBool(str: string): boolean | undefined {
 function getStyle(el: Element, styleProp: string): string | undefined {
   let x = undefined;
 
-  // Old, IE 5+ attribute only - https://developer.mozilla.org/en-US/docs/Web/API/Element/currentStyle
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
+  // @ts-expect-error; Old, IE 5+ attribute only - https://developer.mozilla.org/en-US/docs/Web/API/Element/currentStyle
   if (el.currentStyle) x = el.currentStyle[styleProp];
   else if (window.getComputedStyle) {
     // getComputedStyle can return null when we're inside a hidden iframe on
@@ -186,7 +185,7 @@ function asArray<T>(value: T | Array<T> | null | undefined): Array<T> {
 // bindings by priority and insertion order.
 function mergeSort<T>(
   list: Array<T>,
-  sortfunc: (a: any, b: any) => boolean
+  sortfunc: (a: any, b: any) => boolean | number
 ): Array<T> {
   function merge(sortfunc, a, b) {
     let ia = 0;
@@ -230,11 +229,11 @@ const $escape = function (val: string): string {
 
 // Maps a function over an object, preserving keys. Like the mapValues
 // function from lodash.
-function mapValues(
-  obj: Record<string, unknown>,
-  f: (value: unknown, key: string, obj: Record<string, unknown>) => unknown
-): Record<string, unknown> {
-  const newObj: Record<string, unknown> = {};
+function mapValues<V, R>(
+  obj: Record<string, V>,
+  f: (value: V, key: string, obj: Record<string, V>) => R
+): Record<string, R> {
+  const newObj: Record<string, R> = {};
 
   for (const key in obj) {
     // eslint-disable-next-line no-prototype-builtins
@@ -362,8 +361,7 @@ function getComputedLinkColor(el: HTMLElement): string {
 }
 
 function isBS3(): boolean {
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
+  // @ts-expect-error; Check if `window.bootstrap` exists
   return !window.bootstrap;
 }
 
@@ -390,5 +388,6 @@ export {
   updateLabel,
   getComputedLinkColor,
   makeBlob,
+  hasOwnProperty,
   isBS3,
 };

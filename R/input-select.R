@@ -243,9 +243,8 @@ selectizeDependency <- function() {
 }
 
 selectizeDependencyFunc <- function(theme) {
-  selectizeVersion <- "0.12.4"
   if (!is_bs_theme(theme)) {
-    return(selectizeStaticDependency(selectizeVersion))
+    return(selectizeStaticDependency(version_selectize))
   }
 
   selectizeDir <- system.file(package = "shiny", "www/shared/selectize/")
@@ -267,7 +266,7 @@ selectizeDependencyFunc <- function(theme) {
     input = sass::sass_file(stylesheet),
     theme = theme,
     name = "selectize",
-    version = selectizeVersion,
+    version = version_selectize,
     cache_key_extra = shinyPackageVersion(),
     .dep_args = list(script = script)
   )

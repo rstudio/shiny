@@ -7,3 +7,4 @@ node_modules/
 !.yarn/versions
 .pnp.*
 coverage/
+madge.svg

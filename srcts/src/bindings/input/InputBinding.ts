@@ -1,30 +1,6 @@
 import { RatePolicyModes } from "../../inputPolicies/inputRateDecorator";
 import { bindScope } from "../../shiny/bind";
 
-import type { NumberReceiveMessageData } from "./number";
-import type { RadioReceiveMessageData } from "./radio";
-import type { SelectInputReceiveMessageData } from "./selectInput";
-import type { SliderReceiveMessageData } from "./slider";
-import type { TabInputReceiveMessageData } from "./tabinput";
-import type { TextReceiveMessageData } from "./text";
-import type { ActionButtonReceiveMessageData } from "./actionbutton";
-import type { CheckboxGroupReceiveMessageData } from "./checkboxgroup";
-import type { DateReceiveMessageData } from "./date";
-import type { CheckboxReceiveMessageData } from "./checkbox";
-import type { DateRangeReceiveMessageData } from "./daterange";
-
-type receiveMessageDataType =
-  | NumberReceiveMessageData
-  | RadioReceiveMessageData
-  | SelectInputReceiveMessageData
-  | SliderReceiveMessageData
-  | TabInputReceiveMessageData
-  | TextReceiveMessageData
-  | ActionButtonReceiveMessageData
-  | CheckboxReceiveMessageData
-  | CheckboxGroupReceiveMessageData
-  | DateReceiveMessageData
-  | DateRangeReceiveMessageData;
 class InputBinding {
   name: string;
 
@@ -69,7 +45,7 @@ class InputBinding {
   // 'data' should be an object with elements corresponding to value, min,
   // max, etc., as appropriate for the type of input object. It also should
   // trigger a change event.
-  receiveMessage(el: HTMLElement, data: receiveMessageDataType): void {
+  receiveMessage(el: HTMLElement, data: unknown): void {
     throw "Not implemented";
     el;
     data;
@@ -127,4 +103,3 @@ class InputBinding {
 //// END NOTES FOR FUTURE DEV
 
 export { InputBinding };
-export type { receiveMessageDataType };

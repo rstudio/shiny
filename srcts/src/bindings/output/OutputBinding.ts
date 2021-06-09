@@ -11,7 +11,7 @@ class OutputBinding {
     throw "Not implemented";
     scope;
   }
-  renderValue(el: HTMLElement, data): void {
+  renderValue(el: HTMLElement, data: unknown): void {
     throw "Not implemented";
     el;
     data;
@@ -21,7 +21,7 @@ class OutputBinding {
     return el["data-input-id"] || el.id;
   }
 
-  onValueChange(el: HTMLElement, data): void {
+  onValueChange(el: HTMLElement, data: unknown): void {
     this.clearError(el);
     this.renderValue(el, data);
   }

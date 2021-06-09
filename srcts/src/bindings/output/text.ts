@@ -1,8 +1,6 @@
 import $ from "jquery";
 import { OutputBinding } from "./OutputBinding";
 
-// const textOutputBinding = new OutputBinding();
-
 class TextOutputBinding extends OutputBinding {
   find(scope: HTMLElement): JQuery<HTMLElement> {
     return $(scope).find(".shiny-text-output");

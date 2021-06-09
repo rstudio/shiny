@@ -674,7 +674,7 @@ class ShinyApp {
 
     this.addMessageHandler(
       "inputMessages",
-      function (message: Array<{ id: string; message: any }>) {
+      function (message: Array<{ id: string; message: unknown }>) {
         // inputMessages should be an array
         for (let i = 0; i < message.length; i++) {
           const $obj = $(".shiny-bound-input#" + $escape(message[i].id));

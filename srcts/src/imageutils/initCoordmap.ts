@@ -84,6 +84,13 @@ type Coords = {
   log?: PanelType["log"];
 };
 
+type CoordmapInitType = {
+  panels: Array<PanelType>;
+  dims: {
+    height: number;
+    width: number;
+  };
+};
 type CoordmapType = {
   panels: Array<PanelType>;
   dims: {
@@ -133,7 +140,11 @@ type CoordmapType = {
 //    additional scaling due to CSS transforms or width.
 // 3. data: The coordinates in the data space. This is a bit more complicated
 //    than the other two, because there can be multiple panels (as in facets).
-function initCoordmap($el: JQuery<HTMLElement>, coordmap: CoordmapType): void {
+function initCoordmap(
+  $el: JQuery<HTMLElement>,
+  coordmap_: CoordmapInitType
+): CoordmapType {
+  const coordmap = coordmap_ as CoordmapType;
   const $img = $el.find("img");
   const img = $img[0];
 
@@ -387,7 +398,9 @@ function initCoordmap($el: JQuery<HTMLElement>, coordmap: CoordmapType): void {
       shinySetInputValue(inputId, coords, { priority: "event" });
     };
   };
+
+  return coordmap;
 }
 
-export type { CoordmapType };
+export type { CoordmapType, CoordmapInitType };
 export { initCoordmap, findOrigin };

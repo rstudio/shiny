@@ -16,7 +16,7 @@ import {
 import { isQt } from "../utils/browser";
 import { showNotification, removeNotification } from "./notifications";
 import { showModal, removeModal } from "./modal";
-import { renderContent, renderHtml, RenderWhereType } from "./render";
+import { renderContent, renderHtml } from "./render";
 import { hideReconnectDialog, showReconnectDialog } from "./reconnectDialog";
 import { resetBrush } from "../imageutils/resetBrush";
 import { OutputBindingAdapter } from "../bindings/output_adapter";
@@ -28,6 +28,7 @@ import type {
 } from "../events/shinyEvents";
 import { InputBinding } from "../bindings";
 import { indirectEval } from "../utils/eval";
+import type { WherePosition } from "./singletons";
 
 type HandlerType = (
   msg: Record<string, unknown> | Array<unknown> | boolean | string
@@ -42,6 +43,10 @@ type errorsMessageValue = {
   call: Array<string>;
   type?: Array<string>;
 };
+
+type OnSuccessRequest = (value: any) => void;
+type OnErrorRequest = (err: string) => void;
+type InputValuesType = Record<string, unknown>;
 
 //// 2021/03 - TypeScript conversion note:
 // These four variables were moved from being internally defined to being defined globally within the file.
@@ -97,10 +102,10 @@ class ShinyApp {
   } = null;
 
   // Cached input values
-  $inputValues = {};
+  $inputValues: InputValuesType = {};
 
   // Input values at initialization (and reconnect)
-  $initialInput = {};
+  $initialInput: InputValuesType;
 
   // Output bindings
   $bindings: Record<string, OutputBindingAdapter> = {};
@@ -112,8 +117,11 @@ class ShinyApp {
   // Conditional bindings (show/hide element based on expression)
   $conditionals = {};
 
-  $pendingMessages = [];
-  $activeRequests = {};
+  $pendingMessages: Array<string> = [];
+  $activeRequests: Record<
+    number,
+    { onSuccess: OnSuccessRequest; onError: OnErrorRequest }
+  > = {};
   $nextRequestId = 0;
 
   $allowReconnect: boolean | "force" = false;
@@ -122,7 +130,7 @@ class ShinyApp {
     this.init();
   }
 
-  connect(initialInput: unknown): void {
+  connect(initialInput: InputValuesType): void {
     if (this.$socket)
       throw "Connect was already called on this application object";
 
@@ -234,7 +242,7 @@ class ShinyApp {
     return socket;
   }
 
-  sendInput(values: unknown): void {
+  sendInput(values: InputValuesType): void {
     const msg = JSON.stringify({
       method: "update",
       data: values,
@@ -346,8 +354,8 @@ class ShinyApp {
   makeRequest(
     method: string,
     args: Array<unknown>,
-    onSuccess: (value: unknown) => void,
-    onError: (err: string) => void,
+    onSuccess: OnSuccessRequest,
+    onError: OnErrorRequest,
     blobs: Array<Blob | ArrayBuffer | string>
   ): void {
     let requestId = this.$nextRequestId;
@@ -410,7 +418,7 @@ class ShinyApp {
     this.$sendMsg(msg);
   }
 
-  $sendMsg(msg): void {
+  $sendMsg(msg: string): void {
     if (!this.$socket.readyState) {
       this.$pendingMessages.push(msg);
     } else {
@@ -839,7 +847,7 @@ class ShinyApp {
         selector: HTMLElement;
         content: { html: any; deps: any };
         multiple: false | void;
-        where: RenderWhereType;
+        where: WherePosition;
       }) {
         const targets = $(message.selector);
 

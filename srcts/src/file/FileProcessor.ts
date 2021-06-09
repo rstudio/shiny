@@ -90,7 +90,7 @@ class FileProcessor {
 }
 
 class FileUploader extends FileProcessor {
-  shinyapp: any;
+  shinyapp: ShinyApp;
   id: string;
   el: HTMLElement;
 
@@ -113,7 +113,27 @@ class FileUploader extends FileProcessor {
     this.$run();
   }
 
-  makeRequest(method, args, onSuccess, onFailure, blobs): void {
+  makeRequest(
+    method: "uploadInit",
+    args: Array<Array<{ name: string; size: number; type: string }>>,
+    onSuccess: (value: { jobId: string; uploadUrl: string }) => void,
+    onFailure: Parameters<ShinyApp["makeRequest"]>[3],
+    blobs: Parameters<ShinyApp["makeRequest"]>[4]
+  ): void;
+  makeRequest(
+    method: "uploadEnd",
+    args: [string, string],
+    onSuccess: (response: unknown) => void,
+    onFailure: Parameters<ShinyApp["makeRequest"]>[3],
+    blobs: Parameters<ShinyApp["makeRequest"]>[4]
+  ): void;
+  makeRequest(
+    method: string,
+    args: Array<unknown>,
+    onSuccess: Parameters<ShinyApp["makeRequest"]>[2],
+    onFailure: Parameters<ShinyApp["makeRequest"]>[3],
+    blobs: Parameters<ShinyApp["makeRequest"]>[4]
+  ): void {
     this.shinyapp.makeRequest(method, args, onSuccess, onFailure, blobs);
   }
   onBegin(files: FileList, cont: () => void): void {

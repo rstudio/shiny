@@ -10,6 +10,7 @@ import {
 import { sendImageSizeFns } from "./sendImageSize";
 
 import { renderHtml as singletonsRenderHtml } from "./singletons";
+import type { WherePosition } from "./singletons";
 
 function renderDependencies(dependencies): void {
   if (dependencies) {
@@ -19,15 +20,13 @@ function renderDependencies(dependencies): void {
   }
 }
 
-type RenderWhereType = "beforeBegin" | "afterEnd" | "replace";
-
 // Render HTML in a DOM element, add dependencies, and bind Shiny
 // inputs/outputs. `content` can be null, a string, or an object with
 // properties 'html' and 'deps'.
 function renderContent(
   el: bindScope,
   content: null | string | { html: any; deps?: any },
-  where: RenderWhereType = "replace"
+  where: WherePosition = "replace"
 ): void {
   if (where === "replace") {
     shinyUnbindAll(el);
@@ -73,7 +72,7 @@ function renderHtml(
   html,
   el: bindScope,
   dependencies,
-  where: RenderWhereType = "replace"
+  where: WherePosition = "replace"
 ): ReturnType<typeof singletonsRenderHtml> {
   renderDependencies(dependencies);
   return singletonsRenderHtml(html, el, where);
@@ -323,4 +322,3 @@ function renderDependency(dep) {
 }
 
 export { renderDependencies, renderContent, renderHtml, registerDependency };
-export type { RenderWhereType };

@@ -43,7 +43,7 @@
   * √ strftime
   * √ bootstrap date picker
   * font awesome?
-  * bootstrap accessilbility plugin?
+  * bootstrap accessibility plugin?
 
 # Round #2
 * Convert registered bindings

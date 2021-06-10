@@ -14,7 +14,7 @@ const _ZoneClass = {
 // replacing it. The workaround is to restart Safari. When I (Alan Dipert) ran
 // into this bug Winston Chang helped me diagnose the exact problem, and Winston
 // then submitted a bug report to Apple.
-function setFileText($el: JQuery<EventTarget>, files) {
+function setFileText($el: JQuery<EventTarget>, files: FileList) {
   const $fileText = $el.closest("div.input-group").find("input[type=text]");
 
   if (files.length === 1) {
@@ -33,7 +33,10 @@ function abortCurrentUpload($el: JQuery<EventTarget>) {
   $el.removeAttr("data-restore");
 }
 
-function uploadDroppedFilesIE10Plus(el: HTMLInputElement, files): void {
+function uploadDroppedFilesIE10Plus(
+  el: HTMLInputElement,
+  files: FileList
+): void {
   const $el = $(el);
 
   abortCurrentUpload($el);

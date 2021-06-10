@@ -4,6 +4,11 @@ import { $escape } from "../utils";
 import { ShinyApp } from "../shiny/shinyapp";
 import { getFileInputBinding } from "../shiny/initedMethods";
 
+type JobId = string;
+type UploadUrl = string;
+type UploadInitValue = { jobId: JobId; uploadUrl: UploadUrl };
+type UploadEndValue = never;
+
 // Generic driver class for doing chunk-wise asynchronous processing of a
 // FileList object. Subclass/clone it and override the `on*` functions to
 // make it do something useful.
@@ -94,8 +99,8 @@ class FileUploader extends FileProcessor {
   id: string;
   el: HTMLElement;
 
-  jobId: string; // ?
-  uploadUrl: string;
+  jobId: JobId;
+  uploadUrl: UploadUrl;
   progressBytes: number;
   totalBytes: number;
 
@@ -116,14 +121,15 @@ class FileUploader extends FileProcessor {
   makeRequest(
     method: "uploadInit",
     args: Array<Array<{ name: string; size: number; type: string }>>,
-    onSuccess: (value: { jobId: string; uploadUrl: string }) => void,
+    onSuccess: (value: UploadInitValue) => void,
     onFailure: Parameters<ShinyApp["makeRequest"]>[3],
     blobs: Parameters<ShinyApp["makeRequest"]>[4]
   ): void;
   makeRequest(
     method: "uploadEnd",
     args: [string, string],
-    onSuccess: (response: unknown) => void,
+    // UploadEndValue can not be used as the type will not conform
+    onSuccess: (value: unknown) => void,
     onFailure: Parameters<ShinyApp["makeRequest"]>[3],
     blobs: Parameters<ShinyApp["makeRequest"]>[4]
   ): void;
@@ -231,9 +237,7 @@ class FileUploader extends FileProcessor {
     this.makeRequest(
       "uploadEnd",
       [this.jobId, this.id],
-      (response) => {
-        response;
-
+      () => {
         this.$setActive(false);
         this.onProgress(null, 1);
         this.$bar().text("Upload complete");
@@ -272,7 +276,7 @@ class FileUploader extends FileProcessor {
   $setVisible(visible: boolean): void {
     this.$container().css("visibility", visible ? "visible" : "hidden");
   }
-  $setError(error: any | null): void {
+  $setError(error: string | null): void {
     this.$bar().toggleClass("progress-bar-danger", error !== null);
     if (error !== null) {
       this.onProgress(null, 1);
@@ -285,3 +289,4 @@ class FileUploader extends FileProcessor {
 }
 
 export { FileUploader };
+export type { UploadInitValue, UploadEndValue };

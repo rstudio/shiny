@@ -17,6 +17,7 @@ import { isQt } from "../utils/browser";
 import { showNotification, removeNotification } from "./notifications";
 import { showModal, removeModal } from "./modal";
 import { renderContent, renderHtml } from "./render";
+import type { HtmlDep } from "./render";
 import { hideReconnectDialog, showReconnectDialog } from "./reconnectDialog";
 import { resetBrush } from "../imageutils/resetBrush";
 import { OutputBindingAdapter } from "../bindings/output_adapter";
@@ -29,7 +30,9 @@ import type {
 import { InputBinding } from "../bindings";
 import { indirectEval } from "../utils/eval";
 import type { WherePosition } from "./singletons";
+import type { UploadInitValue, UploadEndValue } from "../file/FileProcessor";
 
+type ResponseValue = UploadInitValue | UploadEndValue;
 type HandlerType = (
   msg: Record<string, unknown> | Array<unknown> | boolean | string
 ) => void;
@@ -44,7 +47,7 @@ type errorsMessageValue = {
   type?: Array<string>;
 };
 
-type OnSuccessRequest = (value: any) => void;
+type OnSuccessRequest = (value: ResponseValue) => void;
 type OnErrorRequest = (err: string) => void;
 type InputValuesType = Record<string, unknown>;
 
@@ -593,7 +596,7 @@ class ShinyApp {
   // Shiny.addCustomMessageHandler = addCustomMessageHandler;
 
   dispatchMessage(data: string | ArrayBufferLike): void {
-    let msgObj: any = {};
+    let msgObj: ShinyEventMessage["message"] = {};
 
     if (typeof data === "string") {
       msgObj = JSON.parse(data);
@@ -651,16 +654,20 @@ class ShinyApp {
   // Message handlers =====================================================
 
   private init() {
-    this.addMessageHandler("values", function (message: Record<string, any>) {
-      for (const name in this.$bindings) {
-        if (hasOwnProperty(this.$bindings, name))
-          this.$bindings[name].showProgress(false);
-      }
+    this.addMessageHandler(
+      "values",
+      function (message: Record<string, unknown>) {
+        for (const name in this.$bindings) {
+          if (hasOwnProperty(this.$bindings, name))
+            this.$bindings[name].showProgress(false);
+        }
 
-      for (const key in message) {
-        if (hasOwnProperty(message, key)) this.receiveOutput(key, message[key]);
+        for (const key in message) {
+          if (hasOwnProperty(message, key))
+            this.receiveOutput(key, message[key]);
+        }
       }
-    });
+    );
 
     this.addMessageHandler(
       "errors",
@@ -702,7 +709,7 @@ class ShinyApp {
       indirectEval(message);
     });
 
-    this.addMessageHandler("console", function (message: Array<any>) {
+    this.addMessageHandler("console", function (message: Array<unknown>) {
       for (let i = 0; i < message.length; i++) {
         if (console.log) console.log(message[i]);
       }
@@ -710,7 +717,7 @@ class ShinyApp {
 
     this.addMessageHandler(
       "progress",
-      function (message: { type: string; message: any }) {
+      function (message: { type: string; message: { id: string } }) {
         if (message.type && message.message) {
           const handler = this.progressHandlers[message.type];
 
@@ -738,7 +745,7 @@ class ShinyApp {
       function (
         message:
           | { type: "show"; message: Parameters<typeof showModal>[0] }
-          | { type: "remove" }
+          | { type: "remove"; message: string }
           | { type: void }
       ) {
         if (message.type === "show") showModal(message.message);
@@ -750,7 +757,11 @@ class ShinyApp {
 
     this.addMessageHandler(
       "response",
-      function (message: { tag: string; value?: any; error?: string }) {
+      function (message: {
+        tag: string;
+        value?: ResponseValue;
+        error?: string;
+      }) {
         const requestId = message.tag;
         const request = this.$activeRequests[requestId];
 
@@ -820,7 +831,10 @@ class ShinyApp {
 
     this.addMessageHandler(
       "recalculating",
-      function (message: { name?: string; status?: string }) {
+      function (message: {
+        name?: string;
+        status?: "recalculating" | "recalculated";
+      }) {
         if (
           hasOwnProperty(message, "name") &&
           hasOwnProperty(message, "status")
@@ -835,7 +849,7 @@ class ShinyApp {
       }
     );
 
-    this.addMessageHandler("reload", function (message: never) {
+    this.addMessageHandler("reload", function (message: true) {
       window.location.reload();
       return;
       message;
@@ -844,8 +858,8 @@ class ShinyApp {
     this.addMessageHandler(
       "shiny-insert-ui",
       function (message: {
-        selector: HTMLElement;
-        content: { html: any; deps: any };
+        selector: string;
+        content: { html: string; deps: Array<HtmlDep> };
         multiple: false | void;
         where: WherePosition;
       }) {
@@ -872,7 +886,7 @@ class ShinyApp {
 
     this.addMessageHandler(
       "shiny-remove-ui",
-      function (message: { selector: HTMLElement; multiple: false | void }) {
+      function (message: { selector: string; multiple: false | void }) {
         const els = $(message.selector);
 
         els.each(function (i, el) {
@@ -966,8 +980,8 @@ class ShinyApp {
       "shiny-insert-tab",
       function (message: {
         inputId: string;
-        divTag: { html: HTMLElement; deps };
-        liTag: { html: HTMLElement; deps };
+        divTag: { html: string; deps: Array<HtmlDep> };
+        liTag: { html: string; deps: Array<HtmlDep> };
         target?: string;
         position: "before" | "after" | void;
         select: boolean;
@@ -1211,7 +1225,7 @@ class ShinyApp {
 
     this.addMessageHandler(
       "shiny-remove-tab",
-      function (message: { inputId: string; target: string }) {
+      function (message: { inputId: string; target: string; type: never }) {
         const $tabset = getTabset(message.inputId);
         const $tabContent = getTabContent($tabset);
         const target = getTargetTabs($tabset, $tabContent, message.target);
@@ -1254,7 +1268,7 @@ class ShinyApp {
 
     this.addMessageHandler(
       "updateQueryString",
-      function (message: { mode: "replace" | null; queryString: string }) {
+      function (message: { mode: "replace" | unknown; queryString: string }) {
         // leave the bookmarking code intact
         if (message.mode === "replace") {
           window.history.replaceState(null, null, message.queryString);

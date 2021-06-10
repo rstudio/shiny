@@ -28,7 +28,7 @@ interface ShinyEventError extends ShinyEventCommon {
   error: errorsMessageValue;
 }
 interface ShinyEventMessage extends JQuery.Event {
-  message: any;
+  message: Record<string, unknown>;
 }
 
 export type {

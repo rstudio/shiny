@@ -7,7 +7,7 @@ import {
   hasOwnProperty,
 } from "../../utils";
 
-import { TextHTMLElement, TextInputBinding } from "./text";
+import { TextHTMLElement, TextInputBindingBase } from "./text";
 
 // interface SliderHTMLElement extends NameValueHTMLElement {
 //   checked?: any;
@@ -84,7 +84,7 @@ function getTypePrettifyer(
   return prettify;
 }
 
-class SliderInputBinding extends TextInputBinding {
+class SliderInputBinding extends TextInputBindingBase {
   find(scope: HTMLElement): JQuery<HTMLElement> {
     // Check if ionRangeSlider plugin is loaded
     if (!$.fn.ionRangeSlider) {
@@ -109,20 +109,20 @@ class SliderInputBinding extends TextInputBinding {
     const result = $(el).data("ionRangeSlider").result;
 
     // Function for converting numeric value from slider to appropriate type.
-    let convert: (val: any) => number | string;
+    let convert: (val: unknown) => number | string;
     const dataType = $el.data("data-type");
 
     if (dataType === "date") {
-      convert = function (val: any) {
+      convert = function (val: unknown) {
         return formatDateUTC(new Date(Number(val)));
       };
     } else if (dataType === "datetime") {
-      convert = function (val: any) {
+      convert = function (val: unknown) {
         // Convert ms to s
         return Number(val) / 1000;
       };
     } else {
-      convert = function (val: any) {
+      convert = function (val: unknown) {
         return Number(val);
       };
     }
@@ -227,7 +227,7 @@ class SliderInputBinding extends TextInputBinding {
     };
     el;
   }
-  // @ts-expect-error; TODO-barret Why not implemented?
+  // TODO-barret Why not implemented?
   getState(el: HTMLInputElement): void {
     // empty
     el;

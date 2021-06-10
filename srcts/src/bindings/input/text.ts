@@ -8,7 +8,11 @@ import { InputBinding } from "./InputBinding";
 // }
 
 type TextHTMLElement = HTMLInputElement;
-type TextReceiveMessageData = { label: string; value?: any; placeholder?: any };
+type TextReceiveMessageData = {
+  label: string;
+  value?: TextHTMLElement["value"];
+  placeholder?: TextHTMLElement["placeholder"];
+};
 
 class TextInputBindingBase extends InputBinding {
   find(scope: HTMLElement): JQuery<HTMLElement> {
@@ -28,8 +32,9 @@ class TextInputBindingBase extends InputBinding {
     // return InputBinding.prototype.getId.call(this, el) || el.name;
   }
 
-  getValue(el: TextHTMLElement): any {
-    return el.value;
+  getValue(el: TextHTMLElement): unknown {
+    throw "not implemented";
+    el;
   }
   setValue(el: TextHTMLElement, value: unknown): void {
     throw "not implemented";
@@ -57,26 +62,15 @@ class TextInputBindingBase extends InputBinding {
     $(el).off(".textInputBinding");
   }
 
-  receiveMessage(el: TextHTMLElement, data: TextReceiveMessageData): void {
-    if (hasOwnProperty(data, "value")) this.setValue(el, data.value);
-
-    updateLabel(data.label, this._getLabelNode(el));
-
-    if (hasOwnProperty(data, "placeholder")) el.placeholder = data.placeholder;
-
-    $(el).trigger("change");
+  receiveMessage(el: TextHTMLElement, data: unknown): void {
+    throw "not implemented";
+    el;
+    data;
   }
 
-  getState(el: TextHTMLElement): {
-    label: string;
-    value: any;
-    placeholder: any;
-  } {
-    return {
-      label: this._getLabelNode(el).text(),
-      value: el.value,
-      placeholder: el.placeholder,
-    };
+  getState(el: TextHTMLElement): unknown {
+    throw "not implemented";
+    el;
   }
 
   getRatePolicy(el: HTMLElement): { policy: "debounce"; delay: 250 } {
@@ -97,6 +91,31 @@ class TextInputBindingBase extends InputBinding {
 class TextInputBinding extends TextInputBindingBase {
   setValue(el: TextHTMLElement, value: string): void {
     el.value = value;
+  }
+
+  getValue(el: TextHTMLElement): TextHTMLElement["value"] {
+    return el.value;
+  }
+
+  getState(el: TextHTMLElement): {
+    label: string;
+    value: string;
+    placeholder: string;
+  } {
+    return {
+      label: this._getLabelNode(el).text(),
+      value: el.value,
+      placeholder: el.placeholder,
+    };
+  }
+  receiveMessage(el: TextHTMLElement, data: TextReceiveMessageData): void {
+    if (hasOwnProperty(data, "value")) this.setValue(el, data.value);
+
+    updateLabel(data.label, this._getLabelNode(el));
+
+    if (hasOwnProperty(data, "placeholder")) el.placeholder = data.placeholder;
+
+    $(el).trigger("change");
   }
 }
 

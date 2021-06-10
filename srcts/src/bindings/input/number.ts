@@ -53,7 +53,13 @@ class NumberInputBinding extends TextInputBindingBase {
     $(el).trigger("change");
   }
 
-  getState(el: NumberHTMLElement): any {
+  getState(el: NumberHTMLElement): {
+    label: string;
+    value: ReturnType<NumberInputBinding["getValue"]>;
+    min: number;
+    max: number;
+    step: number;
+  } {
     return {
       label: this._getLabelNode(el).text(),
       value: this.getValue(el),

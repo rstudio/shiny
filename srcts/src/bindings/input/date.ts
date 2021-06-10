@@ -12,6 +12,10 @@ declare global {
   interface JQuery {
     // Adjustment of https://github.com/DefinitelyTyped/DefinitelyTyped/blob/1626e0bac175121ec2e9f766a770e03a91843c31/types/bootstrap-datepicker/index.d.ts#L113-L114
     bsDatepicker(methodName: "getUTCDate"): Date;
+    // Infinity is not allowed as a literal return type. Using `1e9999` as a placeholder that resolves to Infinity
+    // https://github.com/microsoft/TypeScript/issues/32277
+    bsDatepicker(methodName: "getStartDate"): Date | -1e9999;
+    bsDatepicker(methodName: "getEndDate"): Date | 1e9999;
     bsDatepicker(methodName: string): void;
     bsDatepicker(methodName: string, params: null | Date): void;
   }

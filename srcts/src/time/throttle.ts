@@ -1,13 +1,13 @@
-class Throttler {
+class Throttler<T = unknown> {
   target: unknown;
-  func: (...args: Array<any>) => void;
+  func: (...args: Array<T>) => void;
   delayMs: number;
   timerId: NodeJS.Timeout;
-  args: Array<any>;
+  args: Array<T>;
 
   constructor(
     target: unknown,
-    func: (...args: Array<any>) => void,
+    func: (...args: Array<T>) => void,
     delayMs: number
   ) {
     this.target = target;
@@ -18,7 +18,7 @@ class Throttler {
     this.args = null;
   }
 
-  normalCall(...args: Array<any>): void {
+  normalCall(...args: Array<T>): void {
     this.args = args;
     if (this.timerId === null) {
       this.$invoke();
@@ -31,7 +31,7 @@ class Throttler {
       }, this.delayMs);
     }
   }
-  immediateCall(...args: Array<any>): void {
+  immediateCall(...args: Array<T>): void {
     this.$clearTimer();
     this.args = args;
     this.$invoke();
@@ -61,15 +61,15 @@ class Throttler {
 // 900ms intervals will result in something like 15
 // or 16 executions of the underlying function.
 // eslint-disable-next-line no-unused-vars
-function throttle(
+function throttle<T>(
   threshold: number,
-  func: (...args: Array<any>) => void
-): (...args: Array<any>) => void {
+  func: (...args: Array<T>) => void
+): (...args: Array<T>) => void {
   let executionPending = false;
   let timerId = null;
-  let self, args: Array<any>;
+  let self, args: Array<T>;
 
-  function throttled(...argumentVals) {
+  function throttled(...argumentVals: Array<T>) {
     self = null;
     args = null;
     if (timerId === null) {

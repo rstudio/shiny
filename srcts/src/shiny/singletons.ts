@@ -7,11 +7,12 @@ const _reHead = /<head(?:\s[^>]*)?>([\s\S]*?)<\/head>/;
 const knownSingletons: Record<string, boolean> = {};
 
 type WherePosition = "replace" | "beforeBegin" | "afterEnd";
+type RenderHtmlWherePosition = "replace" | InsertPosition;
 
 function renderHtml(
   html: string,
   el: bindScope,
-  where: WherePosition
+  where: RenderHtmlWherePosition
 ): ReturnType<typeof _processHtml> {
   const processed = _processHtml(html);
 
@@ -28,10 +29,8 @@ function renderHtml(
       elElements = el.toArray();
     }
     $.each(elElements, (i, el) => {
-      // @ts-expect-error; The `where` values do not match.
-      // The type definition is to have `InsertPosition` which does not align with `WherePosition` from above
       // type InsertPosition = "beforebegin" | "afterbegin" | "beforeend" | "afterend"
-      el.insertAdjacentHTML(where.toLowerCase(), processed.html);
+      el.insertAdjacentHTML(where, processed.html);
     });
   }
   return processed;
@@ -106,4 +105,4 @@ function _processHtml(val: string): {
 }
 
 export { renderHtml, registerNames };
-export type { WherePosition };
+export type { WherePosition, RenderHtmlWherePosition };

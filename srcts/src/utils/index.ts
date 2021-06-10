@@ -114,8 +114,11 @@ interface lastSizeInterface {
 }
 function makeResizeFilter(
   el: HTMLElement,
-  func: (width: any, height: any) => any
-): () => any {
+  func: (
+    width: HTMLElement["offsetWidth"],
+    height: HTMLElement["offsetHeight"]
+  ) => void
+): () => void {
   let lastSize: lastSizeInterface = {};
 
   return function () {
@@ -140,8 +143,7 @@ function pixelRatio(): number {
 //
 // When the function is executed, it will evaluate that expression using
 // "with" on the argument value, and return the result.
-scopeExprToFunc.call;
-function scopeExprToFunc(expr: string): (scope: any) => any {
+function scopeExprToFunc(expr: string): (scope: unknown) => boolean {
   /*jshint evil: true */
   const exprEscaped = expr
     .replace(/[\\"']/g, "\\$&")
@@ -152,9 +154,10 @@ function scopeExprToFunc(expr: string): (scope: any) => any {
     // \b has a special meaning; need [\b] to match backspace char.
     .replace(/[\b]/g, "\\b");
 
-  let func: any;
+  let func: () => boolean;
 
   try {
+    // @ts-expect-error; Do not know how to type this _dangerous_ situation
     func = new Function(
       `with (this) {
         try {
@@ -170,7 +173,7 @@ function scopeExprToFunc(expr: string): (scope: any) => any {
     throw e;
   }
 
-  return function (scope) {
+  return function (scope: unknown): boolean {
     return func.call(scope);
   };
 }
@@ -185,7 +188,7 @@ function asArray<T>(value: T | Array<T> | null | undefined): Array<T> {
 // bindings by priority and insertion order.
 function mergeSort<T>(
   list: Array<T>,
-  sortfunc: (a: any, b: any) => boolean | number
+  sortfunc: (a: T, b: T) => boolean | number
 ): Array<T> {
   function merge(sortfunc, a, b) {
     let ia = 0;

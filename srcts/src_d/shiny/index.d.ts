@@ -1,0 +1,50 @@
+import { InputBinding, OutputBinding } from "../bindings";
+import { resetBrush } from "../imageutils/resetBrush";
+import { $escape, compareVersion } from "../utils";
+import { showNotification, removeNotification } from "./notifications";
+import { showModal, removeModal } from "./modal";
+import { showReconnectDialog, hideReconnectDialog } from "./reconnectDialog";
+import { renderContent, renderDependencies, renderHtml } from "./render";
+import { shinyBindAll, shinyForgetLastInputValue, shinySetInputValue, shinyInitializeInputs, shinyUnbindAll } from "./initedMethods";
+import { addCustomMessageHandler, HandlerType, ShinyApp } from "./shinyapp";
+import { initInputBindings } from "../bindings/input";
+import { initOutputBindings } from "../bindings/output";
+interface ShinyType {
+    version: string;
+    $escape: typeof $escape;
+    compareVersion: typeof compareVersion;
+    inputBindings: ReturnType<typeof initInputBindings>["inputBindings"];
+    InputBinding: typeof InputBinding;
+    outputBindings: ReturnType<typeof initOutputBindings>["outputBindings"];
+    OutputBinding: typeof OutputBinding;
+    resetBrush: typeof resetBrush;
+    notifications: {
+        show: typeof showNotification;
+        remove: typeof removeNotification;
+    };
+    modal: {
+        show: typeof showModal;
+        remove: typeof removeModal;
+    };
+    createSocket?: () => WebSocket;
+    showReconnectDialog: typeof showReconnectDialog;
+    hideReconnectDialog: typeof hideReconnectDialog;
+    renderDependencies: typeof renderDependencies;
+    renderContent: typeof renderContent;
+    renderHtml: typeof renderHtml;
+    user: string;
+    progressHandlers?: ShinyApp["progressHandlers"];
+    addCustomMessageHandler: typeof addCustomMessageHandler;
+    shinyapp?: ShinyApp;
+    setInputValue?: typeof shinySetInputValue;
+    onInputChange?: typeof shinySetInputValue;
+    forgetLastInputValue?: typeof shinyForgetLastInputValue;
+    bindAll?: typeof shinyBindAll;
+    unbindAll?: typeof shinyUnbindAll;
+    initializeInputs?: typeof shinyInitializeInputs;
+    oncustommessage?: HandlerType;
+}
+declare let Shiny: ShinyType;
+declare function setShiny(Shiny_: ShinyType): void;
+export { Shiny, setShiny };
+export type { ShinyType };

@@ -10,7 +10,7 @@ renderPlot(
   height = "auto",
   res = 72,
   ...,
-  alt = "Plot object",
+  alt = NA,
   env = parent.frame(),
   quoted = FALSE,
   execOnResize = FALSE,
@@ -41,12 +41,14 @@ rendering in R; it won't change the actual ppi of the browser.}
 \item{...}{Arguments to be passed through to \code{\link[grDevices:png]{grDevices::png()}}.
 These can be used to set the width, height, background color, etc.}
 
-\item{alt}{Alternate text for the HTML \verb{<img>} tag
-if it cannot be displayed or viewed (i.e., the user uses a screen reader).
-In addition to a character string, the value may be a reactive expression
-(or a function referencing reactive values) that returns a character string.
-NULL or "" is not recommended because those should be limited to decorative images
-(the default is "Plot object").}
+\item{alt}{Alternate text for the HTML \verb{<img>} tag if it cannot be displayed
+or viewed (i.e., the user uses a screen reader). In addition to a character
+string, the value may be a reactive expression (or a function referencing
+reactive values) that returns a character string. If the value is \code{NA} (the
+default), then \code{ggplot2::get_alt_text()} is used to extract alt text from
+ggplot objects; for other plots, \code{NA} results in alt text of "Plot object".
+\code{NULL} or \code{""} is not recommended because those should be limited to
+decorative images.}
 
 \item{env}{The environment in which to evaluate \code{expr}.}
 

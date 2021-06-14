@@ -239,8 +239,7 @@ function mapValues<V, R>(
   const newObj: Record<string, R> = {};
 
   for (const key in obj) {
-    // eslint-disable-next-line no-prototype-builtins
-    if (obj.hasOwnProperty(key)) newObj[key] = f(obj[key], key, obj);
+    if (hasOwnProperty(obj, key)) newObj[key] = f(obj[key], key, obj);
   }
   return newObj;
 }
@@ -259,7 +258,6 @@ function _equal(x: unknown, y: unknown): boolean {
 
     if (Object.keys(xo).length !== Object.keys(yo).length) return false;
     for (const prop in xo) {
-      // eslint-disable-next-line no-prototype-builtins
       if (!hasOwnProperty(yo, prop) || !_equal(xo[prop], yo[prop]))
         return false;
     }

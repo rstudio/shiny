@@ -90,7 +90,7 @@
 * Fix all `// eslint-disable-next-line no-prototype-builtins` lines
 * TypeScript other shiny files (ex: showcasemode)
 * Completely remove `parcel` from `./package.json` and only use `esbuild`
-* Delete 'shiny-es5' files
+* √ Delete 'shiny-es5' files
 * Delete 'old' folder
 * _Uglify_ js files (like in previous Gruntfile.js)
   * datepicker

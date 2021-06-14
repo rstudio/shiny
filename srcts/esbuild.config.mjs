@@ -4,37 +4,64 @@ import readcontrol from "readcontrol";
 import process from "process";
 import globalsPlugin from "esbuild-plugin-globals";
 
-let watch = process.argv.length >= 3 && process.argv[2] == "--watch";
+async function buildFile(
+  fileName,
+  extraOpts = {},
+  strSize = "shiny.min.js".length
+) {
+  let watch = process.argv.length >= 3 && process.argv[2] == "--watch";
+  let incremental = false;
 
-let outdir = "../inst/www/shared/";
-let opts = {
-  entryPoints: ["src/index.ts"],
-  bundle: true,
-  watch: watch,
-  plugins: [
-    globalsPlugin({
-      jquery: "window.jQuery",
-    }),
-    babel(),
-  ],
-  target: "es5",
-  sourcemap: true,
-  define: {
-    "process.env.SHINY_VERSION": `"${
-      readcontrol.readSync("../DESCRIPTION").version
-    }"`,
-  },
-};
+  let printName = fileName;
 
-console.log("Building shiny.js");
-await esbuild.build({
-  ...opts,
-  outfile: outdir + "shiny.js",
-});
+  while (printName.length < strSize) {
+    printName = printName + " ";
+  }
 
-console.log("Building shiny.min.js");
-await esbuild.build({
-  ...opts,
-  outfile: outdir + "shiny.min.js",
-  minify: true,
-});
+  const onRebuild = function (error, result) {
+    if (error) {
+      console.error(printName, "watch build failed:\n", error);
+    } else {
+      console.log("√ -", printName, "-", new Date().toJSON());
+    }
+    return;
+  };
+
+  if (watch) {
+    incremental = true;
+    watch = {
+      onRebuild: onRebuild,
+    };
+  }
+
+  const outdir = "../inst/www/shared/";
+
+  console.log("Building " + fileName);
+  await esbuild.build({
+    outfile: outdir + fileName,
+    entryPoints: ["src/index.ts"],
+    bundle: true,
+    incremental: incremental,
+    watch: watch,
+    plugins: [
+      globalsPlugin({
+        jquery: "window.jQuery",
+        //// Loaded dynamically. MUST use `window.strftime` within code
+        // strftime: "window.strftime",
+      }),
+      babel(),
+    ],
+    target: "es5",
+    sourcemap: true,
+    define: {
+      "process.env.SHINY_VERSION": `"${
+        readcontrol.readSync("../DESCRIPTION").version
+      }"`,
+    },
+    ...extraOpts,
+  });
+  onRebuild();
+}
+
+buildFile("shiny.js");
+buildFile("shiny.min.js", { minify: true });

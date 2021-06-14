@@ -31,10 +31,10 @@ writeLines(
 withr::with_dir(
   rprojroot::find_package_root_file("srcts"),
   {
-  	exit_code <- system(paste0("yarn add --dev jquery@", version))
-  	if (exit_code != 0) stop("yarn could not install jquery")
+    exit_code <- system(paste0("yarn add --dev jquery@", version))
+    if (exit_code != 0) stop("yarn could not install jquery")
 
-  	exit_code <- system(paste0("yarn add --dev @types/jquery@patch:@types/jquery@", version, "#./patch/types-jquery.patch"))
-  	if (exit_code != 0) stop("yarn could not install @types/jquery")
+    exit_code <- system(paste0("yarn add --dev @types/jquery@patch:@types/jquery@", version, "#./patch/types-jquery.patch"))
+    if (exit_code != 0) stop("yarn could not install @types/jquery")
   }
 )

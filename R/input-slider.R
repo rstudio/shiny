@@ -201,18 +201,16 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
 }
 
 
-ionRangeSliderVersion <- "2.3.1"
-
 ionRangeSliderDependency <- function() {
   list(
     # ion.rangeSlider also needs normalize.css, which is already included in Bootstrap.
     htmlDependency(
-      "ionrangeslider-javascript", ionRangeSliderVersion,
+      "ionrangeslider-javascript", version_ion_range_slider,
       src = c(href = "shared/ionrangeslider"),
       script = "js/ion.rangeSlider.min.js"
     ),
     htmlDependency(
-      "strftime", "0.9.2",
+      "strftime", version_strftime,
       src = c(href = "shared/strftime"),
       script = "strftime-min.js"
     ),
@@ -224,7 +222,7 @@ ionRangeSliderDependencyCSS <- function(theme) {
   if (!is_bs_theme(theme)) {
     return(htmlDependency(
       "ionrangeslider-css",
-      ionRangeSliderVersion,
+      version_ion_range_slider,
       src = c(href = "shared/ionrangeslider"),
       stylesheet = "css/ion.rangeSlider.css"
     ))
@@ -252,7 +250,7 @@ ionRangeSliderDependencyCSS <- function(theme) {
     input = sass_input,
     theme = theme,
     name = "ionRangeSlider",
-    version = ionRangeSliderVersion,
+    version = version_ion_range_slider,
     cache_key_extra = shinyPackageVersion()
   )
 }

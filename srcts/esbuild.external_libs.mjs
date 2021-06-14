@@ -1,4 +1,4 @@
-import {readdirSync, unlinkSync, writeFileSync} from "fs";
+import { readdirSync, unlinkSync, writeFileSync } from "fs";
 import esbuild from "esbuild";
 import globalsPlugin from "esbuild-plugin-globals";
 
@@ -6,7 +6,6 @@ import globalsPlugin from "esbuild-plugin-globals";
 // let watch = process.argv.length >= 3 && process.argv[2] == "--watch";
 
 let instdir = "../inst/";
-let outdir = instdir + "/www/shared/";
 
 let opts = {
   bundle: false,
@@ -16,27 +15,32 @@ let opts = {
 };
 
 console.log("Building datepicker");
-const locale_files = readdirSync(instdir + "www/shared/datepicker/js/locales/")
+const localeFiles = readdirSync(instdir + "www/shared/datepicker/js/locales/");
 
-let require_files = locale_files.map(function(filename) {
-  return `require("./locales/${ filename }");`;
-}).join("\n");
+let requireFiles = localeFiles
+  .map(function (filename) {
+    return `require("./locales/${filename}");`;
+  })
+  .join("\n");
 
 let tmpfile = instdir + "www/shared/datepicker/js/temp.js";
-writeFileSync(tmpfile,
-`require("./bootstrap-datepicker.js");
-${require_files}`)
+
+writeFileSync(
+  tmpfile,
+  `require("./bootstrap-datepicker.js");
+${requireFiles}`
+);
 await esbuild.build({
   ...opts,
-  plugins:[
+  plugins: [
     globalsPlugin({
       jquery: "window.jQuery",
-    })
+    }),
   ],
   bundle: true,
   entryPoints: [tmpfile],
   outfile: instdir + "www/shared/datepicker/js/bootstrap-datepicker.min.js",
-  external: ['jquery'],
+  external: ["jquery"],
   minify: true,
 });
 // Clean up
@@ -45,9 +49,7 @@ unlinkSync(tmpfile);
 console.log("Building ionrangeslider");
 await esbuild.build({
   ...opts,
-  entryPoints: [
-    instdir + "www/shared/ionrangeslider/js/ion.rangeSlider.js"
-  ],
+  entryPoints: [instdir + "www/shared/ionrangeslider/js/ion.rangeSlider.js"],
   outfile: instdir + "www/shared/ionrangeslider/js/ion.rangeSlider.min.js",
   minify: true,
 });
@@ -56,8 +58,10 @@ console.log("Building selectize");
 await esbuild.build({
   ...opts,
   entryPoints: [
-    instdir + "www/shared/selectize/accessibility/js/selectize-plugin-a11y.js"
+    instdir + "www/shared/selectize/accessibility/js/selectize-plugin-a11y.js",
   ],
-  outfile: instdir + "www/shared/selectize/accessibility/js/selectize-plugin-a11y.min.js",
+  outfile:
+    instdir +
+    "www/shared/selectize/accessibility/js/selectize-plugin-a11y.min.js",
   minify: true,
 });

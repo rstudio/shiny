@@ -9,7 +9,7 @@ modalDialog(
   ...,
   title = NULL,
   footer = modalButton("Dismiss"),
-  size = c("m", "s", "l"),
+  size = c("m", "s", "l", "xl"),
   easyClose = FALSE,
   fade = TRUE
 )

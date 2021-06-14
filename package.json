@@ -3,7 +3,7 @@
   "private": true,
   "version": "1.6.0",
   "main": "",
-  "types": "src_d/shiny/index.d.ts",
+  "types": "srcts/types/shiny/index.d.ts",
   "engines": {
     "node": ">= 14",
     "yarn": ">= 1.22"

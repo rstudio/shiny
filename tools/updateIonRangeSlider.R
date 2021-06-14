@@ -81,7 +81,7 @@ writeLines(
 
 
 # Finally, run yarn build so the JS patches propogate to the minified files
-withr::with_dir(rprojroot::find_package_root_file("srcts"), {
+withr::with_dir(rprojroot::find_package_root_file(), {
   exit_code <- system(paste0("yarn add --dev ion-rangeslider@", version))
   if (exit_code != 0) stop("yarn could not install ion-rangeslider")
 

@@ -13,8 +13,6 @@ Updating web libraries
 
 After updating, our patches to `bootstrap-datepicker` must be applied using the script `applyDatepickerPatches.R`
 
-After updating and applying patches, `yarn grunt` should be run per the instructions above in order to generate a minified JavaScript file.
-
 ### Making a new patch
 
 To create a new patch:
@@ -24,9 +22,8 @@ To create a new patch:
 1. Instead, create a patch with a command like `git diff > tools/datepicker-patches/012-a-description.patch`. Patches are applied in alphabetic order (per `list.files`), so you should name your patch based on the last one in `tools/datepicker-patches` so that it's applied last.
 1. Revert `bootstrap-datepicker` to its unpatched state by running `updateBootstrapDatepicker.R`
 1. Apply all patches, including the one you just made, by running `applyDatepickerPatches.R`
-1. Run `yarn grunt`
-1. Test your changes
-1. `git add` the new `.patch` and any resulting changes
+2. Test your changes
+3. `git add` the new `.patch` and any resulting changes
 
 
 ## Updating and patching ion.rangeSlider
@@ -35,7 +32,6 @@ To create a new patch:
 
 [ion.rangeSlider](https://github.com/IonDen/ion.rangeSlider) can be updated with the script `updateIonRangeSlider.R`. That script downloads a specific version of ion.rangeSlider and applies our patches in tools/ion.rangeSlider-patches.
 
-After updating and applying patches, `yarn grunt` should be run per the instructions above in order to generate a minified JavaScript file.
 
 ### Making a new patch
 
@@ -45,9 +41,8 @@ To create a new patch:
 1. **Do not commit your changes.**
 1. Instead, create a patch with a command like `git diff > tools/ion.rangeSlider-patches/0004-a-description.patch`. Patches are applied in alphabetic order (per `list.files`), so you should name your patch based on the last one in `tools/ion.rangeSlider-patches` so that it's applied last.
 1. Run `updateIonRangeSlider.R` to download the library and apply patches.
-1. Run `yarn grunt`
-1. Test your changes
-1. `git add` the new `.patch` and any resulting changes
+2. Test your changes
+3. `git add` the new `.patch` and any resulting changes
 
 
 ## Updating Font-Awesome
@@ -82,7 +77,6 @@ To create a new patch:
 
 [selectize](https://github.com/selectize/selectize.js) and [its accessibility plugin](https://github.com/SLMNBJ/selectize-plugin-a11y) can be updated with the script `updateSelectize.R`. That script downloads a specific version of selectize and selectize-plugin-a11y, and applies our patches in tools/selectize-patches.
 
-After updating and applying patches, `yarn grunt` should be run per the instructions above in order to generate a minified JavaScript file.
 
 ### Making a new patch
 
@@ -92,9 +86,8 @@ To create a new patch:
 1. **Do not commit your changes.**
 1. Instead, create a patch with a command like `git diff > tools/selectize-patches/000-assign-unique-id-per-option.patch`. Patches are applied in alphabetic order (per `list.files`), so you should name your patch based on the last one in `tools/selectize-patches` so that it's applied last.
 1. Run `updateSelectize.R` to download the library and apply patches.
-1. Run `yarn grunt`
-1. Test your changes
-1. `git add` the new `.patch` and any resulting changes
+2. Test your changes
+3. `git add` the new `.patch` and any resulting changes
 
 ## Updating Shiny's [S]CSS
 

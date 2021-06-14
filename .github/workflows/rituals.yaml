@@ -129,7 +129,7 @@ jobs:
           tree src
           yarn install --immutable && yarn build
           git add ./src && git commit -m 'yarn lint (GitHub Actions)' || echo "No yarn lint changes to commit"
-          git add ./src_d && git commit -m 'yarn tsc (GitHub Actions)' || echo "No type definition changes to commit"
+          git add ./types && git commit -m 'yarn tsc (GitHub Actions)' || echo "No type definition changes to commit"
           git add ../inst && git commit -m 'yarn build (GitHub Actions)' || echo "No yarn build changes to commit"
           if [ -n "$(git status --porcelain)" ]
           then

@@ -13,8 +13,6 @@
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
-  font-size: 12px;
-  font-family: Arial, sans-serif;
 }
 
 .irs-line {
@@ -92,7 +90,6 @@
   left: 0;
   width: 1px;
   height: 8px;
-  background: #000;
 }
 
 .irs-grid-pol.small {
@@ -108,7 +105,6 @@
   font-size: 9px;
   line-height: 9px;
   padding: 0 3px;
-  color: #000;
 }
 
 .irs-disable-mask {

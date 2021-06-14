@@ -4,7 +4,7 @@ import type { ShinyEventInputChanged } from "./shinyEvents";
 
 function triggerFileInputChanged(
   name: string,
-  value,
+  value: unknown,
   binding: FileInputBinding,
   el: HTMLElement,
   inputType: string,

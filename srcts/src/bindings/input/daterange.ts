@@ -63,8 +63,8 @@ class DateRangeInputBinding extends DateInputBindingBase {
     label: string;
     value: [string, string];
     valueString: [string, string];
-    min: Date;
-    max: Date;
+    min: ReturnType<typeof formatDateUTC> | null;
+    max: ReturnType<typeof formatDateUTC> | null;
     weekstart: string;
     format: string;
     language: string;
@@ -76,13 +76,13 @@ class DateRangeInputBinding extends DateInputBindingBase {
     const $endinput = $inputs.eq(1);
 
     // For many of the properties, assume start and end have the same values
-    let min = $startinput.bsDatepicker("getStartDate");
-    let max = $startinput.bsDatepicker("getEndDate");
+    const min = $startinput.bsDatepicker("getStartDate");
+    const max = $startinput.bsDatepicker("getEndDate");
 
     // Stringify min and max. If min and max aren't set, they will be
     // -Infinity and Infinity; replace these with null.
-    min = min === -Infinity ? null : formatDateUTC(min);
-    max = max === Infinity ? null : formatDateUTC(max);
+    const minStr = min === -Infinity ? null : formatDateUTC(min as Date);
+    const maxStr = max === Infinity ? null : formatDateUTC(max as Date);
 
     // startViewMode is stored as a number; convert to string
     let startview = $startinput.data("datepicker").startView;
@@ -95,8 +95,8 @@ class DateRangeInputBinding extends DateInputBindingBase {
       label: this._getLabelNode(el).text(),
       value: this.getValue(el),
       valueString: [$startinput.val() as string, $endinput.val() as string],
-      min: min,
-      max: max,
+      min: minStr,
+      max: maxStr,
       weekstart: $startinput.data("datepicker").weekStart,
       format: this._formatToString($startinput.data("datepicker").format),
       language: $startinput.data("datepicker").language,

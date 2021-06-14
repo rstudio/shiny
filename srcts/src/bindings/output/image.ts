@@ -15,13 +15,21 @@ import {
   hasOwnProperty,
 } from "../../utils";
 import { isIE, IEVersion } from "../../utils/browser";
+import type { CoordmapInitType } from "../../imageutils/initCoordmap";
+import type { errorsMessageValue } from "../../shiny/shinyapp";
 
 class ImageOutputBinding extends OutputBinding {
   find(scope: HTMLElement): JQuery<HTMLElement> {
     return $(scope).find(".shiny-image-output, .shiny-plot-output");
   }
 
-  renderValue(el: HTMLElement, data): void {
+  renderValue(
+    el: HTMLElement,
+    data: {
+      coordmap: CoordmapInitType;
+      error?: string;
+    } & Record<string, string>
+  ): void {
     // The overall strategy:
     // * Clear out existing image and event handlers.
     // * Create new image.
@@ -32,7 +40,7 @@ class ImageOutputBinding extends OutputBinding {
     const outputId = this.getId(el);
 
     const $el = $(el);
-    let img;
+    let img: HTMLImageElement;
 
     // Get existing img element if present.
     let $img = $el.find("img");
@@ -148,7 +156,8 @@ class ImageOutputBinding extends OutputBinding {
     // height and width
     $img.off("load.shiny_image_interaction");
     $img.one("load.shiny_image_interaction", function () {
-      initCoordmap($el, opts.coordmap);
+      // Use a local variable so the type check is happy
+      const optsCoordmap = (opts.coordmap = initCoordmap($el, opts.coordmap));
 
       // This object listens for mousedowns, and triggers mousedown2 and dblclick2
       // events as appropriate.
@@ -173,7 +182,7 @@ class ImageOutputBinding extends OutputBinding {
         const clickHandler = createClickHandler(
           opts.clickId,
           opts.clickClip,
-          opts.coordmap
+          optsCoordmap
         );
 
         $el.on("mousedown2.image_output", clickHandler.mousedown);
@@ -193,7 +202,7 @@ class ImageOutputBinding extends OutputBinding {
         const dblclickHandler = createClickHandler(
           opts.dblclickId,
           opts.clickClip,
-          opts.coordmap
+          optsCoordmap
         );
 
         $el.on("dblclick2.image_output", dblclickHandler.mousedown);
@@ -211,7 +220,7 @@ class ImageOutputBinding extends OutputBinding {
           opts.hoverDelayType,
           opts.hoverClip,
           opts.hoverNullOutside,
-          opts.coordmap
+          optsCoordmap
         );
 
         $el.on("mousemove.image_output", hoverHandler.mousemove);
@@ -228,7 +237,7 @@ class ImageOutputBinding extends OutputBinding {
           opts.brushId,
           $el,
           opts,
-          opts.coordmap,
+          optsCoordmap,
           outputId
         );
 
@@ -248,18 +257,21 @@ class ImageOutputBinding extends OutputBinding {
     });
   }
 
-  renderError(el: HTMLElement, err): void {
+  renderError(el: HTMLElement, err: errorsMessageValue): void {
     $(el).find("img").trigger("reset");
     OutputBinding.prototype.renderError.call(this, el, err);
   }
 
-  clearError(el): void {
+  clearError(el: HTMLElement): void {
     // Remove all elements except img and the brush; this is usually just
     // error messages.
     $(el)
       .contents()
       .filter(function () {
-        return this.tagName !== "IMG" && this.id !== el.id + "_brush";
+        return !(
+          this instanceof HTMLElement &&
+          (this.tagName === "IMG" || this.id === el.id + "_brush")
+        );
       })
       .remove();
 

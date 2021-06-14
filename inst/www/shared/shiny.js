@@ -3465,7 +3465,6 @@
       return 1;
     }
   }
-  scopeExprToFunc.call;
   function scopeExprToFunc(expr) {
     var exprEscaped = expr.replace(/[\\"']/g, "\\$&").replace(/\u0000/g, "\\0").replace(/\n/g, "\\n").replace(/\r/g, "\\r").replace(/[\b]/g, "\\b");
     var func;
@@ -3535,18 +3534,22 @@
   }
   function _equal(x, y) {
     if (import_jquery5.default.type(x) === "object" && import_jquery5.default.type(y) === "object") {
-      if (Object.keys(x).length !== Object.keys(y).length)
+      var xo = x;
+      var yo = y;
+      if (Object.keys(xo).length !== Object.keys(yo).length)
         return false;
-      for (var prop in x) {
-        if (!y.hasOwnProperty(prop) || !_equal(x[prop], y[prop]))
+      for (var prop in xo) {
+        if (!hasOwnProperty(yo, prop) || !_equal(xo[prop], yo[prop]))
           return false;
       }
       return true;
     } else if (import_jquery5.default.type(x) === "array" && import_jquery5.default.type(y) === "array") {
-      if (x.length !== y.length)
+      var xa = x;
+      var ya = y;
+      if (xa.length !== ya.length)
         return false;
-      for (var i = 0; i < x.length; i++) {
-        if (!_equal(x[i], y[i]))
+      for (var i = 0; i < xa.length; i++) {
+        if (!_equal(xa[i], ya[i]))
           return false;
       }
       return true;
@@ -4909,14 +4912,14 @@
     };
     return _getPrototypeOf3(o);
   }
-  var TextInputBinding = /* @__PURE__ */ function(_InputBinding) {
-    _inherits3(TextInputBinding2, _InputBinding);
-    var _super = _createSuper3(TextInputBinding2);
-    function TextInputBinding2() {
-      _classCallCheck5(this, TextInputBinding2);
+  var TextInputBindingBase = /* @__PURE__ */ function(_InputBinding) {
+    _inherits3(TextInputBindingBase2, _InputBinding);
+    var _super = _createSuper3(TextInputBindingBase2);
+    function TextInputBindingBase2() {
+      _classCallCheck5(this, TextInputBindingBase2);
       return _super.apply(this, arguments);
     }
-    _createClass5(TextInputBinding2, [{
+    _createClass5(TextInputBindingBase2, [{
       key: "find",
       value: function find2(scope) {
         var $inputs = (0, import_jquery8.default)(scope).find('input[type="text"], input[type="search"], input[type="url"], input[type="email"]');
@@ -4925,17 +4928,20 @@
     }, {
       key: "getId",
       value: function getId(el) {
-        return _get(_getPrototypeOf3(TextInputBinding2.prototype), "getId", this).call(this, el) || el.name;
+        return _get(_getPrototypeOf3(TextInputBindingBase2.prototype), "getId", this).call(this, el) || el.name;
       }
     }, {
       key: "getValue",
       value: function getValue(el) {
-        return el.value;
+        throw "not implemented";
+        el;
       }
     }, {
       key: "setValue",
       value: function setValue(el, value) {
-        el.value = value;
+        throw "not implemented";
+        el;
+        value;
       }
     }, {
       key: "subscribe",
@@ -4955,21 +4961,15 @@
     }, {
       key: "receiveMessage",
       value: function receiveMessage(el, data) {
-        if (hasOwnProperty(data, "value"))
-          this.setValue(el, data.value);
-        updateLabel(data.label, this._getLabelNode(el));
-        if (hasOwnProperty(data, "placeholder"))
-          el.placeholder = data.placeholder;
-        (0, import_jquery8.default)(el).trigger("change");
+        throw "not implemented";
+        el;
+        data;
       }
     }, {
       key: "getState",
       value: function getState(el) {
-        return {
-          label: this._getLabelNode(el).text(),
-          value: el.value,
-          placeholder: el.placeholder
-        };
+        throw "not implemented";
+        el;
       }
     }, {
       key: "getRatePolicy",
@@ -4986,8 +4986,47 @@
         return (0, import_jquery8.default)(el).parent().find('label[for="' + $escape(el.id) + '"]');
       }
     }]);
-    return TextInputBinding2;
+    return TextInputBindingBase2;
   }(InputBinding);
+  var TextInputBinding = /* @__PURE__ */ function(_TextInputBindingBase) {
+    _inherits3(TextInputBinding2, _TextInputBindingBase);
+    var _super2 = _createSuper3(TextInputBinding2);
+    function TextInputBinding2() {
+      _classCallCheck5(this, TextInputBinding2);
+      return _super2.apply(this, arguments);
+    }
+    _createClass5(TextInputBinding2, [{
+      key: "setValue",
+      value: function setValue(el, value) {
+        el.value = value;
+      }
+    }, {
+      key: "getValue",
+      value: function getValue(el) {
+        return el.value;
+      }
+    }, {
+      key: "getState",
+      value: function getState(el) {
+        return {
+          label: this._getLabelNode(el).text(),
+          value: el.value,
+          placeholder: el.placeholder
+        };
+      }
+    }, {
+      key: "receiveMessage",
+      value: function receiveMessage(el, data) {
+        if (hasOwnProperty(data, "value"))
+          this.setValue(el, data.value);
+        updateLabel(data.label, this._getLabelNode(el));
+        if (hasOwnProperty(data, "placeholder"))
+          el.placeholder = data.placeholder;
+        (0, import_jquery8.default)(el).trigger("change");
+      }
+    }]);
+    return TextInputBinding2;
+  }(TextInputBindingBase);
 
   // src/bindings/input/number.ts
   function _typeof4(obj) {
@@ -5086,8 +5125,8 @@
     };
     return _getPrototypeOf4(o);
   }
-  var NumberInputBinding = /* @__PURE__ */ function(_TextInputBinding) {
-    _inherits4(NumberInputBinding2, _TextInputBinding);
+  var NumberInputBinding = /* @__PURE__ */ function(_TextInputBindingBase) {
+    _inherits4(NumberInputBinding2, _TextInputBindingBase);
     var _super = _createSuper4(NumberInputBinding2);
     function NumberInputBinding2() {
       _classCallCheck6(this, NumberInputBinding2);
@@ -5155,7 +5194,7 @@
       }
     }]);
     return NumberInputBinding2;
-  }(TextInputBinding);
+  }(TextInputBindingBase);
 
   // src/bindings/input/password.ts
   var import_es_array_iterator5 = __toModule(require_es_array_iterator());
@@ -6049,8 +6088,8 @@
     }
     return prettify;
   }
-  var SliderInputBinding = /* @__PURE__ */ function(_TextInputBinding) {
-    _inherits9(SliderInputBinding2, _TextInputBinding);
+  var SliderInputBinding = /* @__PURE__ */ function(_TextInputBindingBase) {
+    _inherits9(SliderInputBinding2, _TextInputBindingBase);
     var _super = _createSuper9(SliderInputBinding2);
     function SliderInputBinding2() {
       _classCallCheck11(this, SliderInputBinding2);
@@ -6217,7 +6256,7 @@
       }
     }]);
     return SliderInputBinding2;
-  }(TextInputBinding);
+  }(TextInputBindingBase);
   function formatNumber(num) {
     var thousandSep = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : ",";
     var decimalSep = arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : ".";
@@ -6462,8 +6501,8 @@
         var $endinput = $inputs.eq(1);
         var min4 = $startinput.bsDatepicker("getStartDate");
         var max4 = $startinput.bsDatepicker("getEndDate");
-        min4 = min4 === -Infinity ? null : formatDateUTC(min4);
-        max4 = max4 === Infinity ? null : formatDateUTC(max4);
+        var minStr = min4 === -Infinity ? null : formatDateUTC(min4);
+        var maxStr = max4 === Infinity ? null : formatDateUTC(max4);
         var startview = $startinput.data("datepicker").startView;
         if (startview === 2)
           startview = "decade";
@@ -6475,8 +6514,8 @@
           label: this._getLabelNode(el).text(),
           value: this.getValue(el),
           valueString: [$startinput.val(), $endinput.val()],
-          min: min4,
-          max: max4,
+          min: minStr,
+          max: maxStr,
           weekstart: $startinput.data("datepicker").weekStart,
           format: this._formatToString($startinput.data("datepicker").format),
           language: $startinput.data("datepicker").language,
@@ -7573,10 +7612,10 @@
             size: file.size,
             type: file.type
           };
+          i;
         });
         var evt = triggerFileInputChanged(this.id, fileInfo, getFileInputBinding(), this.el, "shiny.fileupload", document);
-        this.makeRequest("uploadEnd", [this.jobId, this.id], function(response) {
-          response;
+        this.makeRequest("uploadEnd", [this.jobId, this.id], function() {
           _this5.$setActive(false);
           _this5.onProgress(null, 1);
           _this5.$bar().text("Upload complete");
@@ -9145,6 +9184,7 @@
       var metas = import_jquery27.default.map(asArray(dep.meta), function(obj, idx) {
         var name = Object.keys(obj)[0];
         return (0, import_jquery27.default)("<meta>").attr("name", name).attr("content", obj[name]);
+        idx;
       });
       $head.append(metas);
     }
@@ -9524,7 +9564,8 @@
       y: contentRatio.y * boundingRect.height
     };
   }
-  function initCoordmap($el, coordmap) {
+  function initCoordmap($el, coordmap_) {
+    var coordmap = coordmap_;
     var $img = $el.find("img");
     var img = $img[0];
     if (coordmap.panels.length === 0) {
@@ -9686,6 +9727,7 @@
         });
       };
     };
+    return coordmap;
   }
 
   // src/imageutils/findbox.ts
@@ -10539,7 +10581,7 @@
         $img.off(".image_output");
         $img.off("load.shiny_image_interaction");
         $img.one("load.shiny_image_interaction", function() {
-          initCoordmap($el, opts.coordmap);
+          var optsCoordmap = opts.coordmap = initCoordmap($el, opts.coordmap);
           var clickInfo = createClickInfo($el, opts.dblclickId, opts.dblclickDelay);
           $el.on("mousedown.image_output", clickInfo.mousedown);
           if (isIE() && IEVersion() === 8) {
@@ -10547,21 +10589,21 @@
           }
           if (opts.clickId) {
             disableDrag($el, $img);
-            var clickHandler = createClickHandler(opts.clickId, opts.clickClip, opts.coordmap);
+            var clickHandler = createClickHandler(opts.clickId, opts.clickClip, optsCoordmap);
             $el.on("mousedown2.image_output", clickHandler.mousedown);
             $el.on("resize.image_output", clickHandler.onResize);
             $img.on("reset.image_output", clickHandler.onResetImg);
           }
           if (opts.dblclickId) {
             disableDrag($el, $img);
-            var dblclickHandler = createClickHandler(opts.dblclickId, opts.clickClip, opts.coordmap);
+            var dblclickHandler = createClickHandler(opts.dblclickId, opts.clickClip, optsCoordmap);
             $el.on("dblclick2.image_output", dblclickHandler.mousedown);
             $el.on("resize.image_output", dblclickHandler.onResize);
             $img.on("reset.image_output", dblclickHandler.onResetImg);
           }
           if (opts.hoverId) {
             disableDrag($el, $img);
-            var hoverHandler = createHoverHandler(opts.hoverId, opts.hoverDelay, opts.hoverDelayType, opts.hoverClip, opts.hoverNullOutside, opts.coordmap);
+            var hoverHandler = createHoverHandler(opts.hoverId, opts.hoverDelay, opts.hoverDelayType, opts.hoverClip, opts.hoverNullOutside, optsCoordmap);
             $el.on("mousemove.image_output", hoverHandler.mousemove);
             $el.on("mouseout.image_output", hoverHandler.mouseout);
             $el.on("resize.image_output", hoverHandler.onResize);
@@ -10569,7 +10611,7 @@
           }
           if (opts.brushId) {
             disableDrag($el, $img);
-            var brushHandler = createBrushHandler(opts.brushId, $el, opts, opts.coordmap, outputId);
+            var brushHandler = createBrushHandler(opts.brushId, $el, opts, optsCoordmap, outputId);
             $el.on("mousedown.image_output", brushHandler.mousedown);
             $el.on("mousemove.image_output", brushHandler.mousemove);
             $el.on("resize.image_output", brushHandler.onResize);
@@ -10592,7 +10634,7 @@
       key: "clearError",
       value: function clearError(el) {
         (0, import_jquery33.default)(el).contents().filter(function() {
-          return this.tagName !== "IMG" && this.id !== el.id + "_brush";
+          return !(this instanceof HTMLElement && (this.tagName === "IMG" || this.id === el.id + "_brush"));
         }).remove();
         OutputBinding.prototype.clearError.call(this, el);
       }
@@ -12110,7 +12152,7 @@
       _defineProperty16(this, "$socket", null);
       _defineProperty16(this, "config", null);
       _defineProperty16(this, "$inputValues", {});
-      _defineProperty16(this, "$initialInput", {});
+      _defineProperty16(this, "$initialInput", void 0);
       _defineProperty16(this, "$bindings", {});
       _defineProperty16(this, "$values", {});
       _defineProperty16(this, "$errors", {});
@@ -13231,14 +13273,20 @@
     initialValues[".clientdata_url_search"] = window.location.search;
     (0, import_jquery42.default)(window).on("pushstate", function(e) {
       inputs.setInput(".clientdata_url_search", window.location.search);
+      return;
+      e;
     });
     (0, import_jquery42.default)(window).on("popstate", function(e) {
       inputs.setInput(".clientdata_url_search", window.location.search);
+      return;
+      e;
     });
     initialValues[".clientdata_url_hash_initial"] = window.location.hash;
     initialValues[".clientdata_url_hash"] = window.location.hash;
     (0, import_jquery42.default)(window).on("hashchange", function(e) {
       inputs.setInput(".clientdata_url_hash", window.location.hash);
+      return;
+      e;
     });
     var singletonText = initialValues[".clientdata_singletons"] = (0, import_jquery42.default)('script[type="application/shiny-singletons"]').text();
     registerNames(singletonText.split(/,/));

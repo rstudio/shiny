@@ -25,6 +25,8 @@ rules:
     - off
   "@typescript-eslint/no-explicit-any":
     - off
+  "@typescript-eslint/explicit-module-boundary-types":
+    - error
   camelcase:
     - error
   default-case:

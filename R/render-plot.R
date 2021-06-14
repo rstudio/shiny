@@ -290,7 +290,7 @@ drawPlot <- function(name, session, func, width, height, alt, pixelratio, res, .
               recordedPlot = grDevices::recordPlot(),
               coordmap = getCoordmap(value, width*pixelratio, height*pixelratio, res*pixelratio),
               pixelratio = pixelratio,
-              alt = if (anyNA(alt)) autoAltText(value) else alt,
+              alt = if (anyNA(alt)) getAltText(value) else alt,
               res = res
             )
           }
@@ -336,34 +336,28 @@ custom_print.ggplot <- function(x) {
   gtable <- ggplot2::ggplot_gtable(build)
   grid::grid.draw(gtable)
 
-  res <- list(
+  structure(list(
     build = build,
     gtable = gtable
-  )
-  class(res) <- "ggplot_build_gtable"
-
-  # ggplot2::get_alt_text() was added in v3.3.4
-  # https://github.com/tidyverse/ggplot2/pull/4482
-  get_alt <- getNamespace("ggplot2")$get_alt_text
-  if (is.function(get_alt)) {
-    res$alt_text <- get_alt(x)
-  }
-
-  res
+  ), class = "ggplot_build_gtable")
 }
 
 # Infer alt text description from renderPlot() value
 # (currently just ggplot2 is supported)
-autoAltText <- function(x, default = "Plot Object") {
+getAltText <- function(x, default = "Plot Object") {
   # Since, inside renderPlot(), custom_print.ggplot()
   # overrides print.ggplot, this class indicates a ggplot()
-  # value, and should have this field populated if
-  # ggplot2::get_alt_text() is available
-  if (inherits(x, "ggplot_build_gtable")) {
-    x$alt_text %||% default
-  } else {
-    default
+  if (!inherits(x, "ggplot_build_gtable")) {
+    return(default)
   }
+  # ggplot2::get_alt_text() was added in v3.3.4
+  # https://github.com/tidyverse/ggplot2/pull/4482
+  get_alt <- getNamespace("ggplot2")$get_alt_text
+  if (!is.function(get_alt)) {
+    return(default)
+  }
+  alt <- paste(get_alt(x$build), collapse = " ")
+  if (nzchar(alt)) alt else default
 }
 
 # The coordmap extraction functions below return something like the examples

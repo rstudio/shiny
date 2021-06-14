@@ -1,4 +1,4 @@
-import { TextHTMLElement, TextInputBinding } from "./text";
+import { TextHTMLElement, TextInputBindingBase } from "./text";
 declare type TimeFormatter = (fmt: string, dt: Date) => string;
 declare type legacySliderType = {
     canStepNext: () => boolean;
@@ -23,7 +23,7 @@ declare global {
         slider: () => legacySliderType;
     }
 }
-declare class SliderInputBinding extends TextInputBinding {
+declare class SliderInputBinding extends TextInputBindingBase {
     find(scope: HTMLElement): JQuery<HTMLElement>;
     getType(el: HTMLElement): string | false;
     getValue(el: TextHTMLElement): number | string | [number | string, number | string];

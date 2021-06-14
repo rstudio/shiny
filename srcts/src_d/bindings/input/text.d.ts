@@ -2,27 +2,33 @@ import { InputBinding } from "./InputBinding";
 declare type TextHTMLElement = HTMLInputElement;
 declare type TextReceiveMessageData = {
     label: string;
-    value?: any;
-    placeholder?: any;
+    value?: TextHTMLElement["value"];
+    placeholder?: TextHTMLElement["placeholder"];
 };
-declare class TextInputBinding extends InputBinding {
+declare class TextInputBindingBase extends InputBinding {
     find(scope: HTMLElement): JQuery<HTMLElement>;
     getId(el: TextHTMLElement): string;
-    getValue(el: TextHTMLElement): any;
-    setValue(el: TextHTMLElement, value: any): void;
+    getValue(el: TextHTMLElement): unknown;
+    setValue(el: TextHTMLElement, value: unknown): void;
     subscribe(el: TextHTMLElement, callback: (x: boolean) => void): void;
     unsubscribe(el: TextHTMLElement): void;
-    receiveMessage(el: TextHTMLElement, data: TextReceiveMessageData): void;
-    getState(el: TextHTMLElement): {
-        label: string;
-        value: any;
-        placeholder: any;
-    };
+    receiveMessage(el: TextHTMLElement, data: unknown): void;
+    getState(el: TextHTMLElement): unknown;
     getRatePolicy(el: HTMLElement): {
         policy: "debounce";
         delay: 250;
     };
     _getLabelNode(el: HTMLElement): JQuery<HTMLElement>;
 }
-export { TextInputBinding };
+declare class TextInputBinding extends TextInputBindingBase {
+    setValue(el: TextHTMLElement, value: string): void;
+    getValue(el: TextHTMLElement): TextHTMLElement["value"];
+    getState(el: TextHTMLElement): {
+        label: string;
+        value: string;
+        placeholder: string;
+    };
+    receiveMessage(el: TextHTMLElement, data: TextReceiveMessageData): void;
+}
+export { TextInputBinding, TextInputBindingBase };
 export type { TextHTMLElement, TextReceiveMessageData };

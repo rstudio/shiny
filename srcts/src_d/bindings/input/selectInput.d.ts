@@ -5,10 +5,13 @@ declare type SelectHTMLElement = HTMLSelectElement & {
 };
 declare type SelectInputReceiveMessageData = {
     label: string;
-    options?: any;
-    config?: any;
+    options?: string;
+    config?: string;
     url?: string;
     value?: string;
+};
+declare type SelectizeInfo = Selectize.IApi<string, unknown> & {
+    settings: Selectize.IOptions<string, unknown>;
 };
 declare class SelectInputBinding extends InputBinding {
     find(scope: HTMLElement): JQuery<HTMLElement>;
@@ -30,7 +33,7 @@ declare class SelectInputBinding extends InputBinding {
     initialize(el: SelectHTMLElement): void;
     _getLabelNode(el: SelectHTMLElement): JQuery<HTMLElement>;
     _is_selectize(el: HTMLElement): boolean;
-    _selectize(el: SelectHTMLElement, update?: boolean): Selectize.IApi<any, any>;
+    _selectize(el: SelectHTMLElement, update?: boolean): SelectizeInfo;
 }
 export { SelectInputBinding };
 export type { SelectInputReceiveMessageData };

@@ -1,3 +1,3 @@
-declare function showReconnectDialog(delay: any): void;
+declare function showReconnectDialog(delay: number): void;
 declare function hideReconnectDialog(): void;
 export { showReconnectDialog, hideReconnectDialog };

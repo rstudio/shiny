@@ -3,13 +3,17 @@
   "compilerOptions": {
     "target": "ES5",
     "isolatedModules": true,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "declaration": true,
+    "declarationDir": "./src_d",
+    "emitDeclarationOnly": true
   },
   "include": [
     "src/index.ts",
     "src/**/*.ts"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "**/__tests__"
   ]
 }

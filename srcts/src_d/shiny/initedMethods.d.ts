@@ -1,0 +1,23 @@
+import type { ShinyType } from ".";
+import type { FileInputBinding } from "../bindings/input/fileinput";
+import type { OutputBindingAdapter } from "../bindings/output_adapter";
+import type { priorityType } from "../inputPolicies";
+import type { bindScope } from "./bind";
+import type { HandlerType, ShinyApp } from "./shinyapp";
+declare function setShinyObj(shiny: ShinyType): void;
+declare function shinySetInputValue(name: string, value: unknown, opts?: {
+    priority?: priorityType;
+}): void;
+declare function shinyShinyApp(): ShinyApp;
+declare function setShinyUser(user: string): void;
+declare function shinyForgetLastInputValue(name: string): void;
+declare function shinyBindAll(scope: bindScope): void;
+declare function shinyUnbindAll(scope: bindScope, includeSelf?: boolean): void;
+declare function shinyInitializeInputs(scope: bindScope): void;
+declare function shinyAppBindOutput(id: string, binding: OutputBindingAdapter): void;
+declare function shinyAppUnbindOutput(id: string, binding: OutputBindingAdapter): boolean;
+declare function getShinyOnCustomMessage(): null | HandlerType;
+declare function getFileInputBinding(): FileInputBinding;
+declare function setFileInputBinding(fileInputBinding: FileInputBinding): void;
+declare function getShinyCreateWebsocket(): (() => WebSocket) | void;
+export { setShinyObj, shinySetInputValue, shinyShinyApp, setShinyUser, shinyForgetLastInputValue, shinyBindAll, shinyUnbindAll, shinyInitializeInputs, shinyAppBindOutput, shinyAppUnbindOutput, getShinyOnCustomMessage, getFileInputBinding, setFileInputBinding, getShinyCreateWebsocket, };

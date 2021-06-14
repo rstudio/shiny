@@ -1,3 +1,8 @@
+// This build script must be executed from the root repo directory via
+// ```
+// yarn build
+// ```
+
 import esbuild from "esbuild";
 import babel from "esbuild-plugin-babel";
 import readcontrol from "readcontrol";
@@ -34,12 +39,12 @@ async function buildFile(
     };
   }
 
-  const outdir = "../inst/www/shared/";
+  const outdir = "./inst/www/shared/";
 
   console.log("Building " + fileName);
   await esbuild.build({
     outfile: outdir + fileName,
-    entryPoints: ["src/index.ts"],
+    entryPoints: ["srcts/src/index.ts"],
     bundle: true,
     incremental: incremental,
     watch: watch,
@@ -55,7 +60,7 @@ async function buildFile(
     sourcemap: true,
     define: {
       "process.env.SHINY_VERSION": `"${
-        readcontrol.readSync("../DESCRIPTION").version
+        readcontrol.readSync("./DESCRIPTION").version
       }"`,
     },
     ...extraOpts,

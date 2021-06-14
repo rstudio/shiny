@@ -191,7 +191,7 @@
     "node_modules/core-js/internals/has.js": function(exports, module) {
       var toObject6 = require_to_object();
       var hasOwnProperty2 = {}.hasOwnProperty;
-      module.exports = function hasOwn(it, key) {
+      module.exports = Object.hasOwn || function hasOwn(it, key) {
         return hasOwnProperty2.call(toObject6(it), key);
       };
     }
@@ -371,7 +371,7 @@
       (module.exports = function(key, value) {
         return store[key] || (store[key] = value !== void 0 ? value : {});
       })("versions", []).push({
-        version: "3.13.0",
+        version: "3.14.0",
         mode: IS_PURE2 ? "pure" : "global",
         copyright: "\xA9 2021 Denis Pushkarev (zloirock.ru)"
       });
@@ -1015,7 +1015,8 @@
       var V8_VERSION2 = require_engine_v8_version();
       var fails11 = require_fails();
       module.exports = !!Object.getOwnPropertySymbols && !fails11(function() {
-        return !String(Symbol()) || !Symbol.sham && V8_VERSION2 && V8_VERSION2 < 41;
+        var symbol = Symbol();
+        return !String(symbol) || !(Object(symbol) instanceof Symbol) || !Symbol.sham && V8_VERSION2 && V8_VERSION2 < 41;
       });
     }
   });
@@ -2780,7 +2781,7 @@
     }
   });
 
-  // src/initialize/disableForm.ts
+  // srcts/src/initialize/disableForm.ts
   var import_jquery = __toModule(require_jquery());
   function disableFormSubmission() {
     (0, import_jquery.default)(document).on("submit", "form:not([action])", function(e) {
@@ -2788,7 +2789,7 @@
     });
   }
 
-  // src/initialize/history.ts
+  // srcts/src/initialize/history.ts
   var import_jquery2 = __toModule(require_jquery());
   function trackHistory() {
     var origPushState = window.history.pushState;
@@ -2823,10 +2824,10 @@
     parseInt: parseIntImplementation
   });
 
-  // src/initialize/browser.ts
+  // srcts/src/initialize/browser.ts
   var import_jquery3 = __toModule(require_jquery());
 
-  // src/utils/browser.ts
+  // srcts/src/utils/browser.ts
   var isQtVal = false;
   var isIEVal = false;
   var IEVersionVal = -1;
@@ -2849,13 +2850,13 @@
     return IEVersionVal;
   }
 
-  // src/utils/userAgent.ts
+  // srcts/src/utils/userAgent.ts
   var userAgentVal;
   function setUserAgent(userAgent) {
     userAgentVal = userAgent;
   }
 
-  // src/initialize/browser.ts
+  // srcts/src/initialize/browser.ts
   function getIEVersion() {
     var msie = userAgentVal.indexOf("MSIE ");
     if (isIE() && msie > 0) {
@@ -2882,7 +2883,7 @@
     setIEVersion(getIEVersion());
   }
 
-  // src/window/libraries.ts
+  // srcts/src/window/libraries.ts
   function windowShiny() {
     if (!window["Shiny"]) {
       window["Shiny"] = {};
@@ -2890,7 +2891,7 @@
     return window["Shiny"];
   }
 
-  // src/shiny/index.ts
+  // srcts/src/shiny/index.ts
   var import_jquery43 = __toModule(require_jquery());
 
   // node_modules/core-js/modules/es.function.name.js
@@ -2913,7 +2914,7 @@
     });
   }
 
-  // src/utils/index.ts
+  // srcts/src/utils/index.ts
   var import_es_regexp_exec = __toModule(require_es_regexp_exec());
 
   // node_modules/core-js/modules/es.string.replace.js
@@ -3344,15 +3345,15 @@
     ];
   }, UNSUPPORTED_Y);
 
-  // src/utils/index.ts
+  // srcts/src/utils/index.ts
   var import_jquery5 = __toModule(require_jquery());
 
-  // src/window/pixelRatio.ts
+  // srcts/src/window/pixelRatio.ts
   function windowDevicePixelRatio() {
     return window.devicePixelRatio;
   }
 
-  // src/utils/blob.ts
+  // srcts/src/utils/blob.ts
   var import_jquery4 = __toModule(require_jquery());
   var BlobBuilder;
   function setBlobBuilder(BlobBuilder_) {
@@ -3371,12 +3372,12 @@
     }
   }
 
-  // src/utils/Object.ts
+  // srcts/src/utils/Object.ts
   function hasOwnProperty(x, y) {
     return Object.prototype.hasOwnProperty.call(x, y);
   }
 
-  // src/utils/index.ts
+  // srcts/src/utils/index.ts
   function escapeHTML(str) {
     var escaped = {
       "&": "&amp;",
@@ -3630,7 +3631,7 @@
     return !window.bootstrap;
   }
 
-  // src/bindings/registry.ts
+  // srcts/src/bindings/registry.ts
   function _classCallCheck(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
       throw new TypeError("Cannot call a class as a function");
@@ -3708,7 +3709,7 @@
     return BindingRegistry2;
   }();
 
-  // src/bindings/input/InputBinding.ts
+  // srcts/src/bindings/input/InputBinding.ts
   function _classCallCheck2(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
       throw new TypeError("Cannot call a class as a function");
@@ -4237,7 +4238,7 @@
   var defineWellKnownSymbol2 = require_define_well_known_symbol();
   defineWellKnownSymbol2("iterator");
 
-  // src/bindings/input/checkbox.ts
+  // srcts/src/bindings/input/checkbox.ts
   var import_es_array_iterator = __toModule(require_es_array_iterator());
 
   // node_modules/core-js/modules/es.string.iterator.js
@@ -4303,7 +4304,7 @@
   var CollectionPrototype;
   var METHOD_NAME;
 
-  // src/bindings/input/checkbox.ts
+  // srcts/src/bindings/input/checkbox.ts
   var import_jquery6 = __toModule(require_jquery());
   function _typeof(obj) {
     "@babel/helpers - typeof";
@@ -4467,7 +4468,7 @@
     }
   });
 
-  // src/bindings/input/checkboxgroup.ts
+  // srcts/src/bindings/input/checkboxgroup.ts
   var import_es_array_iterator2 = __toModule(require_es_array_iterator());
   var import_jquery7 = __toModule(require_jquery());
   function _typeof2(obj) {
@@ -4747,7 +4748,7 @@
   var j;
   var key;
 
-  // src/bindings/input/number.ts
+  // srcts/src/bindings/input/number.ts
   var import_es_array_iterator4 = __toModule(require_es_array_iterator());
   var import_jquery9 = __toModule(require_jquery());
 
@@ -4788,7 +4789,7 @@
     }
   });
 
-  // src/bindings/input/text.ts
+  // srcts/src/bindings/input/text.ts
   var import_es_array_iterator3 = __toModule(require_es_array_iterator());
   var import_jquery8 = __toModule(require_jquery());
   function _typeof3(obj) {
@@ -5028,7 +5029,7 @@
     return TextInputBinding2;
   }(TextInputBindingBase);
 
-  // src/bindings/input/number.ts
+  // srcts/src/bindings/input/number.ts
   function _typeof4(obj) {
     "@babel/helpers - typeof";
     if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
@@ -5196,7 +5197,7 @@
     return NumberInputBinding2;
   }(TextInputBindingBase);
 
-  // src/bindings/input/password.ts
+  // srcts/src/bindings/input/password.ts
   var import_es_array_iterator5 = __toModule(require_es_array_iterator());
   var import_jquery10 = __toModule(require_jquery());
   function _typeof5(obj) {
@@ -5317,7 +5318,7 @@
     return PasswordInputBinding2;
   }(TextInputBinding);
 
-  // src/bindings/input/textarea.ts
+  // srcts/src/bindings/input/textarea.ts
   var import_es_array_iterator6 = __toModule(require_es_array_iterator());
   var import_jquery11 = __toModule(require_jquery());
   function _typeof6(obj) {
@@ -5432,7 +5433,7 @@
     return TextareaInputBinding2;
   }(TextInputBinding);
 
-  // src/bindings/input/radio.ts
+  // srcts/src/bindings/input/radio.ts
   var import_es_array_iterator7 = __toModule(require_es_array_iterator());
   var import_jquery12 = __toModule(require_jquery());
   function _typeof7(obj) {
@@ -5629,7 +5630,7 @@
     return RadioInputBinding2;
   }(InputBinding);
 
-  // src/bindings/input/date.ts
+  // srcts/src/bindings/input/date.ts
   var import_es_array_iterator8 = __toModule(require_es_array_iterator());
   var import_jquery13 = __toModule(require_jquery());
   function _typeof8(obj) {
@@ -5959,7 +5960,7 @@
     return DateInputBinding2;
   }(DateInputBindingBase);
 
-  // src/bindings/input/slider.ts
+  // srcts/src/bindings/input/slider.ts
   var import_es_regexp_exec2 = __toModule(require_es_regexp_exec());
   var import_es_array_iterator9 = __toModule(require_es_array_iterator());
   var import_jquery14 = __toModule(require_jquery());
@@ -6349,7 +6350,7 @@
     }
   });
 
-  // src/bindings/input/daterange.ts
+  // srcts/src/bindings/input/daterange.ts
   var import_es_array_iterator10 = __toModule(require_es_array_iterator());
   var import_jquery15 = __toModule(require_jquery());
   function _typeof10(obj) {
@@ -6588,14 +6589,14 @@
     return DateRangeInputBinding2;
   }(DateInputBindingBase);
 
-  // src/bindings/input/selectInput.ts
+  // srcts/src/bindings/input/selectInput.ts
   var import_es_array_iterator11 = __toModule(require_es_array_iterator());
   var import_jquery16 = __toModule(require_jquery());
 
-  // src/utils/eval.ts
+  // srcts/src/utils/eval.ts
   var indirectEval = eval;
 
-  // src/bindings/input/selectInput.ts
+  // srcts/src/bindings/input/selectInput.ts
   function _typeof11(obj) {
     "@babel/helpers - typeof";
     if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
@@ -6904,7 +6905,7 @@
     return SelectInputBinding2;
   }(InputBinding);
 
-  // src/bindings/input/actionbutton.ts
+  // srcts/src/bindings/input/actionbutton.ts
   var import_es_array_iterator12 = __toModule(require_es_array_iterator());
   var import_jquery17 = __toModule(require_jquery());
   function _typeof12(obj) {
@@ -7081,7 +7082,7 @@
     e.preventDefault();
   });
 
-  // src/bindings/input/tabinput.ts
+  // srcts/src/bindings/input/tabinput.ts
   var import_es_array_iterator13 = __toModule(require_es_array_iterator());
   var import_jquery18 = __toModule(require_jquery());
   function _typeof13(obj) {
@@ -7255,7 +7256,7 @@
     return BootstrapTabInputBinding2;
   }(InputBinding);
 
-  // src/bindings/input/fileinput.ts
+  // srcts/src/bindings/input/fileinput.ts
   var import_es_array_iterator15 = __toModule(require_es_array_iterator());
   var import_jquery21 = __toModule(require_jquery());
 
@@ -7271,11 +7272,11 @@
     }
   });
 
-  // src/file/FileProcessor.ts
+  // srcts/src/file/FileProcessor.ts
   var import_es_array_iterator14 = __toModule(require_es_array_iterator());
   var import_jquery20 = __toModule(require_jquery());
 
-  // src/events/shiny_inputchanged.ts
+  // srcts/src/events/shiny_inputchanged.ts
   var import_jquery19 = __toModule(require_jquery());
   function triggerFileInputChanged(name, value, binding, el, inputType, onEl) {
     var evt = import_jquery19.default.Event("shiny:inputchanged");
@@ -7288,7 +7289,7 @@
     return evt;
   }
 
-  // src/shiny/initedMethods.ts
+  // srcts/src/shiny/initedMethods.ts
   var fullShinyObj_ = null;
   function setShinyObj(shiny) {
     fullShinyObj_ = shiny;
@@ -7335,7 +7336,7 @@
     return fullShinyObj_.createSocket;
   }
 
-  // src/file/FileProcessor.ts
+  // srcts/src/file/FileProcessor.ts
   function _typeof14(obj) {
     "@babel/helpers - typeof";
     if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
@@ -7675,7 +7676,7 @@
     return FileUploader2;
   }(FileProcessor);
 
-  // src/bindings/input/fileinput.ts
+  // srcts/src/bindings/input/fileinput.ts
   function _typeof15(obj) {
     "@babel/helpers - typeof";
     if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
@@ -7993,7 +7994,7 @@
     return FileInputBinding2;
   }(InputBinding);
 
-  // src/bindings/input/index.ts
+  // srcts/src/bindings/input/index.ts
   function initInputBindings() {
     var inputBindings = new BindingRegistry();
     inputBindings.register(new TextInputBinding(), "shiny.textInput");
@@ -8017,7 +8018,7 @@
     };
   }
 
-  // src/bindings/output/text.ts
+  // srcts/src/bindings/output/text.ts
   var import_es_array_iterator16 = __toModule(require_es_array_iterator());
   var import_jquery23 = __toModule(require_jquery());
 
@@ -8036,7 +8037,7 @@
     }
   });
 
-  // src/bindings/output/OutputBinding.ts
+  // srcts/src/bindings/output/OutputBinding.ts
   var import_es_regexp_exec3 = __toModule(require_es_regexp_exec());
   var import_jquery22 = __toModule(require_jquery());
   function _classCallCheck18(instance, Constructor) {
@@ -8139,7 +8140,7 @@
     return OutputBinding2;
   }();
 
-  // src/bindings/output/text.ts
+  // srcts/src/bindings/output/text.ts
   function _typeof16(obj) {
     "@babel/helpers - typeof";
     if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
@@ -8257,7 +8258,7 @@
     return TextOutputBinding2;
   }(OutputBinding);
 
-  // src/bindings/output/downloadlink.ts
+  // srcts/src/bindings/output/downloadlink.ts
   var import_es_array_iterator17 = __toModule(require_es_array_iterator());
   var import_jquery24 = __toModule(require_jquery());
   function _typeof17(obj) {
@@ -8384,7 +8385,7 @@
     (0, import_jquery24.default)(document).trigger(evt);
   });
 
-  // src/bindings/output/datatable.ts
+  // srcts/src/bindings/output/datatable.ts
   var import_es_regexp_exec4 = __toModule(require_es_regexp_exec());
 
   // node_modules/core-js/modules/es.string.search.js
@@ -8418,11 +8419,11 @@
     ];
   });
 
-  // src/bindings/output/datatable.ts
+  // srcts/src/bindings/output/datatable.ts
   var import_es_array_iterator18 = __toModule(require_es_array_iterator());
   var import_jquery25 = __toModule(require_jquery());
 
-  // src/time/debounce.ts
+  // srcts/src/time/debounce.ts
   function _classCallCheck21(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
       throw new TypeError("Cannot call a class as a function");
@@ -8535,7 +8536,7 @@
     };
   }
 
-  // src/time/invoke.ts
+  // srcts/src/time/invoke.ts
   function _classCallCheck22(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
       throw new TypeError("Cannot call a class as a function");
@@ -8594,7 +8595,7 @@
     return Invoker2;
   }();
 
-  // src/time/throttle.ts
+  // srcts/src/time/throttle.ts
   function _classCallCheck23(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
       throw new TypeError("Cannot call a class as a function");
@@ -8692,7 +8693,7 @@
     return Throttler2;
   }();
 
-  // src/bindings/output/datatable.ts
+  // srcts/src/bindings/output/datatable.ts
   function _typeof18(obj) {
     "@babel/helpers - typeof";
     if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
@@ -8871,11 +8872,11 @@
     return DatatableOutputBinding2;
   }(OutputBinding);
 
-  // src/bindings/output/html.ts
+  // srcts/src/bindings/output/html.ts
   var import_es_array_iterator20 = __toModule(require_es_array_iterator());
   var import_jquery28 = __toModule(require_jquery());
 
-  // src/shiny/render.ts
+  // srcts/src/shiny/render.ts
   var import_es_regexp_exec6 = __toModule(require_es_regexp_exec());
 
   // node_modules/core-js/modules/es.object.entries.js
@@ -8887,7 +8888,7 @@
     }
   });
 
-  // src/shiny/render.ts
+  // srcts/src/shiny/render.ts
   var import_es_array_iterator19 = __toModule(require_es_array_iterator());
 
   // node_modules/core-js/modules/es.array.from.js
@@ -8901,10 +8902,10 @@
     from: from
   });
 
-  // src/shiny/render.ts
+  // srcts/src/shiny/render.ts
   var import_jquery27 = __toModule(require_jquery());
 
-  // src/shiny/sendImageSize.ts
+  // srcts/src/shiny/sendImageSize.ts
   function _classCallCheck25(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
       throw new TypeError("Cannot call a class as a function");
@@ -8960,7 +8961,7 @@
   }();
   var sendImageSizeFns = new SendImageSize();
 
-  // src/shiny/singletons.ts
+  // srcts/src/shiny/singletons.ts
   var import_es_regexp_exec5 = __toModule(require_es_regexp_exec());
   var import_jquery26 = __toModule(require_jquery());
   var _reSingleton = /<!--(SHINY.SINGLETON\[([\w]+)\])-->([\s\S]*?)<!--\/\1-->/;
@@ -9039,7 +9040,7 @@
     };
   }
 
-  // src/shiny/render.ts
+  // srcts/src/shiny/render.ts
   function _slicedToArray(arr, i) {
     return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest();
   }
@@ -9301,7 +9302,7 @@
     return true;
   }
 
-  // src/bindings/output/html.ts
+  // srcts/src/bindings/output/html.ts
   function _typeof20(obj) {
     "@babel/helpers - typeof";
     if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
@@ -9437,17 +9438,17 @@
     }
   });
 
-  // src/bindings/output/image.ts
+  // srcts/src/bindings/output/image.ts
   var import_es_array_iterator21 = __toModule(require_es_array_iterator());
   var import_jquery33 = __toModule(require_jquery());
 
-  // src/imageutils/createBrush.ts
+  // srcts/src/imageutils/createBrush.ts
   var import_jquery30 = __toModule(require_jquery());
 
-  // src/imageutils/initCoordmap.ts
+  // srcts/src/imageutils/initCoordmap.ts
   var import_jquery29 = __toModule(require_jquery());
 
-  // src/imageutils/initPanelScales.ts
+  // srcts/src/imageutils/initPanelScales.ts
   function mapLinear(x, domainMin, domainMax, rangeMin, rangeMax) {
     var clip = arguments.length > 5 && arguments[5] !== void 0 ? arguments[5] : true;
     clip = clip || true;
@@ -9533,7 +9534,7 @@
     }
   }
 
-  // src/imageutils/initCoordmap.ts
+  // srcts/src/imageutils/initCoordmap.ts
   function findScalingRatio($el) {
     var boundingRect = $el[0].getBoundingClientRect();
     return {
@@ -9730,7 +9731,7 @@
     return coordmap;
   }
 
-  // src/imageutils/findbox.ts
+  // srcts/src/imageutils/findbox.ts
   function findBox(offset1, offset2) {
     return {
       xmin: Math.min(offset1.x, offset2.x),
@@ -9740,7 +9741,7 @@
     };
   }
 
-  // src/imageutils/shiftToRange.ts
+  // srcts/src/imageutils/shiftToRange.ts
   function shiftToRange(vals, min4, max4) {
     if (!(vals instanceof Array))
       vals = [vals];
@@ -9759,7 +9760,7 @@
     return newvals;
   }
 
-  // src/imageutils/createBrush.ts
+  // srcts/src/imageutils/createBrush.ts
   function createBrush($el, opts, coordmap, expandPixels) {
     var resizeExpand = 10;
     var el = $el[0];
@@ -10115,7 +10116,7 @@
     };
   }
 
-  // src/imageutils/createClickInfo.ts
+  // srcts/src/imageutils/createClickInfo.ts
   var import_jquery31 = __toModule(require_jquery());
   function createClickInfo($el, dblclickId, dblclickDelay) {
     var clickTimer = null;
@@ -10170,7 +10171,7 @@
     };
   }
 
-  // src/imageutils/createHandlers.ts
+  // srcts/src/imageutils/createHandlers.ts
   var import_jquery32 = __toModule(require_jquery());
   function createClickHandler(inputId, clip, coordmap) {
     var clickInfoSender = coordmap.mouseCoordinateSender(inputId, clip);
@@ -10379,7 +10380,7 @@
     };
   }
 
-  // src/imageutils/disableDrag.ts
+  // srcts/src/imageutils/disableDrag.ts
   function disableDrag($el, $img) {
     $img.css("-webkit-user-drag", "none");
     $img.off("dragstart.image_output");
@@ -10392,7 +10393,7 @@
     });
   }
 
-  // src/bindings/output/image.ts
+  // srcts/src/bindings/output/image.ts
   function _typeof21(obj) {
     "@babel/helpers - typeof";
     if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
@@ -10651,7 +10652,7 @@
   }(OutputBinding);
   var imageOutputBinding = new ImageOutputBinding();
 
-  // src/bindings/output/index.ts
+  // srcts/src/bindings/output/index.ts
   function initOutputBindings() {
     var outputBindings = new BindingRegistry();
     outputBindings.register(new TextOutputBinding(), "shiny.textOutput");
@@ -10664,7 +10665,7 @@
     };
   }
 
-  // src/imageutils/resetBrush.ts
+  // srcts/src/imageutils/resetBrush.ts
   function resetBrush(brushId) {
     shinySetInputValue(brushId, null);
     imageOutputBinding.find(document.documentElement).trigger("shiny-internal:brushed", {
@@ -10673,7 +10674,7 @@
     });
   }
 
-  // src/shiny/notifications.ts
+  // srcts/src/shiny/notifications.ts
   var import_es_regexp_exec7 = __toModule(require_es_regexp_exec());
 
   // node_modules/core-js/modules/es.string.match.js
@@ -10716,7 +10717,7 @@
     ];
   });
 
-  // src/shiny/notifications.ts
+  // srcts/src/shiny/notifications.ts
   var import_jquery34 = __toModule(require_jquery());
   var fadeDuration = 250;
   function show() {
@@ -10808,7 +10809,7 @@
     }
   }
 
-  // src/shiny/modal.ts
+  // srcts/src/shiny/modal.ts
   var import_jquery35 = __toModule(require_jquery());
   function show2() {
     var _ref = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : {}, _ref$html = _ref.html, html = _ref$html === void 0 ? "" : _ref$html, _ref$deps = _ref.deps, deps = _ref$deps === void 0 ? [] : _ref$deps;
@@ -10848,7 +10849,7 @@
     }
   }
 
-  // src/shiny/reconnectDialog.ts
+  // srcts/src/shiny/reconnectDialog.ts
   var import_jquery36 = __toModule(require_jquery());
   function updateTime(reconnectTime) {
     var $time = (0, import_jquery36.default)("#shiny-reconnect-time");
@@ -10884,15 +10885,15 @@
     remove("reconnect");
   }
 
-  // src/shiny/init.ts
+  // srcts/src/shiny/init.ts
   var import_es_regexp_exec10 = __toModule(require_es_regexp_exec());
   var import_jquery42 = __toModule(require_jquery());
 
-  // src/inputPolicies/inputBatchSender.ts
+  // srcts/src/inputPolicies/inputBatchSender.ts
   var import_es_array_iterator22 = __toModule(require_es_array_iterator());
   var import_jquery37 = __toModule(require_jquery());
 
-  // src/inputPolicies/InputPolicy.ts
+  // srcts/src/inputPolicies/InputPolicy.ts
   function _classCallCheck28(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
       throw new TypeError("Cannot call a class as a function");
@@ -10940,7 +10941,7 @@
     return InputPolicy2;
   }();
 
-  // src/inputPolicies/inputBatchSender.ts
+  // srcts/src/inputPolicies/inputBatchSender.ts
   function _typeof22(obj) {
     "@babel/helpers - typeof";
     if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
@@ -11095,10 +11096,10 @@
     return InputBatchSender2;
   }(InputPolicy);
 
-  // src/inputPolicies/inputNoResendDecorator.ts
+  // srcts/src/inputPolicies/inputNoResendDecorator.ts
   var import_es_array_iterator23 = __toModule(require_es_array_iterator());
 
-  // src/inputPolicies/splitInputNameType.ts
+  // srcts/src/inputPolicies/splitInputNameType.ts
   var import_es_regexp_exec8 = __toModule(require_es_regexp_exec());
   function splitInputNameType(nameType) {
     var name2 = nameType.split(":");
@@ -11108,7 +11109,7 @@
     };
   }
 
-  // src/inputPolicies/inputNoResendDecorator.ts
+  // srcts/src/inputPolicies/inputNoResendDecorator.ts
   function _typeof23(obj) {
     "@babel/helpers - typeof";
     if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
@@ -11265,7 +11266,7 @@
     return InputNoResendDecorator2;
   }(InputPolicy);
 
-  // src/inputPolicies/inputEventDecorator.ts
+  // srcts/src/inputPolicies/inputEventDecorator.ts
   var import_es_array_iterator24 = __toModule(require_es_array_iterator());
   var import_jquery38 = __toModule(require_jquery());
   function _typeof24(obj) {
@@ -11399,7 +11400,7 @@
     return InputEventDecorator2;
   }(InputPolicy);
 
-  // src/inputPolicies/inputRateDecorator.ts
+  // srcts/src/inputPolicies/inputRateDecorator.ts
   var import_es_array_iterator25 = __toModule(require_es_array_iterator());
   function _typeof25(obj) {
     "@babel/helpers - typeof";
@@ -11553,7 +11554,7 @@
     return InputRateDecorator2;
   }(InputPolicy);
 
-  // src/inputPolicies/inputDeferDecorator.ts
+  // srcts/src/inputPolicies/inputDeferDecorator.ts
   var import_es_array_iterator26 = __toModule(require_es_array_iterator());
   function _typeof26(obj) {
     "@babel/helpers - typeof";
@@ -11695,7 +11696,7 @@
     return InputDeferDecorator2;
   }(InputPolicy);
 
-  // src/inputPolicies/inputValidateDecorator.ts
+  // srcts/src/inputPolicies/inputValidateDecorator.ts
   var import_jquery39 = __toModule(require_jquery());
   function _classCallCheck34(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
@@ -11740,10 +11741,10 @@
     this.target = target;
   };
 
-  // src/shiny/bind.ts
+  // srcts/src/shiny/bind.ts
   var import_jquery40 = __toModule(require_jquery());
 
-  // src/bindings/output_adapter.ts
+  // srcts/src/bindings/output_adapter.ts
   function _classCallCheck35(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
       throw new TypeError("Cannot call a class as a function");
@@ -11815,7 +11816,7 @@
     return OutputBindingAdapter2;
   }();
 
-  // src/shiny/bind.ts
+  // srcts/src/shiny/bind.ts
   var boundInputs = {};
   function valueChangeCallback(inputs, binding, el, allowDeferred) {
     var id = binding.getId(el);
@@ -12064,7 +12065,7 @@
     }
   });
 
-  // src/shiny/shinyapp.ts
+  // srcts/src/shiny/shinyapp.ts
   var import_es_regexp_exec9 = __toModule(require_es_regexp_exec());
 
   // node_modules/core-js/modules/es.array.for-each.js
@@ -12093,7 +12094,7 @@
   var Collection;
   var CollectionPrototype;
 
-  // src/shiny/shinyapp.ts
+  // srcts/src/shiny/shinyapp.ts
   var import_jquery41 = __toModule(require_jquery());
   function _classCallCheck36(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
@@ -13010,7 +13011,7 @@
     return ShinyApp2;
   }();
 
-  // src/shiny/init.ts
+  // srcts/src/shiny/init.ts
   function initShiny(Shiny2) {
     setShinyObj(Shiny2);
     var shinyapp = Shiny2.shinyapp = new ShinyApp();
@@ -13316,7 +13317,7 @@
     });
   }
 
-  // src/shiny/index.ts
+  // srcts/src/shiny/index.ts
   var Shiny;
   function setShiny(Shiny_) {
     Shiny = Shiny_;
@@ -13352,18 +13353,18 @@
     });
   }
 
-  // src/window/blobBuilder.ts
+  // srcts/src/window/blobBuilder.ts
   function windowBlobBuilder() {
     var blob = window.BlobBuilder || window.WebKitBlobBuilder || window.MozBlobBuilder || window.MSBlobBuilder;
     return blob;
   }
 
-  // src/window/userAgent.ts
+  // srcts/src/window/userAgent.ts
   function windowUserAgent() {
     return window.navigator.userAgent;
   }
 
-  // src/shiny/reactlog.ts
+  // srcts/src/shiny/reactlog.ts
   var import_jquery44 = __toModule(require_jquery());
   function initReactlog() {
     (0, import_jquery44.default)(document).on("keydown", function(e) {
@@ -13393,7 +13394,7 @@
     });
   }
 
-  // src/initialize/index.ts
+  // srcts/src/initialize/index.ts
   function init() {
     setShiny(windowShiny());
     setUserAgent(windowUserAgent());
@@ -13404,7 +13405,7 @@
     initReactlog();
   }
 
-  // src/index.ts
+  // srcts/src/index.ts
   init();
 })();
 //# sourceMappingURL=shiny.js.map

@@ -5,12 +5,12 @@
     "isolatedModules": true,
     "esModuleInterop": true,
     "declaration": true,
-    "declarationDir": "./src_d",
+    "declarationDir": "./srcts/types",
     "emitDeclarationOnly": true
   },
   "include": [
-    "src/index.ts",
-    "src/**/*.ts"
+    "srcts/src/index.ts",
+    "srcts/src/**/*.ts"
   ],
   "exclude": [
     "node_modules",

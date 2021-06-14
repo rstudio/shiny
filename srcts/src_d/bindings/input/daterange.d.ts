@@ -1,3 +1,4 @@
+import { formatDateUTC } from "../../utils";
 import { DateInputBindingBase } from "./date";
 declare type DateRangeReceiveMessageData = {
     label: string;
@@ -19,8 +20,8 @@ declare class DateRangeInputBinding extends DateInputBindingBase {
         label: string;
         value: [string, string];
         valueString: [string, string];
-        min: Date;
-        max: Date;
+        min: ReturnType<typeof formatDateUTC> | null;
+        max: ReturnType<typeof formatDateUTC> | null;
         weekstart: string;
         format: string;
         language: string;

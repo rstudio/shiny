@@ -8,7 +8,7 @@ declare class OutputBindingAdapter {
     binding: OutputBinding;
     constructor(el: HTMLElement, binding: OutpuBindingWithResize);
     getId(): string;
-    onValueChange(data: any): void;
+    onValueChange(data: unknown): void;
     onValueError(err: errorsMessageValue): void;
     showProgress(show: boolean): void;
     onResize(): void;

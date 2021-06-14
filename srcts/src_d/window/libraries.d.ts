@@ -1,2 +1,3 @@
-declare function windowShiny(): any;
+import type { ShinyType } from "../shiny";
+declare function windowShiny(): ShinyType | null;
 export { windowShiny };

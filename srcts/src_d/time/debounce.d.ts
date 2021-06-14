@@ -12,5 +12,5 @@ declare class Debouncer {
     $clearTimer(): void;
     $invoke(): void;
 }
-declare function debounce(threshold: number, func: (...args: Array<any>) => void): (...args: Array<any>) => void;
+declare function debounce<T>(threshold: number, func: (...args: Array<T>) => void): (...args: Array<T>) => void;
 export { Debouncer, debounce };

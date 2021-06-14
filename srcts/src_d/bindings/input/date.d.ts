@@ -2,8 +2,11 @@
 import { InputBinding } from "./InputBinding";
 declare global {
     interface JQuery {
-        bsDatepicker(methodName: string): any;
-        bsDatepicker(methodName: string, params: any): any;
+        bsDatepicker(methodName: "getUTCDate"): Date;
+        bsDatepicker(methodName: "getStartDate"): Date | -1e9999;
+        bsDatepicker(methodName: "getEndDate"): Date | 1e9999;
+        bsDatepicker(methodName: string): void;
+        bsDatepicker(methodName: string, params: null | Date): void;
     }
 }
 declare type DateReceiveMessageData = {
@@ -30,7 +33,7 @@ declare class DateInputBindingBase extends InputBinding {
     }): string;
     _setMin(el: HTMLElement, date: Date | undefined | null): void;
     _setMax(el: HTMLElement, date: Date): void;
-    _newDate(date: Date | string | never): Date | void;
+    _newDate(date: Date | string | never): Date | null;
     _floorDateTime(date: Date): Date;
     _dateAsUTC(date: Date): Date;
     _UTCDateAsLocal(date: Date): Date;

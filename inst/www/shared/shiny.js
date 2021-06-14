@@ -3525,7 +3525,7 @@
   function mapValues(obj, f) {
     var newObj = {};
     for (var _key in obj) {
-      if (obj.hasOwnProperty(_key))
+      if (hasOwnProperty(obj, _key))
         newObj[_key] = f(obj[_key], _key, obj);
     }
     return newObj;

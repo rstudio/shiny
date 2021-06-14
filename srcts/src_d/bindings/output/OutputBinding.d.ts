@@ -2,9 +2,9 @@ import type { errorsMessageValue } from "../../shiny/shinyapp";
 declare class OutputBinding {
     name: string;
     find(scope: JQuery<HTMLElement> | HTMLElement): JQuery<HTMLElement>;
-    renderValue(el: HTMLElement, data: any): void;
+    renderValue(el: HTMLElement, data: unknown): void;
     getId(el: HTMLElement): string;
-    onValueChange(el: HTMLElement, data: any): void;
+    onValueChange(el: HTMLElement, data: unknown): void;
     onValueError(el: HTMLElement, err: errorsMessageValue): void;
     renderError(el: HTMLElement, err: errorsMessageValue): void;
     clearError(el: HTMLElement): void;

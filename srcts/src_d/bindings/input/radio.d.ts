@@ -1,7 +1,7 @@
 import { InputBinding } from "./InputBinding";
 declare type RadioHTMLElement = HTMLInputElement;
 declare type ValueLabelObject = {
-    value: any;
+    value: HTMLInputElement["value"];
     label: string;
 };
 declare type RadioReceiveMessageData = {

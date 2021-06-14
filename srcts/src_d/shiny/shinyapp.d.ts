@@ -1,4 +1,6 @@
 import { OutputBindingAdapter } from "../bindings/output_adapter";
+import type { UploadInitValue, UploadEndValue } from "../file/FileProcessor";
+declare type ResponseValue = UploadInitValue | UploadEndValue;
 declare type HandlerType = (msg: Record<string, unknown> | Array<unknown> | boolean | string) => void;
 declare type ShinyWebSocket = WebSocket & {
     allowReconnect?: boolean;
@@ -8,6 +10,9 @@ declare type errorsMessageValue = {
     call: Array<string>;
     type?: Array<string>;
 };
+declare type OnSuccessRequest = (value: ResponseValue) => void;
+declare type OnErrorRequest = (err: string) => void;
+declare type InputValuesType = Record<string, unknown>;
 declare function addCustomMessageHandler(type: string, handler: HandlerType): void;
 declare class ShinyApp {
     $socket: ShinyWebSocket;
@@ -15,23 +20,26 @@ declare class ShinyApp {
         workerId: string;
         sessionId: string;
     };
-    $inputValues: {};
-    $initialInput: {};
+    $inputValues: InputValuesType;
+    $initialInput: InputValuesType;
     $bindings: Record<string, OutputBindingAdapter>;
     $values: {};
     $errors: Record<string, errorsMessageValue>;
     $conditionals: {};
-    $pendingMessages: any[];
-    $activeRequests: {};
+    $pendingMessages: Array<string>;
+    $activeRequests: Record<number, {
+        onSuccess: OnSuccessRequest;
+        onError: OnErrorRequest;
+    }>;
     $nextRequestId: number;
     $allowReconnect: boolean | "force";
     constructor();
-    connect(initialInput: unknown): void;
+    connect(initialInput: InputValuesType): void;
     isConnected(): boolean;
     private scheduledReconnect;
     reconnect(): void;
     createSocket(): ShinyWebSocket;
-    sendInput(values: unknown): void;
+    sendInput(values: InputValuesType): void;
     $notifyDisconnected(): void;
     $removeSocket(): void;
     $scheduleReconnect(delay: Parameters<typeof setTimeout>[1]): void;
@@ -41,8 +49,8 @@ declare class ShinyApp {
     };
     onDisconnected(): void;
     onConnected(): void;
-    makeRequest(method: string, args: Array<unknown>, onSuccess: (value: unknown) => void, onError: (err: string) => void, blobs: Array<Blob | ArrayBuffer | string>): void;
-    $sendMsg(msg: any): void;
+    makeRequest(method: string, args: Array<unknown>, onSuccess: OnSuccessRequest, onError: OnErrorRequest, blobs: Array<Blob | ArrayBuffer | string>): void;
+    $sendMsg(msg: string): void;
     receiveError(name: string, error: errorsMessageValue): void;
     receiveOutput<T>(name: string, value: T): T;
     bindOutput(id: string, binding: OutputBindingAdapter): OutputBindingAdapter;

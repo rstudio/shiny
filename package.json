@@ -15,6 +15,14 @@
     "node": ">= 14",
     "yarn": ">= 1.22"
   },
+  "dependencies": {
+    "@types/bootstrap": "3.4.0",
+    "@types/bootstrap-datepicker": "0.0.14",
+    "@types/datatables.net": "^1.10.19",
+    "@types/ion-rangeslider": "2.3.0",
+    "@types/jquery": "^3.5.5",
+    "@types/selectize": "0.12.34"
+  },
   "devDependencies": {
     "@babel/core": "^7.14.3",
     "@babel/plugin-proposal-class-properties": "^7.13.0",
@@ -24,19 +32,14 @@
     "@testing-library/dom": "^7.31.0",
     "@testing-library/jest-dom": "^5.12.0",
     "@testing-library/user-event": "^13.1.9",
-    "@types/bootstrap": "3.4.0",
-    "@types/bootstrap-datepicker": "0.0.14",
-    "@types/datatables.net": "^1.10.19",
-    "@types/ion-rangeslider": "2.3.0",
     "@types/jest": "^26.0.23",
-    "@types/jquery": "^3.5.5",
     "@types/lodash": "^4.14.170",
     "@types/node": "^15.6.1",
-    "@types/selectize": "0.12.34",
     "@typescript-eslint/eslint-plugin": "^4.25.0",
     "@typescript-eslint/parser": "^4.25.0",
     "bootstrap-datepicker": "1.9.0",
     "browserslist": "^4.16.6",
+    "core-js": "^3.13.0",
     "esbuild": "^0.12.4",
     "esbuild-plugin-babel": "0.2.3",
     "esbuild-plugin-globals": "^0.1.1",
@@ -48,6 +51,7 @@
     "ion-rangeslider": "2.3.1",
     "jest": "^26.6.3",
     "jquery": "3.6.0",
+    "lodash": "^4.17.21",
     "madge": "^4.0.2",
     "node-gyp": "^8.1.0",
     "phantomjs-prebuilt": "^2.1.16",
@@ -58,7 +62,8 @@
     "strftime": "0.9.2",
     "ts-jest": "^26",
     "type-coverage": "^2.17.5",
-    "typescript": "~4.1.5"
+    "typescript": "~4.1.5",
+    "util-inspect": "https://github.com/deecewan/browser-util-inspect#c0b4350df4378ffd743e8c36dd3898ce3992823e"
   },
   "scripts": {
     "watch": "yarn run build_shiny --watch",
@@ -74,10 +79,5 @@
     "type-check": "type-coverage -p tsconfig.json --detail --at-least 85",
     "import-check": "madge --circular --extensions ts srcts/src",
     "checks": "yarn run lint && yarn run typescript-check && yarn run type-check && yarn run import-check"
-  },
-  "dependencies": {
-    "core-js": "^3.13.0",
-    "lodash": "^4.17.21",
-    "util-inspect": "https://github.com/deecewan/browser-util-inspect#c0b4350df4378ffd743e8c36dd3898ce3992823e"
   }
 }

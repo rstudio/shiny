@@ -148,7 +148,7 @@ withr::with_dir(
     exit_code <- system(paste0("yarn add --dev selectize@", version))
     if (exit_code != 0) stop("yarn could not install selectize")
 
-    exit_code <- system(paste0("yarn add --dev @types/selectize@", types_version))
+    exit_code <- system(paste0("yarn add @types/selectize@", types_version))
     if (exit_code != 0) stop("yarn could not install @types/selectize")
   }
 )

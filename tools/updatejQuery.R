@@ -34,7 +34,7 @@ withr::with_dir(
     exit_code <- system(paste0("yarn add --dev jquery@", version))
     if (exit_code != 0) stop("yarn could not install jquery")
 
-    exit_code <- system(paste0("yarn add --dev @types/jquery@patch:@types/jquery@", version, "#./patch/types-jquery.patch"))
+    exit_code <- system(paste0("yarn add @types/jquery@patch:@types/jquery@", version, "#./patch/types-jquery.patch"))
     if (exit_code != 0) stop("yarn could not install @types/jquery")
   }
 )

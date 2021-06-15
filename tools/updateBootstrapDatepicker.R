@@ -1,8 +1,6 @@
 #!/usr/bin/env Rscript
 # Retrieves a particular version of bootstrap-datepicker:
 #  https://github.com/uxsolutions/bootstrap-datepicker
-# After retrieving, you can apply patches stored in
-# tools/datepicker-patches with applyDatepickerPatches.R
 
 library(rprojroot)
 
@@ -110,7 +108,7 @@ withr::with_dir(
     exit_code <- system(paste0("yarn add --dev bootstrap-datepicker@", version))
     if (exit_code != 0) stop("yarn could not install bootstrap-datepicker")
 
-    exit_code <- system(paste0("yarn add --dev @types/bootstrap-datepicker@", types_version))
+    exit_code <- system(paste0("yarn add @types/bootstrap-datepicker@", types_version))
     if (exit_code != 0) stop("yarn could not install @types/bootstrap-datepicker")
   }
 )

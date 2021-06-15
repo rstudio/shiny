@@ -1,8 +1,12 @@
 {
-  "name": "@types/shiny",
   "private": true,
+  "homepage": "https://shiny.rstudio.com",
+  "repository": "github:rstudio/shiny",
+  "name": "@types/shiny",
   "version": "1.6.0",
+  "license": "GPL-3.0-only",
   "main": "",
+  "browser": "",
   "types": "srcts/types/shiny/index.d.ts",
   "engines": {
     "node": ">= 14",

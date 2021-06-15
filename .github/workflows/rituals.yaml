@@ -129,7 +129,7 @@ jobs:
           tree src
           yarn install --immutable && yarn build
           git add ./src && git commit -m 'yarn lint (GitHub Actions)' || echo "No yarn lint changes to commit"
-          git add ./src_d && git commit -m 'yarn tsc (GitHub Actions)' || echo "No type definition changes to commit"
+          git add ./types && git commit -m 'yarn tsc (GitHub Actions)' || echo "No type definition changes to commit"
           git add ../inst && git commit -m 'yarn build (GitHub Actions)' || echo "No yarn build changes to commit"
           if [ -n "$(git status --porcelain)" ]
           then
@@ -145,10 +145,16 @@ jobs:
         if: github.event_name == 'pull_request'
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Git Push (MASTER)
+      - name: Verify no un-pushed commits (MASTER)
         if: github.event_name == 'push'
         run: |
-          git push https://${{github.actor}}:${{secrets.GITHUB_TOKEN}}@github.com/${{github.repository}}.git HEAD:${{ github.ref }} || echo "No changes to push"
+          # Can't push to a protected branch
+          if [ -z "`git cherry`"]; then
+            echo "Un-pushed commits:"
+            git cherry -v
+            echo "\nCan not push to a protected branch. Exiting"
+            exit 1
+          fi
 
       # Execute after pushing, as no updated files will be produced
       - name: Test TypeScript code

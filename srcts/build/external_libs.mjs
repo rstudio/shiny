@@ -1,3 +1,8 @@
+// This build script must be executed from the root repo directory via
+// ```
+// yarn build
+// ```
+
 import { readdirSync, unlinkSync, writeFileSync } from "fs";
 import esbuild from "esbuild";
 import globalsPlugin from "esbuild-plugin-globals";
@@ -5,7 +10,7 @@ import globalsPlugin from "esbuild-plugin-globals";
 // import process from "process";
 // let watch = process.argv.length >= 3 && process.argv[2] == "--watch";
 
-let instdir = "../inst/";
+let instdir = "./inst/";
 
 let opts = {
   bundle: false,

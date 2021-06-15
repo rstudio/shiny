@@ -4,16 +4,17 @@ import { hasOwnProperty } from "../../utils";
 
 type CheckedHTMLElement = HTMLInputElement;
 
-type CheckboxReceiveMessageData = { value?: any; label?: string };
+type CheckboxChecked = CheckedHTMLElement["checked"];
+type CheckboxReceiveMessageData = { value?: CheckboxChecked; label?: string };
 
 class CheckboxInputBinding extends InputBinding {
   find(scope: HTMLElement): JQuery<HTMLElement> {
     return $(scope).find('input[type="checkbox"]');
   }
-  getValue(el: CheckedHTMLElement): any {
+  getValue(el: CheckedHTMLElement): CheckboxChecked {
     return el.checked;
   }
-  setValue(el: CheckedHTMLElement, value: boolean): void {
+  setValue(el: CheckedHTMLElement, value: CheckboxChecked): void {
     el.checked = value;
   }
   subscribe(el: HTMLElement, callback: (x: boolean) => void): void {
@@ -24,7 +25,7 @@ class CheckboxInputBinding extends InputBinding {
   unsubscribe(el: HTMLElement): void {
     $(el).off(".checkboxInputBinding");
   }
-  getState(el: CheckedHTMLElement): { label: string; value: any } {
+  getState(el: CheckedHTMLElement): { label: string; value: CheckboxChecked } {
     return {
       label: $(el).parent().find("span").text(),
       value: el.checked,

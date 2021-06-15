@@ -466,10 +466,14 @@ function initShiny(Shiny: ShinyType): void {
 
   $(window).on("pushstate", function (e) {
     inputs.setInput(".clientdata_url_search", window.location.search);
+    return;
+    e;
   });
 
   $(window).on("popstate", function (e) {
     inputs.setInput(".clientdata_url_search", window.location.search);
+    return;
+    e;
   });
 
   // This is only the initial value of the hash. The hash can change, but
@@ -481,6 +485,8 @@ function initShiny(Shiny: ShinyType): void {
 
   $(window).on("hashchange", function (e) {
     inputs.setInput(".clientdata_url_hash", window.location.hash);
+    return;
+    e;
   });
 
   // The server needs to know what singletons were rendered as part of

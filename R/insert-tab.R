@@ -112,7 +112,7 @@
 #'
 #' }
 #' @export
-insertTab <- function(inputId, tab, target,
+insertTab <- function(inputId, tab, target = NULL,
                       position = c("before", "after"), select = FALSE,
                       session = getDefaultReactiveDomain()) {
   bslib::nav_insert(
@@ -137,48 +137,14 @@ insertTab <- function(inputId, tab, target,
 #' @export
 prependTab <- function(inputId, tab, select = FALSE, menuName = NULL,
                        session = getDefaultReactiveDomain()) {
-  force(select)
-  force(menuName)
-  inputId <- session$ns(inputId)
-
-  item <- buildTabItem("id", "tsid", TRUE, divTag = tab,
-    textFilter = if (is.character(tab)) navbarMenuTextFilter else NULL)
-
-  callback <- function() {
-    session$sendInsertTab(
-      inputId = inputId,
-      liTag = processDeps(item$liTag, session),
-      divTag = processDeps(item$divTag, session),
-      menuName = menuName,
-      target = NULL,
-      position = "after",
-      select = select)
-  }
-  session$onFlush(callback, once = TRUE)
+  bslib::tab_prepend(inputId, tab, menu_title = menuName, select = select, session = session)
 }
 
 #' @rdname insertTab
 #' @export
 appendTab <- function(inputId, tab, select = FALSE, menuName = NULL,
                       session = getDefaultReactiveDomain()) {
-  force(select)
-  force(menuName)
-  inputId <- session$ns(inputId)
-
-  item <- buildTabItem("id", "tsid", TRUE, divTag = tab,
-    textFilter = if (is.character(tab)) navbarMenuTextFilter else NULL)
-
-  callback <- function() {
-    session$sendInsertTab(
-      inputId = inputId,
-      liTag = processDeps(item$liTag, session),
-      divTag = processDeps(item$divTag, session),
-      menuName = menuName,
-      target = NULL,
-      position = "before",
-      select = select)
-  }
-  session$onFlush(callback, once = TRUE)
+  bslib::tab_append(inputId, tab, menu_title = menuName, select = select, session = session)
 }
 
 #' @rdname insertTab

@@ -74,7 +74,7 @@ function roundSignif(x: number, digits = 1): number {
 
 // Take a string with format "YYYY-MM-DD" and return a Date object.
 // IE8 and QTWebKit don't support YYYY-MM-DD, but they support YYYY/MM/DD
-function parseDate(dateString: any): Date {
+function parseDate(dateString: string): Date {
   let date = new Date(dateString);
 
   if (date.toString() === "Invalid Date") {
@@ -85,7 +85,7 @@ function parseDate(dateString: any): Date {
 
 // Given a Date object, return a string in yyyy-mm-dd format, using the
 // UTC date. This may be a day off from the date in the local time zone.
-function formatDateUTC(date: any): null | string {
+function formatDateUTC(date: Date | null): null | string {
   if (date instanceof Date) {
     return (
       date.getUTCFullYear() +
@@ -114,8 +114,11 @@ interface lastSizeInterface {
 }
 function makeResizeFilter(
   el: HTMLElement,
-  func: (width: any, height: any) => any
-): () => any {
+  func: (
+    width: HTMLElement["offsetWidth"],
+    height: HTMLElement["offsetHeight"]
+  ) => void
+): () => void {
   let lastSize: lastSizeInterface = {};
 
   return function () {
@@ -140,8 +143,7 @@ function pixelRatio(): number {
 //
 // When the function is executed, it will evaluate that expression using
 // "with" on the argument value, and return the result.
-scopeExprToFunc.call;
-function scopeExprToFunc(expr: string): (scope: any) => any {
+function scopeExprToFunc(expr: string): (scope: unknown) => boolean {
   /*jshint evil: true */
   const exprEscaped = expr
     .replace(/[\\"']/g, "\\$&")
@@ -152,9 +154,10 @@ function scopeExprToFunc(expr: string): (scope: any) => any {
     // \b has a special meaning; need [\b] to match backspace char.
     .replace(/[\b]/g, "\\b");
 
-  let func: any;
+  let func: () => boolean;
 
   try {
+    // @ts-expect-error; Do not know how to type this _dangerous_ situation
     func = new Function(
       `with (this) {
         try {
@@ -170,7 +173,7 @@ function scopeExprToFunc(expr: string): (scope: any) => any {
     throw e;
   }
 
-  return function (scope) {
+  return function (scope: unknown): boolean {
     return func.call(scope);
   };
 }
@@ -185,7 +188,7 @@ function asArray<T>(value: T | Array<T> | null | undefined): Array<T> {
 // bindings by priority and insertion order.
 function mergeSort<T>(
   list: Array<T>,
-  sortfunc: (a: any, b: any) => boolean | number
+  sortfunc: (a: T, b: T) => boolean | number
 ): Array<T> {
   function merge(sortfunc, a, b) {
     let ia = 0;
@@ -236,8 +239,7 @@ function mapValues<V, R>(
   const newObj: Record<string, R> = {};
 
   for (const key in obj) {
-    // eslint-disable-next-line no-prototype-builtins
-    if (obj.hasOwnProperty(key)) newObj[key] = f(obj[key], key, obj);
+    if (hasOwnProperty(obj, key)) newObj[key] = f(obj[key], key, obj);
   }
   return newObj;
 }
@@ -249,17 +251,23 @@ function isnan(x: unknown): boolean {
 }
 
 // Binary equality function used by the equal function.
-function _equal(x: any, y: any): boolean {
+function _equal(x: unknown, y: unknown): boolean {
   if ($.type(x) === "object" && $.type(y) === "object") {
-    if (Object.keys(x).length !== Object.keys(y).length) return false;
-    for (const prop in x) {
-      // eslint-disable-next-line no-prototype-builtins
-      if (!y.hasOwnProperty(prop) || !_equal(x[prop], y[prop])) return false;
+    const xo = x as Record<string, unknown>;
+    const yo = y as Record<string, unknown>;
+
+    if (Object.keys(xo).length !== Object.keys(yo).length) return false;
+    for (const prop in xo) {
+      if (!hasOwnProperty(yo, prop) || !_equal(xo[prop], yo[prop]))
+        return false;
     }
     return true;
   } else if ($.type(x) === "array" && $.type(y) === "array") {
-    if (x.length !== y.length) return false;
-    for (let i = 0; i < x.length; i++) if (!_equal(x[i], y[i])) return false;
+    const xa = x as Array<unknown>;
+    const ya = y as Array<unknown>;
+
+    if (xa.length !== ya.length) return false;
+    for (let i = 0; i < xa.length; i++) if (!_equal(xa[i], ya[i])) return false;
     return true;
   } else {
     return x === y;
@@ -271,7 +279,7 @@ function _equal(x: any, y: any): boolean {
 // necessary.
 //
 // Objects other than objects and arrays are tested for equality using ===.
-function equal(...args): boolean {
+function equal(...args: Array<unknown>): boolean {
   if (args.length < 2)
     throw new Error("equal requires at least two arguments.");
   for (let i = 0; i < args.length - 1; i++) {

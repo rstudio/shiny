@@ -4,17 +4,16 @@ import { bindScope } from "./bind";
 const _reSingleton = /<!--(SHINY.SINGLETON\[([\w]+)\])-->([\s\S]*?)<!--\/\1-->/;
 const _reHead = /<head(?:\s[^>]*)?>([\s\S]*?)<\/head>/;
 
-const knownSingletons = {};
+const knownSingletons: Record<string, boolean> = {};
+
+type WherePosition = "replace" | "beforeBegin" | "afterEnd";
+type RenderHtmlWherePosition = "replace" | InsertPosition;
 
 function renderHtml(
-  html,
+  html: string,
   el: bindScope,
-  where
-): {
-  html: any;
-  head: string;
-  singletons: Record<string, true>;
-} {
+  where: RenderHtmlWherePosition
+): ReturnType<typeof _processHtml> {
   const processed = _processHtml(html);
 
   _addToHead(processed.head);
@@ -30,6 +29,7 @@ function renderHtml(
       elElements = el.toArray();
     }
     $.each(elElements, (i, el) => {
+      // type InsertPosition = "beforebegin" | "afterbegin" | "beforeend" | "afterend"
       el.insertAdjacentHTML(where, processed.html);
     });
   }
@@ -41,7 +41,7 @@ function register(s) {
   $.extend(knownSingletons, s);
 }
 // Takes a string or array of strings and adds them to knownSingletons
-function registerNames(s): void {
+function registerNames(s: string | Array<string>): void {
   if (typeof s === "string") {
     knownSingletons[s] = true;
   } else if (s instanceof Array) {
@@ -51,7 +51,7 @@ function registerNames(s): void {
   }
 }
 // Inserts new content into document head
-function _addToHead(head) {
+function _addToHead(head: string) {
   if (head.length > 0) {
     const tempDiv = $("<div>" + head + "</div>").get(0);
     const $head = $("head");
@@ -63,9 +63,13 @@ function _addToHead(head) {
   }
 }
 // Reads HTML and returns an object with info about singletons
-function _processHtml(val) {
-  const newSingletons = {};
-  let newVal;
+function _processHtml(val: string): {
+  html: string;
+  head: string;
+  singletons: typeof knownSingletons;
+} {
+  const newSingletons: typeof knownSingletons = {};
+  let newVal: string;
 
   const findNewPayload = function (match, p1, sig, payload) {
     if (knownSingletons[sig] || newSingletons[sig]) return "";
@@ -101,3 +105,4 @@ function _processHtml(val) {
 }
 
 export { renderHtml, registerNames };
+export type { WherePosition, RenderHtmlWherePosition };

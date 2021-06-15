@@ -55,13 +55,16 @@ for (patch in list.files(patch_dir, full.names = TRUE)) {
 # can serve them up without compilation (The distributed CSS includes all
 # the skins in the same CSS file, but we want them split up)
 library(sass)
-dir.create(file.path(target, "css"))
-sass(
-  list(
-    sass::sass_file(system.file("sass-utils/color-contrast.scss", package = "bslib")),
-    sass_file(file.path(target, "scss", "shiny.scss"))
-  ),
-  output = file.path(target, "css", "ion.rangeSlider.css")
+withr::with_dir(
+  target, {
+    dir.create("css")
+    sass_partial(
+      sass_file("scss/shiny.scss"),
+      bslib::bs_theme(version = 3),
+      output = "css/ion.rangeSlider.css",
+      options = sass_options()
+    )
+  }
 )
 
 
@@ -78,7 +81,7 @@ writeLines(
 
 
 # Finally, run yarn build so the JS patches propogate to the minified files
-withr::with_dir(rprojroot::find_package_root_file("srcts"), {
+withr::with_dir(rprojroot::find_package_root_file(), {
   exit_code <- system(paste0("yarn add --dev ion-rangeslider@", version))
   if (exit_code != 0) stop("yarn could not install ion-rangeslider")
 

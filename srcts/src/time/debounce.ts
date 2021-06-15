@@ -62,10 +62,10 @@ class Debouncer {
 // 900ms intervals will result in a single execution
 // of the underlying function, 1000ms after the 17th
 // call.
-function debounce(
+function debounce<T>(
   threshold: number,
-  func: (...args: Array<any>) => void
-): (...args: Array<any>) => void {
+  func: (...args: Array<T>) => void
+): (...args: Array<T>) => void {
   let timerId = null;
 
   return function (...args) {

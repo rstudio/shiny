@@ -10,8 +10,9 @@ import {
 import { sendImageSizeFns } from "./sendImageSize";
 
 import { renderHtml as singletonsRenderHtml } from "./singletons";
+import type { WherePosition, RenderHtmlWherePosition } from "./singletons";
 
-function renderDependencies(dependencies): void {
+function renderDependencies(dependencies: null | Array<HtmlDep>): void {
   if (dependencies) {
     $.each(dependencies, function (i, dep) {
       renderDependency(dep);
@@ -19,15 +20,13 @@ function renderDependencies(dependencies): void {
   }
 }
 
-type RenderWhereType = "beforeBegin" | "afterEnd" | "replace";
-
 // Render HTML in a DOM element, add dependencies, and bind Shiny
 // inputs/outputs. `content` can be null, a string, or an object with
 // properties 'html' and 'deps'.
 function renderContent(
   el: bindScope,
-  content: null | string | { html: any; deps?: any },
-  where: RenderWhereType = "replace"
+  content: null | string | { html: string; deps?: Array<HtmlDep> },
+  where: WherePosition = "replace"
 ): void {
   if (where === "replace") {
     shinyUnbindAll(el);
@@ -45,6 +44,9 @@ function renderContent(
     dependencies = content.deps || [];
   }
 
+  // @ts-expect-error; TODO-barret; The `where` values do not match.
+  // The type definition is to have `InsertPosition` which does not align with `WherePosition` from above
+  // type InsertPosition = "beforebegin" | "afterbegin" | "beforeend" | "afterend"
   renderHtml(html, el, dependencies, where);
 
   let scope: bindScope = el;
@@ -70,24 +72,41 @@ function renderContent(
 
 // Render HTML in a DOM element, inserting singletons into head as needed
 function renderHtml(
-  html,
+  html: string,
   el: bindScope,
-  dependencies,
-  where: RenderWhereType = "replace"
+  dependencies: Array<HtmlDep>,
+  where: RenderHtmlWherePosition = "replace"
 ): ReturnType<typeof singletonsRenderHtml> {
   renderDependencies(dependencies);
   return singletonsRenderHtml(html, el, where);
 }
 
-const htmlDependencies = {};
+type HtmlDepName = string;
+type HtmlDepVersion = string;
+type HtmlDep = {
+  name: HtmlDepName;
+  version: HtmlDepVersion;
+  restyle?: boolean;
+  src?: { href: string };
+  meta?: string | Array<string>;
+  stylesheet?: string | Array<string>;
+  script?:
+    | string
+    | Array<string>
+    | Record<string, string>
+    | Array<Record<string, string>>;
+  attachment?: string | Array<string> | Record<string, string>;
+  head?: string;
+};
+const htmlDependencies: Record<HtmlDepName, HtmlDepVersion> = {};
 
-function registerDependency(name, version): void {
+function registerDependency(name: HtmlDepName, version: HtmlDepVersion): void {
   htmlDependencies[name] = version;
 }
 
 // Re-render stylesheet(s) if the dependency has specificially requested it
 // and it matches an existing dependency (name and version)
-function needsRestyle(dep) {
+function needsRestyle(dep: HtmlDep) {
   if (!dep.restyle) {
     return false;
   }
@@ -101,7 +120,7 @@ function needsRestyle(dep) {
 }
 
 // Client-side dependency resolution and rendering
-function renderDependency(dep) {
+function renderDependency(dep: HtmlDep) {
   const restyle = needsRestyle(dep);
 
   if (hasOwnProperty(htmlDependencies, dep.name) && !restyle) return false;
@@ -118,6 +137,7 @@ function renderDependency(dep) {
       const name = Object.keys(obj)[0];
 
       return $("<meta>").attr("name", name).attr("content", obj[name]);
+      idx;
     });
 
     $head.append(metas);
@@ -268,7 +288,7 @@ function renderDependency(dep) {
 
       // Can not destructure Object.entries into both a `const` and a `let` variable.
       // eslint-disable-next-line prefer-const
-      for (let [attr, val] of Object.entries(x as Record<string, string>)) {
+      for (let [attr, val] of Object.entries(x)) {
         if (attr === "src") {
           val = href + "/" + encodeURI(val);
         }
@@ -300,14 +320,11 @@ function renderDependency(dep) {
       attachments = tmp;
     }
 
-    const attach = $.map(
-      attachments,
-      function (attachment, key: string | number) {
-        return $("<link rel='attachment'>")
-          .attr("id", dep.name + "-" + key + "-attachment")
-          .attr("href", href + "/" + encodeURI(attachment));
-      }
-    );
+    const attach = $.map(attachments, function (attachment, key) {
+      return $("<link rel='attachment'>")
+        .attr("id", dep.name + "-" + key + "-attachment")
+        .attr("href", href + "/" + encodeURI(attachment));
+    });
 
     $head.append(attach);
   }
@@ -322,4 +339,4 @@ function renderDependency(dep) {
 }
 
 export { renderDependencies, renderContent, renderHtml, registerDependency };
-export type { RenderWhereType };
+export type { HtmlDep };

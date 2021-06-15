@@ -1,18 +1,18 @@
 import $ from "jquery";
 import { $escape, hasOwnProperty, updateLabel } from "../../utils";
-import { TextInputBinding } from "./text";
+import { TextInputBindingBase } from "./text";
 
 type NumberHTMLElement = HTMLInputElement;
 
 type NumberReceiveMessageData = {
   label: string;
-  value?: any;
-  min?: any;
-  max?: any;
-  step?: any;
+  value?: string | null;
+  min?: string | null;
+  max?: string | null;
+  step?: string | null;
 };
 
-class NumberInputBinding extends TextInputBinding {
+class NumberInputBinding extends TextInputBindingBase {
   find(scope: HTMLElement): JQuery<HTMLElement> {
     return $(scope).find('input[type="number"]');
   }
@@ -53,7 +53,13 @@ class NumberInputBinding extends TextInputBinding {
     $(el).trigger("change");
   }
 
-  getState(el: NumberHTMLElement): any {
+  getState(el: NumberHTMLElement): {
+    label: string;
+    value: ReturnType<NumberInputBinding["getValue"]>;
+    min: number;
+    max: number;
+    step: number;
+  } {
     return {
       label: this._getLabelNode(el).text(),
       value: this.getValue(el),

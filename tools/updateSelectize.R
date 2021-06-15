@@ -143,7 +143,7 @@ writeLines(
 
 # Update TypeScript installation
 withr::with_dir(
-  rprojroot::find_package_root_file("srcts"),
+  rprojroot::find_package_root_file(),
   {
     exit_code <- system(paste0("yarn add --dev selectize@", version))
     if (exit_code != 0) stop("yarn could not install selectize")

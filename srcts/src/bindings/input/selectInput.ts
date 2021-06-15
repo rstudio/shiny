@@ -7,10 +7,14 @@ type SelectHTMLElement = HTMLSelectElement & { nonempty: boolean };
 
 type SelectInputReceiveMessageData = {
   label: string;
-  options?: any;
-  config?: any;
+  options?: string;
+  config?: string;
   url?: string;
   value?: string;
+};
+
+type SelectizeInfo = Selectize.IApi<string, unknown> & {
+  settings: Selectize.IOptions<string, unknown>;
 };
 
 class SelectInputBinding extends InputBinding {
@@ -202,7 +206,7 @@ class SelectInputBinding extends InputBinding {
 
     return config.length > 0;
   }
-  _selectize(el: SelectHTMLElement, update = false): Selectize.IApi<any, any> {
+  _selectize(el: SelectHTMLElement, update = false): SelectizeInfo {
     if (!$.fn.selectize) return undefined;
     const $el = $(el);
     const config = $el
@@ -211,7 +215,13 @@ class SelectInputBinding extends InputBinding {
 
     if (config.length === 0) return undefined;
 
-    let options = $.extend(
+    let options: {
+      labelField: "label";
+      valueField: "value";
+      searchField: ["label"];
+      onItemRemove?: (value: string) => void;
+      onDropdownClose?: () => void;
+    } & Record<string, unknown> = $.extend(
       {
         labelField: "label",
         valueField: "value",
@@ -252,15 +262,14 @@ class SelectInputBinding extends InputBinding {
         /*jshint evil: true*/
         options[x] = indirectEval("(" + options[x] + ")");
       });
-    let control = $el.selectize(options)[0].selectize;
+    let control = $el.selectize(options)[0].selectize as SelectizeInfo;
     // .selectize() does not really update settings; must destroy and rebuild
 
     if (update) {
-      // TODO-barret . Where is `control.settings` coming from?
-      const settings = $.extend((control as any).settings, options);
+      const settings = $.extend(control.settings, options);
 
       control.destroy();
-      control = $el.selectize(settings)[0].selectize;
+      control = $el.selectize(settings)[0].selectize as SelectizeInfo;
     }
     return control;
   }

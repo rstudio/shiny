@@ -18,6 +18,8 @@ shiny 1.6.0.9000
   
 * `icon(lib="fontawesome")` is now powered by the `{fontawesome}` package, which will make it easier to use the latest FA icons in the future (by updating the `{fontawesome}` package). (#3302)
 
+* Closed #3397: `renderPlot()` new uses `ggplot2::get_alt_text()` to inform an `alt` text default (for `{ggplot2}` plots). (#3398)
+
 * `modalDialog()` gains support for `size = "xl"`. (#3410)
 
 ### Other improvements

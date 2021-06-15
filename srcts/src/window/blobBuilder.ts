@@ -1,5 +1,5 @@
 function windowBlobBuilder(): MSBlobBuilder {
-  const blob =
+  const blob: MSBlobBuilder =
     // @ts-expect-error; Using legacy definitions of Blob builders
     window.BlobBuilder ||
     // @ts-expect-error; Using legacy definitions of Blob builders
@@ -8,7 +8,7 @@ function windowBlobBuilder(): MSBlobBuilder {
     window.MozBlobBuilder ||
     window.MSBlobBuilder;
 
-  return blob as MSBlobBuilder;
+  return blob;
 }
 
 export { windowBlobBuilder };

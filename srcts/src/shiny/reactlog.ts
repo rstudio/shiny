@@ -44,7 +44,7 @@ function initReactlog(): void {
       window.escape(shinyShinyApp().config.sessionId);
 
     // send notification
-    $.get(url, function (result) {
+    $.get(url, function (result: "marked" | void) {
       if (result !== "marked") return;
 
       const html =

@@ -22,7 +22,7 @@ function updateTime(reconnectTime): void {
   }, 1000);
 }
 
-function showReconnectDialog(delay): void {
+function showReconnectDialog(delay: number): void {
   const reconnectTime = new Date().getTime() + delay;
 
   // If there's already a reconnect dialog, don't add another

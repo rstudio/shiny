@@ -30,7 +30,7 @@ class OutputBindingAdapter {
   getId(): string {
     return this.binding.getId(this.el);
   }
-  onValueChange(data): void {
+  onValueChange(data: unknown): void {
     this.binding.onValueChange(this.el, data);
   }
   onValueError(err: errorsMessageValue): void {

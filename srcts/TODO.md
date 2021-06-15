@@ -85,12 +85,12 @@
 * √ Each _file_ will be pulled out as possible into smaller files in separate PRs
 * √ Convert `FileProcessor` to a true class definition
 * Break up `./utils` into many files
-  * Remove any `: any` types
-* Make `@typescript-eslint/explicit-module-boundary-types` an error
-* Fix all `// eslint-disable-next-line no-prototype-builtins` lines
+  * √ Remove any `: any` types
+* √ Make `@typescript-eslint/explicit-module-boundary-types` an error
+* √ Fix all `// eslint-disable-next-line no-prototype-builtins` lines
 * TypeScript other shiny files (ex: showcasemode)
-* Completely remove `parcel` from `./package.json` and only use `esbuild`
-* Delete 'shiny-es5' files
+* √ Completely remove `parcel` from `./package.json` and only use `esbuild`
+* √ Delete 'shiny-es5' files
 * Delete 'old' folder
 * _Uglify_ js files (like in previous Gruntfile.js)
   * datepicker

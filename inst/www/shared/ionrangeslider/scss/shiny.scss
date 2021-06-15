@@ -37,7 +37,7 @@ $font-family: $font-family-base !default;
   // "High-level" coloring
   $bg:     $body-bg !default;
   $fg:     color-contrast($body-bg) !default;
-  $accent: $component-active-bg !default;
+  $accent: #428bca !default;
 
   // "Low-level" coloring, borders, and fonts
   $line_bg:            linear-gradient(to bottom, mix($bg, $fg, 87%) -50%, $bg 150%) !default;

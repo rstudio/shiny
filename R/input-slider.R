@@ -229,8 +229,11 @@ ionRangeSliderDependencyCSS <- function(theme) {
   }
 
   bslib::bs_dependency(
-    input = sass::sass_file(
-      system.file(package = "shiny", "www/shared/ionrangeslider/scss/shiny.scss")
+    input = list(
+      list(accent = "$component-active-bg"),
+      sass::sass_file(
+        system.file(package = "shiny", "www/shared/ionrangeslider/scss/shiny.scss")
+      )
     ),
     theme = theme,
     name = "ionRangeSlider",

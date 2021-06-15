@@ -313,10 +313,10 @@
     Output
       <div class="tabbable">
         <ul class="nav nav-tabs" data-tabsetid="4785">
-          <li class="active">
+          <li>
             <a href="#tab-4785-1" data-toggle="tab" data-bs-toggle="tab"></a>
           </li>
-          <li>
+          <li class="active">
             <a href="#tab-4785-2" data-toggle="tab" data-bs-toggle="tab" data-value="A">A</a>
           </li>
           <li>
@@ -338,8 +338,8 @@
           </li>
         </ul>
         <div class="tab-content" data-tabsetid="4785">
-          <div class="active" id="tab-4785-1">A div</div>
-          <div class="tab-pane" data-value="A" id="tab-4785-2">a</div>
+          <div id="tab-4785-1">A div</div>
+          <div class="tab-pane active" data-value="A" id="tab-4785-2">a</div>
           <div class="tab-pane" data-value="B" data-icon-class="fab fa-github fa-fw" id="tab-4785-3">b</div>
           <div class="tab-pane" data-value="C" id="tab-1502-1">c</div>
         </div>

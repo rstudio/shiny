@@ -137,14 +137,14 @@ insertTab <- function(inputId, tab, target = NULL,
 #' @export
 prependTab <- function(inputId, tab, select = FALSE, menuName = NULL,
                        session = getDefaultReactiveDomain()) {
-  bslib::tab_prepend(inputId, tab, menu_title = menuName, select = select, session = session)
+  bslib::nav_prepend(inputId, tab, menu_title = menuName, select = select, session = session)
 }
 
 #' @rdname insertTab
 #' @export
 appendTab <- function(inputId, tab, select = FALSE, menuName = NULL,
                       session = getDefaultReactiveDomain()) {
-  bslib::tab_append(inputId, tab, menu_title = menuName, select = select, session = session)
+  bslib::nav_append(inputId, tab, menu_title = menuName, select = select, session = session)
 }
 
 #' @rdname insertTab

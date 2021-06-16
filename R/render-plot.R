@@ -41,7 +41,7 @@
 #'   string, the value may be a reactive expression (or a function referencing
 #'   reactive values) that returns a character string. If the value is `NA` (the
 #'   default), then `ggplot2::get_alt_text()` is used to extract alt text from
-#'   ggplot objects; for other plots, `NA` results in alt text of "Plot object".
+#'   ggplot objects; for other plots, `NA` results in alt text of "Plot Object".
 #'   `NULL` or `""` is not recommended because those should be limited to
 #'   decorative images.
 #' @param ... Arguments to be passed through to [grDevices::png()].

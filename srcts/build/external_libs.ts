@@ -10,7 +10,6 @@ import globalsPlugin from "esbuild-plugin-globals";
 const opts = {
   bundle: false,
   sourcemap: false,
-  target: "es5",
 };
 
 readdir(outDir + "datepicker/js/locales/").then(async (localeFiles) => {

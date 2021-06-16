@@ -77,6 +77,8 @@ All config files are located in the root folder to avoid opening two separate VS
   * Used with `browserslist` and `core-js` to determine which polyfills should be incorporated.
 * `.eslintrc.yml`
   * Used with `eslint` and `prettier` to determine how the TypeScript files should be formatted and which lint failures should cause warnings, errors, or be ignored.
+* `.madgerc`
+  * Package used to determine if circular dependencies are found. `type` only imports are ignored as they are not included in the final bundle.
 * `.prettierrc.yml`
   * Used by `prettier` to know how to adjust code when a file is saved in VSCode or within `eslint`'s linting process.
 * `yarnrc.yml`
@@ -102,9 +104,6 @@ All config files are located in the root folder to avoid opening two separate VS
     * `target: ES5` - Compile to es5, so babel has an easier job.
     * `preserveConstEnums: false` - Do no preserve enum values into the final code. (If true, produces bloat / unused code)
     * `isolatedModules: true` & `esModuleInterop: true` - Requested by `esbuild`. This [allows for `esbuild`](https://esbuild.github.io/content-types/#typescript) to safely compile the files in parallel
-
-* `esbuild.config.mjs`
-  * Script that will build `shiny.js` and `shiny.min.js` with their sourcemaps
 
 
 ## Bundle TypeScript

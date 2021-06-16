@@ -45,7 +45,7 @@ or viewed (i.e., the user uses a screen reader). In addition to a character
 string, the value may be a reactive expression (or a function referencing
 reactive values) that returns a character string. If the value is \code{NA} (the
 default), then \code{ggplot2::get_alt_text()} is used to extract alt text from
-ggplot objects; for other plots, \code{NA} results in alt text of "Plot object".
+ggplot objects; for other plots, \code{NA} results in alt text of "Plot Object".
 \code{NULL} or \code{""} is not recommended because those should be limited to
 decorative images.}
 

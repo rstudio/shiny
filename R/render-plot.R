@@ -41,7 +41,7 @@
 #'   string, the value may be a reactive expression (or a function referencing
 #'   reactive values) that returns a character string. If the value is `NA` (the
 #'   default), then `ggplot2::get_alt_text()` is used to extract alt text from
-#'   ggplot objects; for other plots, `NA` results in alt text of "Plot Object".
+#'   ggplot objects; for other plots, `NA` results in alt text of "Plot object".
 #'   `NULL` or `""` is not recommended because those should be limited to
 #'   decorative images.
 #' @param ... Arguments to be passed through to [grDevices::png()].
@@ -344,7 +344,7 @@ custom_print.ggplot <- function(x) {
 
 # Infer alt text description from renderPlot() value
 # (currently just ggplot2 is supported)
-getAltText <- function(x, default = "Plot Object") {
+getAltText <- function(x, default = "Plot object") {
   # Since, inside renderPlot(), custom_print.ggplot()
   # overrides print.ggplot, this class indicates a ggplot()
   if (!inherits(x, "ggplot_build_gtable")) {

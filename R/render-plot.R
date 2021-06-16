@@ -344,7 +344,7 @@ custom_print.ggplot <- function(x) {
 
 # Infer alt text description from renderPlot() value
 # (currently just ggplot2 is supported)
-getAltText <- function(x, default = "Plot Object") {
+getAltText <- function(x, default = "Plot object") {
   # Since, inside renderPlot(), custom_print.ggplot()
   # overrides print.ggplot, this class indicates a ggplot()
   if (!inherits(x, "ggplot_build_gtable")) {

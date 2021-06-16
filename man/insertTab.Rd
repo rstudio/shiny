@@ -11,7 +11,7 @@ insertTab(
   inputId,
   tab,
   target = NULL,
-  position = c("before", "after"),
+  position = c("after", "before"),
   select = FALSE,
   session = getDefaultReactiveDomain()
 )

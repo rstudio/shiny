@@ -113,7 +113,7 @@
 #' }
 #' @export
 insertTab <- function(inputId, tab, target = NULL,
-                      position = c("before", "after"), select = FALSE,
+                      position = c("after", "before"), select = FALSE,
                       session = getDefaultReactiveDomain()) {
   bslib::nav_insert(
     inputId, tab, target,

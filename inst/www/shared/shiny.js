@@ -12839,6 +12839,7 @@
               throw "Cannot insert a navbarMenu inside another one";
             $tabset = dropdown.$tabset;
             tabsetId = dropdown.id;
+            $liTag.removeClass("nav-item").find(".nav-link").removeClass("nav-link").addClass("dropdown-item");
           }
           if ($aTag.attr("data-toggle") === "tab") {
             var index = getTabIndex($tabset, tabsetId);

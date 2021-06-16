@@ -22,4 +22,5 @@ declare const compareVersion: (a: string, op: "==" | ">=" | ">" | "<=" | "<", b:
 declare function updateLabel(labelTxt: undefined | string, labelNode: JQuery<HTMLElement>): void;
 declare function getComputedLinkColor(el: HTMLElement): string;
 declare function isBS3(): boolean;
-export { escapeHTML, randomId, strToBool, getStyle, padZeros, roundSignif, parseDate, formatDateUTC, makeResizeFilter, pixelRatio, scopeExprToFunc, asArray, mergeSort, $escape, mapValues, isnan, _equal, equal, compareVersion, updateLabel, getComputedLinkColor, makeBlob, hasOwnProperty, isBS3, };
+declare function toLowerCase<T extends string>(str: T): Lowercase<T>;
+export { escapeHTML, randomId, strToBool, getStyle, padZeros, roundSignif, parseDate, formatDateUTC, makeResizeFilter, pixelRatio, scopeExprToFunc, asArray, mergeSort, $escape, mapValues, isnan, _equal, equal, compareVersion, updateLabel, getComputedLinkColor, makeBlob, hasOwnProperty, isBS3, toLowerCase, };

@@ -373,6 +373,11 @@ function isBS3(): boolean {
   return !window.bootstrap;
 }
 
+// Modified from https://stackoverflow.com/a/63902094/591574
+function toLowerCase<T extends string>(str: T): Lowercase<T> {
+  return str.toLowerCase() as Lowercase<T>;
+}
+
 export {
   escapeHTML,
   randomId,
@@ -398,4 +403,5 @@ export {
   makeBlob,
   hasOwnProperty,
   isBS3,
+  toLowerCase,
 };

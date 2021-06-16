@@ -75,11 +75,11 @@
     "test": "jest --coverage",
     "test_phantom": "echo '\n\t!! Must manually stop phantomjs test !!\n\n' && yarn bundle_shiny && phantomjs --debug=yes ../inst/www/shared/shiny.js",
     "checks": "yarn run lint && yarn run build_types && yarn run coverage && yarn run circular",
-    "lint": "eslint --fix --ext .ts srcts/src",
+    "lint": "node --eval \"console.log('linting code...')\" && eslint --fix --ext .ts srcts/src",
     "build_types": "tsc -p tsconfig.json",
     "coverage_detailed": "yarn type-check --detail",
     "coverage": "type-coverage -p tsconfig.json --at-least 93",
     "circular": "madge --circular --extensions ts srcts/src",
-    "circular_image": "madge --circular --extensions ts --image madge.svg srcts/src",
+    "circular_image": "madge --circular --extensions ts --image madge.svg srcts/src"
   }
 }

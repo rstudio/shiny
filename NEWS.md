@@ -7,7 +7,7 @@ shiny 1.6.0.9000
 
 * The `format` and `locale` arguments to `sliderInput()` have been removed. They have been deprecated since 0.10.2.2 (released on 2014-12-08).
 
-* Closed #3403: `insertTab()` with `target = NULL` now inserts the `tab` before (instead of after) the tabset when `position = "before"`. Consequently, the default `position` has changed to `"after"` so that the default still 'appends' the `tab` to the tabset. (#3404)
+* Closed #3403: `insertTab()`'s `position` parameter now defaults to `"after"` instead of `"before"`. This has the benefit of allowing us to fix a bug in positioning when `target = NULL`, but has the drawback of changing the default behavior when `target` is not `NULL`. (#3404)
 
 ### New features and improvements
 

@@ -85,7 +85,7 @@ withr::with_dir(rprojroot::find_package_root_file(), {
   exit_code <- system(paste0("yarn add --dev ion-rangeslider@", version))
   if (exit_code != 0) stop("yarn could not install ion-rangeslider")
 
-  exit_code <- system(paste0("yarn add --dev @types/ion-rangeslider@", types_version))
+  exit_code <- system(paste0("yarn add @types/ion-rangeslider@", types_version))
   if (exit_code != 0) stop("yarn could not install @types/ion-rangeslider")
 
   system("yarn bundle_external_libs")

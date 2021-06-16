@@ -1,5 +1,7 @@
 # TypeScript build tools
 
+All files will be described as if the working directory is the root folder of `rstudio/shiny`, not relative to this `README.md` file.
+
 ## First-time setup
 Shiny's TypeScript build tools use Node.js, along with [yarn](https://yarnpkg.com/) v2 to manage the JavaScript packages.
 
@@ -14,9 +16,10 @@ node --version
 yarn --version
 ```
 
-Once both are installed, run the following in this directory (`srcts/`) to install the packages :
+Once both are installed, run the following in the root repo directory to install the packages :
 
 ```bash
+# Sitting in `rstudio/shiny` repo
 yarn install
 ```
 
@@ -47,12 +50,12 @@ If in the future you want to upgrade or add a package, run:
 yarn add --dev [packagename]
 ```
 
-This will automatically add the package to the dependencies in `./package.json`, and it will also update the `./yarn.lock` to reflect that change. If someone other than yourself does this, simply run `yarn` to update your local packages to match the new `./package.json`.
+This will automatically add the package to the dependencies in `package.json`, and it will also update the `yarn.lock` to reflect that change. If someone other than yourself does this, simply run `yarn` to update your local packages to match the new `package.json`.
 
 ## Upgrading packages
 Periodically, it's good to upgrade the packages to a recent version. There's two ways of doing this, depending on your intention:
 
-1. Use `yarn up` to upgrade all dependencies to their latest version based on the version range specified in the package.json file (the `./yarn.lock` file will be recreated as well. Yarn packages use [semantic versioning](https://yarnpkg.com/en/docs/dependency-versions), i.e. each version is writen with a maximum of 3 dot-separated numbers such that: `major.minor.patch`. For example in the version `3.1.4`, 3 is the major version number, 1 is the minor version number and 4 is the patch version number. Here are the most used operators (these appear before the version number):
+1. Use `yarn up` to upgrade all dependencies to their latest version based on the version range specified in the package.json file (the `yarn.lock` file will be recreated as well. Yarn packages use [semantic versioning](https://yarnpkg.com/en/docs/dependency-versions), i.e. each version is writen with a maximum of 3 dot-separated numbers such that: `major.minor.patch`. For example in the version `3.1.4`, 3 is the major version number, 1 is the minor version number and 4 is the patch version number. Here are the most used operators (these appear before the version number):
 
   - `~` is for upgrades that keep the minor version the same (assuming that was specified);
 
@@ -68,10 +71,14 @@ The JavaScript community likes to build many small, effective packages that do m
 
 ## Config files
 
+All config files are located in the root folder to avoid opening two separate VS Code projects.
+
 * `.browserslistrc`
   * Used with `browserslist` and `core-js` to determine which polyfills should be incorporated.
 * `.eslintrc.yml`
   * Used with `eslint` and `prettier` to determine how the TypeScript files should be formatted and which lint failures should cause warnings, errors, or be ignored.
+* `.madgerc`
+  * Package used to determine if circular dependencies are found. `type` only imports are ignored as they are not included in the final bundle.
 * `.prettierrc.yml`
   * Used by `prettier` to know how to adjust code when a file is saved in VSCode or within `eslint`'s linting process.
 * `yarnrc.yml`
@@ -82,15 +89,13 @@ The JavaScript community likes to build many small, effective packages that do m
     * `"useBuiltIns": "usage"` - `core-js` polyfills are only added as they are _used_.
     * `"corejs": "3.9"` - This number should match the installed `core-js` number.
     * `"ignore":["node_modules/core-js"]` - The `core-js` library is directly ignored to [avoid being processed by `babel`](https://github.com/zloirock/core-js/issues/743#issuecomment-571983318).
-* `esbuild.config.mjs`
-  * Script that will build `shiny.js` and `shiny.min.js` with their sourcemaps
 * `jest.config.js`
   * Used to configure [`jest` testing](https://jestjs.io/)
 * `package.json`
   * Contains useful scripts that can be run by `yarn` via `yarn run SCRIPTNAME`.
   * The scripts described below are inteded for developer use. All other scripts are means to an end.
-    * `yarn run watch` - Watch `./src` for changes and rebuild the JavaScript files.
-    * `yarn run build` - Build `shiny.js` and `shiny.min.js` in `../inst/www/shared`. Both files will have a corresponding sourcemap
+    * `yarn run watch` - Watch `srcts/src` for changes and rebuild the JavaScript files.
+    * `yarn run build` - Build `shiny.js` and `shiny.min.js` in `inst/www/shared`. Both files will have a corresponding sourcemap
     * `yarn run lint` - Fix all TypeScript lints using [`eslint`](https://eslint.org/) and [`prettier`](https://prettier.io/)
     * `yarn run test` - Run all TypeScript tests
 * `tsconfig.json` -
@@ -101,12 +106,11 @@ The JavaScript community likes to build many small, effective packages that do m
     * `isolatedModules: true` & `esModuleInterop: true` - Requested by `esbuild`. This [allows for `esbuild`](https://esbuild.github.io/content-types/#typescript) to safely compile the files in parallel
 
 
-
 ## Bundle TypeScript
 
 [esbuild](https://esbuild.github.io/) is a build tool that (for Shiny's purposes) compiles the TypeScript into a single JavaScript file.
 
-To run all build tasks, from within the `./srcts` directory, run:
+To run all build tasks, run:
 
 ```bash
 yarn build
@@ -141,13 +145,6 @@ For this to work you must first install `xdotool` using your distribution's pack
 ```bash
 find ../srcts/ | entr bash -c './node_modules/grunt/bin/grunt && xdotool search --onlyvisible --class Chrome windowfocus key ctrl+r'
 ``` -->
-
-
-
-# Development in VSCode
-
-VSCode does not like to develop TypeScript with the configuration files in a subfolder. To leverage full VSCode capabilities, it is recommended to open the `./srcts` folder as the root folder of a VSCode project. This will enable VSCode to readily find all of the configuration files.
-
 # Updating dependencies
 ### `@types/jquery`
 
@@ -165,3 +162,14 @@ To update the version of `core-js`:
 
 * Check if there is a newer version available by running `yarn outdated core-js`. (If there's no output, then you have the latest version.)
 * Run `yarn add --dev core-js --exact`.
+
+
+### External libraries
+
+Shiny already has a handful of html dependencies that should NOT be bundled within `shiny.js`.  To update the dependencies below, see the directions in in [`tools/README.md`](../tools).
+* `jquery` / `@types/jquery`
+* `bootstrap` / `@types/bootstrap`
+  * Bootstrap is not being updated anymore. Only bootstrap 3.4 will be utilized within shiny.js. To use the latest bootstrap, see [`rstudio/bslib`](https://github.com/rstudio/bslib)
+* `bootstrap-datepicker` / `@types/bootstrap-datepicker`
+* `ion-rangeslider` / `@types/ion-rangeslider`
+* `selectize` / `@types/selectize`

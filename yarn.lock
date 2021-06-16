@@ -1640,6 +1640,34 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@tsconfig/node10@npm:^1.0.7":
+  version: 1.0.8
+  resolution: "@tsconfig/node10@npm:1.0.8"
+  checksum: 0336493b89fb7c06409a1247a3fb00fac2755f21f3f8ae4b9dd2457859abfc5e8ca42b6d9ca5a279fe81bc70fe1f3450eef61e5dd5a63a7b4a6946ff31874816
+  languageName: node
+  linkType: hard
+
+"@tsconfig/node12@npm:^1.0.7":
+  version: 1.0.8
+  resolution: "@tsconfig/node12@npm:1.0.8"
+  checksum: cd625813b6299b2431cadc4cc0afe8a44388ea9045e8e1d6fe13a9f22080ac7b390dc7a684190298c9a78f48691e05babe0dc00af991ccf8f4924c8c0be7a4fe
+  languageName: node
+  linkType: hard
+
+"@tsconfig/node14@npm:^1.0.0":
+  version: 1.0.1
+  resolution: "@tsconfig/node14@npm:1.0.1"
+  checksum: d0068287dba46dc98e7d49c229b0fee034fbac2bb4bc2efe12cc67227a1c68ec0728ca1e535dff7f033f7455de6c67e9b8f9d90f4fc3bb07c0d9ac08186fe65c
+  languageName: node
+  linkType: hard
+
+"@tsconfig/node16@npm:^1.0.1":
+  version: 1.0.1
+  resolution: "@tsconfig/node16@npm:1.0.1"
+  checksum: c389a4a81c291a27b96705de7fbe46d29aa4eb771450a41dfc075d89e1fdd63141898043a0d9f627460a1c409d06635a044dc4b3a4516173769a7d0a1558c51d
+  languageName: node
+  linkType: hard
+
 "@types/aria-query@npm:^4.2.0":
   version: 4.2.1
   resolution: "@types/aria-query@npm:4.2.1"
@@ -1844,7 +1872,7 @@ __metadata:
     browserslist: ^4.16.6
     core-js: ^3.13.0
     esbuild: ^0.12.4
-    esbuild-plugin-babel: 0.2.3
+    esbuild-plugin-babel: "https://github.com/schloerke/esbuild-plugin-babel#patch-2"
     esbuild-plugin-globals: ^0.1.1
     eslint: ^7.27.0
     eslint-config-prettier: ^7.2.0
@@ -1864,6 +1892,7 @@ __metadata:
     selectize: 0.12.4
     strftime: 0.9.2
     ts-jest: ^26
+    ts-node: ^10.0.0
     type-coverage: ^2.17.5
     typescript: ~4.1.5
     util-inspect: "https://github.com/deecewan/browser-util-inspect#c0b4350df4378ffd743e8c36dd3898ce3992823e"
@@ -2224,6 +2253,13 @@ __metadata:
     delegates: ^1.0.0
     readable-stream: ^2.0.6
   checksum: 2d6fdb0ddde9b8cb120b6851b42c75f6b6db78b540b579a00d144ad38cb9e1bdf1248e5454049fcf5b47ef61d1a6f2ea433a8e38984158afd441bc1e0db7a625
+  languageName: node
+  linkType: hard
+
+"arg@npm:^4.1.0":
+  version: 4.1.3
+  resolution: "arg@npm:4.1.3"
+  checksum: 81b3b40b1529c4fbf75b12f7c3e6fb2dcce9e78072063babc169de9b4f40777788f3d2b04380f659ef676a756e03ccfbfe78adf4477353bda906295fa69dab89
   languageName: node
   linkType: hard
 
@@ -3038,6 +3074,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"create-require@npm:^1.1.0":
+  version: 1.1.1
+  resolution: "create-require@npm:1.1.1"
+  checksum: babd307893abfb26d77ae11cb9d6b6cfa6d18c9cee435cf70b5a3fb44aa8d90c9ec26ea89cbb16e0a94b8d34f5fcaee164b90ed526cdd3158955673ab9652d01
+  languageName: node
+  linkType: hard
+
 "cross-spawn@npm:^6.0.0":
   version: 6.0.5
   resolution: "cross-spawn@npm:6.0.5"
@@ -3407,6 +3450,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"diff@npm:^4.0.1":
+  version: 4.0.2
+  resolution: "diff@npm:4.0.2"
+  checksum: 81b5cd7ddde6f0ba2a532d434cfdca365aedd6cc62bb133e851e66e071d40382a30924a07c1034bd3d5a2e332146f64514b73c06fe2ebc0490a67f0c98da79fb
+  languageName: node
+  linkType: hard
+
 "dir-glob@npm:^3.0.1":
   version: 3.0.1
   resolution: "dir-glob@npm:3.0.1"
@@ -3539,12 +3589,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"esbuild-plugin-babel@npm:0.2.3":
+"esbuild-plugin-babel@https://github.com/schloerke/esbuild-plugin-babel#patch-2":
   version: 0.2.3
-  resolution: "esbuild-plugin-babel@npm:0.2.3"
+  resolution: "esbuild-plugin-babel@https://github.com/schloerke/esbuild-plugin-babel.git#commit=40106e72776cf4e2e4da8e52926632ceed378da0"
   peerDependencies:
     "@babel/core": ^7.0.0
-  checksum: d3485d2c45742a7a36c040656f99c7326cfc34df758c46fd270a7c6e6475daf7bdcf82871e772cccee0819db11263ce373b6dc99a790b6f25173a695144ec31f
+  checksum: 45a43f73bf1482c6885e55d280f53f2a1c81a1a928a1517390e02964d6be4e77745380cf041480540b6b7436d4aee867e2c08320a8598225ec956bf1e9653835
   languageName: node
   linkType: hard
 
@@ -5925,7 +5975,7 @@ fsevents@^2.1.2:
   languageName: node
   linkType: hard
 
-"make-error@npm:1.x":
+"make-error@npm:1.x, make-error@npm:^1.1.1":
   version: 1.3.6
   resolution: "make-error@npm:1.3.6"
   checksum: 2c780bab8409b865e8ee86697c599a2bf2765ec64d21eb67ccda27050e039f983feacad05a0d43aba3c966ea03d305d2612e94fec45474bcbc61181f57c5bb88
@@ -7712,7 +7762,7 @@ fsevents@^2.1.2:
   languageName: node
   linkType: hard
 
-"source-map-support@npm:^0.5.6":
+"source-map-support@npm:^0.5.17, source-map-support@npm:^0.5.6":
   version: 0.5.19
   resolution: "source-map-support@npm:0.5.19"
   dependencies:
@@ -8233,6 +8283,40 @@ fsevents@^2.1.2:
   bin:
     ts-jest: cli.js
   checksum: fd32a8b256091d45d850c491fd090f74a368d44bccc8fedfa0dd074757727e7f07621eb2a69ebf081428f44a357a879237a2cf0aef970896410d454d0bf87ac6
+  languageName: node
+  linkType: hard
+
+"ts-node@npm:^10.0.0":
+  version: 10.0.0
+  resolution: "ts-node@npm:10.0.0"
+  dependencies:
+    "@tsconfig/node10": ^1.0.7
+    "@tsconfig/node12": ^1.0.7
+    "@tsconfig/node14": ^1.0.0
+    "@tsconfig/node16": ^1.0.1
+    arg: ^4.1.0
+    create-require: ^1.1.0
+    diff: ^4.0.1
+    make-error: ^1.1.1
+    source-map-support: ^0.5.17
+    yn: 3.1.1
+  peerDependencies:
+    "@swc/core": ">=1.2.45"
+    "@swc/wasm": ">=1.2.45"
+    "@types/node": "*"
+    typescript: ">=2.7"
+  peerDependenciesMeta:
+    "@swc/core":
+      optional: true
+    "@swc/wasm":
+      optional: true
+  bin:
+    ts-node: dist/bin.js
+    ts-node-cwd: dist/bin-cwd.js
+    ts-node-script: dist/bin-script.js
+    ts-node-transpile-only: dist/bin-transpile.js
+    ts-script: dist/bin-script-deprecated.js
+  checksum: dc461e2b9b931b00ff065530a0247f86da1d035e72a7ef6d7ed072dd8e6b236d1879f113dcc73a354d240c81b6b845445c3d32b16eeb68022ed27ab6d130c049
   languageName: node
   linkType: hard
 
@@ -8844,5 +8928,12 @@ typescript@~4.1.5:
     buffer-crc32: ~0.2.3
     fd-slicer: ~1.1.0
   checksum: 6d0c4e72706ec2df6ea842d09c792e7b34badc5db3d8a893e0c70d0e464c9bf82bac4b1690f3515b5e1d96b72fceb6cc4dd96465426077ba6dddc54e7dd4d517
+  languageName: node
+  linkType: hard
+
+"yn@npm:3.1.1":
+  version: 3.1.1
+  resolution: "yn@npm:3.1.1"
+  checksum: bff63b80568d80c711670935427494dde47cdf97e8b04196b140ce0af519c81c5ee857eddad0caa8b422dd65aea0157bbfaacbb1546bebba623f0f383d5d9ae5
   languageName: node
   linkType: hard

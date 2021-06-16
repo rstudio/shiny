@@ -71,13 +71,12 @@ jobs:
         shell: Rscript {0}
         run: |
           pak::local_install_dev_deps(upgrade = TRUE)
-          pak::pkg_install("sessioninfo")
-          pak::pkg_install("devtools")
 
       - name: Session info
         shell: Rscript {0}
         run: |
           options(width = 100)
+          pak::pkg_install("sessioninfo")
           pkgs <- installed.packages()[, "Package"]
           sessioninfo::session_info(pkgs, include_base = TRUE)
 
@@ -100,6 +99,7 @@ jobs:
 
       - name: Document
         run: |
+          Rscript -e 'pak::pkg_install("devtools")'
           Rscript -e 'devtools::document()'
           git add man/\* NAMESPACE
           git commit -m 'Document (GitHub Actions)' || echo "No documentation changes to commit"
@@ -123,14 +123,23 @@ jobs:
           key: ${{ matrix.config.os }}-${{ matrix.config.node }}-yarn-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
             ${{ matrix.config.os }}-${{ matrix.config.node }}-yarn-
+
+      - name: Sync DESCRIPTION and package.json versions
+        run: |
+          Rscript -e 'pak::pkg_install("jsonlite")'
+          Rscript -e 'pkg <- jsonlite::read_json("package.json", simplifyVector = TRUE)' \
+          -e 'pkg$version <- as.list(read.dcf("DESCRIPTION")[1,])$Version' \
+          -e 'pkg$files <- as.list(pkg$files)' \
+          -e 'jsonlite::write_json(pkg, path = "package.json", pretty = TRUE, auto_unbox = TRUE)'
+          git add package.json && git commit -m 'sync package version (GitHub Actions)' || echo "No version changes to commit"
       - name: Build JS
         run: |
-          cd srcts
-          tree src
+          tree srcts
+          rm -r srcts/types
           yarn install --immutable && yarn build
-          git add ./src && git commit -m 'yarn lint (GitHub Actions)' || echo "No yarn lint changes to commit"
-          git add ./types && git commit -m 'yarn tsc (GitHub Actions)' || echo "No type definition changes to commit"
-          git add ../inst && git commit -m 'yarn build (GitHub Actions)' || echo "No yarn build changes to commit"
+          git add ./srcts/src && git commit -m 'yarn lint (GitHub Actions)' || echo "No yarn lint changes to commit"
+          git add ./srcts/types && git commit -m 'yarn tsc (GitHub Actions)' || echo "No type definition changes to commit"
+          git add ./inst && git commit -m 'yarn build (GitHub Actions)' || echo "No yarn build changes to commit"
           if [ -n "$(git status --porcelain)" ]
           then
             git status --porcelain

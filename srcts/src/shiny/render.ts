@@ -10,7 +10,7 @@ import {
 import { sendImageSizeFns } from "./sendImageSize";
 
 import { renderHtml as singletonsRenderHtml } from "./singletons";
-import type { WherePosition, RenderHtmlWherePosition } from "./singletons";
+import type { WherePosition } from "./singletons";
 
 function renderDependencies(dependencies: null | Array<HtmlDep>): void {
   if (dependencies) {
@@ -44,9 +44,6 @@ function renderContent(
     dependencies = content.deps || [];
   }
 
-  // @ts-expect-error; TODO-barret; The `where` values do not match.
-  // The type definition is to have `InsertPosition` which does not align with `WherePosition` from above
-  // type InsertPosition = "beforebegin" | "afterbegin" | "beforeend" | "afterend"
   renderHtml(html, el, dependencies, where);
 
   let scope: bindScope = el;
@@ -75,7 +72,7 @@ function renderHtml(
   html: string,
   el: bindScope,
   dependencies: Array<HtmlDep>,
-  where: RenderHtmlWherePosition = "replace"
+  where: WherePosition = "replace"
 ): ReturnType<typeof singletonsRenderHtml> {
   renderDependencies(dependencies);
   return singletonsRenderHtml(html, el, where);

@@ -3630,6 +3630,9 @@
   function isBS3() {
     return !window.bootstrap;
   }
+  function toLowerCase(str) {
+    return str.toLowerCase();
+  }
 
   // srcts/src/bindings/registry.ts
   function _classCallCheck(instance, Constructor) {
@@ -8981,7 +8984,7 @@
         elElements = el.toArray();
       }
       import_jquery26.default.each(elElements, function(i, el2) {
-        el2.insertAdjacentHTML(where, processed.html);
+        el2.insertAdjacentHTML(toLowerCase(where), processed.html);
       });
     }
     return processed;

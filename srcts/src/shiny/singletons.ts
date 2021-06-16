@@ -1,4 +1,5 @@
 import $ from "jquery";
+import { toLowerCase } from "../utils";
 import { bindScope } from "./bind";
 
 const _reSingleton = /<!--(SHINY.SINGLETON\[([\w]+)\])-->([\s\S]*?)<!--\/\1-->/;
@@ -6,13 +7,17 @@ const _reHead = /<head(?:\s[^>]*)?>([\s\S]*?)<\/head>/;
 
 const knownSingletons: Record<string, boolean> = {};
 
-type WherePosition = "replace" | "beforeBegin" | "afterEnd";
-type RenderHtmlWherePosition = "replace" | InsertPosition;
+type WherePosition =
+  | "replace"
+  | "afterBegin"
+  | "beforeBegin"
+  | "afterEnd"
+  | "beforeEnd";
 
 function renderHtml(
   html: string,
   el: bindScope,
-  where: RenderHtmlWherePosition
+  where: WherePosition
 ): ReturnType<typeof _processHtml> {
   const processed = _processHtml(html);
 
@@ -30,7 +35,7 @@ function renderHtml(
     }
     $.each(elElements, (i, el) => {
       // type InsertPosition = "beforebegin" | "afterbegin" | "beforeend" | "afterend"
-      el.insertAdjacentHTML(where, processed.html);
+      el.insertAdjacentHTML(toLowerCase(where), processed.html);
     });
   }
   return processed;
@@ -105,4 +110,4 @@ function _processHtml(val: string): {
 }
 
 export { renderHtml, registerNames };
-export type { WherePosition, RenderHtmlWherePosition };
+export type { WherePosition };

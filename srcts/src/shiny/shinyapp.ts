@@ -1016,6 +1016,11 @@ class ShinyApp {
             throw "Cannot insert a navbarMenu inside another one";
           $tabset = dropdown.$tabset;
           tabsetId = dropdown.id;
+          $liTag
+            .removeClass("nav-item")
+            .find(".nav-link")
+            .removeClass("nav-link")
+            .addClass("dropdown-item");
         }
 
         // For regular tab items, fix the href (of the li > a tag)

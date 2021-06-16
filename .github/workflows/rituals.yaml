@@ -134,6 +134,7 @@ jobs:
       - name: Build JS
         run: |
           tree srcts
+          rm -r srcts/types
           yarn install --immutable && yarn build
           git add ./srcts/src && git commit -m 'yarn lint (GitHub Actions)' || echo "No yarn lint changes to commit"
           git add ./srcts/types && git commit -m 'yarn tsc (GitHub Actions)' || echo "No type definition changes to commit"

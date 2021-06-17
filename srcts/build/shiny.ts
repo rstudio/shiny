@@ -3,11 +3,10 @@
 // yarn build
 // ```
 
-import { build, outDir } from "./_build";
+import { banner, build, outDir, shinyDesc } from "./_build";
 import globalsPlugin from "esbuild-plugin-globals";
 import babelPlugin from "esbuild-plugin-babel";
-import readcontrol from "readcontrol";
-import { BuildOptions } from "esbuild";
+import type { BuildOptions } from "esbuild";
 
 const opts: BuildOptions = {
   entryPoints: ["srcts/src/index.ts"],
@@ -19,14 +18,12 @@ const opts: BuildOptions = {
       //// Loaded dynamically. MUST use `window.strftime` within code
       // strftime: "window.strftime",
     }),
-    //
     babelPlugin(),
   ],
   define: {
-    "process.env.SHINY_VERSION": `"${
-      readcontrol.readSync("./DESCRIPTION").version
-    }"`,
+    "process.env.SHINY_VERSION": `"${shinyDesc.version}"`,
   },
+  banner: banner,
 };
 
 build({

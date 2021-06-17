@@ -4,27 +4,48 @@ import {
   BuildOptions,
   BuildResult,
 } from "esbuild";
+import readcontrol from "readcontrol";
 import process from "process";
 import { basename } from "path";
 
 const outDir = "./inst/www/shared/";
 
-async function build(
-  opts: BuildOptions,
-  strSize = "shiny.min.js".length
-): Promise<BuildIncremental | BuildResult> {
-  const outFileName = basename(opts.outfile);
-  let printName = outFileName;
+type ShinyDesc = { version: string; package: string; license: string };
+const shinyDesc = readcontrol.readSync("./DESCRIPTION") as ShinyDesc;
 
-  while (printName.length < strSize) {
-    printName = printName + " ";
+const bannerTxt = [
+  `/*! ${shinyDesc.package} ${shinyDesc.version}`,
+  `(c) 2012-${new Date().getFullYear()} RStudio, PBC.`,
+  `License: ${shinyDesc.license} */`,
+].join(" | ");
+const banner = {
+  js: bannerTxt,
+  css: bannerTxt,
+};
+
+async function build(
+  opts: BuildOptions
+): Promise<BuildIncremental | BuildResult> {
+  const outFileNames = opts.outfile
+    ? [basename(opts.outfile)]
+    : (opts.entryPoints as string[]).map((entry) => basename(entry));
+
+  const strSize = "shiny.min.js".length;
+  const printNames = outFileNames;
+
+  for (let i = 0; i < printNames.length; i++) {
+    while (printNames[i].length < strSize) {
+      printNames[i] = printNames[i] + " ";
+    }
   }
 
   const onRebuild = function (error?: string) {
     if (error) {
-      console.error(printName, "watch build failed:\n", error);
+      console.error(printNames.join(", "), "watch build failed:\n", error);
     } else {
-      console.log("√ -", printName, "-", new Date().toJSON());
+      printNames.map((printName) => {
+        console.log("√ -", printName, "-", new Date().toJSON());
+      });
     }
     return;
   };
@@ -39,7 +60,9 @@ async function build(
     };
   }
 
-  console.log("Building " + outFileName);
+  outFileNames.map((outFileName) => {
+    console.log("Building " + outFileName);
+  });
   return esbuildBuild({
     incremental: incremental,
     watch: watch,
@@ -51,4 +74,4 @@ async function build(
   });
 }
 
-export { outDir, build };
+export { outDir, build, shinyDesc, banner };

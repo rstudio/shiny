@@ -1,10 +1,5 @@
 import { TextHTMLElement, TextInputBindingBase } from "./text";
 declare type TimeFormatter = (fmt: string, dt: Date) => string;
-declare type legacySliderType = {
-    canStepNext: () => boolean;
-    stepNext: () => void;
-    resetToStart: () => void;
-};
 declare type SliderReceiveMessageData = {
     label: string;
     value?: Array<string | number> | string | number;
@@ -18,9 +13,6 @@ declare global {
             utc: () => TimeFormatter;
             timezone: (timezone: string) => TimeFormatter;
         } & TimeFormatter;
-    }
-    interface JQuery {
-        slider: () => legacySliderType;
     }
 }
 declare class SliderInputBinding extends TextInputBindingBase {

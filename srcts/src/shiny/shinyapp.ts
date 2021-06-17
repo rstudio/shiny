@@ -1016,6 +1016,15 @@ class ShinyApp {
             throw "Cannot insert a navbarMenu inside another one";
           $tabset = dropdown.$tabset;
           tabsetId = dropdown.id;
+          // In the BS4+ case, the server will be generating "top-level" nav markup
+          // (i.e., `li.nav-item a.nav-link`), but when inserting inside a dropdown we
+          // need `li a.dropdown-item` for correct styling
+          // https://getbootstrap.com/docs/5.0/components/navs-tabs/#tabs-with-dropdowns
+          $liTag
+            .removeClass("nav-item")
+            .find(".nav-link")
+            .removeClass("nav-link")
+            .addClass("dropdown-item");
         }
 
         // For regular tab items, fix the href (of the li > a tag)

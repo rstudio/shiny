@@ -30,7 +30,10 @@ async function build(
     ? [basename(opts.outfile)]
     : (opts.entryPoints as string[]).map((entry) => basename(entry));
 
-  const strSize = "shiny.min.js".length;
+  const strSizes = outFileNames.map((outFileName) => outFileName.length);
+
+  strSizes.push("shiny.min.js".length);
+  const strSize = Math.max(...strSizes);
   const printNames = outFileNames;
 
   for (let i = 0; i < printNames.length; i++) {

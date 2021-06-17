@@ -1,4 +1,4 @@
-import type { ShinyType } from "../shiny";
+import type { ShinyType } from "../src/shiny";
 
 type ShowcaseSrcMessage = {
   srcref: Array<number>;

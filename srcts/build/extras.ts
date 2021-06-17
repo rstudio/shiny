@@ -13,10 +13,11 @@ build({
   sourcemap: "inline",
   minify: true,
   plugins: [babelPlugin()],
+  banner: banner,
   entryPoints: [
-    "srcts/src/extra/shiny-autoreload.ts",
-    "srcts/src/extra/shiny-showcase.ts",
-    "srcts/src/extra/shiny-testmode.ts",
+    "srcts/extras/shiny-autoreload.ts",
+    "srcts/extras/shiny-showcase.ts",
+    "srcts/extras/shiny-testmode.ts",
   ],
   outdir: outDir,
 });
@@ -38,6 +39,6 @@ build({
       plugins: [autoprefixer],
     }),
   ],
-  entryPoints: ["srcts/src/extra/shiny-showcase.sass"],
+  entryPoints: ["srcts/extras/shiny-showcase.sass"],
   outfile: outDir + "shiny-showcase.css",
 });

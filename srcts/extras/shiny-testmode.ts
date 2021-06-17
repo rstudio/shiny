@@ -1,4 +1,4 @@
-import { indirectEval } from "../utils/eval";
+import { indirectEval } from "../src/utils/eval";
 
 // Listen for messages from parent frame. This file is only added when the
 // shiny.testmode option is TRUE.

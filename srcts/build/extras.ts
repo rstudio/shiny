@@ -39,6 +39,6 @@ build({
       plugins: [autoprefixer],
     }),
   ],
-  entryPoints: ["srcts/extras/shiny-showcase.sass"],
+  entryPoints: ["srcts/extras/shiny-showcase.scss"],
   outfile: outDir + "shiny-showcase.css",
 });

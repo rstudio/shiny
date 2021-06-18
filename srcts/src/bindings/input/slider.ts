@@ -14,6 +14,7 @@ import { TextHTMLElement, TextInputBindingBase } from "./text";
 // }
 
 type TimeFormatter = (fmt: string, dt: Date) => string;
+// Backward compatible code for old-style jsliders (Shiny <= 0.10.2.2),
 type legacySliderType = {
   canStepNext: () => boolean;
   stepNext: () => void;
@@ -36,10 +37,6 @@ declare global {
       utc: () => TimeFormatter;
       timezone: (timezone: string) => TimeFormatter;
     } & TimeFormatter;
-  }
-  interface JQuery {
-    // Backward compatible code for old-style jsliders (Shiny <= 0.10.2.2),
-    slider: () => legacySliderType;
   }
 }
 
@@ -303,7 +300,7 @@ $(document).on("click", ".slider-animate-button", function (evt: Event) {
     // Backward compatible code for old-style jsliders (Shiny <= 0.10.2.2),
     // and new-style ionsliders.
     if (target.hasClass("jslider")) {
-      const slider = target.slider();
+      const slider = target.slider() as unknown as legacySliderType;
 
       // If we're currently at the end, restart
       if (!slider.canStepNext()) slider.resetToStart();

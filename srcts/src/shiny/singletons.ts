@@ -1,9 +1,9 @@
 import $ from "jquery";
 import { toLowerCase } from "../utils";
-import { bindScope } from "./bind";
+import { BindScope } from "./bind";
 
-const _reSingleton = /<!--(SHINY.SINGLETON\[([\w]+)\])-->([\s\S]*?)<!--\/\1-->/;
-const _reHead = /<head(?:\s[^>]*)?>([\s\S]*?)<\/head>/;
+const reSingleton = /<!--(SHINY.SINGLETON\[([\w]+)\])-->([\s\S]*?)<!--\/\1-->/;
+const reHead = /<head(?:\s[^>]*)?>([\s\S]*?)<\/head>/;
 
 const knownSingletons: Record<string, boolean> = {};
 
@@ -16,12 +16,12 @@ type WherePosition =
 
 function renderHtml(
   html: string,
-  el: bindScope,
+  el: BindScope,
   where: WherePosition
-): ReturnType<typeof _processHtml> {
-  const processed = _processHtml(html);
+): ReturnType<typeof processHtml> {
+  const processed = processHtml(html);
 
-  _addToHead(processed.head);
+  addToHead(processed.head);
   register(processed.singletons);
   if (where === "replace") {
     $(el).html(processed.html);
@@ -56,7 +56,7 @@ function registerNames(s: string | Array<string>): void {
   }
 }
 // Inserts new content into document head
-function _addToHead(head: string) {
+function addToHead(head: string) {
   if (head.length > 0) {
     const tempDiv = $("<div>" + head + "</div>").get(0);
     const $head = $("head");
@@ -68,7 +68,7 @@ function _addToHead(head: string) {
   }
 }
 // Reads HTML and returns an object with info about singletons
-function _processHtml(val: string): {
+function processHtml(val: string): {
   html: string;
   head: string;
   singletons: typeof knownSingletons;
@@ -84,7 +84,7 @@ function _processHtml(val: string): {
 
   // eslint-disable-next-line no-constant-condition
   while (true) {
-    newVal = val.replace(_reSingleton, findNewPayload);
+    newVal = val.replace(reSingleton, findNewPayload);
     if (val.length === newVal.length) break;
     val = newVal;
   }
@@ -97,7 +97,7 @@ function _processHtml(val: string): {
 
   // eslint-disable-next-line no-constant-condition
   while (true) {
-    newVal = val.replace(_reHead, headAddPayload);
+    newVal = val.replace(reHead, headAddPayload);
     if (val.length === newVal.length) break;
     val = newVal;
   }

@@ -1,6 +1,6 @@
 // Map a value x from a domain to a range. If clip is true, clip it to the
 
-import { OffsetType } from "./findbox";
+import type { Offset } from "./findbox";
 import { mapValues } from "../utils";
 
 // range.
@@ -52,7 +52,7 @@ function scaler1D(
   };
 }
 
-type PanelType = {
+type Panel = {
   domain: {
     top: number;
     bottom: number;
@@ -70,7 +70,7 @@ type PanelType = {
     y?: number;
   };
   mapping: Record<string, string>;
-  // eslint-disable-next-line camelcase
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   panel_vars?: Record<string, number | string>;
 
   scaleDataToImg?: (
@@ -78,7 +78,7 @@ type PanelType = {
     clip?: boolean
   ) => Record<string, number>;
   scaleImgToData?: {
-    (val: OffsetType, clip?: boolean): OffsetType;
+    (val: Offset, clip?: boolean): Offset;
     (val: Record<string, number>, clip?: boolean): Record<string, number>;
   };
 
@@ -87,7 +87,7 @@ type PanelType = {
 
 // Modify panel, adding scale and inverse-scale functions that take objects
 // like {x:1, y:3}, and also add clip function.
-function addScaleFuns(panel: PanelType) {
+function addScaleFuns(panel: Panel) {
   const d = panel.domain;
   const r = panel.range;
   const xlog = panel.log && panel.log.x ? panel.log.x : null;
@@ -111,7 +111,7 @@ function addScaleFuns(panel: PanelType) {
     });
   };
 
-  function scaleImgToData(val: OffsetType, clip?: boolean);
+  function scaleImgToData(val: Offset, clip?: boolean);
   function scaleImgToData(val: Record<string, number>, clip?: boolean) {
     return mapValues(val, (value, key) => {
       const prefix = key.substring(0, 1);
@@ -149,7 +149,7 @@ function addScaleFuns(panel: PanelType) {
 // scaleDataToImg(), and clipImg() functions to each one. The panel objects
 // use img and data coordinates only; they do not use css coordinates. The
 // domain is in data coordinates; the range is in img coordinates.
-function initPanelScales(panels: Array<PanelType>): void {
+function initPanelScales(panels: Array<Panel>): void {
   // Add the functions to each panel object.
   for (let i = 0; i < panels.length; i++) {
     const panel = panels[i];
@@ -158,5 +158,5 @@ function initPanelScales(panels: Array<PanelType>): void {
   }
 }
 
-export type { PanelType };
+export type { Panel };
 export { initPanelScales };

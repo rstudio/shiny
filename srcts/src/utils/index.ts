@@ -108,10 +108,10 @@ function formatDateUTC(date: Date | null): null | string {
 // Basically we are trying to filter out extraneous calls to func, so that
 // when the window size changes or whatever, we don't run resize logic for
 // elements that haven't actually changed size or aren't visible anyway.
-interface lastSizeInterface {
+type LastSizeInterface = {
   w?: number;
   h?: number;
-}
+};
 function makeResizeFilter(
   el: HTMLElement,
   func: (
@@ -119,7 +119,7 @@ function makeResizeFilter(
     height: HTMLElement["offsetHeight"]
   ) => void
 ): () => void {
-  let lastSize: lastSizeInterface = {};
+  let lastSize: LastSizeInterface = {};
 
   return function () {
     const size = { w: el.offsetWidth, h: el.offsetHeight };
@@ -251,6 +251,8 @@ function isnan(x: unknown): boolean {
 }
 
 // Binary equality function used by the equal function.
+// (Name existed before TS conversion)
+// eslint-disable-next-line @typescript-eslint/naming-convention
 function _equal(x: unknown, y: unknown): boolean {
   if ($.type(x) === "object" && $.type(y) === "object") {
     const xo = x as Record<string, unknown>;

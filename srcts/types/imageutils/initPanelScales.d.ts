@@ -1,5 +1,5 @@
-import { OffsetType } from "./findbox";
-declare type PanelType = {
+import type { Offset } from "./findbox";
+declare type Panel = {
     domain: {
         top: number;
         bottom: number;
@@ -20,7 +20,7 @@ declare type PanelType = {
     panel_vars?: Record<string, number | string>;
     scaleDataToImg?: (val: Record<string, number>, clip?: boolean) => Record<string, number>;
     scaleImgToData?: {
-        (val: OffsetType, clip?: boolean): OffsetType;
+        (val: Offset, clip?: boolean): Offset;
         (val: Record<string, number>, clip?: boolean): Record<string, number>;
     };
     clipImg?: (offsetImg: {
@@ -31,6 +31,6 @@ declare type PanelType = {
         y: number;
     };
 };
-declare function initPanelScales(panels: Array<PanelType>): void;
-export type { PanelType };
+declare function initPanelScales(panels: Array<Panel>): void;
+export type { Panel };
 export { initPanelScales };

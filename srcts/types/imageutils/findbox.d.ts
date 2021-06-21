@@ -1,8 +1,8 @@
-import type { BoundsType } from "./createBrush";
-declare type OffsetType = {
+import type { Bounds } from "./createBrush";
+declare type Offset = {
     x: number;
     y: number;
 };
-declare function findBox(offset1: OffsetType, offset2: OffsetType): BoundsType;
-export type { OffsetType };
+declare function findBox(offset1: Offset, offset2: Offset): Bounds;
+export type { Offset };
 export { findBox };

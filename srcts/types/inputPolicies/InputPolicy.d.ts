@@ -1,9 +1,9 @@
-declare type priorityType = "immediate" | "deferred" | "event";
+declare type EventPriority = "immediate" | "deferred" | "event";
 declare class InputPolicy {
     target: InputPolicy;
     setInput(name: string, value: unknown, opts: {
-        priority: priorityType;
+        priority: EventPriority;
     }): void;
 }
 export { InputPolicy };
-export type { priorityType };
+export type { EventPriority };

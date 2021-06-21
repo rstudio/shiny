@@ -3,6 +3,11 @@ import { InputBinding } from "./InputBinding";
 import { hasOwnProperty, isBS3 } from "../../utils";
 
 type TabInputReceiveMessageData = { value?: string };
+
+function getTabName(anchor: JQuery<HTMLElement>): string {
+  return anchor.attr("data-value") || anchor.text();
+}
+
 class BootstrapTabInputBinding extends InputBinding {
   find(scope: HTMLElement): JQuery<HTMLElement> {
     return $(scope).find("ul.nav.shiny-tab-input");
@@ -16,14 +21,11 @@ class BootstrapTabInputBinding extends InputBinding {
         ".nav-link:not(.dropdown-toggle).active, .dropdown-menu .dropdown-item.active"
       );
 
-    if (anchor.length === 1) return this._getTabName(anchor);
+    if (anchor.length === 1) return getTabName(anchor);
 
     return null;
   }
   setValue(el: HTMLElement, value: string): void {
-    // this is required as an arrow function will not fix the usage
-    // eslint-disable-next-line @typescript-eslint/no-this-alias
-    const self = this;
     let success = false;
 
     if (value) {
@@ -36,7 +38,7 @@ class BootstrapTabInputBinding extends InputBinding {
         );
 
       anchors.each(function () {
-        if (self._getTabName($(this)) === value) {
+        if (getTabName($(this)) === value) {
           $(this).tab("show");
           success = true;
           return false; // Break out of each()
@@ -68,9 +70,6 @@ class BootstrapTabInputBinding extends InputBinding {
   }
   unsubscribe(el: HTMLElement): void {
     $(el).off(".bootstrapTabInputBinding");
-  }
-  _getTabName(anchor: JQuery<HTMLElement>): string {
-    return anchor.attr("data-value") || anchor.text();
   }
 }
 

@@ -1,12 +1,12 @@
-import { bindScope } from "./bind";
+import { BindScope } from "./bind";
 import { renderHtml as singletonsRenderHtml } from "./singletons";
 import type { WherePosition } from "./singletons";
 declare function renderDependencies(dependencies: null | Array<HtmlDep>): void;
-declare function renderContent(el: bindScope, content: null | string | {
+declare function renderContent(el: BindScope, content: null | string | {
     html: string;
     deps?: Array<HtmlDep>;
 }, where?: WherePosition): void;
-declare function renderHtml(html: string, el: bindScope, dependencies: Array<HtmlDep>, where?: WherePosition): ReturnType<typeof singletonsRenderHtml>;
+declare function renderHtml(html: string, el: BindScope, dependencies: Array<HtmlDep>, where?: WherePosition): ReturnType<typeof singletonsRenderHtml>;
 declare type HtmlDepName = string;
 declare type HtmlDepVersion = string;
 declare type HtmlDep = {

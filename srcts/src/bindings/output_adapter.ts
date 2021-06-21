@@ -1,4 +1,4 @@
-import type { errorsMessageValue } from "../shiny/shinyapp";
+import type { ErrorsMessageValue } from "../shiny/shinyapp";
 import { makeResizeFilter } from "../utils";
 import { OutputBinding } from "./output";
 
@@ -33,7 +33,7 @@ class OutputBindingAdapter {
   onValueChange(data: unknown): void {
     this.binding.onValueChange(this.el, data);
   }
-  onValueError(err: errorsMessageValue): void {
+  onValueError(err: ErrorsMessageValue): void {
     this.binding.onValueError(this.el, err);
   }
   showProgress(show: boolean): void {

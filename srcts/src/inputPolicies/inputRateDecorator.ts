@@ -1,4 +1,4 @@
-import { priorityType, InputPolicy } from "./InputPolicy";
+import { EventPriority, InputPolicy } from "./InputPolicy";
 import { Debouncer, Invoker, Throttler } from "../time";
 import { splitInputNameType } from "./splitInputNameType";
 
@@ -20,11 +20,11 @@ class InputRateDecorator extends InputPolicy {
   setInput(
     nameType: string,
     value: unknown,
-    opts: { priority: priorityType }
+    opts: { priority: EventPriority }
   ): void {
     const { name: inputName } = splitInputNameType(nameType);
 
-    this.$ensureInit(inputName);
+    this._ensureInit(inputName);
 
     if (opts.priority !== "deferred")
       this.inputRatePolicies[inputName].immediateCall(nameType, value, opts);
@@ -38,28 +38,28 @@ class InputRateDecorator extends InputPolicy {
     const { name: inputName } = splitInputNameType(nameType);
 
     if (mode === "direct") {
-      this.inputRatePolicies[inputName] = new Invoker(this, this.$doSetInput);
+      this.inputRatePolicies[inputName] = new Invoker(this, this._doSetInput);
     } else if (mode === "debounce") {
       this.inputRatePolicies[inputName] = new Debouncer(
         this,
-        this.$doSetInput,
+        this._doSetInput,
         millis
       );
     } else if (mode === "throttle") {
       this.inputRatePolicies[inputName] = new Throttler(
         this,
-        this.$doSetInput,
+        this._doSetInput,
         millis
       );
     }
   }
-  private $ensureInit(name: string): void {
+  private _ensureInit(name: string): void {
     if (!(name in this.inputRatePolicies)) this.setRatePolicy(name, "direct");
   }
-  private $doSetInput(
+  private _doSetInput(
     nameType: string,
     value: unknown,
-    opts: { priority: priorityType }
+    opts: { priority: EventPriority }
   ): void {
     this.target.setInput(nameType, value, opts);
   }

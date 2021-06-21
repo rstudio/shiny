@@ -20,7 +20,6 @@ declare class NumberInputBinding extends TextInputBindingBase {
         max: number;
         step: number;
     };
-    _getLabelNode(el: NumberHTMLElement): JQuery<HTMLElement>;
 }
 export { NumberInputBinding };
 export type { NumberReceiveMessageData };

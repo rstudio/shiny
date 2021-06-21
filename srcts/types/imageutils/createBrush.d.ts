@@ -1,20 +1,20 @@
-import type { CoordmapType } from "./initCoordmap";
-import type { PanelType } from "./initPanelScales";
-import type { OffsetType } from "./findbox";
-declare type BoundsType = {
+import type { Coordmap } from "./initCoordmap";
+import type { Panel } from "./initPanelScales";
+import type { Offset } from "./findbox";
+declare type Bounds = {
     xmin: number;
     xmax: number;
     ymin: number;
     ymax: number;
 };
-declare type BoundsCss = BoundsType;
-declare type BoundsData = BoundsType;
+declare type BoundsCss = Bounds;
+declare type BoundsData = Bounds;
 declare type ImageState = {
     brushing?: boolean;
     dragging?: boolean;
     resizing?: boolean;
-    down?: OffsetType;
-    up?: OffsetType;
+    down?: Offset;
+    up?: Offset;
     resizeSides?: {
         left: boolean;
         right: boolean;
@@ -23,10 +23,10 @@ declare type ImageState = {
     };
     boundsCss?: BoundsCss;
     boundsData?: BoundsData;
-    panel?: PanelType;
-    changeStartBounds?: BoundsType;
+    panel?: Panel;
+    changeStartBounds?: Bounds;
 };
-declare type BrushOptsType = {
+declare type BrushOpts = {
     brushDirection: "x" | "y" | "xy";
     brushClip: boolean;
     brushFill: string;
@@ -36,12 +36,12 @@ declare type BrushOptsType = {
     brushDelay?: number;
     brushResetOnNew?: boolean;
 };
-declare type BrushType = {
+declare type Brush = {
     reset: () => void;
     importOldBrush: () => void;
-    isInsideBrush: (offsetCss: OffsetType) => boolean;
-    isInResizeArea: (offsetCss: OffsetType) => boolean;
-    whichResizeSides: (offsetCss: OffsetType) => ImageState["resizeSides"];
+    isInsideBrush: (offsetCss: Offset) => boolean;
+    isInResizeArea: (offsetCss: Offset) => boolean;
+    whichResizeSides: (offsetCss: Offset) => ImageState["resizeSides"];
     onResize: () => void;
     boundsCss: {
         (boxCss: BoundsCss): void;
@@ -62,17 +62,17 @@ declare type BrushType = {
     };
     isBrushing: () => ImageState["brushing"];
     startBrushing: () => void;
-    brushTo: (offsetCss: OffsetType) => void;
+    brushTo: (offsetCss: Offset) => void;
     stopBrushing: () => void;
     isDragging: () => ImageState["dragging"];
     startDragging: () => void;
-    dragTo: (offsetCss: OffsetType) => void;
+    dragTo: (offsetCss: Offset) => void;
     stopDragging: () => void;
     isResizing: () => ImageState["resizing"];
     startResizing: () => void;
-    resizeTo: (offsetCss: OffsetType) => void;
+    resizeTo: (offsetCss: Offset) => void;
     stopResizing: () => void;
 };
-declare function createBrush($el: JQuery<HTMLElement>, opts: BrushOptsType, coordmap: CoordmapType, expandPixels: number): BrushType;
+declare function createBrush($el: JQuery<HTMLElement>, opts: BrushOpts, coordmap: Coordmap, expandPixels: number): Brush;
 export { createBrush };
-export type { BoundsType, BrushOptsType, BoundsCss };
+export type { Bounds, BrushOpts, BoundsCss };

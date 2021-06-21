@@ -1,7 +1,7 @@
 import $ from "jquery";
 import { asArray, hasOwnProperty } from "../utils";
 import { isIE } from "../utils/browser";
-import { bindScope } from "./bind";
+import { BindScope } from "./bind";
 import {
   shinyBindAll,
   shinyInitializeInputs,
@@ -24,7 +24,7 @@ function renderDependencies(dependencies: null | Array<HtmlDep>): void {
 // inputs/outputs. `content` can be null, a string, or an object with
 // properties 'html' and 'deps'.
 function renderContent(
-  el: bindScope,
+  el: BindScope,
   content: null | string | { html: string; deps?: Array<HtmlDep> },
   where: WherePosition = "replace"
 ): void {
@@ -46,7 +46,7 @@ function renderContent(
 
   renderHtml(html, el, dependencies, where);
 
-  let scope: bindScope = el;
+  let scope: BindScope = el;
 
   if (where === "replace") {
     shinyInitializeInputs(el);
@@ -70,7 +70,7 @@ function renderContent(
 // Render HTML in a DOM element, inserting singletons into head as needed
 function renderHtml(
   html: string,
-  el: bindScope,
+  el: BindScope,
   dependencies: Array<HtmlDep>,
   where: WherePosition = "replace"
 ): ReturnType<typeof singletonsRenderHtml> {

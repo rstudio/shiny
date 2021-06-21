@@ -5,7 +5,7 @@ import $ from "jquery";
 import { getQueriesForElement } from "@testing-library/dom";
 import userEvent from "@testing-library/user-event";
 
-$.fn._test = function countify() {
+$.fn.internalTest = function countify() {
   this.html(`
     <div>
       <button>0</button>
@@ -24,7 +24,7 @@ $.fn._test = function countify() {
 test("counter increments", () => {
   const div = document.createElement("div");
 
-  $(div)._test();
+  $(div).internalTest();
 
   const { getByText } = getQueriesForElement(div);
   const counter = getByText("0");

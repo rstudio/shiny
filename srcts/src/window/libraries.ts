@@ -1,6 +1,6 @@
-import type { ShinyType } from "../shiny";
+import type { Shiny } from "../shiny";
 
-function windowShiny(): ShinyType | null {
+function windowShiny(): Shiny | null {
   // Use `unknown` type as we know what we are doing is _dangerous_
   // Immediately init shiny on the window
   if (!(window as unknown)["Shiny"]) {

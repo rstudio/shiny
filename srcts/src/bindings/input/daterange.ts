@@ -15,6 +15,9 @@ type DateRangeReceiveMessageData = {
   value?: { start?: Date; end?: Date };
 };
 
+function getLabelNode(el: HTMLElement): JQuery<HTMLElement> {
+  return $(el).find('label[for="' + $escape(el.id) + '"]');
+}
 class DateRangeInputBinding extends DateInputBindingBase {
   find(scope: HTMLElement): JQuery<HTMLElement> {
     return $(scope).find(".shiny-date-range-input");
@@ -92,7 +95,7 @@ class DateRangeInputBinding extends DateInputBindingBase {
     else if (startview === 0) startview = "month";
 
     return {
-      label: this._getLabelNode(el).text(),
+      label: getLabelNode(el).text(),
       value: this.getValue(el),
       valueString: [$startinput.val() as string, $endinput.val() as string],
       min: minStr,
@@ -109,7 +112,7 @@ class DateRangeInputBinding extends DateInputBindingBase {
     const $startinput = $inputs.eq(0);
     const $endinput = $inputs.eq(1);
 
-    updateLabel(data.label, this._getLabelNode(el));
+    updateLabel(data.label, getLabelNode(el));
 
     if (hasOwnProperty(data, "min")) {
       this._setMin($startinput[0], data.min);
@@ -175,9 +178,6 @@ class DateRangeInputBinding extends DateInputBindingBase {
   }
   unsubscribe(el: HTMLElement): void {
     $(el).off(".dateRangeInputBinding");
-  }
-  _getLabelNode(el: HTMLElement): JQuery<HTMLElement> {
-    return $(el).find('label[for="' + $escape(el.id) + '"]');
   }
 }
 

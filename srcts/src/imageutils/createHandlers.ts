@@ -3,10 +3,10 @@ import { imageOutputBinding } from "../bindings/output/image";
 import { shinySetInputValue } from "../shiny/initedMethods";
 import { Debouncer, Throttler } from "../time";
 import { createBrush } from "./createBrush";
-import type { BoundsCss, BoundsType, BrushOptsType } from "./createBrush";
-import type { OffsetType } from "./findbox";
-import type { CoordmapType } from "./initCoordmap";
-import type { PanelType } from "./initPanelScales";
+import type { BoundsCss, Bounds, BrushOpts } from "./createBrush";
+import type { Offset } from "./findbox";
+import type { Coordmap } from "./initCoordmap";
+import type { Panel } from "./initPanelScales";
 
 // ----------------------------------------------------------
 // Handler creators for click, hover, brush.
@@ -15,7 +15,7 @@ import type { PanelType } from "./initPanelScales";
 // the same name (like 'mousedown').
 // ----------------------------------------------------------
 
-type CreateHandlerType = {
+type CreateHandler = {
   mousemove?: (e: JQuery.MouseMoveEvent) => void;
   mouseout?: (e: JQuery.MouseOutEvent) => void;
   mousedown?: (e: JQuery.MouseDownEvent) => void;
@@ -28,32 +28,32 @@ type BrushInfo = {
   xmax: number;
   ymin: number;
   ymax: number;
-  // eslint-disable-next-line camelcase
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   coords_css?: BoundsCss;
-  // eslint-disable-next-line camelcase
-  coords_img?: BoundsType;
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  coords_img?: Bounds;
   x?: number;
   y?: number;
-  // eslint-disable-next-line camelcase
-  img_css_ratio?: OffsetType;
-  mapping?: PanelType["mapping"];
-  domain?: PanelType["domain"];
-  range?: PanelType["range"];
-  log?: PanelType["log"];
-  direction?: BrushOptsType["brushDirection"];
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  img_css_ratio?: Offset;
+  mapping?: Panel["mapping"];
+  domain?: Panel["domain"];
+  range?: Panel["range"];
+  log?: Panel["log"];
+  direction?: BrushOpts["brushDirection"];
   brushId?: string;
   outputId?: string;
 };
 
-type InputIdType = Parameters<CoordmapType["mouseCoordinateSender"]>[0];
-type ClipType = Parameters<CoordmapType["mouseCoordinateSender"]>[1];
-type NullOutsideType = Parameters<CoordmapType["mouseCoordinateSender"]>[2];
+type InputId = Parameters<Coordmap["mouseCoordinateSender"]>[0];
+type Clip = Parameters<Coordmap["mouseCoordinateSender"]>[1];
+type NullOutside = Parameters<Coordmap["mouseCoordinateSender"]>[2];
 
 function createClickHandler(
-  inputId: InputIdType,
-  clip: ClipType,
-  coordmap: CoordmapType
-): CreateHandlerType {
+  inputId: InputId,
+  clip: Clip,
+  coordmap: Coordmap
+): CreateHandler {
   const clickInfoSender = coordmap.mouseCoordinateSender(inputId, clip);
 
   return {
@@ -70,13 +70,13 @@ function createClickHandler(
 }
 
 function createHoverHandler(
-  inputId: InputIdType,
+  inputId: InputId,
   delay: number,
   delayType: "throttle" | string,
-  clip: ClipType,
-  nullOutside: NullOutsideType,
-  coordmap: CoordmapType
-): CreateHandlerType {
+  clip: Clip,
+  nullOutside: NullOutside,
+  coordmap: Coordmap
+): CreateHandler {
   const sendHoverInfo = coordmap.mouseCoordinateSender(
     inputId,
     clip,
@@ -116,12 +116,12 @@ function createHoverHandler(
 // Returns a brush handler object. This has three public functions:
 // mousedown, mousemove, and onResetImg.
 function createBrushHandler(
-  inputId: InputIdType,
+  inputId: InputId,
   $el: JQuery<HTMLElement>,
-  opts: BrushOptsType,
-  coordmap: CoordmapType,
+  opts: BrushOpts,
+  coordmap: Coordmap,
   outputId: BrushInfo["outputId"]
-): CreateHandlerType {
+): CreateHandler {
   // Parameter: expand the area in which a brush can be started, by this
   // many pixels in all directions. (This should probably be a brush option)
   const expandPixels = 20;

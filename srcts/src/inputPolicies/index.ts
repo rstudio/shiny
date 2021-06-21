@@ -5,7 +5,8 @@ import { InputRateDecorator } from "./inputRateDecorator";
 import { InputDeferDecorator } from "./inputDeferDecorator";
 import { InputValidateDecorator } from "./inputValidateDecorator";
 
-import { priorityType, InputPolicy } from "./InputPolicy";
+import { InputPolicy } from "./InputPolicy";
+import type { EventPriority } from "./InputPolicy";
 
 export {
   InputBatchSender,
@@ -17,4 +18,4 @@ export {
   InputPolicy,
 };
 
-export type { priorityType };
+export type { EventPriority };

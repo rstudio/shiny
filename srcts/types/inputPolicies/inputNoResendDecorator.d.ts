@@ -1,10 +1,10 @@
-import { priorityType, InputPolicy } from "./InputPolicy";
-declare type lastSentValuesType = Record<string, Record<string, string>>;
+import { EventPriority, InputPolicy } from "./InputPolicy";
+declare type LastSentValues = Record<string, Record<string, string>>;
 declare class InputNoResendDecorator extends InputPolicy {
-    lastSentValues: lastSentValuesType;
-    constructor(target: InputPolicy, initialValues?: lastSentValuesType);
+    lastSentValues: LastSentValues;
+    constructor(target: InputPolicy, initialValues?: LastSentValues);
     setInput(nameType: string, value: unknown, opts: {
-        priority: priorityType;
+        priority: EventPriority;
     }): void;
     reset(values?: {}): void;
     forget(name: string): void;

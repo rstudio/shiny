@@ -1,5 +1,5 @@
 /// <reference types="node" />
-import { priorityType, InputPolicy } from "./InputPolicy";
+import { EventPriority, InputPolicy } from "./InputPolicy";
 import { ShinyApp } from "../shiny/shinyapp";
 declare class InputBatchSender extends InputPolicy {
     shinyapp: ShinyApp;
@@ -9,8 +9,8 @@ declare class InputBatchSender extends InputPolicy {
     lastChanceCallback: Array<() => void>;
     constructor(shinyapp: ShinyApp);
     setInput(nameType: string, value: unknown, opts: {
-        priority: priorityType;
+        priority: EventPriority;
     }): void;
-    private $sendNow;
+    private _sendNow;
 }
 export { InputBatchSender };

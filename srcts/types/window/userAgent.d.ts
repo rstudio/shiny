@@ -1,3 +1,3 @@
-import { UserAgentType } from "../utils/userAgent";
-declare function windowUserAgent(): UserAgentType;
+import type { UserAgent } from "../utils/userAgent";
+declare function windowUserAgent(): UserAgent;
 export { windowUserAgent };

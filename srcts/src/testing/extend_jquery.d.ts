@@ -13,5 +13,5 @@
 
 interface JQuery {
   // used for testing only
-  _test: () => void;
+  internalTest: () => void;
 }

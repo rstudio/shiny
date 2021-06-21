@@ -1,4 +1,4 @@
-import type { ShinyType } from "../src/shiny";
+import type { Shiny } from "../src/shiny";
 
 type ShowcaseSrcMessage = {
   srcref: Array<number>;
@@ -136,7 +136,7 @@ function highlightSrcref(
 // TODO-barret, this should work
 
 if ((window as any).Shiny) {
-  ((window as any).Shiny as ShinyType).addCustomMessageHandler(
+  ((window as any).Shiny as Shiny).addCustomMessageHandler(
     "showcase-src",
     function (message: ShowcaseSrcMessage) {
       if (message.srcref && message.srcfile) {

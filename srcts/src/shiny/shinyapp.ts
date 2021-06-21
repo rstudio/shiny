@@ -33,7 +33,7 @@ import type { WherePosition } from "./singletons";
 import type { UploadInitValue, UploadEndValue } from "../file/FileProcessor";
 
 type ResponseValue = UploadInitValue | UploadEndValue;
-type HandlerType = (
+type Handler = (
   msg: Record<string, unknown> | Array<unknown> | boolean | string
 ) => void;
 
@@ -41,7 +41,7 @@ type ShinyWebSocket = WebSocket & {
   allowReconnect?: boolean;
 };
 
-type errorsMessageValue = {
+type ErrorsMessageValue = {
   message: string;
   call: Array<string>;
   type?: Array<string>;
@@ -49,7 +49,7 @@ type errorsMessageValue = {
 
 type OnSuccessRequest = (value: ResponseValue) => void;
 type OnErrorRequest = (err: string) => void;
-type InputValuesType = Record<string, unknown>;
+type InputValues = Record<string, unknown>;
 
 //// 2021/03 - TypeScript conversion note:
 // These four variables were moved from being internally defined to being defined globally within the file.
@@ -71,8 +71,23 @@ const messageHandlers = {};
 const customMessageHandlerOrder = [];
 const customMessageHandlers = {};
 
+// Adds Shiny (internal) message handler
+function addMessageHandler(type: string, handler: Handler) {
+  if (messageHandlers[type]) {
+    throw 'handler for message of type "' + type + '" already added.';
+  }
+  if (typeof handler !== "function") {
+    throw "handler must be a function.";
+  }
+  if (handler.length !== 1) {
+    throw "handler must be a function that takes one argument.";
+  }
+  messageHandlerOrder.push(type);
+  messageHandlers[type] = handler;
+}
+
 // Adds custom message handler - this one is exposed to the user
-function addCustomMessageHandler(type: string, handler: HandlerType): void {
+function addCustomMessageHandler(type: string, handler: Handler): void {
   // Remove any previously defined handlers so that only the most recent one
   // will be called
   if (customMessageHandlers[type]) {
@@ -96,6 +111,25 @@ function addCustomMessageHandler(type: string, handler: HandlerType): void {
 
 //// End message handler variables
 
+// A function for sending messages to the appropriate handlers.
+// - msgObj: the object containing messages, with format {msgObj.foo, msObj.bar
+function sendMessagesToHandlers(
+  msgObj: Record<string, unknown>,
+  handlers: Record<string, Handler>,
+  handlerOrder: Array<string>
+): void {
+  // Dispatch messages to handlers, if handler is present
+  for (let i = 0; i < handlerOrder.length; i++) {
+    const msgType = handlerOrder[i];
+
+    if (hasOwnProperty(msgObj, msgType)) {
+      // Execute each handler with 'this' referring to the present value of
+      // 'this'
+      handlers[msgType].call(this, msgObj[msgType]);
+    }
+  }
+}
+
 class ShinyApp {
   $socket: ShinyWebSocket = null;
 
@@ -105,17 +139,17 @@ class ShinyApp {
   } = null;
 
   // Cached input values
-  $inputValues: InputValuesType = {};
+  $inputValues: InputValues = {};
 
   // Input values at initialization (and reconnect)
-  $initialInput: InputValuesType;
+  $initialInput: InputValues;
 
   // Output bindings
   $bindings: Record<string, OutputBindingAdapter> = {};
 
   // Cached values/errors
   $values = {};
-  $errors: Record<string, errorsMessageValue> = {};
+  $errors: Record<string, ErrorsMessageValue> = {};
 
   // Conditional bindings (show/hide element based on expression)
   $conditionals = {};
@@ -130,10 +164,10 @@ class ShinyApp {
   $allowReconnect: boolean | "force" = false;
 
   constructor() {
-    this.init();
+    this._init();
   }
 
-  connect(initialInput: InputValuesType): void {
+  connect(initialInput: InputValues): void {
     if (this.$socket)
       throw "Connect was already called on this application object";
 
@@ -245,7 +279,7 @@ class ShinyApp {
     return socket;
   }
 
-  sendInput(values: InputValuesType): void {
+  sendInput(values: InputValues): void {
     const msg = JSON.stringify({
       method: "update",
       data: values,
@@ -429,7 +463,7 @@ class ShinyApp {
     }
   }
 
-  receiveError(name: string, error: errorsMessageValue): void {
+  receiveError(name: string, error: ErrorsMessageValue): void {
     if (this.$errors[name] === error) return;
 
     this.$errors[name] = error;
@@ -496,7 +530,7 @@ class ShinyApp {
   // Narrows a scopeComponent -- an input or output object -- to one constrained
   // by nsPrefix. Returns a new object with keys removed and renamed as
   // necessary.
-  private narrowScopeComponent<T>(
+  private _narrowScopeComponent<T>(
     scopeComponent: Record<string, T>,
     nsPrefix: string | null
   ) {
@@ -513,11 +547,11 @@ class ShinyApp {
   //
   // Otherwise, returns a new object with keys in subComponents removed and
   // renamed as necessary.
-  private narrowScope(scope, nsPrefix: string) {
+  private _narrowScope(scope, nsPrefix: string) {
     if (nsPrefix) {
       return {
-        input: this.narrowScopeComponent(scope.input, nsPrefix),
-        output: this.narrowScopeComponent(scope.output, nsPrefix),
+        input: this._narrowScopeComponent(scope.input, nsPrefix),
+        output: this._narrowScopeComponent(scope.output, nsPrefix),
       };
     }
     return scope;
@@ -557,7 +591,7 @@ class ShinyApp {
       }
 
       const nsPrefix = el.attr("data-ns-prefix");
-      const nsScope = this.narrowScope(scope, nsPrefix);
+      const nsScope = this._narrowScope(scope, nsPrefix);
       const show = condFunc(nsScope);
       const showing = el.css("display") !== "none";
 
@@ -576,21 +610,6 @@ class ShinyApp {
   }
 
   // Message handler management functions =================================
-
-  // Adds Shiny (internal) message handler
-  private addMessageHandler(type: string, handler: HandlerType) {
-    if (messageHandlers[type]) {
-      throw 'handler for message of type "' + type + '" already added.';
-    }
-    if (typeof handler !== "function") {
-      throw "handler must be a function.";
-    }
-    if (handler.length !== 1) {
-      throw "handler must be a function that takes one argument.";
-    }
-    messageHandlerOrder.push(type);
-    messageHandlers[type] = handler;
-  }
 
   // // Added in shiny init method
   // Shiny.addCustomMessageHandler = addCustomMessageHandler;
@@ -623,55 +642,28 @@ class ShinyApp {
     if (evt.isDefaultPrevented()) return;
 
     // Send msgObj.foo and msgObj.bar to appropriate handlers
-    this._sendMessagesToHandlers(
-      evt.message,
-      messageHandlers,
-      messageHandlerOrder
-    );
+    sendMessagesToHandlers(evt.message, messageHandlers, messageHandlerOrder);
 
     this.$updateConditionals();
   }
 
-  // A function for sending messages to the appropriate handlers.
-  // - msgObj: the object containing messages, with format {msgObj.foo, msObj.bar
-  _sendMessagesToHandlers(
-    msgObj: Record<string, unknown>,
-    handlers: Record<string, HandlerType>,
-    handlerOrder: Array<string>
-  ): void {
-    // Dispatch messages to handlers, if handler is present
-    for (let i = 0; i < handlerOrder.length; i++) {
-      const msgType = handlerOrder[i];
-
-      if (hasOwnProperty(msgObj, msgType)) {
-        // Execute each handler with 'this' referring to the present value of
-        // 'this'
-        handlers[msgType].call(this, msgObj[msgType]);
-      }
-    }
-  }
-
   // Message handlers =====================================================
 
-  private init() {
-    this.addMessageHandler(
-      "values",
-      function (message: Record<string, unknown>) {
-        for (const name in this.$bindings) {
-          if (hasOwnProperty(this.$bindings, name))
-            this.$bindings[name].showProgress(false);
-        }
-
-        for (const key in message) {
-          if (hasOwnProperty(message, key))
-            this.receiveOutput(key, message[key]);
-        }
+  private _init() {
+    addMessageHandler("values", function (message: Record<string, unknown>) {
+      for (const name in this.$bindings) {
+        if (hasOwnProperty(this.$bindings, name))
+          this.$bindings[name].showProgress(false);
       }
-    );
 
-    this.addMessageHandler(
+      for (const key in message) {
+        if (hasOwnProperty(message, key)) this.receiveOutput(key, message[key]);
+      }
+    });
+
+    addMessageHandler(
       "errors",
-      function (message: Record<string, errorsMessageValue>) {
+      function (message: Record<string, ErrorsMessageValue>) {
         for (const key in message) {
           if (hasOwnProperty(message, key))
             this.receiveError(key, message[key]);
@@ -679,7 +671,7 @@ class ShinyApp {
       }
     );
 
-    this.addMessageHandler(
+    addMessageHandler(
       "inputMessages",
       function (message: Array<{ id: string; message: unknown }>) {
         // inputMessages should be an array
@@ -704,18 +696,18 @@ class ShinyApp {
       }
     );
 
-    this.addMessageHandler("javascript", function (message: string) {
+    addMessageHandler("javascript", function (message: string) {
       /*jshint evil: true */
       indirectEval(message);
     });
 
-    this.addMessageHandler("console", function (message: Array<unknown>) {
+    addMessageHandler("console", function (message: Array<unknown>) {
       for (let i = 0; i < message.length; i++) {
         if (console.log) console.log(message[i]);
       }
     });
 
-    this.addMessageHandler(
+    addMessageHandler(
       "progress",
       function (message: { type: string; message: { id: string } }) {
         if (message.type && message.message) {
@@ -726,7 +718,7 @@ class ShinyApp {
       }
     );
 
-    this.addMessageHandler(
+    addMessageHandler(
       "notification",
       function (
         message:
@@ -740,7 +732,7 @@ class ShinyApp {
       }
     );
 
-    this.addMessageHandler(
+    addMessageHandler(
       "modal",
       function (
         message:
@@ -755,7 +747,7 @@ class ShinyApp {
       }
     );
 
-    this.addMessageHandler(
+    addMessageHandler(
       "response",
       function (message: {
         tag: string;
@@ -773,7 +765,7 @@ class ShinyApp {
       }
     );
 
-    this.addMessageHandler(
+    addMessageHandler(
       "allowReconnect",
       function (message: true | false | "force") {
         switch (message) {
@@ -788,7 +780,7 @@ class ShinyApp {
       }
     );
 
-    this.addMessageHandler("custom", function (message) {
+    addMessageHandler("custom", function (message: Record<string, unknown>) {
       // For old-style custom messages - should deprecate and migrate to new
       // method
       const shinyOnCustomMessage = getShinyOnCustomMessage();
@@ -796,14 +788,14 @@ class ShinyApp {
       if (shinyOnCustomMessage) shinyOnCustomMessage(message);
 
       // Send messages.foo and messages.bar to appropriate handlers
-      this._sendMessagesToHandlers(
+      sendMessagesToHandlers(
         message,
         customMessageHandlers,
         customMessageHandlerOrder
       );
     });
 
-    this.addMessageHandler(
+    addMessageHandler(
       "config",
       function (message: {
         workerId: string;
@@ -819,7 +811,7 @@ class ShinyApp {
       }
     );
 
-    this.addMessageHandler("busy", function (message: "busy" | "idle") {
+    addMessageHandler("busy", function (message: "busy" | "idle") {
       if (message === "busy") {
         $(document.documentElement).addClass("shiny-busy");
         $(document).trigger("shiny:busy");
@@ -829,7 +821,7 @@ class ShinyApp {
       }
     });
 
-    this.addMessageHandler(
+    addMessageHandler(
       "recalculating",
       function (message: {
         name?: string;
@@ -849,13 +841,13 @@ class ShinyApp {
       }
     );
 
-    this.addMessageHandler("reload", function (message: true) {
+    addMessageHandler("reload", function (message: true) {
       window.location.reload();
       return;
       message;
     });
 
-    this.addMessageHandler(
+    addMessageHandler(
       "shiny-insert-ui",
       function (message: {
         selector: string;
@@ -884,7 +876,7 @@ class ShinyApp {
       }
     );
 
-    this.addMessageHandler(
+    addMessageHandler(
       "shiny-remove-ui",
       function (message: { selector: string; multiple: false | void }) {
         const els = $(message.selector);
@@ -900,14 +892,11 @@ class ShinyApp {
       }
     );
 
-    this.addMessageHandler(
-      "frozen",
-      function (message: { ids: Array<string> }) {
-        for (let i = 0; i < message.ids.length; i++) {
-          shinyForgetLastInputValue(message.ids[i]);
-        }
+    addMessageHandler("frozen", function (message: { ids: Array<string> }) {
+      for (let i = 0; i < message.ids.length; i++) {
+        shinyForgetLastInputValue(message.ids[i]);
       }
-    );
+    });
 
     function getTabset(id: string) {
       const $tabset = $("#" + $escape(id));
@@ -976,7 +965,7 @@ class ShinyApp {
       return { $liTag: $liTag, $liTags: $liTags, $divTags: $divTags };
     }
 
-    this.addMessageHandler(
+    addMessageHandler(
       "shiny-insert-tab",
       function (message: {
         inputId: string;
@@ -1232,7 +1221,7 @@ class ShinyApp {
       });
     }
 
-    this.addMessageHandler(
+    addMessageHandler(
       "shiny-remove-tab",
       function (message: { inputId: string; target: string; type: never }) {
         const $tabset = getTabset(message.inputId);
@@ -1250,7 +1239,7 @@ class ShinyApp {
       }
     );
 
-    this.addMessageHandler(
+    addMessageHandler(
       "shiny-change-tab-visibility",
       function (message: {
         inputId: string;
@@ -1275,7 +1264,7 @@ class ShinyApp {
       }
     );
 
-    this.addMessageHandler(
+    addMessageHandler(
       "updateQueryString",
       function (message: { mode: "replace" | unknown; queryString: string }) {
         // leave the bookmarking code intact
@@ -1330,7 +1319,7 @@ class ShinyApp {
       }
     );
 
-    this.addMessageHandler(
+    addMessageHandler(
       "resetBrush",
       function (message: { brushId: Parameters<typeof resetBrush>[0] }) {
         resetBrush(message.brushId);
@@ -1518,4 +1507,4 @@ class ShinyApp {
 }
 
 export { ShinyApp, addCustomMessageHandler };
-export type { HandlerType, errorsMessageValue };
+export type { Handler, ErrorsMessageValue };

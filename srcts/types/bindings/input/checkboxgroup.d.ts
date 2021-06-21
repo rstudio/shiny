@@ -23,9 +23,6 @@ declare class CheckboxGroupInputBinding extends InputBinding {
     receiveMessage(el: CheckboxGroupHTMLElement, data: CheckboxGroupReceiveMessageData): void;
     subscribe(el: CheckboxGroupHTMLElement, callback: (x: boolean) => void): void;
     unsubscribe(el: CheckboxGroupHTMLElement): void;
-    _getLabelNode(el: CheckboxGroupHTMLElement): JQuery<HTMLElement>;
-    _getLabel(obj: HTMLElement): string | null;
-    _setLabel(obj: HTMLElement, value: string): null;
 }
 export { CheckboxGroupInputBinding };
 export type { CheckboxGroupReceiveMessageData };

@@ -26,17 +26,17 @@ declare class DateInputBindingBase extends InputBinding {
     };
     setValue(el: HTMLElement, data: unknown): void;
     initialize(el: HTMLElement): void;
-    _getLabelNode(el: HTMLElement): JQuery<HTMLElement>;
-    _formatToString(format: {
+    protected _getLabelNode(el: HTMLElement): JQuery<HTMLElement>;
+    protected _formatToString(format: {
         parts: Array<string>;
         separators: Array<string>;
     }): string;
-    _setMin(el: HTMLElement, date: Date | undefined | null): void;
-    _setMax(el: HTMLElement, date: Date): void;
-    _newDate(date: Date | string | never): Date | null;
-    _floorDateTime(date: Date): Date;
-    _dateAsUTC(date: Date): Date;
-    _UTCDateAsLocal(date: Date): Date;
+    protected _setMin(el: HTMLElement, date: Date | undefined | null): void;
+    protected _setMax(el: HTMLElement, date: Date): void;
+    protected _newDate(date: Date | string | never): Date | null;
+    protected _floorDateTime(date: Date): Date;
+    protected _dateAsUTC(date: Date): Date;
+    protected _utcDateAsLocal(date: Date): Date;
 }
 declare class DateInputBinding extends DateInputBindingBase {
     getValue(el: HTMLElement): string;

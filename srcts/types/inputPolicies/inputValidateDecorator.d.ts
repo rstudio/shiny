@@ -1,11 +1,11 @@
-import { priorityType, InputPolicy } from "./InputPolicy";
+import { EventPriority, InputPolicy } from "./InputPolicy";
 declare type MaybeInputOpts = {
-    priority?: priorityType;
+    priority?: EventPriority;
     binding?: unknown;
     el?: HTMLElement;
 };
 declare function addDefaultInputOpts<T>(opts?: T & MaybeInputOpts): T & {
-    priority: priorityType;
+    priority: EventPriority;
     binding: unknown;
     el?: HTMLElement;
 };

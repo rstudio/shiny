@@ -12,6 +12,12 @@ type NumberReceiveMessageData = {
   step?: string | null;
 };
 
+function getLabelNode(el: NumberHTMLElement): JQuery<HTMLElement> {
+  return $(el)
+    .parent()
+    .find('label[for="' + $escape(el.id) + '"]');
+}
+
 class NumberInputBinding extends TextInputBindingBase {
   find(scope: HTMLElement): JQuery<HTMLElement> {
     return $(scope).find('input[type="number"]');
@@ -48,7 +54,7 @@ class NumberInputBinding extends TextInputBindingBase {
     if (hasOwnProperty(data, "max")) el.max = data.max;
     if (hasOwnProperty(data, "step")) el.step = data.step;
 
-    updateLabel(data.label, this._getLabelNode(el));
+    updateLabel(data.label, getLabelNode(el));
 
     $(el).trigger("change");
   }
@@ -61,18 +67,12 @@ class NumberInputBinding extends TextInputBindingBase {
     step: number;
   } {
     return {
-      label: this._getLabelNode(el).text(),
+      label: getLabelNode(el).text(),
       value: this.getValue(el),
       min: Number(el.min),
       max: Number(el.max),
       step: Number(el.step),
     };
-  }
-
-  _getLabelNode(el: NumberHTMLElement): JQuery<HTMLElement> {
-    return $(el)
-      .parent()
-      .find('label[for="' + $escape(el.id) + '"]');
   }
 }
 

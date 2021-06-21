@@ -29,8 +29,6 @@ declare class SliderInputBinding extends TextInputBindingBase {
     };
     getState(el: HTMLInputElement): void;
     initialize(el: HTMLElement): void;
-    _getLabelNode(el: HTMLElement): JQuery<HTMLElement>;
-    _numValues(el: HTMLElement): 1 | 2;
 }
 export { SliderInputBinding };
 export type { SliderReceiveMessageData };

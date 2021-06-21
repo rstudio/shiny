@@ -1,9 +1,9 @@
-import { bindScope } from "./bind";
+import { BindScope } from "./bind";
 declare const knownSingletons: Record<string, boolean>;
 declare type WherePosition = "replace" | "afterBegin" | "beforeBegin" | "afterEnd" | "beforeEnd";
-declare function renderHtml(html: string, el: bindScope, where: WherePosition): ReturnType<typeof _processHtml>;
+declare function renderHtml(html: string, el: BindScope, where: WherePosition): ReturnType<typeof processHtml>;
 declare function registerNames(s: string | Array<string>): void;
-declare function _processHtml(val: string): {
+declare function processHtml(val: string): {
     html: string;
     head: string;
     singletons: typeof knownSingletons;

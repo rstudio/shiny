@@ -21,9 +21,6 @@ declare class RadioInputBinding extends InputBinding {
     receiveMessage(el: RadioHTMLElement, data: RadioReceiveMessageData): void;
     subscribe(el: RadioHTMLElement, callback: (x: boolean) => void): void;
     unsubscribe(el: RadioHTMLElement): void;
-    _getLabelNode(el: RadioHTMLElement): JQuery<HTMLElement>;
-    _getLabel(obj: HTMLElement): string | null;
-    _setLabel(obj: HTMLElement, value: string): null;
 }
 export { RadioInputBinding };
 export type { RadioReceiveMessageData };

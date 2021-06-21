@@ -1,15 +1,15 @@
 // Given two sets of x/y coordinates, return an object representing the min
 // and max x and y values. (This could be generalized to any number of
 
-import type { BoundsType } from "./createBrush";
+import type { Bounds } from "./createBrush";
 
-type OffsetType = {
+type Offset = {
   x: number;
   y: number;
 };
 
 // points).
-function findBox(offset1: OffsetType, offset2: OffsetType): BoundsType {
+function findBox(offset1: Offset, offset2: Offset): Bounds {
   return {
     xmin: Math.min(offset1.x, offset2.x),
     xmax: Math.max(offset1.x, offset2.x),
@@ -18,5 +18,5 @@ function findBox(offset1: OffsetType, offset2: OffsetType): BoundsType {
   };
 }
 
-export type { OffsetType };
+export type { Offset };
 export { findBox };

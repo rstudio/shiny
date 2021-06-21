@@ -1,10 +1,10 @@
-import { priorityType, InputPolicy } from "./InputPolicy";
+import { EventPriority, InputPolicy } from "./InputPolicy";
 import { hasOwnProperty } from "../utils";
 
 class InputDeferDecorator extends InputPolicy {
   pendingInput: Record<
     string,
-    { value: unknown; opts: { priority: priorityType } }
+    { value: unknown; opts: { priority: EventPriority } }
   > = {};
   constructor(target: InputPolicy) {
     super();
@@ -14,7 +14,7 @@ class InputDeferDecorator extends InputPolicy {
   setInput(
     nameType: string,
     value: unknown,
-    opts: { priority: priorityType }
+    opts: { priority: EventPriority }
   ): void {
     if (/^\./.test(nameType)) this.target.setInput(nameType, value, opts);
     else this.pendingInput[nameType] = { value, opts };

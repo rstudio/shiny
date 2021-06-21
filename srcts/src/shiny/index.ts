@@ -16,17 +16,19 @@ import {
   shinyUnbindAll,
   setFileInputBinding,
 } from "./initedMethods";
-import { addCustomMessageHandler, HandlerType, ShinyApp } from "./shinyapp";
+import { addCustomMessageHandler, Handler, ShinyApp } from "./shinyapp";
 import { initInputBindings } from "../bindings/input";
 import { initOutputBindings } from "../bindings/output";
 
-interface ShinyType {
+interface Shiny {
   version: string;
   $escape: typeof $escape;
   compareVersion: typeof compareVersion;
   inputBindings: ReturnType<typeof initInputBindings>["inputBindings"];
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   InputBinding: typeof InputBinding;
   outputBindings: ReturnType<typeof initOutputBindings>["outputBindings"];
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   OutputBinding: typeof OutputBinding;
   resetBrush: typeof resetBrush;
   notifications: {
@@ -53,17 +55,17 @@ interface ShinyType {
 
   // Eventually deprecate
   // For old-style custom messages - should deprecate and migrate to new
-  oncustommessage?: HandlerType;
+  oncustommessage?: Handler;
 }
 
-let Shiny: ShinyType;
+let windowShiny: Shiny;
 
-function setShiny(Shiny_: ShinyType): void {
-  Shiny = Shiny_;
+function setShiny(windowShiny_: Shiny): void {
+  windowShiny = windowShiny_;
 
   // `process.env.SHINY_VERSION` is overwritten to the Shiny version at build time.
   // During testing, the `Shiny.version` will be `"development"`
-  Shiny.version = process.env.SHINY_VERSION || "development";
+  windowShiny.version = process.env.SHINY_VERSION || "development";
 
   const { inputBindings, fileInputBinding } = initInputBindings();
   const { outputBindings } = initOutputBindings();
@@ -71,32 +73,35 @@ function setShiny(Shiny_: ShinyType): void {
   // set variable to be retrieved later
   setFileInputBinding(fileInputBinding);
 
-  Shiny.$escape = $escape;
-  Shiny.compareVersion = compareVersion;
-  Shiny.inputBindings = inputBindings;
-  Shiny.InputBinding = InputBinding;
-  Shiny.outputBindings = outputBindings;
-  Shiny.OutputBinding = OutputBinding;
-  Shiny.resetBrush = resetBrush;
-  Shiny.notifications = { show: showNotification, remove: removeNotification };
-  Shiny.modal = { show: showModal, remove: removeModal };
+  windowShiny.$escape = $escape;
+  windowShiny.compareVersion = compareVersion;
+  windowShiny.inputBindings = inputBindings;
+  windowShiny.InputBinding = InputBinding;
+  windowShiny.outputBindings = outputBindings;
+  windowShiny.OutputBinding = OutputBinding;
+  windowShiny.resetBrush = resetBrush;
+  windowShiny.notifications = {
+    show: showNotification,
+    remove: removeNotification,
+  };
+  windowShiny.modal = { show: showModal, remove: removeModal };
 
-  Shiny.addCustomMessageHandler = addCustomMessageHandler;
-  Shiny.showReconnectDialog = showReconnectDialog;
-  Shiny.hideReconnectDialog = hideReconnectDialog;
-  Shiny.renderDependencies = renderDependencies;
-  Shiny.renderContent = renderContent;
-  Shiny.renderHtml = renderHtml;
+  windowShiny.addCustomMessageHandler = addCustomMessageHandler;
+  windowShiny.showReconnectDialog = showReconnectDialog;
+  windowShiny.hideReconnectDialog = hideReconnectDialog;
+  windowShiny.renderDependencies = renderDependencies;
+  windowShiny.renderContent = renderContent;
+  windowShiny.renderHtml = renderHtml;
 
   $(function () {
     // Init Shiny a little later than document ready, so user code can
     // run first (i.e. to register bindings)
     setTimeout(function () {
-      initShiny(Shiny);
+      initShiny(windowShiny);
     }, 1);
   });
 }
 
-export { Shiny, setShiny };
+export { windowShiny, setShiny };
 
-export type { ShinyType };
+export type { Shiny };

@@ -15,6 +15,34 @@ type RadioReceiveMessageData = {
   label: string;
 };
 
+// Get the DOM element that contains the top-level label
+function getLabelNode(el: RadioHTMLElement): JQuery<HTMLElement> {
+  return $(el)
+    .parent()
+    .find('label[for="' + $escape(el.id) + '"]');
+}
+// Given an input DOM object, get the associated label. Handles labels
+// that wrap the input as well as labels associated with 'for' attribute.
+function getLabel(obj: HTMLElement): string | null {
+  // If <label><input /><span>label text</span></label>
+  if ((obj.parentNode as HTMLElement).tagName === "LABEL") {
+    return $(obj.parentNode).find("span").text().trim();
+  }
+
+  return null;
+}
+// Given an input DOM object, set the associated label. Handles labels
+// that wrap the input as well as labels associated with 'for' attribute.
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function setLabel(obj: HTMLElement, value: string): null {
+  // If <label><input /><span>label text</span></label>
+  if ((obj.parentNode as HTMLElement).tagName === "LABEL") {
+    $(obj.parentNode).find("span").text(value);
+  }
+
+  return null;
+}
+
 class RadioInputBinding extends InputBinding {
   find(scope: HTMLElement): JQuery<HTMLElement> {
     return $(scope).find(".shiny-input-radiogroup");
@@ -60,11 +88,11 @@ class RadioInputBinding extends InputBinding {
     const options = new Array($objs.length);
 
     for (let i = 0; i < options.length; i++) {
-      options[i] = { value: $objs[i].value, label: this._getLabel($objs[i]) };
+      options[i] = { value: $objs[i].value, label: getLabel($objs[i]) };
     }
 
     return {
-      label: this._getLabelNode(el).text(),
+      label: getLabelNode(el).text(),
       value: this.getValue(el),
       options: options,
     };
@@ -84,7 +112,7 @@ class RadioInputBinding extends InputBinding {
 
     if (hasOwnProperty(data, "value")) this.setValue(el, data.value);
 
-    updateLabel(data.label, this._getLabelNode(el));
+    updateLabel(data.label, getLabelNode(el));
 
     $(el).trigger("change");
   }
@@ -95,32 +123,6 @@ class RadioInputBinding extends InputBinding {
   }
   unsubscribe(el: RadioHTMLElement): void {
     $(el).off(".radioInputBinding");
-  }
-  // Get the DOM element that contains the top-level label
-  _getLabelNode(el: RadioHTMLElement): JQuery<HTMLElement> {
-    return $(el)
-      .parent()
-      .find('label[for="' + $escape(el.id) + '"]');
-  }
-  // Given an input DOM object, get the associated label. Handles labels
-  // that wrap the input as well as labels associated with 'for' attribute.
-  _getLabel(obj: HTMLElement): string | null {
-    // If <label><input /><span>label text</span></label>
-    if ((obj.parentNode as HTMLElement).tagName === "LABEL") {
-      return $(obj.parentNode).find("span").text().trim();
-    }
-
-    return null;
-  }
-  // Given an input DOM object, set the associated label. Handles labels
-  // that wrap the input as well as labels associated with 'for' attribute.
-  _setLabel(obj: HTMLElement, value: string): null {
-    // If <label><input /><span>label text</span></label>
-    if ((obj.parentNode as HTMLElement).tagName === "LABEL") {
-      $(obj.parentNode).find("span").text(value);
-    }
-
-    return null;
   }
 }
 

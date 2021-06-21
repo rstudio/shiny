@@ -1,13 +1,13 @@
-import { priorityType, InputPolicy } from "./InputPolicy";
+import { EventPriority, InputPolicy } from "./InputPolicy";
 import { hasOwnProperty } from "../utils";
 import { splitInputNameType } from "./splitInputNameType";
 
-type lastSentValuesType = Record<string, Record<string, string>>;
+type LastSentValues = Record<string, Record<string, string>>;
 
 class InputNoResendDecorator extends InputPolicy {
-  lastSentValues: lastSentValuesType;
+  lastSentValues: LastSentValues;
 
-  constructor(target: InputPolicy, initialValues: lastSentValuesType = {}) {
+  constructor(target: InputPolicy, initialValues: LastSentValues = {}) {
     super();
     this.target = target;
     this.reset(initialValues);
@@ -16,7 +16,7 @@ class InputNoResendDecorator extends InputPolicy {
   setInput(
     nameType: string,
     value: unknown,
-    opts: { priority: priorityType }
+    opts: { priority: EventPriority }
   ): void {
     const { name: inputName, inputType: inputType } =
       splitInputNameType(nameType);

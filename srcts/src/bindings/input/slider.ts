@@ -15,7 +15,7 @@ import { TextHTMLElement, TextInputBindingBase } from "./text";
 
 type TimeFormatter = (fmt: string, dt: Date) => string;
 // Backward compatible code for old-style jsliders (Shiny <= 0.10.2.2),
-type legacySliderType = {
+type LegacySlider = {
   canStepNext: () => boolean;
   stepNext: () => void;
   resetToStart: () => void;
@@ -47,14 +47,14 @@ function forceIonSliderUpdate(slider) {
   else console.log("Couldn't force ion slider to update");
 }
 
-type prettifyType = (num: number) => string;
+type Prettify = (num: number) => string;
 function getTypePrettifyer(
   dataType: string,
   timeFormat: string,
   timezone: string
 ) {
   let timeFormatter: TimeFormatter;
-  let prettify: prettifyType;
+  let prettify: Prettify;
 
   if (dataType === "date") {
     timeFormatter = window.strftime.utc();
@@ -79,6 +79,17 @@ function getTypePrettifyer(
     };
   }
   return prettify;
+}
+
+function getLabelNode(el: HTMLElement): JQuery<HTMLElement> {
+  return $(el)
+    .parent()
+    .find('label[for="' + $escape(el.id) + '"]');
+}
+// Number of values; 1 for single slider, 2 for range slider
+function numValues(el: HTMLElement): 1 | 2 {
+  if ($(el).data("ionRangeSlider").options.type === "double") return 2;
+  else return 1;
 }
 
 class SliderInputBinding extends TextInputBindingBase {
@@ -124,7 +135,7 @@ class SliderInputBinding extends TextInputBindingBase {
       };
     }
 
-    if (this._numValues(el) === 2) {
+    if (numValues(el) === 2) {
       return [convert(result.from), convert(result.to)];
     } else {
       return convert(result.from);
@@ -139,7 +150,7 @@ class SliderInputBinding extends TextInputBindingBase {
 
     $el.data("immediate", true);
     try {
-      if (this._numValues(el) === 2 && value instanceof Array) {
+      if (numValues(el) === 2 && value instanceof Array) {
         slider.update({ from: value[0], to: value[1] });
       } else {
         slider.update({ from: value });
@@ -167,11 +178,11 @@ class SliderInputBinding extends TextInputBindingBase {
       min?: number;
       max?: number;
       step?: number;
-      prettify?: prettifyType;
+      prettify?: Prettify;
     } = {};
 
     if (hasOwnProperty(data, "value")) {
-      if (this._numValues(el) === 2 && data.value instanceof Array) {
+      if (numValues(el) === 2 && data.value instanceof Array) {
         msg.from = data.value[0];
         msg.to = data.value[1];
       } else {
@@ -189,7 +200,7 @@ class SliderInputBinding extends TextInputBindingBase {
       }
     }
 
-    updateLabel(data.label, this._getLabelNode(el));
+    updateLabel(data.label, getLabelNode(el));
 
     // (maybe) update data elements
     const domElements = ["data-type", "time-format", "timezone"];
@@ -242,16 +253,6 @@ class SliderInputBinding extends TextInputBindingBase {
 
     $el.ionRangeSlider(opts);
   }
-  _getLabelNode(el: HTMLElement): JQuery<HTMLElement> {
-    return $(el)
-      .parent()
-      .find('label[for="' + $escape(el.id) + '"]');
-  }
-  // Number of values; 1 for single slider, 2 for range slider
-  _numValues(el: HTMLElement): 1 | 2 {
-    if ($(el).data("ionRangeSlider").options.type === "double") return 2;
-    else return 1;
-  }
 }
 
 // Format numbers for nicer output.
@@ -300,7 +301,7 @@ $(document).on("click", ".slider-animate-button", function (evt: Event) {
     // Backward compatible code for old-style jsliders (Shiny <= 0.10.2.2),
     // and new-style ionsliders.
     if (target.hasClass("jslider")) {
-      const slider = target.slider() as unknown as legacySliderType;
+      const slider = target.slider() as unknown as LegacySlider;
 
       // If we're currently at the end, restart
       if (!slider.canStepNext()) slider.resetToStart();

@@ -31,9 +31,7 @@ declare class SelectInputBinding extends InputBinding {
     subscribe(el: SelectHTMLElement, callback: (x: boolean) => void): void;
     unsubscribe(el: HTMLElement): void;
     initialize(el: SelectHTMLElement): void;
-    _getLabelNode(el: SelectHTMLElement): JQuery<HTMLElement>;
-    _is_selectize(el: HTMLElement): boolean;
-    _selectize(el: SelectHTMLElement, update?: boolean): SelectizeInfo;
+    protected _selectize(el: SelectHTMLElement, update?: boolean): SelectizeInfo;
 }
 export { SelectInputBinding };
 export type { SelectInputReceiveMessageData };

@@ -31,7 +31,6 @@ declare class DateRangeInputBinding extends DateInputBindingBase {
     initialize(el: HTMLElement): void;
     subscribe(el: HTMLElement, callback: (x: boolean) => void): void;
     unsubscribe(el: HTMLElement): void;
-    _getLabelNode(el: HTMLElement): JQuery<HTMLElement>;
 }
 export { DateRangeInputBinding };
 export type { DateRangeReceiveMessageData };

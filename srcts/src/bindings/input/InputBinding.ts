@@ -1,12 +1,12 @@
 import { RatePolicyModes } from "../../inputPolicies/inputRateDecorator";
-import { bindScope } from "../../shiny/bind";
+import { BindScope } from "../../shiny/bind";
 
 class InputBinding {
   name: string;
 
   // Returns a jQuery object or element array that contains the
   // descendants of scope that match this binding
-  find(scope: bindScope): JQuery<HTMLElement> {
+  find(scope: BindScope): JQuery<HTMLElement> {
     throw "Not implemented";
     // add so that typescript isn't mad about an unused var
     scope;

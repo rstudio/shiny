@@ -12,7 +12,6 @@ declare class BootstrapTabInputBinding extends InputBinding {
     receiveMessage(el: HTMLElement, data: TabInputReceiveMessageData): void;
     subscribe(el: HTMLElement, callback: (x: boolean) => void): void;
     unsubscribe(el: HTMLElement): void;
-    _getTabName(anchor: JQuery<HTMLElement>): string;
 }
 export { BootstrapTabInputBinding };
 export type { TabInputReceiveMessageData };

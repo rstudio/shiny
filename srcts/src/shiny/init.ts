@@ -1,5 +1,5 @@
 import $ from "jquery";
-import { ShinyType } from ".";
+import type { Shiny } from ".";
 import {
   InputBatchSender,
   InputDeferDecorator,
@@ -7,8 +7,8 @@ import {
   InputNoResendDecorator,
   InputRateDecorator,
   InputValidateDecorator,
-  priorityType,
 } from "../inputPolicies";
+import type { EventPriority } from "../inputPolicies";
 import { addDefaultInputOpts } from "../inputPolicies/inputValidateDecorator";
 import { debounce, Debouncer } from "../time";
 import {
@@ -18,7 +18,8 @@ import {
   mapValues,
   pixelRatio,
 } from "../utils";
-import { bindAll, bindInputsCtx, bindScope, unbindAll, _bindAll } from "./bind";
+import { bindAll, unbindAll, _bindAll } from "./bind";
+import type { BindInputsCtx, BindScope } from "./bind";
 import { setShinyObj } from "./initedMethods";
 import { registerDependency } from "./render";
 import { sendImageSizeFns } from "./sendImageSize";
@@ -26,11 +27,11 @@ import { ShinyApp } from "./shinyapp";
 import { registerNames as singletonsRegisterNames } from "./singletons";
 
 // "init_shiny.js"
-function initShiny(Shiny: ShinyType): void {
-  setShinyObj(Shiny);
-  const shinyapp = (Shiny.shinyapp = new ShinyApp());
+function initShiny(windowShiny: Shiny): void {
+  setShinyObj(windowShiny);
+  const shinyapp = (windowShiny.shinyapp = new ShinyApp());
 
-  Shiny.progressHandlers = shinyapp.progressHandlers;
+  windowShiny.progressHandlers = shinyapp.progressHandlers;
 
   const inputBatchSender = new InputBatchSender(shinyapp);
   const inputsNoResend = new InputNoResendDecorator(inputBatchSender);
@@ -57,10 +58,10 @@ function initShiny(Shiny: ShinyType): void {
 
   const inputs = new InputValidateDecorator(target);
 
-  Shiny.setInputValue = Shiny.onInputChange = function (
+  windowShiny.setInputValue = windowShiny.onInputChange = function (
     name: string,
     value: unknown,
-    opts?: { priority?: priorityType }
+    opts?: { priority?: EventPriority }
   ): void {
     const newOpts = addDefaultInputOpts(opts);
 
@@ -73,15 +74,15 @@ function initShiny(Shiny: ShinyType): void {
   // `forgetLastInputValue` tells Shiny that the very next call to
   // `setInputValue` for this input id shouldn't be ignored, even if it
   // is a dupe of the existing value.
-  Shiny.forgetLastInputValue = function (name) {
+  windowShiny.forgetLastInputValue = function (name) {
     inputsNoResend.forget(name);
   };
 
   // MUST be called after `setShiny()`
-  const inputBindings = Shiny.inputBindings;
-  const outputBindings = Shiny.outputBindings;
+  const inputBindings = windowShiny.inputBindings;
+  const outputBindings = windowShiny.outputBindings;
 
-  function shinyBindCtx(): bindInputsCtx {
+  function shinyBindCtx(): BindInputsCtx {
     return {
       inputs,
       inputsRate,
@@ -93,16 +94,16 @@ function initShiny(Shiny: ShinyType): void {
     };
   }
 
-  Shiny.bindAll = function (scope: bindScope) {
+  windowShiny.bindAll = function (scope: BindScope) {
     bindAll(shinyBindCtx(), scope);
   };
-  Shiny.unbindAll = function (scope: bindScope, includeSelf = false) {
+  windowShiny.unbindAll = function (scope: BindScope, includeSelf = false) {
     unbindAll(shinyBindCtx(), scope, includeSelf);
   };
 
   // Calls .initialize() for all of the input objects in all input bindings,
   // in the given scope.
-  function initializeInputs(scope: bindScope = document.documentElement) {
+  function initializeInputs(scope: BindScope = document.documentElement) {
     const bindings = inputBindings.getBindings();
 
     // Iterate over all bindings
@@ -123,7 +124,7 @@ function initShiny(Shiny: ShinyType): void {
       }
     }
   }
-  Shiny.initializeInputs = initializeInputs;
+  windowShiny.initializeInputs = initializeInputs;
 
   function getIdFromEl(el: HTMLElement) {
     const $el = $(el);
@@ -516,7 +517,7 @@ function initShiny(Shiny: ShinyType): void {
     initDeferredIframes();
   });
 
-  window.console.log("Shiny version: ", Shiny.version);
+  window.console.log("Shiny version: ", windowShiny.version);
 } // function initShiny()
 
 // Give any deferred iframes a chance to load.

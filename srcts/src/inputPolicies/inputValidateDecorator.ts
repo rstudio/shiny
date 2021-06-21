@@ -1,15 +1,15 @@
 import $ from "jquery";
-import { priorityType, InputPolicy } from "./InputPolicy";
+import { EventPriority, InputPolicy } from "./InputPolicy";
 
 type MaybeInputOpts = {
-  priority?: priorityType;
+  priority?: EventPriority;
   binding?: unknown;
   el?: HTMLElement;
 };
 
 // Merge opts with defaults, and return a new object.
 function addDefaultInputOpts<T>(opts?: T & MaybeInputOpts): T & {
-  priority: priorityType;
+  priority: EventPriority;
   binding: unknown;
   el?: HTMLElement;
 } {

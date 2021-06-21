@@ -1,6 +1,6 @@
 import $ from "jquery";
 import { asArray } from "../../utils";
-import type { errorsMessageValue } from "../../shiny/shinyapp";
+import type { ErrorsMessageValue } from "../../shiny/shinyapp";
 
 class OutputBinding {
   name: string;
@@ -25,10 +25,10 @@ class OutputBinding {
     this.clearError(el);
     this.renderValue(el, data);
   }
-  onValueError(el: HTMLElement, err: errorsMessageValue): void {
+  onValueError(el: HTMLElement, err: ErrorsMessageValue): void {
     this.renderError(el, err);
   }
-  renderError(el: HTMLElement, err: errorsMessageValue): void {
+  renderError(el: HTMLElement, err: ErrorsMessageValue): void {
     this.clearError(el);
     if (err.message === "") {
       // not really error, but we just need to wait (e.g. action buttons)
@@ -54,10 +54,10 @@ class OutputBinding {
     });
   }
   showProgress(el: HTMLElement, show: boolean): void {
-    const RECALC_CLASS = "recalculating";
+    const recalcClass = "recalculating";
 
-    if (show) $(el).addClass(RECALC_CLASS);
-    else $(el).removeClass(RECALC_CLASS);
+    if (show) $(el).addClass(recalcClass);
+    else $(el).removeClass(recalcClass);
   }
 }
 

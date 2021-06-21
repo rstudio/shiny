@@ -1,4 +1,5 @@
-import { TextHTMLElement, TextInputBindingBase } from "./text";
+import type { TextHTMLElement } from "./text";
+import { TextInputBindingBase } from "./text";
 declare type TimeFormatter = (fmt: string, dt: Date) => string;
 declare type SliderReceiveMessageData = {
     label: string;

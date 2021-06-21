@@ -8,15 +8,16 @@ import { showModal, removeModal } from "./modal";
 import { showReconnectDialog, hideReconnectDialog } from "./reconnectDialog";
 import { renderContent, renderDependencies, renderHtml } from "./render";
 import { initShiny } from "./init";
-import {
+import type {
   shinyBindAll,
   shinyForgetLastInputValue,
   shinySetInputValue,
   shinyInitializeInputs,
   shinyUnbindAll,
-  setFileInputBinding,
 } from "./initedMethods";
-import { addCustomMessageHandler, Handler, ShinyApp } from "./shinyapp";
+import { setFileInputBinding } from "./initedMethods";
+import type { Handler, ShinyApp } from "./shinyapp";
+import { addCustomMessageHandler } from "./shinyapp";
 import { initInputBindings } from "../bindings/input";
 import { initOutputBindings } from "../bindings/output";
 

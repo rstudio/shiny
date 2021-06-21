@@ -2,7 +2,7 @@ import $ from "jquery";
 
 import { InputBinding } from "./InputBinding";
 import { $escape, hasOwnProperty, updateLabel } from "../../utils";
-import { CheckedHTMLElement } from "./checkbox";
+import type { CheckedHTMLElement } from "./checkbox";
 
 type CheckboxGroupHTMLElement = CheckedHTMLElement;
 type ValueLabelObject = {

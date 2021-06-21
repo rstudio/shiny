@@ -1,7 +1,7 @@
 import $ from "jquery";
 import { triggerFileInputChanged } from "../events/shiny_inputchanged";
 import { $escape } from "../utils";
-import { ShinyApp } from "../shiny/shinyapp";
+import type { ShinyApp } from "../shiny/shinyapp";
 import { getFileInputBinding } from "../shiny/initedMethods";
 
 type JobId = string;

@@ -1,7 +1,7 @@
 import $ from "jquery";
 import { asArray, hasOwnProperty } from "../utils";
 import { isIE } from "../utils/browser";
-import { BindScope } from "./bind";
+import type { BindScope } from "./bind";
 import {
   shinyBindAll,
   shinyInitializeInputs,

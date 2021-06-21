@@ -7,7 +7,8 @@ import {
   hasOwnProperty,
 } from "../../utils";
 
-import { TextHTMLElement, TextInputBindingBase } from "./text";
+import type { TextHTMLElement } from "./text";
+import { TextInputBindingBase } from "./text";
 
 // interface SliderHTMLElement extends NameValueHTMLElement {
 //   checked?: any;

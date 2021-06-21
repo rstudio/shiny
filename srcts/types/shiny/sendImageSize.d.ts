@@ -1,4 +1,4 @@
-import { InputBatchSender } from "../inputPolicies";
+import type { InputBatchSender } from "../inputPolicies";
 import { Debouncer } from "../time";
 declare class SendImageSize {
     regular: () => void;

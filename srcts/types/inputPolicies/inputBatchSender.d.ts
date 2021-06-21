@@ -1,6 +1,7 @@
 /// <reference types="node" />
-import { EventPriority, InputPolicy } from "./InputPolicy";
-import { ShinyApp } from "../shiny/shinyapp";
+import type { EventPriority } from "./InputPolicy";
+import { InputPolicy } from "./InputPolicy";
+import type { ShinyApp } from "../shiny/shinyapp";
 declare class InputBatchSender extends InputPolicy {
     shinyapp: ShinyApp;
     timerId: NodeJS.Timeout;

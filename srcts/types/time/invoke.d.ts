@@ -1,4 +1,4 @@
-import { InputPolicy } from "../inputPolicies";
+import type { InputPolicy } from "../inputPolicies";
 declare class Invoker<T> {
     target: InputPolicy;
     func: () => void;

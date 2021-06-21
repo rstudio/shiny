@@ -1,5 +1,5 @@
 import type { ErrorsMessageValue } from "../shiny/shinyapp";
-import { OutputBinding } from "./output";
+import type { OutputBinding } from "./output";
 interface OutpuBindingWithResize extends OutputBinding {
     resize?: (el: HTMLElement, width: string | number, height: string | number) => void;
 }

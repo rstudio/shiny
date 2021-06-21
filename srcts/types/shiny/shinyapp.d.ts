@@ -1,4 +1,4 @@
-import { OutputBindingAdapter } from "../bindings/output_adapter";
+import type { OutputBindingAdapter } from "../bindings/output_adapter";
 import type { UploadInitValue, UploadEndValue } from "../file/FileProcessor";
 declare type ResponseValue = UploadInitValue | UploadEndValue;
 declare type Handler = (msg: Record<string, unknown> | Array<unknown> | boolean | string) => void;

@@ -20,14 +20,14 @@ import { renderContent, renderHtml } from "./render";
 import type { HtmlDep } from "./render";
 import { hideReconnectDialog, showReconnectDialog } from "./reconnectDialog";
 import { resetBrush } from "../imageutils/resetBrush";
-import { OutputBindingAdapter } from "../bindings/output_adapter";
+import type { OutputBindingAdapter } from "../bindings/output_adapter";
 import type {
   ShinyEventError,
   ShinyEventMessage,
   ShinyEventValue,
   ShinyEventUpdateInput,
 } from "../events/shinyEvents";
-import { InputBinding } from "../bindings";
+import type { InputBinding } from "../bindings";
 import { indirectEval } from "../utils/eval";
 import type { WherePosition } from "./singletons";
 import type { UploadInitValue, UploadEndValue } from "../file/FileProcessor";

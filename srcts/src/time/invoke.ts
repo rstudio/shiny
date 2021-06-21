@@ -1,4 +1,4 @@
-import { InputPolicy } from "../inputPolicies";
+import type { InputPolicy } from "../inputPolicies";
 
 class Invoker<T> {
   target: InputPolicy;

@@ -1,4 +1,5 @@
-import { EventPriority, InputPolicy } from "./InputPolicy";
+import type { EventPriority } from "./InputPolicy";
+import { InputPolicy } from "./InputPolicy";
 declare type LastSentValues = Record<string, Record<string, string>>;
 declare class InputNoResendDecorator extends InputPolicy {
     lastSentValues: LastSentValues;

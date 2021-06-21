@@ -1,6 +1,6 @@
 import type { ErrorsMessageValue } from "../shiny/shinyapp";
 import { makeResizeFilter } from "../utils";
-import { OutputBinding } from "./output";
+import type { OutputBinding } from "./output";
 
 interface OutpuBindingWithResize extends OutputBinding {
   resize?: (

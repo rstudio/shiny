@@ -1,6 +1,7 @@
 import $ from "jquery";
-import { EventPriority, InputPolicy } from "./InputPolicy";
-import { ShinyApp } from "../shiny/shinyapp";
+import type { EventPriority } from "./InputPolicy";
+import { InputPolicy } from "./InputPolicy";
+import type { ShinyApp } from "../shiny/shinyapp";
 
 // Schedules data to be sent to shinyapp at the next setTimeout(0).
 // Batches multiple input calls into one websocket message.

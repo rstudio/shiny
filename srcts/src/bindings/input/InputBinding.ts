@@ -1,5 +1,5 @@
-import { RatePolicyModes } from "../../inputPolicies/inputRateDecorator";
-import { BindScope } from "../../shiny/bind";
+import type { RatePolicyModes } from "../../inputPolicies/inputRateDecorator";
+import type { BindScope } from "../../shiny/bind";
 
 class InputBinding {
   name: string;

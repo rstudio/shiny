@@ -1,6 +1,6 @@
 import $ from "jquery";
 import { toLowerCase } from "../utils";
-import { BindScope } from "./bind";
+import type { BindScope } from "./bind";
 
 const reSingleton = /<!--(SHINY.SINGLETON\[([\w]+)\])-->([\s\S]*?)<!--\/\1-->/;
 const reHead = /<head(?:\s[^>]*)?>([\s\S]*?)<\/head>/;

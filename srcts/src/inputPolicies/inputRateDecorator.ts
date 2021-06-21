@@ -1,4 +1,5 @@
-import { EventPriority, InputPolicy } from "./InputPolicy";
+import type { EventPriority } from "./InputPolicy";
+import { InputPolicy } from "./InputPolicy";
 import { Debouncer, Invoker, Throttler } from "../time";
 import { splitInputNameType } from "./splitInputNameType";
 

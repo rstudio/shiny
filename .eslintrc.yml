@@ -55,6 +55,8 @@ rules:
     # - error
     - "off"
 
+  "@typescript-eslint/consistent-type-imports":
+    - error
   "@typescript-eslint/naming-convention":
     - error
 

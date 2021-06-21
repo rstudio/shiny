@@ -1,4 +1,4 @@
-import { BindScope } from "./bind";
+import type { BindScope } from "./bind";
 import { renderHtml as singletonsRenderHtml } from "./singletons";
 import type { WherePosition } from "./singletons";
 declare function renderDependencies(dependencies: null | Array<HtmlDep>): void;

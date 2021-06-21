@@ -1,4 +1,4 @@
-import { ShinyApp } from "../shiny/shinyapp";
+import type { ShinyApp } from "../shiny/shinyapp";
 declare type JobId = string;
 declare type UploadUrl = string;
 declare type UploadInitValue = {

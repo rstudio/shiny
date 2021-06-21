@@ -5,8 +5,9 @@ import { showNotification, removeNotification } from "./notifications";
 import { showModal, removeModal } from "./modal";
 import { showReconnectDialog, hideReconnectDialog } from "./reconnectDialog";
 import { renderContent, renderDependencies, renderHtml } from "./render";
-import { shinyBindAll, shinyForgetLastInputValue, shinySetInputValue, shinyInitializeInputs, shinyUnbindAll } from "./initedMethods";
-import { addCustomMessageHandler, Handler, ShinyApp } from "./shinyapp";
+import type { shinyBindAll, shinyForgetLastInputValue, shinySetInputValue, shinyInitializeInputs, shinyUnbindAll } from "./initedMethods";
+import type { Handler, ShinyApp } from "./shinyapp";
+import { addCustomMessageHandler } from "./shinyapp";
 import { initInputBindings } from "../bindings/input";
 import { initOutputBindings } from "../bindings/output";
 interface Shiny {

@@ -1,4 +1,5 @@
-import { EventPriority, InputPolicy } from "./InputPolicy";
+import type { EventPriority } from "./InputPolicy";
+import { InputPolicy } from "./InputPolicy";
 import { hasOwnProperty } from "../utils";
 import { splitInputNameType } from "./splitInputNameType";
 

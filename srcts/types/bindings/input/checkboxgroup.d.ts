@@ -1,5 +1,5 @@
 import { InputBinding } from "./InputBinding";
-import { CheckedHTMLElement } from "./checkbox";
+import type { CheckedHTMLElement } from "./checkbox";
 declare type CheckboxGroupHTMLElement = CheckedHTMLElement;
 declare type ValueLabelObject = {
     value: HTMLInputElement["value"];

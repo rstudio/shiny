@@ -1,14 +1,14 @@
 import type { OutputBindingAdapter } from "../bindings/outputAdapter";
 import type { UploadInitValue, UploadEndValue } from "../file/fileProcessor";
 declare type ResponseValue = UploadInitValue | UploadEndValue;
-declare type Handler = (msg: Record<string, unknown> | Array<unknown> | boolean | string) => void;
+declare type Handler = (msg: Record<string, unknown> | unknown[] | boolean | string) => void;
 declare type ShinyWebSocket = WebSocket & {
     allowReconnect?: boolean;
 };
 declare type ErrorsMessageValue = {
     message: string;
-    call: Array<string>;
-    type?: Array<string>;
+    call: string[];
+    type?: string[];
 };
 declare type OnSuccessRequest = (value: ResponseValue) => void;
 declare type OnErrorRequest = (err: string) => void;
@@ -26,7 +26,7 @@ declare class ShinyApp {
     $values: {};
     $errors: Record<string, ErrorsMessageValue>;
     $conditionals: {};
-    $pendingMessages: Array<string>;
+    $pendingMessages: string[];
     $activeRequests: Record<number, {
         onSuccess: OnSuccessRequest;
         onError: OnErrorRequest;
@@ -49,7 +49,7 @@ declare class ShinyApp {
     };
     onDisconnected(): void;
     onConnected(): void;
-    makeRequest(method: string, args: Array<unknown>, onSuccess: OnSuccessRequest, onError: OnErrorRequest, blobs: Array<Blob | ArrayBuffer | string>): void;
+    makeRequest(method: string, args: unknown[], onSuccess: OnSuccessRequest, onError: OnErrorRequest, blobs: Array<Blob | ArrayBuffer | string>): void;
     $sendMsg(msg: string): void;
     receiveError(name: string, error: ErrorsMessageValue): void;
     receiveOutput<T>(name: string, value: T): T;

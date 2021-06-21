@@ -4,7 +4,7 @@ declare class DatatableOutputBinding extends OutputBinding {
     find(scope: HTMLElement): JQuery<HTMLElement>;
     onValueError(el: HTMLElement, err: ErrorsMessageValue): void;
     renderValue(el: HTMLElement, data: null | {
-        colnames?: Array<string>;
+        colnames?: string[];
         options?: null | {
             searching?: boolean;
             search?: {
@@ -13,7 +13,7 @@ declare class DatatableOutputBinding extends OutputBinding {
         };
         action?: string;
         escape?: string;
-        evalOptions?: Array<string>;
+        evalOptions?: string[];
         callback?: string;
         searchDelay?: number;
     }): void;

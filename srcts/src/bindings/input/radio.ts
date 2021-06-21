@@ -11,7 +11,7 @@ type ValueLabelObject = {
 
 type RadioReceiveMessageData = {
   value?: string;
-  options?: Array<ValueLabelObject>;
+  options?: ValueLabelObject[];
   label: string;
 };
 
@@ -78,7 +78,7 @@ class RadioInputBinding extends InputBinding {
   getState(el: RadioHTMLElement): {
     label: string;
     value: string | number | string[];
-    options: Array<ValueLabelObject>;
+    options: ValueLabelObject[];
   } {
     const $objs = $(
       'input:radio[name="' + $escape(el.id) + '"]'

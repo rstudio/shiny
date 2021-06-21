@@ -85,14 +85,14 @@ type Coords = {
 };
 
 type CoordmapInit = {
-  panels: Array<Panel>;
+  panels: Panel[];
   dims: {
     height: number;
     width: number;
   };
 };
 type Coordmap = {
-  panels: Array<Panel>;
+  panels: Panel[];
   dims: {
     height: number;
     width: number;

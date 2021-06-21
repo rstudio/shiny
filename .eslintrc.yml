@@ -60,6 +60,11 @@ rules:
     - error
     - case: camelCase
 
+  "@typescript-eslint/array-type":
+    - error
+    - default: array-simple
+      readonly: array-simple
+
   "@typescript-eslint/consistent-type-imports":
     - error
   "@typescript-eslint/naming-convention":

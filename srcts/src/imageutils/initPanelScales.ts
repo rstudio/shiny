@@ -149,7 +149,7 @@ function addScaleFuns(panel: Panel) {
 // scaleDataToImg(), and clipImg() functions to each one. The panel objects
 // use img and data coordinates only; they do not use css coordinates. The
 // domain is in data coordinates; the range is in img coordinates.
-function initPanelScales(panels: Array<Panel>): void {
+function initPanelScales(panels: Panel[]): void {
   // Add the functions to each panel object.
   for (let i = 0; i < panels.length; i++) {
     const panel = panels[i];

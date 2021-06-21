@@ -31,6 +31,6 @@ declare type Panel = {
         y: number;
     };
 };
-declare function initPanelScales(panels: Array<Panel>): void;
+declare function initPanelScales(panels: Panel[]): void;
 export type { Panel };
 export { initPanelScales };

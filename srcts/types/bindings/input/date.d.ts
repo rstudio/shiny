@@ -28,8 +28,8 @@ declare class DateInputBindingBase extends InputBinding {
     initialize(el: HTMLElement): void;
     protected _getLabelNode(el: HTMLElement): JQuery<HTMLElement>;
     protected _formatToString(format: {
-        parts: Array<string>;
-        separators: Array<string>;
+        parts: string[];
+        separators: string[];
     }): string;
     protected _setMin(el: HTMLElement, date: Date | undefined | null): void;
     protected _setMax(el: HTMLElement, date: Date): void;

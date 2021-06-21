@@ -18,14 +18,14 @@ class DatatableOutputBinding extends OutputBinding {
   renderValue(
     el: HTMLElement,
     data: null | {
-      colnames?: Array<string>;
+      colnames?: string[];
       options?: null | {
         searching?: boolean;
         search?: { caseInsensitive?: boolean };
       };
       action?: string;
       escape?: string;
-      evalOptions?: Array<string>;
+      evalOptions?: string[];
       callback?: string;
       searchDelay?: number;
     }

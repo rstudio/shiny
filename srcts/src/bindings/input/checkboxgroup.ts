@@ -48,7 +48,7 @@ class CheckboxGroupInputBinding extends InputBinding {
     return $(scope).find(".shiny-input-checkboxgroup");
   }
 
-  getValue(el: CheckboxGroupHTMLElement): Array<CheckboxGroupValue> {
+  getValue(el: CheckboxGroupHTMLElement): CheckboxGroupValue[] {
     // Select the checkbox objects that have name equal to the grouping div's id
     const $objs = $('input:checkbox[name="' + $escape(el.id) + '"]:checked');
     const values = new Array($objs.length);
@@ -58,7 +58,7 @@ class CheckboxGroupInputBinding extends InputBinding {
     }
     return values;
   }
-  setValue(el: HTMLElement, value: Array<string> | string): void {
+  setValue(el: HTMLElement, value: string[] | string): void {
     // Clear all checkboxes
     $('input:checkbox[name="' + $escape(el.id) + '"]').prop("checked", false);
 
@@ -87,7 +87,7 @@ class CheckboxGroupInputBinding extends InputBinding {
   getState(el: CheckboxGroupHTMLElement): {
     label: string;
     value: ReturnType<CheckboxGroupInputBinding["getValue"]>;
-    options: Array<ValueLabelObject>;
+    options: ValueLabelObject[];
   } {
     const $objs = $(
       'input:checkbox[name="' + $escape(el.id) + '"]'

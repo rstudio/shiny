@@ -6,14 +6,14 @@ declare function findOrigin($el: JQuery<HTMLElement>): Offset;
 declare type OffsetCss = Record<string, number>;
 declare type OffsetImg = Record<string, number>;
 declare type CoordmapInit = {
-    panels: Array<Panel>;
+    panels: Panel[];
     dims: {
         height: number;
         width: number;
     };
 };
 declare type Coordmap = {
-    panels: Array<Panel>;
+    panels: Panel[];
     dims: {
         height: number;
         width: number;

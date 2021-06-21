@@ -26,7 +26,7 @@ function renderHtml(
   if (where === "replace") {
     $(el).html(processed.html);
   } else {
-    let elElements: Array<HTMLElement>;
+    let elElements: HTMLElement[];
 
     if (el instanceof HTMLElement) {
       elElements = [el];
@@ -46,7 +46,7 @@ function register(s) {
   $.extend(knownSingletons, s);
 }
 // Takes a string or array of strings and adds them to knownSingletons
-function registerNames(s: string | Array<string>): void {
+function registerNames(s: string | string[]): void {
   if (typeof s === "string") {
     knownSingletons[s] = true;
   } else if (s instanceof Array) {

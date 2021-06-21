@@ -135,7 +135,7 @@ class FileUploader extends FileProcessor {
   ): void;
   makeRequest(
     method: string,
-    args: Array<unknown>,
+    args: unknown[],
     onSuccess: Parameters<ShinyApp["makeRequest"]>[2],
     onFailure: Parameters<ShinyApp["makeRequest"]>[3],
     blobs: Parameters<ShinyApp["makeRequest"]>[4]

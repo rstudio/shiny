@@ -105,8 +105,8 @@ class DateInputBindingBase extends InputBinding {
   }
   // Given a format object from a date picker, return a string
   protected _formatToString(format: {
-    parts: Array<string>;
-    separators: Array<string>;
+    parts: string[];
+    separators: string[];
   }): string {
     // Format object has structure like:
     // { parts: ['mm', 'dd', 'yy'], separators: ['', '/', '/' ,''] }

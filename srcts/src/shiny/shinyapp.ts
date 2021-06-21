@@ -34,7 +34,7 @@ import type { UploadInitValue, UploadEndValue } from "../file/fileProcessor";
 
 type ResponseValue = UploadInitValue | UploadEndValue;
 type Handler = (
-  msg: Record<string, unknown> | Array<unknown> | boolean | string
+  msg: Record<string, unknown> | unknown[] | boolean | string
 ) => void;
 
 type ShinyWebSocket = WebSocket & {
@@ -43,8 +43,8 @@ type ShinyWebSocket = WebSocket & {
 
 type ErrorsMessageValue = {
   message: string;
-  call: Array<string>;
-  type?: Array<string>;
+  call: string[];
+  type?: string[];
 };
 
 type OnSuccessRequest = (value: ResponseValue) => void;
@@ -116,7 +116,7 @@ function addCustomMessageHandler(type: string, handler: Handler): void {
 function sendMessagesToHandlers(
   msgObj: Record<string, unknown>,
   handlers: Record<string, Handler>,
-  handlerOrder: Array<string>
+  handlerOrder: string[]
 ): void {
   // Dispatch messages to handlers, if handler is present
   for (let i = 0; i < handlerOrder.length; i++) {
@@ -154,7 +154,7 @@ class ShinyApp {
   // Conditional bindings (show/hide element based on expression)
   $conditionals = {};
 
-  $pendingMessages: Array<string> = [];
+  $pendingMessages: string[] = [];
   $activeRequests: Record<
     number,
     { onSuccess: OnSuccessRequest; onError: OnErrorRequest }
@@ -390,7 +390,7 @@ class ShinyApp {
   //   request. Strings will be encoded using UTF-8.
   makeRequest(
     method: string,
-    args: Array<unknown>,
+    args: unknown[],
     onSuccess: OnSuccessRequest,
     onError: OnErrorRequest,
     blobs: Array<Blob | ArrayBuffer | string>
@@ -701,7 +701,7 @@ class ShinyApp {
       indirectEval(message);
     });
 
-    addMessageHandler("console", function (message: Array<unknown>) {
+    addMessageHandler("console", function (message: unknown[]) {
       for (let i = 0; i < message.length; i++) {
         if (console.log) console.log(message[i]);
       }
@@ -851,7 +851,7 @@ class ShinyApp {
       "shiny-insert-ui",
       function (message: {
         selector: string;
-        content: { html: string; deps: Array<HtmlDep> };
+        content: { html: string; deps: HtmlDep[] };
         multiple: false | void;
         where: WherePosition;
       }) {
@@ -892,7 +892,7 @@ class ShinyApp {
       }
     );
 
-    addMessageHandler("frozen", function (message: { ids: Array<string> }) {
+    addMessageHandler("frozen", function (message: { ids: string[] }) {
       for (let i = 0; i < message.ids.length; i++) {
         shinyForgetLastInputValue(message.ids[i]);
       }
@@ -969,8 +969,8 @@ class ShinyApp {
       "shiny-insert-tab",
       function (message: {
         inputId: string;
-        divTag: { html: string; deps: Array<HtmlDep> };
-        liTag: { html: string; deps: Array<HtmlDep> };
+        divTag: { html: string; deps: HtmlDep[] };
+        liTag: { html: string; deps: HtmlDep[] };
         target?: string;
         position: "before" | "after" | void;
         select: boolean;

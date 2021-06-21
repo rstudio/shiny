@@ -178,7 +178,7 @@ function scopeExprToFunc(expr: string): (scope: unknown) => boolean {
   };
 }
 
-function asArray<T>(value: T | Array<T> | null | undefined): Array<T> {
+function asArray<T>(value: T | T[] | null | undefined): T[] {
   if (value === null || value === undefined) return [];
   if (Array.isArray(value)) return value;
   return [value];
@@ -187,9 +187,9 @@ function asArray<T>(value: T | Array<T> | null | undefined): Array<T> {
 // We need a stable sorting algorithm for ordering
 // bindings by priority and insertion order.
 function mergeSort<T>(
-  list: Array<T>,
+  list: T[],
   sortfunc: (a: T, b: T) => boolean | number
-): Array<T> {
+): T[] {
   function merge(sortfunc, a, b) {
     let ia = 0;
     let ib = 0;
@@ -265,8 +265,8 @@ function _equal(x: unknown, y: unknown): boolean {
     }
     return true;
   } else if ($.type(x) === "array" && $.type(y) === "array") {
-    const xa = x as Array<unknown>;
-    const ya = y as Array<unknown>;
+    const xa = x as unknown[];
+    const ya = y as unknown[];
 
     if (xa.length !== ya.length) return false;
     for (let i = 0; i < xa.length; i++) if (!_equal(xa[i], ya[i])) return false;
@@ -281,7 +281,7 @@ function _equal(x: unknown, y: unknown): boolean {
 // necessary.
 //
 // Objects other than objects and arrays are tested for equality using ===.
-function equal(...args: Array<unknown>): boolean {
+function equal(...args: unknown[]): boolean {
   if (args.length < 2)
     throw new Error("equal requires at least two arguments.");
   for (let i = 0; i < args.length - 1; i++) {

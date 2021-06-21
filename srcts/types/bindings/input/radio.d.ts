@@ -6,7 +6,7 @@ declare type ValueLabelObject = {
 };
 declare type RadioReceiveMessageData = {
     value?: string;
-    options?: Array<ValueLabelObject>;
+    options?: ValueLabelObject[];
     label: string;
 };
 declare class RadioInputBinding extends InputBinding {
@@ -16,7 +16,7 @@ declare class RadioInputBinding extends InputBinding {
     getState(el: RadioHTMLElement): {
         label: string;
         value: string | number | string[];
-        options: Array<ValueLabelObject>;
+        options: ValueLabelObject[];
     };
     receiveMessage(el: RadioHTMLElement, data: RadioReceiveMessageData): void;
     subscribe(el: RadioHTMLElement, callback: (x: boolean) => void): void;

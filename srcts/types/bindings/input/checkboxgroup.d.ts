@@ -13,12 +13,12 @@ declare type CheckboxGroupReceiveMessageData = {
 declare type CheckboxGroupValue = CheckboxGroupHTMLElement["value"];
 declare class CheckboxGroupInputBinding extends InputBinding {
     find(scope: HTMLElement): JQuery<HTMLElement>;
-    getValue(el: CheckboxGroupHTMLElement): Array<CheckboxGroupValue>;
-    setValue(el: HTMLElement, value: Array<string> | string): void;
+    getValue(el: CheckboxGroupHTMLElement): CheckboxGroupValue[];
+    setValue(el: HTMLElement, value: string[] | string): void;
     getState(el: CheckboxGroupHTMLElement): {
         label: string;
         value: ReturnType<CheckboxGroupInputBinding["getValue"]>;
-        options: Array<ValueLabelObject>;
+        options: ValueLabelObject[];
     };
     receiveMessage(el: CheckboxGroupHTMLElement, data: CheckboxGroupReceiveMessageData): void;
     subscribe(el: CheckboxGroupHTMLElement, callback: (x: boolean) => void): void;

@@ -12,7 +12,7 @@ import { sendImageSizeFns } from "./sendImageSize";
 import { renderHtml as singletonsRenderHtml } from "./singletons";
 import type { WherePosition } from "./singletons";
 
-function renderDependencies(dependencies: null | Array<HtmlDep>): void {
+function renderDependencies(dependencies: null | HtmlDep[]): void {
   if (dependencies) {
     $.each(dependencies, function (i, dep) {
       renderDependency(dep);
@@ -25,7 +25,7 @@ function renderDependencies(dependencies: null | Array<HtmlDep>): void {
 // properties 'html' and 'deps'.
 function renderContent(
   el: BindScope,
-  content: null | string | { html: string; deps?: Array<HtmlDep> },
+  content: null | string | { html: string; deps?: HtmlDep[] },
   where: WherePosition = "replace"
 ): void {
   if (where === "replace") {
@@ -71,7 +71,7 @@ function renderContent(
 function renderHtml(
   html: string,
   el: BindScope,
-  dependencies: Array<HtmlDep>,
+  dependencies: HtmlDep[],
   where: WherePosition = "replace"
 ): ReturnType<typeof singletonsRenderHtml> {
   renderDependencies(dependencies);
@@ -85,14 +85,14 @@ type HtmlDep = {
   version: HtmlDepVersion;
   restyle?: boolean;
   src?: { href: string };
-  meta?: string | Array<string>;
-  stylesheet?: string | Array<string>;
+  meta?: string | string[];
+  stylesheet?: string | string[];
   script?:
     | string
-    | Array<string>
+    | string[]
     | Record<string, string>
     | Array<Record<string, string>>;
-  attachment?: string | Array<string> | Record<string, string>;
+  attachment?: string | string[] | Record<string, string>;
   head?: string;
 };
 const htmlDependencies: Record<HtmlDepName, HtmlDepVersion> = {};

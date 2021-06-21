@@ -34,7 +34,7 @@ import type { UploadInitValue, UploadEndValue } from "../file/fileProcessor";
 
 type ResponseValue = UploadInitValue | UploadEndValue;
 type Handler = (
-  msg: Record<string, unknown> | unknown[] | boolean | string
+  msg: { [key: string]: unknown } | unknown[] | boolean | string
 ) => void;
 
 type ShinyWebSocket = WebSocket & {
@@ -49,7 +49,7 @@ type ErrorsMessageValue = {
 
 type OnSuccessRequest = (value: ResponseValue) => void;
 type OnErrorRequest = (err: string) => void;
-type InputValues = Record<string, unknown>;
+type InputValues = { [key: string]: unknown };
 
 //// 2021/03 - TypeScript conversion note:
 // These four variables were moved from being internally defined to being defined globally within the file.
@@ -114,8 +114,8 @@ function addCustomMessageHandler(type: string, handler: Handler): void {
 // A function for sending messages to the appropriate handlers.
 // - msgObj: the object containing messages, with format {msgObj.foo, msObj.bar
 function sendMessagesToHandlers(
-  msgObj: Record<string, unknown>,
-  handlers: Record<string, Handler>,
+  msgObj: { [key: string]: unknown },
+  handlers: { [key: string]: Handler },
   handlerOrder: string[]
 ): void {
   // Dispatch messages to handlers, if handler is present
@@ -145,20 +145,19 @@ class ShinyApp {
   $initialInput: InputValues;
 
   // Output bindings
-  $bindings: Record<string, OutputBindingAdapter> = {};
+  $bindings: { [key: string]: OutputBindingAdapter } = {};
 
   // Cached values/errors
   $values = {};
-  $errors: Record<string, ErrorsMessageValue> = {};
+  $errors: { [key: string]: ErrorsMessageValue } = {};
 
   // Conditional bindings (show/hide element based on expression)
   $conditionals = {};
 
   $pendingMessages: string[] = [];
-  $activeRequests: Record<
-    number,
-    { onSuccess: OnSuccessRequest; onError: OnErrorRequest }
-  > = {};
+  $activeRequests: {
+    [key: number]: { onSuccess: OnSuccessRequest; onError: OnErrorRequest };
+  } = {};
   $nextRequestId = 0;
 
   $allowReconnect: boolean | "force" = false;
@@ -531,7 +530,7 @@ class ShinyApp {
   // by nsPrefix. Returns a new object with keys removed and renamed as
   // necessary.
   private _narrowScopeComponent<T>(
-    scopeComponent: Record<string, T>,
+    scopeComponent: { [key: string]: T },
     nsPrefix: string | null
   ) {
     return Object.keys(scopeComponent)
@@ -650,7 +649,7 @@ class ShinyApp {
   // Message handlers =====================================================
 
   private _init() {
-    addMessageHandler("values", function (message: Record<string, unknown>) {
+    addMessageHandler("values", function (message: { [key: string]: unknown }) {
       for (const name in this.$bindings) {
         if (hasOwnProperty(this.$bindings, name))
           this.$bindings[name].showProgress(false);
@@ -663,7 +662,7 @@ class ShinyApp {
 
     addMessageHandler(
       "errors",
-      function (message: Record<string, ErrorsMessageValue>) {
+      function (message: { [key: string]: ErrorsMessageValue }) {
         for (const key in message) {
           if (hasOwnProperty(message, key))
             this.receiveError(key, message[key]);
@@ -780,7 +779,7 @@ class ShinyApp {
       }
     );
 
-    addMessageHandler("custom", function (message: Record<string, unknown>) {
+    addMessageHandler("custom", function (message: { [key: string]: unknown }) {
       // For old-style custom messages - should deprecate and migrate to new
       // method
       const shinyOnCustomMessage = getShinyOnCustomMessage();

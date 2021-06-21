@@ -64,6 +64,9 @@ rules:
     - error
     - default: array-simple
       readonly: array-simple
+  "@typescript-eslint/consistent-indexed-object-style":
+    - error
+    - index-signature
 
   "@typescript-eslint/consistent-type-imports":
     - error

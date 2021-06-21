@@ -14,7 +14,13 @@ declare function scopeExprToFunc(expr: string): (scope: unknown) => boolean;
 declare function asArray<T>(value: T | T[] | null | undefined): T[];
 declare function mergeSort<T>(list: T[], sortfunc: (a: T, b: T) => boolean | number): T[];
 declare const $escape: (val: string) => string;
-declare function mapValues<V, R>(obj: Record<string, V>, f: (value: V, key: string, obj: Record<string, V>) => R): Record<string, R>;
+declare function mapValues<V, R>(obj: {
+    [key: string]: V;
+}, f: (value: V, key: string, obj: {
+    [key: string]: V;
+}) => R): {
+    [key: string]: R;
+};
 declare function isnan(x: unknown): boolean;
 declare function _equal(x: unknown, y: unknown): boolean;
 declare function equal(...args: unknown[]): boolean;

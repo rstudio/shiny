@@ -7,10 +7,9 @@ declare function renderContent(el: BindScope, content: null | string | {
     deps?: HtmlDep[];
 }, where?: WherePosition): void;
 declare function renderHtml(html: string, el: BindScope, dependencies: HtmlDep[], where?: WherePosition): ReturnType<typeof singletonsRenderHtml>;
-declare type HtmlDepName = string;
 declare type HtmlDepVersion = string;
 declare type HtmlDep = {
-    name: HtmlDepName;
+    name: string;
     version: HtmlDepVersion;
     restyle?: boolean;
     src?: {
@@ -18,10 +17,16 @@ declare type HtmlDep = {
     };
     meta?: string | string[];
     stylesheet?: string | string[];
-    script?: string | string[] | Record<string, string> | Array<Record<string, string>>;
-    attachment?: string | string[] | Record<string, string>;
+    script?: string | string[] | {
+        [key: string]: string;
+    } | Array<{
+        [key: string]: string;
+    }>;
+    attachment?: string | string[] | {
+        [key: string]: string;
+    };
     head?: string;
 };
-declare function registerDependency(name: HtmlDepName, version: HtmlDepVersion): void;
+declare function registerDependency(name: string, version: HtmlDepVersion): void;
 export { renderDependencies, renderContent, renderHtml, registerDependency };
 export type { HtmlDep };

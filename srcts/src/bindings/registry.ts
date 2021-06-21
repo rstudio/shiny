@@ -13,7 +13,7 @@ interface BindingObj<Binding> {
 class BindingRegistry<Binding extends BindingBase> {
   name: string;
   bindings: Array<BindingObj<Binding>> = [];
-  bindingNames: Record<string, BindingObj<Binding>> = {};
+  bindingNames: { [key: string]: BindingObj<Binding> } = {};
 
   register(binding: Binding, bindingName: string, priority = 0): void {
     const bindingObj = { binding, priority };

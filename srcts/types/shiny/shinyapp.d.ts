@@ -1,7 +1,9 @@
 import type { OutputBindingAdapter } from "../bindings/outputAdapter";
 import type { UploadInitValue, UploadEndValue } from "../file/fileProcessor";
 declare type ResponseValue = UploadInitValue | UploadEndValue;
-declare type Handler = (msg: Record<string, unknown> | unknown[] | boolean | string) => void;
+declare type Handler = (msg: {
+    [key: string]: unknown;
+} | unknown[] | boolean | string) => void;
 declare type ShinyWebSocket = WebSocket & {
     allowReconnect?: boolean;
 };
@@ -12,7 +14,9 @@ declare type ErrorsMessageValue = {
 };
 declare type OnSuccessRequest = (value: ResponseValue) => void;
 declare type OnErrorRequest = (err: string) => void;
-declare type InputValues = Record<string, unknown>;
+declare type InputValues = {
+    [key: string]: unknown;
+};
 declare function addCustomMessageHandler(type: string, handler: Handler): void;
 declare class ShinyApp {
     $socket: ShinyWebSocket;
@@ -22,15 +26,21 @@ declare class ShinyApp {
     };
     $inputValues: InputValues;
     $initialInput: InputValues;
-    $bindings: Record<string, OutputBindingAdapter>;
+    $bindings: {
+        [key: string]: OutputBindingAdapter;
+    };
     $values: {};
-    $errors: Record<string, ErrorsMessageValue>;
+    $errors: {
+        [key: string]: ErrorsMessageValue;
+    };
     $conditionals: {};
     $pendingMessages: string[];
-    $activeRequests: Record<number, {
-        onSuccess: OnSuccessRequest;
-        onError: OnErrorRequest;
-    }>;
+    $activeRequests: {
+        [key: number]: {
+            onSuccess: OnSuccessRequest;
+            onError: OnErrorRequest;
+        };
+    };
     $nextRequestId: number;
     $allowReconnect: boolean | "force";
     constructor();

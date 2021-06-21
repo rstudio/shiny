@@ -1,6 +1,10 @@
 import type { EventPriority } from "./inputPolicy";
 import { InputPolicy } from "./inputPolicy";
-declare type LastSentValues = Record<string, Record<string, string>>;
+declare type LastSentValues = {
+    [key: string]: {
+        [key: string]: string;
+    };
+};
 declare class InputNoResendDecorator extends InputPolicy {
     lastSentValues: LastSentValues;
     constructor(target: InputPolicy, initialValues?: LastSentValues);

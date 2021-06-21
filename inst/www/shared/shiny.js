@@ -12573,15 +12573,15 @@
             if (hasOwnProperty(this.$bindings, name))
               this.$bindings[name].showProgress(false);
           }
-          for (var key in message) {
-            if (hasOwnProperty(message, key))
-              this.receiveOutput(key, message[key]);
+          for (var _key in message) {
+            if (hasOwnProperty(message, _key))
+              this.receiveOutput(_key, message[_key]);
           }
         });
         addMessageHandler("errors", function(message) {
-          for (var key in message) {
-            if (hasOwnProperty(message, key))
-              this.receiveError(key, message[key]);
+          for (var _key2 in message) {
+            if (hasOwnProperty(message, _key2))
+              this.receiveError(_key2, message[_key2]);
           }
         });
         addMessageHandler("inputMessages", function(message) {

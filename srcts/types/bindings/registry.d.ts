@@ -9,7 +9,9 @@ interface BindingObj<Binding> {
 declare class BindingRegistry<Binding extends BindingBase> {
     name: string;
     bindings: Array<BindingObj<Binding>>;
-    bindingNames: Record<string, BindingObj<Binding>>;
+    bindingNames: {
+        [key: string]: BindingObj<Binding>;
+    };
     register(binding: Binding, bindingName: string, priority?: number): void;
     setPriority(bindingName: string, priority: number): void;
     getPriority(bindingName: string): number | false;

@@ -66,8 +66,8 @@ function findDims($el: JQuery<HTMLElement>) {
   };
 }
 
-type OffsetCss = Record<string, number>;
-type OffsetImg = Record<string, number>;
+type OffsetCss = { [key: string]: number };
+type OffsetImg = { [key: string]: number };
 
 type Coords = {
   // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -220,9 +220,9 @@ function initCoordmap(
   function scaleImgToCss(offsetImg: Bounds): Bounds;
   function scaleImgToCss(offsetImg: Offset): Offset;
   function scaleImgToCss(offsetImg: OffsetImg): OffsetCss;
-  function scaleImgToCss(
-    offsetImg: Record<string, number>
-  ): Record<string, number> {
+  function scaleImgToCss(offsetImg: { [key: string]: number }): {
+    [key: string]: number;
+  } {
     const pixelScaling = coordmap.imgToCssScalingRatio();
 
     const result = mapValues(offsetImg, (value, key) => {

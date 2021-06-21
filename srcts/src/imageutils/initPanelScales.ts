@@ -69,17 +69,17 @@ type Panel = {
     x?: number;
     y?: number;
   };
-  mapping: Record<string, string>;
+  mapping: { [key: string]: string };
   // eslint-disable-next-line @typescript-eslint/naming-convention
-  panel_vars?: Record<string, number | string>;
+  panel_vars?: { [key: string]: number | string };
 
   scaleDataToImg?: (
-    val: Record<string, number>,
+    val: { [key: string]: number },
     clip?: boolean
-  ) => Record<string, number>;
+  ) => { [key: string]: number };
   scaleImgToData?: {
     (val: Offset, clip?: boolean): Offset;
-    (val: Record<string, number>, clip?: boolean): Record<string, number>;
+    (val: { [key: string]: number }, clip?: boolean): { [key: string]: number };
   };
 
   clipImg?: (offsetImg: { x: number; y: number }) => { x: number; y: number };
@@ -112,7 +112,7 @@ function addScaleFuns(panel: Panel) {
   };
 
   function scaleImgToData(val: Offset, clip?: boolean);
-  function scaleImgToData(val: Record<string, number>, clip?: boolean) {
+  function scaleImgToData(val: { [key: string]: number }, clip?: boolean) {
     return mapValues(val, (value, key) => {
       const prefix = key.substring(0, 1);
 

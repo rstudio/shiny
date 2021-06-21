@@ -45,13 +45,12 @@ type BindInputsCtx = {
 function bindInputs(
   shinyCtx: BindInputsCtx,
   scope: BindScope = document.documentElement
-): Record<
-  string,
-  {
+): {
+  [key: string]: {
     value: unknown;
     opts: { immediate: boolean; binding: InputBinding; el: HTMLElement };
-  }
-> {
+  };
+} {
   const { inputs, inputsRate, inputBindings } = shinyCtx;
   const bindings = inputBindings.getBindings();
 
@@ -272,7 +271,7 @@ function bindAll(shinyCtx: BindInputsCtx, scope: BindScope): void {
 
   const inputs = shinyCtx.inputs;
 
-  $.each(currentInputItems, function (name, item) {
+  $.each(currentInputItems, function (name: string, item) {
     inputs.setInput(name, item.value, item.opts);
   });
 

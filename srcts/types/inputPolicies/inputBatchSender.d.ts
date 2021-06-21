@@ -5,7 +5,9 @@ import type { ShinyApp } from "../shiny/shinyapp";
 declare class InputBatchSender extends InputPolicy {
     shinyapp: ShinyApp;
     timerId: NodeJS.Timeout;
-    pendingData: Record<string, unknown>;
+    pendingData: {
+        [key: string]: unknown;
+    };
     reentrant: boolean;
     lastChanceCallback: Array<() => void>;
     constructor(shinyapp: ShinyApp);

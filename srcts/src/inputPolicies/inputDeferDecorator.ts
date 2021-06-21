@@ -3,10 +3,9 @@ import { InputPolicy } from "./inputPolicy";
 import { hasOwnProperty } from "../utils";
 
 class InputDeferDecorator extends InputPolicy {
-  pendingInput: Record<
-    string,
-    { value: unknown; opts: { priority: EventPriority } }
-  > = {};
+  pendingInput: {
+    [key: string]: { value: unknown; opts: { priority: EventPriority } };
+  } = {};
   constructor(target: InputPolicy) {
     super();
     this.target = target;

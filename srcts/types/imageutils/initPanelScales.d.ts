@@ -16,12 +16,24 @@ declare type Panel = {
         x?: number;
         y?: number;
     };
-    mapping: Record<string, string>;
-    panel_vars?: Record<string, number | string>;
-    scaleDataToImg?: (val: Record<string, number>, clip?: boolean) => Record<string, number>;
+    mapping: {
+        [key: string]: string;
+    };
+    panel_vars?: {
+        [key: string]: number | string;
+    };
+    scaleDataToImg?: (val: {
+        [key: string]: number;
+    }, clip?: boolean) => {
+        [key: string]: number;
+    };
     scaleImgToData?: {
         (val: Offset, clip?: boolean): Offset;
-        (val: Record<string, number>, clip?: boolean): Record<string, number>;
+        (val: {
+            [key: string]: number;
+        }, clip?: boolean): {
+            [key: string]: number;
+        };
     };
     clipImg?: (offsetImg: {
         x: number;

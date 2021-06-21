@@ -1,2 +1,4 @@
-declare function hasOwnProperty(x: Record<string, unknown>, y: string): boolean;
+declare function hasOwnProperty(x: {
+    [key: string]: unknown;
+}, y: string): boolean;
 export { hasOwnProperty };

@@ -3,7 +3,7 @@ import { InputPolicy } from "./inputPolicy";
 import { hasOwnProperty } from "../utils";
 import { splitInputNameType } from "./splitInputNameType";
 
-type LastSentValues = Record<string, Record<string, string>>;
+type LastSentValues = { [key: string]: { [key: string]: string } };
 
 class InputNoResendDecorator extends InputPolicy {
   lastSentValues: LastSentValues;

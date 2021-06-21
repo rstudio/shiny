@@ -6,7 +6,9 @@ declare class ImageOutputBinding extends OutputBinding {
     renderValue(el: HTMLElement, data: {
         coordmap: CoordmapInit;
         error?: string;
-    } & Record<string, string>): void;
+    } & {
+        [key: string]: string;
+    }): void;
     renderError(el: HTMLElement, err: ErrorsMessageValue): void;
     clearError(el: HTMLElement): void;
     resize(el: HTMLElement, width: string | number, height: string | number): void;

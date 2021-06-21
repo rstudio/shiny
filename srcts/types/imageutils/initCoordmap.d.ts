@@ -3,8 +3,12 @@ import type { Offset } from "./findbox";
 import type { Bounds } from "./createBrush";
 import type { Panel } from "./initPanelScales";
 declare function findOrigin($el: JQuery<HTMLElement>): Offset;
-declare type OffsetCss = Record<string, number>;
-declare type OffsetImg = Record<string, number>;
+declare type OffsetCss = {
+    [key: string]: number;
+};
+declare type OffsetImg = {
+    [key: string]: number;
+};
 declare type CoordmapInit = {
     panels: Panel[];
     dims: {

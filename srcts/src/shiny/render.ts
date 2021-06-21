@@ -78,10 +78,9 @@ function renderHtml(
   return singletonsRenderHtml(html, el, where);
 }
 
-type HtmlDepName = string;
 type HtmlDepVersion = string;
 type HtmlDep = {
-  name: HtmlDepName;
+  name: string;
   version: HtmlDepVersion;
   restyle?: boolean;
   src?: { href: string };
@@ -90,14 +89,14 @@ type HtmlDep = {
   script?:
     | string
     | string[]
-    | Record<string, string>
-    | Array<Record<string, string>>;
-  attachment?: string | string[] | Record<string, string>;
+    | { [key: string]: string }
+    | Array<{ [key: string]: string }>;
+  attachment?: string | string[] | { [key: string]: string };
   head?: string;
 };
-const htmlDependencies: Record<HtmlDepName, HtmlDepVersion> = {};
+const htmlDependencies: { [key: string]: HtmlDepVersion } = {};
 
-function registerDependency(name: HtmlDepName, version: HtmlDepVersion): void {
+function registerDependency(name: string, version: HtmlDepVersion): void {
   htmlDependencies[name] = version;
 }
 

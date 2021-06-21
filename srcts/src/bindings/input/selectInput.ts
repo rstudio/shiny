@@ -222,7 +222,7 @@ class SelectInputBinding extends InputBinding {
       searchField: ["label"];
       onItemRemove?: (value: string) => void;
       onDropdownClose?: () => void;
-    } & Record<string, unknown> = $.extend(
+    } & { [key: string]: unknown } = $.extend(
       {
         labelField: "label",
         valueField: "value",

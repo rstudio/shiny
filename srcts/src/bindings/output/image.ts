@@ -28,7 +28,7 @@ class ImageOutputBinding extends OutputBinding {
     data: {
       coordmap: CoordmapInit;
       error?: string;
-    } & Record<string, string>
+    } & { [key: string]: string }
   ): void {
     // The overall strategy:
     // * Clear out existing image and event handlers.
@@ -111,7 +111,7 @@ class ImageOutputBinding extends OutputBinding {
     }
 
     // Copy items from data to img. Don't set the coordmap as an attribute.
-    $.each(data, function (key, value) {
+    $.each(data, function (key: string, value) {
       if (value === null || key === "coordmap") {
         return;
       }

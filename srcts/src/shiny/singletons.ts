@@ -5,7 +5,7 @@ import type { BindScope } from "./bind";
 const reSingleton = /<!--(SHINY.SINGLETON\[([\w]+)\])-->([\s\S]*?)<!--\/\1-->/;
 const reHead = /<head(?:\s[^>]*)?>([\s\S]*?)<\/head>/;
 
-const knownSingletons: Record<string, boolean> = {};
+const knownSingletons: { [key: string]: boolean } = {};
 
 type WherePosition =
   | "replace"

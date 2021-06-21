@@ -233,10 +233,10 @@ const $escape = function (val: string): string {
 // Maps a function over an object, preserving keys. Like the mapValues
 // function from lodash.
 function mapValues<V, R>(
-  obj: Record<string, V>,
-  f: (value: V, key: string, obj: Record<string, V>) => R
-): Record<string, R> {
-  const newObj: Record<string, R> = {};
+  obj: { [key: string]: V },
+  f: (value: V, key: string, obj: { [key: string]: V }) => R
+): { [key: string]: R } {
+  const newObj: { [key: string]: R } = {};
 
   for (const key in obj) {
     if (hasOwnProperty(obj, key)) newObj[key] = f(obj[key], key, obj);
@@ -255,8 +255,8 @@ function isnan(x: unknown): boolean {
 // eslint-disable-next-line @typescript-eslint/naming-convention
 function _equal(x: unknown, y: unknown): boolean {
   if ($.type(x) === "object" && $.type(y) === "object") {
-    const xo = x as Record<string, unknown>;
-    const yo = y as Record<string, unknown>;
+    const xo = x as { [key: string]: unknown };
+    const yo = y as { [key: string]: unknown };
 
     if (Object.keys(xo).length !== Object.keys(yo).length) return false;
     for (const prop in xo) {

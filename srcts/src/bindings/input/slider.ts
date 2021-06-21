@@ -24,7 +24,7 @@ type LegacySlider = {
 
 type SliderReceiveMessageData = {
   label: string;
-  value?: Array<string | number> | string | number;
+  value?: Array<number | string> | number | string;
   min?: number;
   max?: number;
   step?: number;
@@ -34,10 +34,10 @@ type SliderReceiveMessageData = {
 // and could be needed after shiny has initialized.
 declare global {
   interface Window {
-    strftime: {
+    strftime: TimeFormatter & {
       utc: () => TimeFormatter;
       timezone: (timezone: string) => TimeFormatter;
-    } & TimeFormatter;
+    };
   }
 }
 
@@ -174,8 +174,8 @@ class SliderInputBinding extends TextInputBindingBase {
     const $el = $(el);
     const slider = $el.data("ionRangeSlider");
     const msg: {
-      from?: string | number;
-      to?: string | number;
+      from?: number | string;
+      to?: number | string;
       min?: number;
       max?: number;
       step?: number;
@@ -187,7 +187,7 @@ class SliderInputBinding extends TextInputBindingBase {
         msg.from = data.value[0];
         msg.to = data.value[1];
       } else {
-        msg.from = data.value as string | number;
+        msg.from = data.value as number | string;
       }
     }
 

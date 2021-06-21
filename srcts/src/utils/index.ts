@@ -85,7 +85,7 @@ function parseDate(dateString: string): Date {
 
 // Given a Date object, return a string in yyyy-mm-dd format, using the
 // UTC date. This may be a day off from the date in the local time zone.
-function formatDateUTC(date: Date | null): null | string {
+function formatDateUTC(date: Date | null): string | null {
   if (date instanceof Date) {
     return (
       date.getUTCFullYear() +
@@ -294,7 +294,7 @@ function equal(...args: unknown[]): boolean {
 // "==" or "<".
 const compareVersion = function (
   a: string,
-  op: "==" | ">=" | ">" | "<=" | "<",
+  op: "<" | "<=" | "==" | ">" | ">=",
   b: string
 ): boolean {
   function versionParts(ver) {
@@ -330,7 +330,7 @@ const compareVersion = function (
 };
 
 function updateLabel(
-  labelTxt: undefined | string,
+  labelTxt: string | undefined,
   labelNode: JQuery<HTMLElement>
 ): void {
   // Only update if label was specified in the update method

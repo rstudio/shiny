@@ -17,18 +17,18 @@ class DatatableOutputBinding extends OutputBinding {
   }
   renderValue(
     el: HTMLElement,
-    data: null | {
+    data: {
       colnames?: string[];
-      options?: null | {
+      options?: {
         searching?: boolean;
         search?: { caseInsensitive?: boolean };
-      };
+      } | null;
       action?: string;
       escape?: string;
       evalOptions?: string[];
       callback?: string;
       searchDelay?: number;
-    }
+    } | null
   ): void {
     const $el = $(el).empty();
 

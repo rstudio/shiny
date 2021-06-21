@@ -12,7 +12,7 @@ import { sendImageSizeFns } from "./sendImageSize";
 import { renderHtml as singletonsRenderHtml } from "./singletons";
 import type { WherePosition } from "./singletons";
 
-function renderDependencies(dependencies: null | HtmlDep[]): void {
+function renderDependencies(dependencies: HtmlDep[] | null): void {
   if (dependencies) {
     $.each(dependencies, function (i, dep) {
       renderDependency(dep);
@@ -25,7 +25,7 @@ function renderDependencies(dependencies: null | HtmlDep[]): void {
 // properties 'html' and 'deps'.
 function renderContent(
   el: BindScope,
-  content: null | string | { html: string; deps?: HtmlDep[] },
+  content: string | { html: string; deps?: HtmlDep[] } | null,
   where: WherePosition = "replace"
 ): void {
   if (where === "replace") {
@@ -84,14 +84,14 @@ type HtmlDep = {
   version: HtmlDepVersion;
   restyle?: boolean;
   src?: { href: string };
-  meta?: string | string[];
-  stylesheet?: string | string[];
+  meta?: string[] | string;
+  stylesheet?: string[] | string;
   script?:
-    | string
+    | Array<{ [key: string]: string }>
     | string[]
-    | { [key: string]: string }
-    | Array<{ [key: string]: string }>;
-  attachment?: string | string[] | { [key: string]: string };
+    | string
+    | { [key: string]: string };
+  attachment?: string[] | string | { [key: string]: string };
   head?: string;
 };
 const htmlDependencies: { [key: string]: HtmlDepVersion } = {};

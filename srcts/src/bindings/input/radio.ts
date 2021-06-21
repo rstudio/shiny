@@ -47,7 +47,7 @@ class RadioInputBinding extends InputBinding {
   find(scope: HTMLElement): JQuery<HTMLElement> {
     return $(scope).find(".shiny-input-radiogroup");
   }
-  getValue(el: RadioHTMLElement): string | number | string[] | null {
+  getValue(el: RadioHTMLElement): string[] | number | string | null {
     // Select the radio objects that have name equal to the grouping div's id
     const checkedItems = $(
       'input:radio[name="' + $escape(el.id) + '"]:checked'
@@ -77,7 +77,7 @@ class RadioInputBinding extends InputBinding {
   }
   getState(el: RadioHTMLElement): {
     label: string;
-    value: string | number | string[];
+    value: string[] | number | string;
     options: ValueLabelObject[];
   } {
     const $objs = $(

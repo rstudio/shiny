@@ -68,6 +68,9 @@ rules:
     - error
     - index-signature
 
+  "@typescript-eslint/sort-type-union-intersection-members":
+    - error
+
   "@typescript-eslint/consistent-type-imports":
     - error
   "@typescript-eslint/naming-convention":

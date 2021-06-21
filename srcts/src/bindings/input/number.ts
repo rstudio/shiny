@@ -23,7 +23,7 @@ class NumberInputBinding extends TextInputBindingBase {
     return $(scope).find('input[type="number"]');
   }
 
-  getValue(el: NumberHTMLElement): string | number | string[] {
+  getValue(el: NumberHTMLElement): string[] | number | string {
     const numberVal = $(el).val();
 
     if (typeof numberVal == "string") {

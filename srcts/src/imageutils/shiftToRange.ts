@@ -3,7 +3,7 @@
 // range in vals is larger than the range of min and max, the result might not
 // make sense.
 function shiftToRange(
-  vals: number | number[],
+  vals: number[] | number,
   min: number,
   max: number
 ): number[] {

@@ -72,7 +72,7 @@ function createClickHandler(
 function createHoverHandler(
   inputId: InputId,
   delay: number,
-  delayType: "throttle" | string,
+  delayType: string | "throttle",
   clip: Clip,
   nullOutside: NullOutside,
   coordmap: Coordmap
@@ -83,7 +83,7 @@ function createHoverHandler(
     nullOutside
   );
 
-  let hoverInfoSender: Throttler | Debouncer;
+  let hoverInfoSender: Debouncer | Throttler;
 
   if (delayType === "throttle")
     hoverInfoSender = new Throttler(null, sendHoverInfo, delay);

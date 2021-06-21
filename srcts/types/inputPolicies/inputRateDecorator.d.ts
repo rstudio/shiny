@@ -1,6 +1,6 @@
 import type { EventPriority } from "./inputPolicy";
 import { InputPolicy } from "./inputPolicy";
-declare type RatePolicyModes = "direct" | "debounce" | "throttle";
+declare type RatePolicyModes = "debounce" | "direct" | "throttle";
 declare class InputRateDecorator extends InputPolicy {
     inputRatePolicies: {};
     constructor(target: InputPolicy);

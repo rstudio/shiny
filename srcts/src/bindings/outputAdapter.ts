@@ -5,8 +5,8 @@ import type { OutputBinding } from "./output";
 interface OutpuBindingWithResize extends OutputBinding {
   resize?: (
     el: HTMLElement,
-    width: string | number,
-    height: string | number
+    width: number | string,
+    height: number | string
   ) => void;
 }
 

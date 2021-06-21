@@ -17,11 +17,11 @@ declare class SelectInputBinding extends InputBinding {
     find(scope: HTMLElement): JQuery<HTMLElement>;
     getType(el: HTMLElement): string;
     getId(el: SelectHTMLElement): string;
-    getValue(el: HTMLElement): string | number | string[];
+    getValue(el: HTMLElement): string[] | number | string;
     setValue(el: SelectHTMLElement, value: string): void;
     getState(el: SelectHTMLElement): {
         label: JQuery<HTMLElement>;
-        value: string | number | string[];
+        value: string[] | number | string;
         options: Array<{
             value: string;
             label: string;

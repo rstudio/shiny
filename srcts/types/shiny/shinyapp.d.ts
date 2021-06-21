@@ -1,9 +1,9 @@
 import type { OutputBindingAdapter } from "../bindings/outputAdapter";
 import type { UploadInitValue, UploadEndValue } from "../file/fileProcessor";
-declare type ResponseValue = UploadInitValue | UploadEndValue;
-declare type Handler = (msg: {
+declare type ResponseValue = UploadEndValue | UploadInitValue;
+declare type Handler = (msg: unknown[] | boolean | string | {
     [key: string]: unknown;
-} | unknown[] | boolean | string) => void;
+}) => void;
 declare type ShinyWebSocket = WebSocket & {
     allowReconnect?: boolean;
 };
@@ -59,7 +59,7 @@ declare class ShinyApp {
     };
     onDisconnected(): void;
     onConnected(): void;
-    makeRequest(method: string, args: unknown[], onSuccess: OnSuccessRequest, onError: OnErrorRequest, blobs: Array<Blob | ArrayBuffer | string>): void;
+    makeRequest(method: string, args: unknown[], onSuccess: OnSuccessRequest, onError: OnErrorRequest, blobs: Array<ArrayBuffer | Blob | string>): void;
     $sendMsg(msg: string): void;
     receiveError(name: string, error: ErrorsMessageValue): void;
     receiveOutput<T>(name: string, value: T): T;
@@ -68,7 +68,7 @@ declare class ShinyApp {
     private _narrowScopeComponent;
     private _narrowScope;
     $updateConditionals(): void;
-    dispatchMessage(data: string | ArrayBufferLike): void;
+    dispatchMessage(data: ArrayBufferLike | string): void;
     private _init;
     progressHandlers: {
         binding: (message: {

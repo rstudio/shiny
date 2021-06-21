@@ -3,7 +3,7 @@ import { InputPolicy } from "./inputPolicy";
 import { Debouncer, Invoker, Throttler } from "../time";
 import { splitInputNameType } from "./splitInputNameType";
 
-type RatePolicyModes = "direct" | "debounce" | "throttle";
+type RatePolicyModes = "debounce" | "direct" | "throttle";
 class InputRateDecorator extends InputPolicy {
   inputRatePolicies = {};
 

@@ -58,7 +58,7 @@ class SelectInputBinding extends InputBinding {
   getId(el: SelectHTMLElement): string {
     return InputBinding.prototype.getId.call(this, el) || el.name;
   }
-  getValue(el: HTMLElement): string | number | string[] {
+  getValue(el: HTMLElement): string[] | number | string {
     return $(el).val();
   }
   setValue(el: SelectHTMLElement, value: string): void {
@@ -74,7 +74,7 @@ class SelectInputBinding extends InputBinding {
   }
   getState(el: SelectHTMLElement): {
     label: JQuery<HTMLElement>;
-    value: string | number | string[];
+    value: string[] | number | string;
     options: Array<{ value: string; label: string }>;
   } {
     // Store options in an array of objects, each with with value and label

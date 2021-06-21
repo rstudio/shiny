@@ -11,7 +11,7 @@ declare class ImageOutputBinding extends OutputBinding {
     }): void;
     renderError(el: HTMLElement, err: ErrorsMessageValue): void;
     clearError(el: HTMLElement): void;
-    resize(el: HTMLElement, width: string | number, height: string | number): void;
+    resize(el: HTMLElement, width: number | string, height: number | string): void;
 }
 declare const imageOutputBinding: ImageOutputBinding;
 export { imageOutputBinding, ImageOutputBinding };

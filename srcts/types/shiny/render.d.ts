@@ -1,11 +1,11 @@
 import type { BindScope } from "./bind";
 import { renderHtml as singletonsRenderHtml } from "./singletons";
 import type { WherePosition } from "./singletons";
-declare function renderDependencies(dependencies: null | HtmlDep[]): void;
-declare function renderContent(el: BindScope, content: null | string | {
+declare function renderDependencies(dependencies: HtmlDep[] | null): void;
+declare function renderContent(el: BindScope, content: string | {
     html: string;
     deps?: HtmlDep[];
-}, where?: WherePosition): void;
+} | null, where?: WherePosition): void;
 declare function renderHtml(html: string, el: BindScope, dependencies: HtmlDep[], where?: WherePosition): ReturnType<typeof singletonsRenderHtml>;
 declare type HtmlDepVersion = string;
 declare type HtmlDep = {
@@ -15,14 +15,14 @@ declare type HtmlDep = {
     src?: {
         href: string;
     };
-    meta?: string | string[];
-    stylesheet?: string | string[];
-    script?: string | string[] | {
+    meta?: string[] | string;
+    stylesheet?: string[] | string;
+    script?: Array<{
         [key: string]: string;
-    } | Array<{
+    }> | string[] | string | {
         [key: string]: string;
-    }>;
-    attachment?: string | string[] | {
+    };
+    attachment?: string[] | string | {
         [key: string]: string;
     };
     head?: string;

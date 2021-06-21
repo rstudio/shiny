@@ -8,11 +8,11 @@ const reHead = /<head(?:\s[^>]*)?>([\s\S]*?)<\/head>/;
 const knownSingletons: { [key: string]: boolean } = {};
 
 type WherePosition =
-  | "replace"
   | "afterBegin"
-  | "beforeBegin"
   | "afterEnd"
-  | "beforeEnd";
+  | "beforeBegin"
+  | "beforeEnd"
+  | "replace";
 
 function renderHtml(
   html: string,
@@ -46,7 +46,7 @@ function register(s) {
   $.extend(knownSingletons, s);
 }
 // Takes a string or array of strings and adds them to knownSingletons
-function registerNames(s: string | string[]): void {
+function registerNames(s: string[] | string): void {
   if (typeof s === "string") {
     knownSingletons[s] = true;
   } else if (s instanceof Array) {

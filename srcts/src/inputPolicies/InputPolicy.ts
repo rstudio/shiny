@@ -1,4 +1,4 @@
-type EventPriority = "immediate" | "deferred" | "event";
+type EventPriority = "deferred" | "event" | "immediate";
 
 // Schedules data to be sent to shinyapp at the next setTimeout(0).
 // Batches multiple input calls into one websocket message.

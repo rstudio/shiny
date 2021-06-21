@@ -11,11 +11,11 @@ declare type RadioReceiveMessageData = {
 };
 declare class RadioInputBinding extends InputBinding {
     find(scope: HTMLElement): JQuery<HTMLElement>;
-    getValue(el: RadioHTMLElement): string | number | string[] | null;
+    getValue(el: RadioHTMLElement): string[] | number | string | null;
     setValue(el: RadioHTMLElement, value: string): void;
     getState(el: RadioHTMLElement): {
         label: string;
-        value: string | number | string[];
+        value: string[] | number | string;
         options: ValueLabelObject[];
     };
     receiveMessage(el: RadioHTMLElement, data: RadioReceiveMessageData): void;

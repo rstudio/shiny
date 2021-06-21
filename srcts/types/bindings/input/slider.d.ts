@@ -3,17 +3,17 @@ import { TextInputBindingBase } from "./text";
 declare type TimeFormatter = (fmt: string, dt: Date) => string;
 declare type SliderReceiveMessageData = {
     label: string;
-    value?: Array<string | number> | string | number;
+    value?: Array<number | string> | number | string;
     min?: number;
     max?: number;
     step?: number;
 };
 declare global {
     interface Window {
-        strftime: {
+        strftime: TimeFormatter & {
             utc: () => TimeFormatter;
             timezone: (timezone: string) => TimeFormatter;
-        } & TimeFormatter;
+        };
     }
 }
 declare class SliderInputBinding extends TextInputBindingBase {

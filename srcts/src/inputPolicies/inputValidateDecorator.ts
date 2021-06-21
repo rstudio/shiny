@@ -8,7 +8,7 @@ type MaybeInputOpts = {
 };
 
 // Merge opts with defaults, and return a new object.
-function addDefaultInputOpts<T>(opts?: T & MaybeInputOpts): T & {
+function addDefaultInputOpts<T>(opts?: MaybeInputOpts & T): T & {
   priority: EventPriority;
   binding: unknown;
   el?: HTMLElement;
@@ -48,7 +48,7 @@ class InputValidateDecorator {
   setInput = function <T>(
     nameType: string,
     value: unknown,
-    opts?: T & MaybeInputOpts
+    opts?: MaybeInputOpts & T
   ): void {
     if (!nameType) throw "Can't set input with empty name.";
 

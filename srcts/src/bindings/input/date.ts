@@ -17,7 +17,7 @@ declare global {
     bsDatepicker(methodName: "getStartDate"): Date | -1e9999;
     bsDatepicker(methodName: "getEndDate"): Date | 1e9999;
     bsDatepicker(methodName: string): void;
-    bsDatepicker(methodName: string, params: null | Date): void;
+    bsDatepicker(methodName: string, params: Date | null): void;
   }
 }
 
@@ -122,7 +122,7 @@ class DateInputBindingBase extends InputBinding {
   }
   // Given an unambiguous date string or a Date object, set the min (start) date.
   // null will unset. undefined will result in no change,
-  protected _setMin(el: HTMLElement, date: Date | undefined | null): void {
+  protected _setMin(el: HTMLElement, date: Date | null | undefined): void {
     if (date === undefined) return;
     if (date === null) {
       $(el).bsDatepicker("setStartDate", null);
@@ -192,7 +192,7 @@ class DateInputBindingBase extends InputBinding {
   // Given a date string of format yyyy-mm-dd, return a Date object with
   // that date at 12AM UTC.
   // If date is a Date object, return it unchanged.
-  protected _newDate(date: Date | string | never): Date | null {
+  protected _newDate(date: Date | never | string): Date | null {
     if (date instanceof Date) return date;
     if (!date) return null;
 
@@ -257,7 +257,7 @@ class DateInputBinding extends DateInputBindingBase {
   getState(el: HTMLElement): {
     label: string;
     value: string | null;
-    valueString: string | number | string[];
+    valueString: string[] | number | string;
     min: string | null;
     max: string | null;
     language: string | null;

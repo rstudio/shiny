@@ -32,9 +32,9 @@ import { indirectEval } from "../utils/eval";
 import type { WherePosition } from "./singletons";
 import type { UploadInitValue, UploadEndValue } from "../file/fileProcessor";
 
-type ResponseValue = UploadInitValue | UploadEndValue;
+type ResponseValue = UploadEndValue | UploadInitValue;
 type Handler = (
-  msg: { [key: string]: unknown } | unknown[] | boolean | string
+  msg: unknown[] | boolean | string | { [key: string]: unknown }
 ) => void;
 
 type ShinyWebSocket = WebSocket & {
@@ -392,7 +392,7 @@ class ShinyApp {
     args: unknown[],
     onSuccess: OnSuccessRequest,
     onError: OnErrorRequest,
-    blobs: Array<Blob | ArrayBuffer | string>
+    blobs: Array<ArrayBuffer | Blob | string>
   ): void {
     let requestId = this.$nextRequestId;
 
@@ -613,7 +613,7 @@ class ShinyApp {
   // // Added in shiny init method
   // Shiny.addCustomMessageHandler = addCustomMessageHandler;
 
-  dispatchMessage(data: string | ArrayBufferLike): void {
+  dispatchMessage(data: ArrayBufferLike | string): void {
     let msgObj: ShinyEventMessage["message"] = {};
 
     if (typeof data === "string") {
@@ -721,8 +721,8 @@ class ShinyApp {
       "notification",
       function (
         message:
-          | { type: "show"; message: Parameters<typeof showNotification>[0] }
           | { type: "remove"; message: string }
+          | { type: "show"; message: Parameters<typeof showNotification>[0] }
           | { type: void }
       ) {
         if (message.type === "show") showNotification(message.message);
@@ -735,8 +735,8 @@ class ShinyApp {
       "modal",
       function (
         message:
-          | { type: "show"; message: Parameters<typeof showModal>[0] }
           | { type: "remove"; message: string }
+          | { type: "show"; message: Parameters<typeof showModal>[0] }
           | { type: void }
       ) {
         if (message.type === "show") showModal(message.message);
@@ -766,7 +766,7 @@ class ShinyApp {
 
     addMessageHandler(
       "allowReconnect",
-      function (message: true | false | "force") {
+      function (message: "force" | false | true) {
         switch (message) {
           case true:
           case false:
@@ -824,7 +824,7 @@ class ShinyApp {
       "recalculating",
       function (message: {
         name?: string;
-        status?: "recalculating" | "recalculated";
+        status?: "recalculated" | "recalculating";
       }) {
         if (
           hasOwnProperty(message, "name") &&
@@ -971,7 +971,7 @@ class ShinyApp {
         divTag: { html: string; deps: HtmlDep[] };
         liTag: { html: string; deps: HtmlDep[] };
         target?: string;
-        position: "before" | "after" | void;
+        position: "after" | "before" | void;
         select: boolean;
         menuName: string;
       }) {
@@ -1243,7 +1243,7 @@ class ShinyApp {
       function (message: {
         inputId: string;
         target: string;
-        type: "show" | "hide" | null;
+        type: "hide" | "show" | null;
       }) {
         const $tabset = getTabset(message.inputId);
         const $tabContent = getTabContent($tabset);
@@ -1265,7 +1265,7 @@ class ShinyApp {
 
     addMessageHandler(
       "updateQueryString",
-      function (message: { mode: "replace" | unknown; queryString: string }) {
+      function (message: { mode: unknown | "replace"; queryString: string }) {
         // leave the bookmarking code intact
         if (message.mode === "replace") {
           window.history.replaceState(null, null, message.queryString);

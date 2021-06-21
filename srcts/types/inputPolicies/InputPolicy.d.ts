@@ -1,4 +1,4 @@
-declare type EventPriority = "immediate" | "deferred" | "event";
+declare type EventPriority = "deferred" | "event" | "immediate";
 declare class InputPolicy {
     target: InputPolicy;
     setInput(name: string, value: unknown, opts: {

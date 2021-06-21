@@ -16,7 +16,7 @@ declare function shinyUnbindAll(scope: BindScope, includeSelf?: boolean): void;
 declare function shinyInitializeInputs(scope: BindScope): void;
 declare function shinyAppBindOutput(id: string, binding: OutputBindingAdapter): void;
 declare function shinyAppUnbindOutput(id: string, binding: OutputBindingAdapter): boolean;
-declare function getShinyOnCustomMessage(): null | Handler;
+declare function getShinyOnCustomMessage(): Handler | null;
 declare function getFileInputBinding(): FileInputBinding;
 declare function setFileInputBinding(fileInputBinding_: FileInputBinding): void;
 declare function getShinyCreateWebsocket(): (() => WebSocket) | void;

@@ -53,7 +53,7 @@ function shinyAppUnbindOutput(
   return fullShinyObj.shinyapp.unbindOutput(id, binding);
 }
 
-function getShinyOnCustomMessage(): null | Handler {
+function getShinyOnCustomMessage(): Handler | null {
   return fullShinyObj.oncustommessage;
 }
 

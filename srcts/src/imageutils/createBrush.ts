@@ -45,12 +45,12 @@ type ImageState = {
 };
 
 type BrushOpts = {
-  brushDirection: "x" | "y" | "xy";
+  brushDirection: "x" | "xy" | "y";
   brushClip: boolean;
   brushFill: string;
   brushOpacity: string;
   brushStroke: string;
-  brushDelayType?: "throttle" | "debounce";
+  brushDelayType?: "debounce" | "throttle";
   brushDelay?: number;
   brushResetOnNew?: boolean;
 };

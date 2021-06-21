@@ -32,7 +32,7 @@ declare type InputId = Parameters<Coordmap["mouseCoordinateSender"]>[0];
 declare type Clip = Parameters<Coordmap["mouseCoordinateSender"]>[1];
 declare type NullOutside = Parameters<Coordmap["mouseCoordinateSender"]>[2];
 declare function createClickHandler(inputId: InputId, clip: Clip, coordmap: Coordmap): CreateHandler;
-declare function createHoverHandler(inputId: InputId, delay: number, delayType: "throttle" | string, clip: Clip, nullOutside: NullOutside, coordmap: Coordmap): CreateHandler;
+declare function createHoverHandler(inputId: InputId, delay: number, delayType: string | "throttle", clip: Clip, nullOutside: NullOutside, coordmap: Coordmap): CreateHandler;
 declare function createBrushHandler(inputId: InputId, $el: JQuery<HTMLElement>, opts: BrushOpts, coordmap: Coordmap, outputId: BrushInfo["outputId"]): CreateHandler;
 export { createClickHandler, createHoverHandler, createBrushHandler };
 export type { BrushInfo };

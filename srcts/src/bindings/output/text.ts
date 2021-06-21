@@ -1,5 +1,5 @@
 import $ from "jquery";
-import { OutputBinding } from "./OutputBinding";
+import { OutputBinding } from "./outputBinding";
 
 class TextOutputBinding extends OutputBinding {
   find(scope: HTMLElement): JQuery<HTMLElement> {

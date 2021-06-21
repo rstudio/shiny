@@ -1,6 +1,6 @@
 import $ from "jquery";
 import type { InputBinding, OutputBinding } from "../bindings";
-import { OutputBindingAdapter } from "../bindings/output_adapter";
+import { OutputBindingAdapter } from "../bindings/outputAdapter";
 import type { BindingRegistry } from "../bindings/registry";
 import type {
   InputRateDecorator,

@@ -1,4 +1,4 @@
-import { OutputBinding } from "./OutputBinding";
+import { OutputBinding } from "./outputBinding";
 import type { CoordmapInit } from "../../imageutils/initCoordmap";
 import type { ErrorsMessageValue } from "../../shiny/shinyapp";
 declare class ImageOutputBinding extends OutputBinding {

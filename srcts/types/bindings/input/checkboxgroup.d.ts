@@ -1,4 +1,4 @@
-import { InputBinding } from "./InputBinding";
+import { InputBinding } from "./inputBinding";
 import type { CheckedHTMLElement } from "./checkbox";
 declare type CheckboxGroupHTMLElement = CheckedHTMLElement;
 declare type ValueLabelObject = {

@@ -1,5 +1,5 @@
 /// <reference types="node" />
-import type { EventPriority } from "./InputPolicy";
+import type { EventPriority } from "./inputPolicy";
 import { InputPolicy } from "./InputPolicy";
 import type { ShinyApp } from "../shiny/shinyapp";
 declare class InputBatchSender extends InputPolicy {

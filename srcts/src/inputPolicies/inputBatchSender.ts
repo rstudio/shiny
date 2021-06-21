@@ -1,6 +1,6 @@
 import $ from "jquery";
-import type { EventPriority } from "./InputPolicy";
-import { InputPolicy } from "./InputPolicy";
+import type { EventPriority } from "./inputPolicy";
+import { InputPolicy } from "./inputPolicy";
 import type { ShinyApp } from "../shiny/shinyapp";
 
 // Schedules data to be sent to shinyapp at the next setTimeout(0).

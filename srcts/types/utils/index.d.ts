@@ -1,5 +1,5 @@
 import { makeBlob } from "./blob";
-import { hasOwnProperty } from "./Object";
+import { hasOwnProperty } from "./object";
 declare function escapeHTML(str: string): string;
 declare function randomId(): string;
 declare function strToBool(str: string): boolean | undefined;

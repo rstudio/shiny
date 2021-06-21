@@ -20,7 +20,7 @@ import { renderContent, renderHtml } from "./render";
 import type { HtmlDep } from "./render";
 import { hideReconnectDialog, showReconnectDialog } from "./reconnectDialog";
 import { resetBrush } from "../imageutils/resetBrush";
-import type { OutputBindingAdapter } from "../bindings/output_adapter";
+import type { OutputBindingAdapter } from "../bindings/outputAdapter";
 import type {
   ShinyEventError,
   ShinyEventMessage,
@@ -30,7 +30,7 @@ import type {
 import type { InputBinding } from "../bindings";
 import { indirectEval } from "../utils/eval";
 import type { WherePosition } from "./singletons";
-import type { UploadInitValue, UploadEndValue } from "../file/FileProcessor";
+import type { UploadInitValue, UploadEndValue } from "../file/fileProcessor";
 
 type ResponseValue = UploadInitValue | UploadEndValue;
 type Handler = (

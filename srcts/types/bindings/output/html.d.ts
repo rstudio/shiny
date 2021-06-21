@@ -1,4 +1,4 @@
-import { OutputBinding } from "./OutputBinding";
+import { OutputBinding } from "./outputBinding";
 import { renderContent } from "../../shiny/render";
 import type { ErrorsMessageValue } from "../../shiny/shinyapp";
 declare class HtmlOutputBinding extends OutputBinding {

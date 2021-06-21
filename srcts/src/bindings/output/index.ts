@@ -5,7 +5,7 @@ import { DatatableOutputBinding } from "./datatable";
 import { HtmlOutputBinding } from "./html";
 import { imageOutputBinding } from "./image";
 
-import { OutputBinding } from "./OutputBinding";
+import { OutputBinding } from "./outputBinding";
 
 type InitOutputBindings = {
   outputBindings: BindingRegistry<OutputBinding>;

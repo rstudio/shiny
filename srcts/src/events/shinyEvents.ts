@@ -1,6 +1,6 @@
-import type { InputBinding } from "../bindings/input/InputBinding";
-import type { OutputBindingAdapter } from "../bindings/output_adapter";
-import type { EventPriority } from "../inputPolicies/InputPolicy";
+import type { InputBinding } from "../bindings/input/inputBinding";
+import type { OutputBindingAdapter } from "../bindings/outputAdapter";
+import type { EventPriority } from "../inputPolicies/inputPolicy";
 import type { ErrorsMessageValue } from "../shiny/shinyapp";
 
 interface ShinyEventCommon extends JQuery.Event {

@@ -1,6 +1,6 @@
 import type { Shiny } from ".";
 import type { FileInputBinding } from "../bindings/input/fileinput";
-import type { OutputBindingAdapter } from "../bindings/output_adapter";
+import type { OutputBindingAdapter } from "../bindings/outputAdapter";
 import type { EventPriority } from "../inputPolicies";
 import type { BindScope } from "./bind";
 import type { Handler, ShinyApp } from "./shinyapp";

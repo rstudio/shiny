@@ -1,4 +1,4 @@
-import { OutputBinding } from "./OutputBinding";
+import { OutputBinding } from "./outputBinding";
 import type { ErrorsMessageValue } from "../../shiny/shinyapp";
 declare class DatatableOutputBinding extends OutputBinding {
     find(scope: HTMLElement): JQuery<HTMLElement>;

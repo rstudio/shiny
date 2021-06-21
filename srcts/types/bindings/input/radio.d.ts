@@ -1,4 +1,4 @@
-import { InputBinding } from "./InputBinding";
+import { InputBinding } from "./inputBinding";
 declare type RadioHTMLElement = HTMLInputElement;
 declare type ValueLabelObject = {
     value: HTMLInputElement["value"];

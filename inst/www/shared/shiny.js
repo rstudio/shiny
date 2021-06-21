@@ -3373,7 +3373,7 @@
     }
   }
 
-  // srcts/src/utils/Object.ts
+  // srcts/src/utils/object.ts
   function hasOwnProperty(x, y) {
     return Object.prototype.hasOwnProperty.call(x, y);
   }
@@ -3714,7 +3714,7 @@
     return BindingRegistry2;
   }();
 
-  // srcts/src/bindings/input/InputBinding.ts
+  // srcts/src/bindings/input/inputBinding.ts
   function _classCallCheck2(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
       throw new TypeError("Cannot call a class as a function");
@@ -7236,11 +7236,11 @@
     }
   });
 
-  // srcts/src/file/FileProcessor.ts
+  // srcts/src/file/fileProcessor.ts
   var import_es_array_iterator14 = __toModule(require_es_array_iterator());
   var import_jquery20 = __toModule(require_jquery());
 
-  // srcts/src/events/shiny_inputchanged.ts
+  // srcts/src/events/inputChanged.ts
   var import_jquery19 = __toModule(require_jquery());
   function triggerFileInputChanged(name, value, binding, el, inputType, onEl) {
     var evt = import_jquery19.default.Event("shiny:inputchanged");
@@ -7300,7 +7300,7 @@
     return fullShinyObj.createSocket;
   }
 
-  // srcts/src/file/FileProcessor.ts
+  // srcts/src/file/fileProcessor.ts
   function _typeof14(obj) {
     "@babel/helpers - typeof";
     if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
@@ -7983,7 +7983,7 @@
     }
   });
 
-  // srcts/src/bindings/output/OutputBinding.ts
+  // srcts/src/bindings/output/outputBinding.ts
   var import_es_regexp_exec3 = __toModule(require_es_regexp_exec());
   var import_jquery22 = __toModule(require_jquery());
   function _classCallCheck18(instance, Constructor) {
@@ -10839,7 +10839,7 @@
   var import_es_array_iterator22 = __toModule(require_es_array_iterator());
   var import_jquery37 = __toModule(require_jquery());
 
-  // srcts/src/inputPolicies/InputPolicy.ts
+  // srcts/src/inputPolicies/inputPolicy.ts
   function _classCallCheck28(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
       throw new TypeError("Cannot call a class as a function");
@@ -11690,7 +11690,7 @@
   // srcts/src/shiny/bind.ts
   var import_jquery40 = __toModule(require_jquery());
 
-  // srcts/src/bindings/output_adapter.ts
+  // srcts/src/bindings/outputAdapter.ts
   function _classCallCheck35(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
       throw new TypeError("Cannot call a class as a function");

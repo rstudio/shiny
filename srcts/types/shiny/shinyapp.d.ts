@@ -1,5 +1,5 @@
-import type { OutputBindingAdapter } from "../bindings/output_adapter";
-import type { UploadInitValue, UploadEndValue } from "../file/FileProcessor";
+import type { OutputBindingAdapter } from "../bindings/outputAdapter";
+import type { UploadInitValue, UploadEndValue } from "../file/fileProcessor";
 declare type ResponseValue = UploadInitValue | UploadEndValue;
 declare type Handler = (msg: Record<string, unknown> | Array<unknown> | boolean | string) => void;
 declare type ShinyWebSocket = WebSocket & {

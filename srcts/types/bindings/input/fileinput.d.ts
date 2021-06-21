@@ -1,4 +1,4 @@
-import { InputBinding } from "./InputBinding";
+import { InputBinding } from "./inputBinding";
 declare class FileInputBinding extends InputBinding {
     find(scope: HTMLElement): JQuery<HTMLElement>;
     getId(el: HTMLInputElement): string;

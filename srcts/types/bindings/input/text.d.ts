@@ -1,4 +1,4 @@
-import { InputBinding } from "./InputBinding";
+import { InputBinding } from "./inputBinding";
 declare type TextHTMLElement = HTMLInputElement;
 declare type TextReceiveMessageData = {
     label: string;

@@ -1,5 +1,5 @@
-import type { EventPriority } from "./InputPolicy";
-import { InputPolicy } from "./InputPolicy";
+import type { EventPriority } from "./inputPolicy";
+import { InputPolicy } from "./inputPolicy";
 declare class InputDeferDecorator extends InputPolicy {
     pendingInput: Record<string, {
         value: unknown;

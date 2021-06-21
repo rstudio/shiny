@@ -1,5 +1,5 @@
 import $ from "jquery";
-import { triggerFileInputChanged } from "../events/shiny_inputchanged";
+import { triggerFileInputChanged } from "../events/inputChanged";
 import { $escape } from "../utils";
 import type { ShinyApp } from "../shiny/shinyapp";
 import { getFileInputBinding } from "../shiny/initedMethods";

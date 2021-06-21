@@ -1,5 +1,5 @@
 import $ from "jquery";
-import type { EventPriority, InputPolicy } from "./InputPolicy";
+import type { EventPriority, InputPolicy } from "./inputPolicy";
 
 type MaybeInputOpts = {
   priority?: EventPriority;

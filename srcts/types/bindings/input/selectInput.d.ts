@@ -1,5 +1,5 @@
 /// <reference types="selectize" />
-import { InputBinding } from "./InputBinding";
+import { InputBinding } from "./inputBinding";
 declare type SelectHTMLElement = HTMLSelectElement & {
     nonempty: boolean;
 };

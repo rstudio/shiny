@@ -1,4 +1,4 @@
-import type { EventPriority, InputPolicy } from "./InputPolicy";
+import type { EventPriority, InputPolicy } from "./inputPolicy";
 declare type MaybeInputOpts = {
     priority?: EventPriority;
     binding?: unknown;

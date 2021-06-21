@@ -1,5 +1,5 @@
 import $ from "jquery";
-import { OutputBinding } from "./OutputBinding";
+import { OutputBinding } from "./outputBinding";
 import {
   createBrushHandler,
   createClickHandler,

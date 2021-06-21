@@ -20,6 +20,7 @@ plugins:
   - '@typescript-eslint'
   - prettier
   - jest-dom
+  - unicorn
 rules:
   "@typescript-eslint/explicit-function-return-type":
     - off
@@ -55,6 +56,10 @@ rules:
     # - error
     - "off"
 
+  unicorn/filename-case:
+    - error
+    - case: camelCase
+
   "@typescript-eslint/consistent-type-imports":
     - error
   "@typescript-eslint/naming-convention":
@@ -81,6 +86,9 @@ rules:
       format: [camelCase]
       trailingUnderscore: allow
       leadingUnderscore: forbid
+
+    - selector: [enum, enumMember]
+      format: [PascalCase]
 
     - selector: typeLike
       format: [PascalCase]

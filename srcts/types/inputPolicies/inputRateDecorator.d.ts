@@ -1,5 +1,5 @@
-import type { EventPriority } from "./InputPolicy";
-import { InputPolicy } from "./InputPolicy";
+import type { EventPriority } from "./inputPolicy";
+import { InputPolicy } from "./inputPolicy";
 declare type RatePolicyModes = "direct" | "debounce" | "throttle";
 declare class InputRateDecorator extends InputPolicy {
     inputRatePolicies: {};

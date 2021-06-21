@@ -1,6 +1,6 @@
 import { BindingRegistry } from "../registry";
 
-import { InputBinding } from "./InputBinding";
+import { InputBinding } from "./inputBinding";
 
 import { CheckboxInputBinding } from "./checkbox";
 import { CheckboxGroupInputBinding } from "./checkboxgroup";

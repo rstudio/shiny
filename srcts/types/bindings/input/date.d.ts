@@ -1,5 +1,5 @@
 /// <reference types="bootstrap-datepicker" />
-import { InputBinding } from "./InputBinding";
+import { InputBinding } from "./inputBinding";
 declare global {
     interface JQuery {
         bsDatepicker(methodName: "getUTCDate"): Date;

@@ -1,5 +1,5 @@
-import type { EventPriority } from "./InputPolicy";
-import { InputPolicy } from "./InputPolicy";
+import type { EventPriority } from "./inputPolicy";
+import { InputPolicy } from "./inputPolicy";
 import type { InputBinding } from "../bindings";
 declare class InputEventDecorator extends InputPolicy {
     constructor(target: InputPolicy);

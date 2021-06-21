@@ -1,7 +1,7 @@
 import $ from "jquery";
 import { windowDevicePixelRatio } from "../window/pixelRatio";
 import { makeBlob } from "./blob";
-import { hasOwnProperty } from "./Object";
+import { hasOwnProperty } from "./object";
 
 function escapeHTML(str: string): string {
   const escaped = {

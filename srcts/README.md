@@ -65,11 +65,61 @@ Periodically, it's good to upgrade the packages to a recent version. There's two
 
 3. To see all outdated packages, run `yarn outdated`
 
-# Configure TypeScript
+# TypeScript
 
-The JavaScript community likes to build many small, effective packages that do minimal work. The unfortunate side effect is needing a config file for everything.
+## Learn about TypeScript
+
+The documentation by [TypeScript](https://www.typescriptlang.org/docs/) is a solid resource to know each and every bell and whistle. Most features have examples and convey the thoughts well.
+
+[TypeScript Deep Dive](https://basarat.gitbook.io/typescript/) is an online `bookdown`-like approach to TypeScript by "Microsoft MVP for TypeScript", Basarat Ali Syed. In his book, he goes through many examples of what you "should do", not necessarily "what is possible" like the [TypeScript docs](https://www.typescriptlang.org/docs/).
+
+## TypeScript StyleGuide
+
+Using the style guid from [TypeScript Deep Dive / StyleGuide](https://basarat.gitbook.io/typescript/styleguide), we extend it to have the usage be more familiar to R developers and preexisting Shiny development.  The goal is to produce consistent code that can be injested quickly.
+
+
+### StyleGuide
+
+* `null` vs. `undefined`
+  * Do not use `x === null` unless you truly mean it.
+  * Safer to use _truthy_ or _falsey_ checks instead. Ex: `if (x) {}`
+* `type` vs `interface`
+  * > Use `type` when you might need a union or intersection: `type Foo = number | { someProperty: number }`
+  * > Use `interface` when you want extends or implements: `interface FooBar extends Foo { bar: string;}`
+  * > Otherwise use whatever makes you happy that day.
+* Namespace
+  * `PascalCase`
+  * Ex: `Shiny`
+
+### Enforced (by `eslint`) StyleGuide
+
+* Variable
+  * `camelCase`
+  * Ex: `const hello = "world`
+* Class
+  * `PascalCase`
+  * Ex: `class InputBinding {}`
+* Type, Interface definitions:
+  * `PascalCase`
+  * Ex: `type BindingBase = {name: string}`
+  * Ex: `interface ShinyEventMessage extends JQuery.Event {}`
+* Enum
+  * `PascalCase`
+  * (Currently unused)
+* Single vs. Double Quotes
+  * While the JS community has decided on single quotes, R has decided on double quotes.
+  * > When you can't use double quotes, try using back ticks (`).
+* Annotate Arrays as `Type[]`
+  * Ex: `Foo[]` (vs `Array<Foo>`)
+* Annotate Records as `{[key: string]: valueType}`
+  * Ex: `const x: {[key: string]: number} = {a: 4}`
+  * Ex: Extend the unknown key definition with static keys: `const x: {known: string, [key: string]: number} = {known: "yes", a: 4}`
+* File Names
+  * `camelCase` - Enforced by `eslint`
 
 ## Config files
+
+The JavaScript community likes to build many small, effective packages that do minimal work. The unfortunate side effect is needing a config file for everything.
 
 All config files are located in the root folder to avoid opening two separate VS Code projects.
 
@@ -104,6 +154,20 @@ All config files are located in the root folder to avoid opening two separate VS
     * `target: ES5` - Compile to es5, so babel has an easier job.
     * `preserveConstEnums: false` - Do no preserve enum values into the final code. (If true, produces bloat / unused code)
     * `isolatedModules: true` & `esModuleInterop: true` - Requested by `esbuild`. This [allows for `esbuild`](https://esbuild.github.io/content-types/#typescript) to safely compile the files in parallel
+
+
+## Style Guide
+
+https://basarat.gitbook.io/typescript/styleguide
+style guide
+* make a bullet list of all style guide items from
+https://basarat.gitbook.io/typescript/type-system/freshness
+
+
+double quote
+array -> Foo[]
+record -> {[key: string]: number}
+use `type` over `interface` unless you are "extends" something
 
 
 ## Bundle TypeScript

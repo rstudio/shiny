@@ -155,21 +155,6 @@ All config files are located in the root folder to avoid opening two separate VS
     * `preserveConstEnums: false` - Do no preserve enum values into the final code. (If true, produces bloat / unused code)
     * `isolatedModules: true` & `esModuleInterop: true` - Requested by `esbuild`. This [allows for `esbuild`](https://esbuild.github.io/content-types/#typescript) to safely compile the files in parallel
 
-
-## Style Guide
-
-https://basarat.gitbook.io/typescript/styleguide
-style guide
-* make a bullet list of all style guide items from
-https://basarat.gitbook.io/typescript/type-system/freshness
-
-
-double quote
-array -> Foo[]
-record -> {[key: string]: number}
-use `type` over `interface` unless you are "extends" something
-
-
 ## Bundle TypeScript
 
 [esbuild](https://esbuild.github.io/) is a build tool that (for Shiny's purposes) compiles the TypeScript into a single JavaScript file.

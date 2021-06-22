@@ -12106,14 +12106,6 @@
     customMessageHandlerOrder.push(type);
     customMessageHandlers[type] = handler;
   }
-  function sendMessagesToHandlers(msgObj, handlers, handlerOrder) {
-    for (var i = 0; i < handlerOrder.length; i++) {
-      var msgType = handlerOrder[i];
-      if (hasOwnProperty(msgObj, msgType)) {
-        handlers[msgType].call(this, msgObj[msgType]);
-      }
-    }
-  }
   var ShinyApp = /* @__PURE__ */ function() {
     function ShinyApp2() {
       _classCallCheck36(this, ShinyApp2);
@@ -12562,20 +12554,32 @@
         (0, import_jquery41.default)(document).trigger(evt);
         if (evt.isDefaultPrevented())
           return;
-        sendMessagesToHandlers(evt.message, messageHandlers, messageHandlerOrder);
+        this._sendMessagesToHandlers(evt.message, messageHandlers, messageHandlerOrder);
         this.$updateConditionals();
+      }
+    }, {
+      key: "_sendMessagesToHandlers",
+      value: function _sendMessagesToHandlers(msgObj, handlers, handlerOrder) {
+        for (var i = 0; i < handlerOrder.length; i++) {
+          var msgType = handlerOrder[i];
+          if (hasOwnProperty(msgObj, msgType)) {
+            handlers[msgType].call(this, msgObj[msgType]);
+          }
+        }
       }
     }, {
       key: "_init",
       value: function _init() {
+        var _this3 = this;
         addMessageHandler("values", function(message) {
-          for (var name in this.$bindings) {
-            if (hasOwnProperty(this.$bindings, name))
-              this.$bindings[name].showProgress(false);
+          for (var name in _this3.$bindings) {
+            if (hasOwnProperty(_this3.$bindings, name))
+              _this3.$bindings[name].showProgress(false);
           }
           for (var _key in message) {
-            if (hasOwnProperty(message, _key))
-              this.receiveOutput(_key, message[_key]);
+            if (hasOwnProperty(message, _key)) {
+              _this3.receiveOutput(_key, message[_key]);
+            }
           }
         });
         addMessageHandler("errors", function(message) {
@@ -12612,9 +12616,9 @@
         });
         addMessageHandler("progress", function(message) {
           if (message.type && message.message) {
-            var handler = this.progressHandlers[message.type];
+            var handler = _this3.progressHandlers[message.type];
             if (handler)
-              handler.call(this, message.message);
+              handler.call(_this3, message.message);
           }
         });
         addMessageHandler("notification", function(message) {
@@ -12635,9 +12639,9 @@
         });
         addMessageHandler("response", function(message) {
           var requestId = message.tag;
-          var request = this.$activeRequests[requestId];
+          var request = _this3.$activeRequests[requestId];
           if (request) {
-            delete this.$activeRequests[requestId];
+            delete _this3.$activeRequests[requestId];
             if ("value" in message)
               request.onSuccess(message.value);
             else
@@ -12649,7 +12653,7 @@
             case true:
             case false:
             case "force":
-              this.$allowReconnect = message;
+              _this3.$allowReconnect = message;
               break;
             default:
               throw "Invalid value for allowReconnect: " + message;
@@ -12659,10 +12663,10 @@
           var shinyOnCustomMessage = getShinyOnCustomMessage();
           if (shinyOnCustomMessage)
             shinyOnCustomMessage(message);
-          sendMessagesToHandlers(message, customMessageHandlers, customMessageHandlerOrder);
+          _this3._sendMessagesToHandlers(message, customMessageHandlers, customMessageHandlerOrder);
         });
         addMessageHandler("config", function(message) {
-          this.config = {
+          _this3.config = {
             workerId: message.workerId,
             sessionId: message.sessionId
           };
@@ -12681,7 +12685,7 @@
         });
         addMessageHandler("recalculating", function(message) {
           if (hasOwnProperty(message, "name") && hasOwnProperty(message, "status")) {
-            var binding = this.$bindings[message.name];
+            var binding = _this3.$bindings[message.name];
             (0, import_jquery41.default)(binding ? binding.el : null).trigger({
               type: "shiny:" + message.status
             });

@@ -21,6 +21,7 @@ const opts: BuildOptions = {
     babelPlugin(),
   ],
   define: {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     "process.env.SHINY_VERSION": `"${shinyDesc.version}"`,
   },
   banner: banner,

@@ -111,25 +111,6 @@ function addCustomMessageHandler(type: string, handler: Handler): void {
 
 //// End message handler variables
 
-// A function for sending messages to the appropriate handlers.
-// - msgObj: the object containing messages, with format {msgObj.foo, msObj.bar
-function sendMessagesToHandlers(
-  msgObj: { [key: string]: unknown },
-  handlers: { [key: string]: Handler },
-  handlerOrder: string[]
-): void {
-  // Dispatch messages to handlers, if handler is present
-  for (let i = 0; i < handlerOrder.length; i++) {
-    const msgType = handlerOrder[i];
-
-    if (hasOwnProperty(msgObj, msgType)) {
-      // Execute each handler with 'this' referring to the present value of
-      // 'this'
-      handlers[msgType].call(this, msgObj[msgType]);
-    }
-  }
-}
-
 class ShinyApp {
   $socket: ShinyWebSocket = null;
 
@@ -641,22 +622,51 @@ class ShinyApp {
     if (evt.isDefaultPrevented()) return;
 
     // Send msgObj.foo and msgObj.bar to appropriate handlers
-    sendMessagesToHandlers(evt.message, messageHandlers, messageHandlerOrder);
+    this._sendMessagesToHandlers(
+      evt.message,
+      messageHandlers,
+      messageHandlerOrder
+    );
 
     this.$updateConditionals();
   }
 
   // Message handlers =====================================================
 
+  // A function for sending messages to the appropriate handlers.
+  // - msgObj: the object containing messages, with format {msgObj.foo, msObj.bar
+  private _sendMessagesToHandlers(
+    msgObj: { [key: string]: unknown },
+    handlers: { [key: string]: Handler },
+    handlerOrder: string[]
+  ): void {
+    // Dispatch messages to handlers, if handler is present
+    for (let i = 0; i < handlerOrder.length; i++) {
+      const msgType = handlerOrder[i];
+
+      if (hasOwnProperty(msgObj, msgType)) {
+        // Execute each handler with 'this' referring to the present value of
+        // 'this'
+        handlers[msgType].call(this, msgObj[msgType]);
+      }
+    }
+  }
+
   private _init() {
-    addMessageHandler("values", function (message: { [key: string]: unknown }) {
+    // Dev note:
+    // * Use arrow functions to allow the Types to propagate.
+    // * However, `_sendMessagesToHandlers()` will adjust the `this` context to the same _`this`_.
+
+    addMessageHandler("values", (message: { [key: string]: unknown }) => {
       for (const name in this.$bindings) {
         if (hasOwnProperty(this.$bindings, name))
           this.$bindings[name].showProgress(false);
       }
 
       for (const key in message) {
-        if (hasOwnProperty(message, key)) this.receiveOutput(key, message[key]);
+        if (hasOwnProperty(message, key)) {
+          this.receiveOutput(key, message[key]);
+        }
       }
     });
 
@@ -672,7 +682,7 @@ class ShinyApp {
 
     addMessageHandler(
       "inputMessages",
-      function (message: Array<{ id: string; message: unknown }>) {
+      (message: Array<{ id: string; message: unknown }>) => {
         // inputMessages should be an array
         for (let i = 0; i < message.length; i++) {
           const $obj = $(".shiny-bound-input#" + $escape(message[i].id));
@@ -695,12 +705,12 @@ class ShinyApp {
       }
     );
 
-    addMessageHandler("javascript", function (message: string) {
+    addMessageHandler("javascript", (message: string) => {
       /*jshint evil: true */
       indirectEval(message);
     });
 
-    addMessageHandler("console", function (message: unknown[]) {
+    addMessageHandler("console", (message: unknown[]) => {
       for (let i = 0; i < message.length; i++) {
         if (console.log) console.log(message[i]);
       }
@@ -708,7 +718,7 @@ class ShinyApp {
 
     addMessageHandler(
       "progress",
-      function (message: { type: string; message: { id: string } }) {
+      (message: { type: string; message: { id: string } }) => {
         if (message.type && message.message) {
           const handler = this.progressHandlers[message.type];
 
@@ -719,12 +729,12 @@ class ShinyApp {
 
     addMessageHandler(
       "notification",
-      function (
+      (
         message:
           | { type: "remove"; message: string }
           | { type: "show"; message: Parameters<typeof showNotification>[0] }
           | { type: void }
-      ) {
+      ) => {
         if (message.type === "show") showNotification(message.message);
         else if (message.type === "remove") removeNotification(message.message);
         else throw "Unkown notification type: " + message.type;
@@ -733,12 +743,12 @@ class ShinyApp {
 
     addMessageHandler(
       "modal",
-      function (
+      (
         message:
           | { type: "remove"; message: string }
           | { type: "show"; message: Parameters<typeof showModal>[0] }
           | { type: void }
-      ) {
+      ) => {
         if (message.type === "show") showModal(message.message);
         // For 'remove', message content isn't used
         else if (message.type === "remove") removeModal();
@@ -748,11 +758,7 @@ class ShinyApp {
 
     addMessageHandler(
       "response",
-      function (message: {
-        tag: string;
-        value?: ResponseValue;
-        error?: string;
-      }) {
+      (message: { tag: string; value?: ResponseValue; error?: string }) => {
         const requestId = message.tag;
         const request = this.$activeRequests[requestId];
 
@@ -764,22 +770,19 @@ class ShinyApp {
       }
     );
 
-    addMessageHandler(
-      "allowReconnect",
-      function (message: "force" | false | true) {
-        switch (message) {
-          case true:
-          case false:
-          case "force":
-            this.$allowReconnect = message;
-            break;
-          default:
-            throw "Invalid value for allowReconnect: " + message;
-        }
+    addMessageHandler("allowReconnect", (message: "force" | false | true) => {
+      switch (message) {
+        case true:
+        case false:
+        case "force":
+          this.$allowReconnect = message;
+          break;
+        default:
+          throw "Invalid value for allowReconnect: " + message;
       }
-    );
+    });
 
-    addMessageHandler("custom", function (message: { [key: string]: unknown }) {
+    addMessageHandler("custom", (message: { [key: string]: unknown }) => {
       // For old-style custom messages - should deprecate and migrate to new
       // method
       const shinyOnCustomMessage = getShinyOnCustomMessage();
@@ -787,7 +790,7 @@ class ShinyApp {
       if (shinyOnCustomMessage) shinyOnCustomMessage(message);
 
       // Send messages.foo and messages.bar to appropriate handlers
-      sendMessagesToHandlers(
+      this._sendMessagesToHandlers(
         message,
         customMessageHandlers,
         customMessageHandlerOrder
@@ -796,11 +799,7 @@ class ShinyApp {
 
     addMessageHandler(
       "config",
-      function (message: {
-        workerId: string;
-        sessionId: string;
-        user?: string;
-      }) {
+      (message: { workerId: string; sessionId: string; user?: string }) => {
         this.config = {
           workerId: message.workerId,
           sessionId: message.sessionId,
@@ -810,7 +809,7 @@ class ShinyApp {
       }
     );
 
-    addMessageHandler("busy", function (message: "busy" | "idle") {
+    addMessageHandler("busy", (message: "busy" | "idle") => {
       if (message === "busy") {
         $(document.documentElement).addClass("shiny-busy");
         $(document).trigger("shiny:busy");
@@ -822,10 +821,10 @@ class ShinyApp {
 
     addMessageHandler(
       "recalculating",
-      function (message: {
+      (message: {
         name?: string;
         status?: "recalculated" | "recalculating";
-      }) {
+      }) => {
         if (
           hasOwnProperty(message, "name") &&
           hasOwnProperty(message, "status")
@@ -840,7 +839,7 @@ class ShinyApp {
       }
     );
 
-    addMessageHandler("reload", function (message: true) {
+    addMessageHandler("reload", (message: true) => {
       window.location.reload();
       return;
       message;
@@ -848,12 +847,12 @@ class ShinyApp {
 
     addMessageHandler(
       "shiny-insert-ui",
-      function (message: {
+      (message: {
         selector: string;
         content: { html: string; deps: HtmlDep[] };
         multiple: false | void;
         where: WherePosition;
-      }) {
+      }) => {
         const targets = $(message.selector);
 
         if (targets.length === 0) {
@@ -877,7 +876,7 @@ class ShinyApp {
 
     addMessageHandler(
       "shiny-remove-ui",
-      function (message: { selector: string; multiple: false | void }) {
+      (message: { selector: string; multiple: false | void }) => {
         const els = $(message.selector);
 
         els.each(function (i, el) {
@@ -891,7 +890,7 @@ class ShinyApp {
       }
     );
 
-    addMessageHandler("frozen", function (message: { ids: string[] }) {
+    addMessageHandler("frozen", (message: { ids: string[] }) => {
       for (let i = 0; i < message.ids.length; i++) {
         shinyForgetLastInputValue(message.ids[i]);
       }
@@ -966,7 +965,7 @@ class ShinyApp {
 
     addMessageHandler(
       "shiny-insert-tab",
-      function (message: {
+      (message: {
         inputId: string;
         divTag: { html: string; deps: HtmlDep[] };
         liTag: { html: string; deps: HtmlDep[] };
@@ -974,7 +973,7 @@ class ShinyApp {
         position: "after" | "before" | void;
         select: boolean;
         menuName: string;
-      }) {
+      }) => {
         const $parentTabset = getTabset(message.inputId);
         let $tabset = $parentTabset;
         const $tabContent = getTabContent($tabset);
@@ -1222,7 +1221,7 @@ class ShinyApp {
 
     addMessageHandler(
       "shiny-remove-tab",
-      function (message: { inputId: string; target: string; type: never }) {
+      (message: { inputId: string; target: string; type: never }) => {
         const $tabset = getTabset(message.inputId);
         const $tabContent = getTabContent($tabset);
         const target = getTargetTabs($tabset, $tabContent, message.target);
@@ -1240,11 +1239,11 @@ class ShinyApp {
 
     addMessageHandler(
       "shiny-change-tab-visibility",
-      function (message: {
+      (message: {
         inputId: string;
         target: string;
         type: "hide" | "show" | null;
-      }) {
+      }) => {
         const $tabset = getTabset(message.inputId);
         const $tabContent = getTabContent($tabset);
         const target = getTargetTabs($tabset, $tabContent, message.target);
@@ -1265,7 +1264,7 @@ class ShinyApp {
 
     addMessageHandler(
       "updateQueryString",
-      function (message: { mode: unknown | "replace"; queryString: string }) {
+      (message: { mode: unknown | "replace"; queryString: string }) => {
         // leave the bookmarking code intact
         if (message.mode === "replace") {
           window.history.replaceState(null, null, message.queryString);
@@ -1320,7 +1319,7 @@ class ShinyApp {
 
     addMessageHandler(
       "resetBrush",
-      function (message: { brushId: Parameters<typeof resetBrush>[0] }) {
+      (message: { brushId: Parameters<typeof resetBrush>[0] }) => {
         resetBrush(message.brushId);
       }
     );

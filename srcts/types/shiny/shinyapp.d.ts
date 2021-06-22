@@ -69,6 +69,7 @@ declare class ShinyApp {
     private _narrowScope;
     $updateConditionals(): void;
     dispatchMessage(data: ArrayBufferLike | string): void;
+    private _sendMessagesToHandlers;
     private _init;
     progressHandlers: {
         binding: (message: {

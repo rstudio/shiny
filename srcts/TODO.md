@@ -92,11 +92,16 @@
 * √ Completely remove `parcel` from `./package.json` and only use `esbuild`
 * √ Delete 'shiny-es5' files
 * Delete 'old' folder
+  * Maybe not. Might be good to keep for a cycle.
 * _Uglify_ js files (like in previous Gruntfile.js)
   * datepicker
   * ionrangeslider
   * selectize
-
+* Documentation
+  * Check out
+    * https://www.typescriptlang.org/docs/handbook/jsdoc-supported-types.html#this
+    * https://github.com/gajus/eslint-plugin-jsdoc
+  * Looks like it can handle markdown
 
 
 # Eventual TODO

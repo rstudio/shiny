@@ -1,13 +1,14 @@
 import $ from "jquery";
-import { priorityType, InputPolicy } from "./InputPolicy";
-import { ShinyApp } from "../shiny/shinyapp";
+import type { EventPriority } from "./inputPolicy";
+import { InputPolicy } from "./inputPolicy";
+import type { ShinyApp } from "../shiny/shinyapp";
 
 // Schedules data to be sent to shinyapp at the next setTimeout(0).
 // Batches multiple input calls into one websocket message.
 class InputBatchSender extends InputPolicy {
   shinyapp: ShinyApp;
   timerId: NodeJS.Timeout = null;
-  pendingData: Record<string, unknown> = {};
+  pendingData: { [key: string]: unknown } = {};
   reentrant = false;
   lastChanceCallback: Array<() => void> = [];
 
@@ -19,20 +20,20 @@ class InputBatchSender extends InputPolicy {
   setInput(
     nameType: string,
     value: unknown,
-    opts: { priority: priorityType }
+    opts: { priority: EventPriority }
   ): void {
     this.pendingData[nameType] = value;
 
     if (!this.reentrant) {
       if (opts.priority === "event") {
-        this.$sendNow();
+        this._sendNow();
       } else if (!this.timerId) {
-        this.timerId = setTimeout(this.$sendNow.bind(this), 0);
+        this.timerId = setTimeout(this._sendNow.bind(this), 0);
       }
     }
   }
 
-  private $sendNow(): void {
+  private _sendNow(): void {
     if (this.reentrant) {
       console.trace("Unexpected reentrancy in InputBatchSender!");
     }

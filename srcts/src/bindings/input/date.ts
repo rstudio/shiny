@@ -1,5 +1,5 @@
 import $ from "jquery";
-import { InputBinding } from "./InputBinding";
+import { InputBinding } from "./inputBinding";
 import {
   formatDateUTC,
   updateLabel,
@@ -17,7 +17,7 @@ declare global {
     bsDatepicker(methodName: "getStartDate"): Date | -1e9999;
     bsDatepicker(methodName: "getEndDate"): Date | 1e9999;
     bsDatepicker(methodName: string): void;
-    bsDatepicker(methodName: string, params: null | Date): void;
+    bsDatepicker(methodName: string, params: Date | null): void;
   }
 }
 
@@ -100,13 +100,13 @@ class DateInputBindingBase extends InputBinding {
       this._setMax($input[0], $input.data("max-date"));
     }
   }
-  _getLabelNode(el: HTMLElement): JQuery<HTMLElement> {
+  protected _getLabelNode(el: HTMLElement): JQuery<HTMLElement> {
     return $(el).find('label[for="' + $escape(el.id) + '"]');
   }
   // Given a format object from a date picker, return a string
-  _formatToString(format: {
-    parts: Array<string>;
-    separators: Array<string>;
+  protected _formatToString(format: {
+    parts: string[];
+    separators: string[];
   }): string {
     // Format object has structure like:
     // { parts: ['mm', 'dd', 'yy'], separators: ['', '/', '/' ,''] }
@@ -122,7 +122,7 @@ class DateInputBindingBase extends InputBinding {
   }
   // Given an unambiguous date string or a Date object, set the min (start) date.
   // null will unset. undefined will result in no change,
-  _setMin(el: HTMLElement, date: Date | undefined | null): void {
+  protected _setMin(el: HTMLElement, date: Date | null | undefined): void {
     if (date === undefined) return;
     if (date === null) {
       $(el).bsDatepicker("setStartDate", null);
@@ -145,7 +145,7 @@ class DateInputBindingBase extends InputBinding {
     // Note that there's no `setUTCStartDate`, so we need to convert this Date.
     // It starts at 00:00 UTC, and we convert it to 00:00 in local time, which
     // is what's needed for `setStartDate`.
-    $(el).bsDatepicker("setStartDate", this._UTCDateAsLocal(date));
+    $(el).bsDatepicker("setStartDate", this._utcDateAsLocal(date));
 
     // If the new min is greater than the current date, unset the current date.
     if (date && curValue && date.getTime() > curValue.getTime()) {
@@ -161,7 +161,7 @@ class DateInputBindingBase extends InputBinding {
   }
   // Given an unambiguous date string or a Date object, set the max (end) date
   // null will unset.
-  _setMax(el: HTMLElement, date: Date): void {
+  protected _setMax(el: HTMLElement, date: Date): void {
     if (date === undefined) return;
     if (date === null) {
       $(el).bsDatepicker("setEndDate", null);
@@ -180,7 +180,7 @@ class DateInputBindingBase extends InputBinding {
     // Workaround for same issue as in _setMin.
     const curValue = $(el).bsDatepicker("getUTCDate");
 
-    $(el).bsDatepicker("setEndDate", this._UTCDateAsLocal(date));
+    $(el).bsDatepicker("setEndDate", this._utcDateAsLocal(date));
 
     // If the new min is greater than the current date, unset the current date.
     if (date && curValue && date.getTime() < curValue.getTime()) {
@@ -192,7 +192,7 @@ class DateInputBindingBase extends InputBinding {
   // Given a date string of format yyyy-mm-dd, return a Date object with
   // that date at 12AM UTC.
   // If date is a Date object, return it unchanged.
-  _newDate(date: Date | string | never): Date | null {
+  protected _newDate(date: Date | never | string): Date | null {
     if (date instanceof Date) return date;
     if (!date) return null;
 
@@ -207,7 +207,7 @@ class DateInputBindingBase extends InputBinding {
   }
   // A Date can have any time during a day; this will return a new Date object
   // set to 00:00 in UTC.
-  _floorDateTime(date: Date): Date {
+  protected _floorDateTime(date: Date): Date {
     date = new Date(date.getTime());
     date.setUTCHours(0, 0, 0, 0);
     return date;
@@ -216,13 +216,13 @@ class DateInputBindingBase extends InputBinding {
   // in UTC. For example, if input date is 2013-02-01 23:00:00 GMT-0600 (CST),
   // output will be 2013-02-01 23:00:00 UTC. Note that the JS console may
   // print this in local time, as "Sat Feb 02 2013 05:00:00 GMT-0600 (CST)".
-  _dateAsUTC(date: Date): Date {
+  protected _dateAsUTC(date: Date): Date {
     return new Date(date.getTime() - date.getTimezoneOffset() * 60000);
   }
   // The inverse of _dateAsUTC. This is needed to adjust time zones because
   // some bootstrap-datepicker methods only take local dates as input, and not
   // UTC.
-  _UTCDateAsLocal(date: Date): Date {
+  protected _utcDateAsLocal(date: Date): Date {
     return new Date(date.getTime() + date.getTimezoneOffset() * 60000);
   }
 }
@@ -257,7 +257,7 @@ class DateInputBinding extends DateInputBindingBase {
   getState(el: HTMLElement): {
     label: string;
     value: string | null;
-    valueString: string | number | string[];
+    valueString: string[] | number | string;
     min: string | null;
     max: string | null;
     language: string | null;

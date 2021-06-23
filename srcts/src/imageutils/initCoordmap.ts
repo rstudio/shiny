@@ -1,9 +1,9 @@
 import $ from "jquery";
 import { shinySetInputValue } from "../shiny/initedMethods";
 import { mapValues } from "../utils";
-import type { OffsetType } from "./findbox";
-import type { BoundsType } from "./createBrush";
-import type { PanelType } from "./initPanelScales";
+import type { Offset } from "./findbox";
+import type { Bounds } from "./createBrush";
+import type { Panel } from "./initPanelScales";
 import { initPanelScales } from "./initPanelScales";
 
 // -----------------------------------------------------------------------
@@ -21,7 +21,7 @@ function findScalingRatio($el: JQuery<HTMLElement>) {
   };
 }
 
-function findOrigin($el: JQuery<HTMLElement>): OffsetType {
+function findOrigin($el: JQuery<HTMLElement>): Offset {
   const offset = $el.offset();
   const scalingRatio = findScalingRatio($el);
 
@@ -66,53 +66,53 @@ function findDims($el: JQuery<HTMLElement>) {
   };
 }
 
-type OffsetCssType = Record<string, number>;
-type OffsetImgType = Record<string, number>;
+type OffsetCss = { [key: string]: number };
+type OffsetImg = { [key: string]: number };
 
 type Coords = {
-  // eslint-disable-next-line camelcase
-  coords_css: OffsetType;
-  // eslint-disable-next-line camelcase
-  coords_img: OffsetType;
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  coords_css: Offset;
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  coords_img: Offset;
   x?: number;
   y?: number;
-  // eslint-disable-next-line camelcase
-  img_css_ratio?: OffsetType;
-  mapping?: PanelType["mapping"];
-  domain?: PanelType["domain"];
-  range?: PanelType["range"];
-  log?: PanelType["log"];
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  img_css_ratio?: Offset;
+  mapping?: Panel["mapping"];
+  domain?: Panel["domain"];
+  range?: Panel["range"];
+  log?: Panel["log"];
 };
 
-type CoordmapInitType = {
-  panels: Array<PanelType>;
+type CoordmapInit = {
+  panels: Panel[];
   dims: {
     height: number;
     width: number;
   };
 };
-type CoordmapType = {
-  panels: Array<PanelType>;
+type Coordmap = {
+  panels: Panel[];
   dims: {
     height: number;
     width: number;
   };
-  mouseOffsetCss: (evt: JQuery.MouseEventBase) => OffsetType;
+  mouseOffsetCss: (evt: JQuery.MouseEventBase) => Offset;
   scaleCssToImg: {
-    (offsetCss: BoundsType): BoundsType;
-    (offsetCss: OffsetType): OffsetType;
-    (offsetCss: OffsetCssType): OffsetImgType;
+    (offsetCss: Bounds): Bounds;
+    (offsetCss: Offset): Offset;
+    (offsetCss: OffsetCss): OffsetImg;
   };
   scaleImgToCss: {
-    (offsetImg: BoundsType): BoundsType;
-    (offsetImg: OffsetType): OffsetType;
-    (offsetImg: OffsetImgType): OffsetCssType;
+    (offsetImg: Bounds): Bounds;
+    (offsetImg: Offset): Offset;
+    (offsetImg: OffsetImg): OffsetCss;
   };
-  imgToCssScalingRatio: () => OffsetType;
-  cssToImgScalingRatio: () => OffsetType;
+  imgToCssScalingRatio: () => Offset;
+  cssToImgScalingRatio: () => Offset;
 
-  getPanelCss: (offsetCss: OffsetCssType, expand?: number) => PanelType;
-  isInPanelCss: (offsetCss: OffsetCssType, expand?: number) => boolean;
+  getPanelCss: (offsetCss: OffsetCss, expand?: number) => Panel;
+  isInPanelCss: (offsetCss: OffsetCss, expand?: number) => boolean;
 
   mouseCoordinateSender: (
     inputId: string,
@@ -142,9 +142,9 @@ type CoordmapType = {
 //    than the other two, because there can be multiple panels (as in facets).
 function initCoordmap(
   $el: JQuery<HTMLElement>,
-  coordmap_: CoordmapInitType
-): CoordmapType {
-  const coordmap = coordmap_ as CoordmapType;
+  coordmap_: CoordmapInit
+): Coordmap {
+  const coordmap = coordmap_ as Coordmap;
   const $img = $el.find("img");
   const img = $img[0];
 
@@ -192,9 +192,9 @@ function initCoordmap(
   // "xmin", "y", and "ymax" -- anything that starts with "x" and "y". If the
   // img content is 1000 pixels wide, but is scaled to 400 pixels on screen,
   // and the input is x:400, then this will return x:1000.
-  function scaleCssToImg(offsetCss: BoundsType): BoundsType;
-  function scaleCssToImg(offsetCss: OffsetType): OffsetType;
-  function scaleCssToImg(offsetCss: OffsetCssType): OffsetImgType;
+  function scaleCssToImg(offsetCss: Bounds): Bounds;
+  function scaleCssToImg(offsetCss: Offset): Offset;
+  function scaleCssToImg(offsetCss: OffsetCss): OffsetImg;
   function scaleCssToImg(offsetCss) {
     const pixelScaling = coordmap.imgToCssScalingRatio();
 
@@ -217,12 +217,12 @@ function initCoordmap(
   // corresponding offset in CSS pixels. If the img content is 1000 pixels
   // wide, but is scaled to 400 pixels on screen, and the input is x:1000,
   // then this will return x:400.
-  function scaleImgToCss(offsetImg: BoundsType): BoundsType;
-  function scaleImgToCss(offsetImg: OffsetType): OffsetType;
-  function scaleImgToCss(offsetImg: OffsetImgType): OffsetCssType;
-  function scaleImgToCss(
-    offsetImg: Record<string, number>
-  ): Record<string, number> {
+  function scaleImgToCss(offsetImg: Bounds): Bounds;
+  function scaleImgToCss(offsetImg: Offset): Offset;
+  function scaleImgToCss(offsetImg: OffsetImg): OffsetCss;
+  function scaleImgToCss(offsetImg: { [key: string]: number }): {
+    [key: string]: number;
+  } {
     const pixelScaling = coordmap.imgToCssScalingRatio();
 
     const result = mapValues(offsetImg, (value, key) => {
@@ -359,9 +359,9 @@ function initCoordmap(
         if (clip) return;
 
         const coords: Coords = {
-          // eslint-disable-next-line camelcase
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           coords_css: coordsCss,
-          // eslint-disable-next-line camelcase
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           coords_img: coordmap.scaleCssToImg(coordsCss),
         };
 
@@ -376,11 +376,11 @@ function initCoordmap(
       const coords: Coords = {
         x: coordsData.x,
         y: coordsData.y,
-        // eslint-disable-next-line camelcase
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         coords_css: coordsCss,
-        // eslint-disable-next-line camelcase
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         coords_img: coordsImg,
-        // eslint-disable-next-line camelcase
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         img_css_ratio: coordmap.cssToImgScalingRatio(),
       };
 
@@ -402,5 +402,5 @@ function initCoordmap(
   return coordmap;
 }
 
-export type { CoordmapType, CoordmapInitType };
+export type { Coordmap, CoordmapInit };
 export { initCoordmap, findOrigin };

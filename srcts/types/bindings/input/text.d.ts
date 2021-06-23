@@ -1,4 +1,4 @@
-import { InputBinding } from "./InputBinding";
+import { InputBinding } from "./inputBinding";
 declare type TextHTMLElement = HTMLInputElement;
 declare type TextReceiveMessageData = {
     label: string;
@@ -18,7 +18,6 @@ declare class TextInputBindingBase extends InputBinding {
         policy: "debounce";
         delay: 250;
     };
-    _getLabelNode(el: HTMLElement): JQuery<HTMLElement>;
 }
 declare class TextInputBinding extends TextInputBindingBase {
     setValue(el: TextHTMLElement, value: string): void;

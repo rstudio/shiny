@@ -1,4 +1,4 @@
-type priorityType = "immediate" | "deferred" | "event";
+type EventPriority = "deferred" | "event" | "immediate";
 
 // Schedules data to be sent to shinyapp at the next setTimeout(0).
 // Batches multiple input calls into one websocket message.
@@ -8,7 +8,7 @@ class InputPolicy {
   setInput(
     name: string,
     value: unknown,
-    opts: { priority: priorityType }
+    opts: { priority: EventPriority }
   ): void {
     throw "not implemented";
     name;
@@ -18,4 +18,4 @@ class InputPolicy {
 }
 
 export { InputPolicy };
-export type { priorityType };
+export type { EventPriority };

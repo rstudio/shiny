@@ -5,11 +5,12 @@ import { showNotification, removeNotification } from "./notifications";
 import { showModal, removeModal } from "./modal";
 import { showReconnectDialog, hideReconnectDialog } from "./reconnectDialog";
 import { renderContent, renderDependencies, renderHtml } from "./render";
-import { shinyBindAll, shinyForgetLastInputValue, shinySetInputValue, shinyInitializeInputs, shinyUnbindAll } from "./initedMethods";
-import { addCustomMessageHandler, HandlerType, ShinyApp } from "./shinyapp";
+import type { shinyBindAll, shinyForgetLastInputValue, shinySetInputValue, shinyInitializeInputs, shinyUnbindAll } from "./initedMethods";
+import type { Handler, ShinyApp } from "./shinyapp";
+import { addCustomMessageHandler } from "./shinyapp";
 import { initInputBindings } from "../bindings/input";
 import { initOutputBindings } from "../bindings/output";
-interface ShinyType {
+interface Shiny {
     version: string;
     $escape: typeof $escape;
     compareVersion: typeof compareVersion;
@@ -42,9 +43,9 @@ interface ShinyType {
     bindAll?: typeof shinyBindAll;
     unbindAll?: typeof shinyUnbindAll;
     initializeInputs?: typeof shinyInitializeInputs;
-    oncustommessage?: HandlerType;
+    oncustommessage?: Handler;
 }
-declare let Shiny: ShinyType;
-declare function setShiny(Shiny_: ShinyType): void;
-export { Shiny, setShiny };
-export type { ShinyType };
+declare let windowShiny: Shiny;
+declare function setShiny(windowShiny_: Shiny): void;
+export { windowShiny, setShiny };
+export type { Shiny };

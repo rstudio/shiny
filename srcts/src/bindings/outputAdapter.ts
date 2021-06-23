@@ -1,12 +1,12 @@
-import type { errorsMessageValue } from "../shiny/shinyapp";
+import type { ErrorsMessageValue } from "../shiny/shinyapp";
 import { makeResizeFilter } from "../utils";
-import { OutputBinding } from "./output";
+import type { OutputBinding } from "./output";
 
 interface OutpuBindingWithResize extends OutputBinding {
   resize?: (
     el: HTMLElement,
-    width: string | number,
-    height: string | number
+    width: number | string,
+    height: number | string
   ) => void;
 }
 
@@ -33,7 +33,7 @@ class OutputBindingAdapter {
   onValueChange(data: unknown): void {
     this.binding.onValueChange(this.el, data);
   }
-  onValueError(err: errorsMessageValue): void {
+  onValueError(err: ErrorsMessageValue): void {
     this.binding.onValueError(this.el, err);
   }
   showProgress(show: boolean): void {

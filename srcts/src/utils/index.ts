@@ -1,7 +1,7 @@
 import $ from "jquery";
 import { windowDevicePixelRatio } from "../window/pixelRatio";
 import { makeBlob } from "./blob";
-import { hasOwnProperty } from "./Object";
+import { hasOwnProperty } from "./object";
 
 function escapeHTML(str: string): string {
   const escaped = {
@@ -85,7 +85,7 @@ function parseDate(dateString: string): Date {
 
 // Given a Date object, return a string in yyyy-mm-dd format, using the
 // UTC date. This may be a day off from the date in the local time zone.
-function formatDateUTC(date: Date | null): null | string {
+function formatDateUTC(date: Date | null): string | null {
   if (date instanceof Date) {
     return (
       date.getUTCFullYear() +
@@ -108,10 +108,10 @@ function formatDateUTC(date: Date | null): null | string {
 // Basically we are trying to filter out extraneous calls to func, so that
 // when the window size changes or whatever, we don't run resize logic for
 // elements that haven't actually changed size or aren't visible anyway.
-interface lastSizeInterface {
+type LastSizeInterface = {
   w?: number;
   h?: number;
-}
+};
 function makeResizeFilter(
   el: HTMLElement,
   func: (
@@ -119,7 +119,7 @@ function makeResizeFilter(
     height: HTMLElement["offsetHeight"]
   ) => void
 ): () => void {
-  let lastSize: lastSizeInterface = {};
+  let lastSize: LastSizeInterface = {};
 
   return function () {
     const size = { w: el.offsetWidth, h: el.offsetHeight };
@@ -178,7 +178,7 @@ function scopeExprToFunc(expr: string): (scope: unknown) => boolean {
   };
 }
 
-function asArray<T>(value: T | Array<T> | null | undefined): Array<T> {
+function asArray<T>(value: T | T[] | null | undefined): T[] {
   if (value === null || value === undefined) return [];
   if (Array.isArray(value)) return value;
   return [value];
@@ -187,9 +187,9 @@ function asArray<T>(value: T | Array<T> | null | undefined): Array<T> {
 // We need a stable sorting algorithm for ordering
 // bindings by priority and insertion order.
 function mergeSort<T>(
-  list: Array<T>,
+  list: T[],
   sortfunc: (a: T, b: T) => boolean | number
-): Array<T> {
+): T[] {
   function merge(sortfunc, a, b) {
     let ia = 0;
     let ib = 0;
@@ -233,10 +233,10 @@ const $escape = function (val: string): string {
 // Maps a function over an object, preserving keys. Like the mapValues
 // function from lodash.
 function mapValues<V, R>(
-  obj: Record<string, V>,
-  f: (value: V, key: string, obj: Record<string, V>) => R
-): Record<string, R> {
-  const newObj: Record<string, R> = {};
+  obj: { [key: string]: V },
+  f: (value: V, key: string, obj: { [key: string]: V }) => R
+): { [key: string]: R } {
+  const newObj: { [key: string]: R } = {};
 
   for (const key in obj) {
     if (hasOwnProperty(obj, key)) newObj[key] = f(obj[key], key, obj);
@@ -251,10 +251,12 @@ function isnan(x: unknown): boolean {
 }
 
 // Binary equality function used by the equal function.
+// (Name existed before TS conversion)
+// eslint-disable-next-line @typescript-eslint/naming-convention
 function _equal(x: unknown, y: unknown): boolean {
   if ($.type(x) === "object" && $.type(y) === "object") {
-    const xo = x as Record<string, unknown>;
-    const yo = y as Record<string, unknown>;
+    const xo = x as { [key: string]: unknown };
+    const yo = y as { [key: string]: unknown };
 
     if (Object.keys(xo).length !== Object.keys(yo).length) return false;
     for (const prop in xo) {
@@ -263,8 +265,8 @@ function _equal(x: unknown, y: unknown): boolean {
     }
     return true;
   } else if ($.type(x) === "array" && $.type(y) === "array") {
-    const xa = x as Array<unknown>;
-    const ya = y as Array<unknown>;
+    const xa = x as unknown[];
+    const ya = y as unknown[];
 
     if (xa.length !== ya.length) return false;
     for (let i = 0; i < xa.length; i++) if (!_equal(xa[i], ya[i])) return false;
@@ -279,7 +281,7 @@ function _equal(x: unknown, y: unknown): boolean {
 // necessary.
 //
 // Objects other than objects and arrays are tested for equality using ===.
-function equal(...args: Array<unknown>): boolean {
+function equal(...args: unknown[]): boolean {
   if (args.length < 2)
     throw new Error("equal requires at least two arguments.");
   for (let i = 0; i < args.length - 1; i++) {
@@ -292,7 +294,7 @@ function equal(...args: Array<unknown>): boolean {
 // "==" or "<".
 const compareVersion = function (
   a: string,
-  op: "==" | ">=" | ">" | "<=" | "<",
+  op: "<" | "<=" | "==" | ">" | ">=",
   b: string
 ): boolean {
   function versionParts(ver) {
@@ -328,7 +330,7 @@ const compareVersion = function (
 };
 
 function updateLabel(
-  labelTxt: undefined | string,
+  labelTxt: string | undefined,
   labelNode: JQuery<HTMLElement>
 ): void {
   // Only update if label was specified in the update method

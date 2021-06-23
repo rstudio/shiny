@@ -1,7 +1,7 @@
 import $ from "jquery";
-import { triggerFileInputChanged } from "../events/shiny_inputchanged";
+import { triggerFileInputChanged } from "../events/inputChanged";
 import { $escape } from "../utils";
-import { ShinyApp } from "../shiny/shinyapp";
+import type { ShinyApp } from "../shiny/shinyapp";
 import { getFileInputBinding } from "../shiny/initedMethods";
 
 type JobId = string;
@@ -135,7 +135,7 @@ class FileUploader extends FileProcessor {
   ): void;
   makeRequest(
     method: string,
-    args: Array<unknown>,
+    args: unknown[],
     onSuccess: Parameters<ShinyApp["makeRequest"]>[2],
     onFailure: Parameters<ShinyApp["makeRequest"]>[3],
     blobs: Parameters<ShinyApp["makeRequest"]>[4]

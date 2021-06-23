@@ -1,14 +1,14 @@
-import type { ShinyType } from ".";
+import type { Shiny } from ".";
 import type { FileInputBinding } from "../bindings/input/fileinput";
-import type { OutputBindingAdapter } from "../bindings/output_adapter";
-import type { priorityType } from "../inputPolicies";
-import type { bindScope } from "./bind";
-import type { HandlerType, ShinyApp } from "./shinyapp";
+import type { OutputBindingAdapter } from "../bindings/outputAdapter";
+import type { EventPriority } from "../inputPolicies";
+import type { BindScope } from "./bind";
+import type { Handler, ShinyApp } from "./shinyapp";
 
-let fullShinyObj_: ShinyType = null;
+let fullShinyObj: Shiny = null;
 
-function setShinyObj(shiny: ShinyType): void {
-  fullShinyObj_ = shiny;
+function setShinyObj(shiny: Shiny): void {
+  fullShinyObj = shiny;
 }
 
 //// 2021/03: TypeScript Conversion note
@@ -19,55 +19,55 @@ function setShinyObj(shiny: ShinyType): void {
 function shinySetInputValue(
   name: string,
   value: unknown,
-  opts?: { priority?: priorityType }
+  opts?: { priority?: EventPriority }
 ): void {
-  fullShinyObj_.setInputValue(name, value, opts);
+  fullShinyObj.setInputValue(name, value, opts);
 }
 function shinyShinyApp(): ShinyApp {
-  return fullShinyObj_.shinyapp;
+  return fullShinyObj.shinyapp;
 }
 function setShinyUser(user: string): void {
-  fullShinyObj_.user = user;
+  fullShinyObj.user = user;
 }
 function shinyForgetLastInputValue(name: string): void {
-  fullShinyObj_.forgetLastInputValue(name);
+  fullShinyObj.forgetLastInputValue(name);
 }
-function shinyBindAll(scope: bindScope): void {
-  fullShinyObj_.bindAll(scope);
+function shinyBindAll(scope: BindScope): void {
+  fullShinyObj.bindAll(scope);
 }
-function shinyUnbindAll(scope: bindScope, includeSelf = false): void {
-  fullShinyObj_.unbindAll(scope, includeSelf);
+function shinyUnbindAll(scope: BindScope, includeSelf = false): void {
+  fullShinyObj.unbindAll(scope, includeSelf);
 }
-function shinyInitializeInputs(scope: bindScope): void {
-  fullShinyObj_.initializeInputs(scope);
+function shinyInitializeInputs(scope: BindScope): void {
+  fullShinyObj.initializeInputs(scope);
 }
 
 function shinyAppBindOutput(id: string, binding: OutputBindingAdapter): void {
-  fullShinyObj_.shinyapp.bindOutput(id, binding);
+  fullShinyObj.shinyapp.bindOutput(id, binding);
 }
 
 function shinyAppUnbindOutput(
   id: string,
   binding: OutputBindingAdapter
 ): boolean {
-  return fullShinyObj_.shinyapp.unbindOutput(id, binding);
+  return fullShinyObj.shinyapp.unbindOutput(id, binding);
 }
 
-function getShinyOnCustomMessage(): null | HandlerType {
-  return fullShinyObj_.oncustommessage;
+function getShinyOnCustomMessage(): Handler | null {
+  return fullShinyObj.oncustommessage;
 }
 
-let fileInputBinding_: FileInputBinding;
+let fileInputBinding: FileInputBinding;
 
 function getFileInputBinding(): FileInputBinding {
-  return fileInputBinding_;
+  return fileInputBinding;
 }
-function setFileInputBinding(fileInputBinding: FileInputBinding): void {
-  fileInputBinding_ = fileInputBinding;
+function setFileInputBinding(fileInputBinding_: FileInputBinding): void {
+  fileInputBinding = fileInputBinding_;
 }
 
 function getShinyCreateWebsocket(): (() => WebSocket) | void {
-  return fullShinyObj_.createSocket;
+  return fullShinyObj.createSocket;
 }
 
 export {

@@ -1,4 +1,4 @@
-import { InputBinding } from "./InputBinding";
+import { InputBinding } from "./inputBinding";
 declare type CheckedHTMLElement = HTMLInputElement;
 declare type CheckboxChecked = CheckedHTMLElement["checked"];
 declare type CheckboxReceiveMessageData = {

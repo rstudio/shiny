@@ -1,34 +1,34 @@
 import $ from "jquery";
 
-import { OutputBinding } from "./OutputBinding";
+import { OutputBinding } from "./outputBinding";
 import { shinyUnbindAll } from "../../shiny/initedMethods";
 import { debounce } from "../../time";
 import { escapeHTML } from "../../utils";
 import { indirectEval } from "../../utils/eval";
-import type { errorsMessageValue } from "../../shiny/shinyapp";
+import type { ErrorsMessageValue } from "../../shiny/shinyapp";
 
 class DatatableOutputBinding extends OutputBinding {
   find(scope: HTMLElement): JQuery<HTMLElement> {
     return $(scope).find(".shiny-datatable-output");
   }
-  onValueError(el: HTMLElement, err: errorsMessageValue): void {
+  onValueError(el: HTMLElement, err: ErrorsMessageValue): void {
     shinyUnbindAll(el);
     this.renderError(el, err);
   }
   renderValue(
     el: HTMLElement,
-    data: null | {
-      colnames?: Array<string>;
-      options?: null | {
+    data: {
+      colnames?: string[];
+      options?: {
         searching?: boolean;
         search?: { caseInsensitive?: boolean };
-      };
+      } | null;
       action?: string;
       escape?: string;
-      evalOptions?: Array<string>;
+      evalOptions?: string[];
       callback?: string;
       searchDelay?: number;
-    }
+    } | null
   ): void {
     const $el = $(el).empty();
 

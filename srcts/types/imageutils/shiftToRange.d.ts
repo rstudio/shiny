@@ -1,2 +1,2 @@
-declare function shiftToRange(vals: number | Array<number>, min: number, max: number): Array<number>;
+declare function shiftToRange(vals: number[] | number, min: number, max: number): number[];
 export { shiftToRange };

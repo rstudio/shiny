@@ -1,5 +1,5 @@
-declare type UserAgentType = typeof window.navigator.userAgent;
-declare let userAgentVal: UserAgentType;
-declare function setUserAgent(userAgent: UserAgentType): void;
-export type { UserAgentType };
-export { userAgentVal as userAgent, setUserAgent };
+declare type UserAgent = typeof window.navigator.userAgent;
+declare let userAgent: UserAgent;
+declare function setUserAgent(userAgent_: UserAgent): void;
+export type { UserAgent };
+export { userAgent, setUserAgent };

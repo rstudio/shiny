@@ -1,12 +1,12 @@
 /// <reference types="bootstrap-datepicker" />
-import { InputBinding } from "./InputBinding";
+import { InputBinding } from "./inputBinding";
 declare global {
     interface JQuery {
         bsDatepicker(methodName: "getUTCDate"): Date;
         bsDatepicker(methodName: "getStartDate"): Date | -1e9999;
         bsDatepicker(methodName: "getEndDate"): Date | 1e9999;
         bsDatepicker(methodName: string): void;
-        bsDatepicker(methodName: string, params: null | Date): void;
+        bsDatepicker(methodName: string, params: Date | null): void;
     }
 }
 declare type DateReceiveMessageData = {
@@ -26,17 +26,17 @@ declare class DateInputBindingBase extends InputBinding {
     };
     setValue(el: HTMLElement, data: unknown): void;
     initialize(el: HTMLElement): void;
-    _getLabelNode(el: HTMLElement): JQuery<HTMLElement>;
-    _formatToString(format: {
-        parts: Array<string>;
-        separators: Array<string>;
+    protected _getLabelNode(el: HTMLElement): JQuery<HTMLElement>;
+    protected _formatToString(format: {
+        parts: string[];
+        separators: string[];
     }): string;
-    _setMin(el: HTMLElement, date: Date | undefined | null): void;
-    _setMax(el: HTMLElement, date: Date): void;
-    _newDate(date: Date | string | never): Date | null;
-    _floorDateTime(date: Date): Date;
-    _dateAsUTC(date: Date): Date;
-    _UTCDateAsLocal(date: Date): Date;
+    protected _setMin(el: HTMLElement, date: Date | null | undefined): void;
+    protected _setMax(el: HTMLElement, date: Date): void;
+    protected _newDate(date: Date | never | string): Date | null;
+    protected _floorDateTime(date: Date): Date;
+    protected _dateAsUTC(date: Date): Date;
+    protected _utcDateAsLocal(date: Date): Date;
 }
 declare class DateInputBinding extends DateInputBindingBase {
     getValue(el: HTMLElement): string;
@@ -44,7 +44,7 @@ declare class DateInputBinding extends DateInputBindingBase {
     getState(el: HTMLElement): {
         label: string;
         value: string | null;
-        valueString: string | number | string[];
+        valueString: string[] | number | string;
         min: string | null;
         max: string | null;
         language: string | null;

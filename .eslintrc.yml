@@ -20,6 +20,7 @@ plugins:
   - '@typescript-eslint'
   - prettier
   - jest-dom
+  - unicorn
 rules:
   "@typescript-eslint/explicit-function-return-type":
     - off
@@ -27,8 +28,7 @@ rules:
     - off
   "@typescript-eslint/explicit-module-boundary-types":
     - error
-  camelcase:
-    - error
+
   default-case:
     - error
   indent:
@@ -51,3 +51,58 @@ rules:
   dot-location:
     - error
     - property
+
+  camelcase:
+    # - error
+    - "off"
+
+  unicorn/filename-case:
+    - error
+    - case: camelCase
+
+  "@typescript-eslint/array-type":
+    - error
+    - default: array-simple
+      readonly: array-simple
+  "@typescript-eslint/consistent-indexed-object-style":
+    - error
+    - index-signature
+
+  "@typescript-eslint/sort-type-union-intersection-members":
+    - error
+
+  "@typescript-eslint/consistent-type-imports":
+    - error
+  "@typescript-eslint/naming-convention":
+    - error
+
+    - selector: default
+      format: [camelCase]
+
+    - selector: method
+      modifiers: [private]
+      format: [camelCase]
+      leadingUnderscore: require
+    - selector: method
+      modifiers: [protected]
+      format: [camelCase]
+      leadingUnderscore: require
+
+    - selector: variable
+      format: [camelCase]
+      trailingUnderscore: forbid
+      leadingUnderscore: forbid
+
+    - selector: parameter
+      format: [camelCase]
+      trailingUnderscore: allow
+      leadingUnderscore: forbid
+
+    - selector: [enum, enumMember]
+      format: [PascalCase]
+
+    - selector: typeLike
+      format: [PascalCase]
+      custom:
+        regex: "(t|T)ype$"
+        match: false

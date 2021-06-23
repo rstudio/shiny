@@ -1,7 +1,7 @@
 import $ from "jquery";
 import { asArray, hasOwnProperty } from "../utils";
 import { isIE } from "../utils/browser";
-import { bindScope } from "./bind";
+import type { BindScope } from "./bind";
 import {
   shinyBindAll,
   shinyInitializeInputs,
@@ -12,7 +12,7 @@ import { sendImageSizeFns } from "./sendImageSize";
 import { renderHtml as singletonsRenderHtml } from "./singletons";
 import type { WherePosition } from "./singletons";
 
-function renderDependencies(dependencies: null | Array<HtmlDep>): void {
+function renderDependencies(dependencies: HtmlDep[] | null): void {
   if (dependencies) {
     $.each(dependencies, function (i, dep) {
       renderDependency(dep);
@@ -24,8 +24,8 @@ function renderDependencies(dependencies: null | Array<HtmlDep>): void {
 // inputs/outputs. `content` can be null, a string, or an object with
 // properties 'html' and 'deps'.
 function renderContent(
-  el: bindScope,
-  content: null | string | { html: string; deps?: Array<HtmlDep> },
+  el: BindScope,
+  content: string | { html: string; deps?: HtmlDep[] } | null,
   where: WherePosition = "replace"
 ): void {
   if (where === "replace") {
@@ -46,7 +46,7 @@ function renderContent(
 
   renderHtml(html, el, dependencies, where);
 
-  let scope: bindScope = el;
+  let scope: BindScope = el;
 
   if (where === "replace") {
     shinyInitializeInputs(el);
@@ -70,34 +70,33 @@ function renderContent(
 // Render HTML in a DOM element, inserting singletons into head as needed
 function renderHtml(
   html: string,
-  el: bindScope,
-  dependencies: Array<HtmlDep>,
+  el: BindScope,
+  dependencies: HtmlDep[],
   where: WherePosition = "replace"
 ): ReturnType<typeof singletonsRenderHtml> {
   renderDependencies(dependencies);
   return singletonsRenderHtml(html, el, where);
 }
 
-type HtmlDepName = string;
 type HtmlDepVersion = string;
 type HtmlDep = {
-  name: HtmlDepName;
+  name: string;
   version: HtmlDepVersion;
   restyle?: boolean;
   src?: { href: string };
-  meta?: string | Array<string>;
-  stylesheet?: string | Array<string>;
+  meta?: string[] | string;
+  stylesheet?: string[] | string;
   script?:
+    | Array<{ [key: string]: string }>
+    | string[]
     | string
-    | Array<string>
-    | Record<string, string>
-    | Array<Record<string, string>>;
-  attachment?: string | Array<string> | Record<string, string>;
+    | { [key: string]: string };
+  attachment?: string[] | string | { [key: string]: string };
   head?: string;
 };
-const htmlDependencies: Record<HtmlDepName, HtmlDepVersion> = {};
+const htmlDependencies: { [key: string]: HtmlDepVersion } = {};
 
-function registerDependency(name: HtmlDepName, version: HtmlDepVersion): void {
+function registerDependency(name: string, version: HtmlDepVersion): void {
   htmlDependencies[name] = version;
 }
 

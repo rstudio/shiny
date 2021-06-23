@@ -1,13 +1,13 @@
 class Debouncer {
   target: unknown;
-  func: (...args: Array<unknown>) => void;
+  func: (...args: unknown[]) => void;
   delayMs: number;
   timerId: NodeJS.Timeout;
-  args: Array<unknown>;
+  args: unknown[];
 
   constructor(
     target: unknown,
-    func: (...args: Array<unknown>) => void,
+    func: (...args: unknown[]) => void,
     delayMs: number
   ) {
     this.target = target;
@@ -18,7 +18,7 @@ class Debouncer {
     this.args = null;
   }
 
-  normalCall(...args: Array<unknown>): void {
+  normalCall(...args: unknown[]): void {
     this.$clearTimer();
     this.args = args;
 
@@ -30,7 +30,7 @@ class Debouncer {
       this.$invoke();
     }, this.delayMs);
   }
-  immediateCall(...args: Array<unknown>): void {
+  immediateCall(...args: unknown[]): void {
     this.$clearTimer();
     this.args = args;
     this.$invoke();
@@ -64,8 +64,8 @@ class Debouncer {
 // call.
 function debounce<T>(
   threshold: number,
-  func: (...args: Array<T>) => void
-): (...args: Array<T>) => void {
+  func: (...args: T[]) => void
+): (...args: T[]) => void {
   let timerId = null;
 
   return function (...args) {

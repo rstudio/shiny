@@ -1,16 +1,19 @@
 /// <reference types="node" />
-import { priorityType, InputPolicy } from "./InputPolicy";
-import { ShinyApp } from "../shiny/shinyapp";
+import type { EventPriority } from "./inputPolicy";
+import { InputPolicy } from "./inputPolicy";
+import type { ShinyApp } from "../shiny/shinyapp";
 declare class InputBatchSender extends InputPolicy {
     shinyapp: ShinyApp;
     timerId: NodeJS.Timeout;
-    pendingData: Record<string, unknown>;
+    pendingData: {
+        [key: string]: unknown;
+    };
     reentrant: boolean;
     lastChanceCallback: Array<() => void>;
     constructor(shinyapp: ShinyApp);
     setInput(nameType: string, value: unknown, opts: {
-        priority: priorityType;
+        priority: EventPriority;
     }): void;
-    private $sendNow;
+    private _sendNow;
 }
 export { InputBatchSender };

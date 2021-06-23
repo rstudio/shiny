@@ -54,6 +54,7 @@
     "eslint-plugin-jest": "^24.3.6",
     "eslint-plugin-jest-dom": "^3.9.0",
     "eslint-plugin-prettier": "^3.4.0",
+    "eslint-plugin-unicorn": "^33.0.1",
     "ion-rangeslider": "2.3.1",
     "jest": "^26.6.3",
     "jquery": "3.6.0",

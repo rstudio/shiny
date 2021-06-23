@@ -1,45 +1,55 @@
-import { OutputBindingAdapter } from "../bindings/output_adapter";
-import type { UploadInitValue, UploadEndValue } from "../file/FileProcessor";
-declare type ResponseValue = UploadInitValue | UploadEndValue;
-declare type HandlerType = (msg: Record<string, unknown> | Array<unknown> | boolean | string) => void;
+import type { OutputBindingAdapter } from "../bindings/outputAdapter";
+import type { UploadInitValue, UploadEndValue } from "../file/fileProcessor";
+declare type ResponseValue = UploadEndValue | UploadInitValue;
+declare type Handler = (msg: unknown[] | boolean | string | {
+    [key: string]: unknown;
+}) => void;
 declare type ShinyWebSocket = WebSocket & {
     allowReconnect?: boolean;
 };
-declare type errorsMessageValue = {
+declare type ErrorsMessageValue = {
     message: string;
-    call: Array<string>;
-    type?: Array<string>;
+    call: string[];
+    type?: string[];
 };
 declare type OnSuccessRequest = (value: ResponseValue) => void;
 declare type OnErrorRequest = (err: string) => void;
-declare type InputValuesType = Record<string, unknown>;
-declare function addCustomMessageHandler(type: string, handler: HandlerType): void;
+declare type InputValues = {
+    [key: string]: unknown;
+};
+declare function addCustomMessageHandler(type: string, handler: Handler): void;
 declare class ShinyApp {
     $socket: ShinyWebSocket;
     config: {
         workerId: string;
         sessionId: string;
     };
-    $inputValues: InputValuesType;
-    $initialInput: InputValuesType;
-    $bindings: Record<string, OutputBindingAdapter>;
+    $inputValues: InputValues;
+    $initialInput: InputValues;
+    $bindings: {
+        [key: string]: OutputBindingAdapter;
+    };
     $values: {};
-    $errors: Record<string, errorsMessageValue>;
+    $errors: {
+        [key: string]: ErrorsMessageValue;
+    };
     $conditionals: {};
-    $pendingMessages: Array<string>;
-    $activeRequests: Record<number, {
-        onSuccess: OnSuccessRequest;
-        onError: OnErrorRequest;
-    }>;
+    $pendingMessages: string[];
+    $activeRequests: {
+        [key: number]: {
+            onSuccess: OnSuccessRequest;
+            onError: OnErrorRequest;
+        };
+    };
     $nextRequestId: number;
     $allowReconnect: boolean | "force";
     constructor();
-    connect(initialInput: InputValuesType): void;
+    connect(initialInput: InputValues): void;
     isConnected(): boolean;
     private scheduledReconnect;
     reconnect(): void;
     createSocket(): ShinyWebSocket;
-    sendInput(values: InputValuesType): void;
+    sendInput(values: InputValues): void;
     $notifyDisconnected(): void;
     $removeSocket(): void;
     $scheduleReconnect(delay: Parameters<typeof setTimeout>[1]): void;
@@ -49,19 +59,18 @@ declare class ShinyApp {
     };
     onDisconnected(): void;
     onConnected(): void;
-    makeRequest(method: string, args: Array<unknown>, onSuccess: OnSuccessRequest, onError: OnErrorRequest, blobs: Array<Blob | ArrayBuffer | string>): void;
+    makeRequest(method: string, args: unknown[], onSuccess: OnSuccessRequest, onError: OnErrorRequest, blobs: Array<ArrayBuffer | Blob | string>): void;
     $sendMsg(msg: string): void;
-    receiveError(name: string, error: errorsMessageValue): void;
+    receiveError(name: string, error: ErrorsMessageValue): void;
     receiveOutput<T>(name: string, value: T): T;
     bindOutput(id: string, binding: OutputBindingAdapter): OutputBindingAdapter;
     unbindOutput(id: string, binding: OutputBindingAdapter): boolean;
-    private narrowScopeComponent;
-    private narrowScope;
+    private _narrowScopeComponent;
+    private _narrowScope;
     $updateConditionals(): void;
-    private addMessageHandler;
-    dispatchMessage(data: string | ArrayBufferLike): void;
-    _sendMessagesToHandlers(msgObj: Record<string, unknown>, handlers: Record<string, HandlerType>, handlerOrder: Array<string>): void;
-    private init;
+    dispatchMessage(data: ArrayBufferLike | string): void;
+    private _sendMessagesToHandlers;
+    private _init;
     progressHandlers: {
         binding: (message: {
             id: string;
@@ -87,4 +96,4 @@ declare class ShinyApp {
     }): string;
 }
 export { ShinyApp, addCustomMessageHandler };
-export type { HandlerType, errorsMessageValue };
+export type { Handler, ErrorsMessageValue };

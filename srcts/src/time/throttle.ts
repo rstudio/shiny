@@ -1,15 +1,11 @@
 class Throttler<T = unknown> {
   target: unknown;
-  func: (...args: Array<T>) => void;
+  func: (...args: T[]) => void;
   delayMs: number;
   timerId: NodeJS.Timeout;
-  args: Array<T>;
+  args: T[];
 
-  constructor(
-    target: unknown,
-    func: (...args: Array<T>) => void,
-    delayMs: number
-  ) {
+  constructor(target: unknown, func: (...args: T[]) => void, delayMs: number) {
     this.target = target;
     this.func = func;
     this.delayMs = delayMs;
@@ -18,7 +14,7 @@ class Throttler<T = unknown> {
     this.args = null;
   }
 
-  normalCall(...args: Array<T>): void {
+  normalCall(...args: T[]): void {
     this.args = args;
     if (this.timerId === null) {
       this.$invoke();
@@ -31,7 +27,7 @@ class Throttler<T = unknown> {
       }, this.delayMs);
     }
   }
-  immediateCall(...args: Array<T>): void {
+  immediateCall(...args: T[]): void {
     this.$clearTimer();
     this.args = args;
     this.$invoke();
@@ -63,13 +59,13 @@ class Throttler<T = unknown> {
 // eslint-disable-next-line no-unused-vars
 function throttle<T>(
   threshold: number,
-  func: (...args: Array<T>) => void
-): (...args: Array<T>) => void {
+  func: (...args: T[]) => void
+): (...args: T[]) => void {
   let executionPending = false;
   let timerId = null;
-  let self, args: Array<T>;
+  let self, args: T[];
 
-  function throttled(...argumentVals: Array<T>) {
+  function throttled(...argumentVals: T[]) {
     self = null;
     args = null;
     if (timerId === null) {

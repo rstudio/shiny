@@ -21,7 +21,7 @@ function createClickInfo(
   // it with the information stored in this.e.
   function triggerEvent(
     newEventType: string,
-    e: JQuery.MouseDownEvent | JQuery.DoubleClickEvent
+    e: JQuery.DoubleClickEvent | JQuery.MouseDownEvent
   ) {
     // Extract important info from e and construct a new event with type
     // eventType.

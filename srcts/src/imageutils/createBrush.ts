@@ -1,21 +1,21 @@
 import $ from "jquery";
-import type { CoordmapType } from "./initCoordmap";
+import type { Coordmap } from "./initCoordmap";
 import { findOrigin } from "./initCoordmap";
 import { equal, isnan, mapValues, roundSignif } from "../utils";
-import type { PanelType } from "./initPanelScales";
+import type { Panel } from "./initPanelScales";
 
-import type { OffsetType } from "./findbox";
+import type { Offset } from "./findbox";
 import { findBox } from "./findbox";
 import { shiftToRange } from "./shiftToRange";
 
-type BoundsType = {
+type Bounds = {
   xmin: number;
   xmax: number;
   ymin: number;
   ymax: number;
 };
-type BoundsCss = BoundsType;
-type BoundsData = BoundsType;
+type BoundsCss = Bounds;
+type BoundsData = Bounds;
 
 type ImageState = {
   brushing?: boolean;
@@ -23,8 +23,8 @@ type ImageState = {
   resizing?: boolean;
 
   // Offset of last mouse down and up events (in CSS pixels)
-  down?: OffsetType;
-  up?: OffsetType;
+  down?: Offset;
+  up?: Offset;
 
   // Which side(s) we're currently resizing
   resizeSides?: {
@@ -38,30 +38,30 @@ type ImageState = {
   boundsData?: BoundsData;
 
   // Panel object that the brush is in
-  panel?: PanelType;
+  panel?: Panel;
 
   // The bounds at the start of a drag/resize (in CSS pixels)
-  changeStartBounds?: BoundsType;
+  changeStartBounds?: Bounds;
 };
 
-type BrushOptsType = {
-  brushDirection: "x" | "y" | "xy";
+type BrushOpts = {
+  brushDirection: "x" | "xy" | "y";
   brushClip: boolean;
   brushFill: string;
   brushOpacity: string;
   brushStroke: string;
-  brushDelayType?: "throttle" | "debounce";
+  brushDelayType?: "debounce" | "throttle";
   brushDelay?: number;
   brushResetOnNew?: boolean;
 };
 
-type BrushType = {
+type Brush = {
   reset: () => void;
 
   importOldBrush: () => void;
-  isInsideBrush: (offsetCss: OffsetType) => boolean;
-  isInResizeArea: (offsetCss: OffsetType) => boolean;
-  whichResizeSides: (offsetCss: OffsetType) => ImageState["resizeSides"];
+  isInsideBrush: (offsetCss: Offset) => boolean;
+  isInResizeArea: (offsetCss: Offset) => boolean;
+  whichResizeSides: (offsetCss: Offset) => ImageState["resizeSides"];
 
   // A callback when the wrapper div or img is resized.
   onResize: () => void;
@@ -91,17 +91,17 @@ type BrushType = {
 
   isBrushing: () => ImageState["brushing"];
   startBrushing: () => void;
-  brushTo: (offsetCss: OffsetType) => void;
+  brushTo: (offsetCss: Offset) => void;
   stopBrushing: () => void;
 
   isDragging: () => ImageState["dragging"];
   startDragging: () => void;
-  dragTo: (offsetCss: OffsetType) => void;
+  dragTo: (offsetCss: Offset) => void;
   stopDragging: () => void;
 
   isResizing: () => ImageState["resizing"];
   startResizing: () => void;
-  resizeTo: (offsetCss: OffsetType) => void;
+  resizeTo: (offsetCss: Offset) => void;
   stopResizing: () => void;
 };
 
@@ -109,10 +109,10 @@ type BrushType = {
 // in a brushHandler, which provides various event listeners.
 function createBrush(
   $el: JQuery<HTMLElement>,
-  opts: BrushOptsType,
-  coordmap: CoordmapType,
+  opts: BrushOpts,
+  coordmap: Coordmap,
   expandPixels: number
-): BrushType {
+): Brush {
   // Number of pixels outside of brush to allow start resizing
   const resizeExpand = 10;
 
@@ -354,10 +354,8 @@ function createBrush(
 
   // Get or set the bounds of the brush using coordinates in the data space.
   function boundsData(): ImageState["boundsData"];
-  function boundsData(
-    boxData: Parameters<PanelType["scaleDataToImg"]>[0]
-  ): void;
-  function boundsData(boxData?: Parameters<PanelType["scaleDataToImg"]>[0]) {
+  function boundsData(boxData: Parameters<Panel["scaleDataToImg"]>[0]): void;
+  function boundsData(boxData?: Parameters<Panel["scaleDataToImg"]>[0]) {
     if (boxData === undefined) {
       return $.extend({}, state.boundsData);
     }
@@ -436,14 +434,14 @@ function createBrush(
       .outerHeight(b.ymax - b.ymin + 1);
   }
 
-  function down(offsetCss?: OffsetType) {
+  function down(offsetCss?: Offset) {
     if (offsetCss === undefined) return state.down;
 
     state.down = offsetCss;
     return undefined;
   }
 
-  function up(offsetCss?: OffsetType) {
+  function up(offsetCss?: Offset) {
     if (offsetCss === undefined) return state.up;
 
     state.up = offsetCss;
@@ -463,7 +461,7 @@ function createBrush(
     updateDiv();
   }
 
-  function brushTo(offsetCss: OffsetType) {
+  function brushTo(offsetCss: Offset) {
     boundsCss(findBox(state.down, offsetCss));
     $div.show();
     updateDiv();
@@ -484,7 +482,7 @@ function createBrush(
     state.changeStartBounds = $.extend({}, state.boundsCss);
   }
 
-  function dragTo(offsetCss: OffsetType) {
+  function dragTo(offsetCss: Offset) {
     // How far the brush was dragged
     const dx = offsetCss.x - state.down.x;
     const dy = offsetCss.y - state.down.y;
@@ -545,7 +543,7 @@ function createBrush(
     state.resizeSides = whichResizeSides(state.down);
   }
 
-  function resizeTo(offsetCss: OffsetType) {
+  function resizeTo(offsetCss: Offset) {
     // How far the brush was dragged
     const dCss = {
       x: offsetCss.x - state.down.x,
@@ -638,4 +636,4 @@ function createBrush(
 
 export { createBrush };
 
-export type { BoundsType, BrushOptsType, BoundsCss };
+export type { Bounds, BrushOpts, BoundsCss };

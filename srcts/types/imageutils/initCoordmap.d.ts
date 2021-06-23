@@ -1,40 +1,44 @@
 /// <reference types="jquery" />
-import type { OffsetType } from "./findbox";
-import type { BoundsType } from "./createBrush";
-import type { PanelType } from "./initPanelScales";
-declare function findOrigin($el: JQuery<HTMLElement>): OffsetType;
-declare type OffsetCssType = Record<string, number>;
-declare type OffsetImgType = Record<string, number>;
-declare type CoordmapInitType = {
-    panels: Array<PanelType>;
+import type { Offset } from "./findbox";
+import type { Bounds } from "./createBrush";
+import type { Panel } from "./initPanelScales";
+declare function findOrigin($el: JQuery<HTMLElement>): Offset;
+declare type OffsetCss = {
+    [key: string]: number;
+};
+declare type OffsetImg = {
+    [key: string]: number;
+};
+declare type CoordmapInit = {
+    panels: Panel[];
     dims: {
         height: number;
         width: number;
     };
 };
-declare type CoordmapType = {
-    panels: Array<PanelType>;
+declare type Coordmap = {
+    panels: Panel[];
     dims: {
         height: number;
         width: number;
     };
-    mouseOffsetCss: (evt: JQuery.MouseEventBase) => OffsetType;
+    mouseOffsetCss: (evt: JQuery.MouseEventBase) => Offset;
     scaleCssToImg: {
-        (offsetCss: BoundsType): BoundsType;
-        (offsetCss: OffsetType): OffsetType;
-        (offsetCss: OffsetCssType): OffsetImgType;
+        (offsetCss: Bounds): Bounds;
+        (offsetCss: Offset): Offset;
+        (offsetCss: OffsetCss): OffsetImg;
     };
     scaleImgToCss: {
-        (offsetImg: BoundsType): BoundsType;
-        (offsetImg: OffsetType): OffsetType;
-        (offsetImg: OffsetImgType): OffsetCssType;
+        (offsetImg: Bounds): Bounds;
+        (offsetImg: Offset): Offset;
+        (offsetImg: OffsetImg): OffsetCss;
     };
-    imgToCssScalingRatio: () => OffsetType;
-    cssToImgScalingRatio: () => OffsetType;
-    getPanelCss: (offsetCss: OffsetCssType, expand?: number) => PanelType;
-    isInPanelCss: (offsetCss: OffsetCssType, expand?: number) => boolean;
+    imgToCssScalingRatio: () => Offset;
+    cssToImgScalingRatio: () => Offset;
+    getPanelCss: (offsetCss: OffsetCss, expand?: number) => Panel;
+    isInPanelCss: (offsetCss: OffsetCss, expand?: number) => boolean;
     mouseCoordinateSender: (inputId: string, clip?: boolean, nullOutside?: boolean) => (e: JQuery.MouseDownEvent) => void;
 };
-declare function initCoordmap($el: JQuery<HTMLElement>, coordmap_: CoordmapInitType): CoordmapType;
-export type { CoordmapType, CoordmapInitType };
+declare function initCoordmap($el: JQuery<HTMLElement>, coordmap_: CoordmapInit): Coordmap;
+export type { Coordmap, CoordmapInit };
 export { initCoordmap, findOrigin };

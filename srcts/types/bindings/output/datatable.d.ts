@@ -1,21 +1,21 @@
-import { OutputBinding } from "./OutputBinding";
-import type { errorsMessageValue } from "../../shiny/shinyapp";
+import { OutputBinding } from "./outputBinding";
+import type { ErrorsMessageValue } from "../../shiny/shinyapp";
 declare class DatatableOutputBinding extends OutputBinding {
     find(scope: HTMLElement): JQuery<HTMLElement>;
-    onValueError(el: HTMLElement, err: errorsMessageValue): void;
-    renderValue(el: HTMLElement, data: null | {
-        colnames?: Array<string>;
-        options?: null | {
+    onValueError(el: HTMLElement, err: ErrorsMessageValue): void;
+    renderValue(el: HTMLElement, data: {
+        colnames?: string[];
+        options?: {
             searching?: boolean;
             search?: {
                 caseInsensitive?: boolean;
             };
-        };
+        } | null;
         action?: string;
         escape?: string;
-        evalOptions?: Array<string>;
+        evalOptions?: string[];
         callback?: string;
         searchDelay?: number;
-    }): void;
+    } | null): void;
 }
 export { DatatableOutputBinding };

@@ -1,7 +1,7 @@
 import $ from "jquery";
 import { $escape, updateLabel, hasOwnProperty } from "../../utils";
 
-import { InputBinding } from "./InputBinding";
+import { InputBinding } from "./inputBinding";
 
 // interface TextHTMLElement extends NameValueHTMLElement {
 //   placeholder: any;
@@ -13,6 +13,12 @@ type TextReceiveMessageData = {
   value?: TextHTMLElement["value"];
   placeholder?: TextHTMLElement["placeholder"];
 };
+
+function getLabelNode(el: HTMLElement): JQuery<HTMLElement> {
+  return $(el)
+    .parent()
+    .find('label[for="' + $escape(el.id) + '"]');
+}
 
 class TextInputBindingBase extends InputBinding {
   find(scope: HTMLElement): JQuery<HTMLElement> {
@@ -80,12 +86,6 @@ class TextInputBindingBase extends InputBinding {
     };
     el;
   }
-
-  _getLabelNode(el: HTMLElement): JQuery<HTMLElement> {
-    return $(el)
-      .parent()
-      .find('label[for="' + $escape(el.id) + '"]');
-  }
 }
 
 class TextInputBinding extends TextInputBindingBase {
@@ -103,7 +103,7 @@ class TextInputBinding extends TextInputBindingBase {
     placeholder: string;
   } {
     return {
-      label: this._getLabelNode(el).text(),
+      label: getLabelNode(el).text(),
       value: el.value,
       placeholder: el.placeholder,
     };
@@ -111,7 +111,7 @@ class TextInputBinding extends TextInputBindingBase {
   receiveMessage(el: TextHTMLElement, data: TextReceiveMessageData): void {
     if (hasOwnProperty(data, "value")) this.setValue(el, data.value);
 
-    updateLabel(data.label, this._getLabelNode(el));
+    updateLabel(data.label, getLabelNode(el));
 
     if (hasOwnProperty(data, "placeholder")) el.placeholder = data.placeholder;
 

@@ -1,6 +1,6 @@
 import $ from "jquery";
-import type { priorityType } from "./InputPolicy";
-import { InputPolicy } from "./InputPolicy";
+import type { EventPriority } from "./inputPolicy";
+import { InputPolicy } from "./inputPolicy";
 import type { InputBinding } from "../bindings";
 import type { ShinyEventInputChanged } from "../events/shinyEvents";
 import { splitInputNameType } from "./splitInputNameType";
@@ -16,7 +16,7 @@ class InputEventDecorator extends InputPolicy {
     value: unknown,
     opts: {
       el: HTMLElement;
-      priority: priorityType;
+      priority: EventPriority;
       binding: InputBinding;
     }
   ): void {

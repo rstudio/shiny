@@ -1,5 +1,5 @@
 import $ from "jquery";
-import { InputBinding } from "./InputBinding";
+import { InputBinding } from "./inputBinding";
 import { $escape, hasOwnProperty, updateLabel } from "../../utils";
 import { indirectEval } from "../../utils/eval";
 
@@ -16,6 +16,27 @@ type SelectInputReceiveMessageData = {
 type SelectizeInfo = Selectize.IApi<string, unknown> & {
   settings: Selectize.IOptions<string, unknown>;
 };
+
+function getLabelNode(el: SelectHTMLElement): JQuery<HTMLElement> {
+  let escapedId = $escape(el.id);
+
+  if (isSelectize(el)) {
+    escapedId += "-selectized";
+  }
+  return $(el)
+    .parent()
+    .parent()
+    .find('label[for="' + escapedId + '"]');
+}
+// Return true if it's a selectize input, false if it's a regular select input.
+// eslint-disable-next-line camelcase
+function isSelectize(el: HTMLElement): boolean {
+  const config = $(el)
+    .parent()
+    .find('script[data-for="' + $escape(el.id) + '"]');
+
+  return config.length > 0;
+}
 
 class SelectInputBinding extends InputBinding {
   find(scope: HTMLElement): JQuery<HTMLElement> {
@@ -37,11 +58,11 @@ class SelectInputBinding extends InputBinding {
   getId(el: SelectHTMLElement): string {
     return InputBinding.prototype.getId.call(this, el) || el.name;
   }
-  getValue(el: HTMLElement): string | number | string[] {
+  getValue(el: HTMLElement): string[] | number | string {
     return $(el).val();
   }
   setValue(el: SelectHTMLElement, value: string): void {
-    if (!this._is_selectize(el)) {
+    if (!isSelectize(el)) {
       $(el).val(value);
     } else {
       const selectize = this._selectize(el);
@@ -53,7 +74,7 @@ class SelectInputBinding extends InputBinding {
   }
   getState(el: SelectHTMLElement): {
     label: JQuery<HTMLElement>;
-    value: string | number | string[];
+    value: string[] | number | string;
     options: Array<{ value: string; label: string }>;
   } {
     // Store options in an array of objects, each with with value and label
@@ -70,7 +91,7 @@ class SelectInputBinding extends InputBinding {
     }
 
     return {
-      label: this._getLabelNode(el),
+      label: getLabelNode(el),
       value: this.getValue(el),
       options: options,
     };
@@ -161,7 +182,7 @@ class SelectInputBinding extends InputBinding {
       this.setValue(el, data.value);
     }
 
-    updateLabel(data.label, this._getLabelNode(el));
+    updateLabel(data.label, getLabelNode(el));
 
     $(el).trigger("change");
   }
@@ -186,27 +207,7 @@ class SelectInputBinding extends InputBinding {
   initialize(el: SelectHTMLElement): void {
     this._selectize(el);
   }
-  _getLabelNode(el: SelectHTMLElement): JQuery<HTMLElement> {
-    let escapedId = $escape(el.id);
-
-    if (this._is_selectize(el)) {
-      escapedId += "-selectized";
-    }
-    return $(el)
-      .parent()
-      .parent()
-      .find('label[for="' + escapedId + '"]');
-  }
-  // Return true if it's a selectize input, false if it's a regular select input.
-  // eslint-disable-next-line camelcase
-  _is_selectize(el: HTMLElement): boolean {
-    const config = $(el)
-      .parent()
-      .find('script[data-for="' + $escape(el.id) + '"]');
-
-    return config.length > 0;
-  }
-  _selectize(el: SelectHTMLElement, update = false): SelectizeInfo {
+  protected _selectize(el: SelectHTMLElement, update = false): SelectizeInfo {
     if (!$.fn.selectize) return undefined;
     const $el = $(el);
     const config = $el
@@ -221,7 +222,7 @@ class SelectInputBinding extends InputBinding {
       searchField: ["label"];
       onItemRemove?: (value: string) => void;
       onDropdownClose?: () => void;
-    } & Record<string, unknown> = $.extend(
+    } & { [key: string]: unknown } = $.extend(
       {
         labelField: "label",
         valueField: "value",

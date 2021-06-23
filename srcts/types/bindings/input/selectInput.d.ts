@@ -1,5 +1,5 @@
 /// <reference types="selectize" />
-import { InputBinding } from "./InputBinding";
+import { InputBinding } from "./inputBinding";
 declare type SelectHTMLElement = HTMLSelectElement & {
     nonempty: boolean;
 };
@@ -17,11 +17,11 @@ declare class SelectInputBinding extends InputBinding {
     find(scope: HTMLElement): JQuery<HTMLElement>;
     getType(el: HTMLElement): string;
     getId(el: SelectHTMLElement): string;
-    getValue(el: HTMLElement): string | number | string[];
+    getValue(el: HTMLElement): string[] | number | string;
     setValue(el: SelectHTMLElement, value: string): void;
     getState(el: SelectHTMLElement): {
         label: JQuery<HTMLElement>;
-        value: string | number | string[];
+        value: string[] | number | string;
         options: Array<{
             value: string;
             label: string;
@@ -31,9 +31,7 @@ declare class SelectInputBinding extends InputBinding {
     subscribe(el: SelectHTMLElement, callback: (x: boolean) => void): void;
     unsubscribe(el: HTMLElement): void;
     initialize(el: SelectHTMLElement): void;
-    _getLabelNode(el: SelectHTMLElement): JQuery<HTMLElement>;
-    _is_selectize(el: HTMLElement): boolean;
-    _selectize(el: SelectHTMLElement, update?: boolean): SelectizeInfo;
+    protected _selectize(el: SelectHTMLElement, update?: boolean): SelectizeInfo;
 }
 export { SelectInputBinding };
 export type { SelectInputReceiveMessageData };

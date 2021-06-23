@@ -1,3 +1,3 @@
-import type { ShinyType } from "../shiny";
-declare function windowShiny(): ShinyType | null;
+import type { Shiny } from "../shiny";
+declare function windowShiny(): Shiny | null;
 export { windowShiny };

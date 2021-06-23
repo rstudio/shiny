@@ -1,8 +1,8 @@
 import type { InputBinding, OutputBinding } from "../bindings";
 import type { BindingRegistry } from "../bindings/registry";
 import type { InputRateDecorator, InputValidateDecorator } from "../inputPolicies";
-declare type bindScope = HTMLElement | JQuery<HTMLElement>;
-declare type bindInputsCtx = {
+declare type BindScope = HTMLElement | JQuery<HTMLElement>;
+declare type BindInputsCtx = {
     inputs: InputValidateDecorator;
     inputsRate: InputRateDecorator;
     inputBindings: BindingRegistry<InputBinding>;
@@ -11,16 +11,18 @@ declare type bindInputsCtx = {
     maybeAddThemeObserver: (el: HTMLElement) => void;
     initDeferredIframes: () => void;
 };
-declare function bindInputs(shinyCtx: bindInputsCtx, scope?: bindScope): Record<string, {
-    value: unknown;
-    opts: {
-        immediate: boolean;
-        binding: InputBinding;
-        el: HTMLElement;
+declare function bindInputs(shinyCtx: BindInputsCtx, scope?: BindScope): {
+    [key: string]: {
+        value: unknown;
+        opts: {
+            immediate: boolean;
+            binding: InputBinding;
+            el: HTMLElement;
+        };
     };
-}>;
-declare function _bindAll(shinyCtx: bindInputsCtx, scope: bindScope): ReturnType<typeof bindInputs>;
-declare function unbindAll(shinyCtx: bindInputsCtx, scope: bindScope, includeSelf?: boolean): void;
-declare function bindAll(shinyCtx: bindInputsCtx, scope: bindScope): void;
+};
+declare function _bindAll(shinyCtx: BindInputsCtx, scope: BindScope): ReturnType<typeof bindInputs>;
+declare function unbindAll(shinyCtx: BindInputsCtx, scope: BindScope, includeSelf?: boolean): void;
+declare function bindAll(shinyCtx: BindInputsCtx, scope: BindScope): void;
 export { unbindAll, bindAll, _bindAll };
-export type { bindScope, bindInputsCtx };
+export type { BindScope, BindInputsCtx };

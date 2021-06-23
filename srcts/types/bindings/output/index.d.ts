@@ -1,5 +1,5 @@
 import { BindingRegistry } from "../registry";
-import { OutputBinding } from "./OutputBinding";
+import { OutputBinding } from "./outputBinding";
 declare type InitOutputBindings = {
     outputBindings: BindingRegistry<OutputBinding>;
 };

@@ -1,5 +1,5 @@
 import $ from "jquery";
-import { OutputBinding } from "./OutputBinding";
+import { OutputBinding } from "./outputBinding";
 import {
   createBrushHandler,
   createClickHandler,
@@ -15,8 +15,8 @@ import {
   hasOwnProperty,
 } from "../../utils";
 import { isIE, IEVersion } from "../../utils/browser";
-import type { CoordmapInitType } from "../../imageutils/initCoordmap";
-import type { errorsMessageValue } from "../../shiny/shinyapp";
+import type { CoordmapInit } from "../../imageutils/initCoordmap";
+import type { ErrorsMessageValue } from "../../shiny/shinyapp";
 
 class ImageOutputBinding extends OutputBinding {
   find(scope: HTMLElement): JQuery<HTMLElement> {
@@ -26,9 +26,9 @@ class ImageOutputBinding extends OutputBinding {
   renderValue(
     el: HTMLElement,
     data: {
-      coordmap: CoordmapInitType;
+      coordmap: CoordmapInit;
       error?: string;
-    } & Record<string, string>
+    } & { [key: string]: string }
   ): void {
     // The overall strategy:
     // * Clear out existing image and event handlers.
@@ -65,34 +65,40 @@ class ImageOutputBinding extends OutputBinding {
 
     // If value is undefined, return alternate. Sort of like ||, except it won't
     // return alternate for other falsy values (0, false, null).
-    function OR(value, alternate) {
+    function ifUndefined(value, alternate) {
       if (value === undefined) return alternate;
       return value;
     }
 
     const opts = {
       clickId: $el.data("click-id"),
-      clickClip: OR(strToBool($el.data("click-clip")), true),
+      clickClip: ifUndefined(strToBool($el.data("click-clip")), true),
 
       dblclickId: $el.data("dblclick-id"),
-      dblclickClip: OR(strToBool($el.data("dblclick-clip")), true),
-      dblclickDelay: OR($el.data("dblclick-delay"), 400),
+      dblclickClip: ifUndefined(strToBool($el.data("dblclick-clip")), true),
+      dblclickDelay: ifUndefined($el.data("dblclick-delay"), 400),
 
       hoverId: $el.data("hover-id"),
-      hoverClip: OR(strToBool($el.data("hover-clip")), true),
-      hoverDelayType: OR($el.data("hover-delay-type"), "debounce"),
-      hoverDelay: OR($el.data("hover-delay"), 300),
-      hoverNullOutside: OR(strToBool($el.data("hover-null-outside")), false),
+      hoverClip: ifUndefined(strToBool($el.data("hover-clip")), true),
+      hoverDelayType: ifUndefined($el.data("hover-delay-type"), "debounce"),
+      hoverDelay: ifUndefined($el.data("hover-delay"), 300),
+      hoverNullOutside: ifUndefined(
+        strToBool($el.data("hover-null-outside")),
+        false
+      ),
 
       brushId: $el.data("brush-id"),
-      brushClip: OR(strToBool($el.data("brush-clip")), true),
-      brushDelayType: OR($el.data("brush-delay-type"), "debounce"),
-      brushDelay: OR($el.data("brush-delay"), 300),
-      brushFill: OR($el.data("brush-fill"), "#666"),
-      brushStroke: OR($el.data("brush-stroke"), "#000"),
-      brushOpacity: OR($el.data("brush-opacity"), 0.3),
-      brushDirection: OR($el.data("brush-direction"), "xy"),
-      brushResetOnNew: OR(strToBool($el.data("brush-reset-on-new")), false),
+      brushClip: ifUndefined(strToBool($el.data("brush-clip")), true),
+      brushDelayType: ifUndefined($el.data("brush-delay-type"), "debounce"),
+      brushDelay: ifUndefined($el.data("brush-delay"), 300),
+      brushFill: ifUndefined($el.data("brush-fill"), "#666"),
+      brushStroke: ifUndefined($el.data("brush-stroke"), "#000"),
+      brushOpacity: ifUndefined($el.data("brush-opacity"), 0.3),
+      brushDirection: ifUndefined($el.data("brush-direction"), "xy"),
+      brushResetOnNew: ifUndefined(
+        strToBool($el.data("brush-reset-on-new")),
+        false
+      ),
 
       coordmap: data.coordmap,
     };
@@ -105,7 +111,7 @@ class ImageOutputBinding extends OutputBinding {
     }
 
     // Copy items from data to img. Don't set the coordmap as an attribute.
-    $.each(data, function (key, value) {
+    $.each(data, function (key: string, value) {
       if (value === null || key === "coordmap") {
         return;
       }
@@ -257,7 +263,7 @@ class ImageOutputBinding extends OutputBinding {
     });
   }
 
-  renderError(el: HTMLElement, err: errorsMessageValue): void {
+  renderError(el: HTMLElement, err: ErrorsMessageValue): void {
     $(el).find("img").trigger("reset");
     OutputBinding.prototype.renderError.call(this, el, err);
   }
@@ -281,8 +287,8 @@ class ImageOutputBinding extends OutputBinding {
 
   resize(
     el: HTMLElement,
-    width: string | number,
-    height: string | number
+    width: number | string,
+    height: number | string
   ): void {
     $(el).find("img").trigger("resize");
     return;

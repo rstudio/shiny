@@ -1,5 +1,5 @@
 import { BindingRegistry } from "../registry";
-import { InputBinding } from "./InputBinding";
+import { InputBinding } from "./inputBinding";
 import { FileInputBinding } from "./fileinput";
 declare type InitInputBindings = {
     inputBindings: BindingRegistry<InputBinding>;

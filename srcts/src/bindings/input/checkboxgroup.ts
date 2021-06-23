@@ -1,8 +1,8 @@
 import $ from "jquery";
 
-import { InputBinding } from "./InputBinding";
+import { InputBinding } from "./inputBinding";
 import { $escape, hasOwnProperty, updateLabel } from "../../utils";
-import { CheckedHTMLElement } from "./checkbox";
+import type { CheckedHTMLElement } from "./checkbox";
 
 type CheckboxGroupHTMLElement = CheckedHTMLElement;
 type ValueLabelObject = {
@@ -17,12 +17,38 @@ type CheckboxGroupReceiveMessageData = {
 
 type CheckboxGroupValue = CheckboxGroupHTMLElement["value"];
 
+// Get the DOM element that contains the top-level label
+function getLabelNode(el: CheckboxGroupHTMLElement): JQuery<HTMLElement> {
+  return $(el).find('label[for="' + $escape(el.id) + '"]');
+}
+// Given an input DOM object, get the associated label. Handles labels
+// that wrap the input as well as labels associated with 'for' attribute.
+function getLabel(obj: HTMLElement): string | null {
+  // If <label><input /><span>label text</span></label>
+  if ((obj.parentNode as HTMLElement).tagName === "LABEL") {
+    return $(obj.parentNode).find("span").text().trim();
+  }
+
+  return null;
+}
+// Given an input DOM object, set the associated label. Handles labels
+// that wrap the input as well as labels associated with 'for' attribute.
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function setLabel(obj: HTMLElement, value: string): null {
+  // If <label><input /><span>label text</span></label>
+  if ((obj.parentNode as HTMLElement).tagName === "LABEL") {
+    $(obj.parentNode).find("span").text(value);
+  }
+
+  return null;
+}
+
 class CheckboxGroupInputBinding extends InputBinding {
   find(scope: HTMLElement): JQuery<HTMLElement> {
     return $(scope).find(".shiny-input-checkboxgroup");
   }
 
-  getValue(el: CheckboxGroupHTMLElement): Array<CheckboxGroupValue> {
+  getValue(el: CheckboxGroupHTMLElement): CheckboxGroupValue[] {
     // Select the checkbox objects that have name equal to the grouping div's id
     const $objs = $('input:checkbox[name="' + $escape(el.id) + '"]:checked');
     const values = new Array($objs.length);
@@ -32,7 +58,7 @@ class CheckboxGroupInputBinding extends InputBinding {
     }
     return values;
   }
-  setValue(el: HTMLElement, value: Array<string> | string): void {
+  setValue(el: HTMLElement, value: string[] | string): void {
     // Clear all checkboxes
     $('input:checkbox[name="' + $escape(el.id) + '"]').prop("checked", false);
 
@@ -61,7 +87,7 @@ class CheckboxGroupInputBinding extends InputBinding {
   getState(el: CheckboxGroupHTMLElement): {
     label: string;
     value: ReturnType<CheckboxGroupInputBinding["getValue"]>;
-    options: Array<ValueLabelObject>;
+    options: ValueLabelObject[];
   } {
     const $objs = $(
       'input:checkbox[name="' + $escape(el.id) + '"]'
@@ -71,11 +97,11 @@ class CheckboxGroupInputBinding extends InputBinding {
     const options = new Array($objs.length);
 
     for (let i = 0; i < options.length; i++) {
-      options[i] = { value: $objs[i].value, label: this._getLabel($objs[i]) };
+      options[i] = { value: $objs[i].value, label: getLabel($objs[i]) };
     }
 
     return {
-      label: this._getLabelNode(el).text(),
+      label: getLabelNode(el).text(),
       value: this.getValue(el),
       options: options,
     };
@@ -97,7 +123,7 @@ class CheckboxGroupInputBinding extends InputBinding {
 
     if (hasOwnProperty(data, "value")) this.setValue(el, data.value);
 
-    updateLabel(data.label, this._getLabelNode(el));
+    updateLabel(data.label, getLabelNode(el));
 
     $(el).trigger("change");
   }
@@ -111,31 +137,6 @@ class CheckboxGroupInputBinding extends InputBinding {
   }
   unsubscribe(el: CheckboxGroupHTMLElement): void {
     $(el).off(".checkboxGroupInputBinding");
-  }
-
-  // Get the DOM element that contains the top-level label
-  _getLabelNode(el: CheckboxGroupHTMLElement): JQuery<HTMLElement> {
-    return $(el).find('label[for="' + $escape(el.id) + '"]');
-  }
-  // Given an input DOM object, get the associated label. Handles labels
-  // that wrap the input as well as labels associated with 'for' attribute.
-  _getLabel(obj: HTMLElement): string | null {
-    // If <label><input /><span>label text</span></label>
-    if ((obj.parentNode as HTMLElement).tagName === "LABEL") {
-      return $(obj.parentNode).find("span").text().trim();
-    }
-
-    return null;
-  }
-  // Given an input DOM object, set the associated label. Handles labels
-  // that wrap the input as well as labels associated with 'for' attribute.
-  _setLabel(obj: HTMLElement, value: string): null {
-    // If <label><input /><span>label text</span></label>
-    if ((obj.parentNode as HTMLElement).tagName === "LABEL") {
-      $(obj.parentNode).find("span").text(value);
-    }
-
-    return null;
   }
 }
 

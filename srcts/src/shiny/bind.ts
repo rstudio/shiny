@@ -1,6 +1,6 @@
 import $ from "jquery";
 import type { InputBinding, OutputBinding } from "../bindings";
-import { OutputBindingAdapter } from "../bindings/output_adapter";
+import { OutputBindingAdapter } from "../bindings/outputAdapter";
 import type { BindingRegistry } from "../bindings/registry";
 import type {
   InputRateDecorator,
@@ -11,7 +11,7 @@ import { sendImageSizeFns } from "./sendImageSize";
 
 const boundInputs = {};
 
-type bindScope = HTMLElement | JQuery<HTMLElement>;
+type BindScope = HTMLElement | JQuery<HTMLElement>;
 
 // todo make sure allowDeferred can NOT be supplied and still work
 function valueChangeCallback(inputs, binding, el, allowDeferred) {
@@ -33,7 +33,7 @@ function valueChangeCallback(inputs, binding, el, allowDeferred) {
   }
 }
 
-type bindInputsCtx = {
+type BindInputsCtx = {
   inputs: InputValidateDecorator;
   inputsRate: InputRateDecorator;
   inputBindings: BindingRegistry<InputBinding>;
@@ -43,15 +43,14 @@ type bindInputsCtx = {
   initDeferredIframes: () => void;
 };
 function bindInputs(
-  shinyCtx: bindInputsCtx,
-  scope: bindScope = document.documentElement
-): Record<
-  string,
-  {
+  shinyCtx: BindInputsCtx,
+  scope: BindScope = document.documentElement
+): {
+  [key: string]: {
     value: unknown;
     opts: { immediate: boolean; binding: InputBinding; el: HTMLElement };
-  }
-> {
+  };
+} {
   const { inputs, inputsRate, inputBindings } = shinyCtx;
   const bindings = inputBindings.getBindings();
 
@@ -125,8 +124,8 @@ function bindOutputs(
     sendOutputHiddenState,
     maybeAddThemeObserver,
     outputBindings,
-  }: bindInputsCtx,
-  scope: bindScope = document.documentElement
+  }: BindInputsCtx,
+  scope: BindScope = document.documentElement
 ): void {
   const $scope = $(scope);
 
@@ -183,7 +182,7 @@ function bindOutputs(
 }
 
 function unbindInputs(
-  scope: bindScope = document.documentElement,
+  scope: BindScope = document.documentElement,
   includeSelf = false
 ) {
   const inputs: Array<HTMLElement | JQuery<HTMLElement>> = $(scope)
@@ -213,8 +212,8 @@ function unbindInputs(
   }
 }
 function unbindOutputs(
-  { sendOutputHiddenState }: bindInputsCtx,
-  scope: bindScope = document.documentElement,
+  { sendOutputHiddenState }: BindInputsCtx,
+  scope: BindScope = document.documentElement,
   includeSelf = false
 ) {
   const outputs: Array<HTMLElement | JQuery<HTMLElement>> = $(scope)
@@ -248,29 +247,31 @@ function unbindOutputs(
   setTimeout(sendOutputHiddenState, 0);
 }
 
+// (Named used before TS conversion)
+// eslint-disable-next-line @typescript-eslint/naming-convention
 function _bindAll(
-  shinyCtx: bindInputsCtx,
-  scope: bindScope
+  shinyCtx: BindInputsCtx,
+  scope: BindScope
 ): ReturnType<typeof bindInputs> {
   bindOutputs(shinyCtx, scope);
   return bindInputs(shinyCtx, scope);
 }
 function unbindAll(
-  shinyCtx: bindInputsCtx,
-  scope: bindScope,
+  shinyCtx: BindInputsCtx,
+  scope: BindScope,
   includeSelf = false
 ): void {
   unbindInputs(scope, includeSelf);
   unbindOutputs(shinyCtx, scope, includeSelf);
 }
-function bindAll(shinyCtx: bindInputsCtx, scope: bindScope): void {
+function bindAll(shinyCtx: BindInputsCtx, scope: BindScope): void {
   // _bindAll returns input values; it doesn't send them to the server.
   // Shiny.bindAll needs to send the values to the server.
   const currentInputItems = _bindAll(shinyCtx, scope);
 
   const inputs = shinyCtx.inputs;
 
-  $.each(currentInputItems, function (name, item) {
+  $.each(currentInputItems, function (name: string, item) {
     inputs.setInput(name, item.value, item.opts);
   });
 
@@ -283,4 +284,4 @@ function bindAll(shinyCtx: bindInputsCtx, scope: bindScope): void {
 
 export { unbindAll, bindAll, _bindAll };
 
-export type { bindScope, bindInputsCtx };
+export type { BindScope, BindInputsCtx };

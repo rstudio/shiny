@@ -1,5 +1,5 @@
 import $ from "jquery";
-import { InputBinding } from "./InputBinding";
+import { InputBinding } from "./inputBinding";
 
 import { hasOwnProperty } from "../../utils";
 

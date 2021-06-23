@@ -423,15 +423,15 @@
       var OBJECT_ALREADY_INITIALIZED = "Object already initialized";
       var WeakMap = global8.WeakMap;
       var set;
-      var get2;
+      var get3;
       var has5;
       var enforce = function(it) {
-        return has5(it) ? get2(it) : set(it, {});
+        return has5(it) ? get3(it) : set(it, {});
       };
       var getterFor = function(TYPE) {
         return function(it) {
           var state;
-          if (!isObject7(it) || (state = get2(it)).type !== TYPE) {
+          if (!isObject7(it) || (state = get3(it)).type !== TYPE) {
             throw TypeError("Incompatible receiver, " + TYPE + " required");
           }
           return state;
@@ -449,7 +449,7 @@
           wmset.call(store, it, metadata);
           return metadata;
         };
-        get2 = function(it) {
+        get3 = function(it) {
           return wmget.call(store, it) || {};
         };
         has5 = function(it) {
@@ -465,7 +465,7 @@
           createNonEnumerableProperty4(it, STATE, metadata);
           return metadata;
         };
-        get2 = function(it) {
+        get3 = function(it) {
           return objectHas(it, STATE) ? it[STATE] : {};
         };
         has5 = function(it) {
@@ -479,7 +479,7 @@
       var STATE;
       module.exports = {
         set: set,
-        get: get2,
+        get: get3,
         has: has5,
         enforce: enforce,
         getterFor: getterFor
@@ -989,7 +989,7 @@
   var require_engine_v8_version = __commonJS({
     "node_modules/core-js/internals/engine-v8-version.js": function(exports, module) {
       var global8 = require_global();
-      var userAgent = require_engine_user_agent();
+      var userAgent2 = require_engine_user_agent();
       var process2 = global8.process;
       var versions = process2 && process2.versions;
       var v8 = versions && versions.v8;
@@ -998,10 +998,10 @@
       if (v8) {
         match = v8.split(".");
         version = match[0] < 4 ? 1 : match[0] + match[1];
-      } else if (userAgent) {
-        match = userAgent.match(/Edge\/(\d+)/);
+      } else if (userAgent2) {
+        match = userAgent2.match(/Edge\/(\d+)/);
         if (!match || match[1] >= 74) {
-          match = userAgent.match(/Chrome\/(\d+)/);
+          match = userAgent2.match(/Chrome\/(\d+)/);
           if (match)
             version = match[1];
         }
@@ -1514,8 +1514,8 @@
           var boundFunction = bind2(callbackfn, that, 3);
           var length = toLength8(self2.length);
           var index = 0;
-          var create4 = specificCreate || arraySpeciesCreate3;
-          var target = IS_MAP ? create4($this, length) : IS_FILTER || IS_FILTER_OUT ? create4($this, 0) : void 0;
+          var create5 = specificCreate || arraySpeciesCreate3;
+          var target = IS_MAP ? create5($this, length) : IS_FILTER || IS_FILTER_OUT ? create5($this, 0) : void 0;
           var value, result;
           for (; length > index; index++)
             if (NO_HOLES || index in self2) {
@@ -1641,7 +1641,7 @@
         return NullProtoObject();
       };
       hiddenKeys2[IE_PROTO] = true;
-      module.exports = Object.create || function create4(O, Properties) {
+      module.exports = Object.create || function create5(O, Properties) {
         var result;
         if (O !== null) {
           EmptyConstructor[PROTOTYPE2] = anObject10(O);
@@ -1659,14 +1659,14 @@
   var require_add_to_unscopables = __commonJS({
     "node_modules/core-js/internals/add-to-unscopables.js": function(exports, module) {
       var wellKnownSymbol5 = require_well_known_symbol();
-      var create4 = require_object_create();
+      var create5 = require_object_create();
       var definePropertyModule2 = require_object_define_property();
       var UNSCOPABLES = wellKnownSymbol5("unscopables");
       var ArrayPrototype = Array.prototype;
       if (ArrayPrototype[UNSCOPABLES] == void 0) {
         definePropertyModule2.f(ArrayPrototype, UNSCOPABLES, {
           configurable: true,
-          value: create4(null)
+          value: create5(null)
         });
       }
       module.exports = function(key) {
@@ -1896,7 +1896,7 @@
     "node_modules/core-js/internals/create-iterator-constructor.js": function(exports, module) {
       "use strict";
       var IteratorPrototype = require_iterators_core().IteratorPrototype;
-      var create4 = require_object_create();
+      var create5 = require_object_create();
       var createPropertyDescriptor2 = require_create_property_descriptor();
       var setToStringTag2 = require_set_to_string_tag();
       var Iterators = require_iterators();
@@ -1905,7 +1905,7 @@
       };
       module.exports = function(IteratorConstructor, NAME2, next2) {
         var TO_STRING_TAG2 = NAME2 + " Iterator";
-        IteratorConstructor.prototype = create4(IteratorPrototype, { next: createPropertyDescriptor2(1, next2) });
+        IteratorConstructor.prototype = create5(IteratorPrototype, { next: createPropertyDescriptor2(1, next2) });
         setToStringTag2(IteratorConstructor, TO_STRING_TAG2, false, true);
         Iterators[TO_STRING_TAG2] = returnThis;
         return IteratorConstructor;
@@ -2529,7 +2529,7 @@
           return getInternalState3(this)[key2];
         } });
       };
-      var get2 = function(view, count, index, isLittleEndian) {
+      var get3 = function(view, count, index, isLittleEndian) {
         var intIndex = toIndex(index);
         var store = getInternalState3(view);
         if (intIndex + count > store.byteLength)
@@ -2590,30 +2590,30 @@
         }
         redefineAll($DataView[PROTOTYPE2], {
           getInt8: function getInt8(byteOffset) {
-            return get2(this, 1, byteOffset)[0] << 24 >> 24;
+            return get3(this, 1, byteOffset)[0] << 24 >> 24;
           },
           getUint8: function getUint8(byteOffset) {
-            return get2(this, 1, byteOffset)[0];
+            return get3(this, 1, byteOffset)[0];
           },
           getInt16: function getInt16(byteOffset) {
-            var bytes = get2(this, 2, byteOffset, arguments.length > 1 ? arguments[1] : void 0);
+            var bytes = get3(this, 2, byteOffset, arguments.length > 1 ? arguments[1] : void 0);
             return (bytes[1] << 8 | bytes[0]) << 16 >> 16;
           },
           getUint16: function getUint16(byteOffset) {
-            var bytes = get2(this, 2, byteOffset, arguments.length > 1 ? arguments[1] : void 0);
+            var bytes = get3(this, 2, byteOffset, arguments.length > 1 ? arguments[1] : void 0);
             return bytes[1] << 8 | bytes[0];
           },
           getInt32: function getInt32(byteOffset) {
-            return unpackInt32(get2(this, 4, byteOffset, arguments.length > 1 ? arguments[1] : void 0));
+            return unpackInt32(get3(this, 4, byteOffset, arguments.length > 1 ? arguments[1] : void 0));
           },
           getUint32: function getUint32(byteOffset) {
-            return unpackInt32(get2(this, 4, byteOffset, arguments.length > 1 ? arguments[1] : void 0)) >>> 0;
+            return unpackInt32(get3(this, 4, byteOffset, arguments.length > 1 ? arguments[1] : void 0)) >>> 0;
           },
           getFloat32: function getFloat32(byteOffset) {
-            return unpackIEEE754(get2(this, 4, byteOffset, arguments.length > 1 ? arguments[1] : void 0), 23);
+            return unpackIEEE754(get3(this, 4, byteOffset, arguments.length > 1 ? arguments[1] : void 0), 23);
           },
           getFloat64: function getFloat64(byteOffset) {
-            return unpackIEEE754(get2(this, 8, byteOffset, arguments.length > 1 ? arguments[1] : void 0), 52);
+            return unpackIEEE754(get3(this, 8, byteOffset, arguments.length > 1 ? arguments[1] : void 0), 52);
           },
           setInt8: function setInt8(byteOffset, value) {
             set(this, 1, byteOffset, packInt8, value);
@@ -2831,15 +2831,15 @@
   // srcts/src/utils/browser.ts
   var isQtVal = false;
   var isIEVal = false;
-  var IEVersionVal = -1;
+  var versionIE = -1;
   function setIsQt(isQt2) {
     isQtVal = isQt2;
   }
   function setIsIE(isIE2) {
     isIEVal = isIE2;
   }
-  function setIEVersion(IEVersion_) {
-    IEVersionVal = IEVersion_;
+  function setIEVersion(versionIE_) {
+    versionIE = versionIE_;
   }
   function isQt() {
     return isQtVal;
@@ -2848,39 +2848,39 @@
     return isIEVal;
   }
   function IEVersion() {
-    return IEVersionVal;
+    return versionIE;
   }
 
   // srcts/src/utils/userAgent.ts
-  var userAgentVal;
-  function setUserAgent(userAgent) {
-    userAgentVal = userAgent;
+  var userAgent;
+  function setUserAgent(userAgent_) {
+    userAgent = userAgent_;
   }
 
   // srcts/src/initialize/browser.ts
   function getIEVersion() {
-    var msie = userAgentVal.indexOf("MSIE ");
+    var msie = userAgent.indexOf("MSIE ");
     if (isIE() && msie > 0) {
-      return parseInt(userAgentVal.substring(msie + 5, userAgentVal.indexOf(".", msie)), 10);
+      return parseInt(userAgent.substring(msie + 5, userAgent.indexOf(".", msie)), 10);
     }
-    var trident = userAgentVal.indexOf("Trident/");
+    var trident = userAgent.indexOf("Trident/");
     if (trident > 0) {
-      var rv = userAgentVal.indexOf("rv:");
-      return parseInt(userAgentVal.substring(rv + 3, userAgentVal.indexOf(".", rv)), 10);
+      var rv = userAgent.indexOf("rv:");
+      return parseInt(userAgent.substring(rv + 3, userAgent.indexOf(".", rv)), 10);
     }
     return -1;
   }
   function determineBrowserInfo() {
-    if (/\bQt\//.test(userAgentVal)) {
+    if (/\bQt\//.test(userAgent)) {
       (0, import_jquery3.default)(document.documentElement).addClass("qt");
       setIsQt(true);
     } else {
       setIsQt(false);
     }
-    if (/\bQt\/5/.test(userAgentVal) && /Linux/.test(userAgentVal)) {
+    if (/\bQt\/5/.test(userAgent) && /Linux/.test(userAgent)) {
       (0, import_jquery3.default)(document.documentElement).addClass("qt5");
     }
-    setIsIE(/MSIE|Trident|Edge/.test(userAgentVal));
+    setIsIE(/MSIE|Trident|Edge/.test(userAgent));
     setIEVersion(getIEVersion());
   }
 
@@ -3356,16 +3356,16 @@
 
   // srcts/src/utils/blob.ts
   var import_jquery4 = __toModule(require_jquery());
-  var BlobBuilder;
-  function setBlobBuilder(BlobBuilder_) {
-    BlobBuilder = BlobBuilder_;
+  var blobBuilderClass;
+  function setBlobBuilder(blobBuilderClass_) {
+    blobBuilderClass = blobBuilderClass_;
     return;
   }
   function makeBlob(parts) {
     try {
       return new Blob(parts);
     } catch (e) {
-      var blobBuilder = new BlobBuilder();
+      var blobBuilder = new blobBuilderClass();
       import_jquery4.default.each(parts, function(i, part) {
         blobBuilder.append(part);
       });
@@ -3373,7 +3373,7 @@
     }
   }
 
-  // srcts/src/utils/Object.ts
+  // srcts/src/utils/object.ts
   function hasOwnProperty(x, y) {
     return Object.prototype.hasOwnProperty.call(x, y);
   }
@@ -3669,6 +3669,7 @@
   var BindingRegistry = /* @__PURE__ */ function() {
     function BindingRegistry2() {
       _classCallCheck(this, BindingRegistry2);
+      _defineProperty(this, "name", void 0);
       _defineProperty(this, "bindings", []);
       _defineProperty(this, "bindingNames", {});
     }
@@ -3713,7 +3714,7 @@
     return BindingRegistry2;
   }();
 
-  // srcts/src/bindings/input/InputBinding.ts
+  // srcts/src/bindings/input/inputBinding.ts
   function _classCallCheck2(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
       throw new TypeError("Cannot call a class as a function");
@@ -4571,6 +4572,15 @@
     };
     return _getPrototypeOf2(o);
   }
+  function getLabelNode(el) {
+    return (0, import_jquery7.default)(el).find('label[for="' + $escape(el.id) + '"]');
+  }
+  function getLabel(obj) {
+    if (obj.parentNode.tagName === "LABEL") {
+      return (0, import_jquery7.default)(obj.parentNode).find("span").text().trim();
+    }
+    return null;
+  }
   var CheckboxGroupInputBinding = /* @__PURE__ */ function(_InputBinding) {
     _inherits2(CheckboxGroupInputBinding2, _InputBinding);
     var _super = _createSuper2(CheckboxGroupInputBinding2);
@@ -4613,11 +4623,11 @@
         for (var i = 0; i < options.length; i++) {
           options[i] = {
             value: $objs[i].value,
-            label: this._getLabel($objs[i])
+            label: getLabel($objs[i])
           };
         }
         return {
-          label: this._getLabelNode(el).text(),
+          label: getLabelNode(el).text(),
           value: this.getValue(el),
           options: options
         };
@@ -4633,7 +4643,7 @@
         }
         if (hasOwnProperty(data, "value"))
           this.setValue(el, data.value);
-        updateLabel(data.label, this._getLabelNode(el));
+        updateLabel(data.label, getLabelNode(el));
         (0, import_jquery7.default)(el).trigger("change");
       }
     }, {
@@ -4647,27 +4657,6 @@
       key: "unsubscribe",
       value: function unsubscribe(el) {
         (0, import_jquery7.default)(el).off(".checkboxGroupInputBinding");
-      }
-    }, {
-      key: "_getLabelNode",
-      value: function _getLabelNode(el) {
-        return (0, import_jquery7.default)(el).find('label[for="' + $escape(el.id) + '"]');
-      }
-    }, {
-      key: "_getLabel",
-      value: function _getLabel(obj) {
-        if (obj.parentNode.tagName === "LABEL") {
-          return (0, import_jquery7.default)(obj.parentNode).find("span").text().trim();
-        }
-        return null;
-      }
-    }, {
-      key: "_setLabel",
-      value: function _setLabel(obj, value) {
-        if (obj.parentNode.tagName === "LABEL") {
-          (0, import_jquery7.default)(obj.parentNode).find("span").text(value);
-        }
-        return null;
       }
     }]);
     return CheckboxGroupInputBinding2;
@@ -4835,7 +4824,7 @@
     if (typeof Reflect !== "undefined" && Reflect.get) {
       _get = Reflect.get;
     } else {
-      _get = function _get3(target2, property2, receiver2) {
+      _get = function _get2(target2, property2, receiver2) {
         var base = _superPropBase(target2, property2);
         if (!base)
           return;
@@ -4917,6 +4906,9 @@
     };
     return _getPrototypeOf3(o);
   }
+  function getLabelNode2(el) {
+    return (0, import_jquery8.default)(el).parent().find('label[for="' + $escape(el.id) + '"]');
+  }
   var TextInputBindingBase = /* @__PURE__ */ function(_InputBinding) {
     _inherits3(TextInputBindingBase2, _InputBinding);
     var _super = _createSuper3(TextInputBindingBase2);
@@ -4985,11 +4977,6 @@
         };
         el;
       }
-    }, {
-      key: "_getLabelNode",
-      value: function _getLabelNode(el) {
-        return (0, import_jquery8.default)(el).parent().find('label[for="' + $escape(el.id) + '"]');
-      }
     }]);
     return TextInputBindingBase2;
   }(InputBinding);
@@ -5014,7 +5001,7 @@
       key: "getState",
       value: function getState(el) {
         return {
-          label: this._getLabelNode(el).text(),
+          label: getLabelNode2(el).text(),
           value: el.value,
           placeholder: el.placeholder
         };
@@ -5024,7 +5011,7 @@
       value: function receiveMessage(el, data) {
         if (hasOwnProperty(data, "value"))
           this.setValue(el, data.value);
-        updateLabel(data.label, this._getLabelNode(el));
+        updateLabel(data.label, getLabelNode2(el));
         if (hasOwnProperty(data, "placeholder"))
           el.placeholder = data.placeholder;
         (0, import_jquery8.default)(el).trigger("change");
@@ -5130,6 +5117,9 @@
     };
     return _getPrototypeOf4(o);
   }
+  function getLabelNode3(el) {
+    return (0, import_jquery9.default)(el).parent().find('label[for="' + $escape(el.id) + '"]');
+  }
   var NumberInputBinding = /* @__PURE__ */ function(_TextInputBindingBase) {
     _inherits4(NumberInputBinding2, _TextInputBindingBase);
     var _super = _createSuper4(NumberInputBinding2);
@@ -5178,24 +5168,19 @@
           el.max = data.max;
         if (hasOwnProperty(data, "step"))
           el.step = data.step;
-        updateLabel(data.label, this._getLabelNode(el));
+        updateLabel(data.label, getLabelNode3(el));
         (0, import_jquery9.default)(el).trigger("change");
       }
     }, {
       key: "getState",
       value: function getState(el) {
         return {
-          label: this._getLabelNode(el).text(),
+          label: getLabelNode3(el).text(),
           value: this.getValue(el),
           min: Number(el.min),
           max: Number(el.max),
           step: Number(el.step)
         };
-      }
-    }, {
-      key: "_getLabelNode",
-      value: function _getLabelNode(el) {
-        return (0, import_jquery9.default)(el).parent().find('label[for="' + $escape(el.id) + '"]');
       }
     }]);
     return NumberInputBinding2;
@@ -5536,6 +5521,15 @@
     };
     return _getPrototypeOf7(o);
   }
+  function getLabelNode4(el) {
+    return (0, import_jquery12.default)(el).parent().find('label[for="' + $escape(el.id) + '"]');
+  }
+  function getLabel2(obj) {
+    if (obj.parentNode.tagName === "LABEL") {
+      return (0, import_jquery12.default)(obj.parentNode).find("span").text().trim();
+    }
+    return null;
+  }
   var RadioInputBinding = /* @__PURE__ */ function(_InputBinding) {
     _inherits7(RadioInputBinding2, _InputBinding);
     var _super = _createSuper7(RadioInputBinding2);
@@ -5574,11 +5568,11 @@
         for (var i = 0; i < options.length; i++) {
           options[i] = {
             value: $objs[i].value,
-            label: this._getLabel($objs[i])
+            label: getLabel2($objs[i])
           };
         }
         return {
-          label: this._getLabelNode(el).text(),
+          label: getLabelNode4(el).text(),
           value: this.getValue(el),
           options: options
         };
@@ -5594,7 +5588,7 @@
         }
         if (hasOwnProperty(data, "value"))
           this.setValue(el, data.value);
-        updateLabel(data.label, this._getLabelNode(el));
+        updateLabel(data.label, getLabelNode4(el));
         (0, import_jquery12.default)(el).trigger("change");
       }
     }, {
@@ -5608,27 +5602,6 @@
       key: "unsubscribe",
       value: function unsubscribe(el) {
         (0, import_jquery12.default)(el).off(".radioInputBinding");
-      }
-    }, {
-      key: "_getLabelNode",
-      value: function _getLabelNode(el) {
-        return (0, import_jquery12.default)(el).parent().find('label[for="' + $escape(el.id) + '"]');
-      }
-    }, {
-      key: "_getLabel",
-      value: function _getLabel(obj) {
-        if (obj.parentNode.tagName === "LABEL") {
-          return (0, import_jquery12.default)(obj.parentNode).find("span").text().trim();
-        }
-        return null;
-      }
-    }, {
-      key: "_setLabel",
-      value: function _setLabel(obj, value) {
-        if (obj.parentNode.tagName === "LABEL") {
-          (0, import_jquery12.default)(obj.parentNode).find("span").text(value);
-        }
-        return null;
       }
     }]);
     return RadioInputBinding2;
@@ -5829,7 +5802,7 @@
         if (isNaN(date.valueOf()))
           return;
         var curValue = (0, import_jquery13.default)(el).bsDatepicker("getUTCDate");
-        (0, import_jquery13.default)(el).bsDatepicker("setStartDate", this._UTCDateAsLocal(date));
+        (0, import_jquery13.default)(el).bsDatepicker("setStartDate", this._utcDateAsLocal(date));
         if (date && curValue && date.getTime() > curValue.getTime()) {
           (0, import_jquery13.default)(el).bsDatepicker("clearDates");
         } else {
@@ -5852,7 +5825,7 @@
         if (isNaN(date.valueOf()))
           return;
         var curValue = (0, import_jquery13.default)(el).bsDatepicker("getUTCDate");
-        (0, import_jquery13.default)(el).bsDatepicker("setEndDate", this._UTCDateAsLocal(date));
+        (0, import_jquery13.default)(el).bsDatepicker("setEndDate", this._utcDateAsLocal(date));
         if (date && curValue && date.getTime() < curValue.getTime()) {
           (0, import_jquery13.default)(el).bsDatepicker("clearDates");
         } else {
@@ -5884,8 +5857,8 @@
         return new Date(date.getTime() - date.getTimezoneOffset() * 6e4);
       }
     }, {
-      key: "_UTCDateAsLocal",
-      value: function _UTCDateAsLocal(date) {
+      key: "_utcDateAsLocal",
+      value: function _utcDateAsLocal(date) {
         return new Date(date.getTime() + date.getTimezoneOffset() * 6e4);
       }
     }]);
@@ -6093,6 +6066,15 @@
     }
     return prettify;
   }
+  function getLabelNode5(el) {
+    return (0, import_jquery14.default)(el).parent().find('label[for="' + $escape(el.id) + '"]');
+  }
+  function numValues(el) {
+    if ((0, import_jquery14.default)(el).data("ionRangeSlider").options.type === "double")
+      return 2;
+    else
+      return 1;
+  }
   var SliderInputBinding = /* @__PURE__ */ function(_TextInputBindingBase) {
     _inherits9(SliderInputBinding2, _TextInputBindingBase);
     var _super = _createSuper9(SliderInputBinding2);
@@ -6139,7 +6121,7 @@
             return Number(val);
           };
         }
-        if (this._numValues(el) === 2) {
+        if (numValues(el) === 2) {
           return [convert(result.from), convert(result.to)];
         } else {
           return convert(result.from);
@@ -6152,7 +6134,7 @@
         var slider = $el.data("ionRangeSlider");
         $el.data("immediate", true);
         try {
-          if (this._numValues(el) === 2 && value instanceof Array) {
+          if (numValues(el) === 2 && value instanceof Array) {
             slider.update({
               from: value[0],
               to: value[1]
@@ -6186,7 +6168,7 @@
         var slider = $el.data("ionRangeSlider");
         var msg = {};
         if (hasOwnProperty(data, "value")) {
-          if (this._numValues(el) === 2 && data.value instanceof Array) {
+          if (numValues(el) === 2 && data.value instanceof Array) {
             msg.from = data.value[0];
             msg.to = data.value[1];
           } else {
@@ -6200,7 +6182,7 @@
             msg[feats] = data[feats];
           }
         }
-        updateLabel(data.label, this._getLabelNode(el));
+        updateLabel(data.label, getLabelNode5(el));
         var domElements = ["data-type", "time-format", "timezone"];
         for (var _i = 0; _i < domElements.length; _i++) {
           var elem = domElements[_i];
@@ -6245,19 +6227,6 @@
           prettify: getTypePrettifyer(dataType, timeFormat, timezone)
         };
         $el.ionRangeSlider(opts);
-      }
-    }, {
-      key: "_getLabelNode",
-      value: function _getLabelNode(el) {
-        return (0, import_jquery14.default)(el).parent().find('label[for="' + $escape(el.id) + '"]');
-      }
-    }, {
-      key: "_numValues",
-      value: function _numValues(el) {
-        if ((0, import_jquery14.default)(el).data("ionRangeSlider").options.type === "double")
-          return 2;
-        else
-          return 1;
       }
     }]);
     return SliderInputBinding2;
@@ -6453,6 +6422,9 @@
     };
     return _getPrototypeOf10(o);
   }
+  function getLabelNode6(el) {
+    return (0, import_jquery15.default)(el).find('label[for="' + $escape(el.id) + '"]');
+  }
   var DateRangeInputBinding = /* @__PURE__ */ function(_DateInputBindingBase) {
     _inherits10(DateRangeInputBinding2, _DateInputBindingBase);
     var _super = _createSuper10(DateRangeInputBinding2);
@@ -6516,7 +6488,7 @@
         else if (startview === 0)
           startview = "month";
         return {
-          label: this._getLabelNode(el).text(),
+          label: getLabelNode6(el).text(),
           value: this.getValue(el),
           valueString: [$startinput.val(), $endinput.val()],
           min: minStr,
@@ -6534,7 +6506,7 @@
         var $inputs = $el.find("input");
         var $startinput = $inputs.eq(0);
         var $endinput = $inputs.eq(1);
-        updateLabel(data.label, this._getLabelNode(el));
+        updateLabel(data.label, getLabelNode6(el));
         if (hasOwnProperty(data, "min")) {
           this._setMin($startinput[0], data.min);
           this._setMin($endinput[0], data.min);
@@ -6583,11 +6555,6 @@
       key: "unsubscribe",
       value: function unsubscribe(el) {
         (0, import_jquery15.default)(el).off(".dateRangeInputBinding");
-      }
-    }, {
-      key: "_getLabelNode",
-      value: function _getLabelNode(el) {
-        return (0, import_jquery15.default)(el).find('label[for="' + $escape(el.id) + '"]');
       }
     }]);
     return DateRangeInputBinding2;
@@ -6697,6 +6664,17 @@
     };
     return _getPrototypeOf11(o);
   }
+  function getLabelNode7(el) {
+    var escapedId = $escape(el.id);
+    if (isSelectize(el)) {
+      escapedId += "-selectized";
+    }
+    return (0, import_jquery16.default)(el).parent().parent().find('label[for="' + escapedId + '"]');
+  }
+  function isSelectize(el) {
+    var config = (0, import_jquery16.default)(el).parent().find('script[data-for="' + $escape(el.id) + '"]');
+    return config.length > 0;
+  }
   var SelectInputBinding = /* @__PURE__ */ function(_InputBinding) {
     _inherits11(SelectInputBinding2, _InputBinding);
     var _super = _createSuper11(SelectInputBinding2);
@@ -6735,7 +6713,7 @@
     }, {
       key: "setValue",
       value: function setValue(el, value) {
-        if (!this._is_selectize(el)) {
+        if (!isSelectize(el)) {
           (0, import_jquery16.default)(el).val(value);
         } else {
           var selectize = this._selectize(el);
@@ -6755,7 +6733,7 @@
           };
         }
         return {
-          label: this._getLabelNode(el),
+          label: getLabelNode7(el),
           value: this.getValue(el),
           options: options
         };
@@ -6821,7 +6799,7 @@
         } else if (hasOwnProperty(data, "value")) {
           this.setValue(el, data.value);
         }
-        updateLabel(data.label, this._getLabelNode(el));
+        updateLabel(data.label, getLabelNode7(el));
         (0, import_jquery16.default)(el).trigger("change");
       }
     }, {
@@ -6844,21 +6822,6 @@
       key: "initialize",
       value: function initialize(el) {
         this._selectize(el);
-      }
-    }, {
-      key: "_getLabelNode",
-      value: function _getLabelNode(el) {
-        var escapedId = $escape(el.id);
-        if (this._is_selectize(el)) {
-          escapedId += "-selectized";
-        }
-        return (0, import_jquery16.default)(el).parent().parent().find('label[for="' + escapedId + '"]');
-      }
-    }, {
-      key: "_is_selectize",
-      value: function _is_selectize(el) {
-        var config = (0, import_jquery16.default)(el).parent().find('script[data-for="' + $escape(el.id) + '"]');
-        return config.length > 0;
       }
     }, {
       key: "_selectize",
@@ -7185,6 +7148,9 @@
     };
     return _getPrototypeOf13(o);
   }
+  function getTabName(anchor) {
+    return anchor.attr("data-value") || anchor.text();
+  }
   var BootstrapTabInputBinding = /* @__PURE__ */ function(_InputBinding) {
     _inherits13(BootstrapTabInputBinding2, _InputBinding);
     var _super = _createSuper13(BootstrapTabInputBinding2);
@@ -7202,18 +7168,17 @@
       value: function getValue(el) {
         var anchor = isBS3() ? (0, import_jquery18.default)(el).find("li:not(.dropdown).active > a") : (0, import_jquery18.default)(el).find(".nav-link:not(.dropdown-toggle).active, .dropdown-menu .dropdown-item.active");
         if (anchor.length === 1)
-          return this._getTabName(anchor);
+          return getTabName(anchor);
         return null;
       }
     }, {
       key: "setValue",
       value: function setValue(el, value) {
-        var self2 = this;
         var success = false;
         if (value) {
           var anchors = isBS3() ? (0, import_jquery18.default)(el).find("li:not(.dropdown) > a") : (0, import_jquery18.default)(el).find(".nav-link:not(.dropdown-toggle), .dropdown-menu .dropdown-item");
           anchors.each(function() {
-            if (self2._getTabName((0, import_jquery18.default)(this)) === value) {
+            if (getTabName((0, import_jquery18.default)(this)) === value) {
               (0, import_jquery18.default)(this).tab("show");
               success = true;
               return false;
@@ -7251,11 +7216,6 @@
       value: function unsubscribe(el) {
         (0, import_jquery18.default)(el).off(".bootstrapTabInputBinding");
       }
-    }, {
-      key: "_getTabName",
-      value: function _getTabName(anchor) {
-        return anchor.attr("data-value") || anchor.text();
-      }
     }]);
     return BootstrapTabInputBinding2;
   }(InputBinding);
@@ -7276,11 +7236,11 @@
     }
   });
 
-  // srcts/src/file/FileProcessor.ts
+  // srcts/src/file/fileProcessor.ts
   var import_es_array_iterator14 = __toModule(require_es_array_iterator());
   var import_jquery20 = __toModule(require_jquery());
 
-  // srcts/src/events/shiny_inputchanged.ts
+  // srcts/src/events/inputChanged.ts
   var import_jquery19 = __toModule(require_jquery());
   function triggerFileInputChanged(name, value, binding, el, inputType, onEl) {
     var evt = import_jquery19.default.Event("shiny:inputchanged");
@@ -7294,53 +7254,53 @@
   }
 
   // srcts/src/shiny/initedMethods.ts
-  var fullShinyObj_ = null;
+  var fullShinyObj = null;
   function setShinyObj(shiny) {
-    fullShinyObj_ = shiny;
+    fullShinyObj = shiny;
   }
   function shinySetInputValue(name, value, opts) {
-    fullShinyObj_.setInputValue(name, value, opts);
+    fullShinyObj.setInputValue(name, value, opts);
   }
   function shinyShinyApp() {
-    return fullShinyObj_.shinyapp;
+    return fullShinyObj.shinyapp;
   }
   function setShinyUser(user) {
-    fullShinyObj_.user = user;
+    fullShinyObj.user = user;
   }
   function shinyForgetLastInputValue(name) {
-    fullShinyObj_.forgetLastInputValue(name);
+    fullShinyObj.forgetLastInputValue(name);
   }
   function shinyBindAll(scope) {
-    fullShinyObj_.bindAll(scope);
+    fullShinyObj.bindAll(scope);
   }
   function shinyUnbindAll(scope) {
     var includeSelf = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : false;
-    fullShinyObj_.unbindAll(scope, includeSelf);
+    fullShinyObj.unbindAll(scope, includeSelf);
   }
   function shinyInitializeInputs(scope) {
-    fullShinyObj_.initializeInputs(scope);
+    fullShinyObj.initializeInputs(scope);
   }
   function shinyAppBindOutput(id, binding) {
-    fullShinyObj_.shinyapp.bindOutput(id, binding);
+    fullShinyObj.shinyapp.bindOutput(id, binding);
   }
   function shinyAppUnbindOutput(id, binding) {
-    return fullShinyObj_.shinyapp.unbindOutput(id, binding);
+    return fullShinyObj.shinyapp.unbindOutput(id, binding);
   }
   function getShinyOnCustomMessage() {
-    return fullShinyObj_.oncustommessage;
+    return fullShinyObj.oncustommessage;
   }
-  var fileInputBinding_;
+  var fileInputBinding;
   function getFileInputBinding() {
-    return fileInputBinding_;
+    return fileInputBinding;
   }
-  function setFileInputBinding(fileInputBinding) {
-    fileInputBinding_ = fileInputBinding;
+  function setFileInputBinding(fileInputBinding_) {
+    fileInputBinding = fileInputBinding_;
   }
   function getShinyCreateWebsocket() {
-    return fullShinyObj_.createSocket;
+    return fullShinyObj.createSocket;
   }
 
-  // srcts/src/file/FileProcessor.ts
+  // srcts/src/file/fileProcessor.ts
   function _typeof14(obj) {
     "@babel/helpers - typeof";
     if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
@@ -7777,10 +7737,84 @@
     };
     return _getPrototypeOf15(o);
   }
-  var _ZoneClass = {
-    ACTIVE: "shiny-file-input-active",
-    OVER: "shiny-file-input-over"
-  };
+  var zoneActive = "shiny-file-input-active";
+  var zoneOver = "shiny-file-input-over";
+  function zoneOf(el) {
+    return (0, import_jquery21.default)(el).closest("div.input-group");
+  }
+  function enableDraghover(el) {
+    var $el = (0, import_jquery21.default)(el);
+    var childCounter = 0;
+    $el.on({
+      "dragenter.draghover": function dragenterDraghover(e) {
+        if (childCounter++ === 0) {
+          $el.trigger("draghover:enter", e);
+        }
+      },
+      "dragleave.draghover": function dragleaveDraghover(e) {
+        if (--childCounter === 0) {
+          $el.trigger("draghover:leave", e);
+        }
+        if (childCounter < 0) {
+          console.error("draghover childCounter is negative somehow");
+        }
+      },
+      "dragover.draghover": function dragoverDraghover(e) {
+        e.preventDefault();
+      },
+      "drop.draghover": function dropDraghover(e) {
+        childCounter = 0;
+        $el.trigger("draghover:drop", e);
+        e.preventDefault();
+      }
+    });
+    return $el;
+  }
+  function disableDraghover(el) {
+    return (0, import_jquery21.default)(el).off(".draghover");
+  }
+  function enableDocumentEvents() {
+    var $doc = (0, import_jquery21.default)("html");
+    enableDraghover($doc).on({
+      "draghover:enter.draghover": function draghoverEnterDraghover() {
+        zoneOf($fileInputs).addClass(zoneActive);
+      },
+      "draghover:leave.draghover": function draghoverLeaveDraghover() {
+        zoneOf($fileInputs).removeClass(zoneActive);
+      },
+      "draghover:drop.draghover": function draghoverDropDraghover() {
+        zoneOf($fileInputs).removeClass(zoneOver).removeClass(zoneActive);
+      }
+    });
+  }
+  function disableDocumentEvents() {
+    var $doc = (0, import_jquery21.default)("html");
+    $doc.off(".draghover");
+    disableDraghover($doc);
+  }
+  function canSetFiles(fileList) {
+    var testEl = document.createElement("input");
+    testEl.type = "file";
+    try {
+      testEl.files = fileList;
+    } catch (e) {
+      return false;
+    }
+    return true;
+  }
+  function handleDrop(e, el) {
+    var files = e.originalEvent.dataTransfer.files, $el = (0, import_jquery21.default)(el);
+    if (files === void 0 || files === null) {
+      console.log("Dropping files is not supported on this browser. (no FileList)");
+    } else if (!canSetFiles(files)) {
+      $el.val("");
+      uploadDroppedFilesIE10Plus(el, files);
+    } else {
+      $el.val("");
+      el.files = e.originalEvent.dataTransfer.files;
+      $el.trigger("change");
+    }
+  }
   function setFileText($el, files) {
     var $fileText = $el.closest("div.input-group").find("input[type=text]");
     if (files.length === 1) {
@@ -7867,132 +7901,40 @@
         el;
       }
     }, {
-      key: "_zoneOf",
-      value: function _zoneOf(el) {
-        return (0, import_jquery21.default)(el).closest("div.input-group");
-      }
-    }, {
-      key: "_enableDraghover",
-      value: function _enableDraghover(el) {
-        var $el = (0, import_jquery21.default)(el);
-        var childCounter = 0;
-        $el.on({
-          "dragenter.draghover": function dragenterDraghover(e) {
-            if (childCounter++ === 0) {
-              $el.trigger("draghover:enter", e);
-            }
-          },
-          "dragleave.draghover": function dragleaveDraghover(e) {
-            if (--childCounter === 0) {
-              $el.trigger("draghover:leave", e);
-            }
-            if (childCounter < 0) {
-              console.error("draghover childCounter is negative somehow");
-            }
-          },
-          "dragover.draghover": function dragoverDraghover(e) {
-            e.preventDefault();
-          },
-          "drop.draghover": function dropDraghover(e) {
-            childCounter = 0;
-            $el.trigger("draghover:drop", e);
-            e.preventDefault();
-          }
-        });
-        return $el;
-      }
-    }, {
-      key: "_disableDraghover",
-      value: function _disableDraghover(el) {
-        return (0, import_jquery21.default)(el).off(".draghover");
-      }
-    }, {
-      key: "_enableDocumentEvents",
-      value: function _enableDocumentEvents() {
-        var _this = this;
-        var $doc = (0, import_jquery21.default)("html"), ACTIVE = _ZoneClass.ACTIVE, OVER = _ZoneClass.OVER;
-        this._enableDraghover($doc).on({
-          "draghover:enter.draghover": function draghoverEnterDraghover() {
-            _this._zoneOf($fileInputs).addClass(ACTIVE);
-          },
-          "draghover:leave.draghover": function draghoverLeaveDraghover() {
-            _this._zoneOf($fileInputs).removeClass(ACTIVE);
-          },
-          "draghover:drop.draghover": function draghoverDropDraghover() {
-            _this._zoneOf($fileInputs).removeClass(OVER).removeClass(ACTIVE);
-          }
-        });
-      }
-    }, {
-      key: "_disableDocumentEvents",
-      value: function _disableDocumentEvents() {
-        var $doc = (0, import_jquery21.default)("html");
-        $doc.off(".draghover");
-        this._disableDraghover($doc);
-      }
-    }, {
-      key: "_canSetFiles",
-      value: function _canSetFiles(fileList) {
-        var testEl = document.createElement("input");
-        testEl.type = "file";
-        try {
-          testEl.files = fileList;
-        } catch (e) {
-          return false;
-        }
-        return true;
-      }
-    }, {
-      key: "_handleDrop",
-      value: function _handleDrop(e, el) {
-        var files = e.originalEvent.dataTransfer.files, $el = (0, import_jquery21.default)(el);
-        if (files === void 0 || files === null) {
-          console.log("Dropping files is not supported on this browser. (no FileList)");
-        } else if (!this._canSetFiles(files)) {
-          $el.val("");
-          uploadDroppedFilesIE10Plus(el, files);
-        } else {
-          $el.val("");
-          el.files = e.originalEvent.dataTransfer.files;
-          $el.trigger("change");
-        }
-      }
-    }, {
       key: "subscribe",
       value: function subscribe(el, callback) {
-        var _this2 = this;
         callback;
         (0, import_jquery21.default)(el).on("change.fileInputBinding", uploadFiles);
         if ($fileInputs.length === 0)
-          this._enableDocumentEvents();
+          enableDocumentEvents();
         $fileInputs = $fileInputs.add(el);
-        var $zone = this._zoneOf(el), OVER = _ZoneClass.OVER;
-        this._enableDraghover($zone).on({
+        var $zone = zoneOf(el);
+        enableDraghover($zone).on({
           "draghover:enter.draghover": function draghoverEnterDraghover(e) {
             e;
-            $zone.addClass(OVER);
+            $zone.addClass(zoneOver);
           },
           "draghover:leave.draghover": function draghoverLeaveDraghover(e) {
-            $zone.removeClass(OVER);
+            $zone.removeClass(zoneOver);
             e.stopPropagation();
           },
           "draghover:drop.draghover": function draghoverDropDraghover(e, dropEvent) {
             e;
-            _this2._handleDrop(dropEvent, el);
+            handleDrop(dropEvent, el);
           }
         });
       }
     }, {
       key: "unsubscribe",
       value: function unsubscribe(el) {
-        var $el = (0, import_jquery21.default)(el), $zone = this._zoneOf(el);
-        $zone.removeClass(_ZoneClass.OVER).removeClass(_ZoneClass.ACTIVE);
-        this._disableDraghover($zone);
+        var $el = (0, import_jquery21.default)(el), $zone = zoneOf(el);
+        $zone.removeClass(zoneOver).removeClass(zoneActive);
+        disableDraghover($zone);
         $el.off(".fileInputBinding");
         $zone.off(".draghover");
         $fileInputs = $fileInputs.not(el);
         if ($fileInputs.length === 0)
-          this._disableDocumentEvents();
+          disableDocumentEvents();
       }
     }]);
     return FileInputBinding2;
@@ -8014,11 +7956,11 @@
     inputBindings.register(new SelectInputBinding(), "shiny.selectInput");
     inputBindings.register(new ActionButtonInputBinding(), "shiny.actionButtonInput");
     inputBindings.register(new BootstrapTabInputBinding(), "shiny.bootstrapTabInput");
-    var fileInputBinding = new FileInputBinding();
-    inputBindings.register(fileInputBinding, "shiny.fileInputBinding");
+    var fileInputBinding2 = new FileInputBinding();
+    inputBindings.register(fileInputBinding2, "shiny.fileInputBinding");
     return {
       inputBindings: inputBindings,
-      fileInputBinding: fileInputBinding
+      fileInputBinding: fileInputBinding2
     };
   }
 
@@ -8041,7 +7983,7 @@
     }
   });
 
-  // srcts/src/bindings/output/OutputBinding.ts
+  // srcts/src/bindings/output/outputBinding.ts
   var import_es_regexp_exec3 = __toModule(require_es_regexp_exec());
   var import_jquery22 = __toModule(require_jquery());
   function _classCallCheck18(instance, Constructor) {
@@ -8134,11 +8076,11 @@
     }, {
       key: "showProgress",
       value: function showProgress(el, show3) {
-        var RECALC_CLASS = "recalculating";
+        var recalcClass = "recalculating";
         if (show3)
-          (0, import_jquery22.default)(el).addClass(RECALC_CLASS);
+          (0, import_jquery22.default)(el).addClass(recalcClass);
         else
-          (0, import_jquery22.default)(el).removeClass(RECALC_CLASS);
+          (0, import_jquery22.default)(el).removeClass(recalcClass);
       }
     }]);
     return OutputBinding2;
@@ -8968,12 +8910,12 @@
   // srcts/src/shiny/singletons.ts
   var import_es_regexp_exec5 = __toModule(require_es_regexp_exec());
   var import_jquery26 = __toModule(require_jquery());
-  var _reSingleton = /<!--(SHINY.SINGLETON\[([\w]+)\])-->([\s\S]*?)<!--\/\1-->/;
-  var _reHead = /<head(?:\s[^>]*)?>([\s\S]*?)<\/head>/;
+  var reSingleton = /<!--(SHINY.SINGLETON\[([\w]+)\])-->([\s\S]*?)<!--\/\1-->/;
+  var reHead = /<head(?:\s[^>]*)?>([\s\S]*?)<\/head>/;
   var knownSingletons = {};
   function renderHtml(html, el, where) {
-    var processed = _processHtml(html);
-    _addToHead(processed.head);
+    var processed = processHtml(html);
+    addToHead(processed.head);
     register(processed.singletons);
     if (where === "replace") {
       (0, import_jquery26.default)(el).html(processed.html);
@@ -9002,7 +8944,7 @@
       }
     }
   }
-  function _addToHead(head) {
+  function addToHead(head) {
     if (head.length > 0) {
       var tempDiv = (0, import_jquery26.default)("<div>" + head + "</div>").get(0);
       var $head = (0, import_jquery26.default)("head");
@@ -9011,7 +8953,7 @@
       }
     }
   }
-  function _processHtml(val) {
+  function processHtml(val) {
     var newSingletons = {};
     var newVal;
     var findNewPayload = function findNewPayload2(match, p1, sig, payload) {
@@ -9021,7 +8963,7 @@
       return payload;
     };
     while (true) {
-      newVal = val.replace(_reSingleton, findNewPayload);
+      newVal = val.replace(reSingleton, findNewPayload);
       if (val.length === newVal.length)
         break;
       val = newVal;
@@ -9032,7 +8974,7 @@
       return "";
     };
     while (true) {
-      newVal = val.replace(_reHead, headAddPayload);
+      newVal = val.replace(reHead, headAddPayload);
       if (val.length === newVal.length)
         break;
       val = newVal;
@@ -9947,7 +9889,7 @@
       });
       return void 0;
     }
-    function getPanel() {
+    function getPanel2() {
       return state.panel;
     }
     function addDiv() {
@@ -10102,7 +10044,7 @@
       onResize: onResize,
       boundsCss: boundsCss,
       boundsData: boundsData,
-      getPanel: getPanel,
+      getPanel: getPanel2,
       down: down,
       up: up,
       isBrushing: isBrushing,
@@ -10525,31 +10467,31 @@
           $el.empty();
           return;
         }
-        function OR(value, alternate) {
+        function ifUndefined(value, alternate) {
           if (value === void 0)
             return alternate;
           return value;
         }
         var opts = {
           clickId: $el.data("click-id"),
-          clickClip: OR(strToBool($el.data("click-clip")), true),
+          clickClip: ifUndefined(strToBool($el.data("click-clip")), true),
           dblclickId: $el.data("dblclick-id"),
-          dblclickClip: OR(strToBool($el.data("dblclick-clip")), true),
-          dblclickDelay: OR($el.data("dblclick-delay"), 400),
+          dblclickClip: ifUndefined(strToBool($el.data("dblclick-clip")), true),
+          dblclickDelay: ifUndefined($el.data("dblclick-delay"), 400),
           hoverId: $el.data("hover-id"),
-          hoverClip: OR(strToBool($el.data("hover-clip")), true),
-          hoverDelayType: OR($el.data("hover-delay-type"), "debounce"),
-          hoverDelay: OR($el.data("hover-delay"), 300),
-          hoverNullOutside: OR(strToBool($el.data("hover-null-outside")), false),
+          hoverClip: ifUndefined(strToBool($el.data("hover-clip")), true),
+          hoverDelayType: ifUndefined($el.data("hover-delay-type"), "debounce"),
+          hoverDelay: ifUndefined($el.data("hover-delay"), 300),
+          hoverNullOutside: ifUndefined(strToBool($el.data("hover-null-outside")), false),
           brushId: $el.data("brush-id"),
-          brushClip: OR(strToBool($el.data("brush-clip")), true),
-          brushDelayType: OR($el.data("brush-delay-type"), "debounce"),
-          brushDelay: OR($el.data("brush-delay"), 300),
-          brushFill: OR($el.data("brush-fill"), "#666"),
-          brushStroke: OR($el.data("brush-stroke"), "#000"),
-          brushOpacity: OR($el.data("brush-opacity"), 0.3),
-          brushDirection: OR($el.data("brush-direction"), "xy"),
-          brushResetOnNew: OR(strToBool($el.data("brush-reset-on-new")), false),
+          brushClip: ifUndefined(strToBool($el.data("brush-clip")), true),
+          brushDelayType: ifUndefined($el.data("brush-delay-type"), "debounce"),
+          brushDelay: ifUndefined($el.data("brush-delay"), 300),
+          brushFill: ifUndefined($el.data("brush-fill"), "#666"),
+          brushStroke: ifUndefined($el.data("brush-stroke"), "#000"),
+          brushOpacity: ifUndefined($el.data("brush-opacity"), 0.3),
+          brushDirection: ifUndefined($el.data("brush-direction"), "xy"),
+          brushResetOnNew: ifUndefined(strToBool($el.data("brush-reset-on-new")), false),
           coordmap: data.coordmap
         };
         if (opts.brushFill === "auto") {
@@ -10728,10 +10670,10 @@
     var _ref = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : {}, _ref$html = _ref.html, html = _ref$html === void 0 ? "" : _ref$html, _ref$action = _ref.action, action = _ref$action === void 0 ? "" : _ref$action, _ref$deps = _ref.deps, deps = _ref$deps === void 0 ? [] : _ref$deps, _ref$duration = _ref.duration, duration = _ref$duration === void 0 ? 5e3 : _ref$duration, _ref$id = _ref.id, id = _ref$id === void 0 ? null : _ref$id, _ref$closeButton = _ref.closeButton, closeButton = _ref$closeButton === void 0 ? true : _ref$closeButton, _ref$type = _ref.type, type = _ref$type === void 0 ? null : _ref$type;
     if (!id)
       id = randomId();
-    _createPanel();
-    var $notification = _get2(id);
+    createPanel();
+    var $notification = get2(id);
     if ($notification.length === 0)
-      $notification = _create(id);
+      $notification = create4(id);
     var newHtml = '<div class="shiny-notification-content-text">'.concat(html, "</div>") + '<div class="shiny-notification-content-action">'.concat(action, "</div>");
     var $content = $notification.find(".shiny-notification-content");
     renderContent($content, {
@@ -10751,42 +10693,42 @@
       $close.remove();
     }
     if (duration)
-      _addRemovalCallback(id, duration);
+      addRemovalCallback(id, duration);
     else
-      _clearRemovalCallback(id);
+      clearRemovalCallback(id);
     return id;
   }
   function remove(id) {
-    _get2(id).fadeOut(fadeDuration, function() {
+    get2(id).fadeOut(fadeDuration, function() {
       shinyUnbindAll(this);
       (0, import_jquery34.default)(this).remove();
-      if (_ids().length === 0) {
-        _getPanel().remove();
+      if (ids().length === 0) {
+        getPanel().remove();
       }
     });
   }
-  function _get2(id) {
+  function get2(id) {
     if (!id)
       return null;
-    return _getPanel().find("#shiny-notification-" + $escape(id));
+    return getPanel().find("#shiny-notification-" + $escape(id));
   }
-  function _ids() {
-    return _getPanel().find(".shiny-notification").map(function() {
+  function ids() {
+    return getPanel().find(".shiny-notification").map(function() {
       return this.id.replace(/shiny-notification-/, "");
     }).get();
   }
-  function _getPanel() {
+  function getPanel() {
     return (0, import_jquery34.default)("#shiny-notification-panel");
   }
-  function _createPanel() {
-    var $panel = _getPanel();
+  function createPanel() {
+    var $panel = getPanel();
     if ($panel.length > 0)
       return $panel;
     (0, import_jquery34.default)(document.body).append('<div id="shiny-notification-panel">');
     return $panel;
   }
-  function _create(id) {
-    var $notification = _get2(id);
+  function create4(id) {
+    var $notification = get2(id);
     if ($notification.length === 0) {
       $notification = (0, import_jquery34.default)('<div id="shiny-notification-'.concat(id, '" class="shiny-notification">') + '<div class="shiny-notification-close">&times;</div><div class="shiny-notification-content"></div></div>');
       $notification.find(".shiny-notification-close").on("click", function(e) {
@@ -10794,19 +10736,19 @@
         e.stopPropagation();
         remove(id);
       });
-      _getPanel().append($notification);
+      getPanel().append($notification);
     }
     return $notification;
   }
-  function _addRemovalCallback(id, delay) {
-    _clearRemovalCallback(id);
+  function addRemovalCallback(id, delay) {
+    clearRemovalCallback(id);
     var removalCallback = setTimeout(function() {
       remove(id);
     }, delay);
-    _get2(id).data("removalCallback", removalCallback);
+    get2(id).data("removalCallback", removalCallback);
   }
-  function _clearRemovalCallback(id) {
-    var $notification = _get2(id);
+  function clearRemovalCallback(id) {
+    var $notification = get2(id);
     var oldRemovalCallback = $notification.data("removalCallback");
     if (oldRemovalCallback) {
       clearTimeout(oldRemovalCallback);
@@ -10897,7 +10839,7 @@
   var import_es_array_iterator22 = __toModule(require_es_array_iterator());
   var import_jquery37 = __toModule(require_jquery());
 
-  // srcts/src/inputPolicies/InputPolicy.ts
+  // srcts/src/inputPolicies/inputPolicy.ts
   function _classCallCheck28(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
       throw new TypeError("Cannot call a class as a function");
@@ -11071,15 +11013,15 @@
         this.pendingData[nameType] = value;
         if (!this.reentrant) {
           if (opts.priority === "event") {
-            this.$sendNow();
+            this._sendNow();
           } else if (!this.timerId) {
-            this.timerId = setTimeout(this.$sendNow.bind(this), 0);
+            this.timerId = setTimeout(this._sendNow.bind(this), 0);
           }
         }
       }
     }, {
-      key: "$sendNow",
-      value: function $sendNow() {
+      key: "_sendNow",
+      value: function _sendNow() {
         if (this.reentrant) {
           console.trace("Unexpected reentrancy in InputBatchSender!");
         }
@@ -11525,7 +11467,7 @@
       key: "setInput",
       value: function setInput(nameType, value, opts) {
         var _splitInputNameType = splitInputNameType(nameType), inputName = _splitInputNameType.name;
-        this.$ensureInit(inputName);
+        this._ensureInit(inputName);
         if (opts.priority !== "deferred")
           this.inputRatePolicies[inputName].immediateCall(nameType, value, opts);
         else
@@ -11536,22 +11478,22 @@
       value: function setRatePolicy(nameType, mode, millis) {
         var _splitInputNameType2 = splitInputNameType(nameType), inputName = _splitInputNameType2.name;
         if (mode === "direct") {
-          this.inputRatePolicies[inputName] = new Invoker(this, this.$doSetInput);
+          this.inputRatePolicies[inputName] = new Invoker(this, this._doSetInput);
         } else if (mode === "debounce") {
-          this.inputRatePolicies[inputName] = new Debouncer(this, this.$doSetInput, millis);
+          this.inputRatePolicies[inputName] = new Debouncer(this, this._doSetInput, millis);
         } else if (mode === "throttle") {
-          this.inputRatePolicies[inputName] = new Throttler(this, this.$doSetInput, millis);
+          this.inputRatePolicies[inputName] = new Throttler(this, this._doSetInput, millis);
         }
       }
     }, {
-      key: "$ensureInit",
-      value: function $ensureInit(name) {
+      key: "_ensureInit",
+      value: function _ensureInit(name) {
         if (!(name in this.inputRatePolicies))
           this.setRatePolicy(name, "direct");
       }
     }, {
-      key: "$doSetInput",
-      value: function $doSetInput(nameType, value, opts) {
+      key: "_doSetInput",
+      value: function _doSetInput(nameType, value, opts) {
         this.target.setInput(nameType, value, opts);
       }
     }]);
@@ -11748,7 +11690,7 @@
   // srcts/src/shiny/bind.ts
   var import_jquery40 = __toModule(require_jquery());
 
-  // srcts/src/bindings/output_adapter.ts
+  // srcts/src/bindings/outputAdapter.ts
   function _classCallCheck35(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
       throw new TypeError("Cannot call a class as a function");
@@ -12134,6 +12076,19 @@
   var messageHandlers = {};
   var customMessageHandlerOrder = [];
   var customMessageHandlers = {};
+  function addMessageHandler(type, handler) {
+    if (messageHandlers[type]) {
+      throw 'handler for message of type "' + type + '" already added.';
+    }
+    if (typeof handler !== "function") {
+      throw "handler must be a function.";
+    }
+    if (handler.length !== 1) {
+      throw "handler must be a function that takes one argument.";
+    }
+    messageHandlerOrder.push(type);
+    messageHandlers[type] = handler;
+  }
   function addCustomMessageHandler(type, handler) {
     if (customMessageHandlers[type]) {
       var typeIdx = customMessageHandlerOrder.indexOf(type);
@@ -12268,7 +12223,7 @@
           }
         }
       });
-      this.init();
+      this._init();
     }
     _createClass35(ShinyApp2, [{
       key: "connect",
@@ -12512,8 +12467,8 @@
         }
       }
     }, {
-      key: "narrowScopeComponent",
-      value: function narrowScopeComponent(scopeComponent, nsPrefix) {
+      key: "_narrowScopeComponent",
+      value: function _narrowScopeComponent(scopeComponent, nsPrefix) {
         return Object.keys(scopeComponent).filter(function(k) {
           return k.indexOf(nsPrefix) === 0;
         }).map(function(k) {
@@ -12523,12 +12478,12 @@
         }, {});
       }
     }, {
-      key: "narrowScope",
-      value: function narrowScope(scope, nsPrefix) {
+      key: "_narrowScope",
+      value: function _narrowScope(scope, nsPrefix) {
         if (nsPrefix) {
           return {
-            input: this.narrowScopeComponent(scope.input, nsPrefix),
-            output: this.narrowScopeComponent(scope.output, nsPrefix)
+            input: this._narrowScopeComponent(scope.input, nsPrefix),
+            output: this._narrowScopeComponent(scope.output, nsPrefix)
           };
         }
         return scope;
@@ -12560,7 +12515,7 @@
             el.data("data-display-if-func", condFunc);
           }
           var nsPrefix = el.attr("data-ns-prefix");
-          var nsScope = this.narrowScope(scope, nsPrefix);
+          var nsScope = this._narrowScope(scope, nsPrefix);
           var show3 = condFunc(nsScope);
           var showing = el.css("display") !== "none";
           if (show3 !== showing) {
@@ -12575,21 +12530,6 @@
             }
           }
         }
-      }
-    }, {
-      key: "addMessageHandler",
-      value: function addMessageHandler(type, handler) {
-        if (messageHandlers[type]) {
-          throw 'handler for message of type "' + type + '" already added.';
-        }
-        if (typeof handler !== "function") {
-          throw "handler must be a function.";
-        }
-        if (handler.length !== 1) {
-          throw "handler must be a function that takes one argument.";
-        }
-        messageHandlerOrder.push(type);
-        messageHandlers[type] = handler;
       }
     }, {
       key: "dispatchMessage",
@@ -12628,25 +12568,27 @@
         }
       }
     }, {
-      key: "init",
-      value: function init2() {
-        this.addMessageHandler("values", function(message) {
-          for (var name in this.$bindings) {
-            if (hasOwnProperty(this.$bindings, name))
-              this.$bindings[name].showProgress(false);
+      key: "_init",
+      value: function _init() {
+        var _this3 = this;
+        addMessageHandler("values", function(message) {
+          for (var name in _this3.$bindings) {
+            if (hasOwnProperty(_this3.$bindings, name))
+              _this3.$bindings[name].showProgress(false);
           }
-          for (var key in message) {
-            if (hasOwnProperty(message, key))
-              this.receiveOutput(key, message[key]);
-          }
-        });
-        this.addMessageHandler("errors", function(message) {
-          for (var key in message) {
-            if (hasOwnProperty(message, key))
-              this.receiveError(key, message[key]);
+          for (var _key in message) {
+            if (hasOwnProperty(message, _key)) {
+              _this3.receiveOutput(_key, message[_key]);
+            }
           }
         });
-        this.addMessageHandler("inputMessages", function(message) {
+        addMessageHandler("errors", function(message) {
+          for (var _key2 in message) {
+            if (hasOwnProperty(message, _key2))
+              this.receiveError(_key2, message[_key2]);
+          }
+        });
+        addMessageHandler("inputMessages", function(message) {
           for (var i = 0; i < message.length; i++) {
             var $obj = (0, import_jquery41.default)(".shiny-bound-input#" + $escape(message[i].id));
             var inputBinding = $obj.data("shiny-input-binding");
@@ -12663,23 +12605,23 @@
             }
           }
         });
-        this.addMessageHandler("javascript", function(message) {
+        addMessageHandler("javascript", function(message) {
           indirectEval(message);
         });
-        this.addMessageHandler("console", function(message) {
+        addMessageHandler("console", function(message) {
           for (var i = 0; i < message.length; i++) {
             if (console.log)
               console.log(message[i]);
           }
         });
-        this.addMessageHandler("progress", function(message) {
+        addMessageHandler("progress", function(message) {
           if (message.type && message.message) {
-            var handler = this.progressHandlers[message.type];
+            var handler = _this3.progressHandlers[message.type];
             if (handler)
-              handler.call(this, message.message);
+              handler.call(_this3, message.message);
           }
         });
-        this.addMessageHandler("notification", function(message) {
+        addMessageHandler("notification", function(message) {
           if (message.type === "show")
             show(message.message);
           else if (message.type === "remove")
@@ -12687,7 +12629,7 @@
           else
             throw "Unkown notification type: " + message.type;
         });
-        this.addMessageHandler("modal", function(message) {
+        addMessageHandler("modal", function(message) {
           if (message.type === "show")
             show2(message.message);
           else if (message.type === "remove")
@@ -12695,36 +12637,36 @@
           else
             throw "Unkown modal type: " + message.type;
         });
-        this.addMessageHandler("response", function(message) {
+        addMessageHandler("response", function(message) {
           var requestId = message.tag;
-          var request = this.$activeRequests[requestId];
+          var request = _this3.$activeRequests[requestId];
           if (request) {
-            delete this.$activeRequests[requestId];
+            delete _this3.$activeRequests[requestId];
             if ("value" in message)
               request.onSuccess(message.value);
             else
               request.onError(message.error);
           }
         });
-        this.addMessageHandler("allowReconnect", function(message) {
+        addMessageHandler("allowReconnect", function(message) {
           switch (message) {
             case true:
             case false:
             case "force":
-              this.$allowReconnect = message;
+              _this3.$allowReconnect = message;
               break;
             default:
               throw "Invalid value for allowReconnect: " + message;
           }
         });
-        this.addMessageHandler("custom", function(message) {
+        addMessageHandler("custom", function(message) {
           var shinyOnCustomMessage = getShinyOnCustomMessage();
           if (shinyOnCustomMessage)
             shinyOnCustomMessage(message);
-          this._sendMessagesToHandlers(message, customMessageHandlers, customMessageHandlerOrder);
+          _this3._sendMessagesToHandlers(message, customMessageHandlers, customMessageHandlerOrder);
         });
-        this.addMessageHandler("config", function(message) {
-          this.config = {
+        addMessageHandler("config", function(message) {
+          _this3.config = {
             workerId: message.workerId,
             sessionId: message.sessionId
           };
@@ -12732,7 +12674,7 @@
             setShinyUser(message.user);
           (0, import_jquery41.default)(document).trigger("shiny:sessioninitialized");
         });
-        this.addMessageHandler("busy", function(message) {
+        addMessageHandler("busy", function(message) {
           if (message === "busy") {
             (0, import_jquery41.default)(document.documentElement).addClass("shiny-busy");
             (0, import_jquery41.default)(document).trigger("shiny:busy");
@@ -12741,20 +12683,20 @@
             (0, import_jquery41.default)(document).trigger("shiny:idle");
           }
         });
-        this.addMessageHandler("recalculating", function(message) {
+        addMessageHandler("recalculating", function(message) {
           if (hasOwnProperty(message, "name") && hasOwnProperty(message, "status")) {
-            var binding = this.$bindings[message.name];
+            var binding = _this3.$bindings[message.name];
             (0, import_jquery41.default)(binding ? binding.el : null).trigger({
               type: "shiny:" + message.status
             });
           }
         });
-        this.addMessageHandler("reload", function(message) {
+        addMessageHandler("reload", function(message) {
           window.location.reload();
           return;
           message;
         });
-        this.addMessageHandler("shiny-insert-ui", function(message) {
+        addMessageHandler("shiny-insert-ui", function(message) {
           var targets = (0, import_jquery41.default)(message.selector);
           if (targets.length === 0) {
             console.warn('The selector you chose ("' + message.selector + '") could not be found in the DOM.');
@@ -12766,7 +12708,7 @@
             });
           }
         });
-        this.addMessageHandler("shiny-remove-ui", function(message) {
+        addMessageHandler("shiny-remove-ui", function(message) {
           var els = (0, import_jquery41.default)(message.selector);
           els.each(function(i, el) {
             shinyUnbindAll(el, true);
@@ -12774,7 +12716,7 @@
             return message.multiple;
           });
         });
-        this.addMessageHandler("frozen", function(message) {
+        addMessageHandler("frozen", function(message) {
           for (var i = 0; i < message.ids.length; i++) {
             shinyForgetLastInputValue(message.ids[i]);
           }
@@ -12820,7 +12762,7 @@
             $divTags: $divTags
           };
         }
-        this.addMessageHandler("shiny-insert-tab", function(message) {
+        addMessageHandler("shiny-insert-tab", function(message) {
           var $parentTabset = getTabset(message.inputId);
           var $tabset = $parentTabset;
           var $tabContent = getTabContent($tabset);
@@ -12942,7 +12884,7 @@
             }
           });
         }
-        this.addMessageHandler("shiny-remove-tab", function(message) {
+        addMessageHandler("shiny-remove-tab", function(message) {
           var $tabset = getTabset(message.inputId);
           var $tabContent = getTabContent($tabset);
           var target = getTargetTabs($tabset, $tabContent, message.target);
@@ -12953,7 +12895,7 @@
             $el.remove();
           }
         });
-        this.addMessageHandler("shiny-change-tab-visibility", function(message) {
+        addMessageHandler("shiny-change-tab-visibility", function(message) {
           var $tabset = getTabset(message.inputId);
           var $tabContent = getTabContent($tabset);
           var target = getTargetTabs($tabset, $tabContent, message.target);
@@ -12968,7 +12910,7 @@
             }
           }
         });
-        this.addMessageHandler("updateQueryString", function(message) {
+        addMessageHandler("updateQueryString", function(message) {
           if (message.mode === "replace") {
             window.history.replaceState(null, null, message.queryString);
             return;
@@ -12996,7 +12938,7 @@
           if (what === "hash")
             (0, import_jquery41.default)(document).trigger("hashchange");
         });
-        this.addMessageHandler("resetBrush", function(message) {
+        addMessageHandler("resetBrush", function(message) {
           resetBrush(message.brushId);
         });
       }
@@ -13017,10 +12959,10 @@
   }();
 
   // srcts/src/shiny/init.ts
-  function initShiny(Shiny2) {
-    setShinyObj(Shiny2);
-    var shinyapp = Shiny2.shinyapp = new ShinyApp();
-    Shiny2.progressHandlers = shinyapp.progressHandlers;
+  function initShiny(windowShiny3) {
+    setShinyObj(windowShiny3);
+    var shinyapp = windowShiny3.shinyapp = new ShinyApp();
+    windowShiny3.progressHandlers = shinyapp.progressHandlers;
     var inputBatchSender = new InputBatchSender(shinyapp);
     var inputsNoResend = new InputNoResendDecorator(inputBatchSender);
     var inputsEvent = new InputEventDecorator(inputsNoResend);
@@ -13039,15 +12981,15 @@
       target = inputsRate;
     }
     var inputs = new InputValidateDecorator(target);
-    Shiny2.setInputValue = Shiny2.onInputChange = function(name, value, opts) {
+    windowShiny3.setInputValue = windowShiny3.onInputChange = function(name, value, opts) {
       var newOpts = addDefaultInputOpts(opts);
       inputs.setInput(name, value, newOpts);
     };
-    Shiny2.forgetLastInputValue = function(name) {
+    windowShiny3.forgetLastInputValue = function(name) {
       inputsNoResend.forget(name);
     };
-    var inputBindings = Shiny2.inputBindings;
-    var outputBindings = Shiny2.outputBindings;
+    var inputBindings = windowShiny3.inputBindings;
+    var outputBindings = windowShiny3.outputBindings;
     function shinyBindCtx() {
       return {
         inputs: inputs,
@@ -13059,10 +13001,10 @@
         initDeferredIframes: initDeferredIframes
       };
     }
-    Shiny2.bindAll = function(scope) {
+    windowShiny3.bindAll = function(scope) {
       bindAll(shinyBindCtx(), scope);
     };
-    Shiny2.unbindAll = function(scope) {
+    windowShiny3.unbindAll = function(scope) {
       var includeSelf = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : false;
       unbindAll(shinyBindCtx(), scope, includeSelf);
     };
@@ -13083,7 +13025,7 @@
         }
       }
     }
-    Shiny2.initializeInputs = initializeInputs;
+    windowShiny3.initializeInputs = initializeInputs;
     function getIdFromEl(el) {
       var $el = (0, import_jquery42.default)(el);
       var bindingAdapter = $el.data("shiny-output-binding");
@@ -13308,7 +13250,7 @@
     (0, import_jquery42.default)(document).one("shiny:connected", function() {
       initDeferredIframes();
     });
-    window.console.log("Shiny version: ", Shiny2.version);
+    window.console.log("Shiny version: ", windowShiny3.version);
   }
   function initDeferredIframes() {
     if (!window.Shiny || !window.Shiny.shinyapp || !window.Shiny.shinyapp.isConnected()) {
@@ -13323,37 +13265,37 @@
   }
 
   // srcts/src/shiny/index.ts
-  var Shiny;
-  function setShiny(Shiny_) {
-    Shiny = Shiny_;
-    Shiny.version = "1.6.0.9021";
-    var _initInputBindings = initInputBindings(), inputBindings = _initInputBindings.inputBindings, fileInputBinding = _initInputBindings.fileInputBinding;
+  var windowShiny2;
+  function setShiny(windowShiny_) {
+    windowShiny2 = windowShiny_;
+    windowShiny2.version = "1.6.0.9021";
+    var _initInputBindings = initInputBindings(), inputBindings = _initInputBindings.inputBindings, fileInputBinding2 = _initInputBindings.fileInputBinding;
     var _initOutputBindings = initOutputBindings(), outputBindings = _initOutputBindings.outputBindings;
-    setFileInputBinding(fileInputBinding);
-    Shiny.$escape = $escape;
-    Shiny.compareVersion = compareVersion;
-    Shiny.inputBindings = inputBindings;
-    Shiny.InputBinding = InputBinding;
-    Shiny.outputBindings = outputBindings;
-    Shiny.OutputBinding = OutputBinding;
-    Shiny.resetBrush = resetBrush;
-    Shiny.notifications = {
+    setFileInputBinding(fileInputBinding2);
+    windowShiny2.$escape = $escape;
+    windowShiny2.compareVersion = compareVersion;
+    windowShiny2.inputBindings = inputBindings;
+    windowShiny2.InputBinding = InputBinding;
+    windowShiny2.outputBindings = outputBindings;
+    windowShiny2.OutputBinding = OutputBinding;
+    windowShiny2.resetBrush = resetBrush;
+    windowShiny2.notifications = {
       show: show,
       remove: remove
     };
-    Shiny.modal = {
+    windowShiny2.modal = {
       show: show2,
       remove: remove2
     };
-    Shiny.addCustomMessageHandler = addCustomMessageHandler;
-    Shiny.showReconnectDialog = showReconnectDialog;
-    Shiny.hideReconnectDialog = hideReconnectDialog;
-    Shiny.renderDependencies = renderDependencies;
-    Shiny.renderContent = renderContent;
-    Shiny.renderHtml = renderHtml2;
+    windowShiny2.addCustomMessageHandler = addCustomMessageHandler;
+    windowShiny2.showReconnectDialog = showReconnectDialog;
+    windowShiny2.hideReconnectDialog = hideReconnectDialog;
+    windowShiny2.renderDependencies = renderDependencies;
+    windowShiny2.renderContent = renderContent;
+    windowShiny2.renderHtml = renderHtml2;
     (0, import_jquery43.default)(function() {
       setTimeout(function() {
-        initShiny(Shiny);
+        initShiny(windowShiny2);
       }, 1);
     });
   }

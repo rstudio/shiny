@@ -1,8 +1,8 @@
-import { RatePolicyModes } from "../../inputPolicies/inputRateDecorator";
-import { bindScope } from "../../shiny/bind";
+import type { RatePolicyModes } from "../../inputPolicies/inputRateDecorator";
+import type { BindScope } from "../../shiny/bind";
 declare class InputBinding {
     name: string;
-    find(scope: bindScope): JQuery<HTMLElement>;
+    find(scope: BindScope): JQuery<HTMLElement>;
     getId(el: HTMLElement): string;
     getType(el: HTMLElement): string | false;
     getValue(el: HTMLElement): unknown;

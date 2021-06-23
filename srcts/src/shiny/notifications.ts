@@ -19,12 +19,12 @@ function show({
   if (!id) id = randomId();
 
   // Create panel if necessary
-  _createPanel();
+  createPanel();
 
   // Get existing DOM element for this ID, or create if needed.
-  let $notification = _get(id);
+  let $notification = get(id);
 
-  if ($notification.length === 0) $notification = _create(id);
+  if ($notification.length === 0) $notification = create(id);
 
   // Render html and dependencies
   const newHtml =
@@ -61,34 +61,34 @@ function show({
   // If duration was provided, schedule removal. If not, clear existing
   // removal callback (this happens if a message was first added with
   // a duration, and then updated with no duration).
-  if (duration) _addRemovalCallback(id, duration);
-  else _clearRemovalCallback(id);
+  if (duration) addRemovalCallback(id, duration);
+  else clearRemovalCallback(id);
 
   return id;
 }
 
 // TODO-barret - Should `id` be required? (some places do not supply one)
 function remove(id?: string): void {
-  _get(id).fadeOut(fadeDuration, function () {
+  get(id).fadeOut(fadeDuration, function () {
     shinyUnbindAll(this);
     $(this).remove();
 
     // If no more notifications, remove the panel from the DOM.
-    if (_ids().length === 0) {
-      _getPanel().remove();
+    if (ids().length === 0) {
+      getPanel().remove();
     }
   });
 }
 
 // Returns an individual notification DOM object (wrapped in jQuery).
-function _get(id?: string) {
+function get(id?: string) {
   if (!id) return null;
-  return _getPanel().find("#shiny-notification-" + $escape(id));
+  return getPanel().find("#shiny-notification-" + $escape(id));
 }
 
 // Return array of all notification IDs
-function _ids() {
-  return _getPanel()
+function ids() {
+  return getPanel()
     .find(".shiny-notification")
     .map(function () {
       return this.id.replace(/shiny-notification-/, "");
@@ -97,14 +97,14 @@ function _ids() {
 }
 
 // Returns the notification panel DOM object (wrapped in jQuery).
-function _getPanel() {
+function getPanel() {
   return $("#shiny-notification-panel");
 }
 
 // Create notifications panel and return the jQuery object. If the DOM
 // element already exists, just return it.
-function _createPanel() {
-  const $panel = _getPanel();
+function createPanel() {
+  const $panel = getPanel();
 
   if ($panel.length > 0) return $panel;
 
@@ -115,8 +115,8 @@ function _createPanel() {
 
 // Create a notification DOM element and return the jQuery object. If the
 // DOM element already exists for the ID, just return it without creating.
-function _create(id) {
-  let $notification = _get(id);
+function create(id) {
+  let $notification = get(id);
 
   if ($notification.length === 0) {
     $notification = $(
@@ -132,29 +132,29 @@ function _create(id) {
       remove(id);
     });
 
-    _getPanel().append($notification);
+    getPanel().append($notification);
   }
 
   return $notification;
 }
 
 // Add a callback to remove a notification after a delay in ms.
-function _addRemovalCallback(id, delay) {
+function addRemovalCallback(id, delay) {
   // If there's an existing removalCallback, clear it before adding the new
   // one.
-  _clearRemovalCallback(id);
+  clearRemovalCallback(id);
 
   // Attach new removal callback
   const removalCallback = setTimeout(function () {
     remove(id);
   }, delay);
 
-  _get(id).data("removalCallback", removalCallback);
+  get(id).data("removalCallback", removalCallback);
 }
 
 // Clear a removal callback from a notification, if present.
-function _clearRemovalCallback(id) {
-  const $notification = _get(id);
+function clearRemovalCallback(id) {
+  const $notification = get(id);
   const oldRemovalCallback = $notification.data("removalCallback");
 
   if (oldRemovalCallback) {

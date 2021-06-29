@@ -233,7 +233,6 @@ function renderDependency(dep: HtmlDep) {
           // the same plot being redrawn multiple times with different
           // styling.
           link.attr("onload", () => {
-
             const $dummyEl = $("<div>")
               .css("transition", "0.1s all")
               .css("position", "absolute")

@@ -233,37 +233,26 @@ function renderDependency(dep: HtmlDep) {
           // the same plot being redrawn multiple times with different
           // styling.
           link.attr("onload", () => {
-            const dummyId = "dummy-" + Math.floor(Math.random() * 999999999);
-            const cssString =
-              "#" +
-              dummyId +
-              " { " +
-              "color: #a7c920 !important; " + // An arbitrary color for the transition
-              "transition: 0.1s all !important; " +
-              "visibility: hidden !important; " +
-              "position: absolute !important; " +
-              "top: -1000px !important; " +
-              "left: 0 !important; }";
-            const base64CssString = "data:text/css;base64," + btoa(cssString);
 
-            const $dummyLink = $("<link rel='stylesheet' type='text/css' />");
-
-            $dummyLink.attr("href", base64CssString);
-
-            const $dummyEl = $("<div id='" + dummyId + "'></div>");
+            const $dummyEl = $("<div>")
+              .css("transition", "0.1s all")
+              .css("position", "absolute")
+              .css("top", "-1000px")
+              .css("left", "0");
 
             $dummyEl.one("transitionend", () => {
               $dummyEl.remove();
-              removeSheet(findSheet($dummyLink.attr("href")));
               removeSheet(oldSheet);
               sendImageSizeFns.transitioned();
             });
             $(document.body).append($dummyEl);
 
-            // Need to add the CSS with a setTimeout 0, to ensure that it
-            // takes effect _after_ the DOM element has been added. This is
-            // necessary to ensure that the transition actually occurs.
-            setTimeout(() => $head.append($dummyLink), 0);
+            // To ensure a transition actually happens, change the inline style _after_
+            // the DOM element has been added, and also use a new random color each time
+            // to prevent any potential caching done by the browser
+            const color = Math.floor(Math.random() * 16777215).toString(16);
+
+            setTimeout(() => $dummyEl.css("color", color), 10);
           });
 
           $head.append(link);

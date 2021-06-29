@@ -178,14 +178,15 @@ modalDialog <- function(..., title = NULL, footer = modalButton("Dismiss"),
         if (!is.null(footer)) div(class = "modal-footer", footer)
       )
     ),
-    tags$script(
-      "if (window.bootstrap) {
+    # jQuery plugin doesn't work in Bootstrap 5, but vanilla JS doesn't work in Bootstrap 4 :sob:
+    tags$script(HTML(
+      "if (window.bootstrap && !window.bootstrap.Modal.VERSION.match(/^4\\./)) {
          var modal = new bootstrap.Modal(document.getElementById('shiny-modal'));
          modal.show();
       } else {
          $('#shiny-modal').modal().focus();
       }"
-    )
+    ))
   )
 }
 

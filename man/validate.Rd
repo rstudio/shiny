@@ -68,7 +68,7 @@ options(device.ask.default = FALSE)
 
 ui <- fluidPage(
   checkboxGroupInput('in1', 'Check some letters', choices = head(LETTERS)),
-  selectizeInput('in2', 'Select a state', choices = state.name),
+  selectizeInput('in2', 'Select a state', choices = c("", state.name)),
   plotOutput('plot')
 )
 

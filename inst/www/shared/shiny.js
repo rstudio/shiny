@@ -9181,22 +9181,17 @@
           } else {
             link.attr("href", href2);
             link.attr("onload", function() {
-              var dummyId = "dummy-" + Math.floor(Math.random() * 999999999);
-              var cssString = "#" + dummyId + " { color: #a7c920 !important; transition: 0.1s all !important; visibility: hidden !important; position: absolute !important; top: -1000px !important; left: 0 !important; }";
-              var base64CssString = "data:text/css;base64," + btoa(cssString);
-              var $dummyLink = (0, import_jquery27.default)("<link rel='stylesheet' type='text/css' />");
-              $dummyLink.attr("href", base64CssString);
-              var $dummyEl = (0, import_jquery27.default)("<div id='" + dummyId + "'></div>");
+              var $dummyEl = (0, import_jquery27.default)("<div>").css("transition", "0.1s all").css("position", "absolute").css("top", "-1000px").css("left", "0");
               $dummyEl.one("transitionend", function() {
                 $dummyEl.remove();
-                removeSheet(findSheet($dummyLink.attr("href")));
                 removeSheet(oldSheet);
                 sendImageSizeFns.transitioned();
               });
               (0, import_jquery27.default)(document.body).append($dummyEl);
+              var color = "#" + Math.floor(Math.random() * 16777215).toString(16);
               setTimeout(function() {
-                return $head.append($dummyLink);
-              }, 0);
+                return $dummyEl.css("color", color);
+              }, 10);
             });
             $head.append(link);
           }

@@ -9188,7 +9188,7 @@
                 sendImageSizeFns.transitioned();
               });
               (0, import_jquery27.default)(document.body).append($dummyEl);
-              var color = Math.floor(Math.random() * 16777215).toString(16);
+              var color = "#" + Math.floor(Math.random() * 16777215).toString(16);
               setTimeout(function() {
                 return $dummyEl.css("color", color);
               }, 10);

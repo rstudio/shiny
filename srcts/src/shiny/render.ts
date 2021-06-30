@@ -249,7 +249,8 @@ function renderDependency(dep: HtmlDep) {
             // To ensure a transition actually happens, change the inline style _after_
             // the DOM element has been added, and also use a new random color each time
             // to prevent any potential caching done by the browser
-            const color = "#" + Math.floor(Math.random() * 16777215).toString(16);
+            const color =
+              "#" + Math.floor(Math.random() * 16777215).toString(16);
 
             setTimeout(() => $dummyEl.css("color", color), 10);
           });

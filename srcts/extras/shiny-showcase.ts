@@ -1,4 +1,5 @@
 import type { Shiny } from "../src/shiny";
+/* eslint-disable unicorn/filename-case */
 
 type ShowcaseSrcMessage = {
   srcref: Array<number>;

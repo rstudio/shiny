@@ -12286,8 +12286,8 @@
             data: _this.$initialInput
           }));
           while (_this.$pendingMessages.length) {
-            var _msg = _this.$pendingMessages.shift();
-            socket.send(_msg);
+            var msg = _this.$pendingMessages.shift();
+            socket.send(msg);
           }
         };
         socket.onmessage = function(e) {

@@ -1882,9 +1882,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/jquery@patch:@types/jquery@3.5.5#./srcts/patch/types-jquery.patch::locator=%40types%2Fshiny%40workspace%3A.":
+"@types/jquery@patch:@types/jquery@3.5.5#./srcts/patch/types-jquery.patch::locator=%40types%2Frstudio-shiny%40workspace%3A.":
   version: 3.5.5
-  resolution: "@types/jquery@patch:@types/jquery@npm%3A3.5.5#./srcts/patch/types-jquery.patch::version=3.5.5&hash=c1c0fd&locator=%40types%2Fshiny%40workspace%3A."
+  resolution: "@types/jquery@patch:@types/jquery@npm%3A3.5.5#./srcts/patch/types-jquery.patch::version=3.5.5&hash=c1c0fd&locator=%40types%2Frstudio-shiny%40workspace%3A."
   dependencies:
     "@types/sizzle": "*"
   checksum: 6cfc1b6d59c97046f1caa725ac72a81d6b4a2564b40e4e1fca599bf5ebb1e3ca9ea24867459094f2e21df953f2234a15a5d2f70556b1cdf3566ce05d7ac1f8d0
@@ -1935,16 +1935,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/selectize@npm:0.12.34":
-  version: 0.12.34
-  resolution: "@types/selectize@npm:0.12.34"
-  checksum: 111ea48537c03747e2ba85cdd8705aa632a20cf743bb8308c57415f29c7af15a4c009ea816f9cdc77976ae41d26881916fa80eaf930d86beb360b03fbc798bd0
-  languageName: node
-  linkType: hard
-
-"@types/shiny@workspace:.":
+"@types/rstudio-shiny@workspace:.":
   version: 0.0.0-use.local
-  resolution: "@types/shiny@workspace:."
+  resolution: "@types/rstudio-shiny@workspace:."
   dependencies:
     "@babel/core": ^7.14.3
     "@babel/plugin-proposal-class-properties": ^7.13.0
@@ -2003,6 +1996,13 @@ __metadata:
     util-inspect: "https://github.com/deecewan/browser-util-inspect#c0b4350df4378ffd743e8c36dd3898ce3992823e"
   languageName: unknown
   linkType: soft
+
+"@types/selectize@npm:0.12.34":
+  version: 0.12.34
+  resolution: "@types/selectize@npm:0.12.34"
+  checksum: 111ea48537c03747e2ba85cdd8705aa632a20cf743bb8308c57415f29c7af15a4c009ea816f9cdc77976ae41d26881916fa80eaf930d86beb360b03fbc798bd0
+  languageName: node
+  linkType: hard
 
 "@types/showdown@npm:^1.9.3":
   version: 1.9.3

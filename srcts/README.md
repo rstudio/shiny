@@ -189,6 +189,8 @@ yarn add https://github.com/rstudio/shiny\#v1.7.0
 
 This will provide a global type defintion of `Shiny`, let your IDE know that `window.Shiny` is of type `Shiny`, and declare a globally available variable `Shiny` within your project. You **should not** need to import anything. Similar to `jQuery`, it should _Just Work_<sup>TM</sup>.
 
+When loading your compiled file, it should be loaded after Shiny is loaded. If you are using an `htmlDependency()` to add your code to the page, your script will automatically be loaded after has been loaded.
+
 
 ### GitHub Actions
 

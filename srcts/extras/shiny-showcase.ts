@@ -1,7 +1,8 @@
-import type { Shiny } from "../src/shiny";
+/* eslint-disable unicorn/filename-case */
+import "./globalShiny";
 
 type ShowcaseSrcMessage = {
-  srcref: Array<number>;
+  srcref: number[];
   srcfile: string;
 };
 
@@ -135,8 +136,8 @@ function highlightSrcref(
 // If this is the main Shiny window, wire up our custom message handler.
 // TODO-barret, this should work
 
-if ((window as any).Shiny) {
-  ((window as any).Shiny as Shiny).addCustomMessageHandler(
+if (Shiny) {
+  Shiny.addCustomMessageHandler(
     "showcase-src",
     function (message: ShowcaseSrcMessage) {
       if (message.srcref && message.srcfile) {

@@ -1873,12 +1873,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/jquery@npm:*, @types/jquery@npm:^3.5.5":
+"@types/jquery@3.5.5, @types/jquery@npm:*":
   version: 3.5.5
   resolution: "@types/jquery@npm:3.5.5"
   dependencies:
     "@types/sizzle": "*"
   checksum: 9e3c34451577c6916ac9de8a26fd8bce2831cb5861116514cba4a984189067635a3e084039308324d8e20bfa5f2e1ce7725a509110e5e05487b91f9369b1ae43
+  languageName: node
+  linkType: hard
+
+"@types/jquery@patch:@types/jquery@3.5.5#./srcts/patch/types-jquery.patch::locator=%40types%2Frstudio-shiny%40workspace%3A.":
+  version: 3.5.5
+  resolution: "@types/jquery@patch:@types/jquery@npm%3A3.5.5#./srcts/patch/types-jquery.patch::version=3.5.5&hash=c1c0fd&locator=%40types%2Frstudio-shiny%40workspace%3A."
+  dependencies:
+    "@types/sizzle": "*"
+  checksum: 6cfc1b6d59c97046f1caa725ac72a81d6b4a2564b40e4e1fca599bf5ebb1e3ca9ea24867459094f2e21df953f2234a15a5d2f70556b1cdf3566ce05d7ac1f8d0
   languageName: node
   linkType: hard
 
@@ -1926,16 +1935,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/selectize@npm:0.12.34":
-  version: 0.12.34
-  resolution: "@types/selectize@npm:0.12.34"
-  checksum: 111ea48537c03747e2ba85cdd8705aa632a20cf743bb8308c57415f29c7af15a4c009ea816f9cdc77976ae41d26881916fa80eaf930d86beb360b03fbc798bd0
-  languageName: node
-  linkType: hard
-
-"@types/shiny@workspace:.":
+"@types/rstudio-shiny@workspace:.":
   version: 0.0.0-use.local
-  resolution: "@types/shiny@workspace:."
+  resolution: "@types/rstudio-shiny@workspace:."
   dependencies:
     "@babel/core": ^7.14.3
     "@babel/plugin-proposal-class-properties": ^7.13.0
@@ -1952,7 +1954,7 @@ __metadata:
     "@types/highlightjs": ^9.12.1
     "@types/ion-rangeslider": 2.3.0
     "@types/jest": ^26.0.23
-    "@types/jquery": ^3.5.5
+    "@types/jquery": "patch:@types/jquery@3.5.5#./srcts/patch/types-jquery.patch"
     "@types/jqueryui": 1.12.15
     "@types/lodash": ^4.14.170
     "@types/node": ^15.6.1
@@ -1994,6 +1996,13 @@ __metadata:
     util-inspect: "https://github.com/deecewan/browser-util-inspect#c0b4350df4378ffd743e8c36dd3898ce3992823e"
   languageName: unknown
   linkType: soft
+
+"@types/selectize@npm:0.12.34":
+  version: 0.12.34
+  resolution: "@types/selectize@npm:0.12.34"
+  checksum: 111ea48537c03747e2ba85cdd8705aa632a20cf743bb8308c57415f29c7af15a4c009ea816f9cdc77976ae41d26881916fa80eaf930d86beb360b03fbc798bd0
+  languageName: node
+  linkType: hard
 
 "@types/showdown@npm:^1.9.3":
   version: 1.9.3

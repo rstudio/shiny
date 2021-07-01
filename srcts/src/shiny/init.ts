@@ -525,11 +525,17 @@ function initDeferredIframes(): void {
   // TODO-barret; This method uses `window.Shiny`. Could be replaced with `fullShinyObj_.shinyapp?.isConnected()`,
   // but that would not use `window.Shiny`. Is it a problem???
   if (
-    // @ts-expect-error; Do not want to define `window.Shiny` as a type to discourage usage of `window.Shiny`
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore; Do not want to define `window.Shiny` as a type to discourage usage of `window.Shiny`;
+    // Can not expect error when combining with window available Shiny definition
     !window.Shiny ||
-    // @ts-expect-error; Do not want to define `window.Shiny` as a type to discourage usage of `window.Shiny`
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore; Do not want to define `window.Shiny` as a type to discourage usage of `window.Shiny`;
+    // Can not expect error when combining with window available Shiny definition
     !window.Shiny.shinyapp ||
-    // @ts-expect-error; Do not want to define `window.Shiny` as a type to discourage usage of `window.Shiny`
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore; Do not want to define `window.Shiny` as a type to discourage usage of `window.Shiny`;
+    // Can not expect error when combining with window available Shiny definition
     !window.Shiny.shinyapp.isConnected()
   ) {
     // If somehow we accidentally call this before the server connection is

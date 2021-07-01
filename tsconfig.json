@@ -10,10 +10,12 @@
   },
   "include": [
     "srcts/src/index.ts",
-    "srcts/src/**/*.ts"
+    "srcts/src/**/*.ts",
+    "srcts/extras/globalShiny.ts"
   ],
   "exclude": [
     "node_modules",
+    "srcts/types/",
     "**/__tests__"
   ]
 }

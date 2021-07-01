@@ -173,6 +173,25 @@ yarn watch
 
 Both JavaScript files will produce a sourcemap (`**.js.map`) that the browser will understand.  This will help you debug Shiny's JavaScript code within the browser and point back to the original TypeScript files.
 
+### Exported types
+
+`./extras/globalShiny.ts` contains global declarations to define `window.Shiny`, a globally available `Shiny` variable, and a globally available `Shiny` type. This file is in a parallel folder to `./src` to avoid `Shiny` from being globally accessable within the source code. However, this file is the default type defintion when the Type definitions are installed by external developers.
+
+#### External development
+
+When developing TypeScript projects that leverage Shiny, we recommend installing the Shiny TypeScript definitions to your package. To install the definitions, call
+
+```bash
+yarn add https://github.com/rstudio/shiny\#v1.7.0
+```
+
+, matching the GitHub tag to your current the Shiny CRAN release (ex: `v1.7.0`).  If you are asked to select a version of `@types/jquery`, please select the closest version.
+
+This will provide a global type defintion of `Shiny`, let your IDE know that `window.Shiny` is of type `Shiny`, and declare a globally available variable `Shiny` within your project. You **should not** need to import anything. Similar to `jQuery`, it should _Just Work_<sup>TM</sup>.
+
+When loading your compiled file, it should be loaded after Shiny is loaded. If you are using an `htmlDependency()` to add your code to the page, your script will automatically be loaded after has been loaded.
+
+
 ### GitHub Actions
 
 On push to the `master` branch or push to a Pull Request to the `master` branch, a GitHub Action will be run to make sure the bundled JavaScript code is up to date. If the source code does not compile to the exact same file, it will be committed an pushed back to the outdated branch. (This makes it so the full build tools are not necessary for small tweaks and comments. 🎉)

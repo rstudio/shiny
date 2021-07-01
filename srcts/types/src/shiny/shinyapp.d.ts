@@ -1,9 +1,7 @@
 import type { OutputBindingAdapter } from "../bindings/outputAdapter";
 import type { UploadInitValue, UploadEndValue } from "../file/fileProcessor";
 declare type ResponseValue = UploadEndValue | UploadInitValue;
-declare type Handler = (msg: unknown[] | boolean | string | {
-    [key: string]: unknown;
-}) => void;
+declare type Handler = (message: any) => void;
 declare type ShinyWebSocket = WebSocket & {
     allowReconnect?: boolean;
 };

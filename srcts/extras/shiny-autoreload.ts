@@ -1,3 +1,4 @@
+/* eslint-disable unicorn/filename-case */
 let protocol = "ws:";
 
 if (window.location.protocol === "https:") protocol = "wss:";

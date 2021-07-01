@@ -2,13 +2,16 @@
   "private": true,
   "homepage": "https://shiny.rstudio.com",
   "repository": "github:rstudio/shiny",
-  "name": "@types/shiny",
+  "name": "@types/rstudio-shiny",
   "version": "1.6.0-alpha.9021",
   "license": "GPL-3.0-only",
   "main": "",
   "browser": "",
-  "types": "srcts/types/shiny/index.d.ts",
+  "types": "srcts/types/extras/globalShiny.d.ts",
   "files": [
+    "DESCRIPTION",
+    "LICENSE",
+    "NEWS.md",
     "srcts/types/**/*.d.ts"
   ],
   "engines": {
@@ -20,7 +23,7 @@
     "@types/bootstrap-datepicker": "0.0.14",
     "@types/datatables.net": "^1.10.19",
     "@types/ion-rangeslider": "2.3.0",
-    "@types/jquery": "^3.5.5",
+    "@types/jquery": "patch:@types/jquery@3.5.5#./srcts/patch/types-jquery.patch",
     "@types/selectize": "0.12.34"
   },
   "devDependencies": {
@@ -75,6 +78,7 @@
     "util-inspect": "https://github.com/deecewan/browser-util-inspect#c0b4350df4378ffd743e8c36dd3898ce3992823e"
   },
   "scripts": {
+    "prepare": "node --eval \"1+1; // help yarn users not install the whole repo; https://github.com/yarnpkg/yarn/issues/2822#issuecomment-847360267\"",
     "watch": "yarn run build_shiny --watch",
     "build": "yarn run build_shiny && yarn run bundle_extras && yarn run bundle_external_libs",
     "build_shiny": "yarn run checks && yarn run bundle_shiny",

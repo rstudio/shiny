@@ -1,3 +1,7 @@
+Addresses #2521: Updated the list of TCP ports that will [be rejected](https://chromium.googlesource.com/chromium/src.git/+/refs/heads/main/net/base/port_util.cc)
+by default in runapp.R, adding 5060, 5061 and 6566. Added documentation describing the port range (3000:8000)
+and which ports are rejected. 
+
 shiny 1.6.0.9000
 ================
 

@@ -33,9 +33,7 @@ import type { WherePosition } from "./singletons";
 import type { UploadInitValue, UploadEndValue } from "../file/fileProcessor";
 
 type ResponseValue = UploadEndValue | UploadInitValue;
-type Handler = (
-  msg: unknown[] | boolean | string | { [key: string]: unknown }
-) => void;
+type Handler = (message: any) => void;
 
 type ShinyWebSocket = WebSocket & {
   allowReconnect?: boolean;

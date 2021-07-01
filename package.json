@@ -2,7 +2,7 @@
   "private": true,
   "homepage": "https://shiny.rstudio.com",
   "repository": "github:rstudio/shiny",
-  "name": "@types-rstudio/shiny",
+  "name": "@types/rstudio-shiny",
   "version": "1.6.0-alpha.9021",
   "license": "GPL-3.0-only",
   "main": "",

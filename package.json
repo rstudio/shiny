@@ -7,7 +7,7 @@
   "license": "GPL-3.0-only",
   "main": "",
   "browser": "",
-  "types": "srcts/types/shiny/index.d.ts",
+  "types": "srcts/types/extras/windowShiny.d.ts",
   "files": [
     "srcts/types/**/*.d.ts"
   ],

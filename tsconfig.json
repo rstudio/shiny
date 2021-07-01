@@ -10,7 +10,8 @@
   },
   "include": [
     "srcts/src/index.ts",
-    "srcts/src/**/*.ts"
+    "srcts/src/**/*.ts",
+    "srcts/extras/windowShiny.ts"
   ],
   "exclude": [
     "node_modules",

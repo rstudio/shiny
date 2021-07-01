@@ -173,6 +173,10 @@ yarn watch
 
 Both JavaScript files will produce a sourcemap (`**.js.map`) that the browser will understand.  This will help you debug Shiny's JavaScript code within the browser and point back to the original TypeScript files.
 
+### Exported types
+
+`./extras/windowShiny.ts` contains global declarations to define `window.Shiny` as a `Shiny` type. This file is in a parallel folder to `./src` to avoid `Shiny` from being globally defined within the source code. However, this file is the default type defintion when the Type definitions are installed by users.
+
 ### GitHub Actions
 
 On push to the `master` branch or push to a Pull Request to the `master` branch, a GitHub Action will be run to make sure the bundled JavaScript code is up to date. If the source code does not compile to the exact same file, it will be committed an pushed back to the outdated branch. (This makes it so the full build tools are not necessary for small tweaks and comments. 🎉)

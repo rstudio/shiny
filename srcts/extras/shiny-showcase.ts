@@ -1,6 +1,5 @@
 /* eslint-disable unicorn/filename-case */
-
-import "./windowShiny";
+import "./globalShiny";
 
 type ShowcaseSrcMessage = {
   srcref: number[];

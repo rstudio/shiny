@@ -11,11 +11,11 @@
   "include": [
     "srcts/src/index.ts",
     "srcts/src/**/*.ts",
-    "srcts/extras/windowShiny.ts"
+    "srcts/extras/globalShiny.ts"
   ],
   "exclude": [
     "node_modules",
-    "srcts/types/extras",
+    "srcts/types/",
     "**/__tests__"
   ]
 }

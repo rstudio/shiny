@@ -175,7 +175,7 @@ Both JavaScript files will produce a sourcemap (`**.js.map`) that the browser wi
 
 ### Exported types
 
-`./extras/windowShiny.ts` contains global declarations to define `window.Shiny` as a `Shiny` type. This file is in a parallel folder to `./src` to avoid `Shiny` from being globally defined within the source code. However, this file is the default type defintion when the Type definitions are installed by users.
+`./extras/globalShiny.ts` contains global declarations to define `window.Shiny`, a globally available `Shiny` variable, and a globally available `Shiny` type. This file is in a parallel folder to `./src` to avoid `Shiny` from being globally accessable within the source code. However, this file is the default type defintion when the Type definitions are installed by external developers.
 
 #### External development
 
@@ -185,7 +185,7 @@ When developing TypeScript projects that leverage Shiny, we recommend installing
 yarn add https://github.com/rstudio/shiny\#v1.7.0
 ```
 
-, matching the GitHub tag to your current the Shiny CRAN release.  If you are asked to select a version of `@types/jquery`, please select the closest version.
+, matching the GitHub tag to your current the Shiny CRAN release (ex: `v1.7.0`).  If you are asked to select a version of `@types/jquery`, please select the closest version.
 
 This will provide a global type defintion of `Shiny`, let your IDE know that `window.Shiny` is of type `Shiny`, and declare a globally available variable `Shiny` within your project. You **should not** need to import anything. Similar to `jQuery`, it should _Just Work_<sup>TM</sup>.
 

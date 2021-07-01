@@ -9,6 +9,9 @@
   "browser": "",
   "types": "srcts/types/extras/windowShiny.d.ts",
   "files": [
+    "DESCRIPTION",
+    "LICENSE",
+    "NEWS.md",
     "srcts/types/**/*.d.ts"
   ],
   "engines": {

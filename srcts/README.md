@@ -177,6 +177,19 @@ Both JavaScript files will produce a sourcemap (`**.js.map`) that the browser wi
 
 `./extras/windowShiny.ts` contains global declarations to define `window.Shiny` as a `Shiny` type. This file is in a parallel folder to `./src` to avoid `Shiny` from being globally defined within the source code. However, this file is the default type defintion when the Type definitions are installed by users.
 
+#### External development
+
+When developing TypeScript projects that leverage Shiny, we recommend installing the Shiny TypeScript definitions to your package. To install the definitions, call
+
+```bash
+yarn add https://github.com/rstudio/shiny\#v1.7.0
+```
+
+, matching the GitHub tag to your current the Shiny CRAN release.  If you are asked to select a version of `@types/jquery`, please select the closest version.
+
+This will provide a global type defintion of `Shiny`, let your IDE know that `window.Shiny` is of type `Shiny`, and declare a globally available variable `Shiny` within your project. You **should not** need to import anything. Similar to `jQuery`, it should _Just Work_<sup>TM</sup>.
+
+
 ### GitHub Actions
 
 On push to the `master` branch or push to a Pull Request to the `master` branch, a GitHub Action will be run to make sure the bundled JavaScript code is up to date. If the source code does not compile to the exact same file, it will be committed an pushed back to the outdated branch. (This makes it so the full build tools are not necessary for small tweaks and comments. 🎉)

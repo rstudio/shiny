@@ -13,6 +13,13 @@
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
+  /* https://github.com/rstudio/shiny/issues/3443 */
+  /* https://css-tricks.com/inheriting-box-sizing-probably-slightly-better-best-practice/ */
+  box-sizing: border-box;
+}
+
+.irs *, .irs *:before, .irs *:after {
+  box-sizing: inherit;
 }
 
 .irs-line {

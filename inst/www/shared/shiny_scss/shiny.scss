@@ -92,6 +92,8 @@ pre.shiny-text-output {
   bottom: 0;
   left: 0;
   right: 0;
+  max-width: 100%;  /* Make sure width isn't restricted by styles on selectors like "body > div" */
+  max-height: 100%;
   background-color: $shiny-disconnected-bg;
   opacity: 0.5;
   overflow: hidden;

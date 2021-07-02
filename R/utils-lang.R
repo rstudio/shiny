@@ -108,3 +108,163 @@ get_quosure <- function(x, env, quoted) {
 
   x
 }
+
+
+# Create a zero-arg function from a quoted expression and environment
+# @examples
+# makeFunction(body=quote(print(3)))
+makeFunction <- function(args = pairlist(), body, env = parent.frame()) {
+  eval(call("function", args, body), env)
+}
+
+#' Convert an expression to a function
+#'
+#' This is to be called from another function, because it will attempt to get
+#' an unquoted expression from two calls back. Note: as of Shiny 1.6.0, it is
+#' recommended to use [quoToFunction()] instead.
+#'
+#' If expr is a quoted expression, then this just converts it to a function.
+#' If expr is a function, then this simply returns expr (and prints a
+#'   deprecation message).
+#' If expr was a non-quoted expression from two calls back, then this will
+#'   quote the original expression and convert it to a function.
+#
+#' @param expr A quoted or unquoted expression, or a function.
+#' @param env The desired environment for the function. Defaults to the
+#'   calling environment two steps back.
+#' @param quoted Is the expression quoted?
+#'
+#' @examples
+#' # Example of a new renderer, similar to renderText
+#' # This is something that toolkit authors will do
+#' renderTriple <- function(expr, env=parent.frame(), quoted=FALSE) {
+#'   # Convert expr to a function
+#'   func <- shiny::exprToFunction(expr, env, quoted)
+#'
+#'   function() {
+#'     value <- func()
+#'     paste(rep(value, 3), collapse=", ")
+#'   }
+#' }
+#'
+#'
+#' # Example of using the renderer.
+#' # This is something that app authors will do.
+#' values <- reactiveValues(A="text")
+#'
+#' \dontrun{
+#' # Create an output object
+#' output$tripleA <- renderTriple({
+#'   values$A
+#' })
+#' }
+#'
+#' # At the R console, you can experiment with the renderer using isolate()
+#' tripleA <- renderTriple({
+#'   values$A
+#' })
+#'
+#' isolate(tripleA())
+#' # "text, text, text"
+#' @export
+exprToFunction <- function(expr, env = parent.frame(), quoted = FALSE) {
+  if (!quoted) {
+    expr <- eval(substitute(substitute(expr)), parent.frame())
+  }
+
+  # expr is a quoted expression
+  makeFunction(body=expr, env=env)
+}
+
+#' Install an expression as a function
+#'
+#' Installs an expression in the given environment as a function, and registers
+#' debug hooks so that breakpoints may be set in the function. Note: as of
+#' Shiny 1.6.0, it is recommended to use [quoToFunction()] instead.
+#'
+#' This function can replace `exprToFunction` as follows: we may use
+#' `func <- exprToFunction(expr)` if we do not want the debug hooks, or
+#' `installExprFunction(expr, "func")` if we do. Both approaches create a
+#' function named `func` in the current environment.
+#'
+#' @seealso Wraps [exprToFunction()]; see that method's documentation
+#'   for more documentation and examples.
+#'
+#' @param expr A quoted or unquoted expression
+#' @param name The name the function should be given
+#' @param eval.env The desired environment for the function. Defaults to the
+#'   calling environment two steps back.
+#' @param quoted Is the expression quoted?
+#' @param assign.env The environment in which the function should be assigned.
+#' @param label A label for the object to be shown in the debugger. Defaults to
+#'   the name of the calling function.
+#' @param wrappedWithLabel,..stacktraceon Advanced use only. For stack manipulation purposes; see
+#'   [stacktrace()].
+#' @export
+installExprFunction <- function(expr, name, eval.env = parent.frame(2),
+                                quoted = FALSE,
+                                assign.env = parent.frame(1),
+                                label = deparse(sys.call(-1)[[1]]),
+                                wrappedWithLabel = TRUE,
+                                ..stacktraceon = FALSE) {
+  if (!quoted) {
+    quoted <- TRUE
+    expr <- eval(substitute(substitute(expr)), parent.frame())
+  }
+
+  func <- exprToFunction(expr, eval.env, quoted)
+  if (length(label) > 1) {
+    # Just in case the deparsed code is more complicated than we imagine. If we
+    # have a label with length > 1 it causes warnings in wrapFunctionLabel.
+    label <- paste0(label, collapse = "\n")
+  }
+  if (wrappedWithLabel) {
+    func <- wrapFunctionLabel(func, label, ..stacktraceon = ..stacktraceon)
+  } else {
+    registerDebugHook(name, assign.env, label)
+  }
+  assign(name, func, envir = assign.env)
+}
+
+#' Convert a quosure to a function for a Shiny render function
+#'
+#' This takes a quosure and label, and wraps them into a function that should be
+#' passed to [createRenderFunction()] or [markRenderFunction()].
+#'
+#' This function was added in Shiny 1.6.0. Previously, it was recommended to use
+#' [installExprFunction()] or [exprToFunction()] in render functions, but now we
+#' recommend using [quoToFunction()], because it does not require `env` and
+#' `quoted` arguments -- that information is captured by quosures provided by
+#' \pkg{rlang}.
+#'
+#' @param q A quosure.
+#' @inheritParams installExprFunction
+#' @seealso [createRenderFunction()] for example usage.
+#'
+#' @export
+quoToFunction <- function(q, label, ..stacktraceon = FALSE) {
+  q <- as_quosure(q)
+  func <- as_function(q)
+  # as_function returns a function that takes `...`. We want one that takes no
+  # args.
+  formals(func) <- list()
+  wrapFunctionLabel(func, label, ..stacktraceon = ..stacktraceon)
+}
+
+
+# Utility function for creating a debugging label, given an expression.
+# `expr` is a quoted expression.
+# `function_name` is the name of the calling function.
+# `label` is an optional user-provided label. If NULL, it will be inferred.
+exprToLabel <- function(expr, function_name, label = NULL) {
+  srcref <- attr(expr, "srcref", exact = TRUE)
+  if (is.null(label)) {
+    label <- rexprSrcrefToLabel(
+      srcref[[1]],
+      sprintf('%s(%s)', function_name, paste(deparse(expr), collapse = '\n'))
+    )
+  }
+  if (length(srcref) >= 2) attr(label, "srcref") <- srcref[[2]]
+  attr(label, "srcfile") <- srcFileOfRef(srcref[[1]])
+  label
+}

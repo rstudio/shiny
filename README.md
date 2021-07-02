@@ -58,3 +58,7 @@ We welcome contributions to the **shiny** package. Please see our [CONTRIBUTING.
 ## License
 
 The shiny package as a whole is licensed under the GPLv3. See the [LICENSE](LICENSE) file for more details.
+
+## R version support
+
+Shiny is supported on the latest release version of R, as well as the previous four minor release versions of R. For example, if the latest release R version is 4.1, then that version is supported, as well as 4.0, 3.6, 3.5, and 3.4.

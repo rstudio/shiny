@@ -110,13 +110,6 @@ get_quosure <- function(x, env, quoted) {
 }
 
 
-# Create a zero-arg function from a quoted expression and environment
-# @examples
-# makeFunction(body=quote(print(3)))
-makeFunction <- function(args = pairlist(), body, env = parent.frame()) {
-  eval(call("function", args, body), env)
-}
-
 #' Convert an expression to a function
 #'
 #' This is to be called from another function, because it will attempt to get
@@ -129,7 +122,7 @@ makeFunction <- function(args = pairlist(), body, env = parent.frame()) {
 #' If expr was a non-quoted expression from two calls back, then this will
 #'   quote the original expression and convert it to a function.
 #
-#' @param expr A quoted or unquoted expression, or a function.
+#' @param expr A quoted or unquoted expression, or a quosure.
 #' @param env The desired environment for the function. Defaults to the
 #'   calling environment two steps back.
 #' @param quoted Is the expression quoted?
@@ -168,12 +161,32 @@ makeFunction <- function(args = pairlist(), body, env = parent.frame()) {
 #' # "text, text, text"
 #' @export
 exprToFunction <- function(expr, env = parent.frame(), quoted = FALSE) {
-  if (!quoted) {
+  # Note that this block of code is essentially copied from quoToFunction. It
+  # reaches two call levels back to get the expression. The reason that the code
+  # is copied instead of calling quoToFunction() is because this function
+  # reaches two levels back, and quoToFunction() does the same; if we called
+  # quoToFunction() from here, that function would need to reach three levels
+  # back.
+  if (!eval(substitute(missing(env)), parent.frame()) ||
+      !eval(substitute(missing(quoted)), parent.frame()))
+  {
+    deprecatedEnvQuotedMessage()
+    if (!quoted) {
+      expr <- eval(substitute(substitute(x)), parent.frame())
+    }
+    expr <- new_quosure(expr, env)
+
+  } else {
     expr <- eval(substitute(substitute(expr)), parent.frame())
+
+    # At this point, x can be a quosure if rlang::inject() is used, but the
+    # typical case is that x is not a quosure.
+    if (!is_quosure(expr)) {
+      expr <- new_quosure(expr, env = parent.frame(2L))
+    }
   }
 
-  # expr is a quoted expression
-  makeFunction(body=expr, env=env)
+  new_function(list(), get_expr(expr), get_env(expr))
 }
 
 #' Install an expression as a function

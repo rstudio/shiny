@@ -400,7 +400,7 @@ markOutputAttrs <- function(renderFunc, snapshotExclude = NULL,
 renderImage <- function(expr, env=parent.frame(), quoted=FALSE,
                         deleteFile, outputArgs=list())
 {
-  expr <- get_quosure(expr, env, quoted)
+  expr <- getQuosure(expr, env, quoted)
   func <- quoToFunction(expr, "renderImage")
 
   # missing() must be used directly within the function with the given arg
@@ -536,7 +536,7 @@ isTemp <- function(path, tempDir = tempdir(), mustExist) {
 renderPrint <- function(expr, env = parent.frame(), quoted = FALSE,
                         width = getOption('width'), outputArgs=list())
 {
-  expr <- get_quosure(expr, env, quoted)
+  expr <- getQuosure(expr, env, quoted)
   func <- quoToFunction(expr, "renderPrint")
 
   # Set a promise domain that sets the console width
@@ -622,7 +622,7 @@ createRenderPrintPromiseDomain <- function(width) {
 renderText <- function(expr, env=parent.frame(), quoted=FALSE,
                        outputArgs=list(), sep=" ") {
 
-  expr <- get_quosure(expr, env, quoted)
+  expr <- getQuosure(expr, env, quoted)
   func <- quoToFunction(expr, "renderText")
 
   createRenderFunction(
@@ -675,7 +675,7 @@ renderText <- function(expr, env=parent.frame(), quoted=FALSE,
 renderUI <- function(expr, env = parent.frame(), quoted = FALSE,
                      outputArgs = list())
 {
-  expr <- get_quosure(expr, env, quoted)
+  expr <- getQuosure(expr, env, quoted)
   func <- quoToFunction(expr, "renderUI")
 
   createRenderFunction(
@@ -829,7 +829,7 @@ renderDataTable <- function(expr, options = NULL, searchDelay = 500,
     )
   }
 
-  expr <- get_quosure(expr, env, quoted)
+  expr <- getQuosure(expr, env, quoted)
   func <- quoToFunction(expr, "renderDataTable")
 
   renderFunc <- function(shinysession, name, ...) {

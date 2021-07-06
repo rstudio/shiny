@@ -987,7 +987,7 @@ reactive <- function(x, env = parent.frame(), quoted = FALSE,
 {
   check_dots_empty()
 
-  x <- get_quosure(x, env, quoted)
+  x <- getQuosure(x, env, quoted)
   fun <- as_function(x)
   # as_function returns a function that takes `...`. We need one that takes no
   # args.
@@ -1411,7 +1411,7 @@ observe <- function(x, env = parent.frame(), quoted = FALSE,
 {
   check_dots_empty()
 
-  x <- get_quosure(x, env, quoted)
+  x <- getQuosure(x, env, quoted)
   fun <- as_function(x)
   # as_function returns a function that takes `...`. We need one that takes no
   # args.
@@ -2274,8 +2274,8 @@ observeEvent <- function(eventExpr, handlerExpr,
 {
   check_dots_empty()
 
-  eventExpr   <- get_quosure(eventExpr,   event.env,   event.quoted)
-  handlerExpr <- get_quosure(handlerExpr, handler.env, handler.quoted)
+  eventExpr   <- getQuosure(eventExpr,   event.env,   event.quoted)
+  handlerExpr <- getQuosure(handlerExpr, handler.env, handler.quoted)
 
   if (is.null(label)) {
     label <- sprintf('observeEvent(%s)', paste(deparse(get_expr(eventExpr)), collapse='\n'))
@@ -2314,8 +2314,8 @@ eventReactive <- function(eventExpr, valueExpr,
 {
   check_dots_empty()
 
-  eventExpr <- get_quosure(eventExpr, event.env, event.quoted)
-  valueExpr <- get_quosure(valueExpr, value.env, value.quoted)
+  eventExpr <- getQuosure(eventExpr, event.env, event.quoted)
+  valueExpr <- getQuosure(valueExpr, value.env, value.quoted)
 
   if (is.null(label)) {
     label <- sprintf('eventReactive(%s)', paste(deparse(get_expr(eventExpr)), collapse='\n'))

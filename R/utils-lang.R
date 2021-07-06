@@ -78,7 +78,7 @@ formalsAndBody <- function(x) {
 #
 # In the future, the calling functions will not need to have the `env` and
 # `quoted` arguments -- `rlang::inject()` and quosures can be used instead.
-# Instead of using this function, `get_quosure()`, the caller can instead use
+# Instead of using this function, `getQuosure()`, the caller can instead use
 # just the following code:
 #
 # x <- substitute(x)

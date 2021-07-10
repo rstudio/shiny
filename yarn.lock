@@ -1969,7 +1969,7 @@ __metadata:
     esbuild: ^0.12.4
     esbuild-plugin-babel: "https://github.com/schloerke/esbuild-plugin-babel#patch-2"
     esbuild-plugin-globals: ^0.1.1
-    esbuild-plugin-sass: "https://github.com/schloerke/esbuild-plugin-sass#js-files-typo"
+    esbuild-plugin-sass: ^0.5.2
     eslint: ^7.27.0
     eslint-config-prettier: ^7.2.0
     eslint-plugin-jest: ^24.3.6
@@ -3801,9 +3801,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"esbuild-plugin-sass@https://github.com/schloerke/esbuild-plugin-sass#js-files-typo":
-  version: 0.5.1
-  resolution: "esbuild-plugin-sass@https://github.com/schloerke/esbuild-plugin-sass.git#commit=1f04d94e5c2894339e428018613a43b742e0bd03"
+"esbuild-plugin-sass@npm:^0.5.2":
+  version: 0.5.2
+  resolution: "esbuild-plugin-sass@npm:0.5.2"
   dependencies:
     css-tree: ^1.1.2
     fs-extra: ^9.0.1
@@ -3811,7 +3811,7 @@ __metadata:
     tmp: ^0.2.1
   peerDependencies:
     esbuild: ">=0.11.14"
-  checksum: 2cbb57fb40b315a16b8e1fff9478b716ee1e5984388cebe1558ff52ad327a88e063f407d18a493bcef9309c9a54d84d8b1109bf1cb6b85018f0228328998546e
+  checksum: 405a7c845858cb6fc7e69fd48a55d8fe28421ec756b7d146b0d776b344c2bec7b807ebdba546bf579cd7863d9467f4d69090ca740bd96607ed046e0c6d7644fe
   languageName: node
   linkType: hard
 

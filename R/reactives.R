@@ -830,7 +830,7 @@ Observable <- R6Class(
       if (length(formals(func)) > 0)
         rlang::abort(c(
           "Can't make a reactive expression from a function that takes arguments.",
-          "Only functions without parameters can become reactive expressions."
+          "Only functions without arguments can become reactive expressions."
         ))
 
       # This is to make sure that the function labels that show in the profiler

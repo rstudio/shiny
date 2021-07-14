@@ -231,7 +231,7 @@ getQuosure <- function(x, env, quoted) {
 # This is similar to `getQuosure()`, but it is intended to be used only by
 # `installExprFunction()` and `exprToFunction()`. Whereas `getQuosure()` reaches
 # 2 calls back to find the expression passed in, this function reaches 3 calls
-# back.
+# back, and it is only used internally within Shiny.
 getQuosure3 <- function(x, env, quoted) {
   if (!any(c("env", "quoted") %in% names(match.call(sys.function(-1), sys.call(-1))))) {
     # This code path is used when `getQuosure(x)` is called.

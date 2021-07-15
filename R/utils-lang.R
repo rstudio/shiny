@@ -159,7 +159,7 @@ quoToFunction <- function(q,
 #' e <- new.env()
 #' e$vals <- reactiveValues(A="hello")
 #' # Create a quosure that captures both the expression and environment.
-#' myquo <- new_quosure(quote({ vals$A }), env = e)
+#' myquo <- rlang::new_quosure(quote({ vals$A }), env = e)
 #' tripleA <- rlang::inject(renderTriple(!!myquo))
 #' isolate(tripleA())
 #' # "hello, hello, hello"

@@ -74,7 +74,7 @@ renderTable <- function(expr, striped = FALSE, hover = FALSE,
                         env = parent.frame(), quoted = FALSE,
                         outputArgs=list())
 {
-  expr <- get_quosure(expr, env, quoted)
+  expr <- getQuosure(expr, env, quoted)
   func <- quoToFunction(expr, "renderTable")
 
   if (!is.function(spacing)) spacing <- match.arg(spacing)

@@ -65,7 +65,7 @@ renderPlot <- function(expr, width = 'auto', height = 'auto', res = 72, ...,
                        execOnResize = FALSE, outputArgs = list()
 ) {
 
-  expr <- get_quosure(expr, env, quoted)
+  expr <- getQuosure(expr, env, quoted)
   # This ..stacktraceon is matched by a ..stacktraceoff.. when plotFunc
   # is called
   func <- quoToFunction(expr, "renderPlot", ..stacktraceon = TRUE)

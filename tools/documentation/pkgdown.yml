@@ -178,7 +178,6 @@ reference:
       - restoreInput
       - applyInputHandlers
       - exprToFunction
-      - installExprFunction
       - quoToFunction
       - parseQueryString
       - getCurrentOutputInfo

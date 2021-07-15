@@ -997,7 +997,7 @@ test_that("bindCache renderFunction basic functionality", {
 # ==============================================================================
 test_that("Custom render functions that call installExprFunction", {
   # Combinations with `installExprFunction` or `quoToFunction` plus
-  # `markRenderFunction` or `createRenderFunction` should worjk.
+  # `markRenderFunction` or `createRenderFunction` should work.
 
   # The expressions passed into renderDouble below should be converted into this
   # function. We'll use this for comparison.

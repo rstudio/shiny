@@ -32,3 +32,83 @@ test_that("Render functions correctly handle quosures", {
   expect_true(grepl("0\\.0", r1()))
   expect_true(grepl("20\\.0", r2()))
 })
+
+
+test_that("Custom render functions with correctly handle quosures", {
+  # Four ways to create custom render functions:
+  # - exprToFunction
+  # - installExprFunction
+  # - quoToFunction(expr, env, quoted)  <-- For backward compatbility
+  # - quoToFunction(expr)               <-- Recommended way going forward
+
+  # exprToFunction
+  renderDouble <- function(expr, env = parent.frame(), quoted = FALSE) {
+    func <- shiny::exprToFunction(expr, env, quoted)
+    function() {
+      value <- func()
+      paste(rep(value, 2), collapse=", ")
+    }
+  }
+  a <- 1
+  r1 <- inject(renderDouble({ !!a }))
+  r2 <- renderDouble({ eval_tidy(quo(!!a)) })
+  a <- 2
+  expect_identical(r1(), "1, 1")
+  expect_identical(r2(), "2, 2")
+
+
+  # installExprFunction
+  renderDouble <- function(expr, env = parent.frame(), quoted = FALSE) {
+    installExprFunction(expr, "func", env, quoted)
+    function() {
+      value <- func()
+      paste(rep(value, 2), collapse=", ")
+    }
+  }
+  a <- 1
+  r1 <- inject(renderDouble({ !!a }))
+  r2 <- renderDouble({ eval_tidy(quo(!!a)) })
+  a <- 2
+  expect_identical(r1(), "1, 1")
+  expect_identical(r2(), "2, 2")
+
+
+  # quoToFunction(expr, env, quoted)
+  renderDouble <- function(expr, env = parent.frame(), quoted = FALSE) {
+    q <- getQuosure(expr, env, quoted)
+    func <- quoToFunction(q)
+    function() {
+      value <- func()
+      paste(rep(value, 2), collapse=", ")
+    }
+  }
+  a <- 1
+  r1 <- inject(renderDouble({ !!a }))
+  r2 <- renderDouble({ eval_tidy(quo(!!a)) })
+  a <- 2
+  expect_identical(r1(), "1, 1")
+  expect_identical(r2(), "2, 2")
+  # For this particular version, also make sure that it works with `env` and
+  # `quoted`.
+  e <- new.env()
+  e$a <- 1
+  r2 <- renderDouble(quote({ a }), env = e, quoted = TRUE)
+  e$a <- 2
+  expect_identical(r2(), "2, 2")
+
+
+  # quoToFunction(expr)
+  renderDouble <- function(expr) {
+    q <- getQuosure(expr)
+    func <- quoToFunction(q)
+    function() {
+      value <- func()
+      paste(rep(value, 2), collapse=", ")
+    }
+  }
+  a <- 1
+  r1 <- inject(renderDouble({ !!a }))
+  r2 <- renderDouble({ eval_tidy(quo(!!a)) })
+  a <- 2
+  expect_identical(r1(), "1, 1")
+  expect_identical(r2(), "2, 2")})

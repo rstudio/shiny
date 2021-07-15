@@ -8,6 +8,12 @@ utils::globalVariables('func', add = TRUE)
 #' function. This can be used in R Markdown documents to create complete output
 #' widgets out of just the render function.
 #'
+#' Note that it is generally preferable to use [createRenderFunction()] instead
+#' of `markRenderFunction()`. It essentially wraps up the user-provided
+#' expression in the `transform` function passed to it, then pases the resulting
+#' function to `markRenderFunction()`. It also provides a simpler calling
+#' interface.
+#'
 #' @param uiFunc A function that renders Shiny UI. Must take a single argument:
 #'   an output ID.
 #' @param renderFunc A function that is suitable for assigning to a Shiny output
@@ -136,7 +142,8 @@ print.shiny.render.function <- function(x, ...) {
 #' Implement render functions
 #'
 #' This function is a wrapper for [markRenderFunction()] which provides support
-#' for async computation via promises.
+#' for async computation via promises. It is recommended to use
+#' `createRenderFunction()` instead of `markRenderFunction()`.
 #'
 #' @param func A function without parameters, that returns user data. If the
 #'   returned value is a promise, then the render function will proceed in async
@@ -153,16 +160,13 @@ print.shiny.render.function <- function(x, ...) {
 #' @return An annotated render function, ready to be assigned to an
 #'   `output` slot.
 #'
-#' @seealso [quoToFunction()], [markRenderFunction()].
+#' @seealso [getQuosure()], [quoToFunction()], [markRenderFunction()].
 #'
 #' @examples
 #' # A very simple render function
-#' renderTriple <- function(x) {
-#'   x <- substitute(x)
-#'   if (!rlang::is_quosure(x)) {
-#'     x <- rlang::new_quosure(x, env = parent.frame())
-#'   }
-#'   func <- quoToFunction(x, "renderTriple")
+#' renderTriple <- function(expr) {
+#'   expr <- getQuosure(expr)
+#'   func <- quoToFunction(expr)
 #'
 #'   createRenderFunction(
 #'     func,
@@ -175,9 +179,10 @@ print.shiny.render.function <- function(x, ...) {
 #'
 #' # Test render function from the console
 #' a <- 1
-#' r <- renderTriple({ a + 1 })
+#' r <- renderTriple({ a * 10 })
 #' a <- 2
 #' r()
+#' # [1] "20, 20, 20"
 #' @export
 createRenderFunction <- function(
   func,
@@ -400,7 +405,7 @@ markOutputAttrs <- function(renderFunc, snapshotExclude = NULL,
 renderImage <- function(expr, env=parent.frame(), quoted=FALSE,
                         deleteFile, outputArgs=list())
 {
-  expr <- get_quosure(expr, env, quoted)
+  expr <- getQuosure(expr, env, quoted)
   func <- quoToFunction(expr, "renderImage")
 
   # missing() must be used directly within the function with the given arg
@@ -536,7 +541,7 @@ isTemp <- function(path, tempDir = tempdir(), mustExist) {
 renderPrint <- function(expr, env = parent.frame(), quoted = FALSE,
                         width = getOption('width'), outputArgs=list())
 {
-  expr <- get_quosure(expr, env, quoted)
+  expr <- getQuosure(expr, env, quoted)
   func <- quoToFunction(expr, "renderPrint")
 
   # Set a promise domain that sets the console width
@@ -622,7 +627,7 @@ createRenderPrintPromiseDomain <- function(width) {
 renderText <- function(expr, env=parent.frame(), quoted=FALSE,
                        outputArgs=list(), sep=" ") {
 
-  expr <- get_quosure(expr, env, quoted)
+  expr <- getQuosure(expr, env, quoted)
   func <- quoToFunction(expr, "renderText")
 
   createRenderFunction(
@@ -675,7 +680,7 @@ renderText <- function(expr, env=parent.frame(), quoted=FALSE,
 renderUI <- function(expr, env = parent.frame(), quoted = FALSE,
                      outputArgs = list())
 {
-  expr <- get_quosure(expr, env, quoted)
+  expr <- getQuosure(expr, env, quoted)
   func <- quoToFunction(expr, "renderUI")
 
   createRenderFunction(
@@ -829,7 +834,7 @@ renderDataTable <- function(expr, options = NULL, searchDelay = 500,
     )
   }
 
-  expr <- get_quosure(expr, env, quoted)
+  expr <- getQuosure(expr, env, quoted)
   func <- quoToFunction(expr, "renderDataTable")
 
   renderFunc <- function(shinysession, name, ...) {

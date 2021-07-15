@@ -1,7 +1,3 @@
-Addresses #2521: Updated the list of TCP ports that will [be rejected](https://chromium.googlesource.com/chromium/src.git/+/refs/heads/main/net/base/port_util.cc)
-by default in runapp.R, adding 5060, 5061 and 6566. Added documentation describing the port range (3000:8000)
-and which ports are rejected. 
-
 shiny 1.6.0.9000
 ================
 
@@ -29,6 +25,8 @@ shiny 1.6.0.9000
 * Closed #3397: `renderPlot()` new uses `ggplot2::get_alt_text()` to inform an `alt` text default (for `{ggplot2}` plots). (#3398)
 
 * `modalDialog()` gains support for `size = "xl"`. (#3410)
+
+* Addressed #2521: Updated the list of TCP ports that will be rejected by default in runapp.R, adding 5060, 5061 and 6566. Added documentation describing the port range (3000:8000) and which ports are rejected. (#3456)
 
 ### Other improvements
 

@@ -57,6 +57,13 @@ regarding what UI function is most commonly used with this type of render
 function. This can be used in R Markdown documents to create complete output
 widgets out of just the render function.
 }
+\details{
+Note that it is generally preferable to use \code{\link[=createRenderFunction]{createRenderFunction()}} instead
+of \code{markRenderFunction()}. It essentially wraps up the user-provided
+expression in the \code{transform} function passed to it, then pases the resulting
+function to \code{markRenderFunction()}. It also provides a simpler calling
+interface.
+}
 \seealso{
 \code{\link[=createRenderFunction]{createRenderFunction()}}, \code{\link[=quoToFunction]{quoToFunction()}}
 }

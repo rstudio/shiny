@@ -114,10 +114,17 @@ quoToFunction <- function(q,
 #'   expr <- getQuosure(expr)
 #'   func <- quoToFunction(expr)
 #'
-#'   function() {
-#'     value <- func()
-#'     paste(rep(value, 3), collapse=", ")
-#'   }
+#'   # Wrap up func, with another function which takes the value of func()
+#'   # and modifies it.
+#'   createRenderFunction(
+#'     func,
+#'     transform = function(value, session, name, ...) {
+#'       paste(rep(value, 3), collapse=", ")
+#'     },
+#'     # The outputFunc can be used by rmarkdown shiny apps to automatically
+#'     # generate outputs.
+#'     outputFunc = textOutput
+#'   )
 #' }
 #'
 #'

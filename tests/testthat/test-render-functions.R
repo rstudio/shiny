@@ -35,13 +35,17 @@ test_that("Render functions correctly handle quosures", {
 
 
 test_that("Custom render functions with correctly handle quosures", {
-  # Four ways to create custom render functions:
-  # - exprToFunction
-  # - installExprFunction
+  # Many ways to create custom render functions:
+  # - exprToFunction(expr, env, quoted)
+  # - exprToFunction(expr, env, TRUE)
+  # - installExprFunction(expr, env, quoted)
+  # - installExprFunction(expr, env, TRUE)
   # - quoToFunction(expr, env, quoted)  <-- For backward compatbility
+  # - quoToFunction(expr, env, TRUE)    <-- For backward compatbility
   # - quoToFunction(expr)               <-- Recommended way going forward
 
-  # exprToFunction
+  # ==============================================
+  # exprToFunction(expr, env, quoted)
   renderDouble <- function(expr, env = parent.frame(), quoted = FALSE) {
     func <- shiny::exprToFunction(expr, env, quoted)
     function() {
@@ -49,6 +53,25 @@ test_that("Custom render functions with correctly handle quosures", {
       paste(rep(value, 2), collapse=", ")
     }
   }
+
+  # Different usages of env and quoted param
+  a <- 1
+  e <- new.env()
+  e$a <- 2
+  r <- renderDouble(a + 1)
+  expect_identical(r(), "2, 2")
+  r <- renderDouble(a + 1, quoted = FALSE)
+  expect_identical(r(), "2, 2")
+  r <- renderDouble(quote(a + 1), quoted = TRUE)
+  expect_identical(r(), "2, 2")
+  r <- renderDouble(a + 1, env = e)
+  expect_identical(r(), "3, 3")
+  r <- renderDouble(a + 1, env = e, quoted = FALSE)
+  expect_identical(r(), "3, 3")
+  r <- renderDouble(quote(a + 1), env = e, quoted = TRUE)
+  expect_identical(r(), "3, 3")
+
+  # Quosures
   a <- 1
   r1 <- inject(renderDouble({ !!a }))
   r2 <- renderDouble({ eval_tidy(quo(!!a)) })
@@ -57,7 +80,45 @@ test_that("Custom render functions with correctly handle quosures", {
   expect_identical(r2(), "2, 2")
 
 
-  # installExprFunction
+  # ==============================================
+  # exprToFunction(expr, env, TRUE)
+  renderDouble <- function(expr, env = parent.frame(), quoted = FALSE) {
+    if (!quoted) expr <- substitute(expr)
+    func <- shiny::exprToFunction(expr, env, quoted = TRUE)
+    function() {
+      value <- func()
+      paste(rep(value, 2), collapse=", ")
+    }
+  }
+
+  # Different usages of env and quoted param
+  a <- 1
+  e <- new.env()
+  e$a <- 2
+  r <- renderDouble(a + 1)
+  expect_identical(r(), "2, 2")
+  r <- renderDouble(a + 1, quoted = FALSE)
+  expect_identical(r(), "2, 2")
+  r <- renderDouble(quote(a + 1), quoted = TRUE)
+  expect_identical(r(), "2, 2")
+  r <- renderDouble(a + 1, env = e)
+  expect_identical(r(), "3, 3")
+  r <- renderDouble(a + 1, env = e, quoted = FALSE)
+  expect_identical(r(), "3, 3")
+  r <- renderDouble(quote(a + 1), env = e, quoted = TRUE)
+  expect_identical(r(), "3, 3")
+
+  # Quosures
+  a <- 1
+  r1 <- inject(renderDouble({ !!a }))
+  r2 <- renderDouble({ eval_tidy(quo(!!a)) })
+  a <- 2
+  expect_identical(r1(), "1, 1")
+  expect_identical(r2(), "2, 2")
+
+
+  # ==============================================
+  # installExprFunction(expr, env, quoted)
   renderDouble <- function(expr, env = parent.frame(), quoted = FALSE) {
     installExprFunction(expr, "func", env, quoted)
     function() {
@@ -65,6 +126,25 @@ test_that("Custom render functions with correctly handle quosures", {
       paste(rep(value, 2), collapse=", ")
     }
   }
+
+  # Different usages of env and quoted param
+  a <- 1
+  e <- new.env()
+  e$a <- 2
+  r <- renderDouble(a + 1)
+  expect_identical(r(), "2, 2")
+  r <- renderDouble(a + 1, quoted = FALSE)
+  expect_identical(r(), "2, 2")
+  r <- renderDouble(quote(a + 1), quoted = TRUE)
+  expect_identical(r(), "2, 2")
+  r <- renderDouble(a + 1, env = e)
+  expect_identical(r(), "3, 3")
+  r <- renderDouble(a + 1, env = e, quoted = FALSE)
+  expect_identical(r(), "3, 3")
+  r <- renderDouble(quote(a + 1), env = e, quoted = TRUE)
+  expect_identical(r(), "3, 3")
+
+  # Quosures
   a <- 1
   r1 <- inject(renderDouble({ !!a }))
   r2 <- renderDouble({ eval_tidy(quo(!!a)) })
@@ -73,6 +153,44 @@ test_that("Custom render functions with correctly handle quosures", {
   expect_identical(r2(), "2, 2")
 
 
+  # ==============================================
+  # installExprFunction(expr, env, TRUE)
+  renderDouble <- function(expr, env = parent.frame(), quoted = FALSE) {
+    if (!quoted) expr <- substitute(expr)
+    installExprFunction(expr, "func", env, quoted = TRUE)
+    function() {
+      value <- func()
+      paste(rep(value, 2), collapse=", ")
+    }
+  }
+
+  # Different usages of env and quoted param
+  a <- 1
+  e <- new.env()
+  e$a <- 2
+  r <- renderDouble(a + 1)
+  expect_identical(r(), "2, 2")
+  r <- renderDouble(a + 1, quoted = FALSE)
+  expect_identical(r(), "2, 2")
+  r <- renderDouble(quote(a + 1), quoted = TRUE)
+  expect_identical(r(), "2, 2")
+  r <- renderDouble(a + 1, env = e)
+  expect_identical(r(), "3, 3")
+  r <- renderDouble(a + 1, env = e, quoted = FALSE)
+  expect_identical(r(), "3, 3")
+  r <- renderDouble(quote(a + 1), env = e, quoted = TRUE)
+  expect_identical(r(), "3, 3")
+
+  # Quosures
+  a <- 1
+  r1 <- inject(renderDouble({ !!a }))
+  r2 <- renderDouble({ eval_tidy(quo(!!a)) })
+  a <- 2
+  expect_identical(r1(), "1, 1")
+  expect_identical(r2(), "2, 2")
+
+
+  # ==============================================
   # quoToFunction(expr, env, quoted)
   renderDouble <- function(expr, env = parent.frame(), quoted = FALSE) {
     q <- getQuosure(expr, env, quoted)
@@ -82,6 +200,25 @@ test_that("Custom render functions with correctly handle quosures", {
       paste(rep(value, 2), collapse=", ")
     }
   }
+
+  # Different usages of env and quoted param
+  a <- 1
+  e <- new.env()
+  e$a <- 2
+  r <- renderDouble(a + 1)
+  expect_identical(r(), "2, 2")
+  r <- renderDouble(a + 1, quoted = FALSE)
+  expect_identical(r(), "2, 2")
+  r <- renderDouble(quote(a + 1), quoted = TRUE)
+  expect_identical(r(), "2, 2")
+  r <- renderDouble(a + 1, env = e)
+  expect_identical(r(), "3, 3")
+  r <- renderDouble(a + 1, env = e, quoted = FALSE)
+  expect_identical(r(), "3, 3")
+  r <- renderDouble(quote(a + 1), env = e, quoted = TRUE)
+  expect_identical(r(), "3, 3")
+
+  # Quosures
   a <- 1
   r1 <- inject(renderDouble({ !!a }))
   r2 <- renderDouble({ eval_tidy(quo(!!a)) })
@@ -97,6 +234,45 @@ test_that("Custom render functions with correctly handle quosures", {
   expect_identical(r2(), "2, 2")
 
 
+  # ==============================================
+  # quoToFunction(expr, env, TRUE)
+  renderDouble <- function(expr, env = parent.frame(), quoted = FALSE) {
+    if (!quoted) expr <- substitute(expr)
+    q <- getQuosure(expr, env, TRUE)
+    func <- quoToFunction(q)
+    function() {
+      value <- func()
+      paste(rep(value, 2), collapse=", ")
+    }
+  }
+
+  # Different usages of env and quoted param
+  a <- 1
+  e <- new.env()
+  e$a <- 2
+  r <- renderDouble(a + 1)
+  expect_identical(r(), "2, 2")
+  r <- renderDouble(a + 1, quoted = FALSE)
+  expect_identical(r(), "2, 2")
+  r <- renderDouble(quote(a + 1), quoted = TRUE)
+  expect_identical(r(), "2, 2")
+  r <- renderDouble(a + 1, env = e)
+  expect_identical(r(), "3, 3")
+  r <- renderDouble(a + 1, env = e, quoted = FALSE)
+  expect_identical(r(), "3, 3")
+  r <- renderDouble(quote(a + 1), env = e, quoted = TRUE)
+  expect_identical(r(), "3, 3")
+
+  # Quosures
+  a <- 1
+  r1 <- inject(renderDouble({ !!a }))
+  r2 <- renderDouble({ eval_tidy(quo(!!a)) })
+  a <- 2
+  expect_identical(r1(), "1, 1")
+  expect_identical(r2(), "2, 2")
+
+
+  # ==============================================
   # quoToFunction(expr)
   renderDouble <- function(expr) {
     q <- getQuosure(expr)
@@ -106,9 +282,12 @@ test_that("Custom render functions with correctly handle quosures", {
       paste(rep(value, 2), collapse=", ")
     }
   }
+
+  # Quosures
   a <- 1
   r1 <- inject(renderDouble({ !!a }))
   r2 <- renderDouble({ eval_tidy(quo(!!a)) })
   a <- 2
   expect_identical(r1(), "1, 1")
-  expect_identical(r2(), "2, 2")})
+  expect_identical(r2(), "2, 2")
+})

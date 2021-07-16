@@ -202,9 +202,19 @@ getQuosure <- function(x, env, quoted) {
     #     x <- new_quosure(x, env = parent.frame())
     #   }
     # }
-    if (!eval(substitute(missing(env)), parent.frame()) ||
-        !eval(substitute(missing(quoted)), parent.frame()))
-    {
+
+    # TRUE if either the immediate caller (the renderXX function) or caller two
+    # frames back (the user's call to `renderXX()` passed in an environment.)
+    called_with_env <-
+      !missing(env) ||
+      !eval(substitute(missing(env)), parent.frame())
+
+    # Same as above, but with `quoted`
+    called_with_quoted <-
+      !missing(quoted) ||
+      !eval(substitute(missing(quoted)), parent.frame())
+
+    if (called_with_env || called_with_quoted) {
       deprecatedEnvQuotedMessage()
       if (!quoted) {
         x <- eval(substitute(substitute(x)), parent.frame())
@@ -255,9 +265,19 @@ getQuosure3 <- function(x, env, quoted) {
     # This code path is used when `getQuosure3(x, env, quoted)` is
     # called.
 
-    if (!eval(eval(substitute(substitute(missing(env))),    parent.frame()), parent.frame(2)) ||
-        !eval(eval(substitute(substitute(missing(quoted))), parent.frame()), parent.frame(2)))
-    {
+    # TRUE if either the immediate caller (exprToFunction or
+    # installExprFunction) or caller two frames back (the user's call to
+    # `renderXX()` passed in an environment.)
+    called_with_env <-
+      !eval(substitute(missing(env)), parent.frame()) ||
+      !eval(eval(substitute(substitute(missing(env))), parent.frame()), parent.frame(2))
+
+    # Same as above, but with `quoted`
+    called_with_quoted <-
+      !eval(substitute(missing(quoted)), parent.frame()) ||
+      !eval(eval(substitute(substitute(missing(quoted))), parent.frame()), parent.frame(2))
+
+    if (called_with_env || called_with_quoted) {
       deprecatedEnvQuotedMessage()
       if (!quoted) {
         x <- eval(eval(substitute(substitute(substitute(x))), parent.frame()), parent.frame(2))

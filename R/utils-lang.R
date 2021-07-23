@@ -73,13 +73,6 @@ quoToFunction <- function(q,
 {
   q <- as_quosure(q)
   func <- quoToSimpleFunction(q)
-  # cat("quoToFunction()\n")
-  # str(list(
-  #   self = environment(),
-  #   q = q,
-  #   func_env = environment(func)
-  # ))
-  # browser()
   wrapFunctionLabel(func, updateFunctionLabel(label), ..stacktraceon = ..stacktraceon)
 }
 updateFunctionLabel <- function(label) {
@@ -241,6 +234,14 @@ handleEnvAndQuoted <- function(q, x, env, quoted) {
     verbose = TRUE
   )
 }
+
+# `handleEnvAndQuotedInternal()` is to be called from functions like `reactive()`, `observe()`,
+# and the various render functions. It handles the following cases:
+# - The typical case where x is an unquoted expression, and `env` and `quoted`
+#   are not used.
+# - New-style metaprogramming cases, where rlang::inject() is used to inline a
+#   quosure into the AST, as in `inject(reactive(!!x))`.
+# - Old-style metaprogramming cases, where `env` and/or `quoted` are used.
 # Same as `handleEnvAndQuoted()`, but quiet
 # Under assumption that `env = deprecated()` and `quoted = deprecated()`
 handleEnvAndQuotedInternal <- function(q, x, env, quoted) {
@@ -261,65 +262,51 @@ handleEnvAndQuotedInternal <- function(q, x, env, quoted) {
     verbose = FALSE
   )
 }
-# Reaches up two calls to check if env / quoted were provided.
-# Can not leverage `is_present()` logic like in `handleEnvAndQuotedInternal()`
-handleEnvAndQuoted3Internal <- function(q, x, env, quoted) {
+# # Reaches up three calls to check if env / quoted were provided.
+# # Can not leverage `is_present()` logic like in `handleEnvAndQuotedInternal()`
 
-  ## To avoid possible boilerplate with `deprecated()`...
-  env_is_present <-
-    if (!is_present(env)) {
-      # If `env` is `deprecated()`, set to the parent frame of the caller
-      env <- parent.frame(3)
+# # This is similar to `handleEnvAndQuotedInternal()`, but it is intended to be used only by
+# # `installExprFunction()` and `exprToFunction()`. Whereas `handleEnvAndQuotedInternal()` reaches
+# # 2 calls back to find the expression passed in, this function reaches 3 calls
+# # back, and it is only used internally within Shiny.
+# handleEnvAndQuoted3Internal <- function(q, x, env, quoted) {
+#   ## To avoid possible boilerplate with `deprecated()`...
+#   env_is_present <-
+#     if (!is_present(env)) {
+#       # If `env` is `deprecated()`, set to the parent frame of the caller
+#       env <- parent.frame(3)
 
-      FALSE # env_is_present
-    } else {
-      # check of parent frame of the caller had a missing _`env`_ param
-      eval(eval(substitute(substitute(!missing(env))), parent.frame()), parent.frame(2))
-    }
-  quoted_is_present <-
-    if (!is_present(quoted)) {
-      # If `quoted` is deprecated(), set to `FALSE`
-      quoted <- FALSE
+#       FALSE # env_is_present
+#     } else {
+#       # check of parent frame of the caller had a missing _`env`_ param
+#       eval(eval(substitute(substitute(!missing(env))), parent.frame()), parent.frame(2))
+#     }
+#   quoted_is_present <-
+#     if (!is_present(quoted)) {
+#       # If `quoted` is deprecated(), set to `FALSE`
+#       quoted <- FALSE
 
-      FALSE # quoted_is_present
-    } else {
-      # check of parent frame had a missing _`quoted`_ param
-      eval(eval(substitute(substitute(!missing(quoted))), parent.frame()), parent.frame(2))
-    }
-  ##
-  x_is_quosure <- is_quosure(eval(eval(substitute(substitute(x)), parent.frame()), parent.frame(2)))
+#       FALSE # quoted_is_present
+#     } else {
+#       # check of parent frame had a missing _`quoted`_ param
+#       eval(eval(substitute(substitute(!missing(quoted))), parent.frame()), parent.frame(2))
+#     }
+#   ##
+#   x_is_quosure <- is_quosure(eval(eval(substitute(substitute(x)), parent.frame()), parent.frame(2)))
 
-  # cat("handleEnvAndQuoted3Internal(); environment: \n")
-  # str(list(
-  #   q = q,
-  #   env = env,
-  #   quoted = quoted,
-  #   self = environment(),
-  #   parent = parent.frame(1),
-  #   grandparent = parent.frame(2),
-  #   grandgrandparent = parent.frame(3),
-  #   grandgrandgrandparent = parent.frame(4)
-  # ))
-
-  handleEnvAndQuoted_(
-    q = q, env = env, quoted = quoted,
-    env_is_present = env_is_present,
-    quoted_is_present = quoted_is_present,
-    x_is_quosure = x_is_quosure,
-    verbose = FALSE
-  )
-}
+#   handleEnvAndQuoted_(
+#     q = q, env = env, quoted = quoted,
+#     env_is_present = env_is_present,
+#     quoted_is_present = quoted_is_present,
+#     x_is_quosure = x_is_quosure,
+#     verbose = FALSE
+#   )
+# }
 handleEnvAndQuoted_ <- function(
   q, env, quoted,
   env_is_present, quoted_is_present, x_is_quosure,
   verbose = TRUE
 ) {
-  # cat("handleEnvAndQuoted_()\n")
-  # str(list(
-  #   q = q,
-  #   env = env, quoted = quoted, env_is_present = env_is_present, quoted_is_present = quoted_is_present, x_is_quosure = x_is_quosure
-  # ))
-  # is_quoted <- quoted_is_present && isTRUE(quoted)
   if (
     env_is_present ||
     quoted_is_present
@@ -349,141 +336,6 @@ handleEnvAndQuoted_ <- function(
   q
 }
 
-
-# Internal helper method to reach up 1 parent frame.
-getQuosure <- function(x, env, quoted) {
-  stop("Removing getQuosure()")
-
-  if (!any(c("env", "quoted") %in% names(match.call()))) {
-    # This code path is used when `getQuosure(x)` is called.
-    #
-    # It duplicates some of the code in the `else` code path below, but this is
-    # actually clearer and simpler than setting up the logic go through a single
-    # code path.
-
-    x <- eval(substitute(substitute(x)), parent.frame())
-
-    # At this point, x can be a quosure if rlang::inject() is used, but the
-    # typical case is that x is not a quosure.
-    if (!is_quosure(x)) {
-      x <- new_quosure(x, env = parent.frame(2))
-    }
-
-  } else {
-    # This code path is used when `getQuosure(x, env, quoted)` is called.
-    #
-    # Much of the complexity is handling old-style metaprogramming cases. The
-    # code below is more complicated because it needs to look at unevaluated
-    # expressions in the _calling_ function. If this code were put directly in
-    # the calling function, it would look like this:
-    #
-    # if (!missing(env) || !missing(quoted)) {
-    #   deprecatedEnvQuotedMessage()
-    #   if (!quoted) x <- substitute(x)
-    #   x <- new_quosure(x, env)
-    #
-    # } else {
-    #   x <- substitute(x)
-    #   if (!is_quosure(x)) {
-    #     x <- new_quosure(x, env = parent.frame())
-    #   }
-    # }
-
-    # TRUE if either the immediate caller (the renderXX function) or caller two
-    # frames back (the user's call to `renderXX()` passed in an environment.)
-    called_with_env <-
-      !missing(env) ||
-      !eval(substitute(missing(env)), parent.frame())
-
-    # Same as above, but with `quoted`
-    called_with_quoted <-
-      !missing(quoted) ||
-      !eval(substitute(missing(quoted)), parent.frame())
-
-    if (called_with_env || called_with_quoted) {
-      deprecatedEnvQuotedMessage()
-      if (!quoted) {
-        x <- eval(substitute(substitute(x)), parent.frame())
-      }
-      x <- new_quosure(x, env)
-
-    } else {
-      x <- eval(substitute(substitute(x)), parent.frame())
-
-      # At this point, x can be a quosure if rlang::inject() is used, but the
-      # typical case is that x is not a quosure.
-      if (!is_quosure(x)) {
-        x <- new_quosure(x, env = parent.frame(2))
-      }
-    }
-
-  }
-
-  x
-}
-# `getQuosure()` is to be called from functions like `reactive()`, `observe()`,
-# and the various render functions. It handles the following cases:
-# - The typical case where x is an unquoted expression, and `env` and `quoted`
-#   are not used.
-# - New-style metaprogramming cases, where rlang::inject() is used to inline a
-#   quosure into the AST, as in `inject(reactive(!!x))`.
-# - Old-style metaprogramming cases, where `env` and/or `quoted` are used.
-
-
-
-# This is similar to `getQuosure()`, but it is intended to be used only by
-# `installExprFunction()` and `exprToFunction()`. Whereas `getQuosure()` reaches
-# 2 calls back to find the expression passed in, this function reaches 3 calls
-# back, and it is only used internally within Shiny.
-getQuosure3 <- function(x, env, quoted) {
-  stop("Removing getQuosure3()")
-  if (!any(c("env", "quoted") %in% names(match.call(sys.function(-1), sys.call(-1))))) {
-    # This code path is used when `getQuosure(x)` is called.
-
-    x <- eval(eval(substitute(substitute(substitute(x))), parent.frame()), parent.frame(2))
-
-    # At this point, x can be a quosure if rlang::inject() is used, but the
-    # typical case is that x is not a quosure.
-    if (!is_quosure(x)) {
-      x <- new_quosure(x, env = parent.frame(3))
-    }
-
-  } else {
-    # This code path is used when `getQuosure3(x, env, quoted)` is
-    # called.
-
-    # TRUE if either the immediate caller (exprToFunction or
-    # installExprFunction) or caller two frames back (the user's call to
-    # `renderXX()` passed in an environment.)
-    called_with_env <-
-      !eval(substitute(missing(env)), parent.frame()) ||
-      !eval(eval(substitute(substitute(missing(env))), parent.frame()), parent.frame(2))
-
-    # Same as above, but with `quoted`
-    called_with_quoted <-
-      !eval(substitute(missing(quoted)), parent.frame()) ||
-      !eval(eval(substitute(substitute(missing(quoted))), parent.frame()), parent.frame(2))
-
-    if (called_with_env || called_with_quoted) {
-      deprecatedEnvQuotedMessage()
-      if (!quoted) {
-        x <- eval(eval(substitute(substitute(substitute(x))), parent.frame()), parent.frame(2))
-      }
-      x <- new_quosure(x, env)
-
-    } else {
-      x <- eval(eval(substitute(substitute(substitute(x))), parent.frame()), parent.frame(2))
-
-      # At this point, x can be a quosure if rlang::inject() is used, but the
-      # typical case is that x is not a quosure.
-      if (!is_quosure(x)) {
-        x <- new_quosure(x, env = parent.frame(3))
-      }
-    }
-  }
-
-  x
-}
 
 
 #' Convert an expression to a function
@@ -617,7 +469,7 @@ exprToFunction <- function(expr, env=parent.frame(), quoted=FALSE) {
 #     env = env
 #   ))
 #   # browser()
-#   quoToFunction(q, label = functionLabel())
+#   quoToFunction(q, label = sys.call(-1))
 # }
 
 #' @rdname exprToFunction
@@ -658,7 +510,7 @@ installExprFunction <- function(expr, name, eval.env = parent.frame(2),
 # installExprFunctionNew <- function(expr, name, eval.env = parent.frame(2),
 #                                 quoted = FALSE,
 #                                 assign.env = parent.frame(1),
-#                                 label = functionLabel(),
+#                                 label = sys.call(-1)[[1]],
 #                                 wrappedWithLabel = TRUE,
 #                                 ..stacktraceon = FALSE) {
 #   # shinyDeprecated("1.7.0", "installExprFunction()", "quoToFunction()", type = "superseded")

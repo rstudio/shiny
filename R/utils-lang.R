@@ -104,15 +104,19 @@ updateFunctionLabel <- function(label) {
 }
 
 quoToSimpleFunction <- function(q) {
-  return(
-    new_function(list(), get_expr(q), get_env(q))
-  )
   # Should not use `new_function(list(), get_expr(q), get_env(q))` as extra logic
   # is done by rlang to convert the quosure to a function within `as_function(q)`
   fun <- as_function(q)
+
+  # If the quosure is empty, then the returned function can not be called.
+  # https://github.com/r-lib/rlang/issues/1244
+  if (quo_is_missing(q)) {
+    fn_body(fun) <- quote({})
+    return(fun)
+  }
   # as_function returns a function that takes `...`. We need one that takes no
   # args.
-  formals(fun) <- list()
+  fn_fmls(fun) <- list()
   fun
 }
 

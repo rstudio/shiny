@@ -45,10 +45,13 @@ test_that("functionLabel returns static value when the label can not be assigned
     )
   }
 
+  a <- 1
+
   expect_label(
     getFunc({a + 1}),
     "getFunc"
   )
+
   # multiline labels are not supported
   expect_label(
     (function(exprF) {
@@ -62,7 +65,6 @@ test_that("functionLabel returns static value when the label can not be assigned
     "wrappedFunction"
   )
 })
-
 
 for (info in list(
   list(

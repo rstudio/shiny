@@ -2,12 +2,12 @@
 % Please edit documentation in R/utils-lang.R
 \name{quoToFunction}
 \alias{quoToFunction}
-\alias{getQuosure}
+\alias{handleEnvAndQuoted}
 \title{Convert a quosure to a function for a Shiny render function}
 \usage{
-quoToFunction(q, label = deparse(sys.call(-1)[[1]]), ..stacktraceon = FALSE)
+quoToFunction(q, label = sys.call(-1)[[1]], ..stacktraceon = FALSE)
 
-getQuosure(x, env, quoted)
+handleEnvAndQuoted(q, x, env, quoted)
 }
 \arguments{
 \item{q}{A quosure.}
@@ -29,7 +29,7 @@ provided for backward compatibility.}
 This takes a quosure and label, and wraps them into a function that should be
 passed to \code{\link[=createRenderFunction]{createRenderFunction()}} or \code{\link[=markRenderFunction]{markRenderFunction()}}.
 
-\code{getQuosure()} and \code{quoToFunction()} are meant to be used together in a
+\code{handleEnvAndQuoted()} and \code{quoToFunction()} are meant to be used together in a
 \code{render} function, to capture user expressions or quosures and convert them
 to functions. They are meant to replace the older functions
 \code{\link[=installExprFunction]{installExprFunction()}} and \code{\link[=exprToFunction]{exprToFunction()}} (although those will continue

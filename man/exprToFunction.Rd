@@ -13,7 +13,7 @@ installExprFunction(
   eval.env = parent.frame(2),
   quoted = FALSE,
   assign.env = parent.frame(1),
-  label = deparse(sys.call(-1)[[1]]),
+  label = sys.call(-1)[[1]],
   wrappedWithLabel = TRUE,
   ..stacktraceon = FALSE
 )
@@ -40,13 +40,16 @@ the name of the calling function.}
 \code{\link[=stacktrace]{stacktrace()}}.}
 }
 \description{
-This is to be called from another function, because it will attempt to get
-an unquoted expression from two calls back. Note: as of Shiny 1.7.0, it is
-recommended to use \code{\link[=getQuosure]{getQuosure()}} and \code{\link[=quoToFunction]{quoToFunction()}} instead of
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#superseded}{\figure{lifecycle-superseded.svg}{options: alt='[Superseded]'}}}{\strong{[Superseded]}} Please see \code{\link[=quoToFunction]{quoToFunction()}} for updated usage. (Shiny 1.7.0)
+
+Note: as of Shiny 1.7.0, it is
+recommended to use \code{\link[=quoToFunction]{quoToFunction()}} (and if necessary, \code{\link[=handleEnvAndQuoted]{handleEnvAndQuoted()}}) instead of
 \code{exprToFunction()} and \code{installExprFunction()}. See the examples for
 information on how to migrate to \code{getQuosure()} and \code{quoToFunction()}.
-}
-\details{
+
+This is to be called from another function, because it will attempt to get
+an unquoted expression from two calls back.
+
 For \code{exprToFunction()}:
 If \code{expr} is a quoted expression, then this just converts it to a function.
 If \code{expr} is a function, then this simply returns expr (and prints a

@@ -17,6 +17,7 @@
 #'    enquos0 zap_srcref %||% is_na
 #'    is_false list2
 #'    missing_arg is_missing maybe_missing
+#'    quo_is_missing fn_fmls<- fn_body<-
 #' @importFrom ellipsis
 #'    check_dots_empty check_dots_unnamed
 #' @import htmltools

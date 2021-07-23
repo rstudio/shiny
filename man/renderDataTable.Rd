@@ -13,8 +13,8 @@ renderDataTable(
   searchDelay = 500,
   callback = "function(oTable) {}",
   escape = TRUE,
-  env = parent.frame(),
-  quoted = FALSE,
+  env = deprecated(),
+  quoted = deprecated(),
   outputArgs = list()
 )
 }
@@ -48,9 +48,9 @@ indicate which columns to escape, e.g. \code{1:5} (the first 5 columns),
 \code{c(1, 3, 4)}, or \code{c(-1, -3)} (all columns except the first and
 third), or \code{c('Species', 'Sepal.Length')}.}
 
-\item{env}{The environment in which to evaluate \code{expr}.}
+\item{env}{TODO-barret docs; The environment in which to evaluate \code{expr}.}
 
-\item{quoted}{Is \code{expr} a quoted expression (with \code{quote()})?
+\item{quoted}{TODO-barret docs; Is \code{expr} a quoted expression (with \code{quote()})?
 This is useful if you want to save an expression in a variable.}
 
 \item{outputArgs}{A list of arguments to be passed through to the implicit
@@ -58,6 +58,8 @@ call to \code{dataTableOutput()} when \code{renderDataTable()} is used
 in an interactive R Markdown document.}
 }
 \description{
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#superseded}{\figure{lifecycle-superseded.svg}{options: alt='[Superseded]'}}}{\strong{[Superseded]}} Please use \code{\link[DT:dataTableOutput]{DT::renderDataTable()}}. (Shiny 0.11.1)
+
 Makes a reactive version of the given function that returns a data frame (or
 matrix), which will be rendered with the \href{https://datatables.net}{DataTables}
 library. Paging, searching, filtering, and sorting can be done on the R side

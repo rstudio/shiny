@@ -8,10 +8,10 @@
 observeEvent(
   eventExpr,
   handlerExpr,
-  event.env = parent.frame(),
-  event.quoted = FALSE,
-  handler.env = parent.frame(),
-  handler.quoted = FALSE,
+  event.env = deprecated(),
+  event.quoted = deprecated(),
+  handler.env = deprecated(),
+  handler.quoted = deprecated(),
   ...,
   label = NULL,
   suspended = FALSE,
@@ -26,10 +26,10 @@ observeEvent(
 eventReactive(
   eventExpr,
   valueExpr,
-  event.env = parent.frame(),
-  event.quoted = FALSE,
-  value.env = parent.frame(),
-  value.quoted = FALSE,
+  event.env = deprecated(),
+  event.quoted = deprecated(),
+  value.env = deprecated(),
+  value.quoted = deprecated(),
   ...,
   label = NULL,
   domain = getDefaultReactiveDomain(),
@@ -51,15 +51,15 @@ scope.}
 \item{event.env}{The parent environment for \code{eventExpr}. By default,
 this is the calling environment.}
 
-\item{event.quoted}{Is the \code{eventExpr} expression quoted? By default,
+\item{event.quoted}{TODO-barret docs; Is the \code{eventExpr} expression quoted? By default,
 this is \code{FALSE}. This is useful when you want to use an expression
 that is stored in a variable; to do so, it must be quoted with
 \code{quote()}.}
 
-\item{handler.env}{The parent environment for \code{handlerExpr}. By default,
+\item{handler.env}{TODO-barret docs; The parent environment for \code{handlerExpr}. By default,
 this is the calling environment.}
 
-\item{handler.quoted}{Is the \code{handlerExpr} expression quoted? By
+\item{handler.quoted}{TODO-barret docs; Is the \code{handlerExpr} expression quoted? By
 default, this is \code{FALSE}. This is useful when you want to use an
 expression that is stored in a variable; to do so, it must be quoted with
 \code{quote()}.}
@@ -99,7 +99,7 @@ happen once.}
 \code{eventReactive}. It will be executed within an \code{\link[=isolate]{isolate()}}
 scope.}
 
-\item{value.env}{The parent environment for \code{valueExpr}. By default,
+\item{value.env}{TODO-barret docs; The parent environment for \code{valueExpr}. By default,
 this is the calling environment.}
 
 \item{value.quoted}{Is the \code{valueExpr} expression quoted? By default,

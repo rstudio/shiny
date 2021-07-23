@@ -244,8 +244,8 @@ handleEnvAndQuotedInternal <- function(q, x, env, quoted) {
   env_is_present <- is_present(env) # eval(substitute(!missing(env)), parent.frame())
   quoted_is_present <- is_present(quoted) # eval(substitute(!missing(quoted)), parent.frame())
   x_is_quosure <- is_quosure(eval(substitute(substitute(x)), parent.frame()))
-  if (env_is_present) env <- parent.frame(2)
-  if (quoted_is_present) quoted <- FALSE
+  if (!env_is_present) env <- parent.frame(2)
+  if (!quoted_is_present) quoted <- FALSE
 
   handleEnvAndQuoted_(
     q = q,

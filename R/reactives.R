@@ -945,12 +945,12 @@ Observable <- R6Class(
 #' See the [Shiny tutorial](https://shiny.rstudio.com/tutorial/) for
 #' more information about reactive expressions.
 #'
-#' @param x For `reactive`, an expression (quoted or unquoted). For
+#' @param x TODO-barret docs; For `reactive`, an expression (quoted or unquoted). For
 #'   `is.reactive`, an object to test.
-#' @param env The parent environment for the reactive expression. By default,
+#' @param env TODO-barret docs; The parent environment for the reactive expression. By default,
 #'   this is the calling environment, the same as when defining an ordinary
 #'   non-reactive expression.
-#' @param quoted Is the expression quoted? By default, this is `FALSE`.
+#' @param quoted TODO-barret docs; Is the expression quoted? By default, this is `FALSE`.
 #'   This is useful when you want to use an expression that is stored in a
 #'   variable; to do so, it must be quoted with `quote()`.
 #' @param label A label for the reactive expression, useful for debugging.
@@ -961,6 +961,7 @@ Observable <- R6Class(
 #' @return a function, wrapped in a S3 class "reactive"
 #'
 #' @examples
+#' TODO-barret docs; with quosures, not env / quoted
 #' values <- reactiveValues(A=1)
 #'
 #' reactiveB <- reactive({
@@ -979,7 +980,10 @@ Observable <- R6Class(
 #' isolate(reactiveC())
 #' isolate(reactiveD())
 #' @export
-reactive <- function(x, env = parent.frame(), quoted = FALSE,
+reactive <- function(
+  x,
+  env = deprecated(),
+  quoted = deprecated(),
   ...,
   label = NULL,
   domain = getDefaultReactiveDomain(),
@@ -987,20 +991,19 @@ reactive <- function(x, env = parent.frame(), quoted = FALSE,
 {
   check_dots_empty()
 
-  x <- getQuosure(x, env, quoted)
-  fun <- as_function(x)
-  # as_function returns a function that takes `...`. We need one that takes no
-  # args.
-  formals(fun) <- list()
+  q <- enquo0(x)
+  q <- handleEnvAndQuotedInternal(q, x, env, quoted)
+  fun <- quoToSimpleFunction(q)
 
   # Attach a label and a reference to the original user source for debugging
-  label <- exprToLabel(get_expr(x), "reactive", label)
+  q_expr <- get_expr(q)
+  label <- exprToLabel(q_expr, "reactive", label)
 
   o <- Observable$new(fun, label, domain, ..stacktraceon = ..stacktraceon)
   structure(
     o$getValue,
     observable = o,
-    cacheHint = list(userExpr = zap_srcref(get_expr(x))),
+    cacheHint = list(userExpr = zap_srcref(q_expr)),
     class = c("reactiveExpr", "reactive", "function")
   )
 }
@@ -1325,10 +1328,10 @@ Observer <- R6Class(
 #'
 #' @param x An expression (quoted or unquoted). Any return value will be
 #'   ignored.
-#' @param env The parent environment for the reactive expression. By default,
+#' @param env TODO-barret docs; The parent environment for the reactive expression. By default,
 #'   this is the calling environment, the same as when defining an ordinary
 #'   non-reactive expression.
-#' @param quoted Is the expression quoted? By default, this is `FALSE`.
+#' @param quoted TODO-barret docs; Is the expression quoted? By default, this is `FALSE`.
 #'   This is useful when you want to use an expression that is stored in a
 #'   variable; to do so, it must be quoted with `quote()`.
 #' @param label A label for the observer, useful for debugging.
@@ -1383,6 +1386,7 @@ Observer <- R6Class(
 #'   }
 #'
 #' @examples
+#' # TODO-barret docs; examples are outdated
 #' values <- reactiveValues(A=1)
 #'
 #' obsB <- observe({
@@ -1400,7 +1404,10 @@ Observer <- R6Class(
 #' # are at the console, you can force a flush with flushReact()
 #' shiny:::flushReact()
 #' @export
-observe <- function(x, env = parent.frame(), quoted = FALSE,
+observe <- function(
+  x,
+  env = deprecated(),
+  quoted = deprecated(),
   ...,
   label = NULL,
   suspended = FALSE,
@@ -1411,14 +1418,12 @@ observe <- function(x, env = parent.frame(), quoted = FALSE,
 {
   check_dots_empty()
 
-  x <- getQuosure(x, env, quoted)
-  fun <- as_function(x)
-  # as_function returns a function that takes `...`. We need one that takes no
-  # args.
-  formals(fun) <- list()
+  q <- enquo0(x)
+  q <- handleEnvAndQuotedInternal(q, x, env, quoted)
+  fun <- quoToSimpleFunction(q)
 
   if (is.null(label)) {
-    label <- sprintf('observe(%s)', paste(deparse(get_expr(x)), collapse='\n'))
+    label <- sprintf('observe(%s)', paste(deparse(get_expr(q)), collapse='\n'))
   }
 
   o <- Observer$new(
@@ -2146,17 +2151,17 @@ maskReactiveContext <- function(expr) {
 #'   scope.
 #' @param event.env The parent environment for `eventExpr`. By default,
 #'   this is the calling environment.
-#' @param event.quoted Is the `eventExpr` expression quoted? By default,
+#' @param event.quoted TODO-barret docs; Is the `eventExpr` expression quoted? By default,
 #'   this is `FALSE`. This is useful when you want to use an expression
 #'   that is stored in a variable; to do so, it must be quoted with
 #'   `quote()`.
-#' @param handler.env The parent environment for `handlerExpr`. By default,
+#' @param handler.env TODO-barret docs; The parent environment for `handlerExpr`. By default,
 #'   this is the calling environment.
-#' @param handler.quoted Is the `handlerExpr` expression quoted? By
+#' @param handler.quoted TODO-barret docs; Is the `handlerExpr` expression quoted? By
 #'   default, this is `FALSE`. This is useful when you want to use an
 #'   expression that is stored in a variable; to do so, it must be quoted with
 #'   `quote()`.
-#' @param value.env The parent environment for `valueExpr`. By default,
+#' @param value.env TODO-barret docs; The parent environment for `valueExpr`. By default,
 #'   this is the calling environment.
 #' @param value.quoted Is the `valueExpr` expression quoted? By default,
 #'   this is `FALSE`. This is useful when you want to use an expression
@@ -2265,8 +2270,8 @@ maskReactiveContext <- function(expr) {
 #' }
 #' @export
 observeEvent <- function(eventExpr, handlerExpr,
-  event.env = parent.frame(), event.quoted = FALSE,
-  handler.env = parent.frame(), handler.quoted = FALSE,
+  event.env = deprecated(), event.quoted = deprecated(),
+  handler.env = deprecated(), handler.quoted = deprecated(),
   ...,
   label = NULL, suspended = FALSE, priority = 0,
   domain = getDefaultReactiveDomain(), autoDestroy = TRUE,
@@ -2274,15 +2279,17 @@ observeEvent <- function(eventExpr, handlerExpr,
 {
   check_dots_empty()
 
-  eventExpr   <- getQuosure(eventExpr,   event.env,   event.quoted)
-  handlerExpr <- getQuosure(handlerExpr, handler.env, handler.quoted)
+  eventQ <- enquo0(eventExpr)
+  handlerQ <- enquo0(handlerExpr)
+  eventQ <- handleEnvAndQuotedInternal(eventQ, eventExpr, event.env, event.quoted)
+  handlerQ <- handleEnvAndQuotedInternal(handlerQ, handlerExpr, handler.env, handler.quoted)
 
   if (is.null(label)) {
-    label <- sprintf('observeEvent(%s)', paste(deparse(get_expr(eventExpr)), collapse='\n'))
+    label <- sprintf('observeEvent(%s)', paste(deparse(get_expr(eventQ)), collapse='\n'))
   }
 
   handler <- inject(observe(
-    !!handlerExpr,
+    !!handlerQ,
     label = label,
     suspended = suspended,
     priority = priority,
@@ -2296,7 +2303,7 @@ observeEvent <- function(eventExpr, handlerExpr,
     ignoreInit = ignoreInit,
     once = once,
     label = label,
-    !!eventExpr,
+    !!eventQ,
     x = handler
   ))
 
@@ -2306,27 +2313,29 @@ observeEvent <- function(eventExpr, handlerExpr,
 #' @rdname observeEvent
 #' @export
 eventReactive <- function(eventExpr, valueExpr,
-  event.env = parent.frame(), event.quoted = FALSE,
-  value.env = parent.frame(), value.quoted = FALSE,
+  event.env = deprecated(), event.quoted = deprecated(),
+  value.env = deprecated(), value.quoted = deprecated(),
   ...,
   label = NULL, domain = getDefaultReactiveDomain(),
   ignoreNULL = TRUE, ignoreInit = FALSE)
 {
   check_dots_empty()
 
-  eventExpr <- getQuosure(eventExpr, event.env, event.quoted)
-  valueExpr <- getQuosure(valueExpr, value.env, value.quoted)
+  eventQ <- enquo0(eventExpr)
+  valueQ <- enquo0(valueExpr)
+  eventQ <- handleEnvAndQuotedInternal(eventQ, eventExpr, event.env, event.quoted)
+  valueQ <- handleEnvAndQuotedInternal(valueQ, valueExpr, value.env, value.quoted)
 
   if (is.null(label)) {
-    label <- sprintf('eventReactive(%s)', paste(deparse(get_expr(eventExpr)), collapse='\n'))
+    label <- sprintf('eventReactive(%s)', paste(deparse(get_expr(eventQ)), collapse='\n'))
   }
 
   invisible(inject(bindEvent(
     ignoreNULL = ignoreNULL,
     ignoreInit = ignoreInit,
     label = label,
-    !!eventExpr,
-    x = reactive(!!valueExpr, domain = domain, label = label)
+    !!eventQ,
+    x = reactive(!!valueQ, domain = domain, label = label)
   )))
 }
 

@@ -698,11 +698,11 @@ test_that("reactive() accepts injected quosures", {
   # inject() with nested quosures
   a <- 1
   y <- quo(a)
-  exp <- quo(!!y + 10)
+  exp <- quo(eval_tidy(!!y) + 10)
   a <- 2
-  f <- inject(reactive(!! exp ))
+  ff <- inject(reactive(!! exp ))
   a <- 3
-  expect_identical(isolate(f()), 13)
+  expect_identical(isolate(ff()), 13)
 })
 
 test_that("observe() accepts injected quosures", {
@@ -757,7 +757,7 @@ test_that("observe() accepts injected quosures", {
   val <- NULL
   a <- 1
   y <- quo(a)
-  exp <- rlang::quo(val <<- !!y + 10)
+  exp <- rlang::quo(val <<- eval_tidy(!!y) + 10)
   a <- 2
   f <- inject(observe(!!exp))
   a <- 3

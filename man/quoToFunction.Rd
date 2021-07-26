@@ -2,12 +2,12 @@
 % Please edit documentation in R/utils-lang.R
 \name{quoToFunction}
 \alias{quoToFunction}
-\alias{handleEnvAndQuoted}
+\alias{sustainEnvAndQuoted}
 \title{Convert a quosure to a function for a Shiny render function}
 \usage{
 quoToFunction(q, label = sys.call(-1)[[1]], ..stacktraceon = FALSE)
 
-handleEnvAndQuoted(q, x, env, quoted)
+sustainEnvAndQuoted(q, x, env, quoted)
 }
 \arguments{
 \item{q}{A quosure.}

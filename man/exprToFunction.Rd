@@ -43,7 +43,7 @@ the name of the calling function.}
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#superseded}{\figure{lifecycle-superseded.svg}{options: alt='[Superseded]'}}}{\strong{[Superseded]}} Please see \code{\link[=quoToFunction]{quoToFunction()}} for updated usage. (Shiny 1.7.0)
 
 Note: as of Shiny 1.7.0, it is
-recommended to use \code{\link[=quoToFunction]{quoToFunction()}} (and if necessary, \code{\link[=handleEnvAndQuoted]{handleEnvAndQuoted()}}) instead of
+recommended to use \code{\link[=quoToFunction]{quoToFunction()}} (and if necessary, \code{\link[=sustainEnvAndQuoted]{sustainEnvAndQuoted()}}) instead of
 \code{exprToFunction()} and \code{installExprFunction()}. See the examples for
 information on how to migrate to \code{getQuosure()} and \code{quoToFunction()}.
 

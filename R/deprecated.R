@@ -9,13 +9,19 @@
 #' @param details Additional information to be added after a new line to the displayed message
 #' @keywords internal
 shinyDeprecated <- function(
-  version, what, with = NULL, details = NULL
+  version,
+  what,
+  with = NULL,
+  details = NULL,
+  type = c("deprecated", "superseded")
 ) {
   if (is_false(getOption("shiny.deprecation.messages"))) {
     return(invisible())
   }
 
-  msg <- paste0("`", what, "` is deprecated as of shiny ", version, ".")
+  type <- match.arg(type)
+
+  msg <- paste0("`", what, "` is ", type, " as of shiny ", version, ".")
   if (!is.null(with)) {
     msg <- paste0(msg, "\n", "Please use `", with, "` instead.")
   }
@@ -60,7 +66,7 @@ diskCache <- function(
   logfile = NULL
 ) {
   shinyDeprecated("1.6.0", "diskCache()", "cachem::cache_disk()")
-  if (lifecycle::is_present(exec_missing)) {
+  if (is_present(exec_missing)) {
     shinyDeprecated("1.6.0", "diskCache(exec_missing =)")
   }
 
@@ -93,7 +99,7 @@ memoryCache <- function(
   logfile = NULL)
 {
   shinyDeprecated("1.6.0", "diskCache()", "cachem::cache_mem()")
-  if (lifecycle::is_present(exec_missing)) {
+  if (is_present(exec_missing)) {
     shinyDeprecated("1.6.0", "diskCache(exec_missing =)")
   }
 

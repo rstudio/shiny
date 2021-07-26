@@ -6,8 +6,8 @@
 \usage{
 observe(
   x,
-  env = parent.frame(),
-  quoted = FALSE,
+  env = deprecated(),
+  quoted = deprecated(),
   ...,
   label = NULL,
   suspended = FALSE,
@@ -21,11 +21,11 @@ observe(
 \item{x}{An expression (quoted or unquoted). Any return value will be
 ignored.}
 
-\item{env}{The parent environment for the reactive expression. By default,
+\item{env}{TODO-barret docs; The parent environment for the reactive expression. By default,
 this is the calling environment, the same as when defining an ordinary
 non-reactive expression.}
 
-\item{quoted}{Is the expression quoted? By default, this is \code{FALSE}.
+\item{quoted}{TODO-barret docs; Is the expression quoted? By default, this is \code{FALSE}.
 This is useful when you want to use an expression that is stored in a
 variable; to do so, it must be quoted with \code{quote()}.}
 
@@ -110,6 +110,7 @@ when the \link[=domains]{domain} that owns them ends (e.g. when a Shiny
 session ends).
 }
 \examples{
+# TODO-barret docs; examples are outdated
 values <- reactiveValues(A=1)
 
 obsB <- observe({

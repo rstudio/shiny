@@ -2,12 +2,12 @@
 % Please edit documentation in R/utils-lang.R
 \name{quoToFunction}
 \alias{quoToFunction}
-\alias{getQuosure}
+\alias{sustainEnvAndQuoted}
 \title{Convert a quosure to a function for a Shiny render function}
 \usage{
-quoToFunction(q, label = deparse(sys.call(-1)[[1]]), ..stacktraceon = FALSE)
+quoToFunction(q, label = sys.call(-1)[[1]], ..stacktraceon = FALSE)
 
-getQuosure(x, env, quoted)
+sustainEnvAndQuoted(q, x, env, quoted)
 }
 \arguments{
 \item{q}{A quosure.}
@@ -29,7 +29,7 @@ provided for backward compatibility.}
 This takes a quosure and label, and wraps them into a function that should be
 passed to \code{\link[=createRenderFunction]{createRenderFunction()}} or \code{\link[=markRenderFunction]{markRenderFunction()}}.
 
-\code{getQuosure()} and \code{quoToFunction()} are meant to be used together in a
+\code{handleEnvAndQuoted()} and \code{quoToFunction()} are meant to be used together in a
 \code{render} function, to capture user expressions or quosures and convert them
 to functions. They are meant to replace the older functions
 \code{\link[=installExprFunction]{installExprFunction()}} and \code{\link[=exprToFunction]{exprToFunction()}} (although those will continue
@@ -60,8 +60,7 @@ for how to migrate them.
 # This is something that toolkit authors will do.
 renderTriple <- function(expr) {
   # Convert expr to a quosure, and then to a function
-  expr <- getQuosure(expr)
-  func <- quoToFunction(expr)
+  func <- quoToFunction(rlang::enquo0(expr))
 
   # Wrap up func, with another function which takes the value of func()
   # and modifies it.

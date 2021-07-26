@@ -4,7 +4,13 @@
 \alias{shinyDeprecated}
 \title{Print message for deprecated functions in Shiny}
 \usage{
-shinyDeprecated(version, what, with = NULL, details = NULL)
+shinyDeprecated(
+  version,
+  what,
+  with = NULL,
+  details = NULL,
+  type = c("deprecated", "superseded")
+)
 }
 \arguments{
 \item{version}{Shiny version when the function was deprecated}

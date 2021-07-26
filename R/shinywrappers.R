@@ -165,7 +165,7 @@ print.shiny.render.function <- function(x, ...) {
 #' @examples
 #' # A very simple render function
 #' renderTriple <- function(expr) {
-#'   func <- quoToFunction(enquo(0))
+#'   func <- quoToFunction(rlang::enquo0(expr))
 #'
 #'   createRenderFunction(
 #'     func,

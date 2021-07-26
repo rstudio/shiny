@@ -68,7 +68,7 @@ for async computation via promises. It is recommended to use
 \examples{
 # A very simple render function
 renderTriple <- function(expr) {
-  func <- quoToFunction(enquo(0))
+  func <- quoToFunction(rlang::enquo0(expr))
 
   createRenderFunction(
     func,

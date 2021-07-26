@@ -961,7 +961,7 @@ Observable <- R6Class(
 #' @return a function, wrapped in a S3 class "reactive"
 #'
 #' @examples
-#' TODO-barret docs; with quosures, not env / quoted
+#' # TODO-barret docs; with quosures, not env / quoted
 #' values <- reactiveValues(A=1)
 #'
 #' reactiveB <- reactive({

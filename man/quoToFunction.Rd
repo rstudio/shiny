@@ -60,8 +60,7 @@ for how to migrate them.
 # This is something that toolkit authors will do.
 renderTriple <- function(expr) {
   # Convert expr to a quosure, and then to a function
-  expr <- getQuosure(expr)
-  func <- quoToFunction(expr)
+  func <- quoToFunction(rlang::enquo0(expr))
 
   # Wrap up func, with another function which takes the value of func()
   # and modifies it.

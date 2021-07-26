@@ -145,8 +145,7 @@ quoToSimpleFunction <- function(q) {
 #' # This is something that toolkit authors will do.
 #' renderTriple <- function(expr) {
 #'   # Convert expr to a quosure, and then to a function
-#'   expr <- getQuosure(expr)
-#'   func <- quoToFunction(expr)
+#'   func <- quoToFunction(rlang::enquo0(expr))
 #'
 #'   # Wrap up func, with another function which takes the value of func()
 #'   # and modifies it.
@@ -382,7 +381,7 @@ sustainEnvAndQuoted_ <- function(
 #' # The old way of converting the expression to a quosure, with exprToFunction()
 #' renderTriple <- function(expr, env=parent.frame(), quoted=FALSE) {
 #'   # Convert expr to a function
-#'   func <- shiny::exprToFunction(expr, env, quoted)
+#'   func <- exprToFunction(expr, env, quoted)
 #'
 #'   function() {
 #'     value <- func()
@@ -408,7 +407,8 @@ sustainEnvAndQuoted_ <- function(
 #' # backward compatibility
 #' renderTriple <- function(expr, env=parent.frame(), quoted=FALSE) {
 #'   # Convert expr to a quosure, and then to a function
-#'   q <- getQuosure(expr, env, quoted)
+#'   q <- rlang::enquo0(expr)
+#'   q <- sustainEnvAndQuoted(q, expr, env, quoted)
 #'   func <- quoToFunction(q)
 #'
 #'   function() {
@@ -423,8 +423,7 @@ sustainEnvAndQuoted_ <- function(
 #' # it discards `env` and `quoted`, for simplicity.
 #' renderTriple <- function(expr) {
 #'   # Convert expr to a quosure, and then to a function
-#'   q <- getQuosure(expr)
-#'   func <- quoToFunction(q)
+#'   func <- quoToFunction(rlang::enquo0(expr))
 #'
 #'   function() {
 #'     value <- func()

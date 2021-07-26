@@ -74,7 +74,7 @@ function named \code{func} in the current environment.
 # The old way of converting the expression to a quosure, with exprToFunction()
 renderTriple <- function(expr, env=parent.frame(), quoted=FALSE) {
   # Convert expr to a function
-  func <- shiny::exprToFunction(expr, env, quoted)
+  func <- exprToFunction(expr, env, quoted)
 
   function() {
     value <- func()
@@ -100,7 +100,8 @@ renderTriple <- function(expr, env=parent.frame(), quoted=FALSE) {
 # backward compatibility
 renderTriple <- function(expr, env=parent.frame(), quoted=FALSE) {
   # Convert expr to a quosure, and then to a function
-  q <- getQuosure(expr, env, quoted)
+  q <- rlang::enquo0(expr)
+  q <- sustainEnvAndQuoted(q, expr, env, quoted)
   func <- quoToFunction(q)
 
   function() {
@@ -115,8 +116,7 @@ renderTriple <- function(expr, env=parent.frame(), quoted=FALSE) {
 # it discards `env` and `quoted`, for simplicity.
 renderTriple <- function(expr) {
   # Convert expr to a quosure, and then to a function
-  q <- getQuosure(expr)
-  func <- quoToFunction(q)
+  func <- quoToFunction(rlang::enquo0(expr))
 
   function() {
     value <- func()

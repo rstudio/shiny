@@ -58,7 +58,7 @@ See the \href{https://shiny.rstudio.com/tutorial/}{Shiny tutorial} for
 more information about reactive expressions.
 }
 \examples{
-TODO-barret docs; with quosures, not env / quoted
+# TODO-barret docs; with quosures, not env / quoted
 values <- reactiveValues(A=1)
 
 reactiveB <- reactive({

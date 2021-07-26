@@ -996,7 +996,7 @@ reactive <- function(
   fun <- quoToSimpleFunction(q)
 
   # Attach a label and a reference to the original user source for debugging
-  q_expr <- get_expr(q)
+  q_expr <- quo_get_expr(q)
   label <- exprToLabel(q_expr, "reactive", label)
 
   o <- Observable$new(fun, label, domain, ..stacktraceon = ..stacktraceon)
@@ -1423,7 +1423,7 @@ observe <- function(
   fun <- quoToSimpleFunction(q)
 
   if (is.null(label)) {
-    label <- sprintf('observe(%s)', paste(deparse(get_expr(q)), collapse='\n'))
+    label <- sprintf('observe(%s)', paste(deparse(quo_get_expr(q)), collapse='\n'))
   }
 
   o <- Observer$new(

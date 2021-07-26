@@ -224,6 +224,7 @@ handleEnvAndQuoted <- function(q, x, env, quoted) {
       eval(substitute(!missing(quoted)), parent.frame())
     }
   ##
+  # This is TRUE when the user called `inject(renderFoo(!!q))`
   x_is_quosure <- is_quosure(eval(substitute(substitute(x)), parent.frame()))
 
   handleEnvAndQuoted_(

@@ -13,7 +13,7 @@
 #' @importFrom rlang
 #'    quo enquo enquo0 as_function get_expr get_env new_function enquos
 #'    eval_tidy expr pairlist2 new_quosure enexpr as_quosure is_quosure inject
-#'    quo_set_env quo_set_expr
+#'    quo_set_env quo_set_expr quo_get_expr
 #'    enquos0 zap_srcref %||% is_na
 #'    is_false list2
 #'    missing_arg is_missing maybe_missing

@@ -451,27 +451,14 @@ handleEnvAndQuoted_ <- function(
 #' isolate(tripleA())
 #' # "text, text, text"
 #' @export
-exprToFunction <- function(expr, env=parent.frame(), quoted=FALSE) {
+exprToFunction <- function(expr, env = parent.frame(), quoted = FALSE) {
   if (!quoted) {
     expr <- eval(substitute(substitute(expr)), parent.frame())
   }
 
   # expr is a quoted expression
-  new_function(list(), body=expr, env=env)
+  new_function(list(), body = expr, env = env)
 }
-# exprToFunctionNew <- function(expr, env = parent.frame(), quoted = FALSE) {
-#   force(env)
-#   # shinyDeprecated("1.7.0", "exprToFunction()", "quoToFunction()", type = "superseded")
-#   q_old <- q <- enquo0(expr)
-#   q <- handleEnvAndQuoted3Internal(q, expr, env, quoted)
-#   cat("exprToFunction:\n"); str(list(
-#     q_old = q_old,
-#     q = q,
-#     env = env
-#   ))
-#   # browser()
-#   quoToFunction(q, label = sys.call(-1))
-# }
 
 #' @rdname exprToFunction
 #'
@@ -508,29 +495,6 @@ installExprFunction <- function(expr, name, eval.env = parent.frame(2),
   }
   assign(name, func, envir = assign.env)
 }
-# installExprFunctionNew <- function(expr, name, eval.env = parent.frame(2),
-#                                 quoted = FALSE,
-#                                 assign.env = parent.frame(1),
-#                                 label = sys.call(-1)[[1]],
-#                                 wrappedWithLabel = TRUE,
-#                                 ..stacktraceon = FALSE) {
-#   # shinyDeprecated("1.7.0", "installExprFunction()", "quoToFunction()", type = "superseded")
-#   q <- enquo0(expr)
-#   q <- handleEnvAndQuoted3Internal(q, expr, eval.env, quoted)
-#   func <- quoToSimpleFunction(q)
-
-#   if (length(label) > 1) {
-#     # Just in case the deparsed code is more complicated than we imagine. If we
-#     # have a label with length > 1 it causes warnings in wrapFunctionLabel.
-#     label <- paste0(label, collapse = "\n")
-#   }
-#   if (wrappedWithLabel) {
-#     func <- wrapFunctionLabel(func, label, ..stacktraceon = ..stacktraceon)
-#   } else {
-#     registerDebugHook(name, assign.env, label)
-#   }
-#   assign(name, func, envir = assign.env)
-# }
 
 # Utility function for creating a debugging label, given an expression.
 # `expr` is a quoted expression.

@@ -75,7 +75,7 @@ renderTable <- function(expr, striped = FALSE, hover = FALSE,
                         outputArgs=list())
 {
   q <- enquo0(expr)
-  q <- handleEnvAndQuotedInternal(q, expr, env, quoted)
+  q <- sustainEnvAndQuotedInternal(q, expr, env, quoted)
   func <- quoToFunction(q, "renderTable")
 
   if (!is.function(spacing)) spacing <- match.arg(spacing)

@@ -201,7 +201,7 @@ quoToSimpleFunction <- function(q) {
 #'
 #' @rdname quoToFunction
 #' @export
-handleEnvAndQuoted <- function(q, x, env, quoted) {
+sustainEnvAndQuoted <- function(q, x, env, quoted) {
   ## To avoid possible boilerplate with `deprecated()`...
   env_is_present <-
     if (!is_present(env)) {
@@ -227,7 +227,7 @@ handleEnvAndQuoted <- function(q, x, env, quoted) {
   # This is TRUE when the user called `inject(renderFoo(!!q))`
   x_is_quosure <- is_quosure(eval(substitute(substitute(x)), parent.frame()))
 
-  handleEnvAndQuoted_(
+  sustainEnvAndQuoted_(
     q = q, env = env, quoted = quoted,
     env_is_present = env_is_present,
     quoted_is_present = quoted_is_present,
@@ -236,16 +236,16 @@ handleEnvAndQuoted <- function(q, x, env, quoted) {
   )
 }
 
-# `handleEnvAndQuotedInternal()` is to be called from functions like `reactive()`, `observe()`,
+# `sustainEnvAndQuotedInternal()` is to be called from functions like `reactive()`, `observe()`,
 # and the various render functions. It handles the following cases:
 # - The typical case where x is an unquoted expression, and `env` and `quoted`
 #   are not used.
 # - New-style metaprogramming cases, where rlang::inject() is used to inline a
 #   quosure into the AST, as in `inject(reactive(!!x))`.
 # - Old-style metaprogramming cases, where `env` and/or `quoted` are used.
-# Same as `handleEnvAndQuoted()`, but quiet
+# Same as `sustainEnvAndQuoted()`, but quiet
 # Under assumption that `env = deprecated()` and `quoted = deprecated()`
-handleEnvAndQuotedInternal <- function(q, x, env, quoted) {
+sustainEnvAndQuotedInternal <- function(q, x, env, quoted) {
   ## Can leverage the fact that we know all `env` and `quoted` args are set to `deprecated()`
   env_is_present <- is_present(env) # eval(substitute(!missing(env)), parent.frame())
   quoted_is_present <- is_present(quoted) # eval(substitute(!missing(quoted)), parent.frame())
@@ -253,7 +253,7 @@ handleEnvAndQuotedInternal <- function(q, x, env, quoted) {
   if (!env_is_present) env <- parent.frame(2)
   if (!quoted_is_present) quoted <- FALSE
 
-  handleEnvAndQuoted_(
+  sustainEnvAndQuoted_(
     q = q,
     env = env,
     quoted = quoted,
@@ -264,13 +264,13 @@ handleEnvAndQuotedInternal <- function(q, x, env, quoted) {
   )
 }
 # # Reaches up three calls to check if env / quoted were provided.
-# # Can not leverage `is_present()` logic like in `handleEnvAndQuotedInternal()`
+# # Can not leverage `is_present()` logic like in `sustainEnvAndQuotedInternal()`
 
-# # This is similar to `handleEnvAndQuotedInternal()`, but it is intended to be used only by
-# # `installExprFunction()` and `exprToFunction()`. Whereas `handleEnvAndQuotedInternal()` reaches
+# # This is similar to `sustainEnvAndQuotedInternal()`, but it is intended to be used only by
+# # `installExprFunction()` and `exprToFunction()`. Whereas `sustainEnvAndQuotedInternal()` reaches
 # # 2 calls back to find the expression passed in, this function reaches 3 calls
 # # back, and it is only used internally within Shiny.
-# handleEnvAndQuoted3Internal <- function(q, x, env, quoted) {
+# sustainEnvAndQuoted3Internal <- function(q, x, env, quoted) {
 #   ## To avoid possible boilerplate with `deprecated()`...
 #   env_is_present <-
 #     if (!is_present(env)) {
@@ -295,7 +295,7 @@ handleEnvAndQuotedInternal <- function(q, x, env, quoted) {
 #   ##
 #   x_is_quosure <- is_quosure(eval(eval(substitute(substitute(x)), parent.frame()), parent.frame(2)))
 
-#   handleEnvAndQuoted_(
+#   sustainEnvAndQuoted_(
 #     q = q, env = env, quoted = quoted,
 #     env_is_present = env_is_present,
 #     quoted_is_present = quoted_is_present,
@@ -303,7 +303,7 @@ handleEnvAndQuotedInternal <- function(q, x, env, quoted) {
 #     verbose = FALSE
 #   )
 # }
-handleEnvAndQuoted_ <- function(
+sustainEnvAndQuoted_ <- function(
   q, env, quoted,
   env_is_present, quoted_is_present, x_is_quosure,
   verbose = TRUE
@@ -345,7 +345,7 @@ handleEnvAndQuoted_ <- function(
 #' `r lifecycle::badge("superseded")` Please see [`quoToFunction()`] for updated usage. (Shiny 1.7.0)
 #'
 #' Note: as of Shiny 1.7.0, it is
-#' recommended to use [`quoToFunction()`] (and if necessary, [`handleEnvAndQuoted()`]) instead of
+#' recommended to use [`quoToFunction()`] (and if necessary, [`sustainEnvAndQuoted()`]) instead of
 #' `exprToFunction()` and `installExprFunction()`. See the examples for
 #' information on how to migrate to `getQuosure()` and `quoToFunction()`.
 #'

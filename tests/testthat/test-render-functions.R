@@ -116,11 +116,11 @@ for (info in list(
     can_not_test_quosures = TRUE
   ),
   list(
-    name = "handleEnvAndQuoted(); quoToFunction()",
+    name = "sustainEnvAndQuoted(); quoToFunction()",
     fn = function(exprF, envF = parent.frame(), quotedF = FALSE) {
       a <- 1000
       q <- enquo0(exprF)
-      q <- handleEnvAndQuoted(q, exprF, envF, quotedF)
+      q <- sustainEnvAndQuoted(q, exprF, envF, quotedF)
       func <- quoToFunction(q)
       function() {
         value <- func()
@@ -129,11 +129,11 @@ for (info in list(
     }
   ),
   list(
-    name = "lower1 - handleEnvAndQuoted(); quoToFunction()",
+    name = "lower1 - sustainEnvAndQuoted(); quoToFunction()",
     fn = function(exprF, envF = parent.frame(), quotedF = FALSE) {
       a <- 1000
       q <- enquo0(exprF)
-      q <- handleEnvAndQuoted(q, exprF, envF, quotedF)
+      q <- sustainEnvAndQuoted(q, exprF, envF, quotedF)
       function() {
         func <- quoToFunction(q)
         value <- func()
@@ -142,12 +142,12 @@ for (info in list(
     }
   ),
   list(
-    name = "old args - handleEnvAndQuoted(),quoToFunction()",
+    name = "old args - sustainEnvAndQuoted(),quoToFunction()",
     fn = function(xF, envF = parent.frame(), quotedF = FALSE) {
       a <- 1000
       q <- enquo0(xF)
       # Eventually can remove this, once users stop using env and quoted
-      q <- handleEnvAndQuoted(q, xF, envF, quotedF)
+      q <- sustainEnvAndQuoted(q, xF, envF, quotedF)
       func <- quoToFunction(q)
       function() {
         value <- func()
@@ -156,12 +156,12 @@ for (info in list(
     }
   ),
   list(
-    name = "deprecated args - handleEnvAndQuoted(),quoToFunction()",
+    name = "deprecated args - sustainEnvAndQuoted(),quoToFunction()",
     fn = function(xF, envF = deprecated(), quotedF = deprecated()) {
       a <- 1000
       q <- enquo0(xF)
       # Eventually can remove this, once users stop using env and quoted
-      q <- handleEnvAndQuoted(q, xF, envF, quotedF)
+      q <- sustainEnvAndQuoted(q, xF, envF, quotedF)
       func <- quoToFunction(q)
       function() {
         value <- func()

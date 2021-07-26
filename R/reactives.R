@@ -992,7 +992,7 @@ reactive <- function(
   check_dots_empty()
 
   q <- enquo0(x)
-  q <- handleEnvAndQuotedInternal(q, x, env, quoted)
+  q <- sustainEnvAndQuotedInternal(q, x, env, quoted)
   fun <- quoToSimpleFunction(q)
 
   # Attach a label and a reference to the original user source for debugging
@@ -1419,7 +1419,7 @@ observe <- function(
   check_dots_empty()
 
   q <- enquo0(x)
-  q <- handleEnvAndQuotedInternal(q, x, env, quoted)
+  q <- sustainEnvAndQuotedInternal(q, x, env, quoted)
   fun <- quoToSimpleFunction(q)
 
   if (is.null(label)) {
@@ -2281,8 +2281,8 @@ observeEvent <- function(eventExpr, handlerExpr,
 
   eventQ <- enquo0(eventExpr)
   handlerQ <- enquo0(handlerExpr)
-  eventQ <- handleEnvAndQuotedInternal(eventQ, eventExpr, event.env, event.quoted)
-  handlerQ <- handleEnvAndQuotedInternal(handlerQ, handlerExpr, handler.env, handler.quoted)
+  eventQ <- sustainEnvAndQuotedInternal(eventQ, eventExpr, event.env, event.quoted)
+  handlerQ <- sustainEnvAndQuotedInternal(handlerQ, handlerExpr, handler.env, handler.quoted)
 
   if (is.null(label)) {
     label <- sprintf('observeEvent(%s)', paste(deparse(get_expr(eventQ)), collapse='\n'))
@@ -2323,8 +2323,8 @@ eventReactive <- function(eventExpr, valueExpr,
 
   eventQ <- enquo0(eventExpr)
   valueQ <- enquo0(valueExpr)
-  eventQ <- handleEnvAndQuotedInternal(eventQ, eventExpr, event.env, event.quoted)
-  valueQ <- handleEnvAndQuotedInternal(valueQ, valueExpr, value.env, value.quoted)
+  eventQ <- sustainEnvAndQuotedInternal(eventQ, eventExpr, event.env, event.quoted)
+  valueQ <- sustainEnvAndQuotedInternal(valueQ, valueExpr, value.env, value.quoted)
 
   if (is.null(label)) {
     label <- sprintf('eventReactive(%s)', paste(deparse(get_expr(eventQ)), collapse='\n'))

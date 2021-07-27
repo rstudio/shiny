@@ -437,7 +437,9 @@ fortifyDiscreteLimits <- function(coord) {
     function(var) {
       # if there is an 'explicit' NULL, then the limits are NA
       if (is.null(var)) return(NA)
-      vapply(var, function(x) x %OR% NA_character_, character(1))
+      vapply(var, function(x) {
+        if (is.null(x) || isTRUE(is.na(x))) NA_character_ else x
+      }, character(1))
     }
   )
   coord

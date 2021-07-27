@@ -310,13 +310,12 @@ utils::globalVariables(".GenericCallEnv", add = TRUE)
 #'
 #'   ```
 #'   renderMyWidget <- function(expr) {
-#'     expr <- substitute(expr)
+#'     q <- enquo0(expr)
 #'
-#'     htmlwidgets::shinyRenderWidget(expr,
+#'     htmlwidgets::shinyRenderWidget(
+#'       q,
 #'       myWidgetOutput,
-#'       quoted = TRUE,
-#'       env = parent.frame(),
-#'       cacheHint = list(label = "myWidget", userExpr = expr)
+#'       cacheHint = list(label = "myWidget", userQuo = q)
 #'     )
 #'   }
 #'   ```

@@ -1,0 +1,442 @@
+// DEFAULTS
+$shiny-disconnected-bg:             #999 !default;
+$shiny-table-na:                    #909090 !default;
+$shiny-error-color:                 red !default;
+$shiny-error-validated-color:       #888 !default;
+$shiny-progress-text-bg-color:      #eef8ff !default; // TODO: what is this actually for?
+$shiny-input-width:                 300px !default;
+$shiny-input-panel-bg:              #f5f5f5 !default;
+$shiny-input-panel-border:          1px solid #e3e3e3 !default;
+$shiny-input-panel-border-radius:   2px !default;
+$shiny-text-output-border-radius:   null !default;
+$notification-bg-color:             #e8e8e8 !default;
+$notification-color:                #333 !default;
+$notification-border:               1px solid #ccc !default;
+$notification-border-radius:        3px !default;
+$notification-padding:              10px 8px 10px 10px !default;
+$notification-message-bg:           #d9edf7 !default;
+$notification-message-color:        #31708f !default;
+$notification-message-border:       1px solid #bce8f1 !default;
+$notification-warning-bg:           #fcf8e3 !default;
+$notification-warning-color:        #8a6d3b !default;
+$notification-warning-border:       1px solid #faebcc !default;
+$notification-error-bg:             #f2dede !default;
+$notification-error-color:          #a94442 !default;
+$notification-error-border:         1px solid #ebccd1 !default;
+$notification-close-color:          #444 !default;
+$notification-close-hover-color:    #000 !default;
+$notification-content-action-color: #337ab7 !default;
+$datepicker-disabled-color:         #aaa !default;
+$shiny-file-active-shadow:          inset 0 1px 1px rgba(black, .075), 0 0 8px rgba(102, 175, 233, .6) !default;
+$shiny-file-over-shadow:            inset 0 1px 1px rgba(black, .075), 0 0 8px rgba(76, 174, 76, .6) !default;
+
+// DECLARATIONS
+@mixin table-padding($top: null, $right: null, $bottom: null, $left: null) {
+  > thead, > tbody, > tfoot {
+    > tr {
+      > th, > td {
+        padding-top: $top;
+        padding-right: $right;
+        padding-bottom: $bottom;
+        padding-left: $left;
+      }
+    }
+  }
+}
+
+// Both BS3 and BS4 define a border radius mixin, but just in case
+// we're trying to compile this without bootstrapSass
+@mixin border-radius-shim($radius) {
+  @if mixin-exists("border-radius") {
+    @include border-radius($radius);
+  } @else {
+    border-radius: $radius;
+  }
+}
+
+
+// RULES
+
+/* This is necessary so that an empty verbatimTextOutput slot
+is the same height as a non-empty one (only important when
+* placeholder = TRUE) */
+pre.shiny-text-output:empty::before {
+  content: " ";
+}
+
+pre.shiny-text-output.noplaceholder:empty {
+  margin: 0;
+  padding: 0;
+  border-width: 0;
+  height: 0;
+}
+
+/* Some browsers (like Safari) will wrap text in <pre> tags with Bootstrap's
+   CSS. This changes the behavior to not wrap.
+*/
+pre.shiny-text-output {
+  word-wrap: normal;
+  @include border-radius-shim($shiny-text-output-border-radius);
+}
+
+.shiny-image-output, .shiny-plot-output {
+  img.shiny-scalable {
+    max-width: 100%;
+    max-height: 100%;
+  }
+}
+
+#shiny-disconnected-overlay {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: $shiny-disconnected-bg;
+  opacity: 0.5;
+  overflow: hidden;
+  z-index: 99998;
+  pointer-events: none;
+}
+
+.table.shiny-table {
+  @include table-padding($left: 12px, $right: 12px);
+}
+
+.shiny-table {
+  &.spacing {
+    &-xs {
+      @include table-padding($top: 3px, $bottom: 3px);
+    }
+    &-s {
+      @include table-padding($top: 5px, $bottom: 5px);
+    }
+    &-m {
+      @include table-padding($top: 8px, $bottom: 8px);
+    }
+    &-l {
+      @include table-padding($top: 10px, $bottom: 10px);
+    }
+  }
+  .NA {
+    color: $shiny-table-na;
+  }
+}
+
+.shiny-output-error {
+  color: $shiny-error-color;
+  white-space: pre-wrap;
+  &:before {
+    content: 'Error: ';
+    font-weight: bold;
+  }
+  &-validation {
+    color: $shiny-error-validated-color;
+  }
+  &-validation:before {
+    content: '';
+    font-weight: inherit;
+  }
+}
+
+
+/* Work around MS Edge transition bug (issue #1637) */
+@supports (-ms-ime-align:auto) {
+  .shiny-bound-output {
+    transition: 0;
+  }
+}
+
+.recalculating {
+  opacity: 0.3;
+  transition: opacity 250ms ease 500ms;
+}
+
+.slider-animate-container {
+  text-align: right;
+  margin-top: -9px;
+}
+.slider-animate-button {
+  opacity: 0.5;
+  .pause {
+    display: none;
+  }
+  &.playing .pause {
+    display: inline;
+  }
+  .play {
+    display: inline;
+  }
+  &.playing .play {
+    display: none;
+  }
+}
+
+.progress {
+  &.shiny-file-input-progress {
+    visibility: hidden;
+    .progress-bar.bar-danger {
+      transition: none;
+    }
+  }
+}
+
+/* Make sure the filename doesn't extend past the bounds of the container */
+.shiny-input-container input[type=file] {
+  overflow: hidden;
+  max-width: 100%;
+}
+
+/* Old-style progress */
+.shiny-progress-container {
+  position: fixed;
+  top: 0px;
+  width: 100%;
+  /* Make sure it draws above all Bootstrap components */
+  z-index: 2000;
+}
+
+// TODO: should respect more Bootstrap Sass vars?
+.shiny-progress {
+  .progress {
+    position: absolute;
+    width: 100%;
+    top: 0px;
+    height: 3px;
+    margin: 0px;
+  }
+  .bar {
+    opacity: 0.6;
+    transition-duration: 250ms;
+  }
+  .progress-text {
+    position: absolute;
+    right: 10px;
+    width: 240px;
+    background-color: $shiny-progress-text-bg-color;
+    margin: 0px;
+    padding: 2px 3px;
+    opacity: 0.85;
+    .progress-message {
+      padding: 0px 3px;
+      font-weight: bold;
+      font-size: 90%;
+    }
+    .progress-detail {
+      padding: 0px 3px;
+      font-size: 80%;
+    }
+  }
+}
+
+/* New-style progress (uses notifications API) */
+.shiny-progress-notification {
+  .progress {
+    margin-bottom: 5px;
+    height: 10px;
+  }
+  .progress-text {
+    .progress-message {
+      font-weight: bold;
+      font-size: 90%;
+    }
+    .progress-detail {
+      font-size: 80%;
+    }
+  }
+}
+
+.shiny-label-null {
+  display: none;
+}
+
+.crosshair {
+  cursor: crosshair;
+}
+
+.grabbable {
+  cursor: grab;
+  cursor: -moz-grab;
+  cursor: -webkit-grab;
+}
+
+.grabbing {
+  cursor: grabbing;
+  cursor: -moz-grabbing;
+  cursor: -webkit-grabbing;
+}
+
+.ns-resize {
+  cursor: ns-resize;
+}
+
+.ew-resize {
+  cursor: ew-resize;
+}
+
+.nesw-resize {
+  cursor: nesw-resize;
+}
+
+.nwse-resize {
+  cursor: nwse-resize;
+}
+
+
+/* Workaround for Qt, which doesn't use font fallbacks */
+.qt pre, .qt code {
+  font-family: monospace !important;
+}
+
+/* Workaround for Qt 5, which draws its own margins around checks and radios;
+   overrides the top margin on these elements set by Bootstrap */
+.qt5 .radio input[type="radio"],
+.qt5 .checkbox input[type="checkbox"] {
+  margin-top: 0px;
+}
+
+/* consistency with bootstrap.css for selectize.js */
+.selectize-control {
+  margin-bottom: 10px;
+}
+
+.shiny-frame {
+  border: none;
+}
+
+.shiny-flow-layout {
+  > div {
+    display: inline-block;
+    vertical-align: top;
+    padding-right: 12px;
+    width: 220px;
+  }
+}
+.shiny-split-layout {
+  width: 100%;
+  white-space: nowrap;
+  > div {
+    display: inline-block;
+    vertical-align: top;
+    box-sizing: border-box;
+    overflow: auto;
+  }
+}
+
+.shiny-input-panel {
+  padding: 6px 8px;
+  margin-top: 6px;
+  margin-bottom: 6px;
+  background-color: $shiny-input-panel-bg;
+  border: $shiny-input-panel-border;
+  @include border-radius-shim($shiny-input-panel-border-radius);
+}
+
+/* For checkbox groups and radio buttons, bring the options closer to label,
+   if label is present. */
+.shiny-input-checkboxgroup label ~ .shiny-options-group,
+.shiny-input-radiogroup label ~ .shiny-options-group {
+  margin-top: -10px;
+}
+
+/* Checkbox groups and radios that are inline need less negative margin to
+   separate from label. */
+.shiny-input-checkboxgroup.shiny-input-container-inline label ~ .shiny-options-group,
+.shiny-input-radiogroup.shiny-input-container-inline label ~ .shiny-options-group {
+  margin-top: -1px;
+}
+
+/* Limit the width of inputs in the general case. */
+.shiny-input-container:not(.shiny-input-container-inline) {
+  width: $shiny-input-width;
+  max-width: 100%;
+}
+
+/* Don't limit the width of inputs in a sidebar. */
+.well .shiny-input-container {
+  width: auto;
+}
+
+/* Width of non-selectize select inputs */
+.shiny-input-container > div > select:not(.selectized) {
+  width: 100%;
+}
+
+
+#shiny-notification-panel {
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  background-color: rgba(0,0,0,0);
+  padding: 2px;
+  width: 250px;
+  z-index: 99999;
+}
+
+.shiny-notification {
+  background-color: $notification-bg-color;
+  color: $notification-color;
+  border: $notification-border;
+  @include border-radius-shim($notification-border-radius);
+  opacity: 0.85;
+  padding: $notification-padding;
+  margin: 2px;
+  &-message {
+    color: $notification-message-color;
+    background-color: $notification-message-bg;
+    border: $notification-message-border;
+  }
+  &-warning {
+    color: $notification-warning-color;
+    background-color: $notification-warning-bg;
+    border: $notification-warning-border;
+  }
+  &-error {
+    color: $notification-error-color;
+    background-color: $notification-error-bg;
+    border: $notification-error-border;
+  }
+  &-close {
+    float: right;
+    font-weight: bold;
+    font-size: 18px;
+    bottom: 9px;
+    position: relative;
+    padding-left: 4px;
+    color: $notification-close-color;
+    cursor: default;
+  }
+  &-close:hover {
+    color: $notification-close-hover-color;
+  }
+  &-content-action a {
+    color: $notification-content-action-color;
+    text-decoration: underline;
+    font-weight: bold;
+  }
+}
+
+.shiny-file-input {
+  &-active {
+    box-shadow: $shiny-file-active-shadow;
+  }
+  &-over {
+    box-shadow: $shiny-file-over-shadow;
+  }
+}
+
+/* Overrides bootstrap-datepicker3.css styling for invalid date ranges.
+   See https://github.com/rstudio/shiny/issues/2042 for details. */
+.datepicker table tbody tr td.disabled,
+.datepicker table tbody tr td.disabled:hover,
+.datepicker table tbody tr td span.disabled,
+.datepicker table tbody tr td span.disabled:hover {
+  color: $datepicker-disabled-color;
+  cursor: not-allowed;
+}
+
+/* Hidden tabPanels */
+.nav-hidden {
+  /* override anything bootstrap sets for `.nav` */
+  display: none !important;
+}

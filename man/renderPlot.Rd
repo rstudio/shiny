@@ -4,9 +4,18 @@
 \alias{renderPlot}
 \title{Plot Output}
 \usage{
-renderPlot(expr, width = "auto", height = "auto", res = 72, ...,
-  env = parent.frame(), quoted = FALSE, execOnResize = FALSE,
-  outputArgs = list())
+renderPlot(
+  expr,
+  width = "auto",
+  height = "auto",
+  res = 72,
+  ...,
+  alt = NA,
+  env = deprecated(),
+  quoted = deprecated(),
+  execOnResize = FALSE,
+  outputArgs = list()
+)
 }
 \arguments{
 \item{expr}{An expression that generates a plot.}
@@ -32,14 +41,23 @@ rendering in R; it won't change the actual ppi of the browser.}
 \item{...}{Arguments to be passed through to \code{\link[grDevices:png]{grDevices::png()}}.
 These can be used to set the width, height, background color, etc.}
 
-\item{env}{The environment in which to evaluate \code{expr}.}
+\item{alt}{Alternate text for the HTML \verb{<img>} tag if it cannot be displayed
+or viewed (i.e., the user uses a screen reader). In addition to a character
+string, the value may be a reactive expression (or a function referencing
+reactive values) that returns a character string. If the value is \code{NA} (the
+default), then \code{ggplot2::get_alt_text()} is used to extract alt text from
+ggplot objects; for other plots, \code{NA} results in alt text of "Plot object".
+\code{NULL} or \code{""} is not recommended because those should be limited to
+decorative images.}
 
-\item{quoted}{Is \code{expr} a quoted expression (with \code{quote()})? This
+\item{env}{TODO-barret docs; The environment in which to evaluate \code{expr}.}
+
+\item{quoted}{TODO-barret docs; Is \code{expr} a quoted expression (with \code{quote()})? This
 is useful if you want to save an expression in a variable.}
 
 \item{execOnResize}{If \code{FALSE} (the default), then when a plot is
 resized, Shiny will \emph{replay} the plot drawing commands with
-\code{\link[grDevices:replayPlot]{grDevices::replayPlot()}} instead of re-executing \code{expr}.
+\code{\link[grDevices:recordplot]{grDevices::replayPlot()}} instead of re-executing \code{expr}.
 This can result in faster plot redrawing, but there may be rare cases where
 it is undesirable. If you encounter problems when resizing a plot, you can
 have Shiny re-execute the code on resize by setting this to \code{TRUE}.}

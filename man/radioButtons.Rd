@@ -4,9 +4,16 @@
 \alias{radioButtons}
 \title{Create radio buttons}
 \usage{
-radioButtons(inputId, label, choices = NULL, selected = NULL,
-  inline = FALSE, width = NULL, choiceNames = NULL,
-  choiceValues = NULL)
+radioButtons(
+  inputId,
+  label,
+  choices = NULL,
+  selected = NULL,
+  inline = FALSE,
+  width = NULL,
+  choiceNames = NULL,
+  choiceValues = NULL
+)
 }
 \arguments{
 \item{inputId}{The \code{input} slot that will be used to access the value.}
@@ -15,12 +22,13 @@ radioButtons(inputId, label, choices = NULL, selected = NULL,
 
 \item{choices}{List of values to select from (if elements of the list are
 named then that name rather than the value is displayed to the user). If
-this argument is provided, then \code{choiceNames} and \code{choiceValues}
-must not be provided, and vice-versa. The values should be strings; other
-types (such as logicals and numbers) will be coerced to strings.}
+this argument is provided, then \code{choiceNames} and \code{choiceValues} must not
+be provided, and vice-versa. The values should be strings; other types
+(such as logicals and numbers) will be coerced to strings.}
 
-\item{selected}{The initially selected value (if not specified then defaults
-to the first value)}
+\item{selected}{The initially selected value. If not specified, then it
+defaults to the first item in \code{choices}. To start with no items selected,
+use \code{character(0)}.}
 
 \item{inline}{If \code{TRUE}, render the choices inline (i.e. horizontally)}
 
@@ -29,13 +37,12 @@ see \code{\link[=validateCssUnit]{validateCssUnit()}}.}
 
 \item{choiceNames, choiceValues}{List of names and values, respectively, that
 are displayed to the user in the app and correspond to the each choice (for
-this reason, \code{choiceNames} and \code{choiceValues} must have the same
-length). If either of these arguments is provided, then the other
-\emph{must} be provided and \code{choices} \emph{must not} be provided. The
-advantage of using both of these over a named list for \code{choices} is
-that \code{choiceNames} allows any type of UI object to be passed through
-(tag objects, icons, HTML code, ...), instead of just simple text. See
-Examples.}
+this reason, \code{choiceNames} and \code{choiceValues} must have the same length).
+If either of these arguments is provided, then the other \emph{must} be provided
+and \code{choices} \emph{must not} be provided. The advantage of using both of these
+over a named list for \code{choices} is that \code{choiceNames} allows any type of UI
+object to be passed through (tag objects, icons, HTML code, ...), instead
+of just simple text. See Examples.}
 }
 \value{
 A set of radio buttons that can be added to a UI definition.
@@ -50,6 +57,7 @@ to return to that state once they've made a selection. Instead, consider
 having the first of your choices be \code{c("None selected" = "")}.
 }
 \section{Server value}{
+
 
 A character string containing the value of the selected button.
 }
@@ -108,13 +116,20 @@ shinyApp(ui, server)
 \seealso{
 \code{\link[=updateRadioButtons]{updateRadioButtons()}}
 
-Other input elements: \code{\link{actionButton}},
-  \code{\link{checkboxGroupInput}},
-  \code{\link{checkboxInput}}, \code{\link{dateInput}},
-  \code{\link{dateRangeInput}}, \code{\link{fileInput}},
-  \code{\link{numericInput}}, \code{\link{passwordInput}},
-  \code{\link{selectInput}}, \code{\link{sliderInput}},
-  \code{\link{submitButton}}, \code{\link{textAreaInput}},
-  \code{\link{textInput}}, \code{\link{varSelectInput}}
+Other input elements: 
+\code{\link{actionButton}()},
+\code{\link{checkboxGroupInput}()},
+\code{\link{checkboxInput}()},
+\code{\link{dateInput}()},
+\code{\link{dateRangeInput}()},
+\code{\link{fileInput}()},
+\code{\link{numericInput}()},
+\code{\link{passwordInput}()},
+\code{\link{selectInput}()},
+\code{\link{sliderInput}()},
+\code{\link{submitButton}()},
+\code{\link{textAreaInput}()},
+\code{\link{textInput}()},
+\code{\link{varSelectInput}()}
 }
 \concept{input elements}

@@ -11,8 +11,15 @@
 #' @param multiple Whether the user should be allowed to select and upload
 #'   multiple files at once. **Does not work on older browsers, including
 #'   Internet Explorer 9 and earlier.**
-#' @param accept A character vector of MIME types; gives the browser a hint of
-#'   what kind of files the server is expecting.
+#' @param accept A character vector of "unique file type specifiers" which
+#'   gives the browser a hint as to the type of file the server expects.
+#'   Many browsers use this prevent the user from selecting an invalid file.
+#'
+#'   A unique file type specifier can be:
+#'   * A case insensitive extension like `.csv` or `.rds`.
+#'   * A valid MIME type, like `text/plain` or `application/pdf`
+#'   * One of `audio/*`, `video/*`, or `image/*` meaning any audio, video,
+#'     or image type, respectively.
 #' @param buttonLabel The label used on the button. Can be text or an HTML tag
 #'   object.
 #' @param placeholder The text to show before a file has been uploaded.
@@ -24,13 +31,7 @@
 #' ui <- fluidPage(
 #'   sidebarLayout(
 #'     sidebarPanel(
-#'       fileInput("file1", "Choose CSV File",
-#'         accept = c(
-#'           "text/csv",
-#'           "text/comma-separated-values,text/plain",
-#'           ".csv")
-#'         ),
-#'       tags$hr(),
+#'       fileInput("file1", "Choose CSV File", accept = ".csv"),
 #'       checkboxInput("header", "Header", TRUE)
 #'     ),
 #'     mainPanel(
@@ -41,17 +42,13 @@
 #'
 #' server <- function(input, output) {
 #'   output$contents <- renderTable({
-#'     # input$file1 will be NULL initially. After the user selects
-#'     # and uploads a file, it will be a data frame with 'name',
-#'     # 'size', 'type', and 'datapath' columns. The 'datapath'
-#'     # column will contain the local filenames where the data can
-#'     # be found.
-#'     inFile <- input$file1
+#'     file <- input$file1
+#'     ext <- tools::file_ext(file$datapath)
 #'
-#'     if (is.null(inFile))
-#'       return(NULL)
+#'     req(file)
+#'     validate(need(ext == "csv", "Please upload a csv file"))
 #'
-#'     read.csv(inFile$datapath, header = input$header)
+#'     read.csv(file$datapath, header = input$header)
 #'   })
 #' }
 #'
@@ -94,7 +91,8 @@ fileInput <- function(inputId, label, multiple = FALSE, accept = NULL,
     id = inputId,
     name = inputId,
     type = "file",
-    style = "display: none;",
+    # Don't use "display: none;" style, which causes keyboard accessibility issue; instead use the following workaround: https://css-tricks.com/places-its-tempting-to-use-display-none-but-dont/
+    style = "position: absolute !important; top: -99999px !important; left: -99999px !important;",
     `data-restore` = restoredValue
   )
 
@@ -105,11 +103,12 @@ fileInput <- function(inputId, label, multiple = FALSE, accept = NULL,
 
 
   div(class = "form-group shiny-input-container",
-    style = if (!is.null(width)) paste0("width: ", validateCssUnit(width), ";"),
+    style = css(width = validateCssUnit(width)),
     shinyInputLabel(inputId, label),
 
     div(class = "input-group",
-      tags$label(class = "input-group-btn",
+      # input-group-prepend is for bootstrap 4 compat
+      tags$label(class = "input-group-btn input-group-prepend",
         span(class = "btn btn-default btn-file",
           buttonLabel,
           inputTag
@@ -122,7 +121,7 @@ fileInput <- function(inputId, label, multiple = FALSE, accept = NULL,
 
     tags$div(
       id=paste(inputId, "_progress", sep=""),
-      class="progress progress-striped active shiny-file-input-progress",
+      class="progress active shiny-file-input-progress",
       tags$div(class="progress-bar")
     )
   )

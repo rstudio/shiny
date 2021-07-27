@@ -2,17 +2,36 @@
 % Please edit documentation in R/insert-ui.R
 \name{insertUI}
 \alias{insertUI}
-\title{Insert UI objects}
+\alias{removeUI}
+\title{Insert and remove UI objects}
 \usage{
-insertUI(selector, where = c("beforeBegin", "afterBegin", "beforeEnd",
-  "afterEnd"), ui, multiple = FALSE, immediate = FALSE,
-  session = getDefaultReactiveDomain())
+insertUI(
+  selector,
+  where = c("beforeBegin", "afterBegin", "beforeEnd", "afterEnd"),
+  ui,
+  multiple = FALSE,
+  immediate = FALSE,
+  session = getDefaultReactiveDomain()
+)
+
+removeUI(
+  selector,
+  multiple = FALSE,
+  immediate = FALSE,
+  session = getDefaultReactiveDomain()
+)
 }
 \arguments{
-\item{selector}{A string that is accepted by jQuery's selector (i.e. the
-string \code{s} to be placed in a \code{$(s)} jQuery call). This selector
-will determine the element(s) relative to which you want to insert your
-UI object.}
+\item{selector}{A string that is accepted by jQuery's selector
+(i.e. the string \code{s} to be placed in a \verb{$(s)} jQuery call).
+
+For \code{insertUI()} this determines the element(s) relative to which you
+want to insert your UI object. For \code{removeUI()} this determine the
+element(s) to be removed. If you want to remove a Shiny input or output,
+note that many of these are wrapped in \verb{<div>}s, so you may need to use a
+somewhat complex selector --- see the Examples below. (Alternatively, you
+could also wrap the inputs/outputs that you want to be able to remove
+easily in a \verb{<div>} with an id.)}
 
 \item{where}{Where your UI object should go relative to the selector:
 \describe{
@@ -23,8 +42,7 @@ first child}
 last child (default)}
 \item{\code{afterEnd}}{After the selector element itself}
 }
-Adapted from
-\href{https://developer.mozilla.org/en-US/docs/Web/API/Element/insertAdjacentHTML}{here}.}
+Adapted from \url{https://developer.mozilla.org/en-US/docs/Web/API/Element/insertAdjacentHTML}.}
 
 \item{ui}{The UI object you want to insert. This can be anything that
 you usually put inside your apps's \code{ui} function. If you're inserting
@@ -39,25 +57,27 @@ reference or remove it later on). If you want to insert raw html, use
 relative to all matched elements or just relative to the first
 matched element (default).}
 
-\item{immediate}{Whether the UI object should be immediately inserted into
-the app when you call \code{insertUI}, or whether Shiny should wait until
-all outputs have been updated and all observers have been run (default).}
+\item{immediate}{Whether the UI object should be immediately inserted
+or removed, or whether Shiny should wait until all outputs have been
+updated and all observers have been run (default).}
 
-\item{session}{The shiny session within which to call \code{insertUI}.}
+\item{session}{The shiny session. Advanced use only.}
 }
 \description{
-Insert a UI object into the app.
-}
-\details{
-This function allows you to dynamically add an arbitrarily large UI
-object into your app, whenever you want, as many times as you want.
-Unlike \code{\link[=renderUI]{renderUI()}}, the UI generated with \code{insertUI}
-is not updatable as a whole: once it's created, it stays there. Each
-new call to \code{insertUI} creates more UI objects, in addition to
+These functions allow you to dynamically add and remove arbirary UI
+into your app, whenever you want, as many times as you want.
+Unlike \code{\link[=renderUI]{renderUI()}}, the UI generated with \code{insertUI()} is persistent:
+once it's created, it stays there until removed by \code{removeUI()}. Each
+new call to \code{insertUI()} creates more UI objects, in addition to
 the ones already there (all independent from one another). To
 update a part of the UI (ex: an input object), you must use the
 appropriate \code{render} function or a customized \code{reactive}
-function. To remove any part of your UI, use \code{\link[=removeUI]{removeUI()}}.
+function.
+}
+\details{
+It's particularly useful to pair \code{removeUI} with \code{insertUI()}, but there is
+no restriction on what you can use on. Any element that can be selected
+through a jQuery selector can be removed through this function.
 }
 \examples{
 ## Only run this example in interactive R sessions
@@ -82,7 +102,24 @@ server <- function(input, output, session) {
 # Complete app with UI and server components
 shinyApp(ui, server)
 }
+
+if (interactive()) {
+# Define UI
+ui <- fluidPage(
+  actionButton("rmv", "Remove UI"),
+  textInput("txt", "This is no longer useful")
+)
+
+# Server logic
+server <- function(input, output, session) {
+  observeEvent(input$rmv, {
+    removeUI(
+      selector = "div:has(> #txt)"
+    )
+  })
 }
-\seealso{
-\code{\link[=removeUI]{removeUI()}}
+
+# Complete app with UI and server components
+shinyApp(ui, server)
+}
 }

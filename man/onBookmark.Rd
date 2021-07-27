@@ -92,14 +92,14 @@ ui <- function(req) {
 server <- function(input, output) {
   onBookmark(function(state) {
     savedTime <- as.character(Sys.time())
-    cat("Last saved at", savedTime, "\\n")
+    cat("Last saved at", savedTime, "\n")
     # state is a mutable reference object, and we can add arbitrary values to
     # it.
     state$values$time <- savedTime
   })
 
   onRestore(function(state) {
-    cat("Restoring from state bookmarked at", state$values$time, "\\n")
+    cat("Restoring from state bookmarked at", state$values$time, "\n")
   })
 }
 enableBookmarking("url")
@@ -164,10 +164,10 @@ capitalizerServer <- function(input, output, session) {
     toupper(input$text)
   })
   onBookmark(function(state) {
-    state$values$hash <- digest::digest(input$text, "md5")
+    state$values$hash <- rlang::hash(input$text)
   })
   onRestore(function(state) {
-    if (identical(digest::digest(input$text, "md5"), state$values$hash)) {
+    if (identical(rlang::hash(input$text), state$values$hash)) {
       message("Module's input text matches hash ", state$values$hash)
     } else {
       message("Module's input text does not match hash ", state$values$hash)
@@ -190,10 +190,10 @@ ui <- function(request) {
 server <- function(input, output, session) {
   callModule(capitalizerServer, "tc")
   onBookmark(function(state) {
-    state$values$hash <- digest::digest(input$text, "md5")
+    state$values$hash <- rlang::hash(input$text)
   })
   onRestore(function(state) {
-    if (identical(digest::digest(input$text, "md5"), state$values$hash)) {
+    if (identical(rlang::hash(input$text), state$values$hash)) {
       message("App's input text matches hash ", state$values$hash)
     } else {
       message("App's input text does not match hash ", state$values$hash)

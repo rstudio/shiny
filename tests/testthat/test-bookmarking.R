@@ -1,5 +1,3 @@
-context("bookmarking")
-
 test_that("Inputs and values in query string", {
   # Normal format
   vals <- RestoreContext$new("?_inputs_&a=1&b=2&_values_&x=3")$asList()
@@ -32,16 +30,16 @@ test_that("Inputs and values in query string", {
   expect_identical(as.list(vals$values), list())
 
   # Multiple instances of _inputs_ or _values_
-  suppress_stacktrace(expect_warning(RestoreContext$new("?_inputs_&a=1&_inputs_")))
-  suppress_stacktrace(expect_warning(RestoreContext$new("?_inputs_&a=1&_inputs_&")))
-  suppress_stacktrace(expect_warning(RestoreContext$new("?_inputs_&a=1&_inputs_&b=2")))
-  suppress_stacktrace(expect_warning(RestoreContext$new("?_inputs_&a=1&_values_&b=2&_inputs_&")))
-  suppress_stacktrace(expect_warning(RestoreContext$new("?_values_&a=1&_values_")))
-  suppress_stacktrace(expect_warning(RestoreContext$new("?_inputs_&a=1&_values_&_values&b=2")))
+  suppress_stacktrace(expect_warning(expect_warning(RestoreContext$new("?_inputs_&a=1&_inputs_"))))
+  suppress_stacktrace(expect_warning(expect_warning(RestoreContext$new("?_inputs_&a=1&_inputs_&"))))
+  suppress_stacktrace(expect_warning(expect_warning(RestoreContext$new("?_inputs_&a=1&_inputs_&b=2"))))
+  suppress_stacktrace(expect_warning(expect_warning(RestoreContext$new("?_inputs_&a=1&_values_&b=2&_inputs_&"))))
+  suppress_stacktrace(expect_warning(expect_warning(RestoreContext$new("?_values_&a=1&_values_"))))
+  suppress_stacktrace(expect_warning(expect_warning(RestoreContext$new("?_inputs_&a=1&_values_&_values&b=2"))))
 
   # If there's an error in the conversion from query string, should have
   # blank values.
-  suppress_stacktrace(expect_warning(rc <- RestoreContext$new("?_inputs_&a=[x&b=1")))
+  suppress_stacktrace(expect_warning(expect_warning(rc <- RestoreContext$new("?_inputs_&a=[x&b=1"))))
   expect_identical(rc$input$asList(), list())
   expect_identical(as.list(rc$values), list())
   expect_identical(rc$dir, NULL)

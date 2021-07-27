@@ -11,22 +11,22 @@
 #' @inheritParams textInput
 #' @param choices List of values to select from (if elements of the list are
 #'   named then that name rather than the value is displayed to the user). If
-#'   this argument is provided, then `choiceNames` and `choiceValues`
-#'   must not be provided, and vice-versa. The values should be strings; other
-#'   types (such as logicals and numbers) will be coerced to strings.
-#' @param selected The initially selected value (if not specified then defaults
-#'   to the first value)
+#'   this argument is provided, then `choiceNames` and `choiceValues` must not
+#'   be provided, and vice-versa. The values should be strings; other types
+#'   (such as logicals and numbers) will be coerced to strings.
+#' @param selected The initially selected value. If not specified, then it
+#'   defaults to the first item in `choices`. To start with no items selected,
+#'   use `character(0)`.
 #' @param inline If `TRUE`, render the choices inline (i.e. horizontally)
 #' @return A set of radio buttons that can be added to a UI definition.
 #' @param choiceNames,choiceValues List of names and values, respectively, that
 #'   are displayed to the user in the app and correspond to the each choice (for
-#'   this reason, `choiceNames` and `choiceValues` must have the same
-#'   length). If either of these arguments is provided, then the other
-#'   *must* be provided and `choices` *must not* be provided. The
-#'   advantage of using both of these over a named list for `choices` is
-#'   that `choiceNames` allows any type of UI object to be passed through
-#'   (tag objects, icons, HTML code, ...), instead of just simple text. See
-#'   Examples.
+#'   this reason, `choiceNames` and `choiceValues` must have the same length).
+#'   If either of these arguments is provided, then the other *must* be provided
+#'   and `choices` *must not* be provided. The advantage of using both of these
+#'   over a named list for `choices` is that `choiceNames` allows any type of UI
+#'   object to be passed through (tag objects, icons, HTML code, ...), instead
+#'   of just simple text. See Examples.
 #'
 #' @family input elements
 #' @seealso [updateRadioButtons()]
@@ -82,7 +82,8 @@
 #' }
 #'
 #' @section Server value:
-#' A character string containing the value of the selected button.
+#'
+#'   A character string containing the value of the selected button.
 #'
 #' @export
 radioButtons <- function(inputId, label, choices = NULL, selected = NULL,
@@ -103,10 +104,14 @@ radioButtons <- function(inputId, label, choices = NULL, selected = NULL,
   divClass <- "form-group shiny-input-radiogroup shiny-input-container"
   if (inline) divClass <- paste(divClass, "shiny-input-container-inline")
 
+  inputLabel <- shinyInputLabel(inputId, label)
   tags$div(id = inputId,
-    style = if (!is.null(width)) paste0("width: ", validateCssUnit(width), ";"),
+    style = css(width = validateCssUnit(width)),
     class = divClass,
-    shinyInputLabel(inputId, label),
+    # https://www.w3.org/TR/2017/WD-wai-aria-practices-1.1-20170628/examples/radio/radio-1/radio-1.html
+    role = "radiogroup",
+    `aria-labelledby` = inputLabel$attribs$id,
+    inputLabel,
     options
   )
 }

@@ -4,8 +4,15 @@
 \alias{createRenderFunction}
 \title{Implement render functions}
 \usage{
-createRenderFunction(func, transform = function(value, session, name,
-  ...) value, outputFunc = NULL, outputArgs = NULL)
+createRenderFunction(
+  func,
+  transform = function(value, session, name, ...) value,
+  outputFunc = NULL,
+  outputArgs = NULL,
+  cacheHint = "auto",
+  cacheWriteHook = NULL,
+  cacheReadHook = NULL
+)
 }
 \arguments{
 \item{func}{A function without parameters, that returns user data. If the
@@ -22,17 +29,63 @@ JSON-encoded and sent to the browser.}
 this render function. This can be used in R Markdown documents to create
 complete output widgets out of just the render function.}
 
-\item{outputArgs}{A list of arguments to pass to the \code{outputFunc}.
-Render functions should include \code{outputArgs = list()} in their own
-parameter list, and pass through the value as this argument, to allow app
-authors to customize outputs. (Currently, this is only supported for
-dynamically generated UIs, such as those created by Shiny code snippets
-embedded in R Markdown documents).}
+\item{outputArgs}{A list of arguments to pass to the \code{uiFunc}. Render
+functions should include \code{outputArgs = list()} in their own parameter list,
+and pass through the value to \code{markRenderFunction}, to allow app authors to
+customize outputs. (Currently, this is only supported for dynamically
+generated UIs, such as those created by Shiny code snippets embedded in R
+Markdown documents).}
+
+\item{cacheHint}{One of \code{"auto"}, \code{FALSE}, or some other information to
+identify this instance for caching using \code{\link[=bindCache]{bindCache()}}. If \code{"auto"}, it
+will try to automatically infer caching information. If \code{FALSE}, do not
+allow caching for the object. Some render functions (such as \link{renderPlot})
+contain internal state that makes them unsuitable for caching.}
+
+\item{cacheWriteHook}{Used if the render function is passed to \code{bindCache()}.
+This is an optional callback function to invoke before saving the value
+from the render function to the cache. This function must accept one
+argument, the value returned from \code{renderFunc}, and should return the value
+to store in the cache.}
+
+\item{cacheReadHook}{Used if the render function is passed to \code{bindCache()}.
+This is an optional callback function to invoke after reading a value from
+the cache (if there is a cache hit). The function will be passed one
+argument, the value retrieved from the cache. This can be useful when some
+side effect needs to occur for a render function to behave correctly. For
+example, some render functions call \code{\link[=createWebDependency]{createWebDependency()}} so that Shiny
+is able to serve JS and CSS resources.}
 }
 \value{
 An annotated render function, ready to be assigned to an
 \code{output} slot.
 }
 \description{
-Implement render functions
+This function is a wrapper for \code{\link[=markRenderFunction]{markRenderFunction()}} which provides support
+for async computation via promises. It is recommended to use
+\code{createRenderFunction()} instead of \code{markRenderFunction()}.
+}
+\examples{
+# A very simple render function
+renderTriple <- function(expr) {
+  func <- quoToFunction(rlang::enquo0(expr))
+
+  createRenderFunction(
+    func,
+    transform = function(value, session, name, ...) {
+      paste(rep(value, 3), collapse=", ")
+    },
+    outputFunc = textOutput
+  )
+}
+
+# Test render function from the console
+a <- 1
+r <- renderTriple({ a * 10 })
+a <- 2
+r()
+# [1] "20, 20, 20"
+}
+\seealso{
+\code{\link[=quoToFunction]{quoToFunction()}}, \code{\link[=markRenderFunction]{markRenderFunction()}}, \code{\link[rlang:nse-defuse]{rlang::enquo()}}.
 }

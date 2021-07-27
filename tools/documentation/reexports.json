@@ -1,0 +1,24 @@
+{
+  "fastmap": {
+    "name": "fastmap",
+    "repo": "r-lib/fastmap",
+    "exports": [
+      { "file": "key_missing.Rd" }
+    ]
+  },
+  "htmltools": {
+    "name": "htmltools",
+    "repo": "rstudio/htmltools",
+    "exports": [
+      { "file": "builder.Rd", "ignore": "builder" },
+      { "file": "tag.Rd" },
+      { "file": "HTML.Rd" },
+      { "file": "include.Rd", "ignore": "include" },
+      { "file": "singleton.Rd" },
+      { "file": "validateCssUnit.Rd" },
+      { "file": "htmlTemplate.Rd" },
+      { "file": "suppressDependencies.Rd" },
+      { "file": "withTags.Rd" }
+    ]
+  }
+}

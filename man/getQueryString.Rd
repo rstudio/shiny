@@ -15,7 +15,7 @@ getUrlHash(session = getDefaultReactiveDomain())
 \value{
 For \code{getQueryString}, a named list. For example, the query
 string \code{?param1=value1&param2=value2} becomes \code{list(param1 = value1, param2 = value2)}. For \code{getUrlHash}, a character vector with
-the hash (including the leading \code{#} symbol).
+the hash (including the leading \verb{#} symbol).
 }
 \description{
 Two user friendly wrappers for getting the query string and the hash
@@ -27,7 +27,7 @@ depending on the values in the query string / hash (e.g. instead of basing
 the conditional on an input or a calculated reactive, you can base it on the
 query string). However, note that, if you're changing the query string / hash
 programatically from within the server code, you must use
-\code{updateQueryString(_yourNewQueryString_, mode = "push")}. The default
+\verb{updateQueryString(_yourNewQueryString_, mode = "push")}. The default
 \code{mode} for \code{updateQueryString} is \code{"replace"}, which doesn't
 raise any events, so any observers or reactives that depend on it will
 \emph{not} get triggered. However, if you're changing the query string / hash
@@ -58,7 +58,7 @@ if (interactive()) {
         query <- getQueryString()
         queryText <- paste(names(query), query,
                        sep = "=", collapse=", ")
-        paste("Your query string is:\\n", queryText)
+        paste("Your query string is:\n", queryText)
       })
     }
   )
@@ -81,7 +81,7 @@ if (interactive()) {
       })
       output$hash <- renderText({
         hash <- getUrlHash()
-        paste("Your hash is:\\n", hash)
+        paste("Your hash is:\n", hash)
       })
     }
   )

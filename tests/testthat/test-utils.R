@@ -1,5 +1,3 @@
-context("utils")
-
 test_that("Private randomness works at startup", {
 
   if (exists(".Random.seed", envir = .GlobalEnv))
@@ -113,7 +111,7 @@ test_that("need() works as expected", {
 test_that("req works", {
   expect_error(req(TRUE, FALSE))
   expect_error(req(TRUE, stop("boom")))
-  expect_equivalent(req(1, TRUE), 1)
+  expect_equal(req(1, TRUE), 1)
 
   # req arguments short circuit when a falsy value is found
   value <- 0
@@ -190,4 +188,66 @@ test_that("Callbacks fire in predictable order", {
   })
   cb$invoke()
   expect_equal(x, c(1, 2, 3))
+})
+
+test_that("Application directories are identified", {
+  tests <- test_path("..", "test-modules", "12_counter", "tests")
+  expect_false(isAppDir(tests), "tests directory not an app")
+  expect_true(isAppDir(dirname(tests)), "tests parent directory is an app")
+  expect_equal(
+    findEnclosingApp(tests),
+    normalizePath(dirname(tests), winslash = "/")
+  )
+  expect_equal(
+    findEnclosingApp(dirname(tests)),
+    normalizePath(dirname(tests), winslash = "/")
+  )
+})
+
+test_that("dateYMD works", {
+  expect_identical(dateYMD("2020-01-14"),"2020-01-14")
+  expect_identical(dateYMD("2020/01/14"),"2020-01-14")
+  expect_identical(
+    dateYMD(c("2020-01-14", "2019-11-05")),
+    c("2020-01-14", "2019-11-05")
+  )
+  expect_identical(
+    dateYMD(c("2020/01/14", "2019/11/05")),
+    c("2020-01-14", "2019-11-05")
+  )
+
+  expect_identical(
+    expect_warning(dateYMD("")),
+    ""
+  )
+  expect_identical(
+    expect_warning(dateYMD(c(NA))),
+    NA
+  )
+  expect_identical(
+    expect_warning(dateYMD(c("", NA))),
+    c("", NA)
+  )
+
+  # If there are any bad values, the entire thing goes through unchanged
+  expect_identical(
+    expect_warning(dateYMD(c("2019/11/05", NA))),
+    c("2019/11/05", NA)
+  )
+  expect_identical(
+    expect_warning(dateYMD(c("2019/11/05", ""))),
+    c("2019/11/05", "")
+  )
+})
+
+test_that("quoToFunction handles nested quosures", {
+  quo_inner <- local({
+    x <- 1
+    rlang::quo(x)
+  })
+
+  quo_outer <- rlang::quo(!!quo_inner + 1)
+
+  func <- quoToFunction(quo_outer, "foo")
+  expect_identical(func(), 2)
 })

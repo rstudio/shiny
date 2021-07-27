@@ -1,25 +1,24 @@
 #' Slider Input Widget
 #'
-#' Constructs a slider widget to select a numeric value from a range.
+#' Constructs a slider widget to select a number, date, or date-time from a
+#' range.
 #'
 #' @inheritParams textInput
-#' @param min The minimum value (inclusive) that can be selected.
-#' @param max The maximum value (inclusive) that can be selected.
-#' @param value The initial value of the slider. A numeric vector of length one
-#'   will create a regular slider; a numeric vector of length two will create a
-#'   double-ended range slider. A warning will be issued if the value doesn't
-#'   fit between `min` and `max`.
+#' @param min,max The minimum and maximum values (inclusive) that can be
+#'   selected.
+#' @param value The initial value of the slider, either a number, a date
+#'   (class Date), or a date-time (class POSIXt). A length one vector will
+#'   create a regular slider; a length two vector will create a double-ended
+#'   range slider. Must lie between `min` and `max`.
 #' @param step Specifies the interval between each selectable value on the
-#'   slider (if `NULL`, a heuristic is used to determine the step size). If
-#'   the values are dates, `step` is in days; if the values are times
-#'   (POSIXt), `step` is in seconds.
+#'   slider. Either `NULL`, the default, which uses a heuristic to determine the
+#'   step size or a single number. If the values are dates, `step` is in days;
+#'   if the values are date-times, `step` is in seconds.
 #' @param round `TRUE` to round all values to the nearest integer;
 #'   `FALSE` if no rounding is desired; or an integer to round to that
 #'   number of digits (for example, 1 will round to the nearest 10, and -2 will
 #'   round to the nearest .01). Any rounding will be applied after snapping to
 #'   the nearest step.
-#' @param format Deprecated.
-#' @param locale Deprecated.
 #' @param ticks `FALSE` to hide tick marks, `TRUE` to show them
 #'   according to some simple heuristics.
 #' @param animate `TRUE` to show simple animation controls with default
@@ -72,23 +71,15 @@
 #' }
 #'
 #' @section Server value:
-#' A number, or in the case of slider range, a vector of two numbers.
+#' A number, date, or date-time (depending on the class of `value`), or
+#' in the case of slider range, a vector of two numbers/dates/date-times.
 #'
 #' @export
 sliderInput <- function(inputId, label, min, max, value, step = NULL,
-                        round = FALSE, format = NULL, locale = NULL,
-                        ticks = TRUE, animate = FALSE, width = NULL, sep = ",",
-                        pre = NULL, post = NULL, timeFormat = NULL,
-                        timezone = NULL, dragRange = TRUE)
-{
-  if (!missing(format)) {
-    shinyDeprecated(msg = "The `format` argument to sliderInput is deprecated. Use `sep`, `pre`, and `post` instead.",
-                    version = "0.10.2.2")
-  }
-  if (!missing(locale)) {
-    shinyDeprecated(msg = "The `locale` argument to sliderInput is deprecated. Use `sep`, `pre`, and `post` instead.",
-                    version = "0.10.2.2")
-  }
+                        round = FALSE, ticks = TRUE, animate = FALSE,
+                        width = NULL, sep = ",", pre = NULL, post = NULL,
+                        timeFormat = NULL, timezone = NULL, dragRange = TRUE) {
+  validate_slider_value(min, max, value, "sliderInput")
 
   dataType <- getSliderType(min, max, value)
 
@@ -144,6 +135,7 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
   sliderProps <- dropNulls(list(
     class = "js-range-slider",
     id = inputId,
+    `data-skin` = "shiny",
     `data-type` = if (length(value) > 1) "double",
     `data-min` = formatNoSci(min),
     `data-max` = formatNoSci(max),
@@ -175,7 +167,7 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
   })
 
   sliderTag <- div(class = "form-group shiny-input-container",
-    style = if (!is.null(width)) paste0("width: ", validateCssUnit(width), ";"),
+    style = css(width = validateCssUnit(width)),
     shinyInputLabel(inputId, label),
     do.call(tags$input, sliderProps)
   )
@@ -205,27 +197,55 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
     )
   }
 
-  dep <- list(
-    htmlDependency("ionrangeslider", "2.1.6", c(href="shared/ionrangeslider"),
-      script = "js/ion.rangeSlider.min.js",
-      # ion.rangeSlider also needs normalize.css, which is already included in
-      # Bootstrap.
-      stylesheet = c("css/ion.rangeSlider.css",
-                     "css/ion.rangeSlider.skinShiny.css")
-    ),
-    htmlDependency("strftime", "0.9.2", c(href="shared/strftime"),
-      script = "strftime-min.js"
-    )
-  )
+  attachDependencies(sliderTag, ionRangeSliderDependency())
+}
 
-  attachDependencies(sliderTag, dep)
+
+ionRangeSliderDependency <- function() {
+  list(
+    # ion.rangeSlider also needs normalize.css, which is already included in Bootstrap.
+    htmlDependency(
+      "ionrangeslider-javascript", version_ion_range_slider,
+      src = c(href = "shared/ionrangeslider"),
+      script = "js/ion.rangeSlider.min.js"
+    ),
+    htmlDependency(
+      "strftime", version_strftime,
+      src = c(href = "shared/strftime"),
+      script = "strftime-min.js"
+    ),
+    bslib::bs_dependency_defer(ionRangeSliderDependencyCSS)
+  )
+}
+
+ionRangeSliderDependencyCSS <- function(theme) {
+  if (!is_bs_theme(theme)) {
+    return(htmlDependency(
+      "ionrangeslider-css",
+      version_ion_range_slider,
+      src = c(href = "shared/ionrangeslider"),
+      stylesheet = "css/ion.rangeSlider.css"
+    ))
+  }
+
+  bslib::bs_dependency(
+    input = list(
+      list(accent = "$component-active-bg"),
+      sass::sass_file(
+        system.file(package = "shiny", "www/shared/ionrangeslider/scss/shiny.scss")
+      )
+    ),
+    theme = theme,
+    name = "ionRangeSlider",
+    version = version_ion_range_slider,
+    cache_key_extra = shinyPackageVersion()
+  )
 }
 
 hasDecimals <- function(value) {
   truncatedValue <- round(value)
   return (!identical(value, truncatedValue))
 }
-
 
 # If step is NULL, use heuristic to set the step size.
 findStepSize <- function(min, max, step) {
@@ -250,6 +270,37 @@ findStepSize <- function(min, max, step) {
 
   } else {
     1
+  }
+}
+
+# Throw a warning if ever `value` is not in the [`min`, `max`] range
+validate_slider_value <- function(min, max, value, fun) {
+  if (length(min)   != 1 || is_na(min) ||
+      length(max)   != 1 || is_na(max) ||
+      length(value) <  1 || length(value) > 2 || any(is.na(value)))
+  {
+    stop(call. = FALSE,
+      sprintf("In %s(): `min`, `max`, and `value` cannot be NULL, NA, or empty.", fun)
+    )
+  }
+
+  if (min(value) < min) {
+    warning(call. = FALSE,
+      sprintf(
+        "In %s(): `value` should be greater than or equal to `min` (value = %s, min = %s).",
+        fun, paste(value, collapse = ", "), min
+      )
+    )
+  }
+
+  if (max(value) > max) {
+    warning(
+      noBreaks. = TRUE, call. = FALSE,
+      sprintf(
+        "In %s(): `value` should be less than or equal to `max` (value = %s, max = %s).",
+        fun, paste(value, collapse = ", "), max
+      )
+    )
   }
 }
 

@@ -1,6 +1,3 @@
-#' @include stack.R
-NULL
-
 ShinySaveState <- R6Class("ShinySaveState",
   public = list(
     input = NULL,
@@ -79,7 +76,7 @@ saveShinySaveState <- function(state) {
 
   # Look for a save.interface function. This will be defined by the hosting
   # environment if it supports bookmarking.
-  saveInterface <- getShinyOption("save.interface")
+  saveInterface <- getShinyOption("save.interface", default = NULL)
 
   if (is.null(saveInterface)) {
     if (inShinyServer()) {
@@ -217,6 +214,22 @@ RestoreContext <- R6Class("RestoreContext",
       self$dir <- NULL
     },
 
+    # Completely replace the state
+    set = function(active = FALSE, initErrorMessage = NULL, input = list(), values = list(), dir = NULL) {
+      # Validate all inputs
+      stopifnot(is.logical(active))
+      stopifnot(is.null(initErrorMessage) || is.character(initErrorMessage))
+      stopifnot(is.list(input))
+      stopifnot(is.list(values))
+      stopifnot(is.null(dir) || is.character(dir))
+
+      self$active <- active
+      self$initErrorMessage <- initErrorMessage
+      self$input <- RestoreInputSet$new(input)
+      self$values <- list2env2(values, parent = emptyenv())
+      self$dir <- dir
+    },
+
     # This should be called before a restore context is popped off the stack.
     flushPending = function() {
       self$input$flushPending()
@@ -280,7 +293,7 @@ RestoreContext <- R6Class("RestoreContext",
 
       # Look for a load.interface function. This will be defined by the hosting
       # environment if it supports bookmarking.
-      loadInterface <- getShinyOption("load.interface")
+      loadInterface <- getShinyOption("load.interface", default = NULL)
 
       if (is.null(loadInterface)) {
         if (inShinyServer()) {
@@ -431,8 +444,8 @@ RestoreInputSet <- R6Class("RestoreInputSet",
   )
 )
 
-
-restoreCtxStack <- Stack$new()
+# This is a fastmap::faststack(); value is assigned in .onLoad().
+restoreCtxStack <- NULL
 
 withRestoreContext <- function(ctx, expr) {
   restoreCtxStack$push(ctx)
@@ -453,7 +466,7 @@ hasCurrentRestoreContext <- function() {
   domain <- getDefaultReactiveDomain()
   if (!is.null(domain) && !is.null(domain$restoreContext))
     return(TRUE)
-  
+
   return(FALSE)
 }
 
@@ -1144,10 +1157,10 @@ setBookmarkExclude <- function(names = character(0), session = getDefaultReactiv
 #'     toupper(input$text)
 #'   })
 #'   onBookmark(function(state) {
-#'     state$values$hash <- digest::digest(input$text, "md5")
+#'     state$values$hash <- rlang::hash(input$text)
 #'   })
 #'   onRestore(function(state) {
-#'     if (identical(digest::digest(input$text, "md5"), state$values$hash)) {
+#'     if (identical(rlang::hash(input$text), state$values$hash)) {
 #'       message("Module's input text matches hash ", state$values$hash)
 #'     } else {
 #'       message("Module's input text does not match hash ", state$values$hash)
@@ -1170,10 +1183,10 @@ setBookmarkExclude <- function(names = character(0), session = getDefaultReactiv
 #' server <- function(input, output, session) {
 #'   callModule(capitalizerServer, "tc")
 #'   onBookmark(function(state) {
-#'     state$values$hash <- digest::digest(input$text, "md5")
+#'     state$values$hash <- rlang::hash(input$text)
 #'   })
 #'   onRestore(function(state) {
-#'     if (identical(digest::digest(input$text, "md5"), state$values$hash)) {
+#'     if (identical(rlang::hash(input$text), state$values$hash)) {
 #'       message("App's input text matches hash ", state$values$hash)
 #'     } else {
 #'       message("App's input text does not match hash ", state$values$hash)

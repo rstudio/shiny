@@ -5,7 +5,7 @@ processId <- local({
   cached <- NULL
   function() {
     if (is.null(cached)) {
-      cached <<- digest::digest(list(
+      cached <<- rlang::hash(list(
         Sys.info(),
         Sys.time()
       ))
@@ -65,7 +65,7 @@ Context <- R6Class(
         that have been registered with onInvalidate()."
 
       if (!identical(.pid, processId())) {
-        stop("Reactive context was created in one process and invalidated from another")
+        rlang::abort("Reactive context was created in one process and invalidated from another.")
       }
 
       if (.invalidated)
@@ -87,7 +87,7 @@ Context <- R6Class(
         immediately."
 
       if (!identical(.pid, processId())) {
-        stop("Reactive context was created in one process and accessed from another")
+        rlang::abort("Reactive context was created in one process and accessed from another.")
       }
 
       if (.invalidated)
@@ -140,9 +140,13 @@ ReactiveEnvironment <- R6Class(
         if (isTRUE(getOption('shiny.suppressMissingContextError'))) {
           return(getDummyContext())
         } else {
-          stop('Operation not allowed without an active reactive context. ',
-               '(You tried to do something that can only be done from inside a ',
-               'reactive expression or observer.)')
+          rlang::abort(c(
+            'Operation not allowed without an active reactive context.',
+            paste0(
+              'You tried to do something that can only be done from inside a ',
+              'reactive consumer.'
+            )
+          ))
         }
       }
       return(.currentContext)
@@ -202,7 +206,8 @@ getCurrentContext <- function() {
   .getReactiveEnvironment()$currentContext()
 }
 hasCurrentContext <- function() {
-  !is.null(.getReactiveEnvironment()$.currentContext)
+  !is.null(.getReactiveEnvironment()$.currentContext) ||
+    isTRUE(getOption("shiny.suppressMissingContextError"))
 }
 
 getDummyContext <- function() {

@@ -92,14 +92,18 @@ dateRangeInput <- function(inputId, label, start = NULL, end = NULL,
   attachDependencies(
     div(id = inputId,
       class = "shiny-date-range-input form-group shiny-input-container",
-      style = if (!is.null(width)) paste0("width: ", validateCssUnit(width), ";"),
+      style = css(width = validateCssUnit(width)),
 
       shinyInputLabel(inputId, label),
       # input-daterange class is needed for dropdown behavior
-      div(class = "input-daterange input-group",
+      div(class = "input-daterange input-group input-group-sm",
         tags$input(
-          class = "input-sm form-control",
+          class = "form-control",
           type = "text",
+          # `aria-labelledby` attribute is required for accessibility to avoid doubled labels (#2951).
+          `aria-labelledby` = paste0(inputId, "-label"),
+          # title attribute is announced for screen readers for date format.
+          title = paste("Date format:", format),
           `data-date-language` = language,
           `data-date-week-start` = weekstart,
           `data-date-format` = format,
@@ -109,10 +113,19 @@ dateRangeInput <- function(inputId, label, start = NULL, end = NULL,
           `data-initial-date` = start,
           `data-date-autoclose` = if (autoclose) "true" else "false"
         ),
-        span(class = "input-group-addon", separator),
+        # input-group-prepend and input-group-append are for bootstrap 4 forward compat
+        span(class = "input-group-addon input-group-prepend input-group-append",
+          span(class = "input-group-text",
+            separator
+          )
+        ),
         tags$input(
-          class = "input-sm form-control",
+          class = "form-control",
           type = "text",
+          # `aria-labelledby` attribute is required for accessibility to avoid doubled labels (#2951).
+          `aria-labelledby` = paste0(inputId, "-label"),
+          # title attribute is announced for screen readers for date format.
+          title = paste("Date format:", format),
           `data-date-language` = language,
           `data-date-week-start` = weekstart,
           `data-date-format` = format,
@@ -124,6 +137,6 @@ dateRangeInput <- function(inputId, label, start = NULL, end = NULL,
         )
       )
     ),
-    datePickerDependency
+    datePickerDependency()
   )
 }

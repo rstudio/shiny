@@ -1,5 +1,3 @@
-context("stop-app")
-
 checkAndGetResults <- function(isError, isStopped) {
   stopifnot(shiny:::.globals$reterror == isError)
   stopifnot(shiny:::.globals$stopped, isStopped)

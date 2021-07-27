@@ -1,0 +1,1 @@
+R CMD check doesn't like empty directories. But this isn't an R file so it will be ignored.

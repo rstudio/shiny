@@ -5,22 +5,31 @@
 \alias{is.reactive}
 \title{Create a reactive expression}
 \usage{
-reactive(x, env = parent.frame(), quoted = FALSE, label = NULL,
-  domain = getDefaultReactiveDomain(), ..stacktraceon = TRUE)
+reactive(
+  x,
+  env = deprecated(),
+  quoted = deprecated(),
+  ...,
+  label = NULL,
+  domain = getDefaultReactiveDomain(),
+  ..stacktraceon = TRUE
+)
 
 is.reactive(x)
 }
 \arguments{
-\item{x}{For \code{reactive}, an expression (quoted or unquoted). For
+\item{x}{TODO-barret docs; For \code{reactive}, an expression (quoted or unquoted). For
 \code{is.reactive}, an object to test.}
 
-\item{env}{The parent environment for the reactive expression. By default,
+\item{env}{TODO-barret docs; The parent environment for the reactive expression. By default,
 this is the calling environment, the same as when defining an ordinary
 non-reactive expression.}
 
-\item{quoted}{Is the expression quoted? By default, this is \code{FALSE}.
+\item{quoted}{TODO-barret docs; Is the expression quoted? By default, this is \code{FALSE}.
 This is useful when you want to use an expression that is stored in a
 variable; to do so, it must be quoted with \code{quote()}.}
+
+\item{...}{Not used.}
 
 \item{label}{A label for the reactive expression, useful for debugging.}
 
@@ -49,6 +58,7 @@ See the \href{https://shiny.rstudio.com/tutorial/}{Shiny tutorial} for
 more information about reactive expressions.
 }
 \examples{
+# TODO-barret docs; with quosures, not env / quoted
 values <- reactiveValues(A=1)
 
 reactiveB <- reactive({

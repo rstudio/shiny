@@ -83,7 +83,7 @@ navTabsHelper <- function(files, prefix = "") {
     with(tags,
       li(class=if (tolower(file) %in% c("app.r", "server.r")) "active" else "",
          a(href=paste("#", gsub(".", "_", file, fixed=TRUE), "_code", sep=""),
-           "data-toggle"="tab", paste0(prefix, file)))
+           "data-toggle"="tab", "data-bs-toggle"="tab", paste0(prefix, file)))
     )
   })
 }
@@ -92,7 +92,7 @@ navTabsDropdown <- function(files) {
   if (length(files) > 0) {
     with(tags,
       li(role="presentation", class="dropdown",
-        a(class="dropdown-toggle", `data-toggle`="dropdown", href="#",
+        a(class="dropdown-toggle", `data-toggle`="dropdown", `data-bs-toggle`="dropdown", href="#",
           role="button", `aria-haspopup`="true", `aria-expanded`="false",
           "www", span(class="caret")
         ),
@@ -104,20 +104,18 @@ navTabsDropdown <- function(files) {
 
 tabContentHelper <- function(files, path, language) {
   lapply(files, function(file) {
-    with(tags,
-      div(class=paste("tab-pane",
+      tags$div(class=paste("tab-pane",
                       if (tolower(file) %in% c("app.r", "server.r")) " active"
                       else "",
                       sep=""),
           id=paste(gsub(".", "_", file, fixed=TRUE),
                    "_code", sep=""),
-          pre(class="shiny-code",
+          tags$pre(class="shiny-code",
               # we need to prevent the indentation of <code> ... </code>
               HTML(format(tags$code(
                 class=paste0("language-", language),
                 paste(readUTF8(file.path.ci(path, file)), collapse="\n")
               ), indent = FALSE))))
-    )
   })
 }
 
@@ -136,7 +134,7 @@ showcaseCodeTabs <- function(codeLicense) {
     a(id="showcase-code-position-toggle",
       class="btn btn-default btn-sm",
       onclick="toggleCodePosition()",
-      icon("level-up"),
+      icon("level-up-alt"),
       "show with app"),
     ul(class="nav nav-tabs",
        navTabsHelper(rFiles),
@@ -222,4 +220,3 @@ showcaseUI <- function(ui) {
     showcaseBody(ui)
   )
 }
-

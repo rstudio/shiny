@@ -4,9 +4,17 @@
 \alias{brushOpts}
 \title{Create an object representing brushing options}
 \usage{
-brushOpts(id = NULL, fill = "#9cf", stroke = "#036",
-  opacity = 0.25, delay = 300, delayType = c("debounce", "throttle"),
-  clip = TRUE, direction = c("xy", "x", "y"), resetOnNew = FALSE)
+brushOpts(
+  id,
+  fill = "#9cf",
+  stroke = "#036",
+  opacity = 0.25,
+  delay = 300,
+  delayType = c("debounce", "throttle"),
+  clip = TRUE,
+  direction = c("xy", "x", "y"),
+  resetOnNew = FALSE
+)
 }
 \arguments{
 \item{id}{Input value name. For example, if the value is \code{"plot_brush"},
@@ -15,9 +23,13 @@ then the coordinates will be available as \code{input$plot_brush}. Multiple
 value; brushing one image or plot will cause any other brushes with the
 same \code{id} to disappear.}
 
-\item{fill}{Fill color of the brush.}
+\item{fill}{Fill color of the brush. If \code{'auto'}, it derives from the link
+color of the plot's HTML container (if \strong{thematic} is enabled, and \code{accent}
+is a non-\code{'auto'} value, that color is used instead).}
 
-\item{stroke}{Outline color of the brush.}
+\item{stroke}{Outline color of the brush. If \code{'auto'}, it derives from the
+foreground color of the plot's HTML container (if \strong{thematic} is enabled,
+and \code{fg} is a non-\code{'auto'} value, that color is used instead).}
 
 \item{opacity}{Opacity of the brush}
 
@@ -48,4 +60,7 @@ the plot is updated.}
 This generates an object representing brushing options, to be passed as the
 \code{brush} argument of \code{\link[=imageOutput]{imageOutput()}} or
 \code{\link[=plotOutput]{plotOutput()}}.
+}
+\seealso{
+\code{\link[=clickOpts]{clickOpts()}} for clicking events.
 }

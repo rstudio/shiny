@@ -6,8 +6,12 @@
 \alias{mainPanel}
 \title{Layout a sidebar and main area}
 \usage{
-sidebarLayout(sidebarPanel, mainPanel, position = c("left", "right"),
-  fluid = TRUE)
+sidebarLayout(
+  sidebarPanel,
+  mainPanel,
+  position = c("left", "right"),
+  fluid = TRUE
+)
 
 sidebarPanel(..., width = 4)
 
@@ -77,9 +81,13 @@ shinyApp(ui, server)
 }
 }
 \seealso{
-Other layout functions: \code{\link{fillPage}},
-  \code{\link{fixedPage}}, \code{\link{flowLayout}},
-  \code{\link{fluidPage}}, \code{\link{navbarPage}},
-  \code{\link{splitLayout}}, \code{\link{verticalLayout}}
+Other layout functions: 
+\code{\link{fillPage}()},
+\code{\link{fixedPage}()},
+\code{\link{flowLayout}()},
+\code{\link{fluidPage}()},
+\code{\link{navbarPage}()},
+\code{\link{splitLayout}()},
+\code{\link{verticalLayout}()}
 }
 \concept{layout functions}

@@ -1,0 +1,21 @@
+{
+  "declaration": true,
+  "compilerOptions": {
+    "target": "ES5",
+    "isolatedModules": true,
+    "esModuleInterop": true,
+    "declaration": true,
+    "declarationDir": "./srcts/types",
+    "emitDeclarationOnly": true
+  },
+  "include": [
+    "srcts/src/index.ts",
+    "srcts/src/**/*.ts",
+    "srcts/extras/globalShiny.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "srcts/types/",
+    "**/__tests__"
+  ]
+}

@@ -2,9 +2,12 @@
 % Please edit documentation in R/bootstrap.R
 \name{tabPanel}
 \alias{tabPanel}
+\alias{tabPanelBody}
 \title{Create a tab panel}
 \usage{
 tabPanel(title, ..., value = title, icon = NULL)
+
+tabPanelBody(value, ..., icon = NULL)
 }
 \arguments{
 \item{title}{Display title for tab}
@@ -13,7 +16,7 @@ tabPanel(title, ..., value = title, icon = NULL)
 
 \item{value}{The value that should be sent when \code{tabsetPanel} reports
 that this tab is selected. If omitted and \code{tabsetPanel} has an
-\code{id}, then the title will be used..}
+\code{id}, then the title will be used.}
 
 \item{icon}{Optional icon to appear on the tab. This attribute is only
 valid when using a \code{tabPanel} within a \code{\link[=navbarPage]{navbarPage()}}.}
@@ -22,9 +25,16 @@ valid when using a \code{tabPanel} within a \code{\link[=navbarPage]{navbarPage(
 A tab that can be passed to \code{\link[=tabsetPanel]{tabsetPanel()}}
 }
 \description{
-Create a tab panel that can be included within a \code{\link[=tabsetPanel]{tabsetPanel()}} or
-a \code{\link[=navbarPage]{navbarPage()}}.
+Create a tab panel
 }
+\section{Functions}{
+\itemize{
+\item \code{tabPanel}: Create a tab panel that can be included within a \code{\link[=tabsetPanel]{tabsetPanel()}} or a \code{\link[=navbarPage]{navbarPage()}}.
+
+\item \code{tabPanelBody}: Create a tab panel that drops the title argument.
+This function should be used within \code{tabsetPanel(type = "hidden")}. See \code{\link[=tabsetPanel]{tabsetPanel()}} for example usage.
+}}
+
 \examples{
 # Show a tabset that includes a plot, summary, and
 # table view of the generated distribution

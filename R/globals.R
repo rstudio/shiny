@@ -28,14 +28,6 @@ register_s3_method <- function(pkg, generic, class, fun = NULL) {
 }
 
 register_upgrade_message <- function(pkg, version) {
-  # Is an out-dated version of this package installed?
-  needs_upgrade <- function() {
-    if (system.file(package = pkg) == "")
-      return(FALSE)
-    if (utils::packageVersion(pkg) >= version)
-      return(FALSE)
-    TRUE
-  }
 
   msg <- sprintf(
     "This version of Shiny is designed to work with '%s' >= %s.
@@ -43,7 +35,7 @@ register_upgrade_message <- function(pkg, version) {
     pkg, version, pkg
   )
 
-  if (pkg %in% loadedNamespaces() && needs_upgrade()) {
+  if (pkg %in% loadedNamespaces() && !is_available(pkg, version)) {
     packageStartupMessage(msg)
   }
 
@@ -53,7 +45,7 @@ register_upgrade_message <- function(pkg, version) {
   setHook(
     packageEvent(pkg, "onLoad"),
     function(...) {
-      if (needs_upgrade()) packageStartupMessage(msg)
+      if (!is_available(pkg, version)) packageStartupMessage(msg)
     }
   )
 }
@@ -63,6 +55,10 @@ register_upgrade_message <- function(pkg, version) {
   # package itself, making our PRNG completely deterministic. This line resets
   # the private seed during load.
   withPrivateSeed(set.seed(NULL))
+
+  # Create this at the top level, but since the object is from a different
+  # package, we don't want to bake it into the built binary package.
+  restoreCtxStack <<- fastmap::faststack()
 
   # Make sure these methods are available to knitr if shiny is loaded but not
   # attached.

@@ -43,7 +43,7 @@ if (interactive()) {
 
 ui <- fluidPage(
   sliderInput("obs", "Number of observations", 0, 1000, 500),
-  actionButton("goButton", "Go!"),
+  actionButton("goButton", "Go!", class = "btn-success"),
   plotOutput("distPlot")
 )
 
@@ -63,17 +63,28 @@ shinyApp(ui, server)
 
 }
 
+## Example of adding extra class values
+actionButton("largeButton", "Large Primary Button", class = "btn-primary btn-lg")
+actionLink("infoLink", "Information Link", class = "btn-info")
+
 }
 \seealso{
 \code{\link[=observeEvent]{observeEvent()}} and \code{\link[=eventReactive]{eventReactive()}}
 
-Other input elements: \code{\link{checkboxGroupInput}},
-  \code{\link{checkboxInput}}, \code{\link{dateInput}},
-  \code{\link{dateRangeInput}}, \code{\link{fileInput}},
-  \code{\link{numericInput}}, \code{\link{passwordInput}},
-  \code{\link{radioButtons}}, \code{\link{selectInput}},
-  \code{\link{sliderInput}}, \code{\link{submitButton}},
-  \code{\link{textAreaInput}}, \code{\link{textInput}},
-  \code{\link{varSelectInput}}
+Other input elements: 
+\code{\link{checkboxGroupInput}()},
+\code{\link{checkboxInput}()},
+\code{\link{dateInput}()},
+\code{\link{dateRangeInput}()},
+\code{\link{fileInput}()},
+\code{\link{numericInput}()},
+\code{\link{passwordInput}()},
+\code{\link{radioButtons}()},
+\code{\link{selectInput}()},
+\code{\link{sliderInput}()},
+\code{\link{submitButton}()},
+\code{\link{textAreaInput}()},
+\code{\link{textInput}()},
+\code{\link{varSelectInput}()}
 }
 \concept{input elements}

@@ -199,120 +199,29 @@ quoToSimpleFunction <- function(q) {
 #'
 #' @rdname quoToFunction
 #' @export
-sustainEnvAndQuoted <- function(q, x, env, quoted) {
-  ## To avoid possible boilerplate with `deprecated()`...
+sustainEnvAndQuoted <- function(q, x, env, quoted, verbose = TRUE) {
   env_is_present <-
-    if (!is_present(env)) {
-      # If `env` is `deprecated()`, set to the parent frame of the caller
-      env <- parent.frame(2)
+    # env != deprecated()
+    is_present(env) &&
+    # Check if parent frame had a missing _`env`_ param
+    eval(substitute(!missing(env)), parent.frame())
 
-      FALSE # env_is_present
-    } else {
-      # check of parent frame had a missing _`env`_ param
-      eval(substitute(!missing(env)), parent.frame())
-    }
   quoted_is_present <-
-    if (!is_present(quoted)) {
-      # If `quoted` is deprecated(), set to `FALSE`
-      quoted <- FALSE
+    # quoted != deprecated()
+    is_present(quoted)) &&
+    # Check if parent frame had a missing _`quoted`_ param
+    eval(substitute(!missing(quoted)), parent.frame())
 
-      FALSE # quoted_is_present
-    } else {
-      # check of parent frame had a missing _`quoted`_ param
-      eval(substitute(!missing(quoted)), parent.frame())
-    }
-  ##
   # This is TRUE when the user called `inject(renderFoo(!!q))`
   x_is_quosure <- is_quosure(eval(substitute(substitute(x)), parent.frame()))
 
-  sustainEnvAndQuoted_(
-    q = q, env = env, quoted = quoted,
-    env_is_present = env_is_present,
-    quoted_is_present = quoted_is_present,
-    x_is_quosure = x_is_quosure,
-    verbose = TRUE
-  )
-}
-
-# `sustainEnvAndQuotedInternal()` is to be called from functions like `reactive()`, `observe()`,
-# and the various render functions. It handles the following cases:
-# - The typical case where x is an unquoted expression, and `env` and `quoted`
-#   are not used.
-# - New-style metaprogramming cases, where rlang::inject() is used to inline a
-#   quosure into the AST, as in `inject(reactive(!!x))`.
-# - Old-style metaprogramming cases, where `env` and/or `quoted` are used.
-# Same as `sustainEnvAndQuoted()`, but quiet
-# Under assumption that `env = deprecated()` and `quoted = deprecated()`
-sustainEnvAndQuotedInternal <- function(q, x, env, quoted) {
-  ## Can leverage the fact that we know all `env` and `quoted` args are set to `deprecated()`
-  env_is_present <- is_present(env) # eval(substitute(!missing(env)), parent.frame())
-  quoted_is_present <- is_present(quoted) # eval(substitute(!missing(quoted)), parent.frame())
-  x_is_quosure <- is_quosure(eval(substitute(substitute(x)), parent.frame()))
-  if (!env_is_present) env <- parent.frame(2)
-  if (!quoted_is_present) quoted <- FALSE
-
-  sustainEnvAndQuoted_(
-    q = q,
-    env = env,
-    quoted = quoted,
-    env_is_present = env_is_present,
-    quoted_is_present = quoted_is_present,
-    x_is_quosure = x_is_quosure,
-    verbose = FALSE
-  )
-}
-# # Reaches up three calls to check if env / quoted were provided.
-# # Can not leverage `is_present()` logic like in `sustainEnvAndQuotedInternal()`
-
-# # This is similar to `sustainEnvAndQuotedInternal()`, but it is intended to be used only by
-# # `installExprFunction()` and `exprToFunction()`. Whereas `sustainEnvAndQuotedInternal()` reaches
-# # 2 calls back to find the expression passed in, this function reaches 3 calls
-# # back, and it is only used internally within Shiny.
-# sustainEnvAndQuoted3Internal <- function(q, x, env, quoted) {
-#   ## To avoid possible boilerplate with `deprecated()`...
-#   env_is_present <-
-#     if (!is_present(env)) {
-#       # If `env` is `deprecated()`, set to the parent frame of the caller
-#       env <- parent.frame(3)
-
-#       FALSE # env_is_present
-#     } else {
-#       # check of parent frame of the caller had a missing _`env`_ param
-#       eval(eval(substitute(substitute(!missing(env))), parent.frame()), parent.frame(2))
-#     }
-#   quoted_is_present <-
-#     if (!is_present(quoted)) {
-#       # If `quoted` is deprecated(), set to `FALSE`
-#       quoted <- FALSE
-
-#       FALSE # quoted_is_present
-#     } else {
-#       # check of parent frame had a missing _`quoted`_ param
-#       eval(eval(substitute(substitute(!missing(quoted))), parent.frame()), parent.frame(2))
-#     }
-#   ##
-#   x_is_quosure <- is_quosure(eval(eval(substitute(substitute(x)), parent.frame()), parent.frame(2)))
-
-#   sustainEnvAndQuoted_(
-#     q = q, env = env, quoted = quoted,
-#     env_is_present = env_is_present,
-#     quoted_is_present = quoted_is_present,
-#     x_is_quosure = x_is_quosure,
-#     verbose = FALSE
-#   )
-# }
-sustainEnvAndQuoted_ <- function(
-  q, env, quoted,
-  env_is_present, quoted_is_present, x_is_quosure,
-  verbose = TRUE
-) {
   if (
     env_is_present ||
     quoted_is_present
   ) {
     if (verbose) deprecatedEnvQuotedMessage()
 
-    # Can't have x be a quosure and use env/quoted.
+    # Can't have x be a quosure AND use env/quoted.
     if (x_is_quosure) {
       stop(
         "Can not use a `quosure()` with either the `env` or `quoted` parameters.\n",
@@ -324,7 +233,7 @@ sustainEnvAndQuoted_ <- function(
     }
 
     # In this code path, x is NOT a literal quosure object
-    if (isTRUE(quoted)) {
+    if (quoted_is_present && isTRUE(quoted)) {
       q <- quo_set_expr(q, eval_tidy(q))
     }
     if (env_is_present) {

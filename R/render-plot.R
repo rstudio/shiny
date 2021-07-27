@@ -66,7 +66,7 @@ renderPlot <- function(expr, width = 'auto', height = 'auto', res = 72, ...,
 ) {
 
   q <- enquo0(expr)
-  q <- sustainEnvAndQuotedInternal(q, expr, env, quoted)
+  q <- sustainEnvAndQuoted(q, expr, env, quoted, verbose = FALSE)
   # This ..stacktraceon is matched by a ..stacktraceoff.. when plotFunc
   # is called
   func <- quoToFunction(q, "renderPlot", ..stacktraceon = TRUE)

@@ -406,7 +406,7 @@ renderImage <- function(expr, env = deprecated(), quoted = deprecated(),
                         deleteFile, outputArgs=list())
 {
   q <- enquo0(expr)
-  q <- sustainEnvAndQuotedInternal(q, expr, env, quoted)
+  q <- sustainEnvAndQuoted(q, expr, env, quoted, verbose = FALSE)
   func <- quoToFunction(q, "renderImage")
 
   # missing() must be used directly within the function with the given arg
@@ -543,7 +543,7 @@ renderPrint <- function(expr, env = deprecated(), quoted = deprecated(),
                         width = getOption('width'), outputArgs=list())
 {
   q <- enquo0(expr)
-  q <- sustainEnvAndQuotedInternal(q, expr, env, quoted)
+  q <- sustainEnvAndQuoted(q, expr, env, quoted, verbose = FALSE)
   func <- quoToFunction(q, "renderPrint")
 
   # Set a promise domain that sets the console width
@@ -630,7 +630,7 @@ renderText <- function(expr, env = deprecated(), quoted = deprecated(),
                        outputArgs=list(), sep=" ") {
 
   q <- enquo0(expr)
-  q <- sustainEnvAndQuotedInternal(q, expr, env, quoted)
+  q <- sustainEnvAndQuoted(q, expr, env, quoted, verbose = FALSE)
   func <- quoToFunction(q, "renderText")
 
   createRenderFunction(
@@ -684,7 +684,7 @@ renderUI <- function(expr, env = deprecated(), quoted = deprecated(),
                      outputArgs = list())
 {
   q <- enquo0(expr)
-  q <- sustainEnvAndQuotedInternal(q, expr, env, quoted)
+  q <- sustainEnvAndQuoted(q, expr, env, quoted, verbose = FALSE)
   func <- quoToFunction(q, "renderUI")
 
   createRenderFunction(
@@ -841,7 +841,7 @@ renderDataTable <- function(expr, options = NULL, searchDelay = 500,
   }
 
   q <- enquo0(expr)
-  q <- sustainEnvAndQuotedInternal(q, expr, env, quoted)
+  q <- sustainEnvAndQuoted(q, expr, env, quoted, verbose = FALSE)
   func <- quoToFunction(q, "renderDataTable")
 
   renderFunc <- function(shinysession, name, ...) {

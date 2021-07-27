@@ -1099,7 +1099,6 @@ test_that("Custom render functions that call installExprFunction", {
   # quoToFunction + markRenderFunction (with cacheHint): OK
   # Also, non-list cacheHint will get wrapped into a list
   renderDouble <- function(expr) {
-    # browser()
     func <- quoToFunction(enquo(expr), "renderDouble")
     markRenderFunction(textOutput,
       function() {

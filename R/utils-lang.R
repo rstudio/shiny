@@ -76,7 +76,6 @@ quoToFunction <- function(q,
   wrapFunctionLabel(func, updateFunctionLabel(label), ..stacktraceon = ..stacktraceon)
 }
 updateFunctionLabel <- function(label) {
-  # browser()
   if (all(is.language(label))) {
     # Prevent immediately invoked functions like as.language(a()())
     if (is.language(label) && length(label) > 1) {
@@ -312,7 +311,6 @@ sustainEnvAndQuoted_ <- function(
     quoted_is_present
   ) {
     if (verbose) deprecatedEnvQuotedMessage()
-    # browser()
 
     # Can't have x be a quosure and use env/quoted.
     if (x_is_quosure) {

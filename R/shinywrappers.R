@@ -101,6 +101,7 @@ markRenderFunction <- function(
     cacheHint <- lapply(cacheHint, function(x) {
       if      (is.function(x)) formalsAndBody(x)
       else if (is.language(x)) zap_srcref(x)
+      else if (is_quosure(x)) quo_get_expr(x)
       else                     x
     })
   }

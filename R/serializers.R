@@ -5,7 +5,6 @@
 #'   value. The returned value will be used for the test snapshot.
 #' @param session A Shiny session object.
 #'
-#' @keywords internal
 #' @export
 setSerializer <- function(inputId, fun, session = getDefaultReactiveDomain()) {
   if (is.null(session)) {

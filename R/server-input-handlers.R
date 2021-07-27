@@ -46,7 +46,7 @@ inputHandlers <- Map$new()
 #' }
 #'
 #' }
-#' @seealso [removeInputHandler()]
+#' @seealso [removeInputHandler()] [applyInputHandlers()]
 #' @export
 registerInputHandler <- function(type, fun, force=FALSE){
   if (inputHandlers$containsKey(type) && !force){

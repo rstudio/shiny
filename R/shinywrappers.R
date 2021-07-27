@@ -45,6 +45,7 @@ utils::globalVariables('func', add = TRUE)
 #'
 #' @seealso [createRenderFunction()], [quoToFunction()]
 #' @export
+#' @keywords internal
 markRenderFunction <- function(
   uiFunc,
   renderFunc,

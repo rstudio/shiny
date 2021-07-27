@@ -130,11 +130,6 @@ reference:
       - reactiveTimer
       - domains
       - freezeReactiveValue
-  - title: Boilerplate
-    desc: Functions that are required boilerplate in ui.R and server.R.
-    contents:
-      - shinyUI
-      - shinyServer
   - title: Running
     desc: Functions that are used to run or stop Shiny applications.
     contents:
@@ -162,7 +157,6 @@ reference:
       - resourcePaths
       - registerInputHandler
       - removeInputHandler
-      - markRenderFunction
   - title: Utility functions
     desc: Miscellaneous utilities that may be useful to advanced users or when extending Shiny.
     contents:
@@ -176,12 +170,9 @@ reference:
       - safeError
       - onFlush
       - restoreInput
-      - applyInputHandlers
-      - exprToFunction
       - quoToFunction
       - parseQueryString
       - getCurrentOutputInfo
-      - getCurrentTheme
       - plotPNG
       - sizeGrowthRatio
       - exportTestValues
@@ -189,7 +180,6 @@ reference:
       - snapshotExclude
       - snapshotPreprocessInput
       - snapshotPreprocessOutput
-      - markOutputAttrs
       - repeatable
       - serverInfo
       - onStop

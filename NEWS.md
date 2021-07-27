@@ -42,6 +42,8 @@ shiny 1.6.0.9000
 
 * Closed #3345: Shiny now correctly renders `htmltools::htmlDependency()`(s) with a `list()` of `script` attributes when used in a dynamic UI context. This fairly new `htmlDependency()` feature was added in `{htmltools}` v0.5.1. (#3395)
 
+* Fixed [#2666](https://github.com/rstudio/shiny/issues/2666) and [#2670](https://github.com/rstudio/shiny/issues/2670): `nearPoints()` and `brushedPoints()` weren't properly account for missing values (#2666 was introduced in v1.4.0). ([#2668](https://github.com/rstudio/shiny/pull/2668))
+
 * Closed #3374: `quoToFunction()` now works correctly with nested quosures; and as a result, quasi-quotation with rendering function (e.g., `renderPrint()`, `renderPlot()`, etc) now works as expected with nested quosures. (#3373) 
 
 * Exported `register_devmode_option()`. This method was described in the documentation for `devmode()` but was never exported. See `?devmode()` for more details on how to register Shiny Developer options using `register_devmode_option()`. (#3364)

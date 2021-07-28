@@ -157,6 +157,7 @@ reference:
       - resourcePaths
       - registerInputHandler
       - removeInputHandler
+      - markRenderFunction
   - title: Utility functions
     desc: Miscellaneous utilities that may be useful to advanced users or when extending Shiny.
     contents:
@@ -170,6 +171,7 @@ reference:
       - safeError
       - onFlush
       - restoreInput
+      - applyInputHandlers
       - quoToFunction
       - parseQueryString
       - getCurrentOutputInfo
@@ -208,3 +210,10 @@ reference:
       - runTests
       - testServer
       - MockShinySession
+  - title: Superseded
+    desc: Shiny functions that have been `r lifecycle::badge("superseded")`
+    contents:
+      - markRenderFunction
+      - shinyUI
+      - shinyServer
+      - exprToFunction

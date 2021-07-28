@@ -49,13 +49,13 @@ local({
     }
   ))
 
-  # Make sure internal functions to NOT have an entry
-  displayed_internal_topics <- internal_topics[internal_topics %in% indexed_topics]
-  testthat::expect_equal(length(displayed_internal_topics), 0,
-    info = paste("Functions listed in ./tools/documentation/pkgdown.yml but has the keyword internal:\n",
-      paste(" - ", displayed_internal_topics, sep = "", collapse = "\n"),
-      "\nPlease update ./tools/documentation/pkgdown.yml or make it `#' @keywords internal`",
-      sep = ""))
+  # # Make sure internal functions to NOT have an entry
+  # displayed_internal_topics <- internal_topics[internal_topics %in% indexed_topics]
+  # testthat::expect_equal(length(displayed_internal_topics), 0,
+  #   info = paste("Functions listed in ./tools/documentation/pkgdown.yml but has the keyword internal:\n",
+  #     paste(" - ", displayed_internal_topics, sep = "", collapse = "\n"),
+  #     "\nPlease update ./tools/documentation/pkgdown.yml or make it `#' @keywords internal`",
+  #     sep = ""))
 
   # Make sure there are no non-internal topics have an entry
   missing_entry_topics <- setdiff(no_entry_topics, internal_topics)

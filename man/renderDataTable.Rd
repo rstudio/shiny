@@ -48,11 +48,6 @@ indicate which columns to escape, e.g. \code{1:5} (the first 5 columns),
 \code{c(1, 3, 4)}, or \code{c(-1, -3)} (all columns except the first and
 third), or \code{c('Species', 'Sepal.Length')}.}
 
-\item{env}{TODO-barret docs; The environment in which to evaluate \code{expr}.}
-
-\item{quoted}{TODO-barret docs; Is \code{expr} a quoted expression (with \code{quote()})?
-This is useful if you want to save an expression in a variable.}
-
 \item{outputArgs}{A list of arguments to be passed through to the implicit
 call to \code{dataTableOutput()} when \code{renderDataTable()} is used
 in an interactive R Markdown document.}

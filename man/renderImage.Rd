@@ -15,11 +15,6 @@ renderImage(
 \arguments{
 \item{expr}{An expression that returns a list.}
 
-\item{env}{TODO-barret docs; The environment in which to evaluate \code{expr}.}
-
-\item{quoted}{TODO-barret docs; Is \code{expr} a quoted expression (with \code{quote()})? This
-is useful if you want to save an expression in a variable.}
-
 \item{deleteFile}{Should the file in \code{func()$src} be deleted after
 it is sent to the client browser? Generally speaking, if the image is a
 temp file generated within \code{func}, then this should be \code{TRUE};

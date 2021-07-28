@@ -50,11 +50,6 @@ ggplot objects; for other plots, \code{NA} results in alt text of "Plot object".
 \code{NULL} or \code{""} is not recommended because those should be limited to
 decorative images.}
 
-\item{env}{TODO-barret docs; The environment in which to evaluate \code{expr}.}
-
-\item{quoted}{TODO-barret docs; Is \code{expr} a quoted expression (with \code{quote()})? This
-is useful if you want to save an expression in a variable.}
-
 \item{execOnResize}{If \code{FALSE} (the default), then when a plot is
 resized, Shiny will \emph{replay} the plot drawing commands with
 \code{\link[grDevices:recordplot]{grDevices::replayPlot()}} instead of re-executing \code{expr}.

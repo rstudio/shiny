@@ -331,9 +331,7 @@ markOutputAttrs <- function(renderFunc, snapshotExclude = NULL,
 #'   the output, see [plotPNG()].
 #'
 #' @param expr An expression that returns a list.
-#' @param env TODO-barret docs; The environment in which to evaluate `expr`.
-#' @param quoted TODO-barret docs; Is `expr` a quoted expression (with `quote()`)? This
-#'   is useful if you want to save an expression in a variable.
+#' @template params-expr-env-quoted-deprecated
 #' @param deleteFile Should the file in `func()$src` be deleted after
 #'   it is sent to the client browser? Generally speaking, if the image is a
 #'   temp file generated within `func`, then this should be `TRUE`;
@@ -539,9 +537,7 @@ isTemp <- function(path, tempDir = tempdir(), mustExist) {
 #' function return [invisible()].
 #'
 #' @param expr An expression to evaluate.
-#' @param env TODO-barret docs; The environment in which to evaluate `expr`. For expert use only.
-#' @param quoted TODO-barret docs; Is `expr` a quoted expression (with `quote()`)? This
-#'   is useful if you want to save an expression in a variable.
+#' @template params-expr-env-quoted-deprecated
 #' @param width Width of printed output.
 #' @param outputArgs A list of arguments to be passed through to the implicit
 #'   call to [verbatimTextOutput()] or [textOutput()] when the functions are
@@ -662,9 +658,7 @@ renderText <- function(expr, env = deprecated(), quoted = deprecated(),
 #'
 #' @param expr An expression that returns a Shiny tag object, [HTML()],
 #'   or a list of such objects.
-#' @param env TODO-barret docs; The environment in which to evaluate `expr`.
-#' @param quoted TODO-barret docs; Is `expr` a quoted expression (with `quote()`)? This
-#'   is useful if you want to save an expression in a variable.
+#' @template params-expr-env-quoted-deprecated
 #' @param outputArgs A list of arguments to be passed through to the implicit
 #'   call to [uiOutput()] when `renderUI` is used in an
 #'   interactive R Markdown document.

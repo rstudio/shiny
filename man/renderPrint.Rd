@@ -24,11 +24,6 @@ renderText(
 \arguments{
 \item{expr}{An expression to evaluate.}
 
-\item{env}{TODO-barret docs; The environment in which to evaluate \code{expr}. For expert use only.}
-
-\item{quoted}{TODO-barret docs; Is \code{expr} a quoted expression (with \code{quote()})? This
-is useful if you want to save an expression in a variable.}
-
 \item{width}{Width of printed output.}
 
 \item{outputArgs}{A list of arguments to be passed through to the implicit

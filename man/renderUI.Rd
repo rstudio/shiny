@@ -10,11 +10,6 @@ renderUI(expr, env = deprecated(), quoted = deprecated(), outputArgs = list())
 \item{expr}{An expression that returns a Shiny tag object, \code{\link[=HTML]{HTML()}},
 or a list of such objects.}
 
-\item{env}{TODO-barret docs; The environment in which to evaluate \code{expr}.}
-
-\item{quoted}{TODO-barret docs; Is \code{expr} a quoted expression (with \code{quote()})? This
-is useful if you want to save an expression in a variable.}
-
 \item{outputArgs}{A list of arguments to be passed through to the implicit
 call to \code{\link[=uiOutput]{uiOutput()}} when \code{renderUI} is used in an
 interactive R Markdown document.}

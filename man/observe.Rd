@@ -21,14 +21,6 @@ observe(
 \item{x}{An expression (quoted or unquoted). Any return value will be
 ignored.}
 
-\item{env}{TODO-barret docs; The parent environment for the reactive expression. By default,
-this is the calling environment, the same as when defining an ordinary
-non-reactive expression.}
-
-\item{quoted}{TODO-barret docs; Is the expression quoted? By default, this is \code{FALSE}.
-This is useful when you want to use an expression that is stored in a
-variable; to do so, it must be quoted with \code{quote()}.}
-
 \item{...}{Not used.}
 
 \item{label}{A label for the observer, useful for debugging.}
@@ -110,19 +102,18 @@ when the \link[=domains]{domain} that owns them ends (e.g. when a Shiny
 session ends).
 }
 \examples{
-# TODO-barret docs; examples are outdated
 values <- reactiveValues(A=1)
 
 obsB <- observe({
   print(values$A + 1)
 })
 
-# Can use quoted expressions
-obsC <- observe(quote({ print(values$A + 2) }), quoted = TRUE)
+# To store expressions for later conversion to observe, use rlang::quo()
+myquo <- rlang::quo({ print(values$A + 3) })
+obsC <- rlang::inject(observe(!!myquo))
 
-# To store expressions for later conversion to observe, use quote()
-expr_q <- quote({ print(values$A + 3) })
-obsD <- observe(expr_q, quoted = TRUE)
+# (Legacy) Can use quoted expressions
+obsD <- observe(quote({ print(values$A + 2) }), quoted = TRUE)
 
 # In a normal Shiny app, the web client will trigger flush events. If you
 # are at the console, you can force a flush with flushReact()

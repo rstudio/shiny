@@ -18,16 +18,13 @@ reactive(
 is.reactive(x)
 }
 \arguments{
-\item{x}{TODO-barret docs; For \code{reactive}, an expression (quoted or unquoted). For
-\code{is.reactive}, an object to test.}
+\item{x}{For \code{is.reactive()}, an object to test. For \code{reactive()}, an expression. When passing in a \code{\link[=quo]{quo()}}sure with \code{reactive()}, remember to use \code{\link[rlang:inject]{rlang::inject()}} to distinguish that you are passing in the content of your quosure, not the expression of the quosure.}
 
-\item{env}{TODO-barret docs; The parent environment for the reactive expression. By default,
-this is the calling environment, the same as when defining an ordinary
-non-reactive expression.}
+\item{env}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#superseded}{\figure{lifecycle-superseded.svg}{options: alt='[Superseded]'}}}{\strong{[Superseded]}}, \code{x} allows for quosures to be supplied. See \code{\link[rlang:nse-defuse]{rlang::quo()}} for more details.
+However, if a value is supplied, it will overwrite the environment for when the expression of \code{x} is evaluated.}
 
-\item{quoted}{TODO-barret docs; Is the expression quoted? By default, this is \code{FALSE}.
-This is useful when you want to use an expression that is stored in a
-variable; to do so, it must be quoted with \code{quote()}.}
+\item{quoted}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#superseded}{\figure{lifecycle-superseded.svg}{options: alt='[Superseded]'}}}{\strong{[Superseded]}}, \code{x} allows for quosures to be supplied. See \code{\link[rlang:nse-defuse]{rlang::quo()}} for more details.
+If it is \code{TRUE}, then the \code{\link[=quote]{quote()}}ed value of \code{x} will be used when \code{x} is evaluated.}
 
 \item{...}{Not used.}
 
@@ -58,22 +55,32 @@ See the \href{https://shiny.rstudio.com/tutorial/}{Shiny tutorial} for
 more information about reactive expressions.
 }
 \examples{
-# TODO-barret docs; with quosures, not env / quoted
+library(rlang)
 values <- reactiveValues(A=1)
 
 reactiveB <- reactive({
   values$A + 1
 })
-
-# Can use quoted expressions
-reactiveC <- reactive(quote({ values$A + 2 }), quoted = TRUE)
-
-# To store expressions for later conversion to reactive, use quote()
-expr_q <- quote({ values$A + 3 })
-reactiveD <- reactive(expr_q, quoted = TRUE)
-
 # View the values from the R console with isolate()
 isolate(reactiveB())
+# 2
+
+# To store expressions for later conversion to reactive, use quote()
+myquo <- rlang::quo(values$A + 2)
+# Unexpected value! Sending a quosure directly will not work as expected.
+reactiveC <- reactive(myquo)
+# We'd hope for `3`, but instead we get the quosure that was supplied.
 isolate(reactiveC())
+
+# Instead, the quosure should be `rlang::inject()`ed
+reactiveD <- rlang::inject(reactive(!!myquo))
 isolate(reactiveD())
+# 3
+
+# (Legacy) Can use quoted expressions
+expr <- quote({ values$A + 3 })
+reactiveE <- reactive(expr, quoted = TRUE)
+isolate(reactiveE())
+# 4
+
 }

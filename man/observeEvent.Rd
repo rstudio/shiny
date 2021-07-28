@@ -48,22 +48,6 @@ invalidated. This should be a side-effect-producing action (the return
 value will be ignored). It will be executed within an \code{\link[=isolate]{isolate()}}
 scope.}
 
-\item{event.env}{The parent environment for \code{eventExpr}. By default,
-this is the calling environment.}
-
-\item{event.quoted}{TODO-barret docs; Is the \code{eventExpr} expression quoted? By default,
-this is \code{FALSE}. This is useful when you want to use an expression
-that is stored in a variable; to do so, it must be quoted with
-\code{quote()}.}
-
-\item{handler.env}{TODO-barret docs; The parent environment for \code{handlerExpr}. By default,
-this is the calling environment.}
-
-\item{handler.quoted}{TODO-barret docs; Is the \code{handlerExpr} expression quoted? By
-default, this is \code{FALSE}. This is useful when you want to use an
-expression that is stored in a variable; to do so, it must be quoted with
-\code{quote()}.}
-
 \item{...}{Currently not used.}
 
 \item{label}{A label for the observer or reactive, useful for debugging.}
@@ -99,12 +83,11 @@ happen once.}
 \code{eventReactive}. It will be executed within an \code{\link[=isolate]{isolate()}}
 scope.}
 
-\item{value.env}{TODO-barret docs; The parent environment for \code{valueExpr}. By default,
-this is the calling environment.}
+\item{value.env}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#superseded}{\figure{lifecycle-superseded.svg}{options: alt='[Superseded]'}}}{\strong{[Superseded]}}, \code{valueExpr} allows for quosures to be supplied. See \code{\link[rlang:nse-defuse]{rlang::quo()}} for more details.
+However, if a value is supplied, it will overwrite the environment for when the expression of \code{valueExpr} is evaluated.}
 
-\item{value.quoted}{Is the \code{valueExpr} expression quoted? By default,
-this is \code{FALSE}. This is useful when you want to use an expression
-that is stored in a variable; to do so, it must be quoted with \code{quote()}.}
+\item{value.quoted}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#superseded}{\figure{lifecycle-superseded.svg}{options: alt='[Superseded]'}}}{\strong{[Superseded]}}, \code{valueExpr} allows for quosures to be supplied. See \code{\link[rlang:nse-defuse]{rlang::quo()}} for more details.
+If it is \code{TRUE}, then the \code{\link[=quote]{quote()}}ed value of \code{valueExpr} will be used when \code{valueExpr} is evaluated.}
 }
 \value{
 \code{observeEvent} returns an observer reference class object (see

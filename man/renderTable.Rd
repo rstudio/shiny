@@ -71,11 +71,6 @@ columns will be displayed in scientific format with a precision of
 \item{...}{Arguments to be passed through to \code{\link[xtable:xtable]{xtable::xtable()}}
 and \code{\link[xtable:print.xtable]{xtable::print.xtable()}}.}
 
-\item{env}{TODO-barret docs; The environment in which to evaluate \code{expr}.}
-
-\item{quoted}{TODO-barret docs; Is \code{expr} a quoted expression (with \code{quote()})?
-This is useful if you want to save an expression in a variable.}
-
 \item{outputArgs}{A list of arguments to be passed through to the
 implicit call to \code{\link[=tableOutput]{tableOutput()}} when \code{renderTable} is
 used in an interactive R Markdown document.}

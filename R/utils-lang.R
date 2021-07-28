@@ -301,6 +301,8 @@ quoToSimpleFunction <- function(q) {
 #'   provided for backward compatibility. If the calling environment is not
 #'   [`missing()`] the variable used for `quoted`, then the quosure `q` will set
 #'   its expression to its internal quoted value.
+#' @param verbose If `verbose = TRUE` [`devmode()`] is enabled, and `x` is a quosure,
+#'   a message will be printed suggesting to not use the `env` and `quoted` parameters.
 #'
 #' @examples
 #' # Three versions of the same example renderer, similar to `renderText()`.

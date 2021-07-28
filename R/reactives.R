@@ -945,14 +945,11 @@ Observable <- R6Class(
 #' See the [Shiny tutorial](https://shiny.rstudio.com/tutorial/) for
 #' more information about reactive expressions.
 #'
-#' @param x TODO-barret docs; For `reactive`, an expression (quoted or unquoted). For
-#'   `is.reactive`, an object to test.
-#' @param env TODO-barret docs; The parent environment for the reactive expression. By default,
-#'   this is the calling environment, the same as when defining an ordinary
-#'   non-reactive expression.
-#' @param quoted TODO-barret docs; Is the expression quoted? By default, this is `FALSE`.
-#'   This is useful when you want to use an expression that is stored in a
-#'   variable; to do so, it must be quoted with `quote()`.
+#' @param x For `is.reactive()`, an object to test. For `reactive()`, an expression. When passing in a [`quo()`]sure with `reactive()`, remember to use [`rlang::inject()`] to distinguish that you are passing in the content of your quosure, not the expression of the quosure.
+#' @param env `r lifecycle::badge("superseded")`, `x` allows for quosures to be supplied. See [`rlang::quo()`] for more details.
+#'   However, if a value is supplied, it will overwrite the environment for when the expression of `x` is evaluated.
+#' @param quoted `r lifecycle::badge("superseded")`, `x` allows for quosures to be supplied. See [`rlang::quo()`] for more details.
+#'   If it is `TRUE`, then the [`quote()`]ed value of `x` will be used when `x` is evaluated.
 #' @param label A label for the reactive expression, useful for debugging.
 #' @param domain See [domains].
 #' @param ..stacktraceon Advanced use only. For stack manipulation purposes; see
@@ -961,24 +958,34 @@ Observable <- R6Class(
 #' @return a function, wrapped in a S3 class "reactive"
 #'
 #' @examples
-#' # TODO-barret docs; with quosures, not env / quoted
+#' library(rlang)
 #' values <- reactiveValues(A=1)
 #'
 #' reactiveB <- reactive({
 #'   values$A + 1
 #' })
-#'
-#' # Can use quoted expressions
-#' reactiveC <- reactive(quote({ values$A + 2 }), quoted = TRUE)
-#'
-#' # To store expressions for later conversion to reactive, use quote()
-#' expr_q <- quote({ values$A + 3 })
-#' reactiveD <- reactive(expr_q, quoted = TRUE)
-#'
 #' # View the values from the R console with isolate()
 #' isolate(reactiveB())
+#' # 2
+#'
+#' # To store expressions for later conversion to reactive, use quote()
+#' myquo <- rlang::quo(values$A + 2)
+#' # Unexpected value! Sending a quosure directly will not work as expected.
+#' reactiveC <- reactive(myquo)
+#' # We'd hope for `3`, but instead we get the quosure that was supplied.
 #' isolate(reactiveC())
+#'
+#' # Instead, the quosure should be `rlang::inject()`ed
+#' reactiveD <- rlang::inject(reactive(!!myquo))
 #' isolate(reactiveD())
+#' # 3
+#'
+#' # (Legacy) Can use quoted expressions
+#' expr <- quote({ values$A + 3 })
+#' reactiveE <- reactive(expr, quoted = TRUE)
+#' isolate(reactiveE())
+#' # 4
+#'
 #' @export
 reactive <- function(
   x,
@@ -1328,12 +1335,7 @@ Observer <- R6Class(
 #'
 #' @param x An expression (quoted or unquoted). Any return value will be
 #'   ignored.
-#' @param env TODO-barret docs; The parent environment for the reactive expression. By default,
-#'   this is the calling environment, the same as when defining an ordinary
-#'   non-reactive expression.
-#' @param quoted TODO-barret docs; Is the expression quoted? By default, this is `FALSE`.
-#'   This is useful when you want to use an expression that is stored in a
-#'   variable; to do so, it must be quoted with `quote()`.
+#' @template params-x-env-quoted-deprecated
 #' @param label A label for the observer, useful for debugging.
 #' @param suspended If `TRUE`, start the observer in a suspended state. If
 #'   `FALSE` (the default), start in a non-suspended state.
@@ -1386,19 +1388,18 @@ Observer <- R6Class(
 #'   }
 #'
 #' @examples
-#' # TODO-barret docs; examples are outdated
 #' values <- reactiveValues(A=1)
 #'
 #' obsB <- observe({
 #'   print(values$A + 1)
 #' })
 #'
-#' # Can use quoted expressions
-#' obsC <- observe(quote({ print(values$A + 2) }), quoted = TRUE)
+#' # To store expressions for later conversion to observe, use rlang::quo()
+#' myquo <- rlang::quo({ print(values$A + 3) })
+#' obsC <- rlang::inject(observe(!!myquo))
 #'
-#' # To store expressions for later conversion to observe, use quote()
-#' expr_q <- quote({ print(values$A + 3) })
-#' obsD <- observe(expr_q, quoted = TRUE)
+#' # (Legacy) Can use quoted expressions
+#' obsD <- observe(quote({ print(values$A + 2) }), quoted = TRUE)
 #'
 #' # In a normal Shiny app, the web client will trigger flush events. If you
 #' # are at the console, you can force a flush with flushReact()
@@ -2149,23 +2150,24 @@ maskReactiveContext <- function(expr) {
 #' @param valueExpr The expression that produces the return value of the
 #'   `eventReactive`. It will be executed within an [isolate()]
 #'   scope.
-#' @param event.env The parent environment for `eventExpr`. By default,
-#'   this is the calling environment.
-#' @param event.quoted TODO-barret docs; Is the `eventExpr` expression quoted? By default,
-#'   this is `FALSE`. This is useful when you want to use an expression
-#'   that is stored in a variable; to do so, it must be quoted with
-#'   `quote()`.
-#' @param handler.env TODO-barret docs; The parent environment for `handlerExpr`. By default,
-#'   this is the calling environment.
-#' @param handler.quoted TODO-barret docs; Is the `handlerExpr` expression quoted? By
-#'   default, this is `FALSE`. This is useful when you want to use an
-#'   expression that is stored in a variable; to do so, it must be quoted with
-#'   `quote()`.
-#' @param value.env TODO-barret docs; The parent environment for `valueExpr`. By default,
-#'   this is the calling environment.
-#' @param value.quoted Is the `valueExpr` expression quoted? By default,
-#'   this is `FALSE`. This is useful when you want to use an expression
-#'   that is stored in a variable; to do so, it must be quoted with `quote()`.
+#' @template param-env-deprecated
+#' @templateVar x eventExpr
+#' @templateVar env event.env
+#' @template param-quoted-deprecated
+#' @templateVar x eventExpr
+#' @templateVar quoted event.quoted
+#' @template param-env-deprecated
+#' @templateVar x handlerExpr
+#' @templateVar env handler.env
+#' @template param-quoted-deprecated
+#' @templateVar x handlerExpr
+#' @templateVar quoted handler.quoted
+#' @template param-env-deprecated
+#' @templateVar x valueExpr
+#' @templateVar env value.env
+#' @template param-quoted-deprecated
+#' @templateVar x valueExpr
+#' @templateVar quoted value.quoted
 #' @param label A label for the observer or reactive, useful for debugging.
 #' @param suspended If `TRUE`, start the observer in a suspended state. If
 #'   `FALSE` (the default), start in a non-suspended state.

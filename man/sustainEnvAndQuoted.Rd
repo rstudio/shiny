@@ -22,6 +22,9 @@ then the quosure \code{q} will have its environment set to \code{env}.}
 provided for backward compatibility. If the calling environment is not
 \code{\link[=missing]{missing()}} the variable used for \code{quoted}, then the quosure \code{q} will set
 its expression to its internal quoted value.}
+
+\item{verbose}{If \code{verbose = TRUE} \code{\link[=devmode]{devmode()}} is enabled, and \code{x} is a quosure,
+a message will be printed suggesting to not use the \code{env} and \code{quoted} parameters.}
 }
 \description{
 \code{sustainEnvAndQuoted()} and \code{quoToFunction()} are meant to be used together in a

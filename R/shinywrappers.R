@@ -57,9 +57,11 @@ markRenderFunction <- function(
   cacheWriteHook = NULL,
   cacheReadHook = NULL
 ) {
-  if (in_devmode()) {
-    shinyDeprecated("1.1.0", "markRenderFunction()", "createRenderFunction()")
-  }
+  # # Do not include this code
+  # # This method is called by the superseding function, createRenderFunction().
+  # if (in_devmode()) {
+  #   shinyDeprecated("1.1.0", "markRenderFunction()", "createRenderFunction()")
+  # }
 
   force(renderFunc)
 
@@ -169,7 +171,7 @@ print.shiny.render.function <- function(x, ...) {
 #' @return An annotated render function, ready to be assigned to an
 #'   `output` slot.
 #'
-#' @seealso [quoToFunction()], [markRenderFunction()], [rlang::enquo()].
+#' @seealso [quoToFunction()], [markRenderFunction()].
 #'
 #' @examples
 #' # A very simple render function

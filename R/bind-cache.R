@@ -292,11 +292,11 @@ utils::globalVariables(".GenericCallEnv", add = TRUE)
 #'   In some cases, however, the automatic cache hint inference is not
 #'   sufficient, and it is necessary to provide a cache hint. This is true
 #'   for `renderPrint()`. Unlike `renderText()`, it wraps the user-provided
-#'   expression in another function, before passing it to [markRenderFunction()]
+#'   expression in another function, before passing it to [createRenderFunction()]
 #'   (instead of [createRenderFunction()]). Because the user code is wrapped in
-#'   another function, `markRenderFunction()` is not able to automatically
+#'   another function, `createRenderFunction()` is not able to automatically
 #'   extract the user-provided code and use it in the cache key. Instead,
-#'   `renderPrint` calls `markRenderFunction()`, it explicitly passes along a
+#'   `renderPrint` calls `createRenderFunction()`, it explicitly passes along a
 #'   `cacheHint`, which includes a label and the original user expression.
 #'
 #'   In general, if you need to provide a `cacheHint`, it is best practice to
@@ -321,7 +321,7 @@ utils::globalVariables(".GenericCallEnv", add = TRUE)
 #'   ```
 #'
 #'   If your `render` function sets any internal state, you may find it useful
-#'   in your call to [createRenderFunction()] or [markRenderFunction()] to use
+#'   in your call to [createRenderFunction()] (or [markRenderFunction()]) to use
 #'   the `cacheWriteHook` and/or `cacheReadHook` parameters. These hooks are
 #'   functions that run just before the object is stored in the cache, and just
 #'   after the object is retrieved from the cache. They can modify the data
@@ -338,8 +338,8 @@ utils::globalVariables(".GenericCallEnv", add = TRUE)
 #'   effects or modify some external state, and they must re-execute each time
 #'   in order to work properly.
 #'
-#'   For developers of such code, they should call [createRenderFunction()] or
-#'   [markRenderFunction()] with `cacheHint = FALSE`.
+#'   For developers of such code, they should call [createRenderFunction()] (or
+#'   [markRenderFunction()]) with `cacheHint = FALSE`.
 #'
 #'
 #' @section Caching with `renderPlot()`:

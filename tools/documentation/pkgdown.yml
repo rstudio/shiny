@@ -173,6 +173,7 @@ reference:
       - restoreInput
       - applyInputHandlers
       - quoToFunction
+      - sustainEnvAndQuoted
       - parseQueryString
       - getCurrentOutputInfo
       - plotPNG
@@ -211,7 +212,7 @@ reference:
       - testServer
       - MockShinySession
   - title: Superseded
-    desc: Shiny functions that have been `r lifecycle::badge("superseded")`
+    desc: Functions that have been `r lifecycle::badge("superseded")`
     contents:
       - markRenderFunction
       - shinyUI

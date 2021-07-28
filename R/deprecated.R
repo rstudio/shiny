@@ -41,7 +41,7 @@ deprecatedEnvQuotedMessage <- function() {
   # Capture calling function
   grandparent_call <- sys.call(-2)
   # Turn language into user friendly string
-  grandparent_txt <- paste0(capture.output({grandparent_call}), collapse = "\n")
+  grandparent_txt <- paste0(utils::capture.output({grandparent_call}), collapse = "\n")
 
   msg <- paste0(
     "The `env` and `quoted` arguments are deprecated as of shiny 1.7.0.",

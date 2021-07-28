@@ -2,75 +2,47 @@
 % Please edit documentation in R/utils-lang.R
 \name{quoToFunction}
 \alias{quoToFunction}
-\alias{sustainEnvAndQuoted}
 \title{Convert a quosure to a function for a Shiny render function}
 \usage{
 quoToFunction(q, label = sys.call(-1)[[1]], ..stacktraceon = FALSE)
-
-sustainEnvAndQuoted(q, x, env, quoted)
 }
 \arguments{
-\item{q}{A quosure.}
+\item{q}{Quosure of the expression \code{x}. When capturing expressions to create
+your quosure, it is recommended to use \code{\link[=enquo0]{enquo0()}} to not unquote the
+object too early. See \code{\link[=enquo0]{enquo0()}} for more details.}
 
 \item{label}{A label for the object to be shown in the debugger. Defaults to
 the name of the calling function.}
 
 \item{..stacktraceon}{Advanced use only. For stack manipulation purposes; see
 \code{\link[=stacktrace]{stacktrace()}}.}
-
-\item{x}{An expression or quosure.}
-
-\item{env}{An environment. This is provided for backward compatibility.}
-
-\item{quoted}{A boolean indicating whether or not \code{env} is quoted. This is
-provided for backward compatibility.}
 }
 \description{
 This takes a quosure and label, and wraps them into a function that should be
-passed to \code{\link[=createRenderFunction]{createRenderFunction()}} or \code{\link[=markRenderFunction]{markRenderFunction()}}.
-
-\code{handleEnvAndQuoted()} and \code{quoToFunction()} are meant to be used together in a
-\code{render} function, to capture user expressions or quosures and convert them
-to functions. They are meant to replace the older functions
-\code{\link[=installExprFunction]{installExprFunction()}} and \code{\link[=exprToFunction]{exprToFunction()}} (although those will continue
-to work in the future). See the examples in \code{\link[=installExprFunction]{installExprFunction()}} for
-information on how to migrate to \code{getQuosure()} and \code{quoToFunction()}.
+passed to \code{\link[=createRenderFunction]{createRenderFunction()}}.
 }
 \details{
 This function was added in Shiny 1.6.0. Previously, it was recommended to use
 \code{\link[=installExprFunction]{installExprFunction()}} or \code{\link[=exprToFunction]{exprToFunction()}} in render functions, but now we
-recommend using \code{\link[=quoToFunction]{quoToFunction()}}, because it does not require \code{env} and
-\code{quoted} arguments -- that information is captured by quosures provided by
-\pkg{rlang}.
-
-Although \code{getQuosure()} can take \code{env} and \code{quoted} parameters, it is
-recommended that they not be used, except for backward compatibility.
-The recommended usage of \code{getQuosure()} and \code{quoToFunction()} does not
-include use of the \code{env} and \code{quoted} parameters. If it is necessary to
-use quoted expressions and/or custom environments for evaluating, it can be
-done with quosures and \code{\link[rlang:inject]{rlang::inject()}}. The examples below demonstrate how
-to do this.
-
-If you are updating from \code{\link[=installExprFunction]{installExprFunction()}} or \code{\link[=exprToFunction]{exprToFunction()}} to
-these functions, see the examples in the documentation for the old functions
-for how to migrate them.
+recommend using \code{\link[=quoToFunction]{quoToFunction()}} paired with \code{\link[rlang:enquo0]{rlang::enquo0()}}. This is because \code{quoToFunction()}
+does not require package authors to manually handle the \code{env} and \code{quoted} arguments -- that information is captured
+by quosures provided by \pkg{rlang}. To support legacy \code{env} and \code{quoted} variables,
+please see \code{\link[=sustainEnvAndQuoted]{sustainEnvAndQuoted()}} for more details and examples on how to migrate your code.
 }
 \examples{
-# Example of a new renderer, similar to renderText.
+# Create a new renderer, similar to `renderText()`.
 # This is something that toolkit authors will do.
-renderTriple <- function(expr) {
-  # Convert expr to a quosure, and then to a function
-  func <- quoToFunction(rlang::enquo0(expr))
+renderTriple <- function(x) {
+  # Create render function given the user-supplied quosure or expression.
+  func <- quoToFunction(rlang::enquo0(x))
 
   # Wrap up func, with another function which takes the value of func()
-  # and modifies it.
+  # and modifies it to concatinate the value three times
   createRenderFunction(
     func,
-    transform = function(value, session, name, ...) {
+    transform = function(value, ...) {
       paste(rep(value, 3), collapse=", ")
     },
-    # The outputFunc can be used by rmarkdown shiny apps to automatically
-    # generate outputs.
     outputFunc = textOutput
   )
 }
@@ -78,16 +50,20 @@ renderTriple <- function(expr) {
 
 # Example of using the renderer.
 # This is something that app authors will do.
-values <- reactiveValues(A="text")
+values <- reactiveValues(A="text", B="text")
 
 \dontrun{
 # Create an output object
 output$tripleA <- renderTriple({
   values$A
 })
+# Create an output object
+output$tripleB <- renderTriple({
+  values$B
+})
 }
 
-# At the R console, you can experiment with the renderer using isolate()
+# At the R console, you can experiment with the renderer using `isolate()`
 tripleA <- renderTriple({
   values$A
 })
@@ -96,24 +72,30 @@ isolate(tripleA())
 # "text, text, text"
 
 
-# If you want to use a quoted expression, use rlang:inject().
-a <- 1
-expr <- quote({ values$A })
-tripleA <- rlang::inject(renderTriple(!!expr))
+# If you want to use a quoted expression, use `rlang::inject()`.
+q <- quote({ values$A })
+tripleA <- rlang::inject(renderTripleIdeal(!!q))
+# Look at the value
 isolate(tripleA())
-# "text, text, text"
 
-# Capturing an expression and an environment, using a quosure and rlang::inject():
+
+# Capturing an expression and an environment, using a quosure and `rlang::inject()`:
 e <- new.env()
-e$vals <- reactiveValues(A="hello")
+e$vals <- reactiveValues(A = "hello")
 # Create a quosure that captures both the expression and environment.
 myquo <- rlang::new_quosure(quote({ vals$A }), env = e)
-tripleA <- rlang::inject(renderTriple(!!myquo))
+myquo
+# `inject()` the quosure into the render function
+tripleA <- rlang::inject(renderTripleIdeal(!!myquo))
+# Look at the value
 isolate(tripleA())
 # "hello, hello, hello"
-
-
 }
 \seealso{
-\code{\link[=createRenderFunction]{createRenderFunction()}} for example usage.
+\itemize{
+\item \code{\link[=createRenderFunction]{createRenderFunction()}} for example usage.
+\item \code{\link[rlang:enquo0]{rlang::enquo0()}} for more
+information about not immediately unquoting when making \code{q}.
+\item \code{\link[=sustainEnvAndQuoted]{sustainEnvAndQuoted()}} for backwards support for \code{env} and \code{quoted} parameters
+}
 }

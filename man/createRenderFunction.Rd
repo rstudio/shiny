@@ -87,5 +87,5 @@ r()
 # [1] "20, 20, 20"
 }
 \seealso{
-\code{\link[=quoToFunction]{quoToFunction()}}, \code{\link[=markRenderFunction]{markRenderFunction()}}, \code{\link[rlang:nse-defuse]{rlang::enquo()}}.
+\code{\link[=quoToFunction]{quoToFunction()}}, \code{\link[=markRenderFunction]{markRenderFunction()}}.
 }

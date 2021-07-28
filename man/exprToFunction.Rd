@@ -40,12 +40,13 @@ the name of the calling function.}
 \code{\link[=stacktrace]{stacktrace()}}.}
 }
 \description{
-\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#superseded}{\figure{lifecycle-superseded.svg}{options: alt='[Superseded]'}}}{\strong{[Superseded]}} Please see \code{\link[=quoToFunction]{quoToFunction()}} for updated usage. (Shiny 1.7.0)
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#superseded}{\figure{lifecycle-superseded.svg}{options: alt='[Superseded]'}}}{\strong{[Superseded]}} Please see \code{\link[=sustainEnvAndQuoted]{sustainEnvAndQuoted()}} and \code{\link[=quoToFunction]{quoToFunction()}}
+for updated usage. (Shiny 1.7.0)
 
 Note: as of Shiny 1.7.0, it is
 recommended to use \code{\link[=quoToFunction]{quoToFunction()}} (and if necessary, \code{\link[=sustainEnvAndQuoted]{sustainEnvAndQuoted()}}) instead of
 \code{exprToFunction()} and \code{installExprFunction()}. See the examples for
-information on how to migrate to \code{getQuosure()} and \code{quoToFunction()}.
+information on how to migrate your code using \code{\link[=sustainEnvAndQuoted]{sustainEnvAndQuoted()}} and \code{\link[=quoToFunction]{quoToFunction()}}.
 
 This is to be called from another function, because it will attempt to get
 an unquoted expression from two calls back.
@@ -68,11 +69,12 @@ function named \code{func} in the current environment.
 }
 \examples{
 # These examples demonstrate the old method, with exprToFunction() and
-# installExprFunction(), as well as how to replace them, with getQuosure().
+# installExprFunction(), as well as how to replace them, with sustainEnvAndQuoted().
 
 # Version 1: exprToFunction()
-# The old way of converting the expression to a quosure, with exprToFunction()
-renderTriple <- function(expr, env=parent.frame(), quoted=FALSE) {
+# The old way of converting the expression to a function, with exprToFunction()
+# (No quosure support.)
+renderTripleExpr <- function(expr, env=parent.frame(), quoted=FALSE) {
   # Convert expr to a function
   func <- exprToFunction(expr, env, quoted)
 
@@ -83,9 +85,9 @@ renderTriple <- function(expr, env=parent.frame(), quoted=FALSE) {
 }
 
 # Version 2: installExprFunction()
-# The not-quite-as-old way of converting the expression to a quosure, with
-# installExprFunction()
-renderTriple <- function(expr, env=parent.frame(), quoted=FALSE) {
+# The not-quite-as-old way of converting the expression to a function, with
+# installExprFunction(). (No quosure support.)
+renderTripleInstall <- function(expr, env=parent.frame(), quoted=FALSE) {
   # Convert expr to a function
   installExprFunction(expr, "func", env, quoted)
 
@@ -95,12 +97,13 @@ renderTriple <- function(expr, env=parent.frame(), quoted=FALSE) {
   }
 }
 
-# Version 3: Replacing the old functions with getQuosure() and quoToFunction()
+# Version 3: Replacing the old functions with sustainEnvAndQuoted() and quoToFunction()
 # This keeps the `env` and `quoted` arguments, in case they are needed for
 # backward compatibility
-renderTriple <- function(expr, env=parent.frame(), quoted=FALSE) {
+# (Supports quosures. Does not support `inject()`ed quosures with `env` or `quoted` params.)
+renderTripleSustain <- function(expr, env=parent.frame(), quoted=FALSE) {
   # Convert expr to a quosure, and then to a function
-  q <- rlang::enquo0(expr)
+  q <- enquo0(expr)
   q <- sustainEnvAndQuoted(q, expr, env, quoted)
   func <- quoToFunction(q)
 
@@ -111,12 +114,12 @@ renderTriple <- function(expr, env=parent.frame(), quoted=FALSE) {
 }
 
 
-# Version 4: getQuosure()
-# This is the recommended way to use getQuosure() and quoToFunction(), and
+# Version 4: quoToFunction() only
+# This is the recommended way to only use quoToFunction() (`enquo0()`), and
 # it discards `env` and `quoted`, for simplicity.
-renderTriple <- function(expr) {
+renderTripleIdeal <- function(expr) {
   # Convert expr to a quosure, and then to a function
-  func <- quoToFunction(rlang::enquo0(expr))
+  func <- quoToFunction(enquo0(expr))
 
   function() {
     value <- func()
@@ -126,20 +129,21 @@ renderTriple <- function(expr) {
 
 # Example of using the renderer.
 # This is something that app authors will do.
-values <- reactiveValues(A="text")
+values <- renderTripleIdeal(A="text")
 
 \dontrun{
 # Create an output object
-output$tripleA <- renderTriple({
+output$tripleA <- renderTripleIdeal({
   values$A
 })
 }
 
 # At the R console, you can experiment with the renderer using isolate()
-tripleA <- renderTriple({
+tripleA <- renderTripleIdeal({
   values$A
 })
 
 isolate(tripleA())
 # "text, text, text"
 }
+\keyword{internal}

@@ -58,7 +58,7 @@ call to \code{dataTableOutput()} when \code{renderDataTable()} is used
 in an interactive R Markdown document.}
 }
 \description{
-\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#superseded}{\figure{lifecycle-superseded.svg}{options: alt='[Superseded]'}}}{\strong{[Superseded]}} Please use \code{\link[DT:renderDataTable]{DT::renderDataTable()}}. (Shiny 0.11.1)
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#superseded}{\figure{lifecycle-superseded.svg}{options: alt='[Superseded]'}}}{\strong{[Superseded]}} Please use \code{\link[DT:dataTableOutput]{DT::renderDataTable()}}. (Shiny 0.11.1)
 
 Makes a reactive version of the given function that returns a data frame (or
 matrix), which will be rendered with the \href{https://datatables.net}{DataTables}

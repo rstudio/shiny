@@ -51,13 +51,16 @@ is able to serve JS and CSS resources.}
 The \code{renderFunc} function, with annotations.
 }
 \description{
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#superseded}{\figure{lifecycle-superseded.svg}{options: alt='[Superseded]'}}}{\strong{[Superseded]}} Please see \code{\link[=createRenderFunction]{createRenderFunction()}}
+for updated usage. (Shiny 1.1.0)
+}
+\details{
 Should be called by implementers of \code{renderXXX} functions in order to mark
 their return values as Shiny render functions, and to provide a hint to Shiny
 regarding what UI function is most commonly used with this type of render
 function. This can be used in R Markdown documents to create complete output
 widgets out of just the render function.
-}
-\details{
+
 Note that it is generally preferable to use \code{\link[=createRenderFunction]{createRenderFunction()}} instead
 of \code{markRenderFunction()}. It essentially wraps up the user-provided
 expression in the \code{transform} function passed to it, then pases the resulting
@@ -67,3 +70,4 @@ interface.
 \seealso{
 \code{\link[=createRenderFunction]{createRenderFunction()}}, \code{\link[=quoToFunction]{quoToFunction()}}
 }
+\keyword{internal}

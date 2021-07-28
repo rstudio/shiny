@@ -39,7 +39,7 @@ deprecatedEnvQuotedMessage <- function() {
   if (is_false(getOption("shiny.deprecation.messages"))) return(invisible())
 
   # Capture calling function
-  grandparent_call <- sys.call(-3)
+  grandparent_call <- sys.call(-2)
   # Turn language into user friendly string
   grandparent_txt <- paste0(capture.output({grandparent_call}), collapse = "\n")
 
@@ -51,7 +51,7 @@ deprecatedEnvQuotedMessage <- function() {
     grandparent_txt
   )
   # Call less often as users do not have much control over this warning
-  rlang::inform(message = msg, .frequency = "regular", .frequency_id = msg, .file = stderr())
+  rlang::inform(message = msg, .frequency = "regularly", .frequency_id = msg, .file = stderr())
 }
 
 

@@ -31,6 +31,7 @@
 #'   content = "The requested method was not allowed"
 #' )
 #'
+#' @keywords internal
 #' @export
 httpResponse <- function(status = 200L,
                          content_type = "text/html; charset=UTF-8",

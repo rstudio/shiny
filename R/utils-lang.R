@@ -603,13 +603,91 @@ sustainEnvAndQuoted <- function(q, x, env, quoted, verbose = TRUE) {
 #' @export
 #' @keywords internal
 exprToFunction <- function(expr, env = parent.frame(), quoted = FALSE) {
+  # If `expr` is a raw quosure, must say `quoted = TRUE`; (env is ignored)
+  # If `inject()` a quosure, env is ignored, and quoted should be FALSE (aka ignored).
+  # Make article of usage
+  # * (by joe)
+
   if (!quoted) {
     expr <- eval(substitute(substitute(expr)), parent.frame())
   }
-
-  # expr is a quoted expression
-  new_function(list(), body = expr, env = env)
+  if (is_quosure(expr)) {
+    # inject()ed quosure
+    # do nothing
+  } else if (is.language(expr)) {
+    expr <- new_quosure(expr, env = env)
+  } else {
+    stop("Don't know how to convert '", class(expr)[1], "' to a function; a quosure or quoted expression was expected")
+  }
+  # Can NOT call `new_function()`. MUST call `as_function()`
+  # rlang has custom logic for converting quosures to functions
+  quoToSimpleFunction(expr)
 }
+
+
+
+# is_injected_quosure <- function(x) {
+#   # cat("inside is injected:\n"); print(eval(substitute(substitute(x)), parent.frame()))
+#   is_quosure(eval(substitute(substitute(x)), parent.frame()))
+# }
+
+
+# exprToFunctionProposed <- function(expr, env = parent.frame(), quoted = FALSE) {
+#   if (!quoted) {
+#     expr <- enquo0(expr)
+#   }
+#   # Can does not work as expected once `enquo0()` is called
+#   if (is_injected_quosure(expr)) {
+#     env <- rlang::quo_get_env(expr)
+#   }
+#   new_function(
+#     # no args
+#     list(),
+#     # works with `quote()`ed args
+#     rlang::get_expr(expr),
+#     # function env
+#     env
+#   )
+# }
+# exprToFunctionBarret <- function(expr, env = parent.frame(), quoted = FALSE) {
+#   # cat("exprToFunction - Start\n")
+#   was_injected <- is_injected_quosure(expr)
+#   # if (was_injected && isTRUE(quoted)) {
+#   #   stop("Can not use `quoted` and also `inject()` a quosure")
+#   # }
+#   # if (was_injected && !identical(env, parent.frame())) {
+#   #   stop("Can not use `env` and also `inject()` a quosure")
+#   # }
+
+#   if (was_injected) {
+#     # print("updated env from quosure env")
+#     env <- rlang::quo_get_env(expr)
+#   } else {
+#     # not injected, raw expression
+#     if (!quoted) {
+#       # print("turning into quosure")
+#       expr <- enquo0(expr)
+#       # env <- rlang::quo_get_env(expr)
+#     }
+#   }
+#   # cat("exprToFunction Info:\n")
+#   ret <- new_function(list(), rlang::get_expr(expr), env)
+#   # str(list(
+#   #   expr = rlang::get_expr(expr),
+#   #   env = env,
+#   #   envVals = mget(ls(envir = env), envir = env)
+#   # ))
+#   # print(ret)
+#   ret
+# }
+
+# exprToFunctionOld <- function(expr, env = parent.frame(), quoted = FALSE) {
+#   if (!quoted) {
+#     expr <- eval(substitute(substitute(expr)), parent.frame())
+#   }
+#   # expr is a quoted expression
+#   new_function(list(), body = expr, env = env)
+# }
 
 #' @rdname exprToFunction
 #'

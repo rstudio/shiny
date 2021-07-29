@@ -946,10 +946,7 @@ Observable <- R6Class(
 #' more information about reactive expressions.
 #'
 #' @param x For `is.reactive()`, an object to test. For `reactive()`, an expression. When passing in a [`quo()`]sure with `reactive()`, remember to use [`rlang::inject()`] to distinguish that you are passing in the content of your quosure, not the expression of the quosure.
-#' @param env `r lifecycle::badge("superseded")`, `x` allows for quosures to be supplied. See [`rlang::quo()`] for more details.
-#'   However, if a value is supplied, it will overwrite the environment for when the expression of `x` is evaluated.
-#' @param quoted `r lifecycle::badge("superseded")`, `x` allows for quosures to be supplied. See [`rlang::quo()`] for more details.
-#'   If it is `TRUE`, then the [`quote()`]ed value of `x` will be used when `x` is evaluated.
+#' @template params-x-env-quoted
 #' @param label A label for the reactive expression, useful for debugging.
 #' @param domain See [domains].
 #' @param ..stacktraceon Advanced use only. For stack manipulation purposes; see
@@ -989,8 +986,8 @@ Observable <- R6Class(
 #' @export
 reactive <- function(
   x,
-  env = deprecated(),
-  quoted = deprecated(),
+  env = parent.frame(),
+  quoted = FALSE,
   ...,
   label = NULL,
   domain = getDefaultReactiveDomain(),
@@ -1335,7 +1332,7 @@ Observer <- R6Class(
 #'
 #' @param x An expression (quoted or unquoted). Any return value will be
 #'   ignored.
-#' @template params-x-env-quoted-deprecated
+#' @template params-x-env-quoted
 #' @param label A label for the observer, useful for debugging.
 #' @param suspended If `TRUE`, start the observer in a suspended state. If
 #'   `FALSE` (the default), start in a non-suspended state.
@@ -1407,8 +1404,8 @@ Observer <- R6Class(
 #' @export
 observe <- function(
   x,
-  env = deprecated(),
-  quoted = deprecated(),
+  env = parent.frame(),
+  quoted = FALSE,
   ...,
   label = NULL,
   suspended = FALSE,
@@ -2150,22 +2147,22 @@ maskReactiveContext <- function(expr) {
 #' @param valueExpr The expression that produces the return value of the
 #'   `eventReactive`. It will be executed within an [isolate()]
 #'   scope.
-#' @template param-env-deprecated
+#' @template param-env
 #' @templateVar x eventExpr
 #' @templateVar env event.env
-#' @template param-quoted-deprecated
+#' @template param-quoted
 #' @templateVar x eventExpr
 #' @templateVar quoted event.quoted
-#' @template param-env-deprecated
+#' @template param-env
 #' @templateVar x handlerExpr
 #' @templateVar env handler.env
-#' @template param-quoted-deprecated
+#' @template param-quoted
 #' @templateVar x handlerExpr
 #' @templateVar quoted handler.quoted
-#' @template param-env-deprecated
+#' @template param-env
 #' @templateVar x valueExpr
 #' @templateVar env value.env
-#' @template param-quoted-deprecated
+#' @template param-quoted
 #' @templateVar x valueExpr
 #' @templateVar quoted value.quoted
 #' @param label A label for the observer or reactive, useful for debugging.
@@ -2272,8 +2269,8 @@ maskReactiveContext <- function(expr) {
 #' }
 #' @export
 observeEvent <- function(eventExpr, handlerExpr,
-  event.env = deprecated(), event.quoted = deprecated(),
-  handler.env = deprecated(), handler.quoted = deprecated(),
+  event.env = parent.frame(), event.quoted = FALSE,
+  handler.env = parent.frame(), handler.quoted = FALSE,
   ...,
   label = NULL, suspended = FALSE, priority = 0,
   domain = getDefaultReactiveDomain(), autoDestroy = TRUE,
@@ -2315,8 +2312,8 @@ observeEvent <- function(eventExpr, handlerExpr,
 #' @rdname observeEvent
 #' @export
 eventReactive <- function(eventExpr, valueExpr,
-  event.env = deprecated(), event.quoted = deprecated(),
-  value.env = deprecated(), value.quoted = deprecated(),
+  event.env = parent.frame(), event.quoted = FALSE,
+  value.env = parent.frame(), value.quoted = FALSE,
   ...,
   label = NULL, domain = getDefaultReactiveDomain(),
   ignoreNULL = TRUE, ignoreInit = FALSE)

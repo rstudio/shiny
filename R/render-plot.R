@@ -46,7 +46,7 @@
 #'   decorative images.
 #' @param ... Arguments to be passed through to [grDevices::png()].
 #'   These can be used to set the width, height, background color, etc.
-#' @template params-expr-env-quoted-deprecated
+#' @template params-expr-env-quoted
 #' @param execOnResize If `FALSE` (the default), then when a plot is
 #'   resized, Shiny will *replay* the plot drawing commands with
 #'   [grDevices::replayPlot()] instead of re-executing `expr`.
@@ -59,7 +59,7 @@
 #' @export
 renderPlot <- function(expr, width = 'auto', height = 'auto', res = 72, ...,
                        alt = NA,
-                       env = deprecated(), quoted = deprecated(),
+                       env = parent.frame(), quoted = FALSE,
                        execOnResize = FALSE, outputArgs = list()
 ) {
 

@@ -327,7 +327,7 @@ markOutputAttrs <- function(renderFunc, snapshotExclude = NULL,
 #'   the output, see [plotPNG()].
 #'
 #' @param expr An expression that returns a list.
-#' @template params-expr-env-quoted-deprecated
+#' @template params-expr-env-quoted
 #' @param deleteFile Should the file in `func()$src` be deleted after
 #'   it is sent to the client browser? Generally speaking, if the image is a
 #'   temp file generated within `func`, then this should be `TRUE`;
@@ -406,7 +406,7 @@ markOutputAttrs <- function(renderFunc, snapshotExclude = NULL,
 #'
 #' shinyApp(ui, server)
 #' }
-renderImage <- function(expr, env = deprecated(), quoted = deprecated(),
+renderImage <- function(expr, env = parent.frame(), quoted = FALSE,
                         deleteFile, outputArgs=list())
 {
   q <- enquo0(expr)
@@ -533,7 +533,7 @@ isTemp <- function(path, tempDir = tempdir(), mustExist) {
 #' function return [invisible()].
 #'
 #' @param expr An expression to evaluate.
-#' @template params-expr-env-quoted-deprecated
+#' @template params-expr-env-quoted
 #' @param width Width of printed output.
 #' @param outputArgs A list of arguments to be passed through to the implicit
 #'   call to [verbatimTextOutput()] or [textOutput()] when the functions are
@@ -541,7 +541,7 @@ isTemp <- function(path, tempDir = tempdir(), mustExist) {
 #'
 #' @example res/text-example.R
 #' @export
-renderPrint <- function(expr, env = deprecated(), quoted = deprecated(),
+renderPrint <- function(expr, env = parent.frame(), quoted = FALSE,
                         width = getOption('width'), outputArgs=list())
 {
   q <- enquo0(expr)
@@ -628,7 +628,7 @@ createRenderPrintPromiseDomain <- function(width) {
 #'   element.
 #' @export
 #' @rdname renderPrint
-renderText <- function(expr, env = deprecated(), quoted = deprecated(),
+renderText <- function(expr, env = parent.frame(), quoted = FALSE,
                        outputArgs=list(), sep=" ") {
 
   q <- enquo0(expr)
@@ -654,7 +654,7 @@ renderText <- function(expr, env = deprecated(), quoted = deprecated(),
 #'
 #' @param expr An expression that returns a Shiny tag object, [HTML()],
 #'   or a list of such objects.
-#' @template params-expr-env-quoted-deprecated
+#' @template params-expr-env-quoted
 #' @param outputArgs A list of arguments to be passed through to the implicit
 #'   call to [uiOutput()] when `renderUI` is used in an
 #'   interactive R Markdown document.
@@ -680,7 +680,7 @@ renderText <- function(expr, env = deprecated(), quoted = deprecated(),
 #' shinyApp(ui, server)
 #' }
 #'
-renderUI <- function(expr, env = deprecated(), quoted = deprecated(),
+renderUI <- function(expr, env = parent.frame(), quoted = FALSE,
                      outputArgs = list())
 {
   q <- enquo0(expr)
@@ -829,7 +829,7 @@ downloadHandler <- function(filename, content, contentType=NA, outputArgs=list()
 #' }
 renderDataTable <- function(expr, options = NULL, searchDelay = 500,
                             callback = 'function(oTable) {}', escape = TRUE,
-                            env = deprecated(), quoted = deprecated(),
+                            env = parent.frame(), quoted = FALSE,
                             outputArgs=list())
 {
 

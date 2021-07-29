@@ -1,6 +1,6 @@
-#' @template param-env-deprecated
+#' @template param-env
 #' @templateVar x expr
 #' @templateVar env env
-#' @template param-quoted-deprecated
+#' @template param-quoted
 #' @templateVar x expr
 #' @templateVar quoted quoted

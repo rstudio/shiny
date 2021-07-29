@@ -42,7 +42,7 @@
 #'   (i.e. they either evaluate to `NA` or `NaN`).
 #' @param ... Arguments to be passed through to [xtable::xtable()]
 #'   and [xtable::print.xtable()].
-#' @template params-expr-env-quoted-deprecated
+#' @template params-expr-env-quoted
 #' @param outputArgs A list of arguments to be passed through to the
 #'   implicit call to [tableOutput()] when `renderTable` is
 #'   used in an interactive R Markdown document.
@@ -69,7 +69,7 @@ renderTable <- function(expr, striped = FALSE, hover = FALSE,
                         width = "auto", align = NULL,
                         rownames = FALSE, colnames = TRUE,
                         digits = NULL, na = "NA", ...,
-                        env = deprecated(), quoted = deprecated(),
+                        env = parent.frame(), quoted = FALSE,
                         outputArgs=list())
 {
   q <- enquo0(expr)

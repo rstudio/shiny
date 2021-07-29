@@ -235,6 +235,14 @@ for (info in list(
         expect_identical(ans, list(11, 11))
       })
 
+      test_that(paste0("Missing env with quosure, quoted = TRUE: ", info$name), {
+        e <- list2env(list(a=10))
+        x <- new_quosure(quote({ a + 1 }) , env = e)
+
+        ans <- renderH(x, envF = rlang::missing_arg(), quotedF = TRUE)()
+        expect_identical(ans, list(11, 11))
+      })
+
     }
 
     test_that(paste0("Works with inject / !!: ", info$name), {

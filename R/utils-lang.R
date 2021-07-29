@@ -53,7 +53,7 @@ formalsAndBody <- function(x) {
 
 #' Convert a quosure to a function for a Shiny render function
 #'
-#'  This takes a quosure and label, and wraps them into a function that should be
+#' This takes a quosure and label, and wraps them into a function that should be
 #' passed to [createRenderFunction()].
 #'
 #' This function was added in Shiny 1.6.0. Previously, it was recommended to use
@@ -61,15 +61,17 @@ formalsAndBody <- function(x) {
 #' recommend using [quoToFunction()] paired with [`rlang::enquo0()`]. This is because `quoToFunction()`
 #' does not require package authors to manually handle the `env` and `quoted` arguments -- that information is captured
 #' by quosures provided by \pkg{rlang}. To support legacy `env` and `quoted` variables,
-#' please see [`sustainEnvAndQuoted()`] for more details and examples on how to migrate your code.
+#' please see [`installExprFunction()`] for more details.
 #'
-#' @inheritParams sustainEnvAndQuoted
+#'
+#' @param q Quosure of the expression `x`. When capturing expressions to create
+#'   your quosure, it is recommended to use [`enquo0()`] to not unquote the
+#'   object too early. See [`enquo0()`] for more details.
 #' @inheritParams installExprFunction
 #' @seealso
 #' * [createRenderFunction()] for example usage.
 #' * [rlang::enquo0()] for more
 #'   information about not immediately unquoting when making `q`.
-#' * [sustainEnvAndQuoted()] for backwards support for `env` and `quoted` parameters
 #' @export
 #' @examples
 #' # Create a new renderer, similar to `renderText()`.
@@ -116,7 +118,7 @@ formalsAndBody <- function(x) {
 #'
 #' # If you want to use a quoted expression, use `rlang::inject()`.
 #' q <- quote({ values$A })
-#' tripleA <- rlang::inject(renderTripleIdeal(!!q))
+#' tripleA <- rlang::inject(renderTriple(!!q))
 #' # Look at the value
 #' isolate(tripleA())
 #'
@@ -128,7 +130,7 @@ formalsAndBody <- function(x) {
 #' myquo <- rlang::new_quosure(quote({ vals$A }), env = e)
 #' myquo
 #' # `inject()` the quosure into the render function
-#' tripleA <- rlang::inject(renderTripleIdeal(!!myquo))
+#' tripleA <- rlang::inject(renderTriple(!!myquo))
 #' # Look at the value
 #' isolate(tripleA())
 #' # "hello, hello, hello"
@@ -489,23 +491,21 @@ sustainEnvAndQuoted <- function(q, x, env, quoted, verbose = TRUE) {
 #' Convert an expression to a function
 #'
 #' @description
-#' `r lifecycle::badge("superseded")` Please see [`sustainEnvAndQuoted()`] and [`quoToFunction()`]
-#' for updated usage. (Shiny 1.7.0)
+#' Note: As of Shiny 1.6.0, when using quosure objects to replace the need for `expr` and `env` paramters, see [`quoToFunction()`] to simplify your code.
 #'
-#' Note: as of Shiny 1.7.0, it is
-#' recommended to use [`quoToFunction()`] (and if necessary, [`sustainEnvAndQuoted()`]) instead of
-#' `exprToFunction()` and `installExprFunction()`. See the examples for
-#' information on how to migrate your code using [`sustainEnvAndQuoted()`] and [`quoToFunction()`].
-#'
-#' This is to be called from another function, because it will attempt to get
-#' an unquoted expression from two calls back.
+#' These two methods are be called from within another function, because
+#' they will attempt to get an unquoted expression from two calls back.
 #'
 #' For `exprToFunction()`:
-#' If `expr` is a quoted expression, then this just converts it to a function.
-#' If `expr` is a function, then this simply returns expr (and prints a
+#' * If `expr` is a quoted expression, then this just converts it to a function.
+#' * If `expr` is a function, then this simply returns expr (and prints a
 #'   deprecation message).
-#' If `expr` was a non-quoted expression from two calls back, then this will
+#' * If `expr` was a non-quoted expression from two calls back, then this will
 #'   quote the original expression and convert it to a function.
+#' * If `expr` is a quosure, then `quoted` must be `TRUE` to use the quosure as
+#'   the expression.
+#' * If `expr` is an `rlang::inject()`ed quosure value, then `env` and `quoted`
+#'   will be ignored. Ex: `rlang::inject(exprToFunction(!!myquo))`.
 #'
 #' `installExprFunction` installs an expression in the given environment as a
 #' function, and registers debug hooks so that breakpoints may be set in the
@@ -516,90 +516,140 @@ sustainEnvAndQuoted <- function(q, x, env, quoted, verbose = TRUE) {
 #' `installExprFunction(expr, "func")` if we do. Both approaches create a
 #' function named `func` in the current environment.
 #'
+#' To simplify `rlang::inject(installExprFunction(!!myquo, "func"))` or
+#' `rlang::inject(installExprFunction(myquo, "func", quoted = TRUE))`, toolkit
+#' authors can call `func <- quoToFunction(myquo)` instead.
+#' See [`quoToFunction()`] for more details.
+#'
+#'
+#' @section `shinyRenderWidget()`:
+#'
+#' The [`htmlwidgets::shinyRenderWidget()`] function is a wrapper around
+#' [`installExprFunction()`]. Before Shiny 1.6.0, widget authors were recommended to force quoting of the `expr`.
+#'
+#' ```r
+#' # shiny render function for a widget named 'foo'
+#' renderFoo <- function(expr, env = parent.frame(), quoted = FALSE) {
+#'   if (!quoted) { expr <- substitute(expr) } # force quoted
+#'   htmlwidgets::shinyRenderWidget(expr, fooOutput, env, quoted = TRUE)
+#' }
+#' ```
+#'
+#' Now, when making new render methods that leverage quosures, widget authors
+#' can capture the `expr` immedately with a quosure using [`rlang::enquo0()`].
+#' When passing the quosure to [`htmlwidgets::shinyRenderWidget()`],
+#' provide `quoted = TRUE` so `installExprFunction()` can properly handle the quosure.
+#'
+#' ```r
+#' # shiny render function for a widget named 'foo'
+#' renderFoo <- function(expr) {
+#'   q <- rlang::enquo0(expr)
+#'   inject(htmlwidgets::shinyRenderWidget(q, fooOutput, quoted = TRUE))
+#' }
+#' ```
 #'
 #' @param expr A quoted or unquoted expression, or a quosure.
 #' @param env The desired environment for the function. Defaults to the
 #'   calling environment two steps back.
 #' @param quoted Is the expression quoted?
+#' @seealso [`quoToFunction()`], [`rlang::enquo0()`]
 #'
 #' @examples
-#' # These examples demonstrate the old method, with exprToFunction() and
-#' # installExprFunction(), as well as how to replace them, with sustainEnvAndQuoted().
+#' # Example of a new renderer, similar to renderText
+#' # This is something that toolkit authors will do
 #'
 #' # Version 1: exprToFunction()
-#' # The old way of converting the expression to a function, with exprToFunction()
-#' # (No quosure support.)
 #' renderTripleExpr <- function(expr, env=parent.frame(), quoted=FALSE) {
 #'   # Convert expr to a function
 #'   func <- exprToFunction(expr, env, quoted)
 #'
-#'   function() {
-#'     value <- func()
-#'     paste(rep(value, 3), collapse=", ")
-#'   }
+#'   # Wrap up func, with another function which takes the value of func()
+#'   # and modifies it to concatinate the value three times
+#'   createRenderFunction(
+#'     func,
+#'     transform = function(value, ...) {
+#'       paste(rep(value, 3), collapse=", ")
+#'     },
+#'     outputFunc = textOutput
+#'   )
 #' }
 #'
 #' # Version 2: installExprFunction()
-#' # The not-quite-as-old way of converting the expression to a function, with
-#' # installExprFunction(). (No quosure support.)
-#' renderTripleInstall <- function(expr, env=parent.frame(), quoted=FALSE) {
-#'   # Convert expr to a function
+#' renderTriple <- function(expr, env=parent.frame(), quoted=FALSE) {
+#'   # Convert expr to a function and register debug hooks
 #'   installExprFunction(expr, "func", env, quoted)
 #'
-#'   function() {
-#'     value <- func()
-#'     paste(rep(value, 3), collapse=", ")
-#'   }
+#'   # (Same as above)
+#'   createRenderFunction(
+#'     func,
+#'     transform = function(value, session, name, ...) { paste(rep(value, 3), collapse=", ") },
+#'     outputFunc = textOutput
+#'   )
 #' }
 #'
-#' # Version 3: Replacing the old functions with sustainEnvAndQuoted() and quoToFunction()
-#' # This keeps the `env` and `quoted` arguments, in case they are needed for
-#' # backward compatibility
-#' # (Supports quosures. Does not support `inject()`ed quosures with `env` or `quoted` params.)
-#' renderTripleSustain <- function(expr, env=parent.frame(), quoted=FALSE) {
+#' # Version 3: quoToFunction()
+#' # This is the recommended way when able to leverage quosures,
+#' # as it discards `env` and `quoted` for simplicity
+#' renderTripleQuo <- function(expr) {
 #'   # Convert expr to a quosure, and then to a function
-#'   q <- enquo0(expr)
-#'   q <- sustainEnvAndQuoted(q, expr, env, quoted)
-#'   func <- quoToFunction(q)
+#'   func <- quoToFunction(rlang::enquo0(expr))
 #'
-#'   function() {
-#'     value <- func()
-#'     paste(rep(value, 3), collapse=", ")
-#'   }
+#'   # (Same as above)
+#'   createRenderFunction(
+#'     func,
+#'     transform = function(value, session, name, ...) { paste(rep(value, 3), collapse=", ") },
+#'     outputFunc = textOutput
+#'   )
 #' }
 #'
-#'
-#' # Version 4: quoToFunction() only
-#' # This is the recommended way to only use quoToFunction() (`enquo0()`), and
-#' # it discards `env` and `quoted`, for simplicity.
-#' renderTripleIdeal <- function(expr) {
-#'   # Convert expr to a quosure, and then to a function
-#'   func <- quoToFunction(enquo0(expr))
-#'
-#'   function() {
-#'     value <- func()
-#'     paste(rep(value, 3), collapse=", ")
-#'   }
-#' }
-#'
-#' # Example of using the renderer.
+#' # Example of using a renderer (which calls `installToExpr()`).
 #' # This is something that app authors will do.
-#' values <- renderTripleIdeal(A="text")
+#' values <- reactiveValues(A="text")
 #'
-#' \dontrun{
+#' if (FALSE) {
 #' # Create an output object
-#' output$tripleA <- renderTripleIdeal({
+#' output$tripleA <- renderTriple({
 #'   values$A
 #' })
 #' }
 #'
 #' # At the R console, you can experiment with the renderer using isolate()
-#' tripleA <- renderTripleIdeal({
+#' tripleA <- renderTriple({
 #'   values$A
 #' })
-#'
 #' isolate(tripleA())
-#' # "text, text, text"
+#' #> "text, text, text"
+#'
+#'
+#' # If you want to use a quosure for your expresssion,
+#' # use `quoted = TRUE` or `rlang::inject()`.
+#'
+#' # Using `quoted = TRUE`
+#' q <- quote({ values$A })
+#' tripleA <- renderTriple(q, quoted = TRUE)
+#' isolate(tripleA())
+#' #> "text, text, text"
+#'
+#' # Using `rlang::inject()`
+#' tripleA <- rlang::inject(renderTriple(!!q))
+#' isolate(tripleA())
+#' #> "text, text, text"
+#'
+#'
+#' # Capturing an expression and an environment, using a quosure
+#' e <- new.env()
+#' e$vals <- reactiveValues(A = "hello")
+#' # Create a quosure that captures both the expression and environment.
+#' myquo <- rlang::new_quosure(quote({ vals$A }), env = e)
+#' myquo
+#' # Using `quoted = TRUE`
+#' tripleA <- renderTriple(q, quoted = TRUE)
+#' isolate(tripleA())
+#' #> "hello, hello, hello"
+#' # Using `rlang::inject()`
+#' tripleA <- rlang::inject(renderTriple(!!myquo))
+#' isolate(tripleA())
+#' #> "hello, hello, hello"
 #' @export
 #' @keywords internal
 exprToFunction <- function(expr, env = parent.frame(), quoted = FALSE) {
@@ -623,71 +673,6 @@ exprToFunction <- function(expr, env = parent.frame(), quoted = FALSE) {
   # rlang has custom logic for converting quosures to functions
   quoToSimpleFunction(expr)
 }
-
-
-
-# is_injected_quosure <- function(x) {
-#   # cat("inside is injected:\n"); print(eval(substitute(substitute(x)), parent.frame()))
-#   is_quosure(eval(substitute(substitute(x)), parent.frame()))
-# }
-
-
-# exprToFunctionProposed <- function(expr, env = parent.frame(), quoted = FALSE) {
-#   if (!quoted) {
-#     expr <- enquo0(expr)
-#   }
-#   # Can does not work as expected once `enquo0()` is called
-#   if (is_injected_quosure(expr)) {
-#     env <- rlang::quo_get_env(expr)
-#   }
-#   new_function(
-#     # no args
-#     list(),
-#     # works with `quote()`ed args
-#     rlang::get_expr(expr),
-#     # function env
-#     env
-#   )
-# }
-# exprToFunctionBarret <- function(expr, env = parent.frame(), quoted = FALSE) {
-#   # cat("exprToFunction - Start\n")
-#   was_injected <- is_injected_quosure(expr)
-#   # if (was_injected && isTRUE(quoted)) {
-#   #   stop("Can not use `quoted` and also `inject()` a quosure")
-#   # }
-#   # if (was_injected && !identical(env, parent.frame())) {
-#   #   stop("Can not use `env` and also `inject()` a quosure")
-#   # }
-
-#   if (was_injected) {
-#     # print("updated env from quosure env")
-#     env <- rlang::quo_get_env(expr)
-#   } else {
-#     # not injected, raw expression
-#     if (!quoted) {
-#       # print("turning into quosure")
-#       expr <- enquo0(expr)
-#       # env <- rlang::quo_get_env(expr)
-#     }
-#   }
-#   # cat("exprToFunction Info:\n")
-#   ret <- new_function(list(), rlang::get_expr(expr), env)
-#   # str(list(
-#   #   expr = rlang::get_expr(expr),
-#   #   env = env,
-#   #   envVals = mget(ls(envir = env), envir = env)
-#   # ))
-#   # print(ret)
-#   ret
-# }
-
-# exprToFunctionOld <- function(expr, env = parent.frame(), quoted = FALSE) {
-#   if (!quoted) {
-#     expr <- eval(substitute(substitute(expr)), parent.frame())
-#   }
-#   # expr is a quoted expression
-#   new_function(list(), body = expr, env = env)
-# }
 
 #' @rdname exprToFunction
 #'

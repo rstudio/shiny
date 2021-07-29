@@ -2,9 +2,6 @@ utils::globalVariables('func', add = TRUE)
 
 #' Mark a function as a render function
 #'
-#' `r lifecycle::badge("superseded")` Please see [`createRenderFunction()`]
-#' for updated usage. (Shiny 1.1.0)
-#'
 #' Should be called by implementers of `renderXXX` functions in order to mark
 #' their return values as Shiny render functions, and to provide a hint to Shiny
 #' regarding what UI function is most commonly used with this type of render
@@ -48,7 +45,6 @@ utils::globalVariables('func', add = TRUE)
 #'
 #' @seealso [createRenderFunction()], [quoToFunction()]
 #' @export
-#' @keywords internal
 markRenderFunction <- function(
   uiFunc,
   renderFunc,
@@ -111,7 +107,7 @@ markRenderFunction <- function(
     cacheHint <- lapply(cacheHint, function(x) {
       if      (is.function(x)) formalsAndBody(x)
       else if (is.language(x)) zap_srcref(x)
-      else if (is_quosure(x)) quo_get_expr(x)
+      else if (is_quosure(x)) zap_srcref(quo_get_expr(x))
       else                     x
     })
   }

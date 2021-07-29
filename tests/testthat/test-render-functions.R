@@ -1,5 +1,4 @@
 test_that("Render functions correctly handle quosures", {
-  skip("working tests")
   # Normally, quosures are not unwrapped at creation time.
   # However, using inject() will make it unwrap at creation time.
 
@@ -35,7 +34,6 @@ test_that("Render functions correctly handle quosures", {
 })
 
 test_that("functionLabel returns static value when the label can not be assigned to", {
-  skip("working tests")
   getFunc <- function(exprF, envF = parent.frame(), quotedF = FALSE) {
     quoToFunction(enquo0(exprF))
   }
@@ -70,10 +68,11 @@ test_that("functionLabel returns static value when the label can not be assigned
 
 local({
 
+# (must also copy logic into `lower - quoToFunction(enquo0(expr))` code)
 return_func <- function(func) {
   function() {
     value <- func()
-    paste(rep(value, 2), collapse=", ")
+    list(value, value)
   }
 }
 
@@ -144,7 +143,7 @@ for (info in list(
       function() {
         func <- quoToFunction(enquo0(expr))
         value <- func()
-        paste(rep(value, 2), collapse=", ")
+        list(value, value)
       }
     }
   )
@@ -153,7 +152,6 @@ for (info in list(
   # Scope the local variables
   local({
     renderH <- info$fn %||% stop("`info$fn` not found")
-    messageVal <- info$messageVal %||% NA
 
     # Different usages of env and quoted param
     a <- 1
@@ -161,13 +159,12 @@ for (info in list(
     e$a <- 10
 
     test_that(paste0("vanilla: ", info$name), {
-      expect_message({
-        val <- renderH({a + 1})()
-      }, messageVal)
-      expect_identical(val, "2, 2")
+      val <- renderH({a + 1})()
+      expect_identical(val, list(2, 2))
     })
 
     # Test that no error is thrown when the function is created
+    # This proves that the expression is not immediately evaluated
     test_that(paste0("stop('boom'): ", info$name), {
       expect_error(
         renderH(stop("boom")),
@@ -178,72 +175,64 @@ for (info in list(
     if (length(formals(renderH)) > 1) {
       test_that(paste0("quoted = FALSE: ", info$name), {
         r <- renderH(a + 1, quotedF = FALSE)
-        expect_identical(r(), "2, 2")
+        expect_identical(r(), list(2, 2))
       })
 
       test_that(paste0("quoted = TRUE: ", info$name), {
         r <- renderH(quote(a + 1), quotedF = TRUE)
-        expect_identical(r(), "2, 2")
+        expect_identical(r(), list(2, 2))
       })
 
       test_that(paste0("env = e: ", info$name), {
         r <- renderH(a + 1, envF = e)
-        expect_identical(r(), "11, 11")
+        expect_identical(r(), list(11, 11))
       })
 
       test_that(paste0("env = e, quoted = FALSE: ", info$name), {
         r <- renderH(a + 1, envF = e, quotedF = FALSE)
-        expect_identical(r(), "11, 11")
+        expect_identical(r(), list(11, 11))
       })
 
       test_that(paste0("env = e, quoted = TRUE: ", info$name), {
         r <- renderH(quote(a + 1), envF = e, quotedF = TRUE)
-        expect_identical(r(), "11, 11")
+        expect_identical(r(), list(11, 11))
       })
 
       test_that(paste0("Works with raw quosures, quoted = FALSE: ", info$name), {
         e <- list2env(list(a=10))
         x <- new_quosure(quote({ a + 1 }) , env = e)
-        wrapper <- function(exprF, envF = parent.frame(), quotedF = FALSE) {
-          exprToFunction(exprF, envF, quotedF)
-        }
-        expect_identical(
-          wrapper(x, quotedF = FALSE)(),
-          x
-        )
+        r <- renderH(x, quotedF = FALSE)
+        expect_identical(r(), list(x, x))
       })
-      # test_that(paste0("Works with raw quosures, quoted = FALSE: ", info$name), {
-      #   e <- list2env(list(a=10))
-      #   x <- new_quosure(quote({ a + 1 }) , env = e)
-      #   ans <- expect_equal(
-      #     renderH(x, quoted = FALSE)(),
-      #     x
-      #   )
-      #   expect_identical(ans, "11, 11")
-      # })
+      test_that(paste0(
+        "Passing in a raw quosures, quoted = FALSE, env = otherenv",
+        " is treated like an expression: ", info$name),
+      {
+        e <- list2env(list(a=10))
+        x <- new_quosure(quote({ a + 1 }) , env = e)
+        other_env <- list2env(list(x=20))
+        r <- renderH(x, quotedF = FALSE, envF = e)
+        expect_identical(r(), list(x, x))
+      })
+      test_that(
+        paste0("Works with injected quosures, quoted = FALSE, env = otherenv: ", info$name), {
+        e <- list2env(list(a=10))
+        x <- new_quosure(quote({ a + 1 }) , env = e)
+        other_env <- new.env(parent = emptyenv())
+        r <- inject(renderH(!!x, quotedF = FALSE, envF = e))
+        expect_identical(r(), list(11, 11))
+      })
       test_that(paste0("Works with raw quosures, quoted = TRUE: ", info$name), {
         e <- list2env(list(a=10))
         x <- new_quosure(quote({ a + 1 }) , env = e)
-        ans <- expect_message(
-          renderH(x, quotedF = TRUE)(),
-          messageVal
-        )
-        expect_identical(ans, "11, 11")
-      })
-      test_that(paste0("Works with injecting raw quosures: ", info$name), {
-        e <- list2env(list(a=10))
-        x <- new_quosure(quote({ a + 1 }) , env = e)
-        ans <- expect_message(
-          inject(renderH(!!x))(),
-          messageVal
-        )
-        expect_identical(ans, "11, 11")
-      })
-      test_that(paste0("Works with injecting raw quosures: ", info$name), {
-        e <- list2env(list(a=10))
-        x <- new_quosure(quote({ a + 1 }) , env = e)
         ans <- renderH(x, quotedF = TRUE)()
-        expect_identical(ans, "11, 11")
+        expect_identical(ans, list(11, 11))
+      })
+      test_that(paste0("Works with injecting raw quosures: ", info$name), {
+        e <- list2env(list(a=10))
+        x <- new_quosure(quote({ a + 1 }) , env = e)
+        ans <- inject(renderH(!!x))()
+        expect_identical(ans, list(11, 11))
       })
 
     }
@@ -254,8 +243,8 @@ for (info in list(
       r1 <- inject(renderH({ !!a }))
       r2 <- renderH({ eval_tidy(quo(!!a)) })
       a <- 100
-      expect_identical(r1(), "1, 1")
-      expect_identical(r2(), "100, 100")
+      expect_identical(r1(), list(1,1))
+      expect_identical(r2(), list(100, 100))
     })
   })
 }

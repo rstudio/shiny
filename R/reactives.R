@@ -2286,21 +2286,6 @@ observeEvent <- function(eventExpr, handlerExpr,
 
   label <- quoToLabel(eventQ, "observeEvent", label)
 
-  # TODO-barret ; is the code above correct? Or should we go back to labelled functions (code below)?
-  # eventFunc <- installExprFunction(
-  #   eventExpr, "eventFunc", event.env, event.quoted,
-  #   label = "observeEventExpr",
-  #   ..stacktraceon = TRUE
-  # )
-
-  # handlerFunc <- installExprFunction(
-  #   handlerExpr, "handlerFunc", handler.env, handler.quoted,
-  #   label = "observeEventHandler",
-  #   ..stacktraceon = TRUE
-  # )
-
-  # label <- funcToLabel(eventFunc, "observeEvent", label)
-
   handler <- inject(observe(
     !!handlerQ,
     label = label,
@@ -2334,7 +2319,6 @@ eventReactive <- function(eventExpr, valueExpr,
 {
   check_dots_empty()
 
-  # TODO-barret ; Similar situation to observeEvent
   eventQ <- exprToQuo(eventExpr, event.env, event.quoted)
   valueQ <- exprToQuo(valueExpr, value.env, value.quoted)
 

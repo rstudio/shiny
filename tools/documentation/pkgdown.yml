@@ -173,7 +173,6 @@ reference:
       - restoreInput
       - applyInputHandlers
       - quoToFunction
-      - sustainEnvAndQuoted
       - parseQueryString
       - getCurrentOutputInfo
       - plotPNG

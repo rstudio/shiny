@@ -875,7 +875,7 @@ Observable <- R6Class(
         invisible(.value)
     },
     format = function() {
-      label <- funcToLabel(.origFunc, "reactive", NULL)
+      label <- exprToLabel(fn_body(.origFunc), "reactive", NULL)
       strsplit(label, "\n")[[1]]
     },
     .updateValue = function() {
@@ -1001,9 +1001,9 @@ reactive <- function(
 ) {
   check_dots_empty()
 
-  func <- installExprFunction(x, "func", env, quoted)
+  func <- installExprFunction(x, "func", env, quoted, wrappedWithLabel = FALSE)
   # Attach a label and a reference to the original user source for debugging
-  userExpr <- installedFuncExpr(func)
+  userExpr <- fn_body(func)
   label <- exprToLabel(userExpr, "reactive", label)
 
   o <- Observable$new(func, label, domain, ..stacktraceon = ..stacktraceon)

@@ -295,13 +295,14 @@ cache hint, pass it to \code{shinyRenderWidget}. For example:\preformatted{rende
   htmlwidgets::shinyRenderWidget(
     q,
     myWidgetOutput,
+    quoted = TRUE,
     cacheHint = list(label = "myWidget", userQuo = q)
   )
 \}
 }
 
 If your \code{render} function sets any internal state, you may find it useful
-in your call to \code{\link[=createRenderFunction]{createRenderFunction()}} (or \code{\link[=markRenderFunction]{markRenderFunction()}}) to use
+in your call to \code{\link[=createRenderFunction]{createRenderFunction()}} to use
 the \code{cacheWriteHook} and/or \code{cacheReadHook} parameters. These hooks are
 functions that run just before the object is stored in the cache, and just
 after the object is retrieved from the cache. They can modify the data

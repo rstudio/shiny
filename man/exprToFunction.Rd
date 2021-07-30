@@ -194,4 +194,3 @@ isolate(tripleA())
 \seealso{
 \code{\link[=quoToFunction]{quoToFunction()}}, \code{\link[rlang:enquo0]{rlang::enquo0()}}
 }
-\keyword{internal}

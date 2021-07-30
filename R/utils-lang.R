@@ -410,12 +410,16 @@ installExprFunction <- function(expr, name, eval.env = parent.frame(2),
     # have a label with length > 1 it causes warnings in wrapFunctionLabel.
     label <- paste0(label, collapse = "\n")
   }
+  wrappedWithLabel <- isTRUE(wrappedWithLabel)
   if (wrappedWithLabel) {
     func <- wrapFunctionLabel(func, updateFunctionLabel(label), ..stacktraceon = ..stacktraceon, dots = FALSE)
-  } else {
-    registerDebugHook(name, assign.env, label)
   }
   assign(name, func, envir = assign.env)
+  if (!wrappedWithLabel) {
+    registerDebugHook(name, assign.env, label)
+  }
+
+  invisible(func)
 }
 
 # Utility function for creating a debugging label, given an expression.

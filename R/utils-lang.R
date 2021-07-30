@@ -144,10 +144,11 @@ quoToFunction <- function(
 }
 
 updateFunctionLabel <- function(label) {
+  badFnName <- "anonymous"
   if (all(is.language(label))) {
     # Prevent immediately invoked functions like as.language(a()())
     if (is.language(label) && length(label) > 1) {
-      return("wrappedFunction")
+      return(badFnName)
     }
     label <- deparse(label, width.cutoff = 500L)
   }
@@ -155,10 +156,10 @@ updateFunctionLabel <- function(label) {
   # Prevent function calls that are over one line; (Assignments are hard to perform)
     # Prevent immediately invoked functions like "a()()"
   if (length(label) > 1 || grepl("(", label, fixed = TRUE)) {
-    return("wrappedFunction")
+    return(badFnName)
   }
   if (label == "NULL") {
-    return("wrappedFunction")
+    return(badFnName)
   }
   label
 }

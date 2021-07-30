@@ -57,12 +57,12 @@ test_that("functionLabel returns static value when the label can not be assigned
     (function(exprF) {
       quoToFunction(enquo0(exprF))
     })(),
-    "wrappedFunction"
+    "anonymous"
   )
   # parents are not supported
   expect_label(
     (function(exprF) {quoToFunction(enquo0(exprF))})(),
-    "wrappedFunction"
+    "anonymous"
   )
 })
 

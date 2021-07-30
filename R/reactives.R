@@ -875,7 +875,7 @@ Observable <- R6Class(
         invisible(.value)
     },
     format = function() {
-      label <- sprintf('reactive(%s)', paste(deparse(body(.origFunc)), collapse='\n'))
+      label <- funcToLabel(.origFunc, "reactive", NULL)
       strsplit(label, "\n")[[1]]
     },
     .updateValue = function() {
@@ -991,23 +991,20 @@ reactive <- function(
   ...,
   label = NULL,
   domain = getDefaultReactiveDomain(),
-  ..stacktraceon = TRUE)
-{
+  ..stacktraceon = TRUE
+) {
   check_dots_empty()
 
-  q <- enquo0(x)
-  q <- sustainEnvAndQuoted(q, x, env, quoted, verbose = FALSE)
-  fun <- quoToSimpleFunction(q)
-
+  func <- installExprFunction(x, "func", env, quoted)
   # Attach a label and a reference to the original user source for debugging
-  q_expr <- quo_get_expr(q)
-  label <- exprToLabel(q_expr, "reactive", label)
+  userExpr <- installedFuncExpr(func)
+  label <- exprToLabel(userExpr, "reactive", label)
 
-  o <- Observable$new(fun, label, domain, ..stacktraceon = ..stacktraceon)
+  o <- Observable$new(func, label, domain, ..stacktraceon = ..stacktraceon)
   structure(
     o$getValue,
     observable = o,
-    cacheHint = list(userExpr = zap_srcref(q_expr)),
+    cacheHint = list(userExpr = zap_srcref(userExpr)),
     class = c("reactiveExpr", "reactive", "function")
   )
 }
@@ -1416,16 +1413,11 @@ observe <- function(
 {
   check_dots_empty()
 
-  q <- enquo0(x)
-  q <- sustainEnvAndQuoted(q, x, env, quoted, verbose = FALSE)
-  fun <- quoToSimpleFunction(q)
-
-  if (is.null(label)) {
-    label <- sprintf('observe(%s)', paste(deparse(quo_get_expr(q)), collapse='\n'))
-  }
+  func <- installExprFunction(x, "func", env, quoted)
+  label <- funcToLabel(func, "observe", label)
 
   o <- Observer$new(
-    fun,
+    func,
     label = label,
     suspended = suspended,
     priority = priority,
@@ -2278,14 +2270,25 @@ observeEvent <- function(eventExpr, handlerExpr,
 {
   check_dots_empty()
 
-  eventQ <- enquo0(eventExpr)
-  handlerQ <- enquo0(handlerExpr)
-  eventQ <- sustainEnvAndQuoted(eventQ, eventExpr, event.env, event.quoted, verbose = FALSE)
-  handlerQ <- sustainEnvAndQuoted(handlerQ, handlerExpr, handler.env, handler.quoted, verbose = FALSE)
+  eventQ <- exprToQuo(eventExpr, event.env, event.quoted)
+  handlerQ <- exprToQuo(handlerExpr, handler.env, handler.quoted)
 
-  if (is.null(label)) {
-    label <- sprintf('observeEvent(%s)', paste(deparse(get_expr(eventQ)), collapse='\n'))
-  }
+  label <- quoToLabel(eventQ, "observeEvent", label)
+
+  # TODO-barret ; is the code above correct? Or should we go back to labelled functions (code below)?
+  # eventFunc <- installExprFunction(
+  #   eventExpr, "eventFunc", event.env, event.quoted,
+  #   label = "observeEventExpr",
+  #   ..stacktraceon = TRUE
+  # )
+
+  # handlerFunc <- installExprFunction(
+  #   handlerExpr, "handlerFunc", handler.env, handler.quoted,
+  #   label = "observeEventHandler",
+  #   ..stacktraceon = TRUE
+  # )
+
+  # label <- funcToLabel(eventFunc, "observeEvent", label)
 
   handler <- inject(observe(
     !!handlerQ,
@@ -2320,14 +2323,11 @@ eventReactive <- function(eventExpr, valueExpr,
 {
   check_dots_empty()
 
-  eventQ <- enquo0(eventExpr)
-  valueQ <- enquo0(valueExpr)
-  eventQ <- sustainEnvAndQuoted(eventQ, eventExpr, event.env, event.quoted, verbose = FALSE)
-  valueQ <- sustainEnvAndQuoted(valueQ, valueExpr, value.env, value.quoted, verbose = FALSE)
+  # TODO-barret ; Similar situation to observeEvent
+  eventQ <- exprToQuo(eventExpr, event.env, event.quoted)
+  valueQ <- exprToQuo(valueExpr, value.env, value.quoted)
 
-  if (is.null(label)) {
-    label <- sprintf('eventReactive(%s)', paste(deparse(get_expr(eventQ)), collapse='\n'))
-  }
+  label <- quoToLabel(eventQ, "eventReactive", label)
 
   invisible(inject(bindEvent(
     ignoreNULL = ignoreNULL,

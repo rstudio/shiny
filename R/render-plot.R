@@ -63,11 +63,13 @@ renderPlot <- function(expr, width = 'auto', height = 'auto', res = 72, ...,
                        execOnResize = FALSE, outputArgs = list()
 ) {
 
-  q <- enquo0(expr)
-  q <- sustainEnvAndQuoted(q, expr, env, quoted, verbose = FALSE)
-  # This ..stacktraceon is matched by a ..stacktraceoff.. when plotFunc
-  # is called
-  func <- quoToFunction(q, "renderPlot", ..stacktraceon = TRUE)
+  func <- installExprFunction(
+    expr, "func", env, quoted,
+    label = "renderPlot",
+    # This ..stacktraceon is matched by a ..stacktraceoff.. when plotFunc
+    # is called
+    ..stacktraceon = TRUE
+  )
 
   args <- list(...)
 
@@ -185,7 +187,7 @@ renderPlot <- function(expr, width = 'auto', height = 'auto', res = 72, ...,
     outputFunc,
     renderFunc,
     outputArgs,
-    cacheHint = list(userExpr = get_expr(q), res = res)
+    cacheHint = list(userExpr = installedFuncExpr(func), res = res)
   )
   class(markedFunc) <- c("shiny.renderPlot", class(markedFunc))
   markedFunc

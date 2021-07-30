@@ -409,9 +409,7 @@ markOutputAttrs <- function(renderFunc, snapshotExclude = NULL,
 renderImage <- function(expr, env = parent.frame(), quoted = FALSE,
                         deleteFile, outputArgs=list())
 {
-  q <- enquo0(expr)
-  q <- sustainEnvAndQuoted(q, expr, env, quoted, verbose = FALSE)
-  func <- quoToFunction(q, "renderImage")
+  func <- installExprFunction(expr, "func", env, quoted, label = "renderImage")
 
   # missing() must be used directly within the function with the given arg
   if (missing(deleteFile)) {
@@ -544,9 +542,7 @@ isTemp <- function(path, tempDir = tempdir(), mustExist) {
 renderPrint <- function(expr, env = parent.frame(), quoted = FALSE,
                         width = getOption('width'), outputArgs=list())
 {
-  q <- enquo0(expr)
-  q <- sustainEnvAndQuoted(q, expr, env, quoted, verbose = FALSE)
-  func <- quoToFunction(q, "renderPrint")
+  func <- installExprFunction(expr, "func", env, quoted, label = "renderPrint")
 
   # Set a promise domain that sets the console width
   #   and captures output
@@ -578,7 +574,7 @@ renderPrint <- function(expr, env = parent.frame(), quoted = FALSE,
     outputArgs,
     cacheHint = list(
       label = "renderPrint",
-      origUserExpr = get_expr(q)
+      origUserExpr = installedFuncExpr(func)
     )
   )
 }
@@ -631,9 +627,7 @@ createRenderPrintPromiseDomain <- function(width) {
 renderText <- function(expr, env = parent.frame(), quoted = FALSE,
                        outputArgs=list(), sep=" ") {
 
-  q <- enquo0(expr)
-  q <- sustainEnvAndQuoted(q, expr, env, quoted, verbose = FALSE)
-  func <- quoToFunction(q, "renderText")
+  func <- installExprFunction(expr, "func", env, quoted, label = "renderText")
 
   createRenderFunction(
     func,
@@ -683,9 +677,7 @@ renderText <- function(expr, env = parent.frame(), quoted = FALSE,
 renderUI <- function(expr, env = parent.frame(), quoted = FALSE,
                      outputArgs = list())
 {
-  q <- enquo0(expr)
-  q <- sustainEnvAndQuoted(q, expr, env, quoted, verbose = FALSE)
-  func <- quoToFunction(q, "renderUI")
+  func <- installExprFunction(expr, "func", env, quoted, label = "renderUI")
 
   createRenderFunction(
     func,
@@ -840,9 +832,7 @@ renderDataTable <- function(expr, options = NULL, searchDelay = 500,
     )
   }
 
-  q <- enquo0(expr)
-  q <- sustainEnvAndQuoted(q, expr, env, quoted, verbose = FALSE)
-  func <- quoToFunction(q, "renderDataTable")
+  func <- installExprFunction(expr, "func", env, quoted, label = "renderDataTable")
 
   renderFunc <- function(shinysession, name, ...) {
     if (is.function(options)) options <- options()

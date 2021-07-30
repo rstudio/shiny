@@ -72,9 +72,7 @@ renderTable <- function(expr, striped = FALSE, hover = FALSE,
                         env = parent.frame(), quoted = FALSE,
                         outputArgs=list())
 {
-  q <- enquo0(expr)
-  q <- sustainEnvAndQuoted(q, expr, env, quoted, verbose = FALSE)
-  func <- quoToFunction(q, "renderTable")
+  func <- installExprFunction(expr, "func", env, quoted, label = "renderTable")
 
   if (!is.function(spacing)) spacing <- match.arg(spacing)
 

@@ -8,10 +8,10 @@
 observeEvent(
   eventExpr,
   handlerExpr,
-  event.env = deprecated(),
-  event.quoted = deprecated(),
-  handler.env = deprecated(),
-  handler.quoted = deprecated(),
+  event.env = parent.frame(),
+  event.quoted = FALSE,
+  handler.env = parent.frame(),
+  handler.quoted = FALSE,
   ...,
   label = NULL,
   suspended = FALSE,
@@ -26,10 +26,10 @@ observeEvent(
 eventReactive(
   eventExpr,
   valueExpr,
-  event.env = deprecated(),
-  event.quoted = deprecated(),
-  value.env = deprecated(),
-  value.quoted = deprecated(),
+  event.env = parent.frame(),
+  event.quoted = FALSE,
+  value.env = parent.frame(),
+  value.quoted = FALSE,
   ...,
   label = NULL,
   domain = getDefaultReactiveDomain(),
@@ -83,11 +83,15 @@ happen once.}
 \code{eventReactive}. It will be executed within an \code{\link[=isolate]{isolate()}}
 scope.}
 
-\item{value.env}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#superseded}{\figure{lifecycle-superseded.svg}{options: alt='[Superseded]'}}}{\strong{[Superseded]}}, \code{valueExpr} allows for quosures to be supplied. See \code{\link[rlang:nse-defuse]{rlang::quo()}} for more details.
-However, if a value is supplied, it will overwrite the environment for when the expression of \code{valueExpr} is evaluated.}
+\item{value.env}{The parent environment for the reactive expression. By default,
+this is the calling environment, the same as when defining an ordinary
+non-reactive expression. If \code{valueExpr} is a quosure and \code{value.quoted} is \code{TRUE},
+then \code{value.env} is ignored.}
 
-\item{value.quoted}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#superseded}{\figure{lifecycle-superseded.svg}{options: alt='[Superseded]'}}}{\strong{[Superseded]}}, \code{valueExpr} allows for quosures to be supplied. See \code{\link[rlang:nse-defuse]{rlang::quo()}} for more details.
-If it is \code{TRUE}, then the \code{\link[=quote]{quote()}}ed value of \code{valueExpr} will be used when \code{valueExpr} is evaluated.}
+\item{value.quoted}{If it is \code{TRUE}, then the \code{\link[=quote]{quote()}}ed value of \code{valueExpr}
+will be used when \code{valueExpr} is evaluated. If \code{valueExpr} is a quosure and you
+would like to use its expression as a value for \code{valueExpr}, then you must set
+\code{value.quoted} to \code{TRUE}.}
 }
 \value{
 \code{observeEvent} returns an observer reference class object (see

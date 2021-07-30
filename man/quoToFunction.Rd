@@ -27,7 +27,7 @@ This function was added in Shiny 1.6.0. Previously, it was recommended to use
 recommend using \code{\link[=quoToFunction]{quoToFunction()}} paired with \code{\link[rlang:enquo0]{rlang::enquo0()}}. This is because \code{quoToFunction()}
 does not require package authors to manually handle the \code{env} and \code{quoted} arguments -- that information is captured
 by quosures provided by \pkg{rlang}. To support legacy \code{env} and \code{quoted} variables,
-please see \code{\link[=sustainEnvAndQuoted]{sustainEnvAndQuoted()}} for more details and examples on how to migrate your code.
+please see \code{\link[=installExprFunction]{installExprFunction()}} for more details.
 }
 \examples{
 # Create a new renderer, similar to `renderText()`.
@@ -74,7 +74,7 @@ isolate(tripleA())
 
 # If you want to use a quoted expression, use `rlang::inject()`.
 q <- quote({ values$A })
-tripleA <- rlang::inject(renderTripleIdeal(!!q))
+tripleA <- rlang::inject(renderTriple(!!q))
 # Look at the value
 isolate(tripleA())
 
@@ -86,7 +86,7 @@ e$vals <- reactiveValues(A = "hello")
 myquo <- rlang::new_quosure(quote({ vals$A }), env = e)
 myquo
 # `inject()` the quosure into the render function
-tripleA <- rlang::inject(renderTripleIdeal(!!myquo))
+tripleA <- rlang::inject(renderTriple(!!myquo))
 # Look at the value
 isolate(tripleA())
 # "hello, hello, hello"
@@ -96,6 +96,5 @@ isolate(tripleA())
 \item \code{\link[=createRenderFunction]{createRenderFunction()}} for example usage.
 \item \code{\link[rlang:enquo0]{rlang::enquo0()}} for more
 information about not immediately unquoting when making \code{q}.
-\item \code{\link[=sustainEnvAndQuoted]{sustainEnvAndQuoted()}} for backwards support for \code{env} and \code{quoted} parameters
 }
 }

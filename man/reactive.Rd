@@ -7,8 +7,8 @@
 \usage{
 reactive(
   x,
-  env = deprecated(),
-  quoted = deprecated(),
+  env = parent.frame(),
+  quoted = FALSE,
   ...,
   label = NULL,
   domain = getDefaultReactiveDomain(),
@@ -20,11 +20,15 @@ is.reactive(x)
 \arguments{
 \item{x}{For \code{is.reactive()}, an object to test. For \code{reactive()}, an expression. When passing in a \code{\link[=quo]{quo()}}sure with \code{reactive()}, remember to use \code{\link[rlang:inject]{rlang::inject()}} to distinguish that you are passing in the content of your quosure, not the expression of the quosure.}
 
-\item{env}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#superseded}{\figure{lifecycle-superseded.svg}{options: alt='[Superseded]'}}}{\strong{[Superseded]}}, \code{x} allows for quosures to be supplied. See \code{\link[rlang:nse-defuse]{rlang::quo()}} for more details.
-However, if a value is supplied, it will overwrite the environment for when the expression of \code{x} is evaluated.}
+\item{env}{The parent environment for the reactive expression. By default,
+this is the calling environment, the same as when defining an ordinary
+non-reactive expression. If \code{x} is a quosure and \code{quoted} is \code{TRUE},
+then \code{env} is ignored.}
 
-\item{quoted}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#superseded}{\figure{lifecycle-superseded.svg}{options: alt='[Superseded]'}}}{\strong{[Superseded]}}, \code{x} allows for quosures to be supplied. See \code{\link[rlang:nse-defuse]{rlang::quo()}} for more details.
-If it is \code{TRUE}, then the \code{\link[=quote]{quote()}}ed value of \code{x} will be used when \code{x} is evaluated.}
+\item{quoted}{If it is \code{TRUE}, then the \code{\link[=quote]{quote()}}ed value of \code{x}
+will be used when \code{x} is evaluated. If \code{x} is a quosure and you
+would like to use its expression as a value for \code{x}, then you must set
+\code{quoted} to \code{TRUE}.}
 
 \item{...}{Not used.}
 

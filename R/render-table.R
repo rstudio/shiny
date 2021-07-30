@@ -42,7 +42,12 @@
 #'   (i.e. they either evaluate to `NA` or `NaN`).
 #' @param ... Arguments to be passed through to [xtable::xtable()]
 #'   and [xtable::print.xtable()].
-#' @template params-expr-env-quoted
+#' @template param-env
+#' @templateVar x expr
+#' @templateVar env env
+#' @template param-quoted
+#' @templateVar x expr
+#' @templateVar quoted quoted
 #' @param outputArgs A list of arguments to be passed through to the
 #'   implicit call to [tableOutput()] when `renderTable` is
 #'   used in an interactive R Markdown document.

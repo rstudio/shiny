@@ -13,8 +13,8 @@ renderDataTable(
   searchDelay = 500,
   callback = "function(oTable) {}",
   escape = TRUE,
-  env = deprecated(),
-  quoted = deprecated(),
+  env = parent.frame(),
+  quoted = FALSE,
   outputArgs = list()
 )
 }
@@ -48,12 +48,22 @@ indicate which columns to escape, e.g. \code{1:5} (the first 5 columns),
 \code{c(1, 3, 4)}, or \code{c(-1, -3)} (all columns except the first and
 third), or \code{c('Species', 'Sepal.Length')}.}
 
+\item{env}{The parent environment for the reactive expression. By default,
+this is the calling environment, the same as when defining an ordinary
+non-reactive expression. If \code{expr} is a quosure and \code{quoted} is \code{TRUE},
+then \code{env} is ignored.}
+
+\item{quoted}{If it is \code{TRUE}, then the \code{\link[=quote]{quote()}}ed value of \code{expr}
+will be used when \code{expr} is evaluated. If \code{expr} is a quosure and you
+would like to use its expression as a value for \code{expr}, then you must set
+\code{quoted} to \code{TRUE}.}
+
 \item{outputArgs}{A list of arguments to be passed through to the implicit
 call to \code{dataTableOutput()} when \code{renderDataTable()} is used
 in an interactive R Markdown document.}
 }
 \description{
-\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#superseded}{\figure{lifecycle-superseded.svg}{options: alt='[Superseded]'}}}{\strong{[Superseded]}} Please use \code{\link[DT:renderDataTable]{DT::renderDataTable()}}. (Shiny 0.11.1)
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#superseded}{\figure{lifecycle-superseded.svg}{options: alt='[Superseded]'}}}{\strong{[Superseded]}} Please use \code{\link[DT:dataTableOutput]{DT::renderDataTable()}}. (Shiny 0.11.1)
 
 Makes a reactive version of the given function that returns a data frame (or
 matrix), which will be rendered with the \href{https://datatables.net}{DataTables}

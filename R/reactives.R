@@ -946,7 +946,13 @@ Observable <- R6Class(
 #' more information about reactive expressions.
 #'
 #' @param x For `is.reactive()`, an object to test. For `reactive()`, an expression. When passing in a [`quo()`]sure with `reactive()`, remember to use [`rlang::inject()`] to distinguish that you are passing in the content of your quosure, not the expression of the quosure.
-#' @template params-x-env-quoted
+#' @template param-env
+#' @templateVar x x
+#' @templateVar env env
+#' @template param-quoted
+#' @templateVar x x
+#' @templateVar quoted quoted
+
 #' @param label A label for the reactive expression, useful for debugging.
 #' @param domain See [domains].
 #' @param ..stacktraceon Advanced use only. For stack manipulation purposes; see
@@ -1329,7 +1335,12 @@ Observer <- R6Class(
 #'
 #' @param x An expression (quoted or unquoted). Any return value will be
 #'   ignored.
-#' @template params-x-env-quoted
+#' @template param-env
+#' @templateVar x x
+#' @templateVar env env
+#' @template param-quoted
+#' @templateVar x x
+#' @templateVar quoted quoted
 #' @param label A label for the observer, useful for debugging.
 #' @param suspended If `TRUE`, start the observer in a suspended state. If
 #'   `FALSE` (the default), start in a non-suspended state.

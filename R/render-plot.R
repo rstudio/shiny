@@ -46,7 +46,12 @@
 #'   decorative images.
 #' @param ... Arguments to be passed through to [grDevices::png()].
 #'   These can be used to set the width, height, background color, etc.
-#' @template params-expr-env-quoted
+#' @template param-env
+#' @templateVar x expr
+#' @templateVar env env
+#' @template param-quoted
+#' @templateVar x expr
+#' @templateVar quoted quoted
 #' @param execOnResize If `FALSE` (the default), then when a plot is
 #'   resized, Shiny will *replay* the plot drawing commands with
 #'   [grDevices::replayPlot()] instead of re-executing `expr`.

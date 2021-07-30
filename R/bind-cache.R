@@ -315,13 +315,14 @@ utils::globalVariables(".GenericCallEnv", add = TRUE)
 #'     htmlwidgets::shinyRenderWidget(
 #'       q,
 #'       myWidgetOutput,
+#'       quoted = TRUE,
 #'       cacheHint = list(label = "myWidget", userQuo = q)
 #'     )
 #'   }
 #'   ```
 #'
 #'   If your `render` function sets any internal state, you may find it useful
-#'   in your call to [createRenderFunction()] (or [markRenderFunction()]) to use
+#'   in your call to [createRenderFunction()] to use
 #'   the `cacheWriteHook` and/or `cacheReadHook` parameters. These hooks are
 #'   functions that run just before the object is stored in the cache, and just
 #'   after the object is retrieved from the cache. They can modify the data

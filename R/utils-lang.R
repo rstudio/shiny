@@ -345,7 +345,6 @@ quoToSimpleFunction <- function(q) {
 #' isolate(tripleA())
 #' #> "hello, hello, hello"
 #' @export
-#' @keywords internal
 exprToFunction <- function(expr, env = parent.frame(), quoted = FALSE) {
   # If `expr` is a raw quosure, must say `quoted = TRUE`; (env is ignored)
   # If `inject()` a quosure, env is ignored, and quoted should be FALSE (aka ignored).

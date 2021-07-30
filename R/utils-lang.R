@@ -140,7 +140,7 @@ quoToFunction <- function(
   ..stacktraceon = FALSE
 ) {
   func <- quoToSimpleFunction(as_quosure(q))
-  wrapFunctionLabel(func, updateFunctionLabel(label), ..stacktraceon = ..stacktraceon)
+  wrapFunctionLabel(func, updateFunctionLabel(label), ..stacktraceon = ..stacktraceon, dots = FALSE)
 }
 
 updateFunctionLabel <- function(label) {
@@ -355,17 +355,31 @@ exprToFunction <- function(expr, env = parent.frame(), quoted = FALSE) {
   if (!quoted) {
     expr <- eval(substitute(substitute(expr)), parent.frame())
   }
-  if (is_quosure(expr)) {
-    # inject()ed quosure
-    # do nothing
-  } else if (is.language(expr)) {
-    expr <- new_quosure(expr, env = env)
-  } else {
-    stop("Don't know how to convert '", class(expr)[1], "' to a function; a quosure or quoted expression was expected")
+  # MUST call with `quoted = TRUE` as exprToQuo() will not reach high enough
+  q <- exprToQuo(expr, env, quoted = TRUE)
+
+  # MUST call `as_function()`. Can NOT call `new_function()`
+  # rlang has custom logic for handling converting a quosure to a function
+  quoToSimpleFunction(q)
+}
+# For internal use only; External users should be using `exprToFunction()` or `installExprFunction()`
+# MUST be the exact same logic as `exprToFunction()`, but without the `quoToSimpleFunction()` call
+exprToQuo <- function(expr, env = parent.frame(), quoted = FALSE) {
+  if (!quoted) {
+    expr <- eval(substitute(substitute(expr)), parent.frame())
   }
-  # Can NOT call `new_function()`. MUST call `as_function()`
-  # rlang has custom logic for converting quosures to functions
-  quoToSimpleFunction(expr)
+  q <-
+    if (is_quosure(expr)) {
+      # inject()ed quosure
+      # do nothing
+      expr
+    } else if (is.language(expr) || rlang::is_atomic(expr) || is.null(expr)) {
+      # Most common case...
+      new_quosure(expr, env = env)
+    } else {
+      stop("Don't know how to convert '", class(expr)[1], "' to a function; a quosure or quoted expression was expected")
+    }
+  q
 }
 
 #' @rdname exprToFunction
@@ -397,7 +411,7 @@ installExprFunction <- function(expr, name, eval.env = parent.frame(2),
     label <- paste0(label, collapse = "\n")
   }
   if (wrappedWithLabel) {
-    func <- wrapFunctionLabel(func, updateFunctionLabel(label), ..stacktraceon = ..stacktraceon)
+    func <- wrapFunctionLabel(func, updateFunctionLabel(label), ..stacktraceon = ..stacktraceon, dots = FALSE)
   } else {
     registerDebugHook(name, assign.env, label)
   }
@@ -419,4 +433,33 @@ exprToLabel <- function(expr, function_name, label = NULL) {
   if (length(srcref) >= 2) attr(label, "srcref") <- srcref[[2]]
   attr(label, "srcfile") <- srcFileOfRef(srcref[[1]])
   label
+}
+
+installedFuncExpr <- function(func) {
+  fn_body(attr(func, "wrappedFunc", exact = TRUE))
+}
+
+funcToLabelBody <- function(func) {
+  paste(deparse(installedFuncExpr(func)), collapse='\n')
+}
+funcToLabel <- function(func, functionLabel, label = NULL) {
+  if (!is.null(label)) return(label)
+
+  sprintf(
+    '%s(%s)',
+    functionLabel,
+    funcToLabelBody(func)
+  )
+}
+quoToLabelBody <- function(q) {
+  paste(deparse(quo_get_expr(q)), collapse='\n')
+}
+quoToLabel <- function(q, functionLabel, label = NULL) {
+  if (!is.null(label)) return(label)
+
+  sprintf(
+    '%s(%s)',
+    functionLabel,
+    quoToLabelBody(q)
+  )
 }

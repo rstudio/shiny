@@ -60,10 +60,11 @@ widgets out of just the render function.
 \details{
 Note that it is generally preferable to use \code{\link[=createRenderFunction]{createRenderFunction()}} instead
 of \code{markRenderFunction()}. It essentially wraps up the user-provided
-expression in the \code{transform} function passed to it, then pases the resulting
+expression in the \code{transform} function passed to it, then passes the resulting
 function to \code{markRenderFunction()}. It also provides a simpler calling
 interface.
 }
 \seealso{
-\code{\link[=createRenderFunction]{createRenderFunction()}}, \code{\link[=quoToFunction]{quoToFunction()}}
+\code{\link[=createRenderFunction]{createRenderFunction()}}
 }
+\keyword{internal}

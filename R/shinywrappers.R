@@ -10,7 +10,7 @@ utils::globalVariables('func', add = TRUE)
 #'
 #' Note that it is generally preferable to use [createRenderFunction()] instead
 #' of `markRenderFunction()`. It essentially wraps up the user-provided
-#' expression in the `transform` function passed to it, then pases the resulting
+#' expression in the `transform` function passed to it, then passes the resulting
 #' function to `markRenderFunction()`. It also provides a simpler calling
 #' interface.
 #'
@@ -43,8 +43,9 @@ utils::globalVariables('func', add = TRUE)
 #'   is able to serve JS and CSS resources.
 #' @return The `renderFunc` function, with annotations.
 #'
-#' @seealso [createRenderFunction()], [quoToFunction()]
+#' @seealso [createRenderFunction()]
 #' @export
+#' @keywords internal
 markRenderFunction <- function(
   uiFunc,
   renderFunc,
@@ -146,11 +147,27 @@ print.shiny.render.function <- function(x, ...) {
   cat_line("<shiny.render.function>")
 }
 
-#' Implement render functions
+#' Implement custom render functions
 #'
-#' This function is a wrapper for [markRenderFunction()] which provides support
-#' for async computation via promises. It is recommended to use
-#' `createRenderFunction()` instead of `markRenderFunction()`.
+#' Developer-facing utilities for implementing a custom `renderXXX()` function.
+#' Before using these utilities directly, consider using the [`htmlwidgets`
+#' package](http://www.htmlwidgets.org/develop_intro.html) to implement custom
+#' outputs (i.e., custom `renderXXX()`/`xxxOutput()` functions). That said,
+#' these utilities can be used more directly if a full-blown htmlwidget isn't
+#' needed and/or the user-supplied reactive expression needs to be wrapped in
+#' additional call(s).
+#'
+#' To implement a custom `renderXXX()` function, essentially 2 things are needed:
+#'   1. Capture the user's reactive expression as a function
+#'      * New `renderXXX()` functions can use `quoToFunction()` for this, but
+#'      already existing `renderXXX()` functions that contain `env` and `quoted`
+#'      parameters may want to continue using `installExprFunction()` for better
+#'      legacy support (see examples).
+#'   2. Flag the resulting function (from 1) as a Shiny rendering function and
+#'   also provide a UI container for displaying the result of the rendering
+#'   function.
+#'      * `createRenderFunction()` is currently recommended (instead of
+#'      [markRenderFunction()]) for this step (see examples).
 #'
 #' @param func A function without parameters, that returns user data. If the
 #'   returned value is a promise, then the render function will proceed in async
@@ -167,11 +184,10 @@ print.shiny.render.function <- function(x, ...) {
 #' @return An annotated render function, ready to be assigned to an
 #'   `output` slot.
 #'
-#' @seealso [quoToFunction()], [markRenderFunction()].
-#'
 #' @examples
-#' # A very simple render function
+#' # A custom render function that repeats the supplied value 3 times
 #' renderTriple <- function(expr) {
+#'   # Wrap user-supplied reactive expression into a function
 #'   func <- quoToFunction(rlang::enquo0(expr))
 #'
 #'   createRenderFunction(
@@ -183,12 +199,41 @@ print.shiny.render.function <- function(x, ...) {
 #'   )
 #' }
 #'
+#' # For better legacy support, consider using installExprFunction() over quoToFunction()
+#' renderTripleLegacy <- function(expr, env = parent.frame(), quoted = FALSE) {
+#'   func <- installExprFunction(expr, "func", env, quoted)
+#'
+#'   createRenderFunction(
+#'     func,
+#'     transform = function(value, session, name, ...) {
+#'       paste(rep(value, 3), collapse=", ")
+#'     },
+#'     outputFunc = textOutput
+#'   )
+#' }
+#'
 #' # Test render function from the console
-#' a <- 1
-#' r <- renderTriple({ a * 10 })
-#' a <- 2
-#' r()
-#' # [1] "20, 20, 20"
+#' reactiveConsole(TRUE)
+#' r <- reactiveVal()
+#' r("basic")
+#' renderTriple(r())()
+#' #> [1] "basic, basic, basic"
+#'
+#' # User can supply quoted code via rlang::quo()
+#' r2 <- rlang::quo({ r("rlang"); r() })
+#' rlang::inject(renderTriple(!!r2))()
+#' #> [1] "rlang, rlang, rlang"
+#'
+#' # Supplying quoted code without rlang::quo() requires installExprFunction()
+#' renderTripleLegacy(quote({ r("legacy"); r() }), quoted = TRUE)()
+#' #> [1] "legacy, legacy, legacy"
+#'
+#' # The legacy approach also supports with quosures (env is ignored in this case)
+#' r3 <- rlang::quo({ r("legacy-rlang"); r() })
+#' renderTripleLegacy(r3, quoted = TRUE)()
+#' #> [1] "legacy-rlang, legacy-rlang, legacy-rlang"
+#' reactiveConsole(FALSE)
+#'
 #' @export
 createRenderFunction <- function(
   func,

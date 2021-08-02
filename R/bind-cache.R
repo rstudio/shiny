@@ -310,7 +310,7 @@ utils::globalVariables(".GenericCallEnv", add = TRUE)
 #'
 #'   ```
 #'   renderMyWidget <- function(expr) {
-#'     q <- enquo0(expr)
+#'     q <- rlang::enquo0(expr)
 #'
 #'     htmlwidgets::shinyRenderWidget(
 #'       q,

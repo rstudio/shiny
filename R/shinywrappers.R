@@ -54,7 +54,7 @@ markRenderFunction <- function(
   cacheWriteHook = NULL,
   cacheReadHook = NULL
 ) {
-  # # Do not include this code
+  # (Do not emit warning for superseded code, "since there’s no risk if you keep using it")
   # # This method is called by the superseding function, createRenderFunction().
   # if (in_devmode()) {
   #   shinyDeprecated("1.1.0", "markRenderFunction()", "createRenderFunction()")
@@ -214,6 +214,7 @@ print.shiny.render.function <- function(x, ...) {
 #'
 #' # Test render function from the console
 #' reactiveConsole(TRUE)
+#'
 #' r <- reactiveVal()
 #' r("basic")
 #' renderTriple(r())()
@@ -232,6 +233,8 @@ print.shiny.render.function <- function(x, ...) {
 #' r3 <- rlang::quo({ r("legacy-rlang"); r() })
 #' renderTripleLegacy(r3, quoted = TRUE)()
 #' #> [1] "legacy-rlang, legacy-rlang, legacy-rlang"
+#'
+#' # Turn off reactivity in the console
 #' reactiveConsole(FALSE)
 #'
 #' @export

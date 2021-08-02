@@ -875,8 +875,7 @@ Observable <- R6Class(
         invisible(.value)
     },
     format = function() {
-      label <- exprToLabel(fn_body(.origFunc), "reactive", NULL)
-      strsplit(label, "\n")[[1]]
+      simpleExprToFunction(fn_body(.origFunc), "reactive")
     },
     .updateValue = function() {
       ctx <- Context$new(.domain, .label, type = 'observable',

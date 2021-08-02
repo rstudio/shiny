@@ -208,12 +208,15 @@ exprToLabel <- function(expr, function_name, label = NULL) {
   if (is.null(label)) {
     label <- rexprSrcrefToLabel(
       srcref[[1]],
-      sprintf('%s(%s)', function_name, paste(deparse(expr), collapse = '\n'))
+      simpleExprToFunction(expr, function_name)
     )
   }
   if (length(srcref) >= 2) attr(label, "srcref") <- srcref[[2]]
   attr(label, "srcfile") <- srcFileOfRef(srcref[[1]])
   label
+}
+simpleExprToFunction <- function(expr, function_name) {
+  sprintf('%s(%s)', function_name, paste(deparse(expr), collapse='\n'))
 }
 
 installedFuncExpr <- function(func) {

@@ -108,6 +108,10 @@ quoToSimpleFunction <- function(q) {
 
 #' Convert an expression to a function
 #'
+#' `r lifecycle::badge("superseded")` Please use [`installExprFunction()`] for a better
+#' debugging experience (Shiny 0.8.0). If the `expr` and `quoted` parameters are not needed, please see
+#' [`quoToFunction()`] (Shiny 1.6.0).
+#'
 #' Similar to [installExprFunction()] but doesn't register debug hooks.
 #'
 #' @param expr A quoted or unquoted expression, or a quosure.

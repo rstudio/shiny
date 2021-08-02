@@ -290,7 +290,7 @@ For \pkg{htmlwidgets}, it will try to automatically infer a cache hint;
 again, you can inspect the cache hint with \code{shiny:::extractCacheHint()} and
 also test it in an application. If you do need to explicitly provide a
 cache hint, pass it to \code{shinyRenderWidget}. For example:\preformatted{renderMyWidget <- function(expr) \{
-  q <- enquo0(expr)
+  q <- rlang::enquo0(expr)
 
   htmlwidgets::shinyRenderWidget(
     q,

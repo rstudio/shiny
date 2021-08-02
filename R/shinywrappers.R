@@ -2,6 +2,9 @@ utils::globalVariables('func', add = TRUE)
 
 #' Mark a function as a render function
 #'
+#' `r lifecycle::badge("superseded")` Please use [`createRenderFunction()`] to
+#' support async execution. (Shiny 1.1.0)
+#'
 #' Should be called by implementers of `renderXXX` functions in order to mark
 #' their return values as Shiny render functions, and to provide a hint to Shiny
 #' regarding what UI function is most commonly used with this type of render

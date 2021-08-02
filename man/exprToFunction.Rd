@@ -15,8 +15,14 @@ calling environment two steps back.}
 \item{quoted}{Is the expression quoted?}
 }
 \description{
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#superseded}{\figure{lifecycle-superseded.svg}{options: alt='[Superseded]'}}}{\strong{[Superseded]}} Please use \code{\link[=installExprFunction]{installExprFunction()}} for a better
+debugging experience (Shiny 0.8.0). If the \code{expr} and \code{quoted} parameters are not needed, please see
+\code{\link[=quoToFunction]{quoToFunction()}} (Shiny 1.6.0).
+}
+\details{
 Similar to \code{\link[=installExprFunction]{installExprFunction()}} but doesn't register debug hooks.
 }
 \seealso{
 \code{\link[=installExprFunction]{installExprFunction()}} for the modern approach to converting an expression to a function
 }
+\keyword{internal}

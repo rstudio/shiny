@@ -161,6 +161,7 @@ renderTripleLegacy <- function(expr, env = parent.frame(), quoted = FALSE) {
 
 # Test render function from the console
 reactiveConsole(TRUE)
+
 r <- reactiveVal()
 r("basic")
 renderTriple(r())()
@@ -179,6 +180,8 @@ renderTripleLegacy(quote({ r("legacy"); r() }), quoted = TRUE)()
 r3 <- rlang::quo({ r("legacy-rlang"); r() })
 renderTripleLegacy(r3, quoted = TRUE)()
 #> [1] "legacy-rlang, legacy-rlang, legacy-rlang"
+
+# Turn off reactivity in the console
 reactiveConsole(FALSE)
 
 }

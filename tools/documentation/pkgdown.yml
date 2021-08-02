@@ -172,7 +172,6 @@ reference:
       - onFlush
       - restoreInput
       - applyInputHandlers
-      - quoToFunction
       - parseQueryString
       - getCurrentOutputInfo
       - plotPNG

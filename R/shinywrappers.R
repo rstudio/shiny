@@ -15,7 +15,9 @@ utils::globalVariables('func', add = TRUE)
 #' of `markRenderFunction()`. It essentially wraps up the user-provided
 #' expression in the `transform` function passed to it, then passes the resulting
 #' function to `markRenderFunction()`. It also provides a simpler calling
-#' interface.
+#' interface. There may be cases where `markRenderFunction()` must be used instead of
+#' [createRenderFunction()] -- for example, when the `transform` parameter of
+#' [createRenderFunction()] is not flexible enough for your needs.
 #'
 #' @param uiFunc A function that renders Shiny UI. Must take a single argument:
 #'   an output ID.
@@ -161,7 +163,7 @@ print.shiny.render.function <- function(x, ...) {
 #' additional call(s).
 #'
 #' To implement a custom `renderXXX()` function, essentially 2 things are needed:
-#'   1. Capture the user's reactive expression as a function
+#'   1. Capture the user's reactive expression as a function.
 #'      * New `renderXXX()` functions can use `quoToFunction()` for this, but
 #'      already existing `renderXXX()` functions that contain `env` and `quoted`
 #'      parameters may want to continue using `installExprFunction()` for better
@@ -218,24 +220,32 @@ print.shiny.render.function <- function(x, ...) {
 #' # Test render function from the console
 #' reactiveConsole(TRUE)
 #'
-#' r <- reactiveVal()
-#' r("basic")
-#' renderTriple(r())()
+#' v <- reactiveVal("basic")
+#' r <- renderTriple({ v() })
+#' r()
 #' #> [1] "basic, basic, basic"
 #'
-#' # User can supply quoted code via rlang::quo()
-#' r2 <- rlang::quo({ r("rlang"); r() })
-#' rlang::inject(renderTriple(!!r2))()
-#' #> [1] "rlang, rlang, rlang"
-#'
-#' # Supplying quoted code without rlang::quo() requires installExprFunction()
-#' renderTripleLegacy(quote({ r("legacy"); r() }), quoted = TRUE)()
-#' #> [1] "legacy, legacy, legacy"
-#'
-#' # The legacy approach also supports with quosures (env is ignored in this case)
-#' r3 <- rlang::quo({ r("legacy-rlang"); r() })
-#' renderTripleLegacy(r3, quoted = TRUE)()
-#' #> [1] "legacy-rlang, legacy-rlang, legacy-rlang"
+# User can supply quoted code via rlang::quo(). Note that evaluation of the
+# expression happens when r2() is invoked, not when r2 is created.
+q <- rlang::quo({ v() })
+r2 <- rlang::inject(renderTriple(!!q))
+v("rlang")
+r2()
+#> [1] "rlang, rlang, rlang"
+
+# Supplying quoted code without rlang::quo() requires installExprFunction()
+expr <- quote({ v() })
+r3 <- renderTripleLegacy(expr, quoted = TRUE)
+v("legacy")
+r3()
+#> [1] "legacy, legacy, legacy"
+
+# The legacy approach also supports with quosures (env is ignored in this case)
+q <- rlang::quo({ v() })
+r4 <- renderTripleLegacy(q, quoted = TRUE)
+v("legacy-rlang")
+r4()
+#> [1] "legacy-rlang, legacy-rlang, legacy-rlang"
 #'
 #' # Turn off reactivity in the console
 #' reactiveConsole(FALSE)

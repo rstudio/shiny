@@ -62,16 +62,13 @@ An annotated render function, ready to be assigned to an
 }
 \description{
 This function is a wrapper for \code{\link[=markRenderFunction]{markRenderFunction()}} which provides support
-for async computation via promises.
+for async computation via promises. It is recommended to use
+\code{createRenderFunction()} instead of \code{markRenderFunction()}.
 }
 \examples{
 # A very simple render function
-renderTriple <- function(x) {
-  x <- substitute(x)
-  if (!rlang::is_quosure(x)) {
-    x <- rlang::new_quosure(x, env = parent.frame())
-  }
-  func <- quoToFunction(x, "renderTriple")
+renderTriple <- function(expr) {
+  func <- quoToFunction(rlang::enquo0(expr))
 
   createRenderFunction(
     func,
@@ -84,10 +81,11 @@ renderTriple <- function(x) {
 
 # Test render function from the console
 a <- 1
-r <- renderTriple({ a + 1 })
+r <- renderTriple({ a * 10 })
 a <- 2
 r()
+# [1] "20, 20, 20"
 }
 \seealso{
-\code{\link[=quoToFunction]{quoToFunction()}}, \code{\link[=markRenderFunction]{markRenderFunction()}}.
+\code{\link[=quoToFunction]{quoToFunction()}}, \code{\link[=markRenderFunction]{markRenderFunction()}}, \code{\link[rlang:nse-defuse]{rlang::enquo()}}.
 }

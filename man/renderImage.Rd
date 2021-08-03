@@ -6,8 +6,8 @@
 \usage{
 renderImage(
   expr,
-  env = parent.frame(),
-  quoted = FALSE,
+  env = deprecated(),
+  quoted = deprecated(),
   deleteFile,
   outputArgs = list()
 )
@@ -15,9 +15,9 @@ renderImage(
 \arguments{
 \item{expr}{An expression that returns a list.}
 
-\item{env}{The environment in which to evaluate \code{expr}.}
+\item{env}{TODO-barret docs; The environment in which to evaluate \code{expr}.}
 
-\item{quoted}{Is \code{expr} a quoted expression (with \code{quote()})? This
+\item{quoted}{TODO-barret docs; Is \code{expr} a quoted expression (with \code{quote()})? This
 is useful if you want to save an expression in a variable.}
 
 \item{deleteFile}{Should the file in \code{func()$src} be deleted after

@@ -8,6 +8,12 @@ utils::globalVariables('func', add = TRUE)
 #' function. This can be used in R Markdown documents to create complete output
 #' widgets out of just the render function.
 #'
+#' Note that it is generally preferable to use [createRenderFunction()] instead
+#' of `markRenderFunction()`. It essentially wraps up the user-provided
+#' expression in the `transform` function passed to it, then pases the resulting
+#' function to `markRenderFunction()`. It also provides a simpler calling
+#' interface.
+#'
 #' @param uiFunc A function that renders Shiny UI. Must take a single argument:
 #'   an output ID.
 #' @param renderFunc A function that is suitable for assigning to a Shiny output
@@ -136,7 +142,8 @@ print.shiny.render.function <- function(x, ...) {
 #' Implement render functions
 #'
 #' This function is a wrapper for [markRenderFunction()] which provides support
-#' for async computation via promises.
+#' for async computation via promises. It is recommended to use
+#' `createRenderFunction()` instead of `markRenderFunction()`.
 #'
 #' @param func A function without parameters, that returns user data. If the
 #'   returned value is a promise, then the render function will proceed in async
@@ -153,16 +160,12 @@ print.shiny.render.function <- function(x, ...) {
 #' @return An annotated render function, ready to be assigned to an
 #'   `output` slot.
 #'
-#' @seealso [quoToFunction()], [markRenderFunction()].
+#' @seealso [quoToFunction()], [markRenderFunction()], [rlang::enquo()].
 #'
 #' @examples
 #' # A very simple render function
-#' renderTriple <- function(x) {
-#'   x <- substitute(x)
-#'   if (!rlang::is_quosure(x)) {
-#'     x <- rlang::new_quosure(x, env = parent.frame())
-#'   }
-#'   func <- quoToFunction(x, "renderTriple")
+#' renderTriple <- function(expr) {
+#'   func <- quoToFunction(rlang::enquo0(expr))
 #'
 #'   createRenderFunction(
 #'     func,
@@ -175,9 +178,10 @@ print.shiny.render.function <- function(x, ...) {
 #'
 #' # Test render function from the console
 #' a <- 1
-#' r <- renderTriple({ a + 1 })
+#' r <- renderTriple({ a * 10 })
 #' a <- 2
 #' r()
+#' # [1] "20, 20, 20"
 #' @export
 createRenderFunction <- function(
   func,
@@ -316,8 +320,8 @@ markOutputAttrs <- function(renderFunc, snapshotExclude = NULL,
 #'   the output, see [plotPNG()].
 #'
 #' @param expr An expression that returns a list.
-#' @param env The environment in which to evaluate `expr`.
-#' @param quoted Is `expr` a quoted expression (with `quote()`)? This
+#' @param env TODO-barret docs; The environment in which to evaluate `expr`.
+#' @param quoted TODO-barret docs; Is `expr` a quoted expression (with `quote()`)? This
 #'   is useful if you want to save an expression in a variable.
 #' @param deleteFile Should the file in `func()$src` be deleted after
 #'   it is sent to the client browser? Generally speaking, if the image is a
@@ -397,11 +401,12 @@ markOutputAttrs <- function(renderFunc, snapshotExclude = NULL,
 #'
 #' shinyApp(ui, server)
 #' }
-renderImage <- function(expr, env=parent.frame(), quoted=FALSE,
+renderImage <- function(expr, env = deprecated(), quoted = deprecated(),
                         deleteFile, outputArgs=list())
 {
-  expr <- get_quosure(expr, env, quoted)
-  func <- quoToFunction(expr, "renderImage")
+  q <- enquo0(expr)
+  q <- sustainEnvAndQuotedInternal(q, expr, env, quoted)
+  func <- quoToFunction(q, "renderImage")
 
   # missing() must be used directly within the function with the given arg
   if (missing(deleteFile)) {
@@ -523,8 +528,8 @@ isTemp <- function(path, tempDir = tempdir(), mustExist) {
 #' function return [invisible()].
 #'
 #' @param expr An expression to evaluate.
-#' @param env The environment in which to evaluate `expr`. For expert use only.
-#' @param quoted Is `expr` a quoted expression (with `quote()`)? This
+#' @param env TODO-barret docs; The environment in which to evaluate `expr`. For expert use only.
+#' @param quoted TODO-barret docs; Is `expr` a quoted expression (with `quote()`)? This
 #'   is useful if you want to save an expression in a variable.
 #' @param width Width of printed output.
 #' @param outputArgs A list of arguments to be passed through to the implicit
@@ -533,11 +538,12 @@ isTemp <- function(path, tempDir = tempdir(), mustExist) {
 #'
 #' @example res/text-example.R
 #' @export
-renderPrint <- function(expr, env = parent.frame(), quoted = FALSE,
+renderPrint <- function(expr, env = deprecated(), quoted = deprecated(),
                         width = getOption('width'), outputArgs=list())
 {
-  expr <- get_quosure(expr, env, quoted)
-  func <- quoToFunction(expr, "renderPrint")
+  q <- enquo0(expr)
+  q <- sustainEnvAndQuotedInternal(q, expr, env, quoted)
+  func <- quoToFunction(q, "renderPrint")
 
   # Set a promise domain that sets the console width
   #   and captures output
@@ -569,7 +575,7 @@ renderPrint <- function(expr, env = parent.frame(), quoted = FALSE,
     outputArgs,
     cacheHint = list(
       label = "renderPrint",
-      origUserExpr = get_expr(expr)
+      origUserExpr = get_expr(q)
     )
   )
 }
@@ -619,11 +625,12 @@ createRenderPrintPromiseDomain <- function(width) {
 #'   element.
 #' @export
 #' @rdname renderPrint
-renderText <- function(expr, env=parent.frame(), quoted=FALSE,
+renderText <- function(expr, env = deprecated(), quoted = deprecated(),
                        outputArgs=list(), sep=" ") {
 
-  expr <- get_quosure(expr, env, quoted)
-  func <- quoToFunction(expr, "renderText")
+  q <- enquo0(expr)
+  q <- sustainEnvAndQuotedInternal(q, expr, env, quoted)
+  func <- quoToFunction(q, "renderText")
 
   createRenderFunction(
     func,
@@ -644,8 +651,8 @@ renderText <- function(expr, env=parent.frame(), quoted=FALSE,
 #'
 #' @param expr An expression that returns a Shiny tag object, [HTML()],
 #'   or a list of such objects.
-#' @param env The environment in which to evaluate `expr`.
-#' @param quoted Is `expr` a quoted expression (with `quote()`)? This
+#' @param env TODO-barret docs; The environment in which to evaluate `expr`.
+#' @param quoted TODO-barret docs; Is `expr` a quoted expression (with `quote()`)? This
 #'   is useful if you want to save an expression in a variable.
 #' @param outputArgs A list of arguments to be passed through to the implicit
 #'   call to [uiOutput()] when `renderUI` is used in an
@@ -672,11 +679,12 @@ renderText <- function(expr, env=parent.frame(), quoted=FALSE,
 #' shinyApp(ui, server)
 #' }
 #'
-renderUI <- function(expr, env = parent.frame(), quoted = FALSE,
+renderUI <- function(expr, env = deprecated(), quoted = deprecated(),
                      outputArgs = list())
 {
-  expr <- get_quosure(expr, env, quoted)
-  func <- quoToFunction(expr, "renderUI")
+  q <- enquo0(expr)
+  q <- sustainEnvAndQuotedInternal(q, expr, env, quoted)
+  func <- quoToFunction(q, "renderUI")
 
   createRenderFunction(
     func,
@@ -755,6 +763,8 @@ downloadHandler <- function(filename, content, contentType=NA, outputArgs=list()
 #' Table output with the JavaScript DataTables library
 #'
 #' @description
+#' `r lifecycle::badge("superseded")` Please use [`DT::renderDataTable()`]. (Shiny 0.11.1)
+#'
 #' Makes a reactive version of the given function that returns a data frame (or
 #' matrix), which will be rendered with the [DataTables](https://datatables.net)
 #' library. Paging, searching, filtering, and sorting can be done on the R side
@@ -818,7 +828,7 @@ downloadHandler <- function(filename, content, contentType=NA, outputArgs=list()
 #' }
 renderDataTable <- function(expr, options = NULL, searchDelay = 500,
                             callback = 'function(oTable) {}', escape = TRUE,
-                            env = parent.frame(), quoted = FALSE,
+                            env = deprecated(), quoted = deprecated(),
                             outputArgs=list())
 {
 
@@ -829,8 +839,9 @@ renderDataTable <- function(expr, options = NULL, searchDelay = 500,
     )
   }
 
-  expr <- get_quosure(expr, env, quoted)
-  func <- quoToFunction(expr, "renderDataTable")
+  q <- enquo0(expr)
+  q <- sustainEnvAndQuotedInternal(q, expr, env, quoted)
+  func <- quoToFunction(q, "renderDataTable")
 
   renderFunc <- function(shinysession, name, ...) {
     if (is.function(options)) options <- options()

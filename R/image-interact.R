@@ -267,6 +267,7 @@ nearPoints <- function(df, coordinfo, xvar = NULL, yvar = NULL,
     stop("nearPoints: `yvar` ('", yvar ,"')  not in names of input")
 
   # Extract data values from the data frame
+  coordinfo <- fortifyDiscreteLimits(coordinfo)
   x <- asNumber(df[[xvar]], coordinfo$domain$discrete_limits$x)
   y <- asNumber(df[[yvar]], coordinfo$domain$discrete_limits$y)
 
@@ -392,6 +393,7 @@ nearPoints <- function(df, coordinfo, xvar = NULL, yvar = NULL,
 # an input brush
 within_brush <- function(vals, brush, var = "x") {
   var <- match.arg(var, c("x", "y"))
+  brush <- fortifyDiscreteLimits(brush)
   vals <- asNumber(vals, brush$domain$discrete_limits[[var]])
   # It's possible for a non-missing data values to not
   # map to the axis limits, for example:
@@ -414,11 +416,43 @@ asNumber <- function(x, levels = NULL) {
   as.numeric(x)
 }
 
+# Ensure the discrete limits/levels of a coordmap received
+# from the client matches the data structure sent the client.
+#
+# When we construct the coordmap (in getGgplotCoordmap()),
+# we save a character vector which may contain missing values
+# (e.g., c("a", "b", NA)). When that same character is received
+# from the client, it runs through decodeMessage() which sets
+# simplifyVector=FALSE, which means NA are replaced by NULL
+# (because jsonlite::fromJSON('["a", "b", null]') -> list("a", "b", NULL))
+#
+# Thankfully, it doesn't seem like it's meaningful for limits to
+# contains a NULL in the 1st place, so we simply treat NULL like NA.
+# For more context, https://github.com/rstudio/shiny/issues/2666
+fortifyDiscreteLimits <- function(coord) {
+  # Note that discrete_limits$x/y are populated iff
+  # x/y are discrete mappings
+  coord$domain$discrete_limits <- lapply(
+    coord$domain$discrete_limits,
+    function(var) {
+      # if there is an 'explicit' NULL, then the limits are NA
+      if (is.null(var)) return(NA)
+      vapply(var, function(x) {
+        if (is.null(x) || isTRUE(is.na(x))) NA_character_ else x
+      }, character(1))
+    }
+  )
+  coord
+}
+
+
+
 # Given a panelvar value and a vector x, return logical vector indicating which
 # items match the panelvar value. Because the panelvar value is always a
 # string but the vector could be numeric, it might be necessary to coerce the
 # panelvar to a number before comparing to the vector.
 panelMatch <- function(search_value, x) {
+  if (is.null(search_value)) return(is.na(x))
   if (is.numeric(x)) search_value <- as.numeric(search_value)
   x == search_value
 }

@@ -42,8 +42,8 @@
 #'   (i.e. they either evaluate to `NA` or `NaN`).
 #' @param ... Arguments to be passed through to [xtable::xtable()]
 #'   and [xtable::print.xtable()].
-#' @param env The environment in which to evaluate `expr`.
-#' @param quoted Is `expr` a quoted expression (with `quote()`)?
+#' @param env TODO-barret docs; The environment in which to evaluate `expr`.
+#' @param quoted TODO-barret docs; Is `expr` a quoted expression (with `quote()`)?
 #'   This is useful if you want to save an expression in a variable.
 #' @param outputArgs A list of arguments to be passed through to the
 #'   implicit call to [tableOutput()] when `renderTable` is
@@ -71,11 +71,12 @@ renderTable <- function(expr, striped = FALSE, hover = FALSE,
                         width = "auto", align = NULL,
                         rownames = FALSE, colnames = TRUE,
                         digits = NULL, na = "NA", ...,
-                        env = parent.frame(), quoted = FALSE,
+                        env = deprecated(), quoted = deprecated(),
                         outputArgs=list())
 {
-  expr <- get_quosure(expr, env, quoted)
-  func <- quoToFunction(expr, "renderTable")
+  q <- enquo0(expr)
+  q <- sustainEnvAndQuotedInternal(q, expr, env, quoted)
+  func <- quoToFunction(q, "renderTable")
 
   if (!is.function(spacing)) spacing <- match.arg(spacing)
 

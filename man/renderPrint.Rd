@@ -7,16 +7,16 @@
 \usage{
 renderPrint(
   expr,
-  env = parent.frame(),
-  quoted = FALSE,
+  env = deprecated(),
+  quoted = deprecated(),
   width = getOption("width"),
   outputArgs = list()
 )
 
 renderText(
   expr,
-  env = parent.frame(),
-  quoted = FALSE,
+  env = deprecated(),
+  quoted = deprecated(),
   outputArgs = list(),
   sep = " "
 )
@@ -24,9 +24,9 @@ renderText(
 \arguments{
 \item{expr}{An expression to evaluate.}
 
-\item{env}{The environment in which to evaluate \code{expr}. For expert use only.}
+\item{env}{TODO-barret docs; The environment in which to evaluate \code{expr}. For expert use only.}
 
-\item{quoted}{Is \code{expr} a quoted expression (with \code{quote()})? This
+\item{quoted}{TODO-barret docs; Is \code{expr} a quoted expression (with \code{quote()})? This
 is useful if you want to save an expression in a variable.}
 
 \item{width}{Width of printed output.}

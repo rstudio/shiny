@@ -700,9 +700,9 @@ test_that("reactive() accepts injected quosures", {
   y <- quo(a)
   exp <- quo(!!y + 10)
   a <- 2
-  f <- inject(reactive(!! exp ))
+  ff <- inject(reactive(!! exp ))
   a <- 3
-  expect_identical(isolate(f()), 13)
+  expect_identical(isolate(ff()), 13)
 })
 
 test_that("observe() accepts injected quosures", {

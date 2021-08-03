@@ -36,7 +36,7 @@ jobs:
         run: |
           echo "'`git cherry origin/master`'"
           # Can't push to a protected branch
-          if [ -n "`git cherry origin/master`"]; then
+          if [ -n "`git cherry origin/master`" ]; then
             echo "Un-pushed commits:"
             git cherry -v origin/master
             echo "\nCan not push to a protected branch. Exiting"

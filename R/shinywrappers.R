@@ -50,7 +50,6 @@ utils::globalVariables('func', add = TRUE)
 #'
 #' @seealso [createRenderFunction()]
 #' @export
-#' @keywords internal
 markRenderFunction <- function(
   uiFunc,
   renderFunc,

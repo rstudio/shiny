@@ -1265,7 +1265,7 @@ test_that("cacheHint to avoid collisions", {
 
 
 test_that("cacheHint works with quosures", {
-  my_quo <- rlang::quo(a + 1)
+  my_quo <- rlang::quo({a + 1})
 
   expect_equal(
     extractCacheHint(renderPlot({ a + 1 })),
@@ -1283,5 +1283,12 @@ test_that("cacheHint works with quosures", {
   expect_equal(
     extractCacheHint(reactive(my_quo, quoted = TRUE)),
     list(userExpr = rlang::expr({a+1}))
+  )
+
+  expect_equal(
+    extractCacheHint(
+      markRenderFunction(force, force, cacheHint = list(q = my_quo))
+    ),
+    list(q = rlang::expr({a+1}))
   )
 })

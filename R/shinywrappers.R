@@ -2,6 +2,9 @@ utils::globalVariables('func', add = TRUE)
 
 #' Mark a function as a render function
 #'
+#' `r lifecycle::badge("superseded")` Please use [`createRenderFunction()`] to
+#' support async execution. (Shiny 1.1.0)
+#'
 #' Should be called by implementers of `renderXXX` functions in order to mark
 #' their return values as Shiny render functions, and to provide a hint to Shiny
 #' regarding what UI function is most commonly used with this type of render
@@ -10,9 +13,11 @@ utils::globalVariables('func', add = TRUE)
 #'
 #' Note that it is generally preferable to use [createRenderFunction()] instead
 #' of `markRenderFunction()`. It essentially wraps up the user-provided
-#' expression in the `transform` function passed to it, then pases the resulting
+#' expression in the `transform` function passed to it, then passes the resulting
 #' function to `markRenderFunction()`. It also provides a simpler calling
-#' interface.
+#' interface. There may be cases where `markRenderFunction()` must be used instead of
+#' [createRenderFunction()] -- for example, when the `transform` parameter of
+#' [createRenderFunction()] is not flexible enough for your needs.
 #'
 #' @param uiFunc A function that renders Shiny UI. Must take a single argument:
 #'   an output ID.
@@ -43,7 +48,7 @@ utils::globalVariables('func', add = TRUE)
 #'   is able to serve JS and CSS resources.
 #' @return The `renderFunc` function, with annotations.
 #'
-#' @seealso [createRenderFunction()], [quoToFunction()]
+#' @seealso [createRenderFunction()]
 #' @export
 markRenderFunction <- function(
   uiFunc,
@@ -53,6 +58,12 @@ markRenderFunction <- function(
   cacheWriteHook = NULL,
   cacheReadHook = NULL
 ) {
+  # (Do not emit warning for superseded code, "since there’s no risk if you keep using it")
+  # # This method is called by the superseding function, createRenderFunction().
+  # if (in_devmode()) {
+  #   shinyDeprecated("1.1.0", "markRenderFunction()", "createRenderFunction()")
+  # }
+
   force(renderFunc)
 
   # a mutable object that keeps track of whether `useRenderFunction` has been
@@ -100,6 +111,7 @@ markRenderFunction <- function(
     # For everything else, do nothing.
     cacheHint <- lapply(cacheHint, function(x) {
       if      (is.function(x)) formalsAndBody(x)
+      else if (is_quosure(x)) zap_srcref(quo_get_expr(x))
       else if (is.language(x)) zap_srcref(x)
       else                     x
     })
@@ -139,11 +151,27 @@ print.shiny.render.function <- function(x, ...) {
   cat_line("<shiny.render.function>")
 }
 
-#' Implement render functions
+#' Implement custom render functions
 #'
-#' This function is a wrapper for [markRenderFunction()] which provides support
-#' for async computation via promises. It is recommended to use
-#' `createRenderFunction()` instead of `markRenderFunction()`.
+#' Developer-facing utilities for implementing a custom `renderXXX()` function.
+#' Before using these utilities directly, consider using the [`htmlwidgets`
+#' package](http://www.htmlwidgets.org/develop_intro.html) to implement custom
+#' outputs (i.e., custom `renderXXX()`/`xxxOutput()` functions). That said,
+#' these utilities can be used more directly if a full-blown htmlwidget isn't
+#' needed and/or the user-supplied reactive expression needs to be wrapped in
+#' additional call(s).
+#'
+#' To implement a custom `renderXXX()` function, essentially 2 things are needed:
+#'   1. Capture the user's reactive expression as a function.
+#'      * New `renderXXX()` functions can use `quoToFunction()` for this, but
+#'      already existing `renderXXX()` functions that contain `env` and `quoted`
+#'      parameters may want to continue using `installExprFunction()` for better
+#'      legacy support (see examples).
+#'   2. Flag the resulting function (from 1) as a Shiny rendering function and
+#'   also provide a UI container for displaying the result of the rendering
+#'   function.
+#'      * `createRenderFunction()` is currently recommended (instead of
+#'      [markRenderFunction()]) for this step (see examples).
 #'
 #' @param func A function without parameters, that returns user data. If the
 #'   returned value is a promise, then the render function will proceed in async
@@ -160,11 +188,10 @@ print.shiny.render.function <- function(x, ...) {
 #' @return An annotated render function, ready to be assigned to an
 #'   `output` slot.
 #'
-#' @seealso [quoToFunction()], [markRenderFunction()], [rlang::enquo()].
-#'
 #' @examples
-#' # A very simple render function
+#' # A custom render function that repeats the supplied value 3 times
 #' renderTriple <- function(expr) {
+#'   # Wrap user-supplied reactive expression into a function
 #'   func <- quoToFunction(rlang::enquo0(expr))
 #'
 #'   createRenderFunction(
@@ -176,12 +203,52 @@ print.shiny.render.function <- function(x, ...) {
 #'   )
 #' }
 #'
+#' # For better legacy support, consider using installExprFunction() over quoToFunction()
+#' renderTripleLegacy <- function(expr, env = parent.frame(), quoted = FALSE) {
+#'   func <- installExprFunction(expr, "func", env, quoted)
+#'
+#'   createRenderFunction(
+#'     func,
+#'     transform = function(value, session, name, ...) {
+#'       paste(rep(value, 3), collapse=", ")
+#'     },
+#'     outputFunc = textOutput
+#'   )
+#' }
+#'
 #' # Test render function from the console
-#' a <- 1
-#' r <- renderTriple({ a * 10 })
-#' a <- 2
+#' reactiveConsole(TRUE)
+#'
+#' v <- reactiveVal("basic")
+#' r <- renderTriple({ v() })
 #' r()
-#' # [1] "20, 20, 20"
+#' #> [1] "basic, basic, basic"
+#'
+#' # User can supply quoted code via rlang::quo(). Note that evaluation of the
+#' # expression happens when r2() is invoked, not when r2 is created.
+#' q <- rlang::quo({ v() })
+#' r2 <- rlang::inject(renderTriple(!!q))
+#' v("rlang")
+#' r2()
+#' #> [1] "rlang, rlang, rlang"
+#'
+#' # Supplying quoted code without rlang::quo() requires installExprFunction()
+#' expr <- quote({ v() })
+#' r3 <- renderTripleLegacy(expr, quoted = TRUE)
+#' v("legacy")
+#' r3()
+#' #> [1] "legacy, legacy, legacy"
+#'
+#' # The legacy approach also supports with quosures (env is ignored in this case)
+#' q <- rlang::quo({ v() })
+#' r4 <- renderTripleLegacy(q, quoted = TRUE)
+#' v("legacy-rlang")
+#' r4()
+#' #> [1] "legacy-rlang, legacy-rlang, legacy-rlang"
+#'
+#' # Turn off reactivity in the console
+#' reactiveConsole(FALSE)
+#'
 #' @export
 createRenderFunction <- function(
   func,
@@ -320,9 +387,7 @@ markOutputAttrs <- function(renderFunc, snapshotExclude = NULL,
 #'   the output, see [plotPNG()].
 #'
 #' @param expr An expression that returns a list.
-#' @param env TODO-barret docs; The environment in which to evaluate `expr`.
-#' @param quoted TODO-barret docs; Is `expr` a quoted expression (with `quote()`)? This
-#'   is useful if you want to save an expression in a variable.
+#' @inheritParams renderUI
 #' @param deleteFile Should the file in `func()$src` be deleted after
 #'   it is sent to the client browser? Generally speaking, if the image is a
 #'   temp file generated within `func`, then this should be `TRUE`;
@@ -401,12 +466,10 @@ markOutputAttrs <- function(renderFunc, snapshotExclude = NULL,
 #'
 #' shinyApp(ui, server)
 #' }
-renderImage <- function(expr, env = deprecated(), quoted = deprecated(),
+renderImage <- function(expr, env = parent.frame(), quoted = FALSE,
                         deleteFile, outputArgs=list())
 {
-  q <- enquo0(expr)
-  q <- sustainEnvAndQuotedInternal(q, expr, env, quoted)
-  func <- quoToFunction(q, "renderImage")
+  func <- installExprFunction(expr, "func", env, quoted, label = "renderImage")
 
   # missing() must be used directly within the function with the given arg
   if (missing(deleteFile)) {
@@ -528,9 +591,7 @@ isTemp <- function(path, tempDir = tempdir(), mustExist) {
 #' function return [invisible()].
 #'
 #' @param expr An expression to evaluate.
-#' @param env TODO-barret docs; The environment in which to evaluate `expr`. For expert use only.
-#' @param quoted TODO-barret docs; Is `expr` a quoted expression (with `quote()`)? This
-#'   is useful if you want to save an expression in a variable.
+#' @inheritParams renderUI
 #' @param width Width of printed output.
 #' @param outputArgs A list of arguments to be passed through to the implicit
 #'   call to [verbatimTextOutput()] or [textOutput()] when the functions are
@@ -538,12 +599,10 @@ isTemp <- function(path, tempDir = tempdir(), mustExist) {
 #'
 #' @example res/text-example.R
 #' @export
-renderPrint <- function(expr, env = deprecated(), quoted = deprecated(),
+renderPrint <- function(expr, env = parent.frame(), quoted = FALSE,
                         width = getOption('width'), outputArgs=list())
 {
-  q <- enquo0(expr)
-  q <- sustainEnvAndQuotedInternal(q, expr, env, quoted)
-  func <- quoToFunction(q, "renderPrint")
+  func <- installExprFunction(expr, "func", env, quoted, label = "renderPrint")
 
   # Set a promise domain that sets the console width
   #   and captures output
@@ -575,7 +634,7 @@ renderPrint <- function(expr, env = deprecated(), quoted = deprecated(),
     outputArgs,
     cacheHint = list(
       label = "renderPrint",
-      origUserExpr = get_expr(q)
+      origUserExpr = installedFuncExpr(func)
     )
   )
 }
@@ -625,12 +684,10 @@ createRenderPrintPromiseDomain <- function(width) {
 #'   element.
 #' @export
 #' @rdname renderPrint
-renderText <- function(expr, env = deprecated(), quoted = deprecated(),
+renderText <- function(expr, env = parent.frame(), quoted = FALSE,
                        outputArgs=list(), sep=" ") {
 
-  q <- enquo0(expr)
-  q <- sustainEnvAndQuotedInternal(q, expr, env, quoted)
-  func <- quoToFunction(q, "renderText")
+  func <- installExprFunction(expr, "func", env, quoted, label = "renderText")
 
   createRenderFunction(
     func,
@@ -651,9 +708,13 @@ renderText <- function(expr, env = deprecated(), quoted = deprecated(),
 #'
 #' @param expr An expression that returns a Shiny tag object, [HTML()],
 #'   or a list of such objects.
-#' @param env TODO-barret docs; The environment in which to evaluate `expr`.
-#' @param quoted TODO-barret docs; Is `expr` a quoted expression (with `quote()`)? This
-#'   is useful if you want to save an expression in a variable.
+#' @template param-env
+#' @templateVar x expr
+#' @templateVar env env
+#' @templateVar quoted quoted
+#' @template param-quoted
+#' @templateVar x expr
+#' @templateVar quoted quoted
 #' @param outputArgs A list of arguments to be passed through to the implicit
 #'   call to [uiOutput()] when `renderUI` is used in an
 #'   interactive R Markdown document.
@@ -679,12 +740,10 @@ renderText <- function(expr, env = deprecated(), quoted = deprecated(),
 #' shinyApp(ui, server)
 #' }
 #'
-renderUI <- function(expr, env = deprecated(), quoted = deprecated(),
+renderUI <- function(expr, env = parent.frame(), quoted = FALSE,
                      outputArgs = list())
 {
-  q <- enquo0(expr)
-  q <- sustainEnvAndQuotedInternal(q, expr, env, quoted)
-  func <- quoToFunction(q, "renderUI")
+  func <- installExprFunction(expr, "func", env, quoted, label = "renderUI")
 
   createRenderFunction(
     func,
@@ -828,7 +887,7 @@ downloadHandler <- function(filename, content, contentType=NA, outputArgs=list()
 #' }
 renderDataTable <- function(expr, options = NULL, searchDelay = 500,
                             callback = 'function(oTable) {}', escape = TRUE,
-                            env = deprecated(), quoted = deprecated(),
+                            env = parent.frame(), quoted = FALSE,
                             outputArgs=list())
 {
 
@@ -839,9 +898,7 @@ renderDataTable <- function(expr, options = NULL, searchDelay = 500,
     )
   }
 
-  q <- enquo0(expr)
-  q <- sustainEnvAndQuotedInternal(q, expr, env, quoted)
-  func <- quoToFunction(q, "renderDataTable")
+  func <- installExprFunction(expr, "func", env, quoted, label = "renderDataTable")
 
   renderFunc <- function(shinysession, name, ...) {
     if (is.function(options)) options <- options()

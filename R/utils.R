@@ -1438,21 +1438,31 @@ dateYMD <- function(date = NULL, argName = "value") {
 # function which calls the original function using the specified name. This can
 # be helpful for profiling, because the specified name will show up on the stack
 # trace.
-wrapFunctionLabel <- function(func, name, ..stacktraceon = FALSE) {
+wrapFunctionLabel <- function(func, name, ..stacktraceon = FALSE, dots = TRUE) {
   if (name == "name" || name == "func" || name == "relabelWrapper") {
     stop("Invalid name for wrapFunctionLabel: ", name)
   }
   assign(name, func, environment())
   registerDebugHook(name, environment(), name)
 
-  if (..stacktraceon) {
-    # We need to wrap the `...` in `!!quote(...)` so that R CMD check won't
-    # complain about "... may be used in an incorrect context"
-    body <- expr({ ..stacktraceon..((!!name)(!!quote(...))) })
+  if (isTRUE(dots)) {
+    if (..stacktraceon) {
+      # We need to wrap the `...` in `!!quote(...)` so that R CMD check won't
+      # complain about "... may be used in an incorrect context"
+      body <- expr({ ..stacktraceon..((!!name)(!!quote(...))) })
+    } else {
+      body <- expr({ (!!name)(!!quote(...)) })
+    }
+    relabelWrapper <- new_function(pairlist2(... =), body, environment())
   } else {
-    body <- expr({ (!!name)(!!quote(...)) })
+    # Same logic as when `dots = TRUE`, but without the `...`
+    if (..stacktraceon) {
+      body <- expr({ ..stacktraceon..((!!name)()) })
+    } else {
+      body <- expr({ (!!name)() })
+    }
+    relabelWrapper <- new_function(list(), body, environment())
   }
-  relabelWrapper <- new_function(pairlist2(... =), body, environment())
 
   # Preserve the original function that was passed in; is used for caching.
   attr(relabelWrapper, "wrappedFunc") <- func

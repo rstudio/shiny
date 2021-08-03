@@ -7,16 +7,16 @@
 \usage{
 renderPrint(
   expr,
-  env = deprecated(),
-  quoted = deprecated(),
+  env = parent.frame(),
+  quoted = FALSE,
   width = getOption("width"),
   outputArgs = list()
 )
 
 renderText(
   expr,
-  env = deprecated(),
-  quoted = deprecated(),
+  env = parent.frame(),
+  quoted = FALSE,
   outputArgs = list(),
   sep = " "
 )
@@ -24,10 +24,15 @@ renderText(
 \arguments{
 \item{expr}{An expression to evaluate.}
 
-\item{env}{TODO-barret docs; The environment in which to evaluate \code{expr}. For expert use only.}
+\item{env}{The parent environment for the reactive expression. By default,
+this is the calling environment, the same as when defining an ordinary
+non-reactive expression. If \code{expr} is a quosure and \code{quoted} is \code{TRUE},
+then \code{env} is ignored.}
 
-\item{quoted}{TODO-barret docs; Is \code{expr} a quoted expression (with \code{quote()})? This
-is useful if you want to save an expression in a variable.}
+\item{quoted}{If it is \code{TRUE}, then the \code{\link[=quote]{quote()}}ed value of \code{expr}
+will be used when \code{expr} is evaluated. If \code{expr} is a quosure and you
+would like to use its expression as a value for \code{expr}, then you must set
+\code{quoted} to \code{TRUE}.}
 
 \item{width}{Width of printed output.}
 

@@ -20,7 +20,6 @@
 #'   `delay` milliseconds before sending an event.
 #' @seealso [brushOpts()] for brushing events.
 #' @export
-#' @keywords internal
 clickOpts <- function(id, clip = TRUE) {
   if (is.null(id))
     stop("id must not be NULL")

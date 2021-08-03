@@ -24,3 +24,4 @@ knit_print.reactive(x, ..., inline = FALSE)
 These S3 methods are necessary to help Shiny applications and UI chunks embed
 themselves in knitr/rmarkdown documents.
 }
+\keyword{internal}

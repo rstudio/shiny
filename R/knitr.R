@@ -4,6 +4,7 @@
 #' themselves in knitr/rmarkdown documents.
 #'
 #' @name knitr_methods
+#' @keywords internal
 #' @param x Object to knit_print
 #' @param ... Additional knit_print arguments
 NULL

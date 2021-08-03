@@ -512,7 +512,7 @@ MessageLogger = R6Class(
       return(txt)
     },
     singleLine = function(txt) {
-      gsub("[^\\]\\n", "\\\\n", txt)
+      gsub("([^\\])\\n", "\\1\\\\n", txt)
     },
     valueStr = function(valueStr) {
       paste0(

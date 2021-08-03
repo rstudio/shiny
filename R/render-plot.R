@@ -46,9 +46,7 @@
 #'   decorative images.
 #' @param ... Arguments to be passed through to [grDevices::png()].
 #'   These can be used to set the width, height, background color, etc.
-#' @param env TODO-barret docs; The environment in which to evaluate `expr`.
-#' @param quoted TODO-barret docs; Is `expr` a quoted expression (with `quote()`)? This
-#'   is useful if you want to save an expression in a variable.
+#' @inheritParams renderUI
 #' @param execOnResize If `FALSE` (the default), then when a plot is
 #'   resized, Shiny will *replay* the plot drawing commands with
 #'   [grDevices::replayPlot()] instead of re-executing `expr`.
@@ -61,15 +59,17 @@
 #' @export
 renderPlot <- function(expr, width = 'auto', height = 'auto', res = 72, ...,
                        alt = NA,
-                       env = deprecated(), quoted = deprecated(),
+                       env = parent.frame(), quoted = FALSE,
                        execOnResize = FALSE, outputArgs = list()
 ) {
 
-  q <- enquo0(expr)
-  q <- sustainEnvAndQuotedInternal(q, expr, env, quoted)
-  # This ..stacktraceon is matched by a ..stacktraceoff.. when plotFunc
-  # is called
-  func <- quoToFunction(q, "renderPlot", ..stacktraceon = TRUE)
+  func <- installExprFunction(
+    expr, "func", env, quoted,
+    label = "renderPlot",
+    # This ..stacktraceon is matched by a ..stacktraceoff.. when plotFunc
+    # is called
+    ..stacktraceon = TRUE
+  )
 
   args <- list(...)
 
@@ -187,7 +187,7 @@ renderPlot <- function(expr, width = 'auto', height = 'auto', res = 72, ...,
     outputFunc,
     renderFunc,
     outputArgs,
-    cacheHint = list(userExpr = get_expr(q), res = res)
+    cacheHint = list(userExpr = installedFuncExpr(func), res = res)
   )
   class(markedFunc) <- c("shiny.renderPlot", class(markedFunc))
   markedFunc

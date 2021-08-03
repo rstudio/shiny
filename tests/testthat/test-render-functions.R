@@ -57,126 +57,84 @@ test_that("functionLabel returns static value when the label can not be assigned
     (function(exprF) {
       quoToFunction(enquo0(exprF))
     })(),
-    "wrappedFunction"
+    "anonymous"
   )
   # parents are not supported
   expect_label(
     (function(exprF) {quoToFunction(enquo0(exprF))})(),
-    "wrappedFunction"
+    "anonymous"
   )
 })
+
+local({
+
+# (must also copy logic into `lower - quoToFunction(enquo0(expr))` code)
+return_func <- function(func) {
+  function() {
+    value <- func()
+    list(value, value)
+  }
+}
 
 for (info in list(
   list(
     name = "exprToFunction(expr, env, quoted)",
     fn = function(exprF, envF = parent.frame(), quotedF = FALSE) {
       func <- exprToFunction(exprF, envF, quotedF)
-      function() {
-        value <- func()
-        paste(rep(value, 2), collapse=", ")
-      }
-    },
-    can_not_test_quosures = TRUE
+      return_func(func)
+    }
   ),
   list(
     name = "exprToFunction(expr, env, quoted = TRUE)",
     fn = function(exprF, envF = parent.frame(), quotedF = FALSE) {
+      # `exprF` coudl be a raw quosure if `inject()`ed
       if (!quotedF) exprF <- substitute(exprF)
       func <- exprToFunction(exprF, envF, quoted = TRUE)
-      function() {
-        value <- func()
-        paste(rep(value, 2), collapse=", ")
-      }
-    },
-    can_not_test_quosures = TRUE
+      return_func(func)
+    }
+  ),
+  list(
+    name = "exprToFunction(expr, env, quoted = TRUE) + force()",
+    fn = function(exprF, envF = parent.frame(), quotedF = FALSE) {
+      # Make `exprF` always language, even if `inject()`ed
+      if (!quotedF) exprF <- substitute(force(exprF))
+      func <- exprToFunction(exprF, envF, quoted = TRUE)
+      return_func(func)
+    }
   ),
   list(
     name = "installExprFunction(expr, \"func\", env, quoted)",
     fn = function(exprF, envF = parent.frame(), quotedF = FALSE) {
       a <- 1000
       installExprFunction(exprF, "func", envF, quotedF)
-      function() {
-        value <- func()
-        paste(rep(value, 2), collapse=", ")
-      }
-    },
-    can_not_test_quosures = TRUE
+      return_func(func)
+    }
   ),
   list(
     name = "installExprFunction(expr, \"func\", env, quoted = TRUE)",
     fn = function(exprF, envF = parent.frame(), quotedF = FALSE) {
       a <- 1000
+      # `exprF` coudl be a raw quosure if `inject()`ed
       if (!quotedF) exprF <- substitute(exprF)
       installExprFunction(exprF, "func", envF, quoted = TRUE)
-      function() {
-        value <- func()
-        paste(rep(value, 2), collapse=", ")
-      }
-    },
-    can_not_test_quosures = TRUE
+      return_func(func)
+    }
   ),
   list(
-    name = "sustainEnvAndQuoted(); quoToFunction()",
+    name = "installExprFunction(expr, \"func\", env, quoted = TRUE)",
     fn = function(exprF, envF = parent.frame(), quotedF = FALSE) {
       a <- 1000
-      q <- enquo0(exprF)
-      q <- sustainEnvAndQuoted(q, exprF, envF, quotedF)
-      func <- quoToFunction(q)
-      function() {
-        value <- func()
-        paste(rep(value, 2), collapse=", ")
-      }
-    }
-  ),
-  list(
-    name = "lower1 - sustainEnvAndQuoted(); quoToFunction()",
-    fn = function(exprF, envF = parent.frame(), quotedF = FALSE) {
-      a <- 1000
-      q <- enquo0(exprF)
-      q <- sustainEnvAndQuoted(q, exprF, envF, quotedF)
-      function() {
-        func <- quoToFunction(q)
-        value <- func()
-        paste(rep(value, 2), collapse=", ")
-      }
-    }
-  ),
-  list(
-    name = "old args - sustainEnvAndQuoted(),quoToFunction()",
-    fn = function(xF, envF = parent.frame(), quotedF = FALSE) {
-      a <- 1000
-      q <- enquo0(xF)
-      # Eventually can remove this, once users stop using env and quoted
-      q <- sustainEnvAndQuoted(q, xF, envF, quotedF)
-      func <- quoToFunction(q)
-      function() {
-        value <- func()
-        paste(rep(value, 2), collapse=", ")
-      }
-    }
-  ),
-  list(
-    name = "deprecated args - sustainEnvAndQuoted(),quoToFunction()",
-    fn = function(xF, envF = deprecated(), quotedF = deprecated()) {
-      a <- 1000
-      q <- enquo0(xF)
-      # Eventually can remove this, once users stop using env and quoted
-      q <- sustainEnvAndQuoted(q, xF, envF, quotedF)
-      func <- quoToFunction(q)
-      function() {
-        value <- func()
-        paste(rep(value, 2), collapse=", ")
-      }
+      # Make `exprF` always language, even if `inject()`ed
+      if (!quotedF) exprF <- substitute(force(exprF))
+      installExprFunction(exprF, "func", envF, quoted = TRUE)
+      return_func(func)
     }
   ),
   list(
     name = "quoToFunction(enquo0(expr))",
     fn = function(expr) {
       func <- quoToFunction(enquo0(expr))
-      function() {
-        value <- func()
-        paste(rep(value, 2), collapse=", ")
-      }
+      return_func(func)
     }
   ),
   list(
@@ -185,7 +143,7 @@ for (info in list(
       function() {
         func <- quoToFunction(enquo0(expr))
         value <- func()
-        paste(rep(value, 2), collapse=", ")
+        list(value, value)
       }
     }
   )
@@ -194,7 +152,6 @@ for (info in list(
   # Scope the local variables
   local({
     renderH <- info$fn %||% stop("`info$fn` not found")
-    messageVal <- info$messageVal %||% NA
 
     # Different usages of env and quoted param
     a <- 1
@@ -202,56 +159,90 @@ for (info in list(
     e$a <- 10
 
     test_that(paste0("vanilla: ", info$name), {
-      expect_message({
-        val <- renderH({a + 1})()
-      }, messageVal)
-      expect_identical(val, "2, 2")
+      val <- renderH({a + 1})()
+      expect_identical(val, list(2, 2))
     })
 
+    # Test that no error is thrown when the function is created
+    # This proves that the expression is not immediately evaluated
+    test_that(paste0("stop('boom'): ", info$name), {
+      expect_error(
+        renderH(stop("boom")),
+        NA
+      )
+    })
 
     if (length(formals(renderH)) > 1) {
       test_that(paste0("quoted = FALSE: ", info$name), {
         r <- renderH(a + 1, quotedF = FALSE)
-        expect_identical(r(), "2, 2")
+        expect_identical(r(), list(2, 2))
       })
 
       test_that(paste0("quoted = TRUE: ", info$name), {
         r <- renderH(quote(a + 1), quotedF = TRUE)
-        expect_identical(r(), "2, 2")
+        expect_identical(r(), list(2, 2))
       })
 
       test_that(paste0("env = e: ", info$name), {
         r <- renderH(a + 1, envF = e)
-        expect_identical(r(), "11, 11")
+        expect_identical(r(), list(11, 11))
       })
 
       test_that(paste0("env = e, quoted = FALSE: ", info$name), {
         r <- renderH(a + 1, envF = e, quotedF = FALSE)
-        expect_identical(r(), "11, 11")
+        expect_identical(r(), list(11, 11))
       })
 
       test_that(paste0("env = e, quoted = TRUE: ", info$name), {
         r <- renderH(quote(a + 1), envF = e, quotedF = TRUE)
-        expect_identical(r(), "11, 11")
+        expect_identical(r(), list(11, 11))
       })
 
-      if (!isTRUE(info$can_not_test_quosures)) {
-        test_that(paste0("Works with injecting raw quosures: ", info$name), {
-          e <- list2env(list(a=10))
-          x <- new_quosure(quote({ a + 1 }) , env = e)
-          ans <- expect_message(
-            inject(renderH(!!x))(),
-            messageVal
-          )
-          expect_identical(ans, "11, 11")
+      test_that(paste0("Works with raw quosures, quoted = FALSE: ", info$name), {
+        e <- list2env(list(a=10))
+        x <- new_quosure(quote({ a + 1 }) , env = e)
+        r <- renderH(x, quotedF = FALSE)
+        expect_identical(r(), list(x, x))
+      })
+      test_that(paste0(
+        "Passing in a raw quosures, quoted = FALSE, env = otherenv",
+        " is treated like an expression: ", info$name),
+      {
+        e <- list2env(list(a=10))
+        x <- new_quosure(quote({ a + 1 }) , env = e)
+        other_env <- list2env(list(x=20))
+        r <- renderH(x, quotedF = FALSE, envF = e)
+        expect_identical(r(), list(x, x))
+      })
+      test_that(
+        paste0("Works with injected quosures, quoted = FALSE, env = otherenv: ", info$name), {
+        e <- list2env(list(a=10))
+        x <- new_quosure(quote({ a + 1 }) , env = e)
+        other_env <- new.env(parent = emptyenv())
+        r <- inject(renderH(!!x, quotedF = FALSE, envF = e))
+        expect_identical(r(), list(11, 11))
+      })
+      test_that(paste0("Works with raw quosures, quoted = TRUE: ", info$name), {
+        e <- list2env(list(a=10))
+        x <- new_quosure(quote({ a + 1 }) , env = e)
+        ans <- renderH(x, quotedF = TRUE)()
+        expect_identical(ans, list(11, 11))
+      })
+      test_that(paste0("Works with injecting raw quosures: ", info$name), {
+        e <- list2env(list(a=10))
+        x <- new_quosure(quote({ a + 1 }) , env = e)
+        ans <- inject(renderH(!!x))()
+        expect_identical(ans, list(11, 11))
+      })
 
-          # All below should always error
-          expect_error(inject(renderH(!!x, quotedF = F)), "alter your quosure")
-          expect_error(inject(renderH(!!x, quotedF = T)), "alter your quosure")
-          expect_error(inject(renderH(!!x, envF = e)), "alter your quosure")
-          expect_error(inject(renderH(!!x, envF = environment())), "alter your quosure")
-        })
-      }
+      test_that(paste0("Missing env with quosure, quoted = TRUE: ", info$name), {
+        e <- list2env(list(a=10))
+        x <- new_quosure(quote({ a + 1 }) , env = e)
+
+        ans <- renderH(x, envF = rlang::missing_arg(), quotedF = TRUE)()
+        expect_identical(ans, list(11, 11))
+      })
+
     }
 
     test_that(paste0("Works with inject / !!: ", info$name), {
@@ -260,11 +251,13 @@ for (info in list(
       r1 <- inject(renderH({ !!a }))
       r2 <- renderH({ eval_tidy(quo(!!a)) })
       a <- 100
-      expect_identical(r1(), "1, 1")
-      expect_identical(r2(), "100, 100")
+      expect_identical(r1(), list(1,1))
+      expect_identical(r2(), list(100, 100))
     })
   })
 }
+})
+
 
 
 test_that("nested observe events work with exprToFunction", {

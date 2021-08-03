@@ -1099,7 +1099,6 @@ test_that("Custom render functions that call installExprFunction", {
   # quoToFunction + markRenderFunction (with cacheHint): OK
   # Also, non-list cacheHint will get wrapped into a list
   renderDouble <- function(expr) {
-    # browser()
     func <- quoToFunction(enquo(expr), "renderDouble")
     markRenderFunction(textOutput,
       function() {
@@ -1262,4 +1261,34 @@ test_that("cacheHint to avoid collisions", {
     extractCacheHint(renderText({ a + 1 })),
     extractCacheHint(renderUI({ a + 1 }))
   ))
+})
+
+
+test_that("cacheHint works with quosures", {
+  my_quo <- rlang::quo({a + 1})
+
+  expect_equal(
+    extractCacheHint(renderPlot({ a + 1 })),
+    list(userExpr = rlang::expr({a+1}), res = 72)
+  )
+  expect_equal(
+    extractCacheHint(renderPlot(my_quo, quoted = TRUE)),
+    list(userExpr = rlang::expr({a+1}), res = 72)
+  )
+
+  expect_equal(
+    extractCacheHint(reactive(a + 1)),
+    list(userExpr = rlang::expr({a+1}))
+  )
+  expect_equal(
+    extractCacheHint(reactive(my_quo, quoted = TRUE)),
+    list(userExpr = rlang::expr({a+1}))
+  )
+
+  expect_equal(
+    extractCacheHint(
+      markRenderFunction(force, force, cacheHint = list(q = my_quo))
+    ),
+    list(q = rlang::expr({a+1}))
+  )
 })

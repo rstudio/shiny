@@ -38,13 +38,20 @@ deprecatedEnvQuotedMessage <- function() {
   if (!in_devmode()) return(invisible())
   if (is_false(getOption("shiny.deprecation.messages"))) return(invisible())
 
-  # manually
+  # Capture calling function
+  grandparent_call <- sys.call(-2)
+  # Turn language into user friendly string
+  grandparent_txt <- paste0(utils::capture.output({grandparent_call}), collapse = "\n")
+
   msg <- paste0(
-    "The `env` and `quoted` arguments are deprecated as of shiny 1.6.0.",
+    "The `env` and `quoted` arguments are deprecated as of shiny 1.7.0.",
     " Please use quosures from `rlang` instead.\n",
-    "See <https://github.com/rstudio/shiny/issues/3108> for more information."
+    "See <https://github.com/rstudio/shiny/issues/3108> for more information.\n",
+    "Function call:\n",
+    grandparent_txt
   )
-  rlang::inform(message = msg, .frequency = "always", .frequency_id = msg, .file = stderr())
+  # Call less often as users do not have much control over this warning
+  rlang::inform(message = msg, .frequency = "regularly", .frequency_id = msg, .file = stderr())
 }
 
 

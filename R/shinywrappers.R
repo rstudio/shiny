@@ -387,12 +387,7 @@ markOutputAttrs <- function(renderFunc, snapshotExclude = NULL,
 #'   the output, see [plotPNG()].
 #'
 #' @param expr An expression that returns a list.
-#' @template param-env
-#' @templateVar x expr
-#' @templateVar env env
-#' @template param-quoted
-#' @templateVar x expr
-#' @templateVar quoted quoted
+#' @inheritParams renderUI
 #' @param deleteFile Should the file in `func()$src` be deleted after
 #'   it is sent to the client browser? Generally speaking, if the image is a
 #'   temp file generated within `func`, then this should be `TRUE`;
@@ -596,12 +591,7 @@ isTemp <- function(path, tempDir = tempdir(), mustExist) {
 #' function return [invisible()].
 #'
 #' @param expr An expression to evaluate.
-#' @template param-env
-#' @templateVar x expr
-#' @templateVar env env
-#' @template param-quoted
-#' @templateVar x expr
-#' @templateVar quoted quoted
+#' @inheritParams renderUI
 #' @param width Width of printed output.
 #' @param outputArgs A list of arguments to be passed through to the implicit
 #'   call to [verbatimTextOutput()] or [textOutput()] when the functions are
@@ -721,6 +711,7 @@ renderText <- function(expr, env = parent.frame(), quoted = FALSE,
 #' @template param-env
 #' @templateVar x expr
 #' @templateVar env env
+#' @templateVar quoted quoted
 #' @template param-quoted
 #' @templateVar x expr
 #' @templateVar quoted quoted

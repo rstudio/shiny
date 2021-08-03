@@ -948,6 +948,7 @@ Observable <- R6Class(
 #' @template param-env
 #' @templateVar x x
 #' @templateVar env env
+#' @templateVar quoted quoted
 #' @template param-quoted
 #' @templateVar x x
 #' @templateVar quoted quoted
@@ -1334,12 +1335,7 @@ Observer <- R6Class(
 #'
 #' @param x An expression (quoted or unquoted). Any return value will be
 #'   ignored.
-#' @template param-env
-#' @templateVar x x
-#' @templateVar env env
-#' @template param-quoted
-#' @templateVar x x
-#' @templateVar quoted quoted
+#' @inheritParams reactive
 #' @param label A label for the observer, useful for debugging.
 #' @param suspended If `TRUE`, start the observer in a suspended state. If
 #'   `FALSE` (the default), start in a non-suspended state.
@@ -2149,24 +2145,30 @@ maskReactiveContext <- function(expr) {
 #' @param valueExpr The expression that produces the return value of the
 #'   `eventReactive`. It will be executed within an [isolate()]
 #'   scope.
-#' @template param-env
-#' @templateVar x eventExpr
-#' @templateVar env event.env
-#' @template param-quoted
-#' @templateVar x eventExpr
-#' @templateVar quoted event.quoted
-#' @template param-env
-#' @templateVar x handlerExpr
-#' @templateVar env handler.env
-#' @template param-quoted
-#' @templateVar x handlerExpr
-#' @templateVar quoted handler.quoted
-#' @template param-env
-#' @templateVar x valueExpr
-#' @templateVar env value.env
-#' @template param-quoted
-#' @templateVar x valueExpr
-#' @templateVar quoted value.quoted
+#' @param event.env The parent environment for the reactive expression. By default,
+#'   this is the calling environment, the same as when defining an ordinary
+#'   non-reactive expression. If `eventExpr` is a quosure and `event.quoted` is `TRUE`,
+#'   then `event.env` is ignored.
+#' @param event.quoted If it is `TRUE`, then the [`quote()`]ed value of `eventExpr`
+#'   will be used when `eventExpr` is evaluated. If `eventExpr` is a quosure and you
+#'   would like to use its expression as a value for `eventExpr`, then you must set
+#'  `event.quoted` to `TRUE`.
+#' @param handler.env The parent environment for the reactive expression. By default,
+#'   this is the calling environment, the same as when defining an ordinary
+#'   non-reactive expression. If `handlerExpr` is a quosure and `handler.quoted` is `TRUE`,
+#'   then `handler.env` is ignored.
+#' @param handler.quoted If it is `TRUE`, then the [`quote()`]ed value of `handlerExpr`
+#'   will be used when `handlerExpr` is evaluated. If `handlerExpr` is a quosure and you
+#'   would like to use its expression as a value for `handlerExpr`, then you must set
+#'  `handler.quoted` to `TRUE`.
+#' @param value.env The parent environment for the reactive expression. By default,
+#'   this is the calling environment, the same as when defining an ordinary
+#'   non-reactive expression. If `valueExpr` is a quosure and `value.quoted` is `TRUE`,
+#'   then `value.env` is ignored.
+#' @param value.quoted If it is `TRUE`, then the [`quote()`]ed value of `valueExpr`
+#'   will be used when `valueExpr` is evaluated. If `valueExpr` is a quosure and you
+#'   would like to use its expression as a value for `valueExpr`, then you must set
+#'  `value.quoted` to `TRUE`.
 #' @param label A label for the observer or reactive, useful for debugging.
 #' @param suspended If `TRUE`, start the observer in a suspended state. If
 #'   `FALSE` (the default), start in a non-suspended state.

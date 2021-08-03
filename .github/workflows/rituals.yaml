@@ -3,7 +3,6 @@ on:
     branches:
       - master
       - ghactions
-      - rituals_master2
   pull_request:
     branches:
       - master

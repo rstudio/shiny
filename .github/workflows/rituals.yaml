@@ -169,5 +169,4 @@ jobs:
       # Execute after pushing, as no updated files will be produced
       - name: Test TypeScript code
         run: |
-          cd srcts
           yarn test

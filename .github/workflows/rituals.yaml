@@ -159,7 +159,7 @@ jobs:
         if: github.event_name == 'push'
         run: |
           # Can't push to a protected branch
-          if [ -z "`git cherry origin/master`"]; then
+          if [ -n "`git cherry origin/master`"]; then
             echo "Un-pushed commits:"
             git cherry -v origin/master
             echo "\nCan not push to a protected branch. Exiting"

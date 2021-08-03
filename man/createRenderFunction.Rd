@@ -107,7 +107,7 @@ additional call(s).
 \details{
 To implement a custom \code{renderXXX()} function, essentially 2 things are needed:
 \enumerate{
-\item Capture the user's reactive expression as a function
+\item Capture the user's reactive expression as a function.
 \itemize{
 \item New \code{renderXXX()} functions can use \code{quoToFunction()} for this, but
 already existing \code{renderXXX()} functions that contain \code{env} and \code{quoted}
@@ -162,23 +162,31 @@ renderTripleLegacy <- function(expr, env = parent.frame(), quoted = FALSE) {
 # Test render function from the console
 reactiveConsole(TRUE)
 
-r <- reactiveVal()
-r("basic")
-renderTriple(r())()
+v <- reactiveVal("basic")
+r <- renderTriple({ v() })
+r()
 #> [1] "basic, basic, basic"
 
-# User can supply quoted code via rlang::quo()
-r2 <- rlang::quo({ r("rlang"); r() })
-rlang::inject(renderTriple(!!r2))()
+# User can supply quoted code via rlang::quo(). Note that evaluation of the
+# expression happens when r2() is invoked, not when r2 is created.
+q <- rlang::quo({ v() })
+r2 <- rlang::inject(renderTriple(!!q))
+v("rlang")
+r2()
 #> [1] "rlang, rlang, rlang"
 
 # Supplying quoted code without rlang::quo() requires installExprFunction()
-renderTripleLegacy(quote({ r("legacy"); r() }), quoted = TRUE)()
+expr <- quote({ v() })
+r3 <- renderTripleLegacy(expr, quoted = TRUE)
+v("legacy")
+r3()
 #> [1] "legacy, legacy, legacy"
 
 # The legacy approach also supports with quosures (env is ignored in this case)
-r3 <- rlang::quo({ r("legacy-rlang"); r() })
-renderTripleLegacy(r3, quoted = TRUE)()
+q <- rlang::quo({ v() })
+r4 <- renderTripleLegacy(q, quoted = TRUE)
+v("legacy-rlang")
+r4()
 #> [1] "legacy-rlang, legacy-rlang, legacy-rlang"
 
 # Turn off reactivity in the console

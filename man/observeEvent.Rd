@@ -48,6 +48,26 @@ invalidated. This should be a side-effect-producing action (the return
 value will be ignored). It will be executed within an \code{\link[=isolate]{isolate()}}
 scope.}
 
+\item{event.env}{The parent environment for the reactive expression. By default,
+this is the calling environment, the same as when defining an ordinary
+non-reactive expression. If \code{eventExpr} is a quosure and \code{event.quoted} is \code{TRUE},
+then \code{event.env} is ignored.}
+
+\item{event.quoted}{If it is \code{TRUE}, then the \code{\link[=quote]{quote()}}ed value of \code{eventExpr}
+will be used when \code{eventExpr} is evaluated. If \code{eventExpr} is a quosure and you
+would like to use its expression as a value for \code{eventExpr}, then you must set
+\code{event.quoted} to \code{TRUE}.}
+
+\item{handler.env}{The parent environment for the reactive expression. By default,
+this is the calling environment, the same as when defining an ordinary
+non-reactive expression. If \code{handlerExpr} is a quosure and \code{handler.quoted} is \code{TRUE},
+then \code{handler.env} is ignored.}
+
+\item{handler.quoted}{If it is \code{TRUE}, then the \code{\link[=quote]{quote()}}ed value of \code{handlerExpr}
+will be used when \code{handlerExpr} is evaluated. If \code{handlerExpr} is a quosure and you
+would like to use its expression as a value for \code{handlerExpr}, then you must set
+\code{handler.quoted} to \code{TRUE}.}
+
 \item{...}{Currently not used.}
 
 \item{label}{A label for the observer or reactive, useful for debugging.}

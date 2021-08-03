@@ -65,9 +65,10 @@ Note that it is generally preferable to use \code{\link[=createRenderFunction]{c
 of \code{markRenderFunction()}. It essentially wraps up the user-provided
 expression in the \code{transform} function passed to it, then passes the resulting
 function to \code{markRenderFunction()}. It also provides a simpler calling
-interface.
+interface. There may be cases where \code{markRenderFunction()} must be used instead of
+\code{\link[=createRenderFunction]{createRenderFunction()}} -- for example, when the \code{transform} parameter of
+\code{\link[=createRenderFunction]{createRenderFunction()}} is not flexible enough for your needs.
 }
 \seealso{
 \code{\link[=createRenderFunction]{createRenderFunction()}}
 }
-\keyword{internal}

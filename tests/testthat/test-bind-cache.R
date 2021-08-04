@@ -1265,30 +1265,52 @@ test_that("cacheHint to avoid collisions", {
 
 
 test_that("cacheHint works with quosures", {
-  my_quo <- rlang::quo({a + 1})
+  # Cache hint ignores environment
+  my_quo <- local({
+    a <- 5
+    rlang::quo({a + 1})
+  })
+  ap1 <- rlang::expr({a+1})
+  plotCacheList <- list(userExpr = ap1, res = 72)
+  reactiveCacheList <- list(userExpr = ap1)
+  quoCacheList <- list(q = ap1)
 
+
+  # render**
+  # Regular expression, quoted quosure object, injected quosure object
   expect_equal(
     extractCacheHint(renderPlot({ a + 1 })),
-    list(userExpr = rlang::expr({a+1}), res = 72)
+    plotCacheList
   )
   expect_equal(
     extractCacheHint(renderPlot(my_quo, quoted = TRUE)),
-    list(userExpr = rlang::expr({a+1}), res = 72)
+    plotCacheList
+  )
+  expect_equal(
+    extractCacheHint(inject(renderPlot(!!my_quo))),
+    plotCacheList
   )
 
+  # reactive
+  # Regular expression, quoted quosure object, injected quosure object
   expect_equal(
     extractCacheHint(reactive(a + 1)),
-    list(userExpr = rlang::expr({a+1}))
+    reactiveCacheList
   )
   expect_equal(
     extractCacheHint(reactive(my_quo, quoted = TRUE)),
-    list(userExpr = rlang::expr({a+1}))
+    reactiveCacheList
+  )
+  expect_equal(
+    extractCacheHint(inject(reactive(!!my_quo))),
+    reactiveCacheList
   )
 
+  # markRenderFunction handles raw quosure objects as cacheHint
   expect_equal(
     extractCacheHint(
       markRenderFunction(force, force, cacheHint = list(q = my_quo))
     ),
-    list(q = rlang::expr({a+1}))
+    quoCacheList
   )
 })

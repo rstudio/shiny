@@ -13245,7 +13245,6 @@
     (0, import_jquery42.default)(document).one("shiny:connected", function() {
       initDeferredIframes();
     });
-    window.console.log("Shiny version: ", windowShiny3.version);
   }
   function initDeferredIframes() {
     if (!window.Shiny || !window.Shiny.shinyapp || !window.Shiny.shinyapp.isConnected()) {

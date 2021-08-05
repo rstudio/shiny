@@ -517,7 +517,7 @@ function initShiny(windowShiny: Shiny): void {
     initDeferredIframes();
   });
 
-  window.console.log("Shiny version: ", windowShiny.version);
+  // window.console.log("Shiny version: ", windowShiny.version);
 } // function initShiny()
 
 // Give any deferred iframes a chance to load.

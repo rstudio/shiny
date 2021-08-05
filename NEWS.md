@@ -18,7 +18,7 @@ shiny 1.6.0.9000
 
 * All uses of `list(...)` have been replaced with `rlang::list2(...)`. This means that you can use trailing `,` without error and use rlang's `!!!` operator to "splice" a list of argument values into `...`. We think this'll be particularly useful for passing a list of `tabPanel()` to their consumers (i.e., `tabsetPanel()`, `navbarPage()`, etc). For example, `tabs <- list(tabPanel("A", "a"), tabPanel("B", "b")); navbarPage(!!!tabs)`. (#3315 and #3328)
 
-* `installExprFunction()` and `exprToFunction()` are now able to handle quosures, so `render`-functions which call these functions can now understand quosures, when they are called using `rlang::inject()`. This also means that `render` function no longer need `env` and `quoted` parameters; that information can be embedded into a quosure which is then passed to the `render` function. Additionally, the `getQuosure()` function was added, which makes it easier for developers to create `render` functions which understand quosures. Better documentation was added for how to create `render` functions. (#3462, #3466)
+* `installExprFunction()` and `exprToFunction()` are now able to handle quosures when `quoted = TRUE`. So `render`-functions which call these functions (such as with `htmlwidgets`) can now understand quosures. Users can also use `rlang::inject()` to unquote a quosure for evaluation.  This also means that `render` function no longer need `env` and `quoted` parameters; that information can be embedded into a quosure which is then passed to the `render` function. Better documentation was added for how to create `render` functions. (#3472)
 
 * `icon(lib="fontawesome")` is now powered by the `{fontawesome}` package, which will make it easier to use the latest FA icons in the future (by updating the `{fontawesome}` package). (#3302)
 
@@ -44,7 +44,7 @@ shiny 1.6.0.9000
 
 * Fixed [#2666](https://github.com/rstudio/shiny/issues/2666) and [#2670](https://github.com/rstudio/shiny/issues/2670): `nearPoints()` and `brushedPoints()` weren't properly account for missing values (#2666 was introduced in v1.4.0). ([#2668](https://github.com/rstudio/shiny/pull/2668))
 
-* Closed #3374: `quoToFunction()` now works correctly with nested quosures; and as a result, quasi-quotation with rendering function (e.g., `renderPrint()`, `renderPlot()`, etc) now works as expected with nested quosures. (#3373) 
+* Closed #3374: `quoToFunction()` now works correctly with nested quosures; and as a result, quasi-quotation with rendering function (e.g., `renderPrint()`, `renderPlot()`, etc) now works as expected with nested quosures. (#3373)
 
 * Exported `register_devmode_option()`. This method was described in the documentation for `devmode()` but was never exported. See `?devmode()` for more details on how to register Shiny Developer options using `register_devmode_option()`. (#3364)
 

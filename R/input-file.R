@@ -23,6 +23,14 @@
 #' @param buttonLabel The label used on the button. Can be text or an HTML tag
 #'   object.
 #' @param placeholder The text to show before a file has been uploaded.
+#' @param capture What source to use for capturing image, audio or video data.
+#'   This attribute facilitates user access to a device's media capture 
+#'   mechanism, such as a camera, or microphone, from within a file upload 
+#'   control.
+#'
+#'   A value of `user` indicates that the user-facing camera and/or microphone
+#'   should be used. A value of `environment` specifies that the outward-facing
+#'   camera and/or microphone should be used.
 #'
 #' @examples
 #' ## Only run examples in interactive R sessions
@@ -73,7 +81,8 @@
 #'
 #' @export
 fileInput <- function(inputId, label, multiple = FALSE, accept = NULL,
-  width = NULL, buttonLabel = "Browse...", placeholder = "No file selected") {
+  width = NULL, buttonLabel = "Browse...", placeholder = "No file selected",
+  capture = NULL) {
 
   restoredValue <- restoreInput(id = inputId, default = NULL)
 
@@ -101,6 +110,14 @@ fileInput <- function(inputId, label, multiple = FALSE, accept = NULL,
   if (length(accept) > 0)
     inputTag$attribs$accept <- paste(accept, collapse=',')
 
+  if (!is.null(capture)) {
+    if (tolower(capture) %in% c("user", "environment")) {
+      inputTag$attribs$capture <- tolower(capture)
+    } else {
+      # capture was previously a Boolean attribute which, if present, requested that the device's media capture device(s) such as camera or microphone be used instead of requesting a file input.
+      inputTag$attribs$capture <- NA
+    }
+  }
 
   div(class = "form-group shiny-input-container",
     style = css(width = validateCssUnit(width)),

@@ -12,7 +12,7 @@ README.html
 tools/yarn-error.log
 
 # TypeScript / yarn
-node_modules/
+/node_modules/
 .cache
 .yarn/*
 !.yarn/releases

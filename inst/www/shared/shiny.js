@@ -2877,6 +2877,9 @@
     } else {
       setIsQt(false);
     }
+    if (/\bQt/.test(userAgent) && /\bMacintosh/.test(userAgent)) {
+      (0, import_jquery3.default)(document.documentElement).addClass("qtmac");
+    }
     if (/\bQt\/5/.test(userAgent) && /Linux/.test(userAgent)) {
       (0, import_jquery3.default)(document.documentElement).addClass("qt5");
     }

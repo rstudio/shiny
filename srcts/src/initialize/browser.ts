@@ -37,6 +37,12 @@ function determineBrowserInfo(): void {
     setIsQt(false);
   }
 
+  // For Qt on Mac. Note that the target string as of RStudio 1.4.173
+  // is "QtWebEngine" and does not have a trailing slash.
+  if (/\bQt/.test(userAgent) && /\bMacintosh/.test(userAgent)) {
+    $(document.documentElement).addClass("qtmac");
+  }
+
   // Enable special treatment for Qt 5 quirks on Linux
   if (/\bQt\/5/.test(userAgent) && /Linux/.test(userAgent)) {
     $(document.documentElement).addClass("qt5");

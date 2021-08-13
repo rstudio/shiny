@@ -48,6 +48,8 @@ shiny 1.6.0.9000
 
 * Exported `register_devmode_option()`. This method was described in the documentation for `devmode()` but was never exported. See `?devmode()` for more details on how to register Shiny Developer options using `register_devmode_option()`. (#3364)
 
+* Closed #3484: In the RStudio IDE on Mac 11.5, selected checkboxes and radio buttons were not visible. (#3485)
+
 ### Library updates
 
 * Closed #3286: Updated to Font-Awesome 5.15.2. (#3288)

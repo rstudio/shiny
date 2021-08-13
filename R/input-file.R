@@ -111,12 +111,14 @@ fileInput <- function(inputId, label, multiple = FALSE, accept = NULL,
     inputTag$attribs$accept <- paste(accept, collapse=',')
 
   if (!is.null(capture)) {
-    if (tolower(capture) %in% c("user", "environment")) {
-      inputTag$attribs$capture <- tolower(capture)
-    } else {
-      # capture was previously a Boolean attribute which, if present, requested that the device's media capture device(s) such as camera or microphone be used instead of requesting a file input.
-      inputTag$attribs$capture <- NA
-    }
+    inputTag$attribs$capture <- switch(
+      tolower(capture[1]),
+      # Only standard values are `user` and `environment`
+      "user" = "user",
+      "environment" = "environment",
+      # Missing attr value is allowed
+      NA
+    )
   }
 
   div(class = "form-group shiny-input-container",

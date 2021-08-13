@@ -295,6 +295,15 @@ pre.shiny-text-output {
   margin-top: 0px;
 }
 
+/* Workaround for radio buttons and checkboxes not showing on Qt on Mac.
+   This occurs in the RStudio IDE on macOS 11.5.
+   https://github.com/rstudio/shiny/issues/3484
+*/
+.qtmac input[type="radio"],
+.qtmac input[type="checkbox"] {
+  zoom: 1.0000001;
+}
+
 /* consistency with bootstrap.css for selectize.js */
 .selectize-control {
   margin-bottom: 10px;

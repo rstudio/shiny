@@ -113,7 +113,6 @@ Suggests:
     showtext,
     sass
 Remotes:
-    r-lib/rlang,
     rstudio/bslib,
     rstudio/htmltools
 URL: https://shiny.rstudio.com/

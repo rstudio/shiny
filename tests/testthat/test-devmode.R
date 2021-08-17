@@ -11,6 +11,10 @@ test_that("devmode can not be turned on while testing", {
 
 test_that("devmode can be turned on while _testing_ is disabled and check messages", {
 
+  # TODO - Once a stable version of rlang lands with `options(rlib_message_verbosity)` functionality,
+  #        bump the rlang version in DESCRIPTION and remove these skip calls
+  # Skip if *not* on CI; Inspired from `testthat::skip_on_ci()`
+  skip_if(!isTRUE(as.logical(Sys.getenv("CI"))), "Not testing in CI")
   skip_if_not_installed("rlang", "0.4.11.9000")
 
   # disable all existing options

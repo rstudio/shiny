@@ -218,7 +218,7 @@ test_that("Setting options in various places works", {
 
   withr::local_envvar(list(
     SHINY_TEST_PORT_APP = test_app_port,
-    SHINY_TEST_PORT_WRAPPED_2 = test_wrapped_2_port
+    SHINY_TEST_PORT_WRAPPED_2 = test_wrapped_2_port,
     SHINY_TEST_PORT_OPTION = test_option_port
   ))
 

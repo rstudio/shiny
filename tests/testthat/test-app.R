@@ -212,15 +212,19 @@ test_that("Setting options in various places works", {
   on.exit(options(op), add = TRUE)
 
   # If the port values are fixed, the tests fail while being tested concurrently
-  test_app_port <- httpuv::randomPort()
-  test_wrapped_2_port <- httpuv::randomPort()
-  test_option_port <- httpuv::randomPort()
+  # Use temp files as windows has issues with envvars
+  test_fldr <- file.path(tempdir(), "shiny_testthat_port")
+  make_and_save_port <- function(name) {
+    port <- httpuv::randomPort()
+    cat(port, "\n", file = file.path(test_fldr, name))
+    port
+  }
+  dir.create(test_fldr, showWarnings = FALSE)
+  on.exit({unlink(test_fldr, recursive = TRUE)}, add = TRUE)
 
-  withr::local_envvar(list(
-    SHINY_TEST_PORT_APP = test_app_port,
-    SHINY_TEST_PORT_WRAPPED_2 = test_wrapped_2_port,
-    SHINY_TEST_PORT_OPTION = test_option_port
-  ))
+  test_app_port      <- make_and_save_port("app")
+  test_wrapped2_port <- make_and_save_port("wrapped2")
+  test_option_port   <- make_and_save_port("option")
 
   appDir <- test_path("../test-helpers/app7-port")
   withPort <- function(port, expr) {
@@ -257,7 +261,7 @@ test_that("Setting options in various places works", {
   # wrapped.R calls shinyAppDir("app.R")
   expect_port(runApp(file.path(appDir, "wrapped.R")), test_app_port)
   # wrapped2.R calls shinyAppFile("wrapped.R", options = list(port = 3032))
-  expect_port(runApp(file.path(appDir, "wrapped2.R")), test_wrapped_2_port)
+  expect_port(runApp(file.path(appDir, "wrapped2.R")), test_wrapped2_port)
 
   shiny_port_orig <- getOption("shiny.port")
   # Calls to options(shiny.port = xxx) within app.R should also work reliably

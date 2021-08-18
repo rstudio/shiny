@@ -7,10 +7,7 @@ server <- function(input, output, session) {
 }
 
 opts <- list(
-  port = Sys.getenv(
-    "SHINY_TEST_PORT_APP",
-    stop("`Sys.env('SHINY_TEST_PORT_APP')` not found")
-  ),
+  port = as.numeric(readLines(tempdir(), "shiny_testthat_port", "app")),
   launch.browser = FALSE
 )
 

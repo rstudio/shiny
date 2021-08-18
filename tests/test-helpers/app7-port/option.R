@@ -1,9 +1,6 @@
 library(shiny)
 
-op <- options(shiny.port = Sys.getenv(
-  "SHINY_TEST_PORT_OPTION",
-  stop("`Sys.env('SHINY_TEST_PORT_OPTION')` not found")
-))
+op <- options(shiny.port = as.numeric(readLines(tempdir(), "shiny_testthat_port", "option")))
 onStop(function() { options(op) })
 
 ui <- fluidPage(

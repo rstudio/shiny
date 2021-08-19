@@ -822,7 +822,9 @@ downloadHandler <- function(filename, content, contentType=NA, outputArgs=list()
 #' Table output with the JavaScript DataTables library
 #'
 #' @description
-#' `r lifecycle::badge("superseded")` Please use [`DT::renderDataTable()`]. (Shiny 0.11.1)
+#' `r lifecycle::badge("superseded")` Please use
+#' \code{\href{https://rstudio.github.io/DT/shiny.html}{DT::renderDataTable()}}.
+#' (Shiny 0.11.1)
 #'
 #' Makes a reactive version of the given function that returns a data frame (or
 #' matrix), which will be rendered with the [DataTables](https://datatables.net)

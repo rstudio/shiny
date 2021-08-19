@@ -51,8 +51,7 @@ test_that("With ui/server.R, global.R is loaded before R/ helpers and into the r
   }
 
   # Temporarily opt-in to R/ file autoloading
-  op <- options(shiny.autoload.r=TRUE)
-  on.exit(options(op), add=TRUE)
+  withr::local_options(list(shiny.autoload.r=TRUE))
 
   # + shinyAppDir_serverR
   # +--- sourceUTF8
@@ -108,9 +107,7 @@ test_that("Loading supporting R files is opt-out", {
   }
 
   # Temporarily unset autoloading option
-  orig <- getOption("shiny.autoload.r", NULL)
-  options(shiny.autoload.r=NULL)
-  on.exit({options(shiny.autoload.r=orig)}, add=TRUE)
+  withr::local_options(list(shiny.autoload.r = NULL))
 
   # + shinyAppDir_serverR
   # +--- sourceUTF8
@@ -137,9 +134,7 @@ test_that("Disabling supporting R files works", {
   }
 
   # Temporarily unset autoloading option
-  orig <- getOption("shiny.autoload.r", NULL)
-  options(shiny.autoload.r=FALSE)
-  on.exit({options(shiny.autoload.r=orig)}, add=TRUE)
+  withr::local_options(list(shiny.autoload.r = FALSE))
 
   # + shinyAppDir_serverR
   # +--- sourceUTF8
@@ -165,9 +160,7 @@ test_that("app.R is loaded after R/ helpers and into the right envs", {
   }
 
   # Temporarily opt-in to R/ file autoloading
-  orig <- getOption("shiny.autoload.r", NULL)
-  options(shiny.autoload.r=TRUE)
-  on.exit({options(shiny.autoload.r=orig)}, add=TRUE)
+  withr::local_options(list(shiny.autoload.r = TRUE))
 
   # + shinyAppDir_serverR
   # +--- sourceUTF8
@@ -208,20 +201,10 @@ test_that("global.R and sources in R/ are sourced in the app directory", {
 })
 
 test_that("Setting options in various places works", {
-  op <- options(shiny.launch.browser = FALSE)
-  on.exit(options(op), add = TRUE)
+  withr::local_options(list(shiny.launch.browser = FALSE))
 
-  # If the port values are fixed, the tests fail while being tested concurrently
-  # Use temp files as windows has issues with envvars
-  test_fldr <- file.path(tempdir(), "shiny_testthat_port")
-  make_and_save_port <- function(name) {
-    port <- httpuv::randomPort()
-    cat(port, "\n", file = file.path(test_fldr, name))
-    port
-  }
-  dir.create(test_fldr, showWarnings = FALSE)
-  on.exit({unlink(test_fldr, recursive = TRUE)}, add = TRUE)
-
+  # Use random ports to avoid errors while running revdepcheck in parallel
+  # https://github.com/rstudio/shiny/pull/3488
   # Try up to 100 times to find a unique port
   for (i in 1:100) {
     test_app_port      <- make_and_save_port("app")
@@ -234,11 +217,18 @@ test_that("Setting options in various places works", {
       break
     }
   }
+  # Use system envvars to pass values into the tests
+  withr::local_envvar(
+    list(
+      SHINY_TESTTHAT_PORT_APP      = as.character(test_app_port),
+      SHINY_TESTTHAT_PORT_WRAPPED2 = as.character(test_wrapped2_port),
+      SHINY_TESTTHAT_PORT_OPTION   = as.character(test_option_port)
+    )
+  )
 
   appDir <- test_path("../test-helpers/app7-port")
   withPort <- function(port, expr) {
-    op <- options(app7.port = port)
-    on.exit(options(op), add = TRUE)
+    withr::local_options(list(app7.port = port))
 
     force(expr)
   }
@@ -247,14 +237,6 @@ test_that("Setting options in various places works", {
     later::later(~stopApp(), 0)
     testthat::expect_message(expr, paste0("Listening on http://127.0.0.1:", port), fixed = TRUE)
   }
-
-  withr::local_envvar(
-    list(
-      SHINY_TESTTHAT_PORT_APP      = as.character(test_app_port),
-      SHINY_TESTTHAT_PORT_WRAPPED2 = as.character(test_wrapped2_port),
-      SHINY_TESTTHAT_PORT_OPTION   = as.character(test_option_port)
-    )
-  )
 
   expect_port(runApp(appDir), test_app_port)
 

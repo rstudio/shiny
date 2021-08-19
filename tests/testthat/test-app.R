@@ -222,9 +222,18 @@ test_that("Setting options in various places works", {
   dir.create(test_fldr, showWarnings = FALSE)
   on.exit({unlink(test_fldr, recursive = TRUE)}, add = TRUE)
 
-  test_app_port      <- make_and_save_port("app")
-  test_wrapped2_port <- make_and_save_port("wrapped2")
-  test_option_port   <- make_and_save_port("option")
+  # Try up to 100 times to find a unique port
+  for (i in 1:100) {
+    test_app_port      <- make_and_save_port("app")
+    test_wrapped2_port <- make_and_save_port("wrapped2")
+    test_option_port   <- make_and_save_port("option")
+    # If all ports are unique, move on
+    if (length(unique(
+      c(test_app_port, test_wrapped2_port, test_option_port)
+    )) == 3) {
+      break
+    }
+  }
 
   appDir <- test_path("../test-helpers/app7-port")
   withPort <- function(port, expr) {

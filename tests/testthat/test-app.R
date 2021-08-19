@@ -236,8 +236,16 @@ test_that("Setting options in various places works", {
 
   expect_port <- function(expr, port) {
     later::later(~stopApp(), 0)
-    expect_message(expr, paste0("Listening on http://127.0.0.1:", port), fixed = TRUE)
+    testthat::expect_message(expr, paste0("Listening on http://127.0.0.1:", port), fixed = TRUE)
   }
+
+  withr::local_envvar(
+    list(
+      SHINY_TESTTHAT_PORT_APP      = as.character(test_app_port),
+      SHINY_TESTTHAT_PORT_WRAPPED2 = as.character(test_wrapped2_port),
+      SHINY_TESTTHAT_PORT_OPTION   = as.character(test_option_port)
+    )
+  )
 
   expect_port(runApp(appDir), test_app_port)
 
@@ -276,4 +284,6 @@ test_that("Setting options in various places works", {
   # onStop still works even if app.R has an error (ensure option was unset)
   expect_error(runApp(file.path(appDir, "option-broken.R")), "^boom$")
   expect_null(getOption("shiny.port"))
+
+
 })

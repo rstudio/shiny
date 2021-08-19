@@ -1,6 +1,6 @@
 library(shiny)
 
-op <- options(shiny.port = as.numeric(readLines(tempdir(), "shiny_testthat_port", "option")))
+op <- options(shiny.port = as.numeric(Sys.getenv("SHINY_TESTTHAT_PORT_OPTION", "8080")))
 onStop(function() { options(op) })
 
 ui <- fluidPage(

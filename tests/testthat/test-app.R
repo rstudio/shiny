@@ -207,9 +207,9 @@ test_that("Setting options in various places works", {
   # https://github.com/rstudio/shiny/pull/3488
   # Try up to 100 times to find a unique port
   for (i in 1:100) {
-    test_app_port      <- make_and_save_port("app")
-    test_wrapped2_port <- make_and_save_port("wrapped2")
-    test_option_port   <- make_and_save_port("option")
+    test_app_port      <- httpuv::randomPort()
+    test_wrapped2_port <- httpuv::randomPort()
+    test_option_port   <- httpuv::randomPort()
     # If all ports are unique, move on
     if (length(unique(
       c(test_app_port, test_wrapped2_port, test_option_port)

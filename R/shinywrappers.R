@@ -823,7 +823,7 @@ downloadHandler <- function(filename, content, contentType=NA, outputArgs=list()
 #'
 #' @description
 #' `r lifecycle::badge("superseded")` Please use
-#' \code{\href{https://rstudio.github.io/DT/shiny.html}{DT::renderDataTable()}}.
+#' \href{\code{https://rstudio.github.io/DT/shiny.html}}{DT::renderDataTable()}.
 #' (Shiny 0.11.1)
 #'
 #' Makes a reactive version of the given function that returns a data frame (or

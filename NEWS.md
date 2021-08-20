@@ -63,7 +63,7 @@ This release focuses on improvements in three main areas:
 
 1. Better theming (and Bootstrap 4) support:
   * The `theme` argument of `fluidPage()`, `navbarPage()`, and `bootstrapPage()` all now understand `bslib::bs_theme()` objects, which can be used to opt-into Bootstrap 4, use any Bootswatch theme, and/or implement custom themes without writing any CSS.
-  * The `session` object now includes `$setCurrentTheme()` and `$getCurrentTheme()` methods to dynamically update (or obtain) the page's `theme` after initial load, which is useful for things such as [adding a dark mode switch to an app](https://rstudio.github.io/bslib/articles/theming.html#dynamic-shiny) or some other "real-time" theming tool like `bslib::bs_themer()`.
+  * The `session` object now includes `$setCurrentTheme()` and `$getCurrentTheme()` methods to dynamically update (or obtain) the page's `theme` after initial load, which is useful for things such as [adding a dark mode switch to an app](https://rstudio.github.io/bslib/articles/bslib.html#dynamic) or some other "real-time" theming tool like `bslib::bs_themer()`.
   * For more details, see [`{bslib}`'s website](https://rstudio.github.io/bslib/)
 
 2. Caching of `reactive()` and `render*()` (e.g. `renderText()`, `renderTable()`, etc) expressions.
@@ -185,7 +185,7 @@ shiny 1.5.0
 
 * The new `moduleServer` function provides a simpler interface for creating and using modules. (#2773)
 
-* Resolved #2732: `markdown()` is a new function for writing Markdown with Github extensions directly in Shiny UIs. Markdown rendering is performed by the [commonmark](https://github.com/jeroen/commonmark) package. (#2737)
+* Resolved #2732: `markdown()` is a new function for writing Markdown with Github extensions directly in Shiny UIs. Markdown rendering is performed by the [commonmark](https://github.com/r-lib/commonmark) package. (#2737)
 
 * The `getCurrentOutputInfo()` function can now return the background color (`bg`), foreground color (`fg`), `accent` (i.e., hyperlink) color, and `font` information of the output's HTML container. This information is reported by `plotOutput()`, `imageOutput()`, and any other output bindings containing a class of `.shiny-report-theme`. This feature allows developers to style an output's contents based on the container's CSS styling.  (#2740)
 

@@ -76,10 +76,10 @@ value when it is a single choice input and the empty string is not in the
 The resulting server \code{input} value will be returned as:
 \itemize{
 \item A symbol if \code{multiple = FALSE}. The \code{input} value should be
-used with rlang's \code{\link[rlang:bang-bang]{rlang::!!()}}. For example,
+used with rlang's \code{\link[rlang:nse-force]{rlang::!!()}}. For example,
 \code{ggplot2::aes(!!input$variable)}.
 \item A list of symbols if \code{multiple = TRUE}. The \code{input} value
-should be used with rlang's \code{\link[rlang:bang-bang]{rlang::!!!()}} to expand
+should be used with rlang's \code{\link[rlang:nse-force]{rlang::!!!()}} to expand
 the symbol list as individual arguments. For example,
 \code{dplyr::select(mtcars, !!!input$variabls)} which is
 equivalent to \code{dplyr::select(mtcars, !!input$variabls[[1]], !!input$variabls[[2]], ..., !!input$variabls[[length(input$variabls)]])}.

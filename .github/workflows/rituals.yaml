@@ -12,15 +12,14 @@ name: Rituals
 jobs:
   rituals:
     name: Rituals
-    # if: false
-    runs-on: ${{ matrix.config.os }}
 
+    runs-on: ${{ matrix.config.os }}
 
     strategy:
       fail-fast: false
       matrix:
         config:
-        - { os: ubuntu-16.04, r: '4.0', node: "14.x", rspm: "https://packagemanager.rstudio.com/all/__linux__/xenial/latest"}
+        - { os: ubuntu-20.04, r: 'release', node: "14.x", rspm: "https://packagemanager.rstudio.com/all/__linux__/focal/latest"}
 
     env:
       R_REMOTES_NO_ERRORS_FROM_WARNINGS: true

@@ -12,9 +12,8 @@ name: Rituals
 jobs:
   rituals:
     name: Rituals
-    # if: false
-    runs-on: ${{ matrix.config.os }}
 
+    runs-on: ${{ matrix.config.os }}
 
     strategy:
       fail-fast: false

@@ -244,7 +244,7 @@ cache collisions, dealing with internal state that may be set by the,
 the cache.
 
 You may need to provide a \code{cacheHint} to \code{\link[=createRenderFunction]{createRenderFunction()}} (or
-\code{\link[htmlwidgets:htmlwidgets-shiny]{htmlwidgets::shinyRenderWidget()}}, if you've authored an htmlwidget) in
+\code{htmlwidgets::shinyRenderWidget()}, if you've authored an htmlwidget) in
 order for \code{bindCache()} to correctly compute a cache key.
 
 The potential problem is a cache collision. Consider the following:\preformatted{output$x1 <- renderText(\{ input$x \}) \%>\% bindCache(input$x)

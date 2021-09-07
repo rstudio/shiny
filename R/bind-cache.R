@@ -255,7 +255,7 @@ utils::globalVariables(".GenericCallEnv", add = TRUE)
 #'   the cache.
 #'
 #'   You may need to provide a `cacheHint` to [createRenderFunction()] (or
-#'   [htmlwidgets::shinyRenderWidget()], if you've authored an htmlwidget) in
+#'   `htmlwidgets::shinyRenderWidget()`, if you've authored an htmlwidget) in
 #'   order for `bindCache()` to correctly compute a cache key.
 #'
 #'   The potential problem is a cache collision. Consider the following:

@@ -64,7 +64,7 @@ in an interactive R Markdown document.}
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#superseded}{\figure{lifecycle-superseded.svg}{options: alt='[Superseded]'}}}{\strong{[Superseded]}} Please use
-\href{\code{https://rstudio.github.io/DT/shiny.html}}{DT::renderDataTable()}.
+\href{https://rstudio.github.io/DT/shiny.html}{\code{DT::renderDataTable()}}.
 (Shiny 0.11.1)
 
 Makes a reactive version of the given function that returns a data frame (or

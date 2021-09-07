@@ -49,27 +49,25 @@ jobs:
       fail-fast: false
       matrix:
         config:
-          - {os: macOS-latest,   r: '${{ needs.rversions.outputs.devel }}'}
           - {os: macOS-latest,   r: '${{ needs.rversions.outputs.release }}'}
           - {os: windows-latest, r: '${{ needs.rversions.outputs.release }}'}
           - {os: windows-latest, r: '3.6'}
 
-          - {os: ubuntu-20.04,   r: '${{ needs.rversions.outputs.devel }}',   rspm: "https://packagemanager.rstudio.com/cran/__linux__/focal/latest", http-user-agent: "release" }
-          - {os: ubuntu-20.04,   r: '${{ needs.rversions.outputs.release }}', rspm: "https://packagemanager.rstudio.com/cran/__linux__/focal/latest"}
-          - {os: ubuntu-20.04,   r: '${{ needs.rversions.outputs.oldrel1 }}', rspm: "https://packagemanager.rstudio.com/cran/__linux__/focal/latest"}
-          - {os: ubuntu-20.04,   r: '${{ needs.rversions.outputs.oldrel2 }}', rspm: "https://packagemanager.rstudio.com/cran/__linux__/focal/latest"}
-          - {os: ubuntu-20.04,   r: '${{ needs.rversions.outputs.oldrel3 }}', rspm: "https://packagemanager.rstudio.com/cran/__linux__/focal/latest"}
-          - {os: ubuntu-20.04,   r: '${{ needs.rversions.outputs.oldrel4 }}', rspm: "https://packagemanager.rstudio.com/cran/__linux__/focal/latest"}
+          - {os: ubuntu-20.04,   r: '${{ needs.rversions.outputs.devel }}', http-user-agent: "release" }
+          - {os: ubuntu-20.04,   r: '${{ needs.rversions.outputs.release }}'}
+          - {os: ubuntu-20.04,   r: '${{ needs.rversions.outputs.oldrel1 }}'}
+          - {os: ubuntu-20.04,   r: '${{ needs.rversions.outputs.oldrel2 }}'}
+          - {os: ubuntu-20.04,   r: '${{ needs.rversions.outputs.oldrel3 }}'}
+          - {os: ubuntu-20.04,   r: '${{ needs.rversions.outputs.oldrel4 }}'}
 
-          - {os: ubuntu-18.04,   r: '${{ needs.rversions.outputs.devel }}',   rspm: "https://packagemanager.rstudio.com/cran/__linux__/bionic/latest", http-user-agent: "release" }
-          - {os: ubuntu-18.04,   r: '${{ needs.rversions.outputs.release }}', rspm: "https://packagemanager.rstudio.com/cran/__linux__/bionic/latest"}
-          - {os: ubuntu-18.04,   r: '${{ needs.rversions.outputs.oldrel1 }}', rspm: "https://packagemanager.rstudio.com/cran/__linux__/bionic/latest"}
-          - {os: ubuntu-18.04,   r: '${{ needs.rversions.outputs.oldrel2 }}', rspm: "https://packagemanager.rstudio.com/cran/__linux__/bionic/latest"}
-          - {os: ubuntu-18.04,   r: '${{ needs.rversions.outputs.oldrel3 }}', rspm: "https://packagemanager.rstudio.com/cran/__linux__/bionic/latest"}
-          - {os: ubuntu-18.04,   r: '${{ needs.rversions.outputs.oldrel4 }}', rspm: "https://packagemanager.rstudio.com/cran/__linux__/bionic/latest"}
+          - {os: ubuntu-18.04,   r: '${{ needs.rversions.outputs.devel }}', http-user-agent: "release" }
+          - {os: ubuntu-18.04,   r: '${{ needs.rversions.outputs.release }}'}
+          - {os: ubuntu-18.04,   r: '${{ needs.rversions.outputs.oldrel1 }}'}
+          - {os: ubuntu-18.04,   r: '${{ needs.rversions.outputs.oldrel2 }}'}
+          - {os: ubuntu-18.04,   r: '${{ needs.rversions.outputs.oldrel3 }}'}
+          - {os: ubuntu-18.04,   r: '${{ needs.rversions.outputs.oldrel4 }}'}
 
     env:
-      RSPM: ${{ matrix.config.rspm }}
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
 
     steps:
@@ -87,37 +85,13 @@ jobs:
         with:
           r-version: ${{ matrix.config.r }}
           http-user-agent: ${{ matrix.config.http-user-agent }}
+          use-public-rspm: true
 
       - uses: r-lib/actions/setup-pandoc@v1
 
-      - name: Install pak and query dependencies
-        run: |
-          install.packages("pak", repos = "https://r-lib.github.io/p/pak/dev/")
-          saveRDS(pak::pkg_deps("local::.", dependencies = TRUE), ".github/r-depends.rds")
-        shell: Rscript {0}
-
-      - name: Restore R package cache
-        uses: actions/cache@v2
+      - uses: r-lib/actions/setup-r-dependencies@v1
         with:
-          path: |
-            ${{ env.R_LIBS_USER }}/*
-            !${{ env.R_LIBS_USER }}/pak
-          key: ${{ matrix.config.os }}-${{ steps.install-r.outputs.installed-r-version }}-1-${{ hashFiles('.github/r-depends.rds') }}
-          restore-keys: ${{ matrix.config.os }}-${{ steps.install-r.outputs.installed-r-version }}-1-
-
-      - name: Install system dependencies
-        if: runner.os == 'Linux'
-        run: |
-          pak::local_system_requirements(execute = TRUE)
-          pak::pkg_system_requirements("rcmdcheck", execute = TRUE)
-        shell: Rscript {0}
-
-      # https://stackoverflow.com/a/66568545/591574
-      #> fatal error: 'X11/Intrinsic.h' file not found
-      - name: Install Cairo macOS R devel dependency
-        if: runner.os == 'macOS' && matrix.config.r == 'devel'
-        run: |
-          brew install libxt
+          extra-packages: rcmdcheck
 
       # xquartz and cairo are needed for Cairo package.
       # harfbuzz and fribidi are needed for textshaping package.
@@ -127,12 +101,6 @@ jobs:
           brew install --cask xquartz
           brew install cairo
           brew install harfbuzz fribidi
-
-      - name: Install dependencies
-        run: |
-          pak::local_install_dev_deps(upgrade = TRUE)
-          pak::pkg_install("rcmdcheck")
-        shell: Rscript {0}
 
       - name: Find PhantomJS path
         id: phantomjs
@@ -148,13 +116,6 @@ jobs:
         run: >
           Rscript
           -e "if (!shinytest::dependenciesInstalled()) shinytest::installDependencies()"
-
-      - name: Session info
-        run: |
-          options(width = 100)
-          pkgs <- installed.packages()[, "Package"]
-          sessioninfo::session_info(pkgs, include_base = TRUE)
-        shell: Rscript {0}
 
       - name: Check
         env:
@@ -176,8 +137,3 @@ jobs:
         with:
           name: ${{ matrix.config.os }}-r${{ matrix.config.r }}-results
           path: check
-
-      - name: Don't use tar from old Rtools to store the cache
-        if: ${{ runner.os == 'Windows' && startsWith(steps.install-r.outputs.installed-r-version, '3.6' ) }}
-        shell: bash
-        run: echo "C:/Program Files/Git/usr/bin" >> $GITHUB_PATH

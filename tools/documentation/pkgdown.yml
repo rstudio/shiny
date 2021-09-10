@@ -89,7 +89,9 @@ reference:
       - HTML
       - include
       - singleton
-      - tag
+      - tagList
+      - tagAppendAttributes
+      - tagAppendChild
       - validateCssUnit
       - withTags
       - htmlTemplate

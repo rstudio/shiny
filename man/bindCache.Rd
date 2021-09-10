@@ -40,7 +40,7 @@ sense, namely:
 
 In the example here, the \code{bindCache()} key consists of \code{input$x} and
 \code{input$y} combined, and the value is \code{input$x * input$y}. In this simple
-example, for any given key, there is only one possible returned value.\if{html}{\out{<div class="NA">}}\preformatted{r <- reactive(\{ input$x * input$y \}) \%>\%
+example, for any given key, there is only one possible returned value.\if{html}{\out{<div class="sourceCode NA">}}\preformatted{r <- reactive(\{ input$x * input$y \}) \%>\%
   bindCache(input$x, input$y)
 }\if{html}{\out{</div>}}
 
@@ -63,7 +63,7 @@ to do some sort of reduction on the data that still captures information
 about whether a value can be retrieved from the cache. For example, if you
 have a large data set with timestamps, it might make sense to extract the
 most recent timestamp and return that. Then, instead of hashing the entire
-data object, the cached reactive only needs to hash the timestamp.\if{html}{\out{<div class="NA">}}\preformatted{r <- reactive(\{ compute(bigdata()) \} \%>\%
+data object, the cached reactive only needs to hash the timestamp.\if{html}{\out{<div class="sourceCode NA">}}\preformatted{r <- reactive(\{ compute(bigdata()) \} \%>\%
   bindCache(\{ extract_most_recent_time(bigdata()) \})
 }\if{html}{\out{</div>}}
 
@@ -105,7 +105,7 @@ cache key is not too expensive.
 Remember that the key is \emph{reactive}, so it is not re-executed every single
 time that someone accesses the cached reactive. It is only re-executed if
 it has been invalidated by one of the reactives it depends on. For
-example, suppose we have this cached reactive:\if{html}{\out{<div class="NA">}}\preformatted{r <- reactive(\{ input$x * input$y \}) \%>\%
+example, suppose we have this cached reactive:\if{html}{\out{<div class="sourceCode NA">}}\preformatted{r <- reactive(\{ input$x * input$y \}) \%>\%
  bindCache(input$x, input$y)
 }\if{html}{\out{</div>}}
 
@@ -258,7 +258,7 @@ this, a \emph{cache hint} is automatically added when \code{\link[=renderText]{r
 \code{\link[=createRenderFunction]{createRenderFunction()}}. The cache hint is used as part of the actual
 cache key, in addition to the one passed to \code{bindCache()} by the user. The
 cache hint can be viewed by calling the internal Shiny function
-\code{extractCacheHint()}:\if{html}{\out{<div class="NA">}}\preformatted{r <- renderText(\{ input$x \})
+\code{extractCacheHint()}:\if{html}{\out{<div class="sourceCode NA">}}\preformatted{r <- renderText(\{ input$x \})
 shiny:::extractCacheHint(r)
 }\if{html}{\out{</div>}}
 

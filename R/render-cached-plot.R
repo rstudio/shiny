@@ -181,7 +181,7 @@
 #' # At the top of app.R, this set the application-scoped cache to be a disk
 #' # cache that can be shared among multiple concurrent R processes, and is
 #' # deleted when the system reboots.
-#' shinyOptions(cache = cachem::cache_disk(file.path(dirname(tempdir()), "myapp-cache"))
+#' shinyOptions(cache = cachem::cache_disk(file.path(dirname(tempdir()), "myapp-cache")))
 #'
 #' # At the top of app.R, this set the application-scoped cache to be a disk
 #' # cache that can be shared among multiple concurrent R processes, and

@@ -1,6 +1,9 @@
 shiny 1.7.0.9000
 ================
 
+## Bug Fixes
+
+* Re-arrange conditions for testthat 1.0.0 compatibility (#3512)
 
 
 shiny 1.7.0

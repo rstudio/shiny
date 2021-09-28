@@ -216,28 +216,21 @@ test_that("dateYMD works", {
     c("2020-01-14", "2019-11-05")
   )
 
-  expect_identical(
-    expect_warning(dateYMD("")),
-    ""
-  )
-  expect_identical(
-    expect_warning(dateYMD(c(NA))),
-    NA
-  )
-  expect_identical(
-    expect_warning(dateYMD(c("", NA))),
-    c("", NA)
-  )
+  expect_warning(val <- dateYMD(""))
+  expect_identical(val, "")
+
+  expect_warning(val <- dateYMD(c(NA)))
+  expect_identical(val, NA)
+
+  expect_warning(val <- dateYMD(c("", NA)))
+  expect_identical(val, c("", NA))
 
   # If there are any bad values, the entire thing goes through unchanged
-  expect_identical(
-    expect_warning(dateYMD(c("2019/11/05", NA))),
-    c("2019/11/05", NA)
-  )
-  expect_identical(
-    expect_warning(dateYMD(c("2019/11/05", ""))),
-    c("2019/11/05", "")
-  )
+  expect_warning(val <- dateYMD(c("2019/11/05", NA)))
+  expect_identical(val, c("2019/11/05", NA))
+
+  expect_warning(val <- dateYMD(c("2019/11/05", "")))
+  expect_identical(val, c("2019/11/05", ""))
 })
 
 test_that("quoToFunction handles nested quosures", {

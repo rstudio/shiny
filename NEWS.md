@@ -1,3 +1,19 @@
+shiny 1.8.0.9000
+================
+
+## Full changelog
+
+### Breaking changes
+
+* When taking a test snapshot, the sort order of the json keys of the `input`, `output`, and `export` fields will be sorted using `en_US.UTF-8` locale (#3515)
+
+### New features and improvements
+
+### Other improvements
+
+## Bug Fixes
+
+
 shiny 1.7.0.9000
 ================
 

@@ -193,7 +193,11 @@ sortByName <- function(x) {
   if (length(x) == 0)
     return(x)
 
-  x[order(names(x))]
+  # Use `en_US.UTF-8` over `C`
+  #  https://github.com/rocker-org/rocker/issues/19
+  # Must provide consistent sort order
+  #  https://github.com/rstudio/shinytest/issues/40
+  withr::with_collate("en_US.UTF-8", x[order(names(x))])
 }
 
 # Sort a vector. If a character vector, sort using C locale, which is consistent

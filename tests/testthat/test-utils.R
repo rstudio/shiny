@@ -171,6 +171,30 @@ test_that("sortByName works as expected", {
   # Make sure atomic vectors work
   expect_identical(sortByName(c(b=1, a=2)), c(a=2, b=1))
   expect_identical(sortByName(c(b=1, a=2, b=3)), c(a=2, b=1, b=3))
+
+  # Collate order is consistent
+  val <- list(a = 1, b = 2, A = 3, B = 4)
+  expected_val <- list(a = 1, A = 3, b = 2, B = 4)
+  expect_identical(sortByName(val), expected_val)
+  # Make test that _would_ produce bad order
+  expect_identical(
+    withr::with_collate(
+      "C",
+      local({
+        val[order(names(val))]
+      })
+    ),
+    # Ordering that we'd like to avoid...
+    list(A = 3, B = 4, a = 1, b = 2)
+  )
+  # Show bad ordering is not possible
+  expect_identical(
+    withr::with_collate(
+      "C",
+      sortByName(val)
+    ),
+    expected_val
+  )
 })
 
 test_that("Callbacks fire in predictable order", {

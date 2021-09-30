@@ -12818,8 +12818,8 @@
           }
           function getTabIndex($tabset2, tabsetId2) {
             var existingTabIds = [0];
-            $tabset2.find("a[data-toggle='tab']").each(function() {
-              var $tab = (0, import_jquery41.default)(this);
+            $tabset2.find("> li").each(function() {
+              var $tab = (0, import_jquery41.default)(this).find("> a[data-toggle='tab']");
               if ($tab.length > 0) {
                 var href = $tab.attr("href").replace(/.*(?=#[^\s]+$)/, "");
                 var _index = href.replace("#tab-" + tabsetId2 + "-", "");

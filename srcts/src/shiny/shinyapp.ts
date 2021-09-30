@@ -1112,8 +1112,8 @@ class ShinyApp {
           // loop through all existing tabs, find the one with highest id
           // (since this is based on a numeric counter), and increment
 
-          $tabset.find("a[data-toggle='tab']").each(function () {
-            const $tab = $(this);
+          $tabset.find("> li").each(function () {
+            const $tab = $(this).find("> a[data-toggle='tab']");
 
             if ($tab.length > 0) {
               // remove leading url if it exists. (copy of bootstrap url stripper)

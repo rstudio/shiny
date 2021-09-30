@@ -196,7 +196,7 @@ sortByName <- function(x) {
   # Use `en_US.UTF-8` over `C`
   #  https://github.com/rocker-org/rocker/issues/19
   # Must provide consistent sort order
-  #  https://github.com/rstudio/shinytest/issues/40
+  #  https://github.com/rstudio/shinytest/issues/409
   withr::with_collate("en_US.UTF-8", x[order(names(x))])
 }
 

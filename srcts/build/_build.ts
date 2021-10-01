@@ -70,6 +70,7 @@ async function build(
     incremental: incremental,
     watch: watch,
     target: "es5",
+    preserveSymlinks: true,
     ...opts,
   }).then((x) => {
     onRebuild();

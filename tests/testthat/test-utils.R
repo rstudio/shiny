@@ -172,29 +172,11 @@ test_that("sortByName works as expected", {
   expect_identical(sortByName(c(b=1, a=2)), c(a=2, b=1))
   expect_identical(sortByName(c(b=1, a=2, b=3)), c(a=2, b=1, b=3))
 
-  # Collate order is consistent
-  val <- list(a = 1, b = 2, A = 3, B = 4)
-  expected_val <- list(a = 1, A = 3, b = 2, B = 4)
-  expect_identical(sortByName(val), expected_val)
-  # Make test that _would_ produce bad order
-  expect_identical(
-    withr::with_collate(
-      "C",
-      local({
-        val[order(names(val))]
-      })
-    ),
-    # Ordering that we'd like to avoid...
-    list(A = 3, B = 4, a = 1, b = 2)
-  )
-  # Show bad ordering is not possible
-  expect_identical(
-    withr::with_collate(
-      "C",
-      sortByName(val)
-    ),
-    expected_val
-  )
+  # Collate order is consistent when using `radix` sort (`C` locale)
+  skip_on_cran()
+  val <- list("_a"=1, a=2, "å"=3, "_b"=4, b=5, "∫"=6, A=7, B=8)
+  expected_val <- list(A=7, B=8, "_a"=1, "_b"=4, a=2, b=5, å=3, "∫"=6)
+  expect_identical(sortByName(val, method = "radix"), expected_val)
 })
 
 test_that("Callbacks fire in predictable order", {

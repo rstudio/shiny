@@ -1,4 +1,4 @@
-shiny 1.8.0.9000
+shiny development
 ================
 
 ## Full changelog
@@ -9,13 +9,16 @@ shiny 1.8.0.9000
 ### New features and improvements
 
 * When taking a test snapshot, the sort order of the json keys of the `input`, `output`, and `export` fields is currently sorted using the locale of the machine. This can lead to inconsistent test snapshot results. To opt-in to a consistent ordering of snapshot fields, please have a `DESCRIPTION` file with field/value of `Config/shiny/snapshotSortC: 1`.  (#3515)
+
 ### Other improvements
 
 ## Bug Fixes
 
 
-shiny 1.7.0.9000
-================
+
+
+shiny 1.7.1
+===========
 
 ## Bug Fixes
 

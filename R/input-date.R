@@ -138,7 +138,8 @@ datePickerDependency <- function(theme) {
     htmlDependency(
       name = "bootstrap-datepicker-js",
       version = version_bs_date_picker,
-      src = c(href = "shared/datepicker"),
+      src = c(file = "www/shared/datepicker"),
+      package = "shiny",
       script = if (getOption("shiny.minified", TRUE)) "js/bootstrap-datepicker.min.js"
                else                                   "js/bootstrap-datepicker.js",
       # Need to enable noConflict mode. See #1346.
@@ -157,7 +158,8 @@ datePickerCSS <- function(theme) {
     return(htmlDependency(
       name = "bootstrap-datepicker-css",
       version = version_bs_date_picker,
-      src = c(href = "shared/datepicker"),
+      src = c(file = "www/shared/datepicker"),
+      package = "shiny",
       stylesheet = "css/bootstrap-datepicker3.min.css"
     ))
   }

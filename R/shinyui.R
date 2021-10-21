@@ -56,7 +56,8 @@ renderPage <- function(ui, showcase=0, testMode=FALSE) {
     # Add code injection listener if in test mode
     shiny_deps[[length(shiny_deps) + 1]] <-
       htmlDependency("shiny-testmode", shinyPackageVersion(),
-                     c(href="shared"), script = "shiny-testmode.js")
+                     c(file="www/shared"), package = "shiny",
+                     script = "shiny-testmode.js")
   }
 
   html <- renderDocument(ui, shiny_deps, processDep = createWebDependency)
@@ -69,7 +70,6 @@ jqueryDependency <- function() {
     return(htmlDependency(
       "jquery", version_jquery,
       src = c(
-        href = "shared",
         file = "www/shared"
       ),
       package = "shiny",
@@ -80,7 +80,6 @@ jqueryDependency <- function() {
     return(htmlDependency(
       "jquery", "1.12.4",
       src = c(
-        href = "shared/legacy",
         file = "www/shared/legacy"
       ),
       package = "shiny",
@@ -96,7 +95,8 @@ shinyDependencies <- function() {
     htmlDependency(
       name = "shiny-javascript",
       version = shinyPackageVersion(),
-      src = c(href = "shared"),
+      src = c(file = "www/shared"),
+      package = "shiny",
       script =
         if (isTRUE(
           get_devmode_option(
@@ -118,7 +118,8 @@ shinyDependencyCSS <- function(theme) {
     return(htmlDependency(
       name = "shiny-css",
       version = version,
-      src = c(href = "shared"),
+      src = c(file = "www/shared"),
+      package = "shiny",
       stylesheet = "shiny.min.css"
     ))
   }

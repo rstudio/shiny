@@ -32,12 +32,12 @@ licenseLink <- function(licenseName) {
 showcaseHead <- function() {
 
   deps  <- list(
-    htmlDependency("jqueryui", "1.12.1", c(href="shared/jqueryui"),
-      script = "jquery-ui.min.js"),
-    htmlDependency("showdown", "0.3.1", c(href="shared/showdown/compressed"),
-      script = "showdown.js"),
-    htmlDependency("highlight.js", "6.2", c(href="shared/highlight"),
-      script = "highlight.pack.js")
+    htmlDependency("jqueryui", "1.12.1", c(file="www/shared/jqueryui"),
+      package="shiny", script = "jquery-ui.min.js"),
+    htmlDependency("showdown", "0.3.1", c(href="www/shared/showdown/compressed"),
+      package="shiny", script = "showdown.js"),
+    htmlDependency("highlight.js", "6.2", c(href="www/shared/highlight"),
+      package="shiny", script = "highlight.pack.js")
   )
 
   mdfile <- file.path.ci(getwd(), 'Readme.md')

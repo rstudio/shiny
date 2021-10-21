@@ -205,13 +205,17 @@ ionRangeSliderDependency <- function() {
   list(
     # ion.rangeSlider also needs normalize.css, which is already included in Bootstrap.
     htmlDependency(
-      "ionrangeslider-javascript", version_ion_range_slider,
-      src = c(href = "shared/ionrangeslider"),
+      "ionrangeslider-javascript",
+      version_ion_range_slider,
+      src = c(file = "www/shared/ionrangeslider"),
+      package = "shiny",
       script = "js/ion.rangeSlider.min.js"
     ),
     htmlDependency(
-      "strftime", version_strftime,
-      src = c(href = "shared/strftime"),
+      "strftime",
+      version_strftime,
+      src = c(file = "www/shared/strftime"),
+      package = "shiny",
       script = "strftime-min.js"
     ),
     bslib::bs_dependency_defer(ionRangeSliderDependencyCSS)
@@ -223,7 +227,8 @@ ionRangeSliderDependencyCSS <- function(theme) {
     return(htmlDependency(
       "ionrangeslider-css",
       version_ion_range_slider,
-      src = c(href = "shared/ionrangeslider"),
+      src = c(file = "www/shared/ionrangeslider"),
+      package = "shiny",
       stylesheet = "css/ion.rangeSlider.css"
     ))
   }

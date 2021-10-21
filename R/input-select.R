@@ -216,8 +216,10 @@ selectizeIt <- function(inputId, select, options, nonempty = FALSE) {
     deps <- c(
       deps,
       list(htmlDependency(
-        'jqueryui', '1.12.1',
-        c(href = 'shared/jqueryui'),
+        'jqueryui',
+        '1.12.1',
+        c(file = 'www/shared/jqueryui'),
+        package = 'shiny',
         script = 'jquery-ui.min.js'
       ))
     )
@@ -274,8 +276,10 @@ selectizeDependencyFunc <- function(theme) {
 
 selectizeStaticDependency <- function(version) {
   htmlDependency(
-    "selectize", version,
-    src = c(href = "shared/selectize"),
+    "selectize",
+    version,
+    src = c(file = "www/shared/selectize"),
+    package = "shiny",
     stylesheet = "css/selectize.bootstrap3.css",
     script = c(
       "js/selectize.min.js",

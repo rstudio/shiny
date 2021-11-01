@@ -44,7 +44,7 @@ shiny 1.7.0
 
 ### Other improvements
 
-* Shiny's core JavaScript code was converted to TypeScript. For the latest development information, please see the [README.md in `./srcts`](https://github.com/rstudio/shiny/tree/master/srcts). (#3296)
+* Shiny's core JavaScript code was converted to TypeScript. For the latest development information, please see the [README.md in `./srcts`](https://github.com/rstudio/shiny/tree/v1.7.0/srcts). (#3296)
 
 * Switched from `digest::digest()` to `rlang::hash()` for hashing. (#3264)
 

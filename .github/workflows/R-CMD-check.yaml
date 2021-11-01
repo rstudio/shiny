@@ -1,139 +1,19 @@
-# NOTE: This workflow is overkill for most R packages
-# check-standard.yaml is likely a better choice
-# usethis::use_github_action("check-standard") will install it.
-#
-# For help debugging build failures open an issue on the RStudio community with the 'github-actions' tag.
-# https://community.rstudio.com/new-topic?category=Package%20development&tags=github-actions
 on:
   push:
-    branches:
-      - main
-      - master
+    branches: [main, rc-**]
   pull_request:
-    branches:
-      - main
-      - master
-      - rc-v**
+    branches: [main]
+  schedule:
+    - cron:  '0 5 * * 1' # every monday
 
-name: R-CMD-check
+name: Package checks
 
 jobs:
-
-  rversions:
-    name: R Versions
-    runs-on: ubuntu-latest
-    outputs:
-      devel:   ${{ steps.devel.outputs.installed-r-version }}
-      release: ${{ steps.release.outputs.installed-r-version }}
-      oldrel1: ${{ steps.oldrel1.outputs.installed-r-version }}
-      oldrel2: ${{ steps.oldrel2.outputs.installed-r-version }}
-      oldrel3: ${{ steps.oldrel3.outputs.installed-r-version }}
-      oldrel4: ${{ steps.oldrel4.outputs.installed-r-version }}
-    steps:
-    - { name: devel,    uses: r-lib/actions/setup-r@master, id: devel,   with: { r-version: devel,    install-r: false }}
-    - { name: release,  uses: r-lib/actions/setup-r@master, id: release, with: { r-version: release,  install-r: false }}
-    - { name: oldrel/1, uses: r-lib/actions/setup-r@master, id: oldrel1, with: { r-version: oldrel/1, install-r: false }}
-    - { name: oldrel/2, uses: r-lib/actions/setup-r@master, id: oldrel2, with: { r-version: oldrel/2, install-r: false }}
-    - { name: oldrel/3, uses: r-lib/actions/setup-r@master, id: oldrel3, with: { r-version: oldrel/3, install-r: false }}
-    - { name: oldrel/4, uses: r-lib/actions/setup-r@master, id: oldrel4, with: { r-version: oldrel/4, install-r: false }}
-
-
+  website:
+    uses: rstudio/shinycoreci/.github/workflows/call-website.yaml@v1
+  routine:
+    uses: rstudio/shinycoreci/.github/workflows/call-routine.yaml@v1
+    with:
+      node-version: "14.x"
   R-CMD-check:
-    runs-on: ${{ matrix.config.os }}
-
-    name: ${{ matrix.config.os }} (${{ matrix.config.r }})
-
-    needs:
-      - rversions
-    strategy:
-      fail-fast: false
-      matrix:
-        config:
-          - {os: macOS-latest,   r: '${{ needs.rversions.outputs.release }}'}
-          - {os: windows-latest, r: '${{ needs.rversions.outputs.release }}'}
-          - {os: windows-latest, r: '3.6'}
-
-          - {os: ubuntu-20.04,   r: '${{ needs.rversions.outputs.devel }}', http-user-agent: "release" }
-          - {os: ubuntu-20.04,   r: '${{ needs.rversions.outputs.release }}'}
-          - {os: ubuntu-20.04,   r: '${{ needs.rversions.outputs.oldrel1 }}'}
-          - {os: ubuntu-20.04,   r: '${{ needs.rversions.outputs.oldrel2 }}'}
-          - {os: ubuntu-20.04,   r: '${{ needs.rversions.outputs.oldrel3 }}'}
-          - {os: ubuntu-20.04,   r: '${{ needs.rversions.outputs.oldrel4 }}'}
-
-          - {os: ubuntu-18.04,   r: '${{ needs.rversions.outputs.devel }}', http-user-agent: "release" }
-          - {os: ubuntu-18.04,   r: '${{ needs.rversions.outputs.release }}'}
-          - {os: ubuntu-18.04,   r: '${{ needs.rversions.outputs.oldrel1 }}'}
-          - {os: ubuntu-18.04,   r: '${{ needs.rversions.outputs.oldrel2 }}'}
-          - {os: ubuntu-18.04,   r: '${{ needs.rversions.outputs.oldrel3 }}'}
-          - {os: ubuntu-18.04,   r: '${{ needs.rversions.outputs.oldrel4 }}'}
-
-    env:
-      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
-
-    steps:
-      # https://github.com/actions/checkout/issues/135
-      - name: Set git to use LF
-        if: runner.os == 'Windows'
-        run: |
-          git config --system core.autocrlf false
-          git config --system core.eol lf
-
-      - uses: actions/checkout@v2
-
-      - uses: r-lib/actions/setup-r@v1
-        id: install-r
-        with:
-          r-version: ${{ matrix.config.r }}
-          http-user-agent: ${{ matrix.config.http-user-agent }}
-          use-public-rspm: true
-
-      - uses: r-lib/actions/setup-pandoc@v1
-
-      - uses: r-lib/actions/setup-r-dependencies@v1
-        with:
-          extra-packages: rcmdcheck
-
-      # xquartz and cairo are needed for Cairo package.
-      # harfbuzz and fribidi are needed for textshaping package.
-      - name: Mac systemdeps
-        if: runner.os == 'macOS'
-        run: |
-          brew install --cask xquartz
-          brew install cairo
-          brew install harfbuzz fribidi
-
-      - name: Find PhantomJS path
-        id: phantomjs
-        run: |
-          echo "::set-output name=path::$(Rscript -e 'cat(shinytest:::phantom_paths()[[1]])')"
-      - name: Cache PhantomJS
-        uses: actions/cache@v2
-        with:
-          path: ${{ steps.phantomjs.outputs.path }}
-          key: ${{ matrix.config.os }}-phantomjs
-          restore-keys: ${{ matrix.config.os }}-phantomjs
-      - name: Install PhantomJS
-        run: >
-          Rscript
-          -e "if (!shinytest::dependenciesInstalled()) shinytest::installDependencies()"
-
-      - name: Check
-        env:
-          _R_CHECK_CRAN_INCOMING_: false
-          _R_CHECK_FORCE_SUGGESTS_: ${{ matrix.config.r != 'devel' }}
-        run: |
-          options(crayon.enabled = TRUE)
-          rcmdcheck::rcmdcheck(args = c("--no-manual", "--as-cran"), error_on = "warning", check_dir = "check")
-        shell: Rscript {0}
-
-      - name: Show testthat output
-        if: always()
-        run: find check -name 'testthat.Rout*' -exec cat '{}' \; || true
-        shell: bash
-
-      - name: Upload check results
-        if: failure()
-        uses: actions/upload-artifact@main
-        with:
-          name: ${{ matrix.config.os }}-r${{ matrix.config.r }}-results
-          path: check
+    uses: rstudio/shinycoreci/.github/workflows/call-R-CMD-check.yaml@v1

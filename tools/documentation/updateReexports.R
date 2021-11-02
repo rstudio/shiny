@@ -119,14 +119,14 @@ local({
     }) %>%
     paste0(collapse = "\n")
 
-  docs_have_changed <- identical(pre_namespace_lines, post_namespace_lines)
-  msg_fn <- if (docs_have_changed) stop else message
+  docs_are_same <- identical(pre_namespace_lines, post_namespace_lines)
+  msg_fn <- if (docs_are_same) message else stop
   msg_fn(
     "\n",
-    "The NAMESPACE exports ", if (docs_have_changed) { "did NOT change"} else { "CHANGED"},
+    "The NAMESPACE exports ", if (docs_are_same) { "did NOT change"} else { "CHANGED"},
     " by copying in the ", pkg_names, " files\n",
     "\n",
-    if (docs_have_changed) "Possible ", pkg_names, " version requirement to add to DESCRIPTION file:\n",
+    if (docs_are_same) "Possible ", pkg_names, " version requirement to add to DESCRIPTION file:\n",
     "Imports:\n",
     imports_txt
   )

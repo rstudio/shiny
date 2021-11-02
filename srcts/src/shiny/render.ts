@@ -85,10 +85,12 @@ type HtmlDep = {
   restyle?: boolean;
   src?: { href: string };
   meta?: string[] | string;
-  stylesheet?: string[] | string;
+  stylesheet?:
+    | Array<string | { [key: string]: string }>
+    | string
+    | { [key: string]: string };
   script?:
-    | Array<{ [key: string]: string }>
-    | string[]
+    | Array<string | { [key: string]: string }>
     | string
     | { [key: string]: string };
   attachment?: string[] | string | { [key: string]: string };
@@ -140,11 +142,36 @@ function renderDependency(dep: HtmlDep) {
   }
 
   if (dep.stylesheet) {
-    const links = $.map(asArray(dep.stylesheet), function (stylesheet) {
-      return $("<link rel='stylesheet' type='text/css'>").attr(
-        "href",
-        href + "/" + encodeURI(stylesheet)
-      );
+    dep.stylesheet;
+    const stylesheetAttrs = asArray(dep.stylesheet);
+
+    const links = $.map(stylesheetAttrs, (x) => {
+      // Input can be a string; upgrade to an object.
+      if (typeof x === "string") {
+        x = { href: x };
+      }
+
+      // Add "rel" and "type" fields if not already present.
+      if (!hasOwnProperty(x, "rel")) {
+        x.rel = "stylesheet";
+      }
+      if (!hasOwnProperty(x, "type")) {
+        x.type = "text/css";
+      }
+
+      const link = document.createElement("link");
+
+      // Can not destructure Object.entries into both a `const` and a `let` variable.
+      // eslint-disable-next-line prefer-const
+      for (let [attr, val] of Object.entries(x)) {
+        if (attr === "href") {
+          val = href + "/" + encodeURI(val);
+        }
+        // If val isn't truthy (e.g., null), consider it a boolean attribute
+        link.setAttribute(attr, val ? val : "");
+      }
+
+      return link;
     });
 
     if (!restyle) {
@@ -194,19 +221,20 @@ function renderDependency(dep: HtmlDep) {
       };
 
       $.map(links, function (link) {
+        const $link = $(link);
         // Find any document.styleSheets that match this link's href
         // so we can remove it after bringing in the new stylesheet
-        const oldSheet = findSheet(link.attr("href"));
+        const oldSheet = findSheet($link.attr("href"));
 
         // Add a timestamp to the href to prevent caching
-        const href = link.attr("href") + "?restyle=" + new Date().getTime();
+        const href = $link.attr("href") + "?restyle=" + new Date().getTime();
         // Use inline <style> approach for IE, otherwise use the more elegant
         // <link> -based approach
 
         if (isIE()) {
           refreshStyle(href, oldSheet);
         } else {
-          link.attr("href", href);
+          $link.attr("href", href);
 
           // This part is a bit tricky. The link's onload callback will be
           // invoked after the file is loaded, but it can be _before_ the
@@ -232,7 +260,7 @@ function renderDependency(dep: HtmlDep) {
           // sendImageSizeFns.transitioned(), which is debounced. Otherwise, it can result in
           // the same plot being redrawn multiple times with different
           // styling.
-          link.attr("onload", () => {
+          $link.attr("onload", () => {
             const $dummyEl = $("<div>")
               .css("transition", "0.1s all")
               .css("position", "absolute")

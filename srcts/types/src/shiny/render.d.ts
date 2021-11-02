@@ -16,10 +16,14 @@ declare type HtmlDep = {
         href: string;
     };
     meta?: string[] | string;
-    stylesheet?: string[] | string;
-    script?: Array<{
+    stylesheet?: Array<string | {
         [key: string]: string;
-    }> | string[] | string | {
+    }> | string | {
+        [key: string]: string;
+    };
+    script?: Array<string | {
+        [key: string]: string;
+    }> | string | {
         [key: string]: string;
     };
     attachment?: string[] | string | {

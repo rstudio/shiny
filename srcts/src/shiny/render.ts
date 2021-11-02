@@ -125,7 +125,13 @@ function renderDependency(dep: HtmlDep) {
 
   registerDependency(dep.name, dep.version);
 
-  const href = dep.src.href;
+  let href: string;
+
+  if (dep.src) {
+    href = dep.src.href;
+  } else {
+    href = "";
+  }
 
   const $head = $("head").first();
 

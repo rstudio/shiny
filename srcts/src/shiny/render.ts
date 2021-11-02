@@ -79,6 +79,8 @@ function renderHtml(
 }
 
 type HtmlDepVersion = string;
+// This supports the older R htmltools HtmlDependency structure, and it also
+// encompasses the newer, consistent HTMLDependency structure.
 type HtmlDep = {
   name: string;
   version: HtmlDepVersion;
@@ -96,6 +98,18 @@ type HtmlDep = {
   attachment?: string[] | string | { [key: string]: string };
   head?: string;
 };
+
+// This is the newer, consistent HTMLDependency structure.
+type HtmlDepSimplified = {
+  name: string;
+  version: HtmlDepVersion;
+  restyle?: boolean;
+  meta: string[];
+  stylesheet: Array<{ [key: string]: string }>;
+  script: Array<{ [key: string]: string }>;
+  attachment: Array<{ [key: string]: string }>;
+  head?: string;
+};
 const htmlDependencies: { [key: string]: HtmlDepVersion } = {};
 
 function registerDependency(name: string, version: HtmlDepVersion): void {
@@ -104,7 +118,7 @@ function registerDependency(name: string, version: HtmlDepVersion): void {
 
 // Re-render stylesheet(s) if the dependency has specificially requested it
 // and it matches an existing dependency (name and version)
-function needsRestyle(dep: HtmlDep) {
+function needsRestyle(dep: HtmlDepSimplified) {
   if (!dep.restyle) {
     return false;
   }
@@ -118,25 +132,19 @@ function needsRestyle(dep: HtmlDep) {
 }
 
 // Client-side dependency resolution and rendering
-function renderDependency(dep: HtmlDep) {
+function renderDependency(dep_: HtmlDep) {
+  const dep = simplifyHtmlDependency(dep_);
+
   const restyle = needsRestyle(dep);
 
   if (hasOwnProperty(htmlDependencies, dep.name) && !restyle) return false;
 
   registerDependency(dep.name, dep.version);
 
-  let href: string;
-
-  if (dep.src) {
-    href = dep.src.href;
-  } else {
-    href = "";
-  }
-
   const $head = $("head").first();
 
   if (dep.meta && !restyle) {
-    const metas = $.map(asArray(dep.meta), function (obj, idx) {
+    const metas = $.map(dep.meta, function (obj, idx) {
       // only one named pair is expected in obj as it's already been decomposed
       const name = Object.keys(obj)[0];
 
@@ -148,22 +156,10 @@ function renderDependency(dep: HtmlDep) {
   }
 
   if (dep.stylesheet) {
-    dep.stylesheet;
-    const stylesheetAttrs = asArray(dep.stylesheet);
-
-    const links = $.map(stylesheetAttrs, (x) => {
-      // Input can be a string; upgrade to an object.
-      if (typeof x === "string") {
-        x = { href: x };
-      }
-
+    const links = $.map(dep.stylesheet, (x) => {
       // Add "rel" and "type" fields if not already present.
-      if (!hasOwnProperty(x, "rel")) {
-        x.rel = "stylesheet";
-      }
-      if (!hasOwnProperty(x, "type")) {
-        x.type = "text/css";
-      }
+      if (!hasOwnProperty(x, "rel")) x.rel = "stylesheet";
+      if (!hasOwnProperty(x, "type")) x.type = "text/css";
 
       const link = document.createElement("link");
 
@@ -171,7 +167,7 @@ function renderDependency(dep: HtmlDep) {
       // eslint-disable-next-line prefer-const
       for (let [attr, val] of Object.entries(x)) {
         if (attr === "href") {
-          val = href + "/" + encodeURI(val);
+          val = encodeURI(val);
         }
         // If val isn't truthy (e.g., null), consider it a boolean attribute
         link.setAttribute(attr, val ? val : "");
@@ -184,7 +180,10 @@ function renderDependency(dep: HtmlDep) {
       $head.append(links);
     } else {
       // This inline <style> based approach works for IE11
-      const refreshStyle = function (href, oldSheet) {
+      const refreshStyle = function (
+        href: string,
+        oldSheet: CSSStyleSheet | null
+      ) {
         const xhr = new XMLHttpRequest();
 
         xhr.open("GET", href);
@@ -205,7 +204,7 @@ function renderDependency(dep: HtmlDep) {
         xhr.send();
       };
 
-      const findSheet = function (href) {
+      const findSheet = function (href: string): CSSStyleSheet | null {
         for (let i = 0; i < document.styleSheets.length; i++) {
           const sheet = document.styleSheets[i];
           // The sheet's href is a full URL
@@ -219,9 +218,11 @@ function renderDependency(dep: HtmlDep) {
 
       // Removes the stylesheet from document.styleSheets, and also removes
       // the owning <link> element, if present.
-      const removeSheet = function (sheet) {
+      const removeSheet = function (sheet: CSSStyleSheet | null) {
         if (!sheet) return;
         sheet.disabled = true;
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore; .cssText doesn't normally exist, but it does on IE?
         if (isIE()) sheet.cssText = "";
         $(sheet.ownerNode).remove();
       };
@@ -296,20 +297,14 @@ function renderDependency(dep: HtmlDep) {
   }
 
   if (dep.script && !restyle) {
-    const scriptsAttrs = asArray(dep.script);
-    const scripts = $.map(scriptsAttrs, function (x) {
+    const scripts = $.map(dep.script, function (x) {
       const script = document.createElement("script");
-
-      // htmlDependency()'s script arg can be a character vector or a list()
-      if (typeof x === "string") {
-        x = { src: x };
-      }
 
       // Can not destructure Object.entries into both a `const` and a `let` variable.
       // eslint-disable-next-line prefer-const
       for (let [attr, val] of Object.entries(x)) {
         if (attr === "src") {
-          val = href + "/" + encodeURI(val);
+          val = encodeURI(val);
         }
         // If val isn't truthy (e.g., null), consider it a boolean attribute
         script.setAttribute(attr, val ? val : "");
@@ -322,27 +317,14 @@ function renderDependency(dep: HtmlDep) {
   }
 
   if (dep.attachment && !restyle) {
-    // dep.attachment might be a single string, an array, or an object.
-    let attachments = dep.attachment;
-
-    if (typeof attachments === "string") attachments = [attachments];
-    if (Array.isArray(attachments)) {
+    const attach = $.map(dep.attachment, function (attachment, key) {
       // The contract for attachments is that arrays of attachments are
       // addressed using 1-based indexes. Convert this array to an object.
-      const tmp = {};
+      const keyStr = key + 1 + "";
 
-      $.each(attachments, function (index, attachment) {
-        const key = index + 1 + "";
-
-        tmp[key] = attachment;
-      });
-      attachments = tmp;
-    }
-
-    const attach = $.map(attachments, function (attachment, key) {
       return $("<link rel='attachment'>")
-        .attr("id", dep.name + "-" + key + "-attachment")
-        .attr("href", href + "/" + encodeURI(attachment));
+        .attr("id", dep.name + "-" + keyStr + "-attachment")
+        .attr("href", encodeURI(attachment.href));
     });
 
     $head.append(attach);
@@ -355,6 +337,55 @@ function renderDependency(dep: HtmlDep) {
     $head.append($newHead.children());
   }
   return true;
+}
+
+// Convert legacy HtmlDependency to new HTMLDependency format. Should be
+// idempotent; new HTMLDependency objects should be returned unchanged.
+function simplifyHtmlDependency(dep: HtmlDep): HtmlDepSimplified {
+  const hrefPrefix: string | undefined = dep.src?.href;
+
+  const result: HtmlDepSimplified = {
+    name: dep.name,
+    version: dep.version,
+    restyle: dep.restyle,
+    meta: asArray(dep.meta),
+    stylesheet: [],
+    script: [],
+    attachment: [],
+    head: dep.head,
+  };
+
+  result.stylesheet = asArray(dep.stylesheet).map((s) => {
+    if (typeof s === "string") {
+      s = { href: s };
+    }
+    if (hrefPrefix) {
+      s.href = hrefPrefix + "/" + s.href;
+    }
+    return s;
+  });
+
+  result.script = asArray(dep.script).map((s) => {
+    if (typeof s === "string") {
+      s = { src: s };
+    }
+    if (hrefPrefix) {
+      s.src = hrefPrefix + "/" + s.src;
+    }
+    return s;
+  });
+
+  result.attachment = asArray(dep.attachment).map((s) => {
+    if (typeof s === "string") {
+      s = { href: s };
+    }
+    if (hrefPrefix) {
+      s.href = hrefPrefix + "/" + s.href;
+    }
+    return s;
+  });
+
+  return result;
 }
 
 export { renderDependencies, renderContent, renderHtml, registerDependency };

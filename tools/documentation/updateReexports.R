@@ -16,13 +16,13 @@ local({
 
   `%>%` <- magrittr::`%>%`
 
-  local_reexports_r_file <- rprojroot::find_package_root_file("R/reexports.R")
-  unlink(local_reexports_r_file)
-
   # pre document
   devtools::document()
 
   pre_namespace_lines <- readLines(rprojroot::find_package_root_file("NAMESPACE"))
+
+  local_reexports_r_file <- rprojroot::find_package_root_file("R/reexports.R")
+  unlink(local_reexports_r_file)
 
   alias_info <- jsonlite::fromJSON(rprojroot::find_package_root_file("tools/documentation/reexports.json"), simplifyDataFrame = FALSE)
   local_man_folder <- rprojroot::find_package_root_file("man")
@@ -120,7 +120,8 @@ local({
     paste0(collapse = "\n")
 
   docs_have_changed <- identical(pre_namespace_lines, post_namespace_lines)
-  message(
+  msg_fn <- if (docs_have_changed) stop else message
+  msg_fn(
     "\n",
     "The NAMESPACE exports ", if (docs_have_changed) { "did NOT change"} else { "CHANGED"},
     " by copying in the ", pkg_names, " files\n",

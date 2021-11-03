@@ -78,6 +78,12 @@ function renderHtml(
 
 type HtmlDepVersion = string;
 
+type MetaItem = {
+  name: string;
+  content: string;
+  [x: string]: string;
+};
+
 type StylesheetItem = {
   href: string;
   [x: string]: string;
@@ -101,7 +107,7 @@ type HtmlDep = {
   version: HtmlDepVersion;
   restyle?: boolean;
   src?: { href: string };
-  meta?: { [x: string]: string };
+  meta?: MetaItem[] | { [x: string]: string };
   stylesheet?: string[] | StylesheetItem | StylesheetItem[] | string;
   script?: ScriptItem | ScriptItem[] | string[] | string;
   attachment?: AttachmentItem[] | string[] | string | { [key: string]: string };
@@ -113,7 +119,7 @@ type HtmlDepSimplified = {
   name: string;
   version: HtmlDepVersion;
   restyle?: boolean;
-  meta: { [x: string]: string };
+  meta: MetaItem[];
   stylesheet: StylesheetItem[];
   script: ScriptItem[];
   attachment: AttachmentItem[];
@@ -183,13 +189,15 @@ function renderDependency(dep_: HtmlDep) {
 
   // Add each type of element to the DOM.
 
-  for (const [name, content] of Object.entries(dep.meta)) {
+  // for (const metaItem in dep.meta) {
+  dep.meta.forEach((x) => {
     const meta = document.createElement("meta");
 
-    meta.setAttribute("name", name);
-    meta.setAttribute("content", content);
+    for (const [attr, val] of Object.entries(x)) {
+      meta.setAttribute(attr, val);
+    }
     $head.append(meta);
-  }
+  });
 
   if (stylesheetLinks.length !== 0) {
     $head.append(stylesheetLinks);
@@ -363,7 +371,7 @@ function simplifyHtmlDependency(dep: HtmlDep): HtmlDepSimplified {
     name: dep.name,
     version: dep.version,
     restyle: dep.restyle,
-    meta: {},
+    meta: [],
     stylesheet: [],
     script: [],
     attachment: [],
@@ -371,7 +379,17 @@ function simplifyHtmlDependency(dep: HtmlDep): HtmlDepSimplified {
   };
 
   if (dep.meta) {
-    result.meta = dep.meta;
+    if (Array.isArray(dep.meta)) {
+      // Assume we already have the canonical format:
+      //   [{name: "myname", content: "mycontent"}, ...]
+      result.meta = dep.meta;
+    } else {
+      // If here, then we have the legacy format, which we have to convert.
+      //   {myname: "mycontent", ...}
+      for (const [name, content] of Object.entries(dep.meta)) {
+        result.meta.push({ name: name, content: content });
+      }
+    }
   }
 
   result.stylesheet = asArray(dep.stylesheet).map((s) => {

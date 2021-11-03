@@ -30,7 +30,7 @@ function renderContent(
     shinyUnbindAll(el);
   }
 
-  let html: string;
+  let html = "";
   let dependencies: HtmlDep[] = [];
 
   if (content === null) {
@@ -261,7 +261,9 @@ function addStylesheetsAndRestyle(links: HTMLLinkElement[]): void {
     xhr.send();
   };
 
-  const findSheet = function (href: string): CSSStyleSheet | null {
+  const findSheet = function (href: string | undefined): CSSStyleSheet | null {
+    if (!href) return null;
+
     for (let i = 0; i < document.styleSheets.length; i++) {
       const sheet = document.styleSheets[i];
       // The sheet's href is a full URL
@@ -281,7 +283,10 @@ function addStylesheetsAndRestyle(links: HTMLLinkElement[]): void {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore; .cssText doesn't normally exist, but it does on IE?
     if (isIE()) sheet.cssText = "";
-    $(sheet.ownerNode).remove();
+
+    if (sheet.ownerNode instanceof Element) {
+      $(sheet.ownerNode).remove();
+    }
   };
 
   links.map((link) => {
@@ -389,6 +394,7 @@ function simplifyHtmlDependency(dep: HtmlDep): HtmlDepSimplified {
 
   // dep.attachment might be one of the following types, which we will convert
   // as shown:
+  // 0. undefined => []
   // 1. A single string:
   //    "foo.txt"
   //    => [{key: "1", href: "foo.txt"}]
@@ -405,6 +411,9 @@ function simplifyHtmlDependency(dep: HtmlDep): HtmlDepSimplified {
   // Note that the first three formats are from legacy code, and the last format
   // is from new code.
   let attachments = dep.attachment;
+
+  // Convert format 0 (undefined) to format 2 or 4.
+  if (!attachments) attachments = [];
 
   // Convert format 1 to format 2.
   if (typeof attachments === "string") attachments = [attachments];
@@ -431,7 +440,7 @@ function simplifyHtmlDependency(dep: HtmlDep): HtmlDepSimplified {
       }
     });
   } else {
-    // Format 3.
+    // If we got here, it's format 3.
     const tmp: AttachmentItem[] = [];
 
     for (const [attr, val] of Object.entries(attachments)) {

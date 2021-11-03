@@ -101,7 +101,7 @@ type HtmlDep = {
   version: HtmlDepVersion;
   restyle?: boolean;
   src?: { href: string };
-  meta?: string[] | string;
+  meta?: { [x: string]: string };
   stylesheet?: string[] | StylesheetItem | StylesheetItem[] | string;
   script?: ScriptItem | ScriptItem[] | string[] | string;
   attachment?: AttachmentItem[] | string[] | string | { [key: string]: string };
@@ -113,7 +113,7 @@ type HtmlDepSimplified = {
   name: string;
   version: HtmlDepVersion;
   restyle?: boolean;
-  meta: string[];
+  meta: { [x: string]: string };
   stylesheet: StylesheetItem[];
   script: ScriptItem[];
   attachment: AttachmentItem[];
@@ -182,15 +182,13 @@ function renderDependency(dep_: HtmlDep) {
   const $head = $("head").first();
 
   // Add each type of element to the DOM.
-  if (dep.meta.length !== 0) {
-    const metas = dep.meta.map((obj) => {
-      // only one named pair is expected in obj as it's already been decomposed
-      const name = Object.keys(obj)[0];
 
-      return $("<meta>").attr("name", name).attr("content", obj[name]);
-    });
+  for (const [name, content] of Object.entries(dep.meta)) {
+    const meta = document.createElement("meta");
 
-    $head.append(metas);
+    meta.setAttribute("name", name);
+    meta.setAttribute("content", content);
+    $head.append(meta);
   }
 
   if (stylesheetLinks.length !== 0) {
@@ -365,12 +363,16 @@ function simplifyHtmlDependency(dep: HtmlDep): HtmlDepSimplified {
     name: dep.name,
     version: dep.version,
     restyle: dep.restyle,
-    meta: asArray(dep.meta),
+    meta: {},
     stylesheet: [],
     script: [],
     attachment: [],
     head: dep.head,
   };
+
+  if (dep.meta) {
+    result.meta = dep.meta;
+  }
 
   result.stylesheet = asArray(dep.stylesheet).map((s) => {
     if (typeof s === "string") {

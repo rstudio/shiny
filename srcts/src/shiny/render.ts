@@ -146,169 +146,61 @@ function needsRestyle(dep: HtmlDepSimplified) {
 function renderDependency(dep_: HtmlDep) {
   const dep = simplifyHtmlDependency(dep_);
 
-  const restyle = needsRestyle(dep);
+  // Convert stylesheet objs to links early, because if `restyle` is true, we'll
+  // pass them through to `renderStylesheet` below.
+  const stylesheetLinks = dep.stylesheet.map((x) => {
+    // Add "rel" and "type" fields if not already present.
+    if (!hasOwnProperty(x, "rel")) x.rel = "stylesheet";
+    if (!hasOwnProperty(x, "type")) x.type = "text/css";
 
-  if (hasOwnProperty(htmlDependencies, dep.name) && !restyle) return false;
+    const link = document.createElement("link");
+
+    // Can not destructure Object.entries into both a `const` and a `let`
+    // variable.
+    // eslint-disable-next-line prefer-const
+    for (let [attr, val] of Object.entries(x)) {
+      if (attr === "href") {
+        val = encodeURI(val);
+      }
+      // If val isn't truthy (e.g., null), consider it a boolean attribute
+      link.setAttribute(attr, val ? val : "");
+    }
+
+    return link;
+  });
+
+  // If a restyle is needed, do that stuff and return. Note that other items
+  // (like scripts) aren't added, because they would have been added in a
+  // previous run.
+  if (needsRestyle(dep)) {
+    addStylesheetsAndRestyle(stylesheetLinks);
+    return true;
+  }
+
+  if (hasOwnProperty(htmlDependencies, dep.name)) return false;
 
   registerDependency(dep.name, dep.version);
 
   const $head = $("head").first();
 
-  if (dep.meta && !restyle) {
-    const metas = $.map(dep.meta, function (obj, idx) {
+  // Add each type of element to the DOM.
+  if (dep.meta.length !== 0) {
+    const metas = dep.meta.map((obj) => {
       // only one named pair is expected in obj as it's already been decomposed
       const name = Object.keys(obj)[0];
 
       return $("<meta>").attr("name", name).attr("content", obj[name]);
-      idx;
     });
 
     $head.append(metas);
   }
 
-  if (dep.stylesheet) {
-    const links = $.map(dep.stylesheet, (x) => {
-      // Add "rel" and "type" fields if not already present.
-      if (!hasOwnProperty(x, "rel")) x.rel = "stylesheet";
-      if (!hasOwnProperty(x, "type")) x.type = "text/css";
-
-      const link = document.createElement("link");
-
-      // Can not destructure Object.entries into both a `const` and a `let` variable.
-      // eslint-disable-next-line prefer-const
-      for (let [attr, val] of Object.entries(x)) {
-        if (attr === "href") {
-          val = encodeURI(val);
-        }
-        // If val isn't truthy (e.g., null), consider it a boolean attribute
-        link.setAttribute(attr, val ? val : "");
-      }
-
-      return link;
-    });
-
-    if (!restyle) {
-      $head.append(links);
-    } else {
-      // This inline <style> based approach works for IE11
-      const refreshStyle = function (
-        href: string,
-        oldSheet: CSSStyleSheet | null
-      ) {
-        const xhr = new XMLHttpRequest();
-
-        xhr.open("GET", href);
-        xhr.onload = function () {
-          const id =
-            "shiny_restyle_" + href.split("?restyle")[0].replace(/\W/g, "_");
-          const oldStyle = $head.find("style#" + id);
-          const newStyle = $("<style>").attr("id", id).html(xhr.responseText);
-
-          $head.append(newStyle);
-
-          // We can remove the old styles immediately because the new styles
-          // should have been applied synchronously.
-          oldStyle.remove();
-          removeSheet(oldSheet);
-          sendImageSizeFns.transitioned();
-        };
-        xhr.send();
-      };
-
-      const findSheet = function (href: string): CSSStyleSheet | null {
-        for (let i = 0; i < document.styleSheets.length; i++) {
-          const sheet = document.styleSheets[i];
-          // The sheet's href is a full URL
-
-          if (typeof sheet.href === "string" && sheet.href.indexOf(href) > -1) {
-            return sheet;
-          }
-        }
-        return null;
-      };
-
-      // Removes the stylesheet from document.styleSheets, and also removes
-      // the owning <link> element, if present.
-      const removeSheet = function (sheet: CSSStyleSheet | null) {
-        if (!sheet) return;
-        sheet.disabled = true;
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore; .cssText doesn't normally exist, but it does on IE?
-        if (isIE()) sheet.cssText = "";
-        $(sheet.ownerNode).remove();
-      };
-
-      $.map(links, function (link) {
-        const $link = $(link);
-        // Find any document.styleSheets that match this link's href
-        // so we can remove it after bringing in the new stylesheet
-        const oldSheet = findSheet($link.attr("href"));
-
-        // Add a timestamp to the href to prevent caching
-        const href = $link.attr("href") + "?restyle=" + new Date().getTime();
-        // Use inline <style> approach for IE, otherwise use the more elegant
-        // <link> -based approach
-
-        if (isIE()) {
-          refreshStyle(href, oldSheet);
-        } else {
-          $link.attr("href", href);
-
-          // This part is a bit tricky. The link's onload callback will be
-          // invoked after the file is loaded, but it can be _before_ the
-          // styles are actually applied. The amount of time it takes for the
-          // style to be applied is not predictable. We need to make sure the
-          // styles are applied before we send updated size/style information
-          // to the server.
-          //
-          // We do this by adding _another_ link, with CSS content
-          // base64-encoded and inlined into the href. We also add a dummy DOM
-          // element that the CSS applies to. The dummy CSS includes a
-          // transition, and when the `transitionend` event happens, we call
-          // sendImageSizeFns.transitioned() and remove the old sheet. We also remove the
-          // dummy DOM element and dummy CSS content.
-          //
-          // The reason this works is because (we assume) that if multiple
-          // <link> tags are added, they will be applied in the same order
-          // that they are loaded. This seems to be true in the browsers we
-          // have tested.
-          //
-          // Because it is common for multiple stylesheets to arrive close
-          // together, but not on exactly the same tick, we call
-          // sendImageSizeFns.transitioned(), which is debounced. Otherwise, it can result in
-          // the same plot being redrawn multiple times with different
-          // styling.
-          $link.attr("onload", () => {
-            const $dummyEl = $("<div>")
-              .css("transition", "0.1s all")
-              .css("position", "absolute")
-              .css("top", "-1000px")
-              .css("left", "0");
-
-            $dummyEl.one("transitionend", () => {
-              $dummyEl.remove();
-              removeSheet(oldSheet);
-              sendImageSizeFns.transitioned();
-            });
-            $(document.body).append($dummyEl);
-
-            // To ensure a transition actually happens, change the inline style _after_
-            // the DOM element has been added, and also use a new random color each time
-            // to prevent any potential caching done by the browser
-            const color =
-              "#" + Math.floor(Math.random() * 16777215).toString(16);
-
-            setTimeout(() => $dummyEl.css("color", color), 10);
-          });
-
-          $head.append(link);
-        }
-      });
-    }
+  if (stylesheetLinks.length !== 0) {
+    $head.append(stylesheetLinks);
   }
 
-  if (dep.script && !restyle) {
-    const scripts = $.map(dep.script, function (x) {
+  if (dep.script.length !== 0) {
+    const scripts = dep.script.map((x) => {
       const script = document.createElement("script");
 
       // Can not destructure Object.entries into both a `const` and a `let` variable.
@@ -327,7 +219,7 @@ function renderDependency(dep_: HtmlDep) {
     $head.append(scripts);
   }
 
-  if (dep.attachment && !restyle) {
+  if (dep.attachment.length !== 0) {
     const attach = dep.attachment.map((attachment) => {
       return $("<link rel='attachment'>")
         .attr("id", dep.name + "-" + attachment.key + "-attachment")
@@ -337,7 +229,7 @@ function renderDependency(dep_: HtmlDep) {
     $head.append(attach);
   }
 
-  if (dep.head && !restyle) {
+  if (dep.head) {
     const $newHead = $("<head></head>");
 
     $newHead.html(dep.head);
@@ -346,8 +238,123 @@ function renderDependency(dep_: HtmlDep) {
   return true;
 }
 
-// Convert legacy HtmlDependency to new HTMLDependency format. Should be
-// idempotent; new HTMLDependency objects should be returned unchanged.
+function addStylesheetsAndRestyle(links: HTMLLinkElement[]): void {
+  const $head = $("head").first();
+
+  // This inline <style> based approach works for IE11
+  const refreshStyle = function (href: string, oldSheet: CSSStyleSheet | null) {
+    const xhr = new XMLHttpRequest();
+
+    xhr.open("GET", href);
+    xhr.onload = function () {
+      const id =
+        "shiny_restyle_" + href.split("?restyle")[0].replace(/\W/g, "_");
+      const oldStyle = $head.find("style#" + id);
+      const newStyle = $("<style>").attr("id", id).html(xhr.responseText);
+
+      $head.append(newStyle);
+
+      // We can remove the old styles immediately because the new styles
+      // should have been applied synchronously.
+      oldStyle.remove();
+      removeSheet(oldSheet);
+      sendImageSizeFns.transitioned();
+    };
+    xhr.send();
+  };
+
+  const findSheet = function (href: string): CSSStyleSheet | null {
+    for (let i = 0; i < document.styleSheets.length; i++) {
+      const sheet = document.styleSheets[i];
+      // The sheet's href is a full URL
+
+      if (typeof sheet.href === "string" && sheet.href.indexOf(href) > -1) {
+        return sheet;
+      }
+    }
+    return null;
+  };
+
+  // Removes the stylesheet from document.styleSheets, and also removes
+  // the owning <link> element, if present.
+  const removeSheet = function (sheet: CSSStyleSheet | null) {
+    if (!sheet) return;
+    sheet.disabled = true;
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore; .cssText doesn't normally exist, but it does on IE?
+    if (isIE()) sheet.cssText = "";
+    $(sheet.ownerNode).remove();
+  };
+
+  $.map(links, function (link) {
+    const $link = $(link);
+    // Find any document.styleSheets that match this link's href
+    // so we can remove it after bringing in the new stylesheet
+    const oldSheet = findSheet($link.attr("href"));
+
+    // Add a timestamp to the href to prevent caching
+    const href = $link.attr("href") + "?restyle=" + new Date().getTime();
+    // Use inline <style> approach for IE, otherwise use the more elegant
+    // <link> -based approach
+
+    if (isIE()) {
+      refreshStyle(href, oldSheet);
+    } else {
+      $link.attr("href", href);
+
+      // This part is a bit tricky. The link's onload callback will be
+      // invoked after the file is loaded, but it can be _before_ the
+      // styles are actually applied. The amount of time it takes for the
+      // style to be applied is not predictable. We need to make sure the
+      // styles are applied before we send updated size/style information
+      // to the server.
+      //
+      // We do this by adding _another_ link, with CSS content
+      // base64-encoded and inlined into the href. We also add a dummy DOM
+      // element that the CSS applies to. The dummy CSS includes a
+      // transition, and when the `transitionend` event happens, we call
+      // sendImageSizeFns.transitioned() and remove the old sheet. We also remove the
+      // dummy DOM element and dummy CSS content.
+      //
+      // The reason this works is because (we assume) that if multiple
+      // <link> tags are added, they will be applied in the same order
+      // that they are loaded. This seems to be true in the browsers we
+      // have tested.
+      //
+      // Because it is common for multiple stylesheets to arrive close
+      // together, but not on exactly the same tick, we call
+      // sendImageSizeFns.transitioned(), which is debounced. Otherwise, it can result in
+      // the same plot being redrawn multiple times with different
+      // styling.
+      $link.attr("onload", () => {
+        const $dummyEl = $("<div>")
+          .css("transition", "0.1s all")
+          .css("position", "absolute")
+          .css("top", "-1000px")
+          .css("left", "0");
+
+        $dummyEl.one("transitionend", () => {
+          $dummyEl.remove();
+          removeSheet(oldSheet);
+          sendImageSizeFns.transitioned();
+        });
+        $(document.body).append($dummyEl);
+
+        // To ensure a transition actually happens, change the inline style _after_
+        // the DOM element has been added, and also use a new random color each time
+        // to prevent any potential caching done by the browser
+        const color = "#" + Math.floor(Math.random() * 16777215).toString(16);
+
+        setTimeout(() => $dummyEl.css("color", color), 10);
+      });
+
+      $head.append(link);
+    }
+  });
+}
+
+// Convert legacy HtmlDependency to new HTMLDependency format. This is
+// idempotent; new HTMLDependency objects are returned unchanged.
 function simplifyHtmlDependency(dep: HtmlDep): HtmlDepSimplified {
   const hrefPrefix: string | undefined = dep.src?.href;
 

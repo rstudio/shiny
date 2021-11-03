@@ -79,6 +79,23 @@ function renderHtml(
 }
 
 type HtmlDepVersion = string;
+
+type StylesheetItem = {
+  href: string;
+  [x: string]: string;
+};
+
+type ScriptItem = {
+  src: string;
+  [x: string]: string;
+};
+
+type AttachmentItem = {
+  key: string;
+  href: string;
+  [x: string]: string;
+};
+
 // This supports the older R htmltools HtmlDependency structure, and it also
 // encompasses the newer, consistent HTMLDependency structure.
 type HtmlDep = {
@@ -87,15 +104,9 @@ type HtmlDep = {
   restyle?: boolean;
   src?: { href: string };
   meta?: string[] | string;
-  stylesheet?:
-    | Array<string | { [key: string]: string }>
-    | string
-    | { [key: string]: string };
-  script?:
-    | Array<string | { [key: string]: string }>
-    | string
-    | { [key: string]: string };
-  attachment?: string[] | string | { [key: string]: string };
+  stylesheet?: string[] | StylesheetItem | StylesheetItem[] | string;
+  script?: ScriptItem | ScriptItem[] | string[] | string;
+  attachment?: AttachmentItem[] | string[] | string | { [key: string]: string };
   head?: string;
 };
 
@@ -105,9 +116,9 @@ type HtmlDepSimplified = {
   version: HtmlDepVersion;
   restyle?: boolean;
   meta: string[];
-  stylesheet: Array<{ [key: string]: string }>;
-  script: Array<{ [key: string]: string }>;
-  attachment: Array<{ [key: string]: string }>;
+  stylesheet: StylesheetItem[];
+  script: ScriptItem[];
+  attachment: AttachmentItem[];
   head?: string;
 };
 const htmlDependencies: { [key: string]: HtmlDepVersion } = {};
@@ -317,13 +328,9 @@ function renderDependency(dep_: HtmlDep) {
   }
 
   if (dep.attachment && !restyle) {
-    const attach = $.map(dep.attachment, function (attachment, key) {
-      // The contract for attachments is that arrays of attachments are
-      // addressed using 1-based indexes. Convert this array to an object.
-      const keyStr = key + 1 + "";
-
+    const attach = dep.attachment.map((attachment) => {
       return $("<link rel='attachment'>")
-        .attr("id", dep.name + "-" + keyStr + "-attachment")
+        .attr("id", dep.name + "-" + attachment.key + "-attachment")
         .attr("href", encodeURI(attachment.href));
     });
 
@@ -375,10 +382,65 @@ function simplifyHtmlDependency(dep: HtmlDep): HtmlDepSimplified {
     return s;
   });
 
-  result.attachment = asArray(dep.attachment).map((s) => {
-    if (typeof s === "string") {
-      s = { href: s };
+  // dep.attachment might be one of the following types, which we will convert
+  // as shown:
+  // 1. A single string:
+  //    "foo.txt"
+  //    => [{key: "1", href: "foo.txt"}]
+  // 2. An array of strings:
+  //    ["foo.txt" ,"bar.dat"]
+  //    => [{key: "1", href: "foo.txt"}, {key: "2", href: "bar.dat"}]
+  // 3. An object:
+  //    {foo: "foo.txt", bar: "bar.dat"}
+  //    => [{key: "foo", href: "foo.txt"}, {key: "bar", href: "bar.dat"}]
+  // 4. An array of objects:
+  //    [{key: "foo", href: "foo.txt"}, {key: "bar", href: "bar.dat"}]
+  //    => (Returned unchanged)
+  //
+  // Note that the first three formats are from legacy code, and the last format
+  // is from new code.
+  let attachments = dep.attachment;
+
+  // Convert format 1 to format 2.
+  if (typeof attachments === "string") attachments = [attachments];
+
+  if (Array.isArray(attachments)) {
+    // If we've gotten here, the format is either 2 or 4. Even though they are
+    // quite different, we can handle them both in the same loop.
+
+    // Need to give TypeScript a bit of help so that it's happy with .map()
+    // below. Instead of a union of two array types, tell it it's an array of
+    // a union of two types.
+    const tmp = <Array<AttachmentItem | string>>attachments;
+
+    // The contract for attachments is that arrays of attachments are
+    // addressed using 1-based indexes. Convert this array to an object.
+    attachments = tmp.map((attachment, index) => {
+      if (typeof attachment === "string") {
+        return {
+          key: (index + 1).toString(),
+          href: attachment,
+        };
+      } else {
+        return attachment;
+      }
+    });
+  } else {
+    // Format 3.
+    const tmp: AttachmentItem[] = [];
+
+    for (const [attr, val] of Object.entries(attachments)) {
+      tmp.push({
+        key: attr,
+        href: val,
+      });
     }
+    attachments = tmp;
+  }
+
+  // At this point, we've normalized the format to #4. Now we can iterate over
+  // it and prepend `hrefPrefix`.
+  result.attachment = attachments.map((s) => {
     if (hrefPrefix) {
       s.href = hrefPrefix + "/" + s.href;
     }

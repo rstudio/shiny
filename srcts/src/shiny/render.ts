@@ -14,9 +14,7 @@ import type { WherePosition } from "./singletons";
 
 function renderDependencies(dependencies: HtmlDep[] | null): void {
   if (dependencies) {
-    $.each(dependencies, function (i, dep) {
-      renderDependency(dep);
-    });
+    dependencies.forEach(renderDependency);
   }
 }
 
@@ -32,8 +30,8 @@ function renderContent(
     shinyUnbindAll(el);
   }
 
-  let html;
-  let dependencies = [];
+  let html: string;
+  let dependencies: HtmlDep[] = [];
 
   if (content === null) {
     html = "";
@@ -286,7 +284,7 @@ function addStylesheetsAndRestyle(links: HTMLLinkElement[]): void {
     $(sheet.ownerNode).remove();
   };
 
-  $.map(links, function (link) {
+  links.map((link) => {
     const $link = $(link);
     // Find any document.styleSheets that match this link's href
     // so we can remove it after bringing in the new stylesheet

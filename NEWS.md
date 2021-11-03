@@ -1,6 +1,7 @@
 shiny 1.7.1.9000
 ================
 
+* Closed #2955: Input and output bindings previously attempted to use `el['data-input-id']`, but that never worked. They now use `el.getAttribute('data-input-id')` instead. (#3538)
 
 shiny 1.7.1
 ===========

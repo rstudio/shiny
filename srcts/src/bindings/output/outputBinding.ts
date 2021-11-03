@@ -18,7 +18,7 @@ class OutputBinding {
   }
 
   getId(el: HTMLElement): string {
-    return el["data-input-id"] || el.id;
+    return el.getAttribute("data-input-id") || el.id;
   }
 
   onValueChange(el: HTMLElement, data: unknown): void {

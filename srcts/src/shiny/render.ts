@@ -203,35 +203,29 @@ function renderDependency(dep_: HtmlDep) {
     $head.append(stylesheetLinks);
   }
 
-  if (dep.script.length !== 0) {
-    const scripts = dep.script.map((x) => {
-      const script = document.createElement("script");
+  dep.script.forEach((x) => {
+    const script = document.createElement("script");
 
-      // Can not destructure Object.entries into both a `const` and a `let` variable.
-      // eslint-disable-next-line prefer-const
-      for (let [attr, val] of Object.entries(x)) {
-        if (attr === "src") {
-          val = encodeURI(val);
-        }
-        // If val isn't truthy (e.g., null), consider it a boolean attribute
-        script.setAttribute(attr, val ? val : "");
+    // Can not destructure Object.entries into both a `const` and a `let` variable.
+    // eslint-disable-next-line prefer-const
+    for (let [attr, val] of Object.entries(x)) {
+      if (attr === "src") {
+        val = encodeURI(val);
       }
+      // If val isn't truthy (e.g., null), consider it a boolean attribute
+      script.setAttribute(attr, val ? val : "");
+    }
 
-      return script;
-    });
+    $head.append(script);
+  });
 
-    $head.append(scripts);
-  }
+  dep.attachment.forEach((x) => {
+    const link = $("<link rel='attachment'>")
+      .attr("id", dep.name + "-" + x.key + "-attachment")
+      .attr("href", encodeURI(x.href));
 
-  if (dep.attachment.length !== 0) {
-    const attach = dep.attachment.map((attachment) => {
-      return $("<link rel='attachment'>")
-        .attr("id", dep.name + "-" + attachment.key + "-attachment")
-        .attr("href", encodeURI(attachment.href));
-    });
-
-    $head.append(attach);
-  }
+    $head.append(link);
+  });
 
   if (dep.head) {
     const $newHead = $("<head></head>");

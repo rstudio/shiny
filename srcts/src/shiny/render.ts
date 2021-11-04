@@ -115,7 +115,7 @@ type HtmlDep = {
 };
 
 // This is the newer, consistent HTMLDependency structure.
-type HtmlDepSimplified = {
+type HtmlDepNormalized = {
   name: string;
   version: HtmlDepVersion;
   restyle?: boolean;
@@ -133,7 +133,7 @@ function registerDependency(name: string, version: HtmlDepVersion): void {
 
 // Re-render stylesheet(s) if the dependency has specificially requested it
 // and it matches an existing dependency (name and version)
-function needsRestyle(dep: HtmlDepSimplified) {
+function needsRestyle(dep: HtmlDepNormalized) {
   if (!dep.restyle) {
     return false;
   }
@@ -148,7 +148,7 @@ function needsRestyle(dep: HtmlDepSimplified) {
 
 // Client-side dependency resolution and rendering
 function renderDependency(dep_: HtmlDep) {
-  const dep = simplifyHtmlDependency(dep_);
+  const dep = normalizeHtmlDependency(dep_);
 
   // Convert stylesheet objs to links early, because if `restyle` is true, we'll
   // pass them through to `renderStylesheet` below.
@@ -358,10 +358,10 @@ function addStylesheetsAndRestyle(links: HTMLLinkElement[]): void {
 
 // Convert legacy HtmlDependency to new HTMLDependency format. This is
 // idempotent; new HTMLDependency objects are returned unchanged.
-function simplifyHtmlDependency(dep: HtmlDep): HtmlDepSimplified {
+function normalizeHtmlDependency(dep: HtmlDep): HtmlDepNormalized {
   const hrefPrefix: string | undefined = dep.src?.href;
 
-  const result: HtmlDepSimplified = {
+  const result: HtmlDepNormalized = {
     name: dep.name,
     version: dep.version,
     restyle: dep.restyle,

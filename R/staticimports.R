@@ -3,6 +3,18 @@
 # Imported from pkg:staticimports
 # ======================================================================
 
+any_named <- function(x) {
+  if (length(x) == 0) return(FALSE)
+  nms <- names(x)
+  !is.null(nms) && any(nzchar(nms))
+}
+
+any_unnamed <- function(x) {
+  if (length(x) == 0) return(FALSE)
+  nms <- names(x)
+  is.null(nms) || !all(nzchar(nms))
+}
+
 fastPackageVersion <- function(pkg) {
   ns <- .getNamespace(pkg)
   if (is.null(ns)) {

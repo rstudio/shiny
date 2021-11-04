@@ -1152,7 +1152,7 @@ dataTableOutput <- function(outputId) {
 htmlOutput <- function(outputId, inline = FALSE,
   container = if (inline) span else div, ...)
 {
-  if (anyUnnamed(list(...))) {
+  if (any_unnamed(list(...))) {
     warning("Unnamed elements in ... will be replaced with dynamic UI.")
   }
   container(id = outputId, class="shiny-html-output", ...)

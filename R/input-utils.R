@@ -41,7 +41,7 @@ normalizeChoicesArgs <- function(choices, choiceNames, choiceValues,
     if (length(choiceNames) != length(choiceValues)) {
       stop("`choiceNames` and `choiceValues` must have the same length.")
     }
-    if (anyNamed(choiceNames) || anyNamed(choiceValues)) {
+    if (any_named(choiceNames) || any_named(choiceValues)) {
       stop("`choiceNames` and `choiceValues` must not be named.")
     }
   } else {

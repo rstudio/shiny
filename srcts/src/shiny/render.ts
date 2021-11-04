@@ -159,16 +159,13 @@ function renderDependency(dep_: HtmlDep) {
 
     const link = document.createElement("link");
 
-    // Can not destructure Object.entries into both a `const` and a `let`
-    // variable.
-    // eslint-disable-next-line prefer-const
-    for (let [attr, val] of Object.entries(x)) {
+    Object.entries(x).forEach(function ([attr, val]) {
       if (attr === "href") {
         val = encodeURI(val);
       }
       // If val isn't truthy (e.g., null), consider it a boolean attribute
       link.setAttribute(attr, val ? val : "");
-    }
+    });
 
     return link;
   });
@@ -189,7 +186,6 @@ function renderDependency(dep_: HtmlDep) {
 
   // Add each type of element to the DOM.
 
-  // for (const metaItem in dep.meta) {
   dep.meta.forEach((x) => {
     const meta = document.createElement("meta");
 
@@ -206,15 +202,13 @@ function renderDependency(dep_: HtmlDep) {
   dep.script.forEach((x) => {
     const script = document.createElement("script");
 
-    // Can not destructure Object.entries into both a `const` and a `let` variable.
-    // eslint-disable-next-line prefer-const
-    for (let [attr, val] of Object.entries(x)) {
+    Object.entries(x).forEach(function ([attr, val]) {
       if (attr === "src") {
         val = encodeURI(val);
       }
       // If val isn't truthy (e.g., null), consider it a boolean attribute
       script.setAttribute(attr, val ? val : "");
-    }
+    });
 
     $head.append(script);
   });
@@ -380,9 +374,9 @@ function normalizeHtmlDependency(dep: HtmlDep): HtmlDepNormalized {
     } else {
       // If here, then we have the legacy format, which we have to convert.
       //   {myname: "mycontent", ...}
-      for (const [name, content] of Object.entries(dep.meta)) {
-        result.meta.push({ name: name, content: content });
-      }
+      result.meta = Object.entries(dep.meta).map(function ([attr, val]) {
+        return { name: attr, content: val };
+      });
     }
   }
 
@@ -455,15 +449,9 @@ function normalizeHtmlDependency(dep: HtmlDep): HtmlDepNormalized {
     });
   } else {
     // If we got here, it's format 3.
-    const tmp: AttachmentItem[] = [];
-
-    for (const [attr, val] of Object.entries(attachments)) {
-      tmp.push({
-        key: attr,
-        href: val,
-      });
-    }
-    attachments = tmp;
+    attachments = Object.entries(attachments).map(function ([attr, val]) {
+      return { key: attr, href: val };
+    });
   }
 
   // At this point, we've normalized the format to #4. Now we can iterate over

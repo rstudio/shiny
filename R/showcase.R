@@ -32,13 +32,7 @@ licenseLink <- function(licenseName) {
 showcaseHead <- function() {
 
   deps  <- list(
-    htmlDependency(
-      "jqueryui",
-      "1.12.1",
-      c(file = "www/shared/jqueryui"),
-      package = "shiny",
-      script = "jquery-ui.min.js"
-    ),
+    jqueryuiDependency(),
     htmlDependency(
       "showdown",
       "0.3.1",

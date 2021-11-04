@@ -213,16 +213,7 @@ selectizeIt <- function(inputId, select, options, nonempty = FALSE) {
   deps <- list(selectizeDependency())
 
   if ('drag_drop' %in% options$plugins) {
-    deps <- c(
-      deps,
-      list(htmlDependency(
-        'jqueryui',
-        '1.12.1',
-        c(file = 'www/shared/jqueryui'),
-        package = 'shiny',
-        script = 'jquery-ui.min.js'
-      ))
-    )
+    deps <- c(deps, jqueryuiDependency())
   }
 
   # Insert script on same level as <select> tag

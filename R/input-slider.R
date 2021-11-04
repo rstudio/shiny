@@ -232,13 +232,13 @@ ionRangeSliderDependencyCSS <- function(theme) {
     input = list(
       list(accent = "$component-active-bg"),
       sass::sass_file(
-        system.file(package = "shiny", "www/shared/ionrangeslider/scss/shiny.scss")
+        system_file(package = "shiny", "www/shared/ionrangeslider/scss/shiny.scss")
       )
     ),
     theme = theme,
     name = "ionRangeSlider",
     version = version_ion_range_slider,
-    cache_key_extra = shinyPackageVersion()
+    cache_key_extra = fastPackageVersion("shiny")
   )
 }
 

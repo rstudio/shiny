@@ -125,14 +125,14 @@ shinyAppTemplate <- function(path = NULL, examples = "default", dryrun = FALSE)
   }
 
   if ("shinytest" %in% examples) {
-    if (!is_available("shinytest", "1.4.0"))
+    if (!is_installed("shinytest", "1.4.0"))
     {
       message(
         "The tests/shinytest directory needs shinytest 1.4.0 or later to work properly."
       )
-      if (is_available("shinytest")) {
+      if (is_installed("shinytest")) {
         message("You currently have shinytest ",
-                utils::packageVersion("shinytest"), " installed.")
+                fastPackageVersion("shinytest"), " installed.")
       }
 
     }
@@ -152,7 +152,7 @@ shinyAppTemplate <- function(path = NULL, examples = "default", dryrun = FALSE)
 
   # Helper to resolve paths relative to our template
   template_path <- function(...) {
-    system.file("app_template", ..., package = "shiny")
+    system_file("app_template", ..., package = "shiny")
   }
 
   # Resolve path relative to destination

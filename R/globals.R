@@ -35,7 +35,7 @@ register_upgrade_message <- function(pkg, version) {
     pkg, version, pkg
   )
 
-  if (pkg %in% loadedNamespaces() && !is_available(pkg, version)) {
+  if (pkg %in% loadedNamespaces() && !is_installed(pkg, version)) {
     packageStartupMessage(msg)
   }
 
@@ -45,7 +45,7 @@ register_upgrade_message <- function(pkg, version) {
   setHook(
     packageEvent(pkg, "onLoad"),
     function(...) {
-      if (!is_available(pkg, version)) packageStartupMessage(msg)
+      if (!is_installed(pkg, version)) packageStartupMessage(msg)
     }
   )
 }

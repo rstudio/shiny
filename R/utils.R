@@ -2,6 +2,9 @@
 #' @include map.R
 NULL
 
+# @staticimports pkg:staticimports
+#   is_installed fastPackageVersion
+
 #' Make a random number generator repeatable
 #'
 #' Given a function that generates random data, returns a wrapped version of
@@ -1716,24 +1719,23 @@ findEnclosingApp <- function(path = ".") {
   }
 }
 
-# Check if a package is installed, and if version is specified,
-# that we have at least that version
-is_available <- function(package, version = NULL) {
-  installed <- nzchar(system.file(package = package))
-  if (is.null(version)) {
-    return(installed)
-  }
-  installed && isTRUE(utils::packageVersion(package) >= version)
-}
+# Wrapper around base::system.file. In base::system.file, the package directory
+# lookup is a bit slow. This caches the package directory, so it is much faster.
+system_file <- local({
+  package_dir_cache <- character()
 
-
-# cached version of utils::packageVersion("shiny")
-shinyPackageVersion <- local({
-  version <- NULL
-  function() {
-    if (is.null(version)) {
-      version <<- utils::packageVersion("shiny")
+  function(..., package = "base") {
+    if (!is.null(names(list(...)))) {
+      stop("All arguments other than `package` must be unnamed.")
     }
-    version
+
+    if (package %in% names(package_dir_cache)) {
+      package_dir <- package_dir_cache[[package]]
+    } else {
+      package_dir <- system.file(package = package)
+      package_dir_cache[[package]] <<- package_dir
+    }
+
+    file.path(package_dir, ...)
   }
 })

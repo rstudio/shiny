@@ -247,7 +247,7 @@ selectizeDependencyFunc <- function(theme) {
     return(selectizeStaticDependency(version_selectize))
   }
 
-  selectizeDir <- system.file(package = "shiny", "www/shared/selectize/")
+  selectizeDir <- system_file(package = "shiny", "www/shared/selectize/")
   bs_version <- bslib::theme_version(theme)
   stylesheet <- file.path(
     selectizeDir, "scss", paste0("selectize.bootstrap", bs_version, ".scss")
@@ -267,7 +267,7 @@ selectizeDependencyFunc <- function(theme) {
     theme = theme,
     name = "selectize",
     version = version_selectize,
-    cache_key_extra = shinyPackageVersion(),
+    cache_key_extra = fastPackageVersion("shiny"),
     .dep_args = list(script = script)
   )
 }

@@ -138,8 +138,7 @@ bs_theme_deps <- function(theme) {
 }
 
 is_bs_theme <- function(x) {
-  is_available("bslib", "0.2.0.9000") &&
-    bslib::is_bs_theme(x)
+  bslib::is_bs_theme(x)
 }
 
 #' Obtain Shiny's Bootstrap Sass theme
@@ -218,7 +217,7 @@ bootstrapDependency <- function(theme) {
     "bootstrap", bootstrapVersion,
     c(
       href = "shared/bootstrap",
-      file = system.file("www/shared/bootstrap", package = "shiny")
+      file = system_file("www/shared/bootstrap", package = "shiny")
     ),
     script = c(
       "js/bootstrap.min.js",

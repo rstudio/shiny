@@ -612,7 +612,7 @@ getGgplotCoordmap <- function(p, width, height, res) {
 find_panel_info <- function(b) {
   # Structure of ggplot objects changed after 2.1.0. After 2.2.1, there was a
   # an API for extracting the necessary information.
-  ggplot_ver <- utils::packageVersion("ggplot2")
+  ggplot_ver <- fastPackageVersion("ggplot2")
 
   if (ggplot_ver > "2.2.1") {
     find_panel_info_api(b)

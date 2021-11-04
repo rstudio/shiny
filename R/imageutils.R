@@ -4,12 +4,12 @@ startPNG <- function(filename, width, height, res, ...) {
   # to use ragg (say, instead of showtext, for custom font rendering).
   # In the next shiny release, this option will likely be superseded in
   # favor of a fully customizable graphics device option
-  if ((getOption('shiny.useragg') %||% FALSE) && is_available("ragg")) {
+  if ((getOption('shiny.useragg') %||% FALSE) && is_installed("ragg")) {
     pngfun <- ragg::agg_png
   } else if (capabilities("aqua")) {
     # i.e., png(type = 'quartz')
     pngfun <- grDevices::png
-  } else if ((getOption('shiny.usecairo') %||% TRUE) && is_available("Cairo")) {
+  } else if ((getOption('shiny.usecairo') %||% TRUE) && is_installed("Cairo")) {
     pngfun <- Cairo::CairoPNG
   } else {
     # i.e., png(type = 'cairo')

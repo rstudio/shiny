@@ -39,7 +39,7 @@ renderPage <- function(ui, showcase=0, testMode=FALSE) {
 
     # Put the body into the default template
     ui <- htmlTemplate(
-      system.file("template", "default.html", package = "shiny"),
+      system_file("template", "default.html", package = "shiny"),
       lang = lang,
       body = ui,
       # this template is a complete HTML document
@@ -95,7 +95,7 @@ shinyDependencies <- function() {
     bslib::bs_dependency_defer(shinyDependencyCSS),
     htmlDependency(
       name = "shiny-javascript",
-      version = shinyPackageVersion(),
+      version = fastPackageVersion("shiny"),
       src = c(href = "shared"),
       script =
         if (isTRUE(
@@ -112,7 +112,7 @@ shinyDependencies <- function() {
 }
 
 shinyDependencyCSS <- function(theme) {
-  version <- shinyPackageVersion()
+  version <- fastPackageVersion("shiny")
 
   if (!is_bs_theme(theme)) {
     return(htmlDependency(
@@ -123,7 +123,7 @@ shinyDependencyCSS <- function(theme) {
     ))
   }
 
-  scss_home <- system.file("www/shared/shiny_scss", package = "shiny")
+  scss_home <- system_file("www/shared/shiny_scss", package = "shiny")
   scss_files <- file.path(scss_home, c("bootstrap.scss", "shiny.scss"))
   scss_files <- lapply(scss_files, sass::sass_file)
 

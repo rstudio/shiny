@@ -207,14 +207,14 @@ ionRangeSliderDependency <- function() {
     htmlDependency(
       "ionrangeslider-javascript",
       version_ion_range_slider,
-      src = c(file = "www/shared/ionrangeslider"),
+      src = "www/shared/ionrangeslider",
       package = "shiny",
       script = "js/ion.rangeSlider.min.js"
     ),
     htmlDependency(
       "strftime",
       version_strftime,
-      src = c(file = "www/shared/strftime"),
+      src = "www/shared/strftime",
       package = "shiny",
       script = "strftime-min.js"
     ),
@@ -227,7 +227,7 @@ ionRangeSliderDependencyCSS <- function(theme) {
     return(htmlDependency(
       "ionrangeslider-css",
       version_ion_range_slider,
-      src = c(file = "www/shared/ionrangeslider"),
+      src = "www/shared/ionrangeslider",
       package = "shiny",
       stylesheet = "css/ion.rangeSlider.css"
     ))

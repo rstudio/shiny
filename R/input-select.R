@@ -269,7 +269,7 @@ selectizeStaticDependency <- function(version) {
   htmlDependency(
     "selectize",
     version,
-    src = c(file = "www/shared/selectize"),
+    src = "www/shared/selectize",
     package = "shiny",
     stylesheet = "css/selectize.bootstrap3.css",
     script = c(

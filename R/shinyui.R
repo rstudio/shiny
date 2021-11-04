@@ -69,9 +69,7 @@ jqueryDependency <- function() {
   if (version == 3) {
     return(htmlDependency(
       "jquery", version_jquery,
-      src = c(
-        file = "www/shared"
-      ),
+      src = "www/shared",
       package = "shiny",
       script = "jquery.min.js"
     ))
@@ -79,9 +77,7 @@ jqueryDependency <- function() {
   if (version == 1) {
     return(htmlDependency(
       "jquery", "1.12.4",
-      src = c(
-        file = "www/shared/legacy"
-      ),
+      src = "www/shared/legacy",
       package = "shiny",
       script = "jquery.min.js"
     ))
@@ -95,7 +91,7 @@ shinyDependencies <- function() {
     htmlDependency(
       name = "shiny-javascript",
       version = shinyPackageVersion(),
-      src = c(file = "www/shared"),
+      src = "www/shared",
       package = "shiny",
       script =
         if (isTRUE(
@@ -118,7 +114,7 @@ shinyDependencyCSS <- function(theme) {
     return(htmlDependency(
       name = "shiny-css",
       version = version,
-      src = c(file = "www/shared"),
+      src = "www/shared",
       package = "shiny",
       stylesheet = "shiny.min.css"
     ))

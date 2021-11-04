@@ -36,14 +36,14 @@ showcaseHead <- function() {
     htmlDependency(
       "showdown",
       "0.3.1",
-      c(file = "www/shared/showdown/compressed"),
+      src = "www/shared/showdown/compressed",
       package="shiny",
       script = "showdown.js"
     ),
     htmlDependency(
       "highlight.js",
       "6.2",
-      c(file = "www/shared/highlight"),
+      src = "www/shared/highlight",
       package="shiny",
       script = "highlight.pack.js",
       stylesheet = "rstudio.css"
@@ -51,7 +51,7 @@ showcaseHead <- function() {
     htmlDependency(
       "showcase",
       "0.1.0",
-      c(file = "www/shared"),
+      src = "www/shared",
       package = "shiny",
       script = "shiny-showcase.js",
       stylesheet = "shiny-showcase.css"

@@ -217,7 +217,7 @@ bootstrapDependency <- function(theme) {
   htmlDependency(
     "bootstrap",
     bootstrapVersion,
-    c(file = "www/shared/bootstrap"),
+    src = "www/shared/bootstrap",
     package = "shiny",
     script = c(
       "js/bootstrap.min.js",
@@ -1110,14 +1110,14 @@ dataTableDependency <- list(
   htmlDependency(
     "datatables",
     "1.10.5",
-    c(file = "www/shared/datatables"),
+    src = "www/shared/datatables",
     package = "shiny",
     script = "js/jquery.dataTables.min.js"
   ),
   htmlDependency(
     "datatables-bootstrap",
     "1.10.5",
-    c(file = "www/shared/datatables"),
+    src = "www/shared/datatables",
     package = "shiny",
     stylesheet = c("css/dataTables.bootstrap.css", "css/dataTables.extra.css"),
     script = "js/dataTables.bootstrap.js"

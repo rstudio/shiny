@@ -105,7 +105,7 @@ jqueryuiDependency <- function() {
   htmlDependency(
     'jqueryui',
     '1.12.1',
-    c(file = 'www/shared/jqueryui'),
+    src = 'www/shared/jqueryui',
     package = 'shiny',
     script = 'jquery-ui.min.js'
   )

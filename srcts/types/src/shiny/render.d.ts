@@ -8,6 +8,11 @@ declare function renderContent(el: BindScope, content: string | {
 } | null, where?: WherePosition): void;
 declare function renderHtml(html: string, el: BindScope, dependencies: HtmlDep[], where?: WherePosition): ReturnType<typeof singletonsRenderHtml>;
 declare type HtmlDepVersion = string;
+declare type MetaItem = {
+    name: string;
+    content: string;
+    [x: string]: string;
+};
 declare type StylesheetItem = {
     href: string;
     [x: string]: string;
@@ -28,7 +33,9 @@ declare type HtmlDep = {
     src?: {
         href: string;
     };
-    meta?: string[] | string;
+    meta?: MetaItem[] | {
+        [x: string]: string;
+    };
     stylesheet?: string[] | StylesheetItem | StylesheetItem[] | string;
     script?: ScriptItem | ScriptItem[] | string[] | string;
     attachment?: AttachmentItem[] | string[] | string | {

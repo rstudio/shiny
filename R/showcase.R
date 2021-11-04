@@ -54,7 +54,8 @@ showcaseHead <- function() {
       src = "www/shared",
       package = "shiny",
       script = "shiny-showcase.js",
-      stylesheet = "shiny-showcase.css"
+      stylesheet = "shiny-showcase.css",
+      all_files = FALSE
     )
   )
 

@@ -55,9 +55,14 @@ renderPage <- function(ui, showcase=0, testMode=FALSE) {
   if (testMode) {
     # Add code injection listener if in test mode
     shiny_deps[[length(shiny_deps) + 1]] <-
-      htmlDependency("shiny-testmode", shinyPackageVersion(),
-                     c(file="www/shared"), package = "shiny",
-                     script = "shiny-testmode.js")
+      htmlDependency(
+        "shiny-testmode",
+        shinyPackageVersion(),
+        src = "www/shared",
+        package = "shiny",
+        script = "shiny-testmode.js",
+        all_files = FALSE
+      )
   }
 
   html <- renderDocument(ui, shiny_deps, processDep = createWebDependency)
@@ -71,7 +76,8 @@ jqueryDependency <- function() {
       "jquery", version_jquery,
       src = "www/shared",
       package = "shiny",
-      script = "jquery.min.js"
+      script = "jquery.min.js",
+      all_files = FALSE
     ))
   }
   if (version == 1) {
@@ -79,7 +85,8 @@ jqueryDependency <- function() {
       "jquery", "1.12.4",
       src = "www/shared/legacy",
       package = "shiny",
-      script = "jquery.min.js"
+      script = "jquery.min.js",
+      all_files = FALSE
     ))
   }
   stop("Unsupported version of jQuery: ", version)
@@ -102,7 +109,8 @@ shinyDependencies <- function() {
         ))
           "shiny.min.js"
         else
-          "shiny.js"
+          "shiny.js",
+      all_files = FALSE
     )
   )
 }
@@ -116,7 +124,8 @@ shinyDependencyCSS <- function(theme) {
       version = version,
       src = "www/shared",
       package = "shiny",
-      stylesheet = "shiny.min.css"
+      stylesheet = "shiny.min.css",
+      all_files = FALSE
     ))
   }
 

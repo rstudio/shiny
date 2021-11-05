@@ -1,7 +1,18 @@
-shiny 1.7.1.9000
+shiny 1.7.1.9001
 ================
 
+## Full changelog
+
+### Minor new features and improvements
+
+* Shiny's internal HTML dependencies are now mounted dynamically instead of statically. (#3537)
+
+* HTML dependencies that are sent to dynamic UI now have better type checking, and no longer require a `dep.src.href` field. (#3537)
+
+### Bug fixes
+
 * Closed #2955: Input and output bindings previously attempted to use `el['data-input-id']`, but that never worked. They now use `el.getAttribute('data-input-id')` instead. (#3538)
+
 
 shiny 1.7.1
 ===========

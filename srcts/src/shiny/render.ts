@@ -151,7 +151,7 @@ function renderDependency(dep_: HtmlDep) {
   const dep = normalizeHtmlDependency(dep_);
 
   // Convert stylesheet objs to links early, because if `restyle` is true, we'll
-  // pass them through to `renderStylesheet` below.
+  // pass them through to `addStylesheetsAndRestyle` below.
   const stylesheetLinks = dep.stylesheet.map((x) => {
     // Add "rel" and "type" fields if not already present.
     if (!hasOwnProperty(x, "rel")) x.rel = "stylesheet";

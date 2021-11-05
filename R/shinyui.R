@@ -95,7 +95,7 @@ shinyDependencies <- function() {
     bslib::bs_dependency_defer(shinyDependencyCSS),
     htmlDependency(
       name = "shiny-javascript",
-      version = fastPackageVersion("shiny"),
+      version = get_package_version("shiny"),
       src = c(href = "shared"),
       script =
         if (isTRUE(
@@ -112,7 +112,7 @@ shinyDependencies <- function() {
 }
 
 shinyDependencyCSS <- function(theme) {
-  version <- fastPackageVersion("shiny")
+  version <- get_package_version("shiny")
 
   if (!is_bs_theme(theme)) {
     return(htmlDependency(

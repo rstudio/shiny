@@ -267,7 +267,7 @@ selectizeDependencyFunc <- function(theme) {
     theme = theme,
     name = "selectize",
     version = version_selectize,
-    cache_key_extra = fastPackageVersion("shiny"),
+    cache_key_extra = get_package_version("shiny"),
     .dep_args = list(script = script)
   )
 }

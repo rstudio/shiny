@@ -169,6 +169,6 @@ datePickerCSS <- function(theme) {
     theme = theme,
     name = "bootstrap-datepicker",
     version = version_bs_date_picker,
-    cache_key_extra = fastPackageVersion("shiny")
+    cache_key_extra = get_package_version("shiny")
   )
 }

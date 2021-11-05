@@ -15,7 +15,7 @@ any_unnamed <- function(x) {
   is.null(nms) || !all(nzchar(nms))
 }
 
-fastPackageVersion <- function(pkg) {
+get_package_version <- function(pkg) {
   ns <- .getNamespace(pkg)
   if (is.null(ns)) {
     utils::packageVersion(pkg)
@@ -24,12 +24,12 @@ fastPackageVersion <- function(pkg) {
   }
 }
 
-is_installed <- function(package, version = NULL) {
-  installed <- requireNamespace(package, quietly = TRUE)
+is_installed <- function(pkg, version = NULL) {
+  installed <- isNamespaceLoaded(pkg) || nzchar(system.file(package = pkg))
   if (is.null(version)) {
     return(installed)
   }
-  installed && isTRUE(fastPackageVersion(package) >= version)
+  installed && isTRUE(get_package_version(pkg) >= version)
 }
 
 register_s3_method <- function(pkg, generic, class, fun = NULL) {
@@ -58,7 +58,7 @@ register_s3_method <- function(pkg, generic, class, fun = NULL) {
   )
 }
 
-register_upgrade_message <- function(pkg, version) {
+register_upgrade_message <- function(pkg, version, error = FALSE) {
 
   msg <- sprintf(
     "This version of '%s' is designed to work with '%s' >= %s.
@@ -67,8 +67,10 @@ register_upgrade_message <- function(pkg, version) {
     pkg, version, pkg
   )
 
+  cond <- if (error) stop else packageStartupMessage
+
   if (pkg %in% loadedNamespaces() && !is_installed(pkg, version)) {
-    packageStartupMessage(msg)
+    cond(msg)
   }
 
   # Always register hook in case pkg is loaded at some
@@ -77,7 +79,7 @@ register_upgrade_message <- function(pkg, version) {
   setHook(
     packageEvent(pkg, "onLoad"),
     function(...) {
-      if (!is_installed(pkg, version)) packageStartupMessage(msg)
+      if (!is_installed(pkg, version)) cond(msg)
     }
   )
 }

@@ -132,7 +132,7 @@ shinyAppTemplate <- function(path = NULL, examples = "default", dryrun = FALSE)
       )
       if (is_installed("shinytest")) {
         message("You currently have shinytest ",
-                fastPackageVersion("shinytest"), " installed.")
+                get_package_version("shinytest"), " installed.")
       }
 
     }

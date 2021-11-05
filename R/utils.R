@@ -3,7 +3,7 @@
 NULL
 
 # @staticimports pkg:staticimports
-#   is_installed fastPackageVersion
+#   is_installed get_package_version
 #   register_s3_method register_upgrade_message
 #   any_named any_unnamed
 

@@ -3,7 +3,9 @@
 NULL
 
 # @staticimports pkg:staticimports
-#   is_installed fastPackageVersion any_named any_unnamed
+#   is_installed fastPackageVersion
+#   register_s3_method register_upgrade_message
+#   any_named any_unnamed
 
 #' Make a random number generator repeatable
 #'

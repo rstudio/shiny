@@ -3,18 +3,32 @@
 # Imported from pkg:staticimports
 # ======================================================================
 
+# Given a vector, return TRUE if any elements are named, FALSE otherwise.
+# For zero-length vectors, always return FALSE.
 any_named <- function(x) {
   if (length(x) == 0) return(FALSE)
   nms <- names(x)
   !is.null(nms) && any(nzchar(nms))
 }
 
+# Given a vector, return TRUE if any elements are unnamed, FALSE otherwise.
+# For zero-length vectors, always return FALSE.
 any_unnamed <- function(x) {
   if (length(x) == 0) return(FALSE)
   nms <- names(x)
   is.null(nms) || !all(nzchar(nms))
 }
 
+# Borrowed from pkgload:::dev_meta, with some modifications.
+devtools_loaded <- function(pkg) {
+  ns <- .getNamespace(pkg)
+  if (is.null(ns) || is.null(ns$.__DEVTOOLS__)) {
+    return(FALSE)
+  }
+  TRUE
+}
+
+# Since I/O can be expensive, only utils::packageVersion() if the package isn't already loaded
 get_package_version <- function(pkg) {
   ns <- .getNamespace(pkg)
   if (is.null(ns)) {
@@ -25,7 +39,7 @@ get_package_version <- function(pkg) {
 }
 
 is_installed <- function(pkg, version = NULL) {
-  installed <- isNamespaceLoaded(pkg) || nzchar(system.file(package = pkg))
+  installed <- isNamespaceLoaded(pkg) || nzchar(system_file_cached(package = pkg))
   if (is.null(version)) {
     return(installed)
   }
@@ -83,3 +97,70 @@ register_upgrade_message <- function(pkg, version, error = FALSE) {
     }
   )
 }
+
+# Borrowed from pkgload::shim_system.file, with some modifications.
+# Most notably, if the package isn't loaded via devtools, the package directory
+# lookup is cached. Also, to keep the implementation simple, it doesn't support
+# specification of lib.loc or mustWork
+system_file <- function(..., package = "base") {
+  if (!devtools_loaded(package))  {
+    return(system_file_cached(..., package = package))
+  }
+
+  if (!is.null(names(list(...)))) {
+    stop("All arguments other than `package` must be unnamed.")
+  }
+
+  # If package was loaded with devtools (the package loaded with load_all),
+  # also search for files under inst/, and don't cache the results (it seems
+  # more likely that the package path will change during the development
+  # process)
+  pkg_path <- find.package(package)
+
+  # First look in inst/
+  files_inst <- file.path(pkg_path, "inst", ...)
+  present_inst <- file.exists(files_inst)
+
+  # For any files that weren't present in inst/, look in the base path
+  files_top <- file.path(pkg_path, ...)
+  present_top <- file.exists(files_top)
+
+  # Merge them together. Here are the different possible conditions, and the
+  # desired result. NULL means to drop that element from the result.
+  #
+  # files_inst:   /inst/A  /inst/B  /inst/C  /inst/D
+  # present_inst:    T        T        F        F
+  # files_top:      /A       /B       /C       /D
+  # present_top:     T        F        T        F
+  # result:       /inst/A  /inst/B    /C       NULL
+  #
+  files <- files_top
+  files[present_inst] <- files_inst[present_inst]
+  # Drop cases where not present in either location
+  files <- files[present_inst | present_top]
+  if (length(files) == 0) {
+    return("")
+  }
+  # Make sure backslashes are replaced with slashes on Windows
+  normalizePath(files, winslash = "/")
+}
+
+system_file_cached <- local({
+  pkg_dir_cache <- character()
+
+  function(..., package = "base") {
+    if (!is.null(names(list(...)))) {
+      stop("All arguments other than `package` must be unnamed.")
+    }
+
+    not_cached <- is.na(match(package, names(pkg_dir_cache)))
+    if (not_cached) {
+      pkg_dir <- system.file(package = package)
+      pkg_dir_cache[[package]] <<- pkg_dir
+    } else {
+      pkg_dir <- pkg_dir_cache[[package]]
+    }
+
+    file.path(pkg_dir, ...)
+  }
+})

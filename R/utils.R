@@ -3,7 +3,7 @@
 NULL
 
 # @staticimports pkg:staticimports
-#   is_installed get_package_version
+#   is_installed get_package_version system_file
 #   register_s3_method register_upgrade_message
 #   any_named any_unnamed
 
@@ -1692,24 +1692,3 @@ findEnclosingApp <- function(path = ".") {
     path <- dirname(path)
   }
 }
-
-# Wrapper around base::system.file. In base::system.file, the package directory
-# lookup is a bit slow. This caches the package directory, so it is much faster.
-system_file <- local({
-  package_dir_cache <- character()
-
-  function(..., package = "base") {
-    if (!is.null(names(list(...)))) {
-      stop("All arguments other than `package` must be unnamed.")
-    }
-
-    if (package %in% names(package_dir_cache)) {
-      package_dir <- package_dir_cache[[package]]
-    } else {
-      package_dir <- system.file(package = package)
-      package_dir_cache[[package]] <<- package_dir
-    }
-
-    file.path(package_dir, ...)
-  }
-})

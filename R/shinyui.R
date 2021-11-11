@@ -55,7 +55,7 @@ renderPage <- function(ui, showcase=0, testMode=FALSE) {
   if (testMode) {
     # Add code injection listener if in test mode
     shiny_deps[[length(shiny_deps) + 1]] <-
-      htmlDependency("shiny-testmode", shinyPackageVersion(),
+      htmlDependency("shiny-testmode", get_package_version("shiny"),
                      c(href="shared"), script = "shiny-testmode.js")
   }
 

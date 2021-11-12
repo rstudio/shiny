@@ -55,8 +55,14 @@ renderPage <- function(ui, showcase=0, testMode=FALSE) {
   if (testMode) {
     # Add code injection listener if in test mode
     shiny_deps[[length(shiny_deps) + 1]] <-
-      htmlDependency("shiny-testmode", get_package_version("shiny"),
-                     c(href="shared"), script = "shiny-testmode.js")
+      htmlDependency(
+        "shiny-testmode",
+        get_package_version("shiny"),
+        src = "www/shared",
+        package = "shiny",
+        script = "shiny-testmode.js",
+        all_files = FALSE
+      )
   }
 
   html <- renderDocument(ui, shiny_deps, processDep = createWebDependency)
@@ -68,23 +74,19 @@ jqueryDependency <- function() {
   if (version == 3) {
     return(htmlDependency(
       "jquery", version_jquery,
-      src = c(
-        href = "shared",
-        file = "www/shared"
-      ),
+      src = "www/shared",
       package = "shiny",
-      script = "jquery.min.js"
+      script = "jquery.min.js",
+      all_files = FALSE
     ))
   }
   if (version == 1) {
     return(htmlDependency(
       "jquery", "1.12.4",
-      src = c(
-        href = "shared/legacy",
-        file = "www/shared/legacy"
-      ),
+      src = "www/shared/legacy",
       package = "shiny",
-      script = "jquery.min.js"
+      script = "jquery.min.js",
+      all_files = FALSE
     ))
   }
   stop("Unsupported version of jQuery: ", version)
@@ -96,7 +98,8 @@ shinyDependencies <- function() {
     htmlDependency(
       name = "shiny-javascript",
       version = get_package_version("shiny"),
-      src = c(href = "shared"),
+      src = "www/shared",
+      package = "shiny",
       script =
         if (isTRUE(
           get_devmode_option(
@@ -106,7 +109,8 @@ shinyDependencies <- function() {
         ))
           "shiny.min.js"
         else
-          "shiny.js"
+          "shiny.js",
+      all_files = FALSE
     )
   )
 }
@@ -118,8 +122,10 @@ shinyDependencyCSS <- function(theme) {
     return(htmlDependency(
       name = "shiny-css",
       version = version,
-      src = c(href = "shared"),
-      stylesheet = "shiny.min.css"
+      src = "www/shared",
+      package = "shiny",
+      stylesheet = "shiny.min.css",
+      all_files = FALSE
     ))
   }
 

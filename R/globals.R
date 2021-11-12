@@ -13,9 +13,9 @@
 
   # Make sure these methods are available to knitr if shiny is loaded but not
   # attached.
-  register_s3_method("knitr", "knit_print", "reactive")
-  register_s3_method("knitr", "knit_print", "shiny.appobj")
-  register_s3_method("knitr", "knit_print", "shiny.render.function")
+  s3_register("knitr::knit_print", "reactive")
+  s3_register("knitr::knit_print", "shiny.appobj")
+  s3_register("knitr::knit_print", "shiny.render.function")
 
   # Shiny 1.4.0 bumps jQuery 1.x to 3.x, which caused a problem
   # with static-rendering of htmlwidgets, and htmlwidgets 1.5

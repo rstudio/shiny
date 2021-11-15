@@ -20,6 +20,7 @@ any_unnamed <- function(x) {
 }
 
 # Borrowed from pkgload:::dev_meta, with some modifications.
+# Returns TRUE if `pkg` was loaded with `devtools::load_all()`.
 devtools_loaded <- function(pkg) {
   ns <- .getNamespace(pkg)
   if (is.null(ns) || is.null(ns$.__DEVTOOLS__)) {
@@ -28,8 +29,9 @@ devtools_loaded <- function(pkg) {
   TRUE
 }
 
-# Since I/O can be expensive, only utils::packageVersion() if the package isn't already loaded
 get_package_version <- function(pkg) {
+  # `utils::packageVersion()` can be slow, so first try the fast path of
+  # checking if the package is already loaded.
   ns <- .getNamespace(pkg)
   if (is.null(ns)) {
     utils::packageVersion(pkg)
@@ -139,10 +141,12 @@ s3_register <- function(generic, class, method = NULL) {
   invisible()
 }
 
-# Borrowed from pkgload::shim_system.file, with some modifications.
-# Most notably, if the package isn't loaded via devtools, the package directory
-# lookup is cached. Also, to keep the implementation simple, it doesn't support
-# specification of lib.loc or mustWork
+# Borrowed from pkgload::shim_system.file, with some modifications. This behaves
+# like `system.file()`, except that (1) for packages loaded with
+# `devtools::load_all()`, it will return the path to files in the package's
+# inst/ directory, and (2) for other packages, the directory lookup is cached.
+# Also, to keep the implementation simple, it doesn't support specification of
+# lib.loc or mustWork.
 system_file <- function(..., package = "base") {
   if (!devtools_loaded(package))  {
     return(system_file_cached(..., package = package))
@@ -186,6 +190,11 @@ system_file <- function(..., package = "base") {
   normalizePath(files, winslash = "/")
 }
 
+# A wrapper for `system.file()`, which caches the results, because
+# `system.file()` can be slow. Note that because of caching, if
+# `system_file_cached()` is called on a package that isn't installed, then the
+# package is installed, and then `system_file_cached()` is called again, it will
+# still return "".
 system_file_cached <- local({
   pkg_dir_cache <- character()
 

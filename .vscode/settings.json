@@ -1,17 +1,17 @@
 {
-  "typescript.tsdk": ".yarn/sdks/typescript/lib",
   "search.exclude": {
     "**/.yarn": true,
     "**/.pnp.*": true
   },
-  "eslint.nodePath": ".yarn/sdks",
-  "prettier.prettierPath": ".yarn/sdks/prettier/index.js",
+  "prettier.prettierPath": "./node_modules/prettier",
   "typescript.enablePromptUseWorkspaceTsdk": true,
   "[r]": {
     "files.trimTrailingWhitespace": true,
     "files.insertFinalNewline": true,
   },
   "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true,
     "files.trimTrailingWhitespace": true,
     "files.insertFinalNewline": true,
   },

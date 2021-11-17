@@ -4,7 +4,7 @@
 # @param version The version of the package
 check_suggested <- function(package, version = NULL) {
 
-  if (is_available(package, version)) {
+  if (is_installed(package, version)) {
     return()
   }
 
@@ -116,7 +116,7 @@ check_reactlog <- function() {
 # read reactlog version from description file
 # prevents version mismatch in code and description file
 reactlog_version <- function() {
-  desc <- read.dcf(system.file("DESCRIPTION", package = "shiny", mustWork = TRUE))
+  desc <- read.dcf(system_file("DESCRIPTION", package = "shiny", mustWork = TRUE))
   suggests <- desc[1,"Suggests"][[1]]
   suggests_pkgs <- strsplit(suggests, "\n")[[1]]
 

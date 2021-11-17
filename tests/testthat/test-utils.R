@@ -136,16 +136,16 @@ test_that("req works", {
   expect_equal(1, do.call(req, as.list(1:1000)))
 })
 
-test_that("anyUnnamed works as expected", {
-  expect_false(anyUnnamed(list()))
-  expect_true(anyUnnamed(list(1,2,3)))
-  expect_true(anyUnnamed(list(A = 1,2,3)))
-  expect_false(anyUnnamed(list(A = 1,B = 2,C = 3)))
+test_that("any_unnamed works as expected", {
+  expect_false(any_unnamed(list()))
+  expect_true(any_unnamed(list(1,2,3)))
+  expect_true(any_unnamed(list(A = 1,2,3)))
+  expect_false(any_unnamed(list(A = 1,B = 2,C = 3)))
 
   # List with named elements removed
   x <- list(A = 1, B = 2, 3, 4)
   x <- x[3:4]
-  expect_true(anyUnnamed(x))
+  expect_true(any_unnamed(x))
 })
 
 test_that("sortByName works as expected", {

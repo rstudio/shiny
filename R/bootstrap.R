@@ -138,8 +138,7 @@ bs_theme_deps <- function(theme) {
 }
 
 is_bs_theme <- function(x) {
-  is_available("bslib", "0.2.0.9000") &&
-    bslib::is_bs_theme(x)
+  bslib::is_bs_theme(x)
 }
 
 #' Obtain Shiny's Bootstrap Sass theme
@@ -1158,7 +1157,7 @@ dataTableOutput <- function(outputId) {
 htmlOutput <- function(outputId, inline = FALSE,
   container = if (inline) span else div, ...)
 {
-  if (anyUnnamed(list(...))) {
+  if (any_unnamed(list(...))) {
     warning("Unnamed elements in ... will be replaced with dynamic UI.")
   }
   container(id = outputId, class="shiny-html-output", ...)

@@ -189,6 +189,7 @@ Collate:
     'shinywrappers.R'
     'showcase.R'
     'snapshot.R'
+    'staticimports.R'
     'tar.R'
     'test-export.R'
     'test-server.R'

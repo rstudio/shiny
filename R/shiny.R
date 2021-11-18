@@ -403,7 +403,7 @@ ShinySession <- R6Class(
     sendMessage = function(...) {
       # This function is a wrapper for $write
       msg <- list(...)
-      if (anyUnnamed(msg)) {
+      if (any_unnamed(msg)) {
         stop("All arguments to sendMessage must be named.")
       }
       private$write(toJSON(msg))
@@ -825,7 +825,7 @@ ShinySession <- R6Class(
             dots <- eval(substitute(alist(...)))
           }
 
-          if (anyUnnamed(dots))
+          if (any_unnamed(dots))
             stop("exportTestValues: all arguments must be named.")
 
           names(dots) <- ns(names(dots))
@@ -913,7 +913,7 @@ ShinySession <- R6Class(
 
         # Copy `values` from scopeState to state, adding namespace
         if (length(scopeState$values) != 0) {
-          if (anyUnnamed(scopeState$values)) {
+          if (any_unnamed(scopeState$values)) {
             stop("All scope values in must be named.")
           }
 
@@ -1701,7 +1701,7 @@ ShinySession <- R6Class(
         dots <- eval(substitute(alist(...)))
       }
 
-      if (anyUnnamed(dots))
+      if (any_unnamed(dots))
         stop("exportTestValues: all arguments must be named.")
 
       # Create a named list where each item is a list with an expression and

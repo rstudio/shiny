@@ -1,7 +1,7 @@
 Package: shiny
 Type: Package
 Title: Web Application Framework for R
-Version: 1.7.1.9000
+Version: 1.7.1.9001
 Authors@R: c(
     person("Winston", "Chang", role = c("aut", "cre"), email = "winston@rstudio.com", comment = c(ORCID = "0000-0002-1576-2126")),
     person("Joe", "Cheng", role = "aut", email = "joe@rstudio.com"),
@@ -189,6 +189,7 @@ Collate:
     'shinywrappers.R'
     'showcase.R'
     'snapshot.R'
+    'staticimports.R'
     'tar.R'
     'test-export.R'
     'test-server.R'

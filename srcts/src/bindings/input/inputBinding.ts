@@ -13,7 +13,7 @@ class InputBinding {
   }
 
   getId(el: HTMLElement): string {
-    return el["data-input-id"] || el.id;
+    return el.getAttribute("data-input-id") || el.id;
   }
 
   // Gives the input a type in case the server needs to know it

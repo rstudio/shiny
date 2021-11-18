@@ -1,19 +1,23 @@
+# Workflow derived from https://github.com/rstudio/shiny-workflows
+#
+# NOTE: This Shiny team GHA workflow is overkill for most R packages.
+# For most R packages it is better to use https://github.com/r-lib/actions
 on:
   push:
     branches: [main, rc-**]
   pull_request:
     branches: [main]
   schedule:
-    - cron:  '0 5 * * 1' # every monday
+    - cron: '0 5 * * 1' # every monday
 
 name: Package checks
 
 jobs:
   website:
-    uses: rstudio/shinycoreci/.github/workflows/call-website.yaml@v1
+    uses: rstudio/shiny-workflows/.github/workflows/website.yaml@v1
   routine:
-    uses: rstudio/shinycoreci/.github/workflows/call-routine.yaml@v1
+    uses: rstudio/shiny-workflows/.github/workflows/routine.yaml@v1
     with:
       node-version: "14.x"
   R-CMD-check:
-    uses: rstudio/shinycoreci/.github/workflows/call-R-CMD-check.yaml@v1
+    uses: rstudio/shiny-workflows/.github/workflows/R-CMD-check.yaml@v1

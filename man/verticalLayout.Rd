@@ -33,9 +33,7 @@ shinyApp(ui, server = function(input, output) { })
 \seealso{
 Other layout functions: 
 \code{\link{fillPage}()},
-\code{\link{fixedPage}()},
 \code{\link{flowLayout}()},
-\code{\link{fluidPage}()},
 \code{\link{navbarPage}()},
 \code{\link{sidebarLayout}()},
 \code{\link{splitLayout}()}

@@ -71,6 +71,7 @@ layout.}
 build of Bootstrap 3 with a customized version of Bootstrap 3 or higher.
 \item A character string pointing to an alternative Bootstrap stylesheet
 (normally a css file within the www directory, e.g. \code{www/bootstrap.css}).
+This option is here mainly for legacy reasons.
 }}
 
 \item{windowTitle}{the browser window title (as a character string). The
@@ -79,7 +80,7 @@ default value, \code{NA}, means to use any character strings that appear in
 default).}
 
 \item{lang}{ISO 639-1 language code for the HTML page, such as "en" or "ko".
-This will be used as the lang in the \code{<html>} tag, as in \code{<html lang="en">}.
+This will be used as the lang in the \verb{<html>} tag, as in \verb{<html lang="en">}.
 The default (NULL) results in an empty string.}
 
 \item{menuName}{A name that identifies this \code{navbarMenu}. This
@@ -124,9 +125,7 @@ navbarPage("App Title",
 
 Other layout functions: 
 \code{\link{fillPage}()},
-\code{\link{fixedPage}()},
 \code{\link{flowLayout}()},
-\code{\link{fluidPage}()},
 \code{\link{sidebarLayout}()},
 \code{\link{splitLayout}()},
 \code{\link{verticalLayout}()}

@@ -121,7 +121,7 @@ runGist <- function(gist, destdir = NULL, ...) {
 #' @param username GitHub username. If `repo` is of the form
 #'   `"username/repo"`, `username` will be taken from `repo`.
 #' @param ref Desired git reference. Could be a commit, tag, or branch name.
-#'   Defaults to `"main"`.
+#'   Defaults to `"master"`.
 #' @export
 #' @examples
 #' ## Only run this example in interactive R sessions
@@ -133,7 +133,7 @@ runGist <- function(gist, destdir = NULL, ...) {
 #'   runGitHub("shiny_example", "rstudio", subdir = "inst/shinyapp/")
 #' }
 runGitHub <- function(repo, username = getOption("github.user"),
-                      ref = "main", subdir = NULL, destdir = NULL, ...) {
+                      ref = "master", subdir = NULL, destdir = NULL, ...) {
 
   if (grepl('/', repo)) {
     res <- strsplit(repo, '/')[[1]]

@@ -13,7 +13,7 @@ runGist(gist, destdir = NULL, ...)
 runGitHub(
   repo,
   username = getOption("github.user"),
-  ref = "main",
+  ref = "master",
   subdir = NULL,
   destdir = NULL,
   ...
@@ -47,7 +47,7 @@ all valid values.}
 \code{"username/repo"}, \code{username} will be taken from \code{repo}.}
 
 \item{ref}{Desired git reference. Could be a commit, tag, or branch name.
-Defaults to \code{"main"}.}
+Defaults to \code{"master"}.}
 }
 \description{
 \code{runUrl()} downloads and launches a Shiny application that is hosted at

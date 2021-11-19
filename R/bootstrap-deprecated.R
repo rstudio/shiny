@@ -45,3 +45,25 @@ headerPanel <- function(title, windowTitle=title) {
     )
   )
 }
+
+
+#' Create a basic page
+#'
+#' **DEPRECATED**: use [fluidPage()] instead.
+#'
+#' @keywords internal
+#' @export
+basicPage <- function(...) {
+  bootstrapPage(div(class="container-fluid", list(...)))
+}
+
+
+#' Create a fixed width row
+#'
+#' **DEPRECATED**: use [fixedRow()] instead.
+#'
+#' @keywords internal
+#' @export
+fixedRow <- function(...) {
+  div(class = "row", ...)
+}

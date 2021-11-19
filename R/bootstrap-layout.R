@@ -155,12 +155,6 @@ fixedPage <- function(..., title = NULL, theme = NULL, lang = NULL) {
                 lang = lang)
 }
 
-#' @rdname fixedPage
-#' @export
-fixedRow <- function(...) {
-  div(class = "row", ...)
-}
-
 
 #' Create a column within a UI definition
 #'

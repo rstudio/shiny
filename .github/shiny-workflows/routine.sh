@@ -1,6 +1,7 @@
 #!/bin/bash -e
 . ./tools/documentation/checkDocsCurrent.sh
 
+echo "Updating package.json version to match DESCRIPTION Version"
 Rscript ./tools/updatePackageJsonVersion.R
 if [ -n "$(git status --porcelain package.json)" ]
 then

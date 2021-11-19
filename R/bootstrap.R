@@ -1,36 +1,84 @@
 #' @include utils.R
 NULL
 
-#' Create a Bootstrap page
+#' Create a Bootstrap UI page container
 #'
-#' Create a Shiny UI page that loads the CSS and JavaScript for
-#' [Bootstrap](https://getbootstrap.com/), and has no content in the page
-#' body (other than what you provide).
+#' @description
+#' Create a user interface (UI) page container based on
+#' [Bootstrap](https://getbootstrap.com/)'s CSS and JavaScript. Most Shiny apps
+#' should use [fluidPage()] (or [navbarPage()]) to get a page container with a
+#' responsive page width, but in some cases you may want a fixed width container
+#' (`fixedPage()`) or just a bare `<body>` container (`bootstrapPage()`).
 #'
-#' This function is primarily intended for users who are proficient in HTML/CSS,
-#' and know how to lay out pages in Bootstrap. Most applications should use
-#' [fluidPage()] along with layout functions like
-#' [fluidRow()] and [sidebarLayout()].
+#' Most Shiny apps make use of other Shiny UI functions for [managing
+#' layout](https://shiny.rstudio.com/articles/layout-guide.html) (e.g.,
+#' [sidebarLayout()], [fluidRow()], etc), navigation (e.g., [tabPanel()]), and
+#' other styling (e.g., [wellPanel()], [inputPanel()]).  A good portion of these
+#' Shiny UI functions require Bootstrap to work properly (so most Shiny apps
+#' should use these functions to start their UI definitions), but more advanced
+#' usage (i.e., custom HTML/CSS/JS) can avoid Bootstrap entirely by using
+#' [htmlTemplate()] and/or HTML [tags].
 #'
-#' @param ... The contents of the document body.
-#' @param title The browser window title (defaults to the host URL of the page)
+#' @param ... UI elements (i.e., [tags]).
+#' @param title The browser window title (defaults to the host URL of the page).
+#'   Can also be set as a side effect of the [titlePanel()] function.
 #' @param theme One of the following:
 #'   * `NULL` (the default), which implies a "stock" build of Bootstrap 3.
 #'   * A [bslib::bs_theme()] object. This can be used to replace a stock
 #'   build of Bootstrap 3 with a customized version of Bootstrap 3 or higher.
 #'   * A character string pointing to an alternative Bootstrap stylesheet
 #'   (normally a css file within the www directory, e.g. `www/bootstrap.css`).
+#'   This option is here mainly for legacy reasons.
 #' @param lang ISO 639-1 language code for the HTML page, such as "en" or "ko".
-#'   This will be used as the lang in the \code{<html>} tag, as in \code{<html lang="en">}.
+#'   This will be used as the lang in the `<html>` tag, as in `<html lang="en">`.
 #'   The default (NULL) results in an empty string.
 #'
-#' @return A UI defintion that can be passed to the [shinyUI] function.
+#' @return A UI definition (i.e., a [tags] object) that can be passed to [shinyApp()].
 #'
-#' @note The `basicPage` function is deprecated, you should use the
-#'   [fluidPage()] function instead.
-#'
-#' @seealso [fluidPage()], [fixedPage()]
+#' @seealso [navbarPage()], [fillPage()], [column()], [tabPanel()]
 #' @export
+#' @examples
+#'
+#' # First create some UI content.
+#' # See the layout guide to learn more about creating different layouts
+#' # https://shiny.rstudio.com/articles/layout-guide.html
+#' ui <- sidebarLayout(
+#'   sidebarPanel(sliderInput("obs", "Number of observations:", 0, 1000, 500)),
+#'   mainPanel(plotOutput("distPlot"))
+#' )
+#' server <- function(input, output) {
+#'   output$distPlot <- renderPlot(hist(rnorm(input$obs)))
+#' }
+#'
+#' # Demonstrating difference between fluidPage(), fixedPage(), bootstrapPage()
+#' if (interactive()) {
+#'   # Container width scales _fluidly_ with window size
+#'   shinyApp(fluidPage(ui), server)
+#'   # Container width changes with window size at fixed breakpoints
+#'   shinyApp(fixedPage(ui), server)
+#'   # Container width is equal to the window's width
+#'   shinyApp(bootstrapPage(ui), server)
+#' }
+#'
+#' # The default look is provided by Bootstrap 3, but {bslib} can be
+#' # used to customize the Bootstrap version and its default styling
+#' theme <- bslib::bs_theme(
+#'   version = 5,
+#'   bg = "#101010",
+#'   fg = "#FDF7F7",
+#'   primary = "#ED79F9",
+#'   base_font = bslib::font_google("Prompt"),
+#'   code_font = bslib::font_google("JetBrains Mono")
+#' )
+#' if (interactive()) {
+#'   # Call thematic::thematic_shiny(font = "auto") to automatically
+#'   # translate the theme/CSS to the R plot
+#'   shinyApp(
+#'     fluidPage(ui, theme = theme, title = "Hello Bootstrap 5"),
+#'     server
+#'   )
+#' }
+#'
 bootstrapPage <- function(..., title = NULL, theme = NULL, lang = NULL) {
 
   args <- list(

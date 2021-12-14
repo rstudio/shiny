@@ -16,9 +16,11 @@
 ## ------------------------------------------------------------------------
 
 #' Create an HTTP response object
+#' @description
+#' One can use it together with e.g `session$registerDataObj` (exposing REST API endpoints) or `ui` function in Shiny (see examples).
 #'
-#' @param status HTTP status code for the response.
-#' @param content_type The value for the `Content-Type` header.
+#' @param status [HTTP status code](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status) for the response.
+#' @param content_type The value for the `Content-Type` header. For example: `text/plain`, `application/json`, `text/csv` [(see more examples)](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types#important_mime_types_for_web_developers)
 #' @param content The body of the response, given as a single-element character
 #'   vector (will be encoded as UTF-8) or a raw vector.
 #' @param headers A named list of additional headers to include. Do not include
@@ -26,10 +28,171 @@
 #'   `content_type` argument is used instead).
 #'
 #' @examples
-#' httpResponse(status = 405L,
-#'   content_type = "text/plain",
-#'   content = "The requested method was not allowed"
+#'#' Example 1
+#'#' In this example we are exposing REST API endpoint where the httpResponse returns `svg-xml` ggplot object
+#'
+#' library(shiny)
+#' library(ggplot2)
+#' library(svg)
+#'
+#' example_gg_plot <- ggplot(mpg, aes(displ, hwy, colour = class)) + geom_point()
+#'
+#' ui <- fluidPage(
+#'   div(id = "svg_ggplot")
 #' )
+#'
+#' server <- function(input, output, session) {
+#'   #' We create REST API endpoint for fetching ggplot (as svg)
+#'   #' Looks similarily to `session/13b6edsessiontoken3764158e8a3af1/dataobj/example_plot_svg?w=&nonce=14367c50429fc201`
+#'   ggplot_rest_url <- session$registerDataObj(
+#'     name = "example_plot_svg",
+#'     data = list(),
+#'     filterFunc = function(data, req) {
+#'       if(identical(req$REQUEST_METHOD, "GET")) {
+#'         tmp_path <- paste0(tempfile(),".svg")
+#'         ggsave(tmp_path, plot = example_gg_plot)
+#'         raw_gg <- readBin(tmp_path, "raw", 100000000)
+#'         httpResponse(
+#'           status = 200,
+#'           content_type = "image/svg+xml",
+#'           content = raw_gg
+#'         )
+#'       }
+#'     }
+#'   )
+#'
+#'   # The plot is then exposed as `svg` through httpResponse within `img` tag
+#'   insertUI(
+#'     selector = "#svg_ggplot",
+#'     ui = tags$img(src = ggplot_rest_url)
+#'   )
+#' }
+#'
+#' shinyApp(ui, server)
+#'
+#'
+#'#' Example 2
+#'#' In this example we are exposing REST API endpoint which can be used for sending
+#'#' POST requests. The request is handled and then the `httpResponse` is sending the response
+#'
+#' library(shiny)
+#' library(jsonlite)
+#'
+#' js_code_communication <- '
+#'   let post_url = "";
+#'   const submit = async function() {
+#'     const request_body = {
+#'       first_name: $("#first_name").val(),
+#'       last_name: $("#last_name").val()
+#'     }
+#'
+#'     $("#post_request_body").text(JSON.stringify(request_body));
+#'
+#'     const response = await fetch(post_url, {
+#'       method: "POST",
+#'       body: JSON.stringify(request_body)
+#'     }).then(function(response) {
+#'       return response.json();
+#'     });
+#'
+#'     $("#post_response_body").text(JSON.stringify(response));
+#'   };
+#'
+#'   Shiny.addCustomMessageHandler("submit_endpoint_url", function(url) {
+#'     post_url = url;
+#'   })
+#' '
+#'
+#' ui <- function() {
+#'   fluidPage(
+#'     textInput("first_name", "First name:"),
+#'     textInput("last_name", "Last name:"),
+#'     actionButton("submit", "Submit", onclick="submit()"),
+#'     tags$script(js_code_communication),
+#'     tags$p("POST REQUEST BODY"),
+#'     div(id = "post_request_body"),
+#'     tags$p("POST RESPONSE BODY"),
+#'     div(id = "post_response_body")
+#'   )
+#' }
+#'
+#' server <- function(input, output, session) {
+#'   #' We create REST API session-scoped endpoint for making POST requests
+#'   #' Looks similarily to `session/13b6edsessiontoken3764158e8a3af1/dataobj/example_post_url?w=&nonce=14367c50429fc201`
+#'   submit_endpoint_url <- session$registerDataObj(
+#'     name = "example_post_url",
+#'     data = list(),
+#'     filterFunc = function(data, req) {
+#'       if(identical(req$REQUEST_METHOD, "POST")) {
+#'         received = req$rook.input$read_lines() %>% fromJSON()
+#'         print(received)
+#'         response <- append(received, list(server_message = "HELLO"))
+#'         httpResponse(
+#'           status = 200,
+#'           content_type = "application/json",
+#'           content = toJSON(response, auto_unbox = TRUE)
+#'         )
+#'       }
+#'     }
+#'   )
+#'
+#'   #' We have to let the browser know what is the session-scoped endpoint for POST requests
+#'   session$sendCustomMessage("submit_endpoint_url", submit_endpoint_url)
+#' }
+#'
+#' shinyApp(ui, server)
+#'
+#'
+#'#' Example 3
+#'#' One can use it to serve requests from `ui` function.
+#'Please note additional argument - `req` - which is a Rook environment
+#'You can read more here: https://github.com/jeffreyhorner/Rook#the-environment
+#' #'
+#' library(shiny)
+#' library(jsonlite)
+#'
+#' ui <- function(req) {
+#'   if (identical(req$REQUEST_METHOD, "GET")) {
+#'     fluidPage(
+#'       tags$p("Usual UI"),
+#'       markdown(
+#'         sprintf("
+#'         You can now check it out by sending POST request.
+#'         You could do it by running the following command in browser console (the app must be running first):
+#'         ```
+#'         await fetch('http://%s', {
+#'            method: 'POST',
+#'            body: JSON.stringify({
+#'              my_value: \"23\",
+#'              my_array: [1,2,3,4]
+#'            })
+#'          }).then((response) => response.json())
+#'          ```
+#'       ", req$HTTP_HOST))
+#'     )
+#'   } else if (identical(req$REQUEST_METHOD, "POST")) {
+#'     received <- fromJSON(req$rook.input$read_lines())
+#'     print(received)
+#'     # Be sure to return a response
+#'     httpResponse(
+#'       status = 200L,
+#'       content_type = "application/json",
+#'       content = toJSON(received),
+#'       headers = list(
+#'         `Access-Control-Allow-Origin` = "*" # Added to allow requests from other hosts, not necessary if used from the same host
+#'       )
+#'     )
+#'   }
+#' }
+#'
+#' attr(ui, "http_methods_supported") <- c("GET", "POST")
+#'
+#' server <- function(input, output, session) {
+#'   #' Please note, that in this example, when sending a POST request from various places, there is no new session initialized
+#'   print(session$token)
+#' }
+#'
+#' shinyApp(ui, server)
 #'
 #' @keywords internal
 #' @export

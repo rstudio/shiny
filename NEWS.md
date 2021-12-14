@@ -9,6 +9,8 @@ shiny 1.7.1.9001
 
 * HTML dependencies that are sent to dynamic UI now have better type checking, and no longer require a `dep.src.href` field. (#3537)
 
+* Extended description and added example usage of `httpResponse` function (#3471)
+
 ### Bug fixes
 
 * Closed #2955: Input and output bindings previously attempted to use `el['data-input-id']`, but that never worked. They now use `el.getAttribute('data-input-id')` instead. (#3538)

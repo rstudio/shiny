@@ -1,4 +1,4 @@
-/*! shiny 1.7.1.9001 | (c) 2012-2021 RStudio, PBC. | License: GPL-3 | file LICENSE */
+/*! shiny 1.7.1.9001 | (c) 2012-2022 RStudio, PBC. | License: GPL-3 | file LICENSE */
 (function() {
   var __create = Object.create;
   var __defProp = Object.defineProperty;

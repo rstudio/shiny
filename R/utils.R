@@ -472,7 +472,7 @@ shinyCallingHandlers <- function(expr) {
   withCallingHandlers(captureStackTraces(expr),
     error = function(e) {
       # Don't intercept shiny.silent.error (i.e. validation errors)
-      if (inherits(e, "shiny.silent.error"))
+      if (cnd_inherits(e, "shiny.silent.error"))
         return()
 
       handle <- getOption('shiny.error')
@@ -1691,4 +1691,22 @@ findEnclosingApp <- function(path = ".") {
       stop("Shiny app not found at ", orig_path, " or in any parent directory.")
     path <- dirname(path)
   }
+}
+
+# Until `rlang::cnd_inherits()` is on CRAN
+cnd_inherits <- function(cnd, class) {
+  cnd_some(cnd, ~ inherits(.x, class))
+}
+cnd_some <- function(.cnd, .p, ...) {
+  .p <- rlang::as_function(.p)
+
+  while (rlang::is_condition(.cnd)) {
+    if (.p(.cnd, ...)) {
+      return(TRUE)
+    }
+
+    .cnd <- .cnd$parent
+  }
+
+  FALSE
 }

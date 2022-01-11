@@ -181,7 +181,7 @@ registerInputHandler("shiny.datetime", function(val, ...){
 
 registerInputHandler("shiny.action", function(val, shinysession, name) {
   # mark up the action button value with a special class so we can recognize it later
-  class(val) <- c(class(val), "shinyActionButtonValue")
+  class(val) <- c("shinyActionButtonValue", class(val))
   val
 })
 

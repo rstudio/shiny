@@ -1114,7 +1114,12 @@ ShinySession <- R6Class(
                   structure(list(), class = "try-error", condition = cond)
                 } else if (inherits(cond, "shiny.output.cancel")) {
                   structure(list(), class = "cancel-output")
-                } else if (inherits(cond, "shiny.silent.error")) {
+                } else if (cnd_inherits(cond, "shiny.silent.error")) {
+                  # The error condition might have been chained by
+                  # foreign code, e.g. dplyr. Find the original error.
+                  while (!inherits(cond, "shiny.silent.error")) {
+                    cond <- cond$parent
+                  }
                   # Don't let shiny.silent.error go through the normal stop
                   # path of try, because we don't want it to print. But we
                   # do want to try to return the same looking result so that

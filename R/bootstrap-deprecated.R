@@ -60,7 +60,7 @@ basicPage <- function(...) {
 
 #' Create a fixed width row
 #'
-#' **DEPRECATED**: use [fixedRow()] instead.
+#' **DEPRECATED**: use [fluidRow()] instead.
 #'
 #' @keywords internal
 #' @export

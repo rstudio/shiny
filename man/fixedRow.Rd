@@ -7,6 +7,6 @@
 fixedRow(...)
 }
 \description{
-\strong{DEPRECATED}: use \code{\link[=fixedRow]{fixedRow()}} instead.
+\strong{DEPRECATED}: use \code{\link[=fluidRow]{fluidRow()}} instead.
 }
 \keyword{internal}

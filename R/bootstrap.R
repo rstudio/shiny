@@ -282,7 +282,11 @@ bootstrapDependency <- function(theme) {
 
 bootstrapVersion <- "3.4.1"
 
-
+#' @rdname bootstrapPage
+#' @export
+basicPage <- function(...) {
+  bootstrapPage(div(class="container-fluid", list(...)))
+}
 
 #' Create a page that fills the window
 #'

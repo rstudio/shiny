@@ -23,6 +23,11 @@ fixedPage <- function(..., title = NULL, theme = NULL, lang = NULL) {
                 lang = lang)
 }
 
+#' @rdname column
+#' @export
+fixedRow <- function(...) {
+  div(class = "row", ...)
+}
 
 #' Responsive row-column based layout
 #'

@@ -4,6 +4,7 @@
 \alias{fluidPage}
 \alias{fixedPage}
 \alias{bootstrapPage}
+\alias{basicPage}
 \title{Create a Bootstrap UI page container}
 \usage{
 fluidPage(..., title = NULL, theme = NULL, lang = NULL)
@@ -11,6 +12,8 @@ fluidPage(..., title = NULL, theme = NULL, lang = NULL)
 fixedPage(..., title = NULL, theme = NULL, lang = NULL)
 
 bootstrapPage(..., title = NULL, theme = NULL, lang = NULL)
+
+basicPage(...)
 }
 \arguments{
 \item{...}{UI elements (i.e., \link{tags}).}

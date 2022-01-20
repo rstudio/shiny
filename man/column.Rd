@@ -2,10 +2,13 @@
 % Please edit documentation in R/bootstrap-layout.R
 \name{fluidRow}
 \alias{fluidRow}
+\alias{fixedRow}
 \alias{column}
 \title{Responsive row-column based layout}
 \usage{
 fluidRow(...)
+
+fixedRow(...)
 
 column(width, ..., offset = 0)
 }

@@ -25,30 +25,6 @@ reference:
       - flowLayout
       - splitLayout
       - verticalLayout
-  - title: Navigation (tab) panels
-    desc: Create segments of UI content.
-    contents:
-      - navbarPage
-      - tabPanel
-      - tabsetPanel
-      - navlistPanel
-      - updateTabsetPanel
-      - insertTab
-      - showTab
-  - title: UI panels
-    desc: Visually group together a section of UI components.
-    contents:
-      - absolutePanel
-      - conditionalPanel
-      - titlePanel
-      - inputPanel
-      - wellPanel
-  - title: Uploads & downloads
-    desc: Allows users to upload and download files.
-    contents:
-      - fileInput
-      - downloadButton
-      - downloadHandler
   - title: UI Inputs
     desc: Create UI that prompts the user for input values or interaction.
     contents:
@@ -82,6 +58,49 @@ reference:
       - updateTextAreaInput
       - updateActionButton
       - updateQueryString
+  - title: Navigation (tab) panels
+    desc: Create segments of UI content.
+    contents:
+      - navbarPage
+      - tabPanel
+      - tabsetPanel
+      - navlistPanel
+      - updateTabsetPanel
+      - insertTab
+      - showTab
+  - title: UI panels
+    desc: Visually group together a section of UI components.
+    contents:
+      - absolutePanel
+      - conditionalPanel
+      - titlePanel
+      - inputPanel
+      - wellPanel
+  - title: Uploads & downloads
+    desc: Allows users to upload and download files.
+    contents:
+      - fileInput
+      - downloadButton
+      - downloadHandler
+  - title: Custom UI
+    desc: Lower-level UI functions for creating custom HTML/CSS/JS.
+    contents:
+      - icon
+      - markdown
+      - helpText
+      - withMathJax
+      - builder
+      - HTML
+      - tagList
+      - insertUI
+      - include
+      - tagAppendAttributes
+      - tagAppendChild
+      - validateCssUnit
+      - withTags
+      - bootstrapLib
+      - suppressDependencies
+      - singleton
   - title: Rendering outputs
     desc: UI (`*Output()`) and server (`render*()`) functions for generating content server-side.
     contents:
@@ -186,24 +205,6 @@ reference:
       - snapshotPreprocessOutput
       - exportTestValues
       - applyInputHandlers
-  - title: Custom UI
-    desc: Lower-level UI functions for creating custom HTML/CSS/JS.
-    contents:
-      - icon
-      - withMathJax
-      - markdown
-      - builder
-      - HTML
-      - tagList
-      - insertUI
-      - include
-      - tagAppendAttributes
-      - tagAppendChild
-      - validateCssUnit
-      - withTags
-      - bootstrapLib
-      - suppressDependencies
-      - singleton
   - title: Utility functions
     desc: Various utilities for advanced users.
     contents:

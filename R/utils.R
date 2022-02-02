@@ -2,6 +2,11 @@
 #' @include map.R
 NULL
 
+# @staticimports pkg:staticimports
+#   is_installed get_package_version system_file
+#   s3_register register_upgrade_message
+#   any_named any_unnamed
+
 #' Make a random number generator repeatable
 #'
 #' Given a function that generates random data, returns a wrapped version of
@@ -126,34 +131,6 @@ dropNullsOrEmpty <- function(x) {
   x[!vapply(x, nullOrEmpty, FUN.VALUE=logical(1))]
 }
 
-# Given a vector/list, return TRUE if any elements are named, FALSE otherwise.
-anyNamed <- function(x) {
-  # Zero-length vector
-  if (length(x) == 0) return(FALSE)
-
-  nms <- names(x)
-
-  # List with no name attribute
-  if (is.null(nms)) return(FALSE)
-
-  # List with name attribute; check for any ""
-  any(nzchar(nms))
-}
-
-# Given a vector/list, return TRUE if any elements are unnamed, FALSE otherwise.
-anyUnnamed <- function(x) {
-  # Zero-length vector
-  if (length(x) == 0) return(FALSE)
-
-  nms <- names(x)
-
-  # List with no name attribute
-  if (is.null(nms)) return(TRUE)
-
-  # List with name attribute; check for any ""
-  any(!nzchar(nms))
-}
-
 
 # Given a vector/list, returns a named vector/list (the labels will be blank).
 asNamed <- function(x) {
@@ -173,7 +150,7 @@ empty_named_list <- function() {
 # name as elements in a, the element in a is dropped. Also, if there are any
 # duplicated names in a or b, only the last one with that name is kept.
 mergeVectors <- function(a, b) {
-  if (anyUnnamed(a) || anyUnnamed(b)) {
+  if (any_unnamed(a) || any_unnamed(b)) {
     stop("Vectors must be either NULL or have names for all elements")
   }
 
@@ -186,7 +163,7 @@ mergeVectors <- function(a, b) {
 # same name, preserve the original order of those items. For empty
 # vectors/lists/NULL, return the original value.
 sortByName <- function(x, method = "auto") {
-  if (anyUnnamed(x))
+  if (any_unnamed(x))
     stop("All items must be named")
 
   # Special case for empty vectors/lists, and NULL
@@ -507,7 +484,7 @@ shinyCallingHandlers <- function(expr) {
   withCallingHandlers(captureStackTraces(expr),
     error = function(e) {
       # Don't intercept shiny.silent.error (i.e. validation errors)
-      if (inherits(e, "shiny.silent.error"))
+      if (cnd_inherits(e, "shiny.silent.error"))
         return()
 
       handle <- getOption('shiny.error')
@@ -1728,24 +1705,20 @@ findEnclosingApp <- function(path = ".") {
   }
 }
 
-# Check if a package is installed, and if version is specified,
-# that we have at least that version
-is_available <- function(package, version = NULL) {
-  installed <- nzchar(system.file(package = package))
-  if (is.null(version)) {
-    return(installed)
-  }
-  installed && isTRUE(utils::packageVersion(package) >= version)
+# Until `rlang::cnd_inherits()` is on CRAN
+cnd_inherits <- function(cnd, class) {
+  cnd_some(cnd, ~ inherits(.x, class))
 }
+cnd_some <- function(.cnd, .p, ...) {
+  .p <- rlang::as_function(.p)
 
-
-# cached version of utils::packageVersion("shiny")
-shinyPackageVersion <- local({
-  version <- NULL
-  function() {
-    if (is.null(version)) {
-      version <<- utils::packageVersion("shiny")
+  while (rlang::is_condition(.cnd)) {
+    if (.p(.cnd, ...)) {
+      return(TRUE)
     }
-    version
+
+    .cnd <- .cnd$parent
   }
-})
+
+  FALSE
+}

@@ -138,8 +138,7 @@ bs_theme_deps <- function(theme) {
 }
 
 is_bs_theme <- function(x) {
-  is_available("bslib", "0.2.0.9000") &&
-    bslib::is_bs_theme(x)
+  bslib::is_bs_theme(x)
 }
 
 #' Obtain Shiny's Bootstrap Sass theme
@@ -215,11 +214,10 @@ registerThemeDependency <- function(func) {
 
 bootstrapDependency <- function(theme) {
   htmlDependency(
-    "bootstrap", bootstrapVersion,
-    c(
-      href = "shared/bootstrap",
-      file = system.file("www/shared/bootstrap", package = "shiny")
-    ),
+    "bootstrap",
+    bootstrapVersion,
+    src = "www/shared/bootstrap",
+    package = "shiny",
     script = c(
       "js/bootstrap.min.js",
       # Safely adding accessibility plugin for screen readers and keyboard users; no break for sighted aspects (see https://github.com/paypal/bootstrap-accessibility-plugin)
@@ -1109,11 +1107,17 @@ tableOutput <- function(outputId) {
 
 dataTableDependency <- list(
   htmlDependency(
-    "datatables", "1.10.5", c(href = "shared/datatables"),
+    "datatables",
+    "1.10.5",
+    src = "www/shared/datatables",
+    package = "shiny",
     script = "js/jquery.dataTables.min.js"
   ),
   htmlDependency(
-    "datatables-bootstrap", "1.10.5", c(href = "shared/datatables"),
+    "datatables-bootstrap",
+    "1.10.5",
+    src = "www/shared/datatables",
+    package = "shiny",
     stylesheet = c("css/dataTables.bootstrap.css", "css/dataTables.extra.css"),
     script = "js/dataTables.bootstrap.js"
   )
@@ -1153,7 +1157,7 @@ dataTableOutput <- function(outputId) {
 htmlOutput <- function(outputId, inline = FALSE,
   container = if (inline) span else div, ...)
 {
-  if (anyUnnamed(list(...))) {
+  if (any_unnamed(list(...))) {
     warning("Unnamed elements in ... will be replaced with dynamic UI.")
   }
   container(id = outputId, class="shiny-html-output", ...)

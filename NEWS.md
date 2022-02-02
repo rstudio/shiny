@@ -3,19 +3,21 @@ shiny development
 
 ## Full changelog
 
-### Breaking changes
-
-
-### New features and improvements
+### Minor new features and improvements
 
 * When taking a test snapshot, the sort order of the json keys of the `input`, `output`, and `export` fields is currently sorted using the locale of the machine. This can lead to inconsistent test snapshot results. To opt-in to a consistent ordering of snapshot fields, please have a `DESCRIPTION` file with field/value of `Config/shiny/snapshotSortC: 1`.  (#3515)
 
-### Other improvements
+* Shiny's internal HTML dependencies are now mounted dynamically instead of statically. (#3537)
 
-## Bug Fixes
+* HTML dependencies that are sent to dynamic UI now have better type checking, and no longer require a `dep.src.href` field. (#3537)
 
+### Bug fixes
 
+* Closed tidyverse/dplyr#5552: Compatibility of dplyr 1.0 (and rlang chained errors in general) with `req()`, `validate()`, and friends.
 
+* Closed #2955: Input and output bindings previously attempted to use `el['data-input-id']`, but that never worked. They now use `el.getAttribute('data-input-id')` instead. (#3538)
+
+* Closed tidyverse/dplyr#6154: Values from an `actionButton()` had S3 classes in the incorrect order.
 
 shiny 1.7.1
 ===========
@@ -59,7 +61,7 @@ shiny 1.7.0
 
 ### Other improvements
 
-* Shiny's core JavaScript code was converted to TypeScript. For the latest development information, please see the [README.md in `./srcts`](https://github.com/rstudio/shiny/tree/master/srcts). (#3296)
+* Shiny's core JavaScript code was converted to TypeScript. For the latest development information, please see the [README.md in `./srcts`](https://github.com/rstudio/shiny/tree/v1.7.0/srcts). (#3296)
 
 * Switched from `digest::digest()` to `rlang::hash()` for hashing. (#3264)
 

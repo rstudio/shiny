@@ -2472,11 +2472,14 @@ debounce <- function(r, millis, priority = 100, domain = getDefaultReactiveDomai
 
       # Ensure r() is called only after setting firstRun to FALSE since r()
       # may throw an error
-      r()
+      try(r(), silent=TRUE)
       return()
     }
     # This ensures r() is still tracked after firstRun
-    r()
+    # TODO: If this fails, should we still update v$when?
+    # TODO: Does it make sense to update v$when before, rather
+    #       than after, executing r()?
+    try(r(), silent=TRUE)
 
     # The value (or possibly millis) changed. Start or reset the timer.
     v$when <- getDomainTimeMs(domain) + millis()
@@ -2509,7 +2512,7 @@ debounce <- function(r, millis, priority = 100, domain = getDefaultReactiveDomai
   # commenting it out and studying the unit test failure that results.
   primer <- observe({
     primer$destroy()
-    er()
+    try(er(), silent = TRUE)
   }, label = "debounce primer", domain = domain, priority = priority)
 
   er
@@ -2551,7 +2554,9 @@ throttle <- function(r, millis, priority = 100, domain = getDefaultReactiveDomai
   }
 
   # Responsible for tracking when f() changes.
-  observeEvent(r(), {
+  # The try() around r() is necessary to prevent errors in user code from
+  # causing the session to exit.
+  observeEvent(try(r(), silent = TRUE), {
     if (v$pending) {
       # In a blackout period and someone already scheduled; do nothing
     } else if (blackoutMillisLeft() > 0) {

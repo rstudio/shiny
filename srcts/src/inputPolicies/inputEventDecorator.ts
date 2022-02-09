@@ -31,7 +31,7 @@ class InputEventDecorator extends InputPolicy {
     evt.el = opts.el;
     evt.priority = opts.priority;
 
-    $(opts.el).trigger(evt);
+    $(opts.el ?? document).trigger(evt);
 
     if (!evt.isDefaultPrevented()) {
       let name = evt.name;

@@ -183,7 +183,7 @@ function that's assigned to a <code>name</code> in the <code>assign.env</code>.<
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="co"># A custom render function that repeats the supplied value 3 times</span></span>
 <span class="r-in"><span class="va">renderTriple</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">expr</span><span class="op">)</span> <span class="op">{</span></span>
 <span class="r-in">  <span class="co"># Wrap user-supplied reactive expression into a function</span></span>
-<span class="r-in">  <span class="va">func</span> <span class="op">&lt;-</span> <span class="fu">quoToFunction</span><span class="op">(</span><span class="fu">rlang</span><span class="fu">::</span><span class="fu"><a href="https://rlang.r-lib.org/reference/enquo0.html" class="external-link">enquo0</a></span><span class="op">(</span><span class="va">expr</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-in">  <span class="va">func</span> <span class="op">&lt;-</span> <span class="fu">quoToFunction</span><span class="op">(</span><span class="fu">rlang</span><span class="fu">::</span><span class="fu"><a href="https://rlang.r-lib.org/reference/defusing-advanced.html" class="external-link">enquo0</a></span><span class="op">(</span><span class="va">expr</span><span class="op">)</span><span class="op">)</span></span>
 <span class="r-in"></span>
 <span class="r-in">  <span class="fu">createRenderFunction</span><span class="op">(</span></span>
 <span class="r-in">    <span class="va">func</span>,</span>
@@ -218,7 +218,7 @@ function that's assigned to a <code>name</code> in the <code>assign.env</code>.<
 <span class="r-in"></span>
 <span class="r-in"><span class="co"># User can supply quoted code via rlang::quo(). Note that evaluation of the</span></span>
 <span class="r-in"><span class="co"># expression happens when r2() is invoked, not when r2 is created.</span></span>
-<span class="r-in"><span class="va">q</span> <span class="op">&lt;-</span> <span class="fu">rlang</span><span class="fu">::</span><span class="fu"><a href="https://rlang.r-lib.org/reference/nse-defuse.html" class="external-link">quo</a></span><span class="op">(</span><span class="op">{</span> <span class="fu">v</span><span class="op">(</span><span class="op">)</span> <span class="op">}</span><span class="op">)</span></span>
+<span class="r-in"><span class="va">q</span> <span class="op">&lt;-</span> <span class="fu">rlang</span><span class="fu">::</span><span class="fu"><a href="https://rlang.r-lib.org/reference/defusing-advanced.html" class="external-link">quo</a></span><span class="op">(</span><span class="op">{</span> <span class="fu">v</span><span class="op">(</span><span class="op">)</span> <span class="op">}</span><span class="op">)</span></span>
 <span class="r-in"><span class="va">r2</span> <span class="op">&lt;-</span> <span class="fu">rlang</span><span class="fu">::</span><span class="fu"><a href="https://rlang.r-lib.org/reference/inject.html" class="external-link">inject</a></span><span class="op">(</span><span class="fu">renderTriple</span><span class="op">(</span><span class="op">!</span><span class="op">!</span><span class="va">q</span><span class="op">)</span><span class="op">)</span></span>
 <span class="r-in"><span class="fu">v</span><span class="op">(</span><span class="st">"rlang"</span><span class="op">)</span></span>
 <span class="r-in"><span class="fu">r2</span><span class="op">(</span><span class="op">)</span></span>
@@ -234,7 +234,7 @@ function that's assigned to a <code>name</code> in the <code>assign.env</code>.<
 <span class="r-in"><span class="co">#&gt; [1] "legacy, legacy, legacy"</span></span>
 <span class="r-in"></span>
 <span class="r-in"><span class="co"># The legacy approach also supports with quosures (env is ignored in this case)</span></span>
-<span class="r-in"><span class="va">q</span> <span class="op">&lt;-</span> <span class="fu">rlang</span><span class="fu">::</span><span class="fu"><a href="https://rlang.r-lib.org/reference/nse-defuse.html" class="external-link">quo</a></span><span class="op">(</span><span class="op">{</span> <span class="fu">v</span><span class="op">(</span><span class="op">)</span> <span class="op">}</span><span class="op">)</span></span>
+<span class="r-in"><span class="va">q</span> <span class="op">&lt;-</span> <span class="fu">rlang</span><span class="fu">::</span><span class="fu"><a href="https://rlang.r-lib.org/reference/defusing-advanced.html" class="external-link">quo</a></span><span class="op">(</span><span class="op">{</span> <span class="fu">v</span><span class="op">(</span><span class="op">)</span> <span class="op">}</span><span class="op">)</span></span>
 <span class="r-in"><span class="va">r4</span> <span class="op">&lt;-</span> <span class="fu">renderTripleLegacy</span><span class="op">(</span><span class="va">q</span>, quoted <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span class="r-in"><span class="fu">v</span><span class="op">(</span><span class="st">"legacy-rlang"</span><span class="op">)</span></span>
 <span class="r-in"><span class="fu">r4</span><span class="op">(</span><span class="op">)</span></span>
@@ -258,7 +258,7 @@ function that's assigned to a <code>name</code> in the <code>assign.env</code>.<
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.1.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
 </div>
 
       </footer></div>

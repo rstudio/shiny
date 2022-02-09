@@ -128,10 +128,10 @@ value when it is a single choice input and the empty string is not in the
     
 
 <p>The resulting server <code>input</code> value will be returned as:</p><ul><li><p>A symbol if <code>multiple = FALSE</code>. The <code>input</code> value should be
-used with rlang's <code><a href="https://rlang.r-lib.org/reference/nse-force.html" class="external-link">rlang::!!()</a></code>. For example,
+used with rlang's <code><a href="https://rlang.r-lib.org/reference/topic-inject.html" class="external-link">rlang::!!()</a></code>. For example,
 <code>ggplot2::aes(!!input$variable)</code>.</p></li>
 <li><p>A list of symbols if <code>multiple = TRUE</code>. The <code>input</code> value
-should be used with rlang's <code><a href="https://rlang.r-lib.org/reference/nse-force.html" class="external-link">rlang::!!!()</a></code> to expand
+should be used with rlang's <code><a href="https://rlang.r-lib.org/reference/topic-inject.html" class="external-link">rlang::!!!()</a></code> to expand
 the symbol list as individual arguments. For example,
 <code>dplyr::select(mtcars, !!!input$variabls)</code> which is
 equivalent to <code>dplyr::select(mtcars, !!input$variabls[[1]], !!input$variabls[[2]], ..., !!input$variabls[[length(input$variabls)]])</code>.</p></li>
@@ -208,7 +208,7 @@ equivalent to <code>dplyr::select(mtcars, !!input$variabls[[1]], !!input$variabl
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.1.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
 </div>
 
       </footer></div>

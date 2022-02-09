@@ -308,7 +308,7 @@ that may influence the final value.</p>
 again, you can inspect the cache hint with <code>shiny:::extractCacheHint()</code> and
 also test it in an application. If you do need to explicitly provide a
 cache hint, pass it to <code>shinyRenderWidget</code>. For example:</p><div class="sourceCode"><pre><code><span class="va">renderMyWidget</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">expr</span><span class="op">)</span> <span class="op">{</span>
-  <span class="va">q</span> <span class="op">&lt;-</span> <span class="fu">rlang</span><span class="fu">::</span><span class="fu"><a href="https://rlang.r-lib.org/reference/enquo0.html" class="external-link">enquo0</a></span><span class="op">(</span><span class="va">expr</span><span class="op">)</span>
+  <span class="va">q</span> <span class="op">&lt;-</span> <span class="fu">rlang</span><span class="fu">::</span><span class="fu"><a href="https://rlang.r-lib.org/reference/defusing-advanced.html" class="external-link">enquo0</a></span><span class="op">(</span><span class="va">expr</span><span class="op">)</span>
 
   <span class="fu">htmlwidgets</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/htmlwidgets/man/htmlwidgets-shiny.html" class="external-link">shinyRenderWidget</a></span><span class="op">(</span>
     <span class="va">q</span>,
@@ -471,7 +471,7 @@ See <code><a href="sizeGrowthRatio.html">sizeGrowthRatio()</a></code> for more i
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.1.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
 </div>
 
       </footer></div>

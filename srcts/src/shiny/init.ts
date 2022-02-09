@@ -8,7 +8,7 @@ import {
   InputRateDecorator,
   InputValidateDecorator,
 } from "../inputPolicies";
-import type { EventPriority } from "../inputPolicies";
+import type { EventPriority, InputPolicy } from "../inputPolicies";
 import { addDefaultInputOpts } from "../inputPolicies/inputValidateDecorator";
 import { debounce, Debouncer } from "../time";
 import {
@@ -39,7 +39,7 @@ function initShiny(windowShiny: Shiny): void {
   const inputsRate = new InputRateDecorator(inputsEvent);
   const inputsDefer = new InputDeferDecorator(inputsEvent);
 
-  let target;
+  let target: InputPolicy;
 
   if ($('input[type="submit"], button[type="submit"]').length > 0) {
     // If there is a submit button on the page, use defer decorator

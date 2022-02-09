@@ -1,4 +1,3 @@
-import $ from "jquery";
 import type { EventPriority, InputPolicy } from "./inputPolicy";
 
 type MaybeInputOpts = {
@@ -13,14 +12,12 @@ function addDefaultInputOpts<T>(opts?: MaybeInputOpts & T): T & {
   binding: unknown;
   el?: HTMLElement;
 } {
-  const newOpts = $.extend(
-    {
-      priority: "immediate",
-      binding: null,
-      el: null,
-    },
-    opts
-  );
+  const newOpts = {
+    priority: "immediate",
+    binding: null,
+    el: null,
+    ...opts,
+  };
 
   if (newOpts && typeof newOpts.priority !== "undefined") {
     switch (newOpts.priority) {
@@ -38,14 +35,13 @@ function addDefaultInputOpts<T>(opts?: MaybeInputOpts & T): T & {
   return newOpts;
 }
 
-class InputValidateDecorator {
-  target;
-
+class InputValidateDecorator implements InputPolicy {
+  target: InputPolicy;
   constructor(target: InputPolicy) {
     this.target = target;
   }
 
-  setInput = function <T>(
+  setInput<T>(
     nameType: string,
     value: unknown,
     opts?: MaybeInputOpts & T
@@ -55,7 +51,7 @@ class InputValidateDecorator {
     const newOpts = addDefaultInputOpts(opts);
 
     this.target.setInput(nameType, value, newOpts);
-  };
+  }
 }
 
 export { InputValidateDecorator, addDefaultInputOpts };

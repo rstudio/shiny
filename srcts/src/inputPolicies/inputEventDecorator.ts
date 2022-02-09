@@ -1,25 +1,16 @@
 import $ from "jquery";
-import type { EventPriority } from "./inputPolicy";
-import { InputPolicy } from "./inputPolicy";
-import type { InputBinding } from "../bindings";
+import type { InputPolicy, InputPolicyOpts } from "./inputPolicy";
 import type { ShinyEventInputChanged } from "../events/shinyEvents";
 import { splitInputNameType } from "./splitInputNameType";
 
-class InputEventDecorator extends InputPolicy {
+class InputEventDecorator implements InputPolicy {
+  target: InputPolicy;
+
   constructor(target: InputPolicy) {
-    super();
     this.target = target;
   }
 
-  setInput(
-    nameType: string,
-    value: unknown,
-    opts: {
-      el: HTMLElement;
-      priority: EventPriority;
-      binding: InputBinding;
-    }
-  ): void {
+  setInput(nameType: string, value: unknown, opts: InputPolicyOpts): void {
     const evt = jQuery.Event("shiny:inputchanged") as ShinyEventInputChanged;
 
     const input = splitInputNameType(nameType);
@@ -27,8 +18,8 @@ class InputEventDecorator extends InputPolicy {
     evt.name = input.name;
     evt.inputType = input.inputType;
     evt.value = value;
-    evt.binding = opts.binding;
-    evt.el = opts.el;
+    evt.binding = opts.binding ?? null;
+    evt.el = opts.el ?? null;
     evt.priority = opts.priority;
 
     $(opts.el ?? document).trigger(evt);

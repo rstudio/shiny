@@ -1,14 +1,13 @@
-import type { EventPriority } from "./inputPolicy";
-import { InputPolicy } from "./inputPolicy";
+import type { InputPolicy, InputPolicyOpts } from "./inputPolicy";
 import { Debouncer, Invoker, Throttler } from "../time";
 import { splitInputNameType } from "./splitInputNameType";
 
 type RatePolicyModes = "debounce" | "direct" | "throttle";
-class InputRateDecorator extends InputPolicy {
-  inputRatePolicies = {};
+class InputRateDecorator implements InputPolicy {
+  target: InputPolicy;
+  inputRatePolicies: { [key: string]: Invoker<> } = {};
 
   constructor(target: InputPolicy) {
-    super();
     this.target = target;
   }
 
@@ -18,11 +17,7 @@ class InputRateDecorator extends InputPolicy {
   // However, $ensureInit() and $doSetInput() are meant to be passed just
   // the input name (i.e., inputId), which is why we distinguish between
   // nameType and name.
-  setInput(
-    nameType: string,
-    value: unknown,
-    opts: { priority: EventPriority }
-  ): void {
+  setInput(nameType: string, value: unknown, opts: InputPolicyOpts): void {
     const { name: inputName } = splitInputNameType(nameType);
 
     this._ensureInit(inputName);
@@ -60,7 +55,7 @@ class InputRateDecorator extends InputPolicy {
   private _doSetInput(
     nameType: string,
     value: unknown,
-    opts: { priority: EventPriority }
+    opts: InputPolicyOpts
   ): void {
     this.target.setInput(nameType, value, opts);
   }

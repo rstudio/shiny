@@ -1,15 +1,15 @@
-class Debouncer {
-  target: unknown;
-  func: (...args: unknown[]) => void;
-  delayMs: number;
-  timerId: NodeJS.Timeout;
-  args: unknown[];
+import type { InputPolicy } from "../inputPolicies";
+import type { InputRatePolicy } from "../inputPolicies/inputRatePolicy";
+import type { AnyVoidFunction } from "../utils/extraTypes";
 
-  constructor(
-    target: unknown,
-    func: (...args: unknown[]) => void,
-    delayMs: number
-  ) {
+class Debouncer<X extends AnyVoidFunction> implements InputRatePolicy<X> {
+  target: InputPolicy;
+  func: X;
+  delayMs: number | undefined;
+  timerId: number | null;
+  args: Parameters<X> | null;
+
+  constructor(target: InputPolicy, func: X, delayMs: number | undefined) {
     this.target = target;
     this.func = func;
     this.delayMs = delayMs;
@@ -18,11 +18,11 @@ class Debouncer {
     this.args = null;
   }
 
-  normalCall(...args: unknown[]): void {
+  normalCall(...args: Parameters<X>): void {
     this.$clearTimer();
     this.args = args;
 
-    this.timerId = setTimeout(() => {
+    this.timerId = window.setTimeout(() => {
       // IE8 doesn't reliably clear timeout, so this additional
       // check is needed
       if (this.timerId === null) return;
@@ -30,7 +30,7 @@ class Debouncer {
       this.$invoke();
     }, this.delayMs);
   }
-  immediateCall(...args: unknown[]): void {
+  immediateCall(...args: Parameters<X>): void {
     this.$clearTimer();
     this.args = args;
     this.$invoke();
@@ -45,7 +45,12 @@ class Debouncer {
     }
   }
   $invoke(): void {
-    this.func.apply(this.target, this.args);
+    // this.func.apply(this.target, this.args);
+    if (this.args && this.args.length > 0) {
+      this.func.apply(this.target, this.args);
+    } else {
+      this.func.apply(this.target);
+    }
     this.args = null;
   }
 }
@@ -62,22 +67,27 @@ class Debouncer {
 // 900ms intervals will result in a single execution
 // of the underlying function, 1000ms after the 17th
 // call.
-function debounce<T>(
-  threshold: number,
-  func: (...args: T[]) => void
-): (...args: T[]) => void {
-  let timerId = null;
+function debounce<T extends (...args: unknown[]) => void>(
+  threshold: number | undefined,
+  func: T
+): (...args: Parameters<T>) => void {
+  let timerId: number | null = null;
 
-  return function (...args) {
+  // Do not alter `function()` into an arrow function.
+  // The `this` context needs to be kept
+  return function (...args: Parameters<T>) {
     if (timerId !== null) {
       clearTimeout(timerId);
       timerId = null;
     }
-    timerId = setTimeout(() => {
+    timerId = window.setTimeout(() => {
       // IE8 doesn't reliably clear timeout, so this additional
       // check is needed
       if (timerId === null) return;
       timerId = null;
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore; The `this` scope is correct. Do not change it!
+      // Possible typing: https://www.typescriptlang.org/docs/handbook/utility-types.html#thistypetype
       func.apply(this, args);
     }, threshold);
   };

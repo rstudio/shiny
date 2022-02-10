@@ -1,11 +1,15 @@
 import type { InputPolicy, InputPolicyOpts } from "./inputPolicy";
 import { Debouncer, Invoker, Throttler } from "../time";
 import { splitInputNameType } from "./splitInputNameType";
+import type { InputRatePolicy } from "./inputRatePolicy";
 
 type RatePolicyModes = "debounce" | "direct" | "throttle";
+
 class InputRateDecorator implements InputPolicy {
   target: InputPolicy;
-  inputRatePolicies: { [key: string]: Invoker<> } = {};
+  inputRatePolicies: {
+    [key: string]: InputRatePolicy<InputRateDecorator["_doSetInput"]>;
+  } = {};
 
   constructor(target: InputPolicy) {
     this.target = target;

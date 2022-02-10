@@ -46,7 +46,7 @@
     "@typescript-eslint/parser": "^4.25.0",
     "autoprefixer": "^10.2.6",
     "bootstrap-datepicker": "1.9.0",
-    "browserslist": "^4.16.6",
+    "browserslist": "^4.19.1",
     "core-js": "^3.13.0",
     "esbuild": "^0.12.4",
     "esbuild-plugin-babel": "https://github.com/schloerke/esbuild-plugin-babel#patch-2",

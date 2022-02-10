@@ -18,11 +18,11 @@ class InputEventDecorator implements InputPolicy {
     evt.name = input.name;
     evt.inputType = input.inputType;
     evt.value = value;
-    evt.binding = opts.binding ?? null;
-    evt.el = opts.el ?? null;
+    evt.binding = opts.binding || null;
+    evt.el = opts.el || null;
     evt.priority = opts.priority;
 
-    $(opts.el ?? document).trigger(evt);
+    $(opts.el || window.document).trigger(evt);
 
     if (!evt.isDefaultPrevented()) {
       let name = evt.name;

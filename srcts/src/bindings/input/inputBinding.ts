@@ -22,7 +22,7 @@ class InputBinding {
     return false;
     el;
   }
-  getValue(el: HTMLElement): unknown {
+  getValue(el: HTMLElement): any {
     throw "Not implemented";
     el; // unused var
   }

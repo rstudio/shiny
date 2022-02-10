@@ -1,35 +1,21 @@
-import type { EventPriority, InputPolicy } from "./inputPolicy";
-
-type MaybeInputOpts = {
-  priority?: EventPriority;
-  binding?: unknown;
-  el?: HTMLElement;
-};
+import type { InputPolicy, InputPolicyOpts } from "./inputPolicy";
 
 // Merge opts with defaults, and return a new object.
-function addDefaultInputOpts<T>(opts?: MaybeInputOpts & T): T & {
-  priority: EventPriority;
-  binding: unknown;
-  el?: HTMLElement;
-} {
-  const newOpts = {
+function addDefaultInputOpts(opts: Partial<InputPolicyOpts>): InputPolicyOpts {
+  const newOpts: InputPolicyOpts = {
     priority: "immediate",
-    binding: null,
-    el: null,
     ...opts,
   };
 
-  if (newOpts && typeof newOpts.priority !== "undefined") {
-    switch (newOpts.priority) {
-      case "deferred":
-      case "immediate":
-      case "event":
-        break;
-      default:
-        throw new Error(
-          "Unexpected input value mode: '" + newOpts.priority + "'"
-        );
-    }
+  switch (newOpts.priority) {
+    case "deferred":
+    case "immediate":
+    case "event":
+      break;
+    default:
+      throw new Error(
+        "Unexpected input value mode: '" + newOpts.priority + "'"
+      );
   }
 
   return newOpts;
@@ -41,10 +27,10 @@ class InputValidateDecorator implements InputPolicy {
     this.target = target;
   }
 
-  setInput<T>(
+  setInput(
     nameType: string,
     value: unknown,
-    opts?: MaybeInputOpts & T
+    opts: Partial<InputPolicyOpts> = {}
   ): void {
     if (!nameType) throw "Can't set input with empty name.";
 

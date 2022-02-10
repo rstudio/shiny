@@ -8,7 +8,7 @@ import {
   InputRateDecorator,
   InputValidateDecorator,
 } from "../inputPolicies";
-import type { EventPriority, InputPolicy } from "../inputPolicies";
+import type { InputPolicy } from "../inputPolicies";
 import { addDefaultInputOpts } from "../inputPolicies/inputValidateDecorator";
 import { debounce, Debouncer } from "../time";
 import {
@@ -25,6 +25,7 @@ import { registerDependency } from "./render";
 import { sendImageSizeFns } from "./sendImageSize";
 import { ShinyApp } from "./shinyapp";
 import { registerNames as singletonsRegisterNames } from "./singletons";
+import type { InputPolicyOpts } from "../inputPolicies/inputPolicy";
 
 // "init_shiny.js"
 function initShiny(windowShiny: Shiny): void {
@@ -61,7 +62,7 @@ function initShiny(windowShiny: Shiny): void {
   windowShiny.setInputValue = windowShiny.onInputChange = function (
     name: string,
     value: unknown,
-    opts?: { priority?: EventPriority }
+    opts: Partial<InputPolicyOpts> = {}
   ): void {
     const newOpts = addDefaultInputOpts(opts);
 

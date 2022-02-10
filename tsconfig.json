@@ -6,7 +6,8 @@
     "esModuleInterop": true,
     "declaration": true,
     "declarationDir": "./srcts/types",
-    "emitDeclarationOnly": true
+    "emitDeclarationOnly": true,
+    "strict": false
   },
   "include": [
     "srcts/src/index.ts",

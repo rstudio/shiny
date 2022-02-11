@@ -1,16 +1,18 @@
-/// <reference types="node" />
-declare class Debouncer {
-    target: unknown;
-    func: (...args: unknown[]) => void;
-    delayMs: number;
-    timerId: NodeJS.Timeout;
-    args: unknown[];
-    constructor(target: unknown, func: (...args: unknown[]) => void, delayMs: number);
-    normalCall(...args: unknown[]): void;
-    immediateCall(...args: unknown[]): void;
+import type { InputPolicy } from "../inputPolicies";
+import type { InputRatePolicy } from "../inputPolicies/inputRatePolicy";
+import type { AnyVoidFunction } from "../utils/extraTypes";
+declare class Debouncer<X extends AnyVoidFunction> implements InputRatePolicy<X> {
+    target: InputPolicy;
+    func: X;
+    delayMs: number | undefined;
+    timerId: number | null;
+    args: Parameters<X> | null;
+    constructor(target: InputPolicy, func: X, delayMs: number | undefined);
+    normalCall(...args: Parameters<X>): void;
+    immediateCall(...args: Parameters<X>): void;
     isPending(): boolean;
     $clearTimer(): void;
     $invoke(): void;
 }
-declare function debounce<T>(threshold: number, func: (...args: T[]) => void): (...args: T[]) => void;
+declare function debounce<T extends (...args: unknown[]) => void>(threshold: number | undefined, func: T): (...args: Parameters<T>) => void;
 export { Debouncer, debounce };

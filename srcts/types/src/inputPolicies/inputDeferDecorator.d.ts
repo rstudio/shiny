@@ -1,6 +1,6 @@
 import type { EventPriority } from "./inputPolicy";
-import { InputPolicy } from "./inputPolicy";
-declare class InputDeferDecorator extends InputPolicy {
+import type { InputPolicy, InputPolicyOpts } from "./inputPolicy";
+declare class InputDeferDecorator implements InputPolicy {
     pendingInput: {
         [key: string]: {
             value: unknown;
@@ -9,10 +9,9 @@ declare class InputDeferDecorator extends InputPolicy {
             };
         };
     };
+    target: InputPolicy;
     constructor(target: InputPolicy);
-    setInput(nameType: string, value: unknown, opts: {
-        priority: EventPriority;
-    }): void;
+    setInput(nameType: string, value: unknown, opts: InputPolicyOpts): void;
     submit(): void;
 }
 export { InputDeferDecorator };

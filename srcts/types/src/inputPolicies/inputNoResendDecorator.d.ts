@@ -1,17 +1,15 @@
-import type { EventPriority } from "./inputPolicy";
-import { InputPolicy } from "./inputPolicy";
+import type { InputPolicy, InputPolicyOpts } from "./inputPolicy";
 declare type LastSentValues = {
     [key: string]: {
         [key: string]: string;
     };
 };
-declare class InputNoResendDecorator extends InputPolicy {
+declare class InputNoResendDecorator implements InputPolicy {
+    target: InputPolicy;
     lastSentValues: LastSentValues;
     constructor(target: InputPolicy, initialValues?: LastSentValues);
-    setInput(nameType: string, value: unknown, opts: {
-        priority: EventPriority;
-    }): void;
-    reset(values?: {}): void;
+    setInput(nameType: string, value: unknown, opts: InputPolicyOpts): void;
+    reset(values?: LastSentValues): void;
     forget(name: string): void;
 }
 export { InputNoResendDecorator };

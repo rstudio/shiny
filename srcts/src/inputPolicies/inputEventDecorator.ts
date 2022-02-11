@@ -22,6 +22,10 @@ class InputEventDecorator implements InputPolicy {
     evt.el = opts.el || null;
     evt.priority = opts.priority;
 
+    // The `shiny:inputchanged` JavaScript event now triggers on the related
+    // input element instead of `document`. Existing event listeners bound to
+    // `document` will still detect the event due to event bubbling. #2446
+    // If no `el` exists, use `document` instead. #3584
     $(opts.el || window.document).trigger(evt);
 
     if (!evt.isDefaultPrevented()) {

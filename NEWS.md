@@ -11,7 +11,7 @@ shiny development
 
 * HTML dependencies that are sent to dynamic UI now have better type checking, and no longer require a `dep.src.href` field. (#3537)
 
-* When taking a test snapshot, the sort order of the json keys of the `input`, `output`, and `export` fields is currently sorted using the locale of the machine. This can lead to inconsistent test snapshot results. To opt-in to a consistent ordering of snapshot fields, please have a `DESCRIPTION` file with field/value of `Config/shiny/snapshotSortC: 1`.  (#3515)
+* When taking a test snapshot, the sort order of the json keys of the `input`, `output`, and `export` fields is currently sorted using the locale of the machine. This can lead to inconsistent test snapshot results. To opt-in to a consistent ordering of snapshot fields with `{shinytest}`, please have a `DESCRIPTION` file in the root of your app folder with field/value of `Config/shiny/snapshotSortC: 1`.  (#3515)
 
 ### Bug fixes
 

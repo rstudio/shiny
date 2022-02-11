@@ -194,6 +194,28 @@ test_that("shiny.error", {
   expect_null(caught)
 })
 
+test_that("chained silent errors aren't intercepted (tidyverse/dplyr#5552)", {
+  withr::local_options(
+    shiny.error = function() caught <<- TRUE
+  )
+
+  f <- function() {
+    withCallingHandlers(
+      validate(need(NULL, FALSE)),
+      error = function(cnd) {
+        rlang::abort("Child error.", parent = cnd)
+      }
+    )
+  }
+  caught <- NULL
+  try(shiny:::shinyCallingHandlers(f()), silent = TRUE)
+  expect_null(caught)
+
+  caught <- NULL
+  try(hybrid_chain(f()), silent = TRUE)
+  expect_null(caught)
+})
+
 test_that("validation error logging", {
   caught <- NULL
 

@@ -73,8 +73,8 @@ function debounce<T extends (...args: unknown[]) => void>(
   let timerId: number | null = null;
 
   // Do not alter `function()` into an arrow function.
-  // The `this` context needs to be kept
-  return function (...args: Parameters<T>) {
+  // The `this` context needs to be dynamically bound
+  return function thisFunc(...args: Parameters<T>) {
     if (timerId !== null) {
       clearTimeout(timerId);
       timerId = null;
@@ -84,10 +84,8 @@ function debounce<T extends (...args: unknown[]) => void>(
       // check is needed
       if (timerId === null) return;
       timerId = null;
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore; The `this` scope is correct. Do not change it!
-      // Possible typing: https://www.typescriptlang.org/docs/handbook/utility-types.html#thistypetype
-      func.apply(this, args);
+      // Applying on `thisFunc` passes through the `this` context
+      func.apply(thisFunc, args);
     }, threshold);
   };
 }

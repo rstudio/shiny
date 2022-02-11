@@ -23,10 +23,10 @@
 #' @examples
 #' ## Only run this example in interactive R sessions
 #' if (interactive()) {
-#'   runUrl('https://github.com/rstudio/shiny_example/archive/master.tar.gz')
+#'   runUrl('https://github.com/rstudio/shiny_example/archive/main.tar.gz')
 #'
 #'   # Can run an app from a subdirectory in the archive
-#'   runUrl("https://github.com/rstudio/shiny_example/archive/master.zip",
+#'   runUrl("https://github.com/rstudio/shiny_example/archive/main.zip",
 #'     subdir = "inst/shinyapp/")
 #' }
 runUrl <- function(url, filetype = NULL, subdir = NULL, destdir = NULL, ...) {

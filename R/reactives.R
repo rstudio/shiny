@@ -1203,7 +1203,7 @@ Observer <- R6Class(
             # validation = function(e) NULL,
             # shiny.output.cancel = function(e) NULL
 
-            if (inherits(e, "shiny.silent.error")) {
+            if (cnd_inherits(e, "shiny.silent.error")) {
               return()
             }
 

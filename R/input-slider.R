@@ -205,13 +205,17 @@ ionRangeSliderDependency <- function() {
   list(
     # ion.rangeSlider also needs normalize.css, which is already included in Bootstrap.
     htmlDependency(
-      "ionrangeslider-javascript", version_ion_range_slider,
-      src = c(href = "shared/ionrangeslider"),
+      "ionrangeslider-javascript",
+      version_ion_range_slider,
+      src = "www/shared/ionrangeslider",
+      package = "shiny",
       script = "js/ion.rangeSlider.min.js"
     ),
     htmlDependency(
-      "strftime", version_strftime,
-      src = c(href = "shared/strftime"),
+      "strftime",
+      version_strftime,
+      src = "www/shared/strftime",
+      package = "shiny",
       script = "strftime-min.js"
     ),
     bslib::bs_dependency_defer(ionRangeSliderDependencyCSS)
@@ -223,7 +227,8 @@ ionRangeSliderDependencyCSS <- function(theme) {
     return(htmlDependency(
       "ionrangeslider-css",
       version_ion_range_slider,
-      src = c(href = "shared/ionrangeslider"),
+      src = "www/shared/ionrangeslider",
+      package = "shiny",
       stylesheet = "css/ion.rangeSlider.css"
     ))
   }
@@ -232,13 +237,13 @@ ionRangeSliderDependencyCSS <- function(theme) {
     input = list(
       list(accent = "$component-active-bg"),
       sass::sass_file(
-        system.file(package = "shiny", "www/shared/ionrangeslider/scss/shiny.scss")
+        system_file(package = "shiny", "www/shared/ionrangeslider/scss/shiny.scss")
       )
     ),
     theme = theme,
     name = "ionRangeSlider",
     version = version_ion_range_slider,
-    cache_key_extra = shinyPackageVersion()
+    cache_key_extra = get_package_version("shiny")
   )
 }
 

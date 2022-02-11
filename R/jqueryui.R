@@ -79,8 +79,8 @@ absolutePanel <- function(...,
   if (isTRUE(draggable)) {
     divTag <- tagAppendAttributes(divTag, class='draggable')
     return(tagList(
-      singleton(tags$head(tags$script(src='shared/jqueryui/jquery-ui.min.js'))),
       divTag,
+      jqueryuiDependency(),
       tags$script('$(".draggable").draggable();')
     ))
   } else {
@@ -98,4 +98,15 @@ fixedPanel <- function(...,
   absolutePanel(..., top=top, left=left, right=right, bottom=bottom,
                 width=width, height=height, draggable=draggable, cursor=match.arg(cursor),
                 fixed=TRUE)
+}
+
+
+jqueryuiDependency <- function() {
+  htmlDependency(
+    'jqueryui',
+    '1.12.1',
+    src = 'www/shared/jqueryui',
+    package = 'shiny',
+    script = 'jquery-ui.min.js'
+  )
 }

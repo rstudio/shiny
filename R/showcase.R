@@ -32,26 +32,40 @@ licenseLink <- function(licenseName) {
 showcaseHead <- function() {
 
   deps  <- list(
-    htmlDependency("jqueryui", "1.12.1", c(href="shared/jqueryui"),
-      script = "jquery-ui.min.js"),
-    htmlDependency("showdown", "0.3.1", c(href="shared/showdown/compressed"),
-      script = "showdown.js"),
-    htmlDependency("highlight.js", "6.2", c(href="shared/highlight"),
-      script = "highlight.pack.js")
+    jqueryuiDependency(),
+    htmlDependency(
+      "showdown",
+      "0.3.1",
+      src = "www/shared/showdown/compressed",
+      package="shiny",
+      script = "showdown.js"
+    ),
+    htmlDependency(
+      "highlight.js",
+      "6.2",
+      src = "www/shared/highlight",
+      package="shiny",
+      script = "highlight.pack.js",
+      stylesheet = "rstudio.css"
+    ),
+    htmlDependency(
+      "showcase",
+      "0.1.0",
+      src = "www/shared",
+      package = "shiny",
+      script = "shiny-showcase.js",
+      stylesheet = "shiny-showcase.css",
+      all_files = FALSE
+    )
   )
 
   mdfile <- file.path.ci(getwd(), 'Readme.md')
-  html <- with(tags, tagList(
-    script(src="shared/shiny-showcase.js"),
-    link(rel="stylesheet", type="text/css",
-         href="shared/highlight/rstudio.css"),
-    link(rel="stylesheet", type="text/css",
-         href="shared/shiny-showcase.css"),
+  html <- tagList(
     if (file.exists(mdfile))
-      script(type="text/markdown", id="showcase-markdown-content",
+      tags$script(type="text/markdown", id="showcase-markdown-content",
         paste(readUTF8(mdfile), collapse="\n"))
     else ""
-  ))
+  )
 
   return(attachDependencies(html, deps))
 }

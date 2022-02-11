@@ -1,4 +1,4 @@
-/*! shiny 1.7.1.9000 | (c) 2012-2021 RStudio, PBC. | License: GPL-3 | file LICENSE */
+/*! shiny 1.7.1.9002 | (c) 2012-2022 RStudio, PBC. | License: GPL-3 | file LICENSE */
 (function() {
   var __create = Object.create;
   var __defProp = Object.defineProperty;
@@ -2131,6 +2131,19 @@
     }
   });
 
+  // node_modules/core-js/internals/array-for-each.js
+  var require_array_for_each = __commonJS({
+    "node_modules/core-js/internals/array-for-each.js": function(exports, module) {
+      "use strict";
+      var $forEach2 = require_array_iteration().forEach;
+      var arrayMethodIsStrict4 = require_array_method_is_strict();
+      var STRICT_METHOD4 = arrayMethodIsStrict4("forEach");
+      module.exports = !STRICT_METHOD4 ? function forEach3(callbackfn) {
+        return $forEach2(this, callbackfn, arguments.length > 1 ? arguments[1] : void 0);
+      } : [].forEach;
+    }
+  });
+
   // node_modules/core-js/internals/object-to-array.js
   var require_object_to_array = __commonJS({
     "node_modules/core-js/internals/object-to-array.js": function(exports, module) {
@@ -2766,19 +2779,6 @@
       var classof2 = require_classof_raw();
       var global8 = require_global();
       module.exports = classof2(global8.process) == "process";
-    }
-  });
-
-  // node_modules/core-js/internals/array-for-each.js
-  var require_array_for_each = __commonJS({
-    "node_modules/core-js/internals/array-for-each.js": function(exports, module) {
-      "use strict";
-      var $forEach2 = require_array_iteration().forEach;
-      var arrayMethodIsStrict4 = require_array_method_is_strict();
-      var STRICT_METHOD4 = arrayMethodIsStrict4("forEach");
-      module.exports = !STRICT_METHOD4 ? function forEach3(callbackfn) {
-        return $forEach2(this, callbackfn, arguments.length > 1 ? arguments[1] : void 0);
-      } : [].forEach;
     }
   });
 
@@ -3762,7 +3762,7 @@
     }, {
       key: "getId",
       value: function getId(el) {
-        return el["data-input-id"] || el.id;
+        return el.getAttribute("data-input-id") || el.id;
       }
     }, {
       key: "getType",
@@ -8040,7 +8040,7 @@
     }, {
       key: "getId",
       value: function getId(el) {
-        return el["data-input-id"] || el.id;
+        return el.getAttribute("data-input-id") || el.id;
       }
     }, {
       key: "onValueChange",
@@ -8825,29 +8825,53 @@
   var import_es_array_iterator20 = __toModule(require_es_array_iterator());
   var import_jquery28 = __toModule(require_jquery());
 
-  // srcts/src/shiny/render.ts
-  var import_es_regexp_exec6 = __toModule(require_es_regexp_exec());
+  // node_modules/core-js/modules/es.array.for-each.js
+  "use strict";
+  var $45 = require_export();
+  var forEach = require_array_for_each();
+  $45({ target: "Array", proto: true, forced: [].forEach != forEach }, {
+    forEach: forEach
+  });
+
+  // node_modules/core-js/modules/web.dom-collections.for-each.js
+  var global6 = require_global();
+  var DOMIterables2 = require_dom_iterables();
+  var forEach2 = require_array_for_each();
+  var createNonEnumerableProperty3 = require_create_non_enumerable_property();
+  for (var COLLECTION_NAME in DOMIterables2) {
+    Collection = global6[COLLECTION_NAME];
+    CollectionPrototype = Collection && Collection.prototype;
+    if (CollectionPrototype && CollectionPrototype.forEach !== forEach2)
+      try {
+        createNonEnumerableProperty3(CollectionPrototype, "forEach", forEach2);
+      } catch (error) {
+        CollectionPrototype.forEach = forEach2;
+      }
+  }
+  var Collection;
+  var CollectionPrototype;
 
   // node_modules/core-js/modules/es.object.entries.js
-  var $45 = require_export();
+  var $46 = require_export();
   var $entries = require_object_to_array().entries;
-  $45({ target: "Object", stat: true }, {
+  $46({ target: "Object", stat: true }, {
     entries: function entries(O) {
       return $entries(O);
     }
   });
 
   // srcts/src/shiny/render.ts
+  var import_es_regexp_exec6 = __toModule(require_es_regexp_exec());
   var import_es_array_iterator19 = __toModule(require_es_array_iterator());
 
   // node_modules/core-js/modules/es.array.from.js
-  var $46 = require_export();
+  var $47 = require_export();
   var from = require_array_from();
   var checkCorrectnessOfIteration = require_check_correctness_of_iteration();
   var INCORRECT_ITERATION = !checkCorrectnessOfIteration(function(iterable) {
     Array.from(iterable);
   });
-  $46({ target: "Array", stat: true, forced: INCORRECT_ITERATION }, {
+  $47({ target: "Array", stat: true, forced: INCORRECT_ITERATION }, {
     from: from
   });
 
@@ -9064,9 +9088,7 @@
   }
   function renderDependencies(dependencies) {
     if (dependencies) {
-      import_jquery27.default.each(dependencies, function(i, dep) {
-        renderDependency(dep);
-      });
+      dependencies.forEach(renderDependency);
     }
   }
   function renderContent(el, content) {
@@ -9074,7 +9096,7 @@
     if (where === "replace") {
       shinyUnbindAll(el);
     }
-    var html;
+    var html = "";
     var dependencies = [];
     if (content === null) {
       html = "";
@@ -9123,127 +9145,207 @@
     }
     return htmlDependencies[names[idx]] === dep.version;
   }
-  function renderDependency(dep) {
-    var restyle = needsRestyle(dep);
-    if (hasOwnProperty(htmlDependencies, dep.name) && !restyle)
+  function renderDependency(dep_) {
+    var dep = normalizeHtmlDependency(dep_);
+    var stylesheetLinks = dep.stylesheet.map(function(x) {
+      if (!hasOwnProperty(x, "rel"))
+        x.rel = "stylesheet";
+      if (!hasOwnProperty(x, "type"))
+        x.type = "text/css";
+      var link = document.createElement("link");
+      Object.entries(x).forEach(function(_ref) {
+        var _ref2 = _slicedToArray(_ref, 2), attr = _ref2[0], val = _ref2[1];
+        if (attr === "href") {
+          val = encodeURI(val);
+        }
+        link.setAttribute(attr, val ? val : "");
+      });
+      return link;
+    });
+    if (needsRestyle(dep)) {
+      addStylesheetsAndRestyle(stylesheetLinks);
+      return true;
+    }
+    if (hasOwnProperty(htmlDependencies, dep.name))
       return false;
     registerDependency(dep.name, dep.version);
-    var href = dep.src.href;
     var $head = (0, import_jquery27.default)("head").first();
-    if (dep.meta && !restyle) {
-      var metas = import_jquery27.default.map(asArray(dep.meta), function(obj, idx) {
-        var name = Object.keys(obj)[0];
-        return (0, import_jquery27.default)("<meta>").attr("name", name).attr("content", obj[name]);
-        idx;
-      });
-      $head.append(metas);
-    }
-    if (dep.stylesheet) {
-      var links = import_jquery27.default.map(asArray(dep.stylesheet), function(stylesheet) {
-        return (0, import_jquery27.default)("<link rel='stylesheet' type='text/css'>").attr("href", href + "/" + encodeURI(stylesheet));
-      });
-      if (!restyle) {
-        $head.append(links);
-      } else {
-        var refreshStyle = function refreshStyle2(href2, oldSheet) {
-          var xhr = new XMLHttpRequest();
-          xhr.open("GET", href2);
-          xhr.onload = function() {
-            var id = "shiny_restyle_" + href2.split("?restyle")[0].replace(/\W/g, "_");
-            var oldStyle = $head.find("style#" + id);
-            var newStyle = (0, import_jquery27.default)("<style>").attr("id", id).html(xhr.responseText);
-            $head.append(newStyle);
-            oldStyle.remove();
-            removeSheet(oldSheet);
-            sendImageSizeFns.transitioned();
-          };
-          xhr.send();
-        };
-        var findSheet = function findSheet2(href2) {
-          for (var i = 0; i < document.styleSheets.length; i++) {
-            var sheet = document.styleSheets[i];
-            if (typeof sheet.href === "string" && sheet.href.indexOf(href2) > -1) {
-              return sheet;
-            }
-          }
-          return null;
-        };
-        var removeSheet = function removeSheet2(sheet) {
-          if (!sheet)
-            return;
-          sheet.disabled = true;
-          if (isIE())
-            sheet.cssText = "";
-          (0, import_jquery27.default)(sheet.ownerNode).remove();
-        };
-        import_jquery27.default.map(links, function(link) {
-          var oldSheet = findSheet(link.attr("href"));
-          var href2 = link.attr("href") + "?restyle=" + new Date().getTime();
-          if (isIE()) {
-            refreshStyle(href2, oldSheet);
-          } else {
-            link.attr("href", href2);
-            link.attr("onload", function() {
-              var $dummyEl = (0, import_jquery27.default)("<div>").css("transition", "0.1s all").css("position", "absolute").css("top", "-1000px").css("left", "0");
-              $dummyEl.one("transitionend", function() {
-                $dummyEl.remove();
-                removeSheet(oldSheet);
-                sendImageSizeFns.transitioned();
-              });
-              (0, import_jquery27.default)(document.body).append($dummyEl);
-              var color = "#" + Math.floor(Math.random() * 16777215).toString(16);
-              setTimeout(function() {
-                return $dummyEl.css("color", color);
-              }, 10);
-            });
-            $head.append(link);
-          }
-        });
+    dep.meta.forEach(function(x) {
+      var meta = document.createElement("meta");
+      for (var _i2 = 0, _Object$entries = Object.entries(x); _i2 < _Object$entries.length; _i2++) {
+        var _Object$entries$_i = _slicedToArray(_Object$entries[_i2], 2), attr = _Object$entries$_i[0], val = _Object$entries$_i[1];
+        meta.setAttribute(attr, val);
       }
+      $head.append(meta);
+    });
+    if (stylesheetLinks.length !== 0) {
+      $head.append(stylesheetLinks);
     }
-    if (dep.script && !restyle) {
-      var scriptsAttrs = asArray(dep.script);
-      var scripts = import_jquery27.default.map(scriptsAttrs, function(x) {
-        var script = document.createElement("script");
-        if (typeof x === "string") {
-          x = {
-            src: x
-          };
+    dep.script.forEach(function(x) {
+      var script = document.createElement("script");
+      Object.entries(x).forEach(function(_ref3) {
+        var _ref4 = _slicedToArray(_ref3, 2), attr = _ref4[0], val = _ref4[1];
+        if (attr === "src") {
+          val = encodeURI(val);
         }
-        for (var _i = 0, _Object$entries = Object.entries(x); _i < _Object$entries.length; _i++) {
-          var _Object$entries$_i = _slicedToArray(_Object$entries[_i], 2), attr = _Object$entries$_i[0], val = _Object$entries$_i[1];
-          if (attr === "src") {
-            val = href + "/" + encodeURI(val);
-          }
-          script.setAttribute(attr, val ? val : "");
-        }
-        return script;
+        script.setAttribute(attr, val ? val : "");
       });
-      $head.append(scripts);
-    }
-    if (dep.attachment && !restyle) {
-      var attachments = dep.attachment;
-      if (typeof attachments === "string")
-        attachments = [attachments];
-      if (Array.isArray(attachments)) {
-        var tmp = {};
-        import_jquery27.default.each(attachments, function(index, attachment) {
-          var key = index + 1 + "";
-          tmp[key] = attachment;
-        });
-        attachments = tmp;
-      }
-      var attach = import_jquery27.default.map(attachments, function(attachment, key) {
-        return (0, import_jquery27.default)("<link rel='attachment'>").attr("id", dep.name + "-" + key + "-attachment").attr("href", href + "/" + encodeURI(attachment));
-      });
-      $head.append(attach);
-    }
-    if (dep.head && !restyle) {
+      $head.append(script);
+    });
+    dep.attachment.forEach(function(x) {
+      var link = (0, import_jquery27.default)("<link rel='attachment'>").attr("id", dep.name + "-" + x.key + "-attachment").attr("href", encodeURI(x.href));
+      $head.append(link);
+    });
+    if (dep.head) {
       var $newHead = (0, import_jquery27.default)("<head></head>");
       $newHead.html(dep.head);
       $head.append($newHead.children());
     }
     return true;
+  }
+  function addStylesheetsAndRestyle(links) {
+    var $head = (0, import_jquery27.default)("head").first();
+    var refreshStyle = function refreshStyle2(href, oldSheet) {
+      var xhr = new XMLHttpRequest();
+      xhr.open("GET", href);
+      xhr.onload = function() {
+        var id = "shiny_restyle_" + href.split("?restyle")[0].replace(/\W/g, "_");
+        var oldStyle = $head.find("style#" + id);
+        var newStyle = (0, import_jquery27.default)("<style>").attr("id", id).html(xhr.responseText);
+        $head.append(newStyle);
+        oldStyle.remove();
+        removeSheet(oldSheet);
+        sendImageSizeFns.transitioned();
+      };
+      xhr.send();
+    };
+    var findSheet = function findSheet2(href) {
+      if (!href)
+        return null;
+      for (var i = 0; i < document.styleSheets.length; i++) {
+        var sheet = document.styleSheets[i];
+        if (typeof sheet.href === "string" && sheet.href.indexOf(href) > -1) {
+          return sheet;
+        }
+      }
+      return null;
+    };
+    var removeSheet = function removeSheet2(sheet) {
+      if (!sheet)
+        return;
+      sheet.disabled = true;
+      if (isIE())
+        sheet.cssText = "";
+      if (sheet.ownerNode instanceof Element) {
+        (0, import_jquery27.default)(sheet.ownerNode).remove();
+      }
+    };
+    links.map(function(link) {
+      var $link = (0, import_jquery27.default)(link);
+      var oldSheet = findSheet($link.attr("href"));
+      var href = $link.attr("href") + "?restyle=" + new Date().getTime();
+      if (isIE()) {
+        refreshStyle(href, oldSheet);
+      } else {
+        $link.attr("href", href);
+        $link.attr("onload", function() {
+          var $dummyEl = (0, import_jquery27.default)("<div>").css("transition", "0.1s all").css("position", "absolute").css("top", "-1000px").css("left", "0");
+          $dummyEl.one("transitionend", function() {
+            $dummyEl.remove();
+            removeSheet(oldSheet);
+            sendImageSizeFns.transitioned();
+          });
+          (0, import_jquery27.default)(document.body).append($dummyEl);
+          var color = "#" + Math.floor(Math.random() * 16777215).toString(16);
+          setTimeout(function() {
+            return $dummyEl.css("color", color);
+          }, 10);
+        });
+        $head.append(link);
+      }
+    });
+  }
+  function normalizeHtmlDependency(dep) {
+    var _dep$src;
+    var hrefPrefix = (_dep$src = dep.src) === null || _dep$src === void 0 ? void 0 : _dep$src.href;
+    var result = {
+      name: dep.name,
+      version: dep.version,
+      restyle: dep.restyle,
+      meta: [],
+      stylesheet: [],
+      script: [],
+      attachment: [],
+      head: dep.head
+    };
+    if (dep.meta) {
+      if (Array.isArray(dep.meta)) {
+        result.meta = dep.meta;
+      } else {
+        result.meta = Object.entries(dep.meta).map(function(_ref5) {
+          var _ref6 = _slicedToArray(_ref5, 2), attr = _ref6[0], val = _ref6[1];
+          return {
+            name: attr,
+            content: val
+          };
+        });
+      }
+    }
+    result.stylesheet = asArray(dep.stylesheet).map(function(s) {
+      if (typeof s === "string") {
+        s = {
+          href: s
+        };
+      }
+      if (hrefPrefix) {
+        s.href = hrefPrefix + "/" + s.href;
+      }
+      return s;
+    });
+    result.script = asArray(dep.script).map(function(s) {
+      if (typeof s === "string") {
+        s = {
+          src: s
+        };
+      }
+      if (hrefPrefix) {
+        s.src = hrefPrefix + "/" + s.src;
+      }
+      return s;
+    });
+    var attachments = dep.attachment;
+    if (!attachments)
+      attachments = [];
+    if (typeof attachments === "string")
+      attachments = [attachments];
+    if (Array.isArray(attachments)) {
+      var tmp = attachments;
+      attachments = tmp.map(function(attachment, index) {
+        if (typeof attachment === "string") {
+          return {
+            key: (index + 1).toString(),
+            href: attachment
+          };
+        } else {
+          return attachment;
+        }
+      });
+    } else {
+      attachments = Object.entries(attachments).map(function(_ref7) {
+        var _ref8 = _slicedToArray(_ref7, 2), attr = _ref8[0], val = _ref8[1];
+        return {
+          key: attr,
+          href: val
+        };
+      });
+    }
+    result.attachment = attachments.map(function(s) {
+      if (hrefPrefix) {
+        s.href = hrefPrefix + "/" + s.href;
+      }
+      return s;
+    });
+    return result;
   }
 
   // srcts/src/bindings/output/html.ts
@@ -9372,11 +9474,11 @@
 
   // node_modules/core-js/modules/es.array.filter.js
   "use strict";
-  var $50 = require_export();
+  var $51 = require_export();
   var $filter = require_array_iteration().filter;
   var arrayMethodHasSpeciesSupport5 = require_array_method_has_species_support();
   var HAS_SPECIES_SUPPORT4 = arrayMethodHasSpeciesSupport5("filter");
-  $50({ target: "Array", proto: true, forced: !HAS_SPECIES_SUPPORT4 }, {
+  $51({ target: "Array", proto: true, forced: !HAS_SPECIES_SUPPORT4 }, {
     filter: function filter(callbackfn) {
       return $filter(this, callbackfn, arguments.length > 1 ? arguments[1] : void 0);
     }
@@ -11940,21 +12042,21 @@
 
   // node_modules/core-js/modules/es.array-buffer.constructor.js
   "use strict";
-  var $63 = require_export();
-  var global6 = require_global();
+  var $64 = require_export();
+  var global7 = require_global();
   var arrayBufferModule = require_array_buffer();
   var setSpecies = require_set_species();
   var ARRAY_BUFFER = "ArrayBuffer";
   var ArrayBuffer2 = arrayBufferModule[ARRAY_BUFFER];
-  var NativeArrayBuffer = global6[ARRAY_BUFFER];
-  $63({ global: true, forced: NativeArrayBuffer !== ArrayBuffer2 }, {
+  var NativeArrayBuffer = global7[ARRAY_BUFFER];
+  $64({ global: true, forced: NativeArrayBuffer !== ArrayBuffer2 }, {
     ArrayBuffer: ArrayBuffer2
   });
   setSpecies(ARRAY_BUFFER);
 
   // node_modules/core-js/modules/es.array-buffer.slice.js
   "use strict";
-  var $64 = require_export();
+  var $65 = require_export();
   var fails10 = require_fails();
   var ArrayBufferModule = require_array_buffer();
   var anObject9 = require_an_object();
@@ -11967,7 +12069,7 @@
   var INCORRECT_SLICE = fails10(function() {
     return !new ArrayBuffer3(2).slice(1, void 0).byteLength;
   });
-  $64({ target: "ArrayBuffer", proto: true, unsafe: true, forced: INCORRECT_SLICE }, {
+  $65({ target: "ArrayBuffer", proto: true, unsafe: true, forced: INCORRECT_SLICE }, {
     slice: function slice2(start, end) {
       if (nativeArrayBufferSlice !== void 0 && end === void 0) {
         return nativeArrayBufferSlice.call(anObject9(this), start);
@@ -11987,23 +12089,23 @@
   });
 
   // node_modules/core-js/modules/es.data-view.js
-  var $65 = require_export();
+  var $66 = require_export();
   var ArrayBufferModule2 = require_array_buffer();
   var NATIVE_ARRAY_BUFFER = require_array_buffer_native();
-  $65({ global: true, forced: !NATIVE_ARRAY_BUFFER }, {
+  $66({ global: true, forced: !NATIVE_ARRAY_BUFFER }, {
     DataView: ArrayBufferModule2.DataView
   });
 
   // node_modules/core-js/modules/es.array.reduce.js
   "use strict";
-  var $66 = require_export();
+  var $67 = require_export();
   var $reduce = require_array_reduce().left;
   var arrayMethodIsStrict3 = require_array_method_is_strict();
   var CHROME_VERSION = require_engine_v8_version();
   var IS_NODE = require_engine_is_node();
   var STRICT_METHOD3 = arrayMethodIsStrict3("reduce");
   var CHROME_BUG = !IS_NODE && CHROME_VERSION > 79 && CHROME_VERSION < 83;
-  $66({ target: "Array", proto: true, forced: !STRICT_METHOD3 || CHROME_BUG }, {
+  $67({ target: "Array", proto: true, forced: !STRICT_METHOD3 || CHROME_BUG }, {
     reduce: function reduce(callbackfn) {
       return $reduce(this, callbackfn, arguments.length, arguments.length > 1 ? arguments[1] : void 0);
     }
@@ -12011,34 +12113,6 @@
 
   // srcts/src/shiny/shinyapp.ts
   var import_es_regexp_exec9 = __toModule(require_es_regexp_exec());
-
-  // node_modules/core-js/modules/es.array.for-each.js
-  "use strict";
-  var $67 = require_export();
-  var forEach = require_array_for_each();
-  $67({ target: "Array", proto: true, forced: [].forEach != forEach }, {
-    forEach: forEach
-  });
-
-  // node_modules/core-js/modules/web.dom-collections.for-each.js
-  var global7 = require_global();
-  var DOMIterables2 = require_dom_iterables();
-  var forEach2 = require_array_for_each();
-  var createNonEnumerableProperty3 = require_create_non_enumerable_property();
-  for (var COLLECTION_NAME in DOMIterables2) {
-    Collection = global7[COLLECTION_NAME];
-    CollectionPrototype = Collection && Collection.prototype;
-    if (CollectionPrototype && CollectionPrototype.forEach !== forEach2)
-      try {
-        createNonEnumerableProperty3(CollectionPrototype, "forEach", forEach2);
-      } catch (error) {
-        CollectionPrototype.forEach = forEach2;
-      }
-  }
-  var Collection;
-  var CollectionPrototype;
-
-  // srcts/src/shiny/shinyapp.ts
   var import_jquery41 = __toModule(require_jquery());
   function _classCallCheck36(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
@@ -13265,7 +13339,7 @@
   var windowShiny2;
   function setShiny(windowShiny_) {
     windowShiny2 = windowShiny_;
-    windowShiny2.version = "1.7.1.9000";
+    windowShiny2.version = "1.7.1.9002";
     var _initInputBindings = initInputBindings(), inputBindings = _initInputBindings.inputBindings, fileInputBinding2 = _initInputBindings.fileInputBinding;
     var _initOutputBindings = initOutputBindings(), outputBindings = _initOutputBindings.outputBindings;
     setFileInputBinding(fileInputBinding2);

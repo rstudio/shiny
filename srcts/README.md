@@ -196,7 +196,7 @@ Both JavaScript files will produce a sourcemap (`**.js.map`) that the browser wi
 
 ### GitHub Actions
 
-On push to the `master` branch or push to a Pull Request to the `master` branch, a GitHub Action will be run to make sure the bundled JavaScript code is up to date. If the source code does not compile to the exact same file, it will be committed an pushed back to the outdated branch. (This makes it so the full build tools are not necessary for small tweaks and comments. 🎉)
+On push to the `main` branch or push to a Pull Request to the `main` branch, a GitHub Action will be run to make sure the bundled JavaScript code is up to date. If the source code does not compile to the exact same file, it will be committed an pushed back to the outdated branch. (This makes it so the full build tools are not necessary for small tweaks and comments. 🎉)
 
 <!-- #### Auto build and browser refresh
 

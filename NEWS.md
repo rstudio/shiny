@@ -3,13 +3,15 @@ shiny development
 
 ## Full changelog
 
-### Minor new features and improvements
+### Breaking changes
 
-* When taking a test snapshot, the sort order of the json keys of the `input`, `output`, and `export` fields is currently sorted using the locale of the machine. This can lead to inconsistent test snapshot results. To opt-in to a consistent ordering of snapshot fields, please have a `DESCRIPTION` file with field/value of `Config/shiny/snapshotSortC: 1`.  (#3515)
+### Minor new features and improvements
 
 * Shiny's internal HTML dependencies are now mounted dynamically instead of statically. (#3537)
 
 * HTML dependencies that are sent to dynamic UI now have better type checking, and no longer require a `dep.src.href` field. (#3537)
+
+* When taking a test snapshot, the sort order of the json keys of the `input`, `output`, and `export` fields is currently sorted using the locale of the machine. This can lead to inconsistent test snapshot results. To opt-in to a consistent ordering of snapshot fields with `{shinytest}`, please have a `DESCRIPTION` file in the root of your app folder with field/value of `Config/shiny/snapshotSortC: 1`.  (#3515)
 
 ### Bug fixes
 
@@ -18,6 +20,10 @@ shiny development
 * Closed #2955: Input and output bindings previously attempted to use `el['data-input-id']`, but that never worked. They now use `el.getAttribute('data-input-id')` instead. (#3538)
 
 * Closed tidyverse/dplyr#6154: Values from an `actionButton()` had S3 classes in the incorrect order.
+<<<<<<< HEAD
+=======
+
+>>>>>>> a16b11f43364866b24cb46c2649a56610d0c9298
 
 shiny 1.7.1
 ===========

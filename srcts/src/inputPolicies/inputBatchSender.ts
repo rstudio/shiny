@@ -4,9 +4,9 @@ import type { ShinyApp } from "../shiny/shinyapp";
 // Schedules data to be sent to shinyapp at the next setTimeout(0).
 // Batches multiple input calls into one websocket message.
 class InputBatchSender implements InputPolicy {
-  target!: InputPolicy; // We need this ...
+  target!: InputPolicy; // We need this field to satisfy the InputPolicy interface
   shinyapp: ShinyApp;
-  timerId: NodeJS.Timeout | null = null;
+  timerId: number | null = null;
   pendingData: { [key: string]: unknown } = {};
   reentrant = false;
   lastChanceCallback: Array<() => void> = [];

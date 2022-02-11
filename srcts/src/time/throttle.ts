@@ -7,7 +7,7 @@ class Throttler<X extends AnyVoidFunction> implements InputRatePolicy<X> {
   target: InputPolicy;
   func: X;
   delayMs: number | undefined;
-  timerId: NodeJS.Timeout | null;
+  timerId: number | null;
   args: Parameters<X> | null;
 
   constructor(target: InputPolicy, func: X, delayMs: number | undefined) {
@@ -47,7 +47,6 @@ class Throttler<X extends AnyVoidFunction> implements InputRatePolicy<X> {
     }
   }
   $invoke(): void {
-    // this.func.apply(this.target, this.args);
     if (this.args && this.args.length > 0) {
       this.func.apply(this.target, this.args);
     } else {

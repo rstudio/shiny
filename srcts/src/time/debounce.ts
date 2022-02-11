@@ -45,7 +45,6 @@ class Debouncer<X extends AnyVoidFunction> implements InputRatePolicy<X> {
     }
   }
   $invoke(): void {
-    // this.func.apply(this.target, this.args);
     if (this.args && this.args.length > 0) {
       this.func.apply(this.target, this.args);
     } else {

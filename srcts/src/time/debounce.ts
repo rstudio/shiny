@@ -22,7 +22,7 @@ class Debouncer<X extends AnyVoidFunction> implements InputRatePolicy<X> {
     this.$clearTimer();
     this.args = args;
 
-    this.timerId = window.setTimeout(() => {
+    this.timerId = setTimeout(() => {
       // IE8 doesn't reliably clear timeout, so this additional
       // check is needed
       if (this.timerId === null) return;
@@ -80,7 +80,7 @@ function debounce<T extends (...args: unknown[]) => void>(
       clearTimeout(timerId);
       timerId = null;
     }
-    timerId = window.setTimeout(() => {
+    timerId = setTimeout(() => {
       // IE8 doesn't reliably clear timeout, so this additional
       // check is needed
       if (timerId === null) return;

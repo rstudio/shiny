@@ -1965,6 +1965,7 @@ __metadata:
     autoprefixer: ^10.2.6
     bootstrap-datepicker: 1.9.0
     browserslist: ^4.19.1
+    caniuse-lite: ^1.0.30001312
     core-js: ^3.13.0
     esbuild: ^0.12.4
     esbuild-plugin-babel: "https://github.com/schloerke/esbuild-plugin-babel#patch-2"
@@ -2913,17 +2914,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"caniuse-lite@npm:^1.0.30001219, caniuse-lite@npm:^1.0.30001230":
-  version: 1.0.30001237
-  resolution: "caniuse-lite@npm:1.0.30001237"
-  checksum: 8b56e2fff5856adbc3abde2ee85defeba6f6df6cf4e1c195bb0fd863c9d09ee318721d5c228a74beaac812e2c79009bc8ef998d6e85f44153dc6c26cc8bae7ce
-  languageName: node
-  linkType: hard
-
-"caniuse-lite@npm:^1.0.30001286":
-  version: 1.0.30001311
-  resolution: "caniuse-lite@npm:1.0.30001311"
-  checksum: 6961a8b1b81b0e23dd282c7b5ee79754c7692ee17038c4b8d5009e99685bd557c497b1319af424539e3e02f410e2c6e0d46341caeb68fb3b1bb4dcc80a46e6c0
+"caniuse-lite@npm:^1.0.30001219, caniuse-lite@npm:^1.0.30001230, caniuse-lite@npm:^1.0.30001286, caniuse-lite@npm:^1.0.30001312":
+  version: 1.0.30001312
+  resolution: "caniuse-lite@npm:1.0.30001312"
+  checksum: 2700039fd59dc26fba69ff25cbe25f16c9b17ee4e13de4a1514421fc82b24b2b183d6972d6f65aded8e737702ba0cc0f4f2520ae357226cf6c386af6d3282ca6
   languageName: node
   linkType: hard
 

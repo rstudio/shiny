@@ -5,7 +5,7 @@ declare class InputBinding {
     find(scope: BindScope): JQuery<HTMLElement>;
     getId(el: HTMLElement): string;
     getType(el: HTMLElement): string | false;
-    getValue(el: HTMLElement): unknown;
+    getValue(el: HTMLElement): any;
     subscribe(el: HTMLElement, callback: (value: boolean) => void): void;
     unsubscribe(el: HTMLElement): void;
     receiveMessage(el: HTMLElement, data: unknown): void;

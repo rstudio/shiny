@@ -160,7 +160,7 @@ class ShinyApp {
     return !!this.$socket;
   }
 
-  private scheduledReconnect = null;
+  private scheduledReconnect: ReturnType<typeof setTimeout> = null;
 
   reconnect(): void {
     // This function can be invoked directly even if there's a scheduled

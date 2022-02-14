@@ -1,9 +1,12 @@
+import type { InputBinding } from "../bindings";
 declare type EventPriority = "deferred" | "event" | "immediate";
-declare class InputPolicy {
+declare type InputPolicyOpts = {
+    priority: EventPriority;
+    el?: HTMLElement;
+    binding?: InputBinding;
+};
+interface InputPolicy {
     target: InputPolicy;
-    setInput(name: string, value: unknown, opts: {
-        priority: EventPriority;
-    }): void;
+    setInput(name: string, value: unknown, opts: InputPolicyOpts): void;
 }
-export { InputPolicy };
-export type { EventPriority };
+export type { InputPolicy, EventPriority, InputPolicyOpts };

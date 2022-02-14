@@ -21,6 +21,7 @@ shiny development
 
 * Closed tidyverse/dplyr#6154: Values from an `actionButton()` had S3 classes in the incorrect order.
 
+* Fixed a bug where updating an input value without a corresponding Input binding element did not trigger a JavaScript `shiny:inputchanged` event. Now, if no Input binding element is found, the `shiny:inputchanged` event is triggered on `window.document`. (#3584)
 
 shiny 1.7.1
 ===========

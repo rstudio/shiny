@@ -83,13 +83,13 @@ current seed by snapshotting and restoring
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="va">rnormA</span> <span class="op">&lt;-</span> <span class="fu">repeatable</span><span class="op">(</span><span class="va">rnorm</span><span class="op">)</span></span>
 <span class="r-in"><span class="va">rnormB</span> <span class="op">&lt;-</span> <span class="fu">repeatable</span><span class="op">(</span><span class="va">rnorm</span><span class="op">)</span></span>
 <span class="r-in"><span class="fu">rnormA</span><span class="op">(</span><span class="fl">3</span><span class="op">)</span>  <span class="co"># [1]  1.8285879 -0.7468041 -0.4639111</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] -0.1079125 -0.1749806  0.1885328</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1]  0.05211866  0.46267653 -0.79937771</span>
 <span class="r-in"><span class="fu">rnormA</span><span class="op">(</span><span class="fl">3</span><span class="op">)</span>  <span class="co"># [1]  1.8285879 -0.7468041 -0.4639111</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] -0.1079125 -0.1749806  0.1885328</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1]  0.05211866  0.46267653 -0.79937771</span>
 <span class="r-in"><span class="fu">rnormA</span><span class="op">(</span><span class="fl">5</span><span class="op">)</span>  <span class="co"># [1]  1.8285879 -0.7468041 -0.4639111 -1.6510126 -1.4686924</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] -0.10791249 -0.17498063  0.18853282  0.08413168 -0.13540722</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1]  0.05211866  0.46267653 -0.79937771  3.03428684  0.53210774</span>
 <span class="r-in"><span class="fu">rnormB</span><span class="op">(</span><span class="fl">5</span><span class="op">)</span>  <span class="co"># [1] -0.7946034  0.2568374 -0.6567597  1.2451387 -0.8375699</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1]  1.22292026 -0.05486879 -0.02353104  0.19720914 -0.45950129</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1]  0.02352099 -0.18092485 -1.27425069  0.53807239 -0.39894809</span>
 </code></pre></div>
     </div>
   </div>

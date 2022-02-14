@@ -48,24 +48,6 @@
     </div>
 
     <div class="section level2">
-<h2 class="page-header" data-toc-text="1.7.1.9001" id="shiny-1719001">shiny 1.7.1.9001<a class="anchor" aria-label="anchor" href="#shiny-1719001"></a></h2>
-<div class="section level3">
-<h3 id="full-changelog-1-7-1-9001">Full changelog<a class="anchor" aria-label="anchor" href="#full-changelog-1-7-1-9001"></a></h3>
-<div class="section level4">
-<h4 id="minor-new-features-and-improvements-1-7-1-9001">Minor new features and improvements<a class="anchor" aria-label="anchor" href="#minor-new-features-and-improvements-1-7-1-9001"></a></h4>
-<ul><li><p>Shiny’s internal HTML dependencies are now mounted dynamically instead of statically. (<a href="https://github.com/rstudio/shiny/issues/3537" class="external-link">#3537</a>)</p></li>
-<li><p>HTML dependencies that are sent to dynamic UI now have better type checking, and no longer require a <code>dep.src.href</code> field. (<a href="https://github.com/rstudio/shiny/issues/3537" class="external-link">#3537</a>)</p></li>
-</ul></div>
-<div class="section level4">
-<h4 id="bug-fixes-1-7-1-9001">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-1-7-1-9001"></a></h4>
-<ul><li><p>Closed tidyverse/dplyr#5552: Compatibility of dplyr 1.0 (and rlang chained errors in general) with <code><a href="../reference/req.html">req()</a></code>, <code><a href="../reference/validate.html">validate()</a></code>, and friends.</p></li>
-<li><p>Closed <a href="https://github.com/rstudio/shiny/issues/2955" class="external-link">#2955</a>: Input and output bindings previously attempted to use <code>el['data-input-id']</code>, but that never worked. They now use <code>el.getAttribute('data-input-id')</code> instead. (<a href="https://github.com/rstudio/shiny/issues/3538" class="external-link">#3538</a>)</p></li>
-<li><p>Closed tidyverse/dplyr#6154: Values from an <code><a href="../reference/actionButton.html">actionButton()</a></code> had S3 classes in the incorrect order.</p></li>
-<li><p>Fixed a bug where updating an input value without a corresponding Input binding element did not trigger a JavaScript <code>shiny:inputchanged</code> event. Now, if no Input binding element is found, the <code>shiny:inputchanged</code> event is triggered on <code>window.document</code>. (<a href="https://github.com/rstudio/shiny/issues/3584" class="external-link">#3584</a>)</p></li>
-</ul></div>
-</div>
-</div>
-    <div class="section level2">
 <h2 class="page-header" data-toc-text="1.7.1" id="shiny-171">shiny 1.7.1<small>2021-10-02</small><a class="anchor" aria-label="anchor" href="#shiny-171"></a></h2>
 <div class="section level3">
 <h3 id="bug-fixes-1-7-1">Bug Fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-1-7-1"></a></h3>

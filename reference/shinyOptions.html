@@ -191,6 +191,11 @@ console.</p></dd>
 <dd><p>If <code>TRUE</code>, then various features for testing Shiny
 applications are enabled.</p></dd>
 
+<dt>shiny.snapshotsortc (defaults to <code>FALSE</code>)</dt>
+<dd><p>If <code>TRUE</code>, test snapshot keys
+for <span class="pkg">shinytest</span> will be sorted consistently using the C locale.  Snapshots
+retrieved by <span class="pkg">shinytest2</span> will always sort using the C locale.</p></dd>
+
 <dt>shiny.trace (defaults to <code>FALSE</code>)</dt>
 <dd><p>Print messages sent between the R server and the web
 browser client to the R console. This is useful for debugging. Possible

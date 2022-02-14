@@ -7,7 +7,7 @@ class Throttler<X extends AnyVoidFunction> implements InputRatePolicy<X> {
   target: InputPolicy;
   func: X;
   delayMs: number | undefined;
-  timerId: number | null;
+  timerId: ReturnType<typeof setTimeout> | null;
   args: Parameters<X> | null;
 
   constructor(target: InputPolicy, func: X, delayMs: number | undefined) {

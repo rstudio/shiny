@@ -6,7 +6,7 @@ class Debouncer<X extends AnyVoidFunction> implements InputRatePolicy<X> {
   target: InputPolicy;
   func: X;
   delayMs: number | undefined;
-  timerId: number | null;
+  timerId: ReturnType<typeof setTimeout> | null;
   args: Parameters<X> | null;
 
   constructor(target: InputPolicy, func: X, delayMs: number | undefined) {
@@ -70,7 +70,7 @@ function debounce<T extends (...args: unknown[]) => void>(
   threshold: number | undefined,
   func: T
 ): (...args: Parameters<T>) => void {
-  let timerId: number | null = null;
+  let timerId: ReturnType<typeof setTimeout> | null = null;
 
   // Do not alter `function()` into an arrow function.
   // The `this` context needs to be dynamically bound

@@ -6,7 +6,7 @@ import type { ShinyApp } from "../shiny/shinyapp";
 class InputBatchSender implements InputPolicy {
   target!: InputPolicy; // We need this field to satisfy the InputPolicy interface
   shinyapp: ShinyApp;
-  timerId: number | null = null;
+  timerId: ReturnType<typeof setTimeout> | null = null;
   pendingData: { [key: string]: unknown } = {};
   reentrant = false;
   lastChanceCallback: Array<() => void> = [];

@@ -8426,7 +8426,7 @@
           args[_key] = arguments[_key];
         }
         this.args = args;
-        this.timerId = window.setTimeout(function() {
+        this.timerId = setTimeout(function() {
           if (_this.timerId === null)
             return;
           _this.$clearTimer();
@@ -8471,8 +8471,7 @@
   }();
   function debounce(threshold, func) {
     var timerId = null;
-    return function() {
-      var _this2 = this;
+    return function thisFunc() {
       for (var _len3 = arguments.length, args = new Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
         args[_key3] = arguments[_key3];
       }
@@ -8480,11 +8479,11 @@
         clearTimeout(timerId);
         timerId = null;
       }
-      timerId = window.setTimeout(function() {
+      timerId = setTimeout(function() {
         if (timerId === null)
           return;
         timerId = null;
-        func.apply(_this2, args);
+        func.apply(thisFunc, args);
       }, threshold);
     };
   }

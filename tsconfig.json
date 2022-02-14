@@ -7,8 +7,9 @@
     "declaration": true,
     "declarationDir": "./srcts/types",
     "emitDeclarationOnly": true,
-    // Tell TS to not use NodeJS types; only use browser types, like for setTimeout
-    "types": [],
+    // Can not use `types: []` to disable injecting NodeJS types. More types are
+    // needed than just the DOM's `window.setTimeout`
+    // "types": [],
     "strict": false
   },
   "include": [

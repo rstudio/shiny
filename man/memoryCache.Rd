@@ -17,7 +17,7 @@ memoryCache(
 \arguments{
 \item{max_size}{Maximum size of the cache, in bytes. If the cache exceeds
 this size, cached objects will be removed according to the value of the
-\code{evict}. Use \code{Inf} for no size limit. The default is 512 megabytes.}
+\code{evict}. Use \code{Inf} for no size limit. The default is 1 gigabyte.}
 
 \item{max_age}{Maximum age of files in cache before they are evicted, in
 seconds. Use \code{Inf} for no age limit.}

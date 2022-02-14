@@ -13,7 +13,7 @@ declare type BindInputsCtx = {
 };
 declare function bindInputs(shinyCtx: BindInputsCtx, scope?: BindScope): {
     [key: string]: {
-        value: unknown;
+        value: ReturnType<InputBinding["getValue"]>;
         opts: {
             immediate: boolean;
             binding: InputBinding;

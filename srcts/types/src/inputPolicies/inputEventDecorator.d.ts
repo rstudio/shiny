@@ -1,12 +1,7 @@
-import type { EventPriority } from "./inputPolicy";
-import { InputPolicy } from "./inputPolicy";
-import type { InputBinding } from "../bindings";
-declare class InputEventDecorator extends InputPolicy {
+import type { InputPolicy, InputPolicyOpts } from "./inputPolicy";
+declare class InputEventDecorator implements InputPolicy {
+    target: InputPolicy;
     constructor(target: InputPolicy);
-    setInput(nameType: string, value: unknown, opts: {
-        el: HTMLElement;
-        priority: EventPriority;
-        binding: InputBinding;
-    }): void;
+    setInput(nameType: string, value: unknown, opts: InputPolicyOpts): void;
 }
 export { InputEventDecorator };

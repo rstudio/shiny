@@ -47,7 +47,7 @@ function bindInputs(
   scope: BindScope = document.documentElement
 ): {
   [key: string]: {
-    value: unknown;
+    value: ReturnType<InputBinding["getValue"]>;
     opts: { immediate: boolean; binding: InputBinding; el: HTMLElement };
   };
 } {

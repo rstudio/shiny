@@ -14,7 +14,7 @@ function createClickInfo(
   mousedown: (e: JQuery.MouseDownEvent) => void;
   dblclickIE8: (e: JQuery.DoubleClickEvent) => void;
 } {
-  let clickTimer = null;
+  let clickTimer: ReturnType<typeof setTimeout> = null;
   let pendingE: JQuery.MouseDownEvent = null; // A pending mousedown2 event
 
   // Create a new event of type eventType (like 'mousedown2'), and trigger

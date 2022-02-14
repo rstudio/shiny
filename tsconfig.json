@@ -6,7 +6,11 @@
     "esModuleInterop": true,
     "declaration": true,
     "declarationDir": "./srcts/types",
-    "emitDeclarationOnly": true
+    "emitDeclarationOnly": true,
+    // Can not use `types: []` to disable injecting NodeJS types. More types are
+    // needed than just the DOM's `window.setTimeout`
+    // "types": [],
+    "strict": false
   },
   "include": [
     "srcts/src/index.ts",

@@ -1,24 +1,19 @@
-import type { EventPriority } from "./inputPolicy";
-import { InputPolicy } from "./inputPolicy";
+import type { InputPolicy, InputPolicyOpts } from "./inputPolicy";
 import { hasOwnProperty } from "../utils";
 import { splitInputNameType } from "./splitInputNameType";
 
 type LastSentValues = { [key: string]: { [key: string]: string } };
 
-class InputNoResendDecorator extends InputPolicy {
-  lastSentValues: LastSentValues;
+class InputNoResendDecorator implements InputPolicy {
+  target: InputPolicy;
+  lastSentValues: LastSentValues = {};
 
   constructor(target: InputPolicy, initialValues: LastSentValues = {}) {
-    super();
     this.target = target;
     this.reset(initialValues);
   }
 
-  setInput(
-    nameType: string,
-    value: unknown,
-    opts: { priority: EventPriority }
-  ): void {
+  setInput(nameType: string, value: unknown, opts: InputPolicyOpts): void {
     const { name: inputName, inputType: inputType } =
       splitInputNameType(nameType);
     const jsonValue = JSON.stringify(value);
@@ -34,13 +29,15 @@ class InputNoResendDecorator extends InputPolicy {
     this.lastSentValues[inputName] = { jsonValue, inputType };
     this.target.setInput(nameType, value, opts);
   }
-  reset(values = {}): void {
+  reset(values: LastSentValues = {}): void {
     // Given an object with flat name-value format:
     //   { x: "abc", "y.shiny.number": 123 }
     // Create an object in cache format and save it:
     //   { x: { jsonValue: '"abc"', inputType: "" },
     //     y: { jsonValue: "123", inputType: "shiny.number" } }
-    const cacheValues = {};
+    const cacheValues: {
+      [key: string]: { jsonValue: string; inputType: string };
+    } = {};
 
     for (const inputName in values) {
       if (hasOwnProperty(values, inputName)) {

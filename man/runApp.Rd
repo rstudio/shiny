@@ -37,7 +37,7 @@ ports will be tried.}
 
 \item{launch.browser}{If true, the system's default web browser will be
 launched automatically after the app is started. Defaults to true in
-interactive sessions only. This value of this parameter can also be a
+interactive sessions only. The value of this parameter can also be a
 function to call with the application's URL.}
 
 \item{host}{The IPv4 address that the application should listen on. Defaults

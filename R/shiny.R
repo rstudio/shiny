@@ -489,6 +489,10 @@ ShinySession <- R6Class(
           #   same encoding. Only UTF-8 (including ASCII) and Latin-1
           #   encodings are supported. Collation always follows the "C"
           #   locale.
+          # {shinytest2} will always set `sortC=1`
+          # {shinytest} does not have `sortC` functionality.
+          #    Users should set `options(shiny.snapshotsortc = TRUE)` within their app.
+          # The sortingMethod should always be `radix` going forward.
           sortMethod <-
             if (!is.null(params$sortC)) {
               if (params$sortC != "1") {
@@ -496,24 +500,11 @@ ShinySession <- R6Class(
               }
               "radix"
             } else {
-              # No `sortC` param
-              if (!file.exists("DESCRIPTION")) {
-                "auto"
+              # Allow users to set an option for {shinytest2}.
+              if (isTRUE(getShinyOption("snapshotsortc", default = FALSE))) {
+                "radix"
               } else {
-                # read from description file?
-                tryCatch({
-                  info <- as.list(read.dcf("DESCRIPTION")[1, , drop = TRUE])
-                  info <- setNames(info, tolower(names(info)))
-                  val <- info[["config/shiny/snapshotsortc"]] %||% "0"
-                  if (val == "1") {
-                    "radix"
-                  } else {
-                    "auto"
-                  }
-                }, error = function(e) {
-                  message("Error parsing app DESCRIPTION file: ", e)
-                  "auto"
-                })
+                "auto"
               }
             }
 

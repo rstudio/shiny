@@ -173,6 +173,30 @@ test_that("sortByName works as expected", {
   expect_identical(sortByName(c(b=1, a=2, b=3)), c(a=2, b=1, b=3))
 })
 
+test_that("sortByName gives expected sort order using `radix` method", {
+  skip_on_cran()
+
+  # without UTF-8
+  items <- list("aa"=1, "bb"=2, "AA"=5, "BB"=6, "a_"=7, "b_"=8, "_A"=9, "_B"=10)
+  items_expected <- list(AA=5, BB=6, "_A"=9, "_B"=10, a_=7, aa=1, b_=8, bb=2)
+  # sort(names(items), method = "radix")
+  # #> [1] "AA" "BB" "_A" "_B" "a_" "aa" "b_" "bb"
+  # sort(names(items), method = "shell")
+  # #> [1] "_A" "_B" "a_" "aa" "AA" "b_" "bb" "BB"
+  expect_identical(sortByName(items, method = "radix"), items_expected)
+
+  skip_on_os("windows") # windows can't handle UTF-8
+
+  # with UTF-8
+  items <- list("aa"=1, "bb"=2, "åå"=3, "∫∫"=4, "AA"=5, "BB"=6, "a_"=7, "b_"=8, "_A"=9, "_B"=10)
+  items_expected <- list(AA=5, BB=6, "_A"=9, "_B"=10, a_=7, aa=1, b_=8, bb=2, "åå"=3, "∫∫"=4)
+  # sort(name(items), method = "radix")
+  # #> [1] "AA" "BB" "_A" "_B" "a_" "aa" "b_" "bb" "åå" "∫∫"
+  # sort(items, method = "shell")
+  # #> [1] "_A" "_B" "∫∫" "a_" "aa" "AA" "åå" "b_" "bb" "BB"
+  expect_identical(sortByName(items, method = "radix"), items_expected)
+})
+
 test_that("Callbacks fire in predictable order", {
   cb <- Callbacks$new()
 

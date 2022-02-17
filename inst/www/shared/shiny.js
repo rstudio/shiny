@@ -12474,6 +12474,25 @@
           };
         }
         addMessageHandler("shiny-insert-tab", function(message) {
+          if (message.jsxTag) {
+            var jsxContainerEl = document.createElement("div");
+            var jsxId = "shiny-jsx-container-" + message.inputId;
+            jsxContainerEl.style.display = "none";
+            jsxContainerEl.setAttribute("id", jsxId);
+            document.body.appendChild(jsxContainerEl);
+            var jsxContainer = document.body.querySelector("#" + jsxId);
+            (0, import_jquery39.default)(jsxContainer).html(message.jsxTag.html);
+            message.liTag = {
+              html: jsxContainer.querySelector("ul.nav").innerHTML,
+              deps: []
+            };
+            message.divTag = {
+              html: jsxContainer.querySelector("div.tab-content").innerHTML,
+              deps: message.jsxTag.deps
+            };
+            jsxContainer.remove();
+            delete message.jsxTag;
+          }
           var $parentTabset = getTabset(message.inputId);
           var $tabset = $parentTabset;
           var $tabContent = getTabContent($tabset);

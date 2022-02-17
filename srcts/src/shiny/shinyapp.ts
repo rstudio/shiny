@@ -971,7 +971,37 @@ class ShinyApp {
         position: "after" | "before" | void;
         select: boolean;
         menuName: string;
+        jsxTag: { html: string; deps: HtmlDep[] };
       }) => {
+        if (message.jsxTag) {
+          // Render jsxTag (a <script> tag) inside a (temporary) hidden div and use
+          // the HTML results to populate liTag/divTag
+          const jsxContainerEl = document.createElement("div");
+          const jsxId = "shiny-jsx-container-" + message.inputId;
+
+          jsxContainerEl.style.display = "none";
+          jsxContainerEl.setAttribute("id", jsxId);
+
+          document.body.appendChild(jsxContainerEl);
+          const jsxContainer = document.body.querySelector("#" + jsxId);
+
+          // Use jQuery's .html() method since that has special handling to ensure
+          // <script> tags are evaluated.
+          $(jsxContainer).html(message.jsxTag.html);
+
+          message.liTag = {
+            html: jsxContainer.querySelector("ul.nav").innerHTML,
+            deps: [],
+          };
+          message.divTag = {
+            html: jsxContainer.querySelector("div.tab-content").innerHTML,
+            deps: message.jsxTag.deps,
+          };
+
+          jsxContainer.remove();
+          delete message.jsxTag;
+        }
+
         const $parentTabset = getTabset(message.inputId);
         let $tabset = $parentTabset;
         const $tabContent = getTabContent($tabset);

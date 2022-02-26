@@ -6694,8 +6694,10 @@
       key: "getType",
       value: function getType(el) {
         var $el = (0, import_jquery16.default)(el);
+
+
         if (!$el.hasClass("symbol")) {
-          return null;
+          return "shiny.text";
         }
         if ($el.attr("multiple") === "multiple") {
           return "shiny.symbolList";

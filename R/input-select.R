@@ -86,8 +86,8 @@
 #'
 #' @export
 selectInput <- function(inputId, label, choices, selected = NULL,
-  multiple = FALSE, selectize = TRUE, width = NULL,
-  size = NULL) {
+                        multiple = FALSE, selectize = TRUE, width = NULL,
+                        size = NULL) {
 
   selected <- restoreInput(id = inputId, default = selected)
 
@@ -137,9 +137,9 @@ firstChoice <- function(choices) {
 selectOptions <- function(choices, selected = NULL, inputId, perfWarning = FALSE) {
   if (length(choices) >= 1000) {
     warning("The select input \"", inputId, "\" contains a large number of ",
-      "options; consider using server-side selectize for massively improved ",
-      "performance. See the Details section of the ?selectizeInput help topic.",
-      call. = FALSE)
+            "options; consider using server-side selectize for massively improved ",
+            "performance. See the Details section of the ?selectizeInput help topic.",
+            call. = FALSE)
   }
 
   html <- mapply(choices, names(choices), FUN = function(choice, label) {
@@ -153,12 +153,24 @@ selectOptions <- function(choices, selected = NULL, inputId, perfWarning = FALSE
 
     } else {
       # If single item, just return option string
-      sprintf(
-        '<option value="%s"%s>%s</option>',
-        htmlEscape(choice, TRUE),
-        if (choice %in% selected) ' selected' else '',
-        htmlEscape(label)
-      )
+      if(is.na(choice))
+      {
+        temp = sprintf(
+          '<option value=%s%s>%s</option>',
+          htmlEscape(".shiny_NA_.", TRUE),
+          if (choice %in% selected) ' selected' else '',
+          htmlEscape(label)
+        )
+      } else
+      {
+        temp = sprintf(
+          '<option value="%s"%s>%s</option>',
+          htmlEscape(choice, TRUE),
+          if (choice %in% selected) ' selected' else '',
+          htmlEscape(label)
+        )
+      }
+      temp
     }
   })
 

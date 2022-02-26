@@ -86,8 +86,8 @@
 #'
 #' @export
 selectInput <- function(inputId, label, choices, selected = NULL,
-                        multiple = FALSE, selectize = TRUE, width = NULL,
-                        size = NULL) {
+  multiple = FALSE, selectize = TRUE, width = NULL,
+  size = NULL) {
 
   selected <- restoreInput(id = inputId, default = selected)
 
@@ -137,9 +137,9 @@ firstChoice <- function(choices) {
 selectOptions <- function(choices, selected = NULL, inputId, perfWarning = FALSE) {
   if (length(choices) >= 1000) {
     warning("The select input \"", inputId, "\" contains a large number of ",
-            "options; consider using server-side selectize for massively improved ",
-            "performance. See the Details section of the ?selectizeInput help topic.",
-            call. = FALSE)
+      "options; consider using server-side selectize for massively improved ",
+      "performance. See the Details section of the ?selectizeInput help topic.",
+      call. = FALSE)
   }
 
   html <- mapply(choices, names(choices), FUN = function(choice, label) {

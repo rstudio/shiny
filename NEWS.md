@@ -17,6 +17,9 @@ shiny 1.7.1.9001
 
 * Closed tidyverse/dplyr#6154: Values from an `actionButton()` had S3 classes in the incorrect order.
 
+* Closed #2884: selectInput() turns NA into "NA" by adding an option `keepNA` to `selectInput()` while maintaining previous behavior 
+with default value `keepNA = FALSE`.
+
 shiny 1.7.1
 ===========
 

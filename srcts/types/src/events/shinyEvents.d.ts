@@ -6,11 +6,11 @@ import type { ErrorsMessageValue } from "../shiny/shinyapp";
 interface ShinyEventCommon extends JQuery.Event {
     name: string;
     value: unknown;
-    el: HTMLElement;
+    el: HTMLElement | null;
 }
 interface ShinyEventInputChanged extends ShinyEventCommon {
     value: unknown;
-    binding: InputBinding;
+    binding: InputBinding | null;
     inputType: string;
     priority: EventPriority;
 }

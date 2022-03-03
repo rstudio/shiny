@@ -155,7 +155,8 @@ function addRemovalCallback(id, delay) {
 // Clear a removal callback from a notification, if present.
 function clearRemovalCallback(id) {
   const $notification = get(id);
-  const oldRemovalCallback = $notification.data("removalCallback");
+  const oldRemovalCallback: ReturnType<typeof setTimeout> =
+    $notification.data("removalCallback");
 
   if (oldRemovalCallback) {
     clearTimeout(oldRemovalCallback);

@@ -104,6 +104,9 @@ should only be used for debugging or demonstrations of reactivity at the
 console.}
 \item{shiny.testmode (defaults to \code{FALSE})}{If \code{TRUE}, then various features for testing Shiny
 applications are enabled.}
+\item{shiny.snapshotsortc (defaults to \code{FALSE})}{If \code{TRUE}, test snapshot keys
+for \pkg{shinytest} will be sorted consistently using the C locale.  Snapshots
+retrieved by \pkg{shinytest2} will always sort using the C locale.}
 \item{shiny.trace (defaults to \code{FALSE})}{Print messages sent between the R server and the web
 browser client to the R console. This is useful for debugging. Possible
 values are \code{"send"} (only print messages sent to the client),

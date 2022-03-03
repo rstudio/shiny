@@ -118,7 +118,7 @@ type Coordmap = {
     inputId: string,
     clip?: boolean,
     nullOutside?: boolean
-  ) => (e: JQuery.MouseDownEvent) => void;
+  ) => (e: JQuery.MouseDownEvent | JQuery.MouseMoveEvent) => void;
 };
 
 // This adds functions to the coordmap object to handle various

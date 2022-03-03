@@ -1,17 +1,8 @@
-import type { EventPriority, InputPolicy } from "./inputPolicy";
-declare type MaybeInputOpts = {
-    priority?: EventPriority;
-    binding?: unknown;
-    el?: HTMLElement;
-};
-declare function addDefaultInputOpts<T>(opts?: MaybeInputOpts & T): T & {
-    priority: EventPriority;
-    binding: unknown;
-    el?: HTMLElement;
-};
-declare class InputValidateDecorator {
-    target: any;
+import type { InputPolicy, InputPolicyOpts } from "./inputPolicy";
+declare function addDefaultInputOpts(opts: Partial<InputPolicyOpts>): InputPolicyOpts;
+declare class InputValidateDecorator implements InputPolicy {
+    target: InputPolicy;
     constructor(target: InputPolicy);
-    setInput: <T>(nameType: string, value: unknown, opts?: MaybeInputOpts & T) => void;
+    setInput(nameType: string, value: unknown, opts?: Partial<InputPolicyOpts>): void;
 }
 export { InputValidateDecorator, addDefaultInputOpts };

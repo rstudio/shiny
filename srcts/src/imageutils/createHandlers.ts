@@ -7,6 +7,7 @@ import type { BoundsCss, Bounds, BrushOpts } from "./createBrush";
 import type { Offset } from "./findbox";
 import type { Coordmap } from "./initCoordmap";
 import type { Panel } from "./initPanelScales";
+import type { InputRatePolicy } from "../inputPolicies";
 
 // ----------------------------------------------------------
 // Handler creators for click, hover, brush.
@@ -83,7 +84,7 @@ function createHoverHandler(
     nullOutside
   );
 
-  let hoverInfoSender: Debouncer | Throttler;
+  let hoverInfoSender: InputRatePolicy<typeof sendHoverInfo>;
 
   if (delayType === "throttle")
     hoverInfoSender = new Throttler(null, sendHoverInfo, delay);

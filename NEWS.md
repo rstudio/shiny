@@ -1,13 +1,19 @@
-shiny 1.7.1.9001
+shiny development
 ================
 
 ## Full changelog
+
+### Breaking changes
 
 ### Minor new features and improvements
 
 * Shiny's internal HTML dependencies are now mounted dynamically instead of statically. (#3537)
 
 * HTML dependencies that are sent to dynamic UI now have better type checking, and no longer require a `dep.src.href` field. (#3537)
+
+* Default for `ref` input in `runGithub()` changed from `"master"` to `"HEAD"`. (#3346)
+
+* When taking a test snapshot, the sort order of the json keys of the `input`, `output`, and `export` fields is currently sorted using the locale of the machine. This can lead to inconsistent test snapshot results. To opt-in to a consistent ordering of snapshot fields with `{shinytest}`, please set the global option `options(shiny.snapshotsortc = TRUE)`. `{shinytest2}` users do not need to set this value.  (#3515)
 
 ### Bug fixes
 
@@ -19,6 +25,8 @@ shiny 1.7.1.9001
 
 * Closed #2884 ('selectInput() turns NA into "NA"') by adding an option `keepNA` to `selectInput()` while maintaining previous behavior 
 with default value `keepNA = FALSE`.
+
+* Fixed a bug where updating an input value without a corresponding Input binding element did not trigger a JavaScript `shiny:inputchanged` event. Now, if no Input binding element is found, the `shiny:inputchanged` event is triggered on `window.document`. (#3584)
 
 shiny 1.7.1
 ===========

@@ -38,7 +38,7 @@
 #'   Normally, when `multiple=FALSE`, a select input will be a drop-down list,
 #'   but when `size` is set, it will be a box instead.
 #' @param keepNA If `keepNA = FALSE`, an `NA` value in `choices` is converted
-#'   to the string "NA" the returned selection. If `keepNA = TRUE`, an `NA`
+#'   to the string "NA" in the returned selection. If `keepNA = TRUE`, an `NA`
 #'   value in `choices` is still an `NA` in the returned selection.
 #' @return A select list control that can be added to a UI definition.
 #'
@@ -48,7 +48,7 @@
 #' @examples
 #' ## Only run examples in interactive R sessions
 #' if (interactive()) {
-#'
+#'`
 #' # basic example
 #' shinyApp(
 #'   ui = fluidPage(

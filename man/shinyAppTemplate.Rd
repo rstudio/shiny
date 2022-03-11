@@ -66,7 +66,7 @@ package.
 \item \code{tests/testthat/test-examplemodule.R} is a test for an application's module server function.
 \item \code{tests/testthat/test-server.R} is a test for the application's server code
 \item \code{tests/testthat/test-shinytest2.R} is a test that uses the
-\href{https://rstudio.github.io/shinytest/}{shinytest2} package to do
+\href{https://rstudio.github.io/shinytest2/}{shinytest2} package to do
 snapshot-based testing.
 \item \code{tests/testthat/test-sort.R} is a test for a supporting function in the \verb{R/} directory.
 }

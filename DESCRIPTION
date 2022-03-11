@@ -112,7 +112,7 @@ Suggests:
     showtext,
     sass
 Suggests/future:
-    shinytest
+    shinytest2
 URL: https://shiny.rstudio.com/
 BugReports: https://github.com/rstudio/shiny/issues
 Collate:

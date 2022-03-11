@@ -49,7 +49,7 @@
 #' * `tests/testthat/test-examplemodule.R` is a test for an application's module server function.
 #' * `tests/testthat/test-server.R` is a test for the application's server code
 #' * `tests/testthat/test-shinytest2.R` is a test that uses the
-#'   [shinytest2](https://rstudio.github.io/shinytest/) package to do
+#'   [shinytest2](https://rstudio.github.io/shinytest2/) package to do
 #'   snapshot-based testing.
 #' * `tests/testthat/test-sort.R` is a test for a supporting function in the `R/` directory.
 #'

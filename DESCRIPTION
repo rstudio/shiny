@@ -105,13 +105,14 @@ Suggests:
     ggplot2,
     reactlog (>= 1.0.0),
     magrittr,
-    shinytest (>= 1.4.0.9003),
     yaml,
     future,
     dygraphs,
     ragg,
     showtext,
     sass
+Suggests/future:
+    shinytest
 URL: https://shiny.rstudio.com/
 BugReports: https://github.com/rstudio/shiny/issues
 Collate:

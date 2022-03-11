@@ -111,8 +111,6 @@ Suggests:
     ragg,
     showtext,
     sass
-Suggests/future:
-    shinytest2
 URL: https://shiny.rstudio.com/
 BugReports: https://github.com/rstudio/shiny/issues
 Collate:

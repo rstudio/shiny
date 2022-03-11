@@ -1,4 +1,5 @@
 # testthat::skip_on_cran()
+# TODO-future; Add {shinytest2} to Suggests in DESCRIPTION once {shinytest2} is on CRAN
 suppressWarnings(testthat::skip_if_not_installed("shinytest2"))
 
 # test all combos

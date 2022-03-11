@@ -4,13 +4,15 @@ set -e
 
 # Generate package docs in the working directory
 echo "Document..."
+PRE_STATUS=$(git status --porcelain)
 Rscript -e "devtools::document(roclets=c('rd', 'collate', 'namespace'))"
+POST_STATUS=$(git status --porcelain)
 
-if [ -n "$(git status --porcelain)" ]
+if [ "$PRE_STATUS" != "$POST_STATUS" ]
 then
-  git status --porcelain
+  echo "$POST_STATUS"
   >&2 echo "Please generate the Roxygen documentation and commit the updates."
-  >&2 echo "The above files changed when we generated the Roxygen documentation. This most often occurs when a user changes the Roxygen documentation in an R file but doesn't regenerate the documentation before committing."
+  >&2 echo "The above files possibly changed when we generated the Roxygen documentation. This most often occurs when a user changes the Roxygen documentation in an R file but doesn't regenerate the documentation before committing."
   exit 1
 else
   echo "No difference detected; Roxygen docs are current."

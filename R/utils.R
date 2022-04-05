@@ -162,7 +162,7 @@ mergeVectors <- function(a, b) {
 # Sort a vector by the names of items. If there are multiple items with the
 # same name, preserve the original order of those items. For empty
 # vectors/lists/NULL, return the original value.
-sortByName <- function(x) {
+sortByName <- function(x, method = "auto") {
   if (any_unnamed(x))
     stop("All items must be named")
 
@@ -170,7 +170,19 @@ sortByName <- function(x) {
   if (length(x) == 0)
     return(x)
 
-  x[order(names(x))]
+  # Must provide consistent sort order
+  #  https://github.com/rstudio/shinytest/issues/409
+  # Using a flag in the snapshot url to determine the method
+  # `method="radix"` uses `C` locale, which is consistent across platforms
+  # Even if two platforms share `en_us.UTF-8`, they may not sort consistently
+  #  https://blog.zhimingwang.org/macos-lc_collate-hunt
+  #  (macOS) $ LC_ALL=en_US.UTF-8 sort <<<$'python-dev\npython3-dev'
+  #  python-dev
+  #  python3-dev
+  #  (Linux) $ LC_ALL=en_US.UTF-8 sort <<<$'python-dev\npython3-dev'
+  #  python3-dev
+  #  python-dev
+  x[order(names(x), method = method)]
 }
 
 # Sort a vector. If a character vector, sort using C locale, which is consistent
@@ -472,7 +484,7 @@ shinyCallingHandlers <- function(expr) {
   withCallingHandlers(captureStackTraces(expr),
     error = function(e) {
       # Don't intercept shiny.silent.error (i.e. validation errors)
-      if (inherits(e, "shiny.silent.error"))
+      if (cnd_inherits(e, "shiny.silent.error"))
         return()
 
       handle <- getOption('shiny.error')
@@ -1691,4 +1703,22 @@ findEnclosingApp <- function(path = ".") {
       stop("Shiny app not found at ", orig_path, " or in any parent directory.")
     path <- dirname(path)
   }
+}
+
+# Until `rlang::cnd_inherits()` is on CRAN
+cnd_inherits <- function(cnd, class) {
+  cnd_some(cnd, ~ inherits(.x, class))
+}
+cnd_some <- function(.cnd, .p, ...) {
+  .p <- rlang::as_function(.p)
+
+  while (rlang::is_condition(.cnd)) {
+    if (.p(.cnd, ...)) {
+      return(TRUE)
+    }
+
+    .cnd <- .cnd$parent
+  }
+
+  FALSE
 }

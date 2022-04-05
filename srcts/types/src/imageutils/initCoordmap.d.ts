@@ -37,7 +37,7 @@ declare type Coordmap = {
     cssToImgScalingRatio: () => Offset;
     getPanelCss: (offsetCss: OffsetCss, expand?: number) => Panel;
     isInPanelCss: (offsetCss: OffsetCss, expand?: number) => boolean;
-    mouseCoordinateSender: (inputId: string, clip?: boolean, nullOutside?: boolean) => (e: JQuery.MouseDownEvent) => void;
+    mouseCoordinateSender: (inputId: string, clip?: boolean, nullOutside?: boolean) => (e: JQuery.MouseDownEvent | JQuery.MouseMoveEvent) => void;
 };
 declare function initCoordmap($el: JQuery<HTMLElement>, coordmap_: CoordmapInit): Coordmap;
 export type { Coordmap, CoordmapInit };

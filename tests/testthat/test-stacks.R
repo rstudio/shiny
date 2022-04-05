@@ -129,13 +129,11 @@ test_that("integration tests", {
   df <- causeError(full = FALSE)
   # dumpTests(df)
 
-  expect_equal(df$num, c(56L, 55L, 54L, 38L, 37L, 36L, 35L,
-    34L, 33L, 32L, 31L, 30L))
+  expect_equal(df$num, c(56L, 55L, 54L, 38L, 37L, 36L, 35L, 34L, 33L))
   expect_equal(df$call, c("A", "B", "<reactive:C>", "C", "renderTable",
-    "func", "force", "withVisible", "withCallingHandlers", "domain$wrapSync",
-    "promises::with_promise_domain", "captureStackTraces"))
+    "func", "force", "withVisible", "withCallingHandlers"))
   expect_equal(nzchar(df$loc), c(TRUE, TRUE, TRUE, FALSE, TRUE,
-    FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE))
+    FALSE, FALSE, FALSE, FALSE))
 
   df <- causeError(full = TRUE)
   # dumpTests(df)
@@ -193,6 +191,28 @@ test_that("shiny.error", {
   try(shiny:::shinyCallingHandlers(isolate(er())), silent = TRUE)
   expect_null(caught)
   try(shiny:::shinyCallingHandlers(isolate(er())), silent = TRUE)
+  expect_null(caught)
+})
+
+test_that("chained silent errors aren't intercepted (tidyverse/dplyr#5552)", {
+  withr::local_options(
+    shiny.error = function() caught <<- TRUE
+  )
+
+  f <- function() {
+    withCallingHandlers(
+      validate(need(NULL, FALSE)),
+      error = function(cnd) {
+        rlang::abort("Child error.", parent = cnd)
+      }
+    )
+  }
+  caught <- NULL
+  try(shiny:::shinyCallingHandlers(f()), silent = TRUE)
+  expect_null(caught)
+
+  caught <- NULL
+  try(hybrid_chain(f()), silent = TRUE)
   expect_null(caught)
 })
 

@@ -1964,7 +1964,8 @@ __metadata:
     "@typescript-eslint/parser": ^4.25.0
     autoprefixer: ^10.2.6
     bootstrap-datepicker: 1.9.0
-    browserslist: ^4.16.6
+    browserslist: ^4.19.1
+    caniuse-lite: ^1.0.30001312
     core-js: ^3.13.0
     esbuild: ^0.12.4
     esbuild-plugin-babel: "https://github.com/schloerke/esbuild-plugin-babel#patch-2"
@@ -2776,6 +2777,21 @@ __metadata:
   languageName: node
   linkType: hard
 
+"browserslist@npm:^4.19.1":
+  version: 4.19.1
+  resolution: "browserslist@npm:4.19.1"
+  dependencies:
+    caniuse-lite: ^1.0.30001286
+    electron-to-chromium: ^1.4.17
+    escalade: ^3.1.1
+    node-releases: ^2.0.1
+    picocolors: ^1.0.0
+  bin:
+    browserslist: cli.js
+  checksum: 340af7f0527f903445bf6dd3231d2031666db6c262cc56211f8ec2895a6f570152ed17f239331de400d54f823312d9f8e64f186132e0a310e2bcbd94cf7b354b
+  languageName: node
+  linkType: hard
+
 "bs-logger@npm:0.x":
   version: 0.2.6
   resolution: "bs-logger@npm:0.2.6"
@@ -2898,10 +2914,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"caniuse-lite@npm:^1.0.30001219, caniuse-lite@npm:^1.0.30001230":
-  version: 1.0.30001237
-  resolution: "caniuse-lite@npm:1.0.30001237"
-  checksum: 8b56e2fff5856adbc3abde2ee85defeba6f6df6cf4e1c195bb0fd863c9d09ee318721d5c228a74beaac812e2c79009bc8ef998d6e85f44153dc6c26cc8bae7ce
+"caniuse-lite@npm:^1.0.30001219, caniuse-lite@npm:^1.0.30001230, caniuse-lite@npm:^1.0.30001286, caniuse-lite@npm:^1.0.30001312":
+  version: 1.0.30001312
+  resolution: "caniuse-lite@npm:1.0.30001312"
+  checksum: 2700039fd59dc26fba69ff25cbe25f16c9b17ee4e13de4a1514421fc82b24b2b183d6972d6f65aded8e737702ba0cc0f4f2520ae357226cf6c386af6d3282ca6
   languageName: node
   linkType: hard
 
@@ -3701,6 +3717,13 @@ __metadata:
   version: 1.3.752
   resolution: "electron-to-chromium@npm:1.3.752"
   checksum: 8c172dd2d9df7526d6cb94edfeceb73e538f5ee7e47555fabcddeba5e7961d3bad0ddc5e5ac9536f8bb79da10c5c508b7f8981ffc97331fd1fe5f08fbfa24139
+  languageName: node
+  linkType: hard
+
+"electron-to-chromium@npm:^1.4.17":
+  version: 1.4.68
+  resolution: "electron-to-chromium@npm:1.4.68"
+  checksum: ca284d85670e9d46c8320a4363f23aaf6a150699095274770216eba64d786c6d9653630acb3987e59d1f878d8c89e6a61a3c0cb58338915560454940a3b4b060
   languageName: node
   linkType: hard
 
@@ -6699,6 +6722,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"node-releases@npm:^2.0.1":
+  version: 2.0.2
+  resolution: "node-releases@npm:2.0.2"
+  checksum: c01de6705e73b5d0aea8a303d3f96c4e3c72ac857b8940f70a61babb45ac4e8c7cf1e449a4667111dcda17a1b3b75d389ede6b6993e0b88595b9358b55eb0dc4
+  languageName: node
+  linkType: hard
+
 "node-source-walk@npm:^4.0.0, node-source-walk@npm:^4.2.0":
   version: 4.2.0
   resolution: "node-source-walk@npm:4.2.0"
@@ -7095,6 +7125,13 @@ __metadata:
   bin:
     phantomjs: ./bin/phantomjs
   checksum: 8a33eef321b6dccce553420597dd8d9c0074e5a357d547e0ea5be61b6e1e61df52efee81b32f5c187cde5743b7ae104e60f538e14228a0f4b8d5be1afc3504d3
+  languageName: node
+  linkType: hard
+
+"picocolors@npm:^1.0.0":
+  version: 1.0.0
+  resolution: "picocolors@npm:1.0.0"
+  checksum: 6616d34dd03bde8881c63402dea34f0b5972845b04b791b234446d4a408bc3d7f932acea3970a6b671d8f5c5aae1b1ce9fc1f89b0ed9a363469cf9da8e916b71
   languageName: node
   linkType: hard
 

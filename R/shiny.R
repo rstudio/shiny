@@ -478,6 +478,35 @@ ShinySession <- R6Class(
           # "json" unless requested otherwise. The only other valid value is
           # "rds".
           format <- params$format %||% "json"
+          # Machines can test their snapshot under different locales.
+          # R CMD check runs under the `C` locale.
+          # However, before this parameter, existing snapshots were most likely not
+          #   under the `C` locale is would cause failures. This parameter allows
+          #   users to opt-in to the `C` locale.
+          # From ?sort:
+          #   However, there are some caveats with the radix sort:
+          #     If ‘x’ is a ‘character’ vector, all elements must share the
+          #   same encoding. Only UTF-8 (including ASCII) and Latin-1
+          #   encodings are supported. Collation always follows the "C"
+          #   locale.
+          # {shinytest2} will always set `sortC=1`
+          # {shinytest} does not have `sortC` functionality.
+          #    Users should set `options(shiny.snapshotsortc = TRUE)` within their app.
+          # The sortingMethod should always be `radix` going forward.
+          sortMethod <-
+            if (!is.null(params$sortC)) {
+              if (params$sortC != "1") {
+                stop("The `sortC` parameter can only be `1` or not supplied")
+              }
+              "radix"
+            } else {
+              # Allow users to set an option for {shinytest2}.
+              if (isTRUE(getShinyOption("snapshotsortc", default = FALSE))) {
+                "radix"
+              } else {
+                "auto"
+              }
+            }
 
           values <- list()
 
@@ -520,7 +549,7 @@ ShinySession <- R6Class(
               }
             )
 
-            values$input <- sortByName(values$input)
+            values$input <- sortByName(values$input, method = sortMethod)
           }
 
           if (!is.null(params$output)) {
@@ -548,7 +577,7 @@ ShinySession <- R6Class(
               }
             )
 
-            values$output <- sortByName(values$output)
+            values$output <- sortByName(values$output, method = sortMethod)
           }
 
           if (!is.null(params$export)) {
@@ -569,7 +598,7 @@ ShinySession <- R6Class(
               )
             }
 
-            values$export <- sortByName(values$export)
+            values$export <- sortByName(values$export, method = sortMethod)
           }
 
           # Make sure input, output, and export are all named lists (at this
@@ -1114,7 +1143,12 @@ ShinySession <- R6Class(
                   structure(list(), class = "try-error", condition = cond)
                 } else if (inherits(cond, "shiny.output.cancel")) {
                   structure(list(), class = "cancel-output")
-                } else if (inherits(cond, "shiny.silent.error")) {
+                } else if (cnd_inherits(cond, "shiny.silent.error")) {
+                  # The error condition might have been chained by
+                  # foreign code, e.g. dplyr. Find the original error.
+                  while (!inherits(cond, "shiny.silent.error")) {
+                    cond <- cond$parent
+                  }
                   # Don't let shiny.silent.error go through the normal stop
                   # path of try, because we don't want it to print. But we
                   # do want to try to return the same looking result so that
@@ -1714,7 +1748,7 @@ ShinySession <- R6Class(
     },
 
     getTestSnapshotUrl = function(input = TRUE, output = TRUE, export = TRUE,
-                                  format = "json") {
+                                  format = "json", sortC = FALSE) {
       reqString <- function(group, value) {
         if (isTRUE(value))
           paste0(group, "=1")
@@ -1728,6 +1762,7 @@ ShinySession <- R6Class(
         reqString("input", input),
         reqString("output", output),
         reqString("export", export),
+        reqString("sortC", sortC),
         paste0("format=", format),
         sep = "&"
       )

@@ -1,21 +1,19 @@
+import type { InputBinding } from "../bindings";
+
 type EventPriority = "deferred" | "event" | "immediate";
+
+type InputPolicyOpts = {
+  priority: EventPriority;
+  el?: HTMLElement;
+  binding?: InputBinding;
+};
 
 // Schedules data to be sent to shinyapp at the next setTimeout(0).
 // Batches multiple input calls into one websocket message.
-class InputPolicy {
+interface InputPolicy {
   target: InputPolicy;
 
-  setInput(
-    name: string,
-    value: unknown,
-    opts: { priority: EventPriority }
-  ): void {
-    throw "not implemented";
-    name;
-    value;
-    opts;
-  }
+  setInput(name: string, value: unknown, opts: InputPolicyOpts): void;
 }
 
-export { InputPolicy };
-export type { EventPriority };
+export type { InputPolicy, EventPriority, InputPolicyOpts };

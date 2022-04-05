@@ -1,8 +1,8 @@
 # source("tools/documentation/updateReexports.R")
-# Will add all functions aliased in `./tools/documentation/reexports.yml`
+# Will add all functions aliased in `./tools/documentation/reexports.json`
 # Will save all reexports to `./R/reexports.R` and document to enforce all re-exports
-# This script needs information from `./tools/documentation/reexports.yml` to allow pkgdown to be on the same page
-# Information from `./tools/documentation/reexports.yml` will be used in `shiny-dev-center`
+# This script needs information from `./tools/documentation/reexports.json` to allow pkgdown to be on the same page
+# Information from `./tools/documentation/reexports.json` will be used in `shiny-dev-center`
 
 
 local({

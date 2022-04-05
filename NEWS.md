@@ -1,7 +1,9 @@
-shiny 1.7.1.9001
+shiny development
 ================
 
 ## Full changelog
+
+### Breaking changes
 
 ### Minor new features and improvements
 
@@ -11,10 +13,19 @@ shiny 1.7.1.9001
 
 * Extended description and added example usage of `httpResponse` function (#3471)
 
+* Default for `ref` input in `runGithub()` changed from `"master"` to `"HEAD"`. (#3346)
+
+* When taking a test snapshot, the sort order of the json keys of the `input`, `output`, and `export` fields is currently sorted using the locale of the machine. This can lead to inconsistent test snapshot results. To opt-in to a consistent ordering of snapshot fields with `{shinytest}`, please set the global option `options(shiny.snapshotsortc = TRUE)`. `{shinytest2}` users do not need to set this value.  (#3515)
+
 ### Bug fixes
+
+* Closed tidyverse/dplyr#5552: Compatibility of dplyr 1.0 (and rlang chained errors in general) with `req()`, `validate()`, and friends.
 
 * Closed #2955: Input and output bindings previously attempted to use `el['data-input-id']`, but that never worked. They now use `el.getAttribute('data-input-id')` instead. (#3538)
 
+* Closed tidyverse/dplyr#6154: Values from an `actionButton()` had S3 classes in the incorrect order.
+
+* Fixed a bug where updating an input value without a corresponding Input binding element did not trigger a JavaScript `shiny:inputchanged` event. Now, if no Input binding element is found, the `shiny:inputchanged` event is triggered on `window.document`. (#3584)
 
 shiny 1.7.1
 ===========

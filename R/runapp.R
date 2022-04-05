@@ -28,7 +28,7 @@
 #'   ports will be tried.
 #' @param launch.browser If true, the system's default web browser will be
 #'   launched automatically after the app is started. Defaults to true in
-#'   interactive sessions only. This value of this parameter can also be a
+#'   interactive sessions only. The value of this parameter can also be a
 #'   function to call with the application's URL.
 #' @param host The IPv4 address that the application should listen on. Defaults
 #'   to the `shiny.host` option, if set, or `"127.0.0.1"` if not. See

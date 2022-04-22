@@ -62,7 +62,7 @@
 <dd><p>Path to create new shiny application template.</p></dd>
 <dt>examples</dt>
 <dd><p>Either one of "default", "ask", "all", or any combination of
-"app", "rdir", "module", "shinytest", and "testthat". In an
+"app", "rdir", "module", and "tests". In an
 interactive session, "default" falls back to "ask"; in a non-interactive
 session, "default" falls back to "all". With "ask", this function will
 prompt the user to select which template items will be added to the new app
@@ -79,8 +79,7 @@ to select which components to add to the application. Choices are</p><div class=
 2: app.R              : Main application file
 3: R/example.R        : Helper file with R code
 4: R/example-module.R : Example module
-5: tests/shinytest/   : Tests using the shinytest package
-6: tests/testthat/    : Tests using the testthat package
+5: tests/testthat/    : Tests using the testthat and shinytest2 package
 </code></pre></div>
 
 <p>If option 1 is selected, the full example application including the
@@ -90,13 +89,11 @@ following files and directories is created:</p><div class="sourceCode"><pre><cod
 |   |- example-module.R
 |   `- example.R
 `- tests
-    |- shinytest.R
-    |- shinytest
-    |   `- mytest.R
     |- testthat.R
     `- testthat
         |- test-examplemodule.R
         |- test-server.R
+        |- test-shinytest2.R
         `- test-sort.R
 </code></pre></div>
 
@@ -110,15 +107,15 @@ and the second contains code for module created by the
 <li><p><code>tests/</code> contains various tests for the application. You may
 choose to use or remove any of them. They can be executed by the
 <code><a href="runTests.html">runTests()</a></code> function.</p></li>
-<li><p><code>tests/shinytest.R</code> is a test runner for test files in the
-<code>tests/shinytest/</code> directory.</p></li>
-<li><p><code>tests/shinytest/mytest.R</code> is a test that uses the
-<a href="https://rstudio.github.io/shinytest/" class="external-link">shinytest</a> package to do
-snapshot-based testing.</p></li>
 <li><p><code>tests/testthat.R</code> is a test runner for test files in the
-<code>tests/testthat/</code> directory using the <a href="https://testthat.r-lib.org/" class="external-link">testthat</a> package.</p></li>
+<code>tests/testthat/</code> directory using the
+<a href="https://rstudio.github.io/shinytest2/reference/test_app.html" class="external-link">shinytest2</a>
+package.</p></li>
 <li><p><code>tests/testthat/test-examplemodule.R</code> is a test for an application's module server function.</p></li>
 <li><p><code>tests/testthat/test-server.R</code> is a test for the application's server code</p></li>
+<li><p><code>tests/testthat/test-shinytest2.R</code> is a test that uses the
+<a href="https://rstudio.github.io/shinytest2/" class="external-link">shinytest2</a> package to do
+snapshot-based testing.</p></li>
 <li><p><code>tests/testthat/test-sort.R</code> is a test for a supporting function in the <code>R/</code> directory.</p></li>
 </ul></div>
 

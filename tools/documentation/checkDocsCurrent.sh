@@ -24,9 +24,8 @@ echo "Update Reexports..."
 Rscript './tools/documentation/updateReexports.R'
 echo "Check pkgdown..."
 Rscript './tools/documentation/checkPkgdown.R'
-POST_STATUS=$(git status --porcelain)
 
-if [ "$PRE_STATUS" != "$POST_STATUS" ]
+if [ -n "$(git status --porcelain)" ]
 then
   git status --porcelain
   >&2 echo "Please generate the reexports documentation and commit the updates."

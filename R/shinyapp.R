@@ -286,7 +286,7 @@ shinyAppDir_serverR <- function(appDir, options=list()) {
 #
 # The return value is a function that halts monitoring when called.
 initAutoReloadMonitor <- function(dir) {
-  if (!getOption("shiny.autoreload", FALSE)) {
+  if (!get_devmode_option("shiny.autoreload", FALSE)) {
     return(function(){})
   }
 

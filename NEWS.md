@@ -27,6 +27,9 @@ shiny development
 
 * Fixed a bug where updating an input value without a corresponding Input binding element did not trigger a JavaScript `shiny:inputchanged` event. Now, if no Input binding element is found, the `shiny:inputchanged` event is triggered on `window.document`. (#3584)
 
+* Closed #3581: Errors in throttled/debounced reactive expressions cause session to exit.
+
+
 shiny 1.7.1
 ===========
 

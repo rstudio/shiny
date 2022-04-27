@@ -13,7 +13,9 @@ shiny development
 
 * Default for `ref` input in `runGithub()` changed from `"master"` to `"HEAD"`. (#3346)
 
-* When taking a test snapshot, the sort order of the json keys of the `input`, `output`, and `export` fields is currently sorted using the locale of the machine. This can lead to inconsistent test snapshot results. To opt-in to a consistent ordering of snapshot fields with `{shinytest}`, please set the global option `options(shiny.snapshotsortc = TRUE)`. `{shinytest2}` users do not need to set this value.  (#3515)
+* When taking a test snapshot, the sort order of the json keys of the `input`, `output`, and `export` fields is currently sorted using the locale of the machine. This can lead to inconsistent test snapshot results. To opt-in to a consistent ordering of snapshot fields with `{shinytest}`, please set the global option `options(shiny.snapshotsortc = TRUE)`. `{shinytest2}` users do not need to set this value. (#3515)
+
+* The auto-reload feature (`options(shiny.autoreload=TRUE)`) was not being activated by `devmode(TRUE)`, despite a console message asserting that it was. (#3620)
 
 ### Bug fixes
 

@@ -516,7 +516,7 @@ splitLayout <- function(..., cellWidths = NULL, cellArgs = list()) {
   children <- children[childIdx]
   count <- length(children)
 
-  if (length(cellWidths) == 0 || is.na(cellWidths)) {
+  if (length(cellWidths) == 0 || any(is.na(cellWidths))) {
     cellWidths <- sprintf("%.3f%%", 100 / count)
   }
   cellWidths <- rep(cellWidths, length.out = count)

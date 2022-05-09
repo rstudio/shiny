@@ -1,5 +1,4 @@
 import $ from "jquery";
-import { toLowerCase } from "../utils";
 import type { BindScope } from "./bind";
 
 const reSingleton = /<!--(SHINY.SINGLETON\[([\w]+)\])-->([\s\S]*?)<!--\/\1-->/;
@@ -26,17 +25,15 @@ function renderHtml(
   if (where === "replace") {
     $(el).html(processed.html);
   } else {
-    let elElements: HTMLElement[];
-
-    if (el instanceof HTMLElement) {
-      elElements = [el];
-    } else {
-      elElements = el.toArray();
+    if (where === "beforeBegin") {
+      $(el).before(processed.html);
+    } else if (where === "afterBegin") {
+      $(el).prepend(processed.html);
+    } else if (where === "beforeEnd") {
+      $(el).append(processed.html);
+    } else if (where === "afterEnd") {
+      $(el).after(processed.html);
     }
-    $.each(elElements, (i, el) => {
-      // type InsertPosition = "beforebegin" | "afterbegin" | "beforeend" | "afterend"
-      el.insertAdjacentHTML(toLowerCase(where), processed.html);
-    });
   }
   return processed;
 }

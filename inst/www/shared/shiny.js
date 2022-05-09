@@ -3634,9 +3634,6 @@
   function isBS3() {
     return !window.bootstrap;
   }
-  function toLowerCase(str) {
-    return str.toLowerCase();
-  }
 
   // srcts/src/bindings/registry.ts
   function _classCallCheck(instance, Constructor) {
@@ -8953,15 +8950,15 @@
     if (where === "replace") {
       (0, import_jquery26.default)(el).html(processed.html);
     } else {
-      var elElements;
-      if (el instanceof HTMLElement) {
-        elElements = [el];
-      } else {
-        elElements = el.toArray();
+      if (where === "beforeBegin") {
+        (0, import_jquery26.default)(el).before(processed.html);
+      } else if (where === "afterBegin") {
+        (0, import_jquery26.default)(el).prepend(processed.html);
+      } else if (where === "beforeEnd") {
+        (0, import_jquery26.default)(el).append(processed.html);
+      } else if (where === "afterEnd") {
+        (0, import_jquery26.default)(el).after(processed.html);
       }
-      import_jquery26.default.each(elElements, function(i, el2) {
-        el2.insertAdjacentHTML(toLowerCase(where), processed.html);
-      });
     }
     return processed;
   }

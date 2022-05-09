@@ -22,17 +22,28 @@ function renderHtml(
 
   addToHead(processed.head);
   register(processed.singletons);
+
+  // N.B. even though the DOM insertion below _could_ be done with vanilla JS,
+  // we intentionally use jQuery so that <script> tags execute.
+  // https://github.com/rstudio/shiny/pull/3630
   if (where === "replace") {
     $(el).html(processed.html);
   } else {
-    if (where === "beforeBegin") {
-      $(el).before(processed.html);
-    } else if (where === "afterBegin") {
-      $(el).prepend(processed.html);
-    } else if (where === "beforeEnd") {
-      $(el).append(processed.html);
-    } else if (where === "afterEnd") {
-      $(el).after(processed.html);
+    switch (where.toLowerCase()) {
+      case "beforebegin":
+        $(el).before(processed.html);
+        break;
+      case "afterbegin":
+        $(el).prepend(processed.html);
+        break;
+      case "beforeend":
+        $(el).append(processed.html);
+        break;
+      case "afterend":
+        $(el).after(processed.html);
+        break;
+      default:
+        throw new Error("Unknown where position: " + where);
     }
   }
   return processed;

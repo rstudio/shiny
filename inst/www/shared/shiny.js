@@ -8950,14 +8950,21 @@
     if (where === "replace") {
       (0, import_jquery26.default)(el).html(processed.html);
     } else {
-      if (where === "beforeBegin") {
-        (0, import_jquery26.default)(el).before(processed.html);
-      } else if (where === "afterBegin") {
-        (0, import_jquery26.default)(el).prepend(processed.html);
-      } else if (where === "beforeEnd") {
-        (0, import_jquery26.default)(el).append(processed.html);
-      } else if (where === "afterEnd") {
-        (0, import_jquery26.default)(el).after(processed.html);
+      switch (where.toLowerCase()) {
+        case "beforebegin":
+          (0, import_jquery26.default)(el).before(processed.html);
+          break;
+        case "afterbegin":
+          (0, import_jquery26.default)(el).prepend(processed.html);
+          break;
+        case "beforeend":
+          (0, import_jquery26.default)(el).append(processed.html);
+          break;
+        case "afterend":
+          (0, import_jquery26.default)(el).after(processed.html);
+          break;
+        default:
+          throw new Error("Unknown where position: " + where);
       }
     }
     return processed;

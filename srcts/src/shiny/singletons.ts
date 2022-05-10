@@ -26,26 +26,26 @@ function renderHtml(
   // N.B. even though the DOM insertion below _could_ be done with vanilla JS,
   // we intentionally use jQuery so that <script> tags execute.
   // https://github.com/rstudio/shiny/pull/3630
-  if (where === "replace") {
-    $(el).html(processed.html);
-  } else {
-    switch (where.toLowerCase()) {
-      case "beforebegin":
-        $(el).before(processed.html);
-        break;
-      case "afterbegin":
-        $(el).prepend(processed.html);
-        break;
-      case "beforeend":
-        $(el).append(processed.html);
-        break;
-      case "afterend":
-        $(el).after(processed.html);
-        break;
-      default:
-        throw new Error("Unknown where position: " + where);
-    }
+  switch (where.toLowerCase()) {
+    case "replace":
+      $(el).html(processed.html);
+      break;
+    case "beforebegin":
+      $(el).before(processed.html);
+      break;
+    case "afterbegin":
+      $(el).prepend(processed.html);
+      break;
+    case "beforeend":
+      $(el).append(processed.html);
+      break;
+    case "afterend":
+      $(el).after(processed.html);
+      break;
+    default:
+      throw new Error("Unknown where position: " + where);
   }
+
   return processed;
 }
 // Take an object where keys are names of singletons, and merges it into

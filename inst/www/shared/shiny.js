@@ -8947,25 +8947,24 @@
     var processed = processHtml(html);
     addToHead(processed.head);
     register(processed.singletons);
-    if (where === "replace") {
-      (0, import_jquery26.default)(el).html(processed.html);
-    } else {
-      switch (where.toLowerCase()) {
-        case "beforebegin":
-          (0, import_jquery26.default)(el).before(processed.html);
-          break;
-        case "afterbegin":
-          (0, import_jquery26.default)(el).prepend(processed.html);
-          break;
-        case "beforeend":
-          (0, import_jquery26.default)(el).append(processed.html);
-          break;
-        case "afterend":
-          (0, import_jquery26.default)(el).after(processed.html);
-          break;
-        default:
-          throw new Error("Unknown where position: " + where);
-      }
+    switch (where.toLowerCase()) {
+      case "replace":
+        (0, import_jquery26.default)(el).html(processed.html);
+        break;
+      case "beforebegin":
+        (0, import_jquery26.default)(el).before(processed.html);
+        break;
+      case "afterbegin":
+        (0, import_jquery26.default)(el).prepend(processed.html);
+        break;
+      case "beforeend":
+        (0, import_jquery26.default)(el).append(processed.html);
+        break;
+      case "afterend":
+        (0, import_jquery26.default)(el).after(processed.html);
+        break;
+      default:
+        throw new Error("Unknown where position: " + where);
     }
     return processed;
   }

@@ -21,6 +21,8 @@ shiny development
 
 * Closed tidyverse/dplyr#5552: Compatibility of dplyr 1.0 (and rlang chained errors in general) with `req()`, `validate()`, and friends.
 
+* Closed #1545: `insertUI()` now executes `<script>` tags. (#3630)
+
 * Closed #2955: Input and output bindings previously attempted to use `el['data-input-id']`, but that never worked. They now use `el.getAttribute('data-input-id')` instead. (#3538)
 
 * Closed tidyverse/dplyr#6154: Values from an `actionButton()` had S3 classes in the incorrect order.

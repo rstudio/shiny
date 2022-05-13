@@ -9,108 +9,111 @@ template:
   # NOTE: These templates live in shiny-dev-center
   path: _pkgdown_templates
 reference:
-  - title: UI Layout
-    desc: Functions for laying out the user interface for your application.
+  - title: Page containers
+    desc: Create a user interface page container.
     contents:
-      - absolutePanel
       - bootstrapPage
-      - column
-      - conditionalPanel
-      - fillPage
-      - fillRow
-      - fixedPage
-      - fluidPage
-      - helpText
-      - icon
       - navbarPage
-      - navlistPanel
+      - fillPage
+      - htmlTemplate
+  - title: UI layout
+    desc: Control the layout of multiple UI components.
+    contents:
+      - column
+      - fillRow
       - sidebarLayout
-      - tabPanel
-      - tabsetPanel
-      - titlePanel
-      - inputPanel
       - flowLayout
       - splitLayout
       - verticalLayout
-      - wellPanel
-      - withMathJax
   - title: UI Inputs
-    desc: Functions for creating user interface elements that prompt the user for input values or interaction.
+    desc: Create UI that prompts the user for input values or interaction.
     contents:
-      - actionButton
-      - checkboxGroupInput
-      - checkboxInput
-      - dateInput
-      - dateRangeInput
-      - fileInput
-      - numericInput
-      - radioButtons
       - selectInput
       - varSelectInput
       - sliderInput
-      - submitButton
+      - dateInput
+      - dateRangeInput
+      - checkboxInput
+      - checkboxGroupInput
+      - radioButtons
+      - numericInput
       - textInput
       - textAreaInput
       - passwordInput
-      - updateActionButton
-      - updateCheckboxGroupInput
-      - updateCheckboxInput
-      - updateDateInput
-      - updateDateRangeInput
-      - updateNumericInput
-      - updateRadioButtons
+      - actionButton
+      - getQueryString
+      - submitButton
+  - title: Update inputs
+    desc: Programmatically update input values
+    contents:
       - updateSelectInput
       - updateSliderInput
+      - updateDateInput
+      - updateDateRangeInput
+      - updateCheckboxInput
+      - updateCheckboxGroupInput
+      - updateRadioButtons
+      - updateNumericInput
+      - updateTextInput
+      - updateTextAreaInput
+      - updateActionButton
+      - updateQueryString
+  - title: Navigation (tab) panels
+    desc: Create segments of UI content.
+    contents:
+      - navbarPage
+      - tabPanel
+      - tabsetPanel
+      - navlistPanel
       - updateTabsetPanel
       - insertTab
       - showTab
-      - updateTextInput
-      - updateTextAreaInput
-      - updateQueryString
-      - getQueryString
-  - title: UI Outputs
-    desc: Functions for creating user interface elements that, in conjunction with rendering functions, display different kinds of output from your application.
+  - title: UI panels
+    desc: Visually group together a section of UI components.
     contents:
-      - htmlOutput
-      - plotOutput
-      - outputOptions
-      - textOutput
+      - absolutePanel
+      - conditionalPanel
+      - titlePanel
+      - inputPanel
+      - wellPanel
+  - title: Uploads & downloads
+    desc: Allows users to upload and download files.
+    contents:
+      - fileInput
       - downloadButton
-      - Progress
-      - withProgress
-      - modalDialog
-      - urlModal
-      - showModal
-      - showNotification
-  - title: Interface builder functions
-    desc: A sub-library for writing HTML using R functions. These functions form the foundation on which the higher level user interface functions are built, and can also be used in your Shiny UI to provide custom HTML, CSS, and JavaScript.
+      - downloadHandler
+  - title: Custom UI
+    desc: Lower-level UI functions for creating custom HTML/CSS/JS.
     contents:
+      - icon
+      - markdown
+      - helpText
+      - withMathJax
       - builder
       - HTML
-      - include
-      - singleton
       - tagList
+      - insertUI
+      - include
       - tagAppendAttributes
       - tagAppendChild
       - validateCssUnit
       - withTags
-      - htmlTemplate
       - bootstrapLib
       - suppressDependencies
-      - insertUI
-      - markdown
-  - title: Rendering functions
-    desc: Functions that you use in your application's server side code, assigning them to outputs that appear in your user interface.
+      - singleton
+  - title: Rendering outputs
+    desc: UI (`*Output()`) and server (`render*()`) functions for generating content server-side.
     contents:
+      - plotOutput
       - renderPlot
-      - renderCachedPlot
-      - renderPrint
-      - renderDataTable
       - renderImage
-      - renderTable
+      - textOutput
+      - renderPrint
+      - htmlOutput
       - renderUI
-      - downloadHandler
-      - createRenderFunction
+      - renderDataTable
+      - renderTable
+      - outputOptions
   - title: Reactive programming
     desc: A sub-library that provides reactive programming facilities for R.
     contents:
@@ -132,87 +135,101 @@ reference:
       - reactiveTimer
       - domains
       - freezeReactiveValue
-  - title: Running
-    desc: Functions that are used to run or stop Shiny applications.
+  - title: Caching
+    desc: Make apps more responsive by setting up a persistent cache.
     contents:
+      - bindCache
+      - renderCachedPlot
+      - sizeGrowthRatio
+  - title: Create and run applications
+    desc: Create, run, stop, and hook into the lifecycle of Shiny applications.
+    contents:
+      - shinyApp
       - runApp
       - runGadget
       - runExample
-      - runGadget
       - runUrl
       - stopApp
+      - onStop
+      - onFlush
       - viewer
       - isRunning
       - loadSupport
-  - title: Bookmarking state
-    desc: Functions that are used for bookmarking and restoring state.
+  - title: Display messages
+    desc: Display messages to the user.
+    contents:
+      - helpText
+      - showNotification
+      - Progress
+      - withProgress
+      - modalDialog
+      - showModal
+      - urlModal
+  - title: Modules
+    desc: Control application complexity by namespacing UI and server code.
+    contents:
+      - moduleServer
+      - NS
+      - callModule
+  - title: Error validation
+    desc: Control how errors are shown to the user.
+    contents:
+      - req
+      - isTruthy
+      - validate
+      - safeError
+  - title: Bookmarking
+    desc: Bookmark and restore application state.
     contents:
       - bookmarkButton
       - enableBookmarking
       - setBookmarkExclude
       - showBookmarkUrlModal
       - onBookmark
+      - setSerializer
+      - restoreInput
+  - title: Static plot interaction
+    desc: Control the experience of interacting with static plots.
+    contents:
+      - brushedPoints
+      - brushOpts
+      - clickOpts
+  - title: Testing
+    desc: Test apps with and/or without a headless browser (shinytest).
+    contents:
+      - runTests
+      - testServer
+      - MockShinySession
+      - snapshotExclude
+      - snapshotPreprocessInput
+      - snapshotPreprocessOutput
+      - exportTestValues
+      - applyInputHandlers
+  - title: Utility functions
+    desc: Various utilities for advanced users.
+    contents:
+      - session
+      - shinyOptions
+      - serverInfo
+      - getCurrentOutputInfo
+      - httpResponse
+      - devmode
+      - shinyAppTemplate
+      - parseQueryString
+      - plotPNG
+      - repeatable
+      - key_missing
+      - maskReactiveContext
   - title: Extending Shiny
-    desc: Functions that are intended to be called by third-party packages that extend Shiny.
+    desc: Various utilities for 3rd party packages that extend Shiny.
     contents:
       - createWebDependency
       - resourcePaths
       - registerInputHandler
       - removeInputHandler
-      - markRenderFunction
-  - title: Utility functions
-    desc: Miscellaneous utilities that may be useful to advanced users or when extending Shiny.
-    contents:
-      - devmode
-      - shinyAppTemplate
-      - req
-      - isTruthy
-      - validate
-      - session
-      - shinyOptions
-      - safeError
-      - onFlush
-      - restoreInput
-      - applyInputHandlers
-      - parseQueryString
-      - getCurrentOutputInfo
-      - plotPNG
-      - sizeGrowthRatio
-      - exportTestValues
-      - setSerializer
-      - snapshotExclude
-      - snapshotPreprocessInput
-      - snapshotPreprocessOutput
-      - repeatable
-      - serverInfo
-      - onStop
-      - httpResponse
-      - key_missing
-  - title: Plot interaction
-    desc: Functions related to interactive plots
-    contents:
-      - brushedPoints
-      - brushOpts
-      - clickOpts
-  - title: Modules
-    desc: Functions for modularizing Shiny apps
-    contents:
-      - NS
-      - moduleServer
-      - callModule
-  - title: Embedding
-    desc: Functions that are intended for third-party packages that embed Shiny applications.
-    contents:
-      - shinyApp
-      - maskReactiveContext
-  - title: Testing
-    desc: Functions intended for testing of Shiny components
-    contents:
-      - runTests
-      - testServer
-      - MockShinySession
+      - createRenderFunction
   - title: Superseded
-    desc: Functions that have been `r lifecycle::badge("superseded")`
+    desc: Functions that have been `r lifecycle::badge("superseded")`.
     contents:
       - markRenderFunction
       - shinyUI

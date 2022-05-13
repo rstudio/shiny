@@ -1,87 +1,4 @@
-
-#' Create a page with fluid layout
-#'
-#' Functions for creating fluid page layouts. A fluid page layout consists of
-#' rows which in turn include columns. Rows exist for the purpose of making sure
-#' their elements appear on the same line (if the browser has adequate width).
-#' Columns exist for the purpose of defining how much horizontal space within a
-#' 12-unit wide grid it's elements should occupy. Fluid pages scale their
-#' components in realtime to fill all available browser width.
-#'
-#' @param ... Elements to include within the page
-#' @param title The browser window title (defaults to the host URL of the page).
-#'   Can also be set as a side effect of the [titlePanel()] function.
-#' @inheritParams bootstrapPage
-#'
-#' @return A UI defintion that can be passed to the [shinyUI] function.
-#'
-#' @details To create a fluid page use the `fluidPage` function and include
-#'   instances of `fluidRow` and [column()] within it. As an
-#'   alternative to low-level row and column functions you can also use
-#'   higher-level layout functions like [sidebarLayout()].
-#'
-#' @note See the [
-#'   Shiny-Application-Layout-Guide](https://shiny.rstudio.com/articles/layout-guide.html) for additional details on laying out fluid
-#'   pages.
-#'
-#' @family layout functions
-#' @seealso [column()]
-#'
-#' @examples
-#' ## Only run examples in interactive R sessions
-#' if (interactive()) {
-#'
-#' # Example of UI with fluidPage
-#' ui <- fluidPage(
-#'
-#'   # Application title
-#'   titlePanel("Hello Shiny!"),
-#'
-#'   sidebarLayout(
-#'
-#'     # Sidebar with a slider input
-#'     sidebarPanel(
-#'       sliderInput("obs",
-#'                   "Number of observations:",
-#'                   min = 0,
-#'                   max = 1000,
-#'                   value = 500)
-#'     ),
-#'
-#'     # Show a plot of the generated distribution
-#'     mainPanel(
-#'       plotOutput("distPlot")
-#'     )
-#'   )
-#' )
-#'
-#' # Server logic
-#' server <- function(input, output) {
-#'   output$distPlot <- renderPlot({
-#'     hist(rnorm(input$obs))
-#'   })
-#' }
-#'
-#' # Complete app with UI and server components
-#' shinyApp(ui, server)
-#'
-#'
-#' # UI demonstrating column layouts
-#' ui <- fluidPage(
-#'   title = "Hello Shiny!",
-#'   fluidRow(
-#'     column(width = 4,
-#'       "4"
-#'     ),
-#'     column(width = 3, offset = 2,
-#'       "3 offset 2"
-#'     )
-#'   )
-#' )
-#'
-#' shinyApp(ui, server = function(input, output) { })
-#' }
-#' @rdname fluidPage
+#' @rdname bootstrapPage
 #' @export
 fluidPage <- function(..., title = NULL, theme = NULL, lang = NULL) {
   bootstrapPage(div(class = "container-fluid", ...),
@@ -91,62 +8,13 @@ fluidPage <- function(..., title = NULL, theme = NULL, lang = NULL) {
 }
 
 
-#' @rdname fluidPage
+#' @rdname column
 #' @export
 fluidRow <- function(...) {
   div(class = "row", ...)
 }
 
-#' Create a page with a fixed layout
-#'
-#' Functions for creating fixed page layouts. A fixed page layout consists of
-#' rows which in turn include columns. Rows exist for the purpose of making sure
-#' their elements appear on the same line (if the browser has adequate width).
-#' Columns exist for the purpose of defining how much horizontal space within a
-#' 12-unit wide grid it's elements should occupy. Fixed pages limit their width
-#' to 940 pixels on a typical display, and 724px or 1170px on smaller and larger
-#' displays respectively.
-#'
-#' @param ... Elements to include within the container
-#' @param title The browser window title (defaults to the host URL of the page)
-#' @inheritParams bootstrapPage
-#'
-#' @return A UI defintion that can be passed to the [shinyUI] function.
-#'
-#' @details To create a fixed page use the `fixedPage` function and include
-#'   instances of `fixedRow` and [column()] within it. Note that
-#'   unlike [fluidPage()], fixed pages cannot make use of higher-level
-#'   layout functions like `sidebarLayout`, rather, all layout must be done
-#'   with `fixedRow` and `column`.
-#'
-#' @note See the [
-#'   Shiny Application Layout Guide](https://shiny.rstudio.com/articles/layout-guide.html) for additional details on laying out fixed
-#'   pages.
-#'
-#' @family layout functions
-#'
-#' @seealso [column()]
-#'
-#' @examples
-#' ## Only run examples in interactive R sessions
-#' if (interactive()) {
-#'
-#' ui <- fixedPage(
-#'   title = "Hello, Shiny!",
-#'   fixedRow(
-#'     column(width = 4,
-#'       "4"
-#'     ),
-#'     column(width = 3, offset = 2,
-#'       "3 offset 2"
-#'     )
-#'   )
-#' )
-#'
-#' shinyApp(ui, server = function(input, output) { })
-#' }
-#'
-#' @rdname fixedPage
+#' @rdname bootstrapPage
 #' @export
 fixedPage <- function(..., title = NULL, theme = NULL, lang = NULL) {
   bootstrapPage(div(class = "container", ...),
@@ -155,28 +23,39 @@ fixedPage <- function(..., title = NULL, theme = NULL, lang = NULL) {
                 lang = lang)
 }
 
-#' @rdname fixedPage
+#' @rdname column
 #' @export
 fixedRow <- function(...) {
   div(class = "row", ...)
 }
 
-
-#' Create a column within a UI definition
+#' Responsive row-column based layout
 #'
-#' Create a column for use within a  [fluidRow()] or
-#' [fixedRow()]
+#' Layout UI components using Bootstrap's grid layout system. Use
+#' `fluidRow()` to group elements that should appear on the same line (if the
+#' browser has adequate width) and `column()` to define how much horizontal
+#' space within a 12-unit wide grid each on of these elements should occupy. See
+#' the [layout guide](https://shiny.rstudio.com/articles/layout-guide.html) for
+#' more context and examples.
 #'
-#' @param width The grid width of the column (must be between 1 and 12)
-#' @param ... Elements to include within the column
+#' To work properly, these functions need [Bootstrap](https://getbootstrap.com)
+#' included on the page. Since most Shiny apps use [bootstrapPage()]
+#' under-the-hood, this is usually the case, but custom page containers (i.e.,
+#' [htmlTemplate()]) may need to explicitly include [bootstrapLib()]
+#' dependencies.
+#'
+#' @param width The grid width of the column (must be between 1 and 12). When
+#'   the device width is small (e.g., the viewer is on a mobile phone), the
+#'   width is always 12. For more control over these responsive breakpoints, use
+#'   Bootstrap's grid system more directly (e.g., `fluidRow(div(class =
+#'   "col-lg-2", ...))`).
+#' @param ... UI elements (i.e., [tags]). For `fluidRow()`, `...` should be a set of `column()`s.
 #' @param offset The number of columns to offset this column from the end of the
 #'   previous column.
 #'
-#' @return A column that can be included within a
-#'   [fluidRow()] or [fixedRow()].
+#' @return A UI element (i.e., [tags]).
 #'
-#'
-#' @seealso [fluidRow()], [fixedRow()].
+#' @seealso [fluidPage()]
 #'
 #' @examples
 #' ## Only run examples in interactive R sessions
@@ -202,16 +81,10 @@ fixedRow <- function(...) {
 #'
 #' shinyApp(ui, server)
 #'
-#'
-#'
 #' ui <- fluidPage(
 #'   fluidRow(
-#'     column(width = 4,
-#'       "4"
-#'     ),
-#'     column(width = 3, offset = 2,
-#'       "3 offset 2"
-#'     )
+#'     column(width = 4, "4"),
+#'     column(width = 3, offset = 2, "3 offset 2")
 #'   )
 #' )
 #' shinyApp(ui, server = function(input, output) { })

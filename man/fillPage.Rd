@@ -37,10 +37,11 @@ shown in the document).}
 build of Bootstrap 3 with a customized version of Bootstrap 3 or higher.
 \item A character string pointing to an alternative Bootstrap stylesheet
 (normally a css file within the www directory, e.g. \code{www/bootstrap.css}).
+This option is here mainly for legacy reasons.
 }}
 
 \item{lang}{ISO 639-1 language code for the HTML page, such as "en" or "ko".
-This will be used as the lang in the \code{<html>} tag, as in \code{<html lang="en">}.
+This will be used as the lang in the \verb{<html>} tag, as in \verb{<html lang="en">}.
 The default (NULL) results in an empty string.}
 }
 \description{
@@ -101,9 +102,7 @@ fillPage(
 }
 \seealso{
 Other layout functions: 
-\code{\link{fixedPage}()},
 \code{\link{flowLayout}()},
-\code{\link{fluidPage}()},
 \code{\link{navbarPage}()},
 \code{\link{sidebarLayout}()},
 \code{\link{splitLayout}()},

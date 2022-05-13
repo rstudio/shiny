@@ -14,6 +14,7 @@ bootstrapLib(theme = NULL)
 build of Bootstrap 3 with a customized version of Bootstrap 3 or higher.
 \item A character string pointing to an alternative Bootstrap stylesheet
 (normally a css file within the www directory, e.g. \code{www/bootstrap.css}).
+This option is here mainly for legacy reasons.
 }}
 }
 \description{

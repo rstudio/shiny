@@ -1,3 +1,4 @@
+import { debounce } from "../time";
 import { mergeSort } from "../utils";
 
 interface BindingBase {
@@ -9,6 +10,10 @@ interface BindingObj<Binding> {
   priority: number;
   name?: string;
 }
+
+const debouncedBind = debounce(10, () => {
+  Shiny.bindAll(document.documentElement);
+});
 
 class BindingRegistry<Binding extends BindingBase> {
   name: string;
@@ -22,6 +27,19 @@ class BindingRegistry<Binding extends BindingBase> {
     if (bindingName) {
       this.bindingNames[bindingName] = bindingObj;
       binding.name = bindingName;
+    }
+
+    // If this registration happens after Shiny has initialized and outside of a
+    // renderHtml() context, then this is likely happening after Shiny has
+    // attempted to bindAll() before all bindings are registered. At least one
+    // scenario of where this can happen is when some JS code calls register()
+    // in a require() callback (or, more generally, a setTimeout()). (#3635)
+    if (
+      Shiny &&
+      Shiny.bindAll &&
+      !(window as unknown)["Shiny"]._renderingHtml
+    ) {
+      debouncedBind();
     }
   }
 

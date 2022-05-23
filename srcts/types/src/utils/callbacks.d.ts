@@ -10,6 +10,7 @@ declare class Callbacks {
     id: number;
     register(fn: () => void, once?: boolean): () => void;
     invoke(): void;
+    clear(): void;
     count(): number;
 }
 export { Callbacks };

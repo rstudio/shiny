@@ -3701,6 +3701,11 @@
         }
       }
     }, {
+      key: "clear",
+      value: function clear() {
+        this.callbacks = {};
+      }
+    }, {
       key: "count",
       value: function count() {
         return Object.keys(this.callbacks).length;

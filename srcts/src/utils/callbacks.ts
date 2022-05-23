@@ -33,6 +33,10 @@ class Callbacks {
     }
   }
 
+  clear(): void {
+    this.callbacks = {};
+  }
+
   count(): number {
     return Object.keys(this.callbacks).length;
   }

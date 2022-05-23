@@ -72,14 +72,19 @@ function renderHtml(
   dependencies: HtmlDep[],
   where: WherePosition = "replace"
 ): ReturnType<typeof singletonsRenderHtml> {
-  (window as unknown)["Shiny"]._renderingHtml = true;
+  renderHtml._renderCount++;
   try {
     renderDependencies(dependencies);
     return singletonsRenderHtml(html, el, where);
   } finally {
-    (window as unknown)["Shiny"]._renderingHtml = false;
+    renderHtml._renderCount--;
   }
 }
+
+renderHtml._renderCount = 0;
+renderHtml.isExecuting = function () {
+  return renderHtml._renderCount > 0;
+};
 
 type HtmlDepVersion = string;
 

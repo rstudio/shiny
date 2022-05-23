@@ -1,3 +1,4 @@
+import { Callbacks } from "../utils/callbacks";
 interface BindingBase {
     name: string;
 }
@@ -12,7 +13,9 @@ declare class BindingRegistry<Binding extends BindingBase> {
     bindingNames: {
         [key: string]: BindingObj<Binding>;
     };
+    registerCallbacks: Callbacks;
     register(binding: Binding, bindingName: string, priority?: number): void;
+    onRegister(fn: () => void, once?: boolean): void;
     setPriority(bindingName: string, priority: number): void;
     getPriority(bindingName: string): number | false;
     getBindings(): Array<BindingObj<Binding>>;

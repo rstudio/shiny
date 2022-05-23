@@ -2918,282 +2918,6 @@
     });
   }
 
-  // srcts/src/time/debounce.ts
-  function _classCallCheck(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  }
-  function _defineProperties(target, props) {
-    for (var i = 0; i < props.length; i++) {
-      var descriptor = props[i];
-      descriptor.enumerable = descriptor.enumerable || false;
-      descriptor.configurable = true;
-      if ("value" in descriptor)
-        descriptor.writable = true;
-      Object.defineProperty(target, descriptor.key, descriptor);
-    }
-  }
-  function _createClass(Constructor, protoProps, staticProps) {
-    if (protoProps)
-      _defineProperties(Constructor.prototype, protoProps);
-    if (staticProps)
-      _defineProperties(Constructor, staticProps);
-    return Constructor;
-  }
-  function _defineProperty(obj, key, value) {
-    if (key in obj) {
-      Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });
-    } else {
-      obj[key] = value;
-    }
-    return obj;
-  }
-  var Debouncer = /* @__PURE__ */ function() {
-    function Debouncer2(target, func, delayMs) {
-      _classCallCheck(this, Debouncer2);
-      _defineProperty(this, "target", void 0);
-      _defineProperty(this, "func", void 0);
-      _defineProperty(this, "delayMs", void 0);
-      _defineProperty(this, "timerId", void 0);
-      _defineProperty(this, "args", void 0);
-      this.target = target;
-      this.func = func;
-      this.delayMs = delayMs;
-      this.timerId = null;
-      this.args = null;
-    }
-    _createClass(Debouncer2, [{
-      key: "normalCall",
-      value: function normalCall() {
-        var _this = this;
-        this.$clearTimer();
-        for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-          args[_key] = arguments[_key];
-        }
-        this.args = args;
-        this.timerId = setTimeout(function() {
-          if (_this.timerId === null)
-            return;
-          _this.$clearTimer();
-          _this.$invoke();
-        }, this.delayMs);
-      }
-    }, {
-      key: "immediateCall",
-      value: function immediateCall() {
-        this.$clearTimer();
-        for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-          args[_key2] = arguments[_key2];
-        }
-        this.args = args;
-        this.$invoke();
-      }
-    }, {
-      key: "isPending",
-      value: function isPending() {
-        return this.timerId !== null;
-      }
-    }, {
-      key: "$clearTimer",
-      value: function $clearTimer() {
-        if (this.timerId !== null) {
-          clearTimeout(this.timerId);
-          this.timerId = null;
-        }
-      }
-    }, {
-      key: "$invoke",
-      value: function $invoke() {
-        if (this.args && this.args.length > 0) {
-          this.func.apply(this.target, this.args);
-        } else {
-          this.func.apply(this.target);
-        }
-        this.args = null;
-      }
-    }]);
-    return Debouncer2;
-  }();
-  function debounce(threshold, func) {
-    var timerId = null;
-    return function thisFunc() {
-      for (var _len3 = arguments.length, args = new Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
-        args[_key3] = arguments[_key3];
-      }
-      if (timerId !== null) {
-        clearTimeout(timerId);
-        timerId = null;
-      }
-      timerId = setTimeout(function() {
-        if (timerId === null)
-          return;
-        timerId = null;
-        func.apply(thisFunc, args);
-      }, threshold);
-    };
-  }
-
-  // srcts/src/time/invoke.ts
-  function _classCallCheck2(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  }
-  function _defineProperties2(target, props) {
-    for (var i = 0; i < props.length; i++) {
-      var descriptor = props[i];
-      descriptor.enumerable = descriptor.enumerable || false;
-      descriptor.configurable = true;
-      if ("value" in descriptor)
-        descriptor.writable = true;
-      Object.defineProperty(target, descriptor.key, descriptor);
-    }
-  }
-  function _createClass2(Constructor, protoProps, staticProps) {
-    if (protoProps)
-      _defineProperties2(Constructor.prototype, protoProps);
-    if (staticProps)
-      _defineProperties2(Constructor, staticProps);
-    return Constructor;
-  }
-  function _defineProperty2(obj, key, value) {
-    if (key in obj) {
-      Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });
-    } else {
-      obj[key] = value;
-    }
-    return obj;
-  }
-  var Invoker = /* @__PURE__ */ function() {
-    function Invoker2(target, func) {
-      _classCallCheck2(this, Invoker2);
-      _defineProperty2(this, "target", void 0);
-      _defineProperty2(this, "func", void 0);
-      this.target = target;
-      this.func = func;
-    }
-    _createClass2(Invoker2, [{
-      key: "normalCall",
-      value: function normalCall() {
-        for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-          args[_key] = arguments[_key];
-        }
-        this.func.apply(this.target, args);
-      }
-    }, {
-      key: "immediateCall",
-      value: function immediateCall() {
-        for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-          args[_key2] = arguments[_key2];
-        }
-        this.func.apply(this.target, args);
-      }
-    }]);
-    return Invoker2;
-  }();
-
-  // srcts/src/time/throttle.ts
-  function _classCallCheck3(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  }
-  function _defineProperties3(target, props) {
-    for (var i = 0; i < props.length; i++) {
-      var descriptor = props[i];
-      descriptor.enumerable = descriptor.enumerable || false;
-      descriptor.configurable = true;
-      if ("value" in descriptor)
-        descriptor.writable = true;
-      Object.defineProperty(target, descriptor.key, descriptor);
-    }
-  }
-  function _createClass3(Constructor, protoProps, staticProps) {
-    if (protoProps)
-      _defineProperties3(Constructor.prototype, protoProps);
-    if (staticProps)
-      _defineProperties3(Constructor, staticProps);
-    return Constructor;
-  }
-  function _defineProperty3(obj, key, value) {
-    if (key in obj) {
-      Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });
-    } else {
-      obj[key] = value;
-    }
-    return obj;
-  }
-  var Throttler = /* @__PURE__ */ function() {
-    function Throttler2(target, func, delayMs) {
-      _classCallCheck3(this, Throttler2);
-      _defineProperty3(this, "target", void 0);
-      _defineProperty3(this, "func", void 0);
-      _defineProperty3(this, "delayMs", void 0);
-      _defineProperty3(this, "timerId", void 0);
-      _defineProperty3(this, "args", void 0);
-      this.target = target;
-      this.func = func;
-      this.delayMs = delayMs;
-      this.timerId = null;
-      this.args = null;
-    }
-    _createClass3(Throttler2, [{
-      key: "normalCall",
-      value: function normalCall() {
-        for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-          args[_key] = arguments[_key];
-        }
-        this.args = args;
-        if (this.timerId === null) {
-          this.$invoke();
-        }
-      }
-    }, {
-      key: "immediateCall",
-      value: function immediateCall() {
-        this.$clearTimer();
-        for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-          args[_key2] = arguments[_key2];
-        }
-        this.args = args;
-        this.$invoke();
-      }
-    }, {
-      key: "isPending",
-      value: function isPending() {
-        return this.args !== null;
-      }
-    }, {
-      key: "$clearTimer",
-      value: function $clearTimer() {
-        if (this.timerId !== null) {
-          clearTimeout(this.timerId);
-          this.timerId = null;
-        }
-      }
-    }, {
-      key: "$invoke",
-      value: function $invoke() {
-        var _this = this;
-        if (this.args === null) {
-          return;
-        }
-        this.func.apply(this.target, this.args);
-        this.args = null;
-        this.timerId = setTimeout(function() {
-          if (_this.timerId === null)
-            return;
-          _this.$clearTimer();
-          if (_this.isPending()) {
-            _this.$invoke();
-          }
-        }, this.delayMs);
-      }
-    }]);
-    return Throttler2;
-  }();
-
   // srcts/src/utils/index.ts
   var import_es_regexp_exec = __toModule(require_es_regexp_exec());
 
@@ -3911,13 +3635,13 @@
     return !window.bootstrap;
   }
 
-  // srcts/src/bindings/registry.ts
-  function _classCallCheck4(instance, Constructor) {
+  // srcts/src/utils/callbacks.ts
+  function _classCallCheck(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
       throw new TypeError("Cannot call a class as a function");
     }
   }
-  function _defineProperties4(target, props) {
+  function _defineProperties(target, props) {
     for (var i = 0; i < props.length; i++) {
       var descriptor = props[i];
       descriptor.enumerable = descriptor.enumerable || false;
@@ -3927,14 +3651,14 @@
       Object.defineProperty(target, descriptor.key, descriptor);
     }
   }
-  function _createClass4(Constructor, protoProps, staticProps) {
+  function _createClass(Constructor, protoProps, staticProps) {
     if (protoProps)
-      _defineProperties4(Constructor.prototype, protoProps);
+      _defineProperties(Constructor.prototype, protoProps);
     if (staticProps)
-      _defineProperties4(Constructor, staticProps);
+      _defineProperties(Constructor, staticProps);
     return Constructor;
   }
-  function _defineProperty4(obj, key, value) {
+  function _defineProperty(obj, key, value) {
     if (key in obj) {
       Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });
     } else {
@@ -3942,17 +3666,89 @@
     }
     return obj;
   }
-  var debouncedBind = debounce(10, function() {
-    Shiny.bindAll(document.documentElement);
-  });
+  var Callbacks = /* @__PURE__ */ function() {
+    function Callbacks2() {
+      _classCallCheck(this, Callbacks2);
+      _defineProperty(this, "callbacks", {});
+      _defineProperty(this, "id", 0);
+    }
+    _createClass(Callbacks2, [{
+      key: "register",
+      value: function register2(fn) {
+        var _this = this;
+        var once = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : true;
+        this.id += 1;
+        var id = this.id;
+        this.callbacks[id] = {
+          fn: fn,
+          once: once
+        };
+        return function() {
+          delete _this.callbacks[id];
+        };
+      }
+    }, {
+      key: "invoke",
+      value: function invoke() {
+        for (var id in this.callbacks) {
+          var cb = this.callbacks[id];
+          try {
+            cb.fn();
+          } finally {
+            if (cb.once)
+              delete this.callbacks[id];
+          }
+        }
+      }
+    }, {
+      key: "count",
+      value: function count() {
+        return Object.keys(this.callbacks).length;
+      }
+    }]);
+    return Callbacks2;
+  }();
+
+  // srcts/src/bindings/registry.ts
+  function _classCallCheck2(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+  function _defineProperties2(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor)
+        descriptor.writable = true;
+      Object.defineProperty(target, descriptor.key, descriptor);
+    }
+  }
+  function _createClass2(Constructor, protoProps, staticProps) {
+    if (protoProps)
+      _defineProperties2(Constructor.prototype, protoProps);
+    if (staticProps)
+      _defineProperties2(Constructor, staticProps);
+    return Constructor;
+  }
+  function _defineProperty2(obj, key, value) {
+    if (key in obj) {
+      Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });
+    } else {
+      obj[key] = value;
+    }
+    return obj;
+  }
   var BindingRegistry = /* @__PURE__ */ function() {
     function BindingRegistry2() {
-      _classCallCheck4(this, BindingRegistry2);
-      _defineProperty4(this, "name", void 0);
-      _defineProperty4(this, "bindings", []);
-      _defineProperty4(this, "bindingNames", {});
+      _classCallCheck2(this, BindingRegistry2);
+      _defineProperty2(this, "name", void 0);
+      _defineProperty2(this, "bindings", []);
+      _defineProperty2(this, "bindingNames", {});
+      _defineProperty2(this, "registerCallbacks", new Callbacks());
     }
-    _createClass4(BindingRegistry2, [{
+    _createClass2(BindingRegistry2, [{
       key: "register",
       value: function register2(binding, bindingName) {
         var priority = arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : 0;
@@ -3965,9 +3761,13 @@
           this.bindingNames[bindingName] = bindingObj;
           binding.name = bindingName;
         }
-        if (Shiny && Shiny.bindAll && !window["Shiny"]._renderingHtml) {
-          debouncedBind();
-        }
+        this.registerCallbacks.invoke();
+      }
+    }, {
+      key: "onRegister",
+      value: function onRegister(fn) {
+        var once = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : true;
+        this.registerCallbacks.register(fn, once);
       }
     }, {
       key: "setPriority",
@@ -3997,12 +3797,12 @@
   }();
 
   // srcts/src/bindings/input/inputBinding.ts
-  function _classCallCheck5(instance, Constructor) {
+  function _classCallCheck3(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
       throw new TypeError("Cannot call a class as a function");
     }
   }
-  function _defineProperties5(target, props) {
+  function _defineProperties3(target, props) {
     for (var i = 0; i < props.length; i++) {
       var descriptor = props[i];
       descriptor.enumerable = descriptor.enumerable || false;
@@ -4012,14 +3812,14 @@
       Object.defineProperty(target, descriptor.key, descriptor);
     }
   }
-  function _createClass5(Constructor, protoProps, staticProps) {
+  function _createClass3(Constructor, protoProps, staticProps) {
     if (protoProps)
-      _defineProperties5(Constructor.prototype, protoProps);
+      _defineProperties3(Constructor.prototype, protoProps);
     if (staticProps)
-      _defineProperties5(Constructor, staticProps);
+      _defineProperties3(Constructor, staticProps);
     return Constructor;
   }
-  function _defineProperty5(obj, key, value) {
+  function _defineProperty3(obj, key, value) {
     if (key in obj) {
       Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });
     } else {
@@ -4029,10 +3829,10 @@
   }
   var InputBinding = /* @__PURE__ */ function() {
     function InputBinding2() {
-      _classCallCheck5(this, InputBinding2);
-      _defineProperty5(this, "name", void 0);
+      _classCallCheck3(this, InputBinding2);
+      _defineProperty3(this, "name", void 0);
     }
-    _createClass5(InputBinding2, [{
+    _createClass3(InputBinding2, [{
       key: "find",
       value: function find2(scope) {
         throw "Not implemented";
@@ -4606,12 +4406,12 @@
     }
     return _typeof(obj);
   }
-  function _classCallCheck6(instance, Constructor) {
+  function _classCallCheck4(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
       throw new TypeError("Cannot call a class as a function");
     }
   }
-  function _defineProperties6(target, props) {
+  function _defineProperties4(target, props) {
     for (var i = 0; i < props.length; i++) {
       var descriptor = props[i];
       descriptor.enumerable = descriptor.enumerable || false;
@@ -4621,11 +4421,11 @@
       Object.defineProperty(target, descriptor.key, descriptor);
     }
   }
-  function _createClass6(Constructor, protoProps, staticProps) {
+  function _createClass4(Constructor, protoProps, staticProps) {
     if (protoProps)
-      _defineProperties6(Constructor.prototype, protoProps);
+      _defineProperties4(Constructor.prototype, protoProps);
     if (staticProps)
-      _defineProperties6(Constructor, staticProps);
+      _defineProperties4(Constructor, staticProps);
     return Constructor;
   }
   function _inherits(subClass, superClass) {
@@ -4693,10 +4493,10 @@
     _inherits(CheckboxInputBinding2, _InputBinding);
     var _super = _createSuper(CheckboxInputBinding2);
     function CheckboxInputBinding2() {
-      _classCallCheck6(this, CheckboxInputBinding2);
+      _classCallCheck4(this, CheckboxInputBinding2);
       return _super.apply(this, arguments);
     }
-    _createClass6(CheckboxInputBinding2, [{
+    _createClass4(CheckboxInputBinding2, [{
       key: "find",
       value: function find2(scope) {
         return (0, import_jquery6.default)(scope).find('input[type="checkbox"]');
@@ -4771,12 +4571,12 @@
     }
     return _typeof2(obj);
   }
-  function _classCallCheck7(instance, Constructor) {
+  function _classCallCheck5(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
       throw new TypeError("Cannot call a class as a function");
     }
   }
-  function _defineProperties7(target, props) {
+  function _defineProperties5(target, props) {
     for (var i = 0; i < props.length; i++) {
       var descriptor = props[i];
       descriptor.enumerable = descriptor.enumerable || false;
@@ -4786,11 +4586,11 @@
       Object.defineProperty(target, descriptor.key, descriptor);
     }
   }
-  function _createClass7(Constructor, protoProps, staticProps) {
+  function _createClass5(Constructor, protoProps, staticProps) {
     if (protoProps)
-      _defineProperties7(Constructor.prototype, protoProps);
+      _defineProperties5(Constructor.prototype, protoProps);
     if (staticProps)
-      _defineProperties7(Constructor, staticProps);
+      _defineProperties5(Constructor, staticProps);
     return Constructor;
   }
   function _inherits2(subClass, superClass) {
@@ -4867,10 +4667,10 @@
     _inherits2(CheckboxGroupInputBinding2, _InputBinding);
     var _super = _createSuper2(CheckboxGroupInputBinding2);
     function CheckboxGroupInputBinding2() {
-      _classCallCheck7(this, CheckboxGroupInputBinding2);
+      _classCallCheck5(this, CheckboxGroupInputBinding2);
       return _super.apply(this, arguments);
     }
-    _createClass7(CheckboxGroupInputBinding2, [{
+    _createClass5(CheckboxGroupInputBinding2, [{
       key: "find",
       value: function find2(scope) {
         return (0, import_jquery7.default)(scope).find(".shiny-input-checkboxgroup");
@@ -5080,12 +4880,12 @@
     }
     return _typeof3(obj);
   }
-  function _classCallCheck8(instance, Constructor) {
+  function _classCallCheck6(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
       throw new TypeError("Cannot call a class as a function");
     }
   }
-  function _defineProperties8(target, props) {
+  function _defineProperties6(target, props) {
     for (var i = 0; i < props.length; i++) {
       var descriptor = props[i];
       descriptor.enumerable = descriptor.enumerable || false;
@@ -5095,11 +4895,11 @@
       Object.defineProperty(target, descriptor.key, descriptor);
     }
   }
-  function _createClass8(Constructor, protoProps, staticProps) {
+  function _createClass6(Constructor, protoProps, staticProps) {
     if (protoProps)
-      _defineProperties8(Constructor.prototype, protoProps);
+      _defineProperties6(Constructor.prototype, protoProps);
     if (staticProps)
-      _defineProperties8(Constructor, staticProps);
+      _defineProperties6(Constructor, staticProps);
     return Constructor;
   }
   function _get(target, property, receiver) {
@@ -5195,10 +4995,10 @@
     _inherits3(TextInputBindingBase2, _InputBinding);
     var _super = _createSuper3(TextInputBindingBase2);
     function TextInputBindingBase2() {
-      _classCallCheck8(this, TextInputBindingBase2);
+      _classCallCheck6(this, TextInputBindingBase2);
       return _super.apply(this, arguments);
     }
-    _createClass8(TextInputBindingBase2, [{
+    _createClass6(TextInputBindingBase2, [{
       key: "find",
       value: function find2(scope) {
         var $inputs = (0, import_jquery8.default)(scope).find('input[type="text"], input[type="search"], input[type="url"], input[type="email"]');
@@ -5266,10 +5066,10 @@
     _inherits3(TextInputBinding2, _TextInputBindingBase);
     var _super2 = _createSuper3(TextInputBinding2);
     function TextInputBinding2() {
-      _classCallCheck8(this, TextInputBinding2);
+      _classCallCheck6(this, TextInputBinding2);
       return _super2.apply(this, arguments);
     }
-    _createClass8(TextInputBinding2, [{
+    _createClass6(TextInputBinding2, [{
       key: "setValue",
       value: function setValue(el, value) {
         el.value = value;
@@ -5316,12 +5116,12 @@
     }
     return _typeof4(obj);
   }
-  function _classCallCheck9(instance, Constructor) {
+  function _classCallCheck7(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
       throw new TypeError("Cannot call a class as a function");
     }
   }
-  function _defineProperties9(target, props) {
+  function _defineProperties7(target, props) {
     for (var i = 0; i < props.length; i++) {
       var descriptor = props[i];
       descriptor.enumerable = descriptor.enumerable || false;
@@ -5331,11 +5131,11 @@
       Object.defineProperty(target, descriptor.key, descriptor);
     }
   }
-  function _createClass9(Constructor, protoProps, staticProps) {
+  function _createClass7(Constructor, protoProps, staticProps) {
     if (protoProps)
-      _defineProperties9(Constructor.prototype, protoProps);
+      _defineProperties7(Constructor.prototype, protoProps);
     if (staticProps)
-      _defineProperties9(Constructor, staticProps);
+      _defineProperties7(Constructor, staticProps);
     return Constructor;
   }
   function _inherits4(subClass, superClass) {
@@ -5406,10 +5206,10 @@
     _inherits4(NumberInputBinding2, _TextInputBindingBase);
     var _super = _createSuper4(NumberInputBinding2);
     function NumberInputBinding2() {
-      _classCallCheck9(this, NumberInputBinding2);
+      _classCallCheck7(this, NumberInputBinding2);
       return _super.apply(this, arguments);
     }
-    _createClass9(NumberInputBinding2, [{
+    _createClass7(NumberInputBinding2, [{
       key: "find",
       value: function find2(scope) {
         return (0, import_jquery9.default)(scope).find('input[type="number"]');
@@ -5484,12 +5284,12 @@
     }
     return _typeof5(obj);
   }
-  function _classCallCheck10(instance, Constructor) {
+  function _classCallCheck8(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
       throw new TypeError("Cannot call a class as a function");
     }
   }
-  function _defineProperties10(target, props) {
+  function _defineProperties8(target, props) {
     for (var i = 0; i < props.length; i++) {
       var descriptor = props[i];
       descriptor.enumerable = descriptor.enumerable || false;
@@ -5499,11 +5299,11 @@
       Object.defineProperty(target, descriptor.key, descriptor);
     }
   }
-  function _createClass10(Constructor, protoProps, staticProps) {
+  function _createClass8(Constructor, protoProps, staticProps) {
     if (protoProps)
-      _defineProperties10(Constructor.prototype, protoProps);
+      _defineProperties8(Constructor.prototype, protoProps);
     if (staticProps)
-      _defineProperties10(Constructor, staticProps);
+      _defineProperties8(Constructor, staticProps);
     return Constructor;
   }
   function _inherits5(subClass, superClass) {
@@ -5571,10 +5371,10 @@
     _inherits5(PasswordInputBinding2, _TextInputBinding);
     var _super = _createSuper5(PasswordInputBinding2);
     function PasswordInputBinding2() {
-      _classCallCheck10(this, PasswordInputBinding2);
+      _classCallCheck8(this, PasswordInputBinding2);
       return _super.apply(this, arguments);
     }
-    _createClass10(PasswordInputBinding2, [{
+    _createClass8(PasswordInputBinding2, [{
       key: "find",
       value: function find2(scope) {
         return (0, import_jquery10.default)(scope).find('input[type="password"]');
@@ -5605,12 +5405,12 @@
     }
     return _typeof6(obj);
   }
-  function _classCallCheck11(instance, Constructor) {
+  function _classCallCheck9(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
       throw new TypeError("Cannot call a class as a function");
     }
   }
-  function _defineProperties11(target, props) {
+  function _defineProperties9(target, props) {
     for (var i = 0; i < props.length; i++) {
       var descriptor = props[i];
       descriptor.enumerable = descriptor.enumerable || false;
@@ -5620,11 +5420,11 @@
       Object.defineProperty(target, descriptor.key, descriptor);
     }
   }
-  function _createClass11(Constructor, protoProps, staticProps) {
+  function _createClass9(Constructor, protoProps, staticProps) {
     if (protoProps)
-      _defineProperties11(Constructor.prototype, protoProps);
+      _defineProperties9(Constructor.prototype, protoProps);
     if (staticProps)
-      _defineProperties11(Constructor, staticProps);
+      _defineProperties9(Constructor, staticProps);
     return Constructor;
   }
   function _inherits6(subClass, superClass) {
@@ -5692,10 +5492,10 @@
     _inherits6(TextareaInputBinding2, _TextInputBinding);
     var _super = _createSuper6(TextareaInputBinding2);
     function TextareaInputBinding2() {
-      _classCallCheck11(this, TextareaInputBinding2);
+      _classCallCheck9(this, TextareaInputBinding2);
       return _super.apply(this, arguments);
     }
-    _createClass11(TextareaInputBinding2, [{
+    _createClass9(TextareaInputBinding2, [{
       key: "find",
       value: function find2(scope) {
         return (0, import_jquery11.default)(scope).find("textarea");
@@ -5720,12 +5520,12 @@
     }
     return _typeof7(obj);
   }
-  function _classCallCheck12(instance, Constructor) {
+  function _classCallCheck10(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
       throw new TypeError("Cannot call a class as a function");
     }
   }
-  function _defineProperties12(target, props) {
+  function _defineProperties10(target, props) {
     for (var i = 0; i < props.length; i++) {
       var descriptor = props[i];
       descriptor.enumerable = descriptor.enumerable || false;
@@ -5735,11 +5535,11 @@
       Object.defineProperty(target, descriptor.key, descriptor);
     }
   }
-  function _createClass12(Constructor, protoProps, staticProps) {
+  function _createClass10(Constructor, protoProps, staticProps) {
     if (protoProps)
-      _defineProperties12(Constructor.prototype, protoProps);
+      _defineProperties10(Constructor.prototype, protoProps);
     if (staticProps)
-      _defineProperties12(Constructor, staticProps);
+      _defineProperties10(Constructor, staticProps);
     return Constructor;
   }
   function _inherits7(subClass, superClass) {
@@ -5816,10 +5616,10 @@
     _inherits7(RadioInputBinding2, _InputBinding);
     var _super = _createSuper7(RadioInputBinding2);
     function RadioInputBinding2() {
-      _classCallCheck12(this, RadioInputBinding2);
+      _classCallCheck10(this, RadioInputBinding2);
       return _super.apply(this, arguments);
     }
-    _createClass12(RadioInputBinding2, [{
+    _createClass10(RadioInputBinding2, [{
       key: "find",
       value: function find2(scope) {
         return (0, import_jquery12.default)(scope).find(".shiny-input-radiogroup");
@@ -5905,12 +5705,12 @@
     }
     return _typeof8(obj);
   }
-  function _classCallCheck13(instance, Constructor) {
+  function _classCallCheck11(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
       throw new TypeError("Cannot call a class as a function");
     }
   }
-  function _defineProperties13(target, props) {
+  function _defineProperties11(target, props) {
     for (var i = 0; i < props.length; i++) {
       var descriptor = props[i];
       descriptor.enumerable = descriptor.enumerable || false;
@@ -5920,11 +5720,11 @@
       Object.defineProperty(target, descriptor.key, descriptor);
     }
   }
-  function _createClass13(Constructor, protoProps, staticProps) {
+  function _createClass11(Constructor, protoProps, staticProps) {
     if (protoProps)
-      _defineProperties13(Constructor.prototype, protoProps);
+      _defineProperties11(Constructor.prototype, protoProps);
     if (staticProps)
-      _defineProperties13(Constructor, staticProps);
+      _defineProperties11(Constructor, staticProps);
     return Constructor;
   }
   function _inherits8(subClass, superClass) {
@@ -5992,10 +5792,10 @@
     _inherits8(DateInputBindingBase2, _InputBinding);
     var _super = _createSuper8(DateInputBindingBase2);
     function DateInputBindingBase2() {
-      _classCallCheck13(this, DateInputBindingBase2);
+      _classCallCheck11(this, DateInputBindingBase2);
       return _super.apply(this, arguments);
     }
-    _createClass13(DateInputBindingBase2, [{
+    _createClass11(DateInputBindingBase2, [{
       key: "find",
       value: function find2(scope) {
         return (0, import_jquery13.default)(scope).find(".shiny-date-input");
@@ -6150,10 +5950,10 @@
     _inherits8(DateInputBinding2, _DateInputBindingBase);
     var _super2 = _createSuper8(DateInputBinding2);
     function DateInputBinding2() {
-      _classCallCheck13(this, DateInputBinding2);
+      _classCallCheck11(this, DateInputBinding2);
       return _super2.apply(this, arguments);
     }
-    _createClass13(DateInputBinding2, [{
+    _createClass11(DateInputBinding2, [{
       key: "getValue",
       value: function getValue(el) {
         var date = (0, import_jquery13.default)(el).find("input").bsDatepicker("getUTCDate");
@@ -6236,12 +6036,12 @@
     }
     return _typeof9(obj);
   }
-  function _classCallCheck14(instance, Constructor) {
+  function _classCallCheck12(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
       throw new TypeError("Cannot call a class as a function");
     }
   }
-  function _defineProperties14(target, props) {
+  function _defineProperties12(target, props) {
     for (var i = 0; i < props.length; i++) {
       var descriptor = props[i];
       descriptor.enumerable = descriptor.enumerable || false;
@@ -6251,11 +6051,11 @@
       Object.defineProperty(target, descriptor.key, descriptor);
     }
   }
-  function _createClass14(Constructor, protoProps, staticProps) {
+  function _createClass12(Constructor, protoProps, staticProps) {
     if (protoProps)
-      _defineProperties14(Constructor.prototype, protoProps);
+      _defineProperties12(Constructor.prototype, protoProps);
     if (staticProps)
-      _defineProperties14(Constructor, staticProps);
+      _defineProperties12(Constructor, staticProps);
     return Constructor;
   }
   function _inherits9(subClass, superClass) {
@@ -6361,10 +6161,10 @@
     _inherits9(SliderInputBinding2, _TextInputBindingBase);
     var _super = _createSuper9(SliderInputBinding2);
     function SliderInputBinding2() {
-      _classCallCheck14(this, SliderInputBinding2);
+      _classCallCheck12(this, SliderInputBinding2);
       return _super.apply(this, arguments);
     }
-    _createClass14(SliderInputBinding2, [{
+    _createClass12(SliderInputBinding2, [{
       key: "find",
       value: function find2(scope) {
         if (!import_jquery14.default.fn.ionRangeSlider) {
@@ -6621,12 +6421,12 @@
     }
     return _typeof10(obj);
   }
-  function _classCallCheck15(instance, Constructor) {
+  function _classCallCheck13(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
       throw new TypeError("Cannot call a class as a function");
     }
   }
-  function _defineProperties15(target, props) {
+  function _defineProperties13(target, props) {
     for (var i = 0; i < props.length; i++) {
       var descriptor = props[i];
       descriptor.enumerable = descriptor.enumerable || false;
@@ -6636,11 +6436,11 @@
       Object.defineProperty(target, descriptor.key, descriptor);
     }
   }
-  function _createClass15(Constructor, protoProps, staticProps) {
+  function _createClass13(Constructor, protoProps, staticProps) {
     if (protoProps)
-      _defineProperties15(Constructor.prototype, protoProps);
+      _defineProperties13(Constructor.prototype, protoProps);
     if (staticProps)
-      _defineProperties15(Constructor, staticProps);
+      _defineProperties13(Constructor, staticProps);
     return Constructor;
   }
   function _inherits10(subClass, superClass) {
@@ -6711,10 +6511,10 @@
     _inherits10(DateRangeInputBinding2, _DateInputBindingBase);
     var _super = _createSuper10(DateRangeInputBinding2);
     function DateRangeInputBinding2() {
-      _classCallCheck15(this, DateRangeInputBinding2);
+      _classCallCheck13(this, DateRangeInputBinding2);
       return _super.apply(this, arguments);
     }
-    _createClass15(DateRangeInputBinding2, [{
+    _createClass13(DateRangeInputBinding2, [{
       key: "find",
       value: function find2(scope) {
         return (0, import_jquery15.default)(scope).find(".shiny-date-range-input");
@@ -6863,12 +6663,12 @@
     }
     return _typeof11(obj);
   }
-  function _classCallCheck16(instance, Constructor) {
+  function _classCallCheck14(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
       throw new TypeError("Cannot call a class as a function");
     }
   }
-  function _defineProperties16(target, props) {
+  function _defineProperties14(target, props) {
     for (var i = 0; i < props.length; i++) {
       var descriptor = props[i];
       descriptor.enumerable = descriptor.enumerable || false;
@@ -6878,11 +6678,11 @@
       Object.defineProperty(target, descriptor.key, descriptor);
     }
   }
-  function _createClass16(Constructor, protoProps, staticProps) {
+  function _createClass14(Constructor, protoProps, staticProps) {
     if (protoProps)
-      _defineProperties16(Constructor.prototype, protoProps);
+      _defineProperties14(Constructor.prototype, protoProps);
     if (staticProps)
-      _defineProperties16(Constructor, staticProps);
+      _defineProperties14(Constructor, staticProps);
     return Constructor;
   }
   function _inherits11(subClass, superClass) {
@@ -6961,10 +6761,10 @@
     _inherits11(SelectInputBinding2, _InputBinding);
     var _super = _createSuper11(SelectInputBinding2);
     function SelectInputBinding2() {
-      _classCallCheck16(this, SelectInputBinding2);
+      _classCallCheck14(this, SelectInputBinding2);
       return _super.apply(this, arguments);
     }
-    _createClass16(SelectInputBinding2, [{
+    _createClass14(SelectInputBinding2, [{
       key: "find",
       value: function find2(scope) {
         return (0, import_jquery16.default)(scope).find("select");
@@ -7170,12 +6970,12 @@
     }
     return _typeof12(obj);
   }
-  function _classCallCheck17(instance, Constructor) {
+  function _classCallCheck15(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
       throw new TypeError("Cannot call a class as a function");
     }
   }
-  function _defineProperties17(target, props) {
+  function _defineProperties15(target, props) {
     for (var i = 0; i < props.length; i++) {
       var descriptor = props[i];
       descriptor.enumerable = descriptor.enumerable || false;
@@ -7185,11 +6985,11 @@
       Object.defineProperty(target, descriptor.key, descriptor);
     }
   }
-  function _createClass17(Constructor, protoProps, staticProps) {
+  function _createClass15(Constructor, protoProps, staticProps) {
     if (protoProps)
-      _defineProperties17(Constructor.prototype, protoProps);
+      _defineProperties15(Constructor.prototype, protoProps);
     if (staticProps)
-      _defineProperties17(Constructor, staticProps);
+      _defineProperties15(Constructor, staticProps);
     return Constructor;
   }
   function _inherits12(subClass, superClass) {
@@ -7257,10 +7057,10 @@
     _inherits12(ActionButtonInputBinding2, _InputBinding);
     var _super = _createSuper12(ActionButtonInputBinding2);
     function ActionButtonInputBinding2() {
-      _classCallCheck17(this, ActionButtonInputBinding2);
+      _classCallCheck15(this, ActionButtonInputBinding2);
       return _super.apply(this, arguments);
     }
-    _createClass17(ActionButtonInputBinding2, [{
+    _createClass15(ActionButtonInputBinding2, [{
       key: "find",
       value: function find2(scope) {
         return (0, import_jquery17.default)(scope).find(".action-button");
@@ -7347,12 +7147,12 @@
     }
     return _typeof13(obj);
   }
-  function _classCallCheck18(instance, Constructor) {
+  function _classCallCheck16(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
       throw new TypeError("Cannot call a class as a function");
     }
   }
-  function _defineProperties18(target, props) {
+  function _defineProperties16(target, props) {
     for (var i = 0; i < props.length; i++) {
       var descriptor = props[i];
       descriptor.enumerable = descriptor.enumerable || false;
@@ -7362,11 +7162,11 @@
       Object.defineProperty(target, descriptor.key, descriptor);
     }
   }
-  function _createClass18(Constructor, protoProps, staticProps) {
+  function _createClass16(Constructor, protoProps, staticProps) {
     if (protoProps)
-      _defineProperties18(Constructor.prototype, protoProps);
+      _defineProperties16(Constructor.prototype, protoProps);
     if (staticProps)
-      _defineProperties18(Constructor, staticProps);
+      _defineProperties16(Constructor, staticProps);
     return Constructor;
   }
   function _inherits13(subClass, superClass) {
@@ -7437,10 +7237,10 @@
     _inherits13(BootstrapTabInputBinding2, _InputBinding);
     var _super = _createSuper13(BootstrapTabInputBinding2);
     function BootstrapTabInputBinding2() {
-      _classCallCheck18(this, BootstrapTabInputBinding2);
+      _classCallCheck16(this, BootstrapTabInputBinding2);
       return _super.apply(this, arguments);
     }
-    _createClass18(BootstrapTabInputBinding2, [{
+    _createClass16(BootstrapTabInputBinding2, [{
       key: "find",
       value: function find2(scope) {
         return (0, import_jquery18.default)(scope).find("ul.nav.shiny-tab-input");
@@ -7657,12 +7457,12 @@
     };
     return _getPrototypeOf14(o);
   }
-  function _classCallCheck19(instance, Constructor) {
+  function _classCallCheck17(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
       throw new TypeError("Cannot call a class as a function");
     }
   }
-  function _defineProperties19(target, props) {
+  function _defineProperties17(target, props) {
     for (var i = 0; i < props.length; i++) {
       var descriptor = props[i];
       descriptor.enumerable = descriptor.enumerable || false;
@@ -7672,14 +7472,14 @@
       Object.defineProperty(target, descriptor.key, descriptor);
     }
   }
-  function _createClass19(Constructor, protoProps, staticProps) {
+  function _createClass17(Constructor, protoProps, staticProps) {
     if (protoProps)
-      _defineProperties19(Constructor.prototype, protoProps);
+      _defineProperties17(Constructor.prototype, protoProps);
     if (staticProps)
-      _defineProperties19(Constructor, staticProps);
+      _defineProperties17(Constructor, staticProps);
     return Constructor;
   }
-  function _defineProperty6(obj, key, value) {
+  function _defineProperty4(obj, key, value) {
     if (key in obj) {
       Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });
     } else {
@@ -7690,17 +7490,17 @@
   var FileProcessor = /* @__PURE__ */ function() {
     function FileProcessor2(files) {
       var exec$run = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : true;
-      _classCallCheck19(this, FileProcessor2);
-      _defineProperty6(this, "files", void 0);
-      _defineProperty6(this, "fileIndex", -1);
-      _defineProperty6(this, "aborted", false);
-      _defineProperty6(this, "completed", false);
+      _classCallCheck17(this, FileProcessor2);
+      _defineProperty4(this, "files", void 0);
+      _defineProperty4(this, "fileIndex", -1);
+      _defineProperty4(this, "aborted", false);
+      _defineProperty4(this, "completed", false);
       this.files = files;
       if (exec$run) {
         this.$run();
       }
     }
-    _createClass19(FileProcessor2, [{
+    _createClass17(FileProcessor2, [{
       key: "onBegin",
       value: function onBegin(files, cont) {
         files;
@@ -7768,22 +7568,22 @@
     var _super = _createSuper14(FileUploader2);
     function FileUploader2(shinyapp, id, files, el) {
       var _this2;
-      _classCallCheck19(this, FileUploader2);
+      _classCallCheck17(this, FileUploader2);
       _this2 = _super.call(this, files, false);
-      _defineProperty6(_assertThisInitialized14(_this2), "shinyapp", void 0);
-      _defineProperty6(_assertThisInitialized14(_this2), "id", void 0);
-      _defineProperty6(_assertThisInitialized14(_this2), "el", void 0);
-      _defineProperty6(_assertThisInitialized14(_this2), "jobId", void 0);
-      _defineProperty6(_assertThisInitialized14(_this2), "uploadUrl", void 0);
-      _defineProperty6(_assertThisInitialized14(_this2), "progressBytes", void 0);
-      _defineProperty6(_assertThisInitialized14(_this2), "totalBytes", void 0);
+      _defineProperty4(_assertThisInitialized14(_this2), "shinyapp", void 0);
+      _defineProperty4(_assertThisInitialized14(_this2), "id", void 0);
+      _defineProperty4(_assertThisInitialized14(_this2), "el", void 0);
+      _defineProperty4(_assertThisInitialized14(_this2), "jobId", void 0);
+      _defineProperty4(_assertThisInitialized14(_this2), "uploadUrl", void 0);
+      _defineProperty4(_assertThisInitialized14(_this2), "progressBytes", void 0);
+      _defineProperty4(_assertThisInitialized14(_this2), "totalBytes", void 0);
       _this2.shinyapp = shinyapp;
       _this2.id = id;
       _this2.el = el;
       _this2.$run();
       return _this2;
     }
-    _createClass19(FileUploader2, [{
+    _createClass17(FileUploader2, [{
       key: "makeRequest",
       value: function makeRequest(method, args, onSuccess, onFailure, blobs) {
         this.shinyapp.makeRequest(method, args, onSuccess, onFailure, blobs);
@@ -7936,12 +7736,12 @@
     }
     return _typeof15(obj);
   }
-  function _classCallCheck20(instance, Constructor) {
+  function _classCallCheck18(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
       throw new TypeError("Cannot call a class as a function");
     }
   }
-  function _defineProperties20(target, props) {
+  function _defineProperties18(target, props) {
     for (var i = 0; i < props.length; i++) {
       var descriptor = props[i];
       descriptor.enumerable = descriptor.enumerable || false;
@@ -7951,11 +7751,11 @@
       Object.defineProperty(target, descriptor.key, descriptor);
     }
   }
-  function _createClass20(Constructor, protoProps, staticProps) {
+  function _createClass18(Constructor, protoProps, staticProps) {
     if (protoProps)
-      _defineProperties20(Constructor.prototype, protoProps);
+      _defineProperties18(Constructor.prototype, protoProps);
     if (staticProps)
-      _defineProperties20(Constructor, staticProps);
+      _defineProperties18(Constructor, staticProps);
     return Constructor;
   }
   function _inherits15(subClass, superClass) {
@@ -8135,10 +7935,10 @@
     _inherits15(FileInputBinding2, _InputBinding);
     var _super = _createSuper15(FileInputBinding2);
     function FileInputBinding2() {
-      _classCallCheck20(this, FileInputBinding2);
+      _classCallCheck18(this, FileInputBinding2);
       return _super.apply(this, arguments);
     }
-    _createClass20(FileInputBinding2, [{
+    _createClass18(FileInputBinding2, [{
       key: "find",
       value: function find2(scope) {
         return (0, import_jquery21.default)(scope).find('input[type="file"]');
@@ -8268,12 +8068,12 @@
   // srcts/src/bindings/output/outputBinding.ts
   var import_es_regexp_exec3 = __toModule(require_es_regexp_exec());
   var import_jquery22 = __toModule(require_jquery());
-  function _classCallCheck21(instance, Constructor) {
+  function _classCallCheck19(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
       throw new TypeError("Cannot call a class as a function");
     }
   }
-  function _defineProperties21(target, props) {
+  function _defineProperties19(target, props) {
     for (var i = 0; i < props.length; i++) {
       var descriptor = props[i];
       descriptor.enumerable = descriptor.enumerable || false;
@@ -8283,14 +8083,14 @@
       Object.defineProperty(target, descriptor.key, descriptor);
     }
   }
-  function _createClass21(Constructor, protoProps, staticProps) {
+  function _createClass19(Constructor, protoProps, staticProps) {
     if (protoProps)
-      _defineProperties21(Constructor.prototype, protoProps);
+      _defineProperties19(Constructor.prototype, protoProps);
     if (staticProps)
-      _defineProperties21(Constructor, staticProps);
+      _defineProperties19(Constructor, staticProps);
     return Constructor;
   }
-  function _defineProperty7(obj, key, value) {
+  function _defineProperty5(obj, key, value) {
     if (key in obj) {
       Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });
     } else {
@@ -8300,10 +8100,10 @@
   }
   var OutputBinding = /* @__PURE__ */ function() {
     function OutputBinding2() {
-      _classCallCheck21(this, OutputBinding2);
-      _defineProperty7(this, "name", void 0);
+      _classCallCheck19(this, OutputBinding2);
+      _defineProperty5(this, "name", void 0);
     }
-    _createClass21(OutputBinding2, [{
+    _createClass19(OutputBinding2, [{
       key: "find",
       value: function find2(scope) {
         throw "Not implemented";
@@ -8382,12 +8182,12 @@
     }
     return _typeof16(obj);
   }
-  function _classCallCheck22(instance, Constructor) {
+  function _classCallCheck20(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
       throw new TypeError("Cannot call a class as a function");
     }
   }
-  function _defineProperties22(target, props) {
+  function _defineProperties20(target, props) {
     for (var i = 0; i < props.length; i++) {
       var descriptor = props[i];
       descriptor.enumerable = descriptor.enumerable || false;
@@ -8397,11 +8197,11 @@
       Object.defineProperty(target, descriptor.key, descriptor);
     }
   }
-  function _createClass22(Constructor, protoProps, staticProps) {
+  function _createClass20(Constructor, protoProps, staticProps) {
     if (protoProps)
-      _defineProperties22(Constructor.prototype, protoProps);
+      _defineProperties20(Constructor.prototype, protoProps);
     if (staticProps)
-      _defineProperties22(Constructor, staticProps);
+      _defineProperties20(Constructor, staticProps);
     return Constructor;
   }
   function _inherits16(subClass, superClass) {
@@ -8469,10 +8269,10 @@
     _inherits16(TextOutputBinding2, _OutputBinding);
     var _super = _createSuper16(TextOutputBinding2);
     function TextOutputBinding2() {
-      _classCallCheck22(this, TextOutputBinding2);
+      _classCallCheck20(this, TextOutputBinding2);
       return _super.apply(this, arguments);
     }
-    _createClass22(TextOutputBinding2, [{
+    _createClass20(TextOutputBinding2, [{
       key: "find",
       value: function find2(scope) {
         return (0, import_jquery23.default)(scope).find(".shiny-text-output");
@@ -8502,12 +8302,12 @@
     }
     return _typeof17(obj);
   }
-  function _classCallCheck23(instance, Constructor) {
+  function _classCallCheck21(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
       throw new TypeError("Cannot call a class as a function");
     }
   }
-  function _defineProperties23(target, props) {
+  function _defineProperties21(target, props) {
     for (var i = 0; i < props.length; i++) {
       var descriptor = props[i];
       descriptor.enumerable = descriptor.enumerable || false;
@@ -8517,11 +8317,11 @@
       Object.defineProperty(target, descriptor.key, descriptor);
     }
   }
-  function _createClass23(Constructor, protoProps, staticProps) {
+  function _createClass21(Constructor, protoProps, staticProps) {
     if (protoProps)
-      _defineProperties23(Constructor.prototype, protoProps);
+      _defineProperties21(Constructor.prototype, protoProps);
     if (staticProps)
-      _defineProperties23(Constructor, staticProps);
+      _defineProperties21(Constructor, staticProps);
     return Constructor;
   }
   function _inherits17(subClass, superClass) {
@@ -8589,10 +8389,10 @@
     _inherits17(DownloadLinkOutputBinding2, _OutputBinding);
     var _super = _createSuper17(DownloadLinkOutputBinding2);
     function DownloadLinkOutputBinding2() {
-      _classCallCheck23(this, DownloadLinkOutputBinding2);
+      _classCallCheck21(this, DownloadLinkOutputBinding2);
       return _super.apply(this, arguments);
     }
-    _createClass23(DownloadLinkOutputBinding2, [{
+    _createClass21(DownloadLinkOutputBinding2, [{
       key: "find",
       value: function find2(scope) {
         return (0, import_jquery24.default)(scope).find("a.shiny-download-link");
@@ -8650,19 +8450,183 @@
   // srcts/src/bindings/output/datatable.ts
   var import_es_array_iterator18 = __toModule(require_es_array_iterator());
   var import_jquery25 = __toModule(require_jquery());
-  function _typeof18(obj) {
-    "@babel/helpers - typeof";
-    if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
-      _typeof18 = function _typeof22(obj2) {
-        return typeof obj2;
-      };
-    } else {
-      _typeof18 = function _typeof22(obj2) {
-        return obj2 && typeof Symbol === "function" && obj2.constructor === Symbol && obj2 !== Symbol.prototype ? "symbol" : typeof obj2;
-      };
+
+  // srcts/src/time/debounce.ts
+  function _classCallCheck22(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
     }
-    return _typeof18(obj);
   }
+  function _defineProperties22(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor)
+        descriptor.writable = true;
+      Object.defineProperty(target, descriptor.key, descriptor);
+    }
+  }
+  function _createClass22(Constructor, protoProps, staticProps) {
+    if (protoProps)
+      _defineProperties22(Constructor.prototype, protoProps);
+    if (staticProps)
+      _defineProperties22(Constructor, staticProps);
+    return Constructor;
+  }
+  function _defineProperty6(obj, key, value) {
+    if (key in obj) {
+      Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });
+    } else {
+      obj[key] = value;
+    }
+    return obj;
+  }
+  var Debouncer = /* @__PURE__ */ function() {
+    function Debouncer2(target, func, delayMs) {
+      _classCallCheck22(this, Debouncer2);
+      _defineProperty6(this, "target", void 0);
+      _defineProperty6(this, "func", void 0);
+      _defineProperty6(this, "delayMs", void 0);
+      _defineProperty6(this, "timerId", void 0);
+      _defineProperty6(this, "args", void 0);
+      this.target = target;
+      this.func = func;
+      this.delayMs = delayMs;
+      this.timerId = null;
+      this.args = null;
+    }
+    _createClass22(Debouncer2, [{
+      key: "normalCall",
+      value: function normalCall() {
+        var _this = this;
+        this.$clearTimer();
+        for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+          args[_key] = arguments[_key];
+        }
+        this.args = args;
+        this.timerId = setTimeout(function() {
+          if (_this.timerId === null)
+            return;
+          _this.$clearTimer();
+          _this.$invoke();
+        }, this.delayMs);
+      }
+    }, {
+      key: "immediateCall",
+      value: function immediateCall() {
+        this.$clearTimer();
+        for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+          args[_key2] = arguments[_key2];
+        }
+        this.args = args;
+        this.$invoke();
+      }
+    }, {
+      key: "isPending",
+      value: function isPending() {
+        return this.timerId !== null;
+      }
+    }, {
+      key: "$clearTimer",
+      value: function $clearTimer() {
+        if (this.timerId !== null) {
+          clearTimeout(this.timerId);
+          this.timerId = null;
+        }
+      }
+    }, {
+      key: "$invoke",
+      value: function $invoke() {
+        if (this.args && this.args.length > 0) {
+          this.func.apply(this.target, this.args);
+        } else {
+          this.func.apply(this.target);
+        }
+        this.args = null;
+      }
+    }]);
+    return Debouncer2;
+  }();
+  function debounce(threshold, func) {
+    var timerId = null;
+    return function thisFunc() {
+      for (var _len3 = arguments.length, args = new Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
+        args[_key3] = arguments[_key3];
+      }
+      if (timerId !== null) {
+        clearTimeout(timerId);
+        timerId = null;
+      }
+      timerId = setTimeout(function() {
+        if (timerId === null)
+          return;
+        timerId = null;
+        func.apply(thisFunc, args);
+      }, threshold);
+    };
+  }
+
+  // srcts/src/time/invoke.ts
+  function _classCallCheck23(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+  function _defineProperties23(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor)
+        descriptor.writable = true;
+      Object.defineProperty(target, descriptor.key, descriptor);
+    }
+  }
+  function _createClass23(Constructor, protoProps, staticProps) {
+    if (protoProps)
+      _defineProperties23(Constructor.prototype, protoProps);
+    if (staticProps)
+      _defineProperties23(Constructor, staticProps);
+    return Constructor;
+  }
+  function _defineProperty7(obj, key, value) {
+    if (key in obj) {
+      Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });
+    } else {
+      obj[key] = value;
+    }
+    return obj;
+  }
+  var Invoker = /* @__PURE__ */ function() {
+    function Invoker2(target, func) {
+      _classCallCheck23(this, Invoker2);
+      _defineProperty7(this, "target", void 0);
+      _defineProperty7(this, "func", void 0);
+      this.target = target;
+      this.func = func;
+    }
+    _createClass23(Invoker2, [{
+      key: "normalCall",
+      value: function normalCall() {
+        for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+          args[_key] = arguments[_key];
+        }
+        this.func.apply(this.target, args);
+      }
+    }, {
+      key: "immediateCall",
+      value: function immediateCall() {
+        for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+          args[_key2] = arguments[_key2];
+        }
+        this.func.apply(this.target, args);
+      }
+    }]);
+    return Invoker2;
+  }();
+
+  // srcts/src/time/throttle.ts
   function _classCallCheck24(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
       throw new TypeError("Cannot call a class as a function");
@@ -8683,6 +8647,120 @@
       _defineProperties24(Constructor.prototype, protoProps);
     if (staticProps)
       _defineProperties24(Constructor, staticProps);
+    return Constructor;
+  }
+  function _defineProperty8(obj, key, value) {
+    if (key in obj) {
+      Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });
+    } else {
+      obj[key] = value;
+    }
+    return obj;
+  }
+  var Throttler = /* @__PURE__ */ function() {
+    function Throttler2(target, func, delayMs) {
+      _classCallCheck24(this, Throttler2);
+      _defineProperty8(this, "target", void 0);
+      _defineProperty8(this, "func", void 0);
+      _defineProperty8(this, "delayMs", void 0);
+      _defineProperty8(this, "timerId", void 0);
+      _defineProperty8(this, "args", void 0);
+      this.target = target;
+      this.func = func;
+      this.delayMs = delayMs;
+      this.timerId = null;
+      this.args = null;
+    }
+    _createClass24(Throttler2, [{
+      key: "normalCall",
+      value: function normalCall() {
+        for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+          args[_key] = arguments[_key];
+        }
+        this.args = args;
+        if (this.timerId === null) {
+          this.$invoke();
+        }
+      }
+    }, {
+      key: "immediateCall",
+      value: function immediateCall() {
+        this.$clearTimer();
+        for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+          args[_key2] = arguments[_key2];
+        }
+        this.args = args;
+        this.$invoke();
+      }
+    }, {
+      key: "isPending",
+      value: function isPending() {
+        return this.args !== null;
+      }
+    }, {
+      key: "$clearTimer",
+      value: function $clearTimer() {
+        if (this.timerId !== null) {
+          clearTimeout(this.timerId);
+          this.timerId = null;
+        }
+      }
+    }, {
+      key: "$invoke",
+      value: function $invoke() {
+        var _this = this;
+        if (this.args === null) {
+          return;
+        }
+        this.func.apply(this.target, this.args);
+        this.args = null;
+        this.timerId = setTimeout(function() {
+          if (_this.timerId === null)
+            return;
+          _this.$clearTimer();
+          if (_this.isPending()) {
+            _this.$invoke();
+          }
+        }, this.delayMs);
+      }
+    }]);
+    return Throttler2;
+  }();
+
+  // srcts/src/bindings/output/datatable.ts
+  function _typeof18(obj) {
+    "@babel/helpers - typeof";
+    if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
+      _typeof18 = function _typeof22(obj2) {
+        return typeof obj2;
+      };
+    } else {
+      _typeof18 = function _typeof22(obj2) {
+        return obj2 && typeof Symbol === "function" && obj2.constructor === Symbol && obj2 !== Symbol.prototype ? "symbol" : typeof obj2;
+      };
+    }
+    return _typeof18(obj);
+  }
+  function _classCallCheck25(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+  function _defineProperties25(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor)
+        descriptor.writable = true;
+      Object.defineProperty(target, descriptor.key, descriptor);
+    }
+  }
+  function _createClass25(Constructor, protoProps, staticProps) {
+    if (protoProps)
+      _defineProperties25(Constructor.prototype, protoProps);
+    if (staticProps)
+      _defineProperties25(Constructor, staticProps);
     return Constructor;
   }
   function _inherits18(subClass, superClass) {
@@ -8750,10 +8828,10 @@
     _inherits18(DatatableOutputBinding2, _OutputBinding);
     var _super = _createSuper18(DatatableOutputBinding2);
     function DatatableOutputBinding2() {
-      _classCallCheck24(this, DatatableOutputBinding2);
+      _classCallCheck25(this, DatatableOutputBinding2);
       return _super.apply(this, arguments);
     }
-    _createClass24(DatatableOutputBinding2, [{
+    _createClass25(DatatableOutputBinding2, [{
       key: "find",
       value: function find2(scope) {
         return (0, import_jquery25.default)(scope).find(".shiny-datatable-output");
@@ -8886,12 +8964,12 @@
   var import_jquery27 = __toModule(require_jquery());
 
   // srcts/src/shiny/sendImageSize.ts
-  function _classCallCheck25(instance, Constructor) {
+  function _classCallCheck26(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
       throw new TypeError("Cannot call a class as a function");
     }
   }
-  function _defineProperties25(target, props) {
+  function _defineProperties26(target, props) {
     for (var i = 0; i < props.length; i++) {
       var descriptor = props[i];
       descriptor.enumerable = descriptor.enumerable || false;
@@ -8901,14 +8979,14 @@
       Object.defineProperty(target, descriptor.key, descriptor);
     }
   }
-  function _createClass25(Constructor, protoProps, staticProps) {
+  function _createClass26(Constructor, protoProps, staticProps) {
     if (protoProps)
-      _defineProperties25(Constructor.prototype, protoProps);
+      _defineProperties26(Constructor.prototype, protoProps);
     if (staticProps)
-      _defineProperties25(Constructor, staticProps);
+      _defineProperties26(Constructor, staticProps);
     return Constructor;
   }
-  function _defineProperty8(obj, key, value) {
+  function _defineProperty9(obj, key, value) {
     if (key in obj) {
       Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });
     } else {
@@ -8918,11 +8996,11 @@
   }
   var SendImageSize = /* @__PURE__ */ function() {
     function SendImageSize2() {
-      _classCallCheck25(this, SendImageSize2);
-      _defineProperty8(this, "regular", void 0);
-      _defineProperty8(this, "transitioned", void 0);
+      _classCallCheck26(this, SendImageSize2);
+      _defineProperty9(this, "regular", void 0);
+      _defineProperty9(this, "transitioned", void 0);
     }
-    _createClass25(SendImageSize2, [{
+    _createClass26(SendImageSize2, [{
       key: "setImageSend",
       value: function setImageSend(inputBatchSender, doSendImageSize) {
         var sendImageSizeDebouncer = new Debouncer(null, doSendImageSize, 0);
@@ -9140,14 +9218,18 @@
   }
   function renderHtml2(html, el, dependencies) {
     var where = arguments.length > 3 && arguments[3] !== void 0 ? arguments[3] : "replace";
-    window["Shiny"]._renderingHtml = true;
+    renderHtml2._renderCount++;
     try {
       renderDependencies(dependencies);
       return renderHtml(html, el, where);
     } finally {
-      window["Shiny"]._renderingHtml = false;
+      renderHtml2._renderCount--;
     }
   }
+  renderHtml2._renderCount = 0;
+  renderHtml2.isExecuting = function() {
+    return renderHtml2._renderCount > 0;
+  };
   var htmlDependencies = {};
   function registerDependency(name, version) {
     htmlDependencies[name] = version;
@@ -9380,12 +9462,12 @@
     }
     return _typeof20(obj);
   }
-  function _classCallCheck26(instance, Constructor) {
+  function _classCallCheck27(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
       throw new TypeError("Cannot call a class as a function");
     }
   }
-  function _defineProperties26(target, props) {
+  function _defineProperties27(target, props) {
     for (var i = 0; i < props.length; i++) {
       var descriptor = props[i];
       descriptor.enumerable = descriptor.enumerable || false;
@@ -9395,11 +9477,11 @@
       Object.defineProperty(target, descriptor.key, descriptor);
     }
   }
-  function _createClass26(Constructor, protoProps, staticProps) {
+  function _createClass27(Constructor, protoProps, staticProps) {
     if (protoProps)
-      _defineProperties26(Constructor.prototype, protoProps);
+      _defineProperties27(Constructor.prototype, protoProps);
     if (staticProps)
-      _defineProperties26(Constructor, staticProps);
+      _defineProperties27(Constructor, staticProps);
     return Constructor;
   }
   function _inherits19(subClass, superClass) {
@@ -9467,10 +9549,10 @@
     _inherits19(HtmlOutputBinding2, _OutputBinding);
     var _super = _createSuper19(HtmlOutputBinding2);
     function HtmlOutputBinding2() {
-      _classCallCheck26(this, HtmlOutputBinding2);
+      _classCallCheck27(this, HtmlOutputBinding2);
       return _super.apply(this, arguments);
     }
-    _createClass26(HtmlOutputBinding2, [{
+    _createClass27(HtmlOutputBinding2, [{
       key: "find",
       value: function find2(scope) {
         return (0, import_jquery28.default)(scope).find(".shiny-html-output");
@@ -10471,12 +10553,12 @@
     }
     return _typeof21(obj);
   }
-  function _classCallCheck27(instance, Constructor) {
+  function _classCallCheck28(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
       throw new TypeError("Cannot call a class as a function");
     }
   }
-  function _defineProperties27(target, props) {
+  function _defineProperties28(target, props) {
     for (var i = 0; i < props.length; i++) {
       var descriptor = props[i];
       descriptor.enumerable = descriptor.enumerable || false;
@@ -10486,11 +10568,11 @@
       Object.defineProperty(target, descriptor.key, descriptor);
     }
   }
-  function _createClass27(Constructor, protoProps, staticProps) {
+  function _createClass28(Constructor, protoProps, staticProps) {
     if (protoProps)
-      _defineProperties27(Constructor.prototype, protoProps);
+      _defineProperties28(Constructor.prototype, protoProps);
     if (staticProps)
-      _defineProperties27(Constructor, staticProps);
+      _defineProperties28(Constructor, staticProps);
     return Constructor;
   }
   function _inherits20(subClass, superClass) {
@@ -10558,10 +10640,10 @@
     _inherits20(ImageOutputBinding2, _OutputBinding);
     var _super = _createSuper20(ImageOutputBinding2);
     function ImageOutputBinding2() {
-      _classCallCheck27(this, ImageOutputBinding2);
+      _classCallCheck28(this, ImageOutputBinding2);
       return _super.apply(this, arguments);
     }
-    _createClass27(ImageOutputBinding2, [{
+    _createClass28(ImageOutputBinding2, [{
       key: "find",
       value: function find2(scope) {
         return (0, import_jquery33.default)(scope).find(".shiny-image-output, .shiny-plot-output");
@@ -10954,12 +11036,12 @@
   var import_jquery40 = __toModule(require_jquery());
 
   // srcts/src/inputPolicies/inputBatchSender.ts
-  function _classCallCheck28(instance, Constructor) {
+  function _classCallCheck29(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
       throw new TypeError("Cannot call a class as a function");
     }
   }
-  function _defineProperties28(target, props) {
+  function _defineProperties29(target, props) {
     for (var i = 0; i < props.length; i++) {
       var descriptor = props[i];
       descriptor.enumerable = descriptor.enumerable || false;
@@ -10969,14 +11051,14 @@
       Object.defineProperty(target, descriptor.key, descriptor);
     }
   }
-  function _createClass28(Constructor, protoProps, staticProps) {
+  function _createClass29(Constructor, protoProps, staticProps) {
     if (protoProps)
-      _defineProperties28(Constructor.prototype, protoProps);
+      _defineProperties29(Constructor.prototype, protoProps);
     if (staticProps)
-      _defineProperties28(Constructor, staticProps);
+      _defineProperties29(Constructor, staticProps);
     return Constructor;
   }
-  function _defineProperty9(obj, key, value) {
+  function _defineProperty10(obj, key, value) {
     if (key in obj) {
       Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });
     } else {
@@ -10986,16 +11068,16 @@
   }
   var InputBatchSender = /* @__PURE__ */ function() {
     function InputBatchSender2(shinyapp) {
-      _classCallCheck28(this, InputBatchSender2);
-      _defineProperty9(this, "target", void 0);
-      _defineProperty9(this, "shinyapp", void 0);
-      _defineProperty9(this, "timerId", null);
-      _defineProperty9(this, "pendingData", {});
-      _defineProperty9(this, "reentrant", false);
-      _defineProperty9(this, "lastChanceCallback", []);
+      _classCallCheck29(this, InputBatchSender2);
+      _defineProperty10(this, "target", void 0);
+      _defineProperty10(this, "shinyapp", void 0);
+      _defineProperty10(this, "timerId", null);
+      _defineProperty10(this, "pendingData", {});
+      _defineProperty10(this, "reentrant", false);
+      _defineProperty10(this, "lastChanceCallback", []);
       this.shinyapp = shinyapp;
     }
-    _createClass28(InputBatchSender2, [{
+    _createClass29(InputBatchSender2, [{
       key: "setInput",
       value: function setInput(nameType, value, opts) {
         this.pendingData[nameType] = value;
@@ -11041,12 +11123,12 @@
   }
 
   // srcts/src/inputPolicies/inputNoResendDecorator.ts
-  function _classCallCheck29(instance, Constructor) {
+  function _classCallCheck30(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
       throw new TypeError("Cannot call a class as a function");
     }
   }
-  function _defineProperties29(target, props) {
+  function _defineProperties30(target, props) {
     for (var i = 0; i < props.length; i++) {
       var descriptor = props[i];
       descriptor.enumerable = descriptor.enumerable || false;
@@ -11056,14 +11138,14 @@
       Object.defineProperty(target, descriptor.key, descriptor);
     }
   }
-  function _createClass29(Constructor, protoProps, staticProps) {
+  function _createClass30(Constructor, protoProps, staticProps) {
     if (protoProps)
-      _defineProperties29(Constructor.prototype, protoProps);
+      _defineProperties30(Constructor.prototype, protoProps);
     if (staticProps)
-      _defineProperties29(Constructor, staticProps);
+      _defineProperties30(Constructor, staticProps);
     return Constructor;
   }
-  function _defineProperty10(obj, key, value) {
+  function _defineProperty11(obj, key, value) {
     if (key in obj) {
       Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });
     } else {
@@ -11074,13 +11156,13 @@
   var InputNoResendDecorator = /* @__PURE__ */ function() {
     function InputNoResendDecorator2(target) {
       var initialValues = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : {};
-      _classCallCheck29(this, InputNoResendDecorator2);
-      _defineProperty10(this, "target", void 0);
-      _defineProperty10(this, "lastSentValues", {});
+      _classCallCheck30(this, InputNoResendDecorator2);
+      _defineProperty11(this, "target", void 0);
+      _defineProperty11(this, "lastSentValues", {});
       this.target = target;
       this.reset(initialValues);
     }
-    _createClass29(InputNoResendDecorator2, [{
+    _createClass30(InputNoResendDecorator2, [{
       key: "setInput",
       value: function setInput(nameType, value, opts) {
         var _splitInputNameType = splitInputNameType(nameType), inputName = _splitInputNameType.name, inputType = _splitInputNameType.inputType;
@@ -11121,68 +11203,6 @@
 
   // srcts/src/inputPolicies/inputEventDecorator.ts
   var import_jquery37 = __toModule(require_jquery());
-  function _classCallCheck30(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  }
-  function _defineProperties30(target, props) {
-    for (var i = 0; i < props.length; i++) {
-      var descriptor = props[i];
-      descriptor.enumerable = descriptor.enumerable || false;
-      descriptor.configurable = true;
-      if ("value" in descriptor)
-        descriptor.writable = true;
-      Object.defineProperty(target, descriptor.key, descriptor);
-    }
-  }
-  function _createClass30(Constructor, protoProps, staticProps) {
-    if (protoProps)
-      _defineProperties30(Constructor.prototype, protoProps);
-    if (staticProps)
-      _defineProperties30(Constructor, staticProps);
-    return Constructor;
-  }
-  function _defineProperty11(obj, key, value) {
-    if (key in obj) {
-      Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });
-    } else {
-      obj[key] = value;
-    }
-    return obj;
-  }
-  var InputEventDecorator = /* @__PURE__ */ function() {
-    function InputEventDecorator2(target) {
-      _classCallCheck30(this, InputEventDecorator2);
-      _defineProperty11(this, "target", void 0);
-      this.target = target;
-    }
-    _createClass30(InputEventDecorator2, [{
-      key: "setInput",
-      value: function setInput(nameType, value, opts) {
-        var evt = jQuery.Event("shiny:inputchanged");
-        var input = splitInputNameType(nameType);
-        evt.name = input.name;
-        evt.inputType = input.inputType;
-        evt.value = value;
-        evt.binding = opts.binding || null;
-        evt.el = opts.el || null;
-        evt.priority = opts.priority;
-        (0, import_jquery37.default)(opts.el || window.document).trigger(evt);
-        if (!evt.isDefaultPrevented()) {
-          var name = evt.name;
-          if (evt.inputType !== "")
-            name += ":" + evt.inputType;
-          this.target.setInput(name, evt.value, {
-            priority: opts.priority
-          });
-        }
-      }
-    }]);
-    return InputEventDecorator2;
-  }();
-
-  // srcts/src/inputPolicies/inputRateDecorator.ts
   function _classCallCheck31(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
       throw new TypeError("Cannot call a class as a function");
@@ -11213,14 +11233,76 @@
     }
     return obj;
   }
-  var InputRateDecorator = /* @__PURE__ */ function() {
-    function InputRateDecorator2(target) {
-      _classCallCheck31(this, InputRateDecorator2);
+  var InputEventDecorator = /* @__PURE__ */ function() {
+    function InputEventDecorator2(target) {
+      _classCallCheck31(this, InputEventDecorator2);
       _defineProperty12(this, "target", void 0);
-      _defineProperty12(this, "inputRatePolicies", {});
       this.target = target;
     }
-    _createClass31(InputRateDecorator2, [{
+    _createClass31(InputEventDecorator2, [{
+      key: "setInput",
+      value: function setInput(nameType, value, opts) {
+        var evt = jQuery.Event("shiny:inputchanged");
+        var input = splitInputNameType(nameType);
+        evt.name = input.name;
+        evt.inputType = input.inputType;
+        evt.value = value;
+        evt.binding = opts.binding || null;
+        evt.el = opts.el || null;
+        evt.priority = opts.priority;
+        (0, import_jquery37.default)(opts.el || window.document).trigger(evt);
+        if (!evt.isDefaultPrevented()) {
+          var name = evt.name;
+          if (evt.inputType !== "")
+            name += ":" + evt.inputType;
+          this.target.setInput(name, evt.value, {
+            priority: opts.priority
+          });
+        }
+      }
+    }]);
+    return InputEventDecorator2;
+  }();
+
+  // srcts/src/inputPolicies/inputRateDecorator.ts
+  function _classCallCheck32(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+  function _defineProperties32(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor)
+        descriptor.writable = true;
+      Object.defineProperty(target, descriptor.key, descriptor);
+    }
+  }
+  function _createClass32(Constructor, protoProps, staticProps) {
+    if (protoProps)
+      _defineProperties32(Constructor.prototype, protoProps);
+    if (staticProps)
+      _defineProperties32(Constructor, staticProps);
+    return Constructor;
+  }
+  function _defineProperty13(obj, key, value) {
+    if (key in obj) {
+      Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });
+    } else {
+      obj[key] = value;
+    }
+    return obj;
+  }
+  var InputRateDecorator = /* @__PURE__ */ function() {
+    function InputRateDecorator2(target) {
+      _classCallCheck32(this, InputRateDecorator2);
+      _defineProperty13(this, "target", void 0);
+      _defineProperty13(this, "inputRatePolicies", {});
+      this.target = target;
+    }
+    _createClass32(InputRateDecorator2, [{
       key: "setInput",
       value: function setInput(nameType, value, opts) {
         var _splitInputNameType = splitInputNameType(nameType), inputName = _splitInputNameType.name;
@@ -11258,12 +11340,12 @@
   }();
 
   // srcts/src/inputPolicies/inputDeferDecorator.ts
-  function _classCallCheck32(instance, Constructor) {
+  function _classCallCheck33(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
       throw new TypeError("Cannot call a class as a function");
     }
   }
-  function _defineProperties32(target, props) {
+  function _defineProperties33(target, props) {
     for (var i = 0; i < props.length; i++) {
       var descriptor = props[i];
       descriptor.enumerable = descriptor.enumerable || false;
@@ -11273,14 +11355,14 @@
       Object.defineProperty(target, descriptor.key, descriptor);
     }
   }
-  function _createClass32(Constructor, protoProps, staticProps) {
+  function _createClass33(Constructor, protoProps, staticProps) {
     if (protoProps)
-      _defineProperties32(Constructor.prototype, protoProps);
+      _defineProperties33(Constructor.prototype, protoProps);
     if (staticProps)
-      _defineProperties32(Constructor, staticProps);
+      _defineProperties33(Constructor, staticProps);
     return Constructor;
   }
-  function _defineProperty13(obj, key, value) {
+  function _defineProperty14(obj, key, value) {
     if (key in obj) {
       Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });
     } else {
@@ -11290,12 +11372,12 @@
   }
   var InputDeferDecorator = /* @__PURE__ */ function() {
     function InputDeferDecorator2(target) {
-      _classCallCheck32(this, InputDeferDecorator2);
-      _defineProperty13(this, "pendingInput", {});
-      _defineProperty13(this, "target", void 0);
+      _classCallCheck33(this, InputDeferDecorator2);
+      _defineProperty14(this, "pendingInput", {});
+      _defineProperty14(this, "target", void 0);
       this.target = target;
     }
-    _createClass32(InputDeferDecorator2, [{
+    _createClass33(InputDeferDecorator2, [{
       key: "setInput",
       value: function setInput(nameType, value, opts) {
         if (/^\./.test(nameType))
@@ -11345,12 +11427,12 @@
   });
 
   // srcts/src/inputPolicies/inputValidateDecorator.ts
-  function _classCallCheck33(instance, Constructor) {
+  function _classCallCheck34(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
       throw new TypeError("Cannot call a class as a function");
     }
   }
-  function _defineProperties33(target, props) {
+  function _defineProperties34(target, props) {
     for (var i = 0; i < props.length; i++) {
       var descriptor = props[i];
       descriptor.enumerable = descriptor.enumerable || false;
@@ -11360,11 +11442,11 @@
       Object.defineProperty(target, descriptor.key, descriptor);
     }
   }
-  function _createClass33(Constructor, protoProps, staticProps) {
+  function _createClass34(Constructor, protoProps, staticProps) {
     if (protoProps)
-      _defineProperties33(Constructor.prototype, protoProps);
+      _defineProperties34(Constructor.prototype, protoProps);
     if (staticProps)
-      _defineProperties33(Constructor, staticProps);
+      _defineProperties34(Constructor, staticProps);
     return Constructor;
   }
   function ownKeys2(object, enumerableOnly) {
@@ -11385,7 +11467,7 @@
       var source = arguments[i] != null ? arguments[i] : {};
       if (i % 2) {
         ownKeys2(Object(source), true).forEach(function(key) {
-          _defineProperty14(target, key, source[key]);
+          _defineProperty15(target, key, source[key]);
         });
       } else if (Object.getOwnPropertyDescriptors) {
         Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));
@@ -11397,7 +11479,7 @@
     }
     return target;
   }
-  function _defineProperty14(obj, key, value) {
+  function _defineProperty15(obj, key, value) {
     if (key in obj) {
       Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });
     } else {
@@ -11421,11 +11503,11 @@
   }
   var InputValidateDecorator = /* @__PURE__ */ function() {
     function InputValidateDecorator2(target) {
-      _classCallCheck33(this, InputValidateDecorator2);
-      _defineProperty14(this, "target", void 0);
+      _classCallCheck34(this, InputValidateDecorator2);
+      _defineProperty15(this, "target", void 0);
       this.target = target;
     }
-    _createClass33(InputValidateDecorator2, [{
+    _createClass34(InputValidateDecorator2, [{
       key: "setInput",
       value: function setInput(nameType, value) {
         var opts = arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : {};
@@ -11442,12 +11524,12 @@
   var import_jquery38 = __toModule(require_jquery());
 
   // srcts/src/bindings/outputAdapter.ts
-  function _classCallCheck34(instance, Constructor) {
+  function _classCallCheck35(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
       throw new TypeError("Cannot call a class as a function");
     }
   }
-  function _defineProperties34(target, props) {
+  function _defineProperties35(target, props) {
     for (var i = 0; i < props.length; i++) {
       var descriptor = props[i];
       descriptor.enumerable = descriptor.enumerable || false;
@@ -11457,14 +11539,14 @@
       Object.defineProperty(target, descriptor.key, descriptor);
     }
   }
-  function _createClass34(Constructor, protoProps, staticProps) {
+  function _createClass35(Constructor, protoProps, staticProps) {
     if (protoProps)
-      _defineProperties34(Constructor.prototype, protoProps);
+      _defineProperties35(Constructor.prototype, protoProps);
     if (staticProps)
-      _defineProperties34(Constructor, staticProps);
+      _defineProperties35(Constructor, staticProps);
     return Constructor;
   }
-  function _defineProperty15(obj, key, value) {
+  function _defineProperty16(obj, key, value) {
     if (key in obj) {
       Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });
     } else {
@@ -11474,9 +11556,9 @@
   }
   var OutputBindingAdapter = /* @__PURE__ */ function() {
     function OutputBindingAdapter2(el, binding) {
-      _classCallCheck34(this, OutputBindingAdapter2);
-      _defineProperty15(this, "el", void 0);
-      _defineProperty15(this, "binding", void 0);
+      _classCallCheck35(this, OutputBindingAdapter2);
+      _defineProperty16(this, "el", void 0);
+      _defineProperty16(this, "binding", void 0);
       this.el = el;
       this.binding = binding;
       if (binding.resize) {
@@ -11485,7 +11567,7 @@
         });
       }
     }
-    _createClass34(OutputBindingAdapter2, [{
+    _createClass35(OutputBindingAdapter2, [{
       key: "getId",
       value: function getId() {
         return this.binding.getId(this.el);
@@ -11765,12 +11847,12 @@
   // srcts/src/shiny/shinyapp.ts
   var import_es_regexp_exec9 = __toModule(require_es_regexp_exec());
   var import_jquery39 = __toModule(require_jquery());
-  function _classCallCheck35(instance, Constructor) {
+  function _classCallCheck36(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
       throw new TypeError("Cannot call a class as a function");
     }
   }
-  function _defineProperties35(target, props) {
+  function _defineProperties36(target, props) {
     for (var i = 0; i < props.length; i++) {
       var descriptor = props[i];
       descriptor.enumerable = descriptor.enumerable || false;
@@ -11780,14 +11862,14 @@
       Object.defineProperty(target, descriptor.key, descriptor);
     }
   }
-  function _createClass35(Constructor, protoProps, staticProps) {
+  function _createClass36(Constructor, protoProps, staticProps) {
     if (protoProps)
-      _defineProperties35(Constructor.prototype, protoProps);
+      _defineProperties36(Constructor.prototype, protoProps);
     if (staticProps)
-      _defineProperties35(Constructor, staticProps);
+      _defineProperties36(Constructor, staticProps);
     return Constructor;
   }
-  function _defineProperty16(obj, key, value) {
+  function _defineProperty17(obj, key, value) {
     if (key in obj) {
       Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });
     } else {
@@ -11831,21 +11913,21 @@
   }
   var ShinyApp = /* @__PURE__ */ function() {
     function ShinyApp2() {
-      _classCallCheck35(this, ShinyApp2);
-      _defineProperty16(this, "$socket", null);
-      _defineProperty16(this, "config", null);
-      _defineProperty16(this, "$inputValues", {});
-      _defineProperty16(this, "$initialInput", void 0);
-      _defineProperty16(this, "$bindings", {});
-      _defineProperty16(this, "$values", {});
-      _defineProperty16(this, "$errors", {});
-      _defineProperty16(this, "$conditionals", {});
-      _defineProperty16(this, "$pendingMessages", []);
-      _defineProperty16(this, "$activeRequests", {});
-      _defineProperty16(this, "$nextRequestId", 0);
-      _defineProperty16(this, "$allowReconnect", false);
-      _defineProperty16(this, "scheduledReconnect", null);
-      _defineProperty16(this, "reconnectDelay", function() {
+      _classCallCheck36(this, ShinyApp2);
+      _defineProperty17(this, "$socket", null);
+      _defineProperty17(this, "config", null);
+      _defineProperty17(this, "$inputValues", {});
+      _defineProperty17(this, "$initialInput", void 0);
+      _defineProperty17(this, "$bindings", {});
+      _defineProperty17(this, "$values", {});
+      _defineProperty17(this, "$errors", {});
+      _defineProperty17(this, "$conditionals", {});
+      _defineProperty17(this, "$pendingMessages", []);
+      _defineProperty17(this, "$activeRequests", {});
+      _defineProperty17(this, "$nextRequestId", 0);
+      _defineProperty17(this, "$allowReconnect", false);
+      _defineProperty17(this, "scheduledReconnect", null);
+      _defineProperty17(this, "reconnectDelay", function() {
         var attempts = 0;
         var delays = [1500, 1500, 2500, 2500, 5500, 5500, 10500];
         return {
@@ -11862,7 +11944,7 @@
           }
         };
       }());
-      _defineProperty16(this, "progressHandlers", {
+      _defineProperty17(this, "progressHandlers", {
         binding: function binding(message) {
           var key = message.id;
           var binding2 = this.$bindings[key];
@@ -11948,7 +12030,7 @@
       });
       this._init();
     }
-    _createClass35(ShinyApp2, [{
+    _createClass36(ShinyApp2, [{
       key: "connect",
       value: function connect(initialInput) {
         if (this.$socket)
@@ -12195,7 +12277,7 @@
         return Object.keys(scopeComponent).filter(function(k) {
           return k.indexOf(nsPrefix) === 0;
         }).map(function(k) {
-          return _defineProperty16({}, k.substring(nsPrefix.length), scopeComponent[k]);
+          return _defineProperty17({}, k.substring(nsPrefix.length), scopeComponent[k]);
         }).reduce(function(obj, pair) {
           return import_jquery39.default.extend(obj, pair);
         }, {});
@@ -12762,6 +12844,13 @@
     var initialValues = mapValues(_bindAll(shinyBindCtx(), document.documentElement), function(x) {
       return x.value;
     });
+    var maybeBindOnRegister = debounce(0, function() {
+      if (!renderHtml2.isExecuting()) {
+        windowShiny3.bindAll(document.documentElement);
+      }
+    });
+    inputBindings.onRegister(maybeBindOnRegister, false);
+    outputBindings.onRegister(maybeBindOnRegister, false);
     (0, import_jquery40.default)(".shiny-image-output, .shiny-plot-output, .shiny-report-size").each(function() {
       var id = getIdFromEl(this);
       if (this.offsetWidth !== 0 || this.offsetHeight !== 0) {

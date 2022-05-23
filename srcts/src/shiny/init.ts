@@ -21,7 +21,7 @@ import {
 import { bindAll, unbindAll, _bindAll } from "./bind";
 import type { BindInputsCtx, BindScope } from "./bind";
 import { setShinyObj } from "./initedMethods";
-import { registerDependency } from "./render";
+import { registerDependency, renderHtml } from "./render";
 import { sendImageSizeFns } from "./sendImageSize";
 import { ShinyApp } from "./shinyapp";
 import { registerNames as singletonsRegisterNames } from "./singletons";
@@ -149,6 +149,19 @@ function initShiny(windowShiny: Shiny): void {
     _bindAll(shinyBindCtx(), document.documentElement),
     (x) => x.value
   );
+
+  // When future bindings are registered via dynamic UI, check to see if renderHtml()
+  // is currently executing. If it's not, it's likely that the binding registration
+  // is occurring a tick after renderHtml()/renderContent(), in which case we need
+  // to make sure the new bindings get a chance to bind to the DOM. (#3635)
+  const maybeBindOnRegister = debounce(0, () => {
+    if (!renderHtml.isExecuting()) {
+      windowShiny.bindAll(document.documentElement);
+    }
+  });
+
+  inputBindings.onRegister(maybeBindOnRegister, false);
+  outputBindings.onRegister(maybeBindOnRegister, false);
 
   // The server needs to know the size of each image and plot output element,
   // in case it is auto-sizing

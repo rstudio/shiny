@@ -7,6 +7,10 @@ declare function renderContent(el: BindScope, content: string | {
     deps?: HtmlDep[];
 } | null, where?: WherePosition): void;
 declare function renderHtml(html: string, el: BindScope, dependencies: HtmlDep[], where?: WherePosition): ReturnType<typeof singletonsRenderHtml>;
+declare namespace renderHtml {
+    var _renderCount: number;
+    var isExecuting: () => boolean;
+}
 declare type HtmlDepVersion = string;
 declare type MetaItem = {
     name: string;

@@ -91,7 +91,7 @@ function canSetFiles(fileList: FileList): boolean {
   return true;
 }
 function handleDrop(e: JQuery.DragEventBase, el: HTMLInputElement): void {
-  const files = e.originalEvent.dataTransfer.files,
+  const files = e.originalEvent?.dataTransfer?.files,
     $el = $(el);
 
   if (files === undefined || files === null) {
@@ -109,7 +109,7 @@ function handleDrop(e: JQuery.DragEventBase, el: HTMLInputElement): void {
     // 3. The browser supports FileList and input.files assignment.
     // (Chrome, Safari)
     $el.val("");
-    el.files = e.originalEvent.dataTransfer.files;
+    el.files = files;
     // Recent versions of Firefox (57+, or "Quantum" and beyond) don't seem to
     // automatically trigger a change event, so we trigger one manually here.
     // On browsers that do trigger change, this operation appears to be
@@ -188,7 +188,7 @@ function uploadFiles(evt: JQuery.DragEvent): void {
 // TODO-barret ; Should this be an internal class property?
 let $fileInputs = $();
 
-function fileInputBindingGetId(el: HTMLInputElement): string {
+function fileInputBindingGetId(this: any, el: HTMLInputElement): string {
   return InputBinding.prototype.getId.call(this, el) || el.name;
 }
 

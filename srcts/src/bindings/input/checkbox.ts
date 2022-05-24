@@ -35,12 +35,18 @@ class CheckboxInputBinding extends InputBinding {
     el: CheckedHTMLElement,
     data: CheckboxReceiveMessageData
   ): void {
-    if (hasOwnProperty(data, "value")) el.checked = data.value;
+    if (hasOwnProperty(data, "value")) {
+      el.checked = data.value as boolean;
+    }
 
     // checkboxInput()'s label works different from other
     // input labels...the label container should always exist
-    if (hasOwnProperty(data, "label"))
-      $(el).parent().find("span").text(data.label);
+    if (hasOwnProperty(data, "label")) {
+      $(el)
+        .parent()
+        .find("span")
+        .text(data.label as string);
+    }
 
     $(el).trigger("change");
   }

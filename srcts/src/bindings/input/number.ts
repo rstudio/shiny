@@ -23,7 +23,9 @@ class NumberInputBinding extends TextInputBindingBase {
     return $(scope).find('input[type="number"]');
   }
 
-  getValue(el: NumberHTMLElement): string[] | number | string {
+  getValue(
+    el: NumberHTMLElement
+  ): string[] | number | string | null | undefined {
     const numberVal = $(el).val();
 
     if (typeof numberVal == "string") {
@@ -49,10 +51,10 @@ class NumberInputBinding extends TextInputBindingBase {
     el;
   }
   receiveMessage(el: NumberHTMLElement, data: NumberReceiveMessageData): void {
-    if (hasOwnProperty(data, "value")) el.value = data.value;
-    if (hasOwnProperty(data, "min")) el.min = data.min;
-    if (hasOwnProperty(data, "max")) el.max = data.max;
-    if (hasOwnProperty(data, "step")) el.step = data.step;
+    if (hasOwnProperty(data, "value")) el.value = data.value ?? "";
+    if (hasOwnProperty(data, "min")) el.min = data.min ?? "";
+    if (hasOwnProperty(data, "max")) el.max = data.max ?? "";
+    if (hasOwnProperty(data, "step")) el.step = data.step ?? "";
 
     updateLabel(data.label, getLabelNode(el));
 

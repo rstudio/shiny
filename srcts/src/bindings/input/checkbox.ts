@@ -36,7 +36,7 @@ class CheckboxInputBinding extends InputBinding {
     data: CheckboxReceiveMessageData
   ): void {
     if (hasOwnProperty(data, "value")) {
-      el.checked = data.value as boolean;
+      el.checked = data.value as NonNullable<typeof data.value>;
     }
 
     // checkboxInput()'s label works different from other
@@ -45,7 +45,7 @@ class CheckboxInputBinding extends InputBinding {
       $(el)
         .parent()
         .find("span")
-        .text(data.label as string);
+        .text(data.label as NonNullable<typeof data.label>);
     }
 
     $(el).trigger("change");

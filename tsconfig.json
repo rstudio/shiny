@@ -10,7 +10,8 @@
     // Can not use `types: []` to disable injecting NodeJS types. More types are
     // needed than just the DOM's `window.setTimeout`
     // "types": [],
-    "strict": false
+    "strict": true,
+    "strictNullChecks": true,
   },
   "include": [
     "srcts/src/index.ts",

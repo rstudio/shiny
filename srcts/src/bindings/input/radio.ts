@@ -10,7 +10,7 @@ type ValueLabelObject = {
 };
 
 type RadioReceiveMessageData = {
-  value?: string;
+  value?: string | [];
   options?: ValueLabelObject[];
   label: string;
 };
@@ -24,9 +24,11 @@ function getLabelNode(el: RadioHTMLElement): JQuery<HTMLElement> {
 // Given an input DOM object, get the associated label. Handles labels
 // that wrap the input as well as labels associated with 'for' attribute.
 function getLabel(obj: HTMLElement): string | null {
+  const parentNode = obj.parentNode as HTMLElement;
+
   // If <label><input /><span>label text</span></label>
-  if ((obj.parentNode as HTMLElement).tagName === "LABEL") {
-    return $(obj.parentNode).find("span").text().trim();
+  if (parentNode.tagName === "LABEL") {
+    return $(parentNode).find("span").text().trim();
   }
 
   return null;
@@ -35,9 +37,11 @@ function getLabel(obj: HTMLElement): string | null {
 // that wrap the input as well as labels associated with 'for' attribute.
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function setLabel(obj: HTMLElement, value: string): null {
+  const parentNode = obj.parentNode as HTMLElement;
+
   // If <label><input /><span>label text</span></label>
-  if ((obj.parentNode as HTMLElement).tagName === "LABEL") {
-    $(obj.parentNode).find("span").text(value);
+  if (parentNode.tagName === "LABEL") {
+    $(parentNode).find("span").text(value);
   }
 
   return null;
@@ -47,7 +51,9 @@ class RadioInputBinding extends InputBinding {
   find(scope: HTMLElement): JQuery<HTMLElement> {
     return $(scope).find(".shiny-input-radiogroup");
   }
-  getValue(el: RadioHTMLElement): string[] | number | string | null {
+  getValue(
+    el: RadioHTMLElement
+  ): string[] | number | string | null | undefined {
     // Select the radio objects that have name equal to the grouping div's id
     const checkedItems = $(
       'input:radio[name="' + $escape(el.id) + '"]:checked'
@@ -61,8 +67,8 @@ class RadioInputBinding extends InputBinding {
 
     return checkedItems.val();
   }
-  setValue(el: RadioHTMLElement, value: string): void {
-    if ($.isArray(value) && value.length === 0) {
+  setValue(el: RadioHTMLElement, value: string | []): void {
+    if (Array.isArray(value) && value.length === 0) {
       // Removing all checked item if the sent data is empty
       $('input:radio[name="' + $escape(el.id) + '"]').prop("checked", false);
     } else {
@@ -77,7 +83,7 @@ class RadioInputBinding extends InputBinding {
   }
   getState(el: RadioHTMLElement): {
     label: string;
-    value: string[] | number | string;
+    value: ReturnType<RadioInputBinding["getValue"]>;
     options: ValueLabelObject[];
   } {
     const $objs = $(
@@ -110,7 +116,9 @@ class RadioInputBinding extends InputBinding {
       $el.append(data.options);
     }
 
-    if (hasOwnProperty(data, "value")) this.setValue(el, data.value);
+    if (hasOwnProperty(data, "value")) {
+      this.setValue(el, data.value as NonNullable<typeof data.value>);
+    }
 
     updateLabel(data.label, getLabelNode(el));
 

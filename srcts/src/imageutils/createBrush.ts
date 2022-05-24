@@ -18,30 +18,30 @@ type BoundsCss = Bounds;
 type BoundsData = Bounds;
 
 type ImageState = {
-  brushing?: boolean;
-  dragging?: boolean;
-  resizing?: boolean;
+  brushing: boolean;
+  dragging: boolean;
+  resizing: boolean;
 
   // Offset of last mouse down and up events (in CSS pixels)
-  down?: Offset;
-  up?: Offset;
+  down: Offset;
+  up: Offset;
 
   // Which side(s) we're currently resizing
-  resizeSides?: {
+  resizeSides: {
     left: boolean;
     right: boolean;
     top: boolean;
     bottom: boolean;
   };
 
-  boundsCss?: BoundsCss;
-  boundsData?: BoundsData;
+  boundsCss: BoundsCss;
+  boundsData: BoundsData;
 
   // Panel object that the brush is in
-  panel?: Panel;
+  panel: Panel | null;
 
   // The bounds at the start of a drag/resize (in CSS pixels)
-  changeStartBounds?: Bounds;
+  changeStartBounds: Bounds;
 };
 
 type BrushOpts = {
@@ -66,9 +66,6 @@ type Brush = {
   // A callback when the wrapper div or img is resized.
   onResize: () => void;
 
-  // TODO define this type as both a getter and a setter interfaces.
-  // boundsCss: (boxCss: BoundsCss) => void;
-  // boundsCss: () => BoundsCss;
   boundsCss: {
     (boxCss: BoundsCss): void;
     (): BoundsCss;
@@ -82,11 +79,12 @@ type Brush = {
 
   down: {
     (): ImageState["down"];
-    (offsetCss): void;
+    (offsetCss: Offset): void;
+    (offsetCss?: Offset): ImageState["down"] | void;
   };
   up: {
     (): ImageState["up"];
-    (offsetCss): void;
+    (offsetCss: Offset): void;
   };
 
   isBrushing: () => ImageState["brushing"];
@@ -117,9 +115,9 @@ function createBrush(
   const resizeExpand = 10;
 
   const el = $el[0];
-  let $div = null; // The div representing the brush
+  let $div: JQuery<HTMLElement> | null = null; // The div representing the brush
 
-  const state: ImageState = {};
+  const state = {} as ImageState;
 
   // Aliases for conciseness
   const cssToImg = coordmap.scaleCssToImg;
@@ -225,8 +223,8 @@ function createBrush(
     const boundsDataVal = boundsData();
     // Check to see if we have valid boundsData
 
-    for (const val in boundsDataVal) {
-      if (isnan(boundsDataVal[val])) return;
+    for (const val in Object.values(boundsDataVal)) {
+      if (isnan(val)) return;
     }
 
     boundsData(boundsDataVal);
@@ -234,7 +232,7 @@ function createBrush(
   }
 
   // Return true if the offset is inside min/max coords
-  function isInsideBrush(offsetCss) {
+  function isInsideBrush(offsetCss: Offset) {
     const bounds = state.boundsCss;
 
     return (
@@ -246,14 +244,14 @@ function createBrush(
   }
 
   // Return true if offset is inside a region to start a resize
-  function isInResizeArea(offsetCss) {
+  function isInResizeArea(offsetCss: Offset) {
     const sides = whichResizeSides(offsetCss);
 
     return sides.left || sides.right || sides.top || sides.bottom;
   }
 
   // Return an object representing which resize region(s) the cursor is in.
-  function whichResizeSides(offsetCss) {
+  function whichResizeSides(offsetCss: Offset) {
     const b = state.boundsCss;
     // Bounds with expansion
     const e = {
@@ -299,12 +297,13 @@ function createBrush(
   function boundsCss(boxCss: BoundsCss): void;
   function boundsCss(boxCss?: BoundsCss) {
     if (boxCss === undefined) {
-      return $.extend({}, state.boundsCss);
+      return { ...state.boundsCss };
     }
 
-    let minCss = { x: boxCss.xmin, y: boxCss.ymin };
-    let maxCss = { x: boxCss.xmax, y: boxCss.ymax };
+    let minCss: Offset = { x: boxCss.xmin, y: boxCss.ymin };
+    let maxCss: Offset = { x: boxCss.xmax, y: boxCss.ymax };
 
+    if (!state.panel) return;
     const panel = state.panel;
     const panelBoundsImg = panel.range;
 
@@ -342,25 +341,29 @@ function createBrush(
     // (#1634).
     state.boundsData = mapValues(state.boundsData, (val) =>
       roundSignif(val, 14)
-    ) as BoundsData;
+    );
 
     // We also need to attach the data bounds and panel as data attributes, so
     // that if the image is re-sent, we can grab the data bounds to create a new
     // brush. This should be fast because it doesn't actually modify the DOM.
-    $div.data("bounds-data", state.boundsData);
-    $div.data("panel", state.panel);
+    $div?.data("bounds-data", state.boundsData);
+    $div?.data("panel", state.panel);
     return undefined;
   }
 
   // Get or set the bounds of the brush using coordinates in the data space.
-  function boundsData(): ImageState["boundsData"];
-  function boundsData(boxData: Parameters<Panel["scaleDataToImg"]>[0]): void;
-  function boundsData(boxData?: Parameters<Panel["scaleDataToImg"]>[0]) {
-    if (boxData === undefined) {
-      return $.extend({}, state.boundsData);
+  function boundsData(): BoundsData;
+  function boundsData(boxData: BoundsData): void;
+  function boundsData(boxData?: BoundsData | undefined): BoundsData | void {
+    if (typeof boxData === "undefined") {
+      return { ...state.boundsData };
     }
 
-    let boxCss = imgToCss(state.panel.scaleDataToImg(boxData));
+    const boxData2 = boxData as BoundsData;
+
+    const panel = state.panel as Panel;
+
+    let boxCss = imgToCss(panel.scaleDataToImg(boxData2));
     // Round to 13 significant digits to avoid spurious changes in FP values
     // (#2197).
 
@@ -415,7 +418,13 @@ function createBrush(
     }
 
     $el.append($div);
-    $div.offset({ x: 0, y: 0 }).width(0).outerHeight(0);
+    $div
+      .offset(
+        // @ts-expect-error; This is a jQuery Typing issue
+        { x: 0, y: 0 }
+      )
+      .width(0)
+      .outerHeight(0);
   }
 
   // Update the brush div to reflect the current brush bounds.
@@ -426,7 +435,7 @@ function createBrush(
     const b = state.boundsCss;
 
     $div
-      .offset({
+      ?.offset({
         top: imgOffsetCss.y + b.ymin,
         left: imgOffsetCss.x + b.xmin,
       })
@@ -434,14 +443,19 @@ function createBrush(
       .outerHeight(b.ymax - b.ymin + 1);
   }
 
-  function down(offsetCss?: Offset) {
+  // (offsetCss?: Offset): ImageState["down"] | void;
+  function down(): ImageState["down"];
+  function down(offsetCss: Offset): void;
+  function down(offsetCss?: Offset | undefined) {
     if (offsetCss === undefined) return state.down;
 
     state.down = offsetCss;
     return undefined;
   }
 
-  function up(offsetCss?: Offset) {
+  function up(): ImageState["up"];
+  function up(offsetCss: Offset): void;
+  function up(offsetCss?: Offset | undefined) {
     if (offsetCss === undefined) return state.up;
 
     state.up = offsetCss;
@@ -463,7 +477,7 @@ function createBrush(
 
   function brushTo(offsetCss: Offset) {
     boundsCss(findBox(state.down, offsetCss));
-    $div.show();
+    $div?.show();
     updateDiv();
   }
 
@@ -479,7 +493,7 @@ function createBrush(
 
   function startDragging() {
     state.dragging = true;
-    state.changeStartBounds = $.extend({}, state.boundsCss);
+    state.changeStartBounds = { ...state.boundsCss };
   }
 
   function dragTo(offsetCss: Offset) {
@@ -498,7 +512,8 @@ function createBrush(
 
     // Clip to the plotting area
     if (opts.brushClip) {
-      const panelBoundsImg = state.panel.range;
+      const panel = state.panel as Panel;
+      const panelBoundsImg = panel.range;
       const newBoundsImg = cssToImg(newBoundsCss);
 
       // Convert to format for shiftToRange
@@ -539,7 +554,7 @@ function createBrush(
 
   function startResizing() {
     state.resizing = true;
-    state.changeStartBounds = $.extend({}, state.boundsCss);
+    state.changeStartBounds = { ...state.boundsCss };
     state.resizeSides = whichResizeSides(state.down);
   }
 
@@ -554,7 +569,8 @@ function createBrush(
 
     // Calculate what new positions would be, before clipping.
     const bImg = cssToImg(state.changeStartBounds);
-    const panelBoundsImg = state.panel.range;
+    const panel = state.panel as Panel;
+    const panelBoundsImg = panel.range;
 
     if (state.resizeSides.left) {
       const xminImg = shiftToRange(

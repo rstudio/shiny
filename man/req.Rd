@@ -25,26 +25,30 @@ nor displayed in the Shiny app's UI).
 \details{
 The \code{req} function was designed to be used in one of two ways. The first
 is to call it like a statement (ignoring its return value) before attempting
-operations using the required values:\preformatted{rv <- reactiveValues(state = FALSE)
+operations using the required values:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{rv <- reactiveValues(state = FALSE)
 r <- reactive(\{
   req(input$a, input$b, rv$state)
   # Code that uses input$a, input$b, and/or rv$state...
 \})
-}
+}\if{html}{\out{</div>}}
 
 In this example, if \code{r()} is called and any of \code{input$a},
 \code{input$b}, and \code{rv$state} are \code{NULL}, \code{FALSE}, \code{""},
 etc., then the \code{req} call will trigger an error that propagates all the
 way up to whatever render block or observer is executing.
 
-The second is to use it to wrap an expression that must be truthy:\preformatted{output$plot <- renderPlot(\{
+The second is to use it to wrap an expression that must be truthy:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{output$plot <- renderPlot(\{
   if (req(input$plotType) == "histogram") \{
     hist(dataset())
   \} else if (input$plotType == "scatter") \{
     qplot(dataset(), aes(x = x, y = y))
   \}
 \})
-}
+}\if{html}{\out{</div>}}
 
 In this example, \code{req(input$plotType)} first checks that
 \code{input$plotType} is truthy, and if so, returns it. This is a convenient

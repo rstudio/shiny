@@ -161,7 +161,7 @@ class DateInputBindingBase extends InputBinding {
   }
   // Given an unambiguous date string or a Date object, set the max (end) date
   // null will unset.
-  protected _setMax(el: HTMLElement, date: Date): void {
+  protected _setMax(el: HTMLElement, date: Date | null | undefined): void {
     if (date === undefined) return;
     if (date === null) {
       $(el).bsDatepicker("setEndDate", null);
@@ -236,7 +236,8 @@ class DateInputBinding extends DateInputBindingBase {
     return formatDateUTC(date);
   }
   // value must be an unambiguous string like '2001-01-01', or a Date object.
-  setValue(el: HTMLElement, value: Date): void {
+  setValue(el: HTMLElement, value: Date | null | undefined): void {
+    if (value === undefined) return;
     // R's NA, which is null here will remove current value
     if (value === null) {
       $(el).find("input").val("").bsDatepicker("update");
@@ -257,7 +258,7 @@ class DateInputBinding extends DateInputBindingBase {
   getState(el: HTMLElement): {
     label: string;
     value: string | null;
-    valueString: string[] | number | string;
+    valueString: string[] | number | string | undefined;
     min: string | null;
     max: string | null;
     language: string | null;

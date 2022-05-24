@@ -33,7 +33,10 @@ class DateRangeInputBinding extends DateInputBindingBase {
   }
   // value must be an object, with optional fields `start` and `end`. These
   // should be unambiguous strings like '2001-01-01', or Date objects.
-  setValue(el: HTMLElement, value: { start?: Date; end?: Date }): void {
+  setValue(
+    el: HTMLElement,
+    value: { start?: Date; end?: Date } | undefined
+  ): void {
     if (!(value instanceof Object)) {
       return;
     }

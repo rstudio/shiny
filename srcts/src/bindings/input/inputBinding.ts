@@ -2,7 +2,7 @@ import type { RatePolicyModes } from "../../inputPolicies/inputRateDecorator";
 import type { BindScope } from "../../shiny/bind";
 
 class InputBinding {
-  name: string;
+  name!: string;
 
   // Returns a jQuery object or element array that contains the
   // descendants of scope that match this binding

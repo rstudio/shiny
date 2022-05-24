@@ -22,9 +22,10 @@ class DatatableOutputBinding extends OutputBinding {
       options?: {
         searching?: boolean;
         search?: { caseInsensitive?: boolean };
+        escape?: string;
       } | null;
-      action?: string;
       escape?: string;
+      action?: string;
       evalOptions?: string[];
       callback?: string;
       searchDelay?: number;
@@ -42,7 +43,7 @@ class DatatableOutputBinding extends OutputBinding {
     header = "<thead><tr>" + header + "</tr></thead>";
     let footer = "";
 
-    if (data.options === null || data.options.searching !== false) {
+    if (data.options === null || data.options?.searching !== false) {
       footer = $.map(colnames, function (x) {
         // placeholder needs to be escaped (and HTML tags are stripped off)
         return (
@@ -62,16 +63,18 @@ class DatatableOutputBinding extends OutputBinding {
     $el.append(content);
 
     // options that should be eval()ed
-    if (data.evalOptions)
+    if (data.evalOptions) {
       $.each(data.evalOptions, function (i, x) {
         /*jshint evil: true */
+        // @ts-expect-error; If `evalOptions` is defined, `data.options` should be defined
         data.options[x] = indirectEval("(" + data.options[x] + ")");
       });
+    }
 
     // caseInsensitive searching? default true
     const searchCI =
       data.options === null ||
-      typeof data.options.search === "undefined" ||
+      typeof data.options?.search === "undefined" ||
       data.options.search.caseInsensitive !== false;
     const oTable = $(el)
       .children("table")
@@ -86,8 +89,10 @@ class DatatableOutputBinding extends OutputBinding {
             ajax: {
               url: data.action,
               type: "POST",
-              data: function (d) {
+              data: function (d: NonNullable<typeof data.options>) {
+                d.search || (d.search = {});
                 d.search.caseInsensitive = searchCI;
+                // TODO-barret; Is this logic right? Seems like it should be on `data`, not `data.options`.
                 d.escape = data.escape;
               },
             },
@@ -110,7 +115,7 @@ class DatatableOutputBinding extends OutputBinding {
       .first()
       .unbind("keyup")
       .keyup(
-        debounce(data.searchDelay, function () {
+        debounce(data.searchDelay, function (this: HTMLInputElement) {
           oTable.search(this.value).draw();
         })
       );
@@ -124,7 +129,7 @@ class DatatableOutputBinding extends OutputBinding {
         if (!x.bSearchable) searchInputs.eq(i as number).hide();
       });
       searchInputs.keyup(
-        debounce(data.searchDelay, function () {
+        debounce(data.searchDelay, function (this: HTMLInputElement) {
           oTable.column(searchInputs.index(this)).search(this.value).draw();
         })
       );

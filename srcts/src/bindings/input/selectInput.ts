@@ -42,12 +42,12 @@ class SelectInputBinding extends InputBinding {
   find(scope: HTMLElement): JQuery<HTMLElement> {
     return $(scope).find("select");
   }
-  getType(el: HTMLElement): string {
+  getType(el: HTMLElement): string | false {
     const $el = $(el);
 
     if (!$el.hasClass("symbol")) {
       // default character type
-      return null;
+      return false;
     }
     if ($el.attr("multiple") === "multiple") {
       return "shiny.symbolList";

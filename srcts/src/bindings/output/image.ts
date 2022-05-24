@@ -65,7 +65,19 @@ class ImageOutputBinding extends OutputBinding {
 
     // If value is undefined, return alternate. Sort of like ||, except it won't
     // return alternate for other falsy values (0, false, null).
-    function ifUndefined(value, alternate) {
+
+    // Return type for non-null value
+    function ifUndefined<X, T extends NonNullable<X>, K>(
+      value: X,
+      alternate: K
+    ): T;
+    // Return type for null value
+    function ifUndefined<T extends any | undefined, K>(
+      value: T,
+      alternate: K
+    ): K;
+    // Logic
+    function ifUndefined(value: any, alternate: any): any {
       if (value === undefined) return alternate;
       return value;
     }

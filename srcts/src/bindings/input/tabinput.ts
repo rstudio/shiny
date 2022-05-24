@@ -25,7 +25,7 @@ class BootstrapTabInputBinding extends InputBinding {
 
     return null;
   }
-  setValue(el: HTMLElement, value: string): void {
+  setValue(el: HTMLElement, value: string | undefined): void {
     let success = false;
 
     if (value) {

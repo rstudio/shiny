@@ -7577,7 +7577,7 @@
         import_jquery20.default.each(files, function(i, file) {
           _this3.totalBytes += file.size;
         });
-        var fileInfo = import_jquery20.default.map(Array.from(files), function(file) {
+        var fileInfo = import_jquery20.default.map(files, function(file) {
           return {
             name: file.name,
             size: file.size,

@@ -89,8 +89,8 @@ class TextInputBindingBase extends InputBinding {
 }
 
 class TextInputBinding extends TextInputBindingBase {
-  setValue(el: TextHTMLElement, value: string): void {
-    el.value = value;
+  setValue(el: TextHTMLElement, value: string | undefined): void {
+    el.value = value as string;
   }
 
   getValue(el: TextHTMLElement): TextHTMLElement["value"] {
@@ -113,7 +113,8 @@ class TextInputBinding extends TextInputBindingBase {
 
     updateLabel(data.label, getLabelNode(el));
 
-    if (hasOwnProperty(data, "placeholder")) el.placeholder = data.placeholder;
+    if (hasOwnProperty(data, "placeholder"))
+      el.placeholder = data.placeholder as string;
 
     $(el).trigger("change");
   }

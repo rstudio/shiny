@@ -155,7 +155,7 @@ class FileUploader extends FileProcessor {
       this.totalBytes += file.size;
     });
 
-    const fileInfo = $.map(Array.from(files), function (file: File) {
+    const fileInfo = $.map(files, function (file: File) {
       return {
         name: file.name,
         size: file.size,

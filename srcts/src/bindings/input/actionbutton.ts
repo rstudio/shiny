@@ -3,7 +3,7 @@ import { InputBinding } from "./inputBinding";
 
 import { hasOwnProperty } from "../../utils";
 
-type ActionButtonReceiveMessageData = { label?: string; icon?: string };
+type ActionButtonReceiveMessageData = { label?: string; icon?: string | [] };
 
 class ActionButtonInputBinding extends InputBinding {
   find(scope: HTMLElement): JQuery<HTMLElement> {
@@ -40,7 +40,7 @@ class ActionButtonInputBinding extends InputBinding {
     const $el = $(el);
 
     // retrieve current label and icon
-    let label = $el.text();
+    let label: string = $el.text();
     let icon = "";
 
     // to check (and store) the previous icon, we look for a $el child
@@ -57,16 +57,18 @@ class ActionButtonInputBinding extends InputBinding {
     }
 
     // update the requested properties
-    if (hasOwnProperty(data, "label")) label = data.label;
+    if (hasOwnProperty(data, "label")) {
+      label = data.label as NonNullable<typeof data.label>;
+    }
     if (hasOwnProperty(data, "icon")) {
-      icon = data.icon;
-      // if the user entered icon=character(0), remove the icon
-      if (icon.length === 0) icon = "";
+      // `data.icon` can be an [] if user gave `character(0)`.
+      icon = Array.isArray(data.icon) ? "" : data.icon ?? "";
     }
 
     // produce new html
     $el.html(icon + " " + label);
   }
+
   unsubscribe(el: HTMLElement): void {
     $(el).off(".actionButtonInputBinding");
   }

@@ -86,7 +86,8 @@ type MetaItem = {
 
 type StylesheetItem = {
   href: string;
-  [x: string]: string;
+  rel?: string;
+  type?: string;
 };
 
 type ScriptItem = {
@@ -159,9 +160,12 @@ function renderDependency(dep_: HtmlDep) {
 
     const link = document.createElement("link");
 
-    Object.entries(x).forEach(function ([attr, val]) {
+    Object.entries(x).forEach(function ([attr, val]: [
+      string,
+      string | undefined
+    ]) {
       if (attr === "href") {
-        val = encodeURI(val);
+        val = encodeURI(val as string);
       }
       // If val isn't truthy (e.g., null), consider it a boolean attribute
       link.setAttribute(attr, val ? val : "");

@@ -20,7 +20,7 @@ declare class TextInputBindingBase extends InputBinding {
     };
 }
 declare class TextInputBinding extends TextInputBindingBase {
-    setValue(el: TextHTMLElement, value: string): void;
+    setValue(el: TextHTMLElement, value: string | undefined): void;
     getValue(el: TextHTMLElement): TextHTMLElement["value"];
     getState(el: TextHTMLElement): {
         label: string;

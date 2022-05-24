@@ -7,6 +7,9 @@ declare type SliderReceiveMessageData = {
     min?: number;
     max?: number;
     step?: number;
+    "data-type"?: string;
+    "time-format"?: string;
+    timezone?: string;
 };
 declare global {
     interface Window {

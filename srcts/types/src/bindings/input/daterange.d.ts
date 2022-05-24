@@ -15,7 +15,7 @@ declare class DateRangeInputBinding extends DateInputBindingBase {
     setValue(el: HTMLElement, value: {
         start?: Date;
         end?: Date;
-    }): void;
+    } | undefined): void;
     getState(el: HTMLElement): {
         label: string;
         value: [string, string];

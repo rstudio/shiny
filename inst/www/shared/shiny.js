@@ -688,7 +688,7 @@
       var getOwnPropertyNamesModule2 = require_object_get_own_property_names();
       var getOwnPropertySymbolsModule2 = require_object_get_own_property_symbols();
       var anObject10 = require_an_object();
-      module.exports = getBuiltIn3("Reflect", "ownKeys") || function ownKeys3(it) {
+      module.exports = getBuiltIn3("Reflect", "ownKeys") || function ownKeys4(it) {
         var keys2 = getOwnPropertyNamesModule2.f(anObject10(it));
         var getOwnPropertySymbols3 = getOwnPropertySymbolsModule2.f;
         return getOwnPropertySymbols3 ? keys2.concat(getOwnPropertySymbols3(it)) : keys2;
@@ -700,11 +700,11 @@
   var require_copy_constructor_properties = __commonJS({
     "node_modules/core-js/internals/copy-constructor-properties.js": function(exports, module) {
       var has5 = require_has();
-      var ownKeys3 = require_own_keys();
+      var ownKeys4 = require_own_keys();
       var getOwnPropertyDescriptorModule4 = require_object_get_own_property_descriptor();
       var definePropertyModule2 = require_object_define_property();
       module.exports = function(target, source) {
-        var keys2 = ownKeys3(source);
+        var keys2 = ownKeys4(source);
         var defineProperty5 = definePropertyModule2.f;
         var getOwnPropertyDescriptor4 = getOwnPropertyDescriptorModule4.f;
         for (var i = 0; i < keys2.length; i++) {
@@ -969,9 +969,9 @@
   var require_es_regexp_exec = __commonJS({
     "node_modules/core-js/modules/es.regexp.exec.js": function() {
       "use strict";
-      var $71 = require_export();
+      var $73 = require_export();
       var exec = require_regexp_exec();
-      $71({ target: "RegExp", proto: true, forced: /./.exec !== exec }, {
+      $73({ target: "RegExp", proto: true, forced: /./.exec !== exec }, {
         exec: exec
       });
     }
@@ -1406,31 +1406,6 @@
     }
   });
 
-  // node_modules/core-js/internals/object-keys.js
-  var require_object_keys = __commonJS({
-    "node_modules/core-js/internals/object-keys.js": function(exports, module) {
-      var internalObjectKeys = require_object_keys_internal();
-      var enumBugKeys = require_enum_bug_keys();
-      module.exports = Object.keys || function keys2(O) {
-        return internalObjectKeys(O, enumBugKeys);
-      };
-    }
-  });
-
-  // node_modules/core-js/internals/is-regexp.js
-  var require_is_regexp = __commonJS({
-    "node_modules/core-js/internals/is-regexp.js": function(exports, module) {
-      var isObject7 = require_is_object();
-      var classof2 = require_classof_raw();
-      var wellKnownSymbol5 = require_well_known_symbol();
-      var MATCH = wellKnownSymbol5("match");
-      module.exports = function(it) {
-        var isRegExp2;
-        return isObject7(it) && ((isRegExp2 = it[MATCH]) !== void 0 ? !!isRegExp2 : classof2(it) == "RegExp");
-      };
-    }
-  });
-
   // node_modules/core-js/internals/a-function.js
   var require_a_function = __commonJS({
     "node_modules/core-js/internals/a-function.js": function(exports, module) {
@@ -1439,21 +1414,6 @@
           throw TypeError(String(it) + " is not a function");
         }
         return it;
-      };
-    }
-  });
-
-  // node_modules/core-js/internals/species-constructor.js
-  var require_species_constructor = __commonJS({
-    "node_modules/core-js/internals/species-constructor.js": function(exports, module) {
-      var anObject10 = require_an_object();
-      var aFunction2 = require_a_function();
-      var wellKnownSymbol5 = require_well_known_symbol();
-      var SPECIES2 = wellKnownSymbol5("species");
-      module.exports = function(O, defaultConstructor) {
-        var C = anObject10(O).constructor;
-        var S;
-        return C === void 0 || (S = anObject10(C)[SPECIES2]) == void 0 ? defaultConstructor : aFunction2(S);
       };
     }
   });
@@ -1556,6 +1516,98 @@
         find: createMethod(5),
         findIndex: createMethod(6),
         filterOut: createMethod(7)
+      };
+    }
+  });
+
+  // node_modules/core-js/internals/array-for-each.js
+  var require_array_for_each = __commonJS({
+    "node_modules/core-js/internals/array-for-each.js": function(exports, module) {
+      "use strict";
+      var $forEach2 = require_array_iteration().forEach;
+      var arrayMethodIsStrict4 = require_array_method_is_strict();
+      var STRICT_METHOD4 = arrayMethodIsStrict4("forEach");
+      module.exports = !STRICT_METHOD4 ? function forEach3(callbackfn) {
+        return $forEach2(this, callbackfn, arguments.length > 1 ? arguments[1] : void 0);
+      } : [].forEach;
+    }
+  });
+
+  // node_modules/core-js/internals/dom-iterables.js
+  var require_dom_iterables = __commonJS({
+    "node_modules/core-js/internals/dom-iterables.js": function(exports, module) {
+      module.exports = {
+        CSSRuleList: 0,
+        CSSStyleDeclaration: 0,
+        CSSValueList: 0,
+        ClientRectList: 0,
+        DOMRectList: 0,
+        DOMStringList: 0,
+        DOMTokenList: 1,
+        DataTransferItemList: 0,
+        FileList: 0,
+        HTMLAllCollection: 0,
+        HTMLCollection: 0,
+        HTMLFormElement: 0,
+        HTMLSelectElement: 0,
+        MediaList: 0,
+        MimeTypeArray: 0,
+        NamedNodeMap: 0,
+        NodeList: 1,
+        PaintRequestList: 0,
+        Plugin: 0,
+        PluginArray: 0,
+        SVGLengthList: 0,
+        SVGNumberList: 0,
+        SVGPathSegList: 0,
+        SVGPointList: 0,
+        SVGStringList: 0,
+        SVGTransformList: 0,
+        SourceBufferList: 0,
+        StyleSheetList: 0,
+        TextTrackCueList: 0,
+        TextTrackList: 0,
+        TouchList: 0
+      };
+    }
+  });
+
+  // node_modules/core-js/internals/object-keys.js
+  var require_object_keys = __commonJS({
+    "node_modules/core-js/internals/object-keys.js": function(exports, module) {
+      var internalObjectKeys = require_object_keys_internal();
+      var enumBugKeys = require_enum_bug_keys();
+      module.exports = Object.keys || function keys2(O) {
+        return internalObjectKeys(O, enumBugKeys);
+      };
+    }
+  });
+
+  // node_modules/core-js/internals/is-regexp.js
+  var require_is_regexp = __commonJS({
+    "node_modules/core-js/internals/is-regexp.js": function(exports, module) {
+      var isObject7 = require_is_object();
+      var classof2 = require_classof_raw();
+      var wellKnownSymbol5 = require_well_known_symbol();
+      var MATCH = wellKnownSymbol5("match");
+      module.exports = function(it) {
+        var isRegExp2;
+        return isObject7(it) && ((isRegExp2 = it[MATCH]) !== void 0 ? !!isRegExp2 : classof2(it) == "RegExp");
+      };
+    }
+  });
+
+  // node_modules/core-js/internals/species-constructor.js
+  var require_species_constructor = __commonJS({
+    "node_modules/core-js/internals/species-constructor.js": function(exports, module) {
+      var anObject10 = require_an_object();
+      var aFunction2 = require_a_function();
+      var wellKnownSymbol5 = require_well_known_symbol();
+      var SPECIES2 = wellKnownSymbol5("species");
+      module.exports = function(O, defaultConstructor) {
+        var C = anObject10(O).constructor;
+        var S;
+        return C === void 0 || (S = anObject10(C)[SPECIES2]) == void 0 ? defaultConstructor : aFunction2(S);
       };
     }
   });
@@ -1917,7 +1969,7 @@
   var require_define_iterator = __commonJS({
     "node_modules/core-js/internals/define-iterator.js": function(exports, module) {
       "use strict";
-      var $71 = require_export();
+      var $73 = require_export();
       var createIteratorConstructor = require_create_iterator_constructor();
       var getPrototypeOf3 = require_object_get_prototype_of();
       var setPrototypeOf2 = require_object_set_prototype_of();
@@ -1950,7 +2002,7 @@
                 return new IteratorConstructor(this, KIND);
               };
             case VALUES:
-              return function values() {
+              return function values2() {
                 return new IteratorConstructor(this, KIND);
               };
             case ENTRIES:
@@ -1986,7 +2038,7 @@
         }
         if (DEFAULT == VALUES && nativeIterator && nativeIterator.name !== VALUES) {
           INCORRECT_VALUES_NAME = true;
-          defaultIterator = function values() {
+          defaultIterator = function values2() {
             return nativeIterator.call(this);
           };
         }
@@ -2007,7 +2059,7 @@
               }
             }
           else
-            $71({ target: NAME2, proto: true, forced: BUGGY_SAFARI_ITERATORS || INCORRECT_VALUES_NAME }, methods);
+            $73({ target: NAME2, proto: true, forced: BUGGY_SAFARI_ITERATORS || INCORRECT_VALUES_NAME }, methods);
         }
         return methods;
       };
@@ -2055,45 +2107,6 @@
     }
   });
 
-  // node_modules/core-js/internals/dom-iterables.js
-  var require_dom_iterables = __commonJS({
-    "node_modules/core-js/internals/dom-iterables.js": function(exports, module) {
-      module.exports = {
-        CSSRuleList: 0,
-        CSSStyleDeclaration: 0,
-        CSSValueList: 0,
-        ClientRectList: 0,
-        DOMRectList: 0,
-        DOMStringList: 0,
-        DOMTokenList: 1,
-        DataTransferItemList: 0,
-        FileList: 0,
-        HTMLAllCollection: 0,
-        HTMLCollection: 0,
-        HTMLFormElement: 0,
-        HTMLSelectElement: 0,
-        MediaList: 0,
-        MimeTypeArray: 0,
-        NamedNodeMap: 0,
-        NodeList: 1,
-        PaintRequestList: 0,
-        Plugin: 0,
-        PluginArray: 0,
-        SVGLengthList: 0,
-        SVGNumberList: 0,
-        SVGPathSegList: 0,
-        SVGPointList: 0,
-        SVGStringList: 0,
-        SVGTransformList: 0,
-        SourceBufferList: 0,
-        StyleSheetList: 0,
-        TextTrackCueList: 0,
-        TextTrackList: 0,
-        TouchList: 0
-      };
-    }
-  });
-
   // node_modules/core-js/internals/string-trim-forced.js
   var require_string_trim_forced = __commonJS({
     "node_modules/core-js/internals/string-trim-forced.js": function(exports, module) {
@@ -2118,59 +2131,6 @@
         if (setPrototypeOf2 && typeof (NewTarget = dummy.constructor) == "function" && NewTarget !== Wrapper && isObject7(NewTargetPrototype = NewTarget.prototype) && NewTargetPrototype !== Wrapper.prototype)
           setPrototypeOf2($this, NewTargetPrototype);
         return $this;
-      };
-    }
-  });
-
-  // node_modules/core-js/internals/same-value.js
-  var require_same_value = __commonJS({
-    "node_modules/core-js/internals/same-value.js": function(exports, module) {
-      module.exports = Object.is || function is(x, y) {
-        return x === y ? x !== 0 || 1 / x === 1 / y : x != x && y != y;
-      };
-    }
-  });
-
-  // node_modules/core-js/internals/array-for-each.js
-  var require_array_for_each = __commonJS({
-    "node_modules/core-js/internals/array-for-each.js": function(exports, module) {
-      "use strict";
-      var $forEach2 = require_array_iteration().forEach;
-      var arrayMethodIsStrict4 = require_array_method_is_strict();
-      var STRICT_METHOD4 = arrayMethodIsStrict4("forEach");
-      module.exports = !STRICT_METHOD4 ? function forEach3(callbackfn) {
-        return $forEach2(this, callbackfn, arguments.length > 1 ? arguments[1] : void 0);
-      } : [].forEach;
-    }
-  });
-
-  // node_modules/core-js/internals/object-to-array.js
-  var require_object_to_array = __commonJS({
-    "node_modules/core-js/internals/object-to-array.js": function(exports, module) {
-      var DESCRIPTORS7 = require_descriptors();
-      var objectKeys2 = require_object_keys();
-      var toIndexedObject6 = require_to_indexed_object();
-      var propertyIsEnumerable2 = require_object_property_is_enumerable().f;
-      var createMethod = function(TO_ENTRIES) {
-        return function(it) {
-          var O = toIndexedObject6(it);
-          var keys2 = objectKeys2(O);
-          var length = keys2.length;
-          var i = 0;
-          var result = [];
-          var key;
-          while (length > i) {
-            key = keys2[i++];
-            if (!DESCRIPTORS7 || propertyIsEnumerable2.call(O, key)) {
-              result.push(TO_ENTRIES ? [key, O[key]] : O[key]);
-            }
-          }
-          return result;
-        };
-      };
-      module.exports = {
-        entries: createMethod(true),
-        values: createMethod(false)
       };
     }
   });
@@ -2318,6 +2278,46 @@
         } catch (error) {
         }
         return ITERATION_SUPPORT;
+      };
+    }
+  });
+
+  // node_modules/core-js/internals/same-value.js
+  var require_same_value = __commonJS({
+    "node_modules/core-js/internals/same-value.js": function(exports, module) {
+      module.exports = Object.is || function is(x, y) {
+        return x === y ? x !== 0 || 1 / x === 1 / y : x != x && y != y;
+      };
+    }
+  });
+
+  // node_modules/core-js/internals/object-to-array.js
+  var require_object_to_array = __commonJS({
+    "node_modules/core-js/internals/object-to-array.js": function(exports, module) {
+      var DESCRIPTORS7 = require_descriptors();
+      var objectKeys2 = require_object_keys();
+      var toIndexedObject6 = require_to_indexed_object();
+      var propertyIsEnumerable2 = require_object_property_is_enumerable().f;
+      var createMethod = function(TO_ENTRIES) {
+        return function(it) {
+          var O = toIndexedObject6(it);
+          var keys2 = objectKeys2(O);
+          var length = keys2.length;
+          var i = 0;
+          var result = [];
+          var key;
+          while (length > i) {
+            key = keys2[i++];
+            if (!DESCRIPTORS7 || propertyIsEnumerable2.call(O, key)) {
+              result.push(TO_ENTRIES ? [key, O[key]] : O[key]);
+            }
+          }
+          return result;
+        };
+      };
+      module.exports = {
+        entries: createMethod(true),
+        values: createMethod(false)
       };
     }
   });
@@ -3226,15 +3226,41 @@
     }
   });
 
-  // node_modules/core-js/modules/es.object.keys.js
+  // node_modules/core-js/modules/es.array.for-each.js
+  "use strict";
   var $11 = require_export();
+  var forEach = require_array_for_each();
+  $11({ target: "Array", proto: true, forced: [].forEach != forEach }, {
+    forEach: forEach
+  });
+
+  // node_modules/core-js/modules/web.dom-collections.for-each.js
+  var global2 = require_global();
+  var DOMIterables = require_dom_iterables();
+  var forEach2 = require_array_for_each();
+  var createNonEnumerableProperty = require_create_non_enumerable_property();
+  for (var COLLECTION_NAME in DOMIterables) {
+    Collection = global2[COLLECTION_NAME];
+    CollectionPrototype = Collection && Collection.prototype;
+    if (CollectionPrototype && CollectionPrototype.forEach !== forEach2)
+      try {
+        createNonEnumerableProperty(CollectionPrototype, "forEach", forEach2);
+      } catch (error) {
+        CollectionPrototype.forEach = forEach2;
+      }
+  }
+  var Collection;
+  var CollectionPrototype;
+
+  // node_modules/core-js/modules/es.object.keys.js
+  var $12 = require_export();
   var toObject3 = require_to_object();
   var nativeKeys = require_object_keys();
   var fails4 = require_fails();
   var FAILS_ON_PRIMITIVES = fails4(function() {
     nativeKeys(1);
   });
-  $11({ target: "Object", stat: true, forced: FAILS_ON_PRIMITIVES }, {
+  $12({ target: "Object", stat: true, forced: FAILS_ON_PRIMITIVES }, {
     keys: function keys(it) {
       return nativeKeys(toObject3(it));
     }
@@ -3377,8 +3403,8 @@
   }
 
   // srcts/src/utils/object.ts
-  function hasOwnProperty(x, y) {
-    return Object.prototype.hasOwnProperty.call(x, y);
+  function hasOwnProperty(obj, prop) {
+    return Object.prototype.hasOwnProperty.call(obj, prop);
   }
 
   // srcts/src/utils/index.ts
@@ -3412,10 +3438,11 @@
   }
   function getStyle(el, styleProp) {
     var x = void 0;
-    if (el.currentStyle)
+    if ("currentStyle" in el) {
       x = el.currentStyle[styleProp];
-    else if (window.getComputedStyle) {
-      var style = document.defaultView.getComputedStyle(el, null);
+    } else {
+      var _document, _document$defaultView;
+      var style = (_document = document) === null || _document === void 0 ? void 0 : (_document$defaultView = _document.defaultView) === null || _document$defaultView === void 0 ? void 0 : _document$defaultView.getComputedStyle(el, null);
       if (style)
         x = style.getPropertyValue(styleProp);
     }
@@ -3491,12 +3518,12 @@
     return [value];
   }
   function mergeSort(list, sortfunc) {
-    function merge(sortfunc2, a, b) {
+    function merge(a, b) {
       var ia = 0;
       var ib = 0;
       var sorted = [];
       while (ia < a.length && ib < b.length) {
-        if (sortfunc2(a[ia], b[ib]) <= 0) {
+        if (sortfunc(a[ia], b[ib]) <= 0) {
           sorted.push(a[ia++]);
         } else {
           sorted.push(b[ib++]);
@@ -3515,7 +3542,7 @@
       for (var i = 0; i < list.length; i += chunkSize * 2) {
         var listA = list.slice(i, i + chunkSize);
         var listB = list.slice(i + chunkSize, i + chunkSize * 2);
-        var merged = merge(sortfunc, listA, listB);
+        var merged = merge(listA, listB);
         var args = [i, merged.length];
         Array.prototype.push.apply(args, merged);
         Array.prototype.splice.apply(list, args);
@@ -3523,15 +3550,16 @@
     }
     return list;
   }
-  var $escape = function $escape2(val) {
+  function $escape(val) {
+    if (typeof val === "undefined")
+      return val;
     return val.replace(/([!"#$%&'()*+,./:;<=>?@[\\\]^`{|}~])/g, "\\$1");
-  };
+  }
   function mapValues(obj, f) {
     var newObj = {};
-    for (var _key in obj) {
-      if (hasOwnProperty(obj, _key))
-        newObj[_key] = f(obj[_key], _key, obj);
-    }
+    Object.keys(obj).forEach(function(key) {
+      newObj[key] = f(obj[key], key, obj);
+    });
     return newObj;
   }
   function isnan(x) {
@@ -3576,17 +3604,17 @@
       return (ver + "").replace(/-/, ".").replace(/(\.0)+[^.]*$/, "").split(".");
     }
     function cmpVersion(a2, b2) {
-      a2 = versionParts(a2);
-      b2 = versionParts(b2);
-      var len = Math.min(a2.length, b2.length);
+      var aParts = versionParts(a2);
+      var bParts = versionParts(b2);
+      var len = Math.min(aParts.length, bParts.length);
       var cmp;
       for (var i = 0; i < len; i++) {
-        cmp = parseInt(a2[i], 10) - parseInt(b2[i], 10);
+        cmp = parseInt(aParts[i], 10) - parseInt(bParts[i], 10);
         if (cmp !== 0) {
           return cmp;
         }
       }
-      return a2.length - b2.length;
+      return aParts.length - bParts.length;
     }
     var diff = cmpVersion(a, b);
     if (op === "==")
@@ -3819,7 +3847,7 @@
 
   // node_modules/core-js/modules/es.array.find.js
   "use strict";
-  var $14 = require_export();
+  var $15 = require_export();
   var $find = require_array_iteration().find;
   var addToUnscopables = require_add_to_unscopables();
   var FIND = "find";
@@ -3828,7 +3856,7 @@
     Array(1)[FIND](function() {
       SKIPS_HOLES = false;
     });
-  $14({ target: "Array", proto: true, forced: SKIPS_HOLES }, {
+  $15({ target: "Array", proto: true, forced: SKIPS_HOLES }, {
     find: function find(callbackfn) {
       return $find(this, callbackfn, arguments.length > 1 ? arguments[1] : void 0);
     }
@@ -3836,14 +3864,14 @@
   addToUnscopables(FIND);
 
   // node_modules/core-js/modules/es.object.set-prototype-of.js
-  var $15 = require_export();
+  var $16 = require_export();
   var setPrototypeOf = require_object_set_prototype_of();
-  $15({ target: "Object", stat: true }, {
+  $16({ target: "Object", stat: true }, {
     setPrototypeOf: setPrototypeOf
   });
 
   // node_modules/core-js/modules/es.object.get-prototype-of.js
-  var $16 = require_export();
+  var $17 = require_export();
   var fails5 = require_fails();
   var toObject4 = require_to_object();
   var nativeGetPrototypeOf = require_object_get_prototype_of();
@@ -3851,14 +3879,14 @@
   var FAILS_ON_PRIMITIVES2 = fails5(function() {
     nativeGetPrototypeOf(1);
   });
-  $16({ target: "Object", stat: true, forced: FAILS_ON_PRIMITIVES2, sham: !CORRECT_PROTOTYPE_GETTER }, {
+  $17({ target: "Object", stat: true, forced: FAILS_ON_PRIMITIVES2, sham: !CORRECT_PROTOTYPE_GETTER }, {
     getPrototypeOf: function getPrototypeOf(it) {
       return nativeGetPrototypeOf(toObject4(it));
     }
   });
 
   // node_modules/core-js/modules/es.reflect.construct.js
-  var $17 = require_export();
+  var $18 = require_export();
   var getBuiltIn = require_get_built_in();
   var aFunction = require_a_function();
   var anObject4 = require_an_object();
@@ -3878,7 +3906,7 @@
     });
   });
   var FORCED3 = NEW_TARGET_BUG || ARGS_BUG;
-  $17({ target: "Reflect", stat: true, forced: FORCED3, sham: FORCED3 }, {
+  $18({ target: "Reflect", stat: true, forced: FORCED3, sham: FORCED3 }, {
     construct: function construct(Target, args) {
       aFunction(Target);
       anObject4(args);
@@ -3911,8 +3939,8 @@
 
   // node_modules/core-js/modules/es.symbol.js
   "use strict";
-  var $18 = require_export();
-  var global2 = require_global();
+  var $19 = require_export();
+  var global3 = require_global();
   var getBuiltIn2 = require_get_built_in();
   var IS_PURE = require_is_pure();
   var DESCRIPTORS2 = require_descriptors();
@@ -3935,7 +3963,7 @@
   var getOwnPropertyDescriptorModule = require_object_get_own_property_descriptor();
   var definePropertyModule = require_object_define_property();
   var propertyIsEnumerableModule = require_object_property_is_enumerable();
-  var createNonEnumerableProperty = require_create_non_enumerable_property();
+  var createNonEnumerableProperty2 = require_create_non_enumerable_property();
   var redefine3 = require_redefine();
   var shared = require_shared();
   var sharedKey = require_shared_key();
@@ -3954,7 +3982,7 @@
   var setInternalState = InternalStateModule.set;
   var getInternalState = InternalStateModule.getterFor(SYMBOL);
   var ObjectPrototype = Object[PROTOTYPE];
-  var $Symbol = global2.Symbol;
+  var $Symbol = global3.Symbol;
   var $stringify = getBuiltIn2("JSON", "stringify");
   var nativeGetOwnPropertyDescriptor = getOwnPropertyDescriptorModule.f;
   var nativeDefineProperty = definePropertyModule.f;
@@ -3965,7 +3993,7 @@
   var StringToSymbolRegistry = shared("string-to-symbol-registry");
   var SymbolToStringRegistry = shared("symbol-to-string-registry");
   var WellKnownSymbolsStore = shared("wks");
-  var QObject = global2.QObject;
+  var QObject = global3.QObject;
   var USE_SETTER = !QObject || !QObject[PROTOTYPE] || !QObject[PROTOTYPE].findChild;
   var setSymbolDescriptor = DESCRIPTORS2 && fails7(function() {
     return nativeObjectCreate(nativeDefineProperty({}, "a", {
@@ -4112,13 +4140,13 @@
       }
     }
   }
-  $18({ global: true, wrap: true, forced: !NATIVE_SYMBOL, sham: !NATIVE_SYMBOL }, {
+  $19({ global: true, wrap: true, forced: !NATIVE_SYMBOL, sham: !NATIVE_SYMBOL }, {
     Symbol: $Symbol
   });
   $forEach(objectKeys(WellKnownSymbolsStore), function(name) {
     defineWellKnownSymbol(name);
   });
-  $18({ target: SYMBOL, stat: true, forced: !NATIVE_SYMBOL }, {
+  $19({ target: SYMBOL, stat: true, forced: !NATIVE_SYMBOL }, {
     "for": function(key) {
       var string = String(key);
       if (has(StringToSymbolRegistry, string))
@@ -4141,17 +4169,17 @@
       USE_SETTER = false;
     }
   });
-  $18({ target: "Object", stat: true, forced: !NATIVE_SYMBOL, sham: !DESCRIPTORS2 }, {
+  $19({ target: "Object", stat: true, forced: !NATIVE_SYMBOL, sham: !DESCRIPTORS2 }, {
     create: $create,
     defineProperty: $defineProperty,
     defineProperties: $defineProperties,
     getOwnPropertyDescriptor: $getOwnPropertyDescriptor
   });
-  $18({ target: "Object", stat: true, forced: !NATIVE_SYMBOL }, {
+  $19({ target: "Object", stat: true, forced: !NATIVE_SYMBOL }, {
     getOwnPropertyNames: $getOwnPropertyNames,
     getOwnPropertySymbols: $getOwnPropertySymbols
   });
-  $18({ target: "Object", stat: true, forced: fails7(function() {
+  $19({ target: "Object", stat: true, forced: fails7(function() {
     getOwnPropertySymbolsModule.f(1);
   }) }, {
     getOwnPropertySymbols: function getOwnPropertySymbols2(it) {
@@ -4163,7 +4191,7 @@
       var symbol = $Symbol();
       return $stringify([symbol]) != "[null]" || $stringify({ a: symbol }) != "{}" || $stringify(Object(symbol)) != "{}";
     });
-    $18({ target: "JSON", stat: true, forced: FORCED_JSON_STRINGIFY }, {
+    $19({ target: "JSON", stat: true, forced: FORCED_JSON_STRINGIFY }, {
       stringify: function stringify(it, replacer, space) {
         var args = [it];
         var index = 1;
@@ -4187,21 +4215,21 @@
   }
   var FORCED_JSON_STRINGIFY;
   if (!$Symbol[PROTOTYPE][TO_PRIMITIVE]) {
-    createNonEnumerableProperty($Symbol[PROTOTYPE], TO_PRIMITIVE, $Symbol[PROTOTYPE].valueOf);
+    createNonEnumerableProperty2($Symbol[PROTOTYPE], TO_PRIMITIVE, $Symbol[PROTOTYPE].valueOf);
   }
   setToStringTag($Symbol, SYMBOL);
   hiddenKeys[HIDDEN] = true;
 
   // node_modules/core-js/modules/es.symbol.description.js
   "use strict";
-  var $19 = require_export();
+  var $20 = require_export();
   var DESCRIPTORS3 = require_descriptors();
-  var global3 = require_global();
+  var global4 = require_global();
   var has2 = require_has();
   var isObject5 = require_is_object();
   var defineProperty3 = require_object_define_property().f;
   var copyConstructorProperties = require_copy_constructor_properties();
-  var NativeSymbol = global3.Symbol;
+  var NativeSymbol = global4.Symbol;
   if (DESCRIPTORS3 && typeof NativeSymbol == "function" && (!("description" in NativeSymbol.prototype) || NativeSymbol().description !== void 0)) {
     EmptyStringDescriptionStore = {};
     SymbolWrapper = function Symbol2() {
@@ -4228,7 +4256,7 @@
         return desc === "" ? void 0 : desc;
       }
     });
-    $19({ global: true, forced: true }, {
+    $20({ global: true, forced: true }, {
       Symbol: SymbolWrapper
     });
   }
@@ -4273,32 +4301,32 @@
   });
 
   // node_modules/core-js/modules/web.dom-collections.iterator.js
-  var global4 = require_global();
-  var DOMIterables = require_dom_iterables();
+  var global5 = require_global();
+  var DOMIterables2 = require_dom_iterables();
   var ArrayIteratorMethods = require_es_array_iterator();
-  var createNonEnumerableProperty2 = require_create_non_enumerable_property();
+  var createNonEnumerableProperty3 = require_create_non_enumerable_property();
   var wellKnownSymbol4 = require_well_known_symbol();
   var ITERATOR = wellKnownSymbol4("iterator");
   var TO_STRING_TAG = wellKnownSymbol4("toStringTag");
   var ArrayValues = ArrayIteratorMethods.values;
-  for (var COLLECTION_NAME in DOMIterables) {
-    Collection = global4[COLLECTION_NAME];
+  for (var COLLECTION_NAME in DOMIterables2) {
+    Collection = global5[COLLECTION_NAME];
     CollectionPrototype = Collection && Collection.prototype;
     if (CollectionPrototype) {
       if (CollectionPrototype[ITERATOR] !== ArrayValues)
         try {
-          createNonEnumerableProperty2(CollectionPrototype, ITERATOR, ArrayValues);
+          createNonEnumerableProperty3(CollectionPrototype, ITERATOR, ArrayValues);
         } catch (error) {
           CollectionPrototype[ITERATOR] = ArrayValues;
         }
       if (!CollectionPrototype[TO_STRING_TAG]) {
-        createNonEnumerableProperty2(CollectionPrototype, TO_STRING_TAG, COLLECTION_NAME);
+        createNonEnumerableProperty3(CollectionPrototype, TO_STRING_TAG, COLLECTION_NAME);
       }
-      if (DOMIterables[COLLECTION_NAME])
+      if (DOMIterables2[COLLECTION_NAME])
         for (METHOD_NAME in ArrayIteratorMethods) {
           if (CollectionPrototype[METHOD_NAME] !== ArrayIteratorMethods[METHOD_NAME])
             try {
-              createNonEnumerableProperty2(CollectionPrototype, METHOD_NAME, ArrayIteratorMethods[METHOD_NAME]);
+              createNonEnumerableProperty3(CollectionPrototype, METHOD_NAME, ArrayIteratorMethods[METHOD_NAME]);
             } catch (error) {
               CollectionPrototype[METHOD_NAME] = ArrayIteratorMethods[METHOD_NAME];
             }
@@ -4452,10 +4480,12 @@
     }, {
       key: "receiveMessage",
       value: function receiveMessage(el, data) {
-        if (hasOwnProperty(data, "value"))
+        if (hasOwnProperty(data, "value")) {
           el.checked = data.value;
-        if (hasOwnProperty(data, "label"))
+        }
+        if (hasOwnProperty(data, "label")) {
           (0, import_jquery6.default)(el).parent().find("span").text(data.label);
+        }
         (0, import_jquery6.default)(el).trigger("change");
       }
     }]);
@@ -4464,10 +4494,10 @@
 
   // node_modules/core-js/modules/es.string.trim.js
   "use strict";
-  var $21 = require_export();
+  var $22 = require_export();
   var $trim = require_string_trim().trim;
   var forcedStringTrimMethod = require_string_trim_forced();
-  $21({ target: "String", proto: true, forced: forcedStringTrimMethod("trim") }, {
+  $22({ target: "String", proto: true, forced: forcedStringTrimMethod("trim") }, {
     trim: function trim() {
       return $trim(this);
     }
@@ -4576,8 +4606,9 @@
     return (0, import_jquery7.default)(el).find('label[for="' + $escape(el.id) + '"]');
   }
   function getLabel(obj) {
-    if (obj.parentNode.tagName === "LABEL") {
-      return (0, import_jquery7.default)(obj.parentNode).find("span").text().trim();
+    var parentNode = obj.parentNode;
+    if (parentNode.tagName === "LABEL") {
+      return (0, import_jquery7.default)(parentNode).find("span").text().trim();
     }
     return null;
   }
@@ -4597,11 +4628,11 @@
       key: "getValue",
       value: function getValue(el) {
         var $objs = (0, import_jquery7.default)('input:checkbox[name="' + $escape(el.id) + '"]:checked');
-        var values = new Array($objs.length);
+        var values2 = new Array($objs.length);
         for (var i = 0; i < $objs.length; i++) {
-          values[i] = $objs[i].value;
+          values2[i] = $objs[i].value;
         }
-        return values;
+        return values2;
       }
     }, {
       key: "setValue",
@@ -4641,8 +4672,9 @@
           $el.find("label.checkbox").remove();
           $el.append(data.options);
         }
-        if (hasOwnProperty(data, "value"))
+        if (hasOwnProperty(data, "value")) {
           this.setValue(el, data.value);
+        }
         updateLabel(data.label, getLabelNode(el));
         (0, import_jquery7.default)(el).trigger("change");
       }
@@ -4665,7 +4697,7 @@
   // node_modules/core-js/modules/es.number.constructor.js
   "use strict";
   var DESCRIPTORS4 = require_descriptors();
-  var global5 = require_global();
+  var global6 = require_global();
   var isForced = require_is_forced();
   var redefine4 = require_redefine();
   var has3 = require_has();
@@ -4679,7 +4711,7 @@
   var defineProperty4 = require_object_define_property().f;
   var trim2 = require_string_trim().trim;
   var NUMBER = "Number";
-  var NativeNumber = global5[NUMBER];
+  var NativeNumber = global6[NUMBER];
   var NumberPrototype = NativeNumber.prototype;
   var BROKEN_CLASSOF = classof(create3(NumberPrototype)) == NUMBER;
   var toNumber = function(argument) {
@@ -4734,7 +4766,7 @@
     }
     NumberWrapper.prototype = NumberPrototype;
     NumberPrototype.constructor = NumberWrapper;
-    redefine4(global5, NUMBER, NumberWrapper);
+    redefine4(global6, NUMBER, NumberWrapper);
   }
   var NumberWrapper;
   var keys2;
@@ -4746,7 +4778,7 @@
   var import_jquery9 = __toModule(require_jquery());
 
   // node_modules/core-js/modules/es.reflect.get.js
-  var $23 = require_export();
+  var $24 = require_export();
   var isObject6 = require_is_object();
   var anObject6 = require_an_object();
   var has4 = require_has();
@@ -4762,12 +4794,12 @@
     if (isObject6(prototype = getPrototypeOf2(target)))
       return get(prototype, propertyKey, receiver);
   }
-  $23({ target: "Reflect", stat: true }, {
+  $24({ target: "Reflect", stat: true }, {
     get: get
   });
 
   // node_modules/core-js/modules/es.object.get-own-property-descriptor.js
-  var $24 = require_export();
+  var $25 = require_export();
   var fails9 = require_fails();
   var toIndexedObject3 = require_to_indexed_object();
   var nativeGetOwnPropertyDescriptor2 = require_object_get_own_property_descriptor().f;
@@ -4776,7 +4808,7 @@
     nativeGetOwnPropertyDescriptor2(1);
   });
   var FORCED4 = !DESCRIPTORS5 || FAILS_ON_PRIMITIVES3;
-  $24({ target: "Object", stat: true, forced: FORCED4, sham: !DESCRIPTORS5 }, {
+  $25({ target: "Object", stat: true, forced: FORCED4, sham: !DESCRIPTORS5 }, {
     getOwnPropertyDescriptor: function getOwnPropertyDescriptor3(it, key) {
       return nativeGetOwnPropertyDescriptor2(toIndexedObject3(it), key);
     }
@@ -5160,14 +5192,15 @@
     }, {
       key: "receiveMessage",
       value: function receiveMessage(el, data) {
+        var _data$value, _data$min, _data$max, _data$step;
         if (hasOwnProperty(data, "value"))
-          el.value = data.value;
+          el.value = (_data$value = data.value) !== null && _data$value !== void 0 ? _data$value : "";
         if (hasOwnProperty(data, "min"))
-          el.min = data.min;
+          el.min = (_data$min = data.min) !== null && _data$min !== void 0 ? _data$min : "";
         if (hasOwnProperty(data, "max"))
-          el.max = data.max;
+          el.max = (_data$max = data.max) !== null && _data$max !== void 0 ? _data$max : "";
         if (hasOwnProperty(data, "step"))
-          el.step = data.step;
+          el.step = (_data$step = data.step) !== null && _data$step !== void 0 ? _data$step : "";
         updateLabel(data.label, getLabelNode3(el));
         (0, import_jquery9.default)(el).trigger("change");
       }
@@ -5525,8 +5558,9 @@
     return (0, import_jquery12.default)(el).parent().find('label[for="' + $escape(el.id) + '"]');
   }
   function getLabel2(obj) {
-    if (obj.parentNode.tagName === "LABEL") {
-      return (0, import_jquery12.default)(obj.parentNode).find("span").text().trim();
+    var parentNode = obj.parentNode;
+    if (parentNode.tagName === "LABEL") {
+      return (0, import_jquery12.default)(parentNode).find("span").text().trim();
     }
     return null;
   }
@@ -5554,7 +5588,7 @@
     }, {
       key: "setValue",
       value: function setValue(el, value) {
-        if (import_jquery12.default.isArray(value) && value.length === 0) {
+        if (Array.isArray(value) && value.length === 0) {
           (0, import_jquery12.default)('input:radio[name="' + $escape(el.id) + '"]').prop("checked", false);
         } else {
           (0, import_jquery12.default)('input:radio[name="' + $escape(el.id) + '"][value="' + $escape(value) + '"]').prop("checked", true);
@@ -5586,8 +5620,9 @@
           $el.find("label.radio").remove();
           $el.append(data.options);
         }
-        if (hasOwnProperty(data, "value"))
+        if (hasOwnProperty(data, "value")) {
           this.setValue(el, data.value);
+        }
         updateLabel(data.label, getLabelNode4(el));
         (0, import_jquery12.default)(el).trigger("change");
       }
@@ -5880,6 +5915,8 @@
     }, {
       key: "setValue",
       value: function setValue(el, value) {
+        if (value === void 0)
+          return;
         if (value === null) {
           (0, import_jquery13.default)(el).find("input").val("").bsDatepicker("update");
           return;
@@ -6692,7 +6729,7 @@
       value: function getType(el) {
         var $el = (0, import_jquery16.default)(el);
         if (!$el.hasClass("symbol")) {
-          return null;
+          return false;
         }
         if ($el.attr("multiple") === "multiple") {
           return "shiny.symbolList";
@@ -6758,8 +6795,9 @@
           selectize = this._selectize(el);
           selectize.clearOptions();
           var loaded = false;
-          selectize.settings.load = function(query, callback) {
-            var settings = selectize.settings;
+          var innerSelectize = selectize;
+          innerSelectize.settings.load = function(query, callback) {
+            var settings = innerSelectize.settings;
             import_jquery16.default.ajax({
               url: data.url,
               data: {
@@ -6779,22 +6817,24 @@
                   var optgroup = {};
                   optgroup[settings.optgroupLabelField || "label"] = optgroupId;
                   optgroup[settings.optgroupValueField || "value"] = optgroupId;
-                  selectize.addOptionGroup(optgroupId, optgroup);
+                  innerSelectize.addOptionGroup(optgroupId, optgroup);
                 });
                 callback(res);
                 if (!loaded) {
                   if (hasOwnProperty(data, "value")) {
-                    selectize.setValue(data.value);
+                    if (typeof data.value === "string") {
+                      innerSelectize.setValue(data.value);
+                    }
                   } else if (settings.maxItems === 1) {
-                    selectize.setValue(res[0].value);
+                    innerSelectize.setValue(res[0].value);
                   }
                 }
                 loaded = true;
               }
             });
           };
-          selectize.load(function(callback) {
-            selectize.settings.load.apply(selectize, ["", callback]);
+          innerSelectize.load(function(callback) {
+            innerSelectize.settings.load.apply(innerSelectize, ["", callback]);
           });
         } else if (hasOwnProperty(data, "value")) {
           this.setValue(el, data.value);
@@ -6849,8 +6889,9 @@
                 })).trigger("change");
             },
             onDropdownClose: function onDropdownClose() {
-              if (this.getValue() === "")
+              if (this.getValue() === "") {
                 this.setValue((0, import_jquery16.default)("select#" + $escape(el.id)).val());
+              }
             }
           });
         } else {
@@ -7028,12 +7069,12 @@
             icon = (0, import_jquery17.default)(iconHtml).prop("outerHTML");
           }
         }
-        if (hasOwnProperty(data, "label"))
+        if (hasOwnProperty(data, "label")) {
           label = data.label;
+        }
         if (hasOwnProperty(data, "icon")) {
-          icon = data.icon;
-          if (icon.length === 0)
-            icon = "";
+          var _data$icon;
+          icon = Array.isArray(data.icon) ? "" : (_data$icon = data.icon) !== null && _data$icon !== void 0 ? _data$icon : "";
         }
         $el.html(icon + " " + label);
       }
@@ -7224,13 +7265,24 @@
   var import_es_array_iterator15 = __toModule(require_es_array_iterator());
   var import_jquery21 = __toModule(require_jquery());
 
+  // node_modules/core-js/modules/es.array.from.js
+  var $37 = require_export();
+  var from = require_array_from();
+  var checkCorrectnessOfIteration = require_check_correctness_of_iteration();
+  var INCORRECT_ITERATION = !checkCorrectnessOfIteration(function(iterable) {
+    Array.from(iterable);
+  });
+  $37({ target: "Array", stat: true, forced: INCORRECT_ITERATION }, {
+    from: from
+  });
+
   // node_modules/core-js/modules/es.array.map.js
   "use strict";
-  var $36 = require_export();
+  var $38 = require_export();
   var $map = require_array_iteration().map;
   var arrayMethodHasSpeciesSupport4 = require_array_method_has_species_support();
   var HAS_SPECIES_SUPPORT3 = arrayMethodHasSpeciesSupport4("map");
-  $36({ target: "Array", proto: true, forced: !HAS_SPECIES_SUPPORT3 }, {
+  $38({ target: "Array", proto: true, forced: !HAS_SPECIES_SUPPORT3 }, {
     map: function map(callbackfn) {
       return $map(this, callbackfn, arguments.length > 1 ? arguments[1] : void 0);
     }
@@ -7254,40 +7306,46 @@
   }
 
   // srcts/src/shiny/initedMethods.ts
-  var fullShinyObj = null;
+  var fullShinyObj;
   function setShinyObj(shiny) {
     fullShinyObj = shiny;
   }
+  function validateShinyHasBeenSet() {
+    if (typeof fullShinyObj === "undefined") {
+      throw "Shiny has not finish initialization yet. Please wait for the 'shiny-initialized' event.";
+    }
+    return fullShinyObj;
+  }
   function shinySetInputValue(name, value, opts) {
-    fullShinyObj.setInputValue(name, value, opts);
+    validateShinyHasBeenSet().setInputValue(name, value, opts);
   }
   function shinyShinyApp() {
-    return fullShinyObj.shinyapp;
+    return validateShinyHasBeenSet().shinyapp;
   }
   function setShinyUser(user) {
-    fullShinyObj.user = user;
+    validateShinyHasBeenSet().user = user;
   }
   function shinyForgetLastInputValue(name) {
-    fullShinyObj.forgetLastInputValue(name);
+    validateShinyHasBeenSet().forgetLastInputValue(name);
   }
   function shinyBindAll(scope) {
-    fullShinyObj.bindAll(scope);
+    validateShinyHasBeenSet().bindAll(scope);
   }
   function shinyUnbindAll(scope) {
     var includeSelf = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : false;
-    fullShinyObj.unbindAll(scope, includeSelf);
+    validateShinyHasBeenSet().unbindAll(scope, includeSelf);
   }
   function shinyInitializeInputs(scope) {
-    fullShinyObj.initializeInputs(scope);
+    validateShinyHasBeenSet().initializeInputs(scope);
   }
   function shinyAppBindOutput(id, binding) {
-    fullShinyObj.shinyapp.bindOutput(id, binding);
+    shinyShinyApp().bindOutput(id, binding);
   }
   function shinyAppUnbindOutput(id, binding) {
-    return fullShinyObj.shinyapp.unbindOutput(id, binding);
+    return shinyShinyApp().unbindOutput(id, binding);
   }
   function getShinyOnCustomMessage() {
-    return fullShinyObj.oncustommessage;
+    return validateShinyHasBeenSet().oncustommessage;
   }
   var fileInputBinding;
   function getFileInputBinding() {
@@ -7297,7 +7355,7 @@
     fileInputBinding = fileInputBinding_;
   }
   function getShinyCreateWebsocket() {
-    return fullShinyObj.createSocket;
+    return validateShinyHasBeenSet().createSocket;
   }
 
   // srcts/src/file/fileProcessor.ts
@@ -7413,7 +7471,7 @@
       _defineProperty3(this, "fileIndex", -1);
       _defineProperty3(this, "aborted", false);
       _defineProperty3(this, "completed", false);
-      this.files = files;
+      this.files = Array.from(files);
       if (exec$run) {
         this.$run();
       }
@@ -7519,13 +7577,12 @@
         import_jquery20.default.each(files, function(i, file) {
           _this3.totalBytes += file.size;
         });
-        var fileInfo = import_jquery20.default.map(files, function(file, i) {
+        var fileInfo = import_jquery20.default.map(Array.from(files), function(file) {
           return {
             name: file.name,
             size: file.size,
             type: file.type
           };
-          i;
         });
         this.makeRequest("uploadInit", [fileInfo], function(response) {
           _this3.jobId = response.jobId;
@@ -7544,6 +7601,8 @@
           type: "POST",
           cache: false,
           xhr: function xhr() {
+            if (typeof import_jquery20.default.ajaxSettings.xhr !== "function")
+              throw "jQuery's XHR is not a function";
             var xhrVal = import_jquery20.default.ajaxSettings.xhr();
             if (xhrVal.upload) {
               xhrVal.upload.onprogress = function(e) {
@@ -7803,7 +7862,8 @@
     return true;
   }
   function handleDrop(e, el) {
-    var files = e.originalEvent.dataTransfer.files, $el = (0, import_jquery21.default)(el);
+    var _e$originalEvent, _e$originalEvent$data;
+    var files = (_e$originalEvent = e.originalEvent) === null || _e$originalEvent === void 0 ? void 0 : (_e$originalEvent$data = _e$originalEvent.dataTransfer) === null || _e$originalEvent$data === void 0 ? void 0 : _e$originalEvent$data.files, $el = (0, import_jquery21.default)(el);
     if (files === void 0 || files === null) {
       console.log("Dropping files is not supported on this browser. (no FileList)");
     } else if (!canSetFiles(files)) {
@@ -7811,7 +7871,7 @@
       uploadDroppedFilesIE10Plus(el, files);
     } else {
       $el.val("");
-      el.files = e.originalEvent.dataTransfer.files;
+      el.files = files;
       $el.trigger("change");
     }
   }
@@ -7970,14 +8030,14 @@
 
   // node_modules/core-js/modules/es.array.join.js
   "use strict";
-  var $40 = require_export();
+  var $42 = require_export();
   var IndexedObject = require_indexed_object();
   var toIndexedObject4 = require_to_indexed_object();
   var arrayMethodIsStrict2 = require_array_method_is_strict();
   var nativeJoin = [].join;
   var ES3_STRINGS = IndexedObject != Object;
   var STRICT_METHOD2 = arrayMethodIsStrict2("join", ",");
-  $40({ target: "Array", proto: true, forced: ES3_STRINGS || !STRICT_METHOD2 }, {
+  $42({ target: "Array", proto: true, forced: ES3_STRINGS || !STRICT_METHOD2 }, {
     join: function join(separator) {
       return nativeJoin.call(toIndexedObject4(this), separator === void 0 ? "," : separator);
     }
@@ -8763,6 +8823,7 @@
     }, {
       key: "renderValue",
       value: function renderValue(el, _data) {
+        var _data$options, _data$options2;
         var $el = (0, import_jquery25.default)(el).empty();
         if (!_data || !_data.colnames)
           return;
@@ -8772,7 +8833,7 @@
         }).join("");
         header = "<thead><tr>" + header + "</tr></thead>";
         var footer = "";
-        if (_data.options === null || _data.options.searching !== false) {
+        if (_data.options === null || ((_data$options = _data.options) === null || _data$options === void 0 ? void 0 : _data$options.searching) !== false) {
           footer = import_jquery25.default.map(colnames, function(x) {
             return '<th><input type="text" placeholder="' + escapeHTML(x.replace(/(<([^>]+)>)/gi, "")) + '" /></th>';
           }).join("");
@@ -8780,11 +8841,12 @@
         }
         var content = '<table class="table table-striped table-hover">' + header + footer + "</table>";
         $el.append(content);
-        if (_data.evalOptions)
+        if (_data.evalOptions) {
           import_jquery25.default.each(_data.evalOptions, function(i, x) {
             _data.options[x] = indirectEval("(" + _data.options[x] + ")");
           });
-        var searchCI = _data.options === null || typeof _data.options.search === "undefined" || _data.options.search.caseInsensitive !== false;
+        }
+        var searchCI = _data.options === null || typeof ((_data$options2 = _data.options) === null || _data$options2 === void 0 ? void 0 : _data$options2.search) === "undefined" || _data.options.search.caseInsensitive !== false;
         var oTable = (0, import_jquery25.default)(el).children("table").DataTable(import_jquery25.default.extend({
           processing: true,
           serverSide: true,
@@ -8795,6 +8857,7 @@
             url: _data.action,
             type: "POST",
             data: function data(d) {
+              d.search || (d.search = {});
               d.search.caseInsensitive = searchCI;
               d.escape = _data.escape;
             }
@@ -8828,36 +8891,10 @@
   var import_es_array_iterator20 = __toModule(require_es_array_iterator());
   var import_jquery28 = __toModule(require_jquery());
 
-  // node_modules/core-js/modules/es.array.for-each.js
-  "use strict";
-  var $45 = require_export();
-  var forEach = require_array_for_each();
-  $45({ target: "Array", proto: true, forced: [].forEach != forEach }, {
-    forEach: forEach
-  });
-
-  // node_modules/core-js/modules/web.dom-collections.for-each.js
-  var global6 = require_global();
-  var DOMIterables2 = require_dom_iterables();
-  var forEach2 = require_array_for_each();
-  var createNonEnumerableProperty3 = require_create_non_enumerable_property();
-  for (var COLLECTION_NAME in DOMIterables2) {
-    Collection = global6[COLLECTION_NAME];
-    CollectionPrototype = Collection && Collection.prototype;
-    if (CollectionPrototype && CollectionPrototype.forEach !== forEach2)
-      try {
-        createNonEnumerableProperty3(CollectionPrototype, "forEach", forEach2);
-      } catch (error) {
-        CollectionPrototype.forEach = forEach2;
-      }
-  }
-  var Collection;
-  var CollectionPrototype;
-
   // node_modules/core-js/modules/es.object.entries.js
-  var $46 = require_export();
+  var $47 = require_export();
   var $entries = require_object_to_array().entries;
-  $46({ target: "Object", stat: true }, {
+  $47({ target: "Object", stat: true }, {
     entries: function entries(O) {
       return $entries(O);
     }
@@ -8866,19 +8903,6 @@
   // srcts/src/shiny/render.ts
   var import_es_regexp_exec6 = __toModule(require_es_regexp_exec());
   var import_es_array_iterator19 = __toModule(require_es_array_iterator());
-
-  // node_modules/core-js/modules/es.array.from.js
-  var $47 = require_export();
-  var from = require_array_from();
-  var checkCorrectnessOfIteration = require_check_correctness_of_iteration();
-  var INCORRECT_ITERATION = !checkCorrectnessOfIteration(function(iterable) {
-    Array.from(iterable);
-  });
-  $47({ target: "Array", stat: true, forced: INCORRECT_ITERATION }, {
-    from: from
-  });
-
-  // srcts/src/shiny/render.ts
   var import_jquery27 = __toModule(require_jquery());
 
   // srcts/src/shiny/sendImageSize.ts
@@ -9497,8 +9521,49 @@
   var import_es_array_iterator21 = __toModule(require_es_array_iterator());
   var import_jquery33 = __toModule(require_jquery());
 
+  // node_modules/core-js/modules/es.object.values.js
+  var $52 = require_export();
+  var $values = require_object_to_array().values;
+  $52({ target: "Object", stat: true }, {
+    values: function values(O) {
+      return $values(O);
+    }
+  });
+
+  // node_modules/core-js/modules/es.object.get-own-property-descriptors.js
+  var $53 = require_export();
+  var DESCRIPTORS6 = require_descriptors();
+  var ownKeys = require_own_keys();
+  var toIndexedObject5 = require_to_indexed_object();
+  var getOwnPropertyDescriptorModule3 = require_object_get_own_property_descriptor();
+  var createProperty4 = require_create_property();
+  $53({ target: "Object", stat: true, sham: !DESCRIPTORS6 }, {
+    getOwnPropertyDescriptors: function getOwnPropertyDescriptors(object) {
+      var O = toIndexedObject5(object);
+      var getOwnPropertyDescriptor4 = getOwnPropertyDescriptorModule3.f;
+      var keys2 = ownKeys(O);
+      var result = {};
+      var index = 0;
+      var key, descriptor;
+      while (keys2.length > index) {
+        descriptor = getOwnPropertyDescriptor4(O, key = keys2[index++]);
+        if (descriptor !== void 0)
+          createProperty4(result, key, descriptor);
+      }
+      return result;
+    }
+  });
+
   // srcts/src/imageutils/createBrush.ts
   var import_jquery30 = __toModule(require_jquery());
+
+  // node_modules/core-js/modules/es.number.is-nan.js
+  var $54 = require_export();
+  $54({ target: "Number", stat: true }, {
+    isNaN: function isNaN2(number) {
+      return number != number;
+    }
+  });
 
   // srcts/src/imageutils/initCoordmap.ts
   var import_jquery29 = __toModule(require_jquery());
@@ -9535,14 +9600,15 @@
       }
     };
   }
-  function addScaleFuns(panel) {
+  function addScaleFuns(panel_) {
+    var panel = panel_;
     var d = panel.domain;
     var r = panel.range;
     var xlog = panel.log && panel.log.x ? panel.log.x : null;
     var ylog = panel.log && panel.log.y ? panel.log.y : null;
     var xscaler = scaler1D(d.left, d.right, r.left, r.right, xlog);
     var yscaler = scaler1D(d.bottom, d.top, r.bottom, r.top, ylog);
-    panel.scaleDataToImg = function(val, clip) {
+    function scaleDataToImg(val, clip) {
       return mapValues(val, function(value, key) {
         var prefix = key.substring(0, 1);
         if (prefix === "x") {
@@ -9552,7 +9618,8 @@
         }
         return null;
       });
-    };
+    }
+    panel.scaleDataToImg = scaleDataToImg;
     function scaleImgToData(val, clip) {
       return mapValues(val, function(value, key) {
         var prefix = key.substring(0, 1);
@@ -9581,24 +9648,29 @@
         newOffset.y = bounds.top;
       return newOffset;
     };
+    return panel;
   }
   function initPanelScales(panels) {
-    for (var i = 0; i < panels.length; i++) {
-      var panel = panels[i];
-      addScaleFuns(panel);
-    }
+    return panels.map(function(panel) {
+      return addScaleFuns(panel);
+    });
   }
 
   // srcts/src/imageutils/initCoordmap.ts
   function findScalingRatio($el) {
+    var _$el$outerWidth, _$el$outerHeight;
     var boundingRect = $el[0].getBoundingClientRect();
     return {
-      x: boundingRect.width / $el.outerWidth(),
-      y: boundingRect.height / $el.outerHeight()
+      x: boundingRect.width / ((_$el$outerWidth = $el.outerWidth()) !== null && _$el$outerWidth !== void 0 ? _$el$outerWidth : 1),
+      y: boundingRect.height / ((_$el$outerHeight = $el.outerHeight()) !== null && _$el$outerHeight !== void 0 ? _$el$outerHeight : 1)
     };
   }
   function findOrigin($el) {
-    var offset = $el.offset();
+    var _$el$offset;
+    var offset = (_$el$offset = $el.offset()) !== null && _$el$offset !== void 0 ? _$el$offset : {
+      left: 0,
+      top: 0
+    };
     var scalingRatio = findScalingRatio($el);
     var paddingBorder = {
       left: parseInt($el.css("border-left-width")) + parseInt($el.css("padding-left")),
@@ -9610,10 +9682,15 @@
     };
   }
   function findDims($el) {
+    var _$el$width, _$el$outerWidth2, _$el$height, _$el$outerHeight2;
     var contentRatio = {
-      x: $el.width() / $el.outerWidth(),
-      y: $el.height() / $el.outerHeight()
+      x: ((_$el$width = $el.width()) !== null && _$el$width !== void 0 ? _$el$width : NaN) / ((_$el$outerWidth2 = $el.outerWidth()) !== null && _$el$outerWidth2 !== void 0 ? _$el$outerWidth2 : NaN),
+      y: ((_$el$height = $el.height()) !== null && _$el$height !== void 0 ? _$el$height : NaN) / ((_$el$outerHeight2 = $el.outerHeight()) !== null && _$el$outerHeight2 !== void 0 ? _$el$outerHeight2 : NaN)
     };
+    if (Number.isNaN(contentRatio.x))
+      contentRatio.x = 1;
+    if (Number.isNaN(contentRatio.y))
+      contentRatio.y = 1;
     var boundingRect = $el[0].getBoundingClientRect();
     return {
       x: contentRatio.x * boundingRect.width,
@@ -9621,25 +9698,25 @@
     };
   }
   function initCoordmap($el, coordmap_) {
-    var coordmap = coordmap_;
     var $img = $el.find("img");
     var img = $img[0];
-    if (coordmap.panels.length === 0) {
+    if (coordmap_.panels.length === 0) {
       var bounds = {
         top: 0,
         left: 0,
         right: img.clientWidth - 1,
         bottom: img.clientHeight - 1
       };
-      coordmap.panels[0] = {
+      coordmap_.panels[0] = {
         domain: bounds,
         range: bounds,
         mapping: {}
       };
     }
+    var coordmap = coordmap_;
     coordmap.dims.height = coordmap.dims.height || img.naturalHeight;
     coordmap.dims.width = coordmap.dims.width || img.naturalWidth;
-    initPanelScales(coordmap.panels);
+    coordmap.panels = initPanelScales(coordmap_.panels);
     coordmap.mouseOffsetCss = function(mouseEvent) {
       var imgOrigin = findOrigin($img);
       return {
@@ -9765,19 +9842,19 @@
         }
         var panel = coordmap.getPanelCss(coordsCss);
         var coordsImg = coordmap.scaleCssToImg(coordsCss);
-        var coordsData = panel.scaleImgToData(coordsImg);
+        var coordsData = panel !== null && panel !== void 0 && panel.scaleImgToData ? panel.scaleImgToData(coordsImg) : void 0;
         var coords = {
-          x: coordsData.x,
-          y: coordsData.y,
+          x: coordsData === null || coordsData === void 0 ? void 0 : coordsData.x,
+          y: coordsData === null || coordsData === void 0 ? void 0 : coordsData.y,
           coords_css: coordsCss,
           coords_img: coordsImg,
           img_css_ratio: coordmap.cssToImgScalingRatio()
         };
-        import_jquery29.default.extend(coords, panel.panel_vars);
-        coords.mapping = panel.mapping;
-        coords.domain = panel.domain;
-        coords.range = panel.range;
-        coords.log = panel.log;
+        import_jquery29.default.extend(coords, panel === null || panel === void 0 ? void 0 : panel.panel_vars);
+        coords.mapping = panel === null || panel === void 0 ? void 0 : panel.mapping;
+        coords.domain = panel === null || panel === void 0 ? void 0 : panel.domain;
+        coords.range = panel === null || panel === void 0 ? void 0 : panel.range;
+        coords.log = panel === null || panel === void 0 ? void 0 : panel.log;
         shinySetInputValue(inputId, coords, {
           priority: "event"
         });
@@ -9816,6 +9893,44 @@
   }
 
   // srcts/src/imageutils/createBrush.ts
+  function ownKeys2(object, enumerableOnly) {
+    var keys2 = Object.keys(object);
+    if (Object.getOwnPropertySymbols) {
+      var symbols = Object.getOwnPropertySymbols(object);
+      if (enumerableOnly) {
+        symbols = symbols.filter(function(sym) {
+          return Object.getOwnPropertyDescriptor(object, sym).enumerable;
+        });
+      }
+      keys2.push.apply(keys2, symbols);
+    }
+    return keys2;
+  }
+  function _objectSpread(target) {
+    for (var i = 1; i < arguments.length; i++) {
+      var source = arguments[i] != null ? arguments[i] : {};
+      if (i % 2) {
+        ownKeys2(Object(source), true).forEach(function(key) {
+          _defineProperty9(target, key, source[key]);
+        });
+      } else if (Object.getOwnPropertyDescriptors) {
+        Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));
+      } else {
+        ownKeys2(Object(source)).forEach(function(key) {
+          Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));
+        });
+      }
+    }
+    return target;
+  }
+  function _defineProperty9(obj, key, value) {
+    if (key in obj) {
+      Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });
+    } else {
+      obj[key] = value;
+    }
+    return obj;
+  }
   function createBrush($el, opts, coordmap, expandPixels) {
     var resizeExpand = 10;
     var el = $el[0];
@@ -9889,8 +10004,8 @@
     }
     function onResize() {
       var boundsDataVal = boundsData();
-      for (var val in boundsDataVal) {
-        if (isnan(boundsDataVal[val]))
+      for (var val in Object.values(boundsDataVal)) {
+        if (isnan(val))
           return;
       }
       boundsData(boundsDataVal);
@@ -9933,8 +10048,9 @@
       return res;
     }
     function boundsCss(boxCss) {
+      var _$div, _$div2;
       if (boxCss === void 0) {
-        return import_jquery30.default.extend({}, state.boundsCss);
+        return _objectSpread({}, state.boundsCss);
       }
       var minCss = {
         x: boxCss.xmin,
@@ -9944,6 +10060,8 @@
         x: boxCss.xmax,
         y: boxCss.ymax
       };
+      if (!state.panel)
+        return;
       var panel = state.panel;
       var panelBoundsImg = panel.range;
       if (opts.brushClip) {
@@ -9978,15 +10096,17 @@
       state.boundsData = mapValues(state.boundsData, function(val) {
         return roundSignif(val, 14);
       });
-      $div.data("bounds-data", state.boundsData);
-      $div.data("panel", state.panel);
+      (_$div = $div) === null || _$div === void 0 ? void 0 : _$div.data("bounds-data", state.boundsData);
+      (_$div2 = $div) === null || _$div2 === void 0 ? void 0 : _$div2.data("panel", state.panel);
       return void 0;
     }
     function boundsData(boxData) {
-      if (boxData === void 0) {
-        return import_jquery30.default.extend({}, state.boundsData);
+      if (typeof boxData === "undefined") {
+        return _objectSpread({}, state.boundsData);
       }
-      var boxCss = imgToCss(state.panel.scaleDataToImg(boxData));
+      var boxData2 = boxData;
+      var panel = state.panel;
+      var boxCss = imgToCss(panel.scaleDataToImg(boxData2));
       boxCss = mapValues(boxCss, function(val) {
         return roundSignif(val, 13);
       });
@@ -10033,9 +10153,10 @@
       }).width(0).outerHeight(0);
     }
     function updateDiv() {
+      var _$div3;
       var imgOffsetCss = findOrigin($el.find("img"));
       var b = state.boundsCss;
-      $div.offset({
+      (_$div3 = $div) === null || _$div3 === void 0 ? void 0 : _$div3.offset({
         top: imgOffsetCss.y + b.ymin,
         left: imgOffsetCss.x + b.xmin
       }).outerWidth(b.xmax - b.xmin + 1).outerHeight(b.ymax - b.ymin + 1);
@@ -10063,8 +10184,9 @@
       updateDiv();
     }
     function brushTo(offsetCss) {
+      var _$div4;
       boundsCss(findBox(state.down, offsetCss));
-      $div.show();
+      (_$div4 = $div) === null || _$div4 === void 0 ? void 0 : _$div4.show();
       updateDiv();
     }
     function stopBrushing() {
@@ -10076,7 +10198,7 @@
     }
     function startDragging() {
       state.dragging = true;
-      state.changeStartBounds = import_jquery30.default.extend({}, state.boundsCss);
+      state.changeStartBounds = _objectSpread({}, state.boundsCss);
     }
     function dragTo(offsetCss) {
       var dx = offsetCss.x - state.down.x;
@@ -10089,7 +10211,8 @@
         ymax: start.ymax + dy
       };
       if (opts.brushClip) {
-        var panelBoundsImg = state.panel.range;
+        var panel = state.panel;
+        var panelBoundsImg = panel.range;
         var newBoundsImg = cssToImg(newBoundsCss);
         var xvalsImg = [newBoundsImg.xmin, newBoundsImg.xmax];
         var yvalsImg = [newBoundsImg.ymin, newBoundsImg.ymax];
@@ -10113,7 +10236,7 @@
     }
     function startResizing() {
       state.resizing = true;
-      state.changeStartBounds = import_jquery30.default.extend({}, state.boundsCss);
+      state.changeStartBounds = _objectSpread({}, state.boundsCss);
       state.resizeSides = whichResizeSides(state.down);
     }
     function resizeTo(offsetCss) {
@@ -10123,7 +10246,8 @@
       };
       var dImg = cssToImg(dCss);
       var bImg = cssToImg(state.changeStartBounds);
-      var panelBoundsImg = state.panel.range;
+      var panel = state.panel;
+      var panelBoundsImg = panel.range;
       if (state.resizeSides.left) {
         var xminImg = shiftToRange(bImg.xmin + dImg.x, panelBoundsImg.left, bImg.xmax)[0];
         bImg.xmin = xminImg;
@@ -10174,7 +10298,7 @@
   // srcts/src/imageutils/createClickInfo.ts
   var import_jquery31 = __toModule(require_jquery());
   function createClickInfo($el, dblclickId, dblclickDelay) {
-    var clickTimer = null;
+    var clickTimer = void 0;
     var pendingE = null;
     function triggerEvent(newEventType, e) {
       var e2 = import_jquery31.default.Event(newEventType, {
@@ -10192,7 +10316,7 @@
     }
     function scheduleMousedown2(e) {
       pendingE = e;
-      clickTimer = setTimeout(function() {
+      clickTimer = window.setTimeout(function() {
         triggerPendingMousedown2();
       }, dblclickDelay);
     }
@@ -10293,14 +10417,16 @@
         return;
       }
       var panel = brush.getPanel();
-      import_jquery32.default.extend(coords, panel.panel_vars);
+      if (panel) {
+        import_jquery32.default.extend(coords, panel.panel_vars);
+      }
       coords.coords_css = brush.boundsCss();
       coords.coords_img = coordmap.scaleCssToImg(coords.coords_css);
       coords.img_css_ratio = coordmap.cssToImgScalingRatio();
-      coords.mapping = panel.mapping;
-      coords.domain = panel.domain;
-      coords.range = panel.range;
-      coords.log = panel.log;
+      coords.mapping = panel === null || panel === void 0 ? void 0 : panel.mapping;
+      coords.domain = panel === null || panel === void 0 ? void 0 : panel.domain;
+      coords.range = panel === null || panel === void 0 ? void 0 : panel.range;
+      coords.log = panel === null || panel === void 0 ? void 0 : panel.log;
       coords.direction = opts.brushDirection;
       coords.brushId = inputId;
       coords.outputId = outputId;
@@ -10776,23 +10902,28 @@
   var import_jquery34 = __toModule(require_jquery());
   var fadeDuration = 250;
   function show() {
+    var _$notificationInit;
     var _ref = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : {}, _ref$html = _ref.html, html = _ref$html === void 0 ? "" : _ref$html, _ref$action = _ref.action, action = _ref$action === void 0 ? "" : _ref$action, _ref$deps = _ref.deps, deps = _ref$deps === void 0 ? [] : _ref$deps, _ref$duration = _ref.duration, duration = _ref$duration === void 0 ? 5e3 : _ref$duration, _ref$id = _ref.id, id = _ref$id === void 0 ? null : _ref$id, _ref$closeButton = _ref.closeButton, closeButton = _ref$closeButton === void 0 ? true : _ref$closeButton, _ref$type = _ref.type, type = _ref$type === void 0 ? null : _ref$type;
     if (!id)
       id = randomId();
     createPanel();
-    var $notification = get2(id);
-    if ($notification.length === 0)
-      $notification = create4(id);
+    var $notificationInit = get2(id);
+    if (((_$notificationInit = $notificationInit) === null || _$notificationInit === void 0 ? void 0 : _$notificationInit.length) === 0)
+      $notificationInit = create4(id);
+    var $notification = $notificationInit;
     var newHtml = '<div class="shiny-notification-content-text">'.concat(html, "</div>") + '<div class="shiny-notification-content-action">'.concat(action, "</div>");
     var $content = $notification.find(".shiny-notification-content");
     renderContent($content, {
       html: newHtml,
       deps: deps
     });
-    var classes = $notification.attr("class").split(/\s+/).filter(function(cls) {
-      return cls.match(/^shiny-notification-/);
-    }).join(" ");
-    $notification.removeClass(classes);
+    var classes = $notification === null || $notification === void 0 ? void 0 : $notification.attr("class");
+    if (classes) {
+      var classVal = classes.split(/\s+/).filter(function(cls) {
+        return cls.match(/^shiny-notification-/);
+      }).join(" ");
+      $notification.removeClass(classVal);
+    }
     if (type && type !== "default")
       $notification.addClass("shiny-notification-" + type);
     var $close = $notification.find(".shiny-notification-close");
@@ -10808,7 +10939,8 @@
     return id;
   }
   function remove(id) {
-    get2(id).fadeOut(fadeDuration, function() {
+    var _get2;
+    (_get2 = get2(id)) === null || _get2 === void 0 ? void 0 : _get2.fadeOut(fadeDuration, function() {
       shinyUnbindAll(this);
       (0, import_jquery34.default)(this).remove();
       if (ids().length === 0) {
@@ -10837,8 +10969,9 @@
     return $panel;
   }
   function create4(id) {
+    var _$notification;
     var $notification = get2(id);
-    if ($notification.length === 0) {
+    if (((_$notification = $notification) === null || _$notification === void 0 ? void 0 : _$notification.length) === 0) {
       $notification = (0, import_jquery34.default)('<div id="shiny-notification-'.concat(id, '" class="shiny-notification">') + '<div class="shiny-notification-close">&times;</div><div class="shiny-notification-content"></div></div>');
       $notification.find(".shiny-notification-close").on("click", function(e) {
         e.preventDefault();
@@ -10850,15 +10983,16 @@
     return $notification;
   }
   function addRemovalCallback(id, delay) {
+    var _get2;
     clearRemovalCallback(id);
     var removalCallback = setTimeout(function() {
       remove(id);
     }, delay);
-    get2(id).data("removalCallback", removalCallback);
+    (_get2 = get2(id)) === null || _get2 === void 0 ? void 0 : _get2.data("removalCallback", removalCallback);
   }
   function clearRemovalCallback(id) {
     var $notification = get2(id);
-    var oldRemovalCallback = $notification.data("removalCallback");
+    var oldRemovalCallback = $notification === null || $notification === void 0 ? void 0 : $notification.data("removalCallback");
     if (oldRemovalCallback) {
       clearTimeout(oldRemovalCallback);
     }
@@ -10967,7 +11101,7 @@
       _defineProperties28(Constructor, staticProps);
     return Constructor;
   }
-  function _defineProperty9(obj, key, value) {
+  function _defineProperty10(obj, key, value) {
     if (key in obj) {
       Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });
     } else {
@@ -10978,12 +11112,12 @@
   var InputBatchSender = /* @__PURE__ */ function() {
     function InputBatchSender2(shinyapp) {
       _classCallCheck28(this, InputBatchSender2);
-      _defineProperty9(this, "target", void 0);
-      _defineProperty9(this, "shinyapp", void 0);
-      _defineProperty9(this, "timerId", null);
-      _defineProperty9(this, "pendingData", {});
-      _defineProperty9(this, "reentrant", false);
-      _defineProperty9(this, "lastChanceCallback", []);
+      _defineProperty10(this, "target", void 0);
+      _defineProperty10(this, "shinyapp", void 0);
+      _defineProperty10(this, "timerId", null);
+      _defineProperty10(this, "pendingData", {});
+      _defineProperty10(this, "reentrant", false);
+      _defineProperty10(this, "lastChanceCallback", []);
       this.shinyapp = shinyapp;
     }
     _createClass28(InputBatchSender2, [{
@@ -11054,7 +11188,7 @@
       _defineProperties29(Constructor, staticProps);
     return Constructor;
   }
-  function _defineProperty10(obj, key, value) {
+  function _defineProperty11(obj, key, value) {
     if (key in obj) {
       Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });
     } else {
@@ -11066,8 +11200,8 @@
     function InputNoResendDecorator2(target) {
       var initialValues = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : {};
       _classCallCheck29(this, InputNoResendDecorator2);
-      _defineProperty10(this, "target", void 0);
-      _defineProperty10(this, "lastSentValues", {});
+      _defineProperty11(this, "target", void 0);
+      _defineProperty11(this, "lastSentValues", {});
       this.target = target;
       this.reset(initialValues);
     }
@@ -11088,13 +11222,13 @@
     }, {
       key: "reset",
       value: function reset() {
-        var values = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : {};
+        var values2 = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : {};
         var cacheValues = {};
-        for (var inputName in values) {
-          if (hasOwnProperty(values, inputName)) {
+        for (var inputName in values2) {
+          if (hasOwnProperty(values2, inputName)) {
             var _splitInputNameType2 = splitInputNameType(inputName), name = _splitInputNameType2.name, inputType = _splitInputNameType2.inputType;
             cacheValues[name] = {
-              jsonValue: JSON.stringify(values[inputName]),
+              jsonValue: JSON.stringify(values2[inputName]),
               inputType: inputType
             };
           }
@@ -11134,7 +11268,7 @@
       _defineProperties30(Constructor, staticProps);
     return Constructor;
   }
-  function _defineProperty11(obj, key, value) {
+  function _defineProperty12(obj, key, value) {
     if (key in obj) {
       Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });
     } else {
@@ -11145,7 +11279,7 @@
   var InputEventDecorator = /* @__PURE__ */ function() {
     function InputEventDecorator2(target) {
       _classCallCheck30(this, InputEventDecorator2);
-      _defineProperty11(this, "target", void 0);
+      _defineProperty12(this, "target", void 0);
       this.target = target;
     }
     _createClass30(InputEventDecorator2, [{
@@ -11196,7 +11330,7 @@
       _defineProperties31(Constructor, staticProps);
     return Constructor;
   }
-  function _defineProperty12(obj, key, value) {
+  function _defineProperty13(obj, key, value) {
     if (key in obj) {
       Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });
     } else {
@@ -11207,8 +11341,8 @@
   var InputRateDecorator = /* @__PURE__ */ function() {
     function InputRateDecorator2(target) {
       _classCallCheck31(this, InputRateDecorator2);
-      _defineProperty12(this, "target", void 0);
-      _defineProperty12(this, "inputRatePolicies", {});
+      _defineProperty13(this, "target", void 0);
+      _defineProperty13(this, "inputRatePolicies", {});
       this.target = target;
     }
     _createClass31(InputRateDecorator2, [{
@@ -11271,7 +11405,7 @@
       _defineProperties32(Constructor, staticProps);
     return Constructor;
   }
-  function _defineProperty13(obj, key, value) {
+  function _defineProperty14(obj, key, value) {
     if (key in obj) {
       Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });
     } else {
@@ -11282,8 +11416,8 @@
   var InputDeferDecorator = /* @__PURE__ */ function() {
     function InputDeferDecorator2(target) {
       _classCallCheck32(this, InputDeferDecorator2);
-      _defineProperty13(this, "pendingInput", {});
-      _defineProperty13(this, "target", void 0);
+      _defineProperty14(this, "pendingInput", {});
+      _defineProperty14(this, "target", void 0);
       this.target = target;
     }
     _createClass32(InputDeferDecorator2, [{
@@ -11311,30 +11445,6 @@
     return InputDeferDecorator2;
   }();
 
-  // node_modules/core-js/modules/es.object.get-own-property-descriptors.js
-  var $61 = require_export();
-  var DESCRIPTORS6 = require_descriptors();
-  var ownKeys = require_own_keys();
-  var toIndexedObject5 = require_to_indexed_object();
-  var getOwnPropertyDescriptorModule3 = require_object_get_own_property_descriptor();
-  var createProperty4 = require_create_property();
-  $61({ target: "Object", stat: true, sham: !DESCRIPTORS6 }, {
-    getOwnPropertyDescriptors: function getOwnPropertyDescriptors(object) {
-      var O = toIndexedObject5(object);
-      var getOwnPropertyDescriptor4 = getOwnPropertyDescriptorModule3.f;
-      var keys2 = ownKeys(O);
-      var result = {};
-      var index = 0;
-      var key, descriptor;
-      while (keys2.length > index) {
-        descriptor = getOwnPropertyDescriptor4(O, key = keys2[index++]);
-        if (descriptor !== void 0)
-          createProperty4(result, key, descriptor);
-      }
-      return result;
-    }
-  });
-
   // srcts/src/inputPolicies/inputValidateDecorator.ts
   function _classCallCheck33(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
@@ -11358,7 +11468,7 @@
       _defineProperties33(Constructor, staticProps);
     return Constructor;
   }
-  function ownKeys2(object, enumerableOnly) {
+  function ownKeys3(object, enumerableOnly) {
     var keys2 = Object.keys(object);
     if (Object.getOwnPropertySymbols) {
       var symbols = Object.getOwnPropertySymbols(object);
@@ -11371,24 +11481,24 @@
     }
     return keys2;
   }
-  function _objectSpread(target) {
+  function _objectSpread2(target) {
     for (var i = 1; i < arguments.length; i++) {
       var source = arguments[i] != null ? arguments[i] : {};
       if (i % 2) {
-        ownKeys2(Object(source), true).forEach(function(key) {
-          _defineProperty14(target, key, source[key]);
+        ownKeys3(Object(source), true).forEach(function(key) {
+          _defineProperty15(target, key, source[key]);
         });
       } else if (Object.getOwnPropertyDescriptors) {
         Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));
       } else {
-        ownKeys2(Object(source)).forEach(function(key) {
+        ownKeys3(Object(source)).forEach(function(key) {
           Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));
         });
       }
     }
     return target;
   }
-  function _defineProperty14(obj, key, value) {
+  function _defineProperty15(obj, key, value) {
     if (key in obj) {
       Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });
     } else {
@@ -11397,7 +11507,7 @@
     return obj;
   }
   function addDefaultInputOpts(opts) {
-    var newOpts = _objectSpread({
+    var newOpts = _objectSpread2({
       priority: "immediate"
     }, opts);
     switch (newOpts.priority) {
@@ -11413,7 +11523,7 @@
   var InputValidateDecorator = /* @__PURE__ */ function() {
     function InputValidateDecorator2(target) {
       _classCallCheck33(this, InputValidateDecorator2);
-      _defineProperty14(this, "target", void 0);
+      _defineProperty15(this, "target", void 0);
       this.target = target;
     }
     _createClass33(InputValidateDecorator2, [{
@@ -11455,7 +11565,7 @@
       _defineProperties34(Constructor, staticProps);
     return Constructor;
   }
-  function _defineProperty15(obj, key, value) {
+  function _defineProperty16(obj, key, value) {
     if (key in obj) {
       Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });
     } else {
@@ -11466,13 +11576,15 @@
   var OutputBindingAdapter = /* @__PURE__ */ function() {
     function OutputBindingAdapter2(el, binding) {
       _classCallCheck34(this, OutputBindingAdapter2);
-      _defineProperty15(this, "el", void 0);
-      _defineProperty15(this, "binding", void 0);
+      _defineProperty16(this, "el", void 0);
+      _defineProperty16(this, "binding", void 0);
       this.el = el;
       this.binding = binding;
       if (binding.resize) {
         this.onResize = makeResizeFilter(el, function(width, height) {
-          binding.resize(el, width, height);
+          if (typeof binding.resize === "function") {
+            binding.resize(el, width, height);
+          }
         });
       }
     }
@@ -11684,21 +11796,21 @@
 
   // node_modules/core-js/modules/es.array-buffer.constructor.js
   "use strict";
-  var $63 = require_export();
+  var $65 = require_export();
   var global7 = require_global();
   var arrayBufferModule = require_array_buffer();
   var setSpecies = require_set_species();
   var ARRAY_BUFFER = "ArrayBuffer";
   var ArrayBuffer2 = arrayBufferModule[ARRAY_BUFFER];
   var NativeArrayBuffer = global7[ARRAY_BUFFER];
-  $63({ global: true, forced: NativeArrayBuffer !== ArrayBuffer2 }, {
+  $65({ global: true, forced: NativeArrayBuffer !== ArrayBuffer2 }, {
     ArrayBuffer: ArrayBuffer2
   });
   setSpecies(ARRAY_BUFFER);
 
   // node_modules/core-js/modules/es.array-buffer.slice.js
   "use strict";
-  var $64 = require_export();
+  var $66 = require_export();
   var fails10 = require_fails();
   var ArrayBufferModule = require_array_buffer();
   var anObject9 = require_an_object();
@@ -11711,7 +11823,7 @@
   var INCORRECT_SLICE = fails10(function() {
     return !new ArrayBuffer3(2).slice(1, void 0).byteLength;
   });
-  $64({ target: "ArrayBuffer", proto: true, unsafe: true, forced: INCORRECT_SLICE }, {
+  $66({ target: "ArrayBuffer", proto: true, unsafe: true, forced: INCORRECT_SLICE }, {
     slice: function slice2(start, end) {
       if (nativeArrayBufferSlice !== void 0 && end === void 0) {
         return nativeArrayBufferSlice.call(anObject9(this), start);
@@ -11731,23 +11843,23 @@
   });
 
   // node_modules/core-js/modules/es.data-view.js
-  var $65 = require_export();
+  var $67 = require_export();
   var ArrayBufferModule2 = require_array_buffer();
   var NATIVE_ARRAY_BUFFER = require_array_buffer_native();
-  $65({ global: true, forced: !NATIVE_ARRAY_BUFFER }, {
+  $67({ global: true, forced: !NATIVE_ARRAY_BUFFER }, {
     DataView: ArrayBufferModule2.DataView
   });
 
   // node_modules/core-js/modules/es.array.reduce.js
   "use strict";
-  var $66 = require_export();
+  var $68 = require_export();
   var $reduce = require_array_reduce().left;
   var arrayMethodIsStrict3 = require_array_method_is_strict();
   var CHROME_VERSION = require_engine_v8_version();
   var IS_NODE = require_engine_is_node();
   var STRICT_METHOD3 = arrayMethodIsStrict3("reduce");
   var CHROME_BUG = !IS_NODE && CHROME_VERSION > 79 && CHROME_VERSION < 83;
-  $66({ target: "Array", proto: true, forced: !STRICT_METHOD3 || CHROME_BUG }, {
+  $68({ target: "Array", proto: true, forced: !STRICT_METHOD3 || CHROME_BUG }, {
     reduce: function reduce(callbackfn) {
       return $reduce(this, callbackfn, arguments.length, arguments.length > 1 ? arguments[1] : void 0);
     }
@@ -11778,7 +11890,7 @@
       _defineProperties35(Constructor, staticProps);
     return Constructor;
   }
-  function _defineProperty16(obj, key, value) {
+  function _defineProperty17(obj, key, value) {
     if (key in obj) {
       Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });
     } else {
@@ -11823,20 +11935,20 @@
   var ShinyApp = /* @__PURE__ */ function() {
     function ShinyApp2() {
       _classCallCheck35(this, ShinyApp2);
-      _defineProperty16(this, "$socket", null);
-      _defineProperty16(this, "config", null);
-      _defineProperty16(this, "$inputValues", {});
-      _defineProperty16(this, "$initialInput", void 0);
-      _defineProperty16(this, "$bindings", {});
-      _defineProperty16(this, "$values", {});
-      _defineProperty16(this, "$errors", {});
-      _defineProperty16(this, "$conditionals", {});
-      _defineProperty16(this, "$pendingMessages", []);
-      _defineProperty16(this, "$activeRequests", {});
-      _defineProperty16(this, "$nextRequestId", 0);
-      _defineProperty16(this, "$allowReconnect", false);
-      _defineProperty16(this, "scheduledReconnect", null);
-      _defineProperty16(this, "reconnectDelay", function() {
+      _defineProperty17(this, "$socket", null);
+      _defineProperty17(this, "config", null);
+      _defineProperty17(this, "$inputValues", {});
+      _defineProperty17(this, "$initialInput", null);
+      _defineProperty17(this, "$bindings", {});
+      _defineProperty17(this, "$values", {});
+      _defineProperty17(this, "$errors", {});
+      _defineProperty17(this, "$conditionals", {});
+      _defineProperty17(this, "$pendingMessages", []);
+      _defineProperty17(this, "$activeRequests", {});
+      _defineProperty17(this, "$nextRequestId", 0);
+      _defineProperty17(this, "$allowReconnect", false);
+      _defineProperty17(this, "scheduledReconnect", void 0);
+      _defineProperty17(this, "reconnectDelay", function() {
         var attempts = 0;
         var delays = [1500, 1500, 2500, 2500, 5500, 5500, 10500];
         return {
@@ -11853,7 +11965,7 @@
           }
         };
       }());
-      _defineProperty16(this, "progressHandlers", {
+      _defineProperty17(this, "progressHandlers", {
         binding: function binding(message) {
           var key = message.id;
           var binding2 = this.$bindings[key];
@@ -11885,10 +11997,12 @@
             $progress.attr("id", message.id);
             $container.append($progress);
             var $progressBar = $progress.find(".progress");
-            $progressBar.css("top", depth * $progressBar.height() + "px");
-            var $progressText = $progress.find(".progress-text");
-            $progressText.css("top", 3 * $progressBar.height() + depth * $progressText.outerHeight() + "px");
-            $progress.hide();
+            if ($progressBar) {
+              $progressBar.css("top", depth * $progressBar.height() + "px");
+              var $progressText = $progress.find(".progress-text");
+              $progressText.css("top", 3 * $progressBar.height() + depth * $progressText.outerHeight() + "px");
+              $progress.hide();
+            }
           }
         },
         update: function update(message) {
@@ -12022,13 +12136,13 @@
       }
     }, {
       key: "sendInput",
-      value: function sendInput(values) {
+      value: function sendInput(values2) {
         var msg = JSON.stringify({
           method: "update",
-          data: values
+          data: values2
         });
         this.$sendMsg(msg);
-        import_jquery39.default.extend(this.$inputValues, values);
+        import_jquery39.default.extend(this.$inputValues, values2);
         this.$updateConditionals();
       }
     }, {
@@ -12047,18 +12161,19 @@
       key: "$scheduleReconnect",
       value: function $scheduleReconnect(delay) {
         var _this2 = this;
-        this.scheduledReconnect = setTimeout(function() {
+        this.scheduledReconnect = window.setTimeout(function() {
           _this2.reconnect();
         }, delay);
       }
     }, {
       key: "onDisconnected",
       value: function onDisconnected() {
+        var _this$$socket;
         var $overlay = (0, import_jquery39.default)("#shiny-disconnected-overlay");
         if ($overlay.length === 0) {
           (0, import_jquery39.default)(document.body).append('<div id="shiny-disconnected-overlay"></div>');
         }
-        if (this.$allowReconnect === true && this.$socket.allowReconnect === true || this.$allowReconnect === "force") {
+        if (this.$allowReconnect === true && ((_this$$socket = this.$socket) === null || _this$$socket === void 0 ? void 0 : _this$$socket.allowReconnect) === true || this.$allowReconnect === "force") {
           var delay = this.reconnectDelay.next();
           showReconnectDialog(delay);
           this.$scheduleReconnect(delay);
@@ -12113,7 +12228,8 @@
     }, {
       key: "$sendMsg",
       value: function $sendMsg(msg) {
-        if (!this.$socket.readyState) {
+        var _this$$socket2;
+        if (!((_this$$socket2 = this.$socket) !== null && _this$$socket2 !== void 0 && _this$$socket2.readyState)) {
           this.$pendingMessages.push(msg);
         } else {
           this.$socket.send(msg);
@@ -12186,7 +12302,7 @@
         return Object.keys(scopeComponent).filter(function(k) {
           return k.indexOf(nsPrefix) === 0;
         }).map(function(k) {
-          return _defineProperty16({}, k.substring(nsPrefix.length), scopeComponent[k]);
+          return _defineProperty17({}, k.substring(nsPrefix.length), scopeComponent[k]);
         }).reduce(function(obj, pair) {
           return import_jquery39.default.extend(obj, pair);
         }, {});
@@ -12330,9 +12446,9 @@
         });
         addMessageHandler("progress", function(message) {
           if (message.type && message.message) {
-            var handler = _this3.progressHandlers[message.type];
+            var handler = this.progressHandlers[message.type];
             if (handler)
-              handler.call(_this3, message.message);
+              handler.call(this, message.message);
           }
         });
         addMessageHandler("notification", function(message) {
@@ -12400,9 +12516,11 @@
         addMessageHandler("recalculating", function(message) {
           if (hasOwnProperty(message, "name") && hasOwnProperty(message, "status")) {
             var binding = _this3.$bindings[message.name];
-            (0, import_jquery39.default)(binding ? binding.el : null).trigger({
-              type: "shiny:" + message.status
-            });
+            if (binding) {
+              (0, import_jquery39.default)(binding.el).trigger("shiny:" + message.status);
+            } else {
+              (0, import_jquery39.default)().trigger("shiny:" + message.status);
+            }
           }
         });
         addMessageHandler("reload", function(message) {
@@ -12484,11 +12602,10 @@
           var $divTag = (0, import_jquery39.default)(message.divTag.html);
           var $liTag = (0, import_jquery39.default)(message.liTag.html);
           var $aTag = $liTag.find("> a");
-          var target = null;
           var $targetLiTag = null;
           if (message.target !== null) {
-            target = getTargetTabs($tabset, $tabContent, message.target);
-            $targetLiTag = target.$liTag;
+            var targetInfo = getTargetTabs($tabset, $tabContent, message.target);
+            $targetLiTag = targetInfo.$liTag;
           }
           var dropdown = getDropdown();
           if (dropdown !== null) {
@@ -12537,8 +12654,9 @@
             $tabset2.find("> li").each(function() {
               var $tab = (0, import_jquery39.default)(this).find("> a[data-toggle='tab']");
               if ($tab.length > 0) {
-                var href = $tab.attr("href").replace(/.*(?=#[^\s]+$)/, "");
-                var _index = href.replace("#tab-" + tabsetId2 + "-", "");
+                var _$tab$attr;
+                var href = (_$tab$attr = $tab.attr("href")) === null || _$tab$attr === void 0 ? void 0 : _$tab$attr.replace(/.*(?=#[^\s]+$)/, "");
+                var _index = href === null || href === void 0 ? void 0 : href.replace("#tab-" + tabsetId2 + "-", "");
                 existingTabIds.push(Number(_index));
               }
             });
@@ -12556,7 +12674,7 @@
                 $tabset: $dropdownTabset,
                 id: dropdownId
               };
-            } else if (message.target !== null) {
+            } else if (message.target !== null && $targetLiTag !== null) {
               var $uncleTabset = $targetLiTag.parent("ul");
               if ($uncleTabset.hasClass("dropdown-menu")) {
                 var uncleId = $uncleTabset.attr("data-tabsetid");
@@ -12659,13 +12777,14 @@
     }, {
       key: "getTestSnapshotBaseUrl",
       value: function getTestSnapshotBaseUrl() {
+        var _this$config, _this$config2;
         var _ref2 = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : {}, _ref2$fullUrl = _ref2.fullUrl, fullUrl = _ref2$fullUrl === void 0 ? true : _ref2$fullUrl;
         var loc = window.location;
         var url = "";
         if (fullUrl) {
           url = loc.origin + loc.pathname.replace(/\/[^/]*$/, "");
         }
-        url += "/session/" + encodeURIComponent(this.config.sessionId) + "/dataobj/shinytest?w=" + encodeURIComponent(this.config.workerId) + "&nonce=" + randomId();
+        url += "/session/" + encodeURIComponent((_this$config = this.config) === null || _this$config === void 0 ? void 0 : _this$config.sessionId) + "/dataobj/shinytest?w=" + encodeURIComponent((_this$config2 = this.config) === null || _this$config2 === void 0 ? void 0 : _this$config2.workerId) + "&nonce=" + randomId();
         return url;
       }
     }]);
@@ -12765,6 +12884,8 @@
         return null;
       }
       var bgColor = getStyle(el, "background-color");
+      if (!bgColor)
+        return bgColor;
       var m = bgColor.match(/^rgba\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)\s*\)$/);
       if (bgColor === "transparent" || m && parseFloat(m[4]) === 0) {
         var bgImage = getStyle(el, "background-image");
@@ -12780,7 +12901,7 @@
       var fontFamily = getStyle(el, "font-family");
       var fontSize = getStyle(el, "font-size");
       return {
-        families: fontFamily.replace(/"/g, "").split(", "),
+        families: fontFamily === null || fontFamily === void 0 ? void 0 : fontFamily.replace(/"/g, "").split(", "),
         size: fontSize
       };
     }
@@ -12907,14 +13028,15 @@
       for (var _len = arguments.length, args = new Array(_len > 2 ? _len - 2 : 0), _key = 2; _key < _len; _key++) {
         args[_key - 2] = arguments[_key];
       }
-      namespace = namespace.split(".");
+      var namespaceArr = namespace.split(".");
       return function(e) {
-        var eventNamespace = e.namespace.split(".");
-        for (var i = 0; i < namespace.length; i++) {
-          if (eventNamespace.indexOf(namespace[i]) === -1)
+        var _e$namespace$split, _e$namespace;
+        var eventNamespace = (_e$namespace$split = (_e$namespace = e.namespace) === null || _e$namespace === void 0 ? void 0 : _e$namespace.split(".")) !== null && _e$namespace$split !== void 0 ? _e$namespace$split : [];
+        for (var i = 0; i < namespaceArr.length; i++) {
+          if (eventNamespace.indexOf(namespaceArr[i]) === -1)
             return;
         }
-        handler.apply(this, [namespace, handler].concat(args));
+        handler.apply(this, [namespaceArr, handler].concat(args));
       };
     }
     (0, import_jquery40.default)(window).resize(debounce(500, sendImageSizeFns.regular));
@@ -13027,11 +13149,14 @@
 
   // srcts/src/shiny/reactlog.ts
   var import_jquery42 = __toModule(require_jquery());
+  function shinyAppConfig() {
+    return shinyShinyApp().config;
+  }
   function initReactlog() {
     (0, import_jquery42.default)(document).on("keydown", function(e) {
       if (e.which !== 114 || !e.ctrlKey && !e.metaKey || e.shiftKey || e.altKey)
         return;
-      var url = "reactlog?w=" + window.escape(shinyShinyApp().config.workerId) + "&s=" + window.escape(shinyShinyApp().config.sessionId);
+      var url = "reactlog?w=" + window.escape(shinyAppConfig().workerId) + "&s=" + window.escape(shinyAppConfig().sessionId);
       window.open(url);
       e.preventDefault();
     });
@@ -13039,7 +13164,7 @@
       if (!(e.which === 115 && (e.ctrlKey || e.metaKey) && !e.shiftKey && !e.altKey || e.which === 114 && (e.ctrlKey || e.metaKey) && e.shiftKey && !e.altKey)) {
         return;
       }
-      var url = "reactlog/mark?w=" + window.escape(shinyShinyApp().config.workerId) + "&s=" + window.escape(shinyShinyApp().config.sessionId);
+      var url = "reactlog/mark?w=" + window.escape(shinyAppConfig().workerId) + "&s=" + window.escape(shinyAppConfig().sessionId);
       import_jquery42.default.get(url, function(result) {
         if (result !== "marked")
           return;

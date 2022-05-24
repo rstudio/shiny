@@ -17,17 +17,19 @@ declare type InputValues = {
 };
 declare function addCustomMessageHandler(type: string, handler: Handler): void;
 declare class ShinyApp {
-    $socket: ShinyWebSocket;
+    $socket: ShinyWebSocket | null;
     config: {
         workerId: string;
         sessionId: string;
-    };
+    } | null;
     $inputValues: InputValues;
-    $initialInput: InputValues;
+    $initialInput: InputValues | null;
     $bindings: {
         [key: string]: OutputBindingAdapter;
     };
-    $values: {};
+    $values: {
+        [key: string]: any;
+    };
     $errors: {
         [key: string]: ErrorsMessageValue;
     };
@@ -57,10 +59,10 @@ declare class ShinyApp {
     };
     onDisconnected(): void;
     onConnected(): void;
-    makeRequest(method: string, args: unknown[], onSuccess: OnSuccessRequest, onError: OnErrorRequest, blobs: Array<ArrayBuffer | Blob | string>): void;
+    makeRequest(method: string, args: unknown[], onSuccess: OnSuccessRequest, onError: OnErrorRequest, blobs: Array<ArrayBuffer | Blob | string> | undefined): void;
     $sendMsg(msg: string): void;
     receiveError(name: string, error: ErrorsMessageValue): void;
-    receiveOutput<T>(name: string, value: T): T;
+    receiveOutput<T>(name: string, value: T): T | undefined;
     bindOutput(id: string, binding: OutputBindingAdapter): OutputBindingAdapter;
     unbindOutput(id: string, binding: OutputBindingAdapter): boolean;
     private _narrowScopeComponent;
@@ -70,7 +72,7 @@ declare class ShinyApp {
     private _sendMessagesToHandlers;
     private _init;
     progressHandlers: {
-        binding: (message: {
+        binding: (this: ShinyApp, message: {
             id: string;
         }) => void;
         open: (message: {
@@ -80,9 +82,9 @@ declare class ShinyApp {
         update: (message: {
             style: "notification" | "old";
             id: string;
-            message?: string;
-            detail?: string;
-            value?: number;
+            message?: string | undefined;
+            detail?: string | undefined;
+            value?: number | undefined;
         }) => void;
         close: (message: {
             style: "notification";
@@ -90,7 +92,7 @@ declare class ShinyApp {
         }) => void;
     };
     getTestSnapshotBaseUrl({ fullUrl }?: {
-        fullUrl?: boolean;
+        fullUrl?: boolean | undefined;
     }): string;
 }
 export { ShinyApp, addCustomMessageHandler };

@@ -4637,6 +4637,8 @@
     }, {
       key: "setValue",
       value: function setValue(el, value) {
+        var _value;
+        value = (_value = value) !== null && _value !== void 0 ? _value : [];
         (0, import_jquery7.default)('input:checkbox[name="' + $escape(el.id) + '"]').prop("checked", false);
         if (value instanceof Array) {
           for (var i = 0; i < value.length; i++) {
@@ -5192,15 +5194,14 @@
     }, {
       key: "receiveMessage",
       value: function receiveMessage(el, data) {
-        var _data$value, _data$min, _data$max, _data$step;
         if (hasOwnProperty(data, "value"))
-          el.value = (_data$value = data.value) !== null && _data$value !== void 0 ? _data$value : "";
+          el.value = data.value;
         if (hasOwnProperty(data, "min"))
-          el.min = (_data$min = data.min) !== null && _data$min !== void 0 ? _data$min : "";
+          el.min = data.min;
         if (hasOwnProperty(data, "max"))
-          el.max = (_data$max = data.max) !== null && _data$max !== void 0 ? _data$max : "";
+          el.max = data.max;
         if (hasOwnProperty(data, "step"))
-          el.step = (_data$step = data.step) !== null && _data$step !== void 0 ? _data$step : "";
+          el.step = data.step;
         updateLabel(data.label, getLabelNode3(el));
         (0, import_jquery9.default)(el).trigger("change");
       }
@@ -6552,8 +6553,9 @@
           this._setMax($startinput[0], data.max);
           this._setMax($endinput[0], data.max);
         }
-        if (hasOwnProperty(data, "value"))
+        if (hasOwnProperty(data, "value")) {
           this.setValue(el, data.value);
+        }
         $el.trigger("change");
       }
     }, {

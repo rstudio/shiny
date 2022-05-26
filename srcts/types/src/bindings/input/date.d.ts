@@ -44,7 +44,7 @@ declare class DateInputBinding extends DateInputBindingBase {
     getState(el: HTMLElement): {
         label: string;
         value: string | null;
-        valueString: string[] | number | string | undefined;
+        valueString: string[] | number | string;
         min: string | null;
         max: string | null;
         language: string | null;

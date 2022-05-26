@@ -62,7 +62,10 @@ class CheckboxGroupInputBinding extends InputBinding {
     }
     return values;
   }
-  setValue(el: HTMLElement, value: string[] | string): void {
+  setValue(el: HTMLElement, value: string[] | string | null): void {
+    // Null value should be treated as empty array
+    value = value ?? [];
+
     // Clear all checkboxes
     $('input:checkbox[name="' + $escape(el.id) + '"]').prop("checked", false);
 

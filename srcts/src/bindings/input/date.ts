@@ -258,7 +258,7 @@ class DateInputBinding extends DateInputBindingBase {
   getState(el: HTMLElement): {
     label: string;
     value: string | null;
-    valueString: string[] | number | string | undefined;
+    valueString: string[] | number | string;
     min: string | null;
     max: string | null;
     language: string | null;
@@ -287,7 +287,7 @@ class DateInputBinding extends DateInputBindingBase {
     return {
       label: this._getLabelNode(el).text(),
       value: this.getValue(el),
-      valueString: $input.val(),
+      valueString: $input.val() as NonNullable<ReturnType<typeof $input.val>>,
       min: min,
       max: max,
       language: $input.data("datepicker").language,

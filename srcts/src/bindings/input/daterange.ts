@@ -33,10 +33,7 @@ class DateRangeInputBinding extends DateInputBindingBase {
   }
   // value must be an object, with optional fields `start` and `end`. These
   // should be unambiguous strings like '2001-01-01', or Date objects.
-  setValue(
-    el: HTMLElement,
-    value: { start?: Date; end?: Date } | undefined
-  ): void {
+  setValue(el: HTMLElement, value: { start?: Date; end?: Date }): void {
     if (!(value instanceof Object)) {
       return;
     }
@@ -130,7 +127,9 @@ class DateRangeInputBinding extends DateInputBindingBase {
     // Must set value only after min and max have been set. If new value is
     // outside the bounds of the previous min/max, then the result will be a
     // blank input.
-    if (hasOwnProperty(data, "value")) this.setValue(el, data.value);
+    if (hasOwnProperty(data, "value")) {
+      this.setValue(el, data.value as NonNullable<typeof data.value>);
+    }
 
     $el.trigger("change");
   }

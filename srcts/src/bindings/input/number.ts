@@ -51,10 +51,10 @@ class NumberInputBinding extends TextInputBindingBase {
     el;
   }
   receiveMessage(el: NumberHTMLElement, data: NumberReceiveMessageData): void {
-    if (hasOwnProperty(data, "value")) el.value = data.value ?? "";
-    if (hasOwnProperty(data, "min")) el.min = data.min ?? "";
-    if (hasOwnProperty(data, "max")) el.max = data.max ?? "";
-    if (hasOwnProperty(data, "step")) el.step = data.step ?? "";
+    if (hasOwnProperty(data, "value")) el.value = data.value as string;
+    if (hasOwnProperty(data, "min")) el.min = data.min as string;
+    if (hasOwnProperty(data, "max")) el.max = data.max as string;
+    if (hasOwnProperty(data, "step")) el.step = data.step as string;
 
     updateLabel(data.label, getLabelNode(el));
 

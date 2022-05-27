@@ -194,6 +194,9 @@ class SliderInputBinding extends TextInputBindingBase {
         msg.from = data.value[0];
         msg.to = data.value[1];
       } else {
+        if (Array.isArray(data.value)) {
+          throw "Slider only contains a single value and cannot be updated with an array";
+        }
         msg.from = data.value;
       }
     }

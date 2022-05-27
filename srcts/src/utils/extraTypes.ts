@@ -5,4 +5,15 @@ type MapWithResult<X, R> = {
   [Property in keyof X]: R;
 };
 
-export type { AnyFunction, AnyVoidFunction, MapValuesUnion, MapWithResult };
+/**
+ * Exclude undefined from T
+ */
+type NotUndefined<T> = T extends undefined ? never : T;
+
+export type {
+  AnyFunction,
+  AnyVoidFunction,
+  MapValuesUnion,
+  MapWithResult,
+  NotUndefined,
+};

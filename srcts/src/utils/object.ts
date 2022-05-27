@@ -8,3 +8,15 @@ function hasOwnProperty<Prop extends keyof X, X extends { [key: string]: any }>(
 }
 
 export { hasOwnProperty };
+// Return type for non-null value
+function ifUndefined<X extends NotUndefined<any>, Y>(
+  value: X,
+  alternate: Y
+): NotUndefined<X>;
+// Return type for null value
+function ifUndefined<X extends undefined, Y>(value: X, alternate: Y): Y;
+// Logic
+function ifUndefined<X, Y>(value: X, alternate: Y): X | Y {
+  if (value === undefined) return alternate;
+  return value;
+}

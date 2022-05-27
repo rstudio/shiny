@@ -2,7 +2,7 @@ import $ from "jquery";
 import { windowDevicePixelRatio } from "../window/pixelRatio";
 import { makeBlob } from "./blob";
 import type { MapValuesUnion, MapWithResult } from "./extraTypes";
-import { hasOwnProperty } from "./object";
+import { hasOwnProperty, hasDefinedProperty } from "./object";
 
 function escapeHTML(str: string): string {
   const escaped: { [key: string]: string } = {
@@ -409,6 +409,7 @@ export {
   getComputedLinkColor,
   makeBlob,
   hasOwnProperty,
+  hasDefinedProperty,
   isBS3,
   toLowerCase,
 };

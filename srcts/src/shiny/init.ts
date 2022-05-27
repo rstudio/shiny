@@ -14,7 +14,7 @@ import { debounce, Debouncer } from "../time";
 import {
   getComputedLinkColor,
   getStyle,
-  hasOwnProperty,
+  hasDefinedProperty,
   mapValues,
   pixelRatio,
 } from "../utils";
@@ -368,7 +368,7 @@ function initShiny(windowShiny: Shiny): void {
     });
     // Anything left in lastKnownVisibleOutputs is orphaned
     for (const name in lastKnownVisibleOutputs) {
-      if (hasOwnProperty(lastKnownVisibleOutputs, name))
+      if (hasDefinedProperty(lastKnownVisibleOutputs, name))
         inputs.setInput(".clientdata_output_" + name + "_hidden", true);
     }
     // Update the visible outputs for next time

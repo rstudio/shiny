@@ -3,7 +3,7 @@ import $ from "jquery";
 import {
   $escape,
   formatDateUTC,
-  hasOwnProperty,
+  hasDefinedProperty,
   updateLabel,
 } from "../../utils";
 import { DateInputBindingBase } from "./date";
@@ -114,12 +114,12 @@ class DateRangeInputBinding extends DateInputBindingBase {
 
     updateLabel(data.label, getLabelNode(el));
 
-    if (hasOwnProperty(data, "min")) {
+    if (hasDefinedProperty(data, "min")) {
       this._setMin($startinput[0], data.min);
       this._setMin($endinput[0], data.min);
     }
 
-    if (hasOwnProperty(data, "max")) {
+    if (hasDefinedProperty(data, "max")) {
       this._setMax($startinput[0], data.max);
       this._setMax($endinput[0], data.max);
     }
@@ -127,8 +127,8 @@ class DateRangeInputBinding extends DateInputBindingBase {
     // Must set value only after min and max have been set. If new value is
     // outside the bounds of the previous min/max, then the result will be a
     // blank input.
-    if (hasOwnProperty(data, "value")) {
-      this.setValue(el, data.value as NonNullable<typeof data.value>);
+    if (hasDefinedProperty(data, "value")) {
+      this.setValue(el, data.value);
     }
 
     $el.trigger("change");

@@ -8,7 +8,7 @@ import {
   formatDateUTC,
   updateLabel,
   $escape,
-  hasOwnProperty,
+  hasDefinedProperty,
 } from "../../utils";
 
 import type { TextHTMLElement } from "./text";
@@ -189,12 +189,12 @@ class SliderInputBinding extends TextInputBindingBase {
       prettify?: Prettify;
     } = {};
 
-    if (hasOwnProperty(data, "value")) {
+    if (hasDefinedProperty(data, "value")) {
       if (numValues(el) === 2 && data.value instanceof Array) {
         msg.from = data.value[0];
         msg.to = data.value[1];
       } else {
-        msg.from = data.value as number | string;
+        msg.from = data.value;
       }
     }
 
@@ -207,7 +207,7 @@ class SliderInputBinding extends TextInputBindingBase {
     for (let i = 0; i < sliderFeatures.length; i++) {
       const feats = sliderFeatures[i];
 
-      if (hasOwnProperty(data, feats)) {
+      if (hasDefinedProperty(data, feats)) {
         msg[feats] = data[feats];
       }
     }
@@ -224,8 +224,8 @@ class SliderInputBinding extends TextInputBindingBase {
     for (let i = 0; i < domElements.length; i++) {
       const elem = domElements[i];
 
-      if (hasOwnProperty(data, elem)) {
-        $el.data(elem, data[elem] as any);
+      if (hasDefinedProperty(data, elem)) {
+        $el.data(elem, data[elem]);
       }
     }
 

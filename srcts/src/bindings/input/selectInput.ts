@@ -1,6 +1,6 @@
 import $ from "jquery";
 import { InputBinding } from "./inputBinding";
-import { $escape, hasOwnProperty, updateLabel } from "../../utils";
+import { $escape, hasDefinedProperty, updateLabel } from "../../utils";
 import { indirectEval } from "../../utils/eval";
 
 type SelectHTMLElement = HTMLSelectElement & { nonempty: boolean };
@@ -105,27 +105,27 @@ class SelectInputBinding extends InputBinding {
     let selectize: SelectizeInfo | undefined;
 
     // This will replace all the options
-    if (hasOwnProperty(data, "options")) {
+    if (hasDefinedProperty(data, "options")) {
       selectize = this._selectize(el);
       // Must destroy selectize before appending new options, otherwise
       // selectize will restore the original select
       if (selectize) selectize.destroy();
       // Clear existing options and add each new one
-      $el.empty().append(data.options as NonNullable<typeof data.options>);
+      $el.empty().append(data.options);
       this._selectize(el);
     }
 
     // re-initialize selectize
-    if (hasOwnProperty(data, "config")) {
+    if (hasDefinedProperty(data, "config")) {
       $el
         .parent()
         .find('script[data-for="' + $escape(el.id) + '"]')
-        .replaceWith(data.config as NonNullable<typeof data.config>);
+        .replaceWith(data.config);
       this._selectize(el, true);
     }
 
     // use server-side processing for selectize
-    if (hasOwnProperty(data, "url")) {
+    if (hasDefinedProperty(data, "url")) {
       selectize = this._selectize(el) as SelectizeInfo;
       selectize.clearOptions();
       let loaded = false;
@@ -176,7 +176,7 @@ class SelectInputBinding extends InputBinding {
             });
             callback(res);
             if (!loaded) {
-              if (hasOwnProperty(data, "value")) {
+              if (hasDefinedProperty(data, "value")) {
                 if (typeof data.value === "string") {
                   innerSelectize.setValue(data.value);
                 }
@@ -193,8 +193,8 @@ class SelectInputBinding extends InputBinding {
       innerSelectize.load(function (callback) {
         innerSelectize.settings.load.apply(innerSelectize, ["", callback]);
       });
-    } else if (hasOwnProperty(data, "value")) {
-      this.setValue(el, data.value as string);
+    } else if (hasDefinedProperty(data, "value")) {
+      this.setValue(el, data.value);
     }
 
     updateLabel(data.label, getLabelNode(el));

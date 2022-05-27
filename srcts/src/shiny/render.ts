@@ -1,5 +1,5 @@
 import $ from "jquery";
-import { asArray, hasOwnProperty } from "../utils";
+import { asArray, hasDefinedProperty } from "../utils";
 import { isIE } from "../utils/browser";
 import type { BindScope } from "./bind";
 import {
@@ -155,8 +155,8 @@ function renderDependency(dep_: HtmlDep) {
   // pass them through to `addStylesheetsAndRestyle` below.
   const stylesheetLinks = dep.stylesheet.map((x) => {
     // Add "rel" and "type" fields if not already present.
-    if (!hasOwnProperty(x, "rel")) x.rel = "stylesheet";
-    if (!hasOwnProperty(x, "type")) x.type = "text/css";
+    if (!hasDefinedProperty(x, "rel")) x.rel = "stylesheet";
+    if (!hasDefinedProperty(x, "type")) x.type = "text/css";
 
     const link = document.createElement("link");
 
@@ -182,7 +182,7 @@ function renderDependency(dep_: HtmlDep) {
     return true;
   }
 
-  if (hasOwnProperty(htmlDependencies, dep.name)) return false;
+  if (hasDefinedProperty(htmlDependencies, dep.name)) return false;
 
   registerDependency(dep.name, dep.version);
 

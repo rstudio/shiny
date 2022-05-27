@@ -1,7 +1,6 @@
 import $ from "jquery";
+import { hasDefinedProperty } from "../../utils";
 import { InputBinding } from "./inputBinding";
-
-import { hasOwnProperty } from "../../utils";
 
 type ActionButtonReceiveMessageData = { label?: string; icon?: string | [] };
 
@@ -57,10 +56,10 @@ class ActionButtonInputBinding extends InputBinding {
     }
 
     // update the requested properties
-    if (hasOwnProperty(data, "label")) {
-      label = data.label as NonNullable<typeof data.label>;
+    if (hasDefinedProperty(data, "label")) {
+      label = data.label;
     }
-    if (hasOwnProperty(data, "icon")) {
+    if (hasDefinedProperty(data, "icon")) {
       // `data.icon` can be an [] if user gave `character(0)`.
       icon = Array.isArray(data.icon) ? "" : data.icon ?? "";
     }

@@ -3406,6 +3406,14 @@
   function hasOwnProperty(obj, prop) {
     return Object.prototype.hasOwnProperty.call(obj, prop);
   }
+  function hasDefinedProperty(obj, prop) {
+    return Object.prototype.hasOwnProperty.call(obj, prop) && obj[prop] !== void 0;
+  }
+  function ifUndefined(value, alternate) {
+    if (value === void 0)
+      return alternate;
+    return value;
+  }
 
   // srcts/src/utils/index.ts
   function escapeHTML(str) {
@@ -4480,10 +4488,10 @@
     }, {
       key: "receiveMessage",
       value: function receiveMessage(el, data) {
-        if (hasOwnProperty(data, "value")) {
+        if (hasDefinedProperty(data, "value")) {
           el.checked = data.value;
         }
-        if (hasOwnProperty(data, "label")) {
+        if (hasDefinedProperty(data, "label")) {
           (0, import_jquery6.default)(el).parent().find("span").text(data.label);
         }
         (0, import_jquery6.default)(el).trigger("change");
@@ -4669,12 +4677,12 @@
       key: "receiveMessage",
       value: function receiveMessage(el, data) {
         var $el = (0, import_jquery7.default)(el);
-        if (hasOwnProperty(data, "options")) {
+        if (hasDefinedProperty(data, "options")) {
           $el.find("div.shiny-options-group").remove();
           $el.find("label.checkbox").remove();
           $el.append(data.options);
         }
-        if (hasOwnProperty(data, "value")) {
+        if (hasDefinedProperty(data, "value")) {
           this.setValue(el, data.value);
         }
         updateLabel(data.label, getLabelNode(el));
@@ -5043,10 +5051,10 @@
     }, {
       key: "receiveMessage",
       value: function receiveMessage(el, data) {
-        if (hasOwnProperty(data, "value"))
+        if (hasDefinedProperty(data, "value"))
           this.setValue(el, data.value);
         updateLabel(data.label, getLabelNode2(el));
-        if (hasOwnProperty(data, "placeholder"))
+        if (hasDefinedProperty(data, "placeholder"))
           el.placeholder = data.placeholder;
         (0, import_jquery8.default)(el).trigger("change");
       }
@@ -5194,14 +5202,15 @@
     }, {
       key: "receiveMessage",
       value: function receiveMessage(el, data) {
-        if (hasOwnProperty(data, "value"))
-          el.value = data.value;
-        if (hasOwnProperty(data, "min"))
-          el.min = data.min;
-        if (hasOwnProperty(data, "max"))
-          el.max = data.max;
-        if (hasOwnProperty(data, "step"))
-          el.step = data.step;
+        var _data$value, _data$min, _data$max, _data$step;
+        if (hasDefinedProperty(data, "value"))
+          el.value = (_data$value = data.value) !== null && _data$value !== void 0 ? _data$value : "";
+        if (hasDefinedProperty(data, "min"))
+          el.min = (_data$min = data.min) !== null && _data$min !== void 0 ? _data$min : "";
+        if (hasDefinedProperty(data, "max"))
+          el.max = (_data$max = data.max) !== null && _data$max !== void 0 ? _data$max : "";
+        if (hasDefinedProperty(data, "step"))
+          el.step = (_data$step = data.step) !== null && _data$step !== void 0 ? _data$step : "";
         updateLabel(data.label, getLabelNode3(el));
         (0, import_jquery9.default)(el).trigger("change");
       }
@@ -5616,12 +5625,12 @@
       key: "receiveMessage",
       value: function receiveMessage(el, data) {
         var $el = (0, import_jquery12.default)(el);
-        if (hasOwnProperty(data, "options")) {
+        if (hasDefinedProperty(data, "options")) {
           $el.find("div.shiny-options-group").remove();
           $el.find("label.radio").remove();
           $el.append(data.options);
         }
-        if (hasOwnProperty(data, "value")) {
+        if (hasDefinedProperty(data, "value")) {
           this.setValue(el, data.value);
         }
         updateLabel(data.label, getLabelNode4(el));
@@ -5825,8 +5834,6 @@
     }, {
       key: "_setMin",
       value: function _setMin(el, date) {
-        if (date === void 0)
-          return;
         if (date === null) {
           (0, import_jquery13.default)(el).bsDatepicker("setStartDate", null);
           return;
@@ -5848,8 +5855,6 @@
     }, {
       key: "_setMax",
       value: function _setMax(el, date) {
-        if (date === void 0)
-          return;
         if (date === null) {
           (0, import_jquery13.default)(el).bsDatepicker("setEndDate", null);
           return;
@@ -5916,8 +5921,6 @@
     }, {
       key: "setValue",
       value: function setValue(el, value) {
-        if (value === void 0)
-          return;
         if (value === null) {
           (0, import_jquery13.default)(el).find("input").val("").bsDatepicker("update");
           return;
@@ -5963,11 +5966,11 @@
       value: function receiveMessage(el, data) {
         var $input = (0, import_jquery13.default)(el).find("input");
         updateLabel(data.label, this._getLabelNode(el));
-        if (hasOwnProperty(data, "min"))
+        if (hasDefinedProperty(data, "min"))
           this._setMin($input[0], data.min);
-        if (hasOwnProperty(data, "max"))
+        if (hasDefinedProperty(data, "max"))
           this._setMax($input[0], data.max);
-        if (hasOwnProperty(data, "value"))
+        if (hasDefinedProperty(data, "value"))
           this.setValue(el, data.value);
         (0, import_jquery13.default)(el).trigger("change");
       }
@@ -6205,18 +6208,21 @@
         var $el = (0, import_jquery14.default)(el);
         var slider = $el.data("ionRangeSlider");
         var msg = {};
-        if (hasOwnProperty(data, "value")) {
+        if (hasDefinedProperty(data, "value")) {
           if (numValues(el) === 2 && data.value instanceof Array) {
             msg.from = data.value[0];
             msg.to = data.value[1];
           } else {
+            if (Array.isArray(data.value)) {
+              throw "Slider only contains a single value and cannot be updated with an array";
+            }
             msg.from = data.value;
           }
         }
         var sliderFeatures = ["min", "max", "step"];
         for (var i = 0; i < sliderFeatures.length; i++) {
           var feats = sliderFeatures[i];
-          if (hasOwnProperty(data, feats)) {
+          if (hasDefinedProperty(data, feats)) {
             msg[feats] = data[feats];
           }
         }
@@ -6224,7 +6230,7 @@
         var domElements = ["data-type", "time-format", "timezone"];
         for (var _i = 0; _i < domElements.length; _i++) {
           var elem = domElements[_i];
-          if (hasOwnProperty(data, elem)) {
+          if (hasDefinedProperty(data, elem)) {
             $el.data(elem, data[elem]);
           }
         }
@@ -6545,15 +6551,15 @@
         var $startinput = $inputs.eq(0);
         var $endinput = $inputs.eq(1);
         updateLabel(data.label, getLabelNode6(el));
-        if (hasOwnProperty(data, "min")) {
+        if (hasDefinedProperty(data, "min")) {
           this._setMin($startinput[0], data.min);
           this._setMin($endinput[0], data.min);
         }
-        if (hasOwnProperty(data, "max")) {
+        if (hasDefinedProperty(data, "max")) {
           this._setMax($startinput[0], data.max);
           this._setMax($endinput[0], data.max);
         }
-        if (hasOwnProperty(data, "value")) {
+        if (hasDefinedProperty(data, "value")) {
           this.setValue(el, data.value);
         }
         $el.trigger("change");
@@ -6782,18 +6788,18 @@
       value: function receiveMessage(el, data) {
         var $el = (0, import_jquery16.default)(el);
         var selectize;
-        if (hasOwnProperty(data, "options")) {
+        if (hasDefinedProperty(data, "options")) {
           selectize = this._selectize(el);
           if (selectize)
             selectize.destroy();
           $el.empty().append(data.options);
           this._selectize(el);
         }
-        if (hasOwnProperty(data, "config")) {
+        if (hasDefinedProperty(data, "config")) {
           $el.parent().find('script[data-for="' + $escape(el.id) + '"]').replaceWith(data.config);
           this._selectize(el, true);
         }
-        if (hasOwnProperty(data, "url")) {
+        if (hasDefinedProperty(data, "url")) {
           selectize = this._selectize(el);
           selectize.clearOptions();
           var loaded = false;
@@ -6823,7 +6829,7 @@
                 });
                 callback(res);
                 if (!loaded) {
-                  if (hasOwnProperty(data, "value")) {
+                  if (hasDefinedProperty(data, "value")) {
                     if (typeof data.value === "string") {
                       innerSelectize.setValue(data.value);
                     }
@@ -6838,7 +6844,7 @@
           innerSelectize.load(function(callback) {
             innerSelectize.settings.load.apply(innerSelectize, ["", callback]);
           });
-        } else if (hasOwnProperty(data, "value")) {
+        } else if (hasDefinedProperty(data, "value")) {
           this.setValue(el, data.value);
         }
         updateLabel(data.label, getLabelNode7(el));
@@ -7071,10 +7077,10 @@
             icon = (0, import_jquery17.default)(iconHtml).prop("outerHTML");
           }
         }
-        if (hasOwnProperty(data, "label")) {
+        if (hasDefinedProperty(data, "label")) {
           label = data.label;
         }
-        if (hasOwnProperty(data, "icon")) {
+        if (hasDefinedProperty(data, "icon")) {
           var _data$icon;
           icon = Array.isArray(data.icon) ? "" : (_data$icon = data.icon) !== null && _data$icon !== void 0 ? _data$icon : "";
         }
@@ -7243,7 +7249,7 @@
     }, {
       key: "receiveMessage",
       value: function receiveMessage(el, data) {
-        if (hasOwnProperty(data, "value"))
+        if (hasDefinedProperty(data, "value"))
           this.setValue(el, data.value);
         (0, import_jquery18.default)(el).trigger("change");
       }
@@ -9183,9 +9189,9 @@
   function renderDependency(dep_) {
     var dep = normalizeHtmlDependency(dep_);
     var stylesheetLinks = dep.stylesheet.map(function(x) {
-      if (!hasOwnProperty(x, "rel"))
+      if (!hasDefinedProperty(x, "rel"))
         x.rel = "stylesheet";
-      if (!hasOwnProperty(x, "type"))
+      if (!hasDefinedProperty(x, "type"))
         x.type = "text/css";
       var link = document.createElement("link");
       Object.entries(x).forEach(function(_ref) {
@@ -9201,7 +9207,7 @@
       addStylesheetsAndRestyle(stylesheetLinks);
       return true;
     }
-    if (hasOwnProperty(htmlDependencies, dep.name))
+    if (hasDefinedProperty(htmlDependencies, dep.name))
       return false;
     registerDependency(dep.name, dep.version);
     var $head = (0, import_jquery27.default)("head").first();
@@ -10704,11 +10710,6 @@
           $el.empty();
           return;
         }
-        function ifUndefined(value, alternate) {
-          if (value === void 0)
-            return alternate;
-          return value;
-        }
         var opts = {
           clickId: $el.data("click-id"),
           clickClip: ifUndefined(strToBool($el.data("click-clip")), true),
@@ -11227,7 +11228,7 @@
         var values2 = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : {};
         var cacheValues = {};
         for (var inputName in values2) {
-          if (hasOwnProperty(values2, inputName)) {
+          if (hasDefinedProperty(values2, inputName)) {
             var _splitInputNameType2 = splitInputNameType(inputName), name = _splitInputNameType2.name, inputType = _splitInputNameType2.inputType;
             cacheValues[name] = {
               jsonValue: JSON.stringify(values2[inputName]),
@@ -11437,7 +11438,7 @@
       key: "submit",
       value: function submit() {
         for (var nameType in this.pendingInput) {
-          if (hasOwnProperty(this.pendingInput, nameType)) {
+          if (hasDefinedProperty(this.pendingInput, nameType)) {
             var _this$pendingInput$na = this.pendingInput[nameType], value = _this$pendingInput$na.value, opts = _this$pendingInput$na.opts;
             this.target.setInput(nameType, value, opts);
           }
@@ -13013,7 +13014,7 @@
         $this.trigger(evt);
       });
       for (var name in lastKnownVisibleOutputs) {
-        if (hasOwnProperty(lastKnownVisibleOutputs, name))
+        if (hasDefinedProperty(lastKnownVisibleOutputs, name))
           inputs.setInput(".clientdata_output_" + name + "_hidden", true);
       }
       lastKnownVisibleOutputs = visibleOutputs;

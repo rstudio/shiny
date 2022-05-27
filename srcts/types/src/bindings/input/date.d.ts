@@ -31,8 +31,8 @@ declare class DateInputBindingBase extends InputBinding {
         parts: string[];
         separators: string[];
     }): string;
-    protected _setMin(el: HTMLElement, date: Date | null | undefined): void;
-    protected _setMax(el: HTMLElement, date: Date | null | undefined): void;
+    protected _setMin(el: HTMLElement, date: Date | null): void;
+    protected _setMax(el: HTMLElement, date: Date | null): void;
     protected _newDate(date: Date | never | string): Date | null;
     protected _floorDateTime(date: Date): Date;
     protected _dateAsUTC(date: Date): Date;
@@ -40,7 +40,7 @@ declare class DateInputBindingBase extends InputBinding {
 }
 declare class DateInputBinding extends DateInputBindingBase {
     getValue(el: HTMLElement): string;
-    setValue(el: HTMLElement, value: Date | null | undefined): void;
+    setValue(el: HTMLElement, value: Date | null): void;
     getState(el: HTMLElement): {
         label: string;
         value: string | null;

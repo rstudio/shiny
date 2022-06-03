@@ -94,10 +94,10 @@ getShinyOption <- function(name, default = NULL) {
 #'   numbers to JSON format to send to the client web browser.}
 #' \item{shiny.launch.browser (defaults to `interactive()`)}{A boolean which controls the default behavior
 #'   when an app is run. See [runApp()] for more information.}
-#' \item{shiny.mathjax.url (defaults to `NULL`)}{Option to switch the default mathjax provider.
-#'   When set, shiny will access this url to acquire the `MathJax.js` file.
-#' \item{shiny.mathjax.config (defaults to `NULL`)}{Option for configure MathJax. It affects the way
-#`   `withMathJax` access `MathJax.js` file. Keep it empty suits for most cases.
+#' \item{shiny.mathjax.url (defaults to `"https://mathjax.rstudio.com/latest/MathJax.js"`)}{
+#'   The URL that should be used to load MathJax, via [withMathJax()].}
+#' \item{shiny.mathjax.config (defaults to `"config=TeX-AMS-MML_HTMLorMML"`)}{The querystring
+#'   used to load MathJax, via [withMathJax()].}
 #' \item{shiny.maxRequestSize (defaults to 5MB)}{This is a number which specifies the maximum
 #'   web request size, which serves as a size limit for file uploads.}
 #' \item{shiny.minified (defaults to `TRUE`)}{By default

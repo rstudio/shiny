@@ -519,7 +519,7 @@ This is a significant release for Shiny, with a major new feature that was nearl
 
 * Fixed #1600: URL-encoded bookmarking did not work with sliders that had dates or date-times. (#1961)
 
-* Fixed #1962: [File dragging and dropping](https://blog.rstudio.com/2017/08/15/shiny-1-0-4/) broke in the presence of jQuery version 3.0 as introduced by the [rhandsontable](https://jrowen.github.io/rhandsontable/) [htmlwidget](https://www.htmlwidgets.org/). (#2005)
+* Fixed #1962: [File dragging and dropping](https://www.rstudio.com/blog/shiny-1-0-4/) broke in the presence of jQuery version 3.0 as introduced by the [rhandsontable](https://jrowen.github.io/rhandsontable/) [htmlwidget](https://www.htmlwidgets.org/). (#2005)
 
 * Improved the error handling inside the `addResourcePath()` function, to give end users more informative error messages when the `directoryPath` argument cannot be normalized. This is especially useful for `runtime: shiny_prerendered` Rmd documents, like `learnr` tutorials. (#1968)
 

@@ -29,10 +29,7 @@ updateSliderInput(
 create a regular slider; a length two vector will create a double-ended
 range slider. Must lie between \code{min} and \code{max}.}
 
-\item{min}{The minimum and maximum values (inclusive) that can be
-selected.}
-
-\item{max}{The minimum and maximum values (inclusive) that can be
+\item{min, max}{The minimum and maximum values (inclusive) that can be
 selected.}
 
 \item{step}{Specifies the interval between each selectable value on the

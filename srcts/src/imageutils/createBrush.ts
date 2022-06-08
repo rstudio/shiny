@@ -79,6 +79,7 @@ type Brush = {
   };
 
   getPanel: () => ImageState["panel"];
+  setPanelIdx: (idx: number) => void;
 
   down: {
     (): ImageState["down"];
@@ -173,7 +174,10 @@ function createBrush(
       ymax: NaN,
     };
 
-    if ($div) $div.remove();
+    if ($div) {
+      $div.remove();
+      $div = null;
+    }
   }
 
   // If there's an existing brush div, use that div to set the new brush's
@@ -342,14 +346,18 @@ function createBrush(
       roundSignif(val, 14)
     ) as BoundsData;
 
+    // Actually update the shape of the div based on the new coordinates.
+    if (!$div) {
+      addDiv();
+    }
+    updateDiv();
+
     // We also need to attach the data bounds and panel as data attributes, so
     // that if the image is re-sent, we can grab the data bounds to create a new
     // brush. This should be fast because it doesn't actually modify the DOM.
     $div.data("bounds-data", state.boundsData);
     $div.data("panel", state.panel);
 
-    // Actually update the shape of the div based on the new coordinates.
-    updateDiv();
     return undefined;
   }
 
@@ -375,6 +383,9 @@ function createBrush(
       ymin: Math.min(boxCss.ymin, boxCss.ymax),
       ymax: Math.max(boxCss.ymin, boxCss.ymax),
     });
+    $div.show();
+    console.log("this should show the div");
+    console.log($div);
     return undefined;
   }
 
@@ -382,8 +393,14 @@ function createBrush(
     return state.panel;
   }
 
+  function setPanelIdx(idx: number) {
+    state.panel = coordmap.panels[idx];
+  }
+
   // Add a new div representing the brush.
   function addDiv() {
+    console.log("Start of addDiv(), $div = ");
+    console.log($div);
     if ($div) $div.remove();
 
     // Start hidden; we'll show it when movement occurs
@@ -417,6 +434,9 @@ function createBrush(
 
     $el.append($div);
     $div.offset({ x: 0, y: 0 }).width(0).outerHeight(0);
+
+    console.log("End of addDiv(), $div = ");
+    console.log($div);
   }
 
   // Update the brush div to reflect the current brush bounds.
@@ -610,6 +630,7 @@ function createBrush(
     boundsCss: boundsCss,
     boundsData: boundsData,
     getPanel: getPanel,
+    setPanelIdx: setPanelIdx,
 
     down: down,
     up: up,

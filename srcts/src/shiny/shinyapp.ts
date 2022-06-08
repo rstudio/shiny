@@ -20,6 +20,7 @@ import { renderContent, renderHtml } from "./render";
 import type { HtmlDep } from "./render";
 import { hideReconnectDialog, showReconnectDialog } from "./reconnectDialog";
 import { resetBrush } from "../imageutils/resetBrush";
+import { setBrush } from "../imageutils/setBrush";
 import type { OutputBindingAdapter } from "../bindings/outputAdapter";
 import type {
   ShinyEventError,
@@ -1319,6 +1320,17 @@ class ShinyApp {
       "resetBrush",
       (message: { brushId: Parameters<typeof resetBrush>[0] }) => {
         resetBrush(message.brushId);
+      }
+    );
+
+    addMessageHandler(
+      "setBrush",
+      (message: {
+        brushId: Parameters<typeof setBrush>[0];
+        coords: Parameters<typeof setBrush>[1];
+        panel: Parameters<typeof setBrush>[2];
+      }) => {
+        setBrush(message.brushId, message.coords, message.panel);
       }
     );
   }

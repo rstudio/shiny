@@ -201,12 +201,14 @@ workerId <- local({
 #'   The `user`'s relevant group information. Useful for determining what
 #'   privileges the user should or shouldn't have.
 #' }
-#' \item{setBrush(brushId, coords, panel=1)}{
+#' \item{setBrush(brushId, coords, panel=0)}{
 #'   Sets the brush with the given `brushId`, if it exists on
 #'   any `imageOutput` or `plotOutput` in the app. The `coords` should be a
 #'   list with `xmin`, `xmax`, `ymin`, `ymax` single-element numerics that
 #'   specify the desired brush position (in the plot scale). `panel` should
 #'   be a single-element integer that defines the panel that should be brushed.
+#'   If the direction of the brush was set to "x" in `brushOpts()`, then `ymin`
+#'   and `ymax` will be ignored, but must still be supplied, and vice versa.
 #' }
 #' \item{resetBrush(brushId)}{
 #'   Resets/clears the brush with the given `brushId`, if it exists on
@@ -1843,7 +1845,7 @@ ShinySession <- R6Class(
       private$sendMessage(updateQueryString = list(
         queryString = queryString, mode = mode))
     },
-    setBrush = function(brushId, coords, panel = 1) {
+    setBrush = function(brushId, coords, panel = 0) {
       if (!all(c("xmin", "xmax", "ymin", "ymax") %in% names(coords))){
         stop("coords must have xmin, xmax, ymin and ymax fields")
       }

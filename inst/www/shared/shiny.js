@@ -1,4 +1,4 @@
-/*! shiny 1.7.1.9003 | (c) 2012-2022 RStudio, PBC. | License: GPL-3 | file LICENSE */
+/*! shiny 1.7.1.9004 | (c) 2012-2022 RStudio, PBC. | License: GPL-3 | file LICENSE */
 (function() {
   var __create = Object.create;
   var __defProp = Object.defineProperty;
@@ -9861,8 +9861,10 @@
         ymin: NaN,
         ymax: NaN
       };
-      if ($div)
+      if ($div) {
         $div.remove();
+        $div = null;
+      }
     }
     function importOldBrush() {
       var oldDiv = $el.find("#" + el.id + "_brush");
@@ -9976,9 +9978,12 @@
       state.boundsData = mapValues(state.boundsData, function(val) {
         return roundSignif(val, 14);
       });
+      if (!$div) {
+        addDiv();
+      }
+      updateDiv();
       $div.data("bounds-data", state.boundsData);
       $div.data("panel", state.panel);
-      updateDiv();
       return void 0;
     }
     function boundsData(boxData) {
@@ -9995,12 +10000,20 @@
         ymin: Math.min(boxCss.ymin, boxCss.ymax),
         ymax: Math.max(boxCss.ymin, boxCss.ymax)
       });
+      $div.show();
+      console.log("this should show the div");
+      console.log($div);
       return void 0;
     }
     function getPanel2() {
       return state.panel;
     }
+    function setPanelIdx(idx) {
+      state.panel = coordmap.panels[idx];
+    }
     function addDiv() {
+      console.log("Start of addDiv(), $div = ");
+      console.log($div);
       if ($div)
         $div.remove();
       $div = (0, import_jquery30.default)(document.createElement("div")).attr("id", el.id + "_brush").css({
@@ -10030,6 +10043,8 @@
         x: 0,
         y: 0
       }).width(0).outerHeight(0);
+      console.log("End of addDiv(), $div = ");
+      console.log($div);
     }
     function updateDiv() {
       var imgOffsetCss = findOrigin($el.find("img"));
@@ -10149,6 +10164,7 @@
       boundsCss: boundsCss,
       boundsData: boundsData,
       getPanel: getPanel2,
+      setPanelIdx: setPanelIdx,
       down: down,
       up: up,
       isBrushing: isBrushing,
@@ -10271,6 +10287,13 @@
         $el.data("mostRecentBrush", false);
         brush.reset();
       }
+    });
+    $el.on("shiny-internal:setBrush.image_output", function(e, data) {
+      if (data.brushId != inputId)
+        return;
+      brush.setPanelIdx(data.panelIdx);
+      brush.boundsData(data.imgCoords);
+      sendBrushInfo();
     });
     function setCursorStyle(style) {
       $el.removeClass("crosshair grabbable grabbing ns-resize ew-resize nesw-resize nwse-resize");
@@ -10721,6 +10744,16 @@
     imageOutputBinding.find(document.documentElement).trigger("shiny-internal:brushed", {
       brushId: brushId,
       outputId: null
+    });
+  }
+
+  // srcts/src/imageutils/setBrush.ts
+  function setBrush(brushId, coords, panel) {
+    shinySetInputValue(brushId, null);
+    imageOutputBinding.find(document.documentElement).trigger("shiny-internal:setBrush", {
+      brushId: brushId,
+      imgCoords: coords,
+      panelIdx: panel
     });
   }
 
@@ -12650,6 +12683,9 @@
         addMessageHandler("resetBrush", function(message) {
           resetBrush(message.brushId);
         });
+        addMessageHandler("setBrush", function(message) {
+          setBrush(message.brushId, message.coords, message.panel);
+        });
       }
     }, {
       key: "getTestSnapshotBaseUrl",
@@ -12977,7 +13013,7 @@
   var windowShiny2;
   function setShiny(windowShiny_) {
     windowShiny2 = windowShiny_;
-    windowShiny2.version = "1.7.1.9003";
+    windowShiny2.version = "1.7.1.9004";
     var _initInputBindings = initInputBindings(), inputBindings = _initInputBindings.inputBindings, fileInputBinding2 = _initInputBindings.fileInputBinding;
     var _initOutputBindings = initOutputBindings(), outputBindings = _initOutputBindings.outputBindings;
     setFileInputBinding(fileInputBinding2);
@@ -12988,6 +13024,7 @@
     windowShiny2.outputBindings = outputBindings;
     windowShiny2.OutputBinding = OutputBinding;
     windowShiny2.resetBrush = resetBrush;
+    windowShiny2.setBrush = setBrush;
     windowShiny2.notifications = {
       show: show,
       remove: remove

@@ -2,6 +2,7 @@ import $ from "jquery";
 
 import { InputBinding, OutputBinding } from "../bindings";
 import { resetBrush } from "../imageutils/resetBrush";
+import { setBrush } from "../imageutils/setBrush";
 import { $escape, compareVersion } from "../utils";
 import { showNotification, removeNotification } from "./notifications";
 import { showModal, removeModal } from "./modal";
@@ -32,6 +33,7 @@ interface Shiny {
   // eslint-disable-next-line @typescript-eslint/naming-convention
   OutputBinding: typeof OutputBinding;
   resetBrush: typeof resetBrush;
+  setBrush: typeof setBrush;
   notifications: {
     show: typeof showNotification;
     remove: typeof removeNotification;
@@ -81,6 +83,7 @@ function setShiny(windowShiny_: Shiny): void {
   windowShiny.outputBindings = outputBindings;
   windowShiny.OutputBinding = OutputBinding;
   windowShiny.resetBrush = resetBrush;
+  windowShiny.setBrush = setBrush;
   windowShiny.notifications = {
     show: showNotification,
     remove: removeNotification,

@@ -52,6 +52,7 @@ declare type Brush = {
         (): BoundsData;
     };
     getPanel: () => ImageState["panel"];
+    setPanelIdx: (idx: number) => void;
     down: {
         (): ImageState["down"];
         (offsetCss: any): void;

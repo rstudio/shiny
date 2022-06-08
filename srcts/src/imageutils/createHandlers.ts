@@ -341,7 +341,7 @@ function createBrushHandler(
 
     // Send info immediately on mouseup, but only if needed. If we don't
     // do the pending check, we might send the same data twice (with
-    // with difference nonce).
+    // no difference).
     if (brushInfoSender.isPending()) brushInfoSender.immediateCall();
   }
 

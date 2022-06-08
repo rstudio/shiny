@@ -214,7 +214,6 @@ function createBrush(
     $div = oldDiv;
 
     boundsData(oldBoundsData);
-    updateDiv();
   }
 
   // This will reposition the brush div when the image is resized, maintaining
@@ -230,7 +229,6 @@ function createBrush(
     }
 
     boundsData(boundsDataVal);
-    updateDiv();
   }
 
   // Return true if the offset is inside min/max coords
@@ -349,6 +347,9 @@ function createBrush(
     // brush. This should be fast because it doesn't actually modify the DOM.
     $div.data("bounds-data", state.boundsData);
     $div.data("panel", state.panel);
+
+    // Actually update the shape of the div based on the new coordinates.
+    updateDiv();
     return undefined;
   }
 
@@ -458,13 +459,11 @@ function createBrush(
     state.panel = coordmap.getPanelCss(state.down, expandPixels);
 
     boundsCss(findBox(state.down, state.down));
-    updateDiv();
   }
 
   function brushTo(offsetCss: Offset) {
     boundsCss(findBox(state.down, offsetCss));
     $div.show();
-    updateDiv();
   }
 
   function stopBrushing() {
@@ -526,7 +525,6 @@ function createBrush(
     }
 
     boundsCss(newBoundsCss);
-    updateDiv();
   }
 
   function stopDragging() {
@@ -593,7 +591,6 @@ function createBrush(
     }
 
     boundsCss(imgToCss(bImg));
-    updateDiv();
   }
 
   function stopResizing() {

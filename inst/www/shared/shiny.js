@@ -9885,7 +9885,6 @@
       }
       $div = oldDiv;
       boundsData(oldBoundsData);
-      updateDiv();
     }
     function onResize() {
       var boundsDataVal = boundsData();
@@ -9894,7 +9893,6 @@
           return;
       }
       boundsData(boundsDataVal);
-      updateDiv();
     }
     function isInsideBrush(offsetCss) {
       var bounds = state.boundsCss;
@@ -9980,6 +9978,7 @@
       });
       $div.data("bounds-data", state.boundsData);
       $div.data("panel", state.panel);
+      updateDiv();
       return void 0;
     }
     function boundsData(boxData) {
@@ -10060,12 +10059,10 @@
       addDiv();
       state.panel = coordmap.getPanelCss(state.down, expandPixels);
       boundsCss(findBox(state.down, state.down));
-      updateDiv();
     }
     function brushTo(offsetCss) {
       boundsCss(findBox(state.down, offsetCss));
       $div.show();
-      updateDiv();
     }
     function stopBrushing() {
       state.brushing = false;
@@ -10103,7 +10100,6 @@
         });
       }
       boundsCss(newBoundsCss);
-      updateDiv();
     }
     function stopDragging() {
       state.dragging = false;
@@ -10139,7 +10135,6 @@
         bImg.ymax = ymaxImg;
       }
       boundsCss(imgToCss(bImg));
-      updateDiv();
     }
     function stopResizing() {
       state.resizing = false;

@@ -11,7 +11,9 @@
     "repo": "rstudio/htmltools",
     "exports": [
       { "file": "builder.Rd", "ignore": "builder" },
-      { "file": "tag.Rd" },
+      { "file": "tagList.Rd" },
+      { "file": "tagAppendAttributes.Rd" },
+      { "file": "tagAppendChild.Rd", "ignore": "tagInsertChildren" },
       { "file": "HTML.Rd" },
       { "file": "include.Rd", "ignore": "include" },
       { "file": "singleton.Rd" },

@@ -1,5 +1,5 @@
 # Promise helpers taken from:
-#   https://github.com/rstudio/promises/blob/master/tests/testthat/common.R
+#   https://github.com/rstudio/promises/blob/main/tests/testthat/common.R
 # Block until all pending later tasks have executed
 wait_for_it <- function() {
   while (!later::loop_empty()) {

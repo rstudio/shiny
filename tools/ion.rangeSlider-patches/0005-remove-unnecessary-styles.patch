@@ -1,0 +1,29 @@
+diff --git a/inst/www/shared/ionrangeslider/scss/_base.scss b/inst/www/shared/ionrangeslider/scss/_base.scss
+index f167f8cc..fec67457 100644
+--- a/inst/www/shared/ionrangeslider/scss/_base.scss
++++ b/inst/www/shared/ionrangeslider/scss/_base.scss
+@@ -4,8 +4,6 @@
+     @include pos-r();
+     -webkit-touch-callout: none;
+     @include no-click();
+-    font-size: 12px;
+-    font-family: Arial, sans-serif;
+ 
+     &-line {
+         @include pos-r();
+@@ -83,7 +81,6 @@
+             left: 0;
+             width: 1px;
+             height: 8px;
+-            background: #000;
+ 
+             &.small {
+                 height: 4px;
+@@ -99,7 +96,6 @@
+             font-size: 9px;
+             line-height: 9px;
+             padding: 0 3px;
+-            color: #000;
+         }
+     }
+ 

@@ -10,7 +10,7 @@ shinyAppTemplate(path = NULL, examples = "default", dryrun = FALSE)
 \item{path}{Path to create new shiny application template.}
 
 \item{examples}{Either one of "default", "ask", "all", or any combination of
-"app", "rdir", "module", "shinytest", and "testthat". In an
+"app", "rdir", "module", and "tests". In an
 interactive session, "default" falls back to "ask"; in a non-interactive
 session, "default" falls back to "all". With "ask", this function will
 prompt the user to select which template items will be added to the new app
@@ -29,8 +29,7 @@ to select which components to add to the application. Choices are\preformatted{1
 2: app.R              : Main application file
 3: R/example.R        : Helper file with R code
 4: R/example-module.R : Example module
-5: tests/shinytest/   : Tests using the shinytest package
-6: tests/testthat/    : Tests using the testthat package
+5: tests/testthat/    : Tests using the testthat and shinytest2 package
 }
 
 If option 1 is selected, the full example application including the
@@ -40,13 +39,11 @@ following files and directories is created:\preformatted{appdir/
 |   |- example-module.R
 |   `- example.R
 `- tests
-    |- shinytest.R
-    |- shinytest
-    |   `- mytest.R
     |- testthat.R
     `- testthat
         |- test-examplemodule.R
         |- test-server.R
+        |- test-shinytest2.R
         `- test-sort.R
 }
 
@@ -62,15 +59,15 @@ and the second contains code for module created by the
 \item \verb{tests/} contains various tests for the application. You may
 choose to use or remove any of them. They can be executed by the
 \code{\link[=runTests]{runTests()}} function.
-\item \code{tests/shinytest.R} is a test runner for test files in the
-\verb{tests/shinytest/} directory.
-\item \code{tests/shinytest/mytest.R} is a test that uses the
-\href{https://rstudio.github.io/shinytest/}{shinytest} package to do
-snapshot-based testing.
 \item \code{tests/testthat.R} is a test runner for test files in the
-\verb{tests/testthat/} directory using the \href{https://testthat.r-lib.org/}{testthat} package.
+\verb{tests/testthat/} directory using the
+\href{https://rstudio.github.io/shinytest2/reference/test_app.html}{shinytest2}
+package.
 \item \code{tests/testthat/test-examplemodule.R} is a test for an application's module server function.
 \item \code{tests/testthat/test-server.R} is a test for the application's server code
+\item \code{tests/testthat/test-shinytest2.R} is a test that uses the
+\href{https://rstudio.github.io/shinytest2/}{shinytest2} package to do
+snapshot-based testing.
 \item \code{tests/testthat/test-sort.R} is a test for a supporting function in the \verb{R/} directory.
 }
 }

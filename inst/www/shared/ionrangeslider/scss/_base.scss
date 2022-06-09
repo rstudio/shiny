@@ -4,8 +4,12 @@
     @include pos-r();
     -webkit-touch-callout: none;
     @include no-click();
-    font-size: 12px;
-    font-family: Arial, sans-serif;
+    /* https://github.com/rstudio/shiny/issues/3443 */
+    /* https://css-tricks.com/inheriting-box-sizing-probably-slightly-better-best-practice/ */
+    box-sizing: border-box;
+    *, *:before, *:after {
+      box-sizing: inherit;
+    }
 
     &-line {
         @include pos-r();
@@ -83,7 +87,6 @@
             left: 0;
             width: 1px;
             height: 8px;
-            background: #000;
 
             &.small {
                 height: 4px;
@@ -99,7 +102,6 @@
             font-size: 9px;
             line-height: 9px;
             padding: 0 3px;
-            color: #000;
         }
     }
 

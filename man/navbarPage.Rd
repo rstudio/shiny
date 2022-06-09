@@ -17,7 +17,7 @@ navbarPage(
   collapsible = FALSE,
   fluid = TRUE,
   theme = NULL,
-  windowTitle = title,
+  windowTitle = NA,
   lang = NULL
 )
 
@@ -73,8 +73,10 @@ build of Bootstrap 3 with a customized version of Bootstrap 3 or higher.
 (normally a css file within the www directory, e.g. \code{www/bootstrap.css}).
 }}
 
-\item{windowTitle}{The title that should be displayed by the browser window.
-Useful if \code{title} is not a string.}
+\item{windowTitle}{the browser window title (as a character string). The
+default value, \code{NA}, means to use any character strings that appear in
+\code{title} (if none are found, the host URL of the page is displayed by
+default).}
 
 \item{lang}{ISO 639-1 language code for the HTML page, such as "en" or "ko".
 This will be used as the lang in the \code{<html>} tag, as in \code{<html lang="en">}.

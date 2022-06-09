@@ -875,8 +875,7 @@ Observable <- R6Class(
         invisible(.value)
     },
     format = function() {
-      label <- sprintf('reactive(%s)', paste(deparse(body(.origFunc)), collapse='\n'))
-      strsplit(label, "\n")[[1]]
+      simpleExprToFunction(fn_body(.origFunc), "reactive")
     },
     .updateValue = function() {
       ctx <- Context$new(.domain, .label, type = 'observable',
@@ -945,14 +944,15 @@ Observable <- R6Class(
 #' See the [Shiny tutorial](https://shiny.rstudio.com/tutorial/) for
 #' more information about reactive expressions.
 #'
-#' @param x For `reactive`, an expression (quoted or unquoted). For
-#'   `is.reactive`, an object to test.
-#' @param env The parent environment for the reactive expression. By default,
-#'   this is the calling environment, the same as when defining an ordinary
-#'   non-reactive expression.
-#' @param quoted Is the expression quoted? By default, this is `FALSE`.
-#'   This is useful when you want to use an expression that is stored in a
-#'   variable; to do so, it must be quoted with `quote()`.
+#' @param x For `is.reactive()`, an object to test. For `reactive()`, an expression. When passing in a [`quo()`]sure with `reactive()`, remember to use [`rlang::inject()`] to distinguish that you are passing in the content of your quosure, not the expression of the quosure.
+#' @template param-env
+#' @templateVar x x
+#' @templateVar env env
+#' @templateVar quoted quoted
+#' @template param-quoted
+#' @templateVar x x
+#' @templateVar quoted quoted
+
 #' @param label A label for the reactive expression, useful for debugging.
 #' @param domain See [domains].
 #' @param ..stacktraceon Advanced use only. For stack manipulation purposes; see
@@ -961,46 +961,56 @@ Observable <- R6Class(
 #' @return a function, wrapped in a S3 class "reactive"
 #'
 #' @examples
+#' library(rlang)
 #' values <- reactiveValues(A=1)
 #'
 #' reactiveB <- reactive({
 #'   values$A + 1
 #' })
-#'
-#' # Can use quoted expressions
-#' reactiveC <- reactive(quote({ values$A + 2 }), quoted = TRUE)
-#'
-#' # To store expressions for later conversion to reactive, use quote()
-#' expr_q <- quote({ values$A + 3 })
-#' reactiveD <- reactive(expr_q, quoted = TRUE)
-#'
 #' # View the values from the R console with isolate()
 #' isolate(reactiveB())
+#' # 2
+#'
+#' # To store expressions for later conversion to reactive, use quote()
+#' myquo <- rlang::quo(values$A + 2)
+#' # Unexpected value! Sending a quosure directly will not work as expected.
+#' reactiveC <- reactive(myquo)
+#' # We'd hope for `3`, but instead we get the quosure that was supplied.
 #' isolate(reactiveC())
+#'
+#' # Instead, the quosure should be `rlang::inject()`ed
+#' reactiveD <- rlang::inject(reactive(!!myquo))
 #' isolate(reactiveD())
+#' # 3
+#'
+#' # (Legacy) Can use quoted expressions
+#' expr <- quote({ values$A + 3 })
+#' reactiveE <- reactive(expr, quoted = TRUE)
+#' isolate(reactiveE())
+#' # 4
+#'
 #' @export
-reactive <- function(x, env = parent.frame(), quoted = FALSE,
+reactive <- function(
+  x,
+  env = parent.frame(),
+  quoted = FALSE,
   ...,
   label = NULL,
   domain = getDefaultReactiveDomain(),
-  ..stacktraceon = TRUE)
-{
+  ..stacktraceon = TRUE
+) {
   check_dots_empty()
 
-  x <- get_quosure(x, env, quoted)
-  fun <- as_function(x)
-  # as_function returns a function that takes `...`. We need one that takes no
-  # args.
-  formals(fun) <- list()
-
+  func <- installExprFunction(x, "func", env, quoted, wrappedWithLabel = FALSE)
   # Attach a label and a reference to the original user source for debugging
-  label <- exprToLabel(get_expr(x), "reactive", label)
+  userExpr <- fn_body(func)
+  label <- exprToLabel(userExpr, "reactive", label)
 
-  o <- Observable$new(fun, label, domain, ..stacktraceon = ..stacktraceon)
+  o <- Observable$new(func, label, domain, ..stacktraceon = ..stacktraceon)
   structure(
     o$getValue,
     observable = o,
-    cacheHint = list(userExpr = zap_srcref(get_expr(x))),
+    cacheHint = list(userExpr = zap_srcref(userExpr)),
     class = c("reactiveExpr", "reactive", "function")
   )
 }
@@ -1193,7 +1203,7 @@ Observer <- R6Class(
             # validation = function(e) NULL,
             # shiny.output.cancel = function(e) NULL
 
-            if (inherits(e, "shiny.silent.error")) {
+            if (cnd_inherits(e, "shiny.silent.error")) {
               return()
             }
 
@@ -1325,12 +1335,7 @@ Observer <- R6Class(
 #'
 #' @param x An expression (quoted or unquoted). Any return value will be
 #'   ignored.
-#' @param env The parent environment for the reactive expression. By default,
-#'   this is the calling environment, the same as when defining an ordinary
-#'   non-reactive expression.
-#' @param quoted Is the expression quoted? By default, this is `FALSE`.
-#'   This is useful when you want to use an expression that is stored in a
-#'   variable; to do so, it must be quoted with `quote()`.
+#' @inheritParams reactive
 #' @param label A label for the observer, useful for debugging.
 #' @param suspended If `TRUE`, start the observer in a suspended state. If
 #'   `FALSE` (the default), start in a non-suspended state.
@@ -1389,18 +1394,21 @@ Observer <- R6Class(
 #'   print(values$A + 1)
 #' })
 #'
-#' # Can use quoted expressions
-#' obsC <- observe(quote({ print(values$A + 2) }), quoted = TRUE)
+#' # To store expressions for later conversion to observe, use rlang::quo()
+#' myquo <- rlang::quo({ print(values$A + 3) })
+#' obsC <- rlang::inject(observe(!!myquo))
 #'
-#' # To store expressions for later conversion to observe, use quote()
-#' expr_q <- quote({ print(values$A + 3) })
-#' obsD <- observe(expr_q, quoted = TRUE)
+#' # (Legacy) Can use quoted expressions
+#' obsD <- observe(quote({ print(values$A + 2) }), quoted = TRUE)
 #'
 #' # In a normal Shiny app, the web client will trigger flush events. If you
 #' # are at the console, you can force a flush with flushReact()
 #' shiny:::flushReact()
 #' @export
-observe <- function(x, env = parent.frame(), quoted = FALSE,
+observe <- function(
+  x,
+  env = parent.frame(),
+  quoted = FALSE,
   ...,
   label = NULL,
   suspended = FALSE,
@@ -1411,18 +1419,11 @@ observe <- function(x, env = parent.frame(), quoted = FALSE,
 {
   check_dots_empty()
 
-  x <- get_quosure(x, env, quoted)
-  fun <- as_function(x)
-  # as_function returns a function that takes `...`. We need one that takes no
-  # args.
-  formals(fun) <- list()
-
-  if (is.null(label)) {
-    label <- sprintf('observe(%s)', paste(deparse(get_expr(x)), collapse='\n'))
-  }
+  func <- installExprFunction(x, "func", env, quoted)
+  label <- funcToLabel(func, "observe", label)
 
   o <- Observer$new(
-    fun,
+    func,
     label = label,
     suspended = suspended,
     priority = priority,
@@ -2144,23 +2145,30 @@ maskReactiveContext <- function(expr) {
 #' @param valueExpr The expression that produces the return value of the
 #'   `eventReactive`. It will be executed within an [isolate()]
 #'   scope.
-#' @param event.env The parent environment for `eventExpr`. By default,
-#'   this is the calling environment.
-#' @param event.quoted Is the `eventExpr` expression quoted? By default,
-#'   this is `FALSE`. This is useful when you want to use an expression
-#'   that is stored in a variable; to do so, it must be quoted with
-#'   `quote()`.
-#' @param handler.env The parent environment for `handlerExpr`. By default,
-#'   this is the calling environment.
-#' @param handler.quoted Is the `handlerExpr` expression quoted? By
-#'   default, this is `FALSE`. This is useful when you want to use an
-#'   expression that is stored in a variable; to do so, it must be quoted with
-#'   `quote()`.
-#' @param value.env The parent environment for `valueExpr`. By default,
-#'   this is the calling environment.
-#' @param value.quoted Is the `valueExpr` expression quoted? By default,
-#'   this is `FALSE`. This is useful when you want to use an expression
-#'   that is stored in a variable; to do so, it must be quoted with `quote()`.
+#' @param event.env The parent environment for the reactive expression. By default,
+#'   this is the calling environment, the same as when defining an ordinary
+#'   non-reactive expression. If `eventExpr` is a quosure and `event.quoted` is `TRUE`,
+#'   then `event.env` is ignored.
+#' @param event.quoted If it is `TRUE`, then the [`quote()`]ed value of `eventExpr`
+#'   will be used when `eventExpr` is evaluated. If `eventExpr` is a quosure and you
+#'   would like to use its expression as a value for `eventExpr`, then you must set
+#'  `event.quoted` to `TRUE`.
+#' @param handler.env The parent environment for the reactive expression. By default,
+#'   this is the calling environment, the same as when defining an ordinary
+#'   non-reactive expression. If `handlerExpr` is a quosure and `handler.quoted` is `TRUE`,
+#'   then `handler.env` is ignored.
+#' @param handler.quoted If it is `TRUE`, then the [`quote()`]ed value of `handlerExpr`
+#'   will be used when `handlerExpr` is evaluated. If `handlerExpr` is a quosure and you
+#'   would like to use its expression as a value for `handlerExpr`, then you must set
+#'  `handler.quoted` to `TRUE`.
+#' @param value.env The parent environment for the reactive expression. By default,
+#'   this is the calling environment, the same as when defining an ordinary
+#'   non-reactive expression. If `valueExpr` is a quosure and `value.quoted` is `TRUE`,
+#'   then `value.env` is ignored.
+#' @param value.quoted If it is `TRUE`, then the [`quote()`]ed value of `valueExpr`
+#'   will be used when `valueExpr` is evaluated. If `valueExpr` is a quosure and you
+#'   would like to use its expression as a value for `valueExpr`, then you must set
+#'  `value.quoted` to `TRUE`.
 #' @param label A label for the observer or reactive, useful for debugging.
 #' @param suspended If `TRUE`, start the observer in a suspended state. If
 #'   `FALSE` (the default), start in a non-suspended state.
@@ -2274,15 +2282,13 @@ observeEvent <- function(eventExpr, handlerExpr,
 {
   check_dots_empty()
 
-  eventExpr   <- get_quosure(eventExpr,   event.env,   event.quoted)
-  handlerExpr <- get_quosure(handlerExpr, handler.env, handler.quoted)
+  eventQ <- exprToQuo(eventExpr, event.env, event.quoted)
+  handlerQ <- exprToQuo(handlerExpr, handler.env, handler.quoted)
 
-  if (is.null(label)) {
-    label <- sprintf('observeEvent(%s)', paste(deparse(get_expr(eventExpr)), collapse='\n'))
-  }
+  label <- quoToLabel(eventQ, "observeEvent", label)
 
   handler <- inject(observe(
-    !!handlerExpr,
+    !!handlerQ,
     label = label,
     suspended = suspended,
     priority = priority,
@@ -2296,7 +2302,7 @@ observeEvent <- function(eventExpr, handlerExpr,
     ignoreInit = ignoreInit,
     once = once,
     label = label,
-    !!eventExpr,
+    !!eventQ,
     x = handler
   ))
 
@@ -2314,19 +2320,17 @@ eventReactive <- function(eventExpr, valueExpr,
 {
   check_dots_empty()
 
-  eventExpr <- get_quosure(eventExpr, event.env, event.quoted)
-  valueExpr <- get_quosure(valueExpr, value.env, value.quoted)
+  eventQ <- exprToQuo(eventExpr, event.env, event.quoted)
+  valueQ <- exprToQuo(valueExpr, value.env, value.quoted)
 
-  if (is.null(label)) {
-    label <- sprintf('eventReactive(%s)', paste(deparse(get_expr(eventExpr)), collapse='\n'))
-  }
+  label <- quoToLabel(eventQ, "eventReactive", label)
 
   invisible(inject(bindEvent(
     ignoreNULL = ignoreNULL,
     ignoreInit = ignoreInit,
     label = label,
-    !!eventExpr,
-    x = reactive(!!valueExpr, domain = domain, label = label)
+    !!eventQ,
+    x = reactive(!!valueQ, domain = domain, label = label)
   )))
 }
 

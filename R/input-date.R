@@ -133,14 +133,13 @@ dateInput <- function(inputId, label, value = NULL, min = NULL, max = NULL,
 }
 
 
-datePickerVersion <- "1.9.0"
-
 datePickerDependency <- function(theme) {
   list(
     htmlDependency(
       name = "bootstrap-datepicker-js",
-      version = datePickerVersion,
-      src = c(href = "shared/datepicker"),
+      version = version_bs_date_picker,
+      src = "www/shared/datepicker",
+      package = "shiny",
       script = if (getOption("shiny.minified", TRUE)) "js/bootstrap-datepicker.min.js"
                else                                   "js/bootstrap-datepicker.js",
       # Need to enable noConflict mode. See #1346.
@@ -158,19 +157,20 @@ datePickerCSS <- function(theme) {
   if (!is_bs_theme(theme)) {
     return(htmlDependency(
       name = "bootstrap-datepicker-css",
-      version = datePickerVersion,
-      src = c(href = "shared/datepicker"),
+      version = version_bs_date_picker,
+      src = "www/shared/datepicker",
+      package = "shiny",
       stylesheet = "css/bootstrap-datepicker3.min.css"
     ))
   }
 
-  scss_file <- system.file(package = "shiny", "www/shared/datepicker/scss/build3.scss")
+  scss_file <- system_file(package = "shiny", "www/shared/datepicker/scss/build3.scss")
 
   bslib::bs_dependency(
     input = sass::sass_file(scss_file),
     theme = theme,
     name = "bootstrap-datepicker",
-    version = datePickerVersion,
-    cache_key_extra = shinyPackageVersion()
+    version = version_bs_date_picker,
+    cache_key_extra = get_package_version("shiny")
   )
 }

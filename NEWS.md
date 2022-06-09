@@ -1,5 +1,48 @@
-shiny 1.6.0.9000
+shiny development
 ================
+
+## Full changelog
+
+### Breaking changes
+
+### Minor new features and improvements
+
+* Shiny's internal HTML dependencies are now mounted dynamically instead of statically. (#3537)
+
+* HTML dependencies that are sent to dynamic UI now have better type checking, and no longer require a `dep.src.href` field. (#3537)
+
+* Default for `ref` input in `runGithub()` changed from `"master"` to `"HEAD"`. (#3346)
+
+* When taking a test snapshot, the sort order of the json keys of the `input`, `output`, and `export` fields is currently sorted using the locale of the machine. This can lead to inconsistent test snapshot results. To opt-in to a consistent ordering of snapshot fields with `{shinytest}`, please set the global option `options(shiny.snapshotsortc = TRUE)`. `{shinytest2}` users do not need to set this value. (#3515)
+
+* The auto-reload feature (`options(shiny.autoreload=TRUE)`) was not being activated by `devmode(TRUE)`, despite a console message asserting that it was. (#3620)
+
+### Bug fixes
+
+* Closed tidyverse/dplyr#5552: Compatibility of dplyr 1.0 (and rlang chained errors in general) with `req()`, `validate()`, and friends.
+
+* Closed #1545: `insertUI()` now executes `<script>` tags. (#3630)
+
+* Closed #2955: Input and output bindings previously attempted to use `el['data-input-id']`, but that never worked. They now use `el.getAttribute('data-input-id')` instead. (#3538)
+
+* Closed tidyverse/dplyr#6154: Values from an `actionButton()` had S3 classes in the incorrect order.
+
+* Fixed a bug where updating an input value without a corresponding Input binding element did not trigger a JavaScript `shiny:inputchanged` event. Now, if no Input binding element is found, the `shiny:inputchanged` event is triggered on `window.document`. (#3584)
+
+* Restored the previous behavior of automatically guessing the `Content-Type` header for `downloadHandler` functions when no explicit `contentType` argument is supplied. (#3393)
+
+shiny 1.7.1
+===========
+
+## Bug Fixes
+
+* Closed #3516: Fix regression in repeated calls to `appendTab()` when `navbarMenu()` is already present within a `tabsetPanel()`/`navbarPage()`. (#3518)
+
+* Re-arranged conditions for testthat 1.0.0 compatibility. (#3512)
+
+
+shiny 1.7.0
+===========
 
 ## Full changelog
 
@@ -7,22 +50,30 @@ shiny 1.6.0.9000
 
 * The `format` and `locale` arguments to `sliderInput()` have been removed. They have been deprecated since 0.10.2.2 (released on 2014-12-08).
 
+* Closed #3403: `insertTab()`'s `position` parameter now defaults to `"after"` instead of `"before"`. This has the benefit of allowing us to fix a bug in positioning when `target = NULL`, but has the drawback of changing the default behavior when `target` is not `NULL`. (#3404)
+
 ### New features and improvements
+
+* Bootstrap 5 support. (#3410 and rstudio/bslib#304)
+  * As explained [here](https://rstudio.github.io/bslib/index.html#basic-usage), to opt-in to Bootstrap 5, provide `bslib::bs_theme(version = 5)` to a page layout function with a `theme` argument (e.g., `fluidPage()`, `navbarPage()`, etc).
+
+* Closed #3322, #3313, #1823, #3321, #3320, #1928, and #2310: Various improvements to `navbarPage()`, `tabsetPanel()`, `tabPanel()`, `navbarMenu()`, etc. Also, these functions are now powered by the `{bslib}` package's new `nav()` API (consider using `{bslib}`'s API to create better looking and more fully featured navs). (#3388)
 
 * All uses of `list(...)` have been replaced with `rlang::list2(...)`. This means that you can use trailing `,` without error and use rlang's `!!!` operator to "splice" a list of argument values into `...`. We think this'll be particularly useful for passing a list of `tabPanel()` to their consumers (i.e., `tabsetPanel()`, `navbarPage()`, etc). For example, `tabs <- list(tabPanel("A", "a"), tabPanel("B", "b")); navbarPage(!!!tabs)`. (#3315 and #3328)
 
-* Numerous improvements tabset panels (i.e., `tabPanel()`, `navbarMenu()`, `tabsetPanel()`, `navbarPage()`, etc) (#3315):
-  * Closed #3322: `tabsetPanel()` and `navlistPanel()` gain `header`/`footer` arguments (inspired by `navbarPage()`'s already existing `header`/`footer`), making it easier to include content that should appear on every tab.
-  * Closed #3313 and #1823: More informative error when non-`tabPanel()`/`shiny.tag` objects are supplied to `...`.
-  * Closed #3321: New informative warning when `shiny.tag` object(s) are supplied to `...`. In this case we will continue to create an "empty" nav item and include the content on every tab, but the warning will mention the (new) `header`/`footer` args, which is likely what the user wants.
-  * Closed #3320: The HTML markup that `tabPanel()` et. al generate (for Bootstrap nav) is now Bootstrap 4+ compliant when used with `theme = bslib::bs_theme()`.
-  * Closed #1928: `NULL` values are now dropped instead of producing an empty nav item.
-  
+* `installExprFunction()` and `exprToFunction()` are now able to handle quosures when `quoted = TRUE`. So `render`-functions which call these functions (such as with `htmlwidgets`) can now understand quosures. Users can also use `rlang::inject()` to unquote a quosure for evaluation.  This also means that `render` function no longer need `env` and `quoted` parameters; that information can be embedded into a quosure which is then passed to the `render` function. Better documentation was added for how to create `render` functions. (#3472)
+
 * `icon(lib="fontawesome")` is now powered by the `{fontawesome}` package, which will make it easier to use the latest FA icons in the future (by updating the `{fontawesome}` package). (#3302)
+
+* Closed #3397: `renderPlot()` new uses `ggplot2::get_alt_text()` to inform an `alt` text default (for `{ggplot2}` plots). (#3398)
+
+* `modalDialog()` gains support for `size = "xl"`. (#3410)
+
+* Addressed #2521: Updated the list of TCP ports that will be rejected by default in runapp.R, adding 5060, 5061 and 6566. Added documentation describing the port range (3000:8000) and which ports are rejected. (#3456)
 
 ### Other improvements
 
-* Shiny's core JavaScript code was converted to TypeScript. For the latest development information, please see the [README.md in `./srcts`](https://github.com/rstudio/shiny/tree/master/srcts). (#3296)
+* Shiny's core JavaScript code was converted to TypeScript. For the latest development information, please see the [README.md in `./srcts`](https://github.com/rstudio/shiny/tree/v1.7.0/srcts). (#3296)
 
 * Switched from `digest::digest()` to `rlang::hash()` for hashing. (#3264)
 
@@ -32,11 +83,15 @@ shiny 1.6.0.9000
 
 ### Bug fixes
 
-* Closed #3374: `quoToFunction()` now works correctly with nested quosures; and as a result, quasi-quotation with rendering function (e.g., `renderPrint()`, `renderPlot()`, etc) now works as expected with nested quosures. (#3373) 
+* Closed #3345: Shiny now correctly renders `htmltools::htmlDependency()`(s) with a `list()` of `script` attributes when used in a dynamic UI context. This fairly new `htmlDependency()` feature was added in `{htmltools}` v0.5.1. (#3395)
+
+* Fixed [#2666](https://github.com/rstudio/shiny/issues/2666) and [#2670](https://github.com/rstudio/shiny/issues/2670): `nearPoints()` and `brushedPoints()` weren't properly account for missing values (#2666 was introduced in v1.4.0). ([#2668](https://github.com/rstudio/shiny/pull/2668))
+
+* Closed #3374: `quoToFunction()` now works correctly with nested quosures; and as a result, quasi-quotation with rendering function (e.g., `renderPrint()`, `renderPlot()`, etc) now works as expected with nested quosures. (#3373)
 
 * Exported `register_devmode_option()`. This method was described in the documentation for `devmode()` but was never exported. See `?devmode()` for more details on how to register Shiny Developer options using `register_devmode_option()`. (#3364)
 
-* Restored the previous behavior of automatically guessing the `Content-Type` header for `downloadHandler` functions when no explicit `contentType` argument is supplied. (#3393)
+* Closed #3484: In the RStudio IDE on Mac 11.5, selected checkboxes and radio buttons were not visible. (#3485)
 
 ### Library updates
 
@@ -51,7 +106,7 @@ This release focuses on improvements in three main areas:
 
 1. Better theming (and Bootstrap 4) support:
   * The `theme` argument of `fluidPage()`, `navbarPage()`, and `bootstrapPage()` all now understand `bslib::bs_theme()` objects, which can be used to opt-into Bootstrap 4, use any Bootswatch theme, and/or implement custom themes without writing any CSS.
-  * The `session` object now includes `$setCurrentTheme()` and `$getCurrentTheme()` methods to dynamically update (or obtain) the page's `theme` after initial load, which is useful for things such as [adding a dark mode switch to an app](https://rstudio.github.io/bslib/articles/theming.html#dynamic-shiny) or some other "real-time" theming tool like `bslib::bs_themer()`.
+  * The `session` object now includes `$setCurrentTheme()` and `$getCurrentTheme()` methods to dynamically update (or obtain) the page's `theme` after initial load, which is useful for things such as [adding a dark mode switch to an app](https://rstudio.github.io/bslib/articles/bslib.html#dynamic) or some other "real-time" theming tool like `bslib::bs_themer()`.
   * For more details, see [`{bslib}`'s website](https://rstudio.github.io/bslib/)
 
 2. Caching of `reactive()` and `render*()` (e.g. `renderText()`, `renderTable()`, etc) expressions.
@@ -173,7 +228,7 @@ shiny 1.5.0
 
 * The new `moduleServer` function provides a simpler interface for creating and using modules. (#2773)
 
-* Resolved #2732: `markdown()` is a new function for writing Markdown with Github extensions directly in Shiny UIs. Markdown rendering is performed by the [commonmark](https://github.com/jeroen/commonmark) package. (#2737)
+* Resolved #2732: `markdown()` is a new function for writing Markdown with Github extensions directly in Shiny UIs. Markdown rendering is performed by the [commonmark](https://github.com/r-lib/commonmark) package. (#2737)
 
 * The `getCurrentOutputInfo()` function can now return the background color (`bg`), foreground color (`fg`), `accent` (i.e., hyperlink) color, and `font` information of the output's HTML container. This information is reported by `plotOutput()`, `imageOutput()`, and any other output bindings containing a class of `.shiny-report-theme`. This feature allows developers to style an output's contents based on the container's CSS styling.  (#2740)
 

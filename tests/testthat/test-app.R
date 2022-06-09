@@ -51,8 +51,7 @@ test_that("With ui/server.R, global.R is loaded before R/ helpers and into the r
   }
 
   # Temporarily opt-in to R/ file autoloading
-  op <- options(shiny.autoload.r=TRUE)
-  on.exit(options(op), add=TRUE)
+  withr::local_options(list(shiny.autoload.r=TRUE))
 
   # + shinyAppDir_serverR
   # +--- sourceUTF8
@@ -108,9 +107,7 @@ test_that("Loading supporting R files is opt-out", {
   }
 
   # Temporarily unset autoloading option
-  orig <- getOption("shiny.autoload.r", NULL)
-  options(shiny.autoload.r=NULL)
-  on.exit({options(shiny.autoload.r=orig)}, add=TRUE)
+  withr::local_options(list(shiny.autoload.r = NULL))
 
   # + shinyAppDir_serverR
   # +--- sourceUTF8
@@ -137,9 +134,7 @@ test_that("Disabling supporting R files works", {
   }
 
   # Temporarily unset autoloading option
-  orig <- getOption("shiny.autoload.r", NULL)
-  options(shiny.autoload.r=FALSE)
-  on.exit({options(shiny.autoload.r=orig)}, add=TRUE)
+  withr::local_options(list(shiny.autoload.r = FALSE))
 
   # + shinyAppDir_serverR
   # +--- sourceUTF8
@@ -165,9 +160,7 @@ test_that("app.R is loaded after R/ helpers and into the right envs", {
   }
 
   # Temporarily opt-in to R/ file autoloading
-  orig <- getOption("shiny.autoload.r", NULL)
-  options(shiny.autoload.r=TRUE)
-  on.exit({options(shiny.autoload.r=orig)}, add=TRUE)
+  withr::local_options(list(shiny.autoload.r = TRUE))
 
   # + shinyAppDir_serverR
   # +--- sourceUTF8
@@ -208,54 +201,80 @@ test_that("global.R and sources in R/ are sourced in the app directory", {
 })
 
 test_that("Setting options in various places works", {
-  op <- options(shiny.launch.browser = FALSE)
-  on.exit(options(op), add = TRUE)
+  withr::local_options(list(shiny.launch.browser = FALSE))
+
+  # Use random ports to avoid errors while running revdepcheck in parallel
+  # https://github.com/rstudio/shiny/pull/3488
+  # Try up to 100 times to find a unique port
+  for (i in 1:100) {
+    test_app_port      <- httpuv::randomPort()
+    test_wrapped2_port <- httpuv::randomPort()
+    test_option_port   <- httpuv::randomPort()
+    # If all ports are unique, move on
+    if (length(unique(
+      c(test_app_port, test_wrapped2_port, test_option_port)
+    )) == 3) {
+      break
+    }
+  }
+  # Use system envvars to pass values into the tests
+  withr::local_envvar(
+    list(
+      SHINY_TESTTHAT_PORT_APP      = as.character(test_app_port),
+      SHINY_TESTTHAT_PORT_WRAPPED2 = as.character(test_wrapped2_port),
+      SHINY_TESTTHAT_PORT_OPTION   = as.character(test_option_port)
+    )
+  )
 
   appDir <- test_path("../test-helpers/app7-port")
   withPort <- function(port, expr) {
-    op <- options(app7.port = port)
-    on.exit(options(op), add = TRUE)
+    withr::local_options(list(app7.port = port))
 
     force(expr)
   }
 
   expect_port <- function(expr, port) {
     later::later(~stopApp(), 0)
-    expect_message(expr, paste0("Listening on http://127.0.0.1:", port), fixed = TRUE)
+    testthat::expect_message(expr, paste0("Listening on http://127.0.0.1:", port), fixed = TRUE)
   }
 
-  expect_port(runApp(appDir), 3030)
+  expect_port(runApp(appDir), test_app_port)
 
   appObj <- source(file.path(appDir, "app.R"))$value
-  expect_port(print(appObj), 3030)
+  expect_port(print(appObj), test_app_port)
 
   appObj <- shinyAppDir(appDir)
-  expect_port(print(appObj), 3030)
+  expect_port(print(appObj), test_app_port)
 
   # The outermost call (shinyAppDir) has its options take precedence over the
   # options in the inner call (shinyApp in app7-port/app.R).
-  appObj <- shinyAppDir(appDir, options = list(port = 4040))
-  expect_port(print(appObj), 4040)
-  expect_port(runApp(appObj), 4040)
+  options_port <- httpuv::randomPort()
+  appObj <- shinyAppDir(appDir, options = list(port = options_port))
+  expect_port(print(appObj), options_port)
+  expect_port(runApp(appObj), options_port)
 
   # Options set directly on the runApp call take precedence over everything.
-  expect_port(runApp(appObj, port = 5050), 5050)
+  provided_port <- httpuv::randomPort()
+  expect_port(runApp(appObj, port = provided_port), provided_port)
 
   # wrapped.R calls shinyAppDir("app.R")
-  expect_port(runApp(file.path(appDir, "wrapped.R")), 3030)
+  expect_port(runApp(file.path(appDir, "wrapped.R")), test_app_port)
   # wrapped2.R calls shinyAppFile("wrapped.R", options = list(port = 3032))
-  expect_port(runApp(file.path(appDir, "wrapped2.R")), 3032)
+  expect_port(runApp(file.path(appDir, "wrapped2.R")), test_wrapped2_port)
 
   shiny_port_orig <- getOption("shiny.port")
   # Calls to options(shiny.port = xxx) within app.R should also work reliably
-  expect_port(runApp(file.path(appDir, "option.R")), 7777)
+  expect_port(runApp(file.path(appDir, "option.R")), test_option_port)
   # Ensure that option was unset/restored
   expect_identical(getOption("shiny.port"), shiny_port_orig)
   # options(shiny.port = xxx) is overrideable
-  appObj <- shinyAppFile(file.path(appDir, "option.R"), options = list(port = 8888))
-  expect_port(print(appObj), 8888)
+  override_port <- httpuv::randomPort()
+  appObj <- shinyAppFile(file.path(appDir, "option.R"), options = list(port = override_port))
+  expect_port(print(appObj), override_port)
 
   # onStop still works even if app.R has an error (ensure option was unset)
   expect_error(runApp(file.path(appDir, "option-broken.R")), "^boom$")
   expect_null(getOption("shiny.port"))
+
+
 })

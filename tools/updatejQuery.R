@@ -1,4 +1,5 @@
 version <- "3.6.0"
+version_types <- "3.5.5"
 
 jq_cdn_download <- function(version) {
   Map(
@@ -29,12 +30,12 @@ writeLines(
 
 # Update TypeScript installation
 withr::with_dir(
-  rprojroot::find_package_root_file("srcts"),
+  rprojroot::find_package_root_file(),
   {
-  	exit_code <- system(paste0("yarn add --dev jquery@", version))
-  	if (exit_code != 0) stop("yarn could not install jquery")
+    exit_code <- system(paste0("yarn add --dev jquery@", version))
+    if (exit_code != 0) stop("yarn could not install jquery")
 
-  	exit_code <- system(paste0("yarn add --dev @types/jquery@patch:@types/jquery@", version, "#./patch/types-jquery.patch"))
-  	if (exit_code != 0) stop("yarn could not install @types/jquery")
+    exit_code <- system(paste0("yarn add @types/jquery@patch:@types/jquery@", version_types, "#./srcts/patch/types-jquery.patch"))
+    if (exit_code != 0) stop("yarn could not install @types/jquery")
   }
 )

@@ -17,4 +17,3 @@ value. The returned value will be used for the test snapshot.}
 \description{
 Add a function for serializing an input before bookmarking application state
 }
-\keyword{internal}

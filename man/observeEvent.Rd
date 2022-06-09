@@ -48,21 +48,25 @@ invalidated. This should be a side-effect-producing action (the return
 value will be ignored). It will be executed within an \code{\link[=isolate]{isolate()}}
 scope.}
 
-\item{event.env}{The parent environment for \code{eventExpr}. By default,
-this is the calling environment.}
+\item{event.env}{The parent environment for the reactive expression. By default,
+this is the calling environment, the same as when defining an ordinary
+non-reactive expression. If \code{eventExpr} is a quosure and \code{event.quoted} is \code{TRUE},
+then \code{event.env} is ignored.}
 
-\item{event.quoted}{Is the \code{eventExpr} expression quoted? By default,
-this is \code{FALSE}. This is useful when you want to use an expression
-that is stored in a variable; to do so, it must be quoted with
-\code{quote()}.}
+\item{event.quoted}{If it is \code{TRUE}, then the \code{\link[=quote]{quote()}}ed value of \code{eventExpr}
+will be used when \code{eventExpr} is evaluated. If \code{eventExpr} is a quosure and you
+would like to use its expression as a value for \code{eventExpr}, then you must set
+\code{event.quoted} to \code{TRUE}.}
 
-\item{handler.env}{The parent environment for \code{handlerExpr}. By default,
-this is the calling environment.}
+\item{handler.env}{The parent environment for the reactive expression. By default,
+this is the calling environment, the same as when defining an ordinary
+non-reactive expression. If \code{handlerExpr} is a quosure and \code{handler.quoted} is \code{TRUE},
+then \code{handler.env} is ignored.}
 
-\item{handler.quoted}{Is the \code{handlerExpr} expression quoted? By
-default, this is \code{FALSE}. This is useful when you want to use an
-expression that is stored in a variable; to do so, it must be quoted with
-\code{quote()}.}
+\item{handler.quoted}{If it is \code{TRUE}, then the \code{\link[=quote]{quote()}}ed value of \code{handlerExpr}
+will be used when \code{handlerExpr} is evaluated. If \code{handlerExpr} is a quosure and you
+would like to use its expression as a value for \code{handlerExpr}, then you must set
+\code{handler.quoted} to \code{TRUE}.}
 
 \item{...}{Currently not used.}
 
@@ -99,12 +103,15 @@ happen once.}
 \code{eventReactive}. It will be executed within an \code{\link[=isolate]{isolate()}}
 scope.}
 
-\item{value.env}{The parent environment for \code{valueExpr}. By default,
-this is the calling environment.}
+\item{value.env}{The parent environment for the reactive expression. By default,
+this is the calling environment, the same as when defining an ordinary
+non-reactive expression. If \code{valueExpr} is a quosure and \code{value.quoted} is \code{TRUE},
+then \code{value.env} is ignored.}
 
-\item{value.quoted}{Is the \code{valueExpr} expression quoted? By default,
-this is \code{FALSE}. This is useful when you want to use an expression
-that is stored in a variable; to do so, it must be quoted with \code{quote()}.}
+\item{value.quoted}{If it is \code{TRUE}, then the \code{\link[=quote]{quote()}}ed value of \code{valueExpr}
+will be used when \code{valueExpr} is evaluated. If \code{valueExpr} is a quosure and you
+would like to use its expression as a value for \code{valueExpr}, then you must set
+\code{value.quoted} to \code{TRUE}.}
 }
 \value{
 \code{observeEvent} returns an observer reference class object (see

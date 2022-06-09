@@ -151,18 +151,25 @@ removeModal <- function(session = getDefaultReactiveDomain()) {
 #' }
 #' @export
 modalDialog <- function(..., title = NULL, footer = modalButton("Dismiss"),
-  size = c("m", "s", "l"), easyClose = FALSE, fade = TRUE) {
+  size = c("m", "s", "l", "xl"), easyClose = FALSE, fade = TRUE) {
 
   size <- match.arg(size)
 
-  cls <- if (fade) "modal fade" else "modal"
-  div(id = "shiny-modal", class = cls, tabindex = "-1",
-    `data-backdrop` = if (!easyClose) "static",
-    `data-keyboard` = if (!easyClose) "false",
+  backdrop <- if (!easyClose) "static"
+  keyboard <- if (!easyClose) "false"
+  div(
+    id = "shiny-modal",
+    class = "modal",
+    class = if (fade) "fade",
+    tabindex = "-1",
+    `data-backdrop` = backdrop,
+    `data-bs-backdrop` = backdrop,
+    `data-keyboard` = keyboard,
+    `data-bs-keyboard` = keyboard,
 
     div(
       class = "modal-dialog",
-      class = switch(size, s = "modal-sm", m = NULL, l = "modal-lg"),
+      class = switch(size, s = "modal-sm", m = NULL, l = "modal-lg", xl = "modal-xl"),
       div(class = "modal-content",
         if (!is.null(title)) div(class = "modal-header",
           tags$h4(class = "modal-title", title)
@@ -171,14 +178,26 @@ modalDialog <- function(..., title = NULL, footer = modalButton("Dismiss"),
         if (!is.null(footer)) div(class = "modal-footer", footer)
       )
     ),
-    tags$script("$('#shiny-modal').modal().focus();")
+    # jQuery plugin doesn't work in Bootstrap 5, but vanilla JS doesn't work in Bootstrap 4 :sob:
+    tags$script(HTML(
+      "if (window.bootstrap && !window.bootstrap.Modal.VERSION.match(/^4\\./)) {
+         var modal = new bootstrap.Modal(document.getElementById('shiny-modal'));
+         modal.show();
+      } else {
+         $('#shiny-modal').modal().focus();
+      }"
+    ))
   )
 }
 
 #' @export
 #' @rdname modalDialog
 modalButton <- function(label, icon = NULL) {
-  tags$button(type = "button", class = "btn btn-default",
-    `data-dismiss` = "modal", validateIcon(icon), label
+  tags$button(
+    type = "button",
+    class = "btn btn-default",
+    `data-dismiss` = "modal",
+    `data-bs-dismiss` = "modal",
+    validateIcon(icon), label
   )
 }

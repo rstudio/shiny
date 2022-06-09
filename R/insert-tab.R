@@ -112,35 +112,13 @@
 #'
 #' }
 #' @export
-insertTab <- function(inputId, tab, target,
-                      position = c("before", "after"), select = FALSE,
+insertTab <- function(inputId, tab, target = NULL,
+                      position = c("after", "before"), select = FALSE,
                       session = getDefaultReactiveDomain()) {
-  force(target)
-  force(select)
-  position <- match.arg(position)
-  inputId <- session$ns(inputId)
-
-  # Barbara -- August 2017
-  # Note: until now, the number of tabs in a tabsetPanel (or navbarPage
-  # or navlistPanel) was always fixed. So, an easy way to give an id to
-  # a tab was simply incrementing a counter. (Just like it was easy to
-  # give a random 4-digit number to identify the tabsetPanel). Since we
-  # can only know this in the client side, we'll just pass `id` and
-  # `tsid` (TabSetID) as dummy values that will be fixed in the JS code.
-  item <- buildTabItem("id", "tsid", TRUE, divTag = tab,
-    textFilter = if (is.character(tab)) navbarMenuTextFilter else NULL)
-
-  callback <- function() {
-    session$sendInsertTab(
-      inputId = inputId,
-      liTag = processDeps(item$liTag, session),
-      divTag = processDeps(item$divTag, session),
-      menuName = NULL,
-      target = target,
-      position = position,
-      select = select)
-  }
-  session$onFlush(callback, once = TRUE)
+  bslib::nav_insert(
+    inputId, tab, target,
+    match.arg(position), select, session
+  )
 }
 
 #' @param menuName This argument should only be used when you want to
@@ -159,63 +137,21 @@ insertTab <- function(inputId, tab, target,
 #' @export
 prependTab <- function(inputId, tab, select = FALSE, menuName = NULL,
                        session = getDefaultReactiveDomain()) {
-  force(select)
-  force(menuName)
-  inputId <- session$ns(inputId)
-
-  item <- buildTabItem("id", "tsid", TRUE, divTag = tab,
-    textFilter = if (is.character(tab)) navbarMenuTextFilter else NULL)
-
-  callback <- function() {
-    session$sendInsertTab(
-      inputId = inputId,
-      liTag = processDeps(item$liTag, session),
-      divTag = processDeps(item$divTag, session),
-      menuName = menuName,
-      target = NULL,
-      position = "after",
-      select = select)
-  }
-  session$onFlush(callback, once = TRUE)
+  bslib::nav_prepend(inputId, tab, menu_title = menuName, select = select, session = session)
 }
 
 #' @rdname insertTab
 #' @export
 appendTab <- function(inputId, tab, select = FALSE, menuName = NULL,
                       session = getDefaultReactiveDomain()) {
-  force(select)
-  force(menuName)
-  inputId <- session$ns(inputId)
-
-  item <- buildTabItem("id", "tsid", TRUE, divTag = tab,
-    textFilter = if (is.character(tab)) navbarMenuTextFilter else NULL)
-
-  callback <- function() {
-    session$sendInsertTab(
-      inputId = inputId,
-      liTag = processDeps(item$liTag, session),
-      divTag = processDeps(item$divTag, session),
-      menuName = menuName,
-      target = NULL,
-      position = "before",
-      select = select)
-  }
-  session$onFlush(callback, once = TRUE)
+  bslib::nav_append(inputId, tab, menu_title = menuName, select = select, session = session)
 }
 
 #' @rdname insertTab
 #' @export
 removeTab <- function(inputId, target,
                       session = getDefaultReactiveDomain()) {
-  force(target)
-  inputId <- session$ns(inputId)
-
-  callback <- function() {
-    session$sendRemoveTab(
-      inputId = inputId,
-      target = target)
-  }
-  session$onFlush(callback, once = TRUE)
+  bslib::nav_remove(inputId, target, session)
 }
 
 

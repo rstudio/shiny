@@ -1,6 +1,6 @@
 let isQtVal = false;
 let isIEVal = false;
-let IEVersionVal = -1;
+let versionIE = -1;
 
 function setIsQt(isQt: boolean): void {
   isQtVal = isQt;
@@ -8,8 +8,8 @@ function setIsQt(isQt: boolean): void {
 function setIsIE(isIE: boolean): void {
   isIEVal = isIE;
 }
-function setIEVersion(IEVersion_: number): void {
-  IEVersionVal = IEVersion_;
+function setIEVersion(versionIE_: number): void {
+  versionIE = versionIE_;
 }
 
 function isQt(): boolean {
@@ -18,8 +18,11 @@ function isQt(): boolean {
 function isIE(): boolean {
   return isIEVal;
 }
+
+// (Name existed before TS conversion)
+// eslint-disable-next-line @typescript-eslint/naming-convention
 function IEVersion(): number {
-  return IEVersionVal;
+  return versionIE;
 }
 
 export { isQt, isIE, IEVersion, setIsQt, setIsIE, setIEVersion };

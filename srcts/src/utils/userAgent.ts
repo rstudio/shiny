@@ -1,10 +1,10 @@
-type UserAgentType = typeof window.navigator.userAgent;
+type UserAgent = typeof window.navigator.userAgent;
 
-let userAgentVal: UserAgentType;
+let userAgent: UserAgent;
 
-function setUserAgent(userAgent: UserAgentType): void {
-  userAgentVal = userAgent;
+function setUserAgent(userAgent_: UserAgent): void {
+  userAgent = userAgent_;
 }
 
-export type { UserAgentType };
-export { userAgentVal as userAgent, setUserAgent };
+export type { UserAgent };
+export { userAgent, setUserAgent };

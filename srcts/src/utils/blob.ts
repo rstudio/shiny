@@ -1,9 +1,11 @@
 import $ from "jquery";
 
-let BlobBuilder;
+type BlobBuilderConstructor = typeof window.MSBlobBuilder;
 
-function setBlobBuilder(BlobBuilder_: MSBlobBuilder): void {
-  BlobBuilder = BlobBuilder_;
+let blobBuilderClass: BlobBuilderConstructor;
+
+function setBlobBuilder(blobBuilderClass_: BlobBuilderConstructor): void {
+  blobBuilderClass = blobBuilderClass_;
   return;
 }
 
@@ -29,7 +31,7 @@ function makeBlob(parts: BlobPart[]): Blob {
   try {
     return new Blob(parts);
   } catch (e) {
-    const blobBuilder = new BlobBuilder();
+    const blobBuilder = new blobBuilderClass();
 
     $.each(parts, function (i, part) {
       blobBuilder.append(part);
@@ -39,3 +41,4 @@ function makeBlob(parts: BlobPart[]): Blob {
 }
 
 export { makeBlob, setBlobBuilder };
+export type { BlobBuilderConstructor };

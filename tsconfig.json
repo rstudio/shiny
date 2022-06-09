@@ -1,0 +1,25 @@
+{
+  "declaration": true,
+  "compilerOptions": {
+    "target": "ES5",
+    "isolatedModules": true,
+    "esModuleInterop": true,
+    "declaration": true,
+    "declarationDir": "./srcts/types",
+    "emitDeclarationOnly": true,
+    // Can not use `types: []` to disable injecting NodeJS types. More types are
+    // needed than just the DOM's `window.setTimeout`
+    // "types": [],
+    "strict": false
+  },
+  "include": [
+    "srcts/src/index.ts",
+    "srcts/src/**/*.ts",
+    "srcts/extras/globalShiny.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "srcts/types/",
+    "**/__tests__"
+  ]
+}

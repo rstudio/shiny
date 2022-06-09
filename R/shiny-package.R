@@ -2,7 +2,7 @@
 
 ## usethis namespace: start
 ## usethis namespace: end
-#' @importFrom lifecycle deprecated
+#' @importFrom lifecycle deprecated is_present
 #' @importFrom grDevices dev.set dev.cur
 #' @importFrom fastmap fastmap
 #' @importFrom promises %...!%
@@ -11,11 +11,13 @@
 #'    promise promise_resolve promise_reject is.promising
 #'    as.promise
 #' @importFrom rlang
-#'    quo enquo as_function get_expr get_env new_function enquos
+#'    quo enquo enquo0 as_function get_expr get_env new_function enquos
 #'    eval_tidy expr pairlist2 new_quosure enexpr as_quosure is_quosure inject
+#'    quo_set_env quo_set_expr quo_get_expr
 #'    enquos0 zap_srcref %||% is_na
 #'    is_false list2
 #'    missing_arg is_missing maybe_missing
+#'    quo_is_missing fn_fmls<- fn_body fn_body<-
 #' @importFrom ellipsis
 #'    check_dots_empty check_dots_unnamed
 #' @import htmltools

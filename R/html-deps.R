@@ -40,20 +40,17 @@ createWebDependency <- function(dependency, scrubFile = TRUE) {
 
 # Given a Shiny tag object, process singletons and dependencies. Returns a list
 # with rendered HTML and dependency objects.
+# This implementation is very similar to renderTags(), but ignores
+# <head> handling (it should only be used after the user session has started)
 processDeps <- function(tags, session) {
-  ui <- takeSingletons(tags, session$singletons, desingleton=FALSE)$ui
+  tags <- utils::getFromNamespace("tagify", "htmltools")(tags)
+  ui <- takeSingletons(tags, session$singletons, desingleton = FALSE)$ui
   ui <- surroundSingletons(ui)
   dependencies <- lapply(
-    resolveDependencies(findDependencies(ui)),
+    resolveDependencies(findDependencies(ui, tagify = FALSE)),
     createWebDependency
   )
   names(dependencies) <- NULL
-
-  # If ui is a tagFunction() (e.g., insertTab() et al),
-  # then doRenderTags() won't work...
-  if (inherits(ui, "shiny.tag.function")) {
-    ui <- renderTags(ui)$html
-  }
 
   list(
     html = doRenderTags(ui),

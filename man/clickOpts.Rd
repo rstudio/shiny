@@ -49,4 +49,3 @@ These functions give control over the \code{click}, \code{dblClick} and
 \seealso{
 \code{\link[=brushOpts]{brushOpts()}} for brushing events.
 }
-\keyword{internal}

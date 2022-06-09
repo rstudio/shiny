@@ -1,6 +1,6 @@
-import { UserAgentType } from "../utils/userAgent";
+import type { UserAgent } from "../utils/userAgent";
 
-function windowUserAgent(): UserAgentType {
+function windowUserAgent(): UserAgent {
   return window.navigator.userAgent;
 }
 

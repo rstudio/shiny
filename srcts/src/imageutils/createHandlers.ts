@@ -21,7 +21,7 @@ type CreateHandler = {
   mouseout?: (e: JQuery.MouseOutEvent) => void;
   mousedown?: (e: JQuery.MouseDownEvent) => void;
   onResetImg: () => void;
-  onResize?: () => void;
+  onResize?: () => void; // Currently unused
 };
 
 type BrushInfo = {
@@ -66,7 +66,6 @@ function createClickHandler(
     onResetImg: function () {
       clickInfoSender(null);
     },
-    onResize: null,
   };
 }
 
@@ -110,7 +109,6 @@ function createHoverHandler(
     onResetImg: function () {
       hoverInfoSender.immediateCall(null);
     },
-    onResize: null,
   };
 }
 
@@ -428,19 +426,19 @@ function createBrushHandler(
     }
   }
 
-  function onResize() {
-    console.log("resize!");
-    // This doesn't accomplish anything, since the entire image is
-    // redrawn (and thus the brush reloaded) after every resize.
-    // brush.onResize();
-    // brushInfoSender.immediateCall();
-  }
+  // This doesn't accomplish anything, since the entire image is
+  // redrawn (and thus the brush reloaded) after every resize.
+  // function onResize() {
+  //   console.log("resize!");
+  //   // brush.onResize();
+  //   // brushInfoSender.immediateCall();
+  // }
 
   return {
     mousedown: mousedown,
     mousemove: mousemove,
     onResetImg: onResetImg,
-    onResize: onResize,
+    // onResize: onResize,
   };
 }
 

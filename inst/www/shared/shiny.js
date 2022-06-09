@@ -10247,8 +10247,7 @@
       },
       onResetImg: function onResetImg() {
         clickInfoSender(null);
-      },
-      onResize: null
+      }
     };
   }
   function createHoverHandler(inputId, delay, delayType, clip, nullOutside, coordmap) {
@@ -10273,8 +10272,7 @@
       mouseout: mouseout,
       onResetImg: function onResetImg() {
         hoverInfoSender.immediateCall(null);
-      },
-      onResize: null
+      }
     };
   }
   function createBrushHandler(inputId, $el, opts, coordmap, outputId) {
@@ -10441,14 +10439,10 @@
         brushInfoSender.immediateCall();
       }
     }
-    function onResize() {
-      console.log("resize!");
-    }
     return {
       mousedown: mousedown,
       mousemove: mousemove,
-      onResetImg: onResetImg,
-      onResize: onResize
+      onResetImg: onResetImg
     };
   }
 

@@ -228,8 +228,9 @@ function createBrush(
   //
   // This function appears to be completely useless--whenever a plot is resized,
   // it's reloaded entirely, creating an entirely new brush (after this one
-  // dutifully resizes itself). Is there a situation where that doesn't happen
-  // and this code actually does something? -dvg
+  // dutifully "resizes" itself -- which, since it happens before the new image
+  // is loaded, doesn't actually change the size!). importOldBrush() is the code
+  // that's actually responsible for properly resizing the brush. -dvg
   function onResize() {
     const boundsDataVal = boundsData();
     // Check to see if we have valid boundsData
@@ -631,7 +632,8 @@ function createBrush(
     isInResizeArea: isInResizeArea,
     whichResizeSides: whichResizeSides,
 
-    onResize: onResize, // A callback when the wrapper div or img is resized.
+    // Unused, since every resize was either spurious or followed by a reset.
+    onResize: onResize,
 
     boundsCss: boundsCss,
     boundsData: boundsData,

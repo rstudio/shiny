@@ -193,7 +193,7 @@ class ImageOutputBinding extends OutputBinding {
 
         $el.on("mousedown2.image_output", clickHandler.mousedown);
 
-        $el.on("resize.image_output", clickHandler.onResize);
+        $el.on("resize.image_output", clickHandler.onResize); // currently unused
 
         // When img is reset, do housekeeping: clear $el's mouse listener and
         // call the handler's onResetImg callback.
@@ -213,7 +213,7 @@ class ImageOutputBinding extends OutputBinding {
 
         $el.on("dblclick2.image_output", dblclickHandler.mousedown);
 
-        $el.on("resize.image_output", dblclickHandler.onResize);
+        $el.on("resize.image_output", dblclickHandler.onResize); // currently unused
         $img.on("reset.image_output", dblclickHandler.onResetImg);
       }
 
@@ -232,7 +232,7 @@ class ImageOutputBinding extends OutputBinding {
         $el.on("mousemove.image_output", hoverHandler.mousemove);
         $el.on("mouseout.image_output", hoverHandler.mouseout);
 
-        $el.on("resize.image_output", hoverHandler.onResize);
+        $el.on("resize.image_output", hoverHandler.onResize); // currently unused
         $img.on("reset.image_output", hoverHandler.onResetImg);
       }
 
@@ -250,7 +250,7 @@ class ImageOutputBinding extends OutputBinding {
         $el.on("mousedown.image_output", brushHandler.mousedown);
         $el.on("mousemove.image_output", brushHandler.mousemove);
 
-        $el.on("resize.image_output", brushHandler.onResize);
+        $el.on("resize.image_output", brushHandler.onResize); // currently unused
         $img.on("reset.image_output", brushHandler.onResetImg);
       }
 
@@ -285,6 +285,8 @@ class ImageOutputBinding extends OutputBinding {
     OutputBinding.prototype.clearError.call(this, el);
   }
 
+  // TODO does this do anything other than activate the nonexistant
+  // click/hover/brush resize handlers?
   resize(
     el: HTMLElement,
     width: number | string,

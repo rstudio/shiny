@@ -1,6 +1,6 @@
 library(shiny)
 
-op <- options(shiny.port = 7777)
+op <- options(shiny.port = httpuv::randomPort())
 onStop(function() { options(op) })
 
 stop("boom")

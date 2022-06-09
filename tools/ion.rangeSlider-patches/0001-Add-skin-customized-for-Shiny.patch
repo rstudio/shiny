@@ -1,9 +1,9 @@
 diff --git a/inst/www/shared/ionrangeslider/scss/shiny.scss b/inst/www/shared/ionrangeslider/scss/shiny.scss
 new file mode 100644
-index 00000000..4a0fccc1
+index 00000000..ba052f8b
 --- /dev/null
 +++ b/inst/www/shared/ionrangeslider/scss/shiny.scss
-@@ -0,0 +1,174 @@
+@@ -0,0 +1,173 @@
 +/* 'shiny' skin for Ion.RangeSlider, largely based on the 'big' skin, but with smaller dimensions, grayscale grid text, and without gradients
 +© RStudio, Inc, 2014
 +© Denis Ineshin, 2014  https://github.com/IonDen
@@ -25,8 +25,7 @@ index 00000000..4a0fccc1
 +
 +////////////////////////////////////////////////////////////////////////////
 +
-+// Re-define font-family on .irs to make it configurable
-+$font-family: Arial, sans-serif !default;
++$font-family: $font-family-base !default;
 +.irs {
 +  font-family: $font-family;
 +}
@@ -42,8 +41,8 @@ index 00000000..4a0fccc1
 +  $custom_radius: 3px !default;
 +
 +  // "High-level" coloring
-+  $bg:     white !default;
-+  $fg:     black !default;
++  $bg:     $body-bg !default;
++  $fg:     color-contrast($body-bg) !default;
 +  $accent: #428bca !default;
 +
 +  // "Low-level" coloring, borders, and fonts
@@ -58,7 +57,7 @@ index 00000000..4a0fccc1
 +  $handle_border:      1px solid mix($bg, $fg, 67%) !default;
 +  $handle_box_shadow:  1px 1px 3px rgba($bg, 0.3) !default;
 +
-+  $minmax_text_color:  mix($bg, $fg, 20%) !default;
++  $minmax_text_color:  null !default;
 +  $minmax_bg_color:    rgba($fg, 0.1) !default;
 +  $minmax_font_size:   10px !default;
 +  $minmax_line_height: 1.333 !default;
@@ -70,7 +69,7 @@ index 00000000..4a0fccc1
 +
 +  $grid_major_color:  $fg !default;
 +  $grid_minor_color:  mix($bg, $fg, 60%) !default;
-+  $grid_text_color:   mix($bg, $fg, 10%) !default;
++  $grid_text_color:   null !default;
 +
 +
 +  height: 40px;

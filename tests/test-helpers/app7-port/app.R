@@ -7,7 +7,7 @@ server <- function(input, output, session) {
 }
 
 opts <- list(
-  port = 3030,
+  port = as.numeric(Sys.getenv("SHINY_TESTTHAT_PORT_APP", "8080")),
   launch.browser = FALSE
 )
 

@@ -89,7 +89,9 @@ reference:
       - HTML
       - include
       - singleton
-      - tag
+      - tagList
+      - tagAppendAttributes
+      - tagAppendChild
       - validateCssUnit
       - withTags
       - htmlTemplate
@@ -130,11 +132,6 @@ reference:
       - reactiveTimer
       - domains
       - freezeReactiveValue
-  - title: Boilerplate
-    desc: Functions that are required boilerplate in ui.R and server.R.
-    contents:
-      - shinyUI
-      - shinyServer
   - title: Running
     desc: Functions that are used to run or stop Shiny applications.
     contents:
@@ -177,12 +174,8 @@ reference:
       - onFlush
       - restoreInput
       - applyInputHandlers
-      - exprToFunction
-      - installExprFunction
-      - quoToFunction
       - parseQueryString
       - getCurrentOutputInfo
-      - getCurrentTheme
       - plotPNG
       - sizeGrowthRatio
       - exportTestValues
@@ -190,7 +183,6 @@ reference:
       - snapshotExclude
       - snapshotPreprocessInput
       - snapshotPreprocessOutput
-      - markOutputAttrs
       - repeatable
       - serverInfo
       - onStop
@@ -219,3 +211,10 @@ reference:
       - runTests
       - testServer
       - MockShinySession
+  - title: Superseded
+    desc: Functions that have been `r lifecycle::badge("superseded")`
+    contents:
+      - markRenderFunction
+      - shinyUI
+      - shinyServer
+      - exprToFunction

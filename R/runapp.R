@@ -22,10 +22,13 @@
 #' @param port The TCP port that the application should listen on. If the
 #'   `port` is not specified, and the `shiny.port` option is set (with
 #'   `options(shiny.port = XX)`), then that port will be used. Otherwise,
-#'   use a random port.
+#'   use a random port between 3000:8000, excluding ports that are blocked
+#'   by Google Chrome for being considered unsafe: 3659, 4045, 5060,
+#'   5061, 6000, 6566, 6665:6669 and 6697. Up to twenty random
+#'   ports will be tried.
 #' @param launch.browser If true, the system's default web browser will be
 #'   launched automatically after the app is started. Defaults to true in
-#'   interactive sessions only. This value of this parameter can also be a
+#'   interactive sessions only. The value of this parameter can also be a
 #'   function to call with the application's URL.
 #' @param host The IPv4 address that the application should listen on. Defaults
 #'   to the `shiny.host` option, if set, or `"127.0.0.1"` if not. See
@@ -301,7 +304,8 @@ runApp <- function(appDir=getwd(),
           # Reject ports in this range that are considered unsafe by Chrome
           # http://superuser.com/questions/188058/which-ports-are-considered-unsafe-on-chrome
           # https://github.com/rstudio/shiny/issues/1784
-          if (!port %in% c(3659, 4045, 6000, 6665:6669, 6697)) {
+          # https://chromium.googlesource.com/chromium/src.git/+/refs/heads/main/net/base/port_util.cc
+          if (!port %in% c(3659, 4045, 5060, 5061, 6000, 6566, 6665:6669, 6697)) {
             break
           }
         }
@@ -463,7 +467,7 @@ runExample <- function(example=NA,
                        launch.browser = getOption('shiny.launch.browser', interactive()),
                        host=getOption('shiny.host', '127.0.0.1'),
                        display.mode=c("auto", "normal", "showcase")) {
-  examplesDir <- system.file('examples', package='shiny')
+  examplesDir <- system_file('examples', package='shiny')
   dir <- resolve(examplesDir, example)
   if (is.null(dir)) {
     if (is.na(example)) {

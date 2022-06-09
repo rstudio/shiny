@@ -136,16 +136,16 @@ test_that("req works", {
   expect_equal(1, do.call(req, as.list(1:1000)))
 })
 
-test_that("anyUnnamed works as expected", {
-  expect_false(anyUnnamed(list()))
-  expect_true(anyUnnamed(list(1,2,3)))
-  expect_true(anyUnnamed(list(A = 1,2,3)))
-  expect_false(anyUnnamed(list(A = 1,B = 2,C = 3)))
+test_that("any_unnamed works as expected", {
+  expect_false(any_unnamed(list()))
+  expect_true(any_unnamed(list(1,2,3)))
+  expect_true(any_unnamed(list(A = 1,2,3)))
+  expect_false(any_unnamed(list(A = 1,B = 2,C = 3)))
 
   # List with named elements removed
   x <- list(A = 1, B = 2, 3, 4)
   x <- x[3:4]
-  expect_true(anyUnnamed(x))
+  expect_true(any_unnamed(x))
 })
 
 test_that("sortByName works as expected", {
@@ -171,6 +171,30 @@ test_that("sortByName works as expected", {
   # Make sure atomic vectors work
   expect_identical(sortByName(c(b=1, a=2)), c(a=2, b=1))
   expect_identical(sortByName(c(b=1, a=2, b=3)), c(a=2, b=1, b=3))
+})
+
+test_that("sortByName gives expected sort order using `radix` method", {
+  skip_on_cran()
+
+  # without UTF-8
+  items <- list("aa"=1, "bb"=2, "AA"=5, "BB"=6, "a_"=7, "b_"=8, "_A"=9, "_B"=10)
+  items_expected <- list(AA=5, BB=6, "_A"=9, "_B"=10, a_=7, aa=1, b_=8, bb=2)
+  # sort(names(items), method = "radix")
+  # #> [1] "AA" "BB" "_A" "_B" "a_" "aa" "b_" "bb"
+  # sort(names(items), method = "shell")
+  # #> [1] "_A" "_B" "a_" "aa" "AA" "b_" "bb" "BB"
+  expect_identical(sortByName(items, method = "radix"), items_expected)
+
+  skip_on_os("windows") # windows can't handle UTF-8
+
+  # with UTF-8
+  items <- list("aa"=1, "bb"=2, "åå"=3, "∫∫"=4, "AA"=5, "BB"=6, "a_"=7, "b_"=8, "_A"=9, "_B"=10)
+  items_expected <- list(AA=5, BB=6, "_A"=9, "_B"=10, a_=7, aa=1, b_=8, bb=2, "åå"=3, "∫∫"=4)
+  # sort(name(items), method = "radix")
+  # #> [1] "AA" "BB" "_A" "_B" "a_" "aa" "b_" "bb" "åå" "∫∫"
+  # sort(items, method = "shell")
+  # #> [1] "_A" "_B" "∫∫" "a_" "aa" "AA" "åå" "b_" "bb" "BB"
+  expect_identical(sortByName(items, method = "radix"), items_expected)
 })
 
 test_that("Callbacks fire in predictable order", {
@@ -216,28 +240,21 @@ test_that("dateYMD works", {
     c("2020-01-14", "2019-11-05")
   )
 
-  expect_identical(
-    expect_warning(dateYMD("")),
-    ""
-  )
-  expect_identical(
-    expect_warning(dateYMD(c(NA))),
-    NA
-  )
-  expect_identical(
-    expect_warning(dateYMD(c("", NA))),
-    c("", NA)
-  )
+  expect_warning(val <- dateYMD(""))
+  expect_identical(val, "")
+
+  expect_warning(val <- dateYMD(c(NA)))
+  expect_identical(val, NA)
+
+  expect_warning(val <- dateYMD(c("", NA)))
+  expect_identical(val, c("", NA))
 
   # If there are any bad values, the entire thing goes through unchanged
-  expect_identical(
-    expect_warning(dateYMD(c("2019/11/05", NA))),
-    c("2019/11/05", NA)
-  )
-  expect_identical(
-    expect_warning(dateYMD(c("2019/11/05", ""))),
-    c("2019/11/05", "")
-  )
+  expect_warning(val <- dateYMD(c("2019/11/05", NA)))
+  expect_identical(val, c("2019/11/05", NA))
+
+  expect_warning(val <- dateYMD(c("2019/11/05", "")))
+  expect_identical(val, c("2019/11/05", ""))
 })
 
 test_that("quoToFunction handles nested quosures", {

@@ -1,0 +1,17 @@
+diff --git a/inst/www/shared/ionrangeslider/scss/_base.scss b/inst/www/shared/ionrangeslider/scss/_base.scss
+index fec67457..010de825 100644
+--- a/inst/www/shared/ionrangeslider/scss/_base.scss
++++ b/inst/www/shared/ionrangeslider/scss/_base.scss
+@@ -4,6 +4,12 @@
+     @include pos-r();
+     -webkit-touch-callout: none;
+     @include no-click();
++    /* https://github.com/rstudio/shiny/issues/3443 */
++    /* https://css-tricks.com/inheriting-box-sizing-probably-slightly-better-best-practice/ */
++    box-sizing: border-box;
++    *, *:before, *:after {
++      box-sizing: inherit;
++    }
+ 
+     &-line {
+         @include pos-r();

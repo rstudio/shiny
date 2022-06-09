@@ -13,8 +13,13 @@
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
-  font-size: 12px;
-  font-family: Arial, sans-serif;
+  /* https://github.com/rstudio/shiny/issues/3443 */
+  /* https://css-tricks.com/inheriting-box-sizing-probably-slightly-better-best-practice/ */
+  box-sizing: border-box;
+}
+
+.irs *, .irs *:before, .irs *:after {
+  box-sizing: inherit;
 }
 
 .irs-line {
@@ -92,7 +97,6 @@
   left: 0;
   width: 1px;
   height: 8px;
-  background: #000;
 }
 
 .irs-grid-pol.small {
@@ -108,7 +112,6 @@
   font-size: 9px;
   line-height: 9px;
   padding: 0 3px;
-  color: #000;
 }
 
 .irs-disable-mask {
@@ -153,7 +156,7 @@
 }
 
 .irs {
-  font-family: Arial, sans-serif;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
 .irs--shiny {
@@ -167,7 +170,7 @@
 .irs--shiny .irs-line {
   top: 25px;
   height: 8px;
-  background: linear-gradient(to bottom, #dedede -50%, white 150%);
+  background: linear-gradient(to bottom, #dedede -50%, #fff 150%);
   background-color: #ededed;
   border: 1px solid #cccccc;
   border-radius: 8px;
@@ -207,14 +210,13 @@
 }
 
 .irs--shiny .irs-handle.state_hover, .irs--shiny .irs-handle:hover {
-  background: white;
+  background: #fff;
 }
 
 .irs--shiny .irs-min,
 .irs--shiny .irs-max {
   top: 0;
   padding: 1px 3px;
-  color: #333333;
   text-shadow: none;
   background-color: rgba(0, 0, 0, 0.1);
   border-radius: 3px;
@@ -250,12 +252,11 @@
 }
 
 .irs--shiny .irs-grid-pol {
-  background-color: black;
+  background-color: #000;
 }
 
 .irs--shiny .irs-grid-text {
   bottom: 5px;
-  color: #1a1a1a;
 }
 
 .irs--shiny .irs-grid-pol.small {

@@ -228,7 +228,9 @@ withLogErrors <- function(expr,
       if (promises::is.promise(result)) {
         result <- promises::catch(result, function(cond) {
           # Don't print shiny.silent.error (i.e. validation errors)
-          if (inherits(cond, "shiny.silent.error")) return()
+          if (cnd_inherits(cond, "shiny.silent.error")) {
+            return()
+          }
           if (isTRUE(getOption("show.error.messages"))) {
             printError(cond, full = full, offset = offset)
           }
@@ -239,7 +241,7 @@ withLogErrors <- function(expr,
     },
     error = function(cond) {
       # Don't print shiny.silent.error (i.e. validation errors)
-      if (inherits(cond, "shiny.silent.error")) return()
+      if (cnd_inherits(cond, "shiny.silent.error")) return()
       if (isTRUE(getOption("show.error.messages"))) {
         printError(cond, full = full, offset = offset)
       }

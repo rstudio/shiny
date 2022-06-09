@@ -32,26 +32,40 @@ licenseLink <- function(licenseName) {
 showcaseHead <- function() {
 
   deps  <- list(
-    htmlDependency("jqueryui", "1.12.1", c(href="shared/jqueryui"),
-      script = "jquery-ui.min.js"),
-    htmlDependency("showdown", "0.3.1", c(href="shared/showdown/compressed"),
-      script = "showdown.js"),
-    htmlDependency("highlight.js", "6.2", c(href="shared/highlight"),
-      script = "highlight.pack.js")
+    jqueryuiDependency(),
+    htmlDependency(
+      "showdown",
+      "0.3.1",
+      src = "www/shared/showdown/compressed",
+      package="shiny",
+      script = "showdown.js"
+    ),
+    htmlDependency(
+      "highlight.js",
+      "6.2",
+      src = "www/shared/highlight",
+      package="shiny",
+      script = "highlight.pack.js",
+      stylesheet = "rstudio.css"
+    ),
+    htmlDependency(
+      "showcase",
+      "0.1.0",
+      src = "www/shared",
+      package = "shiny",
+      script = "shiny-showcase.js",
+      stylesheet = "shiny-showcase.css",
+      all_files = FALSE
+    )
   )
 
   mdfile <- file.path.ci(getwd(), 'Readme.md')
-  html <- with(tags, tagList(
-    script(src="shared/shiny-showcase.js"),
-    link(rel="stylesheet", type="text/css",
-         href="shared/highlight/rstudio.css"),
-    link(rel="stylesheet", type="text/css",
-         href="shared/shiny-showcase.css"),
+  html <- tagList(
     if (file.exists(mdfile))
-      script(type="text/markdown", id="showcase-markdown-content",
+      tags$script(type="text/markdown", id="showcase-markdown-content",
         paste(readUTF8(mdfile), collapse="\n"))
     else ""
-  ))
+  )
 
   return(attachDependencies(html, deps))
 }
@@ -83,7 +97,7 @@ navTabsHelper <- function(files, prefix = "") {
     with(tags,
       li(class=if (tolower(file) %in% c("app.r", "server.r")) "active" else "",
          a(href=paste("#", gsub(".", "_", file, fixed=TRUE), "_code", sep=""),
-           "data-toggle"="tab", paste0(prefix, file)))
+           "data-toggle"="tab", "data-bs-toggle"="tab", paste0(prefix, file)))
     )
   })
 }
@@ -92,7 +106,7 @@ navTabsDropdown <- function(files) {
   if (length(files) > 0) {
     with(tags,
       li(role="presentation", class="dropdown",
-        a(class="dropdown-toggle", `data-toggle`="dropdown", href="#",
+        a(class="dropdown-toggle", `data-toggle`="dropdown", `data-bs-toggle`="dropdown", href="#",
           role="button", `aria-haspopup`="true", `aria-expanded`="false",
           "www", span(class="caret")
         ),
@@ -134,7 +148,7 @@ showcaseCodeTabs <- function(codeLicense) {
     a(id="showcase-code-position-toggle",
       class="btn btn-default btn-sm",
       onclick="toggleCodePosition()",
-      icon("level-up"),
+      icon("level-up-alt"),
       "show with app"),
     ul(class="nav nav-tabs",
        navTabsHelper(rFiles),

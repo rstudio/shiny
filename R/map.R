@@ -1,4 +1,3 @@
-#' @importFrom fastmap fastmap
 Map <- R6Class(
   'Map',
   portable = FALSE,

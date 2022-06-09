@@ -9,13 +9,19 @@
 #' @param details Additional information to be added after a new line to the displayed message
 #' @keywords internal
 shinyDeprecated <- function(
-  version, what, with = NULL, details = NULL
+  version,
+  what,
+  with = NULL,
+  details = NULL,
+  type = c("deprecated", "superseded")
 ) {
   if (is_false(getOption("shiny.deprecation.messages"))) {
     return(invisible())
   }
 
-  msg <- paste0("`", what, "` is deprecated as of shiny ", version, ".")
+  type <- match.arg(type)
+
+  msg <- paste0("`", what, "` is ", type, " as of shiny ", version, ".")
   if (!is.null(with)) {
     msg <- paste0(msg, "\n", "Please use `", with, "` instead.")
   }
@@ -32,13 +38,20 @@ deprecatedEnvQuotedMessage <- function() {
   if (!in_devmode()) return(invisible())
   if (is_false(getOption("shiny.deprecation.messages"))) return(invisible())
 
-  # manually
+  # Capture calling function
+  grandparent_call <- sys.call(-2)
+  # Turn language into user friendly string
+  grandparent_txt <- paste0(utils::capture.output({grandparent_call}), collapse = "\n")
+
   msg <- paste0(
-    "The `env` and `quoted` arguments are deprecated as of shiny 1.6.0.",
+    "The `env` and `quoted` arguments are deprecated as of shiny 1.7.0.",
     " Please use quosures from `rlang` instead.\n",
-    "See <https://github.com/rstudio/shiny/issues/3108> for more information."
+    "See <https://github.com/rstudio/shiny/issues/3108> for more information.\n",
+    "Function call:\n",
+    grandparent_txt
   )
-  rlang::inform(message = msg, .frequency = "always", .frequency_id = msg, .file = stderr())
+  # Call less often as users do not have much control over this warning
+  rlang::inform(message = msg, .frequency = "regularly", .frequency_id = msg, .file = stderr())
 }
 
 
@@ -60,7 +73,7 @@ diskCache <- function(
   logfile = NULL
 ) {
   shinyDeprecated("1.6.0", "diskCache()", "cachem::cache_disk()")
-  if (lifecycle::is_present(exec_missing)) {
+  if (is_present(exec_missing)) {
     shinyDeprecated("1.6.0", "diskCache(exec_missing =)")
   }
 
@@ -93,7 +106,7 @@ memoryCache <- function(
   logfile = NULL)
 {
   shinyDeprecated("1.6.0", "diskCache()", "cachem::cache_mem()")
-  if (lifecycle::is_present(exec_missing)) {
+  if (is_present(exec_missing)) {
     shinyDeprecated("1.6.0", "diskCache(exec_missing =)")
   }
 

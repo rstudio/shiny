@@ -138,8 +138,7 @@ bs_theme_deps <- function(theme) {
 }
 
 is_bs_theme <- function(x) {
-  is_available("bslib", "0.2.0.9000") &&
-    bslib::is_bs_theme(x)
+  bslib::is_bs_theme(x)
 }
 
 #' Obtain Shiny's Bootstrap Sass theme
@@ -215,11 +214,10 @@ registerThemeDependency <- function(func) {
 
 bootstrapDependency <- function(theme) {
   htmlDependency(
-    "bootstrap", bootstrapVersion,
-    c(
-      href = "shared/bootstrap",
-      file = system.file("www/shared/bootstrap", package = "shiny")
-    ),
+    "bootstrap",
+    bootstrapVersion,
+    src = "www/shared/bootstrap",
+    package = "shiny",
     script = c(
       "js/bootstrap.min.js",
       # Safely adding accessibility plugin for screen readers and keyboard users; no break for sighted aspects (see https://github.com/paypal/bootstrap-accessibility-plugin)
@@ -380,8 +378,10 @@ collapseSizes <- function(padding) {
 #'   (useful for viewing on smaller touchscreen device)
 #' @param fluid `TRUE` to use a fluid layout. `FALSE` to use a fixed
 #'   layout.
-#' @param windowTitle The title that should be displayed by the browser window.
-#'   Useful if `title` is not a string.
+#' @param windowTitle the browser window title (as a character string). The
+#'   default value, `NA`, means to use any character strings that appear in
+#'   `title` (if none are found, the host URL of the page is displayed by
+#'   default).
 #' @inheritParams bootstrapPage
 #' @param icon Optional icon to appear on a `navbarMenu` tab.
 #'
@@ -425,70 +425,18 @@ navbarPage <- function(title,
                        collapsible = FALSE,
                        fluid = TRUE,
                        theme = NULL,
-                       windowTitle = title,
+                       windowTitle = NA,
                        lang = NULL) {
-
-  # alias title so we can avoid conflicts w/ title in withTags
-  pageTitle <- title
-
-  # navbar class based on options
-  # TODO: tagFunction() the navbar logic?
-  navbarClass <- "navbar navbar-default"
-  position <- match.arg(position)
-  if (!is.null(position))
-    navbarClass <- paste0(navbarClass, " navbar-", position)
-  if (inverse)
-    navbarClass <- paste(navbarClass, "navbar-inverse")
-
-  if (!is.null(id))
-    selected <- restoreInput(id = id, default = selected)
-
-  # build the tabset
-  tabset <- buildTabset(..., ulClass = "nav navbar-nav", id = id, selected = selected)
-
-  containerClass <- paste0("container", if (fluid) "-fluid")
-
-  # built the container div dynamically to support optional collapsibility
-  if (collapsible) {
-    navId <- paste0("navbar-collapse-", p_randomInt(1000, 10000))
-    containerDiv <- div(class=containerClass,
-      div(class="navbar-header",
-        tags$button(type="button", class="navbar-toggle collapsed",
-          `data-toggle`="collapse", `data-target`=paste0("#", navId),
-          span(class="sr-only", "Toggle navigation"),
-          span(class="icon-bar"),
-          span(class="icon-bar"),
-          span(class="icon-bar")
-        ),
-        span(class="navbar-brand", pageTitle)
-      ),
-      div(class="navbar-collapse collapse", id=navId, tabset$navList)
-    )
-  } else {
-    containerDiv <- div(class=containerClass,
-      div(class="navbar-header",
-        span(class="navbar-brand", pageTitle)
-      ),
-      tabset$navList
-    )
-  }
-
-  # build the main tab content div
-  contentDiv <- div(class=containerClass)
-  if (!is.null(header))
-    contentDiv <- tagAppendChild(contentDiv, div(class="row", header))
-  contentDiv <- tagAppendChild(contentDiv, tabset$content)
-  if (!is.null(footer))
-    contentDiv <- tagAppendChild(contentDiv, div(class="row", footer))
-
-  # build the page
-  bootstrapPage(
-    title = windowTitle,
+  remove_first_class(bslib::page_navbar(
+    ..., title = title, id = id, selected = selected,
+    position = match.arg(position),
+    header = header, footer = footer,
+    inverse = inverse, collapsible = collapsible,
+    fluid = fluid,
     theme = theme,
-    lang = lang,
-    tags$nav(class=navbarClass, role="navigation", containerDiv),
-    contentDiv
-  )
+    window_title = windowTitle,
+    lang = lang
+  ))
 }
 
 #' @param menuName A name that identifies this `navbarMenu`. This
@@ -498,15 +446,7 @@ navbarPage <- function(title,
 #' @rdname navbarPage
 #' @export
 navbarMenu <- function(title, ..., menuName = title, icon = NULL) {
-  structure(list(title = title,
-                 menuName = menuName,
-                 tabs = list2(...),
-                 iconClass = iconClass(icon)),
-            class = "shiny.navbarmenu")
-}
-
-isNavbarMenu <- function(x) {
-  inherits(x, "shiny.navbarmenu")
+  bslib::nav_menu(title, ..., value = menuName, icon = icon)
 }
 
 #' Create a well panel
@@ -641,34 +581,14 @@ helpText <- function(...) {
 #' @export
 #' @describeIn tabPanel Create a tab panel that can be included within a [tabsetPanel()] or a [navbarPage()].
 tabPanel <- function(title, ..., value = title, icon = NULL) {
-  div(
-    class = "tab-pane",
-    title = title,
-    `data-value` = value,
-    `data-icon-class` = iconClass(icon),
-    ...
-  )
-}
-
-isTabPanel <- function(x) {
-  if (!inherits(x, "shiny.tag")) return(FALSE)
-  class <- tagGetAttribute(x, "class") %||% ""
-  "tab-pane" %in% strsplit(class, "\\s+")[[1]]
+  bslib::nav(title, ..., value = value, icon = icon)
 }
 
 #' @export
 #' @describeIn tabPanel Create a tab panel that drops the title argument.
 #'   This function should be used within `tabsetPanel(type = "hidden")`. See [tabsetPanel()] for example usage.
 tabPanelBody <- function(value, ..., icon = NULL) {
-  if (
-    !is.character(value) ||
-    length(value) != 1 ||
-    any(is.na(value)) ||
-    nchar(value) == 0
-  ) {
-    stop("`value` must be a single, non-empty string value")
-  }
-  tabPanel(title = NULL, ..., value = value, icon = icon)
+  bslib::nav_content(value, ..., icon = icon)
 }
 
 #' Create a tabset panel
@@ -744,20 +664,17 @@ tabsetPanel <- function(...,
                         header = NULL,
                         footer = NULL) {
 
-  if (!is.null(id))
-    selected <- restoreInput(id = id, default = selected)
+  func <- switch(
+    match.arg(type),
+    tabs = bslib::navs_tab,
+    pills = bslib::navs_pill,
+    hidden = bslib::navs_hidden
+  )
 
-  type <- match.arg(type)
-  tabset <- buildTabset(..., ulClass = paste0("nav nav-", type), id = id, selected = selected)
-
-  tags$div(
-    class = "tabbable",
-    !!!dropNulls(list(
-      tabset$navList,
-      header,
-      tabset$content,
-      footer
-    ))
+  # bslib adds a class to make the content browsable() by default,
+  # but that's probably too big of a change for shiny
+  remove_first_class(
+    func(..., id = id, selected = selected, header = header, footer = footer)
   )
 }
 
@@ -813,268 +730,16 @@ navlistPanel <- function(...,
                          well = TRUE,
                          fluid = TRUE,
                          widths = c(4, 8)) {
-
-  if (!is.null(id))
-    selected <- restoreInput(id = id, default = selected)
-
-  tabset <- buildTabset(
-    ..., ulClass = "nav nav-pills nav-stacked",
-    textFilter = function(text) tags$li(class = "navbar-brand", text),
-    id = id, selected = selected
-  )
-
-  row <- if (fluid) fluidRow else fixedRow
-
-  row(
-    column(widths[[1]], class = if (well) "well", tabset$navList),
-    column(
-      widths[[2]],
-      !!!dropNulls(list(header, tabset$content, footer))
-    )
-  )
+  remove_first_class(bslib::navs_pill_list(
+    ..., id = id, selected = selected,
+    header = header, footer = footer,
+    well = well, fluid = fluid, widths = widths
+  ))
 }
 
-# Helpers to build tabsetPanels (& Co.) and their elements
-markTabAsSelected <- function(x) {
-  attr(x, "selected") <- TRUE
+remove_first_class <- function(x) {
+  class(x) <- class(x)[-1]
   x
-}
-
-isTabSelected <- function(x) {
-  isTRUE(attr(x, "selected", exact = TRUE))
-}
-
-containsSelectedTab <- function(tabs) {
-  any(vapply(tabs, isTabSelected, logical(1)))
-}
-
-findAndMarkSelectedTab <- function(tabs, selected, foundSelected) {
-  tabs <- lapply(tabs, function(x) {
-    if (foundSelected || is.character(x)) {
-      # Strings are not selectable items
-
-    } else if (isNavbarMenu(x)) {
-      # Recur for navbarMenus
-      res <- findAndMarkSelectedTab(x$tabs, selected, foundSelected)
-      x$tabs <- res$tabs
-      foundSelected <<- res$foundSelected
-
-    } else {
-      # Base case: regular tab item. If the `selected` argument is
-      # provided, check for a match in the existing tabs; else,
-      # mark first available item as selected
-      if (is.null(selected)) {
-        foundSelected <<- TRUE
-        x <- markTabAsSelected(x)
-      } else {
-        tabValue <- x$attribs$`data-value` %||% x$attribs$title
-        if (identical(selected, tabValue)) {
-          foundSelected <<- TRUE
-          x <- markTabAsSelected(x)
-        }
-      }
-    }
-    return(x)
-  })
-  return(list(tabs = tabs, foundSelected = foundSelected))
-}
-
-# Returns the icon object (or NULL if none), provided either a
-# tabPanel, OR the icon class
-getIcon <- function(tab = NULL, iconClass = NULL) {
-  if (!is.null(tab)) iconClass <- tab$attribs$`data-icon-class`
-  if (!is.null(iconClass)) {
-    if (grepl("fa-", iconClass, fixed = TRUE)) {
-      # for font-awesome we specify fixed-width
-      iconClass <- paste(iconClass, "fa-fw")
-    }
-    icon(name = NULL, class = iconClass)
-  } else NULL
-}
-
-# Text filter for navbarMenu's (plain text) separators
-navbarMenuTextFilter <- function(text) {
-  if (grepl("^\\-+$", text)) tags$li(class = "divider")
-  else tags$li(class = "dropdown-header", text)
-}
-
-# This function is called internally by navbarPage, tabsetPanel
-# and navlistPanel
-buildTabset <- function(..., ulClass, textFilter = NULL, id = NULL,
-                        selected = NULL, foundSelected = FALSE) {
-
-  tabs <- dropNulls(list2(...))
-  res <- findAndMarkSelectedTab(tabs, selected, foundSelected)
-  tabs <- res$tabs
-  foundSelected <- res$foundSelected
-
-  # add input class if we have an id
-  if (!is.null(id)) ulClass <- paste(ulClass, "shiny-tab-input")
-
-  if (anyNamed(tabs)) {
-    nms <- names(tabs)
-    nms <- nms[nzchar(nms)]
-    stop("Tabs should all be unnamed arguments, but some are named: ",
-      paste(nms, collapse = ", "))
-  }
-
-  tabsetId <- p_randomInt(1000, 10000)
-  tabs <- lapply(seq_len(length(tabs)), buildTabItem,
-            tabsetId = tabsetId, foundSelected = foundSelected,
-            tabs = tabs, textFilter = textFilter)
-
-  tabNavList <- tags$ul(class = ulClass, id = id,
-                  `data-tabsetid` = tabsetId, !!!lapply(tabs, "[[", "liTag"))
-
-  tabContent <- tags$div(class = "tab-content",
-                  `data-tabsetid` = tabsetId, !!!lapply(tabs, "[[", "divTag"))
-
-  list(navList = tabNavList, content = tabContent)
-}
-
-# Builds tabPanel/navbarMenu items (this function used to be
-# declared inside the buildTabset() function and it's been
-# refactored for clarity and reusability). Called internally
-# by buildTabset.
-buildTabItem <- function(index, tabsetId, foundSelected, tabs = NULL,
-                         divTag = NULL, textFilter = NULL) {
-
-  divTag <- divTag %||% tabs[[index]]
-
-  # Handles navlistPanel() headers and dropdown dividers
-  if (is.character(divTag) && !is.null(textFilter)) {
-    return(list(liTag = textFilter(divTag), divTag = NULL))
-  }
-
-  if (isNavbarMenu(divTag)) {
-    # tabPanelMenu item: build the child tabset
-    tabset <- buildTabset(
-      !!!divTag$tabs, ulClass = "dropdown-menu",
-      textFilter = navbarMenuTextFilter,
-      foundSelected = foundSelected
-    )
-    return(buildDropdown(divTag, tabset))
-  }
-
-  if (isTabPanel(divTag)) {
-    return(buildNavItem(divTag, tabsetId, index))
-  }
-
-  # The behavior is undefined at this point, so construct a condition message
-  msg <- paste0(
-    "Expected a collection `tabPanel()`s",
-    if (is.null(textFilter)) " and `navbarMenu()`.",
-    if (!is.null(textFilter)) ", `navbarMenu()`, and/or character strings.",
-    " Consider using `header` or `footer` if you wish to place content above (or below) every panel's contents"
-  )
-
-  # Luckily this case has never worked, so it's safe to throw here
-  # https://github.com/rstudio/shiny/issues/3313
-  if (!inherits(divTag, "shiny.tag"))  {
-    stop(msg, call. = FALSE)
-  }
-
-  # Unfortunately, this 'off-label' use case creates an 'empty' nav and includes
-  # the divTag content on every tab. There shouldn't be any reason to be relying on
-  # this behavior since we now have pre/post arguments, so throw a warning, but still
-  # support the use case since we don't make breaking changes
-  warning(msg, call. = FALSE)
-
-  return(buildNavItem(divTag, tabsetId, index))
-}
-
-buildNavItem <- function(divTag, tabsetId, index) {
-  id <- paste("tab", tabsetId, index, sep = "-")
-  # Get title attribute directory (not via tagGetAttribute()) so that contents
-  # don't get passed to as.character().
-  # https://github.com/rstudio/shiny/issues/3352
-  title <- divTag$attribs[["title"]]
-  value <- divTag$attribs[["data-value"]]
-  icon <- getIcon(iconClass = divTag$attribs[["data-icon-class"]])
-  active <- isTabSelected(divTag)
-  divTag <- tagAppendAttributes(divTag, class = if (active) "active")
-  divTag$attribs$id <- id
-  divTag$attribs$title <- NULL
-  list(
-    divTag = divTag,
-    liTag = tagAddRenderHook(
-      liTag(id, title, value, icon),
-      function(x) {
-        if (isTRUE(getCurrentThemeVersion() >= 4)) {
-          tagQuery(x)$
-            addClass("nav-item")$
-            find("a")$
-            addClass(c("nav-link", if (active) "active"))$
-            allTags()
-        } else {
-          tagAppendAttributes(x, class = if (active) "active")
-        }
-      }
-    )
-  )
-}
-
-liTag <- function(id, title, value, icon) {
-  tags$li(
-    tags$a(
-      href = paste0("#", id),
-      `data-toggle` = "tab",
-      `data-value` = value,
-       icon, title
-    )
-  )
-}
-
-buildDropdown <- function(divTag, tabset) {
-
-  navList <- tagAddRenderHook(
-    tabset$navList,
-    function(x) {
-      if (isTRUE(getCurrentThemeVersion() >= 4)) {
-        tagQuery(x)$
-          find(".nav-item")$
-          removeClass("nav-item")$
-          find(".nav-link")$
-          removeClass("nav-link")$
-          addClass("dropdown-item")$
-          allTags()
-      } else {
-        x
-      }
-    }
-  )
-
-  active <- containsSelectedTab(divTag$tabs)
-
-  dropdown <- tags$li(
-    class = "dropdown",
-    tags$a(
-      href = "#",
-      class = "dropdown-toggle",
-      `data-toggle` = "dropdown",
-      `data-value` = divTag$menuName,
-      getIcon(iconClass = divTag$iconClass),
-      divTag$title,
-      tags$b(class = "caret")
-    ),
-    navList,
-    .renderHook = function(x) {
-      if (isTRUE(getCurrentThemeVersion() >= 4)) {
-        tagQuery(x)$
-          addClass("nav-item")$
-          find(".dropdown-toggle")$
-          addClass("nav-link")$
-          allTags()
-      } else {
-        x
-      }
-    }
-  )
-
-  list(
-    divTag = tabset$content$children,
-    liTag = dropdown
-  )
 }
 
 #' Create a text output element
@@ -1442,11 +1107,17 @@ tableOutput <- function(outputId) {
 
 dataTableDependency <- list(
   htmlDependency(
-    "datatables", "1.10.5", c(href = "shared/datatables"),
+    "datatables",
+    "1.10.5",
+    src = "www/shared/datatables",
+    package = "shiny",
     script = "js/jquery.dataTables.min.js"
   ),
   htmlDependency(
-    "datatables-bootstrap", "1.10.5", c(href = "shared/datatables"),
+    "datatables-bootstrap",
+    "1.10.5",
+    src = "www/shared/datatables",
+    package = "shiny",
     stylesheet = c("css/dataTables.bootstrap.css", "css/dataTables.extra.css"),
     script = "js/dataTables.bootstrap.js"
   )
@@ -1486,7 +1157,7 @@ dataTableOutput <- function(outputId) {
 htmlOutput <- function(outputId, inline = FALSE,
   container = if (inline) span else div, ...)
 {
-  if (anyUnnamed(list(...))) {
+  if (any_unnamed(list(...))) {
     warning("Unnamed elements in ... will be replaced with dynamic UI.")
   }
   container(id = outputId, class="shiny-html-output", ...)
@@ -1565,32 +1236,31 @@ downloadLink <- function(outputId, label="Download", class=NULL, ...) {
 #' Create an icon
 #'
 #' Create an icon for use within a page. Icons can appear on their own, inside
-#' of a button, or as an icon for a [tabPanel()] within a
-#' [navbarPage()].
+#' of a button, and/or used with [tabPanel()] and [navbarMenu()].
 #'
-#' @param name Name of icon. Icons are drawn from the
-#'   [Font Awesome Free](https://fontawesome.com/) (currently icons from
-#'   the v5.13.0 set are supported with the v4 naming convention) and
-#'   [Glyphicons](https://getbootstrap.com/components/#glyphicons)
-#'   libraries. Note that the "fa-" and "glyphicon-" prefixes should not be used
-#'   in icon names (i.e. the "fa-calendar" icon should be referred to as
-#'   "calendar")
-#' @param class Additional classes to customize the style of the icon (see the
+#' @param name The name of the icon. A name from either [Font
+#'   Awesome](https://fontawesome.com/) (when `lib="font-awesome"`) or
+#'   [Bootstrap
+#'   Glyphicons](https://getbootstrap.com/docs/3.3/components/#glyphicons) (when
+#'   `lib="glyphicon"`) may be provided. Note that the `"fa-"` and
+#'   `"glyphicon-"` prefixes should not appear in name (i.e., the
+#'   `"fa-calendar"` icon should be referred to as `"calendar"`). A `name` of
+#'   `NULL` may also be provided to get a raw `<i>` tag with no library attached
+#'   to it.
+#' @param class Additional classes to customize the style of an icon (see the
 #'   [usage examples](https://fontawesome.com/how-to-use) for details on
 #'   supported styles).
-#' @param lib Icon library to use ("font-awesome" or "glyphicon")
-#' @param ... Arguments passed to the `<i>` tag of [htmltools::tags]
+#' @param lib The icon library to use. Either `"font-awesome"` or `"glyphicon"`.
+#' @param ... Arguments passed to the `<i>` tag of [htmltools::tags].
 #'
-#' @return An icon element
+#' @return An `<i>` (icon) HTML tag.
 #'
-#' @seealso For lists of available icons, see
-#'   [https://fontawesome.com/icons](https://fontawesome.com/icons) and
-#'   [https://getbootstrap.com/components/#glyphicons](https://getbootstrap.com/components/#glyphicons).
-#'
+#' @seealso For lists of available icons, see <https://fontawesome.com/icons>
+#'   and <https://getbootstrap.com/docs/3.3/components/#glyphicons>
 #'
 #' @examples
 #' # add an icon to a submit button
-#' submitButton("Update View", icon = icon("refresh"))
+#' submitButton("Update View", icon = icon("redo"))
 #'
 #' navbarPage("App Title",
 #'   tabPanel("Plot", icon = icon("bar-chart-o")),
@@ -1599,48 +1269,26 @@ downloadLink <- function(outputId, label="Download", class=NULL, ...) {
 #' )
 #' @export
 icon <- function(name, class = NULL, lib = "font-awesome", ...) {
-  prefixes <- list(
-    "font-awesome" = "fa",
-    "glyphicon" = "glyphicon"
+
+  # A NULL name allows for a generic <i> not tied to any library
+  if (is.null(name)) {
+    lib <- "none"
+  }
+
+  switch(
+    lib %||% "",
+    "none" = iconTag(name, class = class, ...),
+    "font-awesome" = fontawesome::fa_i(name = name, class = class, ...),
+    "glyphicon" = iconTag(
+      name, class = "glyphicon", class = paste0("glyphicon-", name),
+      class = class, ...
+    ),
+    stop("Unknown icon library: ", lib, ". See `?icon` for supported libraries.")
   )
-  prefix <- prefixes[[lib]]
-
-  # determine stylesheet
-  if (is.null(prefix)) {
-    stop("Unknown font library '", lib, "' specified. Must be one of ",
-         paste0('"', names(prefixes), '"', collapse = ", "))
-  }
-
-  # build the icon class (allow name to be null so that other functions
-  # e.g. buildTabset can pass an explicit class value)
-  iconClass <- ""
-  if (!is.null(name)) {
-    prefix_class <- prefix
-    if (prefix_class == "fa" && name %in% font_awesome_brands) {
-      prefix_class <- "fab"
-    }
-    iconClass <- paste0(prefix_class, " ", prefix, "-", name)
-  }
-  if (!is.null(class))
-    iconClass <- paste(iconClass, class)
-
-  iconTag <- tags$i(class = iconClass, role = "presentation", `aria-label` = paste(name, "icon"), ...)
-
-  # font-awesome needs an additional dependency (glyphicon is in bootstrap)
-  if (lib == "font-awesome") {
-    htmlDependencies(iconTag) <- htmlDependency(
-      "font-awesome", "5.13.0", "www/shared/fontawesome", package = "shiny",
-      stylesheet = c(
-        "css/all.min.css",
-        "css/v4-shims.min.css"
-      )
-    )
-  }
-
-  htmltools::browsable(iconTag)
 }
 
-# Helper funtion to extract the class from an icon
-iconClass <- function(icon) {
-  if (!is.null(icon)) icon$attribs$class
+iconTag <- function(name, ...) {
+  htmltools::browsable(
+    tags$i(..., role = "presentation", `aria-label` = paste(name, "icon"))
+  )
 }

@@ -2,6 +2,11 @@
 #' @include map.R
 NULL
 
+# @staticimports pkg:staticimports
+#   is_installed get_package_version system_file
+#   s3_register register_upgrade_message
+#   any_named any_unnamed
+
 #' Make a random number generator repeatable
 #'
 #' Given a function that generates random data, returns a wrapped version of
@@ -126,34 +131,6 @@ dropNullsOrEmpty <- function(x) {
   x[!vapply(x, nullOrEmpty, FUN.VALUE=logical(1))]
 }
 
-# Given a vector/list, return TRUE if any elements are named, FALSE otherwise.
-anyNamed <- function(x) {
-  # Zero-length vector
-  if (length(x) == 0) return(FALSE)
-
-  nms <- names(x)
-
-  # List with no name attribute
-  if (is.null(nms)) return(FALSE)
-
-  # List with name attribute; check for any ""
-  any(nzchar(nms))
-}
-
-# Given a vector/list, return TRUE if any elements are unnamed, FALSE otherwise.
-anyUnnamed <- function(x) {
-  # Zero-length vector
-  if (length(x) == 0) return(FALSE)
-
-  nms <- names(x)
-
-  # List with no name attribute
-  if (is.null(nms)) return(TRUE)
-
-  # List with name attribute; check for any ""
-  any(!nzchar(nms))
-}
-
 
 # Given a vector/list, returns a named vector/list (the labels will be blank).
 asNamed <- function(x) {
@@ -173,7 +150,7 @@ empty_named_list <- function() {
 # name as elements in a, the element in a is dropped. Also, if there are any
 # duplicated names in a or b, only the last one with that name is kept.
 mergeVectors <- function(a, b) {
-  if (anyUnnamed(a) || anyUnnamed(b)) {
+  if (any_unnamed(a) || any_unnamed(b)) {
     stop("Vectors must be either NULL or have names for all elements")
   }
 
@@ -185,15 +162,27 @@ mergeVectors <- function(a, b) {
 # Sort a vector by the names of items. If there are multiple items with the
 # same name, preserve the original order of those items. For empty
 # vectors/lists/NULL, return the original value.
-sortByName <- function(x) {
-  if (anyUnnamed(x))
+sortByName <- function(x, method = "auto") {
+  if (any_unnamed(x))
     stop("All items must be named")
 
   # Special case for empty vectors/lists, and NULL
   if (length(x) == 0)
     return(x)
 
-  x[order(names(x))]
+  # Must provide consistent sort order
+  #  https://github.com/rstudio/shinytest/issues/409
+  # Using a flag in the snapshot url to determine the method
+  # `method="radix"` uses `C` locale, which is consistent across platforms
+  # Even if two platforms share `en_us.UTF-8`, they may not sort consistently
+  #  https://blog.zhimingwang.org/macos-lc_collate-hunt
+  #  (macOS) $ LC_ALL=en_US.UTF-8 sort <<<$'python-dev\npython3-dev'
+  #  python-dev
+  #  python3-dev
+  #  (Linux) $ LC_ALL=en_US.UTF-8 sort <<<$'python-dev\npython3-dev'
+  #  python3-dev
+  #  python-dev
+  x[order(names(x), method = method)]
 }
 
 # Sort a vector. If a character vector, sort using C locale, which is consistent
@@ -404,165 +393,6 @@ getContentType <- function(file, defaultType = 'application/octet-stream') {
   mime::guess_type(file, unknown = defaultType, subtype = subtype)
 }
 
-# Create a zero-arg function from a quoted expression and environment
-# @examples
-# makeFunction(body=quote(print(3)))
-makeFunction <- function(args = pairlist(), body, env = parent.frame()) {
-  eval(call("function", args, body), env)
-}
-
-#' Convert an expression to a function
-#'
-#' This is to be called from another function, because it will attempt to get
-#' an unquoted expression from two calls back. Note: as of Shiny 1.6.0, it is
-#' recommended to use [quoToFunction()] instead.
-#'
-#' If expr is a quoted expression, then this just converts it to a function.
-#' If expr is a function, then this simply returns expr (and prints a
-#'   deprecation message).
-#' If expr was a non-quoted expression from two calls back, then this will
-#'   quote the original expression and convert it to a function.
-#
-#' @param expr A quoted or unquoted expression, or a function.
-#' @param env The desired environment for the function. Defaults to the
-#'   calling environment two steps back.
-#' @param quoted Is the expression quoted?
-#'
-#' @examples
-#' # Example of a new renderer, similar to renderText
-#' # This is something that toolkit authors will do
-#' renderTriple <- function(expr, env=parent.frame(), quoted=FALSE) {
-#'   # Convert expr to a function
-#'   func <- shiny::exprToFunction(expr, env, quoted)
-#'
-#'   function() {
-#'     value <- func()
-#'     paste(rep(value, 3), collapse=", ")
-#'   }
-#' }
-#'
-#'
-#' # Example of using the renderer.
-#' # This is something that app authors will do.
-#' values <- reactiveValues(A="text")
-#'
-#' \dontrun{
-#' # Create an output object
-#' output$tripleA <- renderTriple({
-#'   values$A
-#' })
-#' }
-#'
-#' # At the R console, you can experiment with the renderer using isolate()
-#' tripleA <- renderTriple({
-#'   values$A
-#' })
-#'
-#' isolate(tripleA())
-#' # "text, text, text"
-#' @export
-exprToFunction <- function(expr, env=parent.frame(), quoted=FALSE) {
-  if (!quoted) {
-    expr <- eval(substitute(substitute(expr)), parent.frame())
-  }
-
-  # expr is a quoted expression
-  makeFunction(body=expr, env=env)
-}
-
-#' Install an expression as a function
-#'
-#' Installs an expression in the given environment as a function, and registers
-#' debug hooks so that breakpoints may be set in the function. Note: as of
-#' Shiny 1.6.0, it is recommended to use [quoToFunction()] instead.
-#'
-#' This function can replace `exprToFunction` as follows: we may use
-#' `func <- exprToFunction(expr)` if we do not want the debug hooks, or
-#' `installExprFunction(expr, "func")` if we do. Both approaches create a
-#' function named `func` in the current environment.
-#'
-#' @seealso Wraps [exprToFunction()]; see that method's documentation
-#'   for more documentation and examples.
-#'
-#' @param expr A quoted or unquoted expression
-#' @param name The name the function should be given
-#' @param eval.env The desired environment for the function. Defaults to the
-#'   calling environment two steps back.
-#' @param quoted Is the expression quoted?
-#' @param assign.env The environment in which the function should be assigned.
-#' @param label A label for the object to be shown in the debugger. Defaults to
-#'   the name of the calling function.
-#' @param wrappedWithLabel,..stacktraceon Advanced use only. For stack manipulation purposes; see
-#'   [stacktrace()].
-#' @export
-installExprFunction <- function(expr, name, eval.env = parent.frame(2),
-                                quoted = FALSE,
-                                assign.env = parent.frame(1),
-                                label = deparse(sys.call(-1)[[1]]),
-                                wrappedWithLabel = TRUE,
-                                ..stacktraceon = FALSE) {
-  if (!quoted) {
-    quoted <- TRUE
-    expr <- eval(substitute(substitute(expr)), parent.frame())
-  }
-
-  func <- exprToFunction(expr, eval.env, quoted)
-  if (length(label) > 1) {
-    # Just in case the deparsed code is more complicated than we imagine. If we
-    # have a label with length > 1 it causes warnings in wrapFunctionLabel.
-    label <- paste0(label, collapse = "\n")
-  }
-  if (wrappedWithLabel) {
-    func <- wrapFunctionLabel(func, label, ..stacktraceon = ..stacktraceon)
-  } else {
-    registerDebugHook(name, assign.env, label)
-  }
-  assign(name, func, envir = assign.env)
-}
-
-#' Convert a quosure to a function for a Shiny render function
-#'
-#' This takes a quosure and label, and wraps them into a function that should be
-#' passed to [createRenderFunction()] or [markRenderFunction()].
-#'
-#' This function was added in Shiny 1.6.0. Previously, it was recommended to use
-#' [installExprFunction()] or [exprToFunction()] in render functions, but now we
-#' recommend using [quoToFunction()], because it does not require `env` and
-#' `quoted` arguments -- that information is captured by quosures provided by
-#' \pkg{rlang}.
-#'
-#' @param q A quosure.
-#' @inheritParams installExprFunction
-#' @seealso [createRenderFunction()] for example usage.
-#'
-#' @export
-quoToFunction <- function(q, label, ..stacktraceon = FALSE) {
-  q <- as_quosure(q)
-  func <- as_function(q)
-  # as_function returns a function that takes `...`. We want one that takes no
-  # args.
-  formals(func) <- list()
-  wrapFunctionLabel(func, label, ..stacktraceon = ..stacktraceon)
-}
-
-
-# Utility function for creating a debugging label, given an expression.
-# `expr` is a quoted expression.
-# `function_name` is the name of the calling function.
-# `label` is an optional user-provided label. If NULL, it will be inferred.
-exprToLabel <- function(expr, function_name, label = NULL) {
-  srcref <- attr(expr, "srcref", exact = TRUE)
-  if (is.null(label)) {
-    label <- rexprSrcrefToLabel(
-      srcref[[1]],
-      sprintf('%s(%s)', function_name, paste(deparse(expr), collapse = '\n'))
-    )
-  }
-  if (length(srcref) >= 2) attr(label, "srcref") <- srcref[[2]]
-  attr(label, "srcfile") <- srcFileOfRef(srcref[[1]])
-  label
-}
-
 #' Parse a GET query string from a URL
 #'
 #' Returns a named list of key-value pairs.
@@ -654,7 +484,7 @@ shinyCallingHandlers <- function(expr) {
   withCallingHandlers(captureStackTraces(expr),
     error = function(e) {
       # Don't intercept shiny.silent.error (i.e. validation errors)
-      if (inherits(e, "shiny.silent.error"))
+      if (cnd_inherits(e, "shiny.silent.error"))
         return()
 
       handle <- getOption('shiny.error')
@@ -1159,7 +989,7 @@ reactiveStop <- function(message = "", class = NULL) {
 #'
 #' ui <- fluidPage(
 #'   checkboxGroupInput('in1', 'Check some letters', choices = head(LETTERS)),
-#'   selectizeInput('in2', 'Select a state', choices = state.name),
+#'   selectizeInput('in2', 'Select a state', choices = c("", state.name)),
 #'   plotOutput('plot')
 #' )
 #'
@@ -1597,21 +1427,31 @@ dateYMD <- function(date = NULL, argName = "value") {
 # function which calls the original function using the specified name. This can
 # be helpful for profiling, because the specified name will show up on the stack
 # trace.
-wrapFunctionLabel <- function(func, name, ..stacktraceon = FALSE) {
+wrapFunctionLabel <- function(func, name, ..stacktraceon = FALSE, dots = TRUE) {
   if (name == "name" || name == "func" || name == "relabelWrapper") {
     stop("Invalid name for wrapFunctionLabel: ", name)
   }
   assign(name, func, environment())
   registerDebugHook(name, environment(), name)
 
-  if (..stacktraceon) {
-    # We need to wrap the `...` in `!!quote(...)` so that R CMD check won't
-    # complain about "... may be used in an incorrect context"
-    body <- expr({ ..stacktraceon..((!!name)(!!quote(...))) })
+  if (isTRUE(dots)) {
+    if (..stacktraceon) {
+      # We need to wrap the `...` in `!!quote(...)` so that R CMD check won't
+      # complain about "... may be used in an incorrect context"
+      body <- expr({ ..stacktraceon..((!!name)(!!quote(...))) })
+    } else {
+      body <- expr({ (!!name)(!!quote(...)) })
+    }
+    relabelWrapper <- new_function(pairlist2(... =), body, environment())
   } else {
-    body <- expr({ (!!name)(!!quote(...)) })
+    # Same logic as when `dots = TRUE`, but without the `...`
+    if (..stacktraceon) {
+      body <- expr({ ..stacktraceon..((!!name)()) })
+    } else {
+      body <- expr({ (!!name)() })
+    }
+    relabelWrapper <- new_function(list(), body, environment())
   }
-  relabelWrapper <- new_function(pairlist2(... =), body, environment())
 
   # Preserve the original function that was passed in; is used for caching.
   attr(relabelWrapper, "wrappedFunc") <- func
@@ -1865,24 +1705,20 @@ findEnclosingApp <- function(path = ".") {
   }
 }
 
-# Check if a package is installed, and if version is specified,
-# that we have at least that version
-is_available <- function(package, version = NULL) {
-  installed <- nzchar(system.file(package = package))
-  if (is.null(version)) {
-    return(installed)
-  }
-  installed && isTRUE(utils::packageVersion(package) >= version)
+# Until `rlang::cnd_inherits()` is on CRAN
+cnd_inherits <- function(cnd, class) {
+  cnd_some(cnd, ~ inherits(.x, class))
 }
+cnd_some <- function(.cnd, .p, ...) {
+  .p <- rlang::as_function(.p)
 
-
-# cached version of utils::packageVersion("shiny")
-shinyPackageVersion <- local({
-  version <- NULL
-  function() {
-    if (is.null(version)) {
-      version <<- utils::packageVersion("shiny")
+  while (rlang::is_condition(.cnd)) {
+    if (.p(.cnd, ...)) {
+      return(TRUE)
     }
-    version
+
+    .cnd <- .cnd$parent
   }
-})
+
+  FALSE
+}

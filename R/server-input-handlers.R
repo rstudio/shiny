@@ -41,12 +41,12 @@ inputHandlers <- Map$new()
 #' })
 #'
 #' ## On the Javascript side, the associated input binding must have a corresponding getType method:
-#' getType: function(el) {
-#'   return "mypackage.validint";
-#' }
+#' # getType: function(el) {
+#' #   return "mypackage.validint";
+#' # }
 #'
 #' }
-#' @seealso [removeInputHandler()]
+#' @seealso [removeInputHandler()] [applyInputHandlers()]
 #' @export
 registerInputHandler <- function(type, fun, force=FALSE){
   if (inputHandlers$containsKey(type) && !force){
@@ -181,7 +181,7 @@ registerInputHandler("shiny.datetime", function(val, ...){
 
 registerInputHandler("shiny.action", function(val, shinysession, name) {
   # mark up the action button value with a special class so we can recognize it later
-  class(val) <- c(class(val), "shinyActionButtonValue")
+  class(val) <- c("shinyActionButtonValue", class(val))
   val
 })
 

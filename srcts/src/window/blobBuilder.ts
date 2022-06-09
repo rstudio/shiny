@@ -1,17 +1,16 @@
-function windowBlobBuilder(): MSBlobBuilder {
+import type { BlobBuilderConstructor } from "../utils/blob";
+
+function windowBlobBuilder(): BlobBuilderConstructor {
   const blob =
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
+    // @ts-expect-error; Using legacy definitions of Blob builders
     window.BlobBuilder ||
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
+    // @ts-expect-error; Using legacy definitions of Blob builders
     window.WebKitBlobBuilder ||
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
+    // @ts-expect-error; Using legacy definitions of Blob builders
     window.MozBlobBuilder ||
     window.MSBlobBuilder;
 
-  return blob as MSBlobBuilder;
+  return blob;
 }
 
 export { windowBlobBuilder };

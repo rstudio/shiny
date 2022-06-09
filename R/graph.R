@@ -4,7 +4,7 @@
 # @param version The version of the package
 check_suggested <- function(package, version = NULL) {
 
-  if (is_available(package, version)) {
+  if (is_installed(package, version)) {
     return()
   }
 
@@ -115,22 +115,28 @@ check_reactlog <- function() {
 }
 # read reactlog version from description file
 # prevents version mismatch in code and description file
-reactlog_version <- function() {
-  desc <- read.dcf(system.file("DESCRIPTION", package = "shiny", mustWork = TRUE))
-  suggests <- desc[1,"Suggests"][[1]]
-  suggests_pkgs <- strsplit(suggests, "\n")[[1]]
+reactlog_version <- local({
+  version <- NULL
+  function() {
+    if (!is.null(version)) return(version)
 
-  reactlog_info <- suggests_pkgs[grepl("reactlog", suggests_pkgs)]
-  if (length(reactlog_info) == 0) {
-    stop("reactlog can not be found in shiny DESCRIPTION file")
+    desc <- read.dcf(system_file("DESCRIPTION", package = "shiny"))
+    suggests <- desc[1,"Suggests"][[1]]
+    suggests_pkgs <- strsplit(suggests, "\n")[[1]]
+
+    reactlog_info <- suggests_pkgs[grepl("reactlog", suggests_pkgs)]
+    if (length(reactlog_info) == 0) {
+      stop("reactlog can not be found in shiny DESCRIPTION file")
+    }
+
+    reactlog_info <- sub("^[^\\(]*\\(", "", reactlog_info)
+    reactlog_info <- sub("\\)[^\\)]*$", "", reactlog_info)
+    reactlog_info <- sub("^[>= ]*", "", reactlog_info)
+
+    version <<- package_version(reactlog_info)
+    version
   }
-
-  reactlog_info <- sub("^[^\\(]*\\(", "", reactlog_info)
-  reactlog_info <- sub("\\)[^\\)]*$", "", reactlog_info)
-  reactlog_info <- sub("^[>= ]*", "", reactlog_info)
-
-  package_version(reactlog_info)
-}
+})
 
 
 RLog <- R6Class(
@@ -512,7 +518,7 @@ MessageLogger = R6Class(
       return(txt)
     },
     singleLine = function(txt) {
-      gsub("[^\\]\\n", "\\\\n", txt)
+      gsub("([^\\])\\n", "\\1\\\\n", txt)
     },
     valueStr = function(valueStr) {
       paste0(

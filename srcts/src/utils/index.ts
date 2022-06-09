@@ -1,6 +1,7 @@
 import $ from "jquery";
 import { windowDevicePixelRatio } from "../window/pixelRatio";
 import { makeBlob } from "./blob";
+import { hasOwnProperty } from "./object";
 
 function escapeHTML(str: string): string {
   const escaped = {
@@ -40,9 +41,7 @@ function strToBool(str: string): boolean | undefined {
 function getStyle(el: Element, styleProp: string): string | undefined {
   let x = undefined;
 
-  // Old, IE 5+ attribute only - https://developer.mozilla.org/en-US/docs/Web/API/Element/currentStyle
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
+  // @ts-expect-error; Old, IE 5+ attribute only - https://developer.mozilla.org/en-US/docs/Web/API/Element/currentStyle
   if (el.currentStyle) x = el.currentStyle[styleProp];
   else if (window.getComputedStyle) {
     // getComputedStyle can return null when we're inside a hidden iframe on
@@ -75,7 +74,7 @@ function roundSignif(x: number, digits = 1): number {
 
 // Take a string with format "YYYY-MM-DD" and return a Date object.
 // IE8 and QTWebKit don't support YYYY-MM-DD, but they support YYYY/MM/DD
-function parseDate(dateString: any): Date {
+function parseDate(dateString: string): Date {
   let date = new Date(dateString);
 
   if (date.toString() === "Invalid Date") {
@@ -86,7 +85,7 @@ function parseDate(dateString: any): Date {
 
 // Given a Date object, return a string in yyyy-mm-dd format, using the
 // UTC date. This may be a day off from the date in the local time zone.
-function formatDateUTC(date: any): null | string {
+function formatDateUTC(date: Date | null): string | null {
   if (date instanceof Date) {
     return (
       date.getUTCFullYear() +
@@ -109,15 +108,18 @@ function formatDateUTC(date: any): null | string {
 // Basically we are trying to filter out extraneous calls to func, so that
 // when the window size changes or whatever, we don't run resize logic for
 // elements that haven't actually changed size or aren't visible anyway.
-interface lastSizeInterface {
+type LastSizeInterface = {
   w?: number;
   h?: number;
-}
+};
 function makeResizeFilter(
   el: HTMLElement,
-  func: (width: any, height: any) => any
-): () => any {
-  let lastSize: lastSizeInterface = {};
+  func: (
+    width: HTMLElement["offsetWidth"],
+    height: HTMLElement["offsetHeight"]
+  ) => void
+): () => void {
+  let lastSize: LastSizeInterface = {};
 
   return function () {
     const size = { w: el.offsetWidth, h: el.offsetHeight };
@@ -141,8 +143,7 @@ function pixelRatio(): number {
 //
 // When the function is executed, it will evaluate that expression using
 // "with" on the argument value, and return the result.
-scopeExprToFunc.call;
-function scopeExprToFunc(expr: string): (scope: any) => any {
+function scopeExprToFunc(expr: string): (scope: unknown) => boolean {
   /*jshint evil: true */
   const exprEscaped = expr
     .replace(/[\\"']/g, "\\$&")
@@ -153,9 +154,10 @@ function scopeExprToFunc(expr: string): (scope: any) => any {
     // \b has a special meaning; need [\b] to match backspace char.
     .replace(/[\b]/g, "\\b");
 
-  let func: any;
+  let func: () => boolean;
 
   try {
+    // @ts-expect-error; Do not know how to type this _dangerous_ situation
     func = new Function(
       `with (this) {
         try {
@@ -171,12 +173,12 @@ function scopeExprToFunc(expr: string): (scope: any) => any {
     throw e;
   }
 
-  return function (scope) {
+  return function (scope: unknown): boolean {
     return func.call(scope);
   };
 }
 
-function asArray<T>(value: T | Array<T> | null | undefined): Array<T> {
+function asArray<T>(value: T | T[] | null | undefined): T[] {
   if (value === null || value === undefined) return [];
   if (Array.isArray(value)) return value;
   return [value];
@@ -185,9 +187,9 @@ function asArray<T>(value: T | Array<T> | null | undefined): Array<T> {
 // We need a stable sorting algorithm for ordering
 // bindings by priority and insertion order.
 function mergeSort<T>(
-  list: Array<T>,
-  sortfunc: (a: any, b: any) => boolean
-): Array<T> {
+  list: T[],
+  sortfunc: (a: T, b: T) => boolean | number
+): T[] {
   function merge(sortfunc, a, b) {
     let ia = 0;
     let ib = 0;
@@ -230,15 +232,14 @@ const $escape = function (val: string): string {
 
 // Maps a function over an object, preserving keys. Like the mapValues
 // function from lodash.
-function mapValues(
-  obj: Record<string, unknown>,
-  f: (value: unknown, key: string, obj: Record<string, unknown>) => unknown
-): Record<string, unknown> {
-  const newObj: Record<string, unknown> = {};
+function mapValues<V, R>(
+  obj: { [key: string]: V },
+  f: (value: V, key: string, obj: { [key: string]: V }) => R
+): { [key: string]: R } {
+  const newObj: { [key: string]: R } = {};
 
   for (const key in obj) {
-    // eslint-disable-next-line no-prototype-builtins
-    if (obj.hasOwnProperty(key)) newObj[key] = f(obj[key], key, obj);
+    if (hasOwnProperty(obj, key)) newObj[key] = f(obj[key], key, obj);
   }
   return newObj;
 }
@@ -250,17 +251,25 @@ function isnan(x: unknown): boolean {
 }
 
 // Binary equality function used by the equal function.
-function _equal(x: any, y: any): boolean {
+// (Name existed before TS conversion)
+// eslint-disable-next-line @typescript-eslint/naming-convention
+function _equal(x: unknown, y: unknown): boolean {
   if ($.type(x) === "object" && $.type(y) === "object") {
-    if (Object.keys(x).length !== Object.keys(y).length) return false;
-    for (const prop in x) {
-      // eslint-disable-next-line no-prototype-builtins
-      if (!y.hasOwnProperty(prop) || !_equal(x[prop], y[prop])) return false;
+    const xo = x as { [key: string]: unknown };
+    const yo = y as { [key: string]: unknown };
+
+    if (Object.keys(xo).length !== Object.keys(yo).length) return false;
+    for (const prop in xo) {
+      if (!hasOwnProperty(yo, prop) || !_equal(xo[prop], yo[prop]))
+        return false;
     }
     return true;
   } else if ($.type(x) === "array" && $.type(y) === "array") {
-    if (x.length !== y.length) return false;
-    for (let i = 0; i < x.length; i++) if (!_equal(x[i], y[i])) return false;
+    const xa = x as unknown[];
+    const ya = y as unknown[];
+
+    if (xa.length !== ya.length) return false;
+    for (let i = 0; i < xa.length; i++) if (!_equal(xa[i], ya[i])) return false;
     return true;
   } else {
     return x === y;
@@ -272,7 +281,7 @@ function _equal(x: any, y: any): boolean {
 // necessary.
 //
 // Objects other than objects and arrays are tested for equality using ===.
-function equal(...args): boolean {
+function equal(...args: unknown[]): boolean {
   if (args.length < 2)
     throw new Error("equal requires at least two arguments.");
   for (let i = 0; i < args.length - 1; i++) {
@@ -285,7 +294,7 @@ function equal(...args): boolean {
 // "==" or "<".
 const compareVersion = function (
   a: string,
-  op: "==" | ">=" | ">" | "<=" | "<",
+  op: "<" | "<=" | "==" | ">" | ">=",
   b: string
 ): boolean {
   function versionParts(ver) {
@@ -321,7 +330,7 @@ const compareVersion = function (
 };
 
 function updateLabel(
-  labelTxt: undefined | string,
+  labelTxt: string | undefined,
   labelNode: JQuery<HTMLElement>
 ): void {
   // Only update if label was specified in the update method
@@ -362,14 +371,12 @@ function getComputedLinkColor(el: HTMLElement): string {
 }
 
 function isBS3(): boolean {
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
-  if (!$.fn.tab) {
-    return false;
-  }
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
-  return $.fn.tab.Constructor.VERSION.match(/^3\./);
+  // @ts-expect-error; Check if `window.bootstrap` exists
+  return !window.bootstrap;
+}
+
+function toLowerCase<T extends string>(str: T): Lowercase<T> {
+  return str.toLowerCase() as Lowercase<T>;
 }
 
 export {
@@ -395,5 +402,7 @@ export {
   updateLabel,
   getComputedLinkColor,
   makeBlob,
+  hasOwnProperty,
   isBS3,
+  toLowerCase,
 };

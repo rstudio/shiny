@@ -51,12 +51,12 @@ registerInputHandler("mypackage.validint", function(x, shinysession, name) {
 })
 
 ## On the Javascript side, the associated input binding must have a corresponding getType method:
-getType: function(el) {
-  return "mypackage.validint";
-}
+# getType: function(el) {
+#   return "mypackage.validint";
+# }
 
 }
 }
 \seealso{
-\code{\link[=removeInputHandler]{removeInputHandler()}}
+\code{\link[=removeInputHandler]{removeInputHandler()}} \code{\link[=applyInputHandlers]{applyInputHandlers()}}
 }

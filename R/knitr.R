@@ -4,6 +4,7 @@
 #' themselves in knitr/rmarkdown documents.
 #'
 #' @name knitr_methods
+#' @keywords internal
 #' @param x Object to knit_print
 #' @param ... Additional knit_print arguments
 NULL
@@ -62,7 +63,7 @@ knit_print.shiny.appobj <- function(x, ...) {
 #' @param inline Whether the object is printed inline.
 knit_print.shiny.render.function <- function(x, ..., inline = FALSE) {
   x <- htmltools::as.tags(x, inline = inline)
-  output <- knitr::knit_print(tagList(x))
+  output <- knitr::knit_print(tagList(x), ..., inline = inline)
   attr(output, "knit_cacheable") <- FALSE
   attr(output, "knit_meta") <- append(attr(output, "knit_meta"),
                                       shiny_rmd_warning())
@@ -76,5 +77,5 @@ knit_print.reactive <- function(x, ..., inline = FALSE) {
   renderFunc <- if (inline) renderText else renderPrint
   knitr::knit_print(renderFunc({
     x()
-  }), inline = inline)
+  }), ..., inline = inline)
 }

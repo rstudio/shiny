@@ -201,19 +201,21 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
 }
 
 
-ionRangeSliderVersion <- "2.3.1"
-
 ionRangeSliderDependency <- function() {
   list(
     # ion.rangeSlider also needs normalize.css, which is already included in Bootstrap.
     htmlDependency(
-      "ionrangeslider-javascript", ionRangeSliderVersion,
-      src = c(href = "shared/ionrangeslider"),
+      "ionrangeslider-javascript",
+      version_ion_range_slider,
+      src = "www/shared/ionrangeslider",
+      package = "shiny",
       script = "js/ion.rangeSlider.min.js"
     ),
     htmlDependency(
-      "strftime", "0.9.2",
-      src = c(href = "shared/strftime"),
+      "strftime",
+      version_strftime,
+      src = "www/shared/strftime",
+      package = "shiny",
       script = "strftime-min.js"
     ),
     bslib::bs_dependency_defer(ionRangeSliderDependencyCSS)
@@ -224,36 +226,24 @@ ionRangeSliderDependencyCSS <- function(theme) {
   if (!is_bs_theme(theme)) {
     return(htmlDependency(
       "ionrangeslider-css",
-      ionRangeSliderVersion,
-      src = c(href = "shared/ionrangeslider"),
+      version_ion_range_slider,
+      src = "www/shared/ionrangeslider",
+      package = "shiny",
       stylesheet = "css/ion.rangeSlider.css"
     ))
   }
 
-  # Remap some variable names for ionRangeSlider's scss
-  sass_input <- list(
-    list(
-      # The bootswatch materia theme sets $input-bg: transparent;
-      # which is an issue for the slider's handle(s) (#3130)
-      bg = "if(alpha($input-bg)==0, $body-bg, $input-bg)",
-      fg = sprintf(
-        "if(alpha($input-color)==0, $%s, $input-color)",
-        if ("3" %in% bslib::theme_version(theme)) "text-color" else "body-color"
-      ),
-      accent = "$component-active-bg",
-      `font-family` = "$font-family-base"
-    ),
-    sass::sass_file(
-      system.file(package = "shiny", "www/shared/ionrangeslider/scss/shiny.scss")
-    )
-  )
-
   bslib::bs_dependency(
-    input = sass_input,
+    input = list(
+      list(accent = "$component-active-bg"),
+      sass::sass_file(
+        system_file(package = "shiny", "www/shared/ionrangeslider/scss/shiny.scss")
+      )
+    ),
     theme = theme,
     name = "ionRangeSlider",
-    version = ionRangeSliderVersion,
-    cache_key_extra = shinyPackageVersion()
+    version = version_ion_range_slider,
+    cache_key_extra = get_package_version("shiny")
   )
 }
 

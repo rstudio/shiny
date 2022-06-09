@@ -1329,8 +1329,14 @@ class ShinyApp {
         brushId: Parameters<typeof setBrush>[0];
         coords: Parameters<typeof setBrush>[1];
         panel: Parameters<typeof setBrush>[2];
+        outputId: Parameters<typeof setBrush>[3];
       }) => {
-        setBrush(message.brushId, message.coords, message.panel);
+        setBrush(
+          message.brushId,
+          message.coords,
+          message.panel,
+          message.outputId
+        );
       }
     );
   }

@@ -9987,6 +9987,7 @@
       return void 0;
     }
     function boundsData(boxData) {
+      var round = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : true;
       if (boxData === void 0) {
         return import_jquery30.default.extend({}, state.boundsData);
       }
@@ -9995,9 +9996,11 @@
       var boxCss = imgToCss(state.panel.scaleDataToImg(boxData));
       console.log("boxCss:");
       console.log(boxCss);
-      boxCss = mapValues(boxCss, function(val) {
-        return roundSignif(val, 13);
-      });
+      if (round) {
+        boxCss = mapValues(boxCss, function(val) {
+          return roundSignif(val, 12);
+        });
+      }
       console.log("Rounded:");
       console.log(boxCss);
       boundsCss({
@@ -10285,11 +10288,13 @@
       }
     });
     $el.on("shiny-internal:setBrush.image_output", function(e, data) {
-      if (data.brushId != inputId)
+      if (data.brushId !== inputId)
+        return;
+      if (data.outputId && data.outputId !== outputId)
         return;
       brush.setPanelIdx(data.panelIdx);
       if (brush.getPanel()) {
-        brush.boundsData(data.imgCoords);
+        brush.boundsData(data.imgCoords, false);
         brushInfoSender.immediateCall();
       } else {
         brush.reset();
@@ -10741,12 +10746,13 @@
   }
 
   // srcts/src/imageutils/setBrush.ts
-  function setBrush(brushId, coords, panel) {
+  function setBrush(brushId, coords, panel, outputId) {
     shinySetInputValue(brushId, null);
     imageOutputBinding.find(document.documentElement).trigger("shiny-internal:setBrush", {
       brushId: brushId,
       imgCoords: coords,
-      panelIdx: panel
+      panelIdx: panel,
+      outputId: outputId
     });
   }
 
@@ -12677,7 +12683,7 @@
           resetBrush(message.brushId);
         });
         addMessageHandler("setBrush", function(message) {
-          setBrush(message.brushId, message.coords, message.panel);
+          setBrush(message.brushId, message.coords, message.panel, message.outputId);
         });
       }
     }, {

@@ -74,7 +74,7 @@ type Brush = {
     (): BoundsCss;
   };
   boundsData: {
-    (boxData: BoundsData): void;
+    (boxData: BoundsData, round?: boolean): void;
     (): BoundsData;
   };
 
@@ -369,9 +369,16 @@ function createBrush(
   }
 
   // Get or set the bounds of the brush using coordinates in the data space.
+  // Option to skip rounding is useful for setBrush
   function boundsData(): ImageState["boundsData"];
-  function boundsData(boxData: Parameters<Panel["scaleDataToImg"]>[0]): void;
-  function boundsData(boxData?: Parameters<Panel["scaleDataToImg"]>[0]) {
+  function boundsData(
+    boxData: Parameters<Panel["scaleDataToImg"]>[0],
+    round?: boolean
+  ): void;
+  function boundsData(
+    boxData?: Parameters<Panel["scaleDataToImg"]>[0],
+    round = true
+  ) {
     if (boxData === undefined) {
       return $.extend({}, state.boundsData);
     }
@@ -379,16 +386,17 @@ function createBrush(
     console.log("boundsData() just got new boxData:");
     console.log(boxData);
 
-    // boxData = mapValues(boxData, (val) => roundSignif(val, 14));
-
     let boxCss = imgToCss(state.panel.scaleDataToImg(boxData));
 
     console.log("boxCss:");
     console.log(boxCss);
 
-    // Round to 13 significant digits to avoid spurious changes in FP values
-    // (#2197).
-    boxCss = mapValues(boxCss, (val) => roundSignif(val, 13)); // 12 might be better
+    if (round) {
+      // Round to 12 significant digits to avoid spurious changes in FP values
+      // (#2197). Skip this step to preserve round/precise boundsData values.
+      boxCss = mapValues(boxCss, (val) => roundSignif(val, 12));
+    }
+
     console.log("Rounded:");
     console.log(boxCss);
 

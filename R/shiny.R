@@ -201,18 +201,15 @@ workerId <- local({
 #'   The `user`'s relevant group information. Useful for determining what
 #'   privileges the user should or shouldn't have.
 #' }
-#' \item{setBrush(brushId, coords, panel=0)}{
-#'   Sets the brush with the given `brushId`, if it exists on
-#'   any `imageOutput` or `plotOutput` in the app. The `coords` should be a
-#'   list with `xmin`, `xmax`, `ymin`, `ymax` single-element numerics that
-#'   specify the desired brush position (in the plot scale). `panel` should
-#'   be a single-element integer that defines the panel that should be brushed.
-#'   If the direction of the brush was set to "x" in `brushOpts()`, then `ymin`
-#'   and `ymax` will be ignored, but must still be supplied, and vice versa.
+#' \item{setBrush(brushId, coords, panel, outputId)}{
+#'   Sets the coordinates of a brush. This should generally be called
+#'   through the friendlier [updateBrushCoords()] wrapper; see the
+#'   documentation of that function for details on the parameters.
 #' }
 #' \item{resetBrush(brushId)}{
-#'   Resets/clears the brush with the given `brushId`, if it exists on
-#'   any `imageOutput` or `plotOutput` in the app.
+#'   Resets/clears all brushes with the given `brushId`, if they exists on
+#'   any `imageOutput` or `plotOutput` in the app. This can now be called
+#'   through the friendlier [resetBrush()] wrapper.
 #' }
 #' \item{sendCustomMessage(type, message)}{
 #'   Sends a custom message to the web page. `type` must be a
@@ -820,6 +817,12 @@ ShinySession <- R6Class(
         output = .createOutputWriter(self, ns = ns),
         sendInputMessage = function(inputId, message) {
           .subset2(self, "sendInputMessage")(ns(inputId), message)
+        },
+        setBrush = function(brushId, coords, panel, outputId) {
+          .subset2(self, "setBrush")(ns(brushId), coords, panel, outputId)
+        },
+        resetBrush = function(brushId) {
+          .subset2(self, "resetBrush")(ns(brushId))
         },
         registerDataObj = function(name, data, filterFunc) {
           .subset2(self, "registerDataObj")(ns(name), data, filterFunc)
@@ -1845,18 +1848,14 @@ ShinySession <- R6Class(
       private$sendMessage(updateQueryString = list(
         queryString = queryString, mode = mode))
     },
-    setBrush = function(brushId, coords, panel = 0) {
-      if (!all(c("xmin", "xmax", "ymin", "ymax") %in% names(coords))){
-        stop("coords must have xmin, xmax, ymin and ymax fields")
-      }
-      if (!is.numeric(panel)) {
-        stop("panel must be numeric")
-      }
+    setBrush = function(brushId, coords, panel, outputId) {
+      # input validity checking is done in the updateBrushCoords() wrapper
       private$sendMessage(
         setBrush = list(
           brushId = brushId,
           coords = coords,
-          panel = panel
+          panel = panel,
+          outputId = outputId
         )
       )
     },

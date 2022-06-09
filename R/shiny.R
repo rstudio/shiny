@@ -1849,6 +1849,9 @@ ShinySession <- R6Class(
       if (!all(c("xmin", "xmax", "ymin", "ymax") %in% names(coords))){
         stop("coords must have xmin, xmax, ymin and ymax fields")
       }
+      if (!is.numeric(panel)) {
+        stop("panel must be numeric")
+      }
       private$sendMessage(
         setBrush = list(
           brushId = brushId,

@@ -303,6 +303,7 @@ function createBrush(
   // outside of it. This knows whether we're brushing in the x, y, or xy
   // directions, and sets bounds accordingly. If no box is passed in, just
   // return current bounds. For new bounds, creates or updates the div.
+  // Currently assumes that the panel is defined.
   function boundsCss(): ImageState["boundsCss"];
   function boundsCss(boxCss: BoundsCss): void;
   function boundsCss(boxCss?: BoundsCss) {

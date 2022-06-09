@@ -155,8 +155,14 @@ function createBrushHandler(
   $el.on("shiny-internal:setBrush.image_output", function (e, data) {
     if (data.brushId != inputId) return;
     brush.setPanelIdx(data.panelIdx);
-    brush.boundsData(data.imgCoords);
-    brushInfoSender.immediateCall(); // I think this is a race condition for multiple panels sharing id
+    // check that we set a valid panel
+    if (brush.getPanel()) {
+      brush.boundsData(data.imgCoords);
+      brushInfoSender.immediateCall();
+      // I think this is a race condition for multiple panels sharing id
+    } else {
+      brush.reset();
+    }
   });
 
   // Set cursor to one of 7 styles. We need to set the cursor on the whole

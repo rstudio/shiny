@@ -10290,8 +10290,12 @@
       if (data.brushId != inputId)
         return;
       brush.setPanelIdx(data.panelIdx);
-      brush.boundsData(data.imgCoords);
-      brushInfoSender.immediateCall();
+      if (brush.getPanel()) {
+        brush.boundsData(data.imgCoords);
+        brushInfoSender.immediateCall();
+      } else {
+        brush.reset();
+      }
     });
     function setCursorStyle(style) {
       $el.removeClass("crosshair grabbable grabbing ns-resize ew-resize nesw-resize nwse-resize");

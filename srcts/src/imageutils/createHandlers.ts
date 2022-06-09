@@ -130,6 +130,8 @@ function createBrushHandler(
   // Represents the state of the brush
   const brush = createBrush($el, opts, coordmap, expandPixels);
 
+  // console.log("creating new brush");
+
   // Brush IDs can span multiple image/plot outputs. When an output is brushed,
   // if a brush with the same ID is active on a different image/plot, it must
   // be dismissed (but without sending any data to the server). We implement
@@ -154,7 +156,7 @@ function createBrushHandler(
     if (data.brushId != inputId) return;
     brush.setPanelIdx(data.panelIdx);
     brush.boundsData(data.imgCoords);
-    sendBrushInfo();
+    brushInfoSender.immediateCall(); // I think this is a race condition for multiple panels sharing id
   });
 
   // Set cursor to one of 7 styles. We need to set the cursor on the whole
@@ -212,6 +214,8 @@ function createBrushHandler(
     coords.outputId = outputId;
 
     // Send data to server
+    // console.log("Sending data now!");
+    // console.log(coords);
     shinySetInputValue(inputId, coords);
 
     $el.data("mostRecentBrush", true);
@@ -350,7 +354,11 @@ function createBrushHandler(
     // Send info immediately on mouseup, but only if needed. If we don't
     // do the pending check, we might send the same data twice (with
     // no difference).
-    if (brushInfoSender.isPending()) brushInfoSender.immediateCall();
+    //
+    // shinySetInputValue already checks for duplicate data; I think all
+    // this does is avoid sending *non*-duplicate data. Changing it. -dvg
+    // if (brushInfoSender.isPending()) brushInfoSender.immediateCall();
+    brushInfoSender.immediateCall();
   }
 
   function mouseupDragging(e: JQuery.MouseUpEvent) {
@@ -364,7 +372,8 @@ function createBrushHandler(
     brush.stopDragging();
     setCursorStyle("grabbable");
 
-    if (brushInfoSender.isPending()) brushInfoSender.immediateCall();
+    // if (brushInfoSender.isPending()) brushInfoSender.immediateCall();
+    brushInfoSender.immediateCall();
   }
 
   function mouseupResizing(e: JQuery.MouseUpEvent) {
@@ -376,7 +385,8 @@ function createBrushHandler(
     brush.up(coordmap.mouseOffsetCss(e));
     brush.stopResizing();
 
-    if (brushInfoSender.isPending()) brushInfoSender.immediateCall();
+    // if (brushInfoSender.isPending()) brushInfoSender.immediateCall();
+    brushInfoSender.immediateCall();
   }
 
   // Brush maintenance: When an image is re-rendered, the brush must either
@@ -386,6 +396,7 @@ function createBrushHandler(
 
   // This should be called when the img (not the el) is reset
   function onResetImg() {
+    console.log("reset!");
     if (opts.brushResetOnNew) {
       if ($el.data("mostRecentBrush")) {
         brush.reset();
@@ -396,6 +407,7 @@ function createBrushHandler(
 
   if (!opts.brushResetOnNew) {
     if ($el.data("mostRecentBrush")) {
+      // console.log("Importing old brush");
       // Importing an old brush must happen after the image data has loaded
       // and the <img> DOM element has the updated size. If importOldBrush()
       // is called before this happens, then the css-img coordinate mappings
@@ -411,8 +423,11 @@ function createBrushHandler(
   }
 
   function onResize() {
-    brush.onResize();
-    brushInfoSender.immediateCall();
+    console.log("resize!");
+    // This doesn't accomplish anything, since the entire image is
+    // redrawn (and thus the brush reloaded) after every resize.
+    // brush.onResize();
+    // brushInfoSender.immediateCall();
   }
 
   return {

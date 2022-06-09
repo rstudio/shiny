@@ -9990,19 +9990,22 @@
       if (boxData === void 0) {
         return import_jquery30.default.extend({}, state.boundsData);
       }
+      console.log("boundsData() just got new boxData:");
+      console.log(boxData);
       var boxCss = imgToCss(state.panel.scaleDataToImg(boxData));
+      console.log("boxCss:");
+      console.log(boxCss);
       boxCss = mapValues(boxCss, function(val) {
         return roundSignif(val, 13);
       });
+      console.log("Rounded:");
+      console.log(boxCss);
       boundsCss({
         xmin: Math.min(boxCss.xmin, boxCss.xmax),
         xmax: Math.max(boxCss.xmin, boxCss.xmax),
         ymin: Math.min(boxCss.ymin, boxCss.ymax),
         ymax: Math.max(boxCss.ymin, boxCss.ymax)
       });
-      $div.show();
-      console.log("this should show the div");
-      console.log($div);
       return void 0;
     }
     function getPanel2() {
@@ -10012,16 +10015,12 @@
       state.panel = coordmap.panels[idx];
     }
     function addDiv() {
-      console.log("Start of addDiv(), $div = ");
-      console.log($div);
-      if ($div)
-        $div.remove();
       $div = (0, import_jquery30.default)(document.createElement("div")).attr("id", el.id + "_brush").css({
         "background-color": opts.brushFill,
         opacity: opts.brushOpacity,
         "pointer-events": "none",
         position: "absolute"
-      }).hide();
+      });
       var borderStyle = "1px solid " + opts.brushStroke;
       if (opts.brushDirection === "xy") {
         $div.css({
@@ -10043,8 +10042,6 @@
         x: 0,
         y: 0
       }).width(0).outerHeight(0);
-      console.log("End of addDiv(), $div = ");
-      console.log($div);
     }
     function updateDiv() {
       var imgOffsetCss = findOrigin($el.find("img"));
@@ -10071,13 +10068,14 @@
     }
     function startBrushing() {
       state.brushing = true;
-      addDiv();
+      if ($div) {
+        $div.remove();
+        $div = null;
+      }
       state.panel = coordmap.getPanelCss(state.down, expandPixels);
-      boundsCss(findBox(state.down, state.down));
     }
     function brushTo(offsetCss) {
       boundsCss(findBox(state.down, offsetCss));
-      $div.show();
     }
     function stopBrushing() {
       state.brushing = false;
@@ -10293,7 +10291,7 @@
         return;
       brush.setPanelIdx(data.panelIdx);
       brush.boundsData(data.imgCoords);
-      sendBrushInfo();
+      brushInfoSender.immediateCall();
     });
     function setCursorStyle(style) {
       $el.removeClass("crosshair grabbable grabbing ns-resize ew-resize nesw-resize nwse-resize");
@@ -10405,8 +10403,7 @@
         brushInfoSender.immediateCall();
         return;
       }
-      if (brushInfoSender.isPending())
-        brushInfoSender.immediateCall();
+      brushInfoSender.immediateCall();
     }
     function mouseupDragging(e) {
       if (e.which !== 1)
@@ -10415,8 +10412,7 @@
       brush.up(coordmap.mouseOffsetCss(e));
       brush.stopDragging();
       setCursorStyle("grabbable");
-      if (brushInfoSender.isPending())
-        brushInfoSender.immediateCall();
+      brushInfoSender.immediateCall();
     }
     function mouseupResizing(e) {
       if (e.which !== 1)
@@ -10424,10 +10420,10 @@
       (0, import_jquery32.default)(document).off("mousemove.image_brush").off("mouseup.image_brush");
       brush.up(coordmap.mouseOffsetCss(e));
       brush.stopResizing();
-      if (brushInfoSender.isPending())
-        brushInfoSender.immediateCall();
+      brushInfoSender.immediateCall();
     }
     function onResetImg() {
+      console.log("reset!");
       if (opts.brushResetOnNew) {
         if ($el.data("mostRecentBrush")) {
           brush.reset();
@@ -10442,8 +10438,7 @@
       }
     }
     function onResize() {
-      brush.onResize();
-      brushInfoSender.immediateCall();
+      console.log("resize!");
     }
     return {
       mousedown: mousedown,

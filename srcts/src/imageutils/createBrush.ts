@@ -66,9 +66,9 @@ type Brush = {
   // A callback when the wrapper div or img is resized.
   onResize: () => void;
 
-  // TODO define this type as both a getter and a setter interfaces.
-  // boundsCss: (boxCss: BoundsCss) => void;
-  // boundsCss: () => BoundsCss;
+  // These functions will get or set the bounds of the brush based on CSS or
+  // data coordinates, respectively. The setter versions will visually update
+  // the div as required to match.
   boundsCss: {
     (boxCss: BoundsCss): void;
     (): BoundsCss;
@@ -79,6 +79,7 @@ type Brush = {
   };
 
   getPanel: () => ImageState["panel"];
+
   setPanelIdx: (idx: number) => void;
 
   down: {
@@ -176,7 +177,7 @@ function createBrush(
 
     if ($div) {
       $div.remove();
-      $div = null;
+      $div = null; // let's not have a floating variable hanging around
     }
   }
 
@@ -224,6 +225,11 @@ function createBrush(
   // the same data coordinates. Note that the "resize" here refers to the
   // wrapper div/img being resized; elsewhere, "resize" refers to the brush
   // div being resized.
+  //
+  // This function appears to be completely useless--whenever a plot is resized,
+  // it's reloaded entirely, creating an entirely new brush (after this one
+  // dutifully resizes itself). Is there a situation where that doesn't happen
+  // and this code actually does something? -dvg
   function onResize() {
     const boundsDataVal = boundsData();
     // Check to see if we have valid boundsData
@@ -296,7 +302,7 @@ function createBrush(
   // panel. This will fit the box bounds into the panel, so we don't brush
   // outside of it. This knows whether we're brushing in the x, y, or xy
   // directions, and sets bounds accordingly. If no box is passed in, just
-  // return current bounds.
+  // return current bounds. For new bounds, creates or updates the div.
   function boundsCss(): ImageState["boundsCss"];
   function boundsCss(boxCss: BoundsCss): void;
   function boundsCss(boxCss?: BoundsCss) {
@@ -346,10 +352,10 @@ function createBrush(
       roundSignif(val, 14)
     ) as BoundsData;
 
-    // Actually update the shape of the div based on the new coordinates.
     if (!$div) {
       addDiv();
     }
+
     updateDiv();
 
     // We also need to attach the data bounds and panel as data attributes, so
@@ -357,7 +363,6 @@ function createBrush(
     // brush. This should be fast because it doesn't actually modify the DOM.
     $div.data("bounds-data", state.boundsData);
     $div.data("panel", state.panel);
-
     return undefined;
   }
 
@@ -369,11 +374,21 @@ function createBrush(
       return $.extend({}, state.boundsData);
     }
 
+    console.log("boundsData() just got new boxData:");
+    console.log(boxData);
+
+    // boxData = mapValues(boxData, (val) => roundSignif(val, 14));
+
     let boxCss = imgToCss(state.panel.scaleDataToImg(boxData));
+
+    console.log("boxCss:");
+    console.log(boxCss);
+
     // Round to 13 significant digits to avoid spurious changes in FP values
     // (#2197).
-
-    boxCss = mapValues(boxCss, (val) => roundSignif(val, 13));
+    boxCss = mapValues(boxCss, (val) => roundSignif(val, 13)); // 12 might be better
+    console.log("Rounded:");
+    console.log(boxCss);
 
     // The scaling function can reverse the direction of the axes, so we need to
     // find the min and max again.
@@ -383,9 +398,6 @@ function createBrush(
       ymin: Math.min(boxCss.ymin, boxCss.ymax),
       ymax: Math.max(boxCss.ymin, boxCss.ymax),
     });
-    $div.show();
-    console.log("this should show the div");
-    console.log($div);
     return undefined;
   }
 
@@ -399,11 +411,8 @@ function createBrush(
 
   // Add a new div representing the brush.
   function addDiv() {
-    console.log("Start of addDiv(), $div = ");
-    console.log($div);
-    if ($div) $div.remove();
-
-    // Start hidden; we'll show it when movement occurs
+    // Don't bother starting hidden, this only is added when we want to
+    // draw it now.
     $div = $(document.createElement("div"))
       .attr("id", el.id + "_brush")
       .css({
@@ -411,8 +420,7 @@ function createBrush(
         opacity: opts.brushOpacity,
         "pointer-events": "none",
         position: "absolute",
-      })
-      .hide();
+      });
 
     const borderStyle = "1px solid " + opts.brushStroke;
 
@@ -434,9 +442,6 @@ function createBrush(
 
     $el.append($div);
     $div.offset({ x: 0, y: 0 }).width(0).outerHeight(0);
-
-    console.log("End of addDiv(), $div = ");
-    console.log($div);
   }
 
   // Update the brush div to reflect the current brush bounds.
@@ -475,15 +480,15 @@ function createBrush(
 
   function startBrushing() {
     state.brushing = true;
-    addDiv();
+    if ($div) {
+      $div.remove(); // Remove previous div
+      $div = null;
+    }
     state.panel = coordmap.getPanelCss(state.down, expandPixels);
-
-    boundsCss(findBox(state.down, state.down));
   }
 
   function brushTo(offsetCss: Offset) {
     boundsCss(findBox(state.down, offsetCss));
-    $div.show();
   }
 
   function stopBrushing() {

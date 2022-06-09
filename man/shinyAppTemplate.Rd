@@ -25,15 +25,19 @@ This function populates a directory with files for a Shiny application.
 }
 \details{
 In an interactive R session, this function will, by default, prompt the user
-to select which components to add to the application. Choices are\preformatted{1: All
+to select which components to add to the application. Choices are
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{1: All
 2: app.R              : Main application file
 3: R/example.R        : Helper file with R code
 4: R/example-module.R : Example module
 5: tests/testthat/    : Tests using the testthat and shinytest2 package
-}
+}\if{html}{\out{</div>}}
 
 If option 1 is selected, the full example application including the
-following files and directories is created:\preformatted{appdir/
+following files and directories is created:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{appdir/
 |- app.R
 |- R
 |   |- example-module.R
@@ -45,7 +49,7 @@ following files and directories is created:\preformatted{appdir/
         |- test-server.R
         |- test-shinytest2.R
         `- test-sort.R
-}
+}\if{html}{\out{</div>}}
 
 Some notes about these files:
 \itemize{

@@ -89,7 +89,7 @@ is needed if you want to insert/remove or show/hide an entire
 \item{icon}{Optional icon to appear on a \code{navbarMenu} tab.}
 }
 \value{
-A UI defintion that can be passed to the \link{shinyUI} function.
+A UI definition that can be passed to the \link{shinyUI} function.
 }
 \description{
 Create a page that contains a top level navigation bar that can be used to

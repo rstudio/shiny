@@ -28,7 +28,7 @@ of testServer()."><meta property="og:image" content="/logo.png"><!-- mathjax -->
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">shiny</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.1.9003</span>
       </span>
     </div>
 
@@ -172,36 +172,36 @@ user. Always <code>NULL</code> for a <code>MockShinySesion</code>.</p></dd>
 <div class="section">
 <h3 id="public-methods">Public methods<a class="anchor" aria-label="anchor" href="#public-methods"></a></h3>
 
-<ul><li><p><a href="#method-new"><code>MockShinySession$new()</code></a></p></li>
-<li><p><a href="#method-onFlush"><code>MockShinySession$onFlush()</code></a></p></li>
-<li><p><a href="#method-onFlushed"><code>MockShinySession$onFlushed()</code></a></p></li>
-<li><p><a href="#method-onEnded"><code>MockShinySession$onEnded()</code></a></p></li>
-<li><p><a href="#method-isEnded"><code>MockShinySession$isEnded()</code></a></p></li>
-<li><p><a href="#method-isClosed"><code>MockShinySession$isClosed()</code></a></p></li>
-<li><p><a href="#method-close"><code>MockShinySession$close()</code></a></p></li>
-<li><p><a href="#method-cycleStartAction"><code>MockShinySession$cycleStartAction()</code></a></p></li>
-<li><p><a href="#method-fileUrl"><code>MockShinySession$fileUrl()</code></a></p></li>
-<li><p><a href="#method-setInputs"><code>MockShinySession$setInputs()</code></a></p></li>
-<li><p><a href="#method-.scheduleTask"><code>MockShinySession$.scheduleTask()</code></a></p></li>
-<li><p><a href="#method-elapse"><code>MockShinySession$elapse()</code></a></p></li>
-<li><p><a href="#method-.now"><code>MockShinySession$.now()</code></a></p></li>
-<li><p><a href="#method-defineOutput"><code>MockShinySession$defineOutput()</code></a></p></li>
-<li><p><a href="#method-getOutput"><code>MockShinySession$getOutput()</code></a></p></li>
-<li><p><a href="#method-ns"><code>MockShinySession$ns()</code></a></p></li>
-<li><p><a href="#method-flushReact"><code>MockShinySession$flushReact()</code></a></p></li>
-<li><p><a href="#method-makeScope"><code>MockShinySession$makeScope()</code></a></p></li>
-<li><p><a href="#method-setEnv"><code>MockShinySession$setEnv()</code></a></p></li>
-<li><p><a href="#method-setReturned"><code>MockShinySession$setReturned()</code></a></p></li>
-<li><p><a href="#method-getReturned"><code>MockShinySession$getReturned()</code></a></p></li>
-<li><p><a href="#method-genId"><code>MockShinySession$genId()</code></a></p></li>
-<li><p><a href="#method-rootScope"><code>MockShinySession$rootScope()</code></a></p></li>
-<li><p><a href="#method-unhandledError"><code>MockShinySession$unhandledError()</code></a></p></li>
-<li><p><a href="#method-freezeValue"><code>MockShinySession$freezeValue()</code></a></p></li>
-<li><p><a href="#method-onSessionEnded"><code>MockShinySession$onSessionEnded()</code></a></p></li>
-<li><p><a href="#method-registerDownload"><code>MockShinySession$registerDownload()</code></a></p></li>
-<li><p><a href="#method-getCurrentOutputInfo"><code>MockShinySession$getCurrentOutputInfo()</code></a></p></li>
-<li><p><a href="#method-clone"><code>MockShinySession$clone()</code></a></p></li>
-</ul></div><p></p><hr><a id="method-new"></a><div class="section">
+<ul><li><p><a href="#method-MockShinySession-new"><code>MockShinySession$new()</code></a></p></li>
+<li><p><a href="#method-MockShinySession-onFlush"><code>MockShinySession$onFlush()</code></a></p></li>
+<li><p><a href="#method-MockShinySession-onFlushed"><code>MockShinySession$onFlushed()</code></a></p></li>
+<li><p><a href="#method-MockShinySession-onEnded"><code>MockShinySession$onEnded()</code></a></p></li>
+<li><p><a href="#method-MockShinySession-isEnded"><code>MockShinySession$isEnded()</code></a></p></li>
+<li><p><a href="#method-MockShinySession-isClosed"><code>MockShinySession$isClosed()</code></a></p></li>
+<li><p><a href="#method-MockShinySession-close"><code>MockShinySession$close()</code></a></p></li>
+<li><p><a href="#method-MockShinySession-cycleStartAction"><code>MockShinySession$cycleStartAction()</code></a></p></li>
+<li><p><a href="#method-MockShinySession-fileUrl"><code>MockShinySession$fileUrl()</code></a></p></li>
+<li><p><a href="#method-MockShinySession-setInputs"><code>MockShinySession$setInputs()</code></a></p></li>
+<li><p><a href="#method-MockShinySession-.scheduleTask"><code>MockShinySession$.scheduleTask()</code></a></p></li>
+<li><p><a href="#method-MockShinySession-elapse"><code>MockShinySession$elapse()</code></a></p></li>
+<li><p><a href="#method-MockShinySession-.now"><code>MockShinySession$.now()</code></a></p></li>
+<li><p><a href="#method-MockShinySession-defineOutput"><code>MockShinySession$defineOutput()</code></a></p></li>
+<li><p><a href="#method-MockShinySession-getOutput"><code>MockShinySession$getOutput()</code></a></p></li>
+<li><p><a href="#method-MockShinySession-ns"><code>MockShinySession$ns()</code></a></p></li>
+<li><p><a href="#method-MockShinySession-flushReact"><code>MockShinySession$flushReact()</code></a></p></li>
+<li><p><a href="#method-MockShinySession-makeScope"><code>MockShinySession$makeScope()</code></a></p></li>
+<li><p><a href="#method-MockShinySession-setEnv"><code>MockShinySession$setEnv()</code></a></p></li>
+<li><p><a href="#method-MockShinySession-setReturned"><code>MockShinySession$setReturned()</code></a></p></li>
+<li><p><a href="#method-MockShinySession-getReturned"><code>MockShinySession$getReturned()</code></a></p></li>
+<li><p><a href="#method-MockShinySession-genId"><code>MockShinySession$genId()</code></a></p></li>
+<li><p><a href="#method-MockShinySession-rootScope"><code>MockShinySession$rootScope()</code></a></p></li>
+<li><p><a href="#method-MockShinySession-unhandledError"><code>MockShinySession$unhandledError()</code></a></p></li>
+<li><p><a href="#method-MockShinySession-freezeValue"><code>MockShinySession$freezeValue()</code></a></p></li>
+<li><p><a href="#method-MockShinySession-onSessionEnded"><code>MockShinySession$onSessionEnded()</code></a></p></li>
+<li><p><a href="#method-MockShinySession-registerDownload"><code>MockShinySession$registerDownload()</code></a></p></li>
+<li><p><a href="#method-MockShinySession-getCurrentOutputInfo"><code>MockShinySession$getCurrentOutputInfo()</code></a></p></li>
+<li><p><a href="#method-MockShinySession-clone"><code>MockShinySession$clone()</code></a></p></li>
+</ul></div><p></p><hr><a id="method-MockShinySession-new"></a><div class="section">
 <h3 id="method-new-">Method <code><a href="https://rdrr.io/r/methods/new.html" class="external-link">new()</a></code><a class="anchor" aria-label="anchor" href="#method-new-"></a></h3>
 <p>Create a new MockShinySession.</p><div class="section">
 <h4 id="usage">Usage<a class="anchor" aria-label="anchor" href="#usage"></a></h4>
@@ -209,7 +209,7 @@ user. Always <code>NULL</code> for a <code>MockShinySesion</code>.</p></dd>
 </div>
 
 
-</div><p></p><hr><a id="method-onFlush"></a><div class="section">
+</div><p></p><hr><a id="method-MockShinySession-onFlush"></a><div class="section">
 <h3 id="method-onflush-">Method <code><a href="onFlush.html">onFlush()</a></code><a class="anchor" aria-label="anchor" href="#method-onflush-"></a></h3>
 <p>Define a callback to be invoked before a reactive flush</p><div class="section">
 <h4 id="usage-1">Usage<a class="anchor" aria-label="anchor" href="#usage-1"></a></h4>
@@ -229,7 +229,7 @@ user. Always <code>NULL</code> for a <code>MockShinySesion</code>.</p></dd>
 </dl><p></p></div>
 </div>
 
-</div><p></p><hr><a id="method-onFlushed"></a><div class="section">
+</div><p></p><hr><a id="method-MockShinySession-onFlushed"></a><div class="section">
 <h3 id="method-onflushed-">Method <code><a href="onFlush.html">onFlushed()</a></code><a class="anchor" aria-label="anchor" href="#method-onflushed-"></a></h3>
 <p>Define a callback to be invoked after a reactive flush</p><div class="section">
 <h4 id="usage-2">Usage<a class="anchor" aria-label="anchor" href="#usage-2"></a></h4>
@@ -249,7 +249,7 @@ user. Always <code>NULL</code> for a <code>MockShinySesion</code>.</p></dd>
 </dl><p></p></div>
 </div>
 
-</div><p></p><hr><a id="method-onEnded"></a><div class="section">
+</div><p></p><hr><a id="method-MockShinySession-onEnded"></a><div class="section">
 <h3 id="method-onended-">Method <code>onEnded()</code><a class="anchor" aria-label="anchor" href="#method-onended-"></a></h3>
 <p>Define a callback to be invoked when the session ends</p><div class="section">
 <h4 id="usage-3">Usage<a class="anchor" aria-label="anchor" href="#usage-3"></a></h4>
@@ -265,7 +265,7 @@ user. Always <code>NULL</code> for a <code>MockShinySesion</code>.</p></dd>
 </dl><p></p></div>
 </div>
 
-</div><p></p><hr><a id="method-isEnded"></a><div class="section">
+</div><p></p><hr><a id="method-MockShinySession-isEnded"></a><div class="section">
 <h3 id="method-isended-">Method <code>isEnded()</code><a class="anchor" aria-label="anchor" href="#method-isended-"></a></h3>
 <p>Returns <code>FALSE</code> if the session has not yet been closed</p><div class="section">
 <h4 id="usage-4">Usage<a class="anchor" aria-label="anchor" href="#usage-4"></a></h4>
@@ -273,7 +273,7 @@ user. Always <code>NULL</code> for a <code>MockShinySesion</code>.</p></dd>
 </div>
 
 
-</div><p></p><hr><a id="method-isClosed"></a><div class="section">
+</div><p></p><hr><a id="method-MockShinySession-isClosed"></a><div class="section">
 <h3 id="method-isclosed-">Method <code>isClosed()</code><a class="anchor" aria-label="anchor" href="#method-isclosed-"></a></h3>
 <p>Returns <code>FALSE</code> if the session has not yet been closed</p><div class="section">
 <h4 id="usage-5">Usage<a class="anchor" aria-label="anchor" href="#usage-5"></a></h4>
@@ -281,7 +281,7 @@ user. Always <code>NULL</code> for a <code>MockShinySesion</code>.</p></dd>
 </div>
 
 
-</div><p></p><hr><a id="method-close"></a><div class="section">
+</div><p></p><hr><a id="method-MockShinySession-close"></a><div class="section">
 <h3 id="method-close-">Method <code><a href="https://rdrr.io/r/base/connections.html" class="external-link">close()</a></code><a class="anchor" aria-label="anchor" href="#method-close-"></a></h3>
 <p>Closes the session</p><div class="section">
 <h4 id="usage-6">Usage<a class="anchor" aria-label="anchor" href="#usage-6"></a></h4>
@@ -289,7 +289,7 @@ user. Always <code>NULL</code> for a <code>MockShinySesion</code>.</p></dd>
 </div>
 
 
-</div><p></p><hr><a id="method-cycleStartAction"></a><div class="section">
+</div><p></p><hr><a id="method-MockShinySession-cycleStartAction"></a><div class="section">
 <h3 id="method-cyclestartaction-">Method <code>cycleStartAction()</code><a class="anchor" aria-label="anchor" href="#method-cyclestartaction-"></a></h3>
 <p>Unsophisticated mock implementation that merely invokes</p><div class="section">
 <h4 id="usage-7">Usage<a class="anchor" aria-label="anchor" href="#usage-7"></a></h4>
@@ -305,7 +305,7 @@ user. Always <code>NULL</code> for a <code>MockShinySesion</code>.</p></dd>
 </dl><p></p></div>
 </div>
 
-</div><p></p><hr><a id="method-fileUrl"></a><div class="section">
+</div><p></p><hr><a id="method-MockShinySession-fileUrl"></a><div class="section">
 <h3 id="method-fileurl-">Method <code>fileUrl()</code><a class="anchor" aria-label="anchor" href="#method-fileurl-"></a></h3>
 <p>Base64-encode the given file. Needed for image rendering.</p><div class="section">
 <h4 id="usage-8">Usage<a class="anchor" aria-label="anchor" href="#usage-8"></a></h4>
@@ -329,7 +329,7 @@ user. Always <code>NULL</code> for a <code>MockShinySesion</code>.</p></dd>
 </dl><p></p></div>
 </div>
 
-</div><p></p><hr><a id="method-setInputs"></a><div class="section">
+</div><p></p><hr><a id="method-MockShinySession-setInputs"></a><div class="section">
 <h3 id="method-setinputs-">Method <code>setInputs()</code><a class="anchor" aria-label="anchor" href="#method-setinputs-"></a></h3>
 <p>Sets reactive values associated with the <code>session$inputs</code>
 object and flushes the reactives.</p><div class="section">
@@ -356,7 +356,7 @@ session$setInputs(x=1, y=2)
 </div>
 
 
-</div><p></p><hr><a id="method-.scheduleTask"></a><div class="section">
+</div><p></p><hr><a id="method-MockShinySession-.scheduleTask"></a><div class="section">
 <h3 id="method-scheduletask-">Method <code>.scheduleTask()</code><a class="anchor" aria-label="anchor" href="#method-scheduletask-"></a></h3>
 <p>An internal method which shouldn't be used by others.
 Schedules <code>callback</code> for execution after some number of <code>millis</code>
@@ -378,7 +378,7 @@ milliseconds.</p><div class="section">
 </dl><p></p></div>
 </div>
 
-</div><p></p><hr><a id="method-elapse"></a><div class="section">
+</div><p></p><hr><a id="method-MockShinySession-elapse"></a><div class="section">
 <h3 id="method-elapse-">Method <code>elapse()</code><a class="anchor" aria-label="anchor" href="#method-elapse-"></a></h3>
 <p>Simulate the passing of time by the given number of milliseconds.</p><div class="section">
 <h4 id="usage-11">Usage<a class="anchor" aria-label="anchor" href="#usage-11"></a></h4>
@@ -394,7 +394,7 @@ milliseconds.</p><div class="section">
 </dl><p></p></div>
 </div>
 
-</div><p></p><hr><a id="method-.now"></a><div class="section">
+</div><p></p><hr><a id="method-MockShinySession-.now"></a><div class="section">
 <h3 id="method-now-">Method <code>.now()</code><a class="anchor" aria-label="anchor" href="#method-now-"></a></h3>
 <p>An internal method which shouldn't be used by others.</p><div class="section">
 <h4 id="usage-12">Usage<a class="anchor" aria-label="anchor" href="#usage-12"></a></h4>
@@ -406,7 +406,7 @@ milliseconds.</p><div class="section">
 <p>Elapsed time in milliseconds.</p>
 </div>
 
-</div><p></p><hr><a id="method-defineOutput"></a><div class="section">
+</div><p></p><hr><a id="method-MockShinySession-defineOutput"></a><div class="section">
 <h3 id="method-defineoutput-">Method <code>defineOutput()</code><a class="anchor" aria-label="anchor" href="#method-defineoutput-"></a></h3>
 <p>An internal method which shouldn't be used by others.
 Defines an output in a way that sets private$currentOutputName
@@ -432,7 +432,7 @@ appropriately.</p><div class="section">
 </dl><p></p></div>
 </div>
 
-</div><p></p><hr><a id="method-getOutput"></a><div class="section">
+</div><p></p><hr><a id="method-MockShinySession-getOutput"></a><div class="section">
 <h3 id="method-getoutput-">Method <code>getOutput()</code><a class="anchor" aria-label="anchor" href="#method-getoutput-"></a></h3>
 <p>An internal method which shouldn't be used by others. Forces
 evaluation of any reactive dependencies of the output function.</p><div class="section">
@@ -454,7 +454,7 @@ evaluation of any reactive dependencies of the output function.</p><div class="s
 output.</p>
 </div>
 
-</div><p></p><hr><a id="method-ns"></a><div class="section">
+</div><p></p><hr><a id="method-MockShinySession-ns"></a><div class="section">
 <h3 id="method-ns-">Method <code>ns()</code><a class="anchor" aria-label="anchor" href="#method-ns-"></a></h3>
 <p>Returns the given id prefixed by this namespace's id.</p><div class="section">
 <h4 id="usage-15">Usage<a class="anchor" aria-label="anchor" href="#usage-15"></a></h4>
@@ -474,7 +474,7 @@ output.</p>
 <p>The id with a namespace prefix.</p>
 </div>
 
-</div><p></p><hr><a id="method-flushReact"></a><div class="section">
+</div><p></p><hr><a id="method-MockShinySession-flushReact"></a><div class="section">
 <h3 id="method-flushreact-">Method <code>flushReact()</code><a class="anchor" aria-label="anchor" href="#method-flushreact-"></a></h3>
 <p>Trigger a reactive flush right now.</p><div class="section">
 <h4 id="usage-16">Usage<a class="anchor" aria-label="anchor" href="#usage-16"></a></h4>
@@ -482,7 +482,7 @@ output.</p>
 </div>
 
 
-</div><p></p><hr><a id="method-makeScope"></a><div class="section">
+</div><p></p><hr><a id="method-MockShinySession-makeScope"></a><div class="section">
 <h3 id="method-makescope-">Method <code>makeScope()</code><a class="anchor" aria-label="anchor" href="#method-makescope-"></a></h3>
 <p>Create and return a namespace-specific session proxy.</p><div class="section">
 <h4 id="usage-17">Usage<a class="anchor" aria-label="anchor" href="#usage-17"></a></h4>
@@ -502,7 +502,7 @@ output.</p>
 <p>A new session proxy.</p>
 </div>
 
-</div><p></p><hr><a id="method-setEnv"></a><div class="section">
+</div><p></p><hr><a id="method-MockShinySession-setEnv"></a><div class="section">
 <h3 id="method-setenv-">Method <code>setEnv()</code><a class="anchor" aria-label="anchor" href="#method-setenv-"></a></h3>
 <p>Set the environment associated with a testServer() call, but
 only if it has not previously been set. This ensures that only the
@@ -525,7 +525,7 @@ other words, the first assignment wins.</p><div class="section">
 <p>The provided <code>env</code>.</p>
 </div>
 
-</div><p></p><hr><a id="method-setReturned"></a><div class="section">
+</div><p></p><hr><a id="method-MockShinySession-setReturned"></a><div class="section">
 <h3 id="method-setreturned-">Method <code>setReturned()</code><a class="anchor" aria-label="anchor" href="#method-setreturned-"></a></h3>
 <p>Set the value returned by the module call and proactively
 flush. Note that this method may be called multiple times if modules
@@ -548,7 +548,7 @@ setReturned() in the outermost module, wins.</p><div class="section">
 <p>The provided <code>value</code>.</p>
 </div>
 
-</div><p></p><hr><a id="method-getReturned"></a><div class="section">
+</div><p></p><hr><a id="method-MockShinySession-getReturned"></a><div class="section">
 <h3 id="method-getreturned-">Method <code>getReturned()</code><a class="anchor" aria-label="anchor" href="#method-getreturned-"></a></h3>
 <p>Get the value returned by the module call.</p><div class="section">
 <h4 id="usage-20">Usage<a class="anchor" aria-label="anchor" href="#usage-20"></a></h4>
@@ -560,7 +560,7 @@ setReturned() in the outermost module, wins.</p><div class="section">
 <p>The value returned by the module call</p>
 </div>
 
-</div><p></p><hr><a id="method-genId"></a><div class="section">
+</div><p></p><hr><a id="method-MockShinySession-genId"></a><div class="section">
 <h3 id="method-genid-">Method <code>genId()</code><a class="anchor" aria-label="anchor" href="#method-genid-"></a></h3>
 <p>Generate a distinct character identifier for use as a proxy
 namespace.</p><div class="section">
@@ -573,7 +573,7 @@ namespace.</p><div class="section">
 <p>A character identifier unique to the current session.</p>
 </div>
 
-</div><p></p><hr><a id="method-rootScope"></a><div class="section">
+</div><p></p><hr><a id="method-MockShinySession-rootScope"></a><div class="section">
 <h3 id="method-rootscope-">Method <code>rootScope()</code><a class="anchor" aria-label="anchor" href="#method-rootscope-"></a></h3>
 <p>Provides a way to access the root <code>MockShinySession</code> from
 any descendant proxy.</p><div class="section">
@@ -586,7 +586,7 @@ any descendant proxy.</p><div class="section">
 <p>The root <code>MockShinySession</code>.</p>
 </div>
 
-</div><p></p><hr><a id="method-unhandledError"></a><div class="section">
+</div><p></p><hr><a id="method-MockShinySession-unhandledError"></a><div class="section">
 <h3 id="method-unhandlederror-">Method <code>unhandledError()</code><a class="anchor" aria-label="anchor" href="#method-unhandlederror-"></a></h3>
 <p>Called by observers when a reactive expression errors.</p><div class="section">
 <h4 id="usage-23">Usage<a class="anchor" aria-label="anchor" href="#usage-23"></a></h4>
@@ -602,7 +602,7 @@ any descendant proxy.</p><div class="section">
 </dl><p></p></div>
 </div>
 
-</div><p></p><hr><a id="method-freezeValue"></a><div class="section">
+</div><p></p><hr><a id="method-MockShinySession-freezeValue"></a><div class="section">
 <h3 id="method-freezevalue-">Method <code>freezeValue()</code><a class="anchor" aria-label="anchor" href="#method-freezevalue-"></a></h3>
 <p>Freeze a value until the flush cycle completes.</p><div class="section">
 <h4 id="usage-24">Usage<a class="anchor" aria-label="anchor" href="#usage-24"></a></h4>
@@ -622,7 +622,7 @@ any descendant proxy.</p><div class="section">
 </dl><p></p></div>
 </div>
 
-</div><p></p><hr><a id="method-onSessionEnded"></a><div class="section">
+</div><p></p><hr><a id="method-MockShinySession-onSessionEnded"></a><div class="section">
 <h3 id="method-onsessionended-">Method <code><a href="onFlush.html">onSessionEnded()</a></code><a class="anchor" aria-label="anchor" href="#method-onsessionended-"></a></h3>
 <p>Registers the given callback to be invoked when the session
 is closed (i.e. the connection to the client has been severed). The
@@ -642,7 +642,7 @@ guaranteed.</p><div class="section">
 </dl><p></p></div>
 </div>
 
-</div><p></p><hr><a id="method-registerDownload"></a><div class="section">
+</div><p></p><hr><a id="method-MockShinySession-registerDownload"></a><div class="section">
 <h3 id="method-registerdownload-">Method <code>registerDownload()</code><a class="anchor" aria-label="anchor" href="#method-registerdownload-"></a></h3>
 <p>Associated a downloadable file with the session.</p><div class="section">
 <h4 id="usage-26">Usage<a class="anchor" aria-label="anchor" href="#usage-26"></a></h4>
@@ -675,7 +675,7 @@ function.)</p></dd>
 </dl><p></p></div>
 </div>
 
-</div><p></p><hr><a id="method-getCurrentOutputInfo"></a><div class="section">
+</div><p></p><hr><a id="method-MockShinySession-getCurrentOutputInfo"></a><div class="section">
 <h3 id="method-getcurrentoutputinfo-">Method <code><a href="getCurrentOutputInfo.html">getCurrentOutputInfo()</a></code><a class="anchor" aria-label="anchor" href="#method-getcurrentoutputinfo-"></a></h3>
 <p>Get information about the output that is currently being
 executed.</p><div class="section">
@@ -690,7 +690,7 @@ currently being executed, this will return <code>NULL</code>.
 output, or <code>NULL</code> if no output is currently executing.</p>
 </div>
 
-</div><p></p><hr><a id="method-clone"></a><div class="section">
+</div><p></p><hr><a id="method-MockShinySession-clone"></a><div class="section">
 <h3 id="method-clone-">Method <code>clone()</code><a class="anchor" aria-label="anchor" href="#method-clone-"></a></h3>
 <p>The objects of this class are cloneable with this method.</p><div class="section">
 <h4 id="usage-28">Usage<a class="anchor" aria-label="anchor" href="#usage-28"></a></h4>

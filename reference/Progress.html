@@ -18,7 +18,7 @@ Reporting progress (object-oriented API)"><meta property="og:image" content="/lo
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">shiny</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.1.9003</span>
       </span>
     </div>
 
@@ -84,15 +84,15 @@ function.</p>
 <div class="section">
 <h3 id="public-methods">Public methods<a class="anchor" aria-label="anchor" href="#public-methods"></a></h3>
 
-<ul><li><p><a href="#method-new"><code>Progress$new()</code></a></p></li>
-<li><p><a href="#method-set"><code>Progress$set()</code></a></p></li>
-<li><p><a href="#method-inc"><code>Progress$inc()</code></a></p></li>
-<li><p><a href="#method-getMin"><code>Progress$getMin()</code></a></p></li>
-<li><p><a href="#method-getMax"><code>Progress$getMax()</code></a></p></li>
-<li><p><a href="#method-getValue"><code>Progress$getValue()</code></a></p></li>
-<li><p><a href="#method-close"><code>Progress$close()</code></a></p></li>
-<li><p><a href="#method-clone"><code>Progress$clone()</code></a></p></li>
-</ul></div><p></p><hr><a id="method-new"></a><div class="section">
+<ul><li><p><a href="#method-Progress-new"><code>Progress$new()</code></a></p></li>
+<li><p><a href="#method-Progress-set"><code>Progress$set()</code></a></p></li>
+<li><p><a href="#method-Progress-inc"><code>Progress$inc()</code></a></p></li>
+<li><p><a href="#method-Progress-getMin"><code>Progress$getMin()</code></a></p></li>
+<li><p><a href="#method-Progress-getMax"><code>Progress$getMax()</code></a></p></li>
+<li><p><a href="#method-Progress-getValue"><code>Progress$getValue()</code></a></p></li>
+<li><p><a href="#method-Progress-close"><code>Progress$close()</code></a></p></li>
+<li><p><a href="#method-Progress-clone"><code>Progress$clone()</code></a></p></li>
+</ul></div><p></p><hr><a id="method-Progress-new"></a><div class="section">
 <h3 id="method-new-">Method <code><a href="https://rdrr.io/r/methods/new.html" class="external-link">new()</a></code><a class="anchor" aria-label="anchor" href="#method-new-"></a></h3>
 <p>Creates a new progress panel (but does not display it).</p><div class="section">
 <h4 id="usage">Usage<a class="anchor" aria-label="anchor" href="#usage"></a></h4>
@@ -131,7 +131,7 @@ is for backward-compatibility).</p></dd>
 </dl><p></p></div>
 </div>
 
-</div><p></p><hr><a id="method-set"></a><div class="section">
+</div><p></p><hr><a id="method-Progress-set"></a><div class="section">
 <h3 id="method-set-">Method <code>set()</code><a class="anchor" aria-label="anchor" href="#method-set-"></a></h3>
 <p>Updates the progress panel. When called the first time, the
 progress panel is displayed.</p><div class="section">
@@ -162,7 +162,7 @@ relative to <code>message</code>.</p></dd>
 </dl><p></p></div>
 </div>
 
-</div><p></p><hr><a id="method-inc"></a><div class="section">
+</div><p></p><hr><a id="method-Progress-inc"></a><div class="section">
 <h3 id="method-inc-">Method <code>inc()</code><a class="anchor" aria-label="anchor" href="#method-inc-"></a></h3>
 <p>Like <code>set</code>, this updates the progress panel. The difference
 is that <code>inc</code> increases the progress bar by <code>amount</code>, instead of
@@ -193,7 +193,7 @@ relative to <code>message</code>.</p></dd>
 </dl><p></p></div>
 </div>
 
-</div><p></p><hr><a id="method-getMin"></a><div class="section">
+</div><p></p><hr><a id="method-Progress-getMin"></a><div class="section">
 <h3 id="method-getmin-">Method <code>getMin()</code><a class="anchor" aria-label="anchor" href="#method-getmin-"></a></h3>
 <p>Returns the minimum value.</p><div class="section">
 <h4 id="usage-3">Usage<a class="anchor" aria-label="anchor" href="#usage-3"></a></h4>
@@ -201,7 +201,7 @@ relative to <code>message</code>.</p></dd>
 </div>
 
 
-</div><p></p><hr><a id="method-getMax"></a><div class="section">
+</div><p></p><hr><a id="method-Progress-getMax"></a><div class="section">
 <h3 id="method-getmax-">Method <code>getMax()</code><a class="anchor" aria-label="anchor" href="#method-getmax-"></a></h3>
 <p>Returns the maximum value.</p><div class="section">
 <h4 id="usage-4">Usage<a class="anchor" aria-label="anchor" href="#usage-4"></a></h4>
@@ -209,7 +209,7 @@ relative to <code>message</code>.</p></dd>
 </div>
 
 
-</div><p></p><hr><a id="method-getValue"></a><div class="section">
+</div><p></p><hr><a id="method-Progress-getValue"></a><div class="section">
 <h3 id="method-getvalue-">Method <code>getValue()</code><a class="anchor" aria-label="anchor" href="#method-getvalue-"></a></h3>
 <p>Returns the current value.</p><div class="section">
 <h4 id="usage-5">Usage<a class="anchor" aria-label="anchor" href="#usage-5"></a></h4>
@@ -217,7 +217,7 @@ relative to <code>message</code>.</p></dd>
 </div>
 
 
-</div><p></p><hr><a id="method-close"></a><div class="section">
+</div><p></p><hr><a id="method-Progress-close"></a><div class="section">
 <h3 id="method-close-">Method <code><a href="https://rdrr.io/r/base/connections.html" class="external-link">close()</a></code><a class="anchor" aria-label="anchor" href="#method-close-"></a></h3>
 <p>Removes the progress panel. Future calls to <code>set</code> and
 <code>close</code> will be ignored.</p><div class="section">
@@ -226,7 +226,7 @@ relative to <code>message</code>.</p></dd>
 </div>
 
 
-</div><p></p><hr><a id="method-clone"></a><div class="section">
+</div><p></p><hr><a id="method-Progress-clone"></a><div class="section">
 <h3 id="method-clone-">Method <code>clone()</code><a class="anchor" aria-label="anchor" href="#method-clone-"></a></h3>
 <p>The objects of this class are cloneable with this method.</p><div class="section">
 <h4 id="usage-7">Usage<a class="anchor" aria-label="anchor" href="#usage-7"></a></h4>

@@ -23,7 +23,7 @@ Please see the function descriptions for more details."><meta property="og:image
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">shiny</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.1.9003</span>
       </span>
     </div>
 
@@ -144,7 +144,8 @@ displays a message once every 8 hrs (by default)</p></li>
 <li><p><code>register_devmode_option</code>: Registers a Shiny Developer Mode option with an updated
 value and Developer message. This registration method allows package
 authors to write one message in a single location.</p>
-<p>For example, the following Shiny Developer Mode options are registered:</p><div class="sourceCode r"><pre><code><span class="co"># Reload the Shiny app when a sourced R file changes</span>
+<p>For example, the following Shiny Developer Mode options are registered:</p>
+<p></p><div class="sourceCode r"><pre><code><span class="co"># Reload the Shiny app when a sourced R file changes</span>
 <span class="fu"><a href="../reference/devmode.html">register_devmode_option</a></span><span class="op">(</span>
   <span class="st">"shiny.autoreload"</span>,
   <span class="st">"Turning on shiny autoreload. To disable, call `options(shiny.autoreload = FALSE)`"</span>,
@@ -198,7 +199,8 @@ re-implementing these two functions:</p>
 <ol><li><p><code>in_devmode()</code>:</p>
 <p>This function should return <code>TRUE</code> if <code>getOption("shiny.devmode")</code> is set.
 In addition, we strongly recommend that it also checks to make sure
-<code>testthat</code> is not testing.</p><div class="sourceCode r"><pre><code><span class="va">in_devmode</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="op">)</span> <span class="op">{</span>
+<code>testthat</code> is not testing.</p>
+<p></p><div class="sourceCode r"><pre><code><span class="va">in_devmode</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="op">)</span> <span class="op">{</span>
   <span class="fu"><a href="https://rdrr.io/r/base/Logic.html" class="external-link">isTRUE</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">getOption</a></span><span class="op">(</span><span class="st">"shiny.devmode"</span>, <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span> <span class="op">&amp;&amp;</span>
     <span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/identical.html" class="external-link">identical</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Sys.getenv.html" class="external-link">Sys.getenv</a></span><span class="op">(</span><span class="st">"TESTTHAT"</span><span class="op">)</span>, <span class="st">"true"</span><span class="op">)</span>
 <span class="op">}</span></code></pre><p></p></div></li>
@@ -219,7 +221,8 @@ recommend displaying a message (<code>devmode_message</code>) to <code><a href="
 hours using <code><a href="https://rlang.r-lib.org/reference/abort.html" class="external-link">rlang::inform()</a></code>. This will keep the author up to date as to
 which Dev Mode options are being altered. To allow developers a chance to
 disable Dev Mode messages, the message should be skipped if
-<code>getOption("shiny.devmode.verbose", TRUE)</code> is not <code>TRUE</code>.</p><div class="sourceCode r"><pre><code><span class="va">get_devmode_option</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">name</span>, <span class="va">default</span> <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">devmode_default</span>, <span class="va">devmode_message</span><span class="op">)</span> <span class="op">{</span>
+<code>getOption("shiny.devmode.verbose", TRUE)</code> is not <code>TRUE</code>.</p>
+<p></p><div class="sourceCode r"><pre><code><span class="va">get_devmode_option</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">name</span>, <span class="va">default</span> <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">devmode_default</span>, <span class="va">devmode_message</span><span class="op">)</span> <span class="op">{</span>
   <span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="../reference/devmode.html">in_devmode</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span>
     <span class="co"># Dev Mode disabled, act like `getOption()`</span>
     <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">getOption</a></span><span class="op">(</span><span class="va">name</span>, default <span class="op">=</span> <span class="va">default</span><span class="op">)</span><span class="op">)</span>

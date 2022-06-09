@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">shiny</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.1.9003</span>
       </span>
     </div>
 
@@ -84,17 +84,7 @@ types (such as logicals and numbers) will be coerced to strings.</p></dd>
 <dd><p>The values that should be initially selected, if any.</p></dd>
 <dt>inline</dt>
 <dd><p>If <code>TRUE</code>, render the choices inline (i.e. horizontally)</p></dd>
-<dt>choiceNames</dt>
-<dd><p>List of names and values, respectively,
-that are displayed to the user in the app and correspond to the each
-choice (for this reason, <code>choiceNames</code> and <code>choiceValues</code>
-must have the same length). If either of these arguments is
-provided, then the other <em>must</em> be provided and <code>choices</code>
-<em>must not</em> be provided. The advantage of using both of these over
-a named list for <code>choices</code> is that <code>choiceNames</code> allows any
-type of UI object to be passed through (tag objects, icons, HTML code,
-...), instead of just simple text. See Examples.</p></dd>
-<dt>choiceValues</dt>
+<dt>choiceNames, choiceValues</dt>
 <dd><p>List of names and values, respectively,
 that are displayed to the user in the app and correspond to the each
 choice (for this reason, <code>choiceNames</code> and <code>choiceValues</code>

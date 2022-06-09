@@ -26,7 +26,7 @@ renderText() and renderPlot())."><meta property="og:image" content="/logo.png"><
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">shiny</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.1.9003</span>
       </span>
     </div>
 
@@ -221,7 +221,8 @@ users. But it might make sense to also not do the computation until the
 user sets both <code>x</code> and <code>y</code>, and then clicks on an <a href="actionButton.html">actionButton</a> named
 <code>go</code>.</p>
 <p>To use both caching and events, the object should first be passed to
-<code><a href="bindCache.html">bindCache()</a></code>, then <code>bindEvent()</code>. For example:</p><div class="sourceCode NA"><pre><code></code></pre><p></p></div>
+<code><a href="bindCache.html">bindCache()</a></code>, then <code>bindEvent()</code>. For example:</p>
+<p></p><div class="sourceCode NA"><pre><code></code></pre><p></p></div>
 <p>Anything that consumes <code>r()</code> will take a reactive dependency on the event
 expression given to <code>bindEvent()</code>, and not the cache key expression given to
 <code><a href="bindCache.html">bindCache()</a></code>. In this case, it is just <code>input$go</code>.</p>

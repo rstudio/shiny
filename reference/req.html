@@ -20,7 +20,7 @@ nor displayed in the Shiny app's UI)."><meta property="og:image" content="/logo.
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">shiny</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.1.9003</span>
       </span>
     </div>
 
@@ -79,24 +79,14 @@ whatever state it happens to be in.</p></dd>
     <h2>Details</h2>
     <p>The <code>req</code> function was designed to be used in one of two ways. The first
 is to call it like a statement (ignoring its return value) before attempting
-operations using the required values:</p><div class="sourceCode"><pre><code><span class="va">rv</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/reactiveValues.html">reactiveValues</a></span><span class="op">(</span>state <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
-<span class="va">r</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/reactive.html">reactive</a></span><span class="op">(</span><span class="op">{</span>
-  <span class="fu"><a href="../reference/req.html">req</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">a</span>, <span class="va">input</span><span class="op">$</span><span class="va">b</span>, <span class="va">rv</span><span class="op">$</span><span class="va">state</span><span class="op">)</span>
-  <span class="co"># Code that uses input$a, input$b, and/or rv$state...</span>
-<span class="op">}</span><span class="op">)</span></code></pre></div>
-
+operations using the required values:</p>
+<p></p><div class="sourceCode"><pre><code></code></pre><p></p></div>
 <p>In this example, if <code>r()</code> is called and any of <code>input$a</code>,
 <code>input$b</code>, and <code>rv$state</code> are <code>NULL</code>, <code>FALSE</code>, <code>""</code>,
 etc., then the <code>req</code> call will trigger an error that propagates all the
 way up to whatever render block or observer is executing.</p>
-<p>The second is to use it to wrap an expression that must be truthy:</p><div class="sourceCode"><pre><code><span class="va">output</span><span class="op">$</span><span class="va">plot</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/renderPlot.html">renderPlot</a></span><span class="op">(</span><span class="op">{</span>
-  <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="../reference/req.html">req</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">plotType</span><span class="op">)</span> <span class="op">==</span> <span class="st">"histogram"</span><span class="op">)</span> <span class="op">{</span>
-    <span class="fu"><a href="https://rdrr.io/r/graphics/hist.html" class="external-link">hist</a></span><span class="op">(</span><span class="fu">dataset</span><span class="op">(</span><span class="op">)</span><span class="op">)</span>
-  <span class="op">}</span> <span class="kw">else</span> <span class="kw">if</span> <span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">plotType</span> <span class="op">==</span> <span class="st">"scatter"</span><span class="op">)</span> <span class="op">{</span>
-    <span class="fu">qplot</span><span class="op">(</span><span class="fu">dataset</span><span class="op">(</span><span class="op">)</span>, <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">x</span>, y <span class="op">=</span> <span class="va">y</span><span class="op">)</span><span class="op">)</span>
-  <span class="op">}</span>
-<span class="op">}</span><span class="op">)</span></code></pre></div>
-
+<p>The second is to use it to wrap an expression that must be truthy:</p>
+<p></p><div class="sourceCode"><pre><code></code></pre><p></p></div>
 <p>In this example, <code>req(input$plotType)</code> first checks that
 <code>input$plotType</code> is truthy, and if so, returns it. This is a convenient
 way to check for a value "inline" with its first use.</p>

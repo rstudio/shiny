@@ -359,16 +359,20 @@ RestoreContext <- R6Class("RestoreContext",
       values <- parseQueryString(valueStr, nested = TRUE)
 
       valuesFromJSON <- function(vals) {
-        mapply(names(vals), vals, SIMPLIFY = FALSE,
+        varsUnparsed <- c()
+        valsParsed <- mapply(names(vals), vals, SIMPLIFY = FALSE,
           FUN = function(name, value) {
             tryCatch(
               safeFromJSON(value),
               error = function(e) {
-                stop("Failed to parse URL parameter \"", name, "\"")
+                varsUnparsed <<- c(varsUnparsed, name)
+                message("Failed to parse URL parameter \"", name, "\"")
               }
             )
           }
         )
+        valsParsed[varsUnparsed] <- NULL
+        valsParsed
       }
 
       inputs <- valuesFromJSON(inputs)

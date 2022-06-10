@@ -328,7 +328,7 @@ class ShinyApp {
     // only be used for testing.
     if (
       (this.$allowReconnect === true &&
-        this.$socket?.allowReconnect === true) ||
+        this.$socket!.allowReconnect === true) ||
       this.$allowReconnect === "force"
     ) {
       const delay = this.reconnectDelay.next();
@@ -435,7 +435,7 @@ class ShinyApp {
   }
 
   $sendMsg(msg: string): void {
-    if (!this.$socket?.readyState) {
+    if (!this.$socket!.readyState) {
       this.$pendingMessages.push(msg);
     } else {
       this.$socket.send(msg);
@@ -1141,9 +1141,9 @@ class ShinyApp {
 
             if ($tab.length > 0) {
               // remove leading url if it exists. (copy of bootstrap url stripper)
-              const href = $tab.attr("href")?.replace(/.*(?=#[^\s]+$)/, "");
+              const href = $tab.attr("href")!.replace(/.*(?=#[^\s]+$)/, "");
               // remove tab id to get the index
-              const index = href?.replace("#tab-" + tabsetId + "-", "");
+              const index = href!.replace("#tab-" + tabsetId + "-", "");
 
               existingTabIds.push(Number(index));
             }
@@ -1535,9 +1535,9 @@ class ShinyApp {
     }
     url +=
       "/session/" +
-      encodeURIComponent(this.config?.sessionId as string) +
+      encodeURIComponent(this.config!.sessionId) +
       "/dataobj/shinytest?w=" +
-      encodeURIComponent(this.config?.workerId as string) +
+      encodeURIComponent(this.config!.workerId) +
       "&nonce=" +
       randomId();
 

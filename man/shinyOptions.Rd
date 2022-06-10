@@ -73,6 +73,10 @@ then jQuery 3.6.0 is used.}
 numbers to JSON format to send to the client web browser.}
 \item{shiny.launch.browser (defaults to \code{interactive()})}{A boolean which controls the default behavior
 when an app is run. See \code{\link[=runApp]{runApp()}} for more information.}
+\item{shiny.mathjax.url (defaults to \code{"https://mathjax.rstudio.com/latest/MathJax.js"})}{
+The URL that should be used to load MathJax, via \code{\link[=withMathJax]{withMathJax()}}.}
+\item{shiny.mathjax.config (defaults to \code{"config=TeX-AMS-MML_HTMLorMML"})}{The querystring
+used to load MathJax, via \code{\link[=withMathJax]{withMathJax()}}.}
 \item{shiny.maxRequestSize (defaults to 5MB)}{This is a number which specifies the maximum
 web request size, which serves as a size limit for file uploads.}
 \item{shiny.minified (defaults to \code{TRUE})}{By default

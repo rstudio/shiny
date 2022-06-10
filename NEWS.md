@@ -33,6 +33,8 @@ shiny development
 
 * Restored the previous behavior of automatically guessing the `Content-Type` header for `downloadHandler` functions when no explicit `contentType` argument is supplied. (#3393)
 
+* Closed #3619: In R 4.2, `splitLayout()` raised warnings about incorrect length in an `if` statement. (Thanks to @dmenne, #3625)
+
 shiny 1.7.1
 ===========
 

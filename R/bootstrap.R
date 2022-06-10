@@ -24,7 +24,7 @@ NULL
 #'   This will be used as the lang in the \code{<html>} tag, as in \code{<html lang="en">}.
 #'   The default (NULL) results in an empty string.
 #'
-#' @return A UI defintion that can be passed to the [shinyUI] function.
+#' @return A UI definition that can be passed to the [shinyUI] function.
 #'
 #' @note The `basicPage` function is deprecated, you should use the
 #'   [fluidPage()] function instead.
@@ -385,7 +385,7 @@ collapseSizes <- function(padding) {
 #' @inheritParams bootstrapPage
 #' @param icon Optional icon to appear on a `navbarMenu` tab.
 #'
-#' @return A UI defintion that can be passed to the [shinyUI] function.
+#' @return A UI definition that can be passed to the [shinyUI] function.
 #'
 #' @details The `navbarMenu` function can be used to create an embedded
 #'   menu within the navbar that in turns includes additional tabPanels (see

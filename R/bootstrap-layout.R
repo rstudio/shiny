@@ -13,7 +13,7 @@
 #'   Can also be set as a side effect of the [titlePanel()] function.
 #' @inheritParams bootstrapPage
 #'
-#' @return A UI defintion that can be passed to the [shinyUI] function.
+#' @return A UI definition that can be passed to the [shinyUI] function.
 #'
 #' @details To create a fluid page use the `fluidPage` function and include
 #'   instances of `fluidRow` and [column()] within it. As an
@@ -111,7 +111,7 @@ fluidRow <- function(...) {
 #' @param title The browser window title (defaults to the host URL of the page)
 #' @inheritParams bootstrapPage
 #'
-#' @return A UI defintion that can be passed to the [shinyUI] function.
+#' @return A UI definition that can be passed to the [shinyUI] function.
 #'
 #' @details To create a fixed page use the `fixedPage` function and include
 #'   instances of `fixedRow` and [column()] within it. Note that

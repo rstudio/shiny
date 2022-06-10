@@ -51,7 +51,11 @@ control.
 
 A value of \code{user} indicates that the user-facing camera and/or microphone
 should be used. A value of \code{environment} specifies that the outward-facing
-camera and/or microphone should be used.}
+camera and/or microphone should be used.
+
+By default on most phones, this will accept still photos or video. For
+still photos only, also use \code{accept="image/*"}. For video only, use
+\code{accept="video/*"}.}
 }
 \description{
 Create a file upload control that can be used to upload one or more files.

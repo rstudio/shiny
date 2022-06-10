@@ -35,6 +35,9 @@ shiny development
 
 * Closed #3619: In R 4.2, `splitLayout()` raised warnings about incorrect length in an `if` statement. (Thanks to @dmenne, #3625)
 
+* Closed #2297: If an error occurred in parsing a value in a bookmark query string, an error would be thrown and nothing would be restored. Now a message is displayed and that value is ignored. (Thanks to @daattali, #3385)
+
+
 shiny 1.7.1
 ===========
 

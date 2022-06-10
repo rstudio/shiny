@@ -9975,9 +9975,6 @@
       var minData = state.panel.scaleImgToData(cssToImg(minCss));
       var maxData = state.panel.scaleImgToData(cssToImg(maxCss));
       state.boundsData = findBox(minData, maxData);
-      state.boundsData = mapValues(state.boundsData, function(val) {
-        return roundSignif(val, 14);
-      });
       if (!$div) {
         addDiv();
       }
@@ -9987,7 +9984,6 @@
       return void 0;
     }
     function boundsData(boxData) {
-      var round = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : true;
       if (boxData === void 0) {
         return import_jquery30.default.extend({}, state.boundsData);
       }
@@ -9995,13 +9991,6 @@
       console.log(boxData);
       var boxCss = imgToCss(state.panel.scaleDataToImg(boxData));
       console.log("boxCss:");
-      console.log(boxCss);
-      if (round) {
-        boxCss = mapValues(boxCss, function(val) {
-          return roundSignif(val, 12);
-        });
-      }
-      console.log("Rounded:");
       console.log(boxCss);
       boundsCss({
         xmin: Math.min(boxCss.xmin, boxCss.xmax),
@@ -10294,7 +10283,7 @@
         return;
       brush.setPanelIdx(data.panelIdx);
       if (brush.getPanel()) {
-        brush.boundsData(data.imgCoords, false);
+        brush.boundsData(data.imgCoords);
         brushInfoSender.immediateCall();
       } else {
         brush.reset();
@@ -10306,7 +10295,9 @@
         $el.addClass(style);
     }
     function sendBrushInfo() {
-      var coords = brush.boundsData();
+      var coords = mapValues(brush.boundsData(), function(val) {
+        return roundSignif(val, 13);
+      });
       if (isNaN(coords.xmin)) {
         shinySetInputValue(inputId, null);
         imageOutputBinding.find(document.documentElement).trigger("shiny-internal:brushed", {
@@ -10317,7 +10308,9 @@
       }
       var panel = brush.getPanel();
       import_jquery32.default.extend(coords, panel.panel_vars);
-      coords.coords_css = brush.boundsCss();
+      coords.coords_css = mapValues(brush.boundsCss(), function(val) {
+        return roundSignif(val, 13);
+      });
       coords.coords_img = coordmap.scaleCssToImg(coords.coords_css);
       coords.img_css_ratio = coordmap.cssToImgScalingRatio();
       coords.mapping = panel.mapping;

@@ -74,7 +74,7 @@ type Brush = {
     (): BoundsCss;
   };
   boundsData: {
-    (boxData: BoundsData, round?: boolean): void;
+    (boxData: BoundsData): void;
     (): BoundsData;
   };
 
@@ -344,20 +344,14 @@ function createBrush(
     // Positions in data space
     const minData = state.panel.scaleImgToData(cssToImg(minCss));
     const maxData = state.panel.scaleImgToData(cssToImg(maxCss));
+
     // For reversed scales, the min and max can be reversed, so use findBox
     // to ensure correct order.
-
     state.boundsData = findBox(minData, maxData);
-    // Round to 14 significant digits to avoid spurious changes in FP values
-    // (#1634).
-    state.boundsData = mapValues(state.boundsData, (val) =>
-      roundSignif(val, 14)
-    ) as BoundsData;
 
     if (!$div) {
       addDiv();
     }
-
     updateDiv();
 
     // We also need to attach the data bounds and panel as data attributes, so
@@ -371,14 +365,8 @@ function createBrush(
   // Get or set the bounds of the brush using coordinates in the data space.
   // Option to skip rounding is useful for setBrush
   function boundsData(): ImageState["boundsData"];
-  function boundsData(
-    boxData: Parameters<Panel["scaleDataToImg"]>[0],
-    round?: boolean
-  ): void;
-  function boundsData(
-    boxData?: Parameters<Panel["scaleDataToImg"]>[0],
-    round = true
-  ) {
+  function boundsData(boxData: Parameters<Panel["scaleDataToImg"]>[0]): void;
+  function boundsData(boxData?: Parameters<Panel["scaleDataToImg"]>[0]) {
     if (boxData === undefined) {
       return $.extend({}, state.boundsData);
     }
@@ -386,18 +374,9 @@ function createBrush(
     console.log("boundsData() just got new boxData:");
     console.log(boxData);
 
-    let boxCss = imgToCss(state.panel.scaleDataToImg(boxData));
+    const boxCss = imgToCss(state.panel.scaleDataToImg(boxData));
 
     console.log("boxCss:");
-    console.log(boxCss);
-
-    if (round) {
-      // Round to 12 significant digits to avoid spurious changes in FP values
-      // (#2197). Skip this step to preserve round/precise boundsData values.
-      boxCss = mapValues(boxCss, (val) => roundSignif(val, 12));
-    }
-
-    console.log("Rounded:");
     console.log(boxCss);
 
     // The scaling function can reverse the direction of the axes, so we need to

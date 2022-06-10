@@ -8,6 +8,7 @@ import type { Offset } from "./findbox";
 import type { Coordmap } from "./initCoordmap";
 import type { Panel } from "./initPanelScales";
 import type { InputRatePolicy } from "../inputPolicies";
+import { mapValues, roundSignif } from "../utils";
 
 // ----------------------------------------------------------
 // Handler creators for click, hover, brush.
@@ -155,7 +156,7 @@ function createBrushHandler(
     brush.setPanelIdx(data.panelIdx);
     // check that we set a valid panel
     if (brush.getPanel()) {
-      brush.boundsData(data.imgCoords, false); // don't over-round
+      brush.boundsData(data.imgCoords);
       brushInfoSender.immediateCall();
       // I think this is a race condition for multiple panels sharing id
     } else {
@@ -176,7 +177,12 @@ function createBrushHandler(
   }
 
   function sendBrushInfo() {
-    const coords: BrushInfo = brush.boundsData();
+    // Round to 13 significant digits *here* to prevent FP-rounding-induced
+    // resends of almost-but-not-quite-exactly-the-same data.
+    // This fixes #1634 and the related issue in #2197 for real.
+    const coords: BrushInfo = mapValues(brush.boundsData(), (val) =>
+      roundSignif(val, 13)
+    ) as Bounds;
 
     // We're in a new or reset state
     if (isNaN(coords.xmin)) {
@@ -196,8 +202,13 @@ function createBrushHandler(
     // Add the panel (facet) variables, if present
     $.extend(coords, panel.panel_vars);
 
+    // Round to 13 significant digits *here* to prevent FP-rounding-induced
+    // resends of almost-but-not-quite-exactly-the-same data.
     // eslint-disable-next-line camelcase
-    coords.coords_css = brush.boundsCss();
+    coords.coords_css = mapValues(brush.boundsCss(), (val) =>
+      roundSignif(val, 13)
+    ) as Bounds;
+
     // eslint-disable-next-line camelcase
     coords.coords_img = coordmap.scaleCssToImg(coords.coords_css);
 

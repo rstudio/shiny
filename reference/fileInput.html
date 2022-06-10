@@ -60,7 +60,8 @@
   accept <span class="op">=</span> <span class="cn">NULL</span>,
   width <span class="op">=</span> <span class="cn">NULL</span>,
   buttonLabel <span class="op">=</span> <span class="st">"Browse..."</span>,
-  placeholder <span class="op">=</span> <span class="st">"No file selected"</span>
+  placeholder <span class="op">=</span> <span class="st">"No file selected"</span>,
+  capture <span class="op">=</span> <span class="cn">NULL</span>
 <span class="op">)</span></code></pre></div>
     </div>
 
@@ -91,6 +92,14 @@ see <code><a href="https://rdrr.io/pkg/htmltools/man/validateCssUnit.html" class
 object.</p></dd>
 <dt>placeholder</dt>
 <dd><p>The text to show before a file has been uploaded.</p></dd>
+<dt>capture</dt>
+<dd><p>What source to use for capturing image, audio or video data.
+This attribute facilitates user access to a device's media capture
+mechanism, such as a camera, or microphone, from within a file upload
+control.</p>
+<p>A value of <code>user</code> indicates that the user-facing camera and/or microphone
+should be used. A value of <code>environment</code> specifies that the outward-facing
+camera and/or microphone should be used.</p></dd>
 </dl></div>
     <div id="details">
     <h2>Details</h2>

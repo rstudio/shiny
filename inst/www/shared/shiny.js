@@ -9506,7 +9506,6 @@
   // srcts/src/imageutils/initPanelScales.ts
   function mapLinear(x, domainMin, domainMax, rangeMin, rangeMax) {
     var clip = arguments.length > 5 && arguments[5] !== void 0 ? arguments[5] : true;
-    clip = clip || true;
     var factor = (rangeMax - rangeMin) / (domainMax - domainMin);
     var val = x - domainMin;
     var newval = val * factor + rangeMin;
@@ -9972,8 +9971,8 @@
         ymin: minCss.y,
         ymax: maxCss.y
       };
-      var minData = state.panel.scaleImgToData(cssToImg(minCss));
-      var maxData = state.panel.scaleImgToData(cssToImg(maxCss));
+      var minData = state.panel.scaleImgToData(cssToImg(minCss), opts.brushClip);
+      var maxData = state.panel.scaleImgToData(cssToImg(maxCss), opts.brushClip);
       state.boundsData = findBox(minData, maxData);
       if (!$div) {
         addDiv();
@@ -9987,7 +9986,7 @@
       if (boxData === void 0) {
         return import_jquery30.default.extend({}, state.boundsData);
       }
-      var boxCss = imgToCss(state.panel.scaleDataToImg(boxData));
+      var boxCss = imgToCss(state.panel.scaleDataToImg(boxData, opts.brushClip));
       boundsCss({
         xmin: Math.min(boxCss.xmin, boxCss.xmax),
         xmax: Math.max(boxCss.xmin, boxCss.xmax),

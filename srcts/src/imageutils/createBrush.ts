@@ -1,7 +1,7 @@
 import $ from "jquery";
 import type { Coordmap } from "./initCoordmap";
 import { findOrigin } from "./initCoordmap";
-import { equal, isnan, mapValues, roundSignif } from "../utils";
+import { equal, isnan } from "../utils";
 import type { Panel } from "./initPanelScales";
 
 import type { Offset } from "./findbox";
@@ -342,8 +342,14 @@ function createBrush(
     };
 
     // Positions in data space
-    const minData = state.panel.scaleImgToData(cssToImg(minCss));
-    const maxData = state.panel.scaleImgToData(cssToImg(maxCss));
+    const minData = state.panel.scaleImgToData(
+      cssToImg(minCss),
+      opts.brushClip
+    );
+    const maxData = state.panel.scaleImgToData(
+      cssToImg(maxCss),
+      opts.brushClip
+    );
 
     // For reversed scales, the min and max can be reversed, so use findBox
     // to ensure correct order.
@@ -371,7 +377,9 @@ function createBrush(
       return $.extend({}, state.boundsData);
     }
 
-    const boxCss = imgToCss(state.panel.scaleDataToImg(boxData));
+    const boxCss = imgToCss(
+      state.panel.scaleDataToImg(boxData, opts.brushClip)
+    );
 
     // The scaling function can reverse the direction of the axes, so we need to
     // find the min and max again.

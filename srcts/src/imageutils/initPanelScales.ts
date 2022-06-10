@@ -10,11 +10,8 @@ function mapLinear(
   domainMax: number,
   rangeMin: number,
   rangeMax: number,
-  clip = true
+  clip = true // By default, clip to range
 ) {
-  // By default, clip to range
-  clip = clip || true;
-
   const factor = (rangeMax - rangeMin) / (domainMax - domainMin);
   const val = x - domainMin;
   let newval = val * factor + rangeMin;

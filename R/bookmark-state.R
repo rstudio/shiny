@@ -321,6 +321,8 @@ RestoreContext <- R6Class("RestoreContext",
       if (substr(queryString, 1, 1) == '?')
         queryString <- substr(queryString, 2, nchar(queryString))
 
+      # The "=" after "_inputs_" is optional. Shiny doesn't generate URLs with
+      # "=", but httr always adds "=".
       inputs_reg <- "(^|&)_inputs_=?(&|$)"
       values_reg <- "(^|&)_values_=?(&|$)"
 

@@ -371,13 +371,7 @@ function createBrush(
       return $.extend({}, state.boundsData);
     }
 
-    console.log("boundsData() just got new boxData:");
-    console.log(boxData);
-
     const boxCss = imgToCss(state.panel.scaleDataToImg(boxData));
-
-    console.log("boxCss:");
-    console.log(boxCss);
 
     // The scaling function can reverse the direction of the axes, so we need to
     // find the min and max again.

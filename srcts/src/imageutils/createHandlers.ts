@@ -229,8 +229,6 @@ function createBrushHandler(
     coords.outputId = outputId;
 
     // Send data to server
-    // console.log("Sending data now!");
-    // console.log(coords);
     shinySetInputValue(inputId, coords);
 
     $el.data("mostRecentBrush", true);
@@ -411,7 +409,6 @@ function createBrushHandler(
 
   // This should be called when the img (not the el) is reset
   function onResetImg() {
-    console.log("reset!");
     if (opts.brushResetOnNew) {
       if ($el.data("mostRecentBrush")) {
         brush.reset();
@@ -422,7 +419,6 @@ function createBrushHandler(
 
   if (!opts.brushResetOnNew) {
     if ($el.data("mostRecentBrush")) {
-      // console.log("Importing old brush");
       // Importing an old brush must happen after the image data has loaded
       // and the <img> DOM element has the updated size. If importOldBrush()
       // is called before this happens, then the css-img coordinate mappings
@@ -440,7 +436,6 @@ function createBrushHandler(
   // This doesn't accomplish anything, since the entire image is
   // redrawn (and thus the brush reloaded) after every resize.
   // function onResize() {
-  //   console.log("resize!");
   //   // brush.onResize();
   //   // brushInfoSender.immediateCall();
   // }

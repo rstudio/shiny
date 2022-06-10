@@ -9987,11 +9987,7 @@
       if (boxData === void 0) {
         return import_jquery30.default.extend({}, state.boundsData);
       }
-      console.log("boundsData() just got new boxData:");
-      console.log(boxData);
       var boxCss = imgToCss(state.panel.scaleDataToImg(boxData));
-      console.log("boxCss:");
-      console.log(boxCss);
       boundsCss({
         xmin: Math.min(boxCss.xmin, boxCss.xmax),
         xmax: Math.max(boxCss.xmin, boxCss.xmax),
@@ -10423,7 +10419,6 @@
       brushInfoSender.immediateCall();
     }
     function onResetImg() {
-      console.log("reset!");
       if (opts.brushResetOnNew) {
         if ($el.data("mostRecentBrush")) {
           brush.reset();

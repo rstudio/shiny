@@ -32,6 +32,9 @@
 #'   should be used. A value of `environment` specifies that the outward-facing
 #'   camera and/or microphone should be used.
 #'
+#'   By default on most phones, this will accept still photos or video. For
+#'   still photos only, also use `accept="image/*"`. For video only, use
+#'   `accept="video/*"`.
 #' @examples
 #' ## Only run examples in interactive R sessions
 #' if (interactive()) {
@@ -111,14 +114,7 @@ fileInput <- function(inputId, label, multiple = FALSE, accept = NULL,
     inputTag$attribs$accept <- paste(accept, collapse=',')
 
   if (!is.null(capture)) {
-    inputTag$attribs$capture <- switch(
-      tolower(capture[1]),
-      # Only standard values are `user` and `environment`
-      "user" = "user",
-      "environment" = "environment",
-      # Missing attr value is allowed
-      NA
-    )
+    inputTag$attribs$capture <- capture
   }
 
   div(class = "form-group shiny-input-container",

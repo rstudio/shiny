@@ -65,7 +65,7 @@ download available.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">downloadHandler</span><span class="op">(</span><span class="va">filename</span>, <span class="va">content</span>, contentType <span class="op">=</span> <span class="cn">NA</span>, outputArgs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">downloadHandler</span><span class="op">(</span><span class="va">filename</span>, <span class="va">content</span>, contentType <span class="op">=</span> <span class="cn">NULL</span>, outputArgs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -83,9 +83,9 @@ function.)</p></dd>
 <dt>contentType</dt>
 <dd><p>A string of the download's
 <a href="https://en.wikipedia.org/wiki/Internet_media_type" class="external-link">content type</a>, for
-example <code>"text/csv"</code> or <code>"image/png"</code>. If <code>NULL</code> or
-<code>NA</code>, the content type will be guessed based on the filename
-extension, or <code>application/octet-stream</code> if the extension is unknown.</p></dd>
+example <code>"text/csv"</code> or <code>"image/png"</code>. If <code>NULL</code>, the content type
+will be guessed based on the filename extension, or
+<code>application/octet-stream</code> if the extension is unknown.</p></dd>
 <dt>outputArgs</dt>
 <dd><p>A list of arguments to be passed through to the implicit
 call to <code><a href="downloadButton.html">downloadButton()</a></code> when <code>downloadHandler</code> is used

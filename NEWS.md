@@ -17,6 +17,8 @@ shiny development
 
 * The auto-reload feature (`options(shiny.autoreload=TRUE)`) was not being activated by `devmode(TRUE)`, despite a console message asserting that it was. (#3620)
 
+* Add `shiny.mathjax.url` and `shiny.mathjax.config` options for configuring the MathJax URL used by `withMathJax`. Thanks, @Neutron3529! (#3639)
+
 ### Bug fixes
 
 * Closed tidyverse/dplyr#5552: Compatibility of dplyr 1.0 (and rlang chained errors in general) with `req()`, `validate()`, and friends.

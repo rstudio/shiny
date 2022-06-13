@@ -37,19 +37,15 @@ class DateInputBindingBase extends InputBinding {
     el;
   }
   subscribe(el: HTMLElement, callback: (x: boolean) => void): void {
-    $(el).on(
-      "keyup.dateInputBinding input.dateInputBinding",
-      // event: Event
-      function () {
-        // Use normal debouncing policy when typing
-        callback(true);
-      }
-    );
+    // Don't update when in the middle of typing--this tends to send spurious
+    // values to the server based on unpredictable browser-dependant
+    // interpretation of incomplete date strings.
     $(el).on(
       "changeDate.dateInputBinding change.dateInputBinding",
       // event: Event
       function () {
         // Send immediately when clicked
+        // Or after typing, when enter pressed or focus lost
         callback(false);
       }
     );

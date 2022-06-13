@@ -180,6 +180,11 @@ function createBrushHandler(
     // Round to 13 significant digits *here* to prevent FP-rounding-induced
     // resends of almost-but-not-quite-exactly-the-same data.
     // This fixes #1634 and the related issue in #2197 for real.
+    // TODO: haha, of course this doesn't actually fix it perfectly.
+    // Values are still sporadic near zero, because 1.23456789e-20
+    // and 1.98765432e-20 both get reported with all their "significant"
+    // digits and cause a resend. Maybe write rounding function that
+    // determines precision based on full range of plot?
     const coords: BrushInfo = mapValues(brush.boundsData(), (val) =>
       roundSignif(val, 13)
     ) as Bounds;

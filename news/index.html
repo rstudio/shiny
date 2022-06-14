@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">shiny</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.1.9003</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.2</span>
       </span>
     </div>
 
@@ -47,6 +47,33 @@
       <small>Source: <a href="https://github.com/rstudio/shiny/blob/HEAD/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="page-header" data-toc-text="1.7.2" id="shiny-172">shiny 1.7.2<a class="anchor" aria-label="anchor" href="#shiny-172"></a></h2>
+<div class="section level3">
+<h3 id="new-features-and-improvements-1-7-2">New features and improvements<a class="anchor" aria-label="anchor" href="#new-features-and-improvements-1-7-2"></a></h3>
+<ul><li><p>Closed <a href="https://github.com/rstudio/shiny/issues/1545" class="external-link">#1545</a>: <code><a href="../reference/insertUI.html">insertUI()</a></code> now executes <code>&lt;script&gt;</code> tags. (<a href="https://github.com/rstudio/shiny/issues/3630" class="external-link">#3630</a>)</p></li>
+<li><p><code><a href="../reference/fileInput.html">fileInput()</a></code> can set the <code>capture</code> attribute to facilitates user access to a device’s media capture mechanism, such as a camera, or microphone, from within a file upload control (<a href="https://www.w3.org/TR/html-media-capture/" class="external-link">W3C HTML Media Capture</a>). (Thanks to khaled-alshamaa, <a href="https://github.com/rstudio/shiny/issues/3481" class="external-link">#3481</a>)</p></li>
+<li><p>Closed tidyverse/dplyr#5552: Compatibility of dplyr 1.0 (and rlang chained errors in general) with <code><a href="../reference/req.html">req()</a></code>, <code><a href="../reference/validate.html">validate()</a></code>, and friends.</p></li>
+<li><p>Closed tidyverse/dplyr#6154: Values from an <code><a href="../reference/actionButton.html">actionButton()</a></code> had S3 classes in the incorrect order.</p></li>
+<li><p>Closed <a href="https://github.com/rstudio/shiny/issues/3346" class="external-link">#3346</a>: Default for <code>ref</code> input in <code>runGithub()</code> changed from <code>"master"</code> to <code>"HEAD"</code>. (<a href="https://github.com/rstudio/shiny/issues/3564" class="external-link">#3564</a>)</p></li>
+<li><p>Closed <a href="https://github.com/rstudio/shiny/issues/3619" class="external-link">#3619</a>: In R 4.2, <code><a href="../reference/splitLayout.html">splitLayout()</a></code> no longer raises warnings about incorrect length in an <code>if</code> statement. (Thanks to <a href="https://github.com/dmenne" class="external-link">@dmenne</a>, <a href="https://github.com/rstudio/shiny/issues/3625" class="external-link">#3625</a>)</p></li>
+</ul><div class="section level4">
+<h4 id="bug-fixes-1-7-2">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-1-7-2"></a></h4>
+<ul><li><p>The auto-reload feature (<code>options(shiny.autoreload=TRUE)</code>) was not being activated by <code>devmode(TRUE)</code>, despite a console message asserting that it was. (<a href="https://github.com/rstudio/shiny/issues/3620" class="external-link">#3620</a>)</p></li>
+<li><p>Closed <a href="https://github.com/rstudio/shiny/issues/2297" class="external-link">#2297</a>: If an error occurred in parsing a value in a bookmark query string, an error would be thrown and nothing would be restored. Now a message is displayed and that value is ignored. (Thanks to <a href="https://github.com/daattali" class="external-link">@daattali</a>, <a href="https://github.com/rstudio/shiny/issues/3385" class="external-link">#3385</a>)</p></li>
+<li><p>Restored the previous behavior of automatically guessing the <code>Content-Type</code> header for <code>downloadHandler</code> functions when no explicit <code>contentType</code> argument is supplied. (<a href="https://github.com/rstudio/shiny/issues/3393" class="external-link">#3393</a>)</p></li>
+<li><p>Previously, updating an input value without a corresponding Input binding element did not trigger a JavaScript <code>shiny:inputchanged</code> event. Now, if no Input binding element is found, the <code>shiny:inputchanged</code> event is triggered on <code>window.document</code>. (<a href="https://github.com/rstudio/shiny/issues/3584" class="external-link">#3584</a>)</p></li>
+<li><p>Closed <a href="https://github.com/rstudio/shiny/issues/2955" class="external-link">#2955</a>: Input and output bindings previously attempted to use <code>el['data-input-id']</code>, but that never worked. They now use <code>el.getAttribute('data-input-id')</code> instead. (<a href="https://github.com/rstudio/shiny/issues/3538" class="external-link">#3538</a>)</p></li>
+</ul></div>
+<div class="section level4">
+<h4 id="minor-improvements-1-7-2">Minor improvements<a class="anchor" aria-label="anchor" href="#minor-improvements-1-7-2"></a></h4>
+<ul><li><p>When taking a test snapshot, the sort order of the json keys of the <code>input</code>, <code>output</code>, and <code>export</code> fields is currently sorted using the locale of the machine. This can lead to inconsistent test snapshot results. To opt-in to a consistent ordering of snapshot fields with <a href="https://github.com/rstudio/shinytest" class="external-link">shinytest</a>, please set the global option <code>options(shiny.snapshotsortc = TRUE)</code>. <a href="https://github.com/rstudio/shinytest2" class="external-link">shinytest2</a> users do not need to set this value. (<a href="https://github.com/rstudio/shiny/issues/3515" class="external-link">#3515</a>)</p></li>
+<li><p>Closed rstudio/shinytest2#222: When restoring a context (i.e., bookmarking) from a URL, Shiny now better handles a trailing <code>=</code> after <code>_inputs_</code> and <code>_values_</code>. (<a href="https://github.com/rstudio/shiny/issues/3648" class="external-link">#3648</a>)</p></li>
+<li><p>Shiny’s internal HTML dependencies are now mounted dynamically instead of statically. (<a href="https://github.com/rstudio/shiny/issues/3537" class="external-link">#3537</a>)</p></li>
+<li><p>HTML dependencies that are sent to dynamic UI now have better type checking, and no longer require a <code>dep.src.href</code> field. (<a href="https://github.com/rstudio/shiny/issues/3537" class="external-link">#3537</a>)</p></li>
+</ul></div>
+</div>
+</div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="1.7.1" id="shiny-171">shiny 1.7.1<small>2021-10-02</small><a class="anchor" aria-label="anchor" href="#shiny-171"></a></h2>
 <div class="section level3">
@@ -375,7 +402,7 @@
 <li><p>The internal <code><a href="https://rdrr.io/r/utils/URLencode.html" class="external-link">URLdecode()</a></code> function previously was a copy of <code><a href="https://rdrr.io/pkg/httpuv/man/encodeURI.html" class="external-link">httpuv::decodeURIComponent()</a></code>, assigned at build time; now it invokes the httpuv function at run time.</p></li>
 <li><p>Fixed <a href="https://github.com/rstudio/shiny/issues/1840" class="external-link">#1840</a>: with the release of Shiny 1.0.5, we accidently changed the relative positioning of the icon and the title text in <code>navbarMenu</code>s and <code>tabPanel</code>s. This fix reverts this behavior back (i.e. the icon should be to the left of the text and/or the downward arrow in case of <code>navbarMenu</code>s). (<a href="https://github.com/rstudio/shiny/issues/1848" class="external-link">#1848</a>)</p></li>
 <li><p>Fixed <a href="https://github.com/rstudio/shiny/issues/1600" class="external-link">#1600</a>: URL-encoded bookmarking did not work with sliders that had dates or date-times. (<a href="https://github.com/rstudio/shiny/issues/1961" class="external-link">#1961</a>)</p></li>
-<li><p>Fixed <a href="https://github.com/rstudio/shiny/issues/1962" class="external-link">#1962</a>: <a href="https://blog.rstudio.com/2017/08/15/shiny-1-0-4/" class="external-link">File dragging and dropping</a> broke in the presence of jQuery version 3.0 as introduced by the <a href="https://jrowen.github.io/rhandsontable/" class="external-link">rhandsontable</a> <a href="https://www.htmlwidgets.org/" class="external-link">htmlwidget</a>. (<a href="https://github.com/rstudio/shiny/issues/2005" class="external-link">#2005</a>)</p></li>
+<li><p>Fixed <a href="https://github.com/rstudio/shiny/issues/1962" class="external-link">#1962</a>: <a href="https://www.rstudio.com/blog/shiny-1-0-4/" class="external-link">File dragging and dropping</a> broke in the presence of jQuery version 3.0 as introduced by the <a href="https://jrowen.github.io/rhandsontable/" class="external-link">rhandsontable</a> <a href="https://www.htmlwidgets.org/" class="external-link">htmlwidget</a>. (<a href="https://github.com/rstudio/shiny/issues/2005" class="external-link">#2005</a>)</p></li>
 <li><p>Improved the error handling inside the <code><a href="../reference/resourcePaths.html">addResourcePath()</a></code> function, to give end users more informative error messages when the <code>directoryPath</code> argument cannot be normalized. This is especially useful for <code>runtime: shiny_prerendered</code> Rmd documents, like <code>learnr</code> tutorials. (<a href="https://github.com/rstudio/shiny/issues/1968" class="external-link">#1968</a>)</p></li>
 <li><p>Changed script tags in reactlog (<a href="https://github.com/rstudio/shiny/blob/v1.1.0/inst/www/reactive-graph.html" class="external-link">inst/www/reactive-graph.html</a>) from HTTP to HTTPS in order to avoid mixed content blocking by most browsers. (Thanks, <a href="https://github.com/jekriske-lilly" class="external-link">@jekriske-lilly</a>! <a href="https://github.com/rstudio/shiny/issues/1844" class="external-link">#1844</a>)</p></li>
 <li><p>Addressed <a href="https://github.com/rstudio/shiny/issues/1784" class="external-link">#1784</a>: <code><a href="../reference/runApp.html">runApp()</a></code> will avoid port 6697, which is considered unsafe by Chrome.</p></li>

@@ -1,4 +1,4 @@
-shiny development
+shiny 1.7.2
 ================
 
 ## Full changelog

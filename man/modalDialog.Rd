@@ -24,7 +24,8 @@ modalButton(label, icon = NULL)
 \item{footer}{UI for footer. Use \code{NULL} for no footer.}
 
 \item{size}{One of \code{"s"} for small, \code{"m"} (the default) for medium,
-or \code{"l"} for large.}
+\code{"l"} for large or \code{"xl"} for extra large (will be changed to \code{"m"}
+in Bootstrap 3).}
 
 \item{easyClose}{If \code{TRUE}, the modal dialog can be dismissed by
 clicking outside the dialog box, or be pressing the Escape key. If

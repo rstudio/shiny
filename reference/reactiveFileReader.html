@@ -64,25 +64,36 @@ contents of the file.</p>
 <dd><p>Approximate number of milliseconds to wait between
 checks of the file's last modified time. This can be a numeric value, or a
 function that returns a numeric value.</p></dd>
+
+
 <dt>session</dt>
 <dd><p>The user session to associate this file reader with, or
 <code>NULL</code> if none. If non-null, the reader will automatically stop when
 the session ends.</p></dd>
+
+
 <dt>filePath</dt>
 <dd><p>The file path to poll against and to pass to <code>readFunc</code>.
 This can either be a single-element character vector, or a function that
 returns one.</p></dd>
+
+
 <dt>readFunc</dt>
 <dd><p>The function to use to read the file; must expect the first
 argument to be the file path to read. The return value of this function is
 used as the value of the reactive file reader.</p></dd>
+
+
 <dt>...</dt>
 <dd><p>Any additional arguments to pass to <code>readFunc</code> whenever it is
 invoked.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>A reactive expression that returns the contents of the file, and
+    
+
+<p>A reactive expression that returns the contents of the file, and
 automatically invalidates when the file changes on disk (as determined by
 last modified time).</p>
     </div>
@@ -136,7 +147,7 @@ reactive values and reactive expressions.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
 </div>
 
       </footer></div>

@@ -70,27 +70,40 @@
 <dd><p>Maximum size of the cache, in bytes. If the cache exceeds
 this size, cached objects will be removed according to the value of the
 <code>evict</code>. Use <code>Inf</code> for no size limit. The default is 1 gigabyte.</p></dd>
+
+
 <dt>max_age</dt>
 <dd><p>Maximum age of files in cache before they are evicted, in
 seconds. Use <code>Inf</code> for no age limit.</p></dd>
+
+
 <dt>max_n</dt>
 <dd><p>Maximum number of objects in the cache. If the number of objects
 exceeds this value, then cached objects will be removed according to the
 value of <code>evict</code>. Use <code>Inf</code> for no limit of number of items.</p></dd>
+
+
 <dt>evict</dt>
 <dd><p>The eviction policy to use to decide which objects are removed
 when a cache pruning occurs. Currently, <code>"lru"</code> and <code>"fifo"</code> are supported.</p></dd>
+
+
 <dt>missing</dt>
 <dd><p>A value to return when <code>get(key)</code> is called but the key is not
 present in the cache. The default is a <code><a href="https://r-lib.github.io/fastmap/reference/key_missing.html" class="external-link">key_missing()</a></code> object. It is
 actually an expression that is evaluated each time there is a cache miss.
 See section Missing keys for more information.</p></dd>
+
+
 <dt>exec_missing</dt>
 <dd><p>Deprecated.</p></dd>
+
+
 <dt>logfile</dt>
 <dd><p>An optional filename or connection object to where logging
 information will be written. To log to the console, use <code><a href="https://rdrr.io/r/base/showConnections.html" class="external-link">stderr()</a></code> or
 <code><a href="https://rdrr.io/r/base/showConnections.html" class="external-link">stdout()</a></code>.</p></dd>
+
 </dl></div>
 
   </div>
@@ -105,7 +118,7 @@ information will be written. To log to the console, use <code><a href="https://r
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
 </div>
 
       </footer></div>

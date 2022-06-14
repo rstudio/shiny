@@ -86,43 +86,67 @@ range.</p>
     <h2>Arguments</h2>
     <dl><dt>inputId</dt>
 <dd><p>The <code>input</code> slot that will be used to access the value.</p></dd>
+
+
 <dt>label</dt>
 <dd><p>Display label for the control, or <code>NULL</code> for no label.</p></dd>
+
+
 <dt>min, max</dt>
 <dd><p>The minimum and maximum values (inclusive) that can be
 selected.</p></dd>
+
+
 <dt>value</dt>
 <dd><p>The initial value of the slider, either a number, a date
 (class Date), or a date-time (class POSIXt). A length one vector will
 create a regular slider; a length two vector will create a double-ended
 range slider. Must lie between <code>min</code> and <code>max</code>.</p></dd>
+
+
 <dt>step</dt>
 <dd><p>Specifies the interval between each selectable value on the
 slider. Either <code>NULL</code>, the default, which uses a heuristic to determine the
 step size or a single number. If the values are dates, <code>step</code> is in days;
 if the values are date-times, <code>step</code> is in seconds.</p></dd>
+
+
 <dt>round</dt>
 <dd><p><code>TRUE</code> to round all values to the nearest integer;
 <code>FALSE</code> if no rounding is desired; or an integer to round to that
 number of digits (for example, 1 will round to the nearest 10, and -2 will
 round to the nearest .01). Any rounding will be applied after snapping to
 the nearest step.</p></dd>
+
+
 <dt>ticks</dt>
 <dd><p><code>FALSE</code> to hide tick marks, <code>TRUE</code> to show them
 according to some simple heuristics.</p></dd>
+
+
 <dt>animate</dt>
 <dd><p><code>TRUE</code> to show simple animation controls with default
 settings; <code>FALSE</code> not to; or a custom settings list, such as those
 created using <code>animationOptions()</code>.</p></dd>
+
+
 <dt>width</dt>
 <dd><p>The width of the input, e.g. <code>'400px'</code>, or <code>'100%'</code>;
 see <code><a href="https://rdrr.io/pkg/htmltools/man/validateCssUnit.html" class="external-link">validateCssUnit()</a></code>.</p></dd>
+
+
 <dt>sep</dt>
 <dd><p>Separator between thousands places in numbers.</p></dd>
+
+
 <dt>pre</dt>
 <dd><p>A prefix string to put in front of the value.</p></dd>
+
+
 <dt>post</dt>
 <dd><p>A suffix string to put after the value.</p></dd>
+
+
 <dt>timeFormat</dt>
 <dd><p>Only used if the values are Date or POSIXt objects. A time
 format string, to be passed to the Javascript strftime library. See
@@ -131,29 +155,42 @@ format specifications are very similar, but not identical, to those for R's
 <code><a href="https://rdrr.io/r/base/strptime.html" class="external-link">base::strftime()</a></code> function. For Dates, the default is <code>"%F"</code>
 (like <code>"2015-07-01"</code>), and for POSIXt, the default is <code>"%F %T"</code>
 (like <code>"2015-07-01 15:32:10"</code>).</p></dd>
+
+
 <dt>timezone</dt>
 <dd><p>Only used if the values are POSIXt objects. A string
 specifying the time zone offset for the displayed times, in the format
 <code>"+HHMM"</code> or <code>"-HHMM"</code>. If <code>NULL</code> (the default), times will
 be displayed in the browser's time zone. The value <code>"+0000"</code> will
 result in UTC time.</p></dd>
+
+
 <dt>dragRange</dt>
 <dd><p>This option is used only if it is a range slider (with two
 values). If <code>TRUE</code> (the default), the range can be dragged. In other
 words, the min and max can be dragged together. If <code>FALSE</code>, the range
 cannot be dragged.</p></dd>
+
+
 <dt>interval</dt>
 <dd><p>The interval, in milliseconds, between each animation step.</p></dd>
+
+
 <dt>loop</dt>
 <dd><p><code>TRUE</code> to automatically restart the animation when it
 reaches the end.</p></dd>
+
+
 <dt>playButton</dt>
 <dd><p>Specifies the appearance of the play button. Valid values
 are a one-element character vector (for a simple text label), an HTML tag
 or list of tags (using <code><a href="https://rdrr.io/pkg/htmltools/man/builder.html" class="external-link">tag()</a></code> and friends), or raw HTML (using
 <code><a href="https://rdrr.io/pkg/htmltools/man/HTML.html" class="external-link">HTML()</a></code>).</p></dd>
+
+
 <dt>pauseButton</dt>
 <dd><p>Similar to <code>playButton</code>, but for the pause button.</p></dd>
+
 </dl></div>
     <div id="server-value">
     <h2>Server value</h2>
@@ -220,7 +257,7 @@ in the case of slider range, a vector of two numbers/dates/date-times.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
 </div>
 
       </footer></div>

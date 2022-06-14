@@ -64,12 +64,17 @@ be passed in explicitly if desired; otherwise, a random number is used.</p>
     <h2>Arguments</h2>
     <dl><dt>rngfunc</dt>
 <dd><p>The function that is affected by the R session's seed.</p></dd>
+
+
 <dt>seed</dt>
 <dd><p>The seed to set every time the resulting function is called.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>A repeatable version of the function that was passed in.</p>
+    
+
+<p>A repeatable version of the function that was passed in.</p>
     </div>
     <div id="note">
     <h2>Note</h2>
@@ -83,13 +88,13 @@ current seed by snapshotting and restoring
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="va">rnormA</span> <span class="op">&lt;-</span> <span class="fu">repeatable</span><span class="op">(</span><span class="va">rnorm</span><span class="op">)</span></span>
 <span class="r-in"><span class="va">rnormB</span> <span class="op">&lt;-</span> <span class="fu">repeatable</span><span class="op">(</span><span class="va">rnorm</span><span class="op">)</span></span>
 <span class="r-in"><span class="fu">rnormA</span><span class="op">(</span><span class="fl">3</span><span class="op">)</span>  <span class="co"># [1]  1.8285879 -0.7468041 -0.4639111</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] -0.2996441 -0.6167677  0.0649823</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] -0.3712595  1.4753488 -0.9674740</span>
 <span class="r-in"><span class="fu">rnormA</span><span class="op">(</span><span class="fl">3</span><span class="op">)</span>  <span class="co"># [1]  1.8285879 -0.7468041 -0.4639111</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] -0.2996441 -0.6167677  0.0649823</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] -0.3712595  1.4753488 -0.9674740</span>
 <span class="r-in"><span class="fu">rnormA</span><span class="op">(</span><span class="fl">5</span><span class="op">)</span>  <span class="co"># [1]  1.8285879 -0.7468041 -0.4639111 -1.6510126 -1.4686924</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] -0.2996441 -0.6167677  0.0649823  0.8301923 -1.0196285</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] -0.37125952  1.47534877 -0.96747397 -0.02820583 -0.26208832</span>
 <span class="r-in"><span class="fu">rnormB</span><span class="op">(</span><span class="fl">5</span><span class="op">)</span>  <span class="co"># [1] -0.7946034  0.2568374 -0.6567597  1.2451387 -0.8375699</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] -0.8385125 -0.3955150 -0.4552046 -0.9322165 -2.1241452</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1]  0.55542418 -0.08294965 -1.23711721 -0.99316342 -1.24846116</span>
 </code></pre></div>
     </div>
   </div>
@@ -104,7 +109,7 @@ current seed by snapshotting and restoring
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
 </div>
 
       </footer></div>

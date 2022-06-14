@@ -64,18 +64,27 @@ directories under <code>tests/</code>.</p>
     <h2>Arguments</h2>
     <dl><dt>appDir</dt>
 <dd><p>The base directory for the application.</p></dd>
+
+
 <dt>filter</dt>
 <dd><p>If not <code>NULL</code>, only tests with file names matching this regular
 expression will be executed. Matching is performed on the file name
 including the extension.</p></dd>
+
+
 <dt>assert</dt>
 <dd><p>Logical value which determines if an error should be thrown if any error is captured.</p></dd>
+
+
 <dt>envir</dt>
 <dd><p>Parent testing environment in which to base the individual testing environments.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>A data frame classed with the supplemental class <code>"shiny_runtests"</code>.
+    
+
+<p>A data frame classed with the supplemental class <code>"shiny_runtests"</code>.
 The data frame has the following columns:</p><table class="table table"><tr><td><strong>Name</strong></td><td><strong>Type</strong></td><td><strong>Meaning</strong></td></tr><tr><td><code>file</code></td><td><code>character(1)</code></td><td>File name of the runner script in <code>tests/</code> that was sourced.</td></tr><tr><td><code>pass</code></td><td><code>logical(1)</code></td><td>Whether or not the runner script signaled an error when sourced.</td></tr><tr><td><code>result</code></td><td>any or <code>NA</code></td><td>The return value of the runner</td></tr></table></div>
     <div id="details">
     <h2>Details</h2>
@@ -97,7 +106,7 @@ Please see <code><a href="shinyAppTemplate.html">shinyAppTemplate()</a></code> f
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
 </div>
 
       </footer></div>

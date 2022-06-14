@@ -84,29 +84,45 @@ printed output generated while evaluating <code>expr</code>.</p>
     <h2>Arguments</h2>
     <dl><dt>expr</dt>
 <dd><p>An expression to evaluate.</p></dd>
+
+
 <dt>env</dt>
 <dd><p>The parent environment for the reactive expression. By default,
 this is the calling environment, the same as when defining an ordinary
 non-reactive expression. If <code>expr</code> is a quosure and <code>quoted</code> is <code>TRUE</code>,
 then <code>env</code> is ignored.</p></dd>
+
+
 <dt>quoted</dt>
 <dd><p>If it is <code>TRUE</code>, then the <code><a href="https://rdrr.io/r/base/substitute.html" class="external-link">quote()</a></code>ed value of <code>expr</code>
 will be used when <code>expr</code> is evaluated. If <code>expr</code> is a quosure and you
 would like to use its expression as a value for <code>expr</code>, then you must set
 <code>quoted</code> to <code>TRUE</code>.</p></dd>
+
+
 <dt>width</dt>
 <dd><p>Width of printed output.</p></dd>
+
+
 <dt>outputArgs</dt>
 <dd><p>A list of arguments to be passed through to the implicit
 call to <code><a href="textOutput.html">verbatimTextOutput()</a></code> or <code><a href="textOutput.html">textOutput()</a></code> when the functions are
 used in an interactive RMarkdown document.</p></dd>
+
+
 <dt>sep</dt>
 <dd><p>A separator passed to <code>cat</code> to be appended after each
 element.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>For <code>renderPrint()</code>, note the given expression returns <code>NULL</code> then <code>NULL</code>will actually be visible in the output. To display nothing, make your
+    
+
+<p>For <code>renderPrint()</code>, note the given expression returns <code>NULL</code> then <code>NULL</code></p>
+
+
+<p>will actually be visible in the output. To display nothing, make your
 function return <code><a href="https://rdrr.io/r/base/invisible.html" class="external-link">invisible()</a></code>.</p>
     </div>
     <div id="details">
@@ -196,7 +212,7 @@ have the CSS class name <code>shiny-text-output</code>.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
 </div>
 
       </footer></div>

@@ -86,44 +86,67 @@
     <dl><dt>expr</dt>
 <dd><p>The work to be done. This expression should contain calls to
 <code>setProgress()</code> or <code>incProgress()</code>.</p></dd>
+
+
 <dt>min</dt>
 <dd><p>The value that represents the starting point of the progress bar.
 Must be less tham <code>max</code>. Default is 0.</p></dd>
+
+
 <dt>max</dt>
 <dd><p>The value that represents the end of the progress bar. Must be
 greater than <code>min</code>. Default is 1.</p></dd>
+
+
 <dt>value</dt>
 <dd><p>Single-element numeric vector; the value at which to set the
 progress bar, relative to <code>min</code> and <code>max</code>.</p></dd>
+
+
 <dt>message</dt>
 <dd><p>A single-element character vector; the message to be displayed
 to the user, or <code>NULL</code> to hide the current message (if any).</p></dd>
+
+
 <dt>detail</dt>
 <dd><p>A single-element character vector; the detail message to be
 displayed to the user, or <code>NULL</code> to hide the current detail message
 (if any). The detail message will be shown with a de-emphasized appearance
 relative to <code>message</code>.</p></dd>
+
+
 <dt>style</dt>
 <dd><p>Progress display style. If <code>"notification"</code> (the default),
 the progress indicator will show using Shiny's notification API. If
 <code>"old"</code>, use the same HTML and CSS used in Shiny 0.13.2 and below
 (this is for backward-compatibility).</p></dd>
+
+
 <dt>session</dt>
 <dd><p>The Shiny session object, as provided by <code>shinyServer</code> to
 the server function. The default is to automatically find the session by
 using the current reactive domain.</p></dd>
+
+
 <dt>env</dt>
 <dd><p>The environment in which <code>expr</code> should be evaluated.</p></dd>
+
+
 <dt>quoted</dt>
 <dd><p>Whether <code>expr</code> is a quoted expression (this is not
 common).</p></dd>
+
+
 <dt>amount</dt>
 <dd><p>For <code>incProgress</code>, the amount to increment the status bar.
 Default is 0.1.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>The result of <code>expr</code>.</p>
+    
+
+<p>The result of <code>expr</code>.</p>
     </div>
     <div id="details">
     <h2>Details</h2>
@@ -194,7 +217,7 @@ function.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
 </div>
 
       </footer></div>

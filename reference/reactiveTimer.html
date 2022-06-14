@@ -64,15 +64,20 @@ reactive timers are triggered simply by the passage of time.</p>
     <h2>Arguments</h2>
     <dl><dt>intervalMs</dt>
 <dd><p>How often to fire, in milliseconds</p></dd>
+
+
 <dt>session</dt>
 <dd><p>A session object. This is needed to cancel any scheduled
 invalidations after a user has ended the session. If <code>NULL</code>, then
 this invalidation will not be tied to any session, and so it will still
 occur.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>A no-parameter function that can be called from a reactive context,
+    
+
+<p>A no-parameter function that can be called from a reactive context,
 in order to cause that context to be invalidated the next time the timer
 interval elapses. Calling the returned function also happens to yield the
 current time (as in <code><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">base::Sys.time()</a></code>).</p>
@@ -141,7 +146,7 @@ needed.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
 </div>
 
       </footer></div>

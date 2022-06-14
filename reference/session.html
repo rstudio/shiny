@@ -76,6 +76,7 @@ If <code>value</code> is <code>FALSE</code>, reconnections will be disabled (thi
 the default state). If <code>"force"</code>, then the client browser will always
 attempt to reconnect. The only reason to use <code>"force"</code> is for testing
 on a local connection (without Shiny Server or Connect).</p></dd>
+
 <dt>clientData</dt>
 <dd><p>A <code><a href="reactiveValues.html">reactiveValues()</a></code> object that contains information about the client.</p><ul><li><p><code>pixelratio</code> reports the "device pixel ratio" from the web browser,
 or 1 if none is reported. The value is 2 for Apple Retina displays.</p></li>
@@ -95,37 +96,47 @@ the DOM element that is bound to <code><var>outputId</var></code>, and
 <code>output_<var>outputId</var>_hidden</code> is a logical that indicates whether
 the element is hidden. These values may be <code>NULL</code> if the output is
 not bound.</p></dd>
+
 <dt>input</dt>
 <dd><p>The session's <code>input</code> object (the same as is passed into the Shiny
 server function as an argument).</p></dd>
+
 <dt>isClosed()</dt>
 <dd><p>A function that returns <code>TRUE</code> if the client has
 disconnected.</p></dd>
+
 <dt>ns(id)</dt>
 <dd><p>Server-side version of <code><a href="NS.html">ns &lt;- NS(id)</a></code>. If bare IDs need to be
 explicitly namespaced for the current module, <code>session$ns("name")</code>
 will return the fully-qualified ID.</p></dd>
+
 <dt>onEnded(callback)</dt>
 <dd><p>Synonym for <code>onSessionEnded</code>.</p></dd>
+
 <dt>onFlush(func, once=TRUE)</dt>
 <dd><p>Registers a function to be called before the next time (if <code>once=TRUE</code>)
 or every time (if <code>once=FALSE</code>) Shiny flushes the reactive system.
 Returns a function that can be called with no arguments to cancel the
 registration.</p></dd>
+
 <dt>onFlushed(func, once=TRUE)</dt>
 <dd><p>Registers a function to be called after the next time (if <code>once=TRUE</code>)
 or every time (if <code>once=FALSE</code>) Shiny flushes the reactive system.
 Returns a function that can be called with no arguments to cancel the
 registration.</p></dd>
+
 <dt>onSessionEnded(callback)</dt>
 <dd><p>Registers a function to be called after the client has disconnected.
 Returns a function that can be called with no arguments to cancel the
 registration.</p></dd>
+
 <dt>output</dt>
 <dd><p>The session's <code>output</code> object (the same as is passed into the Shiny
 server function as an argument).</p></dd>
+
 <dt>reactlog</dt>
 <dd><p>For internal use.</p></dd>
+
 <dt>registerDataObj(name, data, filterFunc)</dt>
 <dd><p>Publishes any R object as a URL endpoint that is unique to this session.
 <code>name</code> must be a single element character vector; it will be used
@@ -136,25 +147,32 @@ the Rook specification for HTTP requests). <code>filterFunc</code> will be
 called with these values whenever an HTTP request is made to the URL
 endpoint. The return value of <code>filterFunc</code> should be a Rook-style
 response.</p></dd>
+
 <dt>reload()</dt>
 <dd><p>The equivalent of hitting the browser's Reload button. Only works if the
 session is actually connected.</p></dd>
+
 <dt>request</dt>
 <dd><p>An environment that implements the Rook specification for HTTP requests.
 This is the request that was used to initiate the websocket connection
 (as opposed to the request that downloaded the web page for the app).</p></dd>
+
 <dt>userData</dt>
 <dd><p>An environment for app authors and module/package authors to store whatever
 session-specific data they want.</p></dd>
+
 <dt>user</dt>
 <dd><p>User's log-in information. Useful for identifying users on hosted platforms
 such as RStudio Connect and Shiny Server.</p></dd>
+
 <dt>groups</dt>
 <dd><p>The <code>user</code>'s relevant group information. Useful for determining what
 privileges the user should or shouldn't have.</p></dd>
+
 <dt>resetBrush(brushId)</dt>
 <dd><p>Resets/clears the brush with the given <code>brushId</code>, if it exists on
 any <code>imageOutput</code> or <code>plotOutput</code> in the app.</p></dd>
+
 <dt>sendCustomMessage(type, message)</dt>
 <dd><p>Sends a custom message to the web page. <code>type</code> must be a
 single-element character vector giving the type of message, while
@@ -166,12 +184,14 @@ JavaScript code to the browser that calls
 as the page loads; the function you provide to
 <code>addCustomMessageHandler</code> will be invoked each time
 <code>sendCustomMessage</code> is called on the server.</p></dd>
+
 <dt>sendBinaryMessage(type, message)</dt>
 <dd><p>Similar to <code>sendCustomMessage</code>, but the message must be a raw vector
 and the registration method on the client is
 <code>Shiny.addBinaryMessageHandler(type, function(message){...})</code>. The
 message argument on the client will be a
 <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/DataView" class="external-link">DataView</a>.</p></dd>
+
 <dt>sendInputMessage(inputId, message)</dt>
 <dd><p>Sends a message to an input on the session's client web page; if the input
 is present and bound on the page at the time the message is received, then
@@ -179,25 +199,34 @@ the input binding object's <code>receiveMessage(el, message)</code> method will
 be called. <code>sendInputMessage</code> should generally not be called directly
 from Shiny apps, but through friendlier wrapper functions like
 <code><a href="updateTextInput.html">updateTextInput()</a></code>.</p></dd>
+
 <dt>setBookmarkExclude(names)</dt>
 <dd><p>Set input names to be excluded from bookmarking.</p></dd>
+
 <dt>getBookmarkExclude()</dt>
 <dd><p>Returns the set of input names to be excluded from bookmarking.</p></dd>
+
 <dt>onBookmark(fun)</dt>
 <dd><p>Registers a function that will be called just before bookmarking state.</p></dd>
+
 <dt>onBookmarked(fun)</dt>
 <dd><p>Registers a function that will be called just after bookmarking state.</p></dd>
+
 <dt>onRestore(fun)</dt>
 <dd><p>Registers a function that will be called when a session is restored, before
 all other reactives, observers, and render functions are run.</p></dd>
+
 <dt>onRestored(fun)</dt>
 <dd><p>Registers a function that will be called when a session is restored, after
 all other reactives, observers, and render functions are run.</p></dd>
+
 <dt>doBookmark()</dt>
 <dd><p>Do bookmarking and invoke the onBookmark and onBookmarked callback functions.</p></dd>
+
 <dt>exportTestValues()</dt>
 <dd><p>Registers expressions for export in test mode, available at the test
 snapshot URL.</p></dd>
+
 <dt>getTestSnapshotUrl(input=TRUE, output=TRUE, export=TRUE,
 format="json")</dt>
 <dd><p>Returns a URL for the test snapshots. Only has an effect when the
@@ -206,6 +235,7 @@ export arguments, TRUE means to return all of these values. It is also
 possible to specify by name which values to return by providing a
 character vector, as in <code>input=c("x", "y")</code>. The format can be
 "rds" or "json".</p></dd>
+
 <dt>setCurrentTheme(theme)</dt>
 <dd><p>Sets the current <code><a href="bootstrapLib.html">bootstrapLib()</a></code> theme, which updates the value of
 <code><a href="getCurrentTheme.html">getCurrentTheme()</a></code>, invalidates <code>session$getCurrentTheme()</code>, and calls
@@ -214,8 +244,10 @@ function(s) registered with <code><a href="registerThemeDependency.html">registe
 <code>stylesheet</code>s, then those stylesheets are "refreshed" (i.e., the new
 stylesheets are inserted on the page and the old ones are disabled and
 removed).</p></dd>
+
 <dt>getCurrentTheme()</dt>
 <dd><p>A reactive read of the current <code><a href="bootstrapLib.html">bootstrapLib()</a></code> theme.</p></dd>
+
 </dl></div>
 
   </div>
@@ -230,7 +262,7 @@ removed).</p></dd>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
 </div>
 
       </footer></div>

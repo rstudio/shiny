@@ -101,80 +101,117 @@ renderText() and renderPlot()).'><meta property="og:image" content="/logo.png"><
 this can be a simple reactive value like <code>input$click</code>, a call to a
 reactive expression like <code>dataset()</code>, or even a complex expression
 inside curly braces</p></dd>
+
+
 <dt>handlerExpr</dt>
 <dd><p>The expression to call whenever <code>eventExpr</code> is
 invalidated. This should be a side-effect-producing action (the return
 value will be ignored). It will be executed within an <code><a href="isolate.html">isolate()</a></code>
 scope.</p></dd>
+
+
 <dt>event.env</dt>
 <dd><p>The parent environment for the reactive expression. By default,
 this is the calling environment, the same as when defining an ordinary
 non-reactive expression. If <code>eventExpr</code> is a quosure and <code>event.quoted</code> is <code>TRUE</code>,
 then <code>event.env</code> is ignored.</p></dd>
+
+
 <dt>event.quoted</dt>
 <dd><p>If it is <code>TRUE</code>, then the <code><a href="https://rdrr.io/r/base/substitute.html" class="external-link">quote()</a></code>ed value of <code>eventExpr</code>
 will be used when <code>eventExpr</code> is evaluated. If <code>eventExpr</code> is a quosure and you
 would like to use its expression as a value for <code>eventExpr</code>, then you must set
 <code>event.quoted</code> to <code>TRUE</code>.</p></dd>
+
+
 <dt>handler.env</dt>
 <dd><p>The parent environment for the reactive expression. By default,
 this is the calling environment, the same as when defining an ordinary
 non-reactive expression. If <code>handlerExpr</code> is a quosure and <code>handler.quoted</code> is <code>TRUE</code>,
 then <code>handler.env</code> is ignored.</p></dd>
+
+
 <dt>handler.quoted</dt>
 <dd><p>If it is <code>TRUE</code>, then the <code><a href="https://rdrr.io/r/base/substitute.html" class="external-link">quote()</a></code>ed value of <code>handlerExpr</code>
 will be used when <code>handlerExpr</code> is evaluated. If <code>handlerExpr</code> is a quosure and you
 would like to use its expression as a value for <code>handlerExpr</code>, then you must set
 <code>handler.quoted</code> to <code>TRUE</code>.</p></dd>
+
+
 <dt>...</dt>
 <dd><p>Currently not used.</p></dd>
+
+
 <dt>label</dt>
 <dd><p>A label for the observer or reactive, useful for debugging.</p></dd>
+
+
 <dt>suspended</dt>
 <dd><p>If <code>TRUE</code>, start the observer in a suspended state. If
 <code>FALSE</code> (the default), start in a non-suspended state.</p></dd>
+
+
 <dt>priority</dt>
 <dd><p>An integer or numeric that controls the priority with which
 this observer should be executed. An observer with a given priority level
 will always execute sooner than all observers with a lower priority level.
 Positive, negative, and zero values are allowed.</p></dd>
+
+
 <dt>domain</dt>
 <dd><p>See <a href="domains.html">domains</a>.</p></dd>
+
+
 <dt>autoDestroy</dt>
 <dd><p>If <code>TRUE</code> (the default), the observer will be
 automatically destroyed when its domain (if any) ends.</p></dd>
+
+
 <dt>ignoreNULL</dt>
 <dd><p>Whether the action should be triggered (or value
 calculated, in the case of <code>eventReactive</code>) when the input is
 <code>NULL</code>. See Details.</p></dd>
+
+
 <dt>ignoreInit</dt>
 <dd><p>If <code>TRUE</code>, then, when this <code>observeEvent</code> is
 first created/initialized, ignore the <code>handlerExpr</code> (the second
 argument), whether it is otherwise supposed to run or not. The default is
 <code>FALSE</code>. See Details.</p></dd>
+
+
 <dt>once</dt>
 <dd><p>Whether this <code>observeEvent</code> should be immediately destroyed
 after the first time that the code in <code>handlerExpr</code> is run. This
 pattern is useful when you want to subscribe to a event that should only
 happen once.</p></dd>
+
+
 <dt>valueExpr</dt>
 <dd><p>The expression that produces the return value of the
 <code>eventReactive</code>. It will be executed within an <code><a href="isolate.html">isolate()</a></code>
 scope.</p></dd>
+
+
 <dt>value.env</dt>
 <dd><p>The parent environment for the reactive expression. By default,
 this is the calling environment, the same as when defining an ordinary
 non-reactive expression. If <code>valueExpr</code> is a quosure and <code>value.quoted</code> is <code>TRUE</code>,
 then <code>value.env</code> is ignored.</p></dd>
+
+
 <dt>value.quoted</dt>
 <dd><p>If it is <code>TRUE</code>, then the <code><a href="https://rdrr.io/r/base/substitute.html" class="external-link">quote()</a></code>ed value of <code>valueExpr</code>
 will be used when <code>valueExpr</code> is evaluated. If <code>valueExpr</code> is a quosure and you
 would like to use its expression as a value for <code>valueExpr</code>, then you must set
 <code>value.quoted</code> to <code>TRUE</code>.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p><code>observeEvent</code> returns an observer reference class object (see
+    
+
+<p><code>observeEvent</code> returns an observer reference class object (see
 <code><a href="observe.html">observe()</a></code>). <code>eventReactive</code> returns a reactive expression
 object (see <code><a href="reactive.html">reactive()</a></code>).</p>
     </div>
@@ -361,7 +398,7 @@ created (because  <code>ignoreInit = TRUE</code>). After that,
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
 </div>
 
       </footer></div>

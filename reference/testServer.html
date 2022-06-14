@@ -68,6 +68,8 @@ and <code>session</code>), or a module function (i.e. a function with first
 argument <code>id</code> that calls <code><a href="moduleServer.html">moduleServer()</a></code>.</p>
 <p>You can also provide an app, a path an app, or anything that
 <code><a href="shiny.appobj.html">as.shiny.appobj()</a></code> can handle.</p></dd>
+
+
 <dt>expr</dt>
 <dd><p>Test code containing expectations. The objects from inside the
 server function environment will be made available in the environment of
@@ -75,14 +77,19 @@ the test expression (this is done using a data mask with
 <code><a href="https://rlang.r-lib.org/reference/eval_tidy.html" class="external-link">rlang::eval_tidy()</a></code>). This includes the parameters of the server function
 (e.g. <code>input</code>, <code>output</code>, and <code>session</code>), along with any other values
 created inside of the server function.</p></dd>
+
+
 <dt>args</dt>
 <dd><p>Additional arguments to pass to the module function. If <code>app</code> is
 a module, and no <code>id</code> argument is provided, one will be generated and
 supplied automatically.</p></dd>
+
+
 <dt>session</dt>
 <dd><p>The <code><a href="MockShinySession.html">MockShinySession</a></code> object to use as the <a href="domains.html">reactive domain</a>. The same session object is used as the domain both
 during invocation of the server or module under test and during evaluation
 of <code>expr</code>.</p></dd>
+
 </dl></div>
 
     <div id="ref-examples">
@@ -138,7 +145,7 @@ of <code>expr</code>.</p></dd>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
 </div>
 
       </footer></div>

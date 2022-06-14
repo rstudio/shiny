@@ -60,6 +60,8 @@
     <h2>Arguments</h2>
     <dl><dt>str</dt>
 <dd><p>The query string. It can have a leading <code>"?"</code> or not.</p></dd>
+
+
 <dt>nested</dt>
 <dd><p>Whether to parse the query string of as a nested list when it
 contains pairs of square brackets <code>[]</code>. For example, the query
@@ -67,6 +69,7 @@ contains pairs of square brackets <code>[]</code>. For example, the query
 list(i1 = list(j1 = 'x')), b = list(i1 = list(j1 = 'y'), i2 = list(j1 =
 'z')))</code> when <code>nested = TRUE</code>, and <code>list(`a[i1][j1]` = 'x',
 `b[i1][j1]` = 'y', `b[i2][j1]` = 'z')</code> when <code>nested = FALSE</code>.</p></dd>
+
 </dl></div>
 
     <div id="ref-examples">
@@ -114,7 +117,7 @@ list(i1 = list(j1 = 'x')), b = list(i1 = list(j1 = 'y'), i2 = list(j1 =
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
 </div>
 
       </footer></div>

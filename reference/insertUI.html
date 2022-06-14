@@ -98,6 +98,8 @@ note that many of these are wrapped in <code>&lt;div&gt;</code>s, so you may nee
 somewhat complex selector --- see the Examples below. (Alternatively, you
 could also wrap the inputs/outputs that you want to be able to remove
 easily in a <code>&lt;div&gt;</code> with an id.)</p></dd>
+
+
 <dt>where</dt>
 <dd><p>Where your UI object should go relative to the selector:</p><dl><dt><code>beforeBegin</code></dt>
 <dd><p>Before the selector element itself</p></dd>
@@ -115,6 +117,8 @@ last child (default)</p></dd>
 
 
 </dl><p>Adapted from <a href="https://developer.mozilla.org/en-US/docs/Web/API/Element/insertAdjacentHTML" class="external-link">https://developer.mozilla.org/en-US/docs/Web/API/Element/insertAdjacentHTML</a>.</p></dd>
+
+
 <dt>ui</dt>
 <dd><p>The UI object you want to insert. This can be anything that
 you usually put inside your apps's <code>ui</code> function. If you're inserting
@@ -123,17 +127,24 @@ multiple elements in one call, make sure to wrap them in either a
 advantage that you can give it an <code>id</code> to make it easier to
 reference or remove it later on). If you want to insert raw html, use
 <code>ui = HTML()</code>.</p></dd>
+
+
 <dt>multiple</dt>
 <dd><p>In case your selector matches more than one element,
 <code>multiple</code> determines whether Shiny should insert the UI object
 relative to all matched elements or just relative to the first
 matched element (default).</p></dd>
+
+
 <dt>immediate</dt>
 <dd><p>Whether the UI object should be immediately inserted
 or removed, or whether Shiny should wait until all outputs have been
 updated and all observers have been run (default).</p></dd>
+
+
 <dt>session</dt>
 <dd><p>The shiny session. Advanced use only.</p></dd>
+
 </dl></div>
     <div id="details">
     <h2>Details</h2>
@@ -200,7 +211,7 @@ through a jQuery selector can be removed through this function.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
 </div>
 
       </footer></div>

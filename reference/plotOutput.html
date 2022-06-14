@@ -82,6 +82,8 @@ application page.</p>
     <h2>Arguments</h2>
     <dl><dt>outputId</dt>
 <dd><p>output variable to read the plot/image from.</p></dd>
+
+
 <dt>width, height</dt>
 <dd><p>Image width/height. Must be a valid CSS unit (like
 <code>"100%"</code>, <code>"400px"</code>, <code>"auto"</code>) or a number, which will be
@@ -90,6 +92,8 @@ ignored when <code>inline = TRUE</code>, in which case the width/height of a plo
 must be specified in <code><a href="renderPlot.html">renderPlot()</a></code>. Note that, for height, using
 <code>"auto"</code> or <code>"100%"</code> generally will not work as expected,
 because of how height is computed with HTML/CSS.</p></dd>
+
+
 <dt>click</dt>
 <dd><p>This can be <code>NULL</code> (the default), a string, or an object
 created by the <code><a href="clickOpts.html">clickOpts()</a></code> function. If you use a value like
@@ -98,9 +102,13 @@ the plot will send coordinates to the server whenever it is clicked, and
 the value will be accessible via <code>input$plot_click</code>. The value will be
 a named list  with <code>x</code> and <code>y</code> elements indicating the mouse
 position.</p></dd>
+
+
 <dt>dblclick</dt>
 <dd><p>This is just like the <code>click</code> argument, but for
 double-click events.</p></dd>
+
+
 <dt>hover</dt>
 <dd><p>Similar to the <code>click</code> argument, this can be <code>NULL</code>
 (the default), a string, or an object created by the
@@ -111,6 +119,8 @@ value will be accessible via <code>input$plot_hover</code>. The value will be a
 named list with <code>x</code> and <code>y</code> elements indicating the mouse
 position. To control the hover time or hover delay type, you must use
 <code><a href="clickOpts.html">hoverOpts()</a></code>.</p></dd>
+
+
 <dt>brush</dt>
 <dd><p>Similar to the <code>click</code> argument, this can be <code>NULL</code>
 (the default), a string, or an object created by the
@@ -126,13 +136,18 @@ behavior, use <code><a href="brushOpts.html">brushOpts()</a></code>. Multiple
 <code>imageOutput</code>/<code>plotOutput</code> calls may share the same <code>id</code>
 value; brushing one image or plot will cause any other brushes with the
 same <code>id</code> to disappear.</p></dd>
+
+
 <dt>inline</dt>
 <dd><p>use an inline (<code><a href="https://rdrr.io/pkg/htmltools/man/builder.html" class="external-link">span()</a></code>) or block container (<code><a href="https://rdrr.io/pkg/htmltools/man/builder.html" class="external-link">div()</a></code>)
 for the output</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>A plot or image output element that can be included in a panel.</p>
+    
+
+<p>A plot or image output element that can be included in a panel.</p>
     </div>
     <div id="note">
     <h2>Note</h2>
@@ -341,7 +356,7 @@ properly scaled to the data space.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
 </div>
 
       </footer></div>

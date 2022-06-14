@@ -78,39 +78,56 @@ then the coordinates will be available as <code>input$plot_brush</code>. Multipl
 <code>imageOutput</code>/<code>plotOutput</code> calls may share the same <code>id</code>
 value; brushing one image or plot will cause any other brushes with the
 same <code>id</code> to disappear.</p></dd>
+
+
 <dt>fill</dt>
 <dd><p>Fill color of the brush. If <code>'auto'</code>, it derives from the link
 color of the plot's HTML container (if <strong>thematic</strong> is enabled, and <code>accent</code>
 is a non-<code>'auto'</code> value, that color is used instead).</p></dd>
+
+
 <dt>stroke</dt>
 <dd><p>Outline color of the brush. If <code>'auto'</code>, it derives from the
 foreground color of the plot's HTML container (if <strong>thematic</strong> is enabled,
 and <code>fg</code> is a non-<code>'auto'</code> value, that color is used instead).</p></dd>
+
+
 <dt>opacity</dt>
 <dd><p>Opacity of the brush</p></dd>
+
+
 <dt>delay</dt>
 <dd><p>How long to delay (in milliseconds) when debouncing or
 throttling, before sending the brush data to the server.</p></dd>
+
+
 <dt>delayType</dt>
 <dd><p>The type of algorithm for limiting the number of brush
 events. Use <code>"throttle"</code> to limit the number of brush events to one
 every <code>delay</code> milliseconds. Use <code>"debounce"</code> to suspend events
 while the cursor is moving, and wait until the cursor has been at rest for
 <code>delay</code> milliseconds before sending an event.</p></dd>
+
+
 <dt>clip</dt>
 <dd><p>Should the brush area be clipped to the plotting area? If FALSE,
 then the user will be able to brush outside the plotting area, as long as
 it is still inside the image.</p></dd>
+
+
 <dt>direction</dt>
 <dd><p>The direction for brushing. If <code>"xy"</code>, the brush can be
 drawn and moved in both x and y directions. If <code>"x"</code>, or <code>"y"</code>,
 the brush wil work horizontally or vertically.</p></dd>
+
+
 <dt>resetOnNew</dt>
 <dd><p>When a new image is sent to the browser (via
 <code><a href="renderImage.html">renderImage()</a></code>), should the brush be reset? The default,
 <code>FALSE</code>, is useful if you want to update the plot while keeping the
 brush. Using <code>TRUE</code> is useful if you want to clear the brush whenever
 the plot is updated.</p></dd>
+
 </dl></div>
     <div id="see-also">
     <h2>See also</h2>
@@ -129,7 +146,7 @@ the plot is updated.</p></dd>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
 </div>
 
       </footer></div>

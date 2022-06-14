@@ -78,6 +78,8 @@ expression that produces a Shiny app object.</p></li>
 <li><p>A list with <code>ui</code> and <code>server</code> components.</p></li>
 <li><p>A Shiny app object created by <code><a href="shinyApp.html">shinyApp()</a></code>.</p></li>
 </ul></dd>
+
+
 <dt>port</dt>
 <dd><p>The TCP port that the application should listen on. If the
 <code>port</code> is not specified, and the <code>shiny.port</code> option is set (with
@@ -86,20 +88,30 @@ use a random port between 3000:8000, excluding ports that are blocked
 by Google Chrome for being considered unsafe: 3659, 4045, 5060,
 5061, 6000, 6566, 6665:6669 and 6697. Up to twenty random
 ports will be tried.</p></dd>
+
+
 <dt>launch.browser</dt>
 <dd><p>If true, the system's default web browser will be
 launched automatically after the app is started. Defaults to true in
 interactive sessions only. The value of this parameter can also be a
 function to call with the application's URL.</p></dd>
+
+
 <dt>host</dt>
 <dd><p>The IPv4 address that the application should listen on. Defaults
 to the <code>shiny.host</code> option, if set, or <code>"127.0.0.1"</code> if not. See
 Details.</p></dd>
+
+
 <dt>workerId</dt>
 <dd><p>Can generally be ignored. Exists to help some editions of
 Shiny Server Pro route requests to the correct process.</p></dd>
+
+
 <dt>quiet</dt>
 <dd><p>Should Shiny status messages be shown? Defaults to FALSE.</p></dd>
+
+
 <dt>display.mode</dt>
 <dd><p>The mode in which to display the application. If set to
 the value <code>"showcase"</code>, shows application code and metadata from a
@@ -107,10 +119,13 @@ the value <code>"showcase"</code>, shows application code and metadata from a
 application. If set to <code>"normal"</code>, displays the application normally.
 Defaults to <code>"auto"</code>, which displays the application in the mode given
 in its <code>DESCRIPTION</code> file, if any.</p></dd>
+
+
 <dt>test.mode</dt>
 <dd><p>Should the application be launched in test mode? This is
 only used for recording or running automated tests. Defaults to the
 <code>shiny.testmode</code> option, or FALSE if the option is not set.</p></dd>
+
 </dl></div>
     <div id="details">
     <h2>Details</h2>
@@ -173,7 +188,7 @@ value that was hard-coded into Shiny in 0.8.0 and earlier).</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
 </div>
 
       </footer></div>

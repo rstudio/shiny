@@ -64,6 +64,8 @@ session ends (when a client disconnects).</p>
     <h2>Arguments</h2>
     <dl><dt>fun</dt>
 <dd><p>A function that will be called after the app has finished running.</p></dd>
+
+
 <dt>session</dt>
 <dd><p>A scope for when the callback will run. If <code>onStop</code> is
 called from within the server function, this will default to the current
@@ -72,10 +74,13 @@ session, and the callback will be invoked when the current session ends. If
 be invoked with the application exits. If <code>NULL</code>, it is the same as
 calling <code>onStop</code> outside of the server function, and the callback will
 be invoked when the application exits.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>A function which, if invoked, will cancel the callback.</p>
+    
+
+<p>A function which, if invoked, will cancel the callback.</p>
     </div>
     <div id="see-also">
     <h2>See also</h2>
@@ -149,7 +154,7 @@ the session level only.</p></div>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
 </div>
 
       </footer></div>

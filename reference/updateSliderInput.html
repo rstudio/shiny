@@ -71,23 +71,35 @@
     <dl><dt>session</dt>
 <dd><p>The <code>session</code> object passed to function given to
 <code>shinyServer</code>. Default is <code><a href="domains.html">getDefaultReactiveDomain()</a></code>.</p></dd>
+
+
 <dt>inputId</dt>
 <dd><p>The id of the input object.</p></dd>
+
+
 <dt>label</dt>
 <dd><p>The label to set for the input object.</p></dd>
+
+
 <dt>value</dt>
 <dd><p>The initial value of the slider, either a number, a date
 (class Date), or a date-time (class POSIXt). A length one vector will
 create a regular slider; a length two vector will create a double-ended
 range slider. Must lie between <code>min</code> and <code>max</code>.</p></dd>
+
+
 <dt>min, max</dt>
 <dd><p>The minimum and maximum values (inclusive) that can be
 selected.</p></dd>
+
+
 <dt>step</dt>
 <dd><p>Specifies the interval between each selectable value on the
 slider. Either <code>NULL</code>, the default, which uses a heuristic to determine the
 step size or a single number. If the values are dates, <code>step</code> is in days;
 if the values are date-times, <code>step</code> is in seconds.</p></dd>
+
+
 <dt>timeFormat</dt>
 <dd><p>Only used if the values are Date or POSIXt objects. A time
 format string, to be passed to the Javascript strftime library. See
@@ -96,12 +108,15 @@ format specifications are very similar, but not identical, to those for R's
 <code><a href="https://rdrr.io/r/base/strptime.html" class="external-link">base::strftime()</a></code> function. For Dates, the default is <code>"%F"</code>
 (like <code>"2015-07-01"</code>), and for POSIXt, the default is <code>"%F %T"</code>
 (like <code>"2015-07-01 15:32:10"</code>).</p></dd>
+
+
 <dt>timezone</dt>
 <dd><p>Only used if the values are POSIXt objects. A string
 specifying the time zone offset for the displayed times, in the format
 <code>"+HHMM"</code> or <code>"-HHMM"</code>. If <code>NULL</code> (the default), times will
 be displayed in the browser's time zone. The value <code>"+0000"</code> will
 result in UTC time.</p></dd>
+
 </dl></div>
     <div id="details">
     <h2>Details</h2>
@@ -165,7 +180,7 @@ can be cleared by using <code>selected=character(0)</code>.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
 </div>
 
       </footer></div>

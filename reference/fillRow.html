@@ -74,6 +74,8 @@ occupy a single cell. (To put multiple items in a single cell, you can use
 <code><a href="https://rdrr.io/pkg/htmltools/man/tagList.html" class="external-link">tagList()</a></code> or <code><a href="https://rdrr.io/pkg/htmltools/man/builder.html" class="external-link">div()</a></code> to combine them.) Named
 arguments will be used as attributes on the <code>div</code> element that
 encapsulates the row/column.</p></dd>
+
+
 <dt>flex</dt>
 <dd><p>Determines how space should be distributed to the cells. Can be a
 single value like <code>1</code> or <code>2</code> to evenly distribute the available
@@ -81,12 +83,15 @@ space; or use a vector of numbers to specify the proportions. For example,
 <code>flex = c(2, 3)</code> would cause the space to be split 40%/60% between
 two cells. NA values will cause the corresponding cell to be sized
 according to its contents (without growing or shrinking).</p></dd>
+
+
 <dt>width, height</dt>
 <dd><p>The total amount of width and height to use for the
 entire row/column. For the default height of <code>"100%"</code> to be
 effective, the parent must be <code>fillPage</code>, another
 <code>fillRow</code>/<code>fillCol</code>, or some other HTML element whose height is
 not determined by the height of its contents.</p></dd>
+
 </dl></div>
     <div id="details">
     <h2>Details</h2>
@@ -139,7 +144,7 @@ the size of their contents, as is usually the case in HTML).</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
 </div>
 
       </footer></div>

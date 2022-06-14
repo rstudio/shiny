@@ -70,33 +70,48 @@
     <h2>Arguments</h2>
     <dl><dt>ui</dt>
 <dd><p>Content of message.</p></dd>
+
+
 <dt>action</dt>
 <dd><p>Message content that represents an action. For example, this
 could be a link that the user can click on. This is separate from <code>ui</code>
 so customized layouts can handle the main notification content separately
 from action content.</p></dd>
+
+
 <dt>duration</dt>
 <dd><p>Number of seconds to display the message before it
 disappears. Use <code>NULL</code> to make the message not automatically
 disappear.</p></dd>
+
+
 <dt>closeButton</dt>
 <dd><p>If <code>TRUE</code>, display a button which will make the
 notification disappear when clicked. If <code>FALSE</code> do not display.</p></dd>
+
+
 <dt>id</dt>
 <dd><p>A unique identifier for the notification.</p>
 <p><code>id</code> is optional for <code>showNotification()</code>: Shiny will automatically create
 one if needed. If you do supply it, Shiny will update an existing
 notification if it exists, otherwise it will create a new one.</p>
 <p><code>id</code> is required for <code>removeNotification()</code>.</p></dd>
+
+
 <dt>type</dt>
 <dd><p>A string which controls the color of the notification. One of
 "default" (gray), "message" (blue), "warning" (yellow), or "error" (red).</p></dd>
+
+
 <dt>session</dt>
 <dd><p>Session object to send notification to.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>An ID for the notification.</p>
+    
+
+<p>An ID for the notification.</p>
     </div>
 
     <div id="ref-examples">
@@ -158,7 +173,7 @@ notification if it exists, otherwise it will create a new one.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
 </div>
 
       </footer></div>

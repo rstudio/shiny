@@ -72,29 +72,44 @@ reactive expression is a expression whose result will change over time.</p>
     <h2>Arguments</h2>
     <dl><dt>x</dt>
 <dd><p>For <code>is.reactive()</code>, an object to test. For <code>reactive()</code>, an expression. When passing in a <code><a href="https://rlang.r-lib.org/reference/defusing-advanced.html" class="external-link">quo()</a></code>sure with <code>reactive()</code>, remember to use <code><a href="https://rlang.r-lib.org/reference/inject.html" class="external-link">rlang::inject()</a></code> to distinguish that you are passing in the content of your quosure, not the expression of the quosure.</p></dd>
+
+
 <dt>env</dt>
 <dd><p>The parent environment for the reactive expression. By default,
 this is the calling environment, the same as when defining an ordinary
 non-reactive expression. If <code>x</code> is a quosure and <code>quoted</code> is <code>TRUE</code>,
 then <code>env</code> is ignored.</p></dd>
+
+
 <dt>quoted</dt>
 <dd><p>If it is <code>TRUE</code>, then the <code><a href="https://rdrr.io/r/base/substitute.html" class="external-link">quote()</a></code>ed value of <code>x</code>
 will be used when <code>x</code> is evaluated. If <code>x</code> is a quosure and you
 would like to use its expression as a value for <code>x</code>, then you must set
 <code>quoted</code> to <code>TRUE</code>.</p></dd>
+
+
 <dt>...</dt>
 <dd><p>Not used.</p></dd>
+
+
 <dt>label</dt>
 <dd><p>A label for the reactive expression, useful for debugging.</p></dd>
+
+
 <dt>domain</dt>
 <dd><p>See <a href="domains.html">domains</a>.</p></dd>
+
+
 <dt>..stacktraceon</dt>
 <dd><p>Advanced use only. For stack manipulation purposes; see
 <code><a href="stacktrace.html">stacktrace()</a></code>.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>a function, wrapped in a S3 class "reactive"</p>
+    
+
+<p>a function, wrapped in a S3 class "reactive"</p>
     </div>
     <div id="details">
     <h2>Details</h2>
@@ -130,7 +145,7 @@ more information about reactive expressions.</p>
 <span class="r-in"><span class="fu"><a href="isolate.html">isolate</a></span><span class="op">(</span><span class="fu">reactiveC</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">&lt;quosure&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> expr: <span style="color: #0000BB;">^values$A + 2</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> env:  <span style="color: #0000BB;">0x559383093270</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> env:  <span style="color: #0000BB;">0x560129f1bce0</span></span>
 <span class="r-in"></span>
 <span class="r-in"><span class="co"># Instead, the quosure should be `rlang::inject()`ed</span></span>
 <span class="r-in"><span class="va">reactiveD</span> <span class="op">&lt;-</span> <span class="fu">rlang</span><span class="fu">::</span><span class="fu"><a href="https://rlang.r-lib.org/reference/inject.html" class="external-link">inject</a></span><span class="op">(</span><span class="fu">reactive</span><span class="op">(</span><span class="op">!</span><span class="op">!</span><span class="va">myquo</span><span class="op">)</span><span class="op">)</span></span>
@@ -159,7 +174,7 @@ more information about reactive expressions.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
 </div>
 
       </footer></div>

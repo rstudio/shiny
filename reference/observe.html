@@ -72,41 +72,62 @@
     <dl><dt>x</dt>
 <dd><p>An expression (quoted or unquoted). Any return value will be
 ignored.</p></dd>
+
+
 <dt>env</dt>
 <dd><p>The parent environment for the reactive expression. By default,
 this is the calling environment, the same as when defining an ordinary
 non-reactive expression. If <code>x</code> is a quosure and <code>quoted</code> is <code>TRUE</code>,
 then <code>env</code> is ignored.</p></dd>
+
+
 <dt>quoted</dt>
 <dd><p>If it is <code>TRUE</code>, then the <code><a href="https://rdrr.io/r/base/substitute.html" class="external-link">quote()</a></code>ed value of <code>x</code>
 will be used when <code>x</code> is evaluated. If <code>x</code> is a quosure and you
 would like to use its expression as a value for <code>x</code>, then you must set
 <code>quoted</code> to <code>TRUE</code>.</p></dd>
+
+
 <dt>...</dt>
 <dd><p>Not used.</p></dd>
+
+
 <dt>label</dt>
 <dd><p>A label for the observer, useful for debugging.</p></dd>
+
+
 <dt>suspended</dt>
 <dd><p>If <code>TRUE</code>, start the observer in a suspended state. If
 <code>FALSE</code> (the default), start in a non-suspended state.</p></dd>
+
+
 <dt>priority</dt>
 <dd><p>An integer or numeric that controls the priority with which
 this observer should be executed. A higher value means higher priority: an
 observer with a higher priority value will execute before all observers
 with lower priority values. Positive, negative, and zero values are
 allowed.</p></dd>
+
+
 <dt>domain</dt>
 <dd><p>See <a href="domains.html">domains</a>.</p></dd>
+
+
 <dt>autoDestroy</dt>
 <dd><p>If <code>TRUE</code> (the default), the observer will be
 automatically destroyed when its domain (if any) ends.</p></dd>
+
+
 <dt>..stacktraceon</dt>
 <dd><p>Advanced use only. For stack manipulation purposes; see
 <code><a href="stacktrace.html">stacktrace()</a></code>.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>An observer reference class object. This object has the following
+    
+
+<p>An observer reference class object. This object has the following
 methods:</p><dl><dt><code>suspend()</code></dt>
 <dd><p>Causes this observer to stop scheduling flushes (re-executions) in
 response to invalidations. If the observer was invalidated prior to
@@ -195,7 +216,7 @@ session ends).</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
 </div>
 
       </footer></div>

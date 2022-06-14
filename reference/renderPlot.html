@@ -73,6 +73,8 @@ slot.</p>
     <h2>Arguments</h2>
     <dl><dt>expr</dt>
 <dd><p>An expression that generates a plot.</p></dd>
+
+
 <dt>width, height</dt>
 <dd><p>Height and width can be specified in three ways:</p><ul><li><p><code>"auto"</code>, the default, uses the size specified by <code><a href="plotOutput.html">plotOutput()</a></code>
 (i.e. the <code>offsetWidth</code>/`offsetHeight`` of the HTML element bound to
@@ -83,13 +85,19 @@ The function is executed in a reactive context so that you can refer to
 reactive values and expression to make the width/height reactive.</p></li>
 </ul><p>When rendering an inline plot, you must provide numeric values (in pixels)
 to both <code>width</code> and <code>height</code>.</p></dd>
+
+
 <dt>res</dt>
 <dd><p>Resolution of resulting plot, in pixels per inch. This value is
 passed to <code><a href="https://rdrr.io/r/grDevices/png.html" class="external-link">grDevices::png()</a></code>. Note that this affects the resolution of PNG
 rendering in R; it won't change the actual ppi of the browser.</p></dd>
+
+
 <dt>...</dt>
 <dd><p>Arguments to be passed through to <code><a href="https://rdrr.io/r/grDevices/png.html" class="external-link">grDevices::png()</a></code>.
 These can be used to set the width, height, background color, etc.</p></dd>
+
+
 <dt>alt</dt>
 <dd><p>Alternate text for the HTML <code>&lt;img&gt;</code> tag if it cannot be displayed
 or viewed (i.e., the user uses a screen reader). In addition to a character
@@ -99,16 +107,22 @@ default), then <code><a href="https://ggplot2.tidyverse.org/reference/get_alt_te
 ggplot objects; for other plots, <code>NA</code> results in alt text of "Plot object".
 <code>NULL</code> or <code>""</code> is not recommended because those should be limited to
 decorative images.</p></dd>
+
+
 <dt>env</dt>
 <dd><p>The parent environment for the reactive expression. By default,
 this is the calling environment, the same as when defining an ordinary
 non-reactive expression. If <code>expr</code> is a quosure and <code>quoted</code> is <code>TRUE</code>,
 then <code>env</code> is ignored.</p></dd>
+
+
 <dt>quoted</dt>
 <dd><p>If it is <code>TRUE</code>, then the <code><a href="https://rdrr.io/r/base/substitute.html" class="external-link">quote()</a></code>ed value of <code>expr</code>
 will be used when <code>expr</code> is evaluated. If <code>expr</code> is a quosure and you
 would like to use its expression as a value for <code>expr</code>, then you must set
 <code>quoted</code> to <code>TRUE</code>.</p></dd>
+
+
 <dt>execOnResize</dt>
 <dd><p>If <code>FALSE</code> (the default), then when a plot is
 resized, Shiny will <em>replay</em> the plot drawing commands with
@@ -116,10 +130,13 @@ resized, Shiny will <em>replay</em> the plot drawing commands with
 This can result in faster plot redrawing, but there may be rare cases where
 it is undesirable. If you encounter problems when resizing a plot, you can
 have Shiny re-execute the code on resize by setting this to <code>TRUE</code>.</p></dd>
+
+
 <dt>outputArgs</dt>
 <dd><p>A list of arguments to be passed through to the implicit
 call to <code><a href="plotOutput.html">plotOutput()</a></code> when <code>renderPlot</code> is used in an
 interactive R Markdown document.</p></dd>
+
 </dl></div>
     <div id="details">
     <h2>Details</h2>
@@ -158,7 +175,7 @@ expedite the rendering of identical plots.</p></div>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
 </div>
 
       </footer></div>

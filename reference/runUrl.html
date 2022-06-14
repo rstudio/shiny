@@ -85,34 +85,51 @@ respectively.</p>
     <h2>Arguments</h2>
     <dl><dt>url</dt>
 <dd><p>URL of the application.</p></dd>
+
+
 <dt>filetype</dt>
 <dd><p>The file type (<code>".zip"</code>, <code>".tar"</code>, or
 <code>".tar.gz"</code>. Defaults to the file extension taken from the url.</p></dd>
+
+
 <dt>subdir</dt>
 <dd><p>A subdirectory in the repository that contains the app. By
 default, this function will run an app from the top level of the repo, but
 you can use a path such as <code>"inst/shinyapp"</code>.</p></dd>
+
+
 <dt>destdir</dt>
 <dd><p>Directory to store the downloaded application files. If <code>NULL</code>
 (the default), the application files will be stored in a temporary directory
 and removed when the app exits</p></dd>
+
+
 <dt>...</dt>
 <dd><p>Other arguments to be passed to <code><a href="runApp.html">runApp()</a></code>, such as
 <code>port</code> and <code>launch.browser</code>.</p></dd>
+
+
 <dt>gist</dt>
 <dd><p>The identifier of the gist. For example, if the gist is
 https://gist.github.com/jcheng5/3239667, then <code>3239667</code>,
 <code>'3239667'</code>, and <code>'https://gist.github.com/jcheng5/3239667'</code> are
 all valid values.</p></dd>
+
+
 <dt>repo</dt>
 <dd><p>Name of the repository.</p></dd>
+
+
 <dt>username</dt>
 <dd><p>GitHub username. If <code>repo</code> is of the form
 <code>"username/repo"</code>, <code>username</code> will be taken from <code>repo</code>.</p></dd>
+
+
 <dt>ref</dt>
 <dd><p>Desired git reference. Could be a commit, tag, or branch name.
 Defaults to <code>"HEAD"</code>, which means the default branch on GitHub, typically
 <code>"main"</code> or <code>"master"</code>.</p></dd>
+
 </dl></div>
 
     <div id="ref-examples">
@@ -156,7 +173,7 @@ Defaults to <code>"HEAD"</code>, which means the default branch on GitHub, typic
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
 </div>
 
       </footer></div>

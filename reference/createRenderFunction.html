@@ -93,16 +93,22 @@ additional call(s).</p>
 <dd><p>A function without parameters, that returns user data. If the
 returned value is a promise, then the render function will proceed in async
 mode.</p></dd>
+
+
 <dt>transform</dt>
 <dd><p>A function that takes four arguments: <code>value</code>,
 <code>session</code>, <code>name</code>, and <code>...</code> (for future-proofing). This
 function will be invoked each time a value is returned from <code>func</code>,
 and is responsible for changing the value into a JSON-ready value to be
 JSON-encoded and sent to the browser.</p></dd>
+
+
 <dt>outputFunc</dt>
 <dd><p>The UI function that is used (or most commonly used) with
 this render function. This can be used in R Markdown documents to create
 complete output widgets out of just the render function.</p></dd>
+
+
 <dt>outputArgs</dt>
 <dd><p>A list of arguments to pass to the <code>uiFunc</code>. Render
 functions should include <code>outputArgs = list()</code> in their own parameter list,
@@ -110,18 +116,24 @@ and pass through the value to <code>markRenderFunction</code>, to allow app auth
 customize outputs. (Currently, this is only supported for dynamically
 generated UIs, such as those created by Shiny code snippets embedded in R
 Markdown documents).</p></dd>
+
+
 <dt>cacheHint</dt>
 <dd><p>One of <code>"auto"</code>, <code>FALSE</code>, or some other information to
 identify this instance for caching using <code><a href="bindCache.html">bindCache()</a></code>. If <code>"auto"</code>, it
 will try to automatically infer caching information. If <code>FALSE</code>, do not
 allow caching for the object. Some render functions (such as <a href="renderPlot.html">renderPlot</a>)
 contain internal state that makes them unsuitable for caching.</p></dd>
+
+
 <dt>cacheWriteHook</dt>
 <dd><p>Used if the render function is passed to <code><a href="bindCache.html">bindCache()</a></code>.
 This is an optional callback function to invoke before saving the value
 from the render function to the cache. This function must accept one
 argument, the value returned from <code>renderFunc</code>, and should return the value
 to store in the cache.</p></dd>
+
+
 <dt>cacheReadHook</dt>
 <dd><p>Used if the render function is passed to <code><a href="bindCache.html">bindCache()</a></code>.
 This is an optional callback function to invoke after reading a value from
@@ -130,31 +142,50 @@ argument, the value retrieved from the cache. This can be useful when some
 side effect needs to occur for a render function to behave correctly. For
 example, some render functions call <code><a href="createWebDependency.html">createWebDependency()</a></code> so that Shiny
 is able to serve JS and CSS resources.</p></dd>
+
+
 <dt>q</dt>
 <dd><p>Quosure of the expression <code>x</code>. When capturing expressions to create
 your quosure, it is recommended to use <code>enquo0()</code> to not unquote the
 object too early. See <code>enquo0()</code> for more details.</p></dd>
+
+
 <dt>label</dt>
 <dd><p>A label for the object to be shown in the debugger. Defaults to
 the name of the calling function.</p></dd>
+
+
 <dt>expr</dt>
 <dd><p>A quoted or unquoted expression, or a quosure.</p></dd>
+
+
 <dt>name</dt>
 <dd><p>The name the function should be given</p></dd>
+
+
 <dt>eval.env</dt>
 <dd><p>The desired environment for the function. Defaults to the
 calling environment two steps back.</p></dd>
+
+
 <dt>quoted</dt>
 <dd><p>Is the expression quoted?</p></dd>
+
+
 <dt>assign.env</dt>
 <dd><p>The environment in which the function should be assigned.</p></dd>
+
+
 <dt>wrappedWithLabel, ..stacktraceon</dt>
 <dd><p>Advanced use only. For stack manipulation purposes; see
 <code><a href="stacktrace.html">stacktrace()</a></code>.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>An annotated render function, ready to be assigned to an
+    
+
+<p>An annotated render function, ready to be assigned to an
 <code>output</code> slot.</p>
     </div>
     <div id="details">
@@ -258,7 +289,7 @@ function that's assigned to a <code>name</code> in the <code>assign.env</code>.<
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
 </div>
 
       </footer></div>

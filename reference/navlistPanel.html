@@ -71,30 +71,45 @@ which navigate to a set of tabPanels displayed to the right.</p>
     <h2>Arguments</h2>
     <dl><dt>...</dt>
 <dd><p><code><a href="tabPanel.html">tabPanel()</a></code> elements to include in the navlist</p></dd>
+
+
 <dt>id</dt>
 <dd><p>If provided, you can use <code>input$</code><em><code>id</code></em> in your
 server logic to determine which of the current navlist items is active. The
 value will correspond to the <code>value</code> argument that is passed to
 <code><a href="tabPanel.html">tabPanel()</a></code>.</p></dd>
+
+
 <dt>selected</dt>
 <dd><p>The <code>value</code> (or, if none was supplied, the <code>title</code>)
 of the navigation item that should be selected by default. If <code>NULL</code>,
 the first navigation will be selected.</p></dd>
+
+
 <dt>header</dt>
 <dd><p>Tag or list of tags to display as a common header above all
 tabPanels.</p></dd>
+
+
 <dt>footer</dt>
 <dd><p>Tag or list of tags to display as a common footer below all
 tabPanels</p></dd>
+
+
 <dt>well</dt>
 <dd><p><code>TRUE</code> to place a well (gray rounded rectangle) around the
 navigation list.</p></dd>
+
+
 <dt>fluid</dt>
 <dd><p><code>TRUE</code> to use fluid layout; <code>FALSE</code> to use fixed
 layout.</p></dd>
+
+
 <dt>widths</dt>
 <dd><p>Column widths of the navigation list and tabset content areas
 respectively.</p></dd>
+
 </dl></div>
     <div id="details">
     <h2>Details</h2>
@@ -127,24 +142,24 @@ doesn't support separators.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   &lt;h2&gt;Application Title&lt;/h2&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   &lt;div class="row"&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     &lt;div class="col-sm-4 well"&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       &lt;ul class="nav nav-pills nav-stacked" data-tabsetid="3404"&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       &lt;ul class="nav nav-pills nav-stacked" data-tabsetid="2544"&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         &lt;li class="navbar-brand"&gt;Header&lt;/li&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         &lt;li class="active"&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           &lt;a href="#tab-3404-2" data-toggle="tab" data-bs-toggle="tab" data-value="First"&gt;First&lt;/a&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           &lt;a href="#tab-2544-2" data-toggle="tab" data-bs-toggle="tab" data-value="First"&gt;First&lt;/a&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         &lt;/li&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         &lt;li&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           &lt;a href="#tab-3404-3" data-toggle="tab" data-bs-toggle="tab" data-value="Second"&gt;Second&lt;/a&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           &lt;a href="#tab-2544-3" data-toggle="tab" data-bs-toggle="tab" data-value="Second"&gt;Second&lt;/a&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         &lt;/li&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         &lt;li&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           &lt;a href="#tab-3404-4" data-toggle="tab" data-bs-toggle="tab" data-value="Third"&gt;Third&lt;/a&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           &lt;a href="#tab-2544-4" data-toggle="tab" data-bs-toggle="tab" data-value="Third"&gt;Third&lt;/a&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         &lt;/li&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       &lt;/ul&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     &lt;/div&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     &lt;div class="col-sm-8"&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       &lt;div class="tab-content" data-tabsetid="3404"&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         &lt;div class="tab-pane active" data-value="First" id="tab-3404-2"&gt;&lt;/div&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         &lt;div class="tab-pane" data-value="Second" id="tab-3404-3"&gt;&lt;/div&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         &lt;div class="tab-pane" data-value="Third" id="tab-3404-4"&gt;&lt;/div&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       &lt;div class="tab-content" data-tabsetid="2544"&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         &lt;div class="tab-pane active" data-value="First" id="tab-2544-2"&gt;&lt;/div&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         &lt;div class="tab-pane" data-value="Second" id="tab-2544-3"&gt;&lt;/div&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         &lt;div class="tab-pane" data-value="Third" id="tab-2544-4"&gt;&lt;/div&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       &lt;/div&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     &lt;/div&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   &lt;/div&gt;</span>
@@ -163,7 +178,7 @@ doesn't support separators.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
 </div>
 
       </footer></div>

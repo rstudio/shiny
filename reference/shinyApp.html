@@ -78,39 +78,56 @@ Shiny app (<code>shinyAppDir</code>).</p>
 <code><a href="fluidPage.html">fluidPage()</a></code> with nested controls).</p>
 <p>If bookmarking is enabled (see <code>enableBookmarking</code>), this must be
 a single argument function that returns the UI definition.</p></dd>
+
+
 <dt>server</dt>
 <dd><p>A function with three parameters: <code>input</code>, <code>output</code>, and
 <code>session</code>. The function is called once for each session ensuring that each
 app is independent.</p></dd>
+
+
 <dt>onStart</dt>
 <dd><p>A function that will be called before the app is actually run.
 This is only needed for <code>shinyAppObj</code>, since in the <code>shinyAppDir</code>
 case, a <code>global.R</code> file can be used for this purpose.</p></dd>
+
+
 <dt>options</dt>
 <dd><p>Named options that should be passed to the <code>runApp</code> call
 (these can be any of the following: "port", "launch.browser", "host", "quiet",
 "display.mode" and "test.mode"). You can also specify <code>width</code> and
 <code>height</code> parameters which provide a hint to the embedding environment
 about the ideal height/width for the app.</p></dd>
+
+
 <dt>uiPattern</dt>
 <dd><p>A regular expression that will be applied to each <code>GET</code>
 request to determine whether the <code>ui</code> should be used to handle the
 request. Note that the entire request path must match the regular
 expression in order for the match to be considered successful.</p></dd>
+
+
 <dt>enableBookmarking</dt>
 <dd><p>Can be one of <code>"url"</code>, <code>"server"</code>, or
 <code>"disable"</code>. The default value, <code>NULL</code>, will respect the setting from
 any previous calls to  <code><a href="enableBookmarking.html">enableBookmarking()</a></code>. See <code><a href="enableBookmarking.html">enableBookmarking()</a></code>
 for more information on bookmarking your app.</p></dd>
+
+
 <dt>appDir</dt>
 <dd><p>Path to directory that contains a Shiny app (i.e. a server.R
 file and either ui.R or www/index.html)</p></dd>
+
+
 <dt>appFile</dt>
 <dd><p>Path to a .R file containing a Shiny application</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>An object that represents the app. Printing the object or passing it
+    
+
+<p>An object that represents the app. Printing the object or passing it
 to <code><a href="runApp.html">runApp()</a></code> will run the app.</p>
     </div>
     <div id="details">
@@ -168,7 +185,7 @@ object to <code><a href="https://rdrr.io/r/base/print.html" class="external-link
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
 </div>
 
       </footer></div>

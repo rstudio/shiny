@@ -86,20 +86,30 @@ page.</p>
     <h2>Arguments</h2>
     <dl><dt>outputId</dt>
 <dd><p>output variable to read the table from</p></dd>
+
+
 <dt>expr</dt>
 <dd><p>An expression that returns an R object that can be used with
 <code><a href="https://rdrr.io/pkg/xtable/man/xtable.html" class="external-link">xtable::xtable()</a></code>.</p></dd>
+
+
 <dt>striped, hover, bordered</dt>
 <dd><p>Logicals: if <code>TRUE</code>, apply the
 corresponding Bootstrap table format to the output table.</p></dd>
+
+
 <dt>spacing</dt>
 <dd><p>The spacing between the rows of the table (<code>xs</code>
 stands for "extra small", <code>s</code> for "small", <code>m</code> for "medium"
 and <code>l</code> for "large").</p></dd>
+
+
 <dt>width</dt>
 <dd><p>Table width. Must be a valid CSS unit (like "100%", "400px",
 "auto") or a number, which will be coerced to a string and
 have "px" appended.</p></dd>
+
+
 <dt>align</dt>
 <dd><p>A string that specifies the column alignment. If equal to
 <code>'l'</code>, <code>'c'</code> or <code>'r'</code>, then all columns will be,
@@ -114,35 +124,50 @@ alignment). If <code>NULL</code>, then all numeric/integer columns (including
 the row names, if they are numbers) will be right-aligned and
 everything else will be left-aligned (<code>align = '?'</code> produces the
 same result).</p></dd>
+
+
 <dt>rownames, colnames</dt>
 <dd><p>Logicals: include rownames? include colnames
 (column headers)?</p></dd>
+
+
 <dt>digits</dt>
 <dd><p>An integer specifying the number of decimal places for
 the numeric columns (this will not apply to columns with an integer
 class). If <code>digits</code> is set to a negative value, then the numeric
 columns will be displayed in scientific format with a precision of
 <code>abs(digits)</code> digits.</p></dd>
+
+
 <dt>na</dt>
 <dd><p>The string to use in the table cells whose values are missing
 (i.e. they either evaluate to <code>NA</code> or <code>NaN</code>).</p></dd>
+
+
 <dt>...</dt>
 <dd><p>Arguments to be passed through to <code><a href="https://rdrr.io/pkg/xtable/man/xtable.html" class="external-link">xtable::xtable()</a></code>
 and <code><a href="https://rdrr.io/pkg/xtable/man/print.xtable.html" class="external-link">xtable::print.xtable()</a></code>.</p></dd>
+
+
 <dt>env</dt>
 <dd><p>The parent environment for the reactive expression. By default,
 this is the calling environment, the same as when defining an ordinary
 non-reactive expression. If <code>expr</code> is a quosure and <code>quoted</code> is <code>TRUE</code>,
 then <code>env</code> is ignored.</p></dd>
+
+
 <dt>quoted</dt>
 <dd><p>If it is <code>TRUE</code>, then the <code><a href="https://rdrr.io/r/base/substitute.html" class="external-link">quote()</a></code>ed value of <code>expr</code>
 will be used when <code>expr</code> is evaluated. If <code>expr</code> is a quosure and you
 would like to use its expression as a value for <code>expr</code>, then you must set
 <code>quoted</code> to <code>TRUE</code>.</p></dd>
+
+
 <dt>outputArgs</dt>
 <dd><p>A list of arguments to be passed through to the
 implicit call to <code>tableOutput()</code> when <code>renderTable</code> is
 used in an interactive R Markdown document.</p></dd>
+
 </dl></div>
 
     <div id="ref-examples">
@@ -177,7 +202,7 @@ used in an interactive R Markdown document.</p></dd>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
 </div>
 
       </footer></div>

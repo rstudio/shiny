@@ -64,22 +64,31 @@ non-reactive data source.</p>
 <dd><p>Approximate number of milliseconds to wait between
 calls to <code>checkFunc</code>. This can be either a numeric value, or a
 function that returns a numeric value.</p></dd>
+
+
 <dt>session</dt>
 <dd><p>The user session to associate this file reader with, or
 <code>NULL</code> if none. If non-null, the reader will automatically stop when
 the session ends.</p></dd>
+
+
 <dt>checkFunc</dt>
 <dd><p>A relatively cheap function whose values over time will be
 tested for equality; inequality indicates that the underlying value has
 changed and needs to be invalidated and re-read using <code>valueFunc</code>. See
 Details.</p></dd>
+
+
 <dt>valueFunc</dt>
 <dd><p>A function that calculates the underlying value. See
 Details.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>A reactive expression that returns the result of <code>valueFunc</code>,
+    
+
+<p>A reactive expression that returns the result of <code>valueFunc</code>,
 and invalidates when <code>checkFunc</code> changes.</p>
     </div>
     <div id="details">
@@ -151,7 +160,7 @@ values and reactive expressions.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     data()</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   })</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> }</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x5593813e68d0&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x560127fdf968&gt;</span>
 </code></pre></div>
     </div>
   </div>
@@ -166,7 +175,7 @@ values and reactive expressions.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
 </div>
 
       </footer></div>

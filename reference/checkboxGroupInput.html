@@ -73,21 +73,33 @@ selected values.</p>
     <h2>Arguments</h2>
     <dl><dt>inputId</dt>
 <dd><p>The <code>input</code> slot that will be used to access the value.</p></dd>
+
+
 <dt>label</dt>
 <dd><p>Display label for the control, or <code>NULL</code> for no label.</p></dd>
+
+
 <dt>choices</dt>
 <dd><p>List of values to show checkboxes for. If elements of the list
 are named then that name rather than the value is displayed to the user. If
 this argument is provided, then <code>choiceNames</code> and <code>choiceValues</code>
 must not be provided, and vice-versa. The values should be strings; other
 types (such as logicals and numbers) will be coerced to strings.</p></dd>
+
+
 <dt>selected</dt>
 <dd><p>The values that should be initially selected, if any.</p></dd>
+
+
 <dt>inline</dt>
 <dd><p>If <code>TRUE</code>, render the choices inline (i.e. horizontally)</p></dd>
+
+
 <dt>width</dt>
 <dd><p>The width of the input, e.g. <code>'400px'</code>, or <code>'100%'</code>;
 see <code><a href="https://rdrr.io/pkg/htmltools/man/validateCssUnit.html" class="external-link">validateCssUnit()</a></code>.</p></dd>
+
+
 <dt>choiceNames, choiceValues</dt>
 <dd><p>List of names and values, respectively,
 that are displayed to the user in the app and correspond to the each
@@ -98,10 +110,13 @@ provided, then the other <em>must</em> be provided and <code>choices</code>
 a named list for <code>choices</code> is that <code>choiceNames</code> allows any
 type of UI object to be passed through (tag objects, icons, HTML code,
 ...), instead of just simple text. See Examples.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>A list of HTML elements that can be added to a UI definition.</p>
+    
+
+<p>A list of HTML elements that can be added to a UI definition.</p>
     </div>
     <div id="server-value">
     <h2>Server value</h2>
@@ -184,7 +199,7 @@ type of UI object to be passed through (tag objects, icons, HTML code,
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
 </div>
 
       </footer></div>

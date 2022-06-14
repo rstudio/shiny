@@ -88,10 +88,14 @@ manipulating stack traces.</p>
     <h2>Arguments</h2>
     <dl><dt>expr</dt>
 <dd><p>The expression to wrap.</p></dd>
+
+
 <dt>full</dt>
 <dd><p>If <code>TRUE</code>, then every element of <code><a href="https://rdrr.io/r/base/sys.parent.html" class="external-link">sys.calls()</a></code> will be
 included in the stack trace. By default (<code>FALSE</code>), calls that Shiny
 deems uninteresting will be hidden.</p></dd>
+
+
 <dt>offset</dt>
 <dd><p>If <code>TRUE</code> (the default), srcrefs will be reassigned from
 the calls they originated from, to the destinations of those calls. If
@@ -99,15 +103,22 @@ you're used to stack traces from other languages, this feels more
 intuitive, as the definition of the function indicated in the call and the
 location specified by the srcref match up. If <code>FALSE</code>, srcrefs will be
 left alone (traditional R treatment where the srcref is of the callsite).</p></dd>
+
+
 <dt>cond</dt>
 <dd><p>A condition that may have previously been annotated by
 <code>captureStackTraces</code> (or <code>withLogErrors</code>).</p></dd>
+
+
 <dt>value</dt>
 <dd><p>The stack trace value to assign to the condition.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p><code>printError</code> and <code>printStackTrace</code> return
+    
+
+<p><code>printError</code> and <code>printStackTrace</code> return
 <code><a href="https://rdrr.io/r/base/invisible.html" class="external-link">invisible()</a></code>. The other functions pass through the results of
 <code>expr</code>.</p>
     </div>
@@ -215,7 +226,7 @@ value is less than 1 is hidden, and finally, the ..stacktraceon.. and
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
 </div>
 
       </footer></div>

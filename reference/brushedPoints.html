@@ -89,39 +89,58 @@ rows of the would be selected.</p>
     <h2>Arguments</h2>
     <dl><dt>df</dt>
 <dd><p>A data frame from which to select rows.</p></dd>
+
+
 <dt>brush, coordinfo</dt>
 <dd><p>The data from a brush or click/dblclick/hover event
 e.g. <code>input$plot_brush</code>, <code>input$plot_click</code>.</p></dd>
+
+
 <dt>xvar, yvar</dt>
 <dd><p>A string giving the name of the variable on the x or y axis.
 These are only required for base graphics, and must be the name of
 a column in <code>df</code>.</p></dd>
+
+
 <dt>panelvar1, panelvar2</dt>
 <dd><p>A string giving the name of a panel variable.
 For expert use only; in most cases these will be automatically
 derived from the ggplot2 spec.</p></dd>
+
+
 <dt>allRows</dt>
 <dd><p>If <code>FALSE</code> (the default) return a data frame containing
 the selected rows. If <code>TRUE</code>, the input data frame will have a new
 column, <code>selected_</code>, which indicates whether the row was selected or not.</p></dd>
+
+
 <dt>threshold</dt>
 <dd><p>A maximum distance (in pixels) to the pointer location.
 Rows in the data frame will be selected if the distance to the pointer is
 less than <code>threshold</code>.</p></dd>
+
+
 <dt>maxpoints</dt>
 <dd><p>Maximum number of rows to return. If <code>NULL</code> (the default),
 will return all rows within the threshold distance.</p></dd>
+
+
 <dt>addDist</dt>
 <dd><p>If TRUE, add a column named <code>dist_</code> that contains the
 distance from the coordinate to the point, in pixels. When no pointer
 event has yet occurred, the value of <code>dist_</code> will be <code>NA</code>.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>A data frame based on <code>df</code>, containing the observations selected by the
+    
+
+<p>A data frame based on <code>df</code>, containing the observations selected by the
 brush or near the click event. For <code>nearPoints()</code>, the rows will be sorted
-by distance to the event.
-If <code>allRows = TRUE</code>, then all rows will returned, along with a new
+by distance to the event.</p>
+
+
+<p>If <code>allRows = TRUE</code>, then all rows will returned, along with a new
 <code>selected_</code> column that indicates whether or not the point was selected.
 The output from <code>nearPoints()</code> will no longer be sorted, but you can
 set <code>addDist = TRUE</code> to get an additional column that gives the pixel
@@ -182,7 +201,7 @@ using just the x or y variable, whichever is appropriate.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
 </div>
 
       </footer></div>

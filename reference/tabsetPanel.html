@@ -69,15 +69,21 @@ useful for dividing output into multiple independently viewable sections.</p>
     <h2>Arguments</h2>
     <dl><dt>...</dt>
 <dd><p><code><a href="tabPanel.html">tabPanel()</a></code> elements to include in the tabset</p></dd>
+
+
 <dt>id</dt>
 <dd><p>If provided, you can use <code>input$</code><em><code>id</code></em> in your
 server logic to determine which of the current tabs is active. The value
 will correspond to the <code>value</code> argument that is passed to
 <code><a href="tabPanel.html">tabPanel()</a></code>.</p></dd>
+
+
 <dt>selected</dt>
 <dd><p>The <code>value</code> (or, if none was supplied, the <code>title</code>)
 of the tab that should be selected by default. If <code>NULL</code>, the first
 tab will be selected.</p></dd>
+
+
 <dt>type</dt>
 <dd><dl><dt><code>"tabs"</code></dt>
 <dd><p>Standard tab look</p></dd>
@@ -92,16 +98,25 @@ active tab via other input controls. (See example below)</p></dd>
 
 
 </dl></dd>
+
+
 <dt>header</dt>
 <dd><p>Tag or list of tags to display as a common header above all
 tabPanels.</p></dd>
+
+
 <dt>footer</dt>
 <dd><p>Tag or list of tags to display as a common footer below all
 tabPanels</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>A tabset that can be passed to <code><a href="sidebarLayout.html">mainPanel()</a></code></p>
+    
+
+<p>A tabset that can be passed to <code><a href="sidebarLayout.html">mainPanel()</a></code></p>
+
+
     </div>
     <div id="see-also">
     <h2>See also</h2>
@@ -122,25 +137,25 @@ tabPanels</p></dd>
 <span class="r-in"><span class="op">)</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> &lt;div class="col-sm-8" role="main"&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   &lt;div class="tabbable"&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     &lt;ul class="nav nav-tabs" data-tabsetid="3059"&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     &lt;ul class="nav nav-tabs" data-tabsetid="5783"&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       &lt;li class="active"&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         &lt;a href="#tab-3059-1" data-toggle="tab" data-bs-toggle="tab" data-value="Plot"&gt;Plot&lt;/a&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         &lt;a href="#tab-5783-1" data-toggle="tab" data-bs-toggle="tab" data-value="Plot"&gt;Plot&lt;/a&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       &lt;/li&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       &lt;li&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         &lt;a href="#tab-3059-2" data-toggle="tab" data-bs-toggle="tab" data-value="Summary"&gt;Summary&lt;/a&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         &lt;a href="#tab-5783-2" data-toggle="tab" data-bs-toggle="tab" data-value="Summary"&gt;Summary&lt;/a&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       &lt;/li&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       &lt;li&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         &lt;a href="#tab-3059-3" data-toggle="tab" data-bs-toggle="tab" data-value="Table"&gt;Table&lt;/a&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         &lt;a href="#tab-5783-3" data-toggle="tab" data-bs-toggle="tab" data-value="Table"&gt;Table&lt;/a&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       &lt;/li&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     &lt;/ul&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     &lt;div class="tab-content" data-tabsetid="3059"&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       &lt;div class="tab-pane active" data-value="Plot" id="tab-3059-1"&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     &lt;div class="tab-content" data-tabsetid="5783"&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       &lt;div class="tab-pane active" data-value="Plot" id="tab-5783-1"&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         &lt;div id="plot" class="shiny-plot-output" style="width:100%;height:400px;"&gt;&lt;/div&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       &lt;/div&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       &lt;div class="tab-pane" data-value="Summary" id="tab-3059-2"&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       &lt;div class="tab-pane" data-value="Summary" id="tab-5783-2"&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         &lt;pre class="shiny-text-output noplaceholder" id="summary"&gt;&lt;/pre&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       &lt;/div&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       &lt;div class="tab-pane" data-value="Table" id="tab-3059-3"&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       &lt;div class="tab-pane" data-value="Table" id="tab-5783-3"&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         &lt;div id="table" class="shiny-html-output"&gt;&lt;/div&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       &lt;/div&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     &lt;/div&gt;</span>
@@ -189,7 +204,7 @@ tabPanels</p></dd>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
 </div>
 
       </footer></div>

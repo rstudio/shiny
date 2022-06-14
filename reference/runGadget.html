@@ -69,24 +69,35 @@ if running in RStudio, defaults to viewing the app in the Viewer pane.</p>
     <dl><dt>app</dt>
 <dd><p>Either a Shiny app object as created by
 <code><a href="shiny-package.html">shinyApp()</a></code> et al, or, a UI object.</p></dd>
+
+
 <dt>server</dt>
 <dd><p>Ignored if <code>app</code> is a Shiny app object; otherwise, passed
 along to <code>shinyApp</code> (i.e. <code>shinyApp(ui = app, server = server)</code>).</p></dd>
+
+
 <dt>port</dt>
 <dd><p>See <code><a href="shiny-package.html">runApp()</a></code>.</p></dd>
+
+
 <dt>viewer</dt>
 <dd><p>Specify where the gadget should be displayed--viewer pane,
 dialog window, or external browser--by passing in a call to one of the
 <code><a href="viewer.html">viewer()</a></code> functions.</p></dd>
+
+
 <dt>stopOnCancel</dt>
 <dd><p>If <code>TRUE</code> (the default), then an <code>observeEvent</code>
 is automatically created that handles <code>input$cancel</code> by calling
 <code><a href="stopApp.html">stopApp()</a></code> with an error. Pass <code>FALSE</code> if you want to handle
 <code>input$cancel</code> yourself.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>The value returned by the gadget.</p>
+    
+
+<p>The value returned by the gadget.</p>
     </div>
 
     <div id="ref-examples">
@@ -120,7 +131,7 @@ is automatically created that handles <code>input$cancel</code> by calling
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
 </div>
 
       </footer></div>

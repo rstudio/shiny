@@ -17,6 +17,8 @@ shiny development
 
 * The auto-reload feature (`options(shiny.autoreload=TRUE)`) was not being activated by `devmode(TRUE)`, despite a console message asserting that it was. (#3620)
 
+* Add `shiny.mathjax.url` and `shiny.mathjax.config` options for configuring the MathJax URL used by `withMathJax`. Thanks, @Neutron3529! (#3639)
+
 ### Bug fixes
 
 * Closed tidyverse/dplyr#5552: Compatibility of dplyr 1.0 (and rlang chained errors in general) with `req()`, `validate()`, and friends.
@@ -28,6 +30,17 @@ shiny development
 * Closed tidyverse/dplyr#6154: Values from an `actionButton()` had S3 classes in the incorrect order.
 
 * Fixed a bug where updating an input value without a corresponding Input binding element did not trigger a JavaScript `shiny:inputchanged` event. Now, if no Input binding element is found, the `shiny:inputchanged` event is triggered on `window.document`. (#3584)
+
+* Restored the previous behavior of automatically guessing the `Content-Type` header for `downloadHandler` functions when no explicit `contentType` argument is supplied. (#3393)
+
+* Closed #3619: In R 4.2, `splitLayout()` raised warnings about incorrect length in an `if` statement. (Thanks to @dmenne, #3625)
+
+* Closed #2297: If an error occurred in parsing a value in a bookmark query string, an error would be thrown and nothing would be restored. Now a message is displayed and that value is ignored. (Thanks to @daattali, #3385)
+
+* `fileInput()` can set the `capture` attribute to facilitates user access to a device's media capture mechanism, such as a camera, or microphone, from within a file upload control ([W3C HTML Media Capture](https://www.w3.org/TR/html-media-capture/)). (Thanks to khaled-alshamaa, #3481)
+
+* Closed rstudio/shinytest2#222: When restoring a context (i.e., bookmarking) from a URL, Shiny now better handles a trailing `=` after `_inputs_` and `_values_`. (#3648)
+
 
 shiny 1.7.1
 ===========

@@ -370,7 +370,7 @@ RestoreContext <- R6Class("RestoreContext",
               safeFromJSON(value),
               error = function(e) {
                 varsUnparsed <<- c(varsUnparsed, name)
-                message("Failed to parse URL parameter \"", name, "\"")
+                warning("Failed to parse URL parameter \"", name, "\"")
               }
             )
           }

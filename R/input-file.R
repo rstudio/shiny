@@ -23,7 +23,18 @@
 #' @param buttonLabel The label used on the button. Can be text or an HTML tag
 #'   object.
 #' @param placeholder The text to show before a file has been uploaded.
+#' @param capture What source to use for capturing image, audio or video data.
+#'   This attribute facilitates user access to a device's media capture 
+#'   mechanism, such as a camera, or microphone, from within a file upload 
+#'   control.
 #'
+#'   A value of `user` indicates that the user-facing camera and/or microphone
+#'   should be used. A value of `environment` specifies that the outward-facing
+#'   camera and/or microphone should be used.
+#'
+#'   By default on most phones, this will accept still photos or video. For
+#'   still photos only, also use `accept="image/*"`. For video only, use
+#'   `accept="video/*"`.
 #' @examples
 #' ## Only run examples in interactive R sessions
 #' if (interactive()) {
@@ -73,7 +84,8 @@
 #'
 #' @export
 fileInput <- function(inputId, label, multiple = FALSE, accept = NULL,
-  width = NULL, buttonLabel = "Browse...", placeholder = "No file selected") {
+  width = NULL, buttonLabel = "Browse...", placeholder = "No file selected",
+  capture = NULL) {
 
   restoredValue <- restoreInput(id = inputId, default = NULL)
 
@@ -101,6 +113,9 @@ fileInput <- function(inputId, label, multiple = FALSE, accept = NULL,
   if (length(accept) > 0)
     inputTag$attribs$accept <- paste(accept, collapse=',')
 
+  if (!is.null(capture)) {
+    inputTag$attribs$capture <- capture
+  }
 
   div(class = "form-group shiny-input-container",
     style = css(width = validateCssUnit(width)),

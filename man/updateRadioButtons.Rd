@@ -35,16 +35,7 @@ use \code{character(0)}.}
 
 \item{inline}{If \code{TRUE}, render the choices inline (i.e. horizontally)}
 
-\item{choiceNames}{List of names and values, respectively, that
-are displayed to the user in the app and correspond to the each choice (for
-this reason, \code{choiceNames} and \code{choiceValues} must have the same length).
-If either of these arguments is provided, then the other \emph{must} be provided
-and \code{choices} \emph{must not} be provided. The advantage of using both of these
-over a named list for \code{choices} is that \code{choiceNames} allows any type of UI
-object to be passed through (tag objects, icons, HTML code, ...), instead
-of just simple text. See Examples.}
-
-\item{choiceValues}{List of names and values, respectively, that
+\item{choiceNames, choiceValues}{List of names and values, respectively, that
 are displayed to the user in the app and correspond to the each choice (for
 this reason, \code{choiceNames} and \code{choiceValues} must have the same length).
 If either of these arguments is provided, then the other \emph{must} be provided

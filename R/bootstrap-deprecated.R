@@ -6,7 +6,7 @@
 #' @param sidebarPanel The [sidebarPanel] containing input controls
 #' @param mainPanel The [mainPanel] containing outputs
 #' @keywords internal
-#' @return A UI defintion that can be passed to the [shinyUI] function
+#' @return A UI definition that can be passed to the [shinyUI] function
 #' @export
 pageWithSidebar <- function(headerPanel,
                             sidebarPanel,

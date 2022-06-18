@@ -14,7 +14,7 @@ pageWithSidebar(headerPanel, sidebarPanel, mainPanel)
 \item{mainPanel}{The \link{mainPanel} containing outputs}
 }
 \value{
-A UI defintion that can be passed to the \link{shinyUI} function
+A UI definition that can be passed to the \link{shinyUI} function
 }
 \description{
 \strong{DEPRECATED}: use \code{\link[=fluidPage]{fluidPage()}} and \code{\link[=sidebarLayout]{sidebarLayout()}} instead.

@@ -51,12 +51,14 @@ function scaler1D(
 
 type Panel = {
   domain: {
+    // Data coordinates
     top: number;
     bottom: number;
     left: number;
     right: number;
   };
   range: {
+    // Pixel coordinates
     top: number;
     bottom: number;
     left: number;

@@ -8,7 +8,7 @@ import type { Offset } from "./findbox";
 import type { Coordmap } from "./initCoordmap";
 import type { Panel } from "./initPanelScales";
 import type { InputRatePolicy } from "../inputPolicies";
-import { mapValues, roundSignif } from "../utils";
+import { mapValues, roundSignif, roundDigits } from "../utils";
 
 // ----------------------------------------------------------
 // Handler creators for click, hover, brush.
@@ -179,12 +179,11 @@ function createBrushHandler(
   function sendBrushInfo() {
     // Round to 13 significant digits *here* to prevent FP-rounding-induced
     // resends of almost-but-not-quite-exactly-the-same data.
-    // This fixes #1634 and the related issue in #2197 for real.
-    // TODO: haha, of course this doesn't actually fix it perfectly.
+    // This fixes #1634 and the related issue in #2197 more reliably.
     // Values are still sporadic near zero, because 1.23456789e-20
     // and 1.98765432e-20 both get reported with all their "significant"
-    // digits and cause a resend. Maybe write rounding function that
-    // determines precision based on full range of plot?
+    // digits and cause a resend. This issue is fixed with the further
+    // rounding below.
     const coords: BrushInfo = mapValues(brush.boundsData(), (val) =>
       roundSignif(val, 13)
     ) as Bounds;
@@ -204,14 +203,31 @@ function createBrushHandler(
 
     const panel = brush.getPanel();
 
+    // Round values near zero more agressively to fix the problem mentioned above
+    // Specifically, round values to the same absolute precision achieved by
+    // rounding the range of values to 13 digits.
+    const dataDomainX = Math.abs(panel.domain.right - panel.domain.left);
+    const xDigits = 13 - Math.floor(Math.log10(dataDomainX));
+    const dataDomainY = Math.abs(panel.domain.top - panel.domain.bottom);
+    const yDigits = 13 - Math.floor(Math.log10(dataDomainY));
+
+    coords.xmin = roundDigits(coords.xmin, xDigits);
+    coords.xmax = roundDigits(coords.xmax, xDigits);
+    coords.ymin = roundDigits(coords.ymin, yDigits);
+    coords.ymax = roundDigits(coords.ymax, yDigits);
+
     // Add the panel (facet) variables, if present
     $.extend(coords, panel.panel_vars);
 
-    // Round to 13 significant digits *here* to prevent FP-rounding-induced
+    // Round *here* to prevent FP-rounding-induced
     // resends of almost-but-not-quite-exactly-the-same data.
+    // Rounding more aggressively, to an eigth of a pixel (since less
+    // than that is not meaningful at reasonable zoom levels (≤ 8X))
+    // (power of two to make the actual floating-point value round)
     // eslint-disable-next-line camelcase
-    coords.coords_css = mapValues(brush.boundsCss(), (val) =>
-      roundSignif(val, 13)
+    coords.coords_css = mapValues(
+      brush.boundsCss(),
+      (val) => Math.round(val * 8) / 8
     ) as Bounds;
 
     // eslint-disable-next-line camelcase

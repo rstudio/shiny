@@ -8,8 +8,7 @@ class InputBinding {
   // descendants of scope that match this binding
   find(scope: BindScope): JQuery<HTMLElement> {
     throw "Not implemented";
-    // add so that typescript isn't mad about an unused var
-    scope;
+    scope; // unused var
   }
 
   getId(el: HTMLElement): string {
@@ -32,12 +31,12 @@ class InputBinding {
   // getRatePolicy. If false, send value immediately. Default behavior is `false`
   subscribe(el: HTMLElement, callback: (value: boolean) => void): void {
     // empty
-    el;
-    callback;
+    el; // unused var
+    callback; // unused var
   }
   unsubscribe(el: HTMLElement): void {
     // empty
-    el;
+    el; // unused var
   }
 
   // This is used for receiving messages that tell the input object to do
@@ -47,19 +46,19 @@ class InputBinding {
   // trigger a change event.
   receiveMessage(el: HTMLElement, data: unknown): void {
     throw "Not implemented";
-    el;
-    data;
+    el; // unused var
+    data; // unused var
   }
   getState(el: HTMLElement): unknown {
     throw "Not implemented";
-    el;
+    el; // unused var
   }
 
   getRatePolicy(
     el: HTMLElement
   ): { policy: RatePolicyModes; delay: number } | null {
     return null;
-    el;
+    el; // unused var
   }
 
   // Some input objects need initialization before being bound. This is

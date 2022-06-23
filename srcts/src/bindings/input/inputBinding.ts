@@ -18,9 +18,9 @@ class InputBinding {
 
   // Gives the input a type in case the server needs to know it
   // to deserialize the JSON correctly
-  getType(el: HTMLElement): string | false {
-    return false;
-    el;
+  getType(el: HTMLElement): string | null {
+    return null;
+    el; // unused var
   }
   getValue(el: HTMLElement): any {
     throw "Not implemented";

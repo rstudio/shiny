@@ -111,12 +111,12 @@ class SliderInputBinding extends TextInputBindingBase {
     return $(scope).find("input.js-range-slider");
   }
 
-  getType(el: HTMLElement): string | false {
+  getType(el: HTMLElement): string | null {
     const dataType = $(el).data("data-type");
 
     if (dataType === "date") return "shiny.date";
     else if (dataType === "datetime") return "shiny.datetime";
-    else return false;
+    else return null;
   }
   getValue(
     el: TextHTMLElement

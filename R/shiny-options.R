@@ -140,9 +140,10 @@ getShinyOption <- function(name, default = NULL) {
 #'   messages).}
 #' \item{shiny.autoload.r (defaults to `TRUE`)}{If `TRUE`, then the R/
 #'   of a shiny app will automatically be sourced.}
-#' \item{shiny.usecairo (defaults to `TRUE`)}{This is used to disable graphical rendering by the
-#'   Cairo package, if it is installed. See [plotPNG()] for more
-#'   information.}
+#' \item{shiny.useragg (defaults to `TRUE`)}{Set to `FALSE` to prevent PNG rendering via the
+#'   ragg package. See [plotPNG()] for more information.}
+#' \item{shiny.usecairo (defaults to `TRUE`)}{Set to `FALSE` to prevent PNG rendering via the
+#'   Cairo package. See [plotPNG()] for more information.}
 #' \item{shiny.devmode (defaults to `NULL`)}{Option to enable Shiny Developer Mode. When set,
 #'   different default `getOption(key)` values will be returned. See [devmode()] for more details.}
 ### Not documenting as 'shiny.devmode.verbose' is for niche use only

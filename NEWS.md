@@ -1,7 +1,13 @@
 shiny 1.7.2
 ===========
 
-## New features and improvements
+## Full changelog
+
+### Breaking changes
+
+* Closed #3626: `renderPlot()` (and `plotPNG()`) now uses `ragg::agg_png()` by default when the [`{ragg}` package](https://github.com/r-lib/ragg) is installed. To restore the previous behavior, set `options(shiny.useragg = FALSE)`. (#3654)
+
+### New features and improvements
 
 * Closed #1545: `insertUI()` now executes `<script>` tags. (#3630)
 

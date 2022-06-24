@@ -5,7 +5,7 @@ shiny development
 
 ### Breaking changes
 
-* Closed #3626: `startPNG()` (and thus `renderPlot()`) now uses `ragg::agg_png()` by default when the [`{ragg}` package](https://github.com/r-lib/ragg) is installed. To opt into the previous behavior, set `options(shiny.useragg = FALSE)`. (#3654)
+* Closed #3626: `renderPlot()` (and `plotPNG()`) now uses `ragg::agg_png()` by default when the [`{ragg}` package](https://github.com/r-lib/ragg) is installed. To restore the previous behavior, set `options(shiny.useragg = FALSE)`. (#3654)
 
 ### Minor new features and improvements
 

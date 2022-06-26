@@ -74,10 +74,7 @@ class DatatableOutputBinding extends OutputBinding {
     }
 
     // caseInsensitive searching? default true
-    const searchCI =
-      data.options === null ||
-      typeof data.options?.search === "undefined" ||
-      data.options.search.caseInsensitive !== false;
+    const searchCI = data.options?.search?.caseInsensitive !== false;
     const oTable = $(el)
       .children("table")
       .DataTable(

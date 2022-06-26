@@ -22,9 +22,11 @@ class DatatableOutputBinding extends OutputBinding {
       options?: {
         searching?: boolean;
         search?: { caseInsensitive?: boolean };
+        // To be sent to data table;
+        // Will copy in R value to this location
         escape?: string;
       } | null;
-      escape?: string;
+      escape?: string; // Incoming from R
       action?: string;
       evalOptions?: string[];
       callback?: string;
@@ -92,7 +94,11 @@ class DatatableOutputBinding extends OutputBinding {
               data: function (d: NonNullable<typeof data.options>) {
                 d.search || (d.search = {});
                 d.search.caseInsensitive = searchCI;
-                // TODO-barret; Is this logic right? Seems like it should be on `data`, not `data.options`.
+                // Copy from the R value (`data.escape`) to the escape option
+                // (`d.escape`) similar to `data.options.escape`;
+                // Note: this logic may be wrong, but the method is strongly
+                // deprecated in favor of DT package. So users should not
+                // naturally run this line of code
                 d.escape = data.escape;
               },
             },

@@ -21,7 +21,7 @@ declare global {
 }
 declare class SliderInputBinding extends TextInputBindingBase {
     find(scope: HTMLElement): JQuery<HTMLElement>;
-    getType(el: HTMLElement): string | false;
+    getType(el: HTMLElement): string | null;
     getValue(el: TextHTMLElement): number | string | [number | string, number | string];
     setValue(el: HTMLElement, value: number | string | [number | string, number | string]): void;
     subscribe(el: HTMLElement, callback: (x: boolean) => void): void;

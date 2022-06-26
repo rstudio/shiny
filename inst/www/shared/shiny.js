@@ -969,9 +969,9 @@
   var require_es_regexp_exec = __commonJS({
     "node_modules/core-js/modules/es.regexp.exec.js": function() {
       "use strict";
-      var $73 = require_export();
+      var $72 = require_export();
       var exec = require_regexp_exec();
-      $73({ target: "RegExp", proto: true, forced: /./.exec !== exec }, {
+      $72({ target: "RegExp", proto: true, forced: /./.exec !== exec }, {
         exec: exec
       });
     }
@@ -1969,7 +1969,7 @@
   var require_define_iterator = __commonJS({
     "node_modules/core-js/internals/define-iterator.js": function(exports, module) {
       "use strict";
-      var $73 = require_export();
+      var $72 = require_export();
       var createIteratorConstructor = require_create_iterator_constructor();
       var getPrototypeOf3 = require_object_get_prototype_of();
       var setPrototypeOf2 = require_object_set_prototype_of();
@@ -2059,7 +2059,7 @@
               }
             }
           else
-            $73({ target: NAME2, proto: true, forced: BUGGY_SAFARI_ITERATORS || INCORRECT_VALUES_NAME }, methods);
+            $72({ target: NAME2, proto: true, forced: BUGGY_SAFARI_ITERATORS || INCORRECT_VALUES_NAME }, methods);
         }
         return methods;
       };
@@ -3800,7 +3800,7 @@
     }, {
       key: "getType",
       value: function getType(el) {
-        return false;
+        return null;
         el;
       }
     }, {
@@ -6140,7 +6140,7 @@
         else if (dataType === "datetime")
           return "shiny.datetime";
         else
-          return false;
+          return null;
       }
     }, {
       key: "getValue",
@@ -6737,7 +6737,7 @@
       value: function getType(el) {
         var $el = (0, import_jquery16.default)(el);
         if (!$el.hasClass("symbol")) {
-          return false;
+          return null;
         }
         if ($el.attr("multiple") === "multiple") {
           return "shiny.symbolList";
@@ -6762,9 +6762,7 @@
           (0, import_jquery16.default)(el).val(value);
         } else {
           var selectize = this._selectize(el);
-          if (selectize) {
-            selectize.setValue(value);
-          }
+          selectize.setValue(value);
         }
       }
     }, {
@@ -6787,9 +6785,8 @@
       key: "receiveMessage",
       value: function receiveMessage(el, data) {
         var $el = (0, import_jquery16.default)(el);
-        var selectize;
         if (hasDefinedProperty(data, "options")) {
-          selectize = this._selectize(el);
+          var selectize = this._selectize(el);
           if (selectize)
             selectize.destroy();
           $el.empty().append(data.options);
@@ -6800,12 +6797,11 @@
           this._selectize(el, true);
         }
         if (hasDefinedProperty(data, "url")) {
-          selectize = this._selectize(el);
-          selectize.clearOptions();
+          var _selectize2 = this._selectize(el);
+          _selectize2.clearOptions();
           var loaded = false;
-          var innerSelectize = selectize;
-          innerSelectize.settings.load = function(query, callback) {
-            var settings = innerSelectize.settings;
+          _selectize2.settings.load = function(query, callback) {
+            var settings = _selectize2.settings;
             import_jquery16.default.ajax({
               url: data.url,
               data: {
@@ -6825,24 +6821,24 @@
                   var optgroup = {};
                   optgroup[settings.optgroupLabelField || "label"] = optgroupId;
                   optgroup[settings.optgroupValueField || "value"] = optgroupId;
-                  innerSelectize.addOptionGroup(optgroupId, optgroup);
+                  _selectize2.addOptionGroup(optgroupId, optgroup);
                 });
                 callback(res);
                 if (!loaded) {
                   if (hasDefinedProperty(data, "value")) {
                     if (typeof data.value === "string") {
-                      innerSelectize.setValue(data.value);
+                      _selectize2.setValue(data.value);
                     }
                   } else if (settings.maxItems === 1) {
-                    innerSelectize.setValue(res[0].value);
+                    _selectize2.setValue(res[0].value);
                   }
                 }
                 loaded = true;
               }
             });
           };
-          innerSelectize.load(function(callback) {
-            innerSelectize.settings.load.apply(innerSelectize, ["", callback]);
+          _selectize2.load(function(callback) {
+            _selectize2.settings.load.apply(_selectize2, ["", callback]);
           });
         } else if (hasDefinedProperty(data, "value")) {
           this.setValue(el, data.value);
@@ -6876,11 +6872,11 @@
       value: function _selectize(el) {
         var update = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : false;
         if (!import_jquery16.default.fn.selectize)
-          return void 0;
+          throw "selectize jquery is not defined";
         var $el = (0, import_jquery16.default)(el);
         var config = $el.parent().find('script[data-for="' + $escape(el.id) + '"]');
         if (config.length === 0)
-          return void 0;
+          throw "No config found for selectize with id:" + $escape(el.id);
         var options = import_jquery16.default.extend({
           labelField: "label",
           valueField: "value",
@@ -8831,7 +8827,7 @@
     }, {
       key: "renderValue",
       value: function renderValue(el, _data) {
-        var _data$options, _data$options2;
+        var _data$options$searchi, _data$options, _data$options2;
         var $el = (0, import_jquery25.default)(el).empty();
         if (!_data || !_data.colnames)
           return;
@@ -8841,7 +8837,7 @@
         }).join("");
         header = "<thead><tr>" + header + "</tr></thead>";
         var footer = "";
-        if (_data.options === null || ((_data$options = _data.options) === null || _data$options === void 0 ? void 0 : _data$options.searching) !== false) {
+        if ((_data$options$searchi = (_data$options = _data.options) === null || _data$options === void 0 ? void 0 : _data$options.searching) !== null && _data$options$searchi !== void 0 ? _data$options$searchi : true) {
           footer = import_jquery25.default.map(colnames, function(x) {
             return '<th><input type="text" placeholder="' + escapeHTML(x.replace(/(<([^>]+)>)/gi, "")) + '" /></th>';
           }).join("");
@@ -9565,14 +9561,6 @@
   // srcts/src/imageutils/createBrush.ts
   var import_jquery30 = __toModule(require_jquery());
 
-  // node_modules/core-js/modules/es.number.is-nan.js
-  var $54 = require_export();
-  $54({ target: "Number", stat: true }, {
-    isNaN: function isNaN2(number) {
-      return number != number;
-    }
-  });
-
   // srcts/src/imageutils/initCoordmap.ts
   var import_jquery29 = __toModule(require_jquery());
 
@@ -9666,19 +9654,14 @@
 
   // srcts/src/imageutils/initCoordmap.ts
   function findScalingRatio($el) {
-    var _$el$outerWidth, _$el$outerHeight;
     var boundingRect = $el[0].getBoundingClientRect();
     return {
-      x: boundingRect.width / ((_$el$outerWidth = $el.outerWidth()) !== null && _$el$outerWidth !== void 0 ? _$el$outerWidth : 1),
-      y: boundingRect.height / ((_$el$outerHeight = $el.outerHeight()) !== null && _$el$outerHeight !== void 0 ? _$el$outerHeight : 1)
+      x: boundingRect.width / $el.outerWidth(),
+      y: boundingRect.height / $el.outerHeight()
     };
   }
   function findOrigin($el) {
-    var _$el$offset;
-    var offset = (_$el$offset = $el.offset()) !== null && _$el$offset !== void 0 ? _$el$offset : {
-      left: 0,
-      top: 0
-    };
+    var offset = $el.offset();
     var scalingRatio = findScalingRatio($el);
     var paddingBorder = {
       left: parseInt($el.css("border-left-width")) + parseInt($el.css("padding-left")),
@@ -9690,15 +9673,10 @@
     };
   }
   function findDims($el) {
-    var _$el$width, _$el$outerWidth2, _$el$height, _$el$outerHeight2;
     var contentRatio = {
-      x: ((_$el$width = $el.width()) !== null && _$el$width !== void 0 ? _$el$width : NaN) / ((_$el$outerWidth2 = $el.outerWidth()) !== null && _$el$outerWidth2 !== void 0 ? _$el$outerWidth2 : NaN),
-      y: ((_$el$height = $el.height()) !== null && _$el$height !== void 0 ? _$el$height : NaN) / ((_$el$outerHeight2 = $el.outerHeight()) !== null && _$el$outerHeight2 !== void 0 ? _$el$outerHeight2 : NaN)
+      x: $el.width() / $el.outerWidth(),
+      y: $el.height() / $el.outerHeight()
     };
-    if (Number.isNaN(contentRatio.x))
-      contentRatio.x = 1;
-    if (Number.isNaN(contentRatio.y))
-      contentRatio.y = 1;
     var boundingRect = $el[0].getBoundingClientRect();
     return {
       x: contentRatio.x * boundingRect.width,
@@ -9850,7 +9828,7 @@
         }
         var panel = coordmap.getPanelCss(coordsCss);
         var coordsImg = coordmap.scaleCssToImg(coordsCss);
-        var coordsData = panel !== null && panel !== void 0 && panel.scaleImgToData ? panel.scaleImgToData(coordsImg) : void 0;
+        var coordsData = panel.scaleImgToData(coordsImg);
         var coords = {
           x: coordsData === null || coordsData === void 0 ? void 0 : coordsData.x,
           y: coordsData === null || coordsData === void 0 ? void 0 : coordsData.y,
@@ -9858,11 +9836,11 @@
           coords_img: coordsImg,
           img_css_ratio: coordmap.cssToImgScalingRatio()
         };
-        import_jquery29.default.extend(coords, panel === null || panel === void 0 ? void 0 : panel.panel_vars);
-        coords.mapping = panel === null || panel === void 0 ? void 0 : panel.mapping;
-        coords.domain = panel === null || panel === void 0 ? void 0 : panel.domain;
-        coords.range = panel === null || panel === void 0 ? void 0 : panel.range;
-        coords.log = panel === null || panel === void 0 ? void 0 : panel.log;
+        import_jquery29.default.extend(coords, panel.panel_vars);
+        coords.mapping = panel.mapping;
+        coords.domain = panel.domain;
+        coords.range = panel.range;
+        coords.log = panel.log;
         shinySetInputValue(inputId, coords, {
           priority: "event"
         });
@@ -10056,7 +10034,6 @@
       return res;
     }
     function boundsCss(boxCss) {
-      var _$div, _$div2;
       if (boxCss === void 0) {
         return _objectSpread({}, state.boundsCss);
       }
@@ -10068,8 +10045,6 @@
         x: boxCss.xmax,
         y: boxCss.ymax
       };
-      if (!state.panel)
-        return;
       var panel = state.panel;
       var panelBoundsImg = panel.range;
       if (opts.brushClip) {
@@ -10098,23 +10073,21 @@
         ymin: minCss.y,
         ymax: maxCss.y
       };
-      var minData = state.panel.scaleImgToData(cssToImg(minCss));
-      var maxData = state.panel.scaleImgToData(cssToImg(maxCss));
+      var minData = panel.scaleImgToData(cssToImg(minCss));
+      var maxData = panel.scaleImgToData(cssToImg(maxCss));
       state.boundsData = findBox(minData, maxData);
       state.boundsData = mapValues(state.boundsData, function(val) {
         return roundSignif(val, 14);
       });
-      (_$div = $div) === null || _$div === void 0 ? void 0 : _$div.data("bounds-data", state.boundsData);
-      (_$div2 = $div) === null || _$div2 === void 0 ? void 0 : _$div2.data("panel", state.panel);
+      $div.data("bounds-data", state.boundsData);
+      $div.data("panel", state.panel);
       return void 0;
     }
     function boundsData(boxData) {
       if (typeof boxData === "undefined") {
         return _objectSpread({}, state.boundsData);
       }
-      var boxData2 = boxData;
-      var panel = state.panel;
-      var boxCss = imgToCss(panel.scaleDataToImg(boxData2));
+      var boxCss = imgToCss(state.panel.scaleDataToImg(boxData));
       boxCss = mapValues(boxCss, function(val) {
         return roundSignif(val, 13);
       });
@@ -10161,10 +10134,9 @@
       }).width(0).outerHeight(0);
     }
     function updateDiv() {
-      var _$div3;
       var imgOffsetCss = findOrigin($el.find("img"));
       var b = state.boundsCss;
-      (_$div3 = $div) === null || _$div3 === void 0 ? void 0 : _$div3.offset({
+      $div.offset({
         top: imgOffsetCss.y + b.ymin,
         left: imgOffsetCss.x + b.xmin
       }).outerWidth(b.xmax - b.xmin + 1).outerHeight(b.ymax - b.ymin + 1);
@@ -10192,9 +10164,8 @@
       updateDiv();
     }
     function brushTo(offsetCss) {
-      var _$div4;
       boundsCss(findBox(state.down, offsetCss));
-      (_$div4 = $div) === null || _$div4 === void 0 ? void 0 : _$div4.show();
+      $div.show();
       updateDiv();
     }
     function stopBrushing() {
@@ -10425,16 +10396,14 @@
         return;
       }
       var panel = brush.getPanel();
-      if (panel) {
-        import_jquery32.default.extend(coords, panel.panel_vars);
-      }
+      import_jquery32.default.extend(coords, panel.panel_vars);
       coords.coords_css = brush.boundsCss();
       coords.coords_img = coordmap.scaleCssToImg(coords.coords_css);
       coords.img_css_ratio = coordmap.cssToImgScalingRatio();
-      coords.mapping = panel === null || panel === void 0 ? void 0 : panel.mapping;
-      coords.domain = panel === null || panel === void 0 ? void 0 : panel.domain;
-      coords.range = panel === null || panel === void 0 ? void 0 : panel.range;
-      coords.log = panel === null || panel === void 0 ? void 0 : panel.log;
+      coords.mapping = panel.mapping;
+      coords.domain = panel.domain;
+      coords.range = panel.range;
+      coords.log = panel.log;
       coords.direction = opts.brushDirection;
       coords.brushId = inputId;
       coords.outputId = outputId;
@@ -11585,9 +11554,7 @@
       this.binding = binding;
       if (binding.resize) {
         this.onResize = makeResizeFilter(el, function(width, height) {
-          if (typeof binding.resize === "function") {
-            binding.resize(el, width, height);
-          }
+          binding.resize(el, width, height);
         });
       }
     }
@@ -11799,21 +11766,21 @@
 
   // node_modules/core-js/modules/es.array-buffer.constructor.js
   "use strict";
-  var $65 = require_export();
+  var $64 = require_export();
   var global7 = require_global();
   var arrayBufferModule = require_array_buffer();
   var setSpecies = require_set_species();
   var ARRAY_BUFFER = "ArrayBuffer";
   var ArrayBuffer2 = arrayBufferModule[ARRAY_BUFFER];
   var NativeArrayBuffer = global7[ARRAY_BUFFER];
-  $65({ global: true, forced: NativeArrayBuffer !== ArrayBuffer2 }, {
+  $64({ global: true, forced: NativeArrayBuffer !== ArrayBuffer2 }, {
     ArrayBuffer: ArrayBuffer2
   });
   setSpecies(ARRAY_BUFFER);
 
   // node_modules/core-js/modules/es.array-buffer.slice.js
   "use strict";
-  var $66 = require_export();
+  var $65 = require_export();
   var fails10 = require_fails();
   var ArrayBufferModule = require_array_buffer();
   var anObject9 = require_an_object();
@@ -11826,7 +11793,7 @@
   var INCORRECT_SLICE = fails10(function() {
     return !new ArrayBuffer3(2).slice(1, void 0).byteLength;
   });
-  $66({ target: "ArrayBuffer", proto: true, unsafe: true, forced: INCORRECT_SLICE }, {
+  $65({ target: "ArrayBuffer", proto: true, unsafe: true, forced: INCORRECT_SLICE }, {
     slice: function slice2(start, end) {
       if (nativeArrayBufferSlice !== void 0 && end === void 0) {
         return nativeArrayBufferSlice.call(anObject9(this), start);
@@ -11846,23 +11813,23 @@
   });
 
   // node_modules/core-js/modules/es.data-view.js
-  var $67 = require_export();
+  var $66 = require_export();
   var ArrayBufferModule2 = require_array_buffer();
   var NATIVE_ARRAY_BUFFER = require_array_buffer_native();
-  $67({ global: true, forced: !NATIVE_ARRAY_BUFFER }, {
+  $66({ global: true, forced: !NATIVE_ARRAY_BUFFER }, {
     DataView: ArrayBufferModule2.DataView
   });
 
   // node_modules/core-js/modules/es.array.reduce.js
   "use strict";
-  var $68 = require_export();
+  var $67 = require_export();
   var $reduce = require_array_reduce().left;
   var arrayMethodIsStrict3 = require_array_method_is_strict();
   var CHROME_VERSION = require_engine_v8_version();
   var IS_NODE = require_engine_is_node();
   var STRICT_METHOD3 = arrayMethodIsStrict3("reduce");
   var CHROME_BUG = !IS_NODE && CHROME_VERSION > 79 && CHROME_VERSION < 83;
-  $68({ target: "Array", proto: true, forced: !STRICT_METHOD3 || CHROME_BUG }, {
+  $67({ target: "Array", proto: true, forced: !STRICT_METHOD3 || CHROME_BUG }, {
     reduce: function reduce(callbackfn) {
       return $reduce(this, callbackfn, arguments.length, arguments.length > 1 ? arguments[1] : void 0);
     }
@@ -12171,12 +12138,11 @@
     }, {
       key: "onDisconnected",
       value: function onDisconnected() {
-        var _this$$socket;
         var $overlay = (0, import_jquery39.default)("#shiny-disconnected-overlay");
         if ($overlay.length === 0) {
           (0, import_jquery39.default)(document.body).append('<div id="shiny-disconnected-overlay"></div>');
         }
-        if (this.$allowReconnect === true && ((_this$$socket = this.$socket) === null || _this$$socket === void 0 ? void 0 : _this$$socket.allowReconnect) === true || this.$allowReconnect === "force") {
+        if (this.$allowReconnect === true && this.$socket.allowReconnect === true || this.$allowReconnect === "force") {
           var delay = this.reconnectDelay.next();
           showReconnectDialog(delay);
           this.$scheduleReconnect(delay);
@@ -12231,8 +12197,7 @@
     }, {
       key: "$sendMsg",
       value: function $sendMsg(msg) {
-        var _this$$socket2;
-        if (!((_this$$socket2 = this.$socket) !== null && _this$$socket2 !== void 0 && _this$$socket2.readyState)) {
+        if (!this.$socket.readyState) {
           this.$pendingMessages.push(msg);
         } else {
           this.$socket.send(msg);
@@ -12657,9 +12622,8 @@
             $tabset2.find("> li").each(function() {
               var $tab = (0, import_jquery39.default)(this).find("> a[data-toggle='tab']");
               if ($tab.length > 0) {
-                var _$tab$attr;
-                var href = (_$tab$attr = $tab.attr("href")) === null || _$tab$attr === void 0 ? void 0 : _$tab$attr.replace(/.*(?=#[^\s]+$)/, "");
-                var _index = href === null || href === void 0 ? void 0 : href.replace("#tab-" + tabsetId2 + "-", "");
+                var href = $tab.attr("href").replace(/.*(?=#[^\s]+$)/, "");
+                var _index = href.replace("#tab-" + tabsetId2 + "-", "");
                 existingTabIds.push(Number(_index));
               }
             });
@@ -12780,14 +12744,13 @@
     }, {
       key: "getTestSnapshotBaseUrl",
       value: function getTestSnapshotBaseUrl() {
-        var _this$config, _this$config2;
         var _ref2 = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : {}, _ref2$fullUrl = _ref2.fullUrl, fullUrl = _ref2$fullUrl === void 0 ? true : _ref2$fullUrl;
         var loc = window.location;
         var url = "";
         if (fullUrl) {
           url = loc.origin + loc.pathname.replace(/\/[^/]*$/, "");
         }
-        url += "/session/" + encodeURIComponent((_this$config = this.config) === null || _this$config === void 0 ? void 0 : _this$config.sessionId) + "/dataobj/shinytest?w=" + encodeURIComponent((_this$config2 = this.config) === null || _this$config2 === void 0 ? void 0 : _this$config2.workerId) + "&nonce=" + randomId();
+        url += "/session/" + encodeURIComponent(this.config.sessionId) + "/dataobj/shinytest?w=" + encodeURIComponent(this.config.workerId) + "&nonce=" + randomId();
         return url;
       }
     }]);

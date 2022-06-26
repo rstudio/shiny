@@ -55,7 +55,6 @@ declare type Brush = {
     down: {
         (): ImageState["down"];
         (offsetCss: Offset): void;
-        (offsetCss?: Offset): ImageState["down"] | void;
     };
     up: {
         (): ImageState["up"];

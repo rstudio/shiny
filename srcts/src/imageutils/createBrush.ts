@@ -330,10 +330,8 @@ function createBrush(
     };
 
     // Positions in data space
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const minData = state.panel!.scaleImgToData(cssToImg(minCss));
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const maxData = state.panel!.scaleImgToData(cssToImg(maxCss));
+    const minData = panel.scaleImgToData(cssToImg(minCss));
+    const maxData = panel.scaleImgToData(cssToImg(maxCss));
     // For reversed scales, the min and max can be reversed, so use findBox
     // to ensure correct order.
 

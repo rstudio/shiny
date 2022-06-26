@@ -8827,7 +8827,7 @@
     }, {
       key: "renderValue",
       value: function renderValue(el, _data) {
-        var _data$options$searchi, _data$options, _data$options2;
+        var _data$options$searchi, _data$options, _data$options2, _data$options2$search;
         var $el = (0, import_jquery25.default)(el).empty();
         if (!_data || !_data.colnames)
           return;
@@ -8850,7 +8850,7 @@
             _data.options[x] = indirectEval("(" + _data.options[x] + ")");
           });
         }
-        var searchCI = _data.options === null || typeof ((_data$options2 = _data.options) === null || _data$options2 === void 0 ? void 0 : _data$options2.search) === "undefined" || _data.options.search.caseInsensitive !== false;
+        var searchCI = ((_data$options2 = _data.options) === null || _data$options2 === void 0 ? void 0 : (_data$options2$search = _data$options2.search) === null || _data$options2$search === void 0 ? void 0 : _data$options2$search.caseInsensitive) !== false;
         var oTable = (0, import_jquery25.default)(el).children("table").DataTable(import_jquery25.default.extend({
           processing: true,
           serverSide: true,

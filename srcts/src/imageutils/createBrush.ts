@@ -303,8 +303,8 @@ function createBrush(
     let minCss: Offset = { x: boxCss.xmin, y: boxCss.ymin };
     let maxCss: Offset = { x: boxCss.xmax, y: boxCss.ymax };
 
-    if (!state.panel) return;
-    const panel = state.panel;
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const panel = state.panel!;
     const panelBoundsImg = panel.range;
 
     if (opts.brushClip) {
@@ -346,8 +346,10 @@ function createBrush(
     // We also need to attach the data bounds and panel as data attributes, so
     // that if the image is re-sent, we can grab the data bounds to create a new
     // brush. This should be fast because it doesn't actually modify the DOM.
-    $div?.data("bounds-data", state.boundsData);
-    $div?.data("panel", state.panel);
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    $div!.data("bounds-data", state.boundsData);
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    $div!.data("panel", state.panel);
     return undefined;
   }
 
@@ -359,11 +361,8 @@ function createBrush(
       return { ...state.boundsData };
     }
 
-    const boxData2 = boxData as BoundsData;
-
-    const panel = state.panel as Panel;
-
-    let boxCss = imgToCss(panel.scaleDataToImg(boxData2));
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    let boxCss = imgToCss(state.panel!.scaleDataToImg(boxData));
     // Round to 13 significant digits to avoid spurious changes in FP values
     // (#2197).
 
@@ -434,8 +433,9 @@ function createBrush(
     const imgOffsetCss = findOrigin($el.find("img"));
     const b = state.boundsCss;
 
-    $div
-      ?.offset({
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    $div!
+      .offset({
         top: imgOffsetCss.y + b.ymin,
         left: imgOffsetCss.x + b.xmin,
       })
@@ -443,7 +443,6 @@ function createBrush(
       .outerHeight(b.ymax - b.ymin + 1);
   }
 
-  // (offsetCss?: Offset): ImageState["down"] | void;
   function down(): ImageState["down"];
   function down(offsetCss: Offset): void;
   function down(offsetCss?: Offset | undefined) {
@@ -477,7 +476,8 @@ function createBrush(
 
   function brushTo(offsetCss: Offset) {
     boundsCss(findBox(state.down, offsetCss));
-    $div?.show();
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    $div!.show();
     updateDiv();
   }
 

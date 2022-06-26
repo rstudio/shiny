@@ -43,7 +43,7 @@ class DatatableOutputBinding extends OutputBinding {
     header = "<thead><tr>" + header + "</tr></thead>";
     let footer = "";
 
-    if (data.options === null || data.options?.searching !== false) {
+    if (data.options?.searching ?? true) {
       footer = $.map(colnames, function (x) {
         // placeholder needs to be escaped (and HTML tags are stripped off)
         return (

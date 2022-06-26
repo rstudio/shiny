@@ -16,13 +16,16 @@ function findScalingRatio($el: JQuery<HTMLElement>) {
   const boundingRect = $el[0].getBoundingClientRect();
 
   return {
-    x: boundingRect.width / ($el.outerWidth() ?? 1),
-    y: boundingRect.height / ($el.outerHeight() ?? 1),
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    x: boundingRect.width / $el.outerWidth()!,
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    y: boundingRect.height / $el.outerHeight()!,
   };
 }
 
 function findOrigin($el: JQuery<HTMLElement>): Offset {
-  const offset = $el.offset() ?? { left: 0, top: 0 };
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  const offset = $el.offset()!;
   const scalingRatio = findScalingRatio($el);
 
   // Find the size of the padding and border, for the top and left. This is
@@ -50,13 +53,11 @@ function findDims($el: JQuery<HTMLElement>) {
   // If there's any padding/border, we need to find the ratio of the actual
   // element content compared to the element plus padding and border.
   const contentRatio = {
-    x: ($el.width() ?? NaN) / ($el.outerWidth() ?? NaN),
-    y: ($el.height() ?? NaN) / ($el.outerHeight() ?? NaN),
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    x: $el.width()! / $el.outerWidth()!,
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    y: $el.height()! / $el.outerHeight()!,
   };
-
-  // If any number couldn't be found, replace NaN with 1.
-  if (Number.isNaN(contentRatio.x)) contentRatio.x = 1;
-  if (Number.isNaN(contentRatio.y)) contentRatio.y = 1;
 
   // Get the dimensions of the element _after_ any CSS transforms. This
   // includes the padding and border.
@@ -377,12 +378,11 @@ function initCoordmap(
         shinySetInputValue(inputId, coords, { priority: "event" });
         return;
       }
-      const panel = coordmap.getPanelCss(coordsCss);
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      const panel = coordmap.getPanelCss(coordsCss)!;
 
       const coordsImg = coordmap.scaleCssToImg(coordsCss);
-      const coordsData = panel?.scaleImgToData
-        ? panel.scaleImgToData(coordsImg)
-        : undefined;
+      const coordsData = panel.scaleImgToData(coordsImg);
 
       const coords: Coords = {
         x: coordsData?.x,
@@ -396,15 +396,15 @@ function initCoordmap(
       };
 
       // Add the panel (facet) variables, if present
-      $.extend(coords, panel?.panel_vars);
+      $.extend(coords, panel.panel_vars);
 
       // Add variable name mappings
-      coords.mapping = panel?.mapping;
+      coords.mapping = panel.mapping;
 
       // Add scaling information
-      coords.domain = panel?.domain;
-      coords.range = panel?.range;
-      coords.log = panel?.log;
+      coords.domain = panel.domain;
+      coords.range = panel.range;
+      coords.log = panel.log;
 
       shinySetInputValue(inputId, coords, { priority: "event" });
     };

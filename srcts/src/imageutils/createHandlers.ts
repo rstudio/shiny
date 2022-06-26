@@ -187,12 +187,11 @@ function createBrushHandler(
       return;
     }
 
-    const panel = brush.getPanel();
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const panel = brush.getPanel()!;
 
     // Add the panel (facet) variables, if present
-    if (panel) {
-      $.extend(coords, panel.panel_vars);
-    }
+    $.extend(coords, panel.panel_vars);
 
     // eslint-disable-next-line camelcase
     coords.coords_css = brush.boundsCss();
@@ -203,12 +202,12 @@ function createBrushHandler(
     coords.img_css_ratio = coordmap.cssToImgScalingRatio();
 
     // Add variable name mappings
-    coords.mapping = panel?.mapping;
+    coords.mapping = panel.mapping;
 
     // Add scaling information
-    coords.domain = panel?.domain;
-    coords.range = panel?.range;
-    coords.log = panel?.log;
+    coords.domain = panel.domain;
+    coords.range = panel.range;
+    coords.log = panel.log;
 
     coords.direction = opts.brushDirection;
 

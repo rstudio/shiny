@@ -71,9 +71,7 @@ class SelectInputBinding extends InputBinding {
     } else {
       const selectize = this._selectize(el);
 
-      if (selectize) {
-        selectize.setValue(value);
-      }
+      selectize.setValue(value);
     }
   }
   getState(el: SelectHTMLElement): {
@@ -105,13 +103,13 @@ class SelectInputBinding extends InputBinding {
     data: SelectInputReceiveMessageData
   ): void {
     const $el = $(el);
-    let selectize: SelectizeInfo | undefined;
 
     // This will replace all the options
     if (hasDefinedProperty(data, "options")) {
-      selectize = this._selectize(el);
+      const selectize = this._selectize(el);
       // Must destroy selectize before appending new options, otherwise
       // selectize will restore the original select
+
       if (selectize) selectize.destroy();
       // Clear existing options and add each new one
       $el.empty().append(data.options);
@@ -132,22 +130,19 @@ class SelectInputBinding extends InputBinding {
       type CallbackFn = Parameters<
         NonNullable<SelectizeInfo["settings"]["load"]>
       >[1];
-      // Define `innerSelectize` as TS doesn't like local versions of
-      // `selectize` with different definitions in callback functions
-      const innerSelectize = this._selectize(el) as SelectizeInfo & {
+      const selectize = this._selectize(el) as ReturnType<
+        SelectInputBinding["_selectize"]
+      > & {
         settings: {
           load: (query: string, callback: CallbackFn) => any;
         };
       };
 
-      innerSelectize.clearOptions();
+      selectize.clearOptions();
       let loaded = false;
 
-      innerSelectize.settings.load = function (
-        query: string,
-        callback: CallbackFn
-      ) {
-        const settings = innerSelectize.settings;
+      selectize.settings.load = function (query: string, callback: CallbackFn) {
+        const settings = selectize.settings;
 
         $.ajax({
           url: data.url,
@@ -176,17 +171,17 @@ class SelectInputBinding extends InputBinding {
 
               optgroup[settings.optgroupLabelField || "label"] = optgroupId;
               optgroup[settings.optgroupValueField || "value"] = optgroupId;
-              innerSelectize.addOptionGroup(optgroupId, optgroup);
+              selectize.addOptionGroup(optgroupId, optgroup);
             });
             callback(res);
             if (!loaded) {
               if (hasDefinedProperty(data, "value")) {
                 if (typeof data.value === "string") {
-                  innerSelectize.setValue(data.value);
+                  selectize.setValue(data.value);
                 }
               } else if (settings.maxItems === 1) {
                 // first item selected by default only for single-select
-                innerSelectize.setValue(res[0].value);
+                selectize.setValue(res[0].value);
               }
             }
             loaded = true;
@@ -194,8 +189,8 @@ class SelectInputBinding extends InputBinding {
         });
       };
       // perform an empty search after changing the `load` function
-      innerSelectize.load(function (callback) {
-        innerSelectize.settings.load.apply(innerSelectize, ["", callback]);
+      selectize.load(function (callback) {
+        selectize.settings.load.apply(selectize, ["", callback]);
       });
     } else if (hasDefinedProperty(data, "value")) {
       this.setValue(el, data.value);
@@ -226,17 +221,15 @@ class SelectInputBinding extends InputBinding {
   initialize(el: SelectHTMLElement): void {
     this._selectize(el);
   }
-  protected _selectize(
-    el: SelectHTMLElement,
-    update = false
-  ): SelectizeInfo | undefined {
-    if (!$.fn.selectize) return undefined;
+  protected _selectize(el: SelectHTMLElement, update = false): SelectizeInfo {
+    if (!$.fn.selectize) throw "selectize jquery is not defined";
     const $el = $(el);
     const config = $el
       .parent()
       .find('script[data-for="' + $escape(el.id) + '"]');
 
-    if (config.length === 0) return undefined;
+    if (config.length === 0)
+      throw "No config found for selectize with id:" + $escape(el.id);
 
     let options: SelectizeOptions & {
       labelField: "label";

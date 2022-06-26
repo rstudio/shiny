@@ -1,19 +1,14 @@
 startPNG <- function(filename, width, height, res, ...) {
-  # shiny.useragg is an experimental option that isn't officially supported or
-  # documented. It's here in the off chance that someone really wants
-  # to use ragg (say, instead of showtext, for custom font rendering).
-  # In the next shiny release, this option will likely be superseded in
-  # favor of a fully customizable graphics device option
-  if ((getOption('shiny.useragg') %||% FALSE) && is_installed("ragg")) {
-    pngfun <- ragg::agg_png
+  pngfun <- if ((getOption('shiny.useragg') %||% TRUE) && is_installed("ragg")) {
+    ragg::agg_png
   } else if (capabilities("aqua")) {
     # i.e., png(type = 'quartz')
-    pngfun <- grDevices::png
+    grDevices::png
   } else if ((getOption('shiny.usecairo') %||% TRUE) && is_installed("Cairo")) {
-    pngfun <- Cairo::CairoPNG
+    Cairo::CairoPNG
   } else {
     # i.e., png(type = 'cairo')
-    pngfun <- grDevices::png
+    grDevices::png
   }
 
   args <- rlang::list2(filename=filename, width=width, height=height, res=res, ...)
@@ -57,33 +52,31 @@ startPNG <- function(filename, width, height, res, ...) {
   grDevices::dev.cur()
 }
 
-#' Run a plotting function and save the output as a PNG
+#' Capture a plot as a PNG file.
 #'
-#' This function returns the name of the PNG file that it generates. In
-#' essence, it calls `png()`, then `func()`, then `dev.off()`.
-#' So `func` must be a function that will generate a plot when used this
-#' way.
-#'
-#' For output, it will try to use the following devices, in this order:
-#' quartz (via [grDevices::png()]), then [Cairo::CairoPNG()],
-#' and finally [grDevices::png()]. This is in order of quality of
-#' output. Notably, plain `png` output on Linux and Windows may not
-#' antialias some point shapes, resulting in poor quality output.
-#'
-#' In some cases, `Cairo()` provides output that looks worse than
-#' `png()`. To disable Cairo output for an app, use
-#' `options(shiny.usecairo=FALSE)`.
+#' The PNG graphics device used is determined in the following order:
+#'   * If the ragg package is installed (and the `shiny.useragg` is not
+#'    set to `FALSE`), then use [ragg::agg_png()].
+#'   * If a quartz device is available (i.e., `capabilities("aqua")` is
+#'    `TRUE`), then use `png(type = "quartz")`.
+#'   * If the Cairo package is installed (and the `shiny.usecairo` option
+#'    is not set to `FALSE`), then use [Cairo::CairoPNG()].
+#'   * Otherwise, use [grDevices::png()]. In this case, Linux and Windows
+#'    may not antialias some point shapes, resulting in poor quality output.
 #'
 #' @param func A function that generates a plot.
 #' @param filename The name of the output file. Defaults to a temp file with
 #'   extension `.png`.
 #' @param width Width in pixels.
 #' @param height Height in pixels.
-#' @param res Resolution in pixels per inch. This value is passed to
-#'   [grDevices::png()]. Note that this affects the resolution of PNG rendering in
+#' @param res Resolution in pixels per inch. This value is passed to the
+#'   graphics device. Note that this affects the resolution of PNG rendering in
 #'   R; it won't change the actual ppi of the browser.
-#' @param ... Arguments to be passed through to [grDevices::png()].
-#'   These can be used to set the width, height, background color, etc.
+#' @param ... Arguments to be passed through to the graphics device. These can
+#'   be used to set the width, height, background color, etc.
+#'
+#' @return A path to the newly generated PNG file.
+#'
 #' @export
 plotPNG <- function(func, filename=tempfile(fileext='.png'),
                     width=400, height=400, res=72, ...) {

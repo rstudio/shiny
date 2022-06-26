@@ -35,10 +35,10 @@ When rendering an inline plot, you must provide numeric values (in pixels)
 to both \code{width} and \code{height}.}
 
 \item{res}{Resolution of resulting plot, in pixels per inch. This value is
-passed to \code{\link[grDevices:png]{grDevices::png()}}. Note that this affects the resolution of PNG
+passed to \code{\link[=plotPNG]{plotPNG()}}. Note that this affects the resolution of PNG
 rendering in R; it won't change the actual ppi of the browser.}
 
-\item{...}{Arguments to be passed through to \code{\link[grDevices:png]{grDevices::png()}}.
+\item{...}{Arguments to be passed through to \code{\link[=plotPNG]{plotPNG()}}.
 These can be used to set the width, height, background color, etc.}
 
 \item{alt}{Alternate text for the HTML \verb{<img>} tag if it cannot be displayed

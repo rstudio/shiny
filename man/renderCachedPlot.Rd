@@ -37,7 +37,7 @@ information on the default sizing policy.}
 (the default), \code{"session"}, or a cache object like a
 \code{\link[cachem:cache_disk]{cachem::cache_disk()}}. See the Cache Scoping section for more information.}
 
-\item{...}{Arguments to be passed through to \code{\link[grDevices:png]{grDevices::png()}}.
+\item{...}{Arguments to be passed through to \code{\link[=plotPNG]{plotPNG()}}.
 These can be used to set the width, height, background color, etc.}
 
 \item{alt}{Alternate text for the HTML \verb{<img>} tag if it cannot be displayed

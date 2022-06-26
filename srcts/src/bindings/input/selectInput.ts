@@ -126,18 +126,19 @@ class SelectInputBinding extends InputBinding {
 
     // use server-side processing for selectize
     if (hasDefinedProperty(data, "url")) {
-      selectize = this._selectize(el) as SelectizeInfo;
-      selectize.clearOptions();
-      let loaded = false;
-
       type CallbackFn = Parameters<
         NonNullable<SelectizeInfo["settings"]["load"]>
       >[1];
-      const innerSelectize = selectize as SelectizeInfo & {
+      // Define `innerSelectize` as TS doesn't like local versions of
+      // `selectize` with different definitions in callback functions
+      const innerSelectize = this._selectize(el) as SelectizeInfo & {
         settings: {
           load: (query: string, callback: CallbackFn) => any;
         };
       };
+
+      innerSelectize.clearOptions();
+      let loaded = false;
 
       innerSelectize.settings.load = function (
         query: string,

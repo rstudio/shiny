@@ -2,6 +2,7 @@ import $ from "jquery";
 import { InputBinding } from "./inputBinding";
 import { $escape, hasDefinedProperty, updateLabel } from "../../utils";
 import { indirectEval } from "../../utils/eval";
+import type { NotUndefined } from "../../utils/extraTypes";
 
 type SelectHTMLElement = HTMLSelectElement & { nonempty: boolean };
 
@@ -59,8 +60,10 @@ class SelectInputBinding extends InputBinding {
   getId(el: SelectHTMLElement): string {
     return InputBinding.prototype.getId.call(this, el) || el.name;
   }
-  getValue(el: HTMLElement): string[] | number | string | undefined {
-    return $(el).val();
+  getValue(
+    el: HTMLElement
+  ): NotUndefined<ReturnType<JQuery<HTMLElement>["val"]>> {
+    return $(el).val() as NotUndefined<ReturnType<JQuery<HTMLElement>["val"]>>;
   }
   setValue(el: SelectHTMLElement, value: string): void {
     if (!isSelectize(el)) {

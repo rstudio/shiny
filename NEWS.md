@@ -23,6 +23,10 @@ shiny 1.7.2
 
 ### Bug fixes
 
+* Closed #3250:`{rlang}`/`{tidyeval}` conditions (i.e., warnings and errors) are no longer filtered from stack traces. (#3602)
+
+* Closed #3581: Errors in throttled/debounced reactive expressions no longer cause the session to exit. (#3624)
+
 * The auto-reload feature (`options(shiny.autoreload=TRUE)`) was not being activated by `devmode(TRUE)`, despite a console message asserting that it was. (#3620)
 
 * Closed #2297: If an error occurred in parsing a value in a bookmark query string, an error would be thrown and nothing would be restored. Now a message is displayed and that value is ignored. (Thanks to @daattali, #3385)
@@ -42,7 +46,6 @@ shiny 1.7.2
 * Shiny's internal HTML dependencies are now mounted dynamically instead of statically. (#3537)
 
 * HTML dependencies that are sent to dynamic UI now have better type checking, and no longer require a `dep.src.href` field. (#3537)
-
 
 shiny 1.7.1
 ===========

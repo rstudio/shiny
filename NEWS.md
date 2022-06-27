@@ -43,7 +43,9 @@ shiny development
 
 * Closed rstudio/shinytest2#222: When restoring a context (i.e., bookmarking) from a URL, Shiny now better handles a trailing `=` after `_inputs_` and `_values_`. (#3648)
 
-* Closed #3581: Errors in throttled/debounced reactive expressions cause session to exit. (#3624)
+* Closed #3581: Errors in throttled/debounced reactive expressions no longer cause the session to exit. (#3624)
+
+* Closed #3250:`{rlang}`/`{tidyeval}` conditions (i.e., warnings and errors) are no longer filtered from stack traces. (#3602)
 
 
 shiny 1.7.1

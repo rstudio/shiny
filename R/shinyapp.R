@@ -286,7 +286,7 @@ shinyAppDir_serverR <- function(appDir, options=list()) {
 #
 # The return value is a function that halts monitoring when called.
 initAutoReloadMonitor <- function(dir) {
-  if (!getOption("shiny.autoreload", FALSE)) {
+  if (!get_devmode_option("shiny.autoreload", FALSE)) {
     return(function(){})
   }
 
@@ -339,7 +339,7 @@ initAutoReloadMonitor <- function(dir) {
 #' @param appDir The application directory. If `appDir` is `NULL` or
 #'   not supplied, the nearest enclosing directory that is a Shiny app, starting
 #'   with the current directory, is used.
-#' @param renv The environmeny in which the files in the `R/` directory should
+#' @param renv The environment in which the files in the `R/` directory should
 #'   be evaluated.
 #' @param globalrenv The environment in which `global.R` should be evaluated. If
 #'   `NULL`, `global.R` will not be evaluated at all.

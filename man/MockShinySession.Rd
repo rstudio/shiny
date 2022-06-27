@@ -85,40 +85,40 @@ user. Always \code{NULL} for a \code{MockShinySesion}.}
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
-\item \href{#method-new}{\code{MockShinySession$new()}}
-\item \href{#method-onFlush}{\code{MockShinySession$onFlush()}}
-\item \href{#method-onFlushed}{\code{MockShinySession$onFlushed()}}
-\item \href{#method-onEnded}{\code{MockShinySession$onEnded()}}
-\item \href{#method-isEnded}{\code{MockShinySession$isEnded()}}
-\item \href{#method-isClosed}{\code{MockShinySession$isClosed()}}
-\item \href{#method-close}{\code{MockShinySession$close()}}
-\item \href{#method-cycleStartAction}{\code{MockShinySession$cycleStartAction()}}
-\item \href{#method-fileUrl}{\code{MockShinySession$fileUrl()}}
-\item \href{#method-setInputs}{\code{MockShinySession$setInputs()}}
-\item \href{#method-.scheduleTask}{\code{MockShinySession$.scheduleTask()}}
-\item \href{#method-elapse}{\code{MockShinySession$elapse()}}
-\item \href{#method-.now}{\code{MockShinySession$.now()}}
-\item \href{#method-defineOutput}{\code{MockShinySession$defineOutput()}}
-\item \href{#method-getOutput}{\code{MockShinySession$getOutput()}}
-\item \href{#method-ns}{\code{MockShinySession$ns()}}
-\item \href{#method-flushReact}{\code{MockShinySession$flushReact()}}
-\item \href{#method-makeScope}{\code{MockShinySession$makeScope()}}
-\item \href{#method-setEnv}{\code{MockShinySession$setEnv()}}
-\item \href{#method-setReturned}{\code{MockShinySession$setReturned()}}
-\item \href{#method-getReturned}{\code{MockShinySession$getReturned()}}
-\item \href{#method-genId}{\code{MockShinySession$genId()}}
-\item \href{#method-rootScope}{\code{MockShinySession$rootScope()}}
-\item \href{#method-unhandledError}{\code{MockShinySession$unhandledError()}}
-\item \href{#method-freezeValue}{\code{MockShinySession$freezeValue()}}
-\item \href{#method-onSessionEnded}{\code{MockShinySession$onSessionEnded()}}
-\item \href{#method-registerDownload}{\code{MockShinySession$registerDownload()}}
-\item \href{#method-getCurrentOutputInfo}{\code{MockShinySession$getCurrentOutputInfo()}}
-\item \href{#method-clone}{\code{MockShinySession$clone()}}
+\item \href{#method-MockShinySession-new}{\code{MockShinySession$new()}}
+\item \href{#method-MockShinySession-onFlush}{\code{MockShinySession$onFlush()}}
+\item \href{#method-MockShinySession-onFlushed}{\code{MockShinySession$onFlushed()}}
+\item \href{#method-MockShinySession-onEnded}{\code{MockShinySession$onEnded()}}
+\item \href{#method-MockShinySession-isEnded}{\code{MockShinySession$isEnded()}}
+\item \href{#method-MockShinySession-isClosed}{\code{MockShinySession$isClosed()}}
+\item \href{#method-MockShinySession-close}{\code{MockShinySession$close()}}
+\item \href{#method-MockShinySession-cycleStartAction}{\code{MockShinySession$cycleStartAction()}}
+\item \href{#method-MockShinySession-fileUrl}{\code{MockShinySession$fileUrl()}}
+\item \href{#method-MockShinySession-setInputs}{\code{MockShinySession$setInputs()}}
+\item \href{#method-MockShinySession-.scheduleTask}{\code{MockShinySession$.scheduleTask()}}
+\item \href{#method-MockShinySession-elapse}{\code{MockShinySession$elapse()}}
+\item \href{#method-MockShinySession-.now}{\code{MockShinySession$.now()}}
+\item \href{#method-MockShinySession-defineOutput}{\code{MockShinySession$defineOutput()}}
+\item \href{#method-MockShinySession-getOutput}{\code{MockShinySession$getOutput()}}
+\item \href{#method-MockShinySession-ns}{\code{MockShinySession$ns()}}
+\item \href{#method-MockShinySession-flushReact}{\code{MockShinySession$flushReact()}}
+\item \href{#method-MockShinySession-makeScope}{\code{MockShinySession$makeScope()}}
+\item \href{#method-MockShinySession-setEnv}{\code{MockShinySession$setEnv()}}
+\item \href{#method-MockShinySession-setReturned}{\code{MockShinySession$setReturned()}}
+\item \href{#method-MockShinySession-getReturned}{\code{MockShinySession$getReturned()}}
+\item \href{#method-MockShinySession-genId}{\code{MockShinySession$genId()}}
+\item \href{#method-MockShinySession-rootScope}{\code{MockShinySession$rootScope()}}
+\item \href{#method-MockShinySession-unhandledError}{\code{MockShinySession$unhandledError()}}
+\item \href{#method-MockShinySession-freezeValue}{\code{MockShinySession$freezeValue()}}
+\item \href{#method-MockShinySession-onSessionEnded}{\code{MockShinySession$onSessionEnded()}}
+\item \href{#method-MockShinySession-registerDownload}{\code{MockShinySession$registerDownload()}}
+\item \href{#method-MockShinySession-getCurrentOutputInfo}{\code{MockShinySession$getCurrentOutputInfo()}}
+\item \href{#method-MockShinySession-clone}{\code{MockShinySession$clone()}}
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-new"></a>}}
-\if{latex}{\out{\hypertarget{method-new}{}}}
+\if{html}{\out{<a id="method-MockShinySession-new"></a>}}
+\if{latex}{\out{\hypertarget{method-MockShinySession-new}{}}}
 \subsection{Method \code{new()}}{
 Create a new MockShinySession.
 \subsection{Usage}{
@@ -127,8 +127,8 @@ Create a new MockShinySession.
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-onFlush"></a>}}
-\if{latex}{\out{\hypertarget{method-onFlush}{}}}
+\if{html}{\out{<a id="method-MockShinySession-onFlush"></a>}}
+\if{latex}{\out{\hypertarget{method-MockShinySession-onFlush}{}}}
 \subsection{Method \code{onFlush()}}{
 Define a callback to be invoked before a reactive flush
 \subsection{Usage}{
@@ -146,8 +146,8 @@ Define a callback to be invoked before a reactive flush
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-onFlushed"></a>}}
-\if{latex}{\out{\hypertarget{method-onFlushed}{}}}
+\if{html}{\out{<a id="method-MockShinySession-onFlushed"></a>}}
+\if{latex}{\out{\hypertarget{method-MockShinySession-onFlushed}{}}}
 \subsection{Method \code{onFlushed()}}{
 Define a callback to be invoked after a reactive flush
 \subsection{Usage}{
@@ -165,8 +165,8 @@ Define a callback to be invoked after a reactive flush
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-onEnded"></a>}}
-\if{latex}{\out{\hypertarget{method-onEnded}{}}}
+\if{html}{\out{<a id="method-MockShinySession-onEnded"></a>}}
+\if{latex}{\out{\hypertarget{method-MockShinySession-onEnded}{}}}
 \subsection{Method \code{onEnded()}}{
 Define a callback to be invoked when the session ends
 \subsection{Usage}{
@@ -182,8 +182,8 @@ Define a callback to be invoked when the session ends
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-isEnded"></a>}}
-\if{latex}{\out{\hypertarget{method-isEnded}{}}}
+\if{html}{\out{<a id="method-MockShinySession-isEnded"></a>}}
+\if{latex}{\out{\hypertarget{method-MockShinySession-isEnded}{}}}
 \subsection{Method \code{isEnded()}}{
 Returns \code{FALSE} if the session has not yet been closed
 \subsection{Usage}{
@@ -192,8 +192,8 @@ Returns \code{FALSE} if the session has not yet been closed
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-isClosed"></a>}}
-\if{latex}{\out{\hypertarget{method-isClosed}{}}}
+\if{html}{\out{<a id="method-MockShinySession-isClosed"></a>}}
+\if{latex}{\out{\hypertarget{method-MockShinySession-isClosed}{}}}
 \subsection{Method \code{isClosed()}}{
 Returns \code{FALSE} if the session has not yet been closed
 \subsection{Usage}{
@@ -202,8 +202,8 @@ Returns \code{FALSE} if the session has not yet been closed
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-close"></a>}}
-\if{latex}{\out{\hypertarget{method-close}{}}}
+\if{html}{\out{<a id="method-MockShinySession-close"></a>}}
+\if{latex}{\out{\hypertarget{method-MockShinySession-close}{}}}
 \subsection{Method \code{close()}}{
 Closes the session
 \subsection{Usage}{
@@ -212,8 +212,8 @@ Closes the session
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-cycleStartAction"></a>}}
-\if{latex}{\out{\hypertarget{method-cycleStartAction}{}}}
+\if{html}{\out{<a id="method-MockShinySession-cycleStartAction"></a>}}
+\if{latex}{\out{\hypertarget{method-MockShinySession-cycleStartAction}{}}}
 \subsection{Method \code{cycleStartAction()}}{
 Unsophisticated mock implementation that merely invokes
 \subsection{Usage}{
@@ -229,8 +229,8 @@ Unsophisticated mock implementation that merely invokes
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-fileUrl"></a>}}
-\if{latex}{\out{\hypertarget{method-fileUrl}{}}}
+\if{html}{\out{<a id="method-MockShinySession-fileUrl"></a>}}
+\if{latex}{\out{\hypertarget{method-MockShinySession-fileUrl}{}}}
 \subsection{Method \code{fileUrl()}}{
 Base64-encode the given file. Needed for image rendering.
 \subsection{Usage}{
@@ -250,8 +250,8 @@ Base64-encode the given file. Needed for image rendering.
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-setInputs"></a>}}
-\if{latex}{\out{\hypertarget{method-setInputs}{}}}
+\if{html}{\out{<a id="method-MockShinySession-setInputs"></a>}}
+\if{latex}{\out{\hypertarget{method-MockShinySession-setInputs}{}}}
 \subsection{Method \code{setInputs()}}{
 Sets reactive values associated with the \code{session$inputs}
 object and flushes the reactives.
@@ -280,8 +280,8 @@ session$setInputs(x=1, y=2)
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-.scheduleTask"></a>}}
-\if{latex}{\out{\hypertarget{method-.scheduleTask}{}}}
+\if{html}{\out{<a id="method-MockShinySession-.scheduleTask"></a>}}
+\if{latex}{\out{\hypertarget{method-MockShinySession-.scheduleTask}{}}}
 \subsection{Method \code{.scheduleTask()}}{
 An internal method which shouldn't be used by others.
 Schedules \code{callback} for execution after some number of \code{millis}
@@ -301,8 +301,8 @@ milliseconds.
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-elapse"></a>}}
-\if{latex}{\out{\hypertarget{method-elapse}{}}}
+\if{html}{\out{<a id="method-MockShinySession-elapse"></a>}}
+\if{latex}{\out{\hypertarget{method-MockShinySession-elapse}{}}}
 \subsection{Method \code{elapse()}}{
 Simulate the passing of time by the given number of milliseconds.
 \subsection{Usage}{
@@ -318,8 +318,8 @@ Simulate the passing of time by the given number of milliseconds.
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-.now"></a>}}
-\if{latex}{\out{\hypertarget{method-.now}{}}}
+\if{html}{\out{<a id="method-MockShinySession-.now"></a>}}
+\if{latex}{\out{\hypertarget{method-MockShinySession-.now}{}}}
 \subsection{Method \code{.now()}}{
 An internal method which shouldn't be used by others.
 \subsection{Usage}{
@@ -331,8 +331,8 @@ Elapsed time in milliseconds.
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-defineOutput"></a>}}
-\if{latex}{\out{\hypertarget{method-defineOutput}{}}}
+\if{html}{\out{<a id="method-MockShinySession-defineOutput"></a>}}
+\if{latex}{\out{\hypertarget{method-MockShinySession-defineOutput}{}}}
 \subsection{Method \code{defineOutput()}}{
 An internal method which shouldn't be used by others.
 Defines an output in a way that sets private$currentOutputName
@@ -354,8 +354,8 @@ appropriately.
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-getOutput"></a>}}
-\if{latex}{\out{\hypertarget{method-getOutput}{}}}
+\if{html}{\out{<a id="method-MockShinySession-getOutput"></a>}}
+\if{latex}{\out{\hypertarget{method-MockShinySession-getOutput}{}}}
 \subsection{Method \code{getOutput()}}{
 An internal method which shouldn't be used by others. Forces
 evaluation of any reactive dependencies of the output function.
@@ -376,8 +376,8 @@ output.
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-ns"></a>}}
-\if{latex}{\out{\hypertarget{method-ns}{}}}
+\if{html}{\out{<a id="method-MockShinySession-ns"></a>}}
+\if{latex}{\out{\hypertarget{method-MockShinySession-ns}{}}}
 \subsection{Method \code{ns()}}{
 Returns the given id prefixed by this namespace's id.
 \subsection{Usage}{
@@ -396,8 +396,8 @@ The id with a namespace prefix.
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-flushReact"></a>}}
-\if{latex}{\out{\hypertarget{method-flushReact}{}}}
+\if{html}{\out{<a id="method-MockShinySession-flushReact"></a>}}
+\if{latex}{\out{\hypertarget{method-MockShinySession-flushReact}{}}}
 \subsection{Method \code{flushReact()}}{
 Trigger a reactive flush right now.
 \subsection{Usage}{
@@ -406,8 +406,8 @@ Trigger a reactive flush right now.
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-makeScope"></a>}}
-\if{latex}{\out{\hypertarget{method-makeScope}{}}}
+\if{html}{\out{<a id="method-MockShinySession-makeScope"></a>}}
+\if{latex}{\out{\hypertarget{method-MockShinySession-makeScope}{}}}
 \subsection{Method \code{makeScope()}}{
 Create and return a namespace-specific session proxy.
 \subsection{Usage}{
@@ -426,8 +426,8 @@ A new session proxy.
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-setEnv"></a>}}
-\if{latex}{\out{\hypertarget{method-setEnv}{}}}
+\if{html}{\out{<a id="method-MockShinySession-setEnv"></a>}}
+\if{latex}{\out{\hypertarget{method-MockShinySession-setEnv}{}}}
 \subsection{Method \code{setEnv()}}{
 Set the environment associated with a testServer() call, but
 only if it has not previously been set. This ensures that only the
@@ -449,8 +449,8 @@ The provided \code{env}.
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-setReturned"></a>}}
-\if{latex}{\out{\hypertarget{method-setReturned}{}}}
+\if{html}{\out{<a id="method-MockShinySession-setReturned"></a>}}
+\if{latex}{\out{\hypertarget{method-MockShinySession-setReturned}{}}}
 \subsection{Method \code{setReturned()}}{
 Set the value returned by the module call and proactively
 flush. Note that this method may be called multiple times if modules
@@ -472,8 +472,8 @@ The provided \code{value}.
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-getReturned"></a>}}
-\if{latex}{\out{\hypertarget{method-getReturned}{}}}
+\if{html}{\out{<a id="method-MockShinySession-getReturned"></a>}}
+\if{latex}{\out{\hypertarget{method-MockShinySession-getReturned}{}}}
 \subsection{Method \code{getReturned()}}{
 Get the value returned by the module call.
 \subsection{Usage}{
@@ -485,8 +485,8 @@ The value returned by the module call
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-genId"></a>}}
-\if{latex}{\out{\hypertarget{method-genId}{}}}
+\if{html}{\out{<a id="method-MockShinySession-genId"></a>}}
+\if{latex}{\out{\hypertarget{method-MockShinySession-genId}{}}}
 \subsection{Method \code{genId()}}{
 Generate a distinct character identifier for use as a proxy
 namespace.
@@ -499,8 +499,8 @@ A character identifier unique to the current session.
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-rootScope"></a>}}
-\if{latex}{\out{\hypertarget{method-rootScope}{}}}
+\if{html}{\out{<a id="method-MockShinySession-rootScope"></a>}}
+\if{latex}{\out{\hypertarget{method-MockShinySession-rootScope}{}}}
 \subsection{Method \code{rootScope()}}{
 Provides a way to access the root \code{MockShinySession} from
 any descendant proxy.
@@ -513,8 +513,8 @@ The root \code{MockShinySession}.
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-unhandledError"></a>}}
-\if{latex}{\out{\hypertarget{method-unhandledError}{}}}
+\if{html}{\out{<a id="method-MockShinySession-unhandledError"></a>}}
+\if{latex}{\out{\hypertarget{method-MockShinySession-unhandledError}{}}}
 \subsection{Method \code{unhandledError()}}{
 Called by observers when a reactive expression errors.
 \subsection{Usage}{
@@ -530,8 +530,8 @@ Called by observers when a reactive expression errors.
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-freezeValue"></a>}}
-\if{latex}{\out{\hypertarget{method-freezeValue}{}}}
+\if{html}{\out{<a id="method-MockShinySession-freezeValue"></a>}}
+\if{latex}{\out{\hypertarget{method-MockShinySession-freezeValue}{}}}
 \subsection{Method \code{freezeValue()}}{
 Freeze a value until the flush cycle completes.
 \subsection{Usage}{
@@ -549,8 +549,8 @@ Freeze a value until the flush cycle completes.
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-onSessionEnded"></a>}}
-\if{latex}{\out{\hypertarget{method-onSessionEnded}{}}}
+\if{html}{\out{<a id="method-MockShinySession-onSessionEnded"></a>}}
+\if{latex}{\out{\hypertarget{method-MockShinySession-onSessionEnded}{}}}
 \subsection{Method \code{onSessionEnded()}}{
 Registers the given callback to be invoked when the session
 is closed (i.e. the connection to the client has been severed). The
@@ -570,8 +570,8 @@ guaranteed.
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-registerDownload"></a>}}
-\if{latex}{\out{\hypertarget{method-registerDownload}{}}}
+\if{html}{\out{<a id="method-MockShinySession-registerDownload"></a>}}
+\if{latex}{\out{\hypertarget{method-MockShinySession-registerDownload}{}}}
 \subsection{Method \code{registerDownload()}}{
 Associated a downloadable file with the session.
 \subsection{Usage}{
@@ -598,8 +598,8 @@ function.)}
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-getCurrentOutputInfo"></a>}}
-\if{latex}{\out{\hypertarget{method-getCurrentOutputInfo}{}}}
+\if{html}{\out{<a id="method-MockShinySession-getCurrentOutputInfo"></a>}}
+\if{latex}{\out{\hypertarget{method-MockShinySession-getCurrentOutputInfo}{}}}
 \subsection{Method \code{getCurrentOutputInfo()}}{
 Get information about the output that is currently being
 executed.
@@ -614,8 +614,8 @@ output, or \code{NULL} if no output is currently executing.
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-clone"></a>}}
-\if{latex}{\out{\hypertarget{method-clone}{}}}
+\if{html}{\out{<a id="method-MockShinySession-clone"></a>}}
+\if{latex}{\out{\hypertarget{method-MockShinySession-clone}{}}}
 \subsection{Method \code{clone()}}{
 The objects of this class are cloneable with this method.
 \subsection{Usage}{

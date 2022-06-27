@@ -73,6 +73,10 @@ then jQuery 3.6.0 is used.}
 numbers to JSON format to send to the client web browser.}
 \item{shiny.launch.browser (defaults to \code{interactive()})}{A boolean which controls the default behavior
 when an app is run. See \code{\link[=runApp]{runApp()}} for more information.}
+\item{shiny.mathjax.url (defaults to \code{"https://mathjax.rstudio.com/latest/MathJax.js"})}{
+The URL that should be used to load MathJax, via \code{\link[=withMathJax]{withMathJax()}}.}
+\item{shiny.mathjax.config (defaults to \code{"config=TeX-AMS-MML_HTMLorMML"})}{The querystring
+used to load MathJax, via \code{\link[=withMathJax]{withMathJax()}}.}
 \item{shiny.maxRequestSize (defaults to 5MB)}{This is a number which specifies the maximum
 web request size, which serves as a size limit for file uploads.}
 \item{shiny.minified (defaults to \code{TRUE})}{By default
@@ -115,9 +119,10 @@ values are \code{"send"} (only print messages sent to the client),
 messages).}
 \item{shiny.autoload.r (defaults to \code{TRUE})}{If \code{TRUE}, then the R/
 of a shiny app will automatically be sourced.}
-\item{shiny.usecairo (defaults to \code{TRUE})}{This is used to disable graphical rendering by the
-Cairo package, if it is installed. See \code{\link[=plotPNG]{plotPNG()}} for more
-information.}
+\item{shiny.useragg (defaults to \code{TRUE})}{Set to \code{FALSE} to prevent PNG rendering via the
+ragg package. See \code{\link[=plotPNG]{plotPNG()}} for more information.}
+\item{shiny.usecairo (defaults to \code{TRUE})}{Set to \code{FALSE} to prevent PNG rendering via the
+Cairo package. See \code{\link[=plotPNG]{plotPNG()}} for more information.}
 \item{shiny.devmode (defaults to \code{NULL})}{Option to enable Shiny Developer Mode. When set,
 different default \code{getOption(key)} values will be returned. See \code{\link[=devmode]{devmode()}} for more details.}
 }

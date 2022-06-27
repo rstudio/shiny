@@ -19,7 +19,7 @@ used for bookmarking state.'><meta property="og:image" content="/logo.png"><!-- 
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">shiny</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.1.9003</span>
       </span>
     </div>
 
@@ -57,13 +57,13 @@ used for bookmarking state.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">bookmarkButton</span><span class="op">(</span>
-  label <span class="op">=</span> <span class="st">"Bookmark..."</span>,
-  icon <span class="op">=</span> <span class="fu">shiny</span><span class="fu">::</span><span class="fu"><a href="icon.html">icon</a></span><span class="op">(</span><span class="st">"link"</span>, lib <span class="op">=</span> <span class="st">"glyphicon"</span><span class="op">)</span>,
-  title <span class="op">=</span> <span class="st">"Bookmark this application's state and get a URL for sharing."</span>,
-  <span class="va">...</span>,
-  id <span class="op">=</span> <span class="st">"._bookmark_"</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">bookmarkButton</span><span class="op">(</span></span>
+<span>  label <span class="op">=</span> <span class="st">"Bookmark..."</span>,</span>
+<span>  icon <span class="op">=</span> <span class="fu">shiny</span><span class="fu">::</span><span class="fu"><a href="icon.html">icon</a></span><span class="op">(</span><span class="st">"link"</span>, lib <span class="op">=</span> <span class="st">"glyphicon"</span><span class="op">)</span>,</span>
+<span>  title <span class="op">=</span> <span class="st">"Bookmark this application's state and get a URL for sharing."</span>,</span>
+<span>  <span class="va">...</span>,</span>
+<span>  id <span class="op">=</span> <span class="st">"._bookmark_"</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -101,40 +101,40 @@ does the bookmarking when the button is pressed. See the examples below.</p></dd
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="co">## Only run these examples in interactive sessions</span></span>
-<span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># This example shows how to use multiple bookmark buttons. If you only need</span></span>
-<span class="r-in"><span class="co"># a single bookmark button, see examples in ?enableBookmarking.</span></span>
-<span class="r-in"><span class="va">ui</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">request</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">  <span class="fu"><a href="fluidPage.html">fluidPage</a></span><span class="op">(</span></span>
-<span class="r-in">    <span class="fu"><a href="tabsetPanel.html">tabsetPanel</a></span><span class="op">(</span>id <span class="op">=</span> <span class="st">"tabs"</span>,</span>
-<span class="r-in">      <span class="fu"><a href="tabPanel.html">tabPanel</a></span><span class="op">(</span><span class="st">"One"</span>,</span>
-<span class="r-in">        <span class="fu"><a href="checkboxInput.html">checkboxInput</a></span><span class="op">(</span><span class="st">"chk1"</span>, <span class="st">"Checkbox 1"</span><span class="op">)</span>,</span>
-<span class="r-in">        <span class="fu">bookmarkButton</span><span class="op">(</span>id <span class="op">=</span> <span class="st">"bookmark1"</span><span class="op">)</span></span>
-<span class="r-in">      <span class="op">)</span>,</span>
-<span class="r-in">      <span class="fu"><a href="tabPanel.html">tabPanel</a></span><span class="op">(</span><span class="st">"Two"</span>,</span>
-<span class="r-in">        <span class="fu"><a href="checkboxInput.html">checkboxInput</a></span><span class="op">(</span><span class="st">"chk2"</span>, <span class="st">"Checkbox 2"</span><span class="op">)</span>,</span>
-<span class="r-in">        <span class="fu">bookmarkButton</span><span class="op">(</span>id <span class="op">=</span> <span class="st">"bookmark2"</span><span class="op">)</span></span>
-<span class="r-in">      <span class="op">)</span></span>
-<span class="r-in">    <span class="op">)</span></span>
-<span class="r-in">  <span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
-<span class="r-in"><span class="va">server</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">  <span class="co"># Need to exclude the buttons from themselves being bookmarked</span></span>
-<span class="r-in">  <span class="fu"><a href="setBookmarkExclude.html">setBookmarkExclude</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"bookmark1"</span>, <span class="st">"bookmark2"</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in">  <span class="co"># Trigger bookmarking with either button</span></span>
-<span class="r-in">  <span class="fu"><a href="observeEvent.html">observeEvent</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">bookmark1</span>, <span class="op">{</span></span>
-<span class="r-in">    <span class="va">session</span><span class="op">$</span><span class="fu">doBookmark</span><span class="op">(</span><span class="op">)</span></span>
-<span class="r-in">  <span class="op">}</span><span class="op">)</span></span>
-<span class="r-in">  <span class="fu"><a href="observeEvent.html">observeEvent</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">bookmark2</span>, <span class="op">{</span></span>
-<span class="r-in">    <span class="va">session</span><span class="op">$</span><span class="fu">doBookmark</span><span class="op">(</span><span class="op">)</span></span>
-<span class="r-in">  <span class="op">}</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
-<span class="r-in"><span class="fu"><a href="enableBookmarking.html">enableBookmarking</a></span><span class="op">(</span>store <span class="op">=</span> <span class="st">"url"</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu"><a href="shinyApp.html">shinyApp</a></span><span class="op">(</span><span class="va">ui</span>, <span class="va">server</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co">## Only run these examples in interactive sessions</span></span></span>
+<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># This example shows how to use multiple bookmark buttons. If you only need</span></span></span>
+<span class="r-in"><span><span class="co"># a single bookmark button, see examples in ?enableBookmarking.</span></span></span>
+<span class="r-in"><span><span class="va">ui</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">request</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="fluidPage.html">fluidPage</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="tabsetPanel.html">tabsetPanel</a></span><span class="op">(</span>id <span class="op">=</span> <span class="st">"tabs"</span>,</span></span>
+<span class="r-in"><span>      <span class="fu"><a href="tabPanel.html">tabPanel</a></span><span class="op">(</span><span class="st">"One"</span>,</span></span>
+<span class="r-in"><span>        <span class="fu"><a href="checkboxInput.html">checkboxInput</a></span><span class="op">(</span><span class="st">"chk1"</span>, <span class="st">"Checkbox 1"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>        <span class="fu">bookmarkButton</span><span class="op">(</span>id <span class="op">=</span> <span class="st">"bookmark1"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>      <span class="op">)</span>,</span></span>
+<span class="r-in"><span>      <span class="fu"><a href="tabPanel.html">tabPanel</a></span><span class="op">(</span><span class="st">"Two"</span>,</span></span>
+<span class="r-in"><span>        <span class="fu"><a href="checkboxInput.html">checkboxInput</a></span><span class="op">(</span><span class="st">"chk2"</span>, <span class="st">"Checkbox 2"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>        <span class="fu">bookmarkButton</span><span class="op">(</span>id <span class="op">=</span> <span class="st">"bookmark2"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>      <span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span><span class="va">server</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="co"># Need to exclude the buttons from themselves being bookmarked</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="setBookmarkExclude.html">setBookmarkExclude</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"bookmark1"</span>, <span class="st">"bookmark2"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>  <span class="co"># Trigger bookmarking with either button</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="observeEvent.html">observeEvent</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">bookmark1</span>, <span class="op">{</span></span></span>
+<span class="r-in"><span>    <span class="va">session</span><span class="op">$</span><span class="fu">doBookmark</span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="observeEvent.html">observeEvent</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">bookmark2</span>, <span class="op">{</span></span></span>
+<span class="r-in"><span>    <span class="va">session</span><span class="op">$</span><span class="fu">doBookmark</span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="enableBookmarking.html">enableBookmarking</a></span><span class="op">(</span>store <span class="op">=</span> <span class="st">"url"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="shinyApp.html">shinyApp</a></span><span class="op">(</span><span class="va">ui</span>, <span class="va">server</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
 </code></pre></div>
     </div>
   </div>

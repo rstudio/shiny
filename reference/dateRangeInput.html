@@ -18,7 +18,7 @@ the user can click on to select dates."><meta property="og:image" content="/logo
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">shiny</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.1.9003</span>
       </span>
     </div>
 
@@ -55,21 +55,21 @@ the user can click on to select dates.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">dateRangeInput</span><span class="op">(</span>
-  <span class="va">inputId</span>,
-  <span class="va">label</span>,
-  start <span class="op">=</span> <span class="cn">NULL</span>,
-  end <span class="op">=</span> <span class="cn">NULL</span>,
-  min <span class="op">=</span> <span class="cn">NULL</span>,
-  max <span class="op">=</span> <span class="cn">NULL</span>,
-  format <span class="op">=</span> <span class="st">"yyyy-mm-dd"</span>,
-  startview <span class="op">=</span> <span class="st">"month"</span>,
-  weekstart <span class="op">=</span> <span class="fl">0</span>,
-  language <span class="op">=</span> <span class="st">"en"</span>,
-  separator <span class="op">=</span> <span class="st">" to "</span>,
-  width <span class="op">=</span> <span class="cn">NULL</span>,
-  autoclose <span class="op">=</span> <span class="cn">TRUE</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">dateRangeInput</span><span class="op">(</span></span>
+<span>  <span class="va">inputId</span>,</span>
+<span>  <span class="va">label</span>,</span>
+<span>  start <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  end <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  min <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  max <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  format <span class="op">=</span> <span class="st">"yyyy-mm-dd"</span>,</span>
+<span>  startview <span class="op">=</span> <span class="st">"month"</span>,</span>
+<span>  weekstart <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  language <span class="op">=</span> <span class="st">"en"</span>,</span>
+<span>  separator <span class="op">=</span> <span class="st">" to "</span>,</span>
+<span>  width <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  autoclose <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -187,45 +187,45 @@ the browser. It allows the following values:</p>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="co">## Only run examples in interactive R sessions</span></span>
-<span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="va">ui</span> <span class="op">&lt;-</span> <span class="fu"><a href="fluidPage.html">fluidPage</a></span><span class="op">(</span></span>
-<span class="r-in">  <span class="fu">dateRangeInput</span><span class="op">(</span><span class="st">"daterange1"</span>, <span class="st">"Date range:"</span>,</span>
-<span class="r-in">                 start <span class="op">=</span> <span class="st">"2001-01-01"</span>,</span>
-<span class="r-in">                 end   <span class="op">=</span> <span class="st">"2010-12-31"</span><span class="op">)</span>,</span>
-<span class="r-in"></span>
-<span class="r-in">  <span class="co"># Default start and end is the current date in the client's time zone</span></span>
-<span class="r-in">  <span class="fu">dateRangeInput</span><span class="op">(</span><span class="st">"daterange2"</span>, <span class="st">"Date range:"</span><span class="op">)</span>,</span>
-<span class="r-in"></span>
-<span class="r-in">  <span class="co"># start and end are always specified in yyyy-mm-dd, even if the display</span></span>
-<span class="r-in">  <span class="co"># format is different</span></span>
-<span class="r-in">  <span class="fu">dateRangeInput</span><span class="op">(</span><span class="st">"daterange3"</span>, <span class="st">"Date range:"</span>,</span>
-<span class="r-in">                 start  <span class="op">=</span> <span class="st">"2001-01-01"</span>,</span>
-<span class="r-in">                 end    <span class="op">=</span> <span class="st">"2010-12-31"</span>,</span>
-<span class="r-in">                 min    <span class="op">=</span> <span class="st">"2001-01-01"</span>,</span>
-<span class="r-in">                 max    <span class="op">=</span> <span class="st">"2012-12-21"</span>,</span>
-<span class="r-in">                 format <span class="op">=</span> <span class="st">"mm/dd/yy"</span>,</span>
-<span class="r-in">                 separator <span class="op">=</span> <span class="st">" - "</span><span class="op">)</span>,</span>
-<span class="r-in"></span>
-<span class="r-in">  <span class="co"># Pass in Date objects</span></span>
-<span class="r-in">  <span class="fu">dateRangeInput</span><span class="op">(</span><span class="st">"daterange4"</span>, <span class="st">"Date range:"</span>,</span>
-<span class="r-in">                 start <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.Date</a></span><span class="op">(</span><span class="op">)</span><span class="op">-</span><span class="fl">10</span>,</span>
-<span class="r-in">                 end <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.Date</a></span><span class="op">(</span><span class="op">)</span><span class="op">+</span><span class="fl">10</span><span class="op">)</span>,</span>
-<span class="r-in"></span>
-<span class="r-in">  <span class="co"># Use different language and different first day of week</span></span>
-<span class="r-in">  <span class="fu">dateRangeInput</span><span class="op">(</span><span class="st">"daterange5"</span>, <span class="st">"Date range:"</span>,</span>
-<span class="r-in">                 language <span class="op">=</span> <span class="st">"de"</span>,</span>
-<span class="r-in">                 weekstart <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>,</span>
-<span class="r-in"></span>
-<span class="r-in">  <span class="co"># Start with decade view instead of default month view</span></span>
-<span class="r-in">  <span class="fu">dateRangeInput</span><span class="op">(</span><span class="st">"daterange6"</span>, <span class="st">"Date range:"</span>,</span>
-<span class="r-in">                 startview <span class="op">=</span> <span class="st">"decade"</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu"><a href="shinyApp.html">shinyApp</a></span><span class="op">(</span><span class="va">ui</span>, server <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span><span class="op">)</span> <span class="op">{</span> <span class="op">}</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
-<span class="r-in"></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co">## Only run examples in interactive R sessions</span></span></span>
+<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">ui</span> <span class="op">&lt;-</span> <span class="fu"><a href="fluidPage.html">fluidPage</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  <span class="fu">dateRangeInput</span><span class="op">(</span><span class="st">"daterange1"</span>, <span class="st">"Date range:"</span>,</span></span>
+<span class="r-in"><span>                 start <span class="op">=</span> <span class="st">"2001-01-01"</span>,</span></span>
+<span class="r-in"><span>                 end   <span class="op">=</span> <span class="st">"2010-12-31"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>  <span class="co"># Default start and end is the current date in the client's time zone</span></span></span>
+<span class="r-in"><span>  <span class="fu">dateRangeInput</span><span class="op">(</span><span class="st">"daterange2"</span>, <span class="st">"Date range:"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>  <span class="co"># start and end are always specified in yyyy-mm-dd, even if the display</span></span></span>
+<span class="r-in"><span>  <span class="co"># format is different</span></span></span>
+<span class="r-in"><span>  <span class="fu">dateRangeInput</span><span class="op">(</span><span class="st">"daterange3"</span>, <span class="st">"Date range:"</span>,</span></span>
+<span class="r-in"><span>                 start  <span class="op">=</span> <span class="st">"2001-01-01"</span>,</span></span>
+<span class="r-in"><span>                 end    <span class="op">=</span> <span class="st">"2010-12-31"</span>,</span></span>
+<span class="r-in"><span>                 min    <span class="op">=</span> <span class="st">"2001-01-01"</span>,</span></span>
+<span class="r-in"><span>                 max    <span class="op">=</span> <span class="st">"2012-12-21"</span>,</span></span>
+<span class="r-in"><span>                 format <span class="op">=</span> <span class="st">"mm/dd/yy"</span>,</span></span>
+<span class="r-in"><span>                 separator <span class="op">=</span> <span class="st">" - "</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>  <span class="co"># Pass in Date objects</span></span></span>
+<span class="r-in"><span>  <span class="fu">dateRangeInput</span><span class="op">(</span><span class="st">"daterange4"</span>, <span class="st">"Date range:"</span>,</span></span>
+<span class="r-in"><span>                 start <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.Date</a></span><span class="op">(</span><span class="op">)</span><span class="op">-</span><span class="fl">10</span>,</span></span>
+<span class="r-in"><span>                 end <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.Date</a></span><span class="op">(</span><span class="op">)</span><span class="op">+</span><span class="fl">10</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>  <span class="co"># Use different language and different first day of week</span></span></span>
+<span class="r-in"><span>  <span class="fu">dateRangeInput</span><span class="op">(</span><span class="st">"daterange5"</span>, <span class="st">"Date range:"</span>,</span></span>
+<span class="r-in"><span>                 language <span class="op">=</span> <span class="st">"de"</span>,</span></span>
+<span class="r-in"><span>                 weekstart <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>  <span class="co"># Start with decade view instead of default month view</span></span></span>
+<span class="r-in"><span>  <span class="fu">dateRangeInput</span><span class="op">(</span><span class="st">"daterange6"</span>, <span class="st">"Date range:"</span>,</span></span>
+<span class="r-in"><span>                 startview <span class="op">=</span> <span class="st">"decade"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="shinyApp.html">shinyApp</a></span><span class="op">(</span><span class="va">ui</span>, server <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span><span class="op">)</span> <span class="op">{</span> <span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>

@@ -23,7 +23,7 @@ invalidation signals; see Details."><meta property="og:image" content="/logo.png
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">shiny</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.1.9003</span>
       </span>
     </div>
 
@@ -65,9 +65,9 @@ invalidation signals; see Details.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">debounce</span><span class="op">(</span><span class="va">r</span>, <span class="va">millis</span>, priority <span class="op">=</span> <span class="fl">100</span>, domain <span class="op">=</span> <span class="fu"><a href="domains.html">getDefaultReactiveDomain</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span>
-
-<span class="fu">throttle</span><span class="op">(</span><span class="va">r</span>, <span class="va">millis</span>, priority <span class="op">=</span> <span class="fl">100</span>, domain <span class="op">=</span> <span class="fu"><a href="domains.html">getDefaultReactiveDomain</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">debounce</span><span class="op">(</span><span class="va">r</span>, <span class="va">millis</span>, priority <span class="op">=</span> <span class="fl">100</span>, domain <span class="op">=</span> <span class="fu"><a href="domains.html">getDefaultReactiveDomain</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">throttle</span><span class="op">(</span><span class="va">r</span>, <span class="va">millis</span>, priority <span class="op">=</span> <span class="fl">100</span>, domain <span class="op">=</span> <span class="fu"><a href="domains.html">getDefaultReactiveDomain</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -139,45 +139,45 @@ has expired.</p>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="co">## Only run examples in interactive R sessions</span></span>
-<span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">options</a></span><span class="op">(</span>device.ask.default <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://shiny.rstudio.com/" class="external-link">shiny</a></span><span class="op">)</span></span>
-<span class="r-in"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://magrittr.tidyverse.org" class="external-link">magrittr</a></span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="va">ui</span> <span class="op">&lt;-</span> <span class="fu"><a href="fluidPage.html">fluidPage</a></span><span class="op">(</span></span>
-<span class="r-in">  <span class="fu"><a href="plotOutput.html">plotOutput</a></span><span class="op">(</span><span class="st">"plot"</span>, click <span class="op">=</span> <span class="fu"><a href="clickOpts.html">clickOpts</a></span><span class="op">(</span><span class="st">"hover"</span><span class="op">)</span><span class="op">)</span>,</span>
-<span class="r-in">  <span class="fu"><a href="helpText.html">helpText</a></span><span class="op">(</span><span class="st">"Quickly click on the plot above, while watching the result table below:"</span><span class="op">)</span>,</span>
-<span class="r-in">  <span class="fu"><a href="renderTable.html">tableOutput</a></span><span class="op">(</span><span class="st">"result"</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="va">server</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">  <span class="va">hover</span> <span class="op">&lt;-</span> <span class="fu"><a href="reactive.html">reactive</a></span><span class="op">(</span><span class="op">{</span></span>
-<span class="r-in">    <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NULL.html" class="external-link">is.null</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">hover</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in">      <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>x <span class="op">=</span> <span class="cn">NA</span>, y <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span></span>
-<span class="r-in">    <span class="kw">else</span></span>
-<span class="r-in">      <span class="va">input</span><span class="op">$</span><span class="va">hover</span></span>
-<span class="r-in">  <span class="op">}</span><span class="op">)</span></span>
-<span class="r-in">  <span class="va">hover_d</span> <span class="op">&lt;-</span> <span class="va">hover</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu">debounce</span><span class="op">(</span><span class="fl">1000</span><span class="op">)</span></span>
-<span class="r-in">  <span class="va">hover_t</span> <span class="op">&lt;-</span> <span class="va">hover</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu">throttle</span><span class="op">(</span><span class="fl">1000</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in">  <span class="va">output</span><span class="op">$</span><span class="va">plot</span> <span class="op">&lt;-</span> <span class="fu"><a href="renderPlot.html">renderPlot</a></span><span class="op">(</span><span class="op">{</span></span>
-<span class="r-in">    <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">cars</span><span class="op">)</span></span>
-<span class="r-in">  <span class="op">}</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in">  <span class="va">output</span><span class="op">$</span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="renderTable.html">renderTable</a></span><span class="op">(</span><span class="op">{</span></span>
-<span class="r-in">    <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
-<span class="r-in">      mode <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"raw"</span>, <span class="st">"throttle"</span>, <span class="st">"debounce"</span><span class="op">)</span>,</span>
-<span class="r-in">      x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu">hover</span><span class="op">(</span><span class="op">)</span><span class="op">$</span><span class="va">x</span>, <span class="fu">hover_t</span><span class="op">(</span><span class="op">)</span><span class="op">$</span><span class="va">x</span>, <span class="fu">hover_d</span><span class="op">(</span><span class="op">)</span><span class="op">$</span><span class="va">x</span><span class="op">)</span>,</span>
-<span class="r-in">      y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu">hover</span><span class="op">(</span><span class="op">)</span><span class="op">$</span><span class="va">y</span>, <span class="fu">hover_t</span><span class="op">(</span><span class="op">)</span><span class="op">$</span><span class="va">y</span>, <span class="fu">hover_d</span><span class="op">(</span><span class="op">)</span><span class="op">$</span><span class="va">y</span><span class="op">)</span></span>
-<span class="r-in">    <span class="op">)</span></span>
-<span class="r-in">  <span class="op">}</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu"><a href="shinyApp.html">shinyApp</a></span><span class="op">(</span><span class="va">ui</span>, <span class="va">server</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
-<span class="r-in"></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co">## Only run examples in interactive R sessions</span></span></span>
+<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">options</a></span><span class="op">(</span>device.ask.default <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://shiny.rstudio.com/" class="external-link">shiny</a></span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://magrittr.tidyverse.org" class="external-link">magrittr</a></span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">ui</span> <span class="op">&lt;-</span> <span class="fu"><a href="fluidPage.html">fluidPage</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="plotOutput.html">plotOutput</a></span><span class="op">(</span><span class="st">"plot"</span>, click <span class="op">=</span> <span class="fu"><a href="clickOpts.html">clickOpts</a></span><span class="op">(</span><span class="st">"hover"</span><span class="op">)</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  <span class="fu"><a href="helpText.html">helpText</a></span><span class="op">(</span><span class="st">"Quickly click on the plot above, while watching the result table below:"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  <span class="fu"><a href="renderTable.html">tableOutput</a></span><span class="op">(</span><span class="st">"result"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">server</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="va">hover</span> <span class="op">&lt;-</span> <span class="fu"><a href="reactive.html">reactive</a></span><span class="op">(</span><span class="op">{</span></span></span>
+<span class="r-in"><span>    <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NULL.html" class="external-link">is.null</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">hover</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span>      <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>x <span class="op">=</span> <span class="cn">NA</span>, y <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="kw">else</span></span></span>
+<span class="r-in"><span>      <span class="va">input</span><span class="op">$</span><span class="va">hover</span></span></span>
+<span class="r-in"><span>  <span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="va">hover_d</span> <span class="op">&lt;-</span> <span class="va">hover</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu">debounce</span><span class="op">(</span><span class="fl">1000</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="va">hover_t</span> <span class="op">&lt;-</span> <span class="va">hover</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu">throttle</span><span class="op">(</span><span class="fl">1000</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>  <span class="va">output</span><span class="op">$</span><span class="va">plot</span> <span class="op">&lt;-</span> <span class="fu"><a href="renderPlot.html">renderPlot</a></span><span class="op">(</span><span class="op">{</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">cars</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>  <span class="va">output</span><span class="op">$</span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="renderTable.html">renderTable</a></span><span class="op">(</span><span class="op">{</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>      mode <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"raw"</span>, <span class="st">"throttle"</span>, <span class="st">"debounce"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>      x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu">hover</span><span class="op">(</span><span class="op">)</span><span class="op">$</span><span class="va">x</span>, <span class="fu">hover_t</span><span class="op">(</span><span class="op">)</span><span class="op">$</span><span class="va">x</span>, <span class="fu">hover_d</span><span class="op">(</span><span class="op">)</span><span class="op">$</span><span class="va">x</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>      y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu">hover</span><span class="op">(</span><span class="op">)</span><span class="op">$</span><span class="va">y</span>, <span class="fu">hover_t</span><span class="op">(</span><span class="op">)</span><span class="op">$</span><span class="va">y</span>, <span class="fu">hover_d</span><span class="op">(</span><span class="op">)</span><span class="op">$</span><span class="va">y</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="shinyApp.html">shinyApp</a></span><span class="op">(</span><span class="va">ui</span>, <span class="va">server</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>

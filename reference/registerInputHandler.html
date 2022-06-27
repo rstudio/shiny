@@ -20,7 +20,7 @@ of the server.R file."><meta property="og:image" content="/logo.png"><!-- mathja
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">shiny</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.1.9003</span>
       </span>
     </div>
 
@@ -59,7 +59,7 @@ of the <code>server.R</code> file.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">registerInputHandler</span><span class="op">(</span><span class="va">type</span>, <span class="va">fun</span>, force <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">registerInputHandler</span><span class="op">(</span><span class="va">type</span>, <span class="va">fun</span>, force <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -94,7 +94,7 @@ defined.</p></dd>
 should be very specific to this package to minimize the risk of colliding
 with another Shiny package which might use this data type name. We recommend
 the format of "packageName.widgetName". It should be called from the
-package's <code><a href="https://rdrr.io/r/base/ns-hooks.html" class="external-link">.onLoad()</a></code> function.</p>
+package's <code>.onLoad()</code> function.</p>
 <p>Currently Shiny registers the following handlers: <code>shiny.matrix</code>,
 <code>shiny.number</code>, and <code>shiny.date</code>.</p>
 <p>The <code>type</code> of a custom Shiny Input widget will be deduced using the
@@ -107,20 +107,20 @@ package's <code><a href="https://rdrr.io/r/base/ns-hooks.html" class="external-l
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in"><span class="co"># Register an input handler which rounds a input number to the nearest integer</span></span>
-<span class="r-in"><span class="co"># In a package, this should be called from the .onLoad function.</span></span>
-<span class="r-in"><span class="fu">registerInputHandler</span><span class="op">(</span><span class="st">"mypackage.validint"</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span>, <span class="va">shinysession</span>, <span class="va">name</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">  <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NULL.html" class="external-link">is.null</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span> <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="cn">NA</span><span class="op">)</span></span>
-<span class="r-in">  <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">## On the Javascript side, the associated input binding must have a corresponding getType method:</span></span>
-<span class="r-in"><span class="co"># getType: function(el) {</span></span>
-<span class="r-in"><span class="co">#   return "mypackage.validint";</span></span>
-<span class="r-in"><span class="co"># }</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="op">}</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span><span class="co"># Register an input handler which rounds a input number to the nearest integer</span></span></span>
+<span class="r-in"><span><span class="co"># In a package, this should be called from the .onLoad function.</span></span></span>
+<span class="r-in"><span><span class="fu">registerInputHandler</span><span class="op">(</span><span class="st">"mypackage.validint"</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span>, <span class="va">shinysession</span>, <span class="va">name</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NULL.html" class="external-link">is.null</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span> <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="cn">NA</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">## On the Javascript side, the associated input binding must have a corresponding getType method:</span></span></span>
+<span class="r-in"><span><span class="co"># getType: function(el) {</span></span></span>
+<span class="r-in"><span><span class="co">#   return "mypackage.validint";</span></span></span>
+<span class="r-in"><span><span class="co"># }</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
 </code></pre></div>
     </div>
   </div>

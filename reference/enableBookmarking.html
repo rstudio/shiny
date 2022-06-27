@@ -27,7 +27,7 @@ when the bookmarked state requires storing files."><meta property="og:image" con
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">shiny</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.1.9003</span>
       </span>
     </div>
 
@@ -73,7 +73,7 @@ when the bookmarked state requires storing files.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">enableBookmarking</span><span class="op">(</span>store <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"url"</span>, <span class="st">"server"</span>, <span class="st">"disable"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">enableBookmarking</span><span class="op">(</span>store <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"url"</span>, <span class="st">"server"</span>, <span class="st">"disable"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -125,162 +125,162 @@ restored.</p>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="co">## Only run these examples in interactive R sessions</span></span>
-<span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Basic example with state encoded in URL</span></span>
-<span class="r-in"><span class="va">ui</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">request</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">  <span class="fu"><a href="fluidPage.html">fluidPage</a></span><span class="op">(</span></span>
-<span class="r-in">    <span class="fu"><a href="textInput.html">textInput</a></span><span class="op">(</span><span class="st">"txt"</span>, <span class="st">"Text"</span><span class="op">)</span>,</span>
-<span class="r-in">    <span class="fu"><a href="checkboxInput.html">checkboxInput</a></span><span class="op">(</span><span class="st">"chk"</span>, <span class="st">"Checkbox"</span><span class="op">)</span>,</span>
-<span class="r-in">    <span class="fu"><a href="bookmarkButton.html">bookmarkButton</a></span><span class="op">(</span><span class="op">)</span></span>
-<span class="r-in">  <span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
-<span class="r-in"><span class="va">server</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span> <span class="op">}</span></span>
-<span class="r-in"><span class="fu">enableBookmarking</span><span class="op">(</span><span class="st">"url"</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu"><a href="shinyApp.html">shinyApp</a></span><span class="op">(</span><span class="va">ui</span>, <span class="va">server</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># An alternative to calling enableBookmarking(): use shinyApp's</span></span>
-<span class="r-in"><span class="co"># enableBookmarking argument</span></span>
-<span class="r-in"><span class="fu"><a href="shinyApp.html">shinyApp</a></span><span class="op">(</span><span class="va">ui</span>, <span class="va">server</span>, enableBookmarking <span class="op">=</span> <span class="st">"url"</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Same basic example with state saved to disk</span></span>
-<span class="r-in"><span class="fu">enableBookmarking</span><span class="op">(</span><span class="st">"server"</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu"><a href="shinyApp.html">shinyApp</a></span><span class="op">(</span><span class="va">ui</span>, <span class="va">server</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Save/restore arbitrary values</span></span>
-<span class="r-in"><span class="va">ui</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">req</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">  <span class="fu"><a href="fluidPage.html">fluidPage</a></span><span class="op">(</span></span>
-<span class="r-in">    <span class="fu"><a href="textInput.html">textInput</a></span><span class="op">(</span><span class="st">"txt"</span>, <span class="st">"Text"</span><span class="op">)</span>,</span>
-<span class="r-in">    <span class="fu"><a href="checkboxInput.html">checkboxInput</a></span><span class="op">(</span><span class="st">"chk"</span>, <span class="st">"Checkbox"</span><span class="op">)</span>,</span>
-<span class="r-in">    <span class="fu"><a href="bookmarkButton.html">bookmarkButton</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span class="r-in">    <span class="fu"><a href="https://rdrr.io/pkg/htmltools/man/builder.html" class="external-link">br</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span class="r-in">    <span class="fu"><a href="textOutput.html">textOutput</a></span><span class="op">(</span><span class="st">"lastSaved"</span><span class="op">)</span></span>
-<span class="r-in">  <span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
-<span class="r-in"><span class="va">server</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">  <span class="va">vals</span> <span class="op">&lt;-</span> <span class="fu"><a href="reactiveValues.html">reactiveValues</a></span><span class="op">(</span>savedTime <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
-<span class="r-in">  <span class="va">output</span><span class="op">$</span><span class="va">lastSaved</span> <span class="op">&lt;-</span> <span class="fu"><a href="renderPrint.html">renderText</a></span><span class="op">(</span><span class="op">{</span></span>
-<span class="r-in">    <span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NULL.html" class="external-link">is.null</a></span><span class="op">(</span><span class="va">vals</span><span class="op">$</span><span class="va">savedTime</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in">      <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"Last saved at"</span>, <span class="va">vals</span><span class="op">$</span><span class="va">savedTime</span><span class="op">)</span></span>
-<span class="r-in">    <span class="kw">else</span></span>
-<span class="r-in">      <span class="st">""</span></span>
-<span class="r-in">  <span class="op">}</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in">  <span class="fu"><a href="onBookmark.html">onBookmark</a></span><span class="op">(</span><span class="kw">function</span><span class="op">(</span><span class="va">state</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">    <span class="va">vals</span><span class="op">$</span><span class="va">savedTime</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span></span>
-<span class="r-in">    <span class="co"># state is a mutable reference object, and we can add arbitrary values</span></span>
-<span class="r-in">    <span class="co"># to it.</span></span>
-<span class="r-in">    <span class="va">state</span><span class="op">$</span><span class="va">values</span><span class="op">$</span><span class="va">time</span> <span class="op">&lt;-</span> <span class="va">vals</span><span class="op">$</span><span class="va">savedTime</span></span>
-<span class="r-in">  <span class="op">}</span><span class="op">)</span></span>
-<span class="r-in">  <span class="fu"><a href="onBookmark.html">onRestore</a></span><span class="op">(</span><span class="kw">function</span><span class="op">(</span><span class="va">state</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">    <span class="va">vals</span><span class="op">$</span><span class="va">savedTime</span> <span class="op">&lt;-</span> <span class="va">state</span><span class="op">$</span><span class="va">values</span><span class="op">$</span><span class="va">time</span></span>
-<span class="r-in">  <span class="op">}</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
-<span class="r-in"><span class="fu">enableBookmarking</span><span class="op">(</span>store <span class="op">=</span> <span class="st">"url"</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu"><a href="shinyApp.html">shinyApp</a></span><span class="op">(</span><span class="va">ui</span>, <span class="va">server</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Usable with dynamic UI (set the slider, then change the text input,</span></span>
-<span class="r-in"><span class="co"># click the bookmark button)</span></span>
-<span class="r-in"><span class="va">ui</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">request</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">  <span class="fu"><a href="fluidPage.html">fluidPage</a></span><span class="op">(</span></span>
-<span class="r-in">    <span class="fu"><a href="sliderInput.html">sliderInput</a></span><span class="op">(</span><span class="st">"slider"</span>, <span class="st">"Slider"</span>, <span class="fl">1</span>, <span class="fl">100</span>, <span class="fl">50</span><span class="op">)</span>,</span>
-<span class="r-in">    <span class="fu"><a href="htmlOutput.html">uiOutput</a></span><span class="op">(</span><span class="st">"ui"</span><span class="op">)</span>,</span>
-<span class="r-in">    <span class="fu"><a href="bookmarkButton.html">bookmarkButton</a></span><span class="op">(</span><span class="op">)</span></span>
-<span class="r-in">  <span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
-<span class="r-in"><span class="va">server</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">  <span class="va">output</span><span class="op">$</span><span class="va">ui</span> <span class="op">&lt;-</span> <span class="fu"><a href="renderUI.html">renderUI</a></span><span class="op">(</span><span class="op">{</span></span>
-<span class="r-in">    <span class="fu"><a href="textInput.html">textInput</a></span><span class="op">(</span><span class="st">"txt"</span>, <span class="st">"Text"</span>, <span class="va">input</span><span class="op">$</span><span class="va">slider</span><span class="op">)</span></span>
-<span class="r-in">  <span class="op">}</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
-<span class="r-in"><span class="fu">enableBookmarking</span><span class="op">(</span><span class="st">"url"</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu"><a href="shinyApp.html">shinyApp</a></span><span class="op">(</span><span class="va">ui</span>, <span class="va">server</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Exclude specific inputs (The only input that will be saved in this</span></span>
-<span class="r-in"><span class="co"># example is chk)</span></span>
-<span class="r-in"><span class="va">ui</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">request</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">  <span class="fu"><a href="fluidPage.html">fluidPage</a></span><span class="op">(</span></span>
-<span class="r-in">    <span class="fu"><a href="passwordInput.html">passwordInput</a></span><span class="op">(</span><span class="st">"pw"</span>, <span class="st">"Password"</span><span class="op">)</span>, <span class="co"># Passwords are never saved</span></span>
-<span class="r-in">    <span class="fu"><a href="sliderInput.html">sliderInput</a></span><span class="op">(</span><span class="st">"slider"</span>, <span class="st">"Slider"</span>, <span class="fl">1</span>, <span class="fl">100</span>, <span class="fl">50</span><span class="op">)</span>, <span class="co"># Manually excluded below</span></span>
-<span class="r-in">    <span class="fu"><a href="checkboxInput.html">checkboxInput</a></span><span class="op">(</span><span class="st">"chk"</span>, <span class="st">"Checkbox"</span><span class="op">)</span>,</span>
-<span class="r-in">    <span class="fu"><a href="bookmarkButton.html">bookmarkButton</a></span><span class="op">(</span><span class="op">)</span></span>
-<span class="r-in">  <span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
-<span class="r-in"><span class="va">server</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">  <span class="fu"><a href="setBookmarkExclude.html">setBookmarkExclude</a></span><span class="op">(</span><span class="st">"slider"</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
-<span class="r-in"><span class="fu">enableBookmarking</span><span class="op">(</span><span class="st">"url"</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu"><a href="shinyApp.html">shinyApp</a></span><span class="op">(</span><span class="va">ui</span>, <span class="va">server</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Update the browser's location bar every time an input changes. This should</span></span>
-<span class="r-in"><span class="co"># not be used with enableBookmarking("server"), because that would create a</span></span>
-<span class="r-in"><span class="co"># new saved state on disk every time the user changes an input.</span></span>
-<span class="r-in"><span class="va">ui</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">req</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">  <span class="fu"><a href="fluidPage.html">fluidPage</a></span><span class="op">(</span></span>
-<span class="r-in">    <span class="fu"><a href="textInput.html">textInput</a></span><span class="op">(</span><span class="st">"txt"</span>, <span class="st">"Text"</span><span class="op">)</span>,</span>
-<span class="r-in">    <span class="fu"><a href="checkboxInput.html">checkboxInput</a></span><span class="op">(</span><span class="st">"chk"</span>, <span class="st">"Checkbox"</span><span class="op">)</span></span>
-<span class="r-in">  <span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
-<span class="r-in"><span class="va">server</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">  <span class="fu"><a href="observe.html">observe</a></span><span class="op">(</span><span class="op">{</span></span>
-<span class="r-in">    <span class="co"># Trigger this observer every time an input changes</span></span>
-<span class="r-in">    <span class="fu"><a href="reactiveValuesToList.html">reactiveValuesToList</a></span><span class="op">(</span><span class="va">input</span><span class="op">)</span></span>
-<span class="r-in">    <span class="va">session</span><span class="op">$</span><span class="fu">doBookmark</span><span class="op">(</span><span class="op">)</span></span>
-<span class="r-in">  <span class="op">}</span><span class="op">)</span></span>
-<span class="r-in">  <span class="fu"><a href="onBookmark.html">onBookmarked</a></span><span class="op">(</span><span class="kw">function</span><span class="op">(</span><span class="va">url</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">    <span class="fu"><a href="updateQueryString.html">updateQueryString</a></span><span class="op">(</span><span class="va">url</span><span class="op">)</span></span>
-<span class="r-in">  <span class="op">}</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
-<span class="r-in"><span class="fu">enableBookmarking</span><span class="op">(</span><span class="st">"url"</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu"><a href="shinyApp.html">shinyApp</a></span><span class="op">(</span><span class="va">ui</span>, <span class="va">server</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Save/restore uploaded files</span></span>
-<span class="r-in"><span class="va">ui</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">request</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">  <span class="fu"><a href="fluidPage.html">fluidPage</a></span><span class="op">(</span></span>
-<span class="r-in">    <span class="fu"><a href="sidebarLayout.html">sidebarLayout</a></span><span class="op">(</span></span>
-<span class="r-in">      <span class="fu"><a href="sidebarLayout.html">sidebarPanel</a></span><span class="op">(</span></span>
-<span class="r-in">        <span class="fu"><a href="fileInput.html">fileInput</a></span><span class="op">(</span><span class="st">"file1"</span>, <span class="st">"Choose CSV File"</span>, multiple <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span class="r-in">          accept <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
-<span class="r-in">            <span class="st">"text/csv"</span>,</span>
-<span class="r-in">            <span class="st">"text/comma-separated-values,text/plain"</span>,</span>
-<span class="r-in">            <span class="st">".csv"</span></span>
-<span class="r-in">          <span class="op">)</span></span>
-<span class="r-in">        <span class="op">)</span>,</span>
-<span class="r-in">        <span class="va">tags</span><span class="op">$</span><span class="fu">hr</span><span class="op">(</span><span class="op">)</span>,</span>
-<span class="r-in">        <span class="fu"><a href="checkboxInput.html">checkboxInput</a></span><span class="op">(</span><span class="st">"header"</span>, <span class="st">"Header"</span>, <span class="cn">TRUE</span><span class="op">)</span>,</span>
-<span class="r-in">        <span class="fu"><a href="bookmarkButton.html">bookmarkButton</a></span><span class="op">(</span><span class="op">)</span></span>
-<span class="r-in">      <span class="op">)</span>,</span>
-<span class="r-in">      <span class="fu"><a href="sidebarLayout.html">mainPanel</a></span><span class="op">(</span></span>
-<span class="r-in">        <span class="fu"><a href="renderTable.html">tableOutput</a></span><span class="op">(</span><span class="st">"contents"</span><span class="op">)</span></span>
-<span class="r-in">      <span class="op">)</span></span>
-<span class="r-in">    <span class="op">)</span></span>
-<span class="r-in">  <span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
-<span class="r-in"><span class="va">server</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">  <span class="va">output</span><span class="op">$</span><span class="va">contents</span> <span class="op">&lt;-</span> <span class="fu"><a href="renderTable.html">renderTable</a></span><span class="op">(</span><span class="op">{</span></span>
-<span class="r-in">    <span class="va">inFile</span> <span class="op">&lt;-</span> <span class="va">input</span><span class="op">$</span><span class="va">file1</span></span>
-<span class="r-in">    <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NULL.html" class="external-link">is.null</a></span><span class="op">(</span><span class="va">inFile</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in">      <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="cn">NULL</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in">    <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">inFile</span><span class="op">)</span> <span class="op">==</span> <span class="fl">1</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">      <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="va">inFile</span><span class="op">$</span><span class="va">datapath</span>, header <span class="op">=</span> <span class="va">input</span><span class="op">$</span><span class="va">header</span><span class="op">)</span></span>
-<span class="r-in">    <span class="op">}</span> <span class="kw">else</span> <span class="op">{</span></span>
-<span class="r-in">      <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">"multiple files"</span><span class="op">)</span></span>
-<span class="r-in">    <span class="op">}</span></span>
-<span class="r-in">  <span class="op">}</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
-<span class="r-in"><span class="fu">enableBookmarking</span><span class="op">(</span><span class="st">"server"</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu"><a href="shinyApp.html">shinyApp</a></span><span class="op">(</span><span class="va">ui</span>, <span class="va">server</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="op">}</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co">## Only run these examples in interactive R sessions</span></span></span>
+<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Basic example with state encoded in URL</span></span></span>
+<span class="r-in"><span><span class="va">ui</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">request</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="fluidPage.html">fluidPage</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="textInput.html">textInput</a></span><span class="op">(</span><span class="st">"txt"</span>, <span class="st">"Text"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    <span class="fu"><a href="checkboxInput.html">checkboxInput</a></span><span class="op">(</span><span class="st">"chk"</span>, <span class="st">"Checkbox"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    <span class="fu"><a href="bookmarkButton.html">bookmarkButton</a></span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span><span class="va">server</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span> <span class="op">}</span></span></span>
+<span class="r-in"><span><span class="fu">enableBookmarking</span><span class="op">(</span><span class="st">"url"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="shinyApp.html">shinyApp</a></span><span class="op">(</span><span class="va">ui</span>, <span class="va">server</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># An alternative to calling enableBookmarking(): use shinyApp's</span></span></span>
+<span class="r-in"><span><span class="co"># enableBookmarking argument</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="shinyApp.html">shinyApp</a></span><span class="op">(</span><span class="va">ui</span>, <span class="va">server</span>, enableBookmarking <span class="op">=</span> <span class="st">"url"</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Same basic example with state saved to disk</span></span></span>
+<span class="r-in"><span><span class="fu">enableBookmarking</span><span class="op">(</span><span class="st">"server"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="shinyApp.html">shinyApp</a></span><span class="op">(</span><span class="va">ui</span>, <span class="va">server</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Save/restore arbitrary values</span></span></span>
+<span class="r-in"><span><span class="va">ui</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">req</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="fluidPage.html">fluidPage</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="textInput.html">textInput</a></span><span class="op">(</span><span class="st">"txt"</span>, <span class="st">"Text"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    <span class="fu"><a href="checkboxInput.html">checkboxInput</a></span><span class="op">(</span><span class="st">"chk"</span>, <span class="st">"Checkbox"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    <span class="fu"><a href="bookmarkButton.html">bookmarkButton</a></span><span class="op">(</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/pkg/htmltools/man/builder.html" class="external-link">br</a></span><span class="op">(</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    <span class="fu"><a href="textOutput.html">textOutput</a></span><span class="op">(</span><span class="st">"lastSaved"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span><span class="va">server</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="va">vals</span> <span class="op">&lt;-</span> <span class="fu"><a href="reactiveValues.html">reactiveValues</a></span><span class="op">(</span>savedTime <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="va">output</span><span class="op">$</span><span class="va">lastSaved</span> <span class="op">&lt;-</span> <span class="fu"><a href="renderPrint.html">renderText</a></span><span class="op">(</span><span class="op">{</span></span></span>
+<span class="r-in"><span>    <span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NULL.html" class="external-link">is.null</a></span><span class="op">(</span><span class="va">vals</span><span class="op">$</span><span class="va">savedTime</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span>      <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"Last saved at"</span>, <span class="va">vals</span><span class="op">$</span><span class="va">savedTime</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="kw">else</span></span></span>
+<span class="r-in"><span>      <span class="st">""</span></span></span>
+<span class="r-in"><span>  <span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="onBookmark.html">onBookmark</a></span><span class="op">(</span><span class="kw">function</span><span class="op">(</span><span class="va">state</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>    <span class="va">vals</span><span class="op">$</span><span class="va">savedTime</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="co"># state is a mutable reference object, and we can add arbitrary values</span></span></span>
+<span class="r-in"><span>    <span class="co"># to it.</span></span></span>
+<span class="r-in"><span>    <span class="va">state</span><span class="op">$</span><span class="va">values</span><span class="op">$</span><span class="va">time</span> <span class="op">&lt;-</span> <span class="va">vals</span><span class="op">$</span><span class="va">savedTime</span></span></span>
+<span class="r-in"><span>  <span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="onBookmark.html">onRestore</a></span><span class="op">(</span><span class="kw">function</span><span class="op">(</span><span class="va">state</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>    <span class="va">vals</span><span class="op">$</span><span class="va">savedTime</span> <span class="op">&lt;-</span> <span class="va">state</span><span class="op">$</span><span class="va">values</span><span class="op">$</span><span class="va">time</span></span></span>
+<span class="r-in"><span>  <span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span><span class="fu">enableBookmarking</span><span class="op">(</span>store <span class="op">=</span> <span class="st">"url"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="shinyApp.html">shinyApp</a></span><span class="op">(</span><span class="va">ui</span>, <span class="va">server</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Usable with dynamic UI (set the slider, then change the text input,</span></span></span>
+<span class="r-in"><span><span class="co"># click the bookmark button)</span></span></span>
+<span class="r-in"><span><span class="va">ui</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">request</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="fluidPage.html">fluidPage</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="sliderInput.html">sliderInput</a></span><span class="op">(</span><span class="st">"slider"</span>, <span class="st">"Slider"</span>, <span class="fl">1</span>, <span class="fl">100</span>, <span class="fl">50</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    <span class="fu"><a href="htmlOutput.html">uiOutput</a></span><span class="op">(</span><span class="st">"ui"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    <span class="fu"><a href="bookmarkButton.html">bookmarkButton</a></span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span><span class="va">server</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="va">output</span><span class="op">$</span><span class="va">ui</span> <span class="op">&lt;-</span> <span class="fu"><a href="renderUI.html">renderUI</a></span><span class="op">(</span><span class="op">{</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="textInput.html">textInput</a></span><span class="op">(</span><span class="st">"txt"</span>, <span class="st">"Text"</span>, <span class="va">input</span><span class="op">$</span><span class="va">slider</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span><span class="fu">enableBookmarking</span><span class="op">(</span><span class="st">"url"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="shinyApp.html">shinyApp</a></span><span class="op">(</span><span class="va">ui</span>, <span class="va">server</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Exclude specific inputs (The only input that will be saved in this</span></span></span>
+<span class="r-in"><span><span class="co"># example is chk)</span></span></span>
+<span class="r-in"><span><span class="va">ui</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">request</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="fluidPage.html">fluidPage</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="passwordInput.html">passwordInput</a></span><span class="op">(</span><span class="st">"pw"</span>, <span class="st">"Password"</span><span class="op">)</span>, <span class="co"># Passwords are never saved</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="sliderInput.html">sliderInput</a></span><span class="op">(</span><span class="st">"slider"</span>, <span class="st">"Slider"</span>, <span class="fl">1</span>, <span class="fl">100</span>, <span class="fl">50</span><span class="op">)</span>, <span class="co"># Manually excluded below</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="checkboxInput.html">checkboxInput</a></span><span class="op">(</span><span class="st">"chk"</span>, <span class="st">"Checkbox"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    <span class="fu"><a href="bookmarkButton.html">bookmarkButton</a></span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span><span class="va">server</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="setBookmarkExclude.html">setBookmarkExclude</a></span><span class="op">(</span><span class="st">"slider"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span><span class="fu">enableBookmarking</span><span class="op">(</span><span class="st">"url"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="shinyApp.html">shinyApp</a></span><span class="op">(</span><span class="va">ui</span>, <span class="va">server</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Update the browser's location bar every time an input changes. This should</span></span></span>
+<span class="r-in"><span><span class="co"># not be used with enableBookmarking("server"), because that would create a</span></span></span>
+<span class="r-in"><span><span class="co"># new saved state on disk every time the user changes an input.</span></span></span>
+<span class="r-in"><span><span class="va">ui</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">req</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="fluidPage.html">fluidPage</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="textInput.html">textInput</a></span><span class="op">(</span><span class="st">"txt"</span>, <span class="st">"Text"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    <span class="fu"><a href="checkboxInput.html">checkboxInput</a></span><span class="op">(</span><span class="st">"chk"</span>, <span class="st">"Checkbox"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span><span class="va">server</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="observe.html">observe</a></span><span class="op">(</span><span class="op">{</span></span></span>
+<span class="r-in"><span>    <span class="co"># Trigger this observer every time an input changes</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="reactiveValuesToList.html">reactiveValuesToList</a></span><span class="op">(</span><span class="va">input</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="va">session</span><span class="op">$</span><span class="fu">doBookmark</span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="onBookmark.html">onBookmarked</a></span><span class="op">(</span><span class="kw">function</span><span class="op">(</span><span class="va">url</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="updateQueryString.html">updateQueryString</a></span><span class="op">(</span><span class="va">url</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span><span class="fu">enableBookmarking</span><span class="op">(</span><span class="st">"url"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="shinyApp.html">shinyApp</a></span><span class="op">(</span><span class="va">ui</span>, <span class="va">server</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Save/restore uploaded files</span></span></span>
+<span class="r-in"><span><span class="va">ui</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">request</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="fluidPage.html">fluidPage</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="sidebarLayout.html">sidebarLayout</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>      <span class="fu"><a href="sidebarLayout.html">sidebarPanel</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>        <span class="fu"><a href="fileInput.html">fileInput</a></span><span class="op">(</span><span class="st">"file1"</span>, <span class="st">"Choose CSV File"</span>, multiple <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
+<span class="r-in"><span>          accept <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>            <span class="st">"text/csv"</span>,</span></span>
+<span class="r-in"><span>            <span class="st">"text/comma-separated-values,text/plain"</span>,</span></span>
+<span class="r-in"><span>            <span class="st">".csv"</span></span></span>
+<span class="r-in"><span>          <span class="op">)</span></span></span>
+<span class="r-in"><span>        <span class="op">)</span>,</span></span>
+<span class="r-in"><span>        <span class="va">tags</span><span class="op">$</span><span class="fu">hr</span><span class="op">(</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>        <span class="fu"><a href="checkboxInput.html">checkboxInput</a></span><span class="op">(</span><span class="st">"header"</span>, <span class="st">"Header"</span>, <span class="cn">TRUE</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>        <span class="fu"><a href="bookmarkButton.html">bookmarkButton</a></span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span>      <span class="op">)</span>,</span></span>
+<span class="r-in"><span>      <span class="fu"><a href="sidebarLayout.html">mainPanel</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>        <span class="fu"><a href="renderTable.html">tableOutput</a></span><span class="op">(</span><span class="st">"contents"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>      <span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span><span class="va">server</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="va">output</span><span class="op">$</span><span class="va">contents</span> <span class="op">&lt;-</span> <span class="fu"><a href="renderTable.html">renderTable</a></span><span class="op">(</span><span class="op">{</span></span></span>
+<span class="r-in"><span>    <span class="va">inFile</span> <span class="op">&lt;-</span> <span class="va">input</span><span class="op">$</span><span class="va">file1</span></span></span>
+<span class="r-in"><span>    <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NULL.html" class="external-link">is.null</a></span><span class="op">(</span><span class="va">inFile</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span>      <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="cn">NULL</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>    <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">inFile</span><span class="op">)</span> <span class="op">==</span> <span class="fl">1</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>      <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="va">inFile</span><span class="op">$</span><span class="va">datapath</span>, header <span class="op">=</span> <span class="va">input</span><span class="op">$</span><span class="va">header</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="op">}</span> <span class="kw">else</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>      <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">"multiple files"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="op">}</span></span></span>
+<span class="r-in"><span>  <span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span><span class="fu">enableBookmarking</span><span class="op">(</span><span class="st">"server"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="shinyApp.html">shinyApp</a></span><span class="op">(</span><span class="va">ui</span>, <span class="va">server</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
 </code></pre></div>
     </div>
   </div>

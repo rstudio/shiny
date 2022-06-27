@@ -21,7 +21,7 @@ renderText() and renderPlot()).'><meta property="og:image" content="/logo.png"><
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">shiny</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.1.9003</span>
       </span>
     </div>
 
@@ -61,37 +61,37 @@ renderText() and renderPlot()).'><meta property="og:image" content="/logo.png"><
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">observeEvent</span><span class="op">(</span>
-  <span class="va">eventExpr</span>,
-  <span class="va">handlerExpr</span>,
-  event.env <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sys.parent.html" class="external-link">parent.frame</a></span><span class="op">(</span><span class="op">)</span>,
-  event.quoted <span class="op">=</span> <span class="cn">FALSE</span>,
-  handler.env <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sys.parent.html" class="external-link">parent.frame</a></span><span class="op">(</span><span class="op">)</span>,
-  handler.quoted <span class="op">=</span> <span class="cn">FALSE</span>,
-  <span class="va">...</span>,
-  label <span class="op">=</span> <span class="cn">NULL</span>,
-  suspended <span class="op">=</span> <span class="cn">FALSE</span>,
-  priority <span class="op">=</span> <span class="fl">0</span>,
-  domain <span class="op">=</span> <span class="fu"><a href="domains.html">getDefaultReactiveDomain</a></span><span class="op">(</span><span class="op">)</span>,
-  autoDestroy <span class="op">=</span> <span class="cn">TRUE</span>,
-  ignoreNULL <span class="op">=</span> <span class="cn">TRUE</span>,
-  ignoreInit <span class="op">=</span> <span class="cn">FALSE</span>,
-  once <span class="op">=</span> <span class="cn">FALSE</span>
-<span class="op">)</span>
-
-<span class="fu">eventReactive</span><span class="op">(</span>
-  <span class="va">eventExpr</span>,
-  <span class="va">valueExpr</span>,
-  event.env <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sys.parent.html" class="external-link">parent.frame</a></span><span class="op">(</span><span class="op">)</span>,
-  event.quoted <span class="op">=</span> <span class="cn">FALSE</span>,
-  value.env <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sys.parent.html" class="external-link">parent.frame</a></span><span class="op">(</span><span class="op">)</span>,
-  value.quoted <span class="op">=</span> <span class="cn">FALSE</span>,
-  <span class="va">...</span>,
-  label <span class="op">=</span> <span class="cn">NULL</span>,
-  domain <span class="op">=</span> <span class="fu"><a href="domains.html">getDefaultReactiveDomain</a></span><span class="op">(</span><span class="op">)</span>,
-  ignoreNULL <span class="op">=</span> <span class="cn">TRUE</span>,
-  ignoreInit <span class="op">=</span> <span class="cn">FALSE</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">observeEvent</span><span class="op">(</span></span>
+<span>  <span class="va">eventExpr</span>,</span>
+<span>  <span class="va">handlerExpr</span>,</span>
+<span>  event.env <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sys.parent.html" class="external-link">parent.frame</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  event.quoted <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  handler.env <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sys.parent.html" class="external-link">parent.frame</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  handler.quoted <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  <span class="va">...</span>,</span>
+<span>  label <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  suspended <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  priority <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  domain <span class="op">=</span> <span class="fu"><a href="domains.html">getDefaultReactiveDomain</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  autoDestroy <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  ignoreNULL <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  ignoreInit <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  once <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">eventReactive</span><span class="op">(</span></span>
+<span>  <span class="va">eventExpr</span>,</span>
+<span>  <span class="va">valueExpr</span>,</span>
+<span>  event.env <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sys.parent.html" class="external-link">parent.frame</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  event.quoted <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  value.env <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sys.parent.html" class="external-link">parent.frame</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  value.quoted <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  <span class="va">...</span>,</span>
+<span>  label <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  domain <span class="op">=</span> <span class="fu"><a href="domains.html">getDefaultReactiveDomain</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  ignoreNULL <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  ignoreInit <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -312,78 +312,78 @@ created (because  <code>ignoreInit = TRUE</code>). After that,
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="co">## Only run examples in interactive R sessions</span></span>
-<span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in"></span>
-<span class="r-in">  <span class="co">## App 1: Sample usage</span></span>
-<span class="r-in">  <span class="fu"><a href="shinyApp.html">shinyApp</a></span><span class="op">(</span></span>
-<span class="r-in">    ui <span class="op">=</span> <span class="fu"><a href="fluidPage.html">fluidPage</a></span><span class="op">(</span></span>
-<span class="r-in">      <span class="fu"><a href="column.html">column</a></span><span class="op">(</span><span class="fl">4</span>,</span>
-<span class="r-in">        <span class="fu"><a href="numericInput.html">numericInput</a></span><span class="op">(</span><span class="st">"x"</span>, <span class="st">"Value"</span>, <span class="fl">5</span><span class="op">)</span>,</span>
-<span class="r-in">        <span class="fu"><a href="https://rdrr.io/pkg/htmltools/man/builder.html" class="external-link">br</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span class="r-in">        <span class="fu"><a href="actionButton.html">actionButton</a></span><span class="op">(</span><span class="st">"button"</span>, <span class="st">"Show"</span><span class="op">)</span></span>
-<span class="r-in">      <span class="op">)</span>,</span>
-<span class="r-in">      <span class="fu"><a href="column.html">column</a></span><span class="op">(</span><span class="fl">8</span>, <span class="fu"><a href="renderTable.html">tableOutput</a></span><span class="op">(</span><span class="st">"table"</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in">    <span class="op">)</span>,</span>
-<span class="r-in">    server <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">      <span class="co"># Take an action every time button is pressed;</span></span>
-<span class="r-in">      <span class="co"># here, we just print a message to the console</span></span>
-<span class="r-in">      <span class="fu">observeEvent</span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">button</span>, <span class="op">{</span></span>
-<span class="r-in">        <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Showing"</span>, <span class="va">input</span><span class="op">$</span><span class="va">x</span>, <span class="st">"rows\n"</span><span class="op">)</span></span>
-<span class="r-in">      <span class="op">}</span><span class="op">)</span></span>
-<span class="r-in">      <span class="co"># The observeEvent() above is equivalent to:</span></span>
-<span class="r-in">      <span class="co"># observe({</span></span>
-<span class="r-in">      <span class="co">#    cat("Showing", input$x, "rows\n")</span></span>
-<span class="r-in">      <span class="co">#   }) %&gt;%</span></span>
-<span class="r-in">      <span class="co">#   bindEvent(input$button)</span></span>
-<span class="r-in"></span>
-<span class="r-in">      <span class="co"># Take a reactive dependency on input$button, but</span></span>
-<span class="r-in">      <span class="co"># not on any of the stuff inside the function</span></span>
-<span class="r-in">      <span class="va">df</span> <span class="op">&lt;-</span> <span class="fu">eventReactive</span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">button</span>, <span class="op">{</span></span>
-<span class="r-in">        <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">cars</span>, <span class="va">input</span><span class="op">$</span><span class="va">x</span><span class="op">)</span></span>
-<span class="r-in">      <span class="op">}</span><span class="op">)</span></span>
-<span class="r-in">      <span class="va">output</span><span class="op">$</span><span class="va">table</span> <span class="op">&lt;-</span> <span class="fu"><a href="renderTable.html">renderTable</a></span><span class="op">(</span><span class="op">{</span></span>
-<span class="r-in">        <span class="fu"><a href="https://rdrr.io/r/stats/Fdist.html" class="external-link">df</a></span><span class="op">(</span><span class="op">)</span></span>
-<span class="r-in">      <span class="op">}</span><span class="op">)</span></span>
-<span class="r-in">    <span class="op">}</span></span>
-<span class="r-in">  <span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in">  <span class="co">## App 2: Using `once`</span></span>
-<span class="r-in">  <span class="fu"><a href="shinyApp.html">shinyApp</a></span><span class="op">(</span></span>
-<span class="r-in">    ui <span class="op">=</span> <span class="fu"><a href="bootstrapPage.html">basicPage</a></span><span class="op">(</span> <span class="fu"><a href="actionButton.html">actionButton</a></span><span class="op">(</span><span class="st">"go"</span>, <span class="st">"Go"</span><span class="op">)</span><span class="op">)</span>,</span>
-<span class="r-in">    server <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">      <span class="fu">observeEvent</span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">go</span>, <span class="op">{</span></span>
-<span class="r-in">        <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"This will only be printed once; all"</span>,</span>
-<span class="r-in">              <span class="st">"subsequent button clicks won't do anything"</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in">      <span class="op">}</span>, once <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span class="r-in">      <span class="co"># The observeEvent() above is equivalent to:</span></span>
-<span class="r-in">      <span class="co"># observe({</span></span>
-<span class="r-in">      <span class="co">#   print(paste("This will only be printed once; all",</span></span>
-<span class="r-in">      <span class="co">#         "subsequent button clicks won't do anything"))</span></span>
-<span class="r-in">      <span class="co">#   }) %&gt;%</span></span>
-<span class="r-in">      <span class="co">#   bindEvent(input$go, once = TRUE)</span></span>
-<span class="r-in">    <span class="op">}</span></span>
-<span class="r-in">  <span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in">  <span class="co">## App 3: Using `ignoreInit` and `once`</span></span>
-<span class="r-in">  <span class="fu"><a href="shinyApp.html">shinyApp</a></span><span class="op">(</span></span>
-<span class="r-in">    ui <span class="op">=</span> <span class="fu"><a href="bootstrapPage.html">basicPage</a></span><span class="op">(</span><span class="fu"><a href="actionButton.html">actionButton</a></span><span class="op">(</span><span class="st">"go"</span>, <span class="st">"Go"</span><span class="op">)</span><span class="op">)</span>,</span>
-<span class="r-in">    server <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">      <span class="fu">observeEvent</span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">go</span>, <span class="op">{</span></span>
-<span class="r-in">        <span class="fu"><a href="insertUI.html">insertUI</a></span><span class="op">(</span><span class="st">"#go"</span>, <span class="st">"afterEnd"</span>,</span>
-<span class="r-in">                 <span class="fu"><a href="actionButton.html">actionButton</a></span><span class="op">(</span><span class="st">"dynamic"</span>, <span class="st">"click to remove"</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in">        <span class="co"># set up an observer that depends on the dynamic</span></span>
-<span class="r-in">        <span class="co"># input, so that it doesn't run when the input is</span></span>
-<span class="r-in">        <span class="co"># created, and only runs once after that (since</span></span>
-<span class="r-in">        <span class="co"># the side effect is remove the input from the DOM)</span></span>
-<span class="r-in">        <span class="fu">observeEvent</span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">dynamic</span>, <span class="op">{</span></span>
-<span class="r-in">          <span class="fu"><a href="insertUI.html">removeUI</a></span><span class="op">(</span><span class="st">"#dynamic"</span><span class="op">)</span></span>
-<span class="r-in">        <span class="op">}</span>, ignoreInit <span class="op">=</span> <span class="cn">TRUE</span>, once <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span class="r-in">      <span class="op">}</span><span class="op">)</span></span>
-<span class="r-in">    <span class="op">}</span></span>
-<span class="r-in">  <span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co">## Only run examples in interactive R sessions</span></span></span>
+<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>  <span class="co">## App 1: Sample usage</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="shinyApp.html">shinyApp</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>    ui <span class="op">=</span> <span class="fu"><a href="fluidPage.html">fluidPage</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>      <span class="fu"><a href="column.html">column</a></span><span class="op">(</span><span class="fl">4</span>,</span></span>
+<span class="r-in"><span>        <span class="fu"><a href="numericInput.html">numericInput</a></span><span class="op">(</span><span class="st">"x"</span>, <span class="st">"Value"</span>, <span class="fl">5</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>        <span class="fu"><a href="https://rdrr.io/pkg/htmltools/man/builder.html" class="external-link">br</a></span><span class="op">(</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>        <span class="fu"><a href="actionButton.html">actionButton</a></span><span class="op">(</span><span class="st">"button"</span>, <span class="st">"Show"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>      <span class="op">)</span>,</span></span>
+<span class="r-in"><span>      <span class="fu"><a href="column.html">column</a></span><span class="op">(</span><span class="fl">8</span>, <span class="fu"><a href="renderTable.html">tableOutput</a></span><span class="op">(</span><span class="st">"table"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="op">)</span>,</span></span>
+<span class="r-in"><span>    server <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>      <span class="co"># Take an action every time button is pressed;</span></span></span>
+<span class="r-in"><span>      <span class="co"># here, we just print a message to the console</span></span></span>
+<span class="r-in"><span>      <span class="fu">observeEvent</span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">button</span>, <span class="op">{</span></span></span>
+<span class="r-in"><span>        <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Showing"</span>, <span class="va">input</span><span class="op">$</span><span class="va">x</span>, <span class="st">"rows\n"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>      <span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span>      <span class="co"># The observeEvent() above is equivalent to:</span></span></span>
+<span class="r-in"><span>      <span class="co"># observe({</span></span></span>
+<span class="r-in"><span>      <span class="co">#    cat("Showing", input$x, "rows\n")</span></span></span>
+<span class="r-in"><span>      <span class="co">#   }) %&gt;%</span></span></span>
+<span class="r-in"><span>      <span class="co">#   bindEvent(input$button)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>      <span class="co"># Take a reactive dependency on input$button, but</span></span></span>
+<span class="r-in"><span>      <span class="co"># not on any of the stuff inside the function</span></span></span>
+<span class="r-in"><span>      <span class="va">df</span> <span class="op">&lt;-</span> <span class="fu">eventReactive</span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">button</span>, <span class="op">{</span></span></span>
+<span class="r-in"><span>        <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">cars</span>, <span class="va">input</span><span class="op">$</span><span class="va">x</span><span class="op">)</span></span></span>
+<span class="r-in"><span>      <span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span>      <span class="va">output</span><span class="op">$</span><span class="va">table</span> <span class="op">&lt;-</span> <span class="fu"><a href="renderTable.html">renderTable</a></span><span class="op">(</span><span class="op">{</span></span></span>
+<span class="r-in"><span>        <span class="fu"><a href="https://rdrr.io/r/stats/Fdist.html" class="external-link">df</a></span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span>      <span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="op">}</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>  <span class="co">## App 2: Using `once`</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="shinyApp.html">shinyApp</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>    ui <span class="op">=</span> <span class="fu"><a href="bootstrapPage.html">basicPage</a></span><span class="op">(</span> <span class="fu"><a href="actionButton.html">actionButton</a></span><span class="op">(</span><span class="st">"go"</span>, <span class="st">"Go"</span><span class="op">)</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    server <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>      <span class="fu">observeEvent</span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">go</span>, <span class="op">{</span></span></span>
+<span class="r-in"><span>        <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"This will only be printed once; all"</span>,</span></span>
+<span class="r-in"><span>              <span class="st">"subsequent button clicks won't do anything"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span>      <span class="op">}</span>, once <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span>      <span class="co"># The observeEvent() above is equivalent to:</span></span></span>
+<span class="r-in"><span>      <span class="co"># observe({</span></span></span>
+<span class="r-in"><span>      <span class="co">#   print(paste("This will only be printed once; all",</span></span></span>
+<span class="r-in"><span>      <span class="co">#         "subsequent button clicks won't do anything"))</span></span></span>
+<span class="r-in"><span>      <span class="co">#   }) %&gt;%</span></span></span>
+<span class="r-in"><span>      <span class="co">#   bindEvent(input$go, once = TRUE)</span></span></span>
+<span class="r-in"><span>    <span class="op">}</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>  <span class="co">## App 3: Using `ignoreInit` and `once`</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="shinyApp.html">shinyApp</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>    ui <span class="op">=</span> <span class="fu"><a href="bootstrapPage.html">basicPage</a></span><span class="op">(</span><span class="fu"><a href="actionButton.html">actionButton</a></span><span class="op">(</span><span class="st">"go"</span>, <span class="st">"Go"</span><span class="op">)</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    server <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>      <span class="fu">observeEvent</span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">go</span>, <span class="op">{</span></span></span>
+<span class="r-in"><span>        <span class="fu"><a href="insertUI.html">insertUI</a></span><span class="op">(</span><span class="st">"#go"</span>, <span class="st">"afterEnd"</span>,</span></span>
+<span class="r-in"><span>                 <span class="fu"><a href="actionButton.html">actionButton</a></span><span class="op">(</span><span class="st">"dynamic"</span>, <span class="st">"click to remove"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>        <span class="co"># set up an observer that depends on the dynamic</span></span></span>
+<span class="r-in"><span>        <span class="co"># input, so that it doesn't run when the input is</span></span></span>
+<span class="r-in"><span>        <span class="co"># created, and only runs once after that (since</span></span></span>
+<span class="r-in"><span>        <span class="co"># the side effect is remove the input from the DOM)</span></span></span>
+<span class="r-in"><span>        <span class="fu">observeEvent</span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">dynamic</span>, <span class="op">{</span></span></span>
+<span class="r-in"><span>          <span class="fu"><a href="insertUI.html">removeUI</a></span><span class="op">(</span><span class="st">"#dynamic"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>        <span class="op">}</span>, ignoreInit <span class="op">=</span> <span class="cn">TRUE</span>, once <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span>      <span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="op">}</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
 </code></pre></div>
     </div>
   </div>

@@ -21,7 +21,7 @@ browsers can be assumed."><meta property="og:image" content="/logo.png"><!-- mat
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">shiny</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.1.9003</span>
       </span>
     </div>
 
@@ -61,9 +61,9 @@ browsers can be assumed.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">fillRow</span><span class="op">(</span><span class="va">...</span>, flex <span class="op">=</span> <span class="fl">1</span>, width <span class="op">=</span> <span class="st">"100%"</span>, height <span class="op">=</span> <span class="st">"100%"</span><span class="op">)</span>
-
-<span class="fu">fillCol</span><span class="op">(</span><span class="va">...</span>, flex <span class="op">=</span> <span class="fl">1</span>, width <span class="op">=</span> <span class="st">"100%"</span>, height <span class="op">=</span> <span class="st">"100%"</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">fillRow</span><span class="op">(</span><span class="va">...</span>, flex <span class="op">=</span> <span class="fl">1</span>, width <span class="op">=</span> <span class="st">"100%"</span>, height <span class="op">=</span> <span class="st">"100%"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">fillCol</span><span class="op">(</span><span class="va">...</span>, flex <span class="op">=</span> <span class="fl">1</span>, width <span class="op">=</span> <span class="st">"100%"</span>, height <span class="op">=</span> <span class="st">"100%"</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -110,26 +110,26 @@ the size of their contents, as is usually the case in HTML).</p>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="co"># Only run this example in interactive R sessions.</span></span>
-<span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="va">ui</span> <span class="op">&lt;-</span> <span class="fu"><a href="fillPage.html">fillPage</a></span><span class="op">(</span><span class="fu">fillRow</span><span class="op">(</span></span>
-<span class="r-in">  <span class="fu"><a href="plotOutput.html">plotOutput</a></span><span class="op">(</span><span class="st">"plotLeft"</span>, height <span class="op">=</span> <span class="st">"100%"</span><span class="op">)</span>,</span>
-<span class="r-in">  <span class="fu">fillCol</span><span class="op">(</span></span>
-<span class="r-in">    <span class="fu"><a href="plotOutput.html">plotOutput</a></span><span class="op">(</span><span class="st">"plotTopRight"</span>, height <span class="op">=</span> <span class="st">"100%"</span><span class="op">)</span>,</span>
-<span class="r-in">    <span class="fu"><a href="plotOutput.html">plotOutput</a></span><span class="op">(</span><span class="st">"plotBottomRight"</span>, height <span class="op">=</span> <span class="st">"100%"</span><span class="op">)</span></span>
-<span class="r-in">  <span class="op">)</span></span>
-<span class="r-in"><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="va">server</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">  <span class="va">output</span><span class="op">$</span><span class="va">plotLeft</span> <span class="op">&lt;-</span> <span class="fu"><a href="renderPlot.html">renderPlot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">cars</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in">  <span class="va">output</span><span class="op">$</span><span class="va">plotTopRight</span> <span class="op">&lt;-</span> <span class="fu"><a href="renderPlot.html">renderPlot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">pressure</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in">  <span class="va">output</span><span class="op">$</span><span class="va">plotBottomRight</span> <span class="op">&lt;-</span> <span class="fu"><a href="renderPlot.html">renderPlot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">AirPassengers</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu"><a href="shinyApp.html">shinyApp</a></span><span class="op">(</span><span class="va">ui</span>, <span class="va">server</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="op">}</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Only run this example in interactive R sessions.</span></span></span>
+<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">ui</span> <span class="op">&lt;-</span> <span class="fu"><a href="fillPage.html">fillPage</a></span><span class="op">(</span><span class="fu">fillRow</span><span class="op">(</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="plotOutput.html">plotOutput</a></span><span class="op">(</span><span class="st">"plotLeft"</span>, height <span class="op">=</span> <span class="st">"100%"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  <span class="fu">fillCol</span><span class="op">(</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="plotOutput.html">plotOutput</a></span><span class="op">(</span><span class="st">"plotTopRight"</span>, height <span class="op">=</span> <span class="st">"100%"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    <span class="fu"><a href="plotOutput.html">plotOutput</a></span><span class="op">(</span><span class="st">"plotBottomRight"</span>, height <span class="op">=</span> <span class="st">"100%"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">server</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="va">output</span><span class="op">$</span><span class="va">plotLeft</span> <span class="op">&lt;-</span> <span class="fu"><a href="renderPlot.html">renderPlot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">cars</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="va">output</span><span class="op">$</span><span class="va">plotTopRight</span> <span class="op">&lt;-</span> <span class="fu"><a href="renderPlot.html">renderPlot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">pressure</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="va">output</span><span class="op">$</span><span class="va">plotBottomRight</span> <span class="op">&lt;-</span> <span class="fu"><a href="renderPlot.html">renderPlot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">AirPassengers</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="shinyApp.html">shinyApp</a></span><span class="op">(</span><span class="va">ui</span>, <span class="va">server</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
 </code></pre></div>
     </div>
   </div>

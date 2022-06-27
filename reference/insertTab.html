@@ -19,7 +19,7 @@ navlistPanel() or navbarPage()."><meta property="og:image" content="/logo.png"><
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">shiny</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.1.9003</span>
       </span>
     </div>
 
@@ -57,32 +57,32 @@ navlistPanel() or navbarPage()."><meta property="og:image" content="/logo.png"><
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">insertTab</span><span class="op">(</span>
-  <span class="va">inputId</span>,
-  <span class="va">tab</span>,
-  target <span class="op">=</span> <span class="cn">NULL</span>,
-  position <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"after"</span>, <span class="st">"before"</span><span class="op">)</span>,
-  select <span class="op">=</span> <span class="cn">FALSE</span>,
-  session <span class="op">=</span> <span class="fu"><a href="domains.html">getDefaultReactiveDomain</a></span><span class="op">(</span><span class="op">)</span>
-<span class="op">)</span>
-
-<span class="fu">prependTab</span><span class="op">(</span>
-  <span class="va">inputId</span>,
-  <span class="va">tab</span>,
-  select <span class="op">=</span> <span class="cn">FALSE</span>,
-  menuName <span class="op">=</span> <span class="cn">NULL</span>,
-  session <span class="op">=</span> <span class="fu"><a href="domains.html">getDefaultReactiveDomain</a></span><span class="op">(</span><span class="op">)</span>
-<span class="op">)</span>
-
-<span class="fu">appendTab</span><span class="op">(</span>
-  <span class="va">inputId</span>,
-  <span class="va">tab</span>,
-  select <span class="op">=</span> <span class="cn">FALSE</span>,
-  menuName <span class="op">=</span> <span class="cn">NULL</span>,
-  session <span class="op">=</span> <span class="fu"><a href="domains.html">getDefaultReactiveDomain</a></span><span class="op">(</span><span class="op">)</span>
-<span class="op">)</span>
-
-<span class="fu">removeTab</span><span class="op">(</span><span class="va">inputId</span>, <span class="va">target</span>, session <span class="op">=</span> <span class="fu"><a href="domains.html">getDefaultReactiveDomain</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">insertTab</span><span class="op">(</span></span>
+<span>  <span class="va">inputId</span>,</span>
+<span>  <span class="va">tab</span>,</span>
+<span>  target <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  position <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"after"</span>, <span class="st">"before"</span><span class="op">)</span>,</span>
+<span>  select <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  session <span class="op">=</span> <span class="fu"><a href="domains.html">getDefaultReactiveDomain</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">prependTab</span><span class="op">(</span></span>
+<span>  <span class="va">inputId</span>,</span>
+<span>  <span class="va">tab</span>,</span>
+<span>  select <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  menuName <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  session <span class="op">=</span> <span class="fu"><a href="domains.html">getDefaultReactiveDomain</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">appendTab</span><span class="op">(</span></span>
+<span>  <span class="va">inputId</span>,</span>
+<span>  <span class="va">tab</span>,</span>
+<span>  select <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  menuName <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  session <span class="op">=</span> <span class="fu"><a href="domains.html">getDefaultReactiveDomain</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">removeTab</span><span class="op">(</span><span class="va">inputId</span>, <span class="va">target</span>, session <span class="op">=</span> <span class="fu"><a href="domains.html">getDefaultReactiveDomain</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -154,77 +154,77 @@ this is equal to the value of the <code>title</code> argument).</p>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="co">## Only run this example in interactive R sessions</span></span>
-<span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># example app for inserting/removing a tab</span></span>
-<span class="r-in"><span class="va">ui</span> <span class="op">&lt;-</span> <span class="fu"><a href="fluidPage.html">fluidPage</a></span><span class="op">(</span></span>
-<span class="r-in">  <span class="fu"><a href="sidebarLayout.html">sidebarLayout</a></span><span class="op">(</span></span>
-<span class="r-in">    <span class="fu"><a href="sidebarLayout.html">sidebarPanel</a></span><span class="op">(</span></span>
-<span class="r-in">      <span class="fu"><a href="actionButton.html">actionButton</a></span><span class="op">(</span><span class="st">"add"</span>, <span class="st">"Add 'Dynamic' tab"</span><span class="op">)</span>,</span>
-<span class="r-in">      <span class="fu"><a href="actionButton.html">actionButton</a></span><span class="op">(</span><span class="st">"remove"</span>, <span class="st">"Remove 'Foo' tab"</span><span class="op">)</span></span>
-<span class="r-in">    <span class="op">)</span>,</span>
-<span class="r-in">    <span class="fu"><a href="sidebarLayout.html">mainPanel</a></span><span class="op">(</span></span>
-<span class="r-in">      <span class="fu"><a href="tabsetPanel.html">tabsetPanel</a></span><span class="op">(</span>id <span class="op">=</span> <span class="st">"tabs"</span>,</span>
-<span class="r-in">        <span class="fu"><a href="tabPanel.html">tabPanel</a></span><span class="op">(</span><span class="st">"Hello"</span>, <span class="st">"This is the hello tab"</span><span class="op">)</span>,</span>
-<span class="r-in">        <span class="fu"><a href="tabPanel.html">tabPanel</a></span><span class="op">(</span><span class="st">"Foo"</span>, <span class="st">"This is the foo tab"</span><span class="op">)</span>,</span>
-<span class="r-in">        <span class="fu"><a href="tabPanel.html">tabPanel</a></span><span class="op">(</span><span class="st">"Bar"</span>, <span class="st">"This is the bar tab"</span><span class="op">)</span></span>
-<span class="r-in">      <span class="op">)</span></span>
-<span class="r-in">    <span class="op">)</span></span>
-<span class="r-in">  <span class="op">)</span></span>
-<span class="r-in"><span class="op">)</span></span>
-<span class="r-in"><span class="va">server</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">  <span class="fu"><a href="observeEvent.html">observeEvent</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">add</span>, <span class="op">{</span></span>
-<span class="r-in">    <span class="fu">insertTab</span><span class="op">(</span>inputId <span class="op">=</span> <span class="st">"tabs"</span>,</span>
-<span class="r-in">      <span class="fu"><a href="tabPanel.html">tabPanel</a></span><span class="op">(</span><span class="st">"Dynamic"</span>, <span class="st">"This a dynamically-added tab"</span><span class="op">)</span>,</span>
-<span class="r-in">      target <span class="op">=</span> <span class="st">"Bar"</span></span>
-<span class="r-in">    <span class="op">)</span></span>
-<span class="r-in">  <span class="op">}</span><span class="op">)</span></span>
-<span class="r-in">  <span class="fu"><a href="observeEvent.html">observeEvent</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">remove</span>, <span class="op">{</span></span>
-<span class="r-in">    <span class="fu">removeTab</span><span class="op">(</span>inputId <span class="op">=</span> <span class="st">"tabs"</span>, target <span class="op">=</span> <span class="st">"Foo"</span><span class="op">)</span></span>
-<span class="r-in">  <span class="op">}</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu"><a href="shinyApp.html">shinyApp</a></span><span class="op">(</span><span class="va">ui</span>, <span class="va">server</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># example app for prepending/appending a navbarMenu</span></span>
-<span class="r-in"><span class="va">ui</span> <span class="op">&lt;-</span> <span class="fu"><a href="navbarPage.html">navbarPage</a></span><span class="op">(</span><span class="st">"Navbar page"</span>, id <span class="op">=</span> <span class="st">"tabs"</span>,</span>
-<span class="r-in">  <span class="fu"><a href="tabPanel.html">tabPanel</a></span><span class="op">(</span><span class="st">"Home"</span>,</span>
-<span class="r-in">    <span class="fu"><a href="actionButton.html">actionButton</a></span><span class="op">(</span><span class="st">"prepend"</span>, <span class="st">"Prepend a navbarMenu"</span><span class="op">)</span>,</span>
-<span class="r-in">    <span class="fu"><a href="actionButton.html">actionButton</a></span><span class="op">(</span><span class="st">"append"</span>, <span class="st">"Append a navbarMenu"</span><span class="op">)</span></span>
-<span class="r-in">  <span class="op">)</span></span>
-<span class="r-in"><span class="op">)</span></span>
-<span class="r-in"><span class="va">server</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">  <span class="fu"><a href="observeEvent.html">observeEvent</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">prepend</span>, <span class="op">{</span></span>
-<span class="r-in">    <span class="va">id</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"Dropdown"</span>, <span class="va">input</span><span class="op">$</span><span class="va">prepend</span>, <span class="st">"p"</span><span class="op">)</span></span>
-<span class="r-in">    <span class="fu">prependTab</span><span class="op">(</span>inputId <span class="op">=</span> <span class="st">"tabs"</span>,</span>
-<span class="r-in">      <span class="fu"><a href="navbarPage.html">navbarMenu</a></span><span class="op">(</span><span class="va">id</span>,</span>
-<span class="r-in">        <span class="fu"><a href="tabPanel.html">tabPanel</a></span><span class="op">(</span><span class="st">"Drop1"</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"Drop1 page from"</span>, <span class="va">id</span><span class="op">)</span><span class="op">)</span>,</span>
-<span class="r-in">        <span class="fu"><a href="tabPanel.html">tabPanel</a></span><span class="op">(</span><span class="st">"Drop2"</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"Drop2 page from"</span>, <span class="va">id</span><span class="op">)</span><span class="op">)</span>,</span>
-<span class="r-in">        <span class="st">"------"</span>,</span>
-<span class="r-in">        <span class="st">"Header"</span>,</span>
-<span class="r-in">        <span class="fu"><a href="tabPanel.html">tabPanel</a></span><span class="op">(</span><span class="st">"Drop3"</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"Drop3 page from"</span>, <span class="va">id</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in">      <span class="op">)</span></span>
-<span class="r-in">    <span class="op">)</span></span>
-<span class="r-in">  <span class="op">}</span><span class="op">)</span></span>
-<span class="r-in">  <span class="fu"><a href="observeEvent.html">observeEvent</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">append</span>, <span class="op">{</span></span>
-<span class="r-in">    <span class="va">id</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"Dropdown"</span>, <span class="va">input</span><span class="op">$</span><span class="va">append</span>, <span class="st">"a"</span><span class="op">)</span></span>
-<span class="r-in">    <span class="fu">appendTab</span><span class="op">(</span>inputId <span class="op">=</span> <span class="st">"tabs"</span>,</span>
-<span class="r-in">      <span class="fu"><a href="navbarPage.html">navbarMenu</a></span><span class="op">(</span><span class="va">id</span>,</span>
-<span class="r-in">        <span class="fu"><a href="tabPanel.html">tabPanel</a></span><span class="op">(</span><span class="st">"Drop1"</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"Drop1 page from"</span>, <span class="va">id</span><span class="op">)</span><span class="op">)</span>,</span>
-<span class="r-in">        <span class="fu"><a href="tabPanel.html">tabPanel</a></span><span class="op">(</span><span class="st">"Drop2"</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"Drop2 page from"</span>, <span class="va">id</span><span class="op">)</span><span class="op">)</span>,</span>
-<span class="r-in">        <span class="st">"------"</span>,</span>
-<span class="r-in">        <span class="st">"Header"</span>,</span>
-<span class="r-in">        <span class="fu"><a href="tabPanel.html">tabPanel</a></span><span class="op">(</span><span class="st">"Drop3"</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"Drop3 page from"</span>, <span class="va">id</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in">      <span class="op">)</span></span>
-<span class="r-in">    <span class="op">)</span></span>
-<span class="r-in">  <span class="op">}</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu"><a href="shinyApp.html">shinyApp</a></span><span class="op">(</span><span class="va">ui</span>, <span class="va">server</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="op">}</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co">## Only run this example in interactive R sessions</span></span></span>
+<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># example app for inserting/removing a tab</span></span></span>
+<span class="r-in"><span><span class="va">ui</span> <span class="op">&lt;-</span> <span class="fu"><a href="fluidPage.html">fluidPage</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="sidebarLayout.html">sidebarLayout</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="sidebarLayout.html">sidebarPanel</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>      <span class="fu"><a href="actionButton.html">actionButton</a></span><span class="op">(</span><span class="st">"add"</span>, <span class="st">"Add 'Dynamic' tab"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>      <span class="fu"><a href="actionButton.html">actionButton</a></span><span class="op">(</span><span class="st">"remove"</span>, <span class="st">"Remove 'Foo' tab"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="op">)</span>,</span></span>
+<span class="r-in"><span>    <span class="fu"><a href="sidebarLayout.html">mainPanel</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>      <span class="fu"><a href="tabsetPanel.html">tabsetPanel</a></span><span class="op">(</span>id <span class="op">=</span> <span class="st">"tabs"</span>,</span></span>
+<span class="r-in"><span>        <span class="fu"><a href="tabPanel.html">tabPanel</a></span><span class="op">(</span><span class="st">"Hello"</span>, <span class="st">"This is the hello tab"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>        <span class="fu"><a href="tabPanel.html">tabPanel</a></span><span class="op">(</span><span class="st">"Foo"</span>, <span class="st">"This is the foo tab"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>        <span class="fu"><a href="tabPanel.html">tabPanel</a></span><span class="op">(</span><span class="st">"Bar"</span>, <span class="st">"This is the bar tab"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>      <span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">server</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="observeEvent.html">observeEvent</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">add</span>, <span class="op">{</span></span></span>
+<span class="r-in"><span>    <span class="fu">insertTab</span><span class="op">(</span>inputId <span class="op">=</span> <span class="st">"tabs"</span>,</span></span>
+<span class="r-in"><span>      <span class="fu"><a href="tabPanel.html">tabPanel</a></span><span class="op">(</span><span class="st">"Dynamic"</span>, <span class="st">"This a dynamically-added tab"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>      target <span class="op">=</span> <span class="st">"Bar"</span></span></span>
+<span class="r-in"><span>    <span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="observeEvent.html">observeEvent</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">remove</span>, <span class="op">{</span></span></span>
+<span class="r-in"><span>    <span class="fu">removeTab</span><span class="op">(</span>inputId <span class="op">=</span> <span class="st">"tabs"</span>, target <span class="op">=</span> <span class="st">"Foo"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="shinyApp.html">shinyApp</a></span><span class="op">(</span><span class="va">ui</span>, <span class="va">server</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># example app for prepending/appending a navbarMenu</span></span></span>
+<span class="r-in"><span><span class="va">ui</span> <span class="op">&lt;-</span> <span class="fu"><a href="navbarPage.html">navbarPage</a></span><span class="op">(</span><span class="st">"Navbar page"</span>, id <span class="op">=</span> <span class="st">"tabs"</span>,</span></span>
+<span class="r-in"><span>  <span class="fu"><a href="tabPanel.html">tabPanel</a></span><span class="op">(</span><span class="st">"Home"</span>,</span></span>
+<span class="r-in"><span>    <span class="fu"><a href="actionButton.html">actionButton</a></span><span class="op">(</span><span class="st">"prepend"</span>, <span class="st">"Prepend a navbarMenu"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    <span class="fu"><a href="actionButton.html">actionButton</a></span><span class="op">(</span><span class="st">"append"</span>, <span class="st">"Append a navbarMenu"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">server</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="observeEvent.html">observeEvent</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">prepend</span>, <span class="op">{</span></span></span>
+<span class="r-in"><span>    <span class="va">id</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"Dropdown"</span>, <span class="va">input</span><span class="op">$</span><span class="va">prepend</span>, <span class="st">"p"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="fu">prependTab</span><span class="op">(</span>inputId <span class="op">=</span> <span class="st">"tabs"</span>,</span></span>
+<span class="r-in"><span>      <span class="fu"><a href="navbarPage.html">navbarMenu</a></span><span class="op">(</span><span class="va">id</span>,</span></span>
+<span class="r-in"><span>        <span class="fu"><a href="tabPanel.html">tabPanel</a></span><span class="op">(</span><span class="st">"Drop1"</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"Drop1 page from"</span>, <span class="va">id</span><span class="op">)</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>        <span class="fu"><a href="tabPanel.html">tabPanel</a></span><span class="op">(</span><span class="st">"Drop2"</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"Drop2 page from"</span>, <span class="va">id</span><span class="op">)</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>        <span class="st">"------"</span>,</span></span>
+<span class="r-in"><span>        <span class="st">"Header"</span>,</span></span>
+<span class="r-in"><span>        <span class="fu"><a href="tabPanel.html">tabPanel</a></span><span class="op">(</span><span class="st">"Drop3"</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"Drop3 page from"</span>, <span class="va">id</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span>      <span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="observeEvent.html">observeEvent</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">append</span>, <span class="op">{</span></span></span>
+<span class="r-in"><span>    <span class="va">id</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"Dropdown"</span>, <span class="va">input</span><span class="op">$</span><span class="va">append</span>, <span class="st">"a"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="fu">appendTab</span><span class="op">(</span>inputId <span class="op">=</span> <span class="st">"tabs"</span>,</span></span>
+<span class="r-in"><span>      <span class="fu"><a href="navbarPage.html">navbarMenu</a></span><span class="op">(</span><span class="va">id</span>,</span></span>
+<span class="r-in"><span>        <span class="fu"><a href="tabPanel.html">tabPanel</a></span><span class="op">(</span><span class="st">"Drop1"</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"Drop1 page from"</span>, <span class="va">id</span><span class="op">)</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>        <span class="fu"><a href="tabPanel.html">tabPanel</a></span><span class="op">(</span><span class="st">"Drop2"</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"Drop2 page from"</span>, <span class="va">id</span><span class="op">)</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>        <span class="st">"------"</span>,</span></span>
+<span class="r-in"><span>        <span class="st">"Header"</span>,</span></span>
+<span class="r-in"><span>        <span class="fu"><a href="tabPanel.html">tabPanel</a></span><span class="op">(</span><span class="st">"Drop3"</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"Drop3 page from"</span>, <span class="va">id</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span>      <span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="shinyApp.html">shinyApp</a></span><span class="op">(</span><span class="va">ui</span>, <span class="va">server</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
 </code></pre></div>
     </div>
   </div>

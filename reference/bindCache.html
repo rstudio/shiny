@@ -23,7 +23,7 @@ bindCache() to dramatically improve performance when used correctly."><meta prop
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">shiny</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.1.9003</span>
       </span>
     </div>
 
@@ -65,7 +65,7 @@ cache) and they can be shared across user sessions. This allows
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">bindCache</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span>, cache <span class="op">=</span> <span class="st">"app"</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">bindCache</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span>, cache <span class="op">=</span> <span class="st">"app"</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -373,98 +373,98 @@ See <code><a href="sizeGrowthRatio.html">sizeGrowthRatio()</a></code> for more i
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in"><span class="va">rc</span> <span class="op">&lt;-</span> <span class="fu">bindCache</span><span class="op">(</span></span>
-<span class="r-in">  x <span class="op">=</span> <span class="fu"><a href="reactive.html">reactive</a></span><span class="op">(</span><span class="op">{</span></span>
-<span class="r-in">    <span class="fu"><a href="https://rdrr.io/r/base/Sys.sleep.html" class="external-link">Sys.sleep</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span>   <span class="co"># Pretend this is expensive</span></span>
-<span class="r-in">    <span class="va">input</span><span class="op">$</span><span class="va">x</span> <span class="op">*</span> <span class="fl">100</span></span>
-<span class="r-in">  <span class="op">}</span><span class="op">)</span>,</span>
-<span class="r-in">  <span class="va">input</span><span class="op">$</span><span class="va">x</span></span>
-<span class="r-in"><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Can make it prettier with the %&gt;% operator</span></span>
-<span class="r-in"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://magrittr.tidyverse.org" class="external-link">magrittr</a></span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="va">rc</span> <span class="op">&lt;-</span> <span class="fu"><a href="reactive.html">reactive</a></span><span class="op">(</span><span class="op">{</span></span>
-<span class="r-in">  <span class="fu"><a href="https://rdrr.io/r/base/Sys.sleep.html" class="external-link">Sys.sleep</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span></span>
-<span class="r-in">  <span class="va">input</span><span class="op">$</span><span class="va">x</span> <span class="op">*</span> <span class="fl">100</span></span>
-<span class="r-in"><span class="op">}</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span class="r-in">  <span class="fu">bindCache</span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">x</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="op">}</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">## Only run app examples in interactive R sessions</span></span>
-<span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Basic example</span></span>
-<span class="r-in"><span class="fu"><a href="shinyApp.html">shinyApp</a></span><span class="op">(</span></span>
-<span class="r-in">  ui <span class="op">=</span> <span class="fu"><a href="fluidPage.html">fluidPage</a></span><span class="op">(</span></span>
-<span class="r-in">    <span class="fu"><a href="sliderInput.html">sliderInput</a></span><span class="op">(</span><span class="st">"x"</span>, <span class="st">"x"</span>, <span class="fl">1</span>, <span class="fl">10</span>, <span class="fl">5</span><span class="op">)</span>,</span>
-<span class="r-in">    <span class="fu"><a href="sliderInput.html">sliderInput</a></span><span class="op">(</span><span class="st">"y"</span>, <span class="st">"y"</span>, <span class="fl">1</span>, <span class="fl">10</span>, <span class="fl">5</span><span class="op">)</span>,</span>
-<span class="r-in">    <span class="fu"><a href="https://rdrr.io/pkg/htmltools/man/builder.html" class="external-link">div</a></span><span class="op">(</span><span class="st">"x * y: "</span><span class="op">)</span>,</span>
-<span class="r-in">    <span class="fu"><a href="textOutput.html">verbatimTextOutput</a></span><span class="op">(</span><span class="st">"txt"</span><span class="op">)</span></span>
-<span class="r-in">  <span class="op">)</span>,</span>
-<span class="r-in">  server <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">    <span class="va">r</span> <span class="op">&lt;-</span> <span class="fu"><a href="reactive.html">reactive</a></span><span class="op">(</span><span class="op">{</span></span>
-<span class="r-in">      <span class="co"># The value expression is an _expensive_ computation</span></span>
-<span class="r-in">      <span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="st">"Doing expensive computation..."</span><span class="op">)</span></span>
-<span class="r-in">      <span class="fu"><a href="https://rdrr.io/r/base/Sys.sleep.html" class="external-link">Sys.sleep</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span></span>
-<span class="r-in">      <span class="va">input</span><span class="op">$</span><span class="va">x</span> <span class="op">*</span> <span class="va">input</span><span class="op">$</span><span class="va">y</span></span>
-<span class="r-in">    <span class="op">}</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span class="r-in">      <span class="fu">bindCache</span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">x</span>, <span class="va">input</span><span class="op">$</span><span class="va">y</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in">    <span class="va">output</span><span class="op">$</span><span class="va">txt</span> <span class="op">&lt;-</span> <span class="fu"><a href="renderPrint.html">renderText</a></span><span class="op">(</span><span class="fu">r</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in">  <span class="op">}</span></span>
-<span class="r-in"><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Caching renderText</span></span>
-<span class="r-in"><span class="fu"><a href="shinyApp.html">shinyApp</a></span><span class="op">(</span></span>
-<span class="r-in">  ui <span class="op">=</span> <span class="fu"><a href="fluidPage.html">fluidPage</a></span><span class="op">(</span></span>
-<span class="r-in">    <span class="fu"><a href="sliderInput.html">sliderInput</a></span><span class="op">(</span><span class="st">"x"</span>, <span class="st">"x"</span>, <span class="fl">1</span>, <span class="fl">10</span>, <span class="fl">5</span><span class="op">)</span>,</span>
-<span class="r-in">    <span class="fu"><a href="sliderInput.html">sliderInput</a></span><span class="op">(</span><span class="st">"y"</span>, <span class="st">"y"</span>, <span class="fl">1</span>, <span class="fl">10</span>, <span class="fl">5</span><span class="op">)</span>,</span>
-<span class="r-in">    <span class="fu"><a href="https://rdrr.io/pkg/htmltools/man/builder.html" class="external-link">div</a></span><span class="op">(</span><span class="st">"x * y: "</span><span class="op">)</span>,</span>
-<span class="r-in">    <span class="fu"><a href="textOutput.html">verbatimTextOutput</a></span><span class="op">(</span><span class="st">"txt"</span><span class="op">)</span></span>
-<span class="r-in">  <span class="op">)</span>,</span>
-<span class="r-in">  server <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">    <span class="va">output</span><span class="op">$</span><span class="va">txt</span> <span class="op">&lt;-</span> <span class="fu"><a href="renderPrint.html">renderText</a></span><span class="op">(</span><span class="op">{</span></span>
-<span class="r-in">      <span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="st">"Doing expensive computation..."</span><span class="op">)</span></span>
-<span class="r-in">      <span class="fu"><a href="https://rdrr.io/r/base/Sys.sleep.html" class="external-link">Sys.sleep</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span></span>
-<span class="r-in">      <span class="va">input</span><span class="op">$</span><span class="va">x</span> <span class="op">*</span> <span class="va">input</span><span class="op">$</span><span class="va">y</span></span>
-<span class="r-in">    <span class="op">}</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span class="r-in">      <span class="fu">bindCache</span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">x</span>, <span class="va">input</span><span class="op">$</span><span class="va">y</span><span class="op">)</span></span>
-<span class="r-in">  <span class="op">}</span></span>
-<span class="r-in"><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Demo of using events and caching with an actionButton</span></span>
-<span class="r-in"><span class="fu"><a href="shinyApp.html">shinyApp</a></span><span class="op">(</span></span>
-<span class="r-in">  ui <span class="op">=</span> <span class="fu"><a href="fluidPage.html">fluidPage</a></span><span class="op">(</span></span>
-<span class="r-in">    <span class="fu"><a href="sliderInput.html">sliderInput</a></span><span class="op">(</span><span class="st">"x"</span>, <span class="st">"x"</span>, <span class="fl">1</span>, <span class="fl">10</span>, <span class="fl">5</span><span class="op">)</span>,</span>
-<span class="r-in">    <span class="fu"><a href="sliderInput.html">sliderInput</a></span><span class="op">(</span><span class="st">"y"</span>, <span class="st">"y"</span>, <span class="fl">1</span>, <span class="fl">10</span>, <span class="fl">5</span><span class="op">)</span>,</span>
-<span class="r-in">    <span class="fu"><a href="actionButton.html">actionButton</a></span><span class="op">(</span><span class="st">"go"</span>, <span class="st">"Go"</span><span class="op">)</span>,</span>
-<span class="r-in">    <span class="fu"><a href="https://rdrr.io/pkg/htmltools/man/builder.html" class="external-link">div</a></span><span class="op">(</span><span class="st">"x * y: "</span><span class="op">)</span>,</span>
-<span class="r-in">    <span class="fu"><a href="textOutput.html">verbatimTextOutput</a></span><span class="op">(</span><span class="st">"txt"</span><span class="op">)</span></span>
-<span class="r-in">  <span class="op">)</span>,</span>
-<span class="r-in">  server <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">    <span class="va">r</span> <span class="op">&lt;-</span> <span class="fu"><a href="reactive.html">reactive</a></span><span class="op">(</span><span class="op">{</span></span>
-<span class="r-in">      <span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="st">"Doing expensive computation..."</span><span class="op">)</span></span>
-<span class="r-in">      <span class="fu"><a href="https://rdrr.io/r/base/Sys.sleep.html" class="external-link">Sys.sleep</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span></span>
-<span class="r-in">      <span class="va">input</span><span class="op">$</span><span class="va">x</span> <span class="op">*</span> <span class="va">input</span><span class="op">$</span><span class="va">y</span></span>
-<span class="r-in">    <span class="op">}</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span class="r-in">      <span class="fu">bindCache</span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">x</span>, <span class="va">input</span><span class="op">$</span><span class="va">y</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span class="r-in">      <span class="fu"><a href="bindEvent.html">bindEvent</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">go</span><span class="op">)</span></span>
-<span class="r-in">      <span class="co"># The cached, eventified reactive takes a reactive dependency on</span></span>
-<span class="r-in">      <span class="co"># input$go, but doesn't use it for the cache key. It uses input$x and</span></span>
-<span class="r-in">      <span class="co"># input$y for the cache key, but doesn't take a reactive depdency on</span></span>
-<span class="r-in">      <span class="co"># them, because the reactive dependency is superseded by addEvent().</span></span>
-<span class="r-in"></span>
-<span class="r-in">    <span class="va">output</span><span class="op">$</span><span class="va">txt</span> <span class="op">&lt;-</span> <span class="fu"><a href="renderPrint.html">renderText</a></span><span class="op">(</span><span class="fu">r</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in">  <span class="op">}</span></span>
-<span class="r-in"><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="op">}</span></span>
-<span class="r-in"></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span><span class="va">rc</span> <span class="op">&lt;-</span> <span class="fu">bindCache</span><span class="op">(</span></span></span>
+<span class="r-in"><span>  x <span class="op">=</span> <span class="fu"><a href="reactive.html">reactive</a></span><span class="op">(</span><span class="op">{</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/base/Sys.sleep.html" class="external-link">Sys.sleep</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span>   <span class="co"># Pretend this is expensive</span></span></span>
+<span class="r-in"><span>    <span class="va">input</span><span class="op">$</span><span class="va">x</span> <span class="op">*</span> <span class="fl">100</span></span></span>
+<span class="r-in"><span>  <span class="op">}</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  <span class="va">input</span><span class="op">$</span><span class="va">x</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Can make it prettier with the %&gt;% operator</span></span></span>
+<span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://magrittr.tidyverse.org" class="external-link">magrittr</a></span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">rc</span> <span class="op">&lt;-</span> <span class="fu"><a href="reactive.html">reactive</a></span><span class="op">(</span><span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/Sys.sleep.html" class="external-link">Sys.sleep</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="va">input</span><span class="op">$</span><span class="va">x</span> <span class="op">*</span> <span class="fl">100</span></span></span>
+<span class="r-in"><span><span class="op">}</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span></span>
+<span class="r-in"><span>  <span class="fu">bindCache</span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">x</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">## Only run app examples in interactive R sessions</span></span></span>
+<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Basic example</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="shinyApp.html">shinyApp</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  ui <span class="op">=</span> <span class="fu"><a href="fluidPage.html">fluidPage</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="sliderInput.html">sliderInput</a></span><span class="op">(</span><span class="st">"x"</span>, <span class="st">"x"</span>, <span class="fl">1</span>, <span class="fl">10</span>, <span class="fl">5</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    <span class="fu"><a href="sliderInput.html">sliderInput</a></span><span class="op">(</span><span class="st">"y"</span>, <span class="st">"y"</span>, <span class="fl">1</span>, <span class="fl">10</span>, <span class="fl">5</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/pkg/htmltools/man/builder.html" class="external-link">div</a></span><span class="op">(</span><span class="st">"x * y: "</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    <span class="fu"><a href="textOutput.html">verbatimTextOutput</a></span><span class="op">(</span><span class="st">"txt"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span>,</span></span>
+<span class="r-in"><span>  server <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>    <span class="va">r</span> <span class="op">&lt;-</span> <span class="fu"><a href="reactive.html">reactive</a></span><span class="op">(</span><span class="op">{</span></span></span>
+<span class="r-in"><span>      <span class="co"># The value expression is an _expensive_ computation</span></span></span>
+<span class="r-in"><span>      <span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="st">"Doing expensive computation..."</span><span class="op">)</span></span></span>
+<span class="r-in"><span>      <span class="fu"><a href="https://rdrr.io/r/base/Sys.sleep.html" class="external-link">Sys.sleep</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span></span></span>
+<span class="r-in"><span>      <span class="va">input</span><span class="op">$</span><span class="va">x</span> <span class="op">*</span> <span class="va">input</span><span class="op">$</span><span class="va">y</span></span></span>
+<span class="r-in"><span>    <span class="op">}</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span></span>
+<span class="r-in"><span>      <span class="fu">bindCache</span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">x</span>, <span class="va">input</span><span class="op">$</span><span class="va">y</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>    <span class="va">output</span><span class="op">$</span><span class="va">txt</span> <span class="op">&lt;-</span> <span class="fu"><a href="renderPrint.html">renderText</a></span><span class="op">(</span><span class="fu">r</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">}</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Caching renderText</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="shinyApp.html">shinyApp</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  ui <span class="op">=</span> <span class="fu"><a href="fluidPage.html">fluidPage</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="sliderInput.html">sliderInput</a></span><span class="op">(</span><span class="st">"x"</span>, <span class="st">"x"</span>, <span class="fl">1</span>, <span class="fl">10</span>, <span class="fl">5</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    <span class="fu"><a href="sliderInput.html">sliderInput</a></span><span class="op">(</span><span class="st">"y"</span>, <span class="st">"y"</span>, <span class="fl">1</span>, <span class="fl">10</span>, <span class="fl">5</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/pkg/htmltools/man/builder.html" class="external-link">div</a></span><span class="op">(</span><span class="st">"x * y: "</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    <span class="fu"><a href="textOutput.html">verbatimTextOutput</a></span><span class="op">(</span><span class="st">"txt"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span>,</span></span>
+<span class="r-in"><span>  server <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>    <span class="va">output</span><span class="op">$</span><span class="va">txt</span> <span class="op">&lt;-</span> <span class="fu"><a href="renderPrint.html">renderText</a></span><span class="op">(</span><span class="op">{</span></span></span>
+<span class="r-in"><span>      <span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="st">"Doing expensive computation..."</span><span class="op">)</span></span></span>
+<span class="r-in"><span>      <span class="fu"><a href="https://rdrr.io/r/base/Sys.sleep.html" class="external-link">Sys.sleep</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span></span></span>
+<span class="r-in"><span>      <span class="va">input</span><span class="op">$</span><span class="va">x</span> <span class="op">*</span> <span class="va">input</span><span class="op">$</span><span class="va">y</span></span></span>
+<span class="r-in"><span>    <span class="op">}</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span></span>
+<span class="r-in"><span>      <span class="fu">bindCache</span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">x</span>, <span class="va">input</span><span class="op">$</span><span class="va">y</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">}</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Demo of using events and caching with an actionButton</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="shinyApp.html">shinyApp</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  ui <span class="op">=</span> <span class="fu"><a href="fluidPage.html">fluidPage</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="sliderInput.html">sliderInput</a></span><span class="op">(</span><span class="st">"x"</span>, <span class="st">"x"</span>, <span class="fl">1</span>, <span class="fl">10</span>, <span class="fl">5</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    <span class="fu"><a href="sliderInput.html">sliderInput</a></span><span class="op">(</span><span class="st">"y"</span>, <span class="st">"y"</span>, <span class="fl">1</span>, <span class="fl">10</span>, <span class="fl">5</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    <span class="fu"><a href="actionButton.html">actionButton</a></span><span class="op">(</span><span class="st">"go"</span>, <span class="st">"Go"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/pkg/htmltools/man/builder.html" class="external-link">div</a></span><span class="op">(</span><span class="st">"x * y: "</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    <span class="fu"><a href="textOutput.html">verbatimTextOutput</a></span><span class="op">(</span><span class="st">"txt"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span>,</span></span>
+<span class="r-in"><span>  server <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>    <span class="va">r</span> <span class="op">&lt;-</span> <span class="fu"><a href="reactive.html">reactive</a></span><span class="op">(</span><span class="op">{</span></span></span>
+<span class="r-in"><span>      <span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="st">"Doing expensive computation..."</span><span class="op">)</span></span></span>
+<span class="r-in"><span>      <span class="fu"><a href="https://rdrr.io/r/base/Sys.sleep.html" class="external-link">Sys.sleep</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span></span></span>
+<span class="r-in"><span>      <span class="va">input</span><span class="op">$</span><span class="va">x</span> <span class="op">*</span> <span class="va">input</span><span class="op">$</span><span class="va">y</span></span></span>
+<span class="r-in"><span>    <span class="op">}</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span></span>
+<span class="r-in"><span>      <span class="fu">bindCache</span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">x</span>, <span class="va">input</span><span class="op">$</span><span class="va">y</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span></span>
+<span class="r-in"><span>      <span class="fu"><a href="bindEvent.html">bindEvent</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">go</span><span class="op">)</span></span></span>
+<span class="r-in"><span>      <span class="co"># The cached, eventified reactive takes a reactive dependency on</span></span></span>
+<span class="r-in"><span>      <span class="co"># input$go, but doesn't use it for the cache key. It uses input$x and</span></span></span>
+<span class="r-in"><span>      <span class="co"># input$y for the cache key, but doesn't take a reactive depdency on</span></span></span>
+<span class="r-in"><span>      <span class="co"># them, because the reactive dependency is superseded by addEvent().</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>    <span class="va">output</span><span class="op">$</span><span class="va">txt</span> <span class="op">&lt;-</span> <span class="fu"><a href="renderPrint.html">renderText</a></span><span class="op">(</span><span class="fu">r</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">}</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>

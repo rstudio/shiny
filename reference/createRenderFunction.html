@@ -22,7 +22,7 @@ additional call(s)."><meta property="og:image" content="/logo.png"><!-- mathjax 
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">shiny</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.1.9003</span>
       </span>
     </div>
 
@@ -63,28 +63,28 @@ additional call(s).</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">createRenderFunction</span><span class="op">(</span>
-  <span class="va">func</span>,
-  transform <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">value</span>, <span class="va">session</span>, <span class="va">name</span>, <span class="va">...</span><span class="op">)</span> <span class="va">value</span>,
-  outputFunc <span class="op">=</span> <span class="cn">NULL</span>,
-  outputArgs <span class="op">=</span> <span class="cn">NULL</span>,
-  cacheHint <span class="op">=</span> <span class="st">"auto"</span>,
-  cacheWriteHook <span class="op">=</span> <span class="cn">NULL</span>,
-  cacheReadHook <span class="op">=</span> <span class="cn">NULL</span>
-<span class="op">)</span>
-
-<span class="fu">quoToFunction</span><span class="op">(</span><span class="va">q</span>, label <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sys.parent.html" class="external-link">sys.call</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1</span><span class="op">)</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span>, ..stacktraceon <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
-
-<span class="fu">installExprFunction</span><span class="op">(</span>
-  <span class="va">expr</span>,
-  <span class="va">name</span>,
-  eval.env <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sys.parent.html" class="external-link">parent.frame</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span>,
-  quoted <span class="op">=</span> <span class="cn">FALSE</span>,
-  assign.env <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sys.parent.html" class="external-link">parent.frame</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span>,
-  label <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sys.parent.html" class="external-link">sys.call</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1</span><span class="op">)</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span>,
-  wrappedWithLabel <span class="op">=</span> <span class="cn">TRUE</span>,
-  ..stacktraceon <span class="op">=</span> <span class="cn">FALSE</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">createRenderFunction</span><span class="op">(</span></span>
+<span>  <span class="va">func</span>,</span>
+<span>  transform <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">value</span>, <span class="va">session</span>, <span class="va">name</span>, <span class="va">...</span><span class="op">)</span> <span class="va">value</span>,</span>
+<span>  outputFunc <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  outputArgs <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  cacheHint <span class="op">=</span> <span class="st">"auto"</span>,</span>
+<span>  cacheWriteHook <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  cacheReadHook <span class="op">=</span> <span class="cn">NULL</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">quoToFunction</span><span class="op">(</span><span class="va">q</span>, label <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sys.parent.html" class="external-link">sys.call</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1</span><span class="op">)</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span>, ..stacktraceon <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">installExprFunction</span><span class="op">(</span></span>
+<span>  <span class="va">expr</span>,</span>
+<span>  <span class="va">name</span>,</span>
+<span>  eval.env <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sys.parent.html" class="external-link">parent.frame</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span>,</span>
+<span>  quoted <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  assign.env <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sys.parent.html" class="external-link">parent.frame</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span>,</span>
+<span>  label <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sys.parent.html" class="external-link">sys.call</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1</span><span class="op">)</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span>,</span>
+<span>  wrappedWithLabel <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  ..stacktraceon <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -211,70 +211,70 @@ function that's assigned to a <code>name</code> in the <code>assign.env</code>.<
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="co"># A custom render function that repeats the supplied value 3 times</span></span>
-<span class="r-in"><span class="va">renderTriple</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">expr</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">  <span class="co"># Wrap user-supplied reactive expression into a function</span></span>
-<span class="r-in">  <span class="va">func</span> <span class="op">&lt;-</span> <span class="fu">quoToFunction</span><span class="op">(</span><span class="fu">rlang</span><span class="fu">::</span><span class="fu"><a href="https://rlang.r-lib.org/reference/defusing-advanced.html" class="external-link">enquo0</a></span><span class="op">(</span><span class="va">expr</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in">  <span class="fu">createRenderFunction</span><span class="op">(</span></span>
-<span class="r-in">    <span class="va">func</span>,</span>
-<span class="r-in">    transform <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">value</span>, <span class="va">session</span>, <span class="va">name</span>, <span class="va">...</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">      <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="va">value</span>, <span class="fl">3</span><span class="op">)</span>, collapse<span class="op">=</span><span class="st">", "</span><span class="op">)</span></span>
-<span class="r-in">    <span class="op">}</span>,</span>
-<span class="r-in">    outputFunc <span class="op">=</span> <span class="va">textOutput</span></span>
-<span class="r-in">  <span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># For better legacy support, consider using installExprFunction() over quoToFunction()</span></span>
-<span class="r-in"><span class="va">renderTripleLegacy</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">expr</span>, <span class="va">env</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sys.parent.html" class="external-link">parent.frame</a></span><span class="op">(</span><span class="op">)</span>, <span class="va">quoted</span> <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">  <span class="va">func</span> <span class="op">&lt;-</span> <span class="fu">installExprFunction</span><span class="op">(</span><span class="va">expr</span>, <span class="st">"func"</span>, <span class="va">env</span>, <span class="va">quoted</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in">  <span class="fu">createRenderFunction</span><span class="op">(</span></span>
-<span class="r-in">    <span class="va">func</span>,</span>
-<span class="r-in">    transform <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">value</span>, <span class="va">session</span>, <span class="va">name</span>, <span class="va">...</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">      <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="va">value</span>, <span class="fl">3</span><span class="op">)</span>, collapse<span class="op">=</span><span class="st">", "</span><span class="op">)</span></span>
-<span class="r-in">    <span class="op">}</span>,</span>
-<span class="r-in">    outputFunc <span class="op">=</span> <span class="va">textOutput</span></span>
-<span class="r-in">  <span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Test render function from the console</span></span>
-<span class="r-in"><span class="fu"><a href="reactiveConsole.html">reactiveConsole</a></span><span class="op">(</span><span class="cn">TRUE</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="va">v</span> <span class="op">&lt;-</span> <span class="fu"><a href="reactiveVal.html">reactiveVal</a></span><span class="op">(</span><span class="st">"basic"</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">r</span> <span class="op">&lt;-</span> <span class="fu">renderTriple</span><span class="op">(</span><span class="op">{</span> <span class="fu">v</span><span class="op">(</span><span class="op">)</span> <span class="op">}</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu">r</span><span class="op">(</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># A custom render function that repeats the supplied value 3 times</span></span></span>
+<span class="r-in"><span><span class="va">renderTriple</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">expr</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="co"># Wrap user-supplied reactive expression into a function</span></span></span>
+<span class="r-in"><span>  <span class="va">func</span> <span class="op">&lt;-</span> <span class="fu">quoToFunction</span><span class="op">(</span><span class="fu">rlang</span><span class="fu">::</span><span class="fu"><a href="https://rlang.r-lib.org/reference/defusing-advanced.html" class="external-link">enquo0</a></span><span class="op">(</span><span class="va">expr</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>  <span class="fu">createRenderFunction</span><span class="op">(</span></span></span>
+<span class="r-in"><span>    <span class="va">func</span>,</span></span>
+<span class="r-in"><span>    transform <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">value</span>, <span class="va">session</span>, <span class="va">name</span>, <span class="va">...</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>      <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="va">value</span>, <span class="fl">3</span><span class="op">)</span>, collapse<span class="op">=</span><span class="st">", "</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="op">}</span>,</span></span>
+<span class="r-in"><span>    outputFunc <span class="op">=</span> <span class="va">textOutput</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># For better legacy support, consider using installExprFunction() over quoToFunction()</span></span></span>
+<span class="r-in"><span><span class="va">renderTripleLegacy</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">expr</span>, <span class="va">env</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sys.parent.html" class="external-link">parent.frame</a></span><span class="op">(</span><span class="op">)</span>, <span class="va">quoted</span> <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="va">func</span> <span class="op">&lt;-</span> <span class="fu">installExprFunction</span><span class="op">(</span><span class="va">expr</span>, <span class="st">"func"</span>, <span class="va">env</span>, <span class="va">quoted</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>  <span class="fu">createRenderFunction</span><span class="op">(</span></span></span>
+<span class="r-in"><span>    <span class="va">func</span>,</span></span>
+<span class="r-in"><span>    transform <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">value</span>, <span class="va">session</span>, <span class="va">name</span>, <span class="va">...</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>      <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="va">value</span>, <span class="fl">3</span><span class="op">)</span>, collapse<span class="op">=</span><span class="st">", "</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="op">}</span>,</span></span>
+<span class="r-in"><span>    outputFunc <span class="op">=</span> <span class="va">textOutput</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Test render function from the console</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="reactiveConsole.html">reactiveConsole</a></span><span class="op">(</span><span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">v</span> <span class="op">&lt;-</span> <span class="fu"><a href="reactiveVal.html">reactiveVal</a></span><span class="op">(</span><span class="st">"basic"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">r</span> <span class="op">&lt;-</span> <span class="fu">renderTriple</span><span class="op">(</span><span class="op">{</span> <span class="fu">v</span><span class="op">(</span><span class="op">)</span> <span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">r</span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "basic, basic, basic"</span>
-<span class="r-in"><span class="co">#&gt; [1] "basic, basic, basic"</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># User can supply quoted code via rlang::quo(). Note that evaluation of the</span></span>
-<span class="r-in"><span class="co"># expression happens when r2() is invoked, not when r2 is created.</span></span>
-<span class="r-in"><span class="va">q</span> <span class="op">&lt;-</span> <span class="fu">rlang</span><span class="fu">::</span><span class="fu"><a href="https://rlang.r-lib.org/reference/defusing-advanced.html" class="external-link">quo</a></span><span class="op">(</span><span class="op">{</span> <span class="fu">v</span><span class="op">(</span><span class="op">)</span> <span class="op">}</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">r2</span> <span class="op">&lt;-</span> <span class="fu">rlang</span><span class="fu">::</span><span class="fu"><a href="https://rlang.r-lib.org/reference/inject.html" class="external-link">inject</a></span><span class="op">(</span><span class="fu">renderTriple</span><span class="op">(</span><span class="op">!</span><span class="op">!</span><span class="va">q</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu">v</span><span class="op">(</span><span class="st">"rlang"</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu">r2</span><span class="op">(</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="co">#&gt; [1] "basic, basic, basic"</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># User can supply quoted code via rlang::quo(). Note that evaluation of the</span></span></span>
+<span class="r-in"><span><span class="co"># expression happens when r2() is invoked, not when r2 is created.</span></span></span>
+<span class="r-in"><span><span class="va">q</span> <span class="op">&lt;-</span> <span class="fu">rlang</span><span class="fu">::</span><span class="fu"><a href="https://rlang.r-lib.org/reference/defusing-advanced.html" class="external-link">quo</a></span><span class="op">(</span><span class="op">{</span> <span class="fu">v</span><span class="op">(</span><span class="op">)</span> <span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">r2</span> <span class="op">&lt;-</span> <span class="fu">rlang</span><span class="fu">::</span><span class="fu"><a href="https://rlang.r-lib.org/reference/inject.html" class="external-link">inject</a></span><span class="op">(</span><span class="fu">renderTriple</span><span class="op">(</span><span class="op">!</span><span class="op">!</span><span class="va">q</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">v</span><span class="op">(</span><span class="st">"rlang"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">r2</span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "rlang, rlang, rlang"</span>
-<span class="r-in"><span class="co">#&gt; [1] "rlang, rlang, rlang"</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Supplying quoted code without rlang::quo() requires installExprFunction()</span></span>
-<span class="r-in"><span class="va">expr</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/substitute.html" class="external-link">quote</a></span><span class="op">(</span><span class="op">{</span> <span class="fu">v</span><span class="op">(</span><span class="op">)</span> <span class="op">}</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">r3</span> <span class="op">&lt;-</span> <span class="fu">renderTripleLegacy</span><span class="op">(</span><span class="va">expr</span>, quoted <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu">v</span><span class="op">(</span><span class="st">"legacy"</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu">r3</span><span class="op">(</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="co">#&gt; [1] "rlang, rlang, rlang"</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Supplying quoted code without rlang::quo() requires installExprFunction()</span></span></span>
+<span class="r-in"><span><span class="va">expr</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/substitute.html" class="external-link">quote</a></span><span class="op">(</span><span class="op">{</span> <span class="fu">v</span><span class="op">(</span><span class="op">)</span> <span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">r3</span> <span class="op">&lt;-</span> <span class="fu">renderTripleLegacy</span><span class="op">(</span><span class="va">expr</span>, quoted <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">v</span><span class="op">(</span><span class="st">"legacy"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">r3</span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "legacy, legacy, legacy"</span>
-<span class="r-in"><span class="co">#&gt; [1] "legacy, legacy, legacy"</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># The legacy approach also supports with quosures (env is ignored in this case)</span></span>
-<span class="r-in"><span class="va">q</span> <span class="op">&lt;-</span> <span class="fu">rlang</span><span class="fu">::</span><span class="fu"><a href="https://rlang.r-lib.org/reference/defusing-advanced.html" class="external-link">quo</a></span><span class="op">(</span><span class="op">{</span> <span class="fu">v</span><span class="op">(</span><span class="op">)</span> <span class="op">}</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">r4</span> <span class="op">&lt;-</span> <span class="fu">renderTripleLegacy</span><span class="op">(</span><span class="va">q</span>, quoted <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu">v</span><span class="op">(</span><span class="st">"legacy-rlang"</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu">r4</span><span class="op">(</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="co">#&gt; [1] "legacy, legacy, legacy"</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># The legacy approach also supports with quosures (env is ignored in this case)</span></span></span>
+<span class="r-in"><span><span class="va">q</span> <span class="op">&lt;-</span> <span class="fu">rlang</span><span class="fu">::</span><span class="fu"><a href="https://rlang.r-lib.org/reference/defusing-advanced.html" class="external-link">quo</a></span><span class="op">(</span><span class="op">{</span> <span class="fu">v</span><span class="op">(</span><span class="op">)</span> <span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">r4</span> <span class="op">&lt;-</span> <span class="fu">renderTripleLegacy</span><span class="op">(</span><span class="va">q</span>, quoted <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">v</span><span class="op">(</span><span class="st">"legacy-rlang"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">r4</span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "legacy-rlang, legacy-rlang, legacy-rlang"</span>
-<span class="r-in"><span class="co">#&gt; [1] "legacy-rlang, legacy-rlang, legacy-rlang"</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Turn off reactivity in the console</span></span>
-<span class="r-in"><span class="fu"><a href="reactiveConsole.html">reactiveConsole</a></span><span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span></span>
-<span class="r-in"></span>
+<span class="r-in"><span><span class="co">#&gt; [1] "legacy-rlang, legacy-rlang, legacy-rlang"</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Turn off reactivity in the console</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="reactiveConsole.html">reactiveConsole</a></span><span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>

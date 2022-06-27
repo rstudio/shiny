@@ -18,7 +18,7 @@ component from the app's URL."><meta property="og:image" content="/logo.png"><!-
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">shiny</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.1.9003</span>
       </span>
     </div>
 
@@ -55,9 +55,9 @@ component from the app's URL.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">getQueryString</span><span class="op">(</span>session <span class="op">=</span> <span class="fu"><a href="domains.html">getDefaultReactiveDomain</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span>
-
-<span class="fu">getUrlHash</span><span class="op">(</span>session <span class="op">=</span> <span class="fu"><a href="domains.html">getDefaultReactiveDomain</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">getQueryString</span><span class="op">(</span>session <span class="op">=</span> <span class="fu"><a href="domains.html">getDefaultReactiveDomain</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">getUrlHash</span><span class="op">(</span>session <span class="op">=</span> <span class="fu"><a href="domains.html">getDefaultReactiveDomain</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -95,57 +95,57 @@ to worry about this.</p>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="co">## Only run this example in interactive R sessions</span></span>
-<span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in"></span>
-<span class="r-in">  <span class="co">## App 1: getQueryString</span></span>
-<span class="r-in">  <span class="co">## Printing the value of the query string</span></span>
-<span class="r-in">  <span class="co">## (Use the back and forward buttons to see how the browser</span></span>
-<span class="r-in">  <span class="co">## keeps a record of each state)</span></span>
-<span class="r-in">  <span class="fu"><a href="shinyApp.html">shinyApp</a></span><span class="op">(</span></span>
-<span class="r-in">    ui <span class="op">=</span> <span class="fu"><a href="fluidPage.html">fluidPage</a></span><span class="op">(</span></span>
-<span class="r-in">      <span class="fu"><a href="textInput.html">textInput</a></span><span class="op">(</span><span class="st">"txt"</span>, <span class="st">"Enter new query string"</span><span class="op">)</span>,</span>
-<span class="r-in">      <span class="fu"><a href="helpText.html">helpText</a></span><span class="op">(</span><span class="st">"Format: ?param1=val1&amp;param2=val2"</span><span class="op">)</span>,</span>
-<span class="r-in">      <span class="fu"><a href="actionButton.html">actionButton</a></span><span class="op">(</span><span class="st">"go"</span>, <span class="st">"Update"</span><span class="op">)</span>,</span>
-<span class="r-in">      <span class="fu"><a href="https://rdrr.io/pkg/htmltools/man/builder.html" class="external-link">hr</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span class="r-in">      <span class="fu"><a href="textOutput.html">verbatimTextOutput</a></span><span class="op">(</span><span class="st">"query"</span><span class="op">)</span></span>
-<span class="r-in">    <span class="op">)</span>,</span>
-<span class="r-in">    server <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">      <span class="fu"><a href="observeEvent.html">observeEvent</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">go</span>, <span class="op">{</span></span>
-<span class="r-in">        <span class="fu"><a href="updateQueryString.html">updateQueryString</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">txt</span>, mode <span class="op">=</span> <span class="st">"push"</span><span class="op">)</span></span>
-<span class="r-in">      <span class="op">}</span><span class="op">)</span></span>
-<span class="r-in">      <span class="va">output</span><span class="op">$</span><span class="va">query</span> <span class="op">&lt;-</span> <span class="fu"><a href="renderPrint.html">renderText</a></span><span class="op">(</span><span class="op">{</span></span>
-<span class="r-in">        <span class="va">query</span> <span class="op">&lt;-</span> <span class="fu">getQueryString</span><span class="op">(</span><span class="op">)</span></span>
-<span class="r-in">        <span class="va">queryText</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">query</span><span class="op">)</span>, <span class="va">query</span>,</span>
-<span class="r-in">                       sep <span class="op">=</span> <span class="st">"="</span>, collapse<span class="op">=</span><span class="st">", "</span><span class="op">)</span></span>
-<span class="r-in">        <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"Your query string is:\n"</span>, <span class="va">queryText</span><span class="op">)</span></span>
-<span class="r-in">      <span class="op">}</span><span class="op">)</span></span>
-<span class="r-in">    <span class="op">}</span></span>
-<span class="r-in">  <span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in">  <span class="co">## App 2: getUrlHash</span></span>
-<span class="r-in">  <span class="co">## Printing the value of the URL hash</span></span>
-<span class="r-in">  <span class="co">## (Use the back and forward buttons to see how the browser</span></span>
-<span class="r-in">  <span class="co">## keeps a record of each state)</span></span>
-<span class="r-in">  <span class="fu"><a href="shinyApp.html">shinyApp</a></span><span class="op">(</span></span>
-<span class="r-in">    ui <span class="op">=</span> <span class="fu"><a href="fluidPage.html">fluidPage</a></span><span class="op">(</span></span>
-<span class="r-in">      <span class="fu"><a href="textInput.html">textInput</a></span><span class="op">(</span><span class="st">"txt"</span>, <span class="st">"Enter new hash"</span><span class="op">)</span>,</span>
-<span class="r-in">      <span class="fu"><a href="helpText.html">helpText</a></span><span class="op">(</span><span class="st">"Format: #hash"</span><span class="op">)</span>,</span>
-<span class="r-in">      <span class="fu"><a href="actionButton.html">actionButton</a></span><span class="op">(</span><span class="st">"go"</span>, <span class="st">"Update"</span><span class="op">)</span>,</span>
-<span class="r-in">      <span class="fu"><a href="https://rdrr.io/pkg/htmltools/man/builder.html" class="external-link">hr</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span class="r-in">      <span class="fu"><a href="textOutput.html">verbatimTextOutput</a></span><span class="op">(</span><span class="st">"hash"</span><span class="op">)</span></span>
-<span class="r-in">    <span class="op">)</span>,</span>
-<span class="r-in">    server <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">      <span class="fu"><a href="observeEvent.html">observeEvent</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">go</span>, <span class="op">{</span></span>
-<span class="r-in">        <span class="fu"><a href="updateQueryString.html">updateQueryString</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">txt</span>, mode <span class="op">=</span> <span class="st">"push"</span><span class="op">)</span></span>
-<span class="r-in">      <span class="op">}</span><span class="op">)</span></span>
-<span class="r-in">      <span class="va">output</span><span class="op">$</span><span class="va">hash</span> <span class="op">&lt;-</span> <span class="fu"><a href="renderPrint.html">renderText</a></span><span class="op">(</span><span class="op">{</span></span>
-<span class="r-in">        <span class="va">hash</span> <span class="op">&lt;-</span> <span class="fu">getUrlHash</span><span class="op">(</span><span class="op">)</span></span>
-<span class="r-in">        <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"Your hash is:\n"</span>, <span class="va">hash</span><span class="op">)</span></span>
-<span class="r-in">      <span class="op">}</span><span class="op">)</span></span>
-<span class="r-in">    <span class="op">}</span></span>
-<span class="r-in">  <span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co">## Only run this example in interactive R sessions</span></span></span>
+<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>  <span class="co">## App 1: getQueryString</span></span></span>
+<span class="r-in"><span>  <span class="co">## Printing the value of the query string</span></span></span>
+<span class="r-in"><span>  <span class="co">## (Use the back and forward buttons to see how the browser</span></span></span>
+<span class="r-in"><span>  <span class="co">## keeps a record of each state)</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="shinyApp.html">shinyApp</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>    ui <span class="op">=</span> <span class="fu"><a href="fluidPage.html">fluidPage</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>      <span class="fu"><a href="textInput.html">textInput</a></span><span class="op">(</span><span class="st">"txt"</span>, <span class="st">"Enter new query string"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>      <span class="fu"><a href="helpText.html">helpText</a></span><span class="op">(</span><span class="st">"Format: ?param1=val1&amp;param2=val2"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>      <span class="fu"><a href="actionButton.html">actionButton</a></span><span class="op">(</span><span class="st">"go"</span>, <span class="st">"Update"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>      <span class="fu"><a href="https://rdrr.io/pkg/htmltools/man/builder.html" class="external-link">hr</a></span><span class="op">(</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>      <span class="fu"><a href="textOutput.html">verbatimTextOutput</a></span><span class="op">(</span><span class="st">"query"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="op">)</span>,</span></span>
+<span class="r-in"><span>    server <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>      <span class="fu"><a href="observeEvent.html">observeEvent</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">go</span>, <span class="op">{</span></span></span>
+<span class="r-in"><span>        <span class="fu"><a href="updateQueryString.html">updateQueryString</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">txt</span>, mode <span class="op">=</span> <span class="st">"push"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>      <span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span>      <span class="va">output</span><span class="op">$</span><span class="va">query</span> <span class="op">&lt;-</span> <span class="fu"><a href="renderPrint.html">renderText</a></span><span class="op">(</span><span class="op">{</span></span></span>
+<span class="r-in"><span>        <span class="va">query</span> <span class="op">&lt;-</span> <span class="fu">getQueryString</span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span>        <span class="va">queryText</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">query</span><span class="op">)</span>, <span class="va">query</span>,</span></span>
+<span class="r-in"><span>                       sep <span class="op">=</span> <span class="st">"="</span>, collapse<span class="op">=</span><span class="st">", "</span><span class="op">)</span></span></span>
+<span class="r-in"><span>        <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"Your query string is:\n"</span>, <span class="va">queryText</span><span class="op">)</span></span></span>
+<span class="r-in"><span>      <span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="op">}</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>  <span class="co">## App 2: getUrlHash</span></span></span>
+<span class="r-in"><span>  <span class="co">## Printing the value of the URL hash</span></span></span>
+<span class="r-in"><span>  <span class="co">## (Use the back and forward buttons to see how the browser</span></span></span>
+<span class="r-in"><span>  <span class="co">## keeps a record of each state)</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="shinyApp.html">shinyApp</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>    ui <span class="op">=</span> <span class="fu"><a href="fluidPage.html">fluidPage</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>      <span class="fu"><a href="textInput.html">textInput</a></span><span class="op">(</span><span class="st">"txt"</span>, <span class="st">"Enter new hash"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>      <span class="fu"><a href="helpText.html">helpText</a></span><span class="op">(</span><span class="st">"Format: #hash"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>      <span class="fu"><a href="actionButton.html">actionButton</a></span><span class="op">(</span><span class="st">"go"</span>, <span class="st">"Update"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>      <span class="fu"><a href="https://rdrr.io/pkg/htmltools/man/builder.html" class="external-link">hr</a></span><span class="op">(</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>      <span class="fu"><a href="textOutput.html">verbatimTextOutput</a></span><span class="op">(</span><span class="st">"hash"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="op">)</span>,</span></span>
+<span class="r-in"><span>    server <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>      <span class="fu"><a href="observeEvent.html">observeEvent</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">go</span>, <span class="op">{</span></span></span>
+<span class="r-in"><span>        <span class="fu"><a href="updateQueryString.html">updateQueryString</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">txt</span>, mode <span class="op">=</span> <span class="st">"push"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>      <span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span>      <span class="va">output</span><span class="op">$</span><span class="va">hash</span> <span class="op">&lt;-</span> <span class="fu"><a href="renderPrint.html">renderText</a></span><span class="op">(</span><span class="op">{</span></span></span>
+<span class="r-in"><span>        <span class="va">hash</span> <span class="op">&lt;-</span> <span class="fu">getUrlHash</span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span>        <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"Your hash is:\n"</span>, <span class="va">hash</span><span class="op">)</span></span></span>
+<span class="r-in"><span>      <span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="op">}</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
 </code></pre></div>
     </div>
   </div>

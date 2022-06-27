@@ -18,7 +18,7 @@ slot."><meta property="og:image" content="/logo.png"><!-- mathjax --><script src
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">shiny</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.1.9003</span>
       </span>
     </div>
 
@@ -55,13 +55,13 @@ slot.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">renderImage</span><span class="op">(</span>
-  <span class="va">expr</span>,
-  env <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sys.parent.html" class="external-link">parent.frame</a></span><span class="op">(</span><span class="op">)</span>,
-  quoted <span class="op">=</span> <span class="cn">FALSE</span>,
-  <span class="va">deleteFile</span>,
-  outputArgs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">renderImage</span><span class="op">(</span></span>
+<span>  <span class="va">expr</span>,</span>
+<span>  env <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sys.parent.html" class="external-link">parent.frame</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  quoted <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  <span class="va">deleteFile</span>,</span>
+<span>  outputArgs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -123,71 +123,71 @@ the output, see <code><a href="plotPNG.html">plotPNG()</a></code>.</p></div>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="co">## Only run examples in interactive R sessions</span></span>
-<span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">options</a></span><span class="op">(</span>device.ask.default <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="va">ui</span> <span class="op">&lt;-</span> <span class="fu"><a href="fluidPage.html">fluidPage</a></span><span class="op">(</span></span>
-<span class="r-in">  <span class="fu"><a href="sliderInput.html">sliderInput</a></span><span class="op">(</span><span class="st">"n"</span>, <span class="st">"Number of observations"</span>, <span class="fl">2</span>, <span class="fl">1000</span>, <span class="fl">500</span><span class="op">)</span>,</span>
-<span class="r-in">  <span class="fu"><a href="plotOutput.html">plotOutput</a></span><span class="op">(</span><span class="st">"plot1"</span><span class="op">)</span>,</span>
-<span class="r-in">  <span class="fu"><a href="plotOutput.html">plotOutput</a></span><span class="op">(</span><span class="st">"plot2"</span><span class="op">)</span>,</span>
-<span class="r-in">  <span class="fu"><a href="plotOutput.html">plotOutput</a></span><span class="op">(</span><span class="st">"plot3"</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="va">server</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in"></span>
-<span class="r-in">  <span class="co"># A plot of fixed size</span></span>
-<span class="r-in">  <span class="va">output</span><span class="op">$</span><span class="va">plot1</span> <span class="op">&lt;-</span> <span class="fu">renderImage</span><span class="op">(</span><span class="op">{</span></span>
-<span class="r-in">    <span class="co"># A temp file to save the output. It will be deleted after renderImage</span></span>
-<span class="r-in">    <span class="co"># sends it, because deleteFile=TRUE.</span></span>
-<span class="r-in">    <span class="va">outfile</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span>fileext<span class="op">=</span><span class="st">'.png'</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in">    <span class="co"># Generate a png</span></span>
-<span class="r-in">    <span class="fu"><a href="https://rdrr.io/r/grDevices/png.html" class="external-link">png</a></span><span class="op">(</span><span class="va">outfile</span>, width<span class="op">=</span><span class="fl">400</span>, height<span class="op">=</span><span class="fl">400</span><span class="op">)</span></span>
-<span class="r-in">    <span class="fu"><a href="https://rdrr.io/r/graphics/hist.html" class="external-link">hist</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">n</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in">    <span class="fu"><a href="https://rdrr.io/r/grDevices/dev.html" class="external-link">dev.off</a></span><span class="op">(</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in">    <span class="co"># Return a list</span></span>
-<span class="r-in">    <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>src <span class="op">=</span> <span class="va">outfile</span>,</span>
-<span class="r-in">         alt <span class="op">=</span> <span class="st">"This is alternate text"</span><span class="op">)</span></span>
-<span class="r-in">  <span class="op">}</span>, deleteFile <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in">  <span class="co"># A dynamically-sized plot</span></span>
-<span class="r-in">  <span class="va">output</span><span class="op">$</span><span class="va">plot2</span> <span class="op">&lt;-</span> <span class="fu">renderImage</span><span class="op">(</span><span class="op">{</span></span>
-<span class="r-in">    <span class="co"># Read plot2's width and height. These are reactive values, so this</span></span>
-<span class="r-in">    <span class="co"># expression will re-run whenever these values change.</span></span>
-<span class="r-in">    <span class="va">width</span>  <span class="op">&lt;-</span> <span class="va">session</span><span class="op">$</span><span class="va">clientData</span><span class="op">$</span><span class="va">output_plot2_width</span></span>
-<span class="r-in">    <span class="va">height</span> <span class="op">&lt;-</span> <span class="va">session</span><span class="op">$</span><span class="va">clientData</span><span class="op">$</span><span class="va">output_plot2_height</span></span>
-<span class="r-in"></span>
-<span class="r-in">    <span class="co"># A temp file to save the output.</span></span>
-<span class="r-in">    <span class="va">outfile</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span>fileext<span class="op">=</span><span class="st">'.png'</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in">    <span class="fu"><a href="https://rdrr.io/r/grDevices/png.html" class="external-link">png</a></span><span class="op">(</span><span class="va">outfile</span>, width<span class="op">=</span><span class="va">width</span>, height<span class="op">=</span><span class="va">height</span><span class="op">)</span></span>
-<span class="r-in">    <span class="fu"><a href="https://rdrr.io/r/graphics/hist.html" class="external-link">hist</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">n</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in">    <span class="fu"><a href="https://rdrr.io/r/grDevices/dev.html" class="external-link">dev.off</a></span><span class="op">(</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in">    <span class="co"># Return a list containing the filename</span></span>
-<span class="r-in">    <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>src <span class="op">=</span> <span class="va">outfile</span>,</span>
-<span class="r-in">         width <span class="op">=</span> <span class="va">width</span>,</span>
-<span class="r-in">         height <span class="op">=</span> <span class="va">height</span>,</span>
-<span class="r-in">         alt <span class="op">=</span> <span class="st">"This is alternate text"</span><span class="op">)</span></span>
-<span class="r-in">  <span class="op">}</span>, deleteFile <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in">  <span class="co"># Send a pre-rendered image, and don't delete the image after sending it</span></span>
-<span class="r-in">  <span class="co"># NOTE: For this example to work, it would require files in a subdirectory</span></span>
-<span class="r-in">  <span class="co"># named images/</span></span>
-<span class="r-in">  <span class="va">output</span><span class="op">$</span><span class="va">plot3</span> <span class="op">&lt;-</span> <span class="fu">renderImage</span><span class="op">(</span><span class="op">{</span></span>
-<span class="r-in">    <span class="co"># When input$n is 1, filename is ./images/image1.jpeg</span></span>
-<span class="r-in">    <span class="va">filename</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/normalizePath.html" class="external-link">normalizePath</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="st">'./images'</span>,</span>
-<span class="r-in">                              <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">'image'</span>, <span class="va">input</span><span class="op">$</span><span class="va">n</span>, <span class="st">'.jpeg'</span>, sep<span class="op">=</span><span class="st">''</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in">    <span class="co"># Return a list containing the filename</span></span>
-<span class="r-in">    <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>src <span class="op">=</span> <span class="va">filename</span><span class="op">)</span></span>
-<span class="r-in">  <span class="op">}</span>, deleteFile <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu"><a href="shinyApp.html">shinyApp</a></span><span class="op">(</span><span class="va">ui</span>, <span class="va">server</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co">## Only run examples in interactive R sessions</span></span></span>
+<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">options</a></span><span class="op">(</span>device.ask.default <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">ui</span> <span class="op">&lt;-</span> <span class="fu"><a href="fluidPage.html">fluidPage</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="sliderInput.html">sliderInput</a></span><span class="op">(</span><span class="st">"n"</span>, <span class="st">"Number of observations"</span>, <span class="fl">2</span>, <span class="fl">1000</span>, <span class="fl">500</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  <span class="fu"><a href="plotOutput.html">plotOutput</a></span><span class="op">(</span><span class="st">"plot1"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  <span class="fu"><a href="plotOutput.html">plotOutput</a></span><span class="op">(</span><span class="st">"plot2"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  <span class="fu"><a href="plotOutput.html">plotOutput</a></span><span class="op">(</span><span class="st">"plot3"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">server</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>  <span class="co"># A plot of fixed size</span></span></span>
+<span class="r-in"><span>  <span class="va">output</span><span class="op">$</span><span class="va">plot1</span> <span class="op">&lt;-</span> <span class="fu">renderImage</span><span class="op">(</span><span class="op">{</span></span></span>
+<span class="r-in"><span>    <span class="co"># A temp file to save the output. It will be deleted after renderImage</span></span></span>
+<span class="r-in"><span>    <span class="co"># sends it, because deleteFile=TRUE.</span></span></span>
+<span class="r-in"><span>    <span class="va">outfile</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span>fileext<span class="op">=</span><span class="st">'.png'</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>    <span class="co"># Generate a png</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/grDevices/png.html" class="external-link">png</a></span><span class="op">(</span><span class="va">outfile</span>, width<span class="op">=</span><span class="fl">400</span>, height<span class="op">=</span><span class="fl">400</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/graphics/hist.html" class="external-link">hist</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">n</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/grDevices/dev.html" class="external-link">dev.off</a></span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>    <span class="co"># Return a list</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>src <span class="op">=</span> <span class="va">outfile</span>,</span></span>
+<span class="r-in"><span>         alt <span class="op">=</span> <span class="st">"This is alternate text"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">}</span>, deleteFile <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>  <span class="co"># A dynamically-sized plot</span></span></span>
+<span class="r-in"><span>  <span class="va">output</span><span class="op">$</span><span class="va">plot2</span> <span class="op">&lt;-</span> <span class="fu">renderImage</span><span class="op">(</span><span class="op">{</span></span></span>
+<span class="r-in"><span>    <span class="co"># Read plot2's width and height. These are reactive values, so this</span></span></span>
+<span class="r-in"><span>    <span class="co"># expression will re-run whenever these values change.</span></span></span>
+<span class="r-in"><span>    <span class="va">width</span>  <span class="op">&lt;-</span> <span class="va">session</span><span class="op">$</span><span class="va">clientData</span><span class="op">$</span><span class="va">output_plot2_width</span></span></span>
+<span class="r-in"><span>    <span class="va">height</span> <span class="op">&lt;-</span> <span class="va">session</span><span class="op">$</span><span class="va">clientData</span><span class="op">$</span><span class="va">output_plot2_height</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>    <span class="co"># A temp file to save the output.</span></span></span>
+<span class="r-in"><span>    <span class="va">outfile</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span>fileext<span class="op">=</span><span class="st">'.png'</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/grDevices/png.html" class="external-link">png</a></span><span class="op">(</span><span class="va">outfile</span>, width<span class="op">=</span><span class="va">width</span>, height<span class="op">=</span><span class="va">height</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/graphics/hist.html" class="external-link">hist</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">n</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/grDevices/dev.html" class="external-link">dev.off</a></span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>    <span class="co"># Return a list containing the filename</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>src <span class="op">=</span> <span class="va">outfile</span>,</span></span>
+<span class="r-in"><span>         width <span class="op">=</span> <span class="va">width</span>,</span></span>
+<span class="r-in"><span>         height <span class="op">=</span> <span class="va">height</span>,</span></span>
+<span class="r-in"><span>         alt <span class="op">=</span> <span class="st">"This is alternate text"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">}</span>, deleteFile <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>  <span class="co"># Send a pre-rendered image, and don't delete the image after sending it</span></span></span>
+<span class="r-in"><span>  <span class="co"># NOTE: For this example to work, it would require files in a subdirectory</span></span></span>
+<span class="r-in"><span>  <span class="co"># named images/</span></span></span>
+<span class="r-in"><span>  <span class="va">output</span><span class="op">$</span><span class="va">plot3</span> <span class="op">&lt;-</span> <span class="fu">renderImage</span><span class="op">(</span><span class="op">{</span></span></span>
+<span class="r-in"><span>    <span class="co"># When input$n is 1, filename is ./images/image1.jpeg</span></span></span>
+<span class="r-in"><span>    <span class="va">filename</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/normalizePath.html" class="external-link">normalizePath</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="st">'./images'</span>,</span></span>
+<span class="r-in"><span>                              <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">'image'</span>, <span class="va">input</span><span class="op">$</span><span class="va">n</span>, <span class="st">'.jpeg'</span>, sep<span class="op">=</span><span class="st">''</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>    <span class="co"># Return a list containing the filename</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>src <span class="op">=</span> <span class="va">filename</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">}</span>, deleteFile <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="shinyApp.html">shinyApp</a></span><span class="op">(</span><span class="va">ui</span>, <span class="va">server</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
 </code></pre></div>
     </div>
   </div>

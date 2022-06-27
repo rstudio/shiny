@@ -18,7 +18,7 @@ manipulating stack traces."><meta property="og:image" content="/logo.png"><!-- m
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">shiny</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.1.9003</span>
       </span>
     </div>
 
@@ -55,33 +55,33 @@ manipulating stack traces.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">captureStackTraces</span><span class="op">(</span><span class="va">expr</span><span class="op">)</span>
-
-<span class="fu">withLogErrors</span><span class="op">(</span>
-  <span class="va">expr</span>,
-  full <span class="op">=</span> <span class="fu"><a href="devmode.html">get_devmode_option</a></span><span class="op">(</span><span class="st">"shiny.fullstacktrace"</span>, <span class="cn">FALSE</span><span class="op">)</span>,
-  offset <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">getOption</a></span><span class="op">(</span><span class="st">"shiny.stacktraceoffset"</span>, <span class="cn">TRUE</span><span class="op">)</span>
-<span class="op">)</span>
-
-<span class="fu">printError</span><span class="op">(</span>
-  <span class="va">cond</span>,
-  full <span class="op">=</span> <span class="fu"><a href="devmode.html">get_devmode_option</a></span><span class="op">(</span><span class="st">"shiny.fullstacktrace"</span>, <span class="cn">FALSE</span><span class="op">)</span>,
-  offset <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">getOption</a></span><span class="op">(</span><span class="st">"shiny.stacktraceoffset"</span>, <span class="cn">TRUE</span><span class="op">)</span>
-<span class="op">)</span>
-
-<span class="fu">printStackTrace</span><span class="op">(</span>
-  <span class="va">cond</span>,
-  full <span class="op">=</span> <span class="fu"><a href="devmode.html">get_devmode_option</a></span><span class="op">(</span><span class="st">"shiny.fullstacktrace"</span>, <span class="cn">FALSE</span><span class="op">)</span>,
-  offset <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">getOption</a></span><span class="op">(</span><span class="st">"shiny.stacktraceoffset"</span>, <span class="cn">TRUE</span><span class="op">)</span>
-<span class="op">)</span>
-
-<span class="fu">conditionStackTrace</span><span class="op">(</span><span class="va">cond</span><span class="op">)</span>
-
-<span class="fu">conditionStackTrace</span><span class="op">(</span><span class="va">cond</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">value</span>
-
-<span class="fu">..stacktraceon..</span><span class="op">(</span><span class="va">expr</span><span class="op">)</span>
-
-<span class="fu">..stacktraceoff..</span><span class="op">(</span><span class="va">expr</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">captureStackTraces</span><span class="op">(</span><span class="va">expr</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">withLogErrors</span><span class="op">(</span></span>
+<span>  <span class="va">expr</span>,</span>
+<span>  full <span class="op">=</span> <span class="fu"><a href="devmode.html">get_devmode_option</a></span><span class="op">(</span><span class="st">"shiny.fullstacktrace"</span>, <span class="cn">FALSE</span><span class="op">)</span>,</span>
+<span>  offset <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">getOption</a></span><span class="op">(</span><span class="st">"shiny.stacktraceoffset"</span>, <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">printError</span><span class="op">(</span></span>
+<span>  <span class="va">cond</span>,</span>
+<span>  full <span class="op">=</span> <span class="fu"><a href="devmode.html">get_devmode_option</a></span><span class="op">(</span><span class="st">"shiny.fullstacktrace"</span>, <span class="cn">FALSE</span><span class="op">)</span>,</span>
+<span>  offset <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">getOption</a></span><span class="op">(</span><span class="st">"shiny.stacktraceoffset"</span>, <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">printStackTrace</span><span class="op">(</span></span>
+<span>  <span class="va">cond</span>,</span>
+<span>  full <span class="op">=</span> <span class="fu"><a href="devmode.html">get_devmode_option</a></span><span class="op">(</span><span class="st">"shiny.fullstacktrace"</span>, <span class="cn">FALSE</span><span class="op">)</span>,</span>
+<span>  offset <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">getOption</a></span><span class="op">(</span><span class="st">"shiny.stacktraceoffset"</span>, <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">conditionStackTrace</span><span class="op">(</span><span class="va">cond</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">conditionStackTrace</span><span class="op">(</span><span class="va">cond</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">value</span></span>
+<span></span>
+<span><span class="fu">..stacktraceon..</span><span class="op">(</span><span class="va">expr</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">..stacktraceoff..</span><span class="op">(</span><span class="va">expr</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -158,60 +158,60 @@ value is less than 1 is hidden, and finally, the ..stacktraceon.. and
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="co"># Keeps tryCatch and withVisible related calls off the</span></span>
-<span class="r-in"><span class="co"># pretty-printed stack trace</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="va">visibleFunction1</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">  <span class="kw"><a href="https://rdrr.io/r/base/stop.html" class="external-link">stop</a></span><span class="op">(</span><span class="st">"Kaboom!"</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="va">visibleFunction2</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">  <span class="fu">visibleFunction1</span><span class="op">(</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="va">hiddenFunction</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">expr</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">  <span class="va">expr</span></span>
-<span class="r-in"><span class="op">}</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># An example without ..stacktraceon/off.. manipulation.</span></span>
-<span class="r-in"><span class="co"># The outer "try" is just to prevent example() from stopping.</span></span>
-<span class="r-in"><span class="kw"><a href="https://rdrr.io/r/base/try.html" class="external-link">try</a></span><span class="op">(</span><span class="op">{</span></span>
-<span class="r-in">  <span class="co"># The withLogErrors call ensures that stack traces are captured</span></span>
-<span class="r-in">  <span class="co"># and that errors that bubble up are logged using warning().</span></span>
-<span class="r-in">  <span class="fu">withLogErrors</span><span class="op">(</span><span class="op">{</span></span>
-<span class="r-in">    <span class="co"># tryCatch and withVisible are just here to add some noise to</span></span>
-<span class="r-in">    <span class="co"># the stack trace.</span></span>
-<span class="r-in">    <span class="kw"><a href="https://rdrr.io/r/base/conditions.html" class="external-link">tryCatch</a></span><span class="op">(</span></span>
-<span class="r-in">      <span class="fu"><a href="https://rdrr.io/r/base/withVisible.html" class="external-link">withVisible</a></span><span class="op">(</span><span class="op">{</span></span>
-<span class="r-in">        <span class="fu">hiddenFunction</span><span class="op">(</span><span class="fu">visibleFunction2</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in">      <span class="op">}</span><span class="op">)</span></span>
-<span class="r-in">    <span class="op">)</span></span>
-<span class="r-in">  <span class="op">}</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Keeps tryCatch and withVisible related calls off the</span></span></span>
+<span class="r-in"><span><span class="co"># pretty-printed stack trace</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">visibleFunction1</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="kw"><a href="https://rdrr.io/r/base/stop.html" class="external-link">stop</a></span><span class="op">(</span><span class="st">"Kaboom!"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">visibleFunction2</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="fu">visibleFunction1</span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">hiddenFunction</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">expr</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="va">expr</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># An example without ..stacktraceon/off.. manipulation.</span></span></span>
+<span class="r-in"><span><span class="co"># The outer "try" is just to prevent example() from stopping.</span></span></span>
+<span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/try.html" class="external-link">try</a></span><span class="op">(</span><span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="co"># The withLogErrors call ensures that stack traces are captured</span></span></span>
+<span class="r-in"><span>  <span class="co"># and that errors that bubble up are logged using warning().</span></span></span>
+<span class="r-in"><span>  <span class="fu">withLogErrors</span><span class="op">(</span><span class="op">{</span></span></span>
+<span class="r-in"><span>    <span class="co"># tryCatch and withVisible are just here to add some noise to</span></span></span>
+<span class="r-in"><span>    <span class="co"># the stack trace.</span></span></span>
+<span class="r-in"><span>    <span class="kw"><a href="https://rdrr.io/r/base/conditions.html" class="external-link">tryCatch</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>      <span class="fu"><a href="https://rdrr.io/r/base/withVisible.html" class="external-link">withVisible</a></span><span class="op">(</span><span class="op">{</span></span></span>
+<span class="r-in"><span>        <span class="fu">hiddenFunction</span><span class="op">(</span><span class="fu">visibleFunction2</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span>      <span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span><span class="op">)</span></span></span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Error in visibleFunction1: Kaboom!</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> shiny devmode - Turning on full stack trace. To disable, call `options(shiny.fullstacktrace = FALSE)`</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #555555;">This message is displayed once every 8 hours.</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Error in visibleFunction1() : Kaboom!</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Now the same example, but with ..stacktraceon/off.. to hide some</span></span>
-<span class="r-in"><span class="co"># of the less-interesting bits (tryCatch and withVisible).</span></span>
-<span class="r-in"><span class="fu">..stacktraceoff..</span><span class="op">(</span><span class="op">{</span></span>
-<span class="r-in">  <span class="kw"><a href="https://rdrr.io/r/base/try.html" class="external-link">try</a></span><span class="op">(</span><span class="op">{</span></span>
-<span class="r-in">    <span class="fu">withLogErrors</span><span class="op">(</span><span class="op">{</span></span>
-<span class="r-in">      <span class="kw"><a href="https://rdrr.io/r/base/conditions.html" class="external-link">tryCatch</a></span><span class="op">(</span></span>
-<span class="r-in">        <span class="fu"><a href="https://rdrr.io/r/base/withVisible.html" class="external-link">withVisible</a></span><span class="op">(</span></span>
-<span class="r-in">          <span class="fu">hiddenFunction</span><span class="op">(</span></span>
-<span class="r-in">            <span class="fu">..stacktraceon..</span><span class="op">(</span><span class="fu">visibleFunction2</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in">          <span class="op">)</span></span>
-<span class="r-in">        <span class="op">)</span></span>
-<span class="r-in">      <span class="op">)</span></span>
-<span class="r-in">    <span class="op">}</span><span class="op">)</span></span>
-<span class="r-in">  <span class="op">}</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Now the same example, but with ..stacktraceon/off.. to hide some</span></span></span>
+<span class="r-in"><span><span class="co"># of the less-interesting bits (tryCatch and withVisible).</span></span></span>
+<span class="r-in"><span><span class="fu">..stacktraceoff..</span><span class="op">(</span><span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="kw"><a href="https://rdrr.io/r/base/try.html" class="external-link">try</a></span><span class="op">(</span><span class="op">{</span></span></span>
+<span class="r-in"><span>    <span class="fu">withLogErrors</span><span class="op">(</span><span class="op">{</span></span></span>
+<span class="r-in"><span>      <span class="kw"><a href="https://rdrr.io/r/base/conditions.html" class="external-link">tryCatch</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>        <span class="fu"><a href="https://rdrr.io/r/base/withVisible.html" class="external-link">withVisible</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>          <span class="fu">hiddenFunction</span><span class="op">(</span></span></span>
+<span class="r-in"><span>            <span class="fu">..stacktraceon..</span><span class="op">(</span><span class="fu">visibleFunction2</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span>          <span class="op">)</span></span></span>
+<span class="r-in"><span>        <span class="op">)</span></span></span>
+<span class="r-in"><span>      <span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span><span class="op">)</span></span></span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Error in visibleFunction1: Kaboom!</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Error in visibleFunction1() : Kaboom!</span>
-<span class="r-in"></span>
-<span class="r-in"></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>

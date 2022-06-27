@@ -19,7 +19,7 @@ re-evaluated when they change."><meta property="og:image" content="/logo.png"><!
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">shiny</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.1.9003</span>
       </span>
     </div>
 
@@ -57,7 +57,7 @@ re-evaluated when they change.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">isolate</span><span class="op">(</span><span class="va">expr</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">isolate</span><span class="op">(</span><span class="va">expr</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -86,50 +86,50 @@ calls to the reactive expression with <code>isolate()</code>.</p>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in"><span class="fu"><a href="observe.html">observe</a></span><span class="op">(</span><span class="op">{</span></span>
-<span class="r-in">  <span class="va">input</span><span class="op">$</span><span class="va">saveButton</span>  <span class="co"># Do take a dependency on input$saveButton</span></span>
-<span class="r-in"></span>
-<span class="r-in">  <span class="co"># isolate a simple expression</span></span>
-<span class="r-in">  <span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/get.html" class="external-link">get</a></span><span class="op">(</span><span class="fu">isolate</span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">dataset</span><span class="op">)</span><span class="op">)</span>  <span class="co"># No dependency on input$dataset</span></span>
-<span class="r-in">  <span class="fu">writeToDatabase</span><span class="op">(</span><span class="va">data</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu"><a href="observe.html">observe</a></span><span class="op">(</span><span class="op">{</span></span>
-<span class="r-in">  <span class="va">input</span><span class="op">$</span><span class="va">saveButton</span>  <span class="co"># Do take a dependency on input$saveButton</span></span>
-<span class="r-in"></span>
-<span class="r-in">  <span class="co"># isolate a whole block</span></span>
-<span class="r-in">  <span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">isolate</span><span class="op">(</span><span class="op">{</span></span>
-<span class="r-in">    <span class="va">a</span> <span class="op">&lt;-</span> <span class="va">input</span><span class="op">$</span><span class="va">valueA</span>   <span class="co"># No dependency on input$valueA or input$valueB</span></span>
-<span class="r-in">    <span class="va">b</span> <span class="op">&lt;-</span> <span class="va">input</span><span class="op">$</span><span class="va">valueB</span></span>
-<span class="r-in">    <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>a<span class="op">=</span><span class="va">a</span>, b<span class="op">=</span><span class="va">b</span><span class="op">)</span></span>
-<span class="r-in">  <span class="op">}</span><span class="op">)</span></span>
-<span class="r-in">  <span class="fu">writeToDatabase</span><span class="op">(</span><span class="va">data</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu"><a href="observe.html">observe</a></span><span class="op">(</span><span class="op">{</span></span>
-<span class="r-in">  <span class="va">x</span> <span class="op">&lt;-</span> <span class="fl">1</span></span>
-<span class="r-in">  <span class="co"># x outside of isolate() is affected</span></span>
-<span class="r-in">  <span class="fu">isolate</span><span class="op">(</span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fl">2</span><span class="op">)</span></span>
-<span class="r-in">  <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="co"># 2</span></span>
-<span class="r-in"></span>
-<span class="r-in">  <span class="va">y</span> <span class="op">&lt;-</span> <span class="fl">1</span></span>
-<span class="r-in">  <span class="co"># Use local() to avoid affecting calling environment</span></span>
-<span class="r-in">  <span class="fu">isolate</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/eval.html" class="external-link">local</a></span><span class="op">(</span><span class="va">y</span> <span class="op">&lt;-</span> <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in">  <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">y</span><span class="op">)</span> <span class="co"># 1</span></span>
-<span class="r-in"><span class="op">}</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="op">}</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Can also use isolate to call reactive expressions from the R console</span></span>
-<span class="r-in"><span class="va">values</span> <span class="op">&lt;-</span> <span class="fu"><a href="reactiveValues.html">reactiveValues</a></span><span class="op">(</span>A<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">fun</span> <span class="op">&lt;-</span> <span class="fu"><a href="reactive.html">reactive</a></span><span class="op">(</span><span class="op">{</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character</a></span><span class="op">(</span><span class="va">values</span><span class="op">$</span><span class="va">A</span><span class="op">)</span> <span class="op">}</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu">isolate</span><span class="op">(</span><span class="fu">fun</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="observe.html">observe</a></span><span class="op">(</span><span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="va">input</span><span class="op">$</span><span class="va">saveButton</span>  <span class="co"># Do take a dependency on input$saveButton</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>  <span class="co"># isolate a simple expression</span></span></span>
+<span class="r-in"><span>  <span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/get.html" class="external-link">get</a></span><span class="op">(</span><span class="fu">isolate</span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">dataset</span><span class="op">)</span><span class="op">)</span>  <span class="co"># No dependency on input$dataset</span></span></span>
+<span class="r-in"><span>  <span class="fu">writeToDatabase</span><span class="op">(</span><span class="va">data</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="observe.html">observe</a></span><span class="op">(</span><span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="va">input</span><span class="op">$</span><span class="va">saveButton</span>  <span class="co"># Do take a dependency on input$saveButton</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>  <span class="co"># isolate a whole block</span></span></span>
+<span class="r-in"><span>  <span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">isolate</span><span class="op">(</span><span class="op">{</span></span></span>
+<span class="r-in"><span>    <span class="va">a</span> <span class="op">&lt;-</span> <span class="va">input</span><span class="op">$</span><span class="va">valueA</span>   <span class="co"># No dependency on input$valueA or input$valueB</span></span></span>
+<span class="r-in"><span>    <span class="va">b</span> <span class="op">&lt;-</span> <span class="va">input</span><span class="op">$</span><span class="va">valueB</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>a<span class="op">=</span><span class="va">a</span>, b<span class="op">=</span><span class="va">b</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="fu">writeToDatabase</span><span class="op">(</span><span class="va">data</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="observe.html">observe</a></span><span class="op">(</span><span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="va">x</span> <span class="op">&lt;-</span> <span class="fl">1</span></span></span>
+<span class="r-in"><span>  <span class="co"># x outside of isolate() is affected</span></span></span>
+<span class="r-in"><span>  <span class="fu">isolate</span><span class="op">(</span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fl">2</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="co"># 2</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>  <span class="va">y</span> <span class="op">&lt;-</span> <span class="fl">1</span></span></span>
+<span class="r-in"><span>  <span class="co"># Use local() to avoid affecting calling environment</span></span></span>
+<span class="r-in"><span>  <span class="fu">isolate</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/eval.html" class="external-link">local</a></span><span class="op">(</span><span class="va">y</span> <span class="op">&lt;-</span> <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">y</span><span class="op">)</span> <span class="co"># 1</span></span></span>
+<span class="r-in"><span><span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Can also use isolate to call reactive expressions from the R console</span></span></span>
+<span class="r-in"><span><span class="va">values</span> <span class="op">&lt;-</span> <span class="fu"><a href="reactiveValues.html">reactiveValues</a></span><span class="op">(</span>A<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">fun</span> <span class="op">&lt;-</span> <span class="fu"><a href="reactive.html">reactive</a></span><span class="op">(</span><span class="op">{</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character</a></span><span class="op">(</span><span class="va">values</span><span class="op">$</span><span class="va">A</span><span class="op">)</span> <span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">isolate</span><span class="op">(</span><span class="fu">fun</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "1"</span>
-<span class="r-in"><span class="co"># "1"</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># isolate also works if the reactive expression accesses values from the</span></span>
-<span class="r-in"><span class="co"># input object, like input$x</span></span>
+<span class="r-in"><span><span class="co"># "1"</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># isolate also works if the reactive expression accesses values from the</span></span></span>
+<span class="r-in"><span><span class="co"># input object, like input$x</span></span></span>
 </code></pre></div>
     </div>
   </div>

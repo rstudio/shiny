@@ -18,7 +18,7 @@ event occurs. These events are triggered by accessing a snapshot URL."><meta pro
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">shiny</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.1.9003</span>
       </span>
     </div>
 
@@ -55,12 +55,12 @@ event occurs. These events are triggered by accessing a snapshot URL.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">exportTestValues</span><span class="op">(</span>
-  <span class="va">...</span>,
-  quoted_ <span class="op">=</span> <span class="cn">FALSE</span>,
-  env_ <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sys.parent.html" class="external-link">parent.frame</a></span><span class="op">(</span><span class="op">)</span>,
-  session_ <span class="op">=</span> <span class="fu"><a href="domains.html">getDefaultReactiveDomain</a></span><span class="op">(</span><span class="op">)</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">exportTestValues</span><span class="op">(</span></span>
+<span>  <span class="va">...</span>,</span>
+<span>  quoted_ <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  env_ <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sys.parent.html" class="external-link">parent.frame</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  session_ <span class="op">=</span> <span class="fu"><a href="domains.html">getDefaultReactiveDomain</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -91,46 +91,46 @@ global option <code>shiny.testmode</code> to <code>TRUE</code>.</p>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="co">## Only run this example in interactive R sessions</span></span>
-<span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">options</a></span><span class="op">(</span>shiny.testmode <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># This application shows the test snapshot URL; clicking on it will</span></span>
-<span class="r-in"><span class="co"># fetch the input, output, and exported values in JSON format.</span></span>
-<span class="r-in"><span class="fu"><a href="shinyApp.html">shinyApp</a></span><span class="op">(</span></span>
-<span class="r-in">  ui <span class="op">=</span> <span class="fu"><a href="bootstrapPage.html">basicPage</a></span><span class="op">(</span></span>
-<span class="r-in">    <span class="fu"><a href="https://rdrr.io/pkg/htmltools/man/builder.html" class="external-link">h4</a></span><span class="op">(</span><span class="st">"Snapshot URL: "</span><span class="op">)</span>,</span>
-<span class="r-in">    <span class="fu"><a href="htmlOutput.html">uiOutput</a></span><span class="op">(</span><span class="st">"url"</span><span class="op">)</span>,</span>
-<span class="r-in">    <span class="fu"><a href="https://rdrr.io/pkg/htmltools/man/builder.html" class="external-link">h4</a></span><span class="op">(</span><span class="st">"Current values:"</span><span class="op">)</span>,</span>
-<span class="r-in">    <span class="fu"><a href="textOutput.html">verbatimTextOutput</a></span><span class="op">(</span><span class="st">"values"</span><span class="op">)</span>,</span>
-<span class="r-in">    <span class="fu"><a href="actionButton.html">actionButton</a></span><span class="op">(</span><span class="st">"inc"</span>, <span class="st">"Increment x"</span><span class="op">)</span></span>
-<span class="r-in">  <span class="op">)</span>,</span>
-<span class="r-in"></span>
-<span class="r-in">  server <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">    <span class="va">vals</span> <span class="op">&lt;-</span> <span class="fu"><a href="reactiveValues.html">reactiveValues</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
-<span class="r-in">    <span class="va">y</span> <span class="op">&lt;-</span> <span class="fu"><a href="reactive.html">reactive</a></span><span class="op">(</span><span class="op">{</span> <span class="va">vals</span><span class="op">$</span><span class="va">x</span> <span class="op">+</span> <span class="fl">1</span> <span class="op">}</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in">    <span class="fu"><a href="observeEvent.html">observeEvent</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">inc</span>, <span class="op">{</span></span>
-<span class="r-in">      <span class="va">vals</span><span class="op">$</span><span class="va">x</span> <span class="op">&lt;&lt;-</span> <span class="va">vals</span><span class="op">$</span><span class="va">x</span> <span class="op">+</span> <span class="fl">1</span></span>
-<span class="r-in">    <span class="op">}</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in">    <span class="fu">exportTestValues</span><span class="op">(</span></span>
-<span class="r-in">      x <span class="op">=</span> <span class="va">vals</span><span class="op">$</span><span class="va">x</span>,</span>
-<span class="r-in">      y <span class="op">=</span> <span class="fu">y</span><span class="op">(</span><span class="op">)</span></span>
-<span class="r-in">    <span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in">    <span class="va">output</span><span class="op">$</span><span class="va">url</span> <span class="op">&lt;-</span> <span class="fu"><a href="renderUI.html">renderUI</a></span><span class="op">(</span><span class="op">{</span></span>
-<span class="r-in">      <span class="va">url</span> <span class="op">&lt;-</span> <span class="va">session</span><span class="op">$</span><span class="fu">getTestSnapshotUrl</span><span class="op">(</span>format<span class="op">=</span><span class="st">"json"</span><span class="op">)</span></span>
-<span class="r-in">      <span class="fu"><a href="https://rdrr.io/pkg/htmltools/man/builder.html" class="external-link">a</a></span><span class="op">(</span>href <span class="op">=</span> <span class="va">url</span>, <span class="va">url</span><span class="op">)</span></span>
-<span class="r-in">    <span class="op">}</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in">    <span class="va">output</span><span class="op">$</span><span class="va">values</span> <span class="op">&lt;-</span> <span class="fu"><a href="renderPrint.html">renderText</a></span><span class="op">(</span><span class="op">{</span></span>
-<span class="r-in">      <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"vals$x: "</span>, <span class="va">vals</span><span class="op">$</span><span class="va">x</span>, <span class="st">"\ny: "</span>, <span class="fu">y</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in">    <span class="op">}</span><span class="op">)</span></span>
-<span class="r-in">  <span class="op">}</span></span>
-<span class="r-in"><span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co">## Only run this example in interactive R sessions</span></span></span>
+<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">options</a></span><span class="op">(</span>shiny.testmode <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># This application shows the test snapshot URL; clicking on it will</span></span></span>
+<span class="r-in"><span><span class="co"># fetch the input, output, and exported values in JSON format.</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="shinyApp.html">shinyApp</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  ui <span class="op">=</span> <span class="fu"><a href="bootstrapPage.html">basicPage</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/pkg/htmltools/man/builder.html" class="external-link">h4</a></span><span class="op">(</span><span class="st">"Snapshot URL: "</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    <span class="fu"><a href="htmlOutput.html">uiOutput</a></span><span class="op">(</span><span class="st">"url"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/pkg/htmltools/man/builder.html" class="external-link">h4</a></span><span class="op">(</span><span class="st">"Current values:"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    <span class="fu"><a href="textOutput.html">verbatimTextOutput</a></span><span class="op">(</span><span class="st">"values"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    <span class="fu"><a href="actionButton.html">actionButton</a></span><span class="op">(</span><span class="st">"inc"</span>, <span class="st">"Increment x"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span>,</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>  server <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>    <span class="va">vals</span> <span class="op">&lt;-</span> <span class="fu"><a href="reactiveValues.html">reactiveValues</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="va">y</span> <span class="op">&lt;-</span> <span class="fu"><a href="reactive.html">reactive</a></span><span class="op">(</span><span class="op">{</span> <span class="va">vals</span><span class="op">$</span><span class="va">x</span> <span class="op">+</span> <span class="fl">1</span> <span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="observeEvent.html">observeEvent</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">inc</span>, <span class="op">{</span></span></span>
+<span class="r-in"><span>      <span class="va">vals</span><span class="op">$</span><span class="va">x</span> <span class="op">&lt;&lt;-</span> <span class="va">vals</span><span class="op">$</span><span class="va">x</span> <span class="op">+</span> <span class="fl">1</span></span></span>
+<span class="r-in"><span>    <span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>    <span class="fu">exportTestValues</span><span class="op">(</span></span></span>
+<span class="r-in"><span>      x <span class="op">=</span> <span class="va">vals</span><span class="op">$</span><span class="va">x</span>,</span></span>
+<span class="r-in"><span>      y <span class="op">=</span> <span class="fu">y</span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>    <span class="va">output</span><span class="op">$</span><span class="va">url</span> <span class="op">&lt;-</span> <span class="fu"><a href="renderUI.html">renderUI</a></span><span class="op">(</span><span class="op">{</span></span></span>
+<span class="r-in"><span>      <span class="va">url</span> <span class="op">&lt;-</span> <span class="va">session</span><span class="op">$</span><span class="fu">getTestSnapshotUrl</span><span class="op">(</span>format<span class="op">=</span><span class="st">"json"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>      <span class="fu"><a href="https://rdrr.io/pkg/htmltools/man/builder.html" class="external-link">a</a></span><span class="op">(</span>href <span class="op">=</span> <span class="va">url</span>, <span class="va">url</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>    <span class="va">output</span><span class="op">$</span><span class="va">values</span> <span class="op">&lt;-</span> <span class="fu"><a href="renderPrint.html">renderText</a></span><span class="op">(</span><span class="op">{</span></span></span>
+<span class="r-in"><span>      <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"vals$x: "</span>, <span class="va">vals</span><span class="op">$</span><span class="va">x</span>, <span class="st">"\ny: "</span>, <span class="fu">y</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">}</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
 </code></pre></div>
     </div>
   </div>

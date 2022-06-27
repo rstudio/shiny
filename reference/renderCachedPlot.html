@@ -18,7 +18,7 @@ this is a shortcut for using bindCache() with renderPlot()."><meta property="og:
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">shiny</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.1.9003</span>
       </span>
     </div>
 
@@ -55,18 +55,18 @@ this is a shortcut for using <code><a href="bindCache.html">bindCache()</a></cod
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">renderCachedPlot</span><span class="op">(</span>
-  <span class="va">expr</span>,
-  <span class="va">cacheKeyExpr</span>,
-  sizePolicy <span class="op">=</span> <span class="fu"><a href="sizeGrowthRatio.html">sizeGrowthRatio</a></span><span class="op">(</span>width <span class="op">=</span> <span class="fl">400</span>, height <span class="op">=</span> <span class="fl">400</span>, growthRate <span class="op">=</span> <span class="fl">1.2</span><span class="op">)</span>,
-  res <span class="op">=</span> <span class="fl">72</span>,
-  cache <span class="op">=</span> <span class="st">"app"</span>,
-  <span class="va">...</span>,
-  alt <span class="op">=</span> <span class="st">"Plot object"</span>,
-  outputArgs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,
-  width <span class="op">=</span> <span class="cn">NULL</span>,
-  height <span class="op">=</span> <span class="cn">NULL</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">renderCachedPlot</span><span class="op">(</span></span>
+<span>  <span class="va">expr</span>,</span>
+<span>  <span class="va">cacheKeyExpr</span>,</span>
+<span>  sizePolicy <span class="op">=</span> <span class="fu"><a href="sizeGrowthRatio.html">sizeGrowthRatio</a></span><span class="op">(</span>width <span class="op">=</span> <span class="fl">400</span>, height <span class="op">=</span> <span class="fl">400</span>, growthRate <span class="op">=</span> <span class="fl">1.2</span><span class="op">)</span>,</span>
+<span>  res <span class="op">=</span> <span class="fl">72</span>,</span>
+<span>  cache <span class="op">=</span> <span class="st">"app"</span>,</span>
+<span>  <span class="va">...</span>,</span>
+<span>  alt <span class="op">=</span> <span class="st">"Plot object"</span>,</span>
+<span>  outputArgs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  width <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  height <span class="op">=</span> <span class="cn">NULL</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -180,137 +180,137 @@ function. It can be used with <code><a href="bindCache.html">bindCache()</a></co
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="co">## Only run examples in interactive R sessions</span></span>
-<span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># A basic example that uses the default app-scoped memory cache.</span></span>
-<span class="r-in"><span class="co"># The cache will be shared among all simultaneous users of the application.</span></span>
-<span class="r-in"><span class="fu"><a href="shinyApp.html">shinyApp</a></span><span class="op">(</span></span>
-<span class="r-in">  <span class="fu"><a href="fluidPage.html">fluidPage</a></span><span class="op">(</span></span>
-<span class="r-in">    <span class="fu"><a href="sidebarLayout.html">sidebarLayout</a></span><span class="op">(</span></span>
-<span class="r-in">      <span class="fu"><a href="sidebarLayout.html">sidebarPanel</a></span><span class="op">(</span></span>
-<span class="r-in">        <span class="fu"><a href="sliderInput.html">sliderInput</a></span><span class="op">(</span><span class="st">"n"</span>, <span class="st">"Number of points"</span>, <span class="fl">4</span>, <span class="fl">32</span>, value <span class="op">=</span> <span class="fl">8</span>, step <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
-<span class="r-in">      <span class="op">)</span>,</span>
-<span class="r-in">      <span class="fu"><a href="sidebarLayout.html">mainPanel</a></span><span class="op">(</span><span class="fu"><a href="plotOutput.html">plotOutput</a></span><span class="op">(</span><span class="st">"plot"</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in">    <span class="op">)</span></span>
-<span class="r-in">  <span class="op">)</span>,</span>
-<span class="r-in">  <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">    <span class="va">output</span><span class="op">$</span><span class="va">plot</span> <span class="op">&lt;-</span> <span class="fu">renderCachedPlot</span><span class="op">(</span><span class="op">{</span></span>
-<span class="r-in">        <span class="fu"><a href="https://rdrr.io/r/base/Sys.sleep.html" class="external-link">Sys.sleep</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span>  <span class="co"># Add an artificial delay</span></span>
-<span class="r-in">        <span class="va">seqn</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">n</span><span class="op">)</span></span>
-<span class="r-in">        <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">mtcars</span><span class="op">$</span><span class="va">wt</span><span class="op">[</span><span class="va">seqn</span><span class="op">]</span>, <span class="va">mtcars</span><span class="op">$</span><span class="va">mpg</span><span class="op">[</span><span class="va">seqn</span><span class="op">]</span>,</span>
-<span class="r-in">             xlim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/range.html" class="external-link">range</a></span><span class="op">(</span><span class="va">mtcars</span><span class="op">$</span><span class="va">wt</span><span class="op">)</span>, ylim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/range.html" class="external-link">range</a></span><span class="op">(</span><span class="va">mtcars</span><span class="op">$</span><span class="va">mpg</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in">      <span class="op">}</span>,</span>
-<span class="r-in">      cacheKeyExpr <span class="op">=</span> <span class="op">{</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">n</span><span class="op">)</span> <span class="op">}</span></span>
-<span class="r-in">    <span class="op">)</span></span>
-<span class="r-in">  <span class="op">}</span></span>
-<span class="r-in"><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># An example uses a data object shared across sessions. mydata() is part of</span></span>
-<span class="r-in"><span class="co"># the cache key, so when its value changes, plots that were previously</span></span>
-<span class="r-in"><span class="co"># stored in the cache will no longer be used (unless mydata() changes back</span></span>
-<span class="r-in"><span class="co"># to its previous value).</span></span>
-<span class="r-in"><span class="va">mydata</span> <span class="op">&lt;-</span> <span class="fu"><a href="reactiveVal.html">reactiveVal</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">400</span><span class="op">)</span>, y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">400</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="va">ui</span> <span class="op">&lt;-</span> <span class="fu"><a href="fluidPage.html">fluidPage</a></span><span class="op">(</span></span>
-<span class="r-in">  <span class="fu"><a href="sidebarLayout.html">sidebarLayout</a></span><span class="op">(</span></span>
-<span class="r-in">    <span class="fu"><a href="sidebarLayout.html">sidebarPanel</a></span><span class="op">(</span></span>
-<span class="r-in">      <span class="fu"><a href="sliderInput.html">sliderInput</a></span><span class="op">(</span><span class="st">"n"</span>, <span class="st">"Number of points"</span>, <span class="fl">50</span>, <span class="fl">400</span>, <span class="fl">100</span>, step <span class="op">=</span> <span class="fl">50</span><span class="op">)</span>,</span>
-<span class="r-in">      <span class="fu"><a href="actionButton.html">actionButton</a></span><span class="op">(</span><span class="st">"newdata"</span>, <span class="st">"New data"</span><span class="op">)</span></span>
-<span class="r-in">    <span class="op">)</span>,</span>
-<span class="r-in">    <span class="fu"><a href="sidebarLayout.html">mainPanel</a></span><span class="op">(</span></span>
-<span class="r-in">      <span class="fu"><a href="plotOutput.html">plotOutput</a></span><span class="op">(</span><span class="st">"plot"</span><span class="op">)</span></span>
-<span class="r-in">    <span class="op">)</span></span>
-<span class="r-in">  <span class="op">)</span></span>
-<span class="r-in"><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="va">server</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">  <span class="fu"><a href="observeEvent.html">observeEvent</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">newdata</span>, <span class="op">{</span></span>
-<span class="r-in">    <span class="fu">mydata</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">400</span><span class="op">)</span>, y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">400</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in">  <span class="op">}</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in">  <span class="va">output</span><span class="op">$</span><span class="va">plot</span> <span class="op">&lt;-</span> <span class="fu">renderCachedPlot</span><span class="op">(</span></span>
-<span class="r-in">    <span class="op">{</span></span>
-<span class="r-in">      <span class="fu"><a href="https://rdrr.io/r/base/Sys.sleep.html" class="external-link">Sys.sleep</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span></span>
-<span class="r-in">      <span class="va">d</span> <span class="op">&lt;-</span> <span class="fu">mydata</span><span class="op">(</span><span class="op">)</span></span>
-<span class="r-in">      <span class="va">seqn</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">n</span><span class="op">)</span></span>
-<span class="r-in">      <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">d</span><span class="op">$</span><span class="va">x</span><span class="op">[</span><span class="va">seqn</span><span class="op">]</span>, <span class="va">d</span><span class="op">$</span><span class="va">y</span><span class="op">[</span><span class="va">seqn</span><span class="op">]</span>, xlim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/range.html" class="external-link">range</a></span><span class="op">(</span><span class="va">d</span><span class="op">$</span><span class="va">x</span><span class="op">)</span>, ylim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/range.html" class="external-link">range</a></span><span class="op">(</span><span class="va">d</span><span class="op">$</span><span class="va">y</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in">    <span class="op">}</span>,</span>
-<span class="r-in">    cacheKeyExpr <span class="op">=</span> <span class="op">{</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">n</span>, <span class="fu">mydata</span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">}</span>,</span>
-<span class="r-in">  <span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu"><a href="shinyApp.html">shinyApp</a></span><span class="op">(</span><span class="va">ui</span>, <span class="va">server</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># A basic application with two plots, where each plot in each session has</span></span>
-<span class="r-in"><span class="co"># a separate cache.</span></span>
-<span class="r-in"><span class="fu"><a href="shinyApp.html">shinyApp</a></span><span class="op">(</span></span>
-<span class="r-in">  <span class="fu"><a href="fluidPage.html">fluidPage</a></span><span class="op">(</span></span>
-<span class="r-in">    <span class="fu"><a href="sidebarLayout.html">sidebarLayout</a></span><span class="op">(</span></span>
-<span class="r-in">      <span class="fu"><a href="sidebarLayout.html">sidebarPanel</a></span><span class="op">(</span></span>
-<span class="r-in">        <span class="fu"><a href="sliderInput.html">sliderInput</a></span><span class="op">(</span><span class="st">"n"</span>, <span class="st">"Number of points"</span>, <span class="fl">4</span>, <span class="fl">32</span>, value <span class="op">=</span> <span class="fl">8</span>, step <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
-<span class="r-in">      <span class="op">)</span>,</span>
-<span class="r-in">      <span class="fu"><a href="sidebarLayout.html">mainPanel</a></span><span class="op">(</span></span>
-<span class="r-in">        <span class="fu"><a href="plotOutput.html">plotOutput</a></span><span class="op">(</span><span class="st">"plot1"</span><span class="op">)</span>,</span>
-<span class="r-in">        <span class="fu"><a href="plotOutput.html">plotOutput</a></span><span class="op">(</span><span class="st">"plot2"</span><span class="op">)</span></span>
-<span class="r-in">      <span class="op">)</span></span>
-<span class="r-in">    <span class="op">)</span></span>
-<span class="r-in">  <span class="op">)</span>,</span>
-<span class="r-in">  <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">    <span class="va">output</span><span class="op">$</span><span class="va">plot1</span> <span class="op">&lt;-</span> <span class="fu">renderCachedPlot</span><span class="op">(</span><span class="op">{</span></span>
-<span class="r-in">        <span class="fu"><a href="https://rdrr.io/r/base/Sys.sleep.html" class="external-link">Sys.sleep</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span>  <span class="co"># Add an artificial delay</span></span>
-<span class="r-in">        <span class="va">seqn</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">n</span><span class="op">)</span></span>
-<span class="r-in">        <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">mtcars</span><span class="op">$</span><span class="va">wt</span><span class="op">[</span><span class="va">seqn</span><span class="op">]</span>, <span class="va">mtcars</span><span class="op">$</span><span class="va">mpg</span><span class="op">[</span><span class="va">seqn</span><span class="op">]</span>,</span>
-<span class="r-in">             xlim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/range.html" class="external-link">range</a></span><span class="op">(</span><span class="va">mtcars</span><span class="op">$</span><span class="va">wt</span><span class="op">)</span>, ylim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/range.html" class="external-link">range</a></span><span class="op">(</span><span class="va">mtcars</span><span class="op">$</span><span class="va">mpg</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in">      <span class="op">}</span>,</span>
-<span class="r-in">      cacheKeyExpr <span class="op">=</span> <span class="op">{</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">n</span><span class="op">)</span> <span class="op">}</span>,</span>
-<span class="r-in">      cache <span class="op">=</span> <span class="fu">cachem</span><span class="fu">::</span><span class="fu"><a href="https://cachem.r-lib.org/reference/cache_mem.html" class="external-link">cache_mem</a></span><span class="op">(</span><span class="op">)</span></span>
-<span class="r-in">    <span class="op">)</span></span>
-<span class="r-in">    <span class="va">output</span><span class="op">$</span><span class="va">plot2</span> <span class="op">&lt;-</span> <span class="fu">renderCachedPlot</span><span class="op">(</span><span class="op">{</span></span>
-<span class="r-in">        <span class="fu"><a href="https://rdrr.io/r/base/Sys.sleep.html" class="external-link">Sys.sleep</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span>  <span class="co"># Add an artificial delay</span></span>
-<span class="r-in">        <span class="va">seqn</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">n</span><span class="op">)</span></span>
-<span class="r-in">        <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">mtcars</span><span class="op">$</span><span class="va">wt</span><span class="op">[</span><span class="va">seqn</span><span class="op">]</span>, <span class="va">mtcars</span><span class="op">$</span><span class="va">mpg</span><span class="op">[</span><span class="va">seqn</span><span class="op">]</span>,</span>
-<span class="r-in">             xlim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/range.html" class="external-link">range</a></span><span class="op">(</span><span class="va">mtcars</span><span class="op">$</span><span class="va">wt</span><span class="op">)</span>, ylim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/range.html" class="external-link">range</a></span><span class="op">(</span><span class="va">mtcars</span><span class="op">$</span><span class="va">mpg</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in">      <span class="op">}</span>,</span>
-<span class="r-in">      cacheKeyExpr <span class="op">=</span> <span class="op">{</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">n</span><span class="op">)</span> <span class="op">}</span>,</span>
-<span class="r-in">      cache <span class="op">=</span> <span class="fu">cachem</span><span class="fu">::</span><span class="fu"><a href="https://cachem.r-lib.org/reference/cache_mem.html" class="external-link">cache_mem</a></span><span class="op">(</span><span class="op">)</span></span>
-<span class="r-in">    <span class="op">)</span></span>
-<span class="r-in">  <span class="op">}</span></span>
-<span class="r-in"><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="op">}</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in"><span class="co"># At the top of app.R, this set the application-scoped cache to be a memory</span></span>
-<span class="r-in"><span class="co"># cache that is 20 MB in size, and where cached objects expire after one</span></span>
-<span class="r-in"><span class="co"># hour.</span></span>
-<span class="r-in"><span class="fu"><a href="shinyOptions.html">shinyOptions</a></span><span class="op">(</span>cache <span class="op">=</span> <span class="fu">cachem</span><span class="fu">::</span><span class="fu"><a href="https://cachem.r-lib.org/reference/cache_mem.html" class="external-link">cache_mem</a></span><span class="op">(</span>max_size <span class="op">=</span> <span class="fl">20e6</span>, max_age <span class="op">=</span> <span class="fl">3600</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># At the top of app.R, this set the application-scoped cache to be a disk</span></span>
-<span class="r-in"><span class="co"># cache that can be shared among multiple concurrent R processes, and is</span></span>
-<span class="r-in"><span class="co"># deleted when the system reboots.</span></span>
-<span class="r-in"><span class="fu"><a href="shinyOptions.html">shinyOptions</a></span><span class="op">(</span>cache <span class="op">=</span> <span class="fu">cachem</span><span class="fu">::</span><span class="fu"><a href="https://cachem.r-lib.org/reference/cache_disk.html" class="external-link">cache_disk</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/basename.html" class="external-link">dirname</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span>, <span class="st">"myapp-cache"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># At the top of app.R, this set the application-scoped cache to be a disk</span></span>
-<span class="r-in"><span class="co"># cache that can be shared among multiple concurrent R processes, and</span></span>
-<span class="r-in"><span class="co"># persists on disk across reboots.</span></span>
-<span class="r-in"><span class="fu"><a href="shinyOptions.html">shinyOptions</a></span><span class="op">(</span>cache <span class="op">=</span> <span class="fu">cachem</span><span class="fu">::</span><span class="fu"><a href="https://cachem.r-lib.org/reference/cache_disk.html" class="external-link">cache_disk</a></span><span class="op">(</span><span class="st">"./myapp-cache"</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># At the top of the server function, this set the session-scoped cache to be</span></span>
-<span class="r-in"><span class="co"># a memory cache that is 5 MB in size.</span></span>
-<span class="r-in"><span class="va">server</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">  <span class="fu"><a href="shinyOptions.html">shinyOptions</a></span><span class="op">(</span>cache <span class="op">=</span> <span class="fu">cachem</span><span class="fu">::</span><span class="fu"><a href="https://cachem.r-lib.org/reference/cache_mem.html" class="external-link">cache_mem</a></span><span class="op">(</span>max_size <span class="op">=</span> <span class="fl">5e6</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in">  <span class="va">output</span><span class="op">$</span><span class="va">plot</span> <span class="op">&lt;-</span> <span class="fu">renderCachedPlot</span><span class="op">(</span></span>
-<span class="r-in">    <span class="va">...</span>,</span>
-<span class="r-in">    cache <span class="op">=</span> <span class="st">"session"</span></span>
-<span class="r-in">  <span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="op">}</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co">## Only run examples in interactive R sessions</span></span></span>
+<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># A basic example that uses the default app-scoped memory cache.</span></span></span>
+<span class="r-in"><span><span class="co"># The cache will be shared among all simultaneous users of the application.</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="shinyApp.html">shinyApp</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="fluidPage.html">fluidPage</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="sidebarLayout.html">sidebarLayout</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>      <span class="fu"><a href="sidebarLayout.html">sidebarPanel</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>        <span class="fu"><a href="sliderInput.html">sliderInput</a></span><span class="op">(</span><span class="st">"n"</span>, <span class="st">"Number of points"</span>, <span class="fl">4</span>, <span class="fl">32</span>, value <span class="op">=</span> <span class="fl">8</span>, step <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span></span>
+<span class="r-in"><span>      <span class="op">)</span>,</span></span>
+<span class="r-in"><span>      <span class="fu"><a href="sidebarLayout.html">mainPanel</a></span><span class="op">(</span><span class="fu"><a href="plotOutput.html">plotOutput</a></span><span class="op">(</span><span class="st">"plot"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span>,</span></span>
+<span class="r-in"><span>  <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>    <span class="va">output</span><span class="op">$</span><span class="va">plot</span> <span class="op">&lt;-</span> <span class="fu">renderCachedPlot</span><span class="op">(</span><span class="op">{</span></span></span>
+<span class="r-in"><span>        <span class="fu"><a href="https://rdrr.io/r/base/Sys.sleep.html" class="external-link">Sys.sleep</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span>  <span class="co"># Add an artificial delay</span></span></span>
+<span class="r-in"><span>        <span class="va">seqn</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">n</span><span class="op">)</span></span></span>
+<span class="r-in"><span>        <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">mtcars</span><span class="op">$</span><span class="va">wt</span><span class="op">[</span><span class="va">seqn</span><span class="op">]</span>, <span class="va">mtcars</span><span class="op">$</span><span class="va">mpg</span><span class="op">[</span><span class="va">seqn</span><span class="op">]</span>,</span></span>
+<span class="r-in"><span>             xlim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/range.html" class="external-link">range</a></span><span class="op">(</span><span class="va">mtcars</span><span class="op">$</span><span class="va">wt</span><span class="op">)</span>, ylim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/range.html" class="external-link">range</a></span><span class="op">(</span><span class="va">mtcars</span><span class="op">$</span><span class="va">mpg</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span>      <span class="op">}</span>,</span></span>
+<span class="r-in"><span>      cacheKeyExpr <span class="op">=</span> <span class="op">{</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">n</span><span class="op">)</span> <span class="op">}</span></span></span>
+<span class="r-in"><span>    <span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">}</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># An example uses a data object shared across sessions. mydata() is part of</span></span></span>
+<span class="r-in"><span><span class="co"># the cache key, so when its value changes, plots that were previously</span></span></span>
+<span class="r-in"><span><span class="co"># stored in the cache will no longer be used (unless mydata() changes back</span></span></span>
+<span class="r-in"><span><span class="co"># to its previous value).</span></span></span>
+<span class="r-in"><span><span class="va">mydata</span> <span class="op">&lt;-</span> <span class="fu"><a href="reactiveVal.html">reactiveVal</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">400</span><span class="op">)</span>, y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">400</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">ui</span> <span class="op">&lt;-</span> <span class="fu"><a href="fluidPage.html">fluidPage</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="sidebarLayout.html">sidebarLayout</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="sidebarLayout.html">sidebarPanel</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>      <span class="fu"><a href="sliderInput.html">sliderInput</a></span><span class="op">(</span><span class="st">"n"</span>, <span class="st">"Number of points"</span>, <span class="fl">50</span>, <span class="fl">400</span>, <span class="fl">100</span>, step <span class="op">=</span> <span class="fl">50</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>      <span class="fu"><a href="actionButton.html">actionButton</a></span><span class="op">(</span><span class="st">"newdata"</span>, <span class="st">"New data"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="op">)</span>,</span></span>
+<span class="r-in"><span>    <span class="fu"><a href="sidebarLayout.html">mainPanel</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>      <span class="fu"><a href="plotOutput.html">plotOutput</a></span><span class="op">(</span><span class="st">"plot"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">server</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="observeEvent.html">observeEvent</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">newdata</span>, <span class="op">{</span></span></span>
+<span class="r-in"><span>    <span class="fu">mydata</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">400</span><span class="op">)</span>, y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">400</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>  <span class="va">output</span><span class="op">$</span><span class="va">plot</span> <span class="op">&lt;-</span> <span class="fu">renderCachedPlot</span><span class="op">(</span></span></span>
+<span class="r-in"><span>    <span class="op">{</span></span></span>
+<span class="r-in"><span>      <span class="fu"><a href="https://rdrr.io/r/base/Sys.sleep.html" class="external-link">Sys.sleep</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span></span></span>
+<span class="r-in"><span>      <span class="va">d</span> <span class="op">&lt;-</span> <span class="fu">mydata</span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span>      <span class="va">seqn</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">n</span><span class="op">)</span></span></span>
+<span class="r-in"><span>      <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">d</span><span class="op">$</span><span class="va">x</span><span class="op">[</span><span class="va">seqn</span><span class="op">]</span>, <span class="va">d</span><span class="op">$</span><span class="va">y</span><span class="op">[</span><span class="va">seqn</span><span class="op">]</span>, xlim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/range.html" class="external-link">range</a></span><span class="op">(</span><span class="va">d</span><span class="op">$</span><span class="va">x</span><span class="op">)</span>, ylim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/range.html" class="external-link">range</a></span><span class="op">(</span><span class="va">d</span><span class="op">$</span><span class="va">y</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="op">}</span>,</span></span>
+<span class="r-in"><span>    cacheKeyExpr <span class="op">=</span> <span class="op">{</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">n</span>, <span class="fu">mydata</span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">}</span>,</span></span>
+<span class="r-in"><span>  <span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="shinyApp.html">shinyApp</a></span><span class="op">(</span><span class="va">ui</span>, <span class="va">server</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># A basic application with two plots, where each plot in each session has</span></span></span>
+<span class="r-in"><span><span class="co"># a separate cache.</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="shinyApp.html">shinyApp</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="fluidPage.html">fluidPage</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="sidebarLayout.html">sidebarLayout</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>      <span class="fu"><a href="sidebarLayout.html">sidebarPanel</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>        <span class="fu"><a href="sliderInput.html">sliderInput</a></span><span class="op">(</span><span class="st">"n"</span>, <span class="st">"Number of points"</span>, <span class="fl">4</span>, <span class="fl">32</span>, value <span class="op">=</span> <span class="fl">8</span>, step <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span></span>
+<span class="r-in"><span>      <span class="op">)</span>,</span></span>
+<span class="r-in"><span>      <span class="fu"><a href="sidebarLayout.html">mainPanel</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>        <span class="fu"><a href="plotOutput.html">plotOutput</a></span><span class="op">(</span><span class="st">"plot1"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>        <span class="fu"><a href="plotOutput.html">plotOutput</a></span><span class="op">(</span><span class="st">"plot2"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>      <span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span>,</span></span>
+<span class="r-in"><span>  <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>    <span class="va">output</span><span class="op">$</span><span class="va">plot1</span> <span class="op">&lt;-</span> <span class="fu">renderCachedPlot</span><span class="op">(</span><span class="op">{</span></span></span>
+<span class="r-in"><span>        <span class="fu"><a href="https://rdrr.io/r/base/Sys.sleep.html" class="external-link">Sys.sleep</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span>  <span class="co"># Add an artificial delay</span></span></span>
+<span class="r-in"><span>        <span class="va">seqn</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">n</span><span class="op">)</span></span></span>
+<span class="r-in"><span>        <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">mtcars</span><span class="op">$</span><span class="va">wt</span><span class="op">[</span><span class="va">seqn</span><span class="op">]</span>, <span class="va">mtcars</span><span class="op">$</span><span class="va">mpg</span><span class="op">[</span><span class="va">seqn</span><span class="op">]</span>,</span></span>
+<span class="r-in"><span>             xlim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/range.html" class="external-link">range</a></span><span class="op">(</span><span class="va">mtcars</span><span class="op">$</span><span class="va">wt</span><span class="op">)</span>, ylim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/range.html" class="external-link">range</a></span><span class="op">(</span><span class="va">mtcars</span><span class="op">$</span><span class="va">mpg</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span>      <span class="op">}</span>,</span></span>
+<span class="r-in"><span>      cacheKeyExpr <span class="op">=</span> <span class="op">{</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">n</span><span class="op">)</span> <span class="op">}</span>,</span></span>
+<span class="r-in"><span>      cache <span class="op">=</span> <span class="fu">cachem</span><span class="fu">::</span><span class="fu"><a href="https://cachem.r-lib.org/reference/cache_mem.html" class="external-link">cache_mem</a></span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="va">output</span><span class="op">$</span><span class="va">plot2</span> <span class="op">&lt;-</span> <span class="fu">renderCachedPlot</span><span class="op">(</span><span class="op">{</span></span></span>
+<span class="r-in"><span>        <span class="fu"><a href="https://rdrr.io/r/base/Sys.sleep.html" class="external-link">Sys.sleep</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span>  <span class="co"># Add an artificial delay</span></span></span>
+<span class="r-in"><span>        <span class="va">seqn</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">n</span><span class="op">)</span></span></span>
+<span class="r-in"><span>        <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">mtcars</span><span class="op">$</span><span class="va">wt</span><span class="op">[</span><span class="va">seqn</span><span class="op">]</span>, <span class="va">mtcars</span><span class="op">$</span><span class="va">mpg</span><span class="op">[</span><span class="va">seqn</span><span class="op">]</span>,</span></span>
+<span class="r-in"><span>             xlim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/range.html" class="external-link">range</a></span><span class="op">(</span><span class="va">mtcars</span><span class="op">$</span><span class="va">wt</span><span class="op">)</span>, ylim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/range.html" class="external-link">range</a></span><span class="op">(</span><span class="va">mtcars</span><span class="op">$</span><span class="va">mpg</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span>      <span class="op">}</span>,</span></span>
+<span class="r-in"><span>      cacheKeyExpr <span class="op">=</span> <span class="op">{</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">n</span><span class="op">)</span> <span class="op">}</span>,</span></span>
+<span class="r-in"><span>      cache <span class="op">=</span> <span class="fu">cachem</span><span class="fu">::</span><span class="fu"><a href="https://cachem.r-lib.org/reference/cache_mem.html" class="external-link">cache_mem</a></span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">}</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span><span class="co"># At the top of app.R, this set the application-scoped cache to be a memory</span></span></span>
+<span class="r-in"><span><span class="co"># cache that is 20 MB in size, and where cached objects expire after one</span></span></span>
+<span class="r-in"><span><span class="co"># hour.</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="shinyOptions.html">shinyOptions</a></span><span class="op">(</span>cache <span class="op">=</span> <span class="fu">cachem</span><span class="fu">::</span><span class="fu"><a href="https://cachem.r-lib.org/reference/cache_mem.html" class="external-link">cache_mem</a></span><span class="op">(</span>max_size <span class="op">=</span> <span class="fl">20e6</span>, max_age <span class="op">=</span> <span class="fl">3600</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># At the top of app.R, this set the application-scoped cache to be a disk</span></span></span>
+<span class="r-in"><span><span class="co"># cache that can be shared among multiple concurrent R processes, and is</span></span></span>
+<span class="r-in"><span><span class="co"># deleted when the system reboots.</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="shinyOptions.html">shinyOptions</a></span><span class="op">(</span>cache <span class="op">=</span> <span class="fu">cachem</span><span class="fu">::</span><span class="fu"><a href="https://cachem.r-lib.org/reference/cache_disk.html" class="external-link">cache_disk</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/basename.html" class="external-link">dirname</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span>, <span class="st">"myapp-cache"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># At the top of app.R, this set the application-scoped cache to be a disk</span></span></span>
+<span class="r-in"><span><span class="co"># cache that can be shared among multiple concurrent R processes, and</span></span></span>
+<span class="r-in"><span><span class="co"># persists on disk across reboots.</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="shinyOptions.html">shinyOptions</a></span><span class="op">(</span>cache <span class="op">=</span> <span class="fu">cachem</span><span class="fu">::</span><span class="fu"><a href="https://cachem.r-lib.org/reference/cache_disk.html" class="external-link">cache_disk</a></span><span class="op">(</span><span class="st">"./myapp-cache"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># At the top of the server function, this set the session-scoped cache to be</span></span></span>
+<span class="r-in"><span><span class="co"># a memory cache that is 5 MB in size.</span></span></span>
+<span class="r-in"><span><span class="va">server</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="shinyOptions.html">shinyOptions</a></span><span class="op">(</span>cache <span class="op">=</span> <span class="fu">cachem</span><span class="fu">::</span><span class="fu"><a href="https://cachem.r-lib.org/reference/cache_mem.html" class="external-link">cache_mem</a></span><span class="op">(</span>max_size <span class="op">=</span> <span class="fl">5e6</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>  <span class="va">output</span><span class="op">$</span><span class="va">plot</span> <span class="op">&lt;-</span> <span class="fu">renderCachedPlot</span><span class="op">(</span></span></span>
+<span class="r-in"><span>    <span class="va">...</span>,</span></span>
+<span class="r-in"><span>    cache <span class="op">=</span> <span class="st">"session"</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
 </code></pre></div>
     </div>
   </div>

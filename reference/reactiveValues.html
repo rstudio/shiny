@@ -22,7 +22,7 @@ object are reactive, but the reactiveValues object itself is not."><meta propert
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">shiny</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.1.9003</span>
       </span>
     </div>
 
@@ -63,7 +63,7 @@ object are reactive, but the reactiveValues object itself is not.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">reactiveValues</span><span class="op">(</span><span class="va">...</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">reactiveValues</span><span class="op">(</span><span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -80,31 +80,31 @@ these objects must be named.</p></dd>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="co"># Create the object with no values</span></span>
-<span class="r-in"><span class="va">values</span> <span class="op">&lt;-</span> <span class="fu">reactiveValues</span><span class="op">(</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Assign values to 'a' and 'b'</span></span>
-<span class="r-in"><span class="va">values</span><span class="op">$</span><span class="va">a</span> <span class="op">&lt;-</span> <span class="fl">3</span></span>
-<span class="r-in"><span class="va">values</span><span class="op">[[</span><span class="st">'b'</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fl">4</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in"><span class="co"># From within a reactive context, you can access values with:</span></span>
-<span class="r-in"><span class="va">values</span><span class="op">$</span><span class="va">a</span></span>
-<span class="r-in"><span class="va">values</span><span class="op">[[</span><span class="st">'a'</span><span class="op">]</span><span class="op">]</span></span>
-<span class="r-in"><span class="op">}</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># If not in a reactive context (e.g., at the console), you can use isolate()</span></span>
-<span class="r-in"><span class="co"># to retrieve the value:</span></span>
-<span class="r-in"><span class="fu"><a href="isolate.html">isolate</a></span><span class="op">(</span><span class="va">values</span><span class="op">$</span><span class="va">a</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Create the object with no values</span></span></span>
+<span class="r-in"><span><span class="va">values</span> <span class="op">&lt;-</span> <span class="fu">reactiveValues</span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Assign values to 'a' and 'b'</span></span></span>
+<span class="r-in"><span><span class="va">values</span><span class="op">$</span><span class="va">a</span> <span class="op">&lt;-</span> <span class="fl">3</span></span></span>
+<span class="r-in"><span><span class="va">values</span><span class="op">[[</span><span class="st">'b'</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fl">4</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span><span class="co"># From within a reactive context, you can access values with:</span></span></span>
+<span class="r-in"><span><span class="va">values</span><span class="op">$</span><span class="va">a</span></span></span>
+<span class="r-in"><span><span class="va">values</span><span class="op">[[</span><span class="st">'a'</span><span class="op">]</span><span class="op">]</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># If not in a reactive context (e.g., at the console), you can use isolate()</span></span></span>
+<span class="r-in"><span><span class="co"># to retrieve the value:</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="isolate.html">isolate</a></span><span class="op">(</span><span class="va">values</span><span class="op">$</span><span class="va">a</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 3</span>
-<span class="r-in"><span class="fu"><a href="isolate.html">isolate</a></span><span class="op">(</span><span class="va">values</span><span class="op">[[</span><span class="st">'a'</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="fu"><a href="isolate.html">isolate</a></span><span class="op">(</span><span class="va">values</span><span class="op">[[</span><span class="st">'a'</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 3</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Set values upon creation</span></span>
-<span class="r-in"><span class="va">values</span> <span class="op">&lt;-</span> <span class="fu">reactiveValues</span><span class="op">(</span>a <span class="op">=</span> <span class="fl">1</span>, b <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu"><a href="isolate.html">isolate</a></span><span class="op">(</span><span class="va">values</span><span class="op">$</span><span class="va">a</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Set values upon creation</span></span></span>
+<span class="r-in"><span><span class="va">values</span> <span class="op">&lt;-</span> <span class="fu">reactiveValues</span><span class="op">(</span>a <span class="op">=</span> <span class="fl">1</span>, b <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="isolate.html">isolate</a></span><span class="op">(</span><span class="va">values</span><span class="op">$</span><span class="va">a</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1</span>
-<span class="r-in"></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>

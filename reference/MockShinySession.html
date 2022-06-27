@@ -28,7 +28,7 @@ of testServer()."><meta property="og:image" content="/logo.png"><!-- mathjax -->
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">shiny</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.1.9003</span>
       </span>
     </div>
 
@@ -205,7 +205,7 @@ user. Always <code>NULL</code> for a <code>MockShinySesion</code>.</p></dd>
 <h3 id="method-new-">Method <code><a href="https://rdrr.io/r/methods/new.html" class="external-link">new()</a></code><a class="anchor" aria-label="anchor" href="#method-new-"></a></h3>
 <p>Create a new MockShinySession.</p><div class="section">
 <h4 id="usage">Usage<a class="anchor" aria-label="anchor" href="#usage"></a></h4>
-<p></p><div class="r"><div class="sourceCode"><pre><code><span class="va"><a href="../reference/MockShinySession.html">MockShinySession</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="op">)</span></code></pre></div><p></p></div>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va"><a href="../reference/MockShinySession.html">MockShinySession</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
 
@@ -213,7 +213,7 @@ user. Always <code>NULL</code> for a <code>MockShinySesion</code>.</p></dd>
 <h3 id="method-onflush-">Method <code><a href="onFlush.html">onFlush()</a></code><a class="anchor" aria-label="anchor" href="#method-onflush-"></a></h3>
 <p>Define a callback to be invoked before a reactive flush</p><div class="section">
 <h4 id="usage-1">Usage<a class="anchor" aria-label="anchor" href="#usage-1"></a></h4>
-<p></p><div class="r"><div class="sourceCode"><pre><code><span class="va">MockShinySession</span><span class="op">$</span><span class="fu">onFlush</span><span class="op">(</span><span class="va">fun</span>, once <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div><p></p></div>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">MockShinySession</span><span class="op">$</span><span class="fu">onFlush</span><span class="op">(</span><span class="va">fun</span>, once <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
 <div class="section">
@@ -233,7 +233,7 @@ user. Always <code>NULL</code> for a <code>MockShinySesion</code>.</p></dd>
 <h3 id="method-onflushed-">Method <code><a href="onFlush.html">onFlushed()</a></code><a class="anchor" aria-label="anchor" href="#method-onflushed-"></a></h3>
 <p>Define a callback to be invoked after a reactive flush</p><div class="section">
 <h4 id="usage-2">Usage<a class="anchor" aria-label="anchor" href="#usage-2"></a></h4>
-<p></p><div class="r"><div class="sourceCode"><pre><code><span class="va">MockShinySession</span><span class="op">$</span><span class="fu">onFlushed</span><span class="op">(</span><span class="va">fun</span>, once <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div><p></p></div>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">MockShinySession</span><span class="op">$</span><span class="fu">onFlushed</span><span class="op">(</span><span class="va">fun</span>, once <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
 <div class="section">
@@ -253,7 +253,7 @@ user. Always <code>NULL</code> for a <code>MockShinySesion</code>.</p></dd>
 <h3 id="method-onended-">Method <code>onEnded()</code><a class="anchor" aria-label="anchor" href="#method-onended-"></a></h3>
 <p>Define a callback to be invoked when the session ends</p><div class="section">
 <h4 id="usage-3">Usage<a class="anchor" aria-label="anchor" href="#usage-3"></a></h4>
-<p></p><div class="r"><div class="sourceCode"><pre><code><span class="va">MockShinySession</span><span class="op">$</span><span class="fu">onEnded</span><span class="op">(</span><span class="va">sessionEndedCallback</span><span class="op">)</span></code></pre></div><p></p></div>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">MockShinySession</span><span class="op">$</span><span class="fu">onEnded</span><span class="op">(</span><span class="va">sessionEndedCallback</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
 <div class="section">
@@ -269,7 +269,7 @@ user. Always <code>NULL</code> for a <code>MockShinySesion</code>.</p></dd>
 <h3 id="method-isended-">Method <code>isEnded()</code><a class="anchor" aria-label="anchor" href="#method-isended-"></a></h3>
 <p>Returns <code>FALSE</code> if the session has not yet been closed</p><div class="section">
 <h4 id="usage-4">Usage<a class="anchor" aria-label="anchor" href="#usage-4"></a></h4>
-<p></p><div class="r"><div class="sourceCode"><pre><code><span class="va">MockShinySession</span><span class="op">$</span><span class="fu">isEnded</span><span class="op">(</span><span class="op">)</span></code></pre></div><p></p></div>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">MockShinySession</span><span class="op">$</span><span class="fu">isEnded</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
 
@@ -277,7 +277,7 @@ user. Always <code>NULL</code> for a <code>MockShinySesion</code>.</p></dd>
 <h3 id="method-isclosed-">Method <code>isClosed()</code><a class="anchor" aria-label="anchor" href="#method-isclosed-"></a></h3>
 <p>Returns <code>FALSE</code> if the session has not yet been closed</p><div class="section">
 <h4 id="usage-5">Usage<a class="anchor" aria-label="anchor" href="#usage-5"></a></h4>
-<p></p><div class="r"><div class="sourceCode"><pre><code><span class="va">MockShinySession</span><span class="op">$</span><span class="fu">isClosed</span><span class="op">(</span><span class="op">)</span></code></pre></div><p></p></div>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">MockShinySession</span><span class="op">$</span><span class="fu">isClosed</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
 
@@ -285,7 +285,7 @@ user. Always <code>NULL</code> for a <code>MockShinySesion</code>.</p></dd>
 <h3 id="method-close-">Method <code><a href="https://rdrr.io/r/base/connections.html" class="external-link">close()</a></code><a class="anchor" aria-label="anchor" href="#method-close-"></a></h3>
 <p>Closes the session</p><div class="section">
 <h4 id="usage-6">Usage<a class="anchor" aria-label="anchor" href="#usage-6"></a></h4>
-<p></p><div class="r"><div class="sourceCode"><pre><code><span class="va">MockShinySession</span><span class="op">$</span><span class="fu">close</span><span class="op">(</span><span class="op">)</span></code></pre></div><p></p></div>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">MockShinySession</span><span class="op">$</span><span class="fu">close</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
 
@@ -293,7 +293,7 @@ user. Always <code>NULL</code> for a <code>MockShinySesion</code>.</p></dd>
 <h3 id="method-cyclestartaction-">Method <code>cycleStartAction()</code><a class="anchor" aria-label="anchor" href="#method-cyclestartaction-"></a></h3>
 <p>Unsophisticated mock implementation that merely invokes</p><div class="section">
 <h4 id="usage-7">Usage<a class="anchor" aria-label="anchor" href="#usage-7"></a></h4>
-<p></p><div class="r"><div class="sourceCode"><pre><code><span class="va">MockShinySession</span><span class="op">$</span><span class="fu">cycleStartAction</span><span class="op">(</span><span class="va">callback</span><span class="op">)</span></code></pre></div><p></p></div>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">MockShinySession</span><span class="op">$</span><span class="fu">cycleStartAction</span><span class="op">(</span><span class="va">callback</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
 <div class="section">
@@ -309,7 +309,7 @@ user. Always <code>NULL</code> for a <code>MockShinySesion</code>.</p></dd>
 <h3 id="method-fileurl-">Method <code>fileUrl()</code><a class="anchor" aria-label="anchor" href="#method-fileurl-"></a></h3>
 <p>Base64-encode the given file. Needed for image rendering.</p><div class="section">
 <h4 id="usage-8">Usage<a class="anchor" aria-label="anchor" href="#usage-8"></a></h4>
-<p></p><div class="r"><div class="sourceCode"><pre><code><span class="va">MockShinySession</span><span class="op">$</span><span class="fu">fileUrl</span><span class="op">(</span><span class="va">name</span>, <span class="va">file</span>, contentType <span class="op">=</span> <span class="st">"application/octet-stream"</span><span class="op">)</span></code></pre></div><p></p></div>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">MockShinySession</span><span class="op">$</span><span class="fu">fileUrl</span><span class="op">(</span><span class="va">name</span>, <span class="va">file</span>, contentType <span class="op">=</span> <span class="st">"application/octet-stream"</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
 <div class="section">
@@ -334,7 +334,7 @@ user. Always <code>NULL</code> for a <code>MockShinySesion</code>.</p></dd>
 <p>Sets reactive values associated with the <code>session$inputs</code>
 object and flushes the reactives.</p><div class="section">
 <h4 id="usage-9">Usage<a class="anchor" aria-label="anchor" href="#usage-9"></a></h4>
-<p></p><div class="r"><div class="sourceCode"><pre><code><span class="va">MockShinySession</span><span class="op">$</span><span class="fu">setInputs</span><span class="op">(</span><span class="va">...</span><span class="op">)</span></code></pre></div><p></p></div>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">MockShinySession</span><span class="op">$</span><span class="fu">setInputs</span><span class="op">(</span><span class="va">...</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
 <div class="section">
@@ -362,7 +362,7 @@ session$setInputs(x=1, y=2)
 Schedules <code>callback</code> for execution after some number of <code>millis</code>
 milliseconds.</p><div class="section">
 <h4 id="usage-10">Usage<a class="anchor" aria-label="anchor" href="#usage-10"></a></h4>
-<p></p><div class="r"><div class="sourceCode"><pre><code><span class="va">MockShinySession</span><span class="op">$</span><span class="fu">.scheduleTask</span><span class="op">(</span><span class="va">millis</span>, <span class="va">callback</span><span class="op">)</span></code></pre></div><p></p></div>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">MockShinySession</span><span class="op">$</span><span class="fu">.scheduleTask</span><span class="op">(</span><span class="va">millis</span>, <span class="va">callback</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
 <div class="section">
@@ -382,7 +382,7 @@ milliseconds.</p><div class="section">
 <h3 id="method-elapse-">Method <code>elapse()</code><a class="anchor" aria-label="anchor" href="#method-elapse-"></a></h3>
 <p>Simulate the passing of time by the given number of milliseconds.</p><div class="section">
 <h4 id="usage-11">Usage<a class="anchor" aria-label="anchor" href="#usage-11"></a></h4>
-<p></p><div class="r"><div class="sourceCode"><pre><code><span class="va">MockShinySession</span><span class="op">$</span><span class="fu">elapse</span><span class="op">(</span><span class="va">millis</span><span class="op">)</span></code></pre></div><p></p></div>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">MockShinySession</span><span class="op">$</span><span class="fu">elapse</span><span class="op">(</span><span class="va">millis</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
 <div class="section">
@@ -398,7 +398,7 @@ milliseconds.</p><div class="section">
 <h3 id="method-now-">Method <code>.now()</code><a class="anchor" aria-label="anchor" href="#method-now-"></a></h3>
 <p>An internal method which shouldn't be used by others.</p><div class="section">
 <h4 id="usage-12">Usage<a class="anchor" aria-label="anchor" href="#usage-12"></a></h4>
-<p></p><div class="r"><div class="sourceCode"><pre><code><span class="va">MockShinySession</span><span class="op">$</span><span class="fu">.now</span><span class="op">(</span><span class="op">)</span></code></pre></div><p></p></div>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">MockShinySession</span><span class="op">$</span><span class="fu">.now</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
 <div class="section">
@@ -412,7 +412,7 @@ milliseconds.</p><div class="section">
 Defines an output in a way that sets private$currentOutputName
 appropriately.</p><div class="section">
 <h4 id="usage-13">Usage<a class="anchor" aria-label="anchor" href="#usage-13"></a></h4>
-<p></p><div class="r"><div class="sourceCode"><pre><code><span class="va">MockShinySession</span><span class="op">$</span><span class="fu">defineOutput</span><span class="op">(</span><span class="va">name</span>, <span class="va">func</span>, <span class="va">label</span><span class="op">)</span></code></pre></div><p></p></div>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">MockShinySession</span><span class="op">$</span><span class="fu">defineOutput</span><span class="op">(</span><span class="va">name</span>, <span class="va">func</span>, <span class="va">label</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
 <div class="section">
@@ -437,7 +437,7 @@ appropriately.</p><div class="section">
 <p>An internal method which shouldn't be used by others. Forces
 evaluation of any reactive dependencies of the output function.</p><div class="section">
 <h4 id="usage-14">Usage<a class="anchor" aria-label="anchor" href="#usage-14"></a></h4>
-<p></p><div class="r"><div class="sourceCode"><pre><code><span class="va">MockShinySession</span><span class="op">$</span><span class="fu">getOutput</span><span class="op">(</span><span class="va">name</span><span class="op">)</span></code></pre></div><p></p></div>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">MockShinySession</span><span class="op">$</span><span class="fu">getOutput</span><span class="op">(</span><span class="va">name</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
 <div class="section">
@@ -458,7 +458,7 @@ output.</p>
 <h3 id="method-ns-">Method <code>ns()</code><a class="anchor" aria-label="anchor" href="#method-ns-"></a></h3>
 <p>Returns the given id prefixed by this namespace's id.</p><div class="section">
 <h4 id="usage-15">Usage<a class="anchor" aria-label="anchor" href="#usage-15"></a></h4>
-<p></p><div class="r"><div class="sourceCode"><pre><code><span class="va">MockShinySession</span><span class="op">$</span><span class="fu">ns</span><span class="op">(</span><span class="va">id</span><span class="op">)</span></code></pre></div><p></p></div>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">MockShinySession</span><span class="op">$</span><span class="fu">ns</span><span class="op">(</span><span class="va">id</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
 <div class="section">
@@ -478,7 +478,7 @@ output.</p>
 <h3 id="method-flushreact-">Method <code>flushReact()</code><a class="anchor" aria-label="anchor" href="#method-flushreact-"></a></h3>
 <p>Trigger a reactive flush right now.</p><div class="section">
 <h4 id="usage-16">Usage<a class="anchor" aria-label="anchor" href="#usage-16"></a></h4>
-<p></p><div class="r"><div class="sourceCode"><pre><code><span class="va">MockShinySession</span><span class="op">$</span><span class="fu">flushReact</span><span class="op">(</span><span class="op">)</span></code></pre></div><p></p></div>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">MockShinySession</span><span class="op">$</span><span class="fu">flushReact</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
 
@@ -486,7 +486,7 @@ output.</p>
 <h3 id="method-makescope-">Method <code>makeScope()</code><a class="anchor" aria-label="anchor" href="#method-makescope-"></a></h3>
 <p>Create and return a namespace-specific session proxy.</p><div class="section">
 <h4 id="usage-17">Usage<a class="anchor" aria-label="anchor" href="#usage-17"></a></h4>
-<p></p><div class="r"><div class="sourceCode"><pre><code><span class="va">MockShinySession</span><span class="op">$</span><span class="fu">makeScope</span><span class="op">(</span><span class="va">namespace</span><span class="op">)</span></code></pre></div><p></p></div>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">MockShinySession</span><span class="op">$</span><span class="fu">makeScope</span><span class="op">(</span><span class="va">namespace</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
 <div class="section">
@@ -509,7 +509,7 @@ only if it has not previously been set. This ensures that only the
 environment of the outermost module under test is the one retained. In
 other words, the first assignment wins.</p><div class="section">
 <h4 id="usage-18">Usage<a class="anchor" aria-label="anchor" href="#usage-18"></a></h4>
-<p></p><div class="r"><div class="sourceCode"><pre><code><span class="va">MockShinySession</span><span class="op">$</span><span class="fu">setEnv</span><span class="op">(</span><span class="va">env</span><span class="op">)</span></code></pre></div><p></p></div>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">MockShinySession</span><span class="op">$</span><span class="fu">setEnv</span><span class="op">(</span><span class="va">env</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
 <div class="section">
@@ -532,7 +532,7 @@ flush. Note that this method may be called multiple times if modules
 are nested. The last assignment, corresponding to an invocation of
 setReturned() in the outermost module, wins.</p><div class="section">
 <h4 id="usage-19">Usage<a class="anchor" aria-label="anchor" href="#usage-19"></a></h4>
-<p></p><div class="r"><div class="sourceCode"><pre><code><span class="va">MockShinySession</span><span class="op">$</span><span class="fu">setReturned</span><span class="op">(</span><span class="va">value</span><span class="op">)</span></code></pre></div><p></p></div>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">MockShinySession</span><span class="op">$</span><span class="fu">setReturned</span><span class="op">(</span><span class="va">value</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
 <div class="section">
@@ -552,7 +552,7 @@ setReturned() in the outermost module, wins.</p><div class="section">
 <h3 id="method-getreturned-">Method <code>getReturned()</code><a class="anchor" aria-label="anchor" href="#method-getreturned-"></a></h3>
 <p>Get the value returned by the module call.</p><div class="section">
 <h4 id="usage-20">Usage<a class="anchor" aria-label="anchor" href="#usage-20"></a></h4>
-<p></p><div class="r"><div class="sourceCode"><pre><code><span class="va">MockShinySession</span><span class="op">$</span><span class="fu">getReturned</span><span class="op">(</span><span class="op">)</span></code></pre></div><p></p></div>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">MockShinySession</span><span class="op">$</span><span class="fu">getReturned</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
 <div class="section">
@@ -565,7 +565,7 @@ setReturned() in the outermost module, wins.</p><div class="section">
 <p>Generate a distinct character identifier for use as a proxy
 namespace.</p><div class="section">
 <h4 id="usage-21">Usage<a class="anchor" aria-label="anchor" href="#usage-21"></a></h4>
-<p></p><div class="r"><div class="sourceCode"><pre><code><span class="va">MockShinySession</span><span class="op">$</span><span class="fu">genId</span><span class="op">(</span><span class="op">)</span></code></pre></div><p></p></div>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">MockShinySession</span><span class="op">$</span><span class="fu">genId</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
 <div class="section">
@@ -578,7 +578,7 @@ namespace.</p><div class="section">
 <p>Provides a way to access the root <code>MockShinySession</code> from
 any descendant proxy.</p><div class="section">
 <h4 id="usage-22">Usage<a class="anchor" aria-label="anchor" href="#usage-22"></a></h4>
-<p></p><div class="r"><div class="sourceCode"><pre><code><span class="va">MockShinySession</span><span class="op">$</span><span class="fu">rootScope</span><span class="op">(</span><span class="op">)</span></code></pre></div><p></p></div>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">MockShinySession</span><span class="op">$</span><span class="fu">rootScope</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
 <div class="section">
@@ -590,7 +590,7 @@ any descendant proxy.</p><div class="section">
 <h3 id="method-unhandlederror-">Method <code>unhandledError()</code><a class="anchor" aria-label="anchor" href="#method-unhandlederror-"></a></h3>
 <p>Called by observers when a reactive expression errors.</p><div class="section">
 <h4 id="usage-23">Usage<a class="anchor" aria-label="anchor" href="#usage-23"></a></h4>
-<p></p><div class="r"><div class="sourceCode"><pre><code><span class="va">MockShinySession</span><span class="op">$</span><span class="fu">unhandledError</span><span class="op">(</span><span class="va">e</span><span class="op">)</span></code></pre></div><p></p></div>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">MockShinySession</span><span class="op">$</span><span class="fu">unhandledError</span><span class="op">(</span><span class="va">e</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
 <div class="section">
@@ -606,7 +606,7 @@ any descendant proxy.</p><div class="section">
 <h3 id="method-freezevalue-">Method <code>freezeValue()</code><a class="anchor" aria-label="anchor" href="#method-freezevalue-"></a></h3>
 <p>Freeze a value until the flush cycle completes.</p><div class="section">
 <h4 id="usage-24">Usage<a class="anchor" aria-label="anchor" href="#usage-24"></a></h4>
-<p></p><div class="r"><div class="sourceCode"><pre><code><span class="va">MockShinySession</span><span class="op">$</span><span class="fu">freezeValue</span><span class="op">(</span><span class="va">x</span>, <span class="va">name</span><span class="op">)</span></code></pre></div><p></p></div>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">MockShinySession</span><span class="op">$</span><span class="fu">freezeValue</span><span class="op">(</span><span class="va">x</span>, <span class="va">name</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
 <div class="section">
@@ -630,7 +630,7 @@ return value is a function which unregisters the callback. If multiple
 callbacks are registered, the order in which they are invoked is not
 guaranteed.</p><div class="section">
 <h4 id="usage-25">Usage<a class="anchor" aria-label="anchor" href="#usage-25"></a></h4>
-<p></p><div class="r"><div class="sourceCode"><pre><code><span class="va">MockShinySession</span><span class="op">$</span><span class="fu">onSessionEnded</span><span class="op">(</span><span class="va">sessionEndedCallback</span><span class="op">)</span></code></pre></div><p></p></div>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">MockShinySession</span><span class="op">$</span><span class="fu">onSessionEnded</span><span class="op">(</span><span class="va">sessionEndedCallback</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
 <div class="section">
@@ -646,7 +646,7 @@ guaranteed.</p><div class="section">
 <h3 id="method-registerdownload-">Method <code>registerDownload()</code><a class="anchor" aria-label="anchor" href="#method-registerdownload-"></a></h3>
 <p>Associated a downloadable file with the session.</p><div class="section">
 <h4 id="usage-26">Usage<a class="anchor" aria-label="anchor" href="#usage-26"></a></h4>
-<p></p><div class="r"><div class="sourceCode"><pre><code><span class="va">MockShinySession</span><span class="op">$</span><span class="fu">registerDownload</span><span class="op">(</span><span class="va">name</span>, <span class="va">filename</span>, <span class="va">contentType</span>, <span class="va">content</span><span class="op">)</span></code></pre></div><p></p></div>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">MockShinySession</span><span class="op">$</span><span class="fu">registerDownload</span><span class="op">(</span><span class="va">name</span>, <span class="va">filename</span>, <span class="va">contentType</span>, <span class="va">content</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
 <div class="section">
@@ -680,7 +680,7 @@ function.)</p></dd>
 <p>Get information about the output that is currently being
 executed.</p><div class="section">
 <h4 id="usage-27">Usage<a class="anchor" aria-label="anchor" href="#usage-27"></a></h4>
-<p></p><div class="r"><div class="sourceCode"><pre><code><span class="va">MockShinySession</span><span class="op">$</span><span class="fu">getCurrentOutputInfo</span><span class="op">(</span><span class="op">)</span></code></pre></div><p></p></div>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">MockShinySession</span><span class="op">$</span><span class="fu">getCurrentOutputInfo</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
 <div class="section">
@@ -694,7 +694,7 @@ output, or <code>NULL</code> if no output is currently executing.</p>
 <h3 id="method-clone-">Method <code>clone()</code><a class="anchor" aria-label="anchor" href="#method-clone-"></a></h3>
 <p>The objects of this class are cloneable with this method.</p><div class="section">
 <h4 id="usage-28">Usage<a class="anchor" aria-label="anchor" href="#usage-28"></a></h4>
-<p></p><div class="r"><div class="sourceCode"><pre><code><span class="va">MockShinySession</span><span class="op">$</span><span class="fu">clone</span><span class="op">(</span>deep <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></code></pre></div><p></p></div>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">MockShinySession</span><span class="op">$</span><span class="fu">clone</span><span class="op">(</span>deep <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
 <div class="section">
@@ -712,14 +712,14 @@ output, or <code>NULL</code> if no output is currently executing.</p>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"></span>
-<span class="r-in"><span class="co">## ------------------------------------------------</span></span>
-<span class="r-in"><span class="co">## Method `MockShinySession$setInputs`</span></span>
-<span class="r-in"><span class="co">## ------------------------------------------------</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in"><span class="va">session</span><span class="op">$</span><span class="fu">setInputs</span><span class="op">(</span>x<span class="op">=</span><span class="fl">1</span>, y<span class="op">=</span><span class="fl">2</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">## ------------------------------------------------</span></span></span>
+<span class="r-in"><span><span class="co">## Method `MockShinySession$setInputs`</span></span></span>
+<span class="r-in"><span><span class="co">## ------------------------------------------------</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span><span class="va">session</span><span class="op">$</span><span class="fu">setInputs</span><span class="op">(</span>x<span class="op">=</span><span class="fl">1</span>, y<span class="op">=</span><span class="fl">2</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
 </code></pre></div>
     </div>
   </div>

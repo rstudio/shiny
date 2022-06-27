@@ -18,7 +18,7 @@ non-reactive data source."><meta property="og:image" content="/logo.png"><!-- ma
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">shiny</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.1.9003</span>
       </span>
     </div>
 
@@ -55,7 +55,7 @@ non-reactive data source.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">reactivePoll</span><span class="op">(</span><span class="va">intervalMillis</span>, <span class="va">session</span>, <span class="va">checkFunc</span>, <span class="va">valueFunc</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">reactivePoll</span><span class="op">(</span><span class="va">intervalMillis</span>, <span class="va">session</span>, <span class="va">checkFunc</span>, <span class="va">valueFunc</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -120,26 +120,26 @@ values and reactive expressions.</p>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in"></span>
-<span class="r-in">  <span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">reactivePoll</span><span class="op">(</span><span class="fl">1000</span>, <span class="va">session</span>,</span>
-<span class="r-in">    <span class="co"># This function returns the time that log_file was last modified</span></span>
-<span class="r-in">    checkFunc <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">      <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/files.html" class="external-link">file.exists</a></span><span class="op">(</span><span class="va">log_file</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in">        <span class="fu"><a href="https://rdrr.io/r/base/file.info.html" class="external-link">file.info</a></span><span class="op">(</span><span class="va">log_file</span><span class="op">)</span><span class="op">$</span><span class="va">mtime</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span></span>
-<span class="r-in">      <span class="kw">else</span></span>
-<span class="r-in">        <span class="st">""</span></span>
-<span class="r-in">    <span class="op">}</span>,</span>
-<span class="r-in">    <span class="co"># This function returns the content of log_file</span></span>
-<span class="r-in">    valueFunc <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">      <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="va">log_file</span><span class="op">)</span></span>
-<span class="r-in">    <span class="op">}</span></span>
-<span class="r-in">  <span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in">  <span class="va">output</span><span class="op">$</span><span class="va">dataTable</span> <span class="op">&lt;-</span> <span class="fu"><a href="renderTable.html">renderTable</a></span><span class="op">(</span><span class="op">{</span></span>
-<span class="r-in">    <span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="op">)</span></span>
-<span class="r-in">  <span class="op">}</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>  <span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">reactivePoll</span><span class="op">(</span><span class="fl">1000</span>, <span class="va">session</span>,</span></span>
+<span class="r-in"><span>    <span class="co"># This function returns the time that log_file was last modified</span></span></span>
+<span class="r-in"><span>    checkFunc <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>      <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/files.html" class="external-link">file.exists</a></span><span class="op">(</span><span class="va">log_file</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span>        <span class="fu"><a href="https://rdrr.io/r/base/file.info.html" class="external-link">file.info</a></span><span class="op">(</span><span class="va">log_file</span><span class="op">)</span><span class="op">$</span><span class="va">mtime</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span></span></span>
+<span class="r-in"><span>      <span class="kw">else</span></span></span>
+<span class="r-in"><span>        <span class="st">""</span></span></span>
+<span class="r-in"><span>    <span class="op">}</span>,</span></span>
+<span class="r-in"><span>    <span class="co"># This function returns the content of log_file</span></span></span>
+<span class="r-in"><span>    valueFunc <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>      <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="va">log_file</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="op">}</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>  <span class="va">output</span><span class="op">$</span><span class="va">dataTable</span> <span class="op">&lt;-</span> <span class="fu"><a href="renderTable.html">renderTable</a></span><span class="op">(</span><span class="op">{</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> function(input, output, session) {</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   data &lt;- reactivePoll(1000, session,</span>
@@ -160,7 +160,7 @@ values and reactive expressions.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     data()</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   })</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> }</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x55b82a0c4fb8&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x5629027157c0&gt;</span>
 </code></pre></div>
     </div>
   </div>

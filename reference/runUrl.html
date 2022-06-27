@@ -24,7 +24,7 @@ respectively."><meta property="og:image" content="/logo.png"><!-- mathjax --><sc
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">shiny</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.1.9003</span>
       </span>
     </div>
 
@@ -67,18 +67,18 @@ respectively.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">runUrl</span><span class="op">(</span><span class="va">url</span>, filetype <span class="op">=</span> <span class="cn">NULL</span>, subdir <span class="op">=</span> <span class="cn">NULL</span>, destdir <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">...</span><span class="op">)</span>
-
-<span class="fu">runGist</span><span class="op">(</span><span class="va">gist</span>, destdir <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">...</span><span class="op">)</span>
-
-<span class="fu">runGitHub</span><span class="op">(</span>
-  <span class="va">repo</span>,
-  username <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">getOption</a></span><span class="op">(</span><span class="st">"github.user"</span><span class="op">)</span>,
-  ref <span class="op">=</span> <span class="st">"HEAD"</span>,
-  subdir <span class="op">=</span> <span class="cn">NULL</span>,
-  destdir <span class="op">=</span> <span class="cn">NULL</span>,
-  <span class="va">...</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">runUrl</span><span class="op">(</span><span class="va">url</span>, filetype <span class="op">=</span> <span class="cn">NULL</span>, subdir <span class="op">=</span> <span class="cn">NULL</span>, destdir <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">runGist</span><span class="op">(</span><span class="va">gist</span>, destdir <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">runGitHub</span><span class="op">(</span></span>
+<span>  <span class="va">repo</span>,</span>
+<span>  username <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">getOption</a></span><span class="op">(</span><span class="st">"github.user"</span><span class="op">)</span>,</span>
+<span>  ref <span class="op">=</span> <span class="st">"HEAD"</span>,</span>
+<span>  subdir <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  destdir <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -134,31 +134,31 @@ Defaults to <code>"HEAD"</code>, which means the default branch on GitHub, typic
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="co">## Only run this example in interactive R sessions</span></span>
-<span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">  <span class="fu">runUrl</span><span class="op">(</span><span class="st">'https://github.com/rstudio/shiny_example/archive/main.tar.gz'</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in">  <span class="co"># Can run an app from a subdirectory in the archive</span></span>
-<span class="r-in">  <span class="fu">runUrl</span><span class="op">(</span><span class="st">"https://github.com/rstudio/shiny_example/archive/main.zip"</span>,</span>
-<span class="r-in">    subdir <span class="op">=</span> <span class="st">"inst/shinyapp/"</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
-<span class="r-in"><span class="co">## Only run this example in interactive R sessions</span></span>
-<span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">  <span class="fu">runGist</span><span class="op">(</span><span class="fl">3239667</span><span class="op">)</span></span>
-<span class="r-in">  <span class="fu">runGist</span><span class="op">(</span><span class="st">"https://gist.github.com/jcheng5/3239667"</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in">  <span class="co"># Old URL format without username</span></span>
-<span class="r-in">  <span class="fu">runGist</span><span class="op">(</span><span class="st">"https://gist.github.com/3239667"</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">## Only run this example in interactive R sessions</span></span>
-<span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">  <span class="fu">runGitHub</span><span class="op">(</span><span class="st">"shiny_example"</span>, <span class="st">"rstudio"</span><span class="op">)</span></span>
-<span class="r-in">  <span class="co"># or runGitHub("rstudio/shiny_example")</span></span>
-<span class="r-in"></span>
-<span class="r-in">  <span class="co"># Can run an app from a subdirectory in the repo</span></span>
-<span class="r-in">  <span class="fu">runGitHub</span><span class="op">(</span><span class="st">"shiny_example"</span>, <span class="st">"rstudio"</span>, subdir <span class="op">=</span> <span class="st">"inst/shinyapp/"</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co">## Only run this example in interactive R sessions</span></span></span>
+<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="fu">runUrl</span><span class="op">(</span><span class="st">'https://github.com/rstudio/shiny_example/archive/main.tar.gz'</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>  <span class="co"># Can run an app from a subdirectory in the archive</span></span></span>
+<span class="r-in"><span>  <span class="fu">runUrl</span><span class="op">(</span><span class="st">"https://github.com/rstudio/shiny_example/archive/main.zip"</span>,</span></span>
+<span class="r-in"><span>    subdir <span class="op">=</span> <span class="st">"inst/shinyapp/"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span><span class="co">## Only run this example in interactive R sessions</span></span></span>
+<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="fu">runGist</span><span class="op">(</span><span class="fl">3239667</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="fu">runGist</span><span class="op">(</span><span class="st">"https://gist.github.com/jcheng5/3239667"</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>  <span class="co"># Old URL format without username</span></span></span>
+<span class="r-in"><span>  <span class="fu">runGist</span><span class="op">(</span><span class="st">"https://gist.github.com/3239667"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">## Only run this example in interactive R sessions</span></span></span>
+<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="fu">runGitHub</span><span class="op">(</span><span class="st">"shiny_example"</span>, <span class="st">"rstudio"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="co"># or runGitHub("rstudio/shiny_example")</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>  <span class="co"># Can run an app from a subdirectory in the repo</span></span></span>
+<span class="r-in"><span>  <span class="fu">runGitHub</span><span class="op">(</span><span class="st">"shiny_example"</span>, <span class="st">"rstudio"</span>, subdir <span class="op">=</span> <span class="st">"inst/shinyapp/"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
 </code></pre></div>
     </div>
   </div>

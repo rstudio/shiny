@@ -19,7 +19,7 @@ modules."><meta property="og:image" content="/logo.png"><!-- mathjax --><script 
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">shiny</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.1.9003</span>
       </span>
     </div>
 
@@ -57,7 +57,7 @@ modules.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">testServer</span><span class="op">(</span>app <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">expr</span>, args <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>, session <span class="op">=</span> <span class="va"><a href="MockShinySession.html">MockShinySession</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">testServer</span><span class="op">(</span>app <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">expr</span>, args <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>, session <span class="op">=</span> <span class="va"><a href="MockShinySession.html">MockShinySession</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -94,43 +94,43 @@ of <code>expr</code>.</p></dd>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="co"># Testing a server function  ----------------------------------------------</span></span>
-<span class="r-in"><span class="va">server</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">  <span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="reactive.html">reactive</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">a</span> <span class="op">*</span> <span class="va">input</span><span class="op">$</span><span class="va">b</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu">testServer</span><span class="op">(</span><span class="va">server</span>, <span class="op">{</span></span>
-<span class="r-in">  <span class="va">session</span><span class="op">$</span><span class="fu">setInputs</span><span class="op">(</span>a <span class="op">=</span> <span class="fl">2</span>, b <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span>
-<span class="r-in">  <span class="fu"><a href="https://rdrr.io/r/base/stopifnot.html" class="external-link">stopifnot</a></span><span class="op">(</span><span class="fu">x</span><span class="op">(</span><span class="op">)</span> <span class="op">==</span> <span class="fl">6</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Testing a server function  ----------------------------------------------</span></span></span>
+<span class="r-in"><span><span class="va">server</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="reactive.html">reactive</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">a</span> <span class="op">*</span> <span class="va">input</span><span class="op">$</span><span class="va">b</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu">testServer</span><span class="op">(</span><span class="va">server</span>, <span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="va">session</span><span class="op">$</span><span class="fu">setInputs</span><span class="op">(</span>a <span class="op">=</span> <span class="fl">2</span>, b <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/stopifnot.html" class="external-link">stopifnot</a></span><span class="op">(</span><span class="fu">x</span><span class="op">(</span><span class="op">)</span> <span class="op">==</span> <span class="fl">6</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> The value of x is 30</span>
-<span class="r-in"></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Testing a module --------------------------------------------------------</span></span>
-<span class="r-in"><span class="va">myModuleServer</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">id</span>, <span class="va">multiplier</span> <span class="op">=</span> <span class="fl">2</span>, <span class="va">prefix</span> <span class="op">=</span> <span class="st">"I am "</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">  <span class="fu"><a href="moduleServer.html">moduleServer</a></span><span class="op">(</span><span class="va">id</span>, <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">    <span class="va">myreactive</span> <span class="op">&lt;-</span> <span class="fu"><a href="reactive.html">reactive</a></span><span class="op">(</span><span class="op">{</span></span>
-<span class="r-in">      <span class="va">input</span><span class="op">$</span><span class="va">x</span> <span class="op">*</span> <span class="va">multiplier</span></span>
-<span class="r-in">    <span class="op">}</span><span class="op">)</span></span>
-<span class="r-in">    <span class="va">output</span><span class="op">$</span><span class="va">txt</span> <span class="op">&lt;-</span> <span class="fu"><a href="renderPrint.html">renderText</a></span><span class="op">(</span><span class="op">{</span></span>
-<span class="r-in">      <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">prefix</span>, <span class="fu">myreactive</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in">    <span class="op">}</span><span class="op">)</span></span>
-<span class="r-in">  <span class="op">}</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu">testServer</span><span class="op">(</span><span class="va">myModuleServer</span>, args <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>multiplier <span class="op">=</span> <span class="fl">2</span><span class="op">)</span>, <span class="op">{</span></span>
-<span class="r-in">  <span class="va">session</span><span class="op">$</span><span class="fu">setInputs</span><span class="op">(</span>x <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
-<span class="r-in">  <span class="co"># You're also free to use third-party</span></span>
-<span class="r-in">  <span class="co"># testing packages like testthat:</span></span>
-<span class="r-in">  <span class="co">#   expect_equal(myreactive(), 2)</span></span>
-<span class="r-in">  <span class="fu"><a href="https://rdrr.io/r/base/stopifnot.html" class="external-link">stopifnot</a></span><span class="op">(</span><span class="fu">myreactive</span><span class="op">(</span><span class="op">)</span> <span class="op">==</span> <span class="fl">2</span><span class="op">)</span></span>
-<span class="r-in">  <span class="fu"><a href="https://rdrr.io/r/base/stopifnot.html" class="external-link">stopifnot</a></span><span class="op">(</span><span class="va">output</span><span class="op">$</span><span class="va">txt</span> <span class="op">==</span> <span class="st">"I am 2"</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in">  <span class="va">session</span><span class="op">$</span><span class="fu">setInputs</span><span class="op">(</span>x <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
-<span class="r-in">  <span class="fu"><a href="https://rdrr.io/r/base/stopifnot.html" class="external-link">stopifnot</a></span><span class="op">(</span><span class="fu">myreactive</span><span class="op">(</span><span class="op">)</span> <span class="op">==</span> <span class="fl">4</span><span class="op">)</span></span>
-<span class="r-in">  <span class="fu"><a href="https://rdrr.io/r/base/stopifnot.html" class="external-link">stopifnot</a></span><span class="op">(</span><span class="va">output</span><span class="op">$</span><span class="va">txt</span> <span class="op">==</span> <span class="st">"I am 4"</span><span class="op">)</span></span>
-<span class="r-in">  <span class="co"># Any additional arguments, below, are passed along to the module.</span></span>
-<span class="r-in"><span class="op">}</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Testing a module --------------------------------------------------------</span></span></span>
+<span class="r-in"><span><span class="va">myModuleServer</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">id</span>, <span class="va">multiplier</span> <span class="op">=</span> <span class="fl">2</span>, <span class="va">prefix</span> <span class="op">=</span> <span class="st">"I am "</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="moduleServer.html">moduleServer</a></span><span class="op">(</span><span class="va">id</span>, <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>    <span class="va">myreactive</span> <span class="op">&lt;-</span> <span class="fu"><a href="reactive.html">reactive</a></span><span class="op">(</span><span class="op">{</span></span></span>
+<span class="r-in"><span>      <span class="va">input</span><span class="op">$</span><span class="va">x</span> <span class="op">*</span> <span class="va">multiplier</span></span></span>
+<span class="r-in"><span>    <span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="va">output</span><span class="op">$</span><span class="va">txt</span> <span class="op">&lt;-</span> <span class="fu"><a href="renderPrint.html">renderText</a></span><span class="op">(</span><span class="op">{</span></span></span>
+<span class="r-in"><span>      <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">prefix</span>, <span class="fu">myreactive</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu">testServer</span><span class="op">(</span><span class="va">myModuleServer</span>, args <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>multiplier <span class="op">=</span> <span class="fl">2</span><span class="op">)</span>, <span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="va">session</span><span class="op">$</span><span class="fu">setInputs</span><span class="op">(</span>x <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="co"># You're also free to use third-party</span></span></span>
+<span class="r-in"><span>  <span class="co"># testing packages like testthat:</span></span></span>
+<span class="r-in"><span>  <span class="co">#   expect_equal(myreactive(), 2)</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/stopifnot.html" class="external-link">stopifnot</a></span><span class="op">(</span><span class="fu">myreactive</span><span class="op">(</span><span class="op">)</span> <span class="op">==</span> <span class="fl">2</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/stopifnot.html" class="external-link">stopifnot</a></span><span class="op">(</span><span class="va">output</span><span class="op">$</span><span class="va">txt</span> <span class="op">==</span> <span class="st">"I am 2"</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>  <span class="va">session</span><span class="op">$</span><span class="fu">setInputs</span><span class="op">(</span>x <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/stopifnot.html" class="external-link">stopifnot</a></span><span class="op">(</span><span class="fu">myreactive</span><span class="op">(</span><span class="op">)</span> <span class="op">==</span> <span class="fl">4</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/stopifnot.html" class="external-link">stopifnot</a></span><span class="op">(</span><span class="va">output</span><span class="op">$</span><span class="va">txt</span> <span class="op">==</span> <span class="st">"I am 4"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="co"># Any additional arguments, below, are passed along to the module.</span></span></span>
+<span class="r-in"><span><span class="op">}</span><span class="op">)</span></span></span>
 </code></pre></div>
     </div>
   </div>

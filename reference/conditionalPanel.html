@@ -19,7 +19,7 @@ whenever Shiny detects a relevant change in input/output."><meta property="og:im
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">shiny</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.1.9003</span>
       </span>
     </div>
 
@@ -57,7 +57,7 @@ whenever Shiny detects a relevant change in input/output.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">conditionalPanel</span><span class="op">(</span><span class="va">condition</span>, <span class="va">...</span>, ns <span class="op">=</span> <span class="fu"><a href="NS.html">NS</a></span><span class="op">(</span><span class="cn">NULL</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">conditionalPanel</span><span class="op">(</span><span class="va">condition</span>, <span class="va">...</span>, ns <span class="op">=</span> <span class="fu"><a href="NS.html">NS</a></span><span class="op">(</span><span class="cn">NULL</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -95,52 +95,52 @@ value.</p>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="co">## Only run this example in interactive R sessions</span></span>
-<span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">  <span class="va">ui</span> <span class="op">&lt;-</span> <span class="fu"><a href="fluidPage.html">fluidPage</a></span><span class="op">(</span></span>
-<span class="r-in">    <span class="fu"><a href="sidebarLayout.html">sidebarPanel</a></span><span class="op">(</span></span>
-<span class="r-in">      <span class="fu"><a href="selectInput.html">selectInput</a></span><span class="op">(</span><span class="st">"plotType"</span>, <span class="st">"Plot Type"</span>,</span>
-<span class="r-in">        <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>Scatter <span class="op">=</span> <span class="st">"scatter"</span>, Histogram <span class="op">=</span> <span class="st">"hist"</span><span class="op">)</span></span>
-<span class="r-in">      <span class="op">)</span>,</span>
-<span class="r-in">      <span class="co"># Only show this panel if the plot type is a histogram</span></span>
-<span class="r-in">      <span class="fu">conditionalPanel</span><span class="op">(</span></span>
-<span class="r-in">        condition <span class="op">=</span> <span class="st">"input.plotType == 'hist'"</span>,</span>
-<span class="r-in">        <span class="fu"><a href="selectInput.html">selectInput</a></span><span class="op">(</span></span>
-<span class="r-in">          <span class="st">"breaks"</span>, <span class="st">"Breaks"</span>,</span>
-<span class="r-in">          <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Sturges"</span>, <span class="st">"Scott"</span>, <span class="st">"Freedman-Diaconis"</span>, <span class="st">"[Custom]"</span> <span class="op">=</span> <span class="st">"custom"</span><span class="op">)</span></span>
-<span class="r-in">        <span class="op">)</span>,</span>
-<span class="r-in">        <span class="co"># Only show this panel if Custom is selected</span></span>
-<span class="r-in">        <span class="fu">conditionalPanel</span><span class="op">(</span></span>
-<span class="r-in">          condition <span class="op">=</span> <span class="st">"input.breaks == 'custom'"</span>,</span>
-<span class="r-in">          <span class="fu"><a href="sliderInput.html">sliderInput</a></span><span class="op">(</span><span class="st">"breakCount"</span>, <span class="st">"Break Count"</span>, min <span class="op">=</span> <span class="fl">1</span>, max <span class="op">=</span> <span class="fl">50</span>, value <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span>
-<span class="r-in">        <span class="op">)</span></span>
-<span class="r-in">      <span class="op">)</span></span>
-<span class="r-in">    <span class="op">)</span>,</span>
-<span class="r-in">    <span class="fu"><a href="sidebarLayout.html">mainPanel</a></span><span class="op">(</span></span>
-<span class="r-in">      <span class="fu"><a href="plotOutput.html">plotOutput</a></span><span class="op">(</span><span class="st">"plot"</span><span class="op">)</span></span>
-<span class="r-in">    <span class="op">)</span></span>
-<span class="r-in">  <span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in">  <span class="va">server</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">    <span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">100</span><span class="op">)</span></span>
-<span class="r-in">    <span class="va">y</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">100</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in">    <span class="va">output</span><span class="op">$</span><span class="va">plot</span> <span class="op">&lt;-</span> <span class="fu"><a href="renderPlot.html">renderPlot</a></span><span class="op">(</span><span class="op">{</span></span>
-<span class="r-in">      <span class="kw">if</span> <span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">plotType</span> <span class="op">==</span> <span class="st">"scatter"</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">        <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span><span class="op">)</span></span>
-<span class="r-in">      <span class="op">}</span> <span class="kw">else</span> <span class="op">{</span></span>
-<span class="r-in">        <span class="va">breaks</span> <span class="op">&lt;-</span> <span class="va">input</span><span class="op">$</span><span class="va">breaks</span></span>
-<span class="r-in">        <span class="kw">if</span> <span class="op">(</span><span class="va">breaks</span> <span class="op">==</span> <span class="st">"custom"</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">          <span class="va">breaks</span> <span class="op">&lt;-</span> <span class="va">input</span><span class="op">$</span><span class="va">breakCount</span></span>
-<span class="r-in">        <span class="op">}</span></span>
-<span class="r-in"></span>
-<span class="r-in">        <span class="fu"><a href="https://rdrr.io/r/graphics/hist.html" class="external-link">hist</a></span><span class="op">(</span><span class="va">x</span>, breaks <span class="op">=</span> <span class="va">breaks</span><span class="op">)</span></span>
-<span class="r-in">      <span class="op">}</span></span>
-<span class="r-in">    <span class="op">}</span><span class="op">)</span></span>
-<span class="r-in">  <span class="op">}</span></span>
-<span class="r-in"></span>
-<span class="r-in">  <span class="fu"><a href="shinyApp.html">shinyApp</a></span><span class="op">(</span><span class="va">ui</span>, <span class="va">server</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co">## Only run this example in interactive R sessions</span></span></span>
+<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="va">ui</span> <span class="op">&lt;-</span> <span class="fu"><a href="fluidPage.html">fluidPage</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="sidebarLayout.html">sidebarPanel</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>      <span class="fu"><a href="selectInput.html">selectInput</a></span><span class="op">(</span><span class="st">"plotType"</span>, <span class="st">"Plot Type"</span>,</span></span>
+<span class="r-in"><span>        <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>Scatter <span class="op">=</span> <span class="st">"scatter"</span>, Histogram <span class="op">=</span> <span class="st">"hist"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>      <span class="op">)</span>,</span></span>
+<span class="r-in"><span>      <span class="co"># Only show this panel if the plot type is a histogram</span></span></span>
+<span class="r-in"><span>      <span class="fu">conditionalPanel</span><span class="op">(</span></span></span>
+<span class="r-in"><span>        condition <span class="op">=</span> <span class="st">"input.plotType == 'hist'"</span>,</span></span>
+<span class="r-in"><span>        <span class="fu"><a href="selectInput.html">selectInput</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>          <span class="st">"breaks"</span>, <span class="st">"Breaks"</span>,</span></span>
+<span class="r-in"><span>          <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Sturges"</span>, <span class="st">"Scott"</span>, <span class="st">"Freedman-Diaconis"</span>, <span class="st">"[Custom]"</span> <span class="op">=</span> <span class="st">"custom"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>        <span class="op">)</span>,</span></span>
+<span class="r-in"><span>        <span class="co"># Only show this panel if Custom is selected</span></span></span>
+<span class="r-in"><span>        <span class="fu">conditionalPanel</span><span class="op">(</span></span></span>
+<span class="r-in"><span>          condition <span class="op">=</span> <span class="st">"input.breaks == 'custom'"</span>,</span></span>
+<span class="r-in"><span>          <span class="fu"><a href="sliderInput.html">sliderInput</a></span><span class="op">(</span><span class="st">"breakCount"</span>, <span class="st">"Break Count"</span>, min <span class="op">=</span> <span class="fl">1</span>, max <span class="op">=</span> <span class="fl">50</span>, value <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span></span>
+<span class="r-in"><span>        <span class="op">)</span></span></span>
+<span class="r-in"><span>      <span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="op">)</span>,</span></span>
+<span class="r-in"><span>    <span class="fu"><a href="sidebarLayout.html">mainPanel</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>      <span class="fu"><a href="plotOutput.html">plotOutput</a></span><span class="op">(</span><span class="st">"plot"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>  <span class="va">server</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>    <span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">100</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="va">y</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">100</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>    <span class="va">output</span><span class="op">$</span><span class="va">plot</span> <span class="op">&lt;-</span> <span class="fu"><a href="renderPlot.html">renderPlot</a></span><span class="op">(</span><span class="op">{</span></span></span>
+<span class="r-in"><span>      <span class="kw">if</span> <span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">plotType</span> <span class="op">==</span> <span class="st">"scatter"</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>        <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span><span class="op">)</span></span></span>
+<span class="r-in"><span>      <span class="op">}</span> <span class="kw">else</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>        <span class="va">breaks</span> <span class="op">&lt;-</span> <span class="va">input</span><span class="op">$</span><span class="va">breaks</span></span></span>
+<span class="r-in"><span>        <span class="kw">if</span> <span class="op">(</span><span class="va">breaks</span> <span class="op">==</span> <span class="st">"custom"</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>          <span class="va">breaks</span> <span class="op">&lt;-</span> <span class="va">input</span><span class="op">$</span><span class="va">breakCount</span></span></span>
+<span class="r-in"><span>        <span class="op">}</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>        <span class="fu"><a href="https://rdrr.io/r/graphics/hist.html" class="external-link">hist</a></span><span class="op">(</span><span class="va">x</span>, breaks <span class="op">=</span> <span class="va">breaks</span><span class="op">)</span></span></span>
+<span class="r-in"><span>      <span class="op">}</span></span></span>
+<span class="r-in"><span>    <span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">}</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="shinyApp.html">shinyApp</a></span><span class="op">(</span><span class="va">ui</span>, <span class="va">server</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
 </code></pre></div>
     </div>
   </div>

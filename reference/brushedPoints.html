@@ -21,7 +21,7 @@ rows of the would be selected."><meta property="og:image" content="/logo.png"><!
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">shiny</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.1.9003</span>
       </span>
     </div>
 
@@ -61,28 +61,28 @@ rows of the would be selected.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">brushedPoints</span><span class="op">(</span>
-  <span class="va">df</span>,
-  <span class="va">brush</span>,
-  xvar <span class="op">=</span> <span class="cn">NULL</span>,
-  yvar <span class="op">=</span> <span class="cn">NULL</span>,
-  panelvar1 <span class="op">=</span> <span class="cn">NULL</span>,
-  panelvar2 <span class="op">=</span> <span class="cn">NULL</span>,
-  allRows <span class="op">=</span> <span class="cn">FALSE</span>
-<span class="op">)</span>
-
-<span class="fu">nearPoints</span><span class="op">(</span>
-  <span class="va">df</span>,
-  <span class="va">coordinfo</span>,
-  xvar <span class="op">=</span> <span class="cn">NULL</span>,
-  yvar <span class="op">=</span> <span class="cn">NULL</span>,
-  panelvar1 <span class="op">=</span> <span class="cn">NULL</span>,
-  panelvar2 <span class="op">=</span> <span class="cn">NULL</span>,
-  threshold <span class="op">=</span> <span class="fl">5</span>,
-  maxpoints <span class="op">=</span> <span class="cn">NULL</span>,
-  addDist <span class="op">=</span> <span class="cn">FALSE</span>,
-  allRows <span class="op">=</span> <span class="cn">FALSE</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">brushedPoints</span><span class="op">(</span></span>
+<span>  <span class="va">df</span>,</span>
+<span>  <span class="va">brush</span>,</span>
+<span>  xvar <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  yvar <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  panelvar1 <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  panelvar2 <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  allRows <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">nearPoints</span><span class="op">(</span></span>
+<span>  <span class="va">df</span>,</span>
+<span>  <span class="va">coordinfo</span>,</span>
+<span>  xvar <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  yvar <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  panelvar1 <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  panelvar2 <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  threshold <span class="op">=</span> <span class="fl">5</span>,</span>
+<span>  maxpoints <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  addDist <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  allRows <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -176,17 +176,17 @@ using just the x or y variable, whichever is appropriate.</p>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in"><span class="co"># Note that in practice, these examples would need to go in reactives</span></span>
-<span class="r-in"><span class="co"># or observers.</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># This would select all points within 5 pixels of the click</span></span>
-<span class="r-in"><span class="fu">nearPoints</span><span class="op">(</span><span class="va">mtcars</span>, <span class="va">input</span><span class="op">$</span><span class="va">plot_click</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Select just the nearest point within 10 pixels of the click</span></span>
-<span class="r-in"><span class="fu">nearPoints</span><span class="op">(</span><span class="va">mtcars</span>, <span class="va">input</span><span class="op">$</span><span class="va">plot_click</span>, threshold <span class="op">=</span> <span class="fl">10</span>, maxpoints <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="op">}</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span><span class="co"># Note that in practice, these examples would need to go in reactives</span></span></span>
+<span class="r-in"><span><span class="co"># or observers.</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># This would select all points within 5 pixels of the click</span></span></span>
+<span class="r-in"><span><span class="fu">nearPoints</span><span class="op">(</span><span class="va">mtcars</span>, <span class="va">input</span><span class="op">$</span><span class="va">plot_click</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Select just the nearest point within 10 pixels of the click</span></span></span>
+<span class="r-in"><span><span class="fu">nearPoints</span><span class="op">(</span><span class="va">mtcars</span>, <span class="va">input</span><span class="op">$</span><span class="va">plot_click</span>, threshold <span class="op">=</span> <span class="fl">10</span>, maxpoints <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
 </code></pre></div>
     </div>
   </div>

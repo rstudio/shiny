@@ -20,7 +20,7 @@ renderPrint() and provides fixed-width text in a &amp;lt;pre&amp;gt;."><meta pro
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">shiny</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.1.9003</span>
       </span>
     </div>
 
@@ -59,9 +59,9 @@ in <code>&lt;div&gt;</code> or <code>&lt;span&gt;</code>; <code>verbatimTextOutp
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">textOutput</span><span class="op">(</span><span class="va">outputId</span>, container <span class="op">=</span> <span class="kw">if</span> <span class="op">(</span><span class="va">inline</span><span class="op">)</span> <span class="va">span</span> <span class="kw">else</span> <span class="va">div</span>, inline <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
-
-<span class="fu">verbatimTextOutput</span><span class="op">(</span><span class="va">outputId</span>, placeholder <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">textOutput</span><span class="op">(</span><span class="va">outputId</span>, container <span class="op">=</span> <span class="kw">if</span> <span class="op">(</span><span class="va">inline</span><span class="op">)</span> <span class="va">span</span> <span class="kw">else</span> <span class="va">div</span>, inline <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">verbatimTextOutput</span><span class="op">(</span><span class="va">outputId</span>, placeholder <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -98,20 +98,20 @@ behavior when the output is nonempty)</p></dd>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="co">## Only run this example in interactive R sessions</span></span>
-<span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">  <span class="fu"><a href="shinyApp.html">shinyApp</a></span><span class="op">(</span></span>
-<span class="r-in">    ui <span class="op">=</span> <span class="fu"><a href="bootstrapPage.html">basicPage</a></span><span class="op">(</span></span>
-<span class="r-in">      <span class="fu"><a href="textInput.html">textInput</a></span><span class="op">(</span><span class="st">"txt"</span>, <span class="st">"Enter the text to display below:"</span><span class="op">)</span>,</span>
-<span class="r-in">      <span class="fu">textOutput</span><span class="op">(</span><span class="st">"text"</span><span class="op">)</span>,</span>
-<span class="r-in">      <span class="fu">verbatimTextOutput</span><span class="op">(</span><span class="st">"verb"</span><span class="op">)</span></span>
-<span class="r-in">    <span class="op">)</span>,</span>
-<span class="r-in">    server <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">      <span class="va">output</span><span class="op">$</span><span class="va">text</span> <span class="op">&lt;-</span> <span class="fu"><a href="renderPrint.html">renderText</a></span><span class="op">(</span><span class="op">{</span> <span class="va">input</span><span class="op">$</span><span class="va">txt</span> <span class="op">}</span><span class="op">)</span></span>
-<span class="r-in">      <span class="va">output</span><span class="op">$</span><span class="va">verb</span> <span class="op">&lt;-</span> <span class="fu"><a href="renderPrint.html">renderText</a></span><span class="op">(</span><span class="op">{</span> <span class="va">input</span><span class="op">$</span><span class="va">txt</span> <span class="op">}</span><span class="op">)</span></span>
-<span class="r-in">    <span class="op">}</span></span>
-<span class="r-in">  <span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co">## Only run this example in interactive R sessions</span></span></span>
+<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="shinyApp.html">shinyApp</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>    ui <span class="op">=</span> <span class="fu"><a href="bootstrapPage.html">basicPage</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>      <span class="fu"><a href="textInput.html">textInput</a></span><span class="op">(</span><span class="st">"txt"</span>, <span class="st">"Enter the text to display below:"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>      <span class="fu">textOutput</span><span class="op">(</span><span class="st">"text"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>      <span class="fu">verbatimTextOutput</span><span class="op">(</span><span class="st">"verb"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="op">)</span>,</span></span>
+<span class="r-in"><span>    server <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>      <span class="va">output</span><span class="op">$</span><span class="va">text</span> <span class="op">&lt;-</span> <span class="fu"><a href="renderPrint.html">renderText</a></span><span class="op">(</span><span class="op">{</span> <span class="va">input</span><span class="op">$</span><span class="va">txt</span> <span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span>      <span class="va">output</span><span class="op">$</span><span class="va">verb</span> <span class="op">&lt;-</span> <span class="fu"><a href="renderPrint.html">renderText</a></span><span class="op">(</span><span class="op">{</span> <span class="va">input</span><span class="op">$</span><span class="va">txt</span> <span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="op">}</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
 </code></pre></div>
     </div>
   </div>

@@ -20,7 +20,7 @@ dependencies on all the objects, you can wrap the call with isolate()."><meta pr
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">shiny</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.1.9003</span>
       </span>
     </div>
 
@@ -59,7 +59,7 @@ dependencies on all the objects, you can wrap the call with <code><a href="isola
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">reactiveValuesToList</span><span class="op">(</span><span class="va">x</span>, all.names <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">reactiveValuesToList</span><span class="op">(</span><span class="va">x</span>, all.names <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -76,15 +76,15 @@ dependencies on all the objects, you can wrap the call with <code><a href="isola
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="va">values</span> <span class="op">&lt;-</span> <span class="fu"><a href="reactiveValues.html">reactiveValues</a></span><span class="op">(</span>a <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
-<span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in"><span class="fu">reactiveValuesToList</span><span class="op">(</span><span class="va">values</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># To get the objects without taking dependencies on them, use isolate().</span></span>
-<span class="r-in"><span class="co"># isolate() can also be used when calling from outside a reactive context (e.g.</span></span>
-<span class="r-in"><span class="co"># at the console)</span></span>
-<span class="r-in"><span class="fu"><a href="isolate.html">isolate</a></span><span class="op">(</span><span class="fu">reactiveValuesToList</span><span class="op">(</span><span class="va">values</span><span class="op">)</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">values</span> <span class="op">&lt;-</span> <span class="fu"><a href="reactiveValues.html">reactiveValues</a></span><span class="op">(</span>a <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span><span class="fu">reactiveValuesToList</span><span class="op">(</span><span class="va">values</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># To get the objects without taking dependencies on them, use isolate().</span></span></span>
+<span class="r-in"><span><span class="co"># isolate() can also be used when calling from outside a reactive context (e.g.</span></span></span>
+<span class="r-in"><span><span class="co"># at the console)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="isolate.html">isolate</a></span><span class="op">(</span><span class="fu">reactiveValuesToList</span><span class="op">(</span><span class="va">values</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $a</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>

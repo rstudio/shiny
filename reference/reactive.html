@@ -18,7 +18,7 @@ reactive expression is a expression whose result will change over time."><meta p
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">shiny</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.1.9003</span>
       </span>
     </div>
 
@@ -55,17 +55,17 @@ reactive expression is a expression whose result will change over time.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">reactive</span><span class="op">(</span>
-  <span class="va">x</span>,
-  env <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sys.parent.html" class="external-link">parent.frame</a></span><span class="op">(</span><span class="op">)</span>,
-  quoted <span class="op">=</span> <span class="cn">FALSE</span>,
-  <span class="va">...</span>,
-  label <span class="op">=</span> <span class="cn">NULL</span>,
-  domain <span class="op">=</span> <span class="fu"><a href="domains.html">getDefaultReactiveDomain</a></span><span class="op">(</span><span class="op">)</span>,
-  ..stacktraceon <span class="op">=</span> <span class="cn">TRUE</span>
-<span class="op">)</span>
-
-<span class="fu">is.reactive</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">reactive</span><span class="op">(</span></span>
+<span>  <span class="va">x</span>,</span>
+<span>  env <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sys.parent.html" class="external-link">parent.frame</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  quoted <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  <span class="va">...</span>,</span>
+<span>  label <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  domain <span class="op">=</span> <span class="fu"><a href="domains.html">getDefaultReactiveDomain</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  ..stacktraceon <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">is.reactive</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -126,40 +126,40 @@ more information about reactive expressions.</p>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://rlang.r-lib.org" class="external-link">rlang</a></span><span class="op">)</span></span>
-<span class="r-in"><span class="va">values</span> <span class="op">&lt;-</span> <span class="fu"><a href="reactiveValues.html">reactiveValues</a></span><span class="op">(</span>A<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="va">reactiveB</span> <span class="op">&lt;-</span> <span class="fu">reactive</span><span class="op">(</span><span class="op">{</span></span>
-<span class="r-in">  <span class="va">values</span><span class="op">$</span><span class="va">A</span> <span class="op">+</span> <span class="fl">1</span></span>
-<span class="r-in"><span class="op">}</span><span class="op">)</span></span>
-<span class="r-in"><span class="co"># View the values from the R console with isolate()</span></span>
-<span class="r-in"><span class="fu"><a href="isolate.html">isolate</a></span><span class="op">(</span><span class="fu">reactiveB</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://rlang.r-lib.org" class="external-link">rlang</a></span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">values</span> <span class="op">&lt;-</span> <span class="fu"><a href="reactiveValues.html">reactiveValues</a></span><span class="op">(</span>A<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">reactiveB</span> <span class="op">&lt;-</span> <span class="fu">reactive</span><span class="op">(</span><span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="va">values</span><span class="op">$</span><span class="va">A</span> <span class="op">+</span> <span class="fl">1</span></span></span>
+<span class="r-in"><span><span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># View the values from the R console with isolate()</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="isolate.html">isolate</a></span><span class="op">(</span><span class="fu">reactiveB</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 2</span>
-<span class="r-in"><span class="co"># 2</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># To store expressions for later conversion to reactive, use quote()</span></span>
-<span class="r-in"><span class="va">myquo</span> <span class="op">&lt;-</span> <span class="fu">rlang</span><span class="fu">::</span><span class="fu"><a href="https://rlang.r-lib.org/reference/defusing-advanced.html" class="external-link">quo</a></span><span class="op">(</span><span class="va">values</span><span class="op">$</span><span class="va">A</span> <span class="op">+</span> <span class="fl">2</span><span class="op">)</span></span>
-<span class="r-in"><span class="co"># Unexpected value! Sending a quosure directly will not work as expected.</span></span>
-<span class="r-in"><span class="va">reactiveC</span> <span class="op">&lt;-</span> <span class="fu">reactive</span><span class="op">(</span><span class="va">myquo</span><span class="op">)</span></span>
-<span class="r-in"><span class="co"># We'd hope for `3`, but instead we get the quosure that was supplied.</span></span>
-<span class="r-in"><span class="fu"><a href="isolate.html">isolate</a></span><span class="op">(</span><span class="fu">reactiveC</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="co"># 2</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># To store expressions for later conversion to reactive, use quote()</span></span></span>
+<span class="r-in"><span><span class="va">myquo</span> <span class="op">&lt;-</span> <span class="fu">rlang</span><span class="fu">::</span><span class="fu"><a href="https://rlang.r-lib.org/reference/defusing-advanced.html" class="external-link">quo</a></span><span class="op">(</span><span class="va">values</span><span class="op">$</span><span class="va">A</span> <span class="op">+</span> <span class="fl">2</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># Unexpected value! Sending a quosure directly will not work as expected.</span></span></span>
+<span class="r-in"><span><span class="va">reactiveC</span> <span class="op">&lt;-</span> <span class="fu">reactive</span><span class="op">(</span><span class="va">myquo</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># We'd hope for `3`, but instead we get the quosure that was supplied.</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="isolate.html">isolate</a></span><span class="op">(</span><span class="fu">reactiveC</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">&lt;quosure&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> expr: <span style="color: #0000BB;">^values$A + 2</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> env:  <span style="color: #0000BB;">0x55b826b5c648</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Instead, the quosure should be `rlang::inject()`ed</span></span>
-<span class="r-in"><span class="va">reactiveD</span> <span class="op">&lt;-</span> <span class="fu">rlang</span><span class="fu">::</span><span class="fu"><a href="https://rlang.r-lib.org/reference/inject.html" class="external-link">inject</a></span><span class="op">(</span><span class="fu">reactive</span><span class="op">(</span><span class="op">!</span><span class="op">!</span><span class="va">myquo</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu"><a href="isolate.html">isolate</a></span><span class="op">(</span><span class="fu">reactiveD</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> env:  <span style="color: #0000BB;">0x5628fd7a7ee8</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Instead, the quosure should be `rlang::inject()`ed</span></span></span>
+<span class="r-in"><span><span class="va">reactiveD</span> <span class="op">&lt;-</span> <span class="fu">rlang</span><span class="fu">::</span><span class="fu"><a href="https://rlang.r-lib.org/reference/inject.html" class="external-link">inject</a></span><span class="op">(</span><span class="fu">reactive</span><span class="op">(</span><span class="op">!</span><span class="op">!</span><span class="va">myquo</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="isolate.html">isolate</a></span><span class="op">(</span><span class="fu">reactiveD</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 3</span>
-<span class="r-in"><span class="co"># 3</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># (Legacy) Can use quoted expressions</span></span>
-<span class="r-in"><span class="va">expr</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/substitute.html" class="external-link">quote</a></span><span class="op">(</span><span class="op">{</span> <span class="va">values</span><span class="op">$</span><span class="va">A</span> <span class="op">+</span> <span class="fl">3</span> <span class="op">}</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">reactiveE</span> <span class="op">&lt;-</span> <span class="fu">reactive</span><span class="op">(</span><span class="va">expr</span>, quoted <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu"><a href="isolate.html">isolate</a></span><span class="op">(</span><span class="fu">reactiveE</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="co"># 3</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># (Legacy) Can use quoted expressions</span></span></span>
+<span class="r-in"><span><span class="va">expr</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/substitute.html" class="external-link">quote</a></span><span class="op">(</span><span class="op">{</span> <span class="va">values</span><span class="op">$</span><span class="va">A</span> <span class="op">+</span> <span class="fl">3</span> <span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">reactiveE</span> <span class="op">&lt;-</span> <span class="fu">reactive</span><span class="op">(</span><span class="va">expr</span>, quoted <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="isolate.html">isolate</a></span><span class="op">(</span><span class="fu">reactiveE</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 4</span>
-<span class="r-in"><span class="co"># 4</span></span>
-<span class="r-in"></span>
+<span class="r-in"><span><span class="co"># 4</span></span></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>

@@ -25,7 +25,7 @@ with higher priority values will execute before those with lower values.
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">shiny</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.1.9003</span>
       </span>
     </div>
 
@@ -66,7 +66,7 @@ with higher priority values will execute before those with lower values.</p></li
 </ul></div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">outputOptions</span><span class="op">(</span><span class="va">x</span>, <span class="va">name</span>, <span class="va">...</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">outputOptions</span><span class="op">(</span><span class="va">x</span>, <span class="va">name</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -86,20 +86,20 @@ with higher priority values will execute before those with lower values.</p></li
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in"><span class="co"># Get the list of options for all observers within output</span></span>
-<span class="r-in"><span class="fu">outputOptions</span><span class="op">(</span><span class="va">output</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Disable suspend for output$myplot</span></span>
-<span class="r-in"><span class="fu">outputOptions</span><span class="op">(</span><span class="va">output</span>, <span class="st">"myplot"</span>, suspendWhenHidden <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Change priority for output$myplot</span></span>
-<span class="r-in"><span class="fu">outputOptions</span><span class="op">(</span><span class="va">output</span>, <span class="st">"myplot"</span>, priority <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Get the list of options for output$myplot</span></span>
-<span class="r-in"><span class="fu">outputOptions</span><span class="op">(</span><span class="va">output</span>, <span class="st">"myplot"</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
-<span class="r-in"></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span><span class="co"># Get the list of options for all observers within output</span></span></span>
+<span class="r-in"><span><span class="fu">outputOptions</span><span class="op">(</span><span class="va">output</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Disable suspend for output$myplot</span></span></span>
+<span class="r-in"><span><span class="fu">outputOptions</span><span class="op">(</span><span class="va">output</span>, <span class="st">"myplot"</span>, suspendWhenHidden <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Change priority for output$myplot</span></span></span>
+<span class="r-in"><span><span class="fu">outputOptions</span><span class="op">(</span><span class="va">output</span>, <span class="st">"myplot"</span>, priority <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Get the list of options for output$myplot</span></span></span>
+<span class="r-in"><span><span class="fu">outputOptions</span><span class="op">(</span><span class="va">output</span>, <span class="st">"myplot"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>

@@ -18,7 +18,7 @@ the user can click on to select dates."><meta property="og:image" content="/logo
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">shiny</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.1.9003</span>
       </span>
     </div>
 
@@ -55,21 +55,21 @@ the user can click on to select dates.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">dateInput</span><span class="op">(</span>
-  <span class="va">inputId</span>,
-  <span class="va">label</span>,
-  value <span class="op">=</span> <span class="cn">NULL</span>,
-  min <span class="op">=</span> <span class="cn">NULL</span>,
-  max <span class="op">=</span> <span class="cn">NULL</span>,
-  format <span class="op">=</span> <span class="st">"yyyy-mm-dd"</span>,
-  startview <span class="op">=</span> <span class="st">"month"</span>,
-  weekstart <span class="op">=</span> <span class="fl">0</span>,
-  language <span class="op">=</span> <span class="st">"en"</span>,
-  width <span class="op">=</span> <span class="cn">NULL</span>,
-  autoclose <span class="op">=</span> <span class="cn">TRUE</span>,
-  datesdisabled <span class="op">=</span> <span class="cn">NULL</span>,
-  daysofweekdisabled <span class="op">=</span> <span class="cn">NULL</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">dateInput</span><span class="op">(</span></span>
+<span>  <span class="va">inputId</span>,</span>
+<span>  <span class="va">label</span>,</span>
+<span>  value <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  min <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  max <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  format <span class="op">=</span> <span class="st">"yyyy-mm-dd"</span>,</span>
+<span>  startview <span class="op">=</span> <span class="st">"month"</span>,</span>
+<span>  weekstart <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  language <span class="op">=</span> <span class="st">"en"</span>,</span>
+<span>  width <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  autoclose <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  datesdisabled <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  daysofweekdisabled <span class="op">=</span> <span class="cn">NULL</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -187,41 +187,41 @@ the browser. It allows the following values:</p>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="co">## Only run examples in interactive R sessions</span></span>
-<span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="va">ui</span> <span class="op">&lt;-</span> <span class="fu"><a href="fluidPage.html">fluidPage</a></span><span class="op">(</span></span>
-<span class="r-in">  <span class="fu">dateInput</span><span class="op">(</span><span class="st">"date1"</span>, <span class="st">"Date:"</span>, value <span class="op">=</span> <span class="st">"2012-02-29"</span><span class="op">)</span>,</span>
-<span class="r-in"></span>
-<span class="r-in">  <span class="co"># Default value is the date in client's time zone</span></span>
-<span class="r-in">  <span class="fu">dateInput</span><span class="op">(</span><span class="st">"date2"</span>, <span class="st">"Date:"</span><span class="op">)</span>,</span>
-<span class="r-in"></span>
-<span class="r-in">  <span class="co"># value is always yyyy-mm-dd, even if the display format is different</span></span>
-<span class="r-in">  <span class="fu">dateInput</span><span class="op">(</span><span class="st">"date3"</span>, <span class="st">"Date:"</span>, value <span class="op">=</span> <span class="st">"2012-02-29"</span>, format <span class="op">=</span> <span class="st">"mm/dd/yy"</span><span class="op">)</span>,</span>
-<span class="r-in"></span>
-<span class="r-in">  <span class="co"># Pass in a Date object</span></span>
-<span class="r-in">  <span class="fu">dateInput</span><span class="op">(</span><span class="st">"date4"</span>, <span class="st">"Date:"</span>, value <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.Date</a></span><span class="op">(</span><span class="op">)</span><span class="op">-</span><span class="fl">10</span><span class="op">)</span>,</span>
-<span class="r-in"></span>
-<span class="r-in">  <span class="co"># Use different language and different first day of week</span></span>
-<span class="r-in">  <span class="fu">dateInput</span><span class="op">(</span><span class="st">"date5"</span>, <span class="st">"Date:"</span>,</span>
-<span class="r-in">          language <span class="op">=</span> <span class="st">"ru"</span>,</span>
-<span class="r-in">          weekstart <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>,</span>
-<span class="r-in"></span>
-<span class="r-in">  <span class="co"># Start with decade view instead of default month view</span></span>
-<span class="r-in">  <span class="fu">dateInput</span><span class="op">(</span><span class="st">"date6"</span>, <span class="st">"Date:"</span>,</span>
-<span class="r-in">            startview <span class="op">=</span> <span class="st">"decade"</span><span class="op">)</span>,</span>
-<span class="r-in"></span>
-<span class="r-in">  <span class="co"># Disable Mondays and Tuesdays.</span></span>
-<span class="r-in">  <span class="fu">dateInput</span><span class="op">(</span><span class="st">"date7"</span>, <span class="st">"Date:"</span>, daysofweekdisabled <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">2</span><span class="op">)</span><span class="op">)</span>,</span>
-<span class="r-in"></span>
-<span class="r-in">  <span class="co"># Disable specific dates.</span></span>
-<span class="r-in">  <span class="fu">dateInput</span><span class="op">(</span><span class="st">"date8"</span>, <span class="st">"Date:"</span>, value <span class="op">=</span> <span class="st">"2012-02-29"</span>,</span>
-<span class="r-in">            datesdisabled <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"2012-03-01"</span>, <span class="st">"2012-03-02"</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu"><a href="shinyApp.html">shinyApp</a></span><span class="op">(</span><span class="va">ui</span>, server <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span><span class="op">)</span> <span class="op">{</span> <span class="op">}</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
-<span class="r-in"></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co">## Only run examples in interactive R sessions</span></span></span>
+<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">ui</span> <span class="op">&lt;-</span> <span class="fu"><a href="fluidPage.html">fluidPage</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  <span class="fu">dateInput</span><span class="op">(</span><span class="st">"date1"</span>, <span class="st">"Date:"</span>, value <span class="op">=</span> <span class="st">"2012-02-29"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>  <span class="co"># Default value is the date in client's time zone</span></span></span>
+<span class="r-in"><span>  <span class="fu">dateInput</span><span class="op">(</span><span class="st">"date2"</span>, <span class="st">"Date:"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>  <span class="co"># value is always yyyy-mm-dd, even if the display format is different</span></span></span>
+<span class="r-in"><span>  <span class="fu">dateInput</span><span class="op">(</span><span class="st">"date3"</span>, <span class="st">"Date:"</span>, value <span class="op">=</span> <span class="st">"2012-02-29"</span>, format <span class="op">=</span> <span class="st">"mm/dd/yy"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>  <span class="co"># Pass in a Date object</span></span></span>
+<span class="r-in"><span>  <span class="fu">dateInput</span><span class="op">(</span><span class="st">"date4"</span>, <span class="st">"Date:"</span>, value <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.Date</a></span><span class="op">(</span><span class="op">)</span><span class="op">-</span><span class="fl">10</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>  <span class="co"># Use different language and different first day of week</span></span></span>
+<span class="r-in"><span>  <span class="fu">dateInput</span><span class="op">(</span><span class="st">"date5"</span>, <span class="st">"Date:"</span>,</span></span>
+<span class="r-in"><span>          language <span class="op">=</span> <span class="st">"ru"</span>,</span></span>
+<span class="r-in"><span>          weekstart <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>  <span class="co"># Start with decade view instead of default month view</span></span></span>
+<span class="r-in"><span>  <span class="fu">dateInput</span><span class="op">(</span><span class="st">"date6"</span>, <span class="st">"Date:"</span>,</span></span>
+<span class="r-in"><span>            startview <span class="op">=</span> <span class="st">"decade"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>  <span class="co"># Disable Mondays and Tuesdays.</span></span></span>
+<span class="r-in"><span>  <span class="fu">dateInput</span><span class="op">(</span><span class="st">"date7"</span>, <span class="st">"Date:"</span>, daysofweekdisabled <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">2</span><span class="op">)</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>  <span class="co"># Disable specific dates.</span></span></span>
+<span class="r-in"><span>  <span class="fu">dateInput</span><span class="op">(</span><span class="st">"date8"</span>, <span class="st">"Date:"</span>, value <span class="op">=</span> <span class="st">"2012-02-29"</span>,</span></span>
+<span class="r-in"><span>            datesdisabled <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"2012-03-01"</span>, <span class="st">"2012-03-02"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="shinyApp.html">shinyApp</a></span><span class="op">(</span><span class="va">ui</span>, server <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span><span class="op">)</span> <span class="op">{</span> <span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>

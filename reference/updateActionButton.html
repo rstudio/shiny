@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">shiny</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.1.9003</span>
       </span>
     </div>
 
@@ -53,19 +53,19 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">updateActionButton</span><span class="op">(</span>
-  session <span class="op">=</span> <span class="fu"><a href="domains.html">getDefaultReactiveDomain</a></span><span class="op">(</span><span class="op">)</span>,
-  <span class="va">inputId</span>,
-  label <span class="op">=</span> <span class="cn">NULL</span>,
-  icon <span class="op">=</span> <span class="cn">NULL</span>
-<span class="op">)</span>
-
-<span class="fu">updateActionLink</span><span class="op">(</span>
-  session <span class="op">=</span> <span class="fu"><a href="domains.html">getDefaultReactiveDomain</a></span><span class="op">(</span><span class="op">)</span>,
-  <span class="va">inputId</span>,
-  label <span class="op">=</span> <span class="cn">NULL</span>,
-  icon <span class="op">=</span> <span class="cn">NULL</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">updateActionButton</span><span class="op">(</span></span>
+<span>  session <span class="op">=</span> <span class="fu"><a href="domains.html">getDefaultReactiveDomain</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  <span class="va">inputId</span>,</span>
+<span>  label <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  icon <span class="op">=</span> <span class="cn">NULL</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">updateActionLink</span><span class="op">(</span></span>
+<span>  session <span class="op">=</span> <span class="fu"><a href="domains.html">getDefaultReactiveDomain</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  <span class="va">inputId</span>,</span>
+<span>  label <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  icon <span class="op">=</span> <span class="cn">NULL</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -109,49 +109,49 @@ can be cleared by using <code>selected=character(0)</code>.</p>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="co">## Only run examples in interactive R sessions</span></span>
-<span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="va">ui</span> <span class="op">&lt;-</span> <span class="fu"><a href="fluidPage.html">fluidPage</a></span><span class="op">(</span></span>
-<span class="r-in">  <span class="fu"><a href="actionButton.html">actionButton</a></span><span class="op">(</span><span class="st">"update"</span>, <span class="st">"Update other buttons and link"</span><span class="op">)</span>,</span>
-<span class="r-in">  <span class="fu"><a href="https://rdrr.io/pkg/htmltools/man/builder.html" class="external-link">br</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span class="r-in">  <span class="fu"><a href="actionButton.html">actionButton</a></span><span class="op">(</span><span class="st">"goButton"</span>, <span class="st">"Go"</span><span class="op">)</span>,</span>
-<span class="r-in">  <span class="fu"><a href="https://rdrr.io/pkg/htmltools/man/builder.html" class="external-link">br</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span class="r-in">  <span class="fu"><a href="actionButton.html">actionButton</a></span><span class="op">(</span><span class="st">"goButton2"</span>, <span class="st">"Go 2"</span>, icon <span class="op">=</span> <span class="fu"><a href="icon.html">icon</a></span><span class="op">(</span><span class="st">"area-chart"</span><span class="op">)</span><span class="op">)</span>,</span>
-<span class="r-in">  <span class="fu"><a href="https://rdrr.io/pkg/htmltools/man/builder.html" class="external-link">br</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span class="r-in">  <span class="fu"><a href="actionButton.html">actionButton</a></span><span class="op">(</span><span class="st">"goButton3"</span>, <span class="st">"Go 3"</span><span class="op">)</span>,</span>
-<span class="r-in">  <span class="fu"><a href="https://rdrr.io/pkg/htmltools/man/builder.html" class="external-link">br</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span class="r-in">  <span class="fu"><a href="actionButton.html">actionLink</a></span><span class="op">(</span><span class="st">"goLink"</span>, <span class="st">"Go Link"</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="va">server</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">  <span class="fu"><a href="observe.html">observe</a></span><span class="op">(</span><span class="op">{</span></span>
-<span class="r-in">    <span class="fu"><a href="req.html">req</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">update</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in">    <span class="co"># Updates goButton's label and icon</span></span>
-<span class="r-in">    <span class="fu">updateActionButton</span><span class="op">(</span><span class="va">session</span>, <span class="st">"goButton"</span>,</span>
-<span class="r-in">      label <span class="op">=</span> <span class="st">"New label"</span>,</span>
-<span class="r-in">      icon <span class="op">=</span> <span class="fu"><a href="icon.html">icon</a></span><span class="op">(</span><span class="st">"calendar"</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in">    <span class="co"># Leaves goButton2's label unchaged and</span></span>
-<span class="r-in">    <span class="co"># removes its icon</span></span>
-<span class="r-in">    <span class="fu">updateActionButton</span><span class="op">(</span><span class="va">session</span>, <span class="st">"goButton2"</span>,</span>
-<span class="r-in">      icon <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></span><span class="op">(</span><span class="fl">0</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in">    <span class="co"># Leaves goButton3's icon, if it exists,</span></span>
-<span class="r-in">    <span class="co"># unchaged and changes its label</span></span>
-<span class="r-in">    <span class="fu">updateActionButton</span><span class="op">(</span><span class="va">session</span>, <span class="st">"goButton3"</span>,</span>
-<span class="r-in">      label <span class="op">=</span> <span class="st">"New label 3"</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in">    <span class="co"># Updates goLink's label and icon</span></span>
-<span class="r-in">    <span class="fu">updateActionButton</span><span class="op">(</span><span class="va">session</span>, <span class="st">"goLink"</span>,</span>
-<span class="r-in">      label <span class="op">=</span> <span class="st">"New link label"</span>,</span>
-<span class="r-in">      icon <span class="op">=</span> <span class="fu"><a href="icon.html">icon</a></span><span class="op">(</span><span class="st">"link"</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in">  <span class="op">}</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu"><a href="shinyApp.html">shinyApp</a></span><span class="op">(</span><span class="va">ui</span>, <span class="va">server</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co">## Only run examples in interactive R sessions</span></span></span>
+<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">ui</span> <span class="op">&lt;-</span> <span class="fu"><a href="fluidPage.html">fluidPage</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="actionButton.html">actionButton</a></span><span class="op">(</span><span class="st">"update"</span>, <span class="st">"Update other buttons and link"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/pkg/htmltools/man/builder.html" class="external-link">br</a></span><span class="op">(</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  <span class="fu"><a href="actionButton.html">actionButton</a></span><span class="op">(</span><span class="st">"goButton"</span>, <span class="st">"Go"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/pkg/htmltools/man/builder.html" class="external-link">br</a></span><span class="op">(</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  <span class="fu"><a href="actionButton.html">actionButton</a></span><span class="op">(</span><span class="st">"goButton2"</span>, <span class="st">"Go 2"</span>, icon <span class="op">=</span> <span class="fu"><a href="icon.html">icon</a></span><span class="op">(</span><span class="st">"area-chart"</span><span class="op">)</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/pkg/htmltools/man/builder.html" class="external-link">br</a></span><span class="op">(</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  <span class="fu"><a href="actionButton.html">actionButton</a></span><span class="op">(</span><span class="st">"goButton3"</span>, <span class="st">"Go 3"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/pkg/htmltools/man/builder.html" class="external-link">br</a></span><span class="op">(</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  <span class="fu"><a href="actionButton.html">actionLink</a></span><span class="op">(</span><span class="st">"goLink"</span>, <span class="st">"Go Link"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">server</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="observe.html">observe</a></span><span class="op">(</span><span class="op">{</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="req.html">req</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">update</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>    <span class="co"># Updates goButton's label and icon</span></span></span>
+<span class="r-in"><span>    <span class="fu">updateActionButton</span><span class="op">(</span><span class="va">session</span>, <span class="st">"goButton"</span>,</span></span>
+<span class="r-in"><span>      label <span class="op">=</span> <span class="st">"New label"</span>,</span></span>
+<span class="r-in"><span>      icon <span class="op">=</span> <span class="fu"><a href="icon.html">icon</a></span><span class="op">(</span><span class="st">"calendar"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>    <span class="co"># Leaves goButton2's label unchaged and</span></span></span>
+<span class="r-in"><span>    <span class="co"># removes its icon</span></span></span>
+<span class="r-in"><span>    <span class="fu">updateActionButton</span><span class="op">(</span><span class="va">session</span>, <span class="st">"goButton2"</span>,</span></span>
+<span class="r-in"><span>      icon <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></span><span class="op">(</span><span class="fl">0</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>    <span class="co"># Leaves goButton3's icon, if it exists,</span></span></span>
+<span class="r-in"><span>    <span class="co"># unchaged and changes its label</span></span></span>
+<span class="r-in"><span>    <span class="fu">updateActionButton</span><span class="op">(</span><span class="va">session</span>, <span class="st">"goButton3"</span>,</span></span>
+<span class="r-in"><span>      label <span class="op">=</span> <span class="st">"New label 3"</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>    <span class="co"># Updates goLink's label and icon</span></span></span>
+<span class="r-in"><span>    <span class="fu">updateActionButton</span><span class="op">(</span><span class="va">session</span>, <span class="st">"goLink"</span>,</span></span>
+<span class="r-in"><span>      label <span class="op">=</span> <span class="st">"New link label"</span>,</span></span>
+<span class="r-in"><span>      icon <span class="op">=</span> <span class="fu"><a href="icon.html">icon</a></span><span class="op">(</span><span class="st">"link"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="shinyApp.html">shinyApp</a></span><span class="op">(</span><span class="va">ui</span>, <span class="va">server</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
 </code></pre></div>
     </div>
   </div>

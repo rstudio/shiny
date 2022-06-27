@@ -34,7 +34,7 @@ browser.
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">shiny</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.1.9003</span>
       </span>
     </div>
 
@@ -84,13 +84,13 @@ browser.</p></li>
 </ul></div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">onBookmark</span><span class="op">(</span><span class="va">fun</span>, session <span class="op">=</span> <span class="fu"><a href="domains.html">getDefaultReactiveDomain</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span>
-
-<span class="fu">onBookmarked</span><span class="op">(</span><span class="va">fun</span>, session <span class="op">=</span> <span class="fu"><a href="domains.html">getDefaultReactiveDomain</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span>
-
-<span class="fu">onRestore</span><span class="op">(</span><span class="va">fun</span>, session <span class="op">=</span> <span class="fu"><a href="domains.html">getDefaultReactiveDomain</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span>
-
-<span class="fu">onRestored</span><span class="op">(</span><span class="va">fun</span>, session <span class="op">=</span> <span class="fu"><a href="domains.html">getDefaultReactiveDomain</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">onBookmark</span><span class="op">(</span><span class="va">fun</span>, session <span class="op">=</span> <span class="fu"><a href="domains.html">getDefaultReactiveDomain</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">onBookmarked</span><span class="op">(</span><span class="va">fun</span>, session <span class="op">=</span> <span class="fu"><a href="domains.html">getDefaultReactiveDomain</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">onRestore</span><span class="op">(</span><span class="va">fun</span>, session <span class="op">=</span> <span class="fu"><a href="domains.html">getDefaultReactiveDomain</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">onRestored</span><span class="op">(</span><span class="va">fun</span>, session <span class="op">=</span> <span class="fu"><a href="domains.html">getDefaultReactiveDomain</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -145,131 +145,131 @@ module's inputs and values.</p>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="co">## Only run these examples in interactive sessions</span></span>
-<span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Basic use of onBookmark and onRestore: This app saves the time in its</span></span>
-<span class="r-in"><span class="co"># arbitrary values, and restores that time when the app is restored.</span></span>
-<span class="r-in"><span class="va">ui</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">req</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">  <span class="fu"><a href="fluidPage.html">fluidPage</a></span><span class="op">(</span></span>
-<span class="r-in">    <span class="fu"><a href="textInput.html">textInput</a></span><span class="op">(</span><span class="st">"txt"</span>, <span class="st">"Input text"</span><span class="op">)</span>,</span>
-<span class="r-in">    <span class="fu"><a href="bookmarkButton.html">bookmarkButton</a></span><span class="op">(</span><span class="op">)</span></span>
-<span class="r-in">  <span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
-<span class="r-in"><span class="va">server</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">  <span class="fu">onBookmark</span><span class="op">(</span><span class="kw">function</span><span class="op">(</span><span class="va">state</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">    <span class="va">savedTime</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in">    <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Last saved at"</span>, <span class="va">savedTime</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span class="r-in">    <span class="co"># state is a mutable reference object, and we can add arbitrary values to</span></span>
-<span class="r-in">    <span class="co"># it.</span></span>
-<span class="r-in">    <span class="va">state</span><span class="op">$</span><span class="va">values</span><span class="op">$</span><span class="va">time</span> <span class="op">&lt;-</span> <span class="va">savedTime</span></span>
-<span class="r-in">  <span class="op">}</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in">  <span class="fu">onRestore</span><span class="op">(</span><span class="kw">function</span><span class="op">(</span><span class="va">state</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">    <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Restoring from state bookmarked at"</span>, <span class="va">state</span><span class="op">$</span><span class="va">values</span><span class="op">$</span><span class="va">time</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span class="r-in">  <span class="op">}</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
-<span class="r-in"><span class="fu"><a href="enableBookmarking.html">enableBookmarking</a></span><span class="op">(</span><span class="st">"url"</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu"><a href="shinyApp.html">shinyApp</a></span><span class="op">(</span><span class="va">ui</span>, <span class="va">server</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="va">ui</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">req</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">  <span class="fu"><a href="fluidPage.html">fluidPage</a></span><span class="op">(</span></span>
-<span class="r-in">    <span class="fu"><a href="textInput.html">textInput</a></span><span class="op">(</span><span class="st">"txt"</span>, <span class="st">"Input text"</span><span class="op">)</span>,</span>
-<span class="r-in">    <span class="fu"><a href="bookmarkButton.html">bookmarkButton</a></span><span class="op">(</span><span class="op">)</span></span>
-<span class="r-in">  <span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
-<span class="r-in"><span class="va">server</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">  <span class="va">lastUpdateTime</span> <span class="op">&lt;-</span> <span class="cn">NULL</span></span>
-<span class="r-in"></span>
-<span class="r-in">  <span class="fu"><a href="observeEvent.html">observeEvent</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">txt</span>, <span class="op">{</span></span>
-<span class="r-in">    <span class="fu"><a href="updateTextInput.html">updateTextInput</a></span><span class="op">(</span><span class="va">session</span>, <span class="st">"txt"</span>,</span>
-<span class="r-in">      label <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"Input text (Changed "</span>, <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span>, <span class="st">")"</span><span class="op">)</span></span>
-<span class="r-in">    <span class="op">)</span></span>
-<span class="r-in">  <span class="op">}</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in">  <span class="fu">onBookmark</span><span class="op">(</span><span class="kw">function</span><span class="op">(</span><span class="va">state</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">    <span class="co"># Save content to a file</span></span>
-<span class="r-in">    <span class="va">messageFile</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">state</span><span class="op">$</span><span class="va">dir</span>, <span class="st">"message.txt"</span><span class="op">)</span></span>
-<span class="r-in">    <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span>, file <span class="op">=</span> <span class="va">messageFile</span><span class="op">)</span></span>
-<span class="r-in">  <span class="op">}</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in">  <span class="fu">onRestored</span><span class="op">(</span><span class="kw">function</span><span class="op">(</span><span class="va">state</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">    <span class="co"># Read the file</span></span>
-<span class="r-in">    <span class="va">messageFile</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">state</span><span class="op">$</span><span class="va">dir</span>, <span class="st">"message.txt"</span><span class="op">)</span></span>
-<span class="r-in">    <span class="va">timeText</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readChar.html" class="external-link">readChar</a></span><span class="op">(</span><span class="va">messageFile</span>, <span class="fl">1000</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in">    <span class="co"># updateTextInput must be called in onRestored, as opposed to onRestore,</span></span>
-<span class="r-in">    <span class="co"># because onRestored happens after the client browser is ready.</span></span>
-<span class="r-in">    <span class="fu"><a href="updateTextInput.html">updateTextInput</a></span><span class="op">(</span><span class="va">session</span>, <span class="st">"txt"</span>,</span>
-<span class="r-in">      label <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"Input text (Changed "</span>, <span class="va">timeText</span>, <span class="st">")"</span><span class="op">)</span></span>
-<span class="r-in">    <span class="op">)</span></span>
-<span class="r-in">  <span class="op">}</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
-<span class="r-in"><span class="co"># "server" bookmarking is needed for writing to disk.</span></span>
-<span class="r-in"><span class="fu"><a href="enableBookmarking.html">enableBookmarking</a></span><span class="op">(</span><span class="st">"server"</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu"><a href="shinyApp.html">shinyApp</a></span><span class="op">(</span><span class="va">ui</span>, <span class="va">server</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># This app has a module, and both the module and the main app code have</span></span>
-<span class="r-in"><span class="co"># onBookmark and onRestore functions which write and read state$values$hash. The</span></span>
-<span class="r-in"><span class="co"># module's version of state$values$hash does not conflict with the app's version</span></span>
-<span class="r-in"><span class="co"># of state$values$hash.</span></span>
-<span class="r-in"><span class="co">#</span></span>
-<span class="r-in"><span class="co"># A basic module that captializes text.</span></span>
-<span class="r-in"><span class="va">capitalizerUI</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">id</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">  <span class="va">ns</span> <span class="op">&lt;-</span> <span class="fu"><a href="NS.html">NS</a></span><span class="op">(</span><span class="va">id</span><span class="op">)</span></span>
-<span class="r-in">  <span class="fu"><a href="wellPanel.html">wellPanel</a></span><span class="op">(</span></span>
-<span class="r-in">    <span class="fu"><a href="https://rdrr.io/pkg/htmltools/man/builder.html" class="external-link">h4</a></span><span class="op">(</span><span class="st">"Text captializer module"</span><span class="op">)</span>,</span>
-<span class="r-in">    <span class="fu"><a href="textInput.html">textInput</a></span><span class="op">(</span><span class="fu">ns</span><span class="op">(</span><span class="st">"text"</span><span class="op">)</span>, <span class="st">"Enter text:"</span><span class="op">)</span>,</span>
-<span class="r-in">    <span class="fu"><a href="textOutput.html">verbatimTextOutput</a></span><span class="op">(</span><span class="fu">ns</span><span class="op">(</span><span class="st">"out"</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in">  <span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
-<span class="r-in"><span class="va">capitalizerServer</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">  <span class="va">output</span><span class="op">$</span><span class="va">out</span> <span class="op">&lt;-</span> <span class="fu"><a href="renderPrint.html">renderText</a></span><span class="op">(</span><span class="op">{</span></span>
-<span class="r-in">    <span class="fu"><a href="https://rdrr.io/r/base/chartr.html" class="external-link">toupper</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">text</span><span class="op">)</span></span>
-<span class="r-in">  <span class="op">}</span><span class="op">)</span></span>
-<span class="r-in">  <span class="fu">onBookmark</span><span class="op">(</span><span class="kw">function</span><span class="op">(</span><span class="va">state</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">    <span class="va">state</span><span class="op">$</span><span class="va">values</span><span class="op">$</span><span class="va">hash</span> <span class="op">&lt;-</span> <span class="fu">rlang</span><span class="fu">::</span><span class="fu"><a href="https://rlang.r-lib.org/reference/hash.html" class="external-link">hash</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">text</span><span class="op">)</span></span>
-<span class="r-in">  <span class="op">}</span><span class="op">)</span></span>
-<span class="r-in">  <span class="fu">onRestore</span><span class="op">(</span><span class="kw">function</span><span class="op">(</span><span class="va">state</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">    <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/identical.html" class="external-link">identical</a></span><span class="op">(</span><span class="fu">rlang</span><span class="fu">::</span><span class="fu"><a href="https://rlang.r-lib.org/reference/hash.html" class="external-link">hash</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">text</span><span class="op">)</span>, <span class="va">state</span><span class="op">$</span><span class="va">values</span><span class="op">$</span><span class="va">hash</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">      <span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="st">"Module's input text matches hash "</span>, <span class="va">state</span><span class="op">$</span><span class="va">values</span><span class="op">$</span><span class="va">hash</span><span class="op">)</span></span>
-<span class="r-in">    <span class="op">}</span> <span class="kw">else</span> <span class="op">{</span></span>
-<span class="r-in">      <span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="st">"Module's input text does not match hash "</span>, <span class="va">state</span><span class="op">$</span><span class="va">values</span><span class="op">$</span><span class="va">hash</span><span class="op">)</span></span>
-<span class="r-in">    <span class="op">}</span></span>
-<span class="r-in">  <span class="op">}</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
-<span class="r-in"><span class="co"># Main app code</span></span>
-<span class="r-in"><span class="va">ui</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">request</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">  <span class="fu"><a href="fluidPage.html">fluidPage</a></span><span class="op">(</span></span>
-<span class="r-in">    <span class="fu"><a href="sidebarLayout.html">sidebarLayout</a></span><span class="op">(</span></span>
-<span class="r-in">      <span class="fu"><a href="sidebarLayout.html">sidebarPanel</a></span><span class="op">(</span></span>
-<span class="r-in">        <span class="fu">capitalizerUI</span><span class="op">(</span><span class="st">"tc"</span><span class="op">)</span>,</span>
-<span class="r-in">        <span class="fu"><a href="textInput.html">textInput</a></span><span class="op">(</span><span class="st">"text"</span>, <span class="st">"Enter text (not in module):"</span><span class="op">)</span>,</span>
-<span class="r-in">        <span class="fu"><a href="bookmarkButton.html">bookmarkButton</a></span><span class="op">(</span><span class="op">)</span></span>
-<span class="r-in">      <span class="op">)</span>,</span>
-<span class="r-in">      <span class="fu"><a href="sidebarLayout.html">mainPanel</a></span><span class="op">(</span><span class="op">)</span></span>
-<span class="r-in">    <span class="op">)</span></span>
-<span class="r-in">  <span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
-<span class="r-in"><span class="va">server</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">  <span class="fu"><a href="callModule.html">callModule</a></span><span class="op">(</span><span class="va">capitalizerServer</span>, <span class="st">"tc"</span><span class="op">)</span></span>
-<span class="r-in">  <span class="fu">onBookmark</span><span class="op">(</span><span class="kw">function</span><span class="op">(</span><span class="va">state</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">    <span class="va">state</span><span class="op">$</span><span class="va">values</span><span class="op">$</span><span class="va">hash</span> <span class="op">&lt;-</span> <span class="fu">rlang</span><span class="fu">::</span><span class="fu"><a href="https://rlang.r-lib.org/reference/hash.html" class="external-link">hash</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">text</span><span class="op">)</span></span>
-<span class="r-in">  <span class="op">}</span><span class="op">)</span></span>
-<span class="r-in">  <span class="fu">onRestore</span><span class="op">(</span><span class="kw">function</span><span class="op">(</span><span class="va">state</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">    <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/identical.html" class="external-link">identical</a></span><span class="op">(</span><span class="fu">rlang</span><span class="fu">::</span><span class="fu"><a href="https://rlang.r-lib.org/reference/hash.html" class="external-link">hash</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">text</span><span class="op">)</span>, <span class="va">state</span><span class="op">$</span><span class="va">values</span><span class="op">$</span><span class="va">hash</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">      <span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="st">"App's input text matches hash "</span>, <span class="va">state</span><span class="op">$</span><span class="va">values</span><span class="op">$</span><span class="va">hash</span><span class="op">)</span></span>
-<span class="r-in">    <span class="op">}</span> <span class="kw">else</span> <span class="op">{</span></span>
-<span class="r-in">      <span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="st">"App's input text does not match hash "</span>, <span class="va">state</span><span class="op">$</span><span class="va">values</span><span class="op">$</span><span class="va">hash</span><span class="op">)</span></span>
-<span class="r-in">    <span class="op">}</span></span>
-<span class="r-in">  <span class="op">}</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
-<span class="r-in"><span class="fu"><a href="enableBookmarking.html">enableBookmarking</a></span><span class="op">(</span>store <span class="op">=</span> <span class="st">"url"</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu"><a href="shinyApp.html">shinyApp</a></span><span class="op">(</span><span class="va">ui</span>, <span class="va">server</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co">## Only run these examples in interactive sessions</span></span></span>
+<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Basic use of onBookmark and onRestore: This app saves the time in its</span></span></span>
+<span class="r-in"><span><span class="co"># arbitrary values, and restores that time when the app is restored.</span></span></span>
+<span class="r-in"><span><span class="va">ui</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">req</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="fluidPage.html">fluidPage</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="textInput.html">textInput</a></span><span class="op">(</span><span class="st">"txt"</span>, <span class="st">"Input text"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    <span class="fu"><a href="bookmarkButton.html">bookmarkButton</a></span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span><span class="va">server</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="fu">onBookmark</span><span class="op">(</span><span class="kw">function</span><span class="op">(</span><span class="va">state</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>    <span class="va">savedTime</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Last saved at"</span>, <span class="va">savedTime</span>, <span class="st">"\n"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="co"># state is a mutable reference object, and we can add arbitrary values to</span></span></span>
+<span class="r-in"><span>    <span class="co"># it.</span></span></span>
+<span class="r-in"><span>    <span class="va">state</span><span class="op">$</span><span class="va">values</span><span class="op">$</span><span class="va">time</span> <span class="op">&lt;-</span> <span class="va">savedTime</span></span></span>
+<span class="r-in"><span>  <span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>  <span class="fu">onRestore</span><span class="op">(</span><span class="kw">function</span><span class="op">(</span><span class="va">state</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Restoring from state bookmarked at"</span>, <span class="va">state</span><span class="op">$</span><span class="va">values</span><span class="op">$</span><span class="va">time</span>, <span class="st">"\n"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="enableBookmarking.html">enableBookmarking</a></span><span class="op">(</span><span class="st">"url"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="shinyApp.html">shinyApp</a></span><span class="op">(</span><span class="va">ui</span>, <span class="va">server</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">ui</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">req</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="fluidPage.html">fluidPage</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="textInput.html">textInput</a></span><span class="op">(</span><span class="st">"txt"</span>, <span class="st">"Input text"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    <span class="fu"><a href="bookmarkButton.html">bookmarkButton</a></span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span><span class="va">server</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="va">lastUpdateTime</span> <span class="op">&lt;-</span> <span class="cn">NULL</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="observeEvent.html">observeEvent</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">txt</span>, <span class="op">{</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="updateTextInput.html">updateTextInput</a></span><span class="op">(</span><span class="va">session</span>, <span class="st">"txt"</span>,</span></span>
+<span class="r-in"><span>      label <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"Input text (Changed "</span>, <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span>, <span class="st">")"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>  <span class="fu">onBookmark</span><span class="op">(</span><span class="kw">function</span><span class="op">(</span><span class="va">state</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>    <span class="co"># Save content to a file</span></span></span>
+<span class="r-in"><span>    <span class="va">messageFile</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">state</span><span class="op">$</span><span class="va">dir</span>, <span class="st">"message.txt"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span>, file <span class="op">=</span> <span class="va">messageFile</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>  <span class="fu">onRestored</span><span class="op">(</span><span class="kw">function</span><span class="op">(</span><span class="va">state</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>    <span class="co"># Read the file</span></span></span>
+<span class="r-in"><span>    <span class="va">messageFile</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">state</span><span class="op">$</span><span class="va">dir</span>, <span class="st">"message.txt"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="va">timeText</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readChar.html" class="external-link">readChar</a></span><span class="op">(</span><span class="va">messageFile</span>, <span class="fl">1000</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>    <span class="co"># updateTextInput must be called in onRestored, as opposed to onRestore,</span></span></span>
+<span class="r-in"><span>    <span class="co"># because onRestored happens after the client browser is ready.</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="updateTextInput.html">updateTextInput</a></span><span class="op">(</span><span class="va">session</span>, <span class="st">"txt"</span>,</span></span>
+<span class="r-in"><span>      label <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"Input text (Changed "</span>, <span class="va">timeText</span>, <span class="st">")"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span><span class="co"># "server" bookmarking is needed for writing to disk.</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="enableBookmarking.html">enableBookmarking</a></span><span class="op">(</span><span class="st">"server"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="shinyApp.html">shinyApp</a></span><span class="op">(</span><span class="va">ui</span>, <span class="va">server</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># This app has a module, and both the module and the main app code have</span></span></span>
+<span class="r-in"><span><span class="co"># onBookmark and onRestore functions which write and read state$values$hash. The</span></span></span>
+<span class="r-in"><span><span class="co"># module's version of state$values$hash does not conflict with the app's version</span></span></span>
+<span class="r-in"><span><span class="co"># of state$values$hash.</span></span></span>
+<span class="r-in"><span><span class="co">#</span></span></span>
+<span class="r-in"><span><span class="co"># A basic module that captializes text.</span></span></span>
+<span class="r-in"><span><span class="va">capitalizerUI</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">id</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="va">ns</span> <span class="op">&lt;-</span> <span class="fu"><a href="NS.html">NS</a></span><span class="op">(</span><span class="va">id</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="wellPanel.html">wellPanel</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/pkg/htmltools/man/builder.html" class="external-link">h4</a></span><span class="op">(</span><span class="st">"Text captializer module"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    <span class="fu"><a href="textInput.html">textInput</a></span><span class="op">(</span><span class="fu">ns</span><span class="op">(</span><span class="st">"text"</span><span class="op">)</span>, <span class="st">"Enter text:"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    <span class="fu"><a href="textOutput.html">verbatimTextOutput</a></span><span class="op">(</span><span class="fu">ns</span><span class="op">(</span><span class="st">"out"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span><span class="va">capitalizerServer</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="va">output</span><span class="op">$</span><span class="va">out</span> <span class="op">&lt;-</span> <span class="fu"><a href="renderPrint.html">renderText</a></span><span class="op">(</span><span class="op">{</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/base/chartr.html" class="external-link">toupper</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">text</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="fu">onBookmark</span><span class="op">(</span><span class="kw">function</span><span class="op">(</span><span class="va">state</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>    <span class="va">state</span><span class="op">$</span><span class="va">values</span><span class="op">$</span><span class="va">hash</span> <span class="op">&lt;-</span> <span class="fu">rlang</span><span class="fu">::</span><span class="fu"><a href="https://rlang.r-lib.org/reference/hash.html" class="external-link">hash</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">text</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="fu">onRestore</span><span class="op">(</span><span class="kw">function</span><span class="op">(</span><span class="va">state</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>    <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/identical.html" class="external-link">identical</a></span><span class="op">(</span><span class="fu">rlang</span><span class="fu">::</span><span class="fu"><a href="https://rlang.r-lib.org/reference/hash.html" class="external-link">hash</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">text</span><span class="op">)</span>, <span class="va">state</span><span class="op">$</span><span class="va">values</span><span class="op">$</span><span class="va">hash</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>      <span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="st">"Module's input text matches hash "</span>, <span class="va">state</span><span class="op">$</span><span class="va">values</span><span class="op">$</span><span class="va">hash</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="op">}</span> <span class="kw">else</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>      <span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="st">"Module's input text does not match hash "</span>, <span class="va">state</span><span class="op">$</span><span class="va">values</span><span class="op">$</span><span class="va">hash</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="op">}</span></span></span>
+<span class="r-in"><span>  <span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span><span class="co"># Main app code</span></span></span>
+<span class="r-in"><span><span class="va">ui</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">request</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="fluidPage.html">fluidPage</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="sidebarLayout.html">sidebarLayout</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>      <span class="fu"><a href="sidebarLayout.html">sidebarPanel</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>        <span class="fu">capitalizerUI</span><span class="op">(</span><span class="st">"tc"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>        <span class="fu"><a href="textInput.html">textInput</a></span><span class="op">(</span><span class="st">"text"</span>, <span class="st">"Enter text (not in module):"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>        <span class="fu"><a href="bookmarkButton.html">bookmarkButton</a></span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span>      <span class="op">)</span>,</span></span>
+<span class="r-in"><span>      <span class="fu"><a href="sidebarLayout.html">mainPanel</a></span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span><span class="va">server</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="callModule.html">callModule</a></span><span class="op">(</span><span class="va">capitalizerServer</span>, <span class="st">"tc"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="fu">onBookmark</span><span class="op">(</span><span class="kw">function</span><span class="op">(</span><span class="va">state</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>    <span class="va">state</span><span class="op">$</span><span class="va">values</span><span class="op">$</span><span class="va">hash</span> <span class="op">&lt;-</span> <span class="fu">rlang</span><span class="fu">::</span><span class="fu"><a href="https://rlang.r-lib.org/reference/hash.html" class="external-link">hash</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">text</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="fu">onRestore</span><span class="op">(</span><span class="kw">function</span><span class="op">(</span><span class="va">state</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>    <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/identical.html" class="external-link">identical</a></span><span class="op">(</span><span class="fu">rlang</span><span class="fu">::</span><span class="fu"><a href="https://rlang.r-lib.org/reference/hash.html" class="external-link">hash</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">text</span><span class="op">)</span>, <span class="va">state</span><span class="op">$</span><span class="va">values</span><span class="op">$</span><span class="va">hash</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>      <span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="st">"App's input text matches hash "</span>, <span class="va">state</span><span class="op">$</span><span class="va">values</span><span class="op">$</span><span class="va">hash</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="op">}</span> <span class="kw">else</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>      <span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="st">"App's input text does not match hash "</span>, <span class="va">state</span><span class="op">$</span><span class="va">values</span><span class="op">$</span><span class="va">hash</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="op">}</span></span></span>
+<span class="r-in"><span>  <span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="enableBookmarking.html">enableBookmarking</a></span><span class="op">(</span>store <span class="op">=</span> <span class="st">"url"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="shinyApp.html">shinyApp</a></span><span class="op">(</span><span class="va">ui</span>, <span class="va">server</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
 </code></pre></div>
     </div>
   </div>

@@ -25,7 +25,7 @@ function."><meta property="og:image" content="/logo.png"><!-- mathjax --><script
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">shiny</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.1.9003</span>
       </span>
     </div>
 
@@ -69,21 +69,21 @@ function.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">insertUI</span><span class="op">(</span>
-  <span class="va">selector</span>,
-  where <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"beforeBegin"</span>, <span class="st">"afterBegin"</span>, <span class="st">"beforeEnd"</span>, <span class="st">"afterEnd"</span><span class="op">)</span>,
-  <span class="va">ui</span>,
-  multiple <span class="op">=</span> <span class="cn">FALSE</span>,
-  immediate <span class="op">=</span> <span class="cn">FALSE</span>,
-  session <span class="op">=</span> <span class="fu"><a href="domains.html">getDefaultReactiveDomain</a></span><span class="op">(</span><span class="op">)</span>
-<span class="op">)</span>
-
-<span class="fu">removeUI</span><span class="op">(</span>
-  <span class="va">selector</span>,
-  multiple <span class="op">=</span> <span class="cn">FALSE</span>,
-  immediate <span class="op">=</span> <span class="cn">FALSE</span>,
-  session <span class="op">=</span> <span class="fu"><a href="domains.html">getDefaultReactiveDomain</a></span><span class="op">(</span><span class="op">)</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">insertUI</span><span class="op">(</span></span>
+<span>  <span class="va">selector</span>,</span>
+<span>  where <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"beforeBegin"</span>, <span class="st">"afterBegin"</span>, <span class="st">"beforeEnd"</span>, <span class="st">"afterEnd"</span><span class="op">)</span>,</span>
+<span>  <span class="va">ui</span>,</span>
+<span>  multiple <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  immediate <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  session <span class="op">=</span> <span class="fu"><a href="domains.html">getDefaultReactiveDomain</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">removeUI</span><span class="op">(</span></span>
+<span>  <span class="va">selector</span>,</span>
+<span>  multiple <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  immediate <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  session <span class="op">=</span> <span class="fu"><a href="domains.html">getDefaultReactiveDomain</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -155,48 +155,48 @@ through a jQuery selector can be removed through this function.</p>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="co">## Only run this example in interactive R sessions</span></span>
-<span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in"><span class="co"># Define UI</span></span>
-<span class="r-in"><span class="va">ui</span> <span class="op">&lt;-</span> <span class="fu"><a href="fluidPage.html">fluidPage</a></span><span class="op">(</span></span>
-<span class="r-in">  <span class="fu"><a href="actionButton.html">actionButton</a></span><span class="op">(</span><span class="st">"add"</span>, <span class="st">"Add UI"</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Server logic</span></span>
-<span class="r-in"><span class="va">server</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">  <span class="fu"><a href="observeEvent.html">observeEvent</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">add</span>, <span class="op">{</span></span>
-<span class="r-in">    <span class="fu">insertUI</span><span class="op">(</span></span>
-<span class="r-in">      selector <span class="op">=</span> <span class="st">"#add"</span>,</span>
-<span class="r-in">      where <span class="op">=</span> <span class="st">"afterEnd"</span>,</span>
-<span class="r-in">      ui <span class="op">=</span> <span class="fu"><a href="textInput.html">textInput</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"txt"</span>, <span class="va">input</span><span class="op">$</span><span class="va">add</span><span class="op">)</span>,</span>
-<span class="r-in">                     <span class="st">"Insert some text"</span><span class="op">)</span></span>
-<span class="r-in">    <span class="op">)</span></span>
-<span class="r-in">  <span class="op">}</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Complete app with UI and server components</span></span>
-<span class="r-in"><span class="fu"><a href="shinyApp.html">shinyApp</a></span><span class="op">(</span><span class="va">ui</span>, <span class="va">server</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in"><span class="co"># Define UI</span></span>
-<span class="r-in"><span class="va">ui</span> <span class="op">&lt;-</span> <span class="fu"><a href="fluidPage.html">fluidPage</a></span><span class="op">(</span></span>
-<span class="r-in">  <span class="fu"><a href="actionButton.html">actionButton</a></span><span class="op">(</span><span class="st">"rmv"</span>, <span class="st">"Remove UI"</span><span class="op">)</span>,</span>
-<span class="r-in">  <span class="fu"><a href="textInput.html">textInput</a></span><span class="op">(</span><span class="st">"txt"</span>, <span class="st">"This is no longer useful"</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Server logic</span></span>
-<span class="r-in"><span class="va">server</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">  <span class="fu"><a href="observeEvent.html">observeEvent</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">rmv</span>, <span class="op">{</span></span>
-<span class="r-in">    <span class="fu">removeUI</span><span class="op">(</span></span>
-<span class="r-in">      selector <span class="op">=</span> <span class="st">"div:has(&gt; #txt)"</span></span>
-<span class="r-in">    <span class="op">)</span></span>
-<span class="r-in">  <span class="op">}</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Complete app with UI and server components</span></span>
-<span class="r-in"><span class="fu"><a href="shinyApp.html">shinyApp</a></span><span class="op">(</span><span class="va">ui</span>, <span class="va">server</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co">## Only run this example in interactive R sessions</span></span></span>
+<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span><span class="co"># Define UI</span></span></span>
+<span class="r-in"><span><span class="va">ui</span> <span class="op">&lt;-</span> <span class="fu"><a href="fluidPage.html">fluidPage</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="actionButton.html">actionButton</a></span><span class="op">(</span><span class="st">"add"</span>, <span class="st">"Add UI"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Server logic</span></span></span>
+<span class="r-in"><span><span class="va">server</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="observeEvent.html">observeEvent</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">add</span>, <span class="op">{</span></span></span>
+<span class="r-in"><span>    <span class="fu">insertUI</span><span class="op">(</span></span></span>
+<span class="r-in"><span>      selector <span class="op">=</span> <span class="st">"#add"</span>,</span></span>
+<span class="r-in"><span>      where <span class="op">=</span> <span class="st">"afterEnd"</span>,</span></span>
+<span class="r-in"><span>      ui <span class="op">=</span> <span class="fu"><a href="textInput.html">textInput</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"txt"</span>, <span class="va">input</span><span class="op">$</span><span class="va">add</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>                     <span class="st">"Insert some text"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Complete app with UI and server components</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="shinyApp.html">shinyApp</a></span><span class="op">(</span><span class="va">ui</span>, <span class="va">server</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span><span class="co"># Define UI</span></span></span>
+<span class="r-in"><span><span class="va">ui</span> <span class="op">&lt;-</span> <span class="fu"><a href="fluidPage.html">fluidPage</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="actionButton.html">actionButton</a></span><span class="op">(</span><span class="st">"rmv"</span>, <span class="st">"Remove UI"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  <span class="fu"><a href="textInput.html">textInput</a></span><span class="op">(</span><span class="st">"txt"</span>, <span class="st">"This is no longer useful"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Server logic</span></span></span>
+<span class="r-in"><span><span class="va">server</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="observeEvent.html">observeEvent</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">rmv</span>, <span class="op">{</span></span></span>
+<span class="r-in"><span>    <span class="fu">removeUI</span><span class="op">(</span></span></span>
+<span class="r-in"><span>      selector <span class="op">=</span> <span class="st">"div:has(&gt; #txt)"</span></span></span>
+<span class="r-in"><span>    <span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Complete app with UI and server components</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="shinyApp.html">shinyApp</a></span><span class="op">(</span><span class="va">ui</span>, <span class="va">server</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
 </code></pre></div>
     </div>
   </div>

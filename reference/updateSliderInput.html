@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">shiny</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.1.9003</span>
       </span>
     </div>
 
@@ -53,17 +53,17 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">updateSliderInput</span><span class="op">(</span>
-  session <span class="op">=</span> <span class="fu"><a href="domains.html">getDefaultReactiveDomain</a></span><span class="op">(</span><span class="op">)</span>,
-  <span class="va">inputId</span>,
-  label <span class="op">=</span> <span class="cn">NULL</span>,
-  value <span class="op">=</span> <span class="cn">NULL</span>,
-  min <span class="op">=</span> <span class="cn">NULL</span>,
-  max <span class="op">=</span> <span class="cn">NULL</span>,
-  step <span class="op">=</span> <span class="cn">NULL</span>,
-  timeFormat <span class="op">=</span> <span class="cn">NULL</span>,
-  timezone <span class="op">=</span> <span class="cn">NULL</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">updateSliderInput</span><span class="op">(</span></span>
+<span>  session <span class="op">=</span> <span class="fu"><a href="domains.html">getDefaultReactiveDomain</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  <span class="va">inputId</span>,</span>
+<span>  label <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  value <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  min <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  max <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  step <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  timeFormat <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  timezone <span class="op">=</span> <span class="cn">NULL</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -140,32 +140,32 @@ can be cleared by using <code>selected=character(0)</code>.</p>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="co">## Only run this example in interactive R sessions</span></span>
-<span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">  <span class="fu"><a href="shinyApp.html">shinyApp</a></span><span class="op">(</span></span>
-<span class="r-in">    ui <span class="op">=</span> <span class="fu"><a href="fluidPage.html">fluidPage</a></span><span class="op">(</span></span>
-<span class="r-in">      <span class="fu"><a href="sidebarLayout.html">sidebarLayout</a></span><span class="op">(</span></span>
-<span class="r-in">        <span class="fu"><a href="sidebarLayout.html">sidebarPanel</a></span><span class="op">(</span></span>
-<span class="r-in">          <span class="fu"><a href="https://rdrr.io/pkg/htmltools/man/builder.html" class="external-link">p</a></span><span class="op">(</span><span class="st">"The first slider controls the second"</span><span class="op">)</span>,</span>
-<span class="r-in">          <span class="fu"><a href="sliderInput.html">sliderInput</a></span><span class="op">(</span><span class="st">"control"</span>, <span class="st">"Controller:"</span>, min<span class="op">=</span><span class="fl">0</span>, max<span class="op">=</span><span class="fl">20</span>, value<span class="op">=</span><span class="fl">10</span>,</span>
-<span class="r-in">                       step<span class="op">=</span><span class="fl">1</span><span class="op">)</span>,</span>
-<span class="r-in">          <span class="fu"><a href="sliderInput.html">sliderInput</a></span><span class="op">(</span><span class="st">"receive"</span>, <span class="st">"Receiver:"</span>, min<span class="op">=</span><span class="fl">0</span>, max<span class="op">=</span><span class="fl">20</span>, value<span class="op">=</span><span class="fl">10</span>,</span>
-<span class="r-in">                       step<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span>
-<span class="r-in">        <span class="op">)</span>,</span>
-<span class="r-in">        <span class="fu"><a href="sidebarLayout.html">mainPanel</a></span><span class="op">(</span><span class="op">)</span></span>
-<span class="r-in">      <span class="op">)</span></span>
-<span class="r-in">    <span class="op">)</span>,</span>
-<span class="r-in">    server <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">      <span class="fu"><a href="observe.html">observe</a></span><span class="op">(</span><span class="op">{</span></span>
-<span class="r-in">        <span class="va">val</span> <span class="op">&lt;-</span> <span class="va">input</span><span class="op">$</span><span class="va">control</span></span>
-<span class="r-in">        <span class="co"># Control the value, min, max, and step.</span></span>
-<span class="r-in">        <span class="co"># Step size is 2 when input value is even; 1 when value is odd.</span></span>
-<span class="r-in">        <span class="fu">updateSliderInput</span><span class="op">(</span><span class="va">session</span>, <span class="st">"receive"</span>, value <span class="op">=</span> <span class="va">val</span>,</span>
-<span class="r-in">          min <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">floor</a></span><span class="op">(</span><span class="va">val</span><span class="op">/</span><span class="fl">2</span><span class="op">)</span>, max <span class="op">=</span> <span class="va">val</span><span class="op">+</span><span class="fl">4</span>, step <span class="op">=</span> <span class="op">(</span><span class="va">val</span><span class="op">+</span><span class="fl">1</span><span class="op">)</span><span class="op"><a href="https://rdrr.io/r/base/Arithmetic.html" class="external-link">%%</a></span><span class="fl">2</span> <span class="op">+</span> <span class="fl">1</span><span class="op">)</span></span>
-<span class="r-in">      <span class="op">}</span><span class="op">)</span></span>
-<span class="r-in">    <span class="op">}</span></span>
-<span class="r-in">  <span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co">## Only run this example in interactive R sessions</span></span></span>
+<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="shinyApp.html">shinyApp</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>    ui <span class="op">=</span> <span class="fu"><a href="fluidPage.html">fluidPage</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>      <span class="fu"><a href="sidebarLayout.html">sidebarLayout</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>        <span class="fu"><a href="sidebarLayout.html">sidebarPanel</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>          <span class="fu"><a href="https://rdrr.io/pkg/htmltools/man/builder.html" class="external-link">p</a></span><span class="op">(</span><span class="st">"The first slider controls the second"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>          <span class="fu"><a href="sliderInput.html">sliderInput</a></span><span class="op">(</span><span class="st">"control"</span>, <span class="st">"Controller:"</span>, min<span class="op">=</span><span class="fl">0</span>, max<span class="op">=</span><span class="fl">20</span>, value<span class="op">=</span><span class="fl">10</span>,</span></span>
+<span class="r-in"><span>                       step<span class="op">=</span><span class="fl">1</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>          <span class="fu"><a href="sliderInput.html">sliderInput</a></span><span class="op">(</span><span class="st">"receive"</span>, <span class="st">"Receiver:"</span>, min<span class="op">=</span><span class="fl">0</span>, max<span class="op">=</span><span class="fl">20</span>, value<span class="op">=</span><span class="fl">10</span>,</span></span>
+<span class="r-in"><span>                       step<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span></span>
+<span class="r-in"><span>        <span class="op">)</span>,</span></span>
+<span class="r-in"><span>        <span class="fu"><a href="sidebarLayout.html">mainPanel</a></span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span>      <span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="op">)</span>,</span></span>
+<span class="r-in"><span>    server <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>      <span class="fu"><a href="observe.html">observe</a></span><span class="op">(</span><span class="op">{</span></span></span>
+<span class="r-in"><span>        <span class="va">val</span> <span class="op">&lt;-</span> <span class="va">input</span><span class="op">$</span><span class="va">control</span></span></span>
+<span class="r-in"><span>        <span class="co"># Control the value, min, max, and step.</span></span></span>
+<span class="r-in"><span>        <span class="co"># Step size is 2 when input value is even; 1 when value is odd.</span></span></span>
+<span class="r-in"><span>        <span class="fu">updateSliderInput</span><span class="op">(</span><span class="va">session</span>, <span class="st">"receive"</span>, value <span class="op">=</span> <span class="va">val</span>,</span></span>
+<span class="r-in"><span>          min <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">floor</a></span><span class="op">(</span><span class="va">val</span><span class="op">/</span><span class="fl">2</span><span class="op">)</span>, max <span class="op">=</span> <span class="va">val</span><span class="op">+</span><span class="fl">4</span>, step <span class="op">=</span> <span class="op">(</span><span class="va">val</span><span class="op">+</span><span class="fl">1</span><span class="op">)</span><span class="op"><a href="https://rdrr.io/r/base/Arithmetic.html" class="external-link">%%</a></span><span class="fl">2</span> <span class="op">+</span> <span class="fl">1</span><span class="op">)</span></span></span>
+<span class="r-in"><span>      <span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="op">}</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
 </code></pre></div>
     </div>
   </div>

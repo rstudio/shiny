@@ -22,7 +22,7 @@ typically used when customising the footer."><meta property="og:image" content="
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">shiny</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.1.9003</span>
       </span>
     </div>
 
@@ -63,16 +63,16 @@ typically used when customising the <code>footer</code>.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">modalDialog</span><span class="op">(</span>
-  <span class="va">...</span>,
-  title <span class="op">=</span> <span class="cn">NULL</span>,
-  footer <span class="op">=</span> <span class="fu">modalButton</span><span class="op">(</span><span class="st">"Dismiss"</span><span class="op">)</span>,
-  size <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"m"</span>, <span class="st">"s"</span>, <span class="st">"l"</span>, <span class="st">"xl"</span><span class="op">)</span>,
-  easyClose <span class="op">=</span> <span class="cn">FALSE</span>,
-  fade <span class="op">=</span> <span class="cn">TRUE</span>
-<span class="op">)</span>
-
-<span class="fu">modalButton</span><span class="op">(</span><span class="va">label</span>, icon <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">modalDialog</span><span class="op">(</span></span>
+<span>  <span class="va">...</span>,</span>
+<span>  title <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  footer <span class="op">=</span> <span class="fu">modalButton</span><span class="op">(</span><span class="st">"Dismiss"</span><span class="op">)</span>,</span>
+<span>  size <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"m"</span>, <span class="st">"s"</span>, <span class="st">"l"</span>, <span class="st">"xl"</span><span class="op">)</span>,</span>
+<span>  easyClose <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  fade <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">modalButton</span><span class="op">(</span><span class="va">label</span>, icon <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -119,102 +119,102 @@ you could also use any other HTML, like an image.</p></dd>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in"><span class="co"># Display an important message that can be dismissed only by clicking the</span></span>
-<span class="r-in"><span class="co"># dismiss button.</span></span>
-<span class="r-in"><span class="fu"><a href="shinyApp.html">shinyApp</a></span><span class="op">(</span></span>
-<span class="r-in">  ui <span class="op">=</span> <span class="fu"><a href="bootstrapPage.html">basicPage</a></span><span class="op">(</span></span>
-<span class="r-in">    <span class="fu"><a href="actionButton.html">actionButton</a></span><span class="op">(</span><span class="st">"show"</span>, <span class="st">"Show modal dialog"</span><span class="op">)</span></span>
-<span class="r-in">  <span class="op">)</span>,</span>
-<span class="r-in">  server <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">    <span class="fu"><a href="observeEvent.html">observeEvent</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">show</span>, <span class="op">{</span></span>
-<span class="r-in">      <span class="fu"><a href="showModal.html">showModal</a></span><span class="op">(</span><span class="fu">modalDialog</span><span class="op">(</span></span>
-<span class="r-in">        title <span class="op">=</span> <span class="st">"Important message"</span>,</span>
-<span class="r-in">        <span class="st">"This is an important message!"</span></span>
-<span class="r-in">      <span class="op">)</span><span class="op">)</span></span>
-<span class="r-in">    <span class="op">}</span><span class="op">)</span></span>
-<span class="r-in">  <span class="op">}</span></span>
-<span class="r-in"><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Display a message that can be dismissed by clicking outside the modal dialog,</span></span>
-<span class="r-in"><span class="co"># or by pressing Esc.</span></span>
-<span class="r-in"><span class="fu"><a href="shinyApp.html">shinyApp</a></span><span class="op">(</span></span>
-<span class="r-in">  ui <span class="op">=</span> <span class="fu"><a href="bootstrapPage.html">basicPage</a></span><span class="op">(</span></span>
-<span class="r-in">    <span class="fu"><a href="actionButton.html">actionButton</a></span><span class="op">(</span><span class="st">"show"</span>, <span class="st">"Show modal dialog"</span><span class="op">)</span></span>
-<span class="r-in">  <span class="op">)</span>,</span>
-<span class="r-in">  server <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">    <span class="fu"><a href="observeEvent.html">observeEvent</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">show</span>, <span class="op">{</span></span>
-<span class="r-in">      <span class="fu"><a href="showModal.html">showModal</a></span><span class="op">(</span><span class="fu">modalDialog</span><span class="op">(</span></span>
-<span class="r-in">        title <span class="op">=</span> <span class="st">"Somewhat important message"</span>,</span>
-<span class="r-in">        <span class="st">"This is a somewhat important message."</span>,</span>
-<span class="r-in">        easyClose <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span class="r-in">        footer <span class="op">=</span> <span class="cn">NULL</span></span>
-<span class="r-in">      <span class="op">)</span><span class="op">)</span></span>
-<span class="r-in">    <span class="op">}</span><span class="op">)</span></span>
-<span class="r-in">  <span class="op">}</span></span>
-<span class="r-in"><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Display a modal that requires valid input before continuing.</span></span>
-<span class="r-in"><span class="fu"><a href="shinyApp.html">shinyApp</a></span><span class="op">(</span></span>
-<span class="r-in">  ui <span class="op">=</span> <span class="fu"><a href="bootstrapPage.html">basicPage</a></span><span class="op">(</span></span>
-<span class="r-in">    <span class="fu"><a href="actionButton.html">actionButton</a></span><span class="op">(</span><span class="st">"show"</span>, <span class="st">"Show modal dialog"</span><span class="op">)</span>,</span>
-<span class="r-in">    <span class="fu"><a href="textOutput.html">verbatimTextOutput</a></span><span class="op">(</span><span class="st">"dataInfo"</span><span class="op">)</span></span>
-<span class="r-in">  <span class="op">)</span>,</span>
-<span class="r-in"></span>
-<span class="r-in">  server <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">    <span class="co"># reactiveValues object for storing current data set.</span></span>
-<span class="r-in">    <span class="va">vals</span> <span class="op">&lt;-</span> <span class="fu"><a href="reactiveValues.html">reactiveValues</a></span><span class="op">(</span>data <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in">    <span class="co"># Return the UI for a modal dialog with data selection input. If 'failed' is</span></span>
-<span class="r-in">    <span class="co"># TRUE, then display a message that the previous value was invalid.</span></span>
-<span class="r-in">    <span class="va">dataModal</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">failed</span> <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">      <span class="fu">modalDialog</span><span class="op">(</span></span>
-<span class="r-in">        <span class="fu"><a href="textInput.html">textInput</a></span><span class="op">(</span><span class="st">"dataset"</span>, <span class="st">"Choose data set"</span>,</span>
-<span class="r-in">          placeholder <span class="op">=</span> <span class="st">'Try "mtcars" or "abc"'</span></span>
-<span class="r-in">        <span class="op">)</span>,</span>
-<span class="r-in">        <span class="fu"><a href="https://rdrr.io/pkg/htmltools/man/builder.html" class="external-link">span</a></span><span class="op">(</span><span class="st">'(Try the name of a valid data object like "mtcars", '</span>,</span>
-<span class="r-in">             <span class="st">'then a name of a non-existent object like "abc")'</span><span class="op">)</span>,</span>
-<span class="r-in">        <span class="kw">if</span> <span class="op">(</span><span class="va">failed</span><span class="op">)</span></span>
-<span class="r-in">          <span class="fu"><a href="https://rdrr.io/pkg/htmltools/man/builder.html" class="external-link">div</a></span><span class="op">(</span><span class="va">tags</span><span class="op">$</span><span class="fu">b</span><span class="op">(</span><span class="st">"Invalid name of data object"</span>, style <span class="op">=</span> <span class="st">"color: red;"</span><span class="op">)</span><span class="op">)</span>,</span>
-<span class="r-in"></span>
-<span class="r-in">        footer <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/htmltools/man/tagList.html" class="external-link">tagList</a></span><span class="op">(</span></span>
-<span class="r-in">          <span class="fu">modalButton</span><span class="op">(</span><span class="st">"Cancel"</span><span class="op">)</span>,</span>
-<span class="r-in">          <span class="fu"><a href="actionButton.html">actionButton</a></span><span class="op">(</span><span class="st">"ok"</span>, <span class="st">"OK"</span><span class="op">)</span></span>
-<span class="r-in">        <span class="op">)</span></span>
-<span class="r-in">      <span class="op">)</span></span>
-<span class="r-in">    <span class="op">}</span></span>
-<span class="r-in"></span>
-<span class="r-in">    <span class="co"># Show modal when button is clicked.</span></span>
-<span class="r-in">    <span class="fu"><a href="observeEvent.html">observeEvent</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">show</span>, <span class="op">{</span></span>
-<span class="r-in">      <span class="fu"><a href="showModal.html">showModal</a></span><span class="op">(</span><span class="fu">dataModal</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in">    <span class="op">}</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in">    <span class="co"># When OK button is pressed, attempt to load the data set. If successful,</span></span>
-<span class="r-in">    <span class="co"># remove the modal. If not show another modal, but this time with a failure</span></span>
-<span class="r-in">    <span class="co"># message.</span></span>
-<span class="r-in">    <span class="fu"><a href="observeEvent.html">observeEvent</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">ok</span>, <span class="op">{</span></span>
-<span class="r-in">      <span class="co"># Check that data object exists and is data frame.</span></span>
-<span class="r-in">      <span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NULL.html" class="external-link">is.null</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">dataset</span><span class="op">)</span> <span class="op">&amp;&amp;</span> <span class="fu"><a href="https://rdrr.io/r/base/nchar.html" class="external-link">nzchar</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">dataset</span><span class="op">)</span> <span class="op">&amp;&amp;</span></span>
-<span class="r-in">          <span class="fu"><a href="https://rdrr.io/r/base/exists.html" class="external-link">exists</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">dataset</span><span class="op">)</span> <span class="op">&amp;&amp;</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">is.data.frame</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/get.html" class="external-link">get</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">dataset</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">        <span class="va">vals</span><span class="op">$</span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/get.html" class="external-link">get</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">dataset</span><span class="op">)</span></span>
-<span class="r-in">        <span class="fu"><a href="showModal.html">removeModal</a></span><span class="op">(</span><span class="op">)</span></span>
-<span class="r-in">      <span class="op">}</span> <span class="kw">else</span> <span class="op">{</span></span>
-<span class="r-in">        <span class="fu"><a href="showModal.html">showModal</a></span><span class="op">(</span><span class="fu">dataModal</span><span class="op">(</span>failed <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in">      <span class="op">}</span></span>
-<span class="r-in">    <span class="op">}</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in">    <span class="co"># Display information about selected data</span></span>
-<span class="r-in">    <span class="va">output</span><span class="op">$</span><span class="va">dataInfo</span> <span class="op">&lt;-</span> <span class="fu"><a href="renderPrint.html">renderPrint</a></span><span class="op">(</span><span class="op">{</span></span>
-<span class="r-in">      <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NULL.html" class="external-link">is.null</a></span><span class="op">(</span><span class="va">vals</span><span class="op">$</span><span class="va">data</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in">        <span class="st">"No data selected"</span></span>
-<span class="r-in">      <span class="kw">else</span></span>
-<span class="r-in">        <span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">vals</span><span class="op">$</span><span class="va">data</span><span class="op">)</span></span>
-<span class="r-in">    <span class="op">}</span><span class="op">)</span></span>
-<span class="r-in">  <span class="op">}</span></span>
-<span class="r-in"><span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span><span class="co"># Display an important message that can be dismissed only by clicking the</span></span></span>
+<span class="r-in"><span><span class="co"># dismiss button.</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="shinyApp.html">shinyApp</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  ui <span class="op">=</span> <span class="fu"><a href="bootstrapPage.html">basicPage</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="actionButton.html">actionButton</a></span><span class="op">(</span><span class="st">"show"</span>, <span class="st">"Show modal dialog"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span>,</span></span>
+<span class="r-in"><span>  server <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="observeEvent.html">observeEvent</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">show</span>, <span class="op">{</span></span></span>
+<span class="r-in"><span>      <span class="fu"><a href="showModal.html">showModal</a></span><span class="op">(</span><span class="fu">modalDialog</span><span class="op">(</span></span></span>
+<span class="r-in"><span>        title <span class="op">=</span> <span class="st">"Important message"</span>,</span></span>
+<span class="r-in"><span>        <span class="st">"This is an important message!"</span></span></span>
+<span class="r-in"><span>      <span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">}</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Display a message that can be dismissed by clicking outside the modal dialog,</span></span></span>
+<span class="r-in"><span><span class="co"># or by pressing Esc.</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="shinyApp.html">shinyApp</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  ui <span class="op">=</span> <span class="fu"><a href="bootstrapPage.html">basicPage</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="actionButton.html">actionButton</a></span><span class="op">(</span><span class="st">"show"</span>, <span class="st">"Show modal dialog"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span>,</span></span>
+<span class="r-in"><span>  server <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="observeEvent.html">observeEvent</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">show</span>, <span class="op">{</span></span></span>
+<span class="r-in"><span>      <span class="fu"><a href="showModal.html">showModal</a></span><span class="op">(</span><span class="fu">modalDialog</span><span class="op">(</span></span></span>
+<span class="r-in"><span>        title <span class="op">=</span> <span class="st">"Somewhat important message"</span>,</span></span>
+<span class="r-in"><span>        <span class="st">"This is a somewhat important message."</span>,</span></span>
+<span class="r-in"><span>        easyClose <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
+<span class="r-in"><span>        footer <span class="op">=</span> <span class="cn">NULL</span></span></span>
+<span class="r-in"><span>      <span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">}</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Display a modal that requires valid input before continuing.</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="shinyApp.html">shinyApp</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  ui <span class="op">=</span> <span class="fu"><a href="bootstrapPage.html">basicPage</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="actionButton.html">actionButton</a></span><span class="op">(</span><span class="st">"show"</span>, <span class="st">"Show modal dialog"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    <span class="fu"><a href="textOutput.html">verbatimTextOutput</a></span><span class="op">(</span><span class="st">"dataInfo"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span>,</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>  server <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>    <span class="co"># reactiveValues object for storing current data set.</span></span></span>
+<span class="r-in"><span>    <span class="va">vals</span> <span class="op">&lt;-</span> <span class="fu"><a href="reactiveValues.html">reactiveValues</a></span><span class="op">(</span>data <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>    <span class="co"># Return the UI for a modal dialog with data selection input. If 'failed' is</span></span></span>
+<span class="r-in"><span>    <span class="co"># TRUE, then display a message that the previous value was invalid.</span></span></span>
+<span class="r-in"><span>    <span class="va">dataModal</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">failed</span> <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>      <span class="fu">modalDialog</span><span class="op">(</span></span></span>
+<span class="r-in"><span>        <span class="fu"><a href="textInput.html">textInput</a></span><span class="op">(</span><span class="st">"dataset"</span>, <span class="st">"Choose data set"</span>,</span></span>
+<span class="r-in"><span>          placeholder <span class="op">=</span> <span class="st">'Try "mtcars" or "abc"'</span></span></span>
+<span class="r-in"><span>        <span class="op">)</span>,</span></span>
+<span class="r-in"><span>        <span class="fu"><a href="https://rdrr.io/pkg/htmltools/man/builder.html" class="external-link">span</a></span><span class="op">(</span><span class="st">'(Try the name of a valid data object like "mtcars", '</span>,</span></span>
+<span class="r-in"><span>             <span class="st">'then a name of a non-existent object like "abc")'</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>        <span class="kw">if</span> <span class="op">(</span><span class="va">failed</span><span class="op">)</span></span></span>
+<span class="r-in"><span>          <span class="fu"><a href="https://rdrr.io/pkg/htmltools/man/builder.html" class="external-link">div</a></span><span class="op">(</span><span class="va">tags</span><span class="op">$</span><span class="fu">b</span><span class="op">(</span><span class="st">"Invalid name of data object"</span>, style <span class="op">=</span> <span class="st">"color: red;"</span><span class="op">)</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>        footer <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/htmltools/man/tagList.html" class="external-link">tagList</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>          <span class="fu">modalButton</span><span class="op">(</span><span class="st">"Cancel"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>          <span class="fu"><a href="actionButton.html">actionButton</a></span><span class="op">(</span><span class="st">"ok"</span>, <span class="st">"OK"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>        <span class="op">)</span></span></span>
+<span class="r-in"><span>      <span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="op">}</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>    <span class="co"># Show modal when button is clicked.</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="observeEvent.html">observeEvent</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">show</span>, <span class="op">{</span></span></span>
+<span class="r-in"><span>      <span class="fu"><a href="showModal.html">showModal</a></span><span class="op">(</span><span class="fu">dataModal</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>    <span class="co"># When OK button is pressed, attempt to load the data set. If successful,</span></span></span>
+<span class="r-in"><span>    <span class="co"># remove the modal. If not show another modal, but this time with a failure</span></span></span>
+<span class="r-in"><span>    <span class="co"># message.</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="observeEvent.html">observeEvent</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">ok</span>, <span class="op">{</span></span></span>
+<span class="r-in"><span>      <span class="co"># Check that data object exists and is data frame.</span></span></span>
+<span class="r-in"><span>      <span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NULL.html" class="external-link">is.null</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">dataset</span><span class="op">)</span> <span class="op">&amp;&amp;</span> <span class="fu"><a href="https://rdrr.io/r/base/nchar.html" class="external-link">nzchar</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">dataset</span><span class="op">)</span> <span class="op">&amp;&amp;</span></span></span>
+<span class="r-in"><span>          <span class="fu"><a href="https://rdrr.io/r/base/exists.html" class="external-link">exists</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">dataset</span><span class="op">)</span> <span class="op">&amp;&amp;</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">is.data.frame</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/get.html" class="external-link">get</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">dataset</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>        <span class="va">vals</span><span class="op">$</span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/get.html" class="external-link">get</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">dataset</span><span class="op">)</span></span></span>
+<span class="r-in"><span>        <span class="fu"><a href="showModal.html">removeModal</a></span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span>      <span class="op">}</span> <span class="kw">else</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>        <span class="fu"><a href="showModal.html">showModal</a></span><span class="op">(</span><span class="fu">dataModal</span><span class="op">(</span>failed <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span>      <span class="op">}</span></span></span>
+<span class="r-in"><span>    <span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>    <span class="co"># Display information about selected data</span></span></span>
+<span class="r-in"><span>    <span class="va">output</span><span class="op">$</span><span class="va">dataInfo</span> <span class="op">&lt;-</span> <span class="fu"><a href="renderPrint.html">renderPrint</a></span><span class="op">(</span><span class="op">{</span></span></span>
+<span class="r-in"><span>      <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NULL.html" class="external-link">is.null</a></span><span class="op">(</span><span class="va">vals</span><span class="op">$</span><span class="va">data</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span>        <span class="st">"No data selected"</span></span></span>
+<span class="r-in"><span>      <span class="kw">else</span></span></span>
+<span class="r-in"><span>        <span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">vals</span><span class="op">$</span><span class="va">data</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">}</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
 </code></pre></div>
     </div>
   </div>

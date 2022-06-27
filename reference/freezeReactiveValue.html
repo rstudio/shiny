@@ -26,7 +26,7 @@ this GitHub issue.'><meta property="og:image" content="/logo.png"><!-- mathjax -
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">shiny</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.1.9003</span>
       </span>
     </div>
 
@@ -71,9 +71,9 @@ If this affects your app, please let us know by leaving a comment on
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">freezeReactiveVal</span><span class="op">(</span><span class="va">x</span><span class="op">)</span>
-
-<span class="fu">freezeReactiveValue</span><span class="op">(</span><span class="va">x</span>, <span class="va">name</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">freezeReactiveVal</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">freezeReactiveValue</span><span class="op">(</span><span class="va">x</span>, <span class="va">name</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -95,40 +95,40 @@ object (like <code>input</code>); for <code>freezeReactiveVal</code>, a
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="co">## Only run this examples in interactive R sessions</span></span>
-<span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="va">ui</span> <span class="op">&lt;-</span> <span class="fu"><a href="fluidPage.html">fluidPage</a></span><span class="op">(</span></span>
-<span class="r-in">  <span class="fu"><a href="selectInput.html">selectInput</a></span><span class="op">(</span><span class="st">"data"</span>, <span class="st">"Data Set"</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"mtcars"</span>, <span class="st">"pressure"</span><span class="op">)</span><span class="op">)</span>,</span>
-<span class="r-in">  <span class="fu"><a href="checkboxGroupInput.html">checkboxGroupInput</a></span><span class="op">(</span><span class="st">"cols"</span>, <span class="st">"Columns (select 2)"</span>, <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></span><span class="op">(</span><span class="fl">0</span><span class="op">)</span><span class="op">)</span>,</span>
-<span class="r-in">  <span class="fu"><a href="plotOutput.html">plotOutput</a></span><span class="op">(</span><span class="st">"plot"</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="va">server</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">  <span class="fu"><a href="observe.html">observe</a></span><span class="op">(</span><span class="op">{</span></span>
-<span class="r-in">    <span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/get.html" class="external-link">get</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">data</span><span class="op">)</span></span>
-<span class="r-in">    <span class="co"># Sets a flag on input$cols to essentially do req(FALSE) if input$cols</span></span>
-<span class="r-in">    <span class="co"># is accessed. Without this, an error will momentarily show whenever a</span></span>
-<span class="r-in">    <span class="co"># new data set is selected.</span></span>
-<span class="r-in">    <span class="fu">freezeReactiveValue</span><span class="op">(</span><span class="va">input</span>, <span class="st">"cols"</span><span class="op">)</span></span>
-<span class="r-in">    <span class="fu"><a href="updateCheckboxGroupInput.html">updateCheckboxGroupInput</a></span><span class="op">(</span><span class="va">session</span>, <span class="st">"cols"</span>, choices <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in">  <span class="op">}</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in">  <span class="va">output</span><span class="op">$</span><span class="va">plot</span> <span class="op">&lt;-</span> <span class="fu"><a href="renderPlot.html">renderPlot</a></span><span class="op">(</span><span class="op">{</span></span>
-<span class="r-in">    <span class="co"># When a new data set is selected, input$cols will have been invalidated</span></span>
-<span class="r-in">    <span class="co"># above, and this will essentially do the same as req(FALSE), causing</span></span>
-<span class="r-in">    <span class="co"># this observer to stop and raise a silent exception.</span></span>
-<span class="r-in">    <span class="va">cols</span> <span class="op">&lt;-</span> <span class="va">input</span><span class="op">$</span><span class="va">cols</span></span>
-<span class="r-in">    <span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/get.html" class="external-link">get</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">data</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in">    <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">cols</span><span class="op">)</span> <span class="op">==</span> <span class="fl">2</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">      <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">data</span><span class="op">[[</span> <span class="va">cols</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span> <span class="op">]</span><span class="op">]</span>, <span class="va">data</span><span class="op">[[</span> <span class="va">cols</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span> <span class="op">]</span><span class="op">]</span><span class="op">)</span></span>
-<span class="r-in">    <span class="op">}</span></span>
-<span class="r-in">  <span class="op">}</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu"><a href="shinyApp.html">shinyApp</a></span><span class="op">(</span><span class="va">ui</span>, <span class="va">server</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co">## Only run this examples in interactive R sessions</span></span></span>
+<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">ui</span> <span class="op">&lt;-</span> <span class="fu"><a href="fluidPage.html">fluidPage</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="selectInput.html">selectInput</a></span><span class="op">(</span><span class="st">"data"</span>, <span class="st">"Data Set"</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"mtcars"</span>, <span class="st">"pressure"</span><span class="op">)</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  <span class="fu"><a href="checkboxGroupInput.html">checkboxGroupInput</a></span><span class="op">(</span><span class="st">"cols"</span>, <span class="st">"Columns (select 2)"</span>, <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></span><span class="op">(</span><span class="fl">0</span><span class="op">)</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  <span class="fu"><a href="plotOutput.html">plotOutput</a></span><span class="op">(</span><span class="st">"plot"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">server</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="observe.html">observe</a></span><span class="op">(</span><span class="op">{</span></span></span>
+<span class="r-in"><span>    <span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/get.html" class="external-link">get</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">data</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="co"># Sets a flag on input$cols to essentially do req(FALSE) if input$cols</span></span></span>
+<span class="r-in"><span>    <span class="co"># is accessed. Without this, an error will momentarily show whenever a</span></span></span>
+<span class="r-in"><span>    <span class="co"># new data set is selected.</span></span></span>
+<span class="r-in"><span>    <span class="fu">freezeReactiveValue</span><span class="op">(</span><span class="va">input</span>, <span class="st">"cols"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="updateCheckboxGroupInput.html">updateCheckboxGroupInput</a></span><span class="op">(</span><span class="va">session</span>, <span class="st">"cols"</span>, choices <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>  <span class="va">output</span><span class="op">$</span><span class="va">plot</span> <span class="op">&lt;-</span> <span class="fu"><a href="renderPlot.html">renderPlot</a></span><span class="op">(</span><span class="op">{</span></span></span>
+<span class="r-in"><span>    <span class="co"># When a new data set is selected, input$cols will have been invalidated</span></span></span>
+<span class="r-in"><span>    <span class="co"># above, and this will essentially do the same as req(FALSE), causing</span></span></span>
+<span class="r-in"><span>    <span class="co"># this observer to stop and raise a silent exception.</span></span></span>
+<span class="r-in"><span>    <span class="va">cols</span> <span class="op">&lt;-</span> <span class="va">input</span><span class="op">$</span><span class="va">cols</span></span></span>
+<span class="r-in"><span>    <span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/get.html" class="external-link">get</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">data</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>    <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">cols</span><span class="op">)</span> <span class="op">==</span> <span class="fl">2</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>      <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">data</span><span class="op">[[</span> <span class="va">cols</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span> <span class="op">]</span><span class="op">]</span>, <span class="va">data</span><span class="op">[[</span> <span class="va">cols</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span> <span class="op">]</span><span class="op">]</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="op">}</span></span></span>
+<span class="r-in"><span>  <span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="shinyApp.html">shinyApp</a></span><span class="op">(</span><span class="va">ui</span>, <span class="va">server</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
 </code></pre></div>
     </div>
   </div>

@@ -18,7 +18,7 @@ useful for dividing output into multiple independently viewable sections."><meta
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">shiny</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.1.9003</span>
       </span>
     </div>
 
@@ -55,14 +55,14 @@ useful for dividing output into multiple independently viewable sections.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">tabsetPanel</span><span class="op">(</span>
-  <span class="va">...</span>,
-  id <span class="op">=</span> <span class="cn">NULL</span>,
-  selected <span class="op">=</span> <span class="cn">NULL</span>,
-  type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"tabs"</span>, <span class="st">"pills"</span>, <span class="st">"hidden"</span><span class="op">)</span>,
-  header <span class="op">=</span> <span class="cn">NULL</span>,
-  footer <span class="op">=</span> <span class="cn">NULL</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">tabsetPanel</span><span class="op">(</span></span>
+<span>  <span class="va">...</span>,</span>
+<span>  id <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  selected <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"tabs"</span>, <span class="st">"pills"</span>, <span class="st">"hidden"</span><span class="op">)</span>,</span>
+<span>  header <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  footer <span class="op">=</span> <span class="cn">NULL</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -126,70 +126,70 @@ tabPanels</p></dd>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="co"># Show a tabset that includes a plot, summary, and</span></span>
-<span class="r-in"><span class="co"># table view of the generated distribution</span></span>
-<span class="r-in"><span class="fu"><a href="sidebarLayout.html">mainPanel</a></span><span class="op">(</span></span>
-<span class="r-in">  <span class="fu">tabsetPanel</span><span class="op">(</span></span>
-<span class="r-in">    <span class="fu"><a href="tabPanel.html">tabPanel</a></span><span class="op">(</span><span class="st">"Plot"</span>, <span class="fu"><a href="plotOutput.html">plotOutput</a></span><span class="op">(</span><span class="st">"plot"</span><span class="op">)</span><span class="op">)</span>,</span>
-<span class="r-in">    <span class="fu"><a href="tabPanel.html">tabPanel</a></span><span class="op">(</span><span class="st">"Summary"</span>, <span class="fu"><a href="textOutput.html">verbatimTextOutput</a></span><span class="op">(</span><span class="st">"summary"</span><span class="op">)</span><span class="op">)</span>,</span>
-<span class="r-in">    <span class="fu"><a href="tabPanel.html">tabPanel</a></span><span class="op">(</span><span class="st">"Table"</span>, <span class="fu"><a href="renderTable.html">tableOutput</a></span><span class="op">(</span><span class="st">"table"</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in">  <span class="op">)</span></span>
-<span class="r-in"><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Show a tabset that includes a plot, summary, and</span></span></span>
+<span class="r-in"><span><span class="co"># table view of the generated distribution</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="sidebarLayout.html">mainPanel</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  <span class="fu">tabsetPanel</span><span class="op">(</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="tabPanel.html">tabPanel</a></span><span class="op">(</span><span class="st">"Plot"</span>, <span class="fu"><a href="plotOutput.html">plotOutput</a></span><span class="op">(</span><span class="st">"plot"</span><span class="op">)</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    <span class="fu"><a href="tabPanel.html">tabPanel</a></span><span class="op">(</span><span class="st">"Summary"</span>, <span class="fu"><a href="textOutput.html">verbatimTextOutput</a></span><span class="op">(</span><span class="st">"summary"</span><span class="op">)</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    <span class="fu"><a href="tabPanel.html">tabPanel</a></span><span class="op">(</span><span class="st">"Table"</span>, <span class="fu"><a href="renderTable.html">tableOutput</a></span><span class="op">(</span><span class="st">"table"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> &lt;div class="col-sm-8" role="main"&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   &lt;div class="tabbable"&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     &lt;ul class="nav nav-tabs" data-tabsetid="5962"&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     &lt;ul class="nav nav-tabs" data-tabsetid="5815"&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       &lt;li class="active"&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         &lt;a href="#tab-5962-1" data-toggle="tab" data-bs-toggle="tab" data-value="Plot"&gt;Plot&lt;/a&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         &lt;a href="#tab-5815-1" data-toggle="tab" data-bs-toggle="tab" data-value="Plot"&gt;Plot&lt;/a&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       &lt;/li&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       &lt;li&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         &lt;a href="#tab-5962-2" data-toggle="tab" data-bs-toggle="tab" data-value="Summary"&gt;Summary&lt;/a&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         &lt;a href="#tab-5815-2" data-toggle="tab" data-bs-toggle="tab" data-value="Summary"&gt;Summary&lt;/a&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       &lt;/li&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       &lt;li&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         &lt;a href="#tab-5962-3" data-toggle="tab" data-bs-toggle="tab" data-value="Table"&gt;Table&lt;/a&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         &lt;a href="#tab-5815-3" data-toggle="tab" data-bs-toggle="tab" data-value="Table"&gt;Table&lt;/a&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       &lt;/li&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     &lt;/ul&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     &lt;div class="tab-content" data-tabsetid="5962"&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       &lt;div class="tab-pane active" data-value="Plot" id="tab-5962-1"&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     &lt;div class="tab-content" data-tabsetid="5815"&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       &lt;div class="tab-pane active" data-value="Plot" id="tab-5815-1"&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         &lt;div id="plot" class="shiny-plot-output" style="width:100%;height:400px;"&gt;&lt;/div&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       &lt;/div&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       &lt;div class="tab-pane" data-value="Summary" id="tab-5962-2"&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       &lt;div class="tab-pane" data-value="Summary" id="tab-5815-2"&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         &lt;pre class="shiny-text-output noplaceholder" id="summary"&gt;&lt;/pre&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       &lt;/div&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       &lt;div class="tab-pane" data-value="Table" id="tab-5962-3"&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       &lt;div class="tab-pane" data-value="Table" id="tab-5815-3"&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         &lt;div id="table" class="shiny-html-output"&gt;&lt;/div&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       &lt;/div&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     &lt;/div&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   &lt;/div&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> &lt;/div&gt;</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="va">ui</span> <span class="op">&lt;-</span> <span class="fu"><a href="fluidPage.html">fluidPage</a></span><span class="op">(</span></span>
-<span class="r-in">  <span class="fu"><a href="sidebarLayout.html">sidebarLayout</a></span><span class="op">(</span></span>
-<span class="r-in">    <span class="fu"><a href="sidebarLayout.html">sidebarPanel</a></span><span class="op">(</span></span>
-<span class="r-in">      <span class="fu"><a href="radioButtons.html">radioButtons</a></span><span class="op">(</span><span class="st">"controller"</span>, <span class="st">"Controller"</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">3</span>, <span class="fl">1</span><span class="op">)</span></span>
-<span class="r-in">    <span class="op">)</span>,</span>
-<span class="r-in">    <span class="fu"><a href="sidebarLayout.html">mainPanel</a></span><span class="op">(</span></span>
-<span class="r-in">      <span class="fu">tabsetPanel</span><span class="op">(</span></span>
-<span class="r-in">        id <span class="op">=</span> <span class="st">"hidden_tabs"</span>,</span>
-<span class="r-in">        <span class="co"># Hide the tab values.</span></span>
-<span class="r-in">        <span class="co"># Can only switch tabs by using `updateTabsetPanel()`</span></span>
-<span class="r-in">        type <span class="op">=</span> <span class="st">"hidden"</span>,</span>
-<span class="r-in">        <span class="fu"><a href="tabPanel.html">tabPanelBody</a></span><span class="op">(</span><span class="st">"panel1"</span>, <span class="st">"Panel 1 content"</span><span class="op">)</span>,</span>
-<span class="r-in">        <span class="fu"><a href="tabPanel.html">tabPanelBody</a></span><span class="op">(</span><span class="st">"panel2"</span>, <span class="st">"Panel 2 content"</span><span class="op">)</span>,</span>
-<span class="r-in">        <span class="fu"><a href="tabPanel.html">tabPanelBody</a></span><span class="op">(</span><span class="st">"panel3"</span>, <span class="st">"Panel 3 content"</span><span class="op">)</span></span>
-<span class="r-in">      <span class="op">)</span></span>
-<span class="r-in">    <span class="op">)</span></span>
-<span class="r-in">  <span class="op">)</span></span>
-<span class="r-in"><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="va">server</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">  <span class="fu"><a href="observeEvent.html">observeEvent</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">controller</span>, <span class="op">{</span></span>
-<span class="r-in">    <span class="fu"><a href="updateTabsetPanel.html">updateTabsetPanel</a></span><span class="op">(</span><span class="va">session</span>, <span class="st">"hidden_tabs"</span>, selected <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"panel"</span>, <span class="va">input</span><span class="op">$</span><span class="va">controller</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in">  <span class="op">}</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">  <span class="fu"><a href="shinyApp.html">shinyApp</a></span><span class="op">(</span><span class="va">ui</span>, <span class="va">server</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">ui</span> <span class="op">&lt;-</span> <span class="fu"><a href="fluidPage.html">fluidPage</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="sidebarLayout.html">sidebarLayout</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="sidebarLayout.html">sidebarPanel</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>      <span class="fu"><a href="radioButtons.html">radioButtons</a></span><span class="op">(</span><span class="st">"controller"</span>, <span class="st">"Controller"</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">3</span>, <span class="fl">1</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="op">)</span>,</span></span>
+<span class="r-in"><span>    <span class="fu"><a href="sidebarLayout.html">mainPanel</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>      <span class="fu">tabsetPanel</span><span class="op">(</span></span></span>
+<span class="r-in"><span>        id <span class="op">=</span> <span class="st">"hidden_tabs"</span>,</span></span>
+<span class="r-in"><span>        <span class="co"># Hide the tab values.</span></span></span>
+<span class="r-in"><span>        <span class="co"># Can only switch tabs by using `updateTabsetPanel()`</span></span></span>
+<span class="r-in"><span>        type <span class="op">=</span> <span class="st">"hidden"</span>,</span></span>
+<span class="r-in"><span>        <span class="fu"><a href="tabPanel.html">tabPanelBody</a></span><span class="op">(</span><span class="st">"panel1"</span>, <span class="st">"Panel 1 content"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>        <span class="fu"><a href="tabPanel.html">tabPanelBody</a></span><span class="op">(</span><span class="st">"panel2"</span>, <span class="st">"Panel 2 content"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>        <span class="fu"><a href="tabPanel.html">tabPanelBody</a></span><span class="op">(</span><span class="st">"panel3"</span>, <span class="st">"Panel 3 content"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>      <span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">server</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="observeEvent.html">observeEvent</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">controller</span>, <span class="op">{</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="updateTabsetPanel.html">updateTabsetPanel</a></span><span class="op">(</span><span class="va">session</span>, <span class="st">"hidden_tabs"</span>, selected <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"panel"</span>, <span class="va">input</span><span class="op">$</span><span class="va">controller</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="shinyApp.html">shinyApp</a></span><span class="op">(</span><span class="va">ui</span>, <span class="va">server</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
 </code></pre></div>
     </div>
   </div>

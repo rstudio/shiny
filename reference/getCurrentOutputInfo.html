@@ -18,7 +18,7 @@ and in some cases, relevant sizing and styling information."><meta property="og:
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">shiny</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.1.9003</span>
       </span>
     </div>
 
@@ -55,7 +55,7 @@ and in some cases, relevant sizing and styling information.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">getCurrentOutputInfo</span><span class="op">(</span>session <span class="op">=</span> <span class="fu"><a href="domains.html">getDefaultReactiveDomain</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">getCurrentOutputInfo</span><span class="op">(</span>session <span class="op">=</span> <span class="fu"><a href="domains.html">getDefaultReactiveDomain</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -84,44 +84,44 @@ a list which includes:</p><ul><li><p>The <code>name</code> of the output (report
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"></span>
-<span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">  <span class="fu"><a href="shinyApp.html">shinyApp</a></span><span class="op">(</span></span>
-<span class="r-in">    <span class="fu"><a href="fluidPage.html">fluidPage</a></span><span class="op">(</span></span>
-<span class="r-in">      <span class="va">tags</span><span class="op">$</span><span class="fu">style</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/htmltools/man/HTML.html" class="external-link">HTML</a></span><span class="op">(</span><span class="st">"body {background-color: black; color: white; }"</span><span class="op">)</span><span class="op">)</span>,</span>
-<span class="r-in">      <span class="va">tags</span><span class="op">$</span><span class="fu">style</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/htmltools/man/HTML.html" class="external-link">HTML</a></span><span class="op">(</span><span class="st">"body a {color: purple}"</span><span class="op">)</span><span class="op">)</span>,</span>
-<span class="r-in">      <span class="va">tags</span><span class="op">$</span><span class="fu">style</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/htmltools/man/HTML.html" class="external-link">HTML</a></span><span class="op">(</span><span class="st">"#info {background-color: teal; color: orange; }"</span><span class="op">)</span><span class="op">)</span>,</span>
-<span class="r-in">      <span class="fu"><a href="plotOutput.html">plotOutput</a></span><span class="op">(</span><span class="st">"p"</span><span class="op">)</span>,</span>
-<span class="r-in">      <span class="st">"Computed CSS styles for the output named info:"</span>,</span>
-<span class="r-in">      <span class="fu"><a href="https://rdrr.io/pkg/htmltools/man/tagAppendAttributes.html" class="external-link">tagAppendAttributes</a></span><span class="op">(</span></span>
-<span class="r-in">        <span class="fu"><a href="textOutput.html">textOutput</a></span><span class="op">(</span><span class="st">"info"</span><span class="op">)</span>,</span>
-<span class="r-in">        class <span class="op">=</span> <span class="st">"shiny-report-theme"</span></span>
-<span class="r-in">      <span class="op">)</span></span>
-<span class="r-in">    <span class="op">)</span>,</span>
-<span class="r-in">    <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">      <span class="va">output</span><span class="op">$</span><span class="va">p</span> <span class="op">&lt;-</span> <span class="fu"><a href="renderPlot.html">renderPlot</a></span><span class="op">(</span><span class="op">{</span></span>
-<span class="r-in">        <span class="va">info</span> <span class="op">&lt;-</span> <span class="fu">getCurrentOutputInfo</span><span class="op">(</span><span class="op">)</span></span>
-<span class="r-in">        <span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span>bg <span class="op">=</span> <span class="va">info</span><span class="op">$</span><span class="fu">bg</span><span class="op">(</span><span class="op">)</span>, fg <span class="op">=</span> <span class="va">info</span><span class="op">$</span><span class="fu">fg</span><span class="op">(</span><span class="op">)</span>, col.axis <span class="op">=</span> <span class="va">info</span><span class="op">$</span><span class="fu">fg</span><span class="op">(</span><span class="op">)</span>, col.main <span class="op">=</span> <span class="va">info</span><span class="op">$</span><span class="fu">fg</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in">        <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span>, col <span class="op">=</span> <span class="va">info</span><span class="op">$</span><span class="fu">accent</span><span class="op">(</span><span class="op">)</span>, pch <span class="op">=</span> <span class="fl">19</span><span class="op">)</span></span>
-<span class="r-in">        <span class="fu"><a href="https://rdrr.io/r/graphics/title.html" class="external-link">title</a></span><span class="op">(</span><span class="st">"A simple R plot that uses its CSS styling"</span><span class="op">)</span></span>
-<span class="r-in">      <span class="op">}</span><span class="op">)</span></span>
-<span class="r-in">      <span class="va">output</span><span class="op">$</span><span class="va">info</span> <span class="op">&lt;-</span> <span class="fu"><a href="renderPrint.html">renderText</a></span><span class="op">(</span><span class="op">{</span></span>
-<span class="r-in">        <span class="va">info</span> <span class="op">&lt;-</span> <span class="fu">getCurrentOutputInfo</span><span class="op">(</span><span class="op">)</span></span>
-<span class="r-in">        <span class="fu">jsonlite</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/jsonlite/man/fromJSON.html" class="external-link">toJSON</a></span><span class="op">(</span></span>
-<span class="r-in">          <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
-<span class="r-in">            bg <span class="op">=</span> <span class="va">info</span><span class="op">$</span><span class="fu">bg</span><span class="op">(</span><span class="op">)</span>,</span>
-<span class="r-in">            fg <span class="op">=</span> <span class="va">info</span><span class="op">$</span><span class="fu">fg</span><span class="op">(</span><span class="op">)</span>,</span>
-<span class="r-in">            accent <span class="op">=</span> <span class="va">info</span><span class="op">$</span><span class="fu">accent</span><span class="op">(</span><span class="op">)</span>,</span>
-<span class="r-in">            font <span class="op">=</span> <span class="va">info</span><span class="op">$</span><span class="fu">font</span><span class="op">(</span><span class="op">)</span></span>
-<span class="r-in">          <span class="op">)</span>,</span>
-<span class="r-in">          auto_unbox <span class="op">=</span> <span class="cn">TRUE</span></span>
-<span class="r-in">        <span class="op">)</span></span>
-<span class="r-in">      <span class="op">}</span><span class="op">)</span></span>
-<span class="r-in">    <span class="op">}</span></span>
-<span class="r-in">  <span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
-<span class="r-in"></span>
-<span class="r-in"></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="shinyApp.html">shinyApp</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="fluidPage.html">fluidPage</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>      <span class="va">tags</span><span class="op">$</span><span class="fu">style</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/htmltools/man/HTML.html" class="external-link">HTML</a></span><span class="op">(</span><span class="st">"body {background-color: black; color: white; }"</span><span class="op">)</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>      <span class="va">tags</span><span class="op">$</span><span class="fu">style</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/htmltools/man/HTML.html" class="external-link">HTML</a></span><span class="op">(</span><span class="st">"body a {color: purple}"</span><span class="op">)</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>      <span class="va">tags</span><span class="op">$</span><span class="fu">style</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/htmltools/man/HTML.html" class="external-link">HTML</a></span><span class="op">(</span><span class="st">"#info {background-color: teal; color: orange; }"</span><span class="op">)</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>      <span class="fu"><a href="plotOutput.html">plotOutput</a></span><span class="op">(</span><span class="st">"p"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>      <span class="st">"Computed CSS styles for the output named info:"</span>,</span></span>
+<span class="r-in"><span>      <span class="fu"><a href="https://rdrr.io/pkg/htmltools/man/tagAppendAttributes.html" class="external-link">tagAppendAttributes</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>        <span class="fu"><a href="textOutput.html">textOutput</a></span><span class="op">(</span><span class="st">"info"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>        class <span class="op">=</span> <span class="st">"shiny-report-theme"</span></span></span>
+<span class="r-in"><span>      <span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="op">)</span>,</span></span>
+<span class="r-in"><span>    <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>      <span class="va">output</span><span class="op">$</span><span class="va">p</span> <span class="op">&lt;-</span> <span class="fu"><a href="renderPlot.html">renderPlot</a></span><span class="op">(</span><span class="op">{</span></span></span>
+<span class="r-in"><span>        <span class="va">info</span> <span class="op">&lt;-</span> <span class="fu">getCurrentOutputInfo</span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span>        <span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span>bg <span class="op">=</span> <span class="va">info</span><span class="op">$</span><span class="fu">bg</span><span class="op">(</span><span class="op">)</span>, fg <span class="op">=</span> <span class="va">info</span><span class="op">$</span><span class="fu">fg</span><span class="op">(</span><span class="op">)</span>, col.axis <span class="op">=</span> <span class="va">info</span><span class="op">$</span><span class="fu">fg</span><span class="op">(</span><span class="op">)</span>, col.main <span class="op">=</span> <span class="va">info</span><span class="op">$</span><span class="fu">fg</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span>        <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span>, col <span class="op">=</span> <span class="va">info</span><span class="op">$</span><span class="fu">accent</span><span class="op">(</span><span class="op">)</span>, pch <span class="op">=</span> <span class="fl">19</span><span class="op">)</span></span></span>
+<span class="r-in"><span>        <span class="fu"><a href="https://rdrr.io/r/graphics/title.html" class="external-link">title</a></span><span class="op">(</span><span class="st">"A simple R plot that uses its CSS styling"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>      <span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span>      <span class="va">output</span><span class="op">$</span><span class="va">info</span> <span class="op">&lt;-</span> <span class="fu"><a href="renderPrint.html">renderText</a></span><span class="op">(</span><span class="op">{</span></span></span>
+<span class="r-in"><span>        <span class="va">info</span> <span class="op">&lt;-</span> <span class="fu">getCurrentOutputInfo</span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span>        <span class="fu">jsonlite</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/jsonlite/man/fromJSON.html" class="external-link">toJSON</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>          <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>            bg <span class="op">=</span> <span class="va">info</span><span class="op">$</span><span class="fu">bg</span><span class="op">(</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>            fg <span class="op">=</span> <span class="va">info</span><span class="op">$</span><span class="fu">fg</span><span class="op">(</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>            accent <span class="op">=</span> <span class="va">info</span><span class="op">$</span><span class="fu">accent</span><span class="op">(</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>            font <span class="op">=</span> <span class="va">info</span><span class="op">$</span><span class="fu">font</span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span>          <span class="op">)</span>,</span></span>
+<span class="r-in"><span>          auto_unbox <span class="op">=</span> <span class="cn">TRUE</span></span></span>
+<span class="r-in"><span>        <span class="op">)</span></span></span>
+<span class="r-in"><span>      <span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="op">}</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>

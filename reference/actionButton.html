@@ -18,7 +18,7 @@ each time it is pressed."><meta property="og:image" content="/logo.png"><!-- mat
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">shiny</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.1.9003</span>
       </span>
     </div>
 
@@ -55,9 +55,9 @@ each time it is pressed.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">actionButton</span><span class="op">(</span><span class="va">inputId</span>, <span class="va">label</span>, icon <span class="op">=</span> <span class="cn">NULL</span>, width <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">...</span><span class="op">)</span>
-
-<span class="fu">actionLink</span><span class="op">(</span><span class="va">inputId</span>, <span class="va">label</span>, icon <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">...</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">actionButton</span><span class="op">(</span><span class="va">inputId</span>, <span class="va">label</span>, icon <span class="op">=</span> <span class="cn">NULL</span>, width <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">actionLink</span><span class="op">(</span><span class="va">inputId</span>, <span class="va">label</span>, icon <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -115,37 +115,37 @@ This implies two things:</p><ul><li><p>Event handlers (e.g., <code><a href="obse
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="co">## Only run examples in interactive R sessions</span></span>
-<span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="va">ui</span> <span class="op">&lt;-</span> <span class="fu"><a href="fluidPage.html">fluidPage</a></span><span class="op">(</span></span>
-<span class="r-in">  <span class="fu"><a href="sliderInput.html">sliderInput</a></span><span class="op">(</span><span class="st">"obs"</span>, <span class="st">"Number of observations"</span>, <span class="fl">0</span>, <span class="fl">1000</span>, <span class="fl">500</span><span class="op">)</span>,</span>
-<span class="r-in">  <span class="fu">actionButton</span><span class="op">(</span><span class="st">"goButton"</span>, <span class="st">"Go!"</span>, class <span class="op">=</span> <span class="st">"btn-success"</span><span class="op">)</span>,</span>
-<span class="r-in">  <span class="fu"><a href="plotOutput.html">plotOutput</a></span><span class="op">(</span><span class="st">"distPlot"</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="va">server</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">  <span class="va">output</span><span class="op">$</span><span class="va">distPlot</span> <span class="op">&lt;-</span> <span class="fu"><a href="renderPlot.html">renderPlot</a></span><span class="op">(</span><span class="op">{</span></span>
-<span class="r-in">    <span class="co"># Take a dependency on input$goButton. This will run once initially,</span></span>
-<span class="r-in">    <span class="co"># because the value changes from NULL to 0.</span></span>
-<span class="r-in">    <span class="va">input</span><span class="op">$</span><span class="va">goButton</span></span>
-<span class="r-in"></span>
-<span class="r-in">    <span class="co"># Use isolate() to avoid dependency on input$obs</span></span>
-<span class="r-in">    <span class="va">dist</span> <span class="op">&lt;-</span> <span class="fu"><a href="isolate.html">isolate</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">obs</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in">    <span class="fu"><a href="https://rdrr.io/r/graphics/hist.html" class="external-link">hist</a></span><span class="op">(</span><span class="va">dist</span><span class="op">)</span></span>
-<span class="r-in">  <span class="op">}</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu"><a href="shinyApp.html">shinyApp</a></span><span class="op">(</span><span class="va">ui</span>, <span class="va">server</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="op">}</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">## Example of adding extra class values</span></span>
-<span class="r-in"><span class="fu">actionButton</span><span class="op">(</span><span class="st">"largeButton"</span>, <span class="st">"Large Primary Button"</span>, class <span class="op">=</span> <span class="st">"btn-primary btn-lg"</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co">## Only run examples in interactive R sessions</span></span></span>
+<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">ui</span> <span class="op">&lt;-</span> <span class="fu"><a href="fluidPage.html">fluidPage</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="sliderInput.html">sliderInput</a></span><span class="op">(</span><span class="st">"obs"</span>, <span class="st">"Number of observations"</span>, <span class="fl">0</span>, <span class="fl">1000</span>, <span class="fl">500</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  <span class="fu">actionButton</span><span class="op">(</span><span class="st">"goButton"</span>, <span class="st">"Go!"</span>, class <span class="op">=</span> <span class="st">"btn-success"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  <span class="fu"><a href="plotOutput.html">plotOutput</a></span><span class="op">(</span><span class="st">"distPlot"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">server</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="va">output</span><span class="op">$</span><span class="va">distPlot</span> <span class="op">&lt;-</span> <span class="fu"><a href="renderPlot.html">renderPlot</a></span><span class="op">(</span><span class="op">{</span></span></span>
+<span class="r-in"><span>    <span class="co"># Take a dependency on input$goButton. This will run once initially,</span></span></span>
+<span class="r-in"><span>    <span class="co"># because the value changes from NULL to 0.</span></span></span>
+<span class="r-in"><span>    <span class="va">input</span><span class="op">$</span><span class="va">goButton</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>    <span class="co"># Use isolate() to avoid dependency on input$obs</span></span></span>
+<span class="r-in"><span>    <span class="va">dist</span> <span class="op">&lt;-</span> <span class="fu"><a href="isolate.html">isolate</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">obs</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/graphics/hist.html" class="external-link">hist</a></span><span class="op">(</span><span class="va">dist</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="shinyApp.html">shinyApp</a></span><span class="op">(</span><span class="va">ui</span>, <span class="va">server</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">## Example of adding extra class values</span></span></span>
+<span class="r-in"><span><span class="fu">actionButton</span><span class="op">(</span><span class="st">"largeButton"</span>, <span class="st">"Large Primary Button"</span>, class <span class="op">=</span> <span class="st">"btn-primary btn-lg"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> &lt;button class="btn btn-default action-button btn-primary btn-lg" id="largeButton" type="button"&gt;Large Primary Button&lt;/button&gt;</span>
-<span class="r-in"><span class="fu">actionLink</span><span class="op">(</span><span class="st">"infoLink"</span>, <span class="st">"Information Link"</span>, class <span class="op">=</span> <span class="st">"btn-info"</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="fu">actionLink</span><span class="op">(</span><span class="st">"infoLink"</span>, <span class="st">"Information Link"</span>, class <span class="op">=</span> <span class="st">"btn-info"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> &lt;a class="action-button btn-info" href="#" id="infoLink"&gt;Information Link&lt;/a&gt;</span>
-<span class="r-in"></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>

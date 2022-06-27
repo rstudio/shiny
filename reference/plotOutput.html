@@ -18,7 +18,7 @@ application page."><meta property="og:image" content="/logo.png"><!-- mathjax --
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">shiny</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.1.9003</span>
       </span>
     </div>
 
@@ -55,27 +55,27 @@ application page.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">imageOutput</span><span class="op">(</span>
-  <span class="va">outputId</span>,
-  width <span class="op">=</span> <span class="st">"100%"</span>,
-  height <span class="op">=</span> <span class="st">"400px"</span>,
-  click <span class="op">=</span> <span class="cn">NULL</span>,
-  dblclick <span class="op">=</span> <span class="cn">NULL</span>,
-  hover <span class="op">=</span> <span class="cn">NULL</span>,
-  brush <span class="op">=</span> <span class="cn">NULL</span>,
-  inline <span class="op">=</span> <span class="cn">FALSE</span>
-<span class="op">)</span>
-
-<span class="fu">plotOutput</span><span class="op">(</span>
-  <span class="va">outputId</span>,
-  width <span class="op">=</span> <span class="st">"100%"</span>,
-  height <span class="op">=</span> <span class="st">"400px"</span>,
-  click <span class="op">=</span> <span class="cn">NULL</span>,
-  dblclick <span class="op">=</span> <span class="cn">NULL</span>,
-  hover <span class="op">=</span> <span class="cn">NULL</span>,
-  brush <span class="op">=</span> <span class="cn">NULL</span>,
-  inline <span class="op">=</span> <span class="cn">FALSE</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">imageOutput</span><span class="op">(</span></span>
+<span>  <span class="va">outputId</span>,</span>
+<span>  width <span class="op">=</span> <span class="st">"100%"</span>,</span>
+<span>  height <span class="op">=</span> <span class="st">"400px"</span>,</span>
+<span>  click <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  dblclick <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  hover <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  brush <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  inline <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">plotOutput</span><span class="op">(</span></span>
+<span>  <span class="va">outputId</span>,</span>
+<span>  width <span class="op">=</span> <span class="st">"100%"</span>,</span>
+<span>  height <span class="op">=</span> <span class="st">"400px"</span>,</span>
+<span>  click <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  dblclick <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  hover <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  brush <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  inline <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -185,163 +185,163 @@ properly scaled to the data space.</p>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="co"># Only run these examples in interactive R sessions</span></span>
-<span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># A basic shiny app with a plotOutput</span></span>
-<span class="r-in"><span class="fu"><a href="shinyApp.html">shinyApp</a></span><span class="op">(</span></span>
-<span class="r-in">  ui <span class="op">=</span> <span class="fu"><a href="fluidPage.html">fluidPage</a></span><span class="op">(</span></span>
-<span class="r-in">    <span class="fu"><a href="sidebarLayout.html">sidebarLayout</a></span><span class="op">(</span></span>
-<span class="r-in">      <span class="fu"><a href="sidebarLayout.html">sidebarPanel</a></span><span class="op">(</span></span>
-<span class="r-in">        <span class="fu"><a href="actionButton.html">actionButton</a></span><span class="op">(</span><span class="st">"newplot"</span>, <span class="st">"New plot"</span><span class="op">)</span></span>
-<span class="r-in">      <span class="op">)</span>,</span>
-<span class="r-in">      <span class="fu"><a href="sidebarLayout.html">mainPanel</a></span><span class="op">(</span></span>
-<span class="r-in">        <span class="fu">plotOutput</span><span class="op">(</span><span class="st">"plot"</span><span class="op">)</span></span>
-<span class="r-in">      <span class="op">)</span></span>
-<span class="r-in">    <span class="op">)</span></span>
-<span class="r-in">  <span class="op">)</span>,</span>
-<span class="r-in">  server <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">    <span class="va">output</span><span class="op">$</span><span class="va">plot</span> <span class="op">&lt;-</span> <span class="fu"><a href="renderPlot.html">renderPlot</a></span><span class="op">(</span><span class="op">{</span></span>
-<span class="r-in">      <span class="va">input</span><span class="op">$</span><span class="va">newplot</span></span>
-<span class="r-in">      <span class="co"># Add a little noise to the cars data</span></span>
-<span class="r-in">      <span class="va">cars2</span> <span class="op">&lt;-</span> <span class="va">cars</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">cars</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in">      <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">cars2</span><span class="op">)</span></span>
-<span class="r-in">    <span class="op">}</span><span class="op">)</span></span>
-<span class="r-in">  <span class="op">}</span></span>
-<span class="r-in"><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># A demonstration of clicking, hovering, and brushing</span></span>
-<span class="r-in"><span class="fu"><a href="shinyApp.html">shinyApp</a></span><span class="op">(</span></span>
-<span class="r-in">  ui <span class="op">=</span> <span class="fu"><a href="bootstrapPage.html">basicPage</a></span><span class="op">(</span></span>
-<span class="r-in">    <span class="fu"><a href="fluidPage.html">fluidRow</a></span><span class="op">(</span></span>
-<span class="r-in">      <span class="fu"><a href="column.html">column</a></span><span class="op">(</span>width <span class="op">=</span> <span class="fl">4</span>,</span>
-<span class="r-in">        <span class="fu">plotOutput</span><span class="op">(</span><span class="st">"plot"</span>, height<span class="op">=</span><span class="fl">300</span>,</span>
-<span class="r-in">          click <span class="op">=</span> <span class="st">"plot_click"</span>,  <span class="co"># Equiv, to click=clickOpts(id="plot_click")</span></span>
-<span class="r-in">          hover <span class="op">=</span> <span class="fu"><a href="clickOpts.html">hoverOpts</a></span><span class="op">(</span>id <span class="op">=</span> <span class="st">"plot_hover"</span>, delayType <span class="op">=</span> <span class="st">"throttle"</span><span class="op">)</span>,</span>
-<span class="r-in">          brush <span class="op">=</span> <span class="fu"><a href="brushOpts.html">brushOpts</a></span><span class="op">(</span>id <span class="op">=</span> <span class="st">"plot_brush"</span><span class="op">)</span></span>
-<span class="r-in">        <span class="op">)</span>,</span>
-<span class="r-in">        <span class="fu"><a href="https://rdrr.io/pkg/htmltools/man/builder.html" class="external-link">h4</a></span><span class="op">(</span><span class="st">"Clicked points"</span><span class="op">)</span>,</span>
-<span class="r-in">        <span class="fu"><a href="renderTable.html">tableOutput</a></span><span class="op">(</span><span class="st">"plot_clickedpoints"</span><span class="op">)</span>,</span>
-<span class="r-in">        <span class="fu"><a href="https://rdrr.io/pkg/htmltools/man/builder.html" class="external-link">h4</a></span><span class="op">(</span><span class="st">"Brushed points"</span><span class="op">)</span>,</span>
-<span class="r-in">        <span class="fu"><a href="renderTable.html">tableOutput</a></span><span class="op">(</span><span class="st">"plot_brushedpoints"</span><span class="op">)</span></span>
-<span class="r-in">      <span class="op">)</span>,</span>
-<span class="r-in">      <span class="fu"><a href="column.html">column</a></span><span class="op">(</span>width <span class="op">=</span> <span class="fl">4</span>,</span>
-<span class="r-in">        <span class="fu"><a href="textOutput.html">verbatimTextOutput</a></span><span class="op">(</span><span class="st">"plot_clickinfo"</span><span class="op">)</span>,</span>
-<span class="r-in">        <span class="fu"><a href="textOutput.html">verbatimTextOutput</a></span><span class="op">(</span><span class="st">"plot_hoverinfo"</span><span class="op">)</span></span>
-<span class="r-in">      <span class="op">)</span>,</span>
-<span class="r-in">      <span class="fu"><a href="column.html">column</a></span><span class="op">(</span>width <span class="op">=</span> <span class="fl">4</span>,</span>
-<span class="r-in">        <span class="fu"><a href="wellPanel.html">wellPanel</a></span><span class="op">(</span><span class="fu"><a href="actionButton.html">actionButton</a></span><span class="op">(</span><span class="st">"newplot"</span>, <span class="st">"New plot"</span><span class="op">)</span><span class="op">)</span>,</span>
-<span class="r-in">        <span class="fu"><a href="textOutput.html">verbatimTextOutput</a></span><span class="op">(</span><span class="st">"plot_brushinfo"</span><span class="op">)</span></span>
-<span class="r-in">      <span class="op">)</span></span>
-<span class="r-in">    <span class="op">)</span></span>
-<span class="r-in">  <span class="op">)</span>,</span>
-<span class="r-in">  server <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">    <span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="reactive.html">reactive</a></span><span class="op">(</span><span class="op">{</span></span>
-<span class="r-in">      <span class="va">input</span><span class="op">$</span><span class="va">newplot</span></span>
-<span class="r-in">      <span class="co"># Add a little noise to the cars data so the points move</span></span>
-<span class="r-in">      <span class="va">cars</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">cars</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in">    <span class="op">}</span><span class="op">)</span></span>
-<span class="r-in">    <span class="va">output</span><span class="op">$</span><span class="va">plot</span> <span class="op">&lt;-</span> <span class="fu"><a href="renderPlot.html">renderPlot</a></span><span class="op">(</span><span class="op">{</span></span>
-<span class="r-in">      <span class="va">d</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="op">)</span></span>
-<span class="r-in">      <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">d</span><span class="op">$</span><span class="va">speed</span>, <span class="va">d</span><span class="op">$</span><span class="va">dist</span><span class="op">)</span></span>
-<span class="r-in">    <span class="op">}</span><span class="op">)</span></span>
-<span class="r-in">    <span class="va">output</span><span class="op">$</span><span class="va">plot_clickinfo</span> <span class="op">&lt;-</span> <span class="fu"><a href="renderPrint.html">renderPrint</a></span><span class="op">(</span><span class="op">{</span></span>
-<span class="r-in">      <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Click:\n"</span><span class="op">)</span></span>
-<span class="r-in">      <span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">plot_click</span><span class="op">)</span></span>
-<span class="r-in">    <span class="op">}</span><span class="op">)</span></span>
-<span class="r-in">    <span class="va">output</span><span class="op">$</span><span class="va">plot_hoverinfo</span> <span class="op">&lt;-</span> <span class="fu"><a href="renderPrint.html">renderPrint</a></span><span class="op">(</span><span class="op">{</span></span>
-<span class="r-in">      <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Hover (throttled):\n"</span><span class="op">)</span></span>
-<span class="r-in">      <span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">plot_hover</span><span class="op">)</span></span>
-<span class="r-in">    <span class="op">}</span><span class="op">)</span></span>
-<span class="r-in">    <span class="va">output</span><span class="op">$</span><span class="va">plot_brushinfo</span> <span class="op">&lt;-</span> <span class="fu"><a href="renderPrint.html">renderPrint</a></span><span class="op">(</span><span class="op">{</span></span>
-<span class="r-in">      <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Brush (debounced):\n"</span><span class="op">)</span></span>
-<span class="r-in">      <span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">plot_brush</span><span class="op">)</span></span>
-<span class="r-in">    <span class="op">}</span><span class="op">)</span></span>
-<span class="r-in">    <span class="va">output</span><span class="op">$</span><span class="va">plot_clickedpoints</span> <span class="op">&lt;-</span> <span class="fu"><a href="renderTable.html">renderTable</a></span><span class="op">(</span><span class="op">{</span></span>
-<span class="r-in">      <span class="co"># For base graphics, we need to specify columns, though for ggplot2,</span></span>
-<span class="r-in">      <span class="co"># it's usually not necessary.</span></span>
-<span class="r-in">      <span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="brushedPoints.html">nearPoints</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="op">)</span>, <span class="va">input</span><span class="op">$</span><span class="va">plot_click</span>, <span class="st">"speed"</span>, <span class="st">"dist"</span><span class="op">)</span></span>
-<span class="r-in">      <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span> <span class="op">==</span> <span class="fl">0</span><span class="op">)</span></span>
-<span class="r-in">        <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="op">)</span></span>
-<span class="r-in">      <span class="va">res</span></span>
-<span class="r-in">    <span class="op">}</span><span class="op">)</span></span>
-<span class="r-in">    <span class="va">output</span><span class="op">$</span><span class="va">plot_brushedpoints</span> <span class="op">&lt;-</span> <span class="fu"><a href="renderTable.html">renderTable</a></span><span class="op">(</span><span class="op">{</span></span>
-<span class="r-in">      <span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="brushedPoints.html">brushedPoints</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="op">)</span>, <span class="va">input</span><span class="op">$</span><span class="va">plot_brush</span>, <span class="st">"speed"</span>, <span class="st">"dist"</span><span class="op">)</span></span>
-<span class="r-in">      <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span> <span class="op">==</span> <span class="fl">0</span><span class="op">)</span></span>
-<span class="r-in">        <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="op">)</span></span>
-<span class="r-in">      <span class="va">res</span></span>
-<span class="r-in">    <span class="op">}</span><span class="op">)</span></span>
-<span class="r-in">  <span class="op">}</span></span>
-<span class="r-in"><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Demo of clicking, hovering, brushing with imageOutput</span></span>
-<span class="r-in"><span class="co"># Note that coordinates are in pixels</span></span>
-<span class="r-in"><span class="fu"><a href="shinyApp.html">shinyApp</a></span><span class="op">(</span></span>
-<span class="r-in">  ui <span class="op">=</span> <span class="fu"><a href="bootstrapPage.html">basicPage</a></span><span class="op">(</span></span>
-<span class="r-in">    <span class="fu"><a href="fluidPage.html">fluidRow</a></span><span class="op">(</span></span>
-<span class="r-in">      <span class="fu"><a href="column.html">column</a></span><span class="op">(</span>width <span class="op">=</span> <span class="fl">4</span>,</span>
-<span class="r-in">        <span class="fu">imageOutput</span><span class="op">(</span><span class="st">"image"</span>, height<span class="op">=</span><span class="fl">300</span>,</span>
-<span class="r-in">          click <span class="op">=</span> <span class="st">"image_click"</span>,</span>
-<span class="r-in">          hover <span class="op">=</span> <span class="fu"><a href="clickOpts.html">hoverOpts</a></span><span class="op">(</span></span>
-<span class="r-in">            id <span class="op">=</span> <span class="st">"image_hover"</span>,</span>
-<span class="r-in">            delay <span class="op">=</span> <span class="fl">500</span>,</span>
-<span class="r-in">            delayType <span class="op">=</span> <span class="st">"throttle"</span></span>
-<span class="r-in">          <span class="op">)</span>,</span>
-<span class="r-in">          brush <span class="op">=</span> <span class="fu"><a href="brushOpts.html">brushOpts</a></span><span class="op">(</span>id <span class="op">=</span> <span class="st">"image_brush"</span><span class="op">)</span></span>
-<span class="r-in">        <span class="op">)</span></span>
-<span class="r-in">      <span class="op">)</span>,</span>
-<span class="r-in">      <span class="fu"><a href="column.html">column</a></span><span class="op">(</span>width <span class="op">=</span> <span class="fl">4</span>,</span>
-<span class="r-in">        <span class="fu"><a href="textOutput.html">verbatimTextOutput</a></span><span class="op">(</span><span class="st">"image_clickinfo"</span><span class="op">)</span>,</span>
-<span class="r-in">        <span class="fu"><a href="textOutput.html">verbatimTextOutput</a></span><span class="op">(</span><span class="st">"image_hoverinfo"</span><span class="op">)</span></span>
-<span class="r-in">      <span class="op">)</span>,</span>
-<span class="r-in">      <span class="fu"><a href="column.html">column</a></span><span class="op">(</span>width <span class="op">=</span> <span class="fl">4</span>,</span>
-<span class="r-in">        <span class="fu"><a href="wellPanel.html">wellPanel</a></span><span class="op">(</span><span class="fu"><a href="actionButton.html">actionButton</a></span><span class="op">(</span><span class="st">"newimage"</span>, <span class="st">"New image"</span><span class="op">)</span><span class="op">)</span>,</span>
-<span class="r-in">        <span class="fu"><a href="textOutput.html">verbatimTextOutput</a></span><span class="op">(</span><span class="st">"image_brushinfo"</span><span class="op">)</span></span>
-<span class="r-in">      <span class="op">)</span></span>
-<span class="r-in">    <span class="op">)</span></span>
-<span class="r-in">  <span class="op">)</span>,</span>
-<span class="r-in">  server <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">    <span class="va">output</span><span class="op">$</span><span class="va">image</span> <span class="op">&lt;-</span> <span class="fu"><a href="renderImage.html">renderImage</a></span><span class="op">(</span><span class="op">{</span></span>
-<span class="r-in">      <span class="va">input</span><span class="op">$</span><span class="va">newimage</span></span>
-<span class="r-in"></span>
-<span class="r-in">      <span class="co"># Get width and height of image output</span></span>
-<span class="r-in">      <span class="va">width</span>  <span class="op">&lt;-</span> <span class="va">session</span><span class="op">$</span><span class="va">clientData</span><span class="op">$</span><span class="va">output_image_width</span></span>
-<span class="r-in">      <span class="va">height</span> <span class="op">&lt;-</span> <span class="va">session</span><span class="op">$</span><span class="va">clientData</span><span class="op">$</span><span class="va">output_image_height</span></span>
-<span class="r-in"></span>
-<span class="r-in">      <span class="co"># Write to a temporary PNG file</span></span>
-<span class="r-in">      <span class="va">outfile</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span>fileext <span class="op">=</span> <span class="st">".png"</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in">      <span class="fu"><a href="https://rdrr.io/r/grDevices/png.html" class="external-link">png</a></span><span class="op">(</span><span class="va">outfile</span>, width<span class="op">=</span><span class="va">width</span>, height<span class="op">=</span><span class="va">height</span><span class="op">)</span></span>
-<span class="r-in">      <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">200</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">200</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in">      <span class="fu"><a href="https://rdrr.io/r/grDevices/dev.html" class="external-link">dev.off</a></span><span class="op">(</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in">      <span class="co"># Return a list containing information about the image</span></span>
-<span class="r-in">      <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
-<span class="r-in">        src <span class="op">=</span> <span class="va">outfile</span>,</span>
-<span class="r-in">        contentType <span class="op">=</span> <span class="st">"image/png"</span>,</span>
-<span class="r-in">        width <span class="op">=</span> <span class="va">width</span>,</span>
-<span class="r-in">        height <span class="op">=</span> <span class="va">height</span>,</span>
-<span class="r-in">        alt <span class="op">=</span> <span class="st">"This is alternate text"</span></span>
-<span class="r-in">      <span class="op">)</span></span>
-<span class="r-in">    <span class="op">}</span><span class="op">)</span></span>
-<span class="r-in">    <span class="va">output</span><span class="op">$</span><span class="va">image_clickinfo</span> <span class="op">&lt;-</span> <span class="fu"><a href="renderPrint.html">renderPrint</a></span><span class="op">(</span><span class="op">{</span></span>
-<span class="r-in">      <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Click:\n"</span><span class="op">)</span></span>
-<span class="r-in">      <span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">image_click</span><span class="op">)</span></span>
-<span class="r-in">    <span class="op">}</span><span class="op">)</span></span>
-<span class="r-in">    <span class="va">output</span><span class="op">$</span><span class="va">image_hoverinfo</span> <span class="op">&lt;-</span> <span class="fu"><a href="renderPrint.html">renderPrint</a></span><span class="op">(</span><span class="op">{</span></span>
-<span class="r-in">      <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Hover (throttled):\n"</span><span class="op">)</span></span>
-<span class="r-in">      <span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">image_hover</span><span class="op">)</span></span>
-<span class="r-in">    <span class="op">}</span><span class="op">)</span></span>
-<span class="r-in">    <span class="va">output</span><span class="op">$</span><span class="va">image_brushinfo</span> <span class="op">&lt;-</span> <span class="fu"><a href="renderPrint.html">renderPrint</a></span><span class="op">(</span><span class="op">{</span></span>
-<span class="r-in">      <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Brush (debounced):\n"</span><span class="op">)</span></span>
-<span class="r-in">      <span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">image_brush</span><span class="op">)</span></span>
-<span class="r-in">    <span class="op">}</span><span class="op">)</span></span>
-<span class="r-in">  <span class="op">}</span></span>
-<span class="r-in"><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="op">}</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Only run these examples in interactive R sessions</span></span></span>
+<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># A basic shiny app with a plotOutput</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="shinyApp.html">shinyApp</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  ui <span class="op">=</span> <span class="fu"><a href="fluidPage.html">fluidPage</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="sidebarLayout.html">sidebarLayout</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>      <span class="fu"><a href="sidebarLayout.html">sidebarPanel</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>        <span class="fu"><a href="actionButton.html">actionButton</a></span><span class="op">(</span><span class="st">"newplot"</span>, <span class="st">"New plot"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>      <span class="op">)</span>,</span></span>
+<span class="r-in"><span>      <span class="fu"><a href="sidebarLayout.html">mainPanel</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>        <span class="fu">plotOutput</span><span class="op">(</span><span class="st">"plot"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>      <span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span>,</span></span>
+<span class="r-in"><span>  server <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>    <span class="va">output</span><span class="op">$</span><span class="va">plot</span> <span class="op">&lt;-</span> <span class="fu"><a href="renderPlot.html">renderPlot</a></span><span class="op">(</span><span class="op">{</span></span></span>
+<span class="r-in"><span>      <span class="va">input</span><span class="op">$</span><span class="va">newplot</span></span></span>
+<span class="r-in"><span>      <span class="co"># Add a little noise to the cars data</span></span></span>
+<span class="r-in"><span>      <span class="va">cars2</span> <span class="op">&lt;-</span> <span class="va">cars</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">cars</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span>      <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">cars2</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">}</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># A demonstration of clicking, hovering, and brushing</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="shinyApp.html">shinyApp</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  ui <span class="op">=</span> <span class="fu"><a href="bootstrapPage.html">basicPage</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="fluidPage.html">fluidRow</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>      <span class="fu"><a href="column.html">column</a></span><span class="op">(</span>width <span class="op">=</span> <span class="fl">4</span>,</span></span>
+<span class="r-in"><span>        <span class="fu">plotOutput</span><span class="op">(</span><span class="st">"plot"</span>, height<span class="op">=</span><span class="fl">300</span>,</span></span>
+<span class="r-in"><span>          click <span class="op">=</span> <span class="st">"plot_click"</span>,  <span class="co"># Equiv, to click=clickOpts(id="plot_click")</span></span></span>
+<span class="r-in"><span>          hover <span class="op">=</span> <span class="fu"><a href="clickOpts.html">hoverOpts</a></span><span class="op">(</span>id <span class="op">=</span> <span class="st">"plot_hover"</span>, delayType <span class="op">=</span> <span class="st">"throttle"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>          brush <span class="op">=</span> <span class="fu"><a href="brushOpts.html">brushOpts</a></span><span class="op">(</span>id <span class="op">=</span> <span class="st">"plot_brush"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>        <span class="op">)</span>,</span></span>
+<span class="r-in"><span>        <span class="fu"><a href="https://rdrr.io/pkg/htmltools/man/builder.html" class="external-link">h4</a></span><span class="op">(</span><span class="st">"Clicked points"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>        <span class="fu"><a href="renderTable.html">tableOutput</a></span><span class="op">(</span><span class="st">"plot_clickedpoints"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>        <span class="fu"><a href="https://rdrr.io/pkg/htmltools/man/builder.html" class="external-link">h4</a></span><span class="op">(</span><span class="st">"Brushed points"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>        <span class="fu"><a href="renderTable.html">tableOutput</a></span><span class="op">(</span><span class="st">"plot_brushedpoints"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>      <span class="op">)</span>,</span></span>
+<span class="r-in"><span>      <span class="fu"><a href="column.html">column</a></span><span class="op">(</span>width <span class="op">=</span> <span class="fl">4</span>,</span></span>
+<span class="r-in"><span>        <span class="fu"><a href="textOutput.html">verbatimTextOutput</a></span><span class="op">(</span><span class="st">"plot_clickinfo"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>        <span class="fu"><a href="textOutput.html">verbatimTextOutput</a></span><span class="op">(</span><span class="st">"plot_hoverinfo"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>      <span class="op">)</span>,</span></span>
+<span class="r-in"><span>      <span class="fu"><a href="column.html">column</a></span><span class="op">(</span>width <span class="op">=</span> <span class="fl">4</span>,</span></span>
+<span class="r-in"><span>        <span class="fu"><a href="wellPanel.html">wellPanel</a></span><span class="op">(</span><span class="fu"><a href="actionButton.html">actionButton</a></span><span class="op">(</span><span class="st">"newplot"</span>, <span class="st">"New plot"</span><span class="op">)</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>        <span class="fu"><a href="textOutput.html">verbatimTextOutput</a></span><span class="op">(</span><span class="st">"plot_brushinfo"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>      <span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span>,</span></span>
+<span class="r-in"><span>  server <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>    <span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="reactive.html">reactive</a></span><span class="op">(</span><span class="op">{</span></span></span>
+<span class="r-in"><span>      <span class="va">input</span><span class="op">$</span><span class="va">newplot</span></span></span>
+<span class="r-in"><span>      <span class="co"># Add a little noise to the cars data so the points move</span></span></span>
+<span class="r-in"><span>      <span class="va">cars</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">cars</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="va">output</span><span class="op">$</span><span class="va">plot</span> <span class="op">&lt;-</span> <span class="fu"><a href="renderPlot.html">renderPlot</a></span><span class="op">(</span><span class="op">{</span></span></span>
+<span class="r-in"><span>      <span class="va">d</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span>      <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">d</span><span class="op">$</span><span class="va">speed</span>, <span class="va">d</span><span class="op">$</span><span class="va">dist</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="va">output</span><span class="op">$</span><span class="va">plot_clickinfo</span> <span class="op">&lt;-</span> <span class="fu"><a href="renderPrint.html">renderPrint</a></span><span class="op">(</span><span class="op">{</span></span></span>
+<span class="r-in"><span>      <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Click:\n"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>      <span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">plot_click</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="va">output</span><span class="op">$</span><span class="va">plot_hoverinfo</span> <span class="op">&lt;-</span> <span class="fu"><a href="renderPrint.html">renderPrint</a></span><span class="op">(</span><span class="op">{</span></span></span>
+<span class="r-in"><span>      <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Hover (throttled):\n"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>      <span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">plot_hover</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="va">output</span><span class="op">$</span><span class="va">plot_brushinfo</span> <span class="op">&lt;-</span> <span class="fu"><a href="renderPrint.html">renderPrint</a></span><span class="op">(</span><span class="op">{</span></span></span>
+<span class="r-in"><span>      <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Brush (debounced):\n"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>      <span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">plot_brush</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="va">output</span><span class="op">$</span><span class="va">plot_clickedpoints</span> <span class="op">&lt;-</span> <span class="fu"><a href="renderTable.html">renderTable</a></span><span class="op">(</span><span class="op">{</span></span></span>
+<span class="r-in"><span>      <span class="co"># For base graphics, we need to specify columns, though for ggplot2,</span></span></span>
+<span class="r-in"><span>      <span class="co"># it's usually not necessary.</span></span></span>
+<span class="r-in"><span>      <span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="brushedPoints.html">nearPoints</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="op">)</span>, <span class="va">input</span><span class="op">$</span><span class="va">plot_click</span>, <span class="st">"speed"</span>, <span class="st">"dist"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>      <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span> <span class="op">==</span> <span class="fl">0</span><span class="op">)</span></span></span>
+<span class="r-in"><span>        <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span>      <span class="va">res</span></span></span>
+<span class="r-in"><span>    <span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="va">output</span><span class="op">$</span><span class="va">plot_brushedpoints</span> <span class="op">&lt;-</span> <span class="fu"><a href="renderTable.html">renderTable</a></span><span class="op">(</span><span class="op">{</span></span></span>
+<span class="r-in"><span>      <span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="brushedPoints.html">brushedPoints</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="op">)</span>, <span class="va">input</span><span class="op">$</span><span class="va">plot_brush</span>, <span class="st">"speed"</span>, <span class="st">"dist"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>      <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span> <span class="op">==</span> <span class="fl">0</span><span class="op">)</span></span></span>
+<span class="r-in"><span>        <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span>      <span class="va">res</span></span></span>
+<span class="r-in"><span>    <span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">}</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Demo of clicking, hovering, brushing with imageOutput</span></span></span>
+<span class="r-in"><span><span class="co"># Note that coordinates are in pixels</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="shinyApp.html">shinyApp</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  ui <span class="op">=</span> <span class="fu"><a href="bootstrapPage.html">basicPage</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="fluidPage.html">fluidRow</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>      <span class="fu"><a href="column.html">column</a></span><span class="op">(</span>width <span class="op">=</span> <span class="fl">4</span>,</span></span>
+<span class="r-in"><span>        <span class="fu">imageOutput</span><span class="op">(</span><span class="st">"image"</span>, height<span class="op">=</span><span class="fl">300</span>,</span></span>
+<span class="r-in"><span>          click <span class="op">=</span> <span class="st">"image_click"</span>,</span></span>
+<span class="r-in"><span>          hover <span class="op">=</span> <span class="fu"><a href="clickOpts.html">hoverOpts</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>            id <span class="op">=</span> <span class="st">"image_hover"</span>,</span></span>
+<span class="r-in"><span>            delay <span class="op">=</span> <span class="fl">500</span>,</span></span>
+<span class="r-in"><span>            delayType <span class="op">=</span> <span class="st">"throttle"</span></span></span>
+<span class="r-in"><span>          <span class="op">)</span>,</span></span>
+<span class="r-in"><span>          brush <span class="op">=</span> <span class="fu"><a href="brushOpts.html">brushOpts</a></span><span class="op">(</span>id <span class="op">=</span> <span class="st">"image_brush"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>        <span class="op">)</span></span></span>
+<span class="r-in"><span>      <span class="op">)</span>,</span></span>
+<span class="r-in"><span>      <span class="fu"><a href="column.html">column</a></span><span class="op">(</span>width <span class="op">=</span> <span class="fl">4</span>,</span></span>
+<span class="r-in"><span>        <span class="fu"><a href="textOutput.html">verbatimTextOutput</a></span><span class="op">(</span><span class="st">"image_clickinfo"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>        <span class="fu"><a href="textOutput.html">verbatimTextOutput</a></span><span class="op">(</span><span class="st">"image_hoverinfo"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>      <span class="op">)</span>,</span></span>
+<span class="r-in"><span>      <span class="fu"><a href="column.html">column</a></span><span class="op">(</span>width <span class="op">=</span> <span class="fl">4</span>,</span></span>
+<span class="r-in"><span>        <span class="fu"><a href="wellPanel.html">wellPanel</a></span><span class="op">(</span><span class="fu"><a href="actionButton.html">actionButton</a></span><span class="op">(</span><span class="st">"newimage"</span>, <span class="st">"New image"</span><span class="op">)</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>        <span class="fu"><a href="textOutput.html">verbatimTextOutput</a></span><span class="op">(</span><span class="st">"image_brushinfo"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>      <span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span>,</span></span>
+<span class="r-in"><span>  server <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>    <span class="va">output</span><span class="op">$</span><span class="va">image</span> <span class="op">&lt;-</span> <span class="fu"><a href="renderImage.html">renderImage</a></span><span class="op">(</span><span class="op">{</span></span></span>
+<span class="r-in"><span>      <span class="va">input</span><span class="op">$</span><span class="va">newimage</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>      <span class="co"># Get width and height of image output</span></span></span>
+<span class="r-in"><span>      <span class="va">width</span>  <span class="op">&lt;-</span> <span class="va">session</span><span class="op">$</span><span class="va">clientData</span><span class="op">$</span><span class="va">output_image_width</span></span></span>
+<span class="r-in"><span>      <span class="va">height</span> <span class="op">&lt;-</span> <span class="va">session</span><span class="op">$</span><span class="va">clientData</span><span class="op">$</span><span class="va">output_image_height</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>      <span class="co"># Write to a temporary PNG file</span></span></span>
+<span class="r-in"><span>      <span class="va">outfile</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span>fileext <span class="op">=</span> <span class="st">".png"</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>      <span class="fu"><a href="https://rdrr.io/r/grDevices/png.html" class="external-link">png</a></span><span class="op">(</span><span class="va">outfile</span>, width<span class="op">=</span><span class="va">width</span>, height<span class="op">=</span><span class="va">height</span><span class="op">)</span></span></span>
+<span class="r-in"><span>      <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">200</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">200</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span>      <span class="fu"><a href="https://rdrr.io/r/grDevices/dev.html" class="external-link">dev.off</a></span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>      <span class="co"># Return a list containing information about the image</span></span></span>
+<span class="r-in"><span>      <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>        src <span class="op">=</span> <span class="va">outfile</span>,</span></span>
+<span class="r-in"><span>        contentType <span class="op">=</span> <span class="st">"image/png"</span>,</span></span>
+<span class="r-in"><span>        width <span class="op">=</span> <span class="va">width</span>,</span></span>
+<span class="r-in"><span>        height <span class="op">=</span> <span class="va">height</span>,</span></span>
+<span class="r-in"><span>        alt <span class="op">=</span> <span class="st">"This is alternate text"</span></span></span>
+<span class="r-in"><span>      <span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="va">output</span><span class="op">$</span><span class="va">image_clickinfo</span> <span class="op">&lt;-</span> <span class="fu"><a href="renderPrint.html">renderPrint</a></span><span class="op">(</span><span class="op">{</span></span></span>
+<span class="r-in"><span>      <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Click:\n"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>      <span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">image_click</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="va">output</span><span class="op">$</span><span class="va">image_hoverinfo</span> <span class="op">&lt;-</span> <span class="fu"><a href="renderPrint.html">renderPrint</a></span><span class="op">(</span><span class="op">{</span></span></span>
+<span class="r-in"><span>      <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Hover (throttled):\n"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>      <span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">image_hover</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="va">output</span><span class="op">$</span><span class="va">image_brushinfo</span> <span class="op">&lt;-</span> <span class="fu"><a href="renderPrint.html">renderPrint</a></span><span class="op">(</span><span class="op">{</span></span></span>
+<span class="r-in"><span>      <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Brush (debounced):\n"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>      <span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">image_brush</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">}</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
 </code></pre></div>
     </div>
   </div>

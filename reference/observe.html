@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">shiny</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.1.9003</span>
       </span>
     </div>
 
@@ -53,18 +53,18 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">observe</span><span class="op">(</span>
-  <span class="va">x</span>,
-  env <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sys.parent.html" class="external-link">parent.frame</a></span><span class="op">(</span><span class="op">)</span>,
-  quoted <span class="op">=</span> <span class="cn">FALSE</span>,
-  <span class="va">...</span>,
-  label <span class="op">=</span> <span class="cn">NULL</span>,
-  suspended <span class="op">=</span> <span class="cn">FALSE</span>,
-  priority <span class="op">=</span> <span class="fl">0</span>,
-  domain <span class="op">=</span> <span class="fu"><a href="domains.html">getDefaultReactiveDomain</a></span><span class="op">(</span><span class="op">)</span>,
-  autoDestroy <span class="op">=</span> <span class="cn">TRUE</span>,
-  ..stacktraceon <span class="op">=</span> <span class="cn">TRUE</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">observe</span><span class="op">(</span></span>
+<span>  <span class="va">x</span>,</span>
+<span>  env <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sys.parent.html" class="external-link">parent.frame</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  quoted <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  <span class="va">...</span>,</span>
+<span>  label <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  suspended <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  priority <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  domain <span class="op">=</span> <span class="fu"><a href="domains.html">getDefaultReactiveDomain</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  autoDestroy <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  ..stacktraceon <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -182,22 +182,22 @@ session ends).</p>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="va">values</span> <span class="op">&lt;-</span> <span class="fu"><a href="reactiveValues.html">reactiveValues</a></span><span class="op">(</span>A<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="va">obsB</span> <span class="op">&lt;-</span> <span class="fu">observe</span><span class="op">(</span><span class="op">{</span></span>
-<span class="r-in">  <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">values</span><span class="op">$</span><span class="va">A</span> <span class="op">+</span> <span class="fl">1</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># To store expressions for later conversion to observe, use rlang::quo()</span></span>
-<span class="r-in"><span class="va">myquo</span> <span class="op">&lt;-</span> <span class="fu">rlang</span><span class="fu">::</span><span class="fu"><a href="https://rlang.r-lib.org/reference/defusing-advanced.html" class="external-link">quo</a></span><span class="op">(</span><span class="op">{</span> <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">values</span><span class="op">$</span><span class="va">A</span> <span class="op">+</span> <span class="fl">3</span><span class="op">)</span> <span class="op">}</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">obsC</span> <span class="op">&lt;-</span> <span class="fu">rlang</span><span class="fu">::</span><span class="fu"><a href="https://rlang.r-lib.org/reference/inject.html" class="external-link">inject</a></span><span class="op">(</span><span class="fu">observe</span><span class="op">(</span><span class="op">!</span><span class="op">!</span><span class="va">myquo</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># (Legacy) Can use quoted expressions</span></span>
-<span class="r-in"><span class="va">obsD</span> <span class="op">&lt;-</span> <span class="fu">observe</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/substitute.html" class="external-link">quote</a></span><span class="op">(</span><span class="op">{</span> <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">values</span><span class="op">$</span><span class="va">A</span> <span class="op">+</span> <span class="fl">2</span><span class="op">)</span> <span class="op">}</span><span class="op">)</span>, quoted <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># In a normal Shiny app, the web client will trigger flush events. If you</span></span>
-<span class="r-in"><span class="co"># are at the console, you can force a flush with flushReact()</span></span>
-<span class="r-in"><span class="fu">shiny</span><span class="fu">:::</span><span class="fu">flushReact</span><span class="op">(</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">values</span> <span class="op">&lt;-</span> <span class="fu"><a href="reactiveValues.html">reactiveValues</a></span><span class="op">(</span>A<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">obsB</span> <span class="op">&lt;-</span> <span class="fu">observe</span><span class="op">(</span><span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">values</span><span class="op">$</span><span class="va">A</span> <span class="op">+</span> <span class="fl">1</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># To store expressions for later conversion to observe, use rlang::quo()</span></span></span>
+<span class="r-in"><span><span class="va">myquo</span> <span class="op">&lt;-</span> <span class="fu">rlang</span><span class="fu">::</span><span class="fu"><a href="https://rlang.r-lib.org/reference/defusing-advanced.html" class="external-link">quo</a></span><span class="op">(</span><span class="op">{</span> <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">values</span><span class="op">$</span><span class="va">A</span> <span class="op">+</span> <span class="fl">3</span><span class="op">)</span> <span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">obsC</span> <span class="op">&lt;-</span> <span class="fu">rlang</span><span class="fu">::</span><span class="fu"><a href="https://rlang.r-lib.org/reference/inject.html" class="external-link">inject</a></span><span class="op">(</span><span class="fu">observe</span><span class="op">(</span><span class="op">!</span><span class="op">!</span><span class="va">myquo</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># (Legacy) Can use quoted expressions</span></span></span>
+<span class="r-in"><span><span class="va">obsD</span> <span class="op">&lt;-</span> <span class="fu">observe</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/substitute.html" class="external-link">quote</a></span><span class="op">(</span><span class="op">{</span> <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">values</span><span class="op">$</span><span class="va">A</span> <span class="op">+</span> <span class="fl">2</span><span class="op">)</span> <span class="op">}</span><span class="op">)</span>, quoted <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># In a normal Shiny app, the web client will trigger flush events. If you</span></span></span>
+<span class="r-in"><span><span class="co"># are at the console, you can force a flush with flushReact()</span></span></span>
+<span class="r-in"><span><span class="fu">shiny</span><span class="fu">:::</span><span class="fu">flushReact</span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] -30</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 4</span>

@@ -21,7 +21,7 @@ time we write math expressions to the output."><meta property="og:image" content
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">shiny</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.1.9003</span>
       </span>
     </div>
 
@@ -61,7 +61,7 @@ time we write math expressions to the output.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">withMathJax</span><span class="op">(</span><span class="va">...</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">withMathJax</span><span class="op">(</span><span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -73,11 +73,11 @@ time we write math expressions to the output.</p>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="fu">withMathJax</span><span class="op">(</span><span class="fu"><a href="helpText.html">helpText</a></span><span class="op">(</span><span class="st">"Some math here $$\\alpha+\\beta$$"</span><span class="op">)</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu">withMathJax</span><span class="op">(</span><span class="fu"><a href="helpText.html">helpText</a></span><span class="op">(</span><span class="st">"Some math here $$\\alpha+\\beta$$"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> &lt;span class="help-block"&gt;Some math here $$\alpha+\beta$$&lt;/span&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> &lt;script&gt;if (window.MathJax) MathJax.Hub.Queue(["Typeset", MathJax.Hub]);&lt;/script&gt;</span>
-<span class="r-in"><span class="co"># now we can just write "static" content without withMathJax()</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/pkg/htmltools/man/builder.html" class="external-link">div</a></span><span class="op">(</span><span class="st">"more math here $$\\sqrt{2}$$"</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="co"># now we can just write "static" content without withMathJax()</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/pkg/htmltools/man/builder.html" class="external-link">div</a></span><span class="op">(</span><span class="st">"more math here $$\\sqrt{2}$$"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> &lt;div&gt;more math here $$\sqrt{2}$$&lt;/div&gt;</span>
 </code></pre></div>
     </div>

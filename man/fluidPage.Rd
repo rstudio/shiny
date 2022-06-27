@@ -29,7 +29,7 @@ This will be used as the lang in the \code{<html>} tag, as in \code{<html lang="
 The default (NULL) results in an empty string.}
 }
 \value{
-A UI defintion that can be passed to the \link{shinyUI} function.
+A UI definition that can be passed to the \link{shinyUI} function.
 }
 \description{
 Functions for creating fluid page layouts. A fluid page layout consists of

@@ -10,7 +10,7 @@ import babelPlugin from "esbuild-plugin-babel";
 
 build({
   bundle: true,
-  sourcemap: "inline",
+  sourcemap: true,
   minify: true,
   plugins: [babelPlugin()],
   banner: banner,

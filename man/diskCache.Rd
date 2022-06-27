@@ -40,7 +40,7 @@ deleted from disk. If \code{FALSE} (the default), it will do nothing when
 finalized.}
 
 \item{missing}{A value to return when \code{get(key)} is called but the key is not
-present in the cache. The default is a \code{\link[cachem:reexports]{key_missing()}} object. It is
+present in the cache. The default is a \code{\link[cachem:key_missing]{key_missing()}} object. It is
 actually an expression that is evaluated each time there is a cache miss.
 See section Missing keys for more information.}
 

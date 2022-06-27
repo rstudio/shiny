@@ -11,7 +11,8 @@ fileInput(
   accept = NULL,
   width = NULL,
   buttonLabel = "Browse...",
-  placeholder = "No file selected"
+  placeholder = "No file selected",
+  capture = NULL
 )
 }
 \arguments{
@@ -42,6 +43,19 @@ see \code{\link[=validateCssUnit]{validateCssUnit()}}.}
 object.}
 
 \item{placeholder}{The text to show before a file has been uploaded.}
+
+\item{capture}{What source to use for capturing image, audio or video data.
+This attribute facilitates user access to a device's media capture
+mechanism, such as a camera, or microphone, from within a file upload
+control.
+
+A value of \code{user} indicates that the user-facing camera and/or microphone
+should be used. A value of \code{environment} specifies that the outward-facing
+camera and/or microphone should be used.
+
+By default on most phones, this will accept still photos or video. For
+still photos only, also use \code{accept="image/*"}. For video only, use
+\code{accept="video/*"}.}
 }
 \description{
 Create a file upload control that can be used to upload one or more files.

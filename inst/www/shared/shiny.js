@@ -3634,9 +3634,6 @@
   function isBS3() {
     return !window.bootstrap;
   }
-  function toLowerCase(str) {
-    return str.toLowerCase();
-  }
 
   // srcts/src/bindings/registry.ts
   function _classCallCheck(instance, Constructor) {
@@ -8950,18 +8947,24 @@
     var processed = processHtml(html);
     addToHead(processed.head);
     register(processed.singletons);
-    if (where === "replace") {
-      (0, import_jquery26.default)(el).html(processed.html);
-    } else {
-      var elElements;
-      if (el instanceof HTMLElement) {
-        elElements = [el];
-      } else {
-        elElements = el.toArray();
-      }
-      import_jquery26.default.each(elElements, function(i, el2) {
-        el2.insertAdjacentHTML(toLowerCase(where), processed.html);
-      });
+    switch (where.toLowerCase()) {
+      case "replace":
+        (0, import_jquery26.default)(el).html(processed.html);
+        break;
+      case "beforebegin":
+        (0, import_jquery26.default)(el).before(processed.html);
+        break;
+      case "afterbegin":
+        (0, import_jquery26.default)(el).prepend(processed.html);
+        break;
+      case "beforeend":
+        (0, import_jquery26.default)(el).append(processed.html);
+        break;
+      case "afterend":
+        (0, import_jquery26.default)(el).after(processed.html);
+        break;
+      default:
+        throw new Error("Unknown where position: " + where);
     }
     return processed;
   }

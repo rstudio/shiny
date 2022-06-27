@@ -94,6 +94,10 @@ getShinyOption <- function(name, default = NULL) {
 #'   numbers to JSON format to send to the client web browser.}
 #' \item{shiny.launch.browser (defaults to `interactive()`)}{A boolean which controls the default behavior
 #'   when an app is run. See [runApp()] for more information.}
+#' \item{shiny.mathjax.url (defaults to `"https://mathjax.rstudio.com/latest/MathJax.js"`)}{
+#'   The URL that should be used to load MathJax, via [withMathJax()].}
+#' \item{shiny.mathjax.config (defaults to `"config=TeX-AMS-MML_HTMLorMML"`)}{The querystring
+#'   used to load MathJax, via [withMathJax()].}
 #' \item{shiny.maxRequestSize (defaults to 5MB)}{This is a number which specifies the maximum
 #'   web request size, which serves as a size limit for file uploads.}
 #' \item{shiny.minified (defaults to `TRUE`)}{By default
@@ -136,9 +140,10 @@ getShinyOption <- function(name, default = NULL) {
 #'   messages).}
 #' \item{shiny.autoload.r (defaults to `TRUE`)}{If `TRUE`, then the R/
 #'   of a shiny app will automatically be sourced.}
-#' \item{shiny.usecairo (defaults to `TRUE`)}{This is used to disable graphical rendering by the
-#'   Cairo package, if it is installed. See [plotPNG()] for more
-#'   information.}
+#' \item{shiny.useragg (defaults to `TRUE`)}{Set to `FALSE` to prevent PNG rendering via the
+#'   ragg package. See [plotPNG()] for more information.}
+#' \item{shiny.usecairo (defaults to `TRUE`)}{Set to `FALSE` to prevent PNG rendering via the
+#'   Cairo package. See [plotPNG()] for more information.}
 #' \item{shiny.devmode (defaults to `NULL`)}{Option to enable Shiny Developer Mode. When set,
 #'   different default `getOption(key)` values will be returned. See [devmode()] for more details.}
 ### Not documenting as 'shiny.devmode.verbose' is for niche use only

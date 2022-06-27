@@ -5,6 +5,8 @@ shiny development
 
 ### Breaking changes
 
+* Closed #3626: `renderPlot()` (and `plotPNG()`) now uses `ragg::agg_png()` by default when the [`{ragg}` package](https://github.com/r-lib/ragg) is installed. To restore the previous behavior, set `options(shiny.useragg = FALSE)`. (#3654)
+
 ### Minor new features and improvements
 
 * Shiny's internal HTML dependencies are now mounted dynamically instead of statically. (#3537)
@@ -17,15 +19,29 @@ shiny development
 
 * The auto-reload feature (`options(shiny.autoreload=TRUE)`) was not being activated by `devmode(TRUE)`, despite a console message asserting that it was. (#3620)
 
+* Add `shiny.mathjax.url` and `shiny.mathjax.config` options for configuring the MathJax URL used by `withMathJax`. Thanks, @Neutron3529! (#3639)
+
 ### Bug fixes
 
 * Closed tidyverse/dplyr#5552: Compatibility of dplyr 1.0 (and rlang chained errors in general) with `req()`, `validate()`, and friends.
+
+* Closed #1545: `insertUI()` now executes `<script>` tags. (#3630)
 
 * Closed #2955: Input and output bindings previously attempted to use `el['data-input-id']`, but that never worked. They now use `el.getAttribute('data-input-id')` instead. (#3538)
 
 * Closed tidyverse/dplyr#6154: Values from an `actionButton()` had S3 classes in the incorrect order.
 
 * Fixed a bug where updating an input value without a corresponding Input binding element did not trigger a JavaScript `shiny:inputchanged` event. Now, if no Input binding element is found, the `shiny:inputchanged` event is triggered on `window.document`. (#3584)
+
+* Restored the previous behavior of automatically guessing the `Content-Type` header for `downloadHandler` functions when no explicit `contentType` argument is supplied. (#3393)
+
+* Closed #3619: In R 4.2, `splitLayout()` raised warnings about incorrect length in an `if` statement. (Thanks to @dmenne, #3625)
+
+* Closed #2297: If an error occurred in parsing a value in a bookmark query string, an error would be thrown and nothing would be restored. Now a message is displayed and that value is ignored. (Thanks to @daattali, #3385)
+
+* `fileInput()` can set the `capture` attribute to facilitates user access to a device's media capture mechanism, such as a camera, or microphone, from within a file upload control ([W3C HTML Media Capture](https://www.w3.org/TR/html-media-capture/)). (Thanks to khaled-alshamaa, #3481)
+
+* Closed rstudio/shinytest2#222: When restoring a context (i.e., bookmarking) from a URL, Shiny now better handles a trailing `=` after `_inputs_` and `_values_`. (#3648)
 
 * Closed #3581: Errors in throttled/debounced reactive expressions cause session to exit. (#3624)
 

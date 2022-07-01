@@ -56,6 +56,7 @@ type BrushOpts = {
 };
 
 type Brush = {
+  updateCoordmap: (newCoordmap: Coordmap) => void;
   reset: () => void;
 
   importOldBrush: () => void;
@@ -124,8 +125,54 @@ function createBrush(
   const state: ImageState = {};
 
   // Aliases for conciseness
-  const cssToImg = coordmap.scaleCssToImg;
-  const imgToCss = coordmap.scaleImgToCss;
+  let cssToImg = coordmap.scaleCssToImg;
+  let imgToCss = coordmap.scaleImgToCss;
+
+  function updateCoordmap(newCoordmap: Coordmap) {
+    coordmap = newCoordmap;
+    cssToImg = coordmap.scaleCssToImg;
+    imgToCss = coordmap.scaleImgToCss;
+
+    const oldBoundsData = boundsData();
+    const oldPanel = state.panel;
+
+    // TODO are all of these checks necessary?
+    if (!oldBoundsData || !oldPanel) {
+      reset();
+      return;
+    }
+
+    // Check to see if we have valid boundsData
+    for (const val in oldBoundsData) {
+      if (isnan(oldBoundsData[val])) {
+        reset();
+        return;
+      }
+    }
+
+    let foundPanel = false;
+
+    // Could store panel index and just use panel with same index
+    // Would be faster, but could be buggy if server updates us with
+    // an entirely different set of panels
+    for (let i = 0; i < coordmap.panels.length; i++) {
+      const curPanel = coordmap.panels[i];
+
+      if (
+        equal(oldPanel.mapping, curPanel.mapping) &&
+        equal(oldPanel.panel_vars, curPanel.panel_vars)
+      ) {
+        // We've found a matching panel
+        state.panel = coordmap.panels[i];
+        boundsData(oldBoundsData);
+        foundPanel = true;
+        break;
+      }
+    }
+    if (!foundPanel) {
+      reset();
+    }
+  }
 
   reset();
 
@@ -185,6 +232,7 @@ function createBrush(
   // settings, provided that the x, y, and panel variables have the same names,
   // and there's a panel with matching panel variable values.
   function importOldBrush() {
+    console.log("THIS SHOULDN'T RUN (importOldBrush)");
     const oldDiv = $el.find("#" + el.id + "_brush");
 
     if (oldDiv.length === 0) return;
@@ -232,6 +280,7 @@ function createBrush(
   // is loaded, doesn't actually change the size!). importOldBrush() is the code
   // that's actually responsible for properly resizing the brush. -dvg
   function onResize() {
+    console.log("THIS SHOULDN'T RUN (onResize)");
     const boundsDataVal = boundsData();
     // Check to see if we have valid boundsData
 
@@ -360,11 +409,12 @@ function createBrush(
     }
     updateDiv();
 
-    // We also need to attach the data bounds and panel as data attributes, so
-    // that if the image is re-sent, we can grab the data bounds to create a new
-    // brush. This should be fast because it doesn't actually modify the DOM.
-    $div.data("bounds-data", state.boundsData);
-    $div.data("panel", state.panel);
+    // // We also need to attach the data bounds and panel as data attributes, so
+    // // that if the image is re-sent, we can grab the data bounds to create a new
+    // // brush. This should be fast because it doesn't actually modify the DOM.
+    // $div.data("bounds-data", state.boundsData);
+    // $div.data("panel", state.panel);
+    // Not anymore! -dvg
     return undefined;
   }
 
@@ -377,6 +427,11 @@ function createBrush(
       return $.extend({}, state.boundsData);
     }
 
+    // Converting to CSS coordinates (and then eventually back to data
+    // coordinates) is a bit roundabout, but the checks for clipping and brush
+    // direction are done in the CSS coordinate space. This introduces slight
+    // floating-point rounding errors, which are smoothed over by rounding to
+    // 13 sig figs in createHandlers.ts before sending off to the server.
     const boxCss = imgToCss(
       state.panel.scaleDataToImg(boxData, opts.brushClip)
     );
@@ -614,6 +669,7 @@ function createBrush(
   }
 
   return {
+    updateCoordmap: updateCoordmap,
     reset: reset,
 
     importOldBrush: importOldBrush,

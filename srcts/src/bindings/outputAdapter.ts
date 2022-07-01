@@ -2,7 +2,7 @@ import type { ErrorsMessageValue } from "../shiny/shinyapp";
 import { makeResizeFilter } from "../utils";
 import type { OutputBinding } from "./output";
 
-interface OutpuBindingWithResize extends OutputBinding {
+interface OutputBindingWithResize extends OutputBinding {
   resize?: (
     el: HTMLElement,
     width: number | string,
@@ -14,7 +14,7 @@ class OutputBindingAdapter {
   el: HTMLElement;
   binding: OutputBinding;
 
-  constructor(el: HTMLElement, binding: OutpuBindingWithResize) {
+  constructor(el: HTMLElement, binding: OutputBindingWithResize) {
     this.el = el;
     this.binding = binding;
 
@@ -22,6 +22,7 @@ class OutputBindingAdapter {
     // onResize with a version that does a makeResizeFilter on the element.
     if (binding.resize) {
       this.onResize = makeResizeFilter(el, function (width, height) {
+        console.log("Running resize filter function...");
         binding.resize(el, width, height);
       });
     }

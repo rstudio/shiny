@@ -302,6 +302,7 @@ function initShiny(windowShiny: Shiny): void {
         visible: !isHidden(this),
         binding: binding,
       });
+      console.log("Attempting to trigger resize...");
       binding.onResize();
     });
   }

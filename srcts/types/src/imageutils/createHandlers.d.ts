@@ -9,6 +9,7 @@ declare type CreateHandler = {
     mousedown?: (e: JQuery.MouseDownEvent) => void;
     onResetImg: () => void;
     onResize?: () => void;
+    updateCoordmap?: (newMap: Coordmap) => void;
 };
 declare type BrushInfo = {
     xmin: number;

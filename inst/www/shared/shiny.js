@@ -9973,6 +9973,36 @@
     var state = {};
     var cssToImg = coordmap.scaleCssToImg;
     var imgToCss = coordmap.scaleImgToCss;
+    function updateCoordmap(newCoordmap) {
+      coordmap = newCoordmap;
+      cssToImg = coordmap.scaleCssToImg;
+      imgToCss = coordmap.scaleImgToCss;
+      var oldBoundsData = boundsData();
+      var oldPanel = state.panel;
+      if (!oldBoundsData || !oldPanel) {
+        reset();
+        return;
+      }
+      for (var val in oldBoundsData) {
+        if (isnan(oldBoundsData[val])) {
+          reset();
+          return;
+        }
+      }
+      var foundPanel = false;
+      for (var i = 0; i < coordmap.panels.length; i++) {
+        var curPanel = coordmap.panels[i];
+        if (equal(oldPanel.mapping, curPanel.mapping) && equal(oldPanel.panel_vars, curPanel.panel_vars)) {
+          state.panel = coordmap.panels[i];
+          boundsData(oldBoundsData);
+          foundPanel = true;
+          break;
+        }
+      }
+      if (!foundPanel) {
+        reset();
+      }
+    }
     reset();
     function reset() {
       state.brushing = false;
@@ -10017,6 +10047,7 @@
       }
     }
     function importOldBrush() {
+      console.log("THIS SHOULDN'T RUN (importOldBrush)");
       var oldDiv = $el.find("#" + el.id + "_brush");
       if (oldDiv.length === 0)
         return;
@@ -10039,6 +10070,7 @@
       boundsData(oldBoundsData);
     }
     function onResize() {
+      console.log("THIS SHOULDN'T RUN (onResize)");
       var boundsDataVal = boundsData();
       for (var val in boundsDataVal) {
         if (isnan(boundsDataVal[val]))
@@ -10129,8 +10161,6 @@
         addDiv();
       }
       updateDiv();
-      $div.data("bounds-data", state.boundsData);
-      $div.data("panel", state.panel);
       return void 0;
     }
     function boundsData(boxData) {
@@ -10291,6 +10321,7 @@
       state.resizing = false;
     }
     return {
+      updateCoordmap: updateCoordmap,
       reset: reset,
       importOldBrush: importOldBrush,
       isInsideBrush: isInsideBrush,
@@ -10385,16 +10416,23 @@
       },
       onResetImg: function onResetImg() {
         clickInfoSender(null);
+      },
+      updateCoordmap: function updateCoordmap(newMap) {
+        clickInfoSender = newMap.mouseCoordinateSender(inputId, clip);
       }
     };
   }
   function createHoverHandler(inputId, delay, delayType, clip, nullOutside, coordmap) {
-    var sendHoverInfo = coordmap.mouseCoordinateSender(inputId, clip, nullOutside);
     var hoverInfoSender;
-    if (delayType === "throttle")
-      hoverInfoSender = new Throttler(null, sendHoverInfo, delay);
-    else
-      hoverInfoSender = new Debouncer(null, sendHoverInfo, delay);
+    function updateHoverInfoSender(newCoordmap) {
+      var sendHoverInfo = newCoordmap.mouseCoordinateSender(inputId, clip, nullOutside);
+      console.log(sendHoverInfo);
+      if (delayType === "throttle")
+        hoverInfoSender = new Throttler(null, sendHoverInfo, delay);
+      else
+        hoverInfoSender = new Debouncer(null, sendHoverInfo, delay);
+    }
+    updateHoverInfoSender(coordmap);
     var mouseout;
     if (nullOutside)
       mouseout = function mouseout2() {
@@ -10410,12 +10448,18 @@
       mouseout: mouseout,
       onResetImg: function onResetImg() {
         hoverInfoSender.immediateCall(null);
-      }
+      },
+      updateCoordmap: updateHoverInfoSender
     };
   }
-  function createBrushHandler(inputId, $el, opts, coordmap, outputId) {
+  function createBrushHandler(inputId, $el, opts, initCoordmap2, outputId) {
     var expandPixels = 20;
+    var coordmap = initCoordmap2;
     var brush = createBrush($el, opts, coordmap, expandPixels);
+    function updateCoordmap(newCoordmap) {
+      coordmap = newCoordmap;
+      brush.updateCoordmap(coordmap);
+    }
     $el.on("shiny-internal:brushed.image_output", function(e, coords) {
       if (coords.brushId === inputId && coords.outputId !== outputId) {
         $el.data("mostRecentBrush", false);
@@ -10584,16 +10628,11 @@
         }
       }
     }
-    if (!opts.brushResetOnNew) {
-      if ($el.data("mostRecentBrush")) {
-        brush.importOldBrush();
-        brushInfoSender.immediateCall();
-      }
-    }
     return {
       mousedown: mousedown,
       mousemove: mousemove,
-      onResetImg: onResetImg
+      onResetImg: onResetImg,
+      updateCoordmap: updateCoordmap
     };
   }
 
@@ -10722,6 +10761,7 @@
     }, {
       key: "renderValue",
       value: function renderValue(el, data) {
+        console.log("Reloading image");
         var outputId = this.getId(el);
         var $el = (0, import_jquery33.default)(el);
         var img;
@@ -10795,8 +10835,6 @@
             }
           };
         }
-        $el.off(".image_output");
-        $img.off(".image_output");
         $img.off("load.shiny_image_interaction");
         $img.one("load.shiny_image_interaction", function() {
           var optsCoordmap = opts.coordmap = initCoordmap($el, opts.coordmap);
@@ -10807,33 +10845,53 @@
           }
           if (opts.clickId) {
             disableDrag($el, $img);
-            var clickHandler = createClickHandler(opts.clickId, opts.clickClip, optsCoordmap);
-            $el.on("mousedown2.image_output", clickHandler.mousedown);
-            $el.on("resize.image_output", clickHandler.onResize);
-            $img.on("reset.image_output", clickHandler.onResetImg);
+            if ($el.data("updateClickHandler")) {
+              $el.data("updateClickHandler")(optsCoordmap);
+            } else {
+              var clickHandler = createClickHandler(opts.clickId, opts.clickClip, optsCoordmap);
+              $el.on("mousedown2.image_output", clickHandler.mousedown);
+              $img.on("reset.image_output", clickHandler.onResetImg);
+              $el.data("updateClickHandler", clickHandler.updateCoordmap);
+            }
           }
           if (opts.dblclickId) {
             disableDrag($el, $img);
-            var dblclickHandler = createClickHandler(opts.dblclickId, opts.clickClip, optsCoordmap);
-            $el.on("dblclick2.image_output", dblclickHandler.mousedown);
-            $el.on("resize.image_output", dblclickHandler.onResize);
-            $img.on("reset.image_output", dblclickHandler.onResetImg);
+            if ($el.data("updateDblClickHandler")) {
+              $el.data("updateDblClickHandler")(optsCoordmap);
+            } else {
+              var dblclickHandler = createClickHandler(opts.dblclickId, opts.clickClip, optsCoordmap);
+              $el.on("dblclick2.image_output", dblclickHandler.mousedown);
+              $img.on("reset.image_output", dblclickHandler.onResetImg);
+              $el.data("updateDblClickHandler", dblclickHandler.updateCoordmap);
+            }
           }
           if (opts.hoverId) {
             disableDrag($el, $img);
-            var hoverHandler = createHoverHandler(opts.hoverId, opts.hoverDelay, opts.hoverDelayType, opts.hoverClip, opts.hoverNullOutside, optsCoordmap);
-            $el.on("mousemove.image_output", hoverHandler.mousemove);
-            $el.on("mouseout.image_output", hoverHandler.mouseout);
-            $el.on("resize.image_output", hoverHandler.onResize);
-            $img.on("reset.image_output", hoverHandler.onResetImg);
+            if ($el.data("updateHoverHandler")) {
+              $el.data("updateHoverHandler")(optsCoordmap);
+            } else {
+              console.log("Creating new hover handler...");
+              var hoverHandler = createHoverHandler(opts.hoverId, opts.hoverDelay, opts.hoverDelayType, opts.hoverClip, opts.hoverNullOutside, optsCoordmap);
+              console.log("Binding mousemove...");
+              $el.on("mousemove.image_output", hoverHandler.mousemove);
+              $el.on("mouseout.image_output", hoverHandler.mouseout);
+              $el.on("resize.image_output", hoverHandler.onResize);
+              $img.on("reset.image_output", hoverHandler.onResetImg);
+              $el.data("updateHoverHandler", hoverHandler.updateCoordmap);
+            }
           }
           if (opts.brushId) {
             disableDrag($el, $img);
-            var brushHandler = createBrushHandler(opts.brushId, $el, opts, optsCoordmap, outputId);
-            $el.on("mousedown.image_output", brushHandler.mousedown);
-            $el.on("mousemove.image_output", brushHandler.mousemove);
-            $el.on("resize.image_output", brushHandler.onResize);
-            $img.on("reset.image_output", brushHandler.onResetImg);
+            if ($el.data("updateBrushHandler")) {
+              $el.data("updateBrushHandler")(optsCoordmap);
+            } else {
+              var brushHandler = createBrushHandler(opts.brushId, $el, opts, optsCoordmap, outputId);
+              $el.on("mousedown.image_output", brushHandler.mousedown);
+              $el.on("mousemove.image_output", brushHandler.mousemove);
+              $el.on("resize.image_output", brushHandler.onResize);
+              $img.on("reset.image_output", brushHandler.onResetImg);
+              $el.data("updateBrushHandler", brushHandler.updateCoordmap);
+            }
           }
           if (opts.clickId || opts.dblclickId || opts.hoverId || opts.brushId) {
             $el.addClass("crosshair");
@@ -10860,6 +10918,7 @@
       key: "resize",
       value: function resize(el, width, height) {
         (0, import_jquery33.default)(el).find("img").trigger("resize");
+        console.log("Resizing!");
         return;
         width;
         height;
@@ -11645,6 +11704,7 @@
       this.binding = binding;
       if (binding.resize) {
         this.onResize = makeResizeFilter(el, function(width, height) {
+          console.log("Running resize filter function...");
           binding.resize(el, width, height);
         });
       }
@@ -13023,6 +13083,7 @@
           visible: !isHidden(this),
           binding: binding
         });
+        console.log("Attempting to trigger resize...");
         binding.onResize();
       });
     }

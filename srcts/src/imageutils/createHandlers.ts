@@ -23,6 +23,7 @@ type CreateHandler = {
   mousedown?: (e: JQuery.MouseDownEvent) => void;
   onResetImg: () => void;
   onResize?: () => void; // Currently unused
+  updateCoordmap?: (newMap: Coordmap) => void;
 };
 
 type BrushInfo = {
@@ -56,7 +57,7 @@ function createClickHandler(
   clip: Clip,
   coordmap: Coordmap
 ): CreateHandler {
-  const clickInfoSender = coordmap.mouseCoordinateSender(inputId, clip);
+  let clickInfoSender = coordmap.mouseCoordinateSender(inputId, clip);
 
   return {
     mousedown: function (e) {
@@ -66,6 +67,9 @@ function createClickHandler(
     },
     onResetImg: function () {
       clickInfoSender(null);
+    },
+    updateCoordmap: function (newMap) {
+      clickInfoSender = newMap.mouseCoordinateSender(inputId, clip);
     },
   };
 }
@@ -78,17 +82,35 @@ function createHoverHandler(
   nullOutside: NullOutside,
   coordmap: Coordmap
 ): CreateHandler {
-  const sendHoverInfo = coordmap.mouseCoordinateSender(
-    inputId,
-    clip,
-    nullOutside
-  );
+  // const sendHoverInfo = coordmap.mouseCoordinateSender(
+  //   inputId,
+  //   clip,
+  //   nullOutside
+  // );
 
-  let hoverInfoSender: InputRatePolicy<typeof sendHoverInfo>;
+  let hoverInfoSender: InputRatePolicy<
+    (e: JQuery.MouseDownEvent | JQuery.MouseMoveEvent) => void
+  >;
 
-  if (delayType === "throttle")
-    hoverInfoSender = new Throttler(null, sendHoverInfo, delay);
-  else hoverInfoSender = new Debouncer(null, sendHoverInfo, delay);
+  function updateHoverInfoSender(newCoordmap: Coordmap) {
+    const sendHoverInfo = newCoordmap.mouseCoordinateSender(
+      inputId,
+      clip,
+      nullOutside
+    );
+
+    console.log(sendHoverInfo);
+
+    if (delayType === "throttle")
+      hoverInfoSender = new Throttler(null, sendHoverInfo, delay);
+    else hoverInfoSender = new Debouncer(null, sendHoverInfo, delay);
+  }
+
+  updateHoverInfoSender(coordmap);
+
+  // if (delayType === "throttle")
+  //   hoverInfoSender = new Throttler(null, sendHoverInfo, delay);
+  // else hoverInfoSender = new Debouncer(null, sendHoverInfo, delay);
 
   // What to do when mouse exits the image
   let mouseout: () => void;
@@ -110,6 +132,7 @@ function createHoverHandler(
     onResetImg: function () {
       hoverInfoSender.immediateCall(null);
     },
+    updateCoordmap: updateHoverInfoSender,
   };
 }
 
@@ -119,15 +142,22 @@ function createBrushHandler(
   inputId: InputId,
   $el: JQuery<HTMLElement>,
   opts: BrushOpts,
-  coordmap: Coordmap,
+  initCoordmap: Coordmap,
   outputId: BrushInfo["outputId"]
 ): CreateHandler {
   // Parameter: expand the area in which a brush can be started, by this
   // many pixels in all directions. (This should probably be a brush option)
   const expandPixels = 20;
 
+  let coordmap = initCoordmap;
+
   // Represents the state of the brush
   const brush = createBrush($el, opts, coordmap, expandPixels);
+
+  function updateCoordmap(newCoordmap: Coordmap) {
+    coordmap = newCoordmap;
+    brush.updateCoordmap(coordmap);
+  }
 
   // Brush IDs can span multiple image/plot outputs. When an output is brushed,
   // if a brush with the same ID is active on a different image/plot, it must
@@ -145,6 +175,8 @@ function createBrushHandler(
     if (coords.brushId === inputId && coords.outputId !== outputId) {
       $el.data("mostRecentBrush", false);
       brush.reset();
+      // TODO: if brush is reset in the middle of dragging, the handlers aren't
+      // cleaned up properly and a bunch of errors fire.
     }
   });
 
@@ -438,21 +470,21 @@ function createBrushHandler(
     }
   }
 
-  if (!opts.brushResetOnNew) {
-    if ($el.data("mostRecentBrush")) {
-      // Importing an old brush must happen after the image data has loaded
-      // and the <img> DOM element has the updated size. If importOldBrush()
-      // is called before this happens, then the css-img coordinate mappings
-      // will give the wrong result, and the brush will have the wrong
-      // position.
-      //
-      // jcheng 09/26/2018: This used to happen in img.onLoad, but recently
-      // we moved to all brush initialization moving to img.onLoad so this
-      // logic can be executed inline.
-      brush.importOldBrush();
-      brushInfoSender.immediateCall();
-    }
-  }
+  // if (!opts.brushResetOnNew) {
+  //   if ($el.data("mostRecentBrush")) {
+  //     // Importing an old brush must happen after the image data has loaded
+  //     // and the <img> DOM element has the updated size. If importOldBrush()
+  //     // is called before this happens, then the css-img coordinate mappings
+  //     // will give the wrong result, and the brush will have the wrong
+  //     // position.
+  //     //
+  //     // jcheng 09/26/2018: This used to happen in img.onLoad, but recently
+  //     // we moved to all brush initialization moving to img.onLoad so this
+  //     // logic can be executed inline.
+  //     brush.importOldBrush();
+  //     brushInfoSender.immediateCall();
+  //   }
+  // }
 
   // This doesn't accomplish anything, since the entire image is
   // redrawn (and thus the brush reloaded) after every resize.
@@ -465,6 +497,7 @@ function createBrushHandler(
     mousedown: mousedown,
     mousemove: mousemove,
     onResetImg: onResetImg,
+    updateCoordmap: updateCoordmap,
     // onResize: onResize,
   };
 }

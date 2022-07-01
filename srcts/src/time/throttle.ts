@@ -19,17 +19,15 @@ class Throttler<X extends AnyVoidFunction> implements InputRatePolicy<X> {
     this.args = null;
   }
 
+  // If not timed out, immediately call the function and set the timer;
+  // if timed out, just queue up the args for the call when the timer runs out.
+  // Later calls during the same timeout will overwrite earlier ones
   normalCall(...args: Parameters<X>): void {
-    this.args = args;
+    this.args = args; // This will be an empty list (not null)
+    // if called without arguments, and `[null]` if called with `null`
+
     if (this.timerId === null) {
-      this.$invoke();
-      this.timerId = setTimeout(() => {
-        // IE8 doesn't reliably clear timeout, so this additional
-        // check is needed
-        if (this.timerId === null) return;
-        this.$clearTimer();
-        if (args.length > 0) this.normalCall(...args);
-      }, this.delayMs);
+      this.$invoke(); // This also sets the timeout now
     }
   }
   immediateCall(...args: Parameters<X>): void {
@@ -46,13 +44,28 @@ class Throttler<X extends AnyVoidFunction> implements InputRatePolicy<X> {
       this.timerId = null;
     }
   }
+  // Invoke the throttled function with the currently-stored args
+  // and set the timeout
   $invoke(): void {
-    if (this.args && this.args.length > 0) {
-      this.func.apply(this.target, this.args);
-    } else {
-      this.func.apply(this.target);
-    }
-    this.args = null;
+    // Empty list on a function that doesn't expect arguments will work fine
+    this.func.apply(this.target, this.args);
+
+    this.args = null; // clear the stored args
+
+    // set this.timerId to a newly-created timer, which will invoke a call
+    // with the most recently called args (if any) when it expires
+    this.timerId = setTimeout(() => {
+      // IE8 doesn't reliably clear timeout, so this additional
+      // check is needed
+      if (this.timerId === null) return;
+
+      this.$clearTimer();
+      // Do we have a call queued up? (check existence rather than length)
+      if (this.args) {
+        // If so, invoke the call with queued args and reset timer
+        this.$invoke();
+      }
+    }, this.delayMs);
   }
 }
 

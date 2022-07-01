@@ -5,6 +5,8 @@ shiny development
 
 ### Breaking changes
 
+* Closed #3626: `renderPlot()` (and `plotPNG()`) now uses `ragg::agg_png()` by default when the [`{ragg}` package](https://github.com/r-lib/ragg) is installed. To restore the previous behavior, set `options(shiny.useragg = FALSE)`. (#3654)
+
 ### Minor new features and improvements
 
 * Shiny's internal HTML dependencies are now mounted dynamically instead of statically. (#3537)
@@ -20,6 +22,8 @@ shiny development
 * Add `shiny.mathjax.url` and `shiny.mathjax.config` options for configuring the MathJax URL used by `withMathJax`. Thanks, @Neutron3529! (#3639)
 
 ### Bug fixes
+
+* Closed #3657: `throttle.ts` and the `Throttler` typescript objects it provides now function as intended.
 
 * Closed tidyverse/dplyr#5552: Compatibility of dplyr 1.0 (and rlang chained errors in general) with `req()`, `validate()`, and friends.
 
@@ -40,6 +44,10 @@ shiny development
 * `fileInput()` can set the `capture` attribute to facilitates user access to a device's media capture mechanism, such as a camera, or microphone, from within a file upload control ([W3C HTML Media Capture](https://www.w3.org/TR/html-media-capture/)). (Thanks to khaled-alshamaa, #3481)
 
 * Closed rstudio/shinytest2#222: When restoring a context (i.e., bookmarking) from a URL, Shiny now better handles a trailing `=` after `_inputs_` and `_values_`. (#3648)
+
+* Closed #3581: Errors in throttled/debounced reactive expressions no longer cause the session to exit. (#3624)
+
+* Closed #3250:`{rlang}`/`{tidyeval}` conditions (i.e., warnings and errors) are no longer filtered from stack traces. (#3602)
 
 
 shiny 1.7.1

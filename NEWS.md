@@ -23,6 +23,8 @@ shiny development
 
 ### Bug fixes
 
+* Closed #3657: `throttle.ts` and the `Throttler` typescript objects it provides now function as intended.
+
 * Closed tidyverse/dplyr#5552: Compatibility of dplyr 1.0 (and rlang chained errors in general) with `req()`, `validate()`, and friends.
 
 * Closed #1545: `insertUI()` now executes `<script>` tags. (#3630)

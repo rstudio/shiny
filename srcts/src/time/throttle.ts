@@ -61,7 +61,7 @@ class Throttler<X extends AnyVoidFunction> implements InputRatePolicy<X> {
 
       this.$clearTimer();
       // Do we have a call queued up? (check existence rather than length)
-      if (this.args) {
+      if (this.args !== null) {
         // If so, invoke the call with queued args and reset timer
         this.$invoke();
       }

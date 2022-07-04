@@ -8613,7 +8613,7 @@
     }, {
       key: "isPending",
       value: function isPending() {
-        return this.timerId !== null;
+        return this.args !== null;
       }
     }, {
       key: "$clearTimer",
@@ -8633,7 +8633,7 @@
           if (_this.timerId === null)
             return;
           _this.$clearTimer();
-          if (_this.args) {
+          if (_this.args !== null) {
             _this.$invoke();
           }
         }, this.delayMs);

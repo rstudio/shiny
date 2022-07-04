@@ -26,24 +26,32 @@ class Throttler<X extends AnyVoidFunction> implements InputRatePolicy<X> {
     this.args = args; // This will be an empty list (not null)
     // if called without arguments, and `[null]` if called with `null`
 
+    // Only invoke immediately if there isn't a timer running
     if (this.timerId === null) {
       this.$invoke(); // This also sets the timeout now
     }
   }
+
+  // Reset the timer if active and call immediately
   immediateCall(...args: Parameters<X>): void {
     this.$clearTimer();
     this.args = args;
     this.$invoke();
   }
+
+  // Is there a call waiting to send?
   isPending(): boolean {
-    return this.timerId !== null;
+    return this.args !== null;
   }
+
+  // Cancel the current timeout if currently timed-out
   $clearTimer(): void {
     if (this.timerId !== null) {
       clearTimeout(this.timerId);
       this.timerId = null;
     }
   }
+
   // Invoke the throttled function with the currently-stored args
   // and set the timeout
   $invoke(): void {
@@ -51,6 +59,7 @@ class Throttler<X extends AnyVoidFunction> implements InputRatePolicy<X> {
     this.func.apply(this.target, this.args);
 
     this.args = null; // clear the stored args
+    // (this is what we use to track if a call is pending)
 
     // set this.timerId to a newly-created timer, which will invoke a call
     // with the most recently called args (if any) when it expires

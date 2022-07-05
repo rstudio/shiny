@@ -119,9 +119,10 @@ values are \code{"send"} (only print messages sent to the client),
 messages).}
 \item{shiny.autoload.r (defaults to \code{TRUE})}{If \code{TRUE}, then the R/
 of a shiny app will automatically be sourced.}
-\item{shiny.usecairo (defaults to \code{TRUE})}{This is used to disable graphical rendering by the
-Cairo package, if it is installed. See \code{\link[=plotPNG]{plotPNG()}} for more
-information.}
+\item{shiny.useragg (defaults to \code{TRUE})}{Set to \code{FALSE} to prevent PNG rendering via the
+ragg package. See \code{\link[=plotPNG]{plotPNG()}} for more information.}
+\item{shiny.usecairo (defaults to \code{TRUE})}{Set to \code{FALSE} to prevent PNG rendering via the
+Cairo package. See \code{\link[=plotPNG]{plotPNG()}} for more information.}
 \item{shiny.devmode (defaults to \code{NULL})}{Option to enable Shiny Developer Mode. When set,
 different default \code{getOption(key)} values will be returned. See \code{\link[=devmode]{devmode()}} for more details.}
 }

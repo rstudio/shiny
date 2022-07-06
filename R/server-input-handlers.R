@@ -84,9 +84,11 @@ applyInputHandler <- function(name, val, shinysession) {
     # Get the function for processing this type of input
     inputHandler <- inputHandlers$get(splitName[[2]])
 
-    return(inputHandler(val, shinysession, inputName))
+    val = inputHandler(val, shinysession, inputName)
 
-  } else if (is.list(val) && is.null(names(val))) {
+  }
+
+  if (is.list(val) && is.null(names(val))) {
     return(unlist(val, recursive = TRUE))
   } else {
     return(val)
@@ -143,6 +145,10 @@ registerInputHandler("shiny.matrix", function(data, ...) {
 
 registerInputHandler("shiny.number", function(val, ...){
   ifelse(is.null(val), NA, val)
+})
+
+registerInputHandler("shiny.text", function(val, ...){
+  ifelse(val == ".shiny_NA_." , NA_character_, val)
 })
 
 registerInputHandler("shiny.password", function(val, shinysession, name) {

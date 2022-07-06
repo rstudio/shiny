@@ -37,6 +37,9 @@
 #'   will result in a taller box. Not compatible with `selectize=TRUE`.
 #'   Normally, when `multiple=FALSE`, a select input will be a drop-down list,
 #'   but when `size` is set, it will be a box instead.
+#' @param keepNA If `keepNA = FALSE`, an `NA` value in `choices` is converted
+#'   to the string "NA" in the returned selection. If `keepNA = TRUE`, an `NA`
+#'   value in `choices` is still an `NA` in the returned selection.
 #' @return A select list control that can be added to a UI definition.
 #'
 #' @family input elements
@@ -45,7 +48,7 @@
 #' @examples
 #' ## Only run examples in interactive R sessions
 #' if (interactive()) {
-#'
+#'`
 #' # basic example
 #' shinyApp(
 #'   ui = fluidPage(
@@ -87,7 +90,7 @@
 #' @export
 selectInput <- function(inputId, label, choices, selected = NULL,
   multiple = FALSE, selectize = TRUE, width = NULL,
-  size = NULL) {
+  size = NULL, keepNA = FALSE) {
 
   selected <- restoreInput(id = inputId, default = selected)
 
@@ -108,7 +111,7 @@ selectInput <- function(inputId, label, choices, selected = NULL,
     id = inputId,
     class = if (!selectize) "form-control",
     size = size,
-    selectOptions(choices, selected, inputId, selectize)
+    selectOptions(choices, selected, inputId, selectize, keepNA)
   )
   if (multiple)
     selectTag$attribs$multiple <- "multiple"
@@ -134,7 +137,7 @@ firstChoice <- function(choices) {
 
 # Create tags for each of the options; use <optgroup> if necessary.
 # This returns a HTML string instead of tags for performance reasons.
-selectOptions <- function(choices, selected = NULL, inputId, perfWarning = FALSE) {
+selectOptions <- function(choices, selected = NULL, inputId, perfWarning = FALSE, keepNA = FALSE) {
   if (length(choices) >= 1000) {
     warning("The select input \"", inputId, "\" contains a large number of ",
       "options; consider using server-side selectize for massively improved ",
@@ -153,12 +156,24 @@ selectOptions <- function(choices, selected = NULL, inputId, perfWarning = FALSE
 
     } else {
       # If single item, just return option string
-      sprintf(
-        '<option value="%s"%s>%s</option>',
-        htmlEscape(choice, TRUE),
-        if (choice %in% selected) ' selected' else '',
-        htmlEscape(label)
-      )
+      if(is.na(choice) && keepNA)
+      {
+        temp = sprintf(
+          '<option value=%s%s>%s</option>',
+          htmlEscape(".shiny_NA_.", TRUE),
+          if (choice %in% selected) ' selected' else '',
+          htmlEscape(label)
+        )
+      } else
+      {
+        temp = sprintf(
+          '<option value="%s"%s>%s</option>',
+          htmlEscape(choice, TRUE),
+          if (choice %in% selected) ' selected' else '',
+          htmlEscape(label)
+        )
+      }
+      temp
     }
   })
 

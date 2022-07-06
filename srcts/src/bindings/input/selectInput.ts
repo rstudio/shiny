@@ -47,7 +47,7 @@ class SelectInputBinding extends InputBinding {
 
     if (!$el.hasClass("symbol")) {
       // default character type
-      return null;
+      return "shiny.text";
     }
     if ($el.attr("multiple") === "multiple") {
       return "shiny.symbolList";

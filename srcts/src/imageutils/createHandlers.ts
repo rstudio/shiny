@@ -174,8 +174,10 @@ function createBrushHandler(
     // need to clear our brush (if any).
     if (coords.brushId === inputId && coords.outputId !== outputId) {
       $el.data("mostRecentBrush", false);
-      // Remove mousemove and mouseup handlers if present
-      $(document).off("mousemove.image_brush").off("mouseup.image_brush");
+      // Remove mousemove and mouseup handlers if necessary
+      if (brush.isBrushing || brush.isDragging || brush.isResizing) {
+        $(document).off("mousemove.image_brush").off("mouseup.image_brush");
+      }
       brush.reset();
     }
   });
@@ -185,6 +187,12 @@ function createBrushHandler(
     if (data.brushId !== inputId) return; // ignore if message wasn't for us
     // Check outputId only if provided
     if (data.outputId && data.outputId !== outputId) return;
+
+    // Cancel any current manual brushing
+    if (brush.isBrushing || brush.isDragging || brush.isResizing) {
+      $(document).off("mousemove.image_brush").off("mouseup.image_brush");
+    }
+
     brush.setPanelIdx(data.panelIdx);
     // check that we set a valid panel
     if (brush.getPanel()) {
@@ -193,9 +201,8 @@ function createBrushHandler(
       // This is a race condition if multiple plots share the same brushId
       // and outputId isn't specified; documentation should warn about this.
     } else {
-      // Remove mousemove and mouseup handlers if present
-      $(document).off("mousemove.image_brush").off("mouseup.image_brush");
       brush.reset();
+      brushInfoSender.immediateCall();
     }
   });
 
@@ -468,8 +475,10 @@ function createBrushHandler(
   function onResetImg() {
     if (opts.brushResetOnNew) {
       if ($el.data("mostRecentBrush")) {
-        // Remove mousemove and mouseup handlers if present
-        $(document).off("mousemove.image_brush").off("mouseup.image_brush");
+        // Remove mousemove and mouseup handlers if necessary
+        if (brush.isBrushing || brush.isDragging || brush.isResizing) {
+          $(document).off("mousemove.image_brush").off("mouseup.image_brush");
+        }
         brush.reset();
         brushInfoSender.immediateCall();
       }

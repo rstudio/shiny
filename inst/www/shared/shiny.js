@@ -10466,7 +10466,9 @@
     $el.on("shiny-internal:brushed.image_output", function(e, coords) {
       if (coords.brushId === inputId && coords.outputId !== outputId) {
         $el.data("mostRecentBrush", false);
-        (0, import_jquery32.default)(document).off("mousemove.image_brush").off("mouseup.image_brush");
+        if (brush.isBrushing || brush.isDragging || brush.isResizing) {
+          (0, import_jquery32.default)(document).off("mousemove.image_brush").off("mouseup.image_brush");
+        }
         brush.reset();
       }
     });
@@ -10475,13 +10477,16 @@
         return;
       if (data.outputId && data.outputId !== outputId)
         return;
+      if (brush.isBrushing || brush.isDragging || brush.isResizing) {
+        (0, import_jquery32.default)(document).off("mousemove.image_brush").off("mouseup.image_brush");
+      }
       brush.setPanelIdx(data.panelIdx);
       if (brush.getPanel()) {
         brush.boundsData(data.imgCoords);
         brushInfoSender.immediateCall();
       } else {
-        (0, import_jquery32.default)(document).off("mousemove.image_brush").off("mouseup.image_brush");
         brush.reset();
+        brushInfoSender.immediateCall();
       }
     });
     function setCursorStyle(style) {
@@ -10629,7 +10634,9 @@
     function onResetImg() {
       if (opts.brushResetOnNew) {
         if ($el.data("mostRecentBrush")) {
-          (0, import_jquery32.default)(document).off("mousemove.image_brush").off("mouseup.image_brush");
+          if (brush.isBrushing || brush.isDragging || brush.isResizing) {
+            (0, import_jquery32.default)(document).off("mousemove.image_brush").off("mouseup.image_brush");
+          }
           brush.reset();
           brushInfoSender.immediateCall();
         }
@@ -13091,6 +13098,7 @@
           visible: !isHidden(this),
           binding: binding
         });
+        console.log("Attempting to trigger resize...");
         binding.onResize();
       });
     }

@@ -19,16 +19,18 @@ class Throttler<X extends AnyVoidFunction> implements InputRatePolicy<X> {
     this.args = null;
   }
 
-  // If not timed out, immediately call the function and set the timer;
-  // if timed out, just queue up the args for the call when the timer runs out.
-  // Later calls during the same timeout will overwrite earlier ones
+  // If no timer is currently running, immediately call the function and set the
+  // timer; if a timer is running out, just queue up the args for the call when
+  // the timer runs out. Later calls during the same timeout will overwrite
+  // earlier ones.
   normalCall(...args: Parameters<X>): void {
-    this.args = args; // This will be an empty list (not null)
-    // if called without arguments, and `[null]` if called with `null`
+    // This will be an empty array (not null) if called without arguments, and
+    // `[null]` if called with `null`.
+    this.args = args;
 
-    // Only invoke immediately if there isn't a timer running
+    // Only invoke immediately if there isn't a timer running.
     if (this.timerId === null) {
-      this.$invoke(); // This also sets the timeout now
+      this.$invoke();
     }
   }
 
@@ -44,7 +46,6 @@ class Throttler<X extends AnyVoidFunction> implements InputRatePolicy<X> {
     return this.args !== null;
   }
 
-  // Cancel the current timeout if currently timed-out
   $clearTimer(): void {
     if (this.timerId !== null) {
       clearTimeout(this.timerId);
@@ -52,26 +53,30 @@ class Throttler<X extends AnyVoidFunction> implements InputRatePolicy<X> {
     }
   }
 
-  // Invoke the throttled function with the currently-stored args
-  // and set the timeout
+  // Invoke the throttled function with the currently-stored args and start the
+  // timer.
   $invoke(): void {
-    // Empty list on a function that doesn't expect arguments will work fine
+    if (this.args === null) {
+      // Shouldn't get here, because $invoke should only be called right after
+      // setting this.args. But just in case.
+      return;
+    }
+
     this.func.apply(this.target, this.args);
 
-    this.args = null; // clear the stored args
-    // (this is what we use to track if a call is pending)
+    // Clear the stored args. This is used to track if a call is pending.
+    this.args = null;
 
-    // set this.timerId to a newly-created timer, which will invoke a call
-    // with the most recently called args (if any) when it expires
+    // Set this.timerId to a newly-created timer, which will invoke a call with
+    // the most recently called args (if any) when it expires.
     this.timerId = setTimeout(() => {
-      // IE8 doesn't reliably clear timeout, so this additional
-      // check is needed
+      // IE8 doesn't reliably clear timeout, so this additional check is needed
       if (this.timerId === null) return;
 
       this.$clearTimer();
-      // Do we have a call queued up? (check existence rather than length)
-      if (this.args !== null) {
-        // If so, invoke the call with queued args and reset timer
+      // Do we have a call queued up?
+      if (this.isPending()) {
+        // If so, invoke the call with queued args and reset timer.
         this.$invoke();
       }
     }, this.delayMs);

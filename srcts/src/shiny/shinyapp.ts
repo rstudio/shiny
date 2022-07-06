@@ -438,6 +438,7 @@ class ShinyApp {
     if (!this.$socket.readyState) {
       this.$pendingMessages.push(msg);
     } else {
+      console.log("Actually sending for real");
       this.$socket.send(msg);
     }
   }

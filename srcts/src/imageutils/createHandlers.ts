@@ -177,8 +177,6 @@ function createBrushHandler(
       // Remove mousemove and mouseup handlers if present
       $(document).off("mousemove.image_brush").off("mouseup.image_brush");
       brush.reset();
-      // TODO: if brush is reset in the middle of dragging, the handlers aren't
-      // cleaned up properly and a bunch of errors fire.
     }
   });
 
@@ -287,6 +285,7 @@ function createBrushHandler(
     coords.outputId = outputId;
 
     // Send data to server
+    console.log("Setting input value in createHandlers.ts");
     shinySetInputValue(inputId, coords);
 
     $el.data("mostRecentBrush", true);
@@ -417,8 +416,6 @@ function createBrushHandler(
     // If the brush didn't go anywhere, hide the brush, clear value,
     // and return.
     if (brush.down().x === brush.up().x && brush.down().y === brush.up().y) {
-      // Remove mousemove and mouseup handlers if present
-      $(document).off("mousemove.image_brush").off("mouseup.image_brush");
       brush.reset();
       brushInfoSender.immediateCall();
       return;

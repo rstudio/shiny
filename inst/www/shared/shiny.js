@@ -10523,6 +10523,7 @@
       coords.direction = opts.brushDirection;
       coords.brushId = inputId;
       coords.outputId = outputId;
+      console.log("Setting input value in createHandlers.ts");
       shinySetInputValue(inputId, coords);
       $el.data("mostRecentBrush", true);
       imageOutputBinding.find(document.documentElement).trigger("shiny-internal:brushed", coords);
@@ -10602,7 +10603,6 @@
       brush.stopBrushing();
       setCursorStyle("crosshair");
       if (brush.down().x === brush.up().x && brush.down().y === brush.up().y) {
-        (0, import_jquery32.default)(document).off("mousemove.image_brush").off("mouseup.image_brush");
         brush.reset();
         brushInfoSender.immediateCall();
         return;
@@ -12356,6 +12356,7 @@
         if (!this.$socket.readyState) {
           this.$pendingMessages.push(msg);
         } else {
+          console.log("Actually sending for real");
           this.$socket.send(msg);
         }
       }
@@ -13090,7 +13091,6 @@
           visible: !isHidden(this),
           binding: binding
         });
-        console.log("Attempting to trigger resize...");
         binding.onResize();
       });
     }

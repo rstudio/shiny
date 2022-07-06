@@ -37,6 +37,7 @@ declare type BrushOpts = {
     brushResetOnNew?: boolean;
 };
 declare type Brush = {
+    updateCoordmap: (newCoordmap: Coordmap) => void;
     reset: () => void;
     importOldBrush: () => void;
     isInsideBrush: (offsetCss: Offset) => boolean;

@@ -174,6 +174,8 @@ function createBrushHandler(
     // need to clear our brush (if any).
     if (coords.brushId === inputId && coords.outputId !== outputId) {
       $el.data("mostRecentBrush", false);
+      // Remove mousemove and mouseup handlers if present
+      $(document).off("mousemove.image_brush").off("mouseup.image_brush");
       brush.reset();
       // TODO: if brush is reset in the middle of dragging, the handlers aren't
       // cleaned up properly and a bunch of errors fire.
@@ -190,8 +192,11 @@ function createBrushHandler(
     if (brush.getPanel()) {
       brush.boundsData(data.imgCoords);
       brushInfoSender.immediateCall();
-      // I think this is a race condition for multiple panels sharing id
+      // This is a race condition if multiple plots share the same brushId
+      // and outputId isn't specified; documentation should warn about this.
     } else {
+      // Remove mousemove and mouseup handlers if present
+      $(document).off("mousemove.image_brush").off("mouseup.image_brush");
       brush.reset();
     }
   });
@@ -412,6 +417,8 @@ function createBrushHandler(
     // If the brush didn't go anywhere, hide the brush, clear value,
     // and return.
     if (brush.down().x === brush.up().x && brush.down().y === brush.up().y) {
+      // Remove mousemove and mouseup handlers if present
+      $(document).off("mousemove.image_brush").off("mouseup.image_brush");
       brush.reset();
       brushInfoSender.immediateCall();
       return;
@@ -464,6 +471,8 @@ function createBrushHandler(
   function onResetImg() {
     if (opts.brushResetOnNew) {
       if ($el.data("mostRecentBrush")) {
+        // Remove mousemove and mouseup handlers if present
+        $(document).off("mousemove.image_brush").off("mouseup.image_brush");
         brush.reset();
         brushInfoSender.immediateCall();
       }

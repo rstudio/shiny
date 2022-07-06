@@ -1,4 +1,4 @@
-/*! shiny 1.7.1.55501 | (c) 2012-2022 RStudio, PBC. | License: GPL-3 | file LICENSE */
+/*! shiny 1.7.1.55502 | (c) 2012-2022 RStudio, PBC. | License: GPL-3 | file LICENSE */
 (function() {
   var __create = Object.create;
   var __defProp = Object.defineProperty;
@@ -10466,6 +10466,7 @@
     $el.on("shiny-internal:brushed.image_output", function(e, coords) {
       if (coords.brushId === inputId && coords.outputId !== outputId) {
         $el.data("mostRecentBrush", false);
+        (0, import_jquery32.default)(document).off("mousemove.image_brush").off("mouseup.image_brush");
         brush.reset();
       }
     });
@@ -10479,6 +10480,7 @@
         brush.boundsData(data.imgCoords);
         brushInfoSender.immediateCall();
       } else {
+        (0, import_jquery32.default)(document).off("mousemove.image_brush").off("mouseup.image_brush");
         brush.reset();
       }
     });
@@ -10600,6 +10602,7 @@
       brush.stopBrushing();
       setCursorStyle("crosshair");
       if (brush.down().x === brush.up().x && brush.down().y === brush.up().y) {
+        (0, import_jquery32.default)(document).off("mousemove.image_brush").off("mouseup.image_brush");
         brush.reset();
         brushInfoSender.immediateCall();
         return;
@@ -10626,6 +10629,7 @@
     function onResetImg() {
       if (opts.brushResetOnNew) {
         if ($el.data("mostRecentBrush")) {
+          (0, import_jquery32.default)(document).off("mousemove.image_brush").off("mouseup.image_brush");
           brush.reset();
           brushInfoSender.immediateCall();
         }
@@ -13222,7 +13226,7 @@
   var windowShiny2;
   function setShiny(windowShiny_) {
     windowShiny2 = windowShiny_;
-    windowShiny2.version = "1.7.1.55501";
+    windowShiny2.version = "1.7.1.55502";
     var _initInputBindings = initInputBindings(), inputBindings = _initInputBindings.inputBindings, fileInputBinding2 = _initInputBindings.fileInputBinding;
     var _initOutputBindings = initOutputBindings(), outputBindings = _initOutputBindings.outputBindings;
     setFileInputBinding(fileInputBinding2);

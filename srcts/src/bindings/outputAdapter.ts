@@ -22,7 +22,6 @@ class OutputBindingAdapter {
     // onResize with a version that does a makeResizeFilter on the element.
     if (binding.resize) {
       this.onResize = makeResizeFilter(el, function (width, height) {
-        console.log("Running resize filter function...");
         binding.resize(el, width, height);
       });
     }

@@ -37,8 +37,6 @@ class ImageOutputBinding extends OutputBinding {
     // * Bind those event handlers to events.
     // * Insert the new image.
 
-    console.log("Reloading image");
-
     const outputId = this.getId(el);
 
     const $el = $(el);
@@ -243,7 +241,6 @@ class ImageOutputBinding extends OutputBinding {
         if ($el.data("updateHoverHandler")) {
           $el.data("updateHoverHandler")(optsCoordmap);
         } else {
-          console.log("Creating new hover handler...");
           const hoverHandler = createHoverHandler(
             opts.hoverId,
             opts.hoverDelay,
@@ -253,7 +250,6 @@ class ImageOutputBinding extends OutputBinding {
             optsCoordmap
           );
 
-          console.log("Binding mousemove...");
           $el.on("mousemove.image_output", hoverHandler.mousemove);
           $el.on("mouseout.image_output", hoverHandler.mouseout);
 
@@ -298,11 +294,8 @@ class ImageOutputBinding extends OutputBinding {
 
   renderError(el: HTMLElement, err: ErrorsMessageValue): void {
     $(el).data("errorState", true);
-    console.log("Triggering reset...");
     $(el).find("img").trigger("reset");
-    console.log("Triggered reset, rendering error...");
     OutputBinding.prototype.renderError.call(this, el, err);
-    console.log("Rendered error");
   }
 
   clearError(el: HTMLElement): void {
@@ -336,10 +329,7 @@ class ImageOutputBinding extends OutputBinding {
     // Only trigger resize handlers if this is a cached plot--resizes of
     // non-cached plots are always immediately followed by reloads
     if (img.hasClass("shiny-scalable")) {
-      console.log("Resizing!");
       img.trigger("resize");
-    } else {
-      console.log("Ignoring resize");
     }
     return;
     width;

@@ -192,7 +192,7 @@ function createBrush(
 
     // TODO are all of these checks necessary?
     if (!oldBoundsData || !oldPanel) {
-      console.log("updateCoordmap failed: no previous data");
+      // console.log("updateCoordmap failed: no previous data");
       reset();
       return;
     }
@@ -200,7 +200,7 @@ function createBrush(
     // Check to see if we have valid boundsData
     for (const val in oldBoundsData) {
       if (isnan(oldBoundsData[val])) {
-        console.log("updateCoordmap failed: previous data contains NaN");
+        // console.log("updateCoordmap failed: previous data contains NaN");
         reset();
         return;
       }
@@ -226,7 +226,7 @@ function createBrush(
       }
     }
     if (!foundPanel) {
-      console.log("updateCoordmap failed: couldn't find panel");
+      // console.log("updateCoordmap failed: couldn't find panel");
       reset();
     }
   }
@@ -286,7 +286,6 @@ function createBrush(
   // Update: This is actually useful for *cached* plots, which can be resized in
   // the browser *without* being reloaded. -dvg
   function onImgResize() {
-    console.log("THIS SHOULD ACTUALLY RUN (onImgResize)");
     const boundsDataVal = boundsData();
     // Check to see if we have valid boundsData
 

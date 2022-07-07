@@ -1,4 +1,4 @@
-/*! shiny 1.7.1.55502 | (c) 2012-2022 RStudio, PBC. | License: GPL-3 | file LICENSE */
+/*! shiny 1.7.1.55503 | (c) 2012-2022 RStudio, PBC. | License: GPL-3 | file LICENSE */
 (function() {
   var __create = Object.create;
   var __defProp = Object.defineProperty;
@@ -10026,13 +10026,11 @@
       var oldBoundsData = boundsData();
       var oldPanel = state.panel;
       if (!oldBoundsData || !oldPanel) {
-        console.log("updateCoordmap failed: no previous data");
         reset();
         return;
       }
       for (var val in oldBoundsData) {
         if (isnan(oldBoundsData[val])) {
-          console.log("updateCoordmap failed: previous data contains NaN");
           reset();
           return;
         }
@@ -10048,7 +10046,6 @@
         }
       }
       if (!foundPanel) {
-        console.log("updateCoordmap failed: couldn't find panel");
         reset();
       }
     }
@@ -10076,7 +10073,6 @@
       boundsData(oldBoundsData);
     }
     function onImgResize() {
-      console.log("THIS SHOULD ACTUALLY RUN (onImgResize)");
       var boundsDataVal = boundsData();
       for (var val in boundsDataVal) {
         if (isnan(boundsDataVal[val]))
@@ -10432,7 +10428,6 @@
     var hoverInfoSender;
     function updateHoverInfoSender(newCoordmap) {
       var sendHoverInfo = newCoordmap.mouseCoordinateSender(inputId, clip, nullOutside);
-      console.log(sendHoverInfo);
       if (delayType === "throttle")
         hoverInfoSender = new Throttler(null, sendHoverInfo, delay);
       else
@@ -10531,7 +10526,6 @@
       coords.direction = opts.brushDirection;
       coords.brushId = inputId;
       coords.outputId = outputId;
-      console.log("Setting input value in createHandlers.ts");
       shinySetInputValue(inputId, coords);
       $el.data("mostRecentBrush", true);
       imageOutputBinding.find(document.documentElement).trigger("shiny-internal:brushed", coords);
@@ -10635,12 +10629,10 @@
       brushInfoSender.immediateCall();
     }
     function onResetImg() {
-      console.log("Handler considering reset");
       if (opts.brushResetOnNew || $el.data("errorState")) {
         if (brush.isBrushing || brush.isDragging || brush.isResizing) {
           (0, import_jquery32.default)(document).off("mousemove.image_brush").off("mouseup.image_brush");
         }
-        console.log("Handler resetting brush");
         brush.reset();
         if ($el.data("mostRecentBrush")) {
           brushInfoSender.immediateCall();
@@ -10648,7 +10640,6 @@
       }
     }
     function onResize() {
-      console.log("Brush handler resizing!");
       brush.onImgResize();
       brushInfoSender.immediateCall();
     }
@@ -10786,7 +10777,6 @@
     }, {
       key: "renderValue",
       value: function renderValue(el, data) {
-        console.log("Reloading image");
         var outputId = this.getId(el);
         var $el = (0, import_jquery33.default)(el);
         var img;
@@ -10895,9 +10885,7 @@
             if ($el.data("updateHoverHandler")) {
               $el.data("updateHoverHandler")(optsCoordmap);
             } else {
-              console.log("Creating new hover handler...");
               var hoverHandler = createHoverHandler(opts.hoverId, opts.hoverDelay, opts.hoverDelayType, opts.hoverClip, opts.hoverNullOutside, optsCoordmap);
-              console.log("Binding mousemove...");
               $el.on("mousemove.image_output", hoverHandler.mousemove);
               $el.on("mouseout.image_output", hoverHandler.mouseout);
               $el.on("reset.image_output", hoverHandler.onResetImg);
@@ -10928,11 +10916,8 @@
       key: "renderError",
       value: function renderError(el, err) {
         (0, import_jquery33.default)(el).data("errorState", true);
-        console.log("Triggering reset...");
         (0, import_jquery33.default)(el).find("img").trigger("reset");
-        console.log("Triggered reset, rendering error...");
         OutputBinding.prototype.renderError.call(this, el, err);
-        console.log("Rendered error");
       }
     }, {
       key: "clearError",
@@ -10948,10 +10933,7 @@
       value: function resize(el, width, height) {
         var img = (0, import_jquery33.default)(el).find("img");
         if (img.hasClass("shiny-scalable")) {
-          console.log("Resizing!");
           img.trigger("resize");
-        } else {
-          console.log("Ignoring resize");
         }
         return;
         width;
@@ -11738,7 +11720,6 @@
       this.binding = binding;
       if (binding.resize) {
         this.onResize = makeResizeFilter(el, function(width, height) {
-          console.log("Running resize filter function...");
           binding.resize(el, width, height);
         });
       }
@@ -12383,7 +12364,6 @@
         if (!this.$socket.readyState) {
           this.$pendingMessages.push(msg);
         } else {
-          console.log("Actually sending for real");
           this.$socket.send(msg);
         }
       }
@@ -13118,7 +13098,6 @@
           visible: !isHidden(this),
           binding: binding
         });
-        console.log("Attempting to trigger resize...");
         binding.onResize();
       });
     }
@@ -13254,7 +13233,7 @@
   var windowShiny2;
   function setShiny(windowShiny_) {
     windowShiny2 = windowShiny_;
-    windowShiny2.version = "1.7.1.55502";
+    windowShiny2.version = "1.7.1.55503";
     var _initInputBindings = initInputBindings(), inputBindings = _initInputBindings.inputBindings, fileInputBinding2 = _initInputBindings.fileInputBinding;
     var _initOutputBindings = initOutputBindings(), outputBindings = _initOutputBindings.outputBindings;
     setFileInputBinding(fileInputBinding2);

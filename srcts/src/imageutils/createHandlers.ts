@@ -99,10 +99,8 @@ function createHoverHandler(
       nullOutside
     );
 
-    console.log(sendHoverInfo);
-
     // TODO: should we support Invoker as an option? (i.e. spam the server
-    // with every mousemove) Or is it better not to
+    // with every mousemove) Or is it better not to?
     if (delayType === "throttle")
       hoverInfoSender = new Throttler(null, sendHoverInfo, delay);
     else hoverInfoSender = new Debouncer(null, sendHoverInfo, delay);
@@ -294,7 +292,6 @@ function createBrushHandler(
     coords.outputId = outputId;
 
     // Send data to server
-    console.log("Setting input value in createHandlers.ts");
     shinySetInputValue(inputId, coords);
 
     $el.data("mostRecentBrush", true);
@@ -480,7 +477,6 @@ function createBrushHandler(
 
   // This should be called when the img (not the el) is reset
   function onResetImg() {
-    console.log("Handler considering reset");
     // Reset the brush only if the reset_on_new option is TRUE,
     // or if we are in an error state
     if (opts.brushResetOnNew || $el.data("errorState")) {
@@ -488,7 +484,6 @@ function createBrushHandler(
       if (brush.isBrushing || brush.isDragging || brush.isResizing) {
         $(document).off("mousemove.image_brush").off("mouseup.image_brush");
       }
-      console.log("Handler resetting brush");
       brush.reset();
       if ($el.data("mostRecentBrush")) {
         brushInfoSender.immediateCall();
@@ -516,7 +511,6 @@ function createBrushHandler(
   // redrawn (and thus the brush reloaded) after every resize.
   // Nope, that's not true for cached plots!
   function onResize() {
-    console.log("Brush handler resizing!");
     brush.onImgResize();
     brushInfoSender.immediateCall();
   }

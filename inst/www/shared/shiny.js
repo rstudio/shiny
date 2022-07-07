@@ -9976,36 +9976,6 @@
     var state = {};
     var cssToImg = coordmap.scaleCssToImg;
     var imgToCss = coordmap.scaleImgToCss;
-    function updateCoordmap(newCoordmap) {
-      coordmap = newCoordmap;
-      cssToImg = coordmap.scaleCssToImg;
-      imgToCss = coordmap.scaleImgToCss;
-      var oldBoundsData = boundsData();
-      var oldPanel = state.panel;
-      if (!oldBoundsData || !oldPanel) {
-        reset();
-        return;
-      }
-      for (var val in oldBoundsData) {
-        if (isnan(oldBoundsData[val])) {
-          reset();
-          return;
-        }
-      }
-      var foundPanel = false;
-      for (var i = 0; i < coordmap.panels.length; i++) {
-        var curPanel = coordmap.panels[i];
-        if (equal(oldPanel.mapping, curPanel.mapping) && equal(oldPanel.panel_vars, curPanel.panel_vars)) {
-          state.panel = coordmap.panels[i];
-          boundsData(oldBoundsData);
-          foundPanel = true;
-          break;
-        }
-      }
-      if (!foundPanel) {
-        reset();
-      }
-    }
     reset();
     function reset() {
       state.brushing = false;
@@ -10049,6 +10019,39 @@
         $div = null;
       }
     }
+    function updateCoordmap(newCoordmap) {
+      coordmap = newCoordmap;
+      cssToImg = coordmap.scaleCssToImg;
+      imgToCss = coordmap.scaleImgToCss;
+      var oldBoundsData = boundsData();
+      var oldPanel = state.panel;
+      if (!oldBoundsData || !oldPanel) {
+        console.log("updateCoordmap failed: no previous data");
+        reset();
+        return;
+      }
+      for (var val in oldBoundsData) {
+        if (isnan(oldBoundsData[val])) {
+          console.log("updateCoordmap failed: previous data contains NaN");
+          reset();
+          return;
+        }
+      }
+      var foundPanel = false;
+      for (var i = 0; i < coordmap.panels.length; i++) {
+        var curPanel = coordmap.panels[i];
+        if (equal(oldPanel.mapping, curPanel.mapping) && equal(oldPanel.panel_vars, curPanel.panel_vars)) {
+          state.panel = coordmap.panels[i];
+          boundsData(oldBoundsData);
+          foundPanel = true;
+          break;
+        }
+      }
+      if (!foundPanel) {
+        console.log("updateCoordmap failed: couldn't find panel");
+        reset();
+      }
+    }
     function importOldBrush() {
       console.log("THIS SHOULDN'T RUN (importOldBrush)");
       var oldDiv = $el.find("#" + el.id + "_brush");
@@ -10072,8 +10075,8 @@
       $div = oldDiv;
       boundsData(oldBoundsData);
     }
-    function onResize() {
-      console.log("THIS SHOULDN'T RUN (onResize)");
+    function onImgResize() {
+      console.log("THIS SHOULD ACTUALLY RUN (onImgResize)");
       var boundsDataVal = boundsData();
       for (var val in boundsDataVal) {
         if (isnan(boundsDataVal[val]))
@@ -10330,7 +10333,7 @@
       isInsideBrush: isInsideBrush,
       isInResizeArea: isInResizeArea,
       whichResizeSides: whichResizeSides,
-      onResize: onResize,
+      onImgResize: onImgResize,
       boundsCss: boundsCss,
       boundsData: boundsData,
       getPanel: getPanel2,
@@ -10632,21 +10635,29 @@
       brushInfoSender.immediateCall();
     }
     function onResetImg() {
-      if (opts.brushResetOnNew) {
+      console.log("Handler considering reset");
+      if (opts.brushResetOnNew || $el.data("errorState")) {
+        if (brush.isBrushing || brush.isDragging || brush.isResizing) {
+          (0, import_jquery32.default)(document).off("mousemove.image_brush").off("mouseup.image_brush");
+        }
+        console.log("Handler resetting brush");
+        brush.reset();
         if ($el.data("mostRecentBrush")) {
-          if (brush.isBrushing || brush.isDragging || brush.isResizing) {
-            (0, import_jquery32.default)(document).off("mousemove.image_brush").off("mouseup.image_brush");
-          }
-          brush.reset();
           brushInfoSender.immediateCall();
         }
       }
+    }
+    function onResize() {
+      console.log("Brush handler resizing!");
+      brush.onImgResize();
+      brushInfoSender.immediateCall();
     }
     return {
       mousedown: mousedown,
       mousemove: mousemove,
       onResetImg: onResetImg,
-      updateCoordmap: updateCoordmap
+      updateCoordmap: updateCoordmap,
+      onResize: onResize
     };
   }
 
@@ -10864,7 +10875,7 @@
             } else {
               var clickHandler = createClickHandler(opts.clickId, opts.clickClip, optsCoordmap);
               $el.on("mousedown2.image_output", clickHandler.mousedown);
-              $img.on("reset.image_output", clickHandler.onResetImg);
+              $el.on("reset.image_output", clickHandler.onResetImg);
               $el.data("updateClickHandler", clickHandler.updateCoordmap);
             }
           }
@@ -10875,7 +10886,7 @@
             } else {
               var dblclickHandler = createClickHandler(opts.dblclickId, opts.clickClip, optsCoordmap);
               $el.on("dblclick2.image_output", dblclickHandler.mousedown);
-              $img.on("reset.image_output", dblclickHandler.onResetImg);
+              $el.on("reset.image_output", dblclickHandler.onResetImg);
               $el.data("updateDblClickHandler", dblclickHandler.updateCoordmap);
             }
           }
@@ -10889,8 +10900,7 @@
               console.log("Binding mousemove...");
               $el.on("mousemove.image_output", hoverHandler.mousemove);
               $el.on("mouseout.image_output", hoverHandler.mouseout);
-              $el.on("resize.image_output", hoverHandler.onResize);
-              $img.on("reset.image_output", hoverHandler.onResetImg);
+              $el.on("reset.image_output", hoverHandler.onResetImg);
               $el.data("updateHoverHandler", hoverHandler.updateCoordmap);
             }
           }
@@ -10903,7 +10913,7 @@
               $el.on("mousedown.image_output", brushHandler.mousedown);
               $el.on("mousemove.image_output", brushHandler.mousemove);
               $el.on("resize.image_output", brushHandler.onResize);
-              $img.on("reset.image_output", brushHandler.onResetImg);
+              $el.on("reset.image_output", brushHandler.onResetImg);
               $el.data("updateBrushHandler", brushHandler.updateCoordmap);
             }
           }
@@ -10917,8 +10927,12 @@
     }, {
       key: "renderError",
       value: function renderError(el, err) {
+        (0, import_jquery33.default)(el).data("errorState", true);
+        console.log("Triggering reset...");
         (0, import_jquery33.default)(el).find("img").trigger("reset");
+        console.log("Triggered reset, rendering error...");
         OutputBinding.prototype.renderError.call(this, el, err);
+        console.log("Rendered error");
       }
     }, {
       key: "clearError",
@@ -10926,13 +10940,19 @@
         (0, import_jquery33.default)(el).contents().filter(function() {
           return !(this instanceof HTMLElement && (this.tagName === "IMG" || this.id === el.id + "_brush"));
         }).remove();
+        (0, import_jquery33.default)(el).data("errorState", false);
         OutputBinding.prototype.clearError.call(this, el);
       }
     }, {
       key: "resize",
       value: function resize(el, width, height) {
-        (0, import_jquery33.default)(el).find("img").trigger("resize");
-        console.log("Resizing!");
+        var img = (0, import_jquery33.default)(el).find("img");
+        if (img.hasClass("shiny-scalable")) {
+          console.log("Resizing!");
+          img.trigger("resize");
+        } else {
+          console.log("Ignoring resize");
+        }
         return;
         width;
         height;

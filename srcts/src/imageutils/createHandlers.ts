@@ -22,7 +22,7 @@ type CreateHandler = {
   mouseout?: (e: JQuery.MouseOutEvent) => void;
   mousedown?: (e: JQuery.MouseDownEvent) => void;
   onResetImg: () => void;
-  onResize?: () => void; // Currently unused
+  onResize?: () => void; // Only used for brushes on cached plots
   updateCoordmap?: (newMap: Coordmap) => void;
 };
 
@@ -101,6 +101,8 @@ function createHoverHandler(
 
     console.log(sendHoverInfo);
 
+    // TODO: should we support Invoker as an option? (i.e. spam the server
+    // with every mousemove) Or is it better not to
     if (delayType === "throttle")
       hoverInfoSender = new Throttler(null, sendHoverInfo, delay);
     else hoverInfoSender = new Debouncer(null, sendHoverInfo, delay);
@@ -301,8 +303,10 @@ function createBrushHandler(
       .trigger("shiny-internal:brushed", coords);
   }
 
-  let brushInfoSender;
+  let brushInfoSender: InputRatePolicy<typeof sendBrushInfo>;
 
+  // TODO: should we support Invoker as an option? (i.e. spam the server
+  // with every mousemove) Or is it better not to
   if (opts.brushDelayType === "throttle") {
     brushInfoSender = new Throttler(null, sendBrushInfo, opts.brushDelay);
   } else {
@@ -316,6 +320,9 @@ function createBrushHandler(
     if (brush.isBrushing() || brush.isDragging() || brush.isResizing()) return;
 
     // Listen for left mouse button only
+    // TODO: should we change this to `event.button !== 0`?
+    // e.which is technically deprecated, and every modern browser
+    // (including IE9+, but not IE8) supports e.button (the actual standard)
     if (e.which !== 1) return;
 
     // In general, brush uses css pixels, and coordmap uses img pixels.
@@ -473,13 +480,17 @@ function createBrushHandler(
 
   // This should be called when the img (not the el) is reset
   function onResetImg() {
-    if (opts.brushResetOnNew) {
+    console.log("Handler considering reset");
+    // Reset the brush only if the reset_on_new option is TRUE,
+    // or if we are in an error state
+    if (opts.brushResetOnNew || $el.data("errorState")) {
+      // Remove mousemove and mouseup handlers if necessary
+      if (brush.isBrushing || brush.isDragging || brush.isResizing) {
+        $(document).off("mousemove.image_brush").off("mouseup.image_brush");
+      }
+      console.log("Handler resetting brush");
+      brush.reset();
       if ($el.data("mostRecentBrush")) {
-        // Remove mousemove and mouseup handlers if necessary
-        if (brush.isBrushing || brush.isDragging || brush.isResizing) {
-          $(document).off("mousemove.image_brush").off("mouseup.image_brush");
-        }
-        brush.reset();
         brushInfoSender.immediateCall();
       }
     }
@@ -503,17 +514,19 @@ function createBrushHandler(
 
   // This doesn't accomplish anything, since the entire image is
   // redrawn (and thus the brush reloaded) after every resize.
-  // function onResize() {
-  //   // brush.onResize();
-  //   // brushInfoSender.immediateCall();
-  // }
+  // Nope, that's not true for cached plots!
+  function onResize() {
+    console.log("Brush handler resizing!");
+    brush.onImgResize();
+    brushInfoSender.immediateCall();
+  }
 
   return {
     mousedown: mousedown,
     mousemove: mousemove,
     onResetImg: onResetImg,
     updateCoordmap: updateCoordmap,
-    // onResize: onResize,
+    onResize: onResize,
   };
 }
 

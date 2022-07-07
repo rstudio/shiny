@@ -204,9 +204,11 @@ class ImageOutputBinding extends OutputBinding {
 
           // $el.on("resize.image_output", clickHandler.onResize); // currently unused
 
-          // When img is reset, do housekeeping: clear $el's mouse listener and
-          // call the handler's onResetImg callback.
-          $img.on("reset.image_output", clickHandler.onResetImg);
+          // When img is reset, do housekeeping: update $el's mouse listener
+          // with the new coordmap and call the handler's onResetImg callback.
+          // These should listen on $el rather than $img so they can persist even
+          // after an error.
+          $el.on("reset.image_output", clickHandler.onResetImg);
           $el.data("updateClickHandler", clickHandler.updateCoordmap);
         }
       }
@@ -230,7 +232,7 @@ class ImageOutputBinding extends OutputBinding {
           $el.on("dblclick2.image_output", dblclickHandler.mousedown);
 
           // $el.on("resize.image_output", dblclickHandler.onResize); // currently unused
-          $img.on("reset.image_output", dblclickHandler.onResetImg);
+          $el.on("reset.image_output", dblclickHandler.onResetImg);
           $el.data("updateDblClickHandler", dblclickHandler.updateCoordmap);
         }
       }
@@ -255,14 +257,13 @@ class ImageOutputBinding extends OutputBinding {
           $el.on("mousemove.image_output", hoverHandler.mousemove);
           $el.on("mouseout.image_output", hoverHandler.mouseout);
 
-          $el.on("resize.image_output", hoverHandler.onResize); // currently unused
-          $img.on("reset.image_output", hoverHandler.onResetImg);
+          // $el.on("resize.image_output", hoverHandler.onResize); // currently unused
+          $el.on("reset.image_output", hoverHandler.onResetImg);
           $el.data("updateHoverHandler", hoverHandler.updateCoordmap);
         }
       }
 
       if (opts.brushId) {
-        // TODO: implement coord callback
         disableDrag($el, $img);
 
         if ($el.data("updateBrushHandler")) {
@@ -279,8 +280,9 @@ class ImageOutputBinding extends OutputBinding {
           $el.on("mousedown.image_output", brushHandler.mousedown);
           $el.on("mousemove.image_output", brushHandler.mousemove);
 
-          $el.on("resize.image_output", brushHandler.onResize); // currently unused
-          $img.on("reset.image_output", brushHandler.onResetImg);
+          // TODO: we need this for cached plots!
+          $el.on("resize.image_output", brushHandler.onResize);
+          $el.on("reset.image_output", brushHandler.onResetImg);
           $el.data("updateBrushHandler", brushHandler.updateCoordmap);
         }
       }
@@ -295,8 +297,12 @@ class ImageOutputBinding extends OutputBinding {
   }
 
   renderError(el: HTMLElement, err: ErrorsMessageValue): void {
+    $(el).data("errorState", true);
+    console.log("Triggering reset...");
     $(el).find("img").trigger("reset");
+    console.log("Triggered reset, rendering error...");
     OutputBinding.prototype.renderError.call(this, el, err);
+    console.log("Rendered error");
   }
 
   clearError(el: HTMLElement): void {
@@ -312,22 +318,29 @@ class ImageOutputBinding extends OutputBinding {
       })
       .remove();
 
+    $(el).data("errorState", false);
     // TODO-barret does this work?: `super.clearError(el)`
     OutputBinding.prototype.clearError.call(this, el);
   }
 
-  // TODO: does this do anything other than activate the nonexistant
-  // click/hover/brush resize handlers?
-  // TODO: This only gets called in cases where the image/plot is about to be
-  // reloaded, since a true change in the size of the image requires the data
-  // to be reloaded from the server.
+  // For non-cached plots, this is useless, since it will always be followed by
+  // a reload. However, cached plots may need this code path to update brushes
+  // visually.
   resize(
     el: HTMLElement,
     width: number | string,
     height: number | string
   ): void {
-    $(el).find("img").trigger("resize");
-    console.log("Resizing!");
+    const img = $(el).find("img");
+
+    // Only trigger resize handlers if this is a cached plot--resizes of
+    // non-cached plots are always immediately followed by reloads
+    if (img.hasClass("shiny-scalable")) {
+      console.log("Resizing!");
+      img.trigger("resize");
+    } else {
+      console.log("Ignoring resize");
+    }
     return;
     width;
     height;

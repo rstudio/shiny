@@ -43,7 +43,7 @@ declare type Brush = {
     isInsideBrush: (offsetCss: Offset) => boolean;
     isInResizeArea: (offsetCss: Offset) => boolean;
     whichResizeSides: (offsetCss: Offset) => ImageState["resizeSides"];
-    onResize: () => void;
+    onImgResize: () => void;
     boundsCss: {
         (boxCss: BoundsCss): void;
         (): BoundsCss;

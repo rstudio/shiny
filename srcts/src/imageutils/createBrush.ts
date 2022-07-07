@@ -65,7 +65,7 @@ type Brush = {
   whichResizeSides: (offsetCss: Offset) => ImageState["resizeSides"];
 
   // A callback when the wrapper div or img is resized.
-  onResize: () => void;
+  onImgResize: () => void;
 
   // These functions will get or set the bounds of the brush based on CSS or
   // data coordinates, respectively. The setter versions will visually update
@@ -128,52 +128,6 @@ function createBrush(
   let cssToImg = coordmap.scaleCssToImg;
   let imgToCss = coordmap.scaleImgToCss;
 
-  function updateCoordmap(newCoordmap: Coordmap) {
-    coordmap = newCoordmap;
-    cssToImg = coordmap.scaleCssToImg;
-    imgToCss = coordmap.scaleImgToCss;
-
-    const oldBoundsData = boundsData();
-    const oldPanel = state.panel;
-
-    // TODO are all of these checks necessary?
-    if (!oldBoundsData || !oldPanel) {
-      reset();
-      return;
-    }
-
-    // Check to see if we have valid boundsData
-    for (const val in oldBoundsData) {
-      if (isnan(oldBoundsData[val])) {
-        reset();
-        return;
-      }
-    }
-
-    let foundPanel = false;
-
-    // Could store panel index and just use panel with same index
-    // Would be faster, but could be buggy if server updates us with
-    // an entirely different set of panels
-    for (let i = 0; i < coordmap.panels.length; i++) {
-      const curPanel = coordmap.panels[i];
-
-      if (
-        equal(oldPanel.mapping, curPanel.mapping) &&
-        equal(oldPanel.panel_vars, curPanel.panel_vars)
-      ) {
-        // We've found a matching panel
-        state.panel = coordmap.panels[i];
-        boundsData(oldBoundsData);
-        foundPanel = true;
-        break;
-      }
-    }
-    if (!foundPanel) {
-      reset();
-    }
-  }
-
   reset();
 
   function reset() {
@@ -228,6 +182,55 @@ function createBrush(
     }
   }
 
+  function updateCoordmap(newCoordmap: Coordmap) {
+    coordmap = newCoordmap;
+    cssToImg = coordmap.scaleCssToImg;
+    imgToCss = coordmap.scaleImgToCss;
+
+    const oldBoundsData = boundsData();
+    const oldPanel = state.panel;
+
+    // TODO are all of these checks necessary?
+    if (!oldBoundsData || !oldPanel) {
+      console.log("updateCoordmap failed: no previous data");
+      reset();
+      return;
+    }
+
+    // Check to see if we have valid boundsData
+    for (const val in oldBoundsData) {
+      if (isnan(oldBoundsData[val])) {
+        console.log("updateCoordmap failed: previous data contains NaN");
+        reset();
+        return;
+      }
+    }
+
+    let foundPanel = false;
+
+    // Could store panel index and just use panel with same index
+    // Would be faster, but could be buggy if server updates us with
+    // an entirely different set of panels
+    for (let i = 0; i < coordmap.panels.length; i++) {
+      const curPanel = coordmap.panels[i];
+
+      if (
+        equal(oldPanel.mapping, curPanel.mapping) &&
+        equal(oldPanel.panel_vars, curPanel.panel_vars)
+      ) {
+        // We've found a matching panel
+        state.panel = coordmap.panels[i];
+        boundsData(oldBoundsData);
+        foundPanel = true;
+        break;
+      }
+    }
+    if (!foundPanel) {
+      console.log("updateCoordmap failed: couldn't find panel");
+      reset();
+    }
+  }
+
   // If there's an existing brush div, use that div to set the new brush's
   // settings, provided that the x, y, and panel variables have the same names,
   // and there's a panel with matching panel variable values.
@@ -279,8 +282,11 @@ function createBrush(
   // dutifully "resizes" itself -- which, since it happens before the new image
   // is loaded, doesn't actually change the size!). importOldBrush() is the code
   // that's actually responsible for properly resizing the brush. -dvg
-  function onResize() {
-    console.log("THIS SHOULDN'T RUN (onResize)");
+  //
+  // Update: This is actually useful for *cached* plots, which can be resized in
+  // the browser *without* being reloaded. -dvg
+  function onImgResize() {
+    console.log("THIS SHOULD ACTUALLY RUN (onImgResize)");
     const boundsDataVal = boundsData();
     // Check to see if we have valid boundsData
 
@@ -677,8 +683,8 @@ function createBrush(
     isInResizeArea: isInResizeArea,
     whichResizeSides: whichResizeSides,
 
-    // Unused, since every resize was either spurious or followed by a reset.
-    onResize: onResize,
+    // Only used for cached plots
+    onImgResize: onImgResize,
 
     boundsCss: boundsCss,
     boundsData: boundsData,

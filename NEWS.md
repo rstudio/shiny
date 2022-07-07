@@ -23,6 +23,8 @@ shiny development
 
 ### Bug fixes
 
+* Partial fix for #3664: `dateInput` and `dateRangeInput` will not send spurious values to the server while typing, except for `null` or `NA` when the field is completely empty, until the user presses enter or clicks out of the field.
+
 * Closed #3657: `throttle.ts` and the `Throttler` typescript objects it provides now function as intended.
 
 * Closed tidyverse/dplyr#5552: Compatibility of dplyr 1.0 (and rlang chained errors in general) with `req()`, `validate()`, and friends.

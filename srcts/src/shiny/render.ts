@@ -209,6 +209,9 @@ function renderDependency(dep_: HtmlDep) {
     $head.append(stylesheetLinks);
   }
 
+  const scriptPromises: Array<Promise<any>> = [];
+  const scriptElements: HTMLScriptElement[] = [];
+
   dep.script.forEach((x) => {
     const script = document.createElement("script");
 
@@ -220,7 +223,27 @@ function renderDependency(dep_: HtmlDep) {
       script.setAttribute(attr, val ? val : "");
     });
 
-    $head.append(script);
+    const p = new Promise((resolve) => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      script.onload = (e: Event) => {
+        resolve(null);
+      };
+    });
+
+    scriptPromises.push(p);
+    scriptElements.push(script);
+  });
+
+  // Append the script elements all at once, so that we're sure they'll load in
+  // order. (We didn't append them individually in the `forEach()` above,
+  // because we're not sure that the browser will load them in order if done
+  // that way.)
+  document.head.append(...scriptElements);
+
+  // After the scripts are all loaded, re-bind all.
+  Promise.allSettled(scriptPromises).then(() => {
+    shinyInitializeInputs(document.body);
+    shinyBindAll(document.body);
   });
 
   dep.attachment.forEach((x) => {

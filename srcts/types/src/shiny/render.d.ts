@@ -1,12 +1,12 @@
 import type { BindScope } from "./bind";
 import { renderHtml as singletonsRenderHtml } from "./singletons";
 import type { WherePosition } from "./singletons";
-declare function renderDependencies(dependencies: HtmlDep[] | null): void;
+declare function renderDependencies(dependencies: HtmlDep[] | null): Promise<void>;
 declare function renderContent(el: BindScope, content: string | {
     html: string;
     deps?: HtmlDep[];
-} | null, where?: WherePosition): void;
-declare function renderHtml(html: string, el: BindScope, dependencies: HtmlDep[], where?: WherePosition): ReturnType<typeof singletonsRenderHtml>;
+} | null, where?: WherePosition): Promise<void>;
+declare function renderHtml(html: string, el: BindScope, dependencies: HtmlDep[], where?: WherePosition): Promise<ReturnType<typeof singletonsRenderHtml>>;
 declare type HtmlDepVersion = string;
 declare type MetaItem = {
     name: string;

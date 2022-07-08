@@ -12,20 +12,24 @@ import { sendImageSizeFns } from "./sendImageSize";
 import { renderHtml as singletonsRenderHtml } from "./singletons";
 import type { WherePosition } from "./singletons";
 
-function renderDependencies(dependencies: HtmlDep[] | null): void {
+async function renderDependencies(
+  dependencies: HtmlDep[] | null
+): Promise<void> {
   if (dependencies) {
-    dependencies.forEach(renderDependency);
+    for (const dep of dependencies) {
+      await renderDependency(dep);
+    }
   }
 }
 
 // Render HTML in a DOM element, add dependencies, and bind Shiny
 // inputs/outputs. `content` can be null, a string, or an object with
 // properties 'html' and 'deps'.
-function renderContent(
+async function renderContent(
   el: BindScope,
   content: string | { html: string; deps?: HtmlDep[] } | null,
   where: WherePosition = "replace"
-): void {
+): Promise<void> {
   if (where === "replace") {
     shinyUnbindAll(el);
   }
@@ -42,7 +46,7 @@ function renderContent(
     dependencies = content.deps || [];
   }
 
-  renderHtml(html, el, dependencies, where);
+  await renderHtml(html, el, dependencies, where);
 
   let scope: BindScope = el;
 
@@ -66,13 +70,13 @@ function renderContent(
 }
 
 // Render HTML in a DOM element, inserting singletons into head as needed
-function renderHtml(
+async function renderHtml(
   html: string,
   el: BindScope,
   dependencies: HtmlDep[],
   where: WherePosition = "replace"
-): ReturnType<typeof singletonsRenderHtml> {
-  renderDependencies(dependencies);
+): Promise<ReturnType<typeof singletonsRenderHtml>> {
+  await renderDependencies(dependencies);
   return singletonsRenderHtml(html, el, where);
 }
 
@@ -148,7 +152,7 @@ function needsRestyle(dep: HtmlDepNormalized) {
 }
 
 // Client-side dependency resolution and rendering
-function renderDependency(dep_: HtmlDep) {
+async function renderDependency(dep_: HtmlDep) {
   const dep = normalizeHtmlDependency(dep_);
 
   // Convert stylesheet objs to links early, because if `restyle` is true, we'll
@@ -203,6 +207,9 @@ function renderDependency(dep_: HtmlDep) {
     $head.append(stylesheetLinks);
   }
 
+  const scriptPromises: Array<Promise<any>> = [];
+  const scriptElements: HTMLScriptElement[] = [];
+
   dep.script.forEach((x) => {
     const script = document.createElement("script");
 
@@ -214,8 +221,23 @@ function renderDependency(dep_: HtmlDep) {
       script.setAttribute(attr, val ? val : "");
     });
 
-    $head.append(script);
+    const p = new Promise((resolve) => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      script.onload = (e: Event) => {
+        resolve(null);
+      };
+    });
+
+    scriptPromises.push(p);
+    scriptElements.push(script);
   });
+
+  // Append the script elements all at once, so that we're sure they'll load in
+  // order. (We didn't append them individually in the `forEach()` above,
+  // because we're not sure that the browser will load them in order if done
+  // that way.)
+  document.head.append(...scriptElements);
+  await Promise.allSettled(scriptPromises);
 
   dep.attachment.forEach((x) => {
     const link = $("<link rel='attachment'>")
@@ -231,6 +253,7 @@ function renderDependency(dep_: HtmlDep) {
     $newHead.html(dep.head);
     $head.append($newHead.children());
   }
+
   return true;
 }
 

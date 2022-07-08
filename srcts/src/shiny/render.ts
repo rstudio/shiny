@@ -240,12 +240,6 @@ function renderDependency(dep_: HtmlDep) {
   // that way.)
   document.head.append(...scriptElements);
 
-  // After the scripts are all loaded, re-bind all.
-  Promise.allSettled(scriptPromises).then(() => {
-    shinyInitializeInputs(document.body);
-    shinyBindAll(document.body);
-  });
-
   dep.attachment.forEach((x) => {
     const link = $("<link rel='attachment'>")
       .attr("id", dep.name + "-" + x.key + "-attachment")
@@ -254,12 +248,22 @@ function renderDependency(dep_: HtmlDep) {
     $head.append(link);
   });
 
-  if (dep.head) {
-    const $newHead = $("<head></head>");
+  Promise.allSettled(scriptPromises).then(() => {
+    // After the scripts are all loaded, insert any head content. This may
+    // contain <script> tags with inline content, which we want to execute after
+    // the script elements above, because the code here may depend on them.
+    if (dep.head) {
+      const $newHead = $("<head></head>");
 
-    $newHead.html(dep.head);
-    $head.append($newHead.children());
-  }
+      $newHead.html(dep.head);
+      $head.append($newHead.children());
+    }
+
+    // Bind all
+    shinyInitializeInputs(document.body);
+    shinyBindAll(document.body);
+  });
+
   return true;
 }
 

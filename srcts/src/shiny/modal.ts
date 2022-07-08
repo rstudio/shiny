@@ -6,7 +6,7 @@ import { renderContent } from "./render";
 // that the content is a Bootstrap modal dialog, and the other is that the
 // content is non-Bootstrap. Bootstrap modals require some special handling,
 // which is coded in here.
-function show({ html = "", deps = [] } = {}): void {
+async function show({ html = "", deps = [] } = {}): Promise<void> {
   // If there was an existing Bootstrap modal, then there will be a modal-
   // backdrop div that was added outside of the modal wrapper, and it must be
   // removed; otherwise there can be multiple of these divs.
@@ -44,7 +44,7 @@ function show({ html = "", deps = [] } = {}): void {
   });
 
   // Set/replace contents of wrapper with html.
-  renderContent($modal, { html: html, deps: deps });
+  await renderContent($modal, { html: html, deps: deps });
 }
 
 function remove(): void {

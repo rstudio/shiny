@@ -640,11 +640,11 @@ class ShinyApp {
 
   // A function for sending messages to the appropriate handlers.
   // - msgObj: the object containing messages, with format {msgObj.foo, msObj.bar
-  private _sendMessagesToHandlers(
+  private async _sendMessagesToHandlers(
     msgObj: { [key: string]: unknown },
     handlers: { [key: string]: Handler },
     handlerOrder: string[]
-  ): void {
+  ): Promise<void> {
     // Dispatch messages to handlers, if handler is present
     for (let i = 0; i < handlerOrder.length; i++) {
       const msgType = handlerOrder[i];
@@ -652,7 +652,7 @@ class ShinyApp {
       if (hasOwnProperty(msgObj, msgType)) {
         // Execute each handler with 'this' referring to the present value of
         // 'this'
-        handlers[msgType].call(this, msgObj[msgType]);
+        await handlers[msgType].call(this, msgObj[msgType]);
       }
     }
   }
@@ -677,10 +677,7 @@ class ShinyApp {
 
     addMessageHandler(
       "errors",
-      function (
-        this: ShinyApp,
-        message: { [key: string]: ErrorsMessageValue }
-      ) {
+      (message: { [key: string]: ErrorsMessageValue }) => {
         for (const key in message) {
           if (hasOwnProperty(message, key))
             this.receiveError(key, message[key]);
@@ -725,13 +722,10 @@ class ShinyApp {
 
     addMessageHandler(
       "progress",
-      function (
-        this: ShinyApp,
-        message: { type: string; message: { id: string } }
-      ) {
+      async (message: { type: string; message: { id: string } }) => {
         if (message.type && message.message) {
           // @ts-expect-error; Unknown values handled with followup if statement
-          const handler = this.progressHandlers[message.type];
+          const handler = await this.progressHandlers[message.type];
 
           if (handler) handler.call(this, message.message);
         }
@@ -740,13 +734,13 @@ class ShinyApp {
 
     addMessageHandler(
       "notification",
-      (
+      async (
         message:
           | { type: "remove"; message: string }
           | { type: "show"; message: Parameters<typeof showNotification>[0] }
           | { type: void }
       ) => {
-        if (message.type === "show") showNotification(message.message);
+        if (message.type === "show") await showNotification(message.message);
         else if (message.type === "remove") removeNotification(message.message);
         else throw "Unkown notification type: " + message.type;
       }
@@ -754,13 +748,13 @@ class ShinyApp {
 
     addMessageHandler(
       "modal",
-      (
+      async (
         message:
           | { type: "remove"; message: string }
           | { type: "show"; message: Parameters<typeof showModal>[0] }
           | { type: void }
       ) => {
-        if (message.type === "show") showModal(message.message);
+        if (message.type === "show") await showModal(message.message);
         // For 'remove', message content isn't used
         else if (message.type === "remove") removeModal();
         else throw "Unkown modal type: " + message.type;
@@ -860,7 +854,7 @@ class ShinyApp {
 
     addMessageHandler(
       "shiny-insert-ui",
-      (message: {
+      async (message: {
         selector: string;
         content: { html: string; deps: HtmlDep[] };
         multiple: false | void;
@@ -879,10 +873,10 @@ class ShinyApp {
           );
           renderHtml(message.content.html, $([]), message.content.deps);
         } else {
-          targets.each(function (i, target) {
-            renderContent(target, message.content, message.where);
+          for (const target of targets) {
+            await renderContent(target, message.content, message.where);
             return message.multiple;
-          });
+          }
         }
       }
     );
@@ -978,7 +972,7 @@ class ShinyApp {
 
     addMessageHandler(
       "shiny-insert-tab",
-      (message: {
+      async (message: {
         inputId: string;
         divTag: { html: string; deps: HtmlDep[] };
         liTag: { html: string; deps: HtmlDep[] };
@@ -986,7 +980,7 @@ class ShinyApp {
         position: "after" | "before" | void;
         select: boolean;
         menuName: string;
-      }) => {
+      }): Promise<void> => {
         const $parentTabset = getTabset(message.inputId);
         let $tabset = $parentTabset;
         const $tabContent = getTabContent($tabset);
@@ -1060,7 +1054,7 @@ class ShinyApp {
           }
         }
 
-        renderContent($liTag[0], {
+        await renderContent($liTag[0], {
           html: $liTag.html(),
           deps: message.liTag.deps,
         });
@@ -1095,13 +1089,13 @@ class ShinyApp {
         // lower-level functions that renderContent uses. Like if we pre-process
         // the value of message.divTag.html for singletons, we could do that, then
         // render dependencies, then do $tabContent.append($divTag).
-        renderContent(
+        await renderContent(
           $tabContent[0],
           { html: "", deps: message.divTag.deps },
           // @ts-expect-error; TODO-barret; There is no usage of beforeend
           "beforeend"
         );
-        $divTag.get().forEach((el) => {
+        for (const el of $divTag.get()) {
           // Must not use jQuery for appending el to the doc, we don't want any
           // scripts to run (since they will run when renderContent takes a crack).
           $tabContent[0].appendChild(el);
@@ -1110,8 +1104,8 @@ class ShinyApp {
           // and not the whole tag. That's fine in this case because we control the
           // R code that generates this HTML, and we know that the element is not
           // a script tag.
-          renderContent(el, el.innerHTML || el.textContent);
-        });
+          await renderContent(el, el.innerHTML || el.textContent);
+        }
 
         if (message.select) {
           $liTag.find("a").tab("show");
@@ -1379,17 +1373,17 @@ class ShinyApp {
     },
 
     // Open a page-level progress bar
-    open: function (message: {
+    open: async function (message: {
       style: "notification" | "old";
       id: string;
-    }): void {
+    }): Promise<void> {
       if (message.style === "notification") {
         // For new-style (starting in Shiny 0.14) progress indicators that use
         // the notification API.
 
         // Progress bar starts hidden; will be made visible if a value is provided
         // during updates.
-        showNotification({
+        await showNotification({
           html:
             `<div id="shiny-progress-${message.id}" class="shiny-progress-notification">` +
             '<div class="progress active" style="display: none;"><div class="progress-bar"></div></div>' +

@@ -79,7 +79,7 @@ declare class ShinyApp {
         open: (message: {
             style: "notification" | "old";
             id: string;
-        }) => void;
+        }) => Promise<void>;
         update: (message: {
             style: "notification" | "old";
             id: string;

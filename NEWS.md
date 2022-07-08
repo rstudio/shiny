@@ -13,6 +13,8 @@ shiny development
 
 * HTML dependencies that are sent to dynamic UI now have better type checking, and no longer require a `dep.src.href` field. (#3537)
 
+* Extended description and added example usage of `httpResponse` function (#3471)
+
 * Default for `ref` input in `runGithub()` changed from `"master"` to `"HEAD"`. (#3346)
 
 * When taking a test snapshot, the sort order of the json keys of the `input`, `output`, and `export` fields is currently sorted using the locale of the machine. This can lead to inconsistent test snapshot results. To opt-in to a consistent ordering of snapshot fields with `{shinytest}`, please set the global option `options(shiny.snapshotsortc = TRUE)`. `{shinytest2}` users do not need to set this value. (#3515)

@@ -269,20 +269,34 @@ function initShiny(windowShiny: Shiny): void {
   }
 
   function doSendImageSize() {
+    function doSendSize(el) {
+      const id = getIdFromEl(el);
+
+      if (el.offsetWidth !== 0 || el.offsetHeight !== 0) {
+        inputs.setInput(".clientdata_output_" + id + "_width", el.offsetWidth);
+        inputs.setInput(
+          ".clientdata_output_" + id + "_height",
+          el.offsetHeight
+        );
+      }
+    }
+
+    function doSendChange(el) {
+      const $el = $(el),
+        binding = $el.data("shiny-output-binding");
+
+      $el.trigger({
+        type: "shiny:visualchange",
+        // @ts-expect-error; Can not remove info on a established, malformed Event object
+        visible: !isHidden(el),
+        binding: binding,
+      });
+      binding.onResize();
+    }
+
     $(".shiny-image-output, .shiny-plot-output, .shiny-report-size").each(
       function () {
-        const id = getIdFromEl(this);
-
-        if (this.offsetWidth !== 0 || this.offsetHeight !== 0) {
-          inputs.setInput(
-            ".clientdata_output_" + id + "_width",
-            this.offsetWidth
-          );
-          inputs.setInput(
-            ".clientdata_output_" + id + "_height",
-            this.offsetHeight
-          );
-        }
+        doSendSize(this);
       }
     );
 
@@ -293,16 +307,14 @@ function initShiny(windowShiny: Shiny): void {
     );
 
     $(".shiny-bound-output").each(function () {
-      const $this = $(this),
-        binding = $this.data("shiny-output-binding");
+      doSendChange(this);
+    });
 
-      $this.trigger({
-        type: "shiny:visualchange",
-        // @ts-expect-error; Can not remove info on a established, malformed Event object
-        visible: !isHidden(this),
-        binding: binding,
-      });
-      binding.onResize();
+    $(".shiny-bound-output").each(function () {
+      const $el = $(this);
+      const ro = new ResizeObserver(() => doSendChange($el));
+
+      ro.observe(this);
     });
   }
 

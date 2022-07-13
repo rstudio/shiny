@@ -1935,6 +1935,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/resize-observer-browser@npm:^0.1.7":
+  version: 0.1.7
+  resolution: "@types/resize-observer-browser@npm:0.1.7"
+  checksum: eef8c82c9d3f9f4c57cad6134e795f4eebfcf11a8790d21636539e4314bf0e0c140e525c4a8cb440dd42788855daddb2c52c18f93e1c59bed20e9be6e65de290
+  languageName: node
+  linkType: hard
+
 "@types/rstudio-shiny@workspace:.":
   version: 0.0.0-use.local
   resolution: "@types/rstudio-shiny@workspace:."
@@ -1958,6 +1965,7 @@ __metadata:
     "@types/jqueryui": 1.12.15
     "@types/lodash": ^4.14.170
     "@types/node": ^15.6.1
+    "@types/resize-observer-browser": ^0.1.7
     "@types/selectize": 0.12.34
     "@types/showdown": ^1.9.3
     "@typescript-eslint/eslint-plugin": ^4.25.0

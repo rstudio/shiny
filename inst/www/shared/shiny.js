@@ -1,4 +1,4 @@
-/*! shiny 1.7.2 | (c) 2012-2022 RStudio, PBC. | License: GPL-3 | file LICENSE */
+/*! shiny 1.7.2.9000 | (c) 2012-2022 RStudio, PBC. | License: GPL-3 | file LICENSE */
 (function() {
   var __create = Object.create;
   var __defProp = Object.defineProperty;
@@ -12830,24 +12830,37 @@
       inputs.setInput(".clientdata_output_" + id + "_font", getComputedFont(el));
     }
     function doSendImageSize() {
-      (0, import_jquery40.default)(".shiny-image-output, .shiny-plot-output, .shiny-report-size").each(function() {
-        var id = getIdFromEl(this);
-        if (this.offsetWidth !== 0 || this.offsetHeight !== 0) {
-          inputs.setInput(".clientdata_output_" + id + "_width", this.offsetWidth);
-          inputs.setInput(".clientdata_output_" + id + "_height", this.offsetHeight);
+      function doSendSize(el) {
+        var id = getIdFromEl(el);
+        if (el.offsetWidth !== 0 || el.offsetHeight !== 0) {
+          inputs.setInput(".clientdata_output_" + id + "_width", el.offsetWidth);
+          inputs.setInput(".clientdata_output_" + id + "_height", el.offsetHeight);
         }
+      }
+      function doSendChange(el) {
+        var $el = (0, import_jquery40.default)(el), binding = $el.data("shiny-output-binding");
+        $el.trigger({
+          type: "shiny:visualchange",
+          visible: !isHidden(el),
+          binding: binding
+        });
+        binding.onResize();
+      }
+      (0, import_jquery40.default)(".shiny-image-output, .shiny-plot-output, .shiny-report-size").each(function() {
+        doSendSize(this);
       });
       (0, import_jquery40.default)(".shiny-image-output, .shiny-plot-output, .shiny-report-theme").each(function() {
         doSendTheme(this);
       });
       (0, import_jquery40.default)(".shiny-bound-output").each(function() {
-        var $this = (0, import_jquery40.default)(this), binding = $this.data("shiny-output-binding");
-        $this.trigger({
-          type: "shiny:visualchange",
-          visible: !isHidden(this),
-          binding: binding
+        doSendChange(this);
+      });
+      (0, import_jquery40.default)(".shiny-bound-output").each(function() {
+        var $el = (0, import_jquery40.default)(this);
+        var ro = new ResizeObserver(function() {
+          return doSendChange($el);
         });
-        binding.onResize();
+        ro.observe(this);
       });
     }
     sendImageSizeFns.setImageSend(inputBatchSender, doSendImageSize);
@@ -12982,7 +12995,7 @@
   var windowShiny2;
   function setShiny(windowShiny_) {
     windowShiny2 = windowShiny_;
-    windowShiny2.version = "1.7.2";
+    windowShiny2.version = "1.7.2.9000";
     var _initInputBindings = initInputBindings(), inputBindings = _initInputBindings.inputBindings, fileInputBinding2 = _initInputBindings.fileInputBinding;
     var _initOutputBindings = initOutputBindings(), outputBindings = _initOutputBindings.outputBindings;
     setFileInputBinding(fileInputBinding2);

@@ -331,7 +331,7 @@ argsForServerFunc <- function(serverFunc, session) {
 getEffectiveBody <- function(func) {
   if (is.null(func))
     NULL
-  else if (isS4(func) && class(func) == "functionWithTrace")
+  else if (isS4(func) && inherits(func, "functionWithTrace"))
     body(func@original)
   else
     body(func)

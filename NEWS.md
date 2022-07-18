@@ -513,7 +513,7 @@ This is a significant release for Shiny, with a major new feature that was nearl
 
 * Removed the (ridiculously outdated) "experimental feature" tag from the reference documentation for `renderUI`. (#2036)
 
-* Addressed #1907: the `ignoreInit` argument was first added only to `observeEvent`. Later, we also added it to `eventReactive`, but forgot to update the documentation. Now done, thanks [@flo12392](https://github.com/flo12392)! (#2036)
+* Addressed #1907: the `ignoreInit` argument was first added only to `observeEvent`. Later, we also added it to `eventReactive`, but forgot to update the documentation. Now done, thanks @flo12392! (#2036)
 
 ### Bug fixes
 

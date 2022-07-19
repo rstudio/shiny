@@ -23,7 +23,7 @@ Please see the function descriptions for more details."><meta property="og:image
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">shiny</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.2.9000</span>
       </span>
     </div>
 
@@ -155,16 +155,16 @@ registered <code>devmode_default</code> value will be used.</p></dd>
     <div id="functions">
     <h2>Functions</h2>
     
-<ul><li><p><code>devmode</code>: Function to set two options to enable/disable Shiny
+<ul><li><p><code>devmode()</code>: Function to set two options to enable/disable Shiny
 Developer Mode and Developer messages</p></li>
-<li><p><code>in_devmode</code>: Determines if Shiny is in Developer Mode. If the
+<li><p><code>in_devmode()</code>: Determines if Shiny is in Developer Mode. If the
 <code>getOption("shiny.devmode")</code> is set to <code>TRUE</code> and not in testing inside
 <code>testthat</code>, then Shiny Developer Mode is enabled.</p></li>
-<li><p><code>with_devmode</code>: Temporarily set Shiny Developer Mode and Developer
+<li><p><code>with_devmode()</code>: Temporarily set Shiny Developer Mode and Developer
 message verbosity</p></li>
-<li><p><code>devmode_inform</code>: If Shiny Developer Mode and verbosity are enabled,
+<li><p><code>devmode_inform()</code>: If Shiny Developer Mode and verbosity are enabled,
 displays a message once every 8 hrs (by default)</p></li>
-<li><p><code>register_devmode_option</code>: Registers a Shiny Developer Mode option with an updated
+<li><p><code>register_devmode_option()</code>: Registers a Shiny Developer Mode option with an updated
 value and Developer message. This registration method allows package
 authors to write one message in a single location.</p>
 <p>For example, the following Shiny Developer Mode options are registered:</p>
@@ -195,7 +195,7 @@ authors to write one message in a single location.</p>
 <span>  <span class="st">"Turning off sass cache. To use default caching, call `options(sass.cache = TRUE)`"</span>,</span>
 <span>  devmode_default <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre><p></p></div></li>
-<li><p><code>get_devmode_option</code>: Provides a consistent way to change the expected
+<li><p><code>get_devmode_option()</code>: Provides a consistent way to change the expected
 <code><a href="https://rdrr.io/r/base/options.html" class="external-link">getOption()</a></code> behavior when Developer Mode is enabled. This method is very
 similar to <code><a href="https://rdrr.io/r/base/options.html" class="external-link">getOption()</a></code> where the globally set option takes precedence.
 See section "Avoiding direct dependency on shiny" for

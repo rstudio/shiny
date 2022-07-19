@@ -23,7 +23,7 @@ bindCache() to dramatically improve performance when used correctly."><meta prop
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">shiny</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.2.9000</span>
       </span>
     </div>
 
@@ -97,7 +97,8 @@ sense, namely:</p><ol><li><p>For a given key, the return value is always the sam
 </ol><p>In the example here, the <code>bindCache()</code> key consists of <code>input$x</code> and
 <code>input$y</code> combined, and the value is <code>input$x * input$y</code>. In this simple
 example, for any given key, there is only one possible returned value.</p>
-<p></p><div class="sourceCode NA"><pre><code></code></pre><p></p></div>
+<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1"></a>r &lt;-<span class="st"> </span><span class="kw">reactive</span>({ input<span class="op">$</span>x <span class="op">*</span><span class="st"> </span>input<span class="op">$</span>y }) <span class="op">%&gt;%</span></span>
+<span id="cb1-2"><a href="#cb1-2"></a><span class="st">  </span><span class="kw">bindCache</span>(input<span class="op">$</span>x, input<span class="op">$</span>y)</span></code></pre><p></p></div>
 <p>The largest performance improvements occur when the cache key is fast to
 compute and the reactive expression is slow to compute. To see if the value
 should be computed, a cached reactive evaluates the key, and then serializes
@@ -116,7 +117,8 @@ about whether a value can be retrieved from the cache. For example, if you
 have a large data set with timestamps, it might make sense to extract the
 most recent timestamp and return that. Then, instead of hashing the entire
 data object, the cached reactive only needs to hash the timestamp.</p>
-<p></p><div class="sourceCode NA"><pre><code></code></pre><p></p></div>
+<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1"></a>r &lt;-<span class="st"> </span><span class="kw">reactive</span>({ <span class="kw">compute</span>(<span class="kw">bigdata</span>()) } <span class="op">%&gt;%</span></span>
+<span id="cb1-2"><a href="#cb1-2"></a><span class="st">  </span><span class="kw">bindCache</span>({ <span class="kw">extract_most_recent_time</span>(<span class="kw">bigdata</span>()) })</span></code></pre><p></p></div>
 <p>For computations that are very slow, it often makes sense to pair
 <code>bindCache()</code> with <code><a href="bindEvent.html">bindEvent()</a></code> so that no computation is performed until
 the user explicitly requests it (for more, see the Details section of
@@ -154,7 +156,8 @@ cache key is not too expensive.</p>
 time that someone accesses the cached reactive. It is only re-executed if
 it has been invalidated by one of the reactives it depends on. For
 example, suppose we have this cached reactive:</p>
-<p></p><div class="sourceCode NA"><pre><code></code></pre><p></p></div>
+<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1"></a>r &lt;-<span class="st"> </span><span class="kw">reactive</span>({ input<span class="op">$</span>x <span class="op">*</span><span class="st"> </span>input<span class="op">$</span>y }) <span class="op">%&gt;%</span></span>
+<span id="cb1-2"><a href="#cb1-2"></a><span class="st"> </span><span class="kw">bindCache</span>(input<span class="op">$</span>x, input<span class="op">$</span>y)</span></code></pre><p></p></div>
 <p>In this case, the key expression is essentially <code>reactive(list(input$x, input$y))</code> (there's a bit more to it, but that's a good enough
 approximation). The first time <code>r()</code> is called, it executes the key, then
 fails to find it in the cache, so it executes the value expression, <code>{ input$x + input$y }</code>. If <code>r()</code> is called again, then it does not need to
@@ -291,7 +294,8 @@ this, a <em>cache hint</em> is automatically added when <code><a href="renderPri
 cache key, in addition to the one passed to <code>bindCache()</code> by the user. The
 cache hint can be viewed by calling the internal Shiny function
 <code>extractCacheHint()</code>:</p>
-<p></p><div class="sourceCode NA"><pre><code></code></pre><p></p></div>
+<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1"></a>r &lt;-<span class="st"> </span><span class="kw">renderText</span>({ input<span class="op">$</span>x })</span>
+<span id="cb1-2"><a href="#cb1-2"></a>shiny<span class="op">:::</span><span class="kw">extractCacheHint</span>(r)</span></code></pre><p></p></div>
 <p>This returns a nested list containing an item, <code>$origUserFunc$body</code>, which
 in this case is the expression which was passed to <code><a href="renderPrint.html">renderText()</a></code>:
 <code>{ input$x }</code>. This (quoted)  expression is mixed into the actual cache

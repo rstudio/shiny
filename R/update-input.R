@@ -132,7 +132,7 @@ updateCheckboxInput <- function(session = getDefaultReactiveDomain(), inputId, l
 #'   br(),
 #'   actionButton("goButton", "Go"),
 #'   br(),
-#'   actionButton("goButton2", "Go 2", icon = icon("area-chart")),
+#'   actionButton("goButton2", "Go 2", icon = icon("chart-area")),
 #'   br(),
 #'   actionButton("goButton3", "Go 3"),
 #'   br(),
@@ -146,7 +146,7 @@ updateCheckboxInput <- function(session = getDefaultReactiveDomain(), inputId, l
 #'     # Updates goButton's label and icon
 #'     updateActionButton(session, "goButton",
 #'       label = "New label",
-#'       icon = icon("calendar"))
+#'       icon = icon("calendar-days"))
 #'
 #'     # Leaves goButton2's label unchaged and
 #'     # removes its icon

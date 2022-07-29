@@ -1263,7 +1263,7 @@ downloadLink <- function(outputId, label="Download", class=NULL, ...) {
 #' submitButton("Update View", icon = icon("arrow-rotate-right"))
 #'
 #' navbarPage("App Title",
-#'   tabPanel("Plot", icon = icon("bar-chart-o")),
+#'   tabPanel("Plot", icon = icon("chart-column")),
 #'   tabPanel("Summary", icon = icon("rectangle-list")),
 #'   tabPanel("Table", icon = icon("table"))
 #' )

@@ -9,7 +9,7 @@ function escapeHTML(str: string): string {
     "<": "&lt;",
     ">": "&gt;",
     // eslint-disable-next-line prettier/prettier
-    "\"": "&quot;",
+    '"': "&quot;",
     "'": "&#039;",
     "/": "&#x2F;",
   };
@@ -52,6 +52,20 @@ function getStyle(el: Element, styleProp: string): string | undefined {
     if (style) x = style.getPropertyValue(styleProp);
   }
   return x;
+}
+
+// Return true if the object or one of its ancestors in the DOM tree has
+// style='display:none'; otherwise return false.
+function isHidden(obj: HTMLElement): boolean {
+  // null means we've hit the top of the tree. If width or height is
+  // non-zero, then we know that no ancestor has display:none.
+  if (obj === null || obj.offsetWidth !== 0 || obj.offsetHeight !== 0) {
+    return false;
+  } else if (getStyle(obj, "display") === "none") {
+    return true;
+  } else {
+    return isHidden(obj.parentElement);
+  }
 }
 
 // Convert a number to a string with leading zeros
@@ -384,6 +398,7 @@ export {
   randomId,
   strToBool,
   getStyle,
+  isHidden,
   padZeros,
   roundSignif,
   parseDate,

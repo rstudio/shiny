@@ -29,12 +29,12 @@ Create a tab panel
 }
 \section{Functions}{
 \itemize{
-\item \code{tabPanel}: Create a tab panel that can be included within a \code{\link[=tabsetPanel]{tabsetPanel()}} or a \code{\link[=navbarPage]{navbarPage()}}.
+\item \code{tabPanel()}: Create a tab panel that can be included within a \code{\link[=tabsetPanel]{tabsetPanel()}} or a \code{\link[=navbarPage]{navbarPage()}}.
 
-\item \code{tabPanelBody}: Create a tab panel that drops the title argument.
+\item \code{tabPanelBody()}: Create a tab panel that drops the title argument.
 This function should be used within \code{tabsetPanel(type = "hidden")}. See \code{\link[=tabsetPanel]{tabsetPanel()}} for example usage.
-}}
 
+}}
 \examples{
 # Show a tabset that includes a plot, summary, and
 # table view of the generated distribution

@@ -11129,10 +11129,10 @@
     }, {
       key: "resize",
       value: function resize(el, width, height) {
-        (0, import_jquery33.default)(el).find("img").trigger("resize");
-        return;
-        width;
-        height;
+        var img = (0, import_jquery33.default)(el).find("img");
+        img.attr("width", width);
+        img.attr("height", height);
+        img.trigger("resize");
       }
     }]);
     return ImageOutputBinding2;

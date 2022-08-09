@@ -13262,7 +13262,7 @@
           }
         }
         if (!(0, import_jquery40.default)(el).data("shiny-resize-observer")) {
-          var onResize = debounce(500, handleResize);
+          var onResize = debounce(100, handleResize);
           var ro = new ResizeObserver(function() {
             return onResize(false);
           });

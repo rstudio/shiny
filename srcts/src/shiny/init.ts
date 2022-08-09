@@ -286,7 +286,7 @@ function initShiny(windowShiny: Shiny): void {
 
       // TODO: do we need a polyfill for ResizeObserver?
       if (!$(el).data("shiny-resize-observer")) {
-        const onResize = debounce(500, handleResize);
+        const onResize = debounce(100, handleResize);
         const ro = new ResizeObserver(() => onResize(false));
 
         ro.observe(el);

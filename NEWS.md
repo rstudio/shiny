@@ -1,6 +1,19 @@
 shiny 1.7.2.9000
 ================
 
+## Full changelof
+
+### Breaking changes
+
+* Closed #2866: `session$resetBrush()` now properly namespaces the brush ID automatically within a module. This breaks previous workarounds, which will now result in a doubly-namespaced brush ID. This function has also been supplemented with the slightly more user-friendly `shiny::resetBrush()`; see details below.
+
+### New features and improvements
+
+* Added `resetBrush()` function for a slightly more user-friendly alternative to `session$resetBrush()` with syntax similar to the `update*()` functions.
+
+* Closed #1456: Added `updateBrushCoords()` function to programatically update the area brushed on a plot, similar to other `update*()` functions. Tested primarily with `ggplot2`, but may work with reduced functionality with base graphics and images. See `help(updateBrushCoords, shiny)` for more details.
+
+### Bug fixes
 
 
 shiny 1.7.2

@@ -7,7 +7,7 @@ import {
   shinyInitializeInputs,
   shinyUnbindAll,
 } from "./initedMethods";
-import { sendImageSizeFns } from "./sendImageSize";
+import { sendOutputInfoFns } from "./sendOutputInfo";
 
 import { renderHtml as singletonsRenderHtml } from "./singletons";
 import type { WherePosition } from "./singletons";
@@ -250,7 +250,7 @@ function addStylesheetsAndRestyle(links: HTMLLinkElement[]): void {
       // should have been applied synchronously.
       oldStyle.remove();
       removeSheet(oldSheet);
-      sendImageSizeFns.transitioned();
+      sendOutputInfoFns.transitioned();
     };
     xhr.send();
   };
@@ -310,7 +310,7 @@ function addStylesheetsAndRestyle(links: HTMLLinkElement[]): void {
       // base64-encoded and inlined into the href. We also add a dummy DOM
       // element that the CSS applies to. The dummy CSS includes a
       // transition, and when the `transitionend` event happens, we call
-      // sendImageSizeFns.transitioned() and remove the old sheet. We also remove the
+      // sendOutputInfoFns.transitioned() and remove the old sheet. We also remove the
       // dummy DOM element and dummy CSS content.
       //
       // The reason this works is because (we assume) that if multiple
@@ -320,7 +320,7 @@ function addStylesheetsAndRestyle(links: HTMLLinkElement[]): void {
       //
       // Because it is common for multiple stylesheets to arrive close
       // together, but not on exactly the same tick, we call
-      // sendImageSizeFns.transitioned(), which is debounced. Otherwise, it can result in
+      // sendOutputInfoFns.transitioned(), which is debounced. Otherwise, it can result in
       // the same plot being redrawn multiple times with different
       // styling.
       $link.attr("onload", () => {
@@ -333,7 +333,7 @@ function addStylesheetsAndRestyle(links: HTMLLinkElement[]): void {
         $dummyEl.one("transitionend", () => {
           $dummyEl.remove();
           removeSheet(oldSheet);
-          sendImageSizeFns.transitioned();
+          sendOutputInfoFns.transitioned();
         });
         $(document.body).append($dummyEl);
 

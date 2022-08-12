@@ -2,6 +2,7 @@
   "declaration": true,
   "compilerOptions": {
     "target": "ES5",
+    "lib": ["dom"],
     "isolatedModules": true,
     "esModuleInterop": true,
     "declaration": true,

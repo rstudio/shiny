@@ -3,7 +3,7 @@
   "homepage": "https://shiny.rstudio.com",
   "repository": "github:rstudio/shiny",
   "name": "@types/rstudio-shiny",
-  "version": "1.7.2",
+  "version": "1.7.2-alpha.9000",
   "license": "GPL-3.0-only",
   "main": "",
   "browser": "",
@@ -24,6 +24,7 @@
     "@types/datatables.net": "^1.10.19",
     "@types/ion-rangeslider": "2.3.0",
     "@types/jquery": "patch:@types/jquery@3.5.5#./srcts/patch/types-jquery.patch",
+    "@types/resize-observer-browser": "^0.1.7",
     "@types/selectize": "0.12.34"
   },
   "devDependencies": {

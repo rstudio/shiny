@@ -290,10 +290,12 @@ class ImageOutputBinding extends OutputBinding {
     width: number | string,
     height: number | string
   ): void {
-    $(el).find("img").trigger("resize");
-    return;
-    width;
-    height;
+    const img = $(el).find("img");
+
+    img.attr("width", width);
+    img.attr("height", height);
+
+    img.trigger("resize");
   }
 }
 

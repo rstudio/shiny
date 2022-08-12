@@ -9,7 +9,7 @@ function escapeHTML(str: string): string {
     "<": "&lt;",
     ">": "&gt;",
     // eslint-disable-next-line prettier/prettier
-    "\"": "&quot;",
+    '"': "&quot;",
     "'": "&#039;",
     "/": "&#x2F;",
   };
@@ -52,6 +52,20 @@ function getStyle(el: Element, styleProp: string): string | undefined {
     if (style) x = style.getPropertyValue(styleProp);
   }
   return x;
+}
+
+// Return true if the object or one of its ancestors in the DOM tree has
+// style='display:none'; otherwise return false.
+function isHidden(obj: HTMLElement): boolean {
+  // null means we've hit the top of the tree. If width or height is
+  // non-zero, then we know that no ancestor has display:none.
+  if (obj === null || obj.offsetWidth !== 0 || obj.offsetHeight !== 0) {
+    return false;
+  } else if (getStyle(obj, "display") === "none") {
+    return true;
+  } else {
+    return isHidden(obj.parentElement);
+  }
 }
 
 // Convert a number to a string with leading zeros
@@ -122,7 +136,16 @@ function makeResizeFilter(
   let lastSize: LastSizeInterface = {};
 
   return function () {
+    // If the output container is 'stretchy' and is getting shrunk after being expanded (e.g., bslib::card(full_screen = TRUE)),
+    // it might not know how to properly shrink back to its original size (because it's size is being driven by the
+    // size of it's children). For this reason, we temporarily set display:none on the children of all outputs before
+    // getting the output size (the size of this output could also be driven by the size of other output's children).
+    const outputs = $(".shiny-bound-output");
+
+    outputs.addClass("shiny-output-resizing");
     const size = { w: el.offsetWidth, h: el.offsetHeight };
+
+    outputs.removeClass("shiny-output-resizing");
 
     if (size.w === 0 && size.h === 0) return;
     if (size.w === lastSize.w && size.h === lastSize.h) return;
@@ -384,6 +407,7 @@ export {
   randomId,
   strToBool,
   getStyle,
+  isHidden,
   padZeros,
   roundSignif,
   parseDate,

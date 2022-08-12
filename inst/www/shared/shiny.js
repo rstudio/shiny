@@ -1,4 +1,4 @@
-/*! shiny 1.7.2 | (c) 2012-2022 RStudio, PBC. | License: GPL-3 | file LICENSE */
+/*! shiny 1.7.2.9000 | (c) 2012-2022 RStudio, PBC. | License: GPL-3 | file LICENSE */
 (function() {
   var __create = Object.create;
   var __defProp = Object.defineProperty;
@@ -2322,10 +2322,239 @@
     }
   });
 
-  // node_modules/core-js/internals/array-buffer-native.js
-  var require_array_buffer_native = __commonJS({
-    "node_modules/core-js/internals/array-buffer-native.js": function(exports, module) {
-      module.exports = typeof ArrayBuffer !== "undefined" && typeof DataView !== "undefined";
+  // node_modules/core-js/internals/freezing.js
+  var require_freezing = __commonJS({
+    "node_modules/core-js/internals/freezing.js": function(exports, module) {
+      var fails11 = require_fails();
+      module.exports = !fails11(function() {
+        return Object.isExtensible(Object.preventExtensions({}));
+      });
+    }
+  });
+
+  // node_modules/core-js/internals/internal-metadata.js
+  var require_internal_metadata = __commonJS({
+    "node_modules/core-js/internals/internal-metadata.js": function(exports, module) {
+      var hiddenKeys2 = require_hidden_keys();
+      var isObject7 = require_is_object();
+      var has5 = require_has();
+      var defineProperty5 = require_object_define_property().f;
+      var uid2 = require_uid();
+      var FREEZING = require_freezing();
+      var METADATA = uid2("meta");
+      var id = 0;
+      var isExtensible = Object.isExtensible || function() {
+        return true;
+      };
+      var setMetadata = function(it) {
+        defineProperty5(it, METADATA, { value: {
+          objectID: "O" + ++id,
+          weakData: {}
+        } });
+      };
+      var fastKey = function(it, create5) {
+        if (!isObject7(it))
+          return typeof it == "symbol" ? it : (typeof it == "string" ? "S" : "P") + it;
+        if (!has5(it, METADATA)) {
+          if (!isExtensible(it))
+            return "F";
+          if (!create5)
+            return "E";
+          setMetadata(it);
+        }
+        return it[METADATA].objectID;
+      };
+      var getWeakData = function(it, create5) {
+        if (!has5(it, METADATA)) {
+          if (!isExtensible(it))
+            return true;
+          if (!create5)
+            return false;
+          setMetadata(it);
+        }
+        return it[METADATA].weakData;
+      };
+      var onFreeze = function(it) {
+        if (FREEZING && meta.REQUIRED && isExtensible(it) && !has5(it, METADATA))
+          setMetadata(it);
+        return it;
+      };
+      var meta = module.exports = {
+        REQUIRED: false,
+        fastKey: fastKey,
+        getWeakData: getWeakData,
+        onFreeze: onFreeze
+      };
+      hiddenKeys2[METADATA] = true;
+    }
+  });
+
+  // node_modules/core-js/internals/iterate.js
+  var require_iterate = __commonJS({
+    "node_modules/core-js/internals/iterate.js": function(exports, module) {
+      var anObject10 = require_an_object();
+      var isArrayIteratorMethod = require_is_array_iterator_method();
+      var toLength8 = require_to_length();
+      var bind2 = require_function_bind_context();
+      var getIteratorMethod = require_get_iterator_method();
+      var iteratorClose = require_iterator_close();
+      var Result = function(stopped, result) {
+        this.stopped = stopped;
+        this.result = result;
+      };
+      module.exports = function(iterable, unboundFunction, options) {
+        var that = options && options.that;
+        var AS_ENTRIES = !!(options && options.AS_ENTRIES);
+        var IS_ITERATOR = !!(options && options.IS_ITERATOR);
+        var INTERRUPTED = !!(options && options.INTERRUPTED);
+        var fn = bind2(unboundFunction, that, 1 + AS_ENTRIES + INTERRUPTED);
+        var iterator, iterFn, index, length, result, next2, step;
+        var stop = function(condition) {
+          if (iterator)
+            iteratorClose(iterator);
+          return new Result(true, condition);
+        };
+        var callFn = function(value) {
+          if (AS_ENTRIES) {
+            anObject10(value);
+            return INTERRUPTED ? fn(value[0], value[1], stop) : fn(value[0], value[1]);
+          }
+          return INTERRUPTED ? fn(value, stop) : fn(value);
+        };
+        if (IS_ITERATOR) {
+          iterator = iterable;
+        } else {
+          iterFn = getIteratorMethod(iterable);
+          if (typeof iterFn != "function")
+            throw TypeError("Target is not iterable");
+          if (isArrayIteratorMethod(iterFn)) {
+            for (index = 0, length = toLength8(iterable.length); length > index; index++) {
+              result = callFn(iterable[index]);
+              if (result && result instanceof Result)
+                return result;
+            }
+            return new Result(false);
+          }
+          iterator = iterFn.call(iterable);
+        }
+        next2 = iterator.next;
+        while (!(step = next2.call(iterator)).done) {
+          try {
+            result = callFn(step.value);
+          } catch (error) {
+            iteratorClose(iterator);
+            throw error;
+          }
+          if (typeof result == "object" && result && result instanceof Result)
+            return result;
+        }
+        return new Result(false);
+      };
+    }
+  });
+
+  // node_modules/core-js/internals/an-instance.js
+  var require_an_instance = __commonJS({
+    "node_modules/core-js/internals/an-instance.js": function(exports, module) {
+      module.exports = function(it, Constructor, name) {
+        if (!(it instanceof Constructor)) {
+          throw TypeError("Incorrect " + (name ? name + " " : "") + "invocation");
+        }
+        return it;
+      };
+    }
+  });
+
+  // node_modules/core-js/internals/collection.js
+  var require_collection = __commonJS({
+    "node_modules/core-js/internals/collection.js": function(exports, module) {
+      "use strict";
+      var $71 = require_export();
+      var global8 = require_global();
+      var isForced2 = require_is_forced();
+      var redefine5 = require_redefine();
+      var InternalMetadataModule = require_internal_metadata();
+      var iterate = require_iterate();
+      var anInstance = require_an_instance();
+      var isObject7 = require_is_object();
+      var fails11 = require_fails();
+      var checkCorrectnessOfIteration2 = require_check_correctness_of_iteration();
+      var setToStringTag2 = require_set_to_string_tag();
+      var inheritIfRequired2 = require_inherit_if_required();
+      module.exports = function(CONSTRUCTOR_NAME, wrapper, common) {
+        var IS_MAP = CONSTRUCTOR_NAME.indexOf("Map") !== -1;
+        var IS_WEAK = CONSTRUCTOR_NAME.indexOf("Weak") !== -1;
+        var ADDER = IS_MAP ? "set" : "add";
+        var NativeConstructor = global8[CONSTRUCTOR_NAME];
+        var NativePrototype = NativeConstructor && NativeConstructor.prototype;
+        var Constructor = NativeConstructor;
+        var exported = {};
+        var fixMethod = function(KEY) {
+          var nativeMethod = NativePrototype[KEY];
+          redefine5(NativePrototype, KEY, KEY == "add" ? function add(value) {
+            nativeMethod.call(this, value === 0 ? 0 : value);
+            return this;
+          } : KEY == "delete" ? function(key) {
+            return IS_WEAK && !isObject7(key) ? false : nativeMethod.call(this, key === 0 ? 0 : key);
+          } : KEY == "get" ? function get3(key) {
+            return IS_WEAK && !isObject7(key) ? void 0 : nativeMethod.call(this, key === 0 ? 0 : key);
+          } : KEY == "has" ? function has5(key) {
+            return IS_WEAK && !isObject7(key) ? false : nativeMethod.call(this, key === 0 ? 0 : key);
+          } : function set(key, value) {
+            nativeMethod.call(this, key === 0 ? 0 : key, value);
+            return this;
+          });
+        };
+        var REPLACE = isForced2(CONSTRUCTOR_NAME, typeof NativeConstructor != "function" || !(IS_WEAK || NativePrototype.forEach && !fails11(function() {
+          new NativeConstructor().entries().next();
+        })));
+        if (REPLACE) {
+          Constructor = common.getConstructor(wrapper, CONSTRUCTOR_NAME, IS_MAP, ADDER);
+          InternalMetadataModule.REQUIRED = true;
+        } else if (isForced2(CONSTRUCTOR_NAME, true)) {
+          var instance = new Constructor();
+          var HASNT_CHAINING = instance[ADDER](IS_WEAK ? {} : -0, 1) != instance;
+          var THROWS_ON_PRIMITIVES = fails11(function() {
+            instance.has(1);
+          });
+          var ACCEPT_ITERABLES = checkCorrectnessOfIteration2(function(iterable) {
+            new NativeConstructor(iterable);
+          });
+          var BUGGY_ZERO = !IS_WEAK && fails11(function() {
+            var $instance = new NativeConstructor();
+            var index = 5;
+            while (index--)
+              $instance[ADDER](index, index);
+            return !$instance.has(-0);
+          });
+          if (!ACCEPT_ITERABLES) {
+            Constructor = wrapper(function(dummy, iterable) {
+              anInstance(dummy, Constructor, CONSTRUCTOR_NAME);
+              var that = inheritIfRequired2(new NativeConstructor(), dummy, Constructor);
+              if (iterable != void 0)
+                iterate(iterable, that[ADDER], { that: that, AS_ENTRIES: IS_MAP });
+              return that;
+            });
+            Constructor.prototype = NativePrototype;
+            NativePrototype.constructor = Constructor;
+          }
+          if (THROWS_ON_PRIMITIVES || BUGGY_ZERO) {
+            fixMethod("delete");
+            fixMethod("has");
+            IS_MAP && fixMethod("get");
+          }
+          if (BUGGY_ZERO || HASNT_CHAINING)
+            fixMethod(ADDER);
+          if (IS_WEAK && NativePrototype.clear)
+            delete NativePrototype.clear;
+        }
+        exported[CONSTRUCTOR_NAME] = Constructor;
+        $71({ global: true, forced: Constructor != NativeConstructor }, exported);
+        setToStringTag2(Constructor, CONSTRUCTOR_NAME);
+        if (!IS_WEAK)
+          common.setStrong(Constructor, CONSTRUCTOR_NAME, IS_MAP);
+        return Constructor;
+      };
     }
   });
 
@@ -2341,15 +2570,233 @@
     }
   });
 
-  // node_modules/core-js/internals/an-instance.js
-  var require_an_instance = __commonJS({
-    "node_modules/core-js/internals/an-instance.js": function(exports, module) {
-      module.exports = function(it, Constructor, name) {
-        if (!(it instanceof Constructor)) {
-          throw TypeError("Incorrect " + (name ? name + " " : "") + "invocation");
+  // node_modules/core-js/internals/set-species.js
+  var require_set_species = __commonJS({
+    "node_modules/core-js/internals/set-species.js": function(exports, module) {
+      "use strict";
+      var getBuiltIn3 = require_get_built_in();
+      var definePropertyModule2 = require_object_define_property();
+      var wellKnownSymbol5 = require_well_known_symbol();
+      var DESCRIPTORS7 = require_descriptors();
+      var SPECIES2 = wellKnownSymbol5("species");
+      module.exports = function(CONSTRUCTOR_NAME) {
+        var Constructor = getBuiltIn3(CONSTRUCTOR_NAME);
+        var defineProperty5 = definePropertyModule2.f;
+        if (DESCRIPTORS7 && Constructor && !Constructor[SPECIES2]) {
+          defineProperty5(Constructor, SPECIES2, {
+            configurable: true,
+            get: function() {
+              return this;
+            }
+          });
         }
-        return it;
       };
+    }
+  });
+
+  // node_modules/core-js/internals/collection-strong.js
+  var require_collection_strong = __commonJS({
+    "node_modules/core-js/internals/collection-strong.js": function(exports, module) {
+      "use strict";
+      var defineProperty5 = require_object_define_property().f;
+      var create5 = require_object_create();
+      var redefineAll = require_redefine_all();
+      var bind2 = require_function_bind_context();
+      var anInstance = require_an_instance();
+      var iterate = require_iterate();
+      var defineIterator2 = require_define_iterator();
+      var setSpecies2 = require_set_species();
+      var DESCRIPTORS7 = require_descriptors();
+      var fastKey = require_internal_metadata().fastKey;
+      var InternalStateModule3 = require_internal_state();
+      var setInternalState3 = InternalStateModule3.set;
+      var internalStateGetterFor = InternalStateModule3.getterFor;
+      module.exports = {
+        getConstructor: function(wrapper, CONSTRUCTOR_NAME, IS_MAP, ADDER) {
+          var C = wrapper(function(that, iterable) {
+            anInstance(that, C, CONSTRUCTOR_NAME);
+            setInternalState3(that, {
+              type: CONSTRUCTOR_NAME,
+              index: create5(null),
+              first: void 0,
+              last: void 0,
+              size: 0
+            });
+            if (!DESCRIPTORS7)
+              that.size = 0;
+            if (iterable != void 0)
+              iterate(iterable, that[ADDER], { that: that, AS_ENTRIES: IS_MAP });
+          });
+          var getInternalState3 = internalStateGetterFor(CONSTRUCTOR_NAME);
+          var define = function(that, key, value) {
+            var state = getInternalState3(that);
+            var entry = getEntry(that, key);
+            var previous, index;
+            if (entry) {
+              entry.value = value;
+            } else {
+              state.last = entry = {
+                index: index = fastKey(key, true),
+                key: key,
+                value: value,
+                previous: previous = state.last,
+                next: void 0,
+                removed: false
+              };
+              if (!state.first)
+                state.first = entry;
+              if (previous)
+                previous.next = entry;
+              if (DESCRIPTORS7)
+                state.size++;
+              else
+                that.size++;
+              if (index !== "F")
+                state.index[index] = entry;
+            }
+            return that;
+          };
+          var getEntry = function(that, key) {
+            var state = getInternalState3(that);
+            var index = fastKey(key);
+            var entry;
+            if (index !== "F")
+              return state.index[index];
+            for (entry = state.first; entry; entry = entry.next) {
+              if (entry.key == key)
+                return entry;
+            }
+          };
+          redefineAll(C.prototype, {
+            clear: function clear() {
+              var that = this;
+              var state = getInternalState3(that);
+              var data = state.index;
+              var entry = state.first;
+              while (entry) {
+                entry.removed = true;
+                if (entry.previous)
+                  entry.previous = entry.previous.next = void 0;
+                delete data[entry.index];
+                entry = entry.next;
+              }
+              state.first = state.last = void 0;
+              if (DESCRIPTORS7)
+                state.size = 0;
+              else
+                that.size = 0;
+            },
+            "delete": function(key) {
+              var that = this;
+              var state = getInternalState3(that);
+              var entry = getEntry(that, key);
+              if (entry) {
+                var next2 = entry.next;
+                var prev = entry.previous;
+                delete state.index[entry.index];
+                entry.removed = true;
+                if (prev)
+                  prev.next = next2;
+                if (next2)
+                  next2.previous = prev;
+                if (state.first == entry)
+                  state.first = next2;
+                if (state.last == entry)
+                  state.last = prev;
+                if (DESCRIPTORS7)
+                  state.size--;
+                else
+                  that.size--;
+              }
+              return !!entry;
+            },
+            forEach: function forEach3(callbackfn) {
+              var state = getInternalState3(this);
+              var boundFunction = bind2(callbackfn, arguments.length > 1 ? arguments[1] : void 0, 3);
+              var entry;
+              while (entry = entry ? entry.next : state.first) {
+                boundFunction(entry.value, entry.key, this);
+                while (entry && entry.removed)
+                  entry = entry.previous;
+              }
+            },
+            has: function has5(key) {
+              return !!getEntry(this, key);
+            }
+          });
+          redefineAll(C.prototype, IS_MAP ? {
+            get: function get3(key) {
+              var entry = getEntry(this, key);
+              return entry && entry.value;
+            },
+            set: function set(key, value) {
+              return define(this, key === 0 ? 0 : key, value);
+            }
+          } : {
+            add: function add(value) {
+              return define(this, value = value === 0 ? 0 : value, value);
+            }
+          });
+          if (DESCRIPTORS7)
+            defineProperty5(C.prototype, "size", {
+              get: function() {
+                return getInternalState3(this).size;
+              }
+            });
+          return C;
+        },
+        setStrong: function(C, CONSTRUCTOR_NAME, IS_MAP) {
+          var ITERATOR_NAME = CONSTRUCTOR_NAME + " Iterator";
+          var getInternalCollectionState = internalStateGetterFor(CONSTRUCTOR_NAME);
+          var getInternalIteratorState = internalStateGetterFor(ITERATOR_NAME);
+          defineIterator2(C, CONSTRUCTOR_NAME, function(iterated, kind) {
+            setInternalState3(this, {
+              type: ITERATOR_NAME,
+              target: iterated,
+              state: getInternalCollectionState(iterated),
+              kind: kind,
+              last: void 0
+            });
+          }, function() {
+            var state = getInternalIteratorState(this);
+            var kind = state.kind;
+            var entry = state.last;
+            while (entry && entry.removed)
+              entry = entry.previous;
+            if (!state.target || !(state.last = entry = entry ? entry.next : state.state.first)) {
+              state.target = void 0;
+              return { value: void 0, done: true };
+            }
+            if (kind == "keys")
+              return { value: entry.key, done: false };
+            if (kind == "values")
+              return { value: entry.value, done: false };
+            return { value: [entry.key, entry.value], done: false };
+          }, IS_MAP ? "entries" : "values", !IS_MAP, true);
+          setSpecies2(CONSTRUCTOR_NAME);
+        }
+      };
+    }
+  });
+
+  // node_modules/core-js/modules/es.set.js
+  var require_es_set = __commonJS({
+    "node_modules/core-js/modules/es.set.js": function(exports, module) {
+      "use strict";
+      var collection = require_collection();
+      var collectionStrong = require_collection_strong();
+      module.exports = collection("Set", function(init2) {
+        return function Set2() {
+          return init2(this, arguments.length ? arguments[0] : void 0);
+        };
+      }, collectionStrong);
+    }
+  });
+
+  // node_modules/core-js/internals/array-buffer-native.js
+  var require_array_buffer_native = __commonJS({
+    "node_modules/core-js/internals/array-buffer-native.js": function(exports, module) {
+      module.exports = typeof ArrayBuffer !== "undefined" && typeof DataView !== "undefined";
     }
   });
 
@@ -2704,30 +3151,6 @@
       module.exports = {
         ArrayBuffer: $ArrayBuffer,
         DataView: $DataView
-      };
-    }
-  });
-
-  // node_modules/core-js/internals/set-species.js
-  var require_set_species = __commonJS({
-    "node_modules/core-js/internals/set-species.js": function(exports, module) {
-      "use strict";
-      var getBuiltIn3 = require_get_built_in();
-      var definePropertyModule2 = require_object_define_property();
-      var wellKnownSymbol5 = require_well_known_symbol();
-      var DESCRIPTORS7 = require_descriptors();
-      var SPECIES2 = wellKnownSymbol5("species");
-      module.exports = function(CONSTRUCTOR_NAME) {
-        var Constructor = getBuiltIn3(CONSTRUCTOR_NAME);
-        var defineProperty5 = definePropertyModule2.f;
-        if (DESCRIPTORS7 && Constructor && !Constructor[SPECIES2]) {
-          defineProperty5(Constructor, SPECIES2, {
-            configurable: true,
-            get: function() {
-              return this;
-            }
-          });
-        }
       };
     }
   });
@@ -3421,6 +3844,15 @@
     }
     return x;
   }
+  function isHidden(obj) {
+    if (obj === null || obj.offsetWidth !== 0 || obj.offsetHeight !== 0) {
+      return false;
+    } else if (getStyle(obj, "display") === "none") {
+      return true;
+    } else {
+      return isHidden(obj.parentElement);
+    }
+  }
   function padZeros(n, digits) {
     var str = n.toString();
     while (str.length < digits) {
@@ -3451,10 +3883,13 @@
   function makeResizeFilter(el, func) {
     var lastSize = {};
     return function() {
+      var outputs = (0, import_jquery5.default)(".shiny-bound-output");
+      outputs.addClass("shiny-output-resizing");
       var size = {
         w: el.offsetWidth,
         h: el.offsetHeight
       };
+      outputs.removeClass("shiny-output-resizing");
       if (size.w === 0 && size.h === 0)
         return;
       if (size.w === lastSize.w && size.h === lastSize.h)
@@ -8881,7 +9316,7 @@
   // srcts/src/shiny/render.ts
   var import_jquery27 = __toModule(require_jquery());
 
-  // srcts/src/shiny/sendImageSize.ts
+  // srcts/src/shiny/sendOutputInfo.ts
   function _classCallCheck25(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
       throw new TypeError("Cannot call a class as a function");
@@ -8912,30 +9347,30 @@
     }
     return obj;
   }
-  var SendImageSize = /* @__PURE__ */ function() {
-    function SendImageSize2() {
-      _classCallCheck25(this, SendImageSize2);
+  var SendOutputInfo = /* @__PURE__ */ function() {
+    function SendOutputInfo2() {
+      _classCallCheck25(this, SendOutputInfo2);
       _defineProperty8(this, "regular", void 0);
       _defineProperty8(this, "transitioned", void 0);
     }
-    _createClass25(SendImageSize2, [{
-      key: "setImageSend",
-      value: function setImageSend(inputBatchSender, doSendImageSize) {
-        var sendImageSizeDebouncer = new Debouncer(null, doSendImageSize, 0);
+    _createClass25(SendOutputInfo2, [{
+      key: "setSendMethod",
+      value: function setSendMethod(inputBatchSender, doSendOutputInfo) {
+        var sendOutputInfoDebouncer = new Debouncer(null, doSendOutputInfo, 0);
         this.regular = function() {
-          sendImageSizeDebouncer.normalCall();
+          sendOutputInfoDebouncer.normalCall();
         };
         inputBatchSender.lastChanceCallback.push(function() {
-          if (sendImageSizeDebouncer.isPending())
-            sendImageSizeDebouncer.immediateCall();
+          if (sendOutputInfoDebouncer.isPending())
+            sendOutputInfoDebouncer.immediateCall();
         });
         this.transitioned = debounce(200, this.regular);
-        return sendImageSizeDebouncer;
+        return sendOutputInfoDebouncer;
       }
     }]);
-    return SendImageSize2;
+    return SendOutputInfo2;
   }();
-  var sendImageSizeFns = new SendImageSize();
+  var sendOutputInfoFns = new SendOutputInfo();
 
   // srcts/src/shiny/singletons.ts
   var import_es_regexp_exec5 = __toModule(require_es_regexp_exec());
@@ -9224,7 +9659,7 @@
         $head.append(newStyle);
         oldStyle.remove();
         removeSheet(oldSheet);
-        sendImageSizeFns.transitioned();
+        sendOutputInfoFns.transitioned();
       };
       xhr.send();
     };
@@ -9262,7 +9697,7 @@
           $dummyEl.one("transitionend", function() {
             $dummyEl.remove();
             removeSheet(oldSheet);
-            sendImageSizeFns.transitioned();
+            sendOutputInfoFns.transitioned();
           });
           (0, import_jquery27.default)(document.body).append($dummyEl);
           var color = "#" + Math.floor(Math.random() * 16777215).toString(16);
@@ -10697,10 +11132,10 @@
     }, {
       key: "resize",
       value: function resize(el, width, height) {
-        (0, import_jquery33.default)(el).find("img").trigger("resize");
-        return;
-        width;
-        height;
+        var img = (0, import_jquery33.default)(el).find("img");
+        img.attr("width", width);
+        img.attr("height", height);
+        img.trigger("resize");
       }
     }]);
     return ImageOutputBinding2;
@@ -10942,6 +11377,8 @@
 
   // srcts/src/shiny/init.ts
   var import_es_regexp_exec10 = __toModule(require_es_regexp_exec());
+  var import_es_array_iterator22 = __toModule(require_es_array_iterator());
+  var import_es_set = __toModule(require_es_set());
   var import_jquery40 = __toModule(require_jquery());
 
   // srcts/src/inputPolicies/inputBatchSender.ts
@@ -11580,7 +12017,7 @@
     return inputItems;
   }
   function bindOutputs(_ref) {
-    var sendOutputHiddenState = _ref.sendOutputHiddenState, maybeAddThemeObserver = _ref.maybeAddThemeObserver, outputBindings = _ref.outputBindings;
+    var outputBindings = _ref.outputBindings;
     var scope = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : document.documentElement;
     var $scope = (0, import_jquery38.default)(scope);
     var bindings = outputBindings.getBindings();
@@ -11588,18 +12025,17 @@
       var binding = bindings[i].binding;
       var matches = binding.find($scope) || [];
       for (var j = 0; j < matches.length; j++) {
-        var _el = matches[j];
-        var id = binding.getId(_el);
+        var el = matches[j];
+        var id = binding.getId(el);
         if (!id)
           continue;
-        if (!import_jquery38.default.contains(document.documentElement, _el))
+        if (!import_jquery38.default.contains(document.documentElement, el))
           continue;
-        var $el = (0, import_jquery38.default)(_el);
+        var $el = (0, import_jquery38.default)(el);
         if ($el.hasClass("shiny-bound-output")) {
           continue;
         }
-        maybeAddThemeObserver(_el);
-        var bindingAdapter = new OutputBindingAdapter(_el, binding);
+        var bindingAdapter = new OutputBindingAdapter(el, binding);
         shinyAppBindOutput(id, bindingAdapter);
         $el.data("shiny-output-binding", bindingAdapter);
         $el.addClass("shiny-bound-output");
@@ -11612,8 +12048,7 @@
         });
       }
     }
-    setTimeout(sendImageSizeFns.regular, 0);
-    setTimeout(sendOutputHiddenState, 0);
+    setTimeout(sendOutputInfoFns.regular, 0);
   }
   function unbindInputs() {
     var scope = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : document.documentElement;
@@ -11623,25 +12058,24 @@
       inputs.push(scope);
     }
     for (var i = 0; i < inputs.length; i++) {
-      var _el2 = inputs[i];
-      var binding = (0, import_jquery38.default)(_el2).data("shiny-input-binding");
+      var el = inputs[i];
+      var binding = (0, import_jquery38.default)(el).data("shiny-input-binding");
       if (!binding)
         continue;
-      var id = binding.getId(_el2);
-      (0, import_jquery38.default)(_el2).removeClass("shiny-bound-input");
+      var id = binding.getId(el);
+      (0, import_jquery38.default)(el).removeClass("shiny-bound-input");
       delete boundInputs[id];
-      binding.unsubscribe(_el2);
-      (0, import_jquery38.default)(_el2).trigger({
+      binding.unsubscribe(el);
+      (0, import_jquery38.default)(el).trigger({
         type: "shiny:unbound",
         binding: binding,
         bindingType: "input"
       });
     }
   }
-  function unbindOutputs(_ref2) {
-    var sendOutputHiddenState = _ref2.sendOutputHiddenState;
-    var scope = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : document.documentElement;
-    var includeSelf = arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : false;
+  function unbindOutputs() {
+    var scope = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : document.documentElement;
+    var includeSelf = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : false;
     var outputs = (0, import_jquery38.default)(scope).find(".shiny-bound-output").toArray();
     if (includeSelf && (0, import_jquery38.default)(scope).hasClass("shiny-bound-output")) {
       outputs.push(scope);
@@ -11661,17 +12095,16 @@
         bindingType: "output"
       });
     }
-    setTimeout(sendImageSizeFns.regular, 0);
-    setTimeout(sendOutputHiddenState, 0);
+    setTimeout(sendOutputInfoFns.regular, 0);
   }
   function _bindAll(shinyCtx, scope) {
     bindOutputs(shinyCtx, scope);
     return bindInputs(shinyCtx, scope);
   }
-  function unbindAll(shinyCtx, scope) {
-    var includeSelf = arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : false;
+  function unbindAll(scope) {
+    var includeSelf = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : false;
     unbindInputs(scope, includeSelf);
-    unbindOutputs(shinyCtx, scope, includeSelf);
+    unbindOutputs(scope, includeSelf);
   }
   function bindAll(shinyCtx, scope) {
     var currentInputItems = _bindAll(shinyCtx, scope);
@@ -12709,8 +13142,6 @@
       return {
         inputs: inputs,
         inputsRate: inputsRate,
-        sendOutputHiddenState: sendOutputHiddenState,
-        maybeAddThemeObserver: maybeAddThemeObserver,
         inputBindings: inputBindings,
         outputBindings: outputBindings,
         initDeferredIframes: initDeferredIframes
@@ -12721,7 +13152,7 @@
     };
     windowShiny3.unbindAll = function(scope) {
       var includeSelf = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : false;
-      unbindAll(shinyBindCtx(), scope, includeSelf);
+      unbindAll(scope, includeSelf);
     };
     function initializeInputs() {
       var scope = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : document.documentElement;
@@ -12744,187 +13175,142 @@
     function getIdFromEl(el) {
       var $el = (0, import_jquery40.default)(el);
       var bindingAdapter = $el.data("shiny-output-binding");
-      if (!bindingAdapter)
-        return null;
-      else
-        return bindingAdapter.getId();
+      return bindingAdapter ? bindingAdapter.getId() : null;
     }
     initializeInputs(document.documentElement);
     var initialValues = mapValues(_bindAll(shinyBindCtx(), document.documentElement), function(x) {
       return x.value;
     });
-    (0, import_jquery40.default)(".shiny-image-output, .shiny-plot-output, .shiny-report-size").each(function() {
-      var id = getIdFromEl(this);
-      if (this.offsetWidth !== 0 || this.offsetHeight !== 0) {
-        initialValues[".clientdata_output_" + id + "_width"] = this.offsetWidth;
-        initialValues[".clientdata_output_" + id + "_height"] = this.offsetHeight;
+    function setInput(name, value) {
+      var initial = arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : false;
+      if (initial) {
+        initialValues[name] = value;
+      } else {
+        inputs.setInput(name, value);
       }
-    });
-    function getComputedBgColor(el) {
-      if (!el) {
-        return null;
-      }
-      var bgColor = getStyle(el, "background-color");
-      var m = bgColor.match(/^rgba\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)\s*\)$/);
-      if (bgColor === "transparent" || m && parseFloat(m[4]) === 0) {
-        var bgImage = getStyle(el, "background-image");
-        if (bgImage && bgImage !== "none") {
-          return null;
-        } else {
-          return getComputedBgColor(el.parentElement);
-        }
-      }
-      return bgColor;
     }
-    function getComputedFont(el) {
-      var fontFamily = getStyle(el, "font-family");
-      var fontSize = getStyle(el, "font-size");
-      return {
-        families: fontFamily.replace(/"/g, "").split(", "),
-        size: fontSize
-      };
-    }
-    (0, import_jquery40.default)(".shiny-image-output, .shiny-plot-output, .shiny-report-theme").each(function() {
-      var el = this;
+    function doSendSize(el) {
+      var initial = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : false;
       var id = getIdFromEl(el);
-      initialValues[".clientdata_output_" + id + "_bg"] = getComputedBgColor(el);
-      initialValues[".clientdata_output_" + id + "_fg"] = getStyle(el, "color");
-      initialValues[".clientdata_output_" + id + "_accent"] = getComputedLinkColor(el);
-      initialValues[".clientdata_output_" + id + "_font"] = getComputedFont(el);
-      maybeAddThemeObserver(el);
-    });
-    function maybeAddThemeObserver(el) {
-      if (!window.MutationObserver) {
-        return;
+      if (el.offsetWidth !== 0 || el.offsetHeight !== 0) {
+        setInput(".clientdata_output_" + id + "_width", el.offsetWidth, initial);
+        setInput(".clientdata_output_" + id + "_height", el.offsetHeight, initial);
       }
-      var cl = el.classList;
-      var reportTheme = cl.contains("shiny-image-output") || cl.contains("shiny-plot-output") || cl.contains("shiny-report-theme");
-      if (!reportTheme) {
-        return;
-      }
-      var $el = (0, import_jquery40.default)(el);
-      if ($el.data("shiny-theme-observer")) {
-        return;
-      }
-      var observerCallback = new Debouncer(null, function() {
-        return doSendTheme(el);
-      }, 100);
-      var observer = new MutationObserver(function() {
-        return observerCallback.normalCall();
+    }
+    function doTriggerResize(el) {
+      var $el = (0, import_jquery40.default)(el), binding = $el.data("shiny-output-binding");
+      $el.trigger({
+        type: "shiny:visualchange",
+        visible: !isHidden(el),
+        binding: binding
       });
-      var config = {
-        attributes: true,
-        attributeFilter: ["style", "class"]
-      };
-      observer.observe(el, config);
-      $el.data("shiny-theme-observer", observer);
+      binding.onResize();
     }
     function doSendTheme(el) {
+      var initial = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : false;
       if (el.classList.contains("shiny-output-error")) {
         return;
       }
-      var id = getIdFromEl(el);
-      inputs.setInput(".clientdata_output_" + id + "_bg", getComputedBgColor(el));
-      inputs.setInput(".clientdata_output_" + id + "_fg", getStyle(el, "color"));
-      inputs.setInput(".clientdata_output_" + id + "_accent", getComputedLinkColor(el));
-      inputs.setInput(".clientdata_output_" + id + "_font", getComputedFont(el));
-    }
-    function doSendImageSize() {
-      (0, import_jquery40.default)(".shiny-image-output, .shiny-plot-output, .shiny-report-size").each(function() {
-        var id = getIdFromEl(this);
-        if (this.offsetWidth !== 0 || this.offsetHeight !== 0) {
-          inputs.setInput(".clientdata_output_" + id + "_width", this.offsetWidth);
-          inputs.setInput(".clientdata_output_" + id + "_height", this.offsetHeight);
+      function getComputedBgColor(el2) {
+        if (!el2) {
+          return null;
         }
-      });
-      (0, import_jquery40.default)(".shiny-image-output, .shiny-plot-output, .shiny-report-theme").each(function() {
-        doSendTheme(this);
-      });
-      (0, import_jquery40.default)(".shiny-bound-output").each(function() {
-        var $this = (0, import_jquery40.default)(this), binding = $this.data("shiny-output-binding");
-        $this.trigger({
-          type: "shiny:visualchange",
-          visible: !isHidden(this),
-          binding: binding
-        });
-        binding.onResize();
-      });
-    }
-    sendImageSizeFns.setImageSend(inputBatchSender, doSendImageSize);
-    function isHidden(obj) {
-      if (obj === null || obj.offsetWidth !== 0 || obj.offsetHeight !== 0) {
-        return false;
-      } else if (getStyle(obj, "display") === "none") {
-        return true;
-      } else {
-        return isHidden(obj.parentNode);
+        var bgColor = getStyle(el2, "background-color");
+        var m = bgColor.match(/^rgba\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)\s*\)$/);
+        if (bgColor === "transparent" || m && parseFloat(m[4]) === 0) {
+          var bgImage = getStyle(el2, "background-image");
+          if (bgImage && bgImage !== "none") {
+            return null;
+          } else {
+            return getComputedBgColor(el2.parentElement);
+          }
+        }
+        return bgColor;
       }
-    }
-    var lastKnownVisibleOutputs = {};
-    (0, import_jquery40.default)(".shiny-bound-output").each(function() {
-      var id = getIdFromEl(this);
-      if (isHidden(this)) {
-        initialValues[".clientdata_output_" + id + "_hidden"] = true;
-      } else {
-        lastKnownVisibleOutputs[id] = true;
-        initialValues[".clientdata_output_" + id + "_hidden"] = false;
-      }
-    });
-    function doSendOutputHiddenState() {
-      var visibleOutputs = {};
-      (0, import_jquery40.default)(".shiny-bound-output").each(function() {
-        var id = getIdFromEl(this);
-        delete lastKnownVisibleOutputs[id];
-        var hidden = isHidden(this), evt = {
-          type: "shiny:visualchange",
-          visible: !hidden
+      function getComputedFont(el2) {
+        var fontFamily = getStyle(el2, "font-family");
+        var fontSize = getStyle(el2, "font-size");
+        return {
+          families: fontFamily.replace(/"/g, "").split(", "),
+          size: fontSize
         };
-        if (hidden) {
-          inputs.setInput(".clientdata_output_" + id + "_hidden", true);
-        } else {
-          visibleOutputs[id] = true;
-          inputs.setInput(".clientdata_output_" + id + "_hidden", false);
+      }
+      var id = getIdFromEl(el);
+      setInput(".clientdata_output_" + id + "_bg", getComputedBgColor(el), initial);
+      setInput(".clientdata_output_" + id + "_fg", getStyle(el, "color"), initial);
+      setInput(".clientdata_output_" + id + "_accent", getComputedLinkColor(el), initial);
+      setInput(".clientdata_output_" + id + "_font", getComputedFont(el), initial);
+    }
+    var visibleOutputs = new Set();
+    function doSendHiddenState(el) {
+      var initial = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : false;
+      var id = getIdFromEl(el);
+      var hidden = isHidden(el);
+      if (!hidden)
+        visibleOutputs.add(id);
+      setInput(".clientdata_output_" + id + "_hidden", hidden, initial);
+    }
+    function doSendOutputInfo() {
+      var initial = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : false;
+      var outputIds = new Set();
+      (0, import_jquery40.default)(".shiny-bound-output").each(function() {
+        var el = this, id = getIdFromEl(el), isPlot = el.classList.contains("shiny-image-output") || el.classList.contains("shiny-plot-output");
+        outputIds.add(id);
+        function handleResize() {
+          var initial2 = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : false;
+          doTriggerResize(el);
+          doSendHiddenState(el, initial2);
+          if (isPlot || el.classList.contains("shiny-report-size")) {
+            doSendSize(el, initial2);
+          }
         }
-        var $this = (0, import_jquery40.default)(this);
-        evt.binding = $this.data("shiny-output-binding");
-        $this.trigger(evt);
+        if (!(0, import_jquery40.default)(el).data("shiny-resize-observer")) {
+          var onResize = debounce(100, handleResize);
+          var ro = new ResizeObserver(function() {
+            return onResize(false);
+          });
+          ro.observe(el);
+          (0, import_jquery40.default)(el).data("shiny-resize-observer", ro);
+        }
+        function handleIntersect(entries2) {
+          entries2.forEach(function() {
+            handleResize(false);
+          });
+        }
+        if (!(0, import_jquery40.default)(el).data("shiny-intersection-observer")) {
+          var onIntersect = debounce(100, handleIntersect);
+          var io = new IntersectionObserver(onIntersect);
+          io.observe(el);
+          (0, import_jquery40.default)(el).data("shiny-intersection-observer", io);
+        }
+        function handleMutate() {
+          var initial2 = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : false;
+          if (isPlot || el.classList.contains("shiny-report-theme")) {
+            doSendTheme(el, initial2);
+          }
+        }
+        if (!(0, import_jquery40.default)(el).data("shiny-mutate-observer")) {
+          var onMutate = debounce(100, handleMutate);
+          var mo = new MutationObserver(function() {
+            return onMutate(false);
+          });
+          mo.observe(el, {
+            attributes: true,
+            attributeFilter: ["style", "class"]
+          });
+          (0, import_jquery40.default)(el).data("shiny-mutate-observer", mo);
+        }
+        handleMutate(initial);
       });
-      for (var name in lastKnownVisibleOutputs) {
-        if (hasOwnProperty(lastKnownVisibleOutputs, name))
-          inputs.setInput(".clientdata_output_" + name + "_hidden", true);
-      }
-      lastKnownVisibleOutputs = visibleOutputs;
-    }
-    var sendOutputHiddenStateDebouncer = new Debouncer(null, doSendOutputHiddenState, 0);
-    function sendOutputHiddenState() {
-      sendOutputHiddenStateDebouncer.normalCall();
-    }
-    inputBatchSender.lastChanceCallback.push(function() {
-      if (sendOutputHiddenStateDebouncer.isPending())
-        sendOutputHiddenStateDebouncer.immediateCall();
-    });
-    function filterEventsByNamespace(namespace, handler) {
-      for (var _len = arguments.length, args = new Array(_len > 2 ? _len - 2 : 0), _key = 2; _key < _len; _key++) {
-        args[_key - 2] = arguments[_key];
-      }
-      namespace = namespace.split(".");
-      return function(e) {
-        var eventNamespace = e.namespace.split(".");
-        for (var i = 0; i < namespace.length; i++) {
-          if (eventNamespace.indexOf(namespace[i]) === -1)
-            return;
+      visibleOutputs.forEach(function(id) {
+        if (!outputIds.has(id)) {
+          visibleOutputs.delete(id);
+          setInput(".clientdata_output_" + id + "_hidden", true, initial);
         }
-        handler.apply(this, [namespace, handler].concat(args));
-      };
+      });
     }
-    (0, import_jquery40.default)(window).resize(debounce(500, sendImageSizeFns.regular));
-    var bs3classes = ["modal", "dropdown", "tab", "tooltip", "popover", "collapse"];
-    import_jquery40.default.each(bs3classes, function(idx, classname) {
-      (0, import_jquery40.default)(document.body).on("shown.bs." + classname + ".sendImageSize", "*", filterEventsByNamespace("bs", sendImageSizeFns.regular));
-      (0, import_jquery40.default)(document.body).on("shown.bs." + classname + ".sendOutputHiddenState hidden.bs." + classname + ".sendOutputHiddenState", "*", filterEventsByNamespace("bs", sendOutputHiddenState));
-    });
-    (0, import_jquery40.default)(document.body).on("shown.sendImageSize", "*", sendImageSizeFns.regular);
-    (0, import_jquery40.default)(document.body).on("shown.sendOutputHiddenState hidden.sendOutputHiddenState", "*", sendOutputHiddenState);
+    doSendOutputInfo(true);
+    sendOutputInfoFns.setSendMethod(inputBatchSender, doSendOutputInfo);
     initialValues[".clientdata_pixelratio"] = pixelRatio();
     (0, import_jquery40.default)(window).resize(function() {
       inputs.setInput(".clientdata_pixelratio", pixelRatio());
@@ -12982,7 +13368,7 @@
   var windowShiny2;
   function setShiny(windowShiny_) {
     windowShiny2 = windowShiny_;
-    windowShiny2.version = "1.7.2";
+    windowShiny2.version = "1.7.2.9000";
     var _initInputBindings = initInputBindings(), inputBindings = _initInputBindings.inputBindings, fileInputBinding2 = _initInputBindings.fileInputBinding;
     var _initOutputBindings = initOutputBindings(), outputBindings = _initOutputBindings.outputBindings;
     setFileInputBinding(fileInputBinding2);

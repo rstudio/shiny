@@ -10,11 +10,11 @@ import {
 } from "../inputPolicies";
 import type { InputPolicy } from "../inputPolicies";
 import { addDefaultInputOpts } from "../inputPolicies/inputValidateDecorator";
-import { debounce, Debouncer } from "../time";
+import { debounce } from "../time";
 import {
   getComputedLinkColor,
   getStyle,
-  hasOwnProperty,
+  isHidden,
   mapValues,
   pixelRatio,
 } from "../utils";
@@ -22,7 +22,7 @@ import { bindAll, unbindAll, _bindAll } from "./bind";
 import type { BindInputsCtx, BindScope } from "./bind";
 import { setShinyObj } from "./initedMethods";
 import { registerDependency } from "./render";
-import { sendImageSizeFns } from "./sendImageSize";
+import { sendOutputInfoFns } from "./sendOutputInfo";
 import { ShinyApp } from "./shinyapp";
 import { registerNames as singletonsRegisterNames } from "./singletons";
 import type { InputPolicyOpts } from "../inputPolicies/inputPolicy";
@@ -87,8 +87,6 @@ function initShiny(windowShiny: Shiny): void {
     return {
       inputs,
       inputsRate,
-      sendOutputHiddenState,
-      maybeAddThemeObserver,
       inputBindings,
       outputBindings,
       initDeferredIframes,
@@ -99,7 +97,7 @@ function initShiny(windowShiny: Shiny): void {
     bindAll(shinyBindCtx(), scope);
   };
   windowShiny.unbindAll = function (scope: BindScope, includeSelf = false) {
-    unbindAll(shinyBindCtx(), scope, includeSelf);
+    unbindAll(scope, includeSelf);
   };
 
   // Calls .initialize() for all of the input objects in all input bindings,
@@ -127,12 +125,11 @@ function initShiny(windowShiny: Shiny): void {
   }
   windowShiny.initializeInputs = initializeInputs;
 
-  function getIdFromEl(el: HTMLElement) {
+  function getIdFromEl(el: HTMLElement): string | null {
     const $el = $(el);
     const bindingAdapter = $el.data("shiny-output-binding");
 
-    if (!bindingAdapter) return null;
-    else return bindingAdapter.getId();
+    return bindingAdapter ? bindingAdapter.getId() : null;
   }
 
   // Initialize all input objects in the document, before binding
@@ -150,306 +147,203 @@ function initShiny(windowShiny: Shiny): void {
     (x) => x.value
   );
 
-  // The server needs to know the size of each image and plot output element,
-  // in case it is auto-sizing
-  $(".shiny-image-output, .shiny-plot-output, .shiny-report-size").each(
-    function () {
-      const id = getIdFromEl(this);
-
-      if (this.offsetWidth !== 0 || this.offsetHeight !== 0) {
-        initialValues[".clientdata_output_" + id + "_width"] = this.offsetWidth;
-        initialValues[".clientdata_output_" + id + "_height"] =
-          this.offsetHeight;
-      }
+  // Helper function for both initializing and updating input values
+  function setInput(name: string, value: unknown, initial = false): void {
+    if (initial) {
+      initialValues[name] = value;
+    } else {
+      inputs.setInput(name, value);
     }
-  );
-
-  function getComputedBgColor(el) {
-    if (!el) {
-      // Top of document, can't recurse further
-      return null;
-    }
-
-    const bgColor = getStyle(el, "background-color");
-    const m = bgColor.match(
-      /^rgba\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)\s*\)$/
-    );
-
-    if (bgColor === "transparent" || (m && parseFloat(m[4]) === 0)) {
-      // No background color on this element. See if it has a background image.
-      const bgImage = getStyle(el, "background-image");
-
-      if (bgImage && bgImage !== "none") {
-        // Failed to detect background color, since it has a background image
-        return null;
-      } else {
-        // Recurse
-        return getComputedBgColor(el.parentElement);
-      }
-    }
-    return bgColor;
   }
 
-  function getComputedFont(el) {
-    const fontFamily = getStyle(el, "font-family");
-    const fontSize = getStyle(el, "font-size");
+  function doSendSize(el: HTMLElement, initial = false): void {
+    const id = getIdFromEl(el);
 
-    return {
-      families: fontFamily.replace(/"/g, "").split(", "),
-      size: fontSize,
-    };
+    if (el.offsetWidth !== 0 || el.offsetHeight !== 0) {
+      setInput(".clientdata_output_" + id + "_width", el.offsetWidth, initial);
+      setInput(
+        ".clientdata_output_" + id + "_height",
+        el.offsetHeight,
+        initial
+      );
+    }
   }
 
-  $(".shiny-image-output, .shiny-plot-output, .shiny-report-theme").each(
-    function () {
-      // eslint-disable-next-line @typescript-eslint/no-this-alias
-      const el = this;
-      const id = getIdFromEl(el);
+  function doTriggerResize(el: HTMLElement): void {
+    const $el = $(el),
+      binding = $el.data("shiny-output-binding");
 
-      initialValues[".clientdata_output_" + id + "_bg"] =
-        getComputedBgColor(el);
-      initialValues[".clientdata_output_" + id + "_fg"] = getStyle(el, "color");
-      initialValues[".clientdata_output_" + id + "_accent"] =
-        getComputedLinkColor(el);
-      initialValues[".clientdata_output_" + id + "_font"] = getComputedFont(el);
-      maybeAddThemeObserver(el);
-    }
-  );
-
-  // Resend computed styles if *an output element's* class or style attribute changes.
-  // This gives us some level of confidence that getCurrentOutputInfo() will be
-  // properly invalidated if output container is mutated; but unfortunately,
-  // we don't have a reasonable way to detect change in *inherited* styles
-  // (other than session$setCurrentTheme())
-  // https://github.com/rstudio/shiny/issues/3196
-  // https://github.com/rstudio/shiny/issues/2998
-  function maybeAddThemeObserver(el: HTMLElement): void {
-    if (!window.MutationObserver) {
-      return; // IE10 and lower
-    }
-
-    const cl = el.classList;
-    const reportTheme =
-      cl.contains("shiny-image-output") ||
-      cl.contains("shiny-plot-output") ||
-      cl.contains("shiny-report-theme");
-
-    if (!reportTheme) {
-      return;
-    }
-
-    const $el = $(el);
-
-    if ($el.data("shiny-theme-observer")) {
-      return; // i.e., observer is already observing
-    }
-
-    const observerCallback = new Debouncer(null, () => doSendTheme(el), 100);
-    const observer = new MutationObserver(() => observerCallback.normalCall());
-    const config = { attributes: true, attributeFilter: ["style", "class"] };
-
-    observer.observe(el, config);
-    $el.data("shiny-theme-observer", observer);
+    $el.trigger({
+      type: "shiny:visualchange",
+      // @ts-expect-error; Can not remove info on a established, malformed Event object
+      visible: !isHidden(el),
+      binding: binding,
+    });
+    binding.onResize();
   }
 
-  function doSendTheme(el) {
+  function doSendTheme(el: HTMLElement, initial = false): void {
     // Sending theme info on error isn't necessary (it'd add an unnecessary additional round-trip)
     if (el.classList.contains("shiny-output-error")) {
       return;
     }
-    const id = getIdFromEl(el);
 
-    inputs.setInput(".clientdata_output_" + id + "_bg", getComputedBgColor(el));
-    inputs.setInput(".clientdata_output_" + id + "_fg", getStyle(el, "color"));
-    inputs.setInput(
-      ".clientdata_output_" + id + "_accent",
-      getComputedLinkColor(el)
-    );
-    inputs.setInput(".clientdata_output_" + id + "_font", getComputedFont(el));
-  }
+    function getComputedBgColor(el: HTMLElement): string {
+      if (!el) {
+        // Top of document, can't recurse further
+        return null;
+      }
 
-  function doSendImageSize() {
-    $(".shiny-image-output, .shiny-plot-output, .shiny-report-size").each(
-      function () {
-        const id = getIdFromEl(this);
+      const bgColor = getStyle(el, "background-color");
+      const m = bgColor.match(
+        /^rgba\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)\s*\)$/
+      );
 
-        if (this.offsetWidth !== 0 || this.offsetHeight !== 0) {
-          inputs.setInput(
-            ".clientdata_output_" + id + "_width",
-            this.offsetWidth
-          );
-          inputs.setInput(
-            ".clientdata_output_" + id + "_height",
-            this.offsetHeight
-          );
+      if (bgColor === "transparent" || (m && parseFloat(m[4]) === 0)) {
+        // No background color on this element. See if it has a background image.
+        const bgImage = getStyle(el, "background-image");
+
+        if (bgImage && bgImage !== "none") {
+          // Failed to detect background color, since it has a background image
+          return null;
+        } else {
+          // Recurse
+          return getComputedBgColor(el.parentElement);
         }
       }
-    );
+      return bgColor;
+    }
 
-    $(".shiny-image-output, .shiny-plot-output, .shiny-report-theme").each(
-      function () {
-        doSendTheme(this);
-      }
-    );
+    function getComputedFont(el: HTMLElement): {
+      families: string[];
+      size: string;
+    } {
+      const fontFamily = getStyle(el, "font-family");
+      const fontSize = getStyle(el, "font-size");
 
+      return {
+        families: fontFamily.replace(/"/g, "").split(", "),
+        size: fontSize,
+      };
+    }
+
+    const id = getIdFromEl(el);
+
+    setInput(
+      ".clientdata_output_" + id + "_bg",
+      getComputedBgColor(el),
+      initial
+    );
+    setInput(
+      ".clientdata_output_" + id + "_fg",
+      getStyle(el, "color"),
+      initial
+    );
+    setInput(
+      ".clientdata_output_" + id + "_accent",
+      getComputedLinkColor(el),
+      initial
+    );
+    setInput(
+      ".clientdata_output_" + id + "_font",
+      getComputedFont(el),
+      initial
+    );
+  }
+
+  // eslint-disable-next-line prefer-const
+  let visibleOutputs = new Set();
+
+  function doSendHiddenState(el: HTMLElement, initial = false): void {
+    const id = getIdFromEl(el);
+    const hidden = isHidden(el);
+
+    if (!hidden) visibleOutputs.add(id);
+    setInput(".clientdata_output_" + id + "_hidden", hidden, initial);
+  }
+
+  function doSendOutputInfo(initial = false) {
+    const outputIds = new Set();
+
+    // TODO: can we always rely on this class existing when we're calling this (especially initially)?
     $(".shiny-bound-output").each(function () {
-      const $this = $(this),
-        binding = $this.data("shiny-output-binding");
+      // eslint-disable-next-line @typescript-eslint/no-this-alias
+      const el = this,
+        id = getIdFromEl(el),
+        isPlot =
+          el.classList.contains("shiny-image-output") ||
+          el.classList.contains("shiny-plot-output");
 
-      $this.trigger({
-        type: "shiny:visualchange",
-        // @ts-expect-error; Can not remove info on a established, malformed Event object
-        visible: !isHidden(this),
-        binding: binding,
-      });
-      binding.onResize();
+      outputIds.add(id);
+
+      function handleResize(initial = false) {
+        doTriggerResize(el);
+        doSendHiddenState(el, initial);
+        if (isPlot || el.classList.contains("shiny-report-size")) {
+          doSendSize(el, initial);
+        }
+      }
+
+      // TODO: do we need a polyfill for ResizeObserver?
+      if (!$(el).data("shiny-resize-observer")) {
+        const onResize = debounce(100, handleResize);
+        const ro = new ResizeObserver(() => onResize(false));
+
+        ro.observe(el);
+        $(el).data("shiny-resize-observer", ro);
+      }
+
+      function handleIntersect(entries) {
+        entries.forEach(() => {
+          handleResize(false);
+        });
+      }
+
+      // TODO: do we need a polyfill for IntersectionObserver?
+      if (!$(el).data("shiny-intersection-observer")) {
+        const onIntersect = debounce(100, handleIntersect);
+        const io = new IntersectionObserver(onIntersect);
+
+        io.observe(el);
+        $(el).data("shiny-intersection-observer", io);
+      }
+
+      function handleMutate(initial = false) {
+        if (isPlot || el.classList.contains("shiny-report-theme")) {
+          doSendTheme(el, initial);
+        }
+      }
+
+      // TODO: do we need a polyfill for MutationObserver?
+      if (!$(el).data("shiny-mutate-observer")) {
+        const onMutate = debounce(100, handleMutate);
+        const mo = new MutationObserver(() => onMutate(false));
+
+        mo.observe(el, {
+          attributes: true,
+          attributeFilter: ["style", "class"],
+        });
+
+        $(el).data("shiny-mutate-observer", mo);
+      }
+
+      handleMutate(initial);
+    });
+
+    // It could be that previously visible outputs have been removed from the DOM,
+    // in that case, consider them hidden.
+    visibleOutputs.forEach((id) => {
+      if (!outputIds.has(id)) {
+        visibleOutputs.delete(id);
+        setInput(".clientdata_output_" + id + "_hidden", true, initial);
+      }
     });
   }
 
-  sendImageSizeFns.setImageSend(inputBatchSender, doSendImageSize);
-
-  // Return true if the object or one of its ancestors in the DOM tree has
-  // style='display:none'; otherwise return false.
-  function isHidden(obj) {
-    // null means we've hit the top of the tree. If width or height is
-    // non-zero, then we know that no ancestor has display:none.
-    if (obj === null || obj.offsetWidth !== 0 || obj.offsetHeight !== 0) {
-      return false;
-    } else if (getStyle(obj, "display") === "none") {
-      return true;
-    } else {
-      return isHidden(obj.parentNode);
-    }
-  }
-  let lastKnownVisibleOutputs = {};
-  // Set initial state of outputs to hidden, if needed
-
-  $(".shiny-bound-output").each(function () {
-    const id = getIdFromEl(this);
-
-    if (isHidden(this)) {
-      initialValues[".clientdata_output_" + id + "_hidden"] = true;
-    } else {
-      lastKnownVisibleOutputs[id] = true;
-      initialValues[".clientdata_output_" + id + "_hidden"] = false;
-    }
-  });
-  // Send update when hidden state changes
-  function doSendOutputHiddenState() {
-    const visibleOutputs = {};
-
-    $(".shiny-bound-output").each(function () {
-      const id = getIdFromEl(this);
-
-      delete lastKnownVisibleOutputs[id];
-      // Assume that the object is hidden when width and height are 0
-      const hidden = isHidden(this),
-        evt = {
-          type: "shiny:visualchange",
-          visible: !hidden,
-        };
-
-      if (hidden) {
-        inputs.setInput(".clientdata_output_" + id + "_hidden", true);
-      } else {
-        visibleOutputs[id] = true;
-        inputs.setInput(".clientdata_output_" + id + "_hidden", false);
-      }
-      const $this = $(this);
-
-      // @ts-expect-error; Can not remove info on a established, malformed Event object
-      evt.binding = $this.data("shiny-output-binding");
-      // @ts-expect-error; Can not remove info on a established, malformed Event object
-      $this.trigger(evt);
-    });
-    // Anything left in lastKnownVisibleOutputs is orphaned
-    for (const name in lastKnownVisibleOutputs) {
-      if (hasOwnProperty(lastKnownVisibleOutputs, name))
-        inputs.setInput(".clientdata_output_" + name + "_hidden", true);
-    }
-    // Update the visible outputs for next time
-    lastKnownVisibleOutputs = visibleOutputs;
-  }
-  // sendOutputHiddenState gets called each time DOM elements are shown or
-  // hidden. This can be in the hundreds or thousands of times at startup.
-  // We'll debounce it, so that we do the actual work once per tick.
-  const sendOutputHiddenStateDebouncer = new Debouncer(
-    null,
-    doSendOutputHiddenState,
-    0
-  );
-
-  function sendOutputHiddenState() {
-    sendOutputHiddenStateDebouncer.normalCall();
-  }
-  // We need to make sure doSendOutputHiddenState actually gets called before
-  // the inputBatchSender sends data to the server. The lastChanceCallback
-  // here does that - if the debouncer has a pending call, flush it.
-  inputBatchSender.lastChanceCallback.push(function () {
-    if (sendOutputHiddenStateDebouncer.isPending())
-      sendOutputHiddenStateDebouncer.immediateCall();
-  });
-
-  // Given a namespace and a handler function, return a function that invokes
-  // the handler only when e's namespace matches. For example, if the
-  // namespace is "bs", it would match when e.namespace is "bs" or "bs.tab".
-  // If the namespace is "bs.tab", it would match for "bs.tab", but not "bs".
-  function filterEventsByNamespace(namespace, handler, ...args) {
-    namespace = namespace.split(".");
-
-    return function (e) {
-      const eventNamespace = e.namespace.split(".");
-
-      // If any of the namespace strings aren't present in this event, quit.
-      for (let i = 0; i < namespace.length; i++) {
-        if (eventNamespace.indexOf(namespace[i]) === -1) return;
-      }
-
-      handler.apply(this, [namespace, handler, ...args]);
-    };
-  }
-
-  // The size of each image may change either because the browser window was
-  // resized, or because a tab was shown/hidden (hidden elements report size
-  // of 0x0). It's OK to over-report sizes because the input pipeline will
-  // filter out values that haven't changed.
-  $(window).resize(debounce(500, sendImageSizeFns.regular));
-  // Need to register callbacks for each Bootstrap 3 class.
-  const bs3classes = [
-    "modal",
-    "dropdown",
-    "tab",
-    "tooltip",
-    "popover",
-    "collapse",
-  ];
-
-  $.each(bs3classes, function (idx, classname) {
-    $(document.body).on(
-      "shown.bs." + classname + ".sendImageSize",
-      "*",
-      filterEventsByNamespace("bs", sendImageSizeFns.regular)
-    );
-    $(document.body).on(
-      "shown.bs." +
-        classname +
-        ".sendOutputHiddenState " +
-        "hidden.bs." +
-        classname +
-        ".sendOutputHiddenState",
-      "*",
-      filterEventsByNamespace("bs", sendOutputHiddenState)
-    );
-  });
-
-  // This is needed for Bootstrap 2 compatibility and for non-Bootstrap
-  // related shown/hidden events (like conditionalPanel)
-  $(document.body).on("shown.sendImageSize", "*", sendImageSizeFns.regular);
-  $(document.body).on(
-    "shown.sendOutputHiddenState hidden.sendOutputHiddenState",
-    "*",
-    sendOutputHiddenState
-  );
+  // Send initial input values to the server and also register a callback
+  // to send updated input values whenever we receive new UI, etc.
+  doSendOutputInfo(true);
+  sendOutputInfoFns.setSendMethod(inputBatchSender, doSendOutputInfo);
 
   // Send initial pixel ratio, and update it if it changes
   initialValues[".clientdata_pixelratio"] = pixelRatio();

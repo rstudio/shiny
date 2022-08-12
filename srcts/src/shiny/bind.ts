@@ -7,7 +7,7 @@ import type {
   InputValidateDecorator,
 } from "../inputPolicies";
 import { shinyAppBindOutput, shinyAppUnbindOutput } from "./initedMethods";
-import { sendImageSizeFns } from "./sendImageSize";
+import { sendOutputInfoFns } from "./sendOutputInfo";
 
 const boundInputs = {};
 
@@ -38,8 +38,6 @@ type BindInputsCtx = {
   inputsRate: InputRateDecorator;
   inputBindings: BindingRegistry<InputBinding>;
   outputBindings: BindingRegistry<OutputBinding>;
-  sendOutputHiddenState: () => void;
-  maybeAddThemeObserver: (el: HTMLElement) => void;
   initDeferredIframes: () => void;
 };
 function bindInputs(
@@ -120,11 +118,7 @@ function bindInputs(
 }
 
 function bindOutputs(
-  {
-    sendOutputHiddenState,
-    maybeAddThemeObserver,
-    outputBindings,
-  }: BindInputsCtx,
+  { outputBindings }: BindInputsCtx,
   scope: BindScope = document.documentElement
 ): void {
   const $scope = $(scope);
@@ -155,12 +149,6 @@ function bindOutputs(
         continue;
       }
 
-      // If this element reports its CSS styles to getCurrentOutputInfo()
-      // then it should have a MutationObserver() to resend CSS if its
-      // style/class attributes change. This observer should already exist
-      // for _static_ UI, but not yet for _dynamic_ UI
-      maybeAddThemeObserver(el);
-
       const bindingAdapter = new OutputBindingAdapter(el, binding);
 
       shinyAppBindOutput(id, bindingAdapter);
@@ -177,8 +165,7 @@ function bindOutputs(
   }
 
   // Send later in case DOM layout isn't final yet.
-  setTimeout(sendImageSizeFns.regular, 0);
-  setTimeout(sendOutputHiddenState, 0);
+  setTimeout(sendOutputInfoFns.regular, 0);
 }
 
 function unbindInputs(
@@ -212,7 +199,6 @@ function unbindInputs(
   }
 }
 function unbindOutputs(
-  { sendOutputHiddenState }: BindInputsCtx,
   scope: BindScope = document.documentElement,
   includeSelf = false
 ) {
@@ -243,8 +229,7 @@ function unbindOutputs(
   }
 
   // Send later in case DOM layout isn't final yet.
-  setTimeout(sendImageSizeFns.regular, 0);
-  setTimeout(sendOutputHiddenState, 0);
+  setTimeout(sendOutputInfoFns.regular, 0);
 }
 
 // (Named used before TS conversion)
@@ -256,13 +241,9 @@ function _bindAll(
   bindOutputs(shinyCtx, scope);
   return bindInputs(shinyCtx, scope);
 }
-function unbindAll(
-  shinyCtx: BindInputsCtx,
-  scope: BindScope,
-  includeSelf = false
-): void {
+function unbindAll(scope: BindScope, includeSelf = false): void {
   unbindInputs(scope, includeSelf);
-  unbindOutputs(shinyCtx, scope, includeSelf);
+  unbindOutputs(scope, includeSelf);
 }
 function bindAll(shinyCtx: BindInputsCtx, scope: BindScope): void {
   // _bindAll returns input values; it doesn't send them to the server.

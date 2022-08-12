@@ -66,6 +66,7 @@ function createClickHandler(
       clickInfoSender(e);
     },
     onResetImg: function () {
+      // TODO: consider making this a no-op or adding an option, see #2153
       clickInfoSender(null);
     },
     updateCoordmap: function (newMap) {
@@ -130,6 +131,7 @@ function createHoverHandler(
     },
     mouseout: mouseout,
     onResetImg: function () {
+      // TODO: consider making this a no-op or adding an option, see #2153
       hoverInfoSender.immediateCall(null);
     },
     updateCoordmap: updateHoverInfoSender,
@@ -157,6 +159,11 @@ function createBrushHandler(
   function updateCoordmap(newCoordmap: Coordmap) {
     coordmap = newCoordmap;
     brush.updateCoordmap(coordmap);
+    // Made sure to send new coords if the new map changed the pixel scale or
+    // clipped us off the side, and we were the most recent brush with our id
+    if ($el.data("mostRecentBrush")) {
+      brushInfoSender.normalCall();
+    }
   }
 
   // Brush IDs can span multiple image/plot outputs. When an output is brushed,

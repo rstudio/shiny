@@ -15,6 +15,8 @@ shiny 1.7.2.9000
 
 ### Bug fixes
 
+* Closed #2344 and #1642: Overhauled brush code so that brush handlers (as well as click/hover handlers) persist when a plot is redrawn, and consistently move any drawn brushes to the correct location if the plot is resized. This fixes an issue where a plot that's redrawn in response to a brush would circumvent the debouncer and sometimes update twice each time the brush was moved--or worse, constantly re-update itself as the brush was being dragged. This also fixes a frustrating-to-replicate bug where the rectangle drawn on the plot could become duplicated and desynced from the coordinates sent to the server with a series of rapid user inputs.
+
 
 shiny 1.7.2
 ===========

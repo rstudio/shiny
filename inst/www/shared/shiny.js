@@ -10466,6 +10466,9 @@
     function updateCoordmap(newCoordmap) {
       coordmap = newCoordmap;
       brush.updateCoordmap(coordmap);
+      if ($el.data("mostRecentBrush")) {
+        brushInfoSender.normalCall();
+      }
     }
     $el.on("shiny-internal:brushed.image_output", function(e, coords) {
       if (coords.brushId === inputId && coords.outputId !== outputId) {

@@ -3883,10 +3883,13 @@
   function makeResizeFilter(el, func) {
     var lastSize = {};
     return function() {
+      var outputs = (0, import_jquery5.default)(".shiny-bound-output");
+      outputs.addClass("shiny-output-resizing");
       var size = {
         w: el.offsetWidth,
         h: el.offsetHeight
       };
+      outputs.removeClass("shiny-output-resizing");
       if (size.w === 0 && size.h === 0)
         return;
       if (size.w === lastSize.w && size.h === lastSize.h)
@@ -13270,10 +13273,8 @@
           (0, import_jquery40.default)(el).data("shiny-resize-observer", ro);
         }
         function handleIntersect(entries2) {
-          entries2.forEach(function(entry) {
-            if (entry.intersectionRatio > 0) {
-              handleResize(false);
-            }
+          entries2.forEach(function() {
+            handleResize(false);
           });
         }
         if (!(0, import_jquery40.default)(el).data("shiny-intersection-observer")) {
@@ -13284,7 +13285,6 @@
         }
         function handleMutate() {
           var initial2 = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : false;
-          handleResize(initial2);
           if (isPlot || el.classList.contains("shiny-report-theme")) {
             doSendTheme(el, initial2);
           }

@@ -294,10 +294,8 @@ function initShiny(windowShiny: Shiny): void {
       }
 
       function handleIntersect(entries) {
-        entries.forEach((entry) => {
-          if (entry.intersectionRatio > 0) {
-            handleResize(false);
-          }
+        entries.forEach(() => {
+          handleResize(false);
         });
       }
 
@@ -311,7 +309,6 @@ function initShiny(windowShiny: Shiny): void {
       }
 
       function handleMutate(initial = false) {
-        handleResize(initial);
         if (isPlot || el.classList.contains("shiny-report-theme")) {
           doSendTheme(el, initial);
         }

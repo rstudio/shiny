@@ -1,7 +1,7 @@
 shiny 1.7.2.9000
 ================
 
-## Full changelof
+## Full changelog
 
 ### Breaking changes
 

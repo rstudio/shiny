@@ -371,7 +371,6 @@ function createBrush(
   }
 
   // Get or set the bounds of the brush using coordinates in the data space.
-  // Option to skip rounding is useful for setBrush
   function boundsData(): ImageState["boundsData"];
   function boundsData(boxData: Parameters<Panel["scaleDataToImg"]>[0]): void;
   function boundsData(boxData?: Parameters<Panel["scaleDataToImg"]>[0]) {
@@ -382,8 +381,9 @@ function createBrush(
     // Converting to CSS coordinates (and then eventually back to data
     // coordinates) is a bit roundabout, but the checks for clipping and brush
     // direction are done in the CSS coordinate space. This introduces slight
-    // floating-point rounding errors, which are smoothed over by rounding to
-    // 13 sig figs in createHandlers.ts before sending off to the server.
+    // floating-point rounding errors, which are smoothed over by rounding
+    // data and CSS coordinates in createHandlers.ts before sending them off to
+    // the server.
     const boxCss = imgToCss(
       state.panel.scaleDataToImg(boxData, opts.brushClip)
     );

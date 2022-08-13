@@ -151,11 +151,6 @@ class ImageOutputBinding extends OutputBinding {
       };
     }
 
-    // // Remove event handlers that were added in previous runs of this function.
-    // $el.off(".image_output");
-    // $img.off(".image_output");
-    // NEW: Keep old handlers! -dvg
-
     // When the image loads, initialize all the interaction handlers. When the
     // value of src is set, the browser may not load the image immediately,
     // even if it's a data URL. If we try to initialize this stuff
@@ -183,15 +178,20 @@ class ImageOutputBinding extends OutputBinding {
       // ----------------------------------------------------------
       // Register the various event handlers
       // ----------------------------------------------------------
+      // New strategy: Keep the old handlers around when the image reloads,
+      // simply updating them with a new coordmap. This is accomplished by
+      // storing a reference to their updateCoordmap functions in $el.data,
+      // and calling it with the new coordmap when the image reloads.
+      // This solves #1642
       if (opts.clickId) {
         disableDrag($el, $img);
 
         // Check to see if a click handler already exists
         if ($el.data("updateClickHandler")) {
-          // Update the old handler with the new coordmap
+          // If so, update the old handler with the new coordmap
           $el.data("updateClickHandler")(optsCoordmap);
         } else {
-          // This is the first load, create a new handler
+          // If not, this is the first load, create a new handler
           const clickHandler = createClickHandler(
             opts.clickId,
             opts.clickClip,
@@ -216,7 +216,7 @@ class ImageOutputBinding extends OutputBinding {
 
         // Check to see if a double-click handler already exists
         if ($el.data("updateDblClickHandler")) {
-          // Update the old handler with the new coordmap
+          // If so, update the old handler with the new coordmap
           $el.data("updateDblClickHandler")(optsCoordmap);
         } else {
           // We'll use the clickHandler's mousedown function, but register it to
@@ -276,7 +276,7 @@ class ImageOutputBinding extends OutputBinding {
           $el.on("mousedown.image_output", brushHandler.mousedown);
           $el.on("mousemove.image_output", brushHandler.mousemove);
 
-          // TODO: we need this for cached plots!
+          // resize handler is used for cached plots!
           $el.on("resize.image_output", brushHandler.onResize);
           $el.on("reset.image_output", brushHandler.onResetImg);
           $el.data("updateBrushHandler", brushHandler.updateCoordmap);
@@ -317,8 +317,8 @@ class ImageOutputBinding extends OutputBinding {
   }
 
   // For non-cached plots, this is useless, since it will always be followed by
-  // a reload. However, cached plots may need this code path to update brushes
-  // visually.
+  // a reload. However, cached plots need this code path to update brushes
+  // visually when a small, reload-less resize occurs.
   resize(
     el: HTMLElement,
     width: number | string,

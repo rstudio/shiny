@@ -10055,29 +10055,6 @@
         reset();
       }
     }
-    function importOldBrush() {
-      console.log("THIS SHOULDN'T RUN (importOldBrush)");
-      var oldDiv = $el.find("#" + el.id + "_brush");
-      if (oldDiv.length === 0)
-        return;
-      var oldBoundsData = oldDiv.data("bounds-data");
-      var oldPanel = oldDiv.data("panel");
-      if (!oldBoundsData || !oldPanel)
-        return;
-      for (var i = 0; i < coordmap.panels.length; i++) {
-        var curPanel = coordmap.panels[i];
-        if (equal(oldPanel.mapping, curPanel.mapping) && equal(oldPanel.panel_vars, curPanel.panel_vars)) {
-          state.panel = coordmap.panels[i];
-          break;
-        }
-      }
-      if (state.panel === null) {
-        oldDiv.remove();
-        return;
-      }
-      $div = oldDiv;
-      boundsData(oldBoundsData);
-    }
     function onImgResize() {
       var boundsDataVal = boundsData();
       for (var val in boundsDataVal) {
@@ -10331,7 +10308,6 @@
     return {
       updateCoordmap: updateCoordmap,
       reset: reset,
-      importOldBrush: importOldBrush,
       isInsideBrush: isInsideBrush,
       isInResizeArea: isInResizeArea,
       whichResizeSides: whichResizeSides,

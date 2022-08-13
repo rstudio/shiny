@@ -83,12 +83,6 @@ function createHoverHandler(
   nullOutside: NullOutside,
   coordmap: Coordmap
 ): CreateHandler {
-  // const sendHoverInfo = coordmap.mouseCoordinateSender(
-  //   inputId,
-  //   clip,
-  //   nullOutside
-  // );
-
   let hoverInfoSender: InputRatePolicy<
     (e: JQuery.MouseDownEvent | JQuery.MouseMoveEvent) => void
   >;
@@ -108,10 +102,6 @@ function createHoverHandler(
   }
 
   updateHoverInfoSender(coordmap);
-
-  // if (delayType === "throttle")
-  //   hoverInfoSender = new Throttler(null, sendHoverInfo, delay);
-  // else hoverInfoSender = new Debouncer(null, sendHoverInfo, delay);
 
   // What to do when mouse exits the image
   let mouseout: () => void;
@@ -156,13 +146,14 @@ function createBrushHandler(
   // Represents the state of the brush
   const brush = createBrush($el, opts, coordmap, expandPixels);
 
+  // This is called by the image binding when the image is redrawn for any reason.
   function updateCoordmap(newCoordmap: Coordmap) {
     coordmap = newCoordmap;
     brush.updateCoordmap(coordmap);
     // Made sure to send new coords if the new map changed the pixel scale or
     // clipped us off the side, and we were the most recent brush with our id
     if ($el.data("mostRecentBrush")) {
-      brushInfoSender.normalCall();
+      brushInfoSender.normalCall(); // Don't jump the queue--see #1642
     }
   }
 
@@ -195,7 +186,7 @@ function createBrushHandler(
     // Check outputId only if provided
     if (data.outputId && data.outputId !== outputId) return;
 
-    // Cancel any current manual brushing
+    // Cancel any current manual brushing by removing listeners
     if (brush.isBrushing || brush.isDragging || brush.isResizing) {
       $(document).off("mousemove.image_brush").off("mouseup.image_brush");
     }
@@ -206,8 +197,11 @@ function createBrushHandler(
       brush.boundsData(data.imgCoords);
       brushInfoSender.immediateCall();
       // This is a race condition if multiple plots share the same brushId
-      // and outputId isn't specified; documentation should warn about this.
+      // and outputId isn't specified; documentation should warn about that.
+      // I think that's acceptable, since there's no way for a brush to know
+      // if it's unique.
     } else {
+      // If the panel wasn't valid, fully reset the brush
       brush.reset();
       brushInfoSender.immediateCall();
     }
@@ -228,10 +222,10 @@ function createBrushHandler(
   function sendBrushInfo() {
     // Round to 13 significant digits *here* to prevent FP-rounding-induced
     // resends of almost-but-not-quite-exactly-the-same data.
-    // This fixes #1634 and the related issue in #2197 more reliably.
+    // This fixes #1634, #1642, #2197, and #2344 more reliably.
     // Values are still sporadic near zero, because 1.23456789e-20
     // and 1.98765432e-20 both get reported with all their "significant"
-    // digits and cause a resend. This issue is fixed with the further
+    // digits and cause a resend--this issue is fixed with the further
     // rounding below.
     const coords: BrushInfo = mapValues(brush.boundsData(), (val) =>
       roundSignif(val, 13)
@@ -270,9 +264,10 @@ function createBrushHandler(
 
     // Round *here* to prevent FP-rounding-induced
     // resends of almost-but-not-quite-exactly-the-same data.
-    // Rounding more aggressively, to an eigth of a pixel (since less
-    // than that is not meaningful at reasonable zoom levels (≤ 8X))
-    // (power of two to make the actual floating-point value round)
+    // Rounding more aggressively, to an eigth of a pixel, since less than
+    // that is not meaningful at reasonable zoom levels (≤ 8X) and the
+    // power of two makes the actual floating-point value a round number
+    // in binary.
     // eslint-disable-next-line camelcase
     coords.coords_css = mapValues(
       brush.boundsCss(),
@@ -439,13 +434,9 @@ function createBrushHandler(
       return;
     }
 
-    // Send info immediately on mouseup, but only if needed. If we don't
-    // do the pending check, we might send the same data twice (with
-    // no difference).
-    //
-    // shinySetInputValue already checks for duplicate data; I think all
-    // this does is avoid sending *non*-duplicate data. Changing it. -dvg
-    // if (brushInfoSender.isPending()) brushInfoSender.immediateCall();
+    // Send info immediately on mouseup, since shinySetInputValue will already
+    // filter out any duplicate sends and we want the brush to be responsive
+    // when the user completes their action.
     brushInfoSender.immediateCall();
   }
 
@@ -478,9 +469,11 @@ function createBrushHandler(
   }
 
   // Brush maintenance: When an image is re-rendered, the brush must either
-  // be removed (if brushResetOnNew) or imported (if !brushResetOnNew). The
+  // be removed (if brushResetOnNew) or resized (if !brushResetOnNew). The
   // "mostRecentBrush" bit is to ensure that when multiple outputs share the
   // same brush ID, inactive brushes don't send null values up to the server.
+  // If opts.brushResetOnNew is false, then updateCoordmap() above will take care
+  // of all necessary resizing.
 
   // This should be called when the img (not the el) is reset
   function onResetImg() {
@@ -498,25 +491,9 @@ function createBrushHandler(
     }
   }
 
-  // if (!opts.brushResetOnNew) {
-  //   if ($el.data("mostRecentBrush")) {
-  //     // Importing an old brush must happen after the image data has loaded
-  //     // and the <img> DOM element has the updated size. If importOldBrush()
-  //     // is called before this happens, then the css-img coordinate mappings
-  //     // will give the wrong result, and the brush will have the wrong
-  //     // position.
-  //     //
-  //     // jcheng 09/26/2018: This used to happen in img.onLoad, but recently
-  //     // we moved to all brush initialization moving to img.onLoad so this
-  //     // logic can be executed inline.
-  //     brush.importOldBrush();
-  //     brushInfoSender.immediateCall();
-  //   }
-  // }
-
-  // This doesn't accomplish anything, since the entire image is
-  // redrawn (and thus the brush reloaded) after every resize.
-  // Nope, that's not true for cached plots!
+  // This lets the brush know to resize if the image is resized without being
+  // redrawn. This is only possible for cached plots, so this function is only
+  // triggered in image.ts if the plot is a cached plot.
   function onResize() {
     brush.onImgResize();
     brushInfoSender.immediateCall();

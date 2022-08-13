@@ -59,12 +59,12 @@ type Brush = {
   updateCoordmap: (newCoordmap: Coordmap) => void;
   reset: () => void;
 
-  importOldBrush: () => void;
   isInsideBrush: (offsetCss: Offset) => boolean;
   isInResizeArea: (offsetCss: Offset) => boolean;
   whichResizeSides: (offsetCss: Offset) => ImageState["resizeSides"];
 
-  // A callback when the wrapper div or img is resized.
+  // A callback when the wrapper div or img is resized. Only called if the
+  // brush is on a cached plot.
   onImgResize: () => void;
 
   // These functions will get or set the bounds of the brush based on CSS or
@@ -182,6 +182,8 @@ function createBrush(
     }
   }
 
+  // When provided a new coordmap from a redrawn image, reposition the brush
+  // to keep the same coordinates in the data space.
   function updateCoordmap(newCoordmap: Coordmap) {
     coordmap = newCoordmap;
     cssToImg = coordmap.scaleCssToImg;
@@ -192,7 +194,6 @@ function createBrush(
 
     // TODO are all of these checks necessary?
     if (!oldBoundsData || !oldPanel) {
-      // console.log("updateCoordmap failed: no previous data");
       reset();
       return;
     }
@@ -200,7 +201,6 @@ function createBrush(
     // Check to see if we have valid boundsData
     for (const val in oldBoundsData) {
       if (isnan(oldBoundsData[val])) {
-        // console.log("updateCoordmap failed: previous data contains NaN");
         reset();
         return;
       }
@@ -208,87 +208,40 @@ function createBrush(
 
     let foundPanel = false;
 
-    // Could store panel index and just use panel with same index
-    // Would be faster, but could be buggy if server updates us with
+    // TODO: Could store panel index and just use panel with same index
+    // Would be faster/simpler, but could be buggy if server updates us with
     // an entirely different set of panels
     for (let i = 0; i < coordmap.panels.length; i++) {
+      // Look through the coordmap for a panel whose mapping and panel_vars
+      // match our previous panel
       const curPanel = coordmap.panels[i];
 
       if (
         equal(oldPanel.mapping, curPanel.mapping) &&
         equal(oldPanel.panel_vars, curPanel.panel_vars)
       ) {
-        // We've found a matching panel
+        // We've found a matching panel--save it and set the boundsData
         state.panel = coordmap.panels[i];
-        boundsData(oldBoundsData);
+        boundsData(oldBoundsData); // This will recalculate the CSS coords
         foundPanel = true;
         break;
       }
     }
     if (!foundPanel) {
-      // console.log("updateCoordmap failed: couldn't find panel");
       reset();
     }
-  }
-
-  // If there's an existing brush div, use that div to set the new brush's
-  // settings, provided that the x, y, and panel variables have the same names,
-  // and there's a panel with matching panel variable values.
-  function importOldBrush() {
-    console.log("THIS SHOULDN'T RUN (importOldBrush)");
-    const oldDiv = $el.find("#" + el.id + "_brush");
-
-    if (oldDiv.length === 0) return;
-
-    const oldBoundsData = oldDiv.data("bounds-data");
-    const oldPanel = oldDiv.data("panel");
-
-    if (!oldBoundsData || !oldPanel) return;
-
-    // Find a panel that has matching vars; if none found, we can't restore.
-    // The oldPanel and new panel must match on their mapping vars, and the
-    // values.
-    for (let i = 0; i < coordmap.panels.length; i++) {
-      const curPanel = coordmap.panels[i];
-
-      if (
-        equal(oldPanel.mapping, curPanel.mapping) &&
-        equal(oldPanel.panel_vars, curPanel.panel_vars)
-      ) {
-        // We've found a matching panel
-        state.panel = coordmap.panels[i];
-        break;
-      }
-    }
-
-    // If we didn't find a matching panel, remove the old div and return
-    if (state.panel === null) {
-      oldDiv.remove();
-      return;
-    }
-
-    $div = oldDiv;
-
-    boundsData(oldBoundsData);
   }
 
   // This will reposition the brush div when the image is resized, maintaining
   // the same data coordinates. Note that the "resize" here refers to the
   // wrapper div/img being resized; elsewhere, "resize" refers to the brush
-  // div being resized.
-  //
-  // This function appears to be completely useless--whenever a plot is resized,
-  // it's reloaded entirely, creating an entirely new brush (after this one
-  // dutifully "resizes" itself -- which, since it happens before the new image
-  // is loaded, doesn't actually change the size!). importOldBrush() is the code
-  // that's actually responsible for properly resizing the brush. -dvg
-  //
-  // Update: This is actually useful for *cached* plots, which can be resized in
-  // the browser *without* being reloaded. -dvg
+  // div being resized. This is only necessary (and only called) for cached
+  // plots; all other plots are reloaded whenever they're resized, and the
+  // brush repositioning is handled by updateCoordmap().
   function onImgResize() {
     const boundsDataVal = boundsData();
-    // Check to see if we have valid boundsData
 
+    // Check to see if we have valid boundsData
     for (const val in boundsDataVal) {
       if (isnan(boundsDataVal[val])) return;
     }
@@ -414,12 +367,6 @@ function createBrush(
     }
     updateDiv();
 
-    // // We also need to attach the data bounds and panel as data attributes, so
-    // // that if the image is re-sent, we can grab the data bounds to create a new
-    // // brush. This should be fast because it doesn't actually modify the DOM.
-    // $div.data("bounds-data", state.boundsData);
-    // $div.data("panel", state.panel);
-    // Not anymore! -dvg
     return undefined;
   }
 
@@ -677,7 +624,6 @@ function createBrush(
     updateCoordmap: updateCoordmap,
     reset: reset,
 
-    importOldBrush: importOldBrush,
     isInsideBrush: isInsideBrush,
     isInResizeArea: isInResizeArea,
     whichResizeSides: whichResizeSides,

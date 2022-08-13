@@ -39,7 +39,6 @@ declare type BrushOpts = {
 declare type Brush = {
     updateCoordmap: (newCoordmap: Coordmap) => void;
     reset: () => void;
-    importOldBrush: () => void;
     isInsideBrush: (offsetCss: Offset) => boolean;
     isInResizeArea: (offsetCss: Offset) => boolean;
     whichResizeSides: (offsetCss: Offset) => ImageState["resizeSides"];

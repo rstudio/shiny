@@ -1,7 +1,15 @@
 shiny 1.7.2.9000
 ================
 
+## Full changelog
 
+### Breaking changes
+
+### New features and improvements
+
+### Bug fixes
+
+* Partial fix for #3664: `dateInput` and `dateRangeInput` will not send spurious values to the server while typing until the user presses enter or clicks out of the field, except for `null` or `NA` when the field is completely empty.
 
 shiny 1.7.2
 ===========
@@ -27,8 +35,6 @@ shiny 1.7.2
 * Closed #3619: In R 4.2, `splitLayout()` no longer raises warnings about incorrect length in an `if` statement. (Thanks to @dmenne, #3625)
 
 ### Bug fixes
-
-* Partial fix for #3664: `dateInput` and `dateRangeInput` will not send spurious values to the server while typing, except for `null` or `NA` when the field is completely empty, until the user presses enter or clicks out of the field.
 
 * Closed #3250:`{rlang}`/`{tidyeval}` conditions (i.e., warnings and errors) are no longer filtered from stack traces. (#3602)
 

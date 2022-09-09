@@ -1,7 +1,9 @@
 shiny 1.7.2.9000
 ================
 
+### Library updates
 
+* Closed #3687: Updated to jQuery-UI 1.13.2.
 
 shiny 1.7.2
 ===========

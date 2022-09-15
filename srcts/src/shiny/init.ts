@@ -327,6 +327,7 @@ function initShiny(windowShiny: Shiny): void {
         $(el).data("shiny-mutate-observer", mo);
       }
 
+      handleResize(initial);
       handleMutate(initial);
     });
 

@@ -3883,16 +3883,10 @@
   function makeResizeFilter(el, func) {
     var lastSize = {};
     return function() {
-      var style = document.createElement("style");
-      var head = document.getElementsByTagName("head");
-      style.innerHTML = ".shiny-bound-output * { display: none; }";
-      style.setAttribute("id", "shiny-hidden-output-contents");
-      head[0].appendChild(style);
       var size = {
         w: el.offsetWidth,
         h: el.offsetHeight
       };
-      head[0].querySelector("#shiny-hidden-output-contents").remove();
       if (size.w === 0 && size.h === 0)
         return;
       if (size.w === lastSize.w && size.h === lastSize.h)

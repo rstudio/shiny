@@ -136,21 +136,7 @@ function makeResizeFilter(
   let lastSize: LastSizeInterface = {};
 
   return function () {
-    // To avoid the possibility of the output container (el)'s size being
-    // contaminated by non-responsize contents, ignore the contents of all
-    // outputs before getting the size. A concrete example of this is that if el
-    // wants to shrink (e.g., has something like `flex: 0 1 auto`), it may never
-    // actually shrink when the contents are of a fixed lastSize
-    const style = document.createElement("style");
-    const head = document.getElementsByTagName("head");
-
-    style.innerHTML = ".shiny-bound-output * { display: none; }";
-    style.setAttribute("id", "shiny-hidden-output-contents");
-    head[0].appendChild(style);
-
     const size = { w: el.offsetWidth, h: el.offsetHeight };
-
-    head[0].querySelector("#shiny-hidden-output-contents").remove();
 
     if (size.w === 0 && size.h === 0) return;
     if (size.w === lastSize.w && size.h === lastSize.h) return;

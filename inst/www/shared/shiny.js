@@ -3883,13 +3883,16 @@
   function makeResizeFilter(el, func) {
     var lastSize = {};
     return function() {
-      var outputs = (0, import_jquery5.default)(".shiny-bound-output");
-      outputs.addClass("shiny-output-resizing");
+      var style = document.createElement("style");
+      var head = document.getElementsByTagName("head");
+      style.innerHTML = ".shiny-bound-output * { display: none; }";
+      style.setAttribute("id", "shiny-hidden-output-contents");
+      head[0].appendChild(style);
       var size = {
         w: el.offsetWidth,
         h: el.offsetHeight
       };
-      outputs.removeClass("shiny-output-resizing");
+      head[0].querySelector("#shiny-hidden-output-contents").remove();
       if (size.w === 0 && size.h === 0)
         return;
       if (size.w === lastSize.w && size.h === lastSize.h)
@@ -13300,6 +13303,7 @@
           });
           (0, import_jquery40.default)(el).data("shiny-mutate-observer", mo);
         }
+        handleResize(initial);
         handleMutate(initial);
       });
       visibleOutputs.forEach(function(id) {

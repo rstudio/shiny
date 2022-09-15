@@ -136,16 +136,21 @@ function makeResizeFilter(
   let lastSize: LastSizeInterface = {};
 
   return function () {
-    // If the output container is 'stretchy' and is getting shrunk after being expanded (e.g., bslib::card(full_screen = TRUE)),
-    // it might not know how to properly shrink back to its original size (because it's size is being driven by the
-    // size of it's children). For this reason, we temporarily set display:none on the children of all outputs before
-    // getting the output size (the size of this output could also be driven by the size of other output's children).
-    const outputs = $(".shiny-bound-output");
+    // To avoid the possibility of the output container (el)'s size being
+    // contaminated by non-responsize contents, ignore the contents of all
+    // outputs before getting the size. A concrete example of this is that if el
+    // wants to shrink (e.g., has something like `flex: 0 1 auto`), it may never
+    // actually shrink when the contents are of a fixed lastSize
+    const style = document.createElement("style");
+    const head = document.getElementsByTagName("head");
 
-    outputs.addClass("shiny-output-resizing");
+    style.innerHTML = ".shiny-bound-output * { display: none; }";
+    style.setAttribute("id", "shiny-hidden-output-contents");
+    head[0].appendChild(style);
+
     const size = { w: el.offsetWidth, h: el.offsetHeight };
 
-    outputs.removeClass("shiny-output-resizing");
+    head[0].querySelector("#shiny-hidden-output-contents").remove();
 
     if (size.w === 0 && size.h === 0) return;
     if (size.w === lastSize.w && size.h === lastSize.h) return;

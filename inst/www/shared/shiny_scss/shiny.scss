@@ -361,10 +361,6 @@ pre.shiny-text-output {
   max-width: 100%;
 }
 
-.shiny-output-resizing * {
-  display: none;
-}
-
 /* Don't limit the width of inputs in a sidebar. */
 .well .shiny-input-container {
   width: auto;

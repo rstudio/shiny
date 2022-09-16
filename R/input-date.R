@@ -47,6 +47,16 @@
 #' or a string in `yyyy-mm-dd` format.
 #' @param daysofweekdisabled Days of the week that should be disabled. Should be
 #'   a integer vector with values from 0 (Sunday) to 6 (Saturday).
+#' @param minview The minimum limit for the view mode. Can be "days" (the default),
+#' "months", "years", or "decades". The day is set to the 1st for “months”, 
+#' the month is set to January for “years”, the year is set to the first year 
+#' from the decade for “decades”, and the year is set to the first from the 
+#' millennium for “centuries”.
+#' @param maxview The maximum limit for the view mode. Can be "days", "months",
+#' "years", or "decades" (the default). The day is set to the 1st for “months”, 
+#' the month is set to January for “years”, the year is set to the first year 
+#' from the decade for “decades”, and the year is set to the first from the 
+#' millennium for “centuries”.
 #'
 #' @family input elements
 #' @seealso [dateRangeInput()], [updateDateInput()]
@@ -94,7 +104,8 @@
 dateInput <- function(inputId, label, value = NULL, min = NULL, max = NULL,
   format = "yyyy-mm-dd", startview = "month", weekstart = 0,
   language = "en", width = NULL, autoclose = TRUE,
-  datesdisabled = NULL, daysofweekdisabled = NULL) {
+  datesdisabled = NULL, daysofweekdisabled = NULL,
+  minview = "days", maxview = "centuries") {
 
   value <- dateYMD(value, "value")
   min <- dateYMD(min, "min")
@@ -126,7 +137,9 @@ dateInput <- function(inputId, label, value = NULL, min = NULL, max = NULL,
                    # Ensure NULL is not sent as `{}` but as 'null'
                    jsonlite::toJSON(datesdisabled, null = 'null'),
                `data-date-days-of-week-disabled` =
-                   jsonlite::toJSON(daysofweekdisabled, null = 'null')
+                   jsonlite::toJSON(daysofweekdisabled, null = 'null'),
+               `data-date-min-view-mode` = minview,
+               `data-date-max-view-mode` = maxview
     ),
     datePickerDependency()
   )

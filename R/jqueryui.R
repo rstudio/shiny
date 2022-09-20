@@ -103,10 +103,10 @@ fixedPanel <- function(...,
 
 jqueryuiDependency <- function() {
   htmlDependency(
-    'jqueryui',
-    '1.13.2',
-    src = 'www/shared/jqueryui',
-    package = 'shiny',
-    script = 'jquery-ui.min.js'
+    "jqueryui",
+    version_jqueryui,
+    src = "www/shared/jqueryui",
+    package = "shiny",
+    script = "jquery-ui.min.js"
   )
 }

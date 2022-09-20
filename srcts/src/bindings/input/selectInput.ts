@@ -64,13 +64,33 @@ class SelectInputBinding extends InputBinding {
   setValue(el: SelectHTMLElement, value: string): void {
     if (!isSelectize(el)) {
       $(el).val(value);
-    } else {
-      const selectize = this._selectize(el);
-
-      if (selectize) {
-        selectize.setValue(value);
-      }
+      return;
     }
+    const selectize = this._selectize(el);
+
+    if (!selectize) return;
+    if (!selectize.settings.load) {
+      selectize.setValue(value);
+      return;
+    }
+
+    window.console.log("Querying server side value:", value);
+
+    const callbackFn = (res) => {
+      if (!res) return;
+      window.console.log("Received server side value:", res);
+
+      if (hasOwnProperty(res, "value")) {
+        selectize.setValue(res.value);
+      } else if (selectize.settings.maxItems === 1) {
+        // first item selected by default only for single-select
+        selectize.setValue(res[0].value);
+      }
+    };
+
+    // Server side filtering
+    selectize.clearOptions();
+    selectize.settings.load.apply(selectize, ["", callbackFn]);
   }
   getState(el: SelectHTMLElement): {
     label: JQuery<HTMLElement>;

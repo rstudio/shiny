@@ -6715,12 +6715,28 @@
       value: function setValue(el, value) {
         if (!isSelectize(el)) {
           (0, import_jquery16.default)(el).val(value);
-        } else {
-          var selectize = this._selectize(el);
-          if (selectize) {
-            selectize.setValue(value);
-          }
+          return;
         }
+        var selectize = this._selectize(el);
+        if (!selectize)
+          return;
+        if (!selectize.settings.load) {
+          selectize.setValue(value);
+          return;
+        }
+        window.console.log("Querying server side value:", value);
+        var callbackFn = function callbackFn2(res) {
+          if (!res)
+            return;
+          window.console.log("Received server side value:", res);
+          if (hasOwnProperty(res, "value")) {
+            selectize.setValue(res.value);
+          } else if (selectize.settings.maxItems === 1) {
+            selectize.setValue(res[0].value);
+          }
+        };
+        selectize.clearOptions();
+        selectize.settings.load.apply(selectize, ["", callbackFn]);
       }
     }, {
       key: "getState",

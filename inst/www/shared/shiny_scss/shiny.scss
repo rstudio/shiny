@@ -86,6 +86,11 @@ pre.shiny-text-output {
   }
 }
 
+.shiny-image-output, .shiny-plot-output {
+  width: 100%;
+  height: 400px;
+}
+
 #shiny-disconnected-overlay {
   position: fixed;
   top: 0;

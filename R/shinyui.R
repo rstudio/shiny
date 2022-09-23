@@ -29,7 +29,6 @@ withMathJax <- function(...) {
 }
 
 renderPage <- function(ui, showcase=0, testMode=FALSE) {
-  lang <- getLang(ui)
 
   # If the ui is a NOT complete document (created by htmlTemplate()), then do some
   # preprocessing and make sure it's a complete document.
@@ -38,13 +37,17 @@ renderPage <- function(ui, showcase=0, testMode=FALSE) {
       ui <- showcaseUI(ui)
 
     # Wrap ui in body tag if it doesn't already have a single top-level body tag.
-    if (!(inherits(ui, "shiny.tag") && ui$name == "body"))
-      ui <- tags$body(ui)
+    ui <- if (inherits(ui, "shiny.tag") && ui$name == "body") {
+      tagAppendAttributes(ui, !!!getBodyAttrs(ui))
+    } else {
+      tags$body(ui, !!!getBodyAttrs(ui))
+    }
 
     # Put the body into the default template
     ui <- htmlTemplate(
       system_file("template", "default.html", package = "shiny"),
-      lang = lang,
+
+      html_open = HTML(sub("</html>$", "", tags$html(!!!getHtmlAttrs(ui)))),
       body = ui,
       # this template is a complete HTML document
       document_ = TRUE

@@ -57,17 +57,18 @@ bootstrapPage <- function(..., title = NULL, theme = NULL, lang = NULL) {
     ui <- attachDependencies(ui, bootstrapLib())
   }
 
-  setLang(ui, lang)
+  setHtmlAttr(ui, "lang", lang)
 }
 
-setLang <- function(ui, lang) {
-  # Add lang attribute to be passed to renderPage function
-  attr(ui, "lang") <- lang
+setHtmlAttr <- function(ui, attr_name, attr_value) {
+  attrs <- getHtmlAttrs(ui)
+  attrs[[attr_name]] <- attr_value
+  attr(ui, "html_attrs") <- attrs
   ui
 }
-getLang <- function(ui) {
+getHtmlAttrs <- function(ui) {
   # Check if ui has lang attribute; otherwise, NULL
-  attr(ui, "lang", exact = TRUE)
+  attr(ui, "html_attrs", exact = TRUE)
 }
 
 #' Bootstrap libraries
@@ -331,10 +332,22 @@ fillPage <- function(..., padding = 0, title = NULL, bootstrap = TRUE,
       ...
     )
 
-    ui <- setLang(ui, lang)
+    ui <- setHtmlAttr(ui, "lang", lang)
   }
 
-  return(ui)
+  # vfill-container rules live in bslib which means something like
+  # fillPage(plotOutput("x")) won't work unless a bslib theme is used
+  setBodyAttr(ui, "class", "vfill-container")
+}
+
+setBodyAttr <- function(ui, attr_name, attr_value) {
+  attrs <- getBodyAttrs(ui)
+  attrs[[attr_name]] <- attr_value
+  attr(ui, "body_attrs") <- attrs
+  ui
+}
+getBodyAttrs <- function(ui) {
+  attr(ui, "body_attrs", exact = TRUE)
 }
 
 collapseSizes <- function(padding) {
@@ -792,7 +805,7 @@ verbatimTextOutput <- function(outputId, placeholder = FALSE) {
 #' @name plotOutput
 #' @rdname plotOutput
 #' @export
-imageOutput <- function(outputId, width = "100%", height="400px",
+imageOutput <- function(outputId, width = NULL, height = NULL,
                         click = NULL, dblclick = NULL, hover = NULL, brush = NULL,
                         inline = FALSE) {
 
@@ -807,6 +820,7 @@ imageOutput <- function(outputId, width = "100%", height="400px",
   args <- list(
     id = outputId,
     class = "shiny-image-output",
+    class = if (is.null(height)) "vfill-item",
     style = style
   )
 
@@ -1086,7 +1100,7 @@ imageOutput <- function(outputId, width = "100%", height="400px",
 #'
 #' }
 #' @export
-plotOutput <- function(outputId, width = "100%", height="400px",
+plotOutput <- function(outputId, width = NULL, height = NULL,
                        click = NULL, dblclick = NULL, hover = NULL, brush = NULL,
                        inline = FALSE) {
 
@@ -1135,16 +1149,18 @@ dataTableOutput <- function(outputId) {
 #' Create an HTML output element
 #'
 #' Render a reactive output variable as HTML within an application page. The
-#' text will be included within an HTML `div` tag, and is presumed to
-#' contain HTML content which should not be escaped.
+#' text will be included within an HTML `div` tag, and is presumed to contain
+#' HTML content which should not be escaped.
 #'
-#' `uiOutput` is intended to be used with `renderUI` on the server
-#' side. It is currently just an alias for `htmlOutput`.
+#' `uiOutput` is intended to be used with `renderUI` on the server side. It is
+#' currently just an alias for `htmlOutput`.
 #'
-#' @param outputId output variable to read the value from
+#' @param outputId output variable to read the value from.
 #' @param ... Other arguments to pass to the container tag function. This is
 #'   useful for providing additional classes for the tag.
 #' @inheritParams textOutput
+#' @param fill Whether the output should be allowed to grow/shrink to the size
+#'   of the `container`. Ignored when `inline = TRUE`.
 #' @return An HTML output element that can be included in a panel
 #' @examples
 #' htmlOutput("summary")
@@ -1155,12 +1171,18 @@ dataTableOutput <- function(outputId) {
 #' )
 #' @export
 htmlOutput <- function(outputId, inline = FALSE,
-  container = if (inline) span else div, ...)
+  container = if (inline) span else div, fill = FALSE, ...)
 {
   if (any_unnamed(list(...))) {
     warning("Unnamed elements in ... will be replaced with dynamic UI.")
   }
-  container(id = outputId, class="shiny-html-output", ...)
+
+  container(
+    id = outputId,
+    class = "shiny-html-output",
+    class = if (fill && !inline) "vfill-container vfill-item",
+    ...
+  )
 }
 
 #' @rdname htmlOutput

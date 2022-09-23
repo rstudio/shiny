@@ -7,8 +7,8 @@
 \usage{
 imageOutput(
   outputId,
-  width = "100\%",
-  height = "400px",
+  width = NULL,
+  height = NULL,
   click = NULL,
   dblclick = NULL,
   hover = NULL,
@@ -18,8 +18,8 @@ imageOutput(
 
 plotOutput(
   outputId,
-  width = "100\%",
-  height = "400px",
+  width = NULL,
+  height = NULL,
   click = NULL,
   dblclick = NULL,
   hover = NULL,

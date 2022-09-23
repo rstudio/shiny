@@ -9,18 +9,28 @@ htmlOutput(
   outputId,
   inline = FALSE,
   container = if (inline) span else div,
+  fill = FALSE,
   ...
 )
 
-uiOutput(outputId, inline = FALSE, container = if (inline) span else div, ...)
+uiOutput(
+  outputId,
+  inline = FALSE,
+  container = if (inline) span else div,
+  fill = FALSE,
+  ...
+)
 }
 \arguments{
-\item{outputId}{output variable to read the value from}
+\item{outputId}{output variable to read the value from.}
 
 \item{inline}{use an inline (\code{span()}) or block container (\code{div()})
 for the output}
 
 \item{container}{a function to generate an HTML element to contain the text}
+
+\item{fill}{Whether the output should be allowed to grow/shrink to the size
+of the \code{container}. Ignored when \code{inline = TRUE}.}
 
 \item{...}{Other arguments to pass to the container tag function. This is
 useful for providing additional classes for the tag.}
@@ -30,12 +40,12 @@ An HTML output element that can be included in a panel
 }
 \description{
 Render a reactive output variable as HTML within an application page. The
-text will be included within an HTML \code{div} tag, and is presumed to
-contain HTML content which should not be escaped.
+text will be included within an HTML \code{div} tag, and is presumed to contain
+HTML content which should not be escaped.
 }
 \details{
-\code{uiOutput} is intended to be used with \code{renderUI} on the server
-side. It is currently just an alias for \code{htmlOutput}.
+\code{uiOutput} is intended to be used with \code{renderUI} on the server side. It is
+currently just an alias for \code{htmlOutput}.
 }
 \examples{
 htmlOutput("summary")

@@ -125,12 +125,12 @@ function.
 }
 \section{Functions}{
 \itemize{
-\item \code{quoToFunction}: convert a quosure to a function.
+\item \code{quoToFunction()}: convert a quosure to a function.
 
-\item \code{installExprFunction}: converts a user's reactive \code{expr} into a
+\item \code{installExprFunction()}: converts a user's reactive \code{expr} into a
 function that's assigned to a \code{name} in the \code{assign.env}.
-}}
 
+}}
 \examples{
 # A custom render function that repeats the supplied value 3 times
 renderTriple <- function(expr) {

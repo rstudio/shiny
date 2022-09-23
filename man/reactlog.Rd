@@ -51,11 +51,11 @@ of the source code of your reactive expressions and observers.
 }
 \section{Functions}{
 \itemize{
-\item \code{reactlog}: Return a list of reactive information.  Can be used in conjunction with
+\item \code{reactlog()}: Return a list of reactive information.  Can be used in conjunction with
 \link[reactlog:reactlog_show]{reactlog::reactlog_show} to later display the reactlog graph.
 
-\item \code{reactlogShow}: Display a full reactlog graph for all sessions.
+\item \code{reactlogShow()}: Display a full reactlog graph for all sessions.
 
-\item \code{reactlogReset}: Resets the entire reactlog stack.  Useful for debugging and removing all prior reactive history.
+\item \code{reactlogReset()}: Resets the entire reactlog stack.  Useful for debugging and removing all prior reactive history.
+
 }}
-

@@ -1,4 +1,4 @@
-/*! shiny 1.7.1.9003 | (c) 2012-2022 RStudio, PBC. | License: GPL-3 | file LICENSE */
+/*! shiny 1.7.2.9000 | (c) 2012-2022 RStudio, PBC. | License: GPL-3 | file LICENSE */
 (function() {
   var __create = Object.create;
   var __defProp = Object.defineProperty;
@@ -8656,20 +8656,12 @@
     _createClass23(Throttler2, [{
       key: "normalCall",
       value: function normalCall() {
-        var _this = this;
         for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
           args[_key] = arguments[_key];
         }
         this.args = args;
         if (this.timerId === null) {
           this.$invoke();
-          this.timerId = setTimeout(function() {
-            if (_this.timerId === null)
-              return;
-            _this.$clearTimer();
-            if (args.length > 0)
-              _this.normalCall.apply(_this, args);
-          }, this.delayMs);
         }
       }
     }, {
@@ -8685,7 +8677,7 @@
     }, {
       key: "isPending",
       value: function isPending() {
-        return this.timerId !== null;
+        return this.args !== null;
       }
     }, {
       key: "$clearTimer",
@@ -8698,12 +8690,20 @@
     }, {
       key: "$invoke",
       value: function $invoke() {
-        if (this.args && this.args.length > 0) {
-          this.func.apply(this.target, this.args);
-        } else {
-          this.func.apply(this.target);
+        var _this = this;
+        if (this.args === null) {
+          return;
         }
+        this.func.apply(this.target, this.args);
         this.args = null;
+        this.timerId = setTimeout(function() {
+          if (_this.timerId === null)
+            return;
+          _this.$clearTimer();
+          if (_this.isPending()) {
+            _this.$invoke();
+          }
+        }, this.delayMs);
       }
     }]);
     return Throttler2;
@@ -13070,7 +13070,7 @@
   var windowShiny2;
   function setShiny(windowShiny_) {
     windowShiny2 = windowShiny_;
-    windowShiny2.version = "1.7.1.9003";
+    windowShiny2.version = "1.7.2.9000";
     var _initInputBindings = initInputBindings(), inputBindings = _initInputBindings.inputBindings, fileInputBinding2 = _initInputBindings.fileInputBinding;
     var _initOutputBindings = initOutputBindings(), outputBindings = _initOutputBindings.outputBindings;
     setFileInputBinding(fileInputBinding2);

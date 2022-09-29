@@ -52,7 +52,9 @@
 <div class="section level3">
 <h3 id="full-changelog-1-7-2-9000">Full changelog<a class="anchor" aria-label="anchor" href="#full-changelog-1-7-2-9000"></a></h3>
 <div class="section level4"><h4 id="breaking-changes-1-7-2-9000">Breaking changes<a class="anchor" aria-label="anchor" href="#breaking-changes-1-7-2-9000"></a></h4></div>
-<div class="section level4"><h4 id="new-features-and-improvements-1-7-2-9000">New features and improvements<a class="anchor" aria-label="anchor" href="#new-features-and-improvements-1-7-2-9000"></a></h4></div>
+<div class="section level4">
+<h4 id="new-features-and-improvements-1-7-2-9000">New features and improvements<a class="anchor" aria-label="anchor" href="#new-features-and-improvements-1-7-2-9000"></a></h4>
+<ul><li>Internal: Added clearer and strict TypeScript type definitions (<a href="https://github.com/rstudio/shiny/issues/3644" class="external-link">#3644</a>)</li></ul></div>
 <div class="section level4">
 <h4 id="bug-fixes-1-7-2-9000">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-1-7-2-9000"></a></h4>
 <ul><li>Closed <a href="https://github.com/rstudio/shiny/issues/3687" class="external-link">#3687</a>: Updated jQuery-UI to v1.13.2. (<a href="https://github.com/rstudio/shiny/issues/3697" class="external-link">#3697</a>)</li></ul></div>
@@ -87,7 +89,7 @@
 </ul></div>
 <div class="section level4">
 <h4 id="minor-improvements-1-7-2">Minor improvements<a class="anchor" aria-label="anchor" href="#minor-improvements-1-7-2"></a></h4>
-<ul><li><p>When taking a test snapshot, the sort order of the json keys of the <code>input</code>, <code>output</code>, and <code>export</code> fields is currently sorted using the locale of the machine. This can lead to inconsistent test snapshot results. To opt-in to a consistent ordering of snapshot fields with <a href="https://github.com/rstudio/shinytest" class="external-link">shinytest</a>, please set the global option <code>options(shiny.snapshotsortc = TRUE)</code>. <a href="https://github.com/rstudio/shinytest2" class="external-link">shinytest2</a> users do not need to set this value. (<a href="https://github.com/rstudio/shiny/issues/3515" class="external-link">#3515</a>)</p></li>
+<ul><li><p>When taking a test snapshot, the sort order of the json keys of the <code>input</code>, <code>output</code>, and <code>export</code> fields is currently sorted using the locale of the machine. This can lead to inconsistent test snapshot results. To opt-in to a consistent ordering of snapshot fields with <a href="https://github.com/rstudio/shinytest" class="external-link">shinytest</a>, please set the global option <code>options(shiny.snapshotsortc = TRUE)</code>. <a href="https://rstudio.github.io/shinytest2/" class="external-link">shinytest2</a> users do not need to set this value. (<a href="https://github.com/rstudio/shiny/issues/3515" class="external-link">#3515</a>)</p></li>
 <li><p>Closed rstudio/shinytest2#222: When restoring a context (i.e., bookmarking) from a URL, Shiny now better handles a trailing <code>=</code> after <code>_inputs_</code> and <code>_values_</code>. (<a href="https://github.com/rstudio/shiny/issues/3648" class="external-link">#3648</a>)</p></li>
 <li><p>Shiny’s internal HTML dependencies are now mounted dynamically instead of statically. (<a href="https://github.com/rstudio/shiny/issues/3537" class="external-link">#3537</a>)</p></li>
 <li><p>HTML dependencies that are sent to dynamic UI now have better type checking, and no longer require a <code>dep.src.href</code> field. (<a href="https://github.com/rstudio/shiny/issues/3537" class="external-link">#3537</a>)</p></li>

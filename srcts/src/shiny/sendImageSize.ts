@@ -4,8 +4,8 @@ import { debounce, Debouncer } from "../time";
 class SendImageSize {
   // This function gets defined in initShiny() and 'hoisted' so it can be reused
   // (to send CSS info) inside of Shiny.renderDependencies()
-  regular: () => void;
-  transitioned: () => void;
+  regular!: () => void;
+  transitioned!: () => void;
 
   setImageSend(
     inputBatchSender: InputBatchSender,

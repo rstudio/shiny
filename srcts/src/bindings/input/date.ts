@@ -5,8 +5,9 @@ import {
   updateLabel,
   $escape,
   parseDate,
-  hasOwnProperty,
+  hasDefinedProperty,
 } from "../../utils";
+import type { NotUndefined } from "../../utils/extraTypes";
 
 declare global {
   interface JQuery {
@@ -122,8 +123,7 @@ class DateInputBindingBase extends InputBinding {
   }
   // Given an unambiguous date string or a Date object, set the min (start) date.
   // null will unset. undefined will result in no change,
-  protected _setMin(el: HTMLElement, date: Date | null | undefined): void {
-    if (date === undefined) return;
+  protected _setMin(el: HTMLElement, date: Date | null): void {
     if (date === null) {
       $(el).bsDatepicker("setStartDate", null);
       return;
@@ -161,8 +161,7 @@ class DateInputBindingBase extends InputBinding {
   }
   // Given an unambiguous date string or a Date object, set the max (end) date
   // null will unset.
-  protected _setMax(el: HTMLElement, date: Date): void {
-    if (date === undefined) return;
+  protected _setMax(el: HTMLElement, date: Date | null): void {
     if (date === null) {
       $(el).bsDatepicker("setEndDate", null);
       return;
@@ -236,7 +235,7 @@ class DateInputBinding extends DateInputBindingBase {
     return formatDateUTC(date);
   }
   // value must be an unambiguous string like '2001-01-01', or a Date object.
-  setValue(el: HTMLElement, value: Date): void {
+  setValue(el: HTMLElement, value: Date | null): void {
     // R's NA, which is null here will remove current value
     if (value === null) {
       $(el).find("input").val("").bsDatepicker("update");
@@ -286,7 +285,7 @@ class DateInputBinding extends DateInputBindingBase {
     return {
       label: this._getLabelNode(el).text(),
       value: this.getValue(el),
-      valueString: $input.val(),
+      valueString: $input.val() as NotUndefined<ReturnType<typeof $input.val>>,
       min: min,
       max: max,
       language: $input.data("datepicker").language,
@@ -300,14 +299,14 @@ class DateInputBinding extends DateInputBindingBase {
 
     updateLabel(data.label, this._getLabelNode(el));
 
-    if (hasOwnProperty(data, "min")) this._setMin($input[0], data.min);
+    if (hasDefinedProperty(data, "min")) this._setMin($input[0], data.min);
 
-    if (hasOwnProperty(data, "max")) this._setMax($input[0], data.max);
+    if (hasDefinedProperty(data, "max")) this._setMax($input[0], data.max);
 
     // Must set value only after min and max have been set. If new value is
     // outside the bounds of the previous min/max, then the result will be a
     // blank input.
-    if (hasOwnProperty(data, "value")) this.setValue(el, data.value);
+    if (hasDefinedProperty(data, "value")) this.setValue(el, data.value);
 
     $(el).trigger("change");
   }

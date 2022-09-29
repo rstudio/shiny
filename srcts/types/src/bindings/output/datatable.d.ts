@@ -10,9 +10,10 @@ declare class DatatableOutputBinding extends OutputBinding {
             search?: {
                 caseInsensitive?: boolean;
             };
+            escape?: string;
         } | null;
-        action?: string;
         escape?: string;
+        action?: string;
         evalOptions?: string[];
         callback?: string;
         searchDelay?: number;

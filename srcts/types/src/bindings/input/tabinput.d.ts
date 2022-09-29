@@ -5,7 +5,7 @@ declare type TabInputReceiveMessageData = {
 declare class BootstrapTabInputBinding extends InputBinding {
     find(scope: HTMLElement): JQuery<HTMLElement>;
     getValue(el: HTMLElement): string | null;
-    setValue(el: HTMLElement, value: string): void;
+    setValue(el: HTMLElement, value: string | undefined): void;
     getState(el: HTMLElement): {
         value: string | null;
     };

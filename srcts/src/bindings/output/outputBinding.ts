@@ -3,7 +3,7 @@ import { asArray } from "../../utils";
 import type { ErrorsMessageValue } from "../../shiny/shinyapp";
 
 class OutputBinding {
-  name: string;
+  name!: string;
 
   // Returns a jQuery object or element array that contains the
   // descendants of scope that match this binding

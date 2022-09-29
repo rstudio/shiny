@@ -3,7 +3,7 @@ import { shinySetInputValue } from "../shiny/initedMethods";
 import { mapValues } from "../utils";
 import type { Offset } from "./findbox";
 import type { Bounds } from "./createBrush";
-import type { Panel } from "./initPanelScales";
+import type { Panel, PanelInit } from "./initPanelScales";
 import { initPanelScales } from "./initPanelScales";
 
 // -----------------------------------------------------------------------
@@ -16,13 +16,16 @@ function findScalingRatio($el: JQuery<HTMLElement>) {
   const boundingRect = $el[0].getBoundingClientRect();
 
   return {
-    x: boundingRect.width / $el.outerWidth(),
-    y: boundingRect.height / $el.outerHeight(),
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    x: boundingRect.width / $el.outerWidth()!,
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    y: boundingRect.height / $el.outerHeight()!,
   };
 }
 
 function findOrigin($el: JQuery<HTMLElement>): Offset {
-  const offset = $el.offset();
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  const offset = $el.offset()!;
   const scalingRatio = findScalingRatio($el);
 
   // Find the size of the padding and border, for the top and left. This is
@@ -50,8 +53,10 @@ function findDims($el: JQuery<HTMLElement>) {
   // If there's any padding/border, we need to find the ratio of the actual
   // element content compared to the element plus padding and border.
   const contentRatio = {
-    x: $el.width() / $el.outerWidth(),
-    y: $el.height() / $el.outerHeight(),
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    x: $el.width()! / $el.outerWidth()!,
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    y: $el.height()! / $el.outerHeight()!,
   };
 
   // Get the dimensions of the element _after_ any CSS transforms. This
@@ -85,11 +90,13 @@ type Coords = {
 };
 
 type CoordmapInit = {
-  panels: Panel[];
-  dims: {
-    height: number;
-    width: number;
-  };
+  panels: PanelInit[];
+  dims:
+    | {
+        height: number;
+        width: number;
+      }
+    | { height: null; width: null };
 };
 type Coordmap = {
   panels: Panel[];
@@ -107,18 +114,19 @@ type Coordmap = {
     (offsetImg: Bounds): Bounds;
     (offsetImg: Offset): Offset;
     (offsetImg: OffsetImg): OffsetCss;
+    (offsetImg: { [key: string]: number }): { [key: string]: number | null };
   };
   imgToCssScalingRatio: () => Offset;
   cssToImgScalingRatio: () => Offset;
 
-  getPanelCss: (offsetCss: OffsetCss, expand?: number) => Panel;
+  getPanelCss: (offsetCss: OffsetCss, expand?: number) => Panel | null;
   isInPanelCss: (offsetCss: OffsetCss, expand?: number) => boolean;
 
   mouseCoordinateSender: (
     inputId: string,
     clip?: boolean,
     nullOutside?: boolean
-  ) => (e: JQuery.MouseDownEvent | JQuery.MouseMoveEvent) => void;
+  ) => (e: JQuery.MouseDownEvent | JQuery.MouseMoveEvent | null) => void;
 };
 
 // This adds functions to the coordmap object to handle various
@@ -144,14 +152,13 @@ function initCoordmap(
   $el: JQuery<HTMLElement>,
   coordmap_: CoordmapInit
 ): Coordmap {
-  const coordmap = coordmap_ as Coordmap;
   const $img = $el.find("img");
   const img = $img[0];
 
   // If we didn't get any panels, create a dummy one where the domain and range
   // are simply the pixel dimensions.
   // that we modify.
-  if (coordmap.panels.length === 0) {
+  if (coordmap_.panels.length === 0) {
     const bounds = {
       top: 0,
       left: 0,
@@ -159,20 +166,23 @@ function initCoordmap(
       bottom: img.clientHeight - 1,
     };
 
-    coordmap.panels[0] = {
+    coordmap_.panels[0] = {
       domain: bounds,
       range: bounds,
       mapping: {},
     };
   }
+
+  const coordmap = coordmap_ as Coordmap;
   // If no dim height and width values are found, set them to the raw image height and width
   // These values should be the same...
   // This is only done to initialize an image output, whose height and width are unknown until the image is retrieved
+
   coordmap.dims.height = coordmap.dims.height || img.naturalHeight;
   coordmap.dims.width = coordmap.dims.width || img.naturalWidth;
 
   // Add scaling functions to each panel
-  initPanelScales(coordmap.panels);
+  coordmap.panels = initPanelScales(coordmap_.panels);
 
   // This returns the offset of the mouse in CSS pixels relative to the img,
   // but not including the  padding or border, if present.
@@ -195,7 +205,7 @@ function initCoordmap(
   function scaleCssToImg(offsetCss: Bounds): Bounds;
   function scaleCssToImg(offsetCss: Offset): Offset;
   function scaleCssToImg(offsetCss: OffsetCss): OffsetImg;
-  function scaleCssToImg(offsetCss) {
+  function scaleCssToImg(offsetCss: OffsetCss) {
     const pixelScaling = coordmap.imgToCssScalingRatio();
 
     const result = mapValues(offsetCss, (value, key) => {
@@ -221,7 +231,7 @@ function initCoordmap(
   function scaleImgToCss(offsetImg: Offset): Offset;
   function scaleImgToCss(offsetImg: OffsetImg): OffsetCss;
   function scaleImgToCss(offsetImg: { [key: string]: number }): {
-    [key: string]: number;
+    [key: string]: number | null;
   } {
     const pixelScaling = coordmap.imgToCssScalingRatio();
 
@@ -368,14 +378,15 @@ function initCoordmap(
         shinySetInputValue(inputId, coords, { priority: "event" });
         return;
       }
-      const panel = coordmap.getPanelCss(coordsCss);
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      const panel = coordmap.getPanelCss(coordsCss)!;
 
       const coordsImg = coordmap.scaleCssToImg(coordsCss);
       const coordsData = panel.scaleImgToData(coordsImg);
 
       const coords: Coords = {
-        x: coordsData.x,
-        y: coordsData.y,
+        x: coordsData?.x,
+        y: coordsData?.y,
         // eslint-disable-next-line @typescript-eslint/naming-convention
         coords_css: coordsCss,
         // eslint-disable-next-line @typescript-eslint/naming-convention

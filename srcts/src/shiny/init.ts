@@ -14,7 +14,7 @@ import { debounce, Debouncer } from "../time";
 import {
   getComputedLinkColor,
   getStyle,
-  hasOwnProperty,
+  hasDefinedProperty,
   mapValues,
   pixelRatio,
 } from "../utils";
@@ -164,13 +164,17 @@ function initShiny(windowShiny: Shiny): void {
     }
   );
 
-  function getComputedBgColor(el) {
+  function getComputedBgColor(
+    el: HTMLElement | null
+  ): string | null | undefined {
     if (!el) {
       // Top of document, can't recurse further
       return null;
     }
 
     const bgColor = getStyle(el, "background-color");
+
+    if (!bgColor) return bgColor;
     const m = bgColor.match(
       /^rgba\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)\s*\)$/
     );
@@ -190,12 +194,12 @@ function initShiny(windowShiny: Shiny): void {
     return bgColor;
   }
 
-  function getComputedFont(el) {
+  function getComputedFont(el: HTMLElement) {
     const fontFamily = getStyle(el, "font-family");
     const fontSize = getStyle(el, "font-size");
 
     return {
-      families: fontFamily.replace(/"/g, "").split(", "),
+      families: fontFamily?.replace(/"/g, "").split(", "),
       size: fontSize,
     };
   }
@@ -252,7 +256,7 @@ function initShiny(windowShiny: Shiny): void {
     $el.data("shiny-theme-observer", observer);
   }
 
-  function doSendTheme(el) {
+  function doSendTheme(el: HTMLElement): void {
     // Sending theme info on error isn't necessary (it'd add an unnecessary additional round-trip)
     if (el.classList.contains("shiny-output-error")) {
       return;
@@ -310,7 +314,7 @@ function initShiny(windowShiny: Shiny): void {
 
   // Return true if the object or one of its ancestors in the DOM tree has
   // style='display:none'; otherwise return false.
-  function isHidden(obj) {
+  function isHidden(obj: HTMLElement | null): boolean {
     // null means we've hit the top of the tree. If width or height is
     // non-zero, then we know that no ancestor has display:none.
     if (obj === null || obj.offsetWidth !== 0 || obj.offsetHeight !== 0) {
@@ -318,10 +322,10 @@ function initShiny(windowShiny: Shiny): void {
     } else if (getStyle(obj, "display") === "none") {
       return true;
     } else {
-      return isHidden(obj.parentNode);
+      return isHidden(obj.parentNode as HTMLElement | null);
     }
   }
-  let lastKnownVisibleOutputs = {};
+  let lastKnownVisibleOutputs: { [key: string]: boolean } = {};
   // Set initial state of outputs to hidden, if needed
 
   $(".shiny-bound-output").each(function () {
@@ -336,7 +340,7 @@ function initShiny(windowShiny: Shiny): void {
   });
   // Send update when hidden state changes
   function doSendOutputHiddenState() {
-    const visibleOutputs = {};
+    const visibleOutputs: { [key: string]: boolean } = {};
 
     $(".shiny-bound-output").each(function () {
       const id = getIdFromEl(this);
@@ -364,7 +368,7 @@ function initShiny(windowShiny: Shiny): void {
     });
     // Anything left in lastKnownVisibleOutputs is orphaned
     for (const name in lastKnownVisibleOutputs) {
-      if (hasOwnProperty(lastKnownVisibleOutputs, name))
+      if (hasDefinedProperty(lastKnownVisibleOutputs, name))
         inputs.setInput(".clientdata_output_" + name + "_hidden", true);
     }
     // Update the visible outputs for next time
@@ -394,18 +398,22 @@ function initShiny(windowShiny: Shiny): void {
   // the handler only when e's namespace matches. For example, if the
   // namespace is "bs", it would match when e.namespace is "bs" or "bs.tab".
   // If the namespace is "bs.tab", it would match for "bs.tab", but not "bs".
-  function filterEventsByNamespace(namespace, handler, ...args) {
-    namespace = namespace.split(".");
+  function filterEventsByNamespace(
+    namespace: string,
+    handler: (...handlerArgs: any[]) => void,
+    ...args: any[]
+  ) {
+    const namespaceArr = namespace.split(".");
 
-    return function (e) {
-      const eventNamespace = e.namespace.split(".");
+    return function (this: HTMLElement, e: JQuery.TriggeredEvent) {
+      const eventNamespace = e.namespace?.split(".") ?? [];
 
       // If any of the namespace strings aren't present in this event, quit.
-      for (let i = 0; i < namespace.length; i++) {
-        if (eventNamespace.indexOf(namespace[i]) === -1) return;
+      for (let i = 0; i < namespaceArr.length; i++) {
+        if (eventNamespace.indexOf(namespaceArr[i]) === -1) return;
       }
 
-      handler.apply(this, [namespace, handler, ...args]);
+      handler.apply(this, [namespaceArr, handler, ...args]);
     };
   }
 
@@ -553,6 +561,7 @@ function initDeferredIframes(): void {
     const $el = $(el);
 
     $el.removeClass("shiny-frame-deferred");
+    // @ts-expect-error; If it is undefined, set using the undefined value
     $el.attr("src", $el.attr("data-deferred-src"));
     $el.attr("data-deferred-src", null);
   });

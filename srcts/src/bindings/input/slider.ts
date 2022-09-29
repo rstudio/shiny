@@ -1,10 +1,14 @@
+import type {
+  IonRangeSliderEvent,
+  IonRangeSliderOptions,
+} from "ion-rangeslider";
 import $ from "jquery";
 // import { NameValueHTMLElement } from ".";
 import {
   formatDateUTC,
   updateLabel,
   $escape,
-  hasOwnProperty,
+  hasDefinedProperty,
 } from "../../utils";
 
 import type { TextHTMLElement } from "./text";
@@ -28,6 +32,9 @@ type SliderReceiveMessageData = {
   min?: number;
   max?: number;
   step?: number;
+  "data-type"?: string;
+  "time-format"?: string;
+  timezone?: string;
 };
 
 // MUST use window.strftime as the javascript dependency is dynamic
@@ -42,7 +49,7 @@ declare global {
 }
 
 // Necessary to get hidden sliders to send their updated values
-function forceIonSliderUpdate(slider) {
+function forceIonSliderUpdate(slider: any) {
   if (slider.$cache && slider.$cache.input)
     slider.$cache.input.trigger("change");
   else console.log("Couldn't force ion slider to update");
@@ -73,7 +80,7 @@ function getTypePrettifyer(
     // The default prettify function for ion.rangeSlider adds thousands
     // separators after the decimal mark, so we have our own version here.
     // (#1958)
-    prettify = function (num) {
+    prettify = function (this: IonRangeSliderOptions, num: number) {
       // When executed, `this` will refer to the `IonRangeSlider.options`
       // object.
       return formatNumber(num, this.prettify_separator);
@@ -104,18 +111,18 @@ class SliderInputBinding extends TextInputBindingBase {
     return $(scope).find("input.js-range-slider");
   }
 
-  getType(el: HTMLElement): string | false {
+  getType(el: HTMLElement): string | null {
     const dataType = $(el).data("data-type");
 
     if (dataType === "date") return "shiny.date";
     else if (dataType === "datetime") return "shiny.datetime";
-    else return false;
+    else return null;
   }
   getValue(
     el: TextHTMLElement
   ): number | string | [number | string, number | string] {
     const $el = $(el);
-    const result = $(el).data("ionRangeSlider").result;
+    const result = $(el).data("ionRangeSlider").result as IonRangeSliderEvent;
 
     // Function for converting numeric value from slider to appropriate type.
     let convert: (val: unknown) => number | string;
@@ -182,21 +189,28 @@ class SliderInputBinding extends TextInputBindingBase {
       prettify?: Prettify;
     } = {};
 
-    if (hasOwnProperty(data, "value")) {
+    if (hasDefinedProperty(data, "value")) {
       if (numValues(el) === 2 && data.value instanceof Array) {
         msg.from = data.value[0];
         msg.to = data.value[1];
       } else {
-        msg.from = data.value as number | string;
+        if (Array.isArray(data.value)) {
+          throw "Slider only contains a single value and cannot be updated with an array";
+        }
+        msg.from = data.value;
       }
     }
 
-    const sliderFeatures = ["min", "max", "step"];
+    const sliderFeatures: Array<"max" | "min" | "step"> = [
+      "min",
+      "max",
+      "step",
+    ];
 
     for (let i = 0; i < sliderFeatures.length; i++) {
       const feats = sliderFeatures[i];
 
-      if (hasOwnProperty(data, feats)) {
+      if (hasDefinedProperty(data, feats)) {
         msg[feats] = data[feats];
       }
     }
@@ -204,12 +218,16 @@ class SliderInputBinding extends TextInputBindingBase {
     updateLabel(data.label, getLabelNode(el));
 
     // (maybe) update data elements
-    const domElements = ["data-type", "time-format", "timezone"];
+    const domElements: Array<"data-type" | "time-format" | "timezone"> = [
+      "data-type",
+      "time-format",
+      "timezone",
+    ];
 
     for (let i = 0; i < domElements.length; i++) {
       const elem = domElements[i];
 
-      if (hasOwnProperty(data, elem)) {
+      if (hasDefinedProperty(data, elem)) {
         $el.data(elem, data[elem]);
       }
     }
@@ -284,12 +302,12 @@ function formatNumber(
 $(document).on("click", ".slider-animate-button", function (evt: Event) {
   evt.preventDefault();
   const self = $(this);
-  const target = $("#" + $escape(self.attr("data-target-id")));
+  const target = $("#" + $escape(self.attr("data-target-id") as string));
   const startLabel = "Play";
   const stopLabel = "Pause";
   const loop =
     self.attr("data-loop") !== undefined &&
-    !/^\s*false\s*$/i.test(self.attr("data-loop"));
+    !/^\s*false\s*$/i.test(self.attr("data-loop") as string);
   let animInterval = self.attr("data-interval") as number | string;
 
   if (isNaN(animInterval as number)) animInterval = 1500;

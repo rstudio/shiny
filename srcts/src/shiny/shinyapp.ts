@@ -1,11 +1,5 @@
 import $ from "jquery";
-import {
-  $escape,
-  hasOwnProperty,
-  makeBlob,
-  randomId,
-  scopeExprToFunc,
-} from "../utils";
+import { $escape, hasOwnProperty, randomId, scopeExprToFunc } from "../utils";
 import {
   getShinyCreateWebsocket,
   getShinyOnCustomMessage,
@@ -411,7 +405,7 @@ class ShinyApp {
 
       payload.push(uint32ToBuf(0x01020202)); // signature
 
-      const jsonBuf = makeBlob([msg]);
+      const jsonBuf: Blob = new Blob([msg]);
 
       payload.push(uint32ToBuf(jsonBuf.size));
       payload.push(jsonBuf);
@@ -427,9 +421,9 @@ class ShinyApp {
         payload.push(blob);
       }
 
-      const blob = makeBlob(payload) as unknown;
+      const blob: Blob = new Blob(payload);
 
-      msg = blob as string;
+      msg = blob as unknown as string;
     }
 
     this.$sendMsg(msg);

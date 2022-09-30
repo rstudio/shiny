@@ -1,4 +1,3 @@
-import { makeBlob } from "./blob";
 import type { MapValuesUnion, MapWithResult } from "./extraTypes";
 import { hasOwnProperty, hasDefinedProperty } from "./object";
 declare function escapeHTML(str: string): string;
@@ -27,4 +26,4 @@ declare function updateLabel(labelTxt: string | undefined, labelNode: JQuery<HTM
 declare function getComputedLinkColor(el: HTMLElement): string;
 declare function isBS3(): boolean;
 declare function toLowerCase<T extends string>(str: T): Lowercase<T>;
-export { escapeHTML, randomId, strToBool, getStyle, padZeros, roundSignif, parseDate, formatDateUTC, makeResizeFilter, pixelRatio, scopeExprToFunc, asArray, mergeSort, $escape, mapValues, isnan, _equal, equal, compareVersion, updateLabel, getComputedLinkColor, makeBlob, hasOwnProperty, hasDefinedProperty, isBS3, toLowerCase, };
+export { escapeHTML, randomId, strToBool, getStyle, padZeros, roundSignif, parseDate, formatDateUTC, makeResizeFilter, pixelRatio, scopeExprToFunc, asArray, mergeSort, $escape, mapValues, isnan, _equal, equal, compareVersion, updateLabel, getComputedLinkColor, hasOwnProperty, hasDefinedProperty, isBS3, toLowerCase, };

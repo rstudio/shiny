@@ -1,6 +1,5 @@
 import $ from "jquery";
 import { windowDevicePixelRatio } from "../window/pixelRatio";
-import { makeBlob } from "./blob";
 import type { MapValuesUnion, MapWithResult } from "./extraTypes";
 import { hasOwnProperty, hasDefinedProperty } from "./object";
 
@@ -407,7 +406,6 @@ export {
   compareVersion,
   updateLabel,
   getComputedLinkColor,
-  makeBlob,
   hasOwnProperty,
   hasDefinedProperty,
   isBS3,

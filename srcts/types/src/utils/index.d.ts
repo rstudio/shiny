@@ -18,7 +18,7 @@ declare function $escape(val: undefined): undefined;
 declare function $escape(val: string): string;
 declare function mapValues<T extends {
     [key: string]: any;
-}, R extends any>(obj: T, f: (value: MapValuesUnion<T>, key: string, object: typeof obj) => R): MapWithResult<T, R>;
+}, R>(obj: T, f: (value: MapValuesUnion<T>, key: string, object: typeof obj) => R): MapWithResult<T, R>;
 declare function isnan(x: unknown): boolean;
 declare function _equal(x: unknown, y: unknown): boolean;
 declare function equal(...args: unknown[]): boolean;

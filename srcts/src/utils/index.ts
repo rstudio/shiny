@@ -238,7 +238,7 @@ function $escape(val: string | undefined): string | undefined {
 
 // Maps a function over an object, preserving keys. Like the mapValues
 // function from lodash.
-function mapValues<T extends { [key: string]: any }, R extends any>(
+function mapValues<T extends { [key: string]: any }, R>(
   obj: T,
   f: (value: MapValuesUnion<T>, key: string, object: typeof obj) => R
 ): MapWithResult<T, R> {

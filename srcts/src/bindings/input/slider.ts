@@ -32,7 +32,9 @@ type SliderReceiveMessageData = {
   min?: number;
   max?: number;
   step?: number;
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   "data-type"?: string;
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   "time-format"?: string;
   timezone?: string;
 };

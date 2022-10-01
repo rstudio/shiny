@@ -11,7 +11,6 @@
     // needed than just the DOM's `window.setTimeout`
     // "types": [],
     "strict": true,
-    "strictNullChecks": true,
   },
   "include": [
     "srcts/src/index.ts",

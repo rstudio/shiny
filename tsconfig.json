@@ -1,7 +1,8 @@
 {
   "declaration": true,
   "compilerOptions": {
-    "target": "ES5",
+    "target": "ES2020",
+    "moduleResolution": "node",
     "isolatedModules": true,
     "esModuleInterop": true,
     "declaration": true,

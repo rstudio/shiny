@@ -12492,7 +12492,7 @@
           var targets = (0, import_jquery38.default)(message.selector);
           if (targets.length === 0) {
             console.warn('The selector you chose ("' + message.selector + '") could not be found in the DOM.');
-            renderHtml2(message.content.html, (0, import_jquery38.default)([]).get(0), message.content.deps);
+            renderHtml2(message.content.html, (0, import_jquery38.default)([]), message.content.deps);
           } else {
             targets.each(function(i, target) {
               renderContent(target, message.content, message.where);

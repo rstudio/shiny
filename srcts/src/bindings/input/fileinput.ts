@@ -24,6 +24,7 @@ function enableDraghover(el: JQuery<HTMLElement>): JQuery<HTMLElement> {
   const $el = $(el);
   let childCounter = 0;
 
+  /* eslint-disable @typescript-eslint/naming-convention */
   $el.on({
     "dragenter.draghover": (e) => {
       if (childCounter++ === 0) {

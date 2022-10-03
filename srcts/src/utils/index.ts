@@ -4,6 +4,7 @@ import type { MapValuesUnion, MapWithResult } from "./extraTypes";
 import { hasOwnProperty, hasDefinedProperty } from "./object";
 
 function escapeHTML(str: string): string {
+  /* eslint-disable @typescript-eslint/naming-convention */
   const escaped: { [key: string]: string } = {
     "&": "&amp;",
     "<": "&lt;",

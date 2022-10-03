@@ -106,10 +106,3 @@ rules:
       custom:
         regex: "(t|T)ype$"
         match: false
-
-    - selector: objectLiteralProperty
-      format: null
-
-    - selector: objectLiteralMethod
-      format: null
-

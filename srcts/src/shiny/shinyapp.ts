@@ -878,7 +878,7 @@ class ShinyApp {
               message.selector +
               '") could not be found in the DOM.'
           );
-          renderHtml(message.content.html, $([]).get(0), message.content.deps);
+          renderHtml(message.content.html, $([]), message.content.deps);
         } else {
           targets.each(function (i, target) {
             renderContent(target, message.content, message.where);

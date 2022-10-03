@@ -66,7 +66,7 @@ function registerNames(s: string[] | string): void {
 // Inserts new content into document head
 function addToHead(head: string) {
   if (head.length > 0) {
-    const tempDiv = $("<div>" + head + "</div>").get(0);
+    const tempDiv = $("<div>" + head + "</div>").get(0) as HTMLDivElement;
     const $head = $("head");
 
     while (tempDiv.hasChildNodes()) {

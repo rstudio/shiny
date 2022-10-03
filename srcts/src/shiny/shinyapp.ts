@@ -43,6 +43,8 @@ type OnSuccessRequest = (value: ResponseValue) => void;
 type OnErrorRequest = (err: string) => void;
 type InputValues = { [key: string]: unknown };
 
+type MessageValue = Parameters<WebSocket["send"]>[0];
+
 //// 2021/03 - TypeScript conversion note:
 // These four variables were moved from being internally defined to being defined globally within the file.
 // Before the TypeScript conversion, the values where attached to `window.Shiny.addCustomMessageHandler()`.
@@ -127,7 +129,7 @@ class ShinyApp {
   // Conditional bindings (show/hide element based on expression)
   $conditionals = {};
 
-  $pendingMessages: string[] = [];
+  $pendingMessages: MessageValue[] = [];
   $activeRequests: {
     [key: number]: { onSuccess: OnSuccessRequest; onError: OnErrorRequest };
   } = {};
@@ -381,7 +383,7 @@ class ShinyApp {
       onError: onError,
     };
 
-    let msg = JSON.stringify({
+    let msg: Blob | string = JSON.stringify({
       method: method,
       args: args,
       tag: requestId,
@@ -423,13 +425,13 @@ class ShinyApp {
 
       const blob: Blob = new Blob(payload);
 
-      msg = blob as unknown as string;
+      msg = blob;
     }
 
     this.$sendMsg(msg);
   }
 
-  $sendMsg(msg: string): void {
+  $sendMsg(msg: MessageValue): void {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     if (!this.$socket!.readyState) {
       this.$pendingMessages.push(msg);

@@ -1,11 +1,5 @@
 import $ from "jquery";
-import {
-  $escape,
-  hasOwnProperty,
-  makeBlob,
-  randomId,
-  scopeExprToFunc,
-} from "../utils";
+import { $escape, hasOwnProperty, randomId, scopeExprToFunc } from "../utils";
 import {
   getShinyCreateWebsocket,
   getShinyOnCustomMessage,
@@ -48,6 +42,8 @@ type ErrorsMessageValue = {
 type OnSuccessRequest = (value: ResponseValue) => void;
 type OnErrorRequest = (err: string) => void;
 type InputValues = { [key: string]: unknown };
+
+type MessageValue = Parameters<WebSocket["send"]>[0];
 
 //// 2021/03 - TypeScript conversion note:
 // These four variables were moved from being internally defined to being defined globally within the file.
@@ -133,7 +129,7 @@ class ShinyApp {
   // Conditional bindings (show/hide element based on expression)
   $conditionals = {};
 
-  $pendingMessages: string[] = [];
+  $pendingMessages: MessageValue[] = [];
   $activeRequests: {
     [key: number]: { onSuccess: OnSuccessRequest; onError: OnErrorRequest };
   } = {};
@@ -387,7 +383,7 @@ class ShinyApp {
       onError: onError,
     };
 
-    let msg = JSON.stringify({
+    let msg: Blob | string = JSON.stringify({
       method: method,
       args: args,
       tag: requestId,
@@ -411,7 +407,7 @@ class ShinyApp {
 
       payload.push(uint32ToBuf(0x01020202)); // signature
 
-      const jsonBuf = makeBlob([msg]);
+      const jsonBuf: Blob = new Blob([msg]);
 
       payload.push(uint32ToBuf(jsonBuf.size));
       payload.push(jsonBuf);
@@ -427,15 +423,15 @@ class ShinyApp {
         payload.push(blob);
       }
 
-      const blob = makeBlob(payload) as unknown;
+      const blob: Blob = new Blob(payload);
 
-      msg = blob as string;
+      msg = blob;
     }
 
     this.$sendMsg(msg);
   }
 
-  $sendMsg(msg: string): void {
+  $sendMsg(msg: MessageValue): void {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     if (!this.$socket!.readyState) {
       this.$pendingMessages.push(msg);

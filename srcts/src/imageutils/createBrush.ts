@@ -384,6 +384,7 @@ function createBrush(
 
   // Add a new div representing the brush.
   function addDiv() {
+    /* eslint-disable @typescript-eslint/naming-convention */
     if ($div) $div.remove();
 
     // Start hidden; we'll show it when movement occurs

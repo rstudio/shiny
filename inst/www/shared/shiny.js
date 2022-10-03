@@ -1,4 +1,5 @@
 /*! shiny 1.7.2.9000 | (c) 2012-2022 RStudio, PBC. | License: GPL-3 | file LICENSE */
+"use strict";
 (function() {
   var __create = Object.create;
   var __defProp = Object.defineProperty;
@@ -6,29 +7,27 @@
   var __getOwnPropNames = Object.getOwnPropertyNames;
   var __getProtoOf = Object.getPrototypeOf;
   var __hasOwnProp = Object.prototype.hasOwnProperty;
-  var __markAsModule = function(target) {
-    return __defProp(target, "__esModule", { value: true });
-  };
   var __commonJS = function(cb, mod) {
     return function __require() {
-      return mod || (0, cb[Object.keys(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
+      return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
     };
   };
-  var __reExport = function(target, module, desc) {
-    if (module && typeof module === "object" || typeof module === "function")
-      for (var keys2 = __getOwnPropNames(module), i = 0, n = keys2.length, key; i < n; i++) {
+  var __copyProps = function(to, from2, except, desc) {
+    if (from2 && typeof from2 === "object" || typeof from2 === "function")
+      for (var keys2 = __getOwnPropNames(from2), i = 0, n = keys2.length, key; i < n; i++) {
         key = keys2[i];
-        if (!__hasOwnProp.call(target, key) && key !== "default")
-          __defProp(target, key, { get: function(k) {
-            return module[k];
-          }.bind(null, key), enumerable: !(desc = __getOwnPropDesc(module, key)) || desc.enumerable });
+        if (!__hasOwnProp.call(to, key) && key !== except)
+          __defProp(to, key, { get: function(k) {
+            return from2[k];
+          }.bind(null, key), enumerable: !(desc = __getOwnPropDesc(from2, key)) || desc.enumerable });
       }
-    return target;
+    return to;
   };
-  var __toModule = function(module) {
-    return __reExport(__markAsModule(__defProp(module != null ? __create(__getProtoOf(module)) : {}, "default", module && module.__esModule && "default" in module ? { get: function() {
-      return module.default;
-    }, enumerable: true } : { value: module, enumerable: true })), module);
+  var __toESM = function(mod, isNodeMode, target) {
+    return target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+      isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+      mod
+    );
   };
 
   // globals:jquery
@@ -969,9 +968,9 @@
   var require_es_regexp_exec = __commonJS({
     "node_modules/core-js/modules/es.regexp.exec.js": function() {
       "use strict";
-      var $72 = require_export();
+      var $71 = require_export();
       var exec = require_regexp_exec();
-      $72({ target: "RegExp", proto: true, forced: /./.exec !== exec }, {
+      $71({ target: "RegExp", proto: true, forced: /./.exec !== exec }, {
         exec: exec
       });
     }
@@ -1141,11 +1140,15 @@
           var stringMethod = methods[0];
           var regexMethod = methods[1];
           redefine5(String.prototype, KEY, stringMethod);
-          redefine5(RegExpPrototype2, SYMBOL2, length == 2 ? function(string, arg) {
-            return regexMethod.call(string, this, arg);
-          } : function(string) {
-            return regexMethod.call(string, this);
-          });
+          redefine5(
+            RegExpPrototype2,
+            SYMBOL2,
+            length == 2 ? function(string, arg) {
+              return regexMethod.call(string, this, arg);
+            } : function(string) {
+              return regexMethod.call(string, this);
+            }
+          );
         }
         if (sham)
           createNonEnumerableProperty4(RegExpPrototype2[SYMBOL2], "sham", true);
@@ -1969,7 +1972,7 @@
   var require_define_iterator = __commonJS({
     "node_modules/core-js/internals/define-iterator.js": function(exports, module) {
       "use strict";
-      var $72 = require_export();
+      var $71 = require_export();
       var createIteratorConstructor = require_create_iterator_constructor();
       var getPrototypeOf3 = require_object_get_prototype_of();
       var setPrototypeOf2 = require_object_set_prototype_of();
@@ -2059,7 +2062,7 @@
               }
             }
           else
-            $72({ target: NAME2, proto: true, forced: BUGGY_SAFARI_ITERATORS || INCORRECT_VALUES_NAME }, methods);
+            $71({ target: NAME2, proto: true, forced: BUGGY_SAFARI_ITERATORS || INCORRECT_VALUES_NAME }, methods);
         }
         return methods;
       };
@@ -2783,7 +2786,7 @@
   });
 
   // srcts/src/initialize/disableForm.ts
-  var import_jquery = __toModule(require_jquery());
+  var import_jquery = __toESM(require_jquery());
   function disableFormSubmission() {
     (0, import_jquery.default)(document).on("submit", "form:not([action])", function(e) {
       e.preventDefault();
@@ -2791,7 +2794,7 @@
   }
 
   // srcts/src/initialize/history.ts
-  var import_jquery2 = __toModule(require_jquery());
+  var import_jquery2 = __toESM(require_jquery());
   function trackHistory() {
     var origPushState = window.history.pushState;
     window.history.pushState = function() {
@@ -2805,7 +2808,6 @@
   }
 
   // node_modules/core-js/modules/es.array.index-of.js
-  "use strict";
   var $3 = require_export();
   var $indexOf = require_array_includes().indexOf;
   var arrayMethodIsStrict = require_array_method_is_strict();
@@ -2826,7 +2828,7 @@
   });
 
   // srcts/src/initialize/browser.ts
-  var import_jquery3 = __toModule(require_jquery());
+  var import_jquery3 = __toESM(require_jquery());
 
   // srcts/src/utils/browser.ts
   var isQtVal = false;
@@ -2896,7 +2898,7 @@
   }
 
   // srcts/src/shiny/index.ts
-  var import_jquery41 = __toModule(require_jquery());
+  var import_jquery40 = __toESM(require_jquery());
 
   // node_modules/core-js/modules/es.function.name.js
   var DESCRIPTORS = require_descriptors();
@@ -2919,10 +2921,9 @@
   }
 
   // srcts/src/utils/index.ts
-  var import_es_regexp_exec = __toModule(require_es_regexp_exec());
+  var import_es_regexp_exec = __toESM(require_es_regexp_exec());
 
   // node_modules/core-js/modules/es.string.replace.js
-  "use strict";
   var fixRegExpWellKnownSymbolLogic = require_fix_regexp_well_known_symbol_logic();
   var anObject = require_an_object();
   var toLength = require_to_length();
@@ -3011,7 +3012,6 @@
   }
 
   // node_modules/core-js/modules/es.regexp.to-string.js
-  "use strict";
   var redefine2 = require_redefine();
   var anObject2 = require_an_object();
   var fails = require_fails();
@@ -3041,7 +3041,6 @@
   });
 
   // node_modules/core-js/modules/es.number.to-precision.js
-  "use strict";
   var $7 = require_export();
   var fails2 = require_fails();
   var thisNumberValue = require_this_number_value();
@@ -3058,7 +3057,6 @@
   });
 
   // node_modules/core-js/modules/es.array.concat.js
-  "use strict";
   var $8 = require_export();
   var fails3 = require_fails();
   var isArray = require_is_array();
@@ -3113,7 +3111,6 @@
   });
 
   // node_modules/core-js/modules/es.array.slice.js
-  "use strict";
   var $9 = require_export();
   var isObject2 = require_is_object();
   var isArray2 = require_is_array();
@@ -3157,7 +3154,6 @@
   });
 
   // node_modules/core-js/modules/es.array.splice.js
-  "use strict";
   var $10 = require_export();
   var toAbsoluteIndex2 = require_to_absolute_index();
   var toInteger2 = require_to_integer();
@@ -3227,7 +3223,6 @@
   });
 
   // node_modules/core-js/modules/es.array.for-each.js
-  "use strict";
   var $11 = require_export();
   var forEach = require_array_for_each();
   $11({ target: "Array", proto: true, forced: [].forEach != forEach }, {
@@ -3239,7 +3234,7 @@
   var DOMIterables = require_dom_iterables();
   var forEach2 = require_array_for_each();
   var createNonEnumerableProperty = require_create_non_enumerable_property();
-  for (var COLLECTION_NAME in DOMIterables) {
+  for (COLLECTION_NAME in DOMIterables) {
     Collection = global2[COLLECTION_NAME];
     CollectionPrototype = Collection && Collection.prototype;
     if (CollectionPrototype && CollectionPrototype.forEach !== forEach2)
@@ -3251,6 +3246,7 @@
   }
   var Collection;
   var CollectionPrototype;
+  var COLLECTION_NAME;
 
   // node_modules/core-js/modules/es.object.keys.js
   var $12 = require_export();
@@ -3267,7 +3263,6 @@
   });
 
   // node_modules/core-js/modules/es.string.split.js
-  "use strict";
   var fixRegExpWellKnownSymbolLogic2 = require_fix_regexp_well_known_symbol_logic();
   var isRegExp = require_is_regexp();
   var anObject3 = require_an_object();
@@ -3376,30 +3371,11 @@
   }, UNSUPPORTED_Y);
 
   // srcts/src/utils/index.ts
-  var import_jquery5 = __toModule(require_jquery());
+  var import_jquery4 = __toESM(require_jquery());
 
   // srcts/src/window/pixelRatio.ts
   function windowDevicePixelRatio() {
     return window.devicePixelRatio;
-  }
-
-  // srcts/src/utils/blob.ts
-  var import_jquery4 = __toModule(require_jquery());
-  var blobBuilderClass;
-  function setBlobBuilder(blobBuilderClass_) {
-    blobBuilderClass = blobBuilderClass_;
-    return;
-  }
-  function makeBlob(parts) {
-    try {
-      return new Blob(parts);
-    } catch (e) {
-      var blobBuilder = new blobBuilderClass();
-      import_jquery4.default.each(parts, function(i, part) {
-        blobBuilder.append(part);
-      });
-      return blobBuilder.getBlob();
-    }
   }
 
   // srcts/src/utils/object.ts
@@ -3574,7 +3550,7 @@
     return typeof x === "number" && isNaN(x);
   }
   function _equal(x, y) {
-    if (import_jquery5.default.type(x) === "object" && import_jquery5.default.type(y) === "object") {
+    if (import_jquery4.default.type(x) === "object" && import_jquery4.default.type(y) === "object") {
       var xo = x;
       var yo = y;
       if (Object.keys(xo).length !== Object.keys(yo).length)
@@ -3584,7 +3560,7 @@
           return false;
       }
       return true;
-    } else if (import_jquery5.default.type(x) === "array" && import_jquery5.default.type(y) === "array") {
+    } else if (import_jquery4.default.type(x) === "array" && import_jquery4.default.type(y) === "array") {
       var xa = x;
       var ya = y;
       if (xa.length !== ya.length)
@@ -3854,8 +3830,7 @@
   }();
 
   // node_modules/core-js/modules/es.array.find.js
-  "use strict";
-  var $15 = require_export();
+  var $14 = require_export();
   var $find = require_array_iteration().find;
   var addToUnscopables = require_add_to_unscopables();
   var FIND = "find";
@@ -3864,7 +3839,7 @@
     Array(1)[FIND](function() {
       SKIPS_HOLES = false;
     });
-  $15({ target: "Array", proto: true, forced: SKIPS_HOLES }, {
+  $14({ target: "Array", proto: true, forced: SKIPS_HOLES }, {
     find: function find(callbackfn) {
       return $find(this, callbackfn, arguments.length > 1 ? arguments[1] : void 0);
     }
@@ -3872,14 +3847,14 @@
   addToUnscopables(FIND);
 
   // node_modules/core-js/modules/es.object.set-prototype-of.js
-  var $16 = require_export();
+  var $15 = require_export();
   var setPrototypeOf = require_object_set_prototype_of();
-  $16({ target: "Object", stat: true }, {
+  $15({ target: "Object", stat: true }, {
     setPrototypeOf: setPrototypeOf
   });
 
   // node_modules/core-js/modules/es.object.get-prototype-of.js
-  var $17 = require_export();
+  var $16 = require_export();
   var fails5 = require_fails();
   var toObject4 = require_to_object();
   var nativeGetPrototypeOf = require_object_get_prototype_of();
@@ -3887,14 +3862,14 @@
   var FAILS_ON_PRIMITIVES2 = fails5(function() {
     nativeGetPrototypeOf(1);
   });
-  $17({ target: "Object", stat: true, forced: FAILS_ON_PRIMITIVES2, sham: !CORRECT_PROTOTYPE_GETTER }, {
+  $16({ target: "Object", stat: true, forced: FAILS_ON_PRIMITIVES2, sham: !CORRECT_PROTOTYPE_GETTER }, {
     getPrototypeOf: function getPrototypeOf(it) {
       return nativeGetPrototypeOf(toObject4(it));
     }
   });
 
   // node_modules/core-js/modules/es.reflect.construct.js
-  var $18 = require_export();
+  var $17 = require_export();
   var getBuiltIn = require_get_built_in();
   var aFunction = require_a_function();
   var anObject4 = require_an_object();
@@ -3914,7 +3889,7 @@
     });
   });
   var FORCED3 = NEW_TARGET_BUG || ARGS_BUG;
-  $18({ target: "Reflect", stat: true, forced: FORCED3, sham: FORCED3 }, {
+  $17({ target: "Reflect", stat: true, forced: FORCED3, sham: FORCED3 }, {
     construct: function construct(Target, args) {
       aFunction(Target);
       anObject4(args);
@@ -3946,8 +3921,7 @@
   });
 
   // node_modules/core-js/modules/es.symbol.js
-  "use strict";
-  var $19 = require_export();
+  var $18 = require_export();
   var global3 = require_global();
   var getBuiltIn2 = require_get_built_in();
   var IS_PURE = require_is_pure();
@@ -4148,13 +4122,13 @@
       }
     }
   }
-  $19({ global: true, wrap: true, forced: !NATIVE_SYMBOL, sham: !NATIVE_SYMBOL }, {
+  $18({ global: true, wrap: true, forced: !NATIVE_SYMBOL, sham: !NATIVE_SYMBOL }, {
     Symbol: $Symbol
   });
   $forEach(objectKeys(WellKnownSymbolsStore), function(name) {
     defineWellKnownSymbol(name);
   });
-  $19({ target: SYMBOL, stat: true, forced: !NATIVE_SYMBOL }, {
+  $18({ target: SYMBOL, stat: true, forced: !NATIVE_SYMBOL }, {
     "for": function(key) {
       var string = String(key);
       if (has(StringToSymbolRegistry, string))
@@ -4177,17 +4151,17 @@
       USE_SETTER = false;
     }
   });
-  $19({ target: "Object", stat: true, forced: !NATIVE_SYMBOL, sham: !DESCRIPTORS2 }, {
+  $18({ target: "Object", stat: true, forced: !NATIVE_SYMBOL, sham: !DESCRIPTORS2 }, {
     create: $create,
     defineProperty: $defineProperty,
     defineProperties: $defineProperties,
     getOwnPropertyDescriptor: $getOwnPropertyDescriptor
   });
-  $19({ target: "Object", stat: true, forced: !NATIVE_SYMBOL }, {
+  $18({ target: "Object", stat: true, forced: !NATIVE_SYMBOL }, {
     getOwnPropertyNames: $getOwnPropertyNames,
     getOwnPropertySymbols: $getOwnPropertySymbols
   });
-  $19({ target: "Object", stat: true, forced: fails7(function() {
+  $18({ target: "Object", stat: true, forced: fails7(function() {
     getOwnPropertySymbolsModule.f(1);
   }) }, {
     getOwnPropertySymbols: function getOwnPropertySymbols2(it) {
@@ -4199,7 +4173,7 @@
       var symbol = $Symbol();
       return $stringify([symbol]) != "[null]" || $stringify({ a: symbol }) != "{}" || $stringify(Object(symbol)) != "{}";
     });
-    $19({ target: "JSON", stat: true, forced: FORCED_JSON_STRINGIFY }, {
+    $18({ target: "JSON", stat: true, forced: FORCED_JSON_STRINGIFY }, {
       stringify: function stringify(it, replacer, space) {
         var args = [it];
         var index = 1;
@@ -4229,8 +4203,7 @@
   hiddenKeys[HIDDEN] = true;
 
   // node_modules/core-js/modules/es.symbol.description.js
-  "use strict";
-  var $20 = require_export();
+  var $19 = require_export();
   var DESCRIPTORS3 = require_descriptors();
   var global4 = require_global();
   var has2 = require_has();
@@ -4264,7 +4237,7 @@
         return desc === "" ? void 0 : desc;
       }
     });
-    $20({ global: true, forced: true }, {
+    $19({ global: true, forced: true }, {
       Symbol: SymbolWrapper
     });
   }
@@ -4280,10 +4253,9 @@
   defineWellKnownSymbol2("iterator");
 
   // srcts/src/bindings/input/checkbox.ts
-  var import_es_array_iterator = __toModule(require_es_array_iterator());
+  var import_es_array_iterator = __toESM(require_es_array_iterator());
 
   // node_modules/core-js/modules/es.string.iterator.js
-  "use strict";
   var charAt = require_string_multibyte().charAt;
   var InternalStateModule2 = require_internal_state();
   var defineIterator = require_define_iterator();
@@ -4317,7 +4289,7 @@
   var ITERATOR = wellKnownSymbol4("iterator");
   var TO_STRING_TAG = wellKnownSymbol4("toStringTag");
   var ArrayValues = ArrayIteratorMethods.values;
-  for (var COLLECTION_NAME in DOMIterables2) {
+  for (COLLECTION_NAME in DOMIterables2) {
     Collection = global5[COLLECTION_NAME];
     CollectionPrototype = Collection && Collection.prototype;
     if (CollectionPrototype) {
@@ -4344,9 +4316,10 @@
   var Collection;
   var CollectionPrototype;
   var METHOD_NAME;
+  var COLLECTION_NAME;
 
   // srcts/src/bindings/input/checkbox.ts
-  var import_jquery6 = __toModule(require_jquery());
+  var import_jquery5 = __toESM(require_jquery());
   function _typeof(obj) {
     "@babel/helpers - typeof";
     if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
@@ -4453,7 +4426,7 @@
     _createClass3(CheckboxInputBinding2, [{
       key: "find",
       value: function find2(scope) {
-        return (0, import_jquery6.default)(scope).find('input[type="checkbox"]');
+        return (0, import_jquery5.default)(scope).find('input[type="checkbox"]');
       }
     }, {
       key: "getValue",
@@ -4468,20 +4441,20 @@
     }, {
       key: "subscribe",
       value: function subscribe(el, callback) {
-        (0, import_jquery6.default)(el).on("change.checkboxInputBinding", function() {
+        (0, import_jquery5.default)(el).on("change.checkboxInputBinding", function() {
           callback(true);
         });
       }
     }, {
       key: "unsubscribe",
       value: function unsubscribe(el) {
-        (0, import_jquery6.default)(el).off(".checkboxInputBinding");
+        (0, import_jquery5.default)(el).off(".checkboxInputBinding");
       }
     }, {
       key: "getState",
       value: function getState(el) {
         return {
-          label: (0, import_jquery6.default)(el).parent().find("span").text(),
+          label: (0, import_jquery5.default)(el).parent().find("span").text(),
           value: el.checked
         };
       }
@@ -4492,28 +4465,27 @@
           el.checked = data.value;
         }
         if (hasDefinedProperty(data, "label")) {
-          (0, import_jquery6.default)(el).parent().find("span").text(data.label);
+          (0, import_jquery5.default)(el).parent().find("span").text(data.label);
         }
-        (0, import_jquery6.default)(el).trigger("change");
+        (0, import_jquery5.default)(el).trigger("change");
       }
     }]);
     return CheckboxInputBinding2;
   }(InputBinding);
 
   // node_modules/core-js/modules/es.string.trim.js
-  "use strict";
-  var $22 = require_export();
+  var $21 = require_export();
   var $trim = require_string_trim().trim;
   var forcedStringTrimMethod = require_string_trim_forced();
-  $22({ target: "String", proto: true, forced: forcedStringTrimMethod("trim") }, {
+  $21({ target: "String", proto: true, forced: forcedStringTrimMethod("trim") }, {
     trim: function trim() {
       return $trim(this);
     }
   });
 
   // srcts/src/bindings/input/checkboxgroup.ts
-  var import_es_array_iterator2 = __toModule(require_es_array_iterator());
-  var import_jquery7 = __toModule(require_jquery());
+  var import_es_array_iterator2 = __toESM(require_es_array_iterator());
+  var import_jquery6 = __toESM(require_jquery());
   function _typeof2(obj) {
     "@babel/helpers - typeof";
     if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
@@ -4611,12 +4583,12 @@
     return _getPrototypeOf2(o);
   }
   function getLabelNode(el) {
-    return (0, import_jquery7.default)(el).find('label[for="' + $escape(el.id) + '"]');
+    return (0, import_jquery6.default)(el).find('label[for="' + $escape(el.id) + '"]');
   }
   function getLabel(obj) {
     var parentNode = obj.parentNode;
     if (parentNode.tagName === "LABEL") {
-      return (0, import_jquery7.default)(parentNode).find("span").text().trim();
+      return (0, import_jquery6.default)(parentNode).find("span").text().trim();
     }
     return null;
   }
@@ -4630,12 +4602,12 @@
     _createClass4(CheckboxGroupInputBinding2, [{
       key: "find",
       value: function find2(scope) {
-        return (0, import_jquery7.default)(scope).find(".shiny-input-checkboxgroup");
+        return (0, import_jquery6.default)(scope).find(".shiny-input-checkboxgroup");
       }
     }, {
       key: "getValue",
       value: function getValue(el) {
-        var $objs = (0, import_jquery7.default)('input:checkbox[name="' + $escape(el.id) + '"]:checked');
+        var $objs = (0, import_jquery6.default)('input:checkbox[name="' + $escape(el.id) + '"]:checked');
         var values2 = new Array($objs.length);
         for (var i = 0; i < $objs.length; i++) {
           values2[i] = $objs[i].value;
@@ -4647,19 +4619,19 @@
       value: function setValue(el, value) {
         var _value;
         value = (_value = value) !== null && _value !== void 0 ? _value : [];
-        (0, import_jquery7.default)('input:checkbox[name="' + $escape(el.id) + '"]').prop("checked", false);
+        (0, import_jquery6.default)('input:checkbox[name="' + $escape(el.id) + '"]').prop("checked", false);
         if (value instanceof Array) {
           for (var i = 0; i < value.length; i++) {
-            (0, import_jquery7.default)('input:checkbox[name="' + $escape(el.id) + '"][value="' + $escape(value[i]) + '"]').prop("checked", true);
+            (0, import_jquery6.default)('input:checkbox[name="' + $escape(el.id) + '"][value="' + $escape(value[i]) + '"]').prop("checked", true);
           }
         } else {
-          (0, import_jquery7.default)('input:checkbox[name="' + $escape(el.id) + '"][value="' + $escape(value) + '"]').prop("checked", true);
+          (0, import_jquery6.default)('input:checkbox[name="' + $escape(el.id) + '"][value="' + $escape(value) + '"]').prop("checked", true);
         }
       }
     }, {
       key: "getState",
       value: function getState(el) {
-        var $objs = (0, import_jquery7.default)('input:checkbox[name="' + $escape(el.id) + '"]');
+        var $objs = (0, import_jquery6.default)('input:checkbox[name="' + $escape(el.id) + '"]');
         var options = new Array($objs.length);
         for (var i = 0; i < options.length; i++) {
           options[i] = {
@@ -4676,7 +4648,7 @@
     }, {
       key: "receiveMessage",
       value: function receiveMessage(el, data) {
-        var $el = (0, import_jquery7.default)(el);
+        var $el = (0, import_jquery6.default)(el);
         if (hasDefinedProperty(data, "options")) {
           $el.find("div.shiny-options-group").remove();
           $el.find("label.checkbox").remove();
@@ -4686,26 +4658,25 @@
           this.setValue(el, data.value);
         }
         updateLabel(data.label, getLabelNode(el));
-        (0, import_jquery7.default)(el).trigger("change");
+        (0, import_jquery6.default)(el).trigger("change");
       }
     }, {
       key: "subscribe",
       value: function subscribe(el, callback) {
-        (0, import_jquery7.default)(el).on("change.checkboxGroupInputBinding", function() {
+        (0, import_jquery6.default)(el).on("change.checkboxGroupInputBinding", function() {
           callback(false);
         });
       }
     }, {
       key: "unsubscribe",
       value: function unsubscribe(el) {
-        (0, import_jquery7.default)(el).off(".checkboxGroupInputBinding");
+        (0, import_jquery6.default)(el).off(".checkboxGroupInputBinding");
       }
     }]);
     return CheckboxGroupInputBinding2;
   }(InputBinding);
 
   // node_modules/core-js/modules/es.number.constructor.js
-  "use strict";
   var DESCRIPTORS4 = require_descriptors();
   var global6 = require_global();
   var isForced = require_is_forced();
@@ -4784,11 +4755,11 @@
   var key;
 
   // srcts/src/bindings/input/number.ts
-  var import_es_array_iterator4 = __toModule(require_es_array_iterator());
-  var import_jquery9 = __toModule(require_jquery());
+  var import_es_array_iterator4 = __toESM(require_es_array_iterator());
+  var import_jquery8 = __toESM(require_jquery());
 
   // node_modules/core-js/modules/es.reflect.get.js
-  var $24 = require_export();
+  var $23 = require_export();
   var isObject6 = require_is_object();
   var anObject6 = require_an_object();
   var has4 = require_has();
@@ -4804,12 +4775,12 @@
     if (isObject6(prototype = getPrototypeOf2(target)))
       return get(prototype, propertyKey, receiver);
   }
-  $24({ target: "Reflect", stat: true }, {
+  $23({ target: "Reflect", stat: true }, {
     get: get
   });
 
   // node_modules/core-js/modules/es.object.get-own-property-descriptor.js
-  var $25 = require_export();
+  var $24 = require_export();
   var fails9 = require_fails();
   var toIndexedObject3 = require_to_indexed_object();
   var nativeGetOwnPropertyDescriptor2 = require_object_get_own_property_descriptor().f;
@@ -4818,15 +4789,15 @@
     nativeGetOwnPropertyDescriptor2(1);
   });
   var FORCED4 = !DESCRIPTORS5 || FAILS_ON_PRIMITIVES3;
-  $25({ target: "Object", stat: true, forced: FORCED4, sham: !DESCRIPTORS5 }, {
+  $24({ target: "Object", stat: true, forced: FORCED4, sham: !DESCRIPTORS5 }, {
     getOwnPropertyDescriptor: function getOwnPropertyDescriptor3(it, key) {
       return nativeGetOwnPropertyDescriptor2(toIndexedObject3(it), key);
     }
   });
 
   // srcts/src/bindings/input/text.ts
-  var import_es_array_iterator3 = __toModule(require_es_array_iterator());
-  var import_jquery8 = __toModule(require_jquery());
+  var import_es_array_iterator3 = __toESM(require_es_array_iterator());
+  var import_jquery7 = __toESM(require_jquery());
   function _typeof3(obj) {
     "@babel/helpers - typeof";
     if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
@@ -4949,7 +4920,7 @@
     return _getPrototypeOf3(o);
   }
   function getLabelNode2(el) {
-    return (0, import_jquery8.default)(el).parent().find('label[for="' + $escape(el.id) + '"]');
+    return (0, import_jquery7.default)(el).parent().find('label[for="' + $escape(el.id) + '"]');
   }
   var TextInputBindingBase = /* @__PURE__ */ function(_InputBinding) {
     _inherits3(TextInputBindingBase2, _InputBinding);
@@ -4961,7 +4932,7 @@
     _createClass5(TextInputBindingBase2, [{
       key: "find",
       value: function find2(scope) {
-        var $inputs = (0, import_jquery8.default)(scope).find('input[type="text"], input[type="search"], input[type="url"], input[type="email"]');
+        var $inputs = (0, import_jquery7.default)(scope).find('input[type="text"], input[type="search"], input[type="url"], input[type="email"]');
         return $inputs.not('input[type="text"][id$="-selectized"]');
       }
     }, {
@@ -4985,17 +4956,23 @@
     }, {
       key: "subscribe",
       value: function subscribe(el, callback) {
-        (0, import_jquery8.default)(el).on("keyup.textInputBinding input.textInputBinding", function() {
-          callback(true);
-        });
-        (0, import_jquery8.default)(el).on("change.textInputBinding", function() {
-          callback(false);
-        });
+        (0, import_jquery7.default)(el).on(
+          "keyup.textInputBinding input.textInputBinding",
+          function() {
+            callback(true);
+          }
+        );
+        (0, import_jquery7.default)(el).on(
+          "change.textInputBinding",
+          function() {
+            callback(false);
+          }
+        );
       }
     }, {
       key: "unsubscribe",
       value: function unsubscribe(el) {
-        (0, import_jquery8.default)(el).off(".textInputBinding");
+        (0, import_jquery7.default)(el).off(".textInputBinding");
       }
     }, {
       key: "receiveMessage",
@@ -5056,7 +5033,7 @@
         updateLabel(data.label, getLabelNode2(el));
         if (hasDefinedProperty(data, "placeholder"))
           el.placeholder = data.placeholder;
-        (0, import_jquery8.default)(el).trigger("change");
+        (0, import_jquery7.default)(el).trigger("change");
       }
     }]);
     return TextInputBinding2;
@@ -5160,7 +5137,7 @@
     return _getPrototypeOf4(o);
   }
   function getLabelNode3(el) {
-    return (0, import_jquery9.default)(el).parent().find('label[for="' + $escape(el.id) + '"]');
+    return (0, import_jquery8.default)(el).parent().find('label[for="' + $escape(el.id) + '"]');
   }
   var NumberInputBinding = /* @__PURE__ */ function(_TextInputBindingBase) {
     _inherits4(NumberInputBinding2, _TextInputBindingBase);
@@ -5172,12 +5149,12 @@
     _createClass6(NumberInputBinding2, [{
       key: "find",
       value: function find2(scope) {
-        return (0, import_jquery9.default)(scope).find('input[type="number"]');
+        return (0, import_jquery8.default)(scope).find('input[type="number"]');
       }
     }, {
       key: "getValue",
       value: function getValue(el) {
-        var numberVal = (0, import_jquery9.default)(el).val();
+        var numberVal = (0, import_jquery8.default)(el).val();
         if (typeof numberVal == "string") {
           if (/^\s*$/.test(numberVal))
             return null;
@@ -5212,7 +5189,7 @@
         if (hasDefinedProperty(data, "step"))
           el.step = (_data$step = data.step) !== null && _data$step !== void 0 ? _data$step : "";
         updateLabel(data.label, getLabelNode3(el));
-        (0, import_jquery9.default)(el).trigger("change");
+        (0, import_jquery8.default)(el).trigger("change");
       }
     }, {
       key: "getState",
@@ -5230,8 +5207,8 @@
   }(TextInputBindingBase);
 
   // srcts/src/bindings/input/password.ts
-  var import_es_array_iterator5 = __toModule(require_es_array_iterator());
-  var import_jquery10 = __toModule(require_jquery());
+  var import_es_array_iterator5 = __toESM(require_es_array_iterator());
+  var import_jquery9 = __toESM(require_jquery());
   function _typeof5(obj) {
     "@babel/helpers - typeof";
     if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
@@ -5338,7 +5315,7 @@
     _createClass7(PasswordInputBinding2, [{
       key: "find",
       value: function find2(scope) {
-        return (0, import_jquery10.default)(scope).find('input[type="password"]');
+        return (0, import_jquery9.default)(scope).find('input[type="password"]');
       }
     }, {
       key: "getType",
@@ -5351,8 +5328,8 @@
   }(TextInputBinding);
 
   // srcts/src/bindings/input/textarea.ts
-  var import_es_array_iterator6 = __toModule(require_es_array_iterator());
-  var import_jquery11 = __toModule(require_jquery());
+  var import_es_array_iterator6 = __toESM(require_es_array_iterator());
+  var import_jquery10 = __toESM(require_jquery());
   function _typeof6(obj) {
     "@babel/helpers - typeof";
     if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
@@ -5459,15 +5436,15 @@
     _createClass8(TextareaInputBinding2, [{
       key: "find",
       value: function find2(scope) {
-        return (0, import_jquery11.default)(scope).find("textarea");
+        return (0, import_jquery10.default)(scope).find("textarea");
       }
     }]);
     return TextareaInputBinding2;
   }(TextInputBinding);
 
   // srcts/src/bindings/input/radio.ts
-  var import_es_array_iterator7 = __toModule(require_es_array_iterator());
-  var import_jquery12 = __toModule(require_jquery());
+  var import_es_array_iterator7 = __toESM(require_es_array_iterator());
+  var import_jquery11 = __toESM(require_jquery());
   function _typeof7(obj) {
     "@babel/helpers - typeof";
     if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
@@ -5565,12 +5542,12 @@
     return _getPrototypeOf7(o);
   }
   function getLabelNode4(el) {
-    return (0, import_jquery12.default)(el).parent().find('label[for="' + $escape(el.id) + '"]');
+    return (0, import_jquery11.default)(el).parent().find('label[for="' + $escape(el.id) + '"]');
   }
   function getLabel2(obj) {
     var parentNode = obj.parentNode;
     if (parentNode.tagName === "LABEL") {
-      return (0, import_jquery12.default)(parentNode).find("span").text().trim();
+      return (0, import_jquery11.default)(parentNode).find("span").text().trim();
     }
     return null;
   }
@@ -5584,12 +5561,12 @@
     _createClass9(RadioInputBinding2, [{
       key: "find",
       value: function find2(scope) {
-        return (0, import_jquery12.default)(scope).find(".shiny-input-radiogroup");
+        return (0, import_jquery11.default)(scope).find(".shiny-input-radiogroup");
       }
     }, {
       key: "getValue",
       value: function getValue(el) {
-        var checkedItems = (0, import_jquery12.default)('input:radio[name="' + $escape(el.id) + '"]:checked');
+        var checkedItems = (0, import_jquery11.default)('input:radio[name="' + $escape(el.id) + '"]:checked');
         if (checkedItems.length === 0) {
           return null;
         }
@@ -5599,15 +5576,15 @@
       key: "setValue",
       value: function setValue(el, value) {
         if (Array.isArray(value) && value.length === 0) {
-          (0, import_jquery12.default)('input:radio[name="' + $escape(el.id) + '"]').prop("checked", false);
+          (0, import_jquery11.default)('input:radio[name="' + $escape(el.id) + '"]').prop("checked", false);
         } else {
-          (0, import_jquery12.default)('input:radio[name="' + $escape(el.id) + '"][value="' + $escape(value) + '"]').prop("checked", true);
+          (0, import_jquery11.default)('input:radio[name="' + $escape(el.id) + '"][value="' + $escape(value) + '"]').prop("checked", true);
         }
       }
     }, {
       key: "getState",
       value: function getState(el) {
-        var $objs = (0, import_jquery12.default)('input:radio[name="' + $escape(el.id) + '"]');
+        var $objs = (0, import_jquery11.default)('input:radio[name="' + $escape(el.id) + '"]');
         var options = new Array($objs.length);
         for (var i = 0; i < options.length; i++) {
           options[i] = {
@@ -5624,7 +5601,7 @@
     }, {
       key: "receiveMessage",
       value: function receiveMessage(el, data) {
-        var $el = (0, import_jquery12.default)(el);
+        var $el = (0, import_jquery11.default)(el);
         if (hasDefinedProperty(data, "options")) {
           $el.find("div.shiny-options-group").remove();
           $el.find("label.radio").remove();
@@ -5634,27 +5611,27 @@
           this.setValue(el, data.value);
         }
         updateLabel(data.label, getLabelNode4(el));
-        (0, import_jquery12.default)(el).trigger("change");
+        (0, import_jquery11.default)(el).trigger("change");
       }
     }, {
       key: "subscribe",
       value: function subscribe(el, callback) {
-        (0, import_jquery12.default)(el).on("change.radioInputBinding", function() {
+        (0, import_jquery11.default)(el).on("change.radioInputBinding", function() {
           callback(false);
         });
       }
     }, {
       key: "unsubscribe",
       value: function unsubscribe(el) {
-        (0, import_jquery12.default)(el).off(".radioInputBinding");
+        (0, import_jquery11.default)(el).off(".radioInputBinding");
       }
     }]);
     return RadioInputBinding2;
   }(InputBinding);
 
   // srcts/src/bindings/input/date.ts
-  var import_es_array_iterator8 = __toModule(require_es_array_iterator());
-  var import_jquery13 = __toModule(require_jquery());
+  var import_es_array_iterator8 = __toESM(require_es_array_iterator());
+  var import_jquery12 = __toESM(require_jquery());
   function _typeof8(obj) {
     "@babel/helpers - typeof";
     if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
@@ -5761,7 +5738,7 @@
     _createClass10(DateInputBindingBase2, [{
       key: "find",
       value: function find2(scope) {
-        return (0, import_jquery13.default)(scope).find(".shiny-date-input");
+        return (0, import_jquery12.default)(scope).find(".shiny-date-input");
       }
     }, {
       key: "getType",
@@ -5772,17 +5749,23 @@
     }, {
       key: "subscribe",
       value: function subscribe(el, callback) {
-        (0, import_jquery13.default)(el).on("keyup.dateInputBinding input.dateInputBinding", function() {
-          callback(true);
-        });
-        (0, import_jquery13.default)(el).on("changeDate.dateInputBinding change.dateInputBinding", function() {
-          callback(false);
-        });
+        (0, import_jquery12.default)(el).on(
+          "keyup.dateInputBinding input.dateInputBinding",
+          function() {
+            callback(true);
+          }
+        );
+        (0, import_jquery12.default)(el).on(
+          "changeDate.dateInputBinding change.dateInputBinding",
+          function() {
+            callback(false);
+          }
+        );
       }
     }, {
       key: "unsubscribe",
       value: function unsubscribe(el) {
-        (0, import_jquery13.default)(el).off(".dateInputBinding");
+        (0, import_jquery12.default)(el).off(".dateInputBinding");
       }
     }, {
       key: "getRatePolicy",
@@ -5802,7 +5785,7 @@
     }, {
       key: "initialize",
       value: function initialize(el) {
-        var $input = (0, import_jquery13.default)(el).find("input");
+        var $input = (0, import_jquery12.default)(el).find("input");
         var date = $input.data("initial-date");
         if (date === void 0 || date === null) {
           date = this._floorDateTime(this._dateAsUTC(new Date()));
@@ -5818,7 +5801,7 @@
     }, {
       key: "_getLabelNode",
       value: function _getLabelNode(el) {
-        return (0, import_jquery13.default)(el).find('label[for="' + $escape(el.id) + '"]');
+        return (0, import_jquery12.default)(el).find('label[for="' + $escape(el.id) + '"]');
       }
     }, {
       key: "_formatToString",
@@ -5835,7 +5818,7 @@
       key: "_setMin",
       value: function _setMin(el, date) {
         if (date === null) {
-          (0, import_jquery13.default)(el).bsDatepicker("setStartDate", null);
+          (0, import_jquery12.default)(el).bsDatepicker("setStartDate", null);
           return;
         }
         var parsedDate = this._newDate(date);
@@ -5844,19 +5827,19 @@
         date = parsedDate;
         if (isNaN(date.valueOf()))
           return;
-        var curValue = (0, import_jquery13.default)(el).bsDatepicker("getUTCDate");
-        (0, import_jquery13.default)(el).bsDatepicker("setStartDate", this._utcDateAsLocal(date));
+        var curValue = (0, import_jquery12.default)(el).bsDatepicker("getUTCDate");
+        (0, import_jquery12.default)(el).bsDatepicker("setStartDate", this._utcDateAsLocal(date));
         if (date && curValue && date.getTime() > curValue.getTime()) {
-          (0, import_jquery13.default)(el).bsDatepicker("clearDates");
+          (0, import_jquery12.default)(el).bsDatepicker("clearDates");
         } else {
-          (0, import_jquery13.default)(el).bsDatepicker("setUTCDate", curValue);
+          (0, import_jquery12.default)(el).bsDatepicker("setUTCDate", curValue);
         }
       }
     }, {
       key: "_setMax",
       value: function _setMax(el, date) {
         if (date === null) {
-          (0, import_jquery13.default)(el).bsDatepicker("setEndDate", null);
+          (0, import_jquery12.default)(el).bsDatepicker("setEndDate", null);
           return;
         }
         var parsedDate = this._newDate(date);
@@ -5865,12 +5848,12 @@
         date = parsedDate;
         if (isNaN(date.valueOf()))
           return;
-        var curValue = (0, import_jquery13.default)(el).bsDatepicker("getUTCDate");
-        (0, import_jquery13.default)(el).bsDatepicker("setEndDate", this._utcDateAsLocal(date));
+        var curValue = (0, import_jquery12.default)(el).bsDatepicker("getUTCDate");
+        (0, import_jquery12.default)(el).bsDatepicker("setEndDate", this._utcDateAsLocal(date));
         if (date && curValue && date.getTime() < curValue.getTime()) {
-          (0, import_jquery13.default)(el).bsDatepicker("clearDates");
+          (0, import_jquery12.default)(el).bsDatepicker("clearDates");
         } else {
-          (0, import_jquery13.default)(el).bsDatepicker("setUTCDate", curValue);
+          (0, import_jquery12.default)(el).bsDatepicker("setUTCDate", curValue);
         }
       }
     }, {
@@ -5915,14 +5898,14 @@
     _createClass10(DateInputBinding2, [{
       key: "getValue",
       value: function getValue(el) {
-        var date = (0, import_jquery13.default)(el).find("input").bsDatepicker("getUTCDate");
+        var date = (0, import_jquery12.default)(el).find("input").bsDatepicker("getUTCDate");
         return formatDateUTC(date);
       }
     }, {
       key: "setValue",
       value: function setValue(el, value) {
         if (value === null) {
-          (0, import_jquery13.default)(el).find("input").val("").bsDatepicker("update");
+          (0, import_jquery12.default)(el).find("input").val("").bsDatepicker("update");
           return;
         }
         var date = this._newDate(value);
@@ -5931,12 +5914,12 @@
         }
         if (isNaN(date.valueOf()))
           return;
-        (0, import_jquery13.default)(el).find("input").bsDatepicker("setUTCDate", date);
+        (0, import_jquery12.default)(el).find("input").bsDatepicker("setUTCDate", date);
       }
     }, {
       key: "getState",
       value: function getState(el) {
-        var $el = (0, import_jquery13.default)(el);
+        var $el = (0, import_jquery12.default)(el);
         var $input = $el.find("input");
         var min4 = $input.data("datepicker").startDate;
         var max4 = $input.data("datepicker").endDate;
@@ -5964,7 +5947,7 @@
     }, {
       key: "receiveMessage",
       value: function receiveMessage(el, data) {
-        var $input = (0, import_jquery13.default)(el).find("input");
+        var $input = (0, import_jquery12.default)(el).find("input");
         updateLabel(data.label, this._getLabelNode(el));
         if (hasDefinedProperty(data, "min"))
           this._setMin($input[0], data.min);
@@ -5972,16 +5955,16 @@
           this._setMax($input[0], data.max);
         if (hasDefinedProperty(data, "value"))
           this.setValue(el, data.value);
-        (0, import_jquery13.default)(el).trigger("change");
+        (0, import_jquery12.default)(el).trigger("change");
       }
     }]);
     return DateInputBinding2;
   }(DateInputBindingBase);
 
   // srcts/src/bindings/input/slider.ts
-  var import_es_regexp_exec2 = __toModule(require_es_regexp_exec());
-  var import_es_array_iterator9 = __toModule(require_es_array_iterator());
-  var import_jquery14 = __toModule(require_jquery());
+  var import_es_regexp_exec2 = __toESM(require_es_regexp_exec());
+  var import_es_array_iterator9 = __toESM(require_es_array_iterator());
+  var import_jquery13 = __toESM(require_jquery());
   function _typeof9(obj) {
     "@babel/helpers - typeof";
     if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
@@ -6108,10 +6091,10 @@
     return prettify;
   }
   function getLabelNode5(el) {
-    return (0, import_jquery14.default)(el).parent().find('label[for="' + $escape(el.id) + '"]');
+    return (0, import_jquery13.default)(el).parent().find('label[for="' + $escape(el.id) + '"]');
   }
   function numValues(el) {
-    if ((0, import_jquery14.default)(el).data("ionRangeSlider").options.type === "double")
+    if ((0, import_jquery13.default)(el).data("ionRangeSlider").options.type === "double")
       return 2;
     else
       return 1;
@@ -6126,15 +6109,15 @@
     _createClass11(SliderInputBinding2, [{
       key: "find",
       value: function find2(scope) {
-        if (!import_jquery14.default.fn.ionRangeSlider) {
-          return (0, import_jquery14.default)();
+        if (!import_jquery13.default.fn.ionRangeSlider) {
+          return (0, import_jquery13.default)();
         }
-        return (0, import_jquery14.default)(scope).find("input.js-range-slider");
+        return (0, import_jquery13.default)(scope).find("input.js-range-slider");
       }
     }, {
       key: "getType",
       value: function getType(el) {
-        var dataType = (0, import_jquery14.default)(el).data("data-type");
+        var dataType = (0, import_jquery13.default)(el).data("data-type");
         if (dataType === "date")
           return "shiny.date";
         else if (dataType === "datetime")
@@ -6145,8 +6128,8 @@
     }, {
       key: "getValue",
       value: function getValue(el) {
-        var $el = (0, import_jquery14.default)(el);
-        var result = (0, import_jquery14.default)(el).data("ionRangeSlider").result;
+        var $el = (0, import_jquery13.default)(el);
+        var result = (0, import_jquery13.default)(el).data("ionRangeSlider").result;
         var convert;
         var dataType = $el.data("data-type");
         if (dataType === "date") {
@@ -6171,7 +6154,7 @@
     }, {
       key: "setValue",
       value: function setValue(el, value) {
-        var $el = (0, import_jquery14.default)(el);
+        var $el = (0, import_jquery13.default)(el);
         var slider = $el.data("ionRangeSlider");
         $el.data("immediate", true);
         try {
@@ -6193,19 +6176,19 @@
     }, {
       key: "subscribe",
       value: function subscribe(el, callback) {
-        (0, import_jquery14.default)(el).on("change.sliderInputBinding", function() {
-          callback(!(0, import_jquery14.default)(el).data("immediate") && !(0, import_jquery14.default)(el).data("animating"));
+        (0, import_jquery13.default)(el).on("change.sliderInputBinding", function() {
+          callback(!(0, import_jquery13.default)(el).data("immediate") && !(0, import_jquery13.default)(el).data("animating"));
         });
       }
     }, {
       key: "unsubscribe",
       value: function unsubscribe(el) {
-        (0, import_jquery14.default)(el).off(".sliderInputBinding");
+        (0, import_jquery13.default)(el).off(".sliderInputBinding");
       }
     }, {
       key: "receiveMessage",
       value: function receiveMessage(el, data) {
-        var $el = (0, import_jquery14.default)(el);
+        var $el = (0, import_jquery13.default)(el);
         var slider = $el.data("ionRangeSlider");
         var msg = {};
         if (hasDefinedProperty(data, "value")) {
@@ -6263,7 +6246,7 @@
     }, {
       key: "initialize",
       value: function initialize(el) {
-        var $el = (0, import_jquery14.default)(el);
+        var $el = (0, import_jquery13.default)(el);
         var dataType = $el.data("data-type");
         var timeFormat = $el.data("time-format");
         var timezone = $el.data("timezone");
@@ -6287,10 +6270,10 @@
     else
       return "";
   }
-  (0, import_jquery14.default)(document).on("click", ".slider-animate-button", function(evt) {
+  (0, import_jquery13.default)(document).on("click", ".slider-animate-button", function(evt) {
     evt.preventDefault();
-    var self2 = (0, import_jquery14.default)(this);
-    var target = (0, import_jquery14.default)("#" + $escape(self2.attr("data-target-id")));
+    var self2 = (0, import_jquery13.default)(this);
+    var target = (0, import_jquery13.default)("#" + $escape(self2.attr("data-target-id")));
     var startLabel = "Play";
     var stopLabel = "Pause";
     var loop = self2.attr("data-loop") !== void 0 && !/^\s*false\s*$/i.test(self2.attr("data-loop"));
@@ -6368,8 +6351,8 @@
   });
 
   // srcts/src/bindings/input/daterange.ts
-  var import_es_array_iterator10 = __toModule(require_es_array_iterator());
-  var import_jquery15 = __toModule(require_jquery());
+  var import_es_array_iterator10 = __toESM(require_es_array_iterator());
+  var import_jquery14 = __toESM(require_jquery());
   function _typeof10(obj) {
     "@babel/helpers - typeof";
     if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
@@ -6467,7 +6450,7 @@
     return _getPrototypeOf10(o);
   }
   function getLabelNode6(el) {
-    return (0, import_jquery15.default)(el).find('label[for="' + $escape(el.id) + '"]');
+    return (0, import_jquery14.default)(el).find('label[for="' + $escape(el.id) + '"]');
   }
   var DateRangeInputBinding = /* @__PURE__ */ function(_DateInputBindingBase) {
     _inherits10(DateRangeInputBinding2, _DateInputBindingBase);
@@ -6479,12 +6462,12 @@
     _createClass12(DateRangeInputBinding2, [{
       key: "find",
       value: function find2(scope) {
-        return (0, import_jquery15.default)(scope).find(".shiny-date-range-input");
+        return (0, import_jquery14.default)(scope).find(".shiny-date-range-input");
       }
     }, {
       key: "getValue",
       value: function getValue(el) {
-        var $inputs = (0, import_jquery15.default)(el).find("input");
+        var $inputs = (0, import_jquery14.default)(el).find("input");
         var start = $inputs.eq(0).bsDatepicker("getUTCDate");
         var end = $inputs.eq(1).bsDatepicker("getUTCDate");
         return [formatDateUTC(start), formatDateUTC(end)];
@@ -6495,7 +6478,7 @@
         if (!(value instanceof Object)) {
           return;
         }
-        var $inputs = (0, import_jquery15.default)(el).find("input");
+        var $inputs = (0, import_jquery14.default)(el).find("input");
         if (value.start !== void 0) {
           if (value.start === null) {
             $inputs.eq(0).val("").bsDatepicker("update");
@@ -6516,7 +6499,7 @@
     }, {
       key: "getState",
       value: function getState(el) {
-        var $el = (0, import_jquery15.default)(el);
+        var $el = (0, import_jquery14.default)(el);
         var $inputs = $el.find("input");
         var $startinput = $inputs.eq(0);
         var $endinput = $inputs.eq(1);
@@ -6546,7 +6529,7 @@
     }, {
       key: "receiveMessage",
       value: function receiveMessage(el, data) {
-        var $el = (0, import_jquery15.default)(el);
+        var $el = (0, import_jquery14.default)(el);
         var $inputs = $el.find("input");
         var $startinput = $inputs.eq(0);
         var $endinput = $inputs.eq(1);
@@ -6567,7 +6550,7 @@
     }, {
       key: "initialize",
       value: function initialize(el) {
-        var $el = (0, import_jquery15.default)(el);
+        var $el = (0, import_jquery14.default)(el);
         var $inputs = $el.find("input");
         var $startinput = $inputs.eq(0);
         var $endinput = $inputs.eq(1);
@@ -6589,25 +6572,31 @@
     }, {
       key: "subscribe",
       value: function subscribe(el, callback) {
-        (0, import_jquery15.default)(el).on("keyup.dateRangeInputBinding input.dateRangeInputBinding", function() {
-          callback(true);
-        });
-        (0, import_jquery15.default)(el).on("changeDate.dateRangeInputBinding change.dateRangeInputBinding", function() {
-          callback(false);
-        });
+        (0, import_jquery14.default)(el).on(
+          "keyup.dateRangeInputBinding input.dateRangeInputBinding",
+          function() {
+            callback(true);
+          }
+        );
+        (0, import_jquery14.default)(el).on(
+          "changeDate.dateRangeInputBinding change.dateRangeInputBinding",
+          function() {
+            callback(false);
+          }
+        );
       }
     }, {
       key: "unsubscribe",
       value: function unsubscribe(el) {
-        (0, import_jquery15.default)(el).off(".dateRangeInputBinding");
+        (0, import_jquery14.default)(el).off(".dateRangeInputBinding");
       }
     }]);
     return DateRangeInputBinding2;
   }(DateInputBindingBase);
 
   // srcts/src/bindings/input/selectInput.ts
-  var import_es_array_iterator11 = __toModule(require_es_array_iterator());
-  var import_jquery16 = __toModule(require_jquery());
+  var import_es_array_iterator11 = __toESM(require_es_array_iterator());
+  var import_jquery15 = __toESM(require_jquery());
 
   // srcts/src/utils/eval.ts
   var indirectEval = eval;
@@ -6714,10 +6703,10 @@
     if (isSelectize(el)) {
       escapedId += "-selectized";
     }
-    return (0, import_jquery16.default)(el).parent().parent().find('label[for="' + escapedId + '"]');
+    return (0, import_jquery15.default)(el).parent().parent().find('label[for="' + escapedId + '"]');
   }
   function isSelectize(el) {
-    var config = (0, import_jquery16.default)(el).parent().find('script[data-for="' + $escape(el.id) + '"]');
+    var config = (0, import_jquery15.default)(el).parent().find('script[data-for="' + $escape(el.id) + '"]');
     return config.length > 0;
   }
   var SelectInputBinding = /* @__PURE__ */ function(_InputBinding) {
@@ -6730,12 +6719,12 @@
     _createClass13(SelectInputBinding2, [{
       key: "find",
       value: function find2(scope) {
-        return (0, import_jquery16.default)(scope).find("select");
+        return (0, import_jquery15.default)(scope).find("select");
       }
     }, {
       key: "getType",
       value: function getType(el) {
-        var $el = (0, import_jquery16.default)(el);
+        var $el = (0, import_jquery15.default)(el);
         if (!$el.hasClass("symbol")) {
           return null;
         }
@@ -6753,13 +6742,13 @@
     }, {
       key: "getValue",
       value: function getValue(el) {
-        return (0, import_jquery16.default)(el).val();
+        return (0, import_jquery15.default)(el).val();
       }
     }, {
       key: "setValue",
       value: function setValue(el, value) {
         if (!isSelectize(el)) {
-          (0, import_jquery16.default)(el).val(value);
+          (0, import_jquery15.default)(el).val(value);
         } else {
           var selectize = this._selectize(el);
           selectize.setValue(value);
@@ -6784,7 +6773,7 @@
     }, {
       key: "receiveMessage",
       value: function receiveMessage(el, data) {
-        var $el = (0, import_jquery16.default)(el);
+        var $el = (0, import_jquery15.default)(el);
         if (hasDefinedProperty(data, "options")) {
           var selectize = this._selectize(el);
           if (selectize)
@@ -6802,7 +6791,7 @@
           var loaded = false;
           _selectize2.settings.load = function(query, callback) {
             var settings = _selectize2.settings;
-            import_jquery16.default.ajax({
+            import_jquery15.default.ajax({
               url: data.url,
               data: {
                 query: query,
@@ -6816,7 +6805,7 @@
                 callback();
               },
               success: function success(res) {
-                import_jquery16.default.each(res, function(index, elem) {
+                import_jquery15.default.each(res, function(index, elem) {
                   var optgroupId = elem[settings.optgroupField || "optgroup"];
                   var optgroup = {};
                   optgroup[settings.optgroupLabelField || "label"] = optgroupId;
@@ -6844,23 +6833,26 @@
           this.setValue(el, data.value);
         }
         updateLabel(data.label, getLabelNode7(el));
-        (0, import_jquery16.default)(el).trigger("change");
+        (0, import_jquery15.default)(el).trigger("change");
       }
     }, {
       key: "subscribe",
       value: function subscribe(el, callback) {
         var _this = this;
-        (0, import_jquery16.default)(el).on("change.selectInputBinding", function() {
-          if (el.nonempty && _this.getValue(el) === "") {
-            return;
+        (0, import_jquery15.default)(el).on(
+          "change.selectInputBinding",
+          function() {
+            if (el.nonempty && _this.getValue(el) === "") {
+              return;
+            }
+            callback(false);
           }
-          callback(false);
-        });
+        );
       }
     }, {
       key: "unsubscribe",
       value: function unsubscribe(el) {
-        (0, import_jquery16.default)(el).off(".selectInputBinding");
+        (0, import_jquery15.default)(el).off(".selectInputBinding");
       }
     }, {
       key: "initialize",
@@ -6871,30 +6863,30 @@
       key: "_selectize",
       value: function _selectize(el) {
         var update = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : false;
-        if (!import_jquery16.default.fn.selectize)
+        if (!import_jquery15.default.fn.selectize)
           throw "selectize jquery is not defined";
-        var $el = (0, import_jquery16.default)(el);
+        var $el = (0, import_jquery15.default)(el);
         var config = $el.parent().find('script[data-for="' + $escape(el.id) + '"]');
         if (config.length === 0)
           throw "No config found for selectize with id:" + $escape(el.id);
-        var options = import_jquery16.default.extend({
+        var options = import_jquery15.default.extend({
           labelField: "label",
           valueField: "value",
           searchField: ["label"]
         }, JSON.parse(config.html()));
         if (typeof config.data("nonempty") !== "undefined") {
           el.nonempty = true;
-          options = import_jquery16.default.extend(options, {
+          options = import_jquery15.default.extend(options, {
             onItemRemove: function onItemRemove(value) {
               if (this.getValue() === "")
-                (0, import_jquery16.default)("select#" + $escape(el.id)).empty().append((0, import_jquery16.default)("<option/>", {
+                (0, import_jquery15.default)("select#" + $escape(el.id)).empty().append((0, import_jquery15.default)("<option/>", {
                   value: value,
                   selected: true
                 })).trigger("change");
             },
             onDropdownClose: function onDropdownClose() {
               if (this.getValue() === "") {
-                this.setValue((0, import_jquery16.default)("select#" + $escape(el.id)).val());
+                this.setValue((0, import_jquery15.default)("select#" + $escape(el.id)).val());
               }
             }
           });
@@ -6902,12 +6894,12 @@
           el.nonempty = false;
         }
         if (config.data("eval") instanceof Array)
-          import_jquery16.default.each(config.data("eval"), function(i, x) {
+          import_jquery15.default.each(config.data("eval"), function(i, x) {
             options[x] = indirectEval("(" + options[x] + ")");
           });
         var control = $el.selectize(options)[0].selectize;
         if (update) {
-          var settings = import_jquery16.default.extend(control.settings, options);
+          var settings = import_jquery15.default.extend(control.settings, options);
           control.destroy();
           control = $el.selectize(settings)[0].selectize;
         }
@@ -6918,8 +6910,8 @@
   }(InputBinding);
 
   // srcts/src/bindings/input/actionbutton.ts
-  var import_es_array_iterator12 = __toModule(require_es_array_iterator());
-  var import_jquery17 = __toModule(require_jquery());
+  var import_es_array_iterator12 = __toESM(require_es_array_iterator());
+  var import_jquery16 = __toESM(require_jquery());
   function _typeof12(obj) {
     "@babel/helpers - typeof";
     if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
@@ -7026,17 +7018,17 @@
     _createClass14(ActionButtonInputBinding2, [{
       key: "find",
       value: function find2(scope) {
-        return (0, import_jquery17.default)(scope).find(".action-button");
+        return (0, import_jquery16.default)(scope).find(".action-button");
       }
     }, {
       key: "getValue",
       value: function getValue(el) {
-        return (0, import_jquery17.default)(el).data("val") || 0;
+        return (0, import_jquery16.default)(el).data("val") || 0;
       }
     }, {
       key: "setValue",
       value: function setValue(el, value) {
-        (0, import_jquery17.default)(el).data("val", value);
+        (0, import_jquery16.default)(el).data("val", value);
       }
     }, {
       key: "getType",
@@ -7047,12 +7039,15 @@
     }, {
       key: "subscribe",
       value: function subscribe(el, callback) {
-        (0, import_jquery17.default)(el).on("click.actionButtonInputBinding", function() {
-          var $el = (0, import_jquery17.default)(this);
-          var val = $el.data("val") || 0;
-          $el.data("val", val + 1);
-          callback(false);
-        });
+        (0, import_jquery16.default)(el).on(
+          "click.actionButtonInputBinding",
+          function() {
+            var $el = (0, import_jquery16.default)(this);
+            var val = $el.data("val") || 0;
+            $el.data("val", val + 1);
+            callback(false);
+          }
+        );
       }
     }, {
       key: "getState",
@@ -7064,13 +7059,13 @@
     }, {
       key: "receiveMessage",
       value: function receiveMessage(el, data) {
-        var $el = (0, import_jquery17.default)(el);
+        var $el = (0, import_jquery16.default)(el);
         var label = $el.text();
         var icon = "";
         if ($el.find("i[class]").length > 0) {
           var iconHtml = $el.find("i[class]")[0];
           if (iconHtml === $el.children()[0]) {
-            icon = (0, import_jquery17.default)(iconHtml).prop("outerHTML");
+            icon = (0, import_jquery16.default)(iconHtml).prop("outerHTML");
           }
         }
         if (hasDefinedProperty(data, "label")) {
@@ -7085,18 +7080,18 @@
     }, {
       key: "unsubscribe",
       value: function unsubscribe(el) {
-        (0, import_jquery17.default)(el).off(".actionButtonInputBinding");
+        (0, import_jquery16.default)(el).off(".actionButtonInputBinding");
       }
     }]);
     return ActionButtonInputBinding2;
   }(InputBinding);
-  (0, import_jquery17.default)(document).on("click", "a.action-button", function(e) {
+  (0, import_jquery16.default)(document).on("click", "a.action-button", function(e) {
     e.preventDefault();
   });
 
   // srcts/src/bindings/input/tabinput.ts
-  var import_es_array_iterator13 = __toModule(require_es_array_iterator());
-  var import_jquery18 = __toModule(require_jquery());
+  var import_es_array_iterator13 = __toESM(require_es_array_iterator());
+  var import_jquery17 = __toESM(require_jquery());
   function _typeof13(obj) {
     "@babel/helpers - typeof";
     if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
@@ -7206,12 +7201,12 @@
     _createClass15(BootstrapTabInputBinding2, [{
       key: "find",
       value: function find2(scope) {
-        return (0, import_jquery18.default)(scope).find("ul.nav.shiny-tab-input");
+        return (0, import_jquery17.default)(scope).find("ul.nav.shiny-tab-input");
       }
     }, {
       key: "getValue",
       value: function getValue(el) {
-        var anchor = isBS3() ? (0, import_jquery18.default)(el).find("li:not(.dropdown).active > a") : (0, import_jquery18.default)(el).find(".nav-link:not(.dropdown-toggle).active, .dropdown-menu .dropdown-item.active");
+        var anchor = isBS3() ? (0, import_jquery17.default)(el).find("li:not(.dropdown).active > a") : (0, import_jquery17.default)(el).find(".nav-link:not(.dropdown-toggle).active, .dropdown-menu .dropdown-item.active");
         if (anchor.length === 1)
           return getTabName(anchor);
         return null;
@@ -7221,10 +7216,10 @@
       value: function setValue(el, value) {
         var success = false;
         if (value) {
-          var anchors = isBS3() ? (0, import_jquery18.default)(el).find("li:not(.dropdown) > a") : (0, import_jquery18.default)(el).find(".nav-link:not(.dropdown-toggle), .dropdown-menu .dropdown-item");
+          var anchors = isBS3() ? (0, import_jquery17.default)(el).find("li:not(.dropdown) > a") : (0, import_jquery17.default)(el).find(".nav-link:not(.dropdown-toggle), .dropdown-menu .dropdown-item");
           anchors.each(function() {
-            if (getTabName((0, import_jquery18.default)(this)) === value) {
-              (0, import_jquery18.default)(this).tab("show");
+            if (getTabName((0, import_jquery17.default)(this)) === value) {
+              (0, import_jquery17.default)(this).tab("show");
               success = true;
               return false;
             }
@@ -7232,7 +7227,7 @@
           });
         }
         if (!success) {
-          (0, import_jquery18.default)(el).trigger("change");
+          (0, import_jquery17.default)(el).trigger("change");
         }
       }
     }, {
@@ -7247,65 +7242,67 @@
       value: function receiveMessage(el, data) {
         if (hasDefinedProperty(data, "value"))
           this.setValue(el, data.value);
-        (0, import_jquery18.default)(el).trigger("change");
+        (0, import_jquery17.default)(el).trigger("change");
       }
     }, {
       key: "subscribe",
       value: function subscribe(el, callback) {
-        (0, import_jquery18.default)(el).on("change shown.bootstrapTabInputBinding shown.bs.tab.bootstrapTabInputBinding", function() {
-          callback(false);
-        });
+        (0, import_jquery17.default)(el).on(
+          "change shown.bootstrapTabInputBinding shown.bs.tab.bootstrapTabInputBinding",
+          function() {
+            callback(false);
+          }
+        );
       }
     }, {
       key: "unsubscribe",
       value: function unsubscribe(el) {
-        (0, import_jquery18.default)(el).off(".bootstrapTabInputBinding");
+        (0, import_jquery17.default)(el).off(".bootstrapTabInputBinding");
       }
     }]);
     return BootstrapTabInputBinding2;
   }(InputBinding);
 
   // srcts/src/bindings/input/fileinput.ts
-  var import_es_array_iterator15 = __toModule(require_es_array_iterator());
-  var import_jquery21 = __toModule(require_jquery());
+  var import_es_array_iterator15 = __toESM(require_es_array_iterator());
+  var import_jquery20 = __toESM(require_jquery());
 
   // node_modules/core-js/modules/es.array.from.js
-  var $37 = require_export();
+  var $36 = require_export();
   var from = require_array_from();
   var checkCorrectnessOfIteration = require_check_correctness_of_iteration();
   var INCORRECT_ITERATION = !checkCorrectnessOfIteration(function(iterable) {
     Array.from(iterable);
   });
-  $37({ target: "Array", stat: true, forced: INCORRECT_ITERATION }, {
+  $36({ target: "Array", stat: true, forced: INCORRECT_ITERATION }, {
     from: from
   });
 
   // node_modules/core-js/modules/es.array.map.js
-  "use strict";
-  var $38 = require_export();
+  var $37 = require_export();
   var $map = require_array_iteration().map;
   var arrayMethodHasSpeciesSupport4 = require_array_method_has_species_support();
   var HAS_SPECIES_SUPPORT3 = arrayMethodHasSpeciesSupport4("map");
-  $38({ target: "Array", proto: true, forced: !HAS_SPECIES_SUPPORT3 }, {
+  $37({ target: "Array", proto: true, forced: !HAS_SPECIES_SUPPORT3 }, {
     map: function map(callbackfn) {
       return $map(this, callbackfn, arguments.length > 1 ? arguments[1] : void 0);
     }
   });
 
   // srcts/src/file/fileProcessor.ts
-  var import_es_array_iterator14 = __toModule(require_es_array_iterator());
-  var import_jquery20 = __toModule(require_jquery());
+  var import_es_array_iterator14 = __toESM(require_es_array_iterator());
+  var import_jquery19 = __toESM(require_jquery());
 
   // srcts/src/events/inputChanged.ts
-  var import_jquery19 = __toModule(require_jquery());
+  var import_jquery18 = __toESM(require_jquery());
   function triggerFileInputChanged(name, value, binding, el, inputType, onEl) {
-    var evt = import_jquery19.default.Event("shiny:inputchanged");
+    var evt = import_jquery18.default.Event("shiny:inputchanged");
     evt.name = name;
     evt.value = value;
     evt.binding = binding;
     evt.el = el;
     evt.inputType = inputType;
-    (0, import_jquery19.default)(onEl).trigger(evt);
+    (0, import_jquery18.default)(onEl).trigger(evt);
     return evt;
   }
 
@@ -7578,10 +7575,10 @@
         this.onProgress(null, 0);
         this.totalBytes = 0;
         this.progressBytes = 0;
-        import_jquery20.default.each(files, function(i, file) {
+        import_jquery19.default.each(files, function(i, file) {
           _this3.totalBytes += file.size;
         });
-        var fileInfo = import_jquery20.default.map(files, function(file) {
+        var fileInfo = import_jquery19.default.map(files, function(file) {
           return {
             name: file.name,
             size: file.size,
@@ -7601,13 +7598,13 @@
       value: function onFile(file, cont) {
         var _this4 = this;
         this.onProgress(file, 0);
-        import_jquery20.default.ajax(this.uploadUrl, {
+        import_jquery19.default.ajax(this.uploadUrl, {
           type: "POST",
           cache: false,
           xhr: function xhr() {
-            if (typeof import_jquery20.default.ajaxSettings.xhr !== "function")
+            if (typeof import_jquery19.default.ajaxSettings.xhr !== "function")
               throw "jQuery's XHR is not a function";
-            var xhrVal = import_jquery20.default.ajaxSettings.xhr();
+            var xhrVal = import_jquery19.default.ajaxSettings.xhr();
             if (xhrVal.upload) {
               xhrVal.upload.onprogress = function(e) {
                 if (e.lengthComputable) {
@@ -7634,7 +7631,7 @@
       key: "onComplete",
       value: function onComplete() {
         var _this5 = this;
-        var fileInfo = import_jquery20.default.map(this.files, function(file, i) {
+        var fileInfo = import_jquery19.default.map(this.files, function(file, i) {
           return {
             name: file.name,
             size: file.size,
@@ -7647,7 +7644,7 @@
           _this5.$setActive(false);
           _this5.onProgress(null, 1);
           _this5.$bar().text("Upload complete");
-          (0, import_jquery20.default)(evt.el).val("");
+          (0, import_jquery19.default)(evt.el).val("");
         }, function(error) {
           _this5.onError(error);
         }, void 0);
@@ -7673,12 +7670,12 @@
     }, {
       key: "$container",
       value: function $container() {
-        return (0, import_jquery20.default)("#" + $escape(this.id) + "_progress.shiny-file-input-progress");
+        return (0, import_jquery19.default)("#" + $escape(this.id) + "_progress.shiny-file-input-progress");
       }
     }, {
       key: "$bar",
       value: function $bar() {
-        return (0, import_jquery20.default)("#" + $escape(this.id) + "_progress.shiny-file-input-progress .progress-bar");
+        return (0, import_jquery19.default)("#" + $escape(this.id) + "_progress.shiny-file-input-progress .progress-bar");
       }
     }, {
       key: "$setVisible",
@@ -7803,10 +7800,10 @@
   var zoneActive = "shiny-file-input-active";
   var zoneOver = "shiny-file-input-over";
   function zoneOf(el) {
-    return (0, import_jquery21.default)(el).closest("div.input-group");
+    return (0, import_jquery20.default)(el).closest("div.input-group");
   }
   function enableDraghover(el) {
-    var $el = (0, import_jquery21.default)(el);
+    var $el = (0, import_jquery20.default)(el);
     var childCounter = 0;
     $el.on({
       "dragenter.draghover": function dragenterDraghover(e) {
@@ -7834,10 +7831,10 @@
     return $el;
   }
   function disableDraghover(el) {
-    return (0, import_jquery21.default)(el).off(".draghover");
+    return (0, import_jquery20.default)(el).off(".draghover");
   }
   function enableDocumentEvents() {
-    var $doc = (0, import_jquery21.default)("html");
+    var $doc = (0, import_jquery20.default)("html");
     enableDraghover($doc).on({
       "draghover:enter.draghover": function draghoverEnterDraghover() {
         zoneOf($fileInputs).addClass(zoneActive);
@@ -7851,7 +7848,7 @@
     });
   }
   function disableDocumentEvents() {
-    var $doc = (0, import_jquery21.default)("html");
+    var $doc = (0, import_jquery20.default)("html");
     $doc.off(".draghover");
     disableDraghover($doc);
   }
@@ -7867,7 +7864,7 @@
   }
   function handleDrop(e, el) {
     var _e$originalEvent, _e$originalEvent$data;
-    var files = (_e$originalEvent = e.originalEvent) === null || _e$originalEvent === void 0 ? void 0 : (_e$originalEvent$data = _e$originalEvent.dataTransfer) === null || _e$originalEvent$data === void 0 ? void 0 : _e$originalEvent$data.files, $el = (0, import_jquery21.default)(el);
+    var files = (_e$originalEvent = e.originalEvent) === null || _e$originalEvent === void 0 ? void 0 : (_e$originalEvent$data = _e$originalEvent.dataTransfer) === null || _e$originalEvent$data === void 0 ? void 0 : _e$originalEvent$data.files, $el = (0, import_jquery20.default)(el);
     if (files === void 0 || files === null) {
       console.log("Dropping files is not supported on this browser. (no FileList)");
     } else if (!canSetFiles(files)) {
@@ -7894,13 +7891,13 @@
     $el.removeAttr("data-restore");
   }
   function uploadDroppedFilesIE10Plus(el, files) {
-    var $el = (0, import_jquery21.default)(el);
+    var $el = (0, import_jquery20.default)(el);
     abortCurrentUpload($el);
     setFileText($el, files);
     $el.data("currentUploader", new FileUploader(shinyShinyApp(), fileInputBindingGetId(el), files, el));
   }
   function uploadFiles(evt) {
-    var $el = (0, import_jquery21.default)(evt.target);
+    var $el = (0, import_jquery20.default)(evt.target);
     abortCurrentUpload($el);
     var files = evt.target.files;
     var id = fileInputBindingGetId(evt.target);
@@ -7909,7 +7906,7 @@
     setFileText($el, files);
     $el.data("currentUploader", new FileUploader(shinyShinyApp(), id, files, evt.target));
   }
-  var $fileInputs = (0, import_jquery21.default)();
+  var $fileInputs = (0, import_jquery20.default)();
   function fileInputBindingGetId(el) {
     return InputBinding.prototype.getId.call(this, el) || el.name;
   }
@@ -7923,7 +7920,7 @@
     _createClass17(FileInputBinding2, [{
       key: "find",
       value: function find2(scope) {
-        return (0, import_jquery21.default)(scope).find('input[type="file"]');
+        return (0, import_jquery20.default)(scope).find('input[type="file"]');
       }
     }, {
       key: "getId",
@@ -7933,16 +7930,16 @@
     }, {
       key: "getValue",
       value: function getValue(el) {
-        var data = (0, import_jquery21.default)(el).attr("data-restore");
+        var data = (0, import_jquery20.default)(el).attr("data-restore");
         if (data) {
           var dataParsed = JSON.parse(data);
-          var $fileText = (0, import_jquery21.default)(el).closest("div.input-group").find("input[type=text]");
+          var $fileText = (0, import_jquery20.default)(el).closest("div.input-group").find("input[type=text]");
           if (dataParsed.name.length === 1) {
             $fileText.val(dataParsed.name[0]);
           } else {
             $fileText.val(dataParsed.name.length + " files");
           }
-          var $progress = (0, import_jquery21.default)(el).closest("div.form-group").find(".progress");
+          var $progress = (0, import_jquery20.default)(el).closest("div.form-group").find(".progress");
           var $bar = $progress.find(".progress-bar");
           $progress.removeClass("active");
           $bar.width("100%");
@@ -7968,7 +7965,7 @@
       key: "subscribe",
       value: function subscribe(el, callback) {
         callback;
-        (0, import_jquery21.default)(el).on("change.fileInputBinding", uploadFiles);
+        (0, import_jquery20.default)(el).on("change.fileInputBinding", uploadFiles);
         if ($fileInputs.length === 0)
           enableDocumentEvents();
         $fileInputs = $fileInputs.add(el);
@@ -7991,7 +7988,7 @@
     }, {
       key: "unsubscribe",
       value: function unsubscribe(el) {
-        var $el = (0, import_jquery21.default)(el), $zone = zoneOf(el);
+        var $el = (0, import_jquery20.default)(el), $zone = zoneOf(el);
         $zone.removeClass(zoneOver).removeClass(zoneActive);
         disableDraghover($zone);
         $el.off(".fileInputBinding");
@@ -8029,27 +8026,26 @@
   }
 
   // srcts/src/bindings/output/text.ts
-  var import_es_array_iterator16 = __toModule(require_es_array_iterator());
-  var import_jquery23 = __toModule(require_jquery());
+  var import_es_array_iterator16 = __toESM(require_es_array_iterator());
+  var import_jquery22 = __toESM(require_jquery());
 
   // node_modules/core-js/modules/es.array.join.js
-  "use strict";
-  var $42 = require_export();
+  var $41 = require_export();
   var IndexedObject = require_indexed_object();
   var toIndexedObject4 = require_to_indexed_object();
   var arrayMethodIsStrict2 = require_array_method_is_strict();
   var nativeJoin = [].join;
   var ES3_STRINGS = IndexedObject != Object;
   var STRICT_METHOD2 = arrayMethodIsStrict2("join", ",");
-  $42({ target: "Array", proto: true, forced: ES3_STRINGS || !STRICT_METHOD2 }, {
+  $41({ target: "Array", proto: true, forced: ES3_STRINGS || !STRICT_METHOD2 }, {
     join: function join(separator) {
       return nativeJoin.call(toIndexedObject4(this), separator === void 0 ? "," : separator);
     }
   });
 
   // srcts/src/bindings/output/outputBinding.ts
-  var import_es_regexp_exec3 = __toModule(require_es_regexp_exec());
-  var import_jquery22 = __toModule(require_jquery());
+  var import_es_regexp_exec3 = __toESM(require_es_regexp_exec());
+  var import_jquery21 = __toESM(require_jquery());
   function _classCallCheck18(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
       throw new TypeError("Cannot call a class as a function");
@@ -8119,21 +8115,21 @@
       value: function renderError(el, err) {
         this.clearError(el);
         if (err.message === "") {
-          (0, import_jquery22.default)(el).empty();
+          (0, import_jquery21.default)(el).empty();
           return;
         }
         var errClass = "shiny-output-error";
         if (err.type !== null) {
-          errClass = errClass + " " + import_jquery22.default.map(asArray(err.type), function(type) {
+          errClass = errClass + " " + import_jquery21.default.map(asArray(err.type), function(type) {
             return errClass + "-" + type;
           }).join(" ");
         }
-        (0, import_jquery22.default)(el).addClass(errClass).text(err.message);
+        (0, import_jquery21.default)(el).addClass(errClass).text(err.message);
       }
     }, {
       key: "clearError",
       value: function clearError(el) {
-        (0, import_jquery22.default)(el).attr("class", function(i, c) {
+        (0, import_jquery21.default)(el).attr("class", function(i, c) {
           return c.replace(/(^|\s)shiny-output-error\S*/g, "");
         });
       }
@@ -8142,9 +8138,9 @@
       value: function showProgress(el, show3) {
         var recalcClass = "recalculating";
         if (show3)
-          (0, import_jquery22.default)(el).addClass(recalcClass);
+          (0, import_jquery21.default)(el).addClass(recalcClass);
         else
-          (0, import_jquery22.default)(el).removeClass(recalcClass);
+          (0, import_jquery21.default)(el).removeClass(recalcClass);
       }
     }]);
     return OutputBinding2;
@@ -8257,20 +8253,20 @@
     _createClass19(TextOutputBinding2, [{
       key: "find",
       value: function find2(scope) {
-        return (0, import_jquery23.default)(scope).find(".shiny-text-output");
+        return (0, import_jquery22.default)(scope).find(".shiny-text-output");
       }
     }, {
       key: "renderValue",
       value: function renderValue(el, data) {
-        (0, import_jquery23.default)(el).text(data);
+        (0, import_jquery22.default)(el).text(data);
       }
     }]);
     return TextOutputBinding2;
   }(OutputBinding);
 
   // srcts/src/bindings/output/downloadlink.ts
-  var import_es_array_iterator17 = __toModule(require_es_array_iterator());
-  var import_jquery24 = __toModule(require_jquery());
+  var import_es_array_iterator17 = __toESM(require_es_array_iterator());
+  var import_jquery23 = __toESM(require_jquery());
   function _typeof17(obj) {
     "@babel/helpers - typeof";
     if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
@@ -8377,29 +8373,28 @@
     _createClass20(DownloadLinkOutputBinding2, [{
       key: "find",
       value: function find2(scope) {
-        return (0, import_jquery24.default)(scope).find("a.shiny-download-link");
+        return (0, import_jquery23.default)(scope).find("a.shiny-download-link");
       }
     }, {
       key: "renderValue",
       value: function renderValue(el, data) {
-        (0, import_jquery24.default)(el).attr("href", data);
+        (0, import_jquery23.default)(el).attr("href", data);
       }
     }]);
     return DownloadLinkOutputBinding2;
   }(OutputBinding);
-  (0, import_jquery24.default)(document).on("click.shinyDownloadLink", "a.shiny-download-link", function(e) {
+  (0, import_jquery23.default)(document).on("click.shinyDownloadLink", "a.shiny-download-link", function(e) {
     e;
     var evt = jQuery.Event("shiny:filedownload");
     evt.name = this.id;
     evt.href = this.href;
-    (0, import_jquery24.default)(document).trigger(evt);
+    (0, import_jquery23.default)(document).trigger(evt);
   });
 
   // srcts/src/bindings/output/datatable.ts
-  var import_es_regexp_exec4 = __toModule(require_es_regexp_exec());
+  var import_es_regexp_exec4 = __toESM(require_es_regexp_exec());
 
   // node_modules/core-js/modules/es.string.search.js
-  "use strict";
   var fixRegExpWellKnownSymbolLogic3 = require_fix_regexp_well_known_symbol_logic();
   var anObject7 = require_an_object();
   var requireObjectCoercible3 = require_require_object_coercible();
@@ -8430,8 +8425,8 @@
   });
 
   // srcts/src/bindings/output/datatable.ts
-  var import_es_array_iterator18 = __toModule(require_es_array_iterator());
-  var import_jquery25 = __toModule(require_jquery());
+  var import_es_array_iterator18 = __toESM(require_es_array_iterator());
+  var import_jquery24 = __toESM(require_jquery());
 
   // srcts/src/time/debounce.ts
   function _classCallCheck21(instance, Constructor) {
@@ -8816,7 +8811,7 @@
     _createClass24(DatatableOutputBinding2, [{
       key: "find",
       value: function find2(scope) {
-        return (0, import_jquery25.default)(scope).find(".shiny-datatable-output");
+        return (0, import_jquery24.default)(scope).find(".shiny-datatable-output");
       }
     }, {
       key: "onValueError",
@@ -8828,17 +8823,17 @@
       key: "renderValue",
       value: function renderValue(el, _data) {
         var _data$options$searchi, _data$options, _data$options2, _data$options2$search;
-        var $el = (0, import_jquery25.default)(el).empty();
+        var $el = (0, import_jquery24.default)(el).empty();
         if (!_data || !_data.colnames)
           return;
-        var colnames = import_jquery25.default.makeArray(_data.colnames);
-        var header = import_jquery25.default.map(colnames, function(x) {
+        var colnames = import_jquery24.default.makeArray(_data.colnames);
+        var header = import_jquery24.default.map(colnames, function(x) {
           return "<th>" + x + "</th>";
         }).join("");
         header = "<thead><tr>" + header + "</tr></thead>";
         var footer = "";
         if ((_data$options$searchi = (_data$options = _data.options) === null || _data$options === void 0 ? void 0 : _data$options.searching) !== null && _data$options$searchi !== void 0 ? _data$options$searchi : true) {
-          footer = import_jquery25.default.map(colnames, function(x) {
+          footer = import_jquery24.default.map(colnames, function(x) {
             return '<th><input type="text" placeholder="' + escapeHTML(x.replace(/(<([^>]+)>)/gi, "")) + '" /></th>';
           }).join("");
           footer = "<tfoot>" + footer + "</tfoot>";
@@ -8846,12 +8841,12 @@
         var content = '<table class="table table-striped table-hover">' + header + footer + "</table>";
         $el.append(content);
         if (_data.evalOptions) {
-          import_jquery25.default.each(_data.evalOptions, function(i, x) {
+          import_jquery24.default.each(_data.evalOptions, function(i, x) {
             _data.options[x] = indirectEval("(" + _data.options[x] + ")");
           });
         }
         var searchCI = ((_data$options2 = _data.options) === null || _data$options2 === void 0 ? void 0 : (_data$options2$search = _data$options2.search) === null || _data$options2$search === void 0 ? void 0 : _data$options2$search.caseInsensitive) !== false;
-        var oTable = (0, import_jquery25.default)(el).children("table").DataTable(import_jquery25.default.extend({
+        var oTable = (0, import_jquery24.default)(el).children("table").DataTable(import_jquery24.default.extend({
           processing: true,
           serverSide: true,
           order: [],
@@ -8877,7 +8872,7 @@
         }));
         var searchInputs = $el.find("tfoot input");
         if (searchInputs.length > 0) {
-          import_jquery25.default.each(oTable.settings()[0].aoColumns, function(i, x) {
+          import_jquery24.default.each(oTable.settings()[0].aoColumns, function(i, x) {
             if (!x.bSearchable)
               searchInputs.eq(i).hide();
           });
@@ -8892,22 +8887,22 @@
   }(OutputBinding);
 
   // srcts/src/bindings/output/html.ts
-  var import_es_array_iterator20 = __toModule(require_es_array_iterator());
-  var import_jquery28 = __toModule(require_jquery());
+  var import_es_array_iterator20 = __toESM(require_es_array_iterator());
+  var import_jquery27 = __toESM(require_jquery());
 
   // node_modules/core-js/modules/es.object.entries.js
-  var $47 = require_export();
+  var $46 = require_export();
   var $entries = require_object_to_array().entries;
-  $47({ target: "Object", stat: true }, {
+  $46({ target: "Object", stat: true }, {
     entries: function entries(O) {
       return $entries(O);
     }
   });
 
   // srcts/src/shiny/render.ts
-  var import_es_regexp_exec6 = __toModule(require_es_regexp_exec());
-  var import_es_array_iterator19 = __toModule(require_es_array_iterator());
-  var import_jquery27 = __toModule(require_jquery());
+  var import_es_regexp_exec6 = __toESM(require_es_regexp_exec());
+  var import_es_array_iterator19 = __toESM(require_es_array_iterator());
+  var import_jquery26 = __toESM(require_jquery());
 
   // srcts/src/shiny/sendImageSize.ts
   function _classCallCheck25(instance, Constructor) {
@@ -8966,8 +8961,8 @@
   var sendImageSizeFns = new SendImageSize();
 
   // srcts/src/shiny/singletons.ts
-  var import_es_regexp_exec5 = __toModule(require_es_regexp_exec());
-  var import_jquery26 = __toModule(require_jquery());
+  var import_es_regexp_exec5 = __toESM(require_es_regexp_exec());
+  var import_jquery25 = __toESM(require_jquery());
   var reSingleton = /<!--(SHINY.SINGLETON\[([\w]+)\])-->([\s\S]*?)<!--\/\1-->/;
   var reHead = /<head(?:\s[^>]*)?>([\s\S]*?)<\/head>/;
   var knownSingletons = {};
@@ -8977,19 +8972,19 @@
     register(processed.singletons);
     switch (where.toLowerCase()) {
       case "replace":
-        (0, import_jquery26.default)(el).html(processed.html);
+        (0, import_jquery25.default)(el).html(processed.html);
         break;
       case "beforebegin":
-        (0, import_jquery26.default)(el).before(processed.html);
+        (0, import_jquery25.default)(el).before(processed.html);
         break;
       case "afterbegin":
-        (0, import_jquery26.default)(el).prepend(processed.html);
+        (0, import_jquery25.default)(el).prepend(processed.html);
         break;
       case "beforeend":
-        (0, import_jquery26.default)(el).append(processed.html);
+        (0, import_jquery25.default)(el).append(processed.html);
         break;
       case "afterend":
-        (0, import_jquery26.default)(el).after(processed.html);
+        (0, import_jquery25.default)(el).after(processed.html);
         break;
       default:
         throw new Error("Unknown where position: " + where);
@@ -8997,7 +8992,7 @@
     return processed;
   }
   function register(s) {
-    import_jquery26.default.extend(knownSingletons, s);
+    import_jquery25.default.extend(knownSingletons, s);
   }
   function registerNames(s) {
     if (typeof s === "string") {
@@ -9010,8 +9005,8 @@
   }
   function addToHead(head) {
     if (head.length > 0) {
-      var tempDiv = (0, import_jquery26.default)("<div>" + head + "</div>").get(0);
-      var $head = (0, import_jquery26.default)("head");
+      var tempDiv = (0, import_jquery25.default)("<div>" + head + "</div>").get(0);
+      var $head = (0, import_jquery25.default)("head");
       while (tempDiv.hasChildNodes()) {
         $head.append(tempDiv.firstChild);
       }
@@ -9149,7 +9144,7 @@
       shinyInitializeInputs(el);
       shinyBindAll(el);
     } else {
-      var $parent = (0, import_jquery27.default)(el).parent();
+      var $parent = (0, import_jquery26.default)(el).parent();
       if ($parent.length > 0) {
         scope = $parent;
         if (where === "beforeBegin" || where === "afterEnd") {
@@ -9206,7 +9201,7 @@
     if (hasDefinedProperty(htmlDependencies, dep.name))
       return false;
     registerDependency(dep.name, dep.version);
-    var $head = (0, import_jquery27.default)("head").first();
+    var $head = (0, import_jquery26.default)("head").first();
     dep.meta.forEach(function(x) {
       var meta = document.createElement("meta");
       for (var _i2 = 0, _Object$entries = Object.entries(x); _i2 < _Object$entries.length; _i2++) {
@@ -9230,25 +9225,25 @@
       $head.append(script);
     });
     dep.attachment.forEach(function(x) {
-      var link = (0, import_jquery27.default)("<link rel='attachment'>").attr("id", dep.name + "-" + x.key + "-attachment").attr("href", encodeURI(x.href));
+      var link = (0, import_jquery26.default)("<link rel='attachment'>").attr("id", dep.name + "-" + x.key + "-attachment").attr("href", encodeURI(x.href));
       $head.append(link);
     });
     if (dep.head) {
-      var $newHead = (0, import_jquery27.default)("<head></head>");
+      var $newHead = (0, import_jquery26.default)("<head></head>");
       $newHead.html(dep.head);
       $head.append($newHead.children());
     }
     return true;
   }
   function addStylesheetsAndRestyle(links) {
-    var $head = (0, import_jquery27.default)("head").first();
+    var $head = (0, import_jquery26.default)("head").first();
     var refreshStyle = function refreshStyle2(href, oldSheet) {
       var xhr = new XMLHttpRequest();
       xhr.open("GET", href);
       xhr.onload = function() {
         var id = "shiny_restyle_" + href.split("?restyle")[0].replace(/\W/g, "_");
         var oldStyle = $head.find("style#" + id);
-        var newStyle = (0, import_jquery27.default)("<style>").attr("id", id).html(xhr.responseText);
+        var newStyle = (0, import_jquery26.default)("<style>").attr("id", id).html(xhr.responseText);
         $head.append(newStyle);
         oldStyle.remove();
         removeSheet(oldSheet);
@@ -9274,11 +9269,11 @@
       if (isIE())
         sheet.cssText = "";
       if (sheet.ownerNode instanceof Element) {
-        (0, import_jquery27.default)(sheet.ownerNode).remove();
+        (0, import_jquery26.default)(sheet.ownerNode).remove();
       }
     };
     links.map(function(link) {
-      var $link = (0, import_jquery27.default)(link);
+      var $link = (0, import_jquery26.default)(link);
       var oldSheet = findSheet($link.attr("href"));
       var href = $link.attr("href") + "?restyle=" + new Date().getTime();
       if (isIE()) {
@@ -9286,13 +9281,13 @@
       } else {
         $link.attr("href", href);
         $link.attr("onload", function() {
-          var $dummyEl = (0, import_jquery27.default)("<div>").css("transition", "0.1s all").css("position", "absolute").css("top", "-1000px").css("left", "0");
+          var $dummyEl = (0, import_jquery26.default)("<div>").css("transition", "0.1s all").css("position", "absolute").css("top", "-1000px").css("left", "0");
           $dummyEl.one("transitionend", function() {
             $dummyEl.remove();
             removeSheet(oldSheet);
             sendImageSizeFns.transitioned();
           });
-          (0, import_jquery27.default)(document.body).append($dummyEl);
+          (0, import_jquery26.default)(document.body).append($dummyEl);
           var color = "#" + Math.floor(Math.random() * 16777215).toString(16);
           setTimeout(function() {
             return $dummyEl.css("color", color);
@@ -9492,7 +9487,7 @@
     _createClass26(HtmlOutputBinding2, [{
       key: "find",
       value: function find2(scope) {
-        return (0, import_jquery28.default)(scope).find(".shiny-html-output");
+        return (0, import_jquery27.default)(scope).find(".shiny-html-output");
       }
     }, {
       key: "onValueError",
@@ -9510,38 +9505,37 @@
   }(OutputBinding);
 
   // node_modules/core-js/modules/es.array.filter.js
-  "use strict";
-  var $51 = require_export();
+  var $50 = require_export();
   var $filter = require_array_iteration().filter;
   var arrayMethodHasSpeciesSupport5 = require_array_method_has_species_support();
   var HAS_SPECIES_SUPPORT4 = arrayMethodHasSpeciesSupport5("filter");
-  $51({ target: "Array", proto: true, forced: !HAS_SPECIES_SUPPORT4 }, {
+  $50({ target: "Array", proto: true, forced: !HAS_SPECIES_SUPPORT4 }, {
     filter: function filter(callbackfn) {
       return $filter(this, callbackfn, arguments.length > 1 ? arguments[1] : void 0);
     }
   });
 
   // srcts/src/bindings/output/image.ts
-  var import_es_array_iterator21 = __toModule(require_es_array_iterator());
-  var import_jquery33 = __toModule(require_jquery());
+  var import_es_array_iterator21 = __toESM(require_es_array_iterator());
+  var import_jquery32 = __toESM(require_jquery());
 
   // node_modules/core-js/modules/es.object.values.js
-  var $52 = require_export();
+  var $51 = require_export();
   var $values = require_object_to_array().values;
-  $52({ target: "Object", stat: true }, {
+  $51({ target: "Object", stat: true }, {
     values: function values(O) {
       return $values(O);
     }
   });
 
   // node_modules/core-js/modules/es.object.get-own-property-descriptors.js
-  var $53 = require_export();
+  var $52 = require_export();
   var DESCRIPTORS6 = require_descriptors();
   var ownKeys = require_own_keys();
   var toIndexedObject5 = require_to_indexed_object();
   var getOwnPropertyDescriptorModule3 = require_object_get_own_property_descriptor();
   var createProperty4 = require_create_property();
-  $53({ target: "Object", stat: true, sham: !DESCRIPTORS6 }, {
+  $52({ target: "Object", stat: true, sham: !DESCRIPTORS6 }, {
     getOwnPropertyDescriptors: function getOwnPropertyDescriptors(object) {
       var O = toIndexedObject5(object);
       var getOwnPropertyDescriptor4 = getOwnPropertyDescriptorModule3.f;
@@ -9559,10 +9553,10 @@
   });
 
   // srcts/src/imageutils/createBrush.ts
-  var import_jquery30 = __toModule(require_jquery());
+  var import_jquery29 = __toESM(require_jquery());
 
   // srcts/src/imageutils/initCoordmap.ts
-  var import_jquery29 = __toModule(require_jquery());
+  var import_jquery28 = __toESM(require_jquery());
 
   // srcts/src/imageutils/initPanelScales.ts
   function mapLinear(x, domainMin, domainMax, rangeMin, rangeMax) {
@@ -9836,7 +9830,7 @@
           coords_img: coordsImg,
           img_css_ratio: coordmap.cssToImgScalingRatio()
         };
-        import_jquery29.default.extend(coords, panel.panel_vars);
+        import_jquery28.default.extend(coords, panel.panel_vars);
         coords.mapping = panel.mapping;
         coords.domain = panel.domain;
         coords.range = panel.range;
@@ -10105,7 +10099,7 @@
     function addDiv() {
       if ($div)
         $div.remove();
-      $div = (0, import_jquery30.default)(document.createElement("div")).attr("id", el.id + "_brush").css({
+      $div = (0, import_jquery29.default)(document.createElement("div")).attr("id", el.id + "_brush").css({
         "background-color": opts.brushFill,
         opacity: opts.brushOpacity,
         "pointer-events": "none",
@@ -10128,10 +10122,12 @@
         });
       }
       $el.append($div);
-      $div.offset({
-        x: 0,
-        y: 0
-      }).width(0).outerHeight(0);
+      $div.offset(
+        {
+          x: 0,
+          y: 0
+        }
+      ).width(0).outerHeight(0);
     }
     function updateDiv() {
       var imgOffsetCss = findOrigin($el.find("img"));
@@ -10275,12 +10271,12 @@
   }
 
   // srcts/src/imageutils/createClickInfo.ts
-  var import_jquery31 = __toModule(require_jquery());
+  var import_jquery30 = __toESM(require_jquery());
   function createClickInfo($el, dblclickId, dblclickDelay) {
     var clickTimer = void 0;
     var pendingE = null;
     function triggerEvent(newEventType, e) {
-      var e2 = import_jquery31.default.Event(newEventType, {
+      var e2 = import_jquery30.default.Event(newEventType, {
         which: e.which,
         pageX: e.pageX,
         pageY: e.pageY
@@ -10330,7 +10326,7 @@
   }
 
   // srcts/src/imageutils/createHandlers.ts
-  var import_jquery32 = __toModule(require_jquery());
+  var import_jquery31 = __toESM(require_jquery());
   function createClickHandler(inputId, clip, coordmap) {
     var clickInfoSender = coordmap.mouseCoordinateSender(inputId, clip);
     return {
@@ -10396,7 +10392,7 @@
         return;
       }
       var panel = brush.getPanel();
-      import_jquery32.default.extend(coords, panel.panel_vars);
+      import_jquery31.default.extend(coords, panel.panel_vars);
       coords.coords_css = brush.boundsCss();
       coords.coords_img = coordmap.scaleCssToImg(coords.coords_css);
       coords.img_css_ratio = coordmap.cssToImgScalingRatio();
@@ -10432,15 +10428,15 @@
       brush.down(offsetCss);
       if (brush.isInResizeArea(offsetCss)) {
         brush.startResizing(offsetCss);
-        (0, import_jquery32.default)(document).on("mousemove.image_brush", mousemoveResizing).on("mouseup.image_brush", mouseupResizing);
+        (0, import_jquery31.default)(document).on("mousemove.image_brush", mousemoveResizing).on("mouseup.image_brush", mouseupResizing);
       } else if (brush.isInsideBrush(offsetCss)) {
         brush.startDragging(offsetCss);
         setCursorStyle("grabbing");
-        (0, import_jquery32.default)(document).on("mousemove.image_brush", mousemoveDragging).on("mouseup.image_brush", mouseupDragging);
+        (0, import_jquery31.default)(document).on("mousemove.image_brush", mousemoveDragging).on("mouseup.image_brush", mouseupDragging);
       } else {
         var panel = coordmap.getPanelCss(offsetCss, expandPixels);
         brush.startBrushing(panel.clipImg(coordmap.scaleCssToImg(offsetCss)));
-        (0, import_jquery32.default)(document).on("mousemove.image_brush", mousemoveBrushing).on("mouseup.image_brush", mouseupBrushing);
+        (0, import_jquery31.default)(document).on("mousemove.image_brush", mousemoveBrushing).on("mouseup.image_brush", mouseupBrushing);
       }
     }
     function mousemove(e) {
@@ -10481,7 +10477,7 @@
     function mouseupBrushing(e) {
       if (e.which !== 1)
         return;
-      (0, import_jquery32.default)(document).off("mousemove.image_brush").off("mouseup.image_brush");
+      (0, import_jquery31.default)(document).off("mousemove.image_brush").off("mouseup.image_brush");
       brush.up(coordmap.mouseOffsetCss(e));
       brush.stopBrushing();
       setCursorStyle("crosshair");
@@ -10496,7 +10492,7 @@
     function mouseupDragging(e) {
       if (e.which !== 1)
         return;
-      (0, import_jquery32.default)(document).off("mousemove.image_brush").off("mouseup.image_brush");
+      (0, import_jquery31.default)(document).off("mousemove.image_brush").off("mouseup.image_brush");
       brush.up(coordmap.mouseOffsetCss(e));
       brush.stopDragging();
       setCursorStyle("grabbable");
@@ -10506,7 +10502,7 @@
     function mouseupResizing(e) {
       if (e.which !== 1)
         return;
-      (0, import_jquery32.default)(document).off("mousemove.image_brush").off("mouseup.image_brush");
+      (0, import_jquery31.default)(document).off("mousemove.image_brush").off("mouseup.image_brush");
       brush.up(coordmap.mouseOffsetCss(e));
       brush.stopResizing();
       if (brushInfoSender.isPending())
@@ -10658,19 +10654,19 @@
     _createClass27(ImageOutputBinding2, [{
       key: "find",
       value: function find2(scope) {
-        return (0, import_jquery33.default)(scope).find(".shiny-image-output, .shiny-plot-output");
+        return (0, import_jquery32.default)(scope).find(".shiny-image-output, .shiny-plot-output");
       }
     }, {
       key: "renderValue",
       value: function renderValue(el, data) {
         var outputId = this.getId(el);
-        var $el = (0, import_jquery33.default)(el);
+        var $el = (0, import_jquery32.default)(el);
         var img;
         var $img = $el.find("img");
         if ($img.length === 0) {
           img = document.createElement("img");
           $el.append(img);
-          $img = (0, import_jquery33.default)(img);
+          $img = (0, import_jquery32.default)(img);
         } else {
           img = $img[0];
           $img.trigger("reset");
@@ -10707,7 +10703,7 @@
         if (opts.brushStroke === "auto") {
           opts.brushStroke = getStyle($el[0], "color");
         }
-        import_jquery33.default.each(data, function(key, value) {
+        import_jquery32.default.each(data, function(key, value) {
           if (value === null || key === "coordmap") {
             return;
           }
@@ -10781,13 +10777,13 @@
     }, {
       key: "renderError",
       value: function renderError(el, err) {
-        (0, import_jquery33.default)(el).find("img").trigger("reset");
+        (0, import_jquery32.default)(el).find("img").trigger("reset");
         OutputBinding.prototype.renderError.call(this, el, err);
       }
     }, {
       key: "clearError",
       value: function clearError(el) {
-        (0, import_jquery33.default)(el).contents().filter(function() {
+        (0, import_jquery32.default)(el).contents().filter(function() {
           return !(this instanceof HTMLElement && (this.tagName === "IMG" || this.id === el.id + "_brush"));
         }).remove();
         OutputBinding.prototype.clearError.call(this, el);
@@ -10795,7 +10791,7 @@
     }, {
       key: "resize",
       value: function resize(el, width, height) {
-        (0, import_jquery33.default)(el).find("img").trigger("resize");
+        (0, import_jquery32.default)(el).find("img").trigger("resize");
         return;
         width;
         height;
@@ -10828,10 +10824,9 @@
   }
 
   // srcts/src/shiny/notifications.ts
-  var import_es_regexp_exec7 = __toModule(require_es_regexp_exec());
+  var import_es_regexp_exec7 = __toESM(require_es_regexp_exec());
 
   // node_modules/core-js/modules/es.string.match.js
-  "use strict";
   var fixRegExpWellKnownSymbolLogic4 = require_fix_regexp_well_known_symbol_logic();
   var anObject8 = require_an_object();
   var toLength6 = require_to_length();
@@ -10871,7 +10866,7 @@
   });
 
   // srcts/src/shiny/notifications.ts
-  var import_jquery34 = __toModule(require_jquery());
+  var import_jquery33 = __toESM(require_jquery());
   var fadeDuration = 250;
   function show() {
     var _$notificationInit;
@@ -10914,7 +10909,7 @@
     var _get2;
     (_get2 = get2(id)) === null || _get2 === void 0 ? void 0 : _get2.fadeOut(fadeDuration, function() {
       shinyUnbindAll(this);
-      (0, import_jquery34.default)(this).remove();
+      (0, import_jquery33.default)(this).remove();
       if (ids().length === 0) {
         getPanel().remove();
       }
@@ -10931,20 +10926,20 @@
     }).get();
   }
   function getPanel() {
-    return (0, import_jquery34.default)("#shiny-notification-panel");
+    return (0, import_jquery33.default)("#shiny-notification-panel");
   }
   function createPanel() {
     var $panel = getPanel();
     if ($panel.length > 0)
       return $panel;
-    (0, import_jquery34.default)(document.body).append('<div id="shiny-notification-panel">');
+    (0, import_jquery33.default)(document.body).append('<div id="shiny-notification-panel">');
     return $panel;
   }
   function create4(id) {
     var _$notification;
     var $notification = get2(id);
     if (((_$notification = $notification) === null || _$notification === void 0 ? void 0 : _$notification.length) === 0) {
-      $notification = (0, import_jquery34.default)('<div id="shiny-notification-'.concat(id, '" class="shiny-notification">') + '<div class="shiny-notification-close">&times;</div><div class="shiny-notification-content"></div></div>');
+      $notification = (0, import_jquery33.default)('<div id="shiny-notification-'.concat(id, '" class="shiny-notification">') + '<div class="shiny-notification-close">&times;</div><div class="shiny-notification-content"></div></div>');
       $notification.find(".shiny-notification-close").on("click", function(e) {
         e.preventDefault();
         e.stopPropagation();
@@ -10971,23 +10966,23 @@
   }
 
   // srcts/src/shiny/modal.ts
-  var import_jquery35 = __toModule(require_jquery());
+  var import_jquery34 = __toESM(require_jquery());
   function show2() {
     var _ref = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : {}, _ref$html = _ref.html, html = _ref$html === void 0 ? "" : _ref$html, _ref$deps = _ref.deps, deps = _ref$deps === void 0 ? [] : _ref$deps;
-    (0, import_jquery35.default)(".modal-backdrop").remove();
-    var $modal = (0, import_jquery35.default)("#shiny-modal-wrapper");
+    (0, import_jquery34.default)(".modal-backdrop").remove();
+    var $modal = (0, import_jquery34.default)("#shiny-modal-wrapper");
     if ($modal.length === 0) {
-      $modal = (0, import_jquery35.default)('<div id="shiny-modal-wrapper"></div>');
-      (0, import_jquery35.default)(document.body).append($modal);
+      $modal = (0, import_jquery34.default)('<div id="shiny-modal-wrapper"></div>');
+      (0, import_jquery34.default)(document.body).append($modal);
       $modal.on("hidden.bs.modal", function(e) {
-        if (e.target === (0, import_jquery35.default)("#shiny-modal")[0]) {
+        if (e.target === (0, import_jquery34.default)("#shiny-modal")[0]) {
           shinyUnbindAll($modal);
           $modal.remove();
         }
       });
     }
     $modal.on("keydown.shinymodal", function(e) {
-      if ((0, import_jquery35.default)("#shiny-modal").data("keyboard") === false)
+      if ((0, import_jquery34.default)("#shiny-modal").data("keyboard") === false)
         return;
       if (e.keyCode === 27) {
         e.stopPropagation();
@@ -11000,7 +10995,7 @@
     });
   }
   function remove2() {
-    var $modal = (0, import_jquery35.default)("#shiny-modal-wrapper");
+    var $modal = (0, import_jquery34.default)("#shiny-modal-wrapper");
     $modal.off("keydown.shinymodal");
     if ($modal.find(".modal").length > 0) {
       $modal.find(".modal").modal("hide");
@@ -11011,9 +11006,9 @@
   }
 
   // srcts/src/shiny/reconnectDialog.ts
-  var import_jquery36 = __toModule(require_jquery());
+  var import_jquery35 = __toESM(require_jquery());
   function updateTime(reconnectTime) {
-    var $time = (0, import_jquery36.default)("#shiny-reconnect-time");
+    var $time = (0, import_jquery35.default)("#shiny-reconnect-time");
     if ($time.length === 0)
       return;
     var seconds = Math.floor((reconnectTime - new Date().getTime()) / 1e3);
@@ -11028,7 +11023,7 @@
   }
   function showReconnectDialog(delay) {
     var reconnectTime = new Date().getTime() + delay;
-    if ((0, import_jquery36.default)("#shiny-reconnect-text").length > 0)
+    if ((0, import_jquery35.default)("#shiny-reconnect-text").length > 0)
       return;
     var html = '<span id="shiny-reconnect-text">Attempting to reconnect</span><span id="shiny-reconnect-time"></span>';
     var action = '<a id="shiny-reconnect-now" href="#" onclick="Shiny.shinyapp.reconnect();">Try now</a>';
@@ -11047,8 +11042,8 @@
   }
 
   // srcts/src/shiny/init.ts
-  var import_es_regexp_exec10 = __toModule(require_es_regexp_exec());
-  var import_jquery40 = __toModule(require_jquery());
+  var import_es_regexp_exec10 = __toESM(require_es_regexp_exec());
+  var import_jquery39 = __toESM(require_jquery());
 
   // srcts/src/inputPolicies/inputBatchSender.ts
   function _classCallCheck28(instance, Constructor) {
@@ -11128,7 +11123,7 @@
   }();
 
   // srcts/src/inputPolicies/splitInputNameType.ts
-  var import_es_regexp_exec8 = __toModule(require_es_regexp_exec());
+  var import_es_regexp_exec8 = __toESM(require_es_regexp_exec());
   function splitInputNameType(nameType) {
     var name2 = nameType.split(":");
     return {
@@ -11217,7 +11212,7 @@
   }();
 
   // srcts/src/inputPolicies/inputEventDecorator.ts
-  var import_jquery37 = __toModule(require_jquery());
+  var import_jquery36 = __toESM(require_jquery());
   function _classCallCheck30(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
       throw new TypeError("Cannot call a class as a function");
@@ -11265,7 +11260,7 @@
         evt.binding = opts.binding || null;
         evt.el = opts.el || null;
         evt.priority = opts.priority;
-        (0, import_jquery37.default)(opts.el || window.document).trigger(evt);
+        (0, import_jquery36.default)(opts.el || window.document).trigger(evt);
         if (!evt.isDefaultPrevented()) {
           var name = evt.name;
           if (evt.inputType !== "")
@@ -11512,7 +11507,7 @@
   }();
 
   // srcts/src/shiny/bind.ts
-  var import_jquery38 = __toModule(require_jquery());
+  var import_jquery37 = __toESM(require_jquery());
 
   // srcts/src/bindings/outputAdapter.ts
   function _classCallCheck34(instance, Constructor) {
@@ -11634,8 +11629,8 @@
           };
         }();
         binding.subscribe(el, thisCallback);
-        (0, import_jquery38.default)(el).data("shiny-input-binding", binding);
-        (0, import_jquery38.default)(el).addClass("shiny-bound-input");
+        (0, import_jquery37.default)(el).data("shiny-input-binding", binding);
+        (0, import_jquery37.default)(el).addClass("shiny-bound-input");
         var ratePolicy = binding.getRatePolicy(el);
         if (ratePolicy !== null) {
           inputsRate.setRatePolicy(effectiveId, ratePolicy.policy, ratePolicy.delay);
@@ -11644,7 +11639,7 @@
           binding: binding,
           node: el
         };
-        (0, import_jquery38.default)(el).trigger({
+        (0, import_jquery37.default)(el).trigger({
           type: "shiny:bound",
           binding: binding,
           bindingType: "input"
@@ -11664,7 +11659,7 @@
   function bindOutputs(_ref) {
     var sendOutputHiddenState = _ref.sendOutputHiddenState, maybeAddThemeObserver = _ref.maybeAddThemeObserver, outputBindings = _ref.outputBindings;
     var scope = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : document.documentElement;
-    var $scope = (0, import_jquery38.default)(scope);
+    var $scope = (0, import_jquery37.default)(scope);
     var bindings = outputBindings.getBindings();
     for (var i = 0; i < bindings.length; i++) {
       var binding = bindings[i].binding;
@@ -11674,9 +11669,9 @@
         var id = binding.getId(_el);
         if (!id)
           continue;
-        if (!import_jquery38.default.contains(document.documentElement, _el))
+        if (!import_jquery37.default.contains(document.documentElement, _el))
           continue;
-        var $el = (0, import_jquery38.default)(_el);
+        var $el = (0, import_jquery37.default)(_el);
         if ($el.hasClass("shiny-bound-output")) {
           continue;
         }
@@ -11700,20 +11695,20 @@
   function unbindInputs() {
     var scope = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : document.documentElement;
     var includeSelf = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : false;
-    var inputs = (0, import_jquery38.default)(scope).find(".shiny-bound-input").toArray();
-    if (includeSelf && (0, import_jquery38.default)(scope).hasClass("shiny-bound-input")) {
+    var inputs = (0, import_jquery37.default)(scope).find(".shiny-bound-input").toArray();
+    if (includeSelf && (0, import_jquery37.default)(scope).hasClass("shiny-bound-input")) {
       inputs.push(scope);
     }
     for (var i = 0; i < inputs.length; i++) {
       var _el2 = inputs[i];
-      var binding = (0, import_jquery38.default)(_el2).data("shiny-input-binding");
+      var binding = (0, import_jquery37.default)(_el2).data("shiny-input-binding");
       if (!binding)
         continue;
       var id = binding.getId(_el2);
-      (0, import_jquery38.default)(_el2).removeClass("shiny-bound-input");
+      (0, import_jquery37.default)(_el2).removeClass("shiny-bound-input");
       delete boundInputs[id];
       binding.unsubscribe(_el2);
-      (0, import_jquery38.default)(_el2).trigger({
+      (0, import_jquery37.default)(_el2).trigger({
         type: "shiny:unbound",
         binding: binding,
         bindingType: "input"
@@ -11724,12 +11719,12 @@
     var sendOutputHiddenState = _ref2.sendOutputHiddenState;
     var scope = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : document.documentElement;
     var includeSelf = arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : false;
-    var outputs = (0, import_jquery38.default)(scope).find(".shiny-bound-output").toArray();
-    if (includeSelf && (0, import_jquery38.default)(scope).hasClass("shiny-bound-output")) {
+    var outputs = (0, import_jquery37.default)(scope).find(".shiny-bound-output").toArray();
+    if (includeSelf && (0, import_jquery37.default)(scope).hasClass("shiny-bound-output")) {
       outputs.push(scope);
     }
     for (var i = 0; i < outputs.length; i++) {
-      var $el = (0, import_jquery38.default)(outputs[i]);
+      var $el = (0, import_jquery37.default)(outputs[i]);
       var bindingAdapter = $el.data("shiny-output-binding");
       if (!bindingAdapter)
         continue;
@@ -11758,29 +11753,27 @@
   function bindAll(shinyCtx, scope) {
     var currentInputItems = _bindAll(shinyCtx, scope);
     var inputs = shinyCtx.inputs;
-    import_jquery38.default.each(currentInputItems, function(name, item) {
+    import_jquery37.default.each(currentInputItems, function(name, item) {
       inputs.setInput(name, item.value, item.opts);
     });
     shinyCtx.initDeferredIframes();
   }
 
   // node_modules/core-js/modules/es.array-buffer.constructor.js
-  "use strict";
-  var $64 = require_export();
+  var $63 = require_export();
   var global7 = require_global();
   var arrayBufferModule = require_array_buffer();
   var setSpecies = require_set_species();
   var ARRAY_BUFFER = "ArrayBuffer";
   var ArrayBuffer2 = arrayBufferModule[ARRAY_BUFFER];
   var NativeArrayBuffer = global7[ARRAY_BUFFER];
-  $64({ global: true, forced: NativeArrayBuffer !== ArrayBuffer2 }, {
+  $63({ global: true, forced: NativeArrayBuffer !== ArrayBuffer2 }, {
     ArrayBuffer: ArrayBuffer2
   });
   setSpecies(ARRAY_BUFFER);
 
   // node_modules/core-js/modules/es.array-buffer.slice.js
-  "use strict";
-  var $65 = require_export();
+  var $64 = require_export();
   var fails10 = require_fails();
   var ArrayBufferModule = require_array_buffer();
   var anObject9 = require_an_object();
@@ -11793,7 +11786,7 @@
   var INCORRECT_SLICE = fails10(function() {
     return !new ArrayBuffer3(2).slice(1, void 0).byteLength;
   });
-  $65({ target: "ArrayBuffer", proto: true, unsafe: true, forced: INCORRECT_SLICE }, {
+  $64({ target: "ArrayBuffer", proto: true, unsafe: true, forced: INCORRECT_SLICE }, {
     slice: function slice2(start, end) {
       if (nativeArrayBufferSlice !== void 0 && end === void 0) {
         return nativeArrayBufferSlice.call(anObject9(this), start);
@@ -11813,31 +11806,30 @@
   });
 
   // node_modules/core-js/modules/es.data-view.js
-  var $66 = require_export();
+  var $65 = require_export();
   var ArrayBufferModule2 = require_array_buffer();
   var NATIVE_ARRAY_BUFFER = require_array_buffer_native();
-  $66({ global: true, forced: !NATIVE_ARRAY_BUFFER }, {
+  $65({ global: true, forced: !NATIVE_ARRAY_BUFFER }, {
     DataView: ArrayBufferModule2.DataView
   });
 
   // node_modules/core-js/modules/es.array.reduce.js
-  "use strict";
-  var $67 = require_export();
+  var $66 = require_export();
   var $reduce = require_array_reduce().left;
   var arrayMethodIsStrict3 = require_array_method_is_strict();
   var CHROME_VERSION = require_engine_v8_version();
   var IS_NODE = require_engine_is_node();
   var STRICT_METHOD3 = arrayMethodIsStrict3("reduce");
   var CHROME_BUG = !IS_NODE && CHROME_VERSION > 79 && CHROME_VERSION < 83;
-  $67({ target: "Array", proto: true, forced: !STRICT_METHOD3 || CHROME_BUG }, {
+  $66({ target: "Array", proto: true, forced: !STRICT_METHOD3 || CHROME_BUG }, {
     reduce: function reduce(callbackfn) {
       return $reduce(this, callbackfn, arguments.length, arguments.length > 1 ? arguments[1] : void 0);
     }
   });
 
   // srcts/src/shiny/shinyapp.ts
-  var import_es_regexp_exec9 = __toModule(require_es_regexp_exec());
-  var import_jquery39 = __toModule(require_jquery());
+  var import_es_regexp_exec9 = __toESM(require_es_regexp_exec());
+  var import_jquery38 = __toESM(require_jquery());
   function _classCallCheck35(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
       throw new TypeError("Cannot call a class as a function");
@@ -11940,7 +11932,7 @@
           var key = message.id;
           var binding2 = this.$bindings[key];
           if (binding2) {
-            (0, import_jquery39.default)(binding2.el).trigger({
+            (0, import_jquery38.default)(binding2.el).trigger({
               type: "shiny:outputinvalidated",
               binding: binding2,
               name: key
@@ -11957,13 +11949,13 @@
               duration: null
             });
           } else if (message.style === "old") {
-            var $container = (0, import_jquery39.default)(".shiny-progress-container");
+            var $container = (0, import_jquery38.default)(".shiny-progress-container");
             if ($container.length === 0) {
-              $container = (0, import_jquery39.default)('<div class="shiny-progress-container"></div>');
-              (0, import_jquery39.default)(document.body).append($container);
+              $container = (0, import_jquery38.default)('<div class="shiny-progress-container"></div>');
+              (0, import_jquery38.default)(document.body).append($container);
             }
-            var depth = (0, import_jquery39.default)(".shiny-progress.open").length;
-            var $progress = (0, import_jquery39.default)('<div class="shiny-progress open"><div class="progress active"><div class="progress-bar bar"></div></div><div class="progress-text"><span class="progress-message">message</span><span class="progress-detail"></span></div></div>');
+            var depth = (0, import_jquery38.default)(".shiny-progress.open").length;
+            var $progress = (0, import_jquery38.default)('<div class="shiny-progress open"><div class="progress active"><div class="progress-bar bar"></div></div><div class="progress-text"><span class="progress-message">message</span><span class="progress-detail"></span></div></div>');
             $progress.attr("id", message.id);
             $container.append($progress);
             var $progressBar = $progress.find(".progress");
@@ -11977,7 +11969,7 @@
         },
         update: function update(message) {
           if (message.style === "notification") {
-            var $progress = (0, import_jquery39.default)("#shiny-progress-" + message.id);
+            var $progress = (0, import_jquery38.default)("#shiny-progress-" + message.id);
             if ($progress.length === 0)
               return;
             if (typeof message.message !== "undefined") {
@@ -11991,7 +11983,7 @@
               $progress.find(".progress-bar").width(message.value * 100 + "%");
             }
           } else if (message.style === "old") {
-            var _$progress = (0, import_jquery39.default)("#" + message.id + ".shiny-progress");
+            var _$progress = (0, import_jquery38.default)("#" + message.id + ".shiny-progress");
             if (typeof message.message !== "undefined") {
               _$progress.find(".progress-message").text(message.message);
             }
@@ -12009,13 +12001,13 @@
           if (message.style === "notification") {
             remove(message.id);
           } else if (message.style === "old") {
-            var $progress = (0, import_jquery39.default)("#" + message.id + ".shiny-progress");
+            var $progress = (0, import_jquery38.default)("#" + message.id + ".shiny-progress");
             $progress.removeClass("open");
             $progress.fadeOut({
               complete: function complete() {
                 $progress.remove();
-                if ((0, import_jquery39.default)(".shiny-progress").length === 0)
-                  (0, import_jquery39.default)(".shiny-progress-container").remove();
+                if ((0, import_jquery38.default)(".shiny-progress").length === 0)
+                  (0, import_jquery38.default)(".shiny-progress-container").remove();
               }
             });
           }
@@ -12030,7 +12022,7 @@
           throw "Connect was already called on this application object";
         this.$socket = this.createSocket();
         this.$initialInput = initialInput;
-        import_jquery39.default.extend(this.$inputValues, initialInput);
+        import_jquery38.default.extend(this.$inputValues, initialInput);
         this.$updateConditionals();
       }
     }, {
@@ -12045,7 +12037,7 @@
         if (this.isConnected())
           throw "Attempted to reconnect, but already connected.";
         this.$socket = this.createSocket();
-        this.$initialInput = import_jquery39.default.extend({}, this.$inputValues);
+        this.$initialInput = import_jquery38.default.extend({}, this.$inputValues);
         this.$updateConditionals();
       }
     }, {
@@ -12074,7 +12066,7 @@
         var hasOpened = false;
         socket.onopen = function() {
           hasOpened = true;
-          (0, import_jquery39.default)(document).trigger({
+          (0, import_jquery38.default)(document).trigger({
             type: "shiny:connected",
             socket: socket
           });
@@ -12093,7 +12085,7 @@
         };
         socket.onclose = function() {
           if (hasOpened) {
-            (0, import_jquery39.default)(document).trigger({
+            (0, import_jquery38.default)(document).trigger({
               type: "shiny:disconnected",
               socket: socket
             });
@@ -12112,7 +12104,7 @@
           data: values2
         });
         this.$sendMsg(msg);
-        import_jquery39.default.extend(this.$inputValues, values2);
+        import_jquery38.default.extend(this.$inputValues, values2);
         this.$updateConditionals();
       }
     }, {
@@ -12138,9 +12130,9 @@
     }, {
       key: "onDisconnected",
       value: function onDisconnected() {
-        var $overlay = (0, import_jquery39.default)("#shiny-disconnected-overlay");
+        var $overlay = (0, import_jquery38.default)("#shiny-disconnected-overlay");
         if ($overlay.length === 0) {
-          (0, import_jquery39.default)(document.body).append('<div id="shiny-disconnected-overlay"></div>');
+          (0, import_jquery38.default)(document.body).append('<div id="shiny-disconnected-overlay"></div>');
         }
         if (this.$allowReconnect === true && this.$socket.allowReconnect === true || this.$allowReconnect === "force") {
           var delay = this.reconnectDelay.next();
@@ -12151,7 +12143,7 @@
     }, {
       key: "onConnected",
       value: function onConnected() {
-        (0, import_jquery39.default)("#shiny-disconnected-overlay").remove();
+        (0, import_jquery38.default)("#shiny-disconnected-overlay").remove();
         hideReconnectDialog();
         this.reconnectDelay.reset();
       }
@@ -12181,7 +12173,7 @@
           };
           var payload = [];
           payload.push(uint32ToBuf(16908802));
-          var jsonBuf = makeBlob([msg]);
+          var jsonBuf = new Blob([msg]);
           payload.push(uint32ToBuf(jsonBuf.size));
           payload.push(jsonBuf);
           for (var i = 0; i < blobs.length; i++) {
@@ -12189,7 +12181,7 @@
             payload.push(uint32ToBuf(_blob.byteLength || _blob.size || 0));
             payload.push(_blob);
           }
-          var blob = makeBlob(payload);
+          var blob = new Blob(payload);
           msg = blob;
         }
         this.$sendMsg(msg);
@@ -12215,7 +12207,7 @@
         evt.name = name;
         evt.error = error;
         evt.binding = binding;
-        (0, import_jquery39.default)(binding ? binding.el : document).trigger(evt);
+        (0, import_jquery38.default)(binding ? binding.el : document).trigger(evt);
         if (!evt.isDefaultPrevented() && binding && binding.onValueError) {
           binding.onValueError(evt.error);
         }
@@ -12229,12 +12221,12 @@
         evt.value = value;
         evt.binding = binding;
         if (this.$values[name] === value) {
-          (0, import_jquery39.default)(binding ? binding.el : document).trigger(evt);
+          (0, import_jquery38.default)(binding ? binding.el : document).trigger(evt);
           return void 0;
         }
         this.$values[name] = value;
         delete this.$errors[name];
-        (0, import_jquery39.default)(binding ? binding.el : document).trigger(evt);
+        (0, import_jquery38.default)(binding ? binding.el : document).trigger(evt);
         if (!evt.isDefaultPrevented() && binding) {
           binding.onValueChange(evt.value);
         }
@@ -12272,7 +12264,7 @@
         }).map(function(k) {
           return _defineProperty17({}, k.substring(nsPrefix.length), scopeComponent[k]);
         }).reduce(function(obj, pair) {
-          return import_jquery39.default.extend(obj, pair);
+          return import_jquery38.default.extend(obj, pair);
         }, {});
       }
     }, {
@@ -12289,7 +12281,7 @@
     }, {
       key: "$updateConditionals",
       value: function $updateConditionals() {
-        (0, import_jquery39.default)(document).trigger({
+        (0, import_jquery38.default)(document).trigger({
           type: "shiny:conditional"
         });
         var inputs = {};
@@ -12303,9 +12295,9 @@
           input: inputs,
           output: this.$values
         };
-        var conditionals = (0, import_jquery39.default)(document).find("[data-display-if]");
+        var conditionals = (0, import_jquery38.default)(document).find("[data-display-if]");
         for (var i = 0; i < conditionals.length; i++) {
-          var el = (0, import_jquery39.default)(conditionals[i]);
+          var el = (0, import_jquery38.default)(conditionals[i]);
           var condFunc = el.data("data-display-if-func");
           if (!condFunc) {
             var condExpr = el.attr("data-display-if");
@@ -12349,7 +12341,7 @@
         }
         var evt = jQuery.Event("shiny:message");
         evt.message = msgObj;
-        (0, import_jquery39.default)(document).trigger(evt);
+        (0, import_jquery38.default)(document).trigger(evt);
         if (evt.isDefaultPrevented())
           return;
         this._sendMessagesToHandlers(evt.message, messageHandlers, messageHandlerOrder);
@@ -12388,7 +12380,7 @@
         });
         addMessageHandler("inputMessages", function(message) {
           for (var i = 0; i < message.length; i++) {
-            var $obj = (0, import_jquery39.default)(".shiny-bound-input#" + $escape(message[i].id));
+            var $obj = (0, import_jquery38.default)(".shiny-bound-input#" + $escape(message[i].id));
             var inputBinding = $obj.data("shiny-input-binding");
             if ($obj.length > 0) {
               if (!$obj.attr("aria-live"))
@@ -12397,7 +12389,7 @@
               var evt = jQuery.Event("shiny:updateinput");
               evt.message = message[i].message;
               evt.binding = inputBinding;
-              (0, import_jquery39.default)(el).trigger(evt);
+              (0, import_jquery38.default)(el).trigger(evt);
               if (!evt.isDefaultPrevented())
                 inputBinding.receiveMessage(el, evt.message);
             }
@@ -12470,24 +12462,24 @@
           };
           if (message.user)
             setShinyUser(message.user);
-          (0, import_jquery39.default)(document).trigger("shiny:sessioninitialized");
+          (0, import_jquery38.default)(document).trigger("shiny:sessioninitialized");
         });
         addMessageHandler("busy", function(message) {
           if (message === "busy") {
-            (0, import_jquery39.default)(document.documentElement).addClass("shiny-busy");
-            (0, import_jquery39.default)(document).trigger("shiny:busy");
+            (0, import_jquery38.default)(document.documentElement).addClass("shiny-busy");
+            (0, import_jquery38.default)(document).trigger("shiny:busy");
           } else if (message === "idle") {
-            (0, import_jquery39.default)(document.documentElement).removeClass("shiny-busy");
-            (0, import_jquery39.default)(document).trigger("shiny:idle");
+            (0, import_jquery38.default)(document.documentElement).removeClass("shiny-busy");
+            (0, import_jquery38.default)(document).trigger("shiny:idle");
           }
         });
         addMessageHandler("recalculating", function(message) {
           if (hasOwnProperty(message, "name") && hasOwnProperty(message, "status")) {
             var binding = _this3.$bindings[message.name];
             if (binding) {
-              (0, import_jquery39.default)(binding.el).trigger("shiny:" + message.status);
+              (0, import_jquery38.default)(binding.el).trigger("shiny:" + message.status);
             } else {
-              (0, import_jquery39.default)().trigger("shiny:" + message.status);
+              (0, import_jquery38.default)().trigger("shiny:" + message.status);
             }
           }
         });
@@ -12497,10 +12489,10 @@
           message;
         });
         addMessageHandler("shiny-insert-ui", function(message) {
-          var targets = (0, import_jquery39.default)(message.selector);
+          var targets = (0, import_jquery38.default)(message.selector);
           if (targets.length === 0) {
             console.warn('The selector you chose ("' + message.selector + '") could not be found in the DOM.');
-            renderHtml2(message.content.html, (0, import_jquery39.default)([]).get(0), message.content.deps);
+            renderHtml2(message.content.html, (0, import_jquery38.default)([]).get(0), message.content.deps);
           } else {
             targets.each(function(i, target) {
               renderContent(target, message.content, message.where);
@@ -12509,10 +12501,10 @@
           }
         });
         addMessageHandler("shiny-remove-ui", function(message) {
-          var els = (0, import_jquery39.default)(message.selector);
+          var els = (0, import_jquery38.default)(message.selector);
           els.each(function(i, el) {
             shinyUnbindAll(el, true);
-            (0, import_jquery39.default)(el).remove();
+            (0, import_jquery38.default)(el).remove();
             return message.multiple;
           });
         });
@@ -12522,14 +12514,14 @@
           }
         });
         function getTabset(id) {
-          var $tabset = (0, import_jquery39.default)("#" + $escape(id));
+          var $tabset = (0, import_jquery38.default)("#" + $escape(id));
           if ($tabset.length === 0)
             throw "There is no tabsetPanel (or navbarPage or navlistPanel) with id equal to '" + id + "'";
           return $tabset;
         }
         function getTabContent($tabset) {
           var tabsetId = $tabset.attr("data-tabsetid");
-          var $tabContent = (0, import_jquery39.default)("div.tab-content[data-tabsetid='" + $escape(tabsetId) + "']");
+          var $tabContent = (0, import_jquery38.default)("div.tab-content[data-tabsetid='" + $escape(tabsetId) + "']");
           return $tabContent;
         }
         function getTargetTabs($tabset, $tabContent, target) {
@@ -12546,12 +12538,12 @@
             var dropdownId = $dropdownTabset.attr("data-tabsetid");
             var $dropdownLiTags = $dropdownTabset.find("a[data-toggle='tab']").parent("li");
             $dropdownLiTags.each(function(i, el) {
-              $liTags.push((0, import_jquery39.default)(el));
+              $liTags.push((0, import_jquery38.default)(el));
             });
             var selector = "div.tab-pane[id^='tab-" + $escape(dropdownId) + "']";
             var $dropdownDivs = $tabContent.find(selector);
             $dropdownDivs.each(function(i, el) {
-              $divTags.push((0, import_jquery39.default)(el));
+              $divTags.push((0, import_jquery38.default)(el));
             });
           } else {
             $divTags.push($tabContent.find("div" + dataValue));
@@ -12567,8 +12559,8 @@
           var $tabset = $parentTabset;
           var $tabContent = getTabContent($tabset);
           var tabsetId = $parentTabset.attr("data-tabsetid");
-          var $divTag = (0, import_jquery39.default)(message.divTag.html);
-          var $liTag = (0, import_jquery39.default)(message.liTag.html);
+          var $divTag = (0, import_jquery38.default)(message.divTag.html);
+          var $liTag = (0, import_jquery38.default)(message.liTag.html);
           var $aTag = $liTag.find("> a");
           var $targetLiTag = null;
           if (message.target !== null) {
@@ -12606,10 +12598,14 @@
             html: $liTag.html(),
             deps: message.liTag.deps
           });
-          renderContent($tabContent[0], {
-            html: "",
-            deps: message.divTag.deps
-          }, "beforeend");
+          renderContent(
+            $tabContent[0],
+            {
+              html: "",
+              deps: message.divTag.deps
+            },
+            "beforeend"
+          );
           $divTag.get().forEach(function(el) {
             $tabContent[0].appendChild(el);
             renderContent(el, el.innerHTML || el.textContent);
@@ -12620,7 +12616,7 @@
           function getTabIndex($tabset2, tabsetId2) {
             var existingTabIds = [0];
             $tabset2.find("> li").each(function() {
-              var $tab = (0, import_jquery39.default)(this).find("> a[data-toggle='tab']");
+              var $tab = (0, import_jquery38.default)(this).find("> a[data-toggle='tab']");
               if ($tab.length > 0) {
                 var href = $tab.attr("href").replace(/.*(?=#[^\s]+$)/, "");
                 var _index = href.replace("#tab-" + tabsetId2 + "-", "");
@@ -12631,7 +12627,7 @@
           }
           function getDropdown() {
             if (message.menuName !== null) {
-              var $dropdownATag = (0, import_jquery39.default)("a.dropdown-toggle[data-value='" + $escape(message.menuName) + "']");
+              var $dropdownATag = (0, import_jquery38.default)("a.dropdown-toggle[data-value='" + $escape(message.menuName) + "']");
               if ($dropdownATag.length === 0) {
                 throw "There is no navbarMenu with menuName equal to '" + message.menuName + "'";
               }
@@ -12669,15 +12665,15 @@
         }
         function tabApplyFunction(target, func) {
           var liTags = arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : false;
-          import_jquery39.default.each(target, function(key, el) {
+          import_jquery38.default.each(target, function(key, el) {
             if (key === "$liTag") {
               func(el);
             } else if (key === "$divTags") {
-              import_jquery39.default.each(el, function(i, div) {
+              import_jquery38.default.each(el, function(i, div) {
                 func(div);
               });
             } else if (liTags && key === "$liTags") {
-              import_jquery39.default.each(el, function(i, div) {
+              import_jquery38.default.each(el, function(i, div) {
                 func(div);
               });
             }
@@ -12735,7 +12731,7 @@
           if (window.location.hash !== oldHash)
             what = "hash";
           if (what === "hash")
-            (0, import_jquery39.default)(document).trigger("hashchange");
+            (0, import_jquery38.default)(document).trigger("hashchange");
         });
         addMessageHandler("resetBrush", function(message) {
           resetBrush(message.brushId);
@@ -12768,10 +12764,10 @@
     var inputsRate = new InputRateDecorator(inputsEvent);
     var inputsDefer = new InputDeferDecorator(inputsEvent);
     var target;
-    if ((0, import_jquery40.default)('input[type="submit"], button[type="submit"]').length > 0) {
+    if ((0, import_jquery39.default)('input[type="submit"], button[type="submit"]').length > 0) {
       target = inputsDefer;
-      (0, import_jquery40.default)('input[type="submit"], button[type="submit"]').each(function() {
-        (0, import_jquery40.default)(this).click(function(event) {
+      (0, import_jquery39.default)('input[type="submit"], button[type="submit"]').each(function() {
+        (0, import_jquery39.default)(this).click(function(event) {
           event.preventDefault();
           inputsDefer.submit();
         });
@@ -12816,7 +12812,7 @@
         var inputObjects = binding.find(scope);
         if (inputObjects) {
           for (var j = 0; j < inputObjects.length; j++) {
-            var $inputObjectJ = (0, import_jquery40.default)(inputObjects[j]);
+            var $inputObjectJ = (0, import_jquery39.default)(inputObjects[j]);
             if (!$inputObjectJ.data("_shiny_initialized")) {
               $inputObjectJ.data("_shiny_initialized", true);
               binding.initialize(inputObjects[j]);
@@ -12827,7 +12823,7 @@
     }
     windowShiny3.initializeInputs = initializeInputs;
     function getIdFromEl(el) {
-      var $el = (0, import_jquery40.default)(el);
+      var $el = (0, import_jquery39.default)(el);
       var bindingAdapter = $el.data("shiny-output-binding");
       if (!bindingAdapter)
         return null;
@@ -12838,7 +12834,7 @@
     var initialValues = mapValues(_bindAll(shinyBindCtx(), document.documentElement), function(x) {
       return x.value;
     });
-    (0, import_jquery40.default)(".shiny-image-output, .shiny-plot-output, .shiny-report-size").each(function() {
+    (0, import_jquery39.default)(".shiny-image-output, .shiny-plot-output, .shiny-report-size").each(function() {
       var id = getIdFromEl(this);
       if (this.offsetWidth !== 0 || this.offsetHeight !== 0) {
         initialValues[".clientdata_output_" + id + "_width"] = this.offsetWidth;
@@ -12871,7 +12867,7 @@
         size: fontSize
       };
     }
-    (0, import_jquery40.default)(".shiny-image-output, .shiny-plot-output, .shiny-report-theme").each(function() {
+    (0, import_jquery39.default)(".shiny-image-output, .shiny-plot-output, .shiny-report-theme").each(function() {
       var el = this;
       var id = getIdFromEl(el);
       initialValues[".clientdata_output_" + id + "_bg"] = getComputedBgColor(el);
@@ -12889,7 +12885,7 @@
       if (!reportTheme) {
         return;
       }
-      var $el = (0, import_jquery40.default)(el);
+      var $el = (0, import_jquery39.default)(el);
       if ($el.data("shiny-theme-observer")) {
         return;
       }
@@ -12917,18 +12913,18 @@
       inputs.setInput(".clientdata_output_" + id + "_font", getComputedFont(el));
     }
     function doSendImageSize() {
-      (0, import_jquery40.default)(".shiny-image-output, .shiny-plot-output, .shiny-report-size").each(function() {
+      (0, import_jquery39.default)(".shiny-image-output, .shiny-plot-output, .shiny-report-size").each(function() {
         var id = getIdFromEl(this);
         if (this.offsetWidth !== 0 || this.offsetHeight !== 0) {
           inputs.setInput(".clientdata_output_" + id + "_width", this.offsetWidth);
           inputs.setInput(".clientdata_output_" + id + "_height", this.offsetHeight);
         }
       });
-      (0, import_jquery40.default)(".shiny-image-output, .shiny-plot-output, .shiny-report-theme").each(function() {
+      (0, import_jquery39.default)(".shiny-image-output, .shiny-plot-output, .shiny-report-theme").each(function() {
         doSendTheme(this);
       });
-      (0, import_jquery40.default)(".shiny-bound-output").each(function() {
-        var $this = (0, import_jquery40.default)(this), binding = $this.data("shiny-output-binding");
+      (0, import_jquery39.default)(".shiny-bound-output").each(function() {
+        var $this = (0, import_jquery39.default)(this), binding = $this.data("shiny-output-binding");
         $this.trigger({
           type: "shiny:visualchange",
           visible: !isHidden(this),
@@ -12948,7 +12944,7 @@
       }
     }
     var lastKnownVisibleOutputs = {};
-    (0, import_jquery40.default)(".shiny-bound-output").each(function() {
+    (0, import_jquery39.default)(".shiny-bound-output").each(function() {
       var id = getIdFromEl(this);
       if (isHidden(this)) {
         initialValues[".clientdata_output_" + id + "_hidden"] = true;
@@ -12959,7 +12955,7 @@
     });
     function doSendOutputHiddenState() {
       var visibleOutputs = {};
-      (0, import_jquery40.default)(".shiny-bound-output").each(function() {
+      (0, import_jquery39.default)(".shiny-bound-output").each(function() {
         var id = getIdFromEl(this);
         delete lastKnownVisibleOutputs[id];
         var hidden = isHidden(this), evt = {
@@ -12972,7 +12968,7 @@
           visibleOutputs[id] = true;
           inputs.setInput(".clientdata_output_" + id + "_hidden", false);
         }
-        var $this = (0, import_jquery40.default)(this);
+        var $this = (0, import_jquery39.default)(this);
         evt.binding = $this.data("shiny-output-binding");
         $this.trigger(evt);
       });
@@ -13005,16 +13001,16 @@
         handler.apply(this, [namespaceArr, handler].concat(args));
       };
     }
-    (0, import_jquery40.default)(window).resize(debounce(500, sendImageSizeFns.regular));
+    (0, import_jquery39.default)(window).resize(debounce(500, sendImageSizeFns.regular));
     var bs3classes = ["modal", "dropdown", "tab", "tooltip", "popover", "collapse"];
-    import_jquery40.default.each(bs3classes, function(idx, classname) {
-      (0, import_jquery40.default)(document.body).on("shown.bs." + classname + ".sendImageSize", "*", filterEventsByNamespace("bs", sendImageSizeFns.regular));
-      (0, import_jquery40.default)(document.body).on("shown.bs." + classname + ".sendOutputHiddenState hidden.bs." + classname + ".sendOutputHiddenState", "*", filterEventsByNamespace("bs", sendOutputHiddenState));
+    import_jquery39.default.each(bs3classes, function(idx, classname) {
+      (0, import_jquery39.default)(document.body).on("shown.bs." + classname + ".sendImageSize", "*", filterEventsByNamespace("bs", sendImageSizeFns.regular));
+      (0, import_jquery39.default)(document.body).on("shown.bs." + classname + ".sendOutputHiddenState hidden.bs." + classname + ".sendOutputHiddenState", "*", filterEventsByNamespace("bs", sendOutputHiddenState));
     });
-    (0, import_jquery40.default)(document.body).on("shown.sendImageSize", "*", sendImageSizeFns.regular);
-    (0, import_jquery40.default)(document.body).on("shown.sendOutputHiddenState hidden.sendOutputHiddenState", "*", sendOutputHiddenState);
+    (0, import_jquery39.default)(document.body).on("shown.sendImageSize", "*", sendImageSizeFns.regular);
+    (0, import_jquery39.default)(document.body).on("shown.sendOutputHiddenState hidden.sendOutputHiddenState", "*", sendOutputHiddenState);
     initialValues[".clientdata_pixelratio"] = pixelRatio();
-    (0, import_jquery40.default)(window).resize(function() {
+    (0, import_jquery39.default)(window).resize(function() {
       inputs.setInput(".clientdata_pixelratio", pixelRatio());
     });
     initialValues[".clientdata_url_protocol"] = window.location.protocol;
@@ -13022,27 +13018,27 @@
     initialValues[".clientdata_url_port"] = window.location.port;
     initialValues[".clientdata_url_pathname"] = window.location.pathname;
     initialValues[".clientdata_url_search"] = window.location.search;
-    (0, import_jquery40.default)(window).on("pushstate", function(e) {
+    (0, import_jquery39.default)(window).on("pushstate", function(e) {
       inputs.setInput(".clientdata_url_search", window.location.search);
       return;
       e;
     });
-    (0, import_jquery40.default)(window).on("popstate", function(e) {
+    (0, import_jquery39.default)(window).on("popstate", function(e) {
       inputs.setInput(".clientdata_url_search", window.location.search);
       return;
       e;
     });
     initialValues[".clientdata_url_hash_initial"] = window.location.hash;
     initialValues[".clientdata_url_hash"] = window.location.hash;
-    (0, import_jquery40.default)(window).on("hashchange", function(e) {
+    (0, import_jquery39.default)(window).on("hashchange", function(e) {
       inputs.setInput(".clientdata_url_hash", window.location.hash);
       return;
       e;
     });
-    var singletonText = initialValues[".clientdata_singletons"] = (0, import_jquery40.default)('script[type="application/shiny-singletons"]').text();
+    var singletonText = initialValues[".clientdata_singletons"] = (0, import_jquery39.default)('script[type="application/shiny-singletons"]').text();
     registerNames(singletonText.split(/,/));
-    var dependencyText = (0, import_jquery40.default)('script[type="application/html-dependencies"]').text();
-    import_jquery40.default.each(dependencyText.split(/;/), function(i, depStr) {
+    var dependencyText = (0, import_jquery39.default)('script[type="application/html-dependencies"]').text();
+    import_jquery39.default.each(dependencyText.split(/;/), function(i, depStr) {
       var match = /\s*^(.+)\[(.+)\]\s*$/.exec(depStr);
       if (match) {
         registerDependency(match[1], match[2]);
@@ -13050,7 +13046,7 @@
     });
     inputsNoResend.reset(initialValues);
     shinyapp.connect(initialValues);
-    (0, import_jquery40.default)(document).one("shiny:connected", function() {
+    (0, import_jquery39.default)(document).one("shiny:connected", function() {
       initDeferredIframes();
     });
   }
@@ -13058,8 +13054,8 @@
     if (!window.Shiny || !window.Shiny.shinyapp || !window.Shiny.shinyapp.isConnected()) {
       return;
     }
-    (0, import_jquery40.default)(".shiny-frame-deferred").each(function(i, el) {
-      var $el = (0, import_jquery40.default)(el);
+    (0, import_jquery39.default)(".shiny-frame-deferred").each(function(i, el) {
+      var $el = (0, import_jquery39.default)(el);
       $el.removeClass("shiny-frame-deferred");
       $el.attr("src", $el.attr("data-deferred-src"));
       $el.attr("data-deferred-src", null);
@@ -13095,17 +13091,11 @@
     windowShiny2.renderDependencies = renderDependencies;
     windowShiny2.renderContent = renderContent;
     windowShiny2.renderHtml = renderHtml2;
-    (0, import_jquery41.default)(function() {
+    (0, import_jquery40.default)(function() {
       setTimeout(function() {
         initShiny(windowShiny2);
       }, 1);
     });
-  }
-
-  // srcts/src/window/blobBuilder.ts
-  function windowBlobBuilder() {
-    var blob = window.BlobBuilder || window.WebKitBlobBuilder || window.MozBlobBuilder || window.MSBlobBuilder;
-    return blob;
   }
 
   // srcts/src/window/userAgent.ts
@@ -13114,24 +13104,24 @@
   }
 
   // srcts/src/shiny/reactlog.ts
-  var import_jquery42 = __toModule(require_jquery());
+  var import_jquery41 = __toESM(require_jquery());
   function shinyAppConfig() {
     return shinyShinyApp().config;
   }
   function initReactlog() {
-    (0, import_jquery42.default)(document).on("keydown", function(e) {
+    (0, import_jquery41.default)(document).on("keydown", function(e) {
       if (e.which !== 114 || !e.ctrlKey && !e.metaKey || e.shiftKey || e.altKey)
         return;
       var url = "reactlog?w=" + window.escape(shinyAppConfig().workerId) + "&s=" + window.escape(shinyAppConfig().sessionId);
       window.open(url);
       e.preventDefault();
     });
-    (0, import_jquery42.default)(document).on("keydown", function(e) {
+    (0, import_jquery41.default)(document).on("keydown", function(e) {
       if (!(e.which === 115 && (e.ctrlKey || e.metaKey) && !e.shiftKey && !e.altKey || e.which === 114 && (e.ctrlKey || e.metaKey) && e.shiftKey && !e.altKey)) {
         return;
       }
       var url = "reactlog/mark?w=" + window.escape(shinyAppConfig().workerId) + "&s=" + window.escape(shinyAppConfig().sessionId);
-      import_jquery42.default.get(url, function(result) {
+      import_jquery41.default.get(url, function(result) {
         if (result !== "marked")
           return;
         var html = '<span id="shiny-reactlog-mark-text">Marked time point in reactlog</span>';
@@ -13153,7 +13143,6 @@
     determineBrowserInfo();
     trackHistory();
     disableFormSubmission();
-    setBlobBuilder(windowBlobBuilder());
     initReactlog();
   }
 

@@ -15,6 +15,7 @@ declare type OnErrorRequest = (err: string) => void;
 declare type InputValues = {
     [key: string]: unknown;
 };
+declare type MessageValue = Parameters<WebSocket["send"]>[0];
 declare function addCustomMessageHandler(type: string, handler: Handler): void;
 declare class ShinyApp {
     $socket: ShinyWebSocket | null;
@@ -34,7 +35,7 @@ declare class ShinyApp {
         [key: string]: ErrorsMessageValue;
     };
     $conditionals: {};
-    $pendingMessages: string[];
+    $pendingMessages: MessageValue[];
     $activeRequests: {
         [key: number]: {
             onSuccess: OnSuccessRequest;
@@ -60,7 +61,7 @@ declare class ShinyApp {
     onDisconnected(): void;
     onConnected(): void;
     makeRequest(method: string, args: unknown[], onSuccess: OnSuccessRequest, onError: OnErrorRequest, blobs: Array<ArrayBuffer | Blob | string> | undefined): void;
-    $sendMsg(msg: string): void;
+    $sendMsg(msg: MessageValue): void;
     receiveError(name: string, error: ErrorsMessageValue): void;
     receiveOutput<T>(name: string, value: T): T | undefined;
     bindOutput(id: string, binding: OutputBindingAdapter): OutputBindingAdapter;

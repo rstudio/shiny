@@ -15,7 +15,9 @@ declare global {
     bsDatepicker(methodName: "getUTCDate"): Date;
     // Infinity is not allowed as a literal return type. Using `1e9999` as a placeholder that resolves to Infinity
     // https://github.com/microsoft/TypeScript/issues/32277
+    // eslint-disable-next-line @typescript-eslint/no-loss-of-precision
     bsDatepicker(methodName: "getStartDate"): Date | -1e9999;
+    // eslint-disable-next-line @typescript-eslint/no-loss-of-precision
     bsDatepicker(methodName: "getEndDate"): Date | 1e9999;
     bsDatepicker(methodName: string): void;
     bsDatepicker(methodName: string, params: Date | null): void;

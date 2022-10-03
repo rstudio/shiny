@@ -1918,7 +1918,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/jquery@3.5.5, @types/jquery@npm:*":
+"@types/jquery@npm:*":
   version: 3.5.5
   resolution: "@types/jquery@npm:3.5.5"
   dependencies:
@@ -1927,12 +1927,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/jquery@patch:@types/jquery@3.5.5#./srcts/patch/types-jquery.patch::locator=%40types%2Frstudio-shiny%40workspace%3A.":
-  version: 3.5.5
-  resolution: "@types/jquery@patch:@types/jquery@npm%3A3.5.5#./srcts/patch/types-jquery.patch::version=3.5.5&hash=a7a8f9&locator=%40types%2Frstudio-shiny%40workspace%3A."
+"@types/jquery@npm:3.5.14":
+  version: 3.5.14
+  resolution: "@types/jquery@npm:3.5.14"
   dependencies:
     "@types/sizzle": "*"
-  checksum: aa4ba94f98a085ae77b8717a6ce81a05d7647f0df5f87f160c21e7772d60f7ed20ba951886e36fe8d0205882dfc62107b722df4d638ae6d3b4af9bfed227e289
+  checksum: 159d6f804ed1a204b3f79f2d591a271d82e866bd45bd49fb6ef40561a25dbe0f47ec7815681b44cc2db5598425f72811e7e80ab0e983d980470998ac56feb375
   languageName: node
   linkType: hard
 
@@ -1999,7 +1999,7 @@ __metadata:
     "@types/highlightjs": ^9.12.1
     "@types/ion-rangeslider": 2.3.0
     "@types/jest": ^26.0.23
-    "@types/jquery": "patch:@types/jquery@3.5.5#./srcts/patch/types-jquery.patch"
+    "@types/jquery": 3.5.14
     "@types/jqueryui": 1.12.16
     "@types/lodash": ^4.14.170
     "@types/node": ^15.6.1

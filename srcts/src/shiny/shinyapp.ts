@@ -448,7 +448,7 @@ class ShinyApp {
     delete this.$values[name];
 
     const binding = this.$bindings[name];
-    const evt: ShinyEventError = jQuery.Event("shiny:error");
+    const evt: ShinyEventError = $.Event("shiny:error");
 
     evt.name = name;
     evt.error = error;
@@ -461,7 +461,7 @@ class ShinyApp {
 
   receiveOutput<T>(name: string, value: T): T | undefined {
     const binding = this.$bindings[name];
-    const evt: ShinyEventValue = jQuery.Event("shiny:value");
+    const evt: ShinyEventValue = $.Event("shiny:value");
 
     evt.name = name;
     evt.value = value;
@@ -620,7 +620,7 @@ class ShinyApp {
       msgObj.custom[type] = data;
     }
 
-    const evt: ShinyEventMessage = jQuery.Event("shiny:message");
+    const evt: ShinyEventMessage = $.Event("shiny:message");
 
     evt.message = msgObj;
     $(document).trigger(evt);
@@ -700,8 +700,7 @@ class ShinyApp {
           if ($obj.length > 0) {
             if (!$obj.attr("aria-live")) $obj.attr("aria-live", "polite");
             const el = $obj[0];
-            const evt: ShinyEventUpdateInput =
-              jQuery.Event("shiny:updateinput");
+            const evt: ShinyEventUpdateInput = $.Event("shiny:updateinput");
 
             evt.message = message[i].message;
             evt.binding = inputBinding;
@@ -1204,7 +1203,7 @@ class ShinyApp {
         // value for the tabset gets updated (i.e. input$tabsetId
         // should be null if there are no tabs).
         const destTabValue = getFirstTab($tabset);
-        const evt: ShinyEventUpdateInput = jQuery.Event("shiny:updateinput");
+        const evt: ShinyEventUpdateInput = $.Event("shiny:updateinput");
 
         evt.binding = inputBinding;
         $tabset.trigger(evt);

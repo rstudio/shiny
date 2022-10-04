@@ -213,6 +213,22 @@ async function renderDependency(dep_: HtmlDep) {
   dep.script.forEach((x) => {
     const script = document.createElement("script");
 
+    if (!hasDefinedProperty(x, "async")) {
+      // Set async to false by default, so that if there are multiple script
+      // tags, they are guaranteed to run in order. For dynamically added
+      // <script> tags, browsers set async to true by default, which differs
+      // from static <script> tags in the html, which default to false.
+      //
+      // Refs:
+      // https://stackoverflow.com/a/8996894/412655
+      // https://jason-ge.medium.com/dynamically-load-javascript-files-in-order-5318ac6bcc61
+      //
+      // Note that one odd thing about these dynamically-created <script> tags
+      // is that even though the JS object's `x.script` property is true, it
+      // does NOT show up as a property on the <script> element.
+      script.async = false;
+    }
+
     Object.entries(x).forEach(function ([attr, val]) {
       if (attr === "src") {
         val = encodeURI(val);

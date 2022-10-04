@@ -2022,6 +2022,7 @@ __metadata:
     eslint-plugin-jest-dom: ^4.0.2
     eslint-plugin-prettier: ^4.2.1
     eslint-plugin-unicorn: ^43.0.2
+    fs-readdir-recursive: ^1.1.0
     ion-rangeslider: 2.3.1
     jest: ^26.6.3
     jquery: 3.6.0
@@ -4896,6 +4897,13 @@ __metadata:
   dependencies:
     minipass: ^3.0.0
   checksum: 1b8d128dae2ac6cc94230cc5ead341ba3e0efaef82dab46a33d171c044caaa6ca001364178d42069b2809c35a1c3c35079a32107c770e9ffab3901b59af8c8b1
+  languageName: node
+  linkType: hard
+
+"fs-readdir-recursive@npm:^1.1.0":
+  version: 1.1.0
+  resolution: "fs-readdir-recursive@npm:1.1.0"
+  checksum: 29d50f3d2128391c7fc9fd051c8b7ea45bcc8aa84daf31ef52b17218e20bfd2bd34d02382742801954cc8d1905832b68227f6b680a666ce525d8b6b75068ad1e
   languageName: node
   linkType: hard
 

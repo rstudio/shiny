@@ -1,19 +1,42 @@
+library(magrittr)
+
 version <- "3.6.0"
 version_types <- "3.5.5"
 
 jq_cdn_download <- function(version) {
   Map(
     src = c(".min.js", ".min.map", ".js"),
-    f = function(src) {
+    dst = c(".min.js", ".min.js.map", ".js"),
+    f = function(src, dst) {
       download.file(
         file.path("https://code.jquery.com", paste0("jquery-", version, src)),
-        file.path("inst", "www", "shared",  paste0("jquery", src))
+        file.path("inst", "www", "shared",  paste0("jquery", dst))
       )
     }
   )
 }
 
 jq_cdn_download(version)
+
+# Add in source map location
+# Required given comments in https://blog.jquery.com/2014/01/24/jquery-1-11-and-2-1-released/
+jquery_min_js <- file.path("inst", "www", "shared", "jquery.min.js")
+# Point to the version-less source map file
+cat(
+  file = jquery_min_js,
+  append = TRUE,
+  "//# sourceMappingURL=jquery.min.js.map\n"
+)
+# Replace versioned file source locations with version-less file source
+# locations (~2 locations)
+jquery_min_js_map <- paste0(jquery_min_js, ".map")
+brio::read_lines(jquery_min_js_map) %>%
+  gsub(
+    gsub("\\.", "\\\\.", paste0("\"jquery-", version, ".")),
+    "\"jquery.",
+    .
+  ) %>%
+  brio::write_lines(jquery_min_js_map)
 
 download.file(
   "https://raw.githubusercontent.com/jquery/jquery/master/AUTHORS.txt",

@@ -9,7 +9,7 @@ declare type NumberReceiveMessageData = {
 };
 declare class NumberInputBinding extends TextInputBindingBase {
     find(scope: HTMLElement): JQuery<HTMLElement>;
-    getValue(el: NumberHTMLElement): string[] | number | string;
+    getValue(el: NumberHTMLElement): string[] | number | string | null | undefined;
     setValue(el: NumberHTMLElement, value: number): void;
     getType(el: NumberHTMLElement): string;
     receiveMessage(el: NumberHTMLElement, data: NumberReceiveMessageData): void;

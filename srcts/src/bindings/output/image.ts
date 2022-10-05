@@ -17,6 +17,7 @@ import {
 import { isIE, IEVersion } from "../../utils/browser";
 import type { CoordmapInit } from "../../imageutils/initCoordmap";
 import type { ErrorsMessageValue } from "../../shiny/shinyapp";
+import { ifUndefined } from "../../utils/object";
 
 class ImageOutputBinding extends OutputBinding {
   find(scope: HTMLElement): JQuery<HTMLElement> {
@@ -65,10 +66,6 @@ class ImageOutputBinding extends OutputBinding {
 
     // If value is undefined, return alternate. Sort of like ||, except it won't
     // return alternate for other falsy values (0, false, null).
-    function ifUndefined(value, alternate) {
-      if (value === undefined) return alternate;
-      return value;
-    }
 
     const opts = {
       clickId: $el.data("click-id"),

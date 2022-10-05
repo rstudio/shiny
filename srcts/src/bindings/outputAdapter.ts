@@ -22,7 +22,8 @@ class OutputBindingAdapter {
     // onResize with a version that does a makeResizeFilter on the element.
     if (binding.resize) {
       this.onResize = makeResizeFilter(el, function (width, height) {
-        binding.resize(el, width, height);
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        binding.resize!(el, width, height);
       });
     }
   }

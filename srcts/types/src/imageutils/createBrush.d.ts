@@ -10,21 +10,21 @@ declare type Bounds = {
 declare type BoundsCss = Bounds;
 declare type BoundsData = Bounds;
 declare type ImageState = {
-    brushing?: boolean;
-    dragging?: boolean;
-    resizing?: boolean;
-    down?: Offset;
-    up?: Offset;
-    resizeSides?: {
+    brushing: boolean;
+    dragging: boolean;
+    resizing: boolean;
+    down: Offset;
+    up: Offset;
+    resizeSides: {
         left: boolean;
         right: boolean;
         top: boolean;
         bottom: boolean;
     };
-    boundsCss?: BoundsCss;
-    boundsData?: BoundsData;
-    panel?: Panel;
-    changeStartBounds?: Bounds;
+    boundsCss: BoundsCss;
+    boundsData: BoundsData;
+    panel: Panel | null;
+    changeStartBounds: Bounds;
 };
 declare type BrushOpts = {
     brushDirection: "x" | "xy" | "y";
@@ -54,11 +54,11 @@ declare type Brush = {
     getPanel: () => ImageState["panel"];
     down: {
         (): ImageState["down"];
-        (offsetCss: any): void;
+        (offsetCss: Offset): void;
     };
     up: {
         (): ImageState["up"];
-        (offsetCss: any): void;
+        (offsetCss: Offset): void;
     };
     isBrushing: () => ImageState["brushing"];
     startBrushing: () => void;

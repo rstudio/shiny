@@ -12,7 +12,7 @@ interface BindingObj<Binding> {
 }
 
 class BindingRegistry<Binding extends BindingBase> {
-  name: string;
+  name!: string;
   bindings: Array<BindingObj<Binding>> = [];
   bindingNames: { [key: string]: BindingObj<Binding> } = {};
   registerCallbacks: Callbacks = new Callbacks();

@@ -3,9 +3,8 @@
 // yarn build
 // ```
 
-import { banner, build, outDir, shinyDesc } from "./_build";
+import { banner, build, outDir, shinyDesc, babelPlugin } from "./_build";
 import globalsPlugin from "esbuild-plugin-globals";
-import babelPlugin from "esbuild-plugin-babel";
 import type { BuildOptions } from "esbuild";
 
 const opts: BuildOptions = {

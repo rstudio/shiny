@@ -1,5 +1,5 @@
 import $ from "jquery";
-import { $escape, updateLabel, hasOwnProperty } from "../../utils";
+import { $escape, updateLabel, hasDefinedProperty } from "../../utils";
 
 import { InputBinding } from "./inputBinding";
 
@@ -109,11 +109,12 @@ class TextInputBinding extends TextInputBindingBase {
     };
   }
   receiveMessage(el: TextHTMLElement, data: TextReceiveMessageData): void {
-    if (hasOwnProperty(data, "value")) this.setValue(el, data.value);
+    if (hasDefinedProperty(data, "value")) this.setValue(el, data.value);
 
     updateLabel(data.label, getLabelNode(el));
 
-    if (hasOwnProperty(data, "placeholder")) el.placeholder = data.placeholder;
+    if (hasDefinedProperty(data, "placeholder"))
+      el.placeholder = data.placeholder;
 
     $(el).trigger("change");
   }

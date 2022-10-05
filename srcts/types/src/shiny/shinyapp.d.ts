@@ -1,5 +1,6 @@
 import type { OutputBindingAdapter } from "../bindings/outputAdapter";
 import type { UploadInitValue, UploadEndValue } from "../file/fileProcessor";
+import { AsyncQueue } from "../utils/asyncQueue";
 declare type ResponseValue = UploadEndValue | UploadInitValue;
 declare type Handler = (message: any) => Promise<void> | void;
 declare type ShinyWebSocket = WebSocket & {
@@ -19,9 +20,7 @@ declare type MessageValue = Parameters<WebSocket["send"]>[0];
 declare function addCustomMessageHandler(type: string, handler: Handler): void;
 declare class ShinyApp {
     $socket: ShinyWebSocket | null;
-    private $socketInMessageQueue;
-    $postDispatchMessageFnQueue: Array<() => void>;
-    isInDispatchMessage: boolean;
+    actionQueue: AsyncQueue<() => void>;
     config: {
         workerId: string;
         sessionId: string;
@@ -53,7 +52,7 @@ declare class ShinyApp {
     private scheduledReconnect;
     reconnect(): void;
     createSocket(): ShinyWebSocket;
-    startInMessageQueueLoop(): Promise<void>;
+    startActionQueueLoop(): Promise<void>;
     sendInput(values: InputValues): void;
     $notifyDisconnected(): void;
     $removeSocket(): void;

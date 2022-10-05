@@ -23,7 +23,7 @@
     "@types/bootstrap-datepicker": "0.0.14",
     "@types/datatables.net": "^1.10.19",
     "@types/ion-rangeslider": "2.3.0",
-    "@types/jquery": "patch:@types/jquery@3.5.5#./srcts/patch/types-jquery.patch",
+    "@types/jquery": "3.5.14",
     "@types/selectize": "0.12.34"
   },
   "devDependencies": {
@@ -59,6 +59,7 @@
     "eslint-plugin-jest-dom": "^4.0.2",
     "eslint-plugin-prettier": "^4.2.1",
     "eslint-plugin-unicorn": "^43.0.2",
+    "fs-readdir-recursive": "^1.1.0",
     "ion-rangeslider": "2.3.1",
     "jest": "^26.6.3",
     "jquery": "3.6.0",

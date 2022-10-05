@@ -8385,7 +8385,7 @@
   }(OutputBinding);
   (0, import_jquery23.default)(document).on("click.shinyDownloadLink", "a.shiny-download-link", function(e) {
     e;
-    var evt = jQuery.Event("shiny:filedownload");
+    var evt = import_jquery23.default.Event("shiny:filedownload");
     evt.name = this.id;
     evt.href = this.href;
     (0, import_jquery23.default)(document).trigger(evt);
@@ -11252,7 +11252,7 @@
     _createClass30(InputEventDecorator2, [{
       key: "setInput",
       value: function setInput(nameType, value, opts) {
-        var evt = jQuery.Event("shiny:inputchanged");
+        var evt = import_jquery36.default.Event("shiny:inputchanged");
         var input = splitInputNameType(nameType);
         evt.name = input.name;
         evt.inputType = input.inputType;
@@ -12203,7 +12203,7 @@
         this.$errors[name] = error;
         delete this.$values[name];
         var binding = this.$bindings[name];
-        var evt = jQuery.Event("shiny:error");
+        var evt = import_jquery38.default.Event("shiny:error");
         evt.name = name;
         evt.error = error;
         evt.binding = binding;
@@ -12216,7 +12216,7 @@
       key: "receiveOutput",
       value: function receiveOutput(name, value) {
         var binding = this.$bindings[name];
-        var evt = jQuery.Event("shiny:value");
+        var evt = import_jquery38.default.Event("shiny:value");
         evt.name = name;
         evt.value = value;
         evt.binding = binding;
@@ -12339,7 +12339,7 @@
           msgObj.custom = {};
           msgObj.custom[type] = data;
         }
-        var evt = jQuery.Event("shiny:message");
+        var evt = import_jquery38.default.Event("shiny:message");
         evt.message = msgObj;
         (0, import_jquery38.default)(document).trigger(evt);
         if (evt.isDefaultPrevented())
@@ -12386,7 +12386,7 @@
               if (!$obj.attr("aria-live"))
                 $obj.attr("aria-live", "polite");
               var el = $obj[0];
-              var evt = jQuery.Event("shiny:updateinput");
+              var evt = import_jquery38.default.Event("shiny:updateinput");
               evt.message = message[i].message;
               evt.binding = inputBinding;
               (0, import_jquery38.default)(el).trigger(evt);
@@ -12492,7 +12492,7 @@
           var targets = (0, import_jquery38.default)(message.selector);
           if (targets.length === 0) {
             console.warn('The selector you chose ("' + message.selector + '") could not be found in the DOM.');
-            renderHtml2(message.content.html, (0, import_jquery38.default)([]).get(0), message.content.deps);
+            renderHtml2(message.content.html, (0, import_jquery38.default)([]), message.content.deps);
           } else {
             targets.each(function(i, target) {
               renderContent(target, message.content, message.where);
@@ -12654,7 +12654,7 @@
           var inputBinding = $tabset.data("shiny-input-binding");
           if (!inputBinding.getValue($tabset)) {
             var destTabValue = getFirstTab($tabset);
-            var evt = jQuery.Event("shiny:updateinput");
+            var evt = import_jquery38.default.Event("shiny:updateinput");
             evt.binding = inputBinding;
             $tabset.trigger(evt);
             inputBinding.setValue($tabset[0], destTabValue);

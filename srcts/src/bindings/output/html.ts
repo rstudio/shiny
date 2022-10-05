@@ -13,11 +13,11 @@ class HtmlOutputBinding extends OutputBinding {
     shinyUnbindAll(el);
     this.renderError(el, err);
   }
-  renderValue(
+  override async renderValue(
     el: HTMLElement,
     data: Parameters<typeof renderContent>[1]
-  ): void {
-    renderContent(el, data);
+  ): Promise<void> {
+    await renderContent(el, data);
   }
 }
 

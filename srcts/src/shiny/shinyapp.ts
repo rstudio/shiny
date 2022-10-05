@@ -28,7 +28,7 @@ import type { UploadInitValue, UploadEndValue } from "../file/fileProcessor";
 import { AsyncQueue } from "../utils/asyncQueue";
 
 type ResponseValue = UploadEndValue | UploadInitValue;
-type Handler = (message: any) => void;
+type Handler = (message: any) => Promise<void> | void;
 
 type ShinyWebSocket = WebSocket & {
   allowReconnect?: boolean;
@@ -483,7 +483,7 @@ class ShinyApp {
     }
   }
 
-  receiveOutput<T>(name: string, value: T): T | undefined {
+  async receiveOutput<T>(name: string, value: T): Promise<T | undefined> {
     const binding = this.$bindings[name];
     const evt: ShinyEventValue = $.Event("shiny:value");
 
@@ -502,7 +502,7 @@ class ShinyApp {
     $(binding ? binding.el : document).trigger(evt);
 
     if (!evt.isDefaultPrevented() && binding) {
-      binding.onValueChange(evt.value);
+      await binding.onValueChange(evt.value);
     }
 
     return value;
@@ -692,7 +692,7 @@ class ShinyApp {
     // * Use arrow functions to allow the Types to propagate.
     // * However, `_sendMessagesToHandlers()` will adjust the `this` context to the same _`this`_.
 
-    addMessageHandler("values", (message: { [key: string]: any }) => {
+    addMessageHandler("values", async (message: { [key: string]: any }) => {
       for (const name in this.$bindings) {
         if (hasOwnProperty(this.$bindings, name))
           this.$bindings[name].showProgress(false);
@@ -700,7 +700,7 @@ class ShinyApp {
 
       for (const key in message) {
         if (hasOwnProperty(message, key)) {
-          this.receiveOutput(key, message[key]);
+          await this.receiveOutput(key, message[key]);
         }
       }
     });

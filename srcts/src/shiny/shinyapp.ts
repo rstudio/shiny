@@ -25,6 +25,7 @@ import type { InputBinding } from "../bindings";
 import { indirectEval } from "../utils/eval";
 import type { WherePosition } from "./singletons";
 import type { UploadInitValue, UploadEndValue } from "../file/fileProcessor";
+import { AsyncQueue } from "../utils/asyncQueue";
 
 type ResponseValue = UploadEndValue | UploadInitValue;
 type Handler = (message: any) => void;
@@ -107,6 +108,8 @@ function addCustomMessageHandler(type: string, handler: Handler): void {
 
 class ShinyApp {
   $socket: ShinyWebSocket | null = null;
+
+  private $socketInMessageQueue = new AsyncQueue<ArrayBufferLike | string>();
 
   config: {
     workerId: string;
@@ -228,9 +231,11 @@ class ShinyApp {
 
         socket.send(msg as string);
       }
+
+      this.startInMessageQueueLoop();
     };
     socket.onmessage = (e) => {
-      this.dispatchMessage(e.data);
+      this.$socketInMessageQueue.enqueue(e.data);
     };
     // Called when a successfully-opened websocket is closed, or when an
     // attempt to open a connection fails.
@@ -251,6 +256,15 @@ class ShinyApp {
       this.$removeSocket();
     };
     return socket;
+  }
+
+  async startInMessageQueueLoop(): Promise<void> {
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      const msg = await this.$socketInMessageQueue.dequeue();
+
+      await this.dispatchMessage(msg);
+    }
   }
 
   sendInput(values: InputValues): void {
@@ -598,7 +612,7 @@ class ShinyApp {
   // // Added in shiny init method
   // Shiny.addCustomMessageHandler = addCustomMessageHandler;
 
-  dispatchMessage(data: ArrayBufferLike | string): void {
+  async dispatchMessage(data: ArrayBufferLike | string): Promise<void> {
     let msgObj: ShinyEventMessage["message"] = {};
 
     if (typeof data === "string") {
@@ -627,7 +641,7 @@ class ShinyApp {
     if (evt.isDefaultPrevented()) return;
 
     // Send msgObj.foo and msgObj.bar to appropriate handlers
-    this._sendMessagesToHandlers(
+    await this._sendMessagesToHandlers(
       evt.message,
       messageHandlers,
       messageHandlerOrder

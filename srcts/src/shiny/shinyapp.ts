@@ -887,9 +887,9 @@ class ShinyApp {
       async (message: {
         selector: string;
         content: { html: string; deps: HtmlDep[] };
-        multiple: false | void;
+        multiple: boolean;
         where: WherePosition;
-      }) => {
+      }): Promise<void> => {
         const targets = $(message.selector);
 
         if (targets.length === 0) {
@@ -905,7 +905,8 @@ class ShinyApp {
         } else {
           for (const target of targets) {
             await renderContent(target, message.content, message.where);
-            return message.multiple;
+            // If multiple is false, only render to the first target.
+            if (message.multiple === false) break;
           }
         }
       }
@@ -913,7 +914,7 @@ class ShinyApp {
 
     addMessageHandler(
       "shiny-remove-ui",
-      (message: { selector: string; multiple: false | void }) => {
+      (message: { selector: string; multiple: boolean }) => {
         const els = $(message.selector);
 
         els.each(function (i, el) {
@@ -921,8 +922,8 @@ class ShinyApp {
           $(el).remove();
           // If `multiple` is false, returning false terminates the function
           // and no other elements are removed; if `multiple` is true,
-          // returning true continues removing all remaining elements.
-          return message.multiple;
+          // returning nothing continues removing all remaining elements.
+          return message.multiple === false ? false : undefined;
         });
       }
     );

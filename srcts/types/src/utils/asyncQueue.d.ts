@@ -1,6 +1,6 @@
 export declare class AsyncQueue<T> {
-    private _promises;
-    private _resolvers;
+    private $promises;
+    private $resolvers;
     private _add;
     enqueue(x: T): void;
     dequeue(): Promise<T>;

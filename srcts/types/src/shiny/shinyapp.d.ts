@@ -19,6 +19,9 @@ declare type MessageValue = Parameters<WebSocket["send"]>[0];
 declare function addCustomMessageHandler(type: string, handler: Handler): void;
 declare class ShinyApp {
     $socket: ShinyWebSocket | null;
+    private $socketInMessageQueue;
+    $postDispatchMessageFnQueue: Array<() => void>;
+    isInDispatchMessage: boolean;
     config: {
         workerId: string;
         sessionId: string;
@@ -50,6 +53,7 @@ declare class ShinyApp {
     private scheduledReconnect;
     reconnect(): void;
     createSocket(): ShinyWebSocket;
+    startInMessageQueueLoop(): Promise<void>;
     sendInput(values: InputValues): void;
     $notifyDisconnected(): void;
     $removeSocket(): void;
@@ -69,7 +73,7 @@ declare class ShinyApp {
     private _narrowScopeComponent;
     private _narrowScope;
     $updateConditionals(): void;
-    dispatchMessage(data: ArrayBufferLike | string): void;
+    dispatchMessage(data: ArrayBufferLike | string): Promise<void>;
     private _sendMessagesToHandlers;
     private _init;
     progressHandlers: {

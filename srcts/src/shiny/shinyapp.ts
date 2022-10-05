@@ -110,6 +110,9 @@ class ShinyApp {
   $socket: ShinyWebSocket | null = null;
 
   private $socketInMessageQueue = new AsyncQueue<ArrayBufferLike | string>();
+  $postDispatchMessageFnQueue: Array<() => void> = [];
+
+  isInDispatchMessage = false;
 
   config: {
     workerId: string;
@@ -264,6 +267,13 @@ class ShinyApp {
       const msg = await this.$socketInMessageQueue.dequeue();
 
       await this.dispatchMessage(msg);
+
+      while (this.$postDispatchMessageFnQueue.length > 0) {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        const postDispatchMessageFn = this.$postDispatchMessageFnQueue.shift()!;
+
+        postDispatchMessageFn();
+      }
     }
   }
 
@@ -615,39 +625,45 @@ class ShinyApp {
   async dispatchMessage(data: ArrayBufferLike | string): Promise<void> {
     let msgObj: ShinyEventMessage["message"] = {};
 
-    if (typeof data === "string") {
-      msgObj = JSON.parse(data);
-    } else {
-      // data is arraybuffer
-      const len = new DataView(data, 0, 1).getUint8(0);
-      const typedv = new DataView(data, 1, len);
-      const typebuf = [];
+    try {
+      this.isInDispatchMessage = true;
 
-      for (let i = 0; i < len; i++) {
-        typebuf.push(String.fromCharCode(typedv.getUint8(i)));
+      if (typeof data === "string") {
+        msgObj = JSON.parse(data);
+      } else {
+        // data is arraybuffer
+        const len = new DataView(data, 0, 1).getUint8(0);
+        const typedv = new DataView(data, 1, len);
+        const typebuf = [];
+
+        for (let i = 0; i < len; i++) {
+          typebuf.push(String.fromCharCode(typedv.getUint8(i)));
+        }
+        const type = typebuf.join("");
+
+        data = data.slice(len + 1);
+        msgObj.custom = {};
+        // @ts-expect-error; `custom` value is of unknown type. So setting within it is not allowed
+        msgObj.custom[type] = data;
       }
-      const type = typebuf.join("");
 
-      data = data.slice(len + 1);
-      msgObj.custom = {};
-      // @ts-expect-error; `custom` value is of unknown type. So setting within it is not allowed
-      msgObj.custom[type] = data;
+      const evt: ShinyEventMessage = $.Event("shiny:message");
+
+      evt.message = msgObj;
+      $(document).trigger(evt);
+      if (evt.isDefaultPrevented()) return;
+
+      // Send msgObj.foo and msgObj.bar to appropriate handlers
+      await this._sendMessagesToHandlers(
+        evt.message,
+        messageHandlers,
+        messageHandlerOrder
+      );
+
+      this.$updateConditionals();
+    } finally {
+      this.isInDispatchMessage = false;
     }
-
-    const evt: ShinyEventMessage = $.Event("shiny:message");
-
-    evt.message = msgObj;
-    $(document).trigger(evt);
-    if (evt.isDefaultPrevented()) return;
-
-    // Send msgObj.foo and msgObj.bar to appropriate handlers
-    await this._sendMessagesToHandlers(
-      evt.message,
-      messageHandlers,
-      messageHandlerOrder
-    );
-
-    this.$updateConditionals();
   }
 
   // Message handlers =====================================================

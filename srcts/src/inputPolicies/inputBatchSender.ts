@@ -32,6 +32,11 @@ class InputBatchSender implements InputPolicy {
       console.trace("Unexpected reentrancy in InputBatchSender!");
     }
 
+    if (this.shinyapp.isInDispatchMessage) {
+      this.shinyapp.$postDispatchMessageFnQueue.push(() => this._sendNow());
+      return;
+    }
+
     this.reentrant = true;
     try {
       this.timerId = null;

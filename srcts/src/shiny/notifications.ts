@@ -2,6 +2,7 @@ import $ from "jquery";
 
 import { $escape, randomId } from "../utils";
 import { shinyUnbindAll } from "./initedMethods";
+import type { HtmlDep } from "./render";
 import { renderContent } from "./render";
 
 // Milliseconds to fade in or out
@@ -15,6 +16,14 @@ function show({
   id = null,
   closeButton = true,
   type = null,
+}: {
+  html?: string;
+  action?: string;
+  deps?: HtmlDep[];
+  duration?: number | null;
+  id?: string | null;
+  closeButton?: boolean;
+  type?: string | null;
 } = {}): ReturnType<typeof randomId> {
   if (!id) id = randomId();
 
@@ -22,9 +31,10 @@ function show({
   createPanel();
 
   // Get existing DOM element for this ID, or create if needed.
-  let $notification = get(id);
+  let $notificationInit = get(id);
 
-  if ($notification.length === 0) $notification = create(id);
+  if ($notificationInit?.length === 0) $notificationInit = create(id);
+  const $notification = $notificationInit as JQuery<HTMLElement>;
 
   // Render html and dependencies
   const newHtml =
@@ -36,13 +46,16 @@ function show({
 
   // Remove any existing classes of the form 'shiny-notification-xxxx'.
   // The xxxx would be strings like 'warning'.
-  const classes = $notification
-    .attr("class")
-    .split(/\s+/)
-    .filter((cls) => cls.match(/^shiny-notification-/))
-    .join(" ");
+  const classes = $notification?.attr("class");
 
-  $notification.removeClass(classes);
+  if (classes) {
+    const classVal = classes
+      .split(/\s+/)
+      .filter((cls: string) => cls.match(/^shiny-notification-/))
+      .join(" ");
+
+    $notification.removeClass(classVal);
+  }
 
   // Add class. 'default' means no additional CSS class.
   if (type && type !== "default")
@@ -67,9 +80,8 @@ function show({
   return id;
 }
 
-// TODO-barret - Should `id` be required? (some places do not supply one)
-function remove(id?: string): void {
-  get(id).fadeOut(fadeDuration, function () {
+function remove(id: string): void {
+  get(id)?.fadeOut(fadeDuration, function () {
     shinyUnbindAll(this);
     $(this).remove();
 
@@ -81,7 +93,7 @@ function remove(id?: string): void {
 }
 
 // Returns an individual notification DOM object (wrapped in jQuery).
-function get(id?: string) {
+function get(id: string | null | undefined) {
   if (!id) return null;
   return getPanel().find("#shiny-notification-" + $escape(id));
 }
@@ -115,10 +127,10 @@ function createPanel() {
 
 // Create a notification DOM element and return the jQuery object. If the
 // DOM element already exists for the ID, just return it without creating.
-function create(id) {
+function create(id: string): JQuery<HTMLElement> {
   let $notification = get(id);
 
-  if ($notification.length === 0) {
+  if ($notification?.length === 0) {
     $notification = $(
       `<div id="shiny-notification-${id}" class="shiny-notification">` +
         '<div class="shiny-notification-close">&times;</div>' +
@@ -135,11 +147,11 @@ function create(id) {
     getPanel().append($notification);
   }
 
-  return $notification;
+  return $notification as JQuery<HTMLElement>;
 }
 
 // Add a callback to remove a notification after a delay in ms.
-function addRemovalCallback(id, delay) {
+function addRemovalCallback(id: string, delay: number) {
   // If there's an existing removalCallback, clear it before adding the new
   // one.
   clearRemovalCallback(id);
@@ -149,14 +161,14 @@ function addRemovalCallback(id, delay) {
     remove(id);
   }, delay);
 
-  get(id).data("removalCallback", removalCallback);
+  get(id)?.data("removalCallback", removalCallback);
 }
 
 // Clear a removal callback from a notification, if present.
-function clearRemovalCallback(id) {
+function clearRemovalCallback(id: string) {
   const $notification = get(id);
   const oldRemovalCallback: ReturnType<typeof setTimeout> =
-    $notification.data("removalCallback");
+    $notification?.data("removalCallback");
 
   if (oldRemovalCallback) {
     clearTimeout(oldRemovalCallback);

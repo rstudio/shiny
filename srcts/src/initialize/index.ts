@@ -4,8 +4,6 @@ import { determineBrowserInfo } from "./browser";
 
 import { windowShiny } from "../window/libraries";
 import { setShiny } from "../shiny";
-import { setBlobBuilder } from "../utils/blob";
-import { windowBlobBuilder } from "../window/blobBuilder";
 import { setUserAgent } from "../utils/userAgent";
 import { windowUserAgent } from "../window/userAgent";
 
@@ -19,8 +17,6 @@ function init(): void {
   trackHistory();
 
   disableFormSubmission();
-
-  setBlobBuilder(windowBlobBuilder());
 
   initReactlog();
 }

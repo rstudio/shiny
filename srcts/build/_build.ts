@@ -1,12 +1,22 @@
-import {
-  build as esbuildBuild,
+import type {
+  BuildFailure,
   BuildIncremental,
   BuildOptions,
   BuildResult,
+  WatchMode,
 } from "esbuild";
-import readcontrol from "readcontrol";
+import { build as esbuildBuild } from "esbuild";
+
 import process from "process";
 import { basename } from "path";
+
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore; Type definitions are not found. This occurs when `strict: true` in tsconfig.json
+import readcontrol from "readcontrol";
+
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore; Type definitions are not found. This occurs when `strict: true` in tsconfig.json
+import babelPlugin from "esbuild-plugin-babel";
 
 const outDir = "./inst/www/shared/";
 
@@ -42,7 +52,7 @@ async function build(
     }
   }
 
-  const onRebuild = function (error?: string) {
+  const onRebuild = function (error: BuildFailure | null) {
     if (error) {
       console.error(printNames.join(", "), "watch build failed:\n", error);
     } else {
@@ -54,7 +64,7 @@ async function build(
   };
 
   let incremental = false;
-  let watch: false | { onRebuild: (error, result) => void } = false;
+  let watch: WatchMode | false = false;
 
   if (process.argv.length >= 3 && process.argv[2] == "--watch") {
     incremental = true;
@@ -73,9 +83,9 @@ async function build(
     preserveSymlinks: true,
     ...opts,
   }).then((x) => {
-    onRebuild();
+    onRebuild(null);
     return x;
   });
 }
 
-export { outDir, build, shinyDesc, banner };
+export { outDir, build, shinyDesc, banner, babelPlugin };

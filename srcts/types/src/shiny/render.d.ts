@@ -15,7 +15,8 @@ declare type MetaItem = {
 };
 declare type StylesheetItem = {
     href: string;
-    [x: string]: string;
+    rel?: string;
+    type?: string;
 };
 declare type ScriptItem = {
     src: string;

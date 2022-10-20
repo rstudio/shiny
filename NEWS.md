@@ -7,6 +7,8 @@ shiny 1.7.2.9000
 
 ### New features and improvements
 
+* Internal: Added clearer and strict TypeScript type definitions (#3644)
+
 ### Bug fixes
 
 * Closed #3687: Updated jQuery-UI to v1.13.2. (#3697)

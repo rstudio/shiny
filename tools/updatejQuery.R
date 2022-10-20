@@ -1,7 +1,7 @@
 library(magrittr)
 
 version <- "3.6.0"
-version_types <- "3.5.5"
+version_types <- "3.5.14"
 
 jq_cdn_download <- function(version) {
   Map(
@@ -58,7 +58,7 @@ withr::with_dir(
     exit_code <- system(paste0("yarn add --dev jquery@", version))
     if (exit_code != 0) stop("yarn could not install jquery")
 
-    exit_code <- system(paste0("yarn add @types/jquery@patch:@types/jquery@", version_types, "#./srcts/patch/types-jquery.patch"))
+    exit_code <- system(paste0("yarn add @types/jquery@", version_types))
     if (exit_code != 0) stop("yarn could not install @types/jquery")
   }
 )

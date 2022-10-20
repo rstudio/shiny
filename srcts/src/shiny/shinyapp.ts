@@ -1,11 +1,5 @@
 import $ from "jquery";
-import {
-  $escape,
-  hasOwnProperty,
-  makeBlob,
-  randomId,
-  scopeExprToFunc,
-} from "../utils";
+import { $escape, hasOwnProperty, randomId, scopeExprToFunc } from "../utils";
 import {
   getShinyCreateWebsocket,
   getShinyOnCustomMessage,
@@ -49,6 +43,8 @@ type OnSuccessRequest = (value: ResponseValue) => void;
 type OnErrorRequest = (err: string) => void;
 type InputValues = { [key: string]: unknown };
 
+type MessageValue = Parameters<WebSocket["send"]>[0];
+
 //// 2021/03 - TypeScript conversion note:
 // These four variables were moved from being internally defined to being defined globally within the file.
 // Before the TypeScript conversion, the values where attached to `window.Shiny.addCustomMessageHandler()`.
@@ -58,16 +54,16 @@ type InputValues = { [key: string]: unknown };
 // Records insertion order of handlers. Maps number to name. This is so
 // we can dispatch messages to handlers in the order that handlers were
 // added.
-const messageHandlerOrder = [];
+const messageHandlerOrder: string[] = [];
 // Keep track of handlers by name. Maps name to handler function.
-const messageHandlers = {};
+const messageHandlers: { [key: string]: Handler } = {};
 
 // Two categories of message handlers: those that are from Shiny, and those
 // that are added by the user. The Shiny ones handle messages in
 // msgObj.values, msgObj.errors, and so on. The user ones handle messages
 // in msgObj.custom.foo and msgObj.custom.bar.
-const customMessageHandlerOrder = [];
-const customMessageHandlers = {};
+const customMessageHandlerOrder: string[] = [];
+const customMessageHandlers: { [key: string]: Handler } = {};
 
 // Adds Shiny (internal) message handler
 function addMessageHandler(type: string, handler: Handler) {
@@ -110,30 +106,30 @@ function addCustomMessageHandler(type: string, handler: Handler): void {
 //// End message handler variables
 
 class ShinyApp {
-  $socket: ShinyWebSocket = null;
+  $socket: ShinyWebSocket | null = null;
 
   config: {
     workerId: string;
     sessionId: string;
-  } = null;
+  } | null = null;
 
   // Cached input values
   $inputValues: InputValues = {};
 
   // Input values at initialization (and reconnect)
-  $initialInput: InputValues;
+  $initialInput: InputValues | null = null;
 
   // Output bindings
   $bindings: { [key: string]: OutputBindingAdapter } = {};
 
   // Cached values/errors
-  $values = {};
+  $values: { [key: string]: any } = {};
   $errors: { [key: string]: ErrorsMessageValue } = {};
 
   // Conditional bindings (show/hide element based on expression)
   $conditionals = {};
 
-  $pendingMessages: string[] = [];
+  $pendingMessages: MessageValue[] = [];
   $activeRequests: {
     [key: number]: { onSuccess: OnSuccessRequest; onError: OnErrorRequest };
   } = {};
@@ -160,7 +156,7 @@ class ShinyApp {
     return !!this.$socket;
   }
 
-  private scheduledReconnect: ReturnType<typeof setTimeout> = null;
+  private scheduledReconnect: number | undefined = undefined;
 
   reconnect(): void {
     // This function can be invoked directly even if there's a scheduled
@@ -230,7 +226,7 @@ class ShinyApp {
       while (this.$pendingMessages.length) {
         const msg = this.$pendingMessages.shift();
 
-        socket.send(msg);
+        socket.send(msg as string);
       }
     };
     socket.onmessage = (e) => {
@@ -280,7 +276,7 @@ class ShinyApp {
   }
 
   $scheduleReconnect(delay: Parameters<typeof setTimeout>[1]): void {
-    this.scheduledReconnect = setTimeout(() => {
+    this.scheduledReconnect = window.setTimeout(() => {
       this.reconnect();
     }, delay);
   }
@@ -327,7 +323,9 @@ class ShinyApp {
     // session$allowReconnect("force") was called. The "force" option should
     // only be used for testing.
     if (
-      (this.$allowReconnect === true && this.$socket.allowReconnect === true) ||
+      (this.$allowReconnect === true &&
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        this.$socket!.allowReconnect === true) ||
       this.$allowReconnect === "force"
     ) {
       const delay = this.reconnectDelay.next();
@@ -371,7 +369,7 @@ class ShinyApp {
     args: unknown[],
     onSuccess: OnSuccessRequest,
     onError: OnErrorRequest,
-    blobs: Array<ArrayBuffer | Blob | string>
+    blobs: Array<ArrayBuffer | Blob | string> | undefined
   ): void {
     let requestId = this.$nextRequestId;
 
@@ -385,7 +383,7 @@ class ShinyApp {
       onError: onError,
     };
 
-    let msg = JSON.stringify({
+    let msg: Blob | string = JSON.stringify({
       method: method,
       args: args,
       tag: requestId,
@@ -397,7 +395,7 @@ class ShinyApp {
       // the length followed by the blob. The json payload is UTF-8 encoded
       // and used as the first blob.
 
-      const uint32ToBuf = function (val) {
+      const uint32ToBuf = function (val: number) {
         const buffer = new ArrayBuffer(4);
         const view = new DataView(buffer);
 
@@ -409,7 +407,7 @@ class ShinyApp {
 
       payload.push(uint32ToBuf(0x01020202)); // signature
 
-      const jsonBuf = makeBlob([msg]);
+      const jsonBuf: Blob = new Blob([msg]);
 
       payload.push(uint32ToBuf(jsonBuf.size));
       payload.push(jsonBuf);
@@ -425,19 +423,21 @@ class ShinyApp {
         payload.push(blob);
       }
 
-      const blob = makeBlob(payload) as unknown;
+      const blob: Blob = new Blob(payload);
 
-      msg = blob as string;
+      msg = blob;
     }
 
     this.$sendMsg(msg);
   }
 
-  $sendMsg(msg: string): void {
-    if (!this.$socket.readyState) {
+  $sendMsg(msg: MessageValue): void {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    if (!this.$socket!.readyState) {
       this.$pendingMessages.push(msg);
     } else {
-      this.$socket.send(msg);
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      this.$socket!.send(msg);
     }
   }
 
@@ -448,7 +448,7 @@ class ShinyApp {
     delete this.$values[name];
 
     const binding = this.$bindings[name];
-    const evt: ShinyEventError = jQuery.Event("shiny:error");
+    const evt: ShinyEventError = $.Event("shiny:error");
 
     evt.name = name;
     evt.error = error;
@@ -459,9 +459,9 @@ class ShinyApp {
     }
   }
 
-  receiveOutput<T>(name: string, value: T): T {
+  receiveOutput<T>(name: string, value: T): T | undefined {
     const binding = this.$bindings[name];
-    const evt: ShinyEventValue = jQuery.Event("shiny:value");
+    const evt: ShinyEventValue = $.Event("shiny:value");
 
     evt.name = name;
     evt.value = value;
@@ -510,7 +510,7 @@ class ShinyApp {
   // necessary.
   private _narrowScopeComponent<T>(
     scopeComponent: { [key: string]: T },
-    nsPrefix: string | null
+    nsPrefix: string
   ) {
     return Object.keys(scopeComponent)
       .filter((k) => k.indexOf(nsPrefix) === 0)
@@ -525,7 +525,13 @@ class ShinyApp {
   //
   // Otherwise, returns a new object with keys in subComponents removed and
   // renamed as necessary.
-  private _narrowScope(scope, nsPrefix: string) {
+  private _narrowScope(
+    scope: {
+      input: InputValues;
+      output: { [key: string]: any };
+    },
+    nsPrefix: string
+  ) {
     if (nsPrefix) {
       return {
         input: this._narrowScopeComponent(scope.input, nsPrefix),
@@ -541,7 +547,7 @@ class ShinyApp {
       type: "shiny:conditional",
     });
 
-    const inputs = {};
+    const inputs: InputValues = {};
 
     // Input keys use "name:type" format; we don't want the user to
     // have to know about the type suffix when referring to inputs.
@@ -562,13 +568,13 @@ class ShinyApp {
       let condFunc = el.data("data-display-if-func");
 
       if (!condFunc) {
-        const condExpr = el.attr("data-display-if");
+        const condExpr = el.attr("data-display-if") as string;
 
         condFunc = scopeExprToFunc(condExpr);
         el.data("data-display-if-func", condFunc);
       }
 
-      const nsPrefix = el.attr("data-ns-prefix");
+      const nsPrefix = el.attr("data-ns-prefix") as string;
       const nsScope = this._narrowScope(scope, nsPrefix);
       const show = condFunc(nsScope);
       const showing = el.css("display") !== "none";
@@ -610,10 +616,11 @@ class ShinyApp {
 
       data = data.slice(len + 1);
       msgObj.custom = {};
+      // @ts-expect-error; `custom` value is of unknown type. So setting within it is not allowed
       msgObj.custom[type] = data;
     }
 
-    const evt: ShinyEventMessage = jQuery.Event("shiny:message");
+    const evt: ShinyEventMessage = $.Event("shiny:message");
 
     evt.message = msgObj;
     $(document).trigger(evt);
@@ -655,7 +662,7 @@ class ShinyApp {
     // * Use arrow functions to allow the Types to propagate.
     // * However, `_sendMessagesToHandlers()` will adjust the `this` context to the same _`this`_.
 
-    addMessageHandler("values", (message: { [key: string]: unknown }) => {
+    addMessageHandler("values", (message: { [key: string]: any }) => {
       for (const name in this.$bindings) {
         if (hasOwnProperty(this.$bindings, name))
           this.$bindings[name].showProgress(false);
@@ -670,7 +677,10 @@ class ShinyApp {
 
     addMessageHandler(
       "errors",
-      function (message: { [key: string]: ErrorsMessageValue }) {
+      function (
+        this: ShinyApp,
+        message: { [key: string]: ErrorsMessageValue }
+      ) {
         for (const key in message) {
           if (hasOwnProperty(message, key))
             this.receiveError(key, message[key]);
@@ -690,8 +700,7 @@ class ShinyApp {
           if ($obj.length > 0) {
             if (!$obj.attr("aria-live")) $obj.attr("aria-live", "polite");
             const el = $obj[0];
-            const evt: ShinyEventUpdateInput =
-              jQuery.Event("shiny:updateinput");
+            const evt: ShinyEventUpdateInput = $.Event("shiny:updateinput");
 
             evt.message = message[i].message;
             evt.binding = inputBinding;
@@ -716,8 +725,12 @@ class ShinyApp {
 
     addMessageHandler(
       "progress",
-      (message: { type: string; message: { id: string } }) => {
+      function (
+        this: ShinyApp,
+        message: { type: string; message: { id: string } }
+      ) {
         if (message.type && message.message) {
+          // @ts-expect-error; Unknown values handled with followup if statement
           const handler = this.progressHandlers[message.type];
 
           if (handler) handler.call(this, message.message);
@@ -756,14 +769,15 @@ class ShinyApp {
 
     addMessageHandler(
       "response",
-      (message: { tag: string; value?: ResponseValue; error?: string }) => {
+      (message: { tag: number; value?: ResponseValue; error?: string }) => {
         const requestId = message.tag;
         const request = this.$activeRequests[requestId];
 
         if (request) {
           delete this.$activeRequests[requestId];
-          if ("value" in message) request.onSuccess(message.value);
-          else request.onError(message.error);
+          if ("value" in message)
+            request.onSuccess(message.value as UploadInitValue);
+          else request.onError(message.error as string);
         }
       }
     );
@@ -827,12 +841,13 @@ class ShinyApp {
           hasOwnProperty(message, "name") &&
           hasOwnProperty(message, "status")
         ) {
-          const binding = this.$bindings[message.name];
+          const binding = this.$bindings[message.name as string];
 
-          // @ts-expect-error; TODO-barret; Could this be transformed into `.trigger(TYPE)`?
-          $(binding ? binding.el : null).trigger({
-            type: "shiny:" + message.status,
-          });
+          if (binding) {
+            $(binding.el).trigger("shiny:" + message.status);
+          } else {
+            $().trigger("shiny:" + message.status);
+          }
         }
       }
     );
@@ -862,7 +877,7 @@ class ShinyApp {
               message.selector +
               '") could not be found in the DOM.'
           );
-          renderHtml(message.content.html, $([]).get(0), message.content.deps);
+          renderHtml(message.content.html, $([]), message.content.deps);
         } else {
           targets.each(function (i, target) {
             renderContent(target, message.content, message.where);
@@ -908,7 +923,7 @@ class ShinyApp {
     }
 
     function getTabContent($tabset: JQuery<HTMLElement>) {
-      const tabsetId = $tabset.attr("data-tabsetid");
+      const tabsetId = $tabset.attr("data-tabsetid") as string;
       const $tabContent = $(
         "div.tab-content[data-tabsetid='" + $escape(tabsetId) + "']"
       );
@@ -933,13 +948,13 @@ class ShinyApp {
           "'"
         );
       }
-      const $liTags = [];
-      const $divTags = [];
+      const $liTags: Array<JQuery<HTMLElement>> = [];
+      const $divTags: Array<JQuery<HTMLElement>> = [];
 
       if ($aTag.attr("data-toggle") === "dropdown") {
         // dropdown
         const $dropdownTabset = $aTag.find("+ ul.dropdown-menu");
-        const dropdownId = $dropdownTabset.attr("data-tabsetid");
+        const dropdownId = $dropdownTabset.attr("data-tabsetid") as string;
 
         const $dropdownLiTags = $dropdownTabset
           .find("a[data-toggle='tab']")
@@ -983,12 +998,16 @@ class ShinyApp {
 
         // Unless the item is being prepended/appended, the target tab
         // must be provided
-        let target = null;
-        let $targetLiTag = null;
+        let $targetLiTag: JQuery<HTMLElement> | null = null;
 
         if (message.target !== null) {
-          target = getTargetTabs($tabset, $tabContent, message.target);
-          $targetLiTag = target.$liTag;
+          const targetInfo = getTargetTabs(
+            $tabset,
+            $tabContent,
+            message.target as string
+          );
+
+          $targetLiTag = targetInfo.$liTag;
         }
 
         // If the item is to be placed inside a navbarMenu (dropdown),
@@ -1106,7 +1125,10 @@ class ShinyApp {
   fix the dummy id given to the tab in the R side -- there, we always
   set the tab id (counter dummy) to "id" and the tabset id to "tsid")
   */
-        function getTabIndex($tabset, tabsetId) {
+        function getTabIndex(
+          $tabset: JQuery<HTMLElement>,
+          tabsetId: string | undefined
+        ) {
           // The 0 is to ensure this works for empty tabsetPanels as well
           const existingTabIds = [0];
           // loop through all existing tabs, find the one with highest id
@@ -1117,9 +1139,11 @@ class ShinyApp {
 
             if ($tab.length > 0) {
               // remove leading url if it exists. (copy of bootstrap url stripper)
-              const href = $tab.attr("href").replace(/.*(?=#[^\s]+$)/, "");
+              // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+              const href = $tab.attr("href")!.replace(/.*(?=#[^\s]+$)/, "");
               // remove tab id to get the index
-              const index = href.replace("#tab-" + tabsetId + "-", "");
+              // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+              const index = href!.replace("#tab-" + tabsetId + "-", "");
 
               existingTabIds.push(Number(index));
             }
@@ -1151,7 +1175,7 @@ class ShinyApp {
             const dropdownId = $dropdownTabset.attr("data-tabsetid");
 
             return { $tabset: $dropdownTabset, id: dropdownId };
-          } else if (message.target !== null) {
+          } else if (message.target !== null && $targetLiTag !== null) {
             // if our item is to be placed next to a tab that is inside
             // a navbarMenu, our item will also be inside
             const $uncleTabset = $targetLiTag.parent("ul");
@@ -1168,7 +1192,7 @@ class ShinyApp {
     );
 
     // If the given tabset has no active tabs, select the first one
-    function ensureTabsetHasVisibleTab($tabset) {
+    function ensureTabsetHasVisibleTab($tabset: JQuery<HTMLElement>) {
       const inputBinding = $tabset.data("shiny-input-binding");
 
       // Use the getValue() method to avoid duplicating the CSS selector
@@ -1179,7 +1203,7 @@ class ShinyApp {
         // value for the tabset gets updated (i.e. input$tabsetId
         // should be null if there are no tabs).
         const destTabValue = getFirstTab($tabset);
-        const evt: ShinyEventUpdateInput = jQuery.Event("shiny:updateinput");
+        const evt: ShinyEventUpdateInput = $.Event("shiny:updateinput");
 
         evt.binding = inputBinding;
         $tabset.trigger(evt);
@@ -1189,7 +1213,7 @@ class ShinyApp {
 
     // Given a tabset ul jquery object, return the value of the first tab
     // (in document order) that's visible and able to be selected.
-    function getFirstTab($ul) {
+    function getFirstTab($ul: JQuery<HTMLElement>) {
       return (
         $ul
           .find("li:visible a[data-toggle='tab']")
@@ -1198,21 +1222,31 @@ class ShinyApp {
       );
     }
 
-    function tabApplyFunction(target, func, liTags = false) {
+    function tabApplyFunction(
+      target: ReturnType<typeof getTargetTabs>,
+      func: ($el: JQuery<HTMLElement>) => void,
+      liTags = false
+    ) {
       $.each(target, function (key, el) {
         if (key === "$liTag") {
           // $liTag is always just one jQuery element
-          func(el);
+          func(el as ReturnType<typeof getTargetTabs>["$liTag"]);
         } else if (key === "$divTags") {
           // $divTags is always an array (even if length = 1)
-          $.each(el, function (i, div) {
-            func(div);
-          });
+          $.each(
+            el as ReturnType<typeof getTargetTabs>["$divTags"],
+            function (i, div) {
+              func(div);
+            }
+          );
         } else if (liTags && key === "$liTags") {
           // $liTags is always an array (even if length = 0)
-          $.each(el, function (i, div) {
-            func(div);
-          });
+          $.each(
+            el as ReturnType<typeof getTargetTabs>["$liTags"],
+            function (i, div) {
+              func(div);
+            }
+          );
         }
       });
     }
@@ -1228,7 +1262,7 @@ class ShinyApp {
 
         ensureTabsetHasVisibleTab($tabset);
 
-        function removeEl($el) {
+        function removeEl($el: JQuery<HTMLElement>) {
           shinyUnbindAll($el, true);
           $el.remove();
         }
@@ -1250,7 +1284,7 @@ class ShinyApp {
 
         ensureTabsetHasVisibleTab($tabset);
 
-        function changeVisibility($el) {
+        function changeVisibility($el: JQuery<HTMLElement>) {
           if (message.type === "show") $el.css("display", "");
           else if (message.type === "hide") {
             $el.hide();
@@ -1265,6 +1299,7 @@ class ShinyApp {
       (message: { mode: unknown | "replace"; queryString: string }) => {
         // leave the bookmarking code intact
         if (message.mode === "replace") {
+          // @ts-expect-error; No title value being supplied
           window.history.replaceState(null, null, message.queryString);
           return;
         }
@@ -1298,6 +1333,7 @@ class ShinyApp {
 
         if (what === "query") relURL += message.queryString;
         else relURL += oldQS + message.queryString; // leave old QS if it exists
+        // @ts-expect-error; No title value being supplied
         window.history.pushState(null, null, relURL);
 
         // for the case when message.queryString has both a query string
@@ -1327,7 +1363,7 @@ class ShinyApp {
 
   progressHandlers = {
     // Progress for a particular object
-    binding: function (message: { id: string }): void {
+    binding: function (this: ShinyApp, message: { id: string }): void {
       const key = message.id;
       const binding = this.$bindings[key];
 
@@ -1395,17 +1431,24 @@ class ShinyApp {
         // Stack bars
         const $progressBar = $progress.find(".progress");
 
-        $progressBar.css("top", depth * $progressBar.height() + "px");
+        if ($progressBar) {
+          $progressBar.css(
+            "top",
+            depth * ($progressBar.height() as number) + "px"
+          );
 
-        // Stack text objects
-        const $progressText = $progress.find(".progress-text");
+          // Stack text objects
+          const $progressText = $progress.find(".progress-text");
 
-        $progressText.css(
-          "top",
-          3 * $progressBar.height() + depth * $progressText.outerHeight() + "px"
-        );
+          $progressText.css(
+            "top",
+            3 * ($progressBar.height() as number) +
+              depth * ($progressText.outerHeight() as number) +
+              "px"
+          );
 
-        $progress.hide();
+          $progress.hide();
+        }
       }
     },
 
@@ -1492,9 +1535,11 @@ class ShinyApp {
     }
     url +=
       "/session/" +
-      encodeURIComponent(this.config.sessionId) +
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      encodeURIComponent(this.config!.sessionId) +
       "/dataobj/shinytest?w=" +
-      encodeURIComponent(this.config.workerId) +
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      encodeURIComponent(this.config!.workerId) +
       "&nonce=" +
       randomId();
 

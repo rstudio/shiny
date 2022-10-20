@@ -21,7 +21,7 @@ type CreateHandler = {
   mouseout?: (e: JQuery.MouseOutEvent) => void;
   mousedown?: (e: JQuery.MouseDownEvent) => void;
   onResetImg: () => void;
-  onResize?: () => void;
+  onResize: ((e: JQuery.ResizeEvent) => void) | null;
 };
 
 type BrushInfo = {
@@ -153,7 +153,17 @@ function createBrushHandler(
   // el instead of the brush div, because the brush div has
   // 'pointer-events:none' so that it won't intercept pointer events.
   // If `style` is null, don't add a cursor style.
-  function setCursorStyle(style) {
+  function setCursorStyle(
+    style:
+      | "crosshair"
+      | "ew-resize"
+      | "grabbable"
+      | "grabbing"
+      | "nesw-resize"
+      | "ns-resize"
+      | "nwse-resize"
+      | null
+  ) {
     $el.removeClass(
       "crosshair grabbable grabbing ns-resize ew-resize nesw-resize nwse-resize"
     );
@@ -177,7 +187,8 @@ function createBrushHandler(
       return;
     }
 
-    const panel = brush.getPanel();
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const panel = brush.getPanel()!;
 
     // Add the panel (facet) variables, if present
     $.extend(coords, panel.panel_vars);
@@ -212,7 +223,9 @@ function createBrushHandler(
       .trigger("shiny-internal:brushed", coords);
   }
 
-  let brushInfoSender;
+  let brushInfoSender:
+    | Debouncer<typeof sendBrushInfo>
+    | Throttler<typeof sendBrushInfo>;
 
   if (opts.brushDelayType === "throttle") {
     brushInfoSender = new Throttler(null, sendBrushInfo, opts.brushDelay);

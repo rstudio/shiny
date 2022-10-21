@@ -9,10 +9,17 @@ htmlOutput(
   outputId,
   inline = FALSE,
   container = if (inline) span else div,
+  fill = FALSE,
   ...
 )
 
-uiOutput(outputId, inline = FALSE, container = if (inline) span else div, ...)
+uiOutput(
+  outputId,
+  inline = FALSE,
+  container = if (inline) span else div,
+  fill = FALSE,
+  ...
+)
 }
 \arguments{
 \item{outputId}{output variable to read the value from}
@@ -21,6 +28,12 @@ uiOutput(outputId, inline = FALSE, container = if (inline) span else div, ...)
 for the output}
 
 \item{container}{a function to generate an HTML element to contain the text}
+
+\item{fill}{whether or not the returned \code{container} should be wrapped in
+\code{\link[htmltools:asFillContainer]{htmltools::asFillContainer()}} and \code{\link[htmltools:asFillContainer]{htmltools::asFillItem()}}. This has the
+benefit of allowing \code{uiOutput()}'s children to stretch to \code{uiOutput()}'s
+container, but has the downside of changing the \code{display} context of
+\code{uiOutput()}'s children to be flex items.}
 
 \item{...}{Other arguments to pass to the container tag function. This is
 useful for providing additional classes for the tag.}

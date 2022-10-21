@@ -792,9 +792,9 @@ verbatimTextOutput <- function(outputId, placeholder = FALSE) {
 #' @name plotOutput
 #' @rdname plotOutput
 #' @export
-imageOutput <- function(outputId, width = "100%", height="400px",
+imageOutput <- function(outputId, width = "100%", height = "400px",
                         click = NULL, dblclick = NULL, hover = NULL, brush = NULL,
-                        inline = FALSE) {
+                        inline = FALSE, fill = TRUE) {
 
   style <- if (!inline) {
     # Using `css()` here instead of paste/sprintf so that NULL values will
@@ -850,7 +850,11 @@ imageOutput <- function(outputId, width = "100%", height="400px",
   }
 
   container <- if (inline) span else div
-  do.call(container, args)
+  res <- do.call(container, args)
+  if (fill) {
+    res <- asFillItem(res)
+  }
+  res
 }
 
 #' Create an plot or image output element
@@ -918,6 +922,10 @@ imageOutput <- function(outputId, width = "100%", height="400px",
 #'   `imageOutput`/`plotOutput` calls may share the same `id`
 #'   value; brushing one image or plot will cause any other brushes with the
 #'   same `id` to disappear.
+#' @param fill whether or not the returned tag should be wrapped
+#'   [htmltools::asFillItem()] so that it's `height` is allowed to grow/shrink
+#'   inside a tag wrapped with [htmltools::asFillContainer()] (e.g.,
+#'   [bslib::card_body_fill()]).
 #' @inheritParams textOutput
 #' @note The arguments `clickId` and `hoverId` only work for R base graphics
 #'   (see the \pkg{\link[graphics:graphics-package]{graphics}} package). They do
@@ -1088,11 +1096,11 @@ imageOutput <- function(outputId, width = "100%", height="400px",
 #' @export
 plotOutput <- function(outputId, width = "100%", height="400px",
                        click = NULL, dblclick = NULL, hover = NULL, brush = NULL,
-                       inline = FALSE) {
+                       inline = FALSE, fill = TRUE) {
 
   # Result is the same as imageOutput, except for HTML class
   res <- imageOutput(outputId, width, height, click, dblclick,
-                     hover, brush, inline)
+                     hover, brush, inline, fill)
 
   res$attribs$class <- "shiny-plot-output"
   res
@@ -1144,6 +1152,11 @@ dataTableOutput <- function(outputId) {
 #' @param outputId output variable to read the value from
 #' @param ... Other arguments to pass to the container tag function. This is
 #'   useful for providing additional classes for the tag.
+#' @param fill whether or not the returned `container` should be wrapped in
+#'   [htmltools::asFillContainer()] and [htmltools::asFillItem()]. This has the
+#'   benefit of allowing `uiOutput()`'s children to stretch to `uiOutput()`'s
+#'   container, but has the downside of changing the `display` context of
+#'   `uiOutput()`'s children to be flex items.
 #' @inheritParams textOutput
 #' @return An HTML output element that can be included in a panel
 #' @examples
@@ -1155,12 +1168,16 @@ dataTableOutput <- function(outputId) {
 #' )
 #' @export
 htmlOutput <- function(outputId, inline = FALSE,
-  container = if (inline) span else div, ...)
+  container = if (inline) span else div, fill = FALSE, ...)
 {
   if (any_unnamed(list(...))) {
     warning("Unnamed elements in ... will be replaced with dynamic UI.")
   }
-  container(id = outputId, class="shiny-html-output", ...)
+  res <- container(id = outputId, class = "shiny-html-output", ...)
+  if (fill) {
+    res <- asFillContainer(res, asItem = TRUE)
+  }
+  res
 }
 
 #' @rdname htmlOutput

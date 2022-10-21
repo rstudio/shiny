@@ -25,6 +25,7 @@
 #' `- tests
 #'     |- testthat.R
 #'     `- testthat
+#'         |- setup-shinytest2.R
 #'         |- test-examplemodule.R
 #'         |- test-server.R
 #'         |- test-shinytest2.R
@@ -46,6 +47,7 @@
 #'   `tests/testthat/` directory using the
 #'   [shinytest2](https://rstudio.github.io/shinytest2/reference/test_app.html)
 #'   package.
+#' * `tests/testthat/setup-shinytest2.R` is setup file to source your `./R` folder into the testing environment.
 #' * `tests/testthat/test-examplemodule.R` is a test for an application's module server function.
 #' * `tests/testthat/test-server.R` is a test for the application's server code
 #' * `tests/testthat/test-shinytest2.R` is a test that uses the
@@ -126,7 +128,7 @@ shinyAppTemplate <- function(path = NULL, examples = "default", dryrun = FALSE)
   }
 
   if ("tests" %in% examples) {
-    rlang::check_installed("shinytest2", "for {testthat} tests to work as expected")
+    rlang::check_installed("shinytest2", "for {testthat} tests to work as expected", version = "0.2.0")
   }
 
   # =======================================================

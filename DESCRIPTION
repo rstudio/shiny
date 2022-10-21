@@ -78,7 +78,7 @@ Imports:
     mime (>= 0.3),
     jsonlite (>= 0.9.16),
     xtable,
-    fontawesome (>= 0.2.1),
+    fontawesome (>= 0.4.0),
     htmltools (>= 0.5.2),
     R6 (>= 2.0),
     sourcetools,

@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">shiny</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.2.9000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.2</span>
       </span>
     </div>
 
@@ -96,10 +96,11 @@ following files and directories is created:</p>
 <span id="cb1-6"><a href="#cb1-6"></a><span class="st">`</span><span class="op">-</span><span class="st"> </span>tests</span>
 <span id="cb1-7"><a href="#cb1-7"></a>    <span class="op">|-</span><span class="st"> </span>testthat.R</span>
 <span id="cb1-8"><a href="#cb1-8"></a>    <span class="st">`</span><span class="dt">- testthat</span></span>
-<span id="cb1-9"><a href="#cb1-9"></a><span class="dt">        |- test-examplemodule.R</span></span>
-<span id="cb1-10"><a href="#cb1-10"></a><span class="dt">        |- test-server.R</span></span>
-<span id="cb1-11"><a href="#cb1-11"></a><span class="dt">        |- test-shinytest2.R</span></span>
-<span id="cb1-12"><a href="#cb1-12"></a><span class="dt">        </span><span class="st">`</span><span class="op">-</span><span class="st"> </span>test<span class="op">-</span>sort.R</span></code></pre><p></p></div>
+<span id="cb1-9"><a href="#cb1-9"></a><span class="dt">        |- setup-shinytest2.R</span></span>
+<span id="cb1-10"><a href="#cb1-10"></a><span class="dt">        |- test-examplemodule.R</span></span>
+<span id="cb1-11"><a href="#cb1-11"></a><span class="dt">        |- test-server.R</span></span>
+<span id="cb1-12"><a href="#cb1-12"></a><span class="dt">        |- test-shinytest2.R</span></span>
+<span id="cb1-13"><a href="#cb1-13"></a><span class="dt">        </span><span class="st">`</span><span class="op">-</span><span class="st"> </span>test<span class="op">-</span>sort.R</span></code></pre><p></p></div>
 <p>Some notes about these files:</p><ul><li><p><code>app.R</code> is the main application file.</p></li>
 <li><p>All files in the <code>R/</code> subdirectory are automatically sourced when the
 application is run.</p></li>
@@ -114,6 +115,7 @@ choose to use or remove any of them. They can be executed by the
 <code>tests/testthat/</code> directory using the
 <a href="https://rstudio.github.io/shinytest2/reference/test_app.html" class="external-link">shinytest2</a>
 package.</p></li>
+<li><p><code>tests/testthat/setup-shinytest2.R</code> is setup file to source your <code>./R</code> folder into the testing environment.</p></li>
 <li><p><code>tests/testthat/test-examplemodule.R</code> is a test for an application's module server function.</p></li>
 <li><p><code>tests/testthat/test-server.R</code> is a test for the application's server code</p></li>
 <li><p><code>tests/testthat/test-shinytest2.R</code> is a test that uses the

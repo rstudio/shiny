@@ -83,7 +83,7 @@ for the output}
 (\code{\link[htmltools:asFillContainer]{htmltools::asFillItem()}}), meaning that its \code{height} is allowed to
 grow/shrink inside a fill container (\code{\link[htmltools:asFillContainer]{htmltools::asFillContainer()}}) with
 an opinionated height. Examples of fill containers include \code{\link[bslib:card]{bslib::card()}}
-and \code{\link[bslib:card_body]{bslib::card_body_fill()}}.}
+and \code{\link[bslib:card_body_fill]{bslib::card_body_fill()}}.}
 }
 \value{
 A plot or image output element that can be included in a panel.

@@ -10,6 +10,7 @@ htmlOutput(
   inline = FALSE,
   container = if (inline) span else div,
   fill = FALSE,
+  fillItem = !inline,
   ...
 )
 
@@ -18,6 +19,7 @@ uiOutput(
   inline = FALSE,
   container = if (inline) span else div,
   fill = FALSE,
+  fillItem = !inline,
   ...
 )
 }
@@ -29,11 +31,17 @@ for the output}
 
 \item{container}{a function to generate an HTML element to contain the text}
 
-\item{fill}{whether or not the returned \code{container} should be wrapped in
-\code{\link[htmltools:asFillContainer]{htmltools::asFillContainer()}} and \code{\link[htmltools:asFillContainer]{htmltools::asFillItem()}}. This has the
-benefit of allowing \code{uiOutput()}'s children to stretch to \code{uiOutput()}'s
-container, but has the downside of changing the \code{display} context of
-\code{uiOutput()}'s children to be flex items.}
+\item{fill}{whether or not the returned \code{container} should be treated as a
+fill container (\code{\link[htmltools:asFillContainer]{htmltools::asFillContainer()}}). If \code{TRUE}, children of the
+\code{container} (i.e., results of \code{renderUI()}) that are fill items
+(\code{\link[htmltools:asFillContainer]{htmltools::asFillItem()}}) are allowed to grow/shrink to fit a \code{container}
+with an opinionated height.}
+
+\item{fillItem}{whether or not the \code{container} result should be treated as a
+fill item (\code{\link[htmltools:asFillContainer]{htmltools::asFillItem()}}), meaning that its \code{height} is allowed
+to grow/shrink inside a fill container (\code{\link[htmltools:asFillContainer]{htmltools::asFillContainer()}})
+with an opinionated height. Examples of fill containers include
+\code{\link[bslib:card]{bslib::card()}} and \code{\link[bslib:card_body]{bslib::card_body_fill()}}.}
 
 \item{...}{Other arguments to pass to the container tag function. This is
 useful for providing additional classes for the tag.}
@@ -43,12 +51,12 @@ An HTML output element that can be included in a panel
 }
 \description{
 Render a reactive output variable as HTML within an application page. The
-text will be included within an HTML \code{div} tag, and is presumed to
-contain HTML content which should not be escaped.
+text will be included within an HTML \code{div} tag, and is presumed to contain
+HTML content which should not be escaped.
 }
 \details{
-\code{uiOutput} is intended to be used with \code{renderUI} on the server
-side. It is currently just an alias for \code{htmlOutput}.
+\code{uiOutput} is intended to be used with \code{renderUI} on the server side. It is
+currently just an alias for \code{htmlOutput}.
 }
 \examples{
 htmlOutput("summary")

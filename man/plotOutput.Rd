@@ -14,7 +14,7 @@ imageOutput(
   hover = NULL,
   brush = NULL,
   inline = FALSE,
-  fill = TRUE
+  fill = FALSE
 )
 
 plotOutput(
@@ -26,7 +26,7 @@ plotOutput(
   hover = NULL,
   brush = NULL,
   inline = FALSE,
-  fill = TRUE
+  fill = !inline
 )
 }
 \arguments{
@@ -79,10 +79,11 @@ same \code{id} to disappear.}
 \item{inline}{use an inline (\code{span()}) or block container (\code{div()})
 for the output}
 
-\item{fill}{whether or not the returned tag should be wrapped
-\code{\link[htmltools:asFillContainer]{htmltools::asFillItem()}} so that it's \code{height} is allowed to grow/shrink
-inside a tag wrapped with \code{\link[htmltools:asFillContainer]{htmltools::asFillContainer()}} (e.g.,
-\code{\link[bslib:card_body]{bslib::card_body_fill()}}).}
+\item{fill}{whether or not the returned tag should be treated as a fill item
+(\code{\link[htmltools:asFillContainer]{htmltools::asFillItem()}}), meaning that its \code{height} is allowed to
+grow/shrink inside a fill container (\code{\link[htmltools:asFillContainer]{htmltools::asFillContainer()}}) with
+an opinionated height. Examples of fill containers include \code{\link[bslib:card]{bslib::card()}}
+and \code{\link[bslib:card_body]{bslib::card_body_fill()}}.}
 }
 \value{
 A plot or image output element that can be included in a panel.

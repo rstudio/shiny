@@ -794,7 +794,7 @@ verbatimTextOutput <- function(outputId, placeholder = FALSE) {
 #' @export
 imageOutput <- function(outputId, width = "100%", height = "400px",
                         click = NULL, dblclick = NULL, hover = NULL, brush = NULL,
-                        inline = FALSE, fill = TRUE) {
+                        inline = FALSE, fill = FALSE) {
 
   style <- if (!inline) {
     # Using `css()` here instead of paste/sprintf so that NULL values will
@@ -922,10 +922,11 @@ imageOutput <- function(outputId, width = "100%", height = "400px",
 #'   `imageOutput`/`plotOutput` calls may share the same `id`
 #'   value; brushing one image or plot will cause any other brushes with the
 #'   same `id` to disappear.
-#' @param fill whether or not the returned tag should be wrapped
-#'   [htmltools::asFillItem()] so that it's `height` is allowed to grow/shrink
-#'   inside a tag wrapped with [htmltools::asFillContainer()] (e.g.,
-#'   [bslib::card_body_fill()]).
+#' @param fill whether or not the returned tag should be treated as a fill item
+#'   ([htmltools::asFillItem()]), meaning that its `height` is allowed to
+#'   grow/shrink inside a fill container ([htmltools::asFillContainer()]) with
+#'   an opinionated height. Examples of fill containers include [bslib::card()]
+#'   and [bslib::card_body_fill()].
 #' @inheritParams textOutput
 #' @note The arguments `clickId` and `hoverId` only work for R base graphics
 #'   (see the \pkg{\link[graphics:graphics-package]{graphics}} package). They do
@@ -1096,7 +1097,7 @@ imageOutput <- function(outputId, width = "100%", height = "400px",
 #' @export
 plotOutput <- function(outputId, width = "100%", height="400px",
                        click = NULL, dblclick = NULL, hover = NULL, brush = NULL,
-                       inline = FALSE, fill = TRUE) {
+                       inline = FALSE, fill = !inline) {
 
   # Result is the same as imageOutput, except for HTML class
   res <- imageOutput(outputId, width, height, click, dblclick,
@@ -1143,20 +1144,25 @@ dataTableOutput <- function(outputId) {
 #' Create an HTML output element
 #'
 #' Render a reactive output variable as HTML within an application page. The
-#' text will be included within an HTML `div` tag, and is presumed to
-#' contain HTML content which should not be escaped.
+#' text will be included within an HTML `div` tag, and is presumed to contain
+#' HTML content which should not be escaped.
 #'
-#' `uiOutput` is intended to be used with `renderUI` on the server
-#' side. It is currently just an alias for `htmlOutput`.
+#' `uiOutput` is intended to be used with `renderUI` on the server side. It is
+#' currently just an alias for `htmlOutput`.
 #'
 #' @param outputId output variable to read the value from
 #' @param ... Other arguments to pass to the container tag function. This is
 #'   useful for providing additional classes for the tag.
-#' @param fill whether or not the returned `container` should be wrapped in
-#'   [htmltools::asFillContainer()] and [htmltools::asFillItem()]. This has the
-#'   benefit of allowing `uiOutput()`'s children to stretch to `uiOutput()`'s
-#'   container, but has the downside of changing the `display` context of
-#'   `uiOutput()`'s children to be flex items.
+#' @param fill whether or not the returned `container` should be treated as a
+#'   fill container ([htmltools::asFillContainer()]). If `TRUE`, children of the
+#'   `container` (i.e., results of `renderUI()`) that are fill items
+#'   ([htmltools::asFillItem()]) are allowed to grow/shrink to fit a `container`
+#'   with an opinionated height.
+#' @param fillItem whether or not the `container` result should be treated as a
+#'   fill item ([htmltools::asFillItem()]), meaning that its `height` is allowed
+#'   to grow/shrink inside a fill container ([htmltools::asFillContainer()])
+#'   with an opinionated height. Examples of fill containers include
+#'   [bslib::card()] and [bslib::card_body_fill()].
 #' @inheritParams textOutput
 #' @return An HTML output element that can be included in a panel
 #' @examples
@@ -1168,14 +1174,17 @@ dataTableOutput <- function(outputId) {
 #' )
 #' @export
 htmlOutput <- function(outputId, inline = FALSE,
-  container = if (inline) span else div, fill = FALSE, ...)
+  container = if (inline) span else div, fill = FALSE, fillItem = !inline, ...)
 {
   if (any_unnamed(list(...))) {
     warning("Unnamed elements in ... will be replaced with dynamic UI.")
   }
   res <- container(id = outputId, class = "shiny-html-output", ...)
   if (fill) {
-    res <- asFillContainer(res, asItem = TRUE)
+    res <- asFillContainer(res)
+  }
+  if (fillItem) {
+    res <- asFillItem(res)
   }
   res
 }

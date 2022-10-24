@@ -225,7 +225,6 @@ class SelectInputBinding extends InputBinding {
   ): SelectizeInfo | undefined {
     // Apps like 008-html do not have the selectize js library
     // Safe-guard against missing the selectize js library
-    //
     if (!$.fn.selectize) return undefined;
     const $el = $(el);
     const config = $el

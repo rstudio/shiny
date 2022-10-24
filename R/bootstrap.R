@@ -792,7 +792,7 @@ verbatimTextOutput <- function(outputId, placeholder = FALSE) {
 #' @name plotOutput
 #' @rdname plotOutput
 #' @export
-imageOutput <- function(outputId, width = "100%", height = "400px",
+imageOutput <- function(outputId, width = "100%", height="400px",
                         click = NULL, dblclick = NULL, hover = NULL, brush = NULL,
                         inline = FALSE, fill = FALSE) {
 
@@ -925,8 +925,8 @@ imageOutput <- function(outputId, width = "100%", height = "400px",
 #' @param fill whether or not the returned tag should be treated as a fill item
 #'   ([htmltools::asFillItem()]), meaning that its `height` is allowed to
 #'   grow/shrink inside a fill container ([htmltools::asFillContainer()]) with
-#'   an opinionated height. Examples of fill containers include [bslib::card()]
-#'   and [bslib::card_body_fill()].
+#'   an opinionated height. Examples of fill containers include `bslib::card()`
+#'   and `bslib::card_body_fill()`.
 #' @inheritParams textOutput
 #' @note The arguments `clickId` and `hoverId` only work for R base graphics
 #'   (see the \pkg{\link[graphics:graphics-package]{graphics}} package). They do
@@ -1162,7 +1162,7 @@ dataTableOutput <- function(outputId) {
 #'   fill item ([htmltools::asFillItem()]), meaning that its `height` is allowed
 #'   to grow/shrink inside a fill container ([htmltools::asFillContainer()])
 #'   with an opinionated height. Examples of fill containers include
-#'   [bslib::card()] and [bslib::card_body_fill()].
+#'   `bslib::card()` and `bslib::card_body_fill()`.
 #' @inheritParams textOutput
 #' @return An HTML output element that can be included in a panel
 #' @examples

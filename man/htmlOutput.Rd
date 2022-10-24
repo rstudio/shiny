@@ -41,7 +41,7 @@ with an opinionated height.}
 fill item (\code{\link[htmltools:asFillContainer]{htmltools::asFillItem()}}), meaning that its \code{height} is allowed
 to grow/shrink inside a fill container (\code{\link[htmltools:asFillContainer]{htmltools::asFillContainer()}})
 with an opinionated height. Examples of fill containers include
-\code{\link[bslib:card]{bslib::card()}} and \code{\link[bslib:card_body_fill]{bslib::card_body_fill()}}.}
+\code{bslib::card()} and \code{bslib::card_body_fill()}.}
 
 \item{...}{Other arguments to pass to the container tag function. This is
 useful for providing additional classes for the tag.}

@@ -71,7 +71,7 @@ class SelectInputBinding extends InputBinding {
     } else {
       const selectize = this._selectize(el);
 
-      selectize.setValue(value);
+      selectize?.setValue(value);
     }
   }
   getState(el: SelectHTMLElement): {
@@ -107,10 +107,10 @@ class SelectInputBinding extends InputBinding {
     // This will replace all the options
     if (hasDefinedProperty(data, "options")) {
       const selectize = this._selectize(el);
+
       // Must destroy selectize before appending new options, otherwise
       // selectize will restore the original select
-
-      if (selectize) selectize.destroy();
+      selectize?.destroy();
       // Clear existing options and add each new one
       $el.empty().append(data.options);
       this._selectize(el);
@@ -176,9 +176,7 @@ class SelectInputBinding extends InputBinding {
             callback(res);
             if (!loaded) {
               if (hasDefinedProperty(data, "value")) {
-                if (typeof data.value === "string") {
-                  selectize.setValue(data.value);
-                }
+                selectize.setValue(data.value as any);
               } else if (settings.maxItems === 1) {
                 // first item selected by default only for single-select
                 selectize.setValue(res[0].value);
@@ -221,15 +219,19 @@ class SelectInputBinding extends InputBinding {
   initialize(el: SelectHTMLElement): void {
     this._selectize(el);
   }
-  protected _selectize(el: SelectHTMLElement, update = false): SelectizeInfo {
-    if (!$.fn.selectize) throw "selectize jquery is not defined";
+  protected _selectize(
+    el: SelectHTMLElement,
+    update = false
+  ): SelectizeInfo | undefined {
+    // Apps like 008-html do not have the selectize js library
+    // Safe-guard against missing the selectize js library
+    if (!$.fn.selectize) return undefined;
     const $el = $(el);
     const config = $el
       .parent()
       .find('script[data-for="' + $escape(el.id) + '"]');
 
-    if (config.length === 0)
-      throw "No config found for selectize with id:" + $escape(el.id);
+    if (config.length === 0) return undefined;
 
     let options: SelectizeOptions & {
       labelField: "label";

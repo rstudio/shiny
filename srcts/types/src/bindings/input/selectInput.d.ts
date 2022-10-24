@@ -33,7 +33,7 @@ declare class SelectInputBinding extends InputBinding {
     subscribe(el: SelectHTMLElement, callback: (x: boolean) => void): void;
     unsubscribe(el: HTMLElement): void;
     initialize(el: SelectHTMLElement): void;
-    protected _selectize(el: SelectHTMLElement, update?: boolean): SelectizeInfo;
+    protected _selectize(el: SelectHTMLElement, update?: boolean): SelectizeInfo | undefined;
 }
 export { SelectInputBinding };
 export type { SelectInputReceiveMessageData };

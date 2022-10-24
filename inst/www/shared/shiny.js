@@ -6751,7 +6751,7 @@
           (0, import_jquery15.default)(el).val(value);
         } else {
           var selectize = this._selectize(el);
-          selectize.setValue(value);
+          selectize === null || selectize === void 0 ? void 0 : selectize.setValue(value);
         }
       }
     }, {
@@ -6776,8 +6776,7 @@
         var $el = (0, import_jquery15.default)(el);
         if (hasDefinedProperty(data, "options")) {
           var selectize = this._selectize(el);
-          if (selectize)
-            selectize.destroy();
+          selectize === null || selectize === void 0 ? void 0 : selectize.destroy();
           $el.empty().append(data.options);
           this._selectize(el);
         }
@@ -6815,9 +6814,7 @@
                 callback(res);
                 if (!loaded) {
                   if (hasDefinedProperty(data, "value")) {
-                    if (typeof data.value === "string") {
-                      _selectize2.setValue(data.value);
-                    }
+                    _selectize2.setValue(data.value);
                   } else if (settings.maxItems === 1) {
                     _selectize2.setValue(res[0].value);
                   }
@@ -6864,11 +6861,11 @@
       value: function _selectize(el) {
         var update = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : false;
         if (!import_jquery15.default.fn.selectize)
-          throw "selectize jquery is not defined";
+          return void 0;
         var $el = (0, import_jquery15.default)(el);
         var config = $el.parent().find('script[data-for="' + $escape(el.id) + '"]');
         if (config.length === 0)
-          throw "No config found for selectize with id:" + $escape(el.id);
+          return void 0;
         var options = import_jquery15.default.extend({
           labelField: "label",
           valueField: "value",

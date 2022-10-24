@@ -1,3 +1,11 @@
+shiny 1.7.2.1
+=============
+
+### Bug fixes
+
+* Shiny 1.7.0 changed the `icon(lib="fontawesome")` implementation from a bundled copy of fontawesome, to the {fontawesome} package. This led to issue #3688, where icons that were previously working, were now breaking. That's because {fontawesome} 0.3.0 and earlier did not have support for icon names used in Font Awesome 5 and earlier, only the newest icon names used in Font Awesome 6. Now, {fontawesome} 0.4.0 has restored support for those older icon names, and Shiny 1.7.2.1 has updated its {fontawesome} requirement to >=0.4.0.
+
+
 shiny 1.7.2
 ===========
 

@@ -7,9 +7,7 @@ shiny 1.7.2.9000
 
 ### New features and improvements
 
-* `plotOutput()` and `imageOutput()` gain a `fill` argument. If `TRUE` (the default for `plotOutput()`), the output container is allowed to grow/shrink to fit a fill container (`htmltools::asFillContainer()`) with an opinionated height. Most importantly, this means `plotOutput()` will grow/shrink by default [inside of `bslib::card_body_fill()`](https://rstudio.github.io/bslib/articles/cards.html#responsive-sizing). (#3715) 
-
-* `uiOutput()` gains `fill` and `fillItem` arguments. Set `fill = TRUE` to treat the `uiOutput()`'s `container` as a fill container (`htmltools::asFillContainer()`), allowing it's contents to grow/shrink when the `container` has an opinionated height. (#3715)
+* `plotOutput()`, `imageOutput()`, and `uiOutput()` gain a `fill` argument. If `TRUE` (the default for `plotOutput()`), the output container is allowed to grow/shrink to fit a fill container (created via `htmltools::bindFillRole()`) with an opinionated height. This means `plotOutput()` will grow/shrink by default [inside of `bslib::card_body_fill()`](https://rstudio.github.io/bslib/articles/cards.html#responsive-sizing), but `imageOutput()` and `uiOutput()` will have to opt-in to similar behavior with `fill = TRUE`. (#3715) 
 
 * Internal: Added clearer and strict TypeScript type definitions (#3644)
 

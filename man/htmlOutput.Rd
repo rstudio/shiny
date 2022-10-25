@@ -10,7 +10,6 @@ htmlOutput(
   inline = FALSE,
   container = if (inline) span else div,
   fill = FALSE,
-  fillItem = !inline,
   ...
 )
 
@@ -19,7 +18,6 @@ uiOutput(
   inline = FALSE,
   container = if (inline) span else div,
   fill = FALSE,
-  fillItem = !inline,
   ...
 )
 }
@@ -31,17 +29,12 @@ for the output}
 
 \item{container}{a function to generate an HTML element to contain the text}
 
-\item{fill}{whether or not the returned \code{container} should be treated as a
-fill container (\code{\link[htmltools:asFillContainer]{htmltools::asFillContainer()}}). If \code{TRUE}, children of the
-\code{container} (i.e., results of \code{renderUI()}) that are fill items
-(\code{\link[htmltools:asFillContainer]{htmltools::asFillItem()}}) are allowed to grow/shrink to fit a \code{container}
-with an opinionated height.}
-
-\item{fillItem}{whether or not the \code{container} result should be treated as a
-fill item (\code{\link[htmltools:asFillContainer]{htmltools::asFillItem()}}), meaning that its \code{height} is allowed
-to grow/shrink inside a fill container (\code{\link[htmltools:asFillContainer]{htmltools::asFillContainer()}})
-with an opinionated height. Examples of fill containers include
-\code{bslib::card()} and \code{bslib::card_body_fill()}.}
+\item{fill}{If \code{TRUE}, the result of \code{container} is treated as \emph{both} a fill
+item and container (see \code{\link[htmltools:bindFillRole]{htmltools::bindFillRole()}}), which means both the
+\code{container} as well as its immediate children (i.e., the result of
+\code{renderUI()}) are allowed to grow/shrink to fit a fill container with an
+opinionated height. Set \code{fill = "item"} or \code{fill = "container"} to treat
+\code{container} as just a fill item or a fill container.}
 
 \item{...}{Other arguments to pass to the container tag function. This is
 useful for providing additional classes for the tag.}

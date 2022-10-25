@@ -851,10 +851,7 @@ imageOutput <- function(outputId, width = "100%", height="400px",
 
   container <- if (inline) span else div
   res <- do.call(container, args)
-  if (fill) {
-    res <- asFillItem(res)
-  }
-  res
+  bindFillRole(res, item = fill)
 }
 
 #' Create an plot or image output element
@@ -922,11 +919,11 @@ imageOutput <- function(outputId, width = "100%", height="400px",
 #'   `imageOutput`/`plotOutput` calls may share the same `id`
 #'   value; brushing one image or plot will cause any other brushes with the
 #'   same `id` to disappear.
-#' @param fill whether or not the returned tag should be treated as a fill item
-#'   ([htmltools::asFillItem()]), meaning that its `height` is allowed to
-#'   grow/shrink inside a fill container ([htmltools::asFillContainer()]) with
-#'   an opinionated height. Examples of fill containers include `bslib::card()`
-#'   and `bslib::card_body_fill()`.
+#' @param fill Whether or not the returned tag should be treated as a fill item,
+#'   meaning that its `height` is allowed to grow/shrink to fit a fill container
+#'   with an opinionated height (see [htmltools::bindFillRole()]) with an
+#'   opinionated height. Examples of fill containers include `bslib::card()` and
+#'   `bslib::card_body_fill()`.
 #' @inheritParams textOutput
 #' @note The arguments `clickId` and `hoverId` only work for R base graphics
 #'   (see the \pkg{\link[graphics:graphics-package]{graphics}} package). They do
@@ -1153,16 +1150,12 @@ dataTableOutput <- function(outputId) {
 #' @param outputId output variable to read the value from
 #' @param ... Other arguments to pass to the container tag function. This is
 #'   useful for providing additional classes for the tag.
-#' @param fill whether or not the returned `container` should be treated as a
-#'   fill container ([htmltools::asFillContainer()]). If `TRUE`, children of the
-#'   `container` (i.e., results of `renderUI()`) that are fill items
-#'   ([htmltools::asFillItem()]) are allowed to grow/shrink to fit a `container`
-#'   with an opinionated height.
-#' @param fillItem whether or not the `container` result should be treated as a
-#'   fill item ([htmltools::asFillItem()]), meaning that its `height` is allowed
-#'   to grow/shrink inside a fill container ([htmltools::asFillContainer()])
-#'   with an opinionated height. Examples of fill containers include
-#'   `bslib::card()` and `bslib::card_body_fill()`.
+#' @param fill If `TRUE`, the result of `container` is treated as _both_ a fill
+#'   item and container (see [htmltools::bindFillRole()]), which means both the
+#'   `container` as well as its immediate children (i.e., the result of
+#'   `renderUI()`) are allowed to grow/shrink to fit a fill container with an
+#'   opinionated height. Set `fill = "item"` or `fill = "container"` to treat
+#'   `container` as just a fill item or a fill container.
 #' @inheritParams textOutput
 #' @return An HTML output element that can be included in a panel
 #' @examples
@@ -1174,19 +1167,16 @@ dataTableOutput <- function(outputId) {
 #' )
 #' @export
 htmlOutput <- function(outputId, inline = FALSE,
-  container = if (inline) span else div, fill = FALSE, fillItem = !inline, ...)
+  container = if (inline) span else div, fill = FALSE, ...)
 {
   if (any_unnamed(list(...))) {
     warning("Unnamed elements in ... will be replaced with dynamic UI.")
   }
   res <- container(id = outputId, class = "shiny-html-output", ...)
-  if (fill) {
-    res <- asFillContainer(res)
-  }
-  if (fillItem) {
-    res <- asFillItem(res)
-  }
-  res
+  bindFillRole(
+    res, item = isTRUE(fill) || isTRUE("item" == fill),
+    container = isTRUE(fill) || isTRUE("container" == fill)
+  )
 }
 
 #' @rdname htmlOutput

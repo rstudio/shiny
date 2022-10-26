@@ -1,7 +1,7 @@
 Package: shiny
 Type: Package
 Title: Web Application Framework for R
-Version: 1.7.2.9001
+Version: 1.7.3.9001
 Authors@R: c(
     person("Winston", "Chang", role = c("aut", "cre"), email = "winston@rstudio.com", comment = c(ORCID = "0000-0002-1576-2126")),
     person("Joe", "Cheng", role = "aut", email = "joe@rstudio.com"),
@@ -78,7 +78,7 @@ Imports:
     mime (>= 0.3),
     jsonlite (>= 0.9.16),
     xtable,
-    fontawesome (>= 0.2.1),
+    fontawesome (>= 0.4.0),
     htmltools (>= 0.5.3.9001),
     R6 (>= 2.0),
     sourcetools,
@@ -208,6 +208,6 @@ Roxygen: list(markdown = TRUE)
 RdMacros: lifecycle
 Config/testthat/edition: 3
 Config/Needs/check:
-  rstudio/shinytest2
+  shinytest2
 Remotes:
   rstudio/htmltools

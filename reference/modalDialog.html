@@ -22,7 +22,7 @@ typically used when customising the footer."><meta property="og:image" content="
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">shiny</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.3.9000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.3.9001</span>
       </span>
     </div>
 
@@ -174,12 +174,12 @@ you could also use any other HTML, like an image.</p></dd>
 <span class="r-in"><span>        <span class="fu"><a href="textInput.html">textInput</a></span><span class="op">(</span><span class="st">"dataset"</span>, <span class="st">"Choose data set"</span>,</span></span>
 <span class="r-in"><span>          placeholder <span class="op">=</span> <span class="st">'Try "mtcars" or "abc"'</span></span></span>
 <span class="r-in"><span>        <span class="op">)</span>,</span></span>
-<span class="r-in"><span>        <span class="fu"><a href="https://rdrr.io/pkg/htmltools/man/builder.html" class="external-link">span</a></span><span class="op">(</span><span class="st">'(Try the name of a valid data object like "mtcars", '</span>,</span></span>
+<span class="r-in"><span>        <span class="fu"><a href="https://rstudio.github.io/htmltools/reference/builder.html" class="external-link">span</a></span><span class="op">(</span><span class="st">'(Try the name of a valid data object like "mtcars", '</span>,</span></span>
 <span class="r-in"><span>             <span class="st">'then a name of a non-existent object like "abc")'</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>        <span class="kw">if</span> <span class="op">(</span><span class="va">failed</span><span class="op">)</span></span></span>
-<span class="r-in"><span>          <span class="fu"><a href="https://rdrr.io/pkg/htmltools/man/builder.html" class="external-link">div</a></span><span class="op">(</span><span class="va">tags</span><span class="op">$</span><span class="fu">b</span><span class="op">(</span><span class="st">"Invalid name of data object"</span>, style <span class="op">=</span> <span class="st">"color: red;"</span><span class="op">)</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>          <span class="fu"><a href="https://rstudio.github.io/htmltools/reference/builder.html" class="external-link">div</a></span><span class="op">(</span><span class="va">tags</span><span class="op">$</span><span class="fu">b</span><span class="op">(</span><span class="st">"Invalid name of data object"</span>, style <span class="op">=</span> <span class="st">"color: red;"</span><span class="op">)</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span>        footer <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/htmltools/man/tagList.html" class="external-link">tagList</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>        footer <span class="op">=</span> <span class="fu"><a href="https://rstudio.github.io/htmltools/reference/tagList.html" class="external-link">tagList</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>          <span class="fu">modalButton</span><span class="op">(</span><span class="st">"Cancel"</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>          <span class="fu"><a href="actionButton.html">actionButton</a></span><span class="op">(</span><span class="st">"ok"</span>, <span class="st">"OK"</span><span class="op">)</span></span></span>
 <span class="r-in"><span>        <span class="op">)</span></span></span>

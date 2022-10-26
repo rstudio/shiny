@@ -18,7 +18,7 @@ event occurs. These events are triggered by accessing a snapshot URL."><meta pro
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">shiny</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.3.9000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.3.9001</span>
       </span>
     </div>
 
@@ -100,9 +100,9 @@ global option <code>shiny.testmode</code> to <code>TRUE</code>.</p>
 <span class="r-in"><span><span class="co"># fetch the input, output, and exported values in JSON format.</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="shinyApp.html">shinyApp</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>  ui <span class="op">=</span> <span class="fu"><a href="bootstrapPage.html">basicPage</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/pkg/htmltools/man/builder.html" class="external-link">h4</a></span><span class="op">(</span><span class="st">"Snapshot URL: "</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    <span class="fu"><a href="https://rstudio.github.io/htmltools/reference/builder.html" class="external-link">h4</a></span><span class="op">(</span><span class="st">"Snapshot URL: "</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>    <span class="fu"><a href="htmlOutput.html">uiOutput</a></span><span class="op">(</span><span class="st">"url"</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/pkg/htmltools/man/builder.html" class="external-link">h4</a></span><span class="op">(</span><span class="st">"Current values:"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    <span class="fu"><a href="https://rstudio.github.io/htmltools/reference/builder.html" class="external-link">h4</a></span><span class="op">(</span><span class="st">"Current values:"</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>    <span class="fu"><a href="textOutput.html">verbatimTextOutput</a></span><span class="op">(</span><span class="st">"values"</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>    <span class="fu"><a href="actionButton.html">actionButton</a></span><span class="op">(</span><span class="st">"inc"</span>, <span class="st">"Increment x"</span><span class="op">)</span></span></span>
 <span class="r-in"><span>  <span class="op">)</span>,</span></span>
@@ -122,7 +122,7 @@ global option <code>shiny.testmode</code> to <code>TRUE</code>.</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>    <span class="va">output</span><span class="op">$</span><span class="va">url</span> <span class="op">&lt;-</span> <span class="fu"><a href="renderUI.html">renderUI</a></span><span class="op">(</span><span class="op">{</span></span></span>
 <span class="r-in"><span>      <span class="va">url</span> <span class="op">&lt;-</span> <span class="va">session</span><span class="op">$</span><span class="fu">getTestSnapshotUrl</span><span class="op">(</span>format<span class="op">=</span><span class="st">"json"</span><span class="op">)</span></span></span>
-<span class="r-in"><span>      <span class="fu"><a href="https://rdrr.io/pkg/htmltools/man/builder.html" class="external-link">a</a></span><span class="op">(</span>href <span class="op">=</span> <span class="va">url</span>, <span class="va">url</span><span class="op">)</span></span></span>
+<span class="r-in"><span>      <span class="fu"><a href="https://rstudio.github.io/htmltools/reference/builder.html" class="external-link">a</a></span><span class="op">(</span>href <span class="op">=</span> <span class="va">url</span>, <span class="va">url</span><span class="op">)</span></span></span>
 <span class="r-in"><span>    <span class="op">}</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>    <span class="va">output</span><span class="op">$</span><span class="va">values</span> <span class="op">&lt;-</span> <span class="fu"><a href="renderPrint.html">renderText</a></span><span class="op">(</span><span class="op">{</span></span></span>

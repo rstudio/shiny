@@ -18,7 +18,7 @@ application page."><meta property="og:image" content="/logo.png"><!-- mathjax --
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">shiny</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.3.9000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.3.9001</span>
       </span>
     </div>
 
@@ -63,7 +63,8 @@ application page.</p>
 <span>  dblclick <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  hover <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  brush <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  inline <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  inline <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  fill <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">plotOutput</span><span class="op">(</span></span>
@@ -74,7 +75,8 @@ application page.</p>
 <span>  dblclick <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  hover <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  brush <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  inline <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  inline <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  fill <span class="op">=</span> <span class="op">!</span><span class="va">inline</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -139,8 +141,16 @@ same <code>id</code> to disappear.</p></dd>
 
 
 <dt>inline</dt>
-<dd><p>use an inline (<code><a href="https://rdrr.io/pkg/htmltools/man/builder.html" class="external-link">span()</a></code>) or block container (<code><a href="https://rdrr.io/pkg/htmltools/man/builder.html" class="external-link">div()</a></code>)
+<dd><p>use an inline (<code><a href="https://rstudio.github.io/htmltools/reference/builder.html" class="external-link">span()</a></code>) or block container (<code><a href="https://rstudio.github.io/htmltools/reference/builder.html" class="external-link">div()</a></code>)
 for the output</p></dd>
+
+
+<dt>fill</dt>
+<dd><p>Whether or not the returned tag should be treated as a fill item,
+meaning that its <code>height</code> is allowed to grow/shrink to fit a fill container
+with an opinionated height (see <code><a href="https://rstudio.github.io/htmltools/reference/bindFillRole.html" class="external-link">htmltools::bindFillRole()</a></code>) with an
+opinionated height. Examples of fill containers include <code>bslib::card()</code> and
+<code>bslib::card_body_fill()</code>.</p></dd>
 
 </dl></div>
     <div id="value">
@@ -221,9 +231,9 @@ properly scaled to the data space.</p>
 <span class="r-in"><span>          hover <span class="op">=</span> <span class="fu"><a href="clickOpts.html">hoverOpts</a></span><span class="op">(</span>id <span class="op">=</span> <span class="st">"plot_hover"</span>, delayType <span class="op">=</span> <span class="st">"throttle"</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>          brush <span class="op">=</span> <span class="fu"><a href="brushOpts.html">brushOpts</a></span><span class="op">(</span>id <span class="op">=</span> <span class="st">"plot_brush"</span><span class="op">)</span></span></span>
 <span class="r-in"><span>        <span class="op">)</span>,</span></span>
-<span class="r-in"><span>        <span class="fu"><a href="https://rdrr.io/pkg/htmltools/man/builder.html" class="external-link">h4</a></span><span class="op">(</span><span class="st">"Clicked points"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>        <span class="fu"><a href="https://rstudio.github.io/htmltools/reference/builder.html" class="external-link">h4</a></span><span class="op">(</span><span class="st">"Clicked points"</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>        <span class="fu"><a href="renderTable.html">tableOutput</a></span><span class="op">(</span><span class="st">"plot_clickedpoints"</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>        <span class="fu"><a href="https://rdrr.io/pkg/htmltools/man/builder.html" class="external-link">h4</a></span><span class="op">(</span><span class="st">"Brushed points"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>        <span class="fu"><a href="https://rstudio.github.io/htmltools/reference/builder.html" class="external-link">h4</a></span><span class="op">(</span><span class="st">"Brushed points"</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>        <span class="fu"><a href="renderTable.html">tableOutput</a></span><span class="op">(</span><span class="st">"plot_brushedpoints"</span><span class="op">)</span></span></span>
 <span class="r-in"><span>      <span class="op">)</span>,</span></span>
 <span class="r-in"><span>      <span class="fu"><a href="column.html">column</a></span><span class="op">(</span>width <span class="op">=</span> <span class="fl">4</span>,</span></span>

@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">shiny</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.2.9000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.3.9000</span>
       </span>
     </div>
 
@@ -48,17 +48,23 @@
     </div>
 
     <div class="section level2">
-<h2 class="page-header" data-toc-text="1.7.2.9000" id="shiny-1729000">shiny 1.7.2.9000<a class="anchor" aria-label="anchor" href="#shiny-1729000"></a></h2>
+<h2 class="page-header" data-toc-text="1.7.3.9000" id="shiny-1739000">shiny 1.7.3.9000<a class="anchor" aria-label="anchor" href="#shiny-1739000"></a></h2>
 <div class="section level3">
-<h3 id="full-changelog-1-7-2-9000">Full changelog<a class="anchor" aria-label="anchor" href="#full-changelog-1-7-2-9000"></a></h3>
-<div class="section level4"><h4 id="breaking-changes-1-7-2-9000">Breaking changes<a class="anchor" aria-label="anchor" href="#breaking-changes-1-7-2-9000"></a></h4></div>
+<h3 id="full-changelog-1-7-3-9000">Full changelog<a class="anchor" aria-label="anchor" href="#full-changelog-1-7-3-9000"></a></h3>
+<div class="section level4"><h4 id="breaking-changes-1-7-3-9000">Breaking changes<a class="anchor" aria-label="anchor" href="#breaking-changes-1-7-3-9000"></a></h4></div>
 <div class="section level4">
-<h4 id="new-features-and-improvements-1-7-2-9000">New features and improvements<a class="anchor" aria-label="anchor" href="#new-features-and-improvements-1-7-2-9000"></a></h4>
+<h4 id="new-features-and-improvements-1-7-3-9000">New features and improvements<a class="anchor" aria-label="anchor" href="#new-features-and-improvements-1-7-3-9000"></a></h4>
 <ul><li>Internal: Added clearer and strict TypeScript type definitions (<a href="https://github.com/rstudio/shiny/issues/3644" class="external-link">#3644</a>)</li></ul></div>
 <div class="section level4">
-<h4 id="bug-fixes-1-7-2-9000">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-1-7-2-9000"></a></h4>
+<h4 id="bug-fixes-1-7-3-9000">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-1-7-3-9000"></a></h4>
 <ul><li>Closed <a href="https://github.com/rstudio/shiny/issues/3687" class="external-link">#3687</a>: Updated jQuery-UI to v1.13.2. (<a href="https://github.com/rstudio/shiny/issues/3697" class="external-link">#3697</a>)</li></ul></div>
 </div>
+</div>
+    <div class="section level2">
+<h2 class="page-header" data-toc-text="1.7.3" id="shiny-173">shiny 1.7.3<small>2022-10-25</small><a class="anchor" aria-label="anchor" href="#shiny-173"></a></h2>
+<div class="section level4">
+<h4 id="bug-fixes-1-7-3">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-1-7-3"></a></h4>
+<ul><li>Shiny 1.7.0 changed the <code>icon(lib="fontawesome")</code> implementation from a bundled copy of fontawesome, to the {fontawesome} package. This led to issue <a href="https://github.com/rstudio/shiny/issues/3688" class="external-link">#3688</a>, where icons that were previously working, were now breaking. That’s because {fontawesome} 0.3.0 and earlier did not have support for icon names used in Font Awesome 5 and earlier, only the newest icon names used in Font Awesome 6. Now, {fontawesome} 0.4.0 has restored support for those older icon names, and Shiny 1.7.2.1 has updated its {fontawesome} requirement to &gt;=0.4.0.</li></ul></div>
 </div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="1.7.2" id="shiny-172">shiny 1.7.2<small>2022-07-19</small><a class="anchor" aria-label="anchor" href="#shiny-172"></a></h2>

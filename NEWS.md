@@ -5,6 +5,8 @@ shiny 1.7.3.9000
 
 ### Breaking changes
 
+* Closed #3719: Output container sizes, which are available via [`session$clientData` and `getCurrentOutputInfo()`](https://shiny.rstudio.com/articles/client-data.html), no longer round to the nearest pixel (i.e., they are now more exact, possibly fractional values). (#3720)
+
 ### New features and improvements
 
 * `plotOutput()`, `imageOutput()`, and `uiOutput()` gain a `fill` argument. If `TRUE` (the default for `plotOutput()`), the output container is allowed to grow/shrink to fit a fill container (created via `htmltools::bindFillRole()`) with an opinionated height. This means `plotOutput()` will grow/shrink by default [inside of `bslib::card_body_fill()`](https://rstudio.github.io/bslib/articles/cards.html#responsive-sizing), but `imageOutput()` and `uiOutput()` will have to opt-in to similar behavior with `fill = TRUE`. (#3715) 

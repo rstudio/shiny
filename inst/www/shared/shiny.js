@@ -3462,9 +3462,10 @@
   function makeResizeFilter(el, func) {
     var lastSize = {};
     return function() {
+      var rect = el.getBoundingClientRect();
       var size = {
-        w: el.offsetWidth,
-        h: el.offsetHeight
+        w: rect.width,
+        h: rect.height
       };
       if (size.w === 0 && size.h === 0)
         return;
@@ -12832,10 +12833,10 @@
       return x.value;
     });
     (0, import_jquery39.default)(".shiny-image-output, .shiny-plot-output, .shiny-report-size").each(function() {
-      var id = getIdFromEl(this);
-      if (this.offsetWidth !== 0 || this.offsetHeight !== 0) {
-        initialValues[".clientdata_output_" + id + "_width"] = this.offsetWidth;
-        initialValues[".clientdata_output_" + id + "_height"] = this.offsetHeight;
+      var id = getIdFromEl(this), rect = this.getBoundingClientRect();
+      if (rect.width !== 0 || rect.height !== 0) {
+        initialValues[".clientdata_output_" + id + "_width"] = rect.width;
+        initialValues[".clientdata_output_" + id + "_height"] = rect.height;
       }
     });
     function getComputedBgColor(el) {
@@ -12911,10 +12912,10 @@
     }
     function doSendImageSize() {
       (0, import_jquery39.default)(".shiny-image-output, .shiny-plot-output, .shiny-report-size").each(function() {
-        var id = getIdFromEl(this);
-        if (this.offsetWidth !== 0 || this.offsetHeight !== 0) {
-          inputs.setInput(".clientdata_output_" + id + "_width", this.offsetWidth);
-          inputs.setInput(".clientdata_output_" + id + "_height", this.offsetHeight);
+        var id = getIdFromEl(this), rect = this.getBoundingClientRect();
+        if (rect.width !== 0 || rect.height !== 0) {
+          inputs.setInput(".clientdata_output_" + id + "_width", rect.width);
+          inputs.setInput(".clientdata_output_" + id + "_height", rect.height);
         }
       });
       (0, import_jquery39.default)(".shiny-image-output, .shiny-plot-output, .shiny-report-theme").each(function() {

@@ -154,12 +154,12 @@ function initShiny(windowShiny: Shiny): void {
   // in case it is auto-sizing
   $(".shiny-image-output, .shiny-plot-output, .shiny-report-size").each(
     function () {
-      const id = getIdFromEl(this);
+      const id = getIdFromEl(this),
+        rect = this.getBoundingClientRect();
 
-      if (this.offsetWidth !== 0 || this.offsetHeight !== 0) {
-        initialValues[".clientdata_output_" + id + "_width"] = this.offsetWidth;
-        initialValues[".clientdata_output_" + id + "_height"] =
-          this.offsetHeight;
+      if (rect.width !== 0 || rect.height !== 0) {
+        initialValues[".clientdata_output_" + id + "_width"] = rect.width;
+        initialValues[".clientdata_output_" + id + "_height"] = rect.height;
       }
     }
   );
@@ -275,17 +275,12 @@ function initShiny(windowShiny: Shiny): void {
   function doSendImageSize() {
     $(".shiny-image-output, .shiny-plot-output, .shiny-report-size").each(
       function () {
-        const id = getIdFromEl(this);
+        const id = getIdFromEl(this),
+          rect = this.getBoundingClientRect();
 
-        if (this.offsetWidth !== 0 || this.offsetHeight !== 0) {
-          inputs.setInput(
-            ".clientdata_output_" + id + "_width",
-            this.offsetWidth
-          );
-          inputs.setInput(
-            ".clientdata_output_" + id + "_height",
-            this.offsetHeight
-          );
+        if (rect.width !== 0 || rect.height !== 0) {
+          inputs.setInput(".clientdata_output_" + id + "_width", rect.width);
+          inputs.setInput(".clientdata_output_" + id + "_height", rect.height);
         }
       }
     );

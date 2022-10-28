@@ -125,7 +125,8 @@ function makeResizeFilter(
   let lastSize: LastSizeInterface = {};
 
   return function () {
-    const size = { w: el.offsetWidth, h: el.offsetHeight };
+    const rect = el.getBoundingClientRect();
+    const size = { w: rect.width, h: rect.height };
 
     if (size.w === 0 && size.h === 0) return;
     if (size.w === lastSize.w && size.h === lastSize.h) return;

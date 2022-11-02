@@ -10,7 +10,7 @@ import {
 import { isQt } from "../utils/browser";
 import { showNotification, removeNotification } from "./notifications";
 import { showModal, removeModal } from "./modal";
-import { renderContent, renderHtml } from "./render";
+import { renderContentAsync, renderHtmlAsync } from "./render";
 import type { HtmlDep } from "./render";
 import { hideReconnectDialog, showReconnectDialog } from "./reconnectDialog";
 import { resetBrush } from "../imageutils/resetBrush";
@@ -894,10 +894,14 @@ class ShinyApp {
               message.selector +
               '") could not be found in the DOM.'
           );
-          renderHtml(message.content.html, $([]), message.content.deps);
+          await renderHtmlAsync(
+            message.content.html,
+            $([]),
+            message.content.deps
+          );
         } else {
           for (const target of targets) {
-            await renderContent(target, message.content, message.where);
+            await renderContentAsync(target, message.content, message.where);
             // If multiple is false, only render to the first target.
             if (message.multiple === false) break;
           }
@@ -1078,7 +1082,7 @@ class ShinyApp {
           }
         }
 
-        await renderContent($liTag[0], {
+        await renderContentAsync($liTag[0], {
           html: $liTag.html(),
           deps: message.liTag.deps,
         });
@@ -1113,7 +1117,7 @@ class ShinyApp {
         // lower-level functions that renderContent uses. Like if we pre-process
         // the value of message.divTag.html for singletons, we could do that, then
         // render dependencies, then do $tabContent.append($divTag).
-        await renderContent(
+        await renderContentAsync(
           $tabContent[0],
           { html: "", deps: message.divTag.deps },
           // @ts-expect-error; TODO-barret; There is no usage of beforeend
@@ -1128,7 +1132,7 @@ class ShinyApp {
           // and not the whole tag. That's fine in this case because we control the
           // R code that generates this HTML, and we know that the element is not
           // a script tag.
-          await renderContent(el, el.innerHTML || el.textContent);
+          await renderContentAsync(el, el.innerHTML || el.textContent);
         }
 
         if (message.select) {

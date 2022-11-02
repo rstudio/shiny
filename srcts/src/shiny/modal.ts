@@ -1,6 +1,6 @@
 import $ from "jquery";
 import { shinyUnbindAll } from "./initedMethods";
-import { renderContent } from "./render";
+import { renderContentAsync } from "./render";
 
 // Show a modal dialog. This is meant to handle two types of cases: one is
 // that the content is a Bootstrap modal dialog, and the other is that the
@@ -44,7 +44,7 @@ async function show({ html = "", deps = [] } = {}): Promise<void> {
   });
 
   // Set/replace contents of wrapper with html.
-  await renderContent($modal, { html: html, deps: deps });
+  await renderContentAsync($modal, { html: html, deps: deps });
 }
 
 function remove(): void {

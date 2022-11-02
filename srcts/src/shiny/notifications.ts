@@ -3,7 +3,7 @@ import $ from "jquery";
 import { $escape, randomId } from "../utils";
 import { shinyUnbindAll } from "./initedMethods";
 import type { HtmlDep } from "./render";
-import { renderContent } from "./render";
+import { renderContentAsync } from "./render";
 
 // Milliseconds to fade in or out
 const fadeDuration = 250;
@@ -42,7 +42,7 @@ async function show({
     `<div class="shiny-notification-content-action">${action}</div>`;
   const $content = $notification.find(".shiny-notification-content");
 
-  await renderContent($content, { html: newHtml, deps: deps });
+  await renderContentAsync($content, { html: newHtml, deps: deps });
 
   // Remove any existing classes of the form 'shiny-notification-xxxx'.
   // The xxxx would be strings like 'warning'.

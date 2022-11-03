@@ -489,16 +489,11 @@ shinyCallingHandlers <- function(expr) {
 
       handle <- getOption('shiny.error')
       if (is.function(handle)) {
-        # if the handler takes at least one argument
-        # pass error along
-        args <- formalArgs(handle)
-
-        if(length(args) > 0) {
+        if (length(formals(handle)) > 0) {
           handle(e)
-          return()
+        } else {
+          handle()
         }
-        
-        handle()
       } 
     }
   )

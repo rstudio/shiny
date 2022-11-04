@@ -2398,7 +2398,6 @@ flushPendingSessions <- function() {
       stop = function(e) {
         # If there are any uncaught errors that bubbled up to here, close the
         # session.
-        print("------------ERROR------------")
         shinysession$close()
       }
     )

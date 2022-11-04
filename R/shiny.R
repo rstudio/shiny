@@ -1041,7 +1041,28 @@ ShinySession <- R6Class(
       return(private$inputReceivedCallbacks$register(callback))
     },
     unhandledError = function(e) {
-      self$close()
+      # always close the websocket
+      on.exit({
+        self$close()
+      })
+
+      handler <- getOption("shiny.unhandled.error", NULL)
+
+      # no handler: return early
+      if(!is.function(handler)) {
+        return()
+      }
+
+      # we check whether the handler can accept the error
+      # as parameter.
+      formals <- formals(handler)
+
+      if(length(formals) == 0){
+        handler()
+        return()
+      }
+
+      handler(e)
     },
     close = function() {
       if (!self$closed) {
@@ -2377,6 +2398,7 @@ flushPendingSessions <- function() {
       stop = function(e) {
         # If there are any uncaught errors that bubbled up to here, close the
         # session.
+        print("------------ERROR------------")
         shinysession$close()
       }
     )

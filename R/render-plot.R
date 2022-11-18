@@ -235,6 +235,22 @@ drawPlot <- function(name, session, func, width, height, alt, pixelratio, res, .
   #  9. Return img, value, displaylist, coordmap
   # 10. On error, take width and height dependency
 
+  checkDimsForNulls <- function(width, height) {
+    null_width <- is.null(width)
+    null_height <- is.null(height)
+    if (null_width || null_height) {
+      stop("null ",
+           paste0(c("width", "height")[c(null_width, null_height)], collapse=" and "),
+           " seen for plot output ",
+           name,
+           ". Make sure that the plot container has non-zero size.")
+    }
+  }
+
+  # if any dim is null, this is most likely because the shiny app hasn't sent
+  # any clientData height/width for that output yet.
+  checkDimsForNulls(width, height)
+
   outfile <- tempfile(fileext='.png') # If startPNG throws, this could leak. Shrug.
   device <- startPNG(outfile, width*pixelratio, height*pixelratio, res = res*pixelratio, ...)
   domain <- createGraphicsDevicePromiseDomain(device)

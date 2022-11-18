@@ -17,6 +17,8 @@ shiny 1.7.3.9000
 
 * Closed #3687: Updated jQuery-UI to v1.13.2. (#3697)
 
+* Closed #3735: Protect renderPlot against NULL height/width (#3736)
+
 
 shiny 1.7.3
 ===========

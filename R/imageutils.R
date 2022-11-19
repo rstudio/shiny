@@ -1,4 +1,21 @@
 startPNG <- function(filename, width, height, res, ...) {
+
+  checkDimsForNulls <- function(width, height, res) {
+    null_width <- is.null(width)
+    null_height <- is.null(height)
+    null_res <- is.null(res)
+    if (null_width || null_height || null_res) {
+      whats_null <- paste0(c("width", "height", "res")[c(null_width, null_height, null_res)], collapse=" and ")
+      stop("null ",
+           whats_null,
+           " requested for startPNG.")
+    }
+  }
+
+  # if any dim is null, this is most likely because the shiny app hasn't sent
+  # any clientData height/width for that output yet.
+  checkDimsForNulls(width, height, res)
+
   pngfun <- if ((getOption('shiny.useragg') %||% TRUE) && is_installed("ragg")) {
     ragg::agg_png
   } else if (capabilities("aqua")) {

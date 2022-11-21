@@ -1,6 +1,11 @@
 test_that("plotPNG() works", {
-  file <- plotPNG(function() plot(1))
-  expect_snapshot_file(file)
+  withr::with_tempdir({
+    filename <- "simple-plot.png"
+    file <- plotPNG(function() plot(1), filename = filename)
+    expect_snapshot_file(filename)
+  })
+
+  expect_true(F)
 })
 
 test_that("startPNG() throws informative error", {

@@ -1,4 +1,4 @@
-startPNG <- function(filename, width, height, res, ..., output_id = NULL) {
+startPNG <- function(filename, width, height, res, ..., shinyOutputId = NULL) {
 
   pngfun <- if ((getOption('shiny.useragg') %||% TRUE) && is_installed("ragg")) {
     ragg::agg_png
@@ -22,9 +22,9 @@ startPNG <- function(filename, width, height, res, ..., output_id = NULL) {
     param <- as.character(substitute(x))
     msg <- paste0(
       "PNG device `", param, "` is length 0 (i.e., it's not well defined). ",
-      if (!is.null(output_id)) {
+      if (!is.null(shinyOutputId)) {
         sprintf(
-          "To prevent this error, consider putting `req(getCurrentOutputInfo()$%s())` at the top of the `output$%s <- renderPlot()` expression. Or, change `renderPlot()`'s `%s` argument to something other than 'auto'.", param, output_id, param
+          "To prevent this error, consider putting `req(getCurrentOutputInfo()$%s())` at the top of the `output$%s <- renderPlot()` expression. Or, change `renderPlot()`'s `%s` argument to something other than 'auto'.", param, shinyOutputId, param
         )
       }
     )

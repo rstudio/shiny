@@ -17,7 +17,7 @@ test_that("startPNG() throws informative error", {
       width = NULL,
       height = 100,
       res = 72,
-      output_id = "my_output"
+      shinyOutputId = "my_output"
     ),
     "PNG device `width` is length 0.*getCurrentOutputInfo()"
   )
@@ -28,7 +28,7 @@ test_that("startPNG() throws informative error", {
       width = 100,
       height = NULL,
       res = 72,
-      output_id = "my_output"
+      shinyOutputId = "my_output"
     ),
     "PNG device `height` is length 0.*getCurrentOutputInfo()"
   )

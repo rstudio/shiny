@@ -1,4 +1,5 @@
-startPNG <- function(filename, width, height, res, ...) {
+startPNG <- function(filename, width, height, res, ..., output_id = NULL) {
+
   pngfun <- if ((getOption('shiny.useragg') %||% TRUE) && is_installed("ragg")) {
     ragg::agg_png
   } else if (capabilities("aqua")) {
@@ -11,7 +12,33 @@ startPNG <- function(filename, width, height, res, ...) {
     grDevices::png
   }
 
-  args <- rlang::list2(filename=filename, width=width, height=height, res=res, ...)
+  # Throw a helpful error if the device dimensions are undefined. This can
+  # happen, for example, when using `suspendWhenHidden=F` with something like
+  # `tabsetPanel()` (rstudio/shiny#1409). Also note that ragg will segfault if
+  # provided a height/width of length 0 (r-lib/ragg#116, rstudio/shiny#3704)
+  check_empty_png_param <- function(x) {
+    if (length(x) > 0) return(x)
+
+    param <- as.character(substitute(x))
+    msg <- paste0(
+      "PNG device `", param, "` is length 0 (i.e., it's not well defined). ",
+      if (!is.null(output_id)) {
+        sprintf(
+          "To prevent this error, consider putting `req(getCurrentOutputInfo()$%s())` at the top of the `output$%s <- renderPlot()` expression. Or, change `renderPlot()`'s `%s` argument to something other than 'auto'.", param, output_id, param
+        )
+      }
+    )
+
+    rlang::abort(msg, call = NULL)
+  }
+
+  args <- rlang::list2(
+    filename = filename,
+    width = check_empty_png_param(width),
+    height = check_empty_png_param(height),
+    res = res,
+    ...
+  )
 
   # Set a smarter default for the device's bg argument (based on thematic's global state).
   # Note that, technically, this is really only needed for CairoPNG, since the other

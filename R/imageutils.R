@@ -1,5 +1,4 @@
 startPNG <- function(filename, width, height, res, ...) {
-
   pngfun <- if ((getOption('shiny.useragg') %||% TRUE) && is_installed("ragg")) {
     ragg::agg_png
   } else if (capabilities("aqua")) {

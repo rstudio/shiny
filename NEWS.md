@@ -11,11 +11,11 @@ shiny 1.7.3.9000
 
 * `plotOutput()`, `imageOutput()`, and `uiOutput()` gain a `fill` argument. If `TRUE` (the default for `plotOutput()`), the output container is allowed to grow/shrink to fit a fill container (created via `htmltools::bindFillRole()`) with an opinionated height. This means `plotOutput()` will grow/shrink by default [inside of `bslib::card_body_fill()`](https://rstudio.github.io/bslib/articles/cards.html#responsive-sizing), but `imageOutput()` and `uiOutput()` will have to opt-in to similar behavior with `fill = TRUE`. (#3715) 
 
-* Closed #3704, #3735, #1409: `renderPlot()` now throws an informative error before attempting to open a graphics device when the output's size is not (yet) defined. In addition to providing a helpful message, this error will also prevent a segfault from happening with the default PNG device (`ragg::agg_png`). (#3739)
-
 * Internal: Added clearer and strict TypeScript type definitions (#3644)
 
 ### Bug fixes
+
+* Closed #3704 and #3735: `renderPlot()` no longer leads to a segfault when it executes before the output size is known. (#3739)
 
 * Closed #3687: Updated jQuery-UI to v1.13.2. (#3697)
 

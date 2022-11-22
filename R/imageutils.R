@@ -1,4 +1,4 @@
-startPNG <- function(filename, width, height, res, ..., shinyOutputId = NULL) {
+startPNG <- function(filename, width, height, res, ...) {
 
   pngfun <- if ((getOption('shiny.useragg') %||% TRUE) && is_installed("ragg")) {
     ragg::agg_png
@@ -12,30 +12,24 @@ startPNG <- function(filename, width, height, res, ..., shinyOutputId = NULL) {
     grDevices::png
   }
 
-  # Throw a helpful error if the device dimensions are undefined. This can
-  # happen, for example, when using `suspendWhenHidden=F` with something like
-  # `tabsetPanel()` (rstudio/shiny#1409). Also note that ragg will segfault if
-  # provided a height/width of length 0 (r-lib/ragg#116, rstudio/shiny#3704)
-  check_empty_png_param <- function(x) {
+  # It's possible for width/height to be NULL (e.g., when using
+  # suspendWhenHidden=F w/ tabsetPanel()), which will lead to an error when
+  # attempting to open the device (rstudio/shiny#1409). In this case, ragg will
+  # actually segfault (instead of error), so explicitly throw an error before
+  # opening the device (r-lib/ragg#116, rstudio/shiny#3704)
+  check_empty_png_size <- function(x) {
     if (length(x) > 0) return(x)
 
-    param <- as.character(substitute(x))
-    msg <- paste0(
-      "PNG device `", param, "` is length 0 (i.e., it's not well defined). ",
-      if (!is.null(shinyOutputId)) {
-        sprintf(
-          "To prevent this error, consider putting `req(getCurrentOutputInfo()$%s())` at the top of the `output$%s <- renderPlot()` expression. Or, change `renderPlot()`'s `%s` argument to something other than 'auto'.", param, shinyOutputId, param
-        )
-      }
+    rlang::abort(
+      paste0("Invalid plot `", substitute(x), "`."),
+      call = rlang::caller_env()
     )
-
-    rlang::abort(msg, call = NULL)
   }
 
   args <- rlang::list2(
     filename = filename,
-    width = check_empty_png_param(width),
-    height = check_empty_png_param(height),
+    width = check_empty_png_size(width),
+    height = check_empty_png_size(height),
     res = res,
     ...
   )

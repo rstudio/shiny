@@ -11,7 +11,27 @@ startPNG <- function(filename, width, height, res, ...) {
     grDevices::png
   }
 
-  args <- rlang::list2(filename=filename, width=width, height=height, res=res, ...)
+  # It's possible for width/height to be NULL (e.g., when using
+  # suspendWhenHidden=F w/ tabsetPanel()), which will lead to an error when
+  # attempting to open the device (rstudio/shiny#1409). In this case, ragg will
+  # actually segfault (instead of error), so explicitly throw an error before
+  # opening the device (r-lib/ragg#116, rstudio/shiny#3704)
+  check_empty_png_size <- function(x) {
+    if (length(x) > 0) return(x)
+
+    rlang::abort(
+      paste0("Invalid plot `", substitute(x), "`."),
+      call = rlang::caller_env()
+    )
+  }
+
+  args <- rlang::list2(
+    filename = filename,
+    width = check_empty_png_size(width),
+    height = check_empty_png_size(height),
+    res = res,
+    ...
+  )
 
   # Set a smarter default for the device's bg argument (based on thematic's global state).
   # Note that, technically, this is really only needed for CairoPNG, since the other

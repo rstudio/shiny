@@ -15,7 +15,7 @@ shiny 1.7.3.9000
 
 ### Bug fixes
 
-* Closed #3704 and #3735: `renderPlot()` no longer leads to a segfault when it executes before the output size is known. (#3739)
+* Closed #3704, #3735, and #3740: `renderPlot()` no longer generates an error (or segfault) when it executes before the output size is known. Instead, it'll now use the graphics device's default size for it's initial size. (#3739)
 
 * Closed #3687: Updated jQuery-UI to v1.13.2. (#3697)
 

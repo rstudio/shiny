@@ -70,6 +70,10 @@ startPNG <- function(filename, width, height, res, ...) {
 #'   * Otherwise, use [grDevices::png()]. In this case, Linux and Windows
 #'    may not antialias some point shapes, resulting in poor quality output.
 #'
+#' @details
+#'   A `NULL` value provided to `width` or `height` is ignored (i.e., the
+#'   default `width` or `height` of the graphics device is used).
+#'
 #' @param func A function that generates a plot.
 #' @param filename The name of the output file. Defaults to a temp file with
 #'   extension `.png`.

@@ -1,6 +1,6 @@
-test_that("startPNG() handles NULL dimensions sensibly", {
-  tmp <- tempfile(fileext = '.png')
-  plotPNG(function() plot(1), filename = tmp, width = NULL, height = NULL)
-  bits <- readBin(tmp, "raw", file.info(tmp)$size)
+test_that("plotPNG()/startPNG() ignores NULL dimensions", {
+  f <- plotPNG(function() plot(1), width = NULL, height = NULL)
+  on.exit(unlink(f))
+  bits <- readBin(f, "raw", file.info(f)$size)
   expect_true(length(bits) > 0)
 })

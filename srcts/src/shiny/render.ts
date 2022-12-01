@@ -450,10 +450,13 @@ async function appendScriptTagsAsync(dep: HtmlDepNormalized): Promise<void> {
       script.setAttribute(attr, val ? val : "");
     });
 
-    const p = new Promise((resolve) => {
+    const p = new Promise((resolve, reject) => {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       script.onload = (e: Event) => {
         resolve(null);
+      };
+      script.onerror = (e: Event | string) => {
+        reject(e);
       };
     });
 
@@ -466,7 +469,7 @@ async function appendScriptTagsAsync(dep: HtmlDepNormalized): Promise<void> {
   // because we're not sure that the browser will load them in order if done
   // that way.)
   document.head.append(...scriptElements);
-  await Promise.allSettled(scriptPromises);
+  await Promise.all(scriptPromises);
 }
 
 function appendMetaTags(

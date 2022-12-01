@@ -114,7 +114,7 @@ class ShinyApp {
   // without overlapping. This is used for handling incoming messages from the
   // server and scheduling outgoing messages to the server, and can be used for
   // other things tasks as well.
-  actionQueue = new AsyncQueue<() => void>();
+  actionQueue = new AsyncQueue<() => Promise<void> | void>();
 
   config: {
     workerId: string;
@@ -240,7 +240,7 @@ class ShinyApp {
       this.startActionQueueLoop();
     };
     socket.onmessage = (e) => {
-      this.actionQueue.enqueue(() => this.dispatchMessage(e.data));
+      this.actionQueue.enqueue(async () => await this.dispatchMessage(e.data));
     };
     // Called when a successfully-opened websocket is closed, or when an
     // attempt to open a connection fails.
@@ -269,7 +269,7 @@ class ShinyApp {
       const action = await this.actionQueue.dequeue();
 
       try {
-        action();
+        await action();
       } catch (e) {
         console.error(e);
       }

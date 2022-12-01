@@ -7,6 +7,8 @@ shiny 1.7.3.9000
 
 * Closed #3719: Output container sizes, which are available via [`session$clientData` and `getCurrentOutputInfo()`](https://shiny.rstudio.com/articles/client-data.html), no longer round to the nearest pixel (i.e., they are now more exact, possibly fractional values). (#3720)
 
+* Closed #3704, #3735, and #3740: `renderPlot()` no longer generates an error (or segfault) when it executes before the output is visible. Instead, it'll now use the graphics device's default size for it's initial size. Relatedly, `plotPNG()` now ignores `NULL` values for `width`/`height` (and uses the device's default `width`/`height` instead). (#3739)
+
 ### New features and improvements
 
 * `plotOutput()`, `imageOutput()`, and `uiOutput()` gain a `fill` argument. If `TRUE` (the default for `plotOutput()`), the output container is allowed to grow/shrink to fit a fill container (created via `htmltools::bindFillRole()`) with an opinionated height. This means `plotOutput()` will grow/shrink by default [inside of `bslib::card_body_fill()`](https://rstudio.github.io/bslib/articles/cards.html#responsive-sizing), but `imageOutput()` and `uiOutput()` will have to opt-in to similar behavior with `fill = TRUE`. (#3715) 
@@ -14,8 +16,6 @@ shiny 1.7.3.9000
 * Internal: Added clearer and strict TypeScript type definitions (#3644)
 
 ### Bug fixes
-
-* Closed #3704, #3735, and #3740: `renderPlot()` no longer generates an error (or segfault) when it executes before the output size is known. Instead, it'll now use the graphics device's default size for it's initial size. (#3739)
 
 * Closed #3687: Updated jQuery-UI to v1.13.2. (#3697)
 

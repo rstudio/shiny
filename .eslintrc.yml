@@ -44,9 +44,6 @@ rules:
   semi:
     - error
     - always
-  newline-after-var:
-    - error
-    - always
   dot-location:
     - error
     - property

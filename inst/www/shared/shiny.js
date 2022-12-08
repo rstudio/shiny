@@ -968,9 +968,9 @@
   var require_es_regexp_exec = __commonJS({
     "node_modules/core-js/modules/es.regexp.exec.js": function() {
       "use strict";
-      var $71 = require_export();
+      var $72 = require_export();
       var exec = require_regexp_exec();
-      $71({ target: "RegExp", proto: true, forced: /./.exec !== exec }, {
+      $72({ target: "RegExp", proto: true, forced: /./.exec !== exec }, {
         exec: exec
       });
     }
@@ -1528,9 +1528,9 @@
     "node_modules/core-js/internals/array-for-each.js": function(exports, module) {
       "use strict";
       var $forEach2 = require_array_iteration().forEach;
-      var arrayMethodIsStrict4 = require_array_method_is_strict();
-      var STRICT_METHOD4 = arrayMethodIsStrict4("forEach");
-      module.exports = !STRICT_METHOD4 ? function forEach3(callbackfn) {
+      var arrayMethodIsStrict5 = require_array_method_is_strict();
+      var STRICT_METHOD5 = arrayMethodIsStrict5("forEach");
+      module.exports = !STRICT_METHOD5 ? function forEach3(callbackfn) {
         return $forEach2(this, callbackfn, arguments.length > 1 ? arguments[1] : void 0);
       } : [].forEach;
     }
@@ -1972,7 +1972,7 @@
   var require_define_iterator = __commonJS({
     "node_modules/core-js/internals/define-iterator.js": function(exports, module) {
       "use strict";
-      var $71 = require_export();
+      var $72 = require_export();
       var createIteratorConstructor = require_create_iterator_constructor();
       var getPrototypeOf3 = require_object_get_prototype_of();
       var setPrototypeOf2 = require_object_set_prototype_of();
@@ -2062,7 +2062,7 @@
               }
             }
           else
-            $71({ target: NAME2, proto: true, forced: BUGGY_SAFARI_ITERATORS || INCORRECT_VALUES_NAME }, methods);
+            $72({ target: NAME2, proto: true, forced: BUGGY_SAFARI_ITERATORS || INCORRECT_VALUES_NAME }, methods);
         }
         return methods;
       };
@@ -9517,23 +9517,34 @@
   var import_es_array_iterator21 = __toESM(require_es_array_iterator());
   var import_jquery32 = __toESM(require_jquery());
 
-  // node_modules/core-js/modules/es.object.values.js
+  // node_modules/core-js/modules/es.array.some.js
   var $51 = require_export();
+  var $some = require_array_iteration().some;
+  var arrayMethodIsStrict3 = require_array_method_is_strict();
+  var STRICT_METHOD3 = arrayMethodIsStrict3("some");
+  $51({ target: "Array", proto: true, forced: !STRICT_METHOD3 }, {
+    some: function some(callbackfn) {
+      return $some(this, callbackfn, arguments.length > 1 ? arguments[1] : void 0);
+    }
+  });
+
+  // node_modules/core-js/modules/es.object.values.js
+  var $52 = require_export();
   var $values = require_object_to_array().values;
-  $51({ target: "Object", stat: true }, {
+  $52({ target: "Object", stat: true }, {
     values: function values(O) {
       return $values(O);
     }
   });
 
   // node_modules/core-js/modules/es.object.get-own-property-descriptors.js
-  var $52 = require_export();
+  var $53 = require_export();
   var DESCRIPTORS6 = require_descriptors();
   var ownKeys = require_own_keys();
   var toIndexedObject5 = require_to_indexed_object();
   var getOwnPropertyDescriptorModule3 = require_object_get_own_property_descriptor();
   var createProperty4 = require_create_property();
-  $52({ target: "Object", stat: true, sham: !DESCRIPTORS6 }, {
+  $53({ target: "Object", stat: true, sham: !DESCRIPTORS6 }, {
     getOwnPropertyDescriptors: function getOwnPropertyDescriptors(object) {
       var O = toIndexedObject5(object);
       var getOwnPropertyDescriptor4 = getOwnPropertyDescriptorModule3.f;
@@ -9982,10 +9993,8 @@
     }
     function onResize() {
       var boundsDataVal = boundsData();
-      for (var val in Object.values(boundsDataVal)) {
-        if (isnan(val))
-          return;
-      }
+      if (Object.values(boundsDataVal).some(isnan))
+        return;
       boundsData(boundsDataVal);
       updateDiv();
     }
@@ -11758,20 +11767,20 @@
   }
 
   // node_modules/core-js/modules/es.array-buffer.constructor.js
-  var $63 = require_export();
+  var $64 = require_export();
   var global7 = require_global();
   var arrayBufferModule = require_array_buffer();
   var setSpecies = require_set_species();
   var ARRAY_BUFFER = "ArrayBuffer";
   var ArrayBuffer2 = arrayBufferModule[ARRAY_BUFFER];
   var NativeArrayBuffer = global7[ARRAY_BUFFER];
-  $63({ global: true, forced: NativeArrayBuffer !== ArrayBuffer2 }, {
+  $64({ global: true, forced: NativeArrayBuffer !== ArrayBuffer2 }, {
     ArrayBuffer: ArrayBuffer2
   });
   setSpecies(ARRAY_BUFFER);
 
   // node_modules/core-js/modules/es.array-buffer.slice.js
-  var $64 = require_export();
+  var $65 = require_export();
   var fails10 = require_fails();
   var ArrayBufferModule = require_array_buffer();
   var anObject9 = require_an_object();
@@ -11784,7 +11793,7 @@
   var INCORRECT_SLICE = fails10(function() {
     return !new ArrayBuffer3(2).slice(1, void 0).byteLength;
   });
-  $64({ target: "ArrayBuffer", proto: true, unsafe: true, forced: INCORRECT_SLICE }, {
+  $65({ target: "ArrayBuffer", proto: true, unsafe: true, forced: INCORRECT_SLICE }, {
     slice: function slice2(start, end) {
       if (nativeArrayBufferSlice !== void 0 && end === void 0) {
         return nativeArrayBufferSlice.call(anObject9(this), start);
@@ -11804,22 +11813,22 @@
   });
 
   // node_modules/core-js/modules/es.data-view.js
-  var $65 = require_export();
+  var $66 = require_export();
   var ArrayBufferModule2 = require_array_buffer();
   var NATIVE_ARRAY_BUFFER = require_array_buffer_native();
-  $65({ global: true, forced: !NATIVE_ARRAY_BUFFER }, {
+  $66({ global: true, forced: !NATIVE_ARRAY_BUFFER }, {
     DataView: ArrayBufferModule2.DataView
   });
 
   // node_modules/core-js/modules/es.array.reduce.js
-  var $66 = require_export();
+  var $67 = require_export();
   var $reduce = require_array_reduce().left;
-  var arrayMethodIsStrict3 = require_array_method_is_strict();
+  var arrayMethodIsStrict4 = require_array_method_is_strict();
   var CHROME_VERSION = require_engine_v8_version();
   var IS_NODE = require_engine_is_node();
-  var STRICT_METHOD3 = arrayMethodIsStrict3("reduce");
+  var STRICT_METHOD4 = arrayMethodIsStrict4("reduce");
   var CHROME_BUG = !IS_NODE && CHROME_VERSION > 79 && CHROME_VERSION < 83;
-  $66({ target: "Array", proto: true, forced: !STRICT_METHOD3 || CHROME_BUG }, {
+  $67({ target: "Array", proto: true, forced: !STRICT_METHOD4 || CHROME_BUG }, {
     reduce: function reduce(callbackfn) {
       return $reduce(this, callbackfn, arguments.length, arguments.length > 1 ? arguments[1] : void 0);
     }

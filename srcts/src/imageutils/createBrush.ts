@@ -220,11 +220,9 @@ function createBrush(
   // div being resized.
   function onResize() {
     const boundsDataVal = boundsData();
-    // Check to see if we have valid boundsData
 
-    for (const val in Object.values(boundsDataVal)) {
-      if (isnan(val)) return;
-    }
+    // Check to see if we have valid boundsData
+    if (Object.values(boundsDataVal).some(isnan)) return;
 
     boundsData(boundsDataVal);
     updateDiv();

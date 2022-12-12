@@ -1,4 +1,4 @@
-/*! shiny 1.7.2.9000 | (c) 2012-2022 RStudio, PBC. | License: GPL-3 | file LICENSE */
+/*! shiny 1.7.2.9000 | (c) 2012-2023 RStudio, PBC. | License: GPL-3 | file LICENSE */
 (function() {
   var __create = Object.create;
   var __defProp = Object.defineProperty;
@@ -10953,7 +10953,6 @@
 
   // srcts/src/imageutils/setBrush.ts
   function setBrush(brushId, coords, panel, outputId) {
-    shinySetInputValue(brushId, null);
     imageOutputBinding.find(document.documentElement).trigger("shiny-internal:setBrush", {
       brushId: brushId,
       imgCoords: coords,

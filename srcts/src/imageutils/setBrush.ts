@@ -1,5 +1,4 @@
 import { imageOutputBinding } from "../bindings/output/image";
-import { shinySetInputValue } from "../shiny/initedMethods";
 import type { Bounds } from "./createBrush";
 
 function setBrush(
@@ -8,7 +7,6 @@ function setBrush(
   panel: number,
   outputId: string
 ): void {
-  shinySetInputValue(brushId, null);
   imageOutputBinding
     .find(document.documentElement)
     .trigger("shiny-internal:setBrush", {

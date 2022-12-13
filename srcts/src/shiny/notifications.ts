@@ -3,6 +3,7 @@ import $ from "jquery";
 import { $escape, randomId } from "../utils";
 import { shinyUnbindAll } from "./initedMethods";
 import type { HtmlDep } from "./render";
+import { renderDependenciesAsync } from "./render";
 import { renderContentAsync } from "./render";
 
 // Milliseconds to fade in or out
@@ -27,6 +28,15 @@ async function show({
 } = {}): Promise<ReturnType<typeof randomId>> {
   if (!id) id = randomId();
 
+  // Normally we'd first create the notification's DOM elements, then call
+  // `renderContentAsync(x, {html: html, deps: deps})`, but that has a potential
+  // problem with async rendering. If we did that, then an empty notification
+  // (from this function) could show up and then sit there empty while the
+  // dependencies load (asynchronously), and only after all that get filled with
+  // content for the notification. So instead we'll render the deps here, then
+  // render the notification, then render the content in the notification.
+  await renderDependenciesAsync(deps);
+
   // Create panel if necessary
   createPanel();
 
@@ -42,7 +52,8 @@ async function show({
     `<div class="shiny-notification-content-action">${action}</div>`;
   const $content = $notification.find(".shiny-notification-content");
 
-  await renderContentAsync($content, { html: newHtml, deps: deps });
+  // Set/replace contents of wrapper with html.
+  await renderContentAsync($content, { html: newHtml });
 
   // Remove any existing classes of the form 'shiny-notification-xxxx'.
   // The xxxx would be strings like 'warning'.

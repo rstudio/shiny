@@ -19,3 +19,4 @@ includes extensive annotated examples.
 \seealso{
 \link{shiny-options} for documentation about global options.
 }
+\keyword{internal}

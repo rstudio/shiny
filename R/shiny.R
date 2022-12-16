@@ -17,7 +17,6 @@ NULL
 #' @name shiny-package
 #' @aliases shiny
 #' @docType package
-#' @keywords internal
 NULL
 
 createUniqueId <- function(bytes, prefix = "", suffix = "") {

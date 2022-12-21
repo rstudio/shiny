@@ -469,7 +469,7 @@ async function appendScriptTagsAsync(dep: HtmlDepNormalized): Promise<void> {
   // because we're not sure that the browser will load them in order if done
   // that way.)
   document.head.append(...scriptElements);
-  await Promise.all(scriptPromises);
+  await Promise.allSettled(scriptPromises);
 }
 
 function appendMetaTags(

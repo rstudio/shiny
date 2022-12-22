@@ -11113,14 +11113,12 @@
   }
   function _appendScriptTagsAsync() {
     _appendScriptTagsAsync = _asyncToGenerator2(/* @__PURE__ */ regeneratorRuntime.mark(function _callee4(dep) {
-      var _document$head;
-      var scriptPromises, scriptElements;
+      var scriptPromises;
       return regeneratorRuntime.wrap(function _callee4$(_context4) {
         while (1) {
           switch (_context4.prev = _context4.next) {
             case 0:
               scriptPromises = [];
-              scriptElements = [];
               dep.script.forEach(function(x) {
                 var script = document.createElement("script");
                 if (!hasDefinedProperty(x, "async")) {
@@ -11133,18 +11131,20 @@
                   }
                   script.setAttribute(attr, val ? val : "");
                 });
-                var p = new Promise(function(resolve2) {
+                var p = new Promise(function(resolve2, reject2) {
                   script.onload = function(e) {
                     resolve2(null);
                   };
+                  script.onerror = function(e) {
+                    reject2(e);
+                  };
                 });
                 scriptPromises.push(p);
-                scriptElements.push(script);
+                document.head.append(script);
               });
-              (_document$head = document.head).append.apply(_document$head, scriptElements);
-              _context4.next = 6;
+              _context4.next = 4;
               return Promise.allSettled(scriptPromises);
-            case 6:
+            case 4:
             case "end":
               return _context4.stop();
           }
@@ -12915,6 +12915,9 @@
               _ref = _args.length > 0 && _args[0] !== void 0 ? _args[0] : {}, _ref$html = _ref.html, html = _ref$html === void 0 ? "" : _ref$html, _ref$action = _ref.action, action = _ref$action === void 0 ? "" : _ref$action, _ref$deps = _ref.deps, deps = _ref$deps === void 0 ? [] : _ref$deps, _ref$duration = _ref.duration, duration = _ref$duration === void 0 ? 5e3 : _ref$duration, _ref$id = _ref.id, id = _ref$id === void 0 ? null : _ref$id, _ref$closeButton = _ref.closeButton, closeButton = _ref$closeButton === void 0 ? true : _ref$closeButton, _ref$type = _ref.type, type = _ref$type === void 0 ? null : _ref$type;
               if (!id)
                 id = randomId();
+              _context.next = 4;
+              return renderDependenciesAsync(deps);
+            case 4:
               createPanel();
               $notificationInit = get2(id);
               if (((_$notificationInit = $notificationInit) === null || _$notificationInit === void 0 ? void 0 : _$notificationInit.length) === 0)
@@ -12922,12 +12925,11 @@
               $notification = $notificationInit;
               newHtml = '<div class="shiny-notification-content-text">'.concat(html, "</div>") + '<div class="shiny-notification-content-action">'.concat(action, "</div>");
               $content = $notification.find(".shiny-notification-content");
-              _context.next = 10;
+              _context.next = 12;
               return renderContentAsync($content, {
-                html: newHtml,
-                deps: deps
+                html: newHtml
               });
-            case 10:
+            case 12:
               classes = $notification === null || $notification === void 0 ? void 0 : $notification.attr("class");
               if (classes) {
                 classVal = classes.split(/\s+/).filter(function(cls) {
@@ -12948,7 +12950,7 @@
               else
                 clearRemovalCallback(id);
               return _context.abrupt("return", id);
-            case 17:
+            case 19:
             case "end":
               return _context.stop();
           }
@@ -13062,6 +13064,9 @@
           switch (_context.prev = _context.next) {
             case 0:
               _ref = _args.length > 0 && _args[0] !== void 0 ? _args[0] : {}, _ref$html = _ref.html, html = _ref$html === void 0 ? "" : _ref$html, _ref$deps = _ref.deps, deps = _ref$deps === void 0 ? [] : _ref$deps;
+              _context.next = 3;
+              return renderDependenciesAsync(deps);
+            case 3:
               (0, import_jquery34.default)(".modal-backdrop").remove();
               $modal = (0, import_jquery34.default)("#shiny-modal-wrapper");
               if ($modal.length === 0) {
@@ -13082,12 +13087,11 @@
                   e.preventDefault();
                 }
               });
-              _context.next = 7;
+              _context.next = 9;
               return renderContentAsync($modal, {
-                html: html,
-                deps: deps
+                html: html
               });
-            case 7:
+            case 9:
             case "end":
               return _context.stop();
           }
@@ -14510,9 +14514,22 @@
           _this.startActionQueueLoop();
         };
         socket.onmessage = function(e) {
-          _this.actionQueue.enqueue(function() {
-            return _this.dispatchMessage(e.data);
-          });
+          _this.actionQueue.enqueue(/* @__PURE__ */ _asyncToGenerator8(/* @__PURE__ */ regeneratorRuntime.mark(function _callee2() {
+            return regeneratorRuntime.wrap(function _callee2$(_context2) {
+              while (1) {
+                switch (_context2.prev = _context2.next) {
+                  case 0:
+                    _context2.next = 2;
+                    return _this.dispatchMessage(e.data);
+                  case 2:
+                    return _context2.abrupt("return", _context2.sent);
+                  case 3:
+                  case "end":
+                    return _context2.stop();
+                }
+              }
+            }, _callee2);
+          })));
         };
         socket.onclose = function() {
           if (hasOpened) {
@@ -14530,33 +14547,39 @@
     }, {
       key: "startActionQueueLoop",
       value: function() {
-        var _startActionQueueLoop = _asyncToGenerator8(/* @__PURE__ */ regeneratorRuntime.mark(function _callee2() {
+        var _startActionQueueLoop = _asyncToGenerator8(/* @__PURE__ */ regeneratorRuntime.mark(function _callee3() {
           var action;
-          return regeneratorRuntime.wrap(function _callee2$(_context2) {
+          return regeneratorRuntime.wrap(function _callee3$(_context3) {
             while (1) {
-              switch (_context2.prev = _context2.next) {
+              switch (_context3.prev = _context3.next) {
                 case 0:
                   if (false) {
-                    _context2.next = 7;
+                    _context3.next = 14;
                     break;
                   }
-                  _context2.next = 3;
+                  _context3.next = 3;
                   return this.actionQueue.dequeue();
                 case 3:
-                  action = _context2.sent;
-                  try {
-                    action();
-                  } catch (e) {
-                    console.error(e);
-                  }
-                  _context2.next = 0;
-                  break;
+                  action = _context3.sent;
+                  _context3.prev = 4;
+                  _context3.next = 7;
+                  return action();
                 case 7:
+                  _context3.next = 12;
+                  break;
+                case 9:
+                  _context3.prev = 9;
+                  _context3.t0 = _context3["catch"](4);
+                  console.error(_context3.t0);
+                case 12:
+                  _context3.next = 0;
+                  break;
+                case 14:
                 case "end":
-                  return _context2.stop();
+                  return _context3.stop();
               }
             }
-          }, _callee2, this);
+          }, _callee3, this, [[4, 9]]);
         }));
         function startActionQueueLoop() {
           return _startActionQueueLoop.apply(this, arguments);
@@ -14682,11 +14705,11 @@
     }, {
       key: "receiveOutput",
       value: function() {
-        var _receiveOutput = _asyncToGenerator8(/* @__PURE__ */ regeneratorRuntime.mark(function _callee3(name, value) {
+        var _receiveOutput = _asyncToGenerator8(/* @__PURE__ */ regeneratorRuntime.mark(function _callee4(name, value) {
           var binding, evt;
-          return regeneratorRuntime.wrap(function _callee3$(_context3) {
+          return regeneratorRuntime.wrap(function _callee4$(_context4) {
             while (1) {
-              switch (_context3.prev = _context3.next) {
+              switch (_context4.prev = _context4.next) {
                 case 0:
                   binding = this.$bindings[name];
                   evt = import_jquery38.default.Event("shiny:value");
@@ -14694,29 +14717,29 @@
                   evt.value = value;
                   evt.binding = binding;
                   if (!(this.$values[name] === value)) {
-                    _context3.next = 8;
+                    _context4.next = 8;
                     break;
                   }
                   (0, import_jquery38.default)(binding ? binding.el : document).trigger(evt);
-                  return _context3.abrupt("return", void 0);
+                  return _context4.abrupt("return", void 0);
                 case 8:
                   this.$values[name] = value;
                   delete this.$errors[name];
                   (0, import_jquery38.default)(binding ? binding.el : document).trigger(evt);
                   if (!(!evt.isDefaultPrevented() && binding)) {
-                    _context3.next = 14;
+                    _context4.next = 14;
                     break;
                   }
-                  _context3.next = 14;
+                  _context4.next = 14;
                   return binding.onValueChange(evt.value);
                 case 14:
-                  return _context3.abrupt("return", value);
+                  return _context4.abrupt("return", value);
                 case 15:
                 case "end":
-                  return _context3.stop();
+                  return _context4.stop();
               }
             }
-          }, _callee3, this);
+          }, _callee4, this);
         }));
         function receiveOutput(_x2, _x3) {
           return _receiveOutput.apply(this, arguments);
@@ -14815,11 +14838,11 @@
     }, {
       key: "dispatchMessage",
       value: function() {
-        var _dispatchMessage = _asyncToGenerator8(/* @__PURE__ */ regeneratorRuntime.mark(function _callee4(data) {
+        var _dispatchMessage = _asyncToGenerator8(/* @__PURE__ */ regeneratorRuntime.mark(function _callee5(data) {
           var msgObj, len, typedv, typebuf, i, type, evt;
-          return regeneratorRuntime.wrap(function _callee4$(_context4) {
+          return regeneratorRuntime.wrap(function _callee5$(_context5) {
             while (1) {
-              switch (_context4.prev = _context4.next) {
+              switch (_context5.prev = _context5.next) {
                 case 0:
                   msgObj = {};
                   if (typeof data === "string") {
@@ -14840,21 +14863,21 @@
                   evt.message = msgObj;
                   (0, import_jquery38.default)(document).trigger(evt);
                   if (!evt.isDefaultPrevented()) {
-                    _context4.next = 7;
+                    _context5.next = 7;
                     break;
                   }
-                  return _context4.abrupt("return");
+                  return _context5.abrupt("return");
                 case 7:
-                  _context4.next = 9;
+                  _context5.next = 9;
                   return this._sendMessagesToHandlers(evt.message, messageHandlers, messageHandlerOrder);
                 case 9:
                   this.$updateConditionals();
                 case 10:
                 case "end":
-                  return _context4.stop();
+                  return _context5.stop();
               }
             }
-          }, _callee4, this);
+          }, _callee5, this);
         }));
         function dispatchMessage(_x4) {
           return _dispatchMessage.apply(this, arguments);
@@ -14864,35 +14887,35 @@
     }, {
       key: "_sendMessagesToHandlers",
       value: function() {
-        var _sendMessagesToHandlers2 = _asyncToGenerator8(/* @__PURE__ */ regeneratorRuntime.mark(function _callee5(msgObj, handlers, handlerOrder) {
+        var _sendMessagesToHandlers2 = _asyncToGenerator8(/* @__PURE__ */ regeneratorRuntime.mark(function _callee6(msgObj, handlers, handlerOrder) {
           var i, msgType;
-          return regeneratorRuntime.wrap(function _callee5$(_context5) {
+          return regeneratorRuntime.wrap(function _callee6$(_context6) {
             while (1) {
-              switch (_context5.prev = _context5.next) {
+              switch (_context6.prev = _context6.next) {
                 case 0:
                   i = 0;
                 case 1:
                   if (!(i < handlerOrder.length)) {
-                    _context5.next = 9;
+                    _context6.next = 9;
                     break;
                   }
                   msgType = handlerOrder[i];
                   if (!hasOwnProperty(msgObj, msgType)) {
-                    _context5.next = 6;
+                    _context6.next = 6;
                     break;
                   }
-                  _context5.next = 6;
+                  _context6.next = 6;
                   return handlers[msgType].call(this, msgObj[msgType]);
                 case 6:
                   i++;
-                  _context5.next = 1;
+                  _context6.next = 1;
                   break;
                 case 9:
                 case "end":
-                  return _context5.stop();
+                  return _context6.stop();
               }
             }
-          }, _callee5, this);
+          }, _callee6, this);
         }));
         function _sendMessagesToHandlers(_x5, _x6, _x7) {
           return _sendMessagesToHandlers2.apply(this, arguments);
@@ -14904,41 +14927,41 @@
       value: function _init() {
         var _this3 = this;
         addMessageHandler("values", /* @__PURE__ */ function() {
-          var _ref2 = _asyncToGenerator8(/* @__PURE__ */ regeneratorRuntime.mark(function _callee6(message) {
+          var _ref3 = _asyncToGenerator8(/* @__PURE__ */ regeneratorRuntime.mark(function _callee7(message) {
             var name, _key;
-            return regeneratorRuntime.wrap(function _callee6$(_context6) {
+            return regeneratorRuntime.wrap(function _callee7$(_context7) {
               while (1) {
-                switch (_context6.prev = _context6.next) {
+                switch (_context7.prev = _context7.next) {
                   case 0:
                     for (name in _this3.$bindings) {
                       if (hasOwnProperty(_this3.$bindings, name))
                         _this3.$bindings[name].showProgress(false);
                     }
-                    _context6.t0 = regeneratorRuntime.keys(message);
+                    _context7.t0 = regeneratorRuntime.keys(message);
                   case 2:
-                    if ((_context6.t1 = _context6.t0()).done) {
-                      _context6.next = 9;
+                    if ((_context7.t1 = _context7.t0()).done) {
+                      _context7.next = 9;
                       break;
                     }
-                    _key = _context6.t1.value;
+                    _key = _context7.t1.value;
                     if (!hasOwnProperty(message, _key)) {
-                      _context6.next = 7;
+                      _context7.next = 7;
                       break;
                     }
-                    _context6.next = 7;
+                    _context7.next = 7;
                     return _this3.receiveOutput(_key, message[_key]);
                   case 7:
-                    _context6.next = 2;
+                    _context7.next = 2;
                     break;
                   case 9:
                   case "end":
-                    return _context6.stop();
+                    return _context7.stop();
                 }
               }
-            }, _callee6);
+            }, _callee7);
           }));
           return function(_x8) {
-            return _ref2.apply(this, arguments);
+            return _ref3.apply(this, arguments);
           };
         }());
         addMessageHandler("errors", function(message) {
@@ -14974,70 +14997,34 @@
           }
         });
         addMessageHandler("progress", /* @__PURE__ */ function() {
-          var _ref3 = _asyncToGenerator8(/* @__PURE__ */ regeneratorRuntime.mark(function _callee7(message) {
-            var handler;
-            return regeneratorRuntime.wrap(function _callee7$(_context7) {
-              while (1) {
-                switch (_context7.prev = _context7.next) {
-                  case 0:
-                    if (!(message.type && message.message)) {
-                      _context7.next = 5;
-                      break;
-                    }
-                    _context7.next = 3;
-                    return _this3.progressHandlers[message.type];
-                  case 3:
-                    handler = _context7.sent;
-                    if (handler)
-                      handler.call(_this3, message.message);
-                  case 5:
-                  case "end":
-                    return _context7.stop();
-                }
-              }
-            }, _callee7);
-          }));
-          return function(_x9) {
-            return _ref3.apply(this, arguments);
-          };
-        }());
-        addMessageHandler("notification", /* @__PURE__ */ function() {
           var _ref4 = _asyncToGenerator8(/* @__PURE__ */ regeneratorRuntime.mark(function _callee8(message) {
+            var handler;
             return regeneratorRuntime.wrap(function _callee8$(_context8) {
               while (1) {
                 switch (_context8.prev = _context8.next) {
                   case 0:
-                    if (!(message.type === "show")) {
+                    if (!(message.type && message.message)) {
                       _context8.next = 5;
                       break;
                     }
                     _context8.next = 3;
-                    return show(message.message);
+                    return _this3.progressHandlers[message.type];
                   case 3:
-                    _context8.next = 10;
-                    break;
+                    handler = _context8.sent;
+                    if (handler)
+                      handler.call(_this3, message.message);
                   case 5:
-                    if (!(message.type === "remove")) {
-                      _context8.next = 9;
-                      break;
-                    }
-                    remove(message.message);
-                    _context8.next = 10;
-                    break;
-                  case 9:
-                    throw "Unkown notification type: " + message.type;
-                  case 10:
                   case "end":
                     return _context8.stop();
                 }
               }
             }, _callee8);
           }));
-          return function(_x10) {
+          return function(_x9) {
             return _ref4.apply(this, arguments);
           };
         }());
-        addMessageHandler("modal", /* @__PURE__ */ function() {
+        addMessageHandler("notification", /* @__PURE__ */ function() {
           var _ref5 = _asyncToGenerator8(/* @__PURE__ */ regeneratorRuntime.mark(function _callee9(message) {
             return regeneratorRuntime.wrap(function _callee9$(_context9) {
               while (1) {
@@ -15048,7 +15035,7 @@
                       break;
                     }
                     _context9.next = 3;
-                    return show2(message.message);
+                    return show(message.message);
                   case 3:
                     _context9.next = 10;
                     break;
@@ -15057,11 +15044,11 @@
                       _context9.next = 9;
                       break;
                     }
-                    remove2();
+                    remove(message.message);
                     _context9.next = 10;
                     break;
                   case 9:
-                    throw "Unkown modal type: " + message.type;
+                    throw "Unkown notification type: " + message.type;
                   case 10:
                   case "end":
                     return _context9.stop();
@@ -15069,8 +15056,44 @@
               }
             }, _callee9);
           }));
-          return function(_x11) {
+          return function(_x10) {
             return _ref5.apply(this, arguments);
+          };
+        }());
+        addMessageHandler("modal", /* @__PURE__ */ function() {
+          var _ref6 = _asyncToGenerator8(/* @__PURE__ */ regeneratorRuntime.mark(function _callee10(message) {
+            return regeneratorRuntime.wrap(function _callee10$(_context10) {
+              while (1) {
+                switch (_context10.prev = _context10.next) {
+                  case 0:
+                    if (!(message.type === "show")) {
+                      _context10.next = 5;
+                      break;
+                    }
+                    _context10.next = 3;
+                    return show2(message.message);
+                  case 3:
+                    _context10.next = 10;
+                    break;
+                  case 5:
+                    if (!(message.type === "remove")) {
+                      _context10.next = 9;
+                      break;
+                    }
+                    remove2();
+                    _context10.next = 10;
+                    break;
+                  case 9:
+                    throw "Unkown modal type: " + message.type;
+                  case 10:
+                  case "end":
+                    return _context10.stop();
+                }
+              }
+            }, _callee10);
+          }));
+          return function(_x11) {
+            return _ref6.apply(this, arguments);
           };
         }());
         addMessageHandler("response", function(message) {
@@ -15135,64 +15158,64 @@
           message;
         });
         addMessageHandler("shiny-insert-ui", /* @__PURE__ */ function() {
-          var _ref6 = _asyncToGenerator8(/* @__PURE__ */ regeneratorRuntime.mark(function _callee10(message) {
+          var _ref7 = _asyncToGenerator8(/* @__PURE__ */ regeneratorRuntime.mark(function _callee11(message) {
             var targets, _iterator, _step, target;
-            return regeneratorRuntime.wrap(function _callee10$(_context10) {
+            return regeneratorRuntime.wrap(function _callee11$(_context11) {
               while (1) {
-                switch (_context10.prev = _context10.next) {
+                switch (_context11.prev = _context11.next) {
                   case 0:
                     targets = (0, import_jquery38.default)(message.selector);
                     if (!(targets.length === 0)) {
-                      _context10.next = 7;
+                      _context11.next = 7;
                       break;
                     }
                     console.warn('The selector you chose ("' + message.selector + '") could not be found in the DOM.');
-                    _context10.next = 5;
+                    _context11.next = 5;
                     return renderHtmlAsync(message.content.html, (0, import_jquery38.default)([]), message.content.deps);
                   case 5:
-                    _context10.next = 26;
+                    _context11.next = 26;
                     break;
                   case 7:
                     _iterator = _createForOfIteratorHelper2(targets);
-                    _context10.prev = 8;
+                    _context11.prev = 8;
                     _iterator.s();
                   case 10:
                     if ((_step = _iterator.n()).done) {
-                      _context10.next = 18;
+                      _context11.next = 18;
                       break;
                     }
                     target = _step.value;
-                    _context10.next = 14;
+                    _context11.next = 14;
                     return renderContentAsync(target, message.content, message.where);
                   case 14:
                     if (!(message.multiple === false)) {
-                      _context10.next = 16;
+                      _context11.next = 16;
                       break;
                     }
-                    return _context10.abrupt("break", 18);
+                    return _context11.abrupt("break", 18);
                   case 16:
-                    _context10.next = 10;
+                    _context11.next = 10;
                     break;
                   case 18:
-                    _context10.next = 23;
+                    _context11.next = 23;
                     break;
                   case 20:
-                    _context10.prev = 20;
-                    _context10.t0 = _context10["catch"](8);
-                    _iterator.e(_context10.t0);
+                    _context11.prev = 20;
+                    _context11.t0 = _context11["catch"](8);
+                    _iterator.e(_context11.t0);
                   case 23:
-                    _context10.prev = 23;
+                    _context11.prev = 23;
                     _iterator.f();
-                    return _context10.finish(23);
+                    return _context11.finish(23);
                   case 26:
                   case "end":
-                    return _context10.stop();
+                    return _context11.stop();
                 }
               }
-            }, _callee10, null, [[8, 20, 23, 26]]);
+            }, _callee11, null, [[8, 20, 23, 26]]);
           }));
           return function(_x12) {
-            return _ref6.apply(this, arguments);
+            return _ref7.apply(this, arguments);
           };
         }());
         addMessageHandler("shiny-remove-ui", function(message) {
@@ -15250,11 +15273,11 @@
           };
         }
         addMessageHandler("shiny-insert-tab", /* @__PURE__ */ function() {
-          var _ref7 = _asyncToGenerator8(/* @__PURE__ */ regeneratorRuntime.mark(function _callee11(message) {
+          var _ref8 = _asyncToGenerator8(/* @__PURE__ */ regeneratorRuntime.mark(function _callee12(message) {
             var $parentTabset, $tabset, $tabContent, tabsetId, $divTag, $liTag, $aTag, $targetLiTag, targetInfo, dropdown, index, tabId, _iterator2, _step2, el, getTabIndex, getDropdown;
-            return regeneratorRuntime.wrap(function _callee11$(_context11) {
+            return regeneratorRuntime.wrap(function _callee12$(_context12) {
               while (1) {
-                switch (_context11.prev = _context11.next) {
+                switch (_context12.prev = _context12.next) {
                   case 0:
                     getDropdown = function _getDropdown() {
                       if (message.menuName !== null) {
@@ -15306,11 +15329,11 @@
                     }
                     dropdown = getDropdown();
                     if (!(dropdown !== null)) {
-                      _context11.next = 18;
+                      _context12.next = 18;
                       break;
                     }
                     if (!($aTag.attr("data-toggle") === "dropdown")) {
-                      _context11.next = 15;
+                      _context12.next = 15;
                       break;
                     }
                     throw "Cannot insert a navbarMenu inside another one";
@@ -15338,13 +15361,13 @@
                         $tabset.append($liTag);
                       }
                     }
-                    _context11.next = 22;
+                    _context12.next = 22;
                     return renderContentAsync($liTag[0], {
                       html: $liTag.html(),
                       deps: message.liTag.deps
                     });
                   case 22:
-                    _context11.next = 24;
+                    _context12.next = 24;
                     return renderContentAsync(
                       $tabContent[0],
                       {
@@ -15355,44 +15378,44 @@
                     );
                   case 24:
                     _iterator2 = _createForOfIteratorHelper2($divTag.get());
-                    _context11.prev = 25;
+                    _context12.prev = 25;
                     _iterator2.s();
                   case 27:
                     if ((_step2 = _iterator2.n()).done) {
-                      _context11.next = 34;
+                      _context12.next = 34;
                       break;
                     }
                     el = _step2.value;
                     $tabContent[0].appendChild(el);
-                    _context11.next = 32;
+                    _context12.next = 32;
                     return renderContentAsync(el, el.innerHTML || el.textContent);
                   case 32:
-                    _context11.next = 27;
+                    _context12.next = 27;
                     break;
                   case 34:
-                    _context11.next = 39;
+                    _context12.next = 39;
                     break;
                   case 36:
-                    _context11.prev = 36;
-                    _context11.t0 = _context11["catch"](25);
-                    _iterator2.e(_context11.t0);
+                    _context12.prev = 36;
+                    _context12.t0 = _context12["catch"](25);
+                    _iterator2.e(_context12.t0);
                   case 39:
-                    _context11.prev = 39;
+                    _context12.prev = 39;
                     _iterator2.f();
-                    return _context11.finish(39);
+                    return _context12.finish(39);
                   case 42:
                     if (message.select) {
                       $liTag.find("a").tab("show");
                     }
                   case 43:
                   case "end":
-                    return _context11.stop();
+                    return _context12.stop();
                 }
               }
-            }, _callee11, null, [[25, 36, 39, 42]]);
+            }, _callee12, null, [[25, 36, 39, 42]]);
           }));
           return function(_x13) {
-            return _ref7.apply(this, arguments);
+            return _ref8.apply(this, arguments);
           };
         }());
         function ensureTabsetHasVisibleTab($tabset) {
@@ -15485,7 +15508,7 @@
     }, {
       key: "getTestSnapshotBaseUrl",
       value: function getTestSnapshotBaseUrl() {
-        var _ref8 = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : {}, _ref8$fullUrl = _ref8.fullUrl, fullUrl = _ref8$fullUrl === void 0 ? true : _ref8$fullUrl;
+        var _ref9 = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : {}, _ref9$fullUrl = _ref9.fullUrl, fullUrl = _ref9$fullUrl === void 0 ? true : _ref9$fullUrl;
         var loc = window.location;
         var url = "";
         if (fullUrl) {

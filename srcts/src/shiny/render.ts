@@ -421,7 +421,6 @@ function appendScriptTags(dep: HtmlDepNormalized, $head: JQuery<HTMLElement>) {
 
 async function appendScriptTagsAsync(dep: HtmlDepNormalized): Promise<void> {
   const scriptPromises: Array<Promise<any>> = [];
-  const scriptElements: HTMLScriptElement[] = [];
 
   dep.script.forEach((x) => {
     const script = document.createElement("script");
@@ -461,14 +460,9 @@ async function appendScriptTagsAsync(dep: HtmlDepNormalized): Promise<void> {
     });
 
     scriptPromises.push(p);
-    scriptElements.push(script);
+    document.head.append(script);
   });
 
-  // Append the script elements all at once, so that we're sure they'll load in
-  // order. (We didn't append them individually in the `forEach()` above,
-  // because we're not sure that the browser will load them in order if done
-  // that way.)
-  document.head.append(...scriptElements);
   await Promise.allSettled(scriptPromises);
 }
 

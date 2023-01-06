@@ -778,8 +778,8 @@ renderUI <- function(expr, env = parent.frame(), quoted = FALSE,
 #'   function.)
 #' @param contentType A string of the download's
 #'   [content type](https://en.wikipedia.org/wiki/Internet_media_type), for
-#'   example `"text/csv"` or `"image/png"`. If `NULL`, the content type 
-#'   will be guessed based on the filename extension, or 
+#'   example `"text/csv"` or `"image/png"`. If `NULL`, the content type
+#'   will be guessed based on the filename extension, or
 #'   `application/octet-stream` if the extension is unknown.
 #' @param outputArgs A list of arguments to be passed through to the implicit
 #'   call to [downloadButton()] when `downloadHandler` is used
@@ -822,8 +822,8 @@ downloadHandler <- function(filename, content, contentType=NULL, outputArgs=list
 #' Table output with the JavaScript DataTables library
 #'
 #' @description
-#' `r lifecycle::badge("superseded")` Please use
-#' \href{https://rstudio.github.io/DT/shiny.html}{\code{DT::renderDataTable()}}.
+#' `r lifecycle::badge("deprecated")` Please use
+#' \href{https://rstudio.github.io/DT/shiny.html}{\code{DT::renderDT()}}.
 #' (Shiny 0.11.1)
 #'
 #' Makes a reactive version of the given function that returns a data frame (or
@@ -893,12 +893,12 @@ renderDataTable <- function(expr, options = NULL, searchDelay = 500,
                             outputArgs=list())
 {
 
-  if (in_devmode()) {
-    shinyDeprecated(
-      "0.11.1", "shiny::renderDataTable()", "DT::renderDataTable()",
-      details = "See <https://rstudio.github.io/DT/shiny.html> for more information"
-    )
-  }
+
+  shinyDeprecated(
+    "0.11.1", "shiny::renderDataTable()", "DT::renderDT()",
+    details = "See <https://rstudio.github.io/DT/shiny.html> for more information."
+  )
+
 
   func <- installExprFunction(expr, "func", env, quoted, label = "renderDataTable")
 

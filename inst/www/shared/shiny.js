@@ -1,4 +1,4 @@
-/*! shiny 1.7.4.9000 | (c) 2012-2022 RStudio, PBC. | License: GPL-3 | file LICENSE */
+/*! shiny 1.7.4.9000 | (c) 2012-2023 RStudio, PBC. | License: GPL-3 | file LICENSE */
 "use strict";
 (function() {
   var __create = Object.create;

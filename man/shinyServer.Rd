@@ -11,7 +11,7 @@ shinyServer(func)
 for more information.}
 }
 \description{
-\lifecycle{superseded}
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#superseded}{\figure{lifecycle-superseded.svg}{options: alt='[Superseded]'}}}{\strong{[Superseded]}}
 
 Defines the server-side logic of the Shiny application. This generally
 involves creating functions that map user inputs to various kinds of output.

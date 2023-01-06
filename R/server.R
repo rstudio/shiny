@@ -29,7 +29,7 @@ registerClient <- function(client) {
 
 #' Define Server Functionality
 #'
-#' @description \lifecycle{superseded}
+#' @description `r lifecycle::badge("superseded")`
 #'
 #' @description Defines the server-side logic of the Shiny application. This generally
 #' involves creating functions that map user inputs to various kinds of output.

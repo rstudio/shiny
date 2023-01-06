@@ -1,4 +1,14 @@
-# shiny 1.7.4.9000
+# shiny 1.7.4.9001
+
+## Full changelog
+
+### Breaking changes
+
+### New features and improvements
+
+* Closed #789: `<script>` loaded from dynamic UI are no longer loaded using synchronous `XMLHttpRequest` (via jQuery). (#3666)
+
+### Bug fixes
 
 
 # shiny 1.7.4

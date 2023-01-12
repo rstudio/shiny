@@ -8,7 +8,7 @@ declare type CreateHandler = {
     mouseout?: (e: JQuery.MouseOutEvent) => void;
     mousedown?: (e: JQuery.MouseDownEvent) => void;
     onResetImg: () => void;
-    onResize?: () => void;
+    onResize: ((e: JQuery.ResizeEvent) => void) | null;
 };
 declare type BrushInfo = {
     xmin: number;

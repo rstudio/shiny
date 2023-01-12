@@ -1,6 +1,6 @@
 import $ from "jquery";
 import { InputBinding } from "./inputBinding";
-import { hasOwnProperty } from "../../utils";
+import { hasDefinedProperty } from "../../utils";
 
 type CheckedHTMLElement = HTMLInputElement;
 
@@ -35,12 +35,15 @@ class CheckboxInputBinding extends InputBinding {
     el: CheckedHTMLElement,
     data: CheckboxReceiveMessageData
   ): void {
-    if (hasOwnProperty(data, "value")) el.checked = data.value;
+    if (hasDefinedProperty(data, "value")) {
+      el.checked = data.value;
+    }
 
     // checkboxInput()'s label works different from other
     // input labels...the label container should always exist
-    if (hasOwnProperty(data, "label"))
+    if (hasDefinedProperty(data, "label")) {
       $(el).parent().find("span").text(data.label);
+    }
 
     $(el).trigger("change");
   }

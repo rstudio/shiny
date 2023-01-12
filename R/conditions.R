@@ -421,8 +421,17 @@ pruneStackTrace <- function(parents) {
   # Loop over the parent indices. Anything that is not parented by current_node
   # (a.k.a. last-known-good node), or is a dupe, can be discarded. Anything that
   # is kept becomes the new current_node.
+  #
+  # jcheng 2022-03-18: Two more reasons a node can be kept:
+  #   1. parent is 0
+  #   2. parent is i
+  # Not sure why either of these situations happen, but they're common when
+  # interacting with rlang/dplyr errors. See issue rstudio/shiny#3250 for repro
+  # cases.
   include <- vapply(seq_along(parents), function(i) {
-    if (!is_dupe[[i]] && parents[[i]] == current_node) {
+    if ((!is_dupe[[i]] && parents[[i]] == current_node) ||
+        parents[[i]] == 0 ||
+        parents[[i]] == i) {
       current_node <<- i
       TRUE
     } else {

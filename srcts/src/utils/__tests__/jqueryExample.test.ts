@@ -5,7 +5,7 @@ import $ from "jquery";
 import { getQueriesForElement } from "@testing-library/dom";
 import userEvent from "@testing-library/user-event";
 
-$.fn.internalTest = function countify() {
+$.fn.internalTest = function countify(this: JQuery<HTMLElement>) {
   this.html(`
     <div>
       <button>0</button>
@@ -13,10 +13,13 @@ $.fn.internalTest = function countify() {
   `);
   const $button = this.find("button");
 
-  $button._count = 0;
+  // JQuery<HTMLButtonElement>
+
+  let count = 0;
+
   $button.click(() => {
-    $button._count++;
-    $button.text($button._count);
+    count++;
+    $button.text(count);
   });
 };
 

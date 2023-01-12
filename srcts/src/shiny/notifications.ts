@@ -2,12 +2,14 @@ import $ from "jquery";
 
 import { $escape, randomId } from "../utils";
 import { shinyUnbindAll } from "./initedMethods";
-import { renderContent } from "./render";
+import type { HtmlDep } from "./render";
+import { renderDependenciesAsync } from "./render";
+import { renderContentAsync } from "./render";
 
 // Milliseconds to fade in or out
 const fadeDuration = 250;
 
-function show({
+async function show({
   html = "",
   action = "",
   deps = [],
@@ -15,16 +17,34 @@ function show({
   id = null,
   closeButton = true,
   type = null,
-} = {}): ReturnType<typeof randomId> {
+}: {
+  html?: string;
+  action?: string;
+  deps?: HtmlDep[];
+  duration?: number | null;
+  id?: string | null;
+  closeButton?: boolean;
+  type?: string | null;
+} = {}): Promise<ReturnType<typeof randomId>> {
   if (!id) id = randomId();
+
+  // Normally we'd first create the notification's DOM elements, then call
+  // `renderContentAsync(x, {html: html, deps: deps})`, but that has a potential
+  // problem with async rendering. If we did that, then an empty notification
+  // (from this function) could show up and then sit there empty while the
+  // dependencies load (asynchronously), and only after all that get filled with
+  // content for the notification. So instead we'll render the deps here, then
+  // render the notification, then render the content in the notification.
+  await renderDependenciesAsync(deps);
 
   // Create panel if necessary
   createPanel();
 
   // Get existing DOM element for this ID, or create if needed.
-  let $notification = get(id);
+  let $notificationInit = get(id);
 
-  if ($notification.length === 0) $notification = create(id);
+  if ($notificationInit?.length === 0) $notificationInit = create(id);
+  const $notification = $notificationInit as JQuery<HTMLElement>;
 
   // Render html and dependencies
   const newHtml =
@@ -32,17 +52,21 @@ function show({
     `<div class="shiny-notification-content-action">${action}</div>`;
   const $content = $notification.find(".shiny-notification-content");
 
-  renderContent($content, { html: newHtml, deps: deps });
+  // Set/replace contents of wrapper with html.
+  await renderContentAsync($content, { html: newHtml });
 
   // Remove any existing classes of the form 'shiny-notification-xxxx'.
   // The xxxx would be strings like 'warning'.
-  const classes = $notification
-    .attr("class")
-    .split(/\s+/)
-    .filter((cls) => cls.match(/^shiny-notification-/))
-    .join(" ");
+  const classes = $notification?.attr("class");
 
-  $notification.removeClass(classes);
+  if (classes) {
+    const classVal = classes
+      .split(/\s+/)
+      .filter((cls: string) => cls.match(/^shiny-notification-/))
+      .join(" ");
+
+    $notification.removeClass(classVal);
+  }
 
   // Add class. 'default' means no additional CSS class.
   if (type && type !== "default")
@@ -67,9 +91,8 @@ function show({
   return id;
 }
 
-// TODO-barret - Should `id` be required? (some places do not supply one)
-function remove(id?: string): void {
-  get(id).fadeOut(fadeDuration, function () {
+function remove(id: string): void {
+  get(id)?.fadeOut(fadeDuration, function () {
     shinyUnbindAll(this);
     $(this).remove();
 
@@ -81,7 +104,7 @@ function remove(id?: string): void {
 }
 
 // Returns an individual notification DOM object (wrapped in jQuery).
-function get(id?: string) {
+function get(id: string | null | undefined) {
   if (!id) return null;
   return getPanel().find("#shiny-notification-" + $escape(id));
 }
@@ -115,10 +138,10 @@ function createPanel() {
 
 // Create a notification DOM element and return the jQuery object. If the
 // DOM element already exists for the ID, just return it without creating.
-function create(id) {
+function create(id: string): JQuery<HTMLElement> {
   let $notification = get(id);
 
-  if ($notification.length === 0) {
+  if ($notification?.length === 0) {
     $notification = $(
       `<div id="shiny-notification-${id}" class="shiny-notification">` +
         '<div class="shiny-notification-close">&times;</div>' +
@@ -135,11 +158,11 @@ function create(id) {
     getPanel().append($notification);
   }
 
-  return $notification;
+  return $notification as JQuery<HTMLElement>;
 }
 
 // Add a callback to remove a notification after a delay in ms.
-function addRemovalCallback(id, delay) {
+function addRemovalCallback(id: string, delay: number) {
   // If there's an existing removalCallback, clear it before adding the new
   // one.
   clearRemovalCallback(id);
@@ -149,14 +172,14 @@ function addRemovalCallback(id, delay) {
     remove(id);
   }, delay);
 
-  get(id).data("removalCallback", removalCallback);
+  get(id)?.data("removalCallback", removalCallback);
 }
 
 // Clear a removal callback from a notification, if present.
-function clearRemovalCallback(id) {
+function clearRemovalCallback(id: string) {
   const $notification = get(id);
   const oldRemovalCallback: ReturnType<typeof setTimeout> =
-    $notification.data("removalCallback");
+    $notification?.data("removalCallback");
 
   if (oldRemovalCallback) {
     clearTimeout(oldRemovalCallback);

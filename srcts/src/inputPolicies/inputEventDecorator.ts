@@ -11,7 +11,7 @@ class InputEventDecorator implements InputPolicy {
   }
 
   setInput(nameType: string, value: unknown, opts: InputPolicyOpts): void {
-    const evt = jQuery.Event("shiny:inputchanged") as ShinyEventInputChanged;
+    const evt = $.Event("shiny:inputchanged") as ShinyEventInputChanged;
 
     const input = splitInputNameType(nameType);
 

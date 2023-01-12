@@ -24,7 +24,7 @@ NULL
 #'   This will be used as the lang in the \code{<html>} tag, as in \code{<html lang="en">}.
 #'   The default (NULL) results in an empty string.
 #'
-#' @return A UI defintion that can be passed to the [shinyUI] function.
+#' @return A UI definition that can be passed to the [shinyUI] function.
 #'
 #' @note The `basicPage` function is deprecated, you should use the
 #'   [fluidPage()] function instead.
@@ -138,8 +138,7 @@ bs_theme_deps <- function(theme) {
 }
 
 is_bs_theme <- function(x) {
-  is_available("bslib", "0.2.0.9000") &&
-    bslib::is_bs_theme(x)
+  bslib::is_bs_theme(x)
 }
 
 #' Obtain Shiny's Bootstrap Sass theme
@@ -215,11 +214,10 @@ registerThemeDependency <- function(func) {
 
 bootstrapDependency <- function(theme) {
   htmlDependency(
-    "bootstrap", bootstrapVersion,
-    c(
-      href = "shared/bootstrap",
-      file = system.file("www/shared/bootstrap", package = "shiny")
-    ),
+    "bootstrap",
+    bootstrapVersion,
+    src = "www/shared/bootstrap",
+    package = "shiny",
     script = c(
       "js/bootstrap.min.js",
       # Safely adding accessibility plugin for screen readers and keyboard users; no break for sighted aspects (see https://github.com/paypal/bootstrap-accessibility-plugin)
@@ -387,7 +385,7 @@ collapseSizes <- function(padding) {
 #' @inheritParams bootstrapPage
 #' @param icon Optional icon to appear on a `navbarMenu` tab.
 #'
-#' @return A UI defintion that can be passed to the [shinyUI] function.
+#' @return A UI definition that can be passed to the [shinyUI] function.
 #'
 #' @details The `navbarMenu` function can be used to create an embedded
 #'   menu within the navbar that in turns includes additional tabPanels (see
@@ -796,7 +794,7 @@ verbatimTextOutput <- function(outputId, placeholder = FALSE) {
 #' @export
 imageOutput <- function(outputId, width = "100%", height="400px",
                         click = NULL, dblclick = NULL, hover = NULL, brush = NULL,
-                        inline = FALSE) {
+                        inline = FALSE, fill = FALSE) {
 
   style <- if (!inline) {
     # Using `css()` here instead of paste/sprintf so that NULL values will
@@ -852,7 +850,8 @@ imageOutput <- function(outputId, width = "100%", height="400px",
   }
 
   container <- if (inline) span else div
-  do.call(container, args)
+  res <- do.call(container, args)
+  bindFillRole(res, item = fill)
 }
 
 #' Create an plot or image output element
@@ -920,6 +919,11 @@ imageOutput <- function(outputId, width = "100%", height="400px",
 #'   `imageOutput`/`plotOutput` calls may share the same `id`
 #'   value; brushing one image or plot will cause any other brushes with the
 #'   same `id` to disappear.
+#' @param fill Whether or not the returned tag should be treated as a fill item,
+#'   meaning that its `height` is allowed to grow/shrink to fit a fill container
+#'   with an opinionated height (see [htmltools::bindFillRole()]) with an
+#'   opinionated height. Examples of fill containers include `bslib::card()` and
+#'   `bslib::card_body_fill()`.
 #' @inheritParams textOutput
 #' @note The arguments `clickId` and `hoverId` only work for R base graphics
 #'   (see the \pkg{\link[graphics:graphics-package]{graphics}} package). They do
@@ -1090,11 +1094,11 @@ imageOutput <- function(outputId, width = "100%", height="400px",
 #' @export
 plotOutput <- function(outputId, width = "100%", height="400px",
                        click = NULL, dblclick = NULL, hover = NULL, brush = NULL,
-                       inline = FALSE) {
+                       inline = FALSE, fill = !inline) {
 
   # Result is the same as imageOutput, except for HTML class
   res <- imageOutput(outputId, width, height, click, dblclick,
-                     hover, brush, inline)
+                     hover, brush, inline, fill)
 
   res$attribs$class <- "shiny-plot-output"
   res
@@ -1109,11 +1113,17 @@ tableOutput <- function(outputId) {
 
 dataTableDependency <- list(
   htmlDependency(
-    "datatables", "1.10.5", c(href = "shared/datatables"),
+    "datatables",
+    "1.10.5",
+    src = "www/shared/datatables",
+    package = "shiny",
     script = "js/jquery.dataTables.min.js"
   ),
   htmlDependency(
-    "datatables-bootstrap", "1.10.5", c(href = "shared/datatables"),
+    "datatables-bootstrap",
+    "1.10.5",
+    src = "www/shared/datatables",
+    package = "shiny",
     stylesheet = c("css/dataTables.bootstrap.css", "css/dataTables.extra.css"),
     script = "js/dataTables.bootstrap.js"
   )
@@ -1131,15 +1141,21 @@ dataTableOutput <- function(outputId) {
 #' Create an HTML output element
 #'
 #' Render a reactive output variable as HTML within an application page. The
-#' text will be included within an HTML `div` tag, and is presumed to
-#' contain HTML content which should not be escaped.
+#' text will be included within an HTML `div` tag, and is presumed to contain
+#' HTML content which should not be escaped.
 #'
-#' `uiOutput` is intended to be used with `renderUI` on the server
-#' side. It is currently just an alias for `htmlOutput`.
+#' `uiOutput` is intended to be used with `renderUI` on the server side. It is
+#' currently just an alias for `htmlOutput`.
 #'
 #' @param outputId output variable to read the value from
 #' @param ... Other arguments to pass to the container tag function. This is
 #'   useful for providing additional classes for the tag.
+#' @param fill If `TRUE`, the result of `container` is treated as _both_ a fill
+#'   item and container (see [htmltools::bindFillRole()]), which means both the
+#'   `container` as well as its immediate children (i.e., the result of
+#'   `renderUI()`) are allowed to grow/shrink to fit a fill container with an
+#'   opinionated height. Set `fill = "item"` or `fill = "container"` to treat
+#'   `container` as just a fill item or a fill container.
 #' @inheritParams textOutput
 #' @return An HTML output element that can be included in a panel
 #' @examples
@@ -1151,12 +1167,16 @@ dataTableOutput <- function(outputId) {
 #' )
 #' @export
 htmlOutput <- function(outputId, inline = FALSE,
-  container = if (inline) span else div, ...)
+  container = if (inline) span else div, fill = FALSE, ...)
 {
-  if (anyUnnamed(list(...))) {
+  if (any_unnamed(list(...))) {
     warning("Unnamed elements in ... will be replaced with dynamic UI.")
   }
-  container(id = outputId, class="shiny-html-output", ...)
+  res <- container(id = outputId, class = "shiny-html-output", ...)
+  bindFillRole(
+    res, item = isTRUE(fill) || isTRUE("item" == fill),
+    container = isTRUE(fill) || isTRUE("container" == fill)
+  )
 }
 
 #' @rdname htmlOutput

@@ -1,16 +1,17 @@
-/// <reference types="node" />
-declare class Throttler<T = unknown> {
-    target: unknown;
-    func: (...args: T[]) => void;
-    delayMs: number;
-    timerId: NodeJS.Timeout;
-    args: T[];
-    constructor(target: unknown, func: (...args: T[]) => void, delayMs: number);
-    normalCall(...args: T[]): void;
-    immediateCall(...args: T[]): void;
+import type { InputPolicy } from "../inputPolicies";
+import type { InputRatePolicy } from "../inputPolicies/inputRatePolicy";
+import type { AnyVoidFunction } from "../utils/extraTypes";
+declare class Throttler<X extends AnyVoidFunction> implements InputRatePolicy<X> {
+    target: InputPolicy | null;
+    func: X;
+    delayMs: number | undefined;
+    timerId: ReturnType<typeof setTimeout> | null;
+    args: Parameters<X> | null;
+    constructor(target: InputPolicy | null, func: X, delayMs: number | undefined);
+    normalCall(...args: Parameters<X>): void;
+    immediateCall(...args: Parameters<X>): void;
     isPending(): boolean;
     $clearTimer(): void;
     $invoke(): void;
 }
-declare function throttle<T>(threshold: number, func: (...args: T[]) => void): (...args: T[]) => void;
-export { Throttler, throttle };
+export { Throttler, };

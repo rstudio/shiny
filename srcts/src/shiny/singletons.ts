@@ -1,5 +1,4 @@
 import $ from "jquery";
-import { toLowerCase } from "../utils";
 import type { BindScope } from "./bind";
 
 const reSingleton = /<!--(SHINY.SINGLETON\[([\w]+)\])-->([\s\S]*?)<!--\/\1-->/;
@@ -23,26 +22,35 @@ function renderHtml(
 
   addToHead(processed.head);
   register(processed.singletons);
-  if (where === "replace") {
-    $(el).html(processed.html);
-  } else {
-    let elElements: HTMLElement[];
 
-    if (el instanceof HTMLElement) {
-      elElements = [el];
-    } else {
-      elElements = el.toArray();
-    }
-    $.each(elElements, (i, el) => {
-      // type InsertPosition = "beforebegin" | "afterbegin" | "beforeend" | "afterend"
-      el.insertAdjacentHTML(toLowerCase(where), processed.html);
-    });
+  // N.B. even though the DOM insertion below _could_ be done with vanilla JS,
+  // we intentionally use jQuery so that <script> tags execute.
+  // https://github.com/rstudio/shiny/pull/3630
+  switch (where.toLowerCase()) {
+    case "replace":
+      $(el).html(processed.html);
+      break;
+    case "beforebegin":
+      $(el).before(processed.html);
+      break;
+    case "afterbegin":
+      $(el).prepend(processed.html);
+      break;
+    case "beforeend":
+      $(el).append(processed.html);
+      break;
+    case "afterend":
+      $(el).after(processed.html);
+      break;
+    default:
+      throw new Error("Unknown where position: " + where);
   }
+
   return processed;
 }
 // Take an object where keys are names of singletons, and merges it into
 // knownSingletons
-function register(s) {
+function register(s: typeof knownSingletons) {
   $.extend(knownSingletons, s);
 }
 // Takes a string or array of strings and adds them to knownSingletons
@@ -58,7 +66,7 @@ function registerNames(s: string[] | string): void {
 // Inserts new content into document head
 function addToHead(head: string) {
   if (head.length > 0) {
-    const tempDiv = $("<div>" + head + "</div>").get(0);
+    const tempDiv = $("<div>" + head + "</div>").get(0) as HTMLDivElement;
     const $head = $("head");
 
     while (tempDiv.hasChildNodes()) {
@@ -76,7 +84,12 @@ function processHtml(val: string): {
   const newSingletons: typeof knownSingletons = {};
   let newVal: string;
 
-  const findNewPayload = function (match, p1, sig, payload) {
+  const findNewPayload = function (
+    match: string,
+    p1: string,
+    sig: string,
+    payload: string
+  ) {
     if (knownSingletons[sig] || newSingletons[sig]) return "";
     newSingletons[sig] = true;
     return payload;
@@ -89,8 +102,8 @@ function processHtml(val: string): {
     val = newVal;
   }
 
-  const heads = [];
-  const headAddPayload = function (match, payload) {
+  const heads: string[] = [];
+  const headAddPayload = function (match: string, payload: string) {
     heads.push(payload);
     return "";
   };

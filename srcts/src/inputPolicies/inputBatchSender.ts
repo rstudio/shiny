@@ -1,34 +1,31 @@
-import $ from "jquery";
-import type { EventPriority } from "./inputPolicy";
-import { InputPolicy } from "./inputPolicy";
+import type { InputPolicy, InputPolicyOpts } from "./inputPolicy";
 import type { ShinyApp } from "../shiny/shinyapp";
 
 // Schedules data to be sent to shinyapp at the next setTimeout(0).
 // Batches multiple input calls into one websocket message.
-class InputBatchSender extends InputPolicy {
+class InputBatchSender implements InputPolicy {
+  target!: InputPolicy; // We need this field to satisfy the InputPolicy interface
   shinyapp: ShinyApp;
-  timerId: NodeJS.Timeout = null;
   pendingData: { [key: string]: unknown } = {};
   reentrant = false;
+  sendIsEnqueued = false;
   lastChanceCallback: Array<() => void> = [];
 
   constructor(shinyapp: ShinyApp) {
-    super();
     this.shinyapp = shinyapp;
   }
 
-  setInput(
-    nameType: string,
-    value: unknown,
-    opts: { priority: EventPriority }
-  ): void {
+  setInput(nameType: string, value: unknown, opts: InputPolicyOpts): void {
     this.pendingData[nameType] = value;
 
     if (!this.reentrant) {
       if (opts.priority === "event") {
         this._sendNow();
-      } else if (!this.timerId) {
-        this.timerId = setTimeout(this._sendNow.bind(this), 0);
+      } else if (!this.sendIsEnqueued) {
+        this.shinyapp.actionQueue.enqueue(() => {
+          this.sendIsEnqueued = false;
+          this._sendNow();
+        });
       }
     }
   }
@@ -40,10 +37,7 @@ class InputBatchSender extends InputPolicy {
 
     this.reentrant = true;
     try {
-      this.timerId = null;
-      $.each(this.lastChanceCallback, (i, callback) => {
-        callback();
-      });
+      this.lastChanceCallback.forEach((callback) => callback());
       const currentData = this.pendingData;
 
       this.pendingData = {};

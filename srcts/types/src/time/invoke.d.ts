@@ -1,9 +1,11 @@
 import type { InputPolicy } from "../inputPolicies";
-declare class Invoker<T> {
-    target: InputPolicy;
-    func: () => void;
-    constructor(target: InputPolicy, func: (...args: T[]) => void);
-    normalCall(...args: T[]): void;
-    immediateCall(...args: T[]): void;
+import type { InputRatePolicy } from "../inputPolicies/inputRatePolicy";
+import type { AnyVoidFunction } from "../utils/extraTypes";
+declare class Invoker<X extends AnyVoidFunction> implements InputRatePolicy<X> {
+    target: InputPolicy | null;
+    func: X;
+    constructor(target: InputPolicy | null, func: X);
+    normalCall(...args: Parameters<X>): void;
+    immediateCall(...args: Parameters<X>): void;
 }
 export { Invoker };

@@ -1,6 +1,6 @@
 #' Shiny Developer Mode
 #'
-#' @description \lifecycle{experimental}
+#' @description `r lifecycle::badge("experimental")`
 #'
 #'   Developer Mode enables a number of [options()] to make a developer's life
 #'   easier, like enabling non-minified JS and printing messages about

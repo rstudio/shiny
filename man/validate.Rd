@@ -55,10 +55,12 @@ can create your own validation test functions. A passing test should return
 to display to the user, or if the failure should happen silently, \code{FALSE}.
 
 Alternatively you can use \code{validate()} within an \code{if} statement, which is
-particularly useful for more complex conditions:\preformatted{if (input$x < 0 && input$choice == "positive") \{
+particularly useful for more complex conditions:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{if (input$x < 0 && input$choice == "positive") \{
   validate("If choice is positive then x must be greater than 0")
 \}
-}
+}\if{html}{\out{</div>}}
 }
 
 \examples{

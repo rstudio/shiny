@@ -5,12 +5,11 @@
 
 // - TypeScript -----------------------------------------------------------
 
-import { banner, build, outDir } from "./_build";
-import babelPlugin from "esbuild-plugin-babel";
+import { banner, build, outDir, babelPlugin } from "./_build";
 
 build({
   bundle: true,
-  sourcemap: "inline",
+  sourcemap: true,
   minify: true,
   plugins: [babelPlugin()],
   banner: banner,
@@ -25,8 +24,10 @@ build({
 // - Sass -----------------------------------------------------------
 
 import autoprefixer from "autoprefixer";
-import postCssPlugin from "@deanc/esbuild-plugin-postcss";
 import sassPlugin from "esbuild-plugin-sass";
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore; Type definitions are not found. This occurs when `strict: true` in tsconfig.json
+import postCssPlugin from "@deanc/esbuild-plugin-postcss";
 
 const sassOpts = {
   minify: true,

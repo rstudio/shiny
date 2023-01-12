@@ -40,7 +40,9 @@ sense, namely:
 
 In the example here, the \code{bindCache()} key consists of \code{input$x} and
 \code{input$y} combined, and the value is \code{input$x * input$y}. In this simple
-example, for any given key, there is only one possible returned value.\if{html}{\out{<div class="sourceCode NA">}}\preformatted{r <- reactive(\{ input$x * input$y \}) \%>\%
+example, for any given key, there is only one possible returned value.
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{r <- reactive(\{ input$x * input$y \}) \%>\%
   bindCache(input$x, input$y)
 }\if{html}{\out{</div>}}
 
@@ -63,7 +65,9 @@ to do some sort of reduction on the data that still captures information
 about whether a value can be retrieved from the cache. For example, if you
 have a large data set with timestamps, it might make sense to extract the
 most recent timestamp and return that. Then, instead of hashing the entire
-data object, the cached reactive only needs to hash the timestamp.\if{html}{\out{<div class="sourceCode NA">}}\preformatted{r <- reactive(\{ compute(bigdata()) \} \%>\%
+data object, the cached reactive only needs to hash the timestamp.
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{r <- reactive(\{ compute(bigdata()) \} \%>\%
   bindCache(\{ extract_most_recent_time(bigdata()) \})
 }\if{html}{\out{</div>}}
 
@@ -105,7 +109,9 @@ cache key is not too expensive.
 Remember that the key is \emph{reactive}, so it is not re-executed every single
 time that someone accesses the cached reactive. It is only re-executed if
 it has been invalidated by one of the reactives it depends on. For
-example, suppose we have this cached reactive:\if{html}{\out{<div class="sourceCode NA">}}\preformatted{r <- reactive(\{ input$x * input$y \}) \%>\%
+example, suppose we have this cached reactive:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{r <- reactive(\{ input$x * input$y \}) \%>\%
  bindCache(input$x, input$y)
 }\if{html}{\out{</div>}}
 
@@ -154,24 +160,30 @@ persists beyond the current R session.
 To use different settings for an application-scoped cache, you can call
 \code{\link[=shinyOptions]{shinyOptions()}} at the top of your app.R, server.R, or
 global.R. For example, this will create a cache with 500 MB of space
-instead of the default 200 MB:\preformatted{shinyOptions(cache = cachem::cache_mem(max_size = 500e6))
-}
+instead of the default 200 MB:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{shinyOptions(cache = cachem::cache_mem(max_size = 500e6))
+}\if{html}{\out{</div>}}
 
 To use different settings for a session-scoped cache, you can set
 \code{self$cache} at the top of your server function. By default, it will create
 a 200 MB memory cache for each session, but you can replace it with
 something different. To use the session-scoped cache, you must also call
 \code{bindCache()} with \code{cache="session"}. This will create a 100 MB cache for
-the session:\preformatted{function(input, output, session) \{
+the session:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{function(input, output, session) \{
   session$cache <- cachem::cache_mem(max_size = 100e6)
   ...
 \}
-}
+}\if{html}{\out{</div>}}
 
 If you want to use a cache that is shared across multiple R processes, you
 can use a \code{\link[cachem:cache_disk]{cachem::cache_disk()}}. You can create a application-level shared
-cache by putting this at the top of your app.R, server.R, or global.R:\preformatted{shinyOptions(cache = cachem::cache_disk(file.path(dirname(tempdir()), "myapp-cache"))
-}
+cache by putting this at the top of your app.R, server.R, or global.R:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{shinyOptions(cache = cachem::cache_disk(file.path(dirname(tempdir()), "myapp-cache"))
+}\if{html}{\out{</div>}}
 
 This will create a subdirectory in your system temp directory named
 \code{myapp-cache} (replace \code{myapp-cache} with a unique name of
@@ -181,8 +193,10 @@ stops of the R process, as long as you do not reboot.
 
 To have the cache persist even across multiple reboots, you can create the
 cache in a location outside of the temp directory. For example, it could
-be a subdirectory of the application:\preformatted{shinyOptions(cache = cachem::cache_disk("./myapp-cache"))
-}
+be a subdirectory of the application:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{shinyOptions(cache = cachem::cache_disk("./myapp-cache"))
+}\if{html}{\out{</div>}}
 
 In this case, resetting the cache will have to be done manually, by deleting
 the directory.
@@ -247,9 +261,11 @@ You may need to provide a \code{cacheHint} to \code{\link[=createRenderFunction]
 \code{htmlwidgets::shinyRenderWidget()}, if you've authored an htmlwidget) in
 order for \code{bindCache()} to correctly compute a cache key.
 
-The potential problem is a cache collision. Consider the following:\preformatted{output$x1 <- renderText(\{ input$x \}) \%>\% bindCache(input$x)
+The potential problem is a cache collision. Consider the following:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{output$x1 <- renderText(\{ input$x \}) \%>\% bindCache(input$x)
 output$x2 <- renderText(\{ input$x * 2 \}) \%>\% bindCache(input$x)
-}
+}\if{html}{\out{</div>}}
 
 Both \code{output$x1} and \code{output$x2} use \code{input$x} as part of their cache key,
 but if it were the only thing used in the cache key, then the two outputs
@@ -258,7 +274,9 @@ this, a \emph{cache hint} is automatically added when \code{\link[=renderText]{r
 \code{\link[=createRenderFunction]{createRenderFunction()}}. The cache hint is used as part of the actual
 cache key, in addition to the one passed to \code{bindCache()} by the user. The
 cache hint can be viewed by calling the internal Shiny function
-\code{extractCacheHint()}:\if{html}{\out{<div class="sourceCode NA">}}\preformatted{r <- renderText(\{ input$x \})
+\code{extractCacheHint()}:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{r <- renderText(\{ input$x \})
 shiny:::extractCacheHint(r)
 }\if{html}{\out{</div>}}
 
@@ -289,7 +307,9 @@ that may influence the final value.
 For \pkg{htmlwidgets}, it will try to automatically infer a cache hint;
 again, you can inspect the cache hint with \code{shiny:::extractCacheHint()} and
 also test it in an application. If you do need to explicitly provide a
-cache hint, pass it to \code{shinyRenderWidget}. For example:\preformatted{renderMyWidget <- function(expr) \{
+cache hint, pass it to \code{shinyRenderWidget}. For example:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{renderMyWidget <- function(expr) \{
   q <- rlang::enquo0(expr)
 
   htmlwidgets::shinyRenderWidget(
@@ -299,7 +319,7 @@ cache hint, pass it to \code{shinyRenderWidget}. For example:\preformatted{rende
     cacheHint = list(label = "myWidget", userQuo = q)
   )
 \}
-}
+}\if{html}{\out{</div>}}
 
 If your \code{render} function sets any internal state, you may find it useful
 in your call to \code{\link[=createRenderFunction]{createRenderFunction()}} to use
@@ -330,8 +350,10 @@ For developers of such code, they should call \code{\link[=createRenderFunction]
 
 When \code{bindCache()} is used with \code{renderPlot()}, the \code{height} and \code{width}
 passed to the original \code{renderPlot()} are ignored. They are superseded by
-\code{sizePolicy} argument passed to `bindCache. The default is:\preformatted{sizePolicy = sizeGrowthRatio(width = 400, height = 400, growthRate = 1.2)
-}
+\code{sizePolicy} argument passed to `bindCache. The default is:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{sizePolicy = sizeGrowthRatio(width = 400, height = 400, growthRate = 1.2)
+}\if{html}{\out{</div>}}
 
 \code{sizePolicy} must be a function that takes a two-element numeric vector as
 input, representing the width and height of the \verb{<img>} element in the

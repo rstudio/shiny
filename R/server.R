@@ -29,7 +29,7 @@ registerClient <- function(client) {
 
 #' Define Server Functionality
 #'
-#' @description \lifecycle{superseded}
+#' @description `r lifecycle::badge("superseded")`
 #'
 #' @description Defines the server-side logic of the Shiny application. This generally
 #' involves creating functions that map user inputs to various kinds of output.
@@ -49,7 +49,7 @@ registerClient <- function(client) {
 #' optional `session` parameter, which is used when greater control is
 #' needed.
 #'
-#' See the [tutorial](https://rstudio.github.io/shiny/tutorial/) for more
+#' See the [tutorial](https://shiny.rstudio.com/tutorial/) for more
 #' on how to write a server function.
 #'
 #' @param func The server function for this application. See the details section
@@ -128,7 +128,7 @@ createAppHandlers <- function(httpHandlers, serverFuncSource) {
   appvars <- new.env()
   appvars$server <- NULL
 
-  sys.www.root <- system.file('www', package='shiny')
+  sys.www.root <- system_file('www', package='shiny')
 
   # This value, if non-NULL, must be present on all HTTP and WebSocket
   # requests as the Shiny-Shared-Secret header or else access will be
@@ -331,7 +331,7 @@ argsForServerFunc <- function(serverFunc, session) {
 getEffectiveBody <- function(func) {
   if (is.null(func))
     NULL
-  else if (isS4(func) && class(func) == "functionWithTrace")
+  else if (isS4(func) && inherits(func, "functionWithTrace"))
     body(func@original)
   else
     body(func)
@@ -385,7 +385,7 @@ startApp <- function(appObj, port, host, quiet) {
     list(
       # Always handle /session URLs dynamically, even if / is a static path.
       "session" = excludeStaticPath(),
-      "shared" = system.file(package = "shiny", "www", "shared")
+      "shared" = system_file(package = "shiny", "www", "shared")
     ),
     .globals$resourcePaths
   )

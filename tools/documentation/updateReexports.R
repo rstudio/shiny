@@ -1,8 +1,8 @@
 # source("tools/documentation/updateReexports.R")
-# Will add all functions aliased in `./tools/documentation/reexports.yml`
+# Will add all functions aliased in `./tools/documentation/reexports.json`
 # Will save all reexports to `./R/reexports.R` and document to enforce all re-exports
-# This script needs information from `./tools/documentation/reexports.yml` to allow pkgdown to be on the same page
-# Information from `./tools/documentation/reexports.yml` will be used in `shiny-dev-center`
+# This script needs information from `./tools/documentation/reexports.json` to allow pkgdown to be on the same page
+# Information from `./tools/documentation/reexports.json` will be used in `shiny-dev-center`
 
 
 local({
@@ -16,13 +16,13 @@ local({
 
   `%>%` <- magrittr::`%>%`
 
-  local_reexports_r_file <- rprojroot::find_package_root_file("R/reexports.R")
-  unlink(local_reexports_r_file)
-
   # pre document
   devtools::document()
 
   pre_namespace_lines <- readLines(rprojroot::find_package_root_file("NAMESPACE"))
+
+  local_reexports_r_file <- rprojroot::find_package_root_file("R/reexports.R")
+  unlink(local_reexports_r_file)
 
   alias_info <- jsonlite::fromJSON(rprojroot::find_package_root_file("tools/documentation/reexports.json"), simplifyDataFrame = FALSE)
   local_man_folder <- rprojroot::find_package_root_file("man")
@@ -119,13 +119,14 @@ local({
     }) %>%
     paste0(collapse = "\n")
 
-  docs_have_changed <- identical(pre_namespace_lines, post_namespace_lines)
-  message(
+  docs_are_same <- identical(pre_namespace_lines, post_namespace_lines)
+  msg_fn <- if (docs_are_same) message else stop
+  msg_fn(
     "\n",
-    "The NAMESPACE exports ", if (docs_have_changed) { "did NOT change"} else { "CHANGED"},
+    "The NAMESPACE exports ", if (docs_are_same) { "did NOT change"} else { "CHANGED"},
     " by copying in the ", pkg_names, " files\n",
     "\n",
-    if (docs_have_changed) "Possible ", pkg_names, " version requirement to add to DESCRIPTION file:\n",
+    if (docs_are_same) "Possible ", pkg_names, " version requirement to add to DESCRIPTION file:\n",
     "Imports:\n",
     imports_txt
   )

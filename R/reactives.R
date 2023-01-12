@@ -1203,7 +1203,7 @@ Observer <- R6Class(
             # validation = function(e) NULL,
             # shiny.output.cancel = function(e) NULL
 
-            if (inherits(e, "shiny.silent.error")) {
+            if (cnd_inherits(e, "shiny.silent.error")) {
               return()
             }
 
@@ -2472,11 +2472,11 @@ debounce <- function(r, millis, priority = 100, domain = getDefaultReactiveDomai
 
       # Ensure r() is called only after setting firstRun to FALSE since r()
       # may throw an error
-      r()
+      try(r(), silent = TRUE)
       return()
     }
     # This ensures r() is still tracked after firstRun
-    r()
+    try(r(), silent = TRUE)
 
     # The value (or possibly millis) changed. Start or reset the timer.
     v$when <- getDomainTimeMs(domain) + millis()
@@ -2509,7 +2509,7 @@ debounce <- function(r, millis, priority = 100, domain = getDefaultReactiveDomai
   # commenting it out and studying the unit test failure that results.
   primer <- observe({
     primer$destroy()
-    er()
+    try(er(), silent = TRUE)
   }, label = "debounce primer", domain = domain, priority = priority)
 
   er
@@ -2551,7 +2551,7 @@ throttle <- function(r, millis, priority = 100, domain = getDefaultReactiveDomai
   }
 
   # Responsible for tracking when f() changes.
-  observeEvent(r(), {
+  observeEvent(try(r(), silent = TRUE), {
     if (v$pending) {
       # In a blackout period and someone already scheduled; do nothing
     } else if (blackoutMillisLeft() > 0) {

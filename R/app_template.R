@@ -10,8 +10,7 @@
 #' 2: app.R              : Main application file
 #' 3: R/example.R        : Helper file with R code
 #' 4: R/example-module.R : Example module
-#' 5: tests/shinytest/   : Tests using the shinytest package
-#' 6: tests/testthat/    : Tests using the testthat package
+#' 5: tests/testthat/    : Tests using the testthat and shinytest2 package
 #' ```
 #'
 #' If option 1 is selected, the full example application including the
@@ -24,13 +23,12 @@
 #' |   |- example-module.R
 #' |   `- example.R
 #' `- tests
-#'     |- shinytest.R
-#'     |- shinytest
-#'     |   `- mytest.R
 #'     |- testthat.R
 #'     `- testthat
+#'         |- setup-shinytest2.R
 #'         |- test-examplemodule.R
 #'         |- test-server.R
+#'         |- test-shinytest2.R
 #'         `- test-sort.R
 #' ```
 #'
@@ -45,20 +43,21 @@
 #' * `tests/` contains various tests for the application. You may
 #'   choose to use or remove any of them. They can be executed by the
 #'   [runTests()] function.
-#' * `tests/shinytest.R` is a test runner for test files in the
-#'   `tests/shinytest/` directory.
-#' * `tests/shinytest/mytest.R` is a test that uses the
-#'   [shinytest](https://rstudio.github.io/shinytest/) package to do
-#'   snapshot-based testing.
 #' * `tests/testthat.R` is a test runner for test files in the
-#'   `tests/testthat/` directory using the [testthat](https://testthat.r-lib.org/) package.
+#'   `tests/testthat/` directory using the
+#'   [shinytest2](https://rstudio.github.io/shinytest2/reference/test_app.html)
+#'   package.
+#' * `tests/testthat/setup-shinytest2.R` is setup file to source your `./R` folder into the testing environment.
 #' * `tests/testthat/test-examplemodule.R` is a test for an application's module server function.
 #' * `tests/testthat/test-server.R` is a test for the application's server code
+#' * `tests/testthat/test-shinytest2.R` is a test that uses the
+#'   [shinytest2](https://rstudio.github.io/shinytest2/) package to do
+#'   snapshot-based testing.
 #' * `tests/testthat/test-sort.R` is a test for a supporting function in the `R/` directory.
 #'
 #' @param path Path to create new shiny application template.
 #' @param examples Either one of "default", "ask", "all", or any combination of
-#'   "app", "rdir", "module", "shinytest", and "testthat". In an
+#'   "app", "rdir", "module", and "tests". In an
 #'   interactive session, "default" falls back to "ask"; in a non-interactive
 #'   session, "default" falls back to "all". With "ask", this function will
 #'   prompt the user to select which template items will be added to the new app
@@ -79,15 +78,19 @@ shinyAppTemplate <- function(path = NULL, examples = "default", dryrun = FALSE)
   # =======================================================
 
   choices <- c(
-    app       = "app.R              : Main application file",
-    rdir      = "R/example.R        : Helper file with R code",
-    module    = "R/example-module.R : Example module",
-    shinytest = "tests/shinytest/   : Tests using the shinytest package",
-    testthat  = "tests/testthat/    : Tests using the testthat package"
+    app    = "app.R              : Main application file",
+    rdir   = "R/example.R        : Helper file with R code",
+    module = "R/example-module.R : Example module",
+    tests  = "tests/testthat/    : Tests using {testthat} and {shinytest2}"
   )
 
+  # Support legacy value
+  examples[examples == "shinytest"] <- "tests"
+  examples[examples == "testthat"] <- "tests"
+  examples <- unique(examples)
+
   if (identical(examples, "default")) {
-    if (interactive()) {
+    if (rlang::is_interactive()) {
       examples <- "ask"
     } else {
       examples <- "all"
@@ -124,18 +127,8 @@ shinyAppTemplate <- function(path = NULL, examples = "default", dryrun = FALSE)
     return(invisible())
   }
 
-  if ("shinytest" %in% examples) {
-    if (!is_available("shinytest", "1.4.0"))
-    {
-      message(
-        "The tests/shinytest directory needs shinytest 1.4.0 or later to work properly."
-      )
-      if (is_available("shinytest")) {
-        message("You currently have shinytest ",
-                utils::packageVersion("shinytest"), " installed.")
-      }
-
-    }
+  if ("tests" %in% examples) {
+    rlang::check_installed("shinytest2", "for {testthat} tests to work as expected", version = "0.2.0")
   }
 
   # =======================================================
@@ -152,7 +145,7 @@ shinyAppTemplate <- function(path = NULL, examples = "default", dryrun = FALSE)
 
   # Helper to resolve paths relative to our template
   template_path <- function(...) {
-    system.file("app_template", ..., package = "shiny")
+    system_file("app_template", ..., package = "shiny")
   }
 
   # Resolve path relative to destination
@@ -208,16 +201,13 @@ shinyAppTemplate <- function(path = NULL, examples = "default", dryrun = FALSE)
   }
 
   # Copy the files for a tests/ subdirectory
-  copy_test_dir <- function(name) {
+  copy_test_dir <- function() {
     files <- dir(template_path("tests"), recursive = TRUE)
-    # Note: This is not the same as using dir(pattern = "^shinytest"), since
-    # that will not match files inside of shinytest/.
-    files <- files[grepl(paste0("^", name), files)]
 
     # Filter out files that are not module files in the R directory.
     if (! "rdir" %in% examples) {
       # find all files in the testthat folder that are not module or server files
-      is_r_folder_file <- (!grepl("module|server", basename(files))) & (dirname(files) == "testthat")
+      is_r_folder_file <- !grepl("module|server|shinytest2|testthat", basename(files))
       files <- files[!is_r_folder_file]
     }
 
@@ -282,12 +272,10 @@ shinyAppTemplate <- function(path = NULL, examples = "default", dryrun = FALSE)
     copy_file(file.path("R", module_files))
   }
 
-  # tests/ dir
-  if ("shinytest" %in% examples) {
-    copy_test_dir("shinytest")
+  # tests/testthat dir
+  if ("tests" %in% examples) {
+    copy_test_dir()
   }
-  if ("testthat" %in% examples) {
-    copy_test_dir("testthat")
-  }
+
   invisible()
 }

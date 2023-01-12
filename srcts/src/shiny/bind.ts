@@ -9,12 +9,19 @@ import type {
 import { shinyAppBindOutput, shinyAppUnbindOutput } from "./initedMethods";
 import { sendImageSizeFns } from "./sendImageSize";
 
-const boundInputs = {};
+const boundInputs: {
+  [key: string]: { binding: InputBinding; node: HTMLElement };
+} = {};
 
 type BindScope = HTMLElement | JQuery<HTMLElement>;
 
 // todo make sure allowDeferred can NOT be supplied and still work
-function valueChangeCallback(inputs, binding, el, allowDeferred) {
+function valueChangeCallback(
+  inputs: InputValidateDecorator,
+  binding: InputBinding,
+  el: HTMLElement,
+  allowDeferred: boolean
+) {
   let id = binding.getId(el);
 
   if (id) {
@@ -23,7 +30,11 @@ function valueChangeCallback(inputs, binding, el, allowDeferred) {
 
     if (type) id = id + ":" + type;
 
-    const opts = {
+    const opts: {
+      priority: "deferred" | "immediate";
+      binding: typeof binding;
+      el: typeof el;
+    } = {
       priority: allowDeferred ? "deferred" : "immediate",
       binding: binding,
       el: el,
@@ -47,14 +58,23 @@ function bindInputs(
   scope: BindScope = document.documentElement
 ): {
   [key: string]: {
-    value: unknown;
+    value: ReturnType<InputBinding["getValue"]>;
     opts: { immediate: boolean; binding: InputBinding; el: HTMLElement };
   };
 } {
   const { inputs, inputsRate, inputBindings } = shinyCtx;
   const bindings = inputBindings.getBindings();
 
-  const inputItems = {};
+  const inputItems: {
+    [key: string]: {
+      value: any;
+      opts: {
+        immediate: true;
+        binding: InputBinding;
+        el: HTMLElement;
+      };
+    };
+  } = {};
 
   for (let i = 0; i < bindings.length; i++) {
     const binding = bindings[i].binding;
@@ -84,7 +104,7 @@ function bindInputs(
         const thisBinding = binding;
         const thisEl = el;
 
-        return function (allowDeferred) {
+        return function (allowDeferred: boolean) {
           valueChangeCallback(inputs, thisBinding, thisEl, allowDeferred);
         };
       })();

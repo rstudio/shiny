@@ -778,9 +778,9 @@ renderUI <- function(expr, env = parent.frame(), quoted = FALSE,
 #'   function.)
 #' @param contentType A string of the download's
 #'   [content type](https://en.wikipedia.org/wiki/Internet_media_type), for
-#'   example `"text/csv"` or `"image/png"`. If `NULL` or
-#'   `NA`, the content type will be guessed based on the filename
-#'   extension, or `application/octet-stream` if the extension is unknown.
+#'   example `"text/csv"` or `"image/png"`. If `NULL`, the content type 
+#'   will be guessed based on the filename extension, or 
+#'   `application/octet-stream` if the extension is unknown.
 #' @param outputArgs A list of arguments to be passed through to the implicit
 #'   call to [downloadButton()] when `downloadHandler` is used
 #'   in an interactive R Markdown document.
@@ -810,7 +810,7 @@ renderUI <- function(expr, env = parent.frame(), quoted = FALSE,
 #' shinyApp(ui, server)
 #' }
 #' @export
-downloadHandler <- function(filename, content, contentType=NA, outputArgs=list()) {
+downloadHandler <- function(filename, content, contentType=NULL, outputArgs=list()) {
   renderFunc <- function(shinysession, name, ...) {
     shinysession$registerDownload(name, filename, contentType, content)
   }
@@ -953,7 +953,7 @@ renderDataTable <- function(expr, options = NULL, searchDelay = 500,
 DT10Names <- function() {
   rbind(
     utils::read.table(
-      system.file('www/shared/datatables/upgrade1.10.txt', package = 'shiny'),
+      system_file('www/shared/datatables/upgrade1.10.txt', package = 'shiny'),
       stringsAsFactors = FALSE
     ),
     c('aoColumns', 'Removed')  # looks like an omission on the upgrade guide

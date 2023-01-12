@@ -71,7 +71,7 @@ registered \code{devmode_default} value will be used.}
 \code{TRUE} and the specified option is not set in \code{\link[=options]{options()}}.}
 }
 \description{
-\lifecycle{experimental}
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
 
 Developer Mode enables a number of \code{\link[=options]{options()}} to make a developer's life
 easier, like enabling non-minified JS and printing messages about
@@ -84,24 +84,26 @@ Please see the function descriptions for more details.
 }
 \section{Functions}{
 \itemize{
-\item \code{devmode}: Function to set two options to enable/disable Shiny
+\item \code{devmode()}: Function to set two options to enable/disable Shiny
 Developer Mode and Developer messages
 
-\item \code{in_devmode}: Determines if Shiny is in Developer Mode. If the
+\item \code{in_devmode()}: Determines if Shiny is in Developer Mode. If the
 \code{getOption("shiny.devmode")} is set to \code{TRUE} and not in testing inside
 \code{testthat}, then Shiny Developer Mode is enabled.
 
-\item \code{with_devmode}: Temporarily set Shiny Developer Mode and Developer
+\item \code{with_devmode()}: Temporarily set Shiny Developer Mode and Developer
 message verbosity
 
-\item \code{devmode_inform}: If Shiny Developer Mode and verbosity are enabled,
+\item \code{devmode_inform()}: If Shiny Developer Mode and verbosity are enabled,
 displays a message once every 8 hrs (by default)
 
-\item \code{register_devmode_option}: Registers a Shiny Developer Mode option with an updated
+\item \code{register_devmode_option()}: Registers a Shiny Developer Mode option with an updated
 value and Developer message. This registration method allows package
 authors to write one message in a single location.
 
-For example, the following Shiny Developer Mode options are registered:\if{html}{\out{<div class="sourceCode r">}}\preformatted{# Reload the Shiny app when a sourced R file changes
+For example, the following Shiny Developer Mode options are registered:
+
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{# Reload the Shiny app when a sourced R file changes
 register_devmode_option(
   "shiny.autoreload",
   "Turning on shiny autoreload. To disable, call `options(shiny.autoreload = FALSE)`",
@@ -126,7 +128,9 @@ register_devmode_option(
 Other known, non-Shiny Developer Mode options:
 \itemize{
 \item Sass:
-}\if{html}{\out{<div class="sourceCode r">}}\preformatted{# Display the full stack trace when errors occur during Shiny app execution
+}
+
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{# Display the full stack trace when errors occur during Shiny app execution
 register_devmode_option(
   "sass.cache",
   "Turning off sass cache. To use default caching, call `options(sass.cache = TRUE)`",
@@ -134,7 +138,7 @@ register_devmode_option(
 )
 }\if{html}{\out{</div>}}
 
-\item \code{get_devmode_option}: Provides a consistent way to change the expected
+\item \code{get_devmode_option()}: Provides a consistent way to change the expected
 \code{\link[=getOption]{getOption()}} behavior when Developer Mode is enabled. This method is very
 similar to \code{\link[=getOption]{getOption()}} where the globally set option takes precedence.
 See section "Avoiding direct dependency on shiny" for
@@ -144,8 +148,8 @@ See section "Avoiding direct dependency on shiny" for
 \code{register_devmode_option()} to avoid supplying the same \code{devmode_default}
 and \code{devmode_message} values throughout your package. (This requires a
 \pkg{shiny} dependency.)
-}}
 
+}}
 \section{Avoiding direct dependency on shiny}{
 
 
@@ -165,7 +169,9 @@ re-implementing these two functions:
 
 This function should return \code{TRUE} if \code{getOption("shiny.devmode")} is set.
 In addition, we strongly recommend that it also checks to make sure
-\code{testthat} is not testing.\if{html}{\out{<div class="sourceCode r">}}\preformatted{in_devmode <- function() \{
+\code{testthat} is not testing.
+
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{in_devmode <- function() \{
   isTRUE(getOption("shiny.devmode", FALSE)) &&
     !identical(Sys.getenv("TESTTHAT"), "true")
 \}
@@ -201,7 +207,9 @@ recommend displaying a message (\code{devmode_message}) to \code{stderr()} once 
 hours using \code{\link[rlang:abort]{rlang::inform()}}. This will keep the author up to date as to
 which Dev Mode options are being altered. To allow developers a chance to
 disable Dev Mode messages, the message should be skipped if
-\code{getOption("shiny.devmode.verbose", TRUE)} is not \code{TRUE}.\if{html}{\out{<div class="sourceCode r">}}\preformatted{get_devmode_option <- function(name, default = NULL, devmode_default, devmode_message) \{
+\code{getOption("shiny.devmode.verbose", TRUE)} is not \code{TRUE}.
+
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{get_devmode_option <- function(name, default = NULL, devmode_default, devmode_message) \{
   if (!in_devmode()) \{
     # Dev Mode disabled, act like `getOption()`
     return(getOption(name, default = default))

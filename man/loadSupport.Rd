@@ -15,7 +15,7 @@ loadSupport(
 not supplied, the nearest enclosing directory that is a Shiny app, starting
 with the current directory, is used.}
 
-\item{renv}{The environmeny in which the files in the \verb{R/} directory should
+\item{renv}{The environment in which the files in the \verb{R/} directory should
 be evaluated.}
 
 \item{globalrenv}{The environment in which \code{global.R} should be evaluated. If

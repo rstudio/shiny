@@ -79,7 +79,7 @@ test_that("String input is handled properly", {
 
 test_that("Shiny.tag input produces a warning", {
   panels3 <- c(list(div("A div")), panels)
-  tab_tags <- expect_warning(tabset_panel(!!!panels3))
+  expect_warning(tab_tags <- tabset_panel(!!!panels3))
   # Carson March 12th, 2021: Yes, he 'empty nav' output here isn't
   # sensible (which is why we now throw a warning), but it's probably
   # too late to change the behavior (it could break user code to do

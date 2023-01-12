@@ -14,7 +14,7 @@ declare type CheckboxGroupValue = CheckboxGroupHTMLElement["value"];
 declare class CheckboxGroupInputBinding extends InputBinding {
     find(scope: HTMLElement): JQuery<HTMLElement>;
     getValue(el: CheckboxGroupHTMLElement): CheckboxGroupValue[];
-    setValue(el: HTMLElement, value: string[] | string): void;
+    setValue(el: HTMLElement, value: string[] | string | null): void;
     getState(el: CheckboxGroupHTMLElement): {
         label: string;
         value: ReturnType<CheckboxGroupInputBinding["getValue"]>;

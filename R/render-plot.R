@@ -34,7 +34,7 @@
 #'   When rendering an inline plot, you must provide numeric values (in pixels)
 #'   to both \code{width} and \code{height}.
 #' @param res Resolution of resulting plot, in pixels per inch. This value is
-#'   passed to [grDevices::png()]. Note that this affects the resolution of PNG
+#'   passed to [plotPNG()]. Note that this affects the resolution of PNG
 #'   rendering in R; it won't change the actual ppi of the browser.
 #' @param alt Alternate text for the HTML `<img>` tag if it cannot be displayed
 #'   or viewed (i.e., the user uses a screen reader). In addition to a character
@@ -44,7 +44,7 @@
 #'   ggplot objects; for other plots, `NA` results in alt text of "Plot object".
 #'   `NULL` or `""` is not recommended because those should be limited to
 #'   decorative images.
-#' @param ... Arguments to be passed through to [grDevices::png()].
+#' @param ... Arguments to be passed through to [plotPNG()].
 #'   These can be used to set the width, height, background color, etc.
 #' @inheritParams renderUI
 #' @param execOnResize If `FALSE` (the default), then when a plot is
@@ -194,8 +194,8 @@ renderPlot <- function(expr, width = 'auto', height = 'auto', res = 72, ...,
 }
 
 resizeSavedPlot <- function(name, session, result, width, height, alt, pixelratio, res, ...) {
-  if (result$img$width == width && result$img$height == height &&
-      result$pixelratio == pixelratio && result$res == res) {
+  if (isTRUE(result$img$width == width && result$img$height == height &&
+      result$pixelratio == pixelratio && result$res == res)) {
     return(result)
   }
 
@@ -612,7 +612,7 @@ getGgplotCoordmap <- function(p, width, height, res) {
 find_panel_info <- function(b) {
   # Structure of ggplot objects changed after 2.1.0. After 2.2.1, there was a
   # an API for extracting the necessary information.
-  ggplot_ver <- utils::packageVersion("ggplot2")
+  ggplot_ver <- get_package_version("ggplot2")
 
   if (ggplot_ver > "2.2.1") {
     find_panel_info_api(b)

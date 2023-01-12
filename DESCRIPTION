@@ -1,7 +1,7 @@
 Package: shiny
 Type: Package
 Title: Web Application Framework for R
-Version: 1.7.0.9000
+Version: 1.7.4.9001
 Authors@R: c(
     person("Winston", "Chang", role = c("aut", "cre"), email = "winston@rstudio.com", comment = c(ORCID = "0000-0002-1576-2126")),
     person("Joe", "Cheng", role = "aut", email = "joe@rstudio.com"),
@@ -78,8 +78,8 @@ Imports:
     mime (>= 0.3),
     jsonlite (>= 0.9.16),
     xtable,
-    fontawesome (>= 0.2.1),
-    htmltools (>= 0.5.2),
+    fontawesome (>= 0.4.0),
+    htmltools (>= 0.5.4),
     R6 (>= 2.0),
     sourcetools,
     later (>= 1.0.0),
@@ -105,7 +105,6 @@ Suggests:
     ggplot2,
     reactlog (>= 1.0.0),
     magrittr,
-    shinytest (>= 1.4.0.9003),
     yaml,
     future,
     dygraphs,
@@ -189,6 +188,7 @@ Collate:
     'shinywrappers.R'
     'showcase.R'
     'snapshot.R'
+    'staticimports.R'
     'tar.R'
     'test-export.R'
     'test-server.R'
@@ -198,12 +198,14 @@ Collate:
     'version_bs_date_picker.R'
     'version_ion_range_slider.R'
     'version_jquery.R'
+    'version_jqueryui.R'
     'version_selectize.R'
     'version_strftime.R'
     'viewer.R'
-Remotes: rstudio/bslib
-RoxygenNote: 7.1.2
+RoxygenNote: 7.2.3
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RdMacros: lifecycle
 Config/testthat/edition: 3
+Config/Needs/check:
+  shinytest2

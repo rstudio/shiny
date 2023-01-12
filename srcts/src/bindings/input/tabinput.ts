@@ -1,6 +1,6 @@
 import $ from "jquery";
 import { InputBinding } from "./inputBinding";
-import { hasOwnProperty, isBS3 } from "../../utils";
+import { hasDefinedProperty, isBS3 } from "../../utils";
 
 type TabInputReceiveMessageData = { value?: string };
 
@@ -25,7 +25,7 @@ class BootstrapTabInputBinding extends InputBinding {
 
     return null;
   }
-  setValue(el: HTMLElement, value: string): void {
+  setValue(el: HTMLElement, value: string | undefined): void {
     let success = false;
 
     if (value) {
@@ -56,7 +56,7 @@ class BootstrapTabInputBinding extends InputBinding {
     return { value: this.getValue(el) };
   }
   receiveMessage(el: HTMLElement, data: TabInputReceiveMessageData): void {
-    if (hasOwnProperty(data, "value")) this.setValue(el, data.value);
+    if (hasDefinedProperty(data, "value")) this.setValue(el, data.value);
     $(el).trigger("change");
   }
   subscribe(el: HTMLElement, callback: (x: boolean) => void): void {

@@ -13,7 +13,7 @@ type UploadEndValue = never;
 // FileList object. Subclass/clone it and override the `on*` functions to
 // make it do something useful.
 class FileProcessor {
-  files: FileList;
+  files: File[];
   fileIndex = -1;
   // Currently need to use small chunk size because R-Websockets can't
   // handle continuation frames
@@ -21,7 +21,7 @@ class FileProcessor {
   completed = false;
 
   constructor(files: FileList, exec$run = true) {
-    this.files = files;
+    this.files = Array.from(files);
 
     // TODO: Register error/abort callbacks
     if (exec$run) {
@@ -30,7 +30,7 @@ class FileProcessor {
   }
 
   // Begin callbacks. Subclassers/cloners may override any or all of these.
-  onBegin(files: FileList, cont: () => void): void {
+  onBegin(files: File[], cont: () => void): void {
     files;
     setTimeout(cont, 0);
   }
@@ -99,10 +99,10 @@ class FileUploader extends FileProcessor {
   id: string;
   el: HTMLElement;
 
-  jobId: JobId;
-  uploadUrl: UploadUrl;
-  progressBytes: number;
-  totalBytes: number;
+  jobId!: JobId;
+  uploadUrl!: UploadUrl;
+  progressBytes!: number;
+  totalBytes!: number;
 
   constructor(
     shinyapp: ShinyApp,
@@ -142,7 +142,7 @@ class FileUploader extends FileProcessor {
   ): void {
     this.shinyapp.makeRequest(method, args, onSuccess, onFailure, blobs);
   }
-  onBegin(files: FileList, cont: () => void): void {
+  onBegin(files: File[], cont: () => void): void {
     // Reset progress bar
     this.$setError(null);
     this.$setActive(true);
@@ -155,13 +155,12 @@ class FileUploader extends FileProcessor {
       this.totalBytes += file.size;
     });
 
-    const fileInfo = $.map(files, function (file: File, i) {
+    const fileInfo = $.map(files, function (file: File) {
       return {
         name: file.name,
         size: file.size,
         type: file.type,
       };
-      i;
     });
 
     this.makeRequest(
@@ -185,6 +184,9 @@ class FileUploader extends FileProcessor {
       type: "POST",
       cache: false,
       xhr: () => {
+        if (typeof $.ajaxSettings.xhr !== "function")
+          throw "jQuery's XHR is not a function";
+
         const xhrVal = $.ajaxSettings.xhr();
 
         if (xhrVal.upload) {
@@ -243,7 +245,7 @@ class FileUploader extends FileProcessor {
         this.$bar().text("Upload complete");
         // Reset the file input's value to "". This allows the same file to be
         // uploaded again. https://stackoverflow.com/a/22521275
-        $(evt.el).val("");
+        $(evt.el as HTMLElement).val("");
       },
       (error) => {
         this.onError(error);

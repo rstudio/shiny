@@ -218,3 +218,7 @@ reference:
       - shinyUI
       - shinyServer
       - exprToFunction
+  # This section is silently dropped by pkgdown https://github.com/r-lib/pkgdown/pull/1783
+  - title: internal
+    contents:
+      - shiny-package

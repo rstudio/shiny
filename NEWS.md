@@ -77,8 +77,6 @@
 
 * Closed #2955: Input and output bindings previously attempted to use `el['data-input-id']`, but that never worked. They now use `el.getAttribute('data-input-id')` instead. (#3538)
 
-* fixed the documentation of `sendBinaryMessage` function.
-
 ### Minor improvements
 
 * When taking a test snapshot, the sort order of the json keys of the `input`, `output`, and `export` fields is currently sorted using the locale of the machine. This can lead to inconsistent test snapshot results. To opt-in to a consistent ordering of snapshot fields with `{shinytest}`, please set the global option `options(shiny.snapshotsortc = TRUE)`. `{shinytest2}` users do not need to set this value. (#3515)

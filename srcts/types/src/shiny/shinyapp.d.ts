@@ -1,7 +1,8 @@
 import type { OutputBindingAdapter } from "../bindings/outputAdapter";
 import type { UploadInitValue, UploadEndValue } from "../file/fileProcessor";
+import { AsyncQueue } from "../utils/asyncQueue";
 declare type ResponseValue = UploadEndValue | UploadInitValue;
-declare type Handler = (message: any) => void;
+declare type Handler = (message: any) => Promise<void> | void;
 declare type ShinyWebSocket = WebSocket & {
     allowReconnect?: boolean;
 };
@@ -19,6 +20,7 @@ declare type MessageValue = Parameters<WebSocket["send"]>[0];
 declare function addCustomMessageHandler(type: string, handler: Handler): void;
 declare class ShinyApp {
     $socket: ShinyWebSocket | null;
+    actionQueue: AsyncQueue<() => Promise<void> | void>;
     config: {
         workerId: string;
         sessionId: string;
@@ -50,6 +52,7 @@ declare class ShinyApp {
     private scheduledReconnect;
     reconnect(): void;
     createSocket(): ShinyWebSocket;
+    startActionQueueLoop(): Promise<void>;
     sendInput(values: InputValues): void;
     $notifyDisconnected(): void;
     $removeSocket(): void;
@@ -63,13 +66,13 @@ declare class ShinyApp {
     makeRequest(method: string, args: unknown[], onSuccess: OnSuccessRequest, onError: OnErrorRequest, blobs: Array<ArrayBuffer | Blob | string> | undefined): void;
     $sendMsg(msg: MessageValue): void;
     receiveError(name: string, error: ErrorsMessageValue): void;
-    receiveOutput<T>(name: string, value: T): T | undefined;
+    receiveOutput<T>(name: string, value: T): Promise<T | undefined>;
     bindOutput(id: string, binding: OutputBindingAdapter): OutputBindingAdapter;
     unbindOutput(id: string, binding: OutputBindingAdapter): boolean;
     private _narrowScopeComponent;
     private _narrowScope;
     $updateConditionals(): void;
-    dispatchMessage(data: ArrayBufferLike | string): void;
+    dispatchMessage(data: ArrayBufferLike | string): Promise<void>;
     private _sendMessagesToHandlers;
     private _init;
     progressHandlers: {
@@ -79,7 +82,7 @@ declare class ShinyApp {
         open: (message: {
             style: "notification" | "old";
             id: string;
-        }) => void;
+        }) => Promise<void>;
         update: (message: {
             style: "notification" | "old";
             id: string;

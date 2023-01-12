@@ -11,27 +11,13 @@ startPNG <- function(filename, width, height, res, ...) {
     grDevices::png
   }
 
-  # It's possible for width/height to be NULL (e.g., when using
-  # suspendWhenHidden=F w/ tabsetPanel()), which will lead to an error when
-  # attempting to open the device (rstudio/shiny#1409). In this case, ragg will
-  # actually segfault (instead of error), so explicitly throw an error before
-  # opening the device (r-lib/ragg#116, rstudio/shiny#3704)
-  check_empty_png_size <- function(x) {
-    if (length(x) > 0) return(x)
+  args <- list2(filename = filename, width = width, height = height, res = res, ...)
 
-    rlang::abort(
-      paste0("Invalid plot `", substitute(x), "`."),
-      call = rlang::caller_env()
-    )
-  }
-
-  args <- rlang::list2(
-    filename = filename,
-    width = check_empty_png_size(width),
-    height = check_empty_png_size(height),
-    res = res,
-    ...
-  )
+  # It's possible for width/height to be NULL/numeric(0) (e.g., when using
+  # suspendWhenHidden=F w/ tabsetPanel(), see rstudio/shiny#1409), so when
+  # this happens let the device determine what the default size should be.
+  if (length(args$width) == 0) args$width <- NULL
+  if (length(args$height) == 0) args$height <- NULL
 
   # Set a smarter default for the device's bg argument (based on thematic's global state).
   # Note that, technically, this is really only needed for CairoPNG, since the other
@@ -83,6 +69,10 @@ startPNG <- function(filename, width, height, res, ...) {
 #'    is not set to `FALSE`), then use [Cairo::CairoPNG()].
 #'   * Otherwise, use [grDevices::png()]. In this case, Linux and Windows
 #'    may not antialias some point shapes, resulting in poor quality output.
+#'
+#' @details
+#'   A `NULL` value provided to `width` or `height` is ignored (i.e., the
+#'   default `width` or `height` of the graphics device is used).
 #'
 #' @param func A function that generates a plot.
 #' @param filename The name of the output file. Defaults to a temp file with

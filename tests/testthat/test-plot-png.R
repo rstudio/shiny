@@ -1,23 +1,6 @@
-test_that("startPNG() throws informative error", {
-  tmp <- tempfile(fileext = '.png')
-
-  expect_error(
-    startPNG(
-      filename = tmp,
-      width = NULL,
-      height = 100,
-      res = 72
-    ),
-    "Invalid plot `width`."
-  )
-
-  expect_error(
-    startPNG(
-      filename = tmp,
-      width = 100,
-      height = NULL,
-      res = 72
-    ),
-    "Invalid plot `height`."
-  )
+test_that("plotPNG()/startPNG() ignores NULL dimensions", {
+  f <- plotPNG(function() plot(1), width = NULL, height = NULL)
+  on.exit(unlink(f))
+  bits <- readBin(f, "raw", file.info(f)$size)
+  expect_true(length(bits) > 0)
 })

@@ -24,7 +24,10 @@ modalButton(label, icon = NULL)
 \item{footer}{UI for footer. Use \code{NULL} for no footer.}
 
 \item{size}{One of \code{"s"} for small, \code{"m"} (the default) for medium,
-or \code{"l"} for large.}
+\code{"l"} for large, or \code{"xl"} for extra large. Note that \code{"xl"} only
+works with Bootstrap 4 and above (to opt-in to Bootstrap 4+,
+pass \code{\link[bslib:bs_theme]{bslib::bs_theme()}} to the \code{theme} argument of a page container
+like \code{\link[=fluidPage]{fluidPage()}}).}
 
 \item{easyClose}{If \code{TRUE}, the modal dialog can be dismissed by
 clicking outside the dialog box, or be pressing the Escape key. If

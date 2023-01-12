@@ -41,8 +41,6 @@ shiny development
 
 * Closed rstudio/shinytest2#222: When restoring a context (i.e., bookmarking) from a URL, Shiny now better handles a trailing `=` after `_inputs_` and `_values_`. (#3648)
 
-* Closed #3631: documenting that `modalDialog` with parameter `size` set to `xl` will be changed to `m` in Bootstrap 3.
-
 
 shiny 1.7.1
 ===========

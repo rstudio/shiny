@@ -1876,6 +1876,22 @@ ShinySession <- R6Class(
     # Provides a mechanism for handling direct HTTP requests that are posted
     # to the session (rather than going through the websocket)
     handleRequest = function(req) {
+      if (!is.null(self$user)) {
+        if (is.null(req$HTTP_SHINY_SERVER_CREDENTIALS)) {
+          # Session owner is logged in, but this requester is not
+          return(NULL)
+        }
+
+        creds <- NULL
+        try({creds <- safeFromJSON(req$HTTP_SHINY_SERVER_CREDENTIALS)},
+          silent = TRUE
+        )
+        if (!identical(self$user, creds$user)) {
+          # This requester is not the same user as session owner
+          return(NULL)
+        }
+      }
+
       # TODO: Turn off caching for the response
       subpath <- req$PATH_INFO
 

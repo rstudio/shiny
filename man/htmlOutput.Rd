@@ -9,10 +9,17 @@ htmlOutput(
   outputId,
   inline = FALSE,
   container = if (inline) span else div,
+  fill = FALSE,
   ...
 )
 
-uiOutput(outputId, inline = FALSE, container = if (inline) span else div, ...)
+uiOutput(
+  outputId,
+  inline = FALSE,
+  container = if (inline) span else div,
+  fill = FALSE,
+  ...
+)
 }
 \arguments{
 \item{outputId}{output variable to read the value from}
@@ -22,6 +29,13 @@ for the output}
 
 \item{container}{a function to generate an HTML element to contain the text}
 
+\item{fill}{If \code{TRUE}, the result of \code{container} is treated as \emph{both} a fill
+item and container (see \code{\link[htmltools:bindFillRole]{htmltools::bindFillRole()}}), which means both the
+\code{container} as well as its immediate children (i.e., the result of
+\code{renderUI()}) are allowed to grow/shrink to fit a fill container with an
+opinionated height. Set \code{fill = "item"} or \code{fill = "container"} to treat
+\code{container} as just a fill item or a fill container.}
+
 \item{...}{Other arguments to pass to the container tag function. This is
 useful for providing additional classes for the tag.}
 }
@@ -30,12 +44,12 @@ An HTML output element that can be included in a panel
 }
 \description{
 Render a reactive output variable as HTML within an application page. The
-text will be included within an HTML \code{div} tag, and is presumed to
-contain HTML content which should not be escaped.
+text will be included within an HTML \code{div} tag, and is presumed to contain
+HTML content which should not be escaped.
 }
 \details{
-\code{uiOutput} is intended to be used with \code{renderUI} on the server
-side. It is currently just an alias for \code{htmlOutput}.
+\code{uiOutput} is intended to be used with \code{renderUI} on the server side. It is
+currently just an alias for \code{htmlOutput}.
 }
 \examples{
 htmlOutput("summary")

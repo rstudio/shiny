@@ -43,7 +43,10 @@ removeModal <- function(session = getDefaultReactiveDomain()) {
 #' @param title An optional title for the dialog.
 #' @param footer UI for footer. Use `NULL` for no footer.
 #' @param size One of `"s"` for small, `"m"` (the default) for medium,
-#'   or `"l"` for large.
+#'   `"l"` for large, or `"xl"` for extra large. Note that `"xl"` only 
+#'    works with Bootstrap 4 and above (to opt-in to Bootstrap 4+, 
+#'    pass [bslib::bs_theme()] to the `theme` argument of a page container 
+#'    like [fluidPage()]).
 #' @param easyClose If `TRUE`, the modal dialog can be dismissed by
 #'   clicking outside the dialog box, or be pressing the Escape key. If
 #'   `FALSE` (the default), the modal dialog can't be dismissed in those

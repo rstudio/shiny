@@ -142,6 +142,41 @@
         <div class="content-footer"></div>
       </div>
 
+---
+
+    Code
+      dropdown_active
+    Output
+      <div class="tabbable">
+        <ul class="nav nav-tabs" data-tabsetid="4785">
+          <li>
+            <a href="#tab-4785-1" data-toggle="tab" data-bs-toggle="tab" data-value="A">A</a>
+          </li>
+          <li>
+            <a href="#tab-4785-2" data-toggle="tab" data-bs-toggle="tab" data-value="B">
+              <i aria-label="github icon" class="fab fa-github fa-fw" role="presentation"></i>
+              B
+            </a>
+          </li>
+          <li class="dropdown active">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" data-value="Menu">
+              Menu
+              <b class="caret"></b>
+            </a>
+            <ul class="dropdown-menu" data-tabsetid="1502">
+              <li class="active">
+                <a href="#tab-1502-1" data-toggle="tab" data-bs-toggle="tab" data-value="C">C</a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+        <div class="tab-content" data-tabsetid="4785">
+          <div class="tab-pane" data-value="A" id="tab-4785-1">a</div>
+          <div class="tab-pane" data-value="B" data-icon-class="fab fa-github fa-fw" id="tab-4785-2">b</div>
+          <div class="tab-pane active" data-value="C" id="tab-1502-1">c</div>
+        </div>
+      </div>
+
 # navbarPage() markup is correct
 
     Code

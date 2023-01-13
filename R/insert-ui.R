@@ -94,7 +94,7 @@
 #' }
 #' @export
 insertUI <- function(selector,
-  where = c("beforeBegin", "afterBegin", "beforeEnd", "afterEnd"),
+  where = c("beforeEnd", "beforeBegin", "afterBegin", "afterEnd"),
   ui,
   multiple = FALSE,
   immediate = FALSE,
@@ -104,7 +104,6 @@ insertUI <- function(selector,
   force(ui)
   force(session)
   force(multiple)
-  if (missing(where)) where <- "beforeEnd"
   where <- match.arg(where)
 
   callback <- function() {

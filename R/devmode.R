@@ -190,8 +190,9 @@ devmode_inform <- function(
 
 
 
+# This is a Map object and is assigned in .onLoad().
 #' @include map.R
-registered_devmode_options <- Map$new()
+registered_devmode_options <- NULL
 
 #' @describeIn devmode Registers a Shiny Developer Mode option with an updated
 #'   value and Developer message. This registration method allows package

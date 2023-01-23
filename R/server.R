@@ -1,7 +1,8 @@
 #' @include server-input-handlers.R
 
-appsByToken <- Map$new()
-appsNeedingFlush <- Map$new()
+# These are Map objects, and are assigned in .onLoad() to avoid
+appsByToken <- NULL
+appsNeedingFlush <- NULL
 
 # Provide a character representation of the WS that can be used
 # as a key in a Map.

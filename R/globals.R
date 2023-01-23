@@ -11,6 +11,13 @@
   # package, we don't want to bake it into the built binary package.
   restoreCtxStack <<- fastmap::faststack()
 
+  # Map objects include fastmap objects and we don't want to bake those into a
+  # built package.
+  inputHandlers <<- Map$new()
+  appsByToken <<- Map$new()
+  appsNeedingFlush <<- Map$new()
+  registered_devmode_options <<- Map$new()
+
   # Make sure these methods are available to knitr if shiny is loaded but not
   # attached.
   s3_register("knitr::knit_print", "reactive")

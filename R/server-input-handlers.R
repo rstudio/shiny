@@ -1,5 +1,6 @@
-# Create a map for input handlers and register the defaults.
-inputHandlers <- Map$new()
+# Create a Map object for input handlers and register the defaults.
+# This is assigned in .onLoad time.
+inputHandlers <- NULL
 
 #' Register an Input Handler
 #'

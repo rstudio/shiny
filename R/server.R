@@ -1,8 +1,12 @@
 #' @include server-input-handlers.R
 
-# These are Map objects, and are assigned in .onLoad() to avoid
 appsByToken <- NULL
 appsNeedingFlush <- NULL
+on_load({
+  appsByToken <- Map$new()
+  appsNeedingFlush <- Map$new()
+})
+
 
 # Provide a character representation of the WS that can be used
 # as a key in a Map.
@@ -123,7 +127,10 @@ decodeMessage <- function(data) {
   return(mainMessage)
 }
 
-autoReloadCallbacks <- Callbacks$new()
+autoReloadCallbacks <- NULL
+on_load({
+  autoReloadCallbacks <- Callbacks$new()
+})
 
 createAppHandlers <- function(httpHandlers, serverFuncSource) {
   appvars <- new.env()

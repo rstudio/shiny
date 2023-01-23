@@ -190,9 +190,10 @@ devmode_inform <- function(
 
 
 
-# This is a Map object and is assigned in .onLoad().
-#' @include map.R
 registered_devmode_options <- NULL
+on_load({
+  registered_devmode_options <- Map$new()
+})
 
 #' @describeIn devmode Registers a Shiny Developer Mode option with an updated
 #'   value and Developer message. This registration method allows package
@@ -341,21 +342,22 @@ get_devmode_option <- function(
 }
 
 
+on_load({
+  register_devmode_option(
+    "shiny.autoreload",
+    "Turning on shiny autoreload. To disable, call `options(shiny.autoreload = FALSE)`",
+    TRUE
+  )
 
-register_devmode_option(
-  "shiny.autoreload",
-  "Turning on shiny autoreload. To disable, call `options(shiny.autoreload = FALSE)`",
-  TRUE
-)
+  register_devmode_option(
+    "shiny.minified",
+    "Using full shiny javascript file. To use the minified version, call `options(shiny.minified = TRUE)`",
+    FALSE
+  )
 
-register_devmode_option(
-  "shiny.minified",
-  "Using full shiny javascript file. To use the minified version, call `options(shiny.minified = TRUE)`",
-  FALSE
-)
-
-register_devmode_option(
-  "shiny.fullstacktrace",
-  "Turning on full stack trace. To disable, call `options(shiny.fullstacktrace = FALSE)`",
-  TRUE
-)
+  register_devmode_option(
+    "shiny.fullstacktrace",
+    "Turning on full stack trace. To disable, call `options(shiny.fullstacktrace = FALSE)`",
+    TRUE
+  )
+})

@@ -7,16 +7,9 @@
   # the private seed during load.
   withPrivateSeed(set.seed(NULL))
 
-  # Create this at the top level, but since the object is from a different
-  # package, we don't want to bake it into the built binary package.
-  restoreCtxStack <<- fastmap::faststack()
-
-  # Map objects include fastmap objects and we don't want to bake those into a
-  # built package.
-  inputHandlers <<- Map$new()
-  appsByToken <<- Map$new()
-  appsNeedingFlush <<- Map$new()
-  registered_devmode_options <<- Map$new()
+  for (expr in on_load_exprs) {
+    eval(expr, envir = environment(.onLoad))
+  }
 
   # Make sure these methods are available to knitr if shiny is loaded but not
   # attached.
@@ -29,4 +22,12 @@
   # includes a fix for this problem
   # https://github.com/rstudio/shiny/issues/2630
   register_upgrade_message("htmlwidgets", 1.5)
+}
+
+
+on_load_exprs <- list()
+# Register an expression to be evaluated when the package is loaded (in the
+# .onLoad function).
+on_load <- function(expr) {
+  on_load_exprs[[length(on_load_exprs) + 1]] <<- substitute(expr)
 }

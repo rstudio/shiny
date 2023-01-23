@@ -8,6 +8,8 @@
 
 * Closed #789: `<script>` loaded from dynamic UI are no longer loaded using synchronous `XMLHttpRequest` (via jQuery). (#3666)
 
+* For `reactiveValues()` objects, whenever the `$names()` or `$values()` methods are called, the keys are now in sorted order. (#3774)
+
 ### Bug fixes
 
 * Fixed #3771: Sometimes the error `ion.rangeSlider.min.js: i.stopPropagation is not a function` would appear in the JavaScript console. (#3772)

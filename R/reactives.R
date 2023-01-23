@@ -420,12 +420,12 @@ ReactiveValues <- R6Class(
 
       if (hidden) {
         if (isTRUE(.hasRetrieved$asListAll)) {
-          rLog$valueChangeAsListAll(.reactId, .values$values(), domain)
+          rLog$valueChangeAsListAll(.reactId, .values$values(sort = TRUE), domain)
           .allValuesDeps$invalidate()
         }
       } else {
         if (isTRUE(.hasRetrieved$asList)) {
-          react_vals <- .values$values()
+          react_vals <- .values$values(sort = TRUE)
           react_vals <- react_vals[!grepl("^\\.", base::names(react_vals))]
           # leave as is. both object would be registered to the listening object
           rLog$valueChangeAsList(.reactId, react_vals, domain)
@@ -444,7 +444,7 @@ ReactiveValues <- R6Class(
     },
 
     names = function() {
-      nameValues <- .values$keys()
+      nameValues <- .values$keys(sort = TRUE)
       if (!isTRUE(.hasRetrieved$names)) {
         domain <- getDefaultReactiveDomain()
         rLog$defineNames(.reactId, nameValues, .label, domain)
@@ -499,7 +499,7 @@ ReactiveValues <- R6Class(
     },
 
     toList = function(all.names=FALSE) {
-      listValue <- .values$values()
+      listValue <- .values$values(sort = TRUE)
       if (!all.names) {
         listValue <- listValue[!grepl("^\\.", base::names(listValue))]
       }

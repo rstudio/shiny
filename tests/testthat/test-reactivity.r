@@ -126,6 +126,21 @@ test_that("ReactiveValues", {
   expect_error(values$a <- 1)
 })
 
+test_that("reactiveValues keys are sorted", {
+  values <- reactiveValues()
+  values$a <- 1
+  values$A <- 11
+  values$c <- 3
+  values$B <- 12
+  values$C <- 13
+  values$b <- 2
+  expect_identical(isolate(names(values)), c("A", "B", "C", "a", "b", "c"))
+  expect_identical(
+    isolate(reactiveValuesToList(values)),
+    list(A=11, B=12, C=13, a=1, b=2, c=3)
+  )
+})
+
 test_that("reactiveValues() has useful print method", {
   verify_output(test_path("print-reactiveValues.txt"), {
     x <- reactiveValues(x = 1, y = 2, z = 3)

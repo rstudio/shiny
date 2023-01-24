@@ -8,7 +8,7 @@
 
 * Closed #789: `<script>` loaded from dynamic UI are no longer loaded using synchronous `XMLHttpRequest` (via jQuery). (#3666)
 
-* For `reactiveValues()` objects, whenever the `$names()` or `$values()` methods are called, the keys are now in sorted order. (#3774)
+* For `reactiveValues()` objects, whenever the `$names()` or `$values()` methods are called, the keys are now returned in the order that they were inserted. (#3774)
 
 ### Bug fixes
 

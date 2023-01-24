@@ -127,17 +127,19 @@ test_that("ReactiveValues", {
 })
 
 test_that("reactiveValues keys are sorted", {
-  values <- reactiveValues()
-  values$a <- 1
-  values$A <- 11
+  values <- reactiveValues(b=2, a=0)
+  values$C <- 13
+  values$A <- 0
   values$c <- 3
   values$B <- 12
-  values$C <- 13
-  values$b <- 2
-  expect_identical(isolate(names(values)), c("A", "B", "C", "a", "b", "c"))
+  # Setting an existing value shouldn't change order
+  values$a <- 1
+  values$A <- 11
+
+  expect_identical(isolate(names(values)), c("b", "a", "C", "A", "c", "B"))
   expect_identical(
     isolate(reactiveValuesToList(values)),
-    list(A=11, B=12, C=13, a=1, b=2, c=3)
+    list(b=2, a=1, C=13, A=11, c=3, B=12)
   )
 })
 

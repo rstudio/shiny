@@ -559,4 +559,6 @@ MessageLogger = R6Class(
   )
 )
 
-rLog <- RLog$new("shiny.reactlog", "shiny.reactlog.console")
+on_load({
+  rLog <- RLog$new("shiny.reactlog", "shiny.reactlog.console")
+})

@@ -55,6 +55,7 @@
 <div class="section level4">
 <h4 id="new-features-and-improvements-1-7-4-9001">New features and improvements<a class="anchor" aria-label="anchor" href="#new-features-and-improvements-1-7-4-9001"></a></h4>
 <ul><li><p>Closed <a href="https://github.com/rstudio/shiny/issues/789" class="external-link">#789</a>: <code>&lt;script&gt;</code> loaded from dynamic UI are no longer loaded using synchronous <code>XMLHttpRequest</code> (via jQuery). (<a href="https://github.com/rstudio/shiny/issues/3666" class="external-link">#3666</a>)</p></li>
+<li><p>For <code><a href="../reference/reactiveValues.html">reactiveValues()</a></code> objects, whenever the <code>$names()</code> or <code>$values()</code> methods are called, the keys are now returned in the order that they were inserted. (<a href="https://github.com/rstudio/shiny/issues/3774" class="external-link">#3774</a>)</p></li>
 <li><p><code>Map</code> objects are now initialized at load time instead of build time. This avoids potential problems that could arise from storing <code>fastmap</code> objects into the built Shiny package. (<a href="https://github.com/rstudio/shiny/issues/3775" class="external-link">#3775</a>)</p></li>
 </ul></div>
 <div class="section level4">

@@ -182,8 +182,8 @@ brushedPoints <- function(df, brush, xvar = NULL, yvar = NULL,
 #  $ xmax     : num 3.78
 #  $ ymin     : num 17.1
 #  $ ymax     : num 20.4
-#  $ panelvar1: int 6
-#  $ panelvar2: int 0
+#  $ panelvar1: chr "6"
+#  $ panelvar2: chr "0
 #  $ coords_css:List of 4
 #   ..$ xmin: int 260
 #   ..$ xmax: int 298
@@ -367,8 +367,8 @@ nearPoints <- function(df, coordinfo, xvar = NULL, yvar = NULL,
 #  $ img_css_ratio:List of 2
 #   ..$ x: num 1.25
 #   ..$ y: num 1.25
-#  $ panelvar1 : int 6
-#  $ panelvar2 : int 0
+#  $ panelvar1 : chr "6"
+#  $ panelvar2 : chr "0"
 #  $ mapping   :List of 4
 #   ..$ x        : chr "wt"
 #   ..$ y        : chr "mpg"

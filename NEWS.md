@@ -8,6 +8,8 @@
 
 * Closed #789: `<script>` loaded from dynamic UI are no longer loaded using synchronous `XMLHttpRequest` (via jQuery). (#3666)
 
+* For `reactiveValues()` objects, whenever the `$names()` or `$values()` methods are called, the keys are now returned in the order that they were inserted. (#3774)
+
 * `Map` objects are now initialized at load time instead of build time. This avoids potential problems that could arise from storing `fastmap` objects into the built Shiny package. (#3775)
 
 ### Bug fixes

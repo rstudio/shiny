@@ -1882,11 +1882,15 @@ ShinySession <- R6Class(
           return(NULL)
         }
 
-        creds <- NULL
-        try({creds <- safeFromJSON(req$HTTP_SHINY_SERVER_CREDENTIALS)},
+        requestUser <- NULL
+        try(
+          {
+            creds <- safeFromJSON(req$HTTP_SHINY_SERVER_CREDENTIALS)
+            requestUser <- creds$user
+          },
           silent = TRUE
         )
-        if (!identical(self$user, creds$user)) {
+        if (!identical(self$user, requestUser)) {
           # This requester is not the same user as session owner
           return(NULL)
         }

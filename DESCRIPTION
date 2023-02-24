@@ -87,7 +87,7 @@ Imports:
     tools,
     crayon,
     rlang (>= 0.4.10),
-    fastmap (>= 1.1.0),
+    fastmap (>= 1.1.1),
     withr,
     commonmark (>= 1.7),
     glue (>= 1.3.2),

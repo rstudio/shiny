@@ -2153,17 +2153,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:*":
+"@types/node@npm:*, @types/node@npm:^18.14.2":
   version: 18.14.2
   resolution: "@types/node@npm:18.14.2"
   checksum: 53c07e721f6ae33de71306f6a0b75dae6066a4f55bd5484c93bd59ff25f0c5f004ceafeef509a4d0cb9e24a247efc34d50489bcc1b05a53ecc68e2fc088e65cb
-  languageName: node
-  linkType: hard
-
-"@types/node@npm:^15.6.1":
-  version: 15.14.9
-  resolution: "@types/node@npm:15.14.9"
-  checksum: 49f7f0522a3af4b8389aee660e88426490cd54b86356672a1fedb49919a8797c00d090ec2dcc4a5df34edc2099d57fc2203d796c4e7fbd382f2022ccd789eee7
   languageName: node
   linkType: hard
 
@@ -2203,7 +2196,7 @@ __metadata:
     "@types/jquery": 3.5.14
     "@types/jqueryui": 1.12.16
     "@types/lodash": ^4.14.170
-    "@types/node": ^15.6.1
+    "@types/node": ^18.14.2
     "@types/selectize": 0.12.34
     "@types/showdown": ^1.9.3
     "@typescript-eslint/eslint-plugin": ^5.38.1

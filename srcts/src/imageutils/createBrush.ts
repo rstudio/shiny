@@ -58,6 +58,7 @@ type BrushOpts = {
 type Brush = {
   reset: () => void;
 
+  hasOldBrush: () => boolean;
   importOldBrush: () => void;
   isInsideBrush: (offsetCss: Offset) => boolean;
   isInResizeArea: (offsetCss: Offset) => boolean;
@@ -173,10 +174,15 @@ function createBrush(
     if ($div) $div.remove();
   }
 
+  function hasOldBrush(): boolean {
+    const oldDiv = $el.find("#" + el.id + "_brush");
+    return oldDiv.length > 0;
+  }
+
   // If there's an existing brush div, use that div to set the new brush's
   // settings, provided that the x, y, and panel variables have the same names,
   // and there's a panel with matching panel variable values.
-  function importOldBrush() {
+  function importOldBrush(): void {
     const oldDiv = $el.find("#" + el.id + "_brush");
 
     if (oldDiv.length === 0) return;
@@ -617,6 +623,7 @@ function createBrush(
   return {
     reset: reset,
 
+    hasOldBrush,
     importOldBrush: importOldBrush,
     isInsideBrush: isInsideBrush,
     isInResizeArea: isInResizeArea,

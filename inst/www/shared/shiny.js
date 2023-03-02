@@ -11971,6 +11971,10 @@
       if ($div)
         $div.remove();
     }
+    function hasOldBrush() {
+      var oldDiv = $el.find("#" + el.id + "_brush");
+      return oldDiv.length > 0;
+    }
     function importOldBrush() {
       var oldDiv = $el.find("#" + el.id + "_brush");
       if (oldDiv.length === 0)
@@ -12255,6 +12259,7 @@
     }
     return {
       reset: reset,
+      hasOldBrush: hasOldBrush,
       importOldBrush: importOldBrush,
       isInsideBrush: isInsideBrush,
       isInResizeArea: isInResizeArea,
@@ -12425,7 +12430,9 @@
     } else {
       brushInfoSender = new Debouncer(null, sendBrushInfo, opts.brushDelay);
     }
-    brushInfoSender.immediateCall();
+    if (!brush.hasOldBrush()) {
+      brushInfoSender.immediateCall();
+    }
     function mousedown(e) {
       if (brush.isBrushing() || brush.isDragging() || brush.isResizing())
         return;

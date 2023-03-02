@@ -240,7 +240,9 @@ function createBrushHandler(
   }
 
   // Send initial (null) value on creation.
-  brushInfoSender.immediateCall();
+  if (!brush.hasOldBrush()) {
+    brushInfoSender.immediateCall();
+  }
 
   function mousedown(e: JQuery.MouseDownEvent) {
     // This can happen when mousedown inside the graphic, then mouseup

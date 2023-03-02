@@ -1,6 +1,6 @@
 import type { InputBinding } from "../bindings";
-declare type EventPriority = "deferred" | "event" | "immediate";
-declare type InputPolicyOpts = {
+type EventPriority = "deferred" | "event" | "immediate";
+type InputPolicyOpts = {
     priority: EventPriority;
     el?: HTMLElement;
     binding?: InputBinding;

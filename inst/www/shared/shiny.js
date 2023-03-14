@@ -14163,6 +14163,7 @@
   var import_jquery31 = __toESM(require_jquery());
   function createClickHandler(inputId, clip, coordmap) {
     var clickInfoSender = coordmap.mouseCoordinateSender(inputId, clip);
+    clickInfoSender(null);
     return {
       mousedown: function mousedown(e) {
         if (e.which !== 1)
@@ -14188,6 +14189,7 @@
         hoverInfoSender = new Debouncer(null, sendHoverInfo, delay);
     }
     updateHoverInfoSender(coordmap);
+    hoverInfoSender.immediateCall(null);
     var mouseout;
     if (nullOutside)
       mouseout = function mouseout2() {
@@ -14289,6 +14291,7 @@
     } else {
       brushInfoSender = new Debouncer(null, sendBrushInfo, opts.brushDelay);
     }
+    brushInfoSender.immediateCall();
     function mousedown(e) {
       if (brush.isBrushing() || brush.isDragging() || brush.isResizing())
         return;

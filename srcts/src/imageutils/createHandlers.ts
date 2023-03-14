@@ -60,6 +60,9 @@ function createClickHandler(
 ): CreateHandler {
   let clickInfoSender = coordmap.mouseCoordinateSender(inputId, clip);
 
+  // Send initial (null) value on creation.
+  clickInfoSender(null);
+
   return {
     mousedown: function (e) {
       // Listen for left mouse button only
@@ -103,7 +106,12 @@ function createHoverHandler(
     else hoverInfoSender = new Debouncer(null, sendHoverInfo, delay);
   }
 
+  // Initialize the sender with the starting coordmap
   updateHoverInfoSender(coordmap);
+
+  // Send initial (null) value on creation.
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  hoverInfoSender!.immediateCall(null);
 
   // What to do when mouse exits the image
   let mouseout: () => void;
@@ -321,6 +329,9 @@ function createBrushHandler(
   } else {
     brushInfoSender = new Debouncer(null, sendBrushInfo, opts.brushDelay);
   }
+
+  // Send initial (null) value on creation.
+  brushInfoSender.immediateCall();
 
   function mousedown(e: JQuery.MouseDownEvent) {
     // This can happen when mousedown inside the graphic, then mouseup

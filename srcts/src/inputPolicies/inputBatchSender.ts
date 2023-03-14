@@ -6,9 +6,9 @@ import type { ShinyApp } from "../shiny/shinyapp";
 class InputBatchSender implements InputPolicy {
   target!: InputPolicy; // We need this field to satisfy the InputPolicy interface
   shinyapp: ShinyApp;
-  timerId: ReturnType<typeof setTimeout> | null = null;
   pendingData: { [key: string]: unknown } = {};
   reentrant = false;
+  sendIsEnqueued = false;
   lastChanceCallback: Array<() => void> = [];
 
   constructor(shinyapp: ShinyApp) {
@@ -21,8 +21,11 @@ class InputBatchSender implements InputPolicy {
     if (!this.reentrant) {
       if (opts.priority === "event") {
         this._sendNow();
-      } else if (!this.timerId) {
-        this.timerId = setTimeout(this._sendNow.bind(this), 0);
+      } else if (!this.sendIsEnqueued) {
+        this.shinyapp.actionQueue.enqueue(() => {
+          this.sendIsEnqueued = false;
+          this._sendNow();
+        });
       }
     }
   }
@@ -34,7 +37,6 @@ class InputBatchSender implements InputPolicy {
 
     this.reentrant = true;
     try {
-      this.timerId = null;
       this.lastChanceCallback.forEach((callback) => callback());
       const currentData = this.pendingData;
 

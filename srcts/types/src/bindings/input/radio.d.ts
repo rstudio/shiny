@@ -1,21 +1,21 @@
 import { InputBinding } from "./inputBinding";
-declare type RadioHTMLElement = HTMLInputElement;
-declare type ValueLabelObject = {
+type RadioHTMLElement = HTMLInputElement;
+type ValueLabelObject = {
     value: HTMLInputElement["value"];
     label: string;
 };
-declare type RadioReceiveMessageData = {
-    value?: string;
+type RadioReceiveMessageData = {
+    value?: string | [];
     options?: ValueLabelObject[];
     label: string;
 };
 declare class RadioInputBinding extends InputBinding {
     find(scope: HTMLElement): JQuery<HTMLElement>;
-    getValue(el: RadioHTMLElement): string[] | number | string | null;
-    setValue(el: RadioHTMLElement, value: string): void;
+    getValue(el: RadioHTMLElement): string[] | number | string | null | undefined;
+    setValue(el: RadioHTMLElement, value: string | []): void;
     getState(el: RadioHTMLElement): {
         label: string;
-        value: string[] | number | string;
+        value: ReturnType<RadioInputBinding["getValue"]>;
         options: ValueLabelObject[];
     };
     receiveMessage(el: RadioHTMLElement, data: RadioReceiveMessageData): void;

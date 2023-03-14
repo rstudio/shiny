@@ -1,5 +1,5 @@
 import $ from "jquery";
-import { $escape, hasOwnProperty, updateLabel } from "../../utils";
+import { $escape, hasDefinedProperty, updateLabel } from "../../utils";
 import { TextInputBindingBase } from "./text";
 
 type NumberHTMLElement = HTMLInputElement;
@@ -23,7 +23,9 @@ class NumberInputBinding extends TextInputBindingBase {
     return $(scope).find('input[type="number"]');
   }
 
-  getValue(el: NumberHTMLElement): string[] | number | string {
+  getValue(
+    el: NumberHTMLElement
+  ): string[] | number | string | null | undefined {
     const numberVal = $(el).val();
 
     if (typeof numberVal == "string") {
@@ -49,10 +51,12 @@ class NumberInputBinding extends TextInputBindingBase {
     el;
   }
   receiveMessage(el: NumberHTMLElement, data: NumberReceiveMessageData): void {
-    if (hasOwnProperty(data, "value")) el.value = data.value;
-    if (hasOwnProperty(data, "min")) el.min = data.min;
-    if (hasOwnProperty(data, "max")) el.max = data.max;
-    if (hasOwnProperty(data, "step")) el.step = data.step;
+    // Setting values to `""` will remove the attribute value from the DOM element.
+    // The attr key will still remain, but there is not value... ex: `<input id="foo" type="number" min max/>`
+    if (hasDefinedProperty(data, "value")) el.value = data.value ?? "";
+    if (hasDefinedProperty(data, "min")) el.min = data.min ?? "";
+    if (hasDefinedProperty(data, "max")) el.max = data.max ?? "";
+    if (hasDefinedProperty(data, "step")) el.step = data.step ?? "";
 
     updateLabel(data.label, getLabelNode(el));
 

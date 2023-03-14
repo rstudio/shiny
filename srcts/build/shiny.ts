@@ -3,10 +3,10 @@
 // yarn build
 // ```
 
-import { banner, build, outDir, shinyDesc } from "./_build";
+import { banner, build, outDir, shinyDesc, babelPlugin } from "./_build";
 import globalsPlugin from "esbuild-plugin-globals";
-import babelPlugin from "esbuild-plugin-babel";
 import type { BuildOptions } from "esbuild";
+import { verifyJqueryImport } from "./_jquery";
 
 const opts: BuildOptions = {
   entryPoints: ["srcts/src/index.ts"],
@@ -27,12 +27,21 @@ const opts: BuildOptions = {
   banner: banner,
 };
 
-build({
-  ...opts,
-  outfile: outDir + "shiny.js",
-});
-build({
-  ...opts,
-  outfile: outDir + "shiny.min.js",
-  minify: true,
-});
+// Make sure all ts files contain jquery import statements before building
+verifyJqueryImport("srcts/src")
+  .then(() => {
+    Promise.all([
+      build({
+        ...opts,
+        outfile: outDir + "shiny.js",
+      }),
+      build({
+        ...opts,
+        outfile: outDir + "shiny.min.js",
+        minify: true,
+      }),
+    ]);
+  })
+  .catch((err) => {
+    console.error("Error:\n" + err);
+  });

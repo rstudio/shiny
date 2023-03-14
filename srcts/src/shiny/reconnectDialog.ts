@@ -2,7 +2,7 @@ import $ from "jquery";
 
 import { showNotification, removeNotification } from "./notifications";
 
-function updateTime(reconnectTime): void {
+function updateTime(reconnectTime: number): void {
   const $time = $("#shiny-reconnect-time");
   // If the time has been removed, exit and don't reschedule this function.
 

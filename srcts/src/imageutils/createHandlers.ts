@@ -22,7 +22,8 @@ type CreateHandler = {
   mouseout?: (e: JQuery.MouseOutEvent) => void;
   mousedown?: (e: JQuery.MouseDownEvent) => void;
   onResetImg: () => void;
-  onResize?: () => void; // Only used for brushes on cached plots
+  onResize: ((e: JQuery.ResizeEvent) => void) | null; // Only used for brushes on cached plots
+  // TODO maybe also used if image size changes without window changing?
   updateCoordmap?: (newMap: Coordmap) => void;
 };
 
@@ -72,6 +73,7 @@ function createClickHandler(
     updateCoordmap: function (newMap) {
       clickInfoSender = newMap.mouseCoordinateSender(inputId, clip);
     },
+    onResize: null,
   };
 }
 
@@ -84,7 +86,7 @@ function createHoverHandler(
   coordmap: Coordmap
 ): CreateHandler {
   let hoverInfoSender: InputRatePolicy<
-    (e: JQuery.MouseDownEvent | JQuery.MouseMoveEvent) => void
+    (e: JQuery.MouseDownEvent | JQuery.MouseMoveEvent | null) => void
   >;
 
   function updateHoverInfoSender(newCoordmap: Coordmap) {
@@ -125,6 +127,7 @@ function createHoverHandler(
       hoverInfoSender.immediateCall(null);
     },
     updateCoordmap: updateHoverInfoSender,
+    onResize: null,
   };
 }
 
@@ -173,7 +176,7 @@ function createBrushHandler(
     if (coords.brushId === inputId && coords.outputId !== outputId) {
       $el.data("mostRecentBrush", false);
       // Remove mousemove and mouseup handlers if necessary
-      if (brush.isBrushing || brush.isDragging || brush.isResizing) {
+      if (brush.isBrushing() || brush.isDragging() || brush.isResizing()) {
         $(document).off("mousemove.image_brush").off("mouseup.image_brush");
       }
       brush.reset();
@@ -187,31 +190,35 @@ function createBrushHandler(
     if (data.outputId && data.outputId !== outputId) return;
 
     // Cancel any current manual brushing by removing listeners
-    if (brush.isBrushing || brush.isDragging || brush.isResizing) {
+    if (brush.isBrushing() || brush.isDragging() || brush.isResizing()) {
       $(document).off("mousemove.image_brush").off("mouseup.image_brush");
     }
 
     brush.setPanelIdx(data.panelIdx);
-    // check that we set a valid panel
-    if (brush.getPanel()) {
-      brush.boundsData(data.imgCoords);
-      brushInfoSender.immediateCall();
-      // This is a race condition if multiple plots share the same brushId
-      // and outputId isn't specified; documentation should warn about that.
-      // I think that's acceptable, since there's no way for a brush to know
-      // if it's unique.
-    } else {
-      // If the panel wasn't valid, fully reset the brush
-      brush.reset();
-      brushInfoSender.immediateCall();
-    }
+    // boundData will now check for a valid panel and reset if invalid
+    brush.boundsData(data.imgCoords);
+    brushInfoSender.immediateCall();
+    // This is a race condition if multiple plots share the same brushId
+    // and outputId isn't specified; documentation should warn about that.
+    // I think that's acceptable, since there's no way for a brush to know
+    // if it's unique.
   });
 
   // Set cursor to one of 7 styles. We need to set the cursor on the whole
   // el instead of the brush div, because the brush div has
   // 'pointer-events:none' so that it won't intercept pointer events.
   // If `style` is null, don't add a cursor style.
-  function setCursorStyle(style) {
+  function setCursorStyle(
+    style:
+      | "crosshair"
+      | "ew-resize"
+      | "grabbable"
+      | "grabbing"
+      | "nesw-resize"
+      | "ns-resize"
+      | "nwse-resize"
+      | null
+  ) {
     $el.removeClass(
       "crosshair grabbable grabbing ns-resize ew-resize nesw-resize nwse-resize"
     );
@@ -244,7 +251,8 @@ function createBrushHandler(
       return;
     }
 
-    const panel = brush.getPanel();
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const panel = brush.getPanel()!;
 
     // Round values near zero more agressively to fix the problem mentioned above
     // Specifically, round values to the same absolute precision achieved by
@@ -302,7 +310,9 @@ function createBrushHandler(
       .trigger("shiny-internal:brushed", coords);
   }
 
-  let brushInfoSender: InputRatePolicy<typeof sendBrushInfo>;
+  let brushInfoSender:
+    | Debouncer<typeof sendBrushInfo>
+    | Throttler<typeof sendBrushInfo>;
 
   // TODO: should we support Invoker as an option? (i.e. spam the server
   // with every mousemove) Or is it better not to
@@ -336,9 +346,7 @@ function createBrushHandler(
     brush.down(offsetCss);
 
     if (brush.isInResizeArea(offsetCss)) {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-expect-error; TODO-barret; Remove the variable? it is not used
-      brush.startResizing(offsetCss);
+      brush.startResizing();
 
       // Attach the move and up handlers to the window so that they respond
       // even when the mouse is moved outside of the image.
@@ -346,8 +354,7 @@ function createBrushHandler(
         .on("mousemove.image_brush", mousemoveResizing)
         .on("mouseup.image_brush", mouseupResizing);
     } else if (brush.isInsideBrush(offsetCss)) {
-      // @ts-expect-error; TODO-barret this variable is not respected
-      brush.startDragging(offsetCss);
+      brush.startDragging();
       setCursorStyle("grabbing");
 
       // Attach the move and up handlers to the window so that they respond
@@ -356,10 +363,7 @@ function createBrushHandler(
         .on("mousemove.image_brush", mousemoveDragging)
         .on("mouseup.image_brush", mouseupDragging);
     } else {
-      const panel = coordmap.getPanelCss(offsetCss, expandPixels);
-
-      // @ts-expect-error; TODO-barret start brushing does not take any args; Either change the function to ignore, or do not send to function;
-      brush.startBrushing(panel.clipImg(coordmap.scaleCssToImg(offsetCss)));
+      brush.startBrushing();
 
       // Attach the move and up handlers to the window so that they respond
       // even when the mouse is moved outside of the image.
@@ -481,7 +485,7 @@ function createBrushHandler(
     // or if we are in an error state
     if (opts.brushResetOnNew || $el.data("errorState")) {
       // Remove mousemove and mouseup handlers if necessary
-      if (brush.isBrushing || brush.isDragging || brush.isResizing) {
+      if (brush.isBrushing() || brush.isDragging() || brush.isResizing()) {
         $(document).off("mousemove.image_brush").off("mouseup.image_brush");
       }
       brush.reset();

@@ -6,7 +6,6 @@ extends:
   - 'eslint:recommended'
   - 'plugin:@typescript-eslint/recommended'
   - 'plugin:jest/recommended'
-  - 'prettier/@typescript-eslint'
   - 'plugin:prettier/recommended'
   - 'plugin:jest-dom/recommended'
 globals:
@@ -45,9 +44,6 @@ rules:
   semi:
     - error
     - always
-  newline-after-var:
-    - error
-    - always
   dot-location:
     - error
     - property
@@ -64,6 +60,7 @@ rules:
     - error
     - default: array-simple
       readonly: array-simple
+
   "@typescript-eslint/consistent-indexed-object-style":
     - error
     - index-signature

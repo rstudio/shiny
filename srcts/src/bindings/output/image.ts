@@ -17,6 +17,7 @@ import {
 import { isIE, IEVersion } from "../../utils/browser";
 import type { CoordmapInit } from "../../imageutils/initCoordmap";
 import type { ErrorsMessageValue } from "../../shiny/shinyapp";
+import { ifUndefined } from "../../utils/object";
 
 class ImageOutputBinding extends OutputBinding {
   find(scope: HTMLElement): JQuery<HTMLElement> {
@@ -65,10 +66,6 @@ class ImageOutputBinding extends OutputBinding {
 
     // If value is undefined, return alternate. Sort of like ||, except it won't
     // return alternate for other falsy values (0, false, null).
-    function ifUndefined(value, alternate) {
-      if (value === undefined) return alternate;
-      return value;
-    }
 
     const opts = {
       clickId: $el.data("click-id"),
@@ -187,9 +184,9 @@ class ImageOutputBinding extends OutputBinding {
         disableDrag($el, $img);
 
         // Check to see if a click handler already exists
-        if ($el.data("updateClickHandler")) {
+        if ($el.data("clickHandler")) {
           // If so, update the old handler with the new coordmap
-          $el.data("updateClickHandler")(optsCoordmap);
+          $el.data("clickHandler").updateCoordmap(optsCoordmap);
         } else {
           // If not, this is the first load, create a new handler
           const clickHandler = createClickHandler(
@@ -207,7 +204,7 @@ class ImageOutputBinding extends OutputBinding {
           // These should listen on $el rather than $img so they can persist even
           // after an error.
           $el.on("reset.image_output", clickHandler.onResetImg);
-          $el.data("updateClickHandler", clickHandler.updateCoordmap);
+          $el.data("clickHandler", clickHandler);
         }
       }
 
@@ -215,9 +212,9 @@ class ImageOutputBinding extends OutputBinding {
         disableDrag($el, $img);
 
         // Check to see if a double-click handler already exists
-        if ($el.data("updateDblClickHandler")) {
+        if ($el.data("dblclickHandler")) {
           // If so, update the old handler with the new coordmap
-          $el.data("updateDblClickHandler")(optsCoordmap);
+          $el.data("dblclickHandler").updateCoordmap(optsCoordmap);
         } else {
           // We'll use the clickHandler's mousedown function, but register it to
           // our custom 'dblclick2' event.
@@ -231,15 +228,15 @@ class ImageOutputBinding extends OutputBinding {
 
           // $el.on("resize.image_output", dblclickHandler.onResize); // currently unused
           $el.on("reset.image_output", dblclickHandler.onResetImg);
-          $el.data("updateDblClickHandler", dblclickHandler.updateCoordmap);
+          $el.data("dblclickHandler", dblclickHandler);
         }
       }
 
       if (opts.hoverId) {
         disableDrag($el, $img);
 
-        if ($el.data("updateHoverHandler")) {
-          $el.data("updateHoverHandler")(optsCoordmap);
+        if ($el.data("hoverHandler")) {
+          $el.data("hoverHandler").updateCoordmap(optsCoordmap);
         } else {
           const hoverHandler = createHoverHandler(
             opts.hoverId,
@@ -255,15 +252,15 @@ class ImageOutputBinding extends OutputBinding {
 
           // $el.on("resize.image_output", hoverHandler.onResize); // currently unused
           $el.on("reset.image_output", hoverHandler.onResetImg);
-          $el.data("updateHoverHandler", hoverHandler.updateCoordmap);
+          $el.data("hoverHandler", hoverHandler);
         }
       }
 
       if (opts.brushId) {
         disableDrag($el, $img);
 
-        if ($el.data("updateBrushHandler")) {
-          $el.data("updateBrushHandler")(optsCoordmap);
+        if ($el.data("brushHandler")) {
+          $el.data("brushHandler").updateCoordmap(optsCoordmap);
         } else {
           const brushHandler = createBrushHandler(
             opts.brushId,
@@ -279,7 +276,7 @@ class ImageOutputBinding extends OutputBinding {
           // resize handler is used for cached plots!
           $el.on("resize.image_output", brushHandler.onResize);
           $el.on("reset.image_output", brushHandler.onResetImg);
-          $el.data("updateBrushHandler", brushHandler.updateCoordmap);
+          $el.data("brushHandler", brushHandler);
         }
       }
 

@@ -1,21 +1,22 @@
 import $ from "jquery";
 import { windowDevicePixelRatio } from "../window/pixelRatio";
-import { makeBlob } from "./blob";
-import { hasOwnProperty } from "./object";
+import type { MapValuesUnion, MapWithResult } from "./extraTypes";
+import { hasOwnProperty, hasDefinedProperty } from "./object";
 
 function escapeHTML(str: string): string {
-  const escaped = {
+  /* eslint-disable @typescript-eslint/naming-convention */
+  const escaped: { [key: string]: string } = {
     "&": "&amp;",
     "<": "&lt;",
     ">": "&gt;",
     // eslint-disable-next-line prettier/prettier
-    "\"": "&quot;",
+    '"': "&quot;",
     "'": "&#039;",
     "/": "&#x2F;",
   };
 
   return str.replace(/[&<>'"/]/g, function (m) {
-    return escaped[m];
+    return escaped[m] as string;
   });
 }
 
@@ -41,13 +42,14 @@ function strToBool(str: string): boolean | undefined {
 function getStyle(el: Element, styleProp: string): string | undefined {
   let x = undefined;
 
-  // @ts-expect-error; Old, IE 5+ attribute only - https://developer.mozilla.org/en-US/docs/Web/API/Element/currentStyle
-  if (el.currentStyle) x = el.currentStyle[styleProp];
-  else if (window.getComputedStyle) {
+  if ("currentStyle" in el) {
+    // @ts-expect-error; Old, IE 5+ attribute only - https://developer.mozilla.org/en-US/docs/Web/API/Element/currentStyle
+    x = el.currentStyle[styleProp];
+  } else {
     // getComputedStyle can return null when we're inside a hidden iframe on
     // Firefox; don't attempt to retrieve style props in this case.
     // https://bugzilla.mozilla.org/show_bug.cgi?id=548397
-    const style = document.defaultView.getComputedStyle(el, null);
+    const style = document?.defaultView?.getComputedStyle(el, null);
 
     if (style) x = style.getPropertyValue(styleProp);
   }
@@ -109,6 +111,7 @@ function parseDate(dateString: string): Date {
 
 // Given a Date object, return a string in yyyy-mm-dd format, using the
 // UTC date. This may be a day off from the date in the local time zone.
+function formatDateUTC(x: Date): string;
 function formatDateUTC(date: Date | null): string | null {
   if (date instanceof Date) {
     return (
@@ -146,7 +149,8 @@ function makeResizeFilter(
   let lastSize: LastSizeInterface = {};
 
   return function () {
-    const size = { w: el.offsetWidth, h: el.offsetHeight };
+    const rect = el.getBoundingClientRect();
+    const size = { w: rect.width, h: rect.height };
 
     if (size.w === 0 && size.h === 0) return;
     if (size.w === lastSize.w && size.h === lastSize.h) return;
@@ -210,11 +214,11 @@ function asArray<T>(value: T | T[] | null | undefined): T[] {
 
 // We need a stable sorting algorithm for ordering
 // bindings by priority and insertion order.
-function mergeSort<T>(
-  list: T[],
-  sortfunc: (a: T, b: T) => boolean | number
-): T[] {
-  function merge(sortfunc, a, b) {
+function mergeSort<Item>(
+  list: Item[],
+  sortfunc: (a: Item, b: Item) => boolean | number
+): Item[] {
+  function merge(a: Item[], b: Item[]) {
     let ia = 0;
     let ib = 0;
     const sorted = [];
@@ -238,8 +242,8 @@ function mergeSort<T>(
     for (let i = 0; i < list.length; i += chunkSize * 2) {
       const listA = list.slice(i, i + chunkSize);
       const listB = list.slice(i + chunkSize, i + chunkSize * 2);
-      const merged = merge(sortfunc, listA, listB);
-      const args = [i, merged.length];
+      const merged = merge(listA, listB);
+      const args = [i, merged.length] as [number, number];
 
       Array.prototype.push.apply(args, merged);
       Array.prototype.splice.apply(list, args);
@@ -250,21 +254,24 @@ function mergeSort<T>(
 }
 
 // Escape jQuery selector metacharacters: !"#$%&'()*+,./:;<=>?@[\]^`{|}~
-const $escape = function (val: string): string {
+function $escape(val: undefined): undefined;
+function $escape(val: string): string;
+function $escape(val: string | undefined): string | undefined {
+  if (typeof val === "undefined") return val;
   return val.replace(/([!"#$%&'()*+,./:;<=>?@[\\\]^`{|}~])/g, "\\$1");
-};
+}
 
 // Maps a function over an object, preserving keys. Like the mapValues
 // function from lodash.
-function mapValues<V, R>(
-  obj: { [key: string]: V },
-  f: (value: V, key: string, obj: { [key: string]: V }) => R
-): { [key: string]: R } {
-  const newObj: { [key: string]: R } = {};
+function mapValues<T extends { [key: string]: any }, R>(
+  obj: T,
+  f: (value: MapValuesUnion<T>, key: string, object: typeof obj) => R
+): MapWithResult<T, R> {
+  const newObj = {} as MapWithResult<T, R>;
 
-  for (const key in obj) {
-    if (hasOwnProperty(obj, key)) newObj[key] = f(obj[key], key, obj);
-  }
+  Object.keys(obj).forEach((key: keyof typeof obj) => {
+    newObj[key] = f(obj[key], key as string, obj);
+  });
   return newObj;
 }
 
@@ -321,26 +328,26 @@ const compareVersion = function (
   op: "<" | "<=" | "==" | ">" | ">=",
   b: string
 ): boolean {
-  function versionParts(ver) {
+  function versionParts(ver: string) {
     return (ver + "")
       .replace(/-/, ".")
       .replace(/(\.0)+[^.]*$/, "")
       .split(".");
   }
 
-  function cmpVersion(a, b) {
-    a = versionParts(a);
-    b = versionParts(b);
-    const len = Math.min(a.length, b.length);
+  function cmpVersion(a: string, b: string) {
+    const aParts = versionParts(a);
+    const bParts = versionParts(b);
+    const len = Math.min(aParts.length, bParts.length);
     let cmp;
 
     for (let i = 0; i < len; i++) {
-      cmp = parseInt(a[i], 10) - parseInt(b[i], 10);
+      cmp = parseInt(aParts[i], 10) - parseInt(bParts[i], 10);
       if (cmp !== 0) {
         return cmp;
       }
     }
-    return a.length - b.length;
+    return aParts.length - bParts.length;
   }
 
   const diff = cmpVersion(a, b);
@@ -426,8 +433,8 @@ export {
   compareVersion,
   updateLabel,
   getComputedLinkColor,
-  makeBlob,
   hasOwnProperty,
+  hasDefinedProperty,
   isBS3,
   toLowerCase,
 };

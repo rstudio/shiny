@@ -1,32 +1,32 @@
 import type { Coordmap } from "./initCoordmap";
 import type { Panel } from "./initPanelScales";
 import type { Offset } from "./findbox";
-declare type Bounds = {
+type Bounds = {
     xmin: number;
     xmax: number;
     ymin: number;
     ymax: number;
 };
-declare type BoundsCss = Bounds;
-declare type BoundsData = Bounds;
-declare type ImageState = {
-    brushing?: boolean;
-    dragging?: boolean;
-    resizing?: boolean;
-    down?: Offset;
-    up?: Offset;
-    resizeSides?: {
+type BoundsCss = Bounds;
+type BoundsData = Bounds;
+type ImageState = {
+    brushing: boolean;
+    dragging: boolean;
+    resizing: boolean;
+    down: Offset;
+    up: Offset;
+    resizeSides: {
         left: boolean;
         right: boolean;
         top: boolean;
         bottom: boolean;
     };
-    boundsCss?: BoundsCss;
-    boundsData?: BoundsData;
-    panel?: Panel;
-    changeStartBounds?: Bounds;
+    boundsCss: BoundsCss;
+    boundsData: BoundsData;
+    panel: Panel | null;
+    changeStartBounds: Bounds;
 };
-declare type BrushOpts = {
+type BrushOpts = {
     brushDirection: "x" | "xy" | "y";
     brushClip: boolean;
     brushFill: string;
@@ -36,7 +36,7 @@ declare type BrushOpts = {
     brushDelay?: number;
     brushResetOnNew?: boolean;
 };
-declare type Brush = {
+type Brush = {
     updateCoordmap: (newCoordmap: Coordmap) => void;
     reset: () => void;
     isInsideBrush: (offsetCss: Offset) => boolean;
@@ -55,11 +55,11 @@ declare type Brush = {
     setPanelIdx: (idx: number) => void;
     down: {
         (): ImageState["down"];
-        (offsetCss: any): void;
+        (offsetCss: Offset): void;
     };
     up: {
         (): ImageState["up"];
-        (offsetCss: any): void;
+        (offsetCss: Offset): void;
     };
     isBrushing: () => ImageState["brushing"];
     startBrushing: () => void;

@@ -326,6 +326,9 @@ ReactiveValues <- R6Class(
     .dedupe = logical(0),
     # Key, asList(), or names() have been retrieved
     .hasRetrieved = list(),
+    # All names, in insertion order. The names are also stored in the .values
+    # object, but it does not preserve order.
+    .nameOrder = character(0),
 
 
     initialize = function(
@@ -403,6 +406,11 @@ ReactiveValues <- R6Class(
         return(invisible())
       }
 
+      # If it's new, append key to the name order
+      if (!key_exists) {
+        .nameOrder[length(.nameOrder) + 1] <<- key
+      }
+
       # set the value for better logging
       .values$set(key, value)
 
@@ -444,14 +452,13 @@ ReactiveValues <- R6Class(
     },
 
     names = function() {
-      nameValues <- .values$keys()
       if (!isTRUE(.hasRetrieved$names)) {
         domain <- getDefaultReactiveDomain()
-        rLog$defineNames(.reactId, nameValues, .label, domain)
+        rLog$defineNames(.reactId, .nameOrder, .label, domain)
         .hasRetrieved$names <<- TRUE
       }
       .namesDeps$register()
-      return(nameValues)
+      return(.nameOrder)
     },
 
     # Get a metadata value. Does not trigger reactivity.
@@ -499,7 +506,7 @@ ReactiveValues <- R6Class(
     },
 
     toList = function(all.names=FALSE) {
-      listValue <- .values$values()
+      listValue <- .values$mget(.nameOrder)
       if (!all.names) {
         listValue <- listValue[!grepl("^\\.", base::names(listValue))]
       }

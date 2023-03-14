@@ -452,8 +452,10 @@ RestoreInputSet <- R6Class("RestoreInputSet",
   )
 )
 
-# This is a fastmap::faststack(); value is assigned in .onLoad().
 restoreCtxStack <- NULL
+on_load({
+    restoreCtxStack <- fastmap::faststack()
+})
 
 withRestoreContext <- function(ctx, expr) {
   restoreCtxStack$push(ctx)

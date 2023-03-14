@@ -46,3 +46,7 @@ is not set to \code{FALSE}), then use \code{\link[Cairo:Cairo]{Cairo::CairoPNG()
 may not antialias some point shapes, resulting in poor quality output.
 }
 }
+\details{
+A \code{NULL} value provided to \code{width} or \code{height} is ignored (i.e., the
+default \code{width} or \code{height} of the graphics device is used).
+}

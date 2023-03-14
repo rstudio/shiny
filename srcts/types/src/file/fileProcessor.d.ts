@@ -1,18 +1,18 @@
 import type { ShinyApp } from "../shiny/shinyapp";
-declare type JobId = string;
-declare type UploadUrl = string;
-declare type UploadInitValue = {
+type JobId = string;
+type UploadUrl = string;
+type UploadInitValue = {
     jobId: JobId;
     uploadUrl: UploadUrl;
 };
-declare type UploadEndValue = never;
+type UploadEndValue = never;
 declare class FileProcessor {
-    files: FileList;
+    files: File[];
     fileIndex: number;
     aborted: boolean;
     completed: boolean;
     constructor(files: FileList, exec$run?: boolean);
-    onBegin(files: FileList, cont: () => void): void;
+    onBegin(files: File[], cont: () => void): void;
     onFile(file: File, cont: () => void): void;
     onComplete(): void;
     onAbort(): void;
@@ -35,7 +35,7 @@ declare class FileUploader extends FileProcessor {
         type: string;
     }>>, onSuccess: (value: UploadInitValue) => void, onFailure: Parameters<ShinyApp["makeRequest"]>[3], blobs: Parameters<ShinyApp["makeRequest"]>[4]): void;
     makeRequest(method: "uploadEnd", args: [string, string], onSuccess: (value: unknown) => void, onFailure: Parameters<ShinyApp["makeRequest"]>[3], blobs: Parameters<ShinyApp["makeRequest"]>[4]): void;
-    onBegin(files: FileList, cont: () => void): void;
+    onBegin(files: File[], cont: () => void): void;
     onFile(file: File, cont: () => void): void;
     onComplete(): void;
     onError(message: string): void;

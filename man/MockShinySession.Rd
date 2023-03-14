@@ -28,6 +28,25 @@ of \code{\link[=testServer]{testServer()}}.
 \dontrun{
 session$setInputs(x=1, y=2)
 }
+
+## ------------------------------------------------
+## Method `MockShinySession$verifyInputMessage`
+## ------------------------------------------------
+
+session <- MockShinySession$new()
+session$sendInputMessage("foo", "")
+session$sendInputMessage("bar", list(value=2, add=TRUE))
+session$verifyInputMessage("foo", . == "")
+\dontrun{
+ # This should be wrapped in an if (requireNamespace("testthat)),
+ # but expect_equal was still now found?!
+  session$verifyInputMessage("bar", expect_equal(., list(value=2, add=TRUE)))
+
+ # Will fail, as `expect_equal` returns the value, which
+ # in this case is not truthy.
+ session$verifyInputMessage("foo", expect_equal(., ""))
+}
+
 }
 \section{Public fields}{
 \if{html}{\out{<div class="r6-fields">}}
@@ -113,6 +132,8 @@ user. Always \code{NULL} for a \code{MockShinySesion}.}
 \item \href{#method-MockShinySession-onSessionEnded}{\code{MockShinySession$onSessionEnded()}}
 \item \href{#method-MockShinySession-registerDownload}{\code{MockShinySession$registerDownload()}}
 \item \href{#method-MockShinySession-getCurrentOutputInfo}{\code{MockShinySession$getCurrentOutputInfo()}}
+\item \href{#method-MockShinySession-sendInputMessage}{\code{MockShinySession$sendInputMessage()}}
+\item \href{#method-MockShinySession-verifyInputMessage}{\code{MockShinySession$verifyInputMessage()}}
 \item \href{#method-MockShinySession-clone}{\code{MockShinySession$clone()}}
 }
 }
@@ -610,8 +631,88 @@ executed.
 \subsection{Returns}{
 A list with with the \code{name} of the output. If no output is
 currently being executed, this will return \code{NULL}.
-output, or \code{NULL} if no output is currently executing.
 }
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-MockShinySession-sendInputMessage"></a>}}
+\if{latex}{\out{\hypertarget{method-MockShinySession-sendInputMessage}{}}}
+\subsection{Method \code{sendInputMessage()}}{
+Mocks a \code{session$sendInputMessage}-call
+that can be later verified.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{MockShinySession$sendInputMessage(inputId, message)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{inputId, message}}{See \code{sendInputMessage} in \link{session}.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-MockShinySession-verifyInputMessage"></a>}}
+\if{latex}{\out{\hypertarget{method-MockShinySession-verifyInputMessage}{}}}
+\subsection{Method \code{verifyInputMessage()}}{
+Verifies that a call to \code{session$sendInputMessage} has been performed.
+
+Use either simple expectations, e.g. \code{expect_equal(., "some value")},
+or functions, \code{function(x) is.list(x)} or
+\code{function(x) expect_equal(x, list(1))}.
+
+For simple expectations, the sent message is accessed with \code{.}.
+
+For functions, they are called with the sent message as first argument.
+If any of the expressions in the function throws an error, \code{verifyInputMessage}
+fails.
+
+For both functions and expectations, their returned value must be
+\code{NULL} or pass \code{\link{isTruthy}} for the assertion to succeed.
+
+NB! testthat's \verb{expect_*}-functions, when the expectations succeeds,
+returns the tested value. I.e. if testing for any of the values on the
+list in \code{\link{isTruthy}} (\code{FALSE}, \code{""}, \code{vector(0)}, etc.), \code{verifyInputMessage}
+will fail if results not properly wrapped.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{MockShinySession$verifyInputMessage(inputId, ..., env = rlang::caller_env())}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{inputId}}{Expected inputId and message of the
+last call to \code{session$sendInputMessage}.}
+
+\item{\code{...}}{Assertions to test against.}
+
+\item{\code{env}}{(advanced use only) the environment in which to evaluate
+\code{...} assertions.
+output, or \code{NULL} if no output is currently executing.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{session <- MockShinySession$new()
+session$sendInputMessage("foo", "")
+session$sendInputMessage("bar", list(value=2, add=TRUE))
+session$verifyInputMessage("foo", . == "")
+\dontrun{
+ # This should be wrapped in an if (requireNamespace("testthat)),
+ # but expect_equal was still now found?!
+  session$verifyInputMessage("bar", expect_equal(., list(value=2, add=TRUE)))
+
+ # Will fail, as `expect_equal` returns the value, which
+ # in this case is not truthy.
+ session$verifyInputMessage("foo", expect_equal(., ""))
+}
+
+}
+\if{html}{\out{</div>}}
+
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-MockShinySession-clone"></a>}}

@@ -245,7 +245,51 @@ test_that("session supports sendBinaryMessage", {
 test_that("session supports sendInputMessage", {
   session <- MockShinySession$new()
   session$sendInputMessage(inputId=1, message=2)
-  expect_true(TRUE) # testthat insists that every test must have an expectation
+  session$sendInputMessage(inputId="foo", message=list(bar=1, add=TRUE))
+  session$verifyInputMessage(1, expect_equal(., 2))
+  session$verifyInputMessage(1, function(x) {
+    expect_type(x, "double")
+    expect_equal(x, 2)
+  })
+  session$verifyInputMessage("foo", expect_true(.$add), expect_equal(.$bar, 1))
+})
+
+test_that("verifyInputMessage is itself enough for a `test_that`", {
+  session <- MockShinySession$new()
+  session$sendInputMessage(inputId=1, message=2)
+  session$verifyInputMessage(1, . == 2)
+})
+
+test_that("session supports failing verifyInputMessage", {
+  session <- MockShinySession$new()
+  expect_failure(
+    session$verifyInputMessage(1, expect_equal(., 1)),
+    message = "session$sendInputMessage(inputId=\"1\") has not been called.",
+    fixed = TRUE
+  )
+  session$sendInputMessage(inputId=1, message=2)
+  expect_success(session$verifyInputMessage(1, expect_equal(., 2)))
+  expect_failure(
+    session$verifyInputMessage(1, expect_equal(., 1)),
+    message = "`.` (`actual`) not equal to 1 (`expected`)",
+    fixed = TRUE
+  )
+  expect_failure(
+    session$verifyInputMessage(1, function(x) expect_equal(x, 1)),
+    message = "`x` (`actual`) not equal to 1 (`expected`)",
+    fixed = TRUE
+  )
+  expect_failure(
+    session$verifyInputMessage(1, . == 1),
+    message = ". == 1 is not TRUE",
+    fixed = TRUE
+  )
+  expect_failure(
+    session$verifyInputMessage(1, function(x) x == 1),
+    message = "function(x) x == 1 is not TRUE",
+    fixed = TRUE
+  )
+
 })
 
 test_that("session supports setBookmarkExclude", {

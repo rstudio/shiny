@@ -149,7 +149,6 @@ makeExtraMethods <- function() {
     "sendBinaryMessage",
     "sendChangeTabVisibility",
     "sendCustomMessage",
-    "sendInputMessage",
     "sendInsertTab",
     "sendInsertUI",
     "sendModal",
@@ -209,6 +208,7 @@ addGeneratedInstanceMethods <- function(instance, methods = makeExtraMethods()) 
 #'   of [testServer()].
 #'
 #' @include timer.R
+#' @importFrom rlang is_function
 #' @export
 MockShinySession <- R6Class(
   'MockShinySession',
@@ -609,6 +609,95 @@ MockShinySession <- R6Class(
     getCurrentOutputInfo = function() {
       name <- private$currentOutputName
       if (is.null(name)) NULL else list(name = name)
+    },
+
+    #' @description
+    #' Mocks a `session$sendInputMessage`-call
+    #' that can be later verified.
+    #' @param inputId,message See `sendInputMessage` in [session].
+    sendInputMessage = function(inputId, message) {
+      stopifnot(length(inputId) == 1) ## purely guessing on internal workings of session
+      private$inputMessage[[as.character(inputId)]] = message
+    },
+
+    #' @description
+    #' Verifies that a call to `session$sendInputMessage` has been performed.
+    #'
+    #' Use either simple expectations, e.g. `expect_equal(., "some value")`,
+    #' or functions, `function(x) is.list(x)` or
+    #' `function(x) expect_equal(x, list(1))`.
+    #'
+    #' For simple expectations, the sent message is accessed with `.`.
+    #'
+    #' For functions, they are called with the sent message as first argument.
+    #' If any of the expressions in the function throws an error, `verifyInputMessage`
+    #' fails.
+    #'
+    #' For both functions and expectations, their returned value must be
+    #' `NULL` or pass [`isTruthy`] for the assertion to succeed.
+    #'
+    #' NB! testthat's `expect_*`-functions, when the expectations succeeds,
+    #' returns the tested value. I.e. if testing for any of the values on the
+    #' list in [`isTruthy`] (`FALSE`, `""`, `vector(0)`, etc.), `verifyInputMessage`
+    #' will fail if results not properly wrapped.
+    #'
+    #' @examples
+    #' session <- MockShinySession$new()
+    #' session$sendInputMessage("foo", "")
+    #' session$sendInputMessage("bar", list(value=2, add=TRUE))
+    #' session$verifyInputMessage("foo", . == "")
+    #'\dontrun{
+    #'  # This should be wrapped in an if (requireNamespace("testthat)),
+    #'  # but expect_equal was still now found?!
+    #'   session$verifyInputMessage("bar", expect_equal(., list(value=2, add=TRUE)))
+    #'
+    #'  # Will fail, as `expect_equal` returns the value, which
+    #'  # in this case is not truthy.
+    #'  session$verifyInputMessage("foo", expect_equal(., ""))
+    #' }
+    #'
+    #' @param inputId Expected inputId and message of the
+    #'   last call to `session$sendInputMessage`.
+    #' @param ... Assertions to test against.
+    #' @param env (advanced use only) the environment in which to evaluate
+    #'   `...` assertions.
+    verifyInputMessage = function(inputId, ..., env = rlang::caller_env()) {
+      asserts <- eval(substitute(alist(...)))
+      test.env <- new.env(parent = env)
+      msg <- private$inputMessage[[as.character(inputId)]]
+      if (length(msg) == 0) {
+        stop(errorCondition(
+          sprintf("session$sendInputMessage(inputId=\"%s\") has not been called.", inputId),
+          class = c("failure","expectation")
+        ))
+      }
+
+      delayedAssign(".", msg, assign.env = test.env)
+      for (assertion in asserts) {
+        res <- tryCatch({
+          val <- eval(assertion, test.env)
+          if (is_function(val)) {
+            val <- val(msg)
+          }
+          outcome <- isTruthy(val %||% TRUE)
+          attr(outcome, "msg") <- attr(val, "msg")
+          outcome
+        }, assertError = function(e) {
+          structure(FALSE, msg = e$message)
+        }, error = function(e) {
+          stop(e)
+        })
+        if (!res) {
+          msg <- attr(res, "msg") %||% paste0(deparse(assertion), " is not TRUE")
+          stop(errorCondition(msg, class = c("failure", "expectation")))
+        }
+      }
+
+      # signal a (expectation?) condition, so testthat accepts this as a test.
+      cond <- simpleCondition(TRUE)
+      class(cond) <- c('expectation_success','expectation', class(cond))
+      withRestarts(signalCondition(cond), continue_test = function(e) NULL)
+      invisible(cond)
     }
   ),
   private = list(
@@ -696,7 +785,9 @@ MockShinySession <- R6Class(
         createVarPromiseDomain(private, "currentOutputName", name),
         expr
       )
-    }
+    },
+
+    inputMessage = list()
   ),
   active = list(
     #' @field files For internal use only.

@@ -12,6 +12,8 @@
 
 * `Map` objects are now initialized at load time instead of build time. This avoids potential problems that could arise from storing `fastmap` objects into the built Shiny package. (#3775)
 
+* Added methods to `mock-session` for verifying that specific calls to `session$sendInputMessage` were performed; see `verifyInputMessage`. Fully supports unit testing with the `testthat`-package, but does not require it.
+
 ### Bug fixes
 
 * Fixed #3771: Sometimes the error `ion.rangeSlider.min.js: i.stopPropagation is not a function` would appear in the JavaScript console. (#3772)

@@ -148,7 +148,7 @@ shinyDependencyCSS <- function(theme) {
 
 #' Create a Shiny UI handler
 #'
-#' @description \lifecycle{superseded}
+#' @description `r lifecycle::badge("superseded")`
 #'
 #' @description Historically this function was used in ui.R files to register a user
 #' interface with Shiny. It is no longer required as of Shiny 0.10; simply

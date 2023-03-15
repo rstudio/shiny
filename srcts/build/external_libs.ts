@@ -10,6 +10,12 @@ import globalsPlugin from "esbuild-plugin-globals";
 const opts = {
   bundle: false,
   sourcemap: false,
+  // Oddly, esbuild seems to use the top-level tsconfig.json file even when just
+  // minifying JS to JS. Because that tsconfig file has "strict":true, esbuild
+  // ends up adding "use strict" to the top of each minified JS file, which can
+  // alter behavior. To avoid this, we have a separate tsconfig file with
+  // "alwaysStrict":false.
+  tsconfig: "srcts/build/external_libs_tsconfig.json",
 };
 
 readdir(outDir + "datepicker/js/locales/").then(async (localeFiles) => {

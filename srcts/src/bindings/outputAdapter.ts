@@ -22,7 +22,8 @@ class OutputBindingAdapter {
     // onResize with a version that does a makeResizeFilter on the element.
     if (binding.resize) {
       this.onResize = makeResizeFilter(el, function (width, height) {
-        binding.resize(el, width, height);
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        binding.resize!(el, width, height);
       });
     }
   }
@@ -30,8 +31,8 @@ class OutputBindingAdapter {
   getId(): string {
     return this.binding.getId(this.el);
   }
-  onValueChange(data: unknown): void {
-    this.binding.onValueChange(this.el, data);
+  async onValueChange(data: unknown): Promise<void> {
+    await this.binding.onValueChange(this.el, data);
   }
   onValueError(err: ErrorsMessageValue): void {
     this.binding.onValueError(this.el, err);

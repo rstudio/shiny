@@ -194,8 +194,8 @@ renderPlot <- function(expr, width = 'auto', height = 'auto', res = 72, ...,
 }
 
 resizeSavedPlot <- function(name, session, result, width, height, alt, pixelratio, res, ...) {
-  if (result$img$width == width && result$img$height == height &&
-      result$pixelratio == pixelratio && result$res == res) {
+  if (isTRUE(result$img$width == width && result$img$height == height &&
+      result$pixelratio == pixelratio && result$res == res)) {
     return(result)
   }
 

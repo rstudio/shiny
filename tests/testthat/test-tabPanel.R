@@ -41,7 +41,6 @@ panels <- list(
 )
 
 test_that("tabsetPanel() markup is correct", {
-
   default <- tabset_panel(!!!panels)
   pills <- tabset_panel(
     !!!panels, type = "pills", selected = "B",
@@ -54,6 +53,11 @@ test_that("tabsetPanel() markup is correct", {
   # BS4
   expect_snapshot_bslib(default)
   expect_snapshot_bslib(pills)
+
+  # Make sure .active class gets added to both the .dropdown as well as the
+  # .dropdown-menu's tab
+  dropdown_active <- tabset_panel(!!!panels, selected = "C")
+  expect_snapshot2(dropdown_active)
 })
 
 test_that("navbarPage() markup is correct", {

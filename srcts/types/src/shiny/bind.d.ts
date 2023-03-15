@@ -1,8 +1,8 @@
 import type { InputBinding, OutputBinding } from "../bindings";
 import type { BindingRegistry } from "../bindings/registry";
 import type { InputRateDecorator, InputValidateDecorator } from "../inputPolicies";
-declare type BindScope = HTMLElement | JQuery<HTMLElement>;
-declare type BindInputsCtx = {
+type BindScope = HTMLElement | JQuery<HTMLElement>;
+type BindInputsCtx = {
     inputs: InputValidateDecorator;
     inputsRate: InputRateDecorator;
     inputBindings: BindingRegistry<InputBinding>;

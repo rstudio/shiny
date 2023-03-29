@@ -150,10 +150,11 @@ function initShiny(windowShiny: Shiny): void {
     (x) => x.value
   );
 
-  // When future bindings are registered via dynamic UI, check to see if renderHtml()
-  // is currently executing. If it's not, it's likely that the binding registration
-  // is occurring a tick after renderHtml()/renderContent(), in which case we need
-  // to make sure the new bindings get a chance to bind to the DOM. (#3635)
+  // If and when input/output registration happens in the future, 
+  // check to see if renderHtml()/renderContent() is currently executing. 
+  // If it isn't, we likely need to bind again to the entire document, 
+  // since Shiny has bound to the DOM before having access to the full 
+  // set of bindings. (#3635)
   const debouncedBindAll = debounce(0, () => windowShiny.bindAll!(document.documentElement))
 
   const maybeBindOnRegister = () => {

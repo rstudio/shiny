@@ -1,8 +1,8 @@
-declare type Cb = {
+type Cb = {
     once: boolean;
     fn: () => void;
 };
-declare type Cbs = {
+type Cbs = {
     [key: string]: Cb;
 };
 declare class Callbacks {

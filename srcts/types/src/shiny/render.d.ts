@@ -17,27 +17,27 @@ declare namespace renderHtml {
 }
 declare function renderDependenciesAsync(dependencies: HtmlDep[] | null): Promise<void>;
 declare function renderDependencies(dependencies: HtmlDep[] | null): void;
-declare type HtmlDepVersion = string;
-declare type MetaItem = {
+type HtmlDepVersion = string;
+type MetaItem = {
     name: string;
     content: string;
     [x: string]: string;
 };
-declare type StylesheetItem = {
+type StylesheetItem = {
     href: string;
     rel?: string;
     type?: string;
 };
-declare type ScriptItem = {
+type ScriptItem = {
     src: string;
     [x: string]: string;
 };
-declare type AttachmentItem = {
+type AttachmentItem = {
     key: string;
     href: string;
     [x: string]: string;
 };
-declare type HtmlDep = {
+type HtmlDep = {
     name: string;
     version: HtmlDepVersion;
     restyle?: boolean;

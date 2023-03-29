@@ -1,11 +1,11 @@
 import type { ShinyApp } from "../shiny/shinyapp";
-declare type JobId = string;
-declare type UploadUrl = string;
-declare type UploadInitValue = {
+type JobId = string;
+type UploadUrl = string;
+type UploadInitValue = {
     jobId: JobId;
     uploadUrl: UploadUrl;
 };
-declare type UploadEndValue = never;
+type UploadEndValue = never;
 declare class FileProcessor {
     files: File[];
     fileIndex: number;

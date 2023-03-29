@@ -1,22 +1,22 @@
 import type { OutputBindingAdapter } from "../bindings/outputAdapter";
 import type { UploadInitValue, UploadEndValue } from "../file/fileProcessor";
 import { AsyncQueue } from "../utils/asyncQueue";
-declare type ResponseValue = UploadEndValue | UploadInitValue;
-declare type Handler = (message: any) => Promise<void> | void;
-declare type ShinyWebSocket = WebSocket & {
+type ResponseValue = UploadEndValue | UploadInitValue;
+type Handler = (message: any) => Promise<void> | void;
+type ShinyWebSocket = WebSocket & {
     allowReconnect?: boolean;
 };
-declare type ErrorsMessageValue = {
+type ErrorsMessageValue = {
     message: string;
     call: string[];
     type?: string[];
 };
-declare type OnSuccessRequest = (value: ResponseValue) => void;
-declare type OnErrorRequest = (err: string) => void;
-declare type InputValues = {
+type OnSuccessRequest = (value: ResponseValue) => void;
+type OnErrorRequest = (err: string) => void;
+type InputValues = {
     [key: string]: unknown;
 };
-declare type MessageValue = Parameters<WebSocket["send"]>[0];
+type MessageValue = Parameters<WebSocket["send"]>[0];
 declare function addCustomMessageHandler(type: string, handler: Handler): void;
 declare class ShinyApp {
     $socket: ShinyWebSocket | null;

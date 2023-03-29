@@ -154,12 +154,11 @@ function initShiny(windowShiny: Shiny): void {
   // is currently executing. If it's not, it's likely that the binding registration
   // is occurring a tick after renderHtml()/renderContent(), in which case we need
   // to make sure the new bindings get a chance to bind to the DOM. (#3635)
-  const maybeBindOnRegister = debounce(0, () => {
-    if (!renderHtml.isExecuting()) {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      windowShiny.bindAll!(document.documentElement);
-    }
-  });
+  const debouncedBindAll = debounce(0, () => windowShiny.bindAll!(document.documentElement))
+
+  const maybeBindOnRegister = () => {
+    if (!renderHtml.isExecuting()) debouncedBindAll();
+  };
 
   inputBindings.onRegister(maybeBindOnRegister, false);
   outputBindings.onRegister(maybeBindOnRegister, false);

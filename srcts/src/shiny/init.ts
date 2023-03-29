@@ -150,12 +150,14 @@ function initShiny(windowShiny: Shiny): void {
     (x) => x.value
   );
 
-  // If and when input/output registration happens in the future, 
-  // check to see if renderHtml()/renderContent() is currently executing. 
-  // If it isn't, we likely need to bind again to the entire document, 
-  // since Shiny has bound to the DOM before having access to the full 
+  // If and when input/output registration happens in the future,
+  // check to see if renderHtml()/renderContent() is currently executing.
+  // If it isn't, we likely need to bind again to the entire document,
+  // since Shiny has bound to the DOM before having access to the full
   // set of bindings. (#3635)
-  const debouncedBindAll = debounce(0, () => windowShiny.bindAll!(document.documentElement))
+  const debouncedBindAll = debounce(0, () =>
+    windowShiny.bindAll?.(document.documentElement)
+  );
 
   const maybeBindOnRegister = () => {
     if (!renderHtml.isExecuting()) debouncedBindAll();

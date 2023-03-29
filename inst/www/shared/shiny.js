@@ -15713,11 +15713,14 @@
     var initialValues = mapValues(_bindAll(shinyBindCtx(), document.documentElement), function(x) {
       return x.value;
     });
-    var maybeBindOnRegister = debounce(0, function() {
-      if (!renderHtml2.isExecuting()) {
-        windowShiny3.bindAll(document.documentElement);
-      }
+    var debouncedBindAll = debounce(0, function() {
+      var _windowShiny$bindAll;
+      return (_windowShiny$bindAll = windowShiny3.bindAll) === null || _windowShiny$bindAll === void 0 ? void 0 : _windowShiny$bindAll.call(windowShiny3, document.documentElement);
     });
+    var maybeBindOnRegister = function maybeBindOnRegister2() {
+      if (!renderHtml2.isExecuting())
+        debouncedBindAll();
+    };
     inputBindings.onRegister(maybeBindOnRegister, false);
     outputBindings.onRegister(maybeBindOnRegister, false);
     (0, import_jquery39.default)(".shiny-image-output, .shiny-plot-output, .shiny-report-size").each(function() {

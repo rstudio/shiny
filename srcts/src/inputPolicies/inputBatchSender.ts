@@ -22,7 +22,7 @@ class InputBatchSender implements InputPolicy {
       if (opts.priority === "event") {
         this._sendNow();
       } else if (!this.sendIsEnqueued) {
-        this.shinyapp.actionQueue.enqueue(() => {
+        this.shinyapp.taskQueue.enqueue(() => {
           this.sendIsEnqueued = false;
           this._sendNow();
         });

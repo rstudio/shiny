@@ -1,4 +1,5 @@
 import { mergeSort } from "../utils";
+import { Callbacks } from "../utils/callbacks";
 
 interface BindingBase {
   name: string;
@@ -14,6 +15,7 @@ class BindingRegistry<Binding extends BindingBase> {
   name!: string;
   bindings: Array<BindingObj<Binding>> = [];
   bindingNames: { [key: string]: BindingObj<Binding> } = {};
+  registerCallbacks: Callbacks = new Callbacks();
 
   register(binding: Binding, bindingName: string, priority = 0): void {
     const bindingObj = { binding, priority };
@@ -23,6 +25,12 @@ class BindingRegistry<Binding extends BindingBase> {
       this.bindingNames[bindingName] = bindingObj;
       binding.name = bindingName;
     }
+
+    this.registerCallbacks.invoke();
+  }
+
+  onRegister(fn: () => void, once = true): void {
+    this.registerCallbacks.register(fn, once);
   }
 
   setPriority(bindingName: string, priority: number): void {

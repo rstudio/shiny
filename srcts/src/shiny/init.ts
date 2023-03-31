@@ -150,6 +150,24 @@ function initShiny(windowShiny: Shiny): void {
     (x) => x.value
   );
 
+  // When future bindings are registered, rebind to the DOM once the current
+  // event loop is done. This is necessary since the binding might be registered
+  // after Shiny has already bound to the DOM (#3635)
+  let enqueuedCount = 0;
+  const enqueueRebind = () => {
+    enqueuedCount++;
+    windowShiny.shinyapp?.actionQueue.enqueue(() => {
+      enqueuedCount--;
+      // If this function is scheduled more than once in the queue, don't do anything.
+      // Only do the bindAll when we get to the last instance of this function in the queue.
+      if (enqueuedCount === 0) {
+        windowShiny.bindAll?.(document.documentElement);
+      }
+    });
+  };
+  inputBindings.onRegister(enqueueRebind, false);
+  outputBindings.onRegister(enqueueRebind, false);
+
   // The server needs to know the size of each image and plot output element,
   // in case it is auto-sizing
   $(".shiny-image-output, .shiny-plot-output, .shiny-report-size").each(

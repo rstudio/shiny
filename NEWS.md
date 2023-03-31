@@ -12,6 +12,8 @@
 
 * `Map` objects are now initialized at load time instead of build time. This avoids potential problems that could arise from storing `fastmap` objects into the built Shiny package. (#3775)
 
+* Closed #3635: `window.Shiny.outputBindings` and `window.Shiny.inputBindings` gain a `onRegister()` method, to register callbacks that execute whenever a new binding is registered. Internally, Shiny uses this to check whether it should re-bind to the DOM when a binding has been registered. (#3638)
+
 ### Bug fixes
 
 * Fixed #3771: Sometimes the error `ion.rangeSlider.min.js: i.stopPropagation is not a function` would appear in the JavaScript console. (#3772)

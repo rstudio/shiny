@@ -19072,10 +19072,8 @@
       enqueuedCount++;
       (_windowShiny$shinyapp = windowShiny3.shinyapp) === null || _windowShiny$shinyapp === void 0 ? void 0 : _windowShiny$shinyapp.actionQueue.enqueue(function() {
         enqueuedCount--;
-        console.log("enqueuedCount: ", enqueuedCount);
         if (enqueuedCount === 0) {
           var _windowShiny$bindAll;
-          console.log("REBIND!");
           (_windowShiny$bindAll = windowShiny3.bindAll) === null || _windowShiny$bindAll === void 0 ? void 0 : _windowShiny$bindAll.call(windowShiny3, document.documentElement);
         }
       });

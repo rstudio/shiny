@@ -12383,38 +12383,23 @@
           switch (_context2.prev = _context2.next) {
             case 0:
               where = _args2.length > 3 && _args2[3] !== void 0 ? _args2[3] : "replace";
-              renderHtml2._renderCount++;
-              _context2.prev = 2;
-              _context2.next = 5;
+              _context2.next = 3;
               return renderDependenciesAsync(dependencies);
-            case 5:
+            case 3:
               return _context2.abrupt("return", renderHtml(html, el, where));
-            case 6:
-              _context2.prev = 6;
-              renderHtml2._renderCount--;
-              return _context2.finish(6);
-            case 9:
+            case 4:
             case "end":
               return _context2.stop();
           }
-      }, _callee2, null, [[2, , 6, 9]]);
+      }, _callee2);
     }));
     return _renderHtmlAsync.apply(this, arguments);
   }
   function renderHtml2(html, el, dependencies) {
     var where = arguments.length > 3 && arguments[3] !== void 0 ? arguments[3] : "replace";
-    renderHtml2._renderCount++;
-    try {
-      renderDependencies(dependencies);
-      return renderHtml(html, el, where);
-    } finally {
-      renderHtml2._renderCount--;
-    }
+    renderDependencies(dependencies);
+    return renderHtml(html, el, where);
   }
-  renderHtml2._renderCount = 0;
-  renderHtml2.isExecuting = function() {
-    return renderHtml2._renderCount > 0;
-  };
   function renderDependenciesAsync(_x6) {
     return _renderDependenciesAsync.apply(this, arguments);
   }
@@ -19081,16 +19066,22 @@
     var initialValues = mapValues(_bindAll(shinyBindCtx(), document.documentElement), function(x) {
       return x.value;
     });
-    var debouncedBindAll = debounce(0, function() {
-      var _windowShiny$bindAll;
-      return (_windowShiny$bindAll = windowShiny3.bindAll) === null || _windowShiny$bindAll === void 0 ? void 0 : _windowShiny$bindAll.call(windowShiny3, document.documentElement);
-    });
-    var maybeBindOnRegister = function maybeBindOnRegister2() {
-      if (!renderHtml2.isExecuting())
-        debouncedBindAll();
+    var enqueuedCount = 0;
+    var enqueueRebind = function enqueueRebind2() {
+      var _windowShiny$shinyapp;
+      enqueuedCount++;
+      (_windowShiny$shinyapp = windowShiny3.shinyapp) === null || _windowShiny$shinyapp === void 0 ? void 0 : _windowShiny$shinyapp.actionQueue.enqueue(function() {
+        enqueuedCount--;
+        console.log("enqueuedCount: ", enqueuedCount);
+        if (enqueuedCount === 0) {
+          var _windowShiny$bindAll;
+          console.log("REBIND!");
+          (_windowShiny$bindAll = windowShiny3.bindAll) === null || _windowShiny$bindAll === void 0 ? void 0 : _windowShiny$bindAll.call(windowShiny3, document.documentElement);
+        }
+      });
     };
-    inputBindings.onRegister(maybeBindOnRegister, false);
-    outputBindings.onRegister(maybeBindOnRegister, false);
+    inputBindings.onRegister(enqueueRebind, false);
+    outputBindings.onRegister(enqueueRebind, false);
     (0, import_jquery39.default)(".shiny-image-output, .shiny-plot-output, .shiny-report-size").each(function() {
       var id = getIdFromEl(this), rect = this.getBoundingClientRect();
       if (rect.width !== 0 || rect.height !== 0) {

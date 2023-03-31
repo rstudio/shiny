@@ -133,13 +133,8 @@ async function renderHtmlAsync(
   dependencies: HtmlDep[],
   where: WherePosition = "replace"
 ): Promise<ReturnType<typeof singletonsRenderHtml>> {
-  renderHtml._renderCount++;
-  try {
-    await renderDependenciesAsync(dependencies);
-    return singletonsRenderHtml(html, el, where);
-  } finally {
-    renderHtml._renderCount--;
-  }
+  await renderDependenciesAsync(dependencies);
+  return singletonsRenderHtml(html, el, where);
 }
 
 // Render HTML in a DOM element, inserting singletons into head as needed
@@ -149,19 +144,9 @@ function renderHtml(
   dependencies: HtmlDep[],
   where: WherePosition = "replace"
 ): ReturnType<typeof singletonsRenderHtml> {
-  renderHtml._renderCount++;
-  try {
-    renderDependencies(dependencies);
-    return singletonsRenderHtml(html, el, where);
-  } finally {
-    renderHtml._renderCount--;
-  }
+  renderDependencies(dependencies);
+  return singletonsRenderHtml(html, el, where);
 }
-
-renderHtml._renderCount = 0;
-renderHtml.isExecuting = function () {
-  return renderHtml._renderCount > 0;
-};
 
 // =============================================================================
 // renderDependencies

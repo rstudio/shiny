@@ -21,7 +21,7 @@ import {
 import { bindAll, unbindAll, _bindAll } from "./bind";
 import type { BindInputsCtx, BindScope } from "./bind";
 import { setShinyObj } from "./initedMethods";
-import { registerDependency, renderHtml } from "./render";
+import { registerDependency } from "./render";
 import { sendImageSizeFns } from "./sendImageSize";
 import { ShinyApp } from "./shinyapp";
 import { registerNames as singletonsRegisterNames } from "./singletons";
@@ -150,21 +150,22 @@ function initShiny(windowShiny: Shiny): void {
     (x) => x.value
   );
 
-  // If and when input/output registration happens in the future,
-  // check to see if renderHtml()/renderContent() is currently executing.
-  // If it isn't, we likely need to bind again to the entire document,
-  // since Shiny has bound to the DOM before having access to the full
-  // set of bindings. (#3635)
-  const debouncedBindAll = debounce(0, () =>
-    windowShiny.bindAll?.(document.documentElement)
-  );
-
-  const maybeBindOnRegister = () => {
-    if (!renderHtml.isExecuting()) debouncedBindAll();
+  let enqueuedCount = 0;
+  const enqueueRebind = () => {
+    enqueuedCount++;
+    windowShiny.shinyapp?.actionQueue.enqueue(() => {
+      enqueuedCount--;
+      console.log("enqueuedCount: ", enqueuedCount);
+      // If this function is scheduled more than once in the queue, don't do anything.
+      // Only do the bindAll when we get to the last instance of this function in the queue.
+      if (enqueuedCount === 0) {
+        console.log("REBIND!");
+        windowShiny.bindAll?.(document.documentElement);
+      }
+    });
   };
-
-  inputBindings.onRegister(maybeBindOnRegister, false);
-  outputBindings.onRegister(maybeBindOnRegister, false);
+  inputBindings.onRegister(enqueueRebind, false);
+  outputBindings.onRegister(enqueueRebind, false);
 
   // The server needs to know the size of each image and plot output element,
   // in case it is auto-sizing

@@ -46,6 +46,7 @@ declare class ShinyApp {
     };
     $nextRequestId: number;
     $allowReconnect: boolean | "force";
+    static actionQueue: any;
     constructor();
     connect(initialInput: InputValues): void;
     isConnected(): boolean;

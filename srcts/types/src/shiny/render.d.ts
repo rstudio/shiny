@@ -11,10 +11,6 @@ declare function renderContent(el: BindScope, content: string | {
 } | null, where?: WherePosition): void;
 declare function renderHtmlAsync(html: string, el: BindScope, dependencies: HtmlDep[], where?: WherePosition): Promise<ReturnType<typeof singletonsRenderHtml>>;
 declare function renderHtml(html: string, el: BindScope, dependencies: HtmlDep[], where?: WherePosition): ReturnType<typeof singletonsRenderHtml>;
-declare namespace renderHtml {
-    var _renderCount: number;
-    var isExecuting: () => boolean;
-}
 declare function renderDependenciesAsync(dependencies: HtmlDep[] | null): Promise<void>;
 declare function renderDependencies(dependencies: HtmlDep[] | null): void;
 type HtmlDepVersion = string;

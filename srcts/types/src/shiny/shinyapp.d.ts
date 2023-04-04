@@ -20,7 +20,7 @@ type MessageValue = Parameters<WebSocket["send"]>[0];
 declare function addCustomMessageHandler(type: string, handler: Handler): void;
 declare class ShinyApp {
     $socket: ShinyWebSocket | null;
-    actionQueue: AsyncQueue<() => Promise<void> | void>;
+    taskQueue: AsyncQueue<() => Promise<void> | void>;
     config: {
         workerId: string;
         sessionId: string;
